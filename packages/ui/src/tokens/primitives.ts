@@ -1,0 +1,162 @@
+/**
+ * Tokens primitifs : palettes, échelles. Jamais consommés directement par les
+ * composants — uniquement référencés par les tokens sémantiques.
+ * Couleurs en OKLCH (interpolation perceptuelle, gamut large).
+ */
+import {
+  color,
+  cubicBezier,
+  dimension,
+  duration,
+  fontFamily,
+  fontWeight,
+  shadow,
+  type TokenGroup,
+} from './types'
+
+const palette = (values: Record<string, string>): TokenGroup =>
+  Object.fromEntries(Object.entries(values).map(([step, value]) => [step, color(value)]))
+
+export const primitives = {
+  color: {
+    white: color('oklch(100% 0 0)'),
+    black: color('oklch(0% 0 0)'),
+    neutral: palette({
+      '50': 'oklch(98.4% 0.002 260)',
+      '100': 'oklch(96.7% 0.003 260)',
+      '200': 'oklch(92.2% 0.004 260)',
+      '300': 'oklch(86.9% 0.006 260)',
+      '400': 'oklch(70.9% 0.01 260)',
+      '500': 'oklch(55.4% 0.012 260)',
+      '600': 'oklch(44.6% 0.012 260)',
+      '700': 'oklch(37.2% 0.011 260)',
+      '800': 'oklch(27.9% 0.009 260)',
+      '900': 'oklch(21% 0.008 260)',
+      '950': 'oklch(14.5% 0.007 260)',
+    }),
+    indigo: palette({
+      '50': 'oklch(96.9% 0.015 270)',
+      '100': 'oklch(93.6% 0.032 270)',
+      '200': 'oklch(89% 0.058 270)',
+      '300': 'oklch(81.1% 0.096 270)',
+      '400': 'oklch(70.2% 0.145 270)',
+      '500': 'oklch(60.6% 0.19 270)',
+      '600': 'oklch(54.1% 0.21 270)',
+      '700': 'oklch(48.8% 0.2 270)',
+      '800': 'oklch(42.4% 0.17 270)',
+      '900': 'oklch(37% 0.14 270)',
+      '950': 'oklch(26.5% 0.09 270)',
+    }),
+    red: palette({
+      '50': 'oklch(97.1% 0.013 25)',
+      '100': 'oklch(93.6% 0.03 25)',
+      '200': 'oklch(88.5% 0.06 25)',
+      '300': 'oklch(80.8% 0.1 25)',
+      '400': 'oklch(70.4% 0.16 25)',
+      '500': 'oklch(63.7% 0.2 25)',
+      '600': 'oklch(57.7% 0.22 25)',
+      '700': 'oklch(50.5% 0.19 25)',
+      '800': 'oklch(44.4% 0.16 25)',
+      '900': 'oklch(39.6% 0.13 25)',
+      '950': 'oklch(25.8% 0.08 25)',
+    }),
+    green: palette({
+      '50': 'oklch(98.2% 0.018 155)',
+      '100': 'oklch(96.2% 0.04 155)',
+      '200': 'oklch(92.5% 0.08 155)',
+      '300': 'oklch(87.1% 0.12 155)',
+      '400': 'oklch(79.2% 0.17 155)',
+      '500': 'oklch(72.3% 0.19 155)',
+      '600': 'oklch(62.7% 0.17 155)',
+      '700': 'oklch(52.7% 0.14 155)',
+      '800': 'oklch(44.8% 0.11 155)',
+      '900': 'oklch(39.3% 0.09 155)',
+      '950': 'oklch(26.6% 0.06 155)',
+    }),
+    amber: palette({
+      '50': 'oklch(98.7% 0.022 95)',
+      '100': 'oklch(96.2% 0.059 95)',
+      '200': 'oklch(92.4% 0.12 95)',
+      '300': 'oklch(87.9% 0.16 92)',
+      '400': 'oklch(82.8% 0.17 84)',
+      '500': 'oklch(76.9% 0.16 70)',
+      '600': 'oklch(66.6% 0.16 58)',
+      '700': 'oklch(55.5% 0.15 49)',
+      '800': 'oklch(47.3% 0.13 46)',
+      '900': 'oklch(41.4% 0.11 46)',
+      '950': 'oklch(27.9% 0.077 46)',
+    }),
+  },
+  space: {
+    '1': dimension('0.25rem'),
+    '2': dimension('0.5rem'),
+    '3': dimension('0.75rem'),
+    '4': dimension('1rem'),
+    '5': dimension('1.25rem'),
+    '6': dimension('1.5rem'),
+    '7': dimension('2rem'),
+    '8': dimension('2.5rem'),
+    '9': dimension('3rem'),
+    '10': dimension('4rem'),
+    '11': dimension('5rem'),
+    '12': dimension('6rem'),
+  },
+  font: {
+    family: {
+      sans: fontFamily(
+        "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+      ),
+      mono: fontFamily(
+        "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace",
+      ),
+    },
+    weight: {
+      regular: fontWeight('400'),
+      medium: fontWeight('500'),
+      semibold: fontWeight('600'),
+      bold: fontWeight('700'),
+    },
+    size: {
+      xs: dimension('0.75rem'),
+      sm: dimension('0.875rem'),
+      md: dimension('1rem'),
+      lg: dimension('1.125rem'),
+      xl: dimension('1.25rem'),
+      '2xl': dimension('1.5rem'),
+      '3xl': dimension('1.875rem'),
+    },
+    leading: {
+      none: dimension('1'),
+      tight: dimension('1.25'),
+      snug: dimension('1.4'),
+      normal: dimension('1.5'),
+      relaxed: dimension('1.65'),
+    },
+  },
+  radius: {
+    xs: dimension('0.125rem'),
+    sm: dimension('0.25rem'),
+    md: dimension('0.375rem'),
+    lg: dimension('0.5rem'),
+    xl: dimension('0.75rem'),
+    '2xl': dimension('1rem'),
+    full: dimension('9999px'),
+  },
+  shadow: {
+    '1': shadow('0 1px 2px 0 oklch(0% 0 0 / 0.05)'),
+    '2': shadow('0 1px 3px 0 oklch(0% 0 0 / 0.1), 0 1px 2px -1px oklch(0% 0 0 / 0.1)'),
+    '3': shadow('0 4px 6px -1px oklch(0% 0 0 / 0.1), 0 2px 4px -2px oklch(0% 0 0 / 0.1)'),
+    '4': shadow('0 10px 15px -3px oklch(0% 0 0 / 0.1), 0 4px 6px -4px oklch(0% 0 0 / 0.1)'),
+    '5': shadow('0 20px 25px -5px oklch(0% 0 0 / 0.1), 0 8px 10px -6px oklch(0% 0 0 / 0.1)'),
+  },
+  duration: {
+    fast: duration('120ms'),
+    base: duration('180ms'),
+    slow: duration('300ms'),
+  },
+  ease: {
+    default: cubicBezier('cubic-bezier(0.2, 0, 0, 1)'),
+    in: cubicBezier('cubic-bezier(0.5, 0, 1, 1)'),
+    out: cubicBezier('cubic-bezier(0, 0, 0.2, 1)'),
+  },
+} satisfies TokenGroup

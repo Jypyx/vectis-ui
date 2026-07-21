@@ -1,0 +1,86 @@
+/*
+ * Plomberie commune des éléments flottants (Popover, Tooltip, Dropdown Menu).
+ *
+ * 100 % CSS Anchor Positioning — AUCUN fallback JS : le projet cible les
+ * navigateurs modernes (Chrome/Edge 125+, Safari 26+ ; Firefox pas encore
+ * stable — choix assumé, voir CLAUDE.md/README).
+ *
+ * L'ancre est soit implicite (invocateur `popovertarget` → Popover, Menu),
+ * soit un `anchor-name` statique posé par le composant (Tooltip).
+ * `position-try-fallbacks` retourne le panneau quand la place manque.
+ */
+@layer ds.components {
+  .ds-floating {
+    position: fixed;
+    /* neutralise les styles UA de [popover] (inset: 0 ; margin: auto) */
+    inset: auto;
+    /* l'écart avec l'ancre ET la marge minimale au bord du viewport */
+    margin: var(--ds-space-2);
+    position-try-fallbacks: flip-block, flip-inline;
+  }
+
+  .ds-floating[data-placement='bottom'] {
+    position-area: block-end;
+    justify-self: anchor-center;
+  }
+
+  .ds-floating[data-placement='bottom-start'] {
+    position-area: block-end span-inline-end;
+  }
+
+  .ds-floating[data-placement='bottom-end'] {
+    position-area: block-end span-inline-start;
+  }
+
+  .ds-floating[data-placement='top'] {
+    position-area: block-start;
+    justify-self: anchor-center;
+  }
+
+  .ds-floating[data-placement='top-start'] {
+    position-area: block-start span-inline-end;
+  }
+
+  .ds-floating[data-placement='top-end'] {
+    position-area: block-start span-inline-start;
+  }
+
+  .ds-floating[data-placement='left'] {
+    position-area: inline-start;
+    align-self: anchor-center;
+  }
+
+  .ds-floating[data-placement='right'] {
+    position-area: inline-end;
+    align-self: anchor-center;
+  }
+
+  /* Entrée/sortie animées communes (allow-discrete + @starting-style) */
+  .ds-floating {
+    opacity: 0;
+    transform: scale(0.97);
+    transition:
+      opacity var(--ds-duration-fast) var(--ds-ease-default),
+      transform var(--ds-duration-fast) var(--ds-ease-default),
+      overlay var(--ds-duration-fast) allow-discrete,
+      display var(--ds-duration-fast) allow-discrete;
+  }
+
+  .ds-floating:popover-open {
+    opacity: 1;
+    transform: none;
+  }
+
+  @starting-style {
+    .ds-floating:popover-open {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ds-floating {
+      transition: none;
+    }
+  }
+}

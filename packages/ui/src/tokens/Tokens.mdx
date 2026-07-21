@@ -1,0 +1,182 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+import { tokens, flattenTokens } from './index'
+
+<Meta title="Fondations/Tokens" />
+
+export const mono = { fontFamily: 'var(--ds-font-family-mono)', fontSize: 12 }
+
+export const Swatch = ({ cssName, label }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
+    <div
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 8,
+        background: `var(${cssName})`,
+        border: '1px solid var(--ds-color-border)',
+      }}
+    />
+    <code style={{ ...mono, fontSize: 11 }}>{label}</code>
+  </div>
+)
+
+export const PaletteRow = ({ name }) => (
+  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '8px 0 24px' }}>
+    {flattenTokens(tokens.primitives.color[name], ['color', name]).map((f) => (
+      <Swatch key={f.cssName} cssName={f.cssName} label={f.path[f.path.length - 1]} />
+    ))}
+  </div>
+)
+
+export const TokenTable = ({ flat, preview }) => (
+  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+    <thead>
+      <tr>
+        <th style={{ textAlign: 'left', padding: 6 }}>Aperçu</th>
+        <th style={{ textAlign: 'left', padding: 6 }}>Custom property</th>
+        <th style={{ textAlign: 'left', padding: 6 }}>Valeur source</th>
+        <th style={{ textAlign: 'left', padding: 6 }}>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {flat.map((f) => (
+        <tr key={f.cssName} style={{ borderTop: '1px solid var(--ds-color-border)' }}>
+          <td style={{ padding: 6 }}>{preview(f)}</td>
+          <td style={{ padding: 6 }}>
+            <code style={mono}>{f.cssName}</code>
+          </td>
+          <td style={{ padding: 6 }}>
+            <code style={mono}>{f.token.$value}</code>
+          </td>
+          <td style={{ padding: 6, fontSize: 13 }}>{f.token.$description ?? ''}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)
+
+# Tokens
+
+Cette page est **générée depuis la source typée** (`src/tokens/`) — elle ne peut pas
+diverger du code. Les composants ne consomment que les tokens **sémantiques** ;
+les primitifs ne servent qu'à les définir.
+
+Surcharge runtime : redéfinissez n'importe quelle custom property `--ds-*` sur
+`:root` ou sur un sous-arbre DOM (aucun rebuild). Dark mode : `data-theme="dark"`.
+
+## Palettes primitives
+
+### Neutral
+
+<PaletteRow name="neutral" />
+
+### Indigo (accent par défaut)
+
+<PaletteRow name="indigo" />
+
+### Red
+
+<PaletteRow name="red" />
+
+### Green
+
+<PaletteRow name="green" />
+
+### Amber
+
+<PaletteRow name="amber" />
+
+## Couleurs sémantiques
+
+<TokenTable
+  flat={flattenTokens(tokens.semantic.color, ['color'])}
+  preview={(f) => (
+    <div
+      style={{
+        width: 28,
+        height: 28,
+        borderRadius: 6,
+        background: `var(${f.cssName})`,
+        border: '1px solid var(--ds-color-border)',
+      }}
+    />
+  )}
+/>
+
+## Espacements
+
+<div style={{ display: 'grid', gap: 6, margin: '8px 0 24px' }}>
+  {flattenTokens(tokens.primitives.space, ['space']).map((f) => (
+    <div key={f.cssName} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <code style={{ ...mono, width: 140 }}>{f.cssName}</code>
+      <div
+        style={{ height: 12, width: `var(${f.cssName})`, background: 'var(--ds-color-accent)' }}
+      />
+      <code style={mono}>{f.token.$value}</code>
+    </div>
+  ))}
+</div>
+
+## Typographie
+
+<div style={{ display: 'grid', gap: 8, margin: '8px 0 24px' }}>
+  {flattenTokens(tokens.primitives.font.size, ['font', 'size']).map((f) => (
+    <div key={f.cssName} style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+      <code style={{ ...mono, width: 140 }}>{f.cssName}</code>
+      <span style={{ fontSize: `var(${f.cssName})` }}>Portez ce vieux whisky au juge blond</span>
+      <code style={mono}>{f.token.$value}</code>
+    </div>
+  ))}
+</div>
+
+Graisses : <code style={mono}>regular 400 · medium 500 · semibold 600 · bold 700</code>
+
+## Radii
+
+<div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', margin: '8px 0 24px' }}>
+  {flattenTokens(tokens.primitives.radius, ['radius']).map((f) => (
+    <div key={f.cssName} style={{ textAlign: 'center' }}>
+      <div
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: `var(${f.cssName})`,
+          background: 'var(--ds-color-accent-surface)',
+          border: '1px solid var(--ds-color-accent-border)',
+        }}
+      />
+      <code style={{ ...mono, fontSize: 11 }}>{f.path[f.path.length - 1]}</code>
+    </div>
+  ))}
+</div>
+
+Sémantiques : <code style={mono}>interactive · surface · overlay · pill</code>
+
+## Ombres
+
+<div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', margin: '8px 0 24px' }}>
+  {flattenTokens(tokens.primitives.shadow, ['shadow']).map((f) => (
+    <div key={f.cssName} style={{ textAlign: 'center' }}>
+      <div
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: 12,
+          background: 'var(--ds-color-surface-raised)',
+          boxShadow: `var(${f.cssName})`,
+        }}
+      />
+      <code style={{ ...mono, fontSize: 11 }}>{f.path[f.path.length - 1]}</code>
+    </div>
+  ))}
+</div>
+
+## Mouvement
+
+<TokenTable
+  flat={[
+    ...flattenTokens(tokens.primitives.duration, ['duration']),
+    ...flattenTokens(tokens.primitives.ease, ['ease']),
+  ]}
+  preview={() => null}
+/>

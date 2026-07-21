@@ -1,0 +1,15 @@
+/*
+ * Point d'entrée CSS du design system (`@socle/ui/styles.css`).
+ *
+ * L'ordre des layers est déclaré ici, une fois pour toutes :
+ *   ds.reset < ds.tokens < ds.components < ds.utilities
+ * Tout style consommateur NON layerisé gagne automatiquement sur ces layers —
+ * c'est le mécanisme de surcharge voulu. Pour surcharger finement en gardant
+ * la cascade du DS, un consommateur peut aussi écrire dans `ds.utilities`.
+ */
+@layer ds.reset, ds.tokens, ds.components, ds.utilities;
+
+@import './reset.css';
+@import './tokens.css';
+@import './floating.css';
+@import './utilities.css';
