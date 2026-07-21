@@ -9,17 +9,21 @@ import { ref, watchEffect } from 'vue'
  * DOM (aucun attribut HTML équivalent).
  */
 interface CheckboxProps {
-  size?: 'sm' | 'md' | 'lg'
   /** État visuel « partiellement coché » (listes imbriquées). */
   indeterminate?: boolean
+  /** Position du libellé par rapport à la boîte. */
+  labelPosition?: 'start' | 'end'
+  /** Écarte libellé et boîte aux extrémités (la racine devient block, pleine largeur). */
+  spread?: boolean
   /** Force l'état invalide — pose aria-invalid. */
   invalid?: boolean
   disabled?: boolean
 }
 
 const props = withDefaults(defineProps<CheckboxProps>(), {
-  size: 'md',
   indeterminate: false,
+  labelPosition: 'end',
+  spread: false,
   invalid: false,
   disabled: false,
 })
@@ -49,7 +53,11 @@ watchEffect(
 </script>
 
 <template>
-  <label class="ds-checkbox" :data-size="size">
+  <label
+    class="ds-checkbox"
+    :data-label-position="labelPosition"
+    :data-spread="spread || undefined"
+  >
     <input
       ref="inputEl"
       v-model="model"
@@ -87,7 +95,6 @@ watchEffect(
 <style>
 @layer ds.components {
   .ds-checkbox {
-    --_box: var(--ds-space-5);
     display: inline-flex;
     align-items: center;
     gap: var(--ds-space-2);
@@ -95,6 +102,17 @@ watchEffect(
     font-size: var(--ds-font-size-sm);
     color: var(--ds-color-text);
     cursor: pointer;
+  }
+
+  /* L'input est en position: absolute → hors du flux flex, l'ordre visuel ne
+     concerne que la boîte et le libellé */
+  .ds-checkbox[data-label-position='start'] {
+    flex-direction: row-reverse;
+  }
+
+  .ds-checkbox[data-spread] {
+    display: flex;
+    justify-content: space-between;
   }
 
   /* L'input reste focusable et soumis au formulaire ; seul son rendu disparaît */
@@ -110,11 +128,11 @@ watchEffect(
   .ds-checkbox-box {
     display: inline-grid;
     place-items: center;
-    width: var(--_box);
-    height: var(--_box);
+    width: var(--ds-control-size-check);
+    height: var(--ds-control-size-check);
     flex: none;
     background: var(--ds-color-surface);
-    border: 1px solid var(--ds-color-border-strong);
+    border: var(--ds-control-border-width) solid var(--ds-color-border-strong);
     border-radius: var(--ds-radius-sm);
     color: var(--ds-color-text-on-accent);
     transition:
@@ -123,8 +141,8 @@ watchEffect(
   }
 
   .ds-checkbox-mark {
-    width: calc(var(--_box) * 0.7);
-    height: calc(var(--_box) * 0.7);
+    width: var(--ds-control-size-check-mark);
+    height: var(--ds-control-size-check-mark);
   }
 
   .ds-checkbox-mark-check,
@@ -133,7 +151,9 @@ watchEffect(
     transition: opacity var(--ds-duration-fast) var(--ds-ease-default);
   }
 
-  .ds-checkbox:hover .ds-checkbox-input:not(:disabled):not(:checked) + .ds-checkbox-box {
+  .ds-checkbox:hover
+    .ds-checkbox-input:not(:disabled, :checked, :indeterminate)
+    + .ds-checkbox-box {
     border-color: color-mix(in oklab, var(--ds-color-border-strong), var(--ds-color-text) 15%);
   }
 
@@ -141,6 +161,13 @@ watchEffect(
   .ds-checkbox-input:indeterminate + .ds-checkbox-box {
     background: var(--ds-color-accent);
     border-color: var(--ds-color-accent);
+  }
+
+  .ds-checkbox:hover
+    .ds-checkbox-input:not(:disabled):is(:checked, :indeterminate)
+    + .ds-checkbox-box {
+    background: var(--ds-color-accent-hover);
+    border-color: var(--ds-color-accent-hover);
   }
 
   .ds-checkbox-input:checked + .ds-checkbox-box .ds-checkbox-mark-check {
@@ -165,20 +192,16 @@ watchEffect(
     border-color: var(--ds-color-danger);
   }
 
+  /* Disabled : nuances de gris (mêmes tokens que Button), pas d'opacité */
   .ds-checkbox:has(.ds-checkbox-input:disabled) {
-    opacity: 0.5;
+    color: var(--ds-color-text-subtle);
     cursor: not-allowed;
   }
 
-  /* --- Tailles --- */
-  .ds-checkbox[data-size='sm'] {
-    --_box: var(--ds-space-4);
-    font-size: var(--ds-font-size-xs);
-  }
-
-  .ds-checkbox[data-size='lg'] {
-    --_box: var(--ds-space-6);
-    font-size: var(--ds-font-size-md);
+  .ds-checkbox-input:disabled + .ds-checkbox-box {
+    background: var(--ds-color-surface-muted);
+    border-color: var(--ds-color-border);
+    color: var(--ds-color-text-subtle);
   }
 
   @media (prefers-reduced-motion: reduce) {

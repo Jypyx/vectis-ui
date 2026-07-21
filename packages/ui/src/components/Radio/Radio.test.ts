@@ -24,6 +24,16 @@ describe('Radio', () => {
     expect(alpha.checked).toBe(false)
   })
 
+  it('labelPosition et spread posent les attributs data-* sur la racine', () => {
+    const { container } = render(Radio, {
+      props: { modelValue: '', value: 'x', labelPosition: 'start', spread: true },
+      slots: { default: 'X' },
+    })
+    const root = container.querySelector('.ds-radio') as HTMLElement
+    expect(root.getAttribute('data-label-position')).toBe('start')
+    expect(root.hasAttribute('data-spread')).toBe(true)
+  })
+
   it('name (fallthrough) atterrit sur l’input pour former le groupe natif', () => {
     const { getByRole } = render(Radio, {
       props: { modelValue: '', value: 'x' },

@@ -8,11 +8,12 @@ const meta = {
   title: 'Composants/Checkbox',
   component: Checkbox,
   argTypes: {
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    labelPosition: { control: 'select', options: ['start', 'end'] },
   },
   args: {
-    size: 'md',
     indeterminate: false,
+    labelPosition: 'end',
+    spread: false,
     invalid: false,
     disabled: false,
   },
@@ -38,14 +39,29 @@ export const Default: Story = {
   },
 }
 
-export const Tailles: Story = {
+export const PositionDuLibelle: Story = {
   render: () => ({
     components: { Checkbox },
     template: `
-      <div style="display: grid; gap: 8px">
-        <Checkbox size="sm">Small</Checkbox>
-        <Checkbox size="md">Medium</Checkbox>
-        <Checkbox size="lg">Large</Checkbox>
+      <div style="display: grid; gap: 8px; justify-items: start">
+        <Checkbox label-position="end">Libellé après (défaut)</Checkbox>
+        <Checkbox label-position="start">Libellé avant</Checkbox>
+      </div>
+    `,
+  }),
+}
+
+/**
+ * `spread` : la racine passe en flex pleine largeur, libellé et boîte sont
+ * repoussés aux extrémités du conteneur.
+ */
+export const Spread: Story = {
+  render: () => ({
+    components: { Checkbox },
+    template: `
+      <div style="display: grid; gap: 8px; max-width: 320px">
+        <Checkbox spread>Boîte à droite</Checkbox>
+        <Checkbox spread label-position="start">Boîte à gauche</Checkbox>
       </div>
     `,
   }),

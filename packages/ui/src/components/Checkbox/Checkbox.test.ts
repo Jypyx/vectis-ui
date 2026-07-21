@@ -33,6 +33,23 @@ describe('Checkbox', () => {
     expect(input.indeterminate).toBe(false)
   })
 
+  it('labelPosition et spread posent les attributs data-* sur la racine', () => {
+    const { container } = render(Checkbox, {
+      props: { modelValue: false, labelPosition: 'start', spread: true },
+      slots: { default: 'Cocher' },
+    })
+    const root = container.querySelector('.ds-checkbox') as HTMLElement
+    expect(root.getAttribute('data-label-position')).toBe('start')
+    expect(root.hasAttribute('data-spread')).toBe(true)
+  })
+
+  it('spread absent par défaut (pas d’attribut data-spread)', () => {
+    const { container } = render(Checkbox, { props: { modelValue: false } })
+    const root = container.querySelector('.ds-checkbox') as HTMLElement
+    expect(root.getAttribute('data-label-position')).toBe('end')
+    expect(root.hasAttribute('data-spread')).toBe(false)
+  })
+
   it('les attributs natifs atterrissent sur l’input, pas sur le label', () => {
     const { getByRole } = render(Checkbox, {
       props: { modelValue: false },

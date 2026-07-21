@@ -70,6 +70,10 @@ export const semantic = {
     'height-sm': dimension('2rem'),
     'height-md': dimension('2.5rem'),
     'height-lg': dimension('3rem'),
+    'border-width': dimension('2px', 'Bordure des contrôles cochables (Checkbox, Radio)'),
+    'size-check': dimension('1.25rem', 'Boîte des contrôles cochables (Checkbox, Radio)'),
+    'size-check-mark': dimension('0.875rem', 'Coche SVG du Checkbox'),
+    'size-check-dot': dimension('0.5rem', 'Point intérieur du Radio'),
   },
   icon: {
     'size-sm': dimension('1rem', 'Icônes 16px — contrôles sm'),

@@ -8,7 +8,7 @@ const meta = {
   title: 'Composants/Radio',
   component: Radio,
   argTypes: {
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    labelPosition: { control: 'select', options: ['start', 'end'] },
   },
 } satisfies Meta<typeof Radio>
 
@@ -43,16 +43,39 @@ export const Groupe: Story = {
   },
 }
 
-export const Tailles: Story = {
+export const PositionDuLibelle: Story = {
   args: { value: 'x' },
   render: () => ({
     components: { Radio },
-    setup: () => ({ v: ref('md') }),
+    setup: () => ({ v: ref('end') }),
     template: `
-      <div style="display: grid; gap: 8px">
-        <Radio v-model="v" name="tailles" value="sm" size="sm">Small</Radio>
-        <Radio v-model="v" name="tailles" value="md" size="md">Medium</Radio>
-        <Radio v-model="v" name="tailles" value="lg" size="lg">Large</Radio>
+      <div style="display: grid; gap: 8px; justify-items: start">
+        <Radio v-model="v" name="position" value="end" label-position="end">
+          Libellé après (défaut)
+        </Radio>
+        <Radio v-model="v" name="position" value="start" label-position="start">
+          Libellé avant
+        </Radio>
+      </div>
+    `,
+  }),
+}
+
+/**
+ * `spread` : la racine passe en flex pleine largeur, libellé et pastille sont
+ * repoussés aux extrémités du conteneur.
+ */
+export const Spread: Story = {
+  args: { value: 'x' },
+  render: () => ({
+    components: { Radio },
+    setup: () => ({ v: ref('a') }),
+    template: `
+      <div style="display: grid; gap: 8px; max-width: 320px">
+        <Radio v-model="v" name="spread-demo" value="a" spread>Pastille à droite</Radio>
+        <Radio v-model="v" name="spread-demo" value="b" spread label-position="start">
+          Pastille à gauche
+        </Radio>
       </div>
     `,
   }),

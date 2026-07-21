@@ -9,14 +9,18 @@
 interface RadioProps {
   /** Valeur portée par ce bouton, comparée au v-model du groupe. */
   value: string
-  size?: 'sm' | 'md' | 'lg'
+  /** Position du libellé par rapport à la pastille. */
+  labelPosition?: 'start' | 'end'
+  /** Écarte libellé et pastille aux extrémités (la racine devient block, pleine largeur). */
+  spread?: boolean
   /** Force l'état invalide — pose aria-invalid. */
   invalid?: boolean
   disabled?: boolean
 }
 
 withDefaults(defineProps<RadioProps>(), {
-  size: 'md',
+  labelPosition: 'end',
+  spread: false,
   invalid: false,
   disabled: false,
 })
@@ -34,7 +38,7 @@ defineSlots<{
 </script>
 
 <template>
-  <label class="ds-radio" :data-size="size">
+  <label class="ds-radio" :data-label-position="labelPosition" :data-spread="spread || undefined">
     <input
       v-model="model"
       type="radio"
@@ -52,7 +56,6 @@ defineSlots<{
 <style>
 @layer ds.components {
   .ds-radio {
-    --_box: var(--ds-space-5);
     display: inline-flex;
     align-items: center;
     gap: var(--ds-space-2);
@@ -60,6 +63,17 @@ defineSlots<{
     font-size: var(--ds-font-size-sm);
     color: var(--ds-color-text);
     cursor: pointer;
+  }
+
+  /* L'input est en position: absolute → hors du flux flex, l'ordre visuel ne
+     concerne que la pastille et le libellé */
+  .ds-radio[data-label-position='start'] {
+    flex-direction: row-reverse;
+  }
+
+  .ds-radio[data-spread] {
+    display: flex;
+    justify-content: space-between;
   }
 
   .ds-radio-input {
@@ -71,26 +85,49 @@ defineSlots<{
     pointer-events: none;
   }
 
-  /* Pastille : le point intérieur est un box-shadow inset qui grandit */
+  /* Pastille : même mécanique que la boîte du Checkbox (fond accent quand
+     coché), le point intérieur est un pseudo-élément en currentcolor */
   .ds-radio-dot {
-    width: var(--_box);
-    height: var(--_box);
+    display: inline-grid;
+    place-items: center;
+    width: var(--ds-control-size-check);
+    height: var(--ds-control-size-check);
     flex: none;
     background: var(--ds-color-surface);
-    border: 1px solid var(--ds-color-border-strong);
+    border: var(--ds-control-border-width) solid var(--ds-color-border-strong);
     border-radius: var(--ds-radius-full);
+    color: var(--ds-color-text-on-accent);
     transition:
-      border-color var(--ds-duration-fast) var(--ds-ease-default),
-      box-shadow var(--ds-duration-fast) var(--ds-ease-default);
+      background-color var(--ds-duration-fast) var(--ds-ease-default),
+      border-color var(--ds-duration-fast) var(--ds-ease-default);
   }
 
-  .ds-radio:hover .ds-radio-input:not(:disabled):not(:checked) + .ds-radio-dot {
+  .ds-radio-dot::before {
+    content: '';
+    width: var(--ds-control-size-check-dot);
+    height: var(--ds-control-size-check-dot);
+    border-radius: var(--ds-radius-full);
+    background: currentcolor;
+    opacity: 0;
+    transition: opacity var(--ds-duration-fast) var(--ds-ease-default);
+  }
+
+  .ds-radio:hover .ds-radio-input:not(:disabled, :checked) + .ds-radio-dot {
     border-color: color-mix(in oklab, var(--ds-color-border-strong), var(--ds-color-text) 15%);
   }
 
   .ds-radio-input:checked + .ds-radio-dot {
+    background: var(--ds-color-accent);
     border-color: var(--ds-color-accent);
-    box-shadow: inset 0 0 0 calc(var(--_box) * 0.22) var(--ds-color-accent);
+  }
+
+  .ds-radio-input:checked + .ds-radio-dot::before {
+    opacity: 1;
+  }
+
+  .ds-radio:hover .ds-radio-input:not(:disabled):checked + .ds-radio-dot {
+    background: var(--ds-color-accent-hover);
+    border-color: var(--ds-color-accent-hover);
   }
 
   .ds-radio-input:focus-visible + .ds-radio-dot {
@@ -103,24 +140,21 @@ defineSlots<{
     border-color: var(--ds-color-danger);
   }
 
+  /* Disabled : nuances de gris (mêmes tokens que Button), pas d'opacité */
   .ds-radio:has(.ds-radio-input:disabled) {
-    opacity: 0.5;
+    color: var(--ds-color-text-subtle);
     cursor: not-allowed;
   }
 
-  /* --- Tailles --- */
-  .ds-radio[data-size='sm'] {
-    --_box: var(--ds-space-4);
-    font-size: var(--ds-font-size-xs);
-  }
-
-  .ds-radio[data-size='lg'] {
-    --_box: var(--ds-space-6);
-    font-size: var(--ds-font-size-md);
+  .ds-radio-input:disabled + .ds-radio-dot {
+    background: var(--ds-color-surface-muted);
+    border-color: var(--ds-color-border);
+    color: var(--ds-color-text-subtle);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-radio-dot {
+    .ds-radio-dot,
+    .ds-radio-dot::before {
       transition: none;
     }
   }
