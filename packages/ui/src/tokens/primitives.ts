@@ -109,6 +109,9 @@ export const primitives = {
       mono: fontFamily(
         "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace",
       ),
+      // Police d'icônes (chargée par le consommateur, voir README) ; surcharger
+      // ce token permet de basculer sur Material Symbols Outlined/Sharp.
+      icon: fontFamily("'Material Symbols Rounded'"),
     },
     weight: {
       regular: fontWeight('400'),

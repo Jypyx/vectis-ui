@@ -13,15 +13,17 @@ const meta = {
   title: 'Composants/IconButton',
   component: IconButton,
   argTypes: {
-    variant: { control: 'select', options: ['solid', 'outline', 'ghost'] },
-    tone: { control: 'select', options: ['accent', 'neutral', 'danger'] },
+    variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'elevated', 'tonal'] },
+    tone: { control: 'select', options: ['accent', 'neutral', 'danger', 'success', 'warning'] },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    compact: { control: 'boolean' },
   },
   args: {
     label: 'Ajouter un élément',
     variant: 'ghost',
     tone: 'neutral',
     size: 'md',
+    compact: false,
   },
   render: (args) => ({
     components: { IconButton },
@@ -64,6 +66,20 @@ export const Tailles: Story = {
         <IconButton v-bind="args" size="sm">${ICON}</IconButton>
         <IconButton v-bind="args" size="md">${ICON}</IconButton>
         <IconButton v-bind="args" size="lg">${ICON}</IconButton>
+      </div>
+    `,
+  }),
+}
+
+export const Compact: Story = {
+  render: (args) => ({
+    components: { IconButton },
+    setup: () => ({ args }),
+    template: `
+      <div style="display: flex; gap: 8px; align-items: center">
+        <IconButton v-bind="args" size="sm" compact>${ICON}</IconButton>
+        <IconButton v-bind="args" size="md" compact>${ICON}</IconButton>
+        <IconButton v-bind="args" size="lg" compact>${ICON}</IconButton>
       </div>
     `,
   }),

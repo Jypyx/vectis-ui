@@ -10,9 +10,11 @@ import Button from '../Button/Button.vue'
 interface IconButtonProps {
   /** Libellé accessible, posé en aria-label. */
   label: string
-  variant?: 'solid' | 'outline' | 'ghost'
-  tone?: 'accent' | 'neutral' | 'danger'
+  variant?: 'solid' | 'outline' | 'ghost' | 'elevated' | 'tonal'
+  tone?: 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
   size?: 'sm' | 'md' | 'lg'
+  /** Hauteur (et largeur) réduites de 4px. */
+  compact?: boolean
   type?: ButtonHTMLAttributes['type']
   disabled?: boolean
   loading?: boolean
@@ -22,13 +24,14 @@ withDefaults(defineProps<IconButtonProps>(), {
   variant: 'ghost',
   tone: 'neutral',
   size: 'md',
+  compact: false,
   type: 'button',
   disabled: false,
   loading: false,
 })
 
 defineSlots<{
-  /** L'icône (SVG conseillé, avec aria-hidden="true") */
+  /** L'icône (composant Icon ou SVG avec aria-hidden="true") */
   default(): unknown
 }>()
 </script>
@@ -39,6 +42,7 @@ defineSlots<{
     :variant="variant"
     :tone="tone"
     :size="size"
+    :compact="compact"
     :type="type"
     :disabled="disabled"
     :loading="loading"
@@ -51,21 +55,15 @@ defineSlots<{
 <style>
 @layer ds.components {
   /*
-   * Sélecteurs avec [data-size] pour égaler la spécificité des règles de
+   * Sélecteur avec [data-size] pour égaler la spécificité des règles de
    * padding de Button ; ce fichier doit être importé APRÈS Button dans
    * index.ts (l'ordre du CSS bundlé départage à spécificité égale).
+   * La largeur lit --_height, posée par Button sur ce même élément rendu
+   * (compact inclus) : une seule règle couvre toutes les tailles.
    */
   .ds-icon-button[data-size] {
-    width: var(--ds-control-height-md);
+    width: var(--_height);
     padding-inline: 0;
-  }
-
-  .ds-icon-button[data-size='sm'] {
-    width: var(--ds-control-height-sm);
-  }
-
-  .ds-icon-button[data-size='lg'] {
-    width: var(--ds-control-height-lg);
   }
 }
 </style>

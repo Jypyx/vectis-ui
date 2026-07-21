@@ -111,6 +111,37 @@ const semanticColors = flattenTokens(tokens.semantic.color, ['color'])
 
 `@socle/ui/tokens.json` expose la même source en JSON brut (outillage, export de configuration). C'est la fondation de l'app de theming à venir : modifier l'objet, injecter les variables, exporter la config.
 
+## Icônes
+
+Le composant `Icon` accepte trois sources :
+
+```vue
+<Icon name="favorite" />
+<!-- ligature Material Symbols Rounded -->
+<Icon src="/logo.svg" label="Logo" />
+<!-- image -->
+<Icon><svg …/></Icon>
+<!-- SVG inline (slot) -->
+```
+
+- **Décorative par défaut** (`aria-hidden`) ; la prop `label` la rend informative (`role="img"` + `aria-label`).
+- Tailles : `size="sm|md|lg"` → 16/20/24 px (tokens `--ds-icon-size-*`), axe `opsz` 20/20/24. Sans `size`, l'icône suit le contexte : tout parent peut poser les custom properties **`--ds-icon-size`** et **`--ds-icon-opsz`** (c'est ce que fait `Button` selon sa propre taille) ; défaut `md`.
+
+**La police Material Symbols Rounded n'est PAS embarquée** (zéro dépendance runtime) : c'est au consommateur de la charger, par exemple via Google Fonts :
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
+/>
+```
+
+(ou en self-host du woff2 variable, ex. paquet npm `material-symbols`). `display=block` évite le flash du nom d'icône en toutes lettres. Sans police chargée, la mise en page est préservée (le nom textuel est contenu dans le carré de l'icône). Surcharger le token `--ds-font-family-icon` permet de basculer sur Material Symbols Outlined/Sharp.
+
+Sur `Button` : les props `icon-start` / `icon-end` prennent un nom Material Symbols (les slots `#start`/`#end` restent disponibles pour du contenu custom et priment sur les props). `Button` accepte aussi `href` (rendu `<a>` ; `disabled`/`loading` produisent un lien inerte : `href` retiré + `aria-disabled`) et `compact` (hauteur réduite de 4 px : 28/36/44 px).
+
 ## Composants
 
 | Domaine     | Composants                                                                                                                                               |
@@ -119,7 +150,7 @@ const semanticColors = flattenTokens(tokens.semantic.color, ['color'])
 | Formulaires | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `DatePicker`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)           |
 | Overlays    | `Dialog`, `Popover`, `Tooltip`, `DropdownMenu` + `DropdownMenuItem`                                                                                      |
 | Structure   | `Tabs` + `TabList`/`Tab`/`TabPanel`, `Accordion` + `AccordionItem`, `Card`, `DataTable` (tri, responsive), `Breadcrumb` + `BreadcrumbItem`, `Pagination` |
-| Feedback    | `Alert`, `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`                                                                              |
+| Feedback    | `Alert`, `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline)                              |
 
 Notes d'implémentation notables :
 

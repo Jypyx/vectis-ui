@@ -76,6 +76,7 @@
     --ds-space-12: 6rem;
     --ds-font-family-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     --ds-font-family-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+    --ds-font-family-icon: 'Material Symbols Rounded';
     --ds-font-weight-regular: 400;
     --ds-font-weight-medium: 500;
     --ds-font-weight-semibold: 600;
@@ -119,6 +120,7 @@
     --ds-color-text-muted: var(--ds-color-neutral-600);
     --ds-color-text-subtle: var(--ds-color-neutral-400);
     --ds-color-text-on-accent: var(--ds-color-white);
+    --ds-color-text-on-warning: var(--ds-color-neutral-950);
     --ds-color-border: var(--ds-color-neutral-200);
     --ds-color-border-strong: var(--ds-color-neutral-300);
     --ds-color-accent: var(--ds-color-indigo-600);
@@ -156,6 +158,9 @@
     --ds-control-height-sm: 2rem;
     --ds-control-height-md: 2.5rem;
     --ds-control-height-lg: 3rem;
+    --ds-icon-size-sm: 1rem;
+    --ds-icon-size-md: 1.25rem;
+    --ds-icon-size-lg: 1.5rem;
   }
 
   /* Réapplication explicite du light : permet un sous-arbre light dans un arbre dark. */
@@ -170,6 +175,7 @@
     --ds-color-text-muted: var(--ds-color-neutral-600);
     --ds-color-text-subtle: var(--ds-color-neutral-400);
     --ds-color-text-on-accent: var(--ds-color-white);
+    --ds-color-text-on-warning: var(--ds-color-neutral-950);
     --ds-color-border: var(--ds-color-neutral-200);
     --ds-color-border-strong: var(--ds-color-neutral-300);
     --ds-color-accent: var(--ds-color-indigo-600);
@@ -207,6 +213,9 @@
     --ds-control-height-sm: 2rem;
     --ds-control-height-md: 2.5rem;
     --ds-control-height-lg: 3rem;
+    --ds-icon-size-sm: 1rem;
+    --ds-icon-size-md: 1.25rem;
+    --ds-icon-size-lg: 1.5rem;
   }
 
   [data-theme='dark'] {

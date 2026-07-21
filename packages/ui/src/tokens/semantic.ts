@@ -17,6 +17,10 @@ export const semantic = {
     'text-muted': color('{color.neutral.600}'),
     'text-subtle': color('{color.neutral.400}', 'Placeholders, texte désactivé'),
     'text-on-accent': color('{color.white}', 'Texte posé sur un fond accent/danger/success'),
+    'text-on-warning': color(
+      '{color.neutral.950}',
+      'Texte posé sur un fond warning solid (amber trop clair pour du blanc)',
+    ),
 
     border: color('{color.neutral.200}'),
     'border-strong': color('{color.neutral.300}', 'Bordures des contrôles de formulaire'),
@@ -66,5 +70,10 @@ export const semantic = {
     'height-sm': dimension('2rem'),
     'height-md': dimension('2.5rem'),
     'height-lg': dimension('3rem'),
+  },
+  icon: {
+    'size-sm': dimension('1rem', 'Icônes 16px — contrôles sm'),
+    'size-md': dimension('1.25rem', 'Icônes 20px — contrôles md'),
+    'size-lg': dimension('1.5rem', 'Icônes 24px — contrôles lg'),
   },
 } satisfies TokenGroup

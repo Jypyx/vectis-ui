@@ -24,4 +24,15 @@ describe('IconButton', () => {
     expect(button.dataset.tone).toBe('accent')
     expect(button.dataset.size).toBe('sm')
   })
+
+  it('supporte les nouveaux variants/tones et transmet compact', () => {
+    const { getByRole } = render(IconButton, {
+      props: { label: 'Valider', variant: 'tonal', tone: 'success', compact: true },
+      slots: { default: '<svg aria-hidden="true" />' },
+    })
+    const button = getByRole('button')
+    expect(button.dataset.variant).toBe('tonal')
+    expect(button.dataset.tone).toBe('success')
+    expect(button.dataset.compact).toBe('')
+  })
 })

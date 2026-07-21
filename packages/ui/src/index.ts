@@ -6,10 +6,14 @@
  * explicitement `@socle/ui/styles.css`.
  *
  * L'ordre des exports fixe l'ordre du CSS bundlé : IconButton doit suivre
- * Button (il surcharge ses règles à spécificité égale).
+ * Button (il surcharge ses règles à spécificité égale). Icon est placé avant
+ * Button par cohérence (dépendance → dépendant) mais son ordre n'est pas
+ * contraignant : Button le pilote via des custom properties héritées, pas par
+ * surcharge de sélecteurs.
  */
 import './styles/index.css'
 
+export { default as Icon } from './components/Icon/Icon.vue'
 export { default as Button } from './components/Button/Button.vue'
 export { default as IconButton } from './components/IconButton/IconButton.vue'
 export { default as Input } from './components/Input/Input.vue'
