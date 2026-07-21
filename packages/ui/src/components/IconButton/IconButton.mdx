@@ -1,0 +1,62 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as IconButtonStories from './IconButton.stories'
+
+<Meta of={IconButtonStories} />
+
+# IconButton
+
+Bouton à icône seule : un wrapper de `Button` rendu **carré** (largeur = hauteur, padding
+supprimé), avec la même API visuelle. La prop `label` est **obligatoire** — elle pose
+l'`aria-label` du bouton, car une icône seule ne fournit aucun nom accessible aux lecteurs
+d'écran.
+
+L'icône est passée dans le slot par défaut, idéalement via le composant `Icon` : sa taille et
+son axe `opsz` suivent alors automatiquement la taille du bouton (sm → 16px, md → 20px,
+lg → 24px).
+
+<Canvas of={IconButtonStories.Default} />
+
+<Controls of={IconButtonStories.Default} />
+
+## Variants et tones
+
+Mêmes cinq variants (`solid`, `outline`, `ghost`, `elevated`, `tonal`) et cinq tones
+(`accent`, `neutral`, `danger`, `success`, `warning`) que `Button` — voir sa documentation
+pour le détail de chaque rendu. Défauts adaptés à l'usage icône : `variant="ghost"` et
+`tone="neutral"` (l'IconButton est typiquement une action discrète de barre d'outils).
+
+<Canvas of={IconButtonStories.Variants} />
+
+## Tailles
+
+Trois tailles carrées (`sm` 32px, `md` 40px, `lg` 48px) ; `compact` réduit le côté de 4px
+(28/36/44px) sans changer la taille de l'icône. La largeur suit automatiquement la hauteur du
+`Button` sous-jacent, compact inclus.
+
+<Canvas of={IconButtonStories.Sizes} />
+
+## Sources d'icône
+
+Le slot accepte les trois sources du composant `Icon` : ligature Material Symbols Rounded
+(police chargée par le consommateur — voir le README), SVG inline, ou image.
+
+<Canvas of={IconButtonStories.IconsTypes} />
+
+## États
+
+`loading` désactive le bouton, affiche le spinner et pose `aria-busy` :
+
+<Canvas of={IconButtonStories.Loading} />
+
+`disabled` bascule tous les variants sur des nuances de gris, comme `Button` :
+
+<Canvas of={IconButtonStories.Disabled} />
+
+## Accessibilité
+
+- `label` obligatoire → `aria-label` : le bouton a toujours un nom accessible ; l'icône,
+  elle, reste décorative (`aria-hidden`).
+- Pour un bouton avec libellé visible **et** icône, utiliser `Button` avec
+  `icon-start`/`icon-end` plutôt qu'un IconButton.
+- Focus visible par anneau (`--ds-focus-ring-*`), transitions soumises à
+  `prefers-reduced-motion` — hérités de `Button`.

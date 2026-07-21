@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 
+import Icon from '../Icon/Icon.vue'
 import IconButton from './IconButton.vue'
 
 const ICON = `
@@ -24,11 +25,13 @@ const meta = {
     tone: 'neutral',
     size: 'md',
     compact: false,
+    disabled: false,
+    loading: false,
   },
   render: (args) => ({
-    components: { IconButton },
+    components: { IconButton, Icon },
     setup: () => ({ args }),
-    template: `<IconButton v-bind="args">${ICON}</IconButton>`,
+    template: '<IconButton v-bind="args"><Icon name="add" /></IconButton>',
   }),
 } satisfies Meta<typeof IconButton>
 
@@ -43,43 +46,94 @@ export const Default: Story = {
   },
 }
 
-export const Variantes: Story = {
+export const Variants: Story = {
   render: (args) => ({
-    components: { IconButton },
+    components: { IconButton, Icon },
     setup: () => ({ args }),
     template: `
-      <div style="display: flex; gap: 8px">
-        <IconButton v-bind="args" variant="solid" tone="accent">${ICON}</IconButton>
-        <IconButton v-bind="args" variant="outline" tone="neutral">${ICON}</IconButton>
-        <IconButton v-bind="args" variant="ghost" tone="danger">${ICON}</IconButton>
+      <div style="display: grid; gap: 12px">
+        <div v-for="tone in ['accent', 'neutral', 'danger', 'success', 'warning']" :key="tone" style="display: flex; gap: 8px; flex-wrap: wrap">
+          <IconButton
+            v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']"
+            :key="variant"
+            :label="args.label"
+            :tone="tone"
+            :variant="variant"
+          >
+            <Icon name="favorite" />
+          </IconButton>
+        </div>
       </div>
     `,
   }),
 }
 
-export const Tailles: Story = {
+export const Sizes: Story = {
   render: (args) => ({
-    components: { IconButton },
+    components: { IconButton, Icon },
     setup: () => ({ args }),
     template: `
-      <div style="display: flex; gap: 8px; align-items: center">
-        <IconButton v-bind="args" size="sm">${ICON}</IconButton>
-        <IconButton v-bind="args" size="md">${ICON}</IconButton>
-        <IconButton v-bind="args" size="lg">${ICON}</IconButton>
+      <div style="display: grid; gap: 12px">
+        <div style="display: flex; gap: 8px; align-items: center">
+          <IconButton v-bind="args" size="sm"><Icon name="add" /></IconButton>
+          <IconButton v-bind="args" size="md"><Icon name="add" /></IconButton>
+          <IconButton v-bind="args" size="lg"><Icon name="add" /></IconButton>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center">
+          <IconButton v-bind="args" size="sm" compact><Icon name="add" /></IconButton>
+          <IconButton v-bind="args" size="md" compact><Icon name="add" /></IconButton>
+          <IconButton v-bind="args" size="lg" compact><Icon name="add" /></IconButton>
+        </div>
       </div>
     `,
   }),
 }
 
-export const Compact: Story = {
+export const IconsTypes: Story = {
   render: (args) => ({
-    components: { IconButton },
+    components: { IconButton, Icon },
     setup: () => ({ args }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
-        <IconButton v-bind="args" size="sm" compact>${ICON}</IconButton>
-        <IconButton v-bind="args" size="md" compact>${ICON}</IconButton>
-        <IconButton v-bind="args" size="lg" compact>${ICON}</IconButton>
+        <!-- Ligature Material Symbols -->
+        <IconButton label="Paramètres"><Icon name="settings" /></IconButton>
+
+        <!-- SVG inline -->
+        <IconButton label="Ajouter">${ICON}</IconButton>
+
+        <!-- Image -->
+        <IconButton label="Profil" variant="outline">
+          <Icon src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1'/%3E%3C/svg%3E" />
+        </IconButton>
+      </div>
+    `,
+  }),
+}
+
+export const Loading: Story = {
+  args: { loading: true },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button')
+    await expect(button).toBeDisabled()
+    await expect(button).toHaveAttribute('aria-busy', 'true')
+  },
+}
+
+export const Disabled: Story = {
+  render: (args) => ({
+    components: { IconButton, Icon },
+    setup: () => ({ args }),
+    template: `
+      <div style="display: flex; gap: 8px; flex-wrap: wrap">
+        <IconButton
+          v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']"
+          :key="variant"
+          :label="args.label"
+          :variant="variant"
+          disabled
+        >
+          <Icon name="favorite" />
+        </IconButton>
       </div>
     `,
   }),
