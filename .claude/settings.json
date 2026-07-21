@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(pnpm lint*)",
+      "PowerShell(pnpm typecheck*)",
+      "PowerShell(pnpm test*)",
+      "PowerShell(pnpm format*)",
+      "PowerShell(pnpm format:fix*)",
+      "PowerShell(pnpm build*)",
+      "PowerShell(pnpm build-storybook*)",
+      "PowerShell(pnpm tokens*)",
+      "PowerShell(pnpm exec vitest run *)",
+      "PowerShell(pnpm --filter @vectis/ui exec vitest run *)",
+      "PowerShell(npx vitest run *)",
+      "Bash(pnpm lint*)",
+      "Bash(pnpm typecheck*)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm format*)",
+      "Bash(pnpm format:fix*)",
+      "Bash(pnpm build*)",
+      "Bash(pnpm build-storybook*)",
+      "Bash(pnpm tokens*)",
+      "Bash(pnpm exec vitest run *)",
+      "Bash(pnpm --filter @vectis/ui exec vitest run *)",
+      "Bash(npx vitest run *)"
+    ]
+  }
+}
