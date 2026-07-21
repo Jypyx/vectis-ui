@@ -1,0 +1,165 @@
+﻿/*
+ * Common plumbing of the floating elements (VPopover, VMenu, VTooltip…).
+ *
+ * Two classes, to be set together: `.v-overlay` (the foundation of every popover
+ * in the DS, shared with the toast stacks) and `.v-floating` (anchoring +
+ * placements).
+ *
+ * 100% CSS Anchor Positioning — NO JS fallback: the project targets modern
+ * browsers (Chrome/Edge 125+, Safari 26+; Firefox not yet stable — an accepted
+ * choice, see CLAUDE.md/README).
+ *
+ * Three anchoring cases, all covered by the same placement table:
+ * - implicit: the `popovertarget` invoker is the anchor (VMenu);
+ * - a static `anchor-name` set by the component on its own wrapper (VTooltip) or
+ *   by `VPopover` on its own when a `#trigger` is provided;
+ * - a name passed to `VPopover` through the `anchor` prop, the consumer already
+ *   owning a root and a control to anchor to (VCombobox, VDateInput,
+ *   VTimePicker).
+ *
+ * `position-try-fallbacks` flips the panel when there is no room.
+ */
+@layer vectis.components {
+  /*
+   * The foundation of EVERY popover in the DS, anchored or not — `.v-floating`
+   * (anchored panels) as well as `.v-toast-stack` (stacks positioned in physical
+   * coordinates, with no anchor).
+   *
+   * The `display: none` guard is here rather than in each component: a panel that
+   * sets its own `display` (`.v-panel` as flex, the toast stack as a column)
+   * overrides the UA `[popover] { display: none }` — author styles always beat the
+   * UA, layers or not — and would then stay in layout, invisible but clickable on
+   * top of the content. Its specificity (0,2,0) puts it out of reach of a
+   * component `display`, whatever the bundle order. Each family's
+   * `display … allow-discrete` transitions preserve the exit animation.
+   */
+  .v-overlay {
+    position: fixed;
+    /* neutralizes the UA styles of [popover] (inset: 0; margin: auto) */
+    inset: auto;
+  }
+
+  .v-overlay:not(:popover-open) {
+    display: none;
+  }
+
+  .v-floating {
+    /* both the gap from the anchor AND the minimum margin to the viewport edge */
+    margin: var(--vectis-space-2);
+    position-try-fallbacks: flip-block, flip-inline;
+  }
+
+  /*
+   * Aligned placements (`span-inline-*`): the inline margin on the aligned side
+   * would offset the panel by 8px from the trigger's edge — it is cancelled, and
+   * the opposite margin keeps the minimum gap to the viewport.
+   */
+  .v-floating[data-placement$='-start'] {
+    margin-inline-start: 0;
+  }
+
+  .v-floating[data-placement$='-end'] {
+    margin-inline-end: 0;
+  }
+
+  .v-floating[data-placement='bottom'] {
+    position-area: block-end;
+    justify-self: anchor-center;
+  }
+
+  .v-floating[data-placement='bottom-start'] {
+    position-area: block-end span-inline-end;
+  }
+
+  .v-floating[data-placement='bottom-end'] {
+    position-area: block-end span-inline-start;
+  }
+
+  .v-floating[data-placement='top'] {
+    position-area: block-start;
+    justify-self: anchor-center;
+  }
+
+  .v-floating[data-placement='top-start'] {
+    position-area: block-start span-inline-end;
+  }
+
+  .v-floating[data-placement='top-end'] {
+    position-area: block-start span-inline-start;
+  }
+
+  .v-floating[data-placement='left'] {
+    position-area: inline-start;
+    align-self: anchor-center;
+  }
+
+  .v-floating[data-placement='right'] {
+    position-area: inline-end;
+    align-self: anchor-center;
+  }
+
+  /*
+   * Aligned side placements (VMenu submenus). The axis is swapped compared to the
+   * top/bottom placements: the gap from the anchor is INLINE and the alignment is
+   * BLOCK — so the inline margin cancelled by the generic `$='-start'`/`$='-end'`
+   * rules above is restored (same specificity, source order decides), and the
+   * block margin on the aligned side is cancelled instead.
+   */
+  .v-floating[data-placement='right-start'] {
+    position-area: inline-end span-block-end;
+  }
+
+  .v-floating[data-placement='right-end'] {
+    position-area: inline-end span-block-start;
+  }
+
+  .v-floating[data-placement='left-start'] {
+    position-area: inline-start span-block-end;
+  }
+
+  .v-floating[data-placement='left-end'] {
+    position-area: inline-start span-block-start;
+  }
+
+  .v-floating[data-placement^='right-'],
+  .v-floating[data-placement^='left-'] {
+    margin-inline: var(--vectis-space-2);
+  }
+
+  .v-floating:is([data-placement='right-start'], [data-placement='left-start']) {
+    margin-block-start: 0;
+  }
+
+  .v-floating:is([data-placement='right-end'], [data-placement='left-end']) {
+    margin-block-end: 0;
+  }
+
+  /* Common animated entry/exit (allow-discrete + @starting-style) */
+  .v-floating {
+    opacity: 0;
+    transform: scale(0.97);
+    transition:
+      opacity var(--vectis-duration-fast) var(--vectis-ease-default),
+      transform var(--vectis-duration-fast) var(--vectis-ease-default),
+      overlay var(--vectis-duration-fast) allow-discrete,
+      display var(--vectis-duration-fast) allow-discrete;
+  }
+
+  .v-floating:popover-open {
+    opacity: 1;
+    transform: none;
+  }
+
+  @starting-style {
+    .v-floating:popover-open {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .v-floating {
+      transition: none;
+    }
+  }
+}

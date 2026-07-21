@@ -1,0 +1,89 @@
+/*
+ * Common chassis of the messages the design system floats above the page: the
+ * notification card (VToast) and the confirmation bar (VSnackbar).
+ *
+ * The two are distinct components on purpose — a notification reports a state and
+ * stacks, a snackbar confirms an action the reader just took and appears alone — but
+ * they are the same OBJECT on screen: a raised box, one line of body text tall, laid
+ * out as icon / text / trailing control, sliding in from the edge it came from. That
+ * shape is what lives here, so that a change of radius, of shadow or of entry motion
+ * cannot move one surface and leave the other behind.
+ *
+ * The class goes on the card itself, alongside the component's own:
+ *   class="v-banner v-toast v-tone"
+ *   class="v-banner v-snackbar v-tone"
+ *
+ * RULE, the same as `panel.css`: put ONLY declarations here that no consumer
+ * redeclares. `.v-banner` and `.v-toast`/`.v-snackbar` all have equal specificity
+ * (0,1,0), and since the CSS split each component ships in its own sheet, whose
+ * position the consumer's bundler decides — on a shared declaration the winner would
+ * depend on an order nobody controls. So these stay with each component: `padding`,
+ * every width, and the whole of the tone painting (background, border, colour), which
+ * is exactly where the two genuinely differ. Where one of them MUST redeclare, the
+ * sanctioned form is the compound `.v-banner.v-toast`.
+ *
+ * Two custom properties make up the contract:
+ *
+ *   --banner-line   defined here. The height of ONE line of message text, which is what
+ *                   an icon or a trailing control is measured against: each is given
+ *                   EQUAL margins above and below so that its outer box comes out at
+ *                   exactly that height. Equal is the whole trick — unequal margins move
+ *                   the item's centre by half the difference, and it then pushes the
+ *                   flex line taller than the text.
+ *
+ *                   The two cards do DIFFERENT things with it, which is why `align-items`
+ *                   is not declared here. VToast aligns to the start, so those margins
+ *                   hook its icon and its cross to the FIRST line of a message that
+ *                   wraps. VSnackbar centres, so its action sits in the middle of a
+ *                   two-line bar rather than in its top corner — there the negative
+ *                   margin aligns nothing, it only stops a control taller than a line of
+ *                   text from opening the padding.
+ *
+ *   --banner-enter-y  consumed here, POSED BY THE CONTAINER — the toast stack sets it
+ *                   negative at the top of the screen and positive at the bottom, the
+ *                   snackbar host always positive. It is what makes the card slide in
+ *                   from the edge it belongs to without this sheet knowing where that
+ *                   is. The `, 0` fallback is what lets a card render outside any
+ *                   container at all.
+ */
+@layer vectis.components {
+  .v-banner {
+    --banner-line: calc(var(--vectis-text-body-md-size) * var(--vectis-text-body-md-leading));
+    display: flex;
+    gap: var(--vectis-space-3);
+    border-radius: var(--vectis-radius-overlay);
+    box-shadow: var(--vectis-shadow-lg);
+    font-family: var(--vectis-text-family);
+    font-size: var(--vectis-text-body-md-size);
+    line-height: var(--vectis-text-body-md-leading);
+  }
+
+  /*
+   * A card joining a container that is already open slides in from the screen edge, the
+   * direction coming from the container itself. The starting values apply to any
+   * element being added to the page; where they are not supported it simply appears.
+   *
+   * Leaving is deliberately not animated: keeping the card on screen while it faded
+   * would mean holding it in its queue for the length of the transition, and the
+   * simplicity is worth more than the flourish. The container as a whole does fade when
+   * it empties, which each component handles for itself.
+   */
+  .v-banner {
+    transition:
+      opacity var(--vectis-duration-base) var(--vectis-ease-default),
+      translate var(--vectis-duration-base) var(--vectis-ease-default);
+  }
+
+  @starting-style {
+    .v-banner {
+      opacity: 0;
+      translate: 0 var(--banner-enter-y, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .v-banner {
+      transition: none;
+    }
+  }
+}

@@ -1,0 +1,43 @@
+/*
+ * Common chrome of the floating panels that list rows (VMenu, VCombobox).
+ *
+ * The counterpart of `floating.css`, which carries the POSITIONING of the same
+ * subject: here it is the decoration (surface, border, shadow, internal rhythm).
+ * Both classes go together on the popover root:
+ *   class="v-panel v-menu v-floating"
+ *
+ * RULE: put ONLY declarations here that no consumer redeclares. `.v-panel` and
+ * `.v-menu`/`.v-combobox-panel` have equal specificity (0,1,0) — on a shared
+ * declaration, bundle order would decide. So these stay with each panel:
+ * `min/max-inline-size`, `max-block-size`, `overflow`, the subpanel margin,
+ * `[data-width]` (`position-anchor` comes from `VPopover`).
+ *
+ * Nothing here about SIZES: the panel carries `v-control` (with its
+ * `data-size`/`data-compact`) and the rows consume the inherited `--control-*` —
+ * a single table, `styles/control-size.css`. That is also why the VIcon context
+ * is NOT set here: this sheet applies to every panel, so a submenu would
+ * overwrite the value inherited from its root.
+ *
+ * This class is set by `VPopover`'s `surface` prop (default true), which carries
+ * the popover plumbing — element, state, anchoring, placement. The sharing
+ * granularity is therefore: the plumbing (`VPopover`), the chrome (this file),
+ * the positioning (`floating.css`) and the sizes (`control-size.css`). What stays
+ * FORBIDDEN is a panel parameterized by `role`, which would additionally absorb
+ * the ARIA role, the keyboard, the focus and the dismissal policy — precisely
+ * what distinguishes a menu from a listbox or a date picker, and that lives with
+ * each component.
+ */
+@layer vectis.components {
+  .v-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vectis-space-1);
+    padding: var(--vectis-space-1);
+    background: var(--vectis-color-surface-overlay);
+    color: var(--vectis-color-text);
+    border: 1px solid var(--vectis-color-border);
+    border-radius: var(--vectis-radius-surface);
+    box-shadow: var(--vectis-shadow-lg);
+    font-family: var(--vectis-text-family);
+  }
+}

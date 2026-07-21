@@ -1,0 +1,95 @@
+/*
+ * Tone table — the single CSS incarnation of the design system's tone contract.
+ *
+ * A component sets `v-tone` on the element carrying `data-tone` and consumes the
+ * `--tone-*` variables in its own CSS. The blocks define ONLY custom properties,
+ * never a visual property: it is each component that decides what `--tone-bg-solid`
+ * paints. The four chromatic tones are VButton's values; `neutral`, which no token
+ * family covers, is the canonical inversion described below.
+ *
+ *   --tone-bg-solid / -hover / -active   filled background and its two states
+ *   --tone-text-solid                    text ON that filled background
+ *   --tone-text-tinted                   the tone as TEXT, on the page background
+ *   --tone-bg-soft                       the tinted surface (the `soft` variant,
+ *                                        which is named after this very token, and
+ *                                        the hover of a ghost)
+ *   --tone-border-soft                   the border matching that surface
+ *
+ * WHY `vectis.tokens` AND NOT `vectis.components`. This table is a FALLBACK: a
+ * component must be able to override a tone (VChip and VToast both redefine
+ * `neutral`, VChip's `[data-custom]` replaces the whole set). Those rules and these
+ * would sit at EQUAL specificity — `.v-chip[data-tone='neutral']` and
+ * `.v-tone[data-tone='neutral']` are both (0,2,0) — and since the split each
+ * component ships in its own sheet, whose position the consumer's bundler decides,
+ * the winner would depend on an order nobody controls. Declaring the table one layer
+ * lower makes every component rule win by construction, whatever the file order.
+ */
+@layer vectis.tokens {
+  .v-tone[data-tone='accent'] {
+    --tone-bg-solid: var(--vectis-color-accent);
+    --tone-bg-solid-hover: var(--vectis-color-accent-hover);
+    --tone-bg-solid-active: var(--vectis-color-accent-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-accent-text);
+    --tone-bg-soft: var(--vectis-color-accent-surface);
+    --tone-border-soft: var(--vectis-color-accent-border);
+  }
+
+  .v-tone[data-tone='danger'] {
+    --tone-bg-solid: var(--vectis-color-danger);
+    --tone-bg-solid-hover: var(--vectis-color-danger-hover);
+    --tone-bg-solid-active: var(--vectis-color-danger-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-danger-text);
+    --tone-bg-soft: var(--vectis-color-danger-surface);
+    --tone-border-soft: var(--vectis-color-danger-border);
+  }
+
+  .v-tone[data-tone='success'] {
+    --tone-bg-solid: var(--vectis-color-success);
+    --tone-bg-solid-hover: var(--vectis-color-success-hover);
+    --tone-bg-solid-active: var(--vectis-color-success-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-success-text);
+    --tone-bg-soft: var(--vectis-color-success-surface);
+    --tone-border-soft: var(--vectis-color-success-border);
+  }
+
+  .v-tone[data-tone='warning'] {
+    --tone-bg-solid: var(--vectis-color-warning);
+    --tone-bg-solid-hover: var(--vectis-color-warning-hover);
+    --tone-bg-solid-active: var(--vectis-color-warning-active);
+    /* Amber is too light for white: a dedicated token (dark text) */
+    --tone-text-solid: var(--vectis-color-text-on-warning);
+    --tone-text-tinted: var(--vectis-color-warning-text);
+    --tone-bg-soft: var(--vectis-color-warning-surface);
+    --tone-border-soft: var(--vectis-color-warning-border);
+  }
+
+  /* Neutral has no token family: its solid is a full text/surface INVERSION, and
+     the two obvious alternatives are both dead ends. `surface-muted` would make
+     --tone-bg-solid equal to --tone-bg-soft, so a solid neutral control would be
+     indistinguishable from a soft one — the state a selection has to signal. And
+     `surface-inverse` equals `surface-muted` in dark (both neutral-800), so a
+     selected neutral control would disappear there. The inversion stays distinct
+     from the soft background in BOTH themes: text is neutral-900 in light,
+     neutral-50 in dark. Hover/active therefore mix towards `surface` — the
+     opposite direction from the chromatic tones, which darken. */
+  .v-tone[data-tone='neutral'] {
+    --tone-bg-solid: var(--vectis-color-text);
+    --tone-bg-solid-hover: color-mix(
+      in oklab,
+      var(--vectis-color-text),
+      var(--vectis-color-surface) 8%
+    );
+    --tone-bg-solid-active: color-mix(
+      in oklab,
+      var(--vectis-color-text),
+      var(--vectis-color-surface) 14%
+    );
+    --tone-text-solid: var(--vectis-color-surface);
+    --tone-text-tinted: var(--vectis-color-text);
+    --tone-bg-soft: var(--vectis-color-surface-muted);
+    --tone-border-soft: var(--vectis-color-border-strong);
+  }
+}

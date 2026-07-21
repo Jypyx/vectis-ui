@@ -1,0 +1,19 @@
+/*
+ * CSS entry point of the design system (`@vectis/ui/styles.css`).
+ *
+ * The layer order is declared here, once and for all:
+ *   vectis.reset < vectis.tokens < vectis.components < vectis.utilities
+ * Any NON-layered consumer style automatically wins over these layers — that is
+ * the intended override mechanism. To override finely while keeping the DS
+ * cascade, a consumer can also write into `vectis.utilities`.
+ */
+@layer vectis.reset, vectis.tokens, vectis.components, vectis.utilities;
+
+@import './reset.css';
+@import './tokens.css';
+@import './tones.css';
+@import './floating.css';
+@import './panel.css';
+@import './banner.css';
+@import './control-size.css';
+@import './utilities.css';

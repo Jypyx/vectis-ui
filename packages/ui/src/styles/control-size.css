@@ -1,0 +1,87 @@
+/*
+ * Control size table — the single CSS incarnation of the design system's mapping
+ * (height / icon / opsz / type / paddings per size, xs → xl).
+ *
+ * Every interactive component sets `v-control` on its ROOT (the one carrying
+ * `data-size`/`data-compact`) and consumes the `--control-*` variables in its own
+ * CSS; they inherit down to the children (e.g. VInput's field). The blocks define
+ * ONLY custom properties — never a layout property — so there is no specificity
+ * conflict with the SFCs.
+ *
+ * Two padding-inline columns: `--control-padding-inline` for solid controls
+ * (VButton, VChip, panel rows…), `--control-padding-inline-field` for text inputs
+ * (VInput, VTextarea, VDateInput), which are tighter.
+ * `--control-gap`: internal spacing (icon/label, OTP cells…).
+ *
+ * `--vectis-icon-size`/`--vectis-icon-opsz` = VIcon's public context API; the
+ * opsz stays a literal (a Material Symbols font axis: a technical contract, not a
+ * design token — see VIcon.vue).
+ */
+@layer vectis.components {
+  .v-control {
+    /*
+     * Height in two steps: the sizes set --control-height-base, and compact
+     * derives the effective height (-4px, padding/type/icons unchanged).
+     */
+    --control-height: var(--control-height-base);
+  }
+
+  .v-control[data-compact] {
+    --control-height: calc(var(--control-height-base) - var(--vectis-space-1));
+  }
+
+  .v-control[data-size='xs'] {
+    --control-height-base: var(--vectis-control-height-xs);
+    --control-font-size: var(--vectis-font-size-xs);
+    --control-padding-inline: var(--vectis-space-2);
+    --control-padding-inline-field: var(--vectis-space-1);
+    --control-gap: var(--vectis-space-1);
+    --control-action-size: var(--vectis-control-action-size-sm);
+    --vectis-icon-size: var(--vectis-icon-size-sm);
+    --vectis-icon-opsz: 20;
+  }
+
+  .v-control[data-size='sm'] {
+    --control-height-base: var(--vectis-control-height-sm);
+    --control-font-size: var(--vectis-font-size-sm);
+    --control-padding-inline: var(--vectis-space-3);
+    --control-padding-inline-field: var(--vectis-space-2);
+    --control-gap: var(--vectis-space-2);
+    --control-action-size: var(--vectis-control-action-size-md);
+    --vectis-icon-size: var(--vectis-icon-size-md);
+    --vectis-icon-opsz: 20;
+  }
+
+  .v-control[data-size='md'] {
+    --control-height-base: var(--vectis-control-height-md);
+    --control-font-size: var(--vectis-font-size-sm);
+    --control-padding-inline: var(--vectis-space-4);
+    --control-padding-inline-field: var(--vectis-space-3);
+    --control-gap: var(--vectis-space-2);
+    --control-action-size: var(--vectis-control-action-size-md);
+    --vectis-icon-size: var(--vectis-icon-size-md);
+    --vectis-icon-opsz: 20;
+  }
+
+  .v-control[data-size='lg'] {
+    --control-height-base: var(--vectis-control-height-lg);
+    --control-font-size: var(--vectis-font-size-md);
+    --control-padding-inline: var(--vectis-space-5);
+    --control-padding-inline-field: var(--vectis-space-4);
+    --control-gap: var(--vectis-space-3);
+    --control-action-size: var(--vectis-control-action-size-lg);
+    --vectis-icon-size: var(--vectis-icon-size-lg);
+    --vectis-icon-opsz: 24;
+  }
+
+  .v-control[data-size='xl'] {
+    --control-height-base: var(--vectis-control-height-xl);
+    --control-font-size: var(--vectis-font-size-md);
+    --control-padding-inline: var(--vectis-space-6);
+    --control-padding-inline-field: var(--vectis-space-5);
+    --control-gap: var(--vectis-space-3);
+    --control-action-size: var(--vectis-control-action-size-lg);
+    --vectis-icon-size: var(--vectis-icon-size-lg);
+    --vectis-icon-opsz: 24;
+  }
+}
