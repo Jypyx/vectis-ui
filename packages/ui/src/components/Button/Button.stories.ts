@@ -36,7 +36,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-export const Variantes: Story = {
+export const Variants: Story = {
   render: () => ({
     components: { Button },
     template: `
@@ -51,7 +51,7 @@ export const Variantes: Story = {
   }),
 }
 
-export const Tailles: Story = {
+export const Sizes: Story = {
   render: () => ({
     components: { Button },
     template: `
@@ -71,7 +71,7 @@ export const Tailles: Story = {
   }),
 }
 
-export const IconesParProps: Story = {
+export const Icons: Story = {
   render: () => ({
     components: { Button },
     template: `
@@ -100,7 +100,7 @@ export const IconesParProps: Story = {
   },
 }
 
-export const AvecIcones: Story = {
+export const IconsTypes: Story = {
   render: () => ({
     components: { Button, Icon },
     template: `
@@ -132,7 +132,7 @@ export const AvecIcones: Story = {
   }),
 }
 
-export const Lien: Story = {
+export const Link: Story = {
   render: () => ({
     components: { Button },
     template: `
@@ -149,7 +149,7 @@ export const Lien: Story = {
   },
 }
 
-export const LienDesactive: Story = {
+export const DisabledLink: Story = {
   render: () => ({
     components: { Button },
     template: `

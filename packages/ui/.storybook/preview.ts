@@ -3,35 +3,36 @@ import type { Decorator, Preview } from '@storybook/vue3-vite'
 import '../src/styles/index.css'
 import './preview.css'
 
-/**
- * Preset « custom » du toolbar : injection de surcharges de tokens à la volée
- * sur un sous-arbre DOM, sans rebuild — préfiguration de l'app de theming.
+/*
+ * Thème et direction sont appliqués en effets de bord sur <html> plutôt que
+ * via l'état d'un wrapper templaté : le renderer vue3 de Storybook ne
+ * remonte pas l'arbre quand un global du toolbar change (il ne patche que
+ * les args réactifs), un état capturé dans setup() resterait donc figé. Le
+ * corps du decorator, lui, est bien ré-exécuté à chaque changement.
  */
-const CUSTOM_THEME_OVERRIDES: Record<string, string> = {
-  '--ds-color-accent': 'oklch(58% 0.2 25)',
-  '--ds-color-accent-hover': 'oklch(51% 0.19 25)',
-  '--ds-color-accent-active': 'oklch(45% 0.17 25)',
-  '--ds-color-accent-surface': 'oklch(96.5% 0.02 25)',
-  '--ds-color-accent-border': 'oklch(88% 0.06 25)',
-  '--ds-color-accent-text': 'oklch(51% 0.19 25)',
-  '--ds-focus-ring-color': 'oklch(58% 0.2 25)',
-  '--ds-radius-interactive': '9999px',
-  '--ds-radius-surface': '1rem',
+const darkMedia = window.matchMedia('(prefers-color-scheme: dark)')
+
+const applySystemTheme = () => {
+  document.documentElement.dataset.theme = darkMedia.matches ? 'dark' : 'light'
+}
+
+const applyTheme = (theme: string) => {
+  darkMedia.removeEventListener('change', applySystemTheme)
+  if (theme === 'system') {
+    applySystemTheme()
+    // Suit les changements de préférence OS tant que le preset System est actif.
+    darkMedia.addEventListener('change', applySystemTheme)
+  } else {
+    document.documentElement.dataset.theme = theme
+  }
 }
 
 const withTheme: Decorator = (story, context) => {
-  const theme = (context.globals.theme as string | undefined) ?? 'light'
-  const direction = (context.globals.direction as string | undefined) ?? 'ltr'
-  const dataTheme = theme === 'dark' ? 'dark' : 'light'
-  const styleVars = theme === 'custom' ? CUSTOM_THEME_OVERRIDES : {}
+  applyTheme((context.globals.theme as string | undefined) ?? 'system')
+  document.documentElement.dir = (context.globals.direction as string | undefined) ?? 'ltr'
   return {
     components: { story },
-    setup: () => ({ dataTheme, styleVars, direction }),
-    template: `
-      <div class="sb-theme-root" :data-theme="dataTheme" :dir="direction" :style="styleVars">
-        <story />
-      </div>
-    `,
+    template: '<div class="sb-theme-root"><story /></div>',
   }
 }
 
@@ -51,9 +52,9 @@ const preview: Preview = {
         title: 'Thème',
         icon: 'paintbrush',
         items: [
+          { value: 'system', title: 'System' },
           { value: 'light', title: 'Light' },
           { value: 'dark', title: 'Dark' },
-          { value: 'custom', title: 'Custom (tokens injectés)' },
         ],
         dynamicTitle: true,
       },
@@ -72,7 +73,7 @@ const preview: Preview = {
     },
   },
   initialGlobals: {
-    theme: 'light',
+    theme: 'system',
     direction: 'ltr',
   },
   decorators: [withTheme],

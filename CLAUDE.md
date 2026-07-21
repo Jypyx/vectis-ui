@@ -68,7 +68,7 @@ Chaîne : `src/tokens/*.ts` (source de vérité typée, format DTCG `{ $value, $
 
 Storybook 10, framework `@storybook/vue3-vite`. Imports : types depuis `@storybook/vue3-vite`, utilitaires de test depuis `storybook/test`, blocks MDX depuis `@storybook/addon-docs/blocks`.
 
-- `.storybook/preview.ts` : decorator global de thème (toolbar light/dark/custom + direction RTL). Le preset « custom » injecte des surcharges `--ds-*` inline sur le wrapper — démonstrateur du theming runtime.
+- `.storybook/preview.ts` : decorator global de thème (toolbar System/Light/Dark — System suit `prefers-color-scheme` avec écoute des changements OS — + direction LTR/RTL). **Piège vue3** : thème et direction sont appliqués en effets de bord sur `<html>` (`data-theme`, `dir`), PAS via l'état d'un wrapper templaté — le renderer vue3 ne remonte pas l'arbre au changement d'un global du toolbar (seuls les args sont réactifs), un état capturé dans `setup()` reste figé.
 - Chaque story couvre : défaut, variantes, états (disabled/loading/error), cas limites (textes longs). `src/tokens/Tokens.mdx` est généré depuis la source TS — ne jamais y dupliquer des valeurs en dur.
 
 ## Packaging
