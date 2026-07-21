@@ -65,6 +65,17 @@ describe('Button', () => {
     expect(icons.every((icon) => icon.getAttribute('aria-hidden') === 'true')).toBe(true)
   })
 
+  it('en loading : le spinner remplace iconStart, iconEnd reste affiché', () => {
+    const { getByRole } = render(Button, {
+      props: { loading: true, iconStart: 'add', iconEnd: 'arrow_forward' },
+      slots: { default: 'Envoyer' },
+    })
+    const button = getByRole('button')
+    expect(button.querySelector('.ds-button-spinner')).not.toBeNull()
+    const icons = Array.from(button.querySelectorAll('.ds-icon'))
+    expect(icons.map((icon) => icon.textContent)).toEqual(['arrow_forward'])
+  })
+
   it('le slot #start prime sur iconStart', () => {
     const { getByRole } = render(Button, {
       props: { iconStart: 'add' },

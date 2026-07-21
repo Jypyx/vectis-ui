@@ -23,7 +23,11 @@ interface ButtonProps {
   /** Ignoré en rendu lien. */
   type?: ButtonHTMLAttributes['type']
   disabled?: boolean
-  /** Affiche un spinner, désactive le bouton et pose aria-busy. */
+  /**
+   * Affiche un spinner, désactive le bouton et pose aria-busy. Le spinner
+   * REMPLACE l'emplacement de début (iconStart / slot #start) pour ne jamais
+   * cumuler spinner et icône.
+   */
   loading?: boolean
   /** Nom Material Symbols rendu avant le libellé (le slot #start prime). */
   iconStart?: string
@@ -84,7 +88,7 @@ const passedAttrs = computed(() => {
     :aria-busy="loading || undefined"
   >
     <span v-if="loading" class="ds-button-spinner" aria-hidden="true" />
-    <slot name="start">
+    <slot v-else name="start">
       <Icon v-if="iconStart" :name="iconStart" />
     </slot>
     <slot />
@@ -312,13 +316,25 @@ const passedAttrs = computed(() => {
   }
 
   .ds-button-spinner {
+    /* boîte à la taille des icônes (le spinner remplace iconStart) :
+       aucun décalage de largeur au passage en loading */
+    width: var(--ds-icon-size);
+    height: var(--ds-icon-size);
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* l'anneau lui-même reste proportionné à la typo (1em), centré dans la boîte */
+  .ds-button-spinner::before {
+    content: '';
     width: 1em;
     height: 1em;
-    flex: none;
     border: 2px solid currentcolor;
     border-inline-start-color: transparent;
     border-radius: var(--ds-radius-full);
-    /* durée dérivée d'un token (~450ms) plutôt qu'une valeur brute */
+    /* durée dérivée d'un token plutôt qu'une valeur brute */
     animation: ds-spin calc(var(--ds-duration-slow) * 3) linear infinite;
   }
 
@@ -333,7 +349,7 @@ const passedAttrs = computed(() => {
       transition: none;
     }
 
-    .ds-button-spinner {
+    .ds-button-spinner::before {
       animation-duration: calc(var(--ds-duration-slow) * 5);
     }
   }

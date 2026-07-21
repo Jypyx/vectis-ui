@@ -71,7 +71,9 @@ comportement du composant.
 ## États
 
 `loading` désactive le bouton, affiche un spinner, pose `aria-busy` et atténue le bouton en
-opacité (il garde ses couleurs) :
+opacité (il garde ses couleurs). Le spinner **remplace** l'emplacement de début
+(`icon-start` / slot `#start`) — jamais de spinner et d'icône côte à côte ; `icon-end` reste
+affiché :
 
 <Canvas of={ButtonStories.Loading} />
 
