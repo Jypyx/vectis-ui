@@ -319,7 +319,7 @@ const passedAttrs = computed(() => {
     border-inline-start-color: transparent;
     border-radius: var(--ds-radius-full);
     /* durée dérivée d'un token (~450ms) plutôt qu'une valeur brute */
-    animation: ds-spin calc(var(--ds-duration-slow) * 1.5) linear infinite;
+    animation: ds-spin calc(var(--ds-duration-slow) * 3) linear infinite;
   }
 
   @keyframes ds-spin {
