@@ -13,9 +13,9 @@ import type { MenuPanelPlacement } from './context'
  * - roving focus aux flèches/Home/End, confiné au panneau courant (les keydown
  *   des sous-panneaux bubblent à travers les panneaux ancêtres : garde sur la
  *   cible de l'événement) ;
- * - Échap ferme TOUTE la pile (le natif ne fermerait que le popover le plus
- *   haut) ; Tab aussi — un menu ne se traverse pas au Tab ;
- * - Flèche gauche (sous-menu) referme et rend le focus à l'item parent.
+ * - Échap ferme LE NIVEAU COURANT (comme Flèche gauche en sous-menu, avec
+ *   retour du focus à l'item parent) ; Tab ferme toute la pile — un menu ne
+ *   se traverse pas au Tab.
  */
 interface MenuPanelProps {
   /** Id du panneau, posé par le propriétaire (cible des `popovertarget`). */
@@ -80,8 +80,16 @@ function invoker(): HTMLElement | null {
   return document.querySelector(`[popovertarget="${props.id}"]`)
 }
 
-function show() {
-  if (!shown.value) panelEl.value?.showPopover()
+// L'option `source` de showPopover() n'est pas encore dans lib.dom (TS 5.9).
+type PopoverWithSource = HTMLElement & { showPopover(options?: { source?: HTMLElement }): void }
+
+function show(source?: HTMLElement) {
+  // `source` rétablit la relation d'invocateur lors des ouvertures
+  // PROGRAMMATIQUES (survol, clavier) : sans elle, pas d'ancre implicite ni
+  // de rattachement à la pile — le panneau perdrait son positionnement.
+  // L'invocation par clic (popovertarget) pose cette relation nativement.
+  if (!shown.value)
+    (panelEl.value as PopoverWithSource | null)?.showPopover(source ? { source } : undefined)
 }
 
 function hide() {
@@ -106,16 +114,14 @@ function onKeydown(event: KeyboardEvent) {
     closeAll()
     return
   }
-  if (event.key === 'Escape') {
-    // sans interception, l'Échap natif ne fermerait que ce panneau
-    event.preventDefault()
-    closeAll()
-    return
-  }
-  if (props.submenu && event.key === 'ArrowLeft') {
+  if (event.key === 'Escape' || (props.submenu && event.key === 'ArrowLeft')) {
+    // Échap ne ferme QUE ce niveau. preventDefault : le close request natif
+    // fermerait le popover sans rendre le focus à l'item parent (et notre
+    // hide() l'aurait déjà fermé). Racine : le retour de focus au déclencheur
+    // est géré par le onToggle de Menu.
     event.preventDefault()
     hide()
-    invoker()?.focus()
+    if (props.submenu) invoker()?.focus()
     return
   }
   if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return

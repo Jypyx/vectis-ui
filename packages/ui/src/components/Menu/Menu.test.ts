@@ -96,6 +96,21 @@ describe('Menu', () => {
     expect(onSelect).not.toHaveBeenCalled()
   })
 
+  it("le survol d'un item lui donne le focus (jamais aux items désactivés)", async () => {
+    const { getByRole, container } = renderMenu()
+    await openMenu(container)
+    // à l'ouverture, « Renommer » est focusé
+    const danger = getByRole('menuitem', { name: 'Supprimer' })
+
+    // le survol transfère le focus : une seule surbrillance à la fois
+    danger.dispatchEvent(new Event('pointerenter'))
+    expect(danger).toBe(document.activeElement)
+
+    // survoler un item désactivé ne déplace pas le focus
+    getByRole('menuitem', { name: 'Archiver' }).dispatchEvent(new Event('pointerenter'))
+    expect(danger).toBe(document.activeElement)
+  })
+
   describe("anatomie de l'item", () => {
     it('les slots priment sur les props label/sublabel', async () => {
       const { getByRole, container } = renderHarness(`
@@ -321,7 +336,7 @@ describe('Menu', () => {
       expect(parent).toBe(document.activeElement)
     })
 
-    it('Échap dans un sous-menu ferme TOUTE la pile et rend le focus au déclencheur', async () => {
+    it('Échap ferme le sous-menu courant, puis le menu au second appui', async () => {
       const { getByRole, getByTestId, container } = renderSubmenu()
       const menu = await openMenu(container)
 
@@ -330,11 +345,21 @@ describe('Menu', () => {
       parent.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
       await nextTick()
 
-      document.activeElement?.dispatchEvent(
-        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
-      )
+      const escape = () =>
+        document.activeElement?.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+        )
+
+      // 1er Échap : seul le niveau courant se ferme, focus sur l'item parent
+      escape()
       await nextTick()
       expect(panels(container)[1]?.hasAttribute('data-popover-open')).toBe(false)
+      expect(menu.hasAttribute('data-popover-open')).toBe(true)
+      expect(parent).toBe(document.activeElement)
+
+      // 2e Échap : le panneau racine se ferme, focus sur le déclencheur
+      escape()
+      await nextTick()
       expect(menu.hasAttribute('data-popover-open')).toBe(false)
       expect(getByTestId('trigger')).toBe(document.activeElement)
     })

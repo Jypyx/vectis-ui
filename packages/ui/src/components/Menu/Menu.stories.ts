@@ -188,8 +188,7 @@ export const FermetureEscape: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Menu' }))
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
 
-    // Échap ferme le menu (handler closeAll : avec des sous-menus ouverts,
-    // toute la pile se ferme, pas seulement le panneau le plus haut)
+    // Échap ferme le niveau courant — ici le panneau racine, donc le menu
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(false))
     await waitFor(() => expect(canvas.getByRole('button', { name: 'Menu' })).toHaveFocus())
@@ -297,7 +296,13 @@ export const SousMenus: Story = {
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'Image' })).toHaveFocus())
     await expect(exporter).toHaveAttribute('aria-expanded', 'true')
 
-    // Échap : ferme TOUTE la pile et rend le focus au déclencheur
+    // Échap : ferme le niveau courant seulement, focus sur l'item parent
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(exporter).toHaveAttribute('aria-expanded', 'false'))
+    await expect(root.matches(':popover-open')).toBe(true)
+    await waitFor(() => expect(exporter).toHaveFocus())
+
+    // Échap sur le panneau racine : ferme le menu, focus au déclencheur
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(root.matches(':popover-open')).toBe(false))
     await waitFor(() => expect(trigger).toHaveFocus())
@@ -333,9 +338,11 @@ export const SousMenusSurvol: Story = {
     const root = canvasElement.querySelector('[role="menu"]') as HTMLElement
     await waitFor(() => expect(root.matches(':popover-open')).toBe(true))
 
-    // survol : ouverture après le délai d'intention, sans déplacer le focus
+    // survol : l'item survolé prend le focus (une seule surbrillance),
+    // puis le sous-menu s'ouvre après le délai d'intention
     const exporter = canvas.getByRole('menuitem', { name: 'Exporter' })
     await userEvent.hover(exporter)
+    await expect(exporter).toHaveFocus()
     await waitFor(() => expect(exporter).toHaveAttribute('aria-expanded', 'true'))
     await expect(canvas.getByRole('menuitem', { name: 'PDF' })).toBeVisible()
 

@@ -94,6 +94,10 @@ function onClick() {
 const subId = useId()
 const subOpen = ref(false)
 const subPanel = ref<InstanceType<typeof MenuPanel> | null>(null)
+// Ouvertures programmatiques : l'item est passé en `source` à showPopover(),
+// sinon le sous-panneau n'a pas d'ancre implicite (posée nativement au clic
+// seulement) et perd son positionnement.
+const itemEl = ref<HTMLElement | null>(null)
 
 // Ouverture clavier : le toggle natif ne couvre que le clic.
 function onKeydown(event: KeyboardEvent) {
@@ -102,7 +106,7 @@ function onKeydown(event: KeyboardEvent) {
   // bloque l'activation native du bouton (clic synthétique → toggle) : on
   // ouvre nous-mêmes pour pouvoir focuser le premier sous-item
   event.preventDefault()
-  subPanel.value?.show()
+  subPanel.value?.show(itemEl.value ?? undefined)
   subPanel.value?.focusFirst()
 }
 
@@ -118,9 +122,13 @@ function clearTimers() {
 }
 
 function onPointerEnter() {
-  if (!hasSubmenu.value || props.disabled) return
+  if (props.disabled) return
+  // le survol pilote aussi le focus : hover et roving focus restent
+  // synchronisés, une seule surbrillance à la fois (pattern menu)
+  itemEl.value?.focus({ preventScroll: true })
+  if (!hasSubmenu.value) return
   clearTimers()
-  openTimer = setTimeout(() => subPanel.value?.show(), SUBMENU_HOVER_DELAY)
+  openTimer = setTimeout(() => subPanel.value?.show(itemEl.value ?? undefined), SUBMENU_HOVER_DELAY)
 }
 
 function onPointerLeave() {
@@ -138,6 +146,7 @@ onBeforeUnmount(clearTimers)
 <template>
   <component
     :is="tag"
+    ref="itemEl"
     v-bind="$attrs"
     role="menuitem"
     tabindex="-1"
