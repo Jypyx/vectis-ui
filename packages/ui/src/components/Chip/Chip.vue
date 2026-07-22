@@ -146,7 +146,7 @@ defineSlots<{
   .ds-chip-action {
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-1);
+    gap: var(--_control-gap);
     height: 100%;
     padding-block: 0;
     padding-inline: var(--_control-padding-inline);

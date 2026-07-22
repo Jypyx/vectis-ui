@@ -320,7 +320,7 @@ watchEffect(
 
     display: flex;
     align-items: flex-start;
-    gap: var(--ds-space-2);
+    gap: var(--_control-gap);
     min-height: var(--_min-height);
     padding: var(--ds-space-2) var(--_control-padding-inline-field);
     background: var(--ds-color-surface);

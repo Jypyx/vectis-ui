@@ -293,7 +293,7 @@ watchEffect(
 
     display: flex;
     align-items: center;
-    gap: var(--ds-space-2);
+    gap: var(--_control-gap);
     height: var(--_control-height);
     padding-inline: var(--_control-padding-inline-field);
     background: var(--ds-color-surface);

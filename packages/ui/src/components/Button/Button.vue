@@ -115,7 +115,7 @@ const passedAttrs = computed(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--ds-space-2);
+    gap: var(--_control-gap);
     height: var(--_control-height);
     padding-inline: var(--_control-padding-inline);
     border: 1px solid transparent;

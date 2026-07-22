@@ -12,6 +12,7 @@
  * Deux colonnes de padding-inline : `--_control-padding-inline` pour les
  * contrôles pleins (Button, Chip…), `--_control-padding-inline-field` pour
  * les champs de saisie (Input, Textarea, Select, DatePicker), plus serrés.
+ * `--_control-gap` : espacement interne (icône/libellé, cases OTP…).
  *
  * `--ds-icon-size`/`--ds-icon-opsz` = API de contexte publique d'Icon ;
  * l'opsz reste un littéral (axe de la police Material Symbols : contrat
@@ -36,6 +37,7 @@
     --_control-font-size: var(--ds-font-size-xs);
     --_control-padding-inline: var(--ds-space-2);
     --_control-padding-inline-field: var(--ds-space-1);
+    --_control-gap: var(--ds-space-1);
     --_control-action-size: var(--ds-control-action-size-sm);
     --ds-icon-size: var(--ds-icon-size-sm);
     --ds-icon-opsz: 20;
@@ -46,6 +48,7 @@
     --_control-font-size: var(--ds-font-size-sm);
     --_control-padding-inline: var(--ds-space-3);
     --_control-padding-inline-field: var(--ds-space-2);
+    --_control-gap: var(--ds-space-2);
     --_control-action-size: var(--ds-control-action-size-md);
     --ds-icon-size: var(--ds-icon-size-md);
     --ds-icon-opsz: 20;
@@ -56,6 +59,7 @@
     --_control-font-size: var(--ds-font-size-sm);
     --_control-padding-inline: var(--ds-space-4);
     --_control-padding-inline-field: var(--ds-space-3);
+    --_control-gap: var(--ds-space-2);
     --_control-action-size: var(--ds-control-action-size-md);
     --ds-icon-size: var(--ds-icon-size-md);
     --ds-icon-opsz: 20;
@@ -66,6 +70,7 @@
     --_control-font-size: var(--ds-font-size-md);
     --_control-padding-inline: var(--ds-space-5);
     --_control-padding-inline-field: var(--ds-space-4);
+    --_control-gap: var(--ds-space-2);
     --_control-action-size: var(--ds-control-action-size-lg);
     --ds-icon-size: var(--ds-icon-size-lg);
     --ds-icon-opsz: 24;
@@ -76,6 +81,7 @@
     --_control-font-size: var(--ds-font-size-md);
     --_control-padding-inline: var(--ds-space-6);
     --_control-padding-inline-field: var(--ds-space-5);
+    --_control-gap: var(--ds-space-3);
     --_control-action-size: var(--ds-control-action-size-lg);
     --ds-icon-size: var(--ds-icon-size-lg);
     --ds-icon-opsz: 24;

@@ -226,7 +226,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
 
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-2);
+    gap: var(--_control-gap);
   }
 
   .ds-otp-input {
