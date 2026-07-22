@@ -162,6 +162,8 @@
     --ds-control-size-check: 1.25rem;
     --ds-control-size-check-mark: 0.875rem;
     --ds-control-size-check-dot: 0.5rem;
+    --ds-control-size-switch-w: 2.5rem;
+    --ds-control-size-switch-h: 1.25rem;
     --ds-control-action-size-sm: 1.25rem;
     --ds-control-action-size-md: 1.5rem;
     --ds-control-action-size-lg: 1.75rem;
@@ -224,6 +226,8 @@
     --ds-control-size-check: 1.25rem;
     --ds-control-size-check-mark: 0.875rem;
     --ds-control-size-check-dot: 0.5rem;
+    --ds-control-size-switch-w: 2.5rem;
+    --ds-control-size-switch-h: 1.25rem;
     --ds-control-action-size-sm: 1.25rem;
     --ds-control-action-size-md: 1.5rem;
     --ds-control-action-size-lg: 1.75rem;

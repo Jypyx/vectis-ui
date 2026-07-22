@@ -8,10 +8,11 @@ const meta = {
   title: 'Composants/Switch',
   component: Switch,
   argTypes: {
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    labelPosition: { control: 'select', options: ['start', 'end'] },
   },
   args: {
-    size: 'md',
+    labelPosition: 'end',
+    spread: false,
     disabled: false,
   },
   render: (args) => ({
@@ -34,15 +35,31 @@ export const Default: Story = {
   },
 }
 
-export const Tailles: Story = {
+export const PositionDuLibelle: Story = {
   render: () => ({
     components: { Switch },
-    setup: () => ({ a: ref(true), b: ref(true), c: ref(true) }),
+    setup: () => ({ a: ref(false), b: ref(true) }),
     template: `
-      <div style="display: grid; gap: 8px">
-        <Switch v-model="a" size="sm">Small</Switch>
-        <Switch v-model="b" size="md">Medium</Switch>
-        <Switch v-model="c" size="lg">Large</Switch>
+      <div style="display: grid; gap: 8px; justify-items: start">
+        <Switch v-model="a" label-position="end">Libellé après (défaut)</Switch>
+        <Switch v-model="b" label-position="start">Libellé avant</Switch>
+      </div>
+    `,
+  }),
+}
+
+/**
+ * `spread` : la racine passe en flex pleine largeur, libellé et switch sont
+ * repoussés aux extrémités du conteneur.
+ */
+export const Spread: Story = {
+  render: () => ({
+    components: { Switch },
+    setup: () => ({ a: ref(true), b: ref(false) }),
+    template: `
+      <div style="display: grid; gap: 8px; max-width: 320px">
+        <Switch v-model="a" spread>Switch à droite</Switch>
+        <Switch v-model="b" spread label-position="start">Switch à gauche</Switch>
       </div>
     `,
   }),

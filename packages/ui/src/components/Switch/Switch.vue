@@ -6,12 +6,16 @@
  * JS limité au pont v-model.
  */
 interface SwitchProps {
-  size?: 'sm' | 'md' | 'lg'
+  /** Position du libellé par rapport au switch. */
+  labelPosition?: 'start' | 'end'
+  /** Écarte libellé et switch aux extrémités (la racine devient block, pleine largeur). */
+  spread?: boolean
   disabled?: boolean
 }
 
 withDefaults(defineProps<SwitchProps>(), {
-  size: 'md',
+  labelPosition: 'end',
+  spread: false,
   disabled: false,
 })
 
@@ -28,7 +32,7 @@ defineSlots<{
 </script>
 
 <template>
-  <label class="ds-switch" :data-size="size">
+  <label class="ds-switch" :data-label-position="labelPosition" :data-spread="spread || undefined">
     <input
       v-model="model"
       type="checkbox"
@@ -47,8 +51,8 @@ defineSlots<{
 <style>
 @layer ds.components {
   .ds-switch {
-    --_track-w: var(--ds-space-8);
-    --_track-h: var(--ds-space-5);
+    --_track-w: var(--ds-control-size-switch-w);
+    --_track-h: var(--ds-control-size-switch-h);
     --_pad: 2px;
     display: inline-flex;
     align-items: center;
@@ -57,6 +61,17 @@ defineSlots<{
     font-size: var(--ds-font-size-sm);
     color: var(--ds-color-text);
     cursor: pointer;
+  }
+
+  /* L'input est en position: absolute → hors du flux flex, l'ordre visuel ne
+     concerne que le track et le libellé */
+  .ds-switch[data-label-position='start'] {
+    flex-direction: row-reverse;
+  }
+
+  .ds-switch[data-spread] {
+    display: flex;
+    justify-content: space-between;
   }
 
   .ds-switch-input {
@@ -107,22 +122,21 @@ defineSlots<{
     outline-offset: var(--ds-focus-ring-offset);
   }
 
+  /* Disabled : nuances de gris (mêmes tokens que Checkbox/Radio), pas d'opacité.
+     Le thumb reprend text-subtle — la couleur de la coche/du point disabled de
+     Checkbox/Radio — pour rester visible sur le track gris dans les deux thèmes. */
   .ds-switch:has(.ds-switch-input:disabled) {
-    opacity: 0.5;
+    color: var(--ds-color-text-subtle);
     cursor: not-allowed;
   }
 
-  /* --- Tailles --- */
-  .ds-switch[data-size='sm'] {
-    --_track-w: var(--ds-space-7);
-    --_track-h: var(--ds-space-4);
-    font-size: var(--ds-font-size-xs);
+  .ds-switch-input:disabled + .ds-switch-track {
+    background: var(--ds-color-surface-muted);
   }
 
-  .ds-switch[data-size='lg'] {
-    --_track-w: var(--ds-space-9);
-    --_track-h: var(--ds-space-6);
-    font-size: var(--ds-font-size-md);
+  .ds-switch-input:disabled + .ds-switch-track .ds-switch-thumb {
+    background: var(--ds-color-text-subtle);
+    box-shadow: none;
   }
 
   @media (prefers-reduced-motion: reduce) {

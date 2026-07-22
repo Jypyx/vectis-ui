@@ -74,6 +74,8 @@ export const semantic = {
     'size-check': dimension('1.25rem', 'Boîte des contrôles cochables (Checkbox, Radio)'),
     'size-check-mark': dimension('0.875rem', 'Coche SVG du Checkbox'),
     'size-check-dot': dimension('0.5rem', 'Point intérieur du Radio'),
+    'size-switch-w': dimension('2.5rem', 'Largeur du track du Switch'),
+    'size-switch-h': dimension('1.25rem', 'Hauteur du track du Switch'),
     'action-size-sm': dimension(
       '1.25rem',
       'Boutons internes des champs de saisie sm (effacer, icône cliquable)',

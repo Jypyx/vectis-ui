@@ -28,4 +28,21 @@ describe('Switch', () => {
     })
     expect((getByRole('switch') as HTMLInputElement).disabled).toBe(true)
   })
+
+  it('labelPosition et spread posent les attributs data-* sur la racine', () => {
+    const { container } = render(Switch, {
+      props: { modelValue: false, labelPosition: 'start', spread: true },
+      slots: { default: 'Notifications' },
+    })
+    const root = container.querySelector('.ds-switch') as HTMLElement
+    expect(root.getAttribute('data-label-position')).toBe('start')
+    expect(root.hasAttribute('data-spread')).toBe(true)
+  })
+
+  it('spread absent par défaut (pas d’attribut data-spread)', () => {
+    const { container } = render(Switch, { props: { modelValue: false } })
+    const root = container.querySelector('.ds-switch') as HTMLElement
+    expect(root.getAttribute('data-label-position')).toBe('end')
+    expect(root.hasAttribute('data-spread')).toBe(false)
+  })
 })
