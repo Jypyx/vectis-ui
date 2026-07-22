@@ -1,0 +1,118 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as MenuStories from './Menu.stories'
+
+<Meta of={MenuStories} />
+
+# Menu
+
+Menu d'actions (pattern ARIA menu) construit sur la **Popover API** et le **CSS Anchor
+Positioning** : le déclencheur invoque le panneau par `popovertarget` (ancre implicite,
+light dismiss natif, top-layer sans z-index), aucune dépendance externe. Le JavaScript se
+limite au roving focus, à la navigation clavier et à l'orchestration des sous-menus.
+
+Le déclencheur est fourni par un slot scopé — poser `triggerProps` tel quel :
+
+```vue
+<Menu>
+  <template #trigger="{ triggerProps }">
+    <Button v-bind="triggerProps">Actions</Button>
+  </template>
+  <MenuItem label="Renommer" icon-start="edit" @select="rename" />
+  <MenuSeparator />
+  <MenuItem label="Supprimer" icon-start="delete" danger @select="remove" />
+</Menu>
+```
+
+<Canvas of={MenuStories.Default} />
+
+<Controls of={MenuStories.Default} />
+
+## Items
+
+`MenuItem` : `label` + `sublabel` (description secondaire), `icon-start` / `icon-end` (nom
+[Material Symbols](https://fonts.google.com/icons) ou URL d'image, détection automatique),
+et les slots `#default` / `#sublabel` / `#start` / `#end` qui priment. La sélection d'un
+item émet `select` et **ferme le menu** (focus rendu au déclencheur).
+
+> La police Material Symbols Rounded n'est pas embarquée dans la librairie : elle est
+> chargée par l'application consommatrice (voir le README).
+
+<Canvas of={MenuStories.SousLabels} />
+
+`selected` marque l'item courant (`aria-current="true"`, fond accent) — pour les menus de
+tri ou de choix persistant :
+
+<Canvas of={MenuStories.Selection} />
+
+## Groupes et séparateurs
+
+`MenuGroup` (`role="group"` nommé par `aria-labelledby`, libellé non focusable) structure
+les longues listes ; `MenuSeparator` rend un `<hr>` (rôle implicite). Le roving focus
+traverse les groupes, les libellés sont sautés.
+
+<Canvas of={MenuStories.Groupes} />
+
+## Items de navigation
+
+`href` rend l'item en `<a role="menuitem">` — vrai lien (ouvrable dans un nouvel onglet,
+attributs `target`/`rel` en fallthrough). Un lien `disabled` devient inerte (`href` retiré,
+`aria-disabled="true"`) et le roving focus le saute.
+
+<Canvas of={MenuStories.ItemsDeNavigation} />
+
+## Sous-menus
+
+Le slot `#submenu` d'un `MenuItem` rend un panneau imbriqué **récursif** : l'item devient
+l'invocateur du sous-panneau (un chevron remplace `icon-end` ; `href` et `select` sont
+ignorés). La pile de popovers native gère le light dismiss et la fermeture en cascade —
+ouvrir une branche ferme la branche sœur.
+
+Ouverture : clic, Flèche droite / Entrée / Espace (avec focus du premier sous-item), ou
+survol après un **délai d'intention** de 150 ms. Flèche gauche et Échap referment **un
+niveau** à la fois (focus rendu à l'item parent) ; sur le panneau racine, Échap ferme le
+menu.
+
+<Canvas of={MenuStories.SousMenus} />
+
+Au survol, l'item survolé prend le focus (hover et roving focus restent synchronisés :
+une seule surbrillance à la fois) ; l'item parent d'un sous-menu ouvert garde son fond via
+`aria-expanded` :
+
+<Canvas of={MenuStories.SousMenusSurvol} />
+
+## Tailles
+
+Deux tailles de panneau (`sm` — défaut — items 32px min, `md` items 40px min) ; `compact`
+retire 4px. La taille est posée sur le panneau **racine** et héritée par tous les
+sous-menus.
+
+<Canvas of={MenuStories.Tailles} />
+
+## Placement
+
+`placement` (`bottom-start` par défaut, `bottom`, `bottom-end`, `top-start`, `top`,
+`top-end`) s'appuie sur `position-area` avec retournement automatique
+(`position-try-fallbacks`) quand la place manque. Les sous-menus s'ouvrent en
+`right-start`. Les libellés sont bornés par la largeur maximale du panneau :
+
+<Canvas of={MenuStories.LibellesLongs} />
+
+## Accessibilité
+
+- Rôles ARIA : `role="menu"` sur le panneau, `role="menuitem"` par item (bouton ou lien),
+  `aria-haspopup`/`aria-expanded` sur le déclencheur et les items à sous-menu.
+- **Roving focus** : un seul item tabbable à la fois ; Flèches haut/bas avec bouclage, les
+  items désactivés sont sautés.
+- Clavier : Entrée/Espace sélectionne, Échap et Flèche gauche remontent d'un niveau, Tab
+  ferme tout le menu. La fermeture rend le focus au déclencheur.
+- Light dismiss natif (clic hors du menu, perte de focus) via la Popover API.
+- Jamais de focus automatique au survol d'un item à sous-menu : l'ouverture au survol
+  n'arrache pas le focus clavier.
+- Les animations d'ouverture respectent `prefers-reduced-motion`.
+
+## Support navigateur
+
+Popover API + CSS Anchor Positioning **sans fallback** (décision du projet) : Chrome/Edge
+125+, Safari 26+ — Firefox non supporté tant que l'anchor positioning n'y est pas stable.
+Les ouvertures programmatiques de sous-menus (clavier, survol) utilisent
+`showPopover({ source })`, qui relève le plancher effectif à Chrome/Edge 129+.

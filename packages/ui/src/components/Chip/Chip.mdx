@@ -1,0 +1,137 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as ChipStories from './Chip.stories'
+
+<Meta of={ChipStories} />
+
+# Chip
+
+Étiquette compacte : tag, filtre, valeur de saisie. **Statique par défaut** (aucun hover),
+elle devient interactive via `clickable` (bouton), `href` (lien) ou `selectable` (toggle) —
+dans tous les cas l'élément natif couvre focus, clavier et désactivation. Le bouton de
+retrait (`dismissible`) est toujours un **second** bouton frère : jamais de bouton imbriqué.
+
+<Canvas of={ChipStories.Default} />
+
+<Controls of={ChipStories.Default} />
+
+## Variants et tones
+
+Trois variants (`tonal`, `solid`, `outline`) croisés avec cinq tones (`neutral`, `accent`,
+`danger`, `success`, `warning`), sur le modèle Button : les tones ne définissent que des
+variables CSS locales (`--_bg-solid`, `--_text-tinted`…) que les variants consomment.
+
+Particularité du tone `neutral` en `solid` : inversion totale `text`/`surface` (fond sombre
+en light, fond clair en dark) — un solid gris moyen serait indistinguable du tonal,
+notamment en thème dark.
+
+<Canvas of={ChipStories.Variants} />
+
+## Couleur custom
+
+La prop `color` accepte une couleur du consommateur — hexadécimal, nom CSS (`red`,
+`hotpink`) ou `oklch()` — et **remplace le tone**. Toutes les nuances (fond doux, texte
+teinté, bordure, hover/active) sont dérivées par `color-mix()` avec les tokens de thème :
+le rendu s'adapte automatiquement en light/dark, sur les trois variants.
+
+> En `solid`, le texte est blanc fixe : le contraste avec une couleur claire (jaune,
+> pastel…) est à la charge du consommateur.
+
+<Canvas of={ChipStories.CouleurCustom} />
+
+## Formes
+
+`shape="chip"` (défaut) : coins arrondis rectangulaires (`--ds-radius-interactive`) ;
+`shape="pill"` : pilule (`--ds-radius-pill`).
+
+<Canvas of={ChipStories.Formes} />
+
+## Cliquable
+
+`clickable` rend l'élément d'action en `<button type="button">` : le clic est un événement
+natif (fallthrough, pas d'emit maison), avec hover, active et focus clavier. Un chip
+**non cliquable reste inerte** : aucun hover, curseur par défaut.
+
+<Canvas of={ChipStories.Cliquable} />
+
+## Lien
+
+`href` rend l'action en `<a>` ; les attributs de lien (`target`, `rel`…) passent en
+fallthrough. Un lien `disabled` devient un **lien inerte** (pattern Button) : `href`
+retiré, `aria-disabled="true"`, handlers `click` filtrés.
+
+<Canvas of={ChipStories.Lien} />
+
+## Sélection
+
+`selectable` transforme le chip en toggle : `<button aria-pressed>` lié à
+`v-model:selected`. L'état sélectionné bascule sur le **rendu solid du tone (ou de la
+couleur custom) courant**. Priorité des modes : `selectable` &gt; `href` &gt; `clickable`.
+
+<Canvas of={ChipStories.Selectionnable} />
+
+La prop `check` affiche une coche Material devant le libellé quand le chip est
+sélectionné ; elle **remplace** l'emplacement de début (`icon-start` / slot `#start`) —
+jamais de coche et d'icône côte à côte.
+
+<Canvas of={ChipStories.SelectionnableAvecCheck} />
+
+<Canvas of={ChipStories.SelectionParTone} />
+
+## Suppression
+
+`dismissible` ajoute un bouton de retrait qui émet `dismiss` — la disparition effective
+reste à la charge du consommateur (retrait de la liste, transition…).
+
+<Canvas of={ChipStories.Supprimable} />
+
+Le bouton de retrait n'a **pas de fond**, même au survol : seule la couleur de l'icône
+passe d'atténuée à pleine (pattern des boutons internes d'Input). L'icône suit la taille
+du chip (16px en `xs`, 20px en `sm`) et se personnalise via `dismiss-icon` (nom
+[Material Symbols](https://fonts.google.com/icons) ou URL d'image, défaut `close`).
+
+> La police Material Symbols Rounded n'est pas embarquée dans la librairie : elle est
+> chargée par l'application consommatrice (voir le README).
+
+<Canvas of={ChipStories.IconeDeRetraitCustom} />
+
+Sélection et suppression se combinent — deux boutons frères, jamais imbriqués :
+
+<Canvas of={ChipStories.SelectionnableEtSupprimable} />
+
+## Icônes
+
+`icon-start` / `icon-end` acceptent un nom Material Symbols ou une URL d'image (détection
+automatique). Les slots `#start` / `#end` priment sur les props pour du contenu custom.
+Sans libellé (aucun slot par défaut), le chip devient **carré** (largeur = hauteur, modèle
+IconButton) : penser à l'`aria-label`.
+
+<Canvas of={ChipStories.Icones} />
+
+## Tailles
+
+Deux tailles (`xs` 24px — défaut — et `sm` 32px, tokens `--ds-control-height-*`) ;
+`compact` retire 4px de hauteur sans toucher au padding, à la typographie ni aux icônes.
+Le mapping taille → hauteur/typo/icône est partagé par tous les contrôles (classe
+`ds-control`, voir `styles/control-size.css`).
+
+<Canvas of={ChipStories.Tailles} />
+
+## Désactivé
+
+`disabled` bascule tous les variants sur des nuances de gris (`--ds-color-surface-muted`,
+`--ds-color-text-subtle`) — pas de jeu d'opacité, rendu suivi en thème dark. Les boutons
+internes sont désactivés nativement, un lien devient inerte.
+
+<Canvas of={ChipStories.Disabled} />
+
+## Accessibilité
+
+- Chip statique = simple `<span>` : aucun rôle interactif annoncé à tort.
+- `selectable` → `aria-pressed` synchronisé avec `v-model:selected` (pattern toggle
+  button) ; grouper les filtres dans un conteneur `role="group"` nommé.
+- Le retrait est un bouton dédié (`aria-label` « Retirer ») **frère** de l'action — jamais
+  de bouton dans un bouton.
+- Chip icône seule : fournir un nom accessible via `aria-label` (posé en fallthrough sur
+  l'élément d'action).
+- Focus visible par anneau (`--ds-focus-ring-*`) ; les transitions respectent
+  `prefers-reduced-motion`.
