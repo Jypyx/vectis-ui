@@ -44,7 +44,12 @@ provide(dropdownMenuKey, { close: () => panelEl.value?.hidePopover() })
 function items(): HTMLElement[] {
   const panel = panelEl.value
   if (!panel) return []
-  return [...panel.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)')]
+  // :disabled ne matche que les <button> ; les items <a> inertes portent aria-disabled
+  return [
+    ...panel.querySelectorAll<HTMLElement>(
+      '[role="menuitem"]:not(:disabled):not([aria-disabled="true"])',
+    ),
+  ]
 }
 
 function invoker(): HTMLElement | null {

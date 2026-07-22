@@ -41,6 +41,10 @@ export const Default: Story = {
     const menu = canvasElement.querySelector('[role="menu"]') as HTMLElement
     const trigger = canvas.getByRole('button', { name: 'Actions' })
 
+    // fermé, le panneau est hors layout (display none) : il ne doit jamais
+    // intercepter les clics du contenu qu'il recouvrirait (garde-fou floating.css)
+    await expect(getComputedStyle(menu).display).toBe('none')
+
     // ouverture déclarative (popovertarget) + focus automatique du 1er item
     await userEvent.click(trigger)
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
@@ -115,6 +119,47 @@ export const AvecIcones: Story = {
       </DropdownMenu>
     `,
   }),
+}
+
+export const ItemsDeNavigation: Story = {
+  render: () => ({
+    components: { DropdownMenu, DropdownMenuItem, Button },
+    template: `
+      <DropdownMenu>
+        <template #trigger="{ triggerProps }">
+          <Button variant="outline" tone="neutral" v-bind="triggerProps">Aller à</Button>
+        </template>
+        <DropdownMenuItem href="#profil">Profil</DropdownMenuItem>
+        <DropdownMenuItem href="#facturation">Facturation</DropdownMenuItem>
+        <DropdownMenuItem href="#archives" disabled>Archives (indisponible)</DropdownMenuItem>
+      </DropdownMenu>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const menu = canvasElement.querySelector('[role="menu"]') as HTMLElement
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Aller à' }))
+    await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
+
+    // les items href sont de vrais liens ; le lien désactivé est inerte
+    const profil = canvas.getByRole('menuitem', { name: 'Profil' })
+    await expect(profil).toHaveAttribute('href', '#profil')
+    await expect(profil.tagName).toBe('A')
+    const archives = canvas.getByRole('menuitem', { name: 'Archives (indisponible)' })
+    await expect(archives).not.toHaveAttribute('href')
+    await expect(archives).toHaveAttribute('aria-disabled', 'true')
+
+    // le roving focus saute le lien inerte
+    await waitFor(() => expect(profil).toHaveFocus())
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(canvas.getByRole('menuitem', { name: 'Facturation' })).toHaveFocus()
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(profil).toHaveFocus()
+
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(menu.matches(':popover-open')).toBe(false))
+  },
 }
 
 export const LibellesLongs: Story = {

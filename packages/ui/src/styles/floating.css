@@ -19,6 +19,18 @@
     position-try-fallbacks: flip-block, flip-inline;
   }
 
+  /*
+   * Garde-fou : un panneau qui pose son propre `display` (ex. .ds-menu en
+   * flex) écraserait le `[popover] { display: none }` du style UA — les
+   * styles auteur battent toujours l'UA, layers ou non. Le panneau fermé
+   * resterait alors en layout (opacity: 0), invisible mais cliquable
+   * par-dessus le contenu. La transition `display … allow-discrete`
+   * ci-dessous préserve l'animation de sortie.
+   */
+  .ds-floating:not(:popover-open) {
+    display: none;
+  }
+
   .ds-floating[data-placement='bottom'] {
     position-area: block-end;
     justify-self: anchor-center;

@@ -144,13 +144,13 @@ Sur `Button` : les props `icon-start` / `icon-end` prennent un nom Material Symb
 
 ## Composants
 
-| Domaine     | Composants                                                                                                                                               |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                             |
-| Formulaires | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `DatePicker`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)           |
-| Overlays    | `Dialog`, `Popover`, `Tooltip`, `DropdownMenu` + `DropdownMenuItem`                                                                                      |
-| Structure   | `Tabs` + `TabList`/`Tab`/`TabPanel`, `Accordion` + `AccordionItem`, `Card`, `DataTable` (tri, responsive), `Breadcrumb` + `BreadcrumbItem`, `Pagination` |
-| Feedback    | `Alert`, `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline)                              |
+| Domaine     | Composants                                                                                                                                                      |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                                    |
+| Formulaires | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `DatePicker`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                  |
+| Overlays    | `Dialog`, `Popover`, `Tooltip`, `DropdownMenu` + `DropdownMenuItem`                                                                                             |
+| Structure   | `Tabs` + `TabList`/`Tab`/`TabPanel`, `Accordion` + `AccordionItem`, `Card`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature), `Pagination` |
+| Feedback    | `Alert`, `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline)                                     |
 
 Notes d'implémentation notables :
 
