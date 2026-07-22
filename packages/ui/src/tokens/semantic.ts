@@ -74,9 +74,17 @@ export const semantic = {
     'size-check': dimension('1.25rem', 'Boîte des contrôles cochables (Checkbox, Radio)'),
     'size-check-mark': dimension('0.875rem', 'Coche SVG du Checkbox'),
     'size-check-dot': dimension('0.5rem', 'Point intérieur du Radio'),
-    'action-size': dimension(
+    'action-size-sm': dimension(
+      '1.25rem',
+      'Boutons internes des champs de saisie sm (effacer, icône cliquable)',
+    ),
+    'action-size-md': dimension(
       '1.5rem',
-      'Boutons internes des champs de saisie (effacer, icône cliquable)',
+      'Boutons internes des champs de saisie md (effacer, icône cliquable)',
+    ),
+    'action-size-lg': dimension(
+      '1.75rem',
+      'Boutons internes des champs de saisie lg (effacer, icône cliquable)',
     ),
   },
   icon: {

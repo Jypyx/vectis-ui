@@ -125,4 +125,11 @@ describe('Textarea', () => {
       true,
     )
   })
+
+  it('compact : data-compact posé sur la racine', () => {
+    const { container } = render(Textarea, {
+      props: { modelValue: '', compact: true },
+    })
+    expect(container.querySelector('.ds-textarea')?.hasAttribute('data-compact')).toBe(true)
+  })
 })

@@ -52,6 +52,19 @@ export const Tailles: Story = {
   }),
 }
 
+/** Hauteur minimale réduite de 4px, padding/typo/icônes inchangés (comme Button). */
+export const Compact: Story = {
+  render: () => ({
+    components: { Textarea },
+    template: `
+      <div style="display: grid; gap: 8px; width: 320px">
+        <Textarea placeholder="Normal" aria-label="Normal" />
+        <Textarea compact placeholder="Compact" aria-label="Compact" />
+      </div>
+    `,
+  }),
+}
+
 /** Compteur sous le champ à droite, sur la même ligne que le hint. */
 export const LabelHintCompteur: Story = {
   args: {

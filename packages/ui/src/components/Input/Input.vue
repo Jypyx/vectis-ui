@@ -36,6 +36,10 @@ import Spinner from '../Spinner/Spinner.vue'
 
 interface InputProps {
   size?: 'sm' | 'md' | 'lg'
+  /** Hauteur réduite de 4px ; padding, typo et icônes inchangés. */
+  compact?: boolean
+  /** Type de saisie natif — les claviers virtuels s'adaptent automatiquement. */
+  type?: 'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url'
   /** Force l'état invalide (validation serveur) — pose aria-invalid. */
   invalid?: boolean
   disabled?: boolean
@@ -75,6 +79,8 @@ defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<InputProps>(), {
   size: 'md',
+  compact: false,
+  type: 'text',
   invalid: false,
   disabled: false,
   readonly: false,
@@ -181,6 +187,7 @@ const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
     :class="rootClass"
     :style="rootStyle"
     :data-size="size"
+    :data-compact="compact ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
   >
@@ -207,6 +214,7 @@ const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
         ref="controlEl"
         v-model="model"
         class="ds-input-control"
+        :type="type"
         :maxlength="softLimit ? undefined : maxlength"
         :disabled="disabled"
         :readonly="readonly || undefined"
@@ -225,8 +233,9 @@ const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
         :aria-label="clearLabel"
         @click="onClear"
       >
-        <!-- croix en SVG inline : doit marcher sans la police d'icônes du consommateur -->
-        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+        <!-- croix en SVG inline : doit marcher sans la police d'icônes du consommateur ;
+             dimensionnée en CSS selon la taille du champ -->
+        <svg viewBox="0 0 16 16" aria-hidden="true">
           <path
             d="M4 4l8 8M12 4l-8 8"
             stroke="currentcolor"
@@ -282,15 +291,18 @@ const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
      source de vérité de la couleur (hover/erreur/disabled la redéfinissent) */
   .ds-input-field {
     --_border-color: var(--ds-color-border-strong);
+    --_height-base: var(--ds-control-height-md);
+    --_height: var(--_height-base);
+    --_action-size: var(--ds-control-action-size-md);
 
     /* API de contexte d'Icon : taille et axe opsz selon la taille du champ */
     --ds-icon-size: var(--ds-icon-size-md);
-    --ds-icon-opsz: 20;
+    --ds-icon-opsz: 24;
 
     display: flex;
     align-items: center;
     gap: var(--ds-space-2);
-    height: var(--ds-control-height-md);
+    height: var(--_height);
     padding-inline: var(--ds-space-3);
     background: var(--ds-color-surface);
     color: var(--ds-color-text);
@@ -325,7 +337,7 @@ const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
     border-radius: var(--ds-radius-interactive);
   }
 
-  .ds-input-field:hover:not(:focus-within):not(
+  .ds-input-field:hover:not(:has(.ds-input-control:focus)):not(
       :has(
         .ds-input-control:disabled,
         .ds-input-control:user-invalid,
@@ -336,10 +348,13 @@ const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
   }
 
   /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur,
-     sans saut de layout. :focus-within (pas :focus-visible) : un champ texte
-     montre toujours son focus, souris comprise. L'outline transparent est le
-     filet forced-colors (Windows High Contrast supprime les box-shadow). */
-  .ds-input-field:focus-within {
+     sans saut de layout. On cible le focus du seul CONTRÔLE (pas :focus-within) :
+     quand un bouton interne (clear, icône) est focus au clavier, seul son
+     outline propre s'allume — sinon deux indicateurs simultanés, illisible.
+     :focus (pas :focus-visible) : un champ texte montre toujours son focus,
+     souris comprise. L'outline transparent est le filet forced-colors
+     (Windows High Contrast supprime les box-shadow). */
+  .ds-input-field:has(.ds-input-control:focus) {
     --_border-color: var(--ds-color-accent);
 
     box-shadow: 0 0 0 1px var(--_border-color);
@@ -364,30 +379,43 @@ const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
     color: var(--ds-color-danger-text);
   }
 
-  /* Boutons internes (effacer, icône cliquable) */
+  /* Icônes décoratives : gris foncé, moins présentes que le texte saisi */
+  .ds-input-field > .ds-icon {
+    color: var(--ds-color-text-muted);
+  }
+
+  /* Boutons internes (effacer, icône cliquable) : gris foncé → noir au hover,
+     radius aligné sur Button (focus ring carré aux bords arrondis) */
   .ds-input-action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--ds-control-action-size);
-    height: var(--ds-control-action-size);
+    width: var(--_action-size);
+    height: var(--_action-size);
     margin-inline: calc(var(--ds-space-1) * -1);
     padding: 0;
     border: none;
     background: transparent;
     color: var(--ds-color-text-muted);
-    border-radius: var(--ds-radius-full);
+    border-radius: var(--ds-radius-interactive);
     cursor: pointer;
     flex: none;
+    transition: color var(--ds-duration-fast) var(--ds-ease-default);
   }
 
   .ds-input-action:hover:not(:disabled) {
-    background: color-mix(in oklab, currentcolor, transparent 88%);
+    color: var(--ds-color-text);
   }
 
   .ds-input-action:focus-visible {
     outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
     outline-offset: calc(var(--ds-focus-ring-offset) * -1);
+  }
+
+  /* croix proportionnelle à la zone cliquable (16px dans 24px en md) */
+  .ds-input-clear svg {
+    inline-size: calc(var(--_action-size) - var(--ds-space-2));
+    block-size: calc(var(--_action-size) - var(--ds-space-2));
   }
 
   /* Readonly : fond légèrement enfoncé, texte normal (la valeur reste lisible),
@@ -414,7 +442,8 @@ const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
     color: var(--ds-color-text-subtle);
   }
 
-  .ds-input[data-disabled] .ds-input-action {
+  .ds-input[data-disabled] .ds-input-action,
+  .ds-input[data-disabled] .ds-input-field > .ds-icon {
     color: inherit;
     cursor: not-allowed;
   }
@@ -425,24 +454,32 @@ const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
 
   /* --- Tailles --- */
   .ds-input[data-size='sm'] .ds-input-field {
+    --_height-base: var(--ds-control-height-sm);
+    --_action-size: var(--ds-control-action-size-sm);
     --ds-icon-size: var(--ds-icon-size-sm);
+    --ds-icon-opsz: 20;
 
-    height: var(--ds-control-height-sm);
     padding-inline: var(--ds-space-2);
     font-size: var(--ds-font-size-xs);
   }
 
   .ds-input[data-size='lg'] .ds-input-field {
+    --_height-base: var(--ds-control-height-lg);
+    --_action-size: var(--ds-control-action-size-lg);
     --ds-icon-size: var(--ds-icon-size-lg);
-    --ds-icon-opsz: 24;
 
-    height: var(--ds-control-height-lg);
     padding-inline: var(--ds-space-4);
     font-size: var(--ds-font-size-md);
   }
 
+  /* Compact : hauteur -4px, padding/typo/icônes inchangés (comme Button) */
+  .ds-input[data-compact] .ds-input-field {
+    --_height: calc(var(--_height-base) - var(--ds-space-1));
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .ds-input-field {
+    .ds-input-field,
+    .ds-input-action {
       transition: none;
     }
   }

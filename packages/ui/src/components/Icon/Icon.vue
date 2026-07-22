@@ -58,7 +58,7 @@ defineSlots<{
      * 3. défaut md.
      */
     --_size: var(--ds-icon-size, var(--ds-icon-size-md));
-    --_opsz: var(--ds-icon-opsz, 20);
+    --_opsz: var(--ds-icon-opsz, 24);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -79,7 +79,7 @@ defineSlots<{
 
   .ds-icon[data-size='md'] {
     --_size: var(--ds-icon-size-md);
-    --_opsz: 20;
+    --_opsz: 24;
   }
 
   .ds-icon[data-size='lg'] {

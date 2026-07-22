@@ -176,4 +176,21 @@ describe('Input', () => {
     })
     expect(getByRole('textbox').hasAttribute('readonly')).toBe(true)
   })
+
+  it("type : 'text' par défaut, la prop est posée sur le contrôle", () => {
+    const { getByRole, rerender } = render(Input, {
+      props: { modelValue: '' },
+    })
+    expect(getByRole('textbox').getAttribute('type')).toBe('text')
+    return rerender({ type: 'email' }).then(() => {
+      expect(getByRole('textbox').getAttribute('type')).toBe('email')
+    })
+  })
+
+  it('compact : data-compact posé sur la racine', () => {
+    const { container } = render(Input, {
+      props: { modelValue: '', compact: true },
+    })
+    expect(container.querySelector('.ds-input')?.hasAttribute('data-compact')).toBe(true)
+  })
 })

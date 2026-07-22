@@ -3,6 +3,7 @@ import { computed, useAttrs } from 'vue'
 import type { ButtonHTMLAttributes } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
+import Spinner from '../Spinner/Spinner.vue'
 
 /**
  * Le <button> natif (ou <a> en mode lien) couvre focus, clavier et
@@ -87,7 +88,11 @@ const passedAttrs = computed(() => {
     :data-loading="loading ? '' : undefined"
     :aria-busy="loading || undefined"
   >
-    <span v-if="loading" class="ds-button-spinner" aria-hidden="true" />
+    <!-- wrapper aria-hidden : le bouton porte déjà aria-busy, on évite la
+         double annonce du role="status" du Spinner -->
+    <span v-if="loading" class="ds-button-spinner" aria-hidden="true">
+      <Spinner :size="size === 'lg' ? 'md' : 'sm'" />
+    </span>
     <slot v-else name="start">
       <Icon v-if="iconStart" :name="iconStart" />
     </slot>
@@ -111,7 +116,7 @@ const passedAttrs = computed(() => {
 
     /* API de contexte d'Icon : taille et axe opsz selon la taille du bouton */
     --ds-icon-size: var(--ds-icon-size-md);
-    --ds-icon-opsz: 20;
+    --ds-icon-opsz: 24;
 
     display: inline-flex;
     align-items: center;
@@ -266,6 +271,7 @@ const passedAttrs = computed(() => {
   .ds-button[data-size='sm'] {
     --_height-base: var(--ds-control-height-sm);
     --ds-icon-size: var(--ds-icon-size-sm);
+    --ds-icon-opsz: 20;
     padding-inline: var(--ds-space-3);
     font-size: var(--ds-font-size-xs);
   }
@@ -273,7 +279,6 @@ const passedAttrs = computed(() => {
   .ds-button[data-size='lg'] {
     --_height-base: var(--ds-control-height-lg);
     --ds-icon-size: var(--ds-icon-size-lg);
-    --ds-icon-opsz: 24;
     padding-inline: var(--ds-space-5);
     font-size: var(--ds-font-size-md);
   }
@@ -317,7 +322,8 @@ const passedAttrs = computed(() => {
 
   .ds-button-spinner {
     /* boîte à la taille des icônes (le spinner remplace iconStart) :
-       aucun décalage de largeur au passage en loading */
+       aucun décalage de largeur au passage en loading. Le Spinner est piloté
+       par sa prop size (jamais de surcharge CSS : son CSS sort après celui-ci) */
     width: var(--ds-icon-size);
     height: var(--ds-icon-size);
     flex: none;
@@ -326,31 +332,9 @@ const passedAttrs = computed(() => {
     justify-content: center;
   }
 
-  /* l'anneau lui-même reste proportionné à la typo (1em), centré dans la boîte */
-  .ds-button-spinner::before {
-    content: '';
-    width: 1em;
-    height: 1em;
-    border: 2px solid currentcolor;
-    border-inline-start-color: transparent;
-    border-radius: var(--ds-radius-full);
-    /* durée dérivée d'un token plutôt qu'une valeur brute */
-    animation: ds-spin calc(var(--ds-duration-slow) * 3) linear infinite;
-  }
-
-  @keyframes ds-spin {
-    to {
-      transform: rotate(1turn);
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .ds-button {
       transition: none;
-    }
-
-    .ds-button-spinner::before {
-      animation-duration: calc(var(--ds-duration-slow) * 5);
     }
   }
 }

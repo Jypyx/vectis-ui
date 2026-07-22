@@ -40,7 +40,10 @@ describe('Button', () => {
     const button = getByRole('button') as HTMLButtonElement
     expect(button.disabled).toBe(true)
     expect(button.getAttribute('aria-busy')).toBe('true')
-    expect(button.querySelector('.ds-button-spinner')).not.toBeNull()
+    // le composant Spinner est rendu dans la boîte, masqué aux AT (aria-busy suffit)
+    const box = button.querySelector('.ds-button-spinner') as HTMLElement
+    expect(box.getAttribute('aria-hidden')).toBe('true')
+    expect(box.querySelector('.ds-spinner')).not.toBeNull()
   })
 
   it('laisse passer les attributs natifs (fallthrough)', () => {

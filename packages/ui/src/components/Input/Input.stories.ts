@@ -10,9 +10,14 @@ const meta = {
   component: Input,
   argTypes: {
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    type: {
+      control: 'select',
+      options: ['text', 'email', 'number', 'password', 'search', 'tel', 'url'],
+    },
   },
   args: {
     size: 'md',
+    type: 'text',
     invalid: false,
     disabled: false,
   },
@@ -37,6 +42,20 @@ export const Tailles: Story = {
         <Input size="sm" placeholder="Small" aria-label="Small" />
         <Input size="md" placeholder="Medium" aria-label="Medium" />
         <Input size="lg" placeholder="Large" aria-label="Large" />
+      </div>
+    `,
+  }),
+}
+
+/** Hauteur réduite de 4px, padding/typo/icônes inchangés (comme Button). */
+export const Compact: Story = {
+  render: () => ({
+    components: { Input },
+    template: `
+      <div style="display: grid; gap: 8px; width: 260px">
+        <Input placeholder="Normal" aria-label="Normal" />
+        <Input compact placeholder="Compact" aria-label="Compact" />
+        <Input compact size="lg" placeholder="Large compact" aria-label="Large compact" />
       </div>
     `,
   }),
@@ -327,6 +346,14 @@ export const Showcase: Story = {
           icon-end="search"
           loading
           placeholder="Recherche en cours…"
+        />
+        <Input
+          v-model="search"
+          compact
+          label="Compact"
+          icon-start="search"
+          clearable
+          placeholder="Hauteur réduite de 4px"
         />
         <Input v-model="ref_" label="Référence" readonly icon-start="tag" />
         <Input
