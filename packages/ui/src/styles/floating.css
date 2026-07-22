@@ -80,6 +80,42 @@
     align-self: anchor-center;
   }
 
+  /*
+   * Placements latéraux alignés (sous-menus du Menu). Axe inversé par rapport
+   * aux placements top/bottom : l'écart avec l'ancre est INLINE, l'alignement
+   * est BLOCK — on restaure donc la marge inline annulée par les règles
+   * génériques `$='-start'`/`$='-end'` ci-dessus (même spécificité, l'ordre
+   * source tranche), et on annule la marge block du côté aligné.
+   */
+  .ds-floating[data-placement='right-start'] {
+    position-area: inline-end span-block-end;
+  }
+
+  .ds-floating[data-placement='right-end'] {
+    position-area: inline-end span-block-start;
+  }
+
+  .ds-floating[data-placement='left-start'] {
+    position-area: inline-start span-block-end;
+  }
+
+  .ds-floating[data-placement='left-end'] {
+    position-area: inline-start span-block-start;
+  }
+
+  .ds-floating[data-placement^='right-'],
+  .ds-floating[data-placement^='left-'] {
+    margin-inline: var(--ds-space-2);
+  }
+
+  .ds-floating:is([data-placement='right-start'], [data-placement='left-start']) {
+    margin-block-start: 0;
+  }
+
+  .ds-floating:is([data-placement='right-end'], [data-placement='left-end']) {
+    margin-block-end: 0;
+  }
+
   /* Entrée/sortie animées communes (allow-discrete + @starting-style) */
   .ds-floating {
     opacity: 0;

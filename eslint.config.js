@@ -25,6 +25,8 @@ export default tseslint.config(
     rules: {
       // Les SFC du DS portent des noms d'éléments simples (Button, Input…) : voulu.
       'vue/multi-word-component-names': 'off',
+      // Menu est un nom voulu ; la casse distingue <Menu> du <menu> natif dans les SFC.
+      'vue/no-reserved-component-names': 'off',
     },
   },
   {

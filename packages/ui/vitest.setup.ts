@@ -22,6 +22,9 @@ if (!('showPopover' in HTMLElement.prototype)) {
     },
     hidePopover(this: HTMLElement) {
       if (!this.hasAttribute('data-popover-open')) return
+      // cascade de la pile : fermer un popover ferme ses popovers descendants
+      // (fidèle au spec pour nos panneaux imbriqués, qui sont des descendants DOM)
+      this.querySelectorAll<HTMLElement>('[data-popover-open]').forEach((el) => el.hidePopover())
       this.removeAttribute('data-popover-open')
       this.style.display = ''
       fireToggle(this, 'closed')

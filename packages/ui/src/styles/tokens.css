@@ -183,6 +183,8 @@
     --ds-control-size-progress-circular-md: 3rem;
     --ds-control-size-progress-circular-lg: 5rem;
     --ds-control-size-toast-width: 22rem;
+    --ds-control-size-menu-item: 2.25rem;
+    --ds-control-size-menu-item-compact: 2rem;
     --ds-icon-size-sm: 1rem;
     --ds-icon-size-md: 1.25rem;
     --ds-icon-size-lg: 1.5rem;
@@ -263,6 +265,8 @@
     --ds-control-size-progress-circular-md: 3rem;
     --ds-control-size-progress-circular-lg: 5rem;
     --ds-control-size-toast-width: 22rem;
+    --ds-control-size-menu-item: 2.25rem;
+    --ds-control-size-menu-item-compact: 2rem;
     --ds-icon-size-sm: 1rem;
     --ds-icon-size-md: 1.25rem;
     --ds-icon-size-lg: 1.5rem;

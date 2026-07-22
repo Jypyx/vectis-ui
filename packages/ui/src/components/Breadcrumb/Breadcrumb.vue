@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import DropdownMenu from '../DropdownMenu/DropdownMenu.vue'
-import DropdownMenuItem from '../DropdownMenu/DropdownMenuItem.vue'
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
 import IconButton from '../IconButton/IconButton.vue'
+import Menu from '../Menu/Menu.vue'
+import MenuItem from '../Menu/MenuItem.vue'
 
 /**
  * Fil d'Ariane : <nav> + liste ordonnée, piloté par la prop `items` (pure
@@ -14,7 +14,7 @@ import IconButton from '../IconButton/IconButton.vue'
  * L'item actif est dérivé de `currentPath` (aria-current="page" sur l'item
  * au href correspondant, qui reste un lien cliquable — pattern ARIA APG).
  * Au-delà de `maxItems`, les items intermédiaires sont repliés dans un
- * DropdownMenu ouvert par un bouton « … ».
+ * Menu ouvert par un bouton « … ».
  */
 export interface BreadcrumbItem {
   /** Libellé du segment. */
@@ -84,19 +84,20 @@ const visibleItems = computed(() =>
         <!-- le menu « … » s'insère entre le 1er item et l'avant-dernier -->
         <li v-if="truncated && index === 1" class="ds-breadcrumb-item ds-breadcrumb-ellipsis">
           <Icon class="ds-breadcrumb-separator" v-bind="iconProps(separator)" />
-          <DropdownMenu>
+          <Menu compact>
             <template #trigger="{ triggerProps }">
               <IconButton size="sm" compact :label="ellipsisLabel" v-bind="triggerProps">
                 <Icon name="more_horiz" />
               </IconButton>
             </template>
-            <DropdownMenuItem v-for="hidden in hiddenItems" :key="hidden.href" :href="hidden.href">
-              <template v-if="hidden.iconStart" #icon>
-                <Icon v-bind="iconProps(hidden.iconStart)" />
-              </template>
-              {{ hidden.label }}
-            </DropdownMenuItem>
-          </DropdownMenu>
+            <MenuItem
+              v-for="hidden in hiddenItems"
+              :key="hidden.href"
+              :href="hidden.href"
+              :label="hidden.label"
+              :icon-start="hidden.iconStart"
+            />
+          </Menu>
         </li>
         <li class="ds-breadcrumb-item">
           <Icon class="ds-breadcrumb-separator" v-bind="iconProps(separator)" />
