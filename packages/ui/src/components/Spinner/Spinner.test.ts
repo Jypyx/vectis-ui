@@ -13,4 +13,14 @@ describe('Spinner', () => {
     const { getByRole } = render(Spinner, { props: { label: 'Envoi en cours…' } })
     expect(getByRole('status').textContent).toContain('Envoi en cours…')
   })
+
+  it('prop size numérique : pose --_size en style inline, sinon rien', () => {
+    const explicite = render(Spinner, { props: { size: 32 } })
+    const spinnerExplicite = explicite.container.querySelector('.ds-spinner') as HTMLElement
+    expect(spinnerExplicite.style.getPropertyValue('--_size')).toBe('32px')
+
+    const implicite = render(Spinner)
+    const spinnerImplicite = implicite.container.querySelector('.ds-spinner') as HTMLElement
+    expect(spinnerImplicite.hasAttribute('style')).toBe(false)
+  })
 })

@@ -179,9 +179,6 @@ watchEffect(
   },
   { flush: 'post' },
 )
-
-// sm dans les champs sm/md, md dans les champs lg — aligné sur la taille des icônes
-const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
 </script>
 
 <template>
@@ -243,7 +240,7 @@ const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
         </svg>
       </button>
 
-      <Spinner v-if="loading" :size="spinnerSize" :label="loadingLabel" />
+      <Spinner v-if="loading" :label="loadingLabel" />
       <slot v-else name="end">
         <button
           v-if="iconEnd && hasIconEndHandler"
@@ -369,6 +366,11 @@ const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
   /* Icônes décoratives : gris foncé, moins présentes que le texte saisi */
   .ds-textarea-field > .ds-icon {
     color: var(--ds-color-text-muted);
+  }
+
+  /* le spinner (1em) remplit la taille d'icône du champ */
+  .ds-textarea-field > .ds-spinner {
+    font-size: var(--ds-icon-size);
   }
 
   .ds-textarea-field:hover:not(:has(.ds-textarea-control:focus)):not(

@@ -7,9 +7,8 @@ const meta = {
   title: 'Composants/Spinner',
   component: Spinner,
   argTypes: {
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    size: { control: { type: 'number', min: 12, max: 96, step: 4 } },
   },
-  args: { size: 'md' },
 } satisfies Meta<typeof Spinner>
 
 export default meta
@@ -26,10 +25,17 @@ export const Tailles: Story = {
   render: () => ({
     components: { Spinner },
     template: `
-      <div style="display: flex; gap: 16px; align-items: center">
-        <Spinner size="sm" />
-        <Spinner size="md" />
-        <Spinner size="lg" />
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <span style="font-size: var(--ds-font-size-sm); display: inline-flex; gap: 8px; align-items: center">
+          <Spinner /> Suit un texte sm (1em)
+        </span>
+        <span style="font-size: var(--ds-font-size-xl); display: inline-flex; gap: 8px; align-items: center">
+          <Spinner /> Suit un texte xl (1em)
+        </span>
+        <span style="display: inline-flex; gap: 8px; align-items: center">
+          <Spinner :size="32" />
+          <span>(surcharge numérique 32)</span>
+        </span>
       </div>
     `,
   }),
@@ -41,7 +47,7 @@ export const Colore: Story = {
     template: `
       <!-- le spinner hérite de currentcolor : il suit le texte environnant -->
       <div style="color: var(--ds-color-accent); display: flex; gap: 8px; align-items: center">
-        <Spinner size="sm" label="Envoi en cours…" />
+        <Spinner label="Envoi en cours…" />
         <span>Envoi en cours…</span>
       </div>
     `,

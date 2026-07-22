@@ -11,10 +11,11 @@ interface IconProps {
   /** Source image (URL). Prioritaire sur `name`. */
   src?: string
   /**
-   * Taille explicite. Sans elle : taille du contexte (`--ds-icon-size` posée
-   * par un parent, ex. Button) ou md par défaut.
+   * Taille explicite en pixels (ex. :size="32"). Sans elle : taille du
+   * contexte (`--ds-icon-size` posée par un parent, ex. Button), sinon 1em —
+   * l'icône suit le texte environnant.
    */
-  size?: 'sm' | 'md' | 'lg'
+  size?: number
   /** Libellé accessible ; absent = icône décorative (aria-hidden). */
   label?: string
 }
@@ -35,7 +36,7 @@ defineSlots<{
 <template>
   <span
     class="ds-icon"
-    :data-size="size"
+    :style="size !== undefined ? { '--ds-icon-size': `${size}px` } : undefined"
     :role="label ? 'img' : undefined"
     :aria-label="label"
     :aria-hidden="label ? undefined : 'true'"
@@ -51,13 +52,13 @@ defineSlots<{
   .ds-icon {
     /*
      * Résolution de la taille, par priorité :
-     * 1. prop `size` — les règles [data-size] redéclarent --_size localement,
-     *    ce qui prime sur l'héritage ;
+     * 1. prop `size` (px) — posée en --ds-icon-size inline sur l'élément :
+     *    une déclaration propre prime sur l'héritage et sur la layer ;
      * 2. --ds-icon-size / --ds-icon-opsz héritées d'un parent (API de
      *    contexte : Button les pose selon sa propre taille) ;
-     * 3. défaut md.
+     * 3. 1em — l'icône suit la taille de texte du parent.
      */
-    --_size: var(--ds-icon-size, var(--ds-icon-size-md));
+    --_size: var(--ds-icon-size, 1em);
     --_opsz: var(--ds-icon-opsz, 24);
     display: inline-flex;
     align-items: center;
@@ -70,21 +71,6 @@ defineSlots<{
     /* dégradé si la police n'est pas chargée : le nom textuel reste contenu
        dans le carré au lieu de casser la mise en page */
     overflow: hidden;
-  }
-
-  .ds-icon[data-size='sm'] {
-    --_size: var(--ds-icon-size-sm);
-    --_opsz: 20;
-  }
-
-  .ds-icon[data-size='md'] {
-    --_size: var(--ds-icon-size-md);
-    --_opsz: 24;
-  }
-
-  .ds-icon[data-size='lg'] {
-    --_size: var(--ds-icon-size-lg);
-    --_opsz: 24;
   }
 
   .ds-icon-symbol {

@@ -7,7 +7,7 @@ const meta = {
   title: 'Composants/Icon',
   component: Icon,
   argTypes: {
-    size: { control: 'select', options: [undefined, 'sm', 'md', 'lg'] },
+    size: { control: { type: 'number', min: 12, max: 96, step: 4 } },
     name: { control: 'text' },
     src: { control: 'text' },
     label: { control: 'text' },
@@ -22,16 +22,23 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-export const Tailles: Story = {
+export const AdapteeAuTexte: Story = {
   render: () => ({
     components: { Icon },
     template: `
-      <div style="display: flex; gap: 12px; align-items: center">
-        <Icon name="favorite" size="sm" />
-        <Icon name="favorite" size="md" />
-        <Icon name="favorite" size="lg" />
-        <Icon name="favorite" />
-        <span>(sm / md / lg / défaut = md)</span>
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <span style="font-size: var(--ds-font-size-sm); display: inline-flex; gap: 8px; align-items: center">
+          <Icon name="favorite" /> Suit un texte sm (1em)
+        </span>
+        <span style="font-size: var(--ds-font-size-xl); display: inline-flex; gap: 8px; align-items: center">
+          <Icon name="favorite" /> Suit un texte xl (1em)
+        </span>
+        <span style="display: inline-flex; gap: 8px; align-items: center">
+          <Icon name="favorite" :size="16" />
+          <Icon name="favorite" :size="24" />
+          <Icon name="favorite" :size="48" />
+          <span>(surcharges numériques 16 / 24 / 48)</span>
+        </span>
       </div>
     `,
   }),
@@ -42,12 +49,12 @@ export const TroisSources: Story = {
     components: { Icon },
     template: `
       <div style="display: flex; gap: 12px; align-items: center">
-        <Icon name="rocket_launch" size="lg" />
+        <Icon name="rocket_launch" :size="24" />
         <Icon
-          size="lg"
+          :size="24"
           src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1'/%3E%3C/svg%3E"
         />
-        <Icon size="lg">
+        <Icon :size="24">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 12h16M12 4v16" stroke="currentcolor" stroke-width="2" stroke-linecap="round" />
           </svg>
@@ -70,11 +77,11 @@ export const PiloteParLeParent: Story = {
   render: () => ({
     components: { Icon },
     template: `
-      <!-- Le conteneur pose l'API de contexte ; la prop size explicite prime -->
+      <!-- Le conteneur pose l'API de contexte ; la prop size numérique prime -->
       <div style="--ds-icon-size: var(--ds-icon-size-lg); --ds-icon-opsz: 24; display: flex; gap: 12px; align-items: center">
         <Icon name="palette" />
-        <Icon name="palette" size="sm" />
-        <span>(contexte lg / prop sm qui prime)</span>
+        <Icon name="palette" :size="16" />
+        <span>(contexte lg / prop 16px qui prime)</span>
       </div>
     `,
   }),

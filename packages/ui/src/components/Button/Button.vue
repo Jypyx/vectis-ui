@@ -91,7 +91,7 @@ const passedAttrs = computed(() => {
     <!-- wrapper aria-hidden : le bouton porte déjà aria-busy, on évite la
          double annonce du role="status" du Spinner -->
     <span v-if="loading" class="ds-button-spinner" aria-hidden="true">
-      <Spinner :size="size === 'lg' ? 'md' : 'sm'" />
+      <Spinner />
     </span>
     <slot v-else name="start">
       <Icon v-if="iconStart" :name="iconStart" />
@@ -322,10 +322,11 @@ const passedAttrs = computed(() => {
 
   .ds-button-spinner {
     /* boîte à la taille des icônes (le spinner remplace iconStart) :
-       aucun décalage de largeur au passage en loading. Le Spinner est piloté
-       par sa prop size (jamais de surcharge CSS : son CSS sort après celui-ci) */
+       aucun décalage de largeur au passage en loading. font-size = taille de
+       la boîte : le Spinner (1em) la remplit exactement */
     width: var(--ds-icon-size);
     height: var(--ds-icon-size);
+    font-size: var(--ds-icon-size);
     flex: none;
     display: inline-flex;
     align-items: center;

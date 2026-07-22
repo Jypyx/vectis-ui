@@ -125,7 +125,7 @@ Le composant `Icon` accepte trois sources :
 ```
 
 - **Décorative par défaut** (`aria-hidden`) ; la prop `label` la rend informative (`role="img"` + `aria-label`).
-- Tailles : `size="sm|md|lg"` → 16/20/24 px (tokens `--ds-icon-size-*`), axe `opsz` 20/20/24. Sans `size`, l'icône suit le contexte : tout parent peut poser les custom properties **`--ds-icon-size`** et **`--ds-icon-opsz`** (c'est ce que fait `Button` selon sa propre taille) ; défaut `md`.
+- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--ds-icon-size`** et **`--ds-icon-opsz`** (c'est ce que font `Button`, `Input` et `Textarea` selon leur propre taille) ; la prop numérique prime sur le contexte. `Spinner` suit le même principe (1em + `:size` en px), sans API de contexte.
 
 **La police Material Symbols Rounded n'est PAS embarquée** (zéro dépendance runtime) : c'est au consommateur de la charger, par exemple via Google Fonts :
 

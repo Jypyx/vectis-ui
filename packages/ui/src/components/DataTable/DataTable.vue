@@ -132,7 +132,7 @@ function rowIdentity(row: Row, index: number): string | number {
       <tbody>
         <tr v-if="loading">
           <td :colspan="columns.length" class="ds-table-state">
-            <Spinner size="sm" label="Chargement des données…" />
+            <Spinner label="Chargement des données…" />
           </td>
         </tr>
         <tr v-else-if="sortedRows.length === 0">

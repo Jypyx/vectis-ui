@@ -4,19 +4,25 @@
  * annoncé par les lecteurs d'écran sans bruit visuel.
  */
 interface SpinnerProps {
-  size?: 'sm' | 'md' | 'lg'
+  /** Taille explicite en pixels (ex. :size="32"). Sans elle : 1em — le
+   * spinner suit le texte du parent. */
+  size?: number
   /** Libellé pour les lecteurs d'écran. */
   label?: string
 }
 
 withDefaults(defineProps<SpinnerProps>(), {
-  size: 'md',
+  size: undefined,
   label: 'Chargement…',
 })
 </script>
 
 <template>
-  <span class="ds-spinner" :data-size="size" role="status">
+  <span
+    class="ds-spinner"
+    :style="size !== undefined ? { '--_size': `${size}px` } : undefined"
+    role="status"
+  >
     <span class="ds-spinner-circle" aria-hidden="true" />
     <span class="ds-visually-hidden">{{ label }}</span>
   </span>
@@ -25,27 +31,25 @@ withDefaults(defineProps<SpinnerProps>(), {
 <style>
 @layer ds.components {
   .ds-spinner {
+    /* 1em : le spinner suit le texte du parent (un consommateur le
+       dimensionne par font-size, ex. Button pose font-size: var(--ds-icon-size)
+       sur sa boîte). La prop `size` pose --_size en px inline et prime. */
+    --_size: 1em;
     display: inline-flex;
   }
 
   .ds-spinner-circle {
-    --_size: var(--ds-space-6);
     width: var(--_size);
     height: var(--_size);
-    border: 2px solid color-mix(in oklab, currentcolor, transparent 75%);
+    /* épaisseur proportionnelle (ratio technique toléré, comme les
+       opacités) : 16px → 2px, 24px → 3px ; plancher 1px aux très petites
+       tailles */
+    border: max(1px, calc(var(--_size) / 8)) solid
+      color-mix(in oklab, currentcolor, transparent 75%);
     border-block-start-color: currentcolor;
     border-radius: var(--ds-radius-full);
     /* durée dérivée d'un token plutôt qu'une valeur brute */
     animation: ds-spin calc(var(--ds-duration-slow) * 2.5) linear infinite;
-  }
-
-  .ds-spinner[data-size='sm'] .ds-spinner-circle {
-    --_size: var(--ds-space-4);
-  }
-
-  .ds-spinner[data-size='lg'] .ds-spinner-circle {
-    --_size: var(--ds-space-7);
-    border-width: 3px;
   }
 
   /* Même définition que dans Button.vue : les keyframes CSS sont globales,

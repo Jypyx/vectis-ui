@@ -38,13 +38,13 @@ describe('Icon', () => {
     expect(container.querySelector('[data-testid="svg-inline"]')).not.toBeNull()
   })
 
-  it('pose data-size si la prop est fournie, sinon rien', () => {
-    const explicite = render(Icon, { props: { name: 'add', size: 'lg' } })
+  it('prop size numérique : pose --ds-icon-size en style inline, sinon rien', () => {
+    const explicite = render(Icon, { props: { name: 'add', size: 32 } })
     const iconExplicite = explicite.container.querySelector('.ds-icon') as HTMLElement
-    expect(iconExplicite.dataset.size).toBe('lg')
+    expect(iconExplicite.style.getPropertyValue('--ds-icon-size')).toBe('32px')
 
     const contextuelle = render(Icon, { props: { name: 'add' } })
     const iconContextuelle = contextuelle.container.querySelector('.ds-icon') as HTMLElement
-    expect(iconContextuelle.dataset.size).toBeUndefined()
+    expect(iconContextuelle.hasAttribute('style')).toBe(false)
   })
 })
