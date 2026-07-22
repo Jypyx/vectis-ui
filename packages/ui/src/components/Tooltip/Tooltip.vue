@@ -7,22 +7,24 @@ import { onBeforeUnmount, ref, useId } from 'vue'
  * couvre « montrer au survol/focus avec délai » (`interestfor` est encore
  * expérimental) — le JS gère le délai, pointer/focus et Échap (WCAG 1.4.13).
  *
- * Ancrage 100 % CSS sans ID unique : `anchor-name` statique sur le wrapper ;
- * chaque panneau résout son ancre vers l'élément nommé le plus proche qui le
- * précède dans l'arbre — c'est-à-dire son propre wrapper.
+ * Ancrage 100 % CSS sans ID unique : `anchor-name` statique sur le wrapper,
+ * confiné à son sous-arbre par `anchor-scope`. Sans ce confinement, un
+ * panneau affiché (top layer, donc « après » tout le document pour la
+ * résolution d'ancre) se rattacherait au DERNIER wrapper nommé de la page.
  */
 type Placement =
   'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'right'
 
 interface TooltipProps {
-  /** Contenu du tooltip — texte simple volontairement (role="tooltip"). */
-  text: string
+  /** Contenu texte du tooltip (le slot #content prime s'il est fourni). */
+  text?: string
   placement?: Placement
   /** Délai d'ouverture au survol, en ms (le focus clavier ouvre immédiatement). */
   delay?: number
 }
 
 const props = withDefaults(defineProps<TooltipProps>(), {
+  text: undefined,
   placement: 'top',
   delay: 300,
 })
@@ -30,6 +32,13 @@ const props = withDefaults(defineProps<TooltipProps>(), {
 defineSlots<{
   /** Déclencheur : poser `v-bind="triggerProps"` (aria-describedby) sur l'élément focusable. */
   default(props: { triggerProps: { 'aria-describedby': string } }): unknown
+  /**
+   * Contenu riche à la place de `text`. NON interactif uniquement (mise en
+   * forme, kbd, icônes) : le tooltip se ferme dès que le pointeur quitte le
+   * déclencheur et `aria-describedby` aplatit le contenu en texte — un lien
+   * ou bouton y serait inatteignable. Pour de l'interactif : Popover.
+   */
+  content?(): unknown
 }>()
 
 const panelEl = ref<HTMLElement | null>(null)
@@ -83,7 +92,7 @@ onBeforeUnmount(() => clearTimeout(timer))
       class="ds-tooltip-panel ds-floating"
       :data-placement="placement"
     >
-      {{ text }}
+      <slot name="content">{{ text }}</slot>
     </div>
   </span>
 </template>
@@ -93,6 +102,9 @@ onBeforeUnmount(() => clearTimeout(timer))
   .ds-tooltip {
     display: inline-block;
     anchor-name: --ds-tooltip-anchor;
+    /* confine le nom d'ancre à ce sous-arbre : chaque panneau (même en top
+       layer) résout SON wrapper, pas le dernier wrapper nommé de la page */
+    anchor-scope: --ds-tooltip-anchor;
   }
 
   .ds-tooltip-panel {
@@ -100,9 +112,9 @@ onBeforeUnmount(() => clearTimeout(timer))
     width: max-content;
     max-width: min(18rem, calc(100vw - var(--ds-space-8)));
     padding: var(--ds-space-1) var(--ds-space-2);
-    /* couleurs inversées : lisible sur les deux thèmes via les tokens sémantiques */
-    background: var(--ds-color-text);
-    color: var(--ds-color-surface);
+    /* contraste inversé : gris sombre dans les deux thèmes (plus sombre en dark) */
+    background: var(--ds-color-surface-inverse);
+    color: var(--ds-color-text-on-inverse);
     border: none;
     border-radius: var(--ds-radius-sm);
     box-shadow: var(--ds-shadow-2);

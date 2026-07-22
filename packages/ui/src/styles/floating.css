@@ -20,6 +20,19 @@
   }
 
   /*
+   * Placements alignés (`span-inline-*`) : la marge inline du côté aligné
+   * décalerait le panneau de 8px par rapport au bord du trigger — on
+   * l'annule, la marge opposée garde l'écart minimal avec le viewport.
+   */
+  .ds-floating[data-placement$='-start'] {
+    margin-inline-start: 0;
+  }
+
+  .ds-floating[data-placement$='-end'] {
+    margin-inline-end: 0;
+  }
+
+  /*
    * Garde-fou : un panneau qui pose son propre `display` (ex. .ds-menu en
    * flex) écraserait le `[popover] { display: none }` du style UA — les
    * styles auteur battent toujours l'UA, layers ou non. Le panneau fermé

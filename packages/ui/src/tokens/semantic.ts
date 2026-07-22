@@ -12,6 +12,9 @@ export const semantic = {
     'surface-raised': color('{color.white}', 'Surfaces surélevées : cartes'),
     'surface-overlay': color('{color.white}', 'Surfaces flottantes : dialogs, popovers, menus'),
     'surface-sunken': color('{color.neutral.50}', 'Surfaces en creux : wells, zones de code'),
+    'surface-inverse': color('{color.neutral.900}', 'Surfaces à contraste inversé : tooltips'),
+
+    'text-on-inverse': color('{color.white}', 'Texte posé sur une surface inversée'),
 
     text: color('{color.neutral.900}'),
     'text-muted': color('{color.neutral.600}'),

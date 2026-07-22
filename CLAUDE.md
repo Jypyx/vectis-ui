@@ -90,7 +90,8 @@ Popover API, `<dialog>`, `<details name>`, `:user-invalid`, `color-mix()`, `:has
 **Patterns d'ancrage** (`src/styles/floating.css` : classe `.ds-floating` + `data-placement` → `position-area`/`position-try-fallbacks`) :
 
 - Panneau invoqué par `popovertarget` (Popover, DropdownMenu) : l'invocateur est l'**ancre implicite**, aucun `anchor-name` nécessaire.
-- Panneau ouvert programmatiquement (Tooltip) : `anchor-name` **statique partagé** sur le wrapper + `position-anchor` sur le panneau — chaque panneau résout l'élément nommé le plus proche qui le précède dans l'arbre (son propre wrapper). Pas d'ID unique, pas de style inline.
+- Panneau ouvert programmatiquement (Tooltip) : `anchor-name` **statique partagé** sur le wrapper + `anchor-scope` (même nom) qui le confine au sous-arbre du wrapper + `position-anchor` sur le panneau. Le confinement est indispensable : un popover affiché passe en top layer et est considéré comme « après » tout le document pour la résolution d'ancre — sans `anchor-scope`, tous les panneaux se rattacheraient au dernier wrapper nommé de la page. Pas d'ID unique, pas de style inline. `anchor-scope` : Chrome/Edge 131+, Safari 26+ (léger relèvement du plancher Chrome 125 assumé).
+- Placements alignés (`top-start`, `bottom-end`…) : la marge inline du côté aligné est annulée dans floating.css (`[data-placement$='-start']`/`[$='-end']`), sinon le `margin` d'écart décale le panneau du bord du trigger.
 - Les triggers sont fournis par slots scopés : `#trigger="{ triggerProps }"` + `v-bind="triggerProps"` (popovertarget, aria-*).
 
 ## État d'avancement

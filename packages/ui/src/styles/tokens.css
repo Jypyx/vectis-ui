@@ -116,6 +116,8 @@
     --ds-color-surface-raised: var(--ds-color-white);
     --ds-color-surface-overlay: var(--ds-color-white);
     --ds-color-surface-sunken: var(--ds-color-neutral-50);
+    --ds-color-surface-inverse: var(--ds-color-neutral-900);
+    --ds-color-text-on-inverse: var(--ds-color-white);
     --ds-color-text: var(--ds-color-neutral-900);
     --ds-color-text-muted: var(--ds-color-neutral-600);
     --ds-color-text-subtle: var(--ds-color-neutral-400);
@@ -180,6 +182,8 @@
     --ds-color-surface-raised: var(--ds-color-white);
     --ds-color-surface-overlay: var(--ds-color-white);
     --ds-color-surface-sunken: var(--ds-color-neutral-50);
+    --ds-color-surface-inverse: var(--ds-color-neutral-900);
+    --ds-color-text-on-inverse: var(--ds-color-white);
     --ds-color-text: var(--ds-color-neutral-900);
     --ds-color-text-muted: var(--ds-color-neutral-600);
     --ds-color-text-subtle: var(--ds-color-neutral-400);
@@ -243,6 +247,8 @@
     --ds-color-surface-raised: var(--ds-color-neutral-900);
     --ds-color-surface-overlay: var(--ds-color-neutral-900);
     --ds-color-surface-sunken: oklch(11% 0.006 260);
+    --ds-color-surface-inverse: var(--ds-color-neutral-800);
+    --ds-color-text-on-inverse: var(--ds-color-neutral-50);
     --ds-color-text: var(--ds-color-neutral-50);
     --ds-color-text-muted: var(--ds-color-neutral-400);
     --ds-color-text-subtle: var(--ds-color-neutral-600);

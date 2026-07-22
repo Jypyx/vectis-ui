@@ -11,6 +11,9 @@ export const dark = {
     'surface-raised': color('{color.neutral.900}'),
     'surface-overlay': color('{color.neutral.900}'),
     'surface-sunken': color('oklch(11% 0.006 260)'),
+    'surface-inverse': color('{color.neutral.800}'),
+
+    'text-on-inverse': color('{color.neutral.50}'),
 
     text: color('{color.neutral.50}'),
     'text-muted': color('{color.neutral.400}'),
