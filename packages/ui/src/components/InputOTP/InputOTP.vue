@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import Icon from '../Icon/Icon.vue'
 
 /**
  * Code à usage unique (OTP). Il n'existe pas de primitive « code à N
@@ -7,11 +8,32 @@ import { ref, watch } from 'vue'
  * clavier et le collage (justifié) — avance auto, retour arrière, collage
  * distribué sur les cases, flèches. `autocomplete="one-time-code"` sur la
  * première case : le remplissage automatique (SMS/gestionnaire) est distribué.
+ *
+ * `pattern` découpe le gabarit en cellules : les '#' deviennent des cases,
+ * les autres caractères des littéraux affichés (hors v-model). Le collage est
+ * « pattern-aware » : les littéraux présents dans le texte collé (« GT-123 »,
+ * « 123.456.789 ») sont consommés positionnellement, le reste filtré par
+ * `format` (majuscules forcées hors numeric : v-model canonique).
  */
 interface InputOTPProps {
+  /** Nombre de cases. Ignoré si `pattern` est fourni. */
   length?: number
-  /** Chiffres uniquement (inputmode numérique, filtrage). */
-  numeric?: boolean
+  /** Jeu de caractères accepté : filtre saisie/collage + inputmode. */
+  format?: 'numeric' | 'alpha' | 'alphanumeric'
+  /**
+   * Gabarit : '#' = case éditable, tout autre caractère = littéral affiché
+   * (hors v-model). Prime sur `length`. Ex. 'GT-###', '###.###.###'.
+   */
+  pattern?: string
+  /**
+   * Nom Material Symbols remplaçant TOUS les littéraux du pattern — prévu
+   * pour les gabarits purement séparateurs ('###-###') ; ne pas le fournir
+   * avec un préfixe textuel ('GT-###').
+   */
+  separatorIcon?: string
+  size?: 'sm' | 'md' | 'lg'
+  /** Hauteur réduite de 4px ; typo et icônes inchangées (comme Button/Input). */
+  compact?: boolean
   disabled?: boolean
   invalid?: boolean
   /** Nom accessible du groupe. */
@@ -20,7 +42,11 @@ interface InputOTPProps {
 
 const props = withDefaults(defineProps<InputOTPProps>(), {
   length: 6,
-  numeric: true,
+  format: 'numeric',
+  pattern: undefined,
+  separatorIcon: undefined,
+  size: 'md',
+  compact: false,
   disabled: false,
   invalid: false,
   label: 'Code de vérification',
@@ -33,101 +59,188 @@ const emit = defineEmits<{
   complete: [code: string]
 }>()
 
+type Cell = { type: 'slot'; slotIndex: number } | { type: 'literal'; char: string }
+
+const cells = computed<Cell[]>(() => {
+  if (props.pattern?.includes('#')) {
+    let slotIndex = 0
+    return [...props.pattern].map((char): Cell =>
+      char === '#' ? { type: 'slot', slotIndex: slotIndex++ } : { type: 'literal', char },
+    )
+  }
+  return Array.from({ length: props.length }, (_, i) => ({ type: 'slot', slotIndex: i }))
+})
+const slotCount = computed(() => cells.value.filter((cell) => cell.type === 'slot').length)
+
+// accès optionnel : `env` n'est pas typé dans tsconfig.build.json (types: [])
+// et peut être absent chez un consommateur non-Vite — le garde-fou devient inerte
+if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
+  if (props.pattern && !props.pattern.includes('#'))
+    console.warn("[InputOTP] pattern sans '#' — repli sur `length`.")
+}
+
+const filters: Record<NonNullable<InputOTPProps['format']>, RegExp> = {
+  numeric: /[^0-9]/g,
+  alpha: /[^A-Z]/g,
+  alphanumeric: /[^A-Z0-9]/g,
+}
+
+/** Majuscules forcées hors numeric (v-model canonique), puis filtre du format. */
+function sanitize(text: string) {
+  const upper = props.format === 'numeric' ? text : text.toUpperCase()
+  return upper.replace(filters[props.format], '')
+}
+
 const inputs = ref<(HTMLInputElement | null)[]>([])
 const digits = ref<string[]>([])
 
 function syncFromModel(value: string) {
-  digits.value = Array.from({ length: props.length }, (_, i) => value[i] ?? '')
+  // modèle plus long que les cases : tronqué visuellement, sans réécrire le
+  // modèle spontanément (pas de boucle model → digits → model)
+  digits.value = Array.from({ length: slotCount.value }, (_, i) => value[i] ?? '')
 }
 syncFromModel(model.value)
-watch(model, (value) => {
-  if (value !== digits.value.join('')) syncFromModel(value)
+watch([model, slotCount], ([value, count]) => {
+  if (value !== digits.value.join('') || digits.value.length !== count) syncFromModel(value)
 })
 
 function commit() {
   const code = digits.value.join('')
   model.value = code
-  if (code.length === props.length) emit('complete', code)
+  if (code.length === slotCount.value) emit('complete', code)
 }
 
-function onInput(index: number, event: Event) {
+/**
+ * Distribution pattern-aware : marche sur les cellules depuis la case cible —
+ * un littéral consomme le caractère collé s'il lui est égal (collage de la
+ * chaîne formatée), une case consomme le prochain caractère valide. Renvoie
+ * le dernier slot rempli, ou null si rien d'exploitable.
+ */
+function distribute(raw: string, startSlot: number): number | null {
+  const allCells = cells.value
+  let start = allCells.findIndex((cell) => cell.type === 'slot' && cell.slotIndex === startSlot)
+  // remonter la série de littéraux contigus qui précède la case : un collage
+  // de la chaîne complète (« GT-123 » sur slot 0) les inclut
+  while (start > 0 && allCells[start - 1]?.type === 'literal') start--
+  const chars = [...raw]
+  let charIndex = 0
+  let lastFilled: number | null = null
+  for (const cell of allCells.slice(start)) {
+    if (charIndex >= chars.length) break
+    if (cell.type === 'literal') {
+      if (chars[charIndex]?.toUpperCase() === cell.char.toUpperCase()) charIndex++
+      continue
+    }
+    let char = ''
+    while (charIndex < chars.length && !char) {
+      char = sanitize(chars[charIndex] ?? '')
+      charIndex++
+    }
+    if (!char) break
+    digits.value[cell.slotIndex] = char
+    lastFilled = cell.slotIndex
+  }
+  return lastFilled
+}
+
+function onInput(slotIndex: number, event: Event) {
   const el = event.target as HTMLInputElement
-  let text = el.value
-  if (props.numeric) text = text.replace(/\D+/g, '')
-  if (!text) {
-    digits.value[index] = ''
+  // saisie simple OU collage multi-caractères : distribution à partir de la case
+  const lastFilled = distribute(el.value, slotIndex)
+  if (lastFilled === null) {
+    // effacement, ou aucun caractère valide pour le format
+    digits.value[slotIndex] = ''
     el.value = ''
     commit()
     return
   }
-  // saisie simple OU collage multi-caractères : distribution à partir de la case
-  const chars = [...text].slice(0, props.length - index)
-  chars.forEach((char, offset) => {
-    digits.value[index + offset] = char
-  })
-  el.value = digits.value[index] ?? ''
-  inputs.value[Math.min(index + chars.length, props.length - 1)]?.focus()
+  el.value = digits.value[slotIndex] ?? ''
+  inputs.value[Math.min(lastFilled + 1, slotCount.value - 1)]?.focus()
   commit()
 }
 
-function onKeydown(index: number, event: KeyboardEvent) {
-  if (event.key === 'Backspace' && !digits.value[index] && index > 0) {
+function onKeydown(slotIndex: number, event: KeyboardEvent) {
+  if (event.key === 'Backspace' && !digits.value[slotIndex] && slotIndex > 0) {
     event.preventDefault()
-    digits.value[index - 1] = ''
+    digits.value[slotIndex - 1] = ''
     commit()
-    inputs.value[index - 1]?.focus()
-  } else if (event.key === 'ArrowLeft' && index > 0) {
+    inputs.value[slotIndex - 1]?.focus()
+  } else if (event.key === 'ArrowLeft' && slotIndex > 0) {
     event.preventDefault()
-    inputs.value[index - 1]?.focus()
-  } else if (event.key === 'ArrowRight' && index < props.length - 1) {
+    inputs.value[slotIndex - 1]?.focus()
+  } else if (event.key === 'ArrowRight' && slotIndex < slotCount.value - 1) {
     event.preventDefault()
-    inputs.value[index + 1]?.focus()
+    inputs.value[slotIndex + 1]?.focus()
   }
 }
 </script>
 
 <template>
-  <div class="ds-otp" role="group" :aria-label="label" :data-invalid="invalid ? '' : undefined">
-    <input
-      v-for="n in length"
-      :key="n"
-      :ref="
-        (el) => {
-          inputs[n - 1] = el as HTMLInputElement | null
-        }
-      "
-      type="text"
-      class="ds-otp-input"
-      :inputmode="numeric ? 'numeric' : 'text'"
-      :autocomplete="n === 1 ? 'one-time-code' : 'off'"
-      :value="digits[n - 1]"
-      :disabled="disabled"
-      :aria-label="`Caractère ${n} sur ${length}`"
-      :aria-invalid="invalid || undefined"
-      @input="onInput(n - 1, $event)"
-      @keydown="onKeydown(n - 1, $event)"
-      @focus="($event.target as HTMLInputElement).select()"
-    />
+  <div
+    class="ds-otp"
+    role="group"
+    :aria-label="label"
+    :data-invalid="invalid ? '' : undefined"
+    :data-size="size"
+    :data-compact="compact ? '' : undefined"
+    :data-disabled="disabled ? '' : undefined"
+  >
+    <template v-for="(cell, i) in cells" :key="i">
+      <input
+        v-if="cell.type === 'slot'"
+        :ref="
+          (el) => {
+            inputs[cell.slotIndex] = el as HTMLInputElement | null
+          }
+        "
+        type="text"
+        class="ds-otp-input"
+        :inputmode="format === 'numeric' ? 'numeric' : 'text'"
+        :autocomplete="cell.slotIndex === 0 ? 'one-time-code' : 'off'"
+        :value="digits[cell.slotIndex]"
+        :disabled="disabled"
+        :aria-label="`Caractère ${cell.slotIndex + 1} sur ${slotCount}`"
+        :aria-invalid="invalid || undefined"
+        @input="onInput(cell.slotIndex, $event)"
+        @keydown="onKeydown(cell.slotIndex, $event)"
+        @focus="($event.target as HTMLInputElement).select()"
+      />
+      <!-- littéral décoratif du gabarit : jamais focusable, hors v-model -->
+      <span v-else class="ds-otp-literal" aria-hidden="true">
+        <Icon v-if="separatorIcon" :name="separatorIcon" />
+        <template v-else>{{ cell.char }}</template>
+      </span>
+    </template>
   </div>
 </template>
 
 <style>
 @layer ds.components {
   .ds-otp {
+    --_height-base: var(--ds-control-height-md);
+    --_height: var(--_height-base);
+    --_font-size: var(--ds-font-size-lg);
+
+    /* API de contexte d'Icon (séparateurs) : taille et axe opsz selon size */
+    --ds-icon-size: var(--ds-icon-size-md);
+    --ds-icon-opsz: 24;
+
     display: inline-flex;
+    align-items: center;
     gap: var(--ds-space-2);
   }
 
   .ds-otp-input {
-    width: var(--ds-control-height-md);
-    height: var(--ds-control-height-md);
+    /* cases carrées : size/compact scalent les deux dimensions d'un coup */
+    width: var(--_height);
+    height: var(--_height);
     text-align: center;
     background: var(--ds-color-surface);
     color: var(--ds-color-text);
     border: 1px solid var(--ds-color-border-strong);
     border-radius: var(--ds-radius-interactive);
     font-family: var(--ds-font-family-mono);
-    font-size: var(--ds-font-size-lg);
+    font-size: var(--_font-size);
     transition: border-color var(--ds-duration-fast) var(--ds-ease-default);
   }
 
@@ -148,10 +261,45 @@ function onKeydown(index: number, event: KeyboardEvent) {
     box-shadow: 0 0 0 1px var(--ds-color-danger);
   }
 
-  .ds-otp-input:disabled {
+  .ds-otp-literal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ds-color-text-muted);
+    font-family: var(--ds-font-family-mono);
+    font-size: var(--_font-size);
+    user-select: none;
+  }
+
+  /* Disabled : gris par tokens, sans opacité (aligné sur Input) */
+  .ds-otp[data-disabled] .ds-otp-input {
     background: var(--ds-color-surface-muted);
-    opacity: 0.5;
+    color: var(--ds-color-text-subtle);
+    border-color: var(--ds-color-border);
     cursor: not-allowed;
+  }
+
+  .ds-otp[data-disabled] .ds-otp-literal {
+    color: var(--ds-color-text-subtle);
+  }
+
+  /* --- Tailles --- */
+  .ds-otp[data-size='sm'] {
+    --_height-base: var(--ds-control-height-sm);
+    --_font-size: var(--ds-font-size-md);
+    --ds-icon-size: var(--ds-icon-size-sm);
+    --ds-icon-opsz: 20;
+  }
+
+  .ds-otp[data-size='lg'] {
+    --_height-base: var(--ds-control-height-lg);
+    --_font-size: var(--ds-font-size-xl);
+    --ds-icon-size: var(--ds-icon-size-lg);
+  }
+
+  /* Compact : hauteur -4px, typo/icônes inchangées (comme Button/Input) */
+  .ds-otp[data-compact] {
+    --_height: calc(var(--_height-base) - var(--ds-space-1));
   }
 
   @media (prefers-reduced-motion: reduce) {
