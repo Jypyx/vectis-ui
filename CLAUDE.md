@@ -92,7 +92,7 @@ Popover API, `<dialog>`, `<details name>`, `:user-invalid`, `color-mix()`, `:has
 - Panneau invoqué par `popovertarget` (Popover, DropdownMenu) : l'invocateur est l'**ancre implicite**, aucun `anchor-name` nécessaire.
 - Panneau ouvert programmatiquement (Tooltip) : `anchor-name` **statique partagé** sur le wrapper + `anchor-scope` (même nom) qui le confine au sous-arbre du wrapper + `position-anchor` sur le panneau. Le confinement est indispensable : un popover affiché passe en top layer et est considéré comme « après » tout le document pour la résolution d'ancre — sans `anchor-scope`, tous les panneaux se rattacheraient au dernier wrapper nommé de la page. Pas d'ID unique, pas de style inline. `anchor-scope` : Chrome/Edge 131+, Safari 26+ (léger relèvement du plancher Chrome 125 assumé).
 - Placements alignés (`top-start`, `bottom-end`…) : la marge inline du côté aligné est annulée dans floating.css (`[data-placement$='-start']`/`[$='-end']`), sinon le `margin` d'écart décale le panneau du bord du trigger.
-- Les triggers sont fournis par slots scopés : `#trigger="{ triggerProps }"` + `v-bind="triggerProps"` (popovertarget, aria-*).
+- Les triggers sont fournis par slots scopés : `#trigger="{ triggerProps }"` + `v-bind="triggerProps"` (popovertarget, aria-*). Tooltip suit le même pattern (slot default scopé) — un pont automatique posant aria-describedby au mount a été envisagé puis abandonné (décision utilisateur 2026-07 : la voie explicite est préférée, plus déclarative et sans JS supplémentaire).
 
 ## État d'avancement
 
