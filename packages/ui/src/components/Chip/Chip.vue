@@ -166,8 +166,8 @@ defineSlots<{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--ds-space-5);
-    height: var(--ds-space-5);
+    width: var(--ds-control-action-size-sm);
+    height: var(--ds-control-action-size-sm);
     margin-inline: calc(var(--ds-space-1) * -1) var(--ds-space-1);
     border: none;
     background: transparent;

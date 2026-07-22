@@ -79,6 +79,10 @@ export const semantic = {
     'size-check-dot': dimension('0.5rem', 'Point intérieur du Radio'),
     'size-switch-w': dimension('2.5rem', 'Largeur du track du Switch'),
     'size-switch-h': dimension('1.25rem', 'Hauteur du track du Switch'),
+    'action-size-xs': dimension(
+      '1rem',
+      'Boutons internes les plus compacts (retrait des tags du Combobox)',
+    ),
     'action-size-sm': dimension(
       '1.25rem',
       'Boutons internes des champs de saisie sm (effacer, icône cliquable)',
@@ -91,6 +95,21 @@ export const semantic = {
       '1.75rem',
       'Boutons internes des champs de saisie lg (effacer, icône cliquable)',
     ),
+    'size-slider-track': dimension('0.375rem', 'Épaisseur de la piste du Slider'),
+    'size-slider-thumb': dimension('1.25rem', 'Diamètre du curseur du Slider'),
+    'size-slider-length': dimension('10rem', 'Longueur par défaut du Slider vertical'),
+    'size-slider-field': dimension('5rem', 'Largeur des champs numériques du Slider'),
+    'size-combobox-input-min': dimension(
+      '4rem',
+      'Largeur minimale de la zone de saisie du Combobox',
+    ),
+    'size-listbox-max-block': dimension('18rem', 'Hauteur maximale du panneau listbox du Combobox'),
+    'size-progress-linear-sm': dimension('0.25rem', 'Hauteur du ProgressLinear sm'),
+    'size-progress-linear-md': dimension('0.5rem', 'Hauteur du ProgressLinear md'),
+    'size-progress-linear-lg': dimension('0.75rem', 'Hauteur du ProgressLinear lg'),
+    'size-progress-circular-sm': dimension('1.5rem', 'Diamètre du ProgressCircular sm'),
+    'size-progress-circular-md': dimension('3rem', 'Diamètre du ProgressCircular md'),
+    'size-progress-circular-lg': dimension('5rem', 'Diamètre du ProgressCircular lg'),
   },
   icon: {
     'size-sm': dimension('1rem', 'Icônes 16px — contrôles sm'),

@@ -27,7 +27,7 @@ withDefaults(defineProps<ProgressLinearProps>(), {
   .ds-progress {
     appearance: none;
     width: 100%;
-    height: var(--ds-space-2);
+    height: var(--ds-control-size-progress-linear-md);
     border: none;
     border-radius: var(--ds-radius-full);
     overflow: hidden;
@@ -78,11 +78,11 @@ withDefaults(defineProps<ProgressLinearProps>(), {
   }
 
   .ds-progress[data-size='sm'] {
-    height: var(--ds-space-1);
+    height: var(--ds-control-size-progress-linear-sm);
   }
 
   .ds-progress[data-size='lg'] {
-    height: var(--ds-space-3);
+    height: var(--ds-control-size-progress-linear-lg);
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -155,8 +155,8 @@ const ICON_PATHS: Record<NonNullable<AlertProps['tone']>, string> = {
     align-items: center;
     justify-content: center;
     flex: none;
-    width: var(--ds-space-6);
-    height: var(--ds-space-6);
+    width: var(--ds-control-action-size-md);
+    height: var(--ds-control-action-size-md);
     border: none;
     background: transparent;
     color: var(--_accent);

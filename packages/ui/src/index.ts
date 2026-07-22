@@ -9,7 +9,8 @@
  * Button (il surcharge ses règles à spécificité égale). Icon est placé avant
  * Button par cohérence (dépendance → dépendant) mais son ordre n'est pas
  * contraignant : Button le pilote via des custom properties héritées, pas par
- * surcharge de sélecteurs.
+ * surcharge de sélecteurs. Slider doit rester après Input : il surcharge la
+ * largeur de ses champs numériques (`.ds-slider-field`) à spécificité égale.
  */
 import './styles/index.css'
 
@@ -51,3 +52,4 @@ export { default as Pagination } from './components/Pagination/Pagination.vue'
 export { default as ProgressCircular } from './components/ProgressCircular/ProgressCircular.vue'
 export { default as ProgressLinear } from './components/ProgressLinear/ProgressLinear.vue'
 export { default as Slider } from './components/Slider/Slider.vue'
+export type { SliderLabel } from './components/Slider/Slider.vue'

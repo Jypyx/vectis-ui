@@ -51,7 +51,7 @@ const percent = computed(() => {
 <style>
 @layer ds.components {
   .ds-progress-circular {
-    --_size: var(--ds-space-9);
+    --_size: var(--ds-control-size-progress-circular-md);
     display: inline-flex;
     width: var(--_size);
     height: var(--_size);
@@ -86,11 +86,11 @@ const percent = computed(() => {
   }
 
   .ds-progress-circular[data-size='sm'] {
-    --_size: var(--ds-space-6);
+    --_size: var(--ds-control-size-progress-circular-sm);
   }
 
   .ds-progress-circular[data-size='lg'] {
-    --_size: var(--ds-space-11);
+    --_size: var(--ds-control-size-progress-circular-lg);
   }
 
   @media (prefers-reduced-motion: reduce) {

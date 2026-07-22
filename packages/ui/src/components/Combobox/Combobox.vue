@@ -320,7 +320,7 @@ function onToggle(event: Event) {
 
   .ds-combobox-input {
     flex: 1;
-    min-width: var(--ds-space-10);
+    min-width: var(--ds-control-size-combobox-input-min);
     border: none;
     background: transparent;
     color: var(--ds-color-text);
@@ -349,8 +349,8 @@ function onToggle(event: Event) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--ds-space-4);
-    height: var(--ds-space-4);
+    width: var(--ds-control-action-size-xs);
+    height: var(--ds-control-action-size-xs);
     border: none;
     background: transparent;
     color: inherit;
@@ -371,7 +371,7 @@ function onToggle(event: Event) {
     position-anchor: --ds-combobox-anchor;
     /* aligné sur la largeur du contrôle — pur CSS */
     min-width: anchor-size(width);
-    max-height: calc(var(--ds-space-12) * 3);
+    max-height: var(--ds-control-size-listbox-max-block);
     overflow: auto;
     display: flex;
     flex-direction: column;
