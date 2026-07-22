@@ -1,0 +1,100 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as InputOTPStories from './InputOTP.stories'
+
+<Meta of={InputOTPStories} />
+
+# InputOTP
+
+Code à usage unique (OTP) — une case par caractère, construites sur des `<input>` natifs.
+Il n'existe pas de primitive HTML « code à N caractères » : le JavaScript orchestre le
+clavier et le collage (avance automatique, retour arrière, distribution sur les cases,
+flèches). `autocomplete="one-time-code"` sur la première case : le remplissage automatique
+(SMS, gestionnaire de mots de passe) est distribué sur l'ensemble.
+
+Le v-model est la concaténation des caractères saisis ; `complete` est émis quand toutes
+les cases sont remplies.
+
+<Canvas of={InputOTPStories.Default} />
+
+<Controls of={InputOTPStories.Default} />
+
+## Collage
+
+Coller un code dans n'importe quelle case le distribue à partir de celle-ci — un seul
+handler `input` couvre saisie et collage, aucun événement `paste` dédié :
+
+<Canvas of={InputOTPStories.CollageDistribue} />
+
+## Longueur
+
+`length` fixe le nombre de cases (6 par défaut) — ignoré si `pattern` est fourni :
+
+<Canvas of={InputOTPStories.QuatreCases} />
+
+## Tailles
+
+Trois tailles (`sm` 32px, `md` 40px, `lg` 48px, via les tokens `--ds-control-height-*`).
+Les cases sont carrées : la largeur suit la hauteur, la typographie et les icônes de
+séparateur s'ajustent avec. `compact` réduit la hauteur (et donc la largeur) de 4px sans
+toucher à la typographie (comme `Button`/`Input`) :
+
+<Canvas of={InputOTPStories.Tailles} />
+
+## Format
+
+`format` définit le jeu de caractères accepté : `numeric` (défaut, chiffres seuls,
+clavier numérique via `inputmode`), `alpha` (lettres) ou `alphanumeric`. Hors `numeric`,
+les minuscules sont converties en majuscules à la saisie : le v-model est canonique, la
+comparaison serveur ne dépend pas de la casse.
+
+<Canvas of={InputOTPStories.FormatAlphanumerique} />
+
+## Pattern
+
+`pattern` décrit un gabarit : chaque `#` devient une case, tout autre caractère un
+littéral décoratif (typo mono, couleur atténuée, `aria-hidden`). Les littéraux ne font
+**pas** partie du v-model — pour `###.###.###` rempli, le modèle vaut `123456789`. Le
+nombre de cases dérive du pattern, qui prime sur `length`.
+
+Le collage est « pattern-aware » : coller la chaîne formatée (`123.456.789`) fonctionne,
+les littéraux collés sont consommés positionnellement, le reste est filtré par `format` :
+
+<Canvas of={InputOTPStories.AvecPattern} />
+
+Un préfixe textuel (`GT-###`) est rendu comme littéraux ; coller `GT-123` ne garde que
+`123` :
+
+<Canvas of={InputOTPStories.PatternPrefixe} />
+
+## Séparateur en icône
+
+`separator-icon` (nom Material Symbols) remplace **tous** les littéraux du pattern par une
+icône — réservé aux gabarits purement séparateurs (`####-####`), ne pas le combiner avec
+un préfixe textuel. L'icône suit la taille du composant via le contexte `--ds-icon-size`
+et hérite sa couleur (currentcolor) :
+
+<Canvas of={InputOTPStories.SeparateurIcone} />
+
+## États
+
+La prop `invalid` force l'état d'erreur (validation serveur) — bordures rouges et
+`aria-invalid` sur chaque case :
+
+<Canvas of={InputOTPStories.Invalide} />
+
+`disabled` bascule les cases et les littéraux sur des nuances de gris
+(`--ds-color-surface-muted`, `--ds-color-text-subtle`) — pas de jeu d'opacité, et le rendu
+suit automatiquement le thème dark :
+
+<Canvas of={InputOTPStories.Disabled} />
+
+## Accessibilité
+
+- La racine est un `role="group"` nommé par `label` (« Code de vérification » par défaut).
+- Chaque case porte un `aria-label` « Caractère N sur M » compté sur les cases éditables —
+  les littéraux du pattern sont décoratifs (`aria-hidden`) et jamais focusables.
+- Navigation clavier : flèches gauche/droite entre cases, Backspace sur case vide efface
+  la précédente et y retourne — les littéraux sont traversés de façon transparente.
+- Focus visible : bordure 2px visuels (bordure + `box-shadow` même couleur, alignée sur
+  `Input`), rouge si invalide ; filet `outline` transparent pour le mode forced-colors.
+- Les transitions respectent `prefers-reduced-motion`.
