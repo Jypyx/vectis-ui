@@ -1,0 +1,50 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as IconStories from './Icon.stories'
+
+<Meta of={IconStories} />
+
+# Icon
+
+Icône à trois sources : ligature [Material Symbols Rounded](https://fonts.google.com/icons)
+(`name`), image (`src`), ou SVG inline (slot par défaut). Aucun JavaScript de comportement :
+le rendu, la taille et l'accessibilité sont entièrement déclaratifs.
+
+> La police Material Symbols Rounded n'est pas embarquée dans la librairie (zéro dépendance
+> runtime) : elle est chargée par l'application consommatrice (voir le README).
+
+<Canvas of={IconStories.Default} />
+
+<Controls of={IconStories.Default} />
+
+## Taille
+
+**1em par défaut** : l'icône suit la taille du texte environnant, sans configuration. La prop
+`size` (nombre, en pixels) permet une surcharge libre : `:size="32"` → 32px.
+
+<Canvas of={IconStories.AdapteeAuTexte} />
+
+## Trois sources
+
+`src` prime sur `name`, qui prime sur le slot. L'image reçoit un `alt` vide (le nom
+accessible vient de `label`, jamais de la source) ; le SVG inline remplit le carré de
+l'icône.
+
+<Canvas of={IconStories.TroisSources} />
+
+## Pilotage par le parent
+
+Sans prop `size`, tout parent peut dimensionner ses icônes en posant les custom properties
+**`--ds-icon-size`** (taille) et **`--ds-icon-opsz`** (axe optique de la police). C'est ce
+que font `Button`, `Input` et `Textarea` selon leur propre taille (sm → 16px/opsz 20,
+md → 20px/opsz 24, lg → 24px/opsz 24). La résolution suit la priorité : prop `size`
+numérique > contexte parent > 1em.
+
+<Canvas of={IconStories.PiloteParLeParent} />
+
+## Accessibilité
+
+L'icône est **décorative par défaut** (`aria-hidden="true"`) : dans un bouton ou un champ,
+le nom accessible vient du libellé, pas de l'icône. La prop `label` la rend informative :
+`role="img"` + `aria-label`, sans `aria-hidden`.
+
+<Canvas of={IconStories.AvecLabel} />
