@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, useAttrs } from 'vue'
+import { computed, useAttrs, useSlots } from 'vue'
 import type { StyleValue } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
@@ -110,6 +110,12 @@ const actionAttrs = computed(() => {
 })
 
 const showCheck = computed(() => props.check && props.selectable && selected.value)
+
+/* Icône seule (pas de libellé) : le chip devient carré (largeur = hauteur). */
+const slots = useSlots()
+const iconOnly = computed(
+  () => !slots.default && !!(slots.start || slots.end || props.iconStart || props.iconEnd),
+)
 </script>
 
 <template>
@@ -125,6 +131,7 @@ const showCheck = computed(() => props.check && props.selectable && selected.val
     :data-compact="compact ? '' : undefined"
     :data-selected="selectable && selected ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
+    :data-icon-only="iconOnly ? '' : undefined"
   >
     <component
       :is="actionTag"
@@ -227,21 +234,15 @@ const showCheck = computed(() => props.check && props.selectable && selected.val
   }
 
   /* Divergence vs Button : le solid neutre de Button (surface-muted) serait
-     indistinguable du tonal — contraste inversé façon Toast neutral solid,
-     lisible dans les deux thèmes (un chip neutre sélectionné reste visible) */
+     indistinguable du tonal. Inversion totale text/surface plutôt que
+     surface-inverse : en dark, surface-inverse = surface-muted (neutral-800),
+     un chip neutre sélectionné serait invisible — text (neutral-50 en dark,
+     neutral-900 en light) reste distinct du fond tonal dans les deux thèmes */
   .ds-chip[data-tone='neutral'] {
-    --_bg-solid: var(--ds-color-surface-inverse);
-    --_bg-solid-hover: color-mix(
-      in oklab,
-      var(--ds-color-surface-inverse),
-      var(--ds-color-text-on-inverse) 8%
-    );
-    --_bg-solid-active: color-mix(
-      in oklab,
-      var(--ds-color-surface-inverse),
-      var(--ds-color-text-on-inverse) 14%
-    );
-    --_text-solid: var(--ds-color-text-on-inverse);
+    --_bg-solid: var(--ds-color-text);
+    --_bg-solid-hover: color-mix(in oklab, var(--ds-color-text), var(--ds-color-surface) 8%);
+    --_bg-solid-active: color-mix(in oklab, var(--ds-color-text), var(--ds-color-surface) 14%);
+    --_text-solid: var(--ds-color-surface);
     --_text-tinted: var(--ds-color-text);
     --_bg-soft: var(--ds-color-surface-muted);
     --_border-soft: var(--ds-color-border-strong);
@@ -339,6 +340,14 @@ const showCheck = computed(() => props.check && props.selectable && selected.val
     border-radius: inherit;
     text-decoration: none;
     cursor: default;
+  }
+
+  /* Icône seule : action carrée — l'aspect-ratio suit la hauteur du chip
+     (modèle IconButton, sans nouvelle dimension) */
+  .ds-chip[data-icon-only] .ds-chip-action {
+    aspect-ratio: 1;
+    justify-content: center;
+    padding-inline: 0;
   }
 
   :is(button, a).ds-chip-action {

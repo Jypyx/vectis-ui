@@ -139,6 +139,17 @@ describe('Chip', () => {
     expect(queryByText('cancel')).toBeNull()
   })
 
+  it('icône seule : data-icon-only posé seulement sans libellé', () => {
+    const { container } = render(Chip, { props: { iconStart: 'favorite' } })
+    expect(container.querySelector('.ds-chip')?.hasAttribute('data-icon-only')).toBe(true)
+    const withLabel = render(Chip, { props: { iconStart: 'favorite' }, slots: { default: 'Tag' } })
+    expect(withLabel.container.querySelector('.ds-chip')?.hasAttribute('data-icon-only')).toBe(
+      false,
+    )
+    const noIcon = render(Chip, {})
+    expect(noIcon.container.querySelector('.ds-chip')?.hasAttribute('data-icon-only')).toBe(false)
+  })
+
   it('répartit les attrs : class/style sur la racine, le reste sur l’action', () => {
     const { container } = render(Chip, {
       props: { clickable: true },
