@@ -150,7 +150,7 @@ Sur `Button` : les props `icon-start` / `icon-end` prennent un nom Material Symb
 | Formulaires | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `DatePicker`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                  |
 | Overlays    | `Dialog`, `Popover`, `Tooltip`, `DropdownMenu` + `DropdownMenuItem`                                                                                             |
 | Structure   | `Tabs` + `TabList`/`Tab`/`TabPanel`, `Accordion` + `AccordionItem`, `Card`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature), `Pagination` |
-| Feedback    | `Alert`, `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline)                                     |
+| Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline)       |
 
 Notes d'implémentation notables :
 
@@ -158,6 +158,7 @@ Notes d'implémentation notables :
 - **Slider range** superpose deux `<input type="range">` natifs (chaque curseur reste un vrai slider clavier/ARIA) ; le JS empêche seulement le croisement.
 - **DataTable responsive** : mode `stack` en pur CSS (container queries) — sous 640px de conteneur, les lignes deviennent des cartes, les en-têtes sont réinjectés par `::before + data-label`.
 - **Combobox** suit le pattern ARIA combobox/listbox (`aria-activedescendant`, le focus reste dans l'input) ; le panneau est aligné sur le contrôle via `anchor-size(width)`.
+- **Toast** : monter `<Toaster />` une fois (racine de l'app), puis appeler `toast({ message, tone, ... })` depuis n'importe où — composant, store, retour d'API (client uniquement, jamais pendant le rendu SSR). Placements en piles Popover API (top-layer), auto-fermeture (défaut 5 s, `duration: 0` = persistant, pause au survol), `dismissToast(id?)` pour fermer par programme.
 
 Conventions transverses :
 

@@ -1,0 +1,116 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as ToasterStories from './Toaster.stories'
+
+<Meta of={ToasterStories} />
+
+# Toast
+
+Notifications déclenchées **par programme** : monter `<Toaster />` une fois (racine de
+l'app), puis appeler `toast(options)` depuis n'importe où — composant, store, retour d'API
+asynchrone. La file est un état réactif au niveau module (pas de provide/inject) ; elle est
+**client-only** : ne jamais appeler `toast()` pendant le rendu SSR.
+
+```vue
+<!-- App.vue -->
+<Toaster placement="bottom-right" :duration="5000" />
+```
+
+```ts
+import { toast, dismissToast } from '@socle/ui'
+
+async function save() {
+  try {
+    await api.save()
+    toast({ tone: 'success', message: 'Modifications enregistrées.' })
+  } catch {
+    toast({ tone: 'danger', title: 'Erreur', message: 'Le serveur ne répond pas.', duration: 0 })
+  }
+}
+```
+
+L'affichage passe par la Popover API : un `popover="manual"` **par placement** porte la
+pile (top-layer natif, aucun z-index), l'empilement est du pur CSS — le JavaScript se
+limite au pont file → `showPopover()`/`hidePopover()` et aux timers d'auto-fermeture.
+
+<Canvas of={ToasterStories.Default} />
+
+<Controls of={ToasterStories.Default} />
+
+## Tones
+
+Cinq tones × deux variants. `tonal` (défaut) : fond `-surface`, bordure `-border`, icône et
+titre teintés — le rendu de l'ex-Alert. Le tone `neutral` s'appuie sur `surface-overlay`.
+
+<Canvas of={ToasterStories.Tones} />
+
+`solid` : couleur pleine du tone. `warning` utilise `--ds-color-text-on-warning` (texte
+sombre, le blanc échoue AA sur amber) ; `neutral` passe en contraste inversé
+(`surface-inverse`, style tooltip), lisible dans les deux thèmes.
+
+<Canvas of={ToasterStories.Solid} />
+
+## Placements
+
+Six positions d'écran, en piles indépendantes. La prop `placement` du Toaster fixe le
+défaut ; l'option `placement` d'un toast le surcharge. Coordonnées **physiques**
+(`top/left`…) : une notification est une position d'écran, indépendante de la direction de
+lecture — comme les notifications de l'OS.
+
+<Canvas of={ToasterStories.Placements} />
+
+## Durée d'affichage
+
+`duration` (prop du Toaster : défaut 5000 ms, surchargeable par toast) pilote la fermeture
+automatique. Survoler une pile **suspend ses timers** ; ils repartent à la durée pleine au
+départ du pointeur (WCAG 2.2.1).
+
+<Canvas of={ToasterStories.AutoFermeture} />
+
+`duration: 0` rend le toast persistant : il reste affiché jusqu'à fermeture par la croix
+(IconButton `close`, masquable via `closable: false`) ou par `dismissToast(id)`.
+
+<Canvas of={ToasterStories.Persistant} />
+
+## Contenus
+
+`message` est requis, `title` et l'icône sont optionnels — les quatre combinaisons :
+
+<Canvas of={ToasterStories.Contenus} />
+
+## Icônes
+
+Chaque tone a son icône Material Symbols par défaut : `notifications` (neutral), `info`
+(accent), `check_circle` (success), `error` (danger), `warning` (warning). L'option `icon`
+accepte tout nom Material Symbols ou une URL d'image (détection automatique, comme
+Breadcrumb) ; `icon: false` la retire. La police Material Symbols est chargée par le
+consommateur (voir Icon).
+
+<Canvas of={ToasterStories.IconePersonnalisee} />
+
+## Largeur
+
+Largeur par défaut : token `--ds-control-size-toast-width` (22rem). L'option `width`
+(longueur CSS) la remplace par toast — toujours bornée à `100vw − marges`, un toast ne
+déborde jamais du viewport.
+
+<Canvas of={ToasterStories.Largeur} />
+
+## Empilement
+
+Les toasts d'un même placement s'empilent, le plus récent près du bord de l'écran (pur
+CSS `column`/`column-reverse`, la file reste append-only). L'entrée glisse depuis le bord
+via `@starting-style` ; la sortie individuelle n'est pas animée (choix de simplicité), la
+pile qui se vide fait un fondu.
+
+<Canvas of={ToasterStories.Empilement} />
+
+## Accessibilité
+
+- Rôle par toast : `role="alert"` (interruptif) pour `danger`/`warning`, `role="status"`
+  (poli) sinon — l'annonce du premier toast poli d'une pile peut être manquée par certains
+  lecteurs d'écran (la live region naît avec son contenu) ; les `alert` sont annoncés à
+  l'insertion.
+- Chaque pile est un landmark `role="region"` nommé par la prop `label`
+  (« Notifications ») ; la croix reçoit `closeLabel` (« Fermer »).
+- Le focus n'est jamais volé : un toast s'affiche sans interrompre la saisie en cours.
+- Pause des timers au survol ; les animations respectent `prefers-reduced-motion`.

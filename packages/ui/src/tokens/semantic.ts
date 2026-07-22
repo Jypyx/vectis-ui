@@ -110,6 +110,7 @@ export const semantic = {
     'size-progress-circular-sm': dimension('1.5rem', 'Diamètre du ProgressCircular sm'),
     'size-progress-circular-md': dimension('3rem', 'Diamètre du ProgressCircular md'),
     'size-progress-circular-lg': dimension('5rem', 'Diamètre du ProgressCircular lg'),
+    'size-toast-width': dimension('22rem', "Largeur par défaut d'un toast"),
   },
   icon: {
     'size-sm': dimension('1rem', 'Icônes 16px — contrôles sm'),
