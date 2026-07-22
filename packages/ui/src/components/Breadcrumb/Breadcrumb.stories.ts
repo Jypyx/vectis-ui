@@ -61,7 +61,7 @@ export const SeparateurImage: Story = {
   // Contient ':' et '.' → détecté comme URL, rendu via le `src` d'Icon.
   args: {
     separator:
-      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M2 1l4 3-4 3' fill='none' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E",
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800px' height='800px' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M10 3V6H4L4 10H10L10 13L11 13L16 8L11 3L10 3Z' fill='%23000000'/%3E%3Cpath d='M0 2L1.38281e-06 14H2L2 2L0 2Z' fill='%23000000'/%3E%3C/svg%3E",
     currentPath: '/projets/socle',
     items: [
       { label: 'Accueil', href: '/' },
