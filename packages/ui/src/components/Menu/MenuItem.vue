@@ -205,8 +205,10 @@ onBeforeUnmount(clearTimers)
     align-items: center;
     gap: var(--ds-space-2);
     width: 100%;
-    min-height: var(--_menu-item-min-h, var(--ds-control-size-menu-item));
-    padding: var(--ds-space-1) var(--ds-space-3);
+    min-height: calc(
+      var(--_menu-item-min-h, var(--ds-control-height-sm)) - var(--_menu-item-delta, 0px)
+    );
+    padding: var(--ds-space-1) var(--_menu-item-pad-i, var(--ds-space-3));
     border: none;
     background: transparent;
     color: var(--ds-color-text);

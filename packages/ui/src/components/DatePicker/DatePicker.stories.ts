@@ -8,9 +8,10 @@ const meta = {
   component: DatePicker,
   argTypes: {
     type: { control: 'select', options: ['date', 'datetime-local', 'time', 'month', 'week'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
+    compact: { control: 'boolean' },
   },
-  args: { type: 'date', size: 'md' },
+  args: { type: 'date', size: 'md', compact: false },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({ args, value: ref('2026-07-21') }),
@@ -27,6 +28,23 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
+
+export const Tailles: Story = {
+  render: () => ({
+    components: { DatePicker },
+    setup: () => ({ value: ref('2026-07-21') }),
+    template: `
+      <div style="display: grid; gap: 8px; width: 260px">
+        <DatePicker v-model="value" size="xs" aria-label="XSmall" />
+        <DatePicker v-model="value" size="sm" aria-label="Small" />
+        <DatePicker v-model="value" size="md" aria-label="Medium" />
+        <DatePicker v-model="value" size="lg" aria-label="Large" />
+        <DatePicker v-model="value" size="xl" aria-label="XLarge" />
+        <DatePicker v-model="value" compact aria-label="Compact" />
+      </div>
+    `,
+  }),
+}
 
 export const AvecBornes: Story = {
   render: () => ({

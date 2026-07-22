@@ -15,11 +15,13 @@ import type { MenuPlacement } from './context'
  */
 interface MenuProps {
   placement?: MenuPlacement
-  /** Items à 32px de hauteur minimale (36px sinon) ; hérité par les sous-menus. */
+  /** Hauteur minimale des items : 32px (sm) ou 40px (md) ; héritée par les sous-menus. */
+  size?: 'sm' | 'md'
+  /** Hauteur minimale des items réduite de 4px ; héritée par les sous-menus. */
   compact?: boolean
 }
 
-withDefaults(defineProps<MenuProps>(), { placement: 'bottom-start', compact: false })
+withDefaults(defineProps<MenuProps>(), { placement: 'bottom-start', size: 'sm', compact: false })
 
 const open = defineModel<boolean>('open', { default: false })
 
@@ -89,6 +91,7 @@ onMounted(() => {
     :id="menuId"
     ref="panelRef"
     :placement="placement"
+    :size="size"
     :compact="compact"
     @toggle="onToggle"
   >

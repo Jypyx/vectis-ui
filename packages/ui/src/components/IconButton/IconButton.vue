@@ -12,7 +12,7 @@ interface IconButtonProps {
   label: string
   variant?: 'solid' | 'outline' | 'ghost' | 'elevated' | 'tonal'
   tone?: 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   /** Hauteur (et largeur) réduites de 4px. */
   compact?: boolean
   type?: ButtonHTMLAttributes['type']
@@ -55,14 +55,14 @@ defineSlots<{
 <style>
 @layer ds.components {
   /*
-   * Sélecteur avec [data-size] pour égaler la spécificité des règles de
-   * padding de Button ; ce fichier doit être importé APRÈS Button dans
-   * index.ts (l'ordre du CSS bundlé départage à spécificité égale).
-   * La largeur lit --_height, posée par Button sur ce même élément rendu
-   * (compact inclus) : une seule règle couvre toutes les tailles.
+   * Sélecteur avec [data-size] pour battre la règle de padding de Button
+   * quel que soit l'ordre du CSS bundlé (ce fichier reste importé APRÈS
+   * Button dans index.ts). La largeur lit --_control-height, posée par la
+   * classe partagée ds-control sur ce même élément rendu (compact inclus) :
+   * une seule règle couvre toutes les tailles.
    */
   .ds-icon-button[data-size] {
-    width: var(--_height);
+    width: var(--_control-height);
     padding-inline: 0;
   }
 }

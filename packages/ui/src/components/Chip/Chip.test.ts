@@ -32,4 +32,16 @@ describe('Chip', () => {
     await fireEvent.click(getAllByRole('button', { name: 'Retirer' })[0]!)
     expect(emitted('dismiss')).toHaveLength(1)
   })
+
+  it('pose data-size/data-compact sur la racine ds-control (défaut xs)', () => {
+    const { container, rerender } = render(Chip, { slots: { default: 'Tag' } })
+    const root = container.querySelector('.ds-chip') as HTMLElement
+    expect(root.classList.contains('ds-control')).toBe(true)
+    expect(root.getAttribute('data-size')).toBe('xs')
+    expect(root.hasAttribute('data-compact')).toBe(false)
+    return rerender({ size: 'sm', compact: true }).then(() => {
+      expect(root.getAttribute('data-size')).toBe('sm')
+      expect(root.hasAttribute('data-compact')).toBe(true)
+    })
+  })
 })

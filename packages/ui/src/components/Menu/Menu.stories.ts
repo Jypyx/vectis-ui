@@ -15,9 +15,10 @@ const meta = {
       control: 'select',
       options: ['bottom-start', 'bottom-end', 'bottom', 'top-start', 'top-end', 'top'],
     },
+    size: { control: 'select', options: ['sm', 'md'] },
     compact: { control: 'boolean' },
   },
-  args: { placement: 'bottom-start', compact: false },
+  args: { placement: 'bottom-start', size: 'sm', compact: false },
 } satisfies Meta<typeof Menu>
 
 export default meta
@@ -149,21 +150,27 @@ export const Groupes: Story = {
   },
 }
 
-export const Compact: Story = {
-  args: { compact: true },
-  render: (args) => ({
+/** sm 32px (défaut) / md 40px ; `compact` retire 4px, combinable avec les deux. */
+export const Tailles: Story = {
+  render: () => ({
     components: { Menu, MenuItem, MenuSeparator, Button },
-    setup: () => ({ args }),
     template: `
-      <Menu v-bind="args">
-        <template #trigger="{ triggerProps }">
-          <Button size="sm" variant="outline" tone="neutral" v-bind="triggerProps">Actions</Button>
-        </template>
-        <MenuItem label="Renommer" icon-start="edit" />
-        <MenuItem label="Dupliquer" icon-start="content_copy" />
-        <MenuSeparator />
-        <MenuItem label="Supprimer" icon-start="delete" danger />
-      </Menu>
+      <div style="display: flex; gap: 8px">
+        <Menu v-for="variant in [
+          { label: 'sm', props: {} },
+          { label: 'md', props: { size: 'md' } },
+          { label: 'sm compact', props: { compact: true } },
+          { label: 'md compact', props: { size: 'md', compact: true } },
+        ]" :key="variant.label" v-bind="variant.props">
+          <template #trigger="{ triggerProps }">
+            <Button size="sm" variant="outline" tone="neutral" v-bind="triggerProps">{{ variant.label }}</Button>
+          </template>
+          <MenuItem label="Renommer" icon-start="edit" />
+          <MenuItem label="Dupliquer" icon-start="content_copy" />
+          <MenuSeparator />
+          <MenuItem label="Supprimer" icon-start="delete" danger />
+        </Menu>
+      </div>
     `,
   }),
 }

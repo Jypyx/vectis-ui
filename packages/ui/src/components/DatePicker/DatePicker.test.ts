@@ -33,4 +33,15 @@ describe('DatePicker', () => {
     })
     expect((container.querySelector('input') as HTMLInputElement).type).toBe('time')
   })
+
+  it('pose data-size/data-compact sur la racine ds-control', () => {
+    const { container } = render(DatePicker, {
+      props: { modelValue: '', size: 'xl', compact: true },
+      attrs: { 'aria-label': 'Date' },
+    })
+    const input = container.querySelector('input') as HTMLInputElement
+    expect(input.classList.contains('ds-control')).toBe(true)
+    expect(input.getAttribute('data-size')).toBe('xl')
+    expect(input.hasAttribute('data-compact')).toBe(true)
+  })
 })

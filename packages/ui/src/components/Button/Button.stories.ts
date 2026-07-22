@@ -10,7 +10,7 @@ const meta = {
   argTypes: {
     variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'elevated', 'tonal'] },
     tone: { control: 'select', options: ['accent', 'neutral', 'danger', 'success', 'warning'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     compact: { control: 'boolean' },
     iconStart: { control: 'text' },
     iconEnd: { control: 'text' },
@@ -57,14 +57,18 @@ export const Sizes: Story = {
     template: `
       <div style="display: grid; gap: 12px">
         <div style="display: flex; gap: 8px; align-items: center">
+          <Button size="xs">XSmall 24px</Button>
           <Button size="sm">Small 32px</Button>
           <Button size="md">Medium 40px</Button>
           <Button size="lg">Large 48px</Button>
+          <Button size="xl">XLarge 56px</Button>
         </div>
         <div style="display: flex; gap: 8px; align-items: center">
+          <Button size="xs" compact>XSmall 20px</Button>
           <Button size="sm" compact>Small 28px</Button>
           <Button size="md" compact>Medium 36px</Button>
           <Button size="lg" compact>Large 44px</Button>
+          <Button size="xl" compact>XLarge 52px</Button>
         </div>
       </div>
     `,

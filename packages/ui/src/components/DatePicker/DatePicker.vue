@@ -11,7 +11,9 @@
 interface DatePickerProps {
   /** Granularité native. */
   type?: 'date' | 'datetime-local' | 'time' | 'month' | 'week'
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  /** Hauteur réduite de 4px ; padding et typo inchangés. */
+  compact?: boolean
   /** Force l'état invalide (validation serveur) — pose aria-invalid. */
   invalid?: boolean
   disabled?: boolean
@@ -20,6 +22,7 @@ interface DatePickerProps {
 withDefaults(defineProps<DatePickerProps>(), {
   type: 'date',
   size: 'md',
+  compact: false,
   invalid: false,
   disabled: false,
 })
@@ -32,8 +35,9 @@ const model = defineModel<string>({ default: '' })
   <input
     v-model="model"
     :type="type"
-    class="ds-datepicker"
+    class="ds-datepicker ds-control"
     :data-size="size"
+    :data-compact="compact ? '' : undefined"
     :disabled="disabled"
     :aria-invalid="invalid || undefined"
   />
@@ -41,16 +45,18 @@ const model = defineModel<string>({ default: '' })
 
 <style>
 @layer ds.components {
+  /* Tailles/compact : variables --_control-* posées par la classe partagée
+     ds-control (styles/control-size.css) sur ce même élément */
   .ds-datepicker {
     width: 100%;
-    height: var(--ds-control-height-md);
-    padding-inline: var(--ds-space-3);
+    height: var(--_control-height);
+    padding-inline: var(--_control-padding-inline-field);
     background: var(--ds-color-surface);
     color: var(--ds-color-text);
     border: 1px solid var(--ds-color-border-strong);
     border-radius: var(--ds-radius-interactive);
     font-family: var(--ds-font-family-sans);
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--_control-font-size);
     transition: border-color var(--ds-duration-fast) var(--ds-ease-default);
   }
 
@@ -93,18 +99,6 @@ const model = defineModel<string>({ default: '' })
     background: var(--ds-color-surface-muted);
     opacity: 0.5;
     cursor: not-allowed;
-  }
-
-  .ds-datepicker[data-size='sm'] {
-    height: var(--ds-control-height-sm);
-    padding-inline: var(--ds-space-2);
-    font-size: var(--ds-font-size-xs);
-  }
-
-  .ds-datepicker[data-size='lg'] {
-    height: var(--ds-control-height-lg);
-    padding-inline: var(--ds-space-4);
-    font-size: var(--ds-font-size-md);
   }
 
   @media (prefers-reduced-motion: reduce) {

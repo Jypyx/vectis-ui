@@ -35,7 +35,7 @@ import Icon from '../Icon/Icon.vue'
 import Spinner from '../Spinner/Spinner.vue'
 
 interface InputProps {
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   /** Hauteur réduite de 4px ; padding, typo et icônes inchangés. */
   compact?: boolean
   /** Type de saisie natif — les claviers virtuels s'adaptent automatiquement. */
@@ -180,7 +180,7 @@ watchEffect(
 
 <template>
   <div
-    class="ds-input"
+    class="ds-input ds-control"
     :class="rootClass"
     :style="rootStyle"
     :data-size="size"
@@ -285,27 +285,22 @@ watchEffect(
   }
 
   /* Le field porte bordure, fond et focus ; --_border-color est la seule
-     source de vérité de la couleur (hover/erreur/disabled la redéfinissent) */
+     source de vérité de la couleur (hover/erreur/disabled la redéfinissent).
+     Tailles/compact : variables --_control-* héritées de la racine ds-control
+     (styles/control-size.css), contexte d'Icon compris. */
   .ds-input-field {
     --_border-color: var(--ds-color-border-strong);
-    --_height-base: var(--ds-control-height-md);
-    --_height: var(--_height-base);
-    --_action-size: var(--ds-control-action-size-md);
-
-    /* API de contexte d'Icon : taille et axe opsz selon la taille du champ */
-    --ds-icon-size: var(--ds-icon-size-md);
-    --ds-icon-opsz: 24;
 
     display: flex;
     align-items: center;
     gap: var(--ds-space-2);
-    height: var(--_height);
-    padding-inline: var(--ds-space-3);
+    height: var(--_control-height);
+    padding-inline: var(--_control-padding-inline-field);
     background: var(--ds-color-surface);
     color: var(--ds-color-text);
     border: 1px solid var(--_border-color);
     border-radius: var(--ds-radius-interactive);
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--_control-font-size);
     transition:
       border-color var(--ds-duration-fast) var(--ds-ease-default),
       background-color var(--ds-duration-fast) var(--ds-ease-default),
@@ -392,8 +387,8 @@ watchEffect(
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--_action-size);
-    height: var(--_action-size);
+    width: var(--_control-action-size);
+    height: var(--_control-action-size);
     margin-inline: calc(var(--ds-space-1) * -1);
     padding: 0;
     border: none;
@@ -416,8 +411,8 @@ watchEffect(
 
   /* croix proportionnelle à la zone cliquable (16px dans 24px en md) */
   .ds-input-clear svg {
-    inline-size: calc(var(--_action-size) - var(--ds-space-2));
-    block-size: calc(var(--_action-size) - var(--ds-space-2));
+    inline-size: calc(var(--_control-action-size) - var(--ds-space-2));
+    block-size: calc(var(--_control-action-size) - var(--ds-space-2));
   }
 
   /* Readonly : fond légèrement enfoncé, texte normal (la valeur reste lisible),
@@ -452,31 +447,6 @@ watchEffect(
 
   .ds-input-control:disabled {
     cursor: not-allowed;
-  }
-
-  /* --- Tailles --- */
-  .ds-input[data-size='sm'] .ds-input-field {
-    --_height-base: var(--ds-control-height-sm);
-    --_action-size: var(--ds-control-action-size-sm);
-    --ds-icon-size: var(--ds-icon-size-sm);
-    --ds-icon-opsz: 20;
-
-    padding-inline: var(--ds-space-2);
-    font-size: var(--ds-font-size-xs);
-  }
-
-  .ds-input[data-size='lg'] .ds-input-field {
-    --_height-base: var(--ds-control-height-lg);
-    --_action-size: var(--ds-control-action-size-lg);
-    --ds-icon-size: var(--ds-icon-size-lg);
-
-    padding-inline: var(--ds-space-4);
-    font-size: var(--ds-font-size-md);
-  }
-
-  /* Compact : hauteur -4px, padding/typo/icônes inchangés (comme Button) */
-  .ds-input[data-compact] .ds-input-field {
-    --_height: calc(var(--_height-base) - var(--ds-space-1));
   }
 
   @media (prefers-reduced-motion: reduce) {

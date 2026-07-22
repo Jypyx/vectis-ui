@@ -17,10 +17,12 @@ const meta = {
   title: 'Composants/Select',
   component: Select,
   argTypes: {
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
+    compact: { control: 'boolean' },
   },
   args: {
     size: 'md',
+    compact: false,
     invalid: false,
     disabled: false,
   },
@@ -45,9 +47,12 @@ export const Tailles: Story = {
     components: { Select },
     template: `
       <div style="display: grid; gap: 8px; width: 260px">
+        <Select size="xs" aria-label="XSmall">${OPTIONS}</Select>
         <Select size="sm" aria-label="Small">${OPTIONS}</Select>
         <Select size="md" aria-label="Medium">${OPTIONS}</Select>
         <Select size="lg" aria-label="Large">${OPTIONS}</Select>
+        <Select size="xl" aria-label="XLarge">${OPTIONS}</Select>
+        <Select compact aria-label="Compact">${OPTIONS}</Select>
       </div>
     `,
   }),

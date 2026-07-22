@@ -9,9 +9,10 @@ const meta = {
   component: Chip,
   argTypes: {
     tone: { control: 'select', options: ['neutral', 'accent', 'danger', 'success', 'warning'] },
-    size: { control: 'select', options: ['sm', 'md'] },
+    size: { control: 'select', options: ['xs', 'sm'] },
+    compact: { control: 'boolean' },
   },
-  args: { tone: 'neutral', size: 'md' },
+  args: { tone: 'neutral', size: 'xs', compact: false },
   render: (args) => ({
     components: { Chip },
     setup: () => ({ args }),
@@ -32,6 +33,21 @@ export const Tones: Story = {
         <Chip v-for="tone in ['neutral', 'accent', 'success', 'warning', 'danger']" :key="tone" :tone="tone">
           {{ tone }}
         </Chip>
+      </div>
+    `,
+  }),
+}
+
+/** xs 24px (défaut) / sm 32px ; `compact` retire 4px de hauteur. */
+export const Tailles: Story = {
+  render: () => ({
+    components: { Chip },
+    template: `
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
+        <Chip size="xs" dismissible>XSmall 24px</Chip>
+        <Chip size="sm" dismissible>Small 32px</Chip>
+        <Chip size="xs" compact dismissible>XSmall compact 20px</Chip>
+        <Chip size="sm" compact dismissible>Small compact 28px</Chip>
       </div>
     `,
   }),

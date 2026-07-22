@@ -23,6 +23,11 @@ interface MenuPanelProps {
   placement?: MenuPanelPlacement
   /** Panneau de sous-menu : active Flèche gauche, pas de focus automatique. */
   submenu?: boolean
+  /**
+   * Posé UNIQUEMENT par la racine (pas de défaut : les sous-panneaux ne
+   * rendent pas data-size) : les sous-panneaux héritent via CSS.
+   */
+  size?: 'sm' | 'md'
   /** Posé UNIQUEMENT par la racine : les sous-panneaux héritent via CSS. */
   compact?: boolean
 }
@@ -30,6 +35,7 @@ interface MenuPanelProps {
 const props = withDefaults(defineProps<MenuPanelProps>(), {
   placement: 'bottom-start',
   submenu: false,
+  size: undefined,
   compact: false,
 })
 
@@ -151,6 +157,7 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     role="menu"
     class="ds-menu ds-floating"
     :data-placement="placement"
+    :data-size="size"
     :data-compact="compact ? '' : undefined"
     @beforetoggle="syncShown"
     @toggle="onToggle"
@@ -163,8 +170,10 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
 <style>
 @layer ds.components {
   .ds-menu {
-    /* API de contexte d'Icon : icônes d'items à la densité sm */
-    --ds-icon-size: var(--ds-icon-size-sm);
+    /* API de contexte d'Icon : icônes d'items 20px/opsz 20 pour les deux
+       tailles (sm et md) — constante, donc déclarable sur .ds-menu nu sans
+       piège d'héritage */
+    --ds-icon-size: var(--ds-icon-size-md);
     --ds-icon-opsz: 20;
     display: flex;
     flex-direction: column;
@@ -181,13 +190,24 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
   }
 
   /*
-   * Hauteur d'item compacte : la variable est posée sur le panneau RACINE
-   * seulement (data-compact) et héritée par les sous-panneaux, descendants
-   * DOM — ne jamais la déclarer sur .ds-menu nu, chaque panneau imbriqué la
-   * réinitialiserait.
+   * Taille/densité des items : les variables sont posées sur le panneau
+   * RACINE seulement (seul à rendre data-size/data-compact) et héritées par
+   * les sous-panneaux, descendants DOM — ne jamais les déclarer sur .ds-menu
+   * nu, chaque panneau imbriqué les réinitialiserait. Les fallbacks (valeurs
+   * sm) vivent côté MenuItem.
    */
+  .ds-menu[data-size='sm'] {
+    --_menu-item-min-h: var(--ds-control-height-sm);
+  }
+
+  .ds-menu[data-size='md'] {
+    --_menu-item-min-h: var(--ds-control-height-md);
+    --_menu-item-pad-i: var(--ds-space-4);
+  }
+
+  /* Compact : hauteur minimale -4px, padding/typo/icônes inchangés */
   .ds-menu[data-compact] {
-    --_menu-item-min-h: var(--ds-control-size-menu-item-compact);
+    --_menu-item-delta: var(--ds-space-1);
   }
 
   /* aligne le 1er sous-item sur l'item parent (compense padding + bordure) */

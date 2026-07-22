@@ -16,7 +16,7 @@ import Spinner from '../Spinner/Spinner.vue'
 interface ButtonProps {
   variant?: 'solid' | 'outline' | 'ghost' | 'elevated' | 'tonal'
   tone?: 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   /** Hauteur réduite de 4px ; padding, typo et icônes inchangés. */
   compact?: boolean
   /** Rendu <a> au lieu de <button>. disabled/loading → lien inerte (sans href). */
@@ -76,7 +76,7 @@ const passedAttrs = computed(() => {
   <component
     :is="isLink ? 'a' : 'button'"
     v-bind="passedAttrs"
-    class="ds-button"
+    class="ds-button ds-control"
     :href="isLink && !isInert ? href : undefined"
     :type="isLink ? undefined : type"
     :disabled="isLink ? undefined : disabled || loading"
@@ -107,27 +107,21 @@ const passedAttrs = computed(() => {
 @layer ds.components {
   .ds-button {
     /*
-     * Hauteur en deux temps : les tailles posent --_height-base, compact
-     * dérive --_height par calc(). IconButton lit aussi --_height pour sa
+     * Tailles/compact : la classe partagée ds-control (styles/control-size.css)
+     * pose les variables --_control-* et le contexte d'Icon selon
+     * data-size/data-compact. IconButton lit aussi --_control-height pour sa
      * largeur carrée (même élément rendu).
      */
-    --_height-base: var(--ds-control-height-md);
-    --_height: var(--_height-base);
-
-    /* API de contexte d'Icon : taille et axe opsz selon la taille du bouton */
-    --ds-icon-size: var(--ds-icon-size-md);
-    --ds-icon-opsz: 24;
-
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: var(--ds-space-2);
-    height: var(--_height);
-    padding-inline: var(--ds-space-4);
+    height: var(--_control-height);
+    padding-inline: var(--_control-padding-inline);
     border: 1px solid transparent;
     border-radius: var(--ds-radius-interactive);
     font-family: var(--ds-font-family-sans);
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--_control-font-size);
     font-weight: var(--ds-font-weight-medium);
     line-height: var(--ds-font-leading-none);
     text-decoration: none;
@@ -265,27 +259,6 @@ const passedAttrs = computed(() => {
 
   .ds-button[data-variant='tonal']:active:not(:disabled, [aria-disabled='true']) {
     background: color-mix(in oklab, var(--_bg-soft), var(--_text-tinted) 14%);
-  }
-
-  /* --- Tailles : ne posent que --_height-base (compact dérive --_height) --- */
-  .ds-button[data-size='sm'] {
-    --_height-base: var(--ds-control-height-sm);
-    --ds-icon-size: var(--ds-icon-size-sm);
-    --ds-icon-opsz: 20;
-    padding-inline: var(--ds-space-3);
-    font-size: var(--ds-font-size-xs);
-  }
-
-  .ds-button[data-size='lg'] {
-    --_height-base: var(--ds-control-height-lg);
-    --ds-icon-size: var(--ds-icon-size-lg);
-    padding-inline: var(--ds-space-5);
-    font-size: var(--ds-font-size-md);
-  }
-
-  /* Hauteur -4px (space-1), padding/typo/icônes inchangés */
-  .ds-button[data-compact] {
-    --_height: calc(var(--_height-base) - var(--ds-space-1));
   }
 
   /* --- États --- */

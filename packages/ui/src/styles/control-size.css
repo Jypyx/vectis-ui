@@ -1,0 +1,83 @@
+/*
+ * Table des tailles de contrôle — incarnation CSS unique du tableau de
+ * correspondance du design system (hauteur / icône / opsz / typo / paddings
+ * par taille xs → xl).
+ *
+ * Chaque composant interactif pose `ds-control` sur sa RACINE (celle qui
+ * porte `data-size`/`data-compact`) et consomme les variables `--_control-*`
+ * dans son propre CSS ; elles héritent jusqu'aux enfants (ex. le field
+ * d'Input). Les blocs ne définissent QUE des custom properties — jamais de
+ * propriété de layout — donc aucun conflit de spécificité avec les SFC.
+ *
+ * Deux colonnes de padding-inline : `--_control-padding-inline` pour les
+ * contrôles pleins (Button, Chip…), `--_control-padding-inline-field` pour
+ * les champs de saisie (Input, Textarea, Select, DatePicker), plus serrés.
+ *
+ * `--ds-icon-size`/`--ds-icon-opsz` = API de contexte publique d'Icon ;
+ * l'opsz reste un littéral (axe de la police Material Symbols : contrat
+ * technique, pas un token de design — voir Icon.vue).
+ */
+@layer ds.components {
+  .ds-control {
+    /*
+     * Hauteur en deux temps : les tailles posent --_control-height-base,
+     * compact dérive la hauteur effective (-4px, padding/typo/icônes
+     * inchangés).
+     */
+    --_control-height: var(--_control-height-base);
+  }
+
+  .ds-control[data-compact] {
+    --_control-height: calc(var(--_control-height-base) - var(--ds-space-1));
+  }
+
+  .ds-control[data-size='xs'] {
+    --_control-height-base: var(--ds-control-height-xs);
+    --_control-font-size: var(--ds-font-size-xs);
+    --_control-padding-inline: var(--ds-space-2);
+    --_control-padding-inline-field: var(--ds-space-1);
+    --_control-action-size: var(--ds-control-action-size-sm);
+    --ds-icon-size: var(--ds-icon-size-sm);
+    --ds-icon-opsz: 20;
+  }
+
+  .ds-control[data-size='sm'] {
+    --_control-height-base: var(--ds-control-height-sm);
+    --_control-font-size: var(--ds-font-size-sm);
+    --_control-padding-inline: var(--ds-space-3);
+    --_control-padding-inline-field: var(--ds-space-2);
+    --_control-action-size: var(--ds-control-action-size-md);
+    --ds-icon-size: var(--ds-icon-size-md);
+    --ds-icon-opsz: 20;
+  }
+
+  .ds-control[data-size='md'] {
+    --_control-height-base: var(--ds-control-height-md);
+    --_control-font-size: var(--ds-font-size-sm);
+    --_control-padding-inline: var(--ds-space-4);
+    --_control-padding-inline-field: var(--ds-space-3);
+    --_control-action-size: var(--ds-control-action-size-md);
+    --ds-icon-size: var(--ds-icon-size-md);
+    --ds-icon-opsz: 20;
+  }
+
+  .ds-control[data-size='lg'] {
+    --_control-height-base: var(--ds-control-height-lg);
+    --_control-font-size: var(--ds-font-size-md);
+    --_control-padding-inline: var(--ds-space-5);
+    --_control-padding-inline-field: var(--ds-space-4);
+    --_control-action-size: var(--ds-control-action-size-lg);
+    --ds-icon-size: var(--ds-icon-size-lg);
+    --ds-icon-opsz: 24;
+  }
+
+  .ds-control[data-size='xl'] {
+    --_control-height-base: var(--ds-control-height-xl);
+    --_control-font-size: var(--ds-font-size-md);
+    --_control-padding-inline: var(--ds-space-6);
+    --_control-padding-inline-field: var(--ds-space-5);
+    --_control-action-size: var(--ds-control-action-size-lg);
+    --ds-icon-size: var(--ds-icon-size-lg);
+    --ds-icon-opsz: 24;
+  }
+}

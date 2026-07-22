@@ -31,7 +31,7 @@ interface InputOTPProps {
    * avec un préfixe textuel ('GT-###').
    */
   separatorIcon?: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   /** Hauteur réduite de 4px ; typo et icônes inchangées (comme Button/Input). */
   compact?: boolean
   disabled?: boolean
@@ -177,7 +177,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
 
 <template>
   <div
-    class="ds-otp"
+    class="ds-otp ds-control"
     role="group"
     :aria-label="label"
     :data-invalid="invalid ? '' : undefined"
@@ -217,13 +217,12 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
 <style>
 @layer ds.components {
   .ds-otp {
-    --_height-base: var(--ds-control-height-md);
-    --_height: var(--_height-base);
+    /*
+     * Hauteur/icônes : classe partagée ds-control (styles/control-size.css).
+     * La typo garde son échelle propre, majorée de 2 crans par rapport aux
+     * autres champs : les chiffres remplissent les cases carrées.
+     */
     --_font-size: var(--ds-font-size-lg);
-
-    /* API de contexte d'Icon (séparateurs) : taille et axe opsz selon size */
-    --ds-icon-size: var(--ds-icon-size-md);
-    --ds-icon-opsz: 24;
 
     display: inline-flex;
     align-items: center;
@@ -232,8 +231,8 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
 
   .ds-otp-input {
     /* cases carrées : size/compact scalent les deux dimensions d'un coup */
-    width: var(--_height);
-    height: var(--_height);
+    width: var(--_control-height);
+    height: var(--_control-height);
     text-align: center;
     background: var(--ds-color-surface);
     color: var(--ds-color-text);
@@ -283,23 +282,22 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     color: var(--ds-color-text-subtle);
   }
 
-  /* --- Tailles --- */
+  /* --- Tailles : seule la typo majorée reste locale, le reste vient de
+     ds-control --- */
+  .ds-otp[data-size='xs'] {
+    --_font-size: var(--ds-font-size-sm);
+  }
+
   .ds-otp[data-size='sm'] {
-    --_height-base: var(--ds-control-height-sm);
     --_font-size: var(--ds-font-size-md);
-    --ds-icon-size: var(--ds-icon-size-sm);
-    --ds-icon-opsz: 20;
   }
 
   .ds-otp[data-size='lg'] {
-    --_height-base: var(--ds-control-height-lg);
     --_font-size: var(--ds-font-size-xl);
-    --ds-icon-size: var(--ds-icon-size-lg);
   }
 
-  /* Compact : hauteur -4px, typo/icônes inchangées (comme Button/Input) */
-  .ds-otp[data-compact] {
-    --_height: calc(var(--_height-base) - var(--ds-space-1));
+  .ds-otp[data-size='xl'] {
+    --_font-size: var(--ds-font-size-2xl);
   }
 
   @media (prefers-reduced-motion: reduce) {

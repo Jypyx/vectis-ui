@@ -6,7 +6,9 @@
  */
 interface ChipProps {
   tone?: 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
-  size?: 'sm' | 'md'
+  size?: 'xs' | 'sm'
+  /** Hauteur réduite de 4px ; padding, typo et icônes inchangés. */
+  compact?: boolean
   /** Toggle : le chip devient un bouton aria-pressed, lié à v-model:selected. */
   selectable?: boolean
   /** Bouton de retrait qui émet `dismiss` (la disparition est au consommateur). */
@@ -16,7 +18,8 @@ interface ChipProps {
 
 withDefaults(defineProps<ChipProps>(), {
   tone: 'neutral',
-  size: 'md',
+  size: 'xs',
+  compact: false,
   selectable: false,
   dismissible: false,
   disabled: false,
@@ -39,9 +42,10 @@ defineSlots<{
 
 <template>
   <span
-    class="ds-chip"
+    class="ds-chip ds-control"
     :data-tone="tone"
     :data-size="size"
+    :data-compact="compact ? '' : undefined"
     :data-selected="selectable && selected ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
   >
@@ -82,15 +86,18 @@ defineSlots<{
 
 <style>
 @layer ds.components {
+  /* Tailles/compact : hauteur explicite via la classe partagée ds-control
+     (styles/control-size.css), l'union TS restreint à xs/sm */
   .ds-chip {
     display: inline-flex;
     align-items: center;
+    height: var(--_control-height);
     background: var(--_bg);
     color: var(--_text);
     border: 1px solid var(--_border);
     border-radius: var(--ds-radius-pill);
     font-family: var(--ds-font-family-sans);
-    font-size: var(--ds-font-size-xs);
+    font-size: var(--_control-font-size);
     font-weight: var(--ds-font-weight-medium);
     line-height: var(--ds-font-leading-none);
     transition:
@@ -140,7 +147,9 @@ defineSlots<{
     display: inline-flex;
     align-items: center;
     gap: var(--ds-space-1);
-    padding: var(--ds-space-1) var(--ds-space-2);
+    height: 100%;
+    padding-block: 0;
+    padding-inline: var(--_control-padding-inline);
     border: none;
     background: transparent;
     color: inherit;
@@ -166,14 +175,21 @@ defineSlots<{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--ds-control-action-size-sm);
-    height: var(--ds-control-action-size-sm);
+    width: var(--_control-action-size);
+    height: var(--_control-action-size);
     margin-inline: calc(var(--ds-space-1) * -1) var(--ds-space-1);
     border: none;
     background: transparent;
     color: inherit;
     border-radius: var(--ds-radius-full);
     cursor: pointer;
+  }
+
+  /* croix proportionnelle à la zone cliquable (12px dans 20px en xs) ;
+     les attributs width/height du SVG restent en filet sans CSS */
+  .ds-chip-remove svg {
+    inline-size: calc(var(--_control-action-size) - var(--ds-space-2));
+    block-size: calc(var(--_control-action-size) - var(--ds-space-2));
   }
 
   .ds-chip-remove:hover {
@@ -191,10 +207,6 @@ defineSlots<{
 
   .ds-chip[data-disabled] button {
     cursor: not-allowed;
-  }
-
-  .ds-chip[data-size='sm'] .ds-chip-action {
-    padding: calc(var(--ds-space-1) / 2) var(--ds-space-2);
   }
 
   @media (prefers-reduced-motion: reduce) {

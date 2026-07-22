@@ -39,4 +39,15 @@ describe('Select', () => {
     })
     expect((getByRole('combobox') as HTMLSelectElement).disabled).toBe(true)
   })
+
+  it('pose data-size/data-compact sur la racine ds-control', () => {
+    const { container } = render(Select, {
+      props: { modelValue: 'a', size: 'xs', compact: true },
+      slots,
+    })
+    const root = container.querySelector('.ds-select') as HTMLElement
+    expect(root.classList.contains('ds-control')).toBe(true)
+    expect(root.getAttribute('data-size')).toBe('xs')
+    expect(root.hasAttribute('data-compact')).toBe(true)
+  })
 })

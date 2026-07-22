@@ -7,7 +7,9 @@
  * CSS via :has().
  */
 interface SelectProps {
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  /** Hauteur réduite de 4px ; padding et typo inchangés. */
+  compact?: boolean
   /** Force l'état invalide (validation serveur) — pose aria-invalid. */
   invalid?: boolean
   disabled?: boolean
@@ -15,6 +17,7 @@ interface SelectProps {
 
 withDefaults(defineProps<SelectProps>(), {
   size: 'md',
+  compact: false,
   invalid: false,
   disabled: false,
 })
@@ -32,7 +35,7 @@ defineSlots<{
 </script>
 
 <template>
-  <span class="ds-select" :data-size="size">
+  <span class="ds-select ds-control" :data-size="size" :data-compact="compact ? '' : undefined">
     <select
       v-model="model"
       class="ds-select-control"
@@ -58,7 +61,7 @@ defineSlots<{
   .ds-select::after {
     content: '';
     position: absolute;
-    inset-inline-end: var(--ds-space-3);
+    inset-inline-end: var(--_control-padding-inline-field);
     top: 50%;
     translate: 0 -50%;
     width: 0.65em;
@@ -73,17 +76,20 @@ defineSlots<{
     color: var(--ds-color-text-muted);
   }
 
+  /* Tailles/compact : variables --_control-* héritées de la racine ds-control
+     (styles/control-size.css) ; le padding-end réserve la place du chevron */
   .ds-select-control {
     appearance: none;
     width: 100%;
-    height: var(--ds-control-height-md);
-    padding-inline: var(--ds-space-3) var(--ds-space-7);
+    height: var(--_control-height);
+    padding-inline: var(--_control-padding-inline-field)
+      calc(var(--_control-padding-inline-field) + var(--ds-space-5));
     background: var(--ds-color-surface);
     color: var(--ds-color-text);
     border: 1px solid var(--ds-color-border-strong);
     border-radius: var(--ds-radius-interactive);
     font-family: var(--ds-font-family-sans);
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--_control-font-size);
     cursor: pointer;
     text-overflow: ellipsis;
     transition: border-color var(--ds-duration-fast) var(--ds-ease-default);
@@ -115,19 +121,6 @@ defineSlots<{
   .ds-select-control:disabled {
     background: var(--ds-color-surface-muted);
     cursor: not-allowed;
-  }
-
-  /* --- Tailles --- */
-  .ds-select[data-size='sm'] .ds-select-control {
-    height: var(--ds-control-height-sm);
-    padding-inline: var(--ds-space-2) var(--ds-space-6);
-    font-size: var(--ds-font-size-xs);
-  }
-
-  .ds-select[data-size='lg'] .ds-select-control {
-    height: var(--ds-control-height-lg);
-    padding-inline: var(--ds-space-4) var(--ds-space-8);
-    font-size: var(--ds-font-size-md);
   }
 
   @media (prefers-reduced-motion: reduce) {

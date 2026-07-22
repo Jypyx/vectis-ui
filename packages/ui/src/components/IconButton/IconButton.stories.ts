@@ -16,7 +16,7 @@ const meta = {
   argTypes: {
     variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'elevated', 'tonal'] },
     tone: { control: 'select', options: ['accent', 'neutral', 'danger', 'success', 'warning'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     compact: { control: 'boolean' },
   },
   args: {
@@ -75,14 +75,18 @@ export const Sizes: Story = {
     template: `
       <div style="display: grid; gap: 12px">
         <div style="display: flex; gap: 8px; align-items: center">
+          <IconButton v-bind="args" size="xs"><Icon name="add" /></IconButton>
           <IconButton v-bind="args" size="sm"><Icon name="add" /></IconButton>
           <IconButton v-bind="args" size="md"><Icon name="add" /></IconButton>
           <IconButton v-bind="args" size="lg"><Icon name="add" /></IconButton>
+          <IconButton v-bind="args" size="xl"><Icon name="add" /></IconButton>
         </div>
         <div style="display: flex; gap: 8px; align-items: center">
+          <IconButton v-bind="args" size="xs" compact><Icon name="add" /></IconButton>
           <IconButton v-bind="args" size="sm" compact><Icon name="add" /></IconButton>
           <IconButton v-bind="args" size="md" compact><Icon name="add" /></IconButton>
           <IconButton v-bind="args" size="lg" compact><Icon name="add" /></IconButton>
+          <IconButton v-bind="args" size="xl" compact><Icon name="add" /></IconButton>
         </div>
       </div>
     `,

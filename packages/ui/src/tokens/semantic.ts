@@ -70,9 +70,11 @@ export const semantic = {
     'ring-offset': dimension('2px'),
   },
   control: {
+    'height-xs': dimension('1.5rem'),
     'height-sm': dimension('2rem'),
     'height-md': dimension('2.5rem'),
     'height-lg': dimension('3rem'),
+    'height-xl': dimension('3.5rem'),
     'border-width': dimension('2px', 'Bordure des contrôles cochables (Checkbox, Radio)'),
     'size-check': dimension('1.25rem', 'Boîte des contrôles cochables (Checkbox, Radio)'),
     'size-check-mark': dimension('0.875rem', 'Coche SVG du Checkbox'),
@@ -111,12 +113,10 @@ export const semantic = {
     'size-progress-circular-md': dimension('3rem', 'Diamètre du ProgressCircular md'),
     'size-progress-circular-lg': dimension('5rem', 'Diamètre du ProgressCircular lg'),
     'size-toast-width': dimension('22rem', "Largeur par défaut d'un toast"),
-    'size-menu-item': dimension('2.25rem', "Hauteur minimale d'un item de menu"),
-    'size-menu-item-compact': dimension('2rem', "Hauteur minimale d'un item de menu compact"),
   },
   icon: {
-    'size-sm': dimension('1rem', 'Icônes 16px — contrôles sm'),
-    'size-md': dimension('1.25rem', 'Icônes 20px — contrôles md'),
-    'size-lg': dimension('1.5rem', 'Icônes 24px — contrôles lg'),
+    'size-sm': dimension('1rem', 'Icônes 16px'),
+    'size-md': dimension('1.25rem', 'Icônes 20px'),
+    'size-lg': dimension('1.5rem', 'Icônes 24px'),
   },
 } satisfies TokenGroup

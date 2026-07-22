@@ -11,8 +11,8 @@ l'`aria-label` du bouton, car une icône seule ne fournit aucun nom accessible a
 d'écran.
 
 L'icône est passée dans le slot par défaut, idéalement via le composant `Icon` : sa taille et
-son axe `opsz` suivent alors automatiquement la taille du bouton (sm → 16px, md → 20px,
-lg → 24px).
+son axe `opsz` suivent alors automatiquement la taille du bouton (xs → 16px, sm/md → 20px,
+lg/xl → 24px).
 
 <Canvas of={IconButtonStories.Default} />
 
@@ -29,9 +29,9 @@ pour le détail de chaque rendu. Défauts adaptés à l'usage icône : `variant=
 
 ## Tailles
 
-Trois tailles carrées (`sm` 32px, `md` 40px, `lg` 48px) ; `compact` réduit le côté de 4px
-(28/36/44px) sans changer la taille de l'icône. La largeur suit automatiquement la hauteur du
-`Button` sous-jacent, compact inclus.
+Cinq tailles carrées (`xs` 24px, `sm` 32px, `md` 40px, `lg` 48px, `xl` 56px) ; `compact`
+réduit le côté de 4px (20/28/36/44/52px) sans changer la taille de l'icône. La largeur suit
+automatiquement la hauteur du `Button` sous-jacent, compact inclus.
 
 <Canvas of={IconButtonStories.Sizes} />
 

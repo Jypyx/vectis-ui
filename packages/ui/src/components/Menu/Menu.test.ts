@@ -181,9 +181,9 @@ describe('Menu', () => {
     })
   })
 
-  it('compact pose data-compact sur le panneau racine', () => {
+  it('size/compact posent data-size/data-compact sur le panneau racine', () => {
     const { container } = renderHarness(`
-      <Menu compact>
+      <Menu size="md" compact>
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
@@ -191,7 +191,27 @@ describe('Menu', () => {
       </Menu>
     `)
     const menu = container.querySelector('[role="menu"]') as HTMLElement
+    expect(menu.getAttribute('data-size')).toBe('md')
     expect(menu.hasAttribute('data-compact')).toBe(true)
+  })
+
+  it('les sous-panneaux ne rendent ni data-size ni data-compact (héritage CSS)', () => {
+    const { container } = renderHarness(`
+      <Menu size="md" compact>
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <MenuItem label="Exporter">
+          <template #submenu>
+            <MenuItem label="PDF" />
+          </template>
+        </MenuItem>
+      </Menu>
+    `)
+    const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
+    expect(root?.getAttribute('data-size')).toBe('md')
+    expect(sub?.hasAttribute('data-size')).toBe(false)
+    expect(sub?.hasAttribute('data-compact')).toBe(false)
   })
 
   describe('groupes et séparateurs', () => {
