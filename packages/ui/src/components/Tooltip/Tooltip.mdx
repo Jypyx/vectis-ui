@@ -1,0 +1,73 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as TooltipStories from './Tooltip.stories'
+
+<Meta of={TooltipStories} />
+
+# Tooltip
+
+Infobulle sur la Popover API (`popover="manual"` : pas de light dismiss, le composant
+pilote). Le JavaScript est justifié par l'absence de primitive HTML stable pour « montrer
+au survol/focus avec délai » : il gère le délai d'ouverture, pointer/focus et Échap
+(WCAG 1.4.13). L'ancrage est 100 % CSS — `anchor-name` statique sur le wrapper, confiné à
+son sous-arbre par `anchor-scope`, sans ID unique ni style inline.
+
+Le déclencheur est fourni par le slot par défaut scopé : poser `v-bind="triggerProps"` sur
+l'élément focusable lui attache `aria-describedby` — la voie explicite est préférée à un
+pont automatique au mount.
+
+<Canvas of={TooltipStories.Default} />
+
+<Controls of={TooltipStories.Default} />
+
+## Ouverture au focus
+
+Le survol ouvre après `delay` (300ms par défaut) ; le **focus clavier ouvre immédiatement**
+et Échap ferme sans déplacer le focus — conforme WCAG 1.4.13 (dismissable, hoverable,
+persistent).
+
+<Canvas of={TooltipStories.OuvertureAuFocus} />
+
+## Sur un IconButton
+
+Cas d'usage typique : doubler le libellé accessible d'un bouton icône d'une confirmation
+visuelle. Le tooltip décrit (`aria-describedby`), il ne nomme pas — l'IconButton garde son
+propre `label`.
+
+<Canvas of={TooltipStories.SurIconButton} />
+
+## Placements
+
+Huit placements via `data-placement` → `position-area` (voir `floating.css`, partagé avec
+Popover et DropdownMenu). Les placements alignés (`top-start`…) annulent la marge du côté
+aligné pour rester au bord du déclencheur.
+
+<Canvas of={TooltipStories.Placements} />
+
+Au bord de l'écran, `position-try-fallbacks: flip-block, flip-inline` retourne le panneau
+du côté opposé — sans aucun JS :
+
+<Canvas of={TooltipStories.EdgeFlipping} />
+
+## Contenu riche
+
+Le slot `#content` prime sur la prop `text`. Réservé au contenu **non interactif** (mise en
+forme, `<kbd>`, icônes) : le tooltip se ferme dès que le pointeur quitte le déclencheur et
+`aria-describedby` aplatit le contenu en texte — un lien ou un bouton y serait
+inatteignable. Pour de l'interactif, utiliser Popover.
+
+<Canvas of={TooltipStories.ContenuRiche} />
+
+## Cas limites
+
+Un texte long passe à la ligne dans la largeur maximale du panneau :
+
+<Canvas of={TooltipStories.TexteLong} />
+
+## Accessibilité
+
+- `role="tooltip"` + `aria-describedby` posé sur le déclencheur via `triggerProps` : le
+  contenu est annoncé à la prise de focus.
+- Focus clavier : ouverture immédiate (sans délai), fermeture par Échap ou perte de focus.
+- Le tooltip complète, il ne remplace pas : l'information essentielle doit rester
+  disponible autrement (libellé du contrôle).
+- L'animation d'apparition (commune à `.ds-floating`) respecte `prefers-reduced-motion`.
