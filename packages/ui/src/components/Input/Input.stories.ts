@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
 import Button from '../Button/Button.vue'
@@ -42,6 +42,149 @@ export const Tailles: Story = {
   }),
 }
 
+export const LabelEtHint: Story = {
+  args: {
+    label: 'Adresse email',
+    hint: 'Utilisée uniquement pour la confirmation de commande.',
+  },
+  render: (args) => ({
+    components: { Input },
+    setup: () => ({ args, value: ref('') }),
+    template: '<Input v-bind="args" v-model="value" placeholder="votre@email.fr" />',
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // l'association for/id rend le champ requêtable par son label
+    const input = canvas.getByLabelText('Adresse email')
+    const hint = canvas.getByText('Utilisée uniquement pour la confirmation de commande.')
+    await expect(input.getAttribute('aria-describedby')).toContain(hint.id)
+  },
+}
+
+export const Icones: Story = {
+  args: { iconStart: 'search', iconEnd: 'tune' },
+  play: async ({ canvasElement }) => {
+    // icônes décoratives : aucun bouton dans le champ
+    await expect(within(canvasElement).queryByRole('button')).toBeNull()
+  },
+}
+
+export const IconesCliquables: Story = {
+  args: {
+    iconEnd: 'visibility',
+    iconEndLabel: 'Afficher le mot de passe',
+    'onClick:icon-end': fn(),
+  },
+  render: (args) => ({
+    components: { Input },
+    setup: () => ({ args, value: ref('') }),
+    template: '<Input v-bind="args" v-model="value" type="password" aria-label="Mot de passe" />',
+  }),
+  play: async ({ canvasElement, args }) => {
+    const button = within(canvasElement).getByRole('button', {
+      name: 'Afficher le mot de passe',
+    })
+    await userEvent.click(button)
+    await expect(args['onClick:icon-end']).toHaveBeenCalled()
+  },
+}
+
+export const Compteur: Story = {
+  args: { counter: true, maxlength: 20, label: 'Pseudo' },
+  render: (args) => ({
+    components: { Input },
+    setup: () => ({ args, value: ref('') }),
+    template: '<Input v-bind="args" v-model="value" />',
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Pseudo') as HTMLInputElement
+    // maxlength natif : la saisie est tronquée à 20
+    await userEvent.type(input, 'abcdefghijklmnopqrstuvwxy')
+    await waitFor(() => expect(input.value).toHaveLength(20))
+    await expect(canvas.getByText('20/20')).toBeInTheDocument()
+  },
+}
+
+/**
+ * Limite souple : la saisie dépasse, le champ passe en erreur via la
+ * validation native (setCustomValidity → `:user-invalid` après interaction).
+ */
+export const CompteurSoft: Story = {
+  args: { counter: true, maxlength: 10, softLimit: true, label: 'Titre' },
+  render: (args) => ({
+    components: { Input },
+    setup: () => ({ args, value: ref('') }),
+    template: '<Input v-bind="args" v-model="value" />',
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Titre') as HTMLInputElement
+    await userEvent.type(input, 'beaucoup trop long')
+    // la saisie n'est pas tronquée, le compteur passe en dépassement
+    await waitFor(() => expect(input.value).toBe('beaucoup trop long'))
+    await expect(canvas.getByText('18/10')).toHaveAttribute('data-over')
+    // l'erreur visuelle (:user-invalid) n'apparaît qu'après interaction complète (blur)
+    await userEvent.tab()
+    await waitFor(() => expect(input.matches(':user-invalid')).toBe(true))
+  },
+}
+
+/** Le `pattern` reste l'attribut natif en fallthrough — zéro JS. */
+export const Pattern: Story = {
+  render: () => ({
+    components: { Input },
+    setup: () => ({ value: ref('') }),
+    template: `
+      <Input
+        v-model="value"
+        label="Code postal"
+        hint="5 chiffres"
+        pattern="[0-9]{5}"
+      />
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const input = within(canvasElement).getByLabelText('Code postal') as HTMLInputElement
+    await userEvent.type(input, 'abc')
+    await userEvent.tab()
+    await waitFor(() => expect(input.matches(':user-invalid')).toBe(true))
+  },
+}
+
+export const Loading: Story = {
+  args: { loading: true, iconEnd: 'search', label: 'Recherche' },
+  render: (args) => ({
+    components: { Input },
+    setup: () => ({ args, value: ref('métro') }),
+    template: '<Input v-bind="args" v-model="value" />',
+  }),
+  play: async ({ canvasElement }) => {
+    // le spinner remplace l'icône end
+    await expect(within(canvasElement).getByRole('status')).toBeInTheDocument()
+  },
+}
+
+export const Clearable: Story = {
+  args: { clearable: true, label: 'Recherche' },
+  render: (args) => ({
+    components: { Input },
+    setup: () => ({ args, value: ref('') }),
+    template: '<Input v-bind="args" v-model="value" />',
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Recherche') as HTMLInputElement
+    await userEvent.type(input, 'chaussettes')
+    const clear = await canvas.findByRole('button', { name: 'Effacer' })
+    await userEvent.click(clear)
+    await waitFor(() => expect(input.value).toBe(''))
+    // le bouton disparaît et le focus revient au champ
+    await expect(canvas.queryByRole('button', { name: 'Effacer' })).toBeNull()
+    await expect(input).toHaveFocus()
+  },
+}
+
 export const Invalide: Story = {
   args: { invalid: true },
   play: async ({ canvasElement }) => {
@@ -51,7 +194,26 @@ export const Invalide: Story = {
 }
 
 export const Disabled: Story = {
-  args: { disabled: true },
+  args: {
+    disabled: true,
+    label: 'Email',
+    hint: 'Champ désactivé',
+    iconStart: 'mail',
+  },
+  render: (args) => ({
+    components: { Input },
+    setup: () => ({ args, value: ref('gris@partout.fr') }),
+    template: '<Input v-bind="args" v-model="value" />',
+  }),
+}
+
+export const Readonly: Story = {
+  args: { readonly: true, label: 'Référence', clearable: true },
+  render: (args) => ({
+    components: { Input },
+    setup: () => ({ args, value: ref('CMD-2026-0042') }),
+    template: '<Input v-bind="args" v-model="value" />',
+  }),
 }
 
 export const PlaceholderLong: Story = {
@@ -110,4 +272,71 @@ export const VModel: Story = {
     await userEvent.type(canvas.getByRole('textbox'), 'Bonjour')
     await expect(canvas.getByTestId('mirror')).toHaveTextContent('Bonjour')
   },
+}
+
+/** Vitrine : combinaisons de props pour voir toutes les possibilités d'un coup. */
+export const Showcase: Story = {
+  render: () => ({
+    components: { Input },
+    setup: () => ({
+      search: ref(''),
+      pseudo: ref('Xavier'),
+      bio: ref('Une phrase qui dépasse la limite'),
+      password: ref('hunter2'),
+      ref_: ref('CMD-2026-0042'),
+      onSearch: () => {},
+    }),
+    template: `
+      <div style="display: grid; gap: 24px; width: 340px">
+        <Input
+          v-model="search"
+          label="Recherche"
+          hint="Appuyez sur Entrée pour lancer la recherche."
+          icon-start="search"
+          clearable
+          placeholder="Que cherchez-vous ?"
+        />
+        <Input
+          v-model="pseudo"
+          label="Pseudo"
+          hint="Visible par les autres membres."
+          counter
+          :maxlength="20"
+        />
+        <Input
+          v-model="bio"
+          label="Titre"
+          hint="La limite est souple : le dépassement passe le champ en erreur."
+          counter
+          :maxlength="20"
+          soft-limit
+        />
+        <Input
+          v-model="password"
+          type="password"
+          label="Mot de passe"
+          icon-start="lock"
+          icon-end="visibility"
+          icon-end-label="Afficher le mot de passe"
+          @click:icon-end="onSearch"
+        />
+        <Input
+          v-model="search"
+          size="sm"
+          label="Chargement"
+          icon-end="search"
+          loading
+          placeholder="Recherche en cours…"
+        />
+        <Input v-model="ref_" label="Référence" readonly icon-start="tag" />
+        <Input
+          v-model="ref_"
+          label="Désactivé"
+          hint="Tout passe en gris, sans opacité."
+          icon-start="lock"
+          disabled
+        />
+      </div>
+    `,
+  }),
 }

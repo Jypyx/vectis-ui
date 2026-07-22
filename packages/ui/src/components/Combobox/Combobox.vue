@@ -295,10 +295,13 @@ function onToggle(event: Event) {
     transition: border-color var(--ds-duration-fast) var(--ds-ease-default);
   }
 
+  /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur
+     (aligné sur Input/Textarea) ; l'outline transparent est le filet
+     forced-colors (Windows High Contrast supprime les box-shadow) */
   .ds-combobox-control:focus-within {
     border-color: var(--ds-color-accent);
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    box-shadow: 0 0 0 1px var(--ds-color-accent);
+    outline: var(--ds-focus-ring-width) solid transparent;
   }
 
   .ds-combobox-control[data-invalid] {
@@ -306,7 +309,7 @@ function onToggle(event: Event) {
   }
 
   .ds-combobox-control[data-invalid]:focus-within {
-    outline-color: var(--ds-color-danger);
+    box-shadow: 0 0 0 1px var(--ds-color-danger);
   }
 
   .ds-combobox-control[data-disabled] {

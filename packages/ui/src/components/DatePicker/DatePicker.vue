@@ -70,15 +70,23 @@ const model = defineModel<string>({ default: '' })
     border-color: color-mix(in oklab, var(--ds-color-border-strong), var(--ds-color-text) 15%);
   }
 
+  /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur
+     (aligné sur Input/Textarea) ; l'outline transparent est le filet
+     forced-colors (Windows High Contrast supprime les box-shadow) */
   .ds-datepicker:focus-visible {
     border-color: var(--ds-color-accent);
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    box-shadow: 0 0 0 1px var(--ds-color-accent);
+    outline: var(--ds-focus-ring-width) solid transparent;
   }
 
   .ds-datepicker:user-invalid,
   .ds-datepicker[aria-invalid='true'] {
     border-color: var(--ds-color-danger);
+  }
+
+  .ds-datepicker:user-invalid:focus-visible,
+  .ds-datepicker[aria-invalid='true']:focus-visible {
+    box-shadow: 0 0 0 1px var(--ds-color-danger);
   }
 
   .ds-datepicker:disabled {

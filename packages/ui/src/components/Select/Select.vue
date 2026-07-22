@@ -93,10 +93,13 @@ defineSlots<{
     border-color: color-mix(in oklab, var(--ds-color-border-strong), var(--ds-color-text) 15%);
   }
 
+  /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur
+     (aligné sur Input/Textarea) ; l'outline transparent est le filet
+     forced-colors (Windows High Contrast supprime les box-shadow) */
   .ds-select-control:focus-visible {
     border-color: var(--ds-color-accent);
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    box-shadow: 0 0 0 1px var(--ds-color-accent);
+    outline: var(--ds-focus-ring-width) solid transparent;
   }
 
   .ds-select-control:user-invalid,
@@ -106,7 +109,7 @@ defineSlots<{
 
   .ds-select-control:user-invalid:focus-visible,
   .ds-select-control[aria-invalid='true']:focus-visible {
-    outline-color: var(--ds-color-danger);
+    box-shadow: 0 0 0 1px var(--ds-color-danger);
   }
 
   .ds-select-control:disabled {

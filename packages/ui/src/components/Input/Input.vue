@@ -1,100 +1,448 @@
 <script setup lang="ts">
 /**
- * <input> natif stylé. JS limité au pont v-model (defineModel).
- * La validation visuelle repose d'abord sur `:user-invalid` (natif, sans JS) ;
- * la prop `invalid` permet de forcer l'état (ex. validation serveur) via
- * aria-invalid. Tous les attributs natifs (type, placeholder, required,
- * minlength…) passent par fallthrough.
+ * Champ de saisie complet : label, icônes internes (cliquables), compteur,
+ * limite souple, loading, clearable — autour d'un <input> natif stylé.
+ *
+ * Racine wrapper (label + champ + hint) → `inheritAttrs: false` : les attributs
+ * natifs (type, placeholder, required, pattern…) sont reportés sur l'<input>
+ * via v-bind, SAUF class/style qui restent sur la racine (les consommateurs
+ * dimensionnent le composant entier, pas le contrôle interne — dérogation
+ * volontaire au pattern wrapper de CLAUDE.md).
+ *
+ * La validation reste native : `pattern`/`required` passent en fallthrough et
+ * `:user-invalid` fait le style d'erreur sans JS ; la prop `invalid` force
+ * l'état (validation serveur) via aria-invalid. La limite souple passe par
+ * setCustomValidity : le champ devient :invalid immédiatement mais le rouge
+ * (:user-invalid) n'apparaît qu'après interaction — même timing que le natif —
+ * et la soumission est bloquée ; la validité est exposée par l'API standard
+ * (el.validity), pas par un événement maison.
+ *
+ * JS de comportement (chaque bloc justifié) :
+ * - pont v-model (defineModel) ;
+ * - useId() pour l'association label/for et aria-describedby (SSR-safe) ;
+ * - split de $attrs (class/style → racine, reste → contrôle) ;
+ * - détection des listeners @click:icon-* dans vnode.props pour rendre
+ *   l'icône en <button> accessible (liste considérée statique — un listener
+ *   ajouté dynamiquement après montage n'est pas re-détecté, cas marginal) ;
+ * - clear + refocus (le bouton disparaît au clic, sinon le focus serait perdu) ;
+ * - watchEffect → setCustomValidity pour la limite souple (flush post : la ref
+ *   template doit être posée ; inerte côté serveur, la ref y reste nulle).
  */
+import { computed, getCurrentInstance, ref, useAttrs, useId, watchEffect } from 'vue'
+import type { StyleValue } from 'vue'
+
+import Icon from '../Icon/Icon.vue'
+import Spinner from '../Spinner/Spinner.vue'
+
 interface InputProps {
   size?: 'sm' | 'md' | 'lg'
   /** Force l'état invalide (validation serveur) — pose aria-invalid. */
   invalid?: boolean
   disabled?: boolean
+  /** Lecture seule : focusable, non modifiable ; masque le bouton d'effacement. */
+  readonly?: boolean
+  /** Libellé au-dessus du champ, associé via for/id. */
+  label?: string
+  /** Texte d'aide sous le champ, lié via aria-describedby. */
+  hint?: string
+  /** Nom Material Symbols à gauche dans le champ (le slot #start prime).
+      Décorative ; devient un bouton si un listener @click:icon-start est attaché. */
+  iconStart?: string
+  /** Idem à droite (slot #end prime). Remplacée par le spinner en loading. */
+  iconEnd?: string
+  /** Libellé accessible du bouton icône start (si cliquable). */
+  iconStartLabel?: string
+  /** Libellé accessible du bouton icône end (si cliquable). */
+  iconEndLabel?: string
+  /** Spinner à droite, à la place de iconEnd / #end. */
+  loading?: boolean
+  /** Libellé du spinner pour les lecteurs d'écran. */
+  loadingLabel?: string
+  /** Bouton croix qui vide le champ (visible si non-vide, hors disabled/readonly). */
+  clearable?: boolean
+  /** Libellé accessible du bouton d'effacement. */
+  clearLabel?: string
+  /** Limite de caractères. Par défaut : attribut natif maxlength (saisie bloquée). */
+  maxlength?: number
+  /** Limite souple : la saisie peut dépasser maxlength, le champ passe en erreur
+      (setCustomValidity → :user-invalid) au lieu de bloquer. */
+  softLimit?: boolean
+  /** Compteur de caractères (« 12/80 », ou « 12 » sans maxlength), à droite dans le champ. */
+  counter?: boolean
 }
 
-withDefaults(defineProps<InputProps>(), {
+defineOptions({ inheritAttrs: false })
+
+const props = withDefaults(defineProps<InputProps>(), {
   size: 'md',
   invalid: false,
   disabled: false,
+  readonly: false,
+  label: undefined,
+  hint: undefined,
+  iconStart: undefined,
+  iconEnd: undefined,
+  iconStartLabel: undefined,
+  iconEndLabel: undefined,
+  loading: false,
+  loadingLabel: 'Chargement…',
+  clearable: false,
+  clearLabel: 'Effacer',
+  maxlength: undefined,
+  softLimit: false,
+  counter: false,
 })
 
+const emit = defineEmits<{
+  'click:icon-start': [event: MouseEvent]
+  'click:icon-end': [event: MouseEvent]
+  clear: []
+}>()
+
+defineSlots<{
+  /** Contenu au début du champ (prime sur iconStart). */
+  start?(): unknown
+  /** Contenu à la fin du champ (prime sur iconEnd, masqué en loading). */
+  end?(): unknown
+}>()
+
 const model = defineModel<string>({ default: '' })
+
+const attrs = useAttrs()
+// class/style sur la racine ; tout le reste sur le contrôle natif
+const rootClass = computed(() => attrs.class)
+const rootStyle = computed(() => attrs.style as StyleValue)
+const restAttrs = computed(() =>
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style')),
+)
+
+const uid = useId()
+const fieldId = computed(() => (attrs.id as string | undefined) ?? uid)
+const hintId = useId()
+const describedBy = computed(() => {
+  const ids = [attrs['aria-describedby'] as string | undefined, props.hint ? hintId : undefined]
+  return ids.filter(Boolean).join(' ') || undefined
+})
+
+// Les emits déclarés sont retirés de $attrs (pas de fuite sur l'<input>) ; leur
+// présence se lit dans vnode.props (les deux graphies : template kebab / render camel).
+const vnodeProps = getCurrentInstance()?.vnode.props ?? {}
+const hasIconStartHandler = 'onClick:iconStart' in vnodeProps || 'onClick:icon-start' in vnodeProps
+const hasIconEndHandler = 'onClick:iconEnd' in vnodeProps || 'onClick:icon-end' in vnodeProps
+
+// accès optionnel : `env` n'est pas typé dans tsconfig.build.json (types: [])
+// et peut être absent chez un consommateur non-Vite — le garde-fou devient inerte
+if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
+  // garde-fou a11y : jamais de bouton sans nom accessible (repli = nom Material)
+  if (hasIconStartHandler && !props.iconStartLabel)
+    console.warn(
+      '[Input] icône start cliquable sans iconStartLabel — fournir un libellé accessible.',
+    )
+  if (hasIconEndHandler && !props.iconEndLabel)
+    console.warn('[Input] icône end cliquable sans iconEndLabel — fournir un libellé accessible.')
+}
+
+const controlEl = ref<HTMLInputElement | null>(null)
+
+const showClear = computed(
+  () => props.clearable && model.value.length > 0 && !props.disabled && !props.readonly,
+)
+
+function onClear() {
+  model.value = ''
+  emit('clear')
+  controlEl.value?.focus()
+}
+
+const counterText = computed(() =>
+  props.maxlength != null ? `${model.value.length}/${props.maxlength}` : `${model.value.length}`,
+)
+const over = computed(() => props.maxlength != null && model.value.length > props.maxlength)
+
+// Limite souple : le composant possède la custom validity quand softLimit est actif
+watchEffect(
+  () => {
+    const el = controlEl.value
+    if (!el) return
+    const overLimit =
+      props.softLimit && props.maxlength != null && model.value.length > props.maxlength
+    el.setCustomValidity(overLimit ? `Dépasse la limite de ${props.maxlength} caractères` : '')
+  },
+  { flush: 'post' },
+)
+
+// sm dans les champs sm/md, md dans les champs lg — aligné sur la taille des icônes
+const spinnerSize = computed(() => (props.size === 'lg' ? 'md' : 'sm'))
 </script>
 
 <template>
-  <input
-    v-model="model"
+  <div
     class="ds-input"
+    :class="rootClass"
+    :style="rootStyle"
     :data-size="size"
-    :disabled="disabled"
-    :aria-invalid="invalid || undefined"
-  />
+    :data-disabled="disabled ? '' : undefined"
+    :data-readonly="readonly ? '' : undefined"
+  >
+    <label v-if="label" class="ds-input-label" :for="fieldId">{{ label }}</label>
+
+    <div class="ds-input-field">
+      <slot name="start">
+        <button
+          v-if="iconStart && hasIconStartHandler"
+          type="button"
+          class="ds-input-action"
+          :aria-label="iconStartLabel ?? iconStart"
+          :disabled="disabled"
+          @click="emit('click:icon-start', $event)"
+        >
+          <Icon :name="iconStart" />
+        </button>
+        <Icon v-else-if="iconStart" :name="iconStart" />
+      </slot>
+
+      <input
+        v-bind="restAttrs"
+        :id="fieldId"
+        ref="controlEl"
+        v-model="model"
+        class="ds-input-control"
+        :maxlength="softLimit ? undefined : maxlength"
+        :disabled="disabled"
+        :readonly="readonly || undefined"
+        :aria-invalid="invalid || undefined"
+        :aria-describedby="describedBy"
+      />
+
+      <span v-if="counter" class="ds-input-counter" :data-over="over ? '' : undefined">
+        {{ counterText }}
+      </span>
+
+      <button
+        v-if="showClear"
+        type="button"
+        class="ds-input-action ds-input-clear"
+        :aria-label="clearLabel"
+        @click="onClear"
+      >
+        <!-- croix en SVG inline : doit marcher sans la police d'icônes du consommateur -->
+        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+          <path
+            d="M4 4l8 8M12 4l-8 8"
+            stroke="currentcolor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+
+      <Spinner v-if="loading" :size="spinnerSize" :label="loadingLabel" />
+      <slot v-else name="end">
+        <button
+          v-if="iconEnd && hasIconEndHandler"
+          type="button"
+          class="ds-input-action"
+          :aria-label="iconEndLabel ?? iconEnd"
+          :disabled="disabled"
+          @click="emit('click:icon-end', $event)"
+        >
+          <Icon :name="iconEnd" />
+        </button>
+        <Icon v-else-if="iconEnd" :name="iconEnd" />
+      </slot>
+    </div>
+
+    <p v-if="hint" :id="hintId" class="ds-input-hint">{{ hint }}</p>
+  </div>
 </template>
 
 <style>
 @layer ds.components {
   .ds-input {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-1);
     width: 100%;
+    font-family: var(--ds-font-family-sans);
+  }
+
+  .ds-input-label {
+    font-size: var(--ds-font-size-sm);
+    font-weight: var(--ds-font-weight-medium);
+    color: var(--ds-color-text);
+  }
+
+  .ds-input-hint {
+    margin: 0;
+    font-size: var(--ds-font-size-xs);
+    color: var(--ds-color-text-muted);
+  }
+
+  /* Le field porte bordure, fond et focus ; --_border-color est la seule
+     source de vérité de la couleur (hover/erreur/disabled la redéfinissent) */
+  .ds-input-field {
+    --_border-color: var(--ds-color-border-strong);
+
+    /* API de contexte d'Icon : taille et axe opsz selon la taille du champ */
+    --ds-icon-size: var(--ds-icon-size-md);
+    --ds-icon-opsz: 20;
+
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-2);
     height: var(--ds-control-height-md);
     padding-inline: var(--ds-space-3);
     background: var(--ds-color-surface);
     color: var(--ds-color-text);
-    border: 1px solid var(--ds-color-border-strong);
+    border: 1px solid var(--_border-color);
     border-radius: var(--ds-radius-interactive);
-    font-family: var(--ds-font-family-sans);
     font-size: var(--ds-font-size-sm);
     transition:
       border-color var(--ds-duration-fast) var(--ds-ease-default),
-      background-color var(--ds-duration-fast) var(--ds-ease-default);
+      background-color var(--ds-duration-fast) var(--ds-ease-default),
+      box-shadow var(--ds-duration-fast) var(--ds-ease-default);
   }
 
-  .ds-input::placeholder {
+  .ds-input-control {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    outline: none; /* le focus est porté par le field (focus-within) */
+  }
+
+  .ds-input-control::placeholder {
     color: var(--ds-color-text-subtle);
   }
 
-  .ds-input:hover:not(:disabled):not(:focus-visible) {
-    border-color: color-mix(in oklab, var(--ds-color-border-strong), var(--ds-color-text) 15%);
+  /* le fond autofill du navigateur est peint sur l'input interne : au moins
+     suivre le radius du champ (compromis, la couleur reste celle du navigateur) */
+  .ds-input-control:-webkit-autofill {
+    border-radius: var(--ds-radius-interactive);
   }
 
-  .ds-input:focus-visible {
-    border-color: var(--ds-color-accent);
+  .ds-input-field:hover:not(:focus-within):not(
+      :has(
+        .ds-input-control:disabled,
+        .ds-input-control:user-invalid,
+        .ds-input-control[aria-invalid='true']
+      )
+    ) {
+    --_border-color: color-mix(in oklab, var(--ds-color-border-strong), var(--ds-color-text) 15%);
+  }
+
+  /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur,
+     sans saut de layout. :focus-within (pas :focus-visible) : un champ texte
+     montre toujours son focus, souris comprise. L'outline transparent est le
+     filet forced-colors (Windows High Contrast supprime les box-shadow). */
+  .ds-input-field:focus-within {
+    --_border-color: var(--ds-color-accent);
+
+    box-shadow: 0 0 0 1px var(--_border-color);
+    outline: var(--ds-focus-ring-width) solid transparent;
+  }
+
+  /* État invalide : pseudo-classe native d'abord, prop (aria-invalid) ensuite.
+     Seule la variable change → la bordure ET le ring focus passent en rouge. */
+  .ds-input-field:has(.ds-input-control:user-invalid),
+  .ds-input-field:has(.ds-input-control[aria-invalid='true']) {
+    --_border-color: var(--ds-color-danger);
+  }
+
+  .ds-input-counter {
+    flex: none;
+    font-size: var(--ds-font-size-xs);
+    color: var(--ds-color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ds-input-counter[data-over] {
+    color: var(--ds-color-danger-text);
+  }
+
+  /* Boutons internes (effacer, icône cliquable) */
+  .ds-input-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ds-control-action-size);
+    height: var(--ds-control-action-size);
+    margin-inline: calc(var(--ds-space-1) * -1);
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--ds-color-text-muted);
+    border-radius: var(--ds-radius-full);
+    cursor: pointer;
+    flex: none;
+  }
+
+  .ds-input-action:hover:not(:disabled) {
+    background: color-mix(in oklab, currentcolor, transparent 88%);
+  }
+
+  .ds-input-action:focus-visible {
     outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline-offset: calc(var(--ds-focus-ring-offset) * -1);
   }
 
-  /* État invalide : pseudo-classe native d'abord, prop (aria-invalid) ensuite */
-  .ds-input:user-invalid,
-  .ds-input[aria-invalid='true'] {
-    border-color: var(--ds-color-danger);
+  /* Readonly : fond légèrement enfoncé, texte normal (la valeur reste lisible),
+     focus accent conservé. [data-readonly] et jamais :read-only (matche :disabled). */
+  .ds-input[data-readonly] .ds-input-field {
+    --_border-color: var(--ds-color-border);
+
+    background: var(--ds-color-surface-sunken);
   }
 
-  .ds-input:user-invalid:focus-visible,
-  .ds-input[aria-invalid='true']:focus-visible {
-    outline-color: var(--ds-color-danger);
-  }
+  /* Disabled : nuance de gris sans opacité (mêmes tokens que Checkbox/Radio).
+     Placé après les états erreur/readonly : à spécificité égale, il gagne. */
+  .ds-input[data-disabled] .ds-input-field {
+    --_border-color: var(--ds-color-border);
 
-  .ds-input:disabled {
     background: var(--ds-color-surface-muted);
-    opacity: 0.5;
+    color: var(--ds-color-text-subtle);
+    cursor: not-allowed;
+  }
+
+  .ds-input[data-disabled] .ds-input-label,
+  .ds-input[data-disabled] .ds-input-hint,
+  .ds-input[data-disabled] .ds-input-counter {
+    color: var(--ds-color-text-subtle);
+  }
+
+  .ds-input[data-disabled] .ds-input-action {
+    color: inherit;
+    cursor: not-allowed;
+  }
+
+  .ds-input-control:disabled {
     cursor: not-allowed;
   }
 
   /* --- Tailles --- */
-  .ds-input[data-size='sm'] {
+  .ds-input[data-size='sm'] .ds-input-field {
+    --ds-icon-size: var(--ds-icon-size-sm);
+
     height: var(--ds-control-height-sm);
     padding-inline: var(--ds-space-2);
     font-size: var(--ds-font-size-xs);
   }
 
-  .ds-input[data-size='lg'] {
+  .ds-input[data-size='lg'] .ds-input-field {
+    --ds-icon-size: var(--ds-icon-size-lg);
+    --ds-icon-opsz: 24;
+
     height: var(--ds-control-height-lg);
     padding-inline: var(--ds-space-4);
     font-size: var(--ds-font-size-md);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-input {
+    .ds-input-field {
       transition: none;
     }
   }
