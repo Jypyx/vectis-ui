@@ -104,6 +104,16 @@ describe('Combobox', () => {
     expect(labels()).toEqual(['Sénégal'])
   })
 
+  it('Entrée sélectionne l’unique résultat (même après un filtre sans résultat)', async () => {
+    const { getByRole, emitted } = renderCombobox()
+    const input = getByRole('combobox') as HTMLInputElement
+    // filtre vide puis affiné vers un seul résultat, sans flèche
+    await fireEvent.update(input, 'zzz')
+    await fireEvent.update(input, 'bel')
+    await fireEvent.keyDown(input, { key: 'Enter' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['be'])
+  })
+
   it('la navigation saute les options désactivées', async () => {
     const { getByRole, container } = renderCombobox()
     const input = getByRole('combobox')

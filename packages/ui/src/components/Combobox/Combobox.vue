@@ -100,7 +100,12 @@ const filtered = computed(() => {
 })
 
 watch(filtered, (list) => {
-  if (activeIndex.value >= list.length) {
+  // Panneau ouvert : garder une option active valide. On repointe sur le 1er
+  // résultat quand l'actif est hors liste OU inexistant (-1) — sinon, après un
+  // filtre passé par « aucun résultat », l'index resterait à -1 et Entrée ne
+  // sélectionnerait pas l'unique résultat suivant.
+  if (!open.value) return
+  if (activeIndex.value < 0 || activeIndex.value >= list.length) {
     activeIndex.value = list.findIndex((o) => !o.disabled)
   }
 })
