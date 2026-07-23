@@ -115,6 +115,7 @@ export const semantic = {
     'size-toast-width': dimension('22rem', "Largeur par défaut d'un toast"),
     'size-badge-h': dimension('1.25rem', 'Hauteur du Badge (pilule)'),
     'size-badge-dot': dimension('0.625rem', 'Diamètre du Badge en mode point'),
+    'size-avatar-ring': dimension('2px', 'Anneau de séparation des Avatars empilés (AvatarGroup)'),
   },
   icon: {
     'size-sm': dimension('1rem', 'Icônes 16px'),

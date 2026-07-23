@@ -39,6 +39,8 @@ export type { ToastOptions, ToastTone, ToastPlacement } from './components/Toast
 export { default as Badge } from './components/Badge/Badge.vue'
 export type { BadgeTone } from './components/Badge/Badge.vue'
 export { default as Avatar } from './components/Avatar/Avatar.vue'
+export type { AvatarSize } from './components/Avatar/Avatar.vue'
+export { default as AvatarGroup } from './components/Avatar/AvatarGroup.vue'
 export { default as Spinner } from './components/Spinner/Spinner.vue'
 export { default as Combobox } from './components/Combobox/Combobox.vue'
 export type { ComboboxOption } from './components/Combobox/Combobox.vue'

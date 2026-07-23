@@ -187,6 +187,7 @@
     --ds-control-size-toast-width: 22rem;
     --ds-control-size-badge-h: 1.25rem;
     --ds-control-size-badge-dot: 0.625rem;
+    --ds-control-size-avatar-ring: 2px;
     --ds-icon-size-sm: 1rem;
     --ds-icon-size-md: 1.25rem;
     --ds-icon-size-lg: 1.5rem;
@@ -271,6 +272,7 @@
     --ds-control-size-toast-width: 22rem;
     --ds-control-size-badge-h: 1.25rem;
     --ds-control-size-badge-dot: 0.625rem;
+    --ds-control-size-avatar-ring: 2px;
     --ds-icon-size-sm: 1rem;
     --ds-icon-size-md: 1.25rem;
     --ds-icon-size-lg: 1.5rem;
