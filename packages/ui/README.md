@@ -1,10 +1,10 @@
 ﻿# @socle/ui
 
-Design system **Vue 3 + TypeScript**, compatible **Nuxt 3 (SSR)**, construit sur les primitives natives de la plateforme : `<dialog>`, Popover API, CSS Anchor Positioning, `<details name>`, `:user-invalid`… Le JavaScript est un dernier recours, jamais un réflexe.
+Design system **Vue 3 + TypeScript**, compatible **Nuxt 3 (SSR)**, construit sur les primitives natives de la plateforme : Popover API, CSS Anchor Positioning, `<details name>`, `:user-invalid`… Le JavaScript est un dernier recours, jamais un réflexe.
 
 ## Principes
 
-- **HTML et CSS d'abord.** Les modales sont des `<dialog>` (top-layer, focus trap et Échap natifs), les menus et popovers reposent sur la Popover API (`popovertarget`, light dismiss natif) et l'anchor positioning CSS — **aucune librairie de positionnement**. Les accordéons sont des `<details name>`. Quand du JS existe, il est justifié par un commentaire dans le composant.
+- **HTML et CSS d'abord.** Les menus, tooltips et toasts reposent sur la Popover API (`popovertarget`, top-layer, light dismiss natif) et l'anchor positioning CSS — **aucune librairie de positionnement**. Les accordéons sont des `<details name>`. Quand du JS existe, il est justifié par un commentaire dans le composant.
 - **Zéro dépendance runtime** hors `vue` (peer dependency).
 - **Tout le style passe par des design tokens** (`--ds-*`), surchargeables au runtime sans rebuild.
 - **Tree-shaking réel** : ESM, un module par composant, imports nommés.
@@ -23,23 +23,16 @@ import '@socle/ui/styles.css'
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Button, Dialog, Input } from '@socle/ui'
+import { Button, Input, toast } from '@socle/ui'
 
-const open = ref(false)
 const email = ref('')
 </script>
 
 <template>
   <Input v-model="email" type="email" required placeholder="votre@email.fr" aria-label="Email" />
-  <Button @click="open = true">S'abonner</Button>
-
-  <Dialog v-model:open="open" title="Confirmer l'abonnement">
-    Un email de confirmation sera envoyé à {{ email }}.
-    <template #footer>
-      <Button tone="neutral" variant="outline" @click="open = false">Annuler</Button>
-      <Button @click="open = false">Confirmer</Button>
-    </template>
-  </Dialog>
+  <Button @click="toast({ message: `Confirmation envoyée à ${email}`, tone: 'success' })">
+    S'abonner
+  </Button>
 </template>
 ```
 
@@ -56,7 +49,7 @@ export default defineNuxtConfig({
 
 ```vue
 <script setup lang="ts">
-import { Button, Card } from '@socle/ui'
+import { Button, Badge } from '@socle/ui'
 </script>
 ```
 
@@ -125,7 +118,7 @@ Le composant `Icon` accepte trois sources :
 ```
 
 - **Décorative par défaut** (`aria-hidden`) ; la prop `label` la rend informative (`role="img"` + `aria-label`).
-- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--ds-icon-size`** et **`--ds-icon-opsz`** (c'est ce que fait la classe partagée `ds-control` — Button, Input, Textarea, Select, DatePicker, InputOTP, Chip — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `Spinner` suit le même principe (1em + `:size` en px), sans API de contexte.
+- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--ds-icon-size`** et **`--ds-icon-opsz`** (c'est ce que fait la classe partagée `ds-control` — Button, Input, Textarea, InputOTP, Chip — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `Spinner` suit le même principe (1em + `:size` en px), sans API de contexte.
 
 **La police Material Symbols Rounded n'est PAS embarquée** (zéro dépendance runtime) : c'est au consommateur de la charger, par exemple via Google Fonts :
 
@@ -144,17 +137,18 @@ Sur `Button` : les props `icon-start` / `icon-end` prennent un nom Material Symb
 
 ## Composants
 
-| Domaine     | Composants                                                                                                                                                      |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                                    |
-| Formulaires | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `DatePicker`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                  |
-| Overlays    | `Dialog`, `Popover`, `Tooltip`, `Menu` + `MenuItem`/`MenuGroup`/`MenuSeparator` (sous-menus récursifs)                                                          |
-| Structure   | `Tabs` + `TabList`/`Tab`/`TabPanel`, `Accordion` + `AccordionItem`, `Card`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature), `Pagination` |
-| Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline)       |
+| Domaine     | Composants                                                                                                                                                |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                              |
+| Formulaires | `Input`, `Textarea`, `Checkbox`, `Radio`, `Switch`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                                    |
+| Overlays    | `Tooltip`, `Menu` + `MenuItem`/`MenuGroup`/`MenuSeparator` (sous-menus récursifs)                                                                         |
+| Structure   | `Tabs` + `TabList`/`Tab`/`TabPanel`, `Accordion` + `AccordionItem`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature), `Pagination`   |
+| Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline) |
+
+> `Card`, `Select`, `Popover`, `Dialog` et `DatePicker` ont été retirés temporairement et seront réintroduits ultérieurement.
 
 Notes d'implémentation notables :
 
-- **DatePicker** s'appuie sur `<input type="date">` natif (clavier, localisation, picker mobile, validation gratuits) — le panneau calendrier est celui de la plateforme et n'est pas thémable ; compromis assumé, cohérent avec la philosophie du DS. Un calendrier custom pourra être ajouté si ce theming devient nécessaire.
 - **Slider range** superpose deux `<input type="range">` natifs (chaque curseur reste un vrai slider clavier/ARIA) ; le JS empêche seulement le croisement.
 - **DataTable responsive** : mode `stack` en pur CSS (container queries) — sous 640px de conteneur, les lignes deviennent des cartes, les en-têtes sont réinjectés par `::before + data-label`.
 - **Combobox** suit le pattern ARIA combobox/listbox (`aria-activedescendant`, le focus reste dans l'input) ; le panneau est aligné sur le contrôle via `anchor-size(width)`.
@@ -163,7 +157,7 @@ Notes d'implémentation notables :
 Conventions transverses :
 
 - Variantes pilotées par props → attributs `data-variant` / `data-tone` / `data-size` (ciblables en CSS).
-- `v-model` partout où un état existe (`v-model:open` pour Dialog/Popover/Menu).
+- `v-model` partout où un état existe (`v-model:open` pour Menu).
 - Les flottants prennent leur déclencheur en slot scopé : `<template #trigger="{ triggerProps }"><Button v-bind="triggerProps">…</Button></template>` — `popovertarget` et les attributs ARIA sont posés pour vous.
 - Formulaires : l'état d'erreur visuel vient de `:user-invalid` natif (zéro JS de validation) ; la prop `invalid` force l'état pour la validation serveur.
 
@@ -174,12 +168,12 @@ La documentation vivante (stories, page tokens, switch de thème) : `pnpm storyb
 Cible : **navigateurs modernes** — Chrome/Edge 125+, Safari 26+.
 
 - Baseline, sans compromis : Popover API, `<dialog>`, `<details name>`, `:user-invalid`, `:has()`, `color-mix()`, `@layer`, custom properties.
-- **CSS Anchor Positioning** (Popover, Tooltip, Menu et ses sous-menus) : pas encore stable sur Firefox — choix assumé de ne pas embarquer de fallback JS ; sur Firefox, les panneaux s'ouvrent (Popover API supportée) mais ne sont pas ancrés à leur déclencheur. Le reste du DS y fonctionne normalement.
+- **CSS Anchor Positioning** (Tooltip, Menu et ses sous-menus) : pas encore stable sur Firefox — choix assumé de ne pas embarquer de fallback JS ; sur Firefox, les panneaux s'ouvrent (Popover API supportée) mais ne sont pas ancrés à leur déclencheur. Le reste du DS y fonctionne normalement.
 - Progressive enhancement pur (dégradation propre si non supporté) : animations `@starting-style`/`allow-discrete`, `field-sizing: content` (Textarea `auto-grow`), `::details-content` + `interpolate-size` (animation Accordion).
 
 ## Accessibilité
 
-Navigation clavier et sémantique ARIA sur tous les composants : focus trap natif du `<dialog>`, pattern ARIA menu (roving focus, retour du focus au déclencheur), pattern ARIA tabs (activation automatique aux flèches), `role="switch"`, tooltips liés par `aria-describedby` et fermables à Échap (WCAG 1.4.13), `role="status"`/`role="alert"` selon la criticité, libellé accessible **obligatoire** sur `IconButton`. `prefers-reduced-motion` respecté partout. L'addon a11y de Storybook audite chaque story.
+Navigation clavier et sémantique ARIA sur tous les composants : pattern ARIA menu (roving focus, retour du focus au déclencheur), pattern ARIA tabs (activation automatique aux flèches), `role="switch"`, tooltips liés par `aria-describedby` et fermables à Échap (WCAG 1.4.13), `role="status"`/`role="alert"` selon la criticité, libellé accessible **obligatoire** sur `IconButton`. `prefers-reduced-motion` respecté partout. L'addon a11y de Storybook audite chaque story.
 
 ## Contribuer
 

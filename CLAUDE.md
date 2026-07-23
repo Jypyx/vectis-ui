@@ -127,4 +127,6 @@ Popover API, `<dialog>`, `<details name>`, `:user-invalid`, `color-mix()`, `:has
 
 **Le périmètre initial + les vagues 5-7 sont terminés** (37 composants + l'API `toast()`/`dismissToast` exportés). Suite naturelle : l'app de theming temps réel dans `apps/` (manipule `@socle/ui/tokens`, injecte les `--ds-*`, exporte une config), et/ou un playground Nuxt pour valider le SSR de bout en bout.
 
+- 🗑️ Retrait temporaire (décision utilisateur) : **Card, Select, Popover, DatePicker, Dialog** supprimés (dossiers + exports + docs) — Dialog et DatePicker seront refaits plus tard, le reste sur demande. Simplification volontaire : le DS vise des composants simples, pas de wrappers de primitives natives complexes. Card/DataTable stories qui affichaient un statut texte via Badge → migrées vers Chip lors du resserrement de Badge (count/icône uniquement). Tokens associés (ex. combobox, calendrier) laissés en place (inoffensifs). Popover API native toujours utilisée par Menu/Tooltip/Toast.
+
 Méthode validée avec l'utilisateur : implémenter par lots, checkpoint complet (lint/format/typecheck/test/build/build-storybook) à chaque lot, signaler explicitement tout compromis de support navigateur.
