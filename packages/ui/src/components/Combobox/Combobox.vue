@@ -125,9 +125,16 @@ const collapsed = computed(
   () => props.multiple && !focused.value && selectedValues.value.length > 0,
 )
 
-// La croix vient de la prop `clearable` d'Input (elle s'affiche dès que le champ
-// a du contenu) ; on reflète sa visibilité pour réserver la place à droite.
-const canClear = computed(() => props.clearable && !props.disabled && query.value.length > 0)
+// La croix (prop `clearable` d'Input) doit apparaître dès qu'il y a QUELQUE CHOSE
+// à effacer — une sélection (Chips) OU une recherche — pas seulement quand le
+// champ texte est non-vide. On pilote donc explicitement sa visibilité (Input
+// l'expose via `clearVisible`) et on réserve la place à droite en conséquence.
+const canClear = computed(
+  () =>
+    props.clearable &&
+    !props.disabled &&
+    (selectedValues.value.length > 0 || query.value.length > 0),
+)
 
 const optionId = (index: number) => `${optionsId}-option-${index}`
 
@@ -209,10 +216,9 @@ function removeValue(value: string) {
 }
 
 /** Événement `clear` d'Input (croix) : Input a déjà vidé la recherche (query) ;
-    en simple on vide aussi la valeur sélectionnée (en multiple, les Chips se
-    retirent un par un — la croix ne touche qu'à la recherche). */
+    on vide aussi toute la sélection (valeur en simple, Chips en multiple). */
 function onClear() {
-  if (!props.multiple) model.value = ''
+  model.value = props.multiple ? [] : ''
   typed.value = false
   activeIndex.value = -1
 }
@@ -295,6 +301,7 @@ function onKeydown(event: KeyboardEvent) {
             :invalid="invalid"
             :disabled="disabled"
             :clearable="clearable"
+            :clear-visible="canClear"
             clear-label="Effacer la sélection"
             :placeholder="selectedValues.length === 0 ? placeholder : undefined"
             :aria-activedescendant="open && activeIndex >= 0 ? optionId(activeIndex) : undefined"

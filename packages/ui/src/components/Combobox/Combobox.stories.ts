@@ -57,17 +57,24 @@ export const Default: Story = {
 export const SelectionMultiple: Story = {
   render: (args) => ({
     components: { Combobox },
-    setup: () => ({ args, value: ref<string[]>(['fr']) }),
+    setup: () => ({ args, value: ref<string[]>(['fr']), other: ref<string[]>(['ch', 'ca']) }),
     template: `
-      <div style="display: grid; gap: 8px; width: 340px">
-        <Combobox v-bind="args" multiple v-model="value" aria-label="Pays desservis" />
-        <output data-testid="mirror">{{ value.join(',') }}</output>
+      <div style="display: grid; gap: 16px; width: 340px">
+        <div style="display: grid; gap: 4px">
+          <span style="font: 12px sans-serif; color: #888">Effacement activé (défaut)</span>
+          <Combobox v-bind="args" multiple v-model="value" aria-label="Pays desservis" />
+          <output data-testid="mirror">{{ value.join(',') }}</output>
+        </div>
+        <div style="display: grid; gap: 4px">
+          <span style="font: 12px sans-serif; color: #888">Effacement désactivé (clearable=false)</span>
+          <Combobox v-bind="args" multiple :clearable="false" v-model="other" aria-label="Autres pays" />
+        </div>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const input = canvas.getByRole('combobox')
+    const input = canvas.getAllByRole('combobox')[0]!
 
     // sélection multiple : le panneau reste ouvert, des tags apparaissent
     await userEvent.click(input)
@@ -81,6 +88,13 @@ export const SelectionMultiple: Story = {
 
     // retrait via le bouton du tag
     await userEvent.click(canvas.getByRole('button', { name: 'Retirer France' }))
+    await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^$/))
+
+    // la croix (clearable) est visible dès qu'il y a une sélection et vide tout
+    await userEvent.keyboard('bel')
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('be'))
+    await userEvent.click(canvas.getByRole('button', { name: 'Effacer la sélection' }))
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^$/))
   },
 }

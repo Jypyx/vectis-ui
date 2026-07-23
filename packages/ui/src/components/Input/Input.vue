@@ -64,6 +64,9 @@ interface InputProps {
   loadingLabel?: string
   /** Bouton croix qui vide le champ (visible si non-vide, hors disabled/readonly). */
   clearable?: boolean
+  /** Force la visibilité de la croix (sinon : champ non-vide). Utile quand le
+      « contenu à effacer » vit hors du champ texte (ex. Combobox : des Chips). */
+  clearVisible?: boolean
   /** Libellé accessible du bouton d'effacement. */
   clearLabel?: string
   /** Limite de caractères. Par défaut : attribut natif maxlength (saisie bloquée). */
@@ -93,6 +96,7 @@ const props = withDefaults(defineProps<InputProps>(), {
   loading: false,
   loadingLabel: 'Chargement…',
   clearable: false,
+  clearVisible: undefined,
   clearLabel: 'Effacer',
   maxlength: undefined,
   softLimit: false,
@@ -151,7 +155,12 @@ if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
 const controlEl = ref<HTMLInputElement | null>(null)
 
 const showClear = computed(
-  () => props.clearable && model.value.length > 0 && !props.disabled && !props.readonly,
+  () =>
+    props.clearable &&
+    !props.disabled &&
+    !props.readonly &&
+    // override explicite (Combobox…) sinon défaut « champ non-vide »
+    (props.clearVisible ?? model.value.length > 0),
 )
 
 function onClear() {
