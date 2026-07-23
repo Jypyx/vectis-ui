@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
-import Badge from '../Badge/Badge.vue'
 import Button from '../Button/Button.vue'
+import Chip from '../Chip/Chip.vue'
 import Card from './Card.vue'
 
 const meta = {
@@ -30,13 +30,13 @@ export const Default: Story = {
 
 export const Complete: Story = {
   render: (args) => ({
-    components: { Card, Button, Badge },
+    components: { Card, Button, Chip },
     setup: () => ({ args }),
     template: `
       <Card v-bind="args" style="width: 360px">
         <template #header>
           Projet Alpha
-          <Badge tone="success" size="sm">Actif</Badge>
+          <Chip tone="success">Actif</Chip>
         </template>
         Dernier déploiement il y a 2 heures. 14 contributeurs, 320 commits ce mois-ci.
         <template #footer>

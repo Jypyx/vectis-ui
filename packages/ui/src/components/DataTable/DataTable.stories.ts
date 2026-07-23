@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import type { Component } from 'vue'
 
-import Badge from '../Badge/Badge.vue'
+import Chip from '../Chip/Chip.vue'
 import DataTableSfc from './DataTable.vue'
 
 // SFC générique : sa signature de fonction générique n'est pas assignable aux
@@ -72,12 +72,12 @@ export const Tri: Story = {
 
 export const CellulesPersonnalisees: Story = {
   render: (args) => ({
-    components: { DataTable, Badge },
+    components: { DataTable, Chip },
     setup: () => ({ args }),
     template: `
       <DataTable v-bind="args" style="width: 640px">
         <template #cell-status="{ value }">
-          <Badge :tone="value === 'actif' ? 'success' : 'neutral'" size="sm">{{ value }}</Badge>
+          <Chip :tone="value === 'actif' ? 'success' : 'neutral'">{{ value }}</Chip>
         </template>
       </DataTable>
     `,

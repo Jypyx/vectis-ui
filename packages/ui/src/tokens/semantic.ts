@@ -113,6 +113,8 @@ export const semantic = {
     'size-progress-circular-md': dimension('3rem', 'Diamètre du ProgressCircular md'),
     'size-progress-circular-lg': dimension('5rem', 'Diamètre du ProgressCircular lg'),
     'size-toast-width': dimension('22rem', "Largeur par défaut d'un toast"),
+    'size-badge-h': dimension('1.25rem', 'Hauteur du Badge (pilule)'),
+    'size-badge-dot': dimension('0.625rem', 'Diamètre du Badge en mode point'),
   },
   icon: {
     'size-sm': dimension('1rem', 'Icônes 16px'),
