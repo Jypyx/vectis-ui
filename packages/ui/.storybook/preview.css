@@ -1,0 +1,11 @@
+body {
+  background: var(--vectis-color-surface);
+}
+
+/* Wrapper set by the globals decorator. */
+.sb-theme-root {
+  padding: 2rem;
+  background: var(--vectis-color-surface);
+  color: var(--vectis-color-text);
+  font-family: var(--vectis-font-family-sans);
+}

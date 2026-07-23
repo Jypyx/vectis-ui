@@ -1,0 +1,323 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks'
+import * as I18nStories from './I18n.stories'
+import { en } from './en'
+import { fr } from './fr'
+
+<Meta of={I18nStories} />
+
+export const mono = { fontFamily: 'var(--vectis-font-family-mono)', fontSize: 12 }
+
+export const Keys = ({ namespace }) => (
+  <table>
+    <thead>
+      <tr>
+        <th>Key</th>
+        <th>English</th>
+        <th>French</th>
+      </tr>
+    </thead>
+    <tbody>
+      {Object.keys(en[namespace]).map((key) => (
+        <tr key={key}>
+          <td>
+            <code style={mono}>
+              {namespace}.{key}
+            </code>
+          </td>
+          <td>
+            {typeof en[namespace][key] === 'function' ? <em>function</em> : en[namespace][key]}
+          </td>
+          <td>
+            {typeof fr[namespace][key] === 'function' ? <em>function</em> : fr[namespace][key]}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)
+
+export const Namespaces = () => (
+  <ul>
+    {Object.keys(en).map((ns) => (
+      <li key={ns}>
+        <code style={mono}>{ns}</code> — {Object.keys(en[ns]).length} keys
+      </li>
+    ))}
+  </ul>
+)
+
+# Internationalization
+
+No user-facing text is hardcoded in the components: it all comes from a dictionary. The design
+system is **English by default** and ships French; any other language is added on the consumer
+side.
+
+Two things are settled separately, and that is deliberate:
+
+- the **words** (button labels, accessible names, empty states) come from the dictionary;
+- the **formats** (month and day names, date field order, 12/24 h cycle, first day of the week)
+  are derived from `Intl` using the locale tag — they are never translated by hand.
+
+Consequence: setting a locale with no matching dictionary already yields correct dates and
+times, with the labels left in English. That is a coherent degraded state, not a bug.
+
+<Canvas of={I18nStories.English} />
+
+## Switching the design system to French
+
+`setLocale` and `registerMessages` are **global configuration**: call them at module level
+(`main.ts`, a Nuxt plugin), never inside a `setup()`.
+
+```ts
+// main.ts, or plugins/vectis.ts in Nuxt
+import { fr, registerMessages, setLocale } from '@vectis/ui'
+
+registerMessages('fr', fr)
+setLocale('fr-FR')
+```
+
+French is **opt-in**: it only enters your bundle if you import it. An English-speaking project
+therefore pays nothing for it.
+
+Pass a **complete** BCP 47 tag. `Intl` accepts `'fr'`, but applies the language's default
+conventions to it — a bare tag will not give you the regional settings of `'fr-CA'`.
+
+<Canvas of={I18nStories.French} />
+
+## Adjusting a few words
+
+An override is **partial**: whatever you do not write stays unchanged. Successive calls on the
+same language accumulate.
+
+```ts
+import { registerMessages } from '@vectis/ui'
+
+registerMessages('en', {
+  dataTable: { empty: 'Nothing to show' },
+  common: { close: 'Dismiss' },
+})
+```
+
+<Canvas of={I18nStories.PartialOverride} />
+
+## Adding a language that is not shipped
+
+This is exactly the same gesture as enabling French — there are no two categories of
+dictionary. Whatever you do not write falls back to English, never to an empty string: a
+partial dictionary is usable from its very first key.
+
+```ts
+import { registerMessages, setLocale, type VectisMessagesInput } from '@vectis/ui'
+
+const de: VectisMessagesInput = {
+  common: { loading: 'Wird geladen…', close: 'Schließen' },
+  pagination: { previous: 'Vorherige Seite', next: 'Nächste Seite', page: (p) => `Seite ${p}` },
+}
+
+registerMessages('de', de)
+setLocale('de-DE')
+```
+
+Type the constant as `VectisMessagesInput` to get key autocompletion and signature checking. To
+make the compiler demand **total** coverage, type it `VectisMessages`: it will then reject any
+missing key.
+
+The dictionary is indexed by **language subtag**: `registerMessages('de', …)` covers `de-DE`,
+`de-AT` and `de-CH`, which share their words. What distinguishes them comes from `Intl`.
+
+Below, `setLocale('de-DE')` WITHOUT a German dictionary: the months and the first day of the
+week are already German (they come from `Intl`), while the labels stay English.
+
+<Canvas of={I18nStories.LanguageWithoutDictionary} />
+
+## Switching language at runtime
+
+A language selector needs nothing beyond what you have just seen. The current dictionary is a
+`shallowRef`, so `setLocale` re-renders every **already mounted** component: no remount, no
+reload, no key to bump on a provider.
+
+<Canvas of={I18nStories.LanguageSwitcher} />
+
+Register every language you offer once, at boot; the selector then only ever calls `setLocale`.
+
+```ts
+// locale.ts — module level, imported by main.ts before the app is mounted
+import { ref } from 'vue'
+import { fr, registerMessages, setLocale } from '@vectis/ui'
+
+registerMessages('fr', fr)
+
+export const appLocale = ref(localStorage.getItem('locale') ?? 'en-US')
+
+export function selectLocale(tag: string) {
+  appLocale.value = tag
+  setLocale(tag)
+  document.documentElement.lang = tag // the DS never touches <html>
+  localStorage.setItem('locale', tag)
+}
+
+selectLocale(appLocale.value)
+```
+
+```vue
+<script setup lang="ts">
+import { computed } from 'vue'
+import { appLocale, selectLocale } from './locale'
+
+import flagUS from './flags/us.svg'
+import flagFR from './flags/fr.svg'
+
+const LANGUAGES = [
+  { tag: 'en-US', flag: { src: flagUS }, label: 'English' },
+  { tag: 'fr-FR', flag: { src: flagFR }, label: 'Français' },
+]
+const current = computed(() => LANGUAGES.find((l) => l.tag === appLocale.value))
+</script>
+
+<template>
+  <VMenu match-trigger>
+    <template #trigger="{ triggerProps }">
+      <VButton
+        v-bind="triggerProps"
+        variant="outline"
+        tone="neutral"
+        :icon-start="current.flag"
+        icon-end="expand_more"
+      >
+        {{ current.label }}
+      </VButton>
+    </template>
+    <VMenuItem
+      v-for="language in LANGUAGES"
+      :key="language.tag"
+      :label="language.label"
+      :icon-start="language.flag"
+      :selected="language.tag === appLocale"
+      @select="selectLocale(language.tag)"
+    />
+  </VMenu>
+</template>
+```
+
+The design system ships no flag — its registry is monochrome Material Symbols — so the artwork is
+yours. Every icon prop takes an `IconSource`, so a plain `.svg` file goes in as `{ src }` and is
+rendered as an `<img>`, sized from the surrounding context. Use `{ component }` instead when the
+SVG must inherit `currentcolor` or react to the theme; a flag never does.
+
+Nothing has to be hidden by hand: VIcon marks any icon without a `label` decorative, so the
+endonym alone carries the accessible name — the same split as VHotkeys, where the glyph wins on
+screen and the word wins in the name. Keep the language written out next to the flag; a flag alone
+names a country, not a language.
+
+The **application owns the locale**; the design system is a sink for it, never a source — there is
+no public getter. Keep a single reference and have both your selector and `setLocale` read from
+it, or the two drift apart the first time anything else calls `setLocale`.
+
+### Module level is about _when_, not _where_
+
+"Never inside a `setup()`" constrains the moment the call runs, not the file it is written in. A
+click handler is legitimate: it only ever runs on the client, after hydration, on a deliberate
+action. What must not happen is `setLocale` running on a component's initialization path — under
+SSR that writes per-request state into per-process state, and even in a SPA it makes the locale
+depend on which components happen to be mounted.
+
+The trap is therefore the eager watcher, which does run once during server rendering:
+
+```ts
+// ✗ inside a component: watchEffect runs on the server too
+watchEffect(() => setLocale(appLocale.value))
+
+// ✓ module level, outside any component
+setLocale(appLocale.value)
+watch(appLocale, (tag) => setLocale(tag))
+```
+
+A lazy `watch` never fires during server rendering; `watchEffect` — and `watch` with
+`immediate: true` — do. That second form is also how you drive the design system from an
+application-level i18n library: watch its locale, map it to a complete BCP 47 tag, forward.
+
+Before wiring any of this into a server-rendered site serving several languages, read the limit
+below.
+
+## Parameterized messages
+
+An entry that depends on a value is a **TypeScript function**, not a string with placeholders.
+So there is no plural engine and no ICU syntax to learn: each language writes its own rule, and
+the typing of the arguments is the contract.
+
+```ts
+registerMessages('fr', {
+  dataTable: {
+    selection: (count) =>
+      `${count} élément${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`,
+    range: ({ start, end, total }) => `${start}–${end} sur ${total}`,
+  },
+})
+```
+
+## Precedence
+
+A text prop set on a component stays **authoritative** over the dictionary: a global
+translation only changes the defaults. For the accessible names of containers, the full chain
+is:
+
+`aria-labelledby` › `aria-label` › `label` prop › dictionary › English
+
+## Dates and times
+
+`VDatePicker`, `VDateInput` and `VTimePicker` keep their `locale` prop, which stays
+authoritative. Without it, they follow the global locale — one setting for the whole
+application, with the option of forcing a calendar case by case.
+
+```jsx
+<VDateInput />                  {/* global locale */}
+<VDateInput locale="ja-JP" />   {/* forced */}
+```
+
+## Known limit: one locale per process
+
+The configuration lives at module level, like the icon configuration. That is correct for
+configuration, but it means **one locale per process**: a server-rendered site serving `/en` and
+`/fr` from the same Node process cannot rely on it to vary the language per request — it must
+pass the text props explicitly.
+
+Beware of client-only too: a `setLocale` placed in a `plugins/*.client.ts` makes the server and
+client renders diverge, hence a hydration mismatch.
+
+## What is not translatable
+
+Deliberately outside the dictionary:
+
+- whatever `Intl` already derives from the locale tag (month and day names, date field order,
+  date separator, hour cycle);
+- whatever is made only of digits and universal punctuation: VBadge's `99+`, VAvatarGroup's
+  `+N`, the `N/M` counter of the fields, the `:` of a time. These components expose a slot when
+  a rephrasing is needed;
+- VHotkeys' modifier and arrow **glyphs** (`⌘ ⌃ ⌥ ⇧ ↵ ⌫ ⌦ ⇥ ↑ ↓ ← →`), which are engraved on the
+  hardware and identical in every language — its **words** are translated, see below;
+- **developer** messages (`[Component] …`), which address the integrator.
+
+## Reference
+
+<Namespaces />
+
+### `common`
+
+Words shared by several components — a single place to translate.
+
+<Keys namespace="common" />
+
+### `dataTable`
+
+<Keys namespace="dataTable" />
+
+### `hotkeys`
+
+The names of keyboard keys, and only their **words**: `Shift` becomes `Maj` and `Enter` becomes
+`Entrée` in French, because that is what a French keyboard engraves. The glyphs of the same keys
+(`⌘ ⇧ ⌥ ⌃ ↵ ⌫ ⇥ ↑ ↓ ← →`) never pass through here — they are hardware symbols, not language.
+
+Each entry is the **spoken** form. Where a glyph exists it wins on screen, never in the accessible
+name: VHotkeys displays `⌘` and announces "Command".
+
+<Keys namespace="hotkeys" />

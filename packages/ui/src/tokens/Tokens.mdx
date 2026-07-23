@@ -1,0 +1,266 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+import { tokens, flattenTokens } from './index'
+
+<Meta title="Foundations/Tokens" />
+
+export const mono = { fontFamily: 'var(--vectis-font-family-mono)', fontSize: 12 }
+
+export const Swatch = ({ cssName, label }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
+    <div
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 8,
+        background: `var(${cssName})`,
+        border: '1px solid var(--vectis-color-border)',
+      }}
+    />
+    <code style={{ ...mono, fontSize: 11 }}>{label}</code>
+  </div>
+)
+
+export const PaletteRow = ({ name }) => (
+  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '8px 0 24px' }}>
+    {flattenTokens(tokens.primitives.color[name], ['color', name]).map((f) => (
+      <Swatch key={f.cssName} cssName={f.cssName} label={f.path[f.path.length - 1]} />
+    ))}
+  </div>
+)
+
+export const Palettes = () => (
+  <>
+    {Object.keys(tokens.primitives.color)
+      .filter((name) => name !== 'white' && name !== 'black')
+      .map((name) => (
+        <div key={name}>
+          <h3 style={{ textTransform: 'capitalize' }}>{name}</h3>
+          <PaletteRow name={name} />
+        </div>
+      ))}
+  </>
+)
+
+export const TokenTable = ({ flat, preview }) => (
+  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+    <thead>
+      <tr>
+        <th style={{ textAlign: 'left', padding: 6 }}>Preview</th>
+        <th style={{ textAlign: 'left', padding: 6 }}>Custom property</th>
+        <th style={{ textAlign: 'left', padding: 6 }}>Source value</th>
+        <th style={{ textAlign: 'left', padding: 6 }}>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {flat.map((f) => (
+        <tr key={f.cssName} style={{ borderTop: '1px solid var(--vectis-color-border)' }}>
+          <td style={{ padding: 6 }}>{preview(f)}</td>
+          <td style={{ padding: 6 }}>
+            <code style={mono}>{f.cssName}</code>
+          </td>
+          <td style={{ padding: 6 }}>
+            <code style={mono}>{f.token.$value}</code>
+          </td>
+          <td style={{ padding: 6, fontSize: 13 }}>{f.token.$description ?? ''}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)
+
+# Tokens
+
+This page is **generated from the typed source** (`src/tokens/`) — it cannot diverge
+from the code. Components only consume the **semantic** tokens; the primitives are
+there only to define them.
+
+Runtime override: redefine any `--vectis-*` custom property on `:root` or on a DOM
+subtree (no rebuild). Dark mode: `data-theme="dark"`.
+
+## Primitive palettes
+
+The palettes are Tailwind CSS 4's, family for family and step for step. There are exactly
+five, and they are exactly the five a role points at: **gray** paints the surfaces, the text
+and the borders, **indigo** is the default accent, and **red**, **green** and **amber**
+carry danger, success and warning.
+
+Nothing ships that nothing paints with. A palette costs eleven custom properties in every
+page that loads the stylesheet, read or not, so a sixth colour is declared by the
+application: eleven steps under its own name, in its own unlayered stylesheet, and the role
+pointed at them. That is the whole of it — no rebuild, no release. The documentation site
+does it for its violet accent.
+
+Do not confuse `gray` — the greys this design system paints with, very slightly blue — with
+`tone="neutral"`, which is a role on a component and not a palette.
+
+<Palettes />
+
+## Semantic colours
+
+<TokenTable
+  flat={flattenTokens(tokens.semantic.color, ['color'])}
+  preview={(f) => (
+    <div
+      style={{
+        width: 28,
+        height: 28,
+        borderRadius: 6,
+        background: `var(${f.cssName})`,
+        border: '1px solid var(--vectis-color-border)',
+      }}
+    />
+  )}
+/>
+
+## Spacing
+
+<div style={{ display: 'grid', gap: 6, margin: '8px 0 24px' }}>
+  {flattenTokens(tokens.primitives.space, ['space']).map((f) => (
+    <div key={f.cssName} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <code style={{ ...mono, width: 140 }}>{f.cssName}</code>
+      <div
+        style={{ height: 12, width: `var(${f.cssName})`, background: 'var(--vectis-color-accent)' }}
+      />
+      <code style={mono}>{f.token.$value}</code>
+    </div>
+  ))}
+</div>
+
+## Typography
+
+### Primitive sizes
+
+<div style={{ display: 'grid', gap: 8, margin: '8px 0 24px' }}>
+  {flattenTokens(tokens.primitives.font.size, ['font', 'size']).map((f) => (
+    <div key={f.cssName} style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+      <code style={{ ...mono, width: 140 }}>{f.cssName}</code>
+      <span style={{ fontSize: `var(${f.cssName})`, lineHeight: 1.2 }}>
+        The quick brown fox jumps over the lazy dog
+      </span>
+      <code style={mono}>{f.token.$value}</code>
+    </div>
+  ))}
+</div>
+
+### Weights
+
+<div style={{ display: 'grid', gap: 8, margin: '8px 0 24px' }}>
+  {flattenTokens(tokens.primitives.font.weight, ['font', 'weight']).map((f) => (
+    <div key={f.cssName} style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+      <code style={{ ...mono, width: 140 }}>{f.cssName}</code>
+      <span style={{ fontWeight: `var(${f.cssName})` }}>
+        The quick brown fox jumps over the lazy dog
+      </span>
+      <code style={mono}>{f.token.$value}</code>
+    </div>
+  ))}
+</div>
+
+### Families, leadings and letter spacings
+
+<TokenTable
+  flat={[
+    ...flattenTokens(tokens.primitives.font.family, ['font', 'family']),
+    ...flattenTokens(tokens.primitives.font.leading, ['font', 'leading']),
+    ...flattenTokens(tokens.primitives.font.tracking, ['font', 'tracking']),
+  ]}
+  preview={() => null}
+/>
+
+### Semantic scale (text roles)
+
+Every role is a complete recipe (`--vectis-text-<role>-size/weight/leading[/tracking]`),
+consumed by the **VTypography** component and by the components' CSS. The `control` role
+is technical (the labels of interactive controls): its size comes from the control size
+scale, not from a token of its own.
+
+<div style={{ display: 'grid', gap: 12, margin: '8px 0 24px' }}>
+  {Object.entries(tokens.semantic.text)
+    .filter(([, node]) => node.$value === undefined)
+    .map(([role]) => (
+      <div key={role} style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <code style={{ ...mono, width: 140, flexShrink: 0 }}>{role}</code>
+        <span
+          style={{
+            fontFamily: `var(--vectis-text-family${
+              role === 'code'
+                ? '-code'
+                : role === 'display' || role.startsWith('heading')
+                  ? '-heading'
+                  : ''
+            })`,
+            fontSize: `var(--vectis-text-${role}-size, var(--vectis-font-size-sm))`,
+            fontWeight: `var(--vectis-text-${role}-weight)`,
+            lineHeight: `var(--vectis-text-${role}-leading)`,
+            letterSpacing: `var(--vectis-text-${role}-tracking, normal)`,
+          }}
+        >
+          The quick brown fox jumps over the lazy dog
+        </span>
+      </div>
+    ))}
+</div>
+
+Semantic families: `--vectis-text-family` (running text), `--vectis-text-family-heading`
+(the `display` and `heading-1…4` roles) and `--vectis-text-family-code` (code content).
+The heading one points at the running one out of the box, so giving titles a typeface of
+their own is a matter of redefining that single property.
+
+## Radii
+
+<div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', margin: '8px 0 24px' }}>
+  {flattenTokens(tokens.primitives.radius, ['radius']).map((f) => (
+    <div key={f.cssName} style={{ textAlign: 'center' }}>
+      <div
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: `var(${f.cssName})`,
+          background: 'var(--vectis-color-accent-surface)',
+          border: '1px solid var(--vectis-color-accent-border)',
+        }}
+      />
+      <code style={{ ...mono, fontSize: 11 }}>{f.path[f.path.length - 1]}</code>
+    </div>
+  ))}
+</div>
+
+Semantics: <code style={mono}>interactive · surface · overlay · pill</code>
+
+## Shadows
+
+<div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', margin: '8px 0 24px' }}>
+  {flattenTokens(tokens.primitives.shadow, ['shadow']).map((f) => (
+    <div key={f.cssName} style={{ textAlign: 'center' }}>
+      <div
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: 12,
+          background: 'var(--vectis-color-surface-raised)',
+          boxShadow: `var(${f.cssName})`,
+        }}
+      />
+      <code style={{ ...mono, fontSize: 11 }}>{f.path[f.path.length - 1]}</code>
+    </div>
+  ))}
+</div>
+
+## Motion
+
+Three roles say how long a change takes. They are what a `transition` asks for, and they
+are the same in both themes.
+
+<TokenTable flat={flattenTokens(tokens.semantic.duration, ['duration'])} preview={() => null} />
+
+Each points at a step of the scale below. A long looping animation — a spinner, a
+skeleton's wave — names a step directly instead: "one second" is the whole point of such a
+loop, and no role would say it better.
+
+<TokenTable
+  flat={[
+    ...flattenTokens(tokens.primitives.duration, ['duration']),
+    ...flattenTokens(tokens.primitives.ease, ['ease']),
+  ]}
+  preview={() => null}
+/>
