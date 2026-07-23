@@ -49,6 +49,8 @@ interface ChipProps {
   dismissible?: boolean
   /** Icône du bouton de retrait : nom Material Symbols ou URL. */
   dismissIcon?: string
+  /** Libellé accessible du bouton de retrait. */
+  dismissLabel?: string
   disabled?: boolean
 }
 
@@ -67,6 +69,7 @@ const props = withDefaults(defineProps<ChipProps>(), {
   iconEnd: undefined,
   dismissible: false,
   dismissIcon: 'close',
+  dismissLabel: 'Retirer',
   disabled: false,
 })
 
@@ -157,7 +160,7 @@ const iconOnly = computed(
       v-if="dismissible"
       type="button"
       class="ds-chip-remove"
-      aria-label="Retirer"
+      :aria-label="dismissLabel"
       :disabled="disabled"
       @click="$emit('dismiss')"
     >

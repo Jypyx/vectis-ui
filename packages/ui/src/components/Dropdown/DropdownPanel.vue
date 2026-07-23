@@ -30,6 +30,12 @@ interface DropdownPanelProps {
   size?: 'sm' | 'md'
   /** Posé UNIQUEMENT par la racine : les sous-panneaux héritent via CSS. */
   compact?: boolean
+  /** `menu` (défaut) ou `listbox` (mode combobox : pas de roving focus, popover manual). */
+  role?: 'menu' | 'listbox'
+  /** listbox : aria-multiselectable. */
+  multiselectable?: boolean
+  /** listbox : ancre statique (dashed-ident) → position-anchor + anchor-size. */
+  anchor?: string
 }
 
 const props = withDefaults(defineProps<DropdownPanelProps>(), {
@@ -37,6 +43,9 @@ const props = withDefaults(defineProps<DropdownPanelProps>(), {
   submenu: false,
   size: undefined,
   compact: false,
+  role: 'menu',
+  multiselectable: false,
+  anchor: undefined,
 })
 
 const emit = defineEmits<{
@@ -111,7 +120,14 @@ function focusFirst() {
   items()[0]?.focus()
 }
 
+// listbox : le clavier est piloté par le champ externe (le focus n'est jamais
+// dans le panneau) — on évite que le clic sur une option sorte le focus du champ.
+function onMousedown(event: MouseEvent) {
+  if (props.role === 'listbox') event.preventDefault()
+}
+
 function onKeydown(event: KeyboardEvent) {
+  if (props.role === 'listbox') return
   const panel = panelEl.value
   // seul le panneau qui contient DIRECTEMENT la cible traite l'événement
   if (!panel || (event.target as Element).closest('[role="menu"]') !== panel) return
@@ -153,15 +169,20 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
   <div
     :id="id"
     ref="panelEl"
-    popover
-    role="menu"
+    :popover="role === 'listbox' ? 'manual' : 'auto'"
+    :role="role"
     class="ds-dropdown ds-floating"
     :data-placement="placement"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
+    :data-role="role === 'listbox' ? 'listbox' : undefined"
+    :data-anchored="anchor ? '' : undefined"
+    :style="anchor ? { '--_anchor': anchor } : undefined"
+    :aria-multiselectable="role === 'listbox' && multiselectable ? 'true' : undefined"
     @beforetoggle="syncShown"
     @toggle="onToggle"
     @keydown="onKeydown"
+    @mousedown="onMousedown"
   >
     <slot />
   </div>
@@ -213,6 +234,19 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
   /* aligne le 1er sous-item sur l'item parent (compense padding + bordure) */
   .ds-dropdown .ds-dropdown[data-placement='right-start'] {
     margin-block-start: calc(-1 * (var(--ds-space-1) + 1px));
+  }
+
+  /* Mode listbox (Combobox) : largeur calée sur le contrôle ancré, liste
+     défilante ; ancrage statique via la prop `anchor` du consommateur. */
+  .ds-dropdown[data-role='listbox'] {
+    min-width: anchor-size(width);
+    max-width: none;
+    max-height: var(--ds-control-size-listbox-max-block);
+    overflow: auto;
+  }
+
+  .ds-dropdown[data-anchored] {
+    position-anchor: var(--_anchor);
   }
 }
 </style>

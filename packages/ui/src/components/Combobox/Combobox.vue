@@ -1,14 +1,24 @@
 <script setup lang="ts">
-import { computed, ref, useId, watch } from 'vue'
+import { computed, ref, useAttrs, useId, watch } from 'vue'
+import type { StyleValue } from 'vue'
+
+import Chip from '../Chip/Chip.vue'
+import Dropdown from '../Dropdown/Dropdown.vue'
+import DropdownItem from '../Dropdown/DropdownItem.vue'
+import Input from '../Input/Input.vue'
 
 /**
- * Combobox avec recherche et sélection multiple. Il n'existe pas de primitive
- * native stylable pour ce besoin (<datalist> n'est ni stylable ni multiple) :
- * le JS implémente le pattern ARIA combobox/listbox — filtrage, navigation
- * par aria-activedescendant (le focus DOM reste dans l'input), sélection
- * simple ou multiple. Le panneau est un popover (top-layer) ancré en pur CSS
- * (anchor-name statique, même technique que Tooltip ; largeur alignée sur le
- * contrôle via anchor-size()).
+ * Combobox avec recherche et sélection multiple, composé des briques du DS :
+ * `Input` (champ de recherche `role="combobox"`), `Dropdown` en mode `listbox`
+ * (panneau popover + options `role="option"`, ancré en pur CSS), et `Chip` pour
+ * les valeurs en mode multiple.
+ *
+ * Le JS implémente le pattern ARIA combobox/listbox que le natif ne couvre pas
+ * (pas de `<datalist>` stylable/multiple) : filtrage, navigation par
+ * `aria-activedescendant` (le focus DOM reste dans l'input — d'où le mode
+ * `listbox` du Dropdown, qui désactive son roving focus « menu »), sélection
+ * simple ou multiple. Ouverture pilotée par `v-model:open`, fermeture au
+ * `focusout` (le champ vit hors du panneau `popover="manual"`).
  */
 export interface ComboboxOption {
   value: string
@@ -18,7 +28,7 @@ export interface ComboboxOption {
 
 interface ComboboxProps {
   options: ComboboxOption[]
-  /** Sélection multiple — le v-model devient string[] et des tags s'affichent. */
+  /** Sélection multiple — le v-model devient string[] et des Chips s'affichent. */
   multiple?: boolean
   placeholder?: string
   disabled?: boolean
@@ -37,14 +47,24 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
 
 const model = defineModel<string | string[]>({ default: '' })
 
+// Racine wrapper : class/style restent sur la racine, le reste (aria-label…)
+// est reporté sur l'Input pour nommer le role="combobox".
+defineOptions({ inheritAttrs: false })
+const attrs = useAttrs()
+const rootClass = computed(() => attrs.class)
+const rootStyle = computed(() => attrs.style as StyleValue)
+const forwardedAttrs = computed(() =>
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style')),
+)
+
 const rootEl = ref<HTMLElement | null>(null)
-const inputEl = ref<HTMLInputElement | null>(null)
-const panelEl = ref<HTMLElement | null>(null)
-const listboxId = useId()
+const inputRef = ref<InstanceType<typeof Input> | null>(null)
+const optionsId = useId()
 
 const open = ref(false)
 const query = ref('')
 const activeIndex = ref(-1)
+const focused = ref(false)
 
 const selectedValues = computed<string[]>(() => {
   if (props.multiple) return Array.isArray(model.value) ? model.value : []
@@ -69,17 +89,22 @@ watch(filtered, (list) => {
   }
 })
 
-// mode simple : hors édition, l'input affiche le libellé sélectionné
+// mode simple : hors édition, l'input affiche le libellé sélectionné (texte)
 if (!props.multiple && typeof model.value === 'string' && model.value) {
   query.value = labelOf(model.value)
 }
 
-const optionId = (index: number) => `${listboxId}-option-${index}`
+// multiple avec sélection et champ non focus : replier le champ de saisie
+// (il reste dans le DOM, focusable) pour ne pas laisser d'espace vide.
+const collapsed = computed(
+  () => props.multiple && !focused.value && selectedValues.value.length > 0,
+)
+
+const optionId = (index: number) => `${optionsId}-option-${index}`
 
 function openPanel() {
   if (props.disabled || open.value) return
   open.value = true
-  panelEl.value?.showPopover()
   const list = filtered.value
   const selectedIdx = list.findIndex((o) => !o.disabled && selectedValues.value.includes(o.value))
   activeIndex.value = selectedIdx >= 0 ? selectedIdx : list.findIndex((o) => !o.disabled)
@@ -88,16 +113,22 @@ function openPanel() {
 function closePanel() {
   if (!open.value) return
   open.value = false
-  panelEl.value?.hidePopover()
   activeIndex.value = -1
   query.value =
     !props.multiple && typeof model.value === 'string' && model.value ? labelOf(model.value) : ''
 }
 
-/** Fermeture quand le focus sort du composant (panneau compris). */
+/** Fermeture quand le focus sort du composant (panneau compris, descendant DOM). */
 function onFocusout(event: FocusEvent) {
   const next = event.relatedTarget as Node | null
   if (!next || !rootEl.value?.contains(next)) closePanel()
+}
+
+/** Clic n'importe où dans le contrôle : focus le champ et ouvre le panneau. */
+function onControlClick() {
+  if (props.disabled) return
+  inputRef.value?.focus()
+  openPanel()
 }
 
 function select(option: ComboboxOption) {
@@ -108,7 +139,7 @@ function select(option: ComboboxOption) {
       ? current.filter((v) => v !== option.value)
       : [...current, option.value]
     query.value = ''
-    inputEl.value?.focus()
+    inputRef.value?.focus()
   } else {
     model.value = option.value
     closePanel()
@@ -118,7 +149,7 @@ function select(option: ComboboxOption) {
 function removeValue(value: string) {
   if (!props.multiple) return
   model.value = selectedValues.value.filter((v) => v !== value)
-  inputEl.value?.focus()
+  inputRef.value?.focus()
 }
 
 function move(delta: number) {
@@ -165,247 +196,103 @@ function onKeydown(event: KeyboardEvent) {
       break
   }
 }
-
-function onToggle(event: Event) {
-  // resynchronise si le popover est fermé par une voie externe
-  if ((event as ToggleEvent).newState === 'closed' && open.value) {
-    open.value = false
-    activeIndex.value = -1
-  }
-}
 </script>
 
 <template>
-  <div ref="rootEl" class="ds-combobox" @focusout="onFocusout">
-    <div
-      class="ds-combobox-control"
-      :data-invalid="invalid ? '' : undefined"
-      :data-disabled="disabled ? '' : undefined"
-      @click="
-        () => {
-          inputEl?.focus()
-          openPanel()
-        }
-      "
-    >
-      <template v-if="multiple">
-        <span v-for="value in selectedValues" :key="value" class="ds-combobox-tag">
-          {{ labelOf(value) }}
-          <button
-            type="button"
-            class="ds-combobox-tag-remove"
-            :aria-label="`Retirer ${labelOf(value)}`"
-            :disabled="disabled"
-            @click.stop="removeValue(value)"
-          >
-            <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
-              <path
-                d="M4 4l8 8M12 4l-8 8"
-                stroke="currentcolor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
-          </button>
-        </span>
-      </template>
-      <input
-        ref="inputEl"
-        v-model="query"
-        type="text"
-        role="combobox"
-        class="ds-combobox-input"
-        :aria-expanded="open"
-        :aria-controls="listboxId"
-        aria-autocomplete="list"
-        :aria-activedescendant="open && activeIndex >= 0 ? optionId(activeIndex) : undefined"
-        :aria-invalid="invalid || undefined"
-        :placeholder="selectedValues.length === 0 ? placeholder : undefined"
-        :disabled="disabled"
-        @input="openPanel()"
-        @keydown="onKeydown"
-      />
-    </div>
-
-    <div
-      :id="listboxId"
-      ref="panelEl"
-      popover="manual"
+  <div
+    ref="rootEl"
+    class="ds-combobox"
+    :class="rootClass"
+    :style="rootStyle"
+    :data-multiple="multiple ? '' : undefined"
+    :data-collapsed="collapsed ? '' : undefined"
+    @focusout="onFocusout"
+  >
+    <Dropdown
+      v-model:open="open"
       role="listbox"
-      class="ds-combobox-panel ds-floating"
-      data-placement="bottom-start"
-      :aria-multiselectable="multiple || undefined"
-      @toggle="onToggle"
-      @mousedown.prevent
+      anchor="--ds-combobox-anchor"
+      :multiselectable="multiple"
+      placement="bottom-start"
     >
-      <div
+      <template #trigger="{ triggerProps }">
+        <div class="ds-combobox-control" @click="onControlClick">
+          <Input
+            ref="inputRef"
+            v-model="query"
+            v-bind="{ ...triggerProps, ...forwardedAttrs }"
+            :invalid="invalid"
+            :disabled="disabled"
+            :placeholder="selectedValues.length === 0 ? placeholder : undefined"
+            :aria-activedescendant="open && activeIndex >= 0 ? optionId(activeIndex) : undefined"
+            @input="openPanel"
+            @keydown="onKeydown"
+            @focus="focused = true"
+            @blur="focused = false"
+          >
+            <template v-if="multiple" #start>
+              <Chip
+                v-for="value in selectedValues"
+                :key="value"
+                tone="accent"
+                size="xs"
+                dismissible
+                :dismiss-label="`Retirer ${labelOf(value)}`"
+                :disabled="disabled"
+                @dismiss="removeValue(value)"
+                >{{ labelOf(value) }}</Chip
+              >
+            </template>
+          </Input>
+        </div>
+      </template>
+
+      <DropdownItem
         v-for="(option, index) in filtered"
         :id="optionId(index)"
         :key="option.value"
-        role="option"
-        class="ds-combobox-option"
-        :aria-selected="selectedValues.includes(option.value)"
-        :aria-disabled="option.disabled || undefined"
-        :data-active="index === activeIndex ? '' : undefined"
-        @click="select(option)"
+        :active="index === activeIndex"
+        :selected="selectedValues.includes(option.value)"
+        :disabled="option.disabled"
+        @select="select(option)"
         @pointermove="!option.disabled && (activeIndex = index)"
+        >{{ option.label }}</DropdownItem
       >
-        <span class="ds-combobox-option-label">{{ option.label }}</span>
-        <svg
-          v-if="selectedValues.includes(option.value)"
-          viewBox="0 0 16 16"
-          width="14"
-          height="14"
-          aria-hidden="true"
-        >
-          <path
-            d="m3 8.5 3.5 3.5L13 4.5"
-            fill="none"
-            stroke="currentcolor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </div>
       <div v-if="filtered.length === 0" class="ds-combobox-empty">{{ emptyText }}</div>
-    </div>
+    </Dropdown>
   </div>
 </template>
 
 <style>
 @layer ds.components {
   .ds-combobox {
+    /* confine l'ancre à cette instance (posée sur la racine, ancêtre commun du
+       contrôle et du panneau — même en top-layer le panneau reste descendant) */
+    anchor-scope: --ds-combobox-anchor;
     width: 100%;
     font-family: var(--ds-font-family-sans);
   }
 
   .ds-combobox-control {
     anchor-name: --ds-combobox-anchor;
-    display: flex;
-    align-items: center;
+    display: block;
+  }
+
+  /* multiple : le champ accueille les Chips (retour à la ligne, hauteur auto) */
+  .ds-combobox[data-multiple] .ds-input-field {
     flex-wrap: wrap;
-    gap: var(--ds-space-1);
+    height: auto;
     min-height: var(--ds-control-height-md);
-    padding: var(--ds-space-1) var(--ds-space-2);
-    background: var(--ds-color-surface);
-    border: 1px solid var(--ds-color-border-strong);
-    border-radius: var(--ds-radius-interactive);
-    cursor: text;
-    transition: border-color var(--ds-duration-fast) var(--ds-ease-default);
+    padding-block: var(--ds-space-1);
   }
 
-  /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur
-     (aligné sur Input/Textarea) ; l'outline transparent est le filet
-     forced-colors (Windows High Contrast supprime les box-shadow) */
-  .ds-combobox-control:focus-within {
-    border-color: var(--ds-color-accent);
-    box-shadow: 0 0 0 1px var(--ds-color-accent);
-    outline: var(--ds-focus-ring-width) solid transparent;
-  }
-
-  .ds-combobox-control[data-invalid] {
-    border-color: var(--ds-color-danger);
-  }
-
-  .ds-combobox-control[data-invalid]:focus-within {
-    box-shadow: 0 0 0 1px var(--ds-color-danger);
-  }
-
-  .ds-combobox-control[data-disabled] {
-    background: var(--ds-color-surface-muted);
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .ds-combobox-input {
-    flex: 1;
-    min-width: var(--ds-control-size-combobox-input-min);
-    border: none;
-    background: transparent;
-    color: var(--ds-color-text);
-    font-size: var(--ds-font-size-sm);
-    outline: none;
-  }
-
-  .ds-combobox-input::placeholder {
-    color: var(--ds-color-text-subtle);
-  }
-
-  .ds-combobox-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ds-space-1);
-    padding: var(--ds-space-1) var(--ds-space-2);
-    background: var(--ds-color-accent-surface);
-    color: var(--ds-color-accent-text);
-    border-radius: var(--ds-radius-pill);
-    font-size: var(--ds-font-size-xs);
-    font-weight: var(--ds-font-weight-medium);
-    line-height: var(--ds-font-leading-none);
-  }
-
-  .ds-combobox-tag-remove {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--ds-control-action-size-xs);
-    height: var(--ds-control-action-size-xs);
-    border: none;
-    background: transparent;
-    color: inherit;
-    border-radius: var(--ds-radius-full);
-    cursor: pointer;
-  }
-
-  .ds-combobox-tag-remove:hover {
-    background: color-mix(in oklab, currentcolor, transparent 82%);
-  }
-
-  .ds-combobox-tag-remove:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: calc(var(--ds-focus-ring-offset) * -1);
-  }
-
-  .ds-combobox-panel {
-    position-anchor: --ds-combobox-anchor;
-    /* aligné sur la largeur du contrôle — pur CSS */
-    min-width: anchor-size(width);
-    max-height: var(--ds-control-size-listbox-max-block);
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-space-1);
-    padding: var(--ds-space-1);
-    background: var(--ds-color-surface-overlay);
-    color: var(--ds-color-text);
-    border: 1px solid var(--ds-color-border);
-    border-radius: var(--ds-radius-overlay);
-    box-shadow: var(--ds-shadow-4);
-  }
-
-  .ds-combobox-option {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ds-space-2);
-    padding: var(--ds-space-2) var(--ds-space-3);
-    border-radius: var(--ds-radius-sm);
-    font-size: var(--ds-font-size-sm);
-    cursor: pointer;
-  }
-
-  .ds-combobox-option[data-active] {
-    background: var(--ds-color-surface-muted);
-  }
-
-  .ds-combobox-option[aria-selected='true'] {
-    color: var(--ds-color-accent-text);
-  }
-
-  .ds-combobox-option[aria-disabled='true'] {
-    color: var(--ds-color-text-subtle);
-    cursor: not-allowed;
+  /* multiple hors édition (avec sélection) : replier le champ de saisie —
+     il reste focusable/tabbable, on supprime juste l'espace vide après les Chips */
+  .ds-combobox[data-collapsed] .ds-input-control {
+    flex: 0 0 0;
+    width: 0;
+    min-width: 0;
+    padding: 0;
   }
 
   .ds-combobox-empty {

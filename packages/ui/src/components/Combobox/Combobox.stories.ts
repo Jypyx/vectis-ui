@@ -121,3 +121,59 @@ export const Disabled: Story = {
     `,
   }),
 }
+
+/**
+ * Hors focus, en mode multiple, le champ de saisie est replié : seuls les Chips
+ * restent, sans espace vide. Au focus, le champ de recherche réapparaît.
+ */
+export const RepliAuBlur: Story = {
+  render: (args) => ({
+    components: { Combobox },
+    setup: () => ({ args, value: ref<string[]>(['fr', 'be', 'ch']) }),
+    template: `
+      <div style="display: grid; gap: 8px; width: 340px">
+        <button type="button">Élément voisin (pour retirer le focus)</button>
+        <Combobox v-bind="args" multiple v-model="value" aria-label="Pays desservis" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('combobox') as HTMLInputElement
+
+    // au focus, le champ de recherche est développé (largeur non nulle)
+    await userEvent.click(input)
+    await waitFor(() => expect(input.offsetWidth).toBeGreaterThan(0))
+
+    // hors focus, le champ est replié (largeur nulle), seuls les Chips subsistent
+    await userEvent.click(canvas.getByRole('button', { name: /voisin/ }))
+    await waitFor(() => expect(input.offsetWidth).toBe(0))
+    await expect(canvas.getByRole('button', { name: 'Retirer France' })).toBeVisible()
+  },
+}
+
+/**
+ * Deux Combobox côte à côte : chaque panneau s'ancre à SON contrôle grâce à
+ * `anchor-scope` (le nom d'ancre est confiné à chaque instance).
+ */
+export const DeuxComboboxes: Story = {
+  render: (args) => ({
+    components: { Combobox },
+    setup: () => ({ args, a: ref(''), b: ref('') }),
+    template: `
+      <div style="display: flex; gap: 16px; width: 640px">
+        <Combobox v-bind="args" v-model="a" aria-label="Pays A" />
+        <Combobox v-bind="args" v-model="b" aria-label="Pays B" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const [first, second] = canvas.getAllByRole('combobox')
+
+    await userEvent.click(first!)
+    await waitFor(() => expect(canvas.getByRole('option', { name: 'France' })).toBeVisible())
+    // le second reste fermé et indépendant
+    await expect(second!).toHaveAttribute('aria-expanded', 'false')
+  },
+}

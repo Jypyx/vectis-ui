@@ -141,7 +141,7 @@ Sur `Button` : les props `icon-start` / `icon-end` prennent un nom Material Symb
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                              |
 | Formulaires | `Input`, `Textarea`, `Checkbox`, `Radio`, `Switch`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                                    |
-| Overlays    | `Tooltip`, `Dropdown` + `DropdownItem`/`DropdownGroup`/`DropdownSeparator` (sous-menus récursifs)                                                          |
+| Overlays    | `Tooltip`, `Dropdown` + `DropdownItem`/`DropdownGroup`/`DropdownSeparator` (sous-menus récursifs)                                                         |
 | Structure   | `Tabs` + `TabList`/`Tab`/`TabPanel`, `Accordion` + `AccordionItem`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature), `Pagination`   |
 | Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline) |
 

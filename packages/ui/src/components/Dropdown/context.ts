@@ -4,9 +4,15 @@ import type { InjectionKey } from 'vue'
  * Contrat racine→descendants : la sélection d'un item (même dans un sous-menu)
  * ferme TOUTE la pile. Fermer le panneau racine suffit : les sous-panneaux
  * sont ses descendants DOM, le popover les ferme en cascade.
+ *
+ * `role` : `menu` (défaut, pattern actions/sous-menus, roving focus) ou
+ * `listbox` (pattern combobox — items en `role="option"`, le focus reste dans
+ * un champ externe qui pilote la surbrillance via aria-activedescendant). Les
+ * DropdownItem en dérivent leur rôle sans prop drilling.
  */
 export interface DropdownContext {
   closeAll: () => void
+  role: 'menu' | 'listbox'
 }
 
 export const dropdownKey: InjectionKey<DropdownContext> = Symbol('ds-dropdown')

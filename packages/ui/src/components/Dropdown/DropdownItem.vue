@@ -7,11 +7,16 @@ import DropdownPanel from './DropdownPanel.vue'
 import { dropdownKey, SUBMENU_HOVER_DELAY } from './context'
 
 /**
- * Item de menu (role="menuitem"). tabindex="-1" : le focus est piloté par le
- * panneau (roving focus). La sélection émet `select` puis ferme toute la pile
- * via le contexte injecté. Avec `href`, l'item est un <a> (item de navigation,
- * permis par ARIA) ; un <a> n'a pas de `disabled` natif → pattern « lien
- * inerte » de Button (href retiré + aria-disabled).
+ * Item de panneau déroulant. En `menu` (défaut du Dropdown) : role="menuitem",
+ * le focus est piloté par le panneau (roving focus), la sélection ferme toute
+ * la pile via le contexte injecté. En `listbox` (mode combobox, hérité du
+ * contexte) : role="option" + aria-selected, le focus RESTE dans le champ
+ * externe — la surbrillance vient de la prop `active` (data-active), et la
+ * sélection ne ferme pas le panneau (le consommateur décide via v-model:open).
+ *
+ * Avec `href`, l'item est un <a> (item de navigation, permis par ARIA) ; un <a>
+ * n'a pas de `disabled` natif → pattern « lien inerte » de Button (href retiré
+ * + aria-disabled).
  *
  * Avec le slot #submenu, l'item devient l'invocateur `popovertarget` d'un
  * panneau imbriqué (= son ancre implicite ; le panneau est un descendant DOM
@@ -34,8 +39,10 @@ interface DropdownItemProps {
   iconStart?: string
   /** Icône après le libellé (même détection). Le slot #end prime. */
   iconEnd?: string
-  /** État sélectionné (couleurs accent + aria-current). */
+  /** État sélectionné (menu : accent + aria-current ; listbox : aria-selected). */
   selected?: boolean
+  /** listbox : option active (surbrillance) — posée par le champ combobox. */
+  active?: boolean
   /** Item destructif (couleur danger). */
   danger?: boolean
   disabled?: boolean
@@ -53,6 +60,7 @@ const props = withDefaults(defineProps<DropdownItemProps>(), {
   iconStart: undefined,
   iconEnd: undefined,
   selected: false,
+  active: false,
   danger: false,
   disabled: false,
   href: undefined,
@@ -83,11 +91,13 @@ const tag = computed(() =>
 )
 
 const dropdown = inject(dropdownKey, null)
+const isListbox = computed(() => dropdown?.role === 'listbox')
 
 function onClick() {
   if (props.disabled || hasSubmenu.value) return
   emit('select')
-  dropdown?.closeAll()
+  // listbox : le Combobox décide de fermer (simple) ou non (multiple) via v-model:open.
+  if (!isListbox.value) dropdown?.closeAll()
 }
 
 // ——— Sous-menu ———
@@ -123,6 +133,8 @@ function clearTimers() {
 
 function onPointerEnter() {
   if (props.disabled) return
+  // listbox : le focus reste dans le champ combobox (surbrillance par `active`)
+  if (isListbox.value) return
   // le survol pilote aussi le focus : hover et roving focus restent
   // synchronisés, une seule surbrillance à la fois (pattern menu)
   itemEl.value?.focus({ preventScroll: true })
@@ -148,16 +160,18 @@ onBeforeUnmount(clearTimers)
     :is="tag"
     ref="itemEl"
     v-bind="$attrs"
-    role="menuitem"
+    :role="isListbox ? 'option' : 'menuitem'"
     tabindex="-1"
     class="ds-dropdown-item"
     :type="tag === 'button' ? 'button' : undefined"
-    :disabled="tag === 'button' ? disabled : undefined"
+    :disabled="tag === 'button' && !isListbox ? disabled : undefined"
     :href="tag === 'a' && !disabled ? href : undefined"
-    :aria-disabled="tag === 'a' && disabled ? 'true' : undefined"
+    :aria-disabled="(isListbox && disabled) || (tag === 'a' && disabled) ? 'true' : undefined"
     :data-danger="danger ? '' : undefined"
-    :data-selected="selected ? '' : undefined"
-    :aria-current="selected ? 'true' : undefined"
+    :data-selected="!isListbox && selected ? '' : undefined"
+    :data-active="active ? '' : undefined"
+    :aria-selected="isListbox ? String(selected) : undefined"
+    :aria-current="!isListbox && selected ? 'true' : undefined"
     :aria-haspopup="hasSubmenu ? 'menu' : undefined"
     :aria-expanded="hasSubmenu ? subOpen : undefined"
     :aria-controls="hasSubmenu ? subId : undefined"
@@ -294,6 +308,16 @@ onBeforeUnmount(clearTimers)
   .ds-dropdown-item:disabled .ds-dropdown-item-sublabel,
   .ds-dropdown-item[aria-disabled='true'] .ds-dropdown-item-sublabel {
     color: inherit;
+  }
+
+  /* Mode listbox (Combobox) : le focus reste dans le champ, la surbrillance vient
+     de data-active (posé par le champ) ; l'option sélectionnée est teintée accent. */
+  .ds-dropdown[data-role='listbox'] .ds-dropdown-item[data-active] {
+    background: var(--ds-color-surface-muted);
+  }
+
+  .ds-dropdown[data-role='listbox'] .ds-dropdown-item[aria-selected='true'] {
+    color: var(--ds-color-accent-text);
   }
 }
 </style>

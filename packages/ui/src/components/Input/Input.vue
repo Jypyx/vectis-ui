@@ -176,6 +176,13 @@ watchEffect(
   },
   { flush: 'post' },
 )
+
+// Le contrôle interne est masqué par le wrapper : exposer focus()/el pour les
+// composants qui le composent (ex. Combobox, refocus après action).
+defineExpose({
+  focus: (options?: FocusOptions) => controlEl.value?.focus(options),
+  el: controlEl,
+})
 </script>
 
 <template>
