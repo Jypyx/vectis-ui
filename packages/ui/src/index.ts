@@ -20,3 +20,12 @@
  * exported.
  */
 import './styles/index.css'
+
+// Internationalization — pure TS modules, so no effect on the bundled CSS order
+// (same status as the `setIconResolver` block below). First because this is
+// configuration for the whole DS, not for a component. `fr` is opt-in: not
+// importing it is enough to prune it from the bundle.
+export { setLocale, registerMessages } from './i18n/state'
+export { en } from './i18n/en'
+export { fr } from './i18n/fr'
+export type { VectisMessages, VectisMessagesInput } from './i18n/types'
