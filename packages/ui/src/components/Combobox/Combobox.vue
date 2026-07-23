@@ -30,6 +30,10 @@ interface ComboboxProps {
   options: ComboboxOption[]
   /** Sélection multiple — le v-model devient string[] et des Chips s'affichent. */
   multiple?: boolean
+  /** Hauteur du champ : sm (32px) ou md (40px). */
+  size?: 'sm' | 'md'
+  /** Hauteur réduite de 4px (comme les autres contrôles). */
+  compact?: boolean
   placeholder?: string
   disabled?: boolean
   invalid?: boolean
@@ -39,11 +43,17 @@ interface ComboboxProps {
 
 const props = withDefaults(defineProps<ComboboxProps>(), {
   multiple: false,
+  size: 'sm',
+  compact: false,
   placeholder: undefined,
   disabled: false,
   invalid: false,
   emptyText: 'Aucun résultat',
 })
+
+// Les Chips sont une taille sous le champ : chip + padding-block = hauteur du
+// champ (sm→chips xs, md→chips sm), garantissant un alignement pile.
+const chipSize = computed(() => (props.size === 'md' ? 'sm' : 'xs'))
 
 const model = defineModel<string | string[]>({ default: '' })
 
@@ -65,6 +75,11 @@ const open = ref(false)
 const query = ref('')
 const activeIndex = ref(-1)
 const focused = ref(false)
+// `query` sert à la fois d'affichage (libellé sélectionné en simple) et de
+// recherche. `typed` distingue les deux : tant qu'il est faux, `query` n'est
+// PAS un filtre (toute la liste est proposée à la réouverture) — il ne passe
+// vrai qu'à la frappe de l'utilisateur.
+const typed = ref(false)
 
 const selectedValues = computed<string[]>(() => {
   if (props.multiple) return Array.isArray(model.value) ? model.value : []
@@ -79,7 +94,8 @@ function labelOf(value: string) {
 const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 
 const filtered = computed(() => {
-  const q = normalize(query.value.trim())
+  // pas de frappe → pas de filtre (le libellé affiché ne restreint pas la liste)
+  const q = typed.value ? normalize(query.value.trim()) : ''
   return q ? props.options.filter((o) => normalize(o.label).includes(q)) : props.options
 })
 
@@ -114,6 +130,7 @@ function closePanel() {
   if (!open.value) return
   open.value = false
   activeIndex.value = -1
+  typed.value = false
   query.value =
     !props.multiple && typeof model.value === 'string' && model.value ? labelOf(model.value) : ''
 }
@@ -124,15 +141,35 @@ function onFocusout(event: FocusEvent) {
   if (!next || !rootEl.value?.contains(next)) closePanel()
 }
 
+/** Frappe utilisateur : active le filtre et ouvre le panneau. */
+function onInput() {
+  typed.value = true
+  openPanel()
+}
+
+/** Focus : en simple, sélectionne le libellé affiché pour que la frappe le
+    remplace (la liste complète reste proposée tant qu'on n'a pas tapé). */
+function selectQuery() {
+  if (!props.multiple && query.value) inputRef.value?.select()
+}
+
+function onFocus() {
+  focused.value = true
+  selectQuery()
+}
+
 /** Clic n'importe où dans le contrôle : focus le champ et ouvre le panneau. */
 function onControlClick() {
   if (props.disabled) return
   inputRef.value?.focus()
   openPanel()
+  // après le placement du curseur par le clic (souris) : re-sélectionne le libellé
+  selectQuery()
 }
 
 function select(option: ComboboxOption) {
   if (option.disabled) return
+  typed.value = false // la sélection n'est pas une recherche
   if (props.multiple) {
     const current = selectedValues.value
     model.value = current.includes(option.value)
@@ -142,7 +179,13 @@ function select(option: ComboboxOption) {
     inputRef.value?.focus()
   } else {
     model.value = option.value
-    closePanel()
+    // Le libellé vient de l'option choisie, PAS d'une relecture de model.value :
+    // avec defineModel + v-model parent, `model.value` lu juste après l'écriture
+    // renvoie encore l'ancienne valeur (le libellé afficherait la sélection
+    // précédente). On ferme sans re-dériver la query.
+    query.value = option.label
+    open.value = false
+    activeIndex.value = -1
   }
 }
 
@@ -213,6 +256,8 @@ function onKeydown(event: KeyboardEvent) {
       role="listbox"
       anchor="--ds-combobox-anchor"
       :multiselectable="multiple"
+      :size="size"
+      :compact="compact"
       placement="bottom-start"
     >
       <template #trigger="{ triggerProps }">
@@ -221,13 +266,15 @@ function onKeydown(event: KeyboardEvent) {
             ref="inputRef"
             v-model="query"
             v-bind="{ ...triggerProps, ...forwardedAttrs }"
+            :size="size"
+            :compact="compact"
             :invalid="invalid"
             :disabled="disabled"
             :placeholder="selectedValues.length === 0 ? placeholder : undefined"
             :aria-activedescendant="open && activeIndex >= 0 ? optionId(activeIndex) : undefined"
-            @input="openPanel"
+            @input="onInput"
             @keydown="onKeydown"
-            @focus="focused = true"
+            @focus="onFocus"
             @blur="focused = false"
           >
             <template v-if="multiple" #start>
@@ -235,7 +282,8 @@ function onKeydown(event: KeyboardEvent) {
                 v-for="value in selectedValues"
                 :key="value"
                 tone="accent"
-                size="xs"
+                :size="chipSize"
+                :compact="compact"
                 dismissible
                 :dismiss-label="`Retirer ${labelOf(value)}`"
                 :disabled="disabled"
@@ -278,28 +326,48 @@ function onKeydown(event: KeyboardEvent) {
     display: block;
   }
 
-  /* multiple : le champ accueille les Chips (retour à la ligne, hauteur auto) */
+  /* multiple : le champ accueille les Chips (retour à la ligne). Hauteur calée
+     sur le contrôle (`--_control-height`, size/compact via .ds-control d'Input).
+     Les Chips font une taille en dessous → chip + padding-block (2×space-1 =
+     space-2) = --_control-height, pile. L'input est forcé à la MÊME hauteur que
+     les Chips (`calc(--_control-height - space-2)`) au lieu du `100%` hérité
+     d'Input : sinon sa hauteur intrinsèque dépasse les Chips et fait grandir le
+     champ (34px au lieu de 32). Résultat : champ = --_control-height constant,
+     input jamais plus haut que les Chips, aucun saut au focus. */
   .ds-combobox[data-multiple] .ds-input-field {
+    position: relative; /* contient l'input replié sorti du flux */
     flex-wrap: wrap;
     height: auto;
-    min-height: var(--ds-control-height-md);
+    min-height: var(--_control-height);
     padding-block: var(--ds-space-1);
   }
 
-  /* multiple hors édition (avec sélection) : replier le champ de saisie —
-     il reste focusable/tabbable, on supprime juste l'espace vide après les Chips */
+  .ds-combobox[data-multiple] .ds-input-control {
+    height: calc(var(--_control-height) - var(--ds-space-2));
+  }
+
+  /* hors édition (avec sélection) : sortir l'input du flux (position absolue,
+     taille nulle) — sinon, même à largeur nulle, il déborde sur une seconde
+     ligne sous les Chips et laisse un vide. Il reste dans le DOM et focusable :
+     onControlClick / Tab le réaffichent (data-collapsed retombe au focus). */
   .ds-combobox[data-collapsed] .ds-input-control {
-    flex: 0 0 0;
+    position: absolute;
     width: 0;
-    min-width: 0;
+    height: 0;
     padding: 0;
   }
 
+  /* Message « aucun résultat » : même gabarit qu'une option (hauteur héritée du
+     panneau via --_dropdown-item-*, padding d'item) */
   .ds-combobox-empty {
-    padding: var(--ds-space-3);
+    display: flex;
+    align-items: center;
+    min-height: calc(
+      var(--_dropdown-item-min-h, var(--ds-control-height-sm)) - var(--_dropdown-item-delta, 0px)
+    );
+    padding: var(--ds-space-1) var(--ds-space-3);
     font-size: var(--ds-font-size-sm);
     color: var(--ds-color-text-muted);
-    text-align: center;
   }
 }
 </style>

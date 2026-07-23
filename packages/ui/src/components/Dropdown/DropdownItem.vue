@@ -194,6 +194,8 @@ onBeforeUnmount(clearTimers)
     </span>
     <!-- un item à sous-menu signale l'ouverture latérale : chevron, jamais iconEnd -->
     <Icon v-if="hasSubmenu" name="chevron_right" class="ds-dropdown-item-chevron" />
+    <!-- listbox (Combobox) : coche à droite quand l'option est sélectionnée -->
+    <Icon v-else-if="isListbox && selected" name="check" class="ds-dropdown-item-check" />
     <slot v-else name="end">
       <Icon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
     </slot>

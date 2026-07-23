@@ -18,6 +18,10 @@ const PAYS = [
 const meta = {
   title: 'Composants/Combobox',
   component: Combobox,
+  argTypes: {
+    size: { control: 'inline-radio', options: ['sm', 'md'] },
+    compact: { control: 'boolean' },
+  },
   args: { options: PAYS, placeholder: 'Choisir un pays…' },
 } satisfies Meta<typeof Combobox>
 
@@ -117,6 +121,35 @@ export const Disabled: Story = {
     template: `
       <div style="width: 300px">
         <Combobox v-bind="args" v-model="value" disabled aria-label="Pays" />
+      </div>
+    `,
+  }),
+}
+
+/**
+ * Tailles `sm` (32px, défaut) et `md` (40px), combinables avec `compact` (-4px).
+ * En multiple, les Chips descendent d'un cran (sm→xs, md→sm) et s'alignent pile
+ * sur la hauteur du champ.
+ */
+export const Tailles: Story = {
+  render: (args) => ({
+    components: { Combobox },
+    setup: () => ({
+      args,
+      variants: [
+        { label: 'sm', props: { size: 'sm' } },
+        { label: 'sm compact', props: { size: 'sm', compact: true } },
+        { label: 'md', props: { size: 'md' } },
+        { label: 'md compact', props: { size: 'md', compact: true } },
+      ],
+      value: ['fr', 'be'],
+    }),
+    template: `
+      <div style="display: grid; gap: 16px; width: 340px">
+        <div v-for="v in variants" :key="v.label" style="display: grid; gap: 4px">
+          <span style="font: 12px sans-serif; color: #888">{{ v.label }}</span>
+          <Combobox v-bind="{ ...args, ...v.props }" multiple :model-value="value" aria-label="Pays" />
+        </div>
       </div>
     `,
   }),

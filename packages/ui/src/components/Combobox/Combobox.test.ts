@@ -1,5 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
+import { defineComponent, nextTick, ref } from 'vue'
 
 import Combobox from './Combobox.vue'
 
@@ -51,6 +52,58 @@ describe('Combobox', () => {
     expect(input.value).toBe('Belgique')
   })
 
+  it('sélection simple par clic : l’input affiche le libellé choisi (parent v-model)', async () => {
+    // Régression : avec defineModel + v-model parent, relire model.value juste
+    // après l'avoir écrit renvoie l'ancienne valeur — le libellé affiché doit
+    // venir de l'option choisie, pas d'une re-dérivation depuis le modèle.
+    const Harness = defineComponent({
+      components: { Combobox },
+      setup: () => ({ options: OPTIONS, value: ref('') }),
+      template: `<Combobox :options="options" v-model="value" aria-label="Pays" />
+                 <output>{{ value }}</output>`,
+    })
+    const { getByRole, container } = render(Harness)
+    const input = getByRole('combobox') as HTMLInputElement
+    const optionByText = (text: string) =>
+      [...container.querySelectorAll<HTMLElement>('[role="option"]')].find((o) =>
+        o.textContent?.includes(text),
+      )!
+
+    // 1er choix : Belgique
+    await fireEvent.update(input, 'bel')
+    await nextTick()
+    await fireEvent.click(optionByText('Belgique'))
+    await nextTick()
+    expect(container.querySelector('output')?.textContent).toBe('be')
+    expect(input.value).toBe('Belgique')
+
+    // 2e choix : rouvre, cherche France, clique → l'input ne doit PAS rester sur « Belgique »
+    await fireEvent.click(input)
+    await fireEvent.update(input, 'France')
+    await nextTick()
+    await fireEvent.click(optionByText('France'))
+    await nextTick()
+    expect(container.querySelector('output')?.textContent).toBe('fr')
+    expect(input.value).toBe('France')
+  })
+
+  it('rouvrir en simple ne filtre pas sur la valeur choisie (liste complète, filtre à la frappe)', async () => {
+    const { getByRole, container } = renderCombobox({ modelValue: 'fr' })
+    const input = getByRole('combobox') as HTMLInputElement
+    expect(input.value).toBe('France') // le libellé reste affiché
+    const labels = () =>
+      [...container.querySelectorAll('[role="option"] .ds-dropdown-item-label')].map((o) =>
+        o.textContent?.trim(),
+      )
+
+    // la valeur sélectionnée n'est PAS un filtre : toute la liste est proposée
+    expect(labels()).toEqual(['France', 'Belgique', 'Sénégal', 'Monaco'])
+
+    // le filtre ne s'active qu'à la frappe
+    await fireEvent.update(input, 'séné')
+    expect(labels()).toEqual(['Sénégal'])
+  })
+
   it('la navigation saute les options désactivées', async () => {
     const { getByRole, container } = renderCombobox()
     const input = getByRole('combobox')
@@ -76,5 +129,16 @@ describe('Combobox', () => {
     await rerender({ modelValue: ['be'] })
     await fireEvent.keyDown(getByRole('combobox'), { key: 'Backspace' })
     expect(emitted('update:modelValue').at(-1)).toEqual([[]])
+  })
+
+  it('affiche une coche à droite sur l’option sélectionnée', () => {
+    const { container } = renderCombobox({ multiple: true, modelValue: ['fr'] })
+    const optionByText = (text: string) =>
+      [...container.querySelectorAll<HTMLElement>('[role="option"]')].find((o) =>
+        o.textContent?.includes(text),
+      )
+    // France est sélectionnée → coche ; Belgique non → pas de coche
+    expect(optionByText('France')?.querySelector('.ds-dropdown-item-check')).toBeTruthy()
+    expect(optionByText('Belgique')?.querySelector('.ds-dropdown-item-check')).toBeFalsy()
   })
 })
