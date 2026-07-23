@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue'
 
-import { menuKey } from './context'
-import type { MenuPanelPlacement } from './context'
+import { dropdownKey } from './context'
+import type { DropdownPanelPlacement } from './context'
 
 /**
- * Panneau popover INTERNE (non exporté), partagé par Menu (panneau racine) et
- * MenuItem (sous-menus). Popover API : light dismiss natif, l'invocateur
+ * Panneau popover INTERNE (non exporté), partagé par Dropdown (panneau racine)
+ * et DropdownItem (sous-menus). Popover API : light dismiss natif, l'invocateur
  * `popovertarget` est l'ancre implicite, positionnement pur CSS (floating.css).
  *
  * JS justifié : le pattern ARIA menu n'est pas couvert par le natif —
@@ -17,10 +17,10 @@ import type { MenuPanelPlacement } from './context'
  *   retour du focus à l'item parent) ; Tab ferme toute la pile — un menu ne
  *   se traverse pas au Tab.
  */
-interface MenuPanelProps {
+interface DropdownPanelProps {
   /** Id du panneau, posé par le propriétaire (cible des `popovertarget`). */
   id: string
-  placement?: MenuPanelPlacement
+  placement?: DropdownPanelPlacement
   /** Panneau de sous-menu : active Flèche gauche, pas de focus automatique. */
   submenu?: boolean
   /**
@@ -32,7 +32,7 @@ interface MenuPanelProps {
   compact?: boolean
 }
 
-const props = withDefaults(defineProps<MenuPanelProps>(), {
+const props = withDefaults(defineProps<DropdownPanelProps>(), {
   placement: 'bottom-start',
   submenu: false,
   size: undefined,
@@ -45,7 +45,7 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  /** Les MenuItem / MenuGroup / MenuSeparator. */
+  /** Les DropdownItem / DropdownGroup / DropdownSeparator. */
   default(): unknown
 }>()
 
@@ -58,7 +58,7 @@ const panelEl = ref<HTMLElement | null>(null)
  */
 const shown = ref(false)
 
-const menu = inject(menuKey, null)
+const dropdown = inject(dropdownKey, null)
 
 function syncShown(event: Event) {
   shown.value = (event as ToggleEvent).newState === 'open'
@@ -103,7 +103,7 @@ function hide() {
 }
 
 function closeAll() {
-  if (menu) menu.closeAll()
+  if (dropdown) dropdown.closeAll()
   else hide()
 }
 
@@ -124,7 +124,7 @@ function onKeydown(event: KeyboardEvent) {
     // Échap ne ferme QUE ce niveau. preventDefault : le close request natif
     // fermerait le popover sans rendre le focus à l'item parent (et notre
     // hide() l'aurait déjà fermé). Racine : le retour de focus au déclencheur
-    // est géré par le onToggle de Menu.
+    // est géré par le onToggle de Dropdown.
     event.preventDefault()
     hide()
     if (props.submenu) invoker()?.focus()
@@ -155,7 +155,7 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     ref="panelEl"
     popover
     role="menu"
-    class="ds-menu ds-floating"
+    class="ds-dropdown ds-floating"
     :data-placement="placement"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
@@ -169,9 +169,9 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
 
 <style>
 @layer ds.components {
-  .ds-menu {
+  .ds-dropdown {
     /* API de contexte d'Icon : icônes d'items 20px/opsz 20 pour les deux
-       tailles (sm et md) — constante, donc déclarable sur .ds-menu nu sans
+       tailles (sm et md) — constante, donc déclarable sur .ds-dropdown nu sans
        piège d'héritage */
     --ds-icon-size: var(--ds-icon-size-md);
     --ds-icon-opsz: 20;
@@ -192,26 +192,26 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
   /*
    * Taille/densité des items : les variables sont posées sur le panneau
    * RACINE seulement (seul à rendre data-size/data-compact) et héritées par
-   * les sous-panneaux, descendants DOM — ne jamais les déclarer sur .ds-menu
-   * nu, chaque panneau imbriqué les réinitialiserait. Les fallbacks (valeurs
-   * sm) vivent côté MenuItem.
+   * les sous-panneaux, descendants DOM — ne jamais les déclarer sur
+   * .ds-dropdown nu, chaque panneau imbriqué les réinitialiserait. Les
+   * fallbacks (valeurs sm) vivent côté DropdownItem.
    */
-  .ds-menu[data-size='sm'] {
-    --_menu-item-min-h: var(--ds-control-height-sm);
+  .ds-dropdown[data-size='sm'] {
+    --_dropdown-item-min-h: var(--ds-control-height-sm);
   }
 
-  .ds-menu[data-size='md'] {
-    --_menu-item-min-h: var(--ds-control-height-md);
-    --_menu-item-pad-i: var(--ds-space-4);
+  .ds-dropdown[data-size='md'] {
+    --_dropdown-item-min-h: var(--ds-control-height-md);
+    --_dropdown-item-pad-i: var(--ds-space-4);
   }
 
   /* Compact : hauteur minimale -4px, padding/typo/icônes inchangés */
-  .ds-menu[data-compact] {
-    --_menu-item-delta: var(--ds-space-1);
+  .ds-dropdown[data-compact] {
+    --_dropdown-item-delta: var(--ds-space-1);
   }
 
   /* aligne le 1er sous-item sur l'item parent (compense padding + bordure) */
-  .ds-menu .ds-menu[data-placement='right-start'] {
+  .ds-dropdown .ds-dropdown[data-placement='right-start'] {
     margin-block-start: calc(-1 * (var(--ds-space-1) + 1px));
   }
 }

@@ -1,11 +1,11 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as MenuStories from './Menu.stories'
+import * as DropdownStories from './Dropdown.stories'
 
-<Meta of={MenuStories} />
+<Meta of={DropdownStories} />
 
-# Menu
+# Dropdown
 
-Menu d'actions (pattern ARIA menu) construit sur la **Popover API** et le **CSS Anchor
+Menu déroulant d'actions (pattern ARIA menu) construit sur la **Popover API** et le **CSS Anchor
 Positioning** : le déclencheur invoque le panneau par `popovertarget` (ancre implicite,
 light dismiss natif, top-layer sans z-index), aucune dépendance externe. Le JavaScript se
 limite au roving focus, à la navigation clavier et à l'orchestration des sous-menus.
@@ -13,23 +13,23 @@ limite au roving focus, à la navigation clavier et à l'orchestration des sous-
 Le déclencheur est fourni par un slot scopé — poser `triggerProps` tel quel :
 
 ```vue
-<Menu>
+<Dropdown>
   <template #trigger="{ triggerProps }">
     <Button v-bind="triggerProps">Actions</Button>
   </template>
-  <MenuItem label="Renommer" icon-start="edit" @select="rename" />
-  <MenuSeparator />
-  <MenuItem label="Supprimer" icon-start="delete" danger @select="remove" />
-</Menu>
+  <DropdownItem label="Renommer" icon-start="edit" @select="rename" />
+  <DropdownSeparator />
+  <DropdownItem label="Supprimer" icon-start="delete" danger @select="remove" />
+</Dropdown>
 ```
 
-<Canvas of={MenuStories.Default} />
+<Canvas of={DropdownStories.Default} />
 
-<Controls of={MenuStories.Default} />
+<Controls of={DropdownStories.Default} />
 
 ## Items
 
-`MenuItem` : `label` + `sublabel` (description secondaire), `icon-start` / `icon-end` (nom
+`DropdownItem` : `label` + `sublabel` (description secondaire), `icon-start` / `icon-end` (nom
 [Material Symbols](https://fonts.google.com/icons) ou URL d'image, détection automatique),
 et les slots `#default` / `#sublabel` / `#start` / `#end` qui priment. La sélection d'un
 item émet `select` et **ferme le menu** (focus rendu au déclencheur).
@@ -37,20 +37,20 @@ item émet `select` et **ferme le menu** (focus rendu au déclencheur).
 > La police Material Symbols Rounded n'est pas embarquée dans la librairie : elle est
 > chargée par l'application consommatrice (voir le README).
 
-<Canvas of={MenuStories.SousLabels} />
+<Canvas of={DropdownStories.SousLabels} />
 
 `selected` marque l'item courant (`aria-current="true"`, fond accent) — pour les menus de
 tri ou de choix persistant :
 
-<Canvas of={MenuStories.Selection} />
+<Canvas of={DropdownStories.Selection} />
 
 ## Groupes et séparateurs
 
-`MenuGroup` (`role="group"` nommé par `aria-labelledby`, libellé non focusable) structure
-les longues listes ; `MenuSeparator` rend un `<hr>` (rôle implicite). Le roving focus
+`DropdownGroup` (`role="group"` nommé par `aria-labelledby`, libellé non focusable) structure
+les longues listes ; `DropdownSeparator` rend un `<hr>` (rôle implicite). Le roving focus
 traverse les groupes, les libellés sont sautés.
 
-<Canvas of={MenuStories.Groupes} />
+<Canvas of={DropdownStories.Groupes} />
 
 ## Items de navigation
 
@@ -58,11 +58,11 @@ traverse les groupes, les libellés sont sautés.
 attributs `target`/`rel` en fallthrough). Un lien `disabled` devient inerte (`href` retiré,
 `aria-disabled="true"`) et le roving focus le saute.
 
-<Canvas of={MenuStories.ItemsDeNavigation} />
+<Canvas of={DropdownStories.ItemsDeNavigation} />
 
 ## Sous-menus
 
-Le slot `#submenu` d'un `MenuItem` rend un panneau imbriqué **récursif** : l'item devient
+Le slot `#submenu` d'un `DropdownItem` rend un panneau imbriqué **récursif** : l'item devient
 l'invocateur du sous-panneau (un chevron remplace `icon-end` ; `href` et `select` sont
 ignorés). La pile de popovers native gère le light dismiss et la fermeture en cascade —
 ouvrir une branche ferme la branche sœur.
@@ -72,13 +72,13 @@ survol après un **délai d'intention** de 150 ms. Flèche gauche et Échap refe
 niveau** à la fois (focus rendu à l'item parent) ; sur le panneau racine, Échap ferme le
 menu.
 
-<Canvas of={MenuStories.SousMenus} />
+<Canvas of={DropdownStories.SousMenus} />
 
 Au survol, l'item survolé prend le focus (hover et roving focus restent synchronisés :
 une seule surbrillance à la fois) ; l'item parent d'un sous-menu ouvert garde son fond via
 `aria-expanded` :
 
-<Canvas of={MenuStories.SousMenusSurvol} />
+<Canvas of={DropdownStories.SousMenusSurvol} />
 
 ## Tailles
 
@@ -86,7 +86,7 @@ Deux tailles de panneau (`sm` — défaut — items 32px min, `md` items 40px mi
 retire 4px. La taille est posée sur le panneau **racine** et héritée par tous les
 sous-menus.
 
-<Canvas of={MenuStories.Tailles} />
+<Canvas of={DropdownStories.Tailles} />
 
 ## Placement
 
@@ -95,7 +95,7 @@ sous-menus.
 (`position-try-fallbacks`) quand la place manque. Les sous-menus s'ouvrent en
 `right-start`. Les libellés sont bornés par la largeur maximale du panneau :
 
-<Canvas of={MenuStories.LibellesLongs} />
+<Canvas of={DropdownStories.LibellesLongs} />
 
 ## Accessibilité
 

@@ -1,11 +1,11 @@
 /*
- * Plomberie commune des éléments flottants (Popover, Tooltip, Dropdown Menu).
+ * Plomberie commune des éléments flottants (Popover, Tooltip, Dropdown).
  *
  * 100 % CSS Anchor Positioning — AUCUN fallback JS : le projet cible les
  * navigateurs modernes (Chrome/Edge 125+, Safari 26+ ; Firefox pas encore
  * stable — choix assumé, voir CLAUDE.md/README).
  *
- * L'ancre est soit implicite (invocateur `popovertarget` → Popover, Menu),
+ * L'ancre est soit implicite (invocateur `popovertarget` → Popover, Dropdown),
  * soit un `anchor-name` statique posé par le composant (Tooltip).
  * `position-try-fallbacks` retourne le panneau quand la place manque.
  */
@@ -33,7 +33,7 @@
   }
 
   /*
-   * Garde-fou : un panneau qui pose son propre `display` (ex. .ds-menu en
+   * Garde-fou : un panneau qui pose son propre `display` (ex. .ds-dropdown en
    * flex) écraserait le `[popover] { display: none }` du style UA — les
    * styles auteur battent toujours l'UA, layers ou non. Le panneau fermé
    * resterait alors en layout (opacity: 0), invisible mais cliquable
@@ -81,7 +81,7 @@
   }
 
   /*
-   * Placements latéraux alignés (sous-menus du Menu). Axe inversé par rapport
+   * Placements latéraux alignés (sous-menus du Dropdown). Axe inversé par rapport
    * aux placements top/bottom : l'écart avec l'ancre est INLINE, l'alignement
    * est BLOCK — on restaure donc la marge inline annulée par les règles
    * génériques `$='-start'`/`$='-end'` ci-dessus (même spécificité, l'ordre

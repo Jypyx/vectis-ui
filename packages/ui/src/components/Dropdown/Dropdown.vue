@@ -1,27 +1,31 @@
 <script setup lang="ts">
 import { onMounted, provide, ref, useId, watch } from 'vue'
 
-import MenuPanel from './MenuPanel.vue'
-import { menuKey } from './context'
-import type { MenuPlacement } from './context'
+import DropdownPanel from './DropdownPanel.vue'
+import { dropdownKey } from './context'
+import type { DropdownPlacement } from './context'
 
 /**
- * Menu d'actions (pattern ARIA menu) : Popover API (`popovertarget` → liaison
- * déclarative, light dismiss natif ; l'invocateur est l'ancre implicite du
- * panneau, positionné en pur CSS). Le comportement clavier vit dans MenuPanel
- * (interne, partagé avec les sous-menus). JS justifié ici : pont v-model ↔ API
- * impérative du popover, focus du premier item à l'ouverture, retour du focus
- * au déclencheur à la fermeture.
+ * Menu déroulant d'actions (pattern ARIA menu) : Popover API (`popovertarget` →
+ * liaison déclarative, light dismiss natif ; l'invocateur est l'ancre implicite
+ * du panneau, positionné en pur CSS). Le comportement clavier vit dans
+ * DropdownPanel (interne, partagé avec les sous-menus). JS justifié ici : pont
+ * v-model ↔ API impérative du popover, focus du premier item à l'ouverture,
+ * retour du focus au déclencheur à la fermeture.
  */
-interface MenuProps {
-  placement?: MenuPlacement
+interface DropdownProps {
+  placement?: DropdownPlacement
   /** Hauteur minimale des items : 32px (sm) ou 40px (md) ; héritée par les sous-menus. */
   size?: 'sm' | 'md'
   /** Hauteur minimale des items réduite de 4px ; héritée par les sous-menus. */
   compact?: boolean
 }
 
-withDefaults(defineProps<MenuProps>(), { placement: 'bottom-start', size: 'sm', compact: false })
+withDefaults(defineProps<DropdownProps>(), {
+  placement: 'bottom-start',
+  size: 'sm',
+  compact: false,
+})
 
 const open = defineModel<boolean>('open', { default: false })
 
@@ -35,20 +39,20 @@ defineSlots<{
       'aria-controls': string
     }
   }): unknown
-  /** Les <MenuItem> / <MenuGroup> / <MenuSeparator> */
+  /** Les <DropdownItem> / <DropdownGroup> / <DropdownSeparator> */
   default(): unknown
 }>()
 
-const panelRef = ref<InstanceType<typeof MenuPanel> | null>(null)
-const menuId = useId()
+const panelRef = ref<InstanceType<typeof DropdownPanel> | null>(null)
+const dropdownId = useId()
 const shown = ref(false)
 
 // Fermer le panneau racine ferme toute la pile (les sous-panneaux sont ses
 // descendants DOM : cascade native du popover).
-provide(menuKey, { closeAll: () => panelRef.value?.hide() })
+provide(dropdownKey, { closeAll: () => panelRef.value?.hide() })
 
 function invoker(): HTMLElement | null {
-  return document.querySelector(`[popovertarget="${menuId}"]`)
+  return document.querySelector(`[popovertarget="${dropdownId}"]`)
 }
 
 function onToggle(value: boolean) {
@@ -81,14 +85,14 @@ onMounted(() => {
   <slot
     name="trigger"
     :trigger-props="{
-      popovertarget: menuId,
+      popovertarget: dropdownId,
       'aria-haspopup': 'menu' as const,
       'aria-expanded': open,
-      'aria-controls': menuId,
+      'aria-controls': dropdownId,
     }"
   />
-  <MenuPanel
-    :id="menuId"
+  <DropdownPanel
+    :id="dropdownId"
     ref="panelRef"
     :placement="placement"
     :size="size"
@@ -96,5 +100,5 @@ onMounted(() => {
     @toggle="onToggle"
   >
     <slot />
-  </MenuPanel>
+  </DropdownPanel>
 </template>
