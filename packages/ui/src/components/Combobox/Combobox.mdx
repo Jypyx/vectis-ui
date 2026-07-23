@@ -1,0 +1,115 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as ComboboxStories from './Combobox.stories'
+
+<Meta of={ComboboxStories} />
+
+# Combobox
+
+Champ de recherche avec liste de suggestions et sélection simple ou multiple — le
+pattern ARIA **combobox/listbox** qu'aucune primitive native ne couvre (`<datalist>`
+n'est ni stylable ni multiple). Le composant est **assemblé à partir des briques du
+DS** :
+
+- **`Input`** pour le champ de recherche (`role="combobox"`) ;
+- **`Dropdown`** en mode `listbox` pour le panneau d'options (`role="option"`, popover
+  top-layer ancré en pur CSS) ;
+- **`Chip`** pour les valeurs sélectionnées en mode multiple.
+
+Le focus DOM reste dans l'input pendant la navigation (`aria-activedescendant`) ;
+l'ouverture est pilotée par l'état interne, la fermeture par le light dismiss maison
+(`focusout`).
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { Combobox, type ComboboxOption } from '@socle/ui'
+
+const pays: ComboboxOption[] = [
+  { value: 'fr', label: 'France' },
+  { value: 'be', label: 'Belgique' },
+  { value: 'sn', label: 'Sénégal' },
+]
+const value = ref('')
+</script>
+
+<template>
+  <Combobox v-model="value" :options="pays" placeholder="Choisir un pays…" aria-label="Pays" />
+</template>
+```
+
+<Canvas of={ComboboxStories.Default} />
+
+<Controls of={ComboboxStories.Default} />
+
+## Options
+
+Chaque option est un `ComboboxOption` — `{ value, label, disabled? }`. Le `label` est
+affiché et filtré, la `value` alimente le `v-model` ; une option `disabled` est
+présentée mais ni sélectionnable ni atteignable au clavier.
+
+Le filtrage est **insensible à la casse et aux accents** (normalisation NFD) : taper
+`sene` propose `Sénégal`.
+
+## Recherche
+
+Le filtre ne s'active **qu'à la frappe**. Un `v-model` déjà renseigné affiche son
+libellé sans restreindre la liste : à la réouverture, **toutes** les options sont
+reproposées (l'option courante reçoit une coche), et ce n'est qu'en tapant que la
+liste se réduit. **Entrée** sélectionne l'option active — ou l'unique résultat quand
+il n'en reste qu'un.
+
+Un **chevron** à droite indique l'état et pivote à l'ouverture. Une **croix**
+(`clearable`, activée par défaut — la prop `clearable` d'`Input`, rendue à gauche
+du chevron) apparaît dès que le champ a du contenu : en simple elle vide la valeur,
+en multiple la recherche (les Chips se retirent un par un).
+
+## Sélection multiple
+
+Avec `multiple`, le `v-model` devient un `string[]` et chaque valeur s'affiche en
+`Chip` retirable. Le panneau reste ouvert après un choix (on enchaîne les
+sélections) ; **Retour arrière** sur un champ de recherche vide retire la dernière
+valeur. Hors focus, le champ de saisie se replie pour ne laisser que les Chips, sans
+espace vide.
+
+<Canvas of={ComboboxStories.SelectionMultiple} />
+
+## Tailles
+
+`size` accepte `sm` (32 px) et `md` (40 px, défaut — aligné sur `Input`/`Button`),
+combinable avec `compact` (-4 px). En multiple, les Chips descendent automatiquement
+d'un cran (`md` → Chips `sm`, `sm` → Chips `xs`) et s'alignent pile sur la hauteur du
+champ.
+
+<Canvas of={ComboboxStories.Tailles} />
+
+## États
+
+`invalid` force l'état d'erreur (bordure rouge, pour la validation serveur) ;
+`disabled` grise le champ (nuances par tokens, sans opacité). `placeholder` et
+`empty-text` (message quand aucune option ne correspond) sont personnalisables.
+
+<Canvas of={ComboboxStories.Invalide} />
+
+<Canvas of={ComboboxStories.AucunResultat} />
+
+<Canvas of={ComboboxStories.Disabled} />
+
+## Accessibilité
+
+- Contrat ARIA combobox/listbox : `role="combobox"` + `aria-expanded` /
+  `aria-controls` / `aria-autocomplete="list"` sur l'input, `role="listbox"` sur le
+  panneau, `role="option"` + `aria-selected` par option.
+- **Le focus reste dans l'input** ; l'option courante est signalée par
+  `aria-activedescendant` (jamais de focus déplacé sur les options).
+- Clavier : Flèches haut/bas (avec bouclage, les options désactivées sont sautées),
+  Entrée sélectionne, Échap ferme, Tab ferme et poursuit la tabulation, Retour arrière
+  retire la dernière valeur en multiple.
+- Nommer le champ via `aria-label` (ou un `label` associé) — l'attribut est reporté
+  sur l'input interne.
+
+## Support navigateur
+
+Le panneau s'appuie sur la **Popover API** et le **CSS Anchor Positioning** (largeur
+alignée sur le contrôle via `anchor-size(width)`, ancre confinée par `anchor-scope`)
+**sans fallback** — décision du projet : Chrome/Edge 125+, Safari 26+, Firefox non
+supporté tant que l'anchor positioning n'y est pas stable.

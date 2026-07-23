@@ -128,10 +128,9 @@ describe('Combobox', () => {
       multiple: true,
       modelValue: ['fr', 'be'],
     })
-    expect(getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual([
-      'Retirer France',
-      'Retirer Belgique',
-    ])
+    expect(
+      getAllByRole('button', { name: /Retirer/ }).map((b) => b.getAttribute('aria-label')),
+    ).toEqual(['Retirer France', 'Retirer Belgique'])
 
     await fireEvent.click(getAllByRole('button', { name: 'Retirer France' })[0]!)
     expect(emitted('update:modelValue').at(-1)).toEqual([['be']])
@@ -139,6 +138,37 @@ describe('Combobox', () => {
     await rerender({ modelValue: ['be'] })
     await fireEvent.keyDown(getByRole('combobox'), { key: 'Backspace' })
     expect(emitted('update:modelValue').at(-1)).toEqual([[]])
+  })
+
+  it('la croix (clearable d’Input) vide la valeur en simple', async () => {
+    const { getByRole, emitted } = renderCombobox({ modelValue: 'fr' })
+    const input = getByRole('combobox') as HTMLInputElement
+    expect(input.value).toBe('France')
+    await fireEvent.click(getByRole('button', { name: 'Effacer la sélection' }))
+    expect(emitted('update:modelValue').at(-1)).toEqual([''])
+    expect(input.value).toBe('')
+  })
+
+  it('en multiple, la croix apparaît à la frappe et vide la recherche sans retirer les Chips', async () => {
+    const { getByRole, queryByRole, emitted } = renderCombobox({
+      multiple: true,
+      modelValue: ['fr', 'be'],
+    })
+    // sans recherche : pas de croix (la clearable d'Input suit le contenu du champ)
+    expect(queryByRole('button', { name: 'Effacer la sélection' })).toBeNull()
+
+    // on tape → la croix apparaît ; clic → recherche vidée, sélection intacte
+    await fireEvent.update(getByRole('combobox'), 'xyz')
+    await fireEvent.click(getByRole('button', { name: 'Effacer la sélection' }))
+    expect((getByRole('combobox') as HTMLInputElement).value).toBe('')
+    expect(emitted('update:modelValue')).toBeUndefined()
+  })
+
+  it('pas de croix sans contenu, ni quand clearable=false', () => {
+    const vide = renderCombobox()
+    expect(vide.queryByRole('button', { name: 'Effacer la sélection' })).toBeNull()
+    const off = renderCombobox({ modelValue: 'fr', clearable: false })
+    expect(off.queryByRole('button', { name: 'Effacer la sélection' })).toBeNull()
   })
 
   it('affiche une coche à droite sur l’option sélectionnée', () => {

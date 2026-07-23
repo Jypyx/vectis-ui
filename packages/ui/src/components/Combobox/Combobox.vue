@@ -5,6 +5,7 @@ import type { StyleValue } from 'vue'
 import Chip from '../Chip/Chip.vue'
 import Dropdown from '../Dropdown/Dropdown.vue'
 import DropdownItem from '../Dropdown/DropdownItem.vue'
+import Icon from '../Icon/Icon.vue'
 import Input from '../Input/Input.vue'
 
 /**
@@ -30,24 +31,27 @@ interface ComboboxProps {
   options: ComboboxOption[]
   /** Sélection multiple — le v-model devient string[] et des Chips s'affichent. */
   multiple?: boolean
-  /** Hauteur du champ : sm (32px) ou md (40px). */
+  /** Hauteur du champ : sm (32px) ou md (40px, défaut — aligné sur Button/Input). */
   size?: 'sm' | 'md'
   /** Hauteur réduite de 4px (comme les autres contrôles). */
   compact?: boolean
   placeholder?: string
   disabled?: boolean
   invalid?: boolean
+  /** Bouton d'effacement (croix) qui vide la sélection et la recherche. */
+  clearable?: boolean
   /** Message quand aucune option ne correspond à la recherche. */
   emptyText?: string
 }
 
 const props = withDefaults(defineProps<ComboboxProps>(), {
   multiple: false,
-  size: 'sm',
+  size: 'md',
   compact: false,
   placeholder: undefined,
   disabled: false,
   invalid: false,
+  clearable: true,
   emptyText: 'Aucun résultat',
 })
 
@@ -120,6 +124,10 @@ if (!props.multiple && typeof model.value === 'string' && model.value) {
 const collapsed = computed(
   () => props.multiple && !focused.value && selectedValues.value.length > 0,
 )
+
+// La croix vient de la prop `clearable` d'Input (elle s'affiche dès que le champ
+// a du contenu) ; on reflète sa visibilité pour réserver la place à droite.
+const canClear = computed(() => props.clearable && !props.disabled && query.value.length > 0)
 
 const optionId = (index: number) => `${optionsId}-option-${index}`
 
@@ -200,6 +208,15 @@ function removeValue(value: string) {
   inputRef.value?.focus()
 }
 
+/** Événement `clear` d'Input (croix) : Input a déjà vidé la recherche (query) ;
+    en simple on vide aussi la valeur sélectionnée (en multiple, les Chips se
+    retirent un par un — la croix ne touche qu'à la recherche). */
+function onClear() {
+  if (!props.multiple) model.value = ''
+  typed.value = false
+  activeIndex.value = -1
+}
+
 function move(delta: number) {
   const list = filtered.value
   if (list.length === 0) return
@@ -254,6 +271,8 @@ function onKeydown(event: KeyboardEvent) {
     :style="rootStyle"
     :data-multiple="multiple ? '' : undefined"
     :data-collapsed="collapsed ? '' : undefined"
+    :data-open="open ? '' : undefined"
+    :data-can-clear="canClear ? '' : undefined"
     @focusout="onFocusout"
   >
     <Dropdown
@@ -275,12 +294,15 @@ function onKeydown(event: KeyboardEvent) {
             :compact="compact"
             :invalid="invalid"
             :disabled="disabled"
+            :clearable="clearable"
+            clear-label="Effacer la sélection"
             :placeholder="selectedValues.length === 0 ? placeholder : undefined"
             :aria-activedescendant="open && activeIndex >= 0 ? optionId(activeIndex) : undefined"
             @input="onInput"
             @keydown="onKeydown"
             @focus="onFocus"
             @blur="focused = false"
+            @clear="onClear"
           >
             <template v-if="multiple" #start>
               <Chip
@@ -295,6 +317,12 @@ function onKeydown(event: KeyboardEvent) {
                 @dismiss="removeValue(value)"
                 >{{ labelOf(value) }}</Chip
               >
+            </template>
+
+            <!-- Chevron posé en absolu à droite (cf. CSS), pivote à l'ouverture.
+                 La croix vient de la prop `clearable` d'Input, rendue à sa gauche. -->
+            <template #end>
+              <Icon name="expand_more" class="ds-combobox-chevron" aria-hidden="true" />
             </template>
           </Input>
         </div>
@@ -331,6 +359,50 @@ function onKeydown(event: KeyboardEvent) {
     display: block;
   }
 
+  /* Chevron + croix (clearable d'Input) posés en ABSOLU à droite du champ : ils
+     restent alignés à droite/centrés quels que soient les Chips (retour à la
+     ligne) ou le repli de l'input. On réserve la place correspondante à droite
+     pour que le texte/les Chips ne passent pas dessous (chevron seul, ou croix
+     + chevron). Vertical : translate séparé du rotate (le chevron pivote). */
+  .ds-combobox .ds-input-field {
+    position: relative;
+    padding-inline-end: calc(
+      var(--_control-padding-inline-field) + var(--ds-icon-size) + var(--ds-space-2)
+    );
+  }
+
+  .ds-combobox[data-can-clear] .ds-input-field {
+    padding-inline-end: calc(
+      var(--_control-padding-inline-field) + var(--_control-action-size) + var(--ds-icon-size) +
+        var(--ds-space-2)
+    );
+  }
+
+  .ds-combobox-chevron {
+    position: absolute;
+    inset-inline-end: var(--_control-padding-inline-field);
+    top: 50%;
+    translate: 0 -50%;
+    color: var(--ds-color-text-muted);
+    transition: rotate var(--ds-duration-fast) var(--ds-ease-default);
+  }
+
+  /* le chevron se retourne à l'ouverture de la liste */
+  .ds-combobox[data-open] .ds-combobox-chevron {
+    rotate: 180deg;
+  }
+
+  /* croix d'Input : posée à gauche du chevron, centrée, marge négative annulée */
+  .ds-combobox .ds-input-clear {
+    position: absolute;
+    inset-inline-end: calc(
+      var(--_control-padding-inline-field) + var(--ds-icon-size) + var(--ds-space-1)
+    );
+    top: 50%;
+    translate: 0 -50%;
+    margin-inline: 0;
+  }
+
   /* multiple : le champ accueille les Chips (retour à la ligne). Hauteur calée
      sur le contrôle (`--_control-height`, size/compact via .ds-control d'Input).
      Les Chips font une taille en dessous → chip + padding-block (2×space-1 =
@@ -340,7 +412,6 @@ function onKeydown(event: KeyboardEvent) {
      champ (34px au lieu de 32). Résultat : champ = --_control-height constant,
      input jamais plus haut que les Chips, aucun saut au focus. */
   .ds-combobox[data-multiple] .ds-input-field {
-    position: relative; /* contient l'input replié sorti du flux */
     flex-wrap: wrap;
     height: auto;
     min-height: var(--_control-height);
@@ -373,6 +444,12 @@ function onKeydown(event: KeyboardEvent) {
     padding: var(--ds-space-1) var(--ds-space-3);
     font-size: var(--ds-font-size-sm);
     color: var(--ds-color-text-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ds-combobox-chevron {
+      transition: none;
+    }
   }
 }
 </style>

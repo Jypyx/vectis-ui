@@ -21,6 +21,7 @@ const meta = {
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md'] },
     compact: { control: 'boolean' },
+    clearable: { control: 'boolean' },
   },
   args: { options: PAYS, placeholder: 'Choisir un pays…' },
 } satisfies Meta<typeof Combobox>
@@ -127,7 +128,7 @@ export const Disabled: Story = {
 }
 
 /**
- * Tailles `sm` (32px, défaut) et `md` (40px), combinables avec `compact` (-4px).
+ * Tailles `sm` (32px) et `md` (40px, défaut), combinables avec `compact` (-4px).
  * En multiple, les Chips descendent d'un cran (sm→xs, md→sm) et s'alignent pile
  * sur la hauteur du champ.
  */
