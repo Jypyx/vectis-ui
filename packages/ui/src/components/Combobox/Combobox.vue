@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useAttrs, useId, watch } from 'vue'
+import { computed, nextTick, ref, useAttrs, useId, watch } from 'vue'
 import type { StyleValue } from 'vue'
 
 import Chip from '../Chip/Chip.vue'
@@ -137,6 +137,17 @@ const canClear = computed(
 )
 
 const optionId = (index: number) => `${optionsId}-option-${index}`
+
+// Le focus DOM ne quitte jamais l'input (navigation par aria-activedescendant) :
+// le navigateur ne défile donc pas l'option active dans le panneau `overflow:auto`.
+// On l'amène dans la vue à la main. `block: 'nearest'` = pas de saut si déjà visible.
+watch(activeIndex, (index) => {
+  if (index < 0) return
+  nextTick(() => {
+    // `?.scrollIntoView` : l'API n'existe pas en jsdom (tests).
+    document.getElementById(optionId(index))?.scrollIntoView?.({ block: 'nearest' })
+  })
+})
 
 function openPanel() {
   if (props.disabled || open.value) return
