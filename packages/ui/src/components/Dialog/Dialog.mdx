@@ -25,6 +25,11 @@ n'émet aucun événement à l'ouverture, l'ouverture pose `open.value` (le watc
 (croix, Échap, backdrop) resynchronise alors le `v-model`. Les méthodes `show()` / `close()`
 sont aussi exposées via `ref`.
 
+**Montage paresseux** : le `<dialog>` (et son contenu, potentiellement coûteux) n'est monté dans
+le DOM que pendant qu'il est ouvert, et en est entièrement retiré à la fermeture — rien ne
+subsiste ni ne capte les clics. Comme chaque ouverture recrée un élément neuf, l'animation
+d'**entrée** est conservée mais il n'y a pas d'animation de **sortie**.
+
 ## Trois zones
 
 Le **header** contient un titre et un sous-titre — remplaçables intégralement par le slot
@@ -36,13 +41,13 @@ Le **header** contient un titre et un sous-titre — remplaçables intégralemen
 
 <Canvas of={DialogStories.ActionsHeader} />
 
-## Tailles et responsive
+## Largeur et responsive
 
-`size` accepte `sm` (20rem), `md` (32rem) et `lg` (48rem). La modale ne dépasse jamais
-`100% − marges`, en largeur comme en hauteur (`max-inline-size`/`max-block-size` sur `100dvi`/
-`100dvb`) : sur petit écran elle se rétracte au viewport.
+`width` accepte n'importe quelle unité CSS (défaut `400px`) et pilote la largeur de la modale.
+Celle-ci ne dépasse jamais `100% − marges`, en largeur comme en hauteur (`max-inline-size`/
+`max-block-size` sur `100dvi`/`100dvb`) : sur petit écran elle se rétracte au viewport.
 
-<Canvas of={DialogStories.Tailles} />
+<Canvas of={DialogStories.Largeur} />
 
 ## Contenu débordant et séparateurs
 

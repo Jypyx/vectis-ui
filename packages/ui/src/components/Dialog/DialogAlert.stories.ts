@@ -11,12 +11,12 @@ const meta = {
   argTypes: {
     title: { control: 'text' },
     subtitle: { control: 'text' },
-    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+    width: { control: 'text' },
   },
   args: {
     title: 'Supprimer le projet ?',
     subtitle: 'Cette action est définitive.',
-    size: 'sm',
+    width: '400px',
   },
   render: (args) => ({
     components: { DialogAlert, Button },

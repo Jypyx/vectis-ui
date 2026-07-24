@@ -4,8 +4,14 @@ import { defineComponent, nextTick, ref } from 'vue'
 
 import DialogAlert from './DialogAlert.vue'
 
-function renderHarness(props: Record<string, unknown> = {}) {
-  const open = ref((props.open as boolean) ?? true)
+async function flush() {
+  await nextTick()
+  await new Promise((r) => setTimeout(r))
+  await nextTick()
+}
+
+async function openHarness(props: Record<string, unknown> = {}) {
+  const open = ref(true)
   const Harness = defineComponent({
     components: { DialogAlert },
     setup: () => ({ open, props }),
@@ -17,34 +23,34 @@ function renderHarness(props: Record<string, unknown> = {}) {
     `,
   })
   const utils = render(Harness)
+  await flush()
   const dialog = utils.container.querySelector('.ds-dialog') as HTMLDialogElement
   return { open, dialog, ...utils }
 }
 
 describe('DialogAlert', () => {
-  it('pose role="alertdialog"', () => {
-    expect(renderHarness().dialog.getAttribute('role')).toBe('alertdialog')
+  it('pose role="alertdialog"', async () => {
+    expect((await openHarness()).dialog.getAttribute('role')).toBe('alertdialog')
   })
 
-  it('n’a pas de croix de fermeture', () => {
-    const { queryByRole } = renderHarness()
+  it('n’a pas de croix de fermeture', async () => {
+    const { queryByRole } = await openHarness()
     expect(queryByRole('button', { name: 'Fermer' })).toBeNull()
   })
 
-  it('coupe tout light dismiss (closedby="none")', () => {
-    expect(renderHarness().dialog.getAttribute('closedby')).toBe('none')
+  it('coupe tout light dismiss (closedby="none")', async () => {
+    expect((await openHarness()).dialog.getAttribute('closedby')).toBe('none')
   })
 
-  it('défaut size=sm', () => {
-    expect(renderHarness().dialog.getAttribute('data-size')).toBe('sm')
+  it('défaut width=400px', async () => {
+    expect((await openHarness()).dialog.style.getPropertyValue('--_dialog-width')).toBe('400px')
   })
 
   it('reste piloté par le v-model (bouton d’action ferme)', async () => {
-    const { open, dialog } = renderHarness()
-    await nextTick()
-    expect(dialog.open).toBe(true)
+    const { open, container } = await openHarness()
+    expect(container.querySelector('.ds-dialog')).not.toBeNull()
     open.value = false
-    await nextTick()
-    expect(dialog.open).toBe(false)
+    await flush()
+    expect(container.querySelector('.ds-dialog')).toBeNull()
   })
 })

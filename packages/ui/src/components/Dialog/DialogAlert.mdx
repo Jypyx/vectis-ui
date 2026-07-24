@@ -19,8 +19,8 @@ Seuls les boutons du footer ferment la modale.
 
 `DialogAlert` force `role="alertdialog"`, `closable=false`, `closeOnBackdrop=false` et
 `closeOnEscape=false` sur `Dialog`. Toute la mécanique (top-layer, piège de focus, fond inerte,
-sticky header/footer, séparateurs au défilement) est héritée telle quelle — inutile de
-dupliquer le composant. La taille par défaut est `sm` (alerte compacte).
+sticky header/footer, séparateurs au défilement, montage paresseux) est héritée telle quelle —
+inutile de dupliquer le composant. La largeur par défaut est `400px` (prop `width`).
 
 <Canvas of={DialogAlertStories.Confirmation} />
 

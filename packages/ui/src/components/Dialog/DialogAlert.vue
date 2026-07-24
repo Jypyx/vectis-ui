@@ -14,14 +14,14 @@ interface DialogAlertProps {
   title?: string
   /** Sous-titre du header, sous le titre. */
   subtitle?: string
-  /** Largeur : sm (20rem) / md (32rem) / lg (48rem). Défaut sm (alerte compacte). */
-  size?: 'sm' | 'md' | 'lg'
+  /** Largeur de la modale (toute unité CSS) ; bornée à 100 % du viewport. */
+  width?: string
 }
 
 withDefaults(defineProps<DialogAlertProps>(), {
   title: undefined,
   subtitle: undefined,
-  size: 'sm',
+  width: '400px',
 })
 
 const open = defineModel<boolean>('open', { default: false })
@@ -49,7 +49,7 @@ defineSlots<{
     role="alertdialog"
     :title="title"
     :subtitle="subtitle"
-    :size="size"
+    :width="width"
     :closable="false"
     :close-on-backdrop="false"
     :close-on-escape="false"

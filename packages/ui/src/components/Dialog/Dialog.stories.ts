@@ -11,7 +11,7 @@ const meta = {
   argTypes: {
     title: { control: 'text' },
     subtitle: { control: 'text' },
-    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+    width: { control: 'text' },
     closable: { control: 'boolean' },
     closeOnBackdrop: { control: 'boolean' },
     closeOnEscape: { control: 'boolean' },
@@ -20,7 +20,7 @@ const meta = {
   args: {
     title: 'Partager le document',
     subtitle: 'Choisissez qui peut accéder à ce fichier.',
-    size: 'md',
+    width: '400px',
     closable: true,
     closeOnBackdrop: true,
     closeOnEscape: true,
@@ -67,31 +67,34 @@ export const Default: Story = {
   },
 }
 
-/** Trois largeurs bornées au viewport : sm (20rem), md (32rem), lg (48rem). */
-export const Tailles: Story = {
+/**
+ * La prop `width` accepte n'importe quelle unité CSS et reste bornée à 100 % du
+ * viewport (en réduisant la fenêtre, la modale se rétracte).
+ */
+export const Largeur: Story = {
   render: (args) => ({
     components: { Dialog, Button },
     setup() {
-      const opened = ref<'sm' | 'md' | 'lg' | null>(null)
-      const sizes = ['sm', 'md', 'lg'] as const
-      return { args, opened, sizes }
+      const opened = ref<string | null>(null)
+      const widths = ['320px', '480px', '640px'] as const
+      return { args, opened, widths }
     },
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <Button v-for="s in sizes" :key="s" variant="outline" tone="neutral" @click="opened = s">
-          {{ s }}
+        <Button v-for="w in widths" :key="w" variant="outline" tone="neutral" @click="opened = w">
+          {{ w }}
         </Button>
       </div>
       <Dialog
-        v-for="s in sizes"
-        :key="s"
-        :size="s"
-        :title="'Modale ' + s"
-        subtitle="Largeur adaptée à la taille."
-        :open="opened === s"
+        v-for="w in widths"
+        :key="w"
+        :width="w"
+        :title="'Modale ' + w"
+        subtitle="Largeur pilotée par la prop width."
+        :open="opened === w"
         @update:open="(v) => { if (!v) opened = null }"
       >
-        <p style="margin: 0">Contenu de la modale en taille {{ s }}.</p>
+        <p style="margin: 0">Contenu de la modale en largeur {{ w }}.</p>
         <template #footer>
           <Button @click="opened = null">Fermer</Button>
         </template>

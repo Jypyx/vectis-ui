@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, useAttrs, useId, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, useAttrs, useId, watch } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import IconButton from '../IconButton/IconButton.vue'
@@ -24,8 +24,8 @@ interface DialogProps {
   title?: string
   /** Sous-titre du header, sous le titre. */
   subtitle?: string
-  /** Largeur : sm (20rem) / md (32rem) / lg (48rem). */
-  size?: 'sm' | 'md' | 'lg'
+  /** Largeur de la modale (toute unité CSS) ; bornée à 100 % du viewport. */
+  width?: string
   /** `alertdialog` pour une modale exigeant une action explicite (cf. DialogAlert). */
   role?: 'dialog' | 'alertdialog'
   /** Affiche la croix de fermeture dans le header. */
@@ -41,7 +41,7 @@ interface DialogProps {
 const props = withDefaults(defineProps<DialogProps>(), {
   title: undefined,
   subtitle: undefined,
-  size: 'md',
+  width: '400px',
   role: 'dialog',
   closable: true,
   closeOnBackdrop: true,
@@ -92,13 +92,13 @@ const closedby = computed(() =>
 // avec la classe statique.
 const rootAttrs = computed(() => ({ ...attrs, closedby: closedby.value }))
 
-// Asymétrie native de <dialog> : il émet 'close' à toute fermeture, mais AUCUN
-// événement à l'ouverture (contrairement au 'toggle' du popover). D'où deux
-// chemins :
-//  - OUVERTURE : on pose open.value = true, et le watcher appelle showModal().
-//  - FERMETURE : on demande la fermeture NATIVE (croix, méthode exposée) →
-//    l'événement 'close' resynchronise le v-model (onClose). Le light dismiss
-//    (Échap/backdrop via closedby) emprunte exactement le même événement.
+// Montage paresseux : le <dialog> (et son contenu potentiellement lourd) n'existe
+// dans le DOM que pendant qu'il est ouvert. Chaque ouverture crée un élément NEUF
+// → showModal() sur un DOM propre (toujours modal donc centré), et la fermeture le
+// retire entièrement (aucun résidu qui capterait les clics, pas de race à la
+// réouverture). Le slot #trigger, lui, reste toujours rendu.
+const rendered = ref(open.value)
+
 function show() {
   open.value = true
 }
@@ -113,17 +113,26 @@ const triggerProps = computed<TriggerProps>(() => ({
   'aria-haspopup': 'dialog',
 }))
 
-// Pont v-model ↔ API impérative (client uniquement). Garde anti-InvalidStateError :
-// showModal()/close() lèvent si l'état est déjà atteint.
-watch(open, (value) => {
-  const el = dialogEl.value
-  if (!el || value === el.open) return
-  if (value) el.showModal()
-  else el.close()
+// Asymétrie native de <dialog> : il émet 'close' à toute fermeture, mais AUCUN
+// événement à l'ouverture (contrairement au 'toggle' du popover). D'où deux
+// chemins pour le pont v-model ↔ API impérative (client uniquement) :
+//  - OUVERTURE : monter le <dialog>, puis showModal() une fois le DOM en place.
+//  - FERMETURE : fermeture native (croix, close(), Échap/backdrop) → 'close'
+//    resynchronise le v-model (onClose), puis on démonte.
+watch(open, async (value) => {
+  if (value) {
+    rendered.value = true
+    await nextTick() // laisse Vue monter le <dialog> neuf avant showModal()
+    dialogEl.value?.showModal()
+  } else {
+    dialogEl.value?.close()
+    rendered.value = false
+  }
 })
 
 onMounted(() => {
-  // Les watchers ne tournent pas en SSR : on rejoue l'état initial au montage.
+  // Les watchers ne tournent pas en SSR : on rejoue l'état initial au montage
+  // (rendered vaut déjà open.value, donc le <dialog> est présent si ouvert).
   if (open.value) dialogEl.value?.showModal()
 })
 
@@ -138,63 +147,73 @@ defineExpose({ show, close: requestClose, el: dialogEl })
 <template>
   <slot name="trigger" :trigger-props="triggerProps" />
   <dialog
+    v-if="rendered"
     ref="dialogEl"
     v-bind="rootAttrs"
     class="ds-dialog"
-    :data-size="size"
+    :style="{ '--_dialog-width': width }"
     :role="role === 'alertdialog' ? 'alertdialog' : undefined"
     :aria-labelledby="title ? titleId : undefined"
     :aria-describedby="subtitle ? subtitleId : undefined"
     @close="onClose"
   >
     <!--
-      Le conteneur de défilement est aussi le conteneur `scroll-state` : header
-      et footer, en position sticky À L'INTÉRIEUR, restent toujours visibles ET
-      deviennent descendants interrogeables (les container queries stylent les
-      descendants, jamais les frères).
+      Header et footer sont des frères FIXES (flex: none) : seul le contenu
+      central défile → la barre de défilement reste confinée à la zone du contenu,
+      sans empiéter sur le header ni le footer. Le conteneur de défilement porte
+      `container-type: scroll-state` ; les séparateurs sont deux sentinelles
+      sticky À L'INTÉRIEUR (donc descendantes interrogeables — les container
+      queries stylent les descendants, jamais les frères).
     -->
-    <div class="ds-dialog-scroll">
-      <header class="ds-dialog-header">
-        <slot name="header">
-          <div class="ds-dialog-titles">
-            <h2 v-if="title" :id="titleId" class="ds-dialog-title">{{ title }}</h2>
-            <p v-if="subtitle" :id="subtitleId" class="ds-dialog-subtitle">{{ subtitle }}</p>
-          </div>
-        </slot>
-        <div v-if="closable || $slots.headerActions" class="ds-dialog-header-actions">
-          <slot name="headerActions" />
-          <IconButton
-            v-if="closable"
-            class="ds-dialog-close"
-            :label="closeLabel"
-            variant="ghost"
-            tone="neutral"
-            size="sm"
-            @click="requestClose"
-          >
-            <Icon name="close" />
-          </IconButton>
+    <header class="ds-dialog-header">
+      <slot name="header">
+        <div class="ds-dialog-titles">
+          <h2 v-if="title" :id="titleId" class="ds-dialog-title">{{ title }}</h2>
+          <p v-if="subtitle" :id="subtitleId" class="ds-dialog-subtitle">{{ subtitle }}</p>
         </div>
-      </header>
+      </slot>
+      <div v-if="closable || $slots.headerActions" class="ds-dialog-header-actions">
+        <slot name="headerActions" />
+        <IconButton
+          v-if="closable"
+          class="ds-dialog-close"
+          :label="closeLabel"
+          variant="ghost"
+          tone="neutral"
+          size="sm"
+          @click="requestClose"
+        >
+          <Icon name="close" />
+        </IconButton>
+      </div>
+    </header>
+    <div class="ds-dialog-scroll">
+      <span class="ds-dialog-edge ds-dialog-edge--top" aria-hidden="true" />
       <div class="ds-dialog-body">
         <slot />
       </div>
-      <footer v-if="$slots.footer" class="ds-dialog-footer">
-        <slot name="footer" />
-      </footer>
+      <span class="ds-dialog-edge ds-dialog-edge--bottom" aria-hidden="true" />
     </div>
+    <footer v-if="$slots.footer" class="ds-dialog-footer">
+      <slot name="footer" />
+    </footer>
   </dialog>
 </template>
 
 <style>
 @layer ds.components {
   .ds-dialog {
-    /* fit-content borné : jamais plus large/haut que 100% moins les marges */
-    inline-size: var(--_dialog-width, var(--ds-control-size-dialog-md));
+    /* largeur posée inline (prop width) ; jamais plus large/haut que le viewport
+       moins les marges */
+    inline-size: var(--_dialog-width);
     max-inline-size: calc(100dvi - 2 * var(--ds-space-4));
     max-block-size: calc(100dvb - 2 * var(--ds-space-4));
-    /* le défilement vit dans .ds-dialog-scroll ; overflow:hidden clippe les
-       coins arrondis (fond des header/footer sticky compris) */
+    /* recentre la modale : l'UA centre les <dialog> modaux via `margin: auto`,
+       mais notre reset (`* { margin: 0 }`, layer ds.reset) l'écrase — on le
+       restaure ici (layer ds.components, plus fort que ds.reset) */
+    margin: auto;
+    /* header/footer fixes, seul .ds-dialog-scroll défile ; overflow:hidden
+       clippe les coins arrondis */
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -207,16 +226,15 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     font-family: var(--ds-font-family-sans);
   }
 
-  .ds-dialog[data-size='sm'] {
-    --_dialog-width: var(--ds-control-size-dialog-sm);
-  }
-
-  .ds-dialog[data-size='md'] {
-    --_dialog-width: var(--ds-control-size-dialog-md);
-  }
-
-  .ds-dialog[data-size='lg'] {
-    --_dialog-width: var(--ds-control-size-dialog-lg);
+  /*
+   * Garde-fou indispensable : `.ds-dialog { display: flex }` (auteur) battrait le
+   * `dialog:not([open]) { display: none }` de l'UA — une modale fermée resterait
+   * dans le flux, en haut à gauche, captant les clics. On restaure le display:none
+   * fermé (même rôle que `.ds-floating:not(:popover-open)`). Utile aussi le temps
+   * de la frame montage → showModal() et en SSR.
+   */
+  .ds-dialog:not([open]) {
+    display: none;
   }
 
   /* le conteneur reçoit le focus à l'ouverture (showModal) : pas d'anneau
@@ -226,32 +244,54 @@ defineExpose({ show, close: requestClose, el: dialogEl })
   }
 
   .ds-dialog-scroll {
+    /* la SEULE zone qui défile : occupe l'espace entre header et footer, la
+       barre de défilement y reste donc confinée */
     flex: 1 1 auto;
     min-block-size: 0;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     /* établit le conteneur de requête d'état de défilement (pas de containment
-       de taille) : ses descendants peuvent interroger `scroll-state(...)` */
+       de taille) : ses descendants (les sentinelles) peuvent interroger
+       `scroll-state(...)` */
     container-type: scroll-state;
   }
 
-  .ds-dialog-header {
-    /* sticky : header toujours visible pendant le défilement du contenu */
+  /*
+   * Sentinelles de séparation : fines lignes sticky en haut et en bas de la zone
+   * de défilement (descendantes du conteneur scroll-state). Les marges négatives
+   * évitent qu'elles n'occupent de l'espace. Transparentes par défaut, révélées
+   * au débordement plus bas.
+   */
+  .ds-dialog-edge {
+    flex: none;
+    block-size: 1px;
     position: sticky;
+    background: transparent;
+  }
+
+  .ds-dialog-edge--top {
     inset-block-start: 0;
+    margin-block-end: -1px;
+  }
+
+  .ds-dialog-edge--bottom {
+    inset-block-end: 0;
+    margin-block-start: -1px;
+  }
+
+  .ds-dialog-header {
+    flex: none; /* fixe en haut, hors zone de défilement */
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--ds-space-4);
     padding: var(--ds-space-5) var(--ds-space-6);
-    background: var(--ds-color-surface-overlay);
-    /* séparateur transparent par défaut : révélé au débordement (plus bas) */
-    border-block-end: 1px solid transparent;
   }
 
   .ds-dialog-titles {
     display: flex;
     flex-direction: column;
-    gap: var(--ds-space-1);
     min-inline-size: 0;
   }
 
@@ -279,67 +319,57 @@ defineExpose({ show, close: requestClose, el: dialogEl })
   }
 
   .ds-dialog-body {
-    padding: var(--ds-space-2) var(--ds-space-6) var(--ds-space-5);
+    /* grandit pour remplir la zone quand le contenu est court ; garde sa hauteur
+       naturelle (donc déborde et fait défiler) quand il est long */
+    flex: 1 0 auto;
+    padding: var(--ds-space-2) var(--ds-space-6);
     color: var(--ds-color-text);
     font-size: var(--ds-font-size-sm);
     line-height: var(--ds-font-leading-normal);
   }
 
   .ds-dialog-footer {
-    /* sticky : footer toujours visible pendant le défilement du contenu */
-    position: sticky;
-    inset-block-end: 0;
+    flex: none; /* fixe en bas, hors zone de défilement */
     display: flex;
     align-items: center;
     justify-content: flex-end;
     flex-wrap: wrap;
     gap: var(--ds-space-3);
     padding: var(--ds-space-4) var(--ds-space-6);
-    background: var(--ds-color-surface-overlay);
-    /* séparateur transparent par défaut : révélé au débordement (plus bas) */
-    border-block-start: 1px solid transparent;
   }
 
   /*
    * Séparateurs conditionnels — dernières features CSS (scroll-state container
-   * queries). `scrollable: top` = du contenu est masqué AU-DESSUS (on a scrollé)
-   * → on révèle le trait sous le header ; `scrollable: bottom` = du contenu
-   * reste EN DESSOUS → on révèle le trait au-dessus du footer. Exactement
-   * « visible seulement si le contenu passe sous le header/footer ».
-   * Support : Chrome 133+ (Safari/Firefox pas encore). Dégradation gracieuse :
-   * là où non supporté, les traits restent transparents (aucun séparateur).
+   * queries) sur les sentinelles. `scrollable: top` = du contenu est masqué
+   * AU-DESSUS (on a scrollé) → on révèle le trait sous le header ;
+   * `scrollable: bottom` = du contenu reste EN DESSOUS → on révèle le trait
+   * au-dessus du footer. Exactement « visible seulement si le contenu passe
+   * sous le header/footer ». Support : Chrome 133+ (Safari/Firefox pas encore).
+   * Dégradation gracieuse : là où non supporté, les traits restent transparents.
    */
   @container scroll-state(scrollable: top) {
-    .ds-dialog-header {
-      border-block-end-color: var(--ds-color-border);
+    .ds-dialog-edge--top {
+      background: var(--ds-color-border);
     }
   }
 
   @container scroll-state(scrollable: bottom) {
-    .ds-dialog-footer {
-      border-block-start-color: var(--ds-color-border);
+    .ds-dialog-edge--bottom {
+      background: var(--ds-color-border);
     }
   }
 
   /*
-   * Entrée/sortie animées (progressive enhancement, idiome floating.css adapté
-   * à <dialog>) : allow-discrete + @starting-style sur l'élément ET son
-   * ::backdrop ; `overlay`/`display` maintiennent la modale en top-layer le
-   * temps de la transition de sortie.
+   * Animation d'ENTRÉE uniquement (progressive enhancement, `@starting-style`).
+   * Le montage paresseux retire le <dialog> du DOM à la fermeture : il n'y a plus
+   * d'animation de sortie (le prix d'un DOM propre et sans race de réouverture),
+   * donc pas besoin de `overlay`/`display allow-discrete`. L'élément fraîchement
+   * monté part des valeurs @starting-style puis rejoint l'état ouvert.
    */
   .ds-dialog {
-    opacity: 0;
-    transform: scale(0.97);
     transition:
       opacity var(--ds-duration-base) var(--ds-ease-default),
-      transform var(--ds-duration-base) var(--ds-ease-default),
-      overlay var(--ds-duration-base) allow-discrete,
-      display var(--ds-duration-base) allow-discrete;
-  }
-
-  .ds-dialog[open] {
-    opacity: 1;
-    transform: none;
+      transform var(--ds-duration-base) var(--ds-ease-default);
   }
 
   @starting-style {
@@ -351,15 +381,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
 
   .ds-dialog::backdrop {
     background: var(--ds-color-backdrop);
-    opacity: 0;
-    transition:
-      opacity var(--ds-duration-base) var(--ds-ease-default),
-      overlay var(--ds-duration-base) allow-discrete,
-      display var(--ds-duration-base) allow-discrete;
-  }
-
-  .ds-dialog[open]::backdrop {
-    opacity: 1;
+    transition: opacity var(--ds-duration-base) var(--ds-ease-default);
   }
 
   @starting-style {
