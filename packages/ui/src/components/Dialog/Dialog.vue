@@ -286,7 +286,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--ds-space-4);
-    padding: var(--ds-space-5) var(--ds-space-6);
+    padding: var(--ds-space-6) var(--ds-space-6) var(--ds-space-3);
   }
 
   .ds-dialog-titles {
@@ -322,7 +322,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     /* grandit pour remplir la zone quand le contenu est court ; garde sa hauteur
        naturelle (donc déborde et fait défiler) quand il est long */
     flex: 1 0 auto;
-    padding: var(--ds-space-2) var(--ds-space-6);
+    padding: var(--ds-space-3) var(--ds-space-6);
     color: var(--ds-color-text);
     font-size: var(--ds-font-size-sm);
     line-height: var(--ds-font-leading-normal);
@@ -335,7 +335,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     justify-content: flex-end;
     flex-wrap: wrap;
     gap: var(--ds-space-3);
-    padding: var(--ds-space-4) var(--ds-space-6);
+    padding: var(--ds-space-3) var(--ds-space-6) var(--ds-space-6);
   }
 
   /*
