@@ -56,3 +56,5 @@ export { default as ProgressCircular } from './components/ProgressCircular/Progr
 export { default as ProgressLinear } from './components/ProgressLinear/ProgressLinear.vue'
 export { default as Slider } from './components/Slider/Slider.vue'
 export type { SliderLabel } from './components/Slider/Slider.vue'
+export { default as Dialog } from './components/Dialog/Dialog.vue'
+export { default as DialogAlert } from './components/Dialog/DialogAlert.vue'

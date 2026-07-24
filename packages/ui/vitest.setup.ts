@@ -31,3 +31,31 @@ if (!('showPopover' in HTMLElement.prototype)) {
     },
   })
 }
+
+/**
+ * jsdom ne connaît pas `HTMLDialogElement.prototype.showModal` (« Not
+ * implemented »). Stub minimal pour tester la LOGIQUE de <Dialog> (sync
+ * v-model ↔ .open, ARIA, croix) — le comportement navigateur réel (top-layer,
+ * ::backdrop, piège de focus, light dismiss, scroll-state) reste couvert par
+ * les play functions Storybook.
+ */
+if (typeof HTMLDialogElement !== 'undefined') {
+  const dispatchClose = (el: HTMLDialogElement) => el.dispatchEvent(new Event('close'))
+  HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+    if (this.open) return
+    this.open = true
+    this.setAttribute('open', '')
+  }
+  HTMLDialogElement.prototype.show = function (this: HTMLDialogElement) {
+    if (this.open) return
+    this.open = true
+    this.setAttribute('open', '')
+  }
+  HTMLDialogElement.prototype.close = function (this: HTMLDialogElement, returnValue?: string) {
+    if (!this.open) return
+    this.open = false
+    this.removeAttribute('open')
+    if (returnValue !== undefined) this.returnValue = returnValue
+    dispatchClose(this)
+  }
+}
