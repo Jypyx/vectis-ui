@@ -51,7 +51,7 @@ Chaîne : `src/tokens/*.ts` (source de vérité typée, format DTCG `{ $value, $
 
 ## Conventions composants
 
-- Un dossier par composant : `src/components/X/X.vue` + `X.stories.ts` + `X.test.ts`. Export nommé ajouté dans `src/index.ts`.
+- Un dossier par composant : `src/components/X/X.vue` + `X.stories.ts` + `X.test.ts` + **`X.mdx`** (doc Storybook — obligatoire, générée à chaque nouveau composant). Export nommé ajouté dans `src/index.ts`.
 - Classes `.ds-<nom>` ; **variantes via `data-variant` / `data-tone` / `data-size`** (pas de prolifération de classes). Les tones définissent des variables locales `--_bg-solid`, `--_text-tinted`… que les variantes consomment (voir Button.vue, le modèle de référence).
 - API : `defineProps` typées + `withDefaults`, `defineSlots` typés, `defineModel` pour v-model, `defineEmits` typés seulement s'il y a des événements non natifs. Les attributs natifs passent par fallthrough (pas de re-déclaration).
 - **Pattern wrapper-root** — un composant dont la racine est un wrapper (contrôles masqués Checkbox/Radio/Switch en `<label>` englobant ; champs Input/Textarea ; Chip) : `defineOptions({ inheritAttrs: false })` + `v-bind="$attrs"` sur l'élément fonctionnel (contrôle natif / action), en gardant `class`/`style` sur la racine. Sinon `name`/`required`/`aria-*` atterrissent sur le wrapper et cassent formulaires et accessibilité. Un input masqué l'est via `opacity: 0` (reste focusable/soumis), jamais `display: none`.
@@ -72,6 +72,7 @@ Storybook 10, framework `@storybook/vue3-vite`. Imports : types depuis `@storybo
 - `.storybook/preview.ts` : decorator global de thème (toolbar System/Light/Dark — System suit `prefers-color-scheme` avec écoute des changements OS — + direction LTR/RTL). **Piège vue3** : thème et direction sont appliqués en effets de bord sur `<html>` (`data-theme`, `dir`), PAS via l'état d'un wrapper templaté — le renderer vue3 ne remonte pas l'arbre au changement d'un global du toolbar (seuls les args sont réactifs), un état capturé dans `setup()` reste figé.
 - La police Material Symbols (Icon) est chargée par Storybook via `.storybook/preview-head.html` (jamais embarquée dans la lib).
 - Chaque story couvre : défaut, variantes, états (disabled/loading/error), cas limites (textes longs). `src/tokens/Tokens.mdx` est généré depuis la source TS — ne jamais y dupliquer des valeurs en dur.
+- **Doc `X.mdx` obligatoire par composant** (à générer avec les stories, jamais après-coup) : `import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'` + `import * as XStories from './X.stories'` + `<Meta of={XStories} />`. Structure type (cf. `AvatarGroup.mdx`) : titre `# X`, intro courte décrivant le composant, puis une section par aspect (`<Canvas of={XStories.MaStory} />`, un `<Controls>` sur la story principale), et une section **Accessibilité** finale. Prose seulement (le rendu vient des stories) — aucune valeur de token en dur.
 
 ## Packaging
 
