@@ -42,3 +42,5 @@ export {
 export type { IconResolver, IconAliases } from './components/VIcon/resolver'
 export type { IconContext, IconRender, IconSource } from './components/VIcon/types'
 export type { VectisIconName } from './components/VIcon/icons'
+export { default as VTypography } from './components/VTypography/VTypography.vue'
+export type { TypographyTone, TypographyVariant } from './components/VTypography/VTypography.vue'

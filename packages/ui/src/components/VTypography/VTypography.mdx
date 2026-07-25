@@ -1,0 +1,77 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VTypographyStories from './VTypography.stories'
+
+<Meta of={VTypographyStories} />
+
+# Typography
+
+The design system's text element: the `variant` prop selects a **complete typographic recipe**
+(family, size, weight, leading, letter spacing) taken from the semantic `--vectis-text-*`
+tokens, and `tone` a semantic colour. It is the single route to writing text coherent with the
+components: headings, body copy, labels, captions and code all share exactly the same tokens as
+the components' internal text (VDialog, VInput, VDataTable…).
+
+The component carries **no margin**: vertical spacing belongs to the parent layout (a flex/grid
+stack with `gap`).
+
+<Canvas of={VTypographyStories.Default} />
+
+<Controls of={VTypographyStories.Default} />
+
+## Variants
+
+Fourteen roles: `display`, `heading-1…4`, `subtitle`, `body-xl/lg/md/sm`, `label`, `caption`,
+`overline` (rendered in capitals, with widened tracking) and `code` (monospace stack). `body-xl`
+is the lead that opens a page or a section: one step above the running text, and sharing its
+leading so the rhythm does not change between the first paragraph and the second. Each role
+is a closed recipe — there are no `size`/`weight` props to compose: if an intermediate rendering
+is missing, that is a role to add to the tokens, not a combination to improvise.
+
+Three of the recipes draw their font from a family of their own: `display` and `heading-1…4`
+take `--vectis-text-family-heading`, which points at the running font until you redefine it.
+Giving titles a typeface distinct from the body copy is therefore one custom property, set
+wherever you already set your other tokens — and it reaches every heading the components render
+themselves (a VDialog title, a VDataTable caption) along with the ones you write.
+
+<Canvas of={VTypographyStories.Variants} />
+
+## Tones
+
+`default` (inheritance — the text follows the colour of the context, including on an inverted
+surface or inside a coloured toast), `muted`, `subtle`, `accent`, `danger`, `success`, `warning`
+and `on-inverse`.
+
+<Canvas of={VTypographyStories.Tones} />
+
+## Tags
+
+Each variant renders a default semantic tag (`heading-1` → `h1`, body copy → `p`,
+`label`/`overline` → `span`, `code` → `code`). The `as` prop changes it freely: the **visual**
+hierarchy (the variant) and the **document** hierarchy (the tag) are independent — a secondary
+section heading can be an `h2` styled as `heading-4`.
+
+Native attributes land on the root by fallthrough: `as="label"` + `for` produces a real field
+label (that is how VInput consumes the component internally).
+
+<Canvas of={VTypographyStories.Tags} />
+
+## Truncation
+
+`truncate` cuts the text on a single line with an ellipsis. The element must have a constrained
+width (a block inside a sized container, or a flex item with `min-width: 0`).
+
+<Canvas of={VTypographyStories.Truncate} />
+
+## Running text
+
+<Canvas of={VTypographyStories.Paragraph} />
+
+## Accessibility
+
+- The document's heading hierarchy must stay logical: choose the tag with `as` independently of
+  the visual rendering (do not skip levels).
+- `tone="subtle"` is reserved for non-essential text (placeholders, disabled states): its
+  contrast is deliberately low.
+- `overline` uppercases the text through CSS (`text-transform`): screen readers read the source
+  text as-is, without spelling it out.
+- The component renders no ARIA role: it is text, and the semantics come from the chosen tag.
