@@ -10,6 +10,7 @@ import {
   isValidISO,
   isWithin,
   monthNames,
+  monthNamesCompact,
   parseISO,
   weekdayNames,
 } from './dateUtils'
@@ -53,6 +54,15 @@ describe('dateUtils', () => {
     expect(monthNames('fr-FR', 'long')[5]).toBe('juin')
     // premier jour de semaine lundi → lundi en tête
     expect(weekdayNames('fr-FR', 1, 'long')[0]?.toLowerCase()).toContain('lundi')
+  })
+
+  it('abrège les mois : entier si ≤4 caractères, sinon 3 + point', () => {
+    const m = monthNamesCompact('fr-FR')
+    expect(m[4]).toBe('mai') // 3 car. → entier
+    expect(m[5]).toBe('juin') // 4 car. → entier
+    expect(m[7]).toBe('août') // 4 car. (accent compté comme 1) → entier
+    expect(m[0]).toBe('jan.') // « janvier » → 3 + point
+    expect(m[1]).toBe('fév.') // « février » → 3 + point
   })
 
   it('formate une plage via Intl.formatRange', () => {

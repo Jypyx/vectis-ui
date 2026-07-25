@@ -290,12 +290,15 @@ const close = () => closePanel(true)
 
   .ds-datepicker-panel {
     position-anchor: --ds-datepicker-anchor;
-    /* le Calendar porte son propre fond/rayon ; le panneau ajoute l'élévation */
+    /* le Calendar porte son propre fond ; le panneau épouse ses coins et ajoute
+       l'ombre d'élévation (box-shadow, pas filter : drop-shadow() n'accepte
+       qu'une seule ombre alors que --ds-shadow-* en empile deux). */
     width: max-content;
     padding: 0;
     border: none;
     background: transparent;
-    filter: drop-shadow(var(--ds-shadow-3));
+    border-radius: var(--ds-radius-overlay);
+    box-shadow: var(--ds-shadow-4);
   }
 }
 </style>

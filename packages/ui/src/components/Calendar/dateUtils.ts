@@ -166,6 +166,18 @@ export function monthNames(locale: string, month: 'long' | 'short' = 'long'): st
   return Array.from({ length: 12 }, (_, i) => fmt.format(Date.UTC(2021, i, 1)))
 }
 
+/**
+ * Noms de mois compacts pour le sélecteur : nom entier s'il tient en 4
+ * caractères (« Mai », « Juin », « Août »), sinon 3 premiers + point
+ * (« janvier » → « jan. »). `[...n]` compte les graphèmes (accents inclus).
+ */
+export function monthNamesCompact(locale: string): string[] {
+  return monthNames(locale, 'long').map((n) => {
+    const chars = [...n]
+    return chars.length <= 4 ? n : chars.slice(0, 3).join('') + '.'
+  })
+}
+
 /** Nom d'un mois isolé (0-indexé). */
 export function monthName(
   locale: string,

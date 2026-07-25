@@ -115,6 +115,15 @@ describe('Calendar', () => {
     expect(adjacent(withoutAdjacent.container as HTMLElement)).toBe(0)
   })
 
+  it('barre les jours adjacents hors [min,max]', () => {
+    // juin 2026 (débute lundi) → jours de juillet en fin de grille, tous > max
+    const { container } = render(Calendar, {
+      props: { modelValue: JUNE, max: '2026-06-24' },
+    })
+    const struck = container.querySelectorAll('.ds-calendar-day--static[data-disabled]')
+    expect(struck.length).toBeGreaterThan(0)
+  })
+
   it('rend les jours adjacents cliquables quand selectAdjacentDays est vrai', () => {
     const { container } = render(Calendar, {
       props: { modelValue: JUNE, showAdjacentDays: true, selectAdjacentDays: true },

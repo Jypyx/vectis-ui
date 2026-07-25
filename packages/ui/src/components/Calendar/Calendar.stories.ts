@@ -132,12 +132,14 @@ export const SlotJour: Story = {
       const prices: Record<number, string> = { 10: '89€', 11: '120€', 12: '75€', 15: '99€' }
       return { args, value, prices }
     },
+    // --ds-calendar-day-size agrandit les ronds (40×40) ; la ligne prix est
+    // TOUJOURS rendue (vide si absente) pour que tous les numéros s'alignent.
     template: `
-      <Calendar v-bind="args" v-model="value">
+      <Calendar v-bind="args" v-model="value" style="--ds-calendar-day-size: 40px">
         <template #day="{ day, selected }">
-          <span style="line-height:1">{{ day }}</span>
-          <span v-if="prices[day]" :style="{ fontSize: '0.625rem', color: selected ? 'inherit' : 'var(--ds-color-success-text)' }">
-            {{ prices[day] }}
+          <span style="line-height:1.2">{{ day }}</span>
+          <span :style="{ fontSize: '0.625rem', lineHeight: 1.2, minHeight: '0.75rem', color: selected ? 'inherit' : 'var(--ds-color-success-text)' }">
+            {{ prices[day] ?? '' }}
           </span>
         </template>
       </Calendar>
@@ -178,8 +180,14 @@ export const Localisation: Story = {
     setup: () => ({ args, value: ref('2026-06-10') }),
     template: `
       <div style="display:flex; gap:24px; flex-wrap:wrap">
-        <Calendar v-bind="args" v-model="value" locale="en-US" />
+        <Calendar v-bind="args" v-model="value" locale="fr-FR" />
         <Calendar v-bind="args" v-model="value" locale="ar-EG" />
+        <Calendar v-bind="args" v-model="value" locale="en-US" />
+        <Calendar v-bind="args" v-model="value" locale="ru-RU" />
+        <Calendar v-bind="args" v-model="value" locale="el-GR" />
+        <Calendar v-bind="args" v-model="value" locale="ja-JP" />
+        <Calendar v-bind="args" v-model="value" locale="zh-CN" />
+        <Calendar v-bind="args" v-model="value" locale="th-TH" />
       </div>
     `,
   }),

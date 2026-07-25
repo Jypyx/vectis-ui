@@ -18,7 +18,7 @@ import {
   isValidISO,
   isWithin,
   monthName,
-  monthNames,
+  monthNamesCompact,
   parseISO,
   weekdayNames,
 } from './dateUtils'
@@ -121,7 +121,7 @@ const gridLabelId = useId()
 const resolvedFirstDay = computed(() => props.firstDayOfWeek ?? firstDayOfWeekFor(props.locale))
 const weekdays = computed(() => weekdayNames(props.locale, resolvedFirstDay.value, 'short'))
 const weekdaysLong = computed(() => weekdayNames(props.locale, resolvedFirstDay.value, 'long'))
-const monthLabels = computed(() => monthNames(props.locale, 'short'))
+const monthLabels = computed(() => monthNamesCompact(props.locale))
 
 // ── Valeur normalisée par mode ──────────────────────────────────────────────
 const singleValue = computed(() =>
@@ -497,9 +497,10 @@ defineExpose({ focus })
           size="sm"
           class="ds-calendar-picker-toggle"
           :aria-expanded="view === 'months'"
+          :aria-label="monthLabel"
           @click="toggleView('months')"
         >
-          {{ monthLabel }}
+          {{ monthLabels[viewMonth0] }}
           <Icon
             :name="view === 'months' ? 'arrow_drop_up' : 'arrow_drop_down'"
             aria-hidden="true"
@@ -613,6 +614,7 @@ defineExpose({ focus })
           <span
             v-else-if="cell.kind === 'static'"
             class="ds-calendar-day ds-calendar-day--static"
+            :data-disabled="cell.disabled ? '' : undefined"
             >{{ cell.day }}</span
           >
         </div>
@@ -677,7 +679,10 @@ defineExpose({ focus })
 <style>
 @layer ds.components {
   .ds-calendar {
-    --_cell: var(--ds-control-size-calendar-cell);
+    /* Taille du rond (jour) configurable par le consommateur ; la cellule (zone
+       de survol / colonne) s'agrandit avec, sans jamais passer sous le token. */
+    --_day-size: var(--ds-calendar-day-size, var(--ds-control-height-sm));
+    --_cell: max(var(--ds-control-size-calendar-cell), calc(var(--_day-size) + var(--ds-space-1)));
     display: inline-flex;
     flex-direction: column;
     gap: var(--ds-space-2);
@@ -688,6 +693,8 @@ defineExpose({ focus })
     color: var(--ds-color-text);
   }
 
+  /* Tous les blocs s'étirent sur la largeur du calendrier (stretch par défaut) :
+     la grille jours occupe 100 % via des colonnes 1fr, largeur plancher = 7 cellules. */
   .ds-calendar-header {
     display: flex;
     align-items: center;
@@ -707,10 +714,16 @@ defineExpose({ focus })
   }
 
   /* ── Grille jours ── */
+  /* Largeur plancher = 7 cellules ; sinon la grille s'étire à la largeur du
+     calendrier (imposée par l'en-tête) et les colonnes 1fr se répartissent. */
+  .ds-calendar-grid {
+    min-inline-size: calc(7 * var(--_cell));
+  }
+
   .ds-calendar-weekdays,
   .ds-calendar-week {
     display: grid;
-    grid-template-columns: repeat(7, var(--_cell));
+    grid-template-columns: repeat(7, 1fr);
   }
 
   .ds-calendar-weekday {
@@ -729,27 +742,30 @@ defineExpose({ focus })
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--_cell);
     height: var(--_cell);
   }
 
-  /* Bande de plage : fond teinté posé sur la cellule (colonnes jointives →
-     bande continue). Les extrémités arrondissent le côté correspondant. */
+  /* Bande de plage : fond teinté à la HAUTEUR du rond (pas de la cellule), posé
+     derrière le jour. Marge = demi-écart cellule↔rond, calculée en `%` pour
+     suivre la largeur réelle de la colonne (1fr). Aux extrémités la bande
+     s'arrête pile au bord du rond (inset du côté extérieur) et son coin s'arrondit
+     au rayon du rond (pill plafonné à la moitié de la hauteur = rayon du cercle),
+     sans dépasser. */
   .ds-calendar-cell[data-in-range]::before {
     content: '';
     position: absolute;
-    inset-block: calc((var(--_cell) - var(--ds-control-height-sm)) / 2);
+    inset-block: calc((100% - var(--_day-size)) / 2);
     inset-inline: 0;
     background: var(--ds-color-accent-surface);
     z-index: 0;
   }
   .ds-calendar-cell[data-range-start]::before {
-    inset-inline-start: 50%;
+    inset-inline-start: calc((100% - var(--_day-size)) / 2);
     border-start-start-radius: var(--ds-radius-pill);
     border-end-start-radius: var(--ds-radius-pill);
   }
   .ds-calendar-cell[data-range-end]::before {
-    inset-inline-end: 50%;
+    inset-inline-end: calc((100% - var(--_day-size)) / 2);
     border-start-end-radius: var(--ds-radius-pill);
     border-end-end-radius: var(--ds-radius-pill);
   }
@@ -765,8 +781,8 @@ defineExpose({ focus })
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    inline-size: var(--ds-control-height-sm);
-    block-size: var(--ds-control-height-sm);
+    inline-size: var(--_day-size);
+    block-size: var(--_day-size);
     padding: 0;
     border: none;
     border-radius: var(--ds-radius-pill);
@@ -812,6 +828,12 @@ defineExpose({ focus })
     cursor: default;
   }
 
+  /* jour adjacent hors [min,max] ou désactivé : barré comme une date désactivée */
+  .ds-calendar-day--static[data-disabled] {
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+
   .ds-calendar-day:focus-visible {
     outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
     outline-offset: var(--ds-focus-ring-offset);
@@ -839,12 +861,12 @@ defineExpose({ focus })
   }
 
   /* ── Vues mois / années ── */
+  /* Pleine largeur (comme la grille jours) via stretch + colonnes 1fr. */
   .ds-calendar-picker {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--ds-space-1);
-    /* même largeur que la grille jours (7 cellules) */
-    inline-size: calc(7 * var(--_cell));
+    min-inline-size: calc(7 * var(--_cell));
   }
   .ds-calendar-picker--years {
     max-block-size: calc(6 * var(--_cell));
