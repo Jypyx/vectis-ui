@@ -1,0 +1,93 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as CalendarStories from './Calendar.stories'
+
+<Meta of={CalendarStories} />
+
+# Calendar
+
+Calendrier inline (grille) inspiré de Material. Il porte **toute la logique** de
+sélection, de navigation par vues (jours / mois / années) et du clavier ; le
+[DatePicker](?path=/docs/composants-datepicker--docs) se contente de l'habiller
+d'un champ et d'un panneau flottant.
+
+Le natif ne propose pas de grille de dates accessible et composable
+(`<input type="date">` n'est ni stylable ni décomposable) : le JS implémente donc
+le pattern ARIA **grid** — roving tabindex, flèches, `PageUp`/`PageDown`,
+sélection simple / plage / multiple. Tout se calcule en **heure locale** via des
+chaînes ISO `YYYY-MM-DD` (aucune dérive de fuseau, SSR-safe).
+
+<Canvas of={CalendarStories.Default} />
+<Controls of={CalendarStories.Default} />
+
+## Modes de sélection
+
+`mode` accepte `single` (défaut), `range` et `multiple`. Le type du v-model suit
+le mode : `string | null`, `{ start, end }` (`DateRange`), ou `string[]`.
+
+<Canvas of={CalendarStories.Plage} />
+<Canvas of={CalendarStories.Multiple} />
+
+## Bornes min / max
+
+`min` et `max` (ISO) verrouillent la navigation **et** la sélection : les mois
+hors plage ne sont plus atteignables et les jours hors plage sont désactivés.
+
+<Canvas of={CalendarStories.MinMax} />
+
+## Dates désactivées
+
+`disabledDates` accepte un tableau d'ISO **ou** un prédicat `(iso) => boolean`.
+Les dates concernées sont barrées et non sélectionnables (mais restent
+focusables au clavier, conformément au pattern ARIA).
+
+<Canvas of={CalendarStories.DatesDesactivees} />
+
+## Mois adjacents
+
+`showAdjacentDays` (défaut vrai) affiche les jours des mois précédent/suivant en
+grisé. `selectAdjacentDays` les rend cliquables — un clic navigue alors vers leur
+mois et les sélectionne.
+
+<Canvas of={CalendarStories.MoisAdjacents} />
+
+## Événements
+
+`events` (`{ date, color?, label? }[]`) affiche jusqu'à trois pastilles colorées
+sous une date.
+
+<Canvas of={CalendarStories.Evenements} />
+
+## Contenu personnalisé (slot `#day`)
+
+Le slot `#day` remplace le contenu d'une cellule — par exemple un prix de billet
+sous le numéro du jour. Il reçoit `{ iso, day, inMonth, disabled, selected,
+today, inRange, events }`.
+
+<Canvas of={CalendarStories.SlotJour} />
+
+## Zone footer
+
+Le slot `#footer` accueille des boutons d'action ou des presets
+(« Aujourd'hui », « Demain », …).
+
+<Canvas of={CalendarStories.AvecFooter} />
+
+## Localisation
+
+`locale` (défaut `fr-FR`) pilote les noms de mois/jours et le premier jour de
+semaine (dérivé de la locale, surchargeable par `firstDayOfWeek`). Les libellés
+passent par `Intl`, disponible côté serveur.
+
+<Canvas of={CalendarStories.Localisation} />
+
+## Accessibilité
+
+- La grille des jours est un `role="grid"` nommé par le mois et l'année ; les
+  en-têtes de colonnes portent le nom complet du jour (`aria-label`).
+- **Roving tabindex** : une seule cellule est tabbable ; la sélection et « aujourd'hui »
+  sont signalées par `aria-selected` et `aria-current="date"`.
+- **Clavier** : flèches (± 1 jour / ± 1 semaine), `Home`/`End` (bornes de la
+  semaine), `PageUp`/`PageDown` (± 1 mois, `Shift` → ± 1 an), `Entrée`/`Espace`
+  (sélection). Les vues mois et années sont également navigables aux flèches.
+- Le focus visible utilise l'anneau de focus standard du DS ; toutes les
+  transitions respectent `prefers-reduced-motion`.
