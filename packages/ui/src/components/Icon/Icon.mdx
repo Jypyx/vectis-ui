@@ -41,6 +41,14 @@ numérique > contexte parent > 1em.
 
 <Canvas of={IconStories.PiloteParLeParent} />
 
+## Remplissage
+
+La prop `filled` bascule l'axe variable **`FILL`** de la police (de 0 = contour à 1 = plein).
+Elle ne concerne que la source **ligature** (`name`) : `FILL` est un axe propre à Material
+Symbols, sans effet sur une image (`src`) ou un SVG inline.
+
+<Canvas of={IconStories.Filled} />
+
 ## Accessibilité
 
 L'icône est **décorative par défaut** (`aria-hidden="true"`) : dans un bouton ou un champ,

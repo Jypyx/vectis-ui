@@ -11,6 +11,7 @@ const meta = {
     name: { control: 'text' },
     src: { control: 'text' },
     label: { control: 'text' },
+    filled: { control: 'boolean' },
   },
   args: {
     name: 'favorite',
@@ -60,6 +61,21 @@ export const TroisSources: Story = {
           </svg>
         </Icon>
         <span>(ligature / image / SVG inline)</span>
+      </div>
+    `,
+  }),
+}
+
+export const Filled: Story = {
+  render: () => ({
+    components: { Icon },
+    template: `
+      <div style="display: flex; gap: 16px; align-items: center">
+        <span v-for="name in ['favorite', 'home', 'settings', 'star']" :key="name" style="display: inline-flex; gap: 8px; align-items: center">
+          <Icon :name="name" :size="24" />
+          <Icon :name="name" :size="24" filled />
+        </span>
+        <span>(contour / plein)</span>
       </div>
     `,
   }),

@@ -38,6 +38,16 @@ describe('Icon', () => {
     expect(container.querySelector('[data-testid="svg-inline"]')).not.toBeNull()
   })
 
+  it('filled : pose data-filled sur la racine, absent par défaut', () => {
+    const plein = render(Icon, { props: { name: 'favorite', filled: true } })
+    const iconPlein = plein.container.querySelector('.ds-icon') as HTMLElement
+    expect(iconPlein.hasAttribute('data-filled')).toBe(true)
+
+    const contour = render(Icon, { props: { name: 'favorite' } })
+    const iconContour = contour.container.querySelector('.ds-icon') as HTMLElement
+    expect(iconContour.hasAttribute('data-filled')).toBe(false)
+  })
+
   it('prop size numérique : pose --ds-icon-size en style inline, sinon rien', () => {
     const explicite = render(Icon, { props: { name: 'add', size: 32 } })
     const iconExplicite = explicite.container.querySelector('.ds-icon') as HTMLElement

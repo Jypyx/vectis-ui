@@ -68,6 +68,24 @@ describe('Button', () => {
     expect(icons.every((icon) => icon.getAttribute('aria-hidden') === 'true')).toBe(true)
   })
 
+  it('iconFilled : pose data-filled sur iconStart et iconEnd, absent par défaut', () => {
+    const plein = render(Button, {
+      props: { iconStart: 'add', iconEnd: 'arrow_forward', iconFilled: true },
+      slots: { default: 'Ajouter' },
+    })
+    const iconsPleins = Array.from(plein.container.querySelectorAll('.ds-icon'))
+    expect(iconsPleins).toHaveLength(2)
+    expect(iconsPleins.every((icon) => icon.hasAttribute('data-filled'))).toBe(true)
+
+    const contour = render(Button, {
+      props: { iconStart: 'add', iconEnd: 'arrow_forward' },
+      slots: { default: 'Ajouter' },
+    })
+    const iconsContour = Array.from(contour.container.querySelectorAll('.ds-icon'))
+    expect(iconsContour).toHaveLength(2)
+    expect(iconsContour.some((icon) => icon.hasAttribute('data-filled'))).toBe(false)
+  })
+
   it('en loading : le spinner remplace iconStart, iconEnd reste affiché', () => {
     const { getByRole } = render(Button, {
       props: { loading: true, iconStart: 'add', iconEnd: 'arrow_forward' },

@@ -51,8 +51,14 @@ accessible du bouton reste son libellé.
 
 <Canvas of={ButtonStories.Icons} />
 
+La prop `icon-filled` remplit les icônes `icon-start` / `icon-end` (axe `FILL` de la police),
+sans avoir à passer par les slots :
+
+<Canvas of={ButtonStories.IconsFilled} />
+
 Les slots `#start` / `#end` restent disponibles pour du contenu custom (SVG inline, image) et
-**priment** sur les props :
+**priment** sur les props (leur remplissage se pilote alors directement sur l'`Icon` via sa
+prop `filled`) :
 
 <Canvas of={ButtonStories.IconsTypes} />
 

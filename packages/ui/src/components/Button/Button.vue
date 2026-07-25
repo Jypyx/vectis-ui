@@ -34,6 +34,11 @@ interface ButtonProps {
   iconStart?: string
   /** Nom Material Symbols rendu après le libellé (le slot #end prime). */
   iconEnd?: string
+  /**
+   * Remplit iconStart/iconEnd (axe `FILL` de la police). Sans effet sur les
+   * slots #start/#end, dont l'Icon est fournie par le consommateur.
+   */
+  iconFilled?: boolean
 }
 
 const props = withDefaults(defineProps<ButtonProps>(), {
@@ -47,6 +52,7 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   loading: false,
   iconStart: undefined,
   iconEnd: undefined,
+  iconFilled: false,
 })
 
 defineSlots<{
@@ -94,11 +100,11 @@ const passedAttrs = computed(() => {
       <Spinner />
     </span>
     <slot v-else name="start">
-      <Icon v-if="iconStart" :name="iconStart" />
+      <Icon v-if="iconStart" :name="iconStart" :filled="iconFilled" />
     </slot>
     <slot />
     <slot name="end">
-      <Icon v-if="iconEnd" :name="iconEnd" />
+      <Icon v-if="iconEnd" :name="iconEnd" :filled="iconFilled" />
     </slot>
   </component>
 </template>
