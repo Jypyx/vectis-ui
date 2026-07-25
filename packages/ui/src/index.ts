@@ -29,3 +29,16 @@ export { setLocale, registerMessages } from './i18n/state'
 export { en } from './i18n/en'
 export { fr } from './i18n/fr'
 export type { VectisMessages, VectisMessagesInput } from './i18n/types'
+
+export { default as VIcon } from './components/VIcon/VIcon.vue'
+// Hook for a third-party icon library — pure TS modules, so no effect on the
+// bundled CSS order.
+export {
+  setIconResolver,
+  ligatureIconResolver,
+  classIconResolver,
+  componentIconResolver,
+} from './components/VIcon/resolver'
+export type { IconResolver, IconAliases } from './components/VIcon/resolver'
+export type { IconContext, IconRender, IconSource } from './components/VIcon/types'
+export type { VectisIconName } from './components/VIcon/icons'
