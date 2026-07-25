@@ -18,6 +18,8 @@ const meta = {
     tone: { control: 'select', options: ['accent', 'neutral', 'danger', 'success', 'warning'] },
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     compact: { control: 'boolean' },
+    icon: { control: 'text' },
+    iconFilled: { control: 'boolean' },
   },
   args: {
     label: 'Ajouter un élément',
@@ -112,6 +114,26 @@ export const IconsTypes: Story = {
       </div>
     `,
   }),
+}
+
+export const IconProp: Story = {
+  render: (args) => ({
+    components: { IconButton },
+    setup: () => ({ args }),
+    template: `
+      <div style="display: flex; gap: 8px; align-items: center">
+        <!-- Icône par prop, sans passer par le slot -->
+        <IconButton :label="args.label" icon="favorite" />
+        <IconButton :label="args.label" icon="favorite" icon-filled />
+        <span>(prop icon : contour / plein)</span>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const icons = canvasElement.querySelectorAll('.ds-icon')
+    await expect(icons[0]).not.toHaveAttribute('data-filled')
+    await expect(icons[1]).toHaveAttribute('data-filled')
+  },
 }
 
 export const Loading: Story = {

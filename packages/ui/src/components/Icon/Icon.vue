@@ -18,6 +18,11 @@ interface IconProps {
   size?: number
   /** Libellé accessible ; absent = icône décorative (aria-hidden). */
   label?: string
+  /**
+   * Remplit la ligature Material Symbols (axe `FILL` 1 au lieu de 0). Sans
+   * effet sur les sources `src` (image) et SVG inline (axe propre à la police).
+   */
+  filled?: boolean
 }
 
 withDefaults(defineProps<IconProps>(), {
@@ -25,6 +30,7 @@ withDefaults(defineProps<IconProps>(), {
   src: undefined,
   size: undefined,
   label: undefined,
+  filled: false,
 })
 
 defineSlots<{
@@ -37,6 +43,7 @@ defineSlots<{
   <span
     class="ds-icon"
     :style="size !== undefined ? { '--ds-icon-size': `${size}px` } : undefined"
+    :data-filled="filled || undefined"
     :role="label ? 'img' : undefined"
     :aria-label="label"
     :aria-hidden="label ? undefined : 'true'"
@@ -86,10 +93,14 @@ defineSlots<{
        technique de la police, pas des tokens de design — valeurs littérales
        tolérées, comme les opacités */
     font-variation-settings:
-      'FILL' 0,
+      'FILL' var(--_fill, 0),
       'wght' 400,
       'GRAD' 0,
       'opsz' var(--_opsz);
+  }
+
+  .ds-icon[data-filled] .ds-icon-symbol {
+    --_fill: 1;
   }
 
   .ds-icon-img,

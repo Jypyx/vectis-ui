@@ -1,0 +1,65 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as DatePickerStories from './DatePicker.stories'
+
+<Meta of={DatePickerStories} />
+
+# DatePicker
+
+Sélecteur de date : un champ [Input](?path=/docs/composants-input--docs) en
+lecture seule qui ouvre un [Calendar](?path=/docs/composants-calendar--docs) dans
+un panneau flottant. Le composant ne fait qu'assembler des briques du DS — aucune
+dépendance ni positionnement JS supplémentaire.
+
+Le panneau est un `popover="manual"` ancré en **pur CSS** (`anchor-scope` sur la
+racine + `anchor-name` sur le contrôle → `position-anchor`, comme Tooltip et
+Combobox). On n'utilise pas `popovertarget` (invalide sur un `<input>` texte) :
+l'ouverture est programmatique, ce qui permet de **déplacer le focus dans la
+grille** à l'ouverture — le bon modèle d'accessibilité pour un calendrier. La
+fermeture suit le pattern Combobox (`focusout` sur la racine + `Échap`).
+
+<Canvas of={DatePickerStories.Default} />
+<Controls of={DatePickerStories.Default} />
+
+## Modes de sélection
+
+Comme le Calendar sous-jacent : `single`, `range` et `multiple`. Le champ affiche
+la valeur formatée via `Intl` (une plage via `formatRange`, plusieurs dates
+séparées par des virgules).
+
+<Canvas of={DatePickerStories.Plage} />
+<Canvas of={DatePickerStories.Multiple} />
+
+## Presets & actions (slot `#footer`)
+
+Le slot `#footer` reçoit `close` pour fermer le panneau depuis un bouton ou un
+preset. En mode `single`, sélectionner une date ferme automatiquement ; en
+`range`/`multiple`, le panneau reste ouvert (l'utilisateur ferme via le footer).
+
+<Canvas of={DatePickerStories.AvecPresets} />
+
+## Bornes, événements, tailles
+
+`min`/`max`, `events` et `disabledDates` sont relayés au Calendar. Le champ suit
+l'échelle de tailles du DS (`size`, `compact`).
+
+<Canvas of={DatePickerStories.MinMax} />
+<Canvas of={DatePickerStories.Evenements} />
+<Canvas of={DatePickerStories.Tailles} />
+
+## États
+
+Le champ est effaçable (`clearable`, la croix remplace l'icône calendrier quand
+une valeur est posée) et supporte `disabled`.
+
+<Canvas of={DatePickerStories.Desactive} />
+
+## Accessibilité
+
+- Le champ porte `aria-haspopup="dialog"`, `aria-expanded` et `aria-controls` ;
+  le panneau est un `role="dialog"` nommé.
+- **Ouverture** au clic, à l'`Entrée` ou à la `flèche bas` depuis le champ ; le
+  focus se déplace alors dans la grille du calendrier.
+- **Fermeture** par `Échap` (le focus revient au champ), par clic hors du
+  composant, ou — en mode simple — après sélection.
+- Toute la navigation clavier de la grille est héritée du Calendar (voir sa
+  documentation). Les transitions respectent `prefers-reduced-motion`.

@@ -188,6 +188,9 @@
     --ds-control-size-badge-h: 1.25rem;
     --ds-control-size-badge-dot: 0.625rem;
     --ds-control-size-avatar-ring: 2px;
+    --ds-control-size-calendar-cell: 2.5rem;
+    --ds-control-size-calendar-dot: 0.25rem;
+    --ds-control-size-calendar-nav-min: 5.375rem;
     --ds-icon-size-sm: 1rem;
     --ds-icon-size-md: 1.25rem;
     --ds-icon-size-lg: 1.5rem;
@@ -273,6 +276,9 @@
     --ds-control-size-badge-h: 1.25rem;
     --ds-control-size-badge-dot: 0.625rem;
     --ds-control-size-avatar-ring: 2px;
+    --ds-control-size-calendar-cell: 2.5rem;
+    --ds-control-size-calendar-dot: 0.25rem;
+    --ds-control-size-calendar-nav-min: 5.375rem;
     --ds-icon-size-sm: 1rem;
     --ds-icon-size-md: 1.25rem;
     --ds-icon-size-lg: 1.5rem;

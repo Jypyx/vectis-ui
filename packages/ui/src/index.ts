@@ -58,3 +58,12 @@ export { default as Slider } from './components/Slider/Slider.vue'
 export type { SliderLabel } from './components/Slider/Slider.vue'
 export { default as Dialog } from './components/Dialog/Dialog.vue'
 export { default as DialogAlert } from './components/Dialog/DialogAlert.vue'
+export { default as Calendar } from './components/Calendar/Calendar.vue'
+export type {
+  CalendarMode,
+  CalendarValue,
+  DateRange,
+  CalendarEvent,
+  DateMatcher,
+} from './components/Calendar/Calendar.vue'
+export { default as DatePicker } from './components/DatePicker/DatePicker.vue'

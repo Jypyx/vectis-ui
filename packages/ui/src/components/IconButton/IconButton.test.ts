@@ -25,6 +25,35 @@ describe('IconButton', () => {
     expect(button.dataset.size).toBe('sm')
   })
 
+  it('prop icon : rend une Icon décorative avec la ligature (sans slot)', () => {
+    const { getByRole } = render(IconButton, {
+      props: { label: 'Favori', icon: 'favorite' },
+    })
+    const button = getByRole('button', { name: 'Favori' })
+    const icon = button.querySelector('.ds-icon') as HTMLElement
+    expect(icon).not.toBeNull()
+    expect(icon.textContent).toBe('favorite')
+    expect(icon.getAttribute('aria-hidden')).toBe('true')
+    expect(icon.hasAttribute('data-filled')).toBe(false)
+  })
+
+  it('prop iconFilled : pose data-filled sur l’icône', () => {
+    const { getByRole } = render(IconButton, {
+      props: { label: 'Favori', icon: 'favorite', iconFilled: true },
+    })
+    const icon = getByRole('button').querySelector('.ds-icon') as HTMLElement
+    expect(icon.hasAttribute('data-filled')).toBe(true)
+  })
+
+  it('sans prop icon : le slot par défaut est rendu (fallback)', () => {
+    const { getByRole } = render(IconButton, {
+      props: { label: 'Fermer' },
+      slots: { default: '<svg data-testid="slot-svg" aria-hidden="true" />' },
+    })
+    const button = getByRole('button', { name: 'Fermer' })
+    expect(button.querySelector('[data-testid="slot-svg"]')).not.toBeNull()
+  })
+
   it('supporte les nouveaux variants/tones et transmet compact', () => {
     const { getByRole } = render(IconButton, {
       props: { label: 'Valider', variant: 'tonal', tone: 'success', compact: true },

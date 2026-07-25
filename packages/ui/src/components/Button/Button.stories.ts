@@ -14,6 +14,7 @@ const meta = {
     compact: { control: 'boolean' },
     iconStart: { control: 'text' },
     iconEnd: { control: 'text' },
+    iconFilled: { control: 'boolean' },
     href: { control: 'text' },
   },
   args: {
@@ -101,6 +102,24 @@ export const Icons: Story = {
     const icon = button.querySelector('.ds-icon')
     await expect(icon).not.toBeNull()
     await expect(icon).toHaveAttribute('aria-hidden', 'true')
+  },
+}
+
+export const IconsFilled: Story = {
+  render: () => ({
+    components: { Button },
+    template: `
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
+        <Button icon-start="favorite" variant="tonal">Contour</Button>
+        <Button icon-start="favorite" icon-filled variant="tonal">Plein</Button>
+        <Button icon-start="home" icon-end="star" icon-filled variant="solid">Début + fin pleins</Button>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Plein' })
+    const icon = button.querySelector('.ds-icon')
+    await expect(icon).toHaveAttribute('data-filled')
   },
 }
 

@@ -116,6 +116,15 @@ export const semantic = {
     'size-badge-h': dimension('1.25rem', 'Hauteur du Badge (pilule)'),
     'size-badge-dot': dimension('0.625rem', 'Diamètre du Badge en mode point'),
     'size-avatar-ring': dimension('2px', 'Anneau de séparation des Avatars empilés (AvatarGroup)'),
+    'size-calendar-cell': dimension(
+      '2.5rem',
+      'Côté (hauteur/largeur) d’une cellule jour du Calendar',
+    ),
+    'size-calendar-dot': dimension('0.25rem', 'Diamètre d’une pastille d’événement du Calendar'),
+    'size-calendar-nav-min': dimension(
+      '5.375rem',
+      'Largeur minimale des boutons sélecteurs mois/année du Calendar (≈86px)',
+    ),
   },
   icon: {
     'size-sm': dimension('1rem', 'Icônes 16px'),
