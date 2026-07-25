@@ -71,9 +71,11 @@ interface CalendarProps {
   max?: string
   /** Dates non sélectionnables (barrées) : tableau d'ISO ou prédicat. */
   disabledDates?: DateMatcher
-  /** Afficher les jours des mois adjacents dans la grille. */
+  /** Afficher les jours des mois adjacents (grisés) dans la grille. Désactivé
+      par défaut : activer via `show-adjacent-days`. */
   showAdjacentDays?: boolean
-  /** Rendre cliquables les jours des mois adjacents (navigue vers leur mois). */
+  /** Rendre cliquables les jours des mois adjacents (navigue vers leur mois).
+      Implique leur affichage. */
   selectAdjacentDays?: boolean
   /** Événements → pastilles colorées sous les dates (max 3 par date). */
   events?: CalendarEvent[]
@@ -86,7 +88,7 @@ const props = withDefaults(defineProps<CalendarProps>(), {
   min: undefined,
   max: undefined,
   disabledDates: undefined,
-  showAdjacentDays: true,
+  showAdjacentDays: false,
   selectAdjacentDays: false,
   events: undefined,
 })
@@ -232,7 +234,8 @@ type DayCell = {
 const days = computed<DayCell[]>(() =>
   buildMonthGrid(viewYear.value, viewMonth0.value, resolvedFirstDay.value).map((cell) => {
     const inMonth = cell.adjacent === null
-    const show = inMonth || props.showAdjacentDays
+    // selectAdjacentDays implique l'affichage (un jour cliquable doit être visible)
+    const show = inMonth || props.showAdjacentDays || props.selectAdjacentDays
     const selectable = inMonth || props.selectAdjacentDays
     const disabled = !isWithin(cell.iso, props.min, props.max) || isDisabledDate.value(cell.iso)
     const kind: DayCell['kind'] = !show ? 'empty' : selectable ? 'button' : 'static'
@@ -708,7 +711,10 @@ defineExpose({ focus })
     gap: var(--ds-space-1);
   }
 
+  /* largeur minimale stable pour que les chevrons ne se décalent pas selon la
+     longueur du libellé mois/année */
   .ds-calendar-picker-toggle {
+    min-inline-size: var(--ds-control-size-calendar-nav-min);
     font-weight: 600;
     text-transform: capitalize;
   }
@@ -796,7 +802,11 @@ defineExpose({ focus })
       color var(--ds-duration-fast) var(--ds-ease-default);
   }
 
-  .ds-calendar-day:hover:not([aria-disabled='true']):not([data-selected]) {
+  /* hover réservé aux jours cliquables : ni désactivés, ni sélectionnés, ni les
+     jours adjacents non sélectionnables (spans statiques) */
+  .ds-calendar-day:hover:not([aria-disabled='true']):not([data-selected]):not(
+      .ds-calendar-day--static
+    ) {
     background: var(--ds-color-surface-muted);
   }
 

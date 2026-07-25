@@ -62,7 +62,7 @@ export const Multiple: Story = {
     setup: () => ({ args, value: ref<string[]>(['2026-06-05', '2026-06-12', '2026-06-20']) }),
     template: `
       <div style="display: grid; gap: 12px; justify-items: start">
-        <Calendar v-bind="args" mode="multiple" v-model="value" />
+        <Calendar v-bind="args" mode="multiple" v-model="value"/>
         <output>{{ value.join(', ') || '—' }}</output>
       </div>
     `,

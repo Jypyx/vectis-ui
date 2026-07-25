@@ -44,9 +44,11 @@ focusables au clavier, conformément au pattern ARIA).
 
 ## Mois adjacents
 
-`showAdjacentDays` (défaut vrai) affiche les jours des mois précédent/suivant en
-grisé. `selectAdjacentDays` les rend cliquables — un clic navigue alors vers leur
-mois et les sélectionne.
+`showAdjacentDays` (désactivé par défaut) affiche les jours des mois
+précédent/suivant en grisé — activez-le par simple présence :
+`<Calendar show-adjacent-days />`. `selectAdjacentDays` les rend cliquables (et
+implique leur affichage) — un clic navigue alors vers leur mois et les
+sélectionne.
 
 <Canvas of={CalendarStories.MoisAdjacents} />
 

@@ -121,6 +121,10 @@ export const semantic = {
       'Côté (hauteur/largeur) d’une cellule jour du Calendar',
     ),
     'size-calendar-dot': dimension('0.25rem', 'Diamètre d’une pastille d’événement du Calendar'),
+    'size-calendar-nav-min': dimension(
+      '5.375rem',
+      'Largeur minimale des boutons sélecteurs mois/année du Calendar (≈86px)',
+    ),
   },
   icon: {
     'size-sm': dimension('1rem', 'Icônes 16px'),

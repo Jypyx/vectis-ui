@@ -61,7 +61,7 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   min: undefined,
   max: undefined,
   disabledDates: undefined,
-  showAdjacentDays: true,
+  showAdjacentDays: false,
   selectAdjacentDays: false,
   events: undefined,
   label: undefined,
