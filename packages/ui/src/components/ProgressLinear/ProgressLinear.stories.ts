@@ -13,7 +13,14 @@ const meta = {
     valuePosition: { control: 'select', options: ['start', 'center', 'end'] },
     orientation: { control: 'select', options: ['horizontal', 'vertical'] },
   },
-  args: { value: 40, max: 100, tone: 'accent', shape: 'rounded', valuePosition: 'center' },
+  args: {
+    value: 40,
+    max: 100,
+    indeterminate: false,
+    tone: 'accent',
+    shape: 'rounded',
+    valuePosition: 'center',
+  },
   render: (args) => ({
     components: { ProgressLinear },
     setup: () => ({ args }),
@@ -80,11 +87,11 @@ export const Epaisseur: Story = {
     components: { ProgressLinear },
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <ProgressLinear :thickness="2" :value="40" aria-label="2px" />
-        <ProgressLinear :thickness="8" :value="55" aria-label="8px (défaut)" />
+        <ProgressLinear :value="40" aria-label="4px (défaut)" />
+        <ProgressLinear :thickness="8" :value="55" aria-label="8px" />
         <ProgressLinear :thickness="16" :value="70" aria-label="16px" />
-        <!-- une string est passée telle quelle : rem, var()… -->
-        <ProgressLinear thickness="1.5rem" :value="85" aria-label="1.5rem" />
+        <!-- toujours des pixels : une string numérique équivaut au number -->
+        <ProgressLinear thickness="24" :value="85" aria-label="24px" />
       </div>
     `,
   }),
@@ -93,18 +100,18 @@ export const Epaisseur: Story = {
 /**
  * Le texte est rendu en deux copies superposées : l'une sur la piste, l'autre
  * clippée à la portion remplie et contrastée sur le remplissage. Il reste donc
- * lisible à 5 % comme à 95 %. L'épaisseur par défaut est majorée dès qu'un
- * texte est affiché.
+ * lisible à 5 % comme à 95 %. L'épaisseur par défaut (4px) ne peut pas
+ * l'accueillir : afficher un texte suppose une `thickness`.
  */
 export const Valeur: Story = {
   render: () => ({
     components: { ProgressLinear },
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <ProgressLinear show-value value-position="start" :value="35" aria-label="Début" />
-        <ProgressLinear show-value value-position="center" :value="35" aria-label="Centre" />
-        <ProgressLinear show-value value-position="end" :value="35" aria-label="Fin" />
-        <ProgressLinear show-value value-position="center" :value="92" aria-label="Presque fini" />
+        <ProgressLinear :thickness="20" show-value value-position="start" :value="35" aria-label="Début" />
+        <ProgressLinear :thickness="20" show-value value-position="center" :value="35" aria-label="Centre" />
+        <ProgressLinear :thickness="20" show-value value-position="end" :value="35" aria-label="Fin" />
+        <ProgressLinear :thickness="20" show-value value-position="center" :value="92" aria-label="Presque fini" />
       </div>
     `,
   }),
@@ -149,14 +156,14 @@ export const Carre: Story = {
 }
 
 export const Indetermine: Story = {
-  args: { value: undefined },
+  args: { indeterminate: true },
   render: () => ({
     components: { ProgressLinear },
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <ProgressLinear aria-label="Chargement" />
-        <ProgressLinear tone="success" :thickness="4" aria-label="Synchronisation" />
-        <ProgressLinear color="teal" :thickness="12" shape="square" aria-label="Analyse" />
+        <ProgressLinear indeterminate aria-label="Chargement" />
+        <ProgressLinear indeterminate tone="success" :thickness="8" aria-label="Synchronisation" />
+        <ProgressLinear indeterminate color="teal" :thickness="12" shape="square" aria-label="Analyse" />
       </div>
     `,
   }),
@@ -164,9 +171,9 @@ export const Indetermine: Story = {
 
 /**
  * `orientation="vertical"` : 0 en bas, max en haut, par un simple
- * `writing-mode` sur la piste — remplissage, texte et animation indéterminée
- * basculent d'axe sans règle dupliquée. Longueur par défaut au token, ou prop
- * `length`.
+ * `writing-mode` sur la racine — remplissage, texte et animation indéterminée
+ * basculent d'axe sans règle dupliquée. La longueur se pose en CSS (`height`),
+ * comme la largeur en horizontal.
  */
 export const Vertical: Story = {
   render: () => ({
@@ -174,10 +181,10 @@ export const Vertical: Story = {
     template: `
       <div style="display: flex; gap: 32px; align-items: flex-end">
         <ProgressLinear orientation="vertical" :value="40" aria-label="Défaut" />
-        <ProgressLinear orientation="vertical" :value="75" :length="240" tone="success" aria-label="240px" />
+        <ProgressLinear orientation="vertical" :value="75" style="height: 240px" tone="success" aria-label="240px" />
         <ProgressLinear orientation="vertical" :value="30" :thickness="20" shape="square" tone="warning" aria-label="Épaisse carrée" />
-        <ProgressLinear orientation="vertical" :value="60" :thickness="32" :length="200" show-value aria-label="Avec texte" />
-        <ProgressLinear orientation="vertical" :thickness="12" aria-label="Indéterminé" />
+        <ProgressLinear orientation="vertical" :value="60" :thickness="32" style="height: 200px" show-value aria-label="Avec texte" />
+        <ProgressLinear orientation="vertical" indeterminate :thickness="12" aria-label="Indéterminé" />
       </div>
     `,
   }),
@@ -223,7 +230,7 @@ export const Progression: Story = {
 
 /** `max` libre : les bornes ARIA restent fidèles (« 3 sur 8 »). */
 export const MaxPersonnalise: Story = {
-  args: { value: 3, max: 8, showValue: true },
+  args: { value: 3, max: 8, showValue: true, thickness: 20 },
 }
 
 export const CasLimites: Story = {
@@ -231,12 +238,12 @@ export const CasLimites: Story = {
     components: { ProgressLinear },
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <ProgressLinear :value="0" show-value aria-label="Zéro" />
-        <ProgressLinear :value="100" show-value aria-label="Complet" />
+        <ProgressLinear :value="0" :thickness="20" show-value aria-label="Zéro" />
+        <ProgressLinear :value="100" :thickness="20" show-value aria-label="Complet" />
         <!-- au-delà du max : clampé -->
-        <ProgressLinear :value="250" :max="100" show-value aria-label="Hors bornes" />
+        <ProgressLinear :value="250" :max="100" :thickness="20" show-value aria-label="Hors bornes" />
         <!-- texte plus haut que la barre : débordement visible, non rogné -->
-        <ProgressLinear :value="45" :thickness="4" show-value aria-label="Barre très fine" />
+        <ProgressLinear :value="45" show-value aria-label="Barre à l'épaisseur par défaut" />
         <ProgressLinear :value="45" :thickness="24" aria-label="Texte très long">
           <template #default>Compression des ressources du projet en cours…</template>
         </ProgressLinear>

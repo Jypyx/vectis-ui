@@ -39,13 +39,14 @@ fournir.
 
 <Canvas of={ProgressLinearStories.CouleurCustom} />
 
-## Épaisseur et longueur
+## Épaisseur
 
-`thickness` remplace l'ancienne échelle discrète : un nombre est interprété en pixels, une
-chaîne est passée telle quelle (`'1.5rem'`, `'var(--mon-token)'`). Sans valeur, l'épaisseur
-vient d'un token dédié — majoré automatiquement dès qu'un texte est affiché, un libellé ne
-tenant pas dans une barre de huit pixels. `length` suit la même convention ; en horizontal la
-barre occupe par défaut toute la largeur de son conteneur.
+`thickness` remplace l'ancienne échelle discrète et s'exprime **toujours en pixels** : `12`
+comme `'12'` donnent douze pixels. Sans valeur, l'épaisseur vaut 4 pixels — trop peu pour
+accueillir un texte, qui suppose donc une `thickness` explicite.
+
+La **longueur**, elle, n'est pas une prop : la barre occupe toute la place disponible et c'est
+au conteneur de la définir — `width` en horizontal, `height` en vertical.
 
 <Canvas of={ProgressLinearStories.Epaisseur} />
 
@@ -76,7 +77,8 @@ le ProgressCircular, où elles pilotent les bouts du trait.
 
 ## Indéterminé
 
-Omettre `value` suffit : la barre passe en animation continue et `aria-valuenow` disparaît.
+La prop `indeterminate` bascule la barre en animation continue ; `value` est alors ignorée et
+`aria-valuenow` disparaît.
 
 Une barre de taille fixe traverse la piste, du bord extérieur de départ au bord extérieur
 d'arrivée. Aux deux extrémités elle affleure exactement le bord sans jamais s'en éloigner :
@@ -92,9 +94,10 @@ inversé.
 ## Vertical
 
 `orientation="vertical"` place 0 en bas et le maximum en haut, par un simple mode d'écriture
-posé sur la piste : remplissage, découpe du texte et animation indéterminée changent d'axe
+posé sur la racine : remplissage, découpe du texte et animation indéterminée changent d'axe
 sans règle supplémentaire. Le texte, lui, reste écrit horizontalement — prévoir une épaisseur
-suffisante pour l'accueillir.
+suffisante pour l'accueillir. La hauteur se pose en CSS, faute d'un parent de hauteur connue
+sur lequel s'aligner.
 
 <Canvas of={ProgressLinearStories.Vertical} />
 
@@ -107,8 +110,8 @@ exactement la même durée et la même courbe.
 
 ## Cas limites
 
-Valeur nulle, complète ou hors bornes (clampée), barre trop fine pour son texte (qui déborde
-sans être rogné), libellé très long.
+Valeur nulle, complète ou hors bornes (clampée), barre à l'épaisseur par défaut portant un
+texte (qui déborde sans être rogné), libellé très long.
 
 <Canvas of={ProgressLinearStories.CasLimites} />
 

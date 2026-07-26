@@ -23,10 +23,9 @@ vaut un pixel et il n'y a aucun facteur d'échelle à compenser. Les cercles son
 positionnés par les propriétés CSS de géométrie (`cx`, `cy`, `r`), dérivées des mêmes custom
 properties que la boîte — le rayon vaut la moitié du diamètre moins la moitié de l'épaisseur.
 
-C'est ce qui permet d'accepter un diamètre ou une épaisseur exprimés en `rem` ou via un token :
-l'approche classique, un `viewBox` fixe, obligerait à convertir l'épaisseur en unités de
-`viewBox`, donc à connaître le diamètre en pixels — et réintroduirait du calcul en JavaScript
-pour un résultat moins souple.
+L'approche classique, un `viewBox` fixe, obligerait à convertir l'épaisseur en unités de
+`viewBox` — donc à connaître le rapport entre le diamètre et le `viewBox`, et à le recalculer
+en JavaScript à chaque changement de taille.
 
 La longueur du trait, elle, passe par `pathLength` : le chemin est normalisé à cent unités,
 si bien que le décalage du pointillé s'exprime directement en pourcentage de progression.
@@ -47,10 +46,9 @@ famille. Le tone `neutral` inverse texte et surface plutôt que d'employer un gr
 
 ## Taille et épaisseur
 
-`size` (diamètre) et `thickness` sont indépendants : un nombre est interprété en pixels, une
-chaîne est passée telle quelle (`'6rem'`, `'var(--mon-token)'`). Attendre une longueur — un
-pourcentage n'aurait pas de sens pour la géométrie des cercles. Sans valeur, chacun vient de
-son token dédié.
+`size` (diamètre) et `thickness` sont indépendants et s'expriment **toujours en pixels** :
+`96` comme `'96'` donnent quatre-vingt-seize pixels. Sans valeur, le diamètre vaut 48 pixels
+et l'épaisseur 4.
 
 <Canvas of={ProgressCircularStories.Taille} />
 
@@ -79,7 +77,7 @@ icône de validation, deux lignes de texte hiérarchisées…
 
 ## Indéterminé
 
-Omettre `value` suffit : `aria-valuenow` disparaît et le donut passe en animation continue —
+La prop `indeterminate` fait disparaître `aria-valuenow` et passe le donut en animation continue —
 une rotation d'ensemble combinée à un arc dont la longueur varie, les deux périodes étant
 volontairement décalées pour éviter un battement mécanique.
 

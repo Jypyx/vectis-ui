@@ -53,8 +53,9 @@ describe('ProgressLinear', () => {
     expect(style).not.toContain('Infinity')
   })
 
-  it('indéterminé : pas d’aria-valuenow, data-indeterminate, --_f posée à 0', () => {
+  it('indéterminé : pas d’aria-valuenow, data-indeterminate, --_f toujours posée', () => {
     const { getByRole, container } = render(ProgressLinear, {
+      props: { indeterminate: true },
       attrs: { 'aria-label': 'Chargement' },
     })
     const bar = getByRole('progressbar')
@@ -66,7 +67,7 @@ describe('ProgressLinear', () => {
 
   it('indéterminé : showValue est ignoré (aucun texte rendu)', () => {
     const { container } = render(ProgressLinear, {
-      props: { showValue: true },
+      props: { indeterminate: true, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
     expect(container.querySelectorAll('.ds-progress-linear-text')).toHaveLength(0)
@@ -102,20 +103,12 @@ describe('ProgressLinear', () => {
     expect(styleOf(container)).not.toContain('--_thickness')
     await rerender({ thickness: 12 })
     expect(styleOf(container)).toContain('--_thickness: 12px')
-    await rerender({ thickness: '0.75rem' })
-    expect(styleOf(container)).toContain('--_thickness: 0.75rem')
-  })
-
-  it('length : number → px, string telle quelle, absente si non fournie', async () => {
-    const { container, rerender } = render(ProgressLinear, {
-      props: { value: 40 },
-      attrs: { 'aria-label': 'x' },
-    })
-    expect(styleOf(container)).not.toContain('--_length')
-    await rerender({ length: 240 })
-    expect(styleOf(container)).toContain('--_length: 240px')
-    await rerender({ length: '16rem' })
-    expect(styleOf(container)).toContain('--_length: 16rem')
+    // string numérique : même résultat, toujours des pixels
+    await rerender({ thickness: '12' })
+    expect(styleOf(container)).toContain('--_thickness: 12px')
+    // valeur non numérique : ignorée plutôt que custom property invalide
+    await rerender({ thickness: 'auto' })
+    expect(styleOf(container)).not.toContain('--_thickness')
   })
 
   it('shape : rounded par défaut, square reporté', async () => {

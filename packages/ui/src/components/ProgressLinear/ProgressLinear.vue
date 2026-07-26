@@ -22,10 +22,12 @@
 import { computed } from 'vue'
 
 interface ProgressLinearProps {
-  /** Valeur courante ; absente = indéterminé (animation continue). */
+  /** Valeur courante, bornée à [0, max]. */
   value?: number
   /** Borne haute (la borne basse est toujours 0). */
   max?: number
+  /** Progression inconnue : animation continue, `value` ignorée. */
+  indeterminate?: boolean
   /** Couleur sémantique. */
   tone?: 'accent' | 'success' | 'warning' | 'danger' | 'neutral'
   /**
@@ -34,16 +36,10 @@ interface ProgressLinearProps {
    */
   color?: string
   /**
-   * Épaisseur de la barre : number = px, string = valeur CSS telle quelle
-   * ('0.75rem', 'var(--x)'). Défaut : token, majoré quand un texte est
-   * affiché (un texte de 12px ne tient pas dans 8px).
+   * Épaisseur de la barre, **en pixels** : `12` comme `'12'` donnent 12px.
+   * Défaut : 4px (token).
    */
   thickness?: number | string
-  /**
-   * Longueur de la barre : number = px, string = valeur CSS. Défaut : 100 % du
-   * conteneur en horizontal, token en vertical.
-   */
-  length?: number | string
   /** Extrémités arrondies (défaut) ou angles droits. */
   shape?: 'rounded' | 'square'
   /** Affiche la progression en pourcentage dans la barre (ignoré en indéterminé). */
@@ -55,12 +51,12 @@ interface ProgressLinearProps {
 }
 
 const props = withDefaults(defineProps<ProgressLinearProps>(), {
-  value: undefined,
+  value: 0,
   max: 100,
+  indeterminate: false,
   tone: 'accent',
   color: undefined,
   thickness: undefined,
-  length: undefined,
   shape: 'rounded',
   showValue: false,
   valuePosition: 'center',
@@ -76,23 +72,22 @@ defineSlots<{
   default?(props: { value: number; max: number; percent: number }): unknown
 }>()
 
-/** Valeur bornée à [0, max] ; undefined = indéterminé. */
-const clamped = computed(() =>
-  props.value === undefined
-    ? undefined
-    : Math.min(Math.max(props.value, 0), Math.max(props.max, 0)),
-)
+/** Valeur bornée à [0, max]. */
+const clamped = computed(() => Math.min(Math.max(props.value, 0), Math.max(props.max, 0)))
 
-/*
- * Fraction [0, 1], toujours définie (0 en indéterminé) : sans elle,
- * `calc(100% * var(--_f))` serait invalide au computed-value time et
- * retomberait sur `auto`. `props.max || 1` neutralise max: 0.
+/** Fraction [0, 1] pilotant tout le rendu. `props.max || 1` neutralise max: 0. */
+const fraction = computed(() => clamped.value / (props.max || 1))
+
+/**
+ * Dimensions toujours en pixels : `12` comme `'12'` donnent `12px`. Une valeur
+ * non numérique retourne undefined plutôt qu'une custom property invalide, qui
+ * casserait la géométrie au lieu de retomber sur le token.
  */
-const fraction = computed(() => (clamped.value ?? 0) / (props.max || 1))
-
-/** number → px, string → telle quelle (permet rem, %, var()…). */
-const cssSize = (v: number | string | undefined) =>
-  v === undefined ? undefined : typeof v === 'number' ? `${v}px` : v
+const px = (v: number | string | undefined) => {
+  if (v === undefined) return undefined
+  const n = typeof v === 'number' ? v : Number.parseFloat(v)
+  return Number.isFinite(n) ? `${n}px` : undefined
+}
 </script>
 
 <template>
@@ -104,16 +99,11 @@ const cssSize = (v: number | string | undefined) =>
     :data-shape="shape"
     :data-orientation="orientation === 'vertical' ? 'vertical' : undefined"
     :data-value-position="valuePosition"
-    :data-indeterminate="clamped === undefined ? '' : undefined"
-    :aria-valuenow="clamped"
+    :data-indeterminate="indeterminate ? '' : undefined"
+    :aria-valuenow="indeterminate ? undefined : clamped"
     aria-valuemin="0"
     :aria-valuemax="max"
-    :style="{
-      '--_f': String(fraction),
-      '--_custom': color,
-      '--_thickness': cssSize(thickness),
-      '--_length': cssSize(length),
-    }"
+    :style="{ '--_f': String(fraction), '--_custom': color, '--_thickness': px(thickness) }"
   >
     <span class="ds-progress-linear-fill" />
     <!--
@@ -122,7 +112,7 @@ const cssSize = (v: number | string | undefined) =>
       par contraste sur le remplissage. La copie clippée duplique du texte
       visible → aria-hidden.
     -->
-    <template v-if="clamped !== undefined && (showValue || $slots.default)">
+    <template v-if="!indeterminate && (showValue || $slots.default)">
       <span class="ds-progress-linear-text">
         <slot :value="clamped" :max="max" :percent="fraction * 100">
           {{ Math.round(fraction * 100) }}&nbsp;%
@@ -140,16 +130,15 @@ const cssSize = (v: number | string | undefined) =>
 <style>
 @layer ds.components {
   /*
-   * La racine EST la piste. Les custom properties de dimension y sont toutes
-   * déclarées (jamais sur un descendant) : le style inline posé par les props
-   * gagne ainsi systématiquement, y compris sur le défaut majoré ci-dessous.
+   * La racine EST la piste. Elle occupe toute la longueur disponible : c'est
+   * au consommateur de la dimensionner via son parent (ou un `width`/`height`
+   * direct, qui bat ce layer).
    */
   .ds-progress-linear {
     --_thickness: var(--ds-control-size-progress-linear-thickness);
-    --_length: 100%;
     position: relative;
     display: block;
-    inline-size: var(--_length);
+    inline-size: 100%;
     block-size: var(--_thickness);
     border-radius: var(--ds-radius-pill);
     background: var(--_track);
@@ -157,12 +146,6 @@ const cssSize = (v: number | string | undefined) =>
     font-size: var(--ds-font-size-xs);
     font-weight: var(--ds-font-weight-medium);
     line-height: var(--ds-font-leading-none);
-  }
-
-  /* Un texte de 12px ne tient pas dans une barre de 8px : second défaut,
-     déduit de la présence des copies de texte plutôt que d'un data-attribut. */
-  .ds-progress-linear:has(.ds-progress-linear-text) {
-    --_thickness: var(--ds-control-size-progress-linear-thickness-text);
   }
 
   .ds-progress-linear[data-shape='square'] {
@@ -233,7 +216,8 @@ const cssSize = (v: number | string | undefined) =>
 
   /* --- Texte dans la barre : deux copies superposées, toutes deux calées sur
      la boîte de la racine — qui est aussi celle de la piste, d'où un clip qui
-     tombe pile sur le bord du remplissage. --- */
+     tombe pile sur le bord du remplissage. L'épaisseur par défaut (4px) ne
+     peut pas accueillir de texte : en afficher suppose une `thickness`. --- */
   .ds-progress-linear-text {
     position: absolute;
     inset: 0;
@@ -280,10 +264,14 @@ const cssSize = (v: number | string | undefined) =>
 
      PAS de `direction: rtl` pour mettre le 0 en bas — elle s'appliquerait au
      texte des copies et le bidi réordonnerait « 50 % » en « % 50 ». On ancre
-     le remplissage à la FIN de l'axe inline à la place. */
+     le remplissage à la FIN de l'axe inline à la place.
+
+     La longueur vient d'un token faute de pouvoir hériter d'un parent de
+     hauteur auto (elle s'effondrerait à zéro) ; un `height` consommateur, non
+     layerisé, la surcharge. */
   .ds-progress-linear[data-orientation='vertical'] {
-    --_length: var(--ds-control-size-progress-linear-length);
     writing-mode: vertical-lr;
+    inline-size: var(--ds-control-size-progress-linear-length);
   }
 
   .ds-progress-linear[data-orientation='vertical'] .ds-progress-linear-fill {
@@ -291,8 +279,7 @@ const cssSize = (v: number | string | undefined) =>
     inset-inline-end: 0;
   }
 
-  /* Le texte s'empile sur l'axe vertical, start = côté 0 (donc en bas). Une
-     épaisseur suffisante pour l'accueillir est à la charge du consommateur. */
+  /* Le texte s'empile sur l'axe vertical, start = côté 0 (donc en bas). */
   .ds-progress-linear[data-orientation='vertical'] .ds-progress-linear-text {
     flex-direction: column-reverse;
     padding-inline: 0;
@@ -329,8 +316,8 @@ const cssSize = (v: number | string | undefined) =>
     /* La position de départ dérive de cette taille (les deux doivent rester
        égales pour que la barre parte pile hors piste). */
     --_bar: 40%;
-    /* le sens de parcours est indifférent pour un loader : on reprend l'ancrage
-       au début de l'axe inline, y compris en vertical */
+    /* on reprend l'ancrage au début de l'axe inline, y compris en vertical où
+       le mode déterminé ancre à la fin (voir plus haut) */
     inset-inline-start: 0;
     inset-inline-end: auto;
     inline-size: var(--_bar);
@@ -349,6 +336,16 @@ const cssSize = (v: number | string | undefined) =>
     to {
       inset-inline-start: 100%;
     }
+  }
+
+  /* En écriture verticale l'axe inline descend : la barre irait du haut vers
+     le bas, à rebours du remplissage déterminé qui part du bas. On relit les
+     mêmes keyframes à l'envers — possible sans altérer le rendu parce que la
+     courbe est symétrique (avec un easing asymétrique il faudrait un second
+     jeu de keyframes). En RTL horizontal, rien à faire : `inset-inline-start`
+     suit déjà le sens de lecture. */
+  .ds-progress-linear[data-orientation='vertical'][data-indeterminate] .ds-progress-linear-fill {
+    animation-direction: reverse;
   }
 
   @media (prefers-reduced-motion: reduce) {

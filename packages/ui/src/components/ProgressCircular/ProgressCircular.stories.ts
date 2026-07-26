@@ -10,7 +10,7 @@ const meta = {
     tone: { control: 'select', options: ['accent', 'success', 'warning', 'danger', 'neutral'] },
     shape: { control: 'select', options: ['rounded', 'square'] },
   },
-  args: { value: 65, max: 100, tone: 'accent', shape: 'rounded' },
+  args: { value: 65, max: 100, indeterminate: false, tone: 'accent', shape: 'rounded' },
   render: (args) => ({
     components: { ProgressCircular },
     setup: () => ({ args }),
@@ -81,8 +81,8 @@ export const Taille: Story = {
         <ProgressCircular :size="24" :thickness="3" :value="60" aria-label="24px" />
         <ProgressCircular :size="48" :value="60" aria-label="48px (défaut)" />
         <ProgressCircular :size="80" :value="60" show-value aria-label="80px" />
-        <!-- une string est passée telle quelle : rem, var()… -->
-        <ProgressCircular size="6rem" :value="60" show-value aria-label="6rem" />
+        <!-- toujours des pixels : une string numérique équivaut au number -->
+        <ProgressCircular size="96" :value="60" show-value aria-label="96px (string)" />
       </div>
     `,
   }),
@@ -97,7 +97,7 @@ export const Epaisseur: Story = {
         <ProgressCircular :size="72" :thickness="2" :value="60" aria-label="2px" />
         <ProgressCircular :size="72" :thickness="4" :value="60" aria-label="4px (défaut)" />
         <ProgressCircular :size="72" :thickness="8" :value="60" aria-label="8px" />
-        <ProgressCircular :size="72" thickness="1rem" :value="60" aria-label="1rem" />
+        <ProgressCircular :size="72" :thickness="16" :value="60" aria-label="16px" />
       </div>
     `,
   }),
@@ -155,14 +155,14 @@ export const Carre: Story = {
 }
 
 export const Indetermine: Story = {
-  args: { value: undefined },
+  args: { indeterminate: true },
   render: () => ({
     components: { ProgressCircular },
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <ProgressCircular aria-label="Chargement" />
-        <ProgressCircular :size="72" :thickness="8" tone="success" aria-label="Synchronisation" />
-        <ProgressCircular :size="96" :thickness="4" shape="square" color="teal" aria-label="Analyse" />
+        <ProgressCircular indeterminate aria-label="Chargement" />
+        <ProgressCircular indeterminate :size="72" :thickness="8" tone="success" aria-label="Synchronisation" />
+        <ProgressCircular indeterminate :size="96" :thickness="4" shape="square" color="teal" aria-label="Analyse" />
       </div>
     `,
   }),

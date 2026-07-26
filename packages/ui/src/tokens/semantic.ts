@@ -107,21 +107,17 @@ export const semantic = {
     ),
     'size-listbox-max-block': dimension('18rem', 'Hauteur maximale du panneau listbox du Combobox'),
     'size-progress-linear-thickness': dimension(
-      '0.5rem',
-      'Épaisseur par défaut de la barre du ProgressLinear',
-    ),
-    'size-progress-linear-thickness-text': dimension(
-      '1.25rem',
-      'Épaisseur par défaut du ProgressLinear affichant un texte dans la barre',
+      '0.25rem',
+      'Épaisseur par défaut de la barre du ProgressLinear (4px)',
     ),
     'size-progress-linear-length': dimension(
       '10rem',
-      'Longueur par défaut du ProgressLinear vertical',
+      'Longueur par défaut du ProgressLinear vertical (surchargeable par `height`)',
     ),
     'size-progress-circular-diameter': dimension('3rem', 'Diamètre par défaut du ProgressCircular'),
     'size-progress-circular-thickness': dimension(
       '0.25rem',
-      'Épaisseur par défaut du trait du ProgressCircular',
+      'Épaisseur par défaut du trait du ProgressCircular (4px)',
     ),
     'size-toast-width': dimension('22rem', "Largeur par défaut d'un toast"),
     'size-badge-h': dimension('1.25rem', 'Hauteur du Badge (pilule)'),

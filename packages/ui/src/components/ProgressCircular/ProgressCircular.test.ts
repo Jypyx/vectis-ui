@@ -49,7 +49,7 @@ describe('ProgressCircular', () => {
 
   it('indéterminé : pas d’aria-valuenow, data-indeterminate, aucun label', () => {
     const { getByRole, container } = render(ProgressCircular, {
-      props: { showValue: true },
+      props: { indeterminate: true, showValue: true },
       attrs: { 'aria-label': 'Chargement' },
     })
     const bar = getByRole('progressbar')
@@ -70,9 +70,14 @@ describe('ProgressCircular', () => {
     await rerender({ size: 96, thickness: 8 })
     expect(styleOf(container)).toContain('--_diameter: 96px')
     expect(styleOf(container)).toContain('--_thickness: 8px')
-    await rerender({ size: '6rem', thickness: '0.5rem' })
-    expect(styleOf(container)).toContain('--_diameter: 6rem')
-    expect(styleOf(container)).toContain('--_thickness: 0.5rem')
+    // strings numériques : même résultat, toujours des pixels
+    await rerender({ size: '96', thickness: '8' })
+    expect(styleOf(container)).toContain('--_diameter: 96px')
+    expect(styleOf(container)).toContain('--_thickness: 8px')
+    // valeurs non numériques : ignorées plutôt que custom properties invalides
+    await rerender({ size: 'auto', thickness: 'auto' })
+    expect(styleOf(container)).not.toContain('--_diameter')
+    expect(styleOf(container)).not.toContain('--_thickness')
   })
 
   it('shape : rounded par défaut, square reporté', async () => {

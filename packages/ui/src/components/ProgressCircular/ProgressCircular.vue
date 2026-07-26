@@ -5,10 +5,10 @@
  * Toute la géométrie est CSS, sans un octet de JS de calcul : le <svg> n'a
  * PAS de viewBox (donc 1 unité utilisateur = 1 px, aucun facteur d'échelle à
  * compenser) et les cercles sont positionnés par les propriétés de géométrie
- * SVG2 `cx`/`cy`/`r` dérivées des mêmes custom properties que la boîte. C'est
- * ce qui permet d'accepter un diamètre ou une épaisseur en rem / var() —
- * l'alternative (viewBox fixe + conversion de l'épaisseur en unités de
- * viewBox) exigerait un diamètre numérique en px et réintroduirait du calcul.
+ * SVG2 `cx`/`cy`/`r` dérivées des mêmes custom properties que la boîte. Un
+ * viewBox fixe imposerait au contraire de convertir l'épaisseur en unités de
+ * viewBox — donc de connaître le ratio diamètre/viewBox en JS, à recalculer à
+ * chaque changement de taille.
  *
  * `pathLength=100` normalise la longueur du chemin : stroke-dashoffset
  * s'exprime alors directement en pourcentage de progression.
@@ -24,10 +24,12 @@
 import { computed } from 'vue'
 
 interface ProgressCircularProps {
-  /** Valeur courante ; absente = indéterminé (animation continue). */
+  /** Valeur courante, bornée à [0, max]. */
   value?: number
   /** Borne haute (la borne basse est toujours 0). */
   max?: number
+  /** Progression inconnue : animation continue, `value` ignorée. */
+  indeterminate?: boolean
   /** Couleur sémantique. */
   tone?: 'accent' | 'success' | 'warning' | 'danger' | 'neutral'
   /**
@@ -36,12 +38,13 @@ interface ProgressCircularProps {
    */
   color?: string
   /**
-   * Diamètre : number = px, string = valeur CSS telle quelle ('4rem',
-   * 'var(--x)'). Attendre une longueur — un pourcentage casserait la
-   * géométrie. Défaut : token.
+   * Diamètre, **en pixels** : `96` comme `'96'` donnent 96px. Défaut : token.
    */
   size?: number | string
-  /** Épaisseur du trait : number = px, string = valeur CSS. Défaut : token. */
+  /**
+   * Épaisseur du trait, **en pixels** : `8` comme `'8'` donnent 8px.
+   * Défaut : 4px (token).
+   */
   thickness?: number | string
   /** Bouts du trait arrondis (défaut) ou francs. */
   shape?: 'rounded' | 'square'
@@ -50,8 +53,9 @@ interface ProgressCircularProps {
 }
 
 const props = withDefaults(defineProps<ProgressCircularProps>(), {
-  value: undefined,
+  value: 0,
   max: 100,
+  indeterminate: false,
   tone: 'accent',
   color: undefined,
   size: undefined,
@@ -65,22 +69,22 @@ defineSlots<{
   default?(props: { value: number; max: number; percent: number }): unknown
 }>()
 
-/** Valeur bornée à [0, max] ; undefined = indéterminé. */
-const clamped = computed(() =>
-  props.value === undefined
-    ? undefined
-    : Math.min(Math.max(props.value, 0), Math.max(props.max, 0)),
-)
+/** Valeur bornée à [0, max]. */
+const clamped = computed(() => Math.min(Math.max(props.value, 0), Math.max(props.max, 0)))
 
-/*
- * Fraction [0, 1], toujours définie (0 en indéterminé) : sans elle, le calc()
- * du stroke-dashoffset serait invalide. `props.max || 1` neutralise max: 0.
+/** Fraction [0, 1] pilotant tout le rendu. `props.max || 1` neutralise max: 0. */
+const fraction = computed(() => clamped.value / (props.max || 1))
+
+/**
+ * Dimensions toujours en pixels : `96` comme `'96'` donnent `96px`. Une valeur
+ * non numérique retourne undefined plutôt qu'une custom property invalide, qui
+ * casserait la géométrie au lieu de retomber sur le token.
  */
-const fraction = computed(() => (clamped.value ?? 0) / (props.max || 1))
-
-/** number → px, string → telle quelle (permet rem, var()…). */
-const cssSize = (v: number | string | undefined) =>
-  v === undefined ? undefined : typeof v === 'number' ? `${v}px` : v
+const px = (v: number | string | undefined) => {
+  if (v === undefined) return undefined
+  const n = typeof v === 'number' ? v : Number.parseFloat(v)
+  return Number.isFinite(n) ? `${n}px` : undefined
+}
 </script>
 
 <template>
@@ -90,25 +94,22 @@ const cssSize = (v: number | string | undefined) =>
     :data-tone="tone"
     :data-custom="color !== undefined ? '' : undefined"
     :data-shape="shape"
-    :data-indeterminate="clamped === undefined ? '' : undefined"
-    :aria-valuenow="clamped"
+    :data-indeterminate="indeterminate ? '' : undefined"
+    :aria-valuenow="indeterminate ? undefined : clamped"
     aria-valuemin="0"
     :aria-valuemax="max"
     :style="{
       '--_f': String(fraction),
       '--_custom': color,
-      '--_diameter': cssSize(size),
-      '--_thickness': cssSize(thickness),
+      '--_diameter': px(size),
+      '--_thickness': px(thickness),
     }"
   >
     <svg class="ds-progress-circular-svg" aria-hidden="true">
       <circle class="ds-progress-circular-track" pathLength="100" />
       <circle class="ds-progress-circular-bar" pathLength="100" />
     </svg>
-    <span
-      v-if="clamped !== undefined && (showValue || $slots.default)"
-      class="ds-progress-circular-label"
-    >
+    <span v-if="!indeterminate && (showValue || $slots.default)" class="ds-progress-circular-label">
       <slot :value="clamped" :max="max" :percent="fraction * 100">
         {{ Math.round(fraction * 100) }}&nbsp;%
       </slot>
