@@ -11,7 +11,7 @@
  *
  * Deux colonnes de padding-inline : `--_control-padding-inline` pour les
  * contrôles pleins (Button, Chip…), `--_control-padding-inline-field` pour
- * les champs de saisie (Input, Textarea, Select, DatePicker), plus serrés.
+ * les champs de saisie (Input, Textarea, DatePicker), plus serrés.
  * `--_control-gap` : espacement interne (icône/libellé, cases OTP…).
  *
  * `--ds-icon-size`/`--ds-icon-opsz` = API de contexte publique d'Icon ;

@@ -110,7 +110,7 @@ Popover API, `<dialog>`, `<details name>`, `:user-invalid`, `color-mix()`, `:has
 
 Inventaire (exportés depuis `src/index.ts` — l'ordre y fixe la cascade CSS) : **Icon, Button, IconButton, ButtonGroup, Pagination, Input, Textarea, Checkbox, Radio, Switch, Tooltip, Dropdown** (+ DropdownItem/DropdownGroup/DropdownSeparator)**, Accordion** (+ AccordionItem)**, Toaster** (+ `toast()`/`dismissToast`)**, Badge, Avatar, Spinner, Combobox, Breadcrumb, Chip, DataTable, InputOTP, ProgressLinear, ProgressCircular, Slider, Dialog** (+ DialogAlert)**, Calendar, DatePicker**.
 
-Retirés (décision utilisateur — réintroduction possible sur demande) : **Card, Select, Popover** ; **Alert** remplacé par Toast. La Popover API native reste utilisée par Dropdown/Tooltip/Toast/DatePicker. Tokens orphelins (combobox) laissés en place, inoffensifs.
+**Alert** a été remplacé par Toast (décision utilisateur). La Popover API native est utilisée par Dropdown/Tooltip/Toast/DatePicker. Tokens orphelins (combobox) laissés en place, inoffensifs.
 
 Règles transverses déjà couvertes plus haut : tone/variant (Button = référence), pattern wrapper-root, échelle de tailles, disabled **gris par tokens** (jamais `opacity` — sauf `loading` qui garde `opacity: 0.5`).
 

@@ -1,11 +1,11 @@
 /*
- * Plomberie commune des éléments flottants (Popover, Tooltip, Dropdown).
+ * Plomberie commune des éléments flottants (Tooltip, Dropdown).
  *
  * 100 % CSS Anchor Positioning — AUCUN fallback JS : le projet cible les
  * navigateurs modernes (Chrome/Edge 125+, Safari 26+ ; Firefox pas encore
  * stable — choix assumé, voir CLAUDE.md/README).
  *
- * L'ancre est soit implicite (invocateur `popovertarget` → Popover, Dropdown),
+ * L'ancre est soit implicite (invocateur `popovertarget` → Dropdown),
  * soit un `anchor-name` statique posé par le composant (Tooltip).
  * `position-try-fallbacks` retourne le panneau quand la place manque.
  */

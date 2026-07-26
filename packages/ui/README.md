@@ -145,8 +145,6 @@ Sur `Button` : les props `icon-start` / `icon-end` prennent un nom Material Symb
 | Structure   | `Accordion` + `AccordionItem`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature)                                                      |
 | Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline) |
 
-> `Card`, `Select`, `Popover`, `Dialog` et `DatePicker` ont été retirés temporairement et seront réintroduits ultérieurement.
-
 Notes d'implémentation notables :
 
 - **Slider range** superpose deux `<input type="range">` natifs (chaque curseur reste un vrai slider clavier/ARIA) ; le JS empêche seulement le croisement.
