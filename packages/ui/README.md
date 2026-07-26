@@ -142,7 +142,7 @@ Sur `Button` : les props `icon-start` / `icon-end` prennent un nom Material Symb
 | Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                              |
 | Formulaires | `Input`, `Textarea`, `Checkbox`, `Radio`, `Switch`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                                    |
 | Overlays    | `Tooltip`, `Dropdown` + `DropdownItem`/`DropdownGroup`/`DropdownSeparator` (sous-menus récursifs)                                                         |
-| Structure   | `Tabs` + `TabList`/`Tab`/`TabPanel`, `Accordion` + `AccordionItem`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature)                 |
+| Structure   | `Accordion` + `AccordionItem`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature)                                                      |
 | Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline) |
 
 > `Card`, `Select`, `Popover`, `Dialog` et `DatePicker` ont été retirés temporairement et seront réintroduits ultérieurement.
@@ -173,7 +173,7 @@ Cible : **navigateurs modernes** — Chrome/Edge 125+, Safari 26+.
 
 ## Accessibilité
 
-Navigation clavier et sémantique ARIA sur tous les composants : pattern ARIA menu (roving focus, retour du focus au déclencheur), pattern ARIA tabs (activation automatique aux flèches), `role="switch"`, tooltips liés par `aria-describedby` et fermables à Échap (WCAG 1.4.13), `role="status"`/`role="alert"` selon la criticité, libellé accessible **obligatoire** sur `IconButton`. `prefers-reduced-motion` respecté partout. L'addon a11y de Storybook audite chaque story.
+Navigation clavier et sémantique ARIA sur tous les composants : pattern ARIA menu (roving focus, retour du focus au déclencheur), `role="switch"`, tooltips liés par `aria-describedby` et fermables à Échap (WCAG 1.4.13), `role="status"`/`role="alert"` selon la criticité, libellé accessible **obligatoire** sur `IconButton`. `prefers-reduced-motion` respecté partout. L'addon a11y de Storybook audite chaque story.
 
 ## Contribuer
 

@@ -179,8 +179,8 @@ const navEl = ref<HTMLElement | null>(null)
  * Navigation clavier : aucune primitive native ne déplace le focus entre des
  * boutons frères. Tab reste naturel (chaque pastille visible est un arrêt de
  * tabulation, comme dans une liste de liens) ; les flèches et Home/End ne
- * font que **déplacer le focus** — contrairement à TabList, une pagination ne
- * s'active pas au focus, ce serait une navigation involontaire.
+ * font que **déplacer le focus** — une pagination ne s'active pas au focus,
+ * ce serait une navigation involontaire.
  *
  * Les pastilles sont découvertes par requête DOM (pas de registre) et
  * filtrées sur `display` : celles que les container queries ont masquées ne
