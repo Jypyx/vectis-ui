@@ -1,0 +1,62 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VSeparatorStories from './VSeparator.stories'
+
+<Meta of={VSeparatorStories} />
+
+# Separator
+
+A 1px rule between two blocks. `VSeparator` renders an `<hr>` — the `separator` role comes with
+the element, and it is never focusable, so it stays outside every roving focus. 100% CSS, no
+JavaScript at all.
+
+The rule is drawn with a **border**, not a background: under Windows forced colours a background
+is forced to `Canvas` and the rule would vanish, where a border colour is forced to `CanvasText`
+and survives. With `box-sizing: border-box` the two paints are pixel-identical everywhere else.
+
+<Canvas of={VSeparatorStories.Default} />
+
+<Controls of={VSeparatorStories.Default} />
+
+## Orientation
+
+Horizontal by default. A vertical `VSeparator` carries a contract worth knowing: an `<hr>` has no
+intrinsic block size, so the rule takes its length from `align-self: stretch` — it fills its
+flex or grid line whatever the container's `align-items`, which is what makes it as tall as the
+buttons it separates in the toolbar below. **In normal flow it collapses to zero height, with no
+error**: outside a flex or grid container, give it a `block-size`.
+
+<Canvas of={VSeparatorStories.Vertical} />
+
+## Spacing
+
+`VSeparator` ships zero margin and has no `spacing` prop: the gap around a rule belongs to the
+parent layout, so it is the parent's `gap` that sets it — the same rule as `VTypography`. The two
+lists below are identical apart from that `gap`.
+
+<Canvas of={VSeparatorStories.Spacing} />
+
+## Inside the design system's panels
+
+`VMenuSeparator` and `VComboboxSeparator` **are** `VSeparator`s. They add one declaration each: a
+negative inline margin that takes the rule out to the panel's edges, compensating its padding.
+That override is written as a compound selector (`.v-separator.v-menu-separator`) because each
+component ships its own stylesheet and the order between two of them is decided by the consumer's
+bundler — at equal specificity the winner would depend on that order.
+
+`VSideNavigationSeparator` is deliberately **not** a `VSeparator`: see Accessibility below.
+
+## Accessibility
+
+- The `<hr>` root gives the `separator` role implicitly. It is not focusable, carries no
+  accessible name, and needs none.
+- `aria-orientation` is emitted for `vertical` **only** — a `separator` is horizontal by default,
+  so setting it on a horizontal rule would restate the role.
+- When the container's role forbids a `separator` child, pass `role="presentation"`: it falls
+  through to the `<hr>` and the rule becomes purely visual. That is what `VComboboxSeparator`
+  does, a `role="listbox"` admitting only `option` and `group` as children. Keep such a rule
+  horizontal — `aria-orientation` is not an allowed attribute on `role="presentation"`.
+- Inside a `<ul>`, use a decorative `<li>` (`VSideNavigationSeparator`), never an `<hr>`: a list
+  may own nothing but list items, and the ARIA `list` role is stricter still — it owns `listitem`
+  alone, so not even `<li role="separator">` passes.
+
+<Canvas of={VSeparatorStories.Decorative} />

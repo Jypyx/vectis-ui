@@ -46,3 +46,4 @@ export { default as VTypography } from './components/VTypography/VTypography.vue
 export type { TypographyTone, TypographyVariant } from './components/VTypography/VTypography.vue'
 export { default as VPopover } from './components/VPopover/VPopover.vue'
 export type { PopoverPlacement, PopoverTriggerProps } from './components/VPopover/VPopover.vue'
+export { default as VSeparator } from './components/VSeparator/VSeparator.vue'
