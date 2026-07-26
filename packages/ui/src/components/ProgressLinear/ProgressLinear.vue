@@ -7,18 +7,19 @@
  * stylables qu'en fond plat, n'acceptent aucun enfant — donc pas de texte dans
  * la barre — et ne basculent pas en writing-mode vertical. Le contrat ARIA
  * progressbar est donc porté explicitement ici. Aucun JS de comportement pour
- * autant : seuls des computed de normalisation, tout le rendu est CSS.
+ * autant : deux computed de normalisation, tout le reste est CSS.
  *
- * La géométrie passe par UNE fraction unitless `--_f` en custom property
- * inline (modèle Slider) : le remplissage et le clip du texte contrasté en
- * dérivent, et les propriétés logiques font basculer l'axe en vertical sans
- * dupliquer une seule règle.
+ * La racine EST la piste (fond, rayon, dimensions) : le remplissage y est
+ * posé en absolu, les copies de texte par-dessus. Toute la géométrie dérive
+ * d'une fraction unitless `--_f` en custom property inline (modèle Slider),
+ * exprimée en propriétés logiques — l'orientation verticale ne demande alors
+ * qu'un `writing-mode`.
  *
  * Nom accessible : passer `aria-label` (fallthrough). Attention, le rôle
  * progressbar est « children presentational » : le texte visible dans la barre
  * n'est PAS annoncé, il ne remplace pas un aria-label.
  */
-import { computed, useSlots } from 'vue'
+import { computed } from 'vue'
 
 interface ProgressLinearProps {
   /** Valeur courante ; absente = indéterminé (animation continue). */
@@ -75,8 +76,6 @@ defineSlots<{
   default?(props: { value: number; max: number; percent: number }): unknown
 }>()
 
-const slots = useSlots()
-
 /** Valeur bornée à [0, max] ; undefined = indéterminé. */
 const clamped = computed(() =>
   props.value === undefined
@@ -84,21 +83,12 @@ const clamped = computed(() =>
     : Math.min(Math.max(props.value, 0), Math.max(props.max, 0)),
 )
 
-/* `props.max || 1` neutralise max: 0 (division par zéro → NaN dans le style). */
-const percent = computed(() =>
-  clamped.value === undefined ? undefined : (clamped.value / (props.max || 1)) * 100,
-)
-
 /*
- * --_f est TOUJOURS posée, même en indéterminé : sans elle,
+ * Fraction [0, 1], toujours définie (0 en indéterminé) : sans elle,
  * `calc(100% * var(--_f))` serait invalide au computed-value time et
- * retomberait sur `auto`.
+ * retomberait sur `auto`. `props.max || 1` neutralise max: 0.
  */
-const f = computed(() => (percent.value ?? 0) / 100)
-
-const hasText = computed(
-  () => clamped.value !== undefined && (props.showValue || slots.default !== undefined),
-)
+const fraction = computed(() => (clamped.value ?? 0) / (props.max || 1))
 
 /** number → px, string → telle quelle (permet rem, %, var()…). */
 const cssSize = (v: number | string | undefined) =>
@@ -115,36 +105,32 @@ const cssSize = (v: number | string | undefined) =>
     :data-orientation="orientation === 'vertical' ? 'vertical' : undefined"
     :data-value-position="valuePosition"
     :data-indeterminate="clamped === undefined ? '' : undefined"
-    :data-has-text="hasText ? '' : undefined"
     :aria-valuenow="clamped"
     aria-valuemin="0"
     :aria-valuemax="max"
     :style="{
-      '--_f': String(f),
+      '--_f': String(fraction),
       '--_custom': color,
       '--_thickness': cssSize(thickness),
       '--_length': cssSize(length),
     }"
   >
-    <span class="ds-progress-linear-track">
-      <span class="ds-progress-linear-fill" />
-    </span>
+    <span class="ds-progress-linear-fill" />
     <!--
       Deux copies superposées du même contenu : la première en couleur de texte
       par-dessus la piste, la seconde clippée à la portion remplie et colorée
-      par contraste sur le remplissage. Sœurs de la piste (son overflow ne les
-      tronque pas) et posées après elle dans le DOM (donc au-dessus, sans
-      z-index). La copie clippée duplique du texte visible → aria-hidden.
+      par contraste sur le remplissage. La copie clippée duplique du texte
+      visible → aria-hidden.
     -->
-    <template v-if="hasText">
+    <template v-if="clamped !== undefined && (showValue || $slots.default)">
       <span class="ds-progress-linear-text">
-        <slot :value="clamped!" :max="max" :percent="percent!">
-          {{ Math.round(percent!) }}&nbsp;%
+        <slot :value="clamped" :max="max" :percent="fraction * 100">
+          {{ Math.round(fraction * 100) }}&nbsp;%
         </slot>
       </span>
       <span class="ds-progress-linear-text" data-on-fill aria-hidden="true">
-        <slot :value="clamped!" :max="max" :percent="percent!">
-          {{ Math.round(percent!) }}&nbsp;%
+        <slot :value="clamped" :max="max" :percent="fraction * 100">
+          {{ Math.round(fraction * 100) }}&nbsp;%
         </slot>
       </span>
     </template>
@@ -154,43 +140,33 @@ const cssSize = (v: number | string | undefined) =>
 <style>
 @layer ds.components {
   /*
-   * Les custom properties de dimension sont TOUTES déclarées sur la racine
-   * (jamais sur un descendant) : le style inline posé par les props gagne
-   * ainsi systématiquement, y compris sur le défaut majoré de [data-has-text].
+   * La racine EST la piste. Les custom properties de dimension y sont toutes
+   * déclarées (jamais sur un descendant) : le style inline posé par les props
+   * gagne ainsi systématiquement, y compris sur le défaut majoré ci-dessous.
    */
   .ds-progress-linear {
     --_thickness: var(--ds-control-size-progress-linear-thickness);
     --_length: 100%;
     position: relative;
-    display: flex;
-    align-items: center;
-    /* La racine suit la longueur de la piste (et non 100 % en dur) : les copies
-       de texte sont positionnées sur la racine, leur clip doit tomber sur le
-       bord du remplissage même quand `length` rétrécit la barre. */
+    display: block;
     inline-size: var(--_length);
+    block-size: var(--_thickness);
+    border-radius: var(--ds-radius-pill);
+    background: var(--_track);
     font-family: var(--ds-font-family-sans);
     font-size: var(--ds-font-size-xs);
     font-weight: var(--ds-font-weight-medium);
     line-height: var(--ds-font-leading-none);
   }
 
-  /* Un texte de 12px ne tient pas dans une barre de 8px : second défaut. */
-  .ds-progress-linear[data-has-text] {
+  /* Un texte de 12px ne tient pas dans une barre de 8px : second défaut,
+     déduit de la présence des copies de texte plutôt que d'un data-attribut. */
+  .ds-progress-linear:has(.ds-progress-linear-text) {
     --_thickness: var(--ds-control-size-progress-linear-thickness-text);
   }
 
-  .ds-progress-linear[data-orientation='vertical'] {
-    --_length: var(--ds-control-size-progress-linear-length);
-    inline-size: fit-content;
-  }
-
-  .ds-progress-linear-track {
-    position: relative;
-    inline-size: var(--_length);
-    block-size: var(--_thickness);
-    border-radius: var(--ds-radius-pill);
-    background: var(--_track);
-    overflow: hidden;
+  .ds-progress-linear[data-shape='square'] {
+    border-radius: 0;
   }
 
   .ds-progress-linear-fill {
@@ -212,10 +188,6 @@ const cssSize = (v: number | string | undefined) =>
      * autre sémantique dans Slider.
      */
     transition: inline-size var(--ds-duration-base) var(--ds-ease-default);
-  }
-
-  .ds-progress-linear[data-shape='square'] .ds-progress-linear-track {
-    border-radius: 0;
   }
 
   /* --- Tones : variables locales uniquement (modèle Button/Chip) --- */
@@ -259,10 +231,9 @@ const cssSize = (v: number | string | undefined) =>
     --_text-fallback: var(--ds-color-text-on-accent);
   }
 
-  /* --- Texte dans la barre : deux copies superposées ---
-     Invariant : la racine et la piste ont exactement la même boîte (aucun
-     padding ni bordure sur la racine) — le clip à 100% * --_f tombe donc pile
-     sur le bord du remplissage. */
+  /* --- Texte dans la barre : deux copies superposées, toutes deux calées sur
+     la boîte de la racine — qui est aussi celle de la piste, d'où un clip qui
+     tombe pile sur le bord du remplissage. --- */
   .ds-progress-linear-text {
     position: absolute;
     inset: 0;
@@ -271,6 +242,8 @@ const cssSize = (v: number | string | undefined) =>
     justify-content: center;
     padding-inline: var(--ds-space-2);
     color: var(--ds-color-text);
+    /* la racine bascule en écriture verticale ; le texte, lui, reste horizontal */
+    writing-mode: horizontal-tb;
     white-space: nowrap;
     pointer-events: none;
   }
@@ -300,7 +273,41 @@ const cssSize = (v: number | string | undefined) =>
     clip-path: inset(-100vmax -100vmax -100vmax calc(100% * (1 - var(--_f))));
   }
 
-  /* --- Indéterminé : une barre de largeur fixe traverse la piste, du bord
+  /* --- Vertical : 0 en bas, max en haut ---
+     `writing-mode` sur la racine suffit : l'axe inline devient vertical, donc
+     inline-size = longueur, block-size = épaisseur, et remplissage comme
+     animation basculent d'axe sans une règle dupliquée.
+
+     PAS de `direction: rtl` pour mettre le 0 en bas — elle s'appliquerait au
+     texte des copies et le bidi réordonnerait « 50 % » en « % 50 ». On ancre
+     le remplissage à la FIN de l'axe inline à la place. */
+  .ds-progress-linear[data-orientation='vertical'] {
+    --_length: var(--ds-control-size-progress-linear-length);
+    writing-mode: vertical-lr;
+  }
+
+  .ds-progress-linear[data-orientation='vertical'] .ds-progress-linear-fill {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+  }
+
+  /* Le texte s'empile sur l'axe vertical, start = côté 0 (donc en bas). Une
+     épaisseur suffisante pour l'accueillir est à la charge du consommateur. */
+  .ds-progress-linear[data-orientation='vertical'] .ds-progress-linear-text {
+    flex-direction: column-reverse;
+    padding-inline: 0;
+    padding-block: var(--ds-space-2);
+  }
+
+  /* Le clip passe sur l'axe vertical (le remplissage monte depuis le bas) —
+     donc identique en LTR et en RTL, d'où la neutralisation de la règle
+     :dir(rtl) horizontale ci-dessus. */
+  .ds-progress-linear[data-orientation='vertical'] .ds-progress-linear-text[data-on-fill],
+  .ds-progress-linear[data-orientation='vertical']:dir(rtl) .ds-progress-linear-text[data-on-fill] {
+    clip-path: inset(calc(100% * (1 - var(--_f))) -100vmax -100vmax -100vmax);
+  }
+
+  /* --- Indéterminé : une barre de taille fixe traverse la piste, du bord
      extérieur de départ au bord extérieur d'arrivée. Aux deux extrémités elle
      affleure exactement le bord sans jamais s'en éloigner : le rebouclage est
      invisible ET la piste n'est jamais vide — aucune seconde barre nécessaire.
@@ -313,10 +320,19 @@ const cssSize = (v: number | string | undefined) =>
      la piste) plutôt qu'en `translate` : une seule définition sert
      l'horizontal, le vertical et le RTL, là où un transform — physique —
      imposerait un jeu de keyframes par axe et une inversion de sens en RTL. */
+  .ds-progress-linear[data-indeterminate] {
+    /* seul cas où le remplissage sort de la piste */
+    overflow: hidden;
+  }
+
   .ds-progress-linear[data-indeterminate] .ds-progress-linear-fill {
     /* La position de départ dérive de cette taille (les deux doivent rester
        égales pour que la barre parte pile hors piste). */
     --_bar: 40%;
+    /* le sens de parcours est indifférent pour un loader : on reprend l'ancrage
+       au début de l'axe inline, y compris en vertical */
+    inset-inline-start: 0;
+    inset-inline-end: auto;
     inline-size: var(--_bar);
     /* la transition de progression n'a pas lieu d'être ici, et ferait grandir
        la barre au passage en indéterminé */
@@ -333,34 +349,6 @@ const cssSize = (v: number | string | undefined) =>
     to {
       inset-inline-start: 100%;
     }
-  }
-
-  /* --- Vertical : 0 en bas, max en haut ---
-     Le writing-mode vit sur la PISTE (le bloc conteneur du remplissage) :
-     inline-size/block-size, inset-inline-start et les keyframes basculent
-     d'axe sans une règle dupliquée. vertical-lr + rtl ⇒ inline-start = bas.
-     Les copies de texte sont hors de ce contexte (sœurs de la piste) et
-     restent donc écrites horizontalement. */
-  .ds-progress-linear[data-orientation='vertical'] .ds-progress-linear-track {
-    writing-mode: vertical-lr;
-    direction: rtl;
-  }
-
-  /* Le texte s'empile sur l'axe block, start = côté 0 (donc en bas). Une
-     épaisseur suffisante pour accueillir le texte est à la charge du
-     consommateur. */
-  .ds-progress-linear[data-orientation='vertical'] .ds-progress-linear-text {
-    flex-direction: column-reverse;
-    padding-inline: 0;
-    padding-block: var(--ds-space-2);
-  }
-
-  /* Le clip passe sur l'axe block (le remplissage monte depuis le bas) — donc
-     identique en LTR et en RTL, d'où la neutralisation de la règle :dir(rtl)
-     horizontale ci-dessus. */
-  .ds-progress-linear[data-orientation='vertical'] .ds-progress-linear-text[data-on-fill],
-  .ds-progress-linear[data-orientation='vertical']:dir(rtl) .ds-progress-linear-text[data-on-fill] {
-    clip-path: inset(calc(100% * (1 - var(--_f))) -100vmax -100vmax -100vmax);
   }
 
   @media (prefers-reduced-motion: reduce) {

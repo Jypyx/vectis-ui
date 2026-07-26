@@ -21,7 +21,7 @@
  * Spinner (role="status") : ce composant garde role="progressbar" et la
  * continuité visuelle avec son mode déterminé.
  */
-import { computed, useSlots } from 'vue'
+import { computed } from 'vue'
 
 interface ProgressCircularProps {
   /** Valeur courante ; absente = indéterminé (animation continue). */
@@ -65,8 +65,6 @@ defineSlots<{
   default?(props: { value: number; max: number; percent: number }): unknown
 }>()
 
-const slots = useSlots()
-
 /** Valeur bornée à [0, max] ; undefined = indéterminé. */
 const clamped = computed(() =>
   props.value === undefined
@@ -74,17 +72,11 @@ const clamped = computed(() =>
     : Math.min(Math.max(props.value, 0), Math.max(props.max, 0)),
 )
 
-/* `props.max || 1` neutralise max: 0 (division par zéro → NaN dans le style). */
-const percent = computed(() =>
-  clamped.value === undefined ? undefined : (clamped.value / (props.max || 1)) * 100,
-)
-
-/* Toujours posée : sans elle, le calc() du stroke-dashoffset serait invalide. */
-const f = computed(() => (percent.value ?? 0) / 100)
-
-const hasText = computed(
-  () => clamped.value !== undefined && (props.showValue || slots.default !== undefined),
-)
+/*
+ * Fraction [0, 1], toujours définie (0 en indéterminé) : sans elle, le calc()
+ * du stroke-dashoffset serait invalide. `props.max || 1` neutralise max: 0.
+ */
+const fraction = computed(() => (clamped.value ?? 0) / (props.max || 1))
 
 /** number → px, string → telle quelle (permet rem, var()…). */
 const cssSize = (v: number | string | undefined) =>
@@ -103,7 +95,7 @@ const cssSize = (v: number | string | undefined) =>
     aria-valuemin="0"
     :aria-valuemax="max"
     :style="{
-      '--_f': String(f),
+      '--_f': String(fraction),
       '--_custom': color,
       '--_diameter': cssSize(size),
       '--_thickness': cssSize(thickness),
@@ -113,9 +105,12 @@ const cssSize = (v: number | string | undefined) =>
       <circle class="ds-progress-circular-track" pathLength="100" />
       <circle class="ds-progress-circular-bar" pathLength="100" />
     </svg>
-    <span v-if="hasText" class="ds-progress-circular-label">
-      <slot :value="clamped!" :max="max" :percent="percent!">
-        {{ Math.round(percent!) }}&nbsp;%
+    <span
+      v-if="clamped !== undefined && (showValue || $slots.default)"
+      class="ds-progress-circular-label"
+    >
+      <slot :value="clamped" :max="max" :percent="fraction * 100">
+        {{ Math.round(fraction * 100) }}&nbsp;%
       </slot>
     </span>
   </span>

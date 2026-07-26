@@ -30,12 +30,12 @@ export const Default: Story = {
     const canvas = within(canvasElement)
     const bar = canvas.getByRole('progressbar', { name: 'Progression' })
     await expect(bar).toHaveAttribute('aria-valuenow', '40')
-    // géométrie réelle : le remplissage vaut 40 % de la piste (invérifiable en jsdom)
-    const track = bar.querySelector('.ds-progress-linear-track')!
+    // géométrie réelle : le remplissage vaut 40 % de la piste — la racine EST
+    // la piste (invérifiable en jsdom)
     const fill = bar.querySelector('.ds-progress-linear-fill')!
     await waitFor(() =>
       expect(fill.getBoundingClientRect().width).toBeCloseTo(
-        track.getBoundingClientRect().width * 0.4,
+        bar.getBoundingClientRect().width * 0.4,
         0,
       ),
     )
@@ -211,11 +211,10 @@ export const Progression: Story = {
     await userEvent.click(canvas.getByRole('button', { name: '80 %' }))
     await waitFor(() => expect(bar).toHaveAttribute('aria-valuenow', '80'))
     // la transition converge sur la largeur cible
-    const track = bar.querySelector('.ds-progress-linear-track')!
     const fill = bar.querySelector('.ds-progress-linear-fill')!
     await waitFor(() =>
       expect(fill.getBoundingClientRect().width).toBeCloseTo(
-        track.getBoundingClientRect().width * 0.8,
+        bar.getBoundingClientRect().width * 0.8,
         0,
       ),
     )

@@ -65,12 +65,11 @@ describe('ProgressLinear', () => {
   })
 
   it('indéterminé : showValue est ignoré (aucun texte rendu)', () => {
-    const { getByRole, container } = render(ProgressLinear, {
+    const { container } = render(ProgressLinear, {
       props: { showValue: true },
       attrs: { 'aria-label': 'x' },
     })
     expect(container.querySelectorAll('.ds-progress-linear-text')).toHaveLength(0)
-    expect(getByRole('progressbar').hasAttribute('data-has-text')).toBe(false)
   })
 
   it('tone : accent par défaut, valeur explicite reportée', async () => {
@@ -140,7 +139,7 @@ describe('ProgressLinear', () => {
   })
 
   it('showValue : deux copies du texte, seule la clippée est aria-hidden', () => {
-    const { getByRole, container } = render(ProgressLinear, {
+    const { container } = render(ProgressLinear, {
       props: { value: 50, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
@@ -153,7 +152,19 @@ describe('ProgressLinear', () => {
     // copie contrastée : duplique du texte visible → masquée
     expect(copies[1]!.hasAttribute('data-on-fill')).toBe(true)
     expect(copies[1]!.getAttribute('aria-hidden')).toBe('true')
-    expect(getByRole('progressbar').hasAttribute('data-has-text')).toBe(true)
+  })
+
+  it('DOM minimal : la racine EST la piste, le remplissage son seul enfant', () => {
+    const { getByRole, container } = render(ProgressLinear, {
+      props: { value: 40 },
+      attrs: { 'aria-label': 'x' },
+    })
+    const root = getByRole('progressbar')
+    expect(root.classList.contains('ds-progress-linear')).toBe(true)
+    // pas d'élément de piste intermédiaire
+    expect(container.querySelector('.ds-progress-linear-track')).toBeNull()
+    expect(root.children).toHaveLength(1)
+    expect(root.firstElementChild!.classList.contains('ds-progress-linear-fill')).toBe(true)
   })
 
   it('showValue : le pourcentage est arrondi et dérivé de max', () => {
@@ -179,25 +190,23 @@ describe('ProgressLinear', () => {
     for (const copy of copies) expect(copy.textContent?.trim()).toBe('30/60 — 50')
   })
 
-  it('data-has-text : posé par showValue ou par le slot, absent sinon', () => {
-    // deux render() dans le même test : requêtes scopées au container (les deux
-    // arbres cohabitent dans le document jusqu'au cleanup de fin de test)
-    const sansTexte = render(ProgressLinear, {
-      props: { value: 40 },
-      attrs: { 'aria-label': 'x' },
-    })
-    expect(
-      sansTexte.container.querySelector('.ds-progress-linear')!.hasAttribute('data-has-text'),
-    ).toBe(false)
-
-    const parSlot = render(ProgressLinear, {
+  it('le slot seul suffit à rendre le texte (sans showValue)', () => {
+    const { container } = render(ProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
       slots: { default: 'Envoi…' },
     })
-    expect(
-      parSlot.container.querySelector('.ds-progress-linear')!.hasAttribute('data-has-text'),
-    ).toBe(true)
+    const copies = [...container.querySelectorAll('.ds-progress-linear-text')]
+    expect(copies).toHaveLength(2)
+    for (const copy of copies) expect(copy.textContent?.trim()).toBe('Envoi…')
+  })
+
+  it('sans showValue ni slot : aucun texte rendu', () => {
+    const { container } = render(ProgressLinear, {
+      props: { value: 40 },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(container.querySelectorAll('.ds-progress-linear-text')).toHaveLength(0)
   })
 
   it('vertical : le texte est rendu comme en horizontal', () => {
