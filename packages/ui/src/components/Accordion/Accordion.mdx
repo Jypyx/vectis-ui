@@ -1,0 +1,70 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as AccordionStories from './Accordion.stories'
+
+<Meta of={AccordionStories} />
+
+# Accordion
+
+Panneaux repliables bâtis sur `<details>`/`<summary>` **natifs** : l'état, le clavier et la
+sémantique d'accessibilité viennent du navigateur, sans aucun JS d'état. Le mode exclusif — un
+seul panneau ouvert à la fois — repose sur l'attribut natif `name` partagé entre les items,
+fourni par le groupe. L'ouverture est animée en pur CSS (`::details-content` +
+`interpolate-size`) : sans support, elle est simplement instantanée.
+
+<Canvas of={AccordionStories.Default} />
+
+<Controls of={AccordionStories.Default} />
+
+## Ouvertures multiples
+
+`exclusive={false}` retire le `name` partagé : chaque panneau s'ouvre et se ferme
+indépendamment.
+
+<Canvas of={AccordionStories.OuverturesMultiples} />
+
+## Titre riche
+
+Le slot `#title` remplace la prop `title` pour composer un intitulé (emphase, badge, icône…).
+
+<Canvas of={AccordionStories.TitreRiche} />
+
+## Icônes
+
+Par défaut, un chevron pivote de 180° à l'ouverture. Deux props posées **sur le groupe**
+personnalisent l'iconographie de tous les items : `expandIcon` (état fermé) et `collapseIcon`
+(état ouvert). Chacune accepte un nom Material Symbols **ou** une URL d'image.
+
+Fournir `collapseIcon` bascule le composant en mode permutation : les deux icônes sont rendues
+et échangées en CSS selon l'état du `<details>` — utile pour un couple non directionnel comme
+« plus / moins ». Sans `collapseIcon`, l'icône unique reste pivotée à l'ouverture.
+
+<Canvas of={AccordionStories.IconesPersonnalisees} />
+
+## Compact
+
+`compact` resserre les paddings d'un cran ; typographie, gouttière et taille d'icône restent
+inchangées. Contrairement aux contrôles à hauteur fixe (Button, Input…), l'accordéon n'a pas de
+hauteur imposée : sa densité vient uniquement de ses paddings, portés par des variables posées
+sur le groupe et héritées par les items.
+
+<Canvas of={AccordionStories.Compact} />
+
+## Item désactivé
+
+`disabled` sur un `AccordionItem` le rend inerte : il n'est plus ouvrable au clic ni atteignable
+au clavier, et passe en nuances de gris par les tokens (jamais d'opacité). Comme `<summary>`
+n'expose pas d'attribut `disabled` natif, l'inertie est obtenue en annulant l'activation et en
+retirant l'item du parcours de tabulation.
+
+<Canvas of={AccordionStories.ItemDesactive} />
+
+## Accessibilité
+
+- La sémantique est celle de `<details>`/`<summary>` : état exposé nativement, `Entrée` et
+  `Espace` basculent le panneau focalisé, aucun attribut ARIA à poser côté consommateur.
+- Un item désactivé porte `aria-disabled` et sort du parcours clavier (`tabindex="-1"`) : il
+  reste lisible et annoncé, mais n'est plus activable.
+- Les icônes d'ouverture/fermeture sont décoratives (masquées aux technologies d'assistance) —
+  l'information d'état est déjà portée par `<details>`.
+- Toutes les transitions (rotation de l'icône, ouverture du panneau) sont neutralisées sous
+  `prefers-reduced-motion`.

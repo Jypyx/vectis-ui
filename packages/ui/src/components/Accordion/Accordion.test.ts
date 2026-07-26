@@ -5,18 +5,26 @@ import { defineComponent } from 'vue'
 import Accordion from './Accordion.vue'
 import AccordionItem from './AccordionItem.vue'
 
-function renderAccordion(exclusive = true) {
+/** Attributs bruts posés sur le groupe et sur le 1er item. */
+function renderWith(accordionAttrs = '', firstItemAttrs = '') {
   const Harness = defineComponent({
     components: { Accordion, AccordionItem },
-    setup: () => ({ exclusive }),
     template: `
-      <Accordion :exclusive="exclusive">
-        <AccordionItem title="Premier" default-open>Contenu 1</AccordionItem>
+      <Accordion ${accordionAttrs}>
+        <AccordionItem title="Premier" ${firstItemAttrs}>Contenu 1</AccordionItem>
         <AccordionItem title="Second">Contenu 2</AccordionItem>
       </Accordion>
     `,
   })
   return render(Harness)
+}
+
+const renderAccordion = (exclusive = true) =>
+  renderWith(`:exclusive="${exclusive}"`, 'default-open')
+
+/** Ligatures Material rendues par <Icon> dans un item. */
+function ligatures(item: Element) {
+  return [...item.querySelectorAll('summary .ds-icon-symbol')].map((el) => el.textContent)
 }
 
 describe('Accordion', () => {
@@ -39,5 +47,48 @@ describe('Accordion', () => {
     const [first, second] = [...container.querySelectorAll('details')]
     expect(first?.open).toBe(true)
     expect(second?.open).toBe(false)
+  })
+
+  it('icône par défaut : une seule ligature expand_more par item (rotation CSS)', () => {
+    const { container } = renderWith()
+    for (const details of container.querySelectorAll('details')) {
+      expect(ligatures(details)).toEqual(['expand_more'])
+      expect(details.hasAttribute('data-swap')).toBe(false)
+    }
+  })
+
+  it('expand-icon/collapse-icon : deux icônes rendues et marqueur data-swap', () => {
+    const { container } = renderWith('expand-icon="add" collapse-icon="remove"')
+    for (const details of container.querySelectorAll('details')) {
+      expect(ligatures(details)).toEqual(['add', 'remove'])
+      expect(details.hasAttribute('data-swap')).toBe(true)
+    }
+  })
+
+  it('compact : data-compact posé sur la racine seulement si demandé', () => {
+    expect(
+      renderWith().container.querySelector('.ds-accordion')?.hasAttribute('data-compact'),
+    ).toBe(false)
+    expect(
+      renderWith('compact').container.querySelector('.ds-accordion')?.hasAttribute('data-compact'),
+    ).toBe(true)
+  })
+
+  it('disabled : summary inerte (aria-disabled, hors tabulation, clic annulé)', () => {
+    const { container } = renderWith('', 'disabled')
+    const [first, second] = [...container.querySelectorAll('summary')]
+    expect(first?.getAttribute('aria-disabled')).toBe('true')
+    expect(first?.getAttribute('tabindex')).toBe('-1')
+    expect(second?.hasAttribute('aria-disabled')).toBe(false)
+    expect(second?.hasAttribute('tabindex')).toBe(false)
+
+    // <summary> n'a pas de `disabled` natif : le clic est annulé par preventDefault
+    const clickOn = (el: Element) => {
+      const event = new MouseEvent('click', { bubbles: true, cancelable: true })
+      el.dispatchEvent(event)
+      return event.defaultPrevented
+    }
+    expect(clickOn(first as Element)).toBe(true)
+    expect(clickOn(second as Element)).toBe(false)
   })
 })
