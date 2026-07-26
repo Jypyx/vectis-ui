@@ -11,6 +11,8 @@
  * contraignant : Button le pilote via des custom properties héritées, pas par
  * surcharge de sélecteurs. Slider doit rester après Input : il surcharge la
  * largeur de ses champs numériques (`.ds-slider-field`) à spécificité égale.
+ * Pagination doit rester après ButtonGroup : ses pastilles surchargent la
+ * largeur et le padding de `.ds-button` à spécificité égale.
  */
 import './styles/index.css'
 
@@ -18,6 +20,7 @@ export { default as Icon } from './components/Icon/Icon.vue'
 export { default as Button } from './components/Button/Button.vue'
 export { default as IconButton } from './components/IconButton/IconButton.vue'
 export { default as ButtonGroup } from './components/Button/ButtonGroup.vue'
+export { default as Pagination } from './components/Pagination/Pagination.vue'
 export { default as Input } from './components/Input/Input.vue'
 export { default as Textarea } from './components/Textarea/Textarea.vue'
 export { default as Checkbox } from './components/Checkbox/Checkbox.vue'
