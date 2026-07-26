@@ -77,8 +77,15 @@ le ProgressCircular, où elles pilotent les bouts du trait.
 ## Indéterminé
 
 Omettre `value` suffit : la barre passe en animation continue et `aria-valuenow` disparaît.
-L'animation est décrite sur des propriétés logiques, une seule définition servant donc
-l'horizontal et le vertical.
+
+Une barre de taille fixe traverse la piste, du bord extérieur de départ au bord extérieur
+d'arrivée. Aux deux extrémités elle affleure exactement le bord sans jamais s'en éloigner :
+le rebouclage est invisible et la piste n'est jamais vide. Toute la qualité du mouvement
+tient à la courbe symétrique — entrée progressive, traversée rapide, sortie amortie.
+
+La course est décrite sur des propriétés logiques plutôt qu'avec une transformation, qui
+serait physique : une seule définition sert l'horizontal, le vertical et le sens de lecture
+inversé.
 
 <Canvas of={ProgressLinearStories.Indetermine} />
 

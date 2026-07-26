@@ -163,5 +163,9 @@ export const primitives = {
     default: cubicBezier('cubic-bezier(0.2, 0, 0, 1)'),
     in: cubicBezier('cubic-bezier(0.5, 0, 1, 1)'),
     out: cubicBezier('cubic-bezier(0, 0, 0.2, 1)'),
+    'in-out': cubicBezier(
+      'cubic-bezier(0.4, 0, 0.2, 1)',
+      'Symétrique : départ et arrivée amortis. Animations en boucle qui traversent (ProgressLinear indéterminé).',
+    ),
   },
 } satisfies TokenGroup

@@ -225,6 +225,10 @@ const cssSize = (v: number | string | undefined) =>
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Centrage de la BOÎTE dans la cellule de grille : le max-inline-size
+       ci-dessous empêche l'étirement par défaut, et un `stretch` inapplicable
+       retombe sur `start` — sans ce place-self, le label serait collé au bord. */
+    place-self: center;
     /* rester dans le trou du donut */
     max-inline-size: calc(var(--_diameter) - var(--_thickness) * 2);
     color: var(--ds-color-text);

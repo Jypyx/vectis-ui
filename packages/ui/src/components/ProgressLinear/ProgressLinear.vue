@@ -300,28 +300,38 @@ const cssSize = (v: number | string | undefined) =>
     clip-path: inset(-100vmax -100vmax -100vmax calc(100% * (1 - var(--_f))));
   }
 
-  /* --- Indéterminé : keyframes sur propriétés LOGIQUES, donc une seule
-     définition sert l'horizontal ET le vertical (l'axe suit le writing-mode
-     hérité de la piste). --- */
+  /* --- Indéterminé : une barre de largeur fixe traverse la piste, du bord
+     extérieur de départ au bord extérieur d'arrivée. Aux deux extrémités elle
+     affleure exactement le bord sans jamais s'en éloigner : le rebouclage est
+     invisible ET la piste n'est jamais vide — aucune seconde barre nécessaire.
+
+     `ease-in-out` porte tout le rendu : entrée progressive, traversée rapide,
+     sortie amortie. Une courbe asymétrique (ou `linear`) rend la boucle
+     mécanique.
+
+     La course est décrite en propriétés LOGIQUES (position et taille en % de
+     la piste) plutôt qu'en `translate` : une seule définition sert
+     l'horizontal, le vertical et le RTL, là où un transform — physique —
+     imposerait un jeu de keyframes par axe et une inversion de sens en RTL. */
   .ds-progress-linear[data-indeterminate] .ds-progress-linear-fill {
+    /* La position de départ dérive de cette taille (les deux doivent rester
+       égales pour que la barre parte pile hors piste). */
+    --_bar: 40%;
+    inline-size: var(--_bar);
+    /* la transition de progression n'a pas lieu d'être ici, et ferait grandir
+       la barre au passage en indéterminé */
+    transition: none;
     animation: ds-progress-linear-indeterminate calc(var(--ds-duration-slow) * 5)
-      var(--ds-ease-default) infinite;
+      var(--ds-ease-in-out) infinite;
   }
 
   @keyframes ds-progress-linear-indeterminate {
-    0% {
-      inset-inline-start: 0%;
-      inline-size: 25%;
+    from {
+      inset-inline-start: calc(-1 * var(--_bar));
     }
 
-    50% {
-      inset-inline-start: 37.5%;
-      inline-size: 60%;
-    }
-
-    100% {
+    to {
       inset-inline-start: 100%;
-      inline-size: 25%;
     }
   }
 
@@ -359,7 +369,8 @@ const cssSize = (v: number | string | undefined) =>
       transition: none;
     }
 
-    /* Un loader immobile perdrait sa fonction : ralentir, pas supprimer. */
+    /* Un loader immobile perdrait sa fonction : ralentir, pas supprimer
+       (convention du DS, cf. Spinner et ProgressCircular). */
     .ds-progress-linear[data-indeterminate] .ds-progress-linear-fill {
       animation-duration: calc(var(--ds-duration-slow) * 15);
     }

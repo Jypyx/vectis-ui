@@ -111,6 +111,7 @@
     --ds-ease-default: cubic-bezier(0.2, 0, 0, 1);
     --ds-ease-in: cubic-bezier(0.5, 0, 1, 1);
     --ds-ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ds-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --ds-color-surface: var(--ds-color-white);
     --ds-color-surface-muted: var(--ds-color-neutral-100);
     --ds-color-surface-raised: var(--ds-color-white);
