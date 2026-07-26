@@ -1,0 +1,109 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VPopoverStories from './VPopover.stories'
+
+<Meta of={VPopoverStories} />
+
+# Popover
+
+Generic floating panel, to show any content anchored to a trigger. It rests on the native
+**Popover API** (top layer, light dismiss) and on **CSS Anchor Positioning**: no dependency, no
+position computation in JavaScript. The component's only JS is the bridge between
+`v-model:open` and the imperative popover API.
+
+VPopover carries **the plumbing and nothing else**: the `[popover]` element and its mode, the
+open state, the anchoring, the placement and the surface. It imposes **no ARIA role, no
+keyboard shortcut and no focus management** — that is precisely what distinguishes a menu from
+a listbox or a date picker, and it stays the responsibility of the component using it. That is
+how it serves as the brick under the design system's panels (VCombobox, VTooltip, VDateInput,
+VTimePicker), each keeping its own semantics and keyboard.
+
+<Canvas of={VPopoverStories.Default} />
+
+<Controls of={VPopoverStories.Default} />
+
+## Trigger
+
+The trigger is supplied through the scoped `#trigger` slot: setting `v-bind="triggerProps"` on
+the element attaches `popovertarget`, `aria-expanded` and `aria-controls` — the _disclosure_
+pattern. It is the native `popovertarget` attribute that opens and closes the panel: no click
+handler is needed, and the invoked element becomes the panel's **implicit anchor**.
+
+The wrapper around the trigger carries the `anchor-name`, confined to its subtree by
+`anchor-scope`. That confinement is what allows a **static, shared** anchor name across every
+instance on the page: without it, a shown panel — in the top layer, and therefore considered
+"after" the whole document — would attach to the last named wrapper on the page.
+
+<Canvas of={VPopoverStories.TwoInstances} />
+
+## Opening and closing
+
+`v-model:open` reflects the panel's real state in both directions: the model opens and closes,
+and any close coming from the browser (light dismiss, Escape) sets it back to `false`. The state
+is never set by hand inside the component; it is always read from the panel's
+`beforetoggle`/`toggle` events — which is what guarantees it never drifts.
+
+Two modes:
+
+- **`auto`** (default) — native light dismiss: a click outside or Escape closes the panel, and
+  open popovers form a stack (opening the second closes the first).
+- **`manual`** — nothing is automatic. Reserve it for cases where the consuming component drives
+  the dismissal itself (focus loss, selection, confirmation), as VTooltip and the date and time
+  pickers do.
+
+The trigger needs no click handler: `popovertarget` toggles the panel natively, and
+`aria-expanded` follows the real state.
+
+<Canvas of={VPopoverStories.OpenedByTheTrigger} />
+
+## Placements
+
+Twelve placements through `data-placement` → `position-area` (the shared `floating.css` sheet,
+common to VMenu and VTooltip). Aligned placements (`top-start`, `right-end`…) cancel the margin
+on the aligned side so they stay flush with the trigger's edge.
+
+<Canvas of={VPopoverStories.Placements} />
+
+At the screen edge, `position-try-fallbacks: flip-block, flip-inline` flips the panel to the
+opposite side — with no JS at all:
+
+<Canvas of={VPopoverStories.EdgeFlipping} />
+
+## Surface
+
+By default the panel carries the design system's common surface (background, border, shadow,
+radius). `surface: false` removes it entirely: the content then supplies its own decoration.
+This is the mode used by the DS panels that have their own chrome — VTooltip (inverted contrast)
+and the date and time pickers.
+
+<Canvas of={VPopoverStories.WithoutSurface} />
+
+## Interactive content
+
+Unlike VTooltip, the panel is persistent and focus can enter it: forms, links and buttons are
+usable inside. Since the component imposes no role, dialog-like content must be declared
+explicitly by the consumer.
+
+<Canvas of={VPopoverStories.InteractiveContent} />
+
+## Anchor supplied by the consumer
+
+When the component using VPopover already owns a root and a control — a text input, for
+instance, on which `popovertarget` would be invalid — it sets `anchor-scope` on its root and
+`anchor-name` on its control itself, then passes the name through the `anchor` prop. VPopover
+then renders **no layout node**: the `#trigger` slot is omitted and its wrapper switches to
+`display: contents`.
+
+<Canvas of={VPopoverStories.SuppliedAnchor} />
+
+## Accessibility
+
+- **No default role.** The panel is a neutral container: for dialog-like content, set
+  `role="dialog"` and an accessible name (`aria-label` or `aria-labelledby`) on the VPopover, and
+  `aria-haspopup="dialog"` on the trigger.
+- `triggerProps` supplies `aria-expanded` and `aria-controls`: the panel's state is announced on
+  the trigger, which stays the focusable element.
+- **Focus is not moved** on opening and is not trapped in the panel: this is a non-modal panel.
+  Content that must capture focus belongs to the VDialog component.
+- In `auto` mode, Escape closes the panel and the browser returns focus to the trigger. In
+  `manual` mode, both behaviours belong to the consumer.
+- The appearance animation (shared with `.v-floating`) respects `prefers-reduced-motion`.

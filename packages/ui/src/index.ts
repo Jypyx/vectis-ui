@@ -44,3 +44,5 @@ export type { IconContext, IconRender, IconSource } from './components/VIcon/typ
 export type { VectisIconName } from './components/VIcon/icons'
 export { default as VTypography } from './components/VTypography/VTypography.vue'
 export type { TypographyTone, TypographyVariant } from './components/VTypography/VTypography.vue'
+export { default as VPopover } from './components/VPopover/VPopover.vue'
+export type { PopoverPlacement, PopoverTriggerProps } from './components/VPopover/VPopover.vue'
