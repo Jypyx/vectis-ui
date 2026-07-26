@@ -3,22 +3,232 @@ import { describe, expect, it } from 'vitest'
 
 import ProgressLinear from './ProgressLinear.vue'
 
+/** Style inline de la racine (les custom properties y sont posées). */
+const styleOf = (container: Element) =>
+  container.querySelector('.ds-progress-linear')?.getAttribute('style') ?? ''
+
+/** Le pourcentage est rendu avec une espace insécable (typographie française). */
+const NBSP = ' '
+
 describe('ProgressLinear', () => {
-  it('expose value/max via <progress> natif', () => {
-    const { getByRole } = render(ProgressLinear, {
+  it('contrat ARIA : rôle, bornes fidèles et fraction unitless', () => {
+    const { getByRole, container } = render(ProgressLinear, {
       props: { value: 30, max: 60 },
       attrs: { 'aria-label': 'Progression' },
     })
-    const progress = getByRole('progressbar') as HTMLProgressElement
-    expect(progress.tagName).toBe('PROGRESS')
-    expect(progress.value).toBe(30)
-    expect(progress.max).toBe(60)
+    const bar = getByRole('progressbar')
+    expect(bar.getAttribute('aria-valuenow')).toBe('30')
+    expect(bar.getAttribute('aria-valuemin')).toBe('0')
+    // borne haute fidèle (« 30 sur 60 »), pas de normalisation sur 100
+    expect(bar.getAttribute('aria-valuemax')).toBe('60')
+    expect(styleOf(container)).toContain('--_f: 0.5')
   })
 
-  it('sans value : indéterminé natif (pas d’attribut value)', () => {
-    const { getByRole } = render(ProgressLinear, {
+  it('clampe au-dessus du max', () => {
+    const { getByRole, container } = render(ProgressLinear, {
+      props: { value: 250, max: 100 },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(getByRole('progressbar').getAttribute('aria-valuenow')).toBe('100')
+    expect(styleOf(container)).toContain('--_f: 1')
+  })
+
+  it('clampe en dessous de zéro', () => {
+    const { getByRole, container } = render(ProgressLinear, {
+      props: { value: -10 },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(getByRole('progressbar').getAttribute('aria-valuenow')).toBe('0')
+    expect(styleOf(container)).toContain('--_f: 0')
+  })
+
+  it('max: 0 ne produit ni NaN ni Infinity', () => {
+    const { container } = render(ProgressLinear, {
+      props: { value: 10, max: 0 },
+      attrs: { 'aria-label': 'x' },
+    })
+    const style = styleOf(container)
+    expect(style).toContain('--_f: 0')
+    expect(style).not.toContain('NaN')
+    expect(style).not.toContain('Infinity')
+  })
+
+  it('indéterminé : pas d’aria-valuenow, data-indeterminate, --_f posée à 0', () => {
+    const { getByRole, container } = render(ProgressLinear, {
       attrs: { 'aria-label': 'Chargement' },
     })
-    expect(getByRole('progressbar').hasAttribute('value')).toBe(false)
+    const bar = getByRole('progressbar')
+    expect(bar.hasAttribute('aria-valuenow')).toBe(false)
+    expect(bar.hasAttribute('data-indeterminate')).toBe(true)
+    // toujours posée, sinon calc(100% * var(--_f)) serait invalide
+    expect(styleOf(container)).toContain('--_f: 0')
+  })
+
+  it('indéterminé : showValue est ignoré (aucun texte rendu)', () => {
+    const { getByRole, container } = render(ProgressLinear, {
+      props: { showValue: true },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(container.querySelectorAll('.ds-progress-linear-text')).toHaveLength(0)
+    expect(getByRole('progressbar').hasAttribute('data-has-text')).toBe(false)
+  })
+
+  it('tone : accent par défaut, valeur explicite reportée', async () => {
+    const { getByRole, rerender } = render(ProgressLinear, {
+      props: { value: 40 },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(getByRole('progressbar').getAttribute('data-tone')).toBe('accent')
+    await rerender({ tone: 'warning' })
+    expect(getByRole('progressbar').getAttribute('data-tone')).toBe('warning')
+  })
+
+  it('couleur custom : data-custom + --_custom (absents sinon)', async () => {
+    const { getByRole, container, rerender } = render(ProgressLinear, {
+      props: { value: 40 },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(getByRole('progressbar').hasAttribute('data-custom')).toBe(false)
+    expect(styleOf(container)).not.toContain('--_custom')
+    await rerender({ color: 'hotpink' })
+    expect(getByRole('progressbar').hasAttribute('data-custom')).toBe(true)
+    expect(styleOf(container)).toContain('--_custom: hotpink')
+  })
+
+  it('thickness : number → px, string telle quelle, absente si non fournie', async () => {
+    const { container, rerender } = render(ProgressLinear, {
+      props: { value: 40 },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(styleOf(container)).not.toContain('--_thickness')
+    await rerender({ thickness: 12 })
+    expect(styleOf(container)).toContain('--_thickness: 12px')
+    await rerender({ thickness: '0.75rem' })
+    expect(styleOf(container)).toContain('--_thickness: 0.75rem')
+  })
+
+  it('length : number → px, string telle quelle, absente si non fournie', async () => {
+    const { container, rerender } = render(ProgressLinear, {
+      props: { value: 40 },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(styleOf(container)).not.toContain('--_length')
+    await rerender({ length: 240 })
+    expect(styleOf(container)).toContain('--_length: 240px')
+    await rerender({ length: '16rem' })
+    expect(styleOf(container)).toContain('--_length: 16rem')
+  })
+
+  it('shape : rounded par défaut, square reporté', async () => {
+    const { getByRole, rerender } = render(ProgressLinear, {
+      props: { value: 40 },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(getByRole('progressbar').getAttribute('data-shape')).toBe('rounded')
+    await rerender({ shape: 'square' })
+    expect(getByRole('progressbar').getAttribute('data-shape')).toBe('square')
+  })
+
+  it('orientation : data-orientation posé uniquement en vertical', async () => {
+    const { getByRole, rerender } = render(ProgressLinear, {
+      props: { value: 40 },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(getByRole('progressbar').hasAttribute('data-orientation')).toBe(false)
+    await rerender({ orientation: 'vertical' })
+    expect(getByRole('progressbar').getAttribute('data-orientation')).toBe('vertical')
+  })
+
+  it('showValue : deux copies du texte, seule la clippée est aria-hidden', () => {
+    const { getByRole, container } = render(ProgressLinear, {
+      props: { value: 50, showValue: true },
+      attrs: { 'aria-label': 'x' },
+    })
+    const copies = [...container.querySelectorAll('.ds-progress-linear-text')]
+    expect(copies).toHaveLength(2)
+    for (const copy of copies) expect(copy.textContent?.trim()).toBe(`50${NBSP}%`)
+    // copie de base : annoncée par personne (children presentational) mais non masquée
+    expect(copies[0]!.hasAttribute('data-on-fill')).toBe(false)
+    expect(copies[0]!.hasAttribute('aria-hidden')).toBe(false)
+    // copie contrastée : duplique du texte visible → masquée
+    expect(copies[1]!.hasAttribute('data-on-fill')).toBe(true)
+    expect(copies[1]!.getAttribute('aria-hidden')).toBe('true')
+    expect(getByRole('progressbar').hasAttribute('data-has-text')).toBe(true)
+  })
+
+  it('showValue : le pourcentage est arrondi et dérivé de max', () => {
+    const { container } = render(ProgressLinear, {
+      props: { value: 1, max: 3, showValue: true },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(container.querySelector('.ds-progress-linear-text')?.textContent?.trim()).toBe(
+      `33${NBSP}%`,
+    )
+  })
+
+  it('slot scopé : reçoit value/max/percent et prime sur showValue', () => {
+    const { container } = render(ProgressLinear, {
+      props: { value: 30, max: 60, showValue: true },
+      attrs: { 'aria-label': 'x' },
+      slots: {
+        default: '<template #default="s">{{ s.value }}/{{ s.max }} — {{ s.percent }}</template>',
+      },
+    })
+    const copies = [...container.querySelectorAll('.ds-progress-linear-text')]
+    expect(copies).toHaveLength(2)
+    for (const copy of copies) expect(copy.textContent?.trim()).toBe('30/60 — 50')
+  })
+
+  it('data-has-text : posé par showValue ou par le slot, absent sinon', () => {
+    // deux render() dans le même test : requêtes scopées au container (les deux
+    // arbres cohabitent dans le document jusqu'au cleanup de fin de test)
+    const sansTexte = render(ProgressLinear, {
+      props: { value: 40 },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(
+      sansTexte.container.querySelector('.ds-progress-linear')!.hasAttribute('data-has-text'),
+    ).toBe(false)
+
+    const parSlot = render(ProgressLinear, {
+      props: { value: 40 },
+      attrs: { 'aria-label': 'x' },
+      slots: { default: 'Envoi…' },
+    })
+    expect(
+      parSlot.container.querySelector('.ds-progress-linear')!.hasAttribute('data-has-text'),
+    ).toBe(true)
+  })
+
+  it('vertical : le texte est rendu comme en horizontal', () => {
+    const { container } = render(ProgressLinear, {
+      props: { value: 40, orientation: 'vertical', showValue: true },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(container.querySelectorAll('.ds-progress-linear-text')).toHaveLength(2)
+  })
+
+  it('valuePosition : center par défaut, valeur explicite reportée', async () => {
+    const { getByRole, rerender } = render(ProgressLinear, {
+      props: { value: 40, showValue: true },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(getByRole('progressbar').getAttribute('data-value-position')).toBe('center')
+    await rerender({ valuePosition: 'end' })
+    expect(getByRole('progressbar').getAttribute('data-value-position')).toBe('end')
+  })
+
+  it('fallthrough : class, id et style du consommateur cohabitent avec les custom properties', () => {
+    const { getByRole } = render(ProgressLinear, {
+      props: { value: 40 },
+      attrs: { 'aria-label': 'Envoi', class: 'mon-upload', id: 'up', style: 'margin-top: 4px' },
+    })
+    const bar = getByRole('progressbar', { name: 'Envoi' })
+    expect(bar.classList.contains('ds-progress-linear')).toBe(true)
+    expect(bar.classList.contains('mon-upload')).toBe(true)
+    expect(bar.id).toBe('up')
+    const style = bar.getAttribute('style') ?? ''
+    expect(style).toContain('margin-top: 4px')
+    expect(style).toContain('--_f: 0.4')
   })
 })
