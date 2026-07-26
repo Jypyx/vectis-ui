@@ -15,7 +15,8 @@ import IconButton from '../IconButton/IconButton.vue'
  * disabled, `prefers-reduced-motion` viennent de Button.
  *
  * Double troncature :
- *  1. logique — fenêtre glissante `boundaryCount` + `siblingCount`, pure
+ *  1. logique — `totalVisible` fixe le nombre total d'emplacements rendus
+ *     (ellipses comprises) ; absente, toutes les pages sont rendues. Pure
  *     dérivation d'état (aucune API navigateur, SSR-safe) ;
  *  2. responsive — 100 % CSS par container queries sur la nav elle-même,
  *     donc aucun ResizeObserver (voir le bloc @container plus bas).
@@ -26,11 +27,14 @@ import IconButton from '../IconButton/IconButton.vue'
  */
 interface PaginationProps {
   /** Nombre total de pages. */
-  count: number
-  /** Pages voisines affichées de chaque côté de la page courante. */
-  siblingCount?: number
-  /** Pages affichées à chaque extrémité : ce sont elles qui survivent à la troncature. */
-  boundaryCount?: number
+  length?: number
+  /**
+   * Nombre total d'emplacements rendus, ellipses comprises (minimum 5 :
+   * première + ellipse + courante + ellipse + dernière). La fenêtre se décale
+   * aux extrémités au lieu de rétrécir : la largeur de la barre est stable.
+   * Absente : toutes les pages sont rendues.
+   */
+  totalVisible?: number
 
   /** Rattache tous les boutons en contrôle segmenté (ButtonGroup). */
   attached?: boolean
@@ -72,8 +76,8 @@ interface PaginationProps {
 }
 
 const props = withDefaults(defineProps<PaginationProps>(), {
-  siblingCount: 1,
-  boundaryCount: 1,
+  length: 1,
+  totalVisible: undefined,
   attached: false,
   variant: 'ghost',
   tone: 'accent',
@@ -100,7 +104,7 @@ type PaginationItem =
   | { kind: 'page'; key: string; page: number; edge: boolean; distance: number }
   | { kind: 'gap'; key: string }
 
-const total = computed(() => Math.max(Math.trunc(props.count), 1))
+const total = computed(() => Math.max(Math.trunc(props.length), 1))
 const currentPage = computed(() => Math.min(Math.max(page.value, 1), total.value))
 
 function isPageDisabled(n: number): boolean {
@@ -114,41 +118,46 @@ function pageLabelFor(n: number): string {
 }
 
 /**
- * Fenêtre glissante : bornes + voisins de la page courante, avec un marqueur
- * d'ellipse dès qu'un numéro est sauté. Chaque pastille porte sa distance à
- * la page courante — c'est la clé de tri du masquage responsive, plafonnée à
- * 3 : au-delà, les voisins les plus lointains partagent le premier palier.
+ * Troncature logique à emplacements constants : `totalVisible` compte TOUT ce
+ * qui est rendu, ellipses comprises. La fenêtre centrale (totalVisible - 4
+ * pages) est centrée sur la page courante et se DÉCALE près des extrémités au
+ * lieu de rétrécir — la barre garde exactement la même largeur quelle que
+ * soit la page courante. Chaque pastille porte sa distance à la page courante
+ * — c'est la clé de tri du masquage responsive, plafonnée à 3 : au-delà, les
+ * voisins les plus lointains partagent le premier palier.
  */
 const items = computed<PaginationItem[]>(() => {
   const count = total.value
   const current = currentPage.value
-  const boundary = Math.max(props.boundaryCount, 0)
-  const sibling = Math.max(props.siblingCount, 0)
 
-  const keep = new Set<number>()
-  const add = (n: number) => {
-    if (n >= 1 && n <= count) keep.add(n)
+  const pageItem = (n: number): PaginationItem => ({
+    kind: 'page',
+    key: `page-${n}`,
+    page: n,
+    edge: n === 1 || n === count,
+    distance: Math.min(Math.abs(n - current), 3),
+  })
+  const pages = (from: number, to: number): PaginationItem[] => {
+    const out: PaginationItem[] = []
+    for (let n = from; n <= to; n++) out.push(pageItem(n))
+    return out
   }
-  for (let i = 1; i <= boundary; i++) add(i)
-  for (let i = count - boundary + 1; i <= count; i++) add(i)
-  for (let i = current - sibling; i <= current + sibling; i++) add(i)
-  // garantit la page courante même avec boundaryCount et siblingCount à 0
-  add(current)
+  const gap = (after: number): PaginationItem => ({ kind: 'gap', key: `gap-${after}` })
 
-  const out: PaginationItem[] = []
-  let previous = 0
-  for (const n of [...keep].sort((a, b) => a - b)) {
-    if (previous && n - previous > 1) out.push({ kind: 'gap', key: `gap-${previous}` })
-    out.push({
-      kind: 'page',
-      key: `page-${n}`,
-      page: n,
-      edge: n <= boundary || n > count - boundary,
-      distance: Math.min(Math.abs(n - current), 3),
-    })
-    previous = n
-  }
-  return out
+  // Sans totalVisible : aucune troncature, toutes les pages sont rendues.
+  // Minimum utile : 5 (première + ellipse + courante + ellipse + dernière).
+  const visible =
+    props.totalVisible === undefined ? count : Math.max(Math.trunc(props.totalVisible), 5)
+  if (visible >= count) return pages(1, count)
+
+  const start = current - Math.floor((visible - 5) / 2)
+  const end = start + (visible - 5)
+
+  // Près d'une extrémité (l'ellipse de ce côté ne sauterait aucun numéro),
+  // la fenêtre s'étire jusqu'à la borne : toujours `visible` emplacements.
+  if (start <= 3) return [...pages(1, visible - 2), gap(visible - 2), pageItem(count)]
+  if (end >= count - 2) return [pageItem(1), gap(1), ...pages(count - visible + 3, count)]
+  return [pageItem(1), gap(1), ...pages(start, end), gap(end), pageItem(count)]
 })
 
 /**
@@ -389,14 +398,14 @@ function onKeydown(event: KeyboardEvent) {
    * les paliers suivent la place allouée au composant, jamais le viewport
    * (aucun ResizeObserver, cf. DataTable). Les seuils sont des littéraux :
    * les conditions @container n'acceptent pas var(). Ils sont calibrés sur
-   * size="md" ; pour les cas extrêmes (size xl, count à 5 chiffres),
-   * l'échappatoire est `siblingCount` ou `responsive: false`.
+   * size="md" ; pour les cas extrêmes (size xl, length à 5 chiffres),
+   * l'échappatoire est `totalVisible` ou `responsive: false`.
    *
    * Chaque seuil est la largeur qu'il FAUT pour afficher le niveau concerné —
    * pas celle qui reste après masquage, sinon la rangée déborde pendant tout
    * l'intervalle. À size md : pastille et contrôle font une hauteur de
    * contrôle de large (2.5rem), la gouttière 0.25rem, soit 2.75rem par
-   * élément. Une rangée à 13 éléments (siblingCount 3) demande ~35.5rem,
+   * élément. Une rangée à 13 éléments (totalVisible 11) demande ~35.5rem,
    * 11 éléments ~30rem, 9 éléments ~24.5rem — d'où 36 / 31 / 25rem, marge
    * comprise.
    *

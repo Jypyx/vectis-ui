@@ -18,9 +18,8 @@ const meta = {
     controlsDisplay: { control: 'inline-radio', options: ['icon', 'text', 'both'] },
   },
   args: {
-    count: 20,
-    siblingCount: 1,
-    boundaryCount: 1,
+    length: 20,
+    totalVisible: 7,
     attached: false,
     variant: 'ghost',
     tone: 'accent',
@@ -73,8 +72,8 @@ export const Variants: Story = {
     // La page active est toujours `solid` : seules les pages inactives suivent la variante.
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination :count="12" variant="ghost" v-model="ghost" />
-        <Pagination :count="12" variant="outline" v-model="outline" />
+        <Pagination :length="12" variant="ghost" v-model="ghost" />
+        <Pagination :length="12" variant="outline" v-model="outline" />
       </div>
     `,
   }),
@@ -86,7 +85,7 @@ export const Tones: Story = {
     setup: () => ({ tones: ['accent', 'neutral', 'success', 'warning', 'danger'], page: ref(3) }),
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination v-for="t in tones" :key="t" :count="8" :tone="t" v-model="page" />
+        <Pagination v-for="t in tones" :key="t" :length="8" :tone="t" v-model="page" />
       </div>
     `,
   }),
@@ -98,7 +97,7 @@ export const Sizes: Story = {
     setup: () => ({ sizes: ['xs', 'sm', 'md', 'lg', 'xl'], page: ref(3) }),
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination v-for="s in sizes" :key="s" :count="8" :size="s" v-model="page" />
+        <Pagination v-for="s in sizes" :key="s" :length="8" :size="s" v-model="page" />
       </div>
     `,
   }),
@@ -110,8 +109,8 @@ export const Compact: Story = {
     setup: () => ({ normal: ref(3), compact: ref(3) }),
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination :count="8" v-model="normal" />
-        <Pagination :count="8" compact v-model="compact" />
+        <Pagination :length="8" v-model="normal" />
+        <Pagination :length="8" compact v-model="compact" />
       </div>
     `,
   }),
@@ -124,11 +123,11 @@ export const Controles: Story = {
     // Icônes personnalisées : nom Material Symbols OU URL d'image.
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination :count="10" controls-display="icon" v-model="a" />
-        <Pagination :count="10" controls-display="text" v-model="b" />
-        <Pagination :count="10" controls-display="both" v-model="c" />
+        <Pagination :length="10" controls-display="icon" v-model="a" />
+        <Pagination :length="10" controls-display="text" v-model="b" />
+        <Pagination :length="10" controls-display="both" v-model="c" />
         <Pagination
-          :count="10"
+          :length="10"
           controls-display="both"
           prev-icon="first_page"
           next-icon="last_page"
@@ -136,7 +135,7 @@ export const Controles: Story = {
           next-label="Avancer"
           v-model="d"
         />
-        <Pagination :count="10" :show-controls="false" v-model="e" />
+        <Pagination :length="10" :show-controls="false" v-model="e" />
       </div>
     `,
   }),
@@ -149,8 +148,8 @@ export const PagesDesactivees: Story = {
     // Les contrôles enjambent les pages désactivées jusqu'à la plus proche activable.
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination :count="12" :boundary-count="2" :sibling-count="2" :disabled-pages="[4, 6]" v-model="liste" />
-        <Pagination :count="12" :boundary-count="2" :sibling-count="2" :disabled-pages="(p) => p % 2 === 0" v-model="predicat" />
+        <Pagination :length="12" :disabled-pages="[4, 6]" v-model="liste" />
+        <Pagination :length="12" :disabled-pages="(p) => p % 2 === 0" v-model="predicat" />
       </div>
     `,
   }),
@@ -159,38 +158,36 @@ export const PagesDesactivees: Story = {
 export const Responsive: Story = {
   render: () => ({
     components: { Pagination },
-    setup: () => ({ large: ref(10), moyen: ref(10), etroit: ref(10) }),
+    setup: () => ({ page: ref(10) }),
     // La nav est son propre conteneur de requête : la troncature suit la largeur
-    // du décor, pas celle du viewport. Redimensionner le panneau les fait tomber
-    // par paliers — la première, la dernière et la page courante restent toujours.
+    // du décor, pas celle du viewport. Le panneau est redimensionnable à la
+    // poignée (coin inférieur droit, resize CSS — d'où l'overflow: hidden) :
+    // les voisines tombent par paliers en le rétrécissant, la première, la
+    // dernière et la page courante restent toujours.
     template: `
-      <div style="display: grid; gap: 16px">
-        <!-- ~39rem : la fenêtre complète tient (1 … 8 9 10 11 12 … 40) -->
-        <div style="width: 640px; border: 1px dashed var(--ds-color-border); padding: 8px">
-          <Pagination :count="40" :sibling-count="2" v-model="large" />
-        </div>
-        <!-- ~29rem : les voisines à distance 2 tombent (1 … 9 10 11 … 40) -->
-        <div style="width: 480px; border: 1px dashed var(--ds-color-border); padding: 8px">
-          <Pagination :count="40" :sibling-count="2" v-model="moyen" />
-        </div>
-        <!-- ~19rem : il ne reste que la première, la courante et la dernière -->
-        <div style="width: 320px; border: 1px dashed var(--ds-color-border); padding: 8px">
-          <Pagination :count="40" :sibling-count="2" v-model="etroit" />
-        </div>
+      <div
+        style="
+          width: 640px;
+          max-width: 100%;
+          resize: horizontal;
+          overflow: hidden;
+          border: 1px dashed var(--ds-color-border);
+          padding: 8px;
+        "
+      >
+        <Pagination :length="40" :total-visible="9" v-model="page" />
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
-    const visiblePages = (nav: Element) =>
-      [...nav.querySelectorAll<HTMLElement>('.ds-pagination-page')]
-        .filter((el) => getComputedStyle(el).display !== 'none')
-        .map((el) => el.textContent?.trim())
-    const [wide, medium, narrow] = canvasElement.querySelectorAll('.ds-pagination')
+    // À la largeur initiale (~39rem), la fenêtre complète tient : les paliers
+    // suivants (1 … 9 10 11 … 40, puis 1 … 10 … 40) s'observent à la poignée.
+    const nav = canvasElement.querySelector('.ds-pagination')
+    const visiblePages = [...nav!.querySelectorAll<HTMLElement>('.ds-pagination-page')]
+      .filter((el) => getComputedStyle(el).display !== 'none')
+      .map((el) => el.textContent?.trim())
 
-    await expect(visiblePages(wide!)).toEqual(['1', '8', '9', '10', '11', '12', '40'])
-    await expect(visiblePages(medium!)).toEqual(['1', '9', '10', '11', '40'])
-    // ne restent que la première, la courante et la dernière
-    await expect(visiblePages(narrow!)).toEqual(['1', '10', '40'])
+    await expect(visiblePages).toEqual(['1', '8', '9', '10', '11', '12', '40'])
   },
 }
 
@@ -202,14 +199,14 @@ export const Alignement: Story = {
     // l'alignement passe donc par la prop `align`.
     template: `
       <div style="display: grid; gap: 16px; border: 1px dashed var(--ds-color-border); padding: 8px">
-        <Pagination v-for="a in aligns" :key="a" :count="8" :align="a" v-model="page" />
+        <Pagination v-for="a in aligns" :key="a" :length="8" :align="a" v-model="page" />
       </div>
     `,
   }),
 }
 
 export const BeaucoupDePages: Story = {
-  args: { count: 120, siblingCount: 2, boundaryCount: 2 },
+  args: { length: 120, totalVisible: 9 },
   render: (args) => ({
     components: { Pagination },
     setup: () => ({ args, page: ref(60) }),
@@ -224,12 +221,13 @@ export const CasLimites: Story = {
     template: `
       <div style="display: grid; gap: 16px">
         <!-- Page unique : les deux contrôles sont en butée. -->
-        <Pagination :count="1" v-model="une" />
-        <Pagination :count="2" v-model="deux" />
-        <!-- Numéros à 4 chiffres : les pastilles s'élargissent au-delà du carré. -->
-        <Pagination :count="12000" v-model="longs" />
+        <Pagination :length="1" v-model="une" />
+        <Pagination :length="2" v-model="deux" />
+        <!-- Numéros à 4 chiffres : les pastilles s'élargissent au-delà du carré.
+             Sans totalVisible, les 12 000 pages seraient toutes rendues. -->
+        <Pagination :length="12000" :total-visible="7" v-model="longs" />
         <!-- Troncature responsive désactivée : la rangée déborde plutôt que de se réduire. -->
-        <Pagination :count="12000" :responsive="false" v-model="longs" />
+        <Pagination :length="12000" :total-visible="7" :responsive="false" v-model="longs" />
       </div>
     `,
   }),

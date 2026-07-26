@@ -10,40 +10,69 @@ function pageLabels(container: Element): string[] {
   )
 }
 
+/** Nombre total d'emplacements rendus : pastilles + ellipses. */
+function slotCount(container: Element): number {
+  return container.querySelectorAll('.ds-pagination-page, .ds-pagination-ellipsis').length
+}
+
 describe('Pagination', () => {
-  describe('fenêtre glissante', () => {
-    it('encadre la page courante de ses voisines, garde les bornes et intercale deux ellipses', () => {
-      const { container } = render(Pagination, { props: { count: 20, modelValue: 10 } })
+  describe('troncature logique', () => {
+    it('rend toutes les pages quand totalVisible est absente', () => {
+      const { container } = render(Pagination, { props: { length: 8, modelValue: 2 } })
+
+      expect(pageLabels(container)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8'])
+      expect(container.querySelectorAll('.ds-pagination-ellipsis')).toHaveLength(0)
+    })
+
+    it('encadre la page courante, garde les bornes et intercale deux ellipses', () => {
+      const { container } = render(Pagination, {
+        props: { length: 20, modelValue: 10, totalVisible: 7 },
+      })
 
       expect(pageLabels(container)).toEqual(['1', '9', '10', '11', '20'])
       expect(container.querySelectorAll('.ds-pagination-ellipsis')).toHaveLength(2)
     })
 
-    it("n'intercale aucune ellipse quand toutes les pages tiennent dans la fenêtre", () => {
-      const { container } = render(Pagination, { props: { count: 4, modelValue: 2 } })
+    it('garde un nombre d’emplacements constant en décalant la fenêtre aux extrémités', () => {
+      const cases: Array<[number, string[]]> = [
+        [1, ['1', '2', '3', '4', '5', '20']],
+        [10, ['1', '9', '10', '11', '20']],
+        [18, ['1', '16', '17', '18', '19', '20']],
+      ]
+      for (const [current, expected] of cases) {
+        const { container, unmount } = render(Pagination, {
+          props: { length: 20, modelValue: current, totalVisible: 7 },
+        })
+
+        expect(pageLabels(container)).toEqual(expected)
+        // ellipses comprises : la barre garde exactement la même largeur
+        expect(slotCount(container)).toBe(7)
+        unmount()
+      }
+    })
+
+    it("n'intercale aucune ellipse quand totalVisible couvre toutes les pages", () => {
+      const { container } = render(Pagination, {
+        props: { length: 4, modelValue: 2, totalVisible: 10 },
+      })
 
       expect(pageLabels(container)).toEqual(['1', '2', '3', '4'])
       expect(container.querySelectorAll('.ds-pagination-ellipsis')).toHaveLength(0)
     })
 
-    it('élargit la fenêtre avec siblingCount', () => {
+    it('clampe totalVisible au minimum utile de 5', () => {
       const { container } = render(Pagination, {
-        props: { count: 20, modelValue: 10, siblingCount: 2 },
+        props: { length: 20, modelValue: 10, totalVisible: 3 },
       })
 
-      expect(pageLabels(container)).toEqual(['1', '8', '9', '10', '11', '12', '20'])
-    })
-
-    it('élargit les extrémités avec boundaryCount', () => {
-      const { container } = render(Pagination, {
-        props: { count: 20, modelValue: 10, boundaryCount: 2 },
-      })
-
-      expect(pageLabels(container)).toEqual(['1', '2', '9', '10', '11', '19', '20'])
+      expect(pageLabels(container)).toEqual(['1', '10', '20'])
+      expect(slotCount(container)).toBe(5)
     })
 
     it('marque les bornes en data-edge et les voisines de leur distance à la page courante', () => {
-      const { container } = render(Pagination, { props: { count: 20, modelValue: 10 } })
+      const { container } = render(Pagination, {
+        props: { length: 20, modelValue: 10, totalVisible: 7 },
+      })
       const [first, before, current, after, last] = [
         ...container.querySelectorAll<HTMLElement>('.ds-pagination-page'),
       ]
@@ -59,7 +88,7 @@ describe('Pagination', () => {
 
   describe('v-model', () => {
     it('émet la page cliquée', async () => {
-      const { getByRole, emitted } = render(Pagination, { props: { count: 20, modelValue: 10 } })
+      const { getByRole, emitted } = render(Pagination, { props: { length: 20, modelValue: 10 } })
 
       await fireEvent.click(getByRole('button', { name: 'Page 11' }))
 
@@ -67,18 +96,18 @@ describe('Pagination', () => {
     })
 
     it('avance et recule d’une page avec les contrôles', async () => {
-      const next = render(Pagination, { props: { count: 20, modelValue: 10 } })
+      const next = render(Pagination, { props: { length: 20, modelValue: 10 } })
       await fireEvent.click(next.getByRole('button', { name: 'Page suivante' }))
       expect(next.emitted('update:modelValue')).toEqual([[11]])
       next.unmount()
 
-      const previous = render(Pagination, { props: { count: 20, modelValue: 10 } })
+      const previous = render(Pagination, { props: { length: 20, modelValue: 10 } })
       await fireEvent.click(previous.getByRole('button', { name: 'Page précédente' }))
       expect(previous.emitted('update:modelValue')).toEqual([[9]])
     })
 
     it('désactive le contrôle en butée à chaque extrémité', () => {
-      const first = render(Pagination, { props: { count: 5, modelValue: 1 } })
+      const first = render(Pagination, { props: { length: 5, modelValue: 1 } })
       expect(
         (first.getByRole('button', { name: 'Page précédente' }) as HTMLButtonElement).disabled,
       ).toBe(true)
@@ -87,7 +116,7 @@ describe('Pagination', () => {
       ).toBe(false)
       first.unmount()
 
-      const last = render(Pagination, { props: { count: 5, modelValue: 5 } })
+      const last = render(Pagination, { props: { length: 5, modelValue: 5 } })
       expect(
         (last.getByRole('button', { name: 'Page suivante' }) as HTMLButtonElement).disabled,
       ).toBe(true)
@@ -96,7 +125,9 @@ describe('Pagination', () => {
 
   describe('accessibilité', () => {
     it('pose aria-current="page" sur la seule page active', () => {
-      const { container, getByRole } = render(Pagination, { props: { count: 20, modelValue: 10 } })
+      const { container, getByRole } = render(Pagination, {
+        props: { length: 20, modelValue: 10 },
+      })
 
       expect(container.querySelectorAll('[aria-current="page"]')).toHaveLength(1)
       expect(getByRole('button', { name: 'Page 10' }).getAttribute('aria-current')).toBe('page')
@@ -105,7 +136,7 @@ describe('Pagination', () => {
     it('nomme la navigation et accepte un libellé de page personnalisé', () => {
       const { getByRole } = render(Pagination, {
         props: {
-          count: 5,
+          length: 5,
           modelValue: 2,
           label: 'Résultats',
           pageLabel: (n: number) => `Aller à la page ${n}`,
@@ -117,7 +148,9 @@ describe('Pagination', () => {
     })
 
     it("masque l'ellipse aux technologies d'assistance et la sort de la tabulation", () => {
-      const { container } = render(Pagination, { props: { count: 20, modelValue: 10 } })
+      const { container } = render(Pagination, {
+        props: { length: 20, modelValue: 10, totalVisible: 7 },
+      })
       const ellipsis = container.querySelector<HTMLButtonElement>('.ds-pagination-ellipsis')
 
       expect(ellipsis?.getAttribute('aria-hidden')).toBe('true')
@@ -130,7 +163,7 @@ describe('Pagination', () => {
     // jsdom la contourne en dispatchant l'événement, on n'asserte donc que le marquage
     it('accepte une liste', () => {
       const { getByRole } = render(Pagination, {
-        props: { count: 5, modelValue: 2, disabledPages: [3] },
+        props: { length: 5, modelValue: 2, disabledPages: [3] },
       })
 
       expect((getByRole('button', { name: 'Page 3' }) as HTMLButtonElement).disabled).toBe(true)
@@ -139,7 +172,7 @@ describe('Pagination', () => {
 
     it('accepte un prédicat', () => {
       const { getByRole } = render(Pagination, {
-        props: { count: 5, modelValue: 1, boundaryCount: 3, disabledPages: (n: number) => n > 3 },
+        props: { length: 5, modelValue: 1, disabledPages: (n: number) => n > 3 },
       })
 
       expect((getByRole('button', { name: 'Page 2' }) as HTMLButtonElement).disabled).toBe(false)
@@ -148,7 +181,7 @@ describe('Pagination', () => {
 
     it('enjambe les pages désactivées avec les contrôles', async () => {
       const { getByRole, emitted } = render(Pagination, {
-        props: { count: 5, modelValue: 3, disabledPages: [2] },
+        props: { length: 5, modelValue: 3, disabledPages: [2] },
       })
 
       await fireEvent.click(getByRole('button', { name: 'Page précédente' }))
@@ -158,7 +191,7 @@ describe('Pagination', () => {
 
     it('désactive tout le composant avec disabled', () => {
       const { container } = render(Pagination, {
-        props: { count: 5, modelValue: 3, disabled: true },
+        props: { length: 5, modelValue: 3, disabled: true },
       })
       const buttons = [...container.querySelectorAll<HTMLButtonElement>('button')]
 
@@ -169,7 +202,7 @@ describe('Pagination', () => {
   describe('attached', () => {
     it('rattache les boutons dans un ButtonGroup', () => {
       const { container, getByRole } = render(Pagination, {
-        props: { count: 5, modelValue: 1, attached: true },
+        props: { length: 5, modelValue: 1, attached: true },
       })
 
       expect(container.querySelector('.ds-pagination-items')?.classList).toContain(
@@ -179,7 +212,7 @@ describe('Pagination', () => {
     })
 
     it('reste une simple rangée par défaut', () => {
-      const { container, queryByRole } = render(Pagination, { props: { count: 5, modelValue: 1 } })
+      const { container, queryByRole } = render(Pagination, { props: { length: 5, modelValue: 1 } })
 
       expect(container.querySelector('.ds-button-group')).toBeNull()
       expect(queryByRole('group')).toBeNull()
@@ -189,7 +222,7 @@ describe('Pagination', () => {
   describe('contrôles', () => {
     it("n'affiche aucun contrôle avec showControls: false", () => {
       const { container } = render(Pagination, {
-        props: { count: 5, modelValue: 3, showControls: false },
+        props: { length: 5, modelValue: 3, showControls: false },
       })
 
       expect(container.querySelectorAll('.ds-pagination-control')).toHaveLength(0)
@@ -197,7 +230,7 @@ describe('Pagination', () => {
 
     it('rend un libellé visible en mode text, sans icône', () => {
       const { container } = render(Pagination, {
-        props: { count: 5, modelValue: 3, controlsDisplay: 'text' },
+        props: { length: 5, modelValue: 3, controlsDisplay: 'text' },
       })
       const control = container.querySelector('.ds-pagination-control')
 
@@ -209,7 +242,7 @@ describe('Pagination', () => {
 
     it('cumule icône et libellé en mode both', () => {
       const { container } = render(Pagination, {
-        props: { count: 5, modelValue: 3, controlsDisplay: 'both' },
+        props: { length: 5, modelValue: 3, controlsDisplay: 'both' },
       })
       const control = container.querySelector('.ds-pagination-control')
 
@@ -219,7 +252,7 @@ describe('Pagination', () => {
 
     it('garde le nom accessible même quand le libellé est visible', () => {
       const { getByRole } = render(Pagination, {
-        props: { count: 5, modelValue: 3, controlsDisplay: 'both' },
+        props: { length: 5, modelValue: 3, controlsDisplay: 'both' },
       })
 
       expect(getByRole('button', { name: 'Page précédente' })).toBeTruthy()
@@ -228,7 +261,7 @@ describe('Pagination', () => {
     it('accepte un nom Material ou une URL pour les icônes personnalisées', () => {
       const { container } = render(Pagination, {
         props: {
-          count: 5,
+          length: 5,
           modelValue: 3,
           prevIcon: 'first_page',
           nextIcon: 'https://cdn.test/next.svg',
@@ -244,7 +277,7 @@ describe('Pagination', () => {
 
     it('reprend les libellés personnalisés', () => {
       const { getByRole } = render(Pagination, {
-        props: { count: 5, modelValue: 3, prevLabel: 'Précédent', nextLabel: 'Suivant' },
+        props: { length: 5, modelValue: 3, prevLabel: 'Précédent', nextLabel: 'Suivant' },
       })
 
       expect(getByRole('button', { name: 'Suivant' })).toBeTruthy()
@@ -254,7 +287,7 @@ describe('Pagination', () => {
   describe('taille', () => {
     it('propage size et compact à tous les boutons', () => {
       const { container } = render(Pagination, {
-        props: { count: 20, modelValue: 10, size: 'sm', compact: true },
+        props: { length: 20, modelValue: 10, size: 'sm', compact: true },
       })
       const buttons = [...container.querySelectorAll<HTMLElement>('.ds-button')]
 
@@ -264,7 +297,7 @@ describe('Pagination', () => {
 
     it('rend la page active en solid et les autres dans la variante demandée', () => {
       const { container } = render(Pagination, {
-        props: { count: 5, modelValue: 3, variant: 'outline' },
+        props: { length: 5, modelValue: 3, variant: 'outline' },
       })
       const pages = [...container.querySelectorAll<HTMLElement>('.ds-pagination-page')]
 
@@ -278,7 +311,7 @@ describe('Pagination', () => {
   describe('navigation clavier', () => {
     it('déplace le focus avec les flèches sans changer de page', async () => {
       const { container, getByRole, emitted } = render(Pagination, {
-        props: { count: 20, modelValue: 10 },
+        props: { length: 20, modelValue: 10 },
       })
       const pages = [...container.querySelectorAll<HTMLElement>('.ds-pagination-page')]
       pages[1]?.focus()
@@ -291,7 +324,7 @@ describe('Pagination', () => {
 
     it('boucle en arrière et saute aux extrémités avec Home/End', async () => {
       const { container, getByRole } = render(Pagination, {
-        props: { count: 20, modelValue: 10 },
+        props: { length: 20, modelValue: 10 },
       })
       const nav = getByRole('navigation')
       const pages = [...container.querySelectorAll<HTMLElement>('.ds-pagination-page')]
@@ -309,7 +342,7 @@ describe('Pagination', () => {
 
     it('ignore les pages désactivées', async () => {
       const { container, getByRole } = render(Pagination, {
-        props: { count: 5, modelValue: 1, boundaryCount: 3, disabledPages: [2] },
+        props: { length: 5, modelValue: 1, disabledPages: [2] },
       })
       const pages = [...container.querySelectorAll<HTMLElement>('.ds-pagination-page')]
       pages[0]?.focus()
@@ -322,7 +355,7 @@ describe('Pagination', () => {
 
   describe('cas limites', () => {
     it('rend une seule pastille pour une page unique, contrôles en butée', () => {
-      const { container, getByRole } = render(Pagination, { props: { count: 1, modelValue: 1 } })
+      const { container, getByRole } = render(Pagination, { props: { length: 1, modelValue: 1 } })
 
       expect(pageLabels(container)).toEqual(['1'])
       expect((getByRole('button', { name: 'Page suivante' }) as HTMLButtonElement).disabled).toBe(
@@ -331,7 +364,7 @@ describe('Pagination', () => {
     })
 
     it('borne une page courante hors limites', () => {
-      const { getByRole } = render(Pagination, { props: { count: 5, modelValue: 99 } })
+      const { getByRole } = render(Pagination, { props: { length: 5, modelValue: 99 } })
 
       expect(getByRole('button', { name: 'Page 5' }).getAttribute('aria-current')).toBe('page')
     })

@@ -12,9 +12,9 @@ l'option `attached` rattache le tout dans un `ButtonGroup`. Hover, focus, désac
 de `prefers-reduced-motion` viennent donc directement de `Button`, sans une seule règle d'état
 redéfinie ici.
 
-La troncature se joue à deux niveaux, volontairement distincts. Le premier est **logique** : une
-fenêtre glissante garde les bornes et les voisines de la page courante, et intercale une ellipse dès
-qu'un numéro est sauté — c'est une pure dérivation d'état, sans aucune API navigateur. Le second est
+La troncature se joue à deux niveaux, volontairement distincts. Le premier est **logique** : par
+défaut toutes les pages sont rendues, et `totalVisible` fixe le nombre total d'emplacements affichés
+(ellipses comprises) — c'est une pure dérivation d'état, sans aucune API navigateur. Le second est
 **responsive** et entièrement en CSS : la barre est son propre conteneur de requête, et des paliers
 `@container` retirent les voisines les plus éloignées quand la place manque. Aucun `ResizeObserver`,
 aucune mesure en JavaScript.
@@ -65,9 +65,11 @@ qui couvre aussi les deux extrémités, sans test séparé.
 
 ## Troncature logique
 
-`boundaryCount` fixe le nombre de pages conservées à chaque extrémité et `siblingCount` le nombre de
-voisines de part et d'autre de la page courante. Une ellipse apparaît partout où la suite est
-interrompue.
+Sans `totalVisible`, aucune troncature : la barre rend autant de pastilles que `length`. Renseignée,
+`totalVisible` fixe le nombre total d'emplacements rendus, **ellipses comprises** (minimum utile : 5,
+soit première + ellipse + courante + ellipse + dernière). La première et la dernière page sont
+toujours conservées, et la fenêtre centrée sur la page courante se **décale** près des extrémités au
+lieu de rétrécir : la barre garde exactement la même largeur quelle que soit la page courante.
 
 <Canvas of={PaginationStories.BeaucoupDePages} />
 
@@ -82,7 +84,7 @@ Deux conséquences à connaître. D'abord, la barre est de niveau bloc et occupe
 parent — c'est ce qui rend la troncature dépendante du conteneur — donc l'alignement passe par la
 prop `align` plutôt que par le contexte. Ensuite, les seuils sont des valeurs littérales, les
 conditions `@container` n'acceptant pas de variables ; ils sont calibrés sur la taille `md`. Pour un
-très grand nombre de pages ou une taille `xl`, préférez ajuster `siblingCount`, ou couper la couche
+très grand nombre de pages ou une taille `xl`, préférez ajuster `totalVisible`, ou couper la couche
 responsive avec `responsive: false`.
 
 Aucune ellipse supplémentaire n'apparaît en compensation d'une voisine masquée : elle occuperait
