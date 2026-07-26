@@ -15,7 +15,7 @@ interface AccordionProps {
   expandIcon?: string
   /** Icône des items ouverts ; absente = `expandIcon` pivotée de 180°. */
   collapseIcon?: string
-  /** Densité réduite d'un cran de padding ; typo et icônes inchangées. */
+  /** Densité réduite : paddings d'un cran et icône 16px au lieu de 20px. */
   compact?: boolean
 }
 
@@ -62,6 +62,7 @@ provide(accordionKey, {
      */
     --_accordion-pad-block: var(--ds-space-4);
     --_accordion-pad-inline: var(--ds-space-5);
+    --_accordion-icon-size: var(--ds-icon-size-md);
 
     border: 1px solid var(--ds-color-border);
     border-radius: var(--ds-radius-surface);
@@ -70,10 +71,11 @@ provide(accordionKey, {
     overflow: hidden;
   }
 
-  /* Compact : paddings d'un cran (typo, gap et icônes inchangés) */
+  /* Compact : paddings d'un cran et icône 16px (typo et gap inchangés) */
   .ds-accordion[data-compact] {
     --_accordion-pad-block: var(--ds-space-3);
     --_accordion-pad-inline: var(--ds-space-4);
+    --_accordion-icon-size: var(--ds-icon-size-sm);
   }
 }
 </style>

@@ -93,8 +93,9 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   .ds-accordion-summary {
-    /* Contexte d'Icon (mapping xs de la table des tailles) */
-    --ds-icon-size: var(--ds-icon-size-sm);
+    /* Contexte d'Icon : 20px, 16px en compact (opsz 20 dans les deux cas,
+       comme le mapping xs→md de la table des tailles) */
+    --ds-icon-size: var(--_accordion-icon-size, var(--ds-icon-size-md));
     --ds-icon-opsz: 20;
 
     display: flex;
