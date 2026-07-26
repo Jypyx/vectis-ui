@@ -322,7 +322,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     /* grandit pour remplir la zone quand le contenu est court ; garde sa hauteur
        naturelle (donc déborde et fait défiler) quand il est long */
     flex: 1 0 auto;
-    padding: var(--ds-space-3) var(--ds-space-6);
+    padding: var(--ds-space-1) var(--ds-space-6) var(--ds-space-3);
     color: var(--ds-color-text);
     font-size: var(--ds-font-size-sm);
     line-height: var(--ds-font-leading-normal);
