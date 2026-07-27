@@ -1,0 +1,96 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VIconButtonStories from './VIconButton.stories'
+
+<Meta of={VIconButtonStories} />
+
+# IconButton
+
+Icon-only button: a wrapper around `VButton` rendered **square** (width = height, padding
+removed), with the same visual API — plus a `shape` prop, which is what a square box makes
+possible: a disc. The `label` prop is **mandatory** — it sets the button's `aria-label`, because
+an icon alone gives screen readers no accessible name.
+
+The icon can be provided in two ways: through the `icon` prop (an icon name or an explicit
+render, without going through the slot — the fill is then driven by `icon-filled`), or in the
+default slot for custom content (the slot only shows when `icon` is absent). Through the `VIcon`
+component, the size and the `opsz` axis automatically follow the button size (xs → 16px,
+sm/md → 20px, lg/xl → 24px).
+
+<Canvas of={VIconButtonStories.Default} />
+
+<Controls of={VIconButtonStories.Default} />
+
+## Variants and tones
+
+The same four variants (`solid`, `outline`, `ghost`, `soft`) and three tones
+(`accent`, `neutral`, `danger`) as `VButton` — see its documentation for
+the detail of each rendering, and for why `success`/`warning` are not action tones. The defaults suit icon usage: `variant="ghost"` and
+`tone="neutral"` (a VIconButton is typically a discreet toolbar action).
+
+<Canvas of={VIconButtonStories.Variants} />
+
+## Elevation
+
+The `elevated` boolean is forwarded to `VButton` and behaves exactly as it does there: the shadow
+scale on every variant, plus the raised surface on `ghost` and `outline`.
+
+<Canvas of={VIconButtonStories.Elevated} />
+
+## Sizes
+
+Five square sizes (`xs` 24px, `sm` 32px, `md` 40px, `lg` 48px, `xl` 56px); `compact` reduces the
+side by 4px (20/28/36/44/52px) without changing the icon size. The width automatically follows
+the height of the underlying `VButton`, compact included.
+
+<Canvas of={VIconButtonStories.Sizes} />
+
+## Shape
+
+`shape="square"` (the default): the corner radius every control shares
+(`--vectis-radius-interactive`); `shape="circular"`: a disc (`--vectis-radius-pill`). The box is
+square in both cases — only the corners change, so the two shapes take exactly the same room.
+`VButton` has no equivalent prop: a full radius only produces a meaningful silhouette on a box
+that is already square.
+
+A circular button reads well on top of an image or a coloured surface, where a rounded rectangle
+competes with the content behind it — that is why `VCarousel` renders its previous/next arrows
+this way.
+
+Inside a `VButtonGroup`, the group's own corner rules win: a circular button keeps its round
+outer ends and square inner seams, which is what makes the segments read as one control.
+
+<Canvas of={VIconButtonStories.Shapes} />
+
+## Icon through a prop
+
+The `icon` prop takes an icon name (or an explicit render) and renders the `VIcon` internally,
+without going through the slot; `icon-filled` asks for the filled variant (the `FILL` axis).
+
+<Canvas of={VIconButtonStories.IconProp} />
+
+## Icon sources
+
+The slot (the fallback when `icon` is absent) accepts all three sources of the `VIcon`
+component: the DS's embedded SVG, a ligature from the consumer's font (see the README), inline
+SVG, or an image.
+
+<Canvas of={VIconButtonStories.IconsTypes} />
+
+## States
+
+`loading` disables the button, shows the spinner and sets `aria-busy`:
+
+<Canvas of={VIconButtonStories.Loading} />
+
+`disabled` switches every variant to greys, like `VButton`:
+
+<Canvas of={VIconButtonStories.Disabled} />
+
+## Accessibility
+
+- A mandatory `label` → `aria-label`: the button always has an accessible name; the icon itself
+  stays decorative (`aria-hidden`).
+- For a button with a visible label **and** an icon, use `VButton` with `icon-start`/`icon-end`
+  rather than a VIconButton.
+- Visible focus through a ring (`--vectis-focus-ring-*`), transitions subject to
+  `prefers-reduced-motion` — both inherited from `VButton`.

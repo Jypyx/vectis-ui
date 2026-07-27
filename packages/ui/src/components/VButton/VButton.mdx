@@ -1,0 +1,116 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VButtonStories from './VButton.stories'
+
+<Meta of={VButtonStories} />
+
+# Button
+
+Action button built on the native `<button>` (focus, keyboard and disabling for free) — or
+rendered as an `<a>` link through the `href` prop. No behavioural JavaScript, with one
+exception: the "inert link" bridge (see [Link](#link)).
+
+<Canvas of={VButtonStories.Default} />
+
+<Controls of={VButtonStories.Default} />
+
+## Variants and tones
+
+Four variants (`solid`, `outline`, `ghost`, `soft`) crossed with three tones
+(`accent`, `neutral`, `danger`). The tones define nothing but local CSS
+variables (`--tone-bg-solid`, `--tone-text-tinted`…) that the variants consume: every
+combination is valid.
+
+There is deliberately **no `success` or `warning` tone here**. On a button, `tone` expresses an
+action's **intention** — proceed, stay neutral, destroy — whereas success and warning are **states**.
+Those two tones do exist, on the components that report a state: `VChip`, `VToast`, `VBadge`,
+`VTypography` and the progress indicators.
+
+- **solid**: filled background, primary action.
+- **outline** / **ghost**: tinted border / text only, secondary actions.
+- **soft**: tinted background + tinted text, between solid and ghost. It is named after the token
+  it paints, `--tone-bg-soft`.
+
+<Canvas of={VButtonStories.Variants} />
+
+## Elevation
+
+`elevated` is a boolean, not a variant: it is **orthogonal** to `variant`, so any of the four can
+be raised. It applies the shadow scale — the shadow rises on hover and settles back on press
+(Material 3 style).
+
+On `ghost` and `outline`, which have no background of their own, it additionally paints the raised
+surface. That is not cosmetic: in the dark theme the page is `neutral-950` and the raised surface
+`neutral-900`, so without it the shadow would have nothing casting it. `ghost` + `elevated` is
+therefore the combination that reads as a floating card.
+
+<Canvas of={VButtonStories.Elevated} />
+
+## Sizes
+
+Five sizes (`xs` 24px, `sm` 32px, `md` 40px, `lg` 48px, `xl` 56px, through the
+`--vectis-control-height-*` tokens). The `compact` prop reduces the height by 4px
+(20/28/36/44/52px) **without touching** the padding, the typography or the icon size. The
+size → height/type/icon/padding mapping is shared by every control in the design system (the
+`v-control` class, see `styles/control-size.css`).
+
+<Canvas of={VButtonStories.Sizes} />
+
+## Icons
+
+The `icon-start` / `icon-end` props take a
+[Material Symbols Rounded](https://fonts.google.com/icons) name and render the `VIcon`
+component internally. The icon's size and `opsz` axis automatically follow the button size
+(xs → 16px, sm/md → 20px, lg/xl → 24px). The icons are decorative (`aria-hidden`): the button's
+accessible name stays its label.
+
+> The icons the DS renders itself are embedded SVGs: no font is required. Your own icon names,
+> on the other hand, come from whichever font or library you wire in (see the README).
+
+<Canvas of={VButtonStories.Icons} />
+
+The `icon-filled` prop fills the `icon-start` / `icon-end` icons (the font's `FILL` axis),
+without having to go through the slots:
+
+<Canvas of={VButtonStories.IconsFilled} />
+
+The `#start` / `#end` slots remain available for custom content (inline SVG, an image) and
+**win** over the props (their fill is then driven directly on the `VIcon` through its `filled`
+prop):
+
+<Canvas of={VButtonStories.IconsTypes} />
+
+## Link
+
+With `href`, the component renders an `<a>`: the native `type` and `disabled` are not set, and
+the link attributes (`target`, `rel`…) pass through by fallthrough.
+
+<Canvas of={VButtonStories.Link} />
+
+Since an `<a>` has no native `disabled`, a `disabled` (or `loading`) link becomes an **inert
+link**: `href` removed (not focusable, no navigation), `aria-disabled="true"` for assistive
+technologies, `click` handlers filtered out. This is the component's only behavioural
+JavaScript.
+
+<Canvas of={VButtonStories.DisabledLink} />
+
+## States
+
+`loading` disables the button, shows a spinner, sets `aria-busy` and fades the button with
+opacity (it keeps its colours). The spinner **replaces** the start slot (`icon-start` /
+`#start`) — never a spinner and an icon side by side; `icon-end` stays visible:
+
+<Canvas of={VButtonStories.Loading} />
+
+`disabled` switches every variant to greys (`--vectis-color-surface-muted`,
+`--vectis-color-text-subtle`) — no opacity trick, and the rendering follows the dark theme
+automatically:
+
+<Canvas of={VButtonStories.Disabled} />
+
+## Accessibility
+
+- Visible focus through a ring (`--vectis-focus-ring-*`), never removed.
+- Decorative icons: the accessible name is always the default slot's label. For an icon-only
+  button, use `VIconButton` (where the `aria-label` is mandatory).
+- `loading` → `aria-busy="true"`; an inert link → `aria-disabled="true"` with no `href`.
+- The transitions respect `prefers-reduced-motion`.

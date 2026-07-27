@@ -1,0 +1,59 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VButtonGroupStories from './VButtonGroup.stories'
+
+<Meta of={VButtonGroupStories} />
+
+# ButtonGroup
+
+Visually joins several `VButton`/`VIconButton` into a **segmented control**: adjacent borders
+merged, rounded corners only at the ends of the group. The whole rendering is CSS (no
+`provide`/`inject`) — each button keeps its own props; setting the same
+`variant`/`tone`/`size` on the children gives a homogeneous result.
+
+<Canvas of={VButtonGroupStories.Default} />
+
+<Controls of={VButtonGroupStories.Default} />
+
+## Variants
+
+The seam between segments adapts: for the filled variants (`solid`/`soft`, transparent border) a
+thin `--vectis-color-border` line materializes the separation; for `outline` it unifies the joint.
+Apply the same `variant` to every button in a group.
+
+<Canvas of={VButtonGroupStories.Variants} />
+
+## Vertical orientation
+
+`orientation="vertical"` stacks the buttons: merging and rounded corners switch to the block axis
+(top corners of the first, bottom corners of the last). The buttons are equalized in width.
+
+<Canvas of={VButtonGroupStories.Vertical} />
+
+## Icon toolbar
+
+A group of `VIconButton` forms a compact toolbar. Override the default `role` with
+`role="toolbar"` (fallthrough on the root) and give the group an `aria-label`.
+
+<Canvas of={VButtonGroupStories.WithIconButton} />
+
+## Sizes
+
+A CSS-only approach: the size goes on **each** button (same values → coherence). The group
+propagates nothing.
+
+<Canvas of={VButtonGroupStories.Sizes} />
+
+## Edge cases
+
+A lone button keeps all four rounded corners (no joint). Long labels stay aligned.
+
+<Canvas of={VButtonGroupStories.EdgeCases} />
+
+## Accessibility
+
+- The root is a `role="group"` container (overridable to `role="toolbar"` by fallthrough) — give
+  it an `aria-label` describing the group (e.g. "Alignment", "Formatting").
+- Each `VButton`/`VIconButton` keeps its own semantics and accessible name; a `VIconButton` is
+  still required to carry a `label`.
+- The hovered/focused/active button rises above its neighbours (`z-index`): its focus ring and
+  border are never clipped by the adjacent segment.
