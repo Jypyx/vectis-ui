@@ -21,11 +21,16 @@
  * (`.ds-table-toolbar .ds-input`). Toggle est placé après Tabs par cohérence
  * (il compose Button et ButtonGroup) mais son ordre n'est pas contraignant :
  * ses surcharges sont qualifiées (`.ds-toggle-item[data-size]`,
- * `.ds-toggle:not(.ds-button-group)`).
+ * `.ds-toggle:not(.ds-button-group)`). Typography doit rester en tête (avant
+ * tout composant qui le rend en interne — Input, Textarea, Dialog, Accordion,
+ * DataTable) : leurs classes (`.ds-input-label`…) surchargent `.ds-typography`
+ * à spécificité égale.
  */
 import './styles/index.css'
 
 export { default as Icon } from './components/Icon/Icon.vue'
+export { default as Typography } from './components/Typography/Typography.vue'
+export type { TypographyTone, TypographyVariant } from './components/Typography/Typography.vue'
 export { default as Button } from './components/Button/Button.vue'
 export { default as IconButton } from './components/IconButton/IconButton.vue'
 export { default as ButtonGroup } from './components/Button/ButtonGroup.vue'
