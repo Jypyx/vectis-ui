@@ -52,10 +52,14 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const dialog = canvasElement.querySelector('.ds-dialog') as HTMLDialogElement
 
+    // montage paresseux : le <dialog> n'est requêtable qu'une fois ouvert
     await userEvent.click(canvas.getByRole('button', { name: 'Supprimer' }))
-    await waitFor(() => expect(dialog.open).toBe(true))
+    const dialog = await waitFor(() => {
+      const el = canvasElement.querySelector('.ds-dialog') as HTMLDialogElement | null
+      expect(el?.open).toBe(true)
+      return el!
+    })
     expect(dialog.getAttribute('role')).toBe('alertdialog')
 
     // Échap ne ferme pas une alerte (closedby="none")
@@ -63,9 +67,9 @@ export const Default: Story = {
     await new Promise((r) => setTimeout(r, 100))
     expect(dialog.open).toBe(true)
 
-    // seule une action explicite ferme
+    // seule une action explicite ferme (le <dialog> est alors démonté)
     await userEvent.click(within(dialog).getByRole('button', { name: 'Annuler' }))
-    await waitFor(() => expect(dialog.open).toBe(false))
+    await waitFor(() => expect(canvasElement.querySelector('.ds-dialog')).toBeNull())
   },
 }
 

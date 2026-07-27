@@ -189,14 +189,17 @@ export const Selection: Story = {
       name: 'Tout sélectionner',
     }) as HTMLInputElement
 
-    // master → toutes les cases de la page visible cochées
-    await userEvent.click(master)
+    // master → toutes les cases de la page visible cochées (les inputs masqués
+    // sont en pointer-events: none : on clique les <label> englobants)
+    await userEvent.click(master.closest('label')!)
     await waitFor(() => {
       const boxes = canvas.getAllByRole('checkbox').filter((box) => box !== master)
       boxes.forEach((box) => expect(box).toBeChecked())
     })
     // décocher une ligne → le master repasse en indéterminé
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Sélectionner la ligne 1' }))
+    await userEvent.click(
+      canvas.getByRole('checkbox', { name: 'Sélectionner la ligne 1' }).closest('label')!,
+    )
     await waitFor(() => {
       expect(master.indeterminate).toBe(true)
     })

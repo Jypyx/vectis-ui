@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
 import Radio from './Radio.vue'
@@ -37,8 +37,9 @@ export const Groupe: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByRole('radio', { name: 'Standard' })).toBeChecked()
-    await userEvent.click(canvas.getByRole('radio', { name: 'Pro' }))
-    await expect(canvas.getByTestId('mirror')).toHaveTextContent('pro')
+    // l'input masqué est en pointer-events: none : on clique le <label> englobant
+    await userEvent.click(canvas.getByRole('radio', { name: 'Pro' }).closest('label')!)
+    await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('pro'))
     await expect(canvas.getByRole('radio', { name: 'Standard' })).not.toBeChecked()
   },
 }

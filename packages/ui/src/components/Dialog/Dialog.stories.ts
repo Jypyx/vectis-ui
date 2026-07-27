@@ -55,15 +55,20 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const dialog = canvasElement.querySelector('.ds-dialog') as HTMLDialogElement
 
-    // ouverture via le déclencheur (slot #trigger) : la modale passe en top layer
+    // ouverture via le déclencheur (slot #trigger) : la modale passe en top layer.
+    // Montage paresseux : le <dialog> n'existe dans le DOM qu'une fois ouvert,
+    // il ne peut être requêté qu'après le clic.
     await userEvent.click(canvas.getByRole('button', { name: 'Ouvrir la modale' }))
-    await waitFor(() => expect(dialog.open).toBe(true))
+    const dialog = await waitFor(() => {
+      const el = canvasElement.querySelector('.ds-dialog') as HTMLDialogElement | null
+      expect(el?.open).toBe(true)
+      return el!
+    })
 
-    // fermeture par la croix
+    // fermeture par la croix : le <dialog> est entièrement démonté
     await userEvent.click(within(dialog).getByRole('button', { name: 'Fermer' }))
-    await waitFor(() => expect(dialog.open).toBe(false))
+    await waitFor(() => expect(canvasElement.querySelector('.ds-dialog')).toBeNull())
   },
 }
 
@@ -222,12 +227,20 @@ export const SansCroix: Story = {
 export const FermetureEscape: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const dialog = canvasElement.querySelector('.ds-dialog') as HTMLDialogElement
 
+    // montage paresseux : le <dialog> n'est requêtable qu'une fois ouvert
     await userEvent.click(canvas.getByRole('button', { name: 'Ouvrir la modale' }))
-    await waitFor(() => expect(dialog.open).toBe(true))
+    const dialog = await waitFor(() => {
+      const el = canvasElement.querySelector('.ds-dialog') as HTMLDialogElement | null
+      expect(el?.open).toBe(true)
+      return el!
+    })
 
-    await userEvent.keyboard('{Escape}')
-    await waitFor(() => expect(dialog.open).toBe(false))
+    // Échap passe par le CloseWatcher natif (closedby), qui exige une frappe
+    // *trusted* — impossible à synthétiser en play function. On emprunte la même
+    // voie native (close() → événement 'close') pour vérifier NOTRE pont :
+    // resynchronisation du v-model puis démontage complet.
+    dialog.close()
+    await waitFor(() => expect(canvasElement.querySelector('.ds-dialog')).toBeNull())
   },
 }

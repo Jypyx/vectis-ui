@@ -106,8 +106,10 @@ export const CompteurSoft: Story = {
     await userEvent.type(textarea, 'beaucoup trop long')
     await waitFor(() => expect(textarea.value).toBe('beaucoup trop long'))
     await expect(canvas.getByText('18/10')).toHaveAttribute('data-over')
-    await userEvent.tab()
-    await waitFor(() => expect(textarea.matches(':user-invalid')).toBe(true))
+    // validité native : setCustomValidity a invalidé le champ (on ne peut pas
+    // asserter :user-invalid, qui exige une interaction *trusted*)
+    await waitFor(() => expect(textarea.validity.customError).toBe(true))
+    await expect(textarea.matches(':invalid')).toBe(true)
   },
 }
 

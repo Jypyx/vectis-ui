@@ -34,9 +34,12 @@ export const Default: Story = {
      */
     const barCircle = bar.querySelector('.ds-progress-circular-bar')!
     await waitFor(() => expect(getComputedStyle(barCircle).r).toBe('22px'))
-    await waitFor(() =>
-      expect(Number.parseFloat(getComputedStyle(barCircle).strokeDashoffset)).toBeCloseTo(35, 0),
-    )
+    // Chromium sérialise le calc() résolu en « calc(35px) » dans getComputedStyle
+    // (parseFloat → NaN) : on lit la valeur via l'OM typé.
+    await waitFor(() => {
+      const offset = barCircle.computedStyleMap().get('stroke-dashoffset') as CSSUnitValue
+      expect(offset.value).toBeCloseTo(35, 0)
+    })
   },
 }
 

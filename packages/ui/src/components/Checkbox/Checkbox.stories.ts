@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { computed, ref } from 'vue'
 
 import Checkbox from './Checkbox.vue'
@@ -32,10 +32,13 @@ export const Default: Story = {
     const checkbox = within(canvasElement).getByRole('checkbox', {
       name: 'Recevoir la newsletter',
     })
-    await userEvent.click(checkbox)
-    await expect(checkbox).toBeChecked()
-    await userEvent.click(checkbox)
-    await expect(checkbox).not.toBeChecked()
+    // l'input masqué est en pointer-events: none : on clique le <label>
+    // englobant, comme un utilisateur réel
+    const label = checkbox.closest('label')!
+    await userEvent.click(label)
+    await waitFor(() => expect(checkbox).toBeChecked())
+    await userEvent.click(label)
+    await waitFor(() => expect(checkbox).not.toBeChecked())
   },
 }
 
@@ -95,9 +98,9 @@ export const Indeterminate: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const all = canvas.getByRole('checkbox', { name: 'Tout sélectionner' }) as HTMLInputElement
-    await expect(all.indeterminate).toBe(true)
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Poires' }))
-    await expect(all.indeterminate).toBe(false)
+    await waitFor(() => expect(all.indeterminate).toBe(true))
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Poires' }).closest('label')!)
+    await waitFor(() => expect(all.indeterminate).toBe(false))
     await expect(all).toBeChecked()
   },
 }

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
 import Switch from './Switch.vue'
@@ -30,8 +30,9 @@ export const Default: Story = {
     // role="switch" : sémantique correcte pour les lecteurs d'écran
     const sw = within(canvasElement).getByRole('switch', { name: 'Notifications' })
     await expect(sw).not.toBeChecked()
-    await userEvent.click(sw)
-    await expect(sw).toBeChecked()
+    // l'input masqué est en pointer-events: none : on clique le <label> englobant
+    await userEvent.click(sw.closest('label')!)
+    await waitFor(() => expect(sw).toBeChecked())
   },
 }
 

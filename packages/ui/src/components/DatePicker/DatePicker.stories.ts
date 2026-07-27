@@ -34,7 +34,9 @@ export const Default: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const field = canvas.getByLabelText('Date')
+    // getByRole('textbox') : le panneau (role dialog) porte le même aria-label
+    // que le champ, getByLabelText matcherait les deux
+    const field = canvas.getByRole('textbox', { name: 'Date' })
     // ouverture au clavier (flèche bas), focus déplacé dans la grille
     field.focus()
     await userEvent.keyboard('{ArrowDown}')

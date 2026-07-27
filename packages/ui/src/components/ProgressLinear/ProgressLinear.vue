@@ -202,16 +202,26 @@ const px = (v: number | string | undefined) => {
   }
 
   .ds-progress-linear-text[data-on-fill] {
-    /* Texte adaptatif noir/blanc : contrast-color() (Safari 26+) ; la
-       déclaration est ignorée là où la fonction est inconnue (Chrome/Edge
-       actuels) et le fallback par tone s'applique — pattern Badge. */
+    /* Fallback par tone. contrast-color() ne peut PAS être une simple seconde
+       déclaration : contenant un var(), elle n'est jamais rejetée au parsing
+       par les navigateurs sans support — elle gagnerait la cascade puis
+       deviendrait invalide au calcul (IACVT → color: unset → héritage, le
+       fallback ne s'applique jamais). D'où le @supports ci-dessous, évalué,
+       lui, sans substitution de var() — pattern Badge. */
     color: var(--_text-fallback);
-    color: contrast-color(var(--_fill));
     /* inset() est physique : un jeu de valeurs par orientation et direction.
        Le débord négatif sur les trois autres côtés évite de rogner un texte
        plus haut (ou plus large) que la barre. */
     clip-path: inset(-100vmax calc(100% * (1 - var(--_f))) -100vmax -100vmax);
     transition: clip-path var(--ds-duration-base) var(--ds-ease-default);
+  }
+
+  /* Texte adaptatif noir/blanc là où contrast-color() existe (Safari 26+,
+     Edge 150+). */
+  @supports (color: contrast-color(red)) {
+    .ds-progress-linear-text[data-on-fill] {
+      color: contrast-color(var(--_fill));
+    }
   }
 
   .ds-progress-linear:dir(rtl) .ds-progress-linear-text[data-on-fill] {

@@ -142,8 +142,10 @@ export const Groupes: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Document' }))
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
 
-    // groupes nommés + roving focus qui les traverse (les libellés sont sautés)
-    await expect(canvas.getByRole('group', { name: 'Fichier' })).toBeVisible()
+    // groupes nommés + roving focus qui les traverse (les libellés sont sautés).
+    // waitFor : le panneau vient de s'ouvrir, la transition d'entrée part
+    // d'opacity 0 (@starting-style) et toBeVisible l'évalue.
+    await waitFor(() => expect(canvas.getByRole('group', { name: 'Fichier' })).toBeVisible())
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'Renommer' })).toHaveFocus())
     await userEvent.keyboard('{ArrowDown}{ArrowDown}')
     await expect(canvas.getByRole('menuitem', { name: 'Inviter' })).toHaveFocus()
@@ -379,15 +381,22 @@ export const SousMenusSurvol: Story = {
     await userEvent.hover(exporter)
     await expect(exporter).toHaveFocus()
     await waitFor(() => expect(exporter).toHaveAttribute('aria-expanded', 'true'))
-    await expect(canvas.getByRole('menuitem', { name: 'PDF' })).toBeVisible()
+    // waitFor : transition d'entrée du sous-panneau (opacity 0 au premier instant)
+    await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'PDF' })).toBeVisible())
 
-    // bascule de branche : survoler un autre item à sous-menu ferme la première
+    // bascule de branche : survoler un autre item à sous-menu ferme la première.
+    // unhover explicite : l'API directe de userEvent ne trace pas le pointeur
+    // entre deux hover(), le pointerleave du précédent ne serait jamais émis
+    // (un vrai pointeur le fait en quittant l'item).
     const partager = canvas.getByRole('menuitem', { name: 'Partager' })
+    await userEvent.unhover(exporter)
     await userEvent.hover(partager)
     await waitFor(() => expect(partager).toHaveAttribute('aria-expanded', 'true'))
     await waitFor(() => expect(exporter).toHaveAttribute('aria-expanded', 'false'))
 
-    // survoler un item simple referme la branche voisine
+    // survoler un item simple referme la branche voisine (fermeture au
+    // pointerleave après le délai d'intention)
+    await userEvent.unhover(partager)
     await userEvent.hover(canvas.getByRole('menuitem', { name: 'Nouveau' }))
     await waitFor(() => expect(partager).toHaveAttribute('aria-expanded', 'false'))
   },

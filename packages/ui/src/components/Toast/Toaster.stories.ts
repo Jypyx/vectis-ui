@@ -61,7 +61,10 @@ export const Default: Story = {
     // déclenchement programmatique : la pile passe en top-layer
     await userEvent.click(canvas.getByRole('button', { name: 'Notifier' }))
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(true))
-    expect(within(stack).getByText('Modifications enregistrées.')).toBeVisible()
+    // waitFor : le toast entre en transition depuis opacity 0 (@starting-style)
+    await waitFor(() =>
+      expect(within(stack).getByText('Modifications enregistrées.')).toBeVisible(),
+    )
   },
 }
 

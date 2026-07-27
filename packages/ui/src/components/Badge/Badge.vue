@@ -127,11 +127,21 @@ const badgeAttrs = computed(() => ({
     --ds-icon-size: var(--ds-icon-size-sm);
     --ds-icon-opsz: 20;
 
-    /* Texte adaptatif noir/blanc : contrast-color() (Safari 26+) ; la
-       déclaration est ignorée là où la fonction est inconnue (Chrome/Edge
-       actuels) et le fallback par tone posé ci-dessous s'applique. */
+    /* Fallback par tone (tokens Badge.tokens.css). contrast-color() ne peut
+       PAS être une simple seconde déclaration : contenant un var(), elle
+       n'est jamais rejetée au parsing par les navigateurs sans support —
+       elle gagnerait la cascade puis deviendrait invalide au calcul (IACVT →
+       color: unset → héritage, le fallback ne s'applique jamais). D'où le
+       @supports ci-dessous, évalué, lui, sans substitution de var(). */
     color: var(--_text-fallback);
-    color: contrast-color(var(--_bg));
+  }
+
+  /* Texte adaptatif noir/blanc là où contrast-color() existe (Safari 26+,
+     Edge 150+). */
+  @supports (color: contrast-color(red)) {
+    .ds-badge {
+      color: contrast-color(var(--_bg));
+    }
   }
 
   /* --- Icône seule : le min-width fait le cercle de 20px, padding retiré ---

@@ -145,9 +145,11 @@ export const CompteurSoft: Story = {
     // la saisie n'est pas tronquée, le compteur passe en dépassement
     await waitFor(() => expect(input.value).toBe('beaucoup trop long'))
     await expect(canvas.getByText('18/10')).toHaveAttribute('data-over')
-    // l'erreur visuelle (:user-invalid) n'apparaît qu'après interaction complète (blur)
-    await userEvent.tab()
-    await waitFor(() => expect(input.matches(':user-invalid')).toBe(true))
+    // le dépassement invalide le champ via setCustomValidity. On asserte sur la
+    // validité native, pas sur :user-invalid : ce pseudo-état exige une
+    // interaction *trusted* que les événements synthétiques ne fournissent pas.
+    await waitFor(() => expect(input.validity.customError).toBe(true))
+    await expect(input.matches(':invalid')).toBe(true)
   },
 }
 
@@ -168,8 +170,10 @@ export const Pattern: Story = {
   play: async ({ canvasElement }) => {
     const input = within(canvasElement).getByLabelText('Code postal') as HTMLInputElement
     await userEvent.type(input, 'abc')
-    await userEvent.tab()
-    await waitFor(() => expect(input.matches(':user-invalid')).toBe(true))
+    // validité native : patternMismatch (on ne peut pas asserter :user-invalid,
+    // qui exige une interaction *trusted* — cf. CompteurSoft)
+    await waitFor(() => expect(input.validity.patternMismatch).toBe(true))
+    await expect(input.matches(':invalid')).toBe(true)
   },
 }
 

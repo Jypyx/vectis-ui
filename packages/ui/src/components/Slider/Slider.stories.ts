@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
 import Slider from './Slider.vue'
@@ -26,10 +26,14 @@ export const Default: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const slider = canvas.getByRole('slider', { name: 'Volume' })
-    // clavier 100 % natif : la flèche incrémente la valeur
+    const slider = canvas.getByRole('slider', { name: 'Volume' }) as HTMLInputElement
+    // Le clavier est 100 % natif, mais un keydown synthétique (non trusted) ne
+    // déclenche PAS le comportement par défaut d'un <input type=range> : on
+    // simule l'effet d'une flèche droite (valeur + event input) et on vérifie
+    // le pont v-model.
     slider.focus()
-    await userEvent.keyboard('{ArrowRight}')
+    slider.value = '41'
+    await fireEvent.input(slider)
     await waitFor(() => expect(canvas.getByText('41')).toBeVisible())
   },
 }
@@ -115,10 +119,13 @@ export const AvecInputs: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // saisie hors bornes → commit au change (Enter) → clamp sur max
+    // saisie hors bornes → commit au change → clamp sur max. Un {Enter}
+    // synthétique ne déclenche pas le change natif : on quitte le champ (blur)
+    // comme un utilisateur réel.
     const field = canvas.getByRole('spinbutton', { name: 'Volume' })
     await userEvent.clear(field)
-    await userEvent.type(field, '150{Enter}')
+    await userEvent.type(field, '150')
+    await userEvent.tab()
     await waitFor(() => expect(canvas.getByText('100')).toBeVisible())
     await waitFor(() => expect(field).toHaveValue(100))
   },
@@ -145,10 +152,12 @@ export const LabelsTexte: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     // les valeurs non numériques sont annoncées via aria-valuetext
-    const slider = canvas.getByRole('slider', { name: 'Taille' })
+    const slider = canvas.getByRole('slider', { name: 'Taille' }) as HTMLInputElement
     await expect(slider).toHaveAttribute('aria-valuetext', 'M')
+    // même limite que Default : on simule l'effet d'ArrowRight (valeur + input)
     slider.focus()
-    await userEvent.keyboard('{ArrowRight}')
+    slider.value = '3'
+    await fireEvent.input(slider)
     await waitFor(() => expect(slider).toHaveAttribute('aria-valuetext', 'L'))
   },
 }

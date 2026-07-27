@@ -50,7 +50,7 @@ export const Default: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const field = canvas.getByLabelText('Heure')
+    const field = canvas.getByRole('textbox', { name: 'Heure' })
     // ouverture au clavier (flèche bas), focus déplacé sur la cellule heure
     field.focus()
     await userEvent.keyboard('{ArrowDown}')
@@ -77,7 +77,7 @@ export const SelectionAuCadran: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByLabelText('Heure'))
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
 
@@ -109,7 +109,7 @@ export const AnneauInterieur: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByLabelText('Heure'))
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
     const hourCell = () => canvas.getByRole('button', { name: 'Sélectionner l’heure' })
@@ -139,12 +139,21 @@ export const ModeSaisie: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByLabelText('Heure'))
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     // le focus arrive sur le champ heure ; « 09 » avance automatiquement aux minutes
-    const hourField = canvasElement.querySelector('.ds-timepicker-field') as HTMLInputElement
+    const fields = canvasElement.querySelectorAll<HTMLInputElement>('.ds-timepicker-field')
+    const hourField = fields[0]!
+    const minuteField = fields[1]!
     await waitFor(() => expect(hourField).toHaveFocus())
-    await userEvent.keyboard('0930')
+    // clear() avant la frappe : userEvent bute sur maxlength=2 quand le champ
+    // est pré-rempli (l'heure courante) — la sélection posée au focus n'est pas
+    // prise en compte dans son calcul de dépassement
+    await userEvent.clear(hourField)
+    await userEvent.type(hourField, '09')
+    await waitFor(() => expect(minuteField).toHaveFocus())
+    await userEvent.clear(minuteField)
+    await userEvent.type(minuteField, '30')
     await userEvent.click(canvas.getByRole('button', { name: 'OK' }))
     await waitFor(() => expect(canvas.getByTestId('valeur')).toHaveTextContent('09:30'))
   },
@@ -165,7 +174,7 @@ export const DouzeHeures: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByLabelText('Time'))
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Time' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     await userEvent.click(canvas.getByRole('button', { name: 'PM' }))
     await userEvent.click(canvas.getByRole('button', { name: 'OK' }))
@@ -188,7 +197,7 @@ export const Annulation: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByLabelText('Heure'))
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
     tapDial(face, 10 / 12)

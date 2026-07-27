@@ -377,7 +377,9 @@ export const FlechesPersonnalisees: Story = {
      */
     template: `
       <div style="display: grid; gap: 24px; max-width: 420px">
-        <div style="border: 1px dashed var(--ds-color-border); padding: 8px">
+        <!-- min-width: 0 : un item de grid ne descend pas sous son min-content
+             (min-width: auto), la liste d'onglets ne déborderait jamais -->
+        <div style="min-width: 0; border: 1px dashed var(--ds-color-border); padding: 8px">
           <Tabs
             scroll-buttons
             prev-icon="keyboard_double_arrow_left"
@@ -390,7 +392,7 @@ export const FlechesPersonnalisees: Story = {
           </Tabs>
         </div>
 
-        <div style="border: 1px dashed var(--ds-color-border); padding: 8px">
+        <div style="min-width: 0; border: 1px dashed var(--ds-color-border); padding: 8px">
           <Tabs
             orientation="vertical"
             variant="inset"
