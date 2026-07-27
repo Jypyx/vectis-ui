@@ -18,7 +18,10 @@
  * qui bat `.ds-button[data-variant='…']` quel que soit l'ordre du bundle.
  * DataTable compose Input/Checkbox/Dropdown/Pagination mais son ordre n'est
  * pas contraignant non plus : sa seule surcharge est qualifiée par descendance
- * (`.ds-table-toolbar .ds-input`).
+ * (`.ds-table-toolbar .ds-input`). Toggle est placé après Tabs par cohérence
+ * (il compose Button et ButtonGroup) mais son ordre n'est pas contraignant :
+ * ses surcharges sont qualifiées (`.ds-toggle-item[data-size]`,
+ * `.ds-toggle:not(.ds-button-group)`).
  */
 import './styles/index.css'
 
@@ -38,6 +41,16 @@ export type {
 } from './components/Tabs/Tabs.vue'
 export { default as Tab } from './components/Tabs/Tab.vue'
 export { default as TabPanel } from './components/Tabs/TabPanel.vue'
+export { default as Toggle } from './components/Toggle/Toggle.vue'
+export type {
+  ToggleModelValue,
+  ToggleOrientation,
+  ToggleSize,
+  ToggleTone,
+  ToggleValue,
+  ToggleVariant,
+} from './components/Toggle/Toggle.vue'
+export { default as ToggleItem } from './components/Toggle/ToggleItem.vue'
 export { default as Input } from './components/Input/Input.vue'
 export { default as Textarea } from './components/Textarea/Textarea.vue'
 export { default as Checkbox } from './components/Checkbox/Checkbox.vue'

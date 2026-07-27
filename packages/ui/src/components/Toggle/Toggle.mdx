@@ -1,0 +1,90 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as ToggleStories from './Toggle.stories'
+
+<Meta of={ToggleStories} />
+
+# Toggle
+
+Groupe de boutons sélectionnables pilotés par un **seul v-model**. API composée : `Toggle`
+englobe des `ToggleItem`, et chaque item est un `Button` — hover, focus, désactivation et
+`prefers-reduced-motion` viennent de lui, aucune règle d'état n'est redéfinie. L'item
+sélectionné est toujours rendu en `solid` (au `tone` du groupe), les autres en `ghost` ou
+`outline`.
+
+<Canvas of={ToggleStories.Default} />
+
+<Controls of={ToggleStories.Default} />
+
+## Rattaché ou détaché
+
+Par défaut les items sont **rattachés** dans un `ButtonGroup` (contrôle segmenté, bordures
+fusionnées). `attached: false` les sépare par une gouttière, chaque bouton retrouvant ses
+coins arrondis.
+
+<Canvas of={ToggleStories.Variantes} />
+
+## Sélection
+
+- **Simple** (défaut) : le v-model vaut la valeur sélectionnée, ou `null` ; re-cliquer l'item
+  sélectionné le désélectionne.
+- **`multiple`** : le v-model devient un **tableau** de valeurs, chaque clic ajoute ou retire
+  la sienne.
+- **`mandatory`** : la dernière valeur sélectionnée ne peut jamais être retirée (en simple, le
+  re-clic devient inopérant ; en multiple, le dernier élément reste). C'est une pure garde à
+  la désélection : aucune sélection initiale n'est forcée — poser la valeur de départ dans le
+  v-model.
+
+<Canvas of={ToggleStories.Multiple} />
+
+<Canvas of={ToggleStories.Mandatory} />
+
+## Tones
+
+Le `tone` colore l'item sélectionné ; les items non sélectionnés restent neutres, comme les
+pages inactives d'une Pagination.
+
+<Canvas of={ToggleStories.Tones} />
+
+## Icônes
+
+`icon` accepte un nom Material Symbols **ou** une URL d'image. Sans libellé ni slot, l'item se
+réduit à un carré (poser alors un `aria-label`). Avec `selectedIconFilled` sur le groupe,
+l'icône de l'item sélectionné passe en variante **remplie** (axe FILL de la police) — sans
+effet sur une icône fournie par URL.
+
+<Canvas of={ToggleStories.IconesRemplies} />
+
+## Tailles
+
+L'échelle unifiée `xs`–`xl` et `compact` (hauteur réduite de 4px) se posent sur le groupe et
+se propagent à tous les items.
+
+<Canvas of={ToggleStories.TaillesEtCompact} />
+
+## Orientation
+
+`orientation="vertical"` empile les items — rattachés (couture horizontale) ou détachés
+(largeurs égalisées).
+
+<Canvas of={ToggleStories.Vertical} />
+
+## Désactivation
+
+`disabled` sur le groupe neutralise tous les items ; `disabled` sur un item ne neutralise que
+lui. Un item désactivé est un `<button disabled>` natif : ni cliquable, ni atteignable au
+clavier.
+
+<Canvas of={ToggleStories.Desactive} />
+
+## Accessibilité
+
+- Le groupe est un `role="group"` nommé : fournir la prop `label` (ou un `aria-label` /
+  `aria-labelledby`, qui priment).
+- Chaque item est un **bouton bascule** : `aria-pressed` est toujours présent, y compris à
+  `false` — c'est sa présence qui fait annoncer l'état.
+- Pas de roving tabindex : chaque item visible est un arrêt de tabulation. Les flèches
+  (haut/bas en vertical) et Home/End **déplacent le focus sans activer** — activer au focus
+  basculerait des valeurs involontairement. Les items désactivés sont sautés.
+- En icône seule, poser un `aria-label` sur l'item (il traverse jusqu'au bouton rendu).
+
+<Canvas of={ToggleStories.Clavier} />
