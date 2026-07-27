@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref, useAttrs, useId, watch } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import IconButton from '../IconButton/IconButton.vue'
+import Typography from '../Typography/Typography.vue'
 
 /**
  * Modale bloquante bâtie sur la primitive native `<dialog>` + `showModal()` :
@@ -168,8 +169,24 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     <header class="ds-dialog-header">
       <slot name="header">
         <div class="ds-dialog-titles">
-          <h2 v-if="title" :id="titleId" class="ds-dialog-title">{{ title }}</h2>
-          <p v-if="subtitle" :id="subtitleId" class="ds-dialog-subtitle">{{ subtitle }}</p>
+          <Typography
+            v-if="title"
+            :id="titleId"
+            as="h2"
+            variant="heading-3"
+            class="ds-dialog-title"
+          >
+            {{ title }}
+          </Typography>
+          <Typography
+            v-if="subtitle"
+            :id="subtitleId"
+            variant="subtitle"
+            tone="muted"
+            class="ds-dialog-subtitle"
+          >
+            {{ subtitle }}
+          </Typography>
         </div>
       </slot>
       <div v-if="closable || $slots.headerActions" class="ds-dialog-header-actions">
@@ -223,7 +240,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     background: var(--ds-color-surface-overlay);
     color: var(--ds-color-text);
     box-shadow: var(--ds-shadow-5);
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
   }
 
   /*
@@ -295,19 +312,9 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     min-inline-size: 0;
   }
 
-  .ds-dialog-title {
-    margin: 0;
-    font-size: var(--ds-font-size-lg);
-    font-weight: var(--ds-font-weight-semibold);
-    line-height: var(--ds-font-leading-snug);
-  }
-
-  .ds-dialog-subtitle {
-    margin: 0;
-    color: var(--ds-color-text-muted);
-    font-size: var(--ds-font-size-sm);
-    line-height: var(--ds-font-leading-normal);
-  }
+  /* Titre et sous-titre : rendus par Typography (heading-3 / subtitle muted) —
+     les classes .ds-dialog-title/.ds-dialog-subtitle restent posées comme
+     points d'accroche (surcharges consommateur, tests). */
 
   .ds-dialog-header-actions {
     display: flex;
@@ -324,8 +331,8 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     flex: 1 0 auto;
     padding: var(--ds-space-1) var(--ds-space-6) var(--ds-space-3);
     color: var(--ds-color-text);
-    font-size: var(--ds-font-size-sm);
-    line-height: var(--ds-font-leading-normal);
+    font-size: var(--ds-text-body-md-size);
+    line-height: var(--ds-text-body-md-leading);
   }
 
   .ds-dialog-footer {

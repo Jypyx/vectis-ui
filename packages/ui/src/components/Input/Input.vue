@@ -33,6 +33,7 @@ import type { StyleValue } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import Spinner from '../Spinner/Spinner.vue'
+import Typography from '../Typography/Typography.vue'
 
 interface InputProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
@@ -205,7 +206,9 @@ defineExpose({
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
   >
-    <label v-if="label" class="ds-input-label" :for="fieldId">{{ label }}</label>
+    <Typography v-if="label" as="label" variant="label" class="ds-input-label" :for="fieldId">
+      {{ label }}
+    </Typography>
 
     <div class="ds-input-field">
       <slot name="start">
@@ -268,7 +271,9 @@ defineExpose({
       </slot>
     </div>
 
-    <p v-if="hint" :id="hintId" class="ds-input-hint">{{ hint }}</p>
+    <Typography v-if="hint" :id="hintId" variant="caption" tone="muted" class="ds-input-hint">
+      {{ hint }}
+    </Typography>
   </div>
 </template>
 
@@ -279,20 +284,12 @@ defineExpose({
     flex-direction: column;
     gap: var(--ds-space-1);
     width: 100%;
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
   }
 
-  .ds-input-label {
-    font-size: var(--ds-font-size-sm);
-    font-weight: var(--ds-font-weight-medium);
-    color: var(--ds-color-text);
-  }
-
-  .ds-input-hint {
-    margin: 0;
-    font-size: var(--ds-font-size-xs);
-    color: var(--ds-color-text-muted);
-  }
+  /* Label et hint : rendus par Typography (label / caption muted) — les classes
+     .ds-input-label/.ds-input-hint restent posées comme points d'accroche
+     (surcharges consommateur, état disabled ci-dessous). */
 
   /* Le field porte bordure, fond et focus ; --_border-color est la seule
      source de vérité de la couleur (hover/erreur/disabled la redéfinissent).
@@ -392,9 +389,11 @@ defineExpose({
     --_border-color: var(--ds-color-danger);
   }
 
+  /* Le compteur reste stylé localement : tabular-nums et l'état de dépassement
+     ne sont pas des rôles typographiques. */
   .ds-input-counter {
     flex: none;
-    font-size: var(--ds-font-size-xs);
+    font-size: var(--ds-text-caption-size);
     color: var(--ds-color-text-muted);
     font-variant-numeric: tabular-nums;
   }

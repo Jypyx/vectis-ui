@@ -10,6 +10,7 @@ import Icon from '../Icon/Icon.vue'
 import Input from '../Input/Input.vue'
 import Pagination from '../Pagination/Pagination.vue'
 import Spinner from '../Spinner/Spinner.vue'
+import Typography from '../Typography/Typography.vue'
 
 /**
  * Tableau de données : <table> sémantique (caption, scope, aria-sort), composé
@@ -351,9 +352,9 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
     :data-selectable="selectable ? '' : undefined"
   >
     <div v-if="title || $slots.header || searchable" class="ds-table-toolbar">
-      <div class="ds-table-title">
+      <Typography as="div" variant="heading-4" class="ds-table-title">
         <slot name="header">{{ title }}</slot>
-      </div>
+      </Typography>
       <Input
         v-if="searchable"
         v-model="search"
@@ -526,7 +527,7 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
     --_table-head-pad-block: var(--ds-space-2);
 
     container-type: inline-size;
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
   }
 
   .ds-table-wrapper[data-compact] {
@@ -549,9 +550,9 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
     padding-block-end: var(--ds-space-3);
   }
 
+  /* Titre : rendu par Typography (heading-4) — la couleur reste explicite,
+     la toolbar peut vivre dans un contexte de texte atténué. */
   .ds-table-title {
-    font-size: var(--ds-font-size-md);
-    font-weight: var(--ds-font-weight-semibold);
     color: var(--ds-color-text);
   }
 
@@ -565,21 +566,22 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
   .ds-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--ds-text-body-md-size);
     color: var(--ds-color-text);
   }
 
   .ds-table-caption {
     padding-block-end: var(--ds-space-3);
     text-align: start;
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--ds-text-body-md-size);
     color: var(--ds-color-text-muted);
   }
 
   .ds-table th {
     padding: var(--_table-head-pad-block) var(--_table-pad-inline);
     text-align: start;
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--ds-text-body-md-size);
+    /* semibold : emphase d'état (en-tête détaché des cellules), pas un rôle typo */
     font-weight: var(--ds-font-weight-semibold);
     color: var(--ds-color-text-muted);
     border-block-end: 1px solid var(--ds-color-border);
@@ -677,7 +679,7 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
 
   .ds-table-range,
   .ds-table-per-page-label {
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--ds-text-body-md-size);
     color: var(--ds-color-text-muted);
   }
 
@@ -724,10 +726,12 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
       text-align: end;
     }
 
+    /* Pseudo-en-tête de carte : rôle overline (sans capitales forcées) */
     .ds-table-wrapper[data-responsive='stack'] td::before {
       content: attr(data-label);
-      font-size: var(--ds-font-size-xs);
-      font-weight: var(--ds-font-weight-medium);
+      font-size: var(--ds-text-overline-size);
+      font-weight: var(--ds-text-overline-weight);
+      letter-spacing: var(--ds-text-overline-tracking);
       color: var(--ds-color-text-muted);
     }
 

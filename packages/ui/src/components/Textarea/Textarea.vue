@@ -34,6 +34,7 @@ import type { StyleValue } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import Spinner from '../Spinner/Spinner.vue'
+import Typography from '../Typography/Typography.vue'
 
 interface TextareaProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
@@ -191,7 +192,9 @@ watchEffect(
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
   >
-    <label v-if="label" class="ds-textarea-label" :for="fieldId">{{ label }}</label>
+    <Typography v-if="label" as="label" variant="label" class="ds-textarea-label" :for="fieldId">
+      {{ label }}
+    </Typography>
 
     <div class="ds-textarea-field" :data-auto-grow="autoGrow ? '' : undefined">
       <slot name="start">
@@ -257,7 +260,9 @@ watchEffect(
     </div>
 
     <div v-if="hint || counter" class="ds-textarea-meta">
-      <p v-if="hint" :id="hintId" class="ds-textarea-hint">{{ hint }}</p>
+      <Typography v-if="hint" :id="hintId" variant="caption" tone="muted" class="ds-textarea-hint">
+        {{ hint }}
+      </Typography>
       <span v-if="counter" class="ds-textarea-counter" :data-over="over ? '' : undefined">
         {{ counterText }}
       </span>
@@ -272,14 +277,12 @@ watchEffect(
     flex-direction: column;
     gap: var(--ds-space-1);
     width: 100%;
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
   }
 
-  .ds-textarea-label {
-    font-size: var(--ds-font-size-sm);
-    font-weight: var(--ds-font-weight-medium);
-    color: var(--ds-color-text);
-  }
+  /* Label et hint : rendus par Typography (label / caption muted) — les classes
+     .ds-textarea-label/.ds-textarea-hint restent posées comme points d'accroche
+     (surcharges consommateur, état disabled ci-dessous). */
 
   .ds-textarea-meta {
     display: flex;
@@ -287,15 +290,11 @@ watchEffect(
     gap: var(--ds-space-2);
   }
 
-  .ds-textarea-hint {
-    margin: 0;
-    font-size: var(--ds-font-size-xs);
-    color: var(--ds-color-text-muted);
-  }
-
+  /* Le compteur reste stylé localement : tabular-nums et l'état de dépassement
+     ne sont pas des rôles typographiques. */
   .ds-textarea-counter {
     margin-inline-start: auto;
-    font-size: var(--ds-font-size-xs);
+    font-size: var(--ds-text-caption-size);
     color: var(--ds-color-text-muted);
     font-variant-numeric: tabular-nums;
   }
@@ -328,7 +327,9 @@ watchEffect(
     border: 1px solid var(--_border-color);
     border-radius: var(--ds-radius-interactive);
     font-size: var(--_control-font-size);
-    line-height: var(--ds-font-leading-normal);
+    /* texte multiligne : interlignage du corps de texte (le rôle `control`
+       en leading-none ne vaut que pour les étiquettes d'une ligne) */
+    line-height: var(--ds-text-body-md-leading);
     resize: vertical;
     overflow: hidden;
     transition:

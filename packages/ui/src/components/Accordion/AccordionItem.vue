@@ -3,6 +3,7 @@ import { computed, inject } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
+import Typography from '../Typography/Typography.vue'
 import { accordionKey } from './context'
 
 /**
@@ -82,8 +83,13 @@ function onSummaryClick(event: MouseEvent) {
         <span class="ds-accordion-title"
           ><slot name="title">{{ title }}</slot></span
         >
-        <span v-if="subtitle || $slots.subtitle" class="ds-accordion-subtitle"
-          ><slot name="subtitle">{{ subtitle }}</slot></span
+        <Typography
+          v-if="subtitle || $slots.subtitle"
+          as="span"
+          variant="caption"
+          tone="muted"
+          class="ds-accordion-subtitle"
+          ><slot name="subtitle">{{ subtitle }}</slot></Typography
         >
       </span>
       <Icon class="ds-accordion-icon" v-bind="iconProps(expandIcon)" />
@@ -124,8 +130,8 @@ function onSummaryClick(event: MouseEvent) {
       var(--_accordion-pad-inline, var(--ds-space-5));
     list-style: none;
     cursor: pointer;
-    font-size: var(--ds-font-size-sm);
-    font-weight: var(--ds-font-weight-medium);
+    font-size: var(--ds-text-label-size);
+    font-weight: var(--ds-text-label-weight);
     color: var(--ds-color-text);
   }
 
@@ -147,14 +153,12 @@ function onSummaryClick(event: MouseEvent) {
     flex: 1;
     display: flex;
     flex-direction: column;
-    line-height: var(--ds-font-leading-snug);
+    line-height: var(--ds-text-label-leading);
   }
 
-  .ds-accordion-subtitle {
-    font-size: var(--ds-font-size-xs);
-    font-weight: var(--ds-font-weight-regular);
-    color: var(--ds-color-text-muted);
-  }
+  /* Sous-titre : rendu par Typography (caption muted) — la classe
+     .ds-accordion-subtitle reste posée comme point d'accroche (état
+     disabled ci-dessous). */
 
   /* Classe dédiée (pas .ds-accordion-icon : rotation/permutation réservées au chevron) */
   .ds-accordion-icon-start {
@@ -210,8 +214,8 @@ function onSummaryClick(event: MouseEvent) {
   .ds-accordion-content {
     padding: 0 var(--_accordion-pad-inline, var(--ds-space-5))
       var(--_accordion-pad-block, var(--ds-space-4));
-    font-size: var(--ds-font-size-sm);
-    line-height: var(--ds-font-leading-normal);
+    font-size: var(--ds-text-body-md-size);
+    line-height: var(--ds-text-body-md-leading);
     color: var(--ds-color-text-muted);
   }
 
