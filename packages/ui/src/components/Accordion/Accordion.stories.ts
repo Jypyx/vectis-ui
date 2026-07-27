@@ -151,7 +151,7 @@ export const Flush: Story = {
   }),
 }
 
-/** `compact` : paddings resserrés d'un cran, typo et icônes inchangées. */
+/** `compact` : -4px sur tous les paddings, typo et icônes inchangées. */
 export const Compact: Story = {
   render: () => ({
     components: { Accordion, AccordionItem },

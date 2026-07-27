@@ -17,7 +17,7 @@ interface AccordionProps {
   expandIcon?: string
   /** Icône des items ouverts ; absente = `expandIcon` pivotée de 180°. */
   collapseIcon?: string
-  /** Densité réduite : paddings d'un cran et icône 16px au lieu de 20px. */
+  /** Densité réduite : -4px sur tous les paddings (typo et icône inchangées). */
   compact?: boolean
 }
 
@@ -62,23 +62,24 @@ provide(accordionKey, {
      * Densité : variables posées sur la RACINE seulement (seule à rendre
      * data-compact) et héritées par les items — les fallbacks vivent côté
      * AccordionItem, qui reste utilisable hors groupe.
+     *
+     * Compact = -4px sur TOUS les paddings (idiome `.ds-control`, hors
+     * échelle : l'accordéon n'a pas de hauteur imposée). Un seul delta pilote
+     * les trois mesures, les valeurs de base ne sont donc écrites qu'ici.
      */
-    --_accordion-pad-block: var(--ds-space-4);
-    --_accordion-pad-inline: var(--ds-space-5);
-    --_accordion-content-pad-start: var(--ds-space-2);
-    --_accordion-icon-size: var(--ds-icon-size-md);
+    --_accordion-pad-delta: 0px;
+    --_accordion-pad-block: calc(var(--ds-space-4) - var(--_accordion-pad-delta));
+    --_accordion-pad-inline: calc(var(--ds-space-5) - var(--_accordion-pad-delta));
+    --_accordion-content-pad-start: calc(var(--ds-space-2) - var(--_accordion-pad-delta));
 
     background: var(--ds-color-surface-raised);
     font-family: var(--ds-text-family);
     overflow: hidden;
   }
 
-  /* Compact : paddings d'un cran et icône 16px (typo et gap inchangés) */
+  /* Compact : paddings resserrés seuls — typo, gouttière et icône inchangées */
   .ds-accordion[data-compact] {
-    --_accordion-pad-block: var(--ds-space-3);
-    --_accordion-pad-inline: var(--ds-space-4);
-    --_accordion-content-pad-start: var(--ds-space-1);
-    --_accordion-icon-size: var(--ds-icon-size-sm);
+    --_accordion-pad-delta: var(--ds-space-1);
   }
 
   /* Carte bordée (défaut) ; `flush` n'a rien à annuler, il n'ajoute simplement rien */
