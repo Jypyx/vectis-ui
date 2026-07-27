@@ -7,6 +7,22 @@ import Tab from './Tab.vue'
 import TabPanel from './TabPanel.vue'
 import Tabs from './Tabs.vue'
 
+/** Jeu d'onglets assez long pour déborder d'un conteneur étroit. */
+const VILLES = [
+  'Paris',
+  'Lyon',
+  'Marseille',
+  'Toulouse',
+  'Bordeaux',
+  'Lille',
+  'Nantes',
+  'Strasbourg',
+  'Montpellier',
+  'Rennes',
+  'Grenoble',
+  'Toulon',
+]
+
 const meta = {
   title: 'Composants/Tabs',
   component: Tabs,
@@ -188,14 +204,38 @@ export const Vertical: Story = {
 export const Alignement: Story = {
   render: () => ({
     components: { Tabs, Tab },
-    setup: () => ({ aligns: ['start', 'center', 'end'], onglet: ref('a') }),
+    setup: () => ({
+      aligns: ['start', 'center', 'end'],
+      horizontal: ref('a'),
+      vertical: ref('a'),
+    }),
+    /*
+     * En vertical, `align` joue sur l'axe block : il n'a d'effet que si la
+     * barre reçoit une hauteur — d'où le `height` posé sur chaque exemple.
+     */
     template: `
       <div style="display: grid; gap: 24px">
-        <Tabs v-for="a in aligns" :key="a" :align="a" variant="inset" v-model="onglet">
+        <Tabs v-for="a in aligns" :key="a" :align="a" variant="inset" v-model="horizontal">
           <Tab value="a" label="Aperçu" />
           <Tab value="b" label="Détails" />
           <Tab value="c" label="Historique" />
         </Tabs>
+
+        <div style="display: grid; grid-auto-flow: column; gap: 24px; justify-content: start">
+          <Tabs
+            v-for="a in aligns"
+            :key="a"
+            :align="a"
+            orientation="vertical"
+            variant="inset"
+            v-model="vertical"
+            style="height: 240px"
+          >
+            <Tab value="a" label="Aperçu" />
+            <Tab value="b" label="Détails" />
+            <Tab value="c" label="Historique" />
+          </Tabs>
+        </div>
       </div>
     `,
   }),
@@ -282,23 +322,7 @@ export const Panneaux: Story = {
 export const Defilement: Story = {
   render: () => ({
     components: { Tabs, Tab },
-    setup: () => ({
-      villes: [
-        'Paris',
-        'Lyon',
-        'Marseille',
-        'Toulouse',
-        'Bordeaux',
-        'Lille',
-        'Nantes',
-        'Strasbourg',
-        'Montpellier',
-        'Rennes',
-        'Grenoble',
-        'Toulon',
-      ],
-      onglet: ref('Paris'),
-    }),
+    setup: () => ({ villes: VILLES, onglet: ref('Paris') }),
     // le conteneur est volontairement étroit : la liste défile au doigt, au
     // trackpad et au clavier, sans barre de défilement visible
     template: `
@@ -314,23 +338,7 @@ export const Defilement: Story = {
 export const BoutonsDefilement: Story = {
   render: () => ({
     components: { Tabs, Tab },
-    setup: () => ({
-      villes: [
-        'Paris',
-        'Lyon',
-        'Marseille',
-        'Toulouse',
-        'Bordeaux',
-        'Lille',
-        'Nantes',
-        'Strasbourg',
-        'Montpellier',
-        'Rennes',
-        'Grenoble',
-        'Toulon',
-      ],
-      onglet: ref('Paris'),
-    }),
+    setup: () => ({ villes: VILLES, onglet: ref('Paris') }),
     template: `
       <div style="max-width: 420px; border: 1px dashed var(--ds-color-border); padding: 8px">
         <Tabs scroll-buttons variant="inset" v-model="onglet">
@@ -353,6 +361,70 @@ export const BoutonsDefilement: Story = {
 
     await waitFor(async () => {
       await expect(canvas.getByRole('button', { name: 'Onglets précédents' })).toBeEnabled()
+    })
+  },
+}
+
+export const FlechesPersonnalisees: Story = {
+  render: () => ({
+    components: { Tabs, Tab },
+    setup: () => ({ villes: VILLES, horizontal: ref('Paris'), vertical: ref('Paris') }),
+    /*
+     * `prevIcon`/`nextIcon` acceptent un nom Material Symbols ou une URL
+     * d'image, et `prevLabel`/`nextLabel` fournissent le nom accessible. Les
+     * défauts suivent l'orientation (chevrons en horizontal, expand_less /
+     * expand_more en vertical) ; ici on les remplace dans les deux axes.
+     */
+    template: `
+      <div style="display: grid; gap: 24px; max-width: 420px">
+        <div style="border: 1px dashed var(--ds-color-border); padding: 8px">
+          <Tabs
+            scroll-buttons
+            prev-icon="keyboard_double_arrow_left"
+            next-icon="keyboard_double_arrow_right"
+            prev-label="Voir les onglets précédents"
+            next-label="Voir les onglets suivants"
+            v-model="horizontal"
+          >
+            <Tab v-for="v in villes" :key="v" :value="v" :label="v" />
+          </Tabs>
+        </div>
+
+        <div style="border: 1px dashed var(--ds-color-border); padding: 8px">
+          <Tabs
+            orientation="vertical"
+            variant="inset"
+            scroll-buttons
+            prev-icon="arrow_drop_up"
+            next-icon="arrow_drop_down"
+            prev-label="Onglets au-dessus"
+            next-label="Onglets en dessous"
+            v-model="vertical"
+            style="height: 180px"
+          >
+            <Tab v-for="v in villes" :key="v" :value="v" :label="v" />
+          </Tabs>
+        </div>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const suivants = canvas.getByRole('button', { name: 'Voir les onglets suivants' })
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', { name: 'Voir les onglets précédents' }),
+      ).toBeDisabled()
+      await expect(suivants).toBeEnabled()
+    })
+
+    await userEvent.click(suivants)
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', { name: 'Voir les onglets précédents' }),
+      ).toBeEnabled()
     })
   },
 }

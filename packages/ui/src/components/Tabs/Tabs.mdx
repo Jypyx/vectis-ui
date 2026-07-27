@@ -65,10 +65,12 @@ En vertical, la barre et les panneaux se placent côte à côte, et la bordure d
 passe au bord de départ des onglets (à gauche en LTR, à droite en RTL — tout est décrit en propriétés
 logiques).
 
-`align` place le groupe d'onglets au début (défaut), au centre ou à la fin. L'alignement est posé sur
-la barre et non sur la liste défilante : un `justify-content` sur un conteneur qui déborde rendrait
-la partie dépassant du côté départ définitivement inatteignable. Corollaire : en vertical, `align`
-n'a d'effet que si le consommateur donne une hauteur à la barre.
+`align` place le groupe d'onglets au début (défaut), au centre ou à la fin — à gauche, au centre ou à
+droite en horizontal ; en haut, au milieu ou en bas en vertical. L'alignement est posé sur la barre
+et non sur la liste défilante : un `justify-content` sur un conteneur qui déborde rendrait la partie
+dépassant du côté départ définitivement inatteignable. Corollaire visible dans la seconde rangée
+ci-dessous : en vertical, `align` joue sur l'axe block, il n'a donc d'effet que si la barre reçoit
+une hauteur.
 
 <Canvas of={TabsStories.Vertical} />
 <Canvas of={TabsStories.Alignement} />
@@ -95,6 +97,13 @@ aucun écouteur de défilement.
 
 <Canvas of={TabsStories.Defilement} />
 <Canvas of={TabsStories.BoutonsDefilement} />
+
+Les icônes par défaut suivent l'orientation — chevrons en horizontal, `expand_less`/`expand_more` en
+vertical. `prevIcon` et `nextIcon` les remplacent, et acceptent aussi bien un nom Material Symbols
+qu'une URL d'image ; `prevLabel` et `nextLabel` fournissent le nom accessible correspondant, qu'il
+faut penser à adapter en même temps que l'icône.
+
+<Canvas of={TabsStories.FlechesPersonnalisees} />
 
 ## Panneaux
 
