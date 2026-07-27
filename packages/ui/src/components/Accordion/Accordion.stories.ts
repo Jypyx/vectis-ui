@@ -9,6 +9,7 @@ const meta = {
   component: Accordion,
   argTypes: {
     exclusive: { control: 'boolean' },
+    variant: { control: 'inline-radio', options: ['outlined', 'flush'] },
     compact: { control: 'boolean' },
     expandIcon: { control: 'text' },
     collapseIcon: { control: 'text' },
@@ -31,7 +32,7 @@ const ITEMS = `
 `
 
 export const Default: Story = {
-  args: { exclusive: true, compact: false },
+  args: { exclusive: true, variant: 'outlined', compact: false },
   render: (args) => ({
     components: { Accordion, AccordionItem },
     setup: () => ({ args }),
@@ -138,6 +139,16 @@ export const IconesPersonnalisees: Story = {
     await waitFor(() => expect(item.getByText('remove')).toBeVisible())
     await waitFor(() => expect(item.getByText('add')).not.toBeVisible())
   },
+}
+
+/** `variant="flush"` : ni bordure extérieure ni rayon — les séparateurs entre items subsistent. */
+export const Flush: Story = {
+  render: () => ({
+    components: { Accordion, AccordionItem },
+    template: `
+      <Accordion variant="flush" style="width: 420px">${ITEMS}</Accordion>
+    `,
+  }),
 }
 
 /** `compact` : paddings resserrés d'un cran, typo et icônes inchangées. */

@@ -50,6 +50,16 @@ et échangées en CSS selon l'état du `<details>` — utile pour un couple non 
 
 <Canvas of={AccordionStories.IconesPersonnalisees} />
 
+## Variantes
+
+`variant` pilote l'habillage du groupe. `outlined` (défaut) le présente en carte : bordure et
+coins arrondis autour de l'ensemble. `flush` retire l'un et l'autre pour un rendu bord à bord,
+destiné à un accordéon posé dans un conteneur qui porte déjà son propre cadre (panneau latéral,
+carte, feuille). Les séparateurs entre items, eux, restent en place dans les deux variantes :
+ils appartiennent à la lecture de la liste, pas à son cadre.
+
+<Canvas of={AccordionStories.Flush} />
+
 ## Compact
 
 `compact` resserre les paddings d'un cran et réduit l'icône (20px → 16px) ; typographie et

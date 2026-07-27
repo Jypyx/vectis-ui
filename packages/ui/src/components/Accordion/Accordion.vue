@@ -11,6 +11,8 @@ import { accordionKey } from './context'
 interface AccordionProps {
   /** Un seul item ouvert à la fois (attribut natif <details name>). */
   exclusive?: boolean
+  /** `outlined` : carte bordée et arrondie. `flush` : ni bordure ni rayon (bord à bord). */
+  variant?: 'outlined' | 'flush'
   /** Icône des items fermés : nom Material ou URL. Défaut : chevron pivotant. */
   expandIcon?: string
   /** Icône des items ouverts ; absente = `expandIcon` pivotée de 180°. */
@@ -21,6 +23,7 @@ interface AccordionProps {
 
 const props = withDefaults(defineProps<AccordionProps>(), {
   exclusive: true,
+  variant: 'outlined',
   expandIcon: 'expand_more',
   collapseIcon: undefined,
   compact: false,
@@ -47,7 +50,7 @@ provide(accordionKey, {
 </script>
 
 <template>
-  <div class="ds-accordion" :data-compact="compact ? '' : undefined">
+  <div class="ds-accordion" :data-variant="variant" :data-compact="compact ? '' : undefined">
     <slot />
   </div>
 </template>
@@ -62,10 +65,9 @@ provide(accordionKey, {
      */
     --_accordion-pad-block: var(--ds-space-4);
     --_accordion-pad-inline: var(--ds-space-5);
+    --_accordion-content-pad-start: var(--ds-space-2);
     --_accordion-icon-size: var(--ds-icon-size-md);
 
-    border: 1px solid var(--ds-color-border);
-    border-radius: var(--ds-radius-surface);
     background: var(--ds-color-surface-raised);
     font-family: var(--ds-text-family);
     overflow: hidden;
@@ -75,7 +77,21 @@ provide(accordionKey, {
   .ds-accordion[data-compact] {
     --_accordion-pad-block: var(--ds-space-3);
     --_accordion-pad-inline: var(--ds-space-4);
+    --_accordion-content-pad-start: var(--ds-space-1);
     --_accordion-icon-size: var(--ds-icon-size-sm);
+  }
+
+  /* Carte bordée (défaut) ; `flush` n'a rien à annuler, il n'ajoute simplement rien */
+  .ds-accordion[data-variant='outlined'] {
+    /*
+     * Rayon EMBOÎTÉ (moins la bordure) repris par les summary des items
+     * d'extrémité : `overflow: hidden` découpe tout le sous-arbre sur cette
+     * courbe, un anneau de focus à angles droits y perdrait ses coins.
+     */
+    --_accordion-corner-radius: calc(var(--ds-radius-surface) - 1px);
+
+    border: 1px solid var(--ds-color-border);
+    border-radius: var(--ds-radius-surface);
   }
 }
 </style>

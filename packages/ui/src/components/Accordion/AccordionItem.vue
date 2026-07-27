@@ -148,6 +148,22 @@ function onSummaryClick(event: MouseEvent) {
     outline-offset: calc(var(--ds-focus-ring-offset) * -1);
   }
 
+  /*
+   * Coins des summary d'extrémité alignés sur le rayon intérieur du groupe
+   * (0 hors groupe bordé) : l'outline suit le border-radius, l'anneau devient
+   * donc parallèle à la découpe `overflow: hidden` au lieu d'y être rogné.
+   * Le dernier summary n'est au bord bas que panneau fermé.
+   */
+  .ds-accordion-item:first-child > .ds-accordion-summary {
+    border-start-start-radius: var(--_accordion-corner-radius, 0);
+    border-start-end-radius: var(--_accordion-corner-radius, 0);
+  }
+
+  .ds-accordion-item:last-child:not([open]) > .ds-accordion-summary {
+    border-end-start-radius: var(--_accordion-corner-radius, 0);
+    border-end-end-radius: var(--_accordion-corner-radius, 0);
+  }
+
   /* Bloc textuel : titre seul, ou titre + sous-titre empilés */
   .ds-accordion-heading {
     flex: 1;
@@ -212,8 +228,9 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   .ds-accordion-content {
-    padding: 0 var(--_accordion-pad-inline, var(--ds-space-5))
-      var(--_accordion-pad-block, var(--ds-space-4));
+    /* Respiration sous le summary, réduite en compact (variables du groupe) */
+    padding: var(--_accordion-content-pad-start, var(--ds-space-2))
+      var(--_accordion-pad-inline, var(--ds-space-5)) var(--_accordion-pad-block, var(--ds-space-4));
     font-size: var(--ds-text-body-md-size);
     line-height: var(--ds-text-body-md-leading);
     color: var(--ds-color-text-muted);
