@@ -12,7 +12,8 @@
     "build": "pnpm -r build",
     "tokens": "pnpm --filter @socle/ui tokens",
     "storybook": "pnpm --filter @socle/ui storybook",
-    "build-storybook": "pnpm --filter @socle/ui build-storybook"
+    "build-storybook": "pnpm --filter @socle/ui build-storybook",
+    "chromatic": "pnpm --filter @socle/ui chromatic"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

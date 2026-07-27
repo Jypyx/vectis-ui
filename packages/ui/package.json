@@ -31,7 +31,8 @@
     "prestorybook": "pnpm run tokens",
     "storybook": "storybook dev -p 6006",
     "prebuild-storybook": "pnpm run tokens",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "chromatic": "chromatic"
   },
   "peerDependencies": {
     "vue": "^3.5.0"
@@ -44,6 +45,7 @@
     "@types/node": "^26.1.1",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/test-utils": "^2.4.11",
+    "chromatic": "^18.1.0",
     "jsdom": "^29.1.1",
     "storybook": "^10.5.2",
     "tsx": "^4.23.1",
