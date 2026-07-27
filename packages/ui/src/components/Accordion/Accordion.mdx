@@ -28,6 +28,16 @@ Le slot `#title` remplace la prop `title` pour composer un intitulé (emphase, b
 
 <Canvas of={AccordionStories.TitreRiche} />
 
+## Sous-titre et icône de début
+
+Chaque item peut compléter son titre : `subtitle` ajoute une ligne secondaire sous le titre
+(remplaçable par le slot `#subtitle` pour un contenu riche), et `iconStart` place une icône
+devant le bloc textuel — nom Material Symbols **ou** URL d'image, comme partout ailleurs. Le
+slot `#start` prime sur `iconStart` pour un contenu libre (avatar, badge…). Les deux se
+combinent librement et restent indépendants du chevron d'ouverture.
+
+<Canvas of={AccordionStories.SousTitreEtIcone} />
+
 ## Icônes
 
 Par défaut, un chevron pivote de 180° à l'ouverture. Deux props posées **sur le groupe**

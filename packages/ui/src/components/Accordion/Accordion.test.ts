@@ -65,6 +65,26 @@ describe('Accordion', () => {
     }
   })
 
+  it('subtitle : rendu sous le titre, absent sans prop ni slot', () => {
+    const { container } = renderWith('', 'subtitle="Sous-titre du premier"')
+    const [first, second] = [...container.querySelectorAll('details')]
+    expect(first?.querySelector('.ds-accordion-subtitle')?.textContent).toBe(
+      'Sous-titre du premier',
+    )
+    expect(second?.querySelector('.ds-accordion-subtitle')).toBeNull()
+  })
+
+  it('icon-start : icône dédiée devant le titre, distincte du chevron', () => {
+    const { container } = renderWith('', 'icon-start="settings"')
+    const [first, second] = [...container.querySelectorAll('details')]
+    // les deux ligatures cohabitent : icône de début puis chevron
+    expect(ligatures(first as Element)).toEqual(['settings', 'expand_more'])
+    expect(first?.querySelector('.ds-accordion-icon-start .ds-icon-symbol')?.textContent).toBe(
+      'settings',
+    )
+    expect(second?.querySelector('.ds-accordion-icon-start')).toBeNull()
+  })
+
   it('compact : data-compact posé sur la racine seulement si demandé', () => {
     expect(
       renderWith().container.querySelector('.ds-accordion')?.hasAttribute('data-compact'),

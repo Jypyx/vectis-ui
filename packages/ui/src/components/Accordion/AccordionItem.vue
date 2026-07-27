@@ -14,6 +14,10 @@ import { accordionKey } from './context'
 interface AccordionItemProps {
   /** Titre du résumé ; remplaçable par le slot #title. */
   title?: string
+  /** Sous-titre sous le titre ; remplaçable par le slot #subtitle. */
+  subtitle?: string
+  /** Icône devant le titre : nom Material ou URL. */
+  iconStart?: string
   /** Ouvert au premier rendu (état ensuite géré nativement). */
   defaultOpen?: boolean
   /** Item inerte : ni cliquable ni atteignable au clavier, gris par tokens. */
@@ -22,6 +26,8 @@ interface AccordionItemProps {
 
 const props = withDefaults(defineProps<AccordionItemProps>(), {
   title: undefined,
+  subtitle: undefined,
+  iconStart: undefined,
   defaultOpen: false,
   disabled: false,
 })
@@ -31,6 +37,10 @@ defineSlots<{
   default(): unknown
   /** Titre riche (remplace la prop `title`) */
   title?(): unknown
+  /** Sous-titre riche (remplace la prop `subtitle`) */
+  subtitle?(): unknown
+  /** Contenu libre devant le titre (prime sur `iconStart`) */
+  start?(): unknown
 }>()
 
 const accordion = inject(accordionKey, null)
@@ -65,9 +75,17 @@ function onSummaryClick(event: MouseEvent) {
       :tabindex="disabled ? -1 : undefined"
       @click="onSummaryClick"
     >
-      <span class="ds-accordion-title"
-        ><slot name="title">{{ title }}</slot></span
-      >
+      <slot name="start">
+        <Icon v-if="iconStart" class="ds-accordion-icon-start" v-bind="iconProps(iconStart)" />
+      </slot>
+      <span class="ds-accordion-heading">
+        <span class="ds-accordion-title"
+          ><slot name="title">{{ title }}</slot></span
+        >
+        <span v-if="subtitle || $slots.subtitle" class="ds-accordion-subtitle"
+          ><slot name="subtitle">{{ subtitle }}</slot></span
+        >
+      </span>
       <Icon class="ds-accordion-icon" v-bind="iconProps(expandIcon)" />
       <!-- Deux icônes rendues, permutation 100 % CSS sur [open] -->
       <Icon
@@ -124,8 +142,24 @@ function onSummaryClick(event: MouseEvent) {
     outline-offset: calc(var(--ds-focus-ring-offset) * -1);
   }
 
-  .ds-accordion-title {
+  /* Bloc textuel : titre seul, ou titre + sous-titre empilés */
+  .ds-accordion-heading {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    line-height: var(--ds-font-leading-snug);
+  }
+
+  .ds-accordion-subtitle {
+    font-size: var(--ds-font-size-xs);
+    font-weight: var(--ds-font-weight-regular);
+    color: var(--ds-color-text-muted);
+  }
+
+  /* Classe dédiée (pas .ds-accordion-icon : rotation/permutation réservées au chevron) */
+  .ds-accordion-icon-start {
+    flex: none;
+    color: var(--ds-color-text-muted);
   }
 
   .ds-accordion-icon {
@@ -153,8 +187,10 @@ function onSummaryClick(event: MouseEvent) {
     cursor: not-allowed;
   }
 
-  /* text-muted est plus foncé que text-subtle : l'icône suivrait le titre */
-  .ds-accordion-item[data-disabled] .ds-accordion-icon {
+  /* text-muted est plus foncé que text-subtle : icônes et sous-titre suivent le titre */
+  .ds-accordion-item[data-disabled] .ds-accordion-icon,
+  .ds-accordion-item[data-disabled] .ds-accordion-icon-start,
+  .ds-accordion-item[data-disabled] .ds-accordion-subtitle {
     color: inherit;
   }
 

@@ -86,6 +86,37 @@ export const TitreRiche: Story = {
   }),
 }
 
+/** `subtitle` + `iconStart` : sous-titre empilé sous le titre, icône devant le bloc. */
+export const SousTitreEtIcone: Story = {
+  render: () => ({
+    components: { Accordion, AccordionItem },
+    template: `
+      <Accordion style="width: 420px">
+        <AccordionItem
+          title="Notifications"
+          subtitle="E-mails, push et récapitulatifs hebdomadaires"
+          icon-start="notifications"
+        >
+          Préférences de notification.
+        </AccordionItem>
+        <AccordionItem
+          title="Confidentialité"
+          subtitle="Visibilité du profil et données partagées"
+          icon-start="lock"
+        >
+          Réglages de confidentialité.
+        </AccordionItem>
+        <AccordionItem title="Compte" icon-start="person">
+          Un item peut porter une icône sans sous-titre.
+        </AccordionItem>
+        <AccordionItem title="Sessions" subtitle="Appareils connectés">
+          Ou un sous-titre sans icône.
+        </AccordionItem>
+      </Accordion>
+    `,
+  }),
+}
+
 /** `expandIcon`/`collapseIcon` : deux icônes permutées en CSS (ici add ↔ remove). */
 export const IconesPersonnalisees: Story = {
   render: () => ({
