@@ -131,8 +131,11 @@ if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
 
 // --- Champs numériques : pont v-model string ↔ number ----------------------
 
-const startFieldText = ref(String(startValue.value))
-const endFieldText = ref(String(endValue.value))
+// `string | number` : les champs sont des `<input type="number">`, dont Vue
+// caste la valeur en nombre dès qu'elle est parsable — une saisie vide ou
+// intermédiaire reste une chaîne. D'où le String() au commit.
+const startFieldText = ref<string | number>(String(startValue.value))
+const endFieldText = ref<string | number>(String(endValue.value))
 
 // Le drag du slider resynchronise les champs en continu.
 watch(startValue, (v) => (startFieldText.value = String(v)))
@@ -144,7 +147,9 @@ watch(endValue, (v) => (endFieldText.value = String(v)))
  */
 function commitField(which: 'start' | 'end') {
   const raw = which === 'start' ? startFieldText.value : endFieldText.value
-  const parsed = Number.parseFloat(raw)
+  // parseFloat (et non Number) : sur une chaîne vide il rend NaN → revert,
+  // là où Number('') vaudrait 0 et écraserait la valeur.
+  const parsed = Number.parseFloat(String(raw))
   if (Number.isNaN(parsed)) {
     resyncFields()
     return
@@ -443,7 +448,7 @@ function resyncFields() {
     outline-offset: var(--ds-focus-ring-offset);
   }
 
-  /* --- Tooltip de valeur (apparence du Tooltip, position par fraction : le
+  /* --- Tooltip de valeur (achecpparence du Tooltip, position par fraction : le
      thumb natif est un pseudo-élément non ancrable en anchor positioning). */
   .ds-slider-tooltip {
     position: absolute;

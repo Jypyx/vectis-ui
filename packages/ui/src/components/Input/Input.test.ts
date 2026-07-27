@@ -160,6 +160,19 @@ describe('Input', () => {
     expect(counter.hasAttribute('data-over')).toBe(true)
   })
 
+  it('modèle numérique : valeur rendue, compteur et croix mesurés sur le texte', () => {
+    // Sur `type="number"`, Vue caste la valeur de v-model en nombre : le
+    // modèle doit accepter un nombre sans casser les mesures de longueur.
+    const { container, getByRole } = render(Input, {
+      props: { modelValue: 150, type: 'number', maxlength: 2, counter: true, clearable: true },
+    })
+    expect((getByRole('spinbutton') as HTMLInputElement).value).toBe('150')
+    const counter = container.querySelector('.ds-input-counter') as HTMLElement
+    expect(counter.textContent?.trim()).toBe('3/2')
+    expect(counter.hasAttribute('data-over')).toBe(true)
+    expect(container.querySelector('.ds-input-clear')).toBeTruthy()
+  })
+
   it('disabled : boutons internes désactivés', () => {
     const onClick = vi.fn()
     const { getByRole } = render(Input, {

@@ -117,7 +117,19 @@ defineSlots<{
   end?(): unknown
 }>()
 
-const model = defineModel<string>({ default: '' })
+/**
+ * `string | number` et non `string` seul : sur un `<input type="number">`, Vue
+ * convertit d'office la valeur de `v-model` en nombre (`vModelText` caste dès
+ * que `el.type === 'number'`). Un modèle typé string seul renvoyait donc un
+ * nombre au consommateur, qui le repassait en prop — d'où un « Invalid prop:
+ * type check failed » en dev.
+ */
+const model = defineModel<string | number>({ default: '' })
+
+/** Projection texte du modèle : toutes les mesures de longueur (compteur,
+ * limite souple, visibilité de la croix) passent par elle — un nombre n'a pas
+ * de `.length`. */
+const modelText = computed(() => String(model.value ?? ''))
 
 const attrs = useAttrs()
 // class/style sur la racine ; tout le reste sur le contrôle natif
@@ -161,7 +173,7 @@ const showClear = computed(
     !props.disabled &&
     !props.readonly &&
     // override explicite (Combobox…) sinon défaut « champ non-vide »
-    (props.clearVisible ?? model.value.length > 0),
+    (props.clearVisible ?? modelText.value.length > 0),
 )
 
 function onClear() {
@@ -171,9 +183,11 @@ function onClear() {
 }
 
 const counterText = computed(() =>
-  props.maxlength != null ? `${model.value.length}/${props.maxlength}` : `${model.value.length}`,
+  props.maxlength != null
+    ? `${modelText.value.length}/${props.maxlength}`
+    : `${modelText.value.length}`,
 )
-const over = computed(() => props.maxlength != null && model.value.length > props.maxlength)
+const over = computed(() => props.maxlength != null && modelText.value.length > props.maxlength)
 
 // Limite souple : le composant possède la custom validity quand softLimit est actif
 watchEffect(
@@ -181,7 +195,7 @@ watchEffect(
     const el = controlEl.value
     if (!el) return
     const overLimit =
-      props.softLimit && props.maxlength != null && model.value.length > props.maxlength
+      props.softLimit && props.maxlength != null && modelText.value.length > props.maxlength
     el.setCustomValidity(overLimit ? `Dépasse la limite de ${props.maxlength} caractères` : '')
   },
   { flush: 'post' },
