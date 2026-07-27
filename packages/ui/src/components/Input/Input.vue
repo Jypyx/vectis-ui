@@ -333,6 +333,28 @@ defineExpose({
     color: var(--ds-color-text-subtle);
   }
 
+  /* Décorations natives neutralisées : les contrôles internes viennent du DS
+     (croix `clearable`, icônes) — la croix WebKit de type=search, les spinners
+     de type=number et l'œil de révélation d'Edge feraient doublon ou
+     détonneraient visuellement. */
+  .ds-input-control::-webkit-search-cancel-button,
+  .ds-input-control::-webkit-search-decoration,
+  .ds-input-control::-webkit-search-results-button,
+  .ds-input-control::-webkit-search-results-decoration,
+  .ds-input-control::-webkit-inner-spin-button,
+  .ds-input-control::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .ds-input-control[type='number'] {
+    appearance: textfield;
+  }
+
+  .ds-input-control::-ms-reveal {
+    display: none;
+  }
+
   /* le fond autofill du navigateur est peint sur l'input interne : au moins
      suivre le radius du champ (compromis, la couleur reste celle du navigateur) */
   .ds-input-control:-webkit-autofill {
