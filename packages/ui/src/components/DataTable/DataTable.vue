@@ -478,7 +478,9 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
       <span v-if="showRange" class="ds-table-range" aria-live="polite">{{ rangeText }}</span>
       <div v-if="perPageOptions?.length" class="ds-table-per-page">
         <span class="ds-table-per-page-label" aria-hidden="true">{{ perPageLabel }}</span>
-        <Dropdown size="sm" :compact="compact" placement="top-end">
+        <!-- width="max-content" : le panneau épouse l'option la plus large
+             (« 10 », « 25 »…) au lieu de la largeur minimale par défaut. -->
+        <Dropdown size="sm" :compact="compact" placement="top-end" width="max-content">
           <template #trigger="{ triggerProps }">
             <Button
               variant="ghost"

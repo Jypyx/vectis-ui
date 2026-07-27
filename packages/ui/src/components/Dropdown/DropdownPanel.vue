@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 
 import { dropdownKey } from './context'
 import type { DropdownPanelPlacement } from './context'
@@ -36,6 +36,12 @@ interface DropdownPanelProps {
   multiselectable?: boolean
   /** listbox : ancre statique (dashed-ident) → position-anchor + anchor-size. */
   anchor?: string
+  /**
+   * Largeur du panneau (toute longueur/mot-clé CSS, ex. `max-content`).
+   * Posée UNIQUEMENT par la racine : les sous-panneaux ne rendent pas
+   * data-width et gardent la largeur par défaut.
+   */
+  width?: string
 }
 
 const props = withDefaults(defineProps<DropdownPanelProps>(), {
@@ -46,6 +52,7 @@ const props = withDefaults(defineProps<DropdownPanelProps>(), {
   role: 'menu',
   multiselectable: false,
   anchor: undefined,
+  width: undefined,
 })
 
 const emit = defineEmits<{
@@ -162,6 +169,14 @@ function onKeydown(event: KeyboardEvent) {
   list[next]?.focus()
 }
 
+// Style inline : ancre statique (listbox) et/ou largeur explicite (prop width).
+const panelStyle = computed(() => {
+  const style: Record<string, string> = {}
+  if (props.anchor) style['--_anchor'] = props.anchor
+  if (props.width) style['--_dropdown-width'] = props.width
+  return Object.keys(style).length > 0 ? style : undefined
+})
+
 defineExpose({ show, hide, focusFirst, el: panelEl })
 </script>
 
@@ -177,7 +192,8 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     :data-compact="compact ? '' : undefined"
     :data-role="role === 'listbox' ? 'listbox' : undefined"
     :data-anchored="anchor ? '' : undefined"
-    :style="anchor ? { '--_anchor': anchor } : undefined"
+    :data-width="width ? '' : undefined"
+    :style="panelStyle"
     :aria-multiselectable="role === 'listbox' && multiselectable ? 'true' : undefined"
     @beforetoggle="syncShown"
     @toggle="onToggle"
@@ -199,8 +215,8 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     display: flex;
     flex-direction: column;
     gap: var(--ds-space-1);
-    min-width: 11rem;
-    max-width: min(20rem, calc(100vw - var(--ds-space-8)));
+    min-inline-size: var(--ds-control-size-dropdown-min);
+    max-inline-size: min(var(--ds-control-size-dropdown-max), calc(100vw - var(--ds-space-8)));
     padding: var(--ds-space-1);
     background: var(--ds-color-surface-overlay);
     color: var(--ds-color-text);
@@ -239,10 +255,18 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
   /* Mode listbox (Combobox) : largeur calée sur le contrôle ancré, liste
      défilante ; ancrage statique via la prop `anchor` du consommateur. */
   .ds-dropdown[data-role='listbox'] {
-    min-width: anchor-size(width);
-    max-width: none;
+    min-inline-size: anchor-size(width);
+    max-inline-size: none;
     max-height: var(--ds-control-size-listbox-max-block);
     overflow: auto;
+  }
+
+  /* Largeur explicite (prop width) : rendue par le panneau RACINE seulement —
+     les sous-panneaux ne posent pas data-width, la variable héritée est donc
+     inerte chez eux. Le plafond viewport de max-inline-size reste. */
+  .ds-dropdown[data-width] {
+    min-inline-size: 0;
+    inline-size: var(--_dropdown-width);
   }
 
   .ds-dropdown[data-anchored] {

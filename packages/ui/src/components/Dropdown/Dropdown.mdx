@@ -88,6 +88,18 @@ sous-menus.
 
 <Canvas of={DropdownStories.Tailles} />
 
+## Largeur
+
+Par défaut, le panneau adopte la largeur de son contenu, bornée par des tokens (minimale et
+maximale — le plafond reste toujours inférieur au viewport). La prop `width` la fixe
+explicitement : toute longueur ou mot-clé CSS (`16rem`, `max-content` pour épouser l'item le
+plus large — utilisé par le menu « lignes par page » du DataTable). Elle ne s'applique qu'au
+panneau **racine** (les sous-menus gardent la largeur par défaut) et est ignorée en mode
+`listbox`, où la largeur est calée sur l'ancre. Une largeur plus étroite que le contenu
+tronque les libellés.
+
+<Canvas of={DropdownStories.Largeur} />
+
 ## Placement
 
 `placement` (`bottom-start` par défaut, `bottom`, `bottom-end`, `top-start`, `top`,

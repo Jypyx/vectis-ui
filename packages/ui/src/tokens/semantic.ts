@@ -106,6 +106,8 @@ export const semantic = {
       'Largeur minimale de la zone de saisie du Combobox',
     ),
     'size-listbox-max-block': dimension('18rem', 'Hauteur maximale du panneau listbox du Combobox'),
+    'size-dropdown-min': dimension('11rem', 'Largeur minimale du panneau du Dropdown'),
+    'size-dropdown-max': dimension('20rem', 'Largeur maximale du panneau du Dropdown'),
     'size-progress-linear-thickness': dimension(
       '0.25rem',
       'Épaisseur par défaut de la barre du ProgressLinear (4px)',

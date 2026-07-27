@@ -175,6 +175,34 @@ export const Tailles: Story = {
   }),
 }
 
+/** Largeur explicite du panneau racine : `max-content` (épouse l'item le plus
+    large) ou toute longueur CSS. Les sous-menus ne sont pas affectés. */
+export const Largeur: Story = {
+  render: (args) => ({
+    components: { Dropdown, DropdownItem, Button },
+    setup: () => ({ args, onSelect: fn() }),
+    template: `
+      <div style="display: flex; gap: var(--ds-space-8)">
+        <Dropdown v-bind="args" width="max-content">
+          <template #trigger="{ triggerProps }">
+            <Button variant="outline" tone="neutral" v-bind="triggerProps">10</Button>
+          </template>
+          <DropdownItem label="10" selected @select="onSelect" />
+          <DropdownItem label="25" @select="onSelect" />
+          <DropdownItem label="50" @select="onSelect" />
+        </Dropdown>
+        <Dropdown v-bind="args" width="16rem">
+          <template #trigger="{ triggerProps }">
+            <Button variant="outline" tone="neutral" v-bind="triggerProps">Actions (16rem)</Button>
+          </template>
+          <DropdownItem label="Renommer" icon-start="edit" @select="onSelect" />
+          <DropdownItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
+        </Dropdown>
+      </div>
+    `,
+  }),
+}
+
 export const FermetureEscape: Story = {
   render: () => ({
     components: { Dropdown, DropdownItem, Button },

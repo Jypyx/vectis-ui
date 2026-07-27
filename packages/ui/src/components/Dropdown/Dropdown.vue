@@ -31,6 +31,12 @@ interface DropdownProps {
   /** listbox : ancre statique (dashed-ident) posée par le consommateur sur son
       contrôle — le panneau s'y attache (position-anchor) et cale sa largeur. */
   anchor?: string
+  /**
+   * Largeur du panneau racine (toute longueur/mot-clé CSS, ex. `max-content`,
+   * `16rem`). Ignorée en mode `listbox` (largeur calée sur l'ancre) ; les
+   * sous-menus gardent la largeur par défaut.
+   */
+  width?: string
 }
 
 const props = withDefaults(defineProps<DropdownProps>(), {
@@ -40,6 +46,7 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   role: 'menu',
   multiselectable: false,
   anchor: undefined,
+  width: undefined,
 })
 
 const open = defineModel<boolean>('open', { default: false })
@@ -135,6 +142,7 @@ onMounted(() => {
     :role="role"
     :multiselectable="multiselectable"
     :anchor="anchor"
+    :width="role === 'listbox' ? undefined : width"
     @toggle="onToggle"
   >
     <slot />

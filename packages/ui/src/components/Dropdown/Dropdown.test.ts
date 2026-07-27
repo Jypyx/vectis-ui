@@ -42,6 +42,33 @@ async function openDropdown(container: Element): Promise<HTMLElement> {
 }
 
 describe('Dropdown', () => {
+  it('prop width : data-width + variable inline sur le panneau racine, ignorée en listbox', () => {
+    const { container } = renderHarness(`
+      <Dropdown width="max-content">
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <DropdownItem label="Renommer" />
+      </Dropdown>
+    `)
+    const menu = container.querySelector('[role="menu"]') as HTMLElement
+    expect(menu.hasAttribute('data-width')).toBe(true)
+    expect(menu.style.getPropertyValue('--_dropdown-width')).toBe('max-content')
+
+    // listbox : largeur calée sur l'ancre — la prop est neutralisée
+    const { container: listbox } = renderHarness(`
+      <Dropdown role="listbox" width="16rem" anchor="--ancre-test">
+        <template #trigger="{ triggerProps }">
+          <input v-bind="triggerProps" />
+        </template>
+        <DropdownItem label="10" />
+      </Dropdown>
+    `)
+    const panel = listbox.querySelector('[role="listbox"]') as HTMLElement
+    expect(panel.hasAttribute('data-width')).toBe(false)
+    expect(panel.style.getPropertyValue('--_dropdown-width')).toBe('')
+  })
+
   it('pose le contrat ARIA sur le déclencheur et le panneau', () => {
     // menu fermé ([popover] est display:none) : requête hors arbre d'accessibilité
     const { getByTestId, container } = renderDropdown()

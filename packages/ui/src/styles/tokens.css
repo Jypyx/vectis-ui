@@ -179,6 +179,8 @@
     --ds-control-size-slider-field: 5rem;
     --ds-control-size-combobox-input-min: 4rem;
     --ds-control-size-listbox-max-block: 18rem;
+    --ds-control-size-dropdown-min: 11rem;
+    --ds-control-size-dropdown-max: 20rem;
     --ds-control-size-progress-linear-thickness: 0.25rem;
     --ds-control-size-progress-linear-length: 10rem;
     --ds-control-size-progress-circular-diameter: 3rem;
@@ -267,6 +269,8 @@
     --ds-control-size-slider-field: 5rem;
     --ds-control-size-combobox-input-min: 4rem;
     --ds-control-size-listbox-max-block: 18rem;
+    --ds-control-size-dropdown-min: 11rem;
+    --ds-control-size-dropdown-max: 20rem;
     --ds-control-size-progress-linear-thickness: 0.25rem;
     --ds-control-size-progress-linear-length: 10rem;
     --ds-control-size-progress-circular-diameter: 3rem;
