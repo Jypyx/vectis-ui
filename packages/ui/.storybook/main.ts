@@ -8,9 +8,6 @@ const config: StorybookConfig = {
     // Exécute les play functions dans un vrai navigateur (Vitest browser mode,
     // projet `storybook` de vitest.config.ts) et les expose dans l'UI.
     '@storybook/addon-vitest',
-    // Panneau Visual Tests : lance Chromatic depuis Storybook (jeton dans
-    // chromatic.config.json).
-    '@chromatic-com/storybook',
   ],
   framework: {
     name: '@storybook/vue3-vite',

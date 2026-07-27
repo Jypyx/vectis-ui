@@ -70,7 +70,7 @@ Chaîne : `src/tokens/*.ts` (source de vérité typée, format DTCG `{ $value, $
 
 ## Storybook
 
-Storybook 10, framework `@storybook/vue3-vite`. Imports : types depuis `@storybook/vue3-vite`, utilitaires de test depuis `storybook/test`, blocks MDX depuis `@storybook/addon-docs/blocks`. Addons : `addon-docs`, `addon-a11y`, `addon-vitest` (exécution des play functions, cf. Tests) et `@chromatic-com/storybook` (panneau Visual Tests, jeton dans `chromatic.config.json`).
+Storybook 10, framework `@storybook/vue3-vite`. Imports : types depuis `@storybook/vue3-vite`, utilitaires de test depuis `storybook/test`, blocks MDX depuis `@storybook/addon-docs/blocks`. Addons : `addon-docs`, `addon-a11y` et `addon-vitest` (exécution des play functions, cf. Tests). Chromatic reste piloté en CLI (`pnpm chromatic`, jeton dans `chromatic.config.json`) — pas d'addon dans l'UI (décision utilisateur 2026-07).
 
 - `.storybook/preview.ts` : decorator global de thème (toolbar System/Light/Dark — System suit `prefers-color-scheme` avec écoute des changements OS — + direction LTR/RTL). **Piège vue3** : thème et direction sont appliqués en effets de bord sur `<html>` (`data-theme`, `dir`), PAS via l'état d'un wrapper templaté — le renderer vue3 ne remonte pas l'arbre au changement d'un global du toolbar (seuls les args sont réactifs), un état capturé dans `setup()` reste figé.
 - La police Material Symbols (Icon) est chargée par Storybook via `.storybook/preview-head.html` (jamais embarquée dans la lib).
