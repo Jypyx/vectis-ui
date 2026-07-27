@@ -3,6 +3,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
 import Button from '../Button/Button.vue'
+import Typography from '../Typography/Typography.vue'
 import DialogAlert from './DialogAlert.vue'
 
 const meta = {
@@ -19,7 +20,7 @@ const meta = {
     width: '400px',
   },
   render: (args) => ({
-    components: { DialogAlert, Button },
+    components: { DialogAlert, Button, Typography },
     setup() {
       const open = ref(false)
       return { args, open }
@@ -29,10 +30,10 @@ const meta = {
         <template #trigger="{ triggerProps }">
           <Button tone="danger" v-bind="triggerProps">Supprimer</Button>
         </template>
-        <p style="margin: 0">
+        <Typography>
           Le projet et toutes ses données seront supprimés. Cette action ne peut pas être
           annulée.
-        </p>
+        </Typography>
         <template #footer>
           <Button variant="ghost" tone="neutral" @click="open = false">Annuler</Button>
           <Button tone="danger" @click="open = false">Supprimer définitivement</Button>
@@ -80,7 +81,7 @@ export const Confirmation: Story = {
     subtitle: 'Vos modifications seront perdues.',
   },
   render: (args) => ({
-    components: { DialogAlert, Button },
+    components: { DialogAlert, Button, Typography },
     setup() {
       const open = ref(false)
       return { args, open }
@@ -90,7 +91,7 @@ export const Confirmation: Story = {
         <template #trigger="{ triggerProps }">
           <Button variant="outline" tone="neutral" v-bind="triggerProps">Quitter</Button>
         </template>
-        <p style="margin: 0">Un brouillon non enregistré sera définitivement perdu.</p>
+        <Typography>Un brouillon non enregistré sera définitivement perdu.</Typography>
         <template #footer>
           <Button variant="ghost" tone="neutral" @click="open = false">Continuer l'édition</Button>
           <Button @click="open = false">Quitter</Button>

@@ -495,7 +495,7 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
     anchor-scope: --ds-timepicker-anchor;
     display: block;
     width: 100%;
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
   }
 
   .ds-timepicker-control {
@@ -521,7 +521,7 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
   }
 
   .ds-timepicker-caption {
-    font-size: var(--ds-font-size-xs);
+    font-size: var(--ds-text-caption-size);
     color: var(--ds-color-text-muted);
   }
 
@@ -551,11 +551,11 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
     border-radius: var(--ds-radius-surface);
     background: var(--ds-color-surface-muted);
     color: var(--ds-color-text);
-    font-family: var(--ds-font-family-sans);
-    /* l'échelle typo plafonne à 3xl : taille d'affichage dérivée par calc,
-       comme les durées le sont d'un token */
-    font-size: calc(var(--ds-font-size-3xl) * 1.5);
-    line-height: 1;
+    font-family: var(--ds-text-family);
+    /* chiffres géants de l'en-tête : rôle display (48px — l'ancien
+       calc(3xl × 1.5) valait 45px, +3px assumés en rejoignant l'échelle) */
+    font-size: var(--ds-text-display-size);
+    line-height: var(--ds-text-display-leading);
     transition:
       background-color var(--ds-duration-fast) var(--ds-ease-default),
       color var(--ds-duration-fast) var(--ds-ease-default);
@@ -579,8 +579,8 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
     block-size: var(--ds-control-size-timepicker-cell-h);
     display: grid;
     place-items: center;
-    font-size: calc(var(--ds-font-size-3xl) * 1.5);
-    line-height: 1;
+    font-size: var(--ds-text-display-size);
+    line-height: var(--ds-text-display-leading);
     color: var(--ds-color-text);
     user-select: none;
   }
@@ -604,7 +604,7 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
   }
 
   .ds-timepicker-field-label {
-    font-size: var(--ds-font-size-xs);
+    font-size: var(--ds-text-caption-size);
     color: var(--ds-color-text-muted);
   }
 

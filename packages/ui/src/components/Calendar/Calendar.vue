@@ -692,7 +692,7 @@ defineExpose({ focus })
     padding: var(--ds-space-3);
     background: var(--ds-color-surface-overlay);
     border-radius: var(--ds-radius-overlay);
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
     color: var(--ds-color-text);
   }
 
@@ -715,7 +715,8 @@ defineExpose({ focus })
      longueur du libellé mois/année */
   .ds-calendar-picker-toggle {
     min-inline-size: var(--ds-control-size-calendar-nav-min);
-    font-weight: 600;
+    /* semibold : emphase du libellé mois/année (repère principal de la grille) */
+    font-weight: var(--ds-font-weight-semibold);
     text-transform: capitalize;
   }
 
@@ -737,8 +738,11 @@ defineExpose({ focus })
     align-items: center;
     justify-content: center;
     height: var(--ds-control-height-sm);
-    font-size: var(--ds-font-size-xs);
-    font-weight: 600;
+    /* Micro-en-tête de colonne : rôle overline (la casse reste `capitalize`,
+       convention des calendriers, pas les capitales de la variante Typography) */
+    font-size: var(--ds-text-overline-size);
+    font-weight: var(--ds-text-overline-weight);
+    letter-spacing: var(--ds-text-overline-tracking);
     color: var(--ds-color-text-muted);
     text-transform: capitalize;
   }
@@ -795,7 +799,7 @@ defineExpose({ focus })
     background: transparent;
     color: inherit;
     font: inherit;
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--ds-text-body-md-size);
     cursor: pointer;
     transition:
       background-color var(--ds-duration-fast) var(--ds-ease-default),
@@ -814,16 +818,18 @@ defineExpose({ focus })
     color: var(--ds-color-text-subtle);
   }
 
+  /* semibold ci-dessous : emphases d'état (aujourd'hui, sélection), pas des
+     rôles typographiques */
   .ds-calendar-day[data-today]:not([data-selected]) {
     box-shadow: inset 0 0 0 1px var(--ds-color-accent-border);
     color: var(--ds-color-accent-text);
-    font-weight: 600;
+    font-weight: var(--ds-font-weight-semibold);
   }
 
   .ds-calendar-day[data-selected] {
     background: var(--ds-color-accent);
     color: var(--ds-color-text-on-accent);
-    font-weight: 600;
+    font-weight: var(--ds-font-weight-semibold);
   }
 
   /* dates désactivées : grises + barrées, non cliquables */
@@ -850,7 +856,7 @@ defineExpose({ focus })
   }
 
   .ds-calendar-day-num {
-    line-height: 1;
+    line-height: var(--ds-text-control-leading);
   }
 
   /* pastilles d'événements */
@@ -893,7 +899,7 @@ defineExpose({ focus })
     background: transparent;
     color: inherit;
     font: inherit;
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--ds-text-body-md-size);
     text-transform: capitalize;
     cursor: pointer;
     transition: background-color var(--ds-duration-fast) var(--ds-ease-default);
@@ -904,7 +910,8 @@ defineExpose({ focus })
   .ds-calendar-picker-cell[data-selected] {
     background: var(--ds-color-accent);
     color: var(--ds-color-text-on-accent);
-    font-weight: 600;
+    /* semibold : emphase d'état (sélection) */
+    font-weight: var(--ds-font-weight-semibold);
   }
   .ds-calendar-picker-cell:disabled {
     color: var(--ds-color-text-subtle);

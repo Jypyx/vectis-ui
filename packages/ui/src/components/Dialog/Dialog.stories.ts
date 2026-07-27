@@ -3,6 +3,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
 import Button from '../Button/Button.vue'
+import Typography from '../Typography/Typography.vue'
 import Dialog from './Dialog.vue'
 
 const meta = {
@@ -26,7 +27,7 @@ const meta = {
     closeOnEscape: true,
   },
   render: (args) => ({
-    components: { Dialog, Button },
+    components: { Dialog, Button, Typography },
     setup() {
       const open = ref(false)
       return { args, open }
@@ -36,10 +37,10 @@ const meta = {
         <template #trigger="{ triggerProps }">
           <Button v-bind="triggerProps">Ouvrir la modale</Button>
         </template>
-        <p style="margin: 0">
+        <Typography>
           Toute personne disposant du lien pourra consulter le document. Vous pouvez
           révoquer l'accès à tout moment depuis les paramètres de partage.
-        </p>
+        </Typography>
         <template #footer>
           <Button variant="ghost" tone="neutral" @click="open = false">Annuler</Button>
           <Button @click="open = false">Partager</Button>
@@ -78,7 +79,7 @@ export const Default: Story = {
  */
 export const Largeur: Story = {
   render: (args) => ({
-    components: { Dialog, Button },
+    components: { Dialog, Button, Typography },
     setup() {
       const opened = ref<string | null>(null)
       const widths = ['320px', '480px', '640px'] as const
@@ -99,7 +100,7 @@ export const Largeur: Story = {
         :open="opened === w"
         @update:open="(v) => { if (!v) opened = null }"
       >
-        <p style="margin: 0">Contenu de la modale en largeur {{ w }}.</p>
+        <Typography>Contenu de la modale en largeur {{ w }}.</Typography>
         <template #footer>
           <Button @click="opened = null">Fermer</Button>
         </template>
@@ -115,7 +116,7 @@ export const Largeur: Story = {
  */
 export const ContenuLong: Story = {
   render: (args) => ({
-    components: { Dialog, Button },
+    components: { Dialog, Button, Typography },
     setup() {
       const open = ref(false)
       const paragraphs = Array.from({ length: 12 }, (_, i) => i + 1)
@@ -147,7 +148,7 @@ export const ContenuLong: Story = {
 /** Le slot `#header` remplace entièrement le bloc titre/sous-titre. */
 export const HeaderPersonnalise: Story = {
   render: (args) => ({
-    components: { Dialog, Button },
+    components: { Dialog, Button, Typography },
     setup() {
       const open = ref(false)
       return { args, open }
@@ -164,10 +165,10 @@ export const HeaderPersonnalise: Story = {
             >
               ✦
             </span>
-            <strong style="font-size: var(--ds-font-size-lg)">Nouvelle version</strong>
+            <Typography variant="heading-3" as="strong">Nouvelle version</Typography>
           </div>
         </template>
-        <p style="margin: 0">La version 2.0 est prête à être installée.</p>
+        <Typography>La version 2.0 est prête à être installée.</Typography>
         <template #footer>
           <Button @click="open = false">Plus tard</Button>
         </template>
@@ -179,7 +180,7 @@ export const HeaderPersonnalise: Story = {
 /** Le slot `#headerActions` ajoute des contrôles juste à gauche de la croix. */
 export const ActionsHeader: Story = {
   render: (args) => ({
-    components: { Dialog, Button },
+    components: { Dialog, Button, Typography },
     setup() {
       const open = ref(false)
       return { args, open }
@@ -193,7 +194,7 @@ export const ActionsHeader: Story = {
           <Button variant="ghost" tone="neutral" size="sm" iconStart="download" aria-label="Télécharger" />
           <Button variant="ghost" tone="neutral" size="sm" iconStart="open_in_full" aria-label="Plein écran" />
         </template>
-        <p style="margin: 0">Zone d'aperçu du document.</p>
+        <Typography>Zone d'aperçu du document.</Typography>
       </Dialog>
     `,
   }),
@@ -203,7 +204,7 @@ export const ActionsHeader: Story = {
 export const SansCroix: Story = {
   args: { closable: false },
   render: (args) => ({
-    components: { Dialog, Button },
+    components: { Dialog, Button, Typography },
     setup() {
       const open = ref(false)
       return { args, open }
@@ -213,7 +214,7 @@ export const SansCroix: Story = {
         <template #trigger="{ triggerProps }">
           <Button v-bind="triggerProps">Ouvrir sans croix</Button>
         </template>
-        <p style="margin: 0">Pas de croix : utilisez les actions ci-dessous.</p>
+        <Typography>Pas de croix : utilisez les actions ci-dessous.</Typography>
         <template #footer>
           <Button variant="ghost" tone="neutral" @click="open = false">Annuler</Button>
           <Button @click="open = false">Valider</Button>

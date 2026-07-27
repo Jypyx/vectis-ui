@@ -300,7 +300,8 @@ function onKeydown(event: KeyboardEvent) {
     display: grid;
     place-items: center;
     border-radius: var(--ds-radius-pill);
-    font-size: var(--ds-font-size-md);
+    /* anneau extérieur : lisibilité du cadran, taille du corps de texte large */
+    font-size: var(--ds-text-body-lg-size);
     color: var(--ds-color-text);
     /* au-dessus de l'aiguille : le chiffre visé se lit sur sa pastille */
     z-index: 1;
@@ -315,7 +316,7 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   .ds-timepicker-number[data-ring='inner'] {
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--ds-text-body-md-size);
     color: var(--ds-color-text-muted);
   }
 

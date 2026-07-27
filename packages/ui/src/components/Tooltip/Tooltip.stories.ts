@@ -3,6 +3,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 
 import Button from '../Button/Button.vue'
 import IconButton from '../IconButton/IconButton.vue'
+import Typography from '../Typography/Typography.vue'
 import Tooltip from './Tooltip.vue'
 
 const meta = {
@@ -185,15 +186,18 @@ export const ContenuRiche: Story = {
 export const EdgeFlipping: Story = {
   parameters: { layout: 'fullscreen' },
   render: (args) => ({
-    components: { Tooltip, Button },
+    components: { Tooltip, Button, Typography },
     setup: () => ({ args }),
     template: `
       <div style="position: relative; height: 100dvh;">
-        <p style="position: absolute; inset: 50% auto auto 50%; translate: -50% -50%; max-width: 28rem; text-align: center; font-family: var(--ds-font-family-sans); color: var(--ds-color-text-muted);">
+        <Typography
+          tone="muted"
+          style="position: absolute; inset: 50% auto auto 50%; translate: -50% -50%; max-width: 28rem; text-align: center;"
+        >
           Chaque bouton demande un placement orienté vers le bord dont il est
           proche : le tooltip bascule automatiquement du côté opposé
           (<code>position-try-fallbacks</code>).
-        </p>
+        </Typography>
         <div style="position: absolute; top: 8px; left: 50%; translate: -50%;">
           <Tooltip :text="args.text" :delay="args.delay" placement="top">
             <template #default="{ triggerProps }">

@@ -4,6 +4,7 @@ import type { Component } from 'vue'
 import { ref } from 'vue'
 
 import Chip from '../Chip/Chip.vue'
+import Typography from '../Typography/Typography.vue'
 import DataTableSfc from './DataTable.vue'
 import type { DataTableParams, DataTableRowId } from './DataTable.vue'
 
@@ -173,14 +174,14 @@ export const LignesParPage: Story = {
 export const Selection: Story = {
   args: { rows: ROWS_MANY, selectable: true, showRange: true },
   render: (args) => ({
-    components: { DataTable },
+    components: { DataTable, Typography },
     setup: () => ({ args, selected: ref<DataTableRowId[]>([]), perPage: ref(5) }),
     template: `
       <DataTable v-bind="args" v-model:selected="selected" v-model:per-page="perPage"
         :per-page-options="[5, 10]" style="width: 760px" />
-      <p style="font-size: 0.875rem; color: var(--ds-color-text-muted)">
+      <Typography tone="muted" style="margin-block-start: 8px">
         Sélection : {{ selected.length ? selected.join(', ') : 'aucune' }}
-      </p>
+      </Typography>
     `,
   }),
   play: async ({ canvasElement }) => {

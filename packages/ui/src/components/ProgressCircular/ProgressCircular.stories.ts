@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, waitFor, within } from 'storybook/test'
 
+import Typography from '../Typography/Typography.vue'
 import ProgressCircular from './ProgressCircular.vue'
 
 const meta = {
@@ -123,13 +124,13 @@ export const Valeur: Story = {
 /** Le slot par défaut reçoit `{ value, max, percent }` : au centre, tout est permis. */
 export const LabelCentre: Story = {
   render: () => ({
-    components: { ProgressCircular },
+    components: { ProgressCircular, Typography },
     template: `
       <div style="display: flex; gap: 24px; align-items: center">
         <ProgressCircular :size="112" :thickness="10" :value="7" :max="10" aria-label="Étapes">
           <template #default="{ value, max }">
             <span style="display: grid; gap: 2px; justify-items: center">
-              <strong style="font-size: 1.5rem">{{ value }}</strong>
+              <Typography variant="heading-2" as="strong">{{ value }}</Typography>
               <small style="opacity: 0.7">sur {{ max }}</small>
             </span>
           </template>
