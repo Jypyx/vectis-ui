@@ -9,6 +9,7 @@
     "format:fix": "prettier --write .",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
+    "test:stories": "pnpm --filter @socle/ui test:stories",
     "build": "pnpm -r build",
     "tokens": "pnpm --filter @socle/ui tokens",
     "storybook": "pnpm --filter @socle/ui storybook",

@@ -14,16 +14,17 @@ Tout se lance depuis la racine (pnpm activé via corepack) :
 pnpm lint              # eslint (flat config racine)
 pnpm format            # prettier --check   (format:fix pour corriger)
 pnpm typecheck         # vue-tsc -r
-pnpm test              # vitest run -r
+pnpm test              # vitest run -r  → projet `unit` (jsdom) uniquement
+pnpm test:stories      # play functions dans Chromium (Vitest browser mode)
 pnpm build             # build lib (régénère les tokens en prebuild)
 pnpm tokens            # régénère tokens.css + tokens.json depuis la source TS
 pnpm storybook         # dev server port 6006
 pnpm build-storybook
 ```
 
-Un seul test : `pnpm --filter @socle/ui exec vitest run src/components/Button/Button.test.ts` (ou `-t 'nom du test'`).
+Un seul test : `pnpm --filter @socle/ui exec vitest run --project unit src/components/Button/Button.test.ts` (ou `-t 'nom du test'`).
 
-Checkpoint avant de conclure une étape : `pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm build-storybook` doivent tous passer.
+Checkpoint avant de conclure une étape : `pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm build-storybook` doivent tous passer. `pnpm test:stories` est **hors checkpoint** (il exige les binaires Playwright, ~115 Mo, via `pnpm --filter @socle/ui exec playwright install chromium`) : à lancer dès qu'on touche à une play function ou au comportement navigateur.
 
 ## Philosophie (non négociable — vient du cahier des charges)
 
@@ -62,13 +63,14 @@ Chaîne : `src/tokens/*.ts` (source de vérité typée, format DTCG `{ $value, $
 ## Tests : répartition stricte
 
 - **vitest + jsdom** (`*.test.ts`) : logique uniquement — emits, v-model, attributs ARIA, fallthrough. jsdom ne couvre pas Popover/top-layer : la Popover API est stubbée globalement dans `vitest.setup.ts` (marqueur `data-popover-open` + display inline, car `:popover-open` n'est pas évaluable en jsdom et le style UA `[popover]{display:none}` cache le panneau aux requêtes par rôle ; `hidePopover` ferme aussi les descendants `[data-popover-open]` — cascade de pile nécessaire aux sous-menus). Ne pas tester le comportement navigateur en jsdom.
-- **Play functions Storybook** (`storybook/test` : `expect`, `userEvent`, `within`, `waitFor`) : comportements navigateur réels (ouverture popover, Esc, `:user-invalid`…). Les mises à jour v-model étant asynchrones, toujours passer par `waitFor` après une interaction.
-- `globals: true` dans vitest.config.ts est **requis** pour le cleanup automatique de @testing-library/vue — ne pas le retirer.
+- **Play functions Storybook** (`storybook/test` : `expect`, `userEvent`, `within`, `waitFor`) : comportements navigateur réels (ouverture popover, Esc, `:user-invalid`…). Les mises à jour v-model étant asynchrones, toujours passer par `waitFor` après une interaction. Elles s'exécutent **localement dans Chromium** via `@storybook/addon-vitest` (`pnpm test:stories`) — plus besoin de brûler un build Chromatic pour les valider.
+- `vitest.config.ts` déclare **deux projets** : `unit` (jsdom, `src/**/*.test.ts`) et `storybook` (browser mode Playwright, alimenté par `storybookTest({ configDir: '.storybook' })`). Deux pièges : un projet Vitest **n'hérite pas** des plugins de la racine — `vue()` doit être répété dans le projet `storybook`, sinon les `.vue` importés par les stories échouent en « invalid JS syntax » ; et depuis Storybook 10.3 le plugin applique **lui-même** les annotations de `preview.ts`, donc aucun fichier de setup à écrire (un `setProjectAnnotations` manuel serait signalé comme redondant).
+- `globals: true` dans vitest.config.ts est **requis** pour le cleanup automatique de @testing-library/vue — ne pas le retirer (projet `unit`).
 - L'`expect` de vitest n'a PAS les matchers jest-dom (`toBeVisible`, `toHaveFocus`…) : en jsdom, asserter sur les propriétés DOM (`el.hidden`, `document.activeElement`). Ces matchers n'existent que dans `storybook/test` (play functions).
 
 ## Storybook
 
-Storybook 10, framework `@storybook/vue3-vite`. Imports : types depuis `@storybook/vue3-vite`, utilitaires de test depuis `storybook/test`, blocks MDX depuis `@storybook/addon-docs/blocks`.
+Storybook 10, framework `@storybook/vue3-vite`. Imports : types depuis `@storybook/vue3-vite`, utilitaires de test depuis `storybook/test`, blocks MDX depuis `@storybook/addon-docs/blocks`. Addons : `addon-docs`, `addon-a11y`, `addon-vitest` (exécution des play functions, cf. Tests) et `@chromatic-com/storybook` (panneau Visual Tests, jeton dans `chromatic.config.json`).
 
 - `.storybook/preview.ts` : decorator global de thème (toolbar System/Light/Dark — System suit `prefers-color-scheme` avec écoute des changements OS — + direction LTR/RTL). **Piège vue3** : thème et direction sont appliqués en effets de bord sur `<html>` (`data-theme`, `dir`), PAS via l'état d'un wrapper templaté — le renderer vue3 ne remonte pas l'arbre au changement d'un global du toolbar (seuls les args sont réactifs), un état capturé dans `setup()` reste figé.
 - La police Material Symbols (Icon) est chargée par Storybook via `.storybook/preview-head.html` (jamais embarquée dans la lib).
