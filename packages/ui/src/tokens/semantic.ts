@@ -133,6 +133,7 @@ export const semantic = {
       'Largeur minimale des boutons sélecteurs mois/année du Calendar (≈86px)',
     ),
     'size-tab-indicator': dimension('2px', "Épaisseur de l'indicateur d'onglet actif (Tabs, line)"),
+    'size-table-search': dimension('16rem', 'Largeur du champ de recherche du DataTable'),
   },
   icon: {
     'size-sm': dimension('1rem', 'Icônes 16px'),

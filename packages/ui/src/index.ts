@@ -16,6 +16,9 @@
  * par cohérence (il compose Button et IconButton) mais son ordre n'est PAS
  * contraignant : toutes ses surcharges sont qualifiées `.ds-tab[data-size]`,
  * qui bat `.ds-button[data-variant='…']` quel que soit l'ordre du bundle.
+ * DataTable compose Input/Checkbox/Dropdown/Pagination mais son ordre n'est
+ * pas contraignant non plus : sa seule surcharge est qualifiée par descendance
+ * (`.ds-table-toolbar .ds-input`).
  */
 import './styles/index.css'
 
@@ -62,7 +65,13 @@ export { default as Breadcrumb } from './components/Breadcrumb/Breadcrumb.vue'
 export type { BreadcrumbItem } from './components/Breadcrumb/Breadcrumb.vue'
 export { default as Chip } from './components/Chip/Chip.vue'
 export { default as DataTable } from './components/DataTable/DataTable.vue'
-export type { DataTableColumn } from './components/DataTable/DataTable.vue'
+export type {
+  DataTableColumn,
+  DataTableSort,
+  DataTableRowId,
+  DataTableParams,
+  DataTableProps,
+} from './components/DataTable/DataTable.vue'
 export { default as InputOTP } from './components/InputOTP/InputOTP.vue'
 export { default as ProgressCircular } from './components/ProgressCircular/ProgressCircular.vue'
 export { default as ProgressLinear } from './components/ProgressLinear/ProgressLinear.vue'
