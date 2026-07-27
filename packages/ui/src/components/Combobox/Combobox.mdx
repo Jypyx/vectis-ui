@@ -63,6 +63,55 @@ Un **chevron** à droite indique l'état et pivote à l'ouverture. Une **croix**
 du chevron) apparaît dès qu'il y a **quelque chose à effacer** (une valeur, des Chips
 ou une recherche) et vide **toute la sélection**.
 
+## Recherche serveur
+
+Par défaut le filtrage est **local**. Avec une source distante, la liste arrive déjà
+filtrée : passer `:filter="false"` — sinon le filtre local rejouerait sur `label` et
+écarterait silencieusement les résultats appariés sur un autre champ. `filter` accepte
+aussi un **prédicat** `(option, query) => boolean` pour une correspondance
+personnalisée (le prédicat reçoit la requête brute trimée, pas sa forme normalisée).
+
+L'événement **`search`** porte le terme saisi. Il est **débouncé** (`search-debounce`,
+250 ms par défaut ; `0` = synchrone) sauf à l'ouverture du panneau, où il part
+immédiatement pour permettre un premier chargement. Un même terme n'est **pas réémis** :
+rouvrir le panneau ne relance pas la requête. Aucune requête ne part sur un panneau
+fermé, y compris pour une frappe dont le délai n'était pas écoulé.
+
+Le composant n'annule pas les requêtes en vol : c'est au consommateur d'ignorer les
+réponses obsolètes (jeton d'appel, `AbortController`…).
+
+<Canvas of={ComboboxStories.RechercheAsynchrone} />
+
+Les **libellés des valeurs sélectionnées sont mémorisés** : une valeur choisie garde
+son libellé (Chip, texte du champ) même quand la recherche suivante la fait disparaître
+des options. Une valeur qui n'a jamais figuré dans aucune page reste affichée telle
+quelle — pour l'éviter sur un formulaire d'édition, inclure l'option correspondante
+dans le premier `options` rendu.
+
+## Chargement et pagination
+
+`loading` couvre les deux moments : sans option affichée, le panneau montre l'état de
+chargement (jamais « aucun résultat », qui dirait l'inverse de la réalité) ; avec des
+options déjà affichées, un spinner apparaît en pied de liste. Dans les deux cas, le
+chevron du champ laisse sa place à un spinner, au même endroit et sans saut de largeur.
+`loading-text` personnalise le message, les slots `#loading` et `#empty` (qui reçoit
+`query`) remplacent entièrement ces contenus — pour proposer une action « créer… », par
+exemple.
+
+`has-more` rend une sentinelle en pied de panneau : son entrée dans la vue émet
+**`load-more`**. La détection tient compte du chargement en cours et relance
+l'évaluation à chaque page reçue, de sorte qu'une page trop courte pour remplir le
+panneau n'interrompt pas la pagination.
+
+<Canvas of={ComboboxStories.ScrollInfini} />
+
+## Personnaliser une option
+
+Le slot **`#option`** remplace le contenu d'une option et reçoit `{ option, index,
+active, selected }`. La coche de sélection reste gérée par le composant.
+
+<Canvas of={ComboboxStories.OptionPersonnalisee} />
+
 ## Sélection multiple
 
 Avec `multiple`, le `v-model` devient un `string[]` et chaque valeur s'affiche en
@@ -106,6 +155,8 @@ champ.
   retire la dernière valeur en multiple.
 - Nommer le champ via `aria-label` (ou un `label` associé) — l'attribut est reporté
   sur l'input interne.
+- Le spinner du **champ** est décoratif (`aria-hidden`) : l'annonce du chargement vient
+  du `role="status"` inséré dans le panneau, une seule fois.
 
 ## Support navigateur
 

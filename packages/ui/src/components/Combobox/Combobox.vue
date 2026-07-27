@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, useAttrs, useId, watch } from 'vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  useAttrs,
+  useId,
+  watch,
+  watchEffect,
+} from 'vue'
 import type { StyleValue } from 'vue'
 
 import Chip from '../Chip/Chip.vue'
@@ -7,6 +17,7 @@ import Dropdown from '../Dropdown/Dropdown.vue'
 import DropdownItem from '../Dropdown/DropdownItem.vue'
 import Icon from '../Icon/Icon.vue'
 import Input from '../Input/Input.vue'
+import Spinner from '../Spinner/Spinner.vue'
 
 /**
  * Combobox avec recherche et sélection multiple, composé des briques du DS :
@@ -27,6 +38,12 @@ export interface ComboboxOption {
   disabled?: boolean
 }
 
+/**
+ * Filtrage local : `true` (défaut), `false` (les options arrivent déjà filtrées
+ * — recherche serveur) ou un prédicat de correspondance personnalisé.
+ */
+export type ComboboxFilter = boolean | ((option: ComboboxOption, query: string) => boolean)
+
 interface ComboboxProps {
   options: ComboboxOption[]
   /** Sélection multiple — le v-model devient string[] et des Chips s'affichent. */
@@ -42,6 +59,24 @@ interface ComboboxProps {
   clearable?: boolean
   /** Message quand aucune option ne correspond à la recherche. */
   emptyText?: string
+  /**
+   * Filtrage local des options. `false` : les options sont déjà filtrées par la
+   * source (recherche serveur) et sont affichées telles quelles. Une fonction
+   * reçoit la requête BRUTE (trimée), pas sa forme normalisée NFD.
+   */
+  filter?: ComboboxFilter
+  /** Délai avant émission de `search`, en ms. `0` = émission synchrone. */
+  searchDebounce?: number
+  /**
+   * Chargement en cours : panneau sans option → état plein panneau ; options
+   * déjà affichées → spinner en pied de liste (page suivante). Le champ montre
+   * un spinner à la place du chevron dans les deux cas.
+   */
+  loading?: boolean
+  /** Message et libellé du spinner pendant le chargement. */
+  loadingText?: string
+  /** Il reste des pages à charger : rend la sentinelle qui émet `load-more`. */
+  hasMore?: boolean
 }
 
 const props = withDefaults(defineProps<ComboboxProps>(), {
@@ -53,7 +88,37 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   invalid: false,
   clearable: true,
   emptyText: 'Aucun résultat',
+  filter: true,
+  searchDebounce: 250,
+  loading: false,
+  loadingText: 'Chargement…',
+  hasMore: false,
 })
+
+const emit = defineEmits<{
+  /**
+   * Terme de recherche à envoyer à la source (débouncé ; immédiat à l'ouverture
+   * du panneau, pour le premier chargement). Un même terme n'est pas réémis :
+   * rouvrir le panneau ne relance pas la requête.
+   */
+  search: [query: string]
+  /** La fin de liste est entrée dans la vue : charger la page suivante. */
+  'load-more': []
+}>()
+
+defineSlots<{
+  /** Contenu d'une option (défaut : son libellé). */
+  option?(props: {
+    option: ComboboxOption
+    index: number
+    active: boolean
+    selected: boolean
+  }): unknown
+  /** Panneau sans résultat (défaut : `emptyText`) ; `query` = terme recherché. */
+  empty?(props: { query: string }): unknown
+  /** Panneau en chargement, aucune option affichée (défaut : `loadingText`). */
+  loading?(): unknown
+}>()
 
 // Les Chips sont une taille sous le champ : chip + padding-block = hauteur du
 // champ (sm→chips xs, md→chips sm), garantissant un alignement pile.
@@ -90,18 +155,85 @@ const selectedValues = computed<string[]>(() => {
   return typeof model.value === 'string' && model.value ? [model.value] : []
 })
 
+// Mémoire des libellés SÉLECTIONNÉS : en source asynchrone, `options` ne
+// contient que le dernier jeu de résultats et une valeur déjà choisie en est
+// souvent absente — sans cache, le Chip afficherait son identifiant brut.
+// watchEffect (et non watch sur `props.options`) : il traque l'itération, donc
+// aussi les ajouts en place d'une page (scroll infini). Borné à la sélection :
+// les autres libellés se relisent dans `options`.
+const labelCache = reactive(new Map<string, string>())
+watchEffect(() => {
+  const wanted = new Set(selectedValues.value)
+  for (const option of props.options) {
+    if (wanted.has(option.value)) labelCache.set(option.value, option.label)
+  }
+})
+
 function labelOf(value: string) {
-  return props.options.find((o) => o.value === value)?.label ?? value
+  return props.options.find((o) => o.value === value)?.label ?? labelCache.get(value) ?? value
 }
 
 /** Filtrage insensible à la casse et aux accents. */
 const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 
+// Terme de recherche unique, consommé par le filtre local ET par l'émission
+// `search` : la liste proposée et la requête envoyée ne peuvent pas diverger.
+// Pas de frappe → terme vide (le libellé affiché ne restreint pas la liste).
+const searchTerm = computed(() => (typed.value ? query.value.trim() : ''))
+
 const filtered = computed(() => {
-  // pas de frappe → pas de filtre (le libellé affiché ne restreint pas la liste)
-  const q = typed.value ? normalize(query.value.trim()) : ''
-  return q ? props.options.filter((o) => normalize(o.label).includes(q)) : props.options
+  const matcher = props.filter
+  // recherche serveur : les options arrivent déjà filtrées
+  if (matcher === false) return props.options
+  const q = searchTerm.value
+  if (!q) return props.options
+  if (typeof matcher === 'function') return props.options.filter((o) => matcher(o, q))
+  const needle = normalize(q)
+  return props.options.filter((o) => normalize(o.label).includes(needle))
 })
+
+// ── Recherche (source externe) ──────────────────────────────────────────────
+// JS justifié : aucune primitive native ne débounce ni ne dédoublonne une
+// requête. Timer en `let` (non réactif), annulé partout où le panneau se ferme
+// et au démontage (modèle DropdownItem/Tooltip).
+let searchTimer: ReturnType<typeof setTimeout> | undefined
+// undefined = jamais émis. Dédoublonnage : rouvrir le panneau sur le même terme
+// ne relance pas la requête (le consommateur peut toujours ignorer son cache).
+let lastEmitted: string | undefined
+
+function cancelSearch() {
+  clearTimeout(searchTimer)
+  searchTimer = undefined
+}
+
+function emitSearch(term: string, immediate = false) {
+  cancelSearch()
+  if (term === lastEmitted) return
+  const run = () => {
+    // le panneau a pu se fermer pendant le délai : plus rien à charger
+    if (!open.value) return
+    lastEmitted = term
+    emit('search', term)
+  }
+  // debounce 0 = émission SYNCHRONE (setTimeout(…, 0) ne l'est pas)
+  if (immediate || props.searchDebounce <= 0) run()
+  else searchTimer = setTimeout(run, props.searchDebounce)
+}
+
+watch(searchTerm, (term) => {
+  if (!open.value) return
+  // Nouvelle recherche = nouvelle liste : l'index actif ne lui survit pas (en
+  // source externe, `options` est remplacé en bloc — il pointerait une option
+  // sans rapport). On repointe sur la première activable plutôt que sur -1 :
+  // avec `filter: false`, `filtered` garde la même référence tant que la source
+  // n'a pas répondu, donc le watch ci-dessous ne se déclencherait pas et Entrée
+  // resterait inerte. Quand la nouvelle liste arrive, l'index reste dans les
+  // bornes : il désigne alors sa première option.
+  activeIndex.value = filtered.value.findIndex((o) => !o.disabled)
+  emitSearch(term)
+})
+
+onBeforeUnmount(cancelSearch)
 
 watch(filtered, (list) => {
   // Panneau ouvert : garder une option active valide. On repointe sur le 1er
@@ -118,6 +250,21 @@ watch(filtered, (list) => {
 if (!props.multiple && typeof model.value === 'string' && model.value) {
   query.value = labelOf(model.value)
 }
+
+// Ce libellé est une COPIE (pas une dérivation) : quand les options arrivent
+// après coup (source asynchrone), il faut la rafraîchir — sinon un champ monté
+// avec une valeur mais sans options affiche l'identifiant brut à vie. On
+// n'écoute QUE `options` : écouter `model` réintroduirait la lecture prématurée
+// que `select()` évite volontairement (cf. test « sélection simple par clic »).
+// Gardes `open`/`typed` : ne jamais écraser une saisie en cours.
+watch(
+  () => props.options,
+  () => {
+    if (props.multiple || open.value || typed.value) return
+    if (typeof model.value === 'string' && model.value) query.value = labelOf(model.value)
+  },
+  { flush: 'post' },
+)
 
 // multiple avec sélection et champ non focus : replier le champ de saisie
 // (il reste dans le DOM, focusable) pour ne pas laisser d'espace vide.
@@ -155,10 +302,16 @@ function openPanel() {
   const list = filtered.value
   const selectedIdx = list.findIndex((o) => !o.disabled && selectedValues.value.includes(o.value))
   activeIndex.value = selectedIdx >= 0 ? selectedIdx : list.findIndex((o) => !o.disabled)
+  // Après `open = true` (l'émission différée se re-vérifie sur `open`) : permet
+  // à une source externe de charger sa première page à l'ouverture.
+  emitSearch(searchTerm.value, true)
 }
 
 function closePanel() {
   if (!open.value) return
+  cancelSearch()
+  // une page jamais arrivée (requête en échec) ne doit pas geler la pagination
+  pending = false
   open.value = false
   activeIndex.value = -1
   typed.value = false
@@ -200,6 +353,9 @@ function onControlClick() {
 
 function select(option: ComboboxOption) {
   if (option.disabled) return
+  // mémorisé tout de suite : l'option peut disparaître d'`options` (recherche
+  // suivante) avant que le parent n'ait propagé le modèle
+  labelCache.set(option.value, option.label)
   typed.value = false // la sélection n'est pas une recherche
   if (props.multiple) {
     const current = selectedValues.value
@@ -210,6 +366,9 @@ function select(option: ComboboxOption) {
     inputRef.value?.focus()
   } else {
     model.value = option.value
+    // ce chemin ne passe pas par closePanel() : annuler le timer de recherche
+    // ici aussi, sinon la frappe précédente partirait après la fermeture
+    cancelSearch()
     // Le libellé vient de l'option choisie, PAS d'une relecture de model.value :
     // avec defineModel + v-model parent, `model.value` lu juste après l'écriture
     // renvoie encore l'ancienne valeur (le libellé afficherait la sélection
@@ -278,6 +437,67 @@ function onKeydown(event: KeyboardEvent) {
       break
   }
 }
+
+// ── Scroll infini ───────────────────────────────────────────────────────────
+// JS justifié : aucune primitive CSS ne signale l'arrivée en fin de liste. Une
+// sentinelle en pied de panneau est observée, le panneau (conteneur scrollable)
+// servant de `root`.
+const sentinelEl = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+// Verrou SYNCHRONE, en plus de `props.loading` : le consommateur pose `loading`
+// de façon asynchrone (au retour de sa requête) et la fenêtre entre l'émission
+// et cette mise à jour suffirait à émettre plusieurs fois.
+let pending = false
+
+function onIntersect(entries: IntersectionObserverEntry[]) {
+  if (!entries.some((entry) => entry.isIntersecting)) return
+  if (!open.value || !props.hasMore || props.loading || pending) return
+  pending = true
+  emit('load-more')
+}
+
+watch(
+  sentinelEl,
+  (el, _previous, onCleanup) => {
+    // `IntersectionObserver` n'existe pas en jsdom (même garde que le
+    // `?.scrollIntoView?.()` plus haut) — le comportement se teste au navigateur.
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    // Le panneau est le conteneur scrollable, désigné par son rôle ARIA (API
+    // publique) plutôt que par une classe interne du Dropdown. Sans lui,
+    // `root: null` viserait le viewport : le panneau étant en top layer, la
+    // sentinelle y paraîtrait toujours visible → rafale de `load-more`.
+    const root = el.closest('[role="listbox"]')
+    if (!root) return
+    observer = new IntersectionObserver(onIntersect, {
+      root,
+      // précharge une demi-hauteur de panneau avant le bas (pas de littéral de
+      // dimension : relatif à la racine)
+      rootMargin: '0px 0px 50% 0px',
+    })
+    observer.observe(el)
+    onCleanup(() => {
+      observer?.disconnect()
+      observer = null
+    })
+  },
+  { flush: 'post' },
+)
+
+// Le callback n'est appelé qu'au FRANCHISSEMENT du seuil : si la page reçue ne
+// remplit pas le panneau, la sentinelle reste visible sans jamais re-déclencher
+// et le chargement s'arrêterait à la deuxième page. On ré-observe à chaque page
+// pour forcer une nouvelle évaluation — et si la source n'a rien renvoyé (même
+// longueur), rien ne relance la boucle : condition d'arrêt gratuite.
+watch(
+  () => props.options.length,
+  () => {
+    pending = false
+    const el = sentinelEl.value
+    if (!observer || !el) return
+    observer.unobserve(el)
+    observer.observe(el)
+  },
+)
 </script>
 
 <template>
@@ -338,9 +558,16 @@ function onKeydown(event: KeyboardEvent) {
             </template>
 
             <!-- Chevron posé en absolu à droite (cf. CSS), pivote à l'ouverture.
-                 La croix vient de la prop `clearable` d'Input, rendue à sa gauche. -->
+                 La croix vient de la prop `clearable` d'Input, rendue à sa gauche.
+                 En chargement, le spinner prend EXACTEMENT sa place (Input pose
+                 `font-size: var(--ds-icon-size)` sur les spinners enfants directs
+                 du champ) : aucun saut de largeur. On ne passe pas par la prop
+                 `loading` d'Input, qui écraserait ce slot — donc le chevron.
+                 `aria-hidden` sur la racine du Spinner neutralise son
+                 role="status" : l'annonce vient du panneau, pas deux fois. -->
             <template #end>
-              <Icon name="expand_more" class="ds-combobox-chevron" aria-hidden="true" />
+              <Spinner v-if="loading" class="ds-combobox-spinner" aria-hidden="true" />
+              <Icon v-else name="expand_more" class="ds-combobox-chevron" aria-hidden="true" />
             </template>
           </Input>
         </div>
@@ -355,9 +582,37 @@ function onKeydown(event: KeyboardEvent) {
         :disabled="option.disabled"
         @select="select(option)"
         @pointermove="!option.disabled && (activeIndex = index)"
-        >{{ option.label }}</DropdownItem
       >
-      <div v-if="filtered.length === 0" class="ds-combobox-empty">{{ emptyText }}</div>
+        <!-- slot dans le #default de l'item : en listbox, son #end n'est pas
+             rendu quand l'option est sélectionnée (la coche prend sa place) -->
+        <slot
+          name="option"
+          :option="option"
+          :index="index"
+          :active="index === activeIndex"
+          :selected="selectedValues.includes(option.value)"
+          >{{ option.label }}</slot
+        >
+      </DropdownItem>
+
+      <!-- Ordre chargement → vide → contenu (modèle DataTable) : pendant une
+           requête, le panneau ne doit pas annoncer « aucun résultat ». -->
+      <div v-if="loading && filtered.length === 0" class="ds-combobox-state">
+        <slot name="loading">
+          <Spinner :label="loadingText" />
+          <span aria-hidden="true">{{ loadingText }}</span>
+        </slot>
+      </div>
+      <div v-else-if="filtered.length === 0" class="ds-combobox-state">
+        <slot name="empty" :query="searchTerm">{{ emptyText }}</slot>
+      </div>
+
+      <!-- Sentinelle du scroll infini ET emplacement du spinner de page
+           suivante : un seul nœud, donc stable — un `v-if` sur `loading`
+           détruirait la sentinelle et invaliderait l'observation. -->
+      <div v-if="hasMore" ref="sentinelEl" class="ds-combobox-more" aria-hidden="true">
+        <Spinner v-if="loading" />
+      </div>
     </Dropdown>
   </div>
 </template>
@@ -396,12 +651,19 @@ function onKeydown(event: KeyboardEvent) {
     );
   }
 
-  .ds-combobox-chevron {
+  /* Chevron et spinner partagent l'emplacement : même boîte (--ds-icon-size,
+     posée par Input sur les spinners enfants directs du champ), donc le padding
+     réservé ci-dessus vaut pour les deux et l'échange ne décale rien. */
+  .ds-combobox-chevron,
+  .ds-combobox-spinner {
     position: absolute;
     inset-inline-end: var(--_control-padding-inline-field);
     top: 50%;
     translate: 0 -50%;
     color: var(--ds-color-text-muted);
+  }
+
+  .ds-combobox-chevron {
     transition: rotate var(--ds-duration-fast) var(--ds-ease-default);
   }
 
@@ -451,16 +713,30 @@ function onKeydown(event: KeyboardEvent) {
     padding: 0;
   }
 
-  /* Message « aucun résultat » : même gabarit qu'une option (hauteur héritée du
-     panneau via --_dropdown-item-*, padding d'item) */
-  .ds-combobox-empty {
+  /* États plein panneau (« aucun résultat », chargement) : même gabarit qu'une
+     option (hauteur héritée du panneau via --_dropdown-item-*, padding d'item).
+     `flex: none` : le panneau est un flex column, l'état ne doit pas s'écraser. */
+  .ds-combobox-state {
     display: flex;
+    flex: none;
     align-items: center;
+    gap: var(--ds-space-2);
     min-height: calc(
       var(--_dropdown-item-min-h, var(--ds-control-height-sm)) - var(--_dropdown-item-delta, 0px)
     );
     padding: var(--ds-space-1) var(--ds-space-3);
     font-size: var(--ds-font-size-sm);
+    color: var(--ds-color-text-muted);
+  }
+
+  /* Pied de liste : sentinelle du scroll infini (une boîte de hauteur nulle
+     rendrait l'intersection fragile) et emplacement du spinner de page suivante. */
+  .ds-combobox-more {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--ds-space-6);
     color: var(--ds-color-text-muted);
   }
 

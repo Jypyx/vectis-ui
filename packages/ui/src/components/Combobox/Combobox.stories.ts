@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import Combobox from './Combobox.vue'
+import type { ComboboxOption } from './Combobox.vue'
 
 const PAYS = [
   { value: 'fr', label: 'France' },
@@ -15,6 +16,35 @@ const PAYS = [
   { value: 'ci', label: "Côte d'Ivoire" },
 ]
 
+const CAPITALES: Record<string, string> = {
+  fr: 'Paris',
+  be: 'Bruxelles',
+  ch: 'Berne',
+  ca: 'Ottawa',
+  lu: 'Luxembourg',
+  mc: 'Monaco',
+  sn: 'Dakar',
+  ci: 'Yamoussoukro',
+}
+
+// « API » simulée pour les stories asynchrones : latence réseau, filtrage et
+// pagination côté source (le composant n'en refait aucun).
+const CATALOGUE: ComboboxOption[] = Array.from({ length: 120 }, (_, i) => ({
+  value: `ref-${i + 1}`,
+  label: `Référence ${String(i + 1).padStart(3, '0')}`,
+}))
+const TAILLE_PAGE = 20
+const attendre = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+async function chercher(query: string, page: number) {
+  await attendre(400)
+  const trouves = CATALOGUE.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
+  return {
+    items: trouves.slice(page * TAILLE_PAGE, (page + 1) * TAILLE_PAGE),
+    total: trouves.length,
+  }
+}
+
 const meta = {
   title: 'Composants/Combobox',
   component: Combobox,
@@ -22,6 +52,10 @@ const meta = {
     size: { control: 'inline-radio', options: ['sm', 'md'] },
     compact: { control: 'boolean' },
     clearable: { control: 'boolean' },
+    loading: { control: 'boolean' },
+    // union booléen | prédicat : pas de contrôle possible
+    filter: { control: false },
+    hasMore: { control: false },
   },
   args: { options: PAYS, placeholder: 'Choisir un pays…' },
 } satisfies Meta<typeof Combobox>
@@ -198,6 +232,167 @@ export const RepliAuBlur: Story = {
     await waitFor(() => expect(input.offsetWidth).toBe(0))
     await expect(canvas.getByRole('button', { name: 'Retirer France' })).toBeVisible()
   },
+}
+
+/**
+ * Recherche serveur : `filter: false` (la source a déjà filtré), `@search`
+ * débouncé pour lancer la requête, `loading` pendant l'attente. Le composant
+ * n'annule pas les requêtes : c'est au consommateur d'ignorer les réponses
+ * obsolètes (jeton d'appel ci-dessous).
+ */
+export const RechercheAsynchrone: Story = {
+  render: (args) => ({
+    components: { Combobox },
+    setup: () => {
+      const value = ref('')
+      const options = ref<ComboboxOption[]>([])
+      const loading = ref(false)
+      const requetes = ref(0)
+      let jeton = 0
+
+      async function onSearch(query: string) {
+        const courant = ++jeton
+        requetes.value += 1
+        loading.value = true
+        const { items } = await chercher(query, 0)
+        // réponse obsolète (une frappe plus récente est partie) : on l'ignore
+        if (courant !== jeton) return
+        options.value = items
+        loading.value = false
+      }
+
+      return { args, value, options, loading, requetes, onSearch }
+    },
+    template: `
+      <div style="display: grid; gap: 8px; width: 340px">
+        <Combobox
+          v-bind="args"
+          :options="options"
+          :filter="false"
+          :loading="loading"
+          :search-debounce="400"
+          v-model="value"
+          aria-label="Référence"
+          placeholder="Rechercher une référence…"
+          empty-text="Aucune référence"
+          @search="onSearch"
+        />
+        <output data-testid="mirror">{{ value }}</output>
+        <output data-testid="requetes">{{ requetes }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('combobox')
+
+    // ouverture : premier chargement immédiat (pas de debounce)
+    await userEvent.click(input)
+    await waitFor(() => expect(canvas.getByRole('option', { name: /Référence 001/ })).toBeVisible())
+
+    // rafale de frappes : le debounce ne laisse partir qu'une requête
+    await userEvent.keyboard('042')
+    await waitFor(() => expect(canvas.getByRole('option', { name: /Référence 042/ })).toBeVisible())
+    await expect(Number(canvas.getByTestId('requetes').textContent)).toBeLessThanOrEqual(2)
+
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('ref-42'))
+  },
+}
+
+/**
+ * Pagination : `hasMore` rend une sentinelle en pied de panneau, dont l'entrée
+ * dans la vue émet `load-more`. Le spinner de page suivante s'affiche au même
+ * endroit, sans remplacer les options déjà chargées.
+ */
+export const ScrollInfini: Story = {
+  render: (args) => ({
+    components: { Combobox },
+    setup: () => {
+      const value = ref('')
+      const options = ref<ComboboxOption[]>([])
+      const loading = ref(false)
+      const total = ref(0)
+      const page = ref(0)
+      const requete = ref('')
+      let jeton = 0
+
+      async function onSearch(query: string) {
+        const courant = ++jeton
+        requete.value = query
+        page.value = 0
+        loading.value = true
+        const resultat = await chercher(query, 0)
+        if (courant !== jeton) return
+        options.value = resultat.items
+        total.value = resultat.total
+        loading.value = false
+      }
+
+      async function onLoadMore() {
+        loading.value = true
+        const resultat = await chercher(requete.value, page.value + 1)
+        page.value += 1
+        options.value = [...options.value, ...resultat.items]
+        loading.value = false
+      }
+
+      const hasMore = computed(() => options.value.length < total.value)
+
+      return { args, value, options, loading, hasMore, total, onSearch, onLoadMore }
+    },
+    template: `
+      <div style="display: grid; gap: 8px; width: 340px">
+        <Combobox
+          v-bind="args"
+          :options="options"
+          :filter="false"
+          :loading="loading"
+          :has-more="hasMore"
+          v-model="value"
+          aria-label="Référence"
+          placeholder="Rechercher une référence…"
+          @search="onSearch"
+          @load-more="onLoadMore"
+        />
+        <output data-testid="compte">{{ options.length }} / {{ total }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('combobox'))
+    await waitFor(() => expect(canvas.getByTestId('compte')).toHaveTextContent('20 / 120'))
+
+    // défiler jusqu'en bas du panneau charge la page suivante
+    const listbox = canvas.getByRole('listbox')
+    listbox.scrollTop = listbox.scrollHeight
+    await waitFor(() => expect(canvas.getByTestId('compte')).toHaveTextContent('40 / 120'))
+  },
+}
+
+/**
+ * Le slot `#option` remplace le libellé par le contenu de son choix (ici la
+ * capitale en second niveau). Il reçoit l'option et son état (`active`,
+ * `selected`, `index`).
+ */
+export const OptionPersonnalisee: Story = {
+  render: (args) => ({
+    components: { Combobox },
+    setup: () => ({ args, value: ref('fr'), capitales: CAPITALES }),
+    template: `
+      <div style="width: 340px">
+        <Combobox v-bind="args" v-model="value" aria-label="Pays">
+          <template #option="{ option }">
+            <span style="display: grid">
+              <span>{{ option.label }}</span>
+              <small style="opacity: 0.6">{{ capitales[option.value] }}</small>
+            </span>
+          </template>
+        </Combobox>
+      </div>
+    `,
+  }),
 }
 
 /**
