@@ -164,6 +164,7 @@ const passedAttrs = computed(() => {
   </component>
 </template>
 
+<style src="./Avatar.tokens.css"></style>
 <style>
 @layer ds.components {
   .ds-avatar {
@@ -200,26 +201,7 @@ const passedAttrs = computed(() => {
       box-shadow var(--ds-duration-fast) var(--ds-ease-default);
   }
 
-  /* Teinte auto (name, pas de color custom) : L/C fixes, teinte inline. */
-  .ds-avatar[data-auto] {
-    --_bg: oklch(0.9 0.06 var(--_hue));
-    --_text: oklch(0.42 0.13 var(--_hue));
-  }
-
-  /* Couleur custom (--_custom inline) : prime, texte blanc fixe (contraste à la
-     charge du consommateur, comme Chip/Badge). Bloc après data-auto. */
-  .ds-avatar[data-custom] {
-    --_bg: var(--_custom);
-    --_text: var(--ds-color-text-on-accent);
-  }
-
-  /* Dark : fond sombre teinté + texte clair (le système de thème est opt-in par
-     [data-theme='dark'], jamais par media query — cf. tokens.css). */
-  [data-theme='dark'] .ds-avatar[data-auto] {
-    --_bg: oklch(0.42 0.09 var(--_hue));
-    --_text: oklch(0.92 0.05 var(--_hue));
-  }
-
+  /* (teintes auto/custom/dark : Avatar.tokens.css) */
   .ds-avatar-image {
     inline-size: 100%;
     block-size: 100%;

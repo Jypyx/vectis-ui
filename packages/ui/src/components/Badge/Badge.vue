@@ -95,6 +95,7 @@ const badgeAttrs = computed(() => ({
   </span>
 </template>
 
+<style src="./Badge.tokens.css"></style>
 <style>
 @layer ds.components {
   /* --- Hôte des modes inline / overlay --- */
@@ -133,43 +134,8 @@ const badgeAttrs = computed(() => ({
     color: contrast-color(var(--_bg));
   }
 
-  /* --- Tones : un fond + un fallback texte chacun --- */
-  .ds-badge[data-tone='accent'] {
-    --_bg: var(--ds-color-accent);
-    --_text-fallback: var(--ds-color-text-on-accent);
-  }
-
-  .ds-badge[data-tone='danger'] {
-    --_bg: var(--ds-color-danger);
-    --_text-fallback: var(--ds-color-text-on-accent);
-  }
-
-  .ds-badge[data-tone='success'] {
-    --_bg: var(--ds-color-success);
-    --_text-fallback: var(--ds-color-text-on-accent);
-  }
-
-  .ds-badge[data-tone='warning'] {
-    --_bg: var(--ds-color-warning);
-    --_text-fallback: var(--ds-color-text-on-warning);
-  }
-
-  /* Neutral : inversion text/surface (modèle Chip neutral solid) — un gris
-     type text-muted vaudrait neutral-400 en dark, où le fallback blanc
-     échouerait ; ici fallback et contrast-color() concordent dans les deux
-     thèmes. */
-  .ds-badge[data-tone='neutral'] {
-    --_bg: var(--ds-color-text);
-    --_text-fallback: var(--ds-color-surface);
-  }
-
-  /* --- Couleur custom : après les tones (même spécificité, dernier gagne) --- */
-  .ds-badge[data-custom] {
-    --_bg: var(--_custom);
-    --_text-fallback: var(--ds-color-text-on-accent);
-  }
-
-  /* --- Icône seule : le min-width fait le cercle de 20px, padding retiré --- */
+  /* --- Icône seule : le min-width fait le cercle de 20px, padding retiré ---
+     (tones : Badge.tokens.css) */
   .ds-badge[data-icon-only] {
     padding: 0;
   }

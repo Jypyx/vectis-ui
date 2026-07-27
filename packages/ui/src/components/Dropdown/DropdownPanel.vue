@@ -204,6 +204,7 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
   </div>
 </template>
 
+<style src="./DropdownPanel.tokens.css"></style>
 <style>
 @layer ds.components {
   .ds-dropdown {
@@ -226,26 +227,7 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     font-family: var(--ds-font-family-sans);
   }
 
-  /*
-   * Taille/densité des items : les variables sont posées sur le panneau
-   * RACINE seulement (seul à rendre data-size/data-compact) et héritées par
-   * les sous-panneaux, descendants DOM — ne jamais les déclarer sur
-   * .ds-dropdown nu, chaque panneau imbriqué les réinitialiserait. Les
-   * fallbacks (valeurs sm) vivent côté DropdownItem.
-   */
-  .ds-dropdown[data-size='sm'] {
-    --_dropdown-item-min-h: var(--ds-control-height-sm);
-  }
-
-  .ds-dropdown[data-size='md'] {
-    --_dropdown-item-min-h: var(--ds-control-height-md);
-    --_dropdown-item-pad-i: var(--ds-space-4);
-  }
-
-  /* Compact : hauteur minimale -4px, padding/typo/icônes inchangés */
-  .ds-dropdown[data-compact] {
-    --_dropdown-item-delta: var(--ds-space-1);
-  }
+  /* (taille/densité des items : DropdownPanel.tokens.css) */
 
   /* aligne le 1er sous-item sur l'item parent (compense padding + bordure) */
   .ds-dropdown .ds-dropdown[data-placement='right-start'] {

@@ -71,6 +71,7 @@ const icon = computed(() =>
   </div>
 </template>
 
+<style src="./Toast.tokens.css"></style>
 <style>
 @layer ds.components {
   .ds-toast {
@@ -88,51 +89,7 @@ const icon = computed(() =>
     line-height: var(--ds-font-leading-normal);
   }
 
-  /* --- Tones : ne définissent que des variables locales (modèle Button) --- */
-  .ds-toast[data-tone='neutral'] {
-    /* pas de déclinaisons -surface/-border/-text pour neutral : surface
-       d'overlay en tonal, contraste inversé (style tooltip) en solid */
-    --_bg-tonal: var(--ds-color-surface-overlay);
-    --_border-tonal: var(--ds-color-border);
-    --_accent: var(--ds-color-text);
-    --_bg-solid: var(--ds-color-surface-inverse);
-    --_text-solid: var(--ds-color-text-on-inverse);
-  }
-
-  .ds-toast[data-tone='accent'] {
-    --_bg-tonal: var(--ds-color-accent-surface);
-    --_border-tonal: var(--ds-color-accent-border);
-    --_accent: var(--ds-color-accent-text);
-    --_bg-solid: var(--ds-color-accent);
-    --_text-solid: var(--ds-color-text-on-accent);
-  }
-
-  .ds-toast[data-tone='success'] {
-    --_bg-tonal: var(--ds-color-success-surface);
-    --_border-tonal: var(--ds-color-success-border);
-    --_accent: var(--ds-color-success-text);
-    --_bg-solid: var(--ds-color-success);
-    --_text-solid: var(--ds-color-text-on-accent);
-  }
-
-  .ds-toast[data-tone='danger'] {
-    --_bg-tonal: var(--ds-color-danger-surface);
-    --_border-tonal: var(--ds-color-danger-border);
-    --_accent: var(--ds-color-danger-text);
-    --_bg-solid: var(--ds-color-danger);
-    --_text-solid: var(--ds-color-text-on-accent);
-  }
-
-  .ds-toast[data-tone='warning'] {
-    --_bg-tonal: var(--ds-color-warning-surface);
-    --_border-tonal: var(--ds-color-warning-border);
-    --_accent: var(--ds-color-warning-text);
-    --_bg-solid: var(--ds-color-warning);
-    /* amber trop clair pour du blanc : token dédié (texte sombre) */
-    --_text-solid: var(--ds-color-text-on-warning);
-  }
-
-  /* --- Variantes : consomment les variables du tone --- */
+  /* --- Variantes : consomment les variables du tone (Toast.tokens.css) --- */
   .ds-toast[data-variant='tonal'] {
     background: var(--_bg-tonal);
     border: 1px solid var(--_border-tonal);

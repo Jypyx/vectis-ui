@@ -1,0 +1,44 @@
+/*
+ * Table des tones de ProgressCircular — chaque bloc ne définit QUE des
+ * custom properties --_* (jamais de propriété de layout), consommées par le
+ * <style> de ProgressCircular.vue. Rattaché au SFC par
+ * <style src="./ProgressCircular.tokens.css"> placé AVANT le style principal
+ * (même layer). L'ordre interne est significatif : [data-custom] après les
+ * tones, même spécificité, le dernier gagne.
+ */
+@layer ds.components {
+  /* --- Tones : variables locales uniquement (mêmes valeurs que ProgressLinear,
+     sans couleur de repli du texte : le label est dans le trou du donut, sur le
+     fond de page, donc en couleur de texte courante) --- */
+  .ds-progress-circular[data-tone='accent'] {
+    --_fill: var(--ds-color-accent);
+    --_track: var(--ds-color-accent-surface);
+  }
+
+  .ds-progress-circular[data-tone='success'] {
+    --_fill: var(--ds-color-success);
+    --_track: var(--ds-color-success-surface);
+  }
+
+  .ds-progress-circular[data-tone='danger'] {
+    --_fill: var(--ds-color-danger);
+    --_track: var(--ds-color-danger-surface);
+  }
+
+  .ds-progress-circular[data-tone='warning'] {
+    --_fill: var(--ds-color-warning);
+    --_track: var(--ds-color-warning-surface);
+  }
+
+  /* Neutral : inversion text/surface (modèle Chip/Badge). */
+  .ds-progress-circular[data-tone='neutral'] {
+    --_fill: var(--ds-color-text);
+    --_track: var(--ds-color-surface-muted);
+  }
+
+  /* --- Couleur custom : après les tones (même spécificité, dernier gagne) --- */
+  .ds-progress-circular[data-custom] {
+    --_fill: var(--_custom);
+    --_track: color-mix(in oklab, var(--_custom), var(--ds-color-surface) 85%);
+  }
+}

@@ -1,0 +1,26 @@
+/*
+ * Table des tailles d'InputOTP — chaque bloc ne définit QUE des custom
+ * properties --_* (jamais de propriété de layout), consommées par le
+ * <style> d'InputOTP.vue (le défaut --_font-size vit dans le bloc racine
+ * mixte du SFC). Rattaché au SFC par <style src="./InputOTP.tokens.css">
+ * placé AVANT le style principal (même layer).
+ */
+@layer ds.components {
+  /* --- Tailles : seule la typo majorée reste locale, le reste vient de
+     ds-control --- */
+  .ds-otp[data-size='xs'] {
+    --_font-size: var(--ds-font-size-sm);
+  }
+
+  .ds-otp[data-size='sm'] {
+    --_font-size: var(--ds-font-size-md);
+  }
+
+  .ds-otp[data-size='lg'] {
+    --_font-size: var(--ds-font-size-xl);
+  }
+
+  .ds-otp[data-size='xl'] {
+    --_font-size: var(--ds-font-size-2xl);
+  }
+}

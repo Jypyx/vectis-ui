@@ -127,6 +127,7 @@ const px = (v: number | string | undefined) => {
   </div>
 </template>
 
+<style src="./ProgressLinear.tokens.css"></style>
 <style>
 @layer ds.components {
   /*
@@ -173,48 +174,8 @@ const px = (v: number | string | undefined) => {
     transition: inline-size var(--ds-duration-base) var(--ds-ease-default);
   }
 
-  /* --- Tones : variables locales uniquement (modèle Button/Chip) --- */
-  .ds-progress-linear[data-tone='accent'] {
-    --_fill: var(--ds-color-accent);
-    --_track: var(--ds-color-accent-surface);
-    --_text-fallback: var(--ds-color-text-on-accent);
-  }
-
-  .ds-progress-linear[data-tone='success'] {
-    --_fill: var(--ds-color-success);
-    --_track: var(--ds-color-success-surface);
-    --_text-fallback: var(--ds-color-text-on-accent);
-  }
-
-  .ds-progress-linear[data-tone='danger'] {
-    --_fill: var(--ds-color-danger);
-    --_track: var(--ds-color-danger-surface);
-    --_text-fallback: var(--ds-color-text-on-accent);
-  }
-
-  .ds-progress-linear[data-tone='warning'] {
-    --_fill: var(--ds-color-warning);
-    --_track: var(--ds-color-warning-surface);
-    /* le blanc échoue AA sur amber : token dédié */
-    --_text-fallback: var(--ds-color-text-on-warning);
-  }
-
-  /* Neutral : inversion text/surface (modèle Chip/Badge) — un gris moyen
-     serait illisible dans l'un des deux thèmes. */
-  .ds-progress-linear[data-tone='neutral'] {
-    --_fill: var(--ds-color-text);
-    --_track: var(--ds-color-surface-muted);
-    --_text-fallback: var(--ds-color-surface);
-  }
-
-  /* --- Couleur custom : après les tones (même spécificité, dernier gagne) --- */
-  .ds-progress-linear[data-custom] {
-    --_fill: var(--_custom);
-    --_track: color-mix(in oklab, var(--_custom), var(--ds-color-surface) 85%);
-    --_text-fallback: var(--ds-color-text-on-accent);
-  }
-
-  /* --- Texte dans la barre : deux copies superposées, toutes deux calées sur
+  /* --- Texte dans la barre (tones : ProgressLinear.tokens.css) : deux copies
+     superposées, toutes deux calées sur
      la boîte de la racine — qui est aussi celle de la piste, d'où un clip qui
      tombe pile sur le bord du remplissage. L'épaisseur par défaut (4px) ne
      peut pas accueillir de texte : en afficher suppose une `thickness`. --- */

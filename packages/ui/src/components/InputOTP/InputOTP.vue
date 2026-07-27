@@ -214,6 +214,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
   </div>
 </template>
 
+<style src="./InputOTP.tokens.css"></style>
 <style>
 @layer ds.components {
   .ds-otp {
@@ -282,23 +283,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     color: var(--ds-color-text-subtle);
   }
 
-  /* --- Tailles : seule la typo majorée reste locale, le reste vient de
-     ds-control --- */
-  .ds-otp[data-size='xs'] {
-    --_font-size: var(--ds-font-size-sm);
-  }
-
-  .ds-otp[data-size='sm'] {
-    --_font-size: var(--ds-font-size-md);
-  }
-
-  .ds-otp[data-size='lg'] {
-    --_font-size: var(--ds-font-size-xl);
-  }
-
-  .ds-otp[data-size='xl'] {
-    --_font-size: var(--ds-font-size-2xl);
-  }
+  /* (tailles — typo majorée : InputOTP.tokens.css) */
 
   @media (prefers-reduced-motion: reduce) {
     .ds-otp-input {
