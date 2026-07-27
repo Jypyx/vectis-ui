@@ -1,0 +1,50 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VSpinnerStories from './VSpinner.stories'
+
+<Meta of={VSpinnerStories} />
+
+# Spinner
+
+A **100% CSS** loading indicator: an animated circle (`border` + rotation), with no SVG and no
+JavaScript. The root carries `role="status"` with a visually hidden label — announced by screen
+readers with no visual noise.
+
+<Canvas of={VSpinnerStories.Default} />
+
+<Controls of={VSpinnerStories.Default} />
+
+## Size
+
+**1em by default**: the spinner follows the size of the surrounding text; a parent can also size
+it by setting `font-size` on its container (this is what `VButton`, `VInput` and `VTextarea` do,
+aligning it on the size of their icons). The `size` prop (a number, in pixels) allows a free
+override: `:size="32"` → 32px.
+
+That size is the **box** the spinner occupies, understood exactly as `VIcon`'s — not the diameter
+of the ring, which is drawn at five sixths of the box, with a stroke a tenth of its own diameter.
+Those two fractions are the ones Material Symbols draws `progress_activity` at: a spinner almost
+always stands in for an icon, and taking the icon's proportions is what makes the two read at the
+same size rather than the spinner looking a size up. A `VSpinner` and a `VIcon` given the same
+`size` are therefore interchangeable, box for box.
+
+<Canvas of={VSpinnerStories.Sizes} />
+
+## Colour
+
+The circle follows `currentcolor`: it inherits the parent's text colour, with no dedicated prop.
+
+<Canvas of={VSpinnerStories.Coloured} />
+
+## Accessibility
+
+- `role="status"` + a hidden label (`label`, default "Loading…"): the state is announced by
+  screen readers; customize the label to the context ("Sending…").
+- The animated circle is `aria-hidden`: only the label carries the information.
+- `prefers-reduced-motion` slows the rotation right down instead of removing it: the "something
+  is loading" information stays perceivable.
+- Inside `VButton`, `VInput` and `VTextarea`, the parent component owns the announcement
+  (`aria-busy`, a dedicated label) — the spinner is purely visual there.
+
+This component's accessible labels come from the design system dictionary: they translate
+globally (see **Foundations › Internationalization**), and the text props stay authoritative for
+a case-by-case adjustment.
