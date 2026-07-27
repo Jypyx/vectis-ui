@@ -49,7 +49,7 @@ withDefaults(defineProps<SpinnerProps>(), {
     border-block-start-color: currentcolor;
     border-radius: var(--ds-radius-full);
     /* durée dérivée d'un token plutôt qu'une valeur brute */
-    animation: ds-spin calc(var(--ds-duration-slow) * 2.5) linear infinite;
+    animation: ds-spin calc(var(--ds-duration-slow) * 3.5) linear infinite;
   }
 
   /* Même définition que dans Button.vue : les keyframes CSS sont globales,
