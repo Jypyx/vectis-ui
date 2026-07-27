@@ -119,17 +119,73 @@ Surcharge runtime : redéfinissez n'importe quelle custom property `--ds-*` sur
 
 ## Typographie
 
+### Tailles primitives
+
 <div style={{ display: 'grid', gap: 8, margin: '8px 0 24px' }}>
   {flattenTokens(tokens.primitives.font.size, ['font', 'size']).map((f) => (
     <div key={f.cssName} style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
       <code style={{ ...mono, width: 140 }}>{f.cssName}</code>
-      <span style={{ fontSize: `var(${f.cssName})` }}>Portez ce vieux whisky au juge blond</span>
+      <span style={{ fontSize: `var(${f.cssName})`, lineHeight: 1.2 }}>
+        Portez ce vieux whisky au juge blond
+      </span>
       <code style={mono}>{f.token.$value}</code>
     </div>
   ))}
 </div>
 
-Graisses : <code style={mono}>regular 400 · medium 500 · semibold 600 · bold 700</code>
+### Graisses
+
+<div style={{ display: 'grid', gap: 8, margin: '8px 0 24px' }}>
+  {flattenTokens(tokens.primitives.font.weight, ['font', 'weight']).map((f) => (
+    <div key={f.cssName} style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+      <code style={{ ...mono, width: 140 }}>{f.cssName}</code>
+      <span style={{ fontWeight: `var(${f.cssName})` }}>Portez ce vieux whisky au juge blond</span>
+      <code style={mono}>{f.token.$value}</code>
+    </div>
+  ))}
+</div>
+
+### Familles, interlignages et espacements de lettres
+
+<TokenTable
+  flat={[
+    ...flattenTokens(tokens.primitives.font.family, ['font', 'family']),
+    ...flattenTokens(tokens.primitives.font.leading, ['font', 'leading']),
+    ...flattenTokens(tokens.primitives.font.tracking, ['font', 'tracking']),
+  ]}
+  preview={() => null}
+/>
+
+### Échelle sémantique (rôles de texte)
+
+Chaque rôle est une recette complète (`--ds-text-<rôle>-size/weight/leading[/tracking]`),
+consommée par le composant **Typography** et par le CSS des composants. Le rôle `control`
+est technique (étiquettes de contrôles interactifs) : sa taille vient de l'échelle de
+tailles des contrôles, pas d'un token propre.
+
+<div style={{ display: 'grid', gap: 12, margin: '8px 0 24px' }}>
+  {Object.entries(tokens.semantic.text)
+    .filter(([, node]) => node.$value === undefined)
+    .map(([role]) => (
+      <div key={role} style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <code style={{ ...mono, width: 140, flexShrink: 0 }}>{role}</code>
+        <span
+          style={{
+            fontFamily: 'var(--ds-text-family)',
+            fontSize: `var(--ds-text-${role}-size, var(--ds-font-size-sm))`,
+            fontWeight: `var(--ds-text-${role}-weight)`,
+            lineHeight: `var(--ds-text-${role}-leading)`,
+            letterSpacing: `var(--ds-text-${role}-tracking, normal)`,
+          }}
+        >
+          Portez ce vieux whisky au juge blond
+        </span>
+      </div>
+    ))}
+</div>
+
+Familles sémantiques : `--ds-text-family` (texte courant) et `--ds-text-family-code`
+(contenus code).
 
 ## Radii
 

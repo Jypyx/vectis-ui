@@ -3,7 +3,7 @@
  * SEULS tokens consommés par les composants. Ils référencent les primitifs
  * via des alias DTCG `{path.to.token}`.
  */
-import { color, dimension, type TokenGroup } from './types'
+import { color, dimension, fontFamily, fontWeight, type TokenGroup } from './types'
 
 export const semantic = {
   color: {
@@ -57,6 +57,93 @@ export const semantic = {
     'warning-text': color('{color.amber.900}'),
 
     backdrop: color('oklch(0% 0 0 / 0.45)', 'Voile derrière les dialogs modaux'),
+  },
+  /**
+   * Échelle typographique sémantique : un rôle = une recette complète
+   * (taille, graisse, interlignage, éventuel espacement de lettres).
+   * Consommée par le composant Typography et par le CSS des composants.
+   */
+  text: {
+    family: fontFamily('{font.family.sans}', 'Police de tout le texte du design system'),
+    'family-code': fontFamily(
+      '{font.family.mono}',
+      'Police des contenus code (variante code, InputOTP)',
+    ),
+    display: {
+      size: dimension('{font.size.5xl}'),
+      weight: fontWeight('{font.weight.bold}'),
+      leading: dimension('{font.leading.none}'),
+      tracking: dimension('{font.tracking.tight}'),
+    },
+    'heading-1': {
+      size: dimension('{font.size.4xl}'),
+      weight: fontWeight('{font.weight.bold}'),
+      leading: dimension('{font.leading.tight}'),
+      tracking: dimension('{font.tracking.tight}'),
+    },
+    'heading-2': {
+      size: dimension('{font.size.2xl}'),
+      weight: fontWeight('{font.weight.semibold}'),
+      leading: dimension('{font.leading.tight}'),
+      tracking: dimension('{font.tracking.tight}'),
+    },
+    'heading-3': {
+      size: dimension('{font.size.lg}'),
+      weight: fontWeight('{font.weight.semibold}'),
+      leading: dimension('{font.leading.snug}'),
+    },
+    'heading-4': {
+      size: dimension('{font.size.md}'),
+      weight: fontWeight('{font.weight.semibold}'),
+      leading: dimension('{font.leading.snug}'),
+    },
+    subtitle: {
+      size: dimension('{font.size.sm}'),
+      weight: fontWeight('{font.weight.regular}'),
+      leading: dimension('{font.leading.normal}'),
+    },
+    'body-lg': {
+      size: dimension('{font.size.md}'),
+      weight: fontWeight('{font.weight.regular}'),
+      leading: dimension('{font.leading.relaxed}'),
+    },
+    'body-md': {
+      size: dimension('{font.size.sm}'),
+      weight: fontWeight('{font.weight.regular}'),
+      leading: dimension('{font.leading.normal}'),
+    },
+    'body-sm': {
+      size: dimension('{font.size.xs}'),
+      weight: fontWeight('{font.weight.regular}'),
+      leading: dimension('{font.leading.normal}'),
+    },
+    label: {
+      size: dimension('{font.size.sm}'),
+      weight: fontWeight('{font.weight.medium}'),
+      leading: dimension('{font.leading.snug}'),
+    },
+    caption: {
+      size: dimension('{font.size.xs}'),
+      weight: fontWeight('{font.weight.regular}'),
+      leading: dimension('{font.leading.snug}'),
+    },
+    overline: {
+      size: dimension('{font.size.xs}'),
+      weight: fontWeight('{font.weight.medium}'),
+      leading: dimension('{font.leading.snug}'),
+      tracking: dimension('{font.tracking.wide}'),
+    },
+    code: {
+      size: dimension('{font.size.sm}'),
+      weight: fontWeight('{font.weight.regular}'),
+      leading: dimension('{font.leading.normal}'),
+    },
+    /* Rôle technique : étiquette de contrôle interactif (Button, Chip, Badge…).
+     * Pas de `size` : elle vient de l'échelle de tailles (`--_control-font-size`). */
+    control: {
+      weight: fontWeight('{font.weight.medium}'),
+      leading: dimension('{font.leading.none}'),
+    },
   },
   radius: {
     interactive: dimension('{radius.md}', 'Boutons, inputs, contrôles'),

@@ -129,6 +129,8 @@ export const primitives = {
       xl: dimension('1.25rem'),
       '2xl': dimension('1.5rem'),
       '3xl': dimension('1.875rem'),
+      '4xl': dimension('2.25rem'),
+      '5xl': dimension('3rem'),
     },
     leading: {
       none: dimension('1'),
@@ -136,6 +138,10 @@ export const primitives = {
       snug: dimension('1.4'),
       normal: dimension('1.5'),
       relaxed: dimension('1.65'),
+    },
+    tracking: {
+      tight: dimension('-0.015em', 'Resserrement des grands corps (display, headings hauts)'),
+      wide: dimension('0.05em', 'Espacement des micro-libellés en capitales (overline)'),
     },
   },
   radius: {
