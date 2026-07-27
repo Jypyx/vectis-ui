@@ -136,6 +136,21 @@ export const semantic = {
     ),
     'size-tab-indicator': dimension('2px', "Épaisseur de l'indicateur d'onglet actif (Tabs, line)"),
     'size-table-search': dimension('16rem', 'Largeur du champ de recherche du DataTable'),
+    'size-timepicker-dial': dimension('16rem', 'Diamètre du cadran du TimePicker (spec M3)'),
+    'size-timepicker-number': dimension(
+      '3rem',
+      "Cellule d'un chiffre du cadran du TimePicker et pastille de l'aiguille",
+    ),
+    'size-timepicker-center': dimension('0.5rem', 'Point central du cadran du TimePicker'),
+    'size-timepicker-hand': dimension('2px', "Épaisseur de l'aiguille du cadran du TimePicker"),
+    'size-timepicker-cell-w': dimension(
+      '6rem',
+      "Largeur d'un sélecteur heure/minute du TimePicker (en-tête et mode saisie)",
+    ),
+    'size-timepicker-cell-h': dimension(
+      '5rem',
+      "Hauteur d'un sélecteur heure/minute du TimePicker",
+    ),
   },
   icon: {
     'size-sm': dimension('1rem', 'Icônes 16px'),

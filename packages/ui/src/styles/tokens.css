@@ -194,6 +194,12 @@
     --ds-control-size-calendar-nav-min: 5.375rem;
     --ds-control-size-tab-indicator: 2px;
     --ds-control-size-table-search: 16rem;
+    --ds-control-size-timepicker-dial: 16rem;
+    --ds-control-size-timepicker-number: 3rem;
+    --ds-control-size-timepicker-center: 0.5rem;
+    --ds-control-size-timepicker-hand: 2px;
+    --ds-control-size-timepicker-cell-w: 6rem;
+    --ds-control-size-timepicker-cell-h: 5rem;
     --ds-icon-size-sm: 1rem;
     --ds-icon-size-md: 1.25rem;
     --ds-icon-size-lg: 1.5rem;
@@ -284,6 +290,12 @@
     --ds-control-size-calendar-nav-min: 5.375rem;
     --ds-control-size-tab-indicator: 2px;
     --ds-control-size-table-search: 16rem;
+    --ds-control-size-timepicker-dial: 16rem;
+    --ds-control-size-timepicker-number: 3rem;
+    --ds-control-size-timepicker-center: 0.5rem;
+    --ds-control-size-timepicker-hand: 2px;
+    --ds-control-size-timepicker-cell-w: 6rem;
+    --ds-control-size-timepicker-cell-h: 5rem;
     --ds-icon-size-sm: 1rem;
     --ds-icon-size-md: 1.25rem;
     --ds-icon-size-lg: 1.5rem;

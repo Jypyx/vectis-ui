@@ -101,3 +101,5 @@ export type {
   DateMatcher,
 } from './components/Calendar/Calendar.vue'
 export { default as DatePicker } from './components/DatePicker/DatePicker.vue'
+export { default as TimePicker } from './components/TimePicker/TimePicker.vue'
+export type { TimePickerFormat, TimePickerMode } from './components/TimePicker/TimePicker.vue'
