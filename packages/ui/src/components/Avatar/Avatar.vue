@@ -185,12 +185,14 @@ const passedAttrs = computed(() => {
     background: var(--_bg);
     color: var(--_text);
     border-radius: var(--ds-radius-full);
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
     /* initiales : typo du contrôle (token de l'échelle de tailles), jamais un
        ratio brut sur la hauteur — la typo passe par des tokens (philosophie #3) */
     font-size: var(--_control-font-size);
+    /* semibold : emphase locale des initiales (plus lisibles à petite taille),
+       assumée hors du rôle `control` (medium) */
     font-weight: var(--ds-font-weight-semibold);
-    line-height: var(--ds-font-leading-none);
+    line-height: var(--ds-text-control-leading);
     text-decoration: none;
     user-select: none;
     /* Anneau de séparation en pile (transparent hors AvatarGroup, qui pose

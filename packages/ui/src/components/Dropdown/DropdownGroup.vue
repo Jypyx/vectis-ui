@@ -35,10 +35,13 @@ const labelId = useId()
     gap: var(--ds-space-1);
   }
 
+  /* Micro-label de section : rôle overline (sans capitales forcées — la casse
+     du libellé appartient au consommateur). */
   .ds-dropdown-group-label {
     padding: var(--ds-space-1) var(--ds-space-3);
-    font-size: var(--ds-font-size-xs);
-    font-weight: var(--ds-font-weight-medium);
+    font-size: var(--ds-text-overline-size);
+    font-weight: var(--ds-text-overline-weight);
+    letter-spacing: var(--ds-text-overline-tracking);
     color: var(--ds-color-text-muted);
   }
 }

@@ -84,9 +84,9 @@ const icon = computed(() =>
     max-width: calc(100vw - 2 * var(--ds-space-4));
     border-radius: var(--ds-radius-overlay);
     box-shadow: var(--ds-shadow-4);
-    font-family: var(--ds-font-family-sans);
-    font-size: var(--ds-font-size-sm);
-    line-height: var(--ds-font-leading-normal);
+    font-family: var(--ds-text-family);
+    font-size: var(--ds-text-body-md-size);
+    line-height: var(--ds-text-body-md-leading);
   }
 
   /* --- Variantes : consomment les variables du tone (Toast.tokens.css) --- */
@@ -142,6 +142,7 @@ const icon = computed(() =>
 
   .ds-toast-title {
     margin-block-end: var(--ds-space-1);
+    /* semibold : emphase d'état (titre détaché du message), pas un rôle typo */
     font-weight: var(--ds-font-weight-semibold);
   }
 

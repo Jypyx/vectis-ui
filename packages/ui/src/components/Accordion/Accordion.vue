@@ -67,7 +67,7 @@ provide(accordionKey, {
     border: 1px solid var(--ds-color-border);
     border-radius: var(--ds-radius-surface);
     background: var(--ds-color-surface-raised);
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
     overflow: hidden;
   }
 

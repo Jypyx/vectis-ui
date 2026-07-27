@@ -59,8 +59,8 @@ defineSlots<{
     display: inline-flex;
     align-items: center;
     gap: var(--ds-space-2);
-    font-family: var(--ds-font-family-sans);
-    font-size: var(--ds-font-size-sm);
+    font-family: var(--ds-text-family);
+    font-size: var(--ds-text-label-size);
     color: var(--ds-color-text);
     cursor: pointer;
   }

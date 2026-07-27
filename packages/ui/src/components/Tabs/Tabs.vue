@@ -336,7 +336,7 @@ watch(model, () => {
   .ds-tabs {
     display: flex;
     flex-direction: column;
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
   }
 
   /* Vertical : la barre et les panneaux se placent côte à côte */

@@ -471,8 +471,8 @@ function resyncFields() {
     padding: var(--ds-space-1) var(--ds-space-2);
     background: var(--ds-color-surface-inverse);
     color: var(--ds-color-text-on-inverse);
-    font-size: var(--ds-font-size-xs);
-    line-height: var(--ds-font-leading-normal);
+    font-size: var(--ds-text-caption-size);
+    line-height: var(--ds-text-caption-leading);
     border-radius: var(--ds-radius-sm);
     box-shadow: var(--ds-shadow-2);
     white-space: nowrap;
@@ -485,7 +485,7 @@ function resyncFields() {
     /* Enfants absolus : réserve la hauteur (couvre texte xs ET icônes md). */
     min-block-size: var(--ds-icon-size-md);
     --ds-icon-size: var(--ds-icon-size-md);
-    font-size: var(--ds-font-size-xs);
+    font-size: var(--ds-text-caption-size);
     color: var(--ds-color-text-muted);
   }
 

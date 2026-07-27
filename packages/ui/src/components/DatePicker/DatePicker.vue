@@ -279,7 +279,7 @@ const close = () => closePanel(true)
     anchor-scope: --ds-datepicker-anchor;
     display: block;
     width: 100%;
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
   }
 
   .ds-datepicker-control {

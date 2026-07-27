@@ -181,10 +181,10 @@ const iconOnly = computed(
     /* bordure toujours posée : hauteur stable entre variants */
     border: 1px solid transparent;
     border-radius: var(--ds-radius-interactive);
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
     font-size: var(--_control-font-size);
-    font-weight: var(--ds-font-weight-medium);
-    line-height: var(--ds-font-leading-none);
+    font-weight: var(--ds-text-control-weight);
+    line-height: var(--ds-text-control-leading);
     transition:
       background-color var(--ds-duration-fast) var(--ds-ease-default),
       border-color var(--ds-duration-fast) var(--ds-ease-default),

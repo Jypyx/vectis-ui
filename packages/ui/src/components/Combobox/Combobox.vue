@@ -624,7 +624,7 @@ watch(
        contrôle et du panneau — même en top-layer le panneau reste descendant) */
     anchor-scope: --ds-combobox-anchor;
     width: 100%;
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
   }
 
   .ds-combobox-control {
@@ -725,7 +725,7 @@ watch(
       var(--_dropdown-item-min-h, var(--ds-control-height-sm)) - var(--_dropdown-item-delta, 0px)
     );
     padding: var(--ds-space-1) var(--ds-space-3);
-    font-size: var(--ds-font-size-sm);
+    font-size: var(--ds-text-body-md-size);
     color: var(--ds-color-text-muted);
   }
 

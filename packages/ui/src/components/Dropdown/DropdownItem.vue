@@ -230,8 +230,8 @@ onBeforeUnmount(clearTimers)
     color: var(--ds-color-text);
     border-radius: var(--ds-radius-sm);
     font-family: inherit;
-    font-size: var(--ds-font-size-sm);
-    line-height: var(--ds-font-leading-snug);
+    font-size: var(--ds-text-body-md-size);
+    line-height: var(--ds-text-body-md-leading);
     text-align: start;
     text-decoration: none;
     cursor: pointer;
@@ -245,7 +245,7 @@ onBeforeUnmount(clearTimers)
   }
 
   .ds-dropdown-item-sublabel {
-    font-size: var(--ds-font-size-xs);
+    font-size: var(--ds-text-caption-size);
     color: var(--ds-color-text-muted);
   }
 

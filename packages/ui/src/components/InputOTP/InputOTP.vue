@@ -239,7 +239,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     color: var(--ds-color-text);
     border: 1px solid var(--ds-color-border-strong);
     border-radius: var(--ds-radius-interactive);
-    font-family: var(--ds-font-family-mono);
+    font-family: var(--ds-text-family-code);
     font-size: var(--_font-size);
     transition: border-color var(--ds-duration-fast) var(--ds-ease-default);
   }
@@ -266,7 +266,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     align-items: center;
     justify-content: center;
     color: var(--ds-color-text-muted);
-    font-family: var(--ds-font-family-mono);
+    font-family: var(--ds-text-family-code);
     font-size: var(--_font-size);
     user-select: none;
   }

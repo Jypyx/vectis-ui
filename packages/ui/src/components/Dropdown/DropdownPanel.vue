@@ -224,7 +224,7 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     border: 1px solid var(--ds-color-border);
     border-radius: var(--ds-radius-surface);
     box-shadow: var(--ds-shadow-4);
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
   }
 
   /* (taille/densité des items : DropdownPanel.tokens.css) */

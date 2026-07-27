@@ -195,12 +195,12 @@ const px = (v: number | string | undefined) => {
     /* rester dans le trou du donut */
     max-inline-size: calc(var(--_diameter) - var(--_thickness) * 2);
     color: var(--ds-color-text);
-    font-family: var(--ds-font-family-sans);
+    font-family: var(--ds-text-family);
     /* ratio proportionnel au diamètre (tolérance déjà admise pour l'épaisseur
        du Spinner), avec plancher au token le plus petit */
-    font-size: max(var(--ds-font-size-xs), calc(var(--_diameter) / 4));
-    font-weight: var(--ds-font-weight-medium);
-    line-height: var(--ds-font-leading-none);
+    font-size: max(var(--ds-text-caption-size), calc(var(--_diameter) / 4));
+    font-weight: var(--ds-text-control-weight);
+    line-height: var(--ds-text-control-leading);
     text-align: center;
   }
 

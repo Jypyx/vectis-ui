@@ -117,10 +117,10 @@ const badgeAttrs = computed(() => ({
     padding-inline: var(--ds-space-1);
     border-radius: var(--ds-radius-pill);
     background: var(--_bg);
-    font-family: var(--ds-font-family-sans);
-    font-size: var(--ds-font-size-xs);
-    font-weight: var(--ds-font-weight-medium);
-    line-height: var(--ds-font-leading-none);
+    font-family: var(--ds-text-family);
+    font-size: var(--ds-text-caption-size);
+    font-weight: var(--ds-text-control-weight);
+    line-height: var(--ds-text-control-leading);
 
     /* Contexte icône : mapping xs de l'échelle de tailles (16px, opsz 20 —
        littéral, contrat de la police Material Symbols). */

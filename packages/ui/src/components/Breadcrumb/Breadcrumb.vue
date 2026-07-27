@@ -132,8 +132,8 @@ const visibleItems = computed(() =>
     margin: 0;
     padding: 0;
     list-style: none;
-    font-family: var(--ds-font-family-sans);
-    font-size: var(--ds-font-size-sm);
+    font-family: var(--ds-text-family);
+    font-size: var(--ds-text-body-md-size);
   }
 
   .ds-breadcrumb-item {
@@ -175,7 +175,7 @@ const visibleItems = computed(() =>
 
   .ds-breadcrumb-link[aria-current='page'] {
     color: var(--ds-color-text);
-    font-weight: var(--ds-font-weight-medium);
+    font-weight: var(--ds-text-label-weight);
   }
 
   @media (prefers-reduced-motion: reduce) {

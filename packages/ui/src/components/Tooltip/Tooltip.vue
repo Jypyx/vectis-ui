@@ -119,9 +119,9 @@ onBeforeUnmount(() => clearTimeout(timer))
     border: none;
     border-radius: var(--ds-radius-sm);
     box-shadow: var(--ds-shadow-2);
-    font-family: var(--ds-font-family-sans);
-    font-size: var(--ds-font-size-xs);
-    line-height: var(--ds-font-leading-snug);
+    font-family: var(--ds-text-family);
+    font-size: var(--ds-text-caption-size);
+    line-height: var(--ds-text-caption-leading);
   }
 }
 </style>
