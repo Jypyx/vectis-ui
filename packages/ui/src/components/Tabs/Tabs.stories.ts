@@ -1,0 +1,381 @@
+import type { Meta, StoryObj } from '@storybook/vue3-vite'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { ref } from 'vue'
+
+import Badge from '../Badge/Badge.vue'
+import Tab from './Tab.vue'
+import TabPanel from './TabPanel.vue'
+import Tabs from './Tabs.vue'
+
+const meta = {
+  title: 'Composants/Tabs',
+  component: Tabs,
+  argTypes: {
+    variant: { control: 'inline-radio', options: ['line', 'inset'] },
+    tone: {
+      control: 'inline-radio',
+      options: ['accent', 'neutral', 'danger', 'success', 'warning'],
+    },
+    size: { control: 'inline-radio', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
+    orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
+    align: { control: 'inline-radio', options: ['start', 'center', 'end'] },
+    activation: { control: 'inline-radio', options: ['manual', 'automatic'] },
+  },
+  args: {
+    variant: 'line',
+    tone: 'accent',
+    size: 'md',
+    compact: false,
+    orientation: 'horizontal',
+    align: 'start',
+    grow: false,
+    scrollButtons: false,
+    activation: 'manual',
+  },
+  // v-model vivant : sans ref locale, cliquer un onglet ne changerait rien.
+  render: (args) => ({
+    components: { Tabs, Tab, TabPanel },
+    setup: () => ({ args, onglet: ref('apercu') }),
+    template: `
+      <Tabs v-bind="args" v-model="onglet">
+        <Tab value="apercu" label="Aperçu" />
+        <Tab value="details" label="Détails" />
+        <Tab value="historique" label="Historique" />
+      </Tabs>
+    `,
+  }),
+} satisfies Meta<typeof Tabs>
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByRole('tab', { name: 'Aperçu' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+
+    await userEvent.click(canvas.getByRole('tab', { name: 'Détails' }))
+
+    await waitFor(async () => {
+      await expect(canvas.getByRole('tab', { name: 'Détails' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      )
+    })
+  },
+}
+
+export const Variantes: Story = {
+  render: () => ({
+    components: { Tabs, Tab },
+    setup: () => ({ line: ref('a'), inset: ref('a') }),
+    template: `
+      <div style="display: grid; gap: 32px">
+        <Tabs variant="line" v-model="line">
+          <Tab value="a" label="Aperçu" />
+          <Tab value="b" label="Détails" />
+          <Tab value="c" label="Historique" />
+        </Tabs>
+        <Tabs variant="inset" v-model="inset">
+          <Tab value="a" label="Aperçu" />
+          <Tab value="b" label="Détails" />
+          <Tab value="c" label="Historique" />
+        </Tabs>
+      </div>
+    `,
+  }),
+}
+
+export const Tones: Story = {
+  render: () => ({
+    components: { Tabs, Tab },
+    setup: () => ({
+      tones: ['accent', 'neutral', 'success', 'warning', 'danger'],
+      variants: ['line', 'inset'],
+      onglet: ref('b'),
+    }),
+    template: `
+      <div style="display: grid; gap: 32px">
+        <div v-for="v in variants" :key="v" style="display: grid; gap: 16px">
+          <Tabs v-for="t in tones" :key="t" :variant="v" :tone="t" v-model="onglet">
+            <Tab value="a" label="Aperçu" />
+            <Tab value="b" label="Détails" />
+            <Tab value="c" label="Historique" />
+          </Tabs>
+        </div>
+      </div>
+    `,
+  }),
+}
+
+export const Sizes: Story = {
+  render: () => ({
+    components: { Tabs, Tab },
+    setup: () => ({ sizes: ['xs', 'sm', 'md', 'lg', 'xl'], onglet: ref('a') }),
+    template: `
+      <div style="display: grid; gap: 24px">
+        <Tabs v-for="s in sizes" :key="s" :size="s" variant="inset" v-model="onglet">
+          <Tab value="a" label="Aperçu" />
+          <Tab value="b" label="Détails" icon="tune" />
+          <Tab value="c" icon="more_horiz" aria-label="Plus" />
+        </Tabs>
+      </div>
+    `,
+  }),
+}
+
+export const Compact: Story = {
+  render: () => ({
+    components: { Tabs, Tab },
+    setup: () => ({ normal: ref('a'), compact: ref('a') }),
+    // compact = -4px de hauteur ; padding, typo et icônes inchangés
+    template: `
+      <div style="display: grid; gap: 24px">
+        <Tabs variant="inset" v-model="normal">
+          <Tab value="a" label="Aperçu" />
+          <Tab value="b" label="Détails" />
+        </Tabs>
+        <Tabs variant="inset" compact v-model="compact">
+          <Tab value="a" label="Aperçu" />
+          <Tab value="b" label="Détails" />
+        </Tabs>
+      </div>
+    `,
+  }),
+}
+
+export const ContenuOnglet: Story = {
+  render: () => ({
+    components: { Tabs, Tab, Badge },
+    setup: () => ({ onglet: ref('texte') }),
+    template: `
+      <Tabs v-model="onglet">
+        <Tab value="texte" label="Texte seul" />
+        <Tab value="icone" label="Texte et icône" icon="tune" />
+        <Tab value="seule" icon="settings" aria-label="Réglages" />
+        <Tab value="slot">
+          <Badge :count="3">Messages</Badge>
+        </Tab>
+      </Tabs>
+    `,
+  }),
+}
+
+export const Vertical: Story = {
+  args: { orientation: 'vertical' },
+  render: (args) => ({
+    components: { Tabs, Tab, TabPanel },
+    setup: () => ({ args, onglet: ref('apercu') }),
+    // en vertical la bordure de la variante `line` passe au bord de départ
+    template: `
+      <Tabs v-bind="args" orientation="vertical" v-model="onglet" style="min-height: 220px">
+        <Tab value="apercu" label="Aperçu" icon="dashboard" />
+        <Tab value="details" label="Détails" icon="tune" />
+        <Tab value="historique" label="Historique" icon="history" />
+        <template #panels>
+          <TabPanel value="apercu" style="padding: 16px">Panneau « Aperçu »</TabPanel>
+          <TabPanel value="details" style="padding: 16px">Panneau « Détails »</TabPanel>
+          <TabPanel value="historique" style="padding: 16px">Panneau « Historique »</TabPanel>
+        </template>
+      </Tabs>
+    `,
+  }),
+}
+
+export const Alignement: Story = {
+  render: () => ({
+    components: { Tabs, Tab },
+    setup: () => ({ aligns: ['start', 'center', 'end'], onglet: ref('a') }),
+    template: `
+      <div style="display: grid; gap: 24px">
+        <Tabs v-for="a in aligns" :key="a" :align="a" variant="inset" v-model="onglet">
+          <Tab value="a" label="Aperçu" />
+          <Tab value="b" label="Détails" />
+          <Tab value="c" label="Historique" />
+        </Tabs>
+      </div>
+    `,
+  }),
+}
+
+export const Grow: Story = {
+  args: { grow: true },
+  render: (args) => ({
+    components: { Tabs, Tab },
+    setup: () => ({ args, onglet: ref('a') }),
+    template: `
+      <Tabs v-bind="args" grow v-model="onglet">
+        <Tab value="a" label="Aperçu" />
+        <Tab value="b" label="Détails" />
+        <Tab value="c" label="Historique très long qui doit être tronqué" />
+      </Tabs>
+    `,
+  }),
+}
+
+export const Desactive: Story = {
+  render: () => ({
+    components: { Tabs, Tab },
+    setup: () => ({ onglet: ref('a') }),
+    // l'onglet inerte est un <button disabled> : gris par tokens, sauté par les flèches
+    template: `
+      <Tabs v-model="onglet">
+        <Tab value="a" label="Aperçu" />
+        <Tab value="b" label="Détails" disabled />
+        <Tab value="c" label="Historique" />
+      </Tabs>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByRole('tab', { name: 'Détails' })).toBeDisabled()
+
+    canvas.getByRole('tab', { name: 'Aperçu' }).focus()
+    await userEvent.keyboard('{ArrowRight}')
+
+    await waitFor(async () => {
+      await expect(canvas.getByRole('tab', { name: 'Historique' })).toHaveFocus()
+    })
+  },
+}
+
+export const Panneaux: Story = {
+  render: () => ({
+    components: { Tabs, Tab, TabPanel },
+    setup: () => ({ onglet: ref('apercu') }),
+    template: `
+      <Tabs v-model="onglet">
+        <Tab value="apercu" label="Aperçu" />
+        <Tab value="details" label="Détails" />
+        <Tab value="historique" label="Historique" />
+        <template #panels>
+          <TabPanel value="apercu" style="padding: 16px 0">
+            Le panneau actif est le seul visible ; les autres portent l'attribut natif
+            <code>hidden</code> et gardent leur état.
+          </TabPanel>
+          <TabPanel value="details" style="padding: 16px 0">
+            <label>Une saisie conservée d'un onglet à l'autre : <input type="text" /></label>
+          </TabPanel>
+          <TabPanel value="historique" style="padding: 16px 0" lazy>
+            Ce panneau est <code>lazy</code> : son contenu n'a été monté qu'à son premier affichage.
+          </TabPanel>
+        </template>
+      </Tabs>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('tab', { name: 'Détails' }))
+
+    await waitFor(async () => {
+      await expect(canvas.getByRole('tabpanel')).toHaveAttribute(
+        'aria-labelledby',
+        canvas.getByRole('tab', { name: 'Détails' }).id,
+      )
+    })
+  },
+}
+
+export const Defilement: Story = {
+  render: () => ({
+    components: { Tabs, Tab },
+    setup: () => ({
+      villes: [
+        'Paris',
+        'Lyon',
+        'Marseille',
+        'Toulouse',
+        'Bordeaux',
+        'Lille',
+        'Nantes',
+        'Strasbourg',
+        'Montpellier',
+        'Rennes',
+        'Grenoble',
+        'Toulon',
+      ],
+      onglet: ref('Paris'),
+    }),
+    // le conteneur est volontairement étroit : la liste défile au doigt, au
+    // trackpad et au clavier, sans barre de défilement visible
+    template: `
+      <div style="max-width: 420px; border: 1px dashed var(--ds-color-border); padding: 8px">
+        <Tabs v-model="onglet">
+          <Tab v-for="v in villes" :key="v" :value="v" :label="v" />
+        </Tabs>
+      </div>
+    `,
+  }),
+}
+
+export const BoutonsDefilement: Story = {
+  render: () => ({
+    components: { Tabs, Tab },
+    setup: () => ({
+      villes: [
+        'Paris',
+        'Lyon',
+        'Marseille',
+        'Toulouse',
+        'Bordeaux',
+        'Lille',
+        'Nantes',
+        'Strasbourg',
+        'Montpellier',
+        'Rennes',
+        'Grenoble',
+        'Toulon',
+      ],
+      onglet: ref('Paris'),
+    }),
+    template: `
+      <div style="max-width: 420px; border: 1px dashed var(--ds-color-border); padding: 8px">
+        <Tabs scroll-buttons variant="inset" v-model="onglet">
+          <Tab v-for="v in villes" :key="v" :value="v" :label="v" />
+        </Tabs>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const suivants = canvas.getByRole('button', { name: 'Onglets suivants' })
+
+    // en butée de départ, seul le contrôle aval est actif
+    await waitFor(async () => {
+      await expect(canvas.getByRole('button', { name: 'Onglets précédents' })).toBeDisabled()
+      await expect(suivants).toBeEnabled()
+    })
+
+    await userEvent.click(suivants)
+
+    await waitFor(async () => {
+      await expect(canvas.getByRole('button', { name: 'Onglets précédents' })).toBeEnabled()
+    })
+  },
+}
+
+export const CasLimites: Story = {
+  render: () => ({
+    components: { Tabs, Tab },
+    setup: () => ({ unique: ref('a'), longs: ref('a'), inconnu: ref('zzz') }),
+    template: `
+      <div style="display: grid; gap: 24px">
+        <Tabs v-model="unique"><Tab value="a" label="Onglet unique" /></Tabs>
+
+        <Tabs variant="inset" v-model="longs">
+          <Tab value="a" label="Un libellé d'onglet particulièrement long" />
+          <Tab value="b" label="Un autre libellé tout aussi interminable" />
+        </Tabs>
+
+        <!-- valeur hors liste : aucun onglet actif, la barre sort de la tabulation -->
+        <Tabs v-model="inconnu">
+          <Tab value="a" label="Aperçu" />
+          <Tab value="b" label="Détails" />
+        </Tabs>
+      </div>
+    `,
+  }),
+}

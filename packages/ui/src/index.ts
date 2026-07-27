@@ -12,7 +12,10 @@
  * surcharge de sélecteurs. Slider doit rester après Input : il surcharge la
  * largeur de ses champs numériques (`.ds-slider-field`) à spécificité égale.
  * Pagination doit rester après ButtonGroup : ses pastilles surchargent la
- * largeur et le padding de `.ds-button` à spécificité égale.
+ * largeur et le padding de `.ds-button` à spécificité égale. Tabs est placé là
+ * par cohérence (il compose Button et IconButton) mais son ordre n'est PAS
+ * contraignant : toutes ses surcharges sont qualifiées `.ds-tab[data-size]`,
+ * qui bat `.ds-button[data-variant='…']` quel que soit l'ordre du bundle.
  */
 import './styles/index.css'
 
@@ -21,6 +24,17 @@ export { default as Button } from './components/Button/Button.vue'
 export { default as IconButton } from './components/IconButton/IconButton.vue'
 export { default as ButtonGroup } from './components/Button/ButtonGroup.vue'
 export { default as Pagination } from './components/Pagination/Pagination.vue'
+export { default as Tabs } from './components/Tabs/Tabs.vue'
+export type {
+  TabsActivation,
+  TabsAlign,
+  TabsOrientation,
+  TabsSize,
+  TabsTone,
+  TabsVariant,
+} from './components/Tabs/Tabs.vue'
+export { default as Tab } from './components/Tabs/Tab.vue'
+export { default as TabPanel } from './components/Tabs/TabPanel.vue'
 export { default as Input } from './components/Input/Input.vue'
 export { default as Textarea } from './components/Textarea/Textarea.vue'
 export { default as Checkbox } from './components/Checkbox/Checkbox.vue'

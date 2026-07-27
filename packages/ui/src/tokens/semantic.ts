@@ -132,6 +132,7 @@ export const semantic = {
       '5.375rem',
       'Largeur minimale des boutons sélecteurs mois/année du Calendar (≈86px)',
     ),
+    'size-tab-indicator': dimension('2px', "Épaisseur de l'indicateur d'onglet actif (Tabs, line)"),
   },
   icon: {
     'size-sm': dimension('1rem', 'Icônes 16px'),
