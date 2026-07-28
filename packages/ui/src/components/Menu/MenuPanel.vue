@@ -156,7 +156,6 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
   </div>
 </template>
 
-<style src="./MenuPanel.tokens.css"></style>
 <style>
 @layer ds.components {
   /* Chrome (surface, bordure, ombre, rythme interne, contexte Icon) : classe
@@ -167,7 +166,26 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     max-inline-size: min(var(--ds-control-size-menu-max), calc(100vw - var(--ds-space-8)));
   }
 
-  /* (taille/densité des items : MenuPanel.tokens.css) */
+  /*
+   * Taille/densité des items : les variables sont posées sur le panneau
+   * RACINE seulement (seul à rendre data-size/data-compact) et héritées par
+   * les sous-panneaux, descendants DOM — ne jamais les déclarer sur
+   * .ds-menu nu, chaque panneau imbriqué les réinitialiserait. Les
+   * fallbacks (valeurs sm) vivent côté MenuItem.
+   */
+  .ds-menu[data-size='sm'] {
+    --_menu-item-min-h: var(--ds-control-height-sm);
+  }
+
+  .ds-menu[data-size='md'] {
+    --_menu-item-min-h: var(--ds-control-height-md);
+    --_menu-item-pad-i: var(--ds-space-4);
+  }
+
+  /* Compact : hauteur minimale -4px, padding/typo/icônes inchangés */
+  .ds-menu[data-compact] {
+    --_menu-item-delta: var(--ds-space-1);
+  }
 
   /* aligne le 1er sous-item sur l'item parent (compense padding + bordure) */
   .ds-menu .ds-menu[data-placement='right-start'] {

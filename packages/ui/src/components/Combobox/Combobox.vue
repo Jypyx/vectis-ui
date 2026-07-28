@@ -735,7 +735,7 @@ watch(
 
   /* États plein panneau (« aucun résultat », chargement) : même gabarit qu'une
      option (hauteur héritée du panneau via --_listbox-option-*, padding d'item).
-     Sans fallback : Listbox.tokens.css pose les défauts sur `.ds-listbox`.
+     Sans fallback : Listbox.vue pose les défauts sur `.ds-listbox`.
      `flex: none` : le panneau est un flex column, l'état ne doit pas s'écraser. */
   .ds-combobox-state {
     display: flex;

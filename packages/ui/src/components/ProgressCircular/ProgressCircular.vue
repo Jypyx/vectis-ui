@@ -117,7 +117,6 @@ const px = (v: number | string | undefined) => {
   </span>
 </template>
 
-<style src="./ProgressCircular.tokens.css"></style>
 <style>
 @layer ds.components {
   /* Les custom properties de dimension sont déclarées sur la racine : le style
@@ -183,7 +182,41 @@ const px = (v: number | string | undefined) => {
     stroke-linecap: butt;
   }
 
-  /* (tones : ProgressCircular.tokens.css) */
+  /* --- Tones : variables locales uniquement (mêmes valeurs que ProgressLinear,
+     sans couleur de repli du texte : le label est dans le trou du donut, sur le
+     fond de page, donc en couleur de texte courante) --- */
+  .ds-progress-circular[data-tone='accent'] {
+    --_fill: var(--ds-color-accent);
+    --_track: var(--ds-color-accent-surface);
+  }
+
+  .ds-progress-circular[data-tone='success'] {
+    --_fill: var(--ds-color-success);
+    --_track: var(--ds-color-success-surface);
+  }
+
+  .ds-progress-circular[data-tone='danger'] {
+    --_fill: var(--ds-color-danger);
+    --_track: var(--ds-color-danger-surface);
+  }
+
+  .ds-progress-circular[data-tone='warning'] {
+    --_fill: var(--ds-color-warning);
+    --_track: var(--ds-color-warning-surface);
+  }
+
+  /* Neutral : inversion text/surface (modèle Chip/Badge). */
+  .ds-progress-circular[data-tone='neutral'] {
+    --_fill: var(--ds-color-text);
+    --_track: var(--ds-color-surface-muted);
+  }
+
+  /* --- Couleur custom : après les tones (même spécificité, dernier gagne) --- */
+  .ds-progress-circular[data-custom] {
+    --_fill: var(--_custom);
+    --_track: color-mix(in oklab, var(--_custom), var(--ds-color-surface) 85%);
+  }
+
   .ds-progress-circular-label {
     display: flex;
     align-items: center;

@@ -108,17 +108,37 @@ const panelStyle = computed(() => ({ '--_anchor': props.anchor }))
   </div>
 </template>
 
-<style src="./Listbox.tokens.css"></style>
 <style>
 @layer ds.components {
   /* Chrome (surface, bordure, ombre, rythme interne, contexte Icon) : classe
      partagée `.ds-panel` (styles/panel.css). Ne restent ici que les règles
      propres à la liste : largeur calée sur l'ancre et zone défilante. */
   .ds-listbox {
+    /* Taille/densité des options, consommées par ListboxOption.vue et par les
+       rangées d'état du consommateur (`.ds-combobox-state`). Contrairement à
+       MenuPanel, les défauts sont posés sur `.ds-listbox` nu : une liste ne
+       s'imbrique jamais dans une autre, le piège de réinitialisation des
+       panneaux imbriqués n'existe donc pas. Les consommateurs lisent les
+       variables SANS fallback — un nom périmé produit un calc() invalide (donc
+       visible) plutôt qu'un repli silencieux. */
+    --_listbox-option-min-h: var(--ds-control-height-sm);
+    --_listbox-option-pad-i: var(--ds-space-3);
+    --_listbox-option-delta: 0px;
+
     position-anchor: var(--_anchor);
     min-inline-size: anchor-size(width);
     max-block-size: var(--ds-control-size-listbox-max-block);
     overflow: auto;
+  }
+
+  .ds-listbox[data-size='md'] {
+    --_listbox-option-min-h: var(--ds-control-height-md);
+    --_listbox-option-pad-i: var(--ds-space-4);
+  }
+
+  /* Compact : hauteur minimale -4px, padding/typo/icônes inchangés */
+  .ds-listbox[data-compact] {
+    --_listbox-option-delta: var(--ds-space-1);
   }
 }
 </style>

@@ -169,7 +169,6 @@ const iconOnly = computed(
   </span>
 </template>
 
-<style src="./Chip.tokens.css"></style>
 <style>
 @layer ds.components {
   /* Tailles/compact : hauteur explicite via la classe partagée ds-control
@@ -195,7 +194,80 @@ const iconOnly = computed(
     border-radius: var(--ds-radius-pill);
   }
 
-  /* --- Variantes : consomment les variables du tone (Chip.tokens.css) --- */
+  /* --- Tones : ne définissent que des variables locales (modèle Button) --- */
+  .ds-chip[data-tone='accent'] {
+    --_bg-solid: var(--ds-color-accent);
+    --_bg-solid-hover: var(--ds-color-accent-hover);
+    --_bg-solid-active: var(--ds-color-accent-active);
+    --_text-solid: var(--ds-color-text-on-accent);
+    --_text-tinted: var(--ds-color-accent-text);
+    --_bg-soft: var(--ds-color-accent-surface);
+    --_border-soft: var(--ds-color-accent-border);
+  }
+
+  .ds-chip[data-tone='danger'] {
+    --_bg-solid: var(--ds-color-danger);
+    --_bg-solid-hover: var(--ds-color-danger-hover);
+    --_bg-solid-active: var(--ds-color-danger-active);
+    --_text-solid: var(--ds-color-text-on-accent);
+    --_text-tinted: var(--ds-color-danger-text);
+    --_bg-soft: var(--ds-color-danger-surface);
+    --_border-soft: var(--ds-color-danger-border);
+  }
+
+  .ds-chip[data-tone='success'] {
+    --_bg-solid: var(--ds-color-success);
+    --_bg-solid-hover: var(--ds-color-success-hover);
+    --_bg-solid-active: var(--ds-color-success-active);
+    --_text-solid: var(--ds-color-text-on-accent);
+    --_text-tinted: var(--ds-color-success-text);
+    --_bg-soft: var(--ds-color-success-surface);
+    --_border-soft: var(--ds-color-success-border);
+  }
+
+  .ds-chip[data-tone='warning'] {
+    --_bg-solid: var(--ds-color-warning);
+    --_bg-solid-hover: var(--ds-color-warning-hover);
+    --_bg-solid-active: var(--ds-color-warning-active);
+    /* amber trop clair pour du blanc : token dédié (texte sombre) */
+    --_text-solid: var(--ds-color-text-on-warning);
+    --_text-tinted: var(--ds-color-warning-text);
+    --_bg-soft: var(--ds-color-warning-surface);
+    --_border-soft: var(--ds-color-warning-border);
+  }
+
+  /* Divergence vs Button : le solid neutre de Button (surface-muted) serait
+     indistinguable du tonal. Inversion totale text/surface plutôt que
+     surface-inverse : en dark, surface-inverse = surface-muted (neutral-800),
+     un chip neutre sélectionné serait invisible — text (neutral-50 en dark,
+     neutral-900 en light) reste distinct du fond tonal dans les deux thèmes */
+  .ds-chip[data-tone='neutral'] {
+    --_bg-solid: var(--ds-color-text);
+    --_bg-solid-hover: color-mix(in oklab, var(--ds-color-text), var(--ds-color-surface) 8%);
+    --_bg-solid-active: color-mix(in oklab, var(--ds-color-text), var(--ds-color-surface) 14%);
+    --_text-solid: var(--ds-color-surface);
+    --_text-tinted: var(--ds-color-text);
+    --_bg-soft: var(--ds-color-surface-muted);
+    --_border-soft: var(--ds-color-border-strong);
+  }
+
+  /* Couleur custom (--_custom inline) : remplace le tone, toutes les nuances
+     dérivées par color-mix avec les tokens de thème (surface/text s'inversent
+     entre light et dark → adaptation automatique). Bloc APRÈS les tones :
+     même spécificité, le dernier gagne. */
+  .ds-chip[data-custom] {
+    --_bg-solid: var(--_custom);
+    --_bg-solid-hover: color-mix(in oklab, var(--_custom), var(--ds-color-text) 8%);
+    --_bg-solid-active: color-mix(in oklab, var(--_custom), var(--ds-color-text) 14%);
+    /* blanc fixe : le contraste avec une couleur claire est à la charge du
+       consommateur (même limite que warning avant text-on-warning) */
+    --_text-solid: var(--ds-color-text-on-accent);
+    --_text-tinted: color-mix(in oklab, var(--_custom), var(--ds-color-text) 30%);
+    --_bg-soft: color-mix(in oklab, var(--_custom), var(--ds-color-surface) 85%);
+    --_border-soft: color-mix(in oklab, var(--_custom), var(--ds-color-surface) 60%);
+  }
+
+  /* --- Variantes : consomment les variables du tone --- */
   .ds-chip[data-variant='tonal'] {
     background: var(--_bg-soft);
     color: var(--_text-tinted);

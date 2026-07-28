@@ -109,7 +109,6 @@ const passedAttrs = computed(() => {
   </component>
 </template>
 
-<style src="./Button.tokens.css"></style>
 <style>
 @layer ds.components {
   .ds-button {
@@ -145,7 +144,63 @@ const passedAttrs = computed(() => {
     outline-offset: var(--ds-focus-ring-offset);
   }
 
-  /* --- Variantes : consomment les variables du tone (Button.tokens.css) --- */
+  /* --- Tones : ne définissent que des variables locales --- */
+  .ds-button[data-tone='accent'] {
+    --_bg-solid: var(--ds-color-accent);
+    --_bg-solid-hover: var(--ds-color-accent-hover);
+    --_bg-solid-active: var(--ds-color-accent-active);
+    --_text-solid: var(--ds-color-text-on-accent);
+    --_text-tinted: var(--ds-color-accent-text);
+    --_bg-soft: var(--ds-color-accent-surface);
+    --_border-soft: var(--ds-color-accent-border);
+  }
+
+  .ds-button[data-tone='danger'] {
+    --_bg-solid: var(--ds-color-danger);
+    --_bg-solid-hover: var(--ds-color-danger-hover);
+    --_bg-solid-active: var(--ds-color-danger-active);
+    --_text-solid: var(--ds-color-text-on-accent);
+    --_text-tinted: var(--ds-color-danger-text);
+    --_bg-soft: var(--ds-color-danger-surface);
+    --_border-soft: var(--ds-color-danger-border);
+  }
+
+  .ds-button[data-tone='success'] {
+    --_bg-solid: var(--ds-color-success);
+    --_bg-solid-hover: var(--ds-color-success-hover);
+    --_bg-solid-active: var(--ds-color-success-active);
+    --_text-solid: var(--ds-color-text-on-accent);
+    --_text-tinted: var(--ds-color-success-text);
+    --_bg-soft: var(--ds-color-success-surface);
+    --_border-soft: var(--ds-color-success-border);
+  }
+
+  .ds-button[data-tone='warning'] {
+    --_bg-solid: var(--ds-color-warning);
+    --_bg-solid-hover: var(--ds-color-warning-hover);
+    --_bg-solid-active: var(--ds-color-warning-active);
+    /* amber trop clair pour du blanc : token dédié (texte sombre) */
+    --_text-solid: var(--ds-color-text-on-warning);
+    --_text-tinted: var(--ds-color-warning-text);
+    --_bg-soft: var(--ds-color-warning-surface);
+    --_border-soft: var(--ds-color-warning-border);
+  }
+
+  .ds-button[data-tone='neutral'] {
+    --_bg-solid: var(--ds-color-surface-muted);
+    --_bg-solid-hover: color-mix(in oklab, var(--ds-color-surface-muted), var(--ds-color-text) 8%);
+    --_bg-solid-active: color-mix(
+      in oklab,
+      var(--ds-color-surface-muted),
+      var(--ds-color-text) 14%
+    );
+    --_text-solid: var(--ds-color-text);
+    --_text-tinted: var(--ds-color-text);
+    --_bg-soft: var(--ds-color-surface-muted);
+    --_border-soft: var(--ds-color-border-strong);
+  }
+
+  /* --- Variantes : consomment les variables du tone --- */
   .ds-button[data-variant='solid'] {
     background: var(--_bg-solid);
     color: var(--_text-solid);

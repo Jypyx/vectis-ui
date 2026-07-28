@@ -103,7 +103,7 @@ function onClick() {
     align-items: center;
     gap: var(--ds-space-2);
     width: 100%;
-    /* variables posées par Listbox.tokens.css — sans fallback, volontairement */
+    /* variables posées par Listbox.vue — sans fallback, volontairement */
     min-height: calc(var(--_listbox-option-min-h) - var(--_listbox-option-delta));
     padding: var(--ds-space-1) var(--_listbox-option-pad-i);
     border: none;
