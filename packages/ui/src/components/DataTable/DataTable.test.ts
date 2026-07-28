@@ -74,18 +74,26 @@ describe('DataTable', () => {
     })
     const sortButton = getByRole('button', { name: 'Total' })
     const th = sortButton.closest('th') as HTMLElement
+    // la ligature Material Symbols EST le texte du span rendu par Icon
+    const glyph = () => sortButton.querySelector('.ds-table-sort-icon')?.textContent
+
+    // le nom accessible ne retient que le libellé : l'icône est décorative
+    expect(glyph()).toBe('swap_vert')
 
     await fireEvent.click(sortButton)
     expect(firstColumnCells(container)).toEqual(['Atlas', 'Brume', 'Socle'])
     expect(th.getAttribute('aria-sort')).toBe('ascending')
+    expect(glyph()).toBe('arrow_downward')
 
     await fireEvent.click(sortButton)
     expect(firstColumnCells(container)).toEqual(['Socle', 'Brume', 'Atlas'])
     expect(th.getAttribute('aria-sort')).toBe('descending')
+    expect(glyph()).toBe('arrow_upward')
 
     await fireEvent.click(sortButton)
     expect(firstColumnCells(container)).toEqual(['Brume', 'Atlas', 'Socle'])
     expect(th.hasAttribute('aria-sort')).toBe(false)
+    expect(glyph()).toBe('swap_vert')
   })
 
   it('états vide et chargement', async () => {

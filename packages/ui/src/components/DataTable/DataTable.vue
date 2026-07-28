@@ -257,6 +257,15 @@ function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | undefin
   return sort.value.direction === 'asc' ? 'ascending' : 'descending'
 }
 
+/**
+ * Glyphe de tri : neutre hors colonne triée, puis flèche de la direction —
+ * convention tableur (trier de A à Z = flèche vers le bas).
+ */
+function sortIcon(column: DataTableColumn): string {
+  if (sort.value?.key !== column.key) return 'swap_vert'
+  return sort.value.direction === 'asc' ? 'arrow_downward' : 'arrow_upward'
+}
+
 // ── Recherche : reset de page et debounce serveur ───────────────────────────
 // JS justifié : un filtre qui change invalide la position courante (retour
 // page 1) ; en mode serveur, aucune primitive native ne débounce une saisie —
@@ -424,26 +433,9 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 @click="toggleSort(column.key)"
               >
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
-                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-                  <path
-                    class="ds-table-sort-up"
-                    d="m4 6.5 4-4 4 4"
-                    fill="none"
-                    stroke="currentcolor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    class="ds-table-sort-down"
-                    d="m4 9.5 4 4 4-4"
-                    fill="none"
-                    stroke="currentcolor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
+                <!-- décorative : sans `label`, Icon pose aria-hidden lui-même —
+                     l'état de tri est porté par l'aria-sort du th. -->
+                <Icon class="ds-table-sort-icon" :name="sortIcon(column)" />
               </button>
               <template v-else>
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
@@ -711,6 +703,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .ds-table-sort {
+    /* Contexte d'Icon : 20px, opsz 20 — idiome AccordionItem/DropdownPanel.
+       Sans lui l'icône retomberait sur 1em, soit la taille de texte du th. */
+    --ds-icon-size: var(--ds-icon-size-md);
+    --ds-icon-opsz: 20;
+
     display: inline-flex;
     align-items: center;
     gap: var(--ds-space-1);
@@ -732,18 +729,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     outline-offset: var(--ds-focus-ring-offset);
   }
 
-  /* flèches : atténuées par défaut, la direction active reprend la couleur */
-  .ds-table-sort svg {
+  /* atténuée tant que la colonne n'est pas celle qui porte le tri : le glyphe
+     neutre annonce l'affordance sans concurrencer la direction active */
+  .ds-table-sort-icon {
     opacity: 0.35;
   }
 
-  .ds-table-sort[data-direction] svg {
+  .ds-table-sort[data-direction] .ds-table-sort-icon {
     opacity: 1;
-  }
-
-  .ds-table-sort[data-direction='asc'] .ds-table-sort-down,
-  .ds-table-sort[data-direction='desc'] .ds-table-sort-up {
-    opacity: 0.25;
   }
 
   .ds-table-state {

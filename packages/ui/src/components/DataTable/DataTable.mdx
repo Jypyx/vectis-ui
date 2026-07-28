@@ -21,6 +21,11 @@ Une colonne `sortable` rend son en-tête en bouton : le clic cycle **croissant �
 aucun**, l'état vit dans `v-model:sort` (type exporté `DataTableSort`) et le `<th>` porte
 `aria-sort`. Le tri ne réinitialise pas la page courante : on trie ce que l'on regarde.
 
+L'indicateur suit ces trois états : un glyphe neutre, atténué, signale l'affordance sur les
+colonnes triables, remplacé sur la colonne active par la flèche de la direction — vers le bas en
+croissant, vers le haut en décroissant, selon la convention des tableurs. Purement décoratif :
+c'est `aria-sort` qui porte l'information pour les technologies d'assistance.
+
 <Canvas of={DataTableStories.Tri} />
 
 ## Header et recherche
