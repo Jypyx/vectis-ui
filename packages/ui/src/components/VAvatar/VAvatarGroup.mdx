@@ -1,0 +1,60 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VAvatarGroupStories from './VAvatarGroup.stories'
+
+<Meta of={VAvatarGroupStories} />
+
+# AvatarGroup
+
+Stacks `VAvatar`s into an overlapping pile: the **right-hand** disc paints **over** the left-hand
+one (a negative overlap + the DOM paint order, with no positioning JS), separated by a ring. A
+`max` prop limits the number of visible avatars and pushes a **"+X"** aggregate.
+
+<Canvas of={VAvatarGroupStories.Stacking} />
+
+<Controls of={VAvatarGroupStories.Stacking} />
+
+## Overflow (`max`)
+
+`max` bounds the number of avatars displayed; the rest are summarized by a static, neutral "+X"
+aggregate avatar. Counting and truncating the slot's children is the component's only JS
+(impossible in HTML/CSS), including unwrapping the fragments produced by `v-for`.
+
+<Canvas of={VAvatarGroupStories.Overflow} />
+
+## Inherited size
+
+`size` (and `compact`) set on the group **propagate** to every child through a `provide`/`inject`
+context — no need to repeat them on each `VAvatar`. An explicit `size` prop on a child takes the
+priority back.
+
+<Canvas of={VAvatarGroupStories.InheritedSize} />
+
+## Custom aggregate
+
+The `#overflow` slot (scope: `{ count }`) replaces the default aggregate — to make it clickable,
+attach a menu or a tooltip to it, and so on.
+
+<Canvas of={VAvatarGroupStories.CustomOverflow} />
+
+## With tooltips
+
+Each `VAvatar` (and the aggregate) can be wrapped in a `VTooltip`. The stacking stays correct
+**even when the trigger is wrapped**: the group targets the generic direct child and carries
+`v-control` itself, so the overlap distance (`--control-height`) stays resolved through the
+`<span>` the `VTooltip` inserts around its target.
+
+<Canvas of={VAvatarGroupStories.WithTooltips} />
+
+## Separation ring
+
+Each avatar carries a `box-shadow` ring (the `--vectis-control-size-avatar-ring` token, 2px) in
+the colour of the background behind (`--vectis-color-surface` by default, overridable through
+`ringColor`) — it detaches the overlapping discs. On a different background (a card, a banner),
+pass the appropriate colour to `ringColor`.
+
+## Accessibility
+
+- The group is a `role="group"` container.
+- Each avatar keeps its own semantics (image, `role="img"` + `aria-label`, or interactive).
+- The default aggregate displays "+X"; for an explicit phrasing ("3 other members"), use the
+  `#overflow` slot with a dedicated `aria-label`.

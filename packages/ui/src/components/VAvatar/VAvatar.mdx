@@ -1,0 +1,98 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VAvatarStories from './VAvatar.stories'
+
+<Meta of={VAvatarStories} />
+
+# Avatar
+
+A round representation of a person (or entity) with a **content cascade**: image → icon →
+initials (derived from the name) → fallback slot. The size follows the unified control scale
+(`xs`/`sm`/`md`/`lg`/`xl`, like `VButton`), the colour is derived automatically from the name or
+supplied by the consumer, and the avatar can become **clickable** (a link or a button) when
+needed.
+
+<Canvas of={VAvatarStories.Initials} />
+
+<Controls of={VAvatarStories.Initials} />
+
+## Sizes
+
+The shared `xs`/`sm`/`md`/`lg`/`xl` scale (24 → 56px) through the `v-control` class — the same
+one as `VButton`, `VInput`, and the rest. The disc is square (`--control-height`), and the
+initials follow the control's tokenized typography (`--control-font-size`).
+
+<Canvas of={VAvatarStories.Sizes} />
+
+## Compact
+
+`compact` takes 4px off the height at every size (type and icon unchanged) — consistent with the
+other controls.
+
+<Canvas of={VAvatarStories.Compact} />
+
+## Content: image, icon, initials
+
+The displayed source follows a strict priority:
+
+1. **`src`** — the image. If its loading fails (`error`), the avatar automatically falls through
+   to the next fallback.
+2. **`icon`** — an icon name **or** an explicit render (`{ src: '/logo.svg' }`, `{ component }`).
+   The icon occupies ~55% of the disc.
+3. **`name`** — the **initials** (the first two words, in capitals).
+4. The **default slot** — the escape hatch (e.g. `VAvatarGroup`'s "+X" aggregate), replacing the
+   initials.
+
+<Canvas of={VAvatarStories.WithImage} />
+<Canvas of={VAvatarStories.Icon} />
+
+> The icons the design system renders itself are embedded SVGs: no font is required. Your own
+> icon names, on the other hand, come from the font or the library you wire in (see the README).
+
+If the image is broken, the initials fallback takes over with no intervention:
+
+<Canvas of={VAvatarStories.BrokenImage} />
+
+## Automatic colour
+
+In the absence of an image or a custom colour, a **deterministic OKLCH hue** is derived from
+`name` (a pure JS hash, hence SSR-safe): each person gets a stable, distinct colour. Only the hue
+is set inline (`--avatar-hue`, a scalar); the CSS composes the background and the text with
+lightness/chroma fixed **per theme**, so the light/dark adaptation happens without depending on
+`contrast-color()`.
+
+<Canvas of={VAvatarStories.AutoColor} />
+
+> As with the custom colour of `VChip`/`VBadge`, the auto hue is a colour **computed outside the
+> tokens** — a deliberate exception to the "no raw value" rule, confined to the avatar case.
+
+## Custom colour
+
+The `color` prop (hexadecimal, a CSS name or `oklch()`) **replaces the auto hue**, with a fixed
+white text (the contrast of a light colour is the consumer's responsibility).
+
+<Canvas of={VAvatarStories.CustomColor} />
+
+## Clickable
+
+By priority: `href` → `<a>`, otherwise `clickable` → `<button>`, otherwise a static `<span>`. A
+`disabled` link becomes **inert** (href removed + `aria-disabled`, the `VButton` model). Only the
+interactive avatar exposes a hover state and a keyboard focus ring.
+
+<Canvas of={VAvatarStories.Clickable} />
+
+## VTooltip
+
+The avatar carries no dedicated tooltip API: wrap it in a `VTooltip` and pass it `triggerProps`
+through fallthrough. Since the tooltip opens on hover **and on focus**, the avatar must be
+focusable — make it `clickable` (a button).
+
+<Canvas of={VAvatarStories.WithTooltip} />
+
+## Accessibility
+
+- **Name fallback, non-interactive**: the avatar carries `role="img"` + `aria-label` (`alt` wins
+  over `name`). The visible initials/icon are `aria-hidden`.
+- **With neither name nor image**: decorative — no role wrongly announced.
+- **Image**: the alternative text is carried by the `<img>`'s `alt` (`alt` or `name`).
+- **Interactive** (`<a>`/`<button>`): the accessible name comes from `aria-label`; no superfluous
+  `role="img"`.
