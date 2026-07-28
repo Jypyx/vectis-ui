@@ -5,35 +5,46 @@ import * as TimePickerStories from './TimePicker.stories'
 
 # TimePicker
 
-Sélecteur d'heure inspiré de Material Design : un champ
-[Input](?path=/docs/composants-input--docs) en lecture seule qui ouvre un panneau
-flottant proposant deux modes permutables — le **cadran** (sélection au pointeur
-ou au clavier, heure puis minutes) et la **saisie clavier** (champs HH / MM).
-L'icône en pied de panneau bascule d'un mode à l'autre (`mode` fixe le mode
-initial, `lockMode` le fige).
+Sélecteur d'heure : un champ [Input](?path=/docs/composants-input--docs) et,
+optionnellement, un panneau flottant. Trois façons de remplir le champ, choisies
+par la prop `mode` — un **cadran**, une **saisie masquée** ou une **liste
+d'heures**.
 
 La coquille est celle du [DatePicker](?path=/docs/composants-datepicker--docs) :
 panneau `popover="manual"` ancré en **pur CSS** (`anchor-scope` sur la racine +
 `anchor-name` sur le contrôle → `position-anchor`), ouverture programmatique qui
 déplace le focus dans le panneau, fermeture par `focusout` racine + `Échap`.
 
-Le panneau travaille sur un **brouillon** : seul **OK** écrit le v-model ;
-**Annuler**, `Échap` et la sortie de focus abandonnent la sélection en cours —
-fidèle à Material, où l'on tâtonne au cadran avant de valider.
+Quel que soit le mode, le **v-model reste `'HH:mm'` en 24 h canonique** (`null`
+si vide) : choisir 7 h PM produit `'19:00'`.
 
 <Canvas of={TimePickerStories.Default} />
 <Controls of={TimePickerStories.Default} />
 
+## Trois modes de champ
+
+- **`readonly`** (défaut) : le champ est en lecture seule et le cadran est le
+  seul chemin — `showDial` y est donc forcé à `true`.
+- **`input`** : le champ se tape au clavier, derrière un masque « HH:MM ». Le
+  cadran devient optionnel (`showDial`).
+- **`list`** : un panneau `listbox` propose les heures par pas de `minuteStep` ;
+  le champ reste en lecture seule et `showDial` y est sans objet.
+
 ## Le cadran
 
-L'en-tête affiche l'heure du brouillon dans deux grandes cellules (heure /
-minutes) qui choisissent l'étape active. Sur le cadran, un clic ou un glisser
-positionne l'aiguille ; relâcher après le choix de l'heure passe automatiquement
-aux minutes. Les minutes se sélectionnent à la minute près (les chiffres ne sont
-que des repères de 5 minutes) ; `minuteStep` impose une granularité.
+Deux boutons affichent l'heure du brouillon (heure / minutes) et choisissent
+l'étape active : celui de l'étape en cours passe au ton accent. Sur le cadran, un
+clic ou un glisser positionne l'aiguille ; relâcher après le choix de l'heure
+passe automatiquement aux minutes. Les minutes se sélectionnent à la minute près
+(les chiffres ne sont que des repères de 5 minutes) ; `minuteStep` impose une
+granularité.
 
-En 24 h, le cadran porte un **double anneau** : 12 et 1–11 à l'extérieur,
-00 et 13–23 à l'intérieur (disposition Material/Android).
+Le panneau travaille sur un **brouillon** : seul **OK** écrit le v-model ;
+**Annuler**, `Échap` et la sortie de focus abandonnent la sélection en cours — on
+tâtonne au cadran avant de valider.
+
+En 24 h, le cadran porte un **double anneau** : 12 et 1–11 à l'extérieur, 00 et
+13–23 à l'intérieur.
 
 Les chiffres et l'aiguille sont positionnés en **CSS pur** — trigonométrie
 `sin()`/`cos()` (CSS Values 4, largement sous le plancher navigateur du DS) sur
@@ -44,34 +55,68 @@ pointeur → valeur et au clavier.
 <Canvas of={TimePickerStories.AnneauInterieur} />
 <Canvas of={TimePickerStories.PasDeCinqMinutes} />
 
-## Saisie clavier
+## Saisie masquée
 
-Le mode saisie remplace le cadran par deux champs HH / MM : saisie numérique
-clampée au blur, avance automatique après deux chiffres, flèches haut/bas pour
-incrémenter avec rebouclage, `Entrée` pour valider directement.
+L'utilisateur ne tape que **des chiffres** : le deux-points est posé dès que
+l'heure est complète. Contrairement au masque du DatePicker, dont l'ordre des
+champs et le séparateur sont dérivés de la locale, celui-ci est **universel** —
+`Intl` ne fait varier que le cycle horaire, jamais le deux-points.
 
-<Canvas of={TimePickerStories.ModeSaisie} />
-<Canvas of={TimePickerStories.SaisieVerrouillee} />
+Règles de saisie :
 
-## Format 12 h / 24 h et locale
+- taper un séparateur est toléré et complète l'heure par un zéro de tête
+  (« 9:30 » donne le même résultat que « 0930 »),
+- le `Retour arrière` sur le deux-points efface le chiffre qui le précède,
+- une saisie incomplète ou impossible (« 25:00 ») **revient silencieusement** à
+  la valeur courante à la sortie du champ ; vider le champ pose la valeur à
+  `null`,
+- `Entrée` valide et ferme, et ne soumet donc pas le formulaire environnant.
+
+`showDial` rétablit l'icône de fin de champ et le cadran : le panneau s'ouvre
+alors au focus **sans prendre le focus**, la frappe continue dans le champ, et la
+`flèche bas` reste le chemin explicite vers le cadran.
+
+<Canvas of={TimePickerStories.SaisieMasquee} />
+<Canvas of={TimePickerStories.SaisieAvecCadran} />
+
+## Liste d'heures
+
+Le mode `list` énumère la journée par pas de `minuteStep` (15 ou 30 minutes sont
+les valeurs attendues ; un pas plus fin est signalé en développement — au pas de
+1 minute la liste ferait 1440 rangées). À l'ouverture, la valeur courante — ou la
+plus proche — a le focus et la liste est défilée dessus.
+
+Choisir une heure **commite immédiatement et ferme** : un choix dans une liste
+est un geste unique, il n'y a donc ni brouillon ni bouton OK ici.
+
+<Canvas of={TimePickerStories.ListeDHeures} />
+<Canvas of={TimePickerStories.ListeClavier} />
+
+## Format 12 h / 24 h et AM/PM
 
 Le cycle horaire est **dérivé de la locale** (`hourCycle` d'`Intl`) et
-surchargeable par la prop `format`. En 12 h, un sélecteur AM/PM apparaît dans
-l'en-tête et le cadran repasse à un anneau unique.
+surchargeable par la prop `format`. En 12 h, un sélecteur AM/PM apparaît **à côté
+du champ**, hors du panneau : il sert donc les trois modes et écrit directement
+le v-model, sans qu'il faille ouvrir ni valider quoi que ce soit. Le cadran, lui,
+repasse à un anneau unique.
 
-Quel que soit l'affichage, le **v-model reste `'HH:mm'` en 24 h canonique**
-(`null` si vide) : sélectionner 7 h PM produit `'19:00'`. Le champ, lui, affiche
-la valeur formatée par `Intl` selon la locale.
+Tant qu'aucune heure n'est posée, le méridien choisi est simplement **mémorisé**
+et s'appliquera à la première heure saisie ou choisie. En mode `list`, les
+libellés des rangées portent déjà « AM »/« PM » : le sélecteur n'y sert plus qu'à
+basculer d'un coup la valeur retenue.
+
+Le champ affiche la valeur formatée par `Intl` selon la locale.
 
 <Canvas of={TimePickerStories.DouzeHeures} />
+<Canvas of={TimePickerStories.MeridienAligne} />
 
 ## États
 
-Le champ suit l'échelle des composants de saisie — `sm` (32 px), `md` (40 px, défaut) et
-`lg` (48 px), combinables avec `compact` (-4 px) ; le panneau garde ses dimensions —, est
-effaçable
-(`clearable` : la croix remplace l'icône horloge quand une valeur est posée) et
-supporte `disabled`. Annuler restaure toujours la dernière valeur commitée.
+Le champ suit l'échelle des composants de saisie — `sm` (32 px), `md` (40 px,
+défaut) et `lg` (48 px), combinables avec `compact` (-4 px) ; le panneau garde
+ses dimensions —, est effaçable (`clearable` : la croix remplace l'icône de fin
+quand une valeur est posée, y compris pendant une saisie en cours) et supporte
+`disabled`. Annuler restaure toujours la dernière valeur commitée.
 
 <Canvas of={TimePickerStories.Annulation} />
 <Canvas of={TimePickerStories.Tailles} />
@@ -79,18 +124,23 @@ supporte `disabled`. Annuler restaure toujours la dernière valeur commitée.
 
 ## Accessibilité
 
-- Le champ porte `aria-haspopup="dialog"`, `aria-expanded` et `aria-controls` ;
-  le panneau est un `role="dialog"` nommé.
-- **Ouverture** au clic, à l'`Entrée` ou à la `flèche bas` depuis le champ ; le
-  focus se déplace sur la cellule heure (cadran) ou le champ HH (saisie).
+- Quand un panneau existe, le champ porte `aria-haspopup` (`dialog` pour le
+  cadran, `listbox` pour la liste), `aria-expanded` et `aria-controls`. Un champ
+  de saisie sans `showDial` n'annonce aucun popup.
+- **Ouverture** au clic, à l'`Entrée` ou à la `flèche bas` depuis le champ. En
+  `readonly` et en `list`, le focus se déplace aussitôt dans le panneau ; en
+  saisie avec `showDial`, le panneau s'ouvre **sans prendre le focus**.
 - Le cadran est un **`role="slider"` unique** (un seul arrêt de tabulation) :
   flèches pour ±1 heure ou ±`minuteStep` minutes, `PageUp`/`PageDown` pour ±5
   minutes, `Home`/`End` pour les bornes, `Entrée` pour arrêter l'étape. Les
   chiffres du cadran sont purement décoratifs (`aria-hidden`) ; la valeur est
   annoncée par `aria-valuetext` et le changement d'étape par une live region.
-- **Fermeture** par `Échap` ou Annuler (le focus revient au champ, sans
-  commit), ou par OK (commit).
-- Le cadran n'est **pas miroité en RTL** : une horloge est un objet universel,
-  le sens horaire est invariant (Material exclut les horloges du mirroring) ;
-  le groupe HH:MM force de même l'ordre visuel heure–minutes. Les transitions
-  respectent `prefers-reduced-motion`.
+- La liste est une `listbox` dont chaque rangée est une `option` sélectionnable :
+  flèches et `Home`/`End` déplacent le focus, `Entrée` ou `Espace` choisissent.
+- **Fermeture** par `Échap` ou Annuler (le focus revient au champ, sans commit),
+  par OK, ou — en mode `list` — par le choix d'une heure.
+- Un placeholder n'étant pas une description accessible, décrivez le format
+  attendu via `hint` (lié au champ par `aria-describedby`).
+- Le cadran n'est **pas miroité en RTL** : une horloge est un objet universel, le
+  sens horaire est invariant ; le groupe HH:MM force de même l'ordre visuel
+  heure–minutes. Les transitions respectent `prefers-reduced-motion`.

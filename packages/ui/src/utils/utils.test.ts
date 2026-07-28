@@ -4,7 +4,7 @@ import { toggleValue } from './array'
 import { px } from './css'
 import { resolveMatcher } from './matcher'
 import { clamp } from './number'
-import { normalizeText, pad2 } from './text'
+import { digitsOf, normalizeText, pad2 } from './text'
 
 describe('clamp', () => {
   it('borne aux deux extrémités et laisse passer l’intervalle', () => {
@@ -44,6 +44,15 @@ describe('pad2', () => {
     expect(pad2(7)).toBe('07')
     expect(pad2(23)).toBe('23')
     expect(pad2(120)).toBe('120')
+  })
+})
+
+describe('digitsOf', () => {
+  it('ne garde que les chiffres (les masques posent leurs séparateurs)', () => {
+    expect(digitsOf('10/06/2026')).toBe('10062026')
+    expect(digitsOf('09:30')).toBe('0930')
+    expect(digitsOf('')).toBe('')
+    expect(digitsOf('abc')).toBe('')
   })
 })
 

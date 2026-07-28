@@ -12,7 +12,7 @@
  * c'est donc la seule façon de la couvrir en vitest.
  */
 import { clamp } from './number'
-import { pad2 } from './text'
+import { digitsOf, pad2 } from './text'
 
 export type HourFormat = '12h' | '24h'
 export type Meridiem = 'AM' | 'PM'
@@ -136,4 +136,103 @@ export function hour24ToDial(hour: number): { index: number; ring: 'outer' | 'in
   if (hour === 12) return { index: 0, ring: 'outer' }
   if (hour > 12) return { index: hour - 12, ring: 'inner' }
   return { index: hour, ring: 'outer' }
+}
+
+/* ── Liste d'heures (TimePicker `mode="list"`) ──────────────────────────── */
+
+export interface TimeOption {
+  /** Valeur canonique `'HH:mm'` 24 h — celle du v-model. */
+  value: string
+  /** Libellé localisé (« 07:30 », « 7:30 AM »). */
+  label: string
+}
+
+/** `'HH:mm'` → minutes depuis minuit, `null` si invalide (index d'une liste). */
+export function minutesOf(time: string | null | undefined): number | null {
+  const parts = parseTime(time)
+  return parts ? parts.hour * 60 + parts.minute : null
+}
+
+/**
+ * Les heures d'une journée par pas de `step` minutes, de `00:00` à la dernière
+ * avant minuit. PURE : `formatDisplay` passe par un instant de référence UTC.
+ * Aucune borne min/max — le TimePicker n'en a pas, ne pas en inventer ici.
+ * `step` invalide (≤ 0, non entier, > 60) → repli 60 : la liste doit rester
+ * finie même si le garde-fou de développement du composant a été ignoré.
+ */
+export function timeList(step: number, locale: string, format: HourFormat): TimeOption[] {
+  const safe = Number.isInteger(step) && step >= 1 && step <= 60 ? step : 60
+  const out: TimeOption[] = []
+  for (let m = 0; m < 24 * 60; m += safe) {
+    const value = formatTime(Math.floor(m / 60), m % 60)
+    out.push({ value, label: formatDisplay(value, locale, format) })
+  }
+  return out
+}
+
+/* ── Masque de saisie `HH:MM` (TimePicker `mode="input"`) ───────────────── */
+
+/**
+ * Le séparateur du masque est UNIVERSEL, contrairement à celui du DatePicker :
+ * une heure se lit « HH:MM » dans toutes les locales — `Intl` n'y fait varier
+ * que le cycle horaire, jamais le deux-points.
+ */
+export const TIME_SEPARATOR = ':'
+
+/** Gabarit du placeholder du champ de saisie. */
+export const TIME_MASK_PLACEHOLDER = 'hh:mm'
+
+/**
+ * Suite de chiffres → texte masqué. Le `:` est posé DÈS que l'heure est
+ * complète (« 09 » → « 09: »), comme le séparateur du masque de date.
+ */
+export function formatTimeMask(digits: string): string {
+  const all = digitsOf(digits).slice(0, 4)
+  return all.length >= 2 ? `${all.slice(0, 2)}${TIME_SEPARATOR}${all.slice(2)}` : all
+}
+
+/**
+ * Position de caret « juste après le n-ième chiffre » dans « HH:MM ». Forme
+ * CLOSE — le séparateur est toujours en 3e position, d'où l'absence d'un
+ * équivalent du `caretAfterDigits` du masque de date, qui doit balayer le texte
+ * parce que l'ordre et les longueurs de ses champs varient avec la locale.
+ * `skipSeparator` = insertion : le curseur entre dans les minutes ; à la
+ * suppression on reste devant le `:`, sinon la touche ne progresse jamais.
+ */
+export function timeCaret(n: number, skipSeparator = false): number {
+  if (n < 2) return n
+  if (n === 2) return skipSeparator ? 3 : 2
+  return Math.min(n + 1, 5)
+}
+
+/**
+ * `'HH:mm'` 24 h → texte masqué DU FORMAT AFFICHÉ. En 12 h l'heure est ramenée
+ * à 1–12 : le méridien est porté par le Toggle à côté du champ, jamais par le
+ * masque.
+ */
+export function timeToMask(time: string | null | undefined, format: HourFormat): string {
+  const parts = parseTime(time)
+  if (!parts) return ''
+  const hour = format === '12h' ? to12h(parts.hour).hour : parts.hour
+  return formatTimeMask(pad2(hour) + pad2(parts.minute))
+}
+
+/**
+ * Texte masqué → `'HH:mm'` 24 h canonique, ou `null` si la saisie est
+ * incomplète, surnuméraire ou impossible. En 12 h, `meridiem` vient du Toggle :
+ * c'est le SEUL endroit où le texte tapé et le méridien se rejoignent.
+ */
+export function parseTimeMask(
+  text: string,
+  format: HourFormat,
+  meridiem: Meridiem = 'AM',
+): string | null {
+  const digits = digitsOf(text)
+  if (digits.length !== 4) return null
+  const hour = Number(digits.slice(0, 2))
+  const minute = Number(digits.slice(2))
+  if (minute > 59) return null
+  if (format === '12h')
+    return hour >= 1 && hour <= 12 ? formatTime(to24h(hour, meridiem), minute) : null
+  return hour <= 23 ? formatTime(hour, minute) : null
 }

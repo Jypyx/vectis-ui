@@ -8,11 +8,17 @@ import {
   distanceFraction,
   formatDisplay,
   formatTime,
+  formatTimeMask,
   hour24ToDial,
   hourCycleFor,
   isValidTime,
+  minutesOf,
   parseTime,
+  parseTimeMask,
   snapMinute,
+  timeCaret,
+  timeList,
+  timeToMask,
   to12h,
   to24h,
 } from './time'
@@ -155,5 +161,86 @@ describe('dialIndexToHour24 / hour24ToDial', () => {
       const { index, ring } = hour24ToDial(h)
       expect(dialIndexToHour24(index, ring)).toBe(h)
     }
+  })
+})
+
+describe('minutesOf', () => {
+  it('convertit une heure valide en minutes depuis minuit', () => {
+    expect(minutesOf('00:00')).toBe(0)
+    expect(minutesOf('09:15')).toBe(555)
+    expect(minutesOf('23:59')).toBe(1439)
+  })
+
+  it('rend null sur une heure absente ou invalide', () => {
+    expect(minutesOf(null)).toBeNull()
+    expect(minutesOf('25:00')).toBeNull()
+  })
+})
+
+describe('timeList', () => {
+  it('couvre la journée entière au pas demandé', () => {
+    const half = timeList(30, 'fr-FR', '24h')
+    expect(half).toHaveLength(48)
+    expect(half[0]?.value).toBe('00:00')
+    expect(half.at(-1)?.value).toBe('23:30')
+    expect(timeList(15, 'fr-FR', '24h')).toHaveLength(96)
+  })
+
+  it('localise les libellés selon le format', () => {
+    // Même formatage que le champ (`formatDisplay`) : ce qu'on choisit dans la
+    // liste est exactement ce qui s'affichera — d'où « 0:30 » et non « 00:30 ».
+    expect(timeList(30, 'fr-FR', '24h')[1]?.label).toBe('0:30')
+    expect(timeList(30, 'fr-FR', '24h')[28]?.label).toBe('14:00')
+    expect(timeList(60, 'en-US', '12h')[9]?.label).toMatch(/AM/)
+  })
+
+  it('replie un pas invalide sur 60 (la liste doit rester finie)', () => {
+    expect(timeList(0, 'fr-FR', '24h')).toHaveLength(24)
+    expect(timeList(7.5, 'fr-FR', '24h')).toHaveLength(24)
+    expect(timeList(90, 'fr-FR', '24h')).toHaveLength(24)
+  })
+})
+
+describe('masque HH:MM', () => {
+  it('pose le deux-points dès que l’heure est complète', () => {
+    expect(formatTimeMask('')).toBe('')
+    expect(formatTimeMask('0')).toBe('0')
+    expect(formatTimeMask('09')).toBe('09:')
+    expect(formatTimeMask('093')).toBe('09:3')
+    expect(formatTimeMask('0930')).toBe('09:30')
+    expect(formatTimeMask('093012')).toBe('09:30') // chiffres surnuméraires ignorés
+  })
+
+  it('place le caret en forme close, en franchissant le séparateur à la frappe', () => {
+    expect(timeCaret(0)).toBe(0)
+    expect(timeCaret(1)).toBe(1)
+    expect(timeCaret(2)).toBe(2) // suppression : on reste devant le « : »
+    expect(timeCaret(2, true)).toBe(3) // insertion : on entre dans les minutes
+    expect(timeCaret(3)).toBe(4)
+    expect(timeCaret(4)).toBe(5)
+  })
+
+  it('formate une valeur canonique selon le format affiché', () => {
+    expect(timeToMask('19:05', '24h')).toBe('19:05')
+    expect(timeToMask('19:05', '12h')).toBe('07:05') // le méridien vit hors du masque
+    expect(timeToMask('00:30', '12h')).toBe('12:30')
+    expect(timeToMask(null, '24h')).toBe('')
+  })
+
+  it('parse en 24 h et rejette l’impossible', () => {
+    expect(parseTimeMask('09:30', '24h')).toBe('09:30')
+    expect(parseTimeMask('0930', '24h')).toBe('09:30')
+    expect(parseTimeMask('24:00', '24h')).toBeNull()
+    expect(parseTimeMask('09:60', '24h')).toBeNull()
+    expect(parseTimeMask('09:3', '24h')).toBeNull() // incomplet
+    expect(parseTimeMask('', '24h')).toBeNull()
+  })
+
+  it('parse en 12 h avec le méridien du Toggle', () => {
+    expect(parseTimeMask('07:00', '12h', 'PM')).toBe('19:00')
+    expect(parseTimeMask('12:00', '12h', 'AM')).toBe('00:00')
+    expect(parseTimeMask('12:00', '12h', 'PM')).toBe('12:00')
+    expect(parseTimeMask('00:30', '12h', 'AM')).toBeNull() // 0 hors de 1–12
+    expect(parseTimeMask('13:00', '12h', 'PM')).toBeNull()
   })
 })
