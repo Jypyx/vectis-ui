@@ -1,13 +1,13 @@
 ﻿<script setup lang="ts">
 import { ref, useId } from 'vue'
 
-import { usePopover } from '../../composables/usePopover'
+import Popover from '../Popover/Popover.vue'
 
 import { useTimer } from '../../composables/useTimer'
 
 /**
- * Tooltip sur Popover API (`popover="manual"` : pas de light dismiss, c'est
- * le composant qui pilote). JS justifié : aucune primitive HTML stable ne
+ * Tooltip sur `Popover` (`mode="manual"` : pas de light dismiss, c'est le
+ * composant qui pilote). JS justifié : aucune primitive HTML stable ne
  * couvre « montrer au survol/focus avec délai » (`interestfor` est encore
  * expérimental) — le JS gère le délai, pointer/focus et Échap (WCAG 1.4.13).
  *
@@ -15,6 +15,10 @@ import { useTimer } from '../../composables/useTimer'
  * confiné à son sous-arbre par `anchor-scope`. Sans ce confinement, un
  * panneau affiché (top layer, donc « après » tout le document pour la
  * résolution d'ancre) se rattacherait au DERNIER wrapper nommé de la page.
+ * Le wrapper reste ici (il porte les gestionnaires pointer/focus) : le
+ * `#trigger` de Popover n'est pas utilisé, un déclencheur d'infobulle n'étant
+ * pas un invocateur `popovertarget` — il serait basculé au clic — mais un
+ * élément DÉCRIT par le panneau.
  */
 type Placement =
   'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'right'
@@ -46,22 +50,27 @@ defineSlots<{
   content?(): unknown
 }>()
 
-const panelEl = ref<HTMLElement | null>(null)
 const tooltipId = useId()
-// État d'ouverture et gardes d'idempotence : cf. usePopover. `shown` y est
-// alimentée par les événements du panneau, jamais posée à la main.
-const { syncShown, show: showPanel, hide: hidePanel } = usePopover(panelEl)
+/*
+ * Popover est piloté impérativement (et non par `v-model:open`) : le focus
+ * clavier doit ouvrir SYNCHRONEMENT — un modèle passerait par le watch de
+ * Popover, donc par un tick. Le tooltip ne publie aucun état d'ouverture, il
+ * n'a rien à faire d'un modèle. Les gardes d'idempotence sont dans usePopover,
+ * en amont.
+ */
+const popoverRef = ref<InstanceType<typeof Popover> | null>(null)
 
 // Délai d'apparition (cf. useTimer : réarmement et annulation au démontage).
 const timer = useTimer()
 
 function show(immediate = false) {
-  timer.start(showPanel, immediate ? 0 : props.delay)
+  // délai 0 = exécution synchrone (convention useTimer)
+  timer.start(() => popoverRef.value?.show(), immediate ? 0 : props.delay)
 }
 
 function hide() {
   timer.cancel()
-  hidePanel()
+  popoverRef.value?.hide()
 }
 
 function onKeydown(event: KeyboardEvent) {
@@ -79,18 +88,18 @@ function onKeydown(event: KeyboardEvent) {
     @keydown="onKeydown"
   >
     <slot :trigger-props="{ 'aria-describedby': tooltipId }" />
-    <div
+    <Popover
       :id="tooltipId"
-      ref="panelEl"
-      popover="manual"
+      ref="popoverRef"
+      mode="manual"
+      anchor="--ds-tooltip-anchor"
+      :placement="placement"
+      :surface="false"
       role="tooltip"
-      class="ds-overlay ds-tooltip-panel ds-floating"
-      :data-placement="placement"
-      @beforetoggle="syncShown"
-      @toggle="syncShown"
+      class="ds-tooltip-panel"
     >
       <slot name="content">{{ text }}</slot>
-    </div>
+    </Popover>
   </span>
 </template>
 
@@ -104,8 +113,8 @@ function onKeydown(event: KeyboardEvent) {
     anchor-scope: --ds-tooltip-anchor;
   }
 
+  /* `position-anchor` vient de Popover (prop `anchor`) */
   .ds-tooltip-panel {
-    position-anchor: --ds-tooltip-anchor;
     width: max-content;
     max-width: min(18rem, calc(100vw - var(--ds-space-8)));
     padding: var(--ds-space-1) var(--ds-space-2);

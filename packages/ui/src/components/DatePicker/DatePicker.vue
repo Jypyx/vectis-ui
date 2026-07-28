@@ -11,6 +11,7 @@ import type {
 } from '../Calendar/Calendar.vue'
 import { formatDisplay, formatDisplayRange, isValidISO } from '../../utils/date'
 import Input from '../Input/Input.vue'
+import Popover from '../Popover/Popover.vue'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
@@ -18,10 +19,10 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 
 /**
  * Sélecteur de date : champ `Input` (lecture seule) + `Calendar` dans un
- * panneau `popover="manual"` ancré en pur CSS. On ne passe pas par
- * `popovertarget` (invalide sur un `<input>` texte) : l'ouverture est
- * programmatique, ce qui permet de déplacer le focus DOM dans la grille du
- * calendrier. Fermeture par `@focusout` sur la racine + Échap.
+ * `Popover` en `mode="manual"`, ancré en pur CSS. On ne passe pas par le
+ * `#trigger` de Popover (`popovertarget` est invalide sur un `<input>` texte) :
+ * l'ouverture est programmatique, ce qui permet de déplacer le focus DOM dans
+ * la grille du calendrier. Fermeture par `@focusout` sur la racine + Échap.
  */
 type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
 
@@ -98,21 +99,20 @@ defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const rootEl = ref<HTMLElement | null>(null)
-const panelEl = ref<HTMLElement | null>(null)
+const panelRef = ref<InstanceType<typeof Popover> | null>(null)
 const inputRef = ref<InstanceType<typeof Input> | null>(null)
 const calendarRef = ref<InstanceType<typeof Calendar> | null>(null)
 const panelId = useId()
 
 // Coquille champ + panneau `manual` partagée avec le TimePicker : ouverture,
 // fermeture, sortie de focus, clic sur le contrôle, Échap/ArrowDown/Entrée.
-const { open, syncShown, openPanel, closePanel, onControlClick, onFocusout, onKeydown } =
-  useFieldPanel({
-    rootEl,
-    panelEl,
-    fieldEl: inputRef,
-    disabled: () => props.disabled,
-    focusInPanel: () => calendarRef.value?.focus(),
-  })
+const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown } = useFieldPanel({
+  rootEl,
+  panelRef,
+  fieldEl: inputRef,
+  disabled: () => props.disabled,
+  focusInPanel: () => calendarRef.value?.focus(),
+})
 
 const hasValue = computed(() => {
   if (props.mode === 'multiple') return Array.isArray(model.value) && model.value.length > 0
@@ -198,16 +198,17 @@ const close = () => closePanel(true)
       />
     </div>
 
-    <div
+    <Popover
       :id="panelId"
-      ref="panelEl"
-      popover="manual"
+      ref="panelRef"
+      v-model:open="open"
+      mode="manual"
+      anchor="--ds-datepicker-anchor"
+      :placement="placement"
+      :surface="false"
       role="dialog"
       :aria-label="label ?? 'Choisir une date'"
-      class="ds-overlay ds-datepicker-panel ds-floating"
-      :data-placement="placement"
-      @beforetoggle="syncShown"
-      @toggle="syncShown"
+      class="ds-datepicker-panel"
     >
       <Calendar
         ref="calendarRef"
@@ -230,7 +231,7 @@ const close = () => closePanel(true)
           <slot name="footer" :close="close" />
         </template>
       </Calendar>
-    </div>
+    </Popover>
   </div>
 </template>
 
@@ -250,11 +251,12 @@ const close = () => closePanel(true)
     cursor: pointer;
   }
 
+  /* `position-anchor` vient de Popover (prop `anchor`), rendu sans surface */
   .ds-datepicker-panel {
-    position-anchor: --ds-datepicker-anchor;
-    /* le Calendar porte son propre fond ; le panneau épouse ses coins et ajoute
-       l'ombre d'élévation (box-shadow, pas filter : drop-shadow() n'accepte
-       qu'une seule ombre alors que --ds-shadow-* en empile deux). */
+    /* le Calendar porte son propre fond : on neutralise les styles UA de
+       [popover] (bordure, padding, fond), et le panneau épouse ses coins en
+       ajoutant l'ombre d'élévation (box-shadow, pas filter : drop-shadow()
+       n'accepte qu'une seule ombre alors que --ds-shadow-* en empile deux). */
     width: max-content;
     padding: 0;
     border: none;

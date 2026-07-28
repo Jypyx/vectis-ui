@@ -8,8 +8,13 @@
  * navigateurs modernes (Chrome/Edge 125+, Safari 26+ ; Firefox pas encore
  * stable — choix assumé, voir CLAUDE.md/README).
  *
- * L'ancre est soit implicite (invocateur `popovertarget` → Menu),
- * soit un `anchor-name` statique posé par le composant (Tooltip).
+ * Trois cas d'ancrage, tous couverts par la même table de placements :
+ * - implicite : l'invocateur `popovertarget` est l'ancre (Menu) ;
+ * - `anchor-name` statique posé par le composant sur son propre wrapper
+ *   (Tooltip) ou par `Popover` sur le sien quand un `#trigger` est fourni ;
+ * - nom transmis à `Popover` par la prop `anchor`, le consommateur ayant déjà
+ *   une racine et un contrôle à ancrer (Listbox, DatePicker, TimePicker).
+ *
  * `position-try-fallbacks` retourne le panneau quand la place manque.
  */
 @layer ds.components {

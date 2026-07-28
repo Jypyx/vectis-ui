@@ -1,16 +1,22 @@
+import { ref } from 'vue'
 import type { Ref } from 'vue'
 
 import { useFocusoutDismiss } from './useFocusoutDismiss'
-import { usePopover } from './usePopover'
 
 /** Contrat minimal du champ interne : DatePicker/TimePicker exposent un `Input`. */
 interface FocusableField {
   focus: () => void
 }
 
+/** Contrat minimal du panneau : DatePicker/TimePicker rendent un `Popover`. */
+interface PanelControl {
+  show: () => void
+  hide: () => void
+}
+
 export interface UseFieldPanelOptions {
   rootEl: Ref<HTMLElement | null>
-  panelEl: Ref<HTMLElement | null>
+  panelRef: Ref<PanelControl | null>
   fieldEl: Ref<FocusableField | null>
   disabled: () => boolean
   /** Place le focus DANS le panneau ouvert (appelé sous `requestAnimationFrame`). */
@@ -22,23 +28,27 @@ export interface UseFieldPanelOptions {
 }
 
 /**
- * Coquille « champ en lecture seule + panneau flottant `popover="manual"` »,
+ * Coquille « champ en lecture seule + panneau flottant `mode="manual"` »,
  * partagée par DatePicker et TimePicker. Aucun des deux n'en est propriétaire.
  *
  * Un popover `manual` ne fait RIEN tout seul : ni light dismiss, ni déplacement
  * du focus, ni retour du focus au déclencheur. Tout ce qui suit est ce minimum,
  * et rien de plus — les comportements propres à chaque composant passent par
  * `onOpen`/`onClose`/`focusInPanel`.
+ *
+ * Le panneau est ÉCRIT impérativement (`show`/`hide` de Popover) et LU par
+ * modèle : `open` est à brancher en `v-model:open` sur le Popover, qui l'alimente
+ * depuis les événements du DOM. L'écriture doit rester synchrone — le `rAF` qui
+ * déplace le focus suppose que le panneau est déjà ouvert au moment où il est
+ * armé ; passer par le modèle intercalerait un tick.
  */
 export function useFieldPanel(options: UseFieldPanelOptions) {
-  // État d'ouverture alimenté par les événements du popover (cf. usePopover),
-  // jamais écrit à la main : les gardes de `show`/`hide` évitent l'InvalidStateError.
-  const { shown: open, syncShown, show, hide } = usePopover(options.panelEl)
+  const open = ref(false)
 
   function openPanel() {
     if (options.disabled() || open.value) return
     options.onOpen?.()
-    show()
+    options.panelRef.value?.show()
     // Le focus DOM doit être déplacé à la main : le natif ne le fait pas pour un
     // popover `manual`. rAF : le panneau n'est pas encore peint au retour de show().
     requestAnimationFrame(() => options.focusInPanel())
@@ -46,7 +56,7 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
 
   function closePanel(refocus = false) {
     if (!open.value) return
-    hide()
+    options.panelRef.value?.hide()
     options.onClose?.()
     if (refocus) options.fieldEl.value?.focus()
   }
@@ -82,5 +92,5 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     }
   }
 
-  return { open, syncShown, openPanel, closePanel, onControlClick, onFocusout, onKeydown }
+  return { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown }
 }

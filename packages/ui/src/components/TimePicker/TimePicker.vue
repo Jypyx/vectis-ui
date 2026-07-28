@@ -4,6 +4,7 @@ import { computed, ref, useId, watch } from 'vue'
 import Button from '../Button/Button.vue'
 import IconButton from '../IconButton/IconButton.vue'
 import Input from '../Input/Input.vue'
+import Popover from '../Popover/Popover.vue'
 import Toggle from '../Toggle/Toggle.vue'
 import type { ToggleModelValue } from '../Toggle/Toggle.vue'
 import ToggleItem from '../Toggle/ToggleItem.vue'
@@ -29,9 +30,9 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 /**
  * Sélecteur d'heure Material : champ `Input` (lecture seule) + panneau flottant
  * avec deux modes permutables — cadran (dial) et saisie clavier (input).
- * Composé des briques du DS ; coquille identique au DatePicker (`popover =
- * "manual"` ancré en pur CSS, ouverture programmatique pour déplacer le focus
- * dans le panneau, fermeture par `@focusout` racine + Échap).
+ * Composé des briques du DS ; coquille identique au DatePicker (`Popover` en
+ * `mode="manual"` ancré en pur CSS, ouverture programmatique pour déplacer le
+ * focus dans le panneau, fermeture par `@focusout` racine + Échap).
  *
  * Le panneau travaille sur un BROUILLON : seul OK écrit le v-model (`'HH:mm'`
  * 24 h canonique) ; Annuler, Échap et la sortie de focus abandonnent. Le
@@ -98,7 +99,7 @@ defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const rootEl = ref<HTMLElement | null>(null)
-const panelEl = ref<HTMLElement | null>(null)
+const panelRef = ref<InstanceType<typeof Popover> | null>(null)
 const inputRef = ref<InstanceType<typeof Input> | null>(null)
 const hourCellEl = ref<HTMLButtonElement | null>(null)
 const fieldHourEl = ref<HTMLInputElement | null>(null)
@@ -154,30 +155,29 @@ function focusPrimary() {
 // Coquille champ + panneau `manual` partagée avec le DatePicker. Le prologue
 // d'ouverture (brouillon, étape) et l'épilogue de fermeture (live region) sont
 // les seules parties propres au TimePicker.
-const { open, syncShown, openPanel, closePanel, onControlClick, onFocusout, onKeydown } =
-  useFieldPanel({
-    rootEl,
-    panelEl,
-    fieldEl: inputRef,
-    disabled: () => props.disabled,
-    focusInPanel: focusPrimary,
-    onOpen: () => {
-      // Brouillon : valeur commitée, sinon heure courante (handler → client only).
-      const parts = parseTime(model.value)
-      if (parts) {
-        draftHour.value = parts.hour
-        draftMinute.value = parts.minute
-      } else {
-        const now = new Date()
-        draftHour.value = now.getHours()
-        draftMinute.value = snapMinute(now.getMinutes(), props.minuteStep)
-      }
-      activeStep.value = 'hour'
-    },
-    onClose: () => {
-      liveMessage.value = ''
-    },
-  })
+const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown } = useFieldPanel({
+  rootEl,
+  panelRef,
+  fieldEl: inputRef,
+  disabled: () => props.disabled,
+  focusInPanel: focusPrimary,
+  onOpen: () => {
+    // Brouillon : valeur commitée, sinon heure courante (handler → client only).
+    const parts = parseTime(model.value)
+    if (parts) {
+      draftHour.value = parts.hour
+      draftMinute.value = parts.minute
+    } else {
+      const now = new Date()
+      draftHour.value = now.getHours()
+      draftMinute.value = snapMinute(now.getMinutes(), props.minuteStep)
+    }
+    activeStep.value = 'hour'
+  },
+  onClose: () => {
+    liveMessage.value = ''
+  },
+})
 
 /** OK : seul chemin qui écrit le v-model. */
 function confirm() {
@@ -331,16 +331,17 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
       />
     </div>
 
-    <div
+    <Popover
       :id="panelId"
-      ref="panelEl"
-      popover="manual"
+      ref="panelRef"
+      v-model:open="open"
+      mode="manual"
+      anchor="--ds-timepicker-anchor"
+      :placement="placement"
+      :surface="false"
       role="dialog"
       :aria-label="label ?? 'Choisir une heure'"
-      class="ds-overlay ds-timepicker-panel ds-floating"
-      :data-placement="placement"
-      @beforetoggle="syncShown"
-      @toggle="syncShown"
+      class="ds-timepicker-panel"
     >
       <div class="ds-timepicker-caption">
         {{ activeMode === 'dial' ? 'Sélectionner l’heure' : 'Saisir l’heure' }}
@@ -451,7 +452,7 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
         <Button variant="ghost" tone="neutral" @click="cancel">Annuler</Button>
         <Button @click="confirm">OK</Button>
       </div>
-    </div>
+    </Popover>
   </div>
 </template>
 
@@ -471,10 +472,10 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
     cursor: pointer;
   }
 
-  /* Le `display: flex` d'auteur écrase le `display: none` UA de [popover] :
+  /* `position-anchor` vient de Popover (prop `anchor`), rendu sans surface.
+     Le `display: flex` d'auteur écrase le `display: none` UA de [popover] :
      c'est le garde-fou `.ds-overlay:not(:popover-open)` qui referme. */
   .ds-timepicker-panel {
-    position-anchor: --ds-timepicker-anchor;
     display: flex;
     flex-direction: column;
     gap: var(--ds-space-5);

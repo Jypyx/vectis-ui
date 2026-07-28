@@ -18,11 +18,14 @@
  * le contexte Icon n'est PAS posé ici : cette feuille s'applique à chaque
  * panneau, un sous-menu écraserait donc la valeur héritée de sa racine.
  *
- * Ne PAS transformer ce partage en SFC `FloatingPanel.vue` commun : il faudrait
- * lui repasser en props le mode popover, le rôle ARIA et l'ancre, et republier
- * show/hide — soit un panneau paramétré par `role`. La granularité de partage
- * est le comportement (`composables/usePopover.ts`) et le chrome (ce fichier),
- * jamais le composant.
+ * Cette classe est posée par la prop `surface` de `Popover` (défaut true), qui
+ * porte la plomberie du popover — élément, état, ancrage, placement. La
+ * granularité de partage est donc : la plomberie (`Popover`), le chrome (ce
+ * fichier), le positionnement (`floating.css`) et les tailles
+ * (`control-size.css`). Ce qui reste PROSCRIT est un panneau paramétré par
+ * `role`, qui absorberait en plus le rôle ARIA, le clavier, le focus et la
+ * politique de fermeture — c'est précisément ce qui distingue un menu d'une
+ * liste ou d'un sélecteur de date, et cela vit chez chaque composant.
  */
 @layer ds.components {
   .ds-panel {

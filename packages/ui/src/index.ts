@@ -8,7 +8,7 @@
  * L'ordre des exports fixe l'ordre du CSS bundlé. La plupart des composants
  * sont rangés par cohérence (dépendance → dépendant) sans que leur position
  * soit contraignante : leurs surcharges sont qualifiées (`.ds-tab[data-size]`,
- * `.ds-table-toolbar .ds-input`…), donc indépendantes de l'ordre. Quatre
+ * `.ds-table-toolbar .ds-input`…), donc indépendantes de l'ordre. Cinq
  * contraintes sont réelles, parce qu'elles jouent à spécificité égale :
  * - IconButton après Button (surcharge padding et largeur) ;
  * - Pagination après ButtonGroup (ses pastilles surchargent largeur et padding
@@ -16,7 +16,11 @@
  * - Slider après Input (surcharge la largeur de `.ds-slider-field`) ;
  * - Typography en TÊTE, avant tout composant qui le rend en interne (Input,
  *   Textarea, Dialog, Accordion, DataTable) : leurs classes
- *   (`.ds-input-label`…) surchargent `.ds-typography`.
+ *   (`.ds-input-label`…) surchargent `.ds-typography` ;
+ * - Popover en TÊTE aussi, avant les panneaux qui le rendent en interne
+ *   (Tooltip, Combobox via Listbox, DatePicker, TimePicker) : leurs classes
+ *   (`.ds-tooltip-panel`…) sont posées sur le MÊME élément que
+ *   `.ds-popover-panel`, à spécificité égale (0,1,0).
  *
  * Listbox (brique interne du Combobox) et les composables ne sont pas exportés.
  */
@@ -25,6 +29,8 @@ import './styles/index.css'
 export { default as Icon } from './components/Icon/Icon.vue'
 export { default as Typography } from './components/Typography/Typography.vue'
 export type { TypographyTone, TypographyVariant } from './components/Typography/Typography.vue'
+export { default as Popover } from './components/Popover/Popover.vue'
+export type { PopoverPlacement, PopoverTriggerProps } from './components/Popover/Popover.vue'
 export { default as Button } from './components/Button/Button.vue'
 export { default as IconButton } from './components/IconButton/IconButton.vue'
 export { default as ButtonGroup } from './components/Button/ButtonGroup.vue'
