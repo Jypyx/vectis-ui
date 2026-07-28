@@ -25,6 +25,13 @@ export interface UseFieldPanelOptions {
   onOpen?: () => void
   /** Épilogue de fermeture (vidage d'une live region…). */
   onClose?: () => void
+  /**
+   * Le focus doit-il entrer DANS le panneau à l'ouverture ? Défaut : oui. Un
+   * champ de SAISIE (DatePicker `entry="input"`) ouvre son panneau sans déplacer
+   * le curseur : le clavier continue d'écrire dans le champ, et la flèche bas
+   * reste le seul chemin explicite vers le panneau.
+   */
+  focusOnOpen?: () => boolean
 }
 
 /**
@@ -45,13 +52,13 @@ export interface UseFieldPanelOptions {
 export function useFieldPanel(options: UseFieldPanelOptions) {
   const open = ref(false)
 
-  function openPanel() {
+  function openPanel(moveFocus = options.focusOnOpen?.() ?? true) {
     if (options.disabled() || open.value) return
     options.onOpen?.()
     options.panelRef.value?.show()
     // Le focus DOM doit être déplacé à la main : le natif ne le fait pas pour un
     // popover `manual`. rAF : le panneau n'est pas encore peint au retour de show().
-    requestAnimationFrame(() => options.focusInPanel())
+    if (moveFocus) requestAnimationFrame(() => options.focusInPanel())
   }
 
   function closePanel(refocus = false) {
@@ -108,7 +115,10 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
       !event.defaultPrevented
     ) {
       event.preventDefault()
-      openPanel()
+      // Ouverture au CLAVIER : le focus suit toujours, quel que soit
+      // `focusOnOpen` — sans quoi la flèche bas ouvrirait un panneau que rien
+      // n'atteindrait.
+      openPanel(true)
     }
   }
 

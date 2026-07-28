@@ -206,3 +206,210 @@ export function formatDisplayRange(
   const fmt = new Intl.DateTimeFormat(locale, options)
   return compareISO(start, end) === 0 ? fmt.format(a) : fmt.formatRange(a, b)
 }
+
+/* ── Masque de saisie numérique (DatePicker `entry="input"`) ────────────────
+ *
+ * Le champ de saisie n'affiche JAMAIS le `displayFormat` du DatePicker (« 10
+ * juin 2026 » ne se tape pas) mais un masque purement numérique : l'ordre des
+ * champs et le séparateur sont DÉRIVÉS de la locale, jamais codés en dur.
+ */
+
+export type DateMaskField = 'day' | 'month' | 'year'
+
+export interface DateMask {
+  /** Ordre d'affichage (fr `day,month,year` · en-US `month,day,year` · ja `year,month,day`). */
+  order: readonly DateMaskField[]
+  /** Séparateur unique, nettoyé de ses marques bidi et de ses espaces. */
+  separator: string
+  /** Longueurs alignées sur `order` : année 4, jour et mois 2. */
+  lengths: readonly number[]
+  /** Nombre total de chiffres du masque (8). */
+  size: number
+}
+
+const MASK_FALLBACK: DateMask = {
+  order: ['day', 'month', 'year'],
+  separator: '/',
+  lengths: [2, 2, 4],
+  size: 8,
+}
+
+/** 22 novembre 2021 : jour ≠ mois ≠ année → l'ordre des champs est déductible. */
+const REF_MASK_DATE = Date.UTC(2021, 10, 22)
+
+/** Marques directionnelles insérées par certaines locales (ar-EG : U+200F avant « / »). */
+const BIDI_MARKS = /[‎‏؜]/g
+
+/**
+ * Masque de saisie de la locale. `calendar` et `numberingSystem` sont FORCÉS :
+ * sans eux `fa-IR` renvoie une année persane (1400) et `ar-EG` des chiffres
+ * arabes-indiens — deux valeurs qu'un champ numérique ne saurait ni afficher ni
+ * relire. Repli jour/mois/année « / » si la locale est invalide (`RangeError`).
+ */
+export function dateMaskFor(locale: string): DateMask {
+  try {
+    const parts = new Intl.DateTimeFormat(locale, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'UTC',
+      calendar: 'gregory',
+      numberingSystem: 'latn',
+    }).formatToParts(REF_MASK_DATE)
+
+    const order = parts
+      .map((p) => p.type)
+      .filter((t): t is DateMaskField => t === 'day' || t === 'month' || t === 'year')
+
+    // Premier littéral situé APRÈS le premier champ : hu-HU/ko-KR suffixent le
+    // format d'un point (« 2021. 11. 22. ») qu'il ne faut pas prendre pour lui.
+    const firstField = parts.findIndex((p) => p.type !== 'literal')
+    const separator = parts
+      .slice(firstField)
+      .find((p) => p.type === 'literal')
+      ?.value.replace(BIDI_MARKS, '')
+      .trim()
+
+    if (order.length === 3 && separator) {
+      const lengths = order.map((f) => (f === 'year' ? 4 : 2))
+      return { order, separator, lengths, size: 8 }
+    }
+  } catch {
+    /* locale invalide → repli */
+  }
+  return MASK_FALLBACK
+}
+
+/** Chiffres d'un texte — le masque ne connaît que ça. */
+export const digitsOf = (text: string): string => text.replace(/\D/g, '')
+
+/**
+ * Suite de chiffres → texte masqué. Le séparateur est posé DÈS QUE le champ qui
+ * le précède est complet (« 22 » → « 22/ ») : il montre l'avancement de la
+ * frappe sans que l'utilisateur ait à le taper. Corollaire côté composant : un
+ * Retour arrière sur ce séparateur doit effacer le CHIFFRE qui le précède,
+ * sinon le masque le réécrit aussitôt et la touche paraît morte.
+ */
+export function formatDateMask(digits: string, mask: DateMask): string {
+  const all = digitsOf(digits).slice(0, mask.size)
+  let out = ''
+  let i = 0
+  for (let f = 0; f < mask.lengths.length; f++) {
+    const len = mask.lengths[f] as number
+    const chunk = all.slice(i, i + len)
+    if (!chunk) break
+    out += chunk
+    i += len
+    if (chunk.length < len) break // champ en cours de frappe
+    if (f < mask.lengths.length - 1) out += mask.separator
+  }
+  return out
+}
+
+/** ISO `YYYY-MM-DD` → texte masqué de la locale (« 10/06/2026 »). */
+export function isoToMask(iso: string, mask: DateMask): string {
+  if (!isValidISO(iso)) return ''
+  const [year, month, day] = iso.split('-') as [string, string, string]
+  const by: Record<DateMaskField, string> = { year, month, day }
+  return formatDateMask(mask.order.map((f) => by[f]).join(''), mask)
+}
+
+export interface ParseMaskOptions {
+  /**
+   * Siècle d'expansion d'une année à 2 chiffres (« 10/06/26 » → 2026 avec 2000),
+   * tolérée seulement si l'année est le DERNIER champ du masque. Absent = saisie
+   * refusée tant que l'année n'a pas ses 4 chiffres : c'est le mode utilisé
+   * pendant la frappe, pour ne pas commiter « 26 » comme année.
+   */
+  yearPivot?: number
+}
+
+/**
+ * Texte masqué → ISO, ou `null` si la saisie est incomplète, surnuméraire ou
+ * impossible (31/02 : `isValidISO` fait l'aller-retour `parseISO`/`formatISO`).
+ * Les bornes `min`/`max` et les dates désactivées restent l'affaire du
+ * composant : ce helper ne connaît pas les props.
+ */
+export function parseDateMask(
+  text: string,
+  mask: DateMask,
+  options: ParseMaskOptions = {},
+): string | null {
+  const digits = digitsOf(text)
+  const by: Partial<Record<DateMaskField, string>> = {}
+  let i = 0
+  for (let k = 0; k < mask.order.length; k++) {
+    const field = mask.order[k] as DateMaskField
+    const len = mask.lengths[k] as number
+    const chunk = digits.slice(i, i + len)
+    if (chunk.length === len) i += len
+    else if (
+      field === 'year' &&
+      options.yearPivot !== undefined &&
+      k === mask.order.length - 1 &&
+      chunk.length === 2
+    )
+      i += 2
+    else return null
+    by[field] = chunk
+  }
+  if (i !== digits.length) return null // chiffres en trop
+  const year =
+    (by.year as string).length === 2
+      ? String((options.yearPivot as number) + Number(by.year))
+      : (by.year as string)
+  const iso = `${year}-${by.month}-${by.day}`
+  return isValidISO(iso) ? iso : null
+}
+
+/**
+ * Position de caret équivalente à « juste après le n-ième chiffre » — le seul
+ * repère stable d'un reformatage, les positions absolues sautant dès qu'un
+ * séparateur apparaît ou disparaît. Si `separator` est fourni et suit cette
+ * position, on le franchit : à la frappe le curseur doit se poser dans le champ
+ * SUIVANT, pas devant le séparateur qui vient d'apparaître. À la suppression on
+ * ne le passe pas (`separator` omis).
+ */
+export function caretAfterDigits(text: string, n: number, separator?: string): number {
+  let pos = 0
+  if (n > 0) {
+    pos = text.length
+    let seen = 0
+    for (let i = 0; i < text.length; i++) {
+      const code = text.charCodeAt(i)
+      if (code >= 48 && code <= 57 && ++seen === n) {
+        pos = i + 1
+        break
+      }
+    }
+  }
+  if (separator && text.startsWith(separator, pos)) pos += separator.length
+  return pos
+}
+
+const PLACEHOLDER_FALLBACK: Record<DateMaskField, string> = { day: 'd', month: 'm', year: 'y' }
+
+/** Scripts idéographiques : « 日 » répété ne forme pas un gabarit lisible. */
+const IDEOGRAPHIC = /[\p{sc=Han}\p{sc=Hangul}\p{sc=Hiragana}\p{sc=Katakana}]/u
+
+/**
+ * Gabarit du champ (fr « jj/mm/aaaa », en « dd/mm/yyyy », de « tt.mm.jjjj »,
+ * ru « дд/мм/гггг »). La lettre vient du nom localisé du champ
+ * (`Intl.DisplayNames`), ce qui retombe sur les conventions attestées de tous
+ * les scripts alphabétiques ; repli latin si l'API manque (ICU réduit) ou si le
+ * script est idéographique.
+ */
+export function maskPlaceholder(locale: string, mask: DateMask): string {
+  const letters = { ...PLACEHOLDER_FALLBACK }
+  try {
+    const names = new Intl.DisplayNames(locale, { type: 'dateTimeField' })
+    for (const field of ['day', 'month', 'year'] as const) {
+      const first = [...(names.of(field) ?? '')][0]
+      if (first && /\p{L}/u.test(first) && !IDEOGRAPHIC.test(first))
+        letters[field] = first.toLocaleLowerCase(locale)
+    }
+  } catch {
+    /* Intl.DisplayNames indisponible → repli */
+  }
+  return mask.order.map((f, k) => letters[f].repeat(mask.lengths[k] as number)).join(mask.separator)
+}
