@@ -11,6 +11,7 @@ const meta = {
   component: DatePicker,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+    entry: { control: 'inline-radio', options: ['readonly', 'input'] },
   },
   args: {
     mode: 'single',
@@ -18,6 +19,7 @@ const meta = {
     label: 'Date',
     size: 'md',
     clearable: true,
+    entry: 'readonly',
   },
 } satisfies Meta<typeof DatePicker>
 
@@ -203,4 +205,127 @@ export const ClicDansLeVide: Story = {
     await waitFor(() => expect(panel.matches(':popover-open')).toBe(false))
     await expect(field).toHaveValue('15 juin 2026')
   },
+}
+
+/**
+ * Mode saisie : le champ est éditable et pose les séparateurs tout seul —
+ * l'utilisateur ne tape que des chiffres. Le calendrier reste visible pendant la
+ * frappe, sans prendre le focus.
+ */
+export const Saisie: Story = {
+  args: { entry: 'input', hint: 'Format jj/mm/aaaa' },
+  render: (args) => ({
+    components: { DatePicker },
+    setup: () => ({ args, value: ref<string | null>(null) }),
+    template: `
+      <div style="width: 280px; display:grid; gap:8px">
+        <DatePicker v-bind="args" v-model="value" />
+        <output>{{ value ?? '—' }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = canvas.getByRole('textbox', { name: 'Date' })
+
+    // le clic ouvre le panneau SANS happer le curseur : la frappe continue
+    await userEvent.click(field)
+    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
+    await expect(field).toHaveFocus()
+
+    // seuls les chiffres sont tapés, le masque pose les « / »
+    await userEvent.keyboard('10')
+    await expect(field).toHaveValue('10/')
+    await userEvent.keyboard('062026')
+    await expect(field).toHaveValue('10/06/2026')
+    // le focus n'a pas quitté le champ de toute la saisie
+    await expect(field).toHaveFocus()
+    await waitFor(() => expect(canvas.getByText('2026-06-10')).toBeVisible())
+
+    // le Retour arrière sur le séparateur efface le chiffre qui le précède
+    await userEvent.keyboard('{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}')
+    await expect(field).toHaveValue('10/0')
+
+    // la flèche bas est le chemin explicite vers la grille, Échap en revient
+    await userEvent.keyboard('{ArrowDown}')
+    const panel = canvas.getByRole('dialog')
+    await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(field).toHaveFocus())
+    // Échap n'a pas rouvert le panneau via le focus rendu au champ
+    await expect(panel.matches(':popover-open')).toBe(false)
+    // sortie du champ : la saisie incomplète revient silencieusement à la valeur
+    await userEvent.tab()
+    await waitFor(() => expect(field).toHaveValue('10/06/2026'))
+  },
+}
+
+/**
+ * Le collage d'une date déjà écrite (ISO, ou masquée dans une autre locale) est
+ * reconnu : sans cela, coller « 2026-06-10 » dans un masque jj/mm/aaaa donnerait
+ * « 20/26/0610 ».
+ */
+export const SaisieCollage: Story = {
+  args: { entry: 'input' },
+  render: (args) => ({
+    components: { DatePicker },
+    setup: () => ({ args, value: ref<string | null>(null) }),
+    template: `
+      <div style="width: 280px; display:grid; gap:8px">
+        <DatePicker v-bind="args" v-model="value" />
+        <output>{{ value ?? '—' }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = canvas.getByRole('textbox', { name: 'Date' })
+    await userEvent.click(field)
+    await userEvent.paste('2026-06-10')
+    await expect(field).toHaveValue('10/06/2026')
+    await waitFor(() => expect(canvas.getByText('2026-06-10')).toBeVisible())
+  },
+}
+
+/**
+ * L'ordre des champs et le séparateur sont dérivés de la locale : rien n'est
+ * codé en dur, et le gabarit du placeholder suit les noms de champs localisés.
+ */
+export const SaisieLocales: Story = {
+  args: { entry: 'input' },
+  render: (args) => ({
+    components: { DatePicker },
+    setup: () => ({ args, value: ref('2026-06-10') }),
+    template: `
+      <div style="width: 280px; display:grid; gap:12px">
+        <DatePicker v-bind="args" v-model="value" locale="fr-FR" label="fr-FR" />
+        <DatePicker v-bind="args" v-model="value" locale="en-US" label="en-US" />
+        <DatePicker v-bind="args" v-model="value" locale="de-DE" label="de-DE" />
+        <DatePicker v-bind="args" v-model="value" locale="ja-JP" label="ja-JP" />
+      </div>
+    `,
+  }),
+}
+
+/**
+ * Bornes et dates désactivées valent aussi pour la saisie : une date refusée
+ * revient silencieusement à la valeur courante à la sortie du champ.
+ */
+export const SaisieBornee: Story = {
+  args: { entry: 'input' },
+  render: (args) => ({
+    components: { DatePicker },
+    setup: () => ({
+      args,
+      value: ref('2026-06-10'),
+      weekends: (iso: string) => [0, 6].includes(new Date(`${iso}T00:00:00`).getDay()),
+    }),
+    template: `
+      <div style="width: 280px; display:grid; gap:8px">
+        <DatePicker v-bind="args" v-model="value" min="2026-06-01" max="2026-06-30"
+          :disabled-dates="weekends" hint="Juin 2026, jours ouvrés" />
+        <output>{{ value ?? '—' }}</output>
+      </div>
+    `,
+  }),
 }

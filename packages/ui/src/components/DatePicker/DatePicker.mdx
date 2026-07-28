@@ -5,17 +5,18 @@ import * as DatePickerStories from './DatePicker.stories'
 
 # DatePicker
 
-Sélecteur de date : un champ [Input](?path=/docs/composants-input--docs) en
-lecture seule qui ouvre un [Calendar](?path=/docs/composants-calendar--docs) dans
-un panneau flottant. Le composant ne fait qu'assembler des briques du DS — aucune
-dépendance ni positionnement JS supplémentaire.
+Sélecteur de date : un champ [Input](?path=/docs/composants-input--docs) qui ouvre
+un [Calendar](?path=/docs/composants-calendar--docs) dans un panneau flottant. Le
+composant ne fait qu'assembler des briques du DS — aucune dépendance ni
+positionnement JS supplémentaire.
 
 Le panneau est un `popover="manual"` ancré en **pur CSS** (`anchor-scope` sur la
 racine + `anchor-name` sur le contrôle → `position-anchor`, comme Tooltip et
 Combobox). On n'utilise pas `popovertarget` (invalide sur un `<input>` texte) :
 l'ouverture est programmatique, ce qui permet de **déplacer le focus dans la
-grille** à l'ouverture — le bon modèle d'accessibilité pour un calendrier. La
-fermeture suit le pattern Combobox (`focusout` sur la racine + `Échap`).
+grille** à l'ouverture — le bon modèle d'accessibilité pour un calendrier, et ce
+que le mode saisie peut justement suspendre (voir plus bas). La fermeture suit le
+pattern Combobox (`focusout` sur la racine + `Échap`).
 
 <Canvas of={DatePickerStories.Default} />
 <Controls of={DatePickerStories.Default} />
@@ -54,13 +55,52 @@ une valeur est posée) et supporte `disabled`.
 
 <Canvas of={DatePickerStories.Desactive} />
 
+## Saisie clavier (`entry`)
+
+Par défaut (`entry="readonly"`) la date ne se choisit qu'au calendrier : le champ
+est en lecture seule, ce qui évite toute saisie ambiguë et reste le mode le plus
+sûr. `entry="input"` le rend éditable pour ceux qui vont plus vite au clavier.
+
+L'utilisateur ne tape que **des chiffres** : le composant pose les séparateurs au
+fil de la frappe, comme le fait un `<input type="date">` natif. L'ordre des champs
+et le séparateur sont **dérivés de la locale** (`Intl`), jamais codés en dur — et
+le placeholder reprend le gabarit localisé correspondant.
+
+<Canvas of={DatePickerStories.Saisie} />
+<Canvas of={DatePickerStories.SaisieLocales} />
+
+Le format d'affichage du mode saisie est nécessairement numérique : `displayFormat`
+n'y a donc pas cours (« 10 juin 2026 » ne se retape pas), et fournir la prop
+déclenche un avertissement en développement. Même chose pour les modes de
+sélection `range` et `multiple` : une plage ou une liste ne tenant pas dans un
+champ unique masqué, le composant **retombe silencieusement en lecture seule**.
+
+Règles de saisie :
+
+- taper un séparateur est toléré et complète le champ courant par un zéro de tête
+  (« 5/6/2026 » donne le même résultat que « 05062026 »),
+- le `Retour arrière` sur un séparateur efface le chiffre qui le précède,
+- une année à deux chiffres est étendue au 21ᵉ siècle **à la sortie du champ**,
+- une saisie incomplète, impossible (« 31/02 »), hors `min`/`max` ou portant sur
+  une date désactivée **revient silencieusement** à la valeur courante ; vider le
+  champ pose la valeur à `null`,
+- coller une date déjà écrite (ISO ou masquée) est reconnu.
+
+<Canvas of={DatePickerStories.SaisieBornee} />
+<Canvas of={DatePickerStories.SaisieCollage} />
+
 ## Accessibilité
 
 - Le champ porte `aria-haspopup="dialog"`, `aria-expanded` et `aria-controls` ;
   le panneau est un `role="dialog"` nommé.
-- **Ouverture** au clic, à l'`Entrée` ou à la `flèche bas` depuis le champ ; le
-  focus se déplace alors dans la grille du calendrier.
+- **Ouverture** au clic, à l'`Entrée` ou à la `flèche bas` depuis le champ. En
+  lecture seule le focus se déplace aussitôt dans la grille du calendrier ; en
+  mode saisie le panneau s'ouvre **sans prendre le focus** (la frappe continue
+  dans le champ) et la `flèche bas` reste le chemin explicite vers la grille.
 - **Fermeture** par `Échap` (le focus revient au champ), par clic hors du
-  composant, ou — en mode simple — après sélection.
+  composant, ou — en mode simple — après sélection. En mode saisie, `Entrée`
+  valide et ferme, et ne soumet donc pas le formulaire environnant.
+- Un placeholder n'étant pas une description accessible, décrivez le format
+  attendu via `hint` (lié au champ par `aria-describedby`).
 - Toute la navigation clavier de la grille est héritée du Calendar (voir sa
   documentation). Les transitions respectent `prefers-reduced-motion`.
