@@ -36,9 +36,11 @@ const labelId = useId()
   }
 
   /* Micro-label de section : rôle overline (sans capitales forcées — la casse
-     du libellé appartient au consommateur). */
+     du libellé appartient au consommateur). Le retrait suit celui des items
+     (`--_control-padding-inline` héritée du panneau) pour rester aligné à
+     toutes les tailles ; la typo, elle, ne suit pas l'échelle (rôle overline). */
   .ds-menu-group-label {
-    padding: var(--ds-space-1) var(--ds-space-3);
+    padding: var(--ds-space-1) var(--_control-padding-inline);
     font-size: var(--ds-text-overline-size);
     font-weight: var(--ds-text-overline-weight);
     letter-spacing: var(--ds-text-overline-tracking);

@@ -246,6 +246,27 @@ describe('Menu', () => {
     expect(sub?.hasAttribute('data-compact')).toBe(false)
   })
 
+  it('ds-control n’est posée QUE sur le panneau racine (le compact hérité en dépend)', () => {
+    // Sur un sous-panneau, `.ds-control` redéfinirait --_control-height depuis
+    // --_control-height-base SANS la condition [data-compact] (qu'il ne porte
+    // pas) : la hauteur y repasserait à sa valeur non compacte.
+    const { container } = renderHarness(`
+      <Menu size="md" compact>
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <MenuItem label="Exporter">
+          <template #submenu>
+            <MenuItem label="PDF" />
+          </template>
+        </MenuItem>
+      </Menu>
+    `)
+    const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
+    expect(root?.classList.contains('ds-control')).toBe(true)
+    expect(sub?.classList.contains('ds-control')).toBe(false)
+  })
+
   describe('groupes et séparateurs', () => {
     function renderGrouped() {
       return renderHarness(`

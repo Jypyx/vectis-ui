@@ -99,26 +99,23 @@ function onClick() {
 <style>
 @layer ds.components {
   .ds-listbox-option {
-    /* Contexte Icon posé sur l'OPTION et non sur le panneau : `.ds-panel`
-       redéclare --ds-icon-size, une valeur posée sur `.ds-listbox` serait donc
-       en concurrence avec elle à spécificité voisine. Ici, aucun doute. */
-    --ds-icon-size: var(--_listbox-option-icon-size);
-    --ds-icon-opsz: var(--_listbox-option-icon-opsz);
-
+    /* Taille : `--_control-*` héritées du panneau, qui porte `ds-control`
+       (styles/control-size.css) ; les icônes suivent par le même héritage.
+       Typo composite comme MenuItem : taille de l'échelle, leading `body-md`
+       (ratio unitless) et poids regular. */
     display: flex;
     align-items: center;
-    gap: var(--ds-space-2);
+    gap: var(--_control-gap);
     width: 100%;
-    /* variables posées par Listbox.vue — sans fallback, volontairement */
-    min-height: calc(var(--_listbox-option-min-h) - var(--_listbox-option-delta));
-    padding: var(--ds-space-1) var(--_listbox-option-pad-i);
+    min-height: var(--_control-height);
+    padding: var(--ds-space-1) var(--_control-padding-inline);
     border: none;
     background: transparent;
     color: var(--ds-color-text);
     border-radius: var(--ds-radius-sm);
     font-family: inherit;
-    font-size: var(--_listbox-option-font-size);
-    line-height: var(--_listbox-option-leading);
+    font-size: var(--_control-font-size);
+    line-height: var(--ds-text-body-md-leading);
     text-align: start;
     cursor: pointer;
   }

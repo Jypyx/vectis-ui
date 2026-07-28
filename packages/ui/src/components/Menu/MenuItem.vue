@@ -203,30 +203,29 @@ onBeforeUnmount(clearTimers)
 @layer ds.components {
   .ds-menu-item {
     /*
-     * Contexte Icon posé sur l'ITEM, jamais sur le panneau : `.ds-panel`
-     * redéclare --ds-icon-size sur CHAQUE panneau (styles/panel.css), un
-     * sous-menu écraserait donc la valeur du panneau racine et retomberait à
-     * 20px. Les --_menu-item-* traversent les sous-panneaux, eux (cf. le
-     * commentaire de MenuPanel.vue). Fallbacks = valeurs sm, comme les autres.
+     * Taille : variables `--_control-*` héritées du panneau racine, qui porte
+     * `ds-control` (styles/control-size.css) — une seule table pour tout le
+     * DS. Les icônes suivent sans rien écrire : `--ds-icon-size`/`-opsz` font
+     * partie du même bloc et héritent aussi.
+     *
+     * Seule la typo est composite : la TAILLE vient de l'échelle, le leading
+     * reste celui de `body-md` (ratio unitless, donc il suit) et le poids
+     * reste regular. Pas la recette `control` complète : elle vaut medium/1,
+     * or une rangée peut passer à la ligne et porter un sous-libellé.
      */
-    --ds-icon-size: var(--_menu-item-icon-size, var(--ds-icon-size-md));
-    --ds-icon-opsz: var(--_menu-item-icon-opsz, 20);
-
     display: flex;
     align-items: center;
-    gap: var(--ds-space-2);
+    gap: var(--_control-gap);
     width: 100%;
-    min-height: calc(
-      var(--_menu-item-min-h, var(--ds-control-height-sm)) - var(--_menu-item-delta, 0px)
-    );
-    padding: var(--ds-space-1) var(--_menu-item-pad-i, var(--ds-space-3));
+    min-height: var(--_control-height);
+    padding: var(--ds-space-1) var(--_control-padding-inline);
     border: none;
     background: transparent;
     color: var(--ds-color-text);
     border-radius: var(--ds-radius-sm);
     font-family: inherit;
-    font-size: var(--_menu-item-font-size, var(--ds-text-body-md-size));
-    line-height: var(--_menu-item-leading, var(--ds-text-body-md-leading));
+    font-size: var(--_control-font-size);
+    line-height: var(--ds-text-body-md-leading);
     text-align: start;
     text-decoration: none;
     cursor: pointer;

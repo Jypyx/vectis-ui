@@ -10,8 +10,9 @@
  * propriété de layout — donc aucun conflit de spécificité avec les SFC.
  *
  * Deux colonnes de padding-inline : `--_control-padding-inline` pour les
- * contrôles pleins (Button, Chip…), `--_control-padding-inline-field` pour
- * les champs de saisie (Input, Textarea, DatePicker), plus serrés.
+ * contrôles pleins (Button, Chip, rangées de panneau…),
+ * `--_control-padding-inline-field` pour les champs de saisie (Input,
+ * Textarea, DatePicker), plus serrés.
  * `--_control-gap` : espacement interne (icône/libellé, cases OTP…).
  *
  * `--ds-icon-size`/`--ds-icon-opsz` = API de contexte publique d'Icon ;
@@ -70,7 +71,7 @@
     --_control-font-size: var(--ds-font-size-md);
     --_control-padding-inline: var(--ds-space-5);
     --_control-padding-inline-field: var(--ds-space-4);
-    --_control-gap: var(--ds-space-2);
+    --_control-gap: var(--ds-space-3);
     --_control-action-size: var(--ds-control-action-size-lg);
     --ds-icon-size: var(--ds-icon-size-lg);
     --ds-icon-opsz: 24;

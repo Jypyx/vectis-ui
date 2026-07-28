@@ -94,7 +94,7 @@ const panelStyle = computed(() => ({ '--_anchor': props.anchor }))
     ref="panelEl"
     popover="manual"
     role="listbox"
-    class="ds-panel ds-listbox ds-floating"
+    class="ds-panel ds-listbox ds-floating ds-control"
     :data-placement="placement"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
@@ -110,51 +110,19 @@ const panelStyle = computed(() => ({ '--_anchor': props.anchor }))
 
 <style>
 @layer ds.components {
-  /* Chrome (surface, bordure, ombre, rythme interne, contexte Icon) : classe
-     partagée `.ds-panel` (styles/panel.css). Ne restent ici que les règles
-     propres à la liste : largeur calée sur l'ancre et zone défilante. */
+  /* Chrome (surface, bordure, ombre, rythme interne) : classe partagée
+     `.ds-panel` (styles/panel.css). Tailles : classe partagée `ds-control`
+     posée sur le panneau (voir le template) — aucune table locale, les options
+     et les rangées d'état du consommateur (`.ds-combobox-state`) consomment
+     les `--_control-*` hérités. Contrairement à MenuPanel la classe est
+     inconditionnelle : une liste ne s'imbrique jamais dans une autre.
+     Ne restent ici que les règles propres à la liste : largeur calée sur
+     l'ancre et zone défilante. */
   .ds-listbox {
-    /* Taille/densité des options, consommées par ListboxOption.vue et par les
-       rangées d'état du consommateur (`.ds-combobox-state`). Contrairement à
-       MenuPanel, les défauts sont posés sur `.ds-listbox` nu : une liste ne
-       s'imbrique jamais dans une autre, le piège de réinitialisation des
-       panneaux imbriqués n'existe donc pas. Les consommateurs lisent les
-       variables SANS fallback — un nom périmé produit un calc() invalide (donc
-       visible) plutôt qu'un repli silencieux. */
-    --_listbox-option-min-h: var(--ds-control-height-sm);
-    --_listbox-option-pad-i: var(--ds-space-3);
-    --_listbox-option-delta: 0px;
-    --_listbox-option-font-size: var(--ds-text-body-md-size);
-    --_listbox-option-leading: var(--ds-text-body-md-leading);
-    --_listbox-option-icon-size: var(--ds-icon-size-md);
-    --_listbox-option-icon-opsz: 20;
-
     position-anchor: var(--_anchor);
     min-inline-size: anchor-size(width);
     max-block-size: var(--ds-control-size-listbox-max-block);
     overflow: auto;
-  }
-
-  .ds-listbox[data-size='md'] {
-    --_listbox-option-min-h: var(--ds-control-height-md);
-    --_listbox-option-pad-i: var(--ds-space-4);
-  }
-
-  /* lg est le seul cran où la table des contrôles change de typo ET d'icône
-     (cf. MenuPanel.vue) : les rangées suivent le champ qui pilote le panneau,
-     sm et md restant à 14px/20px comme control-size.css. */
-  .ds-listbox[data-size='lg'] {
-    --_listbox-option-min-h: var(--ds-control-height-lg);
-    --_listbox-option-pad-i: var(--ds-space-5);
-    --_listbox-option-font-size: var(--ds-text-body-lg-size);
-    --_listbox-option-leading: var(--ds-text-body-lg-leading);
-    --_listbox-option-icon-size: var(--ds-icon-size-lg);
-    --_listbox-option-icon-opsz: 24;
-  }
-
-  /* Compact : hauteur minimale -4px, padding/typo/icônes inchangés */
-  .ds-listbox[data-compact] {
-    --_listbox-option-delta: var(--ds-space-1);
   }
 }
 </style>

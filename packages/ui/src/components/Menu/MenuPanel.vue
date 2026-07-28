@@ -143,6 +143,18 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     popover="auto"
     role="menu"
     class="ds-panel ds-menu ds-floating"
+    :class="{
+      /*
+       * `ds-control` sur la RACINE seulement : elle pose les `--_control-*`
+       * (hauteur, paddings, gap, typo, contexte Icon) depuis
+       * styles/control-size.css, et les sous-panneaux — descendants DOM —
+       * en héritent. La poser aussi sur eux les casserait : `.ds-control`
+       * redéfinit `--_control-height` depuis `--_control-height-base` SANS
+       * la condition `[data-compact]` (absente des sous-panneaux), qui y
+       * reviendrait donc à sa valeur non compacte.
+       */
+      'ds-control': !submenu,
+    }"
     :data-placement="placement"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
@@ -158,46 +170,14 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
 
 <style>
 @layer ds.components {
-  /* Chrome (surface, bordure, ombre, rythme interne, contexte Icon) : classe
-     partagée `.ds-panel` (styles/panel.css). Ne restent ici que les règles
-     propres au menu déroulant. */
+  /* Chrome (surface, bordure, ombre, rythme interne) : classe partagée
+     `.ds-panel` (styles/panel.css). Tailles : classe partagée `ds-control`
+     posée ci-dessus sur le panneau RACINE (voir le template) — aucune table
+     locale, les items consomment les `--_control-*` hérités. Ne restent ici
+     que les règles propres au menu déroulant. */
   .ds-menu {
     min-inline-size: var(--ds-control-size-menu-min);
     max-inline-size: min(var(--ds-control-size-menu-max), calc(100vw - var(--ds-space-8)));
-  }
-
-  /*
-   * Taille/densité des items : les variables sont posées sur le panneau
-   * RACINE seulement (seul à rendre data-size/data-compact) et héritées par
-   * les sous-panneaux, descendants DOM — ne jamais les déclarer sur
-   * .ds-menu nu, chaque panneau imbriqué les réinitialiserait. Les
-   * fallbacks (valeurs sm) vivent côté MenuItem.
-   */
-  .ds-menu[data-size='sm'] {
-    --_menu-item-min-h: var(--ds-control-height-sm);
-  }
-
-  .ds-menu[data-size='md'] {
-    --_menu-item-min-h: var(--ds-control-height-md);
-    --_menu-item-pad-i: var(--ds-space-4);
-  }
-
-  /* lg est le seul cran où la table des contrôles change de typo ET d'icône
-     (control-size.css : fonts xs→xs, sm-md→sm, lg-xl→md ; icônes xs→16,
-     sm-md→20, lg-xl→24) : les rangées suivent, sm et md restant à 14px/20px
-     comme la table. */
-  .ds-menu[data-size='lg'] {
-    --_menu-item-min-h: var(--ds-control-height-lg);
-    --_menu-item-pad-i: var(--ds-space-5);
-    --_menu-item-font-size: var(--ds-text-body-lg-size);
-    --_menu-item-leading: var(--ds-text-body-lg-leading);
-    --_menu-item-icon-size: var(--ds-icon-size-lg);
-    --_menu-item-icon-opsz: 24;
-  }
-
-  /* Compact : hauteur minimale -4px, padding/typo/icônes inchangés */
-  .ds-menu[data-compact] {
-    --_menu-item-delta: var(--ds-space-1);
   }
 
   /* aligne le 1er sous-item sur l'item parent (compense padding + bordure) */

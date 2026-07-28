@@ -52,6 +52,8 @@ describe('Listbox', () => {
     // garde-fou du panneau fermé (cf. .ds-floating:not(:popover-open))
     expect(panel.classList.contains('ds-floating')).toBe(true)
     expect(panel.classList.contains('ds-panel')).toBe(true)
+    // tailles : le panneau EST le .ds-control, les options consomment ses --_control-*
+    expect(panel.classList.contains('ds-control')).toBe(true)
   })
 
   it('multiselectable pose aria-multiselectable (absent sinon)', () => {

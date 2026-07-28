@@ -12,6 +12,12 @@
  * Restent donc chez chaque panneau : `min/max-inline-size`, `max-height`,
  * `overflow`, `position-anchor`, la marge des sous-panneaux, `[data-width]`.
  *
+ * Rien ici sur les TAILLES : le panneau porte `ds-control` (avec son
+ * `data-size`/`data-compact`) et les rangées consomment les `--_control-*`
+ * hérités — une seule table, `styles/control-size.css`. C'est aussi pourquoi
+ * le contexte Icon n'est PAS posé ici : cette feuille s'applique à chaque
+ * panneau, un sous-menu écraserait donc la valeur héritée de sa racine.
+ *
  * Ne PAS transformer ce partage en SFC `FloatingPanel.vue` commun : il faudrait
  * lui repasser en props le mode popover, le rôle ARIA, l'ancre, et republier
  * show/hide — soit exactement le panneau paramétré par `role` que la scission
@@ -20,14 +26,6 @@
  */
 @layer ds.components {
   .ds-panel {
-    /* API de contexte d'Icon : défaut du panneau (20px/opsz 20) pour tout ce
-       qui n'est pas une rangée. Les rangées le REDÉFINISSENT chez elles
-       (.ds-menu-item, .ds-listbox-option) et non ici : cette déclaration est
-       reposée sur CHAQUE panneau, donc un sous-menu écraserait une valeur
-       héritée du panneau racine — les familles --_menu-item-* /
-       --_listbox-option-*, elles, traversent l'imbrication. */
-    --ds-icon-size: var(--ds-icon-size-md);
-    --ds-icon-opsz: 20;
     display: flex;
     flex-direction: column;
     gap: var(--ds-space-1);

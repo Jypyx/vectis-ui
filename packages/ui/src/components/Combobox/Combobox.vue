@@ -752,21 +752,17 @@ watch(
   }
 
   /* États plein panneau (« aucun résultat », chargement) : même gabarit qu'une
-     option (hauteur héritée du panneau via --_listbox-option-*, padding d'item).
-     Sans fallback : Listbox.vue pose les défauts sur `.ds-listbox`.
+     option — mêmes `--_control-*` héritées du panneau, qui porte `ds-control`
+     (le spinner suit aussi, via le contexte Icon du même bloc).
      `flex: none` : le panneau est un flex column, l'état ne doit pas s'écraser. */
   .ds-combobox-state {
-    /* même contexte Icon que les options : le spinner suit leur échelle */
-    --ds-icon-size: var(--_listbox-option-icon-size);
-    --ds-icon-opsz: var(--_listbox-option-icon-opsz);
-
     display: flex;
     flex: none;
     align-items: center;
-    gap: var(--ds-space-2);
-    min-height: calc(var(--_listbox-option-min-h) - var(--_listbox-option-delta));
-    padding: var(--ds-space-1) var(--ds-space-3);
-    font-size: var(--_listbox-option-font-size);
+    gap: var(--_control-gap);
+    min-height: var(--_control-height);
+    padding: var(--ds-space-1) var(--_control-padding-inline);
+    font-size: var(--_control-font-size);
     color: var(--ds-color-text-muted);
   }
 
