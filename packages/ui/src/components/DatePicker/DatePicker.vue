@@ -205,7 +205,7 @@ const close = () => closePanel(true)
       mode="manual"
       anchor="--ds-datepicker-anchor"
       :placement="placement"
-      :surface="false"
+      surface
       role="dialog"
       :aria-label="label ?? 'Choisir une date'"
       class="ds-datepicker-panel"
@@ -259,10 +259,6 @@ const close = () => closePanel(true)
        n'accepte qu'une seule ombre alors que --ds-shadow-* en empile deux). */
     width: max-content;
     padding: 0;
-    border: none;
-    background: transparent;
-    border-radius: var(--ds-radius-overlay);
-    box-shadow: var(--ds-shadow-4);
   }
 }
 </style>

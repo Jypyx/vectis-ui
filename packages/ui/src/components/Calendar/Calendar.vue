@@ -702,8 +702,6 @@ defineExpose({ focus })
     flex-direction: column;
     gap: var(--ds-space-2);
     padding: var(--ds-space-3);
-    background: var(--ds-color-surface-overlay);
-    border-radius: var(--ds-radius-overlay);
     font-family: var(--ds-text-family);
     color: var(--ds-color-text);
   }
