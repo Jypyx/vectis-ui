@@ -92,7 +92,7 @@ describe('Combobox', () => {
     const input = getByRole('combobox') as HTMLInputElement
     expect(input.value).toBe('France') // le libellé reste affiché
     const labels = () =>
-      [...container.querySelectorAll('[role="option"] .ds-listbox-option-label')].map((o) =>
+      [...container.querySelectorAll('[role="option"] .ds-combobox-option-label')].map((o) =>
         o.textContent?.trim(),
       )
 
@@ -121,6 +121,41 @@ describe('Combobox', () => {
     // remonte d'un cran depuis la première : boucle en sautant Monaco (disabled)
     await fireEvent.keyDown(input, { key: 'ArrowUp' })
     expect(container.querySelector('[data-active]')?.textContent).toContain('Sénégal')
+  })
+
+  it('mousedown est annulé sur le panneau : le clic sur une option ne vole pas le focus du champ', async () => {
+    const { getByRole, container } = renderCombobox()
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
+    const option = container.querySelector('[role="option"]') as HTMLElement
+
+    const event = new MouseEvent('mousedown', { bubbles: true, cancelable: true })
+    option.dispatchEvent(event)
+    // sans cela, le focusout fermerait le panneau avant que @select soit traité
+    // (sélection à la souris morte, invisible en jsdom)
+    expect(event.defaultPrevented).toBe(true)
+  })
+
+  it('le panneau n’a aucun gestionnaire clavier : le champ pilote tout', async () => {
+    const { getByRole, container } = renderCombobox()
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
+    const panel = container.querySelector('[role="listbox"]') as HTMLElement
+
+    const before = document.activeElement
+    panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+    panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }))
+    // aucune option n'a pris le focus : il ne quitte jamais l'input
+    expect(document.activeElement).toBe(before)
+  })
+
+  it('une option désactivée passe par aria-disabled, jamais par l’attribut natif', async () => {
+    const { getByRole, container } = renderCombobox()
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
+    const options = [...container.querySelectorAll('[role="option"]')] as HTMLButtonElement[]
+    const disabled = options.find((o) => o.textContent?.includes('Monaco'))!
+
+    expect(disabled.getAttribute('aria-disabled')).toBe('true')
+    // l'option doit rester dans l'arbre a11y parcouru par le champ
+    expect(disabled.disabled).toBe(false)
   })
 
   it('multiple : toggle des valeurs, tags avec retrait, Backspace retire le dernier', async () => {
@@ -172,8 +207,8 @@ describe('Combobox', () => {
         o.textContent?.includes(text),
       )
     // France est sélectionnée → coche ; Belgique non → pas de coche
-    expect(optionByText('France')?.querySelector('.ds-listbox-option-check')).toBeTruthy()
-    expect(optionByText('Belgique')?.querySelector('.ds-listbox-option-check')).toBeFalsy()
+    expect(optionByText('France')?.querySelector('.ds-combobox-option-check')).toBeTruthy()
+    expect(optionByText('Belgique')?.querySelector('.ds-combobox-option-check')).toBeFalsy()
   })
 })
 
@@ -185,7 +220,7 @@ describe('Combobox asynchrone', () => {
   })
 
   const labels = (container: Element) =>
-    [...container.querySelectorAll('[role="option"] .ds-listbox-option-label')].map((o) =>
+    [...container.querySelectorAll('[role="option"] .ds-combobox-option-label')].map((o) =>
       o.textContent?.trim(),
     )
 

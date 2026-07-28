@@ -1,5 +1,5 @@
 ﻿/*
- * Plomberie commune des éléments flottants (Tooltip, Menu, Listbox…).
+ * Plomberie commune des éléments flottants (Popover, Menu, Tooltip…).
  *
  * Deux classes, à poser ensemble : `.ds-overlay` (socle de tout popover du DS,
  * partagé avec les piles de toasts) et `.ds-floating` (ancrage + placements).
@@ -13,7 +13,7 @@
  * - `anchor-name` statique posé par le composant sur son propre wrapper
  *   (Tooltip) ou par `Popover` sur le sien quand un `#trigger` est fourni ;
  * - nom transmis à `Popover` par la prop `anchor`, le consommateur ayant déjà
- *   une racine et un contrôle à ancrer (Listbox, DatePicker, TimePicker).
+ *   une racine et un contrôle à ancrer (Combobox, DatePicker, TimePicker).
  *
  * `position-try-fallbacks` retourne le panneau quand la place manque.
  */

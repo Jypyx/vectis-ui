@@ -18,11 +18,12 @@
  *   Textarea, Dialog, Accordion, DataTable) : leurs classes
  *   (`.ds-input-label`…) surchargent `.ds-typography` ;
  * - Popover en TÊTE aussi, avant les panneaux qui le rendent en interne
- *   (Tooltip, Combobox via Listbox, DatePicker, TimePicker) : leurs classes
+ *   (Tooltip, Combobox, DatePicker, TimePicker) : leurs classes
  *   (`.ds-tooltip-panel`…) sont posées sur le MÊME élément que
  *   `.ds-popover-panel`, à spécificité égale (0,1,0).
  *
- * Listbox (brique interne du Combobox) et les composables ne sont pas exportés.
+ * Les composants internes (ComboboxOption, MenuPanel…) et les composables ne
+ * sont pas exportés.
  */
 import './styles/index.css'
 

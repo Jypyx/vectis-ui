@@ -192,9 +192,9 @@ export const semantic = {
       '4rem',
       'Largeur minimale de la zone de saisie du Combobox',
     ),
-    'size-listbox-max-block': dimension(
+    'size-combobox-list-max-block': dimension(
       '18rem',
-      'Hauteur maximale du panneau Listbox (liste défilante du Combobox)',
+      'Hauteur maximale du panneau de liste du Combobox (zone défilante)',
     ),
     'size-menu-min': dimension('11rem', 'Largeur minimale du panneau du Menu'),
     'size-menu-max': dimension('20rem', 'Largeur maximale du panneau du Menu'),

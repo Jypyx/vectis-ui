@@ -11,8 +11,8 @@ n'est ni stylable ni multiple). Le composant est **assemblé à partir des briqu
 DS** :
 
 - **`Input`** pour le champ de recherche (`role="combobox"`) ;
-- **`Listbox`** (panneau interne, non exporté) pour la liste d'options (`role="option"`,
-  popover top-layer ancré en pur CSS) ;
+- **`Popover`** pour la liste, qui porte elle-même `role="listbox"` (top layer, ancrée en
+  pur CSS sur le contrôle) ;
 - **`Chip`** pour les valeurs sélectionnées en mode multiple.
 
 Le focus DOM reste dans l'input pendant la navigation (`aria-activedescendant`) ;

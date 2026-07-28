@@ -3,42 +3,37 @@ import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
 
 /**
- * Option d'un panneau Listbox (`role="option"`). Le focus DOM reste dans le
- * contrôle externe : la surbrillance vient de la prop `active` (posée par le
- * consommateur via `aria-activedescendant`), jamais du focus. La sélection ne
- * ferme pas le panneau — le consommateur décide via son `v-model:open`.
+ * Rangée d'option du Combobox (`role="option"`), composant INTERNE non exporté.
+ * Le focus DOM reste dans le champ : la surbrillance vient de la prop `active`
+ * (posée via `aria-activedescendant`), jamais du focus. La sélection ne ferme
+ * pas le panneau — le Combobox décide.
  *
  * `disabled` ne pose PAS l'attribut natif : une option désactivée doit rester
  * dans l'arbre d'accessibilité que le champ parcourt, d'où `aria-disabled`.
  *
  * Racine unique : `id` et les écouteurs du consommateur (`@pointermove`…)
  * arrivent par fallthrough natif.
+ *
+ * Surface volontairement réduite à ce que le Combobox utilise : le libellé
+ * passe par le slot #default (que le Combobox alimente avec son propre slot
+ * scopé `#option`), pas par une prop.
  */
-interface ListboxOptionProps {
-  /** Libellé de l'option (le slot #default prime). */
-  label?: string
-  /** Sous-libellé sous le label (le slot #sublabel prime). */
-  sublabel?: string
+interface ComboboxOptionProps {
   /**
-   * Icône avant le libellé : nom Material Symbols Rounded, ou URL
-   * d'image/SVG (toute valeur contenant '.', '/' ou ':' est traitée comme
-   * une URL). Le slot #start prime.
+   * Icône avant le libellé : nom Material Symbols Rounded, ou URL d'image/SVG
+   * (toute valeur contenant '.', '/' ou ':' est traitée comme une URL). Le slot
+   * #start prime.
    */
   iconStart?: string
-  /** Icône après le libellé (même détection). Remplacée par la coche si sélectionnée. */
-  iconEnd?: string
   /** Option sélectionnée (aria-selected + coche). */
   selected?: boolean
-  /** Option active (surbrillance) — posée par le contrôle externe. */
+  /** Option active (surbrillance) — posée par le champ. */
   active?: boolean
   disabled?: boolean
 }
 
-const props = withDefaults(defineProps<ListboxOptionProps>(), {
-  label: undefined,
-  sublabel: undefined,
+const props = withDefaults(defineProps<ComboboxOptionProps>(), {
   iconStart: undefined,
-  iconEnd: undefined,
   selected: false,
   active: false,
   disabled: false,
@@ -50,14 +45,10 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  /** Libellé de l'option (prime sur la prop `label`). */
+  /** Libellé de l'option. */
   default?(): unknown
-  /** Sous-libellé (prime sur la prop `sublabel`). */
-  sublabel?(): unknown
   /** Contenu libre avant le libellé (prime sur `iconStart`). */
   start?(): unknown
-  /** Contenu libre après le libellé (prime sur `iconEnd`). */
-  end?(): unknown
 }>()
 
 function onClick() {
@@ -71,7 +62,7 @@ function onClick() {
     type="button"
     role="option"
     tabindex="-1"
-    class="ds-listbox-option"
+    class="ds-combobox-option"
     :aria-selected="selected"
     :aria-disabled="disabled ? 'true' : undefined"
     :data-active="active ? '' : undefined"
@@ -80,25 +71,14 @@ function onClick() {
     <slot name="start">
       <Icon v-if="iconStart" v-bind="iconProps(iconStart)" />
     </slot>
-    <span class="ds-listbox-option-content">
-      <span class="ds-listbox-option-label"
-        ><slot>{{ label }}</slot></span
-      >
-      <span v-if="sublabel !== undefined || $slots.sublabel" class="ds-listbox-option-sublabel">
-        <slot name="sublabel">{{ sublabel }}</slot>
-      </span>
-    </span>
-    <!-- la coche prend la place de l'emplacement de fin quand l'option est sélectionnée -->
-    <Icon v-if="selected" name="check" class="ds-listbox-option-check" />
-    <slot v-else name="end">
-      <Icon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
-    </slot>
+    <span class="ds-combobox-option-label"><slot /></span>
+    <Icon v-if="selected" name="check" class="ds-combobox-option-check" />
   </button>
 </template>
 
 <style>
 @layer ds.components {
-  .ds-listbox-option {
+  .ds-combobox-option {
     /* Taille : `--_control-*` héritées du panneau, qui porte `ds-control`
        (styles/control-size.css) ; les icônes suivent par le même héritage.
        Typo composite comme MenuItem : taille de l'échelle, leading `body-md`
@@ -120,39 +100,30 @@ function onClick() {
     cursor: pointer;
   }
 
-  .ds-listbox-option-content {
+  /* `min-inline-size: 0` : sans lui le minimum automatique du flex item
+     empêcherait un libellé long de se comprimer. */
+  .ds-combobox-option-label {
     flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .ds-listbox-option-sublabel {
-    font-size: var(--ds-text-caption-size);
-    color: var(--ds-color-text-muted);
+    min-inline-size: 0;
   }
 
   /* La surbrillance vient du survol ou de `active` (le focus ne vient jamais
-     ici : il reste dans le contrôle externe). */
-  .ds-listbox-option:hover:not([aria-disabled='true']),
-  .ds-listbox-option[data-active] {
+     ici : il reste dans le champ). */
+  .ds-combobox-option:hover:not([aria-disabled='true']),
+  .ds-combobox-option[data-active] {
     background: var(--ds-color-surface-muted);
     outline: none;
   }
 
-  .ds-listbox-option[aria-selected='true'] {
+  .ds-combobox-option[aria-selected='true'] {
     color: var(--ds-color-accent-text);
   }
 
   /* pas de `disabled` natif ici (l'option reste dans l'arbre a11y du champ) */
-  .ds-listbox-option[aria-disabled='true'] {
+  .ds-combobox-option[aria-disabled='true'] {
     background: transparent;
     color: var(--ds-color-text-subtle);
     cursor: not-allowed;
-  }
-
-  .ds-listbox-option[aria-disabled='true'] .ds-listbox-option-sublabel {
-    color: inherit;
   }
 }
 </style>

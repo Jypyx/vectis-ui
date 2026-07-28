@@ -4,8 +4,9 @@ import { computed, nextTick, reactive, ref, useId, watch, watchEffect } from 'vu
 import Chip from '../Chip/Chip.vue'
 import Icon from '../Icon/Icon.vue'
 import Input from '../Input/Input.vue'
-import Listbox from '../Listbox/Listbox.vue'
-import ListboxOption from '../Listbox/ListboxOption.vue'
+import Popover from '../Popover/Popover.vue'
+// alias : le type public `ComboboxOption` occupe déjà ce nom dans ce module
+import OptionRow from './ComboboxOption.vue'
 import Spinner from '../Spinner/Spinner.vue'
 
 import { toggleValue } from '../../utils/array'
@@ -18,13 +19,14 @@ import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
 import { useTimer } from '../../composables/useTimer'
 
 /**
- * Combobox avec recherche et sélection multiple, composé d'`Input`, `Listbox`
- * et `Chip`. Le JS implémente le pattern ARIA combobox/listbox que le natif ne
- * couvre pas (pas de `<datalist>` stylable/multiple) : filtrage, navigation par
- * `aria-activedescendant` (le focus DOM reste dans l'input — le `Listbox` n'a
- * donc aucun clavier propre), sélection simple ou multiple. C'est ce composant
- * qui possède TOUT le contrat ARIA du champ. Fermeture au `focusout` : le champ
- * vit hors du panneau `popover="manual"`.
+ * Combobox avec recherche et sélection multiple, composé d'`Input`, `Chip` et
+ * d'un `Popover` qui porte lui-même `role="listbox"`. Le JS implémente le
+ * pattern ARIA combobox/listbox que le natif ne couvre pas (pas de `<datalist>`
+ * stylable/multiple) : filtrage, navigation par `aria-activedescendant` (le
+ * focus DOM reste dans l'input — le panneau n'a donc aucun clavier propre),
+ * sélection simple ou multiple. C'est ce composant qui possède TOUT le contrat
+ * ARIA du champ. Fermeture au `focusout` : le champ vit hors du panneau, ouvert
+ * en `mode="manual"` (pas de light dismiss).
  */
 export interface ComboboxOption {
   value: string
@@ -312,6 +314,16 @@ function closePanel() {
 /** Fermeture quand le focus sort du composant (panneau compris, descendant DOM). */
 const onFocusout = useFocusoutDismiss(rootEl, closePanel)
 
+/*
+ * Le focus ne doit jamais quitter le champ : sans ce preventDefault, cliquer une
+ * option le lui retire, le `focusout` ci-dessus ferme le panneau AVANT que la
+ * sélection ne soit traitée — la sélection à la souris devient inopérante.
+ * Invisible en jsdom : couvert par une play function.
+ */
+function onPanelMousedown(event: MouseEvent) {
+  event.preventDefault()
+}
+
 /** Frappe utilisateur : active le filtre et ouvre le panneau. */
 function onInput() {
   typed.value = true
@@ -553,16 +565,23 @@ watch(
       </Input>
     </div>
 
-    <Listbox
+    <!-- Le panneau porte lui-même `role="listbox"` ET le défilement : c'est le
+         contrat sur lequel s'appuient le `root` de l'IntersectionObserver et le
+         `scrollIntoView` de l'option active — ne jamais intercaler de wrapper. -->
+    <Popover
       :id="optionsId"
       v-model:open="open"
+      mode="manual"
       anchor="--ds-combobox-anchor"
-      :multiselectable="multiple"
-      :size="size"
-      :compact="compact"
       placement="bottom-start"
+      role="listbox"
+      class="ds-combobox-panel ds-control"
+      :data-size="size"
+      :data-compact="compact ? '' : undefined"
+      :aria-multiselectable="multiple ? 'true' : undefined"
+      @mousedown="onPanelMousedown"
     >
-      <ListboxOption
+      <OptionRow
         v-for="(option, index) in filtered"
         :id="optionId(index)"
         :key="option.value"
@@ -572,8 +591,6 @@ watch(
         @select="select(option)"
         @pointermove="!option.disabled && (activeIndex = index)"
       >
-        <!-- slot dans le #default de l'option : son #end n'est pas rendu quand
-             l'option est sélectionnée (la coche prend sa place) -->
         <slot
           name="option"
           :option="option"
@@ -582,7 +599,7 @@ watch(
           :selected="selectedValues.includes(option.value)"
           >{{ option.label }}</slot
         >
-      </ListboxOption>
+      </OptionRow>
 
       <!-- Ordre chargement → vide → contenu : pendant une
            requête, le panneau ne doit pas annoncer « aucun résultat ». -->
@@ -602,7 +619,7 @@ watch(
       <div v-if="hasMore" ref="sentinelEl" class="ds-combobox-more" aria-hidden="true">
         <Spinner v-if="loading" />
       </div>
-    </Listbox>
+    </Popover>
   </div>
 </template>
 
@@ -619,6 +636,17 @@ watch(
   .ds-combobox-control {
     anchor-name: --ds-combobox-anchor;
     display: block;
+  }
+
+  /* Le panneau vient de `Popover` : élément popover, état, ancrage, placement et
+     chrome (`.ds-panel` via `surface`). Il porte aussi `ds-control` (le template)
+     — les options et les rangées d'état lisent les `--_control-*` hérités, aucune
+     table de tailles locale. Ne restent ici que les règles propres à la liste :
+     largeur calée sur l'ancre et zone défilante. */
+  .ds-combobox-panel {
+    min-inline-size: anchor-size(width);
+    max-block-size: var(--ds-control-size-combobox-list-max-block);
+    overflow: auto;
   }
 
   /* Chevron + croix (clearable d'Input) posés en ABSOLU à droite du champ : ils

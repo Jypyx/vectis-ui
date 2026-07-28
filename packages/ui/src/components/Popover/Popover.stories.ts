@@ -262,7 +262,7 @@ export const SansHabillage: Story = {
  * Ouverture programmatique par `v-model:open`, sans déclencheur : le
  * consommateur pose alors lui-même l'ancre (`anchor-scope` sur un ancêtre
  * commun, `anchor-name` sur l'élément à suivre) et la passe en prop `anchor`.
- * C'est le mode qu'utilisent Listbox, Tooltip, DatePicker et TimePicker.
+ * C'est le mode qu'utilisent Combobox, Tooltip, DatePicker et TimePicker.
  */
 export const AncrageFourni: Story = {
   render: (args) => ({

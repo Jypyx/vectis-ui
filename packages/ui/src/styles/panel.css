@@ -1,5 +1,5 @@
 /*
- * Chrome commun des panneaux flottants listant des rangées (Menu, Listbox).
+ * Chrome commun des panneaux flottants listant des rangées (Menu, Combobox).
  *
  * Pendant de `floating.css`, qui porte le POSITIONNEMENT du même sujet : ici
  * c'est l'habillage (surface, bordure, ombre, rythme interne). Les deux
@@ -7,10 +7,11 @@
  *   class="ds-panel ds-menu ds-floating"
  *
  * RÈGLE : ne mettre ici QUE des déclarations qu'aucun consommateur ne
- * redéclare. `.ds-panel` et `.ds-menu`/`.ds-listbox` sont à spécificité égale
- * (0,1,0) — à déclaration commune, c'est l'ordre du bundle qui trancherait.
- * Restent donc chez chaque panneau : `min/max-inline-size`, `max-height`,
- * `overflow`, `position-anchor`, la marge des sous-panneaux, `[data-width]`.
+ * redéclare. `.ds-panel` et `.ds-menu`/`.ds-combobox-panel` sont à spécificité
+ * égale (0,1,0) — à déclaration commune, c'est l'ordre du bundle qui
+ * trancherait. Restent donc chez chaque panneau : `min/max-inline-size`,
+ * `max-block-size`, `overflow`, la marge des sous-panneaux, `[data-width]`
+ * (`position-anchor` vient de `Popover`).
  *
  * Rien ici sur les TAILLES : le panneau porte `ds-control` (avec son
  * `data-size`/`data-compact`) et les rangées consomment les `--_control-*`
