@@ -71,6 +71,26 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
   /** Fermeture quand le focus sort du composant (panneau compris, descendant DOM). */
   const onFocusout = useFocusoutDismiss(options.rootEl, () => closePanel(false))
 
+  /*
+   * Clic sur une zone NON interactive du panneau (padding, gouttière entre les
+   * cellules, barre de navigation hors boutons) : le navigateur retire le focus
+   * de l'élément courant et le rend au <body>. Le `focusout` remonte alors à la
+   * racine avec un `relatedTarget` nul — que `useFocusoutDismiss` lit, à raison,
+   * comme une sortie — et ferme un panneau sur lequel on vient de cliquer.
+   *
+   * On garde donc le focus en place, mais SEULEMENT hors des éléments
+   * interactifs : un `preventDefault` inconditionnel (celui du Combobox, dont le
+   * focus ne quitte jamais le champ) priverait de focus les jours et les flèches
+   * de navigation, et désynchroniserait le roving tabindex du Calendar.
+   *
+   * Invisible en jsdom, qui ne simule pas le focus au clic : couvert par des
+   * play functions.
+   */
+  function onPanelMousedown(event: MouseEvent) {
+    const target = event.target as HTMLElement | null
+    if (!target?.closest('button, a, input, select, textarea, [tabindex]')) event.preventDefault()
+  }
+
   function onKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
       if (open.value) {
@@ -92,5 +112,13 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     }
   }
 
-  return { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown }
+  return {
+    open,
+    openPanel,
+    closePanel,
+    onControlClick,
+    onFocusout,
+    onKeydown,
+    onPanelMousedown,
+  }
 }

@@ -155,29 +155,30 @@ function focusPrimary() {
 // Coquille champ + panneau `manual` partagée avec le DatePicker. Le prologue
 // d'ouverture (brouillon, étape) et l'épilogue de fermeture (live region) sont
 // les seules parties propres au TimePicker.
-const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown } = useFieldPanel({
-  rootEl,
-  panelRef,
-  fieldEl: inputRef,
-  disabled: () => props.disabled,
-  focusInPanel: focusPrimary,
-  onOpen: () => {
-    // Brouillon : valeur commitée, sinon heure courante (handler → client only).
-    const parts = parseTime(model.value)
-    if (parts) {
-      draftHour.value = parts.hour
-      draftMinute.value = parts.minute
-    } else {
-      const now = new Date()
-      draftHour.value = now.getHours()
-      draftMinute.value = snapMinute(now.getMinutes(), props.minuteStep)
-    }
-    activeStep.value = 'hour'
-  },
-  onClose: () => {
-    liveMessage.value = ''
-  },
-})
+const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPanelMousedown } =
+  useFieldPanel({
+    rootEl,
+    panelRef,
+    fieldEl: inputRef,
+    disabled: () => props.disabled,
+    focusInPanel: focusPrimary,
+    onOpen: () => {
+      // Brouillon : valeur commitée, sinon heure courante (handler → client only).
+      const parts = parseTime(model.value)
+      if (parts) {
+        draftHour.value = parts.hour
+        draftMinute.value = parts.minute
+      } else {
+        const now = new Date()
+        draftHour.value = now.getHours()
+        draftMinute.value = snapMinute(now.getMinutes(), props.minuteStep)
+      }
+      activeStep.value = 'hour'
+    },
+    onClose: () => {
+      liveMessage.value = ''
+    },
+  })
 
 /** OK : seul chemin qui écrit le v-model. */
 function confirm() {
@@ -342,6 +343,7 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
       role="dialog"
       :aria-label="label ?? 'Choisir une heure'"
       class="ds-timepicker-panel"
+      @mousedown="onPanelMousedown"
     >
       <div class="ds-timepicker-caption">
         {{ activeMode === 'dial' ? 'Sélectionner l’heure' : 'Saisir l’heure' }}

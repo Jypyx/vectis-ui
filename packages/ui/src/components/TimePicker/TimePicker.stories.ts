@@ -263,3 +263,54 @@ export const Desactive: Story = {
     `,
   }),
 }
+
+/**
+ * Cliquer dans une zone vide du panneau (son padding, la gouttière entre le
+ * cadran et le pied) ne doit RIEN fermer — et surtout rien abandonner : la
+ * fermeture par sortie de focus vaut ici annulation du brouillon.
+ *
+ * Sans le `mousedown` neutralisé de `useFieldPanel`, le navigateur rendrait le
+ * focus au `<body>` et le `focusout` de la racine fermerait le panneau. Invisible
+ * en jsdom, qui ne simule pas le focus au clic.
+ */
+export const ClicDansLeVide: Story = {
+  args: { format: '24h' },
+  render: (args) => ({
+    components: { TimePicker },
+    setup: () => ({ args, value: ref('09:15') }),
+    template: `
+      <div style="width: 280px; display:grid; gap:8px">
+        <TimePicker v-bind="args" v-model="value" />
+        <output data-testid="valeur">{{ value }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
+    const panel = await waitFor(() => canvas.getByRole('dialog'))
+    // le focus est déplacé dans le panneau sous rAF
+    await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
+
+    // brouillon en cours : 10 h choisi au cadran, pas encore commité
+    const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
+    tapDial(face, 10 / 12)
+    await waitFor(() =>
+      expect(canvas.getByRole('button', { name: 'Sélectionner l’heure' })).toHaveTextContent('10'),
+    )
+
+    // clic sur le panneau LUI-MÊME et non sur un de ses contrôles : userEvent
+    // dispatche sur l'élément passé, sans hit-testing — c'est fidèlement le clic
+    // qui tombe dans son padding, là où rien n'est focusable
+    await userEvent.click(panel)
+    await expect(panel.matches(':popover-open')).toBe(true)
+    // le brouillon a survécu : une fermeture ici l'aurait abandonné
+    await expect(canvas.getByRole('button', { name: 'Sélectionner l’heure' })).toHaveTextContent(
+      '10',
+    )
+
+    // OK commite normalement
+    await userEvent.click(canvas.getByRole('button', { name: 'OK' }))
+    await waitFor(() => expect(canvas.getByTestId('valeur')).toHaveTextContent('10:15'))
+  },
+}

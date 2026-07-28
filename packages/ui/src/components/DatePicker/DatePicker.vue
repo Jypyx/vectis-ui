@@ -106,13 +106,14 @@ const panelId = useId()
 
 // Coquille champ + panneau `manual` partagée avec le TimePicker : ouverture,
 // fermeture, sortie de focus, clic sur le contrôle, Échap/ArrowDown/Entrée.
-const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown } = useFieldPanel({
-  rootEl,
-  panelRef,
-  fieldEl: inputRef,
-  disabled: () => props.disabled,
-  focusInPanel: () => calendarRef.value?.focus(),
-})
+const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPanelMousedown } =
+  useFieldPanel({
+    rootEl,
+    panelRef,
+    fieldEl: inputRef,
+    disabled: () => props.disabled,
+    focusInPanel: () => calendarRef.value?.focus(),
+  })
 
 const hasValue = computed(() => {
   if (props.mode === 'multiple') return Array.isArray(model.value) && model.value.length > 0
@@ -209,6 +210,7 @@ const close = () => closePanel(true)
       role="dialog"
       :aria-label="label ?? 'Choisir une date'"
       class="ds-datepicker-panel"
+      @mousedown="onPanelMousedown"
     >
       <Calendar
         ref="calendarRef"

@@ -161,3 +161,46 @@ export const Desactive: Story = {
     `,
   }),
 }
+
+/**
+ * Cliquer dans une zone vide du panneau (padding, gouttière entre les cellules)
+ * ne doit RIEN fermer : sans le `mousedown` neutralisé de `useFieldPanel`, le
+ * navigateur rendrait le focus au `<body>` et le `focusout` de la racine
+ * fermerait un panneau sur lequel on vient de cliquer.
+ *
+ * Invisible en jsdom, qui ne simule pas le focus au clic — d'où cette play.
+ */
+export const ClicDansLeVide: Story = {
+  render: (args) => ({
+    components: { DatePicker },
+    setup: () => ({ args, value: ref('2026-06-10') }),
+    template: `
+      <div style="width: 280px">
+        <DatePicker v-bind="args" v-model="value" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = canvas.getByRole('textbox', { name: 'Date' })
+    field.focus()
+    await userEvent.keyboard('{ArrowDown}')
+    const panel = await waitFor(() => canvas.getByRole('dialog'))
+    // le focus est déplacé dans la grille (le panneau `manual` ne le fait pas
+    // seul) — sous rAF, d'où le waitFor
+    await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
+
+    // clic sur la grille ELLE-MÊME et non sur une cellule : userEvent dispatche
+    // sur l'élément passé, sans hit-testing — c'est fidèlement le clic qui tombe
+    // dans le padding ou une gouttière, là où rien n'est focusable
+    await userEvent.click(canvas.getByRole('grid'))
+    await expect(panel.matches(':popover-open')).toBe(true)
+    // et le focus n'a pas été rendu au body
+    await expect(document.body).not.toHaveFocus()
+
+    // un clic sur un vrai jour, lui, garde le comportement natif (focus + choix)
+    await userEvent.click(canvas.getByRole('button', { name: '15' }))
+    await waitFor(() => expect(panel.matches(':popover-open')).toBe(false))
+    await expect(field).toHaveValue('15 juin 2026')
+  },
+}
