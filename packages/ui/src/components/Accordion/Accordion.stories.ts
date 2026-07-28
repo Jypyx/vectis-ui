@@ -9,7 +9,7 @@ const meta = {
   component: Accordion,
   argTypes: {
     exclusive: { control: 'boolean' },
-    variant: { control: 'inline-radio', options: ['outlined', 'flush'] },
+    variant: { control: 'inline-radio', options: ['flat', 'outlined'] },
     compact: { control: 'boolean' },
     expandIcon: { control: 'text' },
     collapseIcon: { control: 'text' },
@@ -32,7 +32,7 @@ const ITEMS = `
 `
 
 export const Default: Story = {
-  args: { exclusive: true, variant: 'outlined', compact: false },
+  args: { exclusive: true, variant: 'flat', compact: false },
   render: (args) => ({
     components: { Accordion, AccordionItem },
     setup: () => ({ args }),
@@ -141,12 +141,30 @@ export const IconesPersonnalisees: Story = {
   },
 }
 
-/** `variant="flush"` : ni bordure extérieure ni rayon — les séparateurs entre items subsistent. */
-export const Flush: Story = {
+/** Les deux habillages : `flat` (défaut, aucun) et `outlined` (fond surélevé, bordure, rayon). */
+export const Variantes: Story = {
   render: () => ({
     components: { Accordion, AccordionItem },
     template: `
-      <Accordion variant="flush" style="width: 420px">${ITEMS}</Accordion>
+      <div style="display: grid; gap: 32px; width: 420px">
+        <Accordion variant="flat">
+          <AccordionItem title="flat — aucun habillage">
+            Ni bordure, ni rayon, ni fond : l'accordéon hérite de la surface de son conteneur.
+          </AccordionItem>
+          <AccordionItem title="Les séparateurs subsistent">
+            Ils appartiennent à la lecture de la liste, pas à son cadre.
+          </AccordionItem>
+        </Accordion>
+
+        <Accordion variant="outlined">
+          <AccordionItem title="outlined — bordure et rayon">
+            Un trait de 1px cerne le groupe, sur un fond surélevé.
+          </AccordionItem>
+          <AccordionItem title="Rayon intérieur emboîté">
+            Les coins des items d'extrémité suivent la découpe du groupe.
+          </AccordionItem>
+        </Accordion>
+      </div>
     `,
   }),
 }

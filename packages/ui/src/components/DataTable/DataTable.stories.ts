@@ -62,6 +62,9 @@ const ROWS_MANY = PROJETS.map((name, index) => ({
 const meta: Meta = {
   title: 'Composants/DataTable',
   component: DataTable as Meta['component'],
+  argTypes: {
+    variant: { control: 'inline-radio', options: ['flat', 'outlined'] },
+  },
   args: {
     columns: COLUMNS,
     rows: ROWS,
@@ -263,6 +266,26 @@ export const EnTetesPersonnalises: Story = {
 }
 
 /** Densité réduite : paddings de cellules -1 cran, composés en compact. */
+/** Habillage du conteneur — même échelle que l'Accordion : `flat` (défaut) et `outlined`. */
+export const Variantes: Story = {
+  args: { title: 'Projets', searchable: true, caption: undefined },
+  render: (args) => ({
+    components: { DataTable },
+    setup: () => ({ args, variants: ['flat', 'outlined'] as const }),
+    template: `
+      <div style="display: grid; gap: 32px; width: 680px">
+        <DataTable
+          v-for="variant in variants"
+          :key="variant"
+          v-bind="args"
+          :variant="variant"
+          :title="'Projets — ' + variant"
+        />
+      </div>
+    `,
+  }),
+}
+
 export const Compact: Story = {
   args: { rows: ROWS_MANY, title: 'Projets', searchable: true, compact: true, showRange: true },
   render: (args) => ({

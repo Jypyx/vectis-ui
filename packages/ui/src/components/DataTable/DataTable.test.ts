@@ -59,6 +59,15 @@ describe('DataTable', () => {
     expect(container.querySelector('td')?.getAttribute('data-label')).toBe('Nom')
   })
 
+  it('variant : data-variant posé sur la racine, flat par défaut', () => {
+    const variantOf = (variant?: 'flat' | 'outlined') =>
+      render(DataTable, { props: { columns: COLUMNS, rows: ROWS, variant } })
+        .container.querySelector('.ds-table-wrapper')
+        ?.getAttribute('data-variant')
+    expect(variantOf()).toBe('flat')
+    expect(variantOf('outlined')).toBe('outlined')
+  })
+
   it('tri : asc → desc → aucun, avec aria-sort', async () => {
     const { container, getByRole } = render(DataTable, {
       props: { columns: COLUMNS, rows: ROWS },

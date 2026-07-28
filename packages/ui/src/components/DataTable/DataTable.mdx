@@ -66,12 +66,24 @@ Fournir `total` (nombre de lignes côté serveur) pour le calcul des pages et du
 
 <Canvas of={DataTableStories.ServerSide} />
 
+## Habillage
+
+`variant` pilote le cadre du tableau, sur l'échelle commune à l'`Accordion`. `flat` (défaut)
+n'ajoute rien : le tableau se pose nu, en-tête, filets et footer à fleur du conteneur d'accueil.
+`outlined` l'enferme dans une surface propre et arrondie, cernée d'un filet ; la barre de titre,
+le résumé et le footer prennent alors la gouttière du cadre, calée sur le padding des cellules —
+leur contenu s'aligne exactement sur le texte de la première colonne et suit `compact`. Seule la
+table continue de défiler bord à bord.
+
+<Canvas of={DataTableStories.Variantes} />
+
 ## Apparence
 
 `striped` alterne le fond des lignes paires ; `compact` réduit les paddings de cellules d'un
 cran et passe les composés (recherche, footer) en compact ; `stickyHeader` fige la rangée
 d'en-têtes au défilement vertical — en mode `scroll`, il suppose une zone défilante bornée par
-`height` (nombre → px, ou toute longueur CSS), sinon rien ne défile sous l'en-tête.
+`height` (nombre → px, ou toute longueur CSS), sinon rien ne défile sous l'en-tête. Son fond opaque
+reprend la surface de la variante : aucune couture au bord du cadre, y compris en thème sombre.
 
 <Canvas of={DataTableStories.Striped} />
 

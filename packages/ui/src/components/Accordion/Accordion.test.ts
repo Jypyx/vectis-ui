@@ -85,11 +85,11 @@ describe('Accordion', () => {
     expect(second?.querySelector('.ds-accordion-icon-start')).toBeNull()
   })
 
-  it('variant : data-variant posé sur la racine, outlined par défaut', () => {
+  it('variant : data-variant posé sur la racine, flat par défaut', () => {
     const variantOf = (attrs = '') =>
       renderWith(attrs).container.querySelector('.ds-accordion')?.getAttribute('data-variant')
-    expect(variantOf()).toBe('outlined')
-    expect(variantOf('variant="flush"')).toBe('flush')
+    expect(variantOf()).toBe('flat')
+    expect(variantOf('variant="outlined"')).toBe('outlined')
   })
 
   it('compact : data-compact posé sur la racine seulement si demandé', () => {

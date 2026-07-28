@@ -11,8 +11,8 @@ import { accordionKey } from './context'
 interface AccordionProps {
   /** Un seul item ouvert à la fois (attribut natif <details name>). */
   exclusive?: boolean
-  /** `outlined` : carte bordée et arrondie. `flush` : ni bordure ni rayon (bord à bord). */
-  variant?: 'outlined' | 'flush'
+  /** `flat` : aucun habillage. `outlined` : fond surélevé, bordure et rayon. */
+  variant?: 'flat' | 'outlined'
   /** Icône des items fermés : nom Material ou URL. Défaut : chevron pivotant. */
   expandIcon?: string
   /** Icône des items ouverts ; absente = `expandIcon` pivotée de 180°. */
@@ -23,7 +23,7 @@ interface AccordionProps {
 
 const props = withDefaults(defineProps<AccordionProps>(), {
   exclusive: true,
-  variant: 'outlined',
+  variant: 'flat',
   expandIcon: 'expand_more',
   collapseIcon: undefined,
   compact: false,
@@ -72,7 +72,6 @@ provide(accordionKey, {
     --_accordion-pad-inline: calc(var(--ds-space-5) - var(--_accordion-pad-delta));
     --_accordion-content-pad-start: calc(var(--ds-space-2) - var(--_accordion-pad-delta));
 
-    background: var(--ds-color-surface-raised);
     font-family: var(--ds-text-family);
     overflow: hidden;
   }
@@ -82,7 +81,8 @@ provide(accordionKey, {
     --_accordion-pad-delta: var(--ds-space-1);
   }
 
-  /* Carte bordée (défaut) ; `flush` n'a rien à annuler, il n'ajoute simplement rien */
+  /* Carte bordée ; `flat` (défaut) n'a rien à annuler — y compris le fond, qui
+     appartient au cadre : à plat, l'accordéon hérite de la surface d'accueil. */
   .ds-accordion[data-variant='outlined'] {
     /*
      * Rayon EMBOÎTÉ (moins la bordure) repris par les summary des items
@@ -91,6 +91,7 @@ provide(accordionKey, {
      */
     --_accordion-corner-radius: calc(var(--ds-radius-surface) - 1px);
 
+    background: var(--ds-color-surface-raised);
     border: 1px solid var(--ds-color-border);
     border-radius: var(--ds-radius-surface);
   }

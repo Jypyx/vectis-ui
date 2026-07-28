@@ -150,7 +150,7 @@ function onSummaryClick(event: MouseEvent) {
 
   /*
    * Coins des summary d'extrémité alignés sur le rayon intérieur du groupe
-   * (0 hors groupe bordé) : l'outline suit le border-radius, l'anneau devient
+   * (0 hors groupe encadré) : l'outline suit le border-radius, l'anneau devient
    * donc parallèle à la découpe `overflow: hidden` au lieu d'y être rogné.
    * Le dernier summary n'est au bord bas que panneau fermé.
    */

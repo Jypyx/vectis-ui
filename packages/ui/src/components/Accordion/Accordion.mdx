@@ -52,13 +52,15 @@ et échangées en CSS selon l'état du `<details>` — utile pour un couple non 
 
 ## Variantes
 
-`variant` pilote l'habillage du groupe. `outlined` (défaut) le présente en carte : bordure et
-coins arrondis autour de l'ensemble. `flush` retire l'un et l'autre pour un rendu bord à bord,
-destiné à un accordéon posé dans un conteneur qui porte déjà son propre cadre (panneau latéral,
-carte, feuille). Les séparateurs entre items, eux, restent en place dans les deux variantes :
-ils appartiennent à la lecture de la liste, pas à son cadre.
+`variant` pilote l'habillage du groupe, sur une échelle commune au `DataTable`. `flat` (défaut)
+n'en pose aucun — ni bordure, ni rayon, ni fond : c'est la variante d'un accordéon placé dans un
+conteneur qui porte déjà son propre cadre (panneau latéral, carte, feuille), dont il hérite alors
+la surface. `outlined` le présente en carte : filet de 1px, coins arrondis et fond surélevé.
 
-<Canvas of={AccordionStories.Flush} />
+Les séparateurs entre items, eux, restent en place dans les deux variantes : ils appartiennent à
+la lecture de la liste, pas à son cadre.
+
+<Canvas of={AccordionStories.Variantes} />
 
 ## Compact
 

@@ -60,6 +60,8 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   rowKey?: string
   /** Résumé du tableau (accessibilité). */
   caption?: string
+  /** Habillage du conteneur. `flat` : aucun. `outlined` : fond surélevé, bordure et rayon. */
+  variant?: 'flat' | 'outlined'
   /** `stack` : lignes en cartes sous 640px de conteneur ; `scroll` : défilement horizontal. */
   responsive?: 'scroll' | 'stack'
   loading?: boolean
@@ -107,6 +109,7 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
 const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   rowKey: undefined,
   caption: undefined,
+  variant: 'flat',
   responsive: 'scroll',
   loading: false,
   emptyText: 'Aucune donnée',
@@ -345,6 +348,7 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
     class="ds-table-wrapper"
     :class="rootClass"
     :style="rootStyle"
+    :data-variant="variant"
     :data-responsive="responsive"
     :data-striped="striped ? '' : undefined"
     :data-compact="compact ? '' : undefined"
@@ -526,6 +530,14 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
     --_table-pad-inline: var(--ds-space-3);
     --_table-head-pad-block: var(--ds-space-2);
 
+    /* Marge intérieure du cadre : nulle à plat (légende, toolbar et footer
+       restent à fleur de bord), alignée sur le padding inline des cellules dès
+       qu'une variante encadre la table. */
+    --_table-frame-pad: 0px;
+    /* Fond des en-têtes figés : suit celui du cadre — sans quoi la couture
+       serait visible en thème sombre (surface ≠ surface-raised). */
+    --_table-surface: var(--ds-color-surface);
+
     container-type: inline-size;
     font-family: var(--ds-text-family);
   }
@@ -534,6 +546,27 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
     --_table-pad-block: var(--ds-space-2);
     --_table-pad-inline: var(--ds-space-2);
     --_table-head-pad-block: var(--ds-space-1);
+  }
+
+  /* Carte bordée ; `flat` (défaut) n'a rien à annuler, il n'ajoute simplement
+     rien — c'est l'hôte qui porte le cadre et la surface. */
+  .ds-table-wrapper[data-variant='outlined'] {
+    --_table-frame-pad: var(--_table-pad-inline);
+    --_table-surface: var(--ds-color-surface-raised);
+
+    background: var(--_table-surface);
+    border: 1px solid var(--ds-color-border);
+    border-radius: var(--ds-radius-surface);
+    /*
+     * Contrepartie du rayon : fonds de lignes (zébrage, sélection), fond
+     * opaque de l'en-tête figé et coins carrés du scroller déborderaient
+     * sinon des angles. `clip` et non `hidden` : `hidden` ferait de la racine
+     * un conteneur de défilement et l'en-tête `sticky` s'y arrimerait au lieu
+     * du scroller. Conditionné à la variante — à plat, toolbar et footer sont
+     * à fleur de bord, la découpe rognerait leurs anneaux de focus. Le panneau
+     * « lignes par page » est un popover natif (top layer) : jamais rogné.
+     */
+    overflow: clip;
   }
 
   /* Seule la table défile : toolbar et footer restent en place. */
@@ -547,7 +580,9 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
     align-items: center;
     justify-content: space-between;
     gap: var(--ds-space-3);
+    padding-block-start: var(--_table-frame-pad);
     padding-block-end: var(--ds-space-3);
+    padding-inline: var(--_table-frame-pad);
   }
 
   /* Titre : rendu par Typography (heading-4) — la couleur reste explicite,
@@ -572,6 +607,7 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
 
   .ds-table-caption {
     padding-block-end: var(--ds-space-3);
+    padding-inline: var(--_table-frame-pad);
     text-align: start;
     font-size: var(--ds-text-body-md-size);
     color: var(--ds-color-text-muted);
@@ -618,12 +654,14 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
     background-color: var(--ds-color-accent-surface);
   }
 
-  /* Fond opaque obligatoire : le contenu défile sous l'en-tête figé. */
+  /* Fond opaque obligatoire : le contenu défile sous l'en-tête figé. Il doit
+     valoir la surface réelle du tableau, d'où la variable — une valeur en dur
+     laisserait une couture au bord du cadre en thème sombre. */
   .ds-table-wrapper[data-sticky-header] th {
     position: sticky;
     inset-block-start: 0;
     z-index: 1;
-    background-color: var(--ds-color-surface);
+    background-color: var(--_table-surface);
   }
 
   .ds-table-sort {
@@ -675,6 +713,8 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
     justify-content: flex-end;
     gap: var(--ds-space-4);
     padding-block-start: var(--ds-space-3);
+    padding-block-end: var(--_table-frame-pad);
+    padding-inline: var(--_table-frame-pad);
   }
 
   .ds-table-range,
