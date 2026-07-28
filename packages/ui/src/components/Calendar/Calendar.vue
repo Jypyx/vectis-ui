@@ -38,9 +38,9 @@ import { clamp } from '../../utils/number'
  * multiple — que HTML/CSS seuls ne couvrent pas. Tout se calcule en heure
  * locale via des chaînes ISO `YYYY-MM-DD` (cf. `utils/date`, SSR-safe).
  */
-export type CalendarMode = 'single' | 'range' | 'multiple'
+export type CalendarSelection = 'single' | 'range' | 'multiple'
 
-/** Plage de dates (mode `range`). Bornes optionnelles pendant la saisie. */
+/** Plage de dates (sélection `range`). Bornes optionnelles pendant la saisie. */
 export interface DateRange {
   start: string | null
   end: string | null
@@ -59,12 +59,12 @@ export interface CalendarEvent {
 /** Liste d'ISO ou prédicat désignant les dates non sélectionnables. */
 export type DateMatcher = string[] | ((iso: string) => boolean)
 
-/** Valeur du v-model, selon `mode`. */
+/** Valeur du v-model, selon `selection`. */
 export type CalendarValue = string | null | DateRange | string[]
 
 interface CalendarProps {
   /** Type de sélection. */
-  mode?: CalendarMode
+  selection?: CalendarSelection
   /** Locale BCP 47 (noms de mois/jours, 1er jour de semaine). */
   locale?: string
   /** Force le 1er jour de semaine (0 = dimanche … 6 = samedi). Défaut : locale. */
@@ -86,7 +86,7 @@ interface CalendarProps {
 }
 
 const props = withDefaults(defineProps<CalendarProps>(), {
-  mode: 'single',
+  selection: 'single',
   locale: 'fr-FR',
   firstDayOfWeek: undefined,
   min: undefined,
@@ -101,7 +101,7 @@ const model = defineModel<CalendarValue>({ default: null })
 
 const emit = defineEmits<{
   /** Émis à chaque sélection (valeur complète courante). Le DatePicker s'en sert
-      pour fermer en mode simple. */
+      pour fermer en sélection simple. */
   select: [value: CalendarValue]
 }>()
 
@@ -129,15 +129,15 @@ const weekdays = computed(() => weekdayNames(props.locale, resolvedFirstDay.valu
 const weekdaysLong = computed(() => weekdayNames(props.locale, resolvedFirstDay.value, 'long'))
 const monthLabels = computed(() => monthNamesCompact(props.locale))
 
-// ── Valeur normalisée par mode ──────────────────────────────────────────────
+// ── Valeur normalisée par type de sélection ──────────────────────────────────────────────
 const singleValue = computed(() =>
-  props.mode === 'single' && typeof model.value === 'string' && isValidISO(model.value)
+  props.selection === 'single' && typeof model.value === 'string' && isValidISO(model.value)
     ? model.value
     : null,
 )
 const rangeValue = computed<DateRange>(() => {
   if (
-    props.mode === 'range' &&
+    props.selection === 'range' &&
     model.value &&
     typeof model.value === 'object' &&
     !Array.isArray(model.value)
@@ -147,7 +147,7 @@ const rangeValue = computed<DateRange>(() => {
   return { start: null, end: null }
 })
 const multipleValues = computed<string[]>(() =>
-  props.mode === 'multiple' && Array.isArray(model.value) ? model.value : [],
+  props.selection === 'multiple' && Array.isArray(model.value) ? model.value : [],
 )
 
 // ── État de vue : focusedISO est la source de vérité du mois affiché ─────────
@@ -194,7 +194,7 @@ function orderRange(a: string, b: string): DateRange {
   return compareISO(a, b) <= 0 ? { start: a, end: b } : { start: b, end: a }
 }
 const effectiveRange = computed<DateRange>(() => {
-  if (props.mode !== 'range') return { start: null, end: null }
+  if (props.selection !== 'range') return { start: null, end: null }
   const r = rangeValue.value
   if (r.start && r.end) return orderRange(r.start, r.end)
   // start posé, end en attente : prévisualise jusqu'au survol/focus courant
@@ -204,8 +204,8 @@ const effectiveRange = computed<DateRange>(() => {
 })
 
 function isSelected(iso: string): boolean {
-  if (props.mode === 'single') return isSameISO(iso, singleValue.value)
-  if (props.mode === 'multiple') return multipleValues.value.includes(iso)
+  if (props.selection === 'single') return isSameISO(iso, singleValue.value)
+  if (props.selection === 'multiple') return multipleValues.value.includes(iso)
   // range : extrémités effectives (prévisualisation comprise)
   return isSameISO(iso, effectiveRange.value.start) || isSameISO(iso, effectiveRange.value.end)
 }
@@ -244,9 +244,9 @@ const days = computed<DayCell[]>(() =>
       inMonth,
       disabled,
       selected: kind === 'button' && !disabled && isSelected(cell.iso),
-      rangeStart: props.mode === 'range' && isSameISO(cell.iso, effectiveRange.value.start),
-      rangeEnd: props.mode === 'range' && isSameISO(cell.iso, effectiveRange.value.end),
-      inRange: props.mode === 'range' && isInRange(cell.iso),
+      rangeStart: props.selection === 'range' && isSameISO(cell.iso, effectiveRange.value.start),
+      rangeEnd: props.selection === 'range' && isSameISO(cell.iso, effectiveRange.value.end),
+      inRange: props.selection === 'range' && isInRange(cell.iso),
       today: isSameISO(cell.iso, today.value),
       events: eventsByDate.value.get(cell.iso) ?? [],
     }
@@ -323,9 +323,9 @@ function toggleView(target: 'months' | 'years') {
 function selectDay(cell: DayCell) {
   if (cell.kind !== 'button' || cell.disabled) return
   focusedISO.value = cell.iso
-  if (props.mode === 'single') {
+  if (props.selection === 'single') {
     model.value = cell.iso
-  } else if (props.mode === 'multiple') {
+  } else if (props.selection === 'multiple') {
     model.value = toggleValue(multipleValues.value, cell.iso).sort(compareISO)
   } else {
     // range : 1er clic = start ; 2e = end (réordonné) ; 3e = recommence
@@ -478,7 +478,12 @@ defineExpose({ focus })
 </script>
 
 <template>
-  <div class="ds-calendar" :data-view="view" :data-mode="mode" @pointerleave="hoverISO = null">
+  <div
+    class="ds-calendar"
+    :data-view="view"
+    :data-selection="selection"
+    @pointerleave="hoverISO = null"
+  >
     <!-- En-tête : sélecteurs mois & année avec chevrons ± -->
     <div class="ds-calendar-header">
       <div class="ds-calendar-nav">
@@ -548,7 +553,7 @@ defineExpose({ focus })
       class="ds-calendar-grid"
       role="grid"
       :aria-label="gridLabel"
-      :aria-multiselectable="mode === 'multiple' ? 'true' : undefined"
+      :aria-multiselectable="selection === 'multiple' ? 'true' : undefined"
       @keydown="onDaysKeydown"
     >
       <div class="ds-calendar-weekdays" role="row">

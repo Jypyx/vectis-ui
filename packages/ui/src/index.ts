@@ -106,13 +106,13 @@ export { default as Dialog } from './components/Dialog/Dialog.vue'
 export { default as DialogAlert } from './components/Dialog/DialogAlert.vue'
 export { default as Calendar } from './components/Calendar/Calendar.vue'
 export type {
-  CalendarMode,
+  CalendarSelection,
   CalendarValue,
   DateRange,
   CalendarEvent,
   DateMatcher,
 } from './components/Calendar/Calendar.vue'
 export { default as DatePicker } from './components/DatePicker/DatePicker.vue'
-export type { DatePickerEntry } from './components/DatePicker/DatePicker.vue'
+export type { DatePickerMode } from './components/DatePicker/DatePicker.vue'
 export { default as TimePicker } from './components/TimePicker/TimePicker.vue'
 export type { TimePickerFormat, TimePickerMode } from './components/TimePicker/TimePicker.vue'
