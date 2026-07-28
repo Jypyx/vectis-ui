@@ -133,13 +133,14 @@ export const SlotJour: Story = {
       return { args, value, prices }
     },
     // --ds-calendar-day-size agrandit les ronds (40×40) ; la ligne prix est
-    // TOUJOURS rendue (vide si absente) pour que tous les numéros s'alignent.
+    // TOUJOURS rendue (vide si absente, et sur les jours adjacents auxquels le
+    // slot s'applique aussi) pour que tous les numéros s'alignent.
     template: `
-      <Calendar v-bind="args" v-model="value" style="--ds-calendar-day-size: 40px">
-        <template #day="{ day, selected }">
+      <Calendar v-bind="args" v-model="value" show-adjacent-days style="--ds-calendar-day-size: 40px">
+        <template #day="{ day, inMonth, selected }">
           <span style="line-height:1.2">{{ day }}</span>
           <span :style="{ fontSize: '0.625rem', lineHeight: 1.2, minHeight: '0.75rem', color: selected ? 'inherit' : 'var(--ds-color-success-text)' }">
-            {{ prices[day] ?? '' }}
+            {{ inMonth ? prices[day] ?? '' : '' }}
           </span>
         </template>
       </Calendar>

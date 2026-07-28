@@ -132,6 +132,18 @@ describe('Calendar', () => {
     expect(struck.length).toBeGreaterThan(0)
   })
 
+  it('applique le slot #day aux jours adjacents statiques', () => {
+    // sinon un contenu multi-lignes ne s'appliquerait qu'aux jours du mois et
+    // décalerait verticalement les numéros des jours adjacents
+    const { container } = render(Calendar, {
+      props: { modelValue: JUNE, showAdjacentDays: true },
+      slots: { day: '<span class="marqueur">{{ params.day }}</span>' },
+    })
+    const statics = [...container.querySelectorAll('.ds-calendar-day--static')]
+    expect(statics.length).toBeGreaterThan(0)
+    expect(statics.every((s) => s.querySelector('.marqueur') !== null)).toBe(true)
+  })
+
   it('rend les jours adjacents cliquables quand selectAdjacentDays est vrai', () => {
     const { container } = render(Calendar, {
       props: { modelValue: JUNE, showAdjacentDays: true, selectAdjacentDays: true },

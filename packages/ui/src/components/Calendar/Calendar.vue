@@ -614,12 +614,29 @@ defineExpose({ focus })
               />
             </span>
           </button>
+          <!-- jour adjacent non sélectionnable : même slot que les jours boutons,
+               sinon un contenu personnalisé multi-lignes ne s'appliquerait qu'aux
+               jours du mois et les numéros ne s'aligneraient plus d'une case à
+               l'autre (le slot reçoit `inMonth` pour différencier le rendu) -->
           <span
             v-else-if="cell.kind === 'static'"
             class="ds-calendar-day ds-calendar-day--static"
             :data-disabled="cell.disabled ? '' : undefined"
-            >{{ cell.day }}</span
           >
+            <slot
+              name="day"
+              :iso="cell.iso"
+              :day="cell.day"
+              :in-month="cell.inMonth"
+              :disabled="cell.disabled"
+              :selected="cell.selected"
+              :today="cell.today"
+              :in-range="cell.inRange"
+              :events="cell.events"
+            >
+              <span class="ds-calendar-day-num">{{ cell.day }}</span>
+            </slot>
+          </span>
         </div>
       </div>
     </div>

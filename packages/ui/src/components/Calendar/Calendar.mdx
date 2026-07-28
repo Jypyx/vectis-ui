@@ -70,6 +70,11 @@ publique **`--ds-calendar-day-size`** (défaut `2rem`) — l'exemple ci-dessous
 utilise des ronds de 40 px et rend toujours la ligne prix (vide si absente) pour
 garder les numéros alignés d'une case à l'autre.
 
+Le slot s'applique aussi aux jours des mois adjacents (`showAdjacentDays`), pour
+que leur numéro reste aligné sur celui des jours du mois : utilisez `inMonth`
+pour n'afficher les données que sur les jours du mois affiché, en gardant la
+même hauteur de contenu.
+
 <Canvas of={CalendarStories.SlotJour} />
 
 ## Zone footer
