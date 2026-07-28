@@ -12,6 +12,7 @@ const meta = {
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     entry: { control: 'inline-radio', options: ['readonly', 'input'] },
+    showCalendar: { control: 'boolean' },
   },
   args: {
     mode: 'single',
@@ -20,6 +21,7 @@ const meta = {
     size: 'md',
     clearable: true,
     entry: 'readonly',
+    showCalendar: false,
   },
 } satisfies Meta<typeof DatePicker>
 
@@ -209,11 +211,59 @@ export const ClicDansLeVide: Story = {
 
 /**
  * Mode saisie : le champ est éditable et pose les séparateurs tout seul —
- * l'utilisateur ne tape que des chiffres. Le calendrier reste visible pendant la
- * frappe, sans prendre le focus.
+ * l'utilisateur ne tape que des chiffres. Par défaut, aucun calendrier : le
+ * champ reste nu tant qu'aucune date n'est saisie, puis affiche la croix
+ * d'effacement.
  */
 export const Saisie: Story = {
   args: { entry: 'input', hint: 'Format jj/mm/aaaa' },
+  render: (args) => ({
+    components: { DatePicker },
+    setup: () => ({ args, value: ref<string | null>(null) }),
+    template: `
+      <div style="width: 280px; display:grid; gap:8px">
+        <DatePicker v-bind="args" v-model="value" />
+        <output>{{ value ?? '—' }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = canvas.getByRole('textbox', { name: 'Date' })
+
+    // sans calendrier, le champ n'annonce aucun popup et n'en ouvre aucun
+    await expect(field).not.toHaveAttribute('aria-haspopup')
+    await userEvent.click(field)
+    await expect(canvas.queryByRole('dialog')).toBeNull()
+
+    // seuls les chiffres sont tapés, le masque pose les « / »
+    await userEvent.keyboard('10')
+    await expect(field).toHaveValue('10/')
+    await userEvent.keyboard('062026')
+    await expect(field).toHaveValue('10/06/2026')
+    await expect(field).toHaveFocus()
+    await waitFor(() => expect(canvas.getByText('2026-06-10')).toBeVisible())
+
+    // la croix d'effacement, elle, reste disponible (clearable)
+    await expect(canvas.getByRole('button', { name: 'Effacer la date' })).toBeVisible()
+
+    // le Retour arrière sur le séparateur efface le chiffre qui le précède
+    await userEvent.keyboard('{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}')
+    await expect(field).toHaveValue('10/0')
+
+    // sortie du champ : la saisie incomplète revient silencieusement à la valeur
+    await userEvent.tab()
+    await waitFor(() => expect(field).toHaveValue('10/06/2026'))
+  },
+}
+
+/**
+ * `showCalendar` rend le calendrier accessible depuis un champ de saisie : icône
+ * cliquable en fin de champ, et panneau ouvert au focus — sans happer le
+ * curseur, la frappe continue dans le champ.
+ */
+export const SaisieAvecCalendrier: Story = {
+  args: { entry: 'input', showCalendar: true, hint: 'Format jj/mm/aaaa' },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({ args, value: ref<string | null>(null) }),
@@ -232,19 +282,9 @@ export const Saisie: Story = {
     await userEvent.click(field)
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     await expect(field).toHaveFocus()
-
-    // seuls les chiffres sont tapés, le masque pose les « / »
-    await userEvent.keyboard('10')
-    await expect(field).toHaveValue('10/')
-    await userEvent.keyboard('062026')
+    await userEvent.keyboard('10062026')
     await expect(field).toHaveValue('10/06/2026')
-    // le focus n'a pas quitté le champ de toute la saisie
     await expect(field).toHaveFocus()
-    await waitFor(() => expect(canvas.getByText('2026-06-10')).toBeVisible())
-
-    // le Retour arrière sur le séparateur efface le chiffre qui le précède
-    await userEvent.keyboard('{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}')
-    await expect(field).toHaveValue('10/0')
 
     // la flèche bas est le chemin explicite vers la grille, Échap en revient
     await userEvent.keyboard('{ArrowDown}')
@@ -254,9 +294,6 @@ export const Saisie: Story = {
     await waitFor(() => expect(field).toHaveFocus())
     // Échap n'a pas rouvert le panneau via le focus rendu au champ
     await expect(panel.matches(':popover-open')).toBe(false)
-    // sortie du champ : la saisie incomplète revient silencieusement à la valeur
-    await userEvent.tab()
-    await waitFor(() => expect(field).toHaveValue('10/06/2026'))
   },
 }
 
