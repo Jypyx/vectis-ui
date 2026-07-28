@@ -701,7 +701,7 @@ defineExpose({ focus })
   .ds-calendar {
     /* Taille du rond (jour) configurable par le consommateur ; la cellule (zone
        de survol / colonne) s'agrandit avec, sans jamais passer sous le token. */
-    --_day-size: var(--ds-calendar-day-size, var(--ds-control-height-sm));
+    --_day-size: var(--ds-calendar-day-size, var(--ds-control-height-md));
     --_cell: max(var(--ds-control-size-calendar-cell), calc(var(--_day-size) + var(--ds-space-1)));
     display: inline-flex;
     flex-direction: column;
