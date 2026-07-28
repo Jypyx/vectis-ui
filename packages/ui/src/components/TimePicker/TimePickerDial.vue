@@ -352,19 +352,25 @@ function onKeydown(event: KeyboardEvent) {
     block-size: var(--ds-control-size-timepicker-number);
     border-radius: var(--ds-radius-pill);
     background: var(--ds-color-accent);
+    /* Seule la BASCULE DE TAILLE (repère ↔ [data-minor]) s'anime : elle
+       interpole entre deux valeurs bornées, contrairement au `rotate` de
+       l'aiguille, laissé sans transition (cf. plus haut). */
+    transition:
+      inline-size var(--ds-duration-fast) var(--ds-ease-default),
+      block-size var(--ds-duration-fast) var(--ds-ease-default);
   }
 
-  /* Minute hors repère 5 min : point clair au centre de la pastille (M3) */
-  .ds-timepicker-hand[data-minor]::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    translate: -50% -50%;
-    inline-size: var(--ds-control-size-timepicker-center);
-    block-size: var(--ds-control-size-timepicker-center);
-    border-radius: var(--ds-radius-pill);
-    background: var(--ds-color-text-on-accent);
+  /*
+   * Minute hors repère 5 min : la pastille ne recouvre aucun chiffre et
+   * déborderait sur les deux voisins → réduite, elle devient à elle seule le
+   * repère précis (d'où l'abandon du point clair central de M3, qui ferait un
+   * anneau à cette taille). Seule la taille du pseudo change : redéfinir
+   * --ds-control-size-timepicker-number ici déplacerait aussi --_r, donc la
+   * longueur de l'aiguille et le rayon des anneaux.
+   */
+  .ds-timepicker-hand[data-minor]::before {
+    inline-size: var(--ds-control-size-timepicker-hand-minor);
+    block-size: var(--ds-control-size-timepicker-hand-minor);
   }
 
   .ds-timepicker-dial-center {
@@ -376,6 +382,12 @@ function onKeydown(event: KeyboardEvent) {
     block-size: var(--ds-control-size-timepicker-center);
     border-radius: var(--ds-radius-pill);
     background: var(--ds-color-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ds-timepicker-hand::before {
+      transition: none;
+    }
   }
 }
 </style>

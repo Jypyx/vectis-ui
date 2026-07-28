@@ -249,6 +249,7 @@
     --ds-control-size-timepicker-number: 3rem;
     --ds-control-size-timepicker-center: 0.5rem;
     --ds-control-size-timepicker-hand: 2px;
+    --ds-control-size-timepicker-hand-minor: 1rem;
     --ds-control-size-timepicker-cell-w: 6rem;
     --ds-control-size-timepicker-list-max-block: 18rem;
     --ds-icon-size-sm: 1rem;
@@ -392,6 +393,7 @@
     --ds-control-size-timepicker-number: 3rem;
     --ds-control-size-timepicker-center: 0.5rem;
     --ds-control-size-timepicker-hand: 2px;
+    --ds-control-size-timepicker-hand-minor: 1rem;
     --ds-control-size-timepicker-cell-w: 6rem;
     --ds-control-size-timepicker-list-max-block: 18rem;
     --ds-icon-size-sm: 1rem;

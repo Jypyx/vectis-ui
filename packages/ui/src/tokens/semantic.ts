@@ -229,10 +229,14 @@ export const semantic = {
     'size-timepicker-dial': dimension('16rem', 'Diamètre du cadran du TimePicker (spec M3)'),
     'size-timepicker-number': dimension(
       '3rem',
-      "Cellule d'un chiffre du cadran du TimePicker et pastille de l'aiguille",
+      "Cellule d'un chiffre du cadran du TimePicker et pastille de l'aiguille sur un repère",
     ),
     'size-timepicker-center': dimension('0.5rem', 'Point central du cadran du TimePicker'),
     'size-timepicker-hand': dimension('2px', "Épaisseur de l'aiguille du cadran du TimePicker"),
+    'size-timepicker-hand-minor': dimension(
+      '1rem',
+      "Pastille de l'aiguille du cadran du TimePicker sur une minute hors repère 5 min",
+    ),
     'size-timepicker-cell-w': dimension(
       '6rem',
       "Largeur d'un sélecteur heure/minute du panneau du TimePicker (la hauteur vient de l'échelle de contrôles)",
