@@ -133,9 +133,6 @@ defineSlots<{
 const chipSize = computed(() => (props.size === 'lg' ? 'sm' : 'xs'))
 const chipCompact = computed(() => (props.size === 'lg' ? props.compact : props.size === 'sm'))
 
-// Le panneau (Listbox, interne) n'a que deux densités : `lg` y retombe sur md.
-const panelSize = computed(() => (props.size === 'lg' ? 'md' : props.size))
-
 const model = defineModel<string | string[]>({ default: '' })
 
 // Racine wrapper : class/style restent sur la racine, le reste (aria-label…)
@@ -588,7 +585,7 @@ watch(
       v-model:open="open"
       anchor="--ds-combobox-anchor"
       :multiselectable="multiple"
-      :size="panelSize"
+      :size="size"
       :compact="compact"
       placement="bottom-start"
     >

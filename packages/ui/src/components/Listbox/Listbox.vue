@@ -33,8 +33,8 @@ interface ListboxProps {
   /** Ancre statique (dashed-ident) posée par le consommateur sur son contrôle. */
   anchor: string
   placement?: ListboxPlacement
-  /** Hauteur minimale des options : 32px (sm) ou 40px (md). */
-  size?: 'sm' | 'md'
+  /** Hauteur minimale des options : 32px (sm), 40px (md) ou 48px (lg). */
+  size?: 'sm' | 'md' | 'lg'
   /** Hauteur minimale des options réduite de 4px. */
   compact?: boolean
   /** Sélection multiple (aria-multiselectable). */
@@ -134,6 +134,11 @@ const panelStyle = computed(() => ({ '--_anchor': props.anchor }))
   .ds-listbox[data-size='md'] {
     --_listbox-option-min-h: var(--ds-control-height-md);
     --_listbox-option-pad-i: var(--ds-space-4);
+  }
+
+  .ds-listbox[data-size='lg'] {
+    --_listbox-option-min-h: var(--ds-control-height-lg);
+    --_listbox-option-pad-i: var(--ds-space-5);
   }
 
   /* Compact : hauteur minimale -4px, padding/typo/icônes inchangés */

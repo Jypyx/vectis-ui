@@ -15,7 +15,7 @@ const meta = {
       control: 'select',
       options: ['bottom-start', 'bottom-end', 'bottom', 'top-start', 'top-end', 'top'],
     },
-    size: { control: 'select', options: ['sm', 'md'] },
+    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     compact: { control: 'boolean' },
   },
   args: { placement: 'bottom-start', size: 'sm', compact: false },
@@ -152,7 +152,10 @@ export const Groupes: Story = {
   },
 }
 
-/** sm 32px (défaut) / md 40px ; `compact` retire 4px, combinable avec les deux. */
+/**
+ * sm 32px (défaut) / md 40px / lg 48px — hauteur minimale des items et padding
+ * inline ; `compact` retire 4px, combinable avec les trois.
+ */
 export const Tailles: Story = {
   render: () => ({
     components: { Menu, MenuItem, MenuSeparator, Button },
@@ -161,8 +164,10 @@ export const Tailles: Story = {
         <Menu v-for="variant in [
           { label: 'sm', props: {} },
           { label: 'md', props: { size: 'md' } },
+          { label: 'lg', props: { size: 'lg' } },
           { label: 'sm compact', props: { compact: true } },
           { label: 'md compact', props: { size: 'md', compact: true } },
+          { label: 'lg compact', props: { size: 'lg', compact: true } },
         ]" :key="variant.label" v-bind="variant.props">
           <template #trigger="{ triggerProps }">
             <Button size="sm" variant="outline" tone="neutral" v-bind="triggerProps">{{ variant.label }}</Button>

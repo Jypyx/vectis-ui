@@ -29,7 +29,7 @@ interface MenuPanelProps {
    * Posé UNIQUEMENT par la racine (pas de défaut : les sous-panneaux ne
    * rendent pas data-size) : les sous-panneaux héritent via CSS.
    */
-  size?: 'sm' | 'md'
+  size?: 'sm' | 'md' | 'lg'
   /** Posé UNIQUEMENT par la racine : les sous-panneaux héritent via CSS. */
   compact?: boolean
   /**
@@ -180,6 +180,11 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
   .ds-menu[data-size='md'] {
     --_menu-item-min-h: var(--ds-control-height-md);
     --_menu-item-pad-i: var(--ds-space-4);
+  }
+
+  .ds-menu[data-size='lg'] {
+    --_menu-item-min-h: var(--ds-control-height-lg);
+    --_menu-item-pad-i: var(--ds-space-5);
   }
 
   /* Compact : hauteur minimale -4px, padding/typo/icônes inchangés */

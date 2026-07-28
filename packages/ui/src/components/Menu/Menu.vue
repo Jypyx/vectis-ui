@@ -16,8 +16,8 @@ import type { MenuPlacement } from './context'
  */
 interface MenuProps {
   placement?: MenuPlacement
-  /** Hauteur minimale des items : 32px (sm) ou 40px (md) ; héritée par les sous-menus. */
-  size?: 'sm' | 'md'
+  /** Hauteur minimale des items : 32px (sm), 40px (md) ou 48px (lg) ; héritée par les sous-menus. */
+  size?: 'sm' | 'md' | 'lg'
   /** Hauteur minimale des items réduite de 4px ; héritée par les sous-menus. */
   compact?: boolean
   /**

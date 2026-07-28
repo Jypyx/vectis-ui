@@ -343,7 +343,7 @@ describe('Combobox asynchrone', () => {
     expect(spinner?.getAttribute('aria-hidden')).toBe('true')
   })
 
-  it('tailles : les Chips restent un cran sous le champ, le panneau clampe lg sur md', async () => {
+  it('tailles : les Chips restent un cran sous le champ, le panneau suit sa taille', async () => {
     // Mapping unique (script) que le CSS `--_chip-height` doit refléter :
     // xs jusqu'à md, sm en lg ; le cran du dessous passe par `compact`.
     const { container, rerender } = renderCombobox({ multiple: true, modelValue: ['fr'] })
@@ -361,8 +361,8 @@ describe('Combobox asynchrone', () => {
     await rerender({ size: 'lg', compact: false })
     expect(chip().getAttribute('data-size')).toBe('sm')
     expect(chip().hasAttribute('data-compact')).toBe(false)
-    // le panneau n'a que deux densités : lg y retombe sur md
-    expect(panel().getAttribute('data-size')).toBe('md')
+    // le panneau suit la taille du champ (aucun clamp)
+    expect(panel().getAttribute('data-size')).toBe('lg')
 
     await rerender({ size: 'lg', compact: true })
     expect(chip().getAttribute('data-size')).toBe('sm')

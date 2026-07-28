@@ -180,7 +180,7 @@ export const Disabled: Story = {
  * `compact` (-4px). En multiple, les Chips restent un cran sous le champ :
  * `xs` (24px) jusqu'à `md`, `sm` (32px) en `lg` — le rattrapage sous le cran
  * le plus bas de chaque paire passe par `compact` (20px en `sm`, 28px en
- * `lg compact`). Le panneau, lui, retombe sur `md` en `lg`.
+ * `lg compact`). Le panneau d'options suit la taille du champ.
  */
 export const Tailles: Story = {
   render: (args) => ({
