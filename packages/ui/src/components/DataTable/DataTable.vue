@@ -424,7 +424,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 @click="toggleSort(column.key)"
               >
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
-                <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
                   <path
                     class="ds-table-sort-up"
                     d="m4 6.5 4-4 4 4"
