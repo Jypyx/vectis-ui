@@ -12,7 +12,7 @@
  * pas du fuseau de la machine.
  */
 
-import { pad2 } from './text'
+import { digitsOf, pad2 } from './text'
 
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/
 
@@ -279,9 +279,6 @@ export function dateMaskFor(locale: string): DateMask {
   }
   return MASK_FALLBACK
 }
-
-/** Chiffres d'un texte — le masque ne connaît que ça. */
-export const digitsOf = (text: string): string => text.replace(/\D/g, '')
 
 /**
  * Suite de chiffres → texte masqué. Le séparateur est posé DÈS QUE le champ qui

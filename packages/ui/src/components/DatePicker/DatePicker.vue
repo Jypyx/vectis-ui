@@ -12,7 +12,6 @@ import type {
 import {
   caretAfterDigits,
   dateMaskFor,
-  digitsOf,
   formatDateMask,
   formatDisplay,
   formatDisplayRange,
@@ -22,6 +21,7 @@ import {
   maskPlaceholder,
   parseDateMask,
 } from '../../utils/date'
+import { digitsOf } from '../../utils/text'
 import { resolveMatcher } from '../../utils/matcher'
 import { isDev } from '../../utils/env'
 import Input from '../Input/Input.vue'
@@ -630,12 +630,11 @@ const close = () => closeAndFocus()
     font-variant-numeric: tabular-nums;
   }
 
-  /* `position-anchor` vient de Popover (prop `anchor`), rendu sans surface */
+  /* `position-anchor` et le chrome viennent de Popover (props `anchor` et
+     `surface`, cette dernière posant `.ds-panel`) : il ne reste ici que les
+     dimensions, que `panel.css` ne porte volontairement pas. Padding annulé —
+     le Calendar gère sa propre respiration. */
   .ds-datepicker-panel {
-    /* le Calendar porte son propre fond : on neutralise les styles UA de
-       [popover] (bordure, padding, fond), et le panneau épouse ses coins en
-       ajoutant l'ombre d'élévation (box-shadow, pas filter : drop-shadow()
-       n'accepte qu'une seule ombre alors que --ds-shadow-* en empile deux). */
     width: max-content;
     padding: 0;
   }

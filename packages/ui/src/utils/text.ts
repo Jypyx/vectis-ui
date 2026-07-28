@@ -14,3 +14,10 @@ export function normalizeText(s: string): string {
 export function pad2(n: number): string {
   return String(n).padStart(2, '0')
 }
+
+/**
+ * Chiffres d'un texte. Helper purement lexical, sans domaine : les masques de
+ * saisie du DS (date du DatePicker, heure du TimePicker) ne connaissent que la
+ * suite de chiffres, jamais les séparateurs, qu'ils posent eux-mêmes.
+ */
+export const digitsOf = (text: string): string => text.replace(/\D/g, '')

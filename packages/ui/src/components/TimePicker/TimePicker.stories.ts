@@ -9,12 +9,14 @@ const meta = {
   component: TimePicker,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+    mode: { control: 'inline-radio', options: ['readonly', 'input', 'list'] },
   },
   args: {
     locale: 'fr-FR',
     label: 'Heure',
     size: 'md',
     clearable: true,
+    mode: 'readonly',
   },
 } satisfies Meta<typeof TimePicker>
 
@@ -128,8 +130,12 @@ export const AnneauInterieur: Story = {
   },
 }
 
-export const ModeSaisie: Story = {
-  args: { mode: 'input', format: '24h' },
+/**
+ * Mode saisie : le champ est masqué, l'utilisateur ne tape que des chiffres et
+ * le deux-points est posé tout seul. Par défaut, aucun cadran.
+ */
+export const SaisieMasquee: Story = {
+  args: { mode: 'input', format: '24h', hint: 'Format hh:mm' },
   render: (args) => ({
     components: { TimePicker },
     setup: () => ({ args, value: ref(null) }),
@@ -142,32 +148,115 @@ export const ModeSaisie: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
-    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
-    // le focus arrive sur le champ heure ; « 09 » avance automatiquement aux minutes
-    const fields = canvasElement.querySelectorAll<HTMLInputElement>('.ds-timepicker-field')
-    const hourField = fields[0]!
-    const minuteField = fields[1]!
-    await waitFor(() => expect(hourField).toHaveFocus())
-    // clear() avant la frappe : userEvent bute sur maxlength=2 quand le champ
-    // est pré-rempli (l'heure courante) — la sélection posée au focus n'est pas
-    // prise en compte dans son calcul de dépassement
-    await userEvent.clear(hourField)
-    await userEvent.type(hourField, '09')
-    await waitFor(() => expect(minuteField).toHaveFocus())
-    await userEvent.clear(minuteField)
-    await userEvent.type(minuteField, '30')
-    await userEvent.click(canvas.getByRole('button', { name: 'OK' }))
+    const field = canvas.getByRole('textbox', { name: 'Heure' }) as HTMLInputElement
+
+    // sans cadran, le champ n'annonce aucun popup et n'en ouvre aucun
+    await expect(field).not.toHaveAttribute('aria-haspopup')
+    await userEvent.click(field)
+    await expect(canvas.queryByRole('dialog')).toBeNull()
+
+    await userEvent.keyboard('09')
+    await expect(field).toHaveValue('09:')
+    // le caret a franchi le deux-points, la frappe continue dans les minutes
+    await expect(field.selectionStart).toBe(3)
+    await userEvent.keyboard('30')
+    await expect(field).toHaveValue('09:30')
     await waitFor(() => expect(canvas.getByTestId('valeur')).toHaveTextContent('09:30'))
+
+    // les deux chiffres des minutes partent, le caret se pose DEVANT le
+    // deux-points (à la suppression il ne le franchit pas)…
+    await userEvent.keyboard('{Backspace}{Backspace}')
+    await expect(field).toHaveValue('09:')
+    await expect(field.selectionStart).toBe(2)
+    // …et le Retour arrière suivant efface le chiffre, pas le séparateur
+    await userEvent.keyboard('{Backspace}')
+    await expect(field).toHaveValue('0')
+
+    // sortie du champ : la saisie incomplète revient silencieusement à la valeur
+    await userEvent.tab()
+    await waitFor(() => expect(field).toHaveValue('09:30'))
   },
 }
 
-// Le v-model reste en 24 h canonique : 7 h + PM → '19:00'.
-export const DouzeHeures: Story = {
-  args: { locale: 'en-US', label: 'Time' },
+/**
+ * `showDial` rend le cadran accessible depuis un champ de saisie : icône
+ * cliquable en fin de champ, et panneau ouvert au focus — sans happer le
+ * curseur, la frappe continue dans le champ.
+ */
+export const SaisieAvecCadran: Story = {
+  args: { mode: 'input', showDial: true, format: '24h' },
   render: (args) => ({
     components: { TimePicker },
-    setup: () => ({ args, value: ref('07:00') }),
+    setup: () => ({ args, value: ref(null) }),
+    template: `
+      <div style="width: 280px; display:grid; gap:8px">
+        <TimePicker v-bind="args" v-model="value" />
+        <output data-testid="valeur">{{ value ?? '—' }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = canvas.getByRole('textbox', { name: 'Heure' })
+
+    // le clic ouvre le panneau SANS happer le curseur : la frappe continue
+    await userEvent.click(field)
+    const panel = await waitFor(() => canvas.getByRole('dialog'))
+    await expect(field).toHaveFocus()
+    await userEvent.keyboard('0930')
+    await expect(field).toHaveValue('09:30')
+    await expect(field).toHaveFocus()
+
+    // la flèche bas est le chemin explicite vers le cadran, Échap en revient
+    await userEvent.keyboard('{ArrowDown}')
+    await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(field).toHaveFocus())
+    await expect(panel.matches(':popover-open')).toBe(false)
+  },
+}
+
+/**
+ * Mode liste : les heures disponibles par pas de `minuteStep`. À l'ouverture, la
+ * valeur courante a le focus et la liste est défilée dessus ; choisir une heure
+ * commite immédiatement (ni brouillon, ni bouton OK).
+ */
+export const ListeDHeures: Story = {
+  args: { mode: 'list', minuteStep: 30, format: '24h' },
+  render: (args) => ({
+    components: { TimePicker },
+    setup: () => ({ args, value: ref('14:30') }),
+    template: `
+      <div style="width: 280px; display:grid; gap:8px">
+        <TimePicker v-bind="args" v-model="value" />
+        <output data-testid="valeur">{{ value ?? '—' }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = canvas.getByRole('textbox', { name: 'Heure' })
+    await userEvent.click(field)
+    const panel = await waitFor(() => canvas.getByRole('listbox'))
+
+    // la rangée sélectionnée a le focus ET la liste a défilé jusqu'à elle
+    await waitFor(() => expect(document.activeElement).toHaveAttribute('data-value', '14:30'))
+    await expect(panel.scrollTop).toBeGreaterThan(0)
+
+    // clic sur une rangée : commit immédiat, fermeture, focus rendu au champ
+    await userEvent.click(canvas.getByRole('option', { name: '9:00' }))
+    await waitFor(() => expect(canvas.getByTestId('valeur')).toHaveTextContent('09:00'))
+    await expect(panel.matches(':popover-open')).toBe(false)
+    await expect(field).toHaveFocus()
+  },
+}
+
+/** Clavier dans la liste : flèches, Home/End, et Entrée qui commite. */
+export const ListeClavier: Story = {
+  args: { mode: 'list', minuteStep: 30, format: '24h' },
+  render: (args) => ({
+    components: { TimePicker },
+    setup: () => ({ args, value: ref('00:00') }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
         <TimePicker v-bind="args" v-model="value" />
@@ -177,10 +266,40 @@ export const DouzeHeures: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('textbox', { name: 'Time' }))
-    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
+    const field = canvas.getByRole('textbox', { name: 'Heure' })
+    field.focus()
+    await userEvent.keyboard('{ArrowDown}')
+    const panel = await waitFor(() => canvas.getByRole('listbox'))
+    await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
+
+    // l'ouverture a posé le focus sur la valeur courante (00:00) : deux crans
+    // plus bas au pas de 30 minutes, on est à 01:00
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}')
+    await expect(document.activeElement).toHaveAttribute('data-value', '01:00')
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(canvas.getByTestId('valeur')).toHaveTextContent('01:00'))
+    // l'Entrée ne rouvre pas le panneau qu'elle vient de fermer
+    await expect(panel.matches(':popover-open')).toBe(false)
+  },
+}
+
+// Le v-model reste en 24 h canonique : 7 h + PM → '19:00'. Le Toggle vit à côté
+// du champ, hors du panneau : aucune ouverture ni validation nécessaire.
+export const DouzeHeures: Story = {
+  args: { locale: 'en-US', label: 'Time' },
+  render: (args) => ({
+    components: { TimePicker },
+    setup: () => ({ args, value: ref('07:00') }),
+    template: `
+      <div style="width: 320px; display:grid; gap:8px">
+        <TimePicker v-bind="args" v-model="value" />
+        <output data-testid="valeur">{{ value }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('button', { name: 'PM' }))
-    await userEvent.click(canvas.getByRole('button', { name: 'OK' }))
     await waitFor(() => expect(canvas.getByTestId('valeur')).toHaveTextContent('19:00'))
   },
 }
@@ -225,19 +344,6 @@ export const PasDeCinqMinutes: Story = {
   }),
 }
 
-export const SaisieVerrouillee: Story = {
-  args: { mode: 'input', lockMode: true, hint: 'Saisie clavier uniquement' },
-  render: (args) => ({
-    components: { TimePicker },
-    setup: () => ({ args, value: ref('09:15') }),
-    template: `
-      <div style="width: 280px">
-        <TimePicker v-bind="args" v-model="value" />
-      </div>
-    `,
-  }),
-}
-
 export const Tailles: Story = {
   render: (args) => ({
     components: { TimePicker },
@@ -247,6 +353,24 @@ export const Tailles: Story = {
         <TimePicker v-bind="args" v-model="value" size="sm" label="sm" />
         <TimePicker v-bind="args" v-model="value" size="md" label="md" />
         <TimePicker v-bind="args" v-model="value" size="lg" label="lg" />
+      </div>
+    `,
+  }),
+}
+
+/** En 12 h, le Toggle AM/PM s'aligne sur le CHAMP, pas sur le bloc : sa position
+    est compensée par la hauteur du label et du hint. */
+export const MeridienAligne: Story = {
+  args: { locale: 'en-US', label: 'Time' },
+  render: (args) => ({
+    components: { TimePicker },
+    setup: () => ({ args, value: ref('07:00') }),
+    template: `
+      <div style="width: 320px; display:grid; gap:12px">
+        <TimePicker v-bind="args" v-model="value" :label="undefined" />
+        <TimePicker v-bind="args" v-model="value" />
+        <TimePicker v-bind="args" v-model="value" hint="Heure de rendez-vous" />
+        <TimePicker v-bind="args" v-model="value" :label="undefined" hint="Sans étiquette" />
       </div>
     `,
   }),

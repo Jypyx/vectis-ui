@@ -235,11 +235,11 @@ export const semantic = {
     'size-timepicker-hand': dimension('2px', "Épaisseur de l'aiguille du cadran du TimePicker"),
     'size-timepicker-cell-w': dimension(
       '6rem',
-      "Largeur d'un sélecteur heure/minute du TimePicker (en-tête et mode saisie)",
+      "Largeur d'un sélecteur heure/minute du panneau du TimePicker (la hauteur vient de l'échelle de contrôles)",
     ),
-    'size-timepicker-cell-h': dimension(
-      '5rem',
-      "Hauteur d'un sélecteur heure/minute du TimePicker",
+    'size-timepicker-list-max-block': dimension(
+      '18rem',
+      'Hauteur maximale du panneau de liste du TimePicker (zone défilante)',
     ),
   },
   icon: {
