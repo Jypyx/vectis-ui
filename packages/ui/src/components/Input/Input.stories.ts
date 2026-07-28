@@ -9,7 +9,7 @@ const meta = {
   title: 'Composants/Input',
   component: Input,
   argTypes: {
-    size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
+    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     type: {
       control: 'select',
       options: ['text', 'email', 'number', 'password', 'search', 'tel', 'url'],
@@ -39,11 +39,9 @@ export const Tailles: Story = {
     components: { Input },
     template: `
       <div style="display: grid; gap: 8px; width: 260px">
-        <Input size="xs" placeholder="XSmall" aria-label="XSmall" />
         <Input size="sm" placeholder="Small" aria-label="Small" />
         <Input size="md" placeholder="Medium" aria-label="Medium" />
         <Input size="lg" placeholder="Large" aria-label="Large" />
-        <Input size="xl" placeholder="XLarge" aria-label="XLarge" />
       </div>
     `,
   }),

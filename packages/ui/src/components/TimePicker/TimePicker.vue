@@ -53,7 +53,8 @@ interface TimePickerProps {
   label?: string
   hint?: string
   placeholder?: string
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  /** Hauteur du champ : sm 32px, md 40px (défaut), lg 48px. */
+  size?: 'sm' | 'md' | 'lg'
   compact?: boolean
   disabled?: boolean
   invalid?: boolean

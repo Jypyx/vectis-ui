@@ -37,7 +37,8 @@ import Spinner from '../Spinner/Spinner.vue'
 import Typography from '../Typography/Typography.vue'
 
 interface TextareaProps {
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  /** Hauteur du champ : sm 32px, md 40px (défaut), lg 48px. */
+  size?: 'sm' | 'md' | 'lg'
   /** Hauteur minimale réduite de 4px ; padding, typo et icônes inchangés. */
   compact?: boolean
   /** Hauteur qui suit le contenu (field-sizing: content ; sans support, textarea classique). */
@@ -487,16 +488,12 @@ watchEffect(
 
   /* --- Tailles : seul le padding-block reste local, le reste vient de
      ds-control ; suit la formule (hauteur - 1lh) / 2 par cran --- */
-  .ds-textarea:is([data-size='xs'], [data-size='sm']) .ds-textarea-field {
+  .ds-textarea[data-size='sm'] .ds-textarea-field {
     padding-block: var(--ds-space-1);
   }
 
   .ds-textarea[data-size='lg'] .ds-textarea-field {
     padding-block: var(--ds-space-3);
-  }
-
-  .ds-textarea[data-size='xl'] .ds-textarea-field {
-    padding-block: var(--ds-space-4);
   }
 
   @media (prefers-reduced-motion: reduce) {

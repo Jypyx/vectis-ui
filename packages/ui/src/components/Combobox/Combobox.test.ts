@@ -343,6 +343,34 @@ describe('Combobox asynchrone', () => {
     expect(spinner?.getAttribute('aria-hidden')).toBe('true')
   })
 
+  it('tailles : les Chips restent un cran sous le champ, le panneau clampe lg sur md', async () => {
+    // Mapping unique (script) que le CSS `--_chip-height` doit refléter :
+    // xs jusqu'à md, sm en lg ; le cran du dessous passe par `compact`.
+    const { container, rerender } = renderCombobox({ multiple: true, modelValue: ['fr'] })
+    const chip = () => container.querySelector('.ds-chip') as HTMLElement
+    const panel = () => container.querySelector('[role="listbox"]') as HTMLElement
+
+    // défaut (md) : Chip xs plein
+    expect(chip().getAttribute('data-size')).toBe('xs')
+    expect(chip().hasAttribute('data-compact')).toBe(false)
+
+    await rerender({ size: 'sm' })
+    expect(chip().getAttribute('data-size')).toBe('xs')
+    expect(chip().hasAttribute('data-compact')).toBe(true)
+
+    await rerender({ size: 'lg', compact: false })
+    expect(chip().getAttribute('data-size')).toBe('sm')
+    expect(chip().hasAttribute('data-compact')).toBe(false)
+    // le panneau n'a que deux densités : lg y retombe sur md
+    expect(panel().getAttribute('data-size')).toBe('md')
+
+    await rerender({ size: 'lg', compact: true })
+    expect(chip().getAttribute('data-size')).toBe('sm')
+    expect(chip().hasAttribute('data-compact')).toBe(true)
+    // data-compact sur la racine : c'est lui qui arme la règle CSS lg+compact
+    expect(container.querySelector('.ds-combobox')?.hasAttribute('data-compact')).toBe(true)
+  })
+
   it('hasMore : une sentinelle ferme la liste (support du scroll infini)', () => {
     const { container } = renderCombobox({ hasMore: true })
     const listbox = container.querySelector('[role="listbox"]') as HTMLElement

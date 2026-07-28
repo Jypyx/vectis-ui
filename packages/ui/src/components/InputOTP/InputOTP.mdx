@@ -33,8 +33,9 @@ handler `input` couvre saisie et collage, aucun événement `paste` dédié :
 
 ## Tailles
 
-Cinq tailles (`xs` 24px, `sm` 32px, `md` 40px, `lg` 48px, `xl` 56px, via les tokens
-`--ds-control-height-*`).
+Trois tailles (`sm` 32px, `md` 40px — défaut —, `lg` 48px, via les tokens
+`--ds-control-height-*`) ; comme pour `Input`, les extrêmes de l'échelle du DS (`xs`, `xl`)
+ne sont pas exposées.
 Les cases sont carrées : la largeur suit la hauteur, la typographie et les icônes de
 séparateur s'ajustent avec. `compact` réduit la hauteur (et donc la largeur) de 4px sans
 toucher à la typographie (comme `Button`/`Input`) :

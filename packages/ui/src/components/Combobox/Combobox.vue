@@ -50,8 +50,8 @@ interface ComboboxProps {
   options: ComboboxOption[]
   /** Sélection multiple — le v-model devient string[] et des Chips s'affichent. */
   multiple?: boolean
-  /** Hauteur du champ : sm (32px) ou md (40px, défaut — aligné sur Button/Input). */
-  size?: 'sm' | 'md'
+  /** Hauteur du champ : sm 32px, md 40px (défaut — aligné sur Input), lg 48px. */
+  size?: 'sm' | 'md' | 'lg'
   /** Hauteur réduite de 4px (comme les autres contrôles). */
   compact?: boolean
   placeholder?: string
@@ -122,12 +122,19 @@ defineSlots<{
   loading?(): unknown
 }>()
 
-// Les Chips gardent une taille constante (xs, 24px) quelle que soit celle du
-// champ : elles portent une valeur, pas la densité du contrôle. Seul `sm` les
-// passe en compact (20px) pour qu'elles tiennent dans les 32px du champ (28px
-// en compact) sans le faire grandir — le `compact` du Combobox ne les touche
-// pas, la marge y suffit déjà.
-const chipCompact = computed(() => props.size === 'sm')
+// Les Chips restent un cran sous le champ pour tenir dedans sans le faire
+// grandir : xs (24px) jusqu'à `md`, sm (32px) en `lg`. Sous le cran le plus
+// bas de chaque paire, le rattrapage passe par `compact` plutôt que par une
+// taille de moins — d'où `sm` → xs compact (20px dans 32px) et `lg` compact →
+// sm compact (28px dans 44px). En `md` la marge suffit déjà, le `compact` du
+// Combobox ne touche donc pas les Chips.
+// Toute évolution de ce mapping doit être reportée sur `--_chip-height` (CSS
+// plus bas) : la hauteur est redite côté champ, hors de portée du sous-arbre.
+const chipSize = computed(() => (props.size === 'lg' ? 'sm' : 'xs'))
+const chipCompact = computed(() => (props.size === 'lg' ? props.compact : props.size === 'sm'))
+
+// Le panneau (Listbox, interne) n'a que deux densités : `lg` y retombe sur md.
+const panelSize = computed(() => (props.size === 'lg' ? 'md' : props.size))
 
 const model = defineModel<string | string[]>({ default: '' })
 
@@ -514,6 +521,7 @@ watch(
     :class="rootClass"
     :style="rootStyle"
     :data-size="size"
+    :data-compact="compact ? '' : undefined"
     :data-multiple="multiple ? '' : undefined"
     :data-collapsed="collapsed ? '' : undefined"
     :data-open="open ? '' : undefined"
@@ -550,7 +558,7 @@ watch(
             v-for="value in selectedValues"
             :key="value"
             tone="accent"
-            size="xs"
+            :size="chipSize"
             :compact="chipCompact"
             dismissible
             :dismiss-label="`Retirer ${labelOf(value)}`"
@@ -580,7 +588,7 @@ watch(
       v-model:open="open"
       anchor="--ds-combobox-anchor"
       :multiselectable="multiple"
-      :size="size"
+      :size="panelSize"
       :compact="compact"
       placement="bottom-start"
     >
@@ -696,19 +704,32 @@ watch(
 
   /* multiple : le champ accueille les Chips (retour à la ligne). Hauteur calée
      sur le contrôle (`--_control-height`, size/compact via .ds-control d'Input).
-     Les Chips gardent une hauteur CONSTANTE (xs, 24px ; compact en `sm` pour
-     tenir dans un champ de 32px) : elle est redite ici en `--_chip-height`
-     parce qu'elle vit dans le sous-arbre du Chip, hors de portée du champ.
+     La hauteur des Chips est redite ici en `--_chip-height` parce qu'elle vit
+     dans le sous-arbre du Chip, hors de portée du champ : ces quatre règles
+     doivent rester le miroir exact de `chipSize`/`chipCompact` (script).
      L'input est forcé à cette MÊME hauteur au lieu du `100%` hérité d'Input :
      sinon sa hauteur intrinsèque dépasse les Chips et fait grandir le champ.
      Résultat : champ = --_control-height constant, input jamais plus haut que
-     les Chips, aucun saut au focus. */
+     les Chips, aucun saut au focus. Ordre significatif : les tailles sont à
+     spécificité égale entre elles, la variante compact vient en dernier. */
   .ds-combobox[data-multiple] {
+    /* md : Chip xs, 24px dans 40px (36px en compact) */
     --_chip-height: var(--ds-control-height-xs);
   }
 
   .ds-combobox[data-multiple][data-size='sm'] {
+    /* sm : Chip xs compact, 20px dans 32px (28px en compact) */
     --_chip-height: calc(var(--ds-control-height-xs) - var(--ds-space-1));
+  }
+
+  .ds-combobox[data-multiple][data-size='lg'] {
+    /* lg : Chip sm, 32px dans 48px */
+    --_chip-height: var(--ds-control-height-sm);
+  }
+
+  .ds-combobox[data-multiple][data-size='lg'][data-compact] {
+    /* lg compact : Chip sm compact, 28px dans 44px */
+    --_chip-height: calc(var(--ds-control-height-sm) - var(--ds-space-1));
   }
 
   .ds-combobox[data-multiple] .ds-input-field {

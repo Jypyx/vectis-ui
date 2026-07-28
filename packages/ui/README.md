@@ -118,7 +118,7 @@ Le composant `Icon` accepte trois sources :
 ```
 
 - **Décorative par défaut** (`aria-hidden`) ; la prop `label` la rend informative (`role="img"` + `aria-label`).
-- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--ds-icon-size`** et **`--ds-icon-opsz`** (c'est ce que fait la classe partagée `ds-control` — Button, Input, Textarea, InputOTP, Chip — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `Spinner` suit le même principe (1em + `:size` en px), sans API de contexte.
+- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--ds-icon-size`** et **`--ds-icon-opsz`** (c'est ce que fait la classe partagée `ds-control` — Button, Input, Textarea, InputOTP, Chip… — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `Spinner` suit le même principe (1em + `:size` en px), sans API de contexte.
 
 **La police Material Symbols Rounded n'est PAS embarquée** (zéro dépendance runtime) : c'est au consommateur de la charger, par exemple via Google Fonts :
 
@@ -134,6 +134,8 @@ Le composant `Icon` accepte trois sources :
 (ou en self-host du woff2 variable, ex. paquet npm `material-symbols`). `display=block` évite le flash du nom d'icône en toutes lettres. Sans police chargée, la mise en page est préservée (le nom textuel est contenu dans le carré de l'icône). Surcharger le token `--ds-font-family-icon` permet de basculer sur Material Symbols Outlined/Sharp.
 
 Sur `Button` : les props `icon-start` / `icon-end` prennent un nom Material Symbols (les slots `#start`/`#end` restent disponibles pour du contenu custom et priment sur les props). `Button` accepte aussi `href` (rendu `<a>` ; `disabled`/`loading` produisent un lien inerte : `href` retiré + `aria-disabled`) et `compact` (hauteur réduite de 4 px : 20/28/36/44/52 px selon la taille `xs`–`xl`).
+
+L'échelle `xs`–`xl` n'est pas exposée par tous les composants : ceux qui embarquent un champ de saisie (`Input`, `Textarea`, `InputOTP`, `Combobox`, `DatePicker`, `TimePicker`) se limitent à **`sm` / `md` / `lg`** (32/40/48 px, défaut `md`), `compact` restant disponible ; `Chip` se limite à `xs`/`sm`.
 
 ## Composants
 

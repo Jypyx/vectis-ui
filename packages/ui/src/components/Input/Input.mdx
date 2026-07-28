@@ -20,9 +20,10 @@ validation.
 
 ## Tailles
 
-Cinq tailles (`xs` 24px, `sm` 32px, `md` 40px, `lg` 48px, `xl` 56px, via les tokens
-`--ds-control-height-*`). Les icônes internes suivent automatiquement (xs → 16px,
-sm/md → 20px, lg/xl → 24px via le contexte `--ds-icon-size`).
+Trois tailles (`sm` 32px, `md` 40px — défaut —, `lg` 48px, via les tokens
+`--ds-control-height-*`). Les icônes internes suivent automatiquement (sm/md → 20px,
+lg → 24px via le contexte `--ds-icon-size`). Les extrêmes de l'échelle du DS (`xs`, `xl`)
+ne sont pas exposées : elles sont hors gabarit pour un champ de saisie.
 
 <Canvas of={InputStories.Tailles} />
 

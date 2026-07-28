@@ -36,7 +36,8 @@ import Spinner from '../Spinner/Spinner.vue'
 import Typography from '../Typography/Typography.vue'
 
 interface InputProps {
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  /** Hauteur du champ : sm 32px, md 40px (défaut), lg 48px. */
+  size?: 'sm' | 'md' | 'lg'
   /** Hauteur réduite de 4px ; padding, typo et icônes inchangés. */
   compact?: boolean
   /** Type de saisie natif — les claviers virtuels s'adaptent automatiquement. */

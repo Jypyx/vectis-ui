@@ -7,6 +7,9 @@ import InputOTP from './InputOTP.vue'
 const meta = {
   title: 'Composants/InputOTP',
   component: InputOTP,
+  argTypes: {
+    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+  },
   args: { length: 6, format: 'numeric' },
 } satisfies Meta<typeof InputOTP>
 
@@ -69,20 +72,16 @@ export const Tailles: Story = {
     components: { InputOTP },
     setup: () => ({
       args,
-      xs: ref(''),
       sm: ref(''),
       md: ref(''),
       lg: ref(''),
-      xl: ref(''),
       compact: ref(''),
     }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <InputOTP v-bind="args" v-model="xs" size="xs" label="Code (xs)" />
         <InputOTP v-bind="args" v-model="sm" size="sm" label="Code (sm)" />
         <InputOTP v-bind="args" v-model="md" size="md" label="Code (md)" />
         <InputOTP v-bind="args" v-model="lg" size="lg" label="Code (lg)" />
-        <InputOTP v-bind="args" v-model="xl" size="xl" label="Code (xl)" />
         <InputOTP v-bind="args" v-model="compact" compact label="Code (compact)" />
       </div>
     `,

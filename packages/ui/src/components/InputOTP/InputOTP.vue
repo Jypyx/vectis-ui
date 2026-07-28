@@ -31,7 +31,8 @@ interface InputOTPProps {
    * avec un préfixe textuel ('GT-###').
    */
   separatorIcon?: string
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  /** Côté des cases : sm 32px, md 40px (défaut), lg 48px. */
+  size?: 'sm' | 'md' | 'lg'
   /** Hauteur réduite de 4px ; typo et icônes inchangées (comme Button/Input). */
   compact?: boolean
   disabled?: boolean
@@ -219,8 +220,8 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
   .ds-otp {
     /*
      * Hauteur/icônes : classe partagée ds-control (styles/control-size.css).
-     * La typo garde son échelle propre, majorée de 2 crans par rapport aux
-     * autres champs : les chiffres remplissent les cases carrées.
+     * La typo garde son échelle propre, majorée d'un à deux crans par rapport
+     * aux autres champs : les chiffres remplissent les cases carrées.
      */
     --_font-size: var(--ds-font-size-lg);
 
@@ -284,20 +285,12 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
 
   /* --- Tailles : seule la typo majorée reste locale, le reste vient de
      ds-control --- */
-  .ds-otp[data-size='xs'] {
-    --_font-size: var(--ds-font-size-sm);
-  }
-
   .ds-otp[data-size='sm'] {
     --_font-size: var(--ds-font-size-md);
   }
 
   .ds-otp[data-size='lg'] {
     --_font-size: var(--ds-font-size-xl);
-  }
-
-  .ds-otp[data-size='xl'] {
-    --_font-size: var(--ds-font-size-2xl);
   }
 
   @media (prefers-reduced-motion: reduce) {

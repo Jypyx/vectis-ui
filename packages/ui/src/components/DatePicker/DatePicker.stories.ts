@@ -9,6 +9,9 @@ import DatePicker from './DatePicker.vue'
 const meta = {
   title: 'Composants/DatePicker',
   component: DatePicker,
+  argTypes: {
+    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+  },
   args: {
     mode: 'single',
     locale: 'fr-FR',

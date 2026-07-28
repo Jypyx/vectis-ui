@@ -8,7 +8,7 @@ const meta = {
   title: 'Composants/Textarea',
   component: Textarea,
   argTypes: {
-    size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
+    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
   },
   args: {
     size: 'md',
@@ -44,11 +44,9 @@ export const Tailles: Story = {
     components: { Textarea },
     template: `
       <div style="display: grid; gap: 8px; width: 320px">
-        <Textarea size="xs" placeholder="XSmall" aria-label="XSmall" />
         <Textarea size="sm" placeholder="Small" aria-label="Small" />
         <Textarea size="md" placeholder="Medium" aria-label="Medium" />
         <Textarea size="lg" placeholder="Large" aria-label="Large" />
-        <Textarea size="xl" placeholder="XLarge" aria-label="XLarge" />
       </div>
     `,
   }),

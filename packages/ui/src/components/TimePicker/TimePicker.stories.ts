@@ -7,6 +7,9 @@ import TimePicker from './TimePicker.vue'
 const meta = {
   title: 'Composants/TimePicker',
   component: TimePicker,
+  argTypes: {
+    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+  },
   args: {
     locale: 'fr-FR',
     label: 'Heure',

@@ -40,7 +40,8 @@ preset. En mode `single`, sélectionner une date ferme automatiquement ; en
 ## Bornes, événements, tailles
 
 `min`/`max`, `events` et `disabledDates` sont relayés au Calendar. Le champ suit
-l'échelle de tailles du DS (`size`, `compact`).
+l'échelle des composants de saisie : `sm` (32 px), `md` (40 px, défaut) et `lg` (48 px),
+combinables avec `compact` (-4 px). La grille du panneau, elle, garde ses dimensions.
 
 <Canvas of={DatePickerStories.MinMax} />
 <Canvas of={DatePickerStories.Evenements} />
