@@ -80,6 +80,12 @@ interface DatePickerProps {
    * de sélection `single` — une plage ou une liste retombe en `readonly`.
    */
   entry?: DatePickerEntry
+  /**
+   * Affiche le calendrier sous le champ en mode saisie : icône cliquable en fin
+   * de champ + panneau ouvert au focus. Sans effet en lecture seule, où le
+   * calendrier est le seul moyen de choisir une date.
+   */
+  showCalendar?: boolean
   label?: string
   hint?: string
   placeholder?: string
@@ -107,6 +113,7 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   selectAdjacentDays: false,
   events: undefined,
   entry: 'readonly',
+  showCalendar: false,
   label: undefined,
   hint: undefined,
   placeholder: undefined,
@@ -161,6 +168,12 @@ const resolvedEntry = computed<DatePickerEntry>(() =>
 )
 const typing = computed(() => resolvedEntry.value === 'input')
 
+/**
+ * Le calendrier n'est optionnel qu'en saisie : en lecture seule, il est le seul
+ * moyen de choisir une date.
+ */
+const hasPanel = computed(() => !typing.value || props.showCalendar)
+
 if (isDev) {
   watchEffect(() => {
     if (props.entry === 'input' && props.mode !== 'single')
@@ -181,7 +194,11 @@ const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPa
     rootEl,
     panelRef,
     fieldEl: inputRef,
-    disabled: () => props.disabled,
+    // Pas de panneau = rien à ouvrir. `disabled` est le point de coupure UNIQUE
+    // du composable (openPanel + onControlClick) et toutes les voies d'ouverture
+    // y passent : clic sur le contrôle, focus du champ, ArrowDown, Entrée, icône
+    // de fin. Inutile de répéter la condition dans chaque handler.
+    disabled: () => props.disabled || !hasPanel.value,
     focusInPanel: () => calendarRef.value?.focus(),
     // En saisie, le panneau s'ouvre sous le curseur sans le happer : la frappe
     // continue dans le champ, la flèche bas reste le chemin vers la grille.
@@ -462,7 +479,17 @@ function onRootKeydown(event: KeyboardEvent) {
 const showClearIcon = computed(
   () => props.clearable && !props.disabled && (hasValue.value || (typing.value && !!draft.value)),
 )
-const endIcon = computed(() => (showClearIcon.value ? 'close' : 'calendar_today'))
+const endIcon = computed(() =>
+  showClearIcon.value ? 'close' : hasPanel.value ? 'calendar_today' : undefined,
+)
+/*
+ * Le LIBELLÉ, lui, reste toujours défini, même quand aucune icône n'est rendue :
+ * `useIconClickHandlers` avertit AU SETUP dès qu'un `@click:icon-end` est
+ * attaché sans `iconEndLabel`, sans savoir si une icône est rendue. Le listener
+ * étant posé en permanence (la croix peut apparaître dès qu'une date est tapée)
+ * et sa détection statique, un libellé conditionnel ferait apparaître un faux
+ * avertissement au montage d'un champ de saisie vide.
+ */
 const endIconLabel = computed(() =>
   showClearIcon.value ? 'Effacer la date' : 'Ouvrir le calendrier',
 )
@@ -521,9 +548,9 @@ const close = () => closeAndFocus()
         :invalid="invalid"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
-        aria-haspopup="dialog"
-        :aria-expanded="open"
-        :aria-controls="panelId"
+        :aria-haspopup="hasPanel ? 'dialog' : undefined"
+        :aria-expanded="hasPanel ? open : undefined"
+        :aria-controls="hasPanel ? panelId : undefined"
         @click:icon-end="onEndIcon"
         @focus="onFieldFocus"
         @input="onFieldInput"
@@ -534,7 +561,10 @@ const close = () => closeAndFocus()
       />
     </div>
 
+    <!-- Sans panneau monté, `panelRef` est nul : `open`, alimenté par le DOM du
+         popover, ne peut plus passer à `true`. -->
     <Popover
+      v-if="hasPanel"
       :id="panelId"
       ref="panelRef"
       v-model:open="open"

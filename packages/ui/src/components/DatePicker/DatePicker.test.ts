@@ -41,6 +41,16 @@ describe('DatePicker', () => {
     expect(container.querySelector('input')?.getAttribute('aria-expanded')).toBe('true')
   })
 
+  it('ignore showCalendar en lecture seule (le calendrier y est le seul chemin)', async () => {
+    const { container, getByRole } = render(DatePicker, {
+      props: { modelValue: JUNE, showCalendar: false },
+    })
+    expect(container.querySelector('button[aria-label="Effacer la date"]')).toBeTruthy()
+    await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
+    await nextTick()
+    expect(getByRole('grid')).toBeTruthy()
+  })
+
   it('sélectionne une date, met à jour le modèle et ferme (single)', async () => {
     const { container, emitted, getByRole } = render(DatePicker, {
       props: { modelValue: JUNE },
@@ -234,7 +244,7 @@ describe('DatePicker — mode saisie', () => {
   })
 
   it('la flèche bas déplace le focus dans la grille sans l’avoir volé à l’ouverture', async () => {
-    const { container, getByRole } = mount({ modelValue: JUNE })
+    const { container, getByRole } = mount({ modelValue: JUNE, showCalendar: true })
     const input = container.querySelector('input') as HTMLInputElement
     await fireEvent.focus(input)
     await nextTick()
@@ -248,7 +258,7 @@ describe('DatePicker — mode saisie', () => {
   })
 
   it('Échap ferme sans que le focus rendu au champ ne rouvre le panneau', async () => {
-    const { container } = mount({ modelValue: JUNE })
+    const { container } = mount({ modelValue: JUNE, showCalendar: true })
     const input = container.querySelector('input') as HTMLInputElement
     await fireEvent.focus(input)
     await nextTick()
@@ -260,7 +270,7 @@ describe('DatePicker — mode saisie', () => {
   })
 
   it('sélectionner un jour ferme définitivement le panneau', async () => {
-    const { container, emitted, getByRole } = mount({ modelValue: JUNE })
+    const { container, emitted, getByRole } = mount({ modelValue: JUNE, showCalendar: true })
     const input = container.querySelector('input') as HTMLInputElement
     await fireEvent.focus(input)
     await nextTick()
@@ -280,6 +290,49 @@ describe('DatePicker — mode saisie', () => {
     const { container } = mount({ mode: 'range', modelValue: { start: null, end: null } })
     expect((container.querySelector('input') as HTMLInputElement).readOnly).toBe(true)
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('[DatePicker]'))
+  })
+
+  it('n’offre aucun calendrier par défaut : ni icône, ni ARIA de popup, ni ouverture', async () => {
+    const { container } = mount({ modelValue: JUNE })
+    const input = container.querySelector('input') as HTMLInputElement
+    expect(container.querySelector('button[aria-label="Ouvrir le calendrier"]')).toBeNull()
+    expect(input.getAttribute('aria-haspopup')).toBeNull()
+    expect(input.getAttribute('aria-controls')).toBeNull()
+    expect(input.getAttribute('aria-expanded')).toBeNull()
+
+    await fireEvent.focus(input)
+    await fireEvent.keyDown(input, { key: 'ArrowDown', bubbles: true })
+    await nextTick()
+    // le Popover n'est même pas monté
+    expect(container.querySelector('.ds-datepicker-panel')).toBeNull()
+  })
+
+  it('showCalendar rétablit l’icône et l’ouverture au focus', async () => {
+    const { container } = mount({ modelValue: JUNE, showCalendar: true })
+    const input = container.querySelector('input') as HTMLInputElement
+    expect(input.getAttribute('aria-haspopup')).toBe('dialog')
+    await fireEvent.focus(input)
+    await nextTick()
+    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+      true,
+    )
+  })
+
+  it('garde la croix d’effacement sans calendrier', async () => {
+    const { container, emitted } = mount({ modelValue: JUNE })
+    const clearBtn = container.querySelector('button[aria-label="Effacer la date"]') as HTMLElement
+    expect(clearBtn).toBeTruthy()
+    await fireEvent.click(clearBtn)
+    expect(emitted('update:modelValue')?.at(-1)).toEqual([null])
+  })
+
+  it('ne déclenche aucun avertissement au montage d’un champ de saisie vide', () => {
+    // `useIconClickHandlers` avertit AU SETUP quand un `@click:icon-end` est
+    // attaché sans `iconEndLabel` — même sans icône rendue. C'est ce qui oblige
+    // `endIconLabel` à rester toujours défini.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    mount()
+    expect(warn).not.toHaveBeenCalled()
   })
 
   it('ignore displayFormat en saisie (et l’annonce)', () => {

@@ -89,14 +89,33 @@ Règles de saisie :
 <Canvas of={DatePickerStories.SaisieBornee} />
 <Canvas of={DatePickerStories.SaisieCollage} />
 
+## Calendrier en mode saisie (`showCalendar`)
+
+En saisie, le calendrier est **opt-in** : un champ qu'on remplit au clavier n'a
+pas forcément besoin d'un panneau, et dans un formulaire dense un popover qui
+s'ouvre à chaque focus est du bruit. Par défaut, `entry="input"` ne rend donc ni
+icône calendrier, ni panneau, ni raccourci d'ouverture.
+
+`showCalendar` rétablit les deux : une icône cliquable en fin de champ, et le
+panneau ouvert au focus — sans prendre le focus, la frappe continue dans le
+champ. La prop est **sans effet en lecture seule**, où le calendrier est le seul
+moyen de choisir une date.
+
+`clearable` (défaut `true`) garde sa sémantique propre : la croix d'effacement
+apparaît dès qu'une date est posée, calendrier ou non.
+
+<Canvas of={DatePickerStories.SaisieAvecCalendrier} />
+
 ## Accessibilité
 
-- Le champ porte `aria-haspopup="dialog"`, `aria-expanded` et `aria-controls` ;
-  le panneau est un `role="dialog"` nommé.
+- Quand un panneau existe, le champ porte `aria-haspopup="dialog"`,
+  `aria-expanded` et `aria-controls` ; le panneau est un `role="dialog"` nommé.
+  Un champ de saisie sans `showCalendar` n'annonce aucun popup.
 - **Ouverture** au clic, à l'`Entrée` ou à la `flèche bas` depuis le champ. En
   lecture seule le focus se déplace aussitôt dans la grille du calendrier ; en
-  mode saisie le panneau s'ouvre **sans prendre le focus** (la frappe continue
-  dans le champ) et la `flèche bas` reste le chemin explicite vers la grille.
+  mode saisie avec `showCalendar` le panneau s'ouvre **sans prendre le focus**
+  (la frappe continue dans le champ) et la `flèche bas` reste le chemin explicite
+  vers la grille.
 - **Fermeture** par `Échap` (le focus revient au champ), par clic hors du
   composant, ou — en mode simple — après sélection. En mode saisie, `Entrée`
   valide et ferme, et ne soumet donc pas le formulaire environnant.
