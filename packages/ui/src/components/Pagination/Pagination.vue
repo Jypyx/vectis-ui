@@ -92,7 +92,7 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   nextLabel: 'Page suivante',
   disabled: false,
   disabledPages: undefined,
-  responsive: true,
+  responsive: false,
   label: 'Pagination',
   pageLabel: undefined,
 })
