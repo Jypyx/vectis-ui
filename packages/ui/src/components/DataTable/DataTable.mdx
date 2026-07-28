@@ -40,11 +40,11 @@ jamais les autres champs des lignes. Un changement de terme ramène à la page 1
 ## Pagination
 
 La pagination locale s'active dès que `perPage` est défini (`v-model:per-page`, ou `:per-page`
-one-way) : le footer apparaît, aligné à droite, avec en option le texte « X–Y sur Z »
-(`showRange`, formatable par `rangeLabel`), le sélecteur de lignes par page (`perPageOptions`,
-un `Dropdown` d'items sélectionnés) et la `Pagination` du DS pilotée par `v-model:page`. Si un
-filtre réduit le nombre de pages, l'affichage retombe sur la dernière page par **dérivation**,
-sans muter le modèle.
+one-way) : le footer apparaît. Sa zone droite groupe, dans cet ordre, le sélecteur de lignes par
+page (`perPageOptions`, un `Dropdown` d'items sélectionnés), le texte « X–Y sur Z » (`showRange`,
+formatable par `rangeLabel`) et la `Pagination` du DS pilotée par `v-model:page` ; la zone gauche
+reste vide hors sélection. Si un filtre réduit le nombre de pages, l'affichage retombe sur la
+dernière page par **dérivation**, sans muter le modèle.
 
 <Canvas of={DataTableStories.PaginationLocale} />
 
@@ -55,7 +55,10 @@ sans muter le modèle.
 l'est partiellement, elle ne touche jamais aux sélections des autres pages (modèle Material).
 `v-model:selected` reçoit les identités de lignes (`DataTableRowId[]`), dérivées de `rowKey` —
 requis en pratique : sans lui les identités par index se corrompent au tri et à la pagination
-(avertissement en développement).
+(avertissement en développement). Le décompte s'affiche à gauche du footer (`selectionLabel` pour
+le reformuler), dans une région live annoncée à chaque changement : elle est posée dès
+`selectable` — vide tant que rien n'est sélectionné — et fait apparaître le footer même sans
+pagination.
 
 <Canvas of={DataTableStories.Selection} />
 

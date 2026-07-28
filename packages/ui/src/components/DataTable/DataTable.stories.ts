@@ -134,7 +134,7 @@ export const Recherche: Story = {
   },
 }
 
-/** Footer : « X–Y sur Z », sélecteur de lignes par page (Dropdown) et Pagination. */
+/** Footer : lignes par page, « X–Y sur Z » puis Pagination, groupés à droite. */
 export const PaginationLocale: Story = {
   args: { rows: ROWS_MANY, showRange: true },
   render: (args) => ({
@@ -145,6 +145,20 @@ export const PaginationLocale: Story = {
         :per-page-options="[5, 10, 20]" style="width: 760px" />
     `,
   }),
+  // Layout non mesurable en jsdom : la nav (responsive off, donc non confinée)
+  // a une largeur intrinsèque et le groupe droit est collé au bord du footer.
+  play: async ({ canvasElement }) => {
+    const footer = canvasElement.querySelector('.ds-table-footer') as HTMLElement
+    const nav = footer.querySelector('.ds-pagination') as HTMLElement
+    const perPage = footer.querySelector('.ds-table-per-page') as HTMLElement
+    await waitFor(() => {
+      expect(nav.getBoundingClientRect().width).toBeGreaterThan(0)
+      expect(perPage.getBoundingClientRect().right).toBeLessThanOrEqual(
+        nav.getBoundingClientRect().left + 1,
+      )
+      expect(nav.getBoundingClientRect().right).toBeCloseTo(footer.getBoundingClientRect().right, 0)
+    })
+  },
 }
 
 /** Le sélecteur « lignes par page » redécoupe et revient page 1 (popover réel). */
@@ -200,12 +214,18 @@ export const Selection: Story = {
       const boxes = canvas.getAllByRole('checkbox').filter((box) => box !== master)
       boxes.forEach((box) => expect(box).toBeChecked())
     })
+    // le décompte s'affiche à gauche du footer
+    await waitFor(() => {
+      expect(canvas.getByText('5 éléments sélectionnés')).toBeInTheDocument()
+    })
+
     // décocher une ligne → le master repasse en indéterminé
     await userEvent.click(
       canvas.getByRole('checkbox', { name: 'Sélectionner la ligne 1' }).closest('label')!,
     )
     await waitFor(() => {
       expect(master.indeterminate).toBe(true)
+      expect(canvas.getByText('4 éléments sélectionnés')).toBeInTheDocument()
     })
   },
 }

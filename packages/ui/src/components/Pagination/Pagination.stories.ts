@@ -195,7 +195,7 @@ export const Alignement: Story = {
   render: () => ({
     components: { Pagination },
     setup: () => ({ aligns: ['start', 'center', 'end'], page: ref(3) }),
-    // La nav occupe toute la largeur disponible (contrainte de container-type) :
+    // La nav est block-level et occupe toute la largeur disponible :
     // l'alignement passe donc par la prop `align`.
     template: `
       <div style="display: grid; gap: 16px; border: 1px dashed var(--ds-color-border); padding: 8px">

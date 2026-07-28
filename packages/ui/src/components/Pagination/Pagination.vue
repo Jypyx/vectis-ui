@@ -342,14 +342,20 @@ function onKeydown(event: KeyboardEvent) {
 <style>
 @layer ds.components {
   .ds-pagination {
-    /*
-     * `container-type: inline-size` calcule la taille inline SANS le contenu :
-     * la nav doit donc être block-level (une inline-flex se réduirait à zéro).
-     * Elle occupe la largeur de son parent — c'est ce qui rend la troncature
-     * dépendante de la place réellement allouée — et l'alignement passe par
-     * `data-align` plutôt que par le contexte.
-     */
     display: flex;
+  }
+
+  /*
+   * Confinement réservé au mode responsive (toutes les @container ci-dessous en
+   * dépendent) : `container-type: inline-size` calcule la taille inline SANS le
+   * contenu, la nav doit donc être block-level (une inline-flex se réduirait à
+   * zéro) et occupe la largeur de son parent — c'est ce qui rend la troncature
+   * dépendante de la place réellement allouée, et ce qui oblige un parent flex
+   * à lui donner une largeur (`flex: 1`). Hors responsive, la nav retrouve une
+   * largeur intrinsèque et se pose comme n'importe quel contenu. Dans les deux
+   * cas l'alignement passe par `data-align`, jamais par le contexte.
+   */
+  .ds-pagination[data-responsive] {
     container-type: inline-size;
     container-name: ds-pagination;
   }

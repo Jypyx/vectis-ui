@@ -203,6 +203,36 @@ describe('DataTable', () => {
     expect(selected.value).toEqual([])
   })
 
+  it('footer : décompte de sélection à gauche, lignes par page → plage → pagination à droite', async () => {
+    const selected = ref<(string | number)[]>([])
+    const Harness = harness(
+      () => ({ columns: COLUMNS, rows: ROWS_MANY, selected }),
+      `
+        <DataTable :columns="columns" :rows="rows" row-key="name" selectable show-range
+          v-model:selected="selected" :per-page="2" :per-page-options="[2, 4]" />
+      `,
+    )
+    const { container, getByRole } = render(Harness)
+    const footer = container.querySelector('.ds-table-footer') as HTMLElement
+    const selection = footer.querySelector('.ds-table-selection') as HTMLElement
+
+    // région live posée dès `selectable` (vide à zéro sélection)
+    expect([...footer.children].indexOf(selection)).toBe(0)
+    expect(selection.textContent).toBe('')
+
+    await fireEvent.click(getByRole('checkbox', { name: 'Sélectionner la ligne 1' }))
+    expect(selection.textContent).toBe('1 élément sélectionné')
+    await fireEvent.click(getByRole('checkbox', { name: 'Sélectionner la ligne 2' }))
+    expect(selection.textContent).toBe('2 éléments sélectionnés')
+
+    const end = footer.querySelector('.ds-table-footer-end') as HTMLElement
+    expect([...end.children].map((el) => el.classList[0])).toEqual([
+      'ds-table-per-page',
+      'ds-table-range',
+      'ds-pagination',
+    ])
+  })
+
   it('avertit en DEV si selectable sans rowKey', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     render(DataTable, { props: { columns: COLUMNS, rows: ROWS, selectable: true } })

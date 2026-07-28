@@ -110,6 +110,11 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   /** Colonne de sélection par checkbox + case « tout sélectionner ». */
   selectable?: boolean
   selectAllLabel?: string
+  /**
+   * Texte de la zone gauche du footer (`selectable`). Défaut : « N éléments
+   * sélectionnés », vide à zéro.
+   */
+  selectionLabel?: (count: number) => string
   /** Nom accessible de la case d'une ligne (défaut : « Sélectionner la ligne N »). */
   selectRowLabel?: (row: Row, index: number) => string
   /**
@@ -142,6 +147,7 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   rangeLabel: undefined,
   selectable: false,
   selectAllLabel: 'Tout sélectionner',
+  selectionLabel: undefined,
   selectRowLabel: undefined,
   serverSide: false,
 })
@@ -350,6 +356,18 @@ function setPerPage(option: number) {
 
 const colCount = computed(() => props.columns.length + (props.selectable ? 1 : 0))
 
+/**
+ * Zone gauche du footer : rendue (vide) dès `selectable` pour que la région
+ * live préexiste à la première sélection — un conteneur aria-live inséré en
+ * même temps que son texte n'est pas annoncé.
+ */
+const selectionText = computed(() => {
+  const count = selected.value.length
+  if (props.selectionLabel) return props.selectionLabel(count)
+  if (count === 0) return ''
+  return `${count} élément${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`
+})
+
 const rangeText = computed(() => {
   const per = perPage.value ?? 0
   const total = totalCount.value
@@ -489,44 +507,50 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       </table>
     </div>
 
-    <div v-if="paginated" class="ds-table-footer">
-      <span v-if="showRange" class="ds-table-range" aria-live="polite">{{ rangeText }}</span>
-      <div v-if="perPageOptions?.length" class="ds-table-per-page">
-        <span class="ds-table-per-page-label" aria-hidden="true">{{ perPageLabel }}</span>
-        <!-- width="max-content" : le panneau épouse l'option la plus large
-             (« 10 », « 25 »…) au lieu de la largeur minimale par défaut. -->
-        <Dropdown size="sm" :compact="compact" placement="top-end" width="max-content">
-          <template #trigger="{ triggerProps }">
-            <Button
-              variant="ghost"
-              tone="neutral"
-              size="sm"
-              :compact="compact"
-              v-bind="triggerProps"
-              :aria-label="`${perPageLabel} : ${perPage}`"
-            >
-              {{ perPage }}
-              <Icon name="arrow_drop_down" />
-            </Button>
-          </template>
-          <DropdownItem
-            v-for="option in perPageOptions"
-            :key="option"
-            :label="String(option)"
-            :selected="option === perPage"
-            @select="setPerPage(option)"
-          />
-        </Dropdown>
+    <!-- Footer : sélection à gauche, lignes par page → plage → pagination à droite. -->
+    <div v-if="paginated || selectable" class="ds-table-footer">
+      <span v-if="selectable" class="ds-table-selection" aria-live="polite">{{
+        selectionText
+      }}</span>
+      <div v-if="paginated" class="ds-table-footer-end">
+        <div v-if="perPageOptions?.length" class="ds-table-per-page">
+          <span class="ds-table-per-page-label" aria-hidden="true">{{ perPageLabel }}</span>
+          <!-- width="max-content" : le panneau épouse l'option la plus large
+               (« 10 », « 25 »…) au lieu de la largeur minimale par défaut. -->
+          <Dropdown size="sm" :compact="compact" placement="top-end" width="max-content">
+            <template #trigger="{ triggerProps }">
+              <Button
+                variant="ghost"
+                tone="neutral"
+                size="sm"
+                :compact="compact"
+                v-bind="triggerProps"
+                :aria-label="`${perPageLabel} : ${perPage}`"
+              >
+                {{ perPage }}
+                <Icon name="arrow_drop_down" />
+              </Button>
+            </template>
+            <DropdownItem
+              v-for="option in perPageOptions"
+              :key="option"
+              :label="String(option)"
+              :selected="option === perPage"
+              @select="setPerPage(option)"
+            />
+          </Dropdown>
+        </div>
+        <span v-if="showRange" class="ds-table-range" aria-live="polite">{{ rangeText }}</span>
+        <Pagination
+          v-model="page"
+          :length="pageCount"
+          size="sm"
+          :compact="compact"
+          align="end"
+          variant="ghost"
+          :total-visible="7"
+        />
       </div>
-      <Pagination
-        v-model="page"
-        :length="pageCount"
-        size="sm"
-        :compact="compact"
-        align="end"
-        variant="ghost"
-        :total-visible="7"
-      />
     </div>
   </div>
 </template>
@@ -757,6 +781,22 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     padding-inline: var(--_table-frame-pad);
   }
 
+  /*
+   * Zone droite d'un seul tenant : `margin-inline-start: auto` la colle au bord
+   * quelle que soit la présence du décompte de sélection à gauche (un simple
+   * justify-content ne suffirait pas — les deux zones sont des items frères et
+   * le décompte doit rester au bord opposé).
+   */
+  .ds-table-footer-end {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ds-space-4);
+    margin-inline-start: auto;
+  }
+
+  .ds-table-selection,
   .ds-table-range,
   .ds-table-per-page-label {
     font-size: var(--ds-text-body-md-size);
@@ -767,12 +807,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     display: flex;
     align-items: center;
     gap: var(--ds-space-2);
-  }
-
-  /* container-type: inline-size rend la largeur de la nav indéfinie en flex
-     item : sans flex: 1 elle collapse à zéro. align="end" recolle le contenu. */
-  .ds-table-footer .ds-pagination {
-    flex: 1 1 auto;
   }
 
   /* --- Mode stack : cartes sous 640px de conteneur, pur CSS --- */
