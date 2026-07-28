@@ -10,8 +10,8 @@ import {
   snapMinute,
   to12h,
   to24h,
-} from './timeUtils'
-import type { HourFormat } from './timeUtils'
+} from '../../utils/time'
+import type { HourFormat } from '../../utils/time'
 import { pad2 } from '../../utils/text'
 
 /**
@@ -19,7 +19,7 @@ import { pad2 } from '../../utils/text'
  *
  * Aucune primitive native ne couvre la sélection angulaire : le JS se limite à
  * (1) la conversion pointeur → valeur (pointerdown/move : mesure du rect puis
- * trigonométrie PURE dans timeUtils — atan2, seuil d'anneau) et (2) le pattern
+ * trigonométrie PURE dans `utils/time` — atan2, seuil d'anneau) et (2) le pattern
  * ARIA « slider » au clavier (flèches / Home / End / PageUp-Down). Tout le
  * rendu — position des chiffres, aiguille — est du CSS (`sin()`/`cos()` sur la
  * fraction de tour unitless `--_turn` inline, idiome `--_f` du Slider).
@@ -272,7 +272,7 @@ function onKeydown(event: KeyboardEvent) {
     cursor: pointer;
     /* Rayon du centre des chiffres (anneau extérieur). Hérité par chiffres et
        aiguille ; l'anneau intérieur le redéfinit. À garder en phase avec
-       DIAL_INNER_THRESHOLD (timeUtils). */
+       DIAL_INNER_THRESHOLD (`utils/time`). */
     --_r: calc(
       var(--ds-control-size-timepicker-dial) / 2 - var(--ds-control-size-timepicker-number) / 2
     );

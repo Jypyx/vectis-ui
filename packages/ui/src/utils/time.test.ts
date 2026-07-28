@@ -15,7 +15,7 @@ import {
   snapMinute,
   to12h,
   to24h,
-} from './timeUtils'
+} from './time'
 
 describe('isValidTime / parseTime / formatTime', () => {
   it('accepte les bornes 00:00 et 23:59', () => {

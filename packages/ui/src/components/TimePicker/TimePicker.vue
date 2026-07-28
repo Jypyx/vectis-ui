@@ -17,8 +17,8 @@ import {
   snapMinute,
   to12h,
   to24h,
-} from './timeUtils'
-import type { HourFormat } from './timeUtils'
+} from '../../utils/time'
+import type { HourFormat } from '../../utils/time'
 import { isDev } from '../../utils/env'
 import { pad2 } from '../../utils/text'
 

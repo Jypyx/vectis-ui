@@ -1,18 +1,18 @@
 /**
- * Utilitaires d'heures PURS pour TimePicker.
+ * Utilitaires d'heures PURS (TimePicker, TimePickerDial).
  *
  * Contrat : l'API publique manipule des chaînes `HH:mm` en **24 h canonique**
  * (le v-model du TimePicker, quel que soit l'affichage 12 h / 24 h). Les objets
  * `Date` ne servent qu'à `Intl` sur des instants de RÉFÉRENCE en
  * `timeZone: 'UTC'`, pour que le rendu ne dépende jamais du fuseau machine
- * (SSR-safe, modèle dateUtils du Calendar).
+ * (SSR-safe, modèle `utils/date`).
  *
  * La géométrie du cadran (conversion pointeur → secteur/anneau) vit ici en
  * fonctions pures : jsdom ne mesure rien (`getBoundingClientRect` à zéro),
  * c'est donc la seule façon de la couvrir en vitest.
  */
-import { clamp } from '../../utils/number'
-import { pad2 } from '../../utils/text'
+import { clamp } from './number'
+import { pad2 } from './text'
 
 export type HourFormat = '12h' | '24h'
 export type Meridiem = 'AM' | 'PM'

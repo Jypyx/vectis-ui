@@ -1,5 +1,5 @@
 /**
- * Utilitaires de dates PURS pour Calendar/DatePicker.
+ * Utilitaires de dates PURS (Calendar, DatePicker).
  *
  * Contrat : l'API publique manipule des chaînes ISO `YYYY-MM-DD` et tout se
  * calcule en **heure locale** — on ne passe JAMAIS par `new Date('YYYY-MM-DD')`
@@ -12,7 +12,7 @@
  * pas du fuseau de la machine.
  */
 
-import { pad2 } from '../../utils/text'
+import { pad2 } from './text'
 
 /** Motif ISO strict `YYYY-MM-DD`. */
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/

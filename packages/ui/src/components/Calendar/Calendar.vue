@@ -21,7 +21,7 @@ import {
   monthNamesCompact,
   parseISO,
   weekdayNames,
-} from './dateUtils'
+} from '../../utils/date'
 
 import { toggleValue } from '../../utils/array'
 import { resolveMatcher } from '../../utils/matcher'
@@ -36,7 +36,7 @@ import { clamp } from '../../utils/number'
  * n'est ni stylable ni composable) : le JS implémente donc le pattern ARIA
  * « grid » — roving tabindex, flèches/PageUp/PageDown, sélection simple/plage/
  * multiple — que HTML/CSS seuls ne couvrent pas. Tout se calcule en heure
- * locale via des chaînes ISO `YYYY-MM-DD` (cf. dateUtils, SSR-safe).
+ * locale via des chaînes ISO `YYYY-MM-DD` (cf. `utils/date`, SSR-safe).
  */
 export type CalendarMode = 'single' | 'range' | 'multiple'
 

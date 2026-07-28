@@ -13,9 +13,9 @@ import {
   monthNamesCompact,
   parseISO,
   weekdayNames,
-} from './dateUtils'
+} from './date'
 
-describe('dateUtils', () => {
+describe('utils/date', () => {
   it('valide et parse un ISO en heure locale (sans dérive UTC)', () => {
     expect(isValidISO('2026-06-10')).toBe(true)
     expect(isValidISO('2026-13-01')).toBe(false)

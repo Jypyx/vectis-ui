@@ -9,7 +9,7 @@ import type {
   DateMatcher,
   DateRange,
 } from '../Calendar/Calendar.vue'
-import { formatDisplay, formatDisplayRange, isValidISO } from '../Calendar/dateUtils'
+import { formatDisplay, formatDisplayRange, isValidISO } from '../../utils/date'
 import Input from '../Input/Input.vue'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
