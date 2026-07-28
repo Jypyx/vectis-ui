@@ -638,7 +638,7 @@ function onEndIcon() {
       mode="manual"
       anchor="--ds-timepicker-anchor"
       :placement="placement"
-      :surface="isList"
+      surface
       :role="isList ? 'listbox' : 'dialog'"
       :class="isList ? 'ds-timepicker-list ds-control' : 'ds-timepicker-panel'"
       :data-size="isList ? size : undefined"
@@ -781,12 +781,8 @@ function onEndIcon() {
     flex-direction: column;
     gap: var(--ds-space-5);
     width: max-content;
-    padding: var(--ds-space-6);
-    border: none;
-    background: var(--ds-color-surface-overlay);
+    padding: var(--ds-space-3);
     color: var(--ds-color-text);
-    border-radius: var(--ds-radius-overlay);
-    box-shadow: var(--ds-shadow-4);
   }
 
   /* Une heure numérique se lit toujours HH:MM : sans ce ltr forcé, le bidi
