@@ -212,6 +212,117 @@ describe('Combobox', () => {
   })
 })
 
+// ── Groupes et séparateurs ──────────────────────────────────────────────────
+
+describe('Combobox groupé', () => {
+  const GROUPES = [
+    {
+      label: 'Europe',
+      options: [
+        { value: 'fr', label: 'France' },
+        { value: 'be', label: 'Belgique' },
+      ],
+    },
+    { separator: true as const },
+    {
+      label: 'Afrique',
+      options: [
+        { value: 'sn', label: 'Sénégal' },
+        { value: 'ma', label: 'Maroc', disabled: true },
+      ],
+    },
+    { separator: true as const },
+    { value: 'jp', label: 'Japon' },
+  ]
+
+  const renderGroupe = (props: Record<string, unknown> = {}) =>
+    render(Combobox, {
+      props: { options: GROUPES, modelValue: '', ...props },
+      attrs: { 'aria-label': 'Pays' },
+    })
+
+  const labels = (container: Element) =>
+    [...container.querySelectorAll('[role="option"] .ds-combobox-option-label')].map((o) =>
+      o.textContent?.trim(),
+    )
+
+  it('rend un role="group" nommé par son libellé, sans casser l’ordre des options', async () => {
+    const { getByRole, container } = renderGroupe()
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
+    // aria-labelledby résolu : le groupe porte bien son nom accessible
+    expect(getByRole('group', { name: 'Europe' })).toBeTruthy()
+    expect(getByRole('group', { name: 'Afrique' })).toBeTruthy()
+    // les options d'un groupe et celles hors groupe forment UNE liste, à plat
+    expect(labels(container)).toEqual(['France', 'Belgique', 'Sénégal', 'Maroc', 'Japon'])
+  })
+
+  it('la navigation clavier traverse les groupes sans s’arrêter sur un libellé', async () => {
+    const { getByRole, container } = renderGroupe()
+    const input = getByRole('combobox')
+    const active = () => container.querySelector('[data-active]')?.textContent?.trim()
+
+    await fireEvent.keyDown(input, { key: 'ArrowDown' }) // ouvre sur France
+    expect(active()).toBe('France')
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
+    expect(active()).toBe('Belgique')
+    // franchit le séparateur ET le libellé « Afrique » d'un seul cran
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
+    expect(active()).toBe('Sénégal')
+    // Maroc est désactivé : sauté, comme une option désactivée hors groupe
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
+    expect(active()).toBe('Japon')
+    // aria-activedescendant désigne toujours un role="option" réel
+    expect(input.getAttribute('aria-activedescendant')).toBe(
+      container.querySelector('[role="option"][data-active]')?.id,
+    )
+  })
+
+  it('un groupe vidé par le filtre disparaît, libellé compris', async () => {
+    const { getByRole, queryByRole, container } = renderGroupe()
+    await fireEvent.update(getByRole('combobox') as HTMLInputElement, 'séné')
+    expect(labels(container)).toEqual(['Sénégal'])
+    expect(queryByRole('group', { name: 'Europe' })).toBeNull()
+    expect(queryByRole('group', { name: 'Afrique' })).toBeTruthy()
+  })
+
+  it('les séparateurs orphelins ne sont pas rendus (tête, fin, consécutifs)', async () => {
+    const { getByRole, container } = renderGroupe()
+    const separators = () => container.querySelectorAll('.ds-combobox-separator').length
+    const panel = () => container.querySelector('[role="listbox"]')!
+    expect(separators()).toBe(2)
+
+    // « Japon » seul : les deux séparateurs qui le précèdent deviennent orphelins
+    await fireEvent.update(getByRole('combobox') as HTMLInputElement, 'japon')
+    expect(separators()).toBe(0)
+
+    // « France » + « Japon » : un seul filet subsiste, entre les deux, et il
+    // n'est ni en tête ni en fin de panneau
+    await fireEvent.update(getByRole('combobox') as HTMLInputElement, 'n')
+    expect(labels(container)).toEqual(['France', 'Sénégal', 'Japon'])
+    expect(separators()).toBe(2)
+    expect(panel().firstElementChild?.classList.contains('ds-combobox-separator')).toBe(false)
+    expect(panel().lastElementChild?.classList.contains('ds-combobox-separator')).toBe(false)
+  })
+
+  it('une option de groupe se sélectionne et alimente les Chips comme une option nue', async () => {
+    const { emitted, container } = renderGroupe({ multiple: true, modelValue: [] })
+    const option = [...container.querySelectorAll<HTMLElement>('[role="option"]')].find((o) =>
+      o.textContent?.includes('Sénégal'),
+    )!
+    await fireEvent.click(option)
+    expect(emitted('update:modelValue').at(-1)).toEqual([['sn']])
+
+    // le libellé du Chip vient bien de l'option dépliée du groupe (`allOptions`)
+    // — requêtes bornées au `container` : les deux rendus partagent document.body
+    const second = renderGroupe({ multiple: true, modelValue: ['sn'] })
+    expect(
+      [...second.container.querySelectorAll('.ds-chip [aria-label]')].map((b) =>
+        b.getAttribute('aria-label'),
+      ),
+    ).toEqual(['Retirer Sénégal'])
+  })
+})
+
 // ── Source asynchrone (recherche serveur, chargement, pagination) ────────────
 
 describe('Combobox asynchrone', () => {

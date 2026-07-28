@@ -4,7 +4,7 @@ import { computed, ref } from 'vue'
 
 import Chip from '../Chip/Chip.vue'
 import Combobox from './Combobox.vue'
-import type { ComboboxOption } from './Combobox.vue'
+import type { ComboboxItem, ComboboxOption } from './Combobox.vue'
 
 const PAYS = [
   { value: 'fr', label: 'France' },
@@ -15,6 +15,43 @@ const PAYS = [
   { value: 'mc', label: 'Monaco', disabled: true },
   { value: 'sn', label: 'Sénégal' },
   { value: 'ci', label: "Côte d'Ivoire" },
+]
+
+// Groupes et séparateurs : une entrée de `options` peut être un groupe nommé
+// (`{ label, options }`), un séparateur (`{ separator: true }`) ou une option
+// nue — les trois se mélangent librement.
+const PAYS_GROUPES: ComboboxItem[] = [
+  {
+    label: 'Europe',
+    options: [
+      { value: 'fr', label: 'France' },
+      { value: 'be', label: 'Belgique' },
+      { value: 'ch', label: 'Suisse' },
+      { value: 'lu', label: 'Luxembourg' },
+      { value: 'mc', label: 'Monaco', disabled: true },
+    ],
+  },
+  { separator: true },
+  {
+    label: 'Afrique',
+    options: [
+      { value: 'sn', label: 'Sénégal' },
+      { value: 'ci', label: "Côte d'Ivoire" },
+      { value: 'ma', label: 'Maroc' },
+      { value: 'cm', label: 'Cameroun' },
+    ],
+  },
+  {
+    label: 'Amérique',
+    options: [
+      { value: 'ca', label: 'Canada' },
+      { value: 'us', label: 'États-Unis' },
+      { value: 'br', label: 'Brésil' },
+    ],
+  },
+  { separator: true },
+  // hors groupe : reste une entrée valide au milieu des autres
+  { value: 'other', label: 'Autre / non listé', icon: 'help' },
 ]
 
 const CAPITALES: Record<string, string> = {
@@ -86,6 +123,61 @@ export const Default: Story = {
     await userEvent.keyboard('{ArrowDown}{Enter}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('sn'))
     await expect(input).toHaveValue('Sénégal')
+  },
+}
+
+/**
+ * Une entrée de `options` peut être un **groupe nommé** (`{ label, options }`,
+ * rendu en `role="group"`) ou un **séparateur** (`{ separator: true }`), mêlés à
+ * des options nues. Les groupes ne sont que du rendu : la navigation clavier
+ * traverse la liste à plat sans jamais s'arrêter sur un libellé. Au filtrage, un
+ * groupe dont plus aucune option ne correspond disparaît (libellé compris) et
+ * les séparateurs devenus orphelins ne sont pas rendus.
+ */
+export const Groupes: Story = {
+  args: { options: PAYS_GROUPES },
+  render: (args) => ({
+    components: { Combobox },
+    setup: () => ({ args, value: ref('') }),
+    template: `
+      <div style="display: grid; gap: 8px; width: 300px">
+        <Combobox v-bind="args" v-model="value" aria-label="Pays" />
+        <output data-testid="mirror">{{ value }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('combobox')
+
+    await userEvent.click(input)
+    const listbox = await waitFor(() => canvas.getByRole('listbox'))
+    // waitFor : le panneau ouvre en transition d'opacité
+    await waitFor(() => expect(canvas.getByRole('group', { name: 'Europe' })).toBeVisible())
+
+    // Le panneau déborde : l'option active doit être amenée dans la vue à
+    // travers le wrapper de groupe (le conteneur défilant reste le panneau).
+    // Non mesurable en jsdom — c'est la raison d'être de cette play function.
+    await userEvent.keyboard('{ArrowUp}')
+    const derniere = canvas.getByRole('option', { name: /Autre/ })
+    await waitFor(() => {
+      expect(derniere.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+        listbox.getBoundingClientRect().bottom + 1,
+      )
+      expect(derniere.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+        listbox.getBoundingClientRect().top - 1,
+      )
+    })
+
+    // filtrage : « Europe » se vide, son libellé disparaît avec lui, et plus
+    // aucun filet ne subsiste en tête ni en fin de panneau
+    await userEvent.keyboard('ma')
+    await waitFor(() => expect(canvas.queryByRole('group', { name: 'Afrique' })).toBeVisible())
+    expect(canvas.queryByRole('group', { name: 'Europe' })).toBeNull()
+    expect(listbox.querySelectorAll('.ds-combobox-separator').length).toBe(0)
+
+    await userEvent.keyboard('{ArrowDown}{Enter}')
+    await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('ma'))
   },
 }
 

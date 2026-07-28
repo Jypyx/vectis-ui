@@ -5,8 +5,11 @@ import Chip from '../Chip/Chip.vue'
 import Icon from '../Icon/Icon.vue'
 import Input from '../Input/Input.vue'
 import Popover from '../Popover/Popover.vue'
-// alias : le type public `ComboboxOption` occupe déjà ce nom dans ce module
+// alias : les types publics `ComboboxOption`/`ComboboxGroup`/`ComboboxSeparator`
+// occupent déjà ces noms dans ce module
 import OptionRow from './ComboboxOption.vue'
+import OptionGroup from './ComboboxGroup.vue'
+import OptionSeparator from './ComboboxSeparator.vue'
 import Spinner from '../Spinner/Spinner.vue'
 
 import { toggleValue } from '../../utils/array'
@@ -40,13 +43,42 @@ export interface ComboboxOption {
 }
 
 /**
+ * Groupe nommé d'options, rendu en `role="group"` + `aria-labelledby` (le
+ * pendant du `<optgroup>` natif). Un groupe dont plus aucune option ne passe le
+ * filtre disparaît, libellé compris.
+ */
+export interface ComboboxGroup {
+  label: string
+  options: ComboboxOption[]
+}
+
+/**
+ * Filet de séparation entre deux blocs d'options. Purement décoratif : les
+ * séparateurs devenus orphelins au filtrage (en tête, en fin, ou consécutifs)
+ * ne sont pas rendus.
+ */
+export interface ComboboxSeparator {
+  separator: true
+}
+
+/** Une entrée de la prop `options` : option, groupe ou séparateur. */
+export type ComboboxItem = ComboboxOption | ComboboxGroup | ComboboxSeparator
+
+const isGroup = (item: ComboboxItem): item is ComboboxGroup => 'options' in item
+const isSeparator = (item: ComboboxItem): item is ComboboxSeparator => 'separator' in item
+
+/**
  * Filtrage local : `true` (défaut), `false` (les options arrivent déjà filtrées
  * — recherche serveur) ou un prédicat de correspondance personnalisé.
  */
 export type ComboboxFilter = boolean | ((option: ComboboxOption, query: string) => boolean)
 
 interface ComboboxProps {
-  options: ComboboxOption[]
+  /**
+   * Options du panneau. Une entrée peut aussi être un `ComboboxGroup` (bloc
+   * nommé) ou un `ComboboxSeparator` ; une liste plate d'options reste valide.
+   */
+  options: ComboboxItem[]
   /** Sélection multiple — le v-model devient string[] et des Chips s'affichent. */
   multiple?: boolean
   /** Hauteur du champ : sm 32px, md 40px (défaut — aligné sur Input), lg 48px. */
@@ -174,6 +206,17 @@ const selectedValues = computed<string[]>(() => {
   return typeof model.value === 'string' && model.value ? [model.value] : []
 })
 
+// Options de `props.options` à plat (groupes dépliés, séparateurs écartés),
+// dans l'ordre du source. C'est l'UNIQUE lecture des options par le reste du
+// composant : filtrage, cache, libellés et pagination ignorent la hiérarchie,
+// que seul le rendu (`rendered`) connaît.
+const allOptions = computed<ComboboxOption[]>(() =>
+  props.options.flatMap((item) => {
+    if (isSeparator(item)) return []
+    return isGroup(item) ? item.options : [item]
+  }),
+)
+
 // Mémoire des options SÉLECTIONNÉES : en source asynchrone, `options` ne
 // contient que le dernier jeu de résultats et une valeur déjà choisie en est
 // souvent absente — sans cache, le Chip afficherait son identifiant brut (et le
@@ -184,7 +227,7 @@ const selectedValues = computed<string[]>(() => {
 const optionCache = reactive(new Map<string, ComboboxOption>())
 watchEffect(() => {
   const wanted = new Set(selectedValues.value)
-  for (const option of props.options) {
+  for (const option of allOptions.value) {
     if (wanted.has(option.value)) optionCache.set(option.value, option)
   }
 })
@@ -195,7 +238,7 @@ watchEffect(() => {
  * valeurs objet) : comparer par `value`, jamais par identité.
  */
 function optionOf(value: string) {
-  return props.options.find((o) => o.value === value) ?? optionCache.get(value)
+  return allOptions.value.find((o) => o.value === value) ?? optionCache.get(value)
 }
 
 function labelOf(value: string) {
@@ -207,14 +250,73 @@ function labelOf(value: string) {
 // Pas de frappe → terme vide (le libellé affiché ne restreint pas la liste).
 const searchTerm = computed(() => (typed.value ? query.value.trim() : ''))
 
+// Liste PLATE des options retenues, dans l'ordre d'affichage : c'est elle que
+// la navigation clavier indexe (`activeIndex`, `optionId`) — les groupes et les
+// séparateurs n'y apparaissent pas, ils ne sont donc jamais un arrêt clavier.
 const filtered = computed(() => {
   const matcher = props.filter
-  if (matcher === false) return props.options
+  const list = allOptions.value
+  if (matcher === false) return list
   const q = searchTerm.value
-  if (!q) return props.options
-  if (typeof matcher === 'function') return props.options.filter((o) => matcher(o, q))
+  if (!q) return list
+  if (typeof matcher === 'function') return list.filter((o) => matcher(o, q))
   const needle = normalizeText(q)
-  return props.options.filter((o) => normalizeText(o.label).includes(needle))
+  return list.filter((o) => normalizeText(o.label).includes(needle))
+})
+
+// ── Arbre de rendu ──────────────────────────────────────────────────────────
+// Seul endroit qui connaît la hiérarchie. Chaque option y porte son index DANS
+// `filtered` (et non sa position dans l'arbre) : ids, surbrillance et slot
+// #option restent alignés sur la navigation clavier.
+type RenderedOption = { kind: 'option'; key: string; option: ComboboxOption; index: number }
+type RenderedNode =
+  | RenderedOption
+  | { kind: 'group'; key: string; label: string; options: RenderedOption[] }
+  | { kind: 'separator'; key: string }
+
+const rendered = computed<RenderedNode[]>(() => {
+  const indexOf = new Map<string, number>()
+  filtered.value.forEach((option, index) => indexOf.set(option.value, index))
+
+  const entryOf = (option: ComboboxOption): RenderedOption | null => {
+    const index = indexOf.get(option.value)
+    if (index === undefined) return null
+    return { kind: 'option', key: `option:${option.value}`, option, index }
+  }
+
+  const nodes: RenderedNode[] = []
+  // Séparateur différé : matérialisé seulement si du contenu le précède ET le
+  // suit. Un seul mécanisme couvre les trois cas d'orphelin nés du filtrage
+  // (filet en tête, en fin, ou deux d'affilée).
+  let pendingSeparator: string | null = null
+
+  for (const [i, item] of props.options.entries()) {
+    if (isSeparator(item)) {
+      if (nodes.length > 0) pendingSeparator = `sep:${i}`
+      continue
+    }
+
+    let node: RenderedNode | null
+    if (isGroup(item)) {
+      const options = item.options
+        .map(entryOf)
+        .filter((entry): entry is RenderedOption => entry !== null)
+      // groupe vidé par le filtre : omis, libellé compris
+      node =
+        options.length > 0 ? { kind: 'group', key: `group:${i}`, label: item.label, options } : null
+    } else {
+      node = entryOf(item)
+    }
+    if (!node) continue
+
+    if (pendingSeparator !== null) {
+      nodes.push({ kind: 'separator', key: pendingSeparator })
+      pendingSeparator = null
+    }
+    nodes.push(node)
+  }
+
+  return nodes
 })
 
 // ── Recherche (source externe) ──────────────────────────────────────────────
@@ -279,7 +381,7 @@ if (!props.multiple && typeof model.value === 'string' && model.value) {
 // que `select()` évite volontairement.
 // Gardes `open`/`typed` : ne jamais écraser une saisie en cours.
 watch(
-  () => props.options,
+  allOptions,
   () => {
     if (props.multiple || open.value || typed.value) return
     if (typeof model.value === 'string' && model.value) query.value = labelOf(model.value)
@@ -305,6 +407,32 @@ const canClear = computed(
 )
 
 const optionId = (index: number) => `${optionsId}-option-${index}`
+
+// Le rendu d'une option est écrit deux fois (dans un groupe, et à la racine du
+// panneau) — un template Vue n'a pas de fragment réutilisable. Ces deux
+// fabriques ramènent la duplication à une ligne de chaque côté.
+function rowProps(entry: RenderedOption) {
+  return {
+    id: optionId(entry.index),
+    icon: entry.option.icon,
+    active: entry.index === activeIndex.value,
+    selected: selectedValues.value.includes(entry.option.value),
+    disabled: entry.option.disabled,
+  }
+}
+
+function optionSlotProps(entry: RenderedOption) {
+  return {
+    option: entry.option,
+    index: entry.index,
+    active: entry.index === activeIndex.value,
+    selected: selectedValues.value.includes(entry.option.value),
+  }
+}
+
+function hover(entry: RenderedOption) {
+  if (!entry.option.disabled) activeIndex.value = entry.index
+}
 
 // Le focus DOM ne quitte jamais l'input (navigation par aria-activedescendant) :
 // le navigateur ne défile donc pas l'option active dans le panneau `overflow:auto`.
@@ -514,7 +642,7 @@ watch(
 // pour forcer une nouvelle évaluation — et si la source n'a rien renvoyé (même
 // longueur), rien ne relance la boucle : condition d'arrêt gratuite.
 watch(
-  () => props.options.length,
+  () => allOptions.value.length,
   () => {
     pending = false
     const el = sentinelEl.value
@@ -620,26 +748,32 @@ watch(
       :aria-multiselectable="multiple ? 'true' : undefined"
       @mousedown="onPanelMousedown"
     >
-      <OptionRow
-        v-for="(option, index) in filtered"
-        :id="optionId(index)"
-        :key="option.value"
-        :icon="option.icon"
-        :active="index === activeIndex"
-        :selected="selectedValues.includes(option.value)"
-        :disabled="option.disabled"
-        @select="select(option)"
-        @pointermove="!option.disabled && (activeIndex = index)"
-      >
-        <slot
-          name="option"
-          :option="option"
-          :index="index"
-          :active="index === activeIndex"
-          :selected="selectedValues.includes(option.value)"
-          >{{ option.label }}</slot
+      <!-- Groupes et séparateurs ne sont QUE du rendu : la navigation clavier
+           indexe `filtered`, plat, et ne les rencontre donc jamais. -->
+      <template v-for="node in rendered" :key="node.key">
+        <OptionSeparator v-if="node.kind === 'separator'" />
+
+        <OptionGroup v-else-if="node.kind === 'group'" :label="node.label">
+          <OptionRow
+            v-for="entry in node.options"
+            :key="entry.key"
+            v-bind="rowProps(entry)"
+            @select="select(entry.option)"
+            @pointermove="hover(entry)"
+          >
+            <slot name="option" v-bind="optionSlotProps(entry)">{{ entry.option.label }}</slot>
+          </OptionRow>
+        </OptionGroup>
+
+        <OptionRow
+          v-else
+          v-bind="rowProps(node)"
+          @select="select(node.option)"
+          @pointermove="hover(node)"
         >
-      </OptionRow>
+          <slot name="option" v-bind="optionSlotProps(node)">{{ node.option.label }}</slot>
+        </OptionRow>
+      </template>
 
       <!-- Ordre chargement → vide → contenu : pendant une
            requête, le panneau ne doit pas annoncer « aucun résultat ». -->

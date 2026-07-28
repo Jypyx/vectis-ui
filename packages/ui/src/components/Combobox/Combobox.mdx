@@ -50,6 +50,30 @@ présentée mais ni sélectionnable ni atteignable au clavier.
 Le filtrage est **insensible à la casse et aux accents** (normalisation NFD) : taper
 `sene` propose `Sénégal`.
 
+## Groupes et séparateurs
+
+Une entrée d'`options` n'est pas forcément une option : ce peut être un **groupe
+nommé** — `{ label, options }`, rendu en `role="group"` avec un micro-libellé — ou un
+**séparateur** — `{ separator: true }`, un filet pleine largeur. Les trois formes se
+mélangent librement dans le même tableau, dans l'ordre voulu.
+
+```ts
+const pays: ComboboxItem[] = [
+  { label: 'Europe', options: [{ value: 'fr', label: 'France' }] },
+  { separator: true },
+  { label: 'Afrique', options: [{ value: 'sn', label: 'Sénégal' }] },
+  { value: 'other', label: 'Autre / non listé' }, // option nue : toujours valide
+]
+```
+
+Groupes et séparateurs sont **du rendu, rien d'autre** : la navigation clavier parcourt
+la liste **à plat** et ne s'arrête jamais sur un libellé de groupe ni sur un filet. Au
+filtrage, un groupe dont plus aucune option ne correspond **disparaît, libellé compris**,
+et les séparateurs devenus orphelins (en tête, en fin, ou deux d'affilée) ne sont pas
+rendus — la liste filtrée ne laisse donc jamais de filet flottant.
+
+<Canvas of={ComboboxStories.Groupes} />
+
 ## Recherche
 
 Le filtre ne s'active **qu'à la frappe**. Un `v-model` déjà renseigné affiche son
@@ -187,6 +211,11 @@ que le champ — le libellé d'une option ne change pas de taille en passant dan
   retire la dernière valeur en multiple.
 - Nommer le champ via `aria-label` (ou un `label` associé) — l'attribut est reporté
   sur l'input interne.
+- Un groupe est un `role="group"` nommé par `aria-labelledby` (l'équivalent d'un
+  `<optgroup>`), enfant autorisé du `role="listbox"` ; son libellé n'est ni focusable ni
+  sélectionnable. Le séparateur est en revanche **décoratif** (`role="presentation"`) : le
+  regroupement est déjà porté par les groupes et leurs noms, un `role="separator"` ne
+  serait pas un enfant valide d'une listbox.
 - Le spinner du **champ** est décoratif (`aria-hidden`) : l'annonce du chargement vient
   du `role="status"` inséré dans le panneau, une seule fois.
 
