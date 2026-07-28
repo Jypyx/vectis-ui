@@ -81,8 +81,8 @@ table continue de défiler bord à bord.
 
 `striped` alterne le fond des lignes paires ; `compact` réduit les paddings de cellules d'un
 cran et passe les composés (recherche, footer) en compact ; `stickyHeader` fige la rangée
-d'en-têtes au défilement vertical — en mode `scroll`, il suppose une zone défilante bornée par
-`height` (nombre → px, ou toute longueur CSS), sinon rien ne défile sous l'en-tête. Son fond opaque
+d'en-têtes au défilement vertical — il suppose une zone défilante bornée, par `height` ou par un
+parent de hauteur définie (cf. **Hauteur**), sinon rien ne défile sous l'en-tête. Son fond opaque
 reprend la surface de la variante : aucune couture au bord du cadre, y compris en thème sombre.
 
 <Canvas of={DataTableStories.Striped} />
@@ -90,6 +90,25 @@ reprend la surface de la variante : aucune couture au bord du cadre, y compris e
 <Canvas of={DataTableStories.Compact} />
 
 <Canvas of={DataTableStories.StickyHeader} />
+
+## Hauteur
+
+Le tableau occupe **100 % de la hauteur de son parent** dès que celui-ci en a une : sa hauteur
+cesse alors de dépendre du nombre de lignes rendues, et une dernière page incomplète ne le fait
+plus se contracter — la pagination reste collée en bas, seule la table défile. Aucune prop, aucun
+JS de mesure : la racine est une colonne flex de hauteur `100 %`, un pourcentage qui retombe sur
+`auto` quand le parent se dimensionne à son contenu. Les tableaux existants sont donc inchangés
+tant qu'on ne borne pas leur hôte.
+
+`height` (nombre → px, ou toute longueur CSS) borne le **composant entier**, barre de titre et
+pagination comprises. Pour un simple plafond, poser `style="max-block-size: …"` ; dans un parent
+en colonne flex, préférer `style="flex: 1; min-block-size: 0"` à une hauteur en dur.
+
+L'espace laissé libre sous les dernières lignes reste nu : le zébrage ne se prolonge pas sur des
+lignes qui n'existent pas — les lignes n'ayant pas de hauteur fixe, un motif de fond se
+décalerait dès qu'une cellule passe sur deux lignes.
+
+<Canvas of={DataTableStories.PleineHauteur} />
 
 ## Responsive
 

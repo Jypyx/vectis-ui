@@ -23,6 +23,12 @@ import Typography from '../Typography/Typography.vue'
  * conteneur, chaque ligne devient une carte et chaque cellule affiche son
  * en-tête via ::before + data-label — aucun JS de mesure. (640px en dur : les
  * conditions @container n'acceptent pas var().)
+ *
+ * Hauteur 100 % CSS : la racine est une colonne flex de `block-size: 100%` dont
+ * seule la zone défilante s'étire. Le tableau occupe donc la hauteur de son
+ * parent (ou celle de la prop `height`) et ne varie plus avec le nombre de
+ * lignes de la page courante ; sur un parent en hauteur auto, le pourcentage
+ * retombe sur `auto` et le rendu est inchangé.
  */
 export interface DataTableColumn {
   key: string
@@ -80,11 +86,18 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   searchDebounce?: number
   /** Alterne le fond des lignes paires. */
   striped?: boolean
-  /** Fige l'en-tête au défilement vertical (nécessite `height` en mode scroll). */
+  /**
+   * Fige l'en-tête au défilement vertical. Suppose une zone défilante bornée :
+   * prop `height` ou parent de hauteur définie.
+   */
   stickyHeader?: boolean
   /** Paddings de cellules réduits d'un cran, propagé aux composés. */
   compact?: boolean
-  /** Hauteur max de la zone défilante (nombre → px, chaîne CSS libre sinon). */
+  /**
+   * Hauteur du composant entier — toolbar et pagination comprises (nombre → px,
+   * chaîne CSS libre sinon). À défaut, le tableau occupe la hauteur de son
+   * parent quand celui-ci en a une.
+   */
   height?: number | string
   /** Choix « lignes par page » (affiché si fourni et pagination active). */
   perPageOptions?: number[]
@@ -336,9 +349,14 @@ const rangeText = computed(() => {
   return props.rangeLabel?.({ start, end, total }) ?? `${start}–${end} sur ${total}`
 })
 
-const scrollerStyle = computed<StyleValue | undefined>(() =>
+// Hauteur posée sur la RACINE (et non en max-block-size sur le scroller) : le
+// composant entier occupe la hauteur demandée et la zone défilante absorbe le
+// reste — une page incomplète ne fait plus rétrécir le tableau. Un plafond
+// souple reste accessible au consommateur (`style="max-block-size: …"`), la
+// racine étant une colonne flex dont le scroller peut se comprimer.
+const heightStyle = computed<StyleValue | undefined>(() =>
   props.height !== undefined
-    ? { maxBlockSize: typeof props.height === 'number' ? `${props.height}px` : props.height }
+    ? { blockSize: typeof props.height === 'number' ? `${props.height}px` : props.height }
     : undefined,
 )
 </script>
@@ -347,7 +365,7 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
   <div
     class="ds-table-wrapper"
     :class="rootClass"
-    :style="rootStyle"
+    :style="[heightStyle, rootStyle]"
     :data-variant="variant"
     :data-responsive="responsive"
     :data-striped="striped ? '' : undefined"
@@ -374,7 +392,7 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
     </div>
 
     <!-- Seule la table défile : toolbar et footer restent en place. -->
-    <div class="ds-table-scroller" :style="scrollerStyle">
+    <div class="ds-table-scroller">
       <table class="ds-table" v-bind="forwardedAttrs">
         <caption v-if="caption" class="ds-table-caption">
           {{
@@ -540,6 +558,21 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
 
     container-type: inline-size;
     font-family: var(--ds-text-family);
+
+    /*
+     * Colonne toolbar / scroller / footer (idiome Dialog) : le composant prend
+     * la hauteur de son parent et c'est la zone défilante qui absorbe le reste
+     * — la table ne rétrécit plus quand une page est incomplète (dernière page
+     * à 2 lignes) et le footer reste collé en bas. Sans hauteur imposée par le
+     * parent, `100%` retombe sur `auto` (pourcentage résolu contre une hauteur
+     * indéfinie) : le rendu historique est conservé tel quel, sans mesure JS.
+     * Pas de `min-block-size: 0` ici, volontairement : dans un parent en
+     * colonne flex trop court, le minimum automatique garde la table à sa
+     * hauteur naturelle au lieu de l'écraser.
+     */
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
   }
 
   .ds-table-wrapper[data-compact] {
@@ -569,12 +602,25 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
     overflow: clip;
   }
 
-  /* Seule la table défile : toolbar et footer restent en place. */
-  .ds-table-wrapper[data-responsive='scroll'] .ds-table-scroller {
+  /*
+   * La SEULE zone qui défile : occupe l'espace laissé par la toolbar et le
+   * footer (idiome `.ds-dialog-scroll`). `flex: 1 1 auto` et non `flex: 1`
+   * (= base 0) : la base `auto` part de la hauteur de contenu, donc inerte tant
+   * qu'il n'y a pas d'espace libre à distribuer. `min-block-size: 0` lève le
+   * minimum automatique de l'item flex (= hauteur du contenu), sans quoi le
+   * scroller refuserait de se comprimer et la table déborderait au lieu de
+   * défiler. Non qualifié par `data-responsive` : en `stack` aussi un tableau
+   * plus haut que son hôte doit défiler — sinon il serait rogné, et
+   * inatteignable, par le `overflow: clip` de la variante `outlined`.
+   */
+  .ds-table-scroller {
+    flex: 1 1 auto;
+    min-block-size: 0;
     overflow: auto;
   }
 
   .ds-table-toolbar {
+    flex: none; /* fixe en haut, hors zone de défilement */
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -707,6 +753,7 @@ const scrollerStyle = computed<StyleValue | undefined>(() =>
   }
 
   .ds-table-footer {
+    flex: none; /* fixe en bas, hors zone de défilement */
     display: flex;
     flex-wrap: wrap;
     align-items: center;

@@ -277,4 +277,29 @@ describe('DataTable', () => {
     expect(wrapper.hasAttribute('aria-describedby')).toBe(false)
     expect(container.querySelector('table')?.getAttribute('aria-describedby')).toBe('legende')
   })
+
+  // Le remplissage lui-même (colonne flex, zone défilante extensible) relève du
+  // navigateur : il est couvert par la play function `PleineHauteur`. Ici on
+  // verrouille seulement le câblage du style.
+  it('height : block-size sur la racine, jamais sur le scroller', () => {
+    const heights: Array<number | string> = [320, '60vh']
+    for (const height of heights) {
+      const { container } = render(DataTable, {
+        props: { columns: COLUMNS, rows: ROWS, height },
+        attrs: { style: 'width: 640px' },
+      })
+      const wrapper = container.querySelector('.ds-table-wrapper') as HTMLElement
+      expect(wrapper.style.blockSize).toBe(typeof height === 'number' ? '320px' : '60vh')
+      // le style du consommateur passe après celui de la prop : il survit
+      expect(wrapper.style.width).toBe('640px')
+      expect(container.querySelector('.ds-table-scroller')?.hasAttribute('style')).toBe(false)
+    }
+  })
+
+  it('sans height : aucune hauteur inline, le parent décide', () => {
+    const { container } = render(DataTable, { props: { columns: COLUMNS, rows: ROWS } })
+    const wrapper = container.querySelector('.ds-table-wrapper') as HTMLElement
+    expect(wrapper.style.blockSize).toBe('')
+    expect(container.querySelector('.ds-table-scroller')?.hasAttribute('style')).toBe(false)
+  })
 })

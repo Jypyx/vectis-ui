@@ -298,7 +298,11 @@ export const Compact: Story = {
   }),
 }
 
-/** En-tête figé : nécessite une hauteur bornée (`height`) pour que la zone défile. */
+/**
+ * En-tête figé : suppose une zone défilante bornée — ici par `height`, qui borne
+ * le composant entier (toolbar et pagination comprises). Un parent de hauteur
+ * définie suffit aussi, cf. `PleineHauteur`.
+ */
 export const StickyHeader: Story = {
   args: { rows: ROWS_MANY, stickyHeader: true, height: 320, caption: undefined },
   render: (args) => ({
@@ -306,6 +310,52 @@ export const StickyHeader: Story = {
     setup: () => ({ args }),
     template: '<DataTable v-bind="args" style="width: 640px" />',
   }),
+}
+
+/**
+ * Hauteur pilotée par le parent : le tableau occupe 100 % de son conteneur et ne
+ * rétrécit PAS sur une page incomplète — la dernière page (2 lignes) fait
+ * exactement la même hauteur qu'une page pleine, la pagination reste collée en
+ * bas. Aucune prop : `stickyHeader` fonctionne ici sans `height`, le scroller
+ * étant borné par le parent.
+ */
+export const PleineHauteur: Story = {
+  args: {
+    rows: ROWS_MANY,
+    variant: 'outlined',
+    title: 'Projets',
+    searchable: true,
+    stickyHeader: true,
+    showRange: true,
+    caption: undefined,
+  },
+  render: (args) => ({
+    components: { DataTable },
+    setup: () => ({ args, perPage: ref(10), page: ref(1) }),
+    template: `
+      <div style="block-size: 460px; inline-size: 760px">
+        <DataTable v-bind="args" v-model:per-page="perPage" v-model:page="page"
+          :per-page-options="[10, 20]" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const wrapper = canvasElement.querySelector('.ds-table-wrapper') as HTMLElement
+    const scroller = canvasElement.querySelector('.ds-table-scroller') as HTMLElement
+
+    // le composant épouse le parent, et le trop-plein défile (au lieu d'être
+    // rogné par le `overflow: clip` de la variante outlined)
+    expect(Math.round(wrapper.getBoundingClientRect().height)).toBe(460)
+    expect(scroller.scrollHeight).toBeGreaterThan(scroller.clientHeight)
+
+    // dernière page : 2 lignes seulement, hauteur du composant inchangée
+    await userEvent.click(canvas.getByRole('button', { name: 'Page 3' }))
+    await waitFor(() => {
+      expect(canvasElement.querySelectorAll('tbody tr').length).toBe(2)
+      expect(Math.round(wrapper.getBoundingClientRect().height)).toBe(460)
+    })
+  },
 }
 
 /** Zébrage : une ligne sur deux sur fond en creux. */
