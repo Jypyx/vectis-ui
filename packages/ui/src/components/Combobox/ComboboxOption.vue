@@ -16,15 +16,16 @@ import { iconProps } from '../Icon/iconProps'
  *
  * Surface volontairement réduite à ce que le Combobox utilise : le libellé
  * passe par le slot #default (que le Combobox alimente avec son propre slot
- * scopé `#option`), pas par une prop.
+ * scopé `#option`), pas par une prop. Un seul emplacement d'icône, au début —
+ * la fin est occupée par la coche de sélection — d'où `icon` et non
+ * `iconStart` (convention Badge/Tab/ToggleItem).
  */
 interface ComboboxOptionProps {
   /**
    * Icône avant le libellé : nom Material Symbols Rounded, ou URL d'image/SVG
-   * (toute valeur contenant '.', '/' ou ':' est traitée comme une URL). Le slot
-   * #start prime.
+   * (toute valeur contenant '.', '/' ou ':' est traitée comme une URL).
    */
-  iconStart?: string
+  icon?: string
   /** Option sélectionnée (aria-selected + coche). */
   selected?: boolean
   /** Option active (surbrillance) — posée par le champ. */
@@ -33,7 +34,7 @@ interface ComboboxOptionProps {
 }
 
 const props = withDefaults(defineProps<ComboboxOptionProps>(), {
-  iconStart: undefined,
+  icon: undefined,
   selected: false,
   active: false,
   disabled: false,
@@ -47,8 +48,6 @@ const emit = defineEmits<{
 defineSlots<{
   /** Libellé de l'option. */
   default?(): unknown
-  /** Contenu libre avant le libellé (prime sur `iconStart`). */
-  start?(): unknown
 }>()
 
 function onClick() {
@@ -68,9 +67,7 @@ function onClick() {
     :data-active="active ? '' : undefined"
     @click="onClick"
   >
-    <slot name="start">
-      <Icon v-if="iconStart" v-bind="iconProps(iconStart)" />
-    </slot>
+    <Icon v-if="icon" v-bind="iconProps(icon)" />
     <span class="ds-combobox-option-label"><slot /></span>
     <Icon v-if="selected" name="check" class="ds-combobox-option-check" />
   </button>

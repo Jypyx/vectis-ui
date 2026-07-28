@@ -453,4 +453,75 @@ describe('Combobox asynchrone', () => {
     })
     expect(chargement.container.querySelector('.ds-test-loading')?.textContent).toBe('patientez')
   })
+
+  it('option.icon rend une icône dans la rangée, son absence n’en rend aucune', async () => {
+    const { getByRole, container } = renderCombobox({
+      options: [
+        { value: 'fr', label: 'France', icon: 'flag' },
+        { value: 'be', label: 'Belgique' },
+      ],
+    })
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
+    const [avec, sans] = [...container.querySelectorAll('[role="option"]')] as [
+      HTMLElement,
+      HTMLElement,
+    ]
+    // ligature Material : le nom de l'icône est le contenu du symbole
+    expect(avec.querySelector('.ds-icon-symbol')?.textContent).toBe('flag')
+    // l'icône précède le libellé (la coche, elle, vient après)
+    expect(avec.firstElementChild?.classList.contains('ds-combobox-option-label')).toBe(false)
+    expect(sans.querySelector('.ds-icon-symbol')).toBeNull()
+    expect(sans.firstElementChild?.classList.contains('ds-combobox-option-label')).toBe(true)
+  })
+
+  it('slot #chip : remplace le Chip par défaut, `remove` retire la valeur', async () => {
+    const { getByRole, container, emitted } = render(Combobox, {
+      props: { options: OPTIONS, modelValue: ['fr'], multiple: true },
+      attrs: { 'aria-label': 'Pays' },
+      slots: {
+        chip: (slotProps: {
+          value: string
+          option: ComboboxOption | undefined
+          label: string
+          remove: () => void
+          size: string
+          compact: boolean
+        }) =>
+          h(
+            'button',
+            { class: 'ds-test-chip', onClick: slotProps.remove },
+            `${slotProps.label}/${slotProps.option?.icon ?? '—'}/${slotProps.size}`,
+          ),
+      },
+    })
+    // le Chip par défaut a bien cédé la place
+    expect(container.querySelector('.ds-chip')).toBeNull()
+    const chip = container.querySelector('.ds-test-chip') as HTMLElement
+    expect(chip.textContent).toBe('France/—/xs')
+
+    await fireEvent.click(chip)
+    expect(emitted('update:modelValue').at(-1)).toEqual([[]])
+    expect(getByRole('combobox')).toBeTruthy()
+  })
+
+  it('le slot #chip garde l’option quand elle sort des options reçues (source async)', async () => {
+    const { container, rerender } = render(Combobox, {
+      props: {
+        options: [{ value: 'fr', label: 'France', icon: 'flag' }],
+        modelValue: ['fr'],
+        multiple: true,
+      },
+      attrs: { 'aria-label': 'Pays' },
+      slots: {
+        chip: (slotProps: { option: ComboboxOption | undefined; label: string }) =>
+          h('span', { class: 'ds-test-chip' }, `${slotProps.label}/${slotProps.option?.icon}`),
+      },
+    })
+    expect(container.querySelector('.ds-test-chip')?.textContent).toBe('France/flag')
+
+    // la recherche suivante ne renvoie plus l'option : le cache la garde entière
+    // (sans lui, le Chip afficherait l'identifiant brut et perdrait son icône)
+    await rerender({ options: [] })
+    expect(container.querySelector('.ds-test-chip')?.textContent).toBe('France/flag')
+  })
 })

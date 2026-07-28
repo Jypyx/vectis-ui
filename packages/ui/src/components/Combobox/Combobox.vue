@@ -31,6 +31,11 @@ import { useTimer } from '../../composables/useTimer'
 export interface ComboboxOption {
   value: string
   label: string
+  /**
+   * Icône avant le libellé : nom Material Symbols Rounded, ou URL d'image/SVG
+   * (toute valeur contenant '.', '/' ou ':' est traitée comme une URL).
+   */
+  icon?: string
   disabled?: boolean
 }
 
@@ -110,6 +115,20 @@ defineSlots<{
     active: boolean
     selected: boolean
   }): unknown
+  /**
+   * Chip d'une valeur sélectionnée en mode multiple (défaut : un `Chip`
+   * dismissible portant le libellé). `option` peut être `undefined` si la
+   * valeur n'a jamais été vue dans `options` ; `size`/`compact` sont ceux
+   * calculés pour tenir dans le champ, les reprendre pour garder le gabarit.
+   */
+  chip?(props: {
+    value: string
+    option: ComboboxOption | undefined
+    label: string
+    remove: () => void
+    size: 'xs' | 'sm'
+    compact: boolean
+  }): unknown
   /** Panneau sans résultat (défaut : `emptyText`) ; `query` = terme recherché. */
   empty?(props: { query: string }): unknown
   /** Panneau en chargement, aucune option affichée (défaut : `loadingText`). */
@@ -155,22 +174,32 @@ const selectedValues = computed<string[]>(() => {
   return typeof model.value === 'string' && model.value ? [model.value] : []
 })
 
-// Mémoire des libellés SÉLECTIONNÉS : en source asynchrone, `options` ne
+// Mémoire des options SÉLECTIONNÉES : en source asynchrone, `options` ne
 // contient que le dernier jeu de résultats et une valeur déjà choisie en est
-// souvent absente — sans cache, le Chip afficherait son identifiant brut.
+// souvent absente — sans cache, le Chip afficherait son identifiant brut (et le
+// slot #chip perdrait l'icône de l'option).
 // watchEffect (et non watch sur `props.options`) : il traque l'itération, donc
 // aussi les ajouts en place d'une page (scroll infini). Borné à la sélection :
-// les autres libellés se relisent dans `options`.
-const labelCache = reactive(new Map<string, string>())
+// les autres options se relisent dans `options`.
+const optionCache = reactive(new Map<string, ComboboxOption>())
 watchEffect(() => {
   const wanted = new Set(selectedValues.value)
   for (const option of props.options) {
-    if (wanted.has(option.value)) labelCache.set(option.value, option.label)
+    if (wanted.has(option.value)) optionCache.set(option.value, option)
   }
 })
 
+/**
+ * Option connue pour cette valeur : `options` courantes d'abord, cache en repli.
+ * Une option issue du cache est un proxy réactif (`reactive` convertit les
+ * valeurs objet) : comparer par `value`, jamais par identité.
+ */
+function optionOf(value: string) {
+  return props.options.find((o) => o.value === value) ?? optionCache.get(value)
+}
+
 function labelOf(value: string) {
-  return props.options.find((o) => o.value === value)?.label ?? labelCache.get(value) ?? value
+  return optionOf(value)?.label ?? value
 }
 
 // Terme de recherche unique, consommé par le filtre local ET par l'émission
@@ -352,9 +381,9 @@ function onControlClick() {
 
 function select(option: ComboboxOption) {
   if (option.disabled) return
-  // mémorisé tout de suite : l'option peut disparaître d'`options` (recherche
+  // mémorisée tout de suite : l'option peut disparaître d'`options` (recherche
   // suivante) avant que le parent n'ait propagé le modèle
-  labelCache.set(option.value, option.label)
+  optionCache.set(option.value, option)
   typed.value = false
   if (props.multiple) {
     model.value = toggleValue(selectedValues.value, option.value)
@@ -536,18 +565,28 @@ watch(
         @clear="onClear"
       >
         <template v-if="multiple" #start>
-          <Chip
-            v-for="value in selectedValues"
-            :key="value"
-            tone="accent"
-            :size="chipSize"
-            :compact="chipCompact"
-            dismissible
-            :dismiss-label="`Retirer ${labelOf(value)}`"
-            :disabled="disabled"
-            @dismiss="removeValue(value)"
-            >{{ labelOf(value) }}</Chip
-          >
+          <template v-for="value in selectedValues" :key="value">
+            <slot
+              name="chip"
+              :value="value"
+              :option="optionOf(value)"
+              :label="labelOf(value)"
+              :remove="() => removeValue(value)"
+              :size="chipSize"
+              :compact="chipCompact"
+            >
+              <Chip
+                tone="accent"
+                :size="chipSize"
+                :compact="chipCompact"
+                dismissible
+                :dismiss-label="`Retirer ${labelOf(value)}`"
+                :disabled="disabled"
+                @dismiss="removeValue(value)"
+                >{{ labelOf(value) }}</Chip
+              >
+            </slot>
+          </template>
         </template>
 
         <!-- Chevron posé en absolu à droite (cf. CSS), pivote à l'ouverture.
@@ -585,6 +624,7 @@ watch(
         v-for="(option, index) in filtered"
         :id="optionId(index)"
         :key="option.value"
+        :icon="option.icon"
         :active="index === activeIndex"
         :selected="selectedValues.includes(option.value)"
         :disabled="option.disabled"

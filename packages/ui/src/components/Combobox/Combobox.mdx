@@ -105,6 +105,19 @@ panneau n'interrompt pas la pagination.
 
 <Canvas of={ComboboxStories.ScrollInfini} />
 
+## Icône d'option
+
+Le champ **`icon`** d'une option affiche une icône avant son libellé — un nom Material
+Symbols Rounded, ou une URL d'image/SVG. Elle est rendue à l'emplacement prévu par la
+rangée, donc alignée et espacée comme le reste du contenu.
+
+C'est la voie à préférer pour une simple icône, plutôt que le slot `#option` : ce dernier
+est rendu **à l'intérieur** du libellé, une icône qu'on y placerait n'atteindrait pas
+l'emplacement de début ni sa gouttière. La fin de la rangée, elle, est réservée à la coche
+de sélection.
+
+<Canvas of={ComboboxStories.AvecIcones} />
+
 ## Personnaliser une option
 
 Le slot **`#option`** remplace le contenu d'une option et reçoit `{ option, index,
@@ -121,6 +134,21 @@ valeur. Hors focus, le champ de saisie se replie pour ne laisser que les Chips, 
 espace vide.
 
 <Canvas of={ComboboxStories.SelectionMultiple} />
+
+### Personnaliser les Chips
+
+Le slot **`#chip`** remplace le Chip d'une valeur sélectionnée. Il reçoit :
+
+- `value` et `label` — la valeur et son libellé résolu ;
+- `option` — l'option complète (donc son `icon`), ou `undefined` si cette valeur n'a jamais
+  été vue dans `options`. Le composant mémorise les options sélectionnées : en source
+  asynchrone, une valeur choisie disparaît des résultats suivants sans perdre son libellé
+  ni son icône ;
+- `remove` — à câbler sur l'action de retrait, sans quoi la valeur ne serait plus retirable ;
+- `size` et `compact` — le gabarit calculé pour tenir dans le champ. Les reprendre sur le
+  Chip personnalisé évite de faire grandir le champ.
+
+<Canvas of={ComboboxStories.ChipPersonnalise} />
 
 ## Tailles
 

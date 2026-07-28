@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { computed, ref } from 'vue'
 
+import Chip from '../Chip/Chip.vue'
 import Combobox from './Combobox.vue'
 import type { ComboboxOption } from './Combobox.vue'
 
@@ -375,9 +376,94 @@ export const ScrollInfini: Story = {
 }
 
 /**
+ * Le champ `icon` d'une option affiche une icône avant son libellé, à
+ * l'emplacement prévu par la rangée (donc aligné et espacé comme le reste,
+ * contrairement à une icône posée dans le slot `#option`, qui atterrirait
+ * dans le libellé). Il accepte un nom Material Symbols **ou** une URL
+ * d'image/SVG — ici les deux dans la même liste.
+ */
+export const AvecIcones: Story = {
+  args: {
+    options: [
+      { value: 'doc', label: 'Document', icon: 'description' },
+      { value: 'img', label: 'Image', icon: 'image' },
+      { value: 'vid', label: 'Vidéo', icon: 'movie' },
+      {
+        value: 'svg',
+        label: 'Icône distante (URL)',
+        icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='%236366f1'/%3E%3C/svg%3E",
+      },
+      { value: 'zip', label: 'Archive (sans icône)' },
+      { value: 'exe', label: 'Exécutable', icon: 'terminal', disabled: true },
+    ],
+    placeholder: 'Choisir un type…',
+  },
+  render: (args) => ({
+    components: { Combobox },
+    setup: () => ({ args, value: ref('img') }),
+    template: `
+      <div style="width: 340px">
+        <Combobox v-bind="args" v-model="value" aria-label="Type de fichier" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('combobox'))
+    const options = await canvas.findAllByRole('option')
+    // l'icône est le PREMIER enfant de la rangée : elle précède le libellé,
+    // la coche de sélection venant après
+    await expect(options[0]!.firstElementChild).not.toHaveClass('ds-combobox-option-label')
+    // une option sans `icon` commence directement par son libellé
+    await expect(options[4]!.firstElementChild).toHaveClass('ds-combobox-option-label')
+  },
+}
+
+/**
+ * Le slot `#chip` remplace le Chip d'une valeur sélectionnée (mode multiple).
+ * Il reçoit `option` — donc son `icon` — ainsi que `remove` pour rester
+ * retirable, et `size`/`compact` pour garder le gabarit calculé par le champ.
+ */
+export const ChipPersonnalise: Story = {
+  args: {
+    multiple: true,
+    options: [
+      { value: 'doc', label: 'Document', icon: 'description' },
+      { value: 'img', label: 'Image', icon: 'image' },
+      { value: 'vid', label: 'Vidéo', icon: 'movie' },
+    ],
+    placeholder: 'Ajouter un type…',
+  },
+  render: (args) => ({
+    components: { Combobox, Chip },
+    setup: () => ({ args, value: ref(['doc', 'img']) }),
+    template: `
+      <div style="width: 380px">
+        <Combobox v-bind="args" v-model="value" aria-label="Types de fichier">
+          <template #chip="{ option, label, remove, size, compact }">
+            <Chip
+              tone="neutral"
+              variant="outline"
+              :icon-start="option?.icon"
+              :size="size"
+              :compact="compact"
+              dismissible
+              :dismiss-label="\`Retirer \${label}\`"
+              @dismiss="remove"
+              >{{ label }}</Chip
+            >
+          </template>
+        </Combobox>
+      </div>
+    `,
+  }),
+}
+
+/**
  * Le slot `#option` remplace le libellé par le contenu de son choix (ici la
  * capitale en second niveau). Il reçoit l'option et son état (`active`,
- * `selected`, `index`).
+ * `selected`, `index`). Pour une simple icône, préférer le champ `icon` de
+ * l'option : le contenu de ce slot est rendu à l'intérieur du libellé.
  */
 export const OptionPersonnalisee: Story = {
   render: (args) => ({
