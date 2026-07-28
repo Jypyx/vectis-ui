@@ -228,7 +228,7 @@ export const SaisieAvecCadran: Story = {
  * commite immédiatement (ni brouillon, ni bouton OK).
  */
 export const ListeDHeures: Story = {
-  args: { mode: 'list', minuteStep: 30, format: '24h' },
+  args: { mode: 'list', minuteStep: 30, format: '12h' },
   render: (args) => ({
     components: { TimePicker },
     setup: () => ({ args, value: ref('14:30') }),

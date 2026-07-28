@@ -677,8 +677,8 @@ function onEndIcon() {
         <div class="ds-timepicker-time">
           <Button
             class="ds-timepicker-cell"
-            :variant="activeStep === 'hour' ? 'solid' : 'ghost'"
-            size="md"
+            variant="ghost"
+            size="lg"
             :tone="activeStep === 'hour' ? 'accent' : 'neutral'"
             :aria-pressed="activeStep === 'hour' ? 'true' : 'false'"
             aria-label="Sélectionner l’heure"
@@ -689,8 +689,8 @@ function onEndIcon() {
           <span class="ds-timepicker-sep" aria-hidden="true">:</span>
           <Button
             class="ds-timepicker-cell"
-            :variant="activeStep === 'minute' ? 'solid' : 'ghost'"
-            size="md"
+            variant="ghost"
+            size="lg"
             :tone="activeStep === 'minute' ? 'accent' : 'neutral'"
             :aria-pressed="activeStep === 'minute' ? 'true' : 'false'"
             aria-label="Sélectionner les minutes"
@@ -715,7 +715,7 @@ function onEndIcon() {
 
         <div class="ds-timepicker-footer">
           <Button variant="ghost" tone="neutral" @click="cancel">Annuler</Button>
-          <Button @click="confirm">OK</Button>
+          <Button @click="confirm">Valider</Button>
         </div>
       </template>
     </Popover>
@@ -787,7 +787,7 @@ function onEndIcon() {
   .ds-timepicker-panel {
     display: flex;
     flex-direction: column;
-    gap: var(--ds-space-5);
+    gap: var(--ds-space-4);
     width: max-content;
     padding: var(--ds-space-3);
     color: var(--ds-color-text);
@@ -810,8 +810,8 @@ function onEndIcon() {
      viennent de Button. Qualifiée [data-size] (modèle IconButton/Tabs) :
      l'ordre d'export n'est pas contraignant. */
   .ds-timepicker-cell[data-size] {
-    inline-size: var(--ds-control-size-timepicker-cell-w);
-    font-size: var(--ds-text-heading-2-size);
+    width: var(--_control-height);
+    font-size: var(--ds-text-heading-1-size);
     font-weight: var(--ds-text-heading-2-weight);
     /* « 11 » et « 00 » ne doivent pas décaler la cellule */
     font-variant-numeric: tabular-nums;
