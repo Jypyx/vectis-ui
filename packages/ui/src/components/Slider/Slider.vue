@@ -193,7 +193,6 @@ function resyncFields() {
       class="ds-slider-field ds-slider-field-start"
       type="number"
       size="sm"
-      compact
       :min="min"
       :max="max"
       :step="step"
@@ -273,7 +272,6 @@ function resyncFields() {
       class="ds-slider-field ds-slider-field-end"
       type="number"
       size="sm"
-      compact
       :min="min"
       :max="max"
       :step="step"
