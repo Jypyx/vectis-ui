@@ -16,11 +16,62 @@ async function type(input: HTMLInputElement, value: string) {
   await fireEvent.input(input)
 }
 
-describe('DatePicker', () => {
-  it('affiche la valeur formatée dans un champ en lecture seule', () => {
-    const { container } = render(DatePicker, {
-      props: { modelValue: JUNE, locale: 'fr-FR', label: 'Date' },
+describe('DatePicker — défaut', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('est un champ de saisie masqué, sans calendrier ni ARIA de popup', async () => {
+    const { container } = render(DatePicker, { props: { modelValue: JUNE, locale: 'fr-FR' } })
+    const input = container.querySelector('input') as HTMLInputElement
+    expect(input.readOnly).toBe(false)
+    expect(input.value).toBe('10/06/2026')
+    expect(input.getAttribute('inputmode')).toBe('numeric')
+    expect(container.querySelector('button[aria-label="Ouvrir le calendrier"]')).toBeNull()
+    expect(input.getAttribute('aria-haspopup')).toBeNull()
+    expect(input.getAttribute('aria-controls')).toBeNull()
+
+    await fireEvent.focus(input)
+    await fireEvent.keyDown(input, { key: 'ArrowDown', bubbles: true })
+    await nextTick()
+    expect(container.querySelector('.ds-datepicker-panel')).toBeNull()
+  })
+
+  it('n’avertit ni à vide, ni sur une sélection range (qui retombe en lecture seule)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(DatePicker, { props: { modelValue: JUNE } })
+    expect(warn).not.toHaveBeenCalled()
+
+    // `mode` n'est pas fourni : le repli en lecture seule est le comportement
+    // attendu, pas une erreur du consommateur.
+    const { container, getByRole } = render(DatePicker, {
+      props: { selection: 'range', modelValue: { start: '2026-06-19', end: '2026-06-26' } },
     })
+    expect(warn).not.toHaveBeenCalled()
+    const input = container.querySelector('input') as HTMLInputElement
+    expect(input.readOnly).toBe(true)
+    await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
+    await nextTick()
+    expect(getByRole('grid')).toBeTruthy()
+  })
+
+  it('avertit quand mode="input" est explicitement demandé hors sélection simple', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(DatePicker, {
+      props: { mode: 'input', selection: 'range', modelValue: { start: null, end: null } },
+    })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('mode="input" ignoré'))
+  })
+})
+
+describe('DatePicker — lecture seule', () => {
+  const mount = (props: Record<string, unknown> = {}) =>
+    render(DatePicker, {
+      props: { mode: 'readonly', locale: 'fr-FR', label: 'Date', ...props },
+    })
+
+  it('affiche la valeur formatée dans un champ en lecture seule', () => {
+    const { container } = mount({ modelValue: JUNE })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.readOnly).toBe(true)
     expect(input.value).toContain('10')
@@ -30,9 +81,7 @@ describe('DatePicker', () => {
   })
 
   it('ouvre le panneau au clic et rend la grille', async () => {
-    const { container, getByRole } = render(DatePicker, {
-      props: { modelValue: JUNE, label: 'Date' },
-    })
+    const { container, getByRole } = mount({ modelValue: JUNE })
     const control = container.querySelector('.ds-datepicker-control') as HTMLElement
     await fireEvent.click(control)
     await nextTick()
@@ -41,10 +90,8 @@ describe('DatePicker', () => {
     expect(container.querySelector('input')?.getAttribute('aria-expanded')).toBe('true')
   })
 
-  it('ignore showCalendar en lecture seule (le calendrier y est le seul chemin)', async () => {
-    const { container, getByRole } = render(DatePicker, {
-      props: { modelValue: JUNE, showCalendar: false },
-    })
+  it('ignore showCalendar (le calendrier y est le seul chemin)', async () => {
+    const { container, getByRole } = mount({ modelValue: JUNE, showCalendar: false })
     expect(container.querySelector('button[aria-label="Effacer la date"]')).toBeTruthy()
     await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
     await nextTick()
@@ -52,9 +99,7 @@ describe('DatePicker', () => {
   })
 
   it('sélectionne une date, met à jour le modèle et ferme (single)', async () => {
-    const { container, emitted, getByRole } = render(DatePicker, {
-      props: { modelValue: JUNE },
-    })
+    const { container, emitted, getByRole } = mount({ modelValue: JUNE })
     await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
     await nextTick()
     const day15 = [...getByRole('grid').querySelectorAll('.ds-calendar-day')].find(
@@ -73,7 +118,7 @@ describe('DatePicker', () => {
     // L'Entrée du Calendar fait preventDefault puis ferme (mode simple) ; elle
     // remonte ensuite à la racine, où ArrowDown/Entrée ouvrent. Sans la garde
     // `defaultPrevented` du composable, le panneau se rouvrait aussitôt.
-    const { container, getByRole } = render(DatePicker, { props: { modelValue: JUNE } })
+    const { container, getByRole } = mount({ modelValue: JUNE })
     await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
     await nextTick()
     const grid = getByRole('grid')
@@ -85,9 +130,7 @@ describe('DatePicker', () => {
   })
 
   it('efface la valeur via la croix', async () => {
-    const { container, emitted } = render(DatePicker, {
-      props: { modelValue: JUNE, clearable: true },
-    })
+    const { container, emitted } = mount({ modelValue: JUNE, clearable: true })
     // avec une valeur, l'icône de fin devient une croix « Effacer la date »
     const clearBtn = container.querySelector('button[aria-label="Effacer la date"]') as HTMLElement
     expect(clearBtn).toBeTruthy()
@@ -96,7 +139,7 @@ describe('DatePicker', () => {
   })
 
   it('ferme quand le focus sort du composant', async () => {
-    const { container } = render(DatePicker, { props: { modelValue: JUNE } })
+    const { container } = mount({ modelValue: JUNE })
     const root = container.querySelector('.ds-datepicker') as HTMLElement
     await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
     await nextTick()
@@ -110,13 +153,10 @@ describe('DatePicker', () => {
     )
   })
 
-  it('affiche une plage formatée (mode range)', () => {
-    const { container } = render(DatePicker, {
-      props: {
-        mode: 'range',
-        modelValue: { start: '2026-06-19', end: '2026-06-26' },
-        locale: 'fr-FR',
-      },
+  it('affiche une plage formatée (sélection range)', () => {
+    const { container } = mount({
+      selection: 'range',
+      modelValue: { start: '2026-06-19', end: '2026-06-26' },
     })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.value).toContain('19')
@@ -131,7 +171,7 @@ describe('DatePicker — mode saisie', () => {
 
   const mount = (props: Record<string, unknown> = {}) =>
     render(DatePicker, {
-      props: { entry: 'input', locale: 'fr-FR', label: 'Date', ...props },
+      props: { mode: 'input', locale: 'fr-FR', label: 'Date', ...props },
     })
 
   it('rend un champ éditable au masque numérique de la locale', () => {
@@ -285,27 +325,15 @@ describe('DatePicker — mode saisie', () => {
     )
   })
 
-  it('retombe en lecture seule (et avertit) en mode range ou multiple', () => {
+  it('retombe en lecture seule (et avertit) en sélection range ou multiple', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    const { container } = mount({ mode: 'range', modelValue: { start: null, end: null } })
+    const { container } = mount({ selection: 'range', modelValue: { start: null, end: null } })
     expect((container.querySelector('input') as HTMLInputElement).readOnly).toBe(true)
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('[DatePicker]'))
   })
 
-  it('n’offre aucun calendrier par défaut : ni icône, ni ARIA de popup, ni ouverture', async () => {
-    const { container } = mount({ modelValue: JUNE })
-    const input = container.querySelector('input') as HTMLInputElement
-    expect(container.querySelector('button[aria-label="Ouvrir le calendrier"]')).toBeNull()
-    expect(input.getAttribute('aria-haspopup')).toBeNull()
-    expect(input.getAttribute('aria-controls')).toBeNull()
-    expect(input.getAttribute('aria-expanded')).toBeNull()
-
-    await fireEvent.focus(input)
-    await fireEvent.keyDown(input, { key: 'ArrowDown', bubbles: true })
-    await nextTick()
-    // le Popover n'est même pas monté
-    expect(container.querySelector('.ds-datepicker-panel')).toBeNull()
-  })
+  // « aucun calendrier sans showCalendar » est désormais le comportement PAR
+  // DÉFAUT du composant : le test vit dans le describe « défaut ».
 
   it('showCalendar rétablit l’icône et l’ouverture au focus', async () => {
     const { container } = mount({ modelValue: JUNE, showCalendar: true })

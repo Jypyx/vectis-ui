@@ -7,8 +7,11 @@ import * as TimePickerStories from './TimePicker.stories'
 
 Sélecteur d'heure : un champ [Input](?path=/docs/composants-input--docs) et,
 optionnellement, un panneau flottant. Trois façons de remplir le champ, choisies
-par la prop `mode` — un **cadran**, une **saisie masquée** ou une **liste
+par la prop `mode` — une **saisie masquée**, un **cadran** ou une **liste
 d'heures**.
+
+**Par défaut, l'heure se tape au clavier et il n'y a pas de panneau** : `mode`
+vaut `input` et `showDial` `false`.
 
 La coquille est celle du [DatePicker](?path=/docs/composants-datepicker--docs) :
 panneau `popover="manual"` ancré en **pur CSS** (`anchor-scope` sur la racine +
@@ -23,12 +26,35 @@ si vide) : choisir 7 h PM produit `'19:00'`.
 
 ## Trois modes de champ
 
-- **`readonly`** (défaut) : le champ est en lecture seule et le cadran est le
-  seul chemin — `showDial` y est donc forcé à `true`.
-- **`input`** : le champ se tape au clavier, derrière un masque « HH:MM ». Le
-  cadran devient optionnel (`showDial`).
+- **`input`** (défaut) : le champ se tape au clavier, derrière un masque
+  « HH:MM ». Le cadran est optionnel (`showDial`) et absent par défaut.
+- **`readonly`** : le champ passe en lecture seule et le cadran devient le seul
+  chemin — `showDial` y est donc forcé à `true`.
 - **`list`** : un panneau `listbox` propose les heures par pas de `minuteStep` ;
   le champ reste en lecture seule et `showDial` y est sans objet.
+
+## Saisie masquée (défaut)
+
+L'utilisateur ne tape que **des chiffres** : le deux-points est posé dès que
+l'heure est complète. Contrairement au masque du DatePicker, dont l'ordre des
+champs et le séparateur sont dérivés de la locale, celui-ci est **universel** —
+`Intl` ne fait varier que le cycle horaire, jamais le deux-points.
+
+Règles de saisie :
+
+- taper un séparateur est toléré et complète l'heure par un zéro de tête
+  (« 9:30 » donne le même résultat que « 0930 »),
+- le `Retour arrière` sur le deux-points efface le chiffre qui le précède,
+- une saisie incomplète ou impossible (« 25:00 ») **revient silencieusement** à
+  la valeur courante à la sortie du champ ; vider le champ pose la valeur à
+  `null`,
+- `Entrée` valide et ferme, et ne soumet donc pas le formulaire environnant.
+
+`showDial` ajoute l'icône de fin de champ et le cadran : le panneau s'ouvre alors
+au focus **sans prendre le focus**, la frappe continue dans le champ, et la
+`flèche bas` reste le chemin explicite vers le cadran.
+
+<Canvas of={TimePickerStories.SaisieAvecCadran} />
 
 ## Le cadran
 
@@ -51,33 +77,10 @@ Les chiffres et l'aiguille sont positionnés en **CSS pur** — trigonométrie
 une fraction de tour posée en variable inline. Le JS se limite à la conversion
 pointeur → valeur et au clavier.
 
+<Canvas of={TimePickerStories.LectureSeule} />
 <Canvas of={TimePickerStories.SelectionAuCadran} />
 <Canvas of={TimePickerStories.AnneauInterieur} />
 <Canvas of={TimePickerStories.PasDeCinqMinutes} />
-
-## Saisie masquée
-
-L'utilisateur ne tape que **des chiffres** : le deux-points est posé dès que
-l'heure est complète. Contrairement au masque du DatePicker, dont l'ordre des
-champs et le séparateur sont dérivés de la locale, celui-ci est **universel** —
-`Intl` ne fait varier que le cycle horaire, jamais le deux-points.
-
-Règles de saisie :
-
-- taper un séparateur est toléré et complète l'heure par un zéro de tête
-  (« 9:30 » donne le même résultat que « 0930 »),
-- le `Retour arrière` sur le deux-points efface le chiffre qui le précède,
-- une saisie incomplète ou impossible (« 25:00 ») **revient silencieusement** à
-  la valeur courante à la sortie du champ ; vider le champ pose la valeur à
-  `null`,
-- `Entrée` valide et ferme, et ne soumet donc pas le formulaire environnant.
-
-`showDial` rétablit l'icône de fin de champ et le cadran : le panneau s'ouvre
-alors au focus **sans prendre le focus**, la frappe continue dans le champ, et la
-`flèche bas` reste le chemin explicite vers le cadran.
-
-<Canvas of={TimePickerStories.SaisieMasquee} />
-<Canvas of={TimePickerStories.SaisieAvecCadran} />
 
 ## Liste d'heures
 

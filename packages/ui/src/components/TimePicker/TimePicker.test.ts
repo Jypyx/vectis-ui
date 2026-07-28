@@ -16,10 +16,35 @@ const panelOpen = (container: Element) =>
 const hourCell = (container: Element) =>
   container.querySelector('button[aria-label="Sélectionner l’heure"]') as HTMLButtonElement
 
-describe('TimePicker', () => {
+describe('TimePicker — défaut', () => {
+  it('est un champ de saisie masqué, sans cadran ni ARIA de popup', async () => {
+    const { container } = render(TimePicker, { props: { modelValue: '09:30', format: '24h' } })
+    const input = container.querySelector('input') as HTMLInputElement
+    expect(input.readOnly).toBe(false)
+    expect(input.value).toBe('09:30')
+    expect(input.getAttribute('inputmode')).toBe('numeric')
+    expect(container.querySelector('button[aria-label="Ouvrir le sélecteur d’heure"]')).toBeNull()
+    expect(input.getAttribute('aria-haspopup')).toBeNull()
+    expect(input.getAttribute('aria-controls')).toBeNull()
+
+    await fireEvent.focus(input)
+    await fireEvent.keyDown(input, { key: 'ArrowDown', bubbles: true })
+    await nextTick()
+    expect(container.querySelector('.ds-timepicker-panel')).toBeNull()
+  })
+
+  it('n’avertit pas dans sa configuration par défaut', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(TimePicker, { props: { modelValue: '09:15' } })
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+})
+
+describe('TimePicker — lecture seule', () => {
   it('affiche la valeur formatée dans un champ en lecture seule', () => {
     const { container } = render(TimePicker, {
-      props: { modelValue: '19:05', locale: 'fr-FR', label: 'Heure' },
+      props: { mode: 'readonly', modelValue: '19:05', locale: 'fr-FR', label: 'Heure' },
     })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.readOnly).toBe(true)
@@ -30,7 +55,7 @@ describe('TimePicker', () => {
 
   it('ouvre le panneau au clic et rend le cadran (slider)', async () => {
     const { container, getByRole } = render(TimePicker, {
-      props: { modelValue: '09:15', label: 'Heure' },
+      props: { mode: 'readonly', modelValue: '09:15', label: 'Heure' },
     })
     await openPanel(container)
     expect(getByRole('dialog')).toBeTruthy()
@@ -42,7 +67,7 @@ describe('TimePicker', () => {
 
   it('travaille sur un brouillon : rien n’est émis avant OK', async () => {
     const { container, emitted, getByRole, getByText } = render(TimePicker, {
-      props: { modelValue: '09:15', format: '24h' },
+      props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
     })
     await openPanel(container)
     // flèche haut sur le cadran : le brouillon avance, le v-model non
@@ -57,7 +82,7 @@ describe('TimePicker', () => {
 
   it('annule sans émettre (bouton, Échap, sortie de focus)', async () => {
     const { container, emitted, getByRole, getByText } = render(TimePicker, {
-      props: { modelValue: '09:15', format: '24h' },
+      props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
     })
     await openPanel(container)
     await fireEvent.keyDown(getByRole('slider'), { key: 'ArrowUp' })
@@ -81,7 +106,7 @@ describe('TimePicker', () => {
 
   it('passe des heures aux minutes (Entrée au cadran, cellules d’en-tête)', async () => {
     const { container, getByRole } = render(TimePicker, {
-      props: { modelValue: '09:15', format: '24h' },
+      props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
     })
     await openPanel(container)
     await fireEvent.keyDown(getByRole('slider'), { key: 'Enter' })
@@ -96,7 +121,7 @@ describe('TimePicker', () => {
 
   it('Entrée à l’étape minutes commite et ferme', async () => {
     const { container, emitted, getByRole } = render(TimePicker, {
-      props: { modelValue: '09:15', format: '24h' },
+      props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
     })
     await openPanel(container)
     const slider = getByRole('slider')
@@ -110,7 +135,7 @@ describe('TimePicker', () => {
   it('ignore showDial en lecture seule (et l’annonce)', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { container, getByRole } = render(TimePicker, {
-      props: { modelValue: '09:15', format: '24h', showDial: false },
+      props: { mode: 'readonly', modelValue: '09:15', format: '24h', showDial: false },
     })
     await openPanel(container)
     expect(getByRole('slider')).toBeTruthy()
@@ -118,17 +143,14 @@ describe('TimePicker', () => {
     warn.mockRestore()
   })
 
-  it('n’avertit pas et n’a plus de bascule de mode dans sa configuration par défaut', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    const { container } = render(TimePicker, { props: { modelValue: '09:15' } })
-    expect(warn).not.toHaveBeenCalled()
+  it('n’a plus de bascule de mode dans le pied du panneau', () => {
+    const { container } = render(TimePicker, { props: { mode: 'readonly', modelValue: '09:15' } })
     expect(container.querySelector('.ds-timepicker-mode')).toBeNull()
-    warn.mockRestore()
   })
 
   it('dérive le format de la locale (en-US → 12h)', async () => {
     const { container, getByRole } = render(TimePicker, {
-      props: { modelValue: '19:00', locale: 'en-US' },
+      props: { mode: 'readonly', modelValue: '19:00', locale: 'en-US' },
     })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.value).toMatch(/PM/)
@@ -150,7 +172,9 @@ describe('TimePicker', () => {
     })
 
     it('initialise le brouillon à l’heure courante sans valeur', async () => {
-      const { container } = render(TimePicker, { props: { modelValue: null, format: '24h' } })
+      const { container } = render(TimePicker, {
+        props: { mode: 'readonly', modelValue: null, format: '24h' },
+      })
       await openPanel(container)
       expect(hourCell(container).textContent?.trim()).toBe('14')
     })
@@ -158,7 +182,7 @@ describe('TimePicker', () => {
 
   it('efface la valeur via la croix', async () => {
     const { container, emitted } = render(TimePicker, {
-      props: { modelValue: '09:15', clearable: true },
+      props: { mode: 'readonly', modelValue: '09:15', clearable: true },
     })
     const clearBtn = container.querySelector('button[aria-label="Effacer l\'heure"]') as HTMLElement
     expect(clearBtn).toBeTruthy()
@@ -168,7 +192,7 @@ describe('TimePicker', () => {
 
   it('expose un slider ARIA complet (valuetext localisé)', async () => {
     const { container, getByRole } = render(TimePicker, {
-      props: { modelValue: '07:35', format: '24h' },
+      props: { mode: 'readonly', modelValue: '07:35', format: '24h' },
     })
     await openPanel(container)
     const slider = getByRole('slider')
@@ -266,17 +290,8 @@ describe('TimePicker — mode saisie', () => {
     expect(emitted('update:modelValue')?.at(-1)).toEqual([null])
   })
 
-  it('n’offre aucun cadran par défaut : ni icône, ni ARIA de popup, ni ouverture', async () => {
-    const { container } = mount({ modelValue: '09:30' })
-    const input = container.querySelector('input') as HTMLInputElement
-    expect(container.querySelector('button[aria-label="Ouvrir le sélecteur d’heure"]')).toBeNull()
-    expect(input.getAttribute('aria-haspopup')).toBeNull()
-    expect(input.getAttribute('aria-controls')).toBeNull()
-    await fireEvent.focus(input)
-    await fireEvent.keyDown(input, { key: 'ArrowDown', bubbles: true })
-    await nextTick()
-    expect(container.querySelector('.ds-timepicker-panel')).toBeNull()
-  })
+  // « aucun cadran sans showDial » est désormais le comportement PAR DÉFAUT du
+  // composant : le test vit dans le describe « défaut ».
 
   it('showDial rétablit l’icône et l’ouverture au focus, sans voler le curseur', async () => {
     // sans valeur : l'icône de fin est bien le cadran, pas la croix d'effacement
@@ -405,7 +420,7 @@ describe('TimePicker — méridien hors du panneau', () => {
 
   it('cadran ouvert : le brouillon suit le méridien, OK commite la bonne valeur', async () => {
     const { container, emitted, getByText } = render(TimePicker, {
-      props: { modelValue: '07:00', format: '12h' },
+      props: { mode: 'readonly', modelValue: '07:00', format: '12h' },
     })
     await openPanel(container)
     await fireEvent.click(pmOf(container))

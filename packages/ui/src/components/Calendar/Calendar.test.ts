@@ -23,7 +23,7 @@ describe('Calendar', () => {
     expect(headers[0]?.getAttribute('aria-label')?.toLowerCase()).toContain('lundi')
   })
 
-  it('sélectionne une date (mode single) et émet un ISO', async () => {
+  it('sélectionne une date (sélection single) et émet un ISO', async () => {
     const { container, emitted } = render(Calendar, {
       props: { modelValue: JUNE },
     })
@@ -37,9 +37,9 @@ describe('Calendar', () => {
     expect(emitted('select')?.at(-1)).toEqual(['2026-06-15'])
   })
 
-  it('construit une plage réordonnée (mode range)', async () => {
+  it('construit une plage réordonnée (sélection range)', async () => {
     const { container, emitted } = render(Calendar, {
-      props: { mode: 'range', modelValue: { start: null, end: null } },
+      props: { selection: 'range', modelValue: { start: null, end: null } },
     })
     // navigue vers juin 2026 via un modelValue de départ n'est pas donné → mois courant.
     // On force plutôt le mois via clic sur des jours du mois affiché.
@@ -59,9 +59,9 @@ describe('Calendar', () => {
     expect(last.start < last.end).toBe(true)
   })
 
-  it('bascule une date dans le tableau (mode multiple)', async () => {
+  it('bascule une date dans le tableau (sélection multiple)', async () => {
     const { container, emitted, rerender } = render(Calendar, {
-      props: { mode: 'multiple', modelValue: [] as string[] },
+      props: { selection: 'multiple', modelValue: [] as string[] },
     })
     const days = [
       ...container.querySelectorAll('.ds-calendar-day:not([data-outside])'),

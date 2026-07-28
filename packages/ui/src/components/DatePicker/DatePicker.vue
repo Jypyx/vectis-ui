@@ -4,7 +4,7 @@ import { computed, ref, useId, watch, watchEffect } from 'vue'
 import Calendar from '../Calendar/Calendar.vue'
 import type {
   CalendarEvent,
-  CalendarMode,
+  CalendarSelection,
   CalendarValue,
   DateMatcher,
   DateRange,
@@ -38,15 +38,18 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
  * est programmatique, ce qui permet de déplacer le focus DOM dans la grille du
  * calendrier. Fermeture par `@focusout` sur la racine + Échap.
  *
- * Deux modes de champ (prop `entry`) : `readonly` (défaut, la date ne se
- * choisit qu'au calendrier) et `input`, où le champ se tape au clavier derrière
- * un masque numérique dérivé de la locale — l'utilisateur ne saisit que des
- * chiffres, les séparateurs sont posés au fil de la frappe.
+ * Deux modes de champ (prop `mode`) : `input` (défaut) où le champ se tape au
+ * clavier derrière un masque numérique dérivé de la locale — l'utilisateur ne
+ * saisit que des chiffres, les séparateurs sont posés au fil de la frappe — et
+ * `readonly`, où la date ne se choisit qu'au calendrier. La prop `selection`,
+ * elle, est le passe-plat du mode de sélection du Calendar.
  */
 type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
 
-/** Mode du champ : `readonly` (défaut) ou saisie clavier masquée. */
-export type DatePickerEntry = 'readonly' | 'input'
+/** Mode du champ : saisie clavier masquée (défaut) ou lecture seule. */
+export type DatePickerMode = 'readonly' | 'input'
+
+const MODES: DatePickerMode[] = ['readonly', 'input']
 
 /**
  * Siècle d'expansion d'une année à 2 chiffres (« 10/06/26 » → 2026), appliqué à
@@ -64,7 +67,7 @@ const DEFAULT_DISPLAY_FORMAT: Intl.DateTimeFormatOptions = {
 
 interface DatePickerProps {
   // Passe-plat vers Calendar.
-  mode?: CalendarMode
+  selection?: CalendarSelection
   locale?: string
   firstDayOfWeek?: number
   min?: string
@@ -75,11 +78,12 @@ interface DatePickerProps {
   events?: CalendarEvent[]
   // Champ.
   /**
-   * `readonly` (défaut) : la date ne se choisit qu'au calendrier. `input` : le
-   * champ se tape au clavier, au masque numérique de la locale. Réservé au mode
-   * de sélection `single` — une plage ou une liste retombe en `readonly`.
+   * `input` (défaut) : le champ se tape au clavier, au masque numérique de la
+   * locale. `readonly` : la date ne se choisit qu'au calendrier. La saisie est
+   * réservée à la sélection `single` — une plage ou une liste retombe d'office
+   * en `readonly`.
    */
-  entry?: DatePickerEntry
+  mode?: DatePickerMode
   /**
    * Affiche le calendrier sous le champ en mode saisie : icône cliquable en fin
    * de champ + panneau ouvert au focus. Sans effet en lecture seule, où le
@@ -96,14 +100,19 @@ interface DatePickerProps {
   invalid?: boolean
   /** Bouton d'effacement (croix) qui vide la valeur. */
   clearable?: boolean
-  /** Format d'affichage de la date dans le champ (Intl.DateTimeFormat). */
+  /**
+   * Format d'affichage de la date dans le champ (Intl.DateTimeFormat). Sans
+   * objet en mode `input` (défaut), où le champ porte le masque numérique de la
+   * locale : concerne donc `mode="readonly"` et les sélections `range` et
+   * `multiple`, qui y retombent.
+   */
   displayFormat?: Intl.DateTimeFormatOptions
   /** Placement du panneau par rapport au champ. */
   placement?: Placement
 }
 
 const props = withDefaults(defineProps<DatePickerProps>(), {
-  mode: 'single',
+  selection: 'single',
   locale: 'fr-FR',
   firstDayOfWeek: undefined,
   min: undefined,
@@ -112,7 +121,10 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   showAdjacentDays: false,
   selectAdjacentDays: false,
   events: undefined,
-  entry: 'readonly',
+  // `undefined` et non `'input'` : c'est ce qui distingue « prop non fournie »
+  // d'un choix explicite, et donc ce qui permet de n'avertir que le
+  // consommateur qui a vraiment demandé quelque chose d'inopérant.
+  mode: undefined,
   showCalendar: false,
   label: undefined,
   hint: undefined,
@@ -159,14 +171,18 @@ const panelId = useId()
 /** L'`<input>` natif du champ (masque, caret) — exposé par `Input`. */
 const fieldEl = computed<HTMLInputElement | null>(() => inputRef.value?.el ?? null)
 
+/** Mode demandé, replié sur le défaut si la valeur est absente ou inconnue. */
+const requestedMode = computed<DatePickerMode>(() =>
+  props.mode !== undefined && MODES.includes(props.mode) ? props.mode : 'input',
+)
 /**
  * Le mode saisie est réservé à la sélection simple : une plage ou une liste de
  * dates ne tient pas dans un champ unique masqué.
  */
-const resolvedEntry = computed<DatePickerEntry>(() =>
-  props.entry === 'input' && props.mode === 'single' ? 'input' : 'readonly',
+const resolvedMode = computed<DatePickerMode>(() =>
+  requestedMode.value === 'input' && props.selection === 'single' ? 'input' : 'readonly',
 )
-const typing = computed(() => resolvedEntry.value === 'input')
+const typing = computed(() => resolvedMode.value === 'input')
 
 /**
  * Le calendrier n'est optionnel qu'en saisie : en lecture seule, il est le seul
@@ -176,13 +192,22 @@ const hasPanel = computed(() => !typing.value || props.showCalendar)
 
 if (isDev) {
   watchEffect(() => {
-    if (props.entry === 'input' && props.mode !== 'single')
+    if (props.mode !== undefined && !MODES.includes(props.mode))
       console.warn(
-        `[DatePicker] entry="input" ignoré en mode « ${props.mode} » : une plage ou une liste de dates ne se saisit pas au clavier.`,
+        `[DatePicker] mode « ${props.mode} » inconnu : utilisez « input » (défaut) ou « readonly ».`,
       )
-    if (props.entry === 'input' && props.displayFormat)
+    // `props.mode` et NON `requestedMode` : « input » étant le défaut, une
+    // sélection range/multiple y retombe d'elle-même — seul celui qui a
+    // explicitement demandé la saisie doit être averti.
+    if (props.mode === 'input' && props.selection !== 'single')
       console.warn(
-        '[DatePicker] displayFormat est ignoré quand entry="input" : le champ affiche le masque numérique de la locale, seul format saisissable.',
+        `[DatePicker] mode="input" ignoré en sélection « ${props.selection} » : une plage ou une liste de dates ne se saisit pas au clavier.`,
+      )
+    // `typing` et non `props.mode` : la prop a bien été fournie et se trouve
+    // réellement sans effet — l'avertissement reste actionnable.
+    if (props.displayFormat && typing.value)
+      console.warn(
+        '[DatePicker] displayFormat est ignoré en mode « input » (défaut) : le champ affiche le masque numérique de la locale, seul format saisissable. Passez mode="readonly" pour un affichage formaté.',
       )
   })
 }
@@ -206,8 +231,8 @@ const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPa
   })
 
 const hasValue = computed(() => {
-  if (props.mode === 'multiple') return Array.isArray(model.value) && model.value.length > 0
-  if (props.mode === 'range') {
+  if (props.selection === 'multiple') return Array.isArray(model.value) && model.value.length > 0
+  if (props.selection === 'range') {
     const r = model.value as DateRange | null
     return !!(r && (r.start || r.end))
   }
@@ -217,12 +242,12 @@ const hasValue = computed(() => {
 const displayText = computed(() => {
   const { locale } = props
   const displayFormat = props.displayFormat ?? DEFAULT_DISPLAY_FORMAT
-  if (props.mode === 'single') {
+  if (props.selection === 'single') {
     return typeof model.value === 'string' && isValidISO(model.value)
       ? formatDisplay(model.value, locale, displayFormat)
       : ''
   }
-  if (props.mode === 'range') {
+  if (props.selection === 'range') {
     const r = model.value as DateRange | null
     if (!r?.start) return ''
     if (!r.end) return formatDisplay(r.start, locale, displayFormat)
@@ -503,7 +528,11 @@ function onEndIcon() {
 }
 function clearValue() {
   model.value =
-    props.mode === 'multiple' ? [] : props.mode === 'range' ? { start: null, end: null } : null
+    props.selection === 'multiple'
+      ? []
+      : props.selection === 'range'
+        ? { start: null, end: null }
+        : null
   // `draft` explicitement : quand le modèle valait déjà `null`, la garde
   // anti-boucle de `syncDraftFromModel` ne le viderait pas.
   if (typing.value) writeField('')
@@ -514,7 +543,7 @@ function clearValue() {
 
 /** Sélection dans le calendrier : en mode simple, on ferme. */
 function onSelect() {
-  if (props.mode === 'single') closeAndFocus()
+  if (props.selection === 'single') closeAndFocus()
 }
 
 const close = () => closeAndFocus()
@@ -527,7 +556,7 @@ const close = () => closeAndFocus()
     :class="rootClass"
     :style="rootStyle"
     :data-open="open ? '' : undefined"
-    :data-entry="resolvedEntry"
+    :data-mode="resolvedMode"
     @focusout="onFocusout"
     @keydown="onRootKeydown"
   >
@@ -580,7 +609,7 @@ const close = () => closeAndFocus()
       <Calendar
         ref="calendarRef"
         v-model="model"
-        :mode="mode"
+        :selection="selection"
         :locale="locale"
         :first-day-of-week="firstDayOfWeek"
         :min="min"
@@ -622,11 +651,11 @@ const close = () => closeAndFocus()
      la main sur le `pointer` du contrôle (qui, lui, signale « ceci ouvre un
      panneau »). Le masque a une largeur fixe : chasse tabulaire, sinon le caret
      vibre d'un chiffre à l'autre. */
-  .ds-datepicker[data-entry='input'] .ds-datepicker-control {
+  .ds-datepicker[data-mode='input'] .ds-datepicker-control {
     cursor: text;
   }
 
-  .ds-datepicker[data-entry='input'] .ds-input-control {
+  .ds-datepicker[data-mode='input'] .ds-input-control {
     font-variant-numeric: tabular-nums;
   }
 

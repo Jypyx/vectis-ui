@@ -41,9 +41,9 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
  * ouverture programmatique pour déplacer le focus dans le panneau, fermeture
  * par `@focusout` racine + Échap).
  *
- * Trois modes de champ (`mode`) : `readonly` (le cadran est le seul chemin),
- * `input` (champ masqué « HH:MM », cadran optionnel via `showDial`) et `list`
- * (panneau listant les heures par pas de `minuteStep`).
+ * Trois modes de champ (`mode`) : `input` (défaut — champ masqué « HH:MM »,
+ * cadran optionnel via `showDial`), `readonly` (le cadran est le seul chemin)
+ * et `list` (panneau listant les heures par pas de `minuteStep`).
  *
  * Le CADRAN travaille sur un brouillon : seul OK écrit le v-model (`'HH:mm'`
  * 24 h canonique) ; Annuler, Échap et la sortie de focus abandonnent. La LISTE,
@@ -62,9 +62,9 @@ interface TimePickerProps {
   format?: TimePickerFormat
   /**
    * Mode du champ :
-   * - `readonly` (défaut) : lecture seule, le cadran est le seul chemin — d'où
-   *   `showDial` forcé à `true` ;
-   * - `input` : champ éditable masqué « HH:MM », cadran optionnel ;
+   * - `input` (défaut) : champ éditable masqué « HH:MM », cadran optionnel ;
+   * - `readonly` : lecture seule, le cadran est le seul chemin — d'où `showDial`
+   *   forcé à `true` ;
    * - `list` : panneau des heures par pas de `minuteStep`, champ en lecture
    *   seule ; `showDial` y est sans objet.
    */
@@ -96,7 +96,10 @@ interface TimePickerProps {
 
 const props = withDefaults(defineProps<TimePickerProps>(), {
   format: undefined,
-  mode: 'readonly',
+  // `undefined` et non `'input'` : c'est ce qui distingue « prop non fournie »
+  // d'un choix explicite, et donc ce qui permet de n'avertir que le
+  // consommateur qui a vraiment demandé quelque chose d'inopérant.
+  mode: undefined,
   showDial: undefined,
   minuteStep: 1,
   locale: 'fr-FR',
@@ -126,9 +129,12 @@ const panelId = useId()
 /** L'`<input>` natif du champ (masque, caret) — exposé par `Input`. */
 const fieldEl = computed<HTMLInputElement | null>(() => inputRef.value?.el ?? null)
 
-const resolvedMode = computed<TimePickerMode>(() =>
-  MODES.includes(props.mode) ? props.mode : 'readonly',
-)
+const resolvedMode = computed<TimePickerMode>(() => {
+  // Le `??` passe AVANT la validation : une prop absente n'est pas une valeur
+  // « inconnue », elle ne doit donc rien déclencher.
+  const mode = props.mode ?? 'input'
+  return MODES.includes(mode) ? mode : 'input'
+})
 const typing = computed(() => resolvedMode.value === 'input')
 const isList = computed(() => resolvedMode.value === 'list')
 /** Le cadran : imposé en lecture seule, opt-in en saisie, sans objet en liste. */
@@ -143,9 +149,9 @@ if (isDev) {
   watchEffect(() => {
     if (props.minuteStep < 1 || 60 % props.minuteStep !== 0)
       console.warn(`[TimePicker] minuteStep ${props.minuteStep} — un diviseur de 60 est attendu.`)
-    if (!MODES.includes(props.mode))
+    if (props.mode !== undefined && !MODES.includes(props.mode))
       console.warn(
-        `[TimePicker] mode « ${props.mode} » inconnu (l'ancienne API 'dial'/'input' a changé) : utilisez « readonly » (défaut), « input » ou « list ».`,
+        `[TimePicker] mode « ${props.mode} » inconnu : utilisez « input » (défaut), « readonly » ou « list » — l'ancien « dial » s'appelle désormais « readonly ».`,
       )
     if (resolvedMode.value === 'readonly' && props.showDial === false)
       console.warn(
@@ -671,8 +677,8 @@ function onEndIcon() {
         <div class="ds-timepicker-time">
           <Button
             class="ds-timepicker-cell"
-            variant="tonal"
-            size="lg"
+            :variant="activeStep === 'hour' ? 'solid' : 'ghost'"
+            size="md"
             :tone="activeStep === 'hour' ? 'accent' : 'neutral'"
             :aria-pressed="activeStep === 'hour' ? 'true' : 'false'"
             aria-label="Sélectionner l’heure"
@@ -683,8 +689,8 @@ function onEndIcon() {
           <span class="ds-timepicker-sep" aria-hidden="true">:</span>
           <Button
             class="ds-timepicker-cell"
-            variant="tonal"
-            size="lg"
+            :variant="activeStep === 'minute' ? 'solid' : 'ghost'"
+            size="md"
             :tone="activeStep === 'minute' ? 'accent' : 'neutral'"
             :aria-pressed="activeStep === 'minute' ? 'true' : 'false'"
             aria-label="Sélectionner les minutes"
@@ -773,9 +779,11 @@ function onEndIcon() {
     );
   }
 
-  /* `position-anchor` vient de Popover (prop `anchor`), rendu sans surface.
-     Le `display: flex` d'auteur écrase le `display: none` UA de [popover] :
-     c'est le garde-fou `.ds-overlay:not(:popover-open)` qui referme. */
+  /* `position-anchor` et le chrome viennent de Popover (props `anchor` et
+     `surface`, cette dernière posant `.ds-panel`) : il ne reste ici que la mise
+     en colonne et le padding propres au cadran. Le `display: flex` d'auteur
+     écrase le `display: none` UA de [popover] : c'est le garde-fou
+     `.ds-overlay:not(:popover-open)` qui referme. */
   .ds-timepicker-panel {
     display: flex;
     flex-direction: column;

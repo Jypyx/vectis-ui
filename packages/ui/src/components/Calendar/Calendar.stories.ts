@@ -10,7 +10,7 @@ const meta = {
   title: 'Composants/Calendar',
   component: Calendar,
   args: {
-    mode: 'single',
+    selection: 'single',
     locale: 'fr-FR',
     showAdjacentDays: true,
     selectAdjacentDays: false,
@@ -48,7 +48,7 @@ export const Plage: Story = {
     setup: () => ({ args, value: ref<DateRange>({ start: '2026-06-19', end: '2026-06-26' }) }),
     template: `
       <div style="display: grid; gap: 12px; justify-items: start">
-        <Calendar v-bind="args" mode="range" v-model="value" />
+        <Calendar v-bind="args" selection="range" v-model="value" />
         <output>{{ value.start ?? '—' }} → {{ value.end ?? '—' }}</output>
       </div>
     `,
@@ -61,7 +61,7 @@ export const Multiple: Story = {
     setup: () => ({ args, value: ref<string[]>(['2026-06-05', '2026-06-12', '2026-06-20']) }),
     template: `
       <div style="display: grid; gap: 12px; justify-items: start">
-        <Calendar v-bind="args" mode="multiple" v-model="value"/>
+        <Calendar v-bind="args" selection="multiple" v-model="value"/>
         <output>{{ value.join(', ') || '—' }}</output>
       </div>
     `,

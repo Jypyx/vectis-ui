@@ -11,24 +11,78 @@ const meta = {
   component: DatePicker,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
-    entry: { control: 'inline-radio', options: ['readonly', 'input'] },
+    selection: { control: 'inline-radio', options: ['single', 'range', 'multiple'] },
+    mode: { control: 'inline-radio', options: ['readonly', 'input'] },
     showCalendar: { control: 'boolean' },
   },
+  // Ni `mode` ni `selection` : les épingler ferait mentir le panneau Controls,
+  // qui afficherait une valeur courante différente du défaut du composant.
   args: {
-    mode: 'single',
     locale: 'fr-FR',
     label: 'Date',
     size: 'md',
     clearable: true,
-    entry: 'readonly',
-    showCalendar: false,
   },
 } satisfies Meta<typeof DatePicker>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
+/**
+ * Par défaut le champ se tape au clavier et pose les séparateurs tout seul,
+ * sans calendrier : le champ reste nu tant qu'aucune date n'est saisie, puis
+ * affiche la croix d'effacement.
+ */
 export const Default: Story = {
+  args: { hint: 'Format jj/mm/aaaa' },
+  render: (args) => ({
+    components: { DatePicker },
+    setup: () => ({ args, value: ref<string | null>(null) }),
+    template: `
+      <div style="width: 280px; display:grid; gap:8px">
+        <DatePicker v-bind="args" v-model="value" />
+        <output>{{ value ?? '—' }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // getByRole('textbox') : le panneau (role dialog) porterait le même
+    // aria-label que le champ, getByLabelText matcherait les deux
+    const field = canvas.getByRole('textbox', { name: 'Date' })
+
+    // sans calendrier, le champ n'annonce aucun popup et n'en ouvre aucun
+    await expect(field).not.toHaveAttribute('aria-haspopup')
+    await userEvent.click(field)
+    await expect(canvas.queryByRole('dialog')).toBeNull()
+
+    // seuls les chiffres sont tapés, le masque pose les « / »
+    await userEvent.keyboard('10')
+    await expect(field).toHaveValue('10/')
+    await userEvent.keyboard('062026')
+    await expect(field).toHaveValue('10/06/2026')
+    await expect(field).toHaveFocus()
+    await waitFor(() => expect(canvas.getByText('2026-06-10')).toBeVisible())
+
+    // la croix d'effacement, elle, reste disponible (clearable)
+    await expect(canvas.getByRole('button', { name: 'Effacer la date' })).toBeVisible()
+
+    // le Retour arrière sur le séparateur efface le chiffre qui le précède
+    await userEvent.keyboard('{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}')
+    await expect(field).toHaveValue('10/0')
+
+    // sortie du champ : la saisie incomplète revient silencieusement à la valeur
+    await userEvent.tab()
+    await waitFor(() => expect(field).toHaveValue('10/06/2026'))
+  },
+}
+
+/**
+ * `mode="readonly"` : la date ne se choisit qu'au calendrier, qui devient dès
+ * lors le seul chemin — `showCalendar` y est sans objet.
+ */
+export const LectureSeule: Story = {
+  args: { mode: 'readonly' },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({ args, value: ref('2026-06-10') }),
@@ -41,8 +95,6 @@ export const Default: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // getByRole('textbox') : le panneau (role dialog) porte le même aria-label
-    // que le champ, getByLabelText matcherait les deux
     const field = canvas.getByRole('textbox', { name: 'Date' })
     // ouverture au clavier (flèche bas), focus déplacé dans la grille
     field.focus()
@@ -55,24 +107,26 @@ export const Default: Story = {
 }
 
 export const Plage: Story = {
+  args: { selection: 'range' },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({ args, value: ref<DateRange>({ start: '2026-06-19', end: '2026-06-26' }) }),
     template: `
       <div style="width: 300px">
-        <DatePicker v-bind="args" mode="range" label="Période" v-model="value" />
+        <DatePicker v-bind="args" label="Période" v-model="value" />
       </div>
     `,
   }),
 }
 
 export const Multiple: Story = {
+  args: { selection: 'multiple' },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({ args, value: ref<string[]>(['2026-06-05', '2026-06-12']) }),
     template: `
       <div style="width: 300px">
-        <DatePicker v-bind="args" mode="multiple" label="Dates" v-model="value" />
+        <DatePicker v-bind="args" label="Dates" v-model="value" />
       </div>
     `,
   }),
@@ -80,6 +134,7 @@ export const Multiple: Story = {
 
 // Footer avec presets qui posent la valeur et ferment le panneau.
 export const AvecPresets: Story = {
+  args: { mode: 'readonly' },
   render: (args) => ({
     components: { DatePicker, Button },
     setup: () => {
@@ -109,6 +164,7 @@ export const AvecPresets: Story = {
 }
 
 export const MinMax: Story = {
+  args: { mode: 'readonly' },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({ args, value: ref('2026-06-15') }),
@@ -122,6 +178,7 @@ export const MinMax: Story = {
 }
 
 export const Evenements: Story = {
+  args: { mode: 'readonly' },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({
@@ -175,6 +232,7 @@ export const Desactive: Story = {
  * Invisible en jsdom, qui ne simule pas le focus au clic — d'où cette play.
  */
 export const ClicDansLeVide: Story = {
+  args: { mode: 'readonly' },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({ args, value: ref('2026-06-10') }),
@@ -210,60 +268,12 @@ export const ClicDansLeVide: Story = {
 }
 
 /**
- * Mode saisie : le champ est éditable et pose les séparateurs tout seul —
- * l'utilisateur ne tape que des chiffres. Par défaut, aucun calendrier : le
- * champ reste nu tant qu'aucune date n'est saisie, puis affiche la croix
- * d'effacement.
- */
-export const Saisie: Story = {
-  args: { entry: 'input', hint: 'Format jj/mm/aaaa' },
-  render: (args) => ({
-    components: { DatePicker },
-    setup: () => ({ args, value: ref<string | null>(null) }),
-    template: `
-      <div style="width: 280px; display:grid; gap:8px">
-        <DatePicker v-bind="args" v-model="value" />
-        <output>{{ value ?? '—' }}</output>
-      </div>
-    `,
-  }),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const field = canvas.getByRole('textbox', { name: 'Date' })
-
-    // sans calendrier, le champ n'annonce aucun popup et n'en ouvre aucun
-    await expect(field).not.toHaveAttribute('aria-haspopup')
-    await userEvent.click(field)
-    await expect(canvas.queryByRole('dialog')).toBeNull()
-
-    // seuls les chiffres sont tapés, le masque pose les « / »
-    await userEvent.keyboard('10')
-    await expect(field).toHaveValue('10/')
-    await userEvent.keyboard('062026')
-    await expect(field).toHaveValue('10/06/2026')
-    await expect(field).toHaveFocus()
-    await waitFor(() => expect(canvas.getByText('2026-06-10')).toBeVisible())
-
-    // la croix d'effacement, elle, reste disponible (clearable)
-    await expect(canvas.getByRole('button', { name: 'Effacer la date' })).toBeVisible()
-
-    // le Retour arrière sur le séparateur efface le chiffre qui le précède
-    await userEvent.keyboard('{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}')
-    await expect(field).toHaveValue('10/0')
-
-    // sortie du champ : la saisie incomplète revient silencieusement à la valeur
-    await userEvent.tab()
-    await waitFor(() => expect(field).toHaveValue('10/06/2026'))
-  },
-}
-
-/**
  * `showCalendar` rend le calendrier accessible depuis un champ de saisie : icône
  * cliquable en fin de champ, et panneau ouvert au focus — sans happer le
  * curseur, la frappe continue dans le champ.
  */
 export const SaisieAvecCalendrier: Story = {
-  args: { entry: 'input', showCalendar: true, hint: 'Format jj/mm/aaaa' },
+  args: { showCalendar: true, hint: 'Format jj/mm/aaaa' },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({ args, value: ref<string | null>(null) }),
@@ -303,7 +313,6 @@ export const SaisieAvecCalendrier: Story = {
  * « 20/26/0610 ».
  */
 export const SaisieCollage: Story = {
-  args: { entry: 'input' },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({ args, value: ref<string | null>(null) }),
@@ -329,7 +338,6 @@ export const SaisieCollage: Story = {
  * codé en dur, et le gabarit du placeholder suit les noms de champs localisés.
  */
 export const SaisieLocales: Story = {
-  args: { entry: 'input' },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({ args, value: ref('2026-06-10') }),
@@ -349,7 +357,6 @@ export const SaisieLocales: Story = {
  * revient silencieusement à la valeur courante à la sortie du champ.
  */
 export const SaisieBornee: Story = {
-  args: { entry: 'input' },
   render: (args) => ({
     components: { DatePicker },
     setup: () => ({

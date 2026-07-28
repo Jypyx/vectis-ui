@@ -11,12 +11,13 @@ const meta = {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     mode: { control: 'inline-radio', options: ['readonly', 'input', 'list'] },
   },
+  // Pas de `mode` : l'épingler ferait mentir le panneau Controls, qui
+  // afficherait une valeur courante différente du défaut du composant.
   args: {
     locale: 'fr-FR',
     label: 'Heure',
     size: 'md',
     clearable: true,
-    mode: 'readonly',
   },
 } satisfies Meta<typeof TimePicker>
 
@@ -42,100 +43,12 @@ function tapDial(face: HTMLElement, turn: number, radiusFraction = 0.8) {
   face.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }))
 }
 
-export const Default: Story = {
-  render: (args) => ({
-    components: { TimePicker },
-    setup: () => ({ args, value: ref('09:15') }),
-    template: `
-      <div style="width: 280px; display:grid; gap:8px">
-        <TimePicker v-bind="args" v-model="value" />
-        <output>{{ value ?? '—' }}</output>
-      </div>
-    `,
-  }),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const field = canvas.getByRole('textbox', { name: 'Heure' })
-    // ouverture au clavier (flèche bas), focus déplacé sur la cellule heure
-    field.focus()
-    await userEvent.keyboard('{ArrowDown}')
-    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
-    // Échap annule, referme et redonne le focus au champ
-    await userEvent.keyboard('{Escape}')
-    await waitFor(() => expect(field).toHaveFocus())
-  },
-}
-
-// Sélection complète au pointeur : heure 3 (anneau extérieur), passage
-// automatique aux minutes, minute 30, OK.
-export const SelectionAuCadran: Story = {
-  args: { format: '24h' },
-  render: (args) => ({
-    components: { TimePicker },
-    setup: () => ({ args, value: ref('09:15') }),
-    template: `
-      <div style="width: 280px; display:grid; gap:8px">
-        <TimePicker v-bind="args" v-model="value" />
-        <output data-testid="valeur">{{ value }}</output>
-      </div>
-    `,
-  }),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
-    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
-    const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
-
-    // heure 3 = quart de tour ; le relâcher passe à l'étape minutes
-    tapDial(face, 3 / 12)
-    await waitFor(() =>
-      expect(canvas.getByRole('button', { name: 'Sélectionner l’heure' })).toHaveTextContent('03'),
-    )
-    await waitFor(() => expect(canvas.getByRole('slider')).toHaveAccessibleName('Minutes'))
-
-    // minute 30 = demi-tour, puis OK commite
-    tapDial(face, 30 / 60)
-    await userEvent.click(canvas.getByRole('button', { name: 'OK' }))
-    await waitFor(() => expect(canvas.getByTestId('valeur')).toHaveTextContent('03:30'))
-  },
-}
-
-// Cadran 24 h : l'anneau intérieur porte 00 et 13–23.
-export const AnneauInterieur: Story = {
-  args: { format: '24h' },
-  render: (args) => ({
-    components: { TimePicker },
-    setup: () => ({ args, value: ref('09:15') }),
-    template: `
-      <div style="width: 280px">
-        <TimePicker v-bind="args" v-model="value" />
-      </div>
-    `,
-  }),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
-    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
-    const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
-    const hourCell = () => canvas.getByRole('button', { name: 'Sélectionner l’heure' })
-
-    // minuit : position de midi, anneau intérieur (mi-rayon)
-    tapDial(face, 0, 0.44)
-    await waitFor(() => expect(hourCell()).toHaveTextContent('00'))
-    // retour à l'étape heure (le relâcher a avancé aux minutes)
-    await userEvent.click(hourCell())
-    // 13 h : position de 1 h, anneau intérieur
-    tapDial(face, 1 / 12, 0.44)
-    await waitFor(() => expect(hourCell()).toHaveTextContent('13'))
-  },
-}
-
 /**
- * Mode saisie : le champ est masqué, l'utilisateur ne tape que des chiffres et
- * le deux-points est posé tout seul. Par défaut, aucun cadran.
+ * Par défaut le champ est masqué : l'utilisateur ne tape que des chiffres et le
+ * deux-points est posé tout seul, sans aucun cadran.
  */
-export const SaisieMasquee: Story = {
-  args: { mode: 'input', format: '24h', hint: 'Format hh:mm' },
+export const Default: Story = {
+  args: { format: '24h', hint: 'Format hh:mm' },
   render: (args) => ({
     components: { TimePicker },
     setup: () => ({ args, value: ref(null) }),
@@ -179,12 +92,105 @@ export const SaisieMasquee: Story = {
 }
 
 /**
+ * `mode="readonly"` : l'heure ne se choisit qu'au cadran, qui devient dès lors
+ * le seul chemin — `showDial` y est sans objet.
+ */
+export const LectureSeule: Story = {
+  args: { mode: 'readonly' },
+  render: (args) => ({
+    components: { TimePicker },
+    setup: () => ({ args, value: ref('09:15') }),
+    template: `
+      <div style="width: 280px; display:grid; gap:8px">
+        <TimePicker v-bind="args" v-model="value" />
+        <output>{{ value ?? '—' }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = canvas.getByRole('textbox', { name: 'Heure' })
+    // ouverture au clavier (flèche bas), focus déplacé dans le panneau
+    field.focus()
+    await userEvent.keyboard('{ArrowDown}')
+    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
+    // Échap annule, referme et redonne le focus au champ
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(field).toHaveFocus())
+  },
+}
+
+// Sélection complète au pointeur : heure 3 (anneau extérieur), passage
+// automatique aux minutes, minute 30, OK.
+export const SelectionAuCadran: Story = {
+  args: { mode: 'readonly', format: '24h' },
+  render: (args) => ({
+    components: { TimePicker },
+    setup: () => ({ args, value: ref('09:15') }),
+    template: `
+      <div style="width: 280px; display:grid; gap:8px">
+        <TimePicker v-bind="args" v-model="value" />
+        <output data-testid="valeur">{{ value }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
+    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
+    const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
+
+    // heure 3 = quart de tour ; le relâcher passe à l'étape minutes
+    tapDial(face, 3 / 12)
+    await waitFor(() =>
+      expect(canvas.getByRole('button', { name: 'Sélectionner l’heure' })).toHaveTextContent('03'),
+    )
+    await waitFor(() => expect(canvas.getByRole('slider')).toHaveAccessibleName('Minutes'))
+
+    // minute 30 = demi-tour, puis OK commite
+    tapDial(face, 30 / 60)
+    await userEvent.click(canvas.getByRole('button', { name: 'OK' }))
+    await waitFor(() => expect(canvas.getByTestId('valeur')).toHaveTextContent('03:30'))
+  },
+}
+
+// Cadran 24 h : l'anneau intérieur porte 00 et 13–23.
+export const AnneauInterieur: Story = {
+  args: { mode: 'readonly', format: '24h' },
+  render: (args) => ({
+    components: { TimePicker },
+    setup: () => ({ args, value: ref('09:15') }),
+    template: `
+      <div style="width: 280px">
+        <TimePicker v-bind="args" v-model="value" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
+    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
+    const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
+    const hourCell = () => canvas.getByRole('button', { name: 'Sélectionner l’heure' })
+
+    // minuit : position de midi, anneau intérieur (mi-rayon)
+    tapDial(face, 0, 0.44)
+    await waitFor(() => expect(hourCell()).toHaveTextContent('00'))
+    // retour à l'étape heure (le relâcher a avancé aux minutes)
+    await userEvent.click(hourCell())
+    // 13 h : position de 1 h, anneau intérieur
+    tapDial(face, 1 / 12, 0.44)
+    await waitFor(() => expect(hourCell()).toHaveTextContent('13'))
+  },
+}
+
+/**
  * `showDial` rend le cadran accessible depuis un champ de saisie : icône
  * cliquable en fin de champ, et panneau ouvert au focus — sans happer le
  * curseur, la frappe continue dans le champ.
  */
 export const SaisieAvecCadran: Story = {
-  args: { mode: 'input', showDial: true, format: '24h' },
+  args: { showDial: true, format: '24h' },
   render: (args) => ({
     components: { TimePicker },
     setup: () => ({ args, value: ref(null) }),
@@ -306,7 +312,7 @@ export const DouzeHeures: Story = {
 
 // Annuler abandonne le brouillon : la valeur ne bouge pas.
 export const Annulation: Story = {
-  args: { format: '24h' },
+  args: { mode: 'readonly', format: '24h' },
   render: (args) => ({
     components: { TimePicker },
     setup: () => ({ args, value: ref('09:15') }),
@@ -332,7 +338,7 @@ export const Annulation: Story = {
 }
 
 export const PasDeCinqMinutes: Story = {
-  args: { format: '24h', minuteStep: 5, hint: 'Minutes par pas de 5' },
+  args: { mode: 'readonly', format: '24h', minuteStep: 5, hint: 'Minutes par pas de 5' },
   render: (args) => ({
     components: { TimePicker },
     setup: () => ({ args, value: ref('14:35') }),
@@ -398,7 +404,7 @@ export const Desactive: Story = {
  * en jsdom, qui ne simule pas le focus au clic.
  */
 export const ClicDansLeVide: Story = {
-  args: { format: '24h' },
+  args: { mode: 'readonly', format: '24h' },
   render: (args) => ({
     components: { TimePicker },
     setup: () => ({ args, value: ref('09:15') }),
