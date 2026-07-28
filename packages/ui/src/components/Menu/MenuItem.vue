@@ -3,16 +3,12 @@ import { computed, inject, onBeforeUnmount, ref, useId, useSlots } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
-import DropdownPanel from './DropdownPanel.vue'
-import { dropdownKey, SUBMENU_HOVER_DELAY } from './context'
+import MenuPanel from './MenuPanel.vue'
+import { menuKey, SUBMENU_HOVER_DELAY } from './context'
 
 /**
- * Item de panneau déroulant. En `menu` (défaut du Dropdown) : role="menuitem",
- * le focus est piloté par le panneau (roving focus), la sélection ferme toute
- * la pile via le contexte injecté. En `listbox` (mode combobox, hérité du
- * contexte) : role="option" + aria-selected, le focus RESTE dans le champ
- * externe — la surbrillance vient de la prop `active` (data-active), et la
- * sélection ne ferme pas le panneau (le consommateur décide via v-model:open).
+ * Item de menu (role="menuitem") : le focus est piloté par le panneau (roving
+ * focus), la sélection ferme toute la pile via le contexte injecté.
  *
  * Avec `href`, l'item est un <a> (item de navigation, permis par ARIA) ; un <a>
  * n'a pas de `disabled` natif → pattern « lien inerte » de Button (href retiré
@@ -26,7 +22,7 @@ import { dropdownKey, SUBMENU_HOVER_DELAY } from './context'
  * ouverture clavier (Flèche droite/Entrée/Espace + focus du 1er sous-item)
  * et survol avec délai d'intention — le clic passe par le toggle natif.
  */
-interface DropdownItemProps {
+interface MenuItemProps {
   /** Libellé de l'item (le slot #default prime). */
   label?: string
   /** Sous-libellé sous le label (le slot #sublabel prime). */
@@ -39,10 +35,8 @@ interface DropdownItemProps {
   iconStart?: string
   /** Icône après le libellé (même détection). Le slot #end prime. */
   iconEnd?: string
-  /** État sélectionné (menu : accent + aria-current ; listbox : aria-selected). */
+  /** État sélectionné (accent + aria-current). */
   selected?: boolean
-  /** listbox : option active (surbrillance) — posée par le champ combobox. */
-  active?: boolean
   /** Item destructif (couleur danger). */
   danger?: boolean
   disabled?: boolean
@@ -54,13 +48,12 @@ interface DropdownItemProps {
 // les attrs (name, aria-*, class…) vont explicitement sur l'item.
 defineOptions({ inheritAttrs: false })
 
-const props = withDefaults(defineProps<DropdownItemProps>(), {
+const props = withDefaults(defineProps<MenuItemProps>(), {
   label: undefined,
   sublabel: undefined,
   iconStart: undefined,
   iconEnd: undefined,
   selected: false,
-  active: false,
   danger: false,
   disabled: false,
   href: undefined,
@@ -80,7 +73,7 @@ defineSlots<{
   start?(): unknown
   /** Contenu libre après le libellé (prime sur `iconEnd`). */
   end?(): unknown
-  /** Contenu du sous-menu (DropdownItem/DropdownGroup/DropdownSeparator, récursif). */
+  /** Contenu du sous-menu (MenuItem/MenuGroup/MenuSeparator, récursif). */
   submenu?(): unknown
 }>()
 
@@ -90,20 +83,18 @@ const tag = computed(() =>
   !hasSubmenu.value && props.href !== undefined ? ('a' as const) : ('button' as const),
 )
 
-const dropdown = inject(dropdownKey, null)
-const isListbox = computed(() => dropdown?.role === 'listbox')
+const menu = inject(menuKey, null)
 
 function onClick() {
   if (props.disabled || hasSubmenu.value) return
   emit('select')
-  // listbox : le Combobox décide de fermer (simple) ou non (multiple) via v-model:open.
-  if (!isListbox.value) dropdown?.closeAll()
+  menu?.closeAll()
 }
 
 // ——— Sous-menu ———
 const subId = useId()
 const subOpen = ref(false)
-const subPanel = ref<InstanceType<typeof DropdownPanel> | null>(null)
+const subPanel = ref<InstanceType<typeof MenuPanel> | null>(null)
 // Ouvertures programmatiques : l'item est passé en `source` à showPopover(),
 // sinon le sous-panneau n'a pas d'ancre implicite (posée nativement au clic
 // seulement) et perd son positionnement.
@@ -133,8 +124,6 @@ function clearTimers() {
 
 function onPointerEnter() {
   if (props.disabled) return
-  // listbox : le focus reste dans le champ combobox (surbrillance par `active`)
-  if (isListbox.value) return
   // le survol pilote aussi le focus : hover et roving focus restent
   // synchronisés, une seule surbrillance à la fois (pattern menu)
   itemEl.value?.focus({ preventScroll: true })
@@ -160,18 +149,16 @@ onBeforeUnmount(clearTimers)
     :is="tag"
     ref="itemEl"
     v-bind="$attrs"
-    :role="isListbox ? 'option' : 'menuitem'"
+    role="menuitem"
     tabindex="-1"
-    class="ds-dropdown-item"
+    class="ds-menu-item"
     :type="tag === 'button' ? 'button' : undefined"
-    :disabled="tag === 'button' && !isListbox ? disabled : undefined"
+    :disabled="tag === 'button' ? disabled : undefined"
     :href="tag === 'a' && !disabled ? href : undefined"
-    :aria-disabled="(isListbox && disabled) || (tag === 'a' && disabled) ? 'true' : undefined"
+    :aria-disabled="tag === 'a' && disabled ? 'true' : undefined"
     :data-danger="danger ? '' : undefined"
-    :data-selected="!isListbox && selected ? '' : undefined"
-    :data-active="active ? '' : undefined"
-    :aria-selected="isListbox ? String(selected) : undefined"
-    :aria-current="!isListbox && selected ? 'true' : undefined"
+    :data-selected="selected ? '' : undefined"
+    :aria-current="selected ? 'true' : undefined"
     :aria-haspopup="hasSubmenu ? 'menu' : undefined"
     :aria-expanded="hasSubmenu ? subOpen : undefined"
     :aria-controls="hasSubmenu ? subId : undefined"
@@ -184,23 +171,21 @@ onBeforeUnmount(clearTimers)
     <slot name="start">
       <Icon v-if="iconStart" v-bind="iconProps(iconStart)" />
     </slot>
-    <span class="ds-dropdown-item-content">
-      <span class="ds-dropdown-item-label"
+    <span class="ds-menu-item-content">
+      <span class="ds-menu-item-label"
         ><slot>{{ label }}</slot></span
       >
-      <span v-if="sublabel !== undefined || $slots.sublabel" class="ds-dropdown-item-sublabel">
+      <span v-if="sublabel !== undefined || $slots.sublabel" class="ds-menu-item-sublabel">
         <slot name="sublabel">{{ sublabel }}</slot>
       </span>
     </span>
     <!-- un item à sous-menu signale l'ouverture latérale : chevron, jamais iconEnd -->
-    <Icon v-if="hasSubmenu" name="chevron_right" class="ds-dropdown-item-chevron" />
-    <!-- listbox (Combobox) : coche à droite quand l'option est sélectionnée -->
-    <Icon v-else-if="isListbox && selected" name="check" class="ds-dropdown-item-check" />
+    <Icon v-if="hasSubmenu" name="chevron_right" class="ds-menu-item-chevron" />
     <slot v-else name="end">
       <Icon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
     </slot>
   </component>
-  <DropdownPanel
+  <MenuPanel
     v-if="hasSubmenu"
     :id="subId"
     ref="subPanel"
@@ -211,20 +196,20 @@ onBeforeUnmount(clearTimers)
     @pointerleave="onPointerLeave"
   >
     <slot name="submenu" />
-  </DropdownPanel>
+  </MenuPanel>
 </template>
 
 <style>
 @layer ds.components {
-  .ds-dropdown-item {
+  .ds-menu-item {
     display: flex;
     align-items: center;
     gap: var(--ds-space-2);
     width: 100%;
     min-height: calc(
-      var(--_dropdown-item-min-h, var(--ds-control-height-sm)) - var(--_dropdown-item-delta, 0px)
+      var(--_menu-item-min-h, var(--ds-control-height-sm)) - var(--_menu-item-delta, 0px)
     );
-    padding: var(--ds-space-1) var(--_dropdown-item-pad-i, var(--ds-space-3));
+    padding: var(--ds-space-1) var(--_menu-item-pad-i, var(--ds-space-3));
     border: none;
     background: transparent;
     color: var(--ds-color-text);
@@ -237,89 +222,79 @@ onBeforeUnmount(clearTimers)
     cursor: pointer;
   }
 
-  .ds-dropdown-item-content {
+  .ds-menu-item-content {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
   }
 
-  .ds-dropdown-item-sublabel {
+  .ds-menu-item-sublabel {
     font-size: var(--ds-text-caption-size);
     color: var(--ds-color-text-muted);
   }
 
-  .ds-dropdown-item-chevron {
+  .ds-menu-item-chevron {
     color: var(--ds-color-text-muted);
   }
 
-  .ds-dropdown-item-chevron:dir(rtl) {
+  .ds-menu-item-chevron:dir(rtl) {
     transform: scaleX(-1);
   }
 
   /* Le focus EST la surbrillance (roving focus programmatique → :focus, pas :focus-visible) */
-  .ds-dropdown-item:hover:not(:disabled, [aria-disabled='true']),
-  .ds-dropdown-item:focus {
+  .ds-menu-item:hover:not(:disabled, [aria-disabled='true']),
+  .ds-menu-item:focus {
     background: var(--ds-color-surface-muted);
     outline: none;
   }
 
   /* sous-menu ouvert : la surbrillance persiste sur l'item parent */
-  .ds-dropdown-item[aria-expanded='true'] {
+  .ds-menu-item[aria-expanded='true'] {
     background: var(--ds-color-surface-muted);
   }
 
-  .ds-dropdown-item[data-selected] {
+  .ds-menu-item[data-selected] {
     background: var(--ds-color-accent-surface);
     color: var(--ds-color-accent-text);
   }
 
-  .ds-dropdown-item[data-selected] .ds-dropdown-item-sublabel {
+  .ds-menu-item[data-selected] .ds-menu-item-sublabel {
     color: inherit;
   }
 
-  .ds-dropdown-item[data-selected]:hover:not(:disabled, [aria-disabled='true']),
-  .ds-dropdown-item[data-selected]:focus,
-  .ds-dropdown-item[data-selected][aria-expanded='true'] {
+  .ds-menu-item[data-selected]:hover:not(:disabled, [aria-disabled='true']),
+  .ds-menu-item[data-selected]:focus,
+  .ds-menu-item[data-selected][aria-expanded='true'] {
     /* assombrit légèrement la surface accent (modèle Button tonal) */
     background: color-mix(in oklab, var(--ds-color-accent-surface), var(--ds-color-accent-text) 8%);
   }
 
-  .ds-dropdown-item[data-danger] {
+  .ds-menu-item[data-danger] {
     color: var(--ds-color-danger-text);
   }
 
-  .ds-dropdown-item[data-danger] .ds-dropdown-item-sublabel {
+  .ds-menu-item[data-danger] .ds-menu-item-sublabel {
     color: inherit;
   }
 
-  .ds-dropdown-item[data-danger]:hover:not(:disabled, [aria-disabled='true']),
-  .ds-dropdown-item[data-danger]:focus,
-  .ds-dropdown-item[data-danger][aria-expanded='true'] {
+  .ds-menu-item[data-danger]:hover:not(:disabled, [aria-disabled='true']),
+  .ds-menu-item[data-danger]:focus,
+  .ds-menu-item[data-danger][aria-expanded='true'] {
     background: var(--ds-color-danger-surface);
   }
 
   /* :disabled ne s'applique qu'au <button> ; le lien inerte passe par aria-disabled */
-  .ds-dropdown-item:disabled,
-  .ds-dropdown-item[aria-disabled='true'] {
+  .ds-menu-item:disabled,
+  .ds-menu-item[aria-disabled='true'] {
     background: transparent;
     color: var(--ds-color-text-subtle);
     cursor: not-allowed;
   }
 
-  .ds-dropdown-item:disabled .ds-dropdown-item-sublabel,
-  .ds-dropdown-item[aria-disabled='true'] .ds-dropdown-item-sublabel {
+  .ds-menu-item:disabled .ds-menu-item-sublabel,
+  .ds-menu-item[aria-disabled='true'] .ds-menu-item-sublabel {
     color: inherit;
-  }
-
-  /* Mode listbox (Combobox) : le focus reste dans le champ, la surbrillance vient
-     de data-active (posé par le champ) ; l'option sélectionnée est teintée accent. */
-  .ds-dropdown[data-role='listbox'] .ds-dropdown-item[data-active] {
-    background: var(--ds-color-surface-muted);
-  }
-
-  .ds-dropdown[data-role='listbox'] .ds-dropdown-item[aria-selected='true'] {
-    color: var(--ds-color-accent-text);
   }
 }
 </style>

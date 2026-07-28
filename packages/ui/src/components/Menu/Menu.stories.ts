@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/vue3-vite'
+﻿import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
 import Button from '../Button/Button.vue'
-import Dropdown from './Dropdown.vue'
-import DropdownGroup from './DropdownGroup.vue'
-import DropdownItem from './DropdownItem.vue'
-import DropdownSeparator from './DropdownSeparator.vue'
+import Menu from './Menu.vue'
+import MenuGroup from './MenuGroup.vue'
+import MenuItem from './MenuItem.vue'
+import MenuSeparator from './MenuSeparator.vue'
 
 const meta = {
-  title: 'Composants/Dropdown',
-  component: Dropdown,
+  title: 'Composants/Menu',
+  component: Menu,
   argTypes: {
     placement: {
       control: 'select',
@@ -19,26 +19,26 @@ const meta = {
     compact: { control: 'boolean' },
   },
   args: { placement: 'bottom-start', size: 'sm', compact: false },
-} satisfies Meta<typeof Dropdown>
+} satisfies Meta<typeof Menu>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: (args) => ({
-    components: { Dropdown, DropdownItem, DropdownSeparator, Button },
+    components: { Menu, MenuItem, MenuSeparator, Button },
     setup: () => ({ args, onSelect: fn() }),
     template: `
-      <Dropdown v-bind="args">
+      <Menu v-bind="args">
         <template #trigger="{ triggerProps }">
           <Button variant="outline" tone="neutral" v-bind="triggerProps">Actions</Button>
         </template>
-        <DropdownItem label="Renommer" icon-start="edit" @select="onSelect" />
-        <DropdownItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
-        <DropdownItem label="Archiver (indisponible)" icon-start="archive" disabled />
-        <DropdownSeparator />
-        <DropdownItem label="Supprimer" icon-start="delete" danger @select="onSelect" />
-      </Dropdown>
+        <MenuItem label="Renommer" icon-start="edit" @select="onSelect" />
+        <MenuItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
+        <MenuItem label="Archiver (indisponible)" icon-start="archive" disabled />
+        <MenuSeparator />
+        <MenuItem label="Supprimer" icon-start="delete" danger @select="onSelect" />
+      </Menu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -72,32 +72,32 @@ export const Default: Story = {
 
 export const SousLabels: Story = {
   render: () => ({
-    components: { Dropdown, DropdownItem, Button },
+    components: { Menu, MenuItem, Button },
     template: `
-      <Dropdown>
+      <Menu>
         <template #trigger="{ triggerProps }">
           <Button variant="outline" tone="neutral" v-bind="triggerProps">Exporter</Button>
         </template>
-        <DropdownItem label="PDF" sublabel="Mise en page fidèle, non éditable" icon-start="picture_as_pdf" />
-        <DropdownItem label="CSV" sublabel="Données brutes, séparateur virgule" icon-start="csv" />
-        <DropdownItem label="PNG" sublabel="Image de la vue courante" icon-start="image" />
-      </Dropdown>
+        <MenuItem label="PDF" sublabel="Mise en page fidèle, non éditable" icon-start="picture_as_pdf" />
+        <MenuItem label="CSV" sublabel="Données brutes, séparateur virgule" icon-start="csv" />
+        <MenuItem label="PNG" sublabel="Image de la vue courante" icon-start="image" />
+      </Menu>
     `,
   }),
 }
 
 export const Selection: Story = {
   render: () => ({
-    components: { Dropdown, DropdownItem, Button },
+    components: { Menu, MenuItem, Button },
     template: `
-      <Dropdown>
+      <Menu>
         <template #trigger="{ triggerProps }">
           <Button variant="outline" tone="neutral" v-bind="triggerProps">Trier par</Button>
         </template>
-        <DropdownItem label="Nom" selected icon-end="check" />
-        <DropdownItem label="Date de modification" />
-        <DropdownItem label="Taille" />
-      </Dropdown>
+        <MenuItem label="Nom" selected icon-end="check" />
+        <MenuItem label="Date de modification" />
+        <MenuItem label="Taille" />
+      </Menu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -115,24 +115,24 @@ export const Selection: Story = {
 
 export const Groupes: Story = {
   render: () => ({
-    components: { Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, Button },
+    components: { Menu, MenuItem, MenuGroup, MenuSeparator, Button },
     template: `
-      <Dropdown>
+      <Menu>
         <template #trigger="{ triggerProps }">
           <Button variant="outline" tone="neutral" v-bind="triggerProps">Document</Button>
         </template>
-        <DropdownGroup label="Fichier">
-          <DropdownItem label="Renommer" icon-start="edit" />
-          <DropdownItem label="Dupliquer" icon-start="content_copy" />
-        </DropdownGroup>
-        <DropdownSeparator />
-        <DropdownGroup label="Partage">
-          <DropdownItem label="Inviter" icon-start="person_add" />
-          <DropdownItem label="Copier le lien" icon-start="link" />
-        </DropdownGroup>
-        <DropdownSeparator />
-        <DropdownItem label="Supprimer" icon-start="delete" danger />
-      </Dropdown>
+        <MenuGroup label="Fichier">
+          <MenuItem label="Renommer" icon-start="edit" />
+          <MenuItem label="Dupliquer" icon-start="content_copy" />
+        </MenuGroup>
+        <MenuSeparator />
+        <MenuGroup label="Partage">
+          <MenuItem label="Inviter" icon-start="person_add" />
+          <MenuItem label="Copier le lien" icon-start="link" />
+        </MenuGroup>
+        <MenuSeparator />
+        <MenuItem label="Supprimer" icon-start="delete" danger />
+      </Menu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -155,10 +155,10 @@ export const Groupes: Story = {
 /** sm 32px (défaut) / md 40px ; `compact` retire 4px, combinable avec les deux. */
 export const Tailles: Story = {
   render: () => ({
-    components: { Dropdown, DropdownItem, DropdownSeparator, Button },
+    components: { Menu, MenuItem, MenuSeparator, Button },
     template: `
       <div style="display: flex; gap: 8px">
-        <Dropdown v-for="variant in [
+        <Menu v-for="variant in [
           { label: 'sm', props: {} },
           { label: 'md', props: { size: 'md' } },
           { label: 'sm compact', props: { compact: true } },
@@ -167,11 +167,11 @@ export const Tailles: Story = {
           <template #trigger="{ triggerProps }">
             <Button size="sm" variant="outline" tone="neutral" v-bind="triggerProps">{{ variant.label }}</Button>
           </template>
-          <DropdownItem label="Renommer" icon-start="edit" />
-          <DropdownItem label="Dupliquer" icon-start="content_copy" />
-          <DropdownSeparator />
-          <DropdownItem label="Supprimer" icon-start="delete" danger />
-        </Dropdown>
+          <MenuItem label="Renommer" icon-start="edit" />
+          <MenuItem label="Dupliquer" icon-start="content_copy" />
+          <MenuSeparator />
+          <MenuItem label="Supprimer" icon-start="delete" danger />
+        </Menu>
       </div>
     `,
   }),
@@ -181,25 +181,25 @@ export const Tailles: Story = {
     large) ou toute longueur CSS. Les sous-menus ne sont pas affectés. */
 export const Largeur: Story = {
   render: (args) => ({
-    components: { Dropdown, DropdownItem, Button },
+    components: { Menu, MenuItem, Button },
     setup: () => ({ args, onSelect: fn() }),
     template: `
       <div style="display: flex; gap: var(--ds-space-8)">
-        <Dropdown v-bind="args" width="max-content">
+        <Menu v-bind="args" width="max-content">
           <template #trigger="{ triggerProps }">
             <Button variant="outline" tone="neutral" v-bind="triggerProps">10</Button>
           </template>
-          <DropdownItem label="10" selected @select="onSelect" />
-          <DropdownItem label="25" @select="onSelect" />
-          <DropdownItem label="50" @select="onSelect" />
-        </Dropdown>
-        <Dropdown v-bind="args" width="16rem">
+          <MenuItem label="10" selected @select="onSelect" />
+          <MenuItem label="25" @select="onSelect" />
+          <MenuItem label="50" @select="onSelect" />
+        </Menu>
+        <Menu v-bind="args" width="16rem">
           <template #trigger="{ triggerProps }">
             <Button variant="outline" tone="neutral" v-bind="triggerProps">Actions (16rem)</Button>
           </template>
-          <DropdownItem label="Renommer" icon-start="edit" @select="onSelect" />
-          <DropdownItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
-        </Dropdown>
+          <MenuItem label="Renommer" icon-start="edit" @select="onSelect" />
+          <MenuItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
+        </Menu>
       </div>
     `,
   }),
@@ -207,15 +207,15 @@ export const Largeur: Story = {
 
 export const FermetureEscape: Story = {
   render: () => ({
-    components: { Dropdown, DropdownItem, Button },
+    components: { Menu, MenuItem, Button },
     template: `
-      <Dropdown>
+      <Menu>
         <template #trigger="{ triggerProps }">
           <Button variant="outline" tone="neutral" v-bind="triggerProps">Menu</Button>
         </template>
-        <DropdownItem label="Premier" />
-        <DropdownItem label="Second" />
-      </Dropdown>
+        <MenuItem label="Premier" />
+        <MenuItem label="Second" />
+      </Menu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -234,16 +234,16 @@ export const FermetureEscape: Story = {
 
 export const ItemsDeNavigation: Story = {
   render: () => ({
-    components: { Dropdown, DropdownItem, Button },
+    components: { Menu, MenuItem, Button },
     template: `
-      <Dropdown>
+      <Menu>
         <template #trigger="{ triggerProps }">
           <Button variant="outline" tone="neutral" v-bind="triggerProps">Aller à</Button>
         </template>
-        <DropdownItem href="#profil" label="Profil" icon-start="person" />
-        <DropdownItem href="#facturation" label="Facturation" icon-start="credit_card" />
-        <DropdownItem href="#archives" label="Archives (indisponible)" icon-start="archive" disabled />
-      </Dropdown>
+        <MenuItem href="#profil" label="Profil" icon-start="person" />
+        <MenuItem href="#facturation" label="Facturation" icon-start="credit_card" />
+        <MenuItem href="#archives" label="Archives (indisponible)" icon-start="archive" disabled />
+      </Menu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -275,34 +275,34 @@ export const ItemsDeNavigation: Story = {
 
 export const SousMenus: Story = {
   render: () => ({
-    components: { Dropdown, DropdownItem, DropdownSeparator, Button },
+    components: { Menu, MenuItem, MenuSeparator, Button },
     setup: () => ({ onSelect: fn() }),
     template: `
-      <Dropdown>
+      <Menu>
         <template #trigger="{ triggerProps }">
           <Button variant="outline" tone="neutral" v-bind="triggerProps">Fichier</Button>
         </template>
-        <DropdownItem label="Nouveau" icon-start="note_add" />
-        <DropdownItem label="Exporter" icon-start="download">
+        <MenuItem label="Nouveau" icon-start="note_add" />
+        <MenuItem label="Exporter" icon-start="download">
           <template #submenu>
-            <DropdownItem label="PDF" sublabel="Mise en page fidèle" />
-            <DropdownItem label="Image">
+            <MenuItem label="PDF" sublabel="Mise en page fidèle" />
+            <MenuItem label="Image">
               <template #submenu>
-                <DropdownItem label="PNG" @select="onSelect" />
-                <DropdownItem label="JPEG" />
+                <MenuItem label="PNG" @select="onSelect" />
+                <MenuItem label="JPEG" />
               </template>
-            </DropdownItem>
+            </MenuItem>
           </template>
-        </DropdownItem>
-        <DropdownItem label="Partager" icon-start="share">
+        </MenuItem>
+        <MenuItem label="Partager" icon-start="share">
           <template #submenu>
-            <DropdownItem label="Inviter" icon-start="person_add" />
-            <DropdownItem label="Copier le lien" icon-start="link" />
+            <MenuItem label="Inviter" icon-start="person_add" />
+            <MenuItem label="Copier le lien" icon-start="link" />
           </template>
-        </DropdownItem>
-        <DropdownSeparator />
-        <DropdownItem label="Supprimer" icon-start="delete" danger />
-      </Dropdown>
+        </MenuItem>
+        <MenuSeparator />
+        <MenuItem label="Supprimer" icon-start="delete" danger />
+      </Menu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -348,25 +348,25 @@ export const SousMenus: Story = {
 
 export const SousMenusSurvol: Story = {
   render: () => ({
-    components: { Dropdown, DropdownItem, Button },
+    components: { Menu, MenuItem, Button },
     template: `
-      <Dropdown>
+      <Menu>
         <template #trigger="{ triggerProps }">
           <Button variant="outline" tone="neutral" v-bind="triggerProps">Fichier</Button>
         </template>
-        <DropdownItem label="Nouveau" icon-start="note_add" />
-        <DropdownItem label="Exporter" icon-start="download">
+        <MenuItem label="Nouveau" icon-start="note_add" />
+        <MenuItem label="Exporter" icon-start="download">
           <template #submenu>
-            <DropdownItem label="PDF" />
-            <DropdownItem label="CSV" />
+            <MenuItem label="PDF" />
+            <MenuItem label="CSV" />
           </template>
-        </DropdownItem>
-        <DropdownItem label="Partager" icon-start="share">
+        </MenuItem>
+        <MenuItem label="Partager" icon-start="share">
           <template #submenu>
-            <DropdownItem label="Inviter" />
+            <MenuItem label="Inviter" />
           </template>
-        </DropdownItem>
-      </Dropdown>
+        </MenuItem>
+      </Menu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -404,18 +404,18 @@ export const SousMenusSurvol: Story = {
 
 export const LibellesLongs: Story = {
   render: () => ({
-    components: { Dropdown, DropdownItem, Button },
+    components: { Menu, MenuItem, Button },
     template: `
-      <Dropdown placement="bottom-end">
+      <Menu placement="bottom-end">
         <template #trigger="{ triggerProps }">
           <Button variant="outline" tone="neutral" v-bind="triggerProps">Options</Button>
         </template>
-        <DropdownItem label="Exporter la sélection au format CSV avec les en-têtes" />
-        <DropdownItem
+        <MenuItem label="Exporter la sélection au format CSV avec les en-têtes" />
+        <MenuItem
           label="Un libellé anormalement long qui doit être borné par la largeur maximale du menu"
           sublabel="Un sous-libellé tout aussi verbeux qui passe sur plusieurs lignes sans déborder"
         />
-      </Dropdown>
+      </Menu>
     `,
   }),
 }

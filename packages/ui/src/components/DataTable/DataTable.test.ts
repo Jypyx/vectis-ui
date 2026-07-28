@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor } from '@testing-library/vue'
+﻿import { fireEvent, render, waitFor } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
@@ -164,7 +164,7 @@ describe('DataTable', () => {
     expect(firstColumnCells(container)).toEqual(['Socle', 'Éclair'])
     expect(getByRole('button', { name: 'Lignes par page : 2' })).toBeTruthy()
 
-    // ouverture via le stub popover jsdom (précédent Dropdown.test)
+    // ouverture via le stub popover jsdom (précédent Menu.test)
     const menu = container.querySelector('[role="menu"]') as HTMLElement
     menu.showPopover()
     await nextTick()

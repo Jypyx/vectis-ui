@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/vue'
+﻿import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, ref } from 'vue'
 
@@ -93,7 +93,7 @@ describe('Combobox', () => {
     const input = getByRole('combobox') as HTMLInputElement
     expect(input.value).toBe('France') // le libellé reste affiché
     const labels = () =>
-      [...container.querySelectorAll('[role="option"] .ds-dropdown-item-label')].map((o) =>
+      [...container.querySelectorAll('[role="option"] .ds-listbox-option-label')].map((o) =>
         o.textContent?.trim(),
       )
 
@@ -173,8 +173,8 @@ describe('Combobox', () => {
         o.textContent?.includes(text),
       )
     // France est sélectionnée → coche ; Belgique non → pas de coche
-    expect(optionByText('France')?.querySelector('.ds-dropdown-item-check')).toBeTruthy()
-    expect(optionByText('Belgique')?.querySelector('.ds-dropdown-item-check')).toBeFalsy()
+    expect(optionByText('France')?.querySelector('.ds-listbox-option-check')).toBeTruthy()
+    expect(optionByText('Belgique')?.querySelector('.ds-listbox-option-check')).toBeFalsy()
   })
 })
 
@@ -186,7 +186,7 @@ describe('Combobox asynchrone', () => {
   })
 
   const labels = (container: Element) =>
-    [...container.querySelectorAll('[role="option"] .ds-dropdown-item-label')].map((o) =>
+    [...container.querySelectorAll('[role="option"] .ds-listbox-option-label')].map((o) =>
       o.textContent?.trim(),
     )
 

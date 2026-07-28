@@ -1,11 +1,11 @@
 <template>
   <!-- <hr> : role="separator" implicite, non focusable, hors roving focus -->
-  <hr class="ds-dropdown-separator" />
+  <hr class="ds-menu-separator" />
 </template>
 
 <style>
 @layer ds.components {
-  .ds-dropdown-separator {
+  .ds-menu-separator {
     flex: none;
     margin-block: 0;
     /* pleine largeur jusqu'aux bords du panneau (compense son padding) ;

@@ -1,20 +1,20 @@
-<script setup lang="ts" generic="Row extends Record<string, unknown>">
+﻿<script setup lang="ts" generic="Row extends Record<string, unknown>">
 import { computed, onBeforeUnmount, ref, useAttrs, watch } from 'vue'
 import type { StyleValue } from 'vue'
 
 import Button from '../Button/Button.vue'
 import Checkbox from '../Checkbox/Checkbox.vue'
-import Dropdown from '../Dropdown/Dropdown.vue'
-import DropdownItem from '../Dropdown/DropdownItem.vue'
 import Icon from '../Icon/Icon.vue'
 import Input from '../Input/Input.vue'
+import Menu from '../Menu/Menu.vue'
+import MenuItem from '../Menu/MenuItem.vue'
 import Pagination from '../Pagination/Pagination.vue'
 import Spinner from '../Spinner/Spinner.vue'
 import Typography from '../Typography/Typography.vue'
 
 /**
  * Tableau de données : <table> sémantique (caption, scope, aria-sort), composé
- * des briques du DS — Input (recherche), Checkbox (sélection), Dropdown+Button
+ * des briques du DS — Input (recherche), Checkbox (sélection), Menu+Button
  * (lignes par page), Pagination. Le JS se limite à des dérivations pures
  * (filtrage → tri → pagination, états de sélection) et à deux effets justifiés
  * en place : reset de page et debounce de la recherche serveur.
@@ -517,7 +517,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
           <span class="ds-table-per-page-label" aria-hidden="true">{{ perPageLabel }}</span>
           <!-- width="max-content" : le panneau épouse l'option la plus large
                (« 10 », « 25 »…) au lieu de la largeur minimale par défaut. -->
-          <Dropdown size="sm" :compact="compact" placement="top-end" width="max-content">
+          <Menu size="sm" :compact="compact" placement="top-end" width="max-content">
             <template #trigger="{ triggerProps }">
               <Button
                 variant="ghost"
@@ -531,14 +531,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 <Icon name="arrow_drop_down" />
               </Button>
             </template>
-            <DropdownItem
+            <MenuItem
               v-for="option in perPageOptions"
               :key="option"
               :label="String(option)"
               :selected="option === perPage"
               @select="setPerPage(option)"
             />
-          </Dropdown>
+          </Menu>
         </div>
         <span v-if="showRange" class="ds-table-range" aria-live="polite">{{ rangeText }}</span>
         <Pagination
@@ -727,7 +727,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .ds-table-sort {
-    /* Contexte d'Icon : 20px, opsz 20 — idiome AccordionItem/DropdownPanel.
+    /* Contexte d'Icon : 20px, opsz 20 — idiome AccordionItem/MenuPanel.
        Sans lui l'icône retomberait sur 1em, soit la taille de texte du th. */
     --ds-icon-size: var(--ds-icon-size-md);
     --ds-icon-opsz: 20;

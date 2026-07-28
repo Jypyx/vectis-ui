@@ -141,7 +141,7 @@ Sur `Button` : les props `icon-start` / `icon-end` prennent un nom Material Symb
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                              |
 | Formulaires | `Input`, `Textarea`, `Checkbox`, `Radio`, `Switch`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                                    |
-| Overlays    | `Tooltip`, `Dropdown` + `DropdownItem`/`DropdownGroup`/`DropdownSeparator` (sous-menus récursifs)                                                         |
+| Overlays    | `Tooltip`, `Menu` + `MenuItem`/`MenuGroup`/`MenuSeparator` (sous-menus récursifs)                                                                         |
 | Structure   | `Accordion` + `AccordionItem`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature)                                                      |
 | Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline) |
 
@@ -155,7 +155,7 @@ Notes d'implémentation notables :
 Conventions transverses :
 
 - Variantes pilotées par props → attributs `data-variant` / `data-tone` / `data-size` (ciblables en CSS).
-- `v-model` partout où un état existe (`v-model:open` pour Dropdown).
+- `v-model` partout où un état existe (`v-model:open` pour Menu).
 - Les flottants prennent leur déclencheur en slot scopé : `<template #trigger="{ triggerProps }"><Button v-bind="triggerProps">…</Button></template>` — `popovertarget` et les attributs ARIA sont posés pour vous.
 - Formulaires : l'état d'erreur visuel vient de `:user-invalid` natif (zéro JS de validation) ; la prop `invalid` force l'état pour la validation serveur.
 
@@ -166,7 +166,7 @@ La documentation vivante (stories, page tokens, switch de thème) : `pnpm storyb
 Cible : **navigateurs modernes** — Chrome/Edge 125+, Safari 26+.
 
 - Baseline, sans compromis : Popover API, `<dialog>`, `<details name>`, `:user-invalid`, `:has()`, `color-mix()`, `@layer`, custom properties.
-- **CSS Anchor Positioning** (Tooltip, Dropdown et ses sous-menus) : pas encore stable sur Firefox — choix assumé de ne pas embarquer de fallback JS ; sur Firefox, les panneaux s'ouvrent (Popover API supportée) mais ne sont pas ancrés à leur déclencheur. Le reste du DS y fonctionne normalement.
+- **CSS Anchor Positioning** (Tooltip, Menu et ses sous-menus, Combobox) : pas encore stable sur Firefox — choix assumé de ne pas embarquer de fallback JS ; sur Firefox, les panneaux s'ouvrent (Popover API supportée) mais ne sont pas ancrés à leur déclencheur. Le reste du DS y fonctionne normalement.
 - Progressive enhancement pur (dégradation propre si non supporté) : animations `@starting-style`/`allow-discrete`, `field-sizing: content` (Textarea `auto-grow`), `::details-content` + `interpolate-size` (animation Accordion).
 
 ## Accessibilité

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onBeforeUnmount, ref, useId } from 'vue'
 
 /**
@@ -37,7 +37,7 @@ defineSlots<{
    * forme, kbd, icônes) : le tooltip se ferme dès que le pointeur quitte le
    * déclencheur et `aria-describedby` aplatit le contenu en texte — un lien
    * ou bouton y serait inatteignable. Pour de l'interactif, préférer un
-   * panneau flottant persistant (Dropdown).
+   * panneau flottant persistant (Menu).
    */
   content?(): unknown
 }>()

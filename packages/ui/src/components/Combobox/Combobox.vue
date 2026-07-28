@@ -13,24 +13,26 @@ import {
 import type { StyleValue } from 'vue'
 
 import Chip from '../Chip/Chip.vue'
-import Dropdown from '../Dropdown/Dropdown.vue'
-import DropdownItem from '../Dropdown/DropdownItem.vue'
 import Icon from '../Icon/Icon.vue'
 import Input from '../Input/Input.vue'
+import Listbox from '../Listbox/Listbox.vue'
+import ListboxOption from '../Listbox/ListboxOption.vue'
 import Spinner from '../Spinner/Spinner.vue'
 
 /**
  * Combobox avec recherche et sélection multiple, composé des briques du DS :
- * `Input` (champ de recherche `role="combobox"`), `Dropdown` en mode `listbox`
- * (panneau popover + options `role="option"`, ancré en pur CSS), et `Chip` pour
- * les valeurs en mode multiple.
+ * `Input` (champ de recherche `role="combobox"`), `Listbox` (panneau interne
+ * non exporté : popover ancré en pur CSS + options `role="option"`), et `Chip`
+ * pour les valeurs en mode multiple.
  *
  * Le JS implémente le pattern ARIA combobox/listbox que le natif ne couvre pas
  * (pas de `<datalist>` stylable/multiple) : filtrage, navigation par
- * `aria-activedescendant` (le focus DOM reste dans l'input — d'où le mode
- * `listbox` du Dropdown, qui désactive son roving focus « menu »), sélection
- * simple ou multiple. Ouverture pilotée par `v-model:open`, fermeture au
- * `focusout` (le champ vit hors du panneau `popover="manual"`).
+ * `aria-activedescendant` (le focus DOM reste dans l'input — le `Listbox` n'a
+ * donc aucun clavier propre), sélection simple ou multiple. C'est ce composant
+ * qui possède TOUT le contrat ARIA du champ (`role`, `aria-controls`,
+ * `aria-expanded`, `aria-activedescendant`). Ouverture pilotée par
+ * `v-model:open`, fermeture au `focusout` (le champ vit hors du panneau
+ * `popover="manual"`).
  */
 export interface ComboboxOption {
   value: string
@@ -138,6 +140,8 @@ const forwardedAttrs = computed(() =>
 
 const rootEl = ref<HTMLElement | null>(null)
 const inputRef = ref<InstanceType<typeof Input> | null>(null)
+// Sert à la fois d'id du panneau Listbox (cible d'`aria-controls`) et de
+// préfixe des ids d'options (`optionId`) : chaînes distinctes, pas de collision.
 const optionsId = useId()
 
 const open = ref(false)
@@ -195,7 +199,7 @@ const filtered = computed(() => {
 // ── Recherche (source externe) ──────────────────────────────────────────────
 // JS justifié : aucune primitive native ne débounce ni ne dédoublonne une
 // requête. Timer en `let` (non réactif), annulé partout où le panneau se ferme
-// et au démontage (modèle DropdownItem/Tooltip).
+// et au démontage (modèle MenuItem/Tooltip).
 let searchTimer: ReturnType<typeof setTimeout> | undefined
 // undefined = jamais émis. Dédoublonnage : rouvrir le panneau sur le même terme
 // ne relance pas la requête (le consommateur peut toujours ignorer son cache).
@@ -463,7 +467,7 @@ watch(
     // `?.scrollIntoView?.()` plus haut) — le comportement se teste au navigateur.
     if (!el || typeof IntersectionObserver === 'undefined') return
     // Le panneau est le conteneur scrollable, désigné par son rôle ARIA (API
-    // publique) plutôt que par une classe interne du Dropdown. Sans lui,
+    // publique) plutôt que par une classe interne du Listbox. Sans lui,
     // `root: null` viserait le viewport : le panneau étant en top layer, la
     // sentinelle y paraîtrait toujours visible → rafale de `load-more`.
     const root = el.closest('[role="listbox"]')
@@ -512,68 +516,71 @@ watch(
     :data-can-clear="canClear ? '' : undefined"
     @focusout="onFocusout"
   >
-    <Dropdown
+    <div class="ds-combobox-control" @click="onControlClick">
+      <Input
+        ref="inputRef"
+        v-model="query"
+        role="combobox"
+        aria-haspopup="listbox"
+        aria-autocomplete="list"
+        :aria-expanded="open"
+        :aria-controls="optionsId"
+        v-bind="forwardedAttrs"
+        :size="size"
+        :compact="compact"
+        :invalid="invalid"
+        :disabled="disabled"
+        :clearable="clearable"
+        :clear-visible="canClear"
+        clear-label="Effacer la sélection"
+        :placeholder="selectedValues.length === 0 ? placeholder : undefined"
+        :aria-activedescendant="open && activeIndex >= 0 ? optionId(activeIndex) : undefined"
+        @input="onInput"
+        @keydown="onKeydown"
+        @focus="onFocus"
+        @blur="focused = false"
+        @clear="onClear"
+      >
+        <template v-if="multiple" #start>
+          <Chip
+            v-for="value in selectedValues"
+            :key="value"
+            tone="accent"
+            :size="chipSize"
+            :compact="compact"
+            dismissible
+            :dismiss-label="`Retirer ${labelOf(value)}`"
+            :disabled="disabled"
+            @dismiss="removeValue(value)"
+            >{{ labelOf(value) }}</Chip
+          >
+        </template>
+
+        <!-- Chevron posé en absolu à droite (cf. CSS), pivote à l'ouverture.
+             La croix vient de la prop `clearable` d'Input, rendue à sa gauche.
+             En chargement, le spinner prend EXACTEMENT sa place (Input pose
+             `font-size: var(--ds-icon-size)` sur les spinners enfants directs
+             du champ) : aucun saut de largeur. On ne passe pas par la prop
+             `loading` d'Input, qui écraserait ce slot — donc le chevron.
+             `aria-hidden` sur la racine du Spinner neutralise son
+             role="status" : l'annonce vient du panneau, pas deux fois. -->
+        <template #end>
+          <Spinner v-if="loading" class="ds-combobox-spinner" aria-hidden="true" />
+          <Icon v-else name="expand_more" class="ds-combobox-chevron" aria-hidden="true" />
+        </template>
+      </Input>
+    </div>
+
+    <Listbox
+      :id="optionsId"
       v-model:open="open"
-      role="listbox"
       anchor="--ds-combobox-anchor"
       :multiselectable="multiple"
       :size="size"
       :compact="compact"
       placement="bottom-start"
     >
-      <template #trigger="{ triggerProps }">
-        <div class="ds-combobox-control" @click="onControlClick">
-          <Input
-            ref="inputRef"
-            v-model="query"
-            v-bind="{ ...triggerProps, ...forwardedAttrs }"
-            :size="size"
-            :compact="compact"
-            :invalid="invalid"
-            :disabled="disabled"
-            :clearable="clearable"
-            :clear-visible="canClear"
-            clear-label="Effacer la sélection"
-            :placeholder="selectedValues.length === 0 ? placeholder : undefined"
-            :aria-activedescendant="open && activeIndex >= 0 ? optionId(activeIndex) : undefined"
-            @input="onInput"
-            @keydown="onKeydown"
-            @focus="onFocus"
-            @blur="focused = false"
-            @clear="onClear"
-          >
-            <template v-if="multiple" #start>
-              <Chip
-                v-for="value in selectedValues"
-                :key="value"
-                tone="accent"
-                :size="chipSize"
-                :compact="compact"
-                dismissible
-                :dismiss-label="`Retirer ${labelOf(value)}`"
-                :disabled="disabled"
-                @dismiss="removeValue(value)"
-                >{{ labelOf(value) }}</Chip
-              >
-            </template>
-
-            <!-- Chevron posé en absolu à droite (cf. CSS), pivote à l'ouverture.
-                 La croix vient de la prop `clearable` d'Input, rendue à sa gauche.
-                 En chargement, le spinner prend EXACTEMENT sa place (Input pose
-                 `font-size: var(--ds-icon-size)` sur les spinners enfants directs
-                 du champ) : aucun saut de largeur. On ne passe pas par la prop
-                 `loading` d'Input, qui écraserait ce slot — donc le chevron.
-                 `aria-hidden` sur la racine du Spinner neutralise son
-                 role="status" : l'annonce vient du panneau, pas deux fois. -->
-            <template #end>
-              <Spinner v-if="loading" class="ds-combobox-spinner" aria-hidden="true" />
-              <Icon v-else name="expand_more" class="ds-combobox-chevron" aria-hidden="true" />
-            </template>
-          </Input>
-        </div>
-      </template>
-
-      <DropdownItem
+      <ListboxOption
         v-for="(option, index) in filtered"
         :id="optionId(index)"
         :key="option.value"
@@ -583,8 +590,8 @@ watch(
         @select="select(option)"
         @pointermove="!option.disabled && (activeIndex = index)"
       >
-        <!-- slot dans le #default de l'item : en listbox, son #end n'est pas
-             rendu quand l'option est sélectionnée (la coche prend sa place) -->
+        <!-- slot dans le #default de l'option : son #end n'est pas rendu quand
+             l'option est sélectionnée (la coche prend sa place) -->
         <slot
           name="option"
           :option="option"
@@ -593,7 +600,7 @@ watch(
           :selected="selectedValues.includes(option.value)"
           >{{ option.label }}</slot
         >
-      </DropdownItem>
+      </ListboxOption>
 
       <!-- Ordre chargement → vide → contenu (modèle DataTable) : pendant une
            requête, le panneau ne doit pas annoncer « aucun résultat ». -->
@@ -613,7 +620,7 @@ watch(
       <div v-if="hasMore" ref="sentinelEl" class="ds-combobox-more" aria-hidden="true">
         <Spinner v-if="loading" />
       </div>
-    </Dropdown>
+    </Listbox>
   </div>
 </template>
 
@@ -714,16 +721,15 @@ watch(
   }
 
   /* États plein panneau (« aucun résultat », chargement) : même gabarit qu'une
-     option (hauteur héritée du panneau via --_dropdown-item-*, padding d'item).
+     option (hauteur héritée du panneau via --_listbox-option-*, padding d'item).
+     Sans fallback : Listbox.tokens.css pose les défauts sur `.ds-listbox`.
      `flex: none` : le panneau est un flex column, l'état ne doit pas s'écraser. */
   .ds-combobox-state {
     display: flex;
     flex: none;
     align-items: center;
     gap: var(--ds-space-2);
-    min-height: calc(
-      var(--_dropdown-item-min-h, var(--ds-control-height-sm)) - var(--_dropdown-item-delta, 0px)
-    );
+    min-height: calc(var(--_listbox-option-min-h) - var(--_listbox-option-delta));
     padding: var(--ds-space-1) var(--ds-space-3);
     font-size: var(--ds-text-body-md-size);
     color: var(--ds-color-text-muted);

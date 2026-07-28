@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, ref } from 'vue'
 
 import {
@@ -14,7 +14,7 @@ import {
 import type { HourFormat } from './timeUtils'
 
 /**
- * Cadran horloge du TimePicker (interne, non exporté — modèle DropdownPanel).
+ * Cadran horloge du TimePicker (interne, non exporté — modèle MenuPanel).
  *
  * Aucune primitive native ne couvre la sélection angulaire : le JS se limite à
  * (1) la conversion pointeur → valeur (pointerdown/move : mesure du rect puis

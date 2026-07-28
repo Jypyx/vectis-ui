@@ -1,77 +1,82 @@
-import { render } from '@testing-library/vue'
+﻿import { render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick } from 'vue'
 
-import Dropdown from './Dropdown.vue'
-import DropdownGroup from './DropdownGroup.vue'
-import DropdownItem from './DropdownItem.vue'
-import DropdownSeparator from './DropdownSeparator.vue'
+import Menu from './Menu.vue'
+import MenuGroup from './MenuGroup.vue'
+import MenuItem from './MenuItem.vue'
+import MenuSeparator from './MenuSeparator.vue'
 import { SUBMENU_HOVER_DELAY } from './context'
 
 function renderHarness(template: string, onSelect = vi.fn()) {
   const Harness = defineComponent({
-    components: { Dropdown, DropdownItem, DropdownGroup, DropdownSeparator },
+    components: { Menu, MenuItem, MenuGroup, MenuSeparator },
     setup: () => ({ onSelect }),
     template,
   })
   return { onSelect, ...render(Harness) }
 }
 
-function renderDropdown(onSelect = vi.fn()) {
+function renderMenu(onSelect = vi.fn()) {
   return renderHarness(
     `
-      <Dropdown>
+      <Menu>
         <template #trigger="{ triggerProps }">
           <button data-testid="trigger" v-bind="triggerProps">Actions</button>
         </template>
-        <DropdownItem label="Renommer" @select="onSelect" />
-        <DropdownItem label="Archiver" disabled />
-        <DropdownItem label="Supprimer" danger />
-      </Dropdown>
+        <MenuItem label="Renommer" @select="onSelect" />
+        <MenuItem label="Archiver" disabled />
+        <MenuItem label="Supprimer" danger />
+      </Menu>
     `,
     onSelect,
   )
 }
 
 /** Ouvre le panneau racine (stub popover jsdom) et rend le menu interrogeable. */
-async function openDropdown(container: Element): Promise<HTMLElement> {
+async function openMenu(container: Element): Promise<HTMLElement> {
   const menu = container.querySelector('[role="menu"]') as HTMLElement
   menu.showPopover()
   await nextTick()
   return menu
 }
 
-describe('Dropdown', () => {
-  it('prop width : data-width + variable inline sur le panneau racine, ignorée en listbox', () => {
+describe('Menu', () => {
+  it('prop width : data-width + variable inline sur le panneau racine', () => {
     const { container } = renderHarness(`
-      <Dropdown width="max-content">
+      <Menu width="max-content">
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
-        <DropdownItem label="Renommer" />
-      </Dropdown>
+        <MenuItem label="Renommer" />
+      </Menu>
     `)
     const menu = container.querySelector('[role="menu"]') as HTMLElement
     expect(menu.hasAttribute('data-width')).toBe(true)
-    expect(menu.style.getPropertyValue('--_dropdown-width')).toBe('max-content')
+    expect(menu.style.getPropertyValue('--_menu-width')).toBe('max-content')
+  })
 
-    // listbox : largeur calée sur l'ancre — la prop est neutralisée
-    const { container: listbox } = renderHarness(`
-      <Dropdown role="listbox" width="16rem" anchor="--ancre-test">
+  it('les sous-panneaux ne rendent pas data-width (largeur par défaut)', () => {
+    const { container } = renderHarness(`
+      <Menu width="max-content">
         <template #trigger="{ triggerProps }">
-          <input v-bind="triggerProps" />
+          <button v-bind="triggerProps">Actions</button>
         </template>
-        <DropdownItem label="10" />
-      </Dropdown>
+        <MenuItem label="Exporter">
+          <template #submenu>
+            <MenuItem label="PDF" />
+          </template>
+        </MenuItem>
+      </Menu>
     `)
-    const panel = listbox.querySelector('[role="listbox"]') as HTMLElement
-    expect(panel.hasAttribute('data-width')).toBe(false)
-    expect(panel.style.getPropertyValue('--_dropdown-width')).toBe('')
+    const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
+    expect(root?.hasAttribute('data-width')).toBe(true)
+    expect(sub?.hasAttribute('data-width')).toBe(false)
   })
 
   it('pose le contrat ARIA sur le déclencheur et le panneau', () => {
     // menu fermé ([popover] est display:none) : requête hors arbre d'accessibilité
-    const { getByTestId, container } = renderDropdown()
+    const { getByTestId, container } = renderMenu()
     const trigger = getByTestId('trigger')
     const menu = container.querySelector('[role="menu"]') as HTMLElement
     expect(trigger.getAttribute('popovertarget')).toBe(menu.id)
@@ -81,15 +86,15 @@ describe('Dropdown', () => {
   })
 
   it("focus le premier item à l'ouverture et met à jour aria-expanded", async () => {
-    const { getByTestId, getByRole, container } = renderDropdown()
-    await openDropdown(container)
+    const { getByTestId, getByRole, container } = renderMenu()
+    await openMenu(container)
     expect(getByRole('menuitem', { name: 'Renommer' })).toBe(document.activeElement)
     expect(getByTestId('trigger').getAttribute('aria-expanded')).toBe('true')
   })
 
   it('navigue aux flèches en sautant les items désactivés, avec bouclage', async () => {
-    const { getByRole, container } = renderDropdown()
-    const menu = await openDropdown(container)
+    const { getByRole, container } = renderMenu()
+    const menu = await openMenu(container)
 
     const arrowDown = () =>
       menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
@@ -105,8 +110,8 @@ describe('Dropdown', () => {
   })
 
   it('la sélection émet select, ferme le menu et rend le focus au déclencheur', async () => {
-    const { onSelect, getByRole, getByTestId, container } = renderDropdown()
-    const menu = await openDropdown(container)
+    const { onSelect, getByRole, getByTestId, container } = renderMenu()
+    const menu = await openMenu(container)
 
     getByRole('menuitem', { name: 'Renommer' }).click()
     await nextTick()
@@ -116,16 +121,16 @@ describe('Dropdown', () => {
   })
 
   it('un item désactivé ne déclenche pas select', async () => {
-    const { onSelect, getByRole, container } = renderDropdown()
-    await openDropdown(container)
+    const { onSelect, getByRole, container } = renderMenu()
+    await openMenu(container)
 
     getByRole('menuitem', { name: 'Archiver' }).click()
     expect(onSelect).not.toHaveBeenCalled()
   })
 
   it("le survol d'un item lui donne le focus (jamais aux items désactivés)", async () => {
-    const { getByRole, container } = renderDropdown()
-    await openDropdown(container)
+    const { getByRole, container } = renderMenu()
+    await openMenu(container)
     // à l'ouverture, « Renommer » est focusé
     const danger = getByRole('menuitem', { name: 'Supprimer' })
 
@@ -141,43 +146,43 @@ describe('Dropdown', () => {
   describe("anatomie de l'item", () => {
     it('les slots priment sur les props label/sublabel', async () => {
       const { getByRole, container } = renderHarness(`
-        <Dropdown>
+        <Menu>
           <template #trigger="{ triggerProps }">
             <button v-bind="triggerProps">Actions</button>
           </template>
-          <DropdownItem label="Ignoré" sublabel="Ignoré aussi">
+          <MenuItem label="Ignoré" sublabel="Ignoré aussi">
             Partager
             <template #sublabel>Vers un autre espace</template>
-          </DropdownItem>
-          <DropdownItem label="Dupliquer" sublabel="Copie dans le dossier courant" />
-        </Dropdown>
+          </MenuItem>
+          <MenuItem label="Dupliquer" sublabel="Copie dans le dossier courant" />
+        </Menu>
       `)
-      await openDropdown(container)
+      await openMenu(container)
 
       const slotted = getByRole('menuitem', { name: /Partager/ })
-      expect(slotted.querySelector('.ds-dropdown-item-label')?.textContent).toContain('Partager')
-      expect(slotted.querySelector('.ds-dropdown-item-sublabel')?.textContent).toBe(
+      expect(slotted.querySelector('.ds-menu-item-label')?.textContent).toContain('Partager')
+      expect(slotted.querySelector('.ds-menu-item-sublabel')?.textContent).toBe(
         'Vers un autre espace',
       )
 
       const fromProps = getByRole('menuitem', { name: /Dupliquer/ })
-      expect(fromProps.querySelector('.ds-dropdown-item-label')?.textContent).toBe('Dupliquer')
-      expect(fromProps.querySelector('.ds-dropdown-item-sublabel')?.textContent).toBe(
+      expect(fromProps.querySelector('.ds-menu-item-label')?.textContent).toBe('Dupliquer')
+      expect(fromProps.querySelector('.ds-menu-item-sublabel')?.textContent).toBe(
         'Copie dans le dossier courant',
       )
     })
 
     it("iconStart accepte un nom Material Symbols ou une URL d'image", async () => {
       const { getByRole, container } = renderHarness(`
-        <Dropdown>
+        <Menu>
           <template #trigger="{ triggerProps }">
             <button v-bind="triggerProps">Actions</button>
           </template>
-          <DropdownItem label="Renommer" icon-start="edit" icon-end="chevron_right" />
-          <DropdownItem label="Logo" icon-start="/logo.svg" />
-        </Dropdown>
+          <MenuItem label="Renommer" icon-start="edit" icon-end="chevron_right" />
+          <MenuItem label="Logo" icon-start="/logo.svg" />
+        </Menu>
       `)
-      await openDropdown(container)
+      await openMenu(container)
 
       const named = getByRole('menuitem', { name: 'Renommer' })
       const symbols = [...named.querySelectorAll('.ds-icon-symbol')].map((el) => el.textContent)
@@ -189,15 +194,15 @@ describe('Dropdown', () => {
 
     it('selected pose data-selected et aria-current', async () => {
       const { getByRole, container } = renderHarness(`
-        <Dropdown>
+        <Menu>
           <template #trigger="{ triggerProps }">
             <button v-bind="triggerProps">Tri</button>
           </template>
-          <DropdownItem label="Par nom" selected />
-          <DropdownItem label="Par date" />
-        </Dropdown>
+          <MenuItem label="Par nom" selected />
+          <MenuItem label="Par date" />
+        </Menu>
       `)
-      await openDropdown(container)
+      await openMenu(container)
 
       const selected = getByRole('menuitem', { name: 'Par nom' })
       expect(selected.hasAttribute('data-selected')).toBe(true)
@@ -210,12 +215,12 @@ describe('Dropdown', () => {
 
   it('size/compact posent data-size/data-compact sur le panneau racine', () => {
     const { container } = renderHarness(`
-      <Dropdown size="md" compact>
+      <Menu size="md" compact>
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
-        <DropdownItem label="Renommer" />
-      </Dropdown>
+        <MenuItem label="Renommer" />
+      </Menu>
     `)
     const menu = container.querySelector('[role="menu"]') as HTMLElement
     expect(menu.getAttribute('data-size')).toBe('md')
@@ -224,16 +229,16 @@ describe('Dropdown', () => {
 
   it('les sous-panneaux ne rendent ni data-size ni data-compact (héritage CSS)', () => {
     const { container } = renderHarness(`
-      <Dropdown size="md" compact>
+      <Menu size="md" compact>
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
-        <DropdownItem label="Exporter">
+        <MenuItem label="Exporter">
           <template #submenu>
-            <DropdownItem label="PDF" />
+            <MenuItem label="PDF" />
           </template>
-        </DropdownItem>
-      </Dropdown>
+        </MenuItem>
+      </Menu>
     `)
     const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
     expect(root?.getAttribute('data-size')).toBe('md')
@@ -244,23 +249,23 @@ describe('Dropdown', () => {
   describe('groupes et séparateurs', () => {
     function renderGrouped() {
       return renderHarness(`
-        <Dropdown>
+        <Menu>
           <template #trigger="{ triggerProps }">
             <button v-bind="triggerProps">Actions</button>
           </template>
-          <DropdownGroup label="Fichier">
-            <DropdownItem label="Renommer" />
-            <DropdownItem label="Dupliquer" />
-          </DropdownGroup>
-          <DropdownSeparator />
-          <DropdownItem label="Supprimer" danger />
-        </Dropdown>
+          <MenuGroup label="Fichier">
+            <MenuItem label="Renommer" />
+            <MenuItem label="Dupliquer" />
+          </MenuGroup>
+          <MenuSeparator />
+          <MenuItem label="Supprimer" danger />
+        </Menu>
       `)
     }
 
     it('le groupe expose role="group" nommé par son libellé, hors roving focus', async () => {
       const { getByRole, container } = renderGrouped()
-      const menu = await openDropdown(container)
+      const menu = await openMenu(container)
 
       const group = getByRole('group', { name: 'Fichier' })
       const labelId = group.getAttribute('aria-labelledby') as string
@@ -273,7 +278,7 @@ describe('Dropdown', () => {
 
     it('le roving focus traverse les groupes et ignore les séparateurs', async () => {
       const { getByRole, container } = renderGrouped()
-      const menu = await openDropdown(container)
+      const menu = await openMenu(container)
 
       const arrowDown = () =>
         menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
@@ -290,18 +295,18 @@ describe('Dropdown', () => {
     function renderSubmenu(onSelect = vi.fn()) {
       return renderHarness(
         `
-          <Dropdown>
+          <Menu>
             <template #trigger="{ triggerProps }">
               <button data-testid="trigger" v-bind="triggerProps">Actions</button>
             </template>
-            <DropdownItem label="Renommer" @select="onSelect" />
-            <DropdownItem label="Exporter" icon-end="download" @select="onSelect">
+            <MenuItem label="Renommer" @select="onSelect" />
+            <MenuItem label="Exporter" icon-end="download" @select="onSelect">
               <template #submenu>
-                <DropdownItem label="PDF" @select="onSelect" />
-                <DropdownItem label="PNG" />
+                <MenuItem label="PDF" @select="onSelect" />
+                <MenuItem label="PNG" />
               </template>
-            </DropdownItem>
-          </Dropdown>
+            </MenuItem>
+          </Menu>
         `,
         onSelect,
       )
@@ -313,7 +318,7 @@ describe('Dropdown', () => {
 
     it("l'item parent est câblé en invocateur du sous-panneau, chevron à la place d'iconEnd", async () => {
       const { getByRole, container } = renderSubmenu()
-      await openDropdown(container)
+      await openMenu(container)
 
       const parent = getByRole('menuitem', { name: 'Exporter' })
       const sub = panels(container)[1] as HTMLElement
@@ -324,14 +329,14 @@ describe('Dropdown', () => {
       // le sous-panneau est un descendant DOM du panneau parent (pile native)
       expect(panels(container)[0]?.contains(sub)).toBe(true)
       // le chevron remplace iconEnd
-      expect(parent.querySelector('.ds-dropdown-item-chevron')?.textContent).toBe('chevron_right')
+      expect(parent.querySelector('.ds-menu-item-chevron')?.textContent).toBe('chevron_right')
       const symbols = [...parent.querySelectorAll('.ds-icon-symbol')].map((el) => el.textContent)
       expect(symbols).not.toContain('download')
     })
 
     it("Flèche droite ouvre le sous-menu, focus son premier item et n'émet pas select", async () => {
       const { onSelect, getByRole, container } = renderSubmenu()
-      await openDropdown(container)
+      await openMenu(container)
 
       const parent = getByRole('menuitem', { name: 'Exporter' })
       parent.focus()
@@ -347,7 +352,7 @@ describe('Dropdown', () => {
 
     it('le roving focus est confiné au sous-panneau ouvert', async () => {
       const { getByRole, container } = renderSubmenu()
-      await openDropdown(container)
+      await openMenu(container)
 
       const parent = getByRole('menuitem', { name: 'Exporter' })
       parent.focus()
@@ -367,7 +372,7 @@ describe('Dropdown', () => {
 
     it("Flèche gauche referme le sous-menu et rend le focus à l'item parent", async () => {
       const { getByRole, container } = renderSubmenu()
-      await openDropdown(container)
+      await openMenu(container)
 
       const parent = getByRole('menuitem', { name: 'Exporter' })
       parent.focus()
@@ -385,7 +390,7 @@ describe('Dropdown', () => {
 
     it('Échap ferme le sous-menu courant, puis le menu au second appui', async () => {
       const { getByRole, getByTestId, container } = renderSubmenu()
-      const menu = await openDropdown(container)
+      const menu = await openMenu(container)
 
       const parent = getByRole('menuitem', { name: 'Exporter' })
       parent.focus()
@@ -413,7 +418,7 @@ describe('Dropdown', () => {
 
     it("la sélection d'une feuille de sous-menu émet select et ferme toute la pile", async () => {
       const { onSelect, getByRole, container } = renderSubmenu()
-      const menu = await openDropdown(container)
+      const menu = await openMenu(container)
 
       const parent = getByRole('menuitem', { name: 'Exporter' })
       parent.focus()
@@ -429,7 +434,7 @@ describe('Dropdown', () => {
 
     it("l'activation d'un item à sous-menu n'émet jamais select", async () => {
       const { onSelect, getByRole, container } = renderSubmenu()
-      await openDropdown(container)
+      await openMenu(container)
 
       getByRole('menuitem', { name: 'Exporter' }).click()
       expect(onSelect).not.toHaveBeenCalled()
@@ -439,7 +444,7 @@ describe('Dropdown', () => {
       vi.useFakeTimers()
       try {
         const { getByRole, container } = renderSubmenu()
-        await openDropdown(container)
+        await openMenu(container)
 
         const parent = getByRole('menuitem', { name: 'Exporter' })
         const sub = panels(container)[1] as HTMLElement
@@ -462,7 +467,7 @@ describe('Dropdown', () => {
       vi.useFakeTimers()
       try {
         const { getByRole, container } = renderSubmenu()
-        await openDropdown(container)
+        await openMenu(container)
 
         const parent = getByRole('menuitem', { name: 'Exporter' })
         parent.focus()
@@ -480,25 +485,25 @@ describe('Dropdown', () => {
   })
 
   describe('items de navigation (href)', () => {
-    function renderNavDropdown(onSelect = vi.fn()) {
+    function renderNavMenu(onSelect = vi.fn()) {
       return renderHarness(
         `
-          <Dropdown>
+          <Menu>
             <template #trigger="{ triggerProps }">
               <button data-testid="trigger" v-bind="triggerProps">Aller à</button>
             </template>
-            <DropdownItem href="#profil" label="Profil" @select="onSelect" />
-            <DropdownItem href="#archives" label="Archives" disabled />
-            <DropdownItem label="Action" @select="onSelect" />
-          </Dropdown>
+            <MenuItem href="#profil" label="Profil" @select="onSelect" />
+            <MenuItem href="#archives" label="Archives" disabled />
+            <MenuItem label="Action" @select="onSelect" />
+          </Menu>
         `,
         onSelect,
       )
     }
 
     it('href rend un <a role="menuitem"> avec le lien', async () => {
-      const { getByRole, container } = renderNavDropdown()
-      await openDropdown(container)
+      const { getByRole, container } = renderNavMenu()
+      await openMenu(container)
       const item = getByRole('menuitem', { name: 'Profil' })
       expect(item.tagName).toBe('A')
       expect(item.getAttribute('href')).toBe('#profil')
@@ -507,8 +512,8 @@ describe('Dropdown', () => {
     })
 
     it('la sélection d’un lien émet select et ferme le menu', async () => {
-      const { onSelect, getByRole, container } = renderNavDropdown()
-      const menu = await openDropdown(container)
+      const { onSelect, getByRole, container } = renderNavMenu()
+      const menu = await openMenu(container)
 
       getByRole('menuitem', { name: 'Profil' }).click()
       await nextTick()
@@ -517,8 +522,8 @@ describe('Dropdown', () => {
     })
 
     it('un lien désactivé est inerte et exclu du roving focus', async () => {
-      const { getByRole, container } = renderNavDropdown()
-      const menu = await openDropdown(container)
+      const { getByRole, container } = renderNavMenu()
+      const menu = await openMenu(container)
 
       const inert = getByRole('menuitem', { name: 'Archives' })
       expect(inert.hasAttribute('href')).toBe(false)

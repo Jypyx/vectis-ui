@@ -1,4 +1,4 @@
-import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+﻿import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
 import * as DataTableStories from './DataTable.stories'
 
 <Meta of={DataTableStories} />
@@ -7,7 +7,7 @@ import * as DataTableStories from './DataTable.stories'
 
 Tableau de données en HTML strictement sémantique (`<table>`, `caption`, `scope`, `aria-sort`),
 composé des briques du design system : `Input` pour la recherche, `Checkbox` pour la sélection,
-`Dropdown` + `Button` pour les lignes par page, `Pagination` pour le footer. Toute la mécanique
+`Menu` + `Button` pour les lignes par page, `Pagination` pour le footer. Toute la mécanique
 locale (filtrage → tri → pagination) est une chaîne de dérivations pures ; un mode serveur la
 court-circuite entièrement.
 
@@ -41,7 +41,7 @@ jamais les autres champs des lignes. Un changement de terme ramène à la page 1
 
 La pagination locale s'active dès que `perPage` est défini (`v-model:per-page`, ou `:per-page`
 one-way) : le footer apparaît. Sa zone droite groupe, dans cet ordre, le sélecteur de lignes par
-page (`perPageOptions`, un `Dropdown` d'items sélectionnés), le texte « X–Y sur Z » (`showRange`,
+page (`perPageOptions`, un `Menu` d'items sélectionnés), le texte « X–Y sur Z » (`showRange`,
 formatable par `rangeLabel`) et la `Pagination` du DS pilotée par `v-model:page` ; la zone gauche
 reste vide hors sélection. Si un filtre réduit le nombre de pages, l'affichage retombe sur la
 dernière page par **dérivation**, sans muter le modèle.

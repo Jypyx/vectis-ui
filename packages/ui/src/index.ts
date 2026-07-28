@@ -16,9 +16,13 @@
  * par cohérence (il compose Button et IconButton) mais son ordre n'est PAS
  * contraignant : toutes ses surcharges sont qualifiées `.ds-tab[data-size]`,
  * qui bat `.ds-button[data-variant='…']` quel que soit l'ordre du bundle.
- * DataTable compose Input/Checkbox/Dropdown/Pagination mais son ordre n'est
+ * DataTable compose Input/Checkbox/Menu/Pagination mais son ordre n'est
  * pas contraignant non plus : sa seule surcharge est qualifiée par descendance
- * (`.ds-table-toolbar .ds-input`). Toggle est placé après Tabs par cohérence
+ * (`.ds-table-toolbar .ds-input`). Menu n'est pas contraignant non plus : rien
+ * ne surcharge `.ds-menu*` à spécificité égale, et le chrome commun des
+ * panneaux (`.ds-panel`, styles/panel.css) ne contient que des déclarations
+ * qu'aucun panneau ne redéclare. Listbox (brique interne du Combobox) et le
+ * composable `usePopover` ne sont volontairement pas exportés. Toggle est placé après Tabs par cohérence
  * (il compose Button et ButtonGroup) mais son ordre n'est pas contraignant :
  * ses surcharges sont qualifiées (`.ds-toggle-item[data-size]`,
  * `.ds-toggle:not(.ds-button-group)`). Typography doit rester en tête (avant
@@ -62,10 +66,10 @@ export { default as Checkbox } from './components/Checkbox/Checkbox.vue'
 export { default as Radio } from './components/Radio/Radio.vue'
 export { default as Switch } from './components/Switch/Switch.vue'
 export { default as Tooltip } from './components/Tooltip/Tooltip.vue'
-export { default as Dropdown } from './components/Dropdown/Dropdown.vue'
-export { default as DropdownItem } from './components/Dropdown/DropdownItem.vue'
-export { default as DropdownGroup } from './components/Dropdown/DropdownGroup.vue'
-export { default as DropdownSeparator } from './components/Dropdown/DropdownSeparator.vue'
+export { default as Menu } from './components/Menu/Menu.vue'
+export { default as MenuItem } from './components/Menu/MenuItem.vue'
+export { default as MenuGroup } from './components/Menu/MenuGroup.vue'
+export { default as MenuSeparator } from './components/Menu/MenuSeparator.vue'
 export { default as Accordion } from './components/Accordion/Accordion.vue'
 export { default as AccordionItem } from './components/Accordion/AccordionItem.vue'
 export { default as Toaster } from './components/Toast/Toaster.vue'
