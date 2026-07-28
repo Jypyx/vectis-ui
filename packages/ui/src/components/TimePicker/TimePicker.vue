@@ -9,6 +9,7 @@ import Toggle from '../Toggle/Toggle.vue'
 import type { ToggleModelValue } from '../Toggle/Toggle.vue'
 import ToggleItem from '../Toggle/ToggleItem.vue'
 import TimePickerDial from './TimePickerDial.vue'
+import { usePopover } from '../../composables/usePopover'
 import {
   clampInt,
   formatDisplay,
@@ -108,7 +109,10 @@ const panelId = useId()
 
 const pad2 = (n: number) => String(n).padStart(2, '0')
 
-const open = ref(false)
+// État d'ouverture du panneau : alimenté par les événements du popover (cf.
+// usePopover), jamais écrit à la main — `openPanel`/`closePanel` passent par
+// `show()`/`hide()`, dont les gardes évitent l'InvalidStateError.
+const { shown: open, syncShown, show, hide } = usePopover(panelEl)
 /** Mode courant du panneau ; persiste entre ouvertures (préférence d'usage). */
 const activeMode = ref<TimePickerMode>(props.mode)
 const activeStep = ref<'hour' | 'minute'>('hour')
@@ -170,16 +174,14 @@ function openPanel() {
     draftMinute.value = snapMinute(now.getMinutes(), props.minuteStep)
   }
   activeStep.value = 'hour'
-  open.value = true
-  panelEl.value?.showPopover()
+  show()
   focusPrimary()
 }
 
 function closePanel(refocus = false) {
   if (!open.value) return
-  open.value = false
+  hide()
   liveMessage.value = ''
-  panelEl.value?.hidePopover()
   if (refocus) inputRef.value?.focus()
 }
 
@@ -374,6 +376,8 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
       :aria-label="label ?? 'Choisir une heure'"
       class="ds-timepicker-panel ds-floating"
       :data-placement="placement"
+      @beforetoggle="syncShown"
+      @toggle="syncShown"
     >
       <div class="ds-timepicker-caption">
         {{ activeMode === 'dial' ? 'Sélectionner l’heure' : 'Saisir l’heure' }}

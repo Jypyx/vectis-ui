@@ -1,6 +1,8 @@
 ﻿<script setup lang="ts">
 import { onBeforeUnmount, ref, useId } from 'vue'
 
+import { usePopover } from '../../composables/usePopover'
+
 /**
  * Tooltip sur Popover API (`popover="manual"` : pas de light dismiss, c'est
  * le composant qui pilote). JS justifié : aucune primitive HTML stable ne
@@ -44,28 +46,21 @@ defineSlots<{
 
 const panelEl = ref<HTMLElement | null>(null)
 const tooltipId = useId()
-const shown = ref(false)
+// État d'ouverture et gardes d'idempotence : cf. usePopover. `shown` y est
+// alimentée par les événements du panneau, jamais posée à la main.
+const { syncShown, show: showPanel, hide: hidePanel } = usePopover(panelEl)
 
 let timer: ReturnType<typeof setTimeout> | undefined
 
 function show(immediate = false) {
   clearTimeout(timer)
-  const doShow = () => {
-    if (!shown.value) {
-      panelEl.value?.showPopover()
-      shown.value = true
-    }
-  }
-  if (immediate) doShow()
-  else timer = setTimeout(doShow, props.delay)
+  if (immediate) showPanel()
+  else timer = setTimeout(() => showPanel(), props.delay)
 }
 
 function hide() {
   clearTimeout(timer)
-  if (shown.value) {
-    panelEl.value?.hidePopover()
-    shown.value = false
-  }
+  hidePanel()
 }
 
 function onKeydown(event: KeyboardEvent) {
@@ -92,6 +87,8 @@ onBeforeUnmount(() => clearTimeout(timer))
       role="tooltip"
       class="ds-tooltip-panel ds-floating"
       :data-placement="placement"
+      @beforetoggle="syncShown"
+      @toggle="syncShown"
     >
       <slot name="content">{{ text }}</slot>
     </div>

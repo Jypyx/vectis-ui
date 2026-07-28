@@ -12,6 +12,7 @@ import type {
 } from '../Calendar/Calendar.vue'
 import { formatDisplay, formatDisplayRange, isValidISO } from '../Calendar/dateUtils'
 import Input from '../Input/Input.vue'
+import { usePopover } from '../../composables/usePopover'
 
 /**
  * Sélecteur de date : champ `Input` (lecture seule) + `Calendar` dans un
@@ -109,7 +110,10 @@ const inputRef = ref<InstanceType<typeof Input> | null>(null)
 const calendarRef = ref<InstanceType<typeof Calendar> | null>(null)
 const panelId = useId()
 
-const open = ref(false)
+// État d'ouverture du panneau : alimenté par les événements du popover (cf.
+// usePopover), jamais écrit à la main — `openPanel`/`closePanel` passent par
+// `show()`/`hide()`, dont les gardes évitent l'InvalidStateError.
+const { shown: open, syncShown, show, hide } = usePopover(panelEl)
 
 // ── Valeur affichée dans le champ (localisée) ───────────────────────────────
 const hasValue = computed(() => {
@@ -149,15 +153,13 @@ const endIconLabel = computed(() =>
 // ── Ouverture / fermeture du panneau (popover manual) ───────────────────────
 function openPanel() {
   if (props.disabled || open.value) return
-  open.value = true
-  panelEl.value?.showPopover()
+  show()
   // focus DOM déplacé dans la grille (le natif ne le fait pas pour un manual)
   requestAnimationFrame(() => calendarRef.value?.focus())
 }
 function closePanel(refocus = false) {
   if (!open.value) return
-  open.value = false
-  panelEl.value?.hidePopover()
+  hide()
   if (refocus) inputRef.value?.focus()
 }
 
@@ -246,6 +248,8 @@ const close = () => closePanel(true)
       :aria-label="label ?? 'Choisir une date'"
       class="ds-datepicker-panel ds-floating"
       :data-placement="placement"
+      @beforetoggle="syncShown"
+      @toggle="syncShown"
     >
       <Calendar
         ref="calendarRef"

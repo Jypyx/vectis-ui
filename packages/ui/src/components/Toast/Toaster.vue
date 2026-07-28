@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+import { usePopover } from '../../composables/usePopover'
 import Toast from './Toast.vue'
 import { dismissToast, toasts, type ToastItem, type ToastPlacement } from './state'
 
@@ -56,15 +57,29 @@ const groups = computed(() => {
   return map
 })
 
-const stackEls = new Map<ToastPlacement, HTMLElement>()
+/*
+ * Une instance de usePopover PAR placement : elle porte la ref de l'élément,
+ * l'état d'ouverture (alimenté par les événements du popover, cf. syncStack) et
+ * les gardes d'idempotence — re-showPopover() sur un popover déjà ouvert lève
+ * InvalidStateError. Les six conteneurs étant permanents, la fabrique ne tourne
+ * qu'une fois au setup.
+ */
+const stacks = new Map(
+  PLACEMENTS.map((placement) => {
+    const el = ref<HTMLElement | null>(null)
+    return [placement, { el, ...usePopover(el) }] as const
+  }),
+)
 
 function setStackEl(placement: ToastPlacement, el: unknown) {
-  if (el) stackEls.set(placement, el as HTMLElement)
-  else stackEls.delete(placement)
+  const stack = stacks.get(placement)
+  if (stack) stack.el.value = (el as HTMLElement | null) ?? null
 }
 
-/* Garde : re-showPopover() sur un popover déjà ouvert lève InvalidStateError. */
-const shown = new Set<ToastPlacement>()
+function syncStack(placement: ToastPlacement, event: Event) {
+  stacks.get(placement)?.syncShown(event)
+}
+
 /* Timers d'auto-fermeture — ids déjà armés (un toast n'est armé qu'une fois). */
 const timers = new Map<number, ReturnType<typeof setTimeout>>()
 const armed = new Set<number>()
@@ -107,17 +122,13 @@ function sync() {
     if (!paused.has(effectivePlacement(item))) startTimer(item)
   }
 
+  // Les gardes de usePopover rendent show()/hide() idempotents : pas de suivi
+  // manuel des piles déjà ouvertes.
   for (const placement of PLACEMENTS) {
-    const el = stackEls.get(placement)
-    if (!el) continue
-    const hasToasts = (groups.value.get(placement)?.length ?? 0) > 0
-    if (hasToasts && !shown.has(placement)) {
-      el.showPopover()
-      shown.add(placement)
-    } else if (!hasToasts && shown.has(placement)) {
-      el.hidePopover()
-      shown.delete(placement)
-    }
+    const stack = stacks.get(placement)
+    if (!stack?.el.value) continue
+    if ((groups.value.get(placement)?.length ?? 0) > 0) stack.show()
+    else stack.hide()
   }
 }
 
@@ -173,6 +184,8 @@ onBeforeUnmount(() => {
     :aria-label="label"
     @pointerenter="pause(p)"
     @pointerleave="resume(p)"
+    @beforetoggle="syncStack(p, $event)"
+    @toggle="syncStack(p, $event)"
   >
     <Toast
       v-for="item in groups.get(p) ?? []"
