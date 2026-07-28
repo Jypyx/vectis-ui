@@ -124,6 +124,10 @@ const panelStyle = computed(() => ({ '--_anchor': props.anchor }))
     --_listbox-option-min-h: var(--ds-control-height-sm);
     --_listbox-option-pad-i: var(--ds-space-3);
     --_listbox-option-delta: 0px;
+    --_listbox-option-font-size: var(--ds-text-body-md-size);
+    --_listbox-option-leading: var(--ds-text-body-md-leading);
+    --_listbox-option-icon-size: var(--ds-icon-size-md);
+    --_listbox-option-icon-opsz: 20;
 
     position-anchor: var(--_anchor);
     min-inline-size: anchor-size(width);
@@ -136,9 +140,16 @@ const panelStyle = computed(() => ({ '--_anchor': props.anchor }))
     --_listbox-option-pad-i: var(--ds-space-4);
   }
 
+  /* lg est le seul cran où la table des contrôles change de typo ET d'icône
+     (cf. MenuPanel.vue) : les rangées suivent le champ qui pilote le panneau,
+     sm et md restant à 14px/20px comme control-size.css. */
   .ds-listbox[data-size='lg'] {
     --_listbox-option-min-h: var(--ds-control-height-lg);
     --_listbox-option-pad-i: var(--ds-space-5);
+    --_listbox-option-font-size: var(--ds-text-body-lg-size);
+    --_listbox-option-leading: var(--ds-text-body-lg-leading);
+    --_listbox-option-icon-size: var(--ds-icon-size-lg);
+    --_listbox-option-icon-opsz: 24;
   }
 
   /* Compact : hauteur minimale -4px, padding/typo/icônes inchangés */

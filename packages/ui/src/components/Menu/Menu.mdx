@@ -83,10 +83,10 @@ une seule surbrillance à la fois) ; l'item parent d'un sous-menu ouvert garde s
 ## Tailles
 
 Trois tailles de panneau (`sm` — défaut — items 32px min, `md` 40px min, `lg` 48px min) ;
-`compact` retire 4px. C'est un cran de **densité**, pas l'échelle des contrôles : `size` ne
-joue que sur la hauteur minimale des items et leur padding inline — la typographie et les
-icônes de rangée (20px) restent constantes. La taille est posée sur le panneau **racine** et
-héritée par tous les sous-menus.
+`compact` retire 4px. Les items suivent la même table que les contrôles : `sm` et `md`
+partagent la typographie (14px) et les icônes (20px), `lg` passe à 16px et 24px — un menu
+ouvert depuis un bouton `lg` est ainsi à son échelle. La taille est posée sur le panneau
+**racine** et héritée par tous les sous-menus, typographie et icônes comprises.
 
 <Canvas of={MenuStories.Tailles} />
 

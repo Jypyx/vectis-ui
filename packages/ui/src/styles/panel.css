@@ -20,8 +20,12 @@
  */
 @layer ds.components {
   .ds-panel {
-    /* API de contexte d'Icon : icônes de rangée 20px/opsz 20 quelle que soit la
-       taille du panneau — constante, donc sans piège d'héritage */
+    /* API de contexte d'Icon : défaut du panneau (20px/opsz 20) pour tout ce
+       qui n'est pas une rangée. Les rangées le REDÉFINISSENT chez elles
+       (.ds-menu-item, .ds-listbox-option) et non ici : cette déclaration est
+       reposée sur CHAQUE panneau, donc un sous-menu écraserait une valeur
+       héritée du panneau racine — les familles --_menu-item-* /
+       --_listbox-option-*, elles, traversent l'imbrication. */
     --ds-icon-size: var(--ds-icon-size-md);
     --ds-icon-opsz: 20;
     display: flex;

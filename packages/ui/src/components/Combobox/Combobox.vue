@@ -756,13 +756,17 @@ watch(
      Sans fallback : Listbox.vue pose les défauts sur `.ds-listbox`.
      `flex: none` : le panneau est un flex column, l'état ne doit pas s'écraser. */
   .ds-combobox-state {
+    /* même contexte Icon que les options : le spinner suit leur échelle */
+    --ds-icon-size: var(--_listbox-option-icon-size);
+    --ds-icon-opsz: var(--_listbox-option-icon-opsz);
+
     display: flex;
     flex: none;
     align-items: center;
     gap: var(--ds-space-2);
     min-height: calc(var(--_listbox-option-min-h) - var(--_listbox-option-delta));
     padding: var(--ds-space-1) var(--ds-space-3);
-    font-size: var(--ds-text-body-md-size);
+    font-size: var(--_listbox-option-font-size);
     color: var(--ds-color-text-muted);
   }
 

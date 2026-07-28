@@ -129,8 +129,9 @@ combinable avec `compact` (-4 px). En multiple, les Chips restent **un cran sous
 pour tenir dedans sans le faire grandir : `xs` (24 px) jusqu'à `md`, `sm` (32 px) en `lg`.
 Sous le cran le plus bas de chaque paire, le rattrapage passe par `compact` plutôt que par
 une taille de moins — `size="sm"` donne des Chips `xs` compact (20 px), `size="lg"` +
-`compact` des Chips `sm` compact (28 px). Le panneau d'options suit la taille du champ (les
-rangées passent en 32/40/48 px de hauteur minimale).
+`compact` des Chips `sm` compact (28 px). Le panneau d'options suit la taille du champ :
+rangées de 32/40/48 px, et en `lg` la même typographie (16 px) et les mêmes icônes (24 px)
+que le champ — le libellé d'une option ne change pas de taille en passant dans le champ.
 
 <Canvas of={ComboboxStories.Tailles} />
 

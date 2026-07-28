@@ -182,9 +182,17 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     --_menu-item-pad-i: var(--ds-space-4);
   }
 
+  /* lg est le seul cran où la table des contrôles change de typo ET d'icône
+     (control-size.css : fonts xs→xs, sm-md→sm, lg-xl→md ; icônes xs→16,
+     sm-md→20, lg-xl→24) : les rangées suivent, sm et md restant à 14px/20px
+     comme la table. */
   .ds-menu[data-size='lg'] {
     --_menu-item-min-h: var(--ds-control-height-lg);
     --_menu-item-pad-i: var(--ds-space-5);
+    --_menu-item-font-size: var(--ds-text-body-lg-size);
+    --_menu-item-leading: var(--ds-text-body-lg-leading);
+    --_menu-item-icon-size: var(--ds-icon-size-lg);
+    --_menu-item-icon-opsz: 24;
   }
 
   /* Compact : hauteur minimale -4px, padding/typo/icônes inchangés */

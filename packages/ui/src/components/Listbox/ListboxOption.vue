@@ -99,6 +99,12 @@ function onClick() {
 <style>
 @layer ds.components {
   .ds-listbox-option {
+    /* Contexte Icon posé sur l'OPTION et non sur le panneau : `.ds-panel`
+       redéclare --ds-icon-size, une valeur posée sur `.ds-listbox` serait donc
+       en concurrence avec elle à spécificité voisine. Ici, aucun doute. */
+    --ds-icon-size: var(--_listbox-option-icon-size);
+    --ds-icon-opsz: var(--_listbox-option-icon-opsz);
+
     display: flex;
     align-items: center;
     gap: var(--ds-space-2);
@@ -111,8 +117,8 @@ function onClick() {
     color: var(--ds-color-text);
     border-radius: var(--ds-radius-sm);
     font-family: inherit;
-    font-size: var(--ds-text-body-md-size);
-    line-height: var(--ds-text-body-md-leading);
+    font-size: var(--_listbox-option-font-size);
+    line-height: var(--_listbox-option-leading);
     text-align: start;
     cursor: pointer;
   }

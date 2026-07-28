@@ -202,6 +202,16 @@ onBeforeUnmount(clearTimers)
 <style>
 @layer ds.components {
   .ds-menu-item {
+    /*
+     * Contexte Icon posé sur l'ITEM, jamais sur le panneau : `.ds-panel`
+     * redéclare --ds-icon-size sur CHAQUE panneau (styles/panel.css), un
+     * sous-menu écraserait donc la valeur du panneau racine et retomberait à
+     * 20px. Les --_menu-item-* traversent les sous-panneaux, eux (cf. le
+     * commentaire de MenuPanel.vue). Fallbacks = valeurs sm, comme les autres.
+     */
+    --ds-icon-size: var(--_menu-item-icon-size, var(--ds-icon-size-md));
+    --ds-icon-opsz: var(--_menu-item-icon-opsz, 20);
+
     display: flex;
     align-items: center;
     gap: var(--ds-space-2);
@@ -215,8 +225,8 @@ onBeforeUnmount(clearTimers)
     color: var(--ds-color-text);
     border-radius: var(--ds-radius-sm);
     font-family: inherit;
-    font-size: var(--ds-text-body-md-size);
-    line-height: var(--ds-text-body-md-leading);
+    font-size: var(--_menu-item-font-size, var(--ds-text-body-md-size));
+    line-height: var(--_menu-item-leading, var(--ds-text-body-md-leading));
     text-align: start;
     text-decoration: none;
     cursor: pointer;
