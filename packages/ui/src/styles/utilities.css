@@ -1,4 +1,18 @@
 /* Utilities du DS — layer la plus forte : gagne sur les composants. */
+
+/*
+ * Rotation continue, partagée par Spinner et ProgressCircular (chacun fixe sa
+ * durée à partir d'un token). Les @keyframes sont GLOBALES : elles ne sont pas
+ * arbitrées comme les déclarations, le layer n'a donc pas d'effet ici — d'où
+ * cette définition hors layer, une seule fois pour tout le DS (elle était
+ * dupliquée dans les deux composants).
+ */
+@keyframes ds-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 @layer ds.utilities {
   /* Masque visuellement en restant exposé aux lecteurs d'écran. */
   .ds-visually-hidden {

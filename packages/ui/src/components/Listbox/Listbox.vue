@@ -94,7 +94,7 @@ const panelStyle = computed(() => ({ '--_anchor': props.anchor }))
     ref="panelEl"
     popover="manual"
     role="listbox"
-    class="ds-panel ds-listbox ds-floating ds-control"
+    class="ds-overlay ds-panel ds-listbox ds-floating ds-control"
     :data-placement="placement"
     :data-size="size"
     :data-compact="compact ? '' : undefined"

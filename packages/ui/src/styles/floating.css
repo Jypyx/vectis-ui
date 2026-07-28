@@ -1,6 +1,9 @@
 ﻿/*
  * Plomberie commune des éléments flottants (Tooltip, Menu, Listbox…).
  *
+ * Deux classes, à poser ensemble : `.ds-overlay` (socle de tout popover du DS,
+ * partagé avec les piles de toasts) et `.ds-floating` (ancrage + placements).
+ *
  * 100 % CSS Anchor Positioning — AUCUN fallback JS : le projet cible les
  * navigateurs modernes (Chrome/Edge 125+, Safari 26+ ; Firefox pas encore
  * stable — choix assumé, voir CLAUDE.md/README).
@@ -10,10 +13,31 @@
  * `position-try-fallbacks` retourne le panneau quand la place manque.
  */
 @layer ds.components {
-  .ds-floating {
+  /*
+   * Socle de TOUT popover du DS, ancré ou non — `.ds-floating` (panneaux
+   * ancrés) comme `.ds-toast-stack` (piles positionnées en coordonnées
+   * physiques, sans ancre), qui le redéclarait mot pour mot.
+   *
+   * Le garde-fou `display: none` est ici et pas dans chaque composant : un
+   * panneau qui pose son propre `display` (`.ds-panel` en flex, la pile de
+   * toasts en colonne) écrase le `[popover] { display: none }` du style UA —
+   * les styles auteur battent toujours l'UA, layers ou non — et resterait alors
+   * en layout, invisible mais cliquable par-dessus le contenu. Sa spécificité
+   * (0,2,0) le met hors de portée d'un `display` de composant, quel que soit
+   * l'ordre du bundle. Les transitions `display … allow-discrete` de chaque
+   * famille préservent l'animation de sortie.
+   */
+  .ds-overlay {
     position: fixed;
     /* neutralise les styles UA de [popover] (inset: 0 ; margin: auto) */
     inset: auto;
+  }
+
+  .ds-overlay:not(:popover-open) {
+    display: none;
+  }
+
+  .ds-floating {
     /* l'écart avec l'ancre ET la marge minimale au bord du viewport */
     margin: var(--ds-space-2);
     position-try-fallbacks: flip-block, flip-inline;
@@ -30,18 +54,6 @@
 
   .ds-floating[data-placement$='-end'] {
     margin-inline-end: 0;
-  }
-
-  /*
-   * Garde-fou : un panneau qui pose son propre `display` (ex. .ds-panel en
-   * flex) écraserait le `[popover] { display: none }` du style UA — les
-   * styles auteur battent toujours l'UA, layers ou non. Le panneau fermé
-   * resterait alors en layout (opacity: 0), invisible mais cliquable
-   * par-dessus le contenu. La transition `display … allow-discrete`
-   * ci-dessous préserve l'animation de sortie.
-   */
-  .ds-floating:not(:popover-open) {
-    display: none;
   }
 
   .ds-floating[data-placement='bottom'] {

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useAttrs, useId } from 'vue'
-import type { StyleValue } from 'vue'
+import { computed, ref, useId } from 'vue'
 
 import Calendar from '../Calendar/Calendar.vue'
 import type {
@@ -12,7 +11,10 @@ import type {
 } from '../Calendar/Calendar.vue'
 import { formatDisplay, formatDisplayRange, isValidISO } from '../Calendar/dateUtils'
 import Input from '../Input/Input.vue'
-import { usePopover } from '../../composables/usePopover'
+
+import { useRootAttrs } from '../../composables/useRootAttrs'
+
+import { useFieldPanel } from '../../composables/useFieldPanel'
 
 /**
  * Sélecteur de date : champ `Input` (lecture seule) + `Calendar` dans un
@@ -98,12 +100,7 @@ defineSlots<{
 
 // ── Wrapper-root : class/style sur la racine, reste reporté sur l'Input ──────
 defineOptions({ inheritAttrs: false })
-const attrs = useAttrs()
-const rootClass = computed(() => attrs.class)
-const rootStyle = computed(() => attrs.style as StyleValue)
-const forwardedAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([k]) => k !== 'class' && k !== 'style')),
-)
+const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const rootEl = ref<HTMLElement | null>(null)
 const panelEl = ref<HTMLElement | null>(null)
@@ -111,10 +108,16 @@ const inputRef = ref<InstanceType<typeof Input> | null>(null)
 const calendarRef = ref<InstanceType<typeof Calendar> | null>(null)
 const panelId = useId()
 
-// État d'ouverture du panneau : alimenté par les événements du popover (cf.
-// usePopover), jamais écrit à la main — `openPanel`/`closePanel` passent par
-// `show()`/`hide()`, dont les gardes évitent l'InvalidStateError.
-const { shown: open, syncShown, show, hide } = usePopover(panelEl)
+// Coquille champ + panneau `manual` partagée avec le TimePicker : ouverture,
+// fermeture, sortie de focus, clic sur le contrôle, Échap/ArrowDown/Entrée.
+const { open, syncShown, openPanel, closePanel, onControlClick, onFocusout, onKeydown } =
+  useFieldPanel({
+    rootEl,
+    panelEl,
+    fieldEl: inputRef,
+    disabled: () => props.disabled,
+    focusInPanel: () => calendarRef.value?.focus(),
+  })
 
 // ── Valeur affichée dans le champ (localisée) ───────────────────────────────
 const hasValue = computed(() => {
@@ -151,25 +154,6 @@ const endIconLabel = computed(() =>
   showClearIcon.value ? 'Effacer la date' : 'Ouvrir le calendrier',
 )
 
-// ── Ouverture / fermeture du panneau (popover manual) ───────────────────────
-function openPanel() {
-  if (props.disabled || open.value) return
-  show()
-  // focus DOM déplacé dans la grille (le natif ne le fait pas pour un manual)
-  requestAnimationFrame(() => calendarRef.value?.focus())
-}
-function closePanel(refocus = false) {
-  if (!open.value) return
-  hide()
-  if (refocus) inputRef.value?.focus()
-}
-
-function onControlClick(event: MouseEvent) {
-  // clic sur un bouton interne (croix/icône) : laisser son handler agir
-  if ((event.target as HTMLElement).closest('.ds-input-action')) return
-  if (props.disabled) return
-  openPanel()
-}
 function onEndIcon() {
   if (showClearIcon.value) clearValue()
   else if (open.value) closePanel(true)
@@ -179,26 +163,6 @@ function clearValue() {
   model.value =
     props.mode === 'multiple' ? [] : props.mode === 'range' ? { start: null, end: null } : null
   inputRef.value?.focus()
-}
-
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    if (open.value) {
-      event.preventDefault()
-      closePanel(true)
-    }
-    return
-  }
-  if ((event.key === 'ArrowDown' || event.key === 'Enter') && !open.value) {
-    event.preventDefault()
-    openPanel()
-  }
-}
-
-/** Fermeture quand le focus sort du composant (panneau compris, descendant DOM). */
-function onFocusout(event: FocusEvent) {
-  const next = event.relatedTarget as Node | null
-  if (!next || !rootEl.value?.contains(next)) closePanel(false)
 }
 
 /** Sélection dans le calendrier : en mode simple, on ferme. */
@@ -247,7 +211,7 @@ const close = () => closePanel(true)
       popover="manual"
       role="dialog"
       :aria-label="label ?? 'Choisir une date'"
-      class="ds-datepicker-panel ds-floating"
+      class="ds-overlay ds-datepicker-panel ds-floating"
       :data-placement="placement"
       @beforetoggle="syncShown"
       @toggle="syncShown"

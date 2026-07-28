@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { computed, nextTick, provide, ref, useAttrs, useId, useSlots, watch } from 'vue'
-import type { StyleValue } from 'vue'
+import { computed, nextTick, provide, ref, useId, useSlots, watch } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
 import IconButton from '../IconButton/IconButton.vue'
 import { panelIdFor, tabIdFor, tabsKey } from './context'
+
+import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
+
+import { useRootAttrs } from '../../composables/useRootAttrs'
+import { useAriaLabel } from '../../composables/useAriaLabel'
 
 export type TabsVariant = 'line' | 'inset'
 export type TabsTone = 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
@@ -82,19 +86,8 @@ const model = defineModel<string | number>()
 // fonctionnel est la liste. class/style restent sur la racine, tout le reste
 // (aria-labelledby, id, data-*) descend sur le [role="tablist"].
 defineOptions({ inheritAttrs: false })
-const attrs = useAttrs()
-const rootClass = computed(() => attrs.class)
-const rootStyle = computed(() => attrs.style as StyleValue)
-const listAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style')),
-)
-// `label` n'est qu'un défaut : un aria-label du consommateur le remplace, et un
-// aria-labelledby le supprime (sinon les deux noms cohabiteraient).
-const ariaLabel = computed(() =>
-  attrs['aria-labelledby'] !== undefined
-    ? undefined
-    : ((attrs['aria-label'] as string | undefined) ?? props.label),
-)
+const { rootClass, rootStyle, forwardedAttrs: listAttrs } = useRootAttrs()
+const ariaLabel = useAriaLabel(() => props.label)
 
 const slots = useSlots()
 const baseId = useId()
@@ -147,42 +140,18 @@ const resolvedNextIcon = computed(
 const listEl = ref<HTMLElement | null>(null)
 
 /*
- * Navigation clavier — aucune primitive native ne déplace le focus entre des
- * boutons frères. Le handler ne fait QUE déplacer le focus : la sélection au
- * focus (mode `automatic`) est posée par Tab, qui connaît sa valeur typée et
- * n'a donc pas à la faire transiter par un attribut du DOM.
- *
- * Les onglets sont découverts par requête DOM (pas de registre) et filtrés sur
- * `display` : un onglet masqué par le consommateur ne doit pas capter le
- * focus. Les flèches horizontales sont physiques, donc inversées en RTL ; les
- * verticales ne le sont pas (l'axe block ne se retourne pas).
+ * Navigation clavier (implémentation partagée : `utils/arrowNav`). Le handler
+ * ne fait QUE déplacer le focus : la sélection au focus (mode `automatic`) est
+ * posée par Tab, qui connaît sa valeur typée et n'a donc pas à la faire
+ * transiter par un attribut du DOM. Un onglet masqué par le consommateur est
+ * écarté par le filtre `display` du helper.
  */
 function onKeydown(event: KeyboardEvent) {
-  const keys = isVertical.value
-    ? ['ArrowDown', 'ArrowUp', 'Home', 'End']
-    : ['ArrowRight', 'ArrowLeft', 'Home', 'End']
-  if (!keys.includes(event.key)) return
   const list = listEl.value
   if (!list) return
-  const tabs = [...list.querySelectorAll<HTMLElement>('[role="tab"]:not(:disabled)')].filter(
-    (el) => getComputedStyle(el).display !== 'none',
-  )
-  if (tabs.length === 0) return
-  event.preventDefault()
-
-  const forward = isVertical.value
-    ? event.key === 'ArrowDown'
-    : (event.key === 'ArrowRight') !== (getComputedStyle(list).direction === 'rtl')
-  const current = tabs.indexOf(document.activeElement as HTMLElement)
-  const next =
-    event.key === 'Home'
-      ? 0
-      : event.key === 'End'
-        ? tabs.length - 1
-        : current === -1
-          ? 0
-          : (current + (forward ? 1 : -1) + tabs.length) % tabs.length
-  tabs[next]?.focus()
+  arrowNavigate(event, list, navigableItems(list, '[role="tab"]:not(:disabled)'), {
+    vertical: isVertical.value,
+  })
 }
 
 /*

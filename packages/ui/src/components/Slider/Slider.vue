@@ -3,6 +3,8 @@ import { computed, ref, watch } from 'vue'
 import Icon from '../Icon/Icon.vue'
 import Input from '../Input/Input.vue'
 
+import { isDev } from '../../utils/env'
+
 /**
  * <input type="range"> natif (clavier, ARIA slider, formulaires gratuits).
  * Le JS du composant se limite à :
@@ -118,9 +120,7 @@ function labelTextAt(value: number): string {
 const startValueText = computed(() => (props.labels ? labelTextAt(startValue.value) : undefined))
 const endValueText = computed(() => (props.labels ? labelTextAt(endValue.value) : undefined))
 
-// import.meta.env est spécifique à Vite : typage local prudent, garde-fou
-// inerte chez un consommateur non-Vite.
-if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
+if (isDev) {
   if ((props.ticks || props.labels) && stepCount.value > 50)
     console.warn(`[Slider] ${stepCount.value} pas — ticks/labels non rendus au-delà de 50.`)
   if (props.labels && props.labels.length !== stepCount.value + 1)

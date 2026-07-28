@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { computed, provide, useAttrs } from 'vue'
+import { provide } from 'vue'
 
 import ButtonGroup from '../Button/ButtonGroup.vue'
 import { toggleKey } from './context'
+
+import { toggleValue } from '../../utils/array'
+import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
+
+import { useAriaLabel } from '../../composables/useAriaLabel'
 
 export type ToggleValue = string | number
 /** Le type du v-model suit `multiple` : valeur seule (ou null) en simple, tableau en multiple. */
@@ -70,14 +75,7 @@ defineSlots<{
 
 const model = defineModel<ToggleModelValue>({ default: null })
 
-// `label` n'est qu'un défaut : un aria-label du consommateur le remplace, et un
-// aria-labelledby le supprime (sinon les deux noms cohabiteraient).
-const attrs = useAttrs()
-const ariaLabel = computed(() =>
-  attrs['aria-labelledby'] !== undefined
-    ? undefined
-    : ((attrs['aria-label'] as string | undefined) ?? props.label),
-)
+const ariaLabel = useAriaLabel(() => props.label)
 
 function isSelected(value: ToggleValue): boolean {
   return props.multiple
@@ -94,12 +92,9 @@ function isSelected(value: ToggleValue): boolean {
 function select(value: ToggleValue) {
   if (props.multiple) {
     const current = Array.isArray(model.value) ? model.value : []
-    if (current.includes(value)) {
-      if (props.mandatory && current.length === 1) return // jamais vider le dernier
-      model.value = current.filter((v) => v !== value)
-    } else {
-      model.value = [...current, value]
-    }
+    // jamais vider le dernier
+    if (props.mandatory && current.length === 1 && current.includes(value)) return
+    model.value = toggleValue(current, value)
     return
   }
   if (model.value === value) {
@@ -134,48 +129,19 @@ provide(toggleKey, {
 })
 
 /*
- * Navigation clavier : aucune primitive native ne déplace le focus entre des
- * boutons frères. Pas de roving tabindex — chaque item visible est un arrêt de
- * tabulation (modèle Pagination ; le roving est réservé aux composites
- * tablist/radiogroup) — et les flèches et Home/End ne font que DÉPLACER le
- * focus : activer au focus basculerait des valeurs involontairement.
- *
- * Les items sont découverts par requête DOM (pas de registre) et filtrés sur
- * `display` (un item masqué par le consommateur ne capte pas le focus) ; les
- * items disabled sont des <button disabled>, exclus par :not(:disabled). Les
- * flèches horizontales sont physiques, donc inversées en RTL ; les verticales
- * ne le sont pas (l'axe block ne se retourne pas).
+ * Navigation clavier (implémentation partagée : `utils/arrowNav`). Pas de
+ * roving tabindex — chaque item visible est un arrêt de tabulation (modèle
+ * Pagination ; le roving est réservé aux composites tablist/radiogroup). Les
+ * items disabled sont des <button disabled>, exclus par le sélecteur.
  *
  * `event.currentTarget` plutôt qu'une ref template : sur `<component :is>`,
  * une ref renverrait tantôt un élément (div), tantôt une instance (ButtonGroup).
  */
 function onKeydown(event: KeyboardEvent) {
-  const keys =
-    props.orientation === 'vertical'
-      ? ['ArrowDown', 'ArrowUp', 'Home', 'End']
-      : ['ArrowRight', 'ArrowLeft', 'Home', 'End']
-  if (!keys.includes(event.key)) return
   const group = event.currentTarget as HTMLElement
-  const items = [...group.querySelectorAll<HTMLElement>('.ds-toggle-item:not(:disabled)')].filter(
-    (el) => getComputedStyle(el).display !== 'none',
-  )
-  if (items.length === 0) return
-  event.preventDefault()
-
-  const forward =
-    props.orientation === 'vertical'
-      ? event.key === 'ArrowDown'
-      : (event.key === 'ArrowRight') !== (getComputedStyle(group).direction === 'rtl')
-  const current = items.indexOf(document.activeElement as HTMLElement)
-  const next =
-    event.key === 'Home'
-      ? 0
-      : event.key === 'End'
-        ? items.length - 1
-        : current === -1
-          ? 0
-          : (current + (forward ? 1 : -1) + items.length) % items.length
-  items[next]?.focus()
+  arrowNavigate(event, group, navigableItems(group, '.ds-toggle-item:not(:disabled)'), {
+    vertical: props.orientation === 'vertical',
+  })
 }
 </script>
 

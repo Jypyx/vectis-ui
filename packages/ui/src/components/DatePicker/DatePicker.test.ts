@@ -49,6 +49,21 @@ describe('DatePicker', () => {
     )
   })
 
+  it('l’Entrée qui sélectionne dans la grille ne rouvre pas le panneau', async () => {
+    // L'Entrée du Calendar fait preventDefault puis ferme (mode simple) ; elle
+    // remonte ensuite à la racine, où ArrowDown/Entrée ouvrent. Sans la garde
+    // `defaultPrevented` du composable, le panneau se rouvrait aussitôt.
+    const { container, getByRole } = render(DatePicker, { props: { modelValue: JUNE } })
+    await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
+    await nextTick()
+    const grid = getByRole('grid')
+    await fireEvent.keyDown(grid, { key: 'Enter', bubbles: true })
+    await nextTick()
+    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+      false,
+    )
+  })
+
   it('efface la valeur via la croix', async () => {
     const { container, emitted } = render(DatePicker, {
       props: { modelValue: JUNE, clearable: true },

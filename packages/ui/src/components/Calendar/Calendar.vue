@@ -23,6 +23,10 @@ import {
   weekdayNames,
 } from './dateUtils'
 
+import { toggleValue } from '../../utils/array'
+import { resolveMatcher } from '../../utils/matcher'
+import { clamp } from '../../utils/number'
+
 /**
  * Calendrier inline (grille) réutilisable, inspiration Material. Contient TOUTE
  * la logique de dates, de vues (jours / mois / années) et du clavier ; le
@@ -171,13 +175,7 @@ onMounted(() => {
 })
 
 // ── Dates désactivées ───────────────────────────────────────────────────────
-const isDisabledDate = computed<(iso: string) => boolean>(() => {
-  const d = props.disabledDates
-  if (!d) return () => false
-  if (typeof d === 'function') return d
-  const set = new Set(d)
-  return (iso: string) => set.has(iso)
-})
+const isDisabledDate = computed(() => resolveMatcher(props.disabledDates))
 
 // ── Événements indexés par date ─────────────────────────────────────────────
 const eventsByDate = computed(() => {
@@ -328,10 +326,7 @@ function selectDay(cell: DayCell) {
   if (props.mode === 'single') {
     model.value = cell.iso
   } else if (props.mode === 'multiple') {
-    const list = multipleValues.value
-    model.value = list.includes(cell.iso)
-      ? list.filter((v) => v !== cell.iso)
-      : [...list, cell.iso].sort(compareISO)
+    model.value = toggleValue(multipleValues.value, cell.iso).sort(compareISO)
   } else {
     // range : 1er clic = start ; 2e = end (réordonné) ; 3e = recommence
     const r = rangeValue.value
@@ -416,7 +411,7 @@ function onMonthsKeydown(event: KeyboardEvent) {
   const delta = deltas[event.key]
   if (delta === undefined) return
   event.preventDefault()
-  focusedMonth.value = Math.max(0, Math.min(11, focusedMonth.value + delta))
+  focusedMonth.value = clamp(focusedMonth.value + delta, 0, 11)
   monthCellEl(focusedMonth.value)?.focus()
 }
 
@@ -455,7 +450,7 @@ function onYearsKeydown(event: KeyboardEvent) {
   event.preventDefault()
   const list = yearRange.value
   const idx = list.indexOf(focusedYear.value)
-  const nextIdx = Math.max(0, Math.min(list.length - 1, idx + delta))
+  const nextIdx = clamp(idx + delta, 0, list.length - 1)
   focusedYear.value = list[nextIdx] ?? focusedYear.value
   yearCellEl(focusedYear.value)?.focus()
 }

@@ -247,7 +247,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
    * Garde-fou indispensable : `.ds-dialog { display: flex }` (auteur) battrait le
    * `dialog:not([open]) { display: none }` de l'UA — une modale fermée resterait
    * dans le flux, en haut à gauche, captant les clics. On restaure le display:none
-   * fermé (même rôle que `.ds-floating:not(:popover-open)`). Utile aussi le temps
+   * fermé (même rôle que `.ds-overlay:not(:popover-open)`). Utile aussi le temps
    * de la frame montage → showModal() et en SSR.
    */
   .ds-dialog:not([open]) {

@@ -1,7 +1,9 @@
 ﻿<script setup lang="ts">
-import { onBeforeUnmount, ref, useId } from 'vue'
+import { ref, useId } from 'vue'
 
 import { usePopover } from '../../composables/usePopover'
+
+import { useTimer } from '../../composables/useTimer'
 
 /**
  * Tooltip sur Popover API (`popover="manual"` : pas de light dismiss, c'est
@@ -50,24 +52,21 @@ const tooltipId = useId()
 // alimentée par les événements du panneau, jamais posée à la main.
 const { syncShown, show: showPanel, hide: hidePanel } = usePopover(panelEl)
 
-let timer: ReturnType<typeof setTimeout> | undefined
+// Délai d'apparition (cf. useTimer : réarmement et annulation au démontage).
+const timer = useTimer()
 
 function show(immediate = false) {
-  clearTimeout(timer)
-  if (immediate) showPanel()
-  else timer = setTimeout(() => showPanel(), props.delay)
+  timer.start(showPanel, immediate ? 0 : props.delay)
 }
 
 function hide() {
-  clearTimeout(timer)
+  timer.cancel()
   hidePanel()
 }
 
 function onKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') hide()
 }
-
-onBeforeUnmount(() => clearTimeout(timer))
 </script>
 
 <template>
@@ -85,7 +84,7 @@ onBeforeUnmount(() => clearTimeout(timer))
       ref="panelEl"
       popover="manual"
       role="tooltip"
-      class="ds-tooltip-panel ds-floating"
+      class="ds-overlay ds-tooltip-panel ds-floating"
       :data-placement="placement"
       @beforetoggle="syncShown"
       @toggle="syncShown"

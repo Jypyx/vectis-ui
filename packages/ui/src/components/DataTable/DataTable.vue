@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts" generic="Row extends Record<string, unknown>">
-import { computed, onBeforeUnmount, ref, useAttrs, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { StyleValue } from 'vue'
 
 import Button from '../Button/Button.vue'
@@ -11,6 +11,15 @@ import MenuItem from '../Menu/MenuItem.vue'
 import Pagination from '../Pagination/Pagination.vue'
 import Spinner from '../Spinner/Spinner.vue'
 import Typography from '../Typography/Typography.vue'
+
+import { toggleValue } from '../../utils/array'
+import { isDev } from '../../utils/env'
+import { clamp } from '../../utils/number'
+import { normalizeText } from '../../utils/text'
+
+import { useRootAttrs } from '../../composables/useRootAttrs'
+
+import { useTimer } from '../../composables/useTimer'
 
 /**
  * Tableau de données : <table> sémantique (caption, scope, aria-sort), composé
@@ -185,16 +194,9 @@ defineSlots<{
 // Racine wrapper : class/style restent sur la racine, le reste (id, aria-*…)
 // est reporté sur la <table> — seul élément qu'ils décrivent valablement.
 defineOptions({ inheritAttrs: false })
-const attrs = useAttrs()
-const rootClass = computed(() => attrs.class)
-const rootStyle = computed(() => attrs.style as StyleValue)
-const forwardedAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style')),
-)
+const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
-// import.meta.env est spécifique à Vite : typage local prudent, garde-fou
-// inerte chez un consommateur non-Vite.
-if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
+if (isDev) {
   if (props.selectable && !props.rowKey)
     console.warn(
       '[DataTable] `selectable` sans `rowKey` — les identités par index se corrompent au tri, au filtrage et à la pagination.',
@@ -207,17 +209,14 @@ function rowIdentity(row: Row, index: number): DataTableRowId {
 
 // ── Filtrage → tri → pagination (dérivations pures) ─────────────────────────
 
-/** Filtrage insensible à la casse et aux accents (même forme que Combobox). */
-const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
-
 // Périmètre du filtre : les colonnes déclarées (ce que l'utilisateur voit),
 // jamais les autres champs des lignes.
 const filteredRows = computed(() => {
   if (props.serverSide || !props.searchable) return props.rows
-  const needle = normalize(search.value.trim())
+  const needle = normalizeText(search.value.trim())
   if (!needle) return props.rows
   return props.rows.filter((row) =>
-    props.columns.some((column) => normalize(String(row[column.key] ?? '')).includes(needle)),
+    props.columns.some((column) => normalizeText(String(row[column.key] ?? '')).includes(needle)),
   )
 })
 
@@ -242,7 +241,7 @@ const pageCount = computed(() =>
 )
 // Clamp par dérivation, sans muter le model (précédent Pagination) : si le
 // filtre réduit le nombre de pages, l'affichage retombe sur la dernière.
-const currentPage = computed(() => Math.min(Math.max(page.value, 1), pageCount.value))
+const currentPage = computed(() => clamp(page.value, 1, pageCount.value))
 
 const displayedRows = computed(() => {
   // serverSide : les lignes reçues sont déjà la page courante.
@@ -274,10 +273,11 @@ function sortIcon(column: DataTableColumn): string {
 
 // ── Recherche : reset de page et debounce serveur ───────────────────────────
 // JS justifié : un filtre qui change invalide la position courante (retour
-// page 1) ; en mode serveur, aucune primitive native ne débounce une saisie —
-// timer maison, terme commité relu à l'échéance, annulé au démontage.
+// page 1) ; en mode serveur, aucune primitive native ne débounce une saisie.
+// Le report est délégué à `useTimer` (délai ≤ 0 synchrone, annulation au
+// démontage) ; le terme commité est relu par le computed `params`.
 const committedSearch = ref('')
-let searchTimer: ReturnType<typeof setTimeout> | undefined
+const searchTimer = useTimer()
 
 function commitSearch() {
   committedSearch.value = search.value
@@ -289,12 +289,8 @@ watch(search, () => {
     page.value = 1
     return
   }
-  clearTimeout(searchTimer)
-  if (props.searchDebounce <= 0) commitSearch()
-  else searchTimer = setTimeout(commitSearch, props.searchDebounce)
+  searchTimer.start(commitSearch, props.searchDebounce)
 })
-
-onBeforeUnmount(() => clearTimeout(searchTimer))
 
 // ── Mode serveur : émission de l'état courant ───────────────────────────────
 const params = computed<DataTableParams>(() => ({
@@ -326,10 +322,7 @@ function isSelected(row: Row, index: number): boolean {
 }
 
 function toggleRow(row: Row, index: number) {
-  const id = rowIdentity(row, index)
-  selected.value = selectedSet.value.has(id)
-    ? selected.value.filter((value) => value !== id)
-    : [...selected.value, id]
+  selected.value = toggleValue(selected.value, rowIdentity(row, index))
 }
 
 // Ne touche que la page visible : les sélections des autres pages sont préservées.

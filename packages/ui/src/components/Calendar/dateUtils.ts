@@ -12,7 +12,7 @@
  * pas du fuseau de la machine.
  */
 
-const pad2 = (n: number) => String(n).padStart(2, '0')
+import { pad2 } from '../../utils/text'
 
 /** Motif ISO strict `YYYY-MM-DD`. */
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/

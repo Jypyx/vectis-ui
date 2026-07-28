@@ -12,6 +12,7 @@ import {
   to24h,
 } from './timeUtils'
 import type { HourFormat } from './timeUtils'
+import { pad2 } from '../../utils/text'
 
 /**
  * Cadran horloge du TimePicker (interne, non exporté — modèle MenuPanel).
@@ -46,8 +47,6 @@ const emit = defineEmits<{
   /** Valeur d'étape arrêtée (relâcher du pointeur, Entrée/Espace). */
   'confirm-step': [via: 'pointer' | 'keyboard']
 }>()
-
-const pad2 = (n: number) => String(n).padStart(2, '0')
 
 interface DialCell {
   key: string

@@ -21,7 +21,8 @@
  * Spinner (role="status") : ce composant garde role="progressbar" et la
  * continuité visuelle avec son mode déterminé.
  */
-import { computed } from 'vue'
+import { useProgressValue } from '../../composables/useProgressValue'
+import { px } from '../../utils/css'
 
 interface ProgressCircularProps {
   /** Valeur courante, bornée à [0, max]. */
@@ -69,22 +70,10 @@ defineSlots<{
   default?(props: { value: number; max: number; percent: number }): unknown
 }>()
 
-/** Valeur bornée à [0, max]. */
-const clamped = computed(() => Math.min(Math.max(props.value, 0), Math.max(props.max, 0)))
-
-/** Fraction [0, 1] pilotant tout le rendu. `props.max || 1` neutralise max: 0. */
-const fraction = computed(() => clamped.value / (props.max || 1))
-
-/**
- * Dimensions toujours en pixels : `96` comme `'96'` donnent `96px`. Une valeur
- * non numérique retourne undefined plutôt qu'une custom property invalide, qui
- * casserait la géométrie au lieu de retomber sur le token.
- */
-const px = (v: number | string | undefined) => {
-  if (v === undefined) return undefined
-  const n = typeof v === 'number' ? v : Number.parseFloat(v)
-  return Number.isFinite(n) ? `${n}px` : undefined
-}
+const { clamped, fraction } = useProgressValue(
+  () => props.value,
+  () => props.max,
+)
 </script>
 
 <template>
@@ -250,13 +239,8 @@ const px = (v: number | string | undefined) => {
     transition: none;
   }
 
-  /* Même définition que dans Spinner.vue : les keyframes CSS sont globales, la
-     double déclaration (identique) rend chaque fichier autonome. */
-  @keyframes ds-spin {
-    to {
-      transform: rotate(1turn);
-    }
-  }
+  /* `ds-spin` est partagée (styles/utilities.css) ; seule la keyframe propre à
+     l'arc reste ici. */
 
   /* Les deux extrémités de l'arc bougent : il se rallonge, se raccourcit et
      glisse le long du cercle. */

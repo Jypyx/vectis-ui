@@ -2,8 +2,9 @@
 import { computed, inject, ref } from 'vue'
 
 import { usePopover } from '../../composables/usePopover'
-import { menuKey } from './context'
+import { menuInvoker, menuKey } from './context'
 import type { MenuPanelPlacement } from './context'
+import { arrowNavigate } from '../../utils/arrowNav'
 
 /**
  * Panneau popover INTERNE (non exporté), partagé par Menu (panneau racine)
@@ -82,10 +83,6 @@ function items(): HTMLElement[] {
   ].filter((el) => el.closest('[role="menu"]') === panel)
 }
 
-function invoker(): HTMLElement | null {
-  return document.querySelector(`[popovertarget="${props.id}"]`)
-}
-
 function closeAll() {
   if (menu) menu.closeAll()
   else hide()
@@ -111,23 +108,13 @@ function onKeydown(event: KeyboardEvent) {
     // est géré par le onToggle de Menu.
     event.preventDefault()
     hide()
-    if (props.submenu) invoker()?.focus()
+    if (props.submenu) menuInvoker(props.id)?.focus()
     return
   }
-  if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
-  event.preventDefault()
-  const list = items()
-  if (list.length === 0) return
-  const current = list.indexOf(document.activeElement as HTMLElement)
-  const next =
-    event.key === 'Home'
-      ? 0
-      : event.key === 'End'
-        ? list.length - 1
-        : event.key === 'ArrowDown'
-          ? (current + 1) % list.length
-          : (current - 1 + list.length) % list.length
-  list[next]?.focus()
+  // Roving vertical partagé (`utils/arrowNav`) mais sur NOTRE liste : elle
+  // exclut aussi les items aria-disabled et confine le roving au panneau
+  // courant, deux choses que le sélecteur générique ne fait pas.
+  arrowNavigate(event, panel, items(), { vertical: true })
 }
 
 // Style inline : largeur explicite (prop width) uniquement.
@@ -142,7 +129,7 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     ref="panelEl"
     popover="auto"
     role="menu"
-    class="ds-panel ds-menu ds-floating"
+    class="ds-overlay ds-panel ds-menu ds-floating"
     :class="{
       /*
        * `ds-control` sur la RACINE seulement : elle pose les `--_control-*`

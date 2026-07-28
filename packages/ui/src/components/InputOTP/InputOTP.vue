@@ -2,6 +2,10 @@
 import { computed, ref, watch } from 'vue'
 import Icon from '../Icon/Icon.vue'
 
+import { isDev } from '../../utils/env'
+
+import { useAriaLabel } from '../../composables/useAriaLabel'
+
 /**
  * Code à usage unique (OTP). Il n'existe pas de primitive « code à N
  * caractères » : chaque case reste un <input> natif, le JS orchestre le
@@ -53,6 +57,9 @@ const props = withDefaults(defineProps<InputOTPProps>(), {
   label: 'Code de vérification',
 })
 
+// `label` n'est qu'un défaut : cf. useAriaLabel pour la précédence ARIA.
+const ariaLabel = useAriaLabel(() => props.label)
+
 const model = defineModel<string>({ default: '' })
 
 const emit = defineEmits<{
@@ -73,9 +80,7 @@ const cells = computed<Cell[]>(() => {
 })
 const slotCount = computed(() => cells.value.filter((cell) => cell.type === 'slot').length)
 
-// accès optionnel : `env` n'est pas typé dans tsconfig.build.json (types: [])
-// et peut être absent chez un consommateur non-Vite — le garde-fou devient inerte
-if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
+if (isDev) {
   if (props.pattern && !props.pattern.includes('#'))
     console.warn("[InputOTP] pattern sans '#' — repli sur `length`.")
 }
@@ -180,7 +185,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
   <div
     class="ds-otp ds-control"
     role="group"
-    :aria-label="label"
+    :aria-label="ariaLabel"
     :data-invalid="invalid ? '' : undefined"
     :data-size="size"
     :data-compact="compact ? '' : undefined"

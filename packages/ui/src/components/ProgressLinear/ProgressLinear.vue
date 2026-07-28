@@ -7,7 +7,8 @@
  * stylables qu'en fond plat, n'acceptent aucun enfant — donc pas de texte dans
  * la barre — et ne basculent pas en writing-mode vertical. Le contrat ARIA
  * progressbar est donc porté explicitement ici. Aucun JS de comportement pour
- * autant : deux computed de normalisation, tout le reste est CSS.
+ * autant : la normalisation de la valeur est partagée avec ProgressCircular
+ * (`composables/useProgressValue`), tout le reste est CSS.
  *
  * La racine EST la piste (fond, rayon, dimensions) : le remplissage y est
  * posé en absolu, les copies de texte par-dessus. Toute la géométrie dérive
@@ -19,7 +20,8 @@
  * progressbar est « children presentational » : le texte visible dans la barre
  * n'est PAS annoncé, il ne remplace pas un aria-label.
  */
-import { computed } from 'vue'
+import { useProgressValue } from '../../composables/useProgressValue'
+import { px } from '../../utils/css'
 
 interface ProgressLinearProps {
   /** Valeur courante, bornée à [0, max]. */
@@ -72,22 +74,10 @@ defineSlots<{
   default?(props: { value: number; max: number; percent: number }): unknown
 }>()
 
-/** Valeur bornée à [0, max]. */
-const clamped = computed(() => Math.min(Math.max(props.value, 0), Math.max(props.max, 0)))
-
-/** Fraction [0, 1] pilotant tout le rendu. `props.max || 1` neutralise max: 0. */
-const fraction = computed(() => clamped.value / (props.max || 1))
-
-/**
- * Dimensions toujours en pixels : `12` comme `'12'` donnent `12px`. Une valeur
- * non numérique retourne undefined plutôt qu'une custom property invalide, qui
- * casserait la géométrie au lieu de retomber sur le token.
- */
-const px = (v: number | string | undefined) => {
-  if (v === undefined) return undefined
-  const n = typeof v === 'number' ? v : Number.parseFloat(v)
-  return Number.isFinite(n) ? `${n}px` : undefined
-}
+const { clamped, fraction } = useProgressValue(
+  () => props.value,
+  () => props.max,
+)
 </script>
 
 <template>

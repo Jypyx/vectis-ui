@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, ref, useId, useSlots } from 'vue'
+import { computed, inject, ref, useId, useSlots } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
 import MenuPanel from './MenuPanel.vue'
 import { menuKey, SUBMENU_HOVER_DELAY } from './context'
+
+import { useTimer } from '../../composables/useTimer'
 
 /**
  * Item de menu (role="menuitem") : le focus est piloté par le panneau (roving
@@ -111,16 +113,11 @@ function onKeydown(event: KeyboardEvent) {
   subPanel.value?.focusFirst()
 }
 
-// Survol avec délai d'intention : timers annulés au unmount (modèle Tooltip).
-// La fermeture est refusée si le focus est dans le sous-panneau — un pointeur
+// Survol avec délai d'intention (cf. useTimer). Une seule instance : ouverture
+// et fermeture s'excluent — armer l'une annule toujours l'autre.
+// La fermeture est refusée si le focus est dans le sous-panneau : un pointeur
 // qui traîne ne doit pas couper un utilisateur clavier.
-let openTimer: ReturnType<typeof setTimeout> | undefined
-let closeTimer: ReturnType<typeof setTimeout> | undefined
-
-function clearTimers() {
-  clearTimeout(openTimer)
-  clearTimeout(closeTimer)
-}
+const hoverTimer = useTimer()
 
 function onPointerEnter() {
   if (props.disabled) return
@@ -128,20 +125,16 @@ function onPointerEnter() {
   // synchronisés, une seule surbrillance à la fois (pattern menu)
   itemEl.value?.focus({ preventScroll: true })
   if (!hasSubmenu.value) return
-  clearTimers()
-  openTimer = setTimeout(() => subPanel.value?.show(itemEl.value ?? undefined), SUBMENU_HOVER_DELAY)
+  hoverTimer.start(() => subPanel.value?.show(itemEl.value ?? undefined), SUBMENU_HOVER_DELAY)
 }
 
 function onPointerLeave() {
   if (!hasSubmenu.value) return
-  clearTimers()
-  closeTimer = setTimeout(() => {
+  hoverTimer.start(() => {
     if (subPanel.value?.el?.contains(document.activeElement)) return
     subPanel.value?.hide()
   }, SUBMENU_HOVER_DELAY)
 }
-
-onBeforeUnmount(clearTimers)
 </script>
 
 <template>
@@ -192,7 +185,7 @@ onBeforeUnmount(clearTimers)
     placement="right-start"
     submenu
     @toggle="subOpen = $event"
-    @pointerenter="clearTimers"
+    @pointerenter="hoverTimer.cancel()"
     @pointerleave="onPointerLeave"
   >
     <slot name="submenu" />

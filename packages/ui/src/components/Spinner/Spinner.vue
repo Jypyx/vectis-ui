@@ -52,13 +52,8 @@ withDefaults(defineProps<SpinnerProps>(), {
     animation: ds-spin calc(var(--ds-duration-slow) * 3.5) linear infinite;
   }
 
-  /* Même définition que dans Button.vue : les keyframes CSS sont globales,
-     la double déclaration (identique) rend chaque fichier autonome. */
-  @keyframes ds-spin {
-    to {
-      transform: rotate(1turn);
-    }
-  }
+  /* La keyframe `ds-spin` est partagée (styles/utilities.css) : globale, donc
+     hors layer et déclarée une seule fois pour tout le DS. */
 
   @media (prefers-reduced-motion: reduce) {
     .ds-spinner-circle {

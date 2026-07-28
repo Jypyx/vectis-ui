@@ -2,7 +2,7 @@
 import { computed, onMounted, provide, ref, useId, watch } from 'vue'
 
 import MenuPanel from './MenuPanel.vue'
-import { menuKey } from './context'
+import { menuInvoker, menuKey } from './context'
 import type { MenuPlacement } from './context'
 
 /**
@@ -68,10 +68,6 @@ const triggerProps = computed<MenuTriggerProps>(() => ({
 // descendants DOM : cascade native du popover).
 provide(menuKey, { closeAll: () => panelRef.value?.hide() })
 
-function invoker(): HTMLElement | null {
-  return document.querySelector(`[popovertarget="${menuId}"]`)
-}
-
 function onToggle(value: boolean) {
   shown.value = value
   open.value = value
@@ -81,7 +77,7 @@ function onToggle(value: boolean) {
     // Le light dismiss laisse le focus orphelin (body) : on le rend au déclencheur.
     const active = document.activeElement
     if (!active || active === document.body || panelRef.value?.el?.contains(active)) {
-      invoker()?.focus()
+      menuInvoker(menuId)?.focus()
     }
   }
 }

@@ -5,6 +5,8 @@ import { usePopover } from '../../composables/usePopover'
 import Toast from './Toast.vue'
 import { dismissToast, toasts, type ToastItem, type ToastPlacement } from './state'
 
+import { useAriaLabel } from '../../composables/useAriaLabel'
+
 /**
  * Hôte des notifications, à monter UNE fois (racine de l'app). Rend un
  * popover="manual" PAR PLACEMENT (pile flex — l'empilement est du pur CSS) :
@@ -35,6 +37,9 @@ const props = withDefaults(defineProps<ToasterProps>(), {
   closeLabel: 'Fermer',
   label: 'Notifications',
 })
+
+// `label` n'est qu'un défaut : cf. useAriaLabel pour la précédence ARIA.
+const ariaLabel = useAriaLabel(() => props.label)
 
 const PLACEMENTS: ToastPlacement[] = [
   'top-left',
@@ -177,11 +182,11 @@ onBeforeUnmount(() => {
     v-for="p in PLACEMENTS"
     :key="p"
     :ref="(el) => setStackEl(p, el)"
-    class="ds-toast-stack"
+    class="ds-overlay ds-toast-stack"
     popover="manual"
     :data-placement="p"
     role="region"
-    :aria-label="label"
+    :aria-label="ariaLabel"
     @pointerenter="pause(p)"
     @pointerleave="resume(p)"
     @beforetoggle="syncStack(p, $event)"
@@ -199,11 +204,11 @@ onBeforeUnmount(() => {
 
 <style>
 @layer ds.components {
+  /* `position: fixed`, `inset: auto` et le garde-fou `display: none` du popover
+     fermé viennent de `.ds-overlay` (styles/floating.css), posée avec cette
+     classe. Ne restent ici que les neutralisations UA propres à une pile
+     (bordure, padding, fond Canvas, overflow) et sa mise en page. */
   .ds-toast-stack {
-    position: fixed;
-    /* neutralise les styles UA de [popover] (inset: 0 ; margin: auto ;
-       border ; padding ; overflow: auto ; fond Canvas) */
-    inset: auto;
     margin: 0;
     border: none;
     padding: 0;
@@ -213,16 +218,6 @@ onBeforeUnmount(() => {
     display: flex;
     flex-direction: column;
     gap: var(--ds-space-3);
-  }
-
-  /*
-   * Garde-fou : le `display: flex` ci-dessus écraserait le
-   * `[popover] { display: none }` du style UA (les styles auteur battent
-   * toujours l'UA) — la pile fermée resterait cliquable en opacity: 0.
-   * `display … allow-discrete` plus bas préserve l'animation de sortie.
-   */
-  .ds-toast-stack:not(:popover-open) {
-    display: none;
   }
 
   /*

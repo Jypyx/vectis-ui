@@ -17,23 +17,23 @@
  * et la soumission est bloquée ; la validité est exposée par l'API standard
  * (el.validity), pas par un événement maison.
  *
- * JS de comportement (chaque bloc justifié) :
- * - pont v-model (defineModel) ;
- * - useId() pour l'association label/for et aria-describedby (SSR-safe) ;
- * - split de $attrs (class/style → racine, reste → contrôle) ;
- * - détection des listeners @click:icon-* dans vnode.props pour rendre
- *   l'icône en <button> accessible (liste considérée statique — un listener
- *   ajouté dynamiquement après montage n'est pas re-détecté, cas marginal) ;
- * - clear + refocus (le bouton disparaît au clic, sinon le focus serait perdu) ;
- * - watchEffect → setCustomValidity pour la limite souple (flush post : la ref
- *   template doit être posée ; inerte côté serveur, la ref y reste nulle).
+ * JS de comportement propre au composant : le pont v-model (defineModel) et le
+ * clear + refocus (le bouton disparaît au clic, sinon le focus serait perdu).
+ * Tout le reste est partagé avec l'autre champ du DS (Textarea) et vit dans
+ * `composables/` : ids et aria-describedby (useFieldIds), split de $attrs
+ * (useRootAttrs), icônes cliquables (useIconClickHandlers), compteur et limite
+ * souple (useTextLimit).
  */
-import { computed, getCurrentInstance, ref, useAttrs, useId, watchEffect } from 'vue'
-import type { StyleValue } from 'vue'
+import { computed, ref } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import Spinner from '../Spinner/Spinner.vue'
 import Typography from '../Typography/Typography.vue'
+
+import { useFieldIds } from '../../composables/useFieldIds'
+import { useIconClickHandlers } from '../../composables/useIconClickHandlers'
+import { useRootAttrs } from '../../composables/useRootAttrs'
+import { useTextLimit } from '../../composables/useTextLimit'
 
 interface InputProps {
   /** Hauteur du champ : sm 32px, md 40px (défaut), lg 48px. */
@@ -132,39 +132,16 @@ const model = defineModel<string | number>({ default: '' })
  * de `.length`. */
 const modelText = computed(() => String(model.value ?? ''))
 
-const attrs = useAttrs()
 // class/style sur la racine ; tout le reste sur le contrôle natif
-const rootClass = computed(() => attrs.class)
-const rootStyle = computed(() => attrs.style as StyleValue)
-const restAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style')),
-)
+const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
 
-const uid = useId()
-const fieldId = computed(() => (attrs.id as string | undefined) ?? uid)
-const hintId = useId()
-const describedBy = computed(() => {
-  const ids = [attrs['aria-describedby'] as string | undefined, props.hint ? hintId : undefined]
-  return ids.filter(Boolean).join(' ') || undefined
+const { fieldId, hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
+
+const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
+  name: 'Input',
+  iconStartLabel: props.iconStartLabel,
+  iconEndLabel: props.iconEndLabel,
 })
-
-// Les emits déclarés sont retirés de $attrs (pas de fuite sur l'<input>) ; leur
-// présence se lit dans vnode.props (les deux graphies : template kebab / render camel).
-const vnodeProps = getCurrentInstance()?.vnode.props ?? {}
-const hasIconStartHandler = 'onClick:iconStart' in vnodeProps || 'onClick:icon-start' in vnodeProps
-const hasIconEndHandler = 'onClick:iconEnd' in vnodeProps || 'onClick:icon-end' in vnodeProps
-
-// accès optionnel : `env` n'est pas typé dans tsconfig.build.json (types: [])
-// et peut être absent chez un consommateur non-Vite — le garde-fou devient inerte
-if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
-  // garde-fou a11y : jamais de bouton sans nom accessible (repli = nom Material)
-  if (hasIconStartHandler && !props.iconStartLabel)
-    console.warn(
-      '[Input] icône start cliquable sans iconStartLabel — fournir un libellé accessible.',
-    )
-  if (hasIconEndHandler && !props.iconEndLabel)
-    console.warn('[Input] icône end cliquable sans iconEndLabel — fournir un libellé accessible.')
-}
 
 const controlEl = ref<HTMLInputElement | null>(null)
 
@@ -183,24 +160,13 @@ function onClear() {
   controlEl.value?.focus()
 }
 
-const counterText = computed(() =>
-  props.maxlength != null
-    ? `${modelText.value.length}/${props.maxlength}`
-    : `${modelText.value.length}`,
-)
-const over = computed(() => props.maxlength != null && modelText.value.length > props.maxlength)
-
-// Limite souple : le composant possède la custom validity quand softLimit est actif
-watchEffect(
-  () => {
-    const el = controlEl.value
-    if (!el) return
-    const overLimit =
-      props.softLimit && props.maxlength != null && modelText.value.length > props.maxlength
-    el.setCustomValidity(overLimit ? `Dépasse la limite de ${props.maxlength} caractères` : '')
-  },
-  { flush: 'post' },
-)
+// Compteur et limite souple : mesurés sur `modelText`, un nombre n'a pas de `.length`.
+const { counterText, over } = useTextLimit({
+  el: controlEl,
+  text: () => modelText.value,
+  maxlength: () => props.maxlength,
+  softLimit: () => props.softLimit,
+})
 
 // Le contrôle interne est masqué par le wrapper : exposer focus()/select()/el
 // pour les composants qui le composent (ex. Combobox, refocus + select-all).

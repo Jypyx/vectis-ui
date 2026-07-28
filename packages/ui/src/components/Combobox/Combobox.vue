@@ -1,16 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  reactive,
-  ref,
-  useAttrs,
-  useId,
-  watch,
-  watchEffect,
-} from 'vue'
-import type { StyleValue } from 'vue'
+import { computed, nextTick, reactive, ref, useId, watch, watchEffect } from 'vue'
 
 import Chip from '../Chip/Chip.vue'
 import Icon from '../Icon/Icon.vue'
@@ -18,6 +7,15 @@ import Input from '../Input/Input.vue'
 import Listbox from '../Listbox/Listbox.vue'
 import ListboxOption from '../Listbox/ListboxOption.vue'
 import Spinner from '../Spinner/Spinner.vue'
+
+import { toggleValue } from '../../utils/array'
+import { normalizeText } from '../../utils/text'
+
+import { useRootAttrs } from '../../composables/useRootAttrs'
+
+import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
+
+import { useTimer } from '../../composables/useTimer'
 
 /**
  * Combobox avec recherche et sélection multiple, composé des briques du DS :
@@ -138,12 +136,7 @@ const model = defineModel<string | string[]>({ default: '' })
 // Racine wrapper : class/style restent sur la racine, le reste (aria-label…)
 // est reporté sur l'Input pour nommer le role="combobox".
 defineOptions({ inheritAttrs: false })
-const attrs = useAttrs()
-const rootClass = computed(() => attrs.class)
-const rootStyle = computed(() => attrs.style as StyleValue)
-const forwardedAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style')),
-)
+const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const rootEl = ref<HTMLElement | null>(null)
 const inputRef = ref<InstanceType<typeof Input> | null>(null)
@@ -184,9 +177,6 @@ function labelOf(value: string) {
   return props.options.find((o) => o.value === value)?.label ?? labelCache.get(value) ?? value
 }
 
-/** Filtrage insensible à la casse et aux accents. */
-const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
-
 // Terme de recherche unique, consommé par le filtre local ET par l'émission
 // `search` : la liste proposée et la requête envoyée ne peuvent pas diverger.
 // Pas de frappe → terme vide (le libellé affiché ne restreint pas la liste).
@@ -199,36 +189,34 @@ const filtered = computed(() => {
   const q = searchTerm.value
   if (!q) return props.options
   if (typeof matcher === 'function') return props.options.filter((o) => matcher(o, q))
-  const needle = normalize(q)
-  return props.options.filter((o) => normalize(o.label).includes(needle))
+  const needle = normalizeText(q)
+  return props.options.filter((o) => normalizeText(o.label).includes(needle))
 })
 
 // ── Recherche (source externe) ──────────────────────────────────────────────
 // JS justifié : aucune primitive native ne débounce ni ne dédoublonne une
-// requête. Timer en `let` (non réactif), annulé partout où le panneau se ferme
-// et au démontage (modèle MenuItem/Tooltip).
-let searchTimer: ReturnType<typeof setTimeout> | undefined
+// requête. Le report est délégué à `useTimer` (réarmement, délai ≤ 0 synchrone,
+// annulation au démontage) ; ne reste ici que ce qui est propre au Combobox :
+// le dédoublonnage par terme et l'annulation à la fermeture du panneau.
+const searchTimer = useTimer()
 // undefined = jamais émis. Dédoublonnage : rouvrir le panneau sur le même terme
 // ne relance pas la requête (le consommateur peut toujours ignorer son cache).
 let lastEmitted: string | undefined
 
-function cancelSearch() {
-  clearTimeout(searchTimer)
-  searchTimer = undefined
-}
+const cancelSearch = searchTimer.cancel
 
 function emitSearch(term: string, immediate = false) {
   cancelSearch()
   if (term === lastEmitted) return
-  const run = () => {
-    // le panneau a pu se fermer pendant le délai : plus rien à charger
-    if (!open.value) return
-    lastEmitted = term
-    emit('search', term)
-  }
-  // debounce 0 = émission SYNCHRONE (setTimeout(…, 0) ne l'est pas)
-  if (immediate || props.searchDebounce <= 0) run()
-  else searchTimer = setTimeout(run, props.searchDebounce)
+  searchTimer.start(
+    () => {
+      // le panneau a pu se fermer pendant le délai : plus rien à charger
+      if (!open.value) return
+      lastEmitted = term
+      emit('search', term)
+    },
+    immediate ? 0 : props.searchDebounce,
+  )
 }
 
 watch(searchTerm, (term) => {
@@ -243,8 +231,6 @@ watch(searchTerm, (term) => {
   activeIndex.value = filtered.value.findIndex((o) => !o.disabled)
   emitSearch(term)
 })
-
-onBeforeUnmount(cancelSearch)
 
 watch(filtered, (list) => {
   // Panneau ouvert : garder une option active valide. On repointe sur le 1er
@@ -331,10 +317,7 @@ function closePanel() {
 }
 
 /** Fermeture quand le focus sort du composant (panneau compris, descendant DOM). */
-function onFocusout(event: FocusEvent) {
-  const next = event.relatedTarget as Node | null
-  if (!next || !rootEl.value?.contains(next)) closePanel()
-}
+const onFocusout = useFocusoutDismiss(rootEl, closePanel)
 
 /** Frappe utilisateur : active le filtre et ouvre le panneau. */
 function onInput() {
@@ -369,10 +352,7 @@ function select(option: ComboboxOption) {
   labelCache.set(option.value, option.label)
   typed.value = false // la sélection n'est pas une recherche
   if (props.multiple) {
-    const current = selectedValues.value
-    model.value = current.includes(option.value)
-      ? current.filter((v) => v !== option.value)
-      : [...current, option.value]
+    model.value = toggleValue(selectedValues.value, option.value)
     query.value = ''
     inputRef.value?.focus()
   } else {

@@ -7,6 +7,8 @@ import IconButton from '../IconButton/IconButton.vue'
 import Menu from '../Menu/Menu.vue'
 import MenuItem from '../Menu/MenuItem.vue'
 
+import { useAriaLabel } from '../../composables/useAriaLabel'
+
 /**
  * Fil d'Ariane : <nav> + liste ordonnée, piloté par la prop `items` (pure
  * dérivation de données, aucune API navigateur — SSR-safe). Les séparateurs
@@ -56,6 +58,9 @@ const props = withDefaults(defineProps<BreadcrumbProps>(), {
   ellipsisLabel: 'Afficher les pages intermédiaires',
 })
 
+// `label` n'est qu'un défaut : cf. useAriaLabel pour la précédence ARIA.
+const ariaLabel = useAriaLabel(() => props.label)
+
 /** Normalisation pure (SSR-safe) : slash final retiré, sauf pour '/'. */
 function normalize(path: string): string {
   return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path
@@ -78,7 +83,7 @@ const visibleItems = computed(() =>
 </script>
 
 <template>
-  <nav class="ds-breadcrumb" :aria-label="label">
+  <nav class="ds-breadcrumb" :aria-label="ariaLabel">
     <ol class="ds-breadcrumb-list">
       <template v-for="(item, index) in visibleItems" :key="item.href">
         <!-- le menu « … » s'insère entre le 1er item et l'avant-dernier -->

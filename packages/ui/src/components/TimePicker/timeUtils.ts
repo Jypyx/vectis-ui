@@ -11,6 +11,8 @@
  * fonctions pures : jsdom ne mesure rien (`getBoundingClientRect` à zéro),
  * c'est donc la seule façon de la couvrir en vitest.
  */
+import { clamp } from '../../utils/number'
+import { pad2 } from '../../utils/text'
 
 export type HourFormat = '12h' | '24h'
 export type Meridiem = 'AM' | 'PM'
@@ -20,8 +22,6 @@ export interface TimeParts {
   hour: number
   minute: number
 }
-
-const pad2 = (n: number) => String(n).padStart(2, '0')
 
 /** Motif strict `HH:mm` (00–23 / 00–59). */
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/
@@ -86,9 +86,9 @@ export function formatDisplay(time: string, locale: string, format: HourFormat):
   return fmt.format(Date.UTC(2021, 0, 1, parts.hour, parts.minute))
 }
 
-/** Borne un entier à `[min, max]`. */
+/** Borne un entier à `[min, max]` (arrondi d'abord : les saisies sont libres). */
 export function clampInt(n: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, Math.round(n)))
+  return clamp(Math.round(n), min, max)
 }
 
 /**

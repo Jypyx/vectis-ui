@@ -7,6 +7,12 @@ import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
 import IconButton from '../IconButton/IconButton.vue'
 
+import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
+import { clamp } from '../../utils/number'
+import { resolveMatcher } from '../../utils/matcher'
+
+import { useAriaLabel } from '../../composables/useAriaLabel'
+
 /**
  * Pagination composée : chaque pastille est un Button (la page active en
  * `solid`, les autres en `ghost`/`outline`), les contrôles précédent/suivant
@@ -97,6 +103,9 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   pageLabel: undefined,
 })
 
+// `label` n'est qu'un défaut : cf. useAriaLabel pour la précédence ARIA.
+const ariaLabel = useAriaLabel(() => props.label)
+
 const page = defineModel<number>({ default: 1 })
 
 /** Entrée rendue : une pastille de page, ou un marqueur d'ellipse. */
@@ -105,13 +114,9 @@ type PaginationItem =
   | { kind: 'gap'; key: string }
 
 const total = computed(() => Math.max(Math.trunc(props.length), 1))
-const currentPage = computed(() => Math.min(Math.max(page.value, 1), total.value))
+const currentPage = computed(() => clamp(page.value, 1, total.value))
 
-function isPageDisabled(n: number): boolean {
-  const matcher = props.disabledPages
-  if (matcher === undefined) return false
-  return Array.isArray(matcher) ? matcher.includes(n) : matcher(n)
-}
+const isPageDisabled = computed(() => resolveMatcher(props.disabledPages))
 
 function pageLabelFor(n: number): string {
   return props.pageLabel ? props.pageLabel(n) : `Page ${n}`
@@ -167,7 +172,7 @@ const items = computed<PaginationItem[]>(() => {
  */
 function step(direction: -1 | 1): number | undefined {
   for (let n = currentPage.value + direction; n >= 1 && n <= total.value; n += direction) {
-    if (!isPageDisabled(n)) return n
+    if (!isPageDisabled.value(n)) return n
   }
   return undefined
 }
@@ -179,44 +184,21 @@ const nextDisabled = computed(() => props.disabled || nextTarget.value === undef
 
 function goTo(n: number | undefined) {
   if (n === undefined) return
-  page.value = Math.min(Math.max(n, 1), total.value)
+  page.value = clamp(n, 1, total.value)
 }
 
 const navEl = ref<HTMLElement | null>(null)
 
 /**
- * Navigation clavier : aucune primitive native ne déplace le focus entre des
- * boutons frères. Tab reste naturel (chaque pastille visible est un arrêt de
- * tabulation, comme dans une liste de liens) ; les flèches et Home/End ne
- * font que **déplacer le focus** — une pagination ne s'active pas au focus,
- * ce serait une navigation involontaire.
- *
- * Les pastilles sont découvertes par requête DOM (pas de registre) et
- * filtrées sur `display` : celles que les container queries ont masquées ne
- * doivent pas capter le focus. Les flèches sont physiques, donc inversées en
- * RTL où la rangée se lit de droite à gauche.
+ * Navigation clavier (implémentation partagée : `utils/arrowNav`). Tab reste
+ * naturel — chaque pastille visible est un arrêt de tabulation, comme dans une
+ * liste de liens. Les pastilles que les container queries ont masquées sont
+ * écartées par le filtre `display` du helper : elles ne captent pas le focus.
  */
 function onKeydown(event: KeyboardEvent) {
-  if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return
   const nav = navEl.value
   if (!nav) return
-  const pages = [...nav.querySelectorAll<HTMLElement>('.ds-pagination-page:not(:disabled)')].filter(
-    (el) => getComputedStyle(el).display !== 'none',
-  )
-  if (pages.length === 0) return
-  event.preventDefault()
-
-  const forward = (event.key === 'ArrowRight') !== (getComputedStyle(nav).direction === 'rtl')
-  const current = pages.indexOf(document.activeElement as HTMLElement)
-  const next =
-    event.key === 'Home'
-      ? 0
-      : event.key === 'End'
-        ? pages.length - 1
-        : current === -1
-          ? 0
-          : (current + (forward ? 1 : -1) + pages.length) % pages.length
-  pages[next]?.focus()
+  arrowNavigate(event, nav, navigableItems(nav, '.ds-pagination-page:not(:disabled)'))
 }
 </script>
 
@@ -224,7 +206,7 @@ function onKeydown(event: KeyboardEvent) {
   <nav
     ref="navEl"
     class="ds-pagination"
-    :aria-label="label"
+    :aria-label="ariaLabel"
     :data-align="align"
     :data-controls-display="controlsDisplay"
     :data-responsive="responsive ? '' : undefined"

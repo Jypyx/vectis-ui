@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useAttrs, useId, watch } from 'vue'
-import type { StyleValue } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 
 import Button from '../Button/Button.vue'
 import IconButton from '../IconButton/IconButton.vue'
@@ -9,7 +8,6 @@ import Toggle from '../Toggle/Toggle.vue'
 import type { ToggleModelValue } from '../Toggle/Toggle.vue'
 import ToggleItem from '../Toggle/ToggleItem.vue'
 import TimePickerDial from './TimePickerDial.vue'
-import { usePopover } from '../../composables/usePopover'
 import {
   clampInt,
   formatDisplay,
@@ -21,6 +19,12 @@ import {
   to24h,
 } from './timeUtils'
 import type { HourFormat } from './timeUtils'
+import { isDev } from '../../utils/env'
+import { pad2 } from '../../utils/text'
+
+import { useRootAttrs } from '../../composables/useRootAttrs'
+
+import { useFieldPanel } from '../../composables/useFieldPanel'
 
 /**
  * Sélecteur d'heure Material : champ `Input` (lecture seule) + panneau flottant
@@ -84,21 +88,14 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
 /** Heure `'HH:mm'` 24 h canonique, quel que soit l'affichage 12 h / 24 h. */
 const model = defineModel<string | null>({ default: null })
 
-// Garde-fou de dev uniquement : `import.meta.env` est spécifique à Vite/Vitest
-// et peut être absent chez un consommateur non-Vite.
-if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
+if (isDev) {
   if (props.minuteStep < 1 || 60 % props.minuteStep !== 0)
     console.warn(`[TimePicker] minuteStep ${props.minuteStep} — un diviseur de 60 est attendu.`)
 }
 
 // ── Wrapper-root : class/style sur la racine, reste reporté sur l'Input ──────
 defineOptions({ inheritAttrs: false })
-const attrs = useAttrs()
-const rootClass = computed(() => attrs.class)
-const rootStyle = computed(() => attrs.style as StyleValue)
-const forwardedAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([k]) => k !== 'class' && k !== 'style')),
-)
+const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const rootEl = ref<HTMLElement | null>(null)
 const panelEl = ref<HTMLElement | null>(null)
@@ -108,12 +105,6 @@ const fieldHourEl = ref<HTMLInputElement | null>(null)
 const fieldMinuteEl = ref<HTMLInputElement | null>(null)
 const panelId = useId()
 
-const pad2 = (n: number) => String(n).padStart(2, '0')
-
-// État d'ouverture du panneau : alimenté par les événements du popover (cf.
-// usePopover), jamais écrit à la main — `openPanel`/`closePanel` passent par
-// `show()`/`hide()`, dont les gardes évitent l'InvalidStateError.
-const { shown: open, syncShown, show, hide } = usePopover(panelEl)
 /** Mode courant du panneau ; persiste entre ouvertures (préférence d'usage). */
 const activeMode = ref<TimePickerMode>(props.mode)
 const activeStep = ref<'hour' | 'minute'>('hour')
@@ -151,40 +142,42 @@ const endIconLabel = computed(() =>
 )
 
 // ── Ouverture / fermeture du panneau (popover manual) ───────────────────────
+/** Cible du focus à l'ouverture et à la bascule de mode. */
 function focusPrimary() {
-  // focus DOM déplacé dans le panneau (le natif ne le fait pas pour un manual)
-  requestAnimationFrame(() => {
-    if (activeMode.value === 'dial') hourCellEl.value?.focus()
-    else {
-      fieldHourEl.value?.focus()
-      fieldHourEl.value?.select()
-    }
-  })
-}
-
-function openPanel() {
-  if (props.disabled || open.value) return
-  // Brouillon : valeur commitée, sinon heure courante (handler → client only).
-  const parts = parseTime(model.value)
-  if (parts) {
-    draftHour.value = parts.hour
-    draftMinute.value = parts.minute
-  } else {
-    const now = new Date()
-    draftHour.value = now.getHours()
-    draftMinute.value = snapMinute(now.getMinutes(), props.minuteStep)
+  if (activeMode.value === 'dial') hourCellEl.value?.focus()
+  else {
+    fieldHourEl.value?.focus()
+    fieldHourEl.value?.select()
   }
-  activeStep.value = 'hour'
-  show()
-  focusPrimary()
 }
 
-function closePanel(refocus = false) {
-  if (!open.value) return
-  hide()
-  liveMessage.value = ''
-  if (refocus) inputRef.value?.focus()
-}
+// Coquille champ + panneau `manual` partagée avec le DatePicker. Le prologue
+// d'ouverture (brouillon, étape) et l'épilogue de fermeture (live region) sont
+// les seules parties propres au TimePicker.
+const { open, syncShown, openPanel, closePanel, onControlClick, onFocusout, onKeydown } =
+  useFieldPanel({
+    rootEl,
+    panelEl,
+    fieldEl: inputRef,
+    disabled: () => props.disabled,
+    focusInPanel: focusPrimary,
+    onOpen: () => {
+      // Brouillon : valeur commitée, sinon heure courante (handler → client only).
+      const parts = parseTime(model.value)
+      if (parts) {
+        draftHour.value = parts.hour
+        draftMinute.value = parts.minute
+      } else {
+        const now = new Date()
+        draftHour.value = now.getHours()
+        draftMinute.value = snapMinute(now.getMinutes(), props.minuteStep)
+      }
+      activeStep.value = 'hour'
+    },
+    onClose: () => {
+      liveMessage.value = ''
+    },
+  })
 
 /** OK : seul chemin qui écrit le v-model. */
 function confirm() {
@@ -198,7 +191,8 @@ function cancel() {
 
 function toggleMode() {
   activeMode.value = activeMode.value === 'dial' ? 'input' : 'dial'
-  focusPrimary()
+  // rAF : la cible du focus n'existe qu'une fois l'autre mode rendu.
+  requestAnimationFrame(focusPrimary)
 }
 
 /** Étape arrêtée au cadran : heure → minutes (Material) ; minutes → OK au clavier
@@ -206,13 +200,6 @@ function toggleMode() {
 function onDialConfirm(via: 'pointer' | 'keyboard') {
   if (activeStep.value === 'hour') activeStep.value = 'minute'
   else if (via === 'keyboard') confirm()
-}
-
-function onControlClick(event: MouseEvent) {
-  // clic sur un bouton interne (croix/icône) : laisser son handler agir
-  if ((event.target as HTMLElement).closest('.ds-input-action')) return
-  if (props.disabled) return
-  openPanel()
 }
 
 function onEndIcon() {
@@ -226,32 +213,8 @@ function clearValue() {
   inputRef.value?.focus()
 }
 
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    if (open.value) {
-      event.preventDefault()
-      cancel()
-    }
-    return
-  }
-  // `defaultPrevented` : une Entrée déjà consommée DANS le panneau (commit du
-  // cadran ou d'un champ) vient de le fermer — sans ce garde, elle le rouvrirait
-  // en atteignant la racine par bubbling.
-  if (
-    (event.key === 'ArrowDown' || event.key === 'Enter') &&
-    !open.value &&
-    !event.defaultPrevented
-  ) {
-    event.preventDefault()
-    openPanel()
-  }
-}
-
-/** Fermeture SANS commit quand le focus sort du composant (sémantique Annuler). */
-function onFocusout(event: FocusEvent) {
-  const next = event.relatedTarget as Node | null
-  if (!next || !rootEl.value?.contains(next)) closePanel(false)
-}
+// Échap et la sortie de focus ferment SANS commit (sémantique Annuler du
+// TimePicker) : `closePanel` n'écrit jamais le v-model, seul `confirm()` le fait.
 
 // L'étape n'est portée que par l'aria-label du slider, dont le changement n'est
 // pas annoncé de façon fiable : une live region polie double l'information.
@@ -375,7 +338,7 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
       popover="manual"
       role="dialog"
       :aria-label="label ?? 'Choisir une heure'"
-      class="ds-timepicker-panel ds-floating"
+      class="ds-overlay ds-timepicker-panel ds-floating"
       :data-placement="placement"
       @beforetoggle="syncShown"
       @toggle="syncShown"
@@ -510,7 +473,7 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
   }
 
   /* Le `display: flex` d'auteur écrase le `display: none` UA de [popover] :
-     c'est le garde-fou `.ds-floating:not(:popover-open)` qui referme. */
+     c'est le garde-fou `.ds-overlay:not(:popover-open)` qui referme. */
   .ds-timepicker-panel {
     position-anchor: --ds-timepicker-anchor;
     display: flex;
