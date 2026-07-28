@@ -715,7 +715,7 @@ function onEndIcon() {
 
         <div class="ds-timepicker-footer">
           <Button variant="ghost" tone="neutral" @click="cancel">Annuler</Button>
-          <Button @click="confirm">Valider</Button>
+          <Button @click="confirm">OK</Button>
         </div>
       </template>
     </Popover>
