@@ -27,8 +27,7 @@ interface MenuProps {
   width?: string
 }
 
-// Non assigné : le template lit les props directement (aucun accès en script
-// depuis la disparition du mode listbox).
+// Non assigné : le template lit les props directement.
 withDefaults(defineProps<MenuProps>(), {
   placement: 'bottom-start',
   size: 'sm',

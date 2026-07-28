@@ -4,7 +4,7 @@ import { computed, useId, type ComputedRef } from 'vue'
  * Identifiants d'un champ à wrapper (Input, Textarea) : association
  * label/`for`, id du hint, et agrégation d'`aria-describedby`.
  *
- * Deux subtilités que les deux champs traitaient déjà à l'identique :
+ * Deux subtilités :
  * - un `id` fourni par le consommateur PRIME sur le `useId()` interne, sinon
  *   son `<label for>` externe ne pointerait sur rien ;
  * - `aria-describedby` est une LISTE d'IDREF : le hint interne s'ajoute à celui

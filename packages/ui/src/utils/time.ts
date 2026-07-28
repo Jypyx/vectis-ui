@@ -5,7 +5,7 @@
  * (le v-model du TimePicker, quel que soit l'affichage 12 h / 24 h). Les objets
  * `Date` ne servent qu'à `Intl` sur des instants de RÉFÉRENCE en
  * `timeZone: 'UTC'`, pour que le rendu ne dépende jamais du fuseau machine
- * (SSR-safe, modèle `utils/date`).
+ * (SSR-safe).
  *
  * La géométrie du cadran (conversion pointeur → secteur/anneau) vit ici en
  * fonctions pures : jsdom ne mesure rien (`getBoundingClientRect` à zéro),
@@ -23,22 +23,18 @@ export interface TimeParts {
   minute: number
 }
 
-/** Motif strict `HH:mm` (00–23 / 00–59). */
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/
 
-/** Vrai si `value` est une chaîne `HH:mm` valide. */
 export function isValidTime(value: unknown): value is string {
   return typeof value === 'string' && TIME_RE.test(value)
 }
 
-/** `HH:mm` → composantes 24 h (ou `null` si mal formé). */
 export function parseTime(value: string | null | undefined): TimeParts | null {
   if (!isValidTime(value)) return null
   const [h, m] = value.split(':')
   return { hour: Number(h), minute: Number(m) }
 }
 
-/** Composantes 24 h → `HH:mm`. */
 export function formatTime(hour: number, minute: number): string {
   return `${pad2(hour)}:${pad2(minute)}`
 }
@@ -99,8 +95,6 @@ export function snapMinute(minute: number, step: number): number {
   const snapped = step <= 1 ? Math.round(minute) : Math.round(minute / step) * step
   return ((snapped % 60) + 60) % 60
 }
-
-// ─── Géométrie du cadran ────────────────────────────────────────────────────
 
 /**
  * (dx, dy) relatifs au centre du cadran (repère écran : y vers le BAS) →

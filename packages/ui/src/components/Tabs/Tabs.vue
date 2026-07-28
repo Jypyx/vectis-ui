@@ -212,9 +212,8 @@ function scrollStep(direction: -1 | 1) {
 /*
  * Recadrage de l'onglet actif après un changement programmatique du v-model
  * (la navigation clavier, elle, appelle `focus()` : le navigateur recadre
- * seul). `scrollIntoView` est écarté — il remonte TOUS les ancêtres défilants
- * et ferait sauter la page entière. Les deltas viennent des rects, donc
- * physiques : valables en LTR, RTL et vertical sans test de direction.
+ * seul). Le recadrage est borné à la liste. Les deltas viennent des rects,
+ * donc physiques : valables en LTR, RTL et vertical sans test de direction.
  */
 watch(model, () => {
   nextTick(() => {
@@ -372,7 +371,7 @@ watch(model, () => {
   }
 
   /* L'indicateur de 2px recouvre la piste de 1px au lieu de s'empiler dessus
-     (marges négatives, idiome de ButtonGroup) */
+     (marges négatives) */
   .ds-tabs[data-variant='line'] .ds-tabs-list {
     margin-block-end: -1px;
   }

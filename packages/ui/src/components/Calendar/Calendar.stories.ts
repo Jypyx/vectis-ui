@@ -37,7 +37,6 @@ export const Default: Story = {
     // le 10 est la cellule focusable initiale (roving tabindex 0)
     const start = within(grid).getByRole('button', { name: '10' })
     start.focus()
-    // flèche droite → 11, Entrée sélectionne
     await userEvent.keyboard('{ArrowRight}{Enter}')
     await waitFor(() => expect(canvas.getByText('2026-06-11')).toBeVisible())
   },

@@ -109,7 +109,6 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
     overflow-wrap: break-word;
   }
 
-  /* --- Variantes : une recette --ds-text-* chacune --- */
   .ds-typography[data-variant='display'] {
     --_size: var(--ds-text-display-size);
     --_weight: var(--ds-text-display-weight);
@@ -195,9 +194,8 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
     --_leading: var(--ds-text-code-leading);
   }
 
-  /* --- Tones : couleur du texte. `default` n'a pas de bloc : sans --_color,
-     le texte hérite du contexte (composable dans les surfaces inversées,
-     les tones de Toast, etc.). --- */
+  /* `default` n'a pas de bloc : sans --_color, le texte hérite du contexte —
+     ce qui le rend composable dans une surface inversée ou un Toast teinté. */
   .ds-typography[data-tone='muted'] {
     --_color: var(--ds-color-text-muted);
   }

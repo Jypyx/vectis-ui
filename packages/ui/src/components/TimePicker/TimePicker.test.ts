@@ -50,7 +50,6 @@ describe('TimePicker', () => {
     await nextTick()
     expect(hourCell(container).textContent?.trim()).toBe('10')
     expect(emitted('update:modelValue')).toBeUndefined()
-    // OK commite et ferme
     await fireEvent.click(getByText('OK'))
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['10:15'])
     expect(panelOpen(container)).toBe(false)

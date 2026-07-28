@@ -10,19 +10,16 @@ import { useTimer } from '../../composables/useTimer'
 
 /**
  * Item de menu (role="menuitem") : le focus est piloté par le panneau (roving
- * focus), la sélection ferme toute la pile via le contexte injecté.
- *
- * Avec `href`, l'item est un <a> (item de navigation, permis par ARIA) ; un <a>
- * n'a pas de `disabled` natif → pattern « lien inerte » de Button (href retiré
- * + aria-disabled).
+ * focus), la sélection ferme toute la pile via le contexte injecté. Avec
+ * `href`, l'item est un <a> ; un <a> n'ayant pas de `disabled` natif, il passe
+ * par le pont « lien inerte » (href retiré + aria-disabled).
  *
  * Avec le slot #submenu, l'item devient l'invocateur `popovertarget` d'un
  * panneau imbriqué (= son ancre implicite ; le panneau est un descendant DOM
  * du panneau parent → pile native de popovers : light dismiss total, ouvrir
- * une branche sœur ferme l'autre, fermeture en cascade). `href`, `iconEnd`
- * (remplacé par un chevron) et `select` sont alors ignorés. JS justifié :
- * ouverture clavier (Flèche droite/Entrée/Espace + focus du 1er sous-item)
- * et survol avec délai d'intention — le clic passe par le toggle natif.
+ * une branche sœur ferme l'autre, fermeture en cascade). JS justifié :
+ * ouverture clavier et survol avec délai d'intention — le clic passe par le
+ * toggle natif.
  */
 interface MenuItemProps {
   /** Libellé de l'item (le slot #default prime). */
@@ -93,7 +90,6 @@ function onClick() {
   menu?.closeAll()
 }
 
-// ——— Sous-menu ———
 const subId = useId()
 const subOpen = ref(false)
 const subPanel = ref<InstanceType<typeof MenuPanel> | null>(null)
@@ -107,7 +103,6 @@ function onKeydown(event: KeyboardEvent) {
   if (!hasSubmenu.value || props.disabled) return
   if (!['ArrowRight', 'Enter', ' '].includes(event.key)) return
   // bloque l'activation native du bouton (clic synthétique → toggle) : on
-  // ouvre nous-mêmes pour pouvoir focuser le premier sous-item
   event.preventDefault()
   subPanel.value?.show(itemEl.value ?? undefined)
   subPanel.value?.focusFirst()
@@ -268,7 +263,7 @@ function onPointerLeave() {
   .ds-menu-item[data-selected]:hover:not(:disabled, [aria-disabled='true']),
   .ds-menu-item[data-selected]:focus,
   .ds-menu-item[data-selected][aria-expanded='true'] {
-    /* assombrit légèrement la surface accent (modèle Button tonal) */
+    /* assombrit légèrement la surface accent */
     background: color-mix(in oklab, var(--ds-color-accent-surface), var(--ds-color-accent-text) 8%);
   }
 

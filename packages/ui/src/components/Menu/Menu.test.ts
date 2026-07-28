@@ -131,7 +131,6 @@ describe('Menu', () => {
   it("le survol d'un item lui donne le focus (jamais aux items désactivés)", async () => {
     const { getByRole, container } = renderMenu()
     await openMenu(container)
-    // à l'ouverture, « Renommer » est focusé
     const danger = getByRole('menuitem', { name: 'Supprimer' })
 
     // le survol transfère le focus : une seule surbrillance à la fois
@@ -349,7 +348,6 @@ describe('Menu', () => {
       expect(parent.getAttribute('aria-controls')).toBe(sub.id)
       // le sous-panneau est un descendant DOM du panneau parent (pile native)
       expect(panels(container)[0]?.contains(sub)).toBe(true)
-      // le chevron remplace iconEnd
       expect(parent.querySelector('.ds-menu-item-chevron')?.textContent).toBe('chevron_right')
       const symbols = [...parent.querySelectorAll('.ds-icon-symbol')].map((el) => el.textContent)
       expect(symbols).not.toContain('download')

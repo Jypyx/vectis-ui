@@ -35,7 +35,6 @@ defineSlots<{
 }>()
 
 const groupName = useId()
-// Getters : les props du groupe restent réactives à travers l'injection.
 provide(accordionKey, {
   get name() {
     return props.exclusive ? groupName : undefined
@@ -63,7 +62,7 @@ provide(accordionKey, {
      * data-compact) et héritées par les items — les fallbacks vivent côté
      * AccordionItem, qui reste utilisable hors groupe.
      *
-     * Compact = -4px sur TOUS les paddings (idiome `.ds-control`, hors
+     * Compact = -4px sur TOUS les paddings (hors
      * échelle : l'accordéon n'a pas de hauteur imposée). Un seul delta pilote
      * les trois mesures, les valeurs de base ne sont donc écrites qu'ici.
      */

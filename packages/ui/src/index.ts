@@ -5,30 +5,20 @@
  * mode librairie, Vite le retire du JS émis. Le consommateur importe donc
  * explicitement `@socle/ui/styles.css`.
  *
- * L'ordre des exports fixe l'ordre du CSS bundlé : IconButton doit suivre
- * Button (il surcharge ses règles à spécificité égale). Icon est placé avant
- * Button par cohérence (dépendance → dépendant) mais son ordre n'est pas
- * contraignant : Button le pilote via des custom properties héritées, pas par
- * surcharge de sélecteurs. Slider doit rester après Input : il surcharge la
- * largeur de ses champs numériques (`.ds-slider-field`) à spécificité égale.
- * Pagination doit rester après ButtonGroup : ses pastilles surchargent la
- * largeur et le padding de `.ds-button` à spécificité égale. Tabs est placé là
- * par cohérence (il compose Button et IconButton) mais son ordre n'est PAS
- * contraignant : toutes ses surcharges sont qualifiées `.ds-tab[data-size]`,
- * qui bat `.ds-button[data-variant='…']` quel que soit l'ordre du bundle.
- * DataTable compose Input/Checkbox/Menu/Pagination mais son ordre n'est
- * pas contraignant non plus : sa seule surcharge est qualifiée par descendance
- * (`.ds-table-toolbar .ds-input`). Menu n'est pas contraignant non plus : rien
- * ne surcharge `.ds-menu*` à spécificité égale, et le chrome commun des
- * panneaux (`.ds-panel`, styles/panel.css) ne contient que des déclarations
- * qu'aucun panneau ne redéclare. Listbox (brique interne du Combobox) et le
- * composable `usePopover` ne sont volontairement pas exportés. Toggle est placé après Tabs par cohérence
- * (il compose Button et ButtonGroup) mais son ordre n'est pas contraignant :
- * ses surcharges sont qualifiées (`.ds-toggle-item[data-size]`,
- * `.ds-toggle:not(.ds-button-group)`). Typography doit rester en tête (avant
- * tout composant qui le rend en interne — Input, Textarea, Dialog, Accordion,
- * DataTable) : leurs classes (`.ds-input-label`…) surchargent `.ds-typography`
- * à spécificité égale.
+ * L'ordre des exports fixe l'ordre du CSS bundlé. La plupart des composants
+ * sont rangés par cohérence (dépendance → dépendant) sans que leur position
+ * soit contraignante : leurs surcharges sont qualifiées (`.ds-tab[data-size]`,
+ * `.ds-table-toolbar .ds-input`…), donc indépendantes de l'ordre. Quatre
+ * contraintes sont réelles, parce qu'elles jouent à spécificité égale :
+ * - IconButton après Button (surcharge padding et largeur) ;
+ * - Pagination après ButtonGroup (ses pastilles surchargent largeur et padding
+ *   de `.ds-button`) ;
+ * - Slider après Input (surcharge la largeur de `.ds-slider-field`) ;
+ * - Typography en TÊTE, avant tout composant qui le rend en interne (Input,
+ *   Textarea, Dialog, Accordion, DataTable) : leurs classes
+ *   (`.ds-input-label`…) surchargent `.ds-typography`.
+ *
+ * Listbox (brique interne du Combobox) et les composables ne sont pas exportés.
  */
 import './styles/index.css'
 

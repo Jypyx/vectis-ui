@@ -94,13 +94,11 @@ export const Tri: Story = {
     const canvas = within(canvasElement)
     const commitsHeader = canvas.getByRole('button', { name: 'Commits' })
 
-    // tri croissant → le plus petit nombre de commits en premier
     await userEvent.click(commitsHeader)
     await waitFor(() => {
       const cells = canvasElement.querySelectorAll('tbody tr:first-child td')
       expect(cells[0]?.textContent).toContain('Granit')
     })
-    // deuxième clic → décroissant
     await userEvent.click(commitsHeader)
     await waitFor(() => {
       const cells = canvasElement.querySelectorAll('tbody tr:first-child td')

@@ -39,12 +39,11 @@ defineSlots<{
     flex-direction: column;
   }
 
-  /* --- Horizontal (défaut) ---
-     Collapse la bordure 1px partagée (margin négatif) et pose une couture neutre
-     qui matérialise la séparation pour les variantes pleines (bordure transparente)
-     et uniformise la jointure des variantes outline. Coins internes neutralisés.
-     Chaque bloc est scopé à son orientation : sinon les règles horizontales
-     zéroïseraient aussi les coins/bordures latérales en mode vertical. */
+  /* Collapse la bordure 1px partagée (margin négatif) et pose une couture neutre
+     qui matérialise la séparation pour les variantes pleines (bordure
+     transparente) et uniformise la jointure des variantes outline. Chaque bloc
+     est scopé à son orientation : sinon les règles horizontales zéroïseraient
+     aussi les coins et bordures latérales en mode vertical. */
   .ds-button-group[data-orientation='horizontal'] > .ds-button:not(:first-child) {
     margin-inline-start: -1px;
     border-inline-start-color: var(--ds-color-border);
@@ -57,7 +56,6 @@ defineSlots<{
     border-end-end-radius: 0;
   }
 
-  /* --- Vertical --- */
   .ds-button-group[data-orientation='vertical'] > .ds-button:not(:first-child) {
     margin-block-start: -1px;
     border-block-start-color: var(--ds-color-border);
@@ -71,8 +69,7 @@ defineSlots<{
   }
 
   /* Le bouton survolé/focus/actif remonte au-dessus des voisins : sinon sa
-     bordure teintée et son focus-ring sont rognés par le segment adjacent
-     (même logique qu'AvatarGroup). */
+     bordure teintée et son focus-ring sont rognés par le segment adjacent. */
   .ds-button-group > .ds-button:hover,
   .ds-button-group > .ds-button:focus-visible,
   .ds-button-group > .ds-button:active {

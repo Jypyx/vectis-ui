@@ -37,7 +37,6 @@ export const Initiales: Story = {
 export const ImageCassee: Story = {
   args: { src: 'https://exemple.invalid/introuvable.png' },
   play: async ({ canvasElement }) => {
-    // l'échec de chargement bascule sur les initiales
     await waitFor(() => expect(within(canvasElement).getByText('XD')).toBeVisible(), {
       timeout: 3000,
     })

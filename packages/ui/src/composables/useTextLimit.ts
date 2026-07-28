@@ -6,8 +6,8 @@ interface ValidatableControl {
 }
 
 /**
- * Longueur saisie vs `maxlength` : le texte du compteur, le dépassement, et la
- * **limite souple** (Input et Textarea, à l'identique).
+ * Longueur saisie vs `maxlength` : le texte du compteur, le dépassement et la
+ * **limite souple**.
  *
  * Limite souple = la saisie n'est pas bloquée, le champ passe en erreur. Elle
  * passe par `setCustomValidity` plutôt que par un événement maison : le rouge

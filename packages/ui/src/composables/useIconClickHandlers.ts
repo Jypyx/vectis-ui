@@ -15,7 +15,6 @@ import { isDev } from '../utils/env'
  * accessible est un défaut du pattern, pas du composant qui l'emploie.
  */
 export function useIconClickHandlers(options: {
-  /** Nom du composant, pour le message d'avertissement. */
   name: string
   iconStartLabel?: string
   iconEndLabel?: string

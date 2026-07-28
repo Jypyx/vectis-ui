@@ -4,18 +4,12 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { usePopover } from '../../composables/usePopover'
 
 /**
- * Panneau de liste INTERNE (non exporté) : brique du Combobox.
- *
- * Contrairement au Menu, il n'a AUCUNE autonomie — le contrôle externe (champ
- * `role="combobox"`) garde le focus et pilote tout : clavier, surbrillance par
- * `aria-activedescendant`, ouverture et fermeture. D'où :
- * - `popover="manual"` : pas de light dismiss (le consommateur ferme au
- *   `focusout` / Échap) ;
- * - aucun gestionnaire clavier ni roving focus (le focus n'entre jamais ici) ;
- * - ancrage STATIQUE par la prop `anchor` — il n'y a pas d'invocateur
- *   `popovertarget` (invalide sur un `<input>` texte), donc pas d'ancre
- *   implicite. `anchor-name`/`anchor-scope` restent posés par le consommateur
- *   sur son propre sous-arbre.
+ * Panneau de liste INTERNE (non exporté) : brique du Combobox. Aucune
+ * autonomie — le contrôle externe garde le focus et pilote tout. D'où
+ * `popover="manual"` (le consommateur ferme au `focusout` / Échap), aucun
+ * gestionnaire clavier, et un ancrage STATIQUE par la prop `anchor` : sans
+ * invocateur `popovertarget` (invalide sur un `<input>` texte) il n'y a pas
+ * d'ancre implicite.
  *
  * Le panneau porte lui-même `role="listbox"` ET le défilement : c'est le
  * contrat sur lequel s'appuie le consommateur (root d'IntersectionObserver,

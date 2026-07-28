@@ -2,7 +2,7 @@ import { ref, type Ref } from 'vue'
 
 /**
  * Plomberie d'état d'un élément `[popover]` — pendant de `styles/floating.css`,
- * qui mutualise déjà la moitié « positionnement » du même sujet.
+ * qui porte la moitié « positionnement » du même sujet.
  *
  * JS justifié : la Popover API est impérative (`showPopover`/`hidePopover`) là
  * où le reste du DS est déclaratif, et elle pose deux pièges qu'un simple

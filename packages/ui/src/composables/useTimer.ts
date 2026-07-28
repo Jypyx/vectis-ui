@@ -3,9 +3,7 @@ import { onBeforeUnmount } from 'vue'
 /**
  * Un `setTimeout` réarmable, annulé au démontage.
  *
- * Trois règles que toutes les copies manuelles du DS appliquaient — délai
- * d'intention d'un sous-menu, délai d'apparition d'un Tooltip, débounce d'une
- * recherche — et qu'il ne faut pas réécrire à chaque fois :
+ * Trois règles :
  * - le handle vit dans un `let` NON réactif : personne ne le rend, en faire une
  *   `ref` déclencherait des rendus pour rien ;
  * - `start()` annule toujours le précédent, sinon deux timers courent ;

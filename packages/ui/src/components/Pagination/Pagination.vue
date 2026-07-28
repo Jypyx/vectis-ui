@@ -14,22 +14,14 @@ import { resolveMatcher } from '../../utils/matcher'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 
 /**
- * Pagination composée : chaque pastille est un Button (la page active en
- * `solid`, les autres en `ghost`/`outline`), les contrôles précédent/suivant
- * un Button ou un IconButton, et `attached` rattache le tout dans un
- * ButtonGroup. Aucune règle d'état n'est redéfinie ici — hover, focus,
- * disabled, `prefers-reduced-motion` viennent de Button.
+ * Pagination composée : chaque pastille est un Button, les contrôles
+ * précédent/suivant un Button ou un IconButton, et `attached` rattache le tout
+ * dans un ButtonGroup. Aucune règle d'état n'est redéfinie ici.
  *
- * Double troncature :
- *  1. logique — `totalVisible` fixe le nombre total d'emplacements rendus
- *     (ellipses comprises) ; absente, toutes les pages sont rendues. Pure
- *     dérivation d'état (aucune API navigateur, SSR-safe) ;
- *  2. responsive — 100 % CSS par container queries sur la nav elle-même,
- *     donc aucun ResizeObserver (voir le bloc @container plus bas).
- *
- * Le seul JS de comportement est la navigation clavier (flèches / Home /
- * End), justifiée en tête de `onKeydown` : aucune primitive native ne
- * déplace le focus entre des boutons frères.
+ * Double troncature : logique (`totalVisible`, pure dérivation SSR-safe) et
+ * responsive (100 % CSS par container queries sur la nav elle-même, donc aucun
+ * ResizeObserver). Seul JS de comportement : la navigation clavier, justifiée
+ * en tête de `onKeydown`.
  */
 interface PaginationProps {
   /** Nombre total de pages. */
@@ -103,7 +95,6 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   pageLabel: undefined,
 })
 
-// `label` n'est qu'un défaut : cf. useAriaLabel pour la précédence ARIA.
 const ariaLabel = useAriaLabel(() => props.label)
 
 const page = defineModel<number>({ default: 1 })
@@ -362,11 +353,9 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   .ds-pagination-page {
-    /*
-     * Pastille carrée à un chiffre, qui s'élargit d'elle-même au-delà : même
-     * mécanique qu'IconButton, qui lit la variable posée par ds-control sur ce
-     * même élément — une seule règle couvre les 5 tailles × compact.
-     */
+    /* Pastille carrée à un chiffre, qui s'élargit d'elle-même au-delà : la
+       variable est posée par ds-control sur ce même élément, une seule règle
+       couvre donc les 5 tailles × compact. */
     min-inline-size: var(--_control-height);
     padding-inline: var(--ds-space-2);
   }
@@ -384,7 +373,7 @@ function onKeydown(event: KeyboardEvent) {
   /*
    * Troncature responsive — la nav est son propre conteneur de requête, donc
    * les paliers suivent la place allouée au composant, jamais le viewport
-   * (aucun ResizeObserver, cf. DataTable). Les seuils sont des littéraux :
+   * (aucun ResizeObserver). Les seuils sont des littéraux :
    * les conditions @container n'acceptent pas var(). Ils sont calibrés sur
    * size="md" ; pour les cas extrêmes (size xl, length à 5 chiffres),
    * l'échappatoire est `totalVisible` ou `responsive: false`.

@@ -84,8 +84,8 @@ describe('arrowNavigate', () => {
     press(container, 'ArrowRight')
     expect(document.activeElement?.id).toBe('a')
 
-    // Le cas qui avait divergé dans MenuPanel : reculer sans focus courant
-    // donnait l'AVANT-dernier item ((-1 - 1 + n) % n), pas le premier.
+    // Reculer sans focus courant part du premier item, pas de l'avant-dernier
+    // (le modulo naïf `(-1 - 1 + n) % n` donnerait l'avant-dernier).
     document.body.querySelector<HTMLElement>('#a')?.blur()
     press(container, 'ArrowLeft')
     expect(document.activeElement?.id).toBe('a')

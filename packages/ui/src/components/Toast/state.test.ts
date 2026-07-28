@@ -54,7 +54,6 @@ describe('toast (état module)', () => {
     toast({ message: 'Deux' })
     dismissToast(first)
     expect(toasts.map((item) => item.message)).toEqual(['Deux'])
-    // id inconnu : sans effet
     dismissToast(first)
     expect(toasts).toHaveLength(1)
   })

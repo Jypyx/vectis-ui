@@ -328,7 +328,6 @@ export const SousMenus: Story = {
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: /PDF/ })).toHaveFocus())
     await expect(exporter).toHaveAttribute('aria-expanded', 'true')
 
-    // niveau 3 : récursion
     await userEvent.keyboard('{ArrowDown}')
     await userEvent.keyboard('{ArrowRight}')
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'PNG' })).toHaveFocus())

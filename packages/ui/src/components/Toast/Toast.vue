@@ -7,12 +7,11 @@ import IconButton from '../IconButton/IconButton.vue'
 import type { ToastItem, ToastTone } from './state'
 
 /**
- * Carte de notification — présentationnel pur, interne (rendue par
- * <Toaster>, non exportée). role="alert" (interruptif) pour danger/warning,
- * role="status" (poli) sinon — même règle que l'ancien Alert. Compromis
- * assumé : l'annonce du premier toast « poli » d'une pile peut être manquée
- * par certains lecteurs d'écran (la live region naît avec son contenu) ;
- * les role="alert" sont, eux, annoncés à l'insertion.
+ * Carte de notification — présentationnel pur, interne (rendue par <Toaster>,
+ * non exportée). role="alert" (interruptif) pour danger/warning, role="status"
+ * (poli) sinon. Compromis assumé : l'annonce du premier toast « poli » d'une
+ * pile peut être manquée par certains lecteurs d'écran (la live region naît
+ * avec son contenu) ; les role="alert" sont, eux, annoncés à l'insertion.
  */
 const props = defineProps<{
   item: ToastItem
@@ -88,7 +87,6 @@ const icon = computed(() =>
     line-height: var(--ds-text-body-md-leading);
   }
 
-  /* --- Tones : ne définissent que des variables locales (modèle Button) --- */
   .ds-toast[data-tone='neutral'] {
     /* pas de déclinaisons -surface/-border/-text pour neutral : surface
        d'overlay en tonal, contraste inversé (style tooltip) en solid */
@@ -132,7 +130,6 @@ const icon = computed(() =>
     --_text-solid: var(--ds-color-text-on-warning);
   }
 
-  /* --- Variantes : consomment les variables du tone --- */
   .ds-toast[data-variant='tonal'] {
     background: var(--_bg-tonal);
     border: 1px solid var(--_border-tonal);
@@ -157,8 +154,8 @@ const icon = computed(() =>
    * Croix de fermeture : IconButton ghost/neutral, recoloré via les
    * variables locales de Button (--_text-tinted / --_bg-soft) — spécificité
    * supérieure aux règles de tone de Button, et Toast est bundlé après lui.
-   * En tonal : croix à la couleur d'accent du tone (design de l'ex-Alert) ;
-   * en solid : currentcolor (lisible sur le fond plein).
+   * En tonal : croix à la couleur d'accent du tone ; en solid : currentcolor
+   * (lisible sur le fond plein).
    */
   .ds-toast[data-variant='tonal'] .ds-toast-close[data-tone] {
     --_text-tinted: var(--_accent);
@@ -185,7 +182,7 @@ const icon = computed(() =>
 
   .ds-toast-title {
     margin-block-end: var(--ds-space-1);
-    /* semibold : emphase d'état (titre détaché du message), pas un rôle typo */
+    /* semibold : emphase d'état, pas un rôle typo */
     font-weight: var(--ds-font-weight-semibold);
   }
 

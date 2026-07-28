@@ -6,9 +6,7 @@
 import { isToken, type DesignToken, type TokenGroup } from './types'
 
 export interface FlatToken {
-  /** Chemin dans l'arbre, ex. ['color', 'neutral', '500'] */
   path: string[]
-  /** Nom de la custom property, ex. `--ds-color-neutral-500` */
   cssName: string
   token: DesignToken
 }

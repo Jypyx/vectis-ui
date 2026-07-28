@@ -2,28 +2,14 @@
 /**
  * Zone de texte complète : label, icônes internes (cliquables), compteur,
  * limite souple, loading, clearable — autour d'un <textarea> natif stylé.
- * Miroir d'Input avec deux différences : `autoGrow` (pur CSS, `field-sizing:
- * content`) et le compteur rendu SOUS le champ (ligne meta avec le hint),
- * jamais dedans. Pas de prop pattern : <textarea> ne le supporte pas
- * nativement et on ne l'émule pas (décision projet).
+ * Miroir d'Input, avec `autoGrow` (pur CSS, `field-sizing: content`) et le
+ * compteur rendu SOUS le champ, jamais dedans. Wrapper-root : class/style
+ * restent sur la racine, tout le reste est reporté sur le <textarea>. La
+ * validation reste native (`:user-invalid`) ; la limite souple passe par
+ * setCustomValidity.
  *
- * Racine wrapper (label + champ + meta) → `inheritAttrs: false` : les
- * attributs natifs sont reportés sur le <textarea> via v-bind, SAUF
- * class/style qui restent sur la racine (les consommateurs dimensionnent le
- * composant entier — dérogation volontaire au pattern wrapper de CLAUDE.md).
- *
- * Validation native : `required`/`minlength` passent en fallthrough et
- * `:user-invalid` fait le style d'erreur sans JS ; la prop `invalid` force
- * l'état (validation serveur) via aria-invalid. La limite souple passe par
- * setCustomValidity : le rouge (:user-invalid) n'apparaît qu'après
- * interaction et la validité est exposée par l'API standard (el.validity).
- *
- * JS de comportement propre au composant : le pont v-model (defineModel) et le
- * clear + refocus (le bouton disparaît au clic, sinon le focus serait perdu).
- * Tout le reste est partagé avec l'autre champ du DS (Input) et vit dans
- * `composables/` : ids et aria-describedby (useFieldIds), split de $attrs
- * (useRootAttrs), icônes cliquables (useIconClickHandlers), compteur et limite
- * souple (useTextLimit).
+ * JS de comportement propre au composant : le pont v-model et le clear +
+ * refocus (le bouton disparaît au clic, sinon le focus serait perdu).
  */
 import { computed, ref } from 'vue'
 
@@ -336,7 +322,6 @@ const { counterText, over } = useTextLimit({
     color: var(--ds-color-text-muted);
   }
 
-  /* le spinner (1em) remplit la taille d'icône du champ */
   .ds-textarea-field > .ds-spinner {
     font-size: var(--ds-icon-size);
   }

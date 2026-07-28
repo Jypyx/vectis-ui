@@ -11,7 +11,7 @@ import { iconProps } from '../Icon/iconProps'
  * <button> (clic natif en fallthrough), href → <a>. Supprimable → second
  * <button> frère — jamais de bouton imbriqué (HTML invalide). Sans
  * interaction, rendu statique (span, aucun hover). Le seul JS est le pont
- * « lien inerte » (pattern Button : href retiré + aria-disabled + onClick
+ * « lien inerte » (href retiré + aria-disabled + onClick
  * filtré) et la répartition des attrs (class/style sur la racine, le reste
  * sur l'élément d'action).
  */
@@ -177,7 +177,6 @@ const iconOnly = computed(
     display: inline-flex;
     align-items: center;
     height: var(--_control-height);
-    /* bordure toujours posée : hauteur stable entre variants */
     border: 1px solid transparent;
     border-radius: var(--ds-radius-interactive);
     font-family: var(--ds-text-family);
@@ -194,7 +193,7 @@ const iconOnly = computed(
     border-radius: var(--ds-radius-pill);
   }
 
-  /* --- Tones : ne définissent que des variables locales (modèle Button) --- */
+  /* --- Tones : ne définissent que des variables locales --- */
   .ds-chip[data-tone='accent'] {
     --_bg-solid: var(--ds-color-accent);
     --_bg-solid-hover: var(--ds-color-accent-hover);
@@ -346,7 +345,7 @@ const iconOnly = computed(
   }
 
   /* Icône seule : action carrée — l'aspect-ratio suit la hauteur du chip
-     (modèle IconButton, sans nouvelle dimension) */
+     (sans nouvelle dimension) */
   .ds-chip[data-icon-only] .ds-chip-action {
     aspect-ratio: 1;
     justify-content: center;

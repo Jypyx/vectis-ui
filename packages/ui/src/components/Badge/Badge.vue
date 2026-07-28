@@ -1,14 +1,8 @@
 <script setup lang="ts">
 /**
- * Pastille d'information non interactive : compteur ou icône.
- * HTML + CSS uniquement — le seul JS est du calcul de rendu (détection du
- * slot cible, plafonnement « 99+ », pont couleur custom → --_custom).
- *
- * Trois modes de placement :
- * - standalone (pas de slot par défaut) : le badge seul ;
- * - inline (slot par défaut) : le badge à droite de l'élément cible ;
- * - overlay (slot par défaut + `overlay`) : posé sur le coin haut-droit de
- *   la cible, décalé vers l'intérieur.
+ * Pastille d'information non interactive : compteur ou icône. HTML + CSS
+ * uniquement — le seul JS est du calcul de rendu (détection du slot cible,
+ * plafonnement « 99+ », pont couleur custom → --_custom).
  */
 import { computed, useSlots } from 'vue'
 
@@ -97,7 +91,6 @@ const badgeAttrs = computed(() => ({
 
 <style>
 @layer ds.components {
-  /* --- Hôte des modes inline / overlay --- */
   .ds-badge-host {
     position: relative;
     display: inline-flex;
@@ -105,7 +98,6 @@ const badgeAttrs = computed(() => ({
     gap: var(--ds-space-2); /* écart cible ↔ badge en mode inline */
   }
 
-  /* --- Badge : rendu plein-couleur unique --- */
   .ds-badge {
     display: inline-flex;
     align-items: center;
@@ -143,7 +135,6 @@ const badgeAttrs = computed(() => ({
     }
   }
 
-  /* --- Tones : un fond + un fallback texte chacun --- */
   .ds-badge[data-tone='accent'] {
     --_bg: var(--ds-color-accent);
     --_text-fallback: var(--ds-color-text-on-accent);
@@ -164,27 +155,26 @@ const badgeAttrs = computed(() => ({
     --_text-fallback: var(--ds-color-text-on-warning);
   }
 
-  /* Neutral : inversion text/surface (modèle Chip neutral solid) — un gris
-     type text-muted vaudrait neutral-400 en dark, où le fallback blanc
-     échouerait ; ici fallback et contrast-color() concordent dans les deux
-     thèmes. */
+  /* Neutral : inversion text/surface — un gris type text-muted vaudrait
+     neutral-400 en dark, où le fallback blanc échouerait ; ici fallback et
+     contrast-color() concordent dans les deux thèmes. */
   .ds-badge[data-tone='neutral'] {
     --_bg: var(--ds-color-text);
     --_text-fallback: var(--ds-color-surface);
   }
 
-  /* --- Couleur custom : après les tones (même spécificité, dernier gagne) --- */
+  /* Après les tones : même spécificité, le dernier gagne. */
   .ds-badge[data-custom] {
     --_bg: var(--_custom);
     --_text-fallback: var(--ds-color-text-on-accent);
   }
 
-  /* --- Icône seule : le min-width fait le cercle de 20px, padding retiré --- */
+  /* Icône seule : le min-width fait le cercle, padding retiré. */
   .ds-badge[data-icon-only] {
     padding: 0;
   }
 
-  /* --- Dot : min-width neutralisé (il battrait le width de 10px) --- */
+  /* min-width neutralisé : il battrait le width du dot. */
   .ds-badge[data-dot] {
     width: var(--ds-control-size-badge-dot);
     height: var(--ds-control-size-badge-dot);
@@ -192,15 +182,14 @@ const badgeAttrs = computed(() => ({
     padding: 0;
   }
 
-  /* --- Bordered : anneau extérieur en box-shadow — ne modifie pas les
-     dimensions (le dot reste 10px pleins) et suit le border-radius --- */
+  /* Anneau extérieur en box-shadow : ne modifie pas les dimensions (le dot
+     reste 10px pleins) et suit le border-radius. */
   .ds-badge[data-bordered] {
     box-shadow: 0 0 0 2px var(--ds-color-surface);
   }
 
-  /* --- Overlay : coin haut-droit de l'hôte, décalé vers l'intérieur.
-     Les % de translate sont des ratios de la taille du badge lui-même
-     (50% = centré sur le coin) — pas des espacements, pas de token. --- */
+  /* Les % de translate sont des ratios de la taille du badge lui-même
+     (50% = centré sur le coin) — pas des espacements, pas de token. */
   .ds-badge-host[data-overlay] > .ds-badge {
     position: absolute;
     inset-block-start: 0;

@@ -16,7 +16,7 @@
   /*
    * Socle de TOUT popover du DS, ancré ou non — `.ds-floating` (panneaux
    * ancrés) comme `.ds-toast-stack` (piles positionnées en coordonnées
-   * physiques, sans ancre), qui le redéclarait mot pour mot.
+   * physiques, sans ancre).
    *
    * Le garde-fou `display: none` est ici et pas dans chaque composant : un
    * panneau qui pose son propre `display` (`.ds-panel` en flex, la pile de

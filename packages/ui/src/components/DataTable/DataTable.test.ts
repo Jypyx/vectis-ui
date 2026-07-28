@@ -160,11 +160,10 @@ describe('DataTable', () => {
       `,
     )
     const { container, getByRole } = render(Harness)
-    // page 2 (perPage 2) → lignes 3-4
     expect(firstColumnCells(container)).toEqual(['Socle', 'Éclair'])
     expect(getByRole('button', { name: 'Lignes par page : 2' })).toBeTruthy()
 
-    // ouverture via le stub popover jsdom (précédent Menu.test)
+    // ouverture via le stub popover jsdom
     const menu = container.querySelector('[role="menu"]') as HTMLElement
     menu.showPopover()
     await nextTick()

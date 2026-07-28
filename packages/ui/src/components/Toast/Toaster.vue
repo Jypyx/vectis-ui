@@ -38,7 +38,6 @@ const props = withDefaults(defineProps<ToasterProps>(), {
   label: 'Notifications',
 })
 
-// `label` n'est qu'un défaut : cf. useAriaLabel pour la précédence ARIA.
 const ariaLabel = useAriaLabel(() => props.label)
 
 const PLACEMENTS: ToastPlacement[] = [

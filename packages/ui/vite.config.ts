@@ -34,7 +34,6 @@ export default defineConfig({
         'tokens/index': fileURLToPath(new URL('./src/tokens/index.ts', import.meta.url)),
       },
       formats: ['es'],
-      // Tout le CSS (reset + tokens + composants) est extrait dans un unique dist/styles.css
       cssFileName: 'styles',
     },
     rollupOptions: {

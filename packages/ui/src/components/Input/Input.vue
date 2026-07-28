@@ -2,27 +2,12 @@
 /**
  * Champ de saisie complet : label, icônes internes (cliquables), compteur,
  * limite souple, loading, clearable — autour d'un <input> natif stylé.
+ * Wrapper-root : class/style restent sur la racine, tout le reste est reporté
+ * sur l'<input>. La validation reste native (`:user-invalid`) ; la limite
+ * souple passe par setCustomValidity, jamais par un événement maison.
  *
- * Racine wrapper (label + champ + hint) → `inheritAttrs: false` : les attributs
- * natifs (type, placeholder, required, pattern…) sont reportés sur l'<input>
- * via v-bind, SAUF class/style qui restent sur la racine (les consommateurs
- * dimensionnent le composant entier, pas le contrôle interne — dérogation
- * volontaire au pattern wrapper de CLAUDE.md).
- *
- * La validation reste native : `pattern`/`required` passent en fallthrough et
- * `:user-invalid` fait le style d'erreur sans JS ; la prop `invalid` force
- * l'état (validation serveur) via aria-invalid. La limite souple passe par
- * setCustomValidity : le champ devient :invalid immédiatement mais le rouge
- * (:user-invalid) n'apparaît qu'après interaction — même timing que le natif —
- * et la soumission est bloquée ; la validité est exposée par l'API standard
- * (el.validity), pas par un événement maison.
- *
- * JS de comportement propre au composant : le pont v-model (defineModel) et le
- * clear + refocus (le bouton disparaît au clic, sinon le focus serait perdu).
- * Tout le reste est partagé avec l'autre champ du DS (Textarea) et vit dans
- * `composables/` : ids et aria-describedby (useFieldIds), split de $attrs
- * (useRootAttrs), icônes cliquables (useIconClickHandlers), compteur et limite
- * souple (useTextLimit).
+ * JS de comportement propre au composant : le pont v-model et le clear +
+ * refocus (le bouton disparaît au clic, sinon le focus serait perdu).
  */
 import { computed, ref } from 'vue'
 
@@ -121,9 +106,7 @@ defineSlots<{
 /**
  * `string | number` et non `string` seul : sur un `<input type="number">`, Vue
  * convertit d'office la valeur de `v-model` en nombre (`vModelText` caste dès
- * que `el.type === 'number'`). Un modèle typé string seul renvoyait donc un
- * nombre au consommateur, qui le repassait en prop — d'où un « Invalid prop:
- * type check failed » en dev.
+ * que `el.type === 'number'`).
  */
 const model = defineModel<string | number>({ default: '' })
 
@@ -132,7 +115,6 @@ const model = defineModel<string | number>({ default: '' })
  * de `.length`. */
 const modelText = computed(() => String(model.value ?? ''))
 
-// class/style sur la racine ; tout le reste sur le contrôle natif
 const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
 
 const { fieldId, hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
@@ -388,7 +370,6 @@ defineExpose({
     color: var(--ds-color-text-muted);
   }
 
-  /* le spinner (1em) remplit la taille d'icône du champ */
   .ds-input-field > .ds-spinner {
     font-size: var(--ds-icon-size);
   }

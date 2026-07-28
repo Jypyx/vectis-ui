@@ -31,7 +31,6 @@ export function isToken(node: DesignToken | TokenGroup): node is DesignToken {
   return typeof (node as DesignToken).$value === 'string'
 }
 
-/* Constructeurs — allègent l'écriture de la source. */
 const make =
   ($type: TokenType) =>
   ($value: string, $description?: string): DesignToken =>

@@ -249,7 +249,6 @@ const passedAttrs = computed(() => {
 
   .ds-button[data-variant='elevated']:active:not(:disabled, [aria-disabled='true']) {
     background: color-mix(in oklab, var(--ds-color-surface-raised), var(--_text-tinted) 12%);
-    /* l'élévation retombe au press (M3) */
     box-shadow: var(--ds-shadow-2);
   }
 
@@ -267,7 +266,6 @@ const passedAttrs = computed(() => {
     background: color-mix(in oklab, var(--_bg-soft), var(--_text-tinted) 14%);
   }
 
-  /* --- États --- */
   .ds-button:is(:disabled, [aria-disabled='true']) {
     cursor: not-allowed;
   }

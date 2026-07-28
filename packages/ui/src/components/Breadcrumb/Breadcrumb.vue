@@ -58,7 +58,6 @@ const props = withDefaults(defineProps<BreadcrumbProps>(), {
   ellipsisLabel: 'Afficher les pages intermédiaires',
 })
 
-// `label` n'est qu'un défaut : cf. useAriaLabel pour la précédence ARIA.
 const ariaLabel = useAriaLabel(() => props.label)
 
 /** Normalisation pure (SSR-safe) : slash final retiré, sauf pour '/'. */
@@ -148,12 +147,10 @@ const visibleItems = computed(() =>
     color: var(--ds-color-text-muted);
   }
 
-  /* le premier item n'est précédé d'aucun séparateur */
   .ds-breadcrumb-list > .ds-breadcrumb-item:first-child > .ds-breadcrumb-separator {
     display: none;
   }
 
-  /* le reste (display, centrage, taille) vient de .ds-icon */
   .ds-breadcrumb-separator {
     color: var(--ds-color-text-subtle);
   }

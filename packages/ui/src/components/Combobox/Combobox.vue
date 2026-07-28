@@ -18,19 +18,13 @@ import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
 import { useTimer } from '../../composables/useTimer'
 
 /**
- * Combobox avec recherche et sélection multiple, composé des briques du DS :
- * `Input` (champ de recherche `role="combobox"`), `Listbox` (panneau interne
- * non exporté : popover ancré en pur CSS + options `role="option"`), et `Chip`
- * pour les valeurs en mode multiple.
- *
- * Le JS implémente le pattern ARIA combobox/listbox que le natif ne couvre pas
- * (pas de `<datalist>` stylable/multiple) : filtrage, navigation par
+ * Combobox avec recherche et sélection multiple, composé d'`Input`, `Listbox`
+ * et `Chip`. Le JS implémente le pattern ARIA combobox/listbox que le natif ne
+ * couvre pas (pas de `<datalist>` stylable/multiple) : filtrage, navigation par
  * `aria-activedescendant` (le focus DOM reste dans l'input — le `Listbox` n'a
  * donc aucun clavier propre), sélection simple ou multiple. C'est ce composant
- * qui possède TOUT le contrat ARIA du champ (`role`, `aria-controls`,
- * `aria-expanded`, `aria-activedescendant`). Ouverture pilotée par
- * `v-model:open`, fermeture au `focusout` (le champ vit hors du panneau
- * `popover="manual"`).
+ * qui possède TOUT le contrat ARIA du champ. Fermeture au `focusout` : le champ
+ * vit hors du panneau `popover="manual"`.
  */
 export interface ComboboxOption {
   value: string
@@ -184,7 +178,6 @@ const searchTerm = computed(() => (typed.value ? query.value.trim() : ''))
 
 const filtered = computed(() => {
   const matcher = props.filter
-  // recherche serveur : les options arrivent déjà filtrées
   if (matcher === false) return props.options
   const q = searchTerm.value
   if (!q) return props.options
@@ -252,7 +245,7 @@ if (!props.multiple && typeof model.value === 'string' && model.value) {
 // après coup (source asynchrone), il faut la rafraîchir — sinon un champ monté
 // avec une valeur mais sans options affiche l'identifiant brut à vie. On
 // n'écoute QUE `options` : écouter `model` réintroduirait la lecture prématurée
-// que `select()` évite volontairement (cf. test « sélection simple par clic »).
+// que `select()` évite volontairement.
 // Gardes `open`/`typed` : ne jamais écraser une saisie en cours.
 watch(
   () => props.options,
@@ -350,7 +343,7 @@ function select(option: ComboboxOption) {
   // mémorisé tout de suite : l'option peut disparaître d'`options` (recherche
   // suivante) avant que le parent n'ait propagé le modèle
   labelCache.set(option.value, option.label)
-  typed.value = false // la sélection n'est pas une recherche
+  typed.value = false
   if (props.multiple) {
     model.value = toggleValue(selectedValues.value, option.value)
     query.value = ''
@@ -591,7 +584,7 @@ watch(
         >
       </ListboxOption>
 
-      <!-- Ordre chargement → vide → contenu (modèle DataTable) : pendant une
+      <!-- Ordre chargement → vide → contenu : pendant une
            requête, le panneau ne doit pas annoncer « aucun résultat ». -->
       <div v-if="loading && filtered.length === 0" class="ds-combobox-state">
         <slot name="loading">
@@ -663,7 +656,6 @@ watch(
     transition: rotate var(--ds-duration-fast) var(--ds-ease-default);
   }
 
-  /* le chevron se retourne à l'ouverture de la liste */
   .ds-combobox[data-open] .ds-combobox-chevron {
     rotate: 180deg;
   }
@@ -690,22 +682,18 @@ watch(
      les Chips, aucun saut au focus. Ordre significatif : les tailles sont à
      spécificité égale entre elles, la variante compact vient en dernier. */
   .ds-combobox[data-multiple] {
-    /* md : Chip xs, 24px dans 40px (36px en compact) */
     --_chip-height: var(--ds-control-height-xs);
   }
 
   .ds-combobox[data-multiple][data-size='sm'] {
-    /* sm : Chip xs compact, 20px dans 32px (28px en compact) */
     --_chip-height: calc(var(--ds-control-height-xs) - var(--ds-space-1));
   }
 
   .ds-combobox[data-multiple][data-size='lg'] {
-    /* lg : Chip sm, 32px dans 48px */
     --_chip-height: var(--ds-control-height-sm);
   }
 
   .ds-combobox[data-multiple][data-size='lg'][data-compact] {
-    /* lg compact : Chip sm compact, 28px dans 44px */
     --_chip-height: calc(var(--ds-control-height-sm) - var(--ds-space-1));
   }
 

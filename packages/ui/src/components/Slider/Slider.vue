@@ -6,21 +6,16 @@ import Input from '../Input/Input.vue'
 import { isDev } from '../../utils/env'
 
 /**
- * <input type="range"> natif (clavier, ARIA slider, formulaires gratuits).
- * Le JS du composant se limite à :
- * - empêcher le croisement des valeurs en mode range (DEUX inputs natifs
- *   superposés — il n'existe pas de primitive double curseur) ;
- * - le pont des champs numériques (parse/clamp/snap au `change` : le natif
- *   ne valide pas une saisie libre) ;
- * - la dérivation pure de données pour ticks/labels/tooltips (fractions de
- *   pas) — aucun comportement navigateur réimplémenté.
- * Vertical : `writing-mode: vertical-lr` + `direction: rtl` sur le
- * sous-conteneur `.ds-slider-control` — support natif du range vertical :
- * Chrome/Edge 129+, Safari 18.1+ (léger relèvement du plancher Chrome 125
- * assumé, cf. CLAUDE.md).
+ * <input type="range"> natif (clavier, ARIA slider, formulaires gratuits). Le
+ * JS se limite à empêcher le croisement des valeurs en mode range (deux inputs
+ * superposés — il n'existe pas de primitive double curseur), au pont des champs
+ * numériques (le natif ne valide pas une saisie libre) et à des dérivations
+ * pures pour ticks/labels/tooltips.
+ *
  * Les custom properties inline (fractions unitless) sont la seule liaison de
  * style : elles alignent fill/ticks/labels/tooltips sur le CENTRE réel du
  * thumb, qui parcourt [thumb/2, 100% − thumb/2] et non [0, 100%].
+ * Vertical : support natif du range vertical Chrome/Edge 129+, Safari 18.1+.
  */
 export type SliderLabel = string | { icon: string; label: string }
 
@@ -341,7 +336,6 @@ function resyncFields() {
     overflow: hidden;
   }
 
-  /* En simple, le fill part du bord de la piste (rendu plein à l'origine). */
   .ds-slider-fill {
     position: absolute;
     inset-block: 0;
@@ -350,7 +344,6 @@ function resyncFields() {
     background: var(--ds-color-accent);
   }
 
-  /* En range, il relie les centres des deux thumbs. */
   .ds-slider[data-range] .ds-slider-fill {
     inset-inline-start: calc(var(--_thumb) / 2 + (100% - var(--_thumb)) * var(--_start-f));
     inline-size: calc((100% - var(--_thumb)) * (var(--_end-f) - var(--_start-f)));
@@ -446,8 +439,8 @@ function resyncFields() {
     outline-offset: var(--ds-focus-ring-offset);
   }
 
-  /* --- Tooltip de valeur (achecpparence du Tooltip, position par fraction : le
-     thumb natif est un pseudo-élément non ancrable en anchor positioning). */
+  /* --- Tooltip de valeur : apparence du Tooltip, mais position par fraction —
+     le thumb natif est un pseudo-élément, non ancrable en anchor positioning. */
   .ds-slider-tooltip {
     position: absolute;
     inset-block-end: calc(100% + var(--ds-space-2));

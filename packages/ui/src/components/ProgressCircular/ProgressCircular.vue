@@ -1,25 +1,15 @@
 <script setup lang="ts">
 /**
- * Progression en donut. Aucune primitive native : SVG piloté par CSS.
+ * Progression en donut : SVG piloté par CSS, aucun JS de calcul. Le <svg> n'a
+ * PAS de viewBox (1 unité utilisateur = 1 px) et les cercles sont positionnés
+ * par les propriétés SVG2 `cx`/`cy`/`r` en longueurs pures — un viewBox fixe
+ * imposerait de convertir l'épaisseur en unités de viewBox, donc de connaître
+ * le ratio en JS et de le recalculer à chaque changement de taille.
+ * `pathLength=100` normalise le chemin : stroke-dashoffset s'exprime alors
+ * directement en pourcentage.
  *
- * Toute la géométrie est CSS, sans un octet de JS de calcul : le <svg> n'a
- * PAS de viewBox (donc 1 unité utilisateur = 1 px, aucun facteur d'échelle à
- * compenser) et les cercles sont positionnés par les propriétés de géométrie
- * SVG2 `cx`/`cy`/`r` dérivées des mêmes custom properties que la boîte. Un
- * viewBox fixe imposerait au contraire de convertir l'épaisseur en unités de
- * viewBox — donc de connaître le ratio diamètre/viewBox en JS, à recalculer à
- * chaque changement de taille.
- *
- * `pathLength=100` normalise la longueur du chemin : stroke-dashoffset
- * s'exprime alors directement en pourcentage de progression.
- *
- * Nom accessible : passer `aria-label` (fallthrough). Attention, le rôle
- * progressbar est « children presentational » : le label affiché au centre
- * n'est PAS annoncé, il ne remplace pas un aria-label.
- *
- * Pour un simple « chargement » sans sémantique de progression, préférer
- * Spinner (role="status") : ce composant garde role="progressbar" et la
- * continuité visuelle avec son mode déterminé.
+ * Nom accessible : passer `aria-label` (fallthrough). Le rôle progressbar est
+ * « children presentational » : le label affiché au centre n'est PAS annoncé.
  */
 import { useProgressValue } from '../../composables/useProgressValue'
 import { px } from '../../utils/css'
@@ -119,7 +109,6 @@ const { clamped, fraction } = useProgressValue(
     vertical-align: middle;
   }
 
-  /* Superposition SVG / label sans position absolue. */
   .ds-progress-circular-svg,
   .ds-progress-circular-label {
     grid-area: 1 / 1;
@@ -161,7 +150,6 @@ const { clamped, fraction } = useProgressValue(
   .ds-progress-circular-bar {
     stroke: var(--_fill);
     stroke-linecap: round;
-    /* pathLength=100 : le chemin fait 100 unités, dashoffset = reste à parcourir */
     stroke-dasharray: 100;
     stroke-dashoffset: calc(100 - 100 * var(--_f));
     transition: stroke-dashoffset var(--ds-duration-base) var(--ds-ease-default);
@@ -171,9 +159,8 @@ const { clamped, fraction } = useProgressValue(
     stroke-linecap: butt;
   }
 
-  /* --- Tones : variables locales uniquement (mêmes valeurs que ProgressLinear,
-     sans couleur de repli du texte : le label est dans le trou du donut, sur le
-     fond de page, donc en couleur de texte courante) --- */
+  /* Pas de couleur de repli du texte : le label est dans le trou du donut, sur
+     le fond de page, donc en couleur de texte courante. */
   .ds-progress-circular[data-tone='accent'] {
     --_fill: var(--ds-color-accent);
     --_track: var(--ds-color-accent-surface);
@@ -194,13 +181,13 @@ const { clamped, fraction } = useProgressValue(
     --_track: var(--ds-color-warning-surface);
   }
 
-  /* Neutral : inversion text/surface (modèle Chip/Badge). */
+  /* Neutral : inversion text/surface. */
   .ds-progress-circular[data-tone='neutral'] {
     --_fill: var(--ds-color-text);
     --_track: var(--ds-color-surface-muted);
   }
 
-  /* --- Couleur custom : après les tones (même spécificité, dernier gagne) --- */
+  /* Après les tones : même spécificité, le dernier gagne. */
   .ds-progress-circular[data-custom] {
     --_fill: var(--_custom);
     --_track: color-mix(in oklab, var(--_custom), var(--ds-color-surface) 85%);
@@ -214,7 +201,6 @@ const { clamped, fraction } = useProgressValue(
        ci-dessous empêche l'étirement par défaut, et un `stretch` inapplicable
        retombe sur `start` — sans ce place-self, le label serait collé au bord. */
     place-self: center;
-    /* rester dans le trou du donut */
     max-inline-size: calc(var(--_diameter) - var(--_thickness) * 2);
     color: var(--ds-color-text);
     font-family: var(--ds-text-family);
@@ -226,9 +212,9 @@ const { clamped, fraction } = useProgressValue(
     text-align: center;
   }
 
-  /* --- Indéterminé : rotation d'ensemble + arc dont la longueur varie.
-     Périodes volontairement différentes (×4 et ×5) : un rapport entier
-     donnerait un battement mécanique. --- */
+  /* Indéterminé : rotation d'ensemble + arc dont la longueur varie. Périodes
+     volontairement différentes (×4 et ×5) — un rapport entier donnerait un
+     battement mécanique. */
   .ds-progress-circular[data-indeterminate] .ds-progress-circular-svg {
     animation: ds-spin calc(var(--ds-duration-slow) * 4) linear infinite;
   }

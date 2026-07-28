@@ -224,7 +224,7 @@ watch(activeStep, (step) => {
     liveMessage.value = step === 'minute' ? 'Sélection des minutes' : 'Sélection de l’heure'
 })
 
-// ── Mode saisie : champs HH / MM (modèle InputOTP, commit au change) ────────
+// Mode saisie : champs HH / MM, commit au change.
 const fieldHour = ref('')
 const fieldMinute = ref('')
 
@@ -250,7 +250,7 @@ function onFieldInput(which: 'hour' | 'minute', event: Event) {
   el.value = digits
   if (which === 'hour') {
     fieldHour.value = digits
-    // 2 chiffres saisis : avance auto vers les minutes (modèle InputOTP)
+    // 2 chiffres saisis : avance auto vers les minutes
     if (digits.length === 2) {
       commitField('hour')
       fieldMinuteEl.value?.focus()
@@ -262,7 +262,7 @@ function onFieldInput(which: 'hour' | 'minute', event: Event) {
 }
 
 /** Commit au `change` (blur/Entrée), jamais à la frappe : on clamperait « 1 »
-    pendant la saisie de « 15 » (précédent Slider). Vide/NaN → revert. */
+    pendant la saisie de « 15 ». Vide/NaN → revert. */
 function commitField(which: 'hour' | 'minute') {
   const raw = which === 'hour' ? fieldHour.value : fieldMinute.value
   const n = Number(raw)
@@ -289,7 +289,6 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
     return
   }
   // ±1 aux flèches avec wrap : action discrète, committée immédiatement.
-  // (`type="number"` écarté : spinners natifs non stylables, validation laxiste.)
   if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
     event.preventDefault()
     const delta = event.key === 'ArrowUp' ? 1 : -1
@@ -372,7 +371,7 @@ function onFieldKeydown(which: 'hour' | 'minute', event: KeyboardEvent) {
               {{ pad2(draftMinute) }}
             </button>
           </template>
-          <!-- Mode saisie : champs nus (modèle InputOTP) -->
+          <!-- Mode saisie : champs nus -->
           <template v-else>
             <div class="ds-timepicker-field-group">
               <input

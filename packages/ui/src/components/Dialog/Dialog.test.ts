@@ -146,13 +146,10 @@ describe('Dialog', () => {
 
   it('montage paresseux : absent fermé, présent ouvert, retiré après fermeture', async () => {
     const { open, getDialog } = renderHarness()
-    // fermé : pas dans le DOM
     expect(getDialog()).toBeNull()
-    // ouvert : monté
     open.value = true
     await flush()
     expect(getDialog()).not.toBeNull()
-    // refermé : retiré du DOM
     open.value = false
     await flush()
     expect(getDialog()).toBeNull()

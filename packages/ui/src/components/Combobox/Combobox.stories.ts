@@ -120,7 +120,6 @@ export const SelectionMultiple: Story = {
     await userEvent.keyboard('{Backspace}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^fr$/))
 
-    // retrait via le bouton du tag
     await userEvent.click(canvas.getByRole('button', { name: 'Retirer France' }))
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^$/))
 

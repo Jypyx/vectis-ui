@@ -31,7 +31,6 @@ export const Default: Story = {
     const canvas = within(canvasElement)
     const first = canvas.getByRole('textbox', { name: 'Caractère 1 sur 6' })
 
-    // la saisie avance automatiquement de case en case
     await userEvent.click(first)
     await userEvent.keyboard('123456')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('123456'))

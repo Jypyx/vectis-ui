@@ -94,7 +94,6 @@ describe('Listbox', () => {
     const panel = container.querySelector('[role="listbox"]') as HTMLElement
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
 
-    // modèle → DOM
     open.value = true
     await nextTick()
     expect(panel.hasAttribute('data-popover-open')).toBe(true)

@@ -36,7 +36,6 @@ describe('InputOTP', () => {
     const input = getAllByRole('textbox')[0] as HTMLInputElement
     await fireEvent.update(input, 'a')
     expect(input.value).toBe('')
-    // la valeur reste vide : aucun update émis
     expect(emitted()).not.toHaveProperty('update:modelValue')
   })
 

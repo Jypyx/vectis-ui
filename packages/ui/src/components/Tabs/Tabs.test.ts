@@ -141,7 +141,6 @@ describe('Tabs', () => {
       await fireEvent.keyDown(tabs[1] as HTMLElement, { key: 'End' })
       expect(document.activeElement).toBe(tabs[2])
 
-      // bouclage
       await fireEvent.keyDown(tabs[2] as HTMLElement, { key: 'ArrowRight' })
       expect(document.activeElement).toBe(tabs[0])
 

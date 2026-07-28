@@ -48,7 +48,6 @@ withDefaults(defineProps<SpinnerProps>(), {
       color-mix(in oklab, currentcolor, transparent 75%);
     border-block-start-color: currentcolor;
     border-radius: var(--ds-radius-full);
-    /* durée dérivée d'un token plutôt qu'une valeur brute */
     animation: ds-spin calc(var(--ds-duration-slow) * 3.5) linear infinite;
   }
 

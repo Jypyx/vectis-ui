@@ -94,7 +94,6 @@ describe('AvatarGroup', () => {
           ),
       },
     })
-    // 2 avatars visibles + 1 agrégat = 3 disques
     expect(container.querySelectorAll('.ds-avatar')).toHaveLength(3)
     expect(getByText('+2')).toBeTruthy()
   })

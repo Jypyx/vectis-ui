@@ -15,14 +15,14 @@ import type { HourFormat } from '../../utils/time'
 import { pad2 } from '../../utils/text'
 
 /**
- * Cadran horloge du TimePicker (interne, non exporté — modèle MenuPanel).
+ * Cadran horloge du TimePicker (interne, non exporté).
  *
  * Aucune primitive native ne couvre la sélection angulaire : le JS se limite à
  * (1) la conversion pointeur → valeur (pointerdown/move : mesure du rect puis
  * trigonométrie PURE dans `utils/time` — atan2, seuil d'anneau) et (2) le pattern
  * ARIA « slider » au clavier (flèches / Home / End / PageUp-Down). Tout le
  * rendu — position des chiffres, aiguille — est du CSS (`sin()`/`cos()` sur la
- * fraction de tour unitless `--_turn` inline, idiome `--_f` du Slider).
+ * fraction de tour unitless `--_turn` inline).
  *
  * Un unique élément focusable `role="slider"` (1 arrêt de tabulation,
  * `aria-valuetext` localisé) : les chiffres sont des repères purement visuels

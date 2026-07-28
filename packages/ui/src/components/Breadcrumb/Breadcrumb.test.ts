@@ -108,7 +108,6 @@ describe('Breadcrumb', () => {
       const { getAllByRole, getByRole, queryByRole } = render(Breadcrumb, {
         props: { items: sixItems, maxItems: 4, currentPath: '/a/b/c/d/e' },
       })
-      // 4 <li> : premier, ellipsis, avant-dernier, dernier
       expect(getAllByRole('listitem')).toHaveLength(4)
       expect(getByRole('link', { name: 'Accueil' })).toBeTruthy()
       expect(getByRole('link', { name: 'Delta' })).toBeTruthy()

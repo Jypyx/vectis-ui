@@ -322,7 +322,7 @@ function toggleView(target: 'months' | 'years') {
 // ── Sélection ───────────────────────────────────────────────────────────────
 function selectDay(cell: DayCell) {
   if (cell.kind !== 'button' || cell.disabled) return
-  focusedISO.value = cell.iso // la roving-cible suit la sélection
+  focusedISO.value = cell.iso
   if (props.mode === 'single') {
     model.value = cell.iso
   } else if (props.mode === 'multiple') {
@@ -791,7 +791,6 @@ defineExpose({ focus })
     border-start-end-radius: var(--ds-radius-pill);
     border-end-end-radius: var(--ds-radius-pill);
   }
-  /* plage d'un seul jour : pas de bande */
   .ds-calendar-cell[data-range-start][data-range-end]::before {
     content: none;
   }
@@ -844,7 +843,6 @@ defineExpose({ focus })
     font-weight: var(--ds-font-weight-semibold);
   }
 
-  /* dates désactivées : grises + barrées, non cliquables */
   .ds-calendar-day[aria-disabled='true'] {
     color: var(--ds-color-text-subtle);
     text-decoration: line-through;
@@ -871,7 +869,6 @@ defineExpose({ focus })
     line-height: var(--ds-text-control-leading);
   }
 
-  /* pastilles d'événements */
   .ds-calendar-dots {
     position: absolute;
     inset-block-end: calc(var(--ds-space-1) * 0.5);
@@ -922,7 +919,7 @@ defineExpose({ focus })
   .ds-calendar-picker-cell[data-selected] {
     background: var(--ds-color-accent);
     color: var(--ds-color-text-on-accent);
-    /* semibold : emphase d'état (sélection) */
+    /* semibold : emphase d'état, pas un rôle typo */
     font-weight: var(--ds-font-weight-semibold);
   }
   .ds-calendar-picker-cell:disabled {

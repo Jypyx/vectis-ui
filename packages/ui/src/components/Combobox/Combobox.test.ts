@@ -70,7 +70,6 @@ describe('Combobox', () => {
         o.textContent?.includes(text),
       )!
 
-    // 1er choix : Belgique
     await fireEvent.update(input, 'bel')
     await nextTick()
     await fireEvent.click(optionByText('Belgique'))

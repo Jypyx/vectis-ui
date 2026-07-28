@@ -9,11 +9,8 @@ interface FocusableField {
 }
 
 export interface UseFieldPanelOptions {
-  /** Racine du composant : périmètre du test de sortie de focus. */
   rootEl: Ref<HTMLElement | null>
-  /** L'élément `[popover]`. */
   panelEl: Ref<HTMLElement | null>
-  /** Le champ, pour lui rendre le focus à la fermeture. */
   fieldEl: Ref<FocusableField | null>
   disabled: () => boolean
   /** Place le focus DANS le panneau ouvert (appelé sous `requestAnimationFrame`). */
@@ -26,9 +23,7 @@ export interface UseFieldPanelOptions {
 
 /**
  * Coquille « champ en lecture seule + panneau flottant `popover="manual"` »,
- * partagée par DatePicker et TimePicker. Aucun des deux n'en est propriétaire :
- * c'est le même squelette, qui avait été recopié à l'identique (ouverture,
- * fermeture, sortie de focus, clic sur le contrôle, Échap/ArrowDown/Entrée).
+ * partagée par DatePicker et TimePicker. Aucun des deux n'en est propriétaire.
  *
  * Un popover `manual` ne fait RIEN tout seul : ni light dismiss, ni déplacement
  * du focus, ni retour du focus au déclencheur. Tout ce qui suit est ce minimum,

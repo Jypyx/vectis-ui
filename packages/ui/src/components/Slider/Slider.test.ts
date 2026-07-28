@@ -55,7 +55,6 @@ describe('Slider', () => {
       props: { modelValue: 50, ticks: true, step: 25, label: 'x' },
     })
     const ticks = container.querySelectorAll('.ds-slider-tick')
-    // 0, 25, 50, 75, 100
     expect(ticks).toHaveLength(5)
     const filled = container.querySelectorAll('.ds-slider-tick[data-filled]')
     // 0, 25, 50 remplis (≤ valeur)
@@ -67,7 +66,6 @@ describe('Slider', () => {
       props: { modelValue: [25, 75], range: true, ticks: true, step: 25, label: 'x' },
     })
     const filled = container.querySelectorAll('.ds-slider-tick[data-filled]')
-    // 25, 50, 75
     expect(filled).toHaveLength(3)
   })
 

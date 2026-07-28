@@ -39,7 +39,6 @@ defineSlots<{
   overflow?(props: { count: number }): unknown
 }>()
 
-// Getters : les props du groupe restent réactives à travers l'injection.
 provide(avatarGroupKey, {
   get size() {
     return props.size

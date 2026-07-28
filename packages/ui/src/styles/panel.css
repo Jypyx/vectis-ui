@@ -1,8 +1,8 @@
 /*
  * Chrome commun des panneaux flottants listant des rangées (Menu, Listbox).
  *
- * Pendant de `floating.css`, qui mutualise le POSITIONNEMENT du même sujet :
- * ici c'est l'habillage (surface, bordure, ombre, rythme interne). Les deux
+ * Pendant de `floating.css`, qui porte le POSITIONNEMENT du même sujet : ici
+ * c'est l'habillage (surface, bordure, ombre, rythme interne). Les deux
  * classes se posent ensemble sur la racine du popover :
  *   class="ds-panel ds-menu ds-floating"
  *
@@ -19,10 +19,10 @@
  * panneau, un sous-menu écraserait donc la valeur héritée de sa racine.
  *
  * Ne PAS transformer ce partage en SFC `FloatingPanel.vue` commun : il faudrait
- * lui repasser en props le mode popover, le rôle ARIA, l'ancre, et republier
- * show/hide — soit exactement le panneau paramétré par `role` que la scission
- * Menu/Listbox a supprimé. La granularité de partage est le comportement
- * (`composables/usePopover.ts`) et le chrome (ce fichier), jamais le composant.
+ * lui repasser en props le mode popover, le rôle ARIA et l'ancre, et republier
+ * show/hide — soit un panneau paramétré par `role`. La granularité de partage
+ * est le comportement (`composables/usePopover.ts`) et le chrome (ce fichier),
+ * jamais le composant.
  */
 @layer ds.components {
   .ds-panel {

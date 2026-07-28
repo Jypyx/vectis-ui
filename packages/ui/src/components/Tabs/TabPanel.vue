@@ -8,9 +8,6 @@ import { tabsKey } from './context'
  * masqué par l'attribut natif `hidden` quand il n'est pas actif : zéro JS,
  * l'état du contenu (saisie en cours, défilement) survit au changement
  * d'onglet.
- *
- * `hidden="until-found"` est écarté : `beforematch` révélerait le panneau via
- * Ctrl+F sans mettre à jour `aria-selected` ni le v-model.
  */
 interface TabPanelProps {
   /** Doit correspondre au `value` d'un `Tab`. */

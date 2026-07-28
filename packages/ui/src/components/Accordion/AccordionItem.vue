@@ -53,9 +53,7 @@ const collapseIcon = computed(() => accordion?.collapseIcon)
 /*
  * Seul JS de comportement du composant : <summary> n'a pas d'attribut
  * `disabled` natif, le basculement de <details> ne peut être bloqué
- * autrement. `pointer-events: none` est écarté (il supprimerait le
- * `cursor: not-allowed` et la sélection du texte) ; le clavier, lui, est
- * couvert sans handler par `tabindex="-1"`.
+ * autrement — le clavier, lui, est couvert sans handler par `tabindex="-1"`.
  */
 function onSummaryClick(event: MouseEvent) {
   if (props.disabled) event.preventDefault()
@@ -188,7 +186,6 @@ function onSummaryClick(event: MouseEvent) {
     transition: rotate var(--ds-duration-base) var(--ds-ease-default);
   }
 
-  /* Sans icône d'ouverture dédiée : le chevron pivote */
   .ds-accordion-item[open]:not([data-swap]) > .ds-accordion-summary .ds-accordion-icon {
     rotate: 180deg;
   }

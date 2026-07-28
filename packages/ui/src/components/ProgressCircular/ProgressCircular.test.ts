@@ -19,7 +19,7 @@ describe('ProgressCircular', () => {
     const bar = getByRole('progressbar', { name: 'Envoi' })
     expect(bar.getAttribute('aria-valuenow')).toBe('30')
     expect(bar.getAttribute('aria-valuemin')).toBe('0')
-    // borne haute fidèle, pas de normalisation sur 100 (ancien comportement)
+    // borne haute fidèle, pas de normalisation sur 100
     expect(bar.getAttribute('aria-valuemax')).toBe('60')
     expect(styleOf(container)).toContain('--_f: 0.5')
   })
@@ -146,9 +146,9 @@ describe('ProgressCircular', () => {
       props: { value: 40 },
       attrs: { 'aria-label': 'Nom par fallthrough' },
     })
-    // le nom vient de aria-label en fallthrough, plus d'une prop `label` dédiée
+    // le nom vient d'aria-label en fallthrough, pas d'une prop `label` dédiée
     expect(getByRole('progressbar', { name: 'Nom par fallthrough' })).toBeTruthy()
-    // l'ancienne custom property publique est remplacée par --_f (privée)
+    // la fraction est une custom property PRIVÉE : rien de public n'est exposé
     expect(styleOf(container)).not.toContain('--ds-progress-value')
   })
 

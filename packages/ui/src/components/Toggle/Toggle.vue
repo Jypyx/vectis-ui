@@ -92,19 +92,17 @@ function isSelected(value: ToggleValue): boolean {
 function select(value: ToggleValue) {
   if (props.multiple) {
     const current = Array.isArray(model.value) ? model.value : []
-    // jamais vider le dernier
     if (props.mandatory && current.length === 1 && current.includes(value)) return
     model.value = toggleValue(current, value)
     return
   }
   if (model.value === value) {
-    if (!props.mandatory) model.value = null // re-clic = désélection
+    if (!props.mandatory) model.value = null
     return
   }
   model.value = value
 }
 
-// Getters : les props de la racine restent réactives à travers l'injection.
 provide(toggleKey, {
   isSelected,
   select,
@@ -182,7 +180,6 @@ function onKeydown(event: KeyboardEvent) {
 
   .ds-toggle:not(.ds-button-group)[data-orientation='vertical'] {
     flex-direction: column;
-    /* largeurs égalisées, comme ButtonGroup vertical */
     align-items: stretch;
   }
 }

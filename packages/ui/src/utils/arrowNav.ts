@@ -8,8 +8,7 @@
  * composant qui veut l'activation au focus (Tabs en `activation: 'automatic'`)
  * la pose lui-même, dans son propre `@focus`.
  *
- * Une seule incarnation pour Pagination, Tabs, Toggle et Menu — les quatre
- * avaient recopié le même bloc, et les copies avaient divergé.
+ * Incarnation unique pour Pagination, Tabs, Toggle et Menu.
  */
 
 /**

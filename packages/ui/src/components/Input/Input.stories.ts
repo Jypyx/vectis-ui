@@ -183,7 +183,6 @@ export const Loading: Story = {
     template: '<Input v-bind="args" v-model="value" />',
   }),
   play: async ({ canvasElement }) => {
-    // le spinner remplace l'icône end
     await expect(within(canvasElement).getByRole('status')).toBeInTheDocument()
   },
 }

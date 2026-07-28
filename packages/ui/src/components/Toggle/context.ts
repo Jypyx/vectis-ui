@@ -4,7 +4,7 @@ import type { ToggleSize, ToggleTone, ToggleValue, ToggleVariant } from './Toggl
 
 /**
  * Contrat Toggle → ToggleItem. Getters : les props de la racine restent
- * réactives à travers l'injection (modèle Tabs). Pas d'ids ni de registre :
+ * réactives à travers l'injection. Pas d'ids ni de registre :
  * aucun aria-controls dans ce pattern, et la sélection est une pure
  * comparaison de valeurs — déterministe SSR/client.
  *

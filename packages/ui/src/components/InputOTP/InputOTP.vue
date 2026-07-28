@@ -57,7 +57,6 @@ const props = withDefaults(defineProps<InputOTPProps>(), {
   label: 'Code de vérification',
 })
 
-// `label` n'est qu'un défaut : cf. useAriaLabel pour la précédence ARIA.
 const ariaLabel = useAriaLabel(() => props.label)
 
 const model = defineModel<string>({ default: '' })

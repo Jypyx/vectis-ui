@@ -7,18 +7,10 @@ import Typography from '../Typography/Typography.vue'
 
 /**
  * Modale bloquante bâtie sur la primitive native `<dialog>` + `showModal()` :
- * top-layer, `::backdrop`, piège de focus et fond inerte GRATUITS, retour du
- * focus au déclencheur à la fermeture — aucun JS pour tout cela. Le light
- * dismiss (clic backdrop / Échap) est lui aussi déclaratif via l'attribut
- * `closedby`. Le SEUL JS de comportement est le pont `v-model:open` ↔ API
- * impérative (`showModal()`/`close()` n'ont pas d'équivalent déclaratif), gardé
- * SSR-safe (accès DOM confiné à onMounted/watch/handlers).
- *
- * Trois zones : header (titre + sous-titre, remplaçables par le slot #header ;
- * croix à droite, slot #headerActions juste à sa gauche), contenu scrollable
- * (slot par défaut) et footer d'actions (slot #footer). Les séparateurs
- * header/contenu et contenu/footer n'apparaissent que si le contenu déborde —
- * voir le `<style>` (scroll-state container queries).
+ * top-layer, `::backdrop`, piège de focus, fond inerte et retour du focus au
+ * déclencheur sont natifs, et le light dismiss est déclaratif via `closedby`.
+ * Le SEUL JS de comportement est le pont `v-model:open` ↔ API impérative
+ * (`showModal()`/`close()` n'ont pas d'équivalent déclaratif), gardé SSR-safe.
  */
 interface DialogProps {
   /** Titre du header (ignoré si le slot #header est fourni). */
@@ -320,7 +312,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     display: flex;
     align-items: center;
     gap: var(--ds-space-1);
-    /* réduit l'emprise de la croix dans le padding du header (idiome Toast) */
+    /* réduit l'emprise de la croix dans le padding du header */
     margin-block-start: calc(-1 * var(--ds-space-1));
     margin-inline-end: calc(-1 * var(--ds-space-2));
   }

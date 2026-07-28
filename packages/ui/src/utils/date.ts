@@ -14,7 +14,6 @@
 
 import { pad2 } from './text'
 
-/** Motif ISO strict `YYYY-MM-DD`. */
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/
 
 /** Vrai si `iso` est une chaîne `YYYY-MM-DD` valide (mois/jour cohérents). */
@@ -32,7 +31,6 @@ export function parseISO(iso: string | null | undefined): Date | null {
   return Number.isNaN(date.getTime()) ? null : date
 }
 
-/** `Date` (heure locale) → ISO `YYYY-MM-DD`. */
 export function formatISO(date: Date): string {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
 }
@@ -64,7 +62,6 @@ export function addMonths(iso: string, n: number): string {
   return formatISO(d)
 }
 
-/** Nombre de jours du mois (mois 0-indexé). */
 export function daysInMonth(year: number, month0: number): number {
   return new Date(year, month0 + 1, 0).getDate()
 }
@@ -148,7 +145,6 @@ export function firstDayOfWeekFor(locale: string): number {
 const REF_SUNDAY = Date.UTC(2021, 7, 1) // 1er août 2021 = dimanche
 const MS_DAY = 86_400_000
 
-/** Noms des 7 jours ordonnés à partir de `firstDayOfWeek`. */
 export function weekdayNames(
   locale: string,
   firstDayOfWeek: number,
@@ -160,7 +156,6 @@ export function weekdayNames(
   )
 }
 
-/** Noms des 12 mois (0-indexé). */
 export function monthNames(locale: string, month: 'long' | 'short' = 'long'): string[] {
   const fmt = new Intl.DateTimeFormat(locale, { month, timeZone: 'UTC' })
   return Array.from({ length: 12 }, (_, i) => fmt.format(Date.UTC(2021, i, 1)))
@@ -178,7 +173,6 @@ export function monthNamesCompact(locale: string): string[] {
   })
 }
 
-/** Nom d'un mois isolé (0-indexé). */
 export function monthName(
   locale: string,
   month0: number,

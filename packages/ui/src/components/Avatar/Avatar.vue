@@ -14,9 +14,9 @@ export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
  *
  * JS justifié : la détection d'échec de chargement d'image (`error`) n'existe
  * qu'en événement DOM ; les initiales et la teinte auto sont dérivées du nom ;
- * le pont « lien inerte » (href retiré + aria-disabled + onClick filtré) suit
- * le modèle Button ; la répartition des attrs (style hors fallthrough pour y
- * injecter --_hue/--_custom) suit le modèle Chip.
+ * le pont « lien inerte » (href retiré + aria-disabled + onClick filtré) ; la
+ * répartition des attrs (style hors fallthrough pour y injecter
+ * --_hue/--_custom).
  */
 interface AvatarProps {
   /** URL de l'image (priorité 1). */
@@ -78,7 +78,6 @@ const tag = computed(() => (isLink.value ? 'a' : props.clickable ? 'button' : 's
 const isInertLink = computed(() => isLink.value && props.disabled)
 
 const failed = ref(false)
-// nouvelle source → on retente l'image
 watch(
   () => props.src,
   () => {
@@ -102,8 +101,7 @@ const initials = computed(() => {
  * Teinte auto : hash pur JS du nom → teinte OKLCH (0–359). Seule la teinte est
  * inline (scalaire unitless) ; le CSS compose fond/texte avec des L/C fixés par
  * thème (adaptation light/dark sans dépendre de contrast-color). Couleur
- * calculée hors tokens, assumée — même exception que le pont `color` custom de
- * Chip/Badge. SSR-safe : aucune API navigateur.
+ * calculée hors tokens, exception assumée. SSR-safe : aucune API navigateur.
  */
 const hue = computed(() => {
   if (!props.name) return null
@@ -188,8 +186,8 @@ const passedAttrs = computed(() => {
     /* initiales : typo du contrôle (token de l'échelle de tailles), jamais un
        ratio brut sur la hauteur — la typo passe par des tokens (philosophie #3) */
     font-size: var(--_control-font-size);
-    /* semibold : emphase locale des initiales (plus lisibles à petite taille),
-       assumée hors du rôle `control` (medium) */
+    /* semibold : emphase d'état, pas un rôle typo (initiales plus lisibles à
+       petite taille) */
     font-weight: var(--ds-font-weight-semibold);
     line-height: var(--ds-text-control-leading);
     text-decoration: none;
@@ -209,7 +207,7 @@ const passedAttrs = computed(() => {
   }
 
   /* Couleur custom (--_custom inline) : prime, texte blanc fixe (contraste à la
-     charge du consommateur, comme Chip/Badge). Bloc après data-auto. */
+     charge du consommateur). Bloc après data-auto. */
   .ds-avatar[data-custom] {
     --_bg: var(--_custom);
     --_text: var(--ds-color-text-on-accent);
@@ -233,7 +231,6 @@ const passedAttrs = computed(() => {
     --ds-icon-size: calc(var(--_control-height) * 0.55);
   }
 
-  /* --- Interactif : hover/focus scopés à l'élément d'action --- */
   :is(a, button).ds-avatar {
     cursor: pointer;
   }

@@ -103,7 +103,6 @@ function onFocus() {
     white-space: nowrap;
   }
 
-  /* onglet réduit à son icône : carré, comme IconButton */
   .ds-tab[data-size][data-icon-only] {
     padding-inline: 0;
     min-inline-size: var(--_control-height);
@@ -111,7 +110,7 @@ function onFocus() {
 
   /*
    * L'onglet vit dans un conteneur `overflow: auto` qui rognerait un
-   * outline-offset positif : anneau intérieur (précédent .ds-accordion-summary).
+   * outline-offset positif : anneau intérieur.
    */
   .ds-tab[data-size]:focus-visible {
     outline-offset: calc(var(--ds-focus-ring-offset) * -1);

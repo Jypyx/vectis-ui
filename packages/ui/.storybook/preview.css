@@ -1,9 +1,8 @@
-/* Le canvas entier suit le thème posé sur <html> par le decorator. */
 body {
   background: var(--ds-color-surface);
 }
 
-/* Wrapper posé par le decorator de thème — consomme les tokens du DS. */
+/* Wrapper posé par le decorator de thème. */
 .sb-theme-root {
   padding: 2rem;
   background: var(--ds-color-surface);

@@ -1,24 +1,12 @@
 <script setup lang="ts">
 /**
- * Barre de progression.
+ * Barre de progression. La racine EST la piste ; toute la géométrie dérive
+ * d'une fraction unitless `--_f` inline, en propriétés logiques — l'orientation
+ * verticale ne demande alors qu'un `writing-mode`. Aucun JS de comportement.
  *
- * `<progress>` natif a été abandonné (décision utilisateur 2026-07) : ses
- * pseudo-éléments (::-webkit-progress-value, ::-moz-progress-bar) ne sont
- * stylables qu'en fond plat, n'acceptent aucun enfant — donc pas de texte dans
- * la barre — et ne basculent pas en writing-mode vertical. Le contrat ARIA
- * progressbar est donc porté explicitement ici. Aucun JS de comportement pour
- * autant : la normalisation de la valeur est partagée avec ProgressCircular
- * (`composables/useProgressValue`), tout le reste est CSS.
- *
- * La racine EST la piste (fond, rayon, dimensions) : le remplissage y est
- * posé en absolu, les copies de texte par-dessus. Toute la géométrie dérive
- * d'une fraction unitless `--_f` en custom property inline (modèle Slider),
- * exprimée en propriétés logiques — l'orientation verticale ne demande alors
- * qu'un `writing-mode`.
- *
- * Nom accessible : passer `aria-label` (fallthrough). Attention, le rôle
- * progressbar est « children presentational » : le texte visible dans la barre
- * n'est PAS annoncé, il ne remplace pas un aria-label.
+ * Nom accessible : passer `aria-label` (fallthrough). Le rôle progressbar est
+ * « children presentational » : le texte visible dans la barre n'est PAS
+ * annoncé, il ne remplace pas un aria-label.
  */
 import { useProgressValue } from '../../composables/useProgressValue'
 import { px } from '../../utils/css'
@@ -150,20 +138,16 @@ const { clamped, fraction } = useProgressValue(
     border-radius: inherit;
     background: var(--_fill);
     /*
-     * L'animation de progression porte sur inline-size (propriété de layout,
-     * non composited : compromis assumé — `scale` est physique et casserait le
-     * vertical et le RTL). La même durée et le même easing sont repris par le
-     * clip du texte contrasté, sinon la frontière de couleur décrocherait du
-     * bord du remplissage pendant la transition.
-     *
-     * Alternative écartée : enregistrer --_f via @property pour n'avoir qu'une
-     * seule transition — l'enregistrement est global et --_f porte déjà une
-     * autre sémantique dans Slider.
+     * L'animation porte sur inline-size (propriété de layout, non composited :
+     * compromis assumé — `scale` est physique et casserait le vertical et le
+     * RTL). La même durée et le même easing sont repris par le clip du texte
+     * contrasté, sinon la frontière de couleur décrocherait du bord du
+     * remplissage pendant la transition.
      */
     transition: inline-size var(--ds-duration-base) var(--ds-ease-default);
   }
 
-  /* --- Tones : variables locales uniquement (modèle Button/Chip) --- */
+  /* --- Tones : variables locales uniquement --- */
   .ds-progress-linear[data-tone='accent'] {
     --_fill: var(--ds-color-accent);
     --_track: var(--ds-color-accent-surface);
@@ -189,8 +173,8 @@ const { clamped, fraction } = useProgressValue(
     --_text-fallback: var(--ds-color-text-on-warning);
   }
 
-  /* Neutral : inversion text/surface (modèle Chip/Badge) — un gris moyen
-     serait illisible dans l'un des deux thèmes. */
+  /* Neutral : inversion text/surface — un gris moyen serait illisible dans
+     l'un des deux thèmes. */
   .ds-progress-linear[data-tone='neutral'] {
     --_fill: var(--ds-color-text);
     --_track: var(--ds-color-surface-muted);
@@ -236,7 +220,7 @@ const { clamped, fraction } = useProgressValue(
        par les navigateurs sans support — elle gagnerait la cascade puis
        deviendrait invalide au calcul (IACVT → color: unset → héritage, le
        fallback ne s'applique jamais). D'où le @supports ci-dessous, évalué,
-       lui, sans substitution de var() — pattern Badge. */
+       lui, sans substitution de var(). */
     color: var(--_text-fallback);
     /* inset() est physique : un jeu de valeurs par orientation et direction.
        Le débord négatif sur les trois autres côtés évite de rogner un texte
@@ -308,7 +292,6 @@ const { clamped, fraction } = useProgressValue(
      l'horizontal, le vertical et le RTL, là où un transform — physique —
      imposerait un jeu de keyframes par axe et une inversion de sens en RTL. */
   .ds-progress-linear[data-indeterminate] {
-    /* seul cas où le remplissage sort de la piste */
     overflow: hidden;
   }
 
@@ -354,8 +337,7 @@ const { clamped, fraction } = useProgressValue(
       transition: none;
     }
 
-    /* Un loader immobile perdrait sa fonction : ralentir, pas supprimer
-       (convention du DS, cf. Spinner et ProgressCircular). */
+    /* Un loader immobile perdrait sa fonction : ralentir, pas supprimer. */
     .ds-progress-linear[data-indeterminate] .ds-progress-linear-fill {
       animation-duration: calc(var(--ds-duration-slow) * 15);
     }

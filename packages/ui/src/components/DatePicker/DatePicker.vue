@@ -18,20 +18,15 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 
 /**
  * Sélecteur de date : champ `Input` (lecture seule) + `Calendar` dans un
- * panneau flottant. Composé des briques du DS ; ne réintroduit AUCUNE
- * dépendance ni positionnement JS.
- *
- * Le panneau est un `popover="manual"` ancré en pur CSS (`anchor-scope` sur la
- * racine + `anchor-name` sur le contrôle → `position-anchor`, cf. Tooltip /
- * Combobox). On ne passe pas par `popovertarget` (invalide sur un `<input>`
- * texte) : l'ouverture est programmatique, ce qui permet de **déplacer le focus
- * DOM dans la grille** du calendrier (modèle d'accessibilité correct). La
- * fermeture suit le pattern Combobox : `@focusout` sur la racine + Échap.
+ * panneau `popover="manual"` ancré en pur CSS. On ne passe pas par
+ * `popovertarget` (invalide sur un `<input>` texte) : l'ouverture est
+ * programmatique, ce qui permet de déplacer le focus DOM dans la grille du
+ * calendrier. Fermeture par `@focusout` sur la racine + Échap.
  */
 type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
 
 interface DatePickerProps {
-  // ── Calendar (passe-plat) ──
+  // Passe-plat vers Calendar.
   mode?: CalendarMode
   locale?: string
   firstDayOfWeek?: number
@@ -41,7 +36,7 @@ interface DatePickerProps {
   showAdjacentDays?: boolean
   selectAdjacentDays?: boolean
   events?: CalendarEvent[]
-  // ── Champ ──
+  // Champ.
   label?: string
   hint?: string
   placeholder?: string
@@ -98,7 +93,7 @@ defineSlots<{
   footer?(props: { close: () => void }): unknown
 }>()
 
-// ── Wrapper-root : class/style sur la racine, reste reporté sur l'Input ──────
+// Wrapper-root : class/style sur la racine, le reste reporté sur l'Input.
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
@@ -119,7 +114,6 @@ const { open, syncShown, openPanel, closePanel, onControlClick, onFocusout, onKe
     focusInPanel: () => calendarRef.value?.focus(),
   })
 
-// ── Valeur affichée dans le champ (localisée) ───────────────────────────────
 const hasValue = computed(() => {
   if (props.mode === 'multiple') return Array.isArray(model.value) && model.value.length > 0
   if (props.mode === 'range') {
@@ -142,7 +136,6 @@ const displayText = computed(() => {
     if (!r.end) return formatDisplay(r.start, locale, displayFormat)
     return formatDisplayRange(r.start, r.end, locale, displayFormat)
   }
-  // multiple
   const list = Array.isArray(model.value) ? model.value : []
   return list.map((iso) => formatDisplay(iso, locale, displayFormat)).join(', ')
 })

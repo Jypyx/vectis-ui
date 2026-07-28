@@ -16,7 +16,6 @@ describe('Calendar', () => {
     const { container } = render(Calendar, {
       props: { modelValue: JUNE, locale: 'fr-FR' },
     })
-    // 6 lignes × 7 = 42 cellules
     expect(container.querySelectorAll('[role="gridcell"]')).toHaveLength(42)
     const headers = container.querySelectorAll('[role="columnheader"]')
     expect(headers).toHaveLength(7)
@@ -30,7 +29,6 @@ describe('Calendar', () => {
     })
     const btn = container.querySelector('.ds-calendar-day[data-selected]') as HTMLElement
     expect(btn.textContent).toContain('10')
-    // clique le 15
     const cell15 = [...container.querySelectorAll('.ds-calendar-day')].find(
       (b) => b.textContent?.trim() === '15' && !b.hasAttribute('data-outside'),
     ) as HTMLElement
@@ -72,7 +70,6 @@ describe('Calendar', () => {
     await fireEvent.click(d5)
     const added = (emitted('update:modelValue')?.at(-1) as unknown[])?.[0] as string[]
     expect(added).toHaveLength(1)
-    // re-clic retire
     await rerender({ modelValue: added })
     await fireEvent.click(d5)
     const removed = (emitted('update:modelValue')?.at(-1) as unknown[])?.[0] as string[]
@@ -87,7 +84,6 @@ describe('Calendar', () => {
     const d1 = days.find((d) => d.textContent?.trim() === '1' && !d.hasAttribute('data-outside'))!
     expect(d1.getAttribute('aria-disabled')).toBe('true')
     await fireEvent.click(d1)
-    // aucun changement de modèle
     expect(emitted('update:modelValue')).toBeUndefined()
   })
 
@@ -183,9 +179,7 @@ describe('Calendar', () => {
     const { getByRole, getAllByRole } = render(Calendar, {
       props: { modelValue: JUNE, locale: 'fr-FR' },
     })
-    // le libellé de mois est un bouton
     await fireEvent.click(getByRole('button', { expanded: false, name: /juin/i }))
-    // grille des mois visible
     const monthsGrid = getByRole('grid', { name: /mois/i })
     expect(monthsGrid).toBeTruthy()
     const cells = getAllByRole('gridcell')

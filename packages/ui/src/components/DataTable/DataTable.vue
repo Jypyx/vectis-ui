@@ -28,16 +28,10 @@ import { useTimer } from '../../composables/useTimer'
  * (filtrage → tri → pagination, états de sélection) et à deux effets justifiés
  * en place : reset de page et debounce de la recherche serveur.
  *
- * Responsive 100 % CSS via container queries : en mode `stack`, sous 640px de
- * conteneur, chaque ligne devient une carte et chaque cellule affiche son
- * en-tête via ::before + data-label — aucun JS de mesure. (640px en dur : les
- * conditions @container n'acceptent pas var().)
- *
- * Hauteur 100 % CSS : la racine est une colonne flex de `block-size: 100%` dont
- * seule la zone défilante s'étire. Le tableau occupe donc la hauteur de son
- * parent (ou celle de la prop `height`) et ne varie plus avec le nombre de
- * lignes de la page courante ; sur un parent en hauteur auto, le pourcentage
- * retombe sur `auto` et le rendu est inchangé.
+ * Responsive et hauteur : 100 % CSS. En mode `stack`, sous 640px de conteneur,
+ * chaque ligne devient une carte (::before + data-label) — aucun JS de mesure ;
+ * 640px en dur, les conditions @container n'acceptent pas var(). La racine est
+ * une colonne flex de `block-size: 100%` dont seule la zone défilante s'étire.
  */
 export interface DataTableColumn {
   key: string
@@ -239,7 +233,7 @@ const totalCount = computed(() =>
 const pageCount = computed(() =>
   paginated.value ? Math.max(1, Math.ceil(totalCount.value / (perPage.value ?? 1))) : 1,
 )
-// Clamp par dérivation, sans muter le model (précédent Pagination) : si le
+// Clamp par dérivation, sans muter le model : si le
 // filtre réduit le nombre de pages, l'affichage retombe sur la dernière.
 const currentPage = computed(() => clamp(page.value, 1, pageCount.value))
 
@@ -569,7 +563,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     font-family: var(--ds-text-family);
 
     /*
-     * Colonne toolbar / scroller / footer (idiome Dialog) : le composant prend
+     * Colonne toolbar / scroller / footer : le composant prend
      * la hauteur de son parent et c'est la zone défilante qui absorbe le reste
      * — la table ne rétrécit plus quand une page est incomplète (dernière page
      * à 2 lignes) et le footer reste collé en bas. Sans hauteur imposée par le
@@ -613,7 +607,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
   /*
    * La SEULE zone qui défile : occupe l'espace laissé par la toolbar et le
-   * footer (idiome `.ds-dialog-scroll`). `flex: 1 1 auto` et non `flex: 1`
+   * footer. `flex: 1 1 auto` et non `flex: 1`
    * (= base 0) : la base `auto` part de la hauteur de contenu, donc inerte tant
    * qu'il n'y a pas d'espace libre à distribuer. `min-block-size: 0` lève le
    * minimum automatique de l'item flex (= hauteur du contenu), sans quoi le
@@ -647,7 +641,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   /* Surcharge qualifiée (0,2,0) du `.ds-input { width: 100% }` (0,1,0)
-     d'Input — indépendante de l'ordre du bundle (modèle Tabs). */
+     d'Input — indépendante de l'ordre du bundle. */
   .ds-table-toolbar .ds-input {
     inline-size: var(--ds-control-size-table-search);
     max-inline-size: 100%;
@@ -672,7 +666,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     padding: var(--_table-head-pad-block) var(--_table-pad-inline);
     text-align: start;
     font-size: var(--ds-text-body-md-size);
-    /* semibold : emphase d'état (en-tête détaché des cellules), pas un rôle typo */
+    /* semibold : emphase d'état, pas un rôle typo */
     font-weight: var(--ds-font-weight-semibold);
     color: var(--ds-color-text-muted);
     border-block-end: 1px solid var(--ds-color-border);
@@ -720,7 +714,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .ds-table-sort {
-    /* Contexte d'Icon : 20px, opsz 20 — idiome AccordionItem/MenuPanel.
+    /* Contexte d'Icon : 20px, opsz 20.
        Sans lui l'icône retomberait sur 1em, soit la taille de texte du th. */
     --ds-icon-size: var(--ds-icon-size-md);
     --ds-icon-opsz: 20;
