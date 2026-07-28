@@ -177,8 +177,8 @@ export const Disabled: Story = {
 
 /**
  * Tailles `sm` (32px) et `md` (40px, défaut), combinables avec `compact` (-4px).
- * En multiple, les Chips descendent d'un cran (sm→xs, md→sm) et s'alignent pile
- * sur la hauteur du champ.
+ * En multiple, les Chips gardent une taille constante (xs, 24px) ; seul `sm` les
+ * passe en compact (20px) pour tenir dans la hauteur du champ.
  */
 export const Tailles: Story = {
   render: (args) => ({

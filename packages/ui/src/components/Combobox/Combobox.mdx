@@ -125,9 +125,9 @@ espace vide.
 ## Tailles
 
 `size` accepte `sm` (32 px) et `md` (40 px, défaut — aligné sur `Input`/`Button`),
-combinable avec `compact` (-4 px). En multiple, les Chips descendent automatiquement
-d'un cran (`md` → Chips `sm`, `sm` → Chips `xs`) et s'alignent pile sur la hauteur du
-champ.
+combinable avec `compact` (-4 px). En multiple, les Chips gardent une taille constante
+(`xs`, 24 px) quelle que soit celle du champ ; seul `size="sm"` les passe en `compact`
+(20 px) pour qu'elles tiennent dans les 32 px du champ sans le faire grandir.
 
 <Canvas of={ComboboxStories.Tailles} />
 

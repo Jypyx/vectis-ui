@@ -122,9 +122,12 @@ defineSlots<{
   loading?(): unknown
 }>()
 
-// Les Chips sont une taille sous le champ : chip + padding-block = hauteur du
-// champ (sm→chips xs, md→chips sm), garantissant un alignement pile.
-const chipSize = computed(() => (props.size === 'md' ? 'sm' : 'xs'))
+// Les Chips gardent une taille constante (xs, 24px) quelle que soit celle du
+// champ : elles portent une valeur, pas la densité du contrôle. Seul `sm` les
+// passe en compact (20px) pour qu'elles tiennent dans les 32px du champ (28px
+// en compact) sans le faire grandir — le `compact` du Combobox ne les touche
+// pas, la marge y suffit déjà.
+const chipCompact = computed(() => props.size === 'sm')
 
 const model = defineModel<string | string[]>({ default: '' })
 
@@ -510,6 +513,7 @@ watch(
     class="ds-combobox"
     :class="rootClass"
     :style="rootStyle"
+    :data-size="size"
     :data-multiple="multiple ? '' : undefined"
     :data-collapsed="collapsed ? '' : undefined"
     :data-open="open ? '' : undefined"
@@ -546,8 +550,8 @@ watch(
             v-for="value in selectedValues"
             :key="value"
             tone="accent"
-            :size="chipSize"
-            :compact="compact"
+            size="xs"
+            :compact="chipCompact"
             dismissible
             :dismiss-label="`Retirer ${labelOf(value)}`"
             :disabled="disabled"
@@ -692,12 +696,21 @@ watch(
 
   /* multiple : le champ accueille les Chips (retour à la ligne). Hauteur calée
      sur le contrôle (`--_control-height`, size/compact via .ds-control d'Input).
-     Les Chips font une taille en dessous → chip + padding-block (2×space-1 =
-     space-2) = --_control-height, pile. L'input est forcé à la MÊME hauteur que
-     les Chips (`calc(--_control-height - space-2)`) au lieu du `100%` hérité
-     d'Input : sinon sa hauteur intrinsèque dépasse les Chips et fait grandir le
-     champ (34px au lieu de 32). Résultat : champ = --_control-height constant,
-     input jamais plus haut que les Chips, aucun saut au focus. */
+     Les Chips gardent une hauteur CONSTANTE (xs, 24px ; compact en `sm` pour
+     tenir dans un champ de 32px) : elle est redite ici en `--_chip-height`
+     parce qu'elle vit dans le sous-arbre du Chip, hors de portée du champ.
+     L'input est forcé à cette MÊME hauteur au lieu du `100%` hérité d'Input :
+     sinon sa hauteur intrinsèque dépasse les Chips et fait grandir le champ.
+     Résultat : champ = --_control-height constant, input jamais plus haut que
+     les Chips, aucun saut au focus. */
+  .ds-combobox[data-multiple] {
+    --_chip-height: var(--ds-control-height-xs);
+  }
+
+  .ds-combobox[data-multiple][data-size='sm'] {
+    --_chip-height: calc(var(--ds-control-height-xs) - var(--ds-space-1));
+  }
+
   .ds-combobox[data-multiple] .ds-input-field {
     flex-wrap: wrap;
     height: auto;
@@ -706,7 +719,7 @@ watch(
   }
 
   .ds-combobox[data-multiple] .ds-input-control {
-    height: calc(var(--_control-height) - var(--ds-space-2));
+    height: var(--_chip-height);
   }
 
   /* hors édition (avec sélection) : sortir l'input du flux (position absolue,
