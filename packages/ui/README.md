@@ -147,10 +147,13 @@ Une chaîne est **toujours** un nom d'icône : le DS ne devine plus qu'une valeu
 import { setIconResolver, classIconResolver } from '@socle/ui'
 
 // Font Awesome, Phosphor, Bootstrap Icons… (polices à classes + ::before)
+// `fa-solid` sans condition : le tier Free ne dessine qu'une petite fraction du
+// catalogue en Regular, donc mapper `filled: false` dessus rendrait des carrés
+// vides. Le contour/plein de FA demande le tier Pro.
 setIconResolver(
   classIconResolver({
-    aliases: { close: 'xmark', expand_more: 'chevron-down', check_circle: 'circle-check' },
-    className: (nom, filled) => `${filled ? 'fa-solid' : 'fa-regular'} fa-${nom}`,
+    aliases: { close: 'xmark', expand_more: 'angle-down', check_circle: 'circle-check' },
+    className: (nom) => `fa-solid fa-${nom}`,
   }),
 )
 
