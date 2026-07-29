@@ -2,6 +2,7 @@
 import { computed, ref, useId, watch, watchEffect } from 'vue'
 
 import Button from '../Button/Button.vue'
+import type { IconSource } from '../Icon/types'
 import Input from '../Input/Input.vue'
 import Popover from '../Popover/Popover.vue'
 import Toggle from '../Toggle/Toggle.vue'
@@ -90,6 +91,12 @@ interface TimePickerProps {
   invalid?: boolean
   /** Bouton d'effacement (croix) qui vide la valeur. */
   clearable?: boolean
+  /**
+   * Icône d'ouverture du CADRAN, à la fin du champ. Sans effet en `mode="list"`,
+   * dont le chevron suit la convention du Combobox, ni quand la croix
+   * d'effacement de `clearable` a la main.
+   */
+  clockIcon?: IconSource
   /** Placement du panneau par rapport au champ. */
   placement?: Placement
 }
@@ -111,6 +118,7 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   disabled: false,
   invalid: false,
   clearable: true,
+  clockIcon: 'schedule',
   placement: 'bottom-start',
 })
 
@@ -543,13 +551,13 @@ const showClearIcon = computed(
   () =>
     props.clearable && !props.disabled && (hasValue.value || (typing.value && !!maskDraft.value)),
 )
-const endIcon = computed(() =>
+const endIcon = computed<IconSource | undefined>(() =>
   showClearIcon.value
     ? 'close'
     : isList.value
       ? 'expand_more'
       : hasDial.value
-        ? 'schedule'
+        ? props.clockIcon
         : undefined,
 )
 /*

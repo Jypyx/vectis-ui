@@ -39,6 +39,21 @@ describe('TimePicker — défaut', () => {
     expect(warn).not.toHaveBeenCalled()
     warn.mockRestore()
   })
+
+  it('clockIcon : surcharge l’icône du CADRAN, sans effet en mode liste', () => {
+    const endIcon = (props: Record<string, unknown>) =>
+      render(TimePicker, { props }).container.querySelector<HTMLElement>(
+        '.ds-input-action .ds-icon',
+      )?.dataset.icon
+
+    expect(endIcon({ modelValue: null, showDial: true, clockIcon: 'alarm' })).toBe('alarm')
+
+    // En liste, le chevron suit la convention Combobox : la prop est inerte.
+    expect(endIcon({ modelValue: null, mode: 'list', clockIcon: 'alarm' })).toBe('expand_more')
+
+    // Et la croix d'effacement garde la priorité sur le cadran.
+    expect(endIcon({ modelValue: '09:30', showDial: true, clockIcon: 'alarm' })).toBe('close')
+  })
 })
 
 describe('TimePicker — lecture seule', () => {

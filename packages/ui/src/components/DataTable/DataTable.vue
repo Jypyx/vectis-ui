@@ -5,6 +5,8 @@ import type { StyleValue } from 'vue'
 import Button from '../Button/Button.vue'
 import Checkbox from '../Checkbox/Checkbox.vue'
 import Icon from '../Icon/Icon.vue'
+import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 import Input from '../Input/Input.vue'
 import Menu from '../Menu/Menu.vue'
 import MenuItem from '../Menu/MenuItem.vue'
@@ -102,6 +104,12 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
    * parent quand celui-ci en a une.
    */
   height?: number | string
+  /** Icône d'en-tête d'une colonne triable non triée. */
+  sortIcon?: IconSource
+  /** Icône du tri ascendant (convention tableur : trier de A à Z pointe vers le bas). */
+  sortAscIcon?: IconSource
+  /** Icône du tri descendant. */
+  sortDescIcon?: IconSource
   /** Choix « lignes par page » (affiché si fourni et pagination active). */
   perPageOptions?: number[]
   perPageLabel?: string
@@ -143,6 +151,9 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   stickyHeader: false,
   compact: false,
   height: undefined,
+  sortIcon: 'swap_vert',
+  sortAscIcon: 'arrow_downward',
+  sortDescIcon: 'arrow_upward',
   perPageOptions: undefined,
   perPageLabel: 'Lignes par page',
   total: undefined,
@@ -260,9 +271,9 @@ function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | undefin
  * Glyphe de tri : neutre hors colonne triée, puis flèche de la direction —
  * convention tableur (trier de A à Z = flèche vers le bas).
  */
-function sortIcon(column: DataTableColumn): string {
-  if (sort.value?.key !== column.key) return 'swap_vert'
-  return sort.value.direction === 'asc' ? 'arrow_downward' : 'arrow_upward'
+function sortIconFor(column: DataTableColumn): IconSource {
+  if (sort.value?.key !== column.key) return props.sortIcon
+  return sort.value.direction === 'asc' ? props.sortAscIcon : props.sortDescIcon
 }
 
 // ── Recherche : reset de page et debounce serveur ───────────────────────────
@@ -440,7 +451,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
                 <!-- décorative : sans `label`, Icon pose aria-hidden lui-même —
                      l'état de tri est porté par l'aria-sort du th. -->
-                <Icon class="ds-table-sort-icon" :name="sortIcon(column)" />
+                <Icon class="ds-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
               </button>
               <template v-else>
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>

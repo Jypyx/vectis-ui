@@ -96,6 +96,28 @@ describe('DataTable', () => {
     expect(glyph()).toBe('swap_vert')
   })
 
+  it('sortIcon/sortAscIcon/sortDescIcon : les trois états se surchargent', async () => {
+    const { getByRole } = render(DataTable, {
+      props: {
+        columns: COLUMNS,
+        rows: ROWS,
+        sortIcon: 'unfold_more',
+        sortAscIcon: 'north',
+        sortDescIcon: 'south',
+      },
+    })
+    const sortButton = getByRole('button', { name: 'Total' })
+    const glyph = () => sortButton.querySelector<HTMLElement>('.ds-table-sort-icon')?.dataset.icon
+
+    expect(glyph()).toBe('unfold_more')
+    await fireEvent.click(sortButton)
+    expect(glyph()).toBe('north')
+    await fireEvent.click(sortButton)
+    expect(glyph()).toBe('south')
+    await fireEvent.click(sortButton)
+    expect(glyph()).toBe('unfold_more')
+  })
+
   it('états vide et chargement', async () => {
     const { getByText, rerender, getByRole } = render(DataTable, {
       props: { columns: COLUMNS, rows: [], emptyText: 'Rien à afficher' },

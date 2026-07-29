@@ -24,6 +24,7 @@ import {
 import { digitsOf } from '../../utils/text'
 import { resolveMatcher } from '../../utils/matcher'
 import { isDev } from '../../utils/env'
+import type { IconSource } from '../Icon/types'
 import Input from '../Input/Input.vue'
 import Popover from '../Popover/Popover.vue'
 
@@ -101,6 +102,12 @@ interface DatePickerProps {
   /** Bouton d'effacement (croix) qui vide la valeur. */
   clearable?: boolean
   /**
+   * Icône d'ouverture du calendrier, à la fin du champ. La croix d'effacement
+   * de `clearable` la remplace dès qu'il y a de quoi effacer, et aucune icône
+   * n'est rendue quand il n'y a pas de panneau (`showCalendar` à false en saisie).
+   */
+  calendarIcon?: IconSource
+  /**
    * Format d'affichage de la date dans le champ (Intl.DateTimeFormat). Sans
    * objet en mode `input` (défaut), où le champ porte le masque numérique de la
    * locale : concerne donc `mode="readonly"` et les sélections `range` et
@@ -134,6 +141,7 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   disabled: false,
   invalid: false,
   clearable: true,
+  calendarIcon: 'calendar_today',
   // `undefined` et non l'objet lui-même : c'est ce qui rend la prop détectable
   // (garde-fou dev en mode saisie, où elle n'a pas cours).
   displayFormat: undefined,
@@ -504,8 +512,8 @@ function onRootKeydown(event: KeyboardEvent) {
 const showClearIcon = computed(
   () => props.clearable && !props.disabled && (hasValue.value || (typing.value && !!draft.value)),
 )
-const endIcon = computed(() =>
-  showClearIcon.value ? 'close' : hasPanel.value ? 'calendar_today' : undefined,
+const endIcon = computed<IconSource | undefined>(() =>
+  showClearIcon.value ? 'close' : hasPanel.value ? props.calendarIcon : undefined,
 )
 /*
  * Le LIBELLÉ, lui, reste toujours défini, même quand aucune icône n'est rendue :
