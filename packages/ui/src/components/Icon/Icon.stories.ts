@@ -442,12 +442,18 @@ export const PolicePhosphor: Story = {
  * (`.fa-solid:before { content: var(--fa) }`) et la classe d'icône la valeur
  * (`.fa-xmark { --fa: "\\f00d" }`). Le mode « SVG with JS » de FA n'est PAS
  * supporté : il remplace les éléments dans le DOM sous les pieds de Vue.
+ *
+ * `fa-solid` sans condition, et c'est important : le tier **Free** ne dessine
+ * qu'une petite fraction du catalogue en style Regular (25 Ko de glyphes contre
+ * 158 Ko en Solid). Mapper `filled: false` sur `fa-regular` — le réflexe — rend
+ * donc des carrés vides pour la grande majorité des icônes. La distinction
+ * contour/plein de FA demande le tier Pro (`fa-light`, `fa-thin`, `fa-duotone`).
  */
 export const PoliceFontAwesome: Story = {
   ...vitrinePolice(
     classIconResolver({
       aliases: FONT_AWESOME,
-      className: (nom, filled) => `${filled ? 'fa-solid' : 'fa-regular'} fa-${nom}`,
+      className: (nom) => `fa-solid fa-${nom}`,
     }),
   ),
   play: async ({ canvasElement }) => {
