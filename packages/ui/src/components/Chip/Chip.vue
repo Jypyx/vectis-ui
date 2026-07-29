@@ -4,6 +4,7 @@ import type { StyleValue } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 
 /**
  * Chip. Les éléments natifs couvrent focus, clavier et désactivation :
@@ -41,14 +42,14 @@ interface ChipProps {
   /** Icône check devant le libellé quand sélectionné — REMPLACE l'emplacement
       start (iconStart / slot #start) pour ne jamais cumuler les deux. */
   check?: boolean
-  /** Nom Material Symbols ou URL, avant le libellé (le slot #start prime). */
-  iconStart?: string
-  /** Nom Material Symbols ou URL, après le libellé (le slot #end prime). */
-  iconEnd?: string
+  /** Icône avant le libellé (le slot #start prime). */
+  iconStart?: IconSource
+  /** Icône après le libellé (le slot #end prime). */
+  iconEnd?: IconSource
   /** Bouton de retrait qui émet `dismiss` (la disparition est au consommateur). */
   dismissible?: boolean
-  /** Icône du bouton de retrait : nom Material Symbols ou URL. */
-  dismissIcon?: string
+  /** Icône du bouton de retrait. */
+  dismissIcon?: IconSource
   /** Libellé accessible du bouton de retrait. */
   dismissLabel?: string
   disabled?: boolean

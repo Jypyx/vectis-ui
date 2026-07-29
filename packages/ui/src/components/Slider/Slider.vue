@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import Icon from '../Icon/Icon.vue'
+import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 import Input from '../Input/Input.vue'
 
 import { isDev } from '../../utils/env'
@@ -17,7 +19,7 @@ import { isDev } from '../../utils/env'
  * thumb, qui parcourt [thumb/2, 100% − thumb/2] et non [0, 100%].
  * Vertical : support natif du range vertical Chrome/Edge 129+, Safari 18.1+.
  */
-export type SliderLabel = string | { icon: string; label: string }
+export type SliderLabel = string | { icon: IconSource; label: string }
 
 interface SliderProps {
   min?: number
@@ -258,7 +260,7 @@ function resyncFields() {
         :style="{ '--_f': String(labelFraction(i)) }"
       >
         <template v-if="typeof item === 'string'">{{ item }}</template>
-        <Icon v-else :name="item.icon" :label="item.label" />
+        <Icon v-else v-bind="iconProps(item.icon)" :label="item.label" />
       </span>
     </div>
     <Input

@@ -48,12 +48,13 @@ ne porte qu'un compteur ou une icône — pour un statut textuel, utiliser plut�
 
 ## Icône
 
-`icon` affiche une icône **seule** — nom [Material Symbols](https://fonts.google.com/icons)
-ou URL d'image (détection automatique) — dans un badge circulaire de 20px (icône 16px).
+`icon` affiche une icône **seule** — nom d'icône ou rendu explicite (`{ src }`) — dans un
+badge circulaire de 20px (icône 16px).
 Elle prime sur `count`.
 
-> La police Material Symbols Rounded n'est pas embarquée dans la librairie : elle est
-> chargée par l'application consommatrice (voir le README).
+> Les icônes rendues par le DS lui-même sont des SVG embarqués : aucune police n'est requise.
+> Vos propres noms d'icônes, eux, viennent de la police ou de la bibliothèque que vous
+> branchez (voir le README).
 
 <Canvas of={BadgeStories.Icone} />
 

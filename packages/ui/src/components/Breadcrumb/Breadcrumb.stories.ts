@@ -34,10 +34,9 @@ export const Default: Story = {
 }
 
 export const SeparateurIcone: Story = {
-  // Une valeur sans '.', '/' ni ':' est un nom Material Symbols ; sinon elle
-  // est traitée comme une URL d'image. Note RTL : les ligatures
-  // directionnelles ne se retournent pas automatiquement — à vérifier avec
-  // le toggle de la toolbar.
+  // Une chaîne est TOUJOURS un nom d'icône ; une image se déclare en `{ src }`
+  // (cf. SeparateurImage). Note RTL : une icône directionnelle ne se retourne
+  // pas automatiquement — à vérifier avec le toggle de la toolbar.
   args: {
     separator: 'arrow_forward',
     currentPath: '/projets/socle',
@@ -58,10 +57,11 @@ export const SeparateurIcone: Story = {
 }
 
 export const SeparateurImage: Story = {
-  // Contient ':' et '.' → détecté comme URL, rendu via le `src` d'Icon.
+  // Rendu explicite `{ src }` — aucune devinette sur le contenu de la chaîne.
   args: {
-    separator:
-      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800px' height='800px' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M10 3V6H4L4 10H10L10 13L11 13L16 8L11 3L10 3Z' fill='%23000000'/%3E%3Cpath d='M0 2L1.38281e-06 14H2L2 2L0 2Z' fill='%23000000'/%3E%3C/svg%3E",
+    separator: {
+      src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800px' height='800px' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M10 3V6H4L4 10H10L10 13L11 13L16 8L11 3L10 3Z' fill='%23000000'/%3E%3Cpath d='M0 2L1.38281e-06 14H2L2 2L0 2Z' fill='%23000000'/%3E%3C/svg%3E",
+    },
     currentPath: '/projets/socle',
     items: [
       { label: 'Accueil', href: '/' },
@@ -80,8 +80,9 @@ export const AvecIcones: Story = {
       {
         label: 'Socle',
         href: '/projets/socle',
-        iconStart:
-          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2' y='2' width='12' height='12' rx='3' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E",
+        iconStart: {
+          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2' y='2' width='12' height='12' rx='3' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E",
+        },
       },
     ],
   },

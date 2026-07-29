@@ -36,8 +36,8 @@ La source affichée suit une priorité stricte :
 
 1. **`src`** — l'image. Si son chargement échoue (`error`), l'avatar bascule automatiquement
    sur le repli suivant.
-2. **`icon`** — nom [Material Symbols](https://fonts.google.com/icons) **ou** URL d'image
-   (détection automatique via `iconProps`). L'icône occupe ~55% du disque.
+2. **`icon`** — nom d'icône **ou** rendu explicite (`{ src: '/logo.svg' }`, `{ component }`).
+   L'icône occupe ~55% du disque.
 3. **`name`** — les **initiales** (deux premiers mots, en majuscules).
 4. Le **slot par défaut** — échappatoire (ex. l'agrégat « +X » d'`AvatarGroup`), remplace les
    initiales.
@@ -45,8 +45,9 @@ La source affichée suit une priorité stricte :
 <Canvas of={AvatarStories.AvecImage} />
 <Canvas of={AvatarStories.Icone} />
 
-> La police Material Symbols Rounded n'est pas embarquée dans la librairie : elle est chargée
-> par l'application consommatrice (voir le README).
+> Les icônes rendues par le DS lui-même sont des SVG embarqués : aucune police n'est requise.
+> Vos propres noms d'icônes, eux, viennent de la police ou de la bibliothèque que vous
+> branchez (voir le README).
 
 Si l'image est cassée, le repli initiales prend le relais sans intervention :
 

@@ -1,5 +1,7 @@
 import { reactive } from 'vue'
 
+import type { IconSource } from '../Icon/types'
+
 /**
  * File de notifications globale. JS justifié : aucune primitive HTML ne
  * couvre une file de notifications programmatique — l'état vit au niveau
@@ -25,10 +27,10 @@ export interface ToastOptions {
   /** `tonal` : fond teinté + bordure ; `solid` : couleur pleine. */
   variant?: 'tonal' | 'solid'
   /**
-   * Nom Material Symbols ou URL d'image ; `false` = pas d'icône ;
+   * Nom d'icône ou rendu explicite ; `false` = pas d'icône ;
    * absent = icône par défaut du tone.
    */
-  icon?: string | false
+  icon?: IconSource | false
   /**
    * Durée d'affichage en ms ; `0` = reste affiché jusqu'à fermeture
    * manuelle ; absent = durée du Toaster (5000 par défaut).

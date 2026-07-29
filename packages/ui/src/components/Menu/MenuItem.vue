@@ -3,6 +3,7 @@ import { computed, inject, ref, useId, useSlots } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 import MenuPanel from './MenuPanel.vue'
 import { menuKey, SUBMENU_HOVER_DELAY } from './context'
 
@@ -28,12 +29,12 @@ interface MenuItemProps {
   sublabel?: string
   /**
    * Icône avant le libellé : nom Material Symbols Rounded, ou URL
-   * d'image/SVG (toute valeur contenant '.', '/' ou ':' est traitée comme
-   * une URL). Le slot #start prime.
+   * d'icône, ou rendu explicite (`{ src }`, `{ component }`…). Le slot #start
+   * prime.
    */
-  iconStart?: string
-  /** Icône après le libellé (même détection). Le slot #end prime. */
-  iconEnd?: string
+  iconStart?: IconSource
+  /** Icône après le libellé (mêmes formes). Le slot #end prime. */
+  iconEnd?: IconSource
   /** État sélectionné (accent + aria-current). */
   selected?: boolean
   /** Item destructif (couleur danger). */

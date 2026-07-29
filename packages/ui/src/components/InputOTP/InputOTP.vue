@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import Icon from '../Icon/Icon.vue'
+import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 
 import { isDev } from '../../utils/env'
 
@@ -34,7 +36,7 @@ interface InputOTPProps {
    * pour les gabarits purement séparateurs ('###-###') ; ne pas le fournir
    * avec un préfixe textuel ('GT-###').
    */
-  separatorIcon?: string
+  separatorIcon?: IconSource
   /** Côté des cases : sm 32px, md 40px (défaut), lg 48px. */
   size?: 'sm' | 'md' | 'lg'
   /** Hauteur réduite de 4px ; typo et icônes inchangées (comme Button/Input). */
@@ -212,7 +214,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
       />
       <!-- littéral décoratif du gabarit : jamais focusable, hors v-model -->
       <span v-else class="ds-otp-literal" aria-hidden="true">
-        <Icon v-if="separatorIcon" :name="separatorIcon" />
+        <Icon v-if="separatorIcon" v-bind="iconProps(separatorIcon)" />
         <template v-else>{{ cell.char }}</template>
       </span>
     </template>

@@ -29,13 +29,14 @@ Le déclencheur est fourni par un slot scopé — poser `triggerProps` tel quel 
 
 ## Items
 
-`MenuItem` : `label` + `sublabel` (description secondaire), `icon-start` / `icon-end` (nom
-[Material Symbols](https://fonts.google.com/icons) ou URL d'image, détection automatique),
+`MenuItem` : `label` + `sublabel` (description secondaire), `icon-start` / `icon-end`
+(nom d'icône ou rendu explicite `{ src }` / `{ component }`),
 et les slots `#default` / `#sublabel` / `#start` / `#end` qui priment. La sélection d'un
 item émet `select` et **ferme le menu** (focus rendu au déclencheur).
 
-> La police Material Symbols Rounded n'est pas embarquée dans la librairie : elle est
-> chargée par l'application consommatrice (voir le README).
+> Les icônes rendues par le DS lui-même sont des SVG embarqués : aucune police n'est requise.
+> Vos propres noms d'icônes, eux, viennent de la police ou de la bibliothèque que vous
+> branchez (voir le README).
 
 <Canvas of={MenuStories.SousLabels} />
 

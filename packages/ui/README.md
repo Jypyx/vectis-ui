@@ -106,11 +106,15 @@ const semanticColors = flattenTokens(tokens.semantic.color, ['color'])
 
 ## Icônes
 
-Le composant `Icon` accepte trois sources :
+**Aucune police d'icônes n'est requise.** Les icônes que la librairie rend elle-même — croix de `Dialog`, chevrons de `Calendar` et `Menu`, icônes de tone des toasts, tri de `DataTable`… — sont des **SVG embarqués**, répliques exactes de Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24, Apache-2.0 © Google). Elles pèsent ~2 Ko gzip, non tree-shakables : c'est le prix de l'autonomie du DS.
+
+Le composant `Icon` résout sa source dans cet ordre : **`render` explicite → `src` → `name` (résolveur consommateur, puis registre intégré, puis ligature) → slot**.
 
 ```vue
+<Icon name="close" />
+<!-- registre intégré : SVG, aucune police nécessaire -->
 <Icon name="favorite" />
-<!-- ligature Material Symbols Rounded -->
+<!-- hors registre : ligature de VOTRE police d'icônes -->
 <Icon src="/logo.svg" label="Logo" />
 <!-- image -->
 <Icon><svg …/></Icon>
@@ -118,9 +122,61 @@ Le composant `Icon` accepte trois sources :
 ```
 
 - **Décorative par défaut** (`aria-hidden`) ; la prop `label` la rend informative (`role="img"` + `aria-label`).
+- L'attribut **`data-icon`** porte le nom demandé quelle que soit la source — accroche stable pour du CSS consommateur et pour les tests.
 - Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--ds-icon-size`** et **`--ds-icon-opsz`** (c'est ce que fait la classe partagée `ds-control` — Button, Input, Textarea, InputOTP, Chip… — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `Spinner` suit le même principe (1em + `:size` en px), sans API de contexte.
+- **`--ds-icon-opsz` ne s'applique qu'à la ligature** : c'est un axe variable de police, sans prise sur un SVG intégré, une image ou un composant tiers. La taille, elle, vaut pour toutes les sources.
 
-**La police Material Symbols Rounded n'est PAS embarquée** (zéro dépendance runtime) : c'est au consommateur de la charger, par exemple via Google Fonts :
+### Toute prop d'icône accepte un nom **ou** un rendu explicite
+
+```vue
+<Button icon-start="download">Exporter</Button>
+<Breadcrumb :separator="{ src: '/chevron.svg' }" :items="items" />
+<MenuItem label="Ouvrir" :icon-start="{ component: FolderIcon }" />
+```
+
+Une chaîne est **toujours** un nom d'icône : le DS ne devine plus qu'une valeur contenant `.`, `/` ou `:` serait une URL. C'est ce qui permet aux conventions de nommage type Iconify (`mdi:close`, `fa6-solid:xmark`) de fonctionner.
+
+> **Rupture** depuis la 0.1 : une URL passée en chaîne (`separator="/sep.svg"`) doit devenir `:separator="{ src: '/sep.svg' }"`. Le typage ne la signale pas — une URL reste une chaîne valide — mais l'icône s'affichera comme un nom introuvable.
+
+### Brancher votre propre bibliothèque d'icônes
+
+`setIconResolver` est consulté **avant** le registre intégré ; rendre `undefined` signifie « je ne connais pas ce nom » et laisse la main au registre, puis à la ligature. Les mappings **partiels** sont donc utilisables. Le type `DsIconName` énumère les noms à couvrir.
+
+```ts
+// main.ts / plugins/icons.ts — au niveau MODULE, jamais dans un setup()
+import { setIconResolver, classIconResolver } from '@socle/ui'
+
+// Font Awesome, Phosphor, Bootstrap Icons… (polices à classes + ::before)
+setIconResolver(
+  classIconResolver({
+    aliases: { close: 'xmark', expand_more: 'chevron-down', check_circle: 'circle-check' },
+    className: (nom, filled) => `${filled ? 'fa-solid' : 'fa-regular'} fa-${nom}`,
+  }),
+)
+
+// Lucide, Untitled UI… (jeux SVG en composants Vue, racine <svg> unique)
+import { componentIconResolver } from '@socle/ui'
+import { X, Check, ChevronDown } from 'lucide-vue-next'
+setIconResolver(
+  componentIconResolver({
+    components: { close: X, check: Check, expand_more: ChevronDown },
+    props: () => ({ strokeWidth: 1.75 }),
+  }),
+)
+
+// Material Symbols, IcoMoon à ligatures… — rend AUSSI les 20 icônes du DS via
+// la police, ce qui restitue l'axe optique --ds-icon-opsz (20 en xs/sm/md).
+import { ligatureIconResolver } from '@socle/ui'
+setIconResolver(ligatureIconResolver())
+```
+
+`classIconResolver` est **strict** par défaut : un nom du registre intégré absent de votre table d'alias retombe sur le SVG embarqué plutôt que de produire une classe inexistante (carré vide). Vos propres noms, eux, passent toujours.
+
+Pour un besoin ponctuel, `setIconResolver` accepte n'importe quelle fonction rendant l'une des cinq formes : `{ path }`, `{ component }`, `{ src }`, `{ text }`, `{ class }`.
+
+> **SSR** — posez le résolveur au niveau module (plugin Nuxt, `main.ts`), jamais dans un `setup()` : l'état vit dans le processus, ce qui est correct pour de la configuration et faux pour de l'état par requête. Surtout, **ne l'installez pas en client-only** (`plugins/*.client.ts`) : le serveur rendrait le SVG intégré et le client votre bibliothèque — mismatch d'hydratation. Font Awesome en mode « SVG with JS » (qui remplace les éléments dans le DOM) n'est pas supporté : utilisez son mode CSS.
+
+**Charger une police d'icônes reste utile** pour vos propres noms. Exemple avec Material Symbols Rounded via Google Fonts :
 
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -131,21 +187,21 @@ Le composant `Icon` accepte trois sources :
 />
 ```
 
-(ou en self-host du woff2 variable, ex. paquet npm `material-symbols`). `display=block` évite le flash du nom d'icône en toutes lettres. Sans police chargée, la mise en page est préservée (le nom textuel est contenu dans le carré de l'icône). Surcharger le token `--ds-font-family-icon` permet de basculer sur Material Symbols Outlined/Sharp.
+(ou en self-host du woff2 variable, ex. paquet npm `material-symbols`). `display=block` évite le flash du nom d'icône en toutes lettres. Sans police chargée, la mise en page est préservée (le nom textuel est contenu dans le carré de l'icône). Surcharger le token `--ds-font-family-icon` suffit pour basculer sur une autre police **à ligatures** (Material Symbols Outlined/Sharp, build IcoMoon) — sans résolveur.
 
-Sur `Button` : les props `icon-start` / `icon-end` prennent un nom Material Symbols (les slots `#start`/`#end` restent disponibles pour du contenu custom et priment sur les props). `Button` accepte aussi `href` (rendu `<a>` ; `disabled`/`loading` produisent un lien inerte : `href` retiré + `aria-disabled`) et `compact` (hauteur réduite de 4 px : 20/28/36/44/52 px selon la taille `xs`–`xl`).
+Sur `Button` : les props `icon-start` / `icon-end` prennent un nom d'icône ou un rendu explicite (les slots `#start`/`#end` restent disponibles pour du contenu custom et priment sur les props). `Button` accepte aussi `href` (rendu `<a>` ; `disabled`/`loading` produisent un lien inerte : `href` retiré + `aria-disabled`) et `compact` (hauteur réduite de 4 px : 20/28/36/44/52 px selon la taille `xs`–`xl`).
 
 L'échelle `xs`–`xl` n'est pas exposée par tous les composants : ceux qui embarquent un champ de saisie (`Input`, `Textarea`, `InputOTP`, `Combobox`, `DatePicker`, `TimePicker`) se limitent à **`sm` / `md` / `lg`** (32/40/48 px, défaut `md`), `compact` restant disponible ; `Chip` se limite à `xs`/`sm`.
 
 ## Composants
 
-| Domaine     | Composants                                                                                                                                                |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                              |
-| Formulaires | `Input`, `Textarea`, `Checkbox`, `Radio`, `Switch`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                                    |
-| Overlays    | `Tooltip`, `Menu` + `MenuItem`/`MenuGroup`/`MenuSeparator` (sous-menus récursifs)                                                                         |
-| Structure   | `Accordion` + `AccordionItem`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature)                                                      |
-| Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (Material Symbols, image ou SVG inline) |
+| Domaine     | Composants                                                                                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                                  |
+| Formulaires | `Input`, `Textarea`, `Checkbox`, `Radio`, `Switch`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                                        |
+| Overlays    | `Tooltip`, `Menu` + `MenuItem`/`MenuGroup`/`MenuSeparator` (sous-menus récursifs)                                                                             |
+| Structure   | `Accordion` + `AccordionItem`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature)                                                          |
+| Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (SVG intégrés, police, image ou SVG inline) |
 
 Notes d'implémentation notables :
 

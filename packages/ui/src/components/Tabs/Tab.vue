@@ -4,6 +4,7 @@ import { computed, inject, useSlots } from 'vue'
 import Button from '../Button/Button.vue'
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 import { tabsKey } from './context'
 
 /**
@@ -19,8 +20,8 @@ interface TabProps {
   value: string | number
   /** Libellé visible ; le slot par défaut prime. */
   label?: string
-  /** Icône de début : nom Material Symbols ou URL. */
-  icon?: string
+  /** Icône de début : nom, ou rendu explicite. */
+  icon?: IconSource
   /** Onglet inerte : ni cliquable ni atteignable, gris par tokens. */
   disabled?: boolean
 }

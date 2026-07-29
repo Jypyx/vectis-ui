@@ -3,6 +3,7 @@ import { computed, nextTick, provide, ref, useId, useSlots, watch } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 import IconButton from '../IconButton/IconButton.vue'
 import { panelIdFor, tabIdFor, tabsKey } from './context'
 
@@ -44,10 +45,10 @@ interface TabsProps {
   grow?: boolean
   /** Affiche deux boutons de défilement, désactivés en butée. */
   scrollButtons?: boolean
-  /** Icône du bouton de défilement amont : nom Material ou URL. Défaut selon l'orientation. */
-  prevIcon?: string
-  /** Icône du bouton de défilement aval : nom Material ou URL. Défaut selon l'orientation. */
-  nextIcon?: string
+  /** Icône du bouton de défilement amont. Défaut selon l'orientation. */
+  prevIcon?: IconSource
+  /** Icône du bouton de défilement aval. Défaut selon l'orientation. */
+  nextIcon?: IconSource
   prevLabel?: string
   nextLabel?: string
   /** `automatic` : la sélection suit le focus (recommandation APG pour des panneaux instantanés). */

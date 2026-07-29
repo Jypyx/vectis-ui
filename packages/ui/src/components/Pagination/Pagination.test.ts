@@ -258,18 +258,18 @@ describe('Pagination', () => {
       expect(getByRole('button', { name: 'Page précédente' })).toBeTruthy()
     })
 
-    it('accepte un nom Material ou une URL pour les icônes personnalisées', () => {
+    it('accepte un nom ou un rendu explicite pour les icônes personnalisées', () => {
       const { container } = render(Pagination, {
         props: {
           length: 5,
           modelValue: 3,
           prevIcon: 'first_page',
-          nextIcon: 'https://cdn.test/next.svg',
+          nextIcon: { src: 'https://cdn.test/next.svg' },
         },
       })
       const [prev, next] = [...container.querySelectorAll('.ds-pagination-control')]
 
-      expect(prev?.querySelector('.ds-icon-symbol')?.textContent).toBe('first_page')
+      expect(prev?.querySelector<HTMLElement>('.ds-icon')?.dataset.icon).toBe('first_page')
       expect(next?.querySelector('.ds-icon-img')?.getAttribute('src')).toBe(
         'https://cdn.test/next.svg',
       )

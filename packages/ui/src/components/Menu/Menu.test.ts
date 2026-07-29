@@ -171,21 +171,23 @@ describe('Menu', () => {
       )
     })
 
-    it("iconStart accepte un nom Material Symbols ou une URL d'image", async () => {
+    it('iconStart accepte un nom ou un rendu explicite `{ src }`', async () => {
       const { getByRole, container } = renderHarness(`
         <Menu>
           <template #trigger="{ triggerProps }">
             <button v-bind="triggerProps">Actions</button>
           </template>
           <MenuItem label="Renommer" icon-start="edit" icon-end="chevron_right" />
-          <MenuItem label="Logo" icon-start="/logo.svg" />
+          <MenuItem label="Logo" :icon-start="{ src: '/logo.svg' }" />
         </Menu>
       `)
       await openMenu(container)
 
       const named = getByRole('menuitem', { name: 'Renommer' })
-      const symbols = [...named.querySelectorAll('.ds-icon-symbol')].map((el) => el.textContent)
-      expect(symbols).toEqual(['edit', 'chevron_right'])
+      const icones = [...named.querySelectorAll<HTMLElement>('.ds-icon')].map(
+        (el) => el.dataset.icon,
+      )
+      expect(icones).toEqual(['edit', 'chevron_right'])
 
       const img = getByRole('menuitem', { name: 'Logo' }).querySelector('.ds-icon-img')
       expect(img?.getAttribute('src')).toBe('/logo.svg')
@@ -348,9 +350,13 @@ describe('Menu', () => {
       expect(parent.getAttribute('aria-controls')).toBe(sub.id)
       // le sous-panneau est un descendant DOM du panneau parent (pile native)
       expect(panels(container)[0]?.contains(sub)).toBe(true)
-      expect(parent.querySelector('.ds-menu-item-chevron')?.textContent).toBe('chevron_right')
-      const symbols = [...parent.querySelectorAll('.ds-icon-symbol')].map((el) => el.textContent)
-      expect(symbols).not.toContain('download')
+      expect(parent.querySelector<HTMLElement>('.ds-menu-item-chevron')?.dataset.icon).toBe(
+        'chevron_right',
+      )
+      const icones = [...parent.querySelectorAll<HTMLElement>('.ds-icon')].map(
+        (el) => el.dataset.icon,
+      )
+      expect(icones).not.toContain('download')
     })
 
     it("Flèche droite ouvre le sous-menu, focus son premier item et n'émet pas select", async () => {

@@ -23,6 +23,7 @@
   ],
   "scripts": {
     "tokens": "tsx scripts/build-tokens.ts",
+    "icons": "tsx scripts/build-icons.ts",
     "prebuild": "pnpm run tokens",
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",

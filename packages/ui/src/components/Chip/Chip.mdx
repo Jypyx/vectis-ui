@@ -86,11 +86,12 @@ reste à la charge du consommateur (retrait de la liste, transition…).
 
 Le bouton de retrait n'a **pas de fond**, même au survol : seule la couleur de l'icône
 passe d'atténuée à pleine (pattern des boutons internes d'Input). L'icône suit la taille
-du chip (16px en `xs`, 20px en `sm`) et se personnalise via `dismiss-icon` (nom
-[Material Symbols](https://fonts.google.com/icons) ou URL d'image, défaut `close`).
+du chip (16px en `xs`, 20px en `sm`) et se personnalise via `dismiss-icon` (nom d'icône
+ou rendu explicite, défaut `close`).
 
-> La police Material Symbols Rounded n'est pas embarquée dans la librairie : elle est
-> chargée par l'application consommatrice (voir le README).
+> Les icônes rendues par le DS lui-même sont des SVG embarqués : aucune police n'est requise.
+> Vos propres noms d'icônes, eux, viennent de la police ou de la bibliothèque que vous
+> branchez (voir le README).
 
 <Canvas of={ChipStories.IconeDeRetraitCustom} />
 
@@ -100,8 +101,8 @@ Sélection et suppression se combinent — deux boutons frères, jamais imbriqu�
 
 ## Icônes
 
-`icon-start` / `icon-end` acceptent un nom Material Symbols ou une URL d'image (détection
-automatique). Les slots `#start` / `#end` priment sur les props pour du contenu custom.
+`icon-start` / `icon-end` acceptent un nom d'icône ou un rendu explicite (`{ src }`).
+Les slots `#start` / `#end` priment sur les props pour du contenu custom.
 Sans libellé (aucun slot par défaut), le chip devient **carré** (largeur = hauteur, modèle
 IconButton) : penser à l'`aria-label`.
 

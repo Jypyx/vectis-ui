@@ -5,6 +5,7 @@ import Button from '../Button/Button.vue'
 import ButtonGroup from '../Button/ButtonGroup.vue'
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 import IconButton from '../IconButton/IconButton.vue'
 
 import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
@@ -50,10 +51,10 @@ interface PaginationProps {
   showControls?: boolean
   /** Rendu des contrôles : icône seule, texte seul, ou les deux. */
   controlsDisplay?: 'icon' | 'text' | 'both'
-  /** Icône du contrôle précédent : nom Material Symbols OU URL d'image. */
-  prevIcon?: string
-  /** Icône du contrôle suivant : nom Material Symbols OU URL d'image. */
-  nextIcon?: string
+  /** Icône du contrôle précédent : nom, ou rendu explicite. */
+  prevIcon?: IconSource
+  /** Icône du contrôle suivant : nom, ou rendu explicite. */
+  nextIcon?: IconSource
   /** Libellé du contrôle précédent (texte visible et nom accessible). */
   prevLabel?: string
   /** Libellé du contrôle suivant (texte visible et nom accessible). */

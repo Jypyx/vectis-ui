@@ -3,6 +3,8 @@ import { computed, useAttrs } from 'vue'
 import type { ButtonHTMLAttributes } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
+import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 import Spinner from '../Spinner/Spinner.vue'
 
 /**
@@ -30,10 +32,10 @@ interface ButtonProps {
    * cumuler spinner et icône.
    */
   loading?: boolean
-  /** Nom Material Symbols rendu avant le libellé (le slot #start prime). */
-  iconStart?: string
-  /** Nom Material Symbols rendu après le libellé (le slot #end prime). */
-  iconEnd?: string
+  /** Icône rendue avant le libellé (le slot #start prime). */
+  iconStart?: IconSource
+  /** Icône rendue après le libellé (le slot #end prime). */
+  iconEnd?: IconSource
   /**
    * Remplit iconStart/iconEnd (axe `FILL` de la police). Sans effet sur les
    * slots #start/#end, dont l'Icon est fournie par le consommateur.
@@ -100,11 +102,11 @@ const passedAttrs = computed(() => {
       <Spinner />
     </span>
     <slot v-else name="start">
-      <Icon v-if="iconStart" :name="iconStart" :filled="iconFilled" />
+      <Icon v-if="iconStart" v-bind="iconProps(iconStart)" :filled="iconFilled" />
     </slot>
     <slot />
     <slot name="end">
-      <Icon v-if="iconEnd" :name="iconEnd" :filled="iconFilled" />
+      <Icon v-if="iconEnd" v-bind="iconProps(iconEnd)" :filled="iconFilled" />
     </slot>
   </component>
 </template>

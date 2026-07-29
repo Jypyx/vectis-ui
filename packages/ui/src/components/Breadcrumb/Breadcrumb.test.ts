@@ -54,21 +54,22 @@ describe('Breadcrumb', () => {
       expect(separators).toHaveLength(3)
       for (const sep of separators) {
         expect(sep.getAttribute('aria-hidden')).toBe('true')
-        expect(sep.querySelector('.ds-icon-symbol')?.textContent).toBe('chevron_right')
+        // la classe est posée SUR l'Icon : le séparateur est lui-même la racine .ds-icon
+        expect((sep as HTMLElement).dataset.icon).toBe('chevron_right')
       }
     })
 
-    it('separator (nom Material Symbols) rend la ligature', () => {
+    it('separator : nom personnalisé', () => {
       const { container } = render(Breadcrumb, {
         props: { items, separator: 'arrow_forward' },
       })
-      const symbol = container.querySelector('.ds-breadcrumb-separator .ds-icon-symbol')
-      expect(symbol?.textContent).toBe('arrow_forward')
+      const icone = container.querySelector<HTMLElement>('.ds-breadcrumb-separator')
+      expect(icone?.dataset.icon).toBe('arrow_forward')
     })
 
-    it("separator contenant '.', '/' ou ':' est détecté comme une image", () => {
+    it('separator `{ src }` : image explicite, jamais devinée depuis la chaîne', () => {
       const { container } = render(Breadcrumb, {
-        props: { items, separator: '/sep.svg' },
+        props: { items, separator: { src: '/sep.svg' } },
       })
       const img = container.querySelector('.ds-breadcrumb-separator img')
       expect(img?.getAttribute('src')).toBe('/sep.svg')
@@ -77,17 +78,17 @@ describe('Breadcrumb', () => {
   })
 
   describe("icône d'item (iconStart)", () => {
-    it('nom Material Symbols → ligature avant le libellé', () => {
+    it("nom d'icône → icône avant le libellé", () => {
       const { getByRole } = render(Breadcrumb, {
         props: { items: [{ label: 'Accueil', href: '/', iconStart: 'home' }] },
       })
       const link = getByRole('link', { name: 'Accueil' })
-      expect(link.querySelector('.ds-icon-symbol')?.textContent).toBe('home')
+      expect(link.querySelector<HTMLElement>('.ds-icon')?.dataset.icon).toBe('home')
     })
 
-    it('URL → image', () => {
+    it('`{ src }` → image', () => {
       const { getByRole } = render(Breadcrumb, {
-        props: { items: [{ label: 'Accueil', href: '/', iconStart: '/home.png' }] },
+        props: { items: [{ label: 'Accueil', href: '/', iconStart: { src: '/home.png' } }] },
       })
       const img = getByRole('link', { name: 'Accueil' }).querySelector('img')
       expect(img?.getAttribute('src')).toBe('/home.png')

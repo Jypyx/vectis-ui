@@ -3,6 +3,7 @@ import { computed, nextTick, reactive, ref, useId, watch, watchEffect } from 'vu
 
 import Chip from '../Chip/Chip.vue'
 import Icon from '../Icon/Icon.vue'
+import type { IconSource } from '../Icon/types'
 import Input from '../Input/Input.vue'
 import Popover from '../Popover/Popover.vue'
 // alias : les types publics `ComboboxOption`/`ComboboxGroup`/`ComboboxSeparator`
@@ -35,10 +36,9 @@ export interface ComboboxOption {
   value: string
   label: string
   /**
-   * Icône avant le libellé : nom Material Symbols Rounded, ou URL d'image/SVG
-   * (toute valeur contenant '.', '/' ou ':' est traitée comme une URL).
+   * Icône avant le libellé : nom d'icône, ou rendu explicite (`{ src }`…).
    */
-  icon?: string
+  icon?: IconSource
   disabled?: boolean
 }
 

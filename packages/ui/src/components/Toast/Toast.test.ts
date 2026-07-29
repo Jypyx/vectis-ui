@@ -34,20 +34,20 @@ describe('Toast (carte interne)', () => {
     expect(root.dataset.variant).toBe('solid')
   })
 
-  it("affiche l'icône par défaut du tone (ligature Material)", () => {
+  it("affiche l'icône par défaut du tone", () => {
     const { container } = renderToast({ tone: 'success' })
-    expect(container.querySelector('.ds-toast-icon .ds-icon-symbol')?.textContent).toBe(
+    expect(container.querySelector<HTMLElement>('.ds-toast-icon')?.dataset.icon).toBe(
       'check_circle',
     )
   })
 
   it("icon: nom personnalisé remplace l'icône du tone", () => {
     const { container } = renderToast({ icon: 'rocket' })
-    expect(container.querySelector('.ds-toast-icon .ds-icon-symbol')?.textContent).toBe('rocket')
+    expect(container.querySelector<HTMLElement>('.ds-toast-icon')?.dataset.icon).toBe('rocket')
   })
 
-  it('icon: URL rendue en image', () => {
-    const { container } = renderToast({ icon: 'https://example.test/icon.svg' })
+  it('icon: `{ src }` rendu en image', () => {
+    const { container } = renderToast({ icon: { src: 'https://example.test/icon.svg' } })
     const img = container.querySelector('.ds-toast-icon img') as HTMLImageElement
     expect(img.getAttribute('src')).toBe('https://example.test/icon.svg')
   })

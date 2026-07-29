@@ -22,9 +22,10 @@ function renderWith(accordionAttrs = '', firstItemAttrs = '') {
 const renderAccordion = (exclusive = true) =>
   renderWith(`:exclusive="${exclusive}"`, 'default-open')
 
-/** Ligatures Material rendues par <Icon> dans un item. */
-function ligatures(item: Element) {
-  return [...item.querySelectorAll('summary .ds-icon-symbol')].map((el) => el.textContent)
+/** Noms des <Icon> rendues dans un item — `data-icon` est posé quelle que soit
+    la source effective (SVG intégré, ligature, police tierce). */
+function icones(item: Element) {
+  return [...item.querySelectorAll<HTMLElement>('summary .ds-icon')].map((el) => el.dataset.icon)
 }
 
 describe('Accordion', () => {
@@ -49,10 +50,10 @@ describe('Accordion', () => {
     expect(second?.open).toBe(false)
   })
 
-  it('icône par défaut : une seule ligature expand_more par item (rotation CSS)', () => {
+  it('icône par défaut : une seule icône expand_more par item (rotation CSS)', () => {
     const { container } = renderWith()
     for (const details of container.querySelectorAll('details')) {
-      expect(ligatures(details)).toEqual(['expand_more'])
+      expect(icones(details)).toEqual(['expand_more'])
       expect(details.hasAttribute('data-swap')).toBe(false)
     }
   })
@@ -60,7 +61,7 @@ describe('Accordion', () => {
   it('expand-icon/collapse-icon : deux icônes rendues et marqueur data-swap', () => {
     const { container } = renderWith('expand-icon="add" collapse-icon="remove"')
     for (const details of container.querySelectorAll('details')) {
-      expect(ligatures(details)).toEqual(['add', 'remove'])
+      expect(icones(details)).toEqual(['add', 'remove'])
       expect(details.hasAttribute('data-swap')).toBe(true)
     }
   })
@@ -77,9 +78,9 @@ describe('Accordion', () => {
   it('icon-start : icône dédiée devant le titre, distincte du chevron', () => {
     const { container } = renderWith('', 'icon-start="settings"')
     const [first, second] = [...container.querySelectorAll('details')]
-    // les deux ligatures cohabitent : icône de début puis chevron
-    expect(ligatures(first as Element)).toEqual(['settings', 'expand_more'])
-    expect(first?.querySelector('.ds-accordion-icon-start .ds-icon-symbol')?.textContent).toBe(
+    // les deux icônes cohabitent : icône de début puis chevron
+    expect(icones(first as Element)).toEqual(['settings', 'expand_more'])
+    expect(first?.querySelector<HTMLElement>('.ds-accordion-icon-start')?.dataset.icon).toBe(
       'settings',
     )
     expect(second?.querySelector('.ds-accordion-icon-start')).toBeNull()
