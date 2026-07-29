@@ -183,16 +183,9 @@ const { counterText, over } = useTextLimit({
         :aria-label="clearLabel"
         @click="onClear"
       >
-        <!-- croix en SVG inline : doit marcher sans la police d'icônes du consommateur ;
-             dimensionnée en CSS selon la taille du champ -->
-        <svg viewBox="0 0 16 16" aria-hidden="true">
-          <path
-            d="M4 4l8 8M12 4l-8 8"
-            stroke="currentcolor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
+        <!-- croix Material Symbols : même graisse de trait que les autres icônes
+             (iconStart/iconEnd…) ; police chargée par le consommateur -->
+        <Icon name="close" />
       </button>
 
       <Spinner v-if="loading" :label="loadingLabel" />
@@ -383,12 +376,6 @@ const { counterText, over } = useTextLimit({
   .ds-textarea-action:focus-visible {
     outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
     outline-offset: calc(var(--ds-focus-ring-offset) * -1);
-  }
-
-  /* croix proportionnelle à la zone cliquable (16px dans 24px en md) */
-  .ds-textarea-clear svg {
-    inline-size: calc(var(--_control-action-size) - var(--ds-space-2));
-    block-size: calc(var(--_control-action-size) - var(--ds-space-2));
   }
 
   /* Readonly : fond légèrement enfoncé, texte normal (la valeur reste lisible),
