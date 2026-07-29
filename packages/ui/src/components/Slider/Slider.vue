@@ -292,6 +292,7 @@ function resyncFields() {
     column-gap: var(--ds-space-2);
     row-gap: var(--ds-space-1);
     width: 100%;
+    font-family: var(--ds-text-family);
   }
 
   .ds-slider:has(.ds-slider-labels) {
