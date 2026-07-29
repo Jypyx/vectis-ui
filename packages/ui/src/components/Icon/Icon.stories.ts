@@ -2,11 +2,24 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 import { defineComponent, h } from 'vue'
 
+import Accordion from '../Accordion/Accordion.vue'
+import AccordionItem from '../Accordion/AccordionItem.vue'
+import Breadcrumb from '../Breadcrumb/Breadcrumb.vue'
 import Button from '../Button/Button.vue'
+import Chip from '../Chip/Chip.vue'
+import Input from '../Input/Input.vue'
+import Pagination from '../Pagination/Pagination.vue'
 
 import Icon from './Icon.vue'
-import { builtinIcons } from './icons'
-import { setIconResolver } from './resolver'
+import { builtinIcons, type DsIconName } from './icons'
+import {
+  classIconResolver,
+  componentIconResolver,
+  ligatureIconResolver,
+  setIconResolver,
+  type IconAliases,
+  type IconResolver,
+} from './resolver'
 
 const meta = {
   title: 'Composants/Icon',
@@ -241,3 +254,284 @@ export const PiloteParLeParent: Story = {
     `,
   }),
 }
+
+/* ------------------------------------------------------------------ *
+ * Polices d'icônes tierces (setIconResolver)
+ *
+ * Les feuilles CDN sont chargées par `.storybook/preview-head.html` — aucune
+ * dépendance npm ajoutée au package. Chaque story pose SON résolveur dans
+ * `beforeEach` et le retire par la fonction de nettoyage : l'état est
+ * module-level, il fuiterait sinon d'une story à l'autre (même discipline que
+ * le décorateur `dismissToast()` des stories de Toast).
+ *
+ * Les tables d'alias ci-dessous ont été vérifiées classe par classe contre les
+ * feuilles CSS réelles de chaque bibliothèque. Un nom inexistant ne lève rien :
+ * il rend un carré vide.
+ * ------------------------------------------------------------------ */
+
+/** Fabrique d'icônes en COMPOSANT, à la manière d'un jeu SVG type Lucide : un
+    trait `currentcolor`, une racine `<svg>` unique, et des dimensions en dur
+    (24) que le CSS du DS doit battre. Composants fonctionnels : sans `props`
+    déclarées, tout arrive dans l'argument, d'où le spread. */
+const traitSvg = (d: string) => (props: Record<string, unknown>) =>
+  h(
+    'svg',
+    { viewBox: '0 0 24 24', width: 24, height: 24, 'data-jeu': '', fill: 'none', ...props },
+    [h('path', { d, stroke: 'currentcolor', 'stroke-linecap': 'round' })],
+  )
+
+/** Vitrine commune : des composants dont les icônes PAR DÉFAUT viennent du DS —
+    c'est ce qui rend le changement de bibliothèque visible d'un coup d'œil. */
+const VITRINE_COMPOSANTS = {
+  Accordion,
+  AccordionItem,
+  Breadcrumb,
+  Button,
+  Chip,
+  Icon,
+  Input,
+  Pagination,
+}
+
+const VITRINE = `
+  <div style="display: flex; flex-direction: column; gap: 20px; max-inline-size: 640px">
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
+      <Button icon-start="search">Rechercher</Button>
+      <Button variant="outline" tone="neutral" icon-end="expand_more">Filtres</Button>
+      <Chip dismissible>Étiquette</Chip>
+      <Chip selectable check :selected="true" tone="accent">Sélectionné</Chip>
+    </div>
+
+    <Input v-model="recherche" label="Recherche" icon-start="search" clearable />
+
+    <Breadcrumb :items="fil" current-path="/projets/socle" />
+
+    <Accordion>
+      <AccordionItem title="Panneau replié" icon-start="notifications">
+        Le chevron, la croix, la coche et les flèches viennent tous du DS.
+      </AccordionItem>
+    </Accordion>
+
+    <Pagination v-model="page" :length="12" :total-visible="7" />
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-block-start: 4px">
+      <Icon v-for="nom in noms" :key="nom" :name="nom" :size="24" :title="nom" />
+    </div>
+  </div>
+`
+
+/** Fabrique de story « une bibliothèque d'icônes » — même vitrine, résolveur différent. */
+function vitrinePolice(resolver: IconResolver): Story {
+  return {
+    beforeEach: () => {
+      setIconResolver(resolver)
+      return () => setIconResolver(undefined)
+    },
+    render: () => ({
+      components: VITRINE_COMPOSANTS,
+      setup: () => ({
+        recherche: 'Socle',
+        page: 4,
+        noms: Object.keys(builtinIcons),
+        fil: [
+          { label: 'Accueil', href: '/' },
+          { label: 'Projets', href: '/projets' },
+          { label: 'Socle', href: '/projets/socle' },
+        ],
+      }),
+      template: VITRINE,
+    }),
+  }
+}
+
+/** Typé `Record<DsIconName, string>` (et non Partial) : TS refuse de compiler
+    tant qu'une icône du DS n'est pas mappée. C'est le garde-fou d'exhaustivité
+    à recommander aux consommateurs. */
+const PHOSPHOR: Record<DsIconName, string> = {
+  arrow_downward: 'arrow-down',
+  arrow_drop_down: 'caret-down',
+  arrow_drop_up: 'caret-up',
+  arrow_upward: 'arrow-up',
+  calendar_today: 'calendar-blank',
+  check: 'check',
+  check_circle: 'check-circle',
+  chevron_left: 'caret-left',
+  chevron_right: 'caret-right',
+  close: 'x',
+  error: 'warning-circle',
+  expand_less: 'caret-up',
+  expand_more: 'caret-down',
+  info: 'info',
+  more_horiz: 'dots-three',
+  notifications: 'bell',
+  schedule: 'clock',
+  search: 'magnifying-glass',
+  swap_vert: 'arrows-down-up',
+  warning: 'warning',
+}
+
+const FONT_AWESOME: Record<DsIconName, string> = {
+  arrow_downward: 'arrow-down',
+  arrow_drop_down: 'caret-down',
+  arrow_drop_up: 'caret-up',
+  arrow_upward: 'arrow-up',
+  calendar_today: 'calendar',
+  check: 'check',
+  check_circle: 'circle-check',
+  chevron_left: 'angle-left',
+  chevron_right: 'angle-right',
+  close: 'xmark',
+  error: 'circle-exclamation',
+  expand_less: 'angle-up',
+  expand_more: 'angle-down',
+  info: 'circle-info',
+  more_horiz: 'ellipsis',
+  notifications: 'bell',
+  schedule: 'clock',
+  search: 'magnifying-glass',
+  swap_vert: 'sort',
+  warning: 'triangle-exclamation',
+}
+
+const BOOTSTRAP: Record<DsIconName, string> = {
+  arrow_downward: 'arrow-down',
+  arrow_drop_down: 'caret-down-fill',
+  arrow_drop_up: 'caret-up-fill',
+  arrow_upward: 'arrow-up',
+  calendar_today: 'calendar',
+  check: 'check-lg',
+  check_circle: 'check-circle-fill',
+  chevron_left: 'chevron-left',
+  chevron_right: 'chevron-right',
+  close: 'x-lg',
+  error: 'exclamation-circle-fill',
+  expand_less: 'chevron-up',
+  expand_more: 'chevron-down',
+  info: 'info-circle-fill',
+  more_horiz: 'three-dots',
+  notifications: 'bell-fill',
+  schedule: 'clock-fill',
+  search: 'search',
+  swap_vert: 'arrow-down-up',
+  warning: 'exclamation-triangle-fill',
+}
+
+/**
+ * **Phosphor** — police à classes, deux classes sur le même élément
+ * (`ph` pour la graisse, `ph-<nom>` pour le glyphe). `filled` bascule sur la
+ * famille `ph-fill`, qui exige l'import `@phosphor-icons/web/fill`.
+ */
+export const PolicePhosphor: Story = {
+  ...vitrinePolice(
+    classIconResolver({
+      aliases: PHOSPHOR,
+      className: (nom, filled) => `${filled ? 'ph-fill' : 'ph'} ph-${nom}`,
+    }),
+  ),
+  play: async ({ canvasElement }) => {
+    // Le résolveur est bien branché : la croix du Chip porte les classes Phosphor.
+    const croix = canvasElement.querySelector("[data-icon='close'] .ds-icon-glyph")
+    await expect(croix).toHaveClass('ph', 'ph-x')
+    // …et le nom LOGIQUE survit au changement de bibliothèque.
+    await expect(canvasElement.querySelector("[data-icon='search']")).toBeTruthy()
+  },
+}
+
+/**
+ * **Font Awesome 6 (mode CSS)** — la classe de famille porte le `content`
+ * (`.fa-solid:before { content: var(--fa) }`) et la classe d'icône la valeur
+ * (`.fa-xmark { --fa: "\\f00d" }`). Le mode « SVG with JS » de FA n'est PAS
+ * supporté : il remplace les éléments dans le DOM sous les pieds de Vue.
+ */
+export const PoliceFontAwesome: Story = {
+  ...vitrinePolice(
+    classIconResolver({
+      aliases: FONT_AWESOME,
+      className: (nom, filled) => `${filled ? 'fa-solid' : 'fa-regular'} fa-${nom}`,
+    }),
+  ),
+  play: async ({ canvasElement }) => {
+    const croix = canvasElement.querySelector("[data-icon='close'] .ds-icon-glyph")
+    await expect(croix).toHaveClass('fa-xmark')
+  },
+}
+
+/** **Bootstrap Icons** — une seule classe de famille (`bi`) et pas de variante pleine. */
+export const PoliceBootstrapIcons: Story = {
+  ...vitrinePolice(
+    classIconResolver({
+      aliases: BOOTSTRAP,
+      className: (nom) => `bi bi-${nom}`,
+    }),
+  ),
+  play: async ({ canvasElement }) => {
+    const croix = canvasElement.querySelector("[data-icon='close'] .ds-icon-glyph")
+    await expect(croix).toHaveClass('bi', 'bi-x-lg')
+  },
+}
+
+/**
+ * **Material Symbols en ligature** — `ligatureIconResolver()` renvoie les icônes
+ * du DS vers la POLICE au lieu du registre intégré. Seul intérêt : retrouver
+ * l'axe optique `--ds-icon-opsz` (20 en xs/sm/md, 24 en lg/xl), que le registre
+ * — dessiné à opsz 24 — ne peut pas reproduire. Sert aussi aux builds IcoMoon à
+ * ligatures et aux variantes Outlined/Sharp.
+ */
+export const PoliceLigature: Story = {
+  ...vitrinePolice(ligatureIconResolver()),
+  play: async ({ canvasElement }) => {
+    const croix = canvasElement.querySelector("[data-icon='close'] .ds-icon-symbol")
+    await expect(croix).toHaveTextContent('close')
+  },
+}
+
+/**
+ * **Jeu SVG en composants** (Lucide, Untitled UI…) via `componentIconResolver`.
+ * Ici les composants sont fabriqués sur place — le DS n'ajoute aucune
+ * dépendance — mais le contrat est le vrai : racine `<svg>` unique, c'est elle
+ * que `.ds-icon > svg` dimensionne, y compris contre un `width`/`height` en dur.
+ *
+ * La table est volontairement PARTIELLE : les icônes non mappées retombent sur
+ * le registre intégré. C'est ce qui rend une adoption progressive possible.
+ */
+export const JeuDeComposants: Story = {
+  ...vitrinePolice(
+    componentIconResolver({
+      components: {
+        close: traitSvg('M6 6l12 12M18 6L6 18'),
+        check: traitSvg('M4 12l6 6L20 6'),
+        chevron_left: traitSvg('M15 5l-7 7 7 7'),
+        chevron_right: traitSvg('M9 5l7 7-7 7'),
+        expand_more: traitSvg('M5 9l7 7 7-7'),
+        search: traitSvg('M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14M20 20l-4-4'),
+      },
+      props: () => ({ 'stroke-width': 1.75 }),
+    }),
+  ),
+  play: async ({ canvasElement }) => {
+    // Mappé → composant ; non mappé (notifications) → registre intégré.
+    await expect(canvasElement.querySelector("[data-icon='close'] [data-jeu]")).toBeTruthy()
+    await expect(
+      canvasElement.querySelector("[data-icon='notifications'] .ds-icon-svg"),
+    ).toBeTruthy()
+  },
+}
+
+/**
+ * **Mapping partiel** — cinq alias Phosphor seulement, `strict` laissé à son
+ * défaut. Les quinze autres icônes du DS restent des SVG intégrés au lieu de
+ * devenir des `ph-swap_vert` inexistants (donc des carrés vides), et les noms
+ * du consommateur passent toujours, eux, même absents de la table.
+ */
+export const MappingPartiel: Story = vitrinePolice(
+  classIconResolver({
+    aliases: {
+      close: 'x',
+      check: 'check',
+      search: 'magnifying-glass',
+      expand_more: 'caret-down',
+      chevron_right: 'caret-right',
+    } satisfies IconAliases,
+    className: (nom) => `ph ph-${nom}`,
+  }),
+)

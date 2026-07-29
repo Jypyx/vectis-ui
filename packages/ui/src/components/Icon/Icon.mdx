@@ -72,6 +72,66 @@ deux états. Sans effet sur une image (`src`) ou un SVG inline.
 
 <Canvas of={IconStories.Filled} />
 
+## Brancher une bibliothèque d'icônes
+
+`setIconResolver` est consulté **avant** le registre intégré : c'est ce qui permet de faire
+passer toutes les icônes du DS sur votre propre source. Rendre `undefined` signifie « je ne
+connais pas ce nom » et laisse la main au registre, puis à la ligature — les mappings
+**partiels** sont donc utilisables.
+
+À poser au niveau **module** (plugin Nuxt, `main.ts`), jamais dans un `setup()`, et jamais en
+client-only : le serveur rendrait le SVG intégré et le client votre bibliothèque.
+
+Les stories ci-dessous rendent toutes **la même vitrine** — Button, Input, Chip, Breadcrumb,
+Accordion, Pagination, plus la grille complète des icônes intégrées. Seul le résolveur change.
+Les polices sont chargées par `.storybook/preview-head.html` depuis un CDN : aucune n'est une
+dépendance du package.
+
+### Polices à classes
+
+Font Awesome, Phosphor, Bootstrap Icons… — le glyphe vient d'un `::before` porté par des
+classes. `classIconResolver` les couvre toutes ; Icon rend alors un
+`<span class="ds-icon-glyph …">` qui lui appartient, donc qu'il normalise d'une seule règle.
+
+<Canvas of={IconStories.PolicePhosphor} />
+
+<Canvas of={IconStories.PoliceFontAwesome} />
+
+<Canvas of={IconStories.PoliceBootstrapIcons} />
+
+Le paramètre `strict` (défaut) protège les icônes du DS : un nom du registre **absent** de
+votre table d'alias retomberait sur une classe inexistante — donc un carré vide — alors il
+retombe sur le SVG intégré. Vos propres noms, eux, passent toujours : ils sont déjà écrits
+dans le vocabulaire de votre bibliothèque.
+
+<Canvas of={IconStories.MappingPartiel} />
+
+### Jeux SVG en composants
+
+Lucide, Untitled UI… — `componentIconResolver` rend le composant tel quel. Contrat : **racine
+`<svg>` unique**, c'est elle que le CSS dimensionne, y compris contre un `width`/`height` en
+dur (Lucide écrit `width="24"` : un attribut de présentation, battu par toute règle d'auteur).
+
+<Canvas of={IconStories.JeuDeComposants} />
+
+### Polices à ligatures
+
+Material Symbols (toutes variantes) et les builds IcoMoon à ligatures. `ligatureIconResolver()`
+renvoie **aussi** les icônes du DS vers la police : c'est la façon de retrouver l'axe optique
+`--ds-icon-opsz`, que le registre — dessiné à opsz 24 — ne peut pas reproduire. Pour changer
+seulement de variante (Outlined, Sharp), surcharger le token `--ds-font-family-icon` suffit,
+sans résolveur.
+
+<Canvas of={IconStories.PoliceLigature} />
+
+### Sans résolveur du tout
+
+Les icônes du DS s'affichent (registre intégré) ; **vos** noms tombent sur la branche ligature,
+donc sur `--ds-font-family-icon`. Avec une police à classes chargée mais aucun résolveur, ils
+apparaissent en fragments de mots rognés au carré de l'icône — visible et local, jamais une
+mise en page cassée, et jamais annoncé (l'icône est `aria-hidden`). Sinon, chaque prop accepte
+aussi un rendu explicite ponctuel : `:icon-start="{ class: 'ph ph-house' }"`.
+
 ## Accessibilité
 
 L'icône est **décorative par défaut** (`aria-hidden="true"`) : dans un bouton ou un champ,
