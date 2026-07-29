@@ -74,8 +74,8 @@ describe('DataTable', () => {
     })
     const sortButton = getByRole('button', { name: 'Total' })
     const th = sortButton.closest('th') as HTMLElement
-    // la ligature Material Symbols EST le texte du span rendu par Icon
-    const glyph = () => sortButton.querySelector('.ds-table-sort-icon')?.textContent
+    // `data-icon` nomme l'icône quelle que soit sa source (SVG intégré, ligature…)
+    const glyph = () => sortButton.querySelector<HTMLElement>('.ds-table-sort-icon')?.dataset.icon
 
     // le nom accessible ne retient que le libellé : l'icône est décorative
     expect(glyph()).toBe('swap_vert')

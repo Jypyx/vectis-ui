@@ -162,12 +162,14 @@ export const SelectionnableAvecCheck: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByText('check')).toBeVisible()
-    await expect(canvas.queryByText('palette')).toBeNull()
-    await userEvent.click(canvas.getByRole('button'))
-    await expect(canvas.queryByText('check')).toBeNull()
-    await expect(canvas.getByText('palette')).toBeVisible()
+    // `data-icon` nomme l'icône quelle que soit sa source — la coche vient du
+    // registre intégré (SVG), `palette` de la police du consommateur (ligature).
+    const icone = (nom: string) => canvasElement.querySelector(`.ds-icon[data-icon='${nom}']`)
+    await expect(icone('check')).toBeVisible()
+    await expect(icone('palette')).toBeNull()
+    await userEvent.click(within(canvasElement).getByRole('button'))
+    await expect(icone('check')).toBeNull()
+    await expect(icone('palette')).toBeVisible()
   },
 }
 

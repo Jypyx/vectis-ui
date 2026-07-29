@@ -8,6 +8,7 @@ import { computed, useSlots } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 
 export type BadgeTone = 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
 
@@ -25,10 +26,9 @@ interface BadgeProps {
   count?: number
   /**
    * Icône seule (nom Material Symbols ou URL d'image) — prime sur `count`,
-   * ignorée en mode `dot`. Police Material chargée par le consommateur
-   * (contrat Icon).
+   * ignorée en mode `dot`. Nom d'icône, ou rendu explicite (contrat Icon).
    */
-  icon?: string
+  icon?: IconSource
   /** Rond de 10px sans contenu visible. */
   dot?: boolean
   /** Avec une cible : coin haut-droit au lieu d'inline. Ignoré sans cible. */

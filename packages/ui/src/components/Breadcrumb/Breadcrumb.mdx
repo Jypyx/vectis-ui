@@ -20,9 +20,9 @@ le premier étant masqué en CSS (`:first-child`).
 
 ## Séparateur
 
-`separator` (défaut `chevron_right`) accepte un nom Material Symbols **ou** une URL
-d'image : toute valeur contenant `.`, `/` ou `:` est traitée comme une URL (un nom Material
-n'en contient jamais). Note RTL : les ligatures directionnelles ne se retournent pas
+`separator` (défaut `chevron_right`) accepte un nom d'icône **ou** un rendu explicite
+(`{ src: '/chevron.svg' }`) : une chaîne est toujours un nom, jamais une URL devinée. Note
+RTL : une icône directionnelle ne se retourne pas
 automatiquement.
 
 <Canvas of={BreadcrumbStories.SeparateurIcone} />
@@ -61,5 +61,6 @@ Les libellés longs sont tronqués par ellipsis, la liste passe à la ligne si n
 - Les séparateurs sont purement décoratifs (`aria-hidden`), jamais annoncés.
 - Le bouton d'ellipsis a un libellé explicite (`ellipsisLabel`, « Afficher les pages
   intermédiaires » par défaut) et son menu suit le pattern ARIA menu (roving focus).
-- La police Material Symbols est chargée par le consommateur — prévoir des noms d'icônes
-  avec repli acceptable (l'icône est décorative, le libellé porte le sens).
+- Le séparateur par défaut est un SVG embarqué ; les noms d'icônes que VOUS fournissez
+  viennent de votre police — prévoir un repli acceptable (l'icône est décorative, le
+  libellé porte le sens).

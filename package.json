@@ -12,6 +12,7 @@
     "test:stories": "pnpm --filter @socle/ui test:stories",
     "build": "pnpm -r build",
     "tokens": "pnpm --filter @socle/ui tokens",
+    "icons": "pnpm --filter @socle/ui icons",
     "storybook": "pnpm --filter @socle/ui storybook",
     "build-storybook": "pnpm --filter @socle/ui build-storybook",
     "chromatic": "pnpm --filter @socle/ui chromatic"

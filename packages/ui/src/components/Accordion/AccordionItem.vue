@@ -3,6 +3,7 @@ import { computed, inject } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 import Typography from '../Typography/Typography.vue'
 import { accordionKey } from './context'
 
@@ -17,8 +18,8 @@ interface AccordionItemProps {
   title?: string
   /** Sous-titre sous le titre ; remplaçable par le slot #subtitle. */
   subtitle?: string
-  /** Icône devant le titre : nom Material ou URL. */
-  iconStart?: string
+  /** Icône devant le titre : nom, ou rendu explicite (`{ src }`, `{ component }`…). */
+  iconStart?: IconSource
   /** Ouvert au premier rendu (état ensuite géré nativement). */
   defaultOpen?: boolean
   /** Item inerte : ni cliquable ni atteignable au clavier, gris par tokens. */

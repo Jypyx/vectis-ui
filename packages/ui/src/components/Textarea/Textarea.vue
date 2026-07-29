@@ -14,6 +14,8 @@
 import { computed, ref } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
+import { iconName, iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 import Spinner from '../Spinner/Spinner.vue'
 import Typography from '../Typography/Typography.vue'
 
@@ -38,11 +40,11 @@ interface TextareaProps {
   label?: string
   /** Texte d'aide sous le champ, lié via aria-describedby. */
   hint?: string
-  /** Nom Material Symbols à gauche dans le champ (le slot #start prime).
+  /** Icône à gauche dans le champ (le slot #start prime).
       Décorative ; devient un bouton si un listener @click:icon-start est attaché. */
-  iconStart?: string
+  iconStart?: IconSource
   /** Idem à droite (slot #end prime). Remplacée par le spinner en loading. */
-  iconEnd?: string
+  iconEnd?: IconSource
   /** Libellé accessible du bouton icône start (si cliquable). */
   iconStartLabel?: string
   /** Libellé accessible du bouton icône end (si cliquable). */
@@ -154,13 +156,13 @@ const { counterText, over } = useTextLimit({
           v-if="iconStart && hasIconStartHandler"
           type="button"
           class="ds-textarea-action"
-          :aria-label="iconStartLabel ?? iconStart"
+          :aria-label="iconStartLabel ?? iconName(iconStart)"
           :disabled="disabled"
           @click="emit('click:icon-start', $event)"
         >
-          <Icon :name="iconStart" />
+          <Icon v-bind="iconProps(iconStart)" />
         </button>
-        <Icon v-else-if="iconStart" :name="iconStart" />
+        <Icon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
       </slot>
 
       <textarea
@@ -194,13 +196,13 @@ const { counterText, over } = useTextLimit({
           v-if="iconEnd && hasIconEndHandler"
           type="button"
           class="ds-textarea-action"
-          :aria-label="iconEndLabel ?? iconEnd"
+          :aria-label="iconEndLabel ?? iconName(iconEnd)"
           :disabled="disabled"
           @click="emit('click:icon-end', $event)"
         >
-          <Icon :name="iconEnd" />
+          <Icon v-bind="iconProps(iconEnd)" />
         </button>
-        <Icon v-else-if="iconEnd" :name="iconEnd" />
+        <Icon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" />
       </slot>
     </div>
 

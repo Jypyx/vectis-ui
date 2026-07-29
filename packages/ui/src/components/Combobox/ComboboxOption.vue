@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 
 /**
  * Rangée d'option du Combobox (`role="option"`), composant INTERNE non exporté.
@@ -22,10 +23,9 @@ import { iconProps } from '../Icon/iconProps'
  */
 interface ComboboxOptionProps {
   /**
-   * Icône avant le libellé : nom Material Symbols Rounded, ou URL d'image/SVG
-   * (toute valeur contenant '.', '/' ou ':' est traitée comme une URL).
+   * Icône avant le libellé : nom d'icône, ou rendu explicite (`{ src }`…).
    */
-  icon?: string
+  icon?: IconSource
   /** Option sélectionnée (aria-selected + coche). */
   selected?: boolean
   /** Option active (surbrillance) — posée par le champ. */

@@ -482,8 +482,10 @@ export const AvecIcones: Story = {
       { value: 'vid', label: 'Vidéo', icon: 'movie' },
       {
         value: 'svg',
-        label: 'Icône distante (URL)',
-        icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='%236366f1'/%3E%3C/svg%3E",
+        label: 'Icône distante (image explicite)',
+        icon: {
+          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='%236366f1'/%3E%3C/svg%3E",
+        },
       },
       { value: 'zip', label: 'Archive (sans icône)' },
       { value: 'exe', label: 'Exécutable', icon: 'terminal', disabled: true },

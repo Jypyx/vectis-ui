@@ -52,7 +52,7 @@ d'`IconButton`.
 
 ## Contenu d'un onglet
 
-`label` fournit le texte, `icon` une icône de début — nom Material Symbols **ou** URL d'image. Les
+`label` fournit le texte, `icon` une icône de début — nom d'icône **ou** rendu explicite. Les
 deux se combinent. Une icône sans libellé donne un onglet carré : il faut alors lui donner un nom
 accessible avec `aria-label`, qui traverse jusqu'au `<button>` rendu. Enfin, le slot par défaut
 remplace le libellé pour tout contenu riche.
@@ -99,8 +99,8 @@ aucun écouteur de défilement.
 <Canvas of={TabsStories.BoutonsDefilement} />
 
 Les icônes par défaut suivent l'orientation — chevrons en horizontal, `expand_less`/`expand_more` en
-vertical. `prevIcon` et `nextIcon` les remplacent, et acceptent aussi bien un nom Material Symbols
-qu'une URL d'image ; `prevLabel` et `nextLabel` fournissent le nom accessible correspondant, qu'il
+vertical. `prevIcon` et `nextIcon` les remplacent, et acceptent aussi bien un nom d'icône
+qu'un rendu explicite ; `prevLabel` et `nextLabel` fournissent le nom accessible correspondant, qu'il
 faut penser à adapter en même temps que l'icône.
 
 <Canvas of={TabsStories.FlechesPersonnalisees} />

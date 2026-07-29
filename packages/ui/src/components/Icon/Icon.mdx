@@ -5,12 +5,15 @@ import * as IconStories from './Icon.stories'
 
 # Icon
 
-Icône à trois sources : ligature [Material Symbols Rounded](https://fonts.google.com/icons)
-(`name`), image (`src`), ou SVG inline (slot par défaut). Aucun JavaScript de comportement :
-le rendu, la taille et l'accessibilité sont entièrement déclaratifs.
+Icône à quatre sources, résolues dans un ordre fixe : image (`src`), puis `name` — d'abord le
+**registre intégré**, sinon la **ligature** de la police du consommateur — sinon le **SVG
+inline** passé en slot.
 
-> La police Material Symbols Rounded n'est pas embarquée dans la librairie (zéro dépendance
-> runtime) : elle est chargée par l'application consommatrice (voir le README).
+> Les icônes que la librairie rend elle-même (croix, chevrons, icônes de tone des toasts…)
+> sont des SVG **embarqués**, répliques exactes de
+> [Material Symbols Rounded](https://fonts.google.com/icons) (wght 400 · GRAD 0 · opsz 24).
+> **Le design system ne requiert donc aucune police d'icônes.** La police reste utile pour vos
+> propres noms d'icônes ; elle est chargée par l'application consommatrice (voir le README).
 
 <Canvas of={IconStories.Default} />
 
@@ -23,29 +26,49 @@ le rendu, la taille et l'accessibilité sont entièrement déclaratifs.
 
 <Canvas of={IconStories.AdapteeAuTexte} />
 
-## Trois sources
+## Quatre sources
 
-`src` prime sur `name`, qui prime sur le slot. L'image reçoit un `alt` vide (le nom
-accessible vient de `label`, jamais de la source) ; le SVG inline remplit le carré de
-l'icône.
+`src` prime sur `name`, qui prime sur le slot. Un `name` du registre intégré donne un SVG ;
+tout autre nom retombe sur la ligature, donc sur la police du consommateur. L'image reçoit un
+`alt` vide (le nom accessible vient de `label`, jamais de la source) ; le SVG inline remplit le
+carré de l'icône.
 
-<Canvas of={IconStories.TroisSources} />
+<Canvas of={IconStories.QuatreSources} />
+
+L'attribut **`data-icon`** porte le nom demandé quelle que soit la source effective — accroche
+stable pour du CSS consommateur (`.ds-icon[data-icon='close'] { … }`) comme pour les tests.
+
+## Bibliothèque intégrée
+
+<Canvas of={IconStories.Bibliotheque} />
+
+Cette liste n'est pas une bibliothèque d'icônes à disposition : c'est exactement l'ensemble de
+ce que les composants rendent **par défaut**. Elle grandit quand un composant se met à rendre
+une nouvelle icône, jamais pour offrir un catalogue.
+
+<Canvas of={IconStories.SansPolice} />
 
 ## Pilotage par le parent
 
 Sans prop `size`, tout parent peut dimensionner ses icônes en posant les custom properties
-**`--ds-icon-size`** (taille) et **`--ds-icon-opsz`** (axe optique de la police). C'est ce
-que font `Button`, `Input` et `Textarea` selon leur propre taille (sm → 16px/opsz 20,
-md → 20px/opsz 24, lg → 24px/opsz 24). La résolution suit la priorité : prop `size`
-numérique > contexte parent > 1em.
+**`--ds-icon-size`** (taille) et **`--ds-icon-opsz`** (axe optique). C'est ce que font `Button`,
+`Input` et `Textarea` selon leur propre taille (sm → 16px/opsz 20, md → 20px/opsz 20,
+lg → 24px/opsz 24). La résolution suit la priorité : prop `size` numérique > contexte
+parent > 1em.
+
+**`--ds-icon-opsz` ne s'applique qu'à la ligature** : c'est un axe variable de police, sans
+prise sur un SVG intégré (dessiné à opsz 24), une image ou un SVG inline. La taille, elle, vaut
+pour toutes les sources.
 
 <Canvas of={IconStories.PiloteParLeParent} />
 
 ## Remplissage
 
-La prop `filled` bascule l'axe variable **`FILL`** de la police (de 0 = contour à 1 = plein).
-Elle ne concerne que la source **ligature** (`name`) : `FILL` est un axe propre à Material
-Symbols, sans effet sur une image (`src`) ou un SVG inline.
+La prop `filled` demande la variante pleine (axe **`FILL`** de Material Symbols, 0 = contour →
+1 = plein). Elle est honorée par la **ligature** et par le **registre intégré**, qui embarque un
+second path pour les icônes dont la géométrie change réellement (`check_circle`, `warning`,
+`info`…) — les icônes purement linéaires (`close`, chevrons, flèches) sont identiques dans les
+deux états. Sans effet sur une image (`src`) ou un SVG inline.
 
 <Canvas of={IconStories.Filled} />
 

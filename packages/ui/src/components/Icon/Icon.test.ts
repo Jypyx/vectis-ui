@@ -2,6 +2,7 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
 import Icon from './Icon.vue'
+import { builtinIcons } from './icons'
 
 describe('Icon', () => {
   it('est décorative par défaut (aria-hidden, sans role)', () => {
@@ -17,10 +18,42 @@ describe('Icon', () => {
     expect(icon.getAttribute('aria-hidden')).toBeNull()
   })
 
-  it('rend la ligature Material Symbols', () => {
+  it('icône du registre intégré : SVG inline, sans dépendre d’une police', () => {
     const { container } = render(Icon, { props: { name: 'close' } })
+    const path = container.querySelector('.ds-icon-svg path') as SVGPathElement
+    expect(path.getAttribute('d')).toBe(builtinIcons.close[0])
+    expect(container.querySelector('.ds-icon-symbol')).toBeNull()
+  })
+
+  it('nom hors registre : repli sur la ligature de la police du consommateur', () => {
+    const { container } = render(Icon, { props: { name: 'favorite' } })
     const symbol = container.querySelector('.ds-icon-symbol') as HTMLElement
-    expect(symbol.textContent).toBe('close')
+    expect(symbol.textContent).toBe('favorite')
+    expect(container.querySelector('svg')).toBeNull()
+  })
+
+  it('data-icon : posé quelle que soit la source effective', () => {
+    const integree = render(Icon, { props: { name: 'close' } })
+    expect(integree.container.querySelector('.ds-icon')?.getAttribute('data-icon')).toBe('close')
+
+    const ligature = render(Icon, { props: { name: 'favorite' } })
+    expect(ligature.container.querySelector('.ds-icon')?.getAttribute('data-icon')).toBe('favorite')
+
+    const image = render(Icon, { props: { src: '/logo.png' } })
+    expect(image.container.querySelector('.ds-icon')?.hasAttribute('data-icon')).toBe(false)
+  })
+
+  it('filled : path plein quand la géométrie diffère, contour sinon', () => {
+    const plein = render(Icon, { props: { name: 'check_circle', filled: true } })
+    expect(plein.container.querySelector('.ds-icon-svg path')?.getAttribute('d')).toBe(
+      builtinIcons.check_circle[1],
+    )
+
+    // `close` n'a pas de variante FILL distincte : le contour sert aux deux.
+    const trait = render(Icon, { props: { name: 'close', filled: true } })
+    expect(trait.container.querySelector('.ds-icon-svg path')?.getAttribute('d')).toBe(
+      builtinIcons.close[0],
+    )
   })
 
   it('src prime sur name et rend une image neutre (alt vide)', () => {
@@ -29,6 +62,23 @@ describe('Icon', () => {
     expect(img.getAttribute('src')).toBe('/logo.png')
     expect(img.getAttribute('alt')).toBe('')
     expect(container.querySelector('.ds-icon-symbol')).toBeNull()
+    expect(container.querySelector('svg')).toBeNull()
+  })
+
+  it('un nom contenant « / » ou « : » reste un NOM (plus aucune détection d’URL)', () => {
+    // C'est ce qui permet aux conventions type Iconify (`mdi:close`) d'atteindre
+    // le résolveur d'icônes au lieu de partir en <img>.
+    const { container } = render(Icon, { props: { name: 'mdi:close' } })
+    expect(container.querySelector('.ds-icon-symbol')?.textContent).toBe('mdi:close')
+    expect(container.querySelector('img')).toBeNull()
+  })
+
+  it('render : rendu explicite, prioritaire sur name et src', () => {
+    const { container } = render(Icon, {
+      props: { name: 'close', src: '/logo.png', render: { src: '/explicite.svg' } },
+    })
+    expect(container.querySelector('.ds-icon-img')?.getAttribute('src')).toBe('/explicite.svg')
+    expect(container.querySelector('.ds-icon-svg')).toBeNull()
   })
 
   it('rend le slot SVG sans src ni name', () => {

@@ -10,7 +10,7 @@ supprimé), avec la même API visuelle. La prop `label` est **obligatoire** — 
 l'`aria-label` du bouton, car une icône seule ne fournit aucun nom accessible aux lecteurs
 d'écran.
 
-L'icône peut être fournie de deux façons : par la prop `icon` (nom Material Symbols, sans
+L'icône peut être fournie de deux façons : par la prop `icon` (nom d'icône ou rendu explicite, sans
 passer par le slot — le remplissage se pilote alors via `icon-filled`), ou dans le slot par
 défaut pour du contenu custom (le slot ne s'affiche qu'en l'absence de `icon`). Via le
 composant `Icon`, la taille et l'axe `opsz` suivent automatiquement la taille du bouton
@@ -39,16 +39,16 @@ automatiquement la hauteur du `Button` sous-jacent, compact inclus.
 
 ## Icône par prop
 
-La prop `icon` prend un nom Material Symbols Rounded et rend l'`Icon` en interne, sans passer
-par le slot ; `icon-filled` la remplit (axe `FILL` de la police).
+La prop `icon` prend un nom d'icône (ou un rendu explicite) et rend l'`Icon` en interne, sans
+passer par le slot ; `icon-filled` demande la variante pleine (axe `FILL`).
 
 <Canvas of={IconButtonStories.IconProp} />
 
 ## Sources d'icône
 
 Le slot (fallback en l'absence de `icon`) accepte les trois sources du composant `Icon` :
-ligature Material Symbols Rounded (police chargée par le consommateur — voir le README), SVG
-inline, ou image.
+SVG embarqué du DS, ligature de la police du consommateur (voir le README), SVG inline, ou
+image.
 
 <Canvas of={IconButtonStories.IconsTypes} />
 

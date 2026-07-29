@@ -81,9 +81,9 @@ départ du pointeur (WCAG 2.2.1).
 
 Chaque tone a son icône Material Symbols par défaut : `notifications` (neutral), `info`
 (accent), `check_circle` (success), `error` (danger), `warning` (warning). L'option `icon`
-accepte tout nom Material Symbols ou une URL d'image (détection automatique, comme
-Breadcrumb) ; `icon: false` la retire. La police Material Symbols est chargée par le
-consommateur (voir Icon).
+accepte tout nom d'icône ou un rendu explicite (`{ src }`, comme partout ailleurs) ;
+`icon: false` la retire. Les icônes de tone sont des SVG embarqués : elles s'affichent sans
+aucune police (voir Icon).
 
 <Canvas of={ToasterStories.IconePersonnalisee} />
 

@@ -41,14 +41,13 @@ ne sont pas rendus (avertissement en développement).
 ## Labels de pas
 
 `labels` associe un libellé à chaque pas, affiché sous le slider (à droite en vertical) :
-une chaîne est rendue en texte, un objet `{ icon, label }` en icône Material Symbols avec
+une chaîne est rendue en texte, un objet `{ icon, label }` en icône (nom ou rendu explicite) avec
 libellé accessible. Fournir les labels active les ticks implicitement et pose
 `aria-valuetext` sur les inputs : les lecteurs d'écran annoncent « M », pas « 2 ».
 
 <Canvas of={SliderStories.LabelsTexte} />
 
-Valeurs non numériques par icônes (la police Material Symbols est chargée par le
-consommateur) :
+Valeurs non numériques par icônes (ces noms-là viennent de la police du consommateur) :
 
 <Canvas of={SliderStories.LabelsIcones} />
 

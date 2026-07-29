@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { provide, useId } from 'vue'
 
+import type { IconSource } from '../Icon/types'
+
 import { accordionKey } from './context'
 
 /**
@@ -13,10 +15,10 @@ interface AccordionProps {
   exclusive?: boolean
   /** `flat` : aucun habillage. `outlined` : fond surélevé, bordure et rayon. */
   variant?: 'flat' | 'outlined'
-  /** Icône des items fermés : nom Material ou URL. Défaut : chevron pivotant. */
-  expandIcon?: string
+  /** Icône des items fermés : nom, ou `{ src }` / `{ component }`. Défaut : chevron pivotant. */
+  expandIcon?: IconSource
   /** Icône des items ouverts ; absente = `expandIcon` pivotée de 180°. */
-  collapseIcon?: string
+  collapseIcon?: IconSource
   /** Densité réduite : -4px sur tous les paddings (typo et icône inchangées). */
   compact?: boolean
 }

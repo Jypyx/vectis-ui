@@ -89,16 +89,21 @@ export const Compteurs: Story = {
   }),
 }
 
-/** Icône seule (nom Material Symbols ou URL) : badge circulaire de 20px, icône 16px. */
+/** Icône seule (nom, ou `{ src }`) : badge circulaire de 20px, icône 16px. */
 export const Icone: Story = {
   render: () => ({
     components: { Badge },
+    setup: () => ({
+      etoile: {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8Z' fill='white'/%3E%3C/svg%3E",
+      },
+    }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
         <Badge icon="notifications" />
         <Badge tone="success" icon="check" />
         <Badge tone="warning" icon="priority_high" />
-        <Badge icon="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8Z' fill='white'/%3E%3C/svg%3E" />
+        <Badge :icon="etoile" />
       </div>
     `,
   }),

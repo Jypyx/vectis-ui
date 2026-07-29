@@ -3,6 +3,7 @@ import { computed } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 import IconButton from '../IconButton/IconButton.vue'
 import Menu from '../Menu/Menu.vue'
 import MenuItem from '../Menu/MenuItem.vue'
@@ -25,10 +26,9 @@ export interface BreadcrumbItem {
   href: string
   /**
    * Icône avant le libellé : nom Material Symbols Rounded, ou URL
-   * d'image/SVG (toute valeur contenant '.', '/' ou ':' est traitée
-   * comme une URL).
+   * d'icône, ou rendu explicite (`{ src: '/logo.svg' }`, `{ component }`…).
    */
-  iconStart?: string
+  iconStart?: IconSource
 }
 
 interface BreadcrumbProps {
@@ -38,8 +38,8 @@ interface BreadcrumbProps {
   label?: string
   /** Chemin courant ; l'item dont le href correspond reçoit aria-current="page". */
   currentPath?: string
-  /** Séparateur : nom Material Symbols ou URL d'image (même détection qu'iconStart). */
-  separator?: string
+  /** Séparateur : nom d'icône, ou rendu explicite (comme `iconStart`). */
+  separator?: IconSource
   /**
    * Au-delà de ce nombre d'items : 1er + « … » + avant-dernier + dernier ;
    * le menu du bouton « … » liste uniquement les items masqués. Minimum

@@ -92,15 +92,16 @@ describe('Chip', () => {
   })
 
   it('check : remplace iconStart quand sélectionné', async () => {
-    const { queryByText, rerender } = render(Chip, {
+    const { container, rerender } = render(Chip, {
       props: { selectable: true, check: true, iconStart: 'star', selected: true },
       slots: { default: 'Filtre' },
     })
-    expect(queryByText('check')).toBeTruthy()
-    expect(queryByText('star')).toBeNull()
+    const icone = (nom: string) => container.querySelector(`.ds-icon[data-icon='${nom}']`)
+    expect(icone('check')).toBeTruthy()
+    expect(icone('star')).toBeNull()
     await rerender({ selected: false })
-    expect(queryByText('check')).toBeNull()
-    expect(queryByText('star')).toBeTruthy()
+    expect(icone('check')).toBeNull()
+    expect(icone('star')).toBeTruthy()
   })
 
   it('dismissible : émet dismiss sans imbriquer de boutons', async () => {
@@ -115,13 +116,15 @@ describe('Chip', () => {
     expect(emitted('dismiss')).toHaveLength(1)
   })
 
-  it('dismissIcon : ligature Material par défaut (close), URL rendue en <img>', () => {
+  it('dismissIcon : croix intégrée par défaut (close), `{ src }` rendu en <img>', () => {
     const { container, rerender } = render(Chip, {
       props: { dismissible: true },
       slots: { default: 'Tag' },
     })
-    expect(container.querySelector('.ds-chip-remove .ds-icon-symbol')?.textContent).toBe('close')
-    return rerender({ dismissIcon: 'https://example.com/x.svg' }).then(() => {
+    expect(container.querySelector<HTMLElement>('.ds-chip-remove .ds-icon')?.dataset.icon).toBe(
+      'close',
+    )
+    return rerender({ dismissIcon: { src: 'https://example.com/x.svg' } }).then(() => {
       expect(container.querySelector('.ds-chip-remove img')?.getAttribute('src')).toBe(
         'https://example.com/x.svg',
       )

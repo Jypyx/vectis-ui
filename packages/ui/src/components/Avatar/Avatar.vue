@@ -4,6 +4,7 @@ import type { StyleValue } from 'vue'
 
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 import { avatarGroupKey } from './context'
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
@@ -21,8 +22,8 @@ export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 interface AvatarProps {
   /** URL de l'image (priorité 1). */
   src?: string
-  /** Icône (nom Material Symbols OU URL) affichée à défaut d'image (priorité 2). */
-  icon?: string
+  /** Icône affichée à défaut d'image (priorité 2) : nom, ou rendu explicite. */
+  icon?: IconSource
   /** Nom complet — alt par défaut, source des initiales et graine de la teinte auto. */
   name?: string
   /** Alt/libellé explicite (prioritaire sur `name`). */

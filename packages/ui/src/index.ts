@@ -28,6 +28,17 @@
 import './styles/index.css'
 
 export { default as Icon } from './components/Icon/Icon.vue'
+// Branchement d'une bibliothèque d'icônes tierce — modules TS purs, donc sans
+// effet sur l'ordre du CSS bundlé.
+export {
+  setIconResolver,
+  ligatureIconResolver,
+  classIconResolver,
+  componentIconResolver,
+} from './components/Icon/resolver'
+export type { IconResolver, IconAliases } from './components/Icon/resolver'
+export type { IconContext, IconRender, IconSource } from './components/Icon/types'
+export type { DsIconName } from './components/Icon/icons'
 export { default as Typography } from './components/Typography/Typography.vue'
 export type { TypographyTone, TypographyVariant } from './components/Typography/Typography.vue'
 export { default as Popover } from './components/Popover/Popover.vue'

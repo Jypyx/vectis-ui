@@ -3,6 +3,8 @@ import type { ButtonHTMLAttributes } from 'vue'
 
 import Button from '../Button/Button.vue'
 import Icon from '../Icon/Icon.vue'
+import { iconProps } from '../Icon/iconProps'
+import type { IconSource } from '../Icon/types'
 
 /**
  * Bouton icône : même API visuelle que Button, mais carré et avec un libellé
@@ -19,8 +21,8 @@ interface IconButtonProps {
   type?: ButtonHTMLAttributes['type']
   disabled?: boolean
   loading?: boolean
-  /** Nom Material Symbols rendu comme icône (le slot par défaut prime en fallback). */
-  icon?: string
+  /** Icône rendue : nom, ou rendu explicite (le slot par défaut prime en fallback). */
+  icon?: IconSource
   /** Remplit l'icône `icon` (axe `FILL` de la police). */
   iconFilled?: boolean
 }
@@ -55,7 +57,7 @@ defineSlots<{
     :loading="loading"
     :aria-label="label"
   >
-    <Icon v-if="icon" :name="icon" :filled="iconFilled" />
+    <Icon v-if="icon" v-bind="iconProps(icon)" :filled="iconFilled" />
     <slot v-else />
   </Button>
 </template>
