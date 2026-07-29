@@ -1,0 +1,105 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VBadgeStories from './VBadge.stories'
+
+<Meta of={VBadgeStories} />
+
+# Badge
+
+A **non-interactive** information pill: a counter or an icon. No hover, no focus, no event — the
+information alone. Two formats (a 20px pill or a 10px dot through `dot`), three placements
+(standalone, inline, `overlay` — on the top or bottom corner), and a single full-colour rendering
+driven by `tone` or a custom colour. For a **textual** status, use a `VChip`.
+
+<Canvas of={VBadgeStories.Default} />
+
+<Controls of={VBadgeStories.Default} />
+
+## Tones
+
+Five tones (`neutral`, `accent` — the default —, `success`, `warning`, `danger`) in full-colour
+rendering. The text colour adapts **black/white** through `contrast-color()` (Safari 26+);
+browsers without support fall back to a per-tone value (`--vectis-color-text-on-accent`,
+`--vectis-color-text-on-warning`…) — the library's classic solid rendering.
+
+The particularity of the `neutral` tone: a `text`/`surface` inversion (a dark background in
+light, a light background in dark) — a mid grey would be unreadable in one of the two themes.
+
+<Canvas of={VBadgeStories.Tones} />
+
+## Custom colour
+
+The `color` prop accepts a colour of the consumer's — hexadecimal, a CSS name (`hotpink`) or
+`oklch()` — and **replaces the tone**.
+
+> Where `contrast-color()` is not supported (current Chrome/Edge), the text of a custom colour is
+> a fixed white: the contrast against a light colour (`gold`, a pastel…) is the consumer's
+> responsibility until the function ships there.
+
+<Canvas of={VBadgeStories.CustomColor} />
+
+## Counters
+
+`count` is a **number**; past 99, the display is capped at **"99+"**. The reduced inline padding
+keeps the badge round at one or two digits (minimum width = height). The badge carries only a
+counter or an icon — for a textual status, prefer a `VChip`.
+
+<Canvas of={VBadgeStories.Counters} />
+
+## Icon
+
+`icon` displays an icon **alone** — an icon name or an explicit render (`{ src }`) — inside a
+circular 20px badge (a 16px icon). It wins over `count`.
+
+> The icons the design system renders itself are embedded SVGs: no font is required. Your own
+> icon names, on the other hand, come from the font or the library you wire in (see the README).
+
+<Canvas of={VBadgeStories.Icon} />
+
+## Dot
+
+`dot` reduces the badge to a 10px circle with no content — presence, online status, "something
+new". Since the information rests on colour alone, provide adjacent text (or an `aria-label` on
+an enclosing element) for screen readers.
+
+<Canvas of={VBadgeStories.Dot} />
+
+## Inline
+
+With a target element in the default slot, the badge sits to its right, vertically centred.
+
+<Canvas of={VBadgeStories.Inline} />
+
+## Overlay
+
+`overlay` places the badge on a **corner** of the target, slightly tucked inwards (the logical
+corner flips in RTL). The offset is a ratio of the badge's own size: it stays proportionate across
+the pill, the dot and the icon.
+
+<Canvas of={VBadgeStories.Overlay} />
+
+### Corner
+
+`overlayPosition` picks the vertical side: `top` (the default) or `bottom` — a presence dot reads
+better at the foot of an avatar, where it does not collide with what sits above. The horizontal
+side is always the end of the reading direction, and is not configurable: a badge on the start
+side would sit under the eye's entry point into the element it annotates.
+
+<Canvas of={VBadgeStories.OverlayPosition} />
+
+## Bordered
+
+`bordered` draws a 2px ring in the **colour of the background behind** (`--vectis-color-surface`)
+around the badge, to detach it from the element it overlaps. On a different background (a card, a
+coloured banner…), overriding `--vectis-color-surface` on the subtree is enough.
+
+<Canvas of={VBadgeStories.Bordered} />
+
+## Accessibility
+
+- The badge is a plain `<span>`: no interactive role wrongly announced.
+- The badge carries only a counter or an icon — for a **textual** status, prefer a `VChip` (whose
+  role that is).
+- In `dot` mode, the information rests on colour alone (invisible to screen readers): provide
+  adjacent text or an `aria-label` on the enclosing element.
+- The icon (`icon`) is decorative (`aria-hidden`): the meaning must be carried by the context or
+  by adjacent text.
