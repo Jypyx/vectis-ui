@@ -1,0 +1,135 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+
+import * as VPaginationStories from './VPagination.stories'
+
+<Meta of={VPaginationStories} />
+
+# Pagination
+
+Navigation between the pages of a result set. The component invents no button: every pill is a
+`VButton`, the previous/next controls a `VButton` or a `VIconButton`, and the `attached` option
+joins the whole thing in a `VButtonGroup`. Hover, focus, disabling and respect for
+`prefers-reduced-motion` therefore come straight from `VButton`, without a single state rule
+redefined here.
+
+Truncation happens at two deliberately distinct levels. The first is **logical**: by default
+every page is rendered, and `totalVisible` fixes the total number of slots shown (ellipses
+included) — a pure derivation of state, with no browser API involved. The second is
+**responsive** and entirely in CSS: the bar is its own query container, and `@container` steps
+remove the most distant neighbours when room runs out. No `ResizeObserver`, no measurement in
+JavaScript.
+
+<Canvas of={VPaginationStories.Default} />
+<Controls of={VPaginationStories.Default} />
+
+## Attached
+
+`attached` places every button inside a `VButtonGroup`: merged borders, rounded corners only at
+the ends. That constraint is what dictates the internal structure — `VButtonGroup` styles only
+its **direct** children, hence no `<ul>`/`<li>` and an ellipsis rendered as an inert button
+rather than a `<span>`: the seam stays continuous, including when a neighbour is hidden by the
+responsive truncation.
+
+<Canvas of={VPaginationStories.Attached} />
+
+## Variants and tones
+
+The active page is **always** `solid`; `variant` concerns only the inactive pages and the
+controls, in `ghost` (default) or `outline`. `tone` colours the active page, the inactive ones
+staying neutral so that the current number stands out on its own.
+
+<Canvas of={VPaginationStories.Variants} />
+<Canvas of={VPaginationStories.Tones} />
+
+## Sizes
+
+`size` and `compact` are propagated identically to every button — the unified control scale
+therefore applies with no extra setting. The pills are square at one digit then widen by
+themselves: their minimum width derives from the control height, the same variable `VIconButton`
+uses.
+
+<Canvas of={VPaginationStories.Sizes} />
+<Canvas of={VPaginationStories.Compact} />
+
+## Previous / next controls
+
+`showControls` shows them or not, and `controlsDisplay` chooses between icon only, text only or
+both. `prevIcon` and `nextIcon` accept an icon name **or** an explicit render, and
+`prevLabel`/`nextLabel` supply both the visible text and the accessible name.
+
+The controls advance by one activatable page, not by one page: they step over disabled pages to
+the nearest reachable one, and disable themselves when none is left — which also covers both
+extremities, with no separate test.
+
+<Canvas of={VPaginationStories.Controls} />
+
+## Logical truncation
+
+Without `totalVisible`, there is no truncation: the bar renders as many pills as `length`. When
+set, `totalVisible` fixes the total number of rendered slots, **ellipses included** (useful
+minimum: 5, i.e. first + ellipsis + current + ellipsis + last). The first and last pages are
+always kept, and the window centred on the current page **shifts** near the ends instead of
+shrinking: the bar keeps exactly the same width whatever the current page.
+
+<Canvas of={VPaginationStories.ManyPages} />
+
+## Responsive truncation
+
+The bar declares its own query container: the steps depend on the space actually allocated to
+the component, never on the viewport width. The most distant neighbours disappear first; the
+first page, the last and the current one are never hidden. At the narrowest step, a control in
+`both` mode folds down to icon-only.
+
+Two consequences worth knowing. First, the bar is block-level and takes its parent's width —
+which is what makes the truncation container-dependent — so alignment goes through the `align`
+prop rather than through the context. Second, the thresholds are literal values, since
+`@container` conditions accept no variables; they are calibrated on the `md` size. For a very
+large number of pages or an `xl` size, prefer adjusting `totalVisible`, or switch the responsive
+layer off with `responsive: false`.
+
+No extra ellipsis appears to compensate for a hidden neighbour: it would occupy exactly the
+width of a pill, so it would gain nothing.
+
+<Canvas of={VPaginationStories.Responsive} />
+<Canvas of={VPaginationStories.Alignment} />
+
+## Disabled pages
+
+`disabledPages` accepts a list of numbers **or** a predicate, like `VDatePicker`'s
+`disabledDates`. A disabled page stays visible and readable, simply inert. `disabled` disables
+the whole component.
+
+<Canvas of={VPaginationStories.DisabledPages} />
+
+## Edge cases
+
+A single page renders one pill and two controls at the end of the line. An out-of-range current
+page is brought back into the interval. Multi-digit numbers widen the pills without breaking the
+alignment.
+
+<Canvas of={VPaginationStories.EdgeCases} />
+
+## Accessibility
+
+- The root is a `<nav>` named by `label`, and the active page carries `aria-current="page"` while
+  staying activable (the APG recommendation).
+- Every pill gets an explicit accessible name — "Page 7" by default, customizable through
+  `pageLabel` — because an isolated number is meaningless out of context.
+- The controls keep their `aria-label` even when their label is visible: responsive truncation
+  can hide the text, and the accessible name must survive that.
+- The ellipsis is an inert button hidden from assistive technologies: it is neither announced nor
+  reachable by keyboard.
+- Tabbing is natural — every visible button is a stop, as in a list of links. The left/right
+  arrows and Home/End only **move** focus, without changing page: a pagination that activated on
+  focus would trigger unintended navigations. The arrows are physical, hence inverted in RTL,
+  where the chevrons flip as well.
+- A page hidden by the responsive truncation is hidden with `display: none`: it leaves both the
+  accessibility tree and the tab order. A known corollary: if focus was on a neighbour when the
+  container narrows, it falls back to the document.
+- There is no `<ul>`/`<li>`: `VButtonGroup` styles only its direct children and an intervening
+  list element would break the border merging. The named `<nav>` and the `role="group"` of
+  attached mode provide the grouping.
+
+This component's accessible labels come from the design system's dictionary: they translate
+globally (see **Foundations › Internationalization**), and the text props stay authoritative for
+a case-by-case adjustment.
