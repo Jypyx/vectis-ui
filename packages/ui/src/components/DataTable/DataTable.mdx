@@ -26,6 +26,10 @@ colonnes triables, remplacé sur la colonne active par la flèche de la directio
 croissant, vers le haut en décroissant, selon la convention des tableurs. Purement décoratif :
 c'est `aria-sort` qui porte l'information pour les technologies d'assistance.
 
+Les trois glyphes se remplacent indépendamment par `sortIcon` (triable, non trié), `sortAscIcon`
+et `sortDescIcon` — un nom d'icône ou un rendu explicite, comme partout dans le DS. N'en
+surcharger qu'un laisse les deux autres à leur valeur par défaut.
+
 <Canvas of={DataTableStories.Tri} />
 
 ## Header et recherche

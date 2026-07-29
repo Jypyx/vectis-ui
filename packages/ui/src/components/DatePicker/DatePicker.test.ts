@@ -37,6 +37,20 @@ describe('DatePicker — défaut', () => {
     expect(container.querySelector('.ds-datepicker-panel')).toBeNull()
   })
 
+  it('calendarIcon : surcharge l’icône d’ouverture, la croix d’effacement gardant la priorité', async () => {
+    const { container, rerender } = render(DatePicker, {
+      props: { modelValue: null, showCalendar: true, calendarIcon: 'event' },
+    })
+    const endIcon = () =>
+      container.querySelector<HTMLElement>('.ds-input-action .ds-icon')?.dataset.icon
+    expect(endIcon()).toBe('event')
+
+    // Dès qu'il y a de quoi effacer, `close` reprend la main — c'est la
+    // précédence qui casserait silencieusement.
+    await rerender({ modelValue: JUNE })
+    expect(endIcon()).toBe('close')
+  })
+
   it('n’avertit ni à vide, ni sur une sélection range (qui retombe en lecture seule)', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     render(DatePicker, { props: { modelValue: JUNE } })
