@@ -534,9 +534,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       <div v-if="paginated" class="ds-table-footer-end">
         <div v-if="perPageOptions?.length" class="ds-table-per-page">
           <span class="ds-table-per-page-label" aria-hidden="true">{{ resolvedPerPageLabel }}</span>
-          <!-- width="max-content" : le panneau épouse l'option la plus large
-               (« 10 », « 25 »…) au lieu de la largeur minimale par défaut. -->
-          <Menu size="sm" :compact="compact" placement="top-end" width="max-content">
+          <!-- match-trigger : le panneau épouse l'option la plus large (« 10 »,
+               « 25 »…) au lieu de la largeur minimale par défaut, sans jamais
+               être plus étroit que le bouton qui l'ouvre. -->
+          <Menu size="sm" :compact="compact" placement="top-end" match-trigger>
             <template #trigger="{ triggerProps }">
               <Button
                 variant="ghost"

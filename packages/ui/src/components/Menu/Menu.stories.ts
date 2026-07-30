@@ -194,7 +194,8 @@ export const Tailles: Story = {
 }
 
 /** Largeur explicite du panneau racine : `max-content` (épouse l'item le plus
-    large) ou toute longueur CSS. Les sous-menus ne sont pas affectés. */
+    large) ou toute longueur CSS. `match-trigger` pose comme plancher la largeur
+    du déclencheur. Les sous-menus ne sont pas affectés. */
 export const Largeur: Story = {
   render: (args) => ({
     components: { Menu, MenuItem, Button },
@@ -216,9 +217,40 @@ export const Largeur: Story = {
           <MenuItem label="Renommer" icon-start="edit" @select="onSelect" />
           <MenuItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
         </Menu>
+        <Menu v-bind="args" match-trigger>
+          <template #trigger="{ triggerProps }">
+            <Button variant="outline" tone="neutral" v-bind="triggerProps">
+              Trier par ordre alphabétique
+            </Button>
+          </template>
+          <MenuItem label="A → Z" selected @select="onSelect" />
+          <MenuItem label="Z → A" @select="onSelect" />
+        </Menu>
       </div>
     `,
   }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const trigger = canvas.getByRole('button', { name: 'Trier par ordre alphabétique' })
+    // le panneau est celui que le déclencheur invoque (popovertarget)
+    const panel = document.getElementById(
+      trigger.getAttribute('popovertarget') ?? '',
+    ) as HTMLElement
+
+    await userEvent.click(trigger)
+    await waitFor(() => expect(panel.matches(':popover-open')).toBe(true))
+
+    // Les items (« A → Z ») sont bien plus étroits que le déclencheur : sans le
+    // plancher `anchor-size(width)`, le panneau se réduirait à leur largeur.
+    // C'est aussi la seule preuve que anchor-size() résout sur l'ancre
+    // IMPLICITE du popover (invocateur popovertarget), jamais nommée ici.
+    const triggerWidth = trigger.getBoundingClientRect().width
+    await waitFor(() =>
+      expect(panel.getBoundingClientRect().width).toBeGreaterThanOrEqual(triggerWidth - 1),
+    )
+
+    await userEvent.keyboard('{Escape}')
+  },
 }
 
 export const FermetureEscape: Story = {

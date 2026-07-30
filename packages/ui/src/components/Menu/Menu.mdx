@@ -102,9 +102,17 @@ et héritée par tous les sous-menus.
 Par défaut, le panneau adopte la largeur de son contenu, bornée par des tokens (minimale et
 maximale — le plafond reste toujours inférieur au viewport). La prop `width` la fixe
 explicitement : toute longueur ou mot-clé CSS (`16rem`, `max-content` pour épouser l'item le
-plus large — utilisé par le menu « lignes par page » du DataTable). Elle ne s'applique qu'au
-panneau **racine** : les sous-menus gardent la largeur par défaut. Une largeur plus étroite
-que le contenu tronque les libellés.
+plus large). Elle ne s'applique qu'au panneau **racine** : les sous-menus gardent la largeur
+par défaut. Une largeur plus étroite que le contenu tronque les libellés.
+
+`matchTrigger` prend le problème par l'autre bout : il remplace la largeur minimale par celle
+du **déclencheur**, si bien que le panneau ne peut jamais paraître rétréci sous le bouton qui
+l'ouvre, tout en restant libre de s'élargir pour son contenu (c'est le réglage du menu
+« lignes par page » du DataTable). Les deux props se cumulent — le plancher du déclencheur
+l'emporte alors sur `width`. Un déclencheur plus large que la largeur maximale déborde
+volontairement ce plafond : la demande d'alignement prime. Le plancher est mesuré en CSS sur
+l'ancre du panneau, sans une ligne de JavaScript ; comme le reste de l'ancrage, il suppose un
+navigateur qui implémente le positionnement par ancre.
 
 <Canvas of={MenuStories.Largeur} />
 
