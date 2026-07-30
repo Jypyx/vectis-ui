@@ -37,6 +37,7 @@ export const en: DsMessages = {
     label: 'Breadcrumb',
     ellipsis: 'Show intermediate pages',
   },
+  sideNavigation: { label: 'Navigation' },
   combobox: {
     empty: 'No results',
     clear: 'Clear selection',

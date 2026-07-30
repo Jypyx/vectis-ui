@@ -44,6 +44,13 @@ export interface DsMessages {
   }
   tabs: { label: string; previous: string; next: string }
   breadcrumb: { label: string; ellipsis: string }
+  sideNavigation: {
+    /**
+     * Nom accessible du `<nav>`. Seule chaîne du composant : les libellés
+     * viennent des slots, et l'état déplié/replié est porté par `<details>`.
+     */
+    label: string
+  }
   combobox: {
     empty: string
     clear: string

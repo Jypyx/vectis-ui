@@ -36,6 +36,7 @@ export const fr: DsMessages = {
     label: "Fil d'Ariane",
     ellipsis: 'Afficher les pages intermédiaires',
   },
+  sideNavigation: { label: 'Navigation' },
   combobox: {
     empty: 'Aucun résultat',
     clear: 'Effacer la sélection',
