@@ -25,6 +25,12 @@ interface MenuProps {
    * `16rem`). Les sous-menus gardent la largeur par défaut.
    */
   width?: string
+  /**
+   * Le panneau racine ne peut pas être plus étroit que son déclencheur (il
+   * reste libre de s'élargir pour son contenu). Les sous-menus ne sont pas
+   * affectés.
+   */
+  matchTrigger?: boolean
 }
 
 // Non assigné : le template lit les props directement.
@@ -33,6 +39,7 @@ withDefaults(defineProps<MenuProps>(), {
   size: 'sm',
   compact: false,
   width: undefined,
+  matchTrigger: false,
 })
 
 const open = defineModel<boolean>('open', { default: false })
@@ -102,6 +109,7 @@ onMounted(() => {
     :size="size"
     :compact="compact"
     :width="width"
+    :match-trigger="matchTrigger"
     @toggle="onToggle"
   >
     <slot />

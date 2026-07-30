@@ -39,6 +39,12 @@ interface MenuPanelProps {
    * data-width et gardent la largeur par défaut.
    */
   width?: string
+  /**
+   * Plancher de largeur = largeur du déclencheur. Posé UNIQUEMENT par la
+   * racine : les sous-panneaux ne rendent pas data-match-trigger (leur
+   * déclencheur est un item, pas un contrôle à épouser).
+   */
+  matchTrigger?: boolean
 }
 
 const props = withDefaults(defineProps<MenuPanelProps>(), {
@@ -47,6 +53,7 @@ const props = withDefaults(defineProps<MenuPanelProps>(), {
   size: undefined,
   compact: false,
   width: undefined,
+  matchTrigger: false,
 })
 
 const emit = defineEmits<{
@@ -146,6 +153,7 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     :data-size="size"
     :data-compact="compact ? '' : undefined"
     :data-width="width ? '' : undefined"
+    :data-match-trigger="matchTrigger ? '' : undefined"
     :style="panelStyle"
     @beforetoggle="syncShown"
     @toggle="onToggle"
@@ -178,6 +186,18 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
   .ds-menu[data-width] {
     min-inline-size: 0;
     inline-size: var(--_menu-width);
+  }
+
+  /* Plancher de largeur = largeur du déclencheur (prop matchTrigger). Le
+     panneau s'ancre implicitement à son invocateur `popovertarget`, donc
+     anchor-size() résout sans anchor-name — là où Combobox et TimePicker,
+     ancrés à un <input>, doivent nommer leur ancre. Rendu par le panneau
+     RACINE seulement.
+     Placée APRÈS [data-width] (spécificité égale) : combinée à `width`, c'est
+     ce plancher qui gagne. Un déclencheur plus large que le plafond élargit le
+     panneau au-delà (min-inline-size prime sur max-inline-size) : voulu. */
+  .ds-menu[data-match-trigger] {
+    min-inline-size: anchor-size(width);
   }
 }
 </style>

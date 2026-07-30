@@ -74,6 +74,40 @@ describe('Menu', () => {
     expect(sub?.hasAttribute('data-width')).toBe(false)
   })
 
+  // Le plancher lui-même (`min-inline-size: anchor-size(width)`) n'est pas
+  // observable ici — jsdom ne résout ni l'ancre ni la mise en page : c'est la
+  // play function `Menu/Largeur` qui le couvre. Ne reste que le câblage.
+  it('prop matchTrigger : data-match-trigger sur le panneau racine seul', () => {
+    const { container } = renderHarness(`
+      <Menu match-trigger>
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <MenuItem label="Exporter">
+          <template #submenu>
+            <MenuItem label="PDF" />
+          </template>
+        </MenuItem>
+      </Menu>
+    `)
+    const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
+    expect(root?.hasAttribute('data-match-trigger')).toBe(true)
+    expect(sub?.hasAttribute('data-match-trigger')).toBe(false)
+  })
+
+  it('sans matchTrigger, aucun data-match-trigger (largeur par défaut)', () => {
+    const { container } = renderHarness(`
+      <Menu>
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <MenuItem label="Renommer" />
+      </Menu>
+    `)
+    const menu = container.querySelector('[role="menu"]') as HTMLElement
+    expect(menu.hasAttribute('data-match-trigger')).toBe(false)
+  })
+
   it('pose le contrat ARIA sur le déclencheur et le panneau', () => {
     // menu fermé ([popover] est display:none) : requête hors arbre d'accessibilité
     const { getByTestId, container } = renderMenu()
