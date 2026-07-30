@@ -24,7 +24,6 @@ import {
   timeToMask,
   to12h,
   to24h,
-  TIME_MASK_PLACEHOLDER,
 } from '../../utils/time'
 import type { HourFormat, Meridiem, TimeOption } from '../../utils/time'
 import { arrowNavigate } from '../../utils/arrowNav'
@@ -35,6 +34,7 @@ import { digitsOf, pad2 } from '../../utils/text'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFieldPanel } from '../../composables/useFieldPanel'
+import { useLocale, useMessages } from '../../i18n/state'
 
 /**
  * Sélecteur d'heure : champ `Input` + panneau flottant optionnel. Coquille
@@ -79,6 +79,12 @@ interface TimePickerProps {
   showDial?: boolean
   /** Granularité des minutes : cadran, flèches, et pas de la liste. */
   minuteStep?: number
+  /**
+   * Locale BCP 47 (noms de mois/jours, 1er jour de semaine). PRIORITAIRE sur la
+   * locale globale du DS (`setLocale`), sur laquelle elle retombe à défaut —
+   * d'où l'absence de défaut littéral ici : `undefined` doit rester
+   * distinguable pour que la locale globale ait une chance de s'appliquer.
+   */
   locale?: string
   // ── Champ ──
   label?: string
@@ -109,7 +115,7 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   mode: undefined,
   showDial: undefined,
   minuteStep: 1,
-  locale: 'fr-FR',
+  locale: undefined,
   label: undefined,
   hint: undefined,
   placeholder: undefined,
@@ -151,7 +157,13 @@ const hasDial = computed(
 )
 const hasPanel = computed(() => hasDial.value || isList.value)
 
-const resolvedFormat = computed<TimePickerFormat>(() => props.format ?? hourCycleFor(props.locale))
+const dsLocale = useLocale()
+/* Prop prioritaire, sinon locale globale du DS. */
+const resolvedLocale = computed(() => props.locale ?? dsLocale.value)
+
+const resolvedFormat = computed<TimePickerFormat>(
+  () => props.format ?? hourCycleFor(resolvedLocale.value),
+)
 
 if (isDev) {
   watchEffect(() => {
@@ -216,7 +228,7 @@ const displayHourText = computed(() =>
 // ── Valeur affichée dans le champ ───────────────────────────────────────────
 const hasValue = computed(() => !!modelParts.value)
 const displayText = computed(() =>
-  model.value ? formatDisplay(model.value, props.locale, resolvedFormat.value) : '',
+  model.value ? formatDisplay(model.value, resolvedLocale.value, resolvedFormat.value) : '',
 )
 
 // ── Ouverture / fermeture du panneau (popover manual) ───────────────────────
@@ -309,10 +321,14 @@ function clearValue() {
 
 // L'étape n'est portée que par l'aria-label du slider, dont le changement n'est
 // pas annoncé de façon fiable : une live region polie double l'information.
+// Aucune prop dédiée : le dictionnaire est le seul point de surcharge.
+const m = useMessages()
+
 const liveMessage = ref('')
 watch(activeStep, (step) => {
   if (open.value)
-    liveMessage.value = step === 'minute' ? 'Sélection des minutes' : 'Sélection de l’heure'
+    liveMessage.value =
+      step === 'minute' ? m.value.timePicker.minuteStep : m.value.timePicker.hourStep
 })
 
 /* ── Mode saisie : masque « HH:MM » ─────────────────────────────────────── */
@@ -491,7 +507,7 @@ function onRootKeydown(event: KeyboardEvent) {
 /* ── Mode liste ─────────────────────────────────────────────────────────── */
 
 const options = computed<TimeOption[]>(() =>
-  isList.value ? timeList(props.minuteStep, props.locale, resolvedFormat.value) : [],
+  isList.value ? timeList(props.minuteStep, resolvedLocale.value, resolvedFormat.value) : [],
 )
 
 /**
@@ -569,10 +585,10 @@ const endIcon = computed<IconSource | undefined>(() =>
  */
 const endIconLabel = computed(() =>
   showClearIcon.value
-    ? "Effacer l'heure"
+    ? m.value.timePicker.clear
     : isList.value
-      ? 'Ouvrir la liste des heures'
-      : 'Ouvrir le sélecteur d’heure',
+      ? m.value.timePicker.openList
+      : m.value.timePicker.openDial,
 )
 
 function onEndIcon() {
@@ -604,7 +620,7 @@ function onEndIcon() {
           :readonly="!typing"
           :label="label"
           :hint="hint"
-          :placeholder="placeholder ?? (typing ? TIME_MASK_PLACEHOLDER : undefined)"
+          :placeholder="placeholder ?? (typing ? m.timePicker.maskPlaceholder : undefined)"
           :size="size"
           :compact="compact"
           :disabled="disabled"
@@ -635,10 +651,10 @@ function onEndIcon() {
         variant="outline"
         :size="size"
         :compact="compact"
-        label="AM ou PM"
+        :label="m.timePicker.meridiem"
       >
-        <ToggleItem value="AM" label="AM" />
-        <ToggleItem value="PM" label="PM" />
+        <ToggleItem value="AM" :label="m.timePicker.am" />
+        <ToggleItem value="PM" :label="m.timePicker.pm" />
       </Toggle>
     </div>
 
@@ -657,7 +673,7 @@ function onEndIcon() {
       :class="isList ? 'ds-timepicker-list ds-control' : 'ds-timepicker-panel'"
       :data-size="isList ? size : undefined"
       :data-compact="isList && compact ? '' : undefined"
-      :aria-label="label ?? (isList ? 'Heures disponibles' : 'Choisir une heure')"
+      :aria-label="label ?? (isList ? m.timePicker.listLabel : m.timePicker.dialLabel)"
       @mousedown="onPanelMousedown"
       @keydown="onPanelKeydown"
     >
@@ -689,7 +705,7 @@ function onEndIcon() {
             size="lg"
             :tone="activeStep === 'hour' ? 'accent' : 'neutral'"
             :aria-pressed="activeStep === 'hour' ? 'true' : 'false'"
-            aria-label="Sélectionner l’heure"
+            :aria-label="m.timePicker.selectHour"
             @click="activeStep = 'hour'"
           >
             {{ displayHourText }}
@@ -701,7 +717,7 @@ function onEndIcon() {
             size="lg"
             :tone="activeStep === 'minute' ? 'accent' : 'neutral'"
             :aria-pressed="activeStep === 'minute' ? 'true' : 'false'"
-            aria-label="Sélectionner les minutes"
+            :aria-label="m.timePicker.selectMinute"
             @click="activeStep = 'minute'"
           >
             {{ pad2(draftMinute) }}
@@ -722,8 +738,8 @@ function onEndIcon() {
         <div class="ds-visually-hidden" aria-live="polite">{{ liveMessage }}</div>
 
         <div class="ds-timepicker-footer">
-          <Button variant="ghost" tone="neutral" @click="cancel">Annuler</Button>
-          <Button @click="confirm">OK</Button>
+          <Button variant="ghost" tone="neutral" @click="cancel">{{ m.common.cancel }}</Button>
+          <Button @click="confirm">{{ m.common.confirm }}</Button>
         </div>
       </template>
     </Popover>

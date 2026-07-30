@@ -4,6 +4,7 @@ import { computed, nextTick, onMounted, ref, useAttrs, useId, watch } from 'vue'
 import Icon from '../Icon/Icon.vue'
 import IconButton from '../IconButton/IconButton.vue'
 import Typography from '../Typography/Typography.vue'
+import { useMessages } from '../../i18n/state'
 
 /**
  * Modale bloquante bâtie sur la primitive native `<dialog>` + `showModal()` :
@@ -27,7 +28,7 @@ interface DialogProps {
   closeOnBackdrop?: boolean
   /** La touche Échap ferme la modale. */
   closeOnEscape?: boolean
-  /** Nom accessible de la croix de fermeture. */
+  /** Nom accessible de la croix de fermeture. Défaut : dictionnaire du DS. */
   closeLabel?: string
 }
 
@@ -39,8 +40,13 @@ const props = withDefaults(defineProps<DialogProps>(), {
   closable: true,
   closeOnBackdrop: true,
   closeOnEscape: true,
-  closeLabel: 'Fermer',
+  closeLabel: undefined,
 })
+
+// Cascade prop > dictionnaire : la prop garde la priorité, son défaut suit
+// désormais la locale du DS.
+const m = useMessages()
+const resolvedCloseLabel = computed(() => props.closeLabel ?? m.value.common.close)
 
 const open = defineModel<boolean>('open', { default: false })
 
@@ -186,7 +192,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
         <IconButton
           v-if="closable"
           class="ds-dialog-close"
-          :label="closeLabel"
+          :label="resolvedCloseLabel"
           variant="ghost"
           tone="neutral"
           size="sm"

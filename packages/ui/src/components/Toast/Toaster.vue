@@ -6,6 +6,7 @@ import Toast from './Toast.vue'
 import { dismissToast, toasts, type ToastItem, type ToastPlacement } from './state'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useMessages } from '../../i18n/state'
 
 /**
  * Hôte des notifications, à monter UNE fois (racine de l'app). Rend un
@@ -25,20 +26,22 @@ interface ToasterProps {
   placement?: ToastPlacement
   /** Durée d'affichage par défaut en ms (surchargeable par toast ; 0 = persistant). */
   duration?: number
-  /** Libellé accessible de la croix de fermeture. */
+  /** Libellé accessible de la croix de fermeture. Défaut : dictionnaire du DS. */
   closeLabel?: string
-  /** Libellé accessible des régions de notifications (landmarks). */
+  /** Libellé accessible des régions de notifications (landmarks). Défaut : dictionnaire du DS. */
   label?: string
 }
 
 const props = withDefaults(defineProps<ToasterProps>(), {
   placement: 'bottom-right',
   duration: 5000,
-  closeLabel: 'Fermer',
-  label: 'Notifications',
+  closeLabel: undefined,
+  label: undefined,
 })
 
-const ariaLabel = useAriaLabel(() => props.label)
+const m = useMessages()
+const ariaLabel = useAriaLabel(() => props.label ?? m.value.toaster.label)
+const resolvedCloseLabel = computed(() => props.closeLabel ?? m.value.common.close)
 
 const PLACEMENTS: ToastPlacement[] = [
   'top-left',
@@ -195,7 +198,7 @@ onBeforeUnmount(() => {
       v-for="item in groups.get(p) ?? []"
       :key="item.id"
       :item="item"
-      :close-label="closeLabel"
+      :close-label="resolvedCloseLabel"
       @close="dismissToast($event)"
     />
   </div>

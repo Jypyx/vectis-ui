@@ -7,6 +7,7 @@ import type { IconSource } from '../Icon/types'
 import { isDev } from '../../utils/env'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useMessages } from '../../i18n/state'
 
 /**
  * Code à usage unique (OTP). Il n'existe pas de primitive « code à N
@@ -43,7 +44,7 @@ interface InputOTPProps {
   compact?: boolean
   disabled?: boolean
   invalid?: boolean
-  /** Nom accessible du groupe. */
+  /** Nom accessible du groupe. Défaut : dictionnaire du DS. */
   label?: string
 }
 
@@ -56,10 +57,11 @@ const props = withDefaults(defineProps<InputOTPProps>(), {
   compact: false,
   disabled: false,
   invalid: false,
-  label: 'Code de vérification',
+  label: undefined,
 })
 
-const ariaLabel = useAriaLabel(() => props.label)
+const m = useMessages()
+const ariaLabel = useAriaLabel(() => props.label ?? m.value.inputOTP.label)
 
 const model = defineModel<string>({ default: '' })
 
@@ -206,7 +208,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
         :autocomplete="cell.slotIndex === 0 ? 'one-time-code' : 'off'"
         :value="digits[cell.slotIndex]"
         :disabled="disabled"
-        :aria-label="`Caractère ${cell.slotIndex + 1} sur ${slotCount}`"
+        :aria-label="m.inputOTP.slot(cell.slotIndex + 1, slotCount)"
         :aria-invalid="invalid || undefined"
         @input="onInput(cell.slotIndex, $event)"
         @keydown="onKeydown(cell.slotIndex, $event)"

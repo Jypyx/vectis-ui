@@ -13,6 +13,7 @@ import { clamp } from '../../utils/number'
 import { resolveMatcher } from '../../utils/matcher'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useMessages } from '../../i18n/state'
 
 /**
  * Pagination composée : chaque pastille est un Button, les contrôles
@@ -55,9 +56,9 @@ interface PaginationProps {
   prevIcon?: IconSource
   /** Icône du contrôle suivant : nom, ou rendu explicite. */
   nextIcon?: IconSource
-  /** Libellé du contrôle précédent (texte visible et nom accessible). */
+  /** Libellé du contrôle précédent (texte visible et nom accessible). Défaut : dictionnaire du DS. */
   prevLabel?: string
-  /** Libellé du contrôle suivant (texte visible et nom accessible). */
+  /** Libellé du contrôle suivant (texte visible et nom accessible). Défaut : dictionnaire du DS. */
   nextLabel?: string
 
   /** Désactive l'ensemble du composant. */
@@ -68,9 +69,9 @@ interface PaginationProps {
   /** Troncature responsive par container queries. */
   responsive?: boolean
 
-  /** Nom accessible de la navigation. */
+  /** Nom accessible de la navigation. Défaut : dictionnaire du DS. */
   label?: string
-  /** Nom accessible d'une pastille de page. Défaut : « Page N ». */
+  /** Nom accessible d'une pastille de page. Défaut : dictionnaire du DS. */
   pageLabel?: (page: number) => string
 }
 
@@ -87,16 +88,21 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   controlsDisplay: 'icon',
   prevIcon: 'chevron_left',
   nextIcon: 'chevron_right',
-  prevLabel: 'Page précédente',
-  nextLabel: 'Page suivante',
+  prevLabel: undefined,
+  nextLabel: undefined,
   disabled: false,
   disabledPages: undefined,
   responsive: false,
-  label: 'Pagination',
+  label: undefined,
   pageLabel: undefined,
 })
 
-const ariaLabel = useAriaLabel(() => props.label)
+// Cascade prop > dictionnaire ; pour le nom de la nav, `useAriaLabel` place
+// encore `aria-labelledby` et `aria-label` du consommateur au-dessus.
+const m = useMessages()
+const ariaLabel = useAriaLabel(() => props.label ?? m.value.pagination.label)
+const resolvedPrevLabel = computed(() => props.prevLabel ?? m.value.pagination.previous)
+const resolvedNextLabel = computed(() => props.nextLabel ?? m.value.pagination.next)
 
 const page = defineModel<number>({ default: 1 })
 
@@ -111,7 +117,7 @@ const currentPage = computed(() => clamp(page.value, 1, total.value))
 const isPageDisabled = computed(() => resolveMatcher(props.disabledPages))
 
 function pageLabelFor(n: number): string {
-  return props.pageLabel ? props.pageLabel(n) : `Page ${n}`
+  return props.pageLabel ? props.pageLabel(n) : m.value.pagination.page(n)
 }
 
 /**
@@ -212,7 +218,7 @@ function onKeydown(event: KeyboardEvent) {
         <IconButton
           v-if="controlsDisplay === 'icon'"
           class="ds-pagination-control"
-          :label="prevLabel"
+          :label="resolvedPrevLabel"
           :variant="variant"
           tone="neutral"
           :size="size"
@@ -233,13 +239,13 @@ function onKeydown(event: KeyboardEvent) {
           :size="size"
           :compact="compact"
           :disabled="prevDisabled"
-          :aria-label="prevLabel"
+          :aria-label="resolvedPrevLabel"
           @click="goTo(prevTarget)"
         >
           <template v-if="controlsDisplay === 'both'" #start>
             <Icon v-bind="iconProps(prevIcon)" />
           </template>
-          <span class="ds-pagination-control-label">{{ prevLabel }}</span>
+          <span class="ds-pagination-control-label">{{ resolvedPrevLabel }}</span>
         </Button>
       </template>
 
@@ -266,7 +272,7 @@ function onKeydown(event: KeyboardEvent) {
         <IconButton
           v-else
           class="ds-pagination-ellipsis"
-          label="Pages masquées"
+          :label="m.pagination.hiddenPages"
           aria-hidden="true"
           :variant="variant"
           tone="neutral"
@@ -282,7 +288,7 @@ function onKeydown(event: KeyboardEvent) {
         <IconButton
           v-if="controlsDisplay === 'icon'"
           class="ds-pagination-control"
-          :label="nextLabel"
+          :label="resolvedNextLabel"
           :variant="variant"
           tone="neutral"
           :size="size"
@@ -300,13 +306,13 @@ function onKeydown(event: KeyboardEvent) {
           :size="size"
           :compact="compact"
           :disabled="nextDisabled"
-          :aria-label="nextLabel"
+          :aria-label="resolvedNextLabel"
           @click="goTo(nextTarget)"
         >
           <template v-if="controlsDisplay === 'both'" #end>
             <Icon v-bind="iconProps(nextIcon)" />
           </template>
-          <span class="ds-pagination-control-label">{{ nextLabel }}</span>
+          <span class="ds-pagination-control-label">{{ resolvedNextLabel }}</span>
         </Button>
       </template>
     </component>

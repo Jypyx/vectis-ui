@@ -1,5 +1,7 @@
 import { computed, watchEffect, type ComputedRef, type Ref } from 'vue'
 
+import { useMessages } from '../i18n/state'
+
 /** Contrat minimal du contrôle natif : `<input>` comme `<textarea>` l'exposent. */
 interface ValidatableControl {
   setCustomValidity: (message: string) => void
@@ -26,13 +28,21 @@ export function useTextLimit(options: {
 }): { counterText: ComputedRef<string>; over: ComputedRef<boolean> } {
   const length = computed(() => options.text().length)
   const max = computed(() => options.maxlength())
+  const m = useMessages()
 
+  // La lecture du dictionnaire est DANS l'effet : le message de validation se
+  // réécrit donc tout seul si `setLocale` est appelé après le montage.
+  // `if/else` plutôt qu'un ternaire, pour que TS restreigne `limit` à `number`.
   watchEffect(
     () => {
       const el = options.el.value
       if (!el) return
-      const overLimit = options.softLimit() && max.value != null && length.value > max.value
-      el.setCustomValidity(overLimit ? `Dépasse la limite de ${max.value} caractères` : '')
+      const limit = max.value
+      if (options.softLimit() && limit != null && length.value > limit) {
+        el.setCustomValidity(m.value.field.limitExceeded(limit))
+      } else {
+        el.setCustomValidity('')
+      }
     },
     { flush: 'post' },
   )

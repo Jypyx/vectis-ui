@@ -6,6 +6,7 @@ import type { IconSource } from '../Icon/types'
 import Input from '../Input/Input.vue'
 
 import { isDev } from '../../utils/env'
+import { useMessages } from '../../i18n/state'
 
 /**
  * <input type="range"> natif (clavier, ARIA slider, formulaires gratuits). Le
@@ -114,6 +115,26 @@ function labelTextAt(value: number): string {
   return typeof item === 'string' ? item : item.label
 }
 
+/* Noms accessibles des poignées. Aucune prop dédiée : le dictionnaire est le
+   seul point de surcharge. Chaque libellé était écrit DEUX fois (champ
+   numérique et input range) — le computed supprime la duplication.
+
+   Hors mode range, l'extrémité haute EST la valeur : elle garde le `label`
+   du consommateur, et reste sans nom accessible s'il n'en a pas fourni (le
+   repli « Valeur » ne vaut que pour le champ numérique, qui a besoin d'un
+   nom propre). */
+const m = useMessages()
+const startLabel = computed(() =>
+  props.label ? m.value.slider.rangeStart(props.label) : m.value.slider.start,
+)
+const endLabel = computed(() =>
+  props.label ? m.value.slider.rangeEnd(props.label) : m.value.slider.end,
+)
+const rangeEndLabel = computed(() => (props.range ? endLabel.value : props.label))
+const fieldEndLabel = computed(() =>
+  props.range ? endLabel.value : (props.label ?? m.value.slider.value),
+)
+
 const startValueText = computed(() => (props.labels ? labelTextAt(startValue.value) : undefined))
 const endValueText = computed(() => (props.labels ? labelTextAt(endValue.value) : undefined))
 
@@ -194,7 +215,7 @@ function resyncFields() {
       :max="max"
       :step="step"
       :disabled="disabled"
-      :aria-label="label ? `${label} (début)` : 'Début'"
+      :aria-label="startLabel"
       @change="commitField('start')"
     />
     <div class="ds-slider-rail">
@@ -218,7 +239,7 @@ function resyncFields() {
           :step="step"
           :disabled="disabled"
           :value="startValue"
-          :aria-label="label ? `${label} (début)` : 'Début'"
+          :aria-label="startLabel"
           :aria-valuetext="startValueText"
           @input="onStartInput"
         />
@@ -230,7 +251,7 @@ function resyncFields() {
           :step="step"
           :disabled="disabled"
           :value="endValue"
-          :aria-label="range ? (label ? `${label} (fin)` : 'Fin') : label"
+          :aria-label="rangeEndLabel"
           :aria-valuetext="endValueText"
           @input="onEndInput"
         />
@@ -273,7 +294,7 @@ function resyncFields() {
       :max="max"
       :step="step"
       :disabled="disabled"
-      :aria-label="range ? (label ? `${label} (fin)` : 'Fin') : (label ?? 'Valeur')"
+      :aria-label="fieldEndLabel"
       @change="commitField('end')"
     />
   </div>

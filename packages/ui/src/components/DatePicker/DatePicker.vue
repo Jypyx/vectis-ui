@@ -31,6 +31,7 @@ import Popover from '../Popover/Popover.vue'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFieldPanel } from '../../composables/useFieldPanel'
+import { useLocale, useMessages } from '../../i18n/state'
 
 /**
  * Sélecteur de date : champ `Input` + `Calendar` dans un `Popover` en
@@ -69,6 +70,12 @@ const DEFAULT_DISPLAY_FORMAT: Intl.DateTimeFormatOptions = {
 interface DatePickerProps {
   // Passe-plat vers Calendar.
   selection?: CalendarSelection
+  /**
+   * Locale BCP 47 (noms de mois/jours, 1er jour de semaine). PRIORITAIRE sur la
+   * locale globale du DS (`setLocale`), sur laquelle elle retombe à défaut —
+   * d'où l'absence de défaut littéral ici : `undefined` doit rester
+   * distinguable pour que la locale globale ait une chance de s'appliquer.
+   */
   locale?: string
   firstDayOfWeek?: number
   min?: string
@@ -120,7 +127,7 @@ interface DatePickerProps {
 
 const props = withDefaults(defineProps<DatePickerProps>(), {
   selection: 'single',
-  locale: 'fr-FR',
+  locale: undefined,
   firstDayOfWeek: undefined,
   min: undefined,
   max: undefined,
@@ -247,8 +254,14 @@ const hasValue = computed(() => {
   return typeof model.value === 'string' && !!model.value
 })
 
+const dsLocale = useLocale()
+/* Prop prioritaire, sinon locale globale du DS. DatePicker est la source
+   UNIQUE : c'est `resolvedLocale` qui descend au Calendar, jamais `locale`
+   (qui vaudrait `undefined`), sinon la balise serait résolue deux fois. */
+const resolvedLocale = computed(() => props.locale ?? dsLocale.value)
+
 const displayText = computed(() => {
-  const { locale } = props
+  const locale = resolvedLocale.value
   const displayFormat = props.displayFormat ?? DEFAULT_DISPLAY_FORMAT
   if (props.selection === 'single') {
     return typeof model.value === 'string' && isValidISO(model.value)
@@ -267,8 +280,8 @@ const displayText = computed(() => {
 
 /* ── Mode saisie : brouillon masqué ─────────────────────────────────────── */
 
-const mask = computed(() => dateMaskFor(props.locale))
-const maskHint = computed(() => maskPlaceholder(props.locale, mask.value))
+const mask = computed(() => dateMaskFor(resolvedLocale.value))
+const maskHint = computed(() => maskPlaceholder(resolvedLocale.value, mask.value))
 const isDisabledDate = computed(() => resolveMatcher(props.disabledDates))
 
 /**
@@ -523,8 +536,12 @@ const endIcon = computed<IconSource | undefined>(() =>
  * et sa détection statique, un libellé conditionnel ferait apparaître un faux
  * avertissement au montage d'un champ de saisie vide.
  */
+// Libellés : aucune prop dédiée, le dictionnaire est le seul point de
+// surcharge — cf. `src/i18n/`.
+const m = useMessages()
+
 const endIconLabel = computed(() =>
-  showClearIcon.value ? 'Effacer la date' : 'Ouvrir le calendrier',
+  showClearIcon.value ? m.value.datePicker.clear : m.value.datePicker.open,
 )
 
 function onEndIcon() {
@@ -610,7 +627,7 @@ const close = () => closeAndFocus()
       :placement="placement"
       surface
       role="dialog"
-      :aria-label="label ?? 'Choisir une date'"
+      :aria-label="label ?? m.datePicker.label"
       class="ds-datepicker-panel"
       @mousedown="onPanelMousedown"
     >
@@ -618,7 +635,7 @@ const close = () => closeAndFocus()
         ref="calendarRef"
         v-model="model"
         :selection="selection"
-        :locale="locale"
+        :locale="resolvedLocale"
         :first-day-of-week="firstDayOfWeek"
         :min="min"
         :max="max"

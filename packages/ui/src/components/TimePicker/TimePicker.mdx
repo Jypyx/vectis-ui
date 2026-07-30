@@ -151,3 +151,5 @@ quand une valeur est posée, y compris pendant une saisie en cours) et supporte
 - Le cadran n'est **pas miroité en RTL** : une horloge est un objet universel, le
   sens horaire est invariant ; le groupe HH:MM force de même l'ordre visuel
   heure–minutes. Les transitions respectent `prefers-reduced-motion`.
+
+Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**). La prop `locale` reste prioritaire ; sans elle, le composant suit désormais la locale globale posée par `setLocale`, au lieu du `fr-FR` codé en dur.

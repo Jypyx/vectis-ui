@@ -27,6 +27,15 @@
  */
 import './styles/index.css'
 
+// Internationalisation — modules TS purs, donc sans effet sur l'ordre du CSS
+// bundlé (même statut que le bloc `setIconResolver` ci-dessous). En tête parce
+// que c'est de la configuration du DS entier, pas d'un composant. `en` est
+// opt-in : ne pas l'importer suffit à l'élaguer du bundle.
+export { setLocale, registerMessages } from './i18n/state'
+export { fr } from './i18n/fr'
+export { en } from './i18n/en'
+export type { DsMessages, DsMessagesInput } from './i18n/types'
+
 export { default as Icon } from './components/Icon/Icon.vue'
 // Branchement d'une bibliothèque d'icônes tierce — modules TS purs, donc sans
 // effet sur l'ordre du CSS bundlé.

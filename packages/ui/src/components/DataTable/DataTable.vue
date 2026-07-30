@@ -22,6 +22,7 @@ import { normalizeText } from '../../utils/text'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useTimer } from '../../composables/useTimer'
+import { useLocale, useMessages } from '../../i18n/state'
 
 /**
  * Tableau de données : <table> sémantique (caption, scope, aria-sort), composé
@@ -76,6 +77,7 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   /** `stack` : lignes en cartes sous 640px de conteneur ; `scroll` : défilement horizontal. */
   responsive?: 'scroll' | 'stack'
   loading?: boolean
+  /** Texte affiché quand aucune ligne n'est à montrer. Défaut : dictionnaire du DS. */
   emptyText?: string
   /**
    * Titre de la zone gauche du header (le slot #header prime). NB : masque
@@ -84,8 +86,9 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   title?: string
   /** Champ de recherche à droite du header. */
   searchable?: boolean
+  /** Placeholder du champ de recherche. Défaut : dictionnaire du DS. */
   searchPlaceholder?: string
-  /** Nom accessible du champ de recherche (aria-label). */
+  /** Nom accessible du champ de recherche (aria-label). Défaut : dictionnaire du DS. */
   searchLabel?: string
   /** serverSide : délai (ms) avant émission après saisie. `0` = synchrone. */
   searchDebounce?: number
@@ -112,21 +115,23 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   sortDescIcon?: IconSource
   /** Choix « lignes par page » (affiché si fourni et pagination active). */
   perPageOptions?: number[]
+  /** Libellé du sélecteur « lignes par page ». Défaut : dictionnaire du DS. */
   perPageLabel?: string
   /** serverSide : nombre total de lignes côté serveur (pages + range). */
   total?: number
   /** Affiche « X–Y sur Z » dans le footer. */
   showRange?: boolean
+  /** Reformule la plage affichée. Défaut : dictionnaire du DS. */
   rangeLabel?: (range: { start: number; end: number; total: number }) => string
   /** Colonne de sélection par checkbox + case « tout sélectionner ». */
   selectable?: boolean
+  /** Nom accessible de la case « tout sélectionner ». Défaut : dictionnaire du DS. */
   selectAllLabel?: string
   /**
-   * Texte de la zone gauche du footer (`selectable`). Défaut : « N éléments
-   * sélectionnés », vide à zéro.
+   * Texte de la zone gauche du footer (`selectable`). Vide à zéro. Défaut : dictionnaire du DS.
    */
   selectionLabel?: (count: number) => string
-  /** Nom accessible de la case d'une ligne (défaut : « Sélectionner la ligne N »). */
+  /** Nom accessible de la case d'une ligne. Défaut : dictionnaire du DS. */
   selectRowLabel?: (row: Row, index: number) => string
   /**
    * Aucun filtrage/tri/pagination local : les lignes sont affichées telles
@@ -141,11 +146,11 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   variant: 'flat',
   responsive: 'scroll',
   loading: false,
-  emptyText: 'Aucune donnée',
+  emptyText: undefined,
   title: undefined,
   searchable: false,
-  searchPlaceholder: 'Rechercher…',
-  searchLabel: 'Rechercher dans le tableau',
+  searchPlaceholder: undefined,
+  searchLabel: undefined,
   searchDebounce: 250,
   striped: false,
   stickyHeader: false,
@@ -155,16 +160,28 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   sortAscIcon: 'arrow_downward',
   sortDescIcon: 'arrow_upward',
   perPageOptions: undefined,
-  perPageLabel: 'Lignes par page',
+  perPageLabel: undefined,
   total: undefined,
   showRange: false,
   rangeLabel: undefined,
   selectable: false,
-  selectAllLabel: 'Tout sélectionner',
+  selectAllLabel: undefined,
   selectionLabel: undefined,
   selectRowLabel: undefined,
   serverSide: false,
 })
+
+// Cascade prop > dictionnaire : les props gardent la priorité, leurs défauts
+// suivent désormais la locale du DS.
+const m = useMessages()
+const dsLocale = useLocale()
+const resolvedEmptyText = computed(() => props.emptyText ?? m.value.dataTable.empty)
+const resolvedSearchPlaceholder = computed(
+  () => props.searchPlaceholder ?? m.value.dataTable.searchPlaceholder,
+)
+const resolvedSearchLabel = computed(() => props.searchLabel ?? m.value.dataTable.searchLabel)
+const resolvedPerPageLabel = computed(() => props.perPageLabel ?? m.value.dataTable.perPage)
+const resolvedSelectAllLabel = computed(() => props.selectAllLabel ?? m.value.dataTable.selectAll)
 
 /** Tri contrôlable de l'extérieur (v-model:sort) ou interne. */
 const sort = defineModel<DataTableSort | null>('sort', { default: null })
@@ -233,7 +250,9 @@ const sortedRows = computed(() => {
     const av = a[current.key]
     const bv = b[current.key]
     if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * factor
-    return String(av ?? '').localeCompare(String(bv ?? ''), undefined, { numeric: true }) * factor
+    return (
+      String(av ?? '').localeCompare(String(bv ?? ''), dsLocale.value, { numeric: true }) * factor
+    )
   })
 })
 
@@ -343,7 +362,9 @@ function toggleMaster() {
 }
 
 function rowSelectLabel(row: Row, index: number): string {
-  return props.selectRowLabel?.(row, index) ?? `Sélectionner la ligne ${index + 1}`
+  // Le dictionnaire reçoit l'index HUMAIN (1-based) ; la prop, elle, garde la
+  // signature d'origine (`row`, index 0-based).
+  return props.selectRowLabel?.(row, index) ?? m.value.dataTable.selectRow(index + 1)
 }
 
 // ── Footer ──────────────────────────────────────────────────────────────────
@@ -363,7 +384,7 @@ const selectionText = computed(() => {
   const count = selected.value.length
   if (props.selectionLabel) return props.selectionLabel(count)
   if (count === 0) return ''
-  return `${count} élément${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`
+  return m.value.dataTable.selection(count)
 })
 
 const rangeText = computed(() => {
@@ -371,7 +392,7 @@ const rangeText = computed(() => {
   const total = totalCount.value
   const start = total === 0 ? 0 : (currentPage.value - 1) * per + 1
   const end = Math.min(currentPage.value * per, total)
-  return props.rangeLabel?.({ start, end, total }) ?? `${start}–${end} sur ${total}`
+  return props.rangeLabel?.({ start, end, total }) ?? m.value.dataTable.range({ start, end, total })
 })
 
 // Hauteur posée sur la RACINE (et non en max-block-size sur le scroller) : le
@@ -411,8 +432,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
         :compact="compact"
         icon-start="search"
         clearable
-        :placeholder="searchPlaceholder"
-        :aria-label="searchLabel"
+        :placeholder="resolvedSearchPlaceholder"
+        :aria-label="resolvedSearchLabel"
       />
     </div>
 
@@ -430,7 +451,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
               <Checkbox
                 :model-value="allVisibleSelected"
                 :indeterminate="masterIndeterminate"
-                :aria-label="selectAllLabel"
+                :aria-label="resolvedSelectAllLabel"
                 @update:model-value="toggleMaster"
               />
             </th>
@@ -463,11 +484,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
           <!-- Ordre des états : chargement → vide → contenu. -->
           <tr v-if="loading">
             <td :colspan="colCount" class="ds-table-state">
-              <Spinner label="Chargement des données…" />
+              <Spinner :label="m.dataTable.loading" />
             </td>
           </tr>
           <tr v-else-if="displayedRows.length === 0">
-            <td :colspan="colCount" class="ds-table-state">{{ emptyText }}</td>
+            <td :colspan="colCount" class="ds-table-state">{{ resolvedEmptyText }}</td>
           </tr>
           <template v-else>
             <tr
@@ -512,7 +533,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       }}</span>
       <div v-if="paginated" class="ds-table-footer-end">
         <div v-if="perPageOptions?.length" class="ds-table-per-page">
-          <span class="ds-table-per-page-label" aria-hidden="true">{{ perPageLabel }}</span>
+          <span class="ds-table-per-page-label" aria-hidden="true">{{ resolvedPerPageLabel }}</span>
           <!-- width="max-content" : le panneau épouse l'option la plus large
                (« 10 », « 25 »…) au lieu de la largeur minimale par défaut. -->
           <Menu size="sm" :compact="compact" placement="top-end" width="max-content">
@@ -523,7 +544,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 size="sm"
                 :compact="compact"
                 v-bind="triggerProps"
-                :aria-label="`${perPageLabel} : ${perPage}`"
+                :aria-label="m.dataTable.perPageValue(resolvedPerPageLabel, perPage ?? 0)"
               >
                 {{ perPage }}
                 <Icon name="arrow_drop_down" />

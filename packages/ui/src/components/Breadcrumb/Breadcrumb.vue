@@ -9,6 +9,7 @@ import Menu from '../Menu/Menu.vue'
 import MenuItem from '../Menu/MenuItem.vue'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useMessages } from '../../i18n/state'
 
 /**
  * Fil d'Ariane : <nav> + liste ordonnée, piloté par la prop `items` (pure
@@ -34,7 +35,7 @@ export interface BreadcrumbItem {
 interface BreadcrumbProps {
   /** Les segments, du plus général au plus profond. */
   items: BreadcrumbItem[]
-  /** Nom accessible de la navigation. */
+  /** Nom accessible de la navigation. Défaut : dictionnaire du DS. */
   label?: string
   /** Chemin courant ; l'item dont le href correspond reçoit aria-current="page". */
   currentPath?: string
@@ -46,19 +47,21 @@ interface BreadcrumbProps {
    * effectif : 3.
    */
   maxItems?: number
-  /** Libellé accessible du bouton d'ellipsis. */
+  /** Libellé accessible du bouton d'ellipsis. Défaut : dictionnaire du DS. */
   ellipsisLabel?: string
 }
 
 const props = withDefaults(defineProps<BreadcrumbProps>(), {
-  label: "Fil d'Ariane",
+  label: undefined,
   currentPath: undefined,
   separator: 'chevron_right',
   maxItems: undefined,
-  ellipsisLabel: 'Afficher les pages intermédiaires',
+  ellipsisLabel: undefined,
 })
 
-const ariaLabel = useAriaLabel(() => props.label)
+const m = useMessages()
+const ariaLabel = useAriaLabel(() => props.label ?? m.value.breadcrumb.label)
+const resolvedEllipsisLabel = computed(() => props.ellipsisLabel ?? m.value.breadcrumb.ellipsis)
 
 /** Normalisation pure (SSR-safe) : slash final retiré, sauf pour '/'. */
 function normalize(path: string): string {
@@ -90,7 +93,7 @@ const visibleItems = computed(() =>
           <Icon class="ds-breadcrumb-separator" v-bind="iconProps(separator)" />
           <Menu compact>
             <template #trigger="{ triggerProps }">
-              <IconButton size="sm" compact :label="ellipsisLabel" v-bind="triggerProps">
+              <IconButton size="sm" compact :label="resolvedEllipsisLabel" v-bind="triggerProps">
                 <Icon name="more_horiz" />
               </IconButton>
             </template>

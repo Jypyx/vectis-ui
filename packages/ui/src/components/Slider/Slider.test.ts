@@ -190,4 +190,40 @@ describe('Slider', () => {
     expect((getByRole('slider', { name: 'Volume' }) as HTMLInputElement).disabled).toBe(true)
     expect((getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement).disabled).toBe(true)
   })
+
+  /* Les 4 libellés sont désormais des computed partagés entre le champ
+     numérique et l'input range (ils étaient dupliqués dans le template) : la
+     matrice complète est ce qui verrouille la factorisation. */
+  describe('noms accessibles des poignées', () => {
+    it('sans label : « Début »/« Fin » en range, « Valeur » sur le champ simple', () => {
+      const range = render(Slider, {
+        props: { modelValue: [20, 60], range: true, inputs: true },
+      })
+      expect(range.getByRole('slider', { name: 'Début' })).toBeTruthy()
+      expect(range.getByRole('slider', { name: 'Fin' })).toBeTruthy()
+      expect(range.getByRole('spinbutton', { name: 'Début' })).toBeTruthy()
+      expect(range.getByRole('spinbutton', { name: 'Fin' })).toBeTruthy()
+
+      const single = render(Slider, { props: { modelValue: 40, inputs: true } })
+      // Hors range, la poignée EST la valeur : sans label du consommateur elle
+      // reste sans nom, seul le champ numérique a besoin d'un repli.
+      expect(single.getByRole('spinbutton', { name: 'Valeur' })).toBeTruthy()
+    })
+
+    it('avec label : suffixé « (début) »/« (fin) » en range, tel quel en simple', () => {
+      const range = render(Slider, {
+        props: { modelValue: [20, 60], range: true, inputs: true, label: 'Budget' },
+      })
+      expect(range.getByRole('slider', { name: 'Budget (début)' })).toBeTruthy()
+      expect(range.getByRole('slider', { name: 'Budget (fin)' })).toBeTruthy()
+      expect(range.getByRole('spinbutton', { name: 'Budget (début)' })).toBeTruthy()
+      expect(range.getByRole('spinbutton', { name: 'Budget (fin)' })).toBeTruthy()
+
+      const single = render(Slider, {
+        props: { modelValue: 40, inputs: true, label: 'Volume' },
+      })
+      expect(single.getByRole('slider', { name: 'Volume' })).toBeTruthy()
+      expect(single.getByRole('spinbutton', { name: 'Volume' })).toBeTruthy()
+    })
+  })
 })

@@ -5,6 +5,7 @@ import type { StyleValue } from 'vue'
 import Icon from '../Icon/Icon.vue'
 import { iconProps } from '../Icon/iconProps'
 import type { IconSource } from '../Icon/types'
+import { useMessages } from '../../i18n/state'
 
 /**
  * Chip. Les éléments natifs couvrent focus, clavier et désactivation :
@@ -50,7 +51,7 @@ interface ChipProps {
   dismissible?: boolean
   /** Icône du bouton de retrait. */
   dismissIcon?: IconSource
-  /** Libellé accessible du bouton de retrait. */
+  /** Libellé accessible du bouton de retrait. Défaut : dictionnaire du DS. */
   dismissLabel?: string
   disabled?: boolean
 }
@@ -70,9 +71,14 @@ const props = withDefaults(defineProps<ChipProps>(), {
   iconEnd: undefined,
   dismissible: false,
   dismissIcon: 'close',
-  dismissLabel: 'Retirer',
+  dismissLabel: undefined,
   disabled: false,
 })
+
+// Cascade prop > dictionnaire : la prop garde la priorité, son défaut suit
+// désormais la locale du DS.
+const m = useMessages()
+const resolvedDismissLabel = computed(() => props.dismissLabel ?? m.value.common.dismiss)
 
 const selected = defineModel<boolean>('selected', { default: false })
 
@@ -161,7 +167,7 @@ const iconOnly = computed(
       v-if="dismissible"
       type="button"
       class="ds-chip-remove"
-      :aria-label="dismissLabel"
+      :aria-label="resolvedDismissLabel"
       :disabled="disabled"
       @click="$emit('dismiss')"
     >

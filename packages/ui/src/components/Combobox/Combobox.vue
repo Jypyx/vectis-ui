@@ -21,6 +21,7 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
 
 import { useTimer } from '../../composables/useTimer'
+import { useMessages } from '../../i18n/state'
 
 /**
  * Combobox avec recherche et sélection multiple, composé d'`Input`, `Chip` et
@@ -120,13 +121,19 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   disabled: false,
   invalid: false,
   clearable: true,
-  emptyText: 'Aucun résultat',
+  emptyText: undefined,
   filter: true,
   searchDebounce: 250,
   loading: false,
-  loadingText: 'Chargement…',
+  loadingText: undefined,
   hasMore: false,
 })
+
+// Cascade prop > dictionnaire : la prop garde la priorité, son défaut suit
+// désormais la locale du DS.
+const m = useMessages()
+const resolvedEmptyText = computed(() => props.emptyText ?? m.value.combobox.empty)
+const resolvedLoadingText = computed(() => props.loadingText ?? m.value.common.loading)
 
 const emit = defineEmits<{
   /**
@@ -683,7 +690,7 @@ watch(
         :disabled="disabled"
         :clearable="clearable"
         :clear-visible="canClear"
-        clear-label="Effacer la sélection"
+        :clear-label="m.combobox.clear"
         :placeholder="selectedValues.length === 0 ? placeholder : undefined"
         :aria-activedescendant="open && activeIndex >= 0 ? optionId(activeIndex) : undefined"
         @input="onInput"
@@ -708,7 +715,7 @@ watch(
                 :size="chipSize"
                 :compact="chipCompact"
                 dismissible
-                :dismiss-label="`Retirer ${labelOf(value)}`"
+                :dismiss-label="m.combobox.remove(labelOf(value))"
                 :disabled="disabled"
                 @dismiss="removeValue(value)"
                 >{{ labelOf(value) }}</Chip
@@ -779,19 +786,19 @@ watch(
            requête, le panneau ne doit pas annoncer « aucun résultat ». -->
       <div v-if="loading && filtered.length === 0" class="ds-combobox-state">
         <slot name="loading">
-          <Spinner :label="loadingText" />
-          <span aria-hidden="true">{{ loadingText }}</span>
+          <Spinner :label="resolvedLoadingText" />
+          <span aria-hidden="true">{{ resolvedLoadingText }}</span>
         </slot>
       </div>
       <div v-else-if="filtered.length === 0" class="ds-combobox-state">
-        <slot name="empty" :query="searchTerm">{{ emptyText }}</slot>
+        <slot name="empty" :query="searchTerm">{{ resolvedEmptyText }}</slot>
       </div>
 
       <!-- Sentinelle du scroll infini ET emplacement du spinner de page
            suivante : un seul nœud, donc stable — un `v-if` sur `loading`
            détruirait la sentinelle et invaliderait l'observation. -->
       <div v-if="hasMore" ref="sentinelEl" class="ds-combobox-more" aria-hidden="true">
-        <Spinner v-if="loading" />
+        <Spinner v-if="loading" :label="resolvedLoadingText" />
       </div>
     </Popover>
   </div>

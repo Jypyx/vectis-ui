@@ -2,19 +2,32 @@
 /**
  * Indicateur de chargement 100 % CSS. role="status" + libellé masqué :
  * annoncé par les lecteurs d'écran sans bruit visuel.
+ *
+ * Le `computed` de libellé est le seul JS : ce n'est pas du comportement (ni
+ * événement, ni cycle de vie, ni DOM), mais le composant perd sa propriété
+ * « zéro import » — précédent assumé d'Icon depuis son résolveur.
  */
+import { computed } from 'vue'
+
+import { useMessages } from '../../i18n/state'
+
 interface SpinnerProps {
   /** Taille explicite en pixels (ex. :size="32"). Sans elle : 1em — le
    * spinner suit le texte du parent. */
   size?: number
-  /** Libellé pour les lecteurs d'écran. */
+  /** Libellé pour les lecteurs d'écran. Défaut : dictionnaire du DS. */
   label?: string
 }
 
-withDefaults(defineProps<SpinnerProps>(), {
+const props = withDefaults(defineProps<SpinnerProps>(), {
   size: undefined,
-  label: 'Chargement…',
+  label: undefined,
 })
+
+const m = useMessages()
+// Cascade prop > dictionnaire : la prop garde la priorité (aucun breaking
+// change), mais son défaut devient traduisible par `setLocale`.
+const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 </script>
 
 <template>
@@ -24,7 +37,7 @@ withDefaults(defineProps<SpinnerProps>(), {
     role="status"
   >
     <span class="ds-spinner-circle" aria-hidden="true" />
-    <span class="ds-visually-hidden">{{ label }}</span>
+    <span class="ds-visually-hidden">{{ resolvedLabel }}</span>
   </span>
 </template>
 
