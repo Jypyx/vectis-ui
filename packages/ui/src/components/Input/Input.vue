@@ -33,7 +33,8 @@ interface InputProps {
   /** Force l'état invalide (validation serveur) — pose aria-invalid. */
   invalid?: boolean
   disabled?: boolean
-  /** Lecture seule : focusable, non modifiable ; masque le bouton d'effacement. */
+  /** Lecture seule : focusable, non modifiable ; masque le bouton d'effacement
+      (sauf `clearVisible` explicite, qui fait autorité). */
   readonly?: boolean
   /** Libellé au-dessus du champ, associé via for/id. */
   label?: string
@@ -54,8 +55,10 @@ interface InputProps {
   loadingLabel?: string
   /** Bouton croix qui vide le champ (visible si non-vide, hors disabled/readonly). */
   clearable?: boolean
-  /** Force la visibilité de la croix (sinon : champ non-vide). Utile quand le
-      « contenu à effacer » vit hors du champ texte (ex. Combobox : des Chips). */
+  /** Force la visibilité de la croix (sinon : champ non-vide et modifiable) —
+      readonly compris. Utile quand le « contenu à effacer » vit hors du champ
+      texte (Combobox : des Chips) ou se modifie autrement que par la frappe
+      (DatePicker/TimePicker en lecture seule : par leur panneau). */
   clearVisible?: boolean
   /** Libellé accessible du bouton d'effacement. Défaut : dictionnaire du DS. */
   clearLabel?: string
@@ -136,14 +139,14 @@ const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
 
 const controlEl = ref<HTMLInputElement | null>(null)
 
-const showClear = computed(
-  () =>
-    props.clearable &&
-    !props.disabled &&
-    !props.readonly &&
-    // override explicite (Combobox…) sinon défaut « champ non-vide »
-    (props.clearVisible ?? modelText.value.length > 0),
-)
+const showClear = computed(() => {
+  if (!props.clearable || props.disabled) return false
+  // `clearVisible` fourni = réponse EXPLICITE du consommateur à « y a-t-il
+  // quelque chose à effacer ? », readonly compris : la valeur d'un DatePicker /
+  // TimePicker en lecture seule se modifie par son panneau, pas par la frappe.
+  // Sinon : défaut « champ non-vide ET modifiable ».
+  return props.clearVisible ?? (!props.readonly && modelText.value.length > 0)
+})
 
 function onClear() {
   model.value = ''

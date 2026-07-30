@@ -37,18 +37,28 @@ describe('DatePicker — défaut', () => {
     expect(container.querySelector('.ds-datepicker-panel')).toBeNull()
   })
 
-  it('calendarIcon : surcharge l’icône d’ouverture, la croix d’effacement gardant la priorité', async () => {
+  it('calendarIcon : surcharge l’icône d’ouverture, que la croix d’effacement ne remplace pas', async () => {
     const { container, rerender } = render(DatePicker, {
       props: { modelValue: null, showCalendar: true, calendarIcon: 'event' },
     })
+    // `:not(.ds-input-clear)` : la croix est rendue AVANT l'icône de fin.
     const endIcon = () =>
-      container.querySelector<HTMLElement>('.ds-input-action .ds-icon')?.dataset.icon
+      container.querySelector<HTMLElement>('.ds-input-action:not(.ds-input-clear) .ds-icon')
+        ?.dataset.icon
     expect(endIcon()).toBe('event')
 
-    // Dès qu'il y a de quoi effacer, `close` reprend la main — c'est la
-    // précédence qui casserait silencieusement.
+    // Avec de quoi effacer, les deux coexistent — c'est la convention
+    // Input/Textarea/Combobox, qui casserait silencieusement.
     await rerender({ modelValue: JUNE })
-    expect(endIcon()).toBe('close')
+    expect(endIcon()).toBe('event')
+
+    // La croix EN PREMIER : à gauche de l'icône d'ouverture.
+    const actions = [...container.querySelectorAll('.ds-input-field .ds-input-action')]
+    expect(actions.map((el) => el.getAttribute('aria-label'))).toEqual([
+      'Effacer la date',
+      'Ouvrir le calendrier',
+    ])
+    expect(actions.at(0)?.classList.contains('ds-input-clear')).toBe(true)
   })
 
   it('n’avertit ni à vide, ni sur une sélection range (qui retombe en lecture seule)', async () => {
@@ -143,13 +153,21 @@ describe('DatePicker — lecture seule', () => {
     )
   })
 
-  it('efface la valeur via la croix', async () => {
+  it('efface la valeur via la croix, sans perdre l’icône d’ouverture', async () => {
     const { container, emitted } = mount({ modelValue: JUNE, clearable: true })
-    // avec une valeur, l'icône de fin devient une croix « Effacer la date »
     const clearBtn = container.querySelector('button[aria-label="Effacer la date"]') as HTMLElement
     expect(clearBtn).toBeTruthy()
+    // Le champ est readonly dans ce mode : la croix n'y survit que parce que
+    // `clearVisible` fait autorité côté Input.
+    expect((container.querySelector('input') as HTMLInputElement).readOnly).toBe(true)
+    expect(container.querySelector('button[aria-label="Ouvrir le calendrier"]')).toBeTruthy()
+
     await fireEvent.click(clearBtn)
     expect(emitted('update:modelValue')?.at(-1)).toEqual([null])
+    // Le panneau ne s'ouvre pas au refocus rendu au champ.
+    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+      false,
+    )
   })
 
   it('ferme quand le focus sort du composant', async () => {

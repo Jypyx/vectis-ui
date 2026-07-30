@@ -106,12 +106,12 @@ interface DatePickerProps {
   compact?: boolean
   disabled?: boolean
   invalid?: boolean
-  /** Bouton d'effacement (croix) qui vide la valeur. */
+  /** Bouton d'effacement (croix) qui vide la valeur, à gauche de l'icône de fin. */
   clearable?: boolean
   /**
-   * Icône d'ouverture du calendrier, à la fin du champ. La croix d'effacement
-   * de `clearable` la remplace dès qu'il y a de quoi effacer, et aucune icône
-   * n'est rendue quand il n'y a pas de panneau (`showCalendar` à false en saisie).
+   * Icône d'ouverture du calendrier, à la fin du champ. La croix d'effacement de
+   * `clearable` s'affiche à sa gauche sans la remplacer ; aucune icône n'est
+   * rendue quand il n'y a pas de panneau (`showCalendar` à false en saisie).
    */
   calendarIcon?: IconSource
   /**
@@ -521,36 +521,43 @@ function onRootKeydown(event: KeyboardEvent) {
   onKeydown(event)
 }
 
-// L'icône de fin devient la croix d'effacement quand il y a une valeur.
-const showClearIcon = computed(
+/*
+ * La croix d'effacement passe par le `clearable` de l'Input, qui la rend À
+ * GAUCHE de l'icône de fin (convention Input/Textarea/Combobox) : les deux
+ * affordances coexistent. `clearVisible` est indispensable ici — le champ est
+ * readonly hors saisie, et la valeur y vient du panneau.
+ */
+const canClear = computed(
   () => props.clearable && !props.disabled && (hasValue.value || (typing.value && !!draft.value)),
 )
 const endIcon = computed<IconSource | undefined>(() =>
-  showClearIcon.value ? 'close' : hasPanel.value ? props.calendarIcon : undefined,
+  hasPanel.value ? props.calendarIcon : undefined,
 )
 /*
  * Le LIBELLÉ, lui, reste toujours défini, même quand aucune icône n'est rendue :
  * `useIconClickHandlers` avertit AU SETUP dès qu'un `@click:icon-end` est
  * attaché sans `iconEndLabel`, sans savoir si une icône est rendue. Le listener
- * étant posé en permanence (la croix peut apparaître dès qu'une date est tapée)
- * et sa détection statique, un libellé conditionnel ferait apparaître un faux
- * avertissement au montage d'un champ de saisie vide.
+ * étant posé en permanence et sa détection statique, un libellé conditionnel
+ * ferait apparaître un faux avertissement au montage d'un champ sans calendrier.
  */
 // Libellés : aucune prop dédiée, le dictionnaire est le seul point de
 // surcharge — cf. `src/i18n/`.
 const m = useMessages()
 
-const endIconLabel = computed(() =>
-  showClearIcon.value ? m.value.datePicker.clear : m.value.datePicker.open,
-)
+const endIconLabel = computed(() => m.value.datePicker.open)
 
 function onEndIcon() {
-  if (showClearIcon.value) clearValue()
-  else if (open.value) closeAndFocus()
+  if (open.value) closeAndFocus()
   // Clic explicite sur l'icône calendrier : le focus a déjà quitté le champ
   // pour le bouton, l'emmener dans la grille est le bon geste dans les 2 modes.
   else openPanel(true)
 }
+/*
+ * Appelé par `@clear` de l'Input, DANS son `emit` : le `focus()` posé ici sous
+ * verrou rend le `controlEl.focus()` qu'Input exécute juste après inopérant
+ * (élément déjà focalisé = aucun événement `focus` émis), donc le panneau ne se
+ * rouvre pas. Retirer le verrou d'ici le rouvrirait.
+ */
 function clearValue() {
   model.value =
     props.selection === 'multiple'
@@ -600,12 +607,16 @@ const close = () => closeAndFocus()
         :compact="compact"
         :disabled="disabled"
         :invalid="invalid"
+        :clearable="clearable"
+        :clear-visible="canClear"
+        :clear-label="m.datePicker.clear"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
         :aria-haspopup="hasPanel ? 'dialog' : undefined"
         :aria-expanded="hasPanel ? open : undefined"
         :aria-controls="hasPanel ? panelId : undefined"
         @click:icon-end="onEndIcon"
+        @clear="clearValue"
         @focus="onFieldFocus"
         @input="onFieldInput"
         @change="commitOrRevert"

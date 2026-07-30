@@ -95,12 +95,12 @@ interface TimePickerProps {
   compact?: boolean
   disabled?: boolean
   invalid?: boolean
-  /** Bouton d'effacement (croix) qui vide la valeur. */
+  /** Bouton d'effacement (croix) qui vide la valeur, à gauche de l'icône de fin. */
   clearable?: boolean
   /**
    * Icône d'ouverture du CADRAN, à la fin du champ. Sans effet en `mode="list"`,
-   * dont le chevron suit la convention du Combobox, ni quand la croix
-   * d'effacement de `clearable` a la main.
+   * dont le chevron suit la convention du Combobox. La croix d'effacement de
+   * `clearable` s'affiche à sa gauche sans la remplacer.
    */
   clockIcon?: IconSource
   /** Placement du panneau par rapport au champ. */
@@ -306,6 +306,12 @@ function onDialConfirm(via: 'pointer' | 'keyboard') {
   else if (via === 'keyboard') confirm()
 }
 
+/*
+ * Appelé par `@clear` de l'Input, DANS son `emit` : le `focus()` posé ici sous
+ * verrou rend le `controlEl.focus()` qu'Input exécute juste après inopérant
+ * (élément déjà focalisé = aucun événement `focus` émis), donc le panneau ne se
+ * rouvre pas. Retirer le verrou d'ici le rouvrirait.
+ */
 function clearValue() {
   model.value = null
   // `draft` explicitement : quand le modèle valait déjà `null`, la garde
@@ -561,39 +567,35 @@ function onPanelKeydown(event: KeyboardEvent) {
   arrowNavigate(event, panel, optionEls(panel), { vertical: true })
 }
 
-/* ── Icône de fin ───────────────────────────────────────────────────────── */
+/* ── Croix d'effacement et icône de fin ─────────────────────────────────── */
 
-const showClearIcon = computed(
+/*
+ * La croix passe par le `clearable` de l'Input, qui la rend À GAUCHE de l'icône
+ * de fin (convention Input/Textarea/Combobox) : les deux affordances coexistent,
+ * et en mode liste on retrouve exactement le couple croix + chevron du Combobox.
+ * `clearVisible` est indispensable ici — le champ est readonly hors saisie, et
+ * la valeur y vient du panneau.
+ */
+const canClear = computed(
   () =>
     props.clearable && !props.disabled && (hasValue.value || (typing.value && !!maskDraft.value)),
 )
 const endIcon = computed<IconSource | undefined>(() =>
-  showClearIcon.value
-    ? 'close'
-    : isList.value
-      ? 'expand_more'
-      : hasDial.value
-        ? props.clockIcon
-        : undefined,
+  isList.value ? 'expand_more' : hasDial.value ? props.clockIcon : undefined,
 )
 /*
  * Le LIBELLÉ, lui, reste toujours défini, même quand aucune icône n'est rendue :
  * `useIconClickHandlers` avertit AU SETUP dès qu'un `@click:icon-end` est
  * attaché sans `iconEndLabel`, sans savoir si une icône est rendue. Le listener
- * étant posé en permanence (la croix peut apparaître dès qu'une heure est
- * saisie), un libellé conditionnel ferait un faux avertissement au montage.
+ * étant posé en permanence et sa détection statique, un libellé conditionnel
+ * ferait un faux avertissement au montage d'une saisie sans cadran.
  */
 const endIconLabel = computed(() =>
-  showClearIcon.value
-    ? m.value.timePicker.clear
-    : isList.value
-      ? m.value.timePicker.openList
-      : m.value.timePicker.openDial,
+  isList.value ? m.value.timePicker.openList : m.value.timePicker.openDial,
 )
 
 function onEndIcon() {
-  if (showClearIcon.value) clearValue()
-  else if (open.value) closeAndFocus()
+  if (open.value) closeAndFocus()
   else openPanel(true)
 }
 </script>
@@ -625,12 +627,16 @@ function onEndIcon() {
           :compact="compact"
           :disabled="disabled"
           :invalid="invalid"
+          :clearable="clearable"
+          :clear-visible="canClear"
+          :clear-label="m.timePicker.clear"
           :icon-end="endIcon"
           :icon-end-label="endIconLabel"
           :aria-haspopup="hasPanel ? (isList ? 'listbox' : 'dialog') : undefined"
           :aria-expanded="hasPanel ? open : undefined"
           :aria-controls="hasPanel ? panelId : undefined"
           @click:icon-end="onEndIcon"
+          @clear="clearValue"
           @focus="onFieldFocus"
           @input="onFieldInput"
           @change="commitOrRevert"

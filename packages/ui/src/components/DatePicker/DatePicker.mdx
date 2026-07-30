@@ -57,8 +57,9 @@ combinables avec `compact` (-4 px). La grille du panneau, elle, garde ses dimens
 
 ## États
 
-Le champ est effaçable (`clearable`, la croix remplace l'icône de fin quand une
-valeur est posée) et supporte `disabled`.
+Le champ est effaçable (`clearable` : la croix apparaît à gauche de l'icône de fin
+dès qu'une valeur est posée, comme dans Input, Textarea et Combobox) et supporte
+`disabled`.
 
 <Canvas of={DatePickerStories.Desactive} />
 
@@ -111,8 +112,9 @@ moyen de choisir une date.
 apparaît dès qu'une date est posée, calendrier ou non.
 
 `calendarIcon` remplace l'icône d'ouverture du calendrier. Elle ne s'affiche que
-lorsqu'il y a un panneau à ouvrir, et **la croix d'effacement lui reprend la
-main** dès qu'il y a de quoi effacer.
+lorsqu'il y a un panneau à ouvrir, et **la croix d'effacement se pose à sa
+gauche** sans la remplacer : l'ouverture du calendrier reste accessible d'un clic
+une fois la date choisie.
 
 <Canvas of={DatePickerStories.SaisieAvecCalendrier} />
 
