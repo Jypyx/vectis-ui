@@ -108,6 +108,10 @@ export type {
 } from './components/Combobox/Combobox.vue'
 export { default as Breadcrumb } from './components/Breadcrumb/Breadcrumb.vue'
 export type { BreadcrumbItem } from './components/Breadcrumb/Breadcrumb.vue'
+export { default as SideNavigation } from './components/SideNavigation/SideNavigation.vue'
+export { default as SideNavigationItem } from './components/SideNavigation/SideNavigationItem.vue'
+export { default as SideNavigationGroup } from './components/SideNavigation/SideNavigationGroup.vue'
+export { default as SideNavigationSeparator } from './components/SideNavigation/SideNavigationSeparator.vue'
 export { default as Chip } from './components/Chip/Chip.vue'
 export { default as DataTable } from './components/DataTable/DataTable.vue'
 export type {
