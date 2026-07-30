@@ -51,6 +51,17 @@ export { default as VButton } from './components/VButton/VButton.vue'
 export { default as VIconButton } from './components/VIconButton/VIconButton.vue'
 export { default as VButtonGroup } from './components/VButton/VButtonGroup.vue'
 export { default as VPagination } from './components/VPagination/VPagination.vue'
+export { default as VTabs } from './components/VTabs/VTabs.vue'
+export type {
+  TabsActivation,
+  TabsAlign,
+  TabsOrientation,
+  TabsSize,
+  TabsTone,
+  TabsVariant,
+} from './components/VTabs/VTabs.vue'
+export { default as VTab } from './components/VTabs/VTab.vue'
+export { default as VTabPanel } from './components/VTabs/VTabPanel.vue'
 export { default as VTooltip } from './components/VTooltip/VTooltip.vue'
 export { default as VBadge } from './components/VBadge/VBadge.vue'
 export type { BadgeTone } from './components/VBadge/VBadge.vue'

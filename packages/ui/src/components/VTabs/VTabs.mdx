@@ -1,0 +1,175 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+
+import * as VTabsStories from './VTabs.stories'
+
+<Meta of={VTabsStories} />
+
+# Tabs
+
+Navigation between sections of the same level. The component invents no button: every tab is a
+`VButton`, and the scroll controls are `VIconButton`. Hover, focus, disabling, the grey of inert
+states and respect for `prefers-reduced-motion` therefore come straight from `VButton`, without a
+single state rule redefined here.
+
+The API is **composed**: `VTabs` carries the configuration and the `v-model`, `VTab` declares a tab,
+`VTabPanel` its panel. The two families live in two distinct slots — the default slot for the tabs,
+`#panels` for the panels — because nothing else would allow them to be split across two DOM
+containers. The `#panels` slot is optional: without it, `VTabs` is only a bar, and can serve as a
+segmented control.
+
+The ARIA identifiers need no wiring: `VTab` and `VTabPanel` derive the same identifier from their
+`value`, starting from a unique identifier set by the root. There is therefore neither a registry nor
+any state exchange between them.
+
+<Canvas of={VTabsStories.Default} />
+<Controls of={VTabsStories.Default} />
+
+## Variants
+
+`variant` packs two decisions into a single axis: the **track** the tabs live on, and the
+**decoration** of the component.
+
+`flat` (the default) underlines the active tab with an indicator that covers the bar's track; the
+tabs stay `ghost`, and nothing is painted around them — the bar and the panels sit bare in the host
+container, whose surface they inherit. On a track, the tabs are **contiguous, square-cornered
+segments**: it is the indicator and the track that carve the bar, not the buttons' silhouette.
+
+`outlined` takes `flat` line for line and encloses it in a card: a rule, rounded corners and a raised
+background, on the decoration scale shared with `VAccordion` and `VDataTable`. The frame surrounds
+the **whole** component, bar and panels: the track then changes role without changing appearance — it
+becomes the rule that separates the tabs from their content, inside the frame. The bar and the panels
+take the frame's gutter; only the track stays flush, edge to edge, since otherwise it would separate
+nothing. The tab row takes its radius back at the ends only — the internal seams stay square, on the
+`VButtonGroup` idiom — on the side the track does not occupy. With no `#panels` slot there is nothing
+to separate: the track fades away and the card's border replaces it.
+
+`inset` places the tabs in a hollow track and raises the active one — that is `VButton`'s `elevated`
+prop on a `ghost` tab, shadow included. It is never framed: it is a segmented control, already its
+own surface.
+
+<Canvas of={VTabsStories.Variants} />
+
+## Tones
+
+`tone` colours the active tab; the inactive tabs stay neutral so the selection stands out on its own.
+The indicator of the `flat` and `outlined` variants is painted in `currentColor`: it follows the tone
+without being coupled to it, and turns grey along with the text when the tab is disabled. There is no
+custom colour here — a tab is navigation, not a label.
+
+<Canvas of={VTabsStories.Tones} />
+
+## Sizes
+
+`size` and `compact` follow the unified control scale and are propagated to every button, including
+the scroll controls. A tab reduced to its icon becomes square, on the `VIconButton` model.
+
+<Canvas of={VTabsStories.Sizes} />
+<Canvas of={VTabsStories.Compact} />
+
+## Tab content
+
+`label` supplies the text, `icon` a start icon — an icon name **or** an explicit render. The two
+combine. An icon with no label gives a square tab: it then needs an accessible name through
+`aria-label`, which travels through to the rendered `<button>`. Finally, the default slot replaces the
+label for any rich content.
+
+<Canvas of={VTabsStories.TabContent} />
+
+## Orientation and alignment
+
+In vertical mode, the bar and the panels sit side by side, and the indicator moves to the tabs' start
+edge (left in LTR, right in RTL — everything is described in logical properties). The track, on the
+other hand, depends on the decoration: when flat it delimits the tab column and stays at the start
+edge; when framed, that edge is already held by the card's border, and the track moves to the
+opposite edge, where it genuinely separates the tabs from their content.
+
+`align` places the tab group at the start (the default), the centre or the end — left, centre or
+right when horizontal; top, middle or bottom when vertical. The alignment is set on the bar and not
+on the scrolling list: a `justify-content` on an overflowing container would make the part past the
+start edge permanently unreachable. A visible corollary in the second row below: in vertical mode
+`align` acts on the block axis, so it only has an effect if the bar is given a height.
+
+<Canvas of={VTabsStories.Vertical} />
+<Canvas of={VTabsStories.Alignment} />
+
+## Filling the available space
+
+`grow` distributes the available width (or height) between the tabs, and truncates over-long labels.
+That is incompatible with scrolling by construction: nothing overflows any more, so the scroll
+controls would stay disabled.
+
+<Canvas of={VTabsStories.Grow} />
+
+## Scrolling
+
+When the tabs overflow, the list scrolls — by touch, trackpad and keyboard. The native scrollbar is
+hidden: it would cross the indicator and the track. `scrollButtons` adds two explicit controls, whose
+icon is chosen through `prevIcon`/`nextIcon` (a Material name or a URL) and whose accessible name
+comes from `prevLabel`/`nextLabel`; they disable themselves at the ends, and both of them when
+nothing overflows.
+
+Those ends are measured by two sentinels observed inside the list: a single observer covers
+scrolling, container resizing and the addition or removal of tabs. No `ResizeObserver`, no scroll
+listener.
+
+<Canvas of={VTabsStories.Scrolling} />
+<Canvas of={VTabsStories.ScrollButtons} />
+
+The default icons follow the orientation — chevrons when horizontal, `expand_less`/`expand_more` when
+vertical. `prevIcon` and `nextIcon` replace them, and accept either an icon name or an explicit
+render; `prevLabel` and `nextLabel` supply the matching accessible name, which must be adapted at the
+same time as the icon.
+
+<Canvas of={VTabsStories.CustomArrows} />
+
+## Panels
+
+The `VTabPanel` elements are all rendered; the inactive ones carry the native `hidden` attribute. No
+JavaScript is needed, and the content's state — typing in progress, a scroll position — survives a
+tab change. The trade-off is that this content is mounted from the start and that the fields of
+hidden panels are still submitted with the form; `lazy` defers mounting a panel until its first
+display, then keeps it.
+
+A hidden panel is hidden by the browser's stylesheet, which the simplest `display` declaration
+overrides. The component therefore sets a guard of higher specificity — but without `!important`, so
+it stays overridable like the rest of the design system. To give the panel a `display`, target
+`.v-tabs-panel:not([hidden])`.
+
+<Canvas of={VTabsStories.Panels} />
+
+## Disabled tabs and edge cases
+
+A `disabled` tab is a `<button disabled>`: greyed through tokens, inert, and skipped by the arrows —
+the same choice as `VPagination`'s disabled pages.
+
+The `v-model` must reference an existing, activatable tab: the value decides both the panel shown and
+the only tab present in the tab order. A value outside the list breaks nothing, but leaves the entire
+bar out of the tab order.
+
+<Canvas of={VTabsStories.Disabled} />
+<Canvas of={VTabsStories.EdgeCases} />
+
+## Accessibility
+
+- The bar is a `role="tablist"` named by `label`; an `aria-label` or an `aria-labelledby` set by the
+  consumer wins, and lands on the list rather than on the container — the root is only a wrapper, and
+  only `class` and `style` stay on it.
+- `aria-orientation="vertical"` is set in vertical orientation: the `tablist` role is horizontal by
+  default, so a vertical bar would otherwise be announced wrongly.
+- Every tab has an `id`, and its panel answers with `aria-labelledby`; `aria-controls` is only set
+  when the `#panels` slot exists, so it never references a missing identifier. The identifiers derive
+  from `value` and are then sanitized: `aria-controls` is a space-separated list, so a value
+  containing one would designate two non-existent elements.
+- Focus uses a **roving tabindex**: a single tab is a tab stop, and the arrows move between the
+  others. The left/right arrows (up/down when vertical) and Home/End only **move** focus:
+  `activation` is `manual` by default, and the selection waits for Enter or Space — the native
+  `<button>` activations, hence no added code. `activation="automatic"` restores the APG-recommended
+  behaviour where the selection follows focus, to be reserved for panels that display instantly.
+- The horizontal arrows are physical, hence inverted in RTL, where the chevrons of the scroll controls
+  flip as well.
+- The tabs' focus ring is drawn inwards: the list is a scrolling container, and an outward offset
+  would be cropped there.
+- The active panel is focusable (`tabindex="0"`) so it is reachable even with no interactive content,
+  in line with the APG example.
+- The scroll-measuring sentinels are removed from the accessibility tree: a `tablist` owns nothing but
+  `tab` children.
