@@ -21,6 +21,7 @@ import { useFieldIds } from '../../composables/useFieldIds'
 import { useIconClickHandlers } from '../../composables/useIconClickHandlers'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useTextLimit } from '../../composables/useTextLimit'
+import { useMessages } from '../../i18n/state'
 
 interface InputProps {
   /** Hauteur du champ : sm 32px, md 40px (défaut), lg 48px. */
@@ -49,14 +50,14 @@ interface InputProps {
   iconEndLabel?: string
   /** Spinner à droite, à la place de iconEnd / #end. */
   loading?: boolean
-  /** Libellé du spinner pour les lecteurs d'écran. */
+  /** Libellé du spinner pour les lecteurs d'écran. Défaut : dictionnaire du DS. */
   loadingLabel?: string
   /** Bouton croix qui vide le champ (visible si non-vide, hors disabled/readonly). */
   clearable?: boolean
   /** Force la visibilité de la croix (sinon : champ non-vide). Utile quand le
       « contenu à effacer » vit hors du champ texte (ex. Combobox : des Chips). */
   clearVisible?: boolean
-  /** Libellé accessible du bouton d'effacement. */
+  /** Libellé accessible du bouton d'effacement. Défaut : dictionnaire du DS. */
   clearLabel?: string
   /** Limite de caractères. Par défaut : attribut natif maxlength (saisie bloquée). */
   maxlength?: number
@@ -83,10 +84,10 @@ const props = withDefaults(defineProps<InputProps>(), {
   iconStartLabel: undefined,
   iconEndLabel: undefined,
   loading: false,
-  loadingLabel: 'Chargement…',
+  loadingLabel: undefined,
   clearable: false,
   clearVisible: undefined,
-  clearLabel: 'Effacer',
+  clearLabel: undefined,
   maxlength: undefined,
   softLimit: false,
   counter: false,
@@ -118,6 +119,12 @@ const model = defineModel<string | number>({ default: '' })
 const modelText = computed(() => String(model.value ?? ''))
 
 const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
+
+// Cascade prop > dictionnaire : la prop garde la priorité, son défaut suit
+// désormais la locale du DS.
+const m = useMessages()
+const resolvedLoadingLabel = computed(() => props.loadingLabel ?? m.value.common.loading)
+const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
 
 const { fieldId, hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
 
@@ -212,7 +219,7 @@ defineExpose({
         v-if="showClear"
         type="button"
         class="ds-input-action ds-input-clear"
-        :aria-label="clearLabel"
+        :aria-label="resolvedClearLabel"
         @click="onClear"
       >
         <!-- croix Material Symbols : même graisse de trait que les autres icônes
@@ -220,7 +227,7 @@ defineExpose({
         <Icon name="close" />
       </button>
 
-      <Spinner v-if="loading" :label="loadingLabel" />
+      <Spinner v-if="loading" :label="resolvedLoadingLabel" />
       <slot v-else name="end">
         <button
           v-if="iconEnd && hasIconEndHandler"

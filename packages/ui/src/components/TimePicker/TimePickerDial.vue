@@ -13,6 +13,7 @@ import {
 } from '../../utils/time'
 import type { HourFormat } from '../../utils/time'
 import { pad2 } from '../../utils/text'
+import { useMessages } from '../../i18n/state'
 
 /**
  * Cadran horloge du TimePicker (interne, non exporté).
@@ -117,8 +118,12 @@ const ariaValueMin = computed(() => (props.step === 'minute' ? 0 : props.format 
 const ariaValueMax = computed(() =>
   props.step === 'minute' ? 59 : props.format === '12h' ? 12 : 23,
 )
+// Aucune prop dédiée : le dictionnaire est le seul point de surcharge.
+const m = useMessages()
 const ariaValueText = computed(() =>
-  props.step === 'minute' ? `${props.minute} minutes` : `${ariaValueNow.value} heures`,
+  props.step === 'minute'
+    ? m.value.timePicker.minutesValue(props.minute)
+    : m.value.timePicker.hoursValue(ariaValueNow.value),
 )
 
 // ── Pointeur : clic et drag sur la surface ──────────────────────────────────
@@ -225,7 +230,7 @@ function onKeydown(event: KeyboardEvent) {
     role="slider"
     tabindex="0"
     class="ds-timepicker-dial-face"
-    :aria-label="step === 'hour' ? 'Heure' : 'Minutes'"
+    :aria-label="step === 'hour' ? m.timePicker.hour : m.timePicker.minutes"
     :aria-valuemin="ariaValueMin"
     :aria-valuemax="ariaValueMax"
     :aria-valuenow="ariaValueNow"

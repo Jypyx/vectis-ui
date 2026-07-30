@@ -11,6 +11,7 @@ import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useMessages } from '../../i18n/state'
 
 export type TabsVariant = 'line' | 'inset'
 export type TabsTone = 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
@@ -49,11 +50,13 @@ interface TabsProps {
   prevIcon?: IconSource
   /** Icône du bouton de défilement aval. Défaut selon l'orientation. */
   nextIcon?: IconSource
+  /** Libellé accessible du bouton de défilement amont. Défaut : dictionnaire du DS. */
   prevLabel?: string
+  /** Libellé accessible du bouton de défilement aval. Défaut : dictionnaire du DS. */
   nextLabel?: string
   /** `automatic` : la sélection suit le focus (recommandation APG pour des panneaux instantanés). */
   activation?: TabsActivation
-  /** Nom accessible de la liste d'onglets. */
+  /** Nom accessible de la liste d'onglets. Défaut : dictionnaire du DS. */
   label?: string
 }
 
@@ -68,10 +71,10 @@ const props = withDefaults(defineProps<TabsProps>(), {
   scrollButtons: false,
   prevIcon: undefined,
   nextIcon: undefined,
-  prevLabel: 'Onglets précédents',
-  nextLabel: 'Onglets suivants',
+  prevLabel: undefined,
+  nextLabel: undefined,
   activation: 'manual',
-  label: 'Onglets',
+  label: undefined,
 })
 
 defineSlots<{
@@ -88,7 +91,12 @@ const model = defineModel<string | number>()
 // (aria-labelledby, id, data-*) descend sur le [role="tablist"].
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs: listAttrs } = useRootAttrs()
-const ariaLabel = useAriaLabel(() => props.label)
+// Cascade prop > dictionnaire ; pour le nom du tablist, `useAriaLabel` place
+// encore `aria-labelledby` et `aria-label` du consommateur au-dessus.
+const m = useMessages()
+const ariaLabel = useAriaLabel(() => props.label ?? m.value.tabs.label)
+const resolvedPrevLabel = computed(() => props.prevLabel ?? m.value.tabs.previous)
+const resolvedNextLabel = computed(() => props.nextLabel ?? m.value.tabs.next)
 
 const slots = useSlots()
 const baseId = useId()
@@ -244,7 +252,7 @@ watch(model, () => {
       <IconButton
         v-if="scrollButtons"
         class="ds-tabs-scroll"
-        :label="prevLabel"
+        :label="resolvedPrevLabel"
         tone="neutral"
         :size="size"
         :compact="compact"
@@ -283,7 +291,7 @@ watch(model, () => {
       <IconButton
         v-if="scrollButtons"
         class="ds-tabs-scroll"
-        :label="nextLabel"
+        :label="resolvedNextLabel"
         tone="neutral"
         :size="size"
         :compact="compact"

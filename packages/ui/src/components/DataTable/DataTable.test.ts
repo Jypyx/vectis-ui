@@ -194,6 +194,25 @@ describe('DataTable', () => {
     expect(firstColumnCells(container)).toEqual(['Brume', 'Atlas', 'Socle', 'Éclair'])
   })
 
+  /* Le nom du bouton est COMPOSITE : la prop `perPageLabel` (ou son défaut de
+     dictionnaire) est passée à `dataTable.perPageValue`, qui pose le séparateur —
+     lequel varie selon la langue (« : » en français, « : » sans espace en
+     anglais). Une prop personnalisée doit donc traverser la fonction, pas la
+     court-circuiter. */
+  it('sélecteur « lignes par page » : une prop personnalisée traverse le format', () => {
+    const { getByRole } = render(DataTable, {
+      props: {
+        columns: COLUMNS,
+        rows: ROWS_MANY,
+        rowKey: 'name',
+        perPage: 2,
+        perPageOptions: [2, 4],
+        perPageLabel: 'Par page',
+      },
+    })
+    expect(getByRole('button', { name: 'Par page : 2' })).toBeTruthy()
+  })
+
   it('sélection : identités rowKey, master limité à la page visible, indeterminate', async () => {
     const selected = ref<(string | number)[]>([])
     const Harness = harness(

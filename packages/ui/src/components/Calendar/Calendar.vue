@@ -26,6 +26,7 @@ import {
 import { toggleValue } from '../../utils/array'
 import { resolveMatcher } from '../../utils/matcher'
 import { clamp } from '../../utils/number'
+import { useLocale, useMessages } from '../../i18n/state'
 
 /**
  * Calendrier inline (grille) réutilisable, inspiration Material. Contient TOUTE
@@ -65,7 +66,12 @@ export type CalendarValue = string | null | DateRange | string[]
 interface CalendarProps {
   /** Type de sélection. */
   selection?: CalendarSelection
-  /** Locale BCP 47 (noms de mois/jours, 1er jour de semaine). */
+  /**
+   * Locale BCP 47 (noms de mois/jours, 1er jour de semaine). PRIORITAIRE sur la
+   * locale globale du DS (`setLocale`), sur laquelle elle retombe à défaut —
+   * d'où l'absence de défaut littéral ici : `undefined` doit rester
+   * distinguable pour que la locale globale ait une chance de s'appliquer.
+   */
   locale?: string
   /** Force le 1er jour de semaine (0 = dimanche … 6 = samedi). Défaut : locale. */
   firstDayOfWeek?: number
@@ -87,7 +93,7 @@ interface CalendarProps {
 
 const props = withDefaults(defineProps<CalendarProps>(), {
   selection: 'single',
-  locale: 'fr-FR',
+  locale: undefined,
   firstDayOfWeek: undefined,
   min: undefined,
   max: undefined,
@@ -124,10 +130,22 @@ defineSlots<{
 const gridLabelId = useId()
 
 // ── Localisation ────────────────────────────────────────────────────────────
-const resolvedFirstDay = computed(() => props.firstDayOfWeek ?? firstDayOfWeekFor(props.locale))
-const weekdays = computed(() => weekdayNames(props.locale, resolvedFirstDay.value, 'short'))
-const weekdaysLong = computed(() => weekdayNames(props.locale, resolvedFirstDay.value, 'long'))
-const monthLabels = computed(() => monthNamesCompact(props.locale))
+// Libellés de navigation : aucune prop dédiée, le dictionnaire est le seul
+// point de surcharge (globale ou par langue) — cf. `src/i18n/`.
+const m = useMessages()
+const dsLocale = useLocale()
+/* Prop prioritaire, sinon locale globale du DS (idiome `props.x ?? contexte`
+   d'Avatar). Une seule dérivation : toutes les lectures passent par elle. */
+const resolvedLocale = computed(() => props.locale ?? dsLocale.value)
+
+const resolvedFirstDay = computed(
+  () => props.firstDayOfWeek ?? firstDayOfWeekFor(resolvedLocale.value),
+)
+const weekdays = computed(() => weekdayNames(resolvedLocale.value, resolvedFirstDay.value, 'short'))
+const weekdaysLong = computed(() =>
+  weekdayNames(resolvedLocale.value, resolvedFirstDay.value, 'long'),
+)
+const monthLabels = computed(() => monthNamesCompact(resolvedLocale.value))
 
 // ── Valeur normalisée par type de sélection ──────────────────────────────────────────────
 const singleValue = computed(() =>
@@ -165,7 +183,7 @@ const viewYear = computed(
   () => parseISO(focusedISO.value)?.getFullYear() ?? new Date().getFullYear(),
 )
 const viewMonth0 = computed(() => parseISO(focusedISO.value)?.getMonth() ?? 0)
-const monthLabel = computed(() => monthName(props.locale, viewMonth0.value, 'long'))
+const monthLabel = computed(() => monthName(resolvedLocale.value, viewMonth0.value, 'long'))
 const gridLabel = computed(() => `${monthLabel.value} ${viewYear.value}`)
 
 // aujourd'hui : posé au montage (client) → pas de mismatch d'hydratation SSR
@@ -489,7 +507,7 @@ defineExpose({ focus })
       <div class="ds-calendar-nav">
         <IconButton
           icon="chevron_left"
-          label="Mois précédent"
+          :label="m.calendar.previousMonth"
           size="sm"
           :disabled="!canPrevMonth"
           @click="stepMonth(-1)"
@@ -511,7 +529,7 @@ defineExpose({ focus })
         </Button>
         <IconButton
           icon="chevron_right"
-          label="Mois suivant"
+          :label="m.calendar.nextMonth"
           size="sm"
           :disabled="!canNextMonth"
           @click="stepMonth(1)"
@@ -521,7 +539,7 @@ defineExpose({ focus })
       <div class="ds-calendar-nav">
         <IconButton
           icon="chevron_left"
-          label="Année précédente"
+          :label="m.calendar.previousYear"
           size="sm"
           :disabled="!canPrevYear"
           @click="stepYear(-1)"
@@ -539,7 +557,7 @@ defineExpose({ focus })
         </Button>
         <IconButton
           icon="chevron_right"
-          label="Année suivante"
+          :label="m.calendar.nextYear"
           size="sm"
           :disabled="!canNextYear"
           @click="stepYear(1)"
@@ -646,7 +664,7 @@ defineExpose({ focus })
       v-if="view === 'months'"
       class="ds-calendar-picker"
       role="grid"
-      aria-label="Choix du mois"
+      :aria-label="m.calendar.monthPicker"
       @keydown="onMonthsKeydown"
     >
       <button
@@ -671,7 +689,7 @@ defineExpose({ focus })
       v-if="view === 'years'"
       class="ds-calendar-picker ds-calendar-picker--years"
       role="grid"
-      aria-label="Choix de l'année"
+      :aria-label="m.calendar.yearPicker"
       @keydown="onYearsKeydown"
     >
       <button

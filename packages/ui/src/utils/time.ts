@@ -176,11 +176,12 @@ export function timeList(step: number, locale: string, format: HourFormat): Time
  * Le séparateur du masque est UNIVERSEL, contrairement à celui du DatePicker :
  * une heure se lit « HH:MM » dans toutes les locales — `Intl` n'y fait varier
  * que le cycle horaire, jamais le deux-points.
+ *
+ * Le GABARIT du placeholder, lui, a quitté ce fichier pour le dictionnaire
+ * (`timePicker.maskPlaceholder`) : `hh:mm` est fait d'initiales de MOTS, donc
+ * traduisible, là où le `:` ci-dessous ne l'est pas.
  */
 export const TIME_SEPARATOR = ':'
-
-/** Gabarit du placeholder du champ de saisie. */
-export const TIME_MASK_PLACEHOLDER = 'hh:mm'
 
 /**
  * Suite de chiffres → texte masqué. Le `:` est posé DÈS que l'heure est

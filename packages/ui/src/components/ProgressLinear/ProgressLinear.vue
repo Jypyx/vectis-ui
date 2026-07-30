@@ -9,6 +9,7 @@
  * annoncé, il ne remplace pas un aria-label.
  */
 import { useProgressValue } from '../../composables/useProgressValue'
+import { useMessages } from '../../i18n/state'
 import { px } from '../../utils/css'
 
 interface ProgressLinearProps {
@@ -62,6 +63,11 @@ defineSlots<{
   default?(props: { value: number; max: number; percent: number }): unknown
 }>()
 
+/* Le « % » et l'espace INSÉCABLE qui le précède sont une convention de
+   langue (l'anglais n'en met pas) : ils vivent donc au dictionnaire. Le
+   slot scopé reste la voie pour un format arbitraire. */
+const m = useMessages()
+
 const { clamped, fraction } = useProgressValue(
   () => props.value,
   () => props.max,
@@ -93,12 +99,12 @@ const { clamped, fraction } = useProgressValue(
     <template v-if="!indeterminate && (showValue || $slots.default)">
       <span class="ds-progress-linear-text">
         <slot :value="clamped" :max="max" :percent="fraction * 100">
-          {{ Math.round(fraction * 100) }}&nbsp;%
+          {{ m.progress.percent(Math.round(fraction * 100)) }}
         </slot>
       </span>
       <span class="ds-progress-linear-text" data-on-fill aria-hidden="true">
         <slot :value="clamped" :max="max" :percent="fraction * 100">
-          {{ Math.round(fraction * 100) }}&nbsp;%
+          {{ m.progress.percent(Math.round(fraction * 100)) }}
         </slot>
       </span>
     </template>

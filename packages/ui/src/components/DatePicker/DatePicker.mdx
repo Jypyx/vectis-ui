@@ -133,3 +133,5 @@ main** dès qu'il y a de quoi effacer.
   attendu via `hint` (lié au champ par `aria-describedby`).
 - Toute la navigation clavier de la grille est héritée du Calendar (voir sa
   documentation). Les transitions respectent `prefers-reduced-motion`.
+
+Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**). La prop `locale` reste prioritaire ; sans elle, le composant suit désormais la locale globale posée par `setLocale`, au lieu du `fr-FR` codé en dur.

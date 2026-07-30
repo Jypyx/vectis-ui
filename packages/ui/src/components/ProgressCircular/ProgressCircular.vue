@@ -12,6 +12,7 @@
  * « children presentational » : le label affiché au centre n'est PAS annoncé.
  */
 import { useProgressValue } from '../../composables/useProgressValue'
+import { useMessages } from '../../i18n/state'
 import { px } from '../../utils/css'
 
 interface ProgressCircularProps {
@@ -60,6 +61,11 @@ defineSlots<{
   default?(props: { value: number; max: number; percent: number }): unknown
 }>()
 
+/* Le « % » et l'espace INSÉCABLE qui le précède sont une convention de
+   langue (l'anglais n'en met pas) : ils vivent donc au dictionnaire. Le
+   slot scopé reste la voie pour un format arbitraire. */
+const m = useMessages()
+
 const { clamped, fraction } = useProgressValue(
   () => props.value,
   () => props.max,
@@ -90,7 +96,7 @@ const { clamped, fraction } = useProgressValue(
     </svg>
     <span v-if="!indeterminate && (showValue || $slots.default)" class="ds-progress-circular-label">
       <slot :value="clamped" :max="max" :percent="fraction * 100">
-        {{ Math.round(fraction * 100) }}&nbsp;%
+        {{ m.progress.percent(Math.round(fraction * 100)) }}
       </slot>
     </span>
   </span>

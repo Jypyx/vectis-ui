@@ -1,0 +1,109 @@
+import type { DsMessages } from './types'
+
+/**
+ * Français — socle du DS. C'est à la fois la langue par défaut et la BASE de
+ * repli de toute surcharge partielle : une clé absente d'un autre dictionnaire
+ * retombe ici, jamais sur une chaîne vide.
+ *
+ * Toujours embarqué (importé par `state.ts`). Les autres langues sont opt-in,
+ * cf. `en.ts`.
+ *
+ * ⚠ Les chaînes sont COPIÉES des composants, apostrophes typographiques
+ * comprises : plusieurs tests unitaires les ciblent au caractère près.
+ */
+export const fr: DsMessages = {
+  common: {
+    loading: 'Chargement…',
+    clear: 'Effacer',
+    close: 'Fermer',
+    dismiss: 'Retirer',
+    cancel: 'Annuler',
+    confirm: 'OK',
+  },
+  pagination: {
+    label: 'Pagination',
+    previous: 'Page précédente',
+    next: 'Page suivante',
+    page: (page) => `Page ${page}`,
+    hiddenPages: 'Pages masquées',
+  },
+  tabs: {
+    label: 'Onglets',
+    previous: 'Onglets précédents',
+    next: 'Onglets suivants',
+  },
+  breadcrumb: {
+    label: "Fil d'Ariane",
+    ellipsis: 'Afficher les pages intermédiaires',
+  },
+  combobox: {
+    empty: 'Aucun résultat',
+    clear: 'Effacer la sélection',
+    remove: (label) => `Retirer ${label}`,
+  },
+  dataTable: {
+    empty: 'Aucune donnée',
+    loading: 'Chargement des données…',
+    searchLabel: 'Rechercher dans le tableau',
+    searchPlaceholder: 'Rechercher…',
+    perPage: 'Lignes par page',
+    perPageValue: (label, value) => `${label} : ${value}`,
+    selectAll: 'Tout sélectionner',
+    selectRow: (index) => `Sélectionner la ligne ${index}`,
+    selection: (count) =>
+      `${count} élément${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`,
+    range: ({ start, end, total }) => `${start}–${end} sur ${total}`,
+  },
+  toaster: { label: 'Notifications' },
+  inputOTP: {
+    label: 'Code de vérification',
+    slot: (index, total) => `Caractère ${index} sur ${total}`,
+  },
+  slider: {
+    value: 'Valeur',
+    start: 'Début',
+    end: 'Fin',
+    rangeStart: (label) => `${label} (début)`,
+    rangeEnd: (label) => `${label} (fin)`,
+  },
+  field: {
+    limitExceeded: (max) => `Dépasse la limite de ${max} caractères`,
+  },
+  // `\u00A0` = l'entité `&nbsp;` du template : espace INSÉCABLE avant le signe,
+  // convention typographique française. Échappé et non littéral : ESLint refuse
+  // le caractère (`no-irregular-whitespace`), et il serait invisible en revue.
+  // L'anglais n'en met aucun.
+  progress: { percent: (percent) => `${percent}\u00A0%` },
+  calendar: {
+    previousMonth: 'Mois précédent',
+    nextMonth: 'Mois suivant',
+    previousYear: 'Année précédente',
+    nextYear: 'Année suivante',
+    monthPicker: 'Choix du mois',
+    yearPicker: "Choix de l'année",
+  },
+  datePicker: {
+    clear: 'Effacer la date',
+    open: 'Ouvrir le calendrier',
+    label: 'Choisir une date',
+  },
+  timePicker: {
+    clear: "Effacer l'heure",
+    openList: 'Ouvrir la liste des heures',
+    openDial: 'Ouvrir le sélecteur d’heure',
+    listLabel: 'Heures disponibles',
+    dialLabel: 'Choisir une heure',
+    meridiem: 'AM ou PM',
+    am: 'AM',
+    pm: 'PM',
+    selectHour: 'Sélectionner l’heure',
+    selectMinute: 'Sélectionner les minutes',
+    hourStep: 'Sélection de l’heure',
+    minuteStep: 'Sélection des minutes',
+    hour: 'Heure',
+    minutes: 'Minutes',
+    hoursValue: (hour) => `${hour} heures`,
+    minutesValue: (minute) => `${minute} minutes`,
+    maskPlaceholder: 'hh:mm',
+  },
+}

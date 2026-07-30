@@ -55,6 +55,8 @@ import { Button, Badge } from '@socle/ui'
 
 Les imports nommés sont tree-shakés par Vite/Nitro. Pas besoin de `build.transpile`.
 
+Pour la locale et les icônes, posez la configuration dans un plugin **universel** — `plugins/socle.ts`, jamais `plugins/socle.client.ts` : une configuration client-only ferait diverger le rendu serveur et le rendu client, donc un mismatch d'hydratation. Voir [Internationalisation](#internationalisation).
+
 ## Theming
 
 ### Architecture des tokens
@@ -195,6 +197,76 @@ Pour un besoin ponctuel, `setIconResolver` accepte n'importe quelle fonction ren
 Sur `Button` : les props `icon-start` / `icon-end` prennent un nom d'icône ou un rendu explicite (les slots `#start`/`#end` restent disponibles pour du contenu custom et priment sur les props). `Button` accepte aussi `href` (rendu `<a>` ; `disabled`/`loading` produisent un lien inerte : `href` retiré + `aria-disabled`) et `compact` (hauteur réduite de 4 px : 20/28/36/44/52 px selon la taille `xs`–`xl`).
 
 L'échelle `xs`–`xl` n'est pas exposée par tous les composants : ceux qui embarquent un champ de saisie (`Input`, `Textarea`, `InputOTP`, `Combobox`, `DatePicker`, `TimePicker`) se limitent à **`sm` / `md` / `lg`** (32/40/48 px, défaut `md`), `compact` restant disponible ; `Chip` se limite à `xs`/`sm`.
+
+## Internationalisation
+
+Aucun texte utilisateur n'est en dur dans les composants : tout vient d'un dictionnaire. Le design system est **français par défaut** et fournit l'anglais ; toute autre langue s'ajoute côté consommateur.
+
+Deux choses se règlent séparément : les **mots** viennent du dictionnaire, les **formats** (noms de mois et de jours, ordre des champs de date, cycle horaire, premier jour de semaine) sont dérivés d'`Intl` à partir de la balise de locale. Poser une locale sans dictionnaire correspondant donne donc déjà des dates correctes, avec des libellés restés en français.
+
+### Passer le design system en anglais
+
+```ts
+// main.ts
+import { en, registerMessages, setLocale } from '@socle/ui'
+
+registerMessages('en', en)
+setLocale('en-GB')
+```
+
+L'anglais est **opt-in** : il n'entre dans votre bundle que si vous l'importez.
+
+Posez une balise BCP 47 **complète**. `Intl` accepte `'en'`, mais lui applique les conventions par défaut de la langue — `'en'` signifie 12 h et semaine commençant le dimanche, ce qui n'est pas `'en-GB'`.
+
+### Ajuster quelques mots
+
+Une surcharge est **partielle** : ce que vous n'écrivez pas reste inchangé, et les appels successifs sur une même langue se cumulent.
+
+```ts
+import { registerMessages } from '@socle/ui'
+
+registerMessages('fr', {
+  dataTable: { empty: 'Rien à afficher' },
+  common: { close: 'Quitter' },
+})
+```
+
+### Ajouter une langue non fournie
+
+Même geste que pour activer l'anglais — il n'y a pas deux catégories de dictionnaires. Ce que vous n'écrivez pas retombe sur le français, jamais sur une chaîne vide : un dictionnaire partiel est utilisable dès la première clé.
+
+```ts
+import { registerMessages, setLocale, type DsMessagesInput } from '@socle/ui'
+
+const de: DsMessagesInput = {
+  common: { loading: 'Wird geladen…', close: 'Schließen' },
+  pagination: { previous: 'Vorherige Seite', next: 'Nächste Seite', page: (p) => `Seite ${p}` },
+}
+
+registerMessages('de', de)
+setLocale('de-DE')
+```
+
+Une entrée qui dépend d'une valeur est une **fonction TypeScript**, pas une chaîne à placeholders : ni moteur de pluriel, ni syntaxe ICU à apprendre. Typez la constante `DsMessagesInput` pour l'autocomplétion des clés, ou `DsMessages` pour que le compilateur exige une couverture totale.
+
+La clé est la **sous-balise de langue** seule : `registerMessages('de', …)` couvre `de-DE`, `de-AT` et `de-CH`.
+
+### Précédence
+
+Une prop texte posée sur un composant reste **prioritaire** : la traduction globale ne change que les défauts. Pour les noms accessibles de conteneurs, la chaîne complète est `aria-labelledby` › `aria-label` › prop `label` › dictionnaire › français.
+
+`Calendar`, `DatePicker` et `TimePicker` gardent leur prop `locale`, prioritaire ; sans elle, ils suivent la locale globale.
+
+```vue
+<DatePicker />
+<!-- locale globale -->
+<DatePicker locale="ja-JP" />
+<!-- forcé -->
+```
+
+### Limite : une locale par processus
+
+La configuration vit au niveau module, comme celle des icônes : **une seule locale par processus**. Un site rendu côté serveur qui sert `/fr` et `/en` depuis le même processus Node ne peut pas s'appuyer dessus pour varier la langue par requête — il doit passer les props texte explicitement.
 
 ## Composants
 

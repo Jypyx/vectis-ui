@@ -103,3 +103,5 @@ passent par `Intl`, disponible côté serveur.
   (sélection). Les vues mois et années sont également navigables aux flèches.
 - Le focus visible utilise l'anneau de focus standard du DS ; toutes les
   transitions respectent `prefers-reduced-motion`.
+
+Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**). La prop `locale` reste prioritaire ; sans elle, le composant suit désormais la locale globale posée par `setLocale`, au lieu du `fr-FR` codé en dur.
