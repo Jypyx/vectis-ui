@@ -50,13 +50,21 @@ const labelId = useId()
 
   /*
    * Micro-label de section : rôle overline (sans capitales forcées — la casse
-   * du libellé appartient au consommateur). Le retrait redit le `calc` des
-   * rangées, délibérément : une custom property est substituée sur l'élément
-   * qui la DÉCLARE, une variable partagée posée plus haut serait figée au
-   * niveau 0 (précédent : le `--_chip-height` redit du Combobox).
+   * du libellé appartient au consommateur). Retrait ET hauteur décalquent la
+   * recette des rangées — l'en-tête tient la même hauteur qu'une rangée,
+   * compact compris (`--_control-height` en dérive déjà), et le rythme vertical
+   * de la liste ne casse pas ; seule la typo ne suit pas l'échelle (rôle
+   * overline), d'où le centrage vertical.
+   *
+   * Le retrait redit le `calc` des rangées, délibérément : une custom property
+   * est substituée sur l'élément qui la DÉCLARE, une variable partagée posée
+   * plus haut serait figée au niveau 0 (précédent : le `--_chip-height` redit
+   * du Combobox).
    */
   .ds-side-nav-group-label {
-    display: block;
+    display: flex;
+    align-items: center;
+    min-block-size: var(--_control-height);
     padding-block: var(--ds-space-1);
     padding-inline: calc(var(--_control-padding-inline) + var(--_level, 0) * var(--_indent))
       var(--_control-padding-inline);

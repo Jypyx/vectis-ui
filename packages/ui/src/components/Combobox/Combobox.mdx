@@ -57,6 +57,10 @@ nommé** — `{ label, options }`, rendu en `role="group"` avec un micro-libell�
 **séparateur** — `{ separator: true }`, un filet pleine largeur. Les trois formes se
 mélangent librement dans le même tableau, dans l'ordre voulu.
 
+Le micro-libellé d'un groupe occupe la hauteur d'une option, texte centré verticalement : le
+rythme vertical de la liste reste le même de bout en bout, quelle que soit la taille du champ
+et en densité compacte.
+
 ```ts
 const pays: ComboboxItem[] = [
   { label: 'Europe', options: [{ value: 'fr', label: 'France' }] },

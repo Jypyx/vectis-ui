@@ -155,6 +155,15 @@ export const Groupes: Story = {
     // waitFor : le panneau ouvre en transition d'opacité
     await waitFor(() => expect(canvas.getByRole('group', { name: 'Europe' })).toBeVisible())
 
+    // l'en-tête de section tient la hauteur d'une option : le rythme vertical
+    // de la liste ne casse pas (hauteurs non mesurables en jsdom). Tolérance :
+    // le panneau porte une transition `transform`, les rects mesurés en fin
+    // d'animation diffèrent au 100 000e de pixel.
+    const groupe = canvas.getByRole('group', { name: 'Europe' })
+    const hauteur = (selecteur: string) =>
+      (groupe.querySelector(selecteur) as HTMLElement).getBoundingClientRect().height
+    await expect(hauteur('.ds-combobox-group-label')).toBeCloseTo(hauteur('.ds-combobox-option'), 1)
+
     // Le panneau déborde : l'option active doit être amenée dans la vue à
     // travers le wrapper de groupe (le conteneur défilant reste le panneau).
     // Non mesurable en jsdom — c'est la raison d'être de cette play function.
