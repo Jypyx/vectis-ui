@@ -143,11 +143,14 @@ function onKeydown(event: KeyboardEvent) {
 @layer ds.components {
   .ds-side-nav {
     /*
-     * Retrait d'un niveau de hiérarchie : un DÉCALAGE, donc `--ds-space-*` est
-     * légitime (ce n'est pas une dimension de composant). Posé ici, hérité par
-     * tous les niveaux : un seul endroit à régler.
+     * Retrait d'un niveau de hiérarchie : exactement la place que tient une
+     * icône de début (icône + gouttière), pour que le libellé d'un sous-item
+     * tombe sur la MÊME VERTICALE que celui de son parent. Les deux variables
+     * sont posées par `ds-control` sur cette même racine — le retrait suit donc
+     * l'échelle des tailles sans table locale, et un consommateur qui repose
+     * `--ds-icon-size` le voit suivre. Hérité par tous les niveaux.
      */
-    --_indent: var(--ds-space-4);
+    --_indent: calc(var(--ds-icon-size) + var(--_control-gap));
 
     font-family: var(--ds-text-family);
     /* Repli animé de `::details-content` : autorise block-size 0 → auto

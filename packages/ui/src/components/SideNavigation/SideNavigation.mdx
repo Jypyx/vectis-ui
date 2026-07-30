@@ -41,8 +41,11 @@ jamais sur l'élément de liste.
 Le slot `#items` transforme l'item en branche : un chevron apparaît à droite, la rangée devient
 le déclencheur, et le clic déplie les sous-items. C'est récursif **sans limite de profondeur** —
 un sous-item est un `SideNavigationItem` comme un autre, qui peut à son tour porter un `#items`.
-Chaque niveau se décale un peu plus vers la ligne de départ, mais la surbrillance de survol et
-celle de la page courante restent pleine largeur.
+
+Le retrait d'un niveau vaut **exactement la place que tient une icône de début** — icône plus
+gouttière : le libellé d'un sous-item tombe donc sur la même verticale que celui de sa branche
+parente, et la hiérarchie se lit sans effort. Il suit l'échelle des tailles tout seul. La
+surbrillance de survol et celle de la page courante, elles, restent pleine largeur.
 
 `defaultOpen` ouvre une branche au premier rendu ; `v-model:open` la pilote depuis le
 consommateur (pour déplier la branche qui contient la route courante, par exemple).
@@ -76,6 +79,9 @@ repliable se pose donc à côté de la navigation, pas dedans.
 qu'il introduit. `SideNavigationSeparator` trace un filet entre deux blocs. Ni l'un ni l'autre ne
 comptent comme un niveau de hiérarchie : les items qu'ils encadrent gardent le retrait de leur
 niveau réel.
+
+L'intitulé occupe la hauteur d'une rangée, texte centré verticalement : le rythme vertical de la
+navigation reste le même de bout en bout, densité compacte comprise.
 
 ## Page courante
 

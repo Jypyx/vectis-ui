@@ -45,10 +45,15 @@ const labelId = useId()
   }
 
   /* Micro-label de section : rôle overline (sans capitales forcées — la casse
-     du libellé appartient au consommateur). Le retrait suit celui des options
-     (`--_control-padding-inline` héritée du panneau) pour rester aligné à
-     toutes les tailles ; la typo, elle, ne suit pas l'échelle (rôle overline). */
+     du libellé appartient au consommateur). Retrait ET hauteur décalquent la
+     recette des options (`--_control-padding-inline` et `--_control-height`
+     héritées du panneau) : l'en-tête tient la même hauteur qu'une rangée,
+     compact compris, et le rythme vertical de la liste ne casse pas. Seule la
+     typo ne suit pas l'échelle (rôle overline), d'où le centrage vertical. */
   .ds-combobox-group-label {
+    display: flex;
+    align-items: center;
+    min-height: var(--_control-height);
     padding: var(--ds-space-1) var(--_control-padding-inline);
     font-size: var(--ds-text-overline-size);
     font-weight: var(--ds-text-overline-weight);

@@ -70,6 +70,11 @@ export const Default: Story = {
     const branche = beta.closest('details') as HTMLDetailsElement
     const chevron = beta.querySelector('.ds-side-nav-chevron') as HTMLElement
 
+    // Le retrait vaut la place d'une icône (icône + gouttière) : le libellé
+    // d'un sous-item tombe sur la MÊME VERTICALE que celui de son parent.
+    const bordDuLibelle = (nom: string) => canvas.getByText(nom).getBoundingClientRect().left
+    await expect(bordDuLibelle('Alpha')).toBe(bordDuLibelle('Projets'))
+
     // repliée, la sous-liste est « sautée » : son contenu n'est pas focusable
     const cache = branche.querySelector('a') as HTMLElement
     cache.focus()
@@ -91,12 +96,14 @@ export const Default: Story = {
 }
 
 const TAILLES_ITEMS = `
-  <SideNavigationItem icon="folder" default-open>
-    Projets
-    <template #items>
-      <SideNavigationItem href="#alpha">Alpha</SideNavigationItem>
-    </template>
-  </SideNavigationItem>
+  <SideNavigationGroup label="Espace de travail">
+    <SideNavigationItem icon="folder" default-open>
+      Projets
+      <template #items>
+        <SideNavigationItem href="#alpha">Alpha</SideNavigationItem>
+      </template>
+    </SideNavigationItem>
+  </SideNavigationGroup>
 `
 
 export const Tailles: Story = {
@@ -113,11 +120,18 @@ export const Tailles: Story = {
   play: async ({ canvasElement }) => {
     // Rangées de NIVEAU 2 : elles prouvent que les `--_control-*` héritent
     // jusqu'au bout sans jamais reposer `ds-control` sur une sous-liste.
-    const [sm, md, compact] = [...canvasElement.querySelectorAll('.ds-side-nav-children a')].map(
+    const rangees = [...canvasElement.querySelectorAll('.ds-side-nav-children a')].map(
       (el) => (el.closest('.ds-side-nav-row') as HTMLElement).getBoundingClientRect().height,
     )
+    const [sm, md, compact] = rangees
     await expect(md! - sm!).toBe(8) // 40px − 32px
     await expect(md! - compact!).toBe(4) // le compact du DS
+
+    // L'en-tête de section tient la hauteur d'une rangée, aux trois densités.
+    const libelles = [...canvasElement.querySelectorAll('.ds-side-nav-group-label')].map(
+      (el) => (el as HTMLElement).getBoundingClientRect().height,
+    )
+    await expect(libelles).toEqual(rangees)
   },
 }
 
@@ -128,15 +142,15 @@ export const SousItemsProfonds: Story = {
     setup: () => ({ args }),
     template: aside(`
       <SideNavigationItem href="#n0" icon="folder">Niveau 0</SideNavigationItem>
-      <SideNavigationItem default-open>
+      <SideNavigationItem icon="folder" default-open>
         Niveau 0 (branche)
         <template #items>
           <SideNavigationItem href="#n1">Niveau 1</SideNavigationItem>
-          <SideNavigationItem default-open>
+          <SideNavigationItem icon="folder" default-open>
             Niveau 1 (branche)
             <template #items>
               <SideNavigationItem href="#n2">Niveau 2</SideNavigationItem>
-              <SideNavigationItem default-open>
+              <SideNavigationItem icon="folder" default-open>
                 Niveau 2 (branche)
                 <template #items>
                   <SideNavigationItem href="#n3">Niveau 3</SideNavigationItem>
@@ -163,6 +177,13 @@ export const SousItemsProfonds: Story = {
       await expect(retraits[i]).toBeGreaterThan(retraits[i - 1]!)
     }
     await expect(retraits[1]! - retraits[0]!).toBe(retraits[3]! - retraits[2]!)
+
+    // …et ce pas vaut la place d'une icône : à chaque niveau, le libellé d'un
+    // sous-item retombe sur la verticale du libellé de sa branche parente.
+    const bord = (nom: string) => canvas.getByText(nom).getBoundingClientRect().left
+    for (const niveau of [0, 1, 2]) {
+      await expect(bord(`Niveau ${niveau + 1}`)).toBe(bord(`Niveau ${niveau} (branche)`))
+    }
   },
 }
 
