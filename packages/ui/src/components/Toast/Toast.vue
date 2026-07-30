@@ -187,8 +187,13 @@ const icon = computed(() =>
   }
 
   .ds-toast-close {
-    /* réduit l'emprise visuelle du bouton dans le padding de la carte */
-    margin-block-start: calc(-1 * var(--ds-space-1));
+    /* Réduit l'emprise visuelle du bouton dans le padding de la carte. Le
+       retrait block est SYMÉTRIQUE : la croix (28px) reste alignée en tête de
+       carte comme l'icône (align-items: flex-start, donc accrochée à la
+       première ligne quel que soit le nombre de lignes), mais son débord ne
+       tire plus le contenu vers le haut — sur une seule ligne, elle se
+       retrouve centrée verticalement. */
+    margin-block: calc(-1 * var(--ds-space-1));
     margin-inline-end: calc(-1 * var(--ds-space-1));
   }
 
