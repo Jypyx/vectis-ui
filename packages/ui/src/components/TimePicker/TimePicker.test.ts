@@ -41,9 +41,10 @@ describe('TimePicker — défaut', () => {
   })
 
   it('clockIcon : surcharge l’icône du CADRAN, sans effet en mode liste', () => {
+    // `:not(.ds-input-clear)` : la croix est rendue AVANT l'icône de fin.
     const endIcon = (props: Record<string, unknown>) =>
       render(TimePicker, { props }).container.querySelector<HTMLElement>(
-        '.ds-input-action .ds-icon',
+        '.ds-input-action:not(.ds-input-clear) .ds-icon',
       )?.dataset.icon
 
     expect(endIcon({ modelValue: null, showDial: true, clockIcon: 'alarm' })).toBe('alarm')
@@ -51,8 +52,21 @@ describe('TimePicker — défaut', () => {
     // En liste, le chevron suit la convention Combobox : la prop est inerte.
     expect(endIcon({ modelValue: null, mode: 'list', clockIcon: 'alarm' })).toBe('expand_more')
 
-    // Et la croix d'effacement garde la priorité sur le cadran.
-    expect(endIcon({ modelValue: '09:30', showDial: true, clockIcon: 'alarm' })).toBe('close')
+    // Et la croix d'effacement ne la remplace pas : les deux coexistent.
+    expect(endIcon({ modelValue: '09:30', showDial: true, clockIcon: 'alarm' })).toBe('alarm')
+  })
+
+  it('rend la croix d’effacement à GAUCHE de l’icône de fin', () => {
+    const { container } = render(TimePicker, {
+      props: { modelValue: '09:30', mode: 'list', clearable: true },
+    })
+    // Croix en premier, chevron ensuite — exactement le couple du Combobox.
+    const actions = [...container.querySelectorAll('.ds-input-field .ds-input-action')]
+    expect(actions.map((el) => el.getAttribute('aria-label'))).toEqual([
+      "Effacer l'heure",
+      'Ouvrir la liste des heures',
+    ])
+    expect(actions.at(0)?.classList.contains('ds-input-clear')).toBe(true)
   })
 })
 
@@ -195,14 +209,23 @@ describe('TimePicker — lecture seule', () => {
     })
   })
 
-  it('efface la valeur via la croix', async () => {
+  it('efface la valeur via la croix, sans perdre l’icône du cadran', async () => {
     const { container, emitted } = render(TimePicker, {
       props: { mode: 'readonly', modelValue: '09:15', clearable: true },
     })
     const clearBtn = container.querySelector('button[aria-label="Effacer l\'heure"]') as HTMLElement
     expect(clearBtn).toBeTruthy()
+    // Le champ est readonly dans ce mode : la croix n'y survit que parce que
+    // `clearVisible` fait autorité côté Input.
+    expect((container.querySelector('input') as HTMLInputElement).readOnly).toBe(true)
+    expect(container.querySelector('button[aria-label="Ouvrir le sélecteur d’heure"]')).toBeTruthy()
+
     await fireEvent.click(clearBtn)
     expect(emitted('update:modelValue')?.at(-1)).toEqual([null])
+    // Le panneau ne s'ouvre pas au refocus rendu au champ.
+    expect(container.querySelector('.ds-timepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+      false,
+    )
   })
 
   it('expose un slider ARIA complet (valuetext localisé)', async () => {

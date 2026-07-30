@@ -55,8 +55,8 @@ au focus **sans prendre le focus**, la frappe continue dans le champ, et la
 `flèche bas` reste le chemin explicite vers le cadran.
 
 `clockIcon` remplace cette icône-là et elle seule : en `mode="list"` le chevron
-suit la convention du Combobox, et la croix de `clearable` garde la priorité dès
-qu'il y a de quoi effacer.
+suit la convention du Combobox. La croix de `clearable` se pose **à sa gauche**
+sans la remplacer — croix + chevron, exactement comme le Combobox.
 
 <Canvas of={TimePickerStories.SaisieAvecCadran} />
 
@@ -121,9 +121,9 @@ Le champ affiche la valeur formatée par `Intl` selon la locale.
 
 Le champ suit l'échelle des composants de saisie — `sm` (32 px), `md` (40 px,
 défaut) et `lg` (48 px), combinables avec `compact` (-4 px) ; le panneau garde
-ses dimensions —, est effaçable (`clearable` : la croix remplace l'icône de fin
-quand une valeur est posée, y compris pendant une saisie en cours) et supporte
-`disabled`. Annuler restaure toujours la dernière valeur commitée.
+ses dimensions —, est effaçable (`clearable` : la croix apparaît à gauche de
+l'icône de fin dès qu'une valeur est posée, y compris pendant une saisie en
+cours) et supporte `disabled`. Annuler restaure toujours la dernière valeur commitée.
 
 <Canvas of={TimePickerStories.Annulation} />
 <Canvas of={TimePickerStories.Tailles} />
