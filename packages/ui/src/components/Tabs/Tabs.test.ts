@@ -277,6 +277,29 @@ describe('Tabs', () => {
     })
   })
 
+  describe('variantes', () => {
+    it('variant : data-variant posé sur la racine, flat par défaut', () => {
+      const variantOf = (tabsAttrs?: string) =>
+        mount({ tabsAttrs }).container.querySelector('.ds-tabs')?.getAttribute('data-variant')
+      expect(variantOf()).toBe('flat')
+      expect(variantOf('variant="outlined"')).toBe('outlined')
+      expect(variantOf('variant="inset"')).toBe('inset')
+    })
+
+    /*
+     * Seule vraie logique de l'axe (tout le reste est du CSS, hors de portée de
+     * jsdom) : `outlined` est `flat` habillé, il ne surélève donc pas l'onglet
+     * actif — dans une carte, c'est le cadre qui porte l'élévation.
+     */
+    it('seul `inset` surélève l’onglet actif (mapping vers la variante de Button)', () => {
+      const activeVariantOf = (tabsAttrs?: string) =>
+        tabsOf(mount({ tabsAttrs }).container)[0]?.getAttribute('data-variant')
+      expect(activeVariantOf()).toBe('ghost')
+      expect(activeVariantOf('variant="outlined"')).toBe('ghost')
+      expect(activeVariantOf('variant="inset"')).toBe('elevated')
+    })
+  })
+
   describe('boutons de défilement', () => {
     it('absents par défaut', () => {
       const { container } = mount()

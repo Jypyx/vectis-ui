@@ -27,7 +27,7 @@ const meta = {
   title: 'Composants/Tabs',
   component: Tabs,
   argTypes: {
-    variant: { control: 'inline-radio', options: ['line', 'inset'] },
+    variant: { control: 'inline-radio', options: ['flat', 'outlined', 'inset'] },
     tone: {
       control: 'inline-radio',
       options: ['accent', 'neutral', 'danger', 'success', 'warning'],
@@ -38,7 +38,7 @@ const meta = {
     activation: { control: 'inline-radio', options: ['manual', 'automatic'] },
   },
   args: {
-    variant: 'line',
+    variant: 'flat',
     tone: 'accent',
     size: 'md',
     compact: false,
@@ -84,18 +84,36 @@ export const Default: Story = {
   },
 }
 
+/** Les trois habillages : `flat` (défaut), `outlined` (carte) et `inset` (piste creuse). */
 export const Variantes: Story = {
   render: () => ({
-    components: { Tabs, Tab },
-    setup: () => ({ line: ref('a'), inset: ref('a') }),
+    components: { Tabs, Tab, TabPanel },
+    setup: () => ({
+      variants: ['flat', 'outlined', 'inset'],
+      onglets: ref({ flat: 'a', outlined: 'a', inset: 'a', seule: 'a' }),
+    }),
+    /*
+     * Les panneaux sont rendus : c'est le composant ENTIER que `outlined`
+     * enferme dans une carte, et la piste de la barre y devient le filet qui les
+     * sépare. Aucun padding n'est posé sur les panneaux — c'est la gouttière du
+     * cadre qui les écarte en `outlined`, là où `flat` et `inset` les laissent à
+     * fleur, à la charge du consommateur. La dernière barre est le cas limite
+     * `outlined` sans slot #panels : plus rien à séparer, la piste s'efface.
+     */
     template: `
-      <div style="display: grid; gap: 32px">
-        <Tabs variant="line" v-model="line">
+      <div style="display: grid; gap: 32px; width: 480px">
+        <Tabs v-for="v in variants" :key="v" :variant="v" v-model="onglets[v]">
           <Tab value="a" label="Aperçu" />
           <Tab value="b" label="Détails" />
           <Tab value="c" label="Historique" />
+          <template #panels>
+            <TabPanel value="a">Panneau « Aperçu » — variante {{ v }}.</TabPanel>
+            <TabPanel value="b">Panneau « Détails ».</TabPanel>
+            <TabPanel value="c">Panneau « Historique ».</TabPanel>
+          </template>
         </Tabs>
-        <Tabs variant="inset" v-model="inset">
+
+        <Tabs variant="outlined" v-model="onglets.seule">
           <Tab value="a" label="Aperçu" />
           <Tab value="b" label="Détails" />
           <Tab value="c" label="Historique" />
@@ -110,7 +128,9 @@ export const Tones: Story = {
     components: { Tabs, Tab },
     setup: () => ({
       tones: ['accent', 'neutral', 'success', 'warning', 'danger'],
-      variants: ['line', 'inset'],
+      // `outlined` rend les tones à l'identique de `flat` (le cadre est agnostique
+      // du tone) : l'ajouter ne ferait que doubler la planche.
+      variants: ['flat', 'inset'],
       onglet: ref('b'),
     }),
     template: `
@@ -184,19 +204,37 @@ export const Vertical: Story = {
   args: { orientation: 'vertical' },
   render: (args) => ({
     components: { Tabs, Tab, TabPanel },
-    setup: () => ({ args, onglet: ref('apercu') }),
-    // en vertical la bordure de la variante `line` passe au bord de départ
+    setup: () => ({ args, onglet: ref('apercu'), encadre: ref('apercu') }),
+    /*
+     * L'indicateur reste au bord de départ dans les deux habillages. La PISTE,
+     * elle, migre : à plat elle délimite la colonne d'onglets (bord de départ) ;
+     * encadrée, ce bord est déjà tenu par la bordure de la carte et le filet
+     * passe au bord opposé, où il sépare enfin les onglets de leur contenu.
+     */
     template: `
-      <Tabs v-bind="args" orientation="vertical" v-model="onglet" style="min-height: 220px">
-        <Tab value="apercu" label="Aperçu" icon="dashboard" />
-        <Tab value="details" label="Détails" icon="tune" />
-        <Tab value="historique" label="Historique" icon="history" />
-        <template #panels>
-          <TabPanel value="apercu" style="padding: 16px">Panneau « Aperçu »</TabPanel>
-          <TabPanel value="details" style="padding: 16px">Panneau « Détails »</TabPanel>
-          <TabPanel value="historique" style="padding: 16px">Panneau « Historique »</TabPanel>
-        </template>
-      </Tabs>
+      <div style="display: grid; grid-auto-flow: column; gap: 32px; justify-content: start">
+        <Tabs v-bind="args" orientation="vertical" v-model="onglet" style="min-height: 220px">
+          <Tab value="apercu" label="Aperçu" icon="dashboard" />
+          <Tab value="details" label="Détails" icon="tune" />
+          <Tab value="historique" label="Historique" icon="history" />
+          <template #panels>
+            <TabPanel value="apercu" style="padding: 16px">Panneau « Aperçu »</TabPanel>
+            <TabPanel value="details" style="padding: 16px">Panneau « Détails »</TabPanel>
+            <TabPanel value="historique" style="padding: 16px">Panneau « Historique »</TabPanel>
+          </template>
+        </Tabs>
+
+        <Tabs variant="outlined" orientation="vertical" v-model="encadre" style="min-height: 220px">
+          <Tab value="apercu" label="Aperçu" icon="dashboard" />
+          <Tab value="details" label="Détails" icon="tune" />
+          <Tab value="historique" label="Historique" icon="history" />
+          <template #panels>
+            <TabPanel value="apercu">Panneau « Aperçu »</TabPanel>
+            <TabPanel value="details">Panneau « Détails »</TabPanel>
+            <TabPanel value="historique">Panneau « Historique »</TabPanel>
+          </template>
+        </Tabs>
+      </div>
     `,
   }),
 }
