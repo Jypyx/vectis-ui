@@ -133,11 +133,47 @@ function onFocus() {
   }
 
   /*
-   * Indicateur de la variante `line`. `currentColor` plutôt qu'une variable
-   * privée de Button : il suit le tone de l'onglet actif ET le gris de l'état
-   * désactivé, sans couplage.
+   * Sur une piste, les onglets sont des SEGMENTS contigus et à angles droits :
+   * ce sont l'indicateur et la piste qui découpent la barre, pas la silhouette
+   * des boutons. Un rayon laisserait des angles clairs au-dessus du filet, et un
+   * écart couperait la rangée de surbrillances au survol. Le `gap` est retiré
+   * sur la liste et non ici (c'est elle qui le pose) ; celui de la barre reste,
+   * il sépare les boutons de défilement, pas les onglets.
    */
-  .ds-tabs[data-variant='line'] .ds-tab[data-size]::after {
+  .ds-tabs:is([data-variant='flat'], [data-variant='outlined']) .ds-tab[data-size] {
+    border-radius: 0;
+  }
+
+  /*
+   * Encadrée, la rangée reprend son rayon aux seules EXTRÉMITÉS — coutures
+   * internes carrées, idiome ButtonGroup, mais transposé sur le seul bord que la
+   * piste n'occupe pas (elle tient l'autre). Le rayon est celui du bouton et non
+   * celui de la carte : la rangée est en retrait du cadre par la gouttière, elle
+   * n'a pas sa découpe à épouser. `:first-of-type`/`:last-of-type` et non
+   * `:first-child`/`:last-child` — les sentinelles de butée du défilement sont
+   * les vrais premier et dernier enfants de la liste (ce sont des `span`, les
+   * onglets les seuls `button`).
+   */
+  .ds-tabs[data-variant='outlined'] .ds-tab[data-size]:first-of-type {
+    border-start-start-radius: var(--ds-radius-interactive);
+  }
+
+  .ds-tabs[data-variant='outlined'][data-orientation='horizontal'] .ds-tab[data-size]:last-of-type {
+    border-start-end-radius: var(--ds-radius-interactive);
+  }
+
+  /* vertical : la piste ayant migré au bord de fin, le bord libre est celui de
+     départ — les extrémités de la colonne y arrondissent leurs coins */
+  .ds-tabs[data-variant='outlined'][data-orientation='vertical'] .ds-tab[data-size]:last-of-type {
+    border-end-start-radius: var(--ds-radius-interactive);
+  }
+
+  /*
+   * Indicateur des variantes `flat` et `outlined`. `currentColor` plutôt qu'une
+   * variable privée de Button : il suit le tone de l'onglet actif ET le gris de
+   * l'état désactivé, sans couplage.
+   */
+  .ds-tabs:is([data-variant='flat'], [data-variant='outlined']) .ds-tab[data-size]::after {
     content: '';
     position: absolute;
     inset-inline: 0;
@@ -148,7 +184,8 @@ function onFocus() {
     transition: opacity var(--ds-duration-fast) var(--ds-ease-default);
   }
 
-  .ds-tabs[data-variant='line'][data-orientation='vertical'] .ds-tab[data-size]::after {
+  .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+    .ds-tab[data-size]::after {
     inset-block: 0;
     inset-inline: auto;
     inset-inline-start: 0;
@@ -156,12 +193,13 @@ function onFocus() {
     inline-size: var(--ds-control-size-tab-indicator);
   }
 
-  .ds-tabs[data-variant='line'] .ds-tab[data-size][aria-selected='true']::after {
+  .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])
+    .ds-tab[data-size][aria-selected='true']::after {
     opacity: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-tabs[data-variant='line'] .ds-tab[data-size]::after {
+    .ds-tabs:is([data-variant='flat'], [data-variant='outlined']) .ds-tab[data-size]::after {
       transition: none;
     }
   }

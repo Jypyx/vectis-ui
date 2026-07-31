@@ -26,16 +26,34 @@ de leur `value`, à partir d'un identifiant unique posé par la racine. Il n'y a
 
 ## Variantes
 
-`line` (défaut) souligne l'onglet actif d'un indicateur qui recouvre la piste de la barre ; les
-onglets restent `ghost`. `inset` pose les onglets dans une piste creuse et surélève l'actif — c'est
-la variante `elevated` de `Button`, ombre comprise.
+`variant` cumule deux décisions dans un seul axe : la **piste** sur laquelle vivent les onglets, et
+l'**habillage** du composant.
+
+`flat` (défaut) souligne l'onglet actif d'un indicateur qui recouvre la piste de la barre ; les
+onglets restent `ghost`, et rien n'est peint autour — la barre et les panneaux se posent nus dans le
+conteneur d'accueil, dont ils héritent la surface. Sur une piste, les onglets sont des **segments
+contigus et à angles droits** : ce sont l'indicateur et la piste qui découpent la barre, pas la
+silhouette des boutons.
+
+`outlined` reprend `flat` trait pour trait et l'enferme dans une carte : filet, coins arrondis et
+fond surélevé, sur l'échelle d'habillage commune à l'`Accordion` et au `DataTable`. Le cadre entoure
+le composant **entier**, barre et panneaux : la piste change alors de rôle sans changer de trait —
+elle devient le filet qui sépare les onglets de leur contenu, à l'intérieur du cadre. La barre et les
+panneaux prennent la gouttière du cadre ; seule la piste reste à fleur, d'un bord à l'autre, sinon
+elle ne séparerait plus rien. La rangée d'onglets y reprend son rayon aux seules extrémités — les
+coutures internes restent carrées, sur l'idiome du `ButtonGroup` — du côté que la piste n'occupe pas.
+Sans slot `#panels` il n'y a rien à séparer : la piste s'efface et la bordure de la carte la
+remplace.
+
+`inset` pose les onglets dans une piste creuse et surélève l'actif — c'est la variante `elevated` de
+`Button`, ombre comprise. Elle ne s'encadre pas : c'est un contrôle segmenté, déjà sa propre surface.
 
 <Canvas of={TabsStories.Variantes} />
 
 ## Tones
 
 `tone` colore l'onglet actif ; les onglets inactifs restent neutres pour que la sélection se détache
-seule. L'indicateur de la variante `line` est peint en `currentColor` : il suit le tone sans lui être
+seule. L'indicateur des variantes `flat` et `outlined` est peint en `currentColor` : il suit le tone sans lui être
 couplé, et vire au gris avec le texte quand l'onglet est désactivé. Il n'y a pas de couleur custom
 ici — un onglet est une navigation, pas une étiquette.
 
@@ -61,9 +79,11 @@ remplace le libellé pour tout contenu riche.
 
 ## Orientation et alignement
 
-En vertical, la barre et les panneaux se placent côte à côte, et la bordure de la variante `line`
-passe au bord de départ des onglets (à gauche en LTR, à droite en RTL — tout est décrit en propriétés
-logiques).
+En vertical, la barre et les panneaux se placent côte à côte, et l'indicateur passe au bord de départ
+des onglets (à gauche en LTR, à droite en RTL — tout est décrit en propriétés logiques). La piste,
+elle, dépend de l'habillage : à plat elle délimite la colonne d'onglets et se tient au bord de
+départ ; encadrée, ce bord est déjà tenu par la bordure de la carte, et la piste passe au bord opposé,
+là où elle sépare vraiment les onglets de leur contenu.
 
 `align` place le groupe d'onglets au début (défaut), au centre ou à la fin — à gauche, au centre ou à
 droite en horizontal ; en haut, au milieu ou en bas en vertical. L'alignement est posé sur la barre

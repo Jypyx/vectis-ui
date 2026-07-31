@@ -224,7 +224,10 @@ export const semantic = {
       '5.375rem',
       'Largeur minimale des boutons sélecteurs mois/année du Calendar (≈86px)',
     ),
-    'size-tab-indicator': dimension('2px', "Épaisseur de l'indicateur d'onglet actif (Tabs, line)"),
+    'size-tab-indicator': dimension(
+      '2px',
+      "Épaisseur de l'indicateur d'onglet actif (Tabs, flat/outlined)",
+    ),
     'size-table-search': dimension('16rem', 'Largeur du champ de recherche du DataTable'),
     'size-timepicker-dial': dimension('16rem', 'Diamètre du cadran du TimePicker (spec M3)'),
     'size-timepicker-number': dimension(

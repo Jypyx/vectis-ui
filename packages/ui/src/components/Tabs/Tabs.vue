@@ -13,7 +13,7 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
-export type TabsVariant = 'line' | 'inset'
+export type TabsVariant = 'flat' | 'outlined' | 'inset'
 export type TabsTone = 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
 export type TabsSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 export type TabsOrientation = 'horizontal' | 'vertical'
@@ -32,7 +32,11 @@ export type TabsActivation = 'manual' | 'automatic'
  * SSR-safe : aucun accès DOM hors handlers et `watch({ flush: 'post' })`.
  */
 interface TabsProps {
-  /** `line` : onglets ghost soulignés. `inset` : contrôle segmenté dans une piste creuse. */
+  /**
+   * `flat` : onglets ghost soulignés, aucun habillage. `outlined` : `flat` dans
+   * une carte (barre ET panneaux). `inset` : contrôle segmenté dans une piste
+   * creuse.
+   */
   variant?: TabsVariant
   /** Colore l'onglet actif ; les inactifs restent neutres. */
   tone?: TabsTone
@@ -61,7 +65,7 @@ interface TabsProps {
 }
 
 const props = withDefaults(defineProps<TabsProps>(), {
-  variant: 'line',
+  variant: 'flat',
   tone: 'accent',
   size: 'md',
   compact: false,
@@ -311,6 +315,15 @@ watch(model, () => {
 <style>
 @layer ds.components {
   .ds-tabs {
+    /*
+     * Gouttière du cadre : nulle à plat (barre et panneaux à fleur du conteneur
+     * d'accueil), posée par `outlined` — idiome `--_table-frame-pad` du
+     * DataTable. Fixe, PAS indexée sur `data-size`/`compact` : c'est une mesure
+     * de carte, et les `--_control-*` vivent sur les Button descendants (chaque
+     * Tab pose son propre `ds-control`), donc hors de portée de la racine.
+     */
+    --_tabs-frame-pad: 0px;
+
     display: flex;
     flex-direction: column;
     font-family: var(--ds-text-family);
@@ -319,6 +332,28 @@ watch(model, () => {
   /* Vertical : la barre et les panneaux se placent côte à côte */
   .ds-tabs[data-orientation='vertical'] {
     flex-direction: row;
+  }
+
+  /*
+   * Carte bordée — échelle d'habillage partagée avec Accordion et DataTable ;
+   * `flat` (défaut) n'a rien à annuler. Le cadre est sur la RACINE, donc autour
+   * de la barre ET des panneaux : la piste de la barre devient le filet de
+   * séparation entre les deux, à l'intérieur du cadre.
+   *
+   * Pas d'`overflow: clip` contrairement au DataTable, dont la table est bord à
+   * bord par construction : ici la gouttière laisse partout une bande au moins
+   * égale au rayon intérieur (aucune boîte n'atteint un angle, donc aucun rayon
+   * emboîté en `calc()` à prévoir), la liste rogne déjà son propre débordement,
+   * et une découpe rognerait l'anneau de focus EXTÉRIEUR du TabPanel — le seul
+   * qui sorte du composant — en plus d'interdire au consommateur tout contenu
+   * de panneau à fleur de bord.
+   */
+  .ds-tabs[data-variant='outlined'] {
+    --_tabs-frame-pad: var(--ds-space-3);
+
+    background: var(--ds-color-surface-raised);
+    border: 1px solid var(--ds-color-border);
+    border-radius: var(--ds-radius-surface);
   }
 
   .ds-tabs-bar {
@@ -335,11 +370,18 @@ watch(model, () => {
      */
     justify-content: flex-start;
     gap: var(--ds-space-1);
+    /* Gouttière du cadre (0 à plat). Rien au bord de FIN : c'est celui que la
+       piste occupe, les onglets doivent rester posés dessus. */
+    padding-block-start: var(--_tabs-frame-pad);
+    padding-inline: var(--_tabs-frame-pad);
   }
 
   .ds-tabs[data-orientation='vertical'] .ds-tabs-bar {
     flex-direction: column;
     align-items: stretch;
+    /* l'axe de la piste bascule : c'est le bord inline de FIN qui reste à fleur */
+    padding-block: var(--_tabs-frame-pad);
+    padding-inline-end: 0;
   }
 
   .ds-tabs[data-align='center'] .ds-tabs-bar {
@@ -350,15 +392,30 @@ watch(model, () => {
     justify-content: flex-end;
   }
 
-  /* Piste de la variante `line` : sur la barre, pour courir aussi sous les
-     boutons de défilement (frères de la liste) */
-  .ds-tabs[data-variant='line'] .ds-tabs-bar {
+  /* Piste des variantes `flat` et `outlined` : sur la barre, pour courir aussi
+     sous les boutons de défilement (frères de la liste). Encadrée, c'est elle
+     qui sépare la barre des panneaux — d'où le bord de fin laissé sans
+     gouttière, sinon elle ne séparerait plus rien. */
+  .ds-tabs:is([data-variant='flat'], [data-variant='outlined']) .ds-tabs-bar {
     border-block-end: 1px solid var(--ds-color-border);
   }
 
-  .ds-tabs[data-variant='line'][data-orientation='vertical'] .ds-tabs-bar {
+  .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+    .ds-tabs-bar {
     border-block-end: none;
     border-inline-start: 1px solid var(--ds-color-border);
+  }
+
+  /*
+   * Encadré et vertical : la piste MIGRE au bord de fin. À plat elle délimite la
+   * colonne d'onglets, donc au bord de départ ; dans une carte ce bord est déjà
+   * tenu par la bordure du cadre (deux filets parallèles sinon) et ce qui manque
+   * est la frontière barre/panneaux. Spécificité ÉGALE à la règle ci-dessus
+   * (0,4,0) : l'ordre tranche, ne pas remonter ce bloc.
+   */
+  .ds-tabs[data-variant='outlined'][data-orientation='vertical'] .ds-tabs-bar {
+    border-inline-start: none;
+    border-inline-end: 1px solid var(--ds-color-border);
   }
 
   .ds-tabs-list {
@@ -381,19 +438,48 @@ watch(model, () => {
 
   /* L'indicateur de 2px recouvre la piste de 1px au lieu de s'empiler dessus
      (marges négatives) */
-  .ds-tabs[data-variant='line'] .ds-tabs-list {
+  .ds-tabs:is([data-variant='flat'], [data-variant='outlined']) .ds-tabs-list {
     margin-block-end: -1px;
+    /* onglets contigus : sur une piste ils forment une rangée de segments (cf.
+       le rayon nul posé par Tab.vue), pas une file de boutons */
+    gap: 0;
   }
 
   /* la liste étant 1px plus haute que les onglets, ceux-ci s'appuient sur son
      bord de fin : l'indicateur tombe alors pile sur la piste */
-  .ds-tabs[data-variant='line'][data-orientation='horizontal'] .ds-tabs-list {
+  .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='horizontal']
+    .ds-tabs-list {
     align-items: flex-end;
   }
 
-  .ds-tabs[data-variant='line'][data-orientation='vertical'] .ds-tabs-list {
+  .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+    .ds-tabs-list {
     margin-block-end: 0;
     margin-inline-start: -1px;
+  }
+
+  /* Encadré et vertical : plus aucune piste au bord de départ à recouvrir — le
+     débordement d'1px glisserait la liste sous la bordure du cadre. Même
+     spécificité que la règle ci-dessus : l'ordre tranche. */
+  .ds-tabs[data-variant='outlined'][data-orientation='vertical'] .ds-tabs-list {
+    margin-inline-start: 0;
+  }
+
+  /*
+   * Cas limite : `outlined` sans slot #panels — la carte se réduit à la barre.
+   * Il n'y a plus de frontière à marquer et la piste doublerait la bordure du
+   * cadre, collée à elle : le cadre la remplace, la gouttière se referme sur le
+   * bord de fin et la liste cesse de déborder.
+   */
+  .ds-tabs[data-variant='outlined']:not(:has(> .ds-tabs-panels)) .ds-tabs-bar {
+    border-block-end: none;
+    border-inline-end: none;
+    padding-block-end: var(--_tabs-frame-pad);
+    padding-inline-end: var(--_tabs-frame-pad);
+  }
+
+  .ds-tabs[data-variant='outlined']:not(:has(> .ds-tabs-panels)) .ds-tabs-list {
+    margin-block-end: 0;
   }
 
   /* Piste creuse de la variante `inset` : portée par le conteneur défilant
@@ -427,6 +513,9 @@ watch(model, () => {
 
   .ds-tabs-panels {
     min-inline-size: 0;
+    /* gouttière du cadre (0 à plat) : le panneau est la zone de contenu de la
+       carte, il la prend sur ses quatre côtés */
+    padding: var(--_tabs-frame-pad);
   }
 
   .ds-tabs[data-orientation='vertical'] .ds-tabs-panels {
