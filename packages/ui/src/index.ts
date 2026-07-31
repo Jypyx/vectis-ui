@@ -62,6 +62,16 @@ export type {
 } from './components/VTabs/VTabs.vue'
 export { default as VTab } from './components/VTabs/VTab.vue'
 export { default as VTabPanel } from './components/VTabs/VTabPanel.vue'
+export { default as VToggle } from './components/VToggle/VToggle.vue'
+export type {
+  ToggleModelValue,
+  ToggleOrientation,
+  ToggleSize,
+  ToggleTone,
+  ToggleValue,
+  ToggleVariant,
+} from './components/VToggle/VToggle.vue'
+export { default as VToggleItem } from './components/VToggle/VToggleItem.vue'
 export { default as VTooltip } from './components/VTooltip/VTooltip.vue'
 export { default as VBadge } from './components/VBadge/VBadge.vue'
 export type { BadgeTone } from './components/VBadge/VBadge.vue'

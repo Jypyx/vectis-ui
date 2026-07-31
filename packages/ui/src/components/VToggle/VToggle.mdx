@@ -1,0 +1,93 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VToggleStories from './VToggle.stories'
+
+<Meta of={VToggleStories} />
+
+# Toggle
+
+A group of selectable buttons driven by a **single v-model**. Composed API: `VToggle` wraps
+`VToggleItem` elements, and every item is a `VButton` — hover, focus, disabling and
+`prefers-reduced-motion` all come from it, and no state rule is redefined. The selected item is
+always rendered `solid` (in the group's `tone`), the others `ghost` or `outline`.
+
+<Canvas of={VToggleStories.Default} />
+
+<Controls of={VToggleStories.Default} />
+
+## Attached or detached
+
+By default the items are **attached** inside a `VButtonGroup` (a segmented control, merged
+borders). `attached: false` separates them with a gutter, each button regaining its rounded
+corners.
+
+<Canvas of={VToggleStories.Variants} />
+
+## Selection
+
+- **Single** (the default): the v-model holds the selected value, or `null`; clicking the
+  selected item again deselects it.
+- **`multiple`**: the v-model becomes an **array** of values, and each click adds or removes its
+  own.
+- **`mandatory`**: the last selected value can never be removed (in single mode the second click
+  becomes inoperative; in multiple mode the last element stays). This is purely a guard against
+  deselection: no initial selection is forced — set the starting value in the v-model.
+
+<Canvas of={VToggleStories.Multiple} />
+
+<Canvas of={VToggleStories.Mandatory} />
+
+## Tones
+
+The `tone` colours the selected item; unselected items stay neutral, like the inactive pages of
+a VPagination.
+
+<Canvas of={VToggleStories.Tones} />
+
+## Icons
+
+`icon` accepts a Material Symbols name **or** an image URL. With neither a label nor a slot, the
+item shrinks to a square (set an `aria-label` in that case). With `selectedIconFilled` on the
+group, the selected item's icon switches to the **filled** variant (the font's FILL axis) — with
+no effect on an icon supplied by URL.
+
+<Canvas of={VToggleStories.FilledIcons} />
+
+## Sizes
+
+The unified `xs`–`xl` scale and `compact` (height reduced by 4px) are set on the group and
+propagate to every item.
+
+<Canvas of={VToggleStories.SizesAndCompact} />
+
+## Orientation
+
+`orientation="vertical"` stacks the items — attached (a horizontal seam) or detached (widths
+equalized).
+
+<Canvas of={VToggleStories.Vertical} />
+
+## Disabling
+
+`disabled` on the group neutralizes every item; `disabled` on an item neutralizes only that one.
+A disabled item is a native `<button disabled>`: neither clickable nor reachable by keyboard.
+
+<Canvas of={VToggleStories.Disabled} />
+
+## Edge cases
+
+Long labels stay aligned inside the segmented control.
+
+<Canvas of={VToggleStories.EdgeCases} />
+
+## Accessibility
+
+- The group is a named `role="group"`: supply the `label` prop (or an `aria-label` /
+  `aria-labelledby`, which take precedence).
+- Every item is a **toggle button**: `aria-pressed` is always present, including at `false` — its
+  presence is what makes the state announced.
+- No roving tabindex: every visible item is a tab stop. The arrows (up/down in vertical mode) and
+  Home/End **move focus without activating** — activating on focus would toggle values
+  unintentionally. Disabled items are skipped.
+- In icon-only mode, set an `aria-label` on the item (it travels through to the rendered button).
+
+<Canvas of={VToggleStories.Keyboard} />
