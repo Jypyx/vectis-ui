@@ -72,6 +72,8 @@ export type {
   ToggleVariant,
 } from './components/VToggle/VToggle.vue'
 export { default as VToggleItem } from './components/VToggle/VToggleItem.vue'
+export { default as VInput } from './components/VInput/VInput.vue'
+export { default as VTextarea } from './components/VTextarea/VTextarea.vue'
 export { default as VTooltip } from './components/VTooltip/VTooltip.vue'
 export { default as VBadge } from './components/VBadge/VBadge.vue'
 export type { BadgeTone } from './components/VBadge/VBadge.vue'

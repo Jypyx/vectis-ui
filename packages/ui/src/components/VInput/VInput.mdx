@@ -1,0 +1,134 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VInputStories from './VInput.stories'
+
+<Meta of={VInputStories} />
+
+# Input
+
+Complete text field — label, internal (clickable) icons, counter, soft limit, loading, clearing
+— built around a styled native `<input>`. The root is a wrapper (label + field + hint): the
+native attributes (`type`, `placeholder`, `required`, `pattern`…) pass through by fallthrough
+onto the `<input>`, **except** `class`/`style`, which stay on the root (consumers size the whole
+component).
+
+Validation stays native: `:user-invalid` does the error styling with no validation JavaScript.
+
+<Canvas of={VInputStories.Default} />
+
+<Controls of={VInputStories.Default} />
+
+## Sizes
+
+Three sizes (`sm` 32px, `md` 40px — the default —, `lg` 48px, through the
+`--vectis-control-height-*` tokens). The internal icons follow automatically (sm/md → 20px,
+lg → 24px through the `--vectis-icon-size` context). The extremes of the DS scale (`xs`, `xl`)
+are not exposed: they are outside the template for a text field.
+
+<Canvas of={VInputStories.Sizes} />
+
+`compact` reduces the height by 4px **without touching** the padding, the typography or the icon
+size (as in `VButton`).
+
+<Canvas of={VInputStories.Compact} />
+
+## Label and hint
+
+`label` is associated with the field through `for`/`id` (`useId()`, SSR-safe); `hint` is linked
+through `aria-describedby`. Without a `label`, supply an accessible name by fallthrough
+(`aria-label`).
+
+<Canvas of={VInputStories.LabelAndHint} />
+
+## Icons
+
+`icon-start` / `icon-end` take an icon name or an explicit render (the `#start` / `#end` slots
+win for custom content). By default the icons are **decorative** (`aria-hidden`):
+
+<Canvas of={VInputStories.Icons} />
+
+Attaching a `@click:icon-start` / `@click:icon-end` listener turns the icon into a real
+`<button>` — supply its accessible name through `icon-start-label` / `icon-end-label` in that
+case:
+
+<Canvas of={VInputStories.ClickableIcons} />
+
+## Counter and limits
+
+`counter` shows "12/80" (or "12" without `maxlength`) on the right inside the field. By default
+`maxlength` is the native attribute: input is **blocked** at the limit.
+
+<Canvas of={VInputStories.Counter} />
+
+`soft-limit` makes the limit soft: input may go over, the field enters error through native
+validation (`setCustomValidity` → `:user-invalid` after interaction) and submission is blocked —
+never a custom event, the validity is exposed by the standard API (`el.validity`).
+
+<Canvas of={VInputStories.SoftCounter} />
+
+## Native validation
+
+`pattern`, `required`, `type="email"`… stay the native attributes through fallthrough — zero
+JavaScript. The error styling (a red border) comes from `:user-invalid`: it only appears after
+interaction, like the native behaviour.
+
+<Canvas of={VInputStories.Pattern} />
+
+<Canvas of={VInputStories.NativeValidation} />
+
+The `invalid` prop forces the error state (server-side validation) — it sets `aria-invalid`:
+
+<Canvas of={VInputStories.Invalid} />
+
+## States
+
+`loading` shows a spinner that **replaces** the end slot (`icon-end` / `#end`); its label
+(`loading-label`) is announced through `role="status"`:
+
+<Canvas of={VInputStories.Loading} />
+
+`clearable` shows a cross when the field is non-empty (outside disabled/readonly): it empties the
+field, emits `clear` and **returns focus** to the field:
+
+<Canvas of={VInputStories.Clearable} />
+
+`readonly`: a field that is focusable and submitted but not editable, with a slightly sunken
+background and the clear button hidden:
+
+<Canvas of={VInputStories.Readonly} />
+
+`readonly` and `invalid` compose — the sunken background and the red border are two independent
+decisions, and an error stays visible on a field whose value is set elsewhere (a panel, a
+server-side validation). On a read-only field the error can only come from the `invalid` prop:
+a read-only control is barred from constraint validation, so `:user-invalid` never applies to it.
+
+<Canvas of={VInputStories.ReadonlyInvalid} />
+
+`disabled` switches the whole field (background, text, icons) to greys
+(`--vectis-color-surface-muted`, `--vectis-color-text-subtle`) — no opacity trick, and the
+rendering follows the dark theme automatically:
+
+<Canvas of={VInputStories.Disabled} />
+
+## Edge cases
+
+A very long placeholder is truncated cleanly rather than widening the field.
+
+<Canvas of={VInputStories.LongPlaceholder} />
+
+## Showcase
+
+<Canvas of={VInputStories.Showcase} />
+
+## Accessibility
+
+- Always an accessible name: `label`, or `aria-label` by fallthrough failing that.
+- `hint` linked through `aria-describedby` (which stacks with a supplied `aria-describedby`).
+- Decorative icons (`aria-hidden`); a clickable icon → a `<button>` with a mandatory
+  `icon-*-label` (a warning is emitted in dev when the label is missing).
+- Visible focus: the border goes to a visual 2px (border + a `box-shadow` of the same colour)
+  through `:focus-within`, red when invalid; a transparent `outline` rule for forced-colors mode.
+- Errors styled by `:user-invalid` (after interaction); `invalid` sets `aria-invalid`.
+
+This component's accessible labels come from the design system's dictionary: they translate
+globally (see **Foundations › Internationalization**), and the text props stay authoritative for
+a case-by-case adjustment.
