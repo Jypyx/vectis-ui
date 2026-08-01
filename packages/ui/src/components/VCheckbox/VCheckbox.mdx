@@ -1,0 +1,68 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VCheckboxStories from './VCheckbox.stories'
+
+<Meta of={VCheckboxStories} />
+
+# Checkbox
+
+Checkbox built on the native `<input type="checkbox">`, visually replaced by a styled box: the
+input stays in the tree (focus, keyboard, forms, `:user-invalid`), and only its rendering is
+hidden. The root is a wrapping `<label>` — clicking the label ticks the box, with no `for`/`id`.
+The only JavaScript beyond the v-model bridge is `indeterminate`, which exists solely as a DOM
+property.
+
+A single size: a 20px box with a 2px border (the `--vectis-control-size-check` and
+`--vectis-control-border-width` tokens), and a 14px tick (`--vectis-control-size-check-mark`).
+
+<Canvas of={VCheckboxStories.Default} />
+
+<Controls of={VCheckboxStories.Default} />
+
+## Label position
+
+`label-position` places the label after (`end`, the default) or before (`start`) the box.
+
+<Canvas of={VCheckboxStories.LabelPosition} />
+
+## Spread
+
+`spread` switches the root to full-width flex: label and box are pushed to the container's
+opposite ends. It combines with `label-position` to choose which side the box goes to.
+
+<Canvas of={VCheckboxStories.Spread} />
+
+## Indeterminate
+
+`indeterminate` shows the "partially checked" visual state (a dash), typical of a "select all"
+box above a list. It is a purely visual state: it does not change the v-model's value and exists
+only as a DOM property (there is no equivalent HTML attribute).
+
+<Canvas of={VCheckboxStories.Indeterminate} />
+
+## States
+
+`disabled` switches the box to greys (`--vectis-color-surface-muted`,
+`--vectis-color-text-subtle`) — no opacity trick, and the rendering follows the dark theme
+automatically:
+
+<Canvas of={VCheckboxStories.Disabled} />
+
+A long label wraps, and the box stays aligned on the first line without being compressed:
+
+<Canvas of={VCheckboxStories.LongLabel} />
+
+## Forms and validation
+
+The native attributes (`name`, `value`, `required`, `aria-*`…) pass through by fallthrough onto
+the input, not onto the label: the box takes part in forms normally. The invalid state is styled
+through `:user-invalid` (native validation, after interaction); the `invalid` prop allows forcing
+it server-side — it sets `aria-invalid`.
+
+## Accessibility
+
+- The slot label names the control (a wrapping label): always supply a label, or an `aria-label`
+  by fallthrough failing that.
+- The input is hidden with `opacity: 0` (never `display: none`): it stays focusable by keyboard
+  and submitted with the form.
+- Visible focus through a ring (`--vectis-focus-ring-*`) on the box, never removed.
+- The transitions respect `prefers-reduced-motion`.

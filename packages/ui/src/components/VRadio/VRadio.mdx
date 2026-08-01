@@ -1,0 +1,59 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VRadioStories from './VRadio.stories'
+
+<Meta of={VRadioStories} />
+
+# Radio
+
+Radio button built on the native `<input type="radio">`, visually replaced by a styled dot (the
+same approach as `VCheckbox`: the input stays in the tree, and only its rendering is hidden). The
+group is **native**: several VRadio sharing the same `name` (fallthrough) and the same v-model —
+arrow navigation is supplied by the browser, zero JavaScript.
+
+A single size: a 20px dot with a 2px border (the `--vectis-control-size-check` and
+`--vectis-control-border-width` tokens), and an 8px inner dot
+(`--vectis-control-size-check-dot`).
+
+<Canvas of={VRadioStories.Group} />
+
+<Controls of={VRadioStories.Group} />
+
+Every VRadio carries a `value` prop; the group's v-model holds the `value` of the selected
+button.
+
+## Label position
+
+`label-position` places the label after (`end`, the default) or before (`start`) the dot.
+
+<Canvas of={VRadioStories.LabelPosition} />
+
+## Spread
+
+`spread` switches the root to full-width flex: label and dot are pushed to the container's
+opposite ends. It combines with `label-position` to choose which side the dot goes to.
+
+<Canvas of={VRadioStories.Spread} />
+
+## States
+
+`disabled` switches the dot to greys (`--vectis-color-surface-muted`,
+`--vectis-color-text-subtle`) — no opacity trick, and the rendering follows the dark theme
+automatically:
+
+<Canvas of={VRadioStories.Disabled} />
+
+## Forms and validation
+
+The native attributes (`name` above all, to form the group, but also `required`, `aria-*`…) pass
+through by fallthrough onto the input, not onto the label. The invalid state is styled through
+`:user-invalid` (native validation); the `invalid` prop allows forcing it — it sets
+`aria-invalid`.
+
+## Accessibility
+
+- The slot label names the control (a wrapping label); wrap the group in a `<fieldset>` with a
+  `<legend>` to name the question.
+- The input is hidden with `opacity: 0` (never `display: none`): it stays focusable and submitted
+  with the form; the arrows navigate within the group (native behaviour).
+- Visible focus through a ring (`--vectis-focus-ring-*`) on the dot, never removed.
+- The transitions respect `prefers-reduced-motion`.

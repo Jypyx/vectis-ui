@@ -1,0 +1,60 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VSwitchStories from './VSwitch.stories'
+
+<Meta of={VSwitchStories} />
+
+# Switch
+
+Switch built on the native `<input type="checkbox" role="switch">` — correct on/off semantics for
+screen readers, with keyboard and forms for free. The track/thumb rendering is pure CSS driven by
+`:checked`; the JavaScript is limited to the v-model bridge. The root is a wrapping `<label>`:
+clicking the label toggles the switch, with no `for`/`id`.
+
+A single size: a 40×20px track (the `--vectis-control-size-switch-w/h` tokens), aligned on the
+height of VCheckbox/VRadio.
+
+<Canvas of={VSwitchStories.Default} />
+
+<Controls of={VSwitchStories.Default} />
+
+## Label position
+
+`label-position` places the label after (`end`, the default) or before (`start`) the switch.
+
+<Canvas of={VSwitchStories.LabelPosition} />
+
+## Spread
+
+`spread` switches the root to full-width flex: label and switch are pushed to the container's
+opposite ends. It combines with `label-position` to choose which side the switch goes to.
+
+<Canvas of={VSwitchStories.Spread} />
+
+## States
+
+`disabled` switches the control to greys: the track becomes
+`--vectis-color-surface-muted` (checked or not) and the thumb `--vectis-color-text-subtle` with no
+shadow — the colour of VCheckbox/VRadio's disabled tick and dot, visible in both themes. No
+opacity trick.
+
+<Canvas of={VSwitchStories.Disabled} />
+
+## Without a visible label
+
+With no slot, supply an `aria-label`: it passes through by fallthrough onto the input (the
+`<label>` root does not receive the native attributes).
+
+<Canvas of={VSwitchStories.WithoutLabel} />
+
+## Forms
+
+The native attributes (`name`, `value`, `required`, `aria-*`…) pass through by fallthrough onto
+the input, not onto the label: the switch takes part in forms normally.
+
+## Accessibility
+
+- `role="switch"`: screen readers announce "on/off" rather than "checked/unchecked".
+- The input is hidden with `opacity: 0` (never `display: none`): it stays focusable by keyboard
+  (Space toggles it) and submitted with the form.
+- Visible focus through a ring (`--vectis-focus-ring-*`) on the track, never removed.
+- The thumb's transition respects `prefers-reduced-motion`.
