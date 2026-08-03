@@ -3,29 +3,29 @@ import type { InjectionKey } from 'vue'
 import type { IconSource } from '../VIcon/types'
 
 /**
- * Contrat niveau→niveau de la VSideNavigation. Chaque `VSideNavigationItem`
- * injecte le contexte de SON niveau et en fournit un nouveau à ses sous-items :
- * c'est ce qui rend l'exclusivité locale à un niveau plutôt que globale.
+ * The level→level contract of VSideNavigation. Each `VSideNavigationItem` injects
+ * the context of ITS level and provides a new one to its subitems: that is what
+ * makes exclusivity local to a level rather than global.
  *
- * Ce qui n'y transite PAS, délibérément :
- * - `size`/`compact`, portés par l'héritage CSS des `--control-*` (la classe
- *   `v-control` n'est posée que sur le <nav>) — les y mettre serait une
- *   seconde incarnation de la même information ;
- * - la PROFONDEUR, portée par la cascade (compteur CSS à deux noms alternés,
- *   cf. VSideNavigationItem.vue) : ni registre, ni style inline.
+ * What deliberately does NOT travel here:
+ * - `size`/`compact`, carried by the CSS inheritance of the `--control-*` (the
+ *   `v-control` class is only set on the <nav>) — putting them here would be a second
+ *   incarnation of the same information;
+ * - the DEPTH, carried by the cascade (a CSS counter with two alternating names, see
+ *   VSideNavigationItem.vue): no registry, no inline style.
  */
 export interface SideNavigationContext {
   /**
-   * Nom partagé par les <details> frères de ce niveau (attribut natif `name`,
-   * Baseline 2024) : un seul ouvert à la fois, sans le moindre JS.
-   * `undefined` = ouvertures multiples.
+   * Name shared by this level's sibling <details> (the native `name` attribute,
+   * Baseline 2024): a single one open at a time, with no JS at all. `undefined` =
+   * multiple open.
    */
   name: string | undefined
-  /** Exclusivité demandée par la racine ; transmise pour en dériver les noms des sous-niveaux. */
+  /** Exclusivity requested by the root; passed on to derive the sublevel names. */
   exclusive: boolean
-  /** Chevron des branches repliées : nom d'icône, ou rendu explicite. */
+  /** Chevron of collapsed branches: an icon name, or an explicit render. */
   expandIcon: IconSource
-  /** Chevron des branches dépliées ; `undefined` = rotation de `expandIcon`. */
+  /** Chevron of expanded branches; `undefined` = a rotation of `expandIcon`. */
   collapseIcon: IconSource | undefined
 }
 

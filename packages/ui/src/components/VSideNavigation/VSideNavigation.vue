@@ -9,36 +9,34 @@ import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
 /**
- * Navigation verticale de barre latérale : une arborescence de liens rendue
- * INLINE (rien ne flotte), repliable niveau par niveau, composée par
- * sous-composants — `VSideNavigationItem`, `VSideNavigationGroup`,
- * `VSideNavigationSeparator`.
+ * Vertical sidebar navigation: a tree of links rendered INLINE (nothing floats),
+ * collapsible level by level, composed from subcomponents —
+ * `VSideNavigationItem`, `VSideNavigationGroup`, `VSideNavigationSeparator`.
  *
- * `<ul>`/`<li>` et non des div comme VMenu : le pattern ARIA `menu` interdit les
- * listes (il n'admet que `menuitem`/`group`), une navigation est l'inverse — le
- * comptage et la relation d'imbrication SONT l'information de hiérarchie.
+ * `<ul>`/`<li>` and not divs as in VMenu: the ARIA `menu` pattern forbids lists (it
+ * admits only `menuitem`/`group`), and a navigation is the opposite — counting and
+ * the nesting relation ARE the hierarchy information.
  *
- * Le repli est natif (`<details>`/`<summary>`, cf. VSideNavigationItem) : état,
- * clavier d'activation, exclusivité entre frères (`<details name>`) et
- * animation viennent du navigateur. Seul JS de comportement du composant : la
- * navigation aux flèches ci-dessous.
+ * The folding is native (`<details>`/`<summary>`, see VSideNavigationItem): state,
+ * activation keyboard, exclusivity between siblings (`<details name>`) and animation
+ * all come from the browser. The component's only behavioural JS: the arrow
+ * navigation below.
  */
 interface SideNavigationProps {
-  /** Nom accessible de la <nav>. Défaut : dictionnaire du DS. */
+  /** Accessible name of the <nav>. Default: the DS dictionary. */
   label?: string
-  /** Hauteur des rangées : 32px (sm) ou 40px (md). Héritée par TOUS les niveaux. */
+  /** Row height: 32px (sm) or 40px (md). Inherited by EVERY level. */
   size?: 'sm' | 'md'
-  /** Densité : −4px de hauteur. N'est PAS un mode « rail d'icônes replié ». */
+  /** Density: −4px of height. This is NOT a "collapsed icon rail" mode. */
   compact?: boolean
   /**
-   * Un seul sous-niveau ouvert à la fois PAR NIVEAU (attribut natif
-   * `<details name>`). Défaut `false` : une barre latérale garde normalement
-   * plusieurs sections ouvertes.
+   * A single sublevel open at a time PER LEVEL (the native `<details name>`
+   * attribute). Default `false`: a sidebar normally keeps several sections open.
    */
   exclusive?: boolean
-  /** Chevron des branches repliées : nom d'icône, ou rendu explicite (`{ src }`…). */
+  /** Chevron of collapsed branches: an icon name, or an explicit render (`{ src }`…). */
   expandIcon?: IconSource
-  /** Chevron des branches dépliées ; absent = `expandIcon` pivotée de 180°. */
+  /** Chevron of expanded branches; absent = `expandIcon` rotated 180°. */
   collapseIcon?: IconSource
 }
 
@@ -52,15 +50,15 @@ const props = withDefaults(defineProps<SideNavigationProps>(), {
 })
 
 defineSlots<{
-  /** Les `VSideNavigationItem` / `VSideNavigationGroup` / `VSideNavigationSeparator`. */
+  /** The `VSideNavigationItem` / `VSideNavigationGroup` / `VSideNavigationSeparator` elements. */
   default(): unknown
 }>()
 
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.sideNavigation.label)
 
-// Nom de groupe des <details> de PREMIER niveau ; chaque item en fournit un
-// autre à ses propres enfants (cf. context.ts).
+// Group name of the FIRST-level <details>; each item provides another one to its own
+// children (see context.ts).
 const rootName = useId()
 
 provide(sideNavigationKey, {
@@ -81,18 +79,18 @@ provide(sideNavigationKey, {
 const rootEl = ref<HTMLElement | null>(null)
 
 /**
- * Cibles du focus : le <summary> d'une branche, l'action d'une feuille. Les
- * items désactivés sont écartés — `:disabled` ne matche que les <button>, un
- * lien inerte et un summary passent par `aria-disabled` (modèle VMenuPanel).
+ * Focus targets: a branch's <summary>, a leaf's action. Disabled items are excluded
+ * — `:disabled` only matches <button>, while an inert link and a summary go through
+ * `aria-disabled` (the VMenuPanel model).
  */
 const ROW_SELECTOR = ':is(summary, .v-side-nav-action):not(:disabled):not([aria-disabled="true"])'
 
 /**
- * Écarte tout ce qui vit sous une branche REPLIÉE — sauf son propre <summary>,
- * qui reste focusable. Le contenu d'un <details> fermé n'est pas `display:
- * none` (le navigateur le « saute ») : le filtre de `navigableItems` ne le
- * verrait pas. On passe donc notre PROPRE liste à `arrowNavigate`, ce qui évite
- * au passage un `getComputedStyle` par rangée (précédent VTimePicker).
+ * Excludes everything living under a COLLAPSED branch — except its own <summary>,
+ * which stays focusable. The content of a closed <details> is not `display: none`
+ * (the browser "skips" it): `navigableItems`' filter would not see it. So OUR own
+ * list is passed to `arrowNavigate`, which also avoids one `getComputedStyle` per
+ * row.
  */
 function reachable(el: HTMLElement, root: HTMLElement): boolean {
   for (
@@ -108,11 +106,10 @@ function reachable(el: HTMLElement, root: HTMLElement): boolean {
 }
 
 /*
- * Seul JS de comportement : aucune primitive native ne déplace le focus entre
- * des liens frères. Contrat du DS (utils/arrowNav) — les flèches DÉPLACENT le
- * focus, jamais elles n'activent. Pas de roving tabindex : chaque rangée
- * visible reste un arrêt de tabulation (modèle VToggle), comme le veut le
- * pattern « disclosure navigation ».
+ * The only behavioural JS: no native primitive moves the focus between sibling
+ * links. The DS contract (utils/arrowNav) — the arrows MOVE the focus, they never
+ * activate. No roving tabindex: every visible row stays a tab stop (the VToggle
+ * model), as the "disclosure navigation" pattern requires.
  */
 function onKeydown(event: KeyboardEvent) {
   const root = rootEl.value
@@ -143,28 +140,27 @@ function onKeydown(event: KeyboardEvent) {
 @layer vectis.components {
   .v-side-nav {
     /*
-     * Retrait d'un niveau de hiérarchie : exactement la place que tient une
-     * icône de début (icône + gouttière), pour que le libellé d'un sous-item
-     * tombe sur la MÊME VERTICALE que celui de son parent. Les deux variables
-     * sont posées par `v-control` sur cette même racine — le retrait suit donc
-     * l'échelle des tailles sans table locale, et un consommateur qui repose
-     * `--vectis-icon-size` le voit suivre. Hérité par tous les niveaux.
+     * Indent of one hierarchy level: exactly the room a start icon takes (icon +
+     * gutter), so that a subitem's label lands on the SAME VERTICAL as its parent's.
+     * Both variables are set by `v-control` on this same root — the indent therefore
+     * follows the size scale with no local table, and a consumer redefining
+     * `--vectis-icon-size` sees it follow. Inherited by every level.
      */
     --side-nav-indent: calc(var(--vectis-icon-size) + var(--control-gap));
 
     font-family: var(--vectis-text-family);
-    /* Repli animé de `::details-content` : autorise block-size 0 → auto
-       (progressive enhancement, idiome VAccordion). Hérité par les items. */
+    /* Animated folding of `::details-content`: allows block-size 0 → auto
+       (progressive enhancement, the VAccordion idiom). Inherited by the items. */
     interpolate-size: allow-keywords;
   }
 
   /*
-   * Reset commun aux trois listes, déclaré UNE fois chez le propriétaire de la
-   * racine plutôt que recopié dans trois SFC — aucun arbitrage de cascade
-   * possible, ces classes n'existent nulle part ailleurs.
+   * Reset shared by the three lists, declared ONCE by the root's owner rather than
+   * copied into three SFCs — no cascade arbitration is possible, these classes exist
+   * nowhere else.
    *
-   * `flex` et non `block` : il supprime tout margin collapsing, donc la marge
-   * d'un groupe ne peut pas fuir hors d'une branche repliée (block-size: 0).
+   * `flex` and not `block`: it removes all margin collapsing, so a group's margin
+   * cannot leak out of a collapsed branch (block-size: 0).
    */
   .v-side-nav-list,
   .v-side-nav-children,

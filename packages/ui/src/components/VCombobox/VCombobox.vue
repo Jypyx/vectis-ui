@@ -22,29 +22,27 @@ import { useTimer } from '../../composables/useTimer'
 import { useMessages } from '../../i18n/state'
 
 /**
- * VCombobox avec recherche et sélection multiple, composé de `VInput`, `VChip` et
- * d'un `VPopover` qui porte lui-même `role="listbox"`. Le JS implémente le
- * pattern ARIA combobox/listbox que le natif ne couvre pas (pas de `<datalist>`
- * stylable/multiple) : filtrage, navigation par `aria-activedescendant` (le
- * focus DOM reste dans l'input — le panneau n'a donc aucun clavier propre),
- * sélection simple ou multiple. C'est ce composant qui possède TOUT le contrat
- * ARIA du champ. Fermeture au `focusout` : le champ vit hors du panneau, ouvert
- * en `mode="manual"` (pas de light dismiss).
+ * A combobox with search and multiple selection, composed of `VInput`, `VChip` and
+ * a `VPopover` which itself carries `role="listbox"`. The JS implements the ARIA
+ * combobox/listbox pattern the platform does not cover (there is no stylable or
+ * multiple `<datalist>`): filtering, navigation through `aria-activedescendant` (the
+ * DOM focus stays in the input — so the panel has no keyboard of its own), single or
+ * multiple selection. This component owns the WHOLE ARIA contract of the field.
+ * Closing on `focusout`: the field lives outside the panel, which is opened in
+ * `mode="manual"` (no light dismiss).
  */
 export interface ComboboxOption {
   value: string
   label: string
-  /**
-   * Icône avant le libellé : nom d'icône, ou rendu explicite (`{ src }`…).
-   */
+  /** Icon before the label: an icon name, or an explicit render (`{ src }`…). */
   icon?: IconSource
   disabled?: boolean
 }
 
 /**
- * Groupe nommé d'options, rendu en `role="group"` + `aria-labelledby` (le
- * pendant du `<optgroup>` natif). Un groupe dont plus aucune option ne passe le
- * filtre disparaît, libellé compris.
+ * A named group of options, rendered as `role="group"` + `aria-labelledby` (the
+ * counterpart of the native `<optgroup>`). A group no option of which passes the
+ * filter disappears, label included.
  */
 export interface ComboboxGroup {
   label: string
@@ -52,62 +50,62 @@ export interface ComboboxGroup {
 }
 
 /**
- * Filet de séparation entre deux blocs d'options. Purement décoratif : les
- * séparateurs devenus orphelins au filtrage (en tête, en fin, ou consécutifs)
- * ne sont pas rendus.
+ * A separating rule between two blocks of options. Purely decorative: separators
+ * left orphaned by the filtering (at the head, at the tail, or consecutive) are not
+ * rendered.
  */
 export interface ComboboxSeparator {
   separator: true
 }
 
-/** Une entrée de la prop `options` : option, groupe ou séparateur. */
+/** An entry of the `options` prop: an option, a group or a separator. */
 export type ComboboxItem = ComboboxOption | ComboboxGroup | ComboboxSeparator
 
 const isGroup = (item: ComboboxItem): item is ComboboxGroup => 'options' in item
 const isSeparator = (item: ComboboxItem): item is ComboboxSeparator => 'separator' in item
 
 /**
- * Filtrage local : `true` (défaut), `false` (les options arrivent déjà filtrées
- * — recherche serveur) ou un prédicat de correspondance personnalisé.
+ * Local filtering: `true` (the default), `false` (the options already arrive
+ * filtered — a server-side search) or a custom matching predicate.
  */
 export type ComboboxFilter = boolean | ((option: ComboboxOption, query: string) => boolean)
 
 interface ComboboxProps {
   /**
-   * Options du panneau. Une entrée peut aussi être un `ComboboxGroup` (bloc
-   * nommé) ou un `ComboboxSeparator` ; une liste plate d'options reste valide.
+   * Options of the panel. An entry may also be a `ComboboxGroup` (a named block) or
+   * a `ComboboxSeparator`; a flat list of options stays valid.
    */
   options: ComboboxItem[]
-  /** Sélection multiple — le v-model devient string[] et des Chips s'affichent. */
+  /** Multiple selection — the v-model becomes string[] and Chips are displayed. */
   multiple?: boolean
-  /** Hauteur du champ : sm 32px, md 40px (défaut — aligné sur VInput), lg 48px. */
+  /** Field height: sm 32px, md 40px (the default — aligned on VInput), lg 48px. */
   size?: 'sm' | 'md' | 'lg'
-  /** Hauteur réduite de 4px (comme les autres contrôles). */
+  /** Height reduced by 4px (like the other controls). */
   compact?: boolean
   placeholder?: string
   disabled?: boolean
   invalid?: boolean
-  /** Bouton d'effacement (croix) qui vide la sélection et la recherche. */
+  /** A clear button (a cross) emptying the selection and the search. */
   clearable?: boolean
-  /** Message quand aucune option ne correspond à la recherche. */
+  /** Message shown when no option matches the search. */
   emptyText?: string
   /**
-   * Filtrage local des options. `false` : les options sont déjà filtrées par la
-   * source (recherche serveur) et sont affichées telles quelles. Une fonction
-   * reçoit la requête BRUTE (trimée), pas sa forme normalisée NFD.
+   * Local filtering of the options. `false`: the options are already filtered by the
+   * source (a server-side search) and are displayed as they come. A function receives
+   * the RAW query (trimmed), not its NFD-normalized form.
    */
   filter?: ComboboxFilter
-  /** Délai avant émission de `search`, en ms. `0` = émission synchrone. */
+  /** Delay before `search` is emitted, in ms. `0` = a synchronous emission. */
   searchDebounce?: number
   /**
-   * Chargement en cours : panneau sans option → état plein panneau ; options
-   * déjà affichées → spinner en pied de liste (page suivante). Le champ montre
-   * un spinner à la place du chevron dans les deux cas.
+   * Loading in progress: a panel with no option → a full-panel state; options already
+   * displayed → a spinner at the foot of the list (the next page). The field shows a
+   * spinner in place of the chevron in both cases.
    */
   loading?: boolean
-  /** Message et libellé du spinner pendant le chargement. */
+  /** Message and spinner label during loading. */
   loadingText?: string
-  /** Il reste des pages à charger : rend la sentinelle qui émet `load-more`. */
+  /** There are pages left to load: renders the sentinel emitting `load-more`. */
   hasMore?: boolean
 }
 
@@ -127,25 +125,23 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   hasMore: false,
 })
 
-// Cascade prop > dictionnaire : la prop garde la priorité, son défaut suit
-// désormais la locale du DS.
 const m = useMessages()
 const resolvedEmptyText = computed(() => props.emptyText ?? m.value.combobox.empty)
 const resolvedLoadingText = computed(() => props.loadingText ?? m.value.common.loading)
 
 const emit = defineEmits<{
   /**
-   * Terme de recherche à envoyer à la source (débouncé ; immédiat à l'ouverture
-   * du panneau, pour le premier chargement). Un même terme n'est pas réémis :
-   * rouvrir le panneau ne relance pas la requête.
+   * The search term to send to the source (debounced; immediate on opening the
+   * panel, for the first load). The same term is not re-emitted: reopening the panel
+   * does not relaunch the request.
    */
   search: [query: string]
-  /** La fin de liste est entrée dans la vue : charger la page suivante. */
+  /** The end of the list has come into view: load the next page. */
   'load-more': []
 }>()
 
 defineSlots<{
-  /** Contenu d'une option (défaut : son libellé). */
+  /** Content of an option (default: its label). */
   option?(props: {
     option: ComboboxOption
     index: number
@@ -153,10 +149,10 @@ defineSlots<{
     selected: boolean
   }): unknown
   /**
-   * VChip d'une valeur sélectionnée en mode multiple (défaut : un `VChip`
-   * dismissible portant le libellé). `option` peut être `undefined` si la
-   * valeur n'a jamais été vue dans `options` ; `size`/`compact` sont ceux
-   * calculés pour tenir dans le champ, les reprendre pour garder le gabarit.
+   * The VChip of a selected value in multiple mode (default: a dismissible `VChip`
+   * carrying the label). `option` may be `undefined` if the value has never been seen
+   * in `options`; `size`/`compact` are the ones computed to fit in the field — reuse
+   * them to keep the template.
    */
   chip?(props: {
     value: string
@@ -166,44 +162,43 @@ defineSlots<{
     size: 'xs' | 'sm'
     compact: boolean
   }): unknown
-  /** Panneau sans résultat (défaut : `emptyText`) ; `query` = terme recherché. */
+  /** Panel with no result (default: `emptyText`); `query` = the searched term. */
   empty?(props: { query: string }): unknown
-  /** Panneau en chargement, aucune option affichée (défaut : `loadingText`). */
+  /** Panel loading, with no option displayed (default: `loadingText`). */
   loading?(): unknown
 }>()
 
-// Les Chips restent un cran sous le champ pour tenir dedans sans le faire
-// grandir : xs (24px) jusqu'à `md`, sm (32px) en `lg`. Sous le cran le plus
-// bas de chaque paire, le rattrapage passe par `compact` plutôt que par une
-// taille de moins — d'où `sm` → xs compact (20px dans 32px) et `lg` compact →
-// sm compact (28px dans 44px). En `md` la marge suffit déjà, le `compact` du
-// VCombobox ne touche donc pas les Chips.
-// Toute évolution de ce mapping doit être reportée sur `--chip-height` (CSS
-// plus bas) : la hauteur est redite côté champ, hors de portée du sous-arbre.
+// The Chips stay one step below the field so they fit without making it grow: xs
+// (24px) up to `md`, sm (32px) at `lg`. Below the lowest step of each pair, the
+// catch-up goes through `compact` rather than one size less — hence `sm` → xs compact
+// (20px inside 32px) and `lg` compact → sm compact (28px inside 44px). At `md` the
+// margin is already enough, so VCombobox's `compact` does not touch the Chips.
+// Any change to this mapping must be carried over to `--chip-height` (CSS further
+// down): the height is restated on the field side, out of the subtree's reach.
 const chipSize = computed(() => (props.size === 'lg' ? 'sm' : 'xs'))
 const chipCompact = computed(() => (props.size === 'lg' ? props.compact : props.size === 'sm'))
 
 const model = defineModel<string | string[]>({ default: '' })
 
-// Racine wrapper : class/style restent sur la racine, le reste (aria-label…)
-// est reporté sur le VInput pour nommer le role="combobox".
+// Wrapper root: class/style stay on the root, the rest (aria-label…) is carried over
+// to the VInput so it names the role="combobox".
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const rootEl = ref<HTMLElement | null>(null)
 const inputRef = ref<InstanceType<typeof VInput> | null>(null)
-// Sert à la fois d'id du panneau Listbox (cible d'`aria-controls`) et de
-// préfixe des ids d'options (`optionId`) : chaînes distinctes, pas de collision.
+// Serves both as the id of the listbox panel (the `aria-controls` target) and as the
+// prefix of the option ids (`optionId`): distinct strings, no collision.
 const optionsId = useId()
 
 const open = ref(false)
 const query = ref('')
 const activeIndex = ref(-1)
 const focused = ref(false)
-// `query` sert à la fois d'affichage (libellé sélectionné en simple) et de
-// recherche. `typed` distingue les deux : tant qu'il est faux, `query` n'est
-// PAS un filtre (toute la liste est proposée à la réouverture) — il ne passe
-// vrai qu'à la frappe de l'utilisateur.
+// `query` serves both for display (the selected label in single mode) and for
+// searching. `typed` distinguishes the two: while it is false, `query` is NOT a
+// filter (the whole list is offered on reopening) — it only turns true when the user
+// types.
 const typed = ref(false)
 
 const selectedValues = computed<string[]>(() => {
@@ -211,10 +206,10 @@ const selectedValues = computed<string[]>(() => {
   return typeof model.value === 'string' && model.value ? [model.value] : []
 })
 
-// Options de `props.options` à plat (groupes dépliés, séparateurs écartés),
-// dans l'ordre du source. C'est l'UNIQUE lecture des options par le reste du
-// composant : filtrage, cache, libellés et pagination ignorent la hiérarchie,
-// que seul le rendu (`rendered`) connaît.
+// The options of `props.options` flattened (groups unwrapped, separators dropped),
+// in source order. This is the ONLY read of the options by the rest of the component:
+// filtering, the cache, the labels and pagination all ignore the hierarchy, which
+// only the rendering (`rendered`) knows about.
 const allOptions = computed<ComboboxOption[]>(() =>
   props.options.flatMap((item) => {
     if (isSeparator(item)) return []
@@ -222,13 +217,13 @@ const allOptions = computed<ComboboxOption[]>(() =>
   }),
 )
 
-// Mémoire des options SÉLECTIONNÉES : en source asynchrone, `options` ne
-// contient que le dernier jeu de résultats et une valeur déjà choisie en est
-// souvent absente — sans cache, le VChip afficherait son identifiant brut (et le
-// slot #chip perdrait l'icône de l'option).
-// watchEffect (et non watch sur `props.options`) : il traque l'itération, donc
-// aussi les ajouts en place d'une page (scroll infini). Borné à la sélection :
-// les autres options se relisent dans `options`.
+// Memory of the SELECTED options: with an asynchronous source, `options` only holds
+// the last set of results and an already-chosen value is often absent from it —
+// without the cache, the VChip would display its raw identifier (and the #chip slot
+// would lose the option's icon).
+// watchEffect (and not a watch on `props.options`): it tracks the iteration, hence
+// also the in-place additions of a page (infinite scroll). Bounded to the selection:
+// the other options are re-read from `options`.
 const optionCache = reactive(new Map<string, ComboboxOption>())
 watchEffect(() => {
   const wanted = new Set(selectedValues.value)
@@ -238,9 +233,9 @@ watchEffect(() => {
 })
 
 /**
- * Option connue pour cette valeur : `options` courantes d'abord, cache en repli.
- * Une option issue du cache est un proxy réactif (`reactive` convertit les
- * valeurs objet) : comparer par `value`, jamais par identité.
+ * The known option for this value: the current `options` first, the cache as a
+ * fallback. An option coming from the cache is a reactive proxy (`reactive` converts
+ * object values): compare by `value`, never by identity.
  */
 function optionOf(value: string) {
   return allOptions.value.find((o) => o.value === value) ?? optionCache.get(value)
@@ -250,14 +245,14 @@ function labelOf(value: string) {
   return optionOf(value)?.label ?? value
 }
 
-// Terme de recherche unique, consommé par le filtre local ET par l'émission
-// `search` : la liste proposée et la requête envoyée ne peuvent pas diverger.
-// Pas de frappe → terme vide (le libellé affiché ne restreint pas la liste).
+// A single search term, consumed by the local filter AND by the `search` emission:
+// the list offered and the request sent cannot diverge. No typing → an empty term
+// (the displayed label does not restrict the list).
 const searchTerm = computed(() => (typed.value ? query.value.trim() : ''))
 
-// Liste PLATE des options retenues, dans l'ordre d'affichage : c'est elle que
-// la navigation clavier indexe (`activeIndex`, `optionId`) — les groupes et les
-// séparateurs n'y apparaissent pas, ils ne sont donc jamais un arrêt clavier.
+// The FLAT list of retained options, in display order: it is what the keyboard
+// navigation indexes (`activeIndex`, `optionId`) — groups and separators do not
+// appear in it, so they are never a keyboard stop.
 const filtered = computed(() => {
   const matcher = props.filter
   const list = allOptions.value
@@ -269,10 +264,9 @@ const filtered = computed(() => {
   return list.filter((o) => normalizeText(o.label).includes(needle))
 })
 
-// ── Arbre de rendu ──────────────────────────────────────────────────────────
-// Seul endroit qui connaît la hiérarchie. Chaque option y porte son index DANS
-// `filtered` (et non sa position dans l'arbre) : ids, surbrillance et slot
-// #option restent alignés sur la navigation clavier.
+// The render tree: the only place that knows about the hierarchy. Each option there
+// carries its index IN `filtered` (and not its position in the tree): ids, highlight
+// and the #option slot stay aligned on the keyboard navigation.
 type RenderedOption = { kind: 'option'; key: string; option: ComboboxOption; index: number }
 type RenderedNode =
   | RenderedOption
@@ -290,9 +284,9 @@ const rendered = computed<RenderedNode[]>(() => {
   }
 
   const nodes: RenderedNode[] = []
-  // Séparateur différé : matérialisé seulement si du contenu le précède ET le
-  // suit. Un seul mécanisme couvre les trois cas d'orphelin nés du filtrage
-  // (filet en tête, en fin, ou deux d'affilée).
+  // Deferred separator: materialized only if content both precedes AND follows it. A
+  // single mechanism covers the three orphan cases born of filtering (a rule at the
+  // head, at the tail, or two in a row).
   let pendingSeparator: string | null = null
 
   for (const [i, item] of props.options.entries()) {
@@ -306,7 +300,7 @@ const rendered = computed<RenderedNode[]>(() => {
       const options = item.options
         .map(entryOf)
         .filter((entry): entry is RenderedOption => entry !== null)
-      // groupe vidé par le filtre : omis, libellé compris
+      // a group emptied by the filter: omitted, label included
       node =
         options.length > 0 ? { kind: 'group', key: `group:${i}`, label: item.label, options } : null
     } else {
@@ -324,14 +318,13 @@ const rendered = computed<RenderedNode[]>(() => {
   return nodes
 })
 
-// ── Recherche (source externe) ──────────────────────────────────────────────
-// JS justifié : aucune primitive native ne débounce ni ne dédoublonne une
-// requête. Le report est délégué à `useTimer` (réarmement, délai ≤ 0 synchrone,
-// annulation au démontage) ; ne reste ici que ce qui est propre au VCombobox :
-// le dédoublonnage par terme et l'annulation à la fermeture du panneau.
+// Search (external source). JS justified: no native primitive debounces or dedupes a
+// request. The deferral is delegated to `useTimer` (re-arming, a synchronous delay ≤
+// 0, cancellation on unmount); only what is specific to VCombobox stays here:
+// deduping by term and cancelling when the panel closes.
 const searchTimer = useTimer()
-// undefined = jamais émis. Dédoublonnage : rouvrir le panneau sur le même terme
-// ne relance pas la requête (le consommateur peut toujours ignorer son cache).
+// undefined = never emitted. Deduping: reopening the panel on the same term does not
+// relaunch the request (the consumer can always ignore its cache).
 let lastEmitted: string | undefined
 
 const cancelSearch = searchTimer.cancel
@@ -341,7 +334,7 @@ function emitSearch(term: string, immediate = false) {
   if (term === lastEmitted) return
   searchTimer.start(
     () => {
-      // le panneau a pu se fermer pendant le délai : plus rien à charger
+      // the panel may have closed during the delay: nothing left to load
       if (!open.value) return
       lastEmitted = term
       emit('search', term)
@@ -352,39 +345,38 @@ function emitSearch(term: string, immediate = false) {
 
 watch(searchTerm, (term) => {
   if (!open.value) return
-  // Nouvelle recherche = nouvelle liste : l'index actif ne lui survit pas (en
-  // source externe, `options` est remplacé en bloc — il pointerait une option
-  // sans rapport). On repointe sur la première activable plutôt que sur -1 :
-  // avec `filter: false`, `filtered` garde la même référence tant que la source
-  // n'a pas répondu, donc le watch ci-dessous ne se déclencherait pas et Entrée
-  // resterait inerte. Quand la nouvelle liste arrive, l'index reste dans les
-  // bornes : il désigne alors sa première option.
+  // A new search = a new list: the active index does not survive it (with an external
+  // source, `options` is replaced wholesale — it would point at an unrelated option).
+  // It is repointed at the first activable one rather than at -1: with `filter:
+  // false`, `filtered` keeps the same reference until the source has answered, so the
+  // watch below would not fire and Enter would stay inert. When the new list arrives,
+  // the index stays within bounds: it then designates its first option.
   activeIndex.value = filtered.value.findIndex((o) => !o.disabled)
   emitSearch(term)
 })
 
 watch(filtered, (list) => {
-  // Panneau ouvert : garder une option active valide. On repointe sur le 1er
-  // résultat quand l'actif est hors liste OU inexistant (-1) — sinon, après un
-  // filtre passé par « aucun résultat », l'index resterait à -1 et Entrée ne
-  // sélectionnerait pas l'unique résultat suivant.
+  // Panel open: keep a valid active option. It is repointed at the first result when
+  // the active one is out of the list OR non-existent (-1) — otherwise, after a filter
+  // that passed through "no result", the index would stay at -1 and Enter would not
+  // select the single next result.
   if (!open.value) return
   if (activeIndex.value < 0 || activeIndex.value >= list.length) {
     activeIndex.value = list.findIndex((o) => !o.disabled)
   }
 })
 
-// mode simple : hors édition, l'input affiche le libellé sélectionné (texte)
+// single mode: outside editing, the input displays the selected label (as text)
 if (!props.multiple && typeof model.value === 'string' && model.value) {
   query.value = labelOf(model.value)
 }
 
-// Ce libellé est une COPIE (pas une dérivation) : quand les options arrivent
-// après coup (source asynchrone), il faut la rafraîchir — sinon un champ monté
-// avec une valeur mais sans options affiche l'identifiant brut à vie. On
-// n'écoute QUE `options` : écouter `model` réintroduirait la lecture prématurée
-// que `select()` évite volontairement.
-// Gardes `open`/`typed` : ne jamais écraser une saisie en cours.
+// This label is a COPY (not a derivation): when the options arrive afterwards (an
+// asynchronous source), it has to be refreshed — otherwise a field mounted with a
+// value but no options displays the raw identifier forever. ONLY `options` is watched:
+// watching `model` would reintroduce the premature read `select()` deliberately
+// avoids.
+// The `open`/`typed` guards: never overwrite an input in progress.
 watch(
   allOptions,
   () => {
@@ -394,16 +386,16 @@ watch(
   { flush: 'post' },
 )
 
-// multiple avec sélection et champ non focus : replier le champ de saisie
-// (il reste dans le DOM, focusable) pour ne pas laisser d'espace vide.
+// multiple with a selection and an unfocused field: fold the search input away (it
+// stays in the DOM, focusable) so no empty space is left.
 const collapsed = computed(
   () => props.multiple && !focused.value && selectedValues.value.length > 0,
 )
 
-// La croix (prop `clearable` de VInput) doit apparaître dès qu'il y a QUELQUE CHOSE
-// à effacer — une sélection (Chips) OU une recherche — pas seulement quand le
-// champ texte est non-vide. On pilote donc explicitement sa visibilité (VInput
-// l'expose via `clearVisible`) et on réserve la place à droite en conséquence.
+// The cross (VInput's `clearable` prop) must appear as soon as there is SOMETHING to
+// clear — a selection (Chips) OR a search — not only when the text field is non-empty.
+// Its visibility is therefore driven explicitly (VInput exposes it through
+// `clearVisible`) and the room on the right is reserved accordingly.
 const canClear = computed(
   () =>
     props.clearable &&
@@ -413,9 +405,9 @@ const canClear = computed(
 
 const optionId = (index: number) => `${optionsId}-option-${index}`
 
-// Le rendu d'une option est écrit deux fois (dans un groupe, et à la racine du
-// panneau) — un template Vue n'a pas de fragment réutilisable. Ces deux
-// fabriques ramènent la duplication à une ligne de chaque côté.
+// A row's rendering is written twice (inside a group, and at the panel root) — a Vue
+// template has no reusable fragment. These two factories reduce the duplication to one
+// line on each side.
 function rowProps(entry: RenderedOption) {
   return {
     id: optionId(entry.index),
@@ -439,13 +431,13 @@ function hover(entry: RenderedOption) {
   if (!entry.option.disabled) activeIndex.value = entry.index
 }
 
-// Le focus DOM ne quitte jamais l'input (navigation par aria-activedescendant) :
-// le navigateur ne défile donc pas l'option active dans le panneau `overflow:auto`.
-// On l'amène dans la vue à la main. `block: 'nearest'` = pas de saut si déjà visible.
+// The DOM focus never leaves the input (navigation through aria-activedescendant), so
+// the browser does not scroll the active option into the `overflow: auto` panel. It is
+// brought into view by hand. `block: 'nearest'` = no jump if already visible.
 watch(activeIndex, (index) => {
   if (index < 0) return
   nextTick(() => {
-    // `?.scrollIntoView` : l'API n'existe pas en jsdom (tests).
+    // `?.scrollIntoView`: the API does not exist in jsdom (tests).
     document.getElementById(optionId(index))?.scrollIntoView?.({ block: 'nearest' })
   })
 })
@@ -456,15 +448,15 @@ function openPanel() {
   const list = filtered.value
   const selectedIdx = list.findIndex((o) => !o.disabled && selectedValues.value.includes(o.value))
   activeIndex.value = selectedIdx >= 0 ? selectedIdx : list.findIndex((o) => !o.disabled)
-  // Après `open = true` (l'émission différée se re-vérifie sur `open`) : permet
-  // à une source externe de charger sa première page à l'ouverture.
+  // After `open = true` (the deferred emission re-checks `open`): it lets an external
+  // source load its first page on opening.
   emitSearch(searchTerm.value, true)
 }
 
 function closePanel() {
   if (!open.value) return
   cancelSearch()
-  // une page jamais arrivée (requête en échec) ne doit pas geler la pagination
+  // a page that never arrived (a failed request) must not freeze the pagination
   pending = false
   open.value = false
   activeIndex.value = -1
@@ -473,27 +465,27 @@ function closePanel() {
     !props.multiple && typeof model.value === 'string' && model.value ? labelOf(model.value) : ''
 }
 
-/** Fermeture quand le focus sort du composant (panneau compris, descendant DOM). */
+/** Closes when the focus leaves the component (the panel included, a DOM descendant). */
 const onFocusout = useFocusoutDismiss(rootEl, closePanel)
 
 /*
- * Le focus ne doit jamais quitter le champ : sans ce preventDefault, cliquer une
- * option le lui retire, le `focusout` ci-dessus ferme le panneau AVANT que la
- * sélection ne soit traitée — la sélection à la souris devient inopérante.
- * Invisible en jsdom : couvert par une play function.
+ * The focus must never leave the field: without this preventDefault, clicking an
+ * option removes it, the `focusout` above closes the panel BEFORE the selection is
+ * handled — and mouse selection becomes inoperative. Invisible in jsdom: covered by a
+ * play function.
  */
 function onPanelMousedown(event: MouseEvent) {
   event.preventDefault()
 }
 
-/** Frappe utilisateur : active le filtre et ouvre le panneau. */
+/** User typing: activates the filter and opens the panel. */
 function onInput() {
   typed.value = true
   openPanel()
 }
 
-/** Focus : en simple, sélectionne le libellé affiché pour que la frappe le
-    remplace (la liste complète reste proposée tant qu'on n'a pas tapé). */
+/** Focus: in single mode, selects the displayed label so typing replaces it (the
+    full list stays offered until something is typed). */
 function selectQuery() {
   if (!props.multiple && query.value) inputRef.value?.select()
 }
@@ -503,19 +495,19 @@ function onFocus() {
   selectQuery()
 }
 
-/** Clic n'importe où dans le contrôle : focus le champ et ouvre le panneau. */
+/** A click anywhere in the control: focuses the field and opens the panel. */
 function onControlClick() {
   if (props.disabled) return
   inputRef.value?.focus()
   openPanel()
-  // après le placement du curseur par le clic (souris) : re-sélectionne le libellé
+  // after the click has placed the caret (mouse): re-selects the label
   selectQuery()
 }
 
 function select(option: ComboboxOption) {
   if (option.disabled) return
-  // mémorisée tout de suite : l'option peut disparaître d'`options` (recherche
-  // suivante) avant que le parent n'ait propagé le modèle
+  // memorized straight away: the option may disappear from `options` (the next
+  // search) before the parent has propagated the model
   optionCache.set(option.value, option)
   typed.value = false
   if (props.multiple) {
@@ -524,13 +516,13 @@ function select(option: ComboboxOption) {
     inputRef.value?.focus()
   } else {
     model.value = option.value
-    // ce chemin ne passe pas par closePanel() : annuler le timer de recherche
-    // ici aussi, sinon la frappe précédente partirait après la fermeture
+    // this path does not go through closePanel(): cancel the search timer here too,
+    // or the previous keystroke would fire after the close
     cancelSearch()
-    // Le libellé vient de l'option choisie, PAS d'une relecture de model.value :
-    // avec defineModel + v-model parent, `model.value` lu juste après l'écriture
-    // renvoie encore l'ancienne valeur (le libellé afficherait la sélection
-    // précédente). On ferme sans re-dériver la query.
+    // The label comes from the chosen option, NOT from a re-read of model.value: with
+    // defineModel + a parent v-model, `model.value` read just after the write still
+    // returns the old value (the label would display the previous selection). It closes
+    // without re-deriving the query.
     query.value = option.label
     open.value = false
     activeIndex.value = -1
@@ -543,8 +535,8 @@ function removeValue(value: string) {
   inputRef.value?.focus()
 }
 
-/** Événement `clear` de VInput (croix) : VInput a déjà vidé la recherche (query) ;
-    on vide aussi toute la sélection (valeur en simple, Chips en multiple). */
+/** VInput's `clear` event (the cross): VInput has already emptied the search (query);
+    the whole selection is emptied too (the value in single, the Chips in multiple). */
 function onClear() {
   model.value = props.multiple ? [] : ''
   typed.value = false
@@ -596,15 +588,14 @@ function onKeydown(event: KeyboardEvent) {
   }
 }
 
-// ── Scroll infini ───────────────────────────────────────────────────────────
-// JS justifié : aucune primitive CSS ne signale l'arrivée en fin de liste. Une
-// sentinelle en pied de panneau est observée, le panneau (conteneur scrollable)
-// servant de `root`.
+// Infinite scroll. JS justified: no CSS primitive signals reaching the end of the
+// list. A sentinel at the foot of the panel is observed, the panel (the scroll
+// container) serving as the `root`.
 const sentinelEl = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
-// Verrou SYNCHRONE, en plus de `props.loading` : le consommateur pose `loading`
-// de façon asynchrone (au retour de sa requête) et la fenêtre entre l'émission
-// et cette mise à jour suffirait à émettre plusieurs fois.
+// A SYNCHRONOUS lock, on top of `props.loading`: the consumer sets `loading`
+// asynchronously (when its request returns) and the window between the emission and
+// that update would be enough to emit several times.
 let pending = false
 
 function onIntersect(entries: IntersectionObserverEntry[]) {
@@ -617,19 +608,19 @@ function onIntersect(entries: IntersectionObserverEntry[]) {
 watch(
   sentinelEl,
   (el, _previous, onCleanup) => {
-    // `IntersectionObserver` n'existe pas en jsdom (même garde que le
-    // `?.scrollIntoView?.()` plus haut) — le comportement se teste au navigateur.
+    // `IntersectionObserver` does not exist in jsdom (the same guard as the
+    // `?.scrollIntoView?.()` above) — the behaviour is tested in the browser.
     if (!el || typeof IntersectionObserver === 'undefined') return
-    // Le panneau est le conteneur scrollable, désigné par son rôle ARIA (API
-    // publique) plutôt que par une classe interne du Listbox. Sans lui,
-    // `root: null` viserait le viewport : le panneau étant en top layer, la
-    // sentinelle y paraîtrait toujours visible → rafale de `load-more`.
+    // The panel is the scroll container, designated by its ARIA role (a public API)
+    // rather than by an internal class of the listbox. Without it, `root: null` would
+    // target the viewport: since the panel is in the top layer, the sentinel would
+    // always appear visible there → a burst of `load-more`.
     const root = el.closest('[role="listbox"]')
     if (!root) return
     observer = new IntersectionObserver(onIntersect, {
       root,
-      // précharge une demi-hauteur de panneau avant le bas (pas de littéral de
-      // dimension : relatif à la racine)
+      // preloads half a panel height before the bottom (no dimension literal: it is
+      // relative to the root)
       rootMargin: '0px 0px 50% 0px',
     })
     observer.observe(el)
@@ -641,11 +632,11 @@ watch(
   { flush: 'post' },
 )
 
-// Le callback n'est appelé qu'au FRANCHISSEMENT du seuil : si la page reçue ne
-// remplit pas le panneau, la sentinelle reste visible sans jamais re-déclencher
-// et le chargement s'arrêterait à la deuxième page. On ré-observe à chaque page
-// pour forcer une nouvelle évaluation — et si la source n'a rien renvoyé (même
-// longueur), rien ne relance la boucle : condition d'arrêt gratuite.
+// The callback is only called when the threshold is CROSSED: if the page received
+// does not fill the panel, the sentinel stays visible without ever re-triggering and
+// the loading would stop at the second page. It is re-observed on every page to force
+// a fresh evaluation — and if the source returned nothing (the same length), nothing
+// relaunches the loop: a free stopping condition.
 watch(
   () => allOptions.value.length,
   () => {
@@ -722,14 +713,14 @@ watch(
           </template>
         </template>
 
-        <!-- Chevron posé en absolu à droite (cf. CSS), pivote à l'ouverture.
-             La croix vient de la prop `clearable` de VInput, rendue à sa gauche.
-             En chargement, le spinner prend EXACTEMENT sa place (VInput pose
-             `font-size: var(--vectis-icon-size)` sur les spinners enfants directs
-             du champ) : aucun saut de largeur. On ne passe pas par la prop
-             `loading` de VInput, qui écraserait ce slot — donc le chevron.
-             `aria-hidden` sur la racine du VSpinner neutralise son
-             role="status" : l'annonce vient du panneau, pas deux fois. -->
+        <!-- The chevron is placed absolutely on the right (see the CSS) and rotates on
+             opening. The cross comes from VInput's `clearable` prop, rendered to its
+             left. While loading, the spinner takes EXACTLY its place (VInput sets
+             `font-size: var(--vectis-icon-size)` on the spinners that are direct
+             children of the field): no width jump. VInput's `loading` prop is not used,
+             as it would overwrite this slot — hence the chevron. `aria-hidden` on the
+             VSpinner root neutralizes its role="status": the announcement comes from the
+             panel, not twice. -->
         <template #end>
           <VSpinner v-if="loading" class="v-combobox-spinner" aria-hidden="true" />
           <VIcon v-else name="expand_more" class="v-combobox-chevron" aria-hidden="true" />
@@ -737,9 +728,9 @@ watch(
       </VInput>
     </div>
 
-    <!-- Le panneau porte lui-même `role="listbox"` ET le défilement : c'est le
-         contrat sur lequel s'appuient le `root` de l'IntersectionObserver et le
-         `scrollIntoView` de l'option active — ne jamais intercaler de wrapper. -->
+    <!-- The panel itself carries `role="listbox"` AND the scrolling: that is the
+         contract the IntersectionObserver's `root` and the active option's
+         `scrollIntoView` rest on — never insert a wrapper. -->
     <VPopover
       :id="optionsId"
       v-model:open="open"
@@ -753,8 +744,8 @@ watch(
       :aria-multiselectable="multiple ? 'true' : undefined"
       @mousedown="onPanelMousedown"
     >
-      <!-- Groupes et séparateurs ne sont QUE du rendu : la navigation clavier
-           indexe `filtered`, plat, et ne les rencontre donc jamais. -->
+      <!-- Groups and separators are ONLY rendering: the keyboard navigation indexes
+           `filtered`, which is flat, and therefore never meets them. -->
       <template v-for="node in rendered" :key="node.key">
         <VComboboxSeparator v-if="node.kind === 'separator'" />
 
@@ -780,8 +771,8 @@ watch(
         </VComboboxOption>
       </template>
 
-      <!-- Ordre chargement → vide → contenu : pendant une
-           requête, le panneau ne doit pas annoncer « aucun résultat ». -->
+      <!-- Order loading → empty → content: during a request, the panel must not
+           announce "no result". -->
       <div v-if="loading && filtered.length === 0" class="v-combobox-state">
         <slot name="loading">
           <VSpinner :label="resolvedLoadingText" />
@@ -792,9 +783,9 @@ watch(
         <slot name="empty" :query="searchTerm">{{ resolvedEmptyText }}</slot>
       </div>
 
-      <!-- Sentinelle du scroll infini ET emplacement du spinner de page
-           suivante : un seul nœud, donc stable — un `v-if` sur `loading`
-           détruirait la sentinelle et invaliderait l'observation. -->
+      <!-- The infinite-scroll sentinel AND the slot of the next-page spinner: a single
+           node, hence stable — a `v-if` on `loading` would destroy the sentinel and
+           invalidate the observation. -->
       <div v-if="hasMore" ref="sentinelEl" class="v-combobox-more" aria-hidden="true">
         <VSpinner v-if="loading" :label="resolvedLoadingText" />
       </div>
@@ -805,8 +796,8 @@ watch(
 <style>
 @layer vectis.components {
   .v-combobox {
-    /* confine l'ancre à cette instance (posée sur la racine, ancêtre commun du
-       contrôle et du panneau — même en top-layer le panneau reste descendant) */
+    /* Confines the anchor to this instance (set on the root, the common ancestor of
+       the control and the panel — even in the top layer the panel stays a descendant) */
     anchor-scope: --combobox-anchor;
     width: 100%;
     font-family: var(--vectis-text-family);
@@ -817,22 +808,22 @@ watch(
     display: block;
   }
 
-  /* Le panneau vient de `VPopover` : élément popover, état, ancrage, placement et
-     chrome (`.v-panel` via `surface`). Il porte aussi `v-control` (le template)
-     — les options et les rangées d'état lisent les `--control-*` hérités, aucune
-     table de tailles locale. Ne restent ici que les règles propres à la liste :
-     largeur calée sur l'ancre et zone défilante. */
+  /* The panel comes from `VPopover`: the popover element, its state, anchoring,
+     placement and chrome (`.v-panel` through `surface`). It also carries `v-control`
+     (see the template) — the options and the state rows read the inherited
+     `--control-*`, with no local size table. Only the rules specific to the list stay
+     here: a width aligned on the anchor, and the scroll area. */
   .v-combobox-panel {
     min-inline-size: anchor-size(width);
     max-block-size: var(--vectis-control-size-combobox-list-max-block);
     overflow: auto;
   }
 
-  /* Chevron + croix (clearable de VInput) posés en ABSOLU à droite du champ : ils
-     restent alignés à droite/centrés quels que soient les Chips (retour à la
-     ligne) ou le repli de l'input. On réserve la place correspondante à droite
-     pour que le texte/les Chips ne passent pas dessous (chevron seul, ou croix
-     + chevron). Vertical : translate séparé du rotate (le chevron pivote). */
+  /* Chevron + cross (VInput's clearable) placed ABSOLUTELY on the right of the field:
+     they stay right-aligned and centred whatever the Chips (wrapping) or the folding
+     of the input. The corresponding room is reserved on the right so the text/Chips do
+     not pass under them (chevron alone, or cross + chevron). Vertically: translate is
+     kept separate from rotate (the chevron rotates). */
   .v-combobox .v-input-field {
     position: relative;
     padding-inline-end: calc(
@@ -847,9 +838,9 @@ watch(
     );
   }
 
-  /* Chevron et spinner partagent l'emplacement : même boîte (--vectis-icon-size,
-     posée par VInput sur les spinners enfants directs du champ), donc le padding
-     réservé ci-dessus vaut pour les deux et l'échange ne décale rien. */
+  /* Chevron and spinner share the slot: the same box (--vectis-icon-size, set by
+     VInput on the spinners that are direct children of the field), so the padding
+     reserved above holds for both and the swap shifts nothing. */
   .v-combobox-chevron,
   .v-combobox-spinner {
     position: absolute;
@@ -867,7 +858,8 @@ watch(
     rotate: 180deg;
   }
 
-  /* croix de VInput : posée à gauche du chevron, centrée, marge négative annulée */
+  /* VInput's cross: placed to the left of the chevron, centred, negative margin
+     cancelled */
   .v-combobox .v-input-clear {
     position: absolute;
     inset-inline-end: calc(
@@ -878,16 +870,16 @@ watch(
     margin-inline: 0;
   }
 
-  /* multiple : le champ accueille les Chips (retour à la ligne). Hauteur calée
-     sur le contrôle (`--control-height`, size/compact via .v-control de VInput).
-     La hauteur des Chips est redite ici en `--chip-height` parce qu'elle vit
-     dans le sous-arbre du VChip, hors de portée du champ : ces quatre règles
-     doivent rester le miroir exact de `chipSize`/`chipCompact` (script).
-     L'input est forcé à cette MÊME hauteur au lieu du `100%` hérité de VInput :
-     sinon sa hauteur intrinsèque dépasse les Chips et fait grandir le champ.
-     Résultat : champ = --control-height constant, input jamais plus haut que
-     les Chips, aucun saut au focus. Ordre significatif : les tailles sont à
-     spécificité égale entre elles, la variante compact vient en dernier. */
+  /* multiple: the field hosts the Chips (which wrap). Height aligned on the control
+     (`--control-height`, size/compact through VInput's .v-control). The Chips' height
+     is restated here as `--chip-height` because it lives inside the VChip subtree, out
+     of the field's reach: these four rules must stay the exact mirror of
+     `chipSize`/`chipCompact` (in the script). The input is forced to that SAME height
+     instead of the `100%` inherited from VInput: otherwise its intrinsic height exceeds
+     the Chips and makes the field grow. The result: the field stays at a constant
+     --control-height, the input is never taller than the Chips, and there is no jump on
+     focus. The order is significant: the sizes are at equal specificity with each
+     other, so the compact variant comes last. */
   .v-combobox[data-multiple] {
     --chip-height: var(--vectis-control-height-xs);
   }
@@ -915,10 +907,10 @@ watch(
     height: var(--chip-height);
   }
 
-  /* hors édition (avec sélection) : sortir l'input du flux (position absolue,
-     taille nulle) — sinon, même à largeur nulle, il déborde sur une seconde
-     ligne sous les Chips et laisse un vide. Il reste dans le DOM et focusable :
-     onControlClick / Tab le réaffichent (data-collapsed retombe au focus). */
+  /* Outside editing (with a selection): take the input out of the flow (absolutely
+     positioned, zero-sized) — otherwise, even at zero width, it overflows onto a second
+     line under the Chips and leaves a gap. It stays in the DOM and focusable:
+     onControlClick / Tab bring it back (data-collapsed drops on focus). */
   .v-combobox[data-collapsed] .v-input-control {
     position: absolute;
     width: 0;
@@ -926,10 +918,10 @@ watch(
     padding: 0;
   }
 
-  /* États plein panneau (« aucun résultat », chargement) : même gabarit qu'une
-     option — mêmes `--control-*` héritées du panneau, qui porte `v-control`
-     (le spinner suit aussi, via le contexte VIcon du même bloc).
-     `flex: none` : le panneau est un flex column, l'état ne doit pas s'écraser. */
+  /* Full-panel states ("no result", loading): the same template as an option — the
+     same `--control-*` inherited from the panel, which carries `v-control` (the spinner
+     follows too, through the VIcon context of the same block). `flex: none`: the panel
+     is a flex column, and the state must not be squashed. */
   .v-combobox-state {
     display: flex;
     flex: none;
@@ -941,8 +933,8 @@ watch(
     color: var(--vectis-color-text-muted);
   }
 
-  /* Pied de liste : sentinelle du scroll infini (une boîte de hauteur nulle
-     rendrait l'intersection fragile) et emplacement du spinner de page suivante. */
+  /* Foot of the list: the infinite-scroll sentinel (a zero-height box would make the
+     intersection fragile) and the slot of the next-page spinner. */
   .v-combobox-more {
     display: flex;
     flex: none;

@@ -1,31 +1,64 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { computed } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VBreadcrumb from './VBreadcrumb.vue'
 
+const t = storyText({
+  en: {
+    home: 'Home',
+    projects: 'Projects',
+    settings: 'Settings',
+    designSystem: 'Design system',
+    components: 'Components',
+    navigation: 'Navigation',
+    firstLevelLong: 'A first level with a long label',
+    secondLevelLonger: 'A second level, longer still',
+    endlessCurrentPage: 'An endless current page',
+  },
+  fr: {
+    home: 'Accueil',
+    projects: 'Projets',
+    settings: 'Paramètres',
+    designSystem: 'Design system',
+    components: 'Composants',
+    navigation: 'Navigation',
+    firstLevelLong: 'Un premier niveau au libellé long',
+    secondLevelLonger: 'Un deuxième niveau encore plus long',
+    endlessCurrentPage: 'Page courante interminable',
+  },
+})
+
 const meta = {
-  title: 'Composants/Breadcrumb',
+  title: 'Components/Breadcrumb',
   component: VBreadcrumb,
+  // `items` is required, and every story builds its own list in `render` so the
+  // labels follow the locale: the meta only has to satisfy the type.
+  args: { items: [] },
 } satisfies Meta<typeof VBreadcrumb>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  args: {
-    currentPath: '/projets/vectis/parametres',
-    items: [
-      { label: 'Accueil', href: '/' },
-      { label: 'Projets', href: '/projets' },
-      { label: 'Vectis', href: '/projets/vectis' },
-      { label: 'Paramètres', href: '/projets/vectis/parametres' },
-    ],
-  },
+  render: () => ({
+    components: { VBreadcrumb },
+    setup: () => ({
+      items: computed(() => [
+        { label: t.value.home, href: '/' },
+        { label: t.value.projects, href: '/projects' },
+        { label: 'Vectis', href: '/projects/vectis' },
+        { label: t.value.settings, href: '/projects/vectis/settings' },
+      ]),
+    }),
+    template: `<VBreadcrumb :items="items" current-path="/projects/vectis/settings" />`,
+  }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(canvas.getByRole('navigation', { name: "Fil d'Ariane" })).toBeVisible()
-    // l'item actif est détecté via currentPath : lien cliquable + aria-current
-    await expect(canvas.getByRole('link', { name: 'Paramètres' })).toHaveAttribute(
+    await expect(canvas.getByRole('navigation', { name: 'Breadcrumb' })).toBeVisible()
+    // the active item is detected through currentPath: a clickable link + aria-current
+    await expect(canvas.getByRole('link', { name: 'Settings' })).toHaveAttribute(
       'aria-current',
       'page',
     )
@@ -33,128 +66,140 @@ export const Default: Story = {
   },
 }
 
-export const SeparateurIcone: Story = {
-  // Une chaîne est TOUJOURS un nom d'icône ; une image se déclare en `{ src }`
-  // (cf. SeparateurImage). Note RTL : une icône directionnelle ne se retourne
-  // pas automatiquement — à vérifier avec le toggle de la toolbar.
-  args: {
-    separator: 'arrow_forward',
-    currentPath: '/projets/vectis',
-    items: [
-      { label: 'Accueil', href: '/' },
-      { label: 'Projets', href: '/projets' },
-      { label: 'Vectis', href: '/projets/vectis' },
-    ],
-  },
+export const IconSeparator: Story = {
+  // A string is ALWAYS an icon name; an image is declared as `{ src }` (see
+  // ImageSeparator). RTL note: a directional icon does not flip automatically — check
+  // it with the toolbar toggle.
+  render: () => ({
+    components: { VBreadcrumb },
+    setup: () => ({
+      items: computed(() => [
+        { label: t.value.home, href: '/' },
+        { label: t.value.projects, href: '/projects' },
+        { label: 'Vectis', href: '/projects/vectis' },
+      ]),
+    }),
+    template: `
+      <VBreadcrumb :items="items" separator="arrow_forward" current-path="/projects/vectis" />
+    `,
+  }),
   play: async ({ canvasElement }) => {
     const separators = canvasElement.querySelectorAll('.v-breadcrumb-separator')
     await expect(separators).toHaveLength(3)
-    // le premier item n'est précédé d'aucun séparateur (règle :first-child)
+    // the first item is preceded by no separator (the :first-child rule)
     await expect(separators[0]).not.toBeVisible()
     await expect(separators[1]).toBeVisible()
     await expect(separators[2]).toBeVisible()
   },
 }
 
-export const SeparateurImage: Story = {
-  // Rendu explicite `{ src }` — aucune devinette sur le contenu de la chaîne.
-  args: {
-    separator: {
-      src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800px' height='800px' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M10 3V6H4L4 10H10L10 13L11 13L16 8L11 3L10 3Z' fill='%23000000'/%3E%3Cpath d='M0 2L1.38281e-06 14H2L2 2L0 2Z' fill='%23000000'/%3E%3C/svg%3E",
-    },
-    currentPath: '/projets/vectis',
-    items: [
-      { label: 'Accueil', href: '/' },
-      { label: 'Projets', href: '/projets' },
-      { label: 'Vectis', href: '/projets/vectis' },
-    ],
-  },
-}
-
-export const AvecIcones: Story = {
-  args: {
-    currentPath: '/projets/vectis',
-    items: [
-      { label: 'Accueil', href: '/', iconStart: 'home' },
-      { label: 'Projets', href: '/projets', iconStart: 'folder' },
-      {
-        label: 'Vectis',
-        href: '/projets/vectis',
-        iconStart: {
-          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2' y='2' width='12' height='12' rx='3' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E",
-        },
+export const ImageSeparator: Story = {
+  // An explicit `{ src }` render — no guessing about the string's content.
+  render: () => ({
+    components: { VBreadcrumb },
+    setup: () => ({
+      separator: {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800px' height='800px' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M10 3V6H4L4 10H10L10 13L11 13L16 8L11 3L10 3Z' fill='%23000000'/%3E%3Cpath d='M0 2L1.38281e-06 14H2L2 2L0 2Z' fill='%23000000'/%3E%3C/svg%3E",
       },
-    ],
-  },
+      items: computed(() => [
+        { label: t.value.home, href: '/' },
+        { label: t.value.projects, href: '/projects' },
+        { label: 'Vectis', href: '/projects/vectis' },
+      ]),
+    }),
+    template: `
+      <VBreadcrumb :items="items" :separator="separator" current-path="/projects/vectis" />
+    `,
+  }),
 }
 
-export const Tronque: Story = {
-  args: {
-    maxItems: 4,
-    currentPath: '/a/b/c/d/e/f/g',
-    items: [
-      { label: 'Accueil', href: '/', iconStart: 'home' },
-      { label: 'Projets', href: '/a' },
-      { label: 'Design system', href: '/a/b' },
-      { label: 'Vectis', href: '/a/b/c' },
-      { label: 'Composants', href: '/a/b/c/d' },
-      { label: 'Navigation', href: '/a/b/c/d/e' },
-      { label: 'Breadcrumb', href: '/a/b/c/d/e/f' },
-      { label: 'Paramètres', href: '/a/b/c/d/e/f/g' },
-    ],
-  },
+export const WithIcons: Story = {
+  render: () => ({
+    components: { VBreadcrumb },
+    setup: () => ({
+      items: computed(() => [
+        { label: t.value.home, href: '/', iconStart: 'home' },
+        { label: t.value.projects, href: '/projects', iconStart: 'folder' },
+        {
+          label: 'Vectis',
+          href: '/projects/vectis',
+          iconStart: {
+            src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2' y='2' width='12' height='12' rx='3' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E",
+          },
+        },
+      ]),
+    }),
+    template: `<VBreadcrumb :items="items" current-path="/projects/vectis" />`,
+  }),
+}
+
+export const Truncated: Story = {
+  render: () => ({
+    components: { VBreadcrumb },
+    setup: () => ({
+      items: computed(() => [
+        { label: t.value.home, href: '/', iconStart: 'home' },
+        { label: t.value.projects, href: '/a' },
+        { label: t.value.designSystem, href: '/a/b' },
+        { label: 'Vectis', href: '/a/b/c' },
+        { label: t.value.components, href: '/a/b/c/d' },
+        { label: t.value.navigation, href: '/a/b/c/d/e' },
+        { label: 'Breadcrumb', href: '/a/b/c/d/e/f' },
+        { label: t.value.settings, href: '/a/b/c/d/e/f/g' },
+      ]),
+    }),
+    template: `<VBreadcrumb :items="items" :max-items="4" current-path="/a/b/c/d/e/f/g" />`,
+  }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const menu = canvasElement.querySelector('[role="menu"]') as HTMLElement
 
-    // visibles : 1er, avant-dernier, dernier (actif) + le bouton d'ellipsis
+    // visible: first, second-to-last, last (active) + the ellipsis button
     await expect(canvas.getAllByRole('listitem')).toHaveLength(4)
-    await expect(canvas.getByRole('link', { name: 'Accueil' })).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Home' })).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Breadcrumb' })).toBeVisible()
-    await expect(canvas.getByRole('link', { name: 'Paramètres' })).toHaveAttribute(
+    await expect(canvas.getByRole('link', { name: 'Settings' })).toHaveAttribute(
       'aria-current',
       'page',
     )
 
-    // fermé, le panneau du menu est hors layout : il ne recouvre pas les liens voisins
+    // when closed, the menu panel is out of the layout: it does not cover the neighbouring links
     await expect(getComputedStyle(menu).display).toBe('none')
 
-    // l'ellipsis ouvre le menu des seuls items masqués, qui sont des liens
-    const trigger = canvas.getByRole('button', { name: 'Afficher les pages intermédiaires' })
+    // the ellipsis opens the menu of the hidden items only, which are links
+    const trigger = canvas.getByRole('button', { name: 'Show intermediate pages' })
     await userEvent.click(trigger)
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
     const items = canvas.getAllByRole('menuitem')
     await expect(items.map((item) => item.textContent?.trim())).toEqual([
-      'Projets',
+      'Projects',
       'Design system',
       'Vectis',
-      'Composants',
+      'Components',
       'Navigation',
     ])
     await expect(canvas.getByRole('menuitem', { name: 'Vectis' })).toHaveAttribute('href', '/a/b/c')
 
-    // Esc referme et rend le focus au déclencheur
+    // Escape closes and hands the focus back to the trigger
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(false))
     await waitFor(() => expect(trigger).toHaveFocus())
   },
 }
 
-export const LibellesLongs: Story = {
-  args: {
-    currentPath: '/courante',
-    items: [
-      { label: 'Un premier niveau au libellé long', href: '/premier' },
-      { label: 'Un deuxième niveau encore plus long', href: '/deuxieme' },
-      { label: 'Page courante interminable', href: '/courante' },
-    ],
-  },
-  render: (args) => ({
+export const LongLabels: Story = {
+  render: () => ({
     components: { VBreadcrumb },
-    setup: () => ({ args }),
+    setup: () => ({
+      items: computed(() => [
+        { label: t.value.firstLevelLong, href: '/first' },
+        { label: t.value.secondLevelLonger, href: '/second' },
+        { label: t.value.endlessCurrentPage, href: '/current' },
+      ]),
+    }),
     template: `
       <div style="max-width: 280px">
-        <VBreadcrumb v-bind="args" />
+        <VBreadcrumb :items="items" current-path="/current" />
       </div>
     `,
   }),

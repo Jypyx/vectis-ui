@@ -1,9 +1,9 @@
 <template>
-  <!-- role="presentation" : le rôle implicite `separator` du <hr> est légitime
-       dans un role="menu" (cf. VMenuSeparator) mais pas parmi les enfants d'un
-       role="listbox", qui n'admet que `option` et `group`. Ici le filet est
-       purement visuel — le regroupement est déjà porté par les `role="group"`
-       et leurs libellés. -->
+  <!-- role="presentation": the <hr>'s implicit `separator` role is legitimate inside
+       a role="menu" (see VMenuSeparator) but not among the children of a
+       role="listbox", which admits only `option` and `group`. Here the rule is purely
+       visual — the grouping is already carried by the `role="group"`s and their
+       labels. -->
   <hr role="presentation" class="v-combobox-separator" />
 </template>
 
@@ -12,8 +12,8 @@
   .v-combobox-separator {
     flex: none;
     margin-block: 0;
-    /* pleine largeur jusqu'aux bords du panneau (compense son padding) ;
-       l'espacement vertical vient du gap du panneau */
+    /* Full width up to the panel edges (compensates its padding); the vertical
+       spacing comes from the panel's gap */
     margin-inline: calc(-1 * var(--vectis-space-1));
     border: none;
     block-size: 1px;

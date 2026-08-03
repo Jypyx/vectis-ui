@@ -1,7 +1,7 @@
 <template>
-  <!-- <hr> : role="separator" implicite, non focusable, hors tabulation.
-       Enfant direct d'une <ul>, ce que le HTML autorise explicitement entre
-       deux groupes d'items de liste. -->
+  <!-- <hr>: implicit role="separator", not focusable, out of the tab order. A direct
+       child of a <ul>, which HTML explicitly allows between two groups of list
+       items. -->
   <hr class="v-side-nav-separator" />
 </template>
 
@@ -9,8 +9,8 @@
 @layer vectis.components {
   .v-side-nav-separator {
     flex: none;
-    /* Le retrait n'a pas cours ici : un filet sépare des sections, il ne
-       s'aligne pas sur la hiérarchie des rangées qu'il encadre. */
+    /* The indent does not apply here: a rule separates sections, it does not align on
+       the hierarchy of the rows it frames. */
     margin-block: var(--vectis-space-2);
     margin-inline: var(--control-padding-inline);
     border: none;

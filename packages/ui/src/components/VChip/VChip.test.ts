@@ -4,17 +4,17 @@ import { describe, expect, it, vi } from 'vitest'
 import VChip from './VChip.vue'
 
 describe('VChip', () => {
-  it('statique sans interaction : aucun bouton ni lien, action rendue en span', () => {
+  it('static with no interaction: no button, no link, the action rendered as a span', () => {
     const { container, queryByRole, getByText } = render(VChip, {
-      slots: { default: 'Étiquette' },
+      slots: { default: 'Label' },
     })
     expect(queryByRole('button')).toBeNull()
     expect(queryByRole('link')).toBeNull()
     expect(container.querySelector('.v-chip-action')?.tagName).toBe('SPAN')
-    expect(getByText('Étiquette')).toBeTruthy()
+    expect(getByText('Label')).toBeTruthy()
   })
 
-  it('clickable : bouton natif, le @click fallthrough atterrit sur le bouton', async () => {
+  it('clickable: a native button, the @click fallthrough lands on the button', async () => {
     const onClick = vi.fn()
     const { getByRole } = render(VChip, {
       props: { clickable: true },
@@ -27,7 +27,7 @@ describe('VChip', () => {
     expect(onClick).toHaveBeenCalledTimes(1)
   })
 
-  it('clickable disabled : attribut disabled natif posé', () => {
+  it('clickable disabled: the native disabled attribute is set', () => {
     const { getByRole } = render(VChip, {
       props: { clickable: true, disabled: true },
       slots: { default: 'Action' },
@@ -35,7 +35,7 @@ describe('VChip', () => {
     expect((getByRole('button') as HTMLButtonElement).disabled).toBe(true)
   })
 
-  it('href : rendu <a>, les attrs target/rel tombent sur le lien', () => {
+  it('href: rendered as <a>, the target/rel attrs land on the link', () => {
     const { getByRole } = render(VChip, {
       props: { href: '/docs' },
       attrs: { target: '_blank', rel: 'noopener' },
@@ -47,7 +47,7 @@ describe('VChip', () => {
     expect(link.getAttribute('rel')).toBe('noopener')
   })
 
-  it('lien inerte : disabled retire le href, pose aria-disabled et filtre onClick', async () => {
+  it('inert link: disabled removes the href, sets aria-disabled and filters onClick', async () => {
     const onClick = vi.fn()
     const { container } = render(VChip, {
       props: { href: '/docs', disabled: true },
@@ -62,49 +62,49 @@ describe('VChip', () => {
     expect(onClick).not.toHaveBeenCalled()
   })
 
-  it('priorité selectable > href : bouton aria-pressed, pas de lien', () => {
+  it('selectable > href priority: an aria-pressed button, no link', () => {
     const { getByRole, queryByRole } = render(VChip, {
       props: { selectable: true, href: '/docs' },
-      slots: { default: 'Filtre' },
+      slots: { default: 'Filter' },
     })
     expect(queryByRole('link')).toBeNull()
-    expect(getByRole('button', { name: 'Filtre' }).getAttribute('aria-pressed')).toBe('false')
+    expect(getByRole('button', { name: 'Filter' }).getAttribute('aria-pressed')).toBe('false')
   })
 
-  it('selectable : bouton aria-pressed synchronisé avec v-model:selected', async () => {
+  it('selectable: an aria-pressed button synchronized with v-model:selected', async () => {
     const { getByRole, emitted } = render(VChip, {
       props: { selectable: true, selected: false },
-      slots: { default: 'Filtre' },
+      slots: { default: 'Filter' },
     })
-    const button = getByRole('button', { name: 'Filtre' })
+    const button = getByRole('button', { name: 'Filter' })
     expect(button.getAttribute('aria-pressed')).toBe('false')
     await fireEvent.click(button)
     expect(emitted('update:selected')).toEqual([[true]])
   })
 
-  it('selectable disabled : aucun update:selected émis', async () => {
+  it('selectable disabled: no update:selected emitted', async () => {
     const { getByRole, emitted } = render(VChip, {
       props: { selectable: true, selected: false, disabled: true },
-      slots: { default: 'Filtre' },
+      slots: { default: 'Filter' },
     })
     await fireEvent.click(getByRole('button'))
     expect(emitted('update:selected')).toBeUndefined()
   })
 
-  it('check : remplace iconStart quand sélectionné', async () => {
+  it('check: replaces iconStart when selected', async () => {
     const { container, rerender } = render(VChip, {
       props: { selectable: true, check: true, iconStart: 'star', selected: true },
-      slots: { default: 'Filtre' },
+      slots: { default: 'Filter' },
     })
-    const icone = (nom: string) => container.querySelector(`.v-icon[data-icon='${nom}']`)
-    expect(icone('check')).toBeTruthy()
-    expect(icone('star')).toBeNull()
+    const icon = (name: string) => container.querySelector(`.v-icon[data-icon='${name}']`)
+    expect(icon('check')).toBeTruthy()
+    expect(icon('star')).toBeNull()
     await rerender({ selected: false })
-    expect(icone('check')).toBeNull()
-    expect(icone('star')).toBeTruthy()
+    expect(icon('check')).toBeNull()
+    expect(icon('star')).toBeTruthy()
   })
 
-  it('dismissible : émet dismiss sans imbriquer de boutons', async () => {
+  it('dismissible: emits dismiss without nesting buttons', async () => {
     const { getAllByRole, emitted } = render(VChip, {
       props: { selectable: true, dismissible: true, selected: true },
       slots: { default: 'Tag' },
@@ -112,11 +112,11 @@ describe('VChip', () => {
     const buttons = getAllByRole('button')
     expect(buttons).toHaveLength(2)
     for (const b of buttons) expect(b.closest('button')).toBe(b)
-    await fireEvent.click(getAllByRole('button', { name: 'Retirer' })[0]!)
+    await fireEvent.click(getAllByRole('button', { name: 'Remove' })[0]!)
     expect(emitted('dismiss')).toHaveLength(1)
   })
 
-  it('dismissIcon : croix intégrée par défaut (close), `{ src }` rendu en <img>', () => {
+  it('dismissIcon: the built-in cross by default (close), `{ src }` rendered as an <img>', () => {
     const { container, rerender } = render(VChip, {
       props: { dismissible: true },
       slots: { default: 'Tag' },
@@ -131,7 +131,7 @@ describe('VChip', () => {
     })
   })
 
-  it('slots #start/#end priment sur iconStart/iconEnd', () => {
+  it('the #start/#end slots win over iconStart/iconEnd', () => {
     const { queryByText, getByText } = render(VChip, {
       props: { iconStart: 'star', iconEnd: 'cancel' },
       slots: { default: 'Tag', start: '<b>S</b>', end: '<b>E</b>' },
@@ -142,7 +142,7 @@ describe('VChip', () => {
     expect(queryByText('cancel')).toBeNull()
   })
 
-  it('icône seule : data-icon-only posé seulement sans libellé', () => {
+  it('icon alone: data-icon-only set only when there is no label', () => {
     const { container } = render(VChip, { props: { iconStart: 'favorite' } })
     expect(container.querySelector('.v-chip')?.hasAttribute('data-icon-only')).toBe(true)
     const withLabel = render(VChip, { props: { iconStart: 'favorite' }, slots: { default: 'Tag' } })
@@ -151,7 +151,7 @@ describe('VChip', () => {
     expect(noIcon.container.querySelector('.v-chip')?.hasAttribute('data-icon-only')).toBe(false)
   })
 
-  it('répartit les attrs : class/style sur la racine, le reste sur l’action', () => {
+  it('splits the attrs: class/style on the root, the rest on the action', () => {
     const { container } = render(VChip, {
       props: { clickable: true },
       attrs: { class: 'extra', style: 'margin: 4px;', 'data-x': '1' },
@@ -166,7 +166,7 @@ describe('VChip', () => {
     expect(action.classList.contains('extra')).toBe(false)
   })
 
-  it('data-attributes par défaut, couleur custom en --custom-color inline', () => {
+  it('default data-attributes, a custom colour as an inline --custom-color', () => {
     const { container, rerender } = render(VChip, { slots: { default: 'Tag' } })
     const root = container.querySelector('.v-chip') as HTMLElement
     expect(root.getAttribute('data-variant')).toBe('tonal')
@@ -181,7 +181,7 @@ describe('VChip', () => {
     })
   })
 
-  it('pose data-size/data-compact sur la racine v-control (défaut xs)', () => {
+  it('sets data-size/data-compact on the v-control root (xs by default)', () => {
     const { container, rerender } = render(VChip, { slots: { default: 'Tag' } })
     const root = container.querySelector('.v-chip') as HTMLElement
     expect(root.classList.contains('v-control')).toBe(true)

@@ -12,42 +12,40 @@ import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
 /**
- * Fil d'Ariane : <nav> + liste ordonnée, piloté par la prop `items` (pure
- * dérivation de données, aucune API navigateur — SSR-safe). Les séparateurs
- * sont des VIcon décoratifs (aria-hidden), le premier est masqué en CSS.
- * L'item actif est dérivé de `currentPath` (aria-current="page" sur l'item
- * au href correspondant, qui reste un lien cliquable — pattern ARIA APG).
- * Au-delà de `maxItems`, les items intermédiaires sont repliés dans un
- * VMenu ouvert par un bouton « … ».
+ * A breadcrumb trail: <nav> + an ordered list, driven by the `items` prop (pure
+ * data derivation, no browser API — SSR-safe). The separators are decorative VIcons
+ * (aria-hidden), and the first one is hidden in CSS. The active item is derived from
+ * `currentPath` (aria-current="page" on the item with the matching href, which stays
+ * a clickable link — the ARIA APG pattern). Past `maxItems`, the intermediate items
+ * are folded into a VMenu opened by an "…" button.
  */
 export interface BreadcrumbItem {
-  /** Libellé du segment. */
+  /** Label of the segment. */
   label: string
-  /** Destination du segment ; comparée à `currentPath` pour aria-current. */
+  /** Destination of the segment; compared with `currentPath` for aria-current. */
   href: string
   /**
-   * Icône avant le libellé : nom Material Symbols Rounded, ou URL
-   * d'icône, ou rendu explicite (`{ src: '/logo.svg' }`, `{ component }`…).
+   * Icon before the label: a Material Symbols Rounded name, an icon URL, or an
+   * explicit render (`{ src: '/logo.svg' }`, `{ component }`…).
    */
   iconStart?: IconSource
 }
 
 interface BreadcrumbProps {
-  /** Les segments, du plus général au plus profond. */
+  /** The segments, from the most general to the deepest. */
   items: BreadcrumbItem[]
-  /** Nom accessible de la navigation. Défaut : dictionnaire du DS. */
+  /** Accessible name of the navigation. Default: the DS dictionary. */
   label?: string
-  /** Chemin courant ; l'item dont le href correspond reçoit aria-current="page". */
+  /** Current path; the item whose href matches receives aria-current="page". */
   currentPath?: string
-  /** Séparateur : nom d'icône, ou rendu explicite (comme `iconStart`). */
+  /** Separator: an icon name, or an explicit render (like `iconStart`). */
   separator?: IconSource
   /**
-   * Au-delà de ce nombre d'items : 1er + « … » + avant-dernier + dernier ;
-   * le menu du bouton « … » liste uniquement les items masqués. Minimum
-   * effectif : 3.
+   * Past this number of items: first + "…" + second-to-last + last; the "…" button's
+   * menu lists the hidden items only. Effective minimum: 3.
    */
   maxItems?: number
-  /** Libellé accessible du bouton d'ellipsis. Défaut : dictionnaire du DS. */
+  /** Accessible label of the ellipsis button. Default: the DS dictionary. */
   ellipsisLabel?: string
 }
 
@@ -63,7 +61,7 @@ const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.breadcrumb.label)
 const resolvedEllipsisLabel = computed(() => props.ellipsisLabel ?? m.value.breadcrumb.ellipsis)
 
-/** Normalisation pure (SSR-safe) : slash final retiré, sauf pour '/'. */
+/** Pure normalization (SSR-safe): trailing slash removed, except for '/'. */
 function normalize(path: string): string {
   return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path
 }
@@ -76,9 +74,9 @@ function isCurrent(item: BreadcrumbItem): boolean {
 const truncated = computed(
   () => props.maxItems !== undefined && props.items.length > Math.max(props.maxItems, 3),
 )
-/** Items repliés dans le menu (du 2e à l'anté-avant-dernier). */
+/** Items folded into the menu (from the second to the third-from-last). */
 const hiddenItems = computed(() => (truncated.value ? props.items.slice(1, -2) : []))
-/** Items affichés dans la liste ; tronqué : 1er + avant-dernier + dernier. */
+/** Items displayed in the list; when truncated: first + second-to-last + last. */
 const visibleItems = computed(() =>
   truncated.value ? [props.items[0] as BreadcrumbItem, ...props.items.slice(-2)] : props.items,
 )
@@ -88,7 +86,7 @@ const visibleItems = computed(() =>
   <nav class="v-breadcrumb" :aria-label="ariaLabel">
     <ol class="v-breadcrumb-list">
       <template v-for="(item, index) in visibleItems" :key="item.href">
-        <!-- le menu « … » s'insère entre le 1er item et l'avant-dernier -->
+        <!-- the "…" menu is inserted between the first item and the second-to-last -->
         <li v-if="truncated && index === 1" class="v-breadcrumb-item v-breadcrumb-ellipsis">
           <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separator)" />
           <VMenu compact>
@@ -125,8 +123,8 @@ const visibleItems = computed(() =>
 <style>
 @layer vectis.components {
   .v-breadcrumb {
-    /* API de contexte de VIcon : icônes d'items et séparateurs suivent la
-       typo sm du fil d'Ariane */
+    /* VIcon's context API: item icons and separators follow the breadcrumb's sm
+       typography */
     --vectis-icon-size: var(--vectis-icon-size-sm);
     --vectis-icon-opsz: 20;
   }

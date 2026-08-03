@@ -5,137 +5,132 @@ import * as VSideNavigationStories from './VSideNavigation.stories'
 
 # SideNavigation
 
-Navigation verticale d'application : une arborescence de liens **rendue inline** dans une barre
-latérale, repliable niveau par niveau. Elle se compose de sous-composants —
-`VSideNavigationItem`, `VSideNavigationGroup`, `VSideNavigationSeparator` — plutôt que d'un tableau
-d'items passé en prop : les libellés restent des slots, donc composables.
+Vertical application navigation: a tree of links **rendered inline** in a sidebar, collapsible
+level by level. It is composed of subcomponents — `VSideNavigationItem`, `VSideNavigationGroup`,
+`VSideNavigationSeparator` — rather than an array of items passed as a prop: the labels stay slots,
+hence composable.
 
-Le repli est **natif** : chaque branche est un `<details>`/`<summary>`, ce qui donne l'état,
-l'activation clavier, l'exclusivité entre frères et l'animation d'ouverture sans une ligne de
-JavaScript d'état. La structure est celle d'une liste (`<nav>` + `<ul>`/`<li>` imbriquées) : le
-comptage des éléments et la relation d'imbrication annoncés par les lecteurs d'écran _sont_
-l'information de hiérarchie.
+The folding is **native**: each branch is a `<details>`/`<summary>`, which gives the state, the
+activation keyboard, exclusivity between siblings and the opening animation without a line of state
+JavaScript. The structure is that of a list (`<nav>` + nested `<ul>`/`<li>`): the element counting
+and the nesting relation announced by screen readers _are_ the hierarchy information.
 
 <Canvas of={VSideNavigationStories.Default} />
 
 <Controls of={VSideNavigationStories.Default} />
 
-## Anatomie d'un item
+## Anatomy of an item
 
-Le libellé est le slot par défaut — c'est le seul contenu obligatoire. Autour de lui :
-`sublabel` (ou le slot `#sublabel`) ajoute une ligne secondaire, `icon` place une icône devant le
-libellé (nom d'icône **ou** rendu explicite `{ src }` / `{ component }`, comme partout ailleurs
-dans le DS ; le slot `#start` prime pour un contenu libre), et le slot `#end` accueille ce qu'on
-veut à droite — compteur, pastille, action.
+The label is the default slot — it is the only mandatory content. Around it: `sublabel` (or the
+`#sublabel` slot) adds a secondary line, `icon` places an icon before the label (an icon name **or**
+an explicit render `{ src }` / `{ component }`, as everywhere else in the DS; the `#start` slot wins
+for free content), and the `#end` slot takes whatever you want on the right — a counter, a badge, an
+action.
 
-<Canvas of={VSideNavigationStories.SousLabels} />
+<Canvas of={VSideNavigationStories.Sublabels} />
 
-Un item **sans** sous-items est soit un lien (`href`, rendu en `<a>`), soit un bouton qui émet
-`select`. Les attributs du consommateur (`target`, `rel`, `data-*`…) atterrissent sur le contrôle,
-jamais sur l'élément de liste.
+An item **without** subitems is either a link (`href`, rendered as an `<a>`) or a button emitting
+`select`. The consumer's attributes (`target`, `rel`, `data-*`…) land on the control, never on the
+list element.
 
-<Canvas of={VSideNavigationStories.Liens} />
+<Canvas of={VSideNavigationStories.Links} />
 
-## Sous-items
+## Subitems
 
-Le slot `#items` transforme l'item en branche : un chevron apparaît à droite, la rangée devient
-le déclencheur, et le clic déplie les sous-items. C'est récursif **sans limite de profondeur** —
-un sous-item est un `VSideNavigationItem` comme un autre, qui peut à son tour porter un `#items`.
+The `#items` slot turns the item into a branch: a chevron appears on the right, the row becomes the
+trigger, and clicking expands the subitems. It is recursive **with no depth limit** — a subitem is a
+`VSideNavigationItem` like any other, which can in turn carry an `#items`.
 
-Le retrait d'un niveau vaut **exactement la place que tient une icône de début** — icône plus
-gouttière : le libellé d'un sous-item tombe donc sur la même verticale que celui de sa branche
-parente, et la hiérarchie se lit sans effort. Il suit l'échelle des tailles tout seul. La
-surbrillance de survol et celle de la page courante, elles, restent pleine largeur.
+One level's indent is **exactly the room a start icon takes** — icon plus gutter: a subitem's label
+therefore lands on the same vertical as its parent branch's, and the hierarchy reads effortlessly.
+It follows the size scale on its own. The hover highlight and the current-page one, on the other
+hand, stay full width.
 
-`defaultOpen` ouvre une branche au premier rendu ; `v-model:open` la pilote depuis le
-consommateur (pour déplier la branche qui contient la route courante, par exemple).
+`defaultOpen` opens a branch on the first render; `v-model:open` drives it from the consumer (to
+expand the branch containing the current route, for instance).
 
-<Canvas of={VSideNavigationStories.SousItemsProfonds} />
+<Canvas of={VSideNavigationStories.Depth} />
 
-`exclusive` limite l'ouverture à **une branche par niveau** : ouvrir une section referme sa sœur.
-Le mécanisme est l'attribut natif `<details name>`, appliqué niveau par niveau — une branche
-profonde ne referme jamais une branche d'un autre niveau.
+`exclusive` limits opening to **one branch per level**: opening a section closes its sibling. The
+mechanism is the native `<details name>` attribute, applied level by level — a deep branch never
+closes a branch of another level.
 
-<Canvas of={VSideNavigationStories.Exclusif} />
+<Canvas of={VSideNavigationStories.Exclusive} />
 
-## Contenu à droite
+## Content on the right
 
-Le slot `#end` se place à droite du libellé et, sur une branche, **à gauche du chevron**.
+The `#end` slot sits to the right of the label and, on a branch, **to the left of the chevron**.
 
-Sur une **feuille**, il accueille n'importe quoi, y compris un contrôle : la rangée est un
-conteneur et le lien y est étiré par-dessous, si bien que toute la rangée reste cliquable sans
-que le bouton du slot soit imbriqué dans le lien. Sur une **branche**, la rangée est le
-`<summary>` lui-même et le slot y vit forcément : n'y placer que du contenu **non focusable**
-(compteur, pastille, badge). Un contrôle y resterait cliquable — son clic ne déplie pas la
-branche — mais le sous-arbre d'un `<summary>` sert de nom accessible et peut être aplati par
-certains lecteurs d'écran : le bouton n'est alors plus annoncé. Une action sur une section
-repliable se pose donc à côté de la navigation, pas dedans.
+On a **leaf** it takes anything, a control included: the row is a container and the link is
+stretched underneath it, so the whole row stays clickable without the slot's button being nested
+inside the link. On a **branch**, the row is the `<summary>` itself and the slot necessarily lives
+inside it: put only **non-focusable** content there (a counter, a badge). A control would stay
+clickable — its click does not expand the branch — but a `<summary>`'s subtree serves as its
+accessible name and may be flattened by some screen readers: the button would then no longer be
+announced. So an action on a collapsible section belongs next to the navigation, not inside it.
 
-<Canvas of={VSideNavigationStories.ContenuDeFin} />
+<Canvas of={VSideNavigationStories.EndContent} />
 
-## Groupes et séparateurs
+## Groups and separators
 
-`VSideNavigationGroup` coiffe une série d'items d'un intitulé de section, qui nomme la liste
-qu'il introduit. `VSideNavigationSeparator` trace un filet entre deux blocs. Ni l'un ni l'autre ne
-comptent comme un niveau de hiérarchie : les items qu'ils encadrent gardent le retrait de leur
-niveau réel.
+`VSideNavigationGroup` heads a series of items with a section title, which names the list it
+introduces. `VSideNavigationSeparator` draws a rule between two blocks. Neither counts as a
+hierarchy level: the items they frame keep the indent of their real level.
 
-L'intitulé occupe la hauteur d'une rangée, texte centré verticalement : le rythme vertical de la
-navigation reste le même de bout en bout, densité compacte comprise.
+The title occupies the height of a row, its text vertically centred: the navigation's vertical
+rhythm stays the same from end to end, compact density included.
 
-## Page courante
+## Current page
 
-`active` marque l'item de la page affichée : surbrillance accent et `aria-current`. Le
-consommateur le dérive de sa route — le composant ne connaît pas le routeur. Une branche repliée
-qui contient la page courante reste discrètement signalée, pour que la section active se repère
-sans être dépliée.
+`active` marks the item of the displayed page: an accent highlight and `aria-current`. The consumer
+derives it from its route — the component knows nothing of the router. A collapsed branch containing
+the current page stays discreetly flagged, so the active section can be spotted without expanding
+it.
 
-## Tailles
+## Sizes
 
-`size` vaut `sm` (32px) ou `md` (40px, défaut) et vient de l'échelle de tailles commune du DS ;
-`compact` retire 4px de hauteur. **`compact` n'est pas un mode « rail d'icônes replié »** : c'est
-la même densité que celle de `VButton` ou `VInput`. La taille est posée une seule fois sur la
-racine et descend à tous les niveaux, sous-listes comprises.
+`size` is `sm` (32px) or `md` (40px, the default) and comes from the DS's common size scale;
+`compact` removes 4px of height. **`compact` is not a "collapsed icon rail" mode**: it is the same
+density as `VButton`'s or `VInput`'s. The size is set once on the root and descends to every level,
+sublists included.
 
-<Canvas of={VSideNavigationStories.Tailles} />
+<Canvas of={VSideNavigationStories.Sizes} />
 
-## Icônes d'ouverture
+## Opening icons
 
-Par défaut, un chevron pivote de 180° à l'ouverture. `expandIcon` et `collapseIcon`, posées **sur
-la racine**, personnalisent l'iconographie de toutes les branches ; fournir `collapseIcon`
-bascule en mode permutation (les deux icônes sont rendues et échangées en CSS), utile pour un
-couple non directionnel comme « plus / moins ».
+By default, a chevron rotates 180° on opening. `expandIcon` and `collapseIcon`, set **on the root**,
+customize the iconography of every branch; supplying `collapseIcon` switches to swap mode (both
+icons are rendered and exchanged in CSS), useful for a non-directional pair such as "plus / minus".
 
-<Canvas of={VSideNavigationStories.IconesPersonnalisees} />
+<Canvas of={VSideNavigationStories.CustomIcons} />
 
-## Item désactivé
+## Disabled item
 
-`disabled` rend l'item inerte — lien sans cible, bouton désactivé, branche non dépliable — et le
-passe en nuances de gris par les tokens, jamais par de l'opacité. Il sort aussi du parcours des
-flèches.
+`disabled` makes the item inert — a link with no target, a disabled button, a branch that cannot be
+expanded — and switches it to greys through the tokens, never through opacity. It also leaves the
+arrow-navigation path.
 
-<Canvas of={VSideNavigationStories.ItemDesactive} />
+<Canvas of={VSideNavigationStories.DisabledItem} />
 
-## Textes longs
+## Long texts
 
-Libellé et sous-libellé sont tronqués par ellipse : la barre garde sa largeur quelle que soit la
-longueur des intitulés.
+Label and sublabel are truncated with an ellipsis: the bar keeps its width whatever the length of
+the titles.
 
-<Canvas of={VSideNavigationStories.TextesLongs} />
+<Canvas of={VSideNavigationStories.LongTexts} />
 
-## Accessibilité
+## Accessibility
 
-- La racine est un `<nav>` nommé (`label`, ou le dictionnaire du DS) : indispensable dès qu'une
-  page en compte plusieurs. Un `aria-label` ou un `aria-labelledby` du consommateur prime.
-- La hiérarchie est portée par des listes imbriquées, pas par le seul retrait visuel.
-- Les branches sont des `<details>`/`<summary>` : l'état déplié/replié est exposé nativement,
-  `Entrée` et `Espace` basculent la section focalisée, et le contenu d'une branche repliée sort
-  du parcours de tabulation comme de l'arbre d'accessibilité.
-- Pas de roving focus : **chaque rangée visible est un arrêt de tabulation**, comme dans une
-  liste de liens ordinaire. Les flèches Haut/Bas et Home/Fin déplacent le focus en complément —
-  elles ne font que le déplacer, jamais activer — en sautant les items désactivés et ceux d'une
-  branche repliée.
-- Les chevrons sont décoratifs : l'information d'état vient du `<details>`.
-- Un item désactivé porte `aria-disabled` et sort du parcours clavier.
-- Toutes les transitions (rotation du chevron, ouverture d'une branche) sont neutralisées sous
+- The root is a named `<nav>` (`label`, or the DS dictionary): indispensable as soon as a page holds
+  several. A consumer's `aria-label` or `aria-labelledby` wins.
+- The hierarchy is carried by nested lists, not by the visual indent alone.
+- The branches are `<details>`/`<summary>`: the expanded/collapsed state is exposed natively,
+  `Enter` and `Space` toggle the focused section, and the content of a collapsed branch leaves both
+  the tab order and the accessibility tree.
+- No roving focus: **every visible row is a tab stop**, as in an ordinary list of links. The Up/Down
+  arrows and Home/End move the focus in addition — they only move it, never activate — skipping
+  disabled items and those of a collapsed branch.
+- The chevrons are decorative: the state information comes from the `<details>`.
+- A disabled item carries `aria-disabled` and leaves the keyboard path.
+- Every transition (the chevron's rotation, a branch opening) is neutralized under
   `prefers-reduced-motion`.

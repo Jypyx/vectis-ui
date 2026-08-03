@@ -6,40 +6,40 @@ import VBreadcrumb from './VBreadcrumb.vue'
 import type { BreadcrumbItem } from './VBreadcrumb.vue'
 
 const items: BreadcrumbItem[] = [
-  { label: 'Accueil', href: '/' },
-  { label: 'Projets', href: '/projets' },
-  { label: 'Vectis', href: '/projets/vectis' },
+  { label: 'Home', href: '/' },
+  { label: 'Projects', href: '/projects' },
+  { label: 'Vectis', href: '/projects/vectis' },
 ]
 
 describe('VBreadcrumb', () => {
-  it('rend une navigation nommée avec liste ordonnée et un lien par item', () => {
+  it('renders a named navigation with an ordered list and one link per item', () => {
     const { getByRole, getAllByRole } = render(VBreadcrumb, { props: { items } })
-    expect(getByRole('navigation', { name: "Fil d'Ariane" })).toBeTruthy()
+    expect(getByRole('navigation', { name: 'Breadcrumb' })).toBeTruthy()
     expect(getByRole('list').tagName).toBe('OL')
     expect(getAllByRole('link')).toHaveLength(3)
-    expect(getByRole('link', { name: 'Accueil' }).getAttribute('href')).toBe('/')
+    expect(getByRole('link', { name: 'Home' }).getAttribute('href')).toBe('/')
   })
 
   describe('currentPath', () => {
-    it("pose aria-current='page' sur l'item au href correspondant, lui seul", () => {
+    it("sets aria-current='page' on the item with the matching href, and it alone", () => {
       const { getByRole } = render(VBreadcrumb, {
-        props: { items, currentPath: '/projets/vectis' },
+        props: { items, currentPath: '/projects/vectis' },
       })
       expect(getByRole('link', { name: 'Vectis' }).getAttribute('aria-current')).toBe('page')
-      expect(getByRole('link', { name: 'Accueil' }).hasAttribute('aria-current')).toBe(false)
-      expect(getByRole('link', { name: 'Projets' }).hasAttribute('aria-current')).toBe(false)
+      expect(getByRole('link', { name: 'Home' }).hasAttribute('aria-current')).toBe(false)
+      expect(getByRole('link', { name: 'Projects' }).hasAttribute('aria-current')).toBe(false)
     })
 
-    it('normalise le slash final des deux côtés', () => {
+    it('normalizes the trailing slash on both sides', () => {
       const { getByRole } = render(VBreadcrumb, {
-        props: { items, currentPath: '/projets/' },
+        props: { items, currentPath: '/projects/' },
       })
-      expect(getByRole('link', { name: 'Projets' }).getAttribute('aria-current')).toBe('page')
-      // la racine '/' n'est pas vidée par la normalisation
-      expect(getByRole('link', { name: 'Accueil' }).hasAttribute('aria-current')).toBe(false)
+      expect(getByRole('link', { name: 'Projects' }).getAttribute('aria-current')).toBe('page')
+      // the root '/' is not emptied by the normalization
+      expect(getByRole('link', { name: 'Home' }).hasAttribute('aria-current')).toBe(false)
     })
 
-    it("sans currentPath : aucun item n'est marqué courant", () => {
+    it('without currentPath: no item is marked as current', () => {
       const { getAllByRole } = render(VBreadcrumb, { props: { items } })
       for (const link of getAllByRole('link')) {
         expect(link.hasAttribute('aria-current')).toBe(false)
@@ -47,27 +47,27 @@ describe('VBreadcrumb', () => {
     })
   })
 
-  describe('séparateurs', () => {
-    it('un séparateur décoratif (aria-hidden) par item, chevron_right par défaut', () => {
+  describe('separators', () => {
+    it('one decorative separator (aria-hidden) per item, chevron_right by default', () => {
       const { container } = render(VBreadcrumb, { props: { items } })
       const separators = container.querySelectorAll('.v-breadcrumb-separator')
       expect(separators).toHaveLength(3)
       for (const sep of separators) {
         expect(sep.getAttribute('aria-hidden')).toBe('true')
-        // la classe est posée SUR le VIcon : le séparateur est lui-même la racine .v-icon
+        // the class is set ON the VIcon: the separator is itself the .v-icon root
         expect((sep as HTMLElement).dataset.icon).toBe('chevron_right')
       }
     })
 
-    it('separator : nom personnalisé', () => {
+    it('separator: a custom name', () => {
       const { container } = render(VBreadcrumb, {
         props: { items, separator: 'arrow_forward' },
       })
-      const icone = container.querySelector<HTMLElement>('.v-breadcrumb-separator')
-      expect(icone?.dataset.icon).toBe('arrow_forward')
+      const icon = container.querySelector<HTMLElement>('.v-breadcrumb-separator')
+      expect(icon?.dataset.icon).toBe('arrow_forward')
     })
 
-    it('separator `{ src }` : image explicite, jamais devinée depuis la chaîne', () => {
+    it('separator `{ src }`: an explicit image, never guessed from the string', () => {
       const { container } = render(VBreadcrumb, {
         props: { items, separator: { src: '/sep.svg' } },
       })
@@ -77,27 +77,27 @@ describe('VBreadcrumb', () => {
     })
   })
 
-  describe("icône d'item (iconStart)", () => {
-    it("nom d'icône → icône avant le libellé", () => {
+  describe('item icon (iconStart)', () => {
+    it('an icon name → an icon before the label', () => {
       const { getByRole } = render(VBreadcrumb, {
-        props: { items: [{ label: 'Accueil', href: '/', iconStart: 'home' }] },
+        props: { items: [{ label: 'Home', href: '/', iconStart: 'home' }] },
       })
-      const link = getByRole('link', { name: 'Accueil' })
+      const link = getByRole('link', { name: 'Home' })
       expect(link.querySelector<HTMLElement>('.v-icon')?.dataset.icon).toBe('home')
     })
 
-    it('`{ src }` → image', () => {
+    it('`{ src }` → an image', () => {
       const { getByRole } = render(VBreadcrumb, {
-        props: { items: [{ label: 'Accueil', href: '/', iconStart: { src: '/home.png' } }] },
+        props: { items: [{ label: 'Home', href: '/', iconStart: { src: '/home.png' } }] },
       })
-      const img = getByRole('link', { name: 'Accueil' }).querySelector('img')
+      const img = getByRole('link', { name: 'Home' }).querySelector('img')
       expect(img?.getAttribute('src')).toBe('/home.png')
     })
   })
 
   describe('maxItems', () => {
     const sixItems: BreadcrumbItem[] = [
-      { label: 'Accueil', href: '/' },
+      { label: 'Home', href: '/' },
       { label: 'Alpha', href: '/a', iconStart: 'folder' },
       { label: 'Bravo', href: '/a/b' },
       { label: 'Charlie', href: '/a/b/c' },
@@ -105,39 +105,39 @@ describe('VBreadcrumb', () => {
       { label: 'Echo', href: '/a/b/c/d/e' },
     ]
 
-    it('tronque : 1er + ellipsis + avant-dernier + dernier visibles', () => {
+    it('truncates: first + ellipsis + second-to-last + last visible', () => {
       const { getAllByRole, getByRole, queryByRole } = render(VBreadcrumb, {
         props: { items: sixItems, maxItems: 4, currentPath: '/a/b/c/d/e' },
       })
       expect(getAllByRole('listitem')).toHaveLength(4)
-      expect(getByRole('link', { name: 'Accueil' })).toBeTruthy()
+      expect(getByRole('link', { name: 'Home' })).toBeTruthy()
       expect(getByRole('link', { name: 'Delta' })).toBeTruthy()
       expect(getByRole('link', { name: 'Echo' }).getAttribute('aria-current')).toBe('page')
       expect(queryByRole('link', { name: 'Bravo' })).toBeNull()
-      expect(getByRole('button', { name: 'Afficher les pages intermédiaires' })).toBeTruthy()
+      expect(getByRole('button', { name: 'Show intermediate pages' })).toBeTruthy()
     })
 
-    it('le menu contient uniquement les items masqués, dans l’ordre, avec leur href', async () => {
+    it('the menu holds the hidden items only, in order, with their href', async () => {
       const { getByRole, getAllByRole, container } = render(VBreadcrumb, {
         props: { items: sixItems, maxItems: 4 },
       })
       ;(container.querySelector('[role="menu"]') as HTMLElement).showPopover()
       await nextTick()
 
-      // ordre et noms accessibles (l'icône aria-hidden n'entre pas dans le nom)
+      // order and accessible names (the aria-hidden icon does not enter the name)
       const menuitems = getAllByRole('menuitem')
       expect(menuitems).toHaveLength(3)
       for (const [index, name] of ['Alpha', 'Bravo', 'Charlie'].entries()) {
         expect(getByRole('menuitem', { name })).toBe(menuitems[index])
       }
       expect(getByRole('menuitem', { name: 'Bravo' }).getAttribute('href')).toBe('/a/b')
-      // l'icône de l'item masqué est reprise dans le menu
+      // the hidden item's icon is carried over into the menu
       expect(
         getByRole('menuitem', { name: 'Alpha' }).querySelector('.v-icon-symbol')?.textContent,
       ).toBe('folder')
     })
 
-    it("pas d'ellipsis quand le nombre d'items ne dépasse pas maxItems", () => {
+    it('no ellipsis when the number of items does not exceed maxItems', () => {
       const { getAllByRole, queryByRole } = render(VBreadcrumb, {
         props: { items: sixItems.slice(0, 4), maxItems: 4 },
       })

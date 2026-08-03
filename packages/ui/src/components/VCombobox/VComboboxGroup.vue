@@ -2,23 +2,23 @@
 import { useId } from 'vue'
 
 /**
- * Groupe nommé d'options (interne — rendu par `VCombobox` à partir d'une entrée
- * `ComboboxGroup` de sa prop `options`, jamais écrit par le consommateur).
+ * A named group of options (internal — rendered by `VCombobox` from a
+ * `ComboboxGroup` entry of its `options` prop, never written by the consumer).
  *
- * `role="group"` est un enfant AUTORISÉ d'un `role="listbox"` (ARIA 1.2) : c'est
- * le pendant du `<optgroup>` natif. Le libellé n'est ni focusable ni
- * sélectionnable — la navigation clavier du VCombobox indexe `filtered`, une
- * liste plate d'options, et ne voit donc jamais ce nœud.
+ * `role="group"` is an ALLOWED child of a `role="listbox"` (ARIA 1.2): it is the
+ * counterpart of the native `<optgroup>`. The label is neither focusable nor
+ * selectable — VCombobox's keyboard navigation indexes `filtered`, a flat list of
+ * options, and therefore never sees this node.
  */
 interface ComboboxGroupProps {
-  /** Nom du groupe (non sélectionnable). */
+  /** Name of the group (not selectable). */
   label: string
 }
 
 defineProps<ComboboxGroupProps>()
 
 defineSlots<{
-  /** Les options du groupe. */
+  /** The options of the group. */
   default(): unknown
 }>()
 
@@ -34,9 +34,9 @@ const labelId = useId()
 
 <style>
 @layer vectis.components {
-  /* `flex: none` (contrairement à `.v-menu-group`) : le panneau du VCombobox est
-     un flex column borné (`max-block-size` + `overflow: auto`), un groupe s'y
-     écraserait — même raison que `.v-combobox-state` et `.v-combobox-more`. */
+  /* `flex: none` (unlike `.v-menu-group`): VCombobox's panel is a bounded flex
+     column (`max-block-size` + `overflow: auto`), where a group would be squashed —
+     the same reason as `.v-combobox-state` and `.v-combobox-more`. */
   .v-combobox-group {
     display: flex;
     flex: none;
@@ -44,12 +44,12 @@ const labelId = useId()
     gap: var(--vectis-space-1);
   }
 
-  /* Micro-label de section : rôle overline (sans capitales forcées — la casse
-     du libellé appartient au consommateur). Retrait ET hauteur décalquent la
-     recette des options (`--control-padding-inline` et `--control-height`
-     héritées du panneau) : l'en-tête tient la même hauteur qu'une rangée,
-     compact compris, et le rythme vertical de la liste ne casse pas. Seule la
-     typo ne suit pas l'échelle (rôle overline), d'où le centrage vertical. */
+  /* Section micro-label: the overline role (no forced capitals — the label's case
+     belongs to the consumer). Indent AND height trace the options' recipe
+     (`--control-padding-inline` and `--control-height`, inherited from the panel):
+     the header holds the same height as a row, compact included, so the list's
+     vertical rhythm does not break. Only the typography stays outside the scale (the
+     overline role), hence the vertical centring. */
   .v-combobox-group-label {
     display: flex;
     align-items: center;

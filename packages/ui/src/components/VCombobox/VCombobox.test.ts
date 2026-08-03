@@ -5,22 +5,25 @@ import { defineComponent, h, nextTick, ref } from 'vue'
 import VCombobox from './VCombobox.vue'
 import type { ComboboxOption } from './VCombobox.vue'
 
+// `Réunion` carries an accent on purpose: it is what the accent-insensitive
+// filtering is asserted against, in both directions (accented query on an accented
+// label, and the reverse).
 const OPTIONS = [
   { value: 'fr', label: 'France' },
-  { value: 'be', label: 'Belgique' },
-  { value: 'sn', label: 'Sénégal' },
+  { value: 'be', label: 'Belgium' },
+  { value: 're', label: 'Réunion' },
   { value: 'mc', label: 'Monaco', disabled: true },
 ]
 
 function renderCombobox(props: Record<string, unknown> = {}) {
   return render(VCombobox, {
     props: { options: OPTIONS, modelValue: '', ...props },
-    attrs: { 'aria-label': 'Pays' },
+    attrs: { 'aria-label': 'Country' },
   })
 }
 
 describe('VCombobox', () => {
-  it('contrat ARIA : combobox lié au listbox, activedescendant en navigation', async () => {
+  it('ARIA contract: the combobox bound to the listbox, activedescendant while navigating', async () => {
     const { getByRole, container } = renderCombobox()
     const input = getByRole('combobox')
     const listbox = container.querySelector('[role="listbox"]') as HTMLElement
@@ -34,33 +37,33 @@ describe('VCombobox', () => {
     )
   })
 
-  it('filtre sans tenir compte des accents', async () => {
+  it('filters regardless of accents', async () => {
     const { getByRole, container } = renderCombobox()
     const input = getByRole('combobox') as HTMLInputElement
-    await fireEvent.update(input, 'sene')
+    await fireEvent.update(input, 'reun')
     const options = [...container.querySelectorAll('[role="option"]')]
-    expect(options.map((o) => o.textContent?.trim())).toEqual(['Sénégal'])
+    expect(options.map((o) => o.textContent?.trim())).toEqual(['Réunion'])
   })
 
-  it('sélection simple : Enter choisit l’option active et ferme', async () => {
+  it('single selection: Enter picks the active option and closes', async () => {
     const { getByRole, emitted } = renderCombobox()
     const input = getByRole('combobox') as HTMLInputElement
     await fireEvent.update(input, 'bel')
     await fireEvent.keyDown(input, { key: 'Enter' })
     expect(emitted('update:modelValue')).toEqual([['be']])
     expect(input.getAttribute('aria-expanded')).toBe('false')
-    // hors édition, l'input affiche le libellé
-    expect(input.value).toBe('Belgique')
+    // outside editing, the input displays the label
+    expect(input.value).toBe('Belgium')
   })
 
-  it('sélection simple par clic : l’input affiche le libellé choisi (parent v-model)', async () => {
-    // Régression : avec defineModel + v-model parent, relire model.value juste
-    // après l'avoir écrit renvoie l'ancienne valeur — le libellé affiché doit
-    // venir de l'option choisie, pas d'une re-dérivation depuis le modèle.
+  it('single selection by click: the input displays the chosen label (parent v-model)', async () => {
+    // With defineModel + a parent v-model, re-reading model.value just after writing
+    // it returns the old value — the displayed label must come from the chosen option,
+    // not from a re-derivation out of the model.
     const Harness = defineComponent({
       components: { VCombobox },
       setup: () => ({ options: OPTIONS, value: ref('') }),
-      template: `<VCombobox :options="options" v-model="value" aria-label="Pays" />
+      template: `<VCombobox :options="options" v-model="value" aria-label="Country" />
                  <output>{{ value }}</output>`,
     })
     const { getByRole, container } = render(Harness)
@@ -72,12 +75,12 @@ describe('VCombobox', () => {
 
     await fireEvent.update(input, 'bel')
     await nextTick()
-    await fireEvent.click(optionByText('Belgique'))
+    await fireEvent.click(optionByText('Belgium'))
     await nextTick()
     expect(container.querySelector('output')?.textContent).toBe('be')
-    expect(input.value).toBe('Belgique')
+    expect(input.value).toBe('Belgium')
 
-    // 2e choix : rouvre, cherche France, clique → l'input ne doit PAS rester sur « Belgique »
+    // 2nd choice: reopen, search France, click → the input must NOT stay on "Belgium"
     await fireEvent.click(input)
     await fireEvent.update(input, 'France')
     await nextTick()
@@ -87,55 +90,55 @@ describe('VCombobox', () => {
     expect(input.value).toBe('France')
   })
 
-  it('rouvrir en simple ne filtre pas sur la valeur choisie (liste complète, filtre à la frappe)', async () => {
+  it('reopening in single mode does not filter on the chosen value (the full list, filtering on typing)', async () => {
     const { getByRole, container } = renderCombobox({ modelValue: 'fr' })
     const input = getByRole('combobox') as HTMLInputElement
-    expect(input.value).toBe('France') // le libellé reste affiché
+    expect(input.value).toBe('France') // the label stays displayed
     const labels = () =>
       [...container.querySelectorAll('[role="option"] .v-combobox-option-label')].map((o) =>
         o.textContent?.trim(),
       )
 
-    // la valeur sélectionnée n'est PAS un filtre : toute la liste est proposée
-    expect(labels()).toEqual(['France', 'Belgique', 'Sénégal', 'Monaco'])
+    // the selected value is NOT a filter: the whole list is offered
+    expect(labels()).toEqual(['France', 'Belgium', 'Réunion', 'Monaco'])
 
-    // le filtre ne s'active qu'à la frappe
-    await fireEvent.update(input, 'séné')
-    expect(labels()).toEqual(['Sénégal'])
+    // the filter only kicks in on typing — and an accented query matches too
+    await fireEvent.update(input, 'réun')
+    expect(labels()).toEqual(['Réunion'])
   })
 
-  it('Entrée sélectionne l’unique résultat (même après un filtre sans résultat)', async () => {
+  it('Enter selects the single result (even after a filter with no result)', async () => {
     const { getByRole, emitted } = renderCombobox()
     const input = getByRole('combobox') as HTMLInputElement
-    // filtre vide puis affiné vers un seul résultat, sans flèche
+    // an empty filter then narrowed to a single result, with no arrow key
     await fireEvent.update(input, 'zzz')
     await fireEvent.update(input, 'bel')
     await fireEvent.keyDown(input, { key: 'Enter' })
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['be'])
   })
 
-  it('la navigation saute les options désactivées', async () => {
+  it('the navigation skips disabled options', async () => {
     const { getByRole, container } = renderCombobox()
     const input = getByRole('combobox')
     await fireEvent.keyDown(input, { key: 'ArrowDown' })
-    // remonte d'un cran depuis la première : boucle en sautant Monaco (disabled)
+    // one step up from the first: wraps around, skipping Monaco (disabled)
     await fireEvent.keyDown(input, { key: 'ArrowUp' })
-    expect(container.querySelector('[data-active]')?.textContent).toContain('Sénégal')
+    expect(container.querySelector('[data-active]')?.textContent).toContain('Réunion')
   })
 
-  it('mousedown est annulé sur le panneau : le clic sur une option ne vole pas le focus du champ', async () => {
+  it('mousedown is cancelled on the panel: clicking an option does not steal the field focus', async () => {
     const { getByRole, container } = renderCombobox()
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
     const option = container.querySelector('[role="option"]') as HTMLElement
 
     const event = new MouseEvent('mousedown', { bubbles: true, cancelable: true })
     option.dispatchEvent(event)
-    // sans cela, le focusout fermerait le panneau avant que @select soit traité
-    // (sélection à la souris morte, invisible en jsdom)
+    // without it, the focusout would close the panel before @select was handled (a dead
+    // mouse selection, invisible in jsdom)
     expect(event.defaultPrevented).toBe(true)
   })
 
-  it('le panneau n’a aucun gestionnaire clavier : le champ pilote tout', async () => {
+  it('the panel has no keyboard handler at all: the field drives everything', async () => {
     const { getByRole, container } = renderCombobox()
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
     const panel = container.querySelector('[role="listbox"]') as HTMLElement
@@ -143,31 +146,31 @@ describe('VCombobox', () => {
     const before = document.activeElement
     panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
     panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }))
-    // aucune option n'a pris le focus : il ne quitte jamais l'input
+    // no option has taken the focus: it never leaves the input
     expect(document.activeElement).toBe(before)
   })
 
-  it('une option désactivée passe par aria-disabled, jamais par l’attribut natif', async () => {
+  it('a disabled option goes through aria-disabled, never through the native attribute', async () => {
     const { getByRole, container } = renderCombobox()
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
     const options = [...container.querySelectorAll('[role="option"]')] as HTMLButtonElement[]
     const disabled = options.find((o) => o.textContent?.includes('Monaco'))!
 
     expect(disabled.getAttribute('aria-disabled')).toBe('true')
-    // l'option doit rester dans l'arbre a11y parcouru par le champ
+    // the option must stay in the a11y tree the field walks
     expect(disabled.disabled).toBe(false)
   })
 
-  it('multiple : toggle des valeurs, tags avec retrait, Backspace retire le dernier', async () => {
+  it('multiple: toggling values, removable tags, Backspace removes the last', async () => {
     const { getByRole, getAllByRole, emitted, rerender } = renderCombobox({
       multiple: true,
       modelValue: ['fr', 'be'],
     })
     expect(
-      getAllByRole('button', { name: /Retirer/ }).map((b) => b.getAttribute('aria-label')),
-    ).toEqual(['Retirer France', 'Retirer Belgique'])
+      getAllByRole('button', { name: /Remove/ }).map((b) => b.getAttribute('aria-label')),
+    ).toEqual(['Remove France', 'Remove Belgium'])
 
-    await fireEvent.click(getAllByRole('button', { name: 'Retirer France' })[0]!)
+    await fireEvent.click(getAllByRole('button', { name: 'Remove France' })[0]!)
     expect(emitted('update:modelValue').at(-1)).toEqual([['be']])
 
     await rerender({ modelValue: ['be'] })
@@ -175,70 +178,70 @@ describe('VCombobox', () => {
     expect(emitted('update:modelValue').at(-1)).toEqual([[]])
   })
 
-  it('la croix (clearable de VInput) vide la valeur en simple', async () => {
+  it("the cross (VInput's clearable) empties the value in single mode", async () => {
     const { getByRole, emitted } = renderCombobox({ modelValue: 'fr' })
     const input = getByRole('combobox') as HTMLInputElement
     expect(input.value).toBe('France')
-    await fireEvent.click(getByRole('button', { name: 'Effacer la sélection' }))
+    await fireEvent.click(getByRole('button', { name: 'Clear selection' }))
     expect(emitted('update:modelValue').at(-1)).toEqual([''])
     expect(input.value).toBe('')
   })
 
-  it('en multiple, la croix est visible dès qu’il y a des Chips et vide toute la sélection', async () => {
+  it('in multiple mode, the cross shows as soon as there are Chips and empties the whole selection', async () => {
     const { getByRole, emitted } = renderCombobox({ multiple: true, modelValue: ['fr', 'be'] })
-    // visible sans même taper (il y a une sélection)
-    await fireEvent.click(getByRole('button', { name: 'Effacer la sélection' }))
+    // visible without typing at all (there is a selection)
+    await fireEvent.click(getByRole('button', { name: 'Clear selection' }))
     expect(emitted('update:modelValue').at(-1)).toEqual([[]])
   })
 
-  it('pas de croix sans sélection ni recherche, ni quand clearable=false', () => {
-    const vide = renderCombobox()
-    expect(vide.queryByRole('button', { name: 'Effacer la sélection' })).toBeNull()
-    const videMulti = renderCombobox({ multiple: true, modelValue: [] })
-    expect(videMulti.queryByRole('button', { name: 'Effacer la sélection' })).toBeNull()
+  it('no cross without a selection or a search, nor when clearable=false', () => {
+    const empty = renderCombobox()
+    expect(empty.queryByRole('button', { name: 'Clear selection' })).toBeNull()
+    const emptyMulti = renderCombobox({ multiple: true, modelValue: [] })
+    expect(emptyMulti.queryByRole('button', { name: 'Clear selection' })).toBeNull()
     const off = renderCombobox({ modelValue: 'fr', clearable: false })
-    expect(off.queryByRole('button', { name: 'Effacer la sélection' })).toBeNull()
+    expect(off.queryByRole('button', { name: 'Clear selection' })).toBeNull()
   })
 
-  it('affiche une coche à droite sur l’option sélectionnée', () => {
+  it('displays a tick on the right of the selected option', () => {
     const { container } = renderCombobox({ multiple: true, modelValue: ['fr'] })
     const optionByText = (text: string) =>
       [...container.querySelectorAll<HTMLElement>('[role="option"]')].find((o) =>
         o.textContent?.includes(text),
       )
-    // France est sélectionnée → coche ; Belgique non → pas de coche
+    // France is selected → a tick; Belgium is not → no tick
     expect(optionByText('France')?.querySelector('.v-combobox-option-check')).toBeTruthy()
-    expect(optionByText('Belgique')?.querySelector('.v-combobox-option-check')).toBeFalsy()
+    expect(optionByText('Belgium')?.querySelector('.v-combobox-option-check')).toBeFalsy()
   })
 })
 
-// ── Groupes et séparateurs ──────────────────────────────────────────────────
+// Groups and separators
 
-describe('VCombobox groupé', () => {
-  const GROUPES = [
+describe('VCombobox grouped', () => {
+  const GROUPS = [
     {
       label: 'Europe',
       options: [
         { value: 'fr', label: 'France' },
-        { value: 'be', label: 'Belgique' },
+        { value: 'be', label: 'Belgium' },
       ],
     },
     { separator: true as const },
     {
-      label: 'Afrique',
+      label: 'Africa',
       options: [
-        { value: 'sn', label: 'Sénégal' },
-        { value: 'ma', label: 'Maroc', disabled: true },
+        { value: 're', label: 'Réunion' },
+        { value: 'ma', label: 'Morocco', disabled: true },
       ],
     },
     { separator: true as const },
-    { value: 'jp', label: 'Japon' },
+    { value: 'jp', label: 'Japan' },
   ]
 
-  const renderGroupe = (props: Record<string, unknown> = {}) =>
+  const renderGroup = (props: Record<string, unknown> = {}) =>
     render(VCombobox, {
-      props: { options: GROUPES, modelValue: '', ...props },
-      attrs: { 'aria-label': 'Pays' },
+      props: { options: GROUPS, modelValue: '', ...props },
+      attrs: { 'aria-label': 'Country' },
     })
 
   const labels = (container: Element) =>
@@ -246,86 +249,86 @@ describe('VCombobox groupé', () => {
       o.textContent?.trim(),
     )
 
-  it('rend un role="group" nommé par son libellé, sans casser l’ordre des options', async () => {
-    const { getByRole, container } = renderGroupe()
+  it('renders a role="group" named by its label, without breaking the option order', async () => {
+    const { getByRole, container } = renderGroup()
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
-    // aria-labelledby résolu : le groupe porte bien son nom accessible
+    // aria-labelledby resolved: the group does carry its accessible name
     expect(getByRole('group', { name: 'Europe' })).toBeTruthy()
-    expect(getByRole('group', { name: 'Afrique' })).toBeTruthy()
-    // les options d'un groupe et celles hors groupe forment UNE liste, à plat
-    expect(labels(container)).toEqual(['France', 'Belgique', 'Sénégal', 'Maroc', 'Japon'])
+    expect(getByRole('group', { name: 'Africa' })).toBeTruthy()
+    // the options of a group and those outside one form ONE flat list
+    expect(labels(container)).toEqual(['France', 'Belgium', 'Réunion', 'Morocco', 'Japan'])
   })
 
-  it('la navigation clavier traverse les groupes sans s’arrêter sur un libellé', async () => {
-    const { getByRole, container } = renderGroupe()
+  it('the keyboard navigation crosses the groups without stopping on a label', async () => {
+    const { getByRole, container } = renderGroup()
     const input = getByRole('combobox')
     const active = () => container.querySelector('[data-active]')?.textContent?.trim()
 
-    await fireEvent.keyDown(input, { key: 'ArrowDown' }) // ouvre sur France
+    await fireEvent.keyDown(input, { key: 'ArrowDown' }) // opens on France
     expect(active()).toBe('France')
     await fireEvent.keyDown(input, { key: 'ArrowDown' })
-    expect(active()).toBe('Belgique')
-    // franchit le séparateur ET le libellé « Afrique » d'un seul cran
+    expect(active()).toBe('Belgium')
+    // crosses the separator AND the "Africa" label in a single step
     await fireEvent.keyDown(input, { key: 'ArrowDown' })
-    expect(active()).toBe('Sénégal')
-    // Maroc est désactivé : sauté, comme une option désactivée hors groupe
+    expect(active()).toBe('Réunion')
+    // Morocco is disabled: skipped, like a disabled option outside a group
     await fireEvent.keyDown(input, { key: 'ArrowDown' })
-    expect(active()).toBe('Japon')
-    // aria-activedescendant désigne toujours un role="option" réel
+    expect(active()).toBe('Japan')
+    // aria-activedescendant always designates a real role="option"
     expect(input.getAttribute('aria-activedescendant')).toBe(
       container.querySelector('[role="option"][data-active]')?.id,
     )
   })
 
-  it('un groupe vidé par le filtre disparaît, libellé compris', async () => {
-    const { getByRole, queryByRole, container } = renderGroupe()
-    await fireEvent.update(getByRole('combobox') as HTMLInputElement, 'séné')
-    expect(labels(container)).toEqual(['Sénégal'])
+  it('a group emptied by the filter disappears, label included', async () => {
+    const { getByRole, queryByRole, container } = renderGroup()
+    await fireEvent.update(getByRole('combobox') as HTMLInputElement, 'réun')
+    expect(labels(container)).toEqual(['Réunion'])
     expect(queryByRole('group', { name: 'Europe' })).toBeNull()
-    expect(queryByRole('group', { name: 'Afrique' })).toBeTruthy()
+    expect(queryByRole('group', { name: 'Africa' })).toBeTruthy()
   })
 
-  it('les séparateurs orphelins ne sont pas rendus (tête, fin, consécutifs)', async () => {
-    const { getByRole, container } = renderGroupe()
+  it('orphaned separators are not rendered (head, tail, consecutive)', async () => {
+    const { getByRole, container } = renderGroup()
     const separators = () => container.querySelectorAll('.v-combobox-separator').length
     const panel = () => container.querySelector('[role="listbox"]')!
     expect(separators()).toBe(2)
 
-    // « Japon » seul : les deux séparateurs qui le précèdent deviennent orphelins
-    await fireEvent.update(getByRole('combobox') as HTMLInputElement, 'japon')
+    // "Japan" alone: the two separators preceding it become orphans
+    await fireEvent.update(getByRole('combobox') as HTMLInputElement, 'japan')
     expect(separators()).toBe(0)
 
-    // « France » + « Japon » : un seul filet subsiste, entre les deux, et il
-    // n'est ni en tête ni en fin de panneau
+    // "France" + "Réunion" + "Japan": the rules survive between the blocks, and
+    // neither sits at the head nor at the tail of the panel
     await fireEvent.update(getByRole('combobox') as HTMLInputElement, 'n')
-    expect(labels(container)).toEqual(['France', 'Sénégal', 'Japon'])
+    expect(labels(container)).toEqual(['France', 'Réunion', 'Japan'])
     expect(separators()).toBe(2)
     expect(panel().firstElementChild?.classList.contains('v-combobox-separator')).toBe(false)
     expect(panel().lastElementChild?.classList.contains('v-combobox-separator')).toBe(false)
   })
 
-  it('une option de groupe se sélectionne et alimente les Chips comme une option nue', async () => {
-    const { emitted, container } = renderGroupe({ multiple: true, modelValue: [] })
+  it('a group option is selected and feeds the Chips like a bare option', async () => {
+    const { emitted, container } = renderGroup({ multiple: true, modelValue: [] })
     const option = [...container.querySelectorAll<HTMLElement>('[role="option"]')].find((o) =>
-      o.textContent?.includes('Sénégal'),
+      o.textContent?.includes('Réunion'),
     )!
     await fireEvent.click(option)
-    expect(emitted('update:modelValue').at(-1)).toEqual([['sn']])
+    expect(emitted('update:modelValue').at(-1)).toEqual([['re']])
 
-    // le libellé du VChip vient bien de l'option dépliée du groupe (`allOptions`)
-    // — requêtes bornées au `container` : les deux rendus partagent document.body
-    const second = renderGroupe({ multiple: true, modelValue: ['sn'] })
+    // the VChip's label does come from the option unwrapped out of the group
+    // (`allOptions`) — queries bounded to `container`: both renders share document.body
+    const second = renderGroup({ multiple: true, modelValue: ['re'] })
     expect(
       [...second.container.querySelectorAll('.v-chip [aria-label]')].map((b) =>
         b.getAttribute('aria-label'),
       ),
-    ).toEqual(['Retirer Sénégal'])
+    ).toEqual(['Remove Réunion'])
   })
 })
 
-// ── Source asynchrone (recherche serveur, chargement, pagination) ────────────
+// Asynchronous source (server-side search, loading, pagination)
 
-describe('VCombobox asynchrone', () => {
+describe('VCombobox asynchronous', () => {
   afterEach(() => {
     vi.useRealTimers()
   })
@@ -335,13 +338,13 @@ describe('VCombobox asynchrone', () => {
       o.textContent?.trim(),
     )
 
-  it('filter=false : la frappe ne filtre plus (la source a déjà filtré)', async () => {
+  it('filter=false: typing no longer filters (the source has already filtered)', async () => {
     const { getByRole, container } = renderCombobox({ filter: false, searchDebounce: 0 })
     await fireEvent.update(getByRole('combobox'), 'zzz')
-    expect(labels(container)).toEqual(['France', 'Belgique', 'Sénégal', 'Monaco'])
+    expect(labels(container)).toEqual(['France', 'Belgium', 'Réunion', 'Monaco'])
   })
 
-  it('filter=false : Entrée sélectionne l’option active de la liste non filtrée', async () => {
+  it('filter=false: Enter selects the active option of the unfiltered list', async () => {
     const { getByRole, emitted } = renderCombobox({ filter: false, searchDebounce: 0 })
     const input = getByRole('combobox')
     await fireEvent.update(input, 'zzz')
@@ -349,7 +352,7 @@ describe('VCombobox asynchrone', () => {
     expect(emitted('update:modelValue').at(-1)).toEqual(['fr'])
   })
 
-  it('filter fonction : reçoit la requête brute trimée, son résultat s’applique', async () => {
+  it('a filter function: it receives the raw trimmed query, and its result applies', async () => {
     const seen: string[] = []
     const { getByRole, container, emitted } = renderCombobox({
       searchDebounce: 0,
@@ -359,51 +362,51 @@ describe('VCombobox asynchrone', () => {
       },
     })
     await fireEvent.update(getByRole('combobox'), '  fr  ')
-    // brute et trimée : ni normalisée NFD, ni minusculée par le composant
+    // raw and trimmed: neither NFD-normalized nor lowercased by the component
     expect(seen).toContain('fr')
     expect(labels(container)).toEqual(['France'])
     expect(emitted('search').at(-1)).toEqual(['fr'])
   })
 
-  it('search : émis à la frappe, avec le terme trimé', async () => {
+  it('search: emitted on typing, with the term trimmed', async () => {
     const { getByRole, emitted } = renderCombobox({ searchDebounce: 0 })
-    await fireEvent.update(getByRole('combobox'), 'sene ')
-    expect(emitted('search')).toEqual([['sene']])
+    await fireEvent.update(getByRole('combobox'), 'reun ')
+    expect(emitted('search')).toEqual([['reun']])
   })
 
-  it('search : émis immédiatement à l’ouverture (premier chargement)', async () => {
+  it('search: emitted immediately on opening (the first load)', async () => {
     const { getByRole, emitted } = renderCombobox()
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
-    // pas de debounce à l'ouverture, malgré searchDebounce par défaut (250 ms)
+    // no debounce on opening, despite the default searchDebounce (250 ms)
     expect(emitted('search')).toEqual([['']])
   })
 
-  it('search : débouncé (une seule requête pour une rafale de frappes)', async () => {
+  it('search: debounced (a single request for a burst of keystrokes)', async () => {
     vi.useFakeTimers()
     const { getByRole, emitted } = renderCombobox({ searchDebounce: 250 })
     const input = getByRole('combobox')
-    await fireEvent.keyDown(input, { key: 'ArrowDown' }) // ouvre : search('')
-    await fireEvent.update(input, 's')
-    await fireEvent.update(input, 'se')
-    await fireEvent.update(input, 'sen')
+    await fireEvent.keyDown(input, { key: 'ArrowDown' }) // opens: search('')
+    await fireEvent.update(input, 'r')
+    await fireEvent.update(input, 're')
+    await fireEvent.update(input, 'reu')
     expect(emitted('search')).toEqual([['']])
 
     vi.advanceTimersByTime(250)
-    expect(emitted('search')).toEqual([[''], ['sen']])
+    expect(emitted('search')).toEqual([[''], ['reu']])
   })
 
-  it('search : aucune requête parasite après une sélection simple', async () => {
+  it('search: no stray request after a single selection', async () => {
     vi.useFakeTimers()
     const { getByRole, emitted } = renderCombobox({ searchDebounce: 250 })
     const input = getByRole('combobox')
-    await fireEvent.update(input, 'bel') // ouvre + émet 'bel' (immédiat)
+    await fireEvent.update(input, 'bel') // opens + emits 'bel' (immediately)
     await fireEvent.keyDown(input, { key: 'Enter' })
-    // le timer armé par la frappe ne doit pas partir après la fermeture
+    // the timer armed by the keystroke must not fire after the close
     vi.advanceTimersByTime(1000)
     expect(emitted('search')).toEqual([['bel']])
   })
 
-  it('search : aucune requête parasite après Échap', async () => {
+  it('search: no stray request after Escape', async () => {
     vi.useFakeTimers()
     const { getByRole, emitted } = renderCombobox({ searchDebounce: 250 })
     const input = getByRole('combobox')
@@ -414,7 +417,7 @@ describe('VCombobox asynchrone', () => {
     expect(emitted('search')).toEqual([['']])
   })
 
-  it('search : en multiple, la sélection réinitialise la liste (panneau ouvert)', async () => {
+  it('search: in multiple mode, selecting resets the list (panel open)', async () => {
     const { getByRole, emitted } = renderCombobox({ multiple: true, searchDebounce: 0 })
     const input = getByRole('combobox')
     await fireEvent.update(input, 'bel')
@@ -422,7 +425,7 @@ describe('VCombobox asynchrone', () => {
     expect(emitted('search')).toEqual([['bel'], ['']])
   })
 
-  it('search : un même terme n’est pas réémis (rouvrir ne relance pas)', async () => {
+  it('search: the same term is not re-emitted (reopening does not relaunch it)', async () => {
     const { getByRole, emitted } = renderCombobox({ searchDebounce: 0 })
     const input = getByRole('combobox')
     await fireEvent.keyDown(input, { key: 'ArrowDown' })
@@ -431,71 +434,71 @@ describe('VCombobox asynchrone', () => {
     expect(emitted('search')).toEqual([['']])
   })
 
-  it('search : rien quand le composant est disabled', async () => {
+  it('search: nothing when the component is disabled', async () => {
     const { getByRole, emitted } = renderCombobox({ disabled: true, searchDebounce: 0 })
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
     expect(emitted('search')).toBeUndefined()
   })
 
-  it('le libellé d’une valeur choisie survit au renouvellement des options (simple)', async () => {
+  it('the label of a chosen value survives the options being renewed (single)', async () => {
     const { getByRole, rerender } = renderCombobox({ modelValue: 'fr' })
     const input = getByRole('combobox') as HTMLInputElement
     expect(input.value).toBe('France')
-    // page suivante de résultats : « fr » n'y est plus
-    await rerender({ options: [{ value: 'be', label: 'Belgique' }] })
+    // the next page of results: "fr" is no longer in it
+    await rerender({ options: [{ value: 'be', label: 'Belgium' }] })
     expect(input.value).toBe('France')
   })
 
-  it('le libellé d’une valeur choisie survit au renouvellement des options (multiple)', async () => {
+  it('the label of a chosen value survives the options being renewed (multiple)', async () => {
     const { getAllByRole, container, rerender } = renderCombobox({
       multiple: true,
       modelValue: ['fr'],
     })
-    await rerender({ options: [{ value: 'be', label: 'Belgique' }] })
+    await rerender({ options: [{ value: 'be', label: 'Belgium' }] })
     expect(
-      getAllByRole('button', { name: /Retirer/ }).map((b) => b.getAttribute('aria-label')),
-    ).toEqual(['Retirer France'])
+      getAllByRole('button', { name: /Remove/ }).map((b) => b.getAttribute('aria-label')),
+    ).toEqual(['Remove France'])
     expect(container.querySelector('.v-chip')?.textContent).toContain('France')
   })
 
-  it('le champ affiche le libellé dès que les options arrivent (montage sans options)', async () => {
+  it('the field displays the label as soon as the options arrive (mounted with none)', async () => {
     const { getByRole, rerender } = renderCombobox({ options: [], modelValue: 'fr' })
     const input = getByRole('combobox') as HTMLInputElement
-    // sans options, la valeur brute est le seul repli possible
+    // with no options, the raw value is the only possible fallback
     expect(input.value).toBe('fr')
     await rerender({ options: OPTIONS })
     expect(input.value).toBe('France')
   })
 
-  it('loading sans option : état de chargement, jamais « aucun résultat »', () => {
+  it('loading with no option: a loading state, never "no results"', () => {
     const { container } = renderCombobox({ options: [], loading: true })
     const state = container.querySelector('.v-combobox-state')
-    expect(state?.textContent).toContain('Chargement…')
-    expect(state?.textContent).not.toContain('Aucun résultat')
+    expect(state?.textContent).toContain('Loading…')
+    expect(state?.textContent).not.toContain('No results')
   })
 
-  it('loading avec options : les options restent affichées', () => {
+  it('loading with options: the options stay displayed', () => {
     const { container } = renderCombobox({ loading: true })
     expect(container.querySelectorAll('[role="option"]').length).toBe(4)
     expect(container.querySelector('.v-combobox-state')).toBeNull()
   })
 
-  it('loading : le champ échange son chevron contre un spinner décoratif', () => {
+  it('loading: the field swaps its chevron for a decorative spinner', () => {
     const { container } = renderCombobox({ loading: true })
     expect(container.querySelector('.v-combobox-chevron')).toBeNull()
     const spinner = container.querySelector('.v-input-field > .v-spinner')
-    // décoratif : son role="status" ne doit pas doubler l'annonce du panneau
+    // decorative: its role="status" must not double the panel's announcement
     expect(spinner?.getAttribute('aria-hidden')).toBe('true')
   })
 
-  it('tailles : les Chips restent un cran sous le champ, le panneau suit sa taille', async () => {
-    // Mapping unique (script) que le CSS `--chip-height` doit refléter :
-    // xs jusqu'à md, sm en lg ; le cran du dessous passe par `compact`.
+  it('sizes: the Chips stay one step below the field, and the panel follows its size', async () => {
+    // A single mapping (in the script) which the CSS `--chip-height` must mirror: xs up
+    // to md, sm at lg; the step below goes through `compact`.
     const { container, rerender } = renderCombobox({ multiple: true, modelValue: ['fr'] })
     const chip = () => container.querySelector('.v-chip') as HTMLElement
     const panel = () => container.querySelector('[role="listbox"]') as HTMLElement
 
-    // défaut (md) : VChip xs plein
+    // default (md): a full xs VChip
     expect(chip().getAttribute('data-size')).toBe('xs')
     expect(chip().hasAttribute('data-compact')).toBe(false)
 
@@ -506,27 +509,27 @@ describe('VCombobox asynchrone', () => {
     await rerender({ size: 'lg', compact: false })
     expect(chip().getAttribute('data-size')).toBe('sm')
     expect(chip().hasAttribute('data-compact')).toBe(false)
-    // le panneau suit la taille du champ (aucun clamp)
+    // the panel follows the field's size (no clamp)
     expect(panel().getAttribute('data-size')).toBe('lg')
 
     await rerender({ size: 'lg', compact: true })
     expect(chip().getAttribute('data-size')).toBe('sm')
     expect(chip().hasAttribute('data-compact')).toBe(true)
-    // data-compact sur la racine : c'est lui qui arme la règle CSS lg+compact
+    // data-compact on the root: it is what arms the lg+compact CSS rule
     expect(container.querySelector('.v-combobox')?.hasAttribute('data-compact')).toBe(true)
   })
 
-  it('hasMore : une sentinelle ferme la liste (support du scroll infini)', () => {
+  it('hasMore: a sentinel closes the list (infinite-scroll support)', () => {
     const { container } = renderCombobox({ hasMore: true })
     const listbox = container.querySelector('[role="listbox"]') as HTMLElement
     expect(listbox.lastElementChild?.className).toContain('v-combobox-more')
     expect(renderCombobox().container.querySelector('.v-combobox-more')).toBeNull()
   })
 
-  it('slot #option : contenu personnalisé, avec l’état de l’option', async () => {
+  it("the #option slot: custom content, with the option's state", async () => {
     const { getByRole, container } = render(VCombobox, {
       props: { options: OPTIONS, modelValue: '' },
-      attrs: { 'aria-label': 'Pays' },
+      attrs: { 'aria-label': 'Country' },
       slots: {
         option: (slotProps: { option: ComboboxOption; active: boolean; index: number }) =>
           h(
@@ -539,56 +542,58 @@ describe('VCombobox asynchrone', () => {
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
     expect([...container.querySelectorAll('.v-test-option')].map((o) => o.textContent)).toEqual([
       '0:France*',
-      '1:Belgique',
-      '2:Sénégal',
+      '1:Belgium',
+      '2:Réunion',
       '3:Monaco',
     ])
   })
 
-  it('slots #empty et #loading : remplacent les contenus par défaut', async () => {
+  it('the #empty and #loading slots: they replace the default contents', async () => {
     const { getByRole, container } = render(VCombobox, {
       props: { options: OPTIONS, modelValue: '', searchDebounce: 0 },
-      attrs: { 'aria-label': 'Pays' },
+      attrs: { 'aria-label': 'Country' },
       slots: {
         empty: (slotProps: { query: string }) =>
-          h('span', { class: 'v-test-empty' }, `créer « ${slotProps.query} »`),
+          h('span', { class: 'v-test-empty' }, `create "${slotProps.query}"`),
       },
     })
     await fireEvent.update(getByRole('combobox'), 'zzz')
-    expect(container.querySelector('.v-test-empty')?.textContent).toBe('créer « zzz »')
+    expect(container.querySelector('.v-test-empty')?.textContent).toBe('create "zzz"')
 
-    const chargement = render(VCombobox, {
+    const loadingRender = render(VCombobox, {
       props: { options: [], modelValue: '', loading: true },
-      attrs: { 'aria-label': 'Pays' },
-      slots: { loading: () => h('span', { class: 'v-test-loading' }, 'patientez') },
+      attrs: { 'aria-label': 'Country' },
+      slots: { loading: () => h('span', { class: 'v-test-loading' }, 'please wait') },
     })
-    expect(chargement.container.querySelector('.v-test-loading')?.textContent).toBe('patientez')
+    expect(loadingRender.container.querySelector('.v-test-loading')?.textContent).toBe(
+      'please wait',
+    )
   })
 
-  it('option.icon rend une icône dans la rangée, son absence n’en rend aucune', async () => {
+  it('option.icon renders an icon in the row, and its absence renders none', async () => {
     const { getByRole, container } = renderCombobox({
       options: [
         { value: 'fr', label: 'France', icon: 'flag' },
-        { value: 'be', label: 'Belgique' },
+        { value: 'be', label: 'Belgium' },
       ],
     })
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
-    const [avec, sans] = [...container.querySelectorAll('[role="option"]')] as [
+    const [withIcon, withoutIcon] = [...container.querySelectorAll('[role="option"]')] as [
       HTMLElement,
       HTMLElement,
     ]
-    // ligature Material : le nom de l'icône est le contenu du symbole
-    expect(avec.querySelector('.v-icon-symbol')?.textContent).toBe('flag')
-    // l'icône précède le libellé (la coche, elle, vient après)
-    expect(avec.firstElementChild?.classList.contains('v-combobox-option-label')).toBe(false)
-    expect(sans.querySelector('.v-icon-symbol')).toBeNull()
-    expect(sans.firstElementChild?.classList.contains('v-combobox-option-label')).toBe(true)
+    // a Material ligature: the icon's name is the symbol's content
+    expect(withIcon.querySelector('.v-icon-symbol')?.textContent).toBe('flag')
+    // the icon precedes the label (the tick, on the other hand, comes after)
+    expect(withIcon.firstElementChild?.classList.contains('v-combobox-option-label')).toBe(false)
+    expect(withoutIcon.querySelector('.v-icon-symbol')).toBeNull()
+    expect(withoutIcon.firstElementChild?.classList.contains('v-combobox-option-label')).toBe(true)
   })
 
-  it('slot #chip : remplace le VChip par défaut, `remove` retire la valeur', async () => {
+  it('the #chip slot: it replaces the default VChip, and `remove` removes the value', async () => {
     const { getByRole, container, emitted } = render(VCombobox, {
       props: { options: OPTIONS, modelValue: ['fr'], multiple: true },
-      attrs: { 'aria-label': 'Pays' },
+      attrs: { 'aria-label': 'Country' },
       slots: {
         chip: (slotProps: {
           value: string
@@ -605,7 +610,7 @@ describe('VCombobox asynchrone', () => {
           ),
       },
     })
-    // le VChip par défaut a bien cédé la place
+    // the default VChip has indeed given way
     expect(container.querySelector('.v-chip')).toBeNull()
     const chip = container.querySelector('.v-test-chip') as HTMLElement
     expect(chip.textContent).toBe('France/—/xs')
@@ -615,14 +620,14 @@ describe('VCombobox asynchrone', () => {
     expect(getByRole('combobox')).toBeTruthy()
   })
 
-  it('le slot #chip garde l’option quand elle sort des options reçues (source async)', async () => {
+  it('the #chip slot keeps the option when it leaves the received options (async source)', async () => {
     const { container, rerender } = render(VCombobox, {
       props: {
         options: [{ value: 'fr', label: 'France', icon: 'flag' }],
         modelValue: ['fr'],
         multiple: true,
       },
-      attrs: { 'aria-label': 'Pays' },
+      attrs: { 'aria-label': 'Country' },
       slots: {
         chip: (slotProps: { option: ComboboxOption | undefined; label: string }) =>
           h('span', { class: 'v-test-chip' }, `${slotProps.label}/${slotProps.option?.icon}`),
@@ -630,8 +635,8 @@ describe('VCombobox asynchrone', () => {
     })
     expect(container.querySelector('.v-test-chip')?.textContent).toBe('France/flag')
 
-    // la recherche suivante ne renvoie plus l'option : le cache la garde entière
-    // (sans lui, le VChip afficherait l'identifiant brut et perdrait son icône)
+    // the next search no longer returns the option: the cache keeps it whole (without
+    // it, the VChip would display the raw identifier and lose its icon)
     await rerender({ options: [] })
     expect(container.querySelector('.v-test-chip')?.textContent).toBe('France/flag')
   })

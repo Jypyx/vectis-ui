@@ -8,50 +8,49 @@ import type { IconSource } from '../VIcon/types'
 import { useMessages } from '../../i18n/state'
 
 /**
- * VChip. Les éléments natifs couvrent focus, clavier et désactivation :
- * sélectionnable → <button aria-pressed> (v-model:selected), cliquable →
- * <button> (clic natif en fallthrough), href → <a>. Supprimable → second
- * <button> frère — jamais de bouton imbriqué (HTML invalide). Sans
- * interaction, rendu statique (span, aucun hover). Le seul JS est le pont
- * « lien inerte » (href retiré + aria-disabled + onClick
- * filtré) et la répartition des attrs (class/style sur la racine, le reste
- * sur l'élément d'action).
+ * A chip. The native elements cover focus, keyboard and disabling: selectable →
+ * <button aria-pressed> (v-model:selected), clickable → <button> (the native click
+ * through fallthrough), href → <a>. Dismissible → a second sibling <button> — never
+ * a nested button (invalid HTML). With no interaction, a static rendering (a span,
+ * no hover). The only JS is the "inert link" bridge (href removed + aria-disabled +
+ * onClick filtered) and the attrs split (class/style on the root, the rest on the
+ * action element).
  */
 interface ChipProps {
-  /** tonal = fond teinté (défaut), solid = couleur pleine, outline = bordure. */
+  /** tonal = tinted background (the default), solid = full colour, outline = a border. */
   variant?: 'tonal' | 'solid' | 'outline'
   tone?: 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
   /**
-   * Couleur custom du consommateur (hex, nom CSS ou oklch()) qui REMPLACE le
-   * tone : posée en `--custom-color` inline, toutes les nuances (fond doux, texte
-   * teinté, hover…) sont dérivées par color-mix avec les tokens de thème —
-   * s'adapte light/dark sans rebuild. Le contraste du texte en solid (blanc)
-   * reste à la charge du consommateur.
+   * A custom colour from the consumer (hex, CSS name or oklch()) which REPLACES the
+   * tone: set inline as `--custom-color`, with every shade (soft background, tinted
+   * text, hover…) derived by color-mix from the theme tokens — it adapts light/dark
+   * with no rebuild. The contrast of the solid text (white) stays the consumer's
+   * responsibility.
    */
   color?: string
-  /** chip = coins arrondis --vectis-radius-interactive (défaut), pill = pilule. */
+  /** chip = --vectis-radius-interactive rounded corners (the default), pill = a pill. */
   shape?: 'chip' | 'pill'
   size?: 'xs' | 'sm'
-  /** Hauteur réduite de 4px ; padding, typo et icônes inchangés. */
+  /** Height reduced by 4px; padding, typography and icons unchanged. */
   compact?: boolean
-  /** L'élément d'action devient <button type="button"> ; le clic est natif (fallthrough). */
+  /** The action element becomes <button type="button">; the click is native (fallthrough). */
   clickable?: boolean
-  /** Rendu <a>. disabled → lien inerte (href retiré + aria-disabled). */
+  /** Rendered as <a>. disabled → an inert link (href removed + aria-disabled). */
   href?: string
-  /** VToggle : bouton aria-pressed lié à v-model:selected. Prime sur href/clickable. */
+  /** Toggle: an aria-pressed button bound to v-model:selected. Wins over href/clickable. */
   selectable?: boolean
-  /** Icône check devant le libellé quand sélectionné — REMPLACE l'emplacement
-      start (iconStart / slot #start) pour ne jamais cumuler les deux. */
+  /** A check icon before the label when selected — it REPLACES the start slot
+      (iconStart / the #start slot) so the two are never combined. */
   check?: boolean
-  /** Icône avant le libellé (le slot #start prime). */
+  /** Icon before the label (the #start slot wins). */
   iconStart?: IconSource
-  /** Icône après le libellé (le slot #end prime). */
+  /** Icon after the label (the #end slot wins). */
   iconEnd?: IconSource
-  /** Bouton de retrait qui émet `dismiss` (la disparition est au consommateur). */
+  /** A removal button emitting `dismiss` (making it disappear is up to the consumer). */
   dismissible?: boolean
-  /** Icône du bouton de retrait. */
+  /** Icon of the removal button. */
   dismissIcon?: IconSource
-  /** Libellé accessible du bouton de retrait. Défaut : dictionnaire du DS. */
+  /** Accessible label of the removal button. Default: the DS dictionary. */
   dismissLabel?: string
   disabled?: boolean
 }
@@ -75,24 +74,22 @@ const props = withDefaults(defineProps<ChipProps>(), {
   disabled: false,
 })
 
-// Cascade prop > dictionnaire : la prop garde la priorité, son défaut suit
-// désormais la locale du DS.
 const m = useMessages()
 const resolvedDismissLabel = computed(() => props.dismissLabel ?? m.value.common.dismiss)
 
 const selected = defineModel<boolean>('selected', { default: false })
 
 defineEmits<{
-  /** Émis au clic sur le bouton de retrait. */
+  /** Emitted on a click on the removal button. */
   dismiss: []
 }>()
 
 defineSlots<{
-  /** Libellé (facultatif : chip icône seule) */
+  /** Label (optional: an icon-only chip) */
   default?(): unknown
-  /** Contenu avant le libellé (prime sur iconStart) */
+  /** Content before the label (wins over iconStart) */
   start?(): unknown
-  /** Contenu après le libellé (prime sur iconEnd) */
+  /** Content after the label (wins over iconEnd) */
   end?(): unknown
 }>()
 
@@ -100,7 +97,7 @@ defineOptions({ inheritAttrs: false })
 
 const attrs = useAttrs()
 
-/* Priorité d'interactivité : selectable > href > clickable > statique. */
+/* Interactivity priority: selectable > href > clickable > static. */
 const isLink = computed(() => !props.selectable && props.href !== undefined)
 const actionTag = computed(() =>
   props.selectable ? 'button' : isLink.value ? 'a' : props.clickable ? 'button' : 'span',
@@ -121,7 +118,7 @@ const actionAttrs = computed(() => {
 
 const showCheck = computed(() => props.check && props.selectable && selected.value)
 
-/* Icône seule (pas de libellé) : le chip devient carré (largeur = hauteur). */
+/* Icon alone (no label): the chip becomes square (width = height). */
 const slots = useSlots()
 const iconOnly = computed(
   () => !slots.default && !!(slots.start || slots.end || props.iconStart || props.iconEnd),
@@ -178,8 +175,8 @@ const iconOnly = computed(
 
 <style>
 @layer vectis.components {
-  /* Tailles/compact : hauteur explicite via la classe partagée v-control
-     (styles/control-size.css), l'union TS restreint à xs/sm */
+  /* Sizes/compact: explicit height through the shared v-control class
+     (styles/control-size.css); the TS union restricts it to xs/sm */
   .v-chip {
     display: inline-flex;
     align-items: center;
@@ -200,7 +197,6 @@ const iconOnly = computed(
     border-radius: var(--vectis-radius-pill);
   }
 
-  /* --- Tones : ne définissent que des variables locales --- */
   .v-chip[data-tone='accent'] {
     --tone-bg-solid: var(--vectis-color-accent);
     --tone-bg-solid-hover: var(--vectis-color-accent-hover);
@@ -235,18 +231,18 @@ const iconOnly = computed(
     --tone-bg-solid: var(--vectis-color-warning);
     --tone-bg-solid-hover: var(--vectis-color-warning-hover);
     --tone-bg-solid-active: var(--vectis-color-warning-active);
-    /* amber trop clair pour du blanc : token dédié (texte sombre) */
+    /* Amber is too light for white: a dedicated token (dark text) */
     --tone-text-solid: var(--vectis-color-text-on-warning);
     --tone-text-tinted: var(--vectis-color-warning-text);
     --tone-bg-soft: var(--vectis-color-warning-surface);
     --tone-border-soft: var(--vectis-color-warning-border);
   }
 
-  /* Divergence vs VButton : le solid neutre de VButton (surface-muted) serait
-     indistinguable du tonal. Inversion totale text/surface plutôt que
-     surface-inverse : en dark, surface-inverse = surface-muted (neutral-800),
-     un chip neutre sélectionné serait invisible — text (neutral-50 en dark,
-     neutral-900 en light) reste distinct du fond tonal dans les deux thèmes */
+  /* A divergence from VButton: VButton's neutral solid (surface-muted) would be
+     indistinguishable from the tonal. A full text/surface inversion rather than
+     surface-inverse: in dark, surface-inverse = surface-muted (neutral-800), so a
+     selected neutral chip would be invisible — text (neutral-50 in dark, neutral-900
+     in light) stays distinct from the tonal background in both themes */
   .v-chip[data-tone='neutral'] {
     --tone-bg-solid: var(--vectis-color-text);
     --tone-bg-solid-hover: color-mix(
@@ -265,23 +261,22 @@ const iconOnly = computed(
     --tone-border-soft: var(--vectis-color-border-strong);
   }
 
-  /* Couleur custom (--custom-color inline) : remplace le tone, toutes les nuances
-     dérivées par color-mix avec les tokens de thème (surface/text s'inversent
-     entre light et dark → adaptation automatique). Bloc APRÈS les tones :
-     même spécificité, le dernier gagne. */
+  /* Custom colour (--custom-color inline): replaces the tone, with every shade
+     derived by color-mix from the theme tokens (surface/text swap between light and
+     dark → automatic adaptation). Block placed AFTER the tones: equal specificity, the
+     last one wins. */
   .v-chip[data-custom] {
     --tone-bg-solid: var(--custom-color);
     --tone-bg-solid-hover: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 8%);
     --tone-bg-solid-active: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 14%);
-    /* blanc fixe : le contraste avec une couleur claire est à la charge du
-       consommateur (même limite que warning avant text-on-warning) */
+    /* A fixed white: the contrast against a light colour is the consumer's
+       responsibility */
     --tone-text-solid: var(--vectis-color-text-on-accent);
     --tone-text-tinted: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 30%);
     --tone-bg-soft: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
     --tone-border-soft: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 60%);
   }
 
-  /* --- Variantes : consomment les variables du tone --- */
   .v-chip[data-variant='tonal'] {
     background: var(--tone-bg-soft);
     color: var(--tone-text-tinted);
@@ -298,17 +293,17 @@ const iconOnly = computed(
     border-color: var(--tone-border-soft);
   }
 
-  /* Sélectionné : rendu solid du tone/de la couleur COURANTE, quel que soit
-     le variant (bloc après les variants, même spécificité) */
+  /* Selected: the solid rendering of the CURRENT tone/colour, whatever the variant
+     (block after the variants, equal specificity) */
   .v-chip[data-selected] {
     background: var(--tone-bg-solid);
     color: var(--tone-text-solid);
     border-color: transparent;
   }
 
-  /* --- Hover/active : scopés à l'élément d'action interactif — un chip
-     statique n'a aucun hover, et survoler le bouton de retrait ne change pas
-     le fond du chip --- */
+  /* Hover/active, scoped to the interactive action element — a static chip has no
+     hover at all, and hovering the removal button does not change the chip's
+     background */
   .v-chip[data-variant='tonal']:not([data-disabled], [data-selected]):has(
       :is(button, a).v-chip-action:hover
     ) {
@@ -359,8 +354,8 @@ const iconOnly = computed(
     cursor: default;
   }
 
-  /* Icône seule : action carrée — l'aspect-ratio suit la hauteur du chip
-     (sans nouvelle dimension) */
+  /* Icon alone: a square action — the aspect-ratio follows the chip's height (with
+     no new dimension) */
   .v-chip[data-icon-only] .v-chip-action {
     aspect-ratio: 1;
     justify-content: center;
@@ -376,9 +371,9 @@ const iconOnly = computed(
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* Pas de fond, même au survol (pattern .v-input-action) : seule la couleur
-     de l'icône passe de currentcolor atténué à la pleine couleur — text-muted
-     serait illisible sur les fonds teintés/solid */
+  /* No background, even on hover (the .v-input-action pattern): only the icon's
+     colour goes from a dimmed currentcolor to the full colour — text-muted would be
+     unreadable on the tinted/solid backgrounds */
   .v-chip-remove {
     display: inline-flex;
     align-items: center;
@@ -405,7 +400,7 @@ const iconOnly = computed(
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
-  /* --- Désactivé : nuances de gris par tokens (surchargés par le thème dark) --- */
+  /* Disabled: greys through tokens (overridden by the dark theme) */
   .v-chip[data-disabled] {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);

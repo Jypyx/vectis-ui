@@ -5,64 +5,64 @@ import * as VBreadcrumbStories from './VBreadcrumb.stories'
 
 # Breadcrumb
 
-Fil d'Ariane data-driven : un `<nav>` + liste ordonnée entièrement piloté par la prop
-`items: BreadcrumbItem[]` (`{ label, href, iconStart? }`, type exporté) — pure dérivation
-de données, aucune API navigateur, SSR-safe. Chaque item est un lien ; l'item **actif** est
-dérivé de `currentPath` : celui dont le `href` correspond (slash final normalisé) reste un
-lien cliquable et reçoit `aria-current="page"` — pattern ARIA APG.
+A data-driven breadcrumb trail: a `<nav>` + an ordered list entirely driven by the
+`items: BreadcrumbItem[]` prop (`{ label, href, iconStart? }`, an exported type) — pure data
+derivation, no browser API, SSR-safe. Each item is a link; the **active** item is derived from
+`currentPath`: the one whose `href` matches (trailing slash normalized) stays a clickable link and
+receives `aria-current="page"` — the ARIA APG pattern.
 
-Les séparateurs sont des `<VIcon>` décoratifs (`aria-hidden`) placés en tête de chaque item,
-le premier étant masqué en CSS (`:first-child`).
+The separators are decorative `<VIcon>`s (`aria-hidden`) placed at the head of each item, the first
+one being hidden in CSS (`:first-child`).
 
 <Canvas of={VBreadcrumbStories.Default} />
 
 <Controls of={VBreadcrumbStories.Default} />
 
-## Séparateur
+## Separator
 
-`separator` (défaut `chevron_right`) accepte un nom d'icône **ou** un rendu explicite
-(`{ src: '/chevron.svg' }`) : une chaîne est toujours un nom, jamais une URL devinée. Note
-RTL : une icône directionnelle ne se retourne pas
-automatiquement.
+`separator` (default `chevron_right`) accepts an icon name **or** an explicit render
+(`{ src: '/chevron.svg' }`): a string is always a name, never a guessed URL. RTL note: a
+directional icon does not flip automatically.
 
-<Canvas of={VBreadcrumbStories.SeparateurIcone} />
+<Canvas of={VBreadcrumbStories.IconSeparator} />
 
-<Canvas of={VBreadcrumbStories.SeparateurImage} />
+<Canvas of={VBreadcrumbStories.ImageSeparator} />
 
-## Icônes d'items
+## Item icons
 
-`iconStart` sur un item place une icône avant son libellé — même détection nom/URL que le
-séparateur. Les icônes suivent la taille et la couleur du texte via le contexte
-`--vectis-icon-size`.
+`iconStart` on an item places an icon before its label — the same name/URL contract as the
+separator. The icons follow the size and the colour of the text through the `--vectis-icon-size`
+context.
 
-<Canvas of={VBreadcrumbStories.AvecIcones} />
+<Canvas of={VBreadcrumbStories.WithIcons} />
 
-## Troncature
+## Truncation
 
-Au-delà de `maxItems` (minimum effectif : 3), la liste affiche le 1er item + un bouton
-« … » + l'avant-dernier + le dernier. Le bouton ouvre un VMenu listant uniquement
-les items masqués, rendus en vrais liens (`<a role="menuitem">`). Clavier : flèches pour
-naviguer, Échap referme et rend le focus au déclencheur.
+Past `maxItems` (effective minimum: 3), the list displays the first item + an "…" button + the
+second-to-last + the last. The button opens a VMenu listing the hidden items only, rendered as real
+links (`<a role="menuitem">`). Keyboard: arrows to navigate, Escape closes and hands the focus back
+to the trigger.
 
-<Canvas of={VBreadcrumbStories.Tronque} />
+<Canvas of={VBreadcrumbStories.Truncated} />
 
-## Cas limites
+## Edge cases
 
-Les libellés longs sont tronqués par ellipsis, la liste passe à la ligne si nécessaire :
+Long labels are truncated with an ellipsis, and the list wraps when needed:
 
-<Canvas of={VBreadcrumbStories.LibellesLongs} />
+<Canvas of={VBreadcrumbStories.LongLabels} />
 
-## Accessibilité
+## Accessibility
 
-- `<nav aria-label="Fil d'Ariane">` (personnalisable via `label`) + liste ordonnée : les
-  lecteurs d'écran annoncent la navigation et la position de chaque segment.
-- L'item actif reste un lien avec `aria-current="page"` — il demeure atteignable et
-  identifiable (pattern APG).
-- Les séparateurs sont purement décoratifs (`aria-hidden`), jamais annoncés.
-- Le bouton d'ellipsis a un libellé explicite (`ellipsisLabel`, « Afficher les pages
-  intermédiaires » par défaut) et son menu suit le pattern ARIA menu (roving focus).
-- Le séparateur par défaut est un SVG embarqué ; les noms d'icônes que VOUS fournissez
-  viennent de votre police — prévoir un repli acceptable (l'icône est décorative, le
-  libellé porte le sens).
+- `<nav aria-label="Breadcrumb">` (customizable through `label`) + an ordered list: screen readers
+  announce the navigation and the position of each segment.
+- The active item stays a link with `aria-current="page"` — it remains reachable and identifiable
+  (the APG pattern).
+- The separators are purely decorative (`aria-hidden`), never announced.
+- The ellipsis button has an explicit label (`ellipsisLabel`, "Show intermediate pages" by default)
+  and its menu follows the ARIA menu pattern (roving focus).
+- The default separator is an embedded SVG; the icon names YOU supply come from your font — plan an
+  acceptable fallback (the icon is decorative, the label carries the meaning).
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.

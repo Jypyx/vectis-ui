@@ -9,41 +9,41 @@ import { sideNavigationKey } from './context'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 /**
- * Item de navigation latérale. Deux formes, selon la présence du slot #items :
+ * A sidebar navigation item. Two shapes, depending on whether the #items slot is
+ * present:
  *
- * - BRANCHE : `<details>`/`<summary>` natifs — état, activation clavier,
- *   exclusivité entre frères (`<details name>`) et animation viennent du
- *   navigateur. La rangée EST le `<summary>`, qui doit contenir tout ce qui
- *   s'affiche sur la ligne : le slot #end y vit donc, d'où le `@click.stop`
- *   (sans lui, tout clic dans ce slot basculerait la branche). Corollaire à
- *   documenter : n'y placer que du contenu NON focusable (chip, badge,
- *   compteur) — le sous-arbre d'un `<summary>` sert de nom accessible et peut
- *   être aplati par certains lecteurs d'écran.
- * - FEUILLE : la rangée est un CONTENEUR et l'action (`<a>`/`<button>`) est
- *   étirée dessus par un `::after` absolu. Le slot #end reste ainsi son FRÈRE —
- *   jamais un contrôle imbriqué dans un lien — tout en gardant la rangée
- *   entière cliquable.
+ * - BRANCH: native `<details>`/`<summary>` — state, activation keyboard, exclusivity
+ *   between siblings (`<details name>`) and animation all come from the browser. The
+ *   row IS the `<summary>`, which must contain everything displayed on the line: the
+ *   #end slot therefore lives inside it, hence the click cancellation (without it,
+ *   any click in that slot would toggle the branch). Documented corollary: put only
+ *   NON-focusable content there (a chip, a badge, a counter) — a `<summary>`'s
+ *   subtree serves as its accessible name and may be flattened by some screen
+ *   readers.
+ * - LEAF: the row is a CONTAINER and the action (`<a>`/`<button>`) is stretched over
+ *   it by an absolute `::after`. The #end slot thus stays its SIBLING — never a
+ *   control nested inside a link — while keeping the whole row clickable.
  */
 interface SideNavigationItemProps {
-  /** Ligne secondaire sous le libellé (le slot #sublabel prime). */
+  /** Secondary line under the label (the #sublabel slot wins). */
   sublabel?: string
   /**
-   * Icône avant le libellé : nom Material Symbols Rounded, ou rendu explicite
-   * (`{ src }`, `{ component }`…). Le slot #start prime.
+   * Icon before the label: a Material Symbols Rounded name, or an explicit render
+   * (`{ src }`, `{ component }`…). The #start slot wins.
    */
   icon?: IconSource
-  /** Feuille rendue en `<a href>` ; IGNORÉ si le slot #items est présent. */
+  /** A leaf rendered as `<a href>`; IGNORED when the #items slot is present. */
   href?: string
-  /** Item de la page courante : surbrillance accent + aria-current. */
+  /** Item of the current page: accent highlight + aria-current. */
   active?: boolean
-  /** Item inerte : gris par tokens, hors parcours clavier. */
+  /** Inert item: greyed through tokens, out of the keyboard path. */
   disabled?: boolean
-  /** Branche ouverte au premier rendu (l'état est ensuite natif). */
+  /** Branch open on the first render (the state is then native). */
   defaultOpen?: boolean
 }
 
-// Racine de structure (<li>) : sans cette répartition, `target`, `rel`,
-// `download` et les `aria-*` atterriraient sur le <li> au lieu du contrôle.
+// A structural root (<li>): without this split, `target`, `rel`, `download` and the
+// `aria-*` would land on the <li> instead of the control.
 defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<SideNavigationItemProps>(), {
@@ -56,36 +56,36 @@ const props = withDefaults(defineProps<SideNavigationItemProps>(), {
 })
 
 /**
- * Ouverture d'une branche. Sans v-model, l'état reste celui du DOM
- * (`defaultOpen` en valeur initiale) : la valeur liée ne changeant jamais, Vue
- * ne repatche pas et le basculement natif reste souverain.
+ * Opening of a branch. With no v-model, the state stays the DOM's (`defaultOpen` as
+ * the initial value): since the bound value never changes, Vue does not re-patch and
+ * the native toggling stays sovereign.
  *
- * `null` — et non `undefined` — pour distinguer « non lié » : un modèle typé
- * `boolean` seul est déclaré `type: Boolean` au runtime, or un booléen ABSENT
- * est casté en `false` par Vue, ce qui écraserait `defaultOpen`. Un `default`
- * explicite désarme ce castage.
+ * `null` — and not `undefined` — to distinguish "not bound": a model typed `boolean`
+ * alone is declared `type: Boolean` at runtime, and an ABSENT boolean is cast to
+ * `false` by Vue, which would overwrite `defaultOpen`. An explicit `default` disarms
+ * that cast.
  */
 const open = defineModel<boolean | null>('open', { default: null })
 
 const emit = defineEmits<{
   /**
-   * Émis à l'activation d'un item SANS sous-items. Ne jamais déclarer d'emit
-   * `click` : Vue le retirerait de `$attrs` et le `@click` du consommateur
-   * n'atteindrait plus le lien.
+   * Emitted on the activation of an item WITHOUT subitems. Never declare a `click`
+   * emit: Vue would remove it from `$attrs` and the consumer's `@click` would no
+   * longer reach the link.
    */
   select: []
 }>()
 
 defineSlots<{
-  /** Libellé de l'item — OBLIGATOIRE. */
+  /** Label of the item — MANDATORY. */
   default(): unknown
-  /** Sous-libellé riche (prime sur la prop `sublabel`). */
+  /** Rich sublabel (wins over the `sublabel` prop). */
   sublabel?(): unknown
-  /** Contenu libre avant le libellé (prime sur `icon`). */
+  /** Free content before the label (wins over `icon`). */
   start?(): unknown
-  /** Contenu libre à droite, avant le chevron. */
+  /** Free content on the right, before the chevron. */
   end?(): unknown
-  /** Sous-items (VSideNavigationItem/Group/Separator, récursif sans limite). */
+  /** Subitems (VSideNavigationItem/Group/Separator, recursive with no limit). */
   items?(): unknown
 }>()
 
@@ -93,10 +93,9 @@ const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const slots = useSlots()
 /**
- * Présence STATIQUE du slot (modèle `hasSubmenu` de VMenuItem, `hasPanels` de
- * VTabs) : déterministe en SSR, donc aucun registre réactif ni mismatch
- * d'hydratation. Contrepartie : un #items présent mais vide affiche un chevron
- * sur une liste vide.
+ * STATIC presence of the slot (VMenuItem's `hasSubmenu` model, VTabs' `hasPanels`):
+ * deterministic in SSR, hence no reactive registry and no hydration mismatch. The
+ * trade-off: a present but empty #items displays a chevron on an empty list.
  */
 const hasChildren = computed(() => !!slots.items)
 const tag = computed(() =>
@@ -105,12 +104,12 @@ const tag = computed(() =>
 
 const parent = inject(sideNavigationKey, null)
 
-/** Icônes posées par la racine ; l'item reste utilisable seul. */
+/** Icons set by the root; the item stays usable on its own. */
 const expandIcon = computed(() => parent?.expandIcon ?? 'expand_more')
 const collapseIcon = computed(() => parent?.collapseIcon)
 
-// Nom de groupe des <details> ENFANTS : frais à chaque niveau, c'est ce qui
-// rend l'exclusivité locale à un niveau plutôt que globale au document.
+// Group name of the CHILD <details>: fresh at each level, which is what makes
+// exclusivity local to a level rather than global to the document.
 const childrenName = useId()
 
 provide(sideNavigationKey, {
@@ -130,9 +129,9 @@ provide(sideNavigationKey, {
 
 const openAttr = computed(() => (open.value ?? props.defaultOpen) || undefined)
 
-// Le <details> est la source de vérité : le modèle est alimenté PAR le DOM.
-// L'événement `toggle` ne bulle pas, il est donc écouté sur l'élément lui-même
-// et ne remonte jamais d'une branche imbriquée.
+// The <details> is the source of truth: the model is fed BY the DOM. The `toggle`
+// event does not bubble, so it is listened for on the element itself and never comes
+// up from a nested branch.
 function onToggle(event: Event) {
   const value = (event.target as HTMLDetailsElement).open
   if (open.value !== value) open.value = value
@@ -143,32 +142,32 @@ const ariaCurrent = computed(() =>
 )
 
 /*
- * <summary> n'a pas d'attribut `disabled` natif : annuler le clic est le seul
- * moyen de bloquer le basculement (le clavier, lui, est couvert par
- * `tabindex="-1"`). Idiome VAccordionItem — surtout pas `pointer-events: none`,
- * qui tuerait `cursor: not-allowed`.
+ * <summary> has no native `disabled` attribute: cancelling the click is the only way
+ * to block the toggling (the keyboard, on the other hand, is covered by
+ * `tabindex="-1"`). The VAccordionItem idiom — definitely not `pointer-events: none`,
+ * which would kill `cursor: not-allowed`.
  */
 function onSummaryClick(event: MouseEvent) {
   if (props.disabled) event.preventDefault()
 }
 
 /*
- * Le slot #end d'une branche vit DANS le <summary> : `stopPropagation` n'y
- * suffirait pas — le basculement du <details> n'est pas un listener mais
- * l'action PAR DÉFAUT du clic, que seul `preventDefault` annule.
+ * A branch's #end slot lives INSIDE the <summary>: `stopPropagation` would not be
+ * enough there — toggling the <details> is not a listener but the click's DEFAULT
+ * action, which only `preventDefault` cancels.
  *
- * Sauf si le clic vise déjà un élément activable : il est alors sa PROPRE
- * cible d'activation, le <details> n'est pas concerné, et annuler le défaut
- * casserait sa navigation. Même filtre que le `onPanelMousedown` de
- * `useFieldPanel`, pour la même raison.
+ * Unless the click already targets an activable element: it is then its OWN
+ * activation target, the <details> is not concerned, and cancelling the default
+ * would break its navigation. The same filter as `useFieldPanel`'s
+ * `onPanelMousedown`, for the same reason.
  */
 function onEndClick(event: MouseEvent) {
-  const cible = event.target as Element | null
-  if (!cible?.closest('button, a, input, select, textarea, [tabindex]')) event.preventDefault()
+  const target = event.target as Element | null
+  if (!target?.closest('button, a, input, select, textarea, [tabindex]')) event.preventDefault()
 }
 
 function onActionClick(event: MouseEvent) {
-  // <button disabled> ne reçoit pas le clic ; le lien inerte, si.
+  // <button disabled> does not receive the click; an inert link does.
   if (props.disabled) {
     event.preventDefault()
     return
@@ -206,13 +205,13 @@ function onActionClick(event: MouseEvent) {
             <slot name="sublabel">{{ sublabel }}</slot>
           </span>
         </span>
-        <!-- Le slot vit DANS le <summary>, dont TOUT clic bascule le <details> :
-             sans `onEndClick`, une pastille ouvrirait la branche. -->
+        <!-- The slot lives INSIDE the <summary>, where ANY click toggles the
+             <details>: without `onEndClick`, a badge would open the branch. -->
         <span v-if="$slots.end" class="v-side-nav-end" @click="onEndClick"
           ><slot name="end"
         /></span>
         <VIcon class="v-side-nav-chevron" v-bind="iconProps(expandIcon)" />
-        <!-- Deux chevrons rendus, permutation 100 % CSS sur [open] (idiome VAccordion) -->
+        <!-- Two chevrons rendered, swapped 100% in CSS on [open] (the VAccordion idiom) -->
         <VIcon
           v-if="collapseIcon"
           class="v-side-nav-chevron v-side-nav-chevron-open"
@@ -259,15 +258,14 @@ function onActionClick(event: MouseEvent) {
 <style>
 @layer vectis.components {
   /*
-   * PROFONDEUR — compteur 100 % CSS : ni registre, ni provide/inject, ni style
-   * inline, ni prop `level` à passer à la main. La structure fournit deux
-   * éléments par niveau (<li> puis <ul>), et chaque élément lit un nom qu'il ne
-   * DÉCLARE pas.
+   * DEPTH — a 100% CSS counter: no registry, no provide/inject, no inline style, no
+   * `level` prop to pass by hand. The structure supplies two elements per level (<li>
+   * then <ul>), and each element reads a name it does not DECLARE.
    *
-   * ⚠ La forme à un seul nom — `--side-nav-level: calc(var(--side-nav-level, 0) + 1)` — est un
-   * CYCLE (CSS Variables §3), y compris quand la valeur lue est celle héritée :
-   * la propriété tombe en « guaranteed-invalid », `var(--side-nav-level, 0)` retombe
-   * partout sur 0 et l'arbre s'affiche PLAT, sans la moindre erreur console.
+   * ⚠ The single-name form — `--side-nav-level: calc(var(--side-nav-level, 0) + 1)` —
+   * is a CYCLE (CSS Variables §3), including when the value read is the inherited
+   * one: the property falls to "guaranteed-invalid", `var(--side-nav-level, 0)` falls
+   * back to 0 everywhere and the tree displays FLAT, with no console error at all.
    */
   .v-side-nav-item {
     --side-nav-parent-level: var(--side-nav-level, 0);
@@ -278,24 +276,24 @@ function onActionClick(event: MouseEvent) {
   }
 
   .v-side-nav-branch {
-    /* Le repli natif : l'animation vit sur ::details-content, plus bas. */
+    /* The native folding: the animation lives on ::details-content, further down. */
     min-inline-size: 0;
   }
 
   .v-side-nav-row {
     /*
-     * Taille : variables `--control-*` héritées du <nav>, seul porteur de
-     * `v-control` (styles/control-size.css) — les icônes suivent sans une
-     * ligne de CSS, `--vectis-icon-size`/`-opsz` font partie du même bloc.
+     * Size: the `--control-*` variables inherited from the <nav>, the only carrier of
+     * `v-control` (styles/control-size.css) — the icons follow without a line of CSS,
+     * `--vectis-icon-size`/`-opsz` being part of the same block.
      *
-     * Typo composite, comme .v-menu-item : la TAILLE vient de l'échelle, le
-     * leading reste celui de `body-md` (ratio unitless, donc il suit) et le
-     * poids reste regular — la recette `control` vaut medium/1, or une rangée
-     * peut passer à la ligne et porter un sous-libellé.
+     * Composite typography, as in .v-menu-item: the SIZE comes from the scale, the
+     * leading stays that of `body-md` (a unitless ratio, so it follows) and the weight
+     * stays regular — the `control` recipe means medium/1, and a row may wrap and carry
+     * a sublabel.
      *
-     * Le `calc` du retrait est écrit ICI et non dans une variable posée plus
-     * haut : une custom property est substituée sur l'élément qui la DÉCLARE,
-     * une `--side-nav-pad-start` posée sur la racine serait figée au niveau 0.
+     * The indent `calc` is written HERE and not in a variable set higher up: a custom
+     * property is substituted on the element that DECLARES it, so a
+     * `--side-nav-pad-start` set on the root would be frozen at level 0.
      */
     position: relative;
     display: flex;
@@ -315,14 +313,14 @@ function onActionClick(event: MouseEvent) {
     cursor: pointer;
   }
 
-  /* Le marqueur natif du <summary> : list-style ne suffit pas sur WebKit */
+  /* The <summary>'s native marker: list-style is not enough on WebKit */
   .v-side-nav-row::-webkit-details-marker {
     display: none;
   }
 
   .v-side-nav-action {
-    /* Rangée feuille : l'action est un enfant, le retrait reste porté par la
-       rangée — c'est le fond de survol qui doit rester pleine largeur. */
+    /* Leaf row: the action is a child, the indent stays carried by the row — it is
+       the hover background that must stay full width. */
     flex: 1;
     min-inline-size: 0;
     display: flex;
@@ -341,10 +339,10 @@ function onActionClick(event: MouseEvent) {
   }
 
   /*
-   * Zone cliquable étendue à TOUTE la rangée, sans envelopper le slot de fin.
-   * Peinte comme descendant positionné (CSS 2.1 App. E, étape 8) : elle
-   * recouvre le chevron, non positionné, mais passe SOUS `.v-side-nav-end`,
-   * postérieur dans l'arbre et positionné lui aussi.
+   * A clickable area extended to the WHOLE row, without wrapping the end slot.
+   * Painted as a positioned descendant (CSS 2.1 App. E, step 8): it covers the
+   * chevron, which is not positioned, but passes UNDER `.v-side-nav-end`, later in
+   * the tree and positioned too.
    */
   .v-side-nav-action::after {
     content: '';
@@ -379,7 +377,7 @@ function onActionClick(event: MouseEvent) {
     color: var(--vectis-color-text-muted);
   }
 
-  /* Positionné → peint au-dessus de la zone cliquable étendue, donc cliquable. */
+  /* Positioned → painted above the extended clickable area, hence clickable. */
   .v-side-nav-end {
     position: relative;
     flex: none;
@@ -388,8 +386,8 @@ function onActionClick(event: MouseEvent) {
     gap: var(--vectis-space-1);
   }
 
-  /* Chevron : bas quand fermé, retourné quand ouvert. Rotation sur l'axe
-     vertical → aucun miroir RTL (contrairement au chevron latéral de VMenu). */
+  /* Chevron: down when closed, flipped when open. A rotation on the vertical axis →
+     no RTL mirroring (unlike VMenu's sideways chevron). */
   .v-side-nav-chevron {
     flex: none;
     color: var(--vectis-color-text-muted);
@@ -400,7 +398,7 @@ function onActionClick(event: MouseEvent) {
     rotate: 180deg;
   }
 
-  /* Permutation des deux chevrons (data-swap = collapseIcon fournie) */
+  /* Swapping the two chevrons (data-swap = collapseIcon provided) */
   .v-side-nav-branch[data-swap][open]
     > .v-side-nav-row
     > .v-side-nav-chevron:not(.v-side-nav-chevron-open),
@@ -413,11 +411,10 @@ function onActionClick(event: MouseEvent) {
   }
 
   /*
-   * Focus : la branche est elle-même focusable ; la feuille ne l'est qu'à
-   * travers son action, dont l'anneau est porté par la zone étendue — il
-   * encadre donc la rangée entière. `outline-offset` NÉGATIF dans les deux cas :
-   * `::details-content` est en `overflow: clip`, un anneau tiré vers
-   * l'extérieur y serait rogné.
+   * Focus: a branch is itself focusable; a leaf only is through its action, whose
+   * ring is carried by the extended area — so it frames the whole row. A NEGATIVE
+   * `outline-offset` in both cases: `::details-content` is in `overflow: clip`, and a
+   * ring pulled outwards would be cropped there.
    */
   .v-side-nav-row:focus-visible,
   .v-side-nav-action:focus-visible::after {
@@ -429,7 +426,7 @@ function onActionClick(event: MouseEvent) {
     outline: none;
   }
 
-  /* Page courante */
+  /* Current page */
   .v-side-nav-row[data-active] {
     background: var(--vectis-color-accent-surface);
     color: var(--vectis-color-accent-text);
@@ -446,7 +443,7 @@ function onActionClick(event: MouseEvent) {
   }
 
   .v-side-nav-row[data-active]:hover {
-    /* assombrit légèrement la surface accent (idiome VMenuItem) */
+    /* Slightly darkens the accent surface (the VMenuItem idiom) */
     background: color-mix(
       in oklab,
       var(--vectis-color-accent-surface),
@@ -454,27 +451,27 @@ function onActionClick(event: MouseEvent) {
     );
   }
 
-  /* Une branche REPLIÉE qui contient la page courante reste signalée. Le
-     `:has()` est volontairement descendant : il doit matcher à toute profondeur. */
+  /* A COLLAPSED branch containing the current page stays flagged. The `:has()` is
+     deliberately descendant: it must match at any depth. */
   .v-side-nav-branch:not([open]):has(.v-side-nav-children [aria-current])
     > .v-side-nav-row:not([data-active]) {
     color: var(--vectis-color-accent-text);
   }
 
-  /* Désactivé : nuances de gris par tokens (jamais d'opacité) */
+  /* Disabled: greys through tokens (never opacity) */
   .v-side-nav-row[data-disabled] {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
-  /* text-muted est plus foncé que text-subtle : tout suit le libellé */
+  /* text-muted is darker than text-subtle: everything follows the label */
   .v-side-nav-row[data-disabled] .v-side-nav-icon,
   .v-side-nav-row[data-disabled] .v-side-nav-sublabel,
   .v-side-nav-row[data-disabled] .v-side-nav-chevron {
     color: inherit;
   }
 
-  /* Ouverture animée en pur CSS (::details-content, progressive enhancement) */
+  /* Animated opening in pure CSS (::details-content, progressive enhancement) */
   .v-side-nav-branch::details-content {
     block-size: 0;
     overflow: clip;

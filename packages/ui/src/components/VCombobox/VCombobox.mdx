@@ -5,35 +5,38 @@ import * as VComboboxStories from './VCombobox.stories'
 
 # Combobox
 
-Champ de recherche avec liste de suggestions et sélection simple ou multiple — le
-pattern ARIA **combobox/listbox** qu'aucune primitive native ne couvre (`<datalist>`
-n'est ni stylable ni multiple). Le composant est **assemblé à partir des briques du
-DS** :
+A search field with a list of suggestions and single or multiple selection — the ARIA
+**combobox/listbox** pattern no native primitive covers (`<datalist>` is neither stylable nor
+multiple). The component is **assembled from the design system's bricks**:
 
-- **`VInput`** pour le champ de recherche (`role="combobox"`) ;
-- **`VPopover`** pour la liste, qui porte elle-même `role="listbox"` (top layer, ancrée en
-  pur CSS sur le contrôle) ;
-- **`VChip`** pour les valeurs sélectionnées en mode multiple.
+- **`VInput`** for the search field (`role="combobox"`);
+- **`VPopover`** for the list, which itself carries `role="listbox"` (top layer, anchored in pure
+  CSS on the control);
+- **`VChip`** for the values selected in multiple mode.
 
-Le focus DOM reste dans l'input pendant la navigation (`aria-activedescendant`) ;
-l'ouverture est pilotée par l'état interne, la fermeture par le light dismiss maison
-(`focusout`).
+The DOM focus stays in the input while navigating (`aria-activedescendant`); the opening is driven
+by internal state, the closing by the in-house light dismiss (`focusout`).
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
 import { VCombobox, type ComboboxOption } from '@vectis/ui'
 
-const pays: ComboboxOption[] = [
+const countries: ComboboxOption[] = [
   { value: 'fr', label: 'France' },
-  { value: 'be', label: 'Belgique' },
-  { value: 'sn', label: 'Sénégal' },
+  { value: 'be', label: 'Belgium' },
+  { value: 're', label: 'Réunion' },
 ]
 const value = ref('')
 </script>
 
 <template>
-  <VCombobox v-model="value" :options="pays" placeholder="Choisir un pays…" aria-label="Pays" />
+  <VCombobox
+    v-model="value"
+    :options="countries"
+    placeholder="Choose a country…"
+    aria-label="Country"
+  />
 </template>
 ```
 
@@ -43,191 +46,181 @@ const value = ref('')
 
 ## Options
 
-Chaque option est un `ComboboxOption` — `{ value, label, disabled? }`. Le `label` est
-affiché et filtré, la `value` alimente le `v-model` ; une option `disabled` est
-présentée mais ni sélectionnable ni atteignable au clavier.
+Each option is a `ComboboxOption` — `{ value, label, disabled? }`. The `label` is displayed and
+filtered, the `value` feeds the `v-model`; a `disabled` option is presented but is neither
+selectable nor keyboard-reachable.
 
-Le filtrage est **insensible à la casse et aux accents** (normalisation NFD) : taper
-`sene` propose `Sénégal`.
+The filtering is **case- and accent-insensitive** (NFD normalization): typing `reun` offers
+`Réunion`.
 
-## Groupes et séparateurs
+## Groups and separators
 
-Une entrée d'`options` n'est pas forcément une option : ce peut être un **groupe
-nommé** — `{ label, options }`, rendu en `role="group"` avec un micro-libellé — ou un
-**séparateur** — `{ separator: true }`, un filet pleine largeur. Les trois formes se
-mélangent librement dans le même tableau, dans l'ordre voulu.
+An entry of `options` is not necessarily an option: it may be a **named group** —
+`{ label, options }`, rendered as `role="group"` with a micro-label — or a **separator** —
+`{ separator: true }`, a full-width rule. The three forms mix freely in the same array, in whatever
+order you want.
 
-Le micro-libellé d'un groupe occupe la hauteur d'une option, texte centré verticalement : le
-rythme vertical de la liste reste le même de bout en bout, quelle que soit la taille du champ
-et en densité compacte.
+A group's micro-label occupies the height of an option, its text vertically centred: the list's
+vertical rhythm stays the same from end to end, whatever the field's size and in compact density.
 
 ```ts
-const pays: ComboboxItem[] = [
+const countries: ComboboxItem[] = [
   { label: 'Europe', options: [{ value: 'fr', label: 'France' }] },
   { separator: true },
-  { label: 'Afrique', options: [{ value: 'sn', label: 'Sénégal' }] },
-  { value: 'other', label: 'Autre / non listé' }, // option nue : toujours valide
+  { label: 'Africa', options: [{ value: 're', label: 'Réunion' }] },
+  { value: 'other', label: 'Other / not listed' }, // a bare option: always valid
 ]
 ```
 
-Groupes et séparateurs sont **du rendu, rien d'autre** : la navigation clavier parcourt
-la liste **à plat** et ne s'arrête jamais sur un libellé de groupe ni sur un filet. Au
-filtrage, un groupe dont plus aucune option ne correspond **disparaît, libellé compris**,
-et les séparateurs devenus orphelins (en tête, en fin, ou deux d'affilée) ne sont pas
-rendus — la liste filtrée ne laisse donc jamais de filet flottant.
+Groups and separators are **rendering, nothing else**: the keyboard navigation walks the list
+**flat** and never stops on a group label or on a rule. On filtering, a group no option of which
+matches **disappears, label included**, and the separators left orphaned (at the head, at the tail,
+or two in a row) are not rendered — so a filtered list never leaves a floating rule.
 
-<Canvas of={VComboboxStories.Groupes} />
+<Canvas of={VComboboxStories.Groups} />
 
-## Recherche
+## Search
 
-Le filtre ne s'active **qu'à la frappe**. Un `v-model` déjà renseigné affiche son
-libellé sans restreindre la liste : à la réouverture, **toutes** les options sont
-reproposées (l'option courante reçoit une coche), et ce n'est qu'en tapant que la
-liste se réduit. **Entrée** sélectionne l'option active — ou l'unique résultat quand
-il n'en reste qu'un.
+The filter only kicks in **on typing**. An already-filled `v-model` displays its label without
+restricting the list: on reopening, **every** option is offered again (the current one receives a
+tick), and only typing narrows the list. **Enter** selects the active option — or the single result
+when only one is left.
 
-Un **chevron** à droite indique l'état et pivote à l'ouverture. Une **croix**
-(`clearable`, activée par défaut — la prop `clearable` de `VInput`, rendue à gauche
-du chevron) apparaît dès qu'il y a **quelque chose à effacer** (une valeur, des Chips
-ou une recherche) et vide **toute la sélection**.
+A **chevron** on the right indicates the state and rotates on opening. A **cross** (`clearable`,
+enabled by default — `VInput`'s `clearable` prop, rendered to the left of the chevron) appears as
+soon as there is **something to clear** (a value, Chips or a search) and empties **the whole
+selection**.
 
-## Recherche serveur
+## Server-side search
 
-Par défaut le filtrage est **local**. Avec une source distante, la liste arrive déjà
-filtrée : passer `:filter="false"` — sinon le filtre local rejouerait sur `label` et
-écarterait silencieusement les résultats appariés sur un autre champ. `filter` accepte
-aussi un **prédicat** `(option, query) => boolean` pour une correspondance
-personnalisée (le prédicat reçoit la requête brute trimée, pas sa forme normalisée).
+By default the filtering is **local**. With a remote source, the list already arrives filtered: pass
+`:filter="false"` — otherwise the local filter would run again on `label` and silently drop the
+results matched on another field. `filter` also accepts a **predicate**
+`(option, query) => boolean` for a custom match (the predicate receives the raw trimmed query, not
+its normalized form).
 
-L'événement **`search`** porte le terme saisi. Il est **débouncé** (`search-debounce`,
-250 ms par défaut ; `0` = synchrone) sauf à l'ouverture du panneau, où il part
-immédiatement pour permettre un premier chargement. Un même terme n'est **pas réémis** :
-rouvrir le panneau ne relance pas la requête. Aucune requête ne part sur un panneau
-fermé, y compris pour une frappe dont le délai n'était pas écoulé.
+The **`search`** event carries the term typed. It is **debounced** (`search-debounce`, 250 ms by
+default; `0` = synchronous) except when the panel opens, where it fires immediately to allow a first
+load. The same term is **not re-emitted**: reopening the panel does not relaunch the request. No
+request goes out on a closed panel, including for a keystroke whose delay had not elapsed.
 
-Le composant n'annule pas les requêtes en vol : c'est au consommateur d'ignorer les
-réponses obsolètes (jeton d'appel, `AbortController`…).
+The component does not cancel in-flight requests: it is up to the consumer to ignore stale responses
+(a call token, an `AbortController`…).
 
-<Canvas of={VComboboxStories.RechercheAsynchrone} />
+<Canvas of={VComboboxStories.AsynchronousSearch} />
 
-Les **libellés des valeurs sélectionnées sont mémorisés** : une valeur choisie garde
-son libellé (VChip, texte du champ) même quand la recherche suivante la fait disparaître
-des options. Une valeur qui n'a jamais figuré dans aucune page reste affichée telle
-quelle — pour l'éviter sur un formulaire d'édition, inclure l'option correspondante
-dans le premier `options` rendu.
+The **labels of the selected values are memorized**: a chosen value keeps its label (in the VChip,
+in the field's text) even when the next search makes it disappear from the options. A value that has
+never appeared in any page stays displayed as it is — to avoid that on an edit form, include the
+matching option in the first `options` rendered.
 
-## Chargement et pagination
+## Loading and pagination
 
-`loading` couvre les deux moments : sans option affichée, le panneau montre l'état de
-chargement (jamais « aucun résultat », qui dirait l'inverse de la réalité) ; avec des
-options déjà affichées, un spinner apparaît en pied de liste. Dans les deux cas, le
-chevron du champ laisse sa place à un spinner, au même endroit et sans saut de largeur.
-`loading-text` personnalise le message, les slots `#loading` et `#empty` (qui reçoit
-`query`) remplacent entièrement ces contenus — pour proposer une action « créer… », par
-exemple.
+`loading` covers both moments: with no option displayed, the panel shows the loading state (never
+"no results", which would say the opposite of reality); with options already displayed, a spinner
+appears at the foot of the list. In both cases, the field's chevron gives way to a spinner, in the
+same place and with no width jump. `loading-text` customizes the message, and the `#loading` and
+`#empty` slots (the latter receiving `query`) entirely replace those contents — to offer a
+"create…" action, for instance.
 
-`has-more` rend une sentinelle en pied de panneau : son entrée dans la vue émet
-**`load-more`**. La détection tient compte du chargement en cours et relance
-l'évaluation à chaque page reçue, de sorte qu'une page trop courte pour remplir le
-panneau n'interrompt pas la pagination.
+`has-more` renders a sentinel at the foot of the panel: its entry into view emits **`load-more`**.
+The detection accounts for the loading in progress and re-runs the evaluation on every page
+received, so that a page too short to fill the panel does not interrupt the pagination.
 
-<Canvas of={VComboboxStories.ScrollInfini} />
+<Canvas of={VComboboxStories.InfiniteScroll} />
 
-## Icône d'option
+## Option icon
 
-Le champ **`icon`** d'une option affiche une icône avant son libellé — un nom Material
-d'icône, ou un rendu explicite (`{ src }`). Elle est rendue à l'emplacement prévu par la
-rangée, donc alignée et espacée comme le reste du contenu.
+An option's **`icon`** field displays an icon before its label — a Material icon name, or an
+explicit render (`{ src }`). It is rendered in the slot the row provides, hence aligned and spaced
+like the rest of the content.
 
-C'est la voie à préférer pour une simple icône, plutôt que le slot `#option` : ce dernier
-est rendu **à l'intérieur** du libellé, une icône qu'on y placerait n'atteindrait pas
-l'emplacement de début ni sa gouttière. La fin de la rangée, elle, est réservée à la coche
-de sélection.
+That is the route to prefer for a simple icon, rather than the `#option` slot: the latter is
+rendered **inside** the label, so an icon placed there would reach neither the start slot nor its
+gutter. The end of the row, meanwhile, is reserved for the selection tick.
 
-<Canvas of={VComboboxStories.AvecIcones} />
+<Canvas of={VComboboxStories.WithIcons} />
 
-## Personnaliser une option
+## Customizing an option
 
-Le slot **`#option`** remplace le contenu d'une option et reçoit `{ option, index,
-active, selected }`. La coche de sélection reste gérée par le composant.
+The **`#option`** slot replaces an option's content and receives
+`{ option, index, active, selected }`. The selection tick stays handled by the component.
 
-<Canvas of={VComboboxStories.OptionPersonnalisee} />
+<Canvas of={VComboboxStories.CustomOption} />
 
-## Sélection multiple
+## Multiple selection
 
-Avec `multiple`, le `v-model` devient un `string[]` et chaque valeur s'affiche en
-`VChip` retirable. Le panneau reste ouvert après un choix (on enchaîne les
-sélections) ; **Retour arrière** sur un champ de recherche vide retire la dernière
-valeur. Hors focus, le champ de saisie se replie pour ne laisser que les Chips, sans
-espace vide.
+With `multiple`, the `v-model` becomes a `string[]` and each value displays as a removable `VChip`.
+The panel stays open after a choice (so selections can be chained); **Backspace** on an empty search
+field removes the last value. Out of focus, the search input folds away to leave only the Chips,
+with no empty space.
 
-<Canvas of={VComboboxStories.SelectionMultiple} />
+<Canvas of={VComboboxStories.MultipleSelection} />
 
-### Personnaliser les Chips
+### Customizing the Chips
 
-Le slot **`#chip`** remplace le VChip d'une valeur sélectionnée. Il reçoit :
+The **`#chip`** slot replaces the VChip of a selected value. It receives:
 
-- `value` et `label` — la valeur et son libellé résolu ;
-- `option` — l'option complète (donc son `icon`), ou `undefined` si cette valeur n'a jamais
-  été vue dans `options`. Le composant mémorise les options sélectionnées : en source
-  asynchrone, une valeur choisie disparaît des résultats suivants sans perdre son libellé
-  ni son icône ;
-- `remove` — à câbler sur l'action de retrait, sans quoi la valeur ne serait plus retirable ;
-- `size` et `compact` — le gabarit calculé pour tenir dans le champ. Les reprendre sur le
-  VChip personnalisé évite de faire grandir le champ.
+- `value` and `label` — the value and its resolved label;
+- `option` — the whole option (hence its `icon`), or `undefined` if that value has never been seen
+  in `options`. The component memorizes the selected options: with an asynchronous source, a chosen
+  value disappears from the next results without losing its label or its icon;
+- `remove` — to wire onto the removal action, without which the value could no longer be removed;
+- `size` and `compact` — the template computed to fit in the field. Reusing them on the custom VChip
+  avoids making the field grow.
 
-<Canvas of={VComboboxStories.ChipPersonnalise} />
+<Canvas of={VComboboxStories.CustomChip} />
 
-## Tailles
+## Sizes
 
-`size` accepte `sm` (32 px), `md` (40 px, défaut — aligné sur `VInput`) et `lg` (48 px),
-combinable avec `compact` (-4 px). En multiple, les Chips restent **un cran sous le champ**
-pour tenir dedans sans le faire grandir : `xs` (24 px) jusqu'à `md`, `sm` (32 px) en `lg`.
-Sous le cran le plus bas de chaque paire, le rattrapage passe par `compact` plutôt que par
-une taille de moins — `size="sm"` donne des Chips `xs` compact (20 px), `size="lg"` +
-`compact` des Chips `sm` compact (28 px). Le panneau d'options suit la taille du champ :
-rangées de 32/40/48 px, et en `lg` la même typographie (16 px) et les mêmes icônes (24 px)
-que le champ — le libellé d'une option ne change pas de taille en passant dans le champ.
+`size` accepts `sm` (32 px), `md` (40 px, the default — aligned on `VInput`) and `lg` (48 px),
+combinable with `compact` (-4 px). In multiple mode, the Chips stay **one step below the field** so
+they fit without making it grow: `xs` (24 px) up to `md`, `sm` (32 px) at `lg`. Below the lowest
+step of each pair, the catch-up goes through `compact` rather than one size less — `size="sm"` gives
+`xs` compact Chips (20 px), `size="lg"` + `compact` gives `sm` compact Chips (28 px). The options
+panel follows the field's size: rows of 32/40/48 px, and at `lg` the same typography (16 px) and the
+same icons (24 px) as the field — an option's label does not change size on its way into the field.
 
-<Canvas of={VComboboxStories.Tailles} />
+<Canvas of={VComboboxStories.Sizes} />
 
-## États
+## States
 
-`invalid` force l'état d'erreur (bordure rouge, pour la validation serveur) ;
-`disabled` grise le champ (nuances par tokens, sans opacité). `placeholder` et
-`empty-text` (message quand aucune option ne correspond) sont personnalisables.
+`invalid` forces the error state (a red border, for server-side validation); `disabled` greys the
+field (shades through tokens, with no opacity). `placeholder` and `empty-text` (the message when no
+option matches) are customizable.
 
-<Canvas of={VComboboxStories.Invalide} />
+<Canvas of={VComboboxStories.Invalid} />
 
-<Canvas of={VComboboxStories.AucunResultat} />
+<Canvas of={VComboboxStories.NoResults} />
 
 <Canvas of={VComboboxStories.Disabled} />
 
-## Accessibilité
+## Accessibility
 
-- Contrat ARIA combobox/listbox : `role="combobox"` + `aria-expanded` /
-  `aria-controls` / `aria-autocomplete="list"` sur l'input, `role="listbox"` sur le
-  panneau, `role="option"` + `aria-selected` par option.
-- **Le focus reste dans l'input** ; l'option courante est signalée par
-  `aria-activedescendant` (jamais de focus déplacé sur les options).
-- Clavier : Flèches haut/bas (avec bouclage, les options désactivées sont sautées),
-  Entrée sélectionne, Échap ferme, Tab ferme et poursuit la tabulation, Retour arrière
-  retire la dernière valeur en multiple.
-- Nommer le champ via `aria-label` (ou un `label` associé) — l'attribut est reporté
-  sur l'input interne.
-- Un groupe est un `role="group"` nommé par `aria-labelledby` (l'équivalent d'un
-  `<optgroup>`), enfant autorisé du `role="listbox"` ; son libellé n'est ni focusable ni
-  sélectionnable. Le séparateur est en revanche **décoratif** (`role="presentation"`) : le
-  regroupement est déjà porté par les groupes et leurs noms, un `role="separator"` ne
-  serait pas un enfant valide d'une listbox.
-- Le spinner du **champ** est décoratif (`aria-hidden`) : l'annonce du chargement vient
-  du `role="status"` inséré dans le panneau, une seule fois.
+- The combobox/listbox ARIA contract: `role="combobox"` + `aria-expanded` / `aria-controls` /
+  `aria-autocomplete="list"` on the input, `role="listbox"` on the panel, `role="option"` +
+  `aria-selected` per option.
+- **The focus stays in the input**; the current option is signalled by `aria-activedescendant`
+  (never a focus moved onto the options).
+- Keyboard: Up/Down arrows (with wrap-around, disabled options skipped), Enter selects, Escape
+  closes, Tab closes and continues the tab order, Backspace removes the last value in multiple mode.
+- Name the field through `aria-label` (or an associated `label`) — the attribute is carried over to
+  the internal input.
+- A group is a `role="group"` named through `aria-labelledby` (the equivalent of an `<optgroup>`), an
+  allowed child of the `role="listbox"`; its label is neither focusable nor selectable. The
+  separator, on the other hand, is **decorative** (`role="presentation"`): the grouping is already
+  carried by the groups and their names, and a `role="separator"` would not be a valid child of a
+  listbox.
+- The **field's** spinner is decorative (`aria-hidden`): the loading announcement comes from the
+  `role="status"` inserted in the panel, once only.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.
 
-## Support navigateur
+## Browser support
 
-Le panneau s'appuie sur la **Popover API** et le **CSS Anchor Positioning** (largeur
-alignée sur le contrôle via `anchor-size(width)`, ancre confinée par `anchor-scope`)
-**sans fallback** — décision du projet : Chrome/Edge 125+, Safari 26+, Firefox non
-supporté tant que l'anchor positioning n'y est pas stable.
+The panel rests on the **Popover API** and **CSS Anchor Positioning** (a width aligned on the
+control through `anchor-size(width)`, the anchor confined by `anchor-scope`) **with no fallback** —
+a project decision: Chrome/Edge 125+, Safari 26+, Firefox unsupported until anchor positioning is
+stable there.

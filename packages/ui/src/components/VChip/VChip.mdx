@@ -5,136 +5,136 @@ import * as VChipStories from './VChip.stories'
 
 # Chip
 
-Étiquette compacte : tag, filtre, valeur de saisie. **Statique par défaut** (aucun hover),
-elle devient interactive via `clickable` (bouton), `href` (lien) ou `selectable` (toggle) —
-dans tous les cas l'élément natif couvre focus, clavier et désactivation. Le bouton de
-retrait (`dismissible`) est toujours un **second** bouton frère : jamais de bouton imbriqué.
+A compact label: a tag, a filter, an input value. **Static by default** (no hover), it becomes
+interactive through `clickable` (a button), `href` (a link) or `selectable` (a toggle) — in every
+case the native element covers focus, keyboard and disabling. The removal button (`dismissible`) is
+always a **second** sibling button: never a nested button.
 
 <Canvas of={VChipStories.Default} />
 
 <Controls of={VChipStories.Default} />
 
-## Variants et tones
+## Variants and tones
 
-Trois variants (`tonal`, `solid`, `outline`) croisés avec cinq tones (`neutral`, `accent`,
-`danger`, `success`, `warning`), sur le modèle VButton : les tones ne définissent que des
-variables CSS locales (`--tone-bg-solid`, `--tone-text-tinted`…) que les variants consomment.
+Three variants (`tonal`, `solid`, `outline`) crossed with five tones (`neutral`, `accent`,
+`danger`, `success`, `warning`), on the VButton model: the tones define only local CSS variables
+(`--tone-bg-solid`, `--tone-text-tinted`…) which the variants consume.
 
-Particularité du tone `neutral` en `solid` : inversion totale `text`/`surface` (fond sombre
-en light, fond clair en dark) — un solid gris moyen serait indistinguable du tonal,
-notamment en thème dark.
+The particularity of the `neutral` tone in `solid`: a full `text`/`surface` inversion (a dark
+background in light, a light background in dark) — a mid-grey solid would be indistinguishable from
+the tonal, notably in the dark theme.
 
 <Canvas of={VChipStories.Variants} />
 
-## Couleur custom
+## Custom colour
 
-La prop `color` accepte une couleur du consommateur — hexadécimal, nom CSS (`red`,
-`hotpink`) ou `oklch()` — et **remplace le tone**. Toutes les nuances (fond doux, texte
-teinté, bordure, hover/active) sont dérivées par `color-mix()` avec les tokens de thème :
-le rendu s'adapte automatiquement en light/dark, sur les trois variants.
+The `color` prop accepts a colour of the consumer's — hexadecimal, a CSS name (`red`, `hotpink`) or
+`oklch()` — and **replaces the tone**. Every shade (soft background, tinted text, border,
+hover/active) is derived by `color-mix()` from the theme tokens: the rendering adapts automatically
+in light/dark, across all three variants.
 
-> En `solid`, le texte est blanc fixe : le contraste avec une couleur claire (jaune,
-> pastel…) est à la charge du consommateur.
+> In `solid`, the text is a fixed white: the contrast against a light colour (yellow, a pastel…) is
+> the consumer's responsibility.
 
-<Canvas of={VChipStories.CouleurCustom} />
+<Canvas of={VChipStories.CustomColor} />
 
-## Formes
+## Shapes
 
-`shape="chip"` (défaut) : coins arrondis rectangulaires (`--vectis-radius-interactive`) ;
-`shape="pill"` : pilule (`--vectis-radius-pill`).
+`shape="chip"` (the default): rectangular rounded corners (`--vectis-radius-interactive`);
+`shape="pill"`: a pill (`--vectis-radius-pill`).
 
-<Canvas of={VChipStories.Formes} />
+<Canvas of={VChipStories.Shapes} />
 
-## Cliquable
+## Clickable
 
-`clickable` rend l'élément d'action en `<button type="button">` : le clic est un événement
-natif (fallthrough, pas d'emit maison), avec hover, active et focus clavier. Un chip
-**non cliquable reste inerte** : aucun hover, curseur par défaut.
+`clickable` renders the action element as a `<button type="button">`: the click is a native event
+(fallthrough, no home-made emit), with hover, active and keyboard focus. A **non-clickable chip
+stays inert**: no hover, the default cursor.
 
-<Canvas of={VChipStories.Cliquable} />
+<Canvas of={VChipStories.Clickable} />
 
-## Lien
+## Link
 
-`href` rend l'action en `<a>` ; les attributs de lien (`target`, `rel`…) passent en
-fallthrough. Un lien `disabled` devient un **lien inerte** (pattern VButton) : `href`
-retiré, `aria-disabled="true"`, handlers `click` filtrés.
+`href` renders the action as an `<a>`; the link attributes (`target`, `rel`…) pass through
+fallthrough. A `disabled` link becomes an **inert link** (the VButton pattern): `href` removed,
+`aria-disabled="true"`, `click` handlers filtered.
 
-<Canvas of={VChipStories.Lien} />
+<Canvas of={VChipStories.Link} />
 
-## Sélection
+## Selection
 
-`selectable` transforme le chip en toggle : `<button aria-pressed>` lié à
-`v-model:selected`. L'état sélectionné bascule sur le **rendu solid du tone (ou de la
-couleur custom) courant**. Priorité des modes : `selectable` &gt; `href` &gt; `clickable`.
+`selectable` turns the chip into a toggle: a `<button aria-pressed>` bound to `v-model:selected`.
+The selected state switches to the **solid rendering of the current tone (or custom colour)**. Mode
+priority: `selectable` &gt; `href` &gt; `clickable`.
 
-<Canvas of={VChipStories.Selectionnable} />
+<Canvas of={VChipStories.Selectable} />
 
-La prop `check` affiche une coche Material devant le libellé quand le chip est
-sélectionné ; elle **remplace** l'emplacement de début (`icon-start` / slot `#start`) —
-jamais de coche et d'icône côte à côte.
+The `check` prop displays a Material tick before the label when the chip is selected; it
+**replaces** the start slot (`icon-start` / the `#start` slot) — never a tick and an icon side by
+side.
 
-<Canvas of={VChipStories.SelectionnableAvecCheck} />
+<Canvas of={VChipStories.SelectableWithCheck} />
 
-<Canvas of={VChipStories.SelectionParTone} />
+<Canvas of={VChipStories.SelectionPerTone} />
 
-## Suppression
+## Removal
 
-`dismissible` ajoute un bouton de retrait qui émet `dismiss` — la disparition effective
-reste à la charge du consommateur (retrait de la liste, transition…).
+`dismissible` adds a removal button emitting `dismiss` — making it actually disappear stays the
+consumer's responsibility (removing it from the list, a transition…).
 
-<Canvas of={VChipStories.Supprimable} />
+<Canvas of={VChipStories.Dismissible} />
 
-Le bouton de retrait n'a **pas de fond**, même au survol : seule la couleur de l'icône
-passe d'atténuée à pleine (pattern des boutons internes de VInput). L'icône suit la taille
-du chip (16px en `xs`, 20px en `sm`) et se personnalise via `dismiss-icon` (nom d'icône
-ou rendu explicite, défaut `close`).
+The removal button has **no background**, even on hover: only the icon's colour goes from dimmed to
+full (the pattern of VInput's internal buttons). The icon follows the chip's size (16px in `xs`,
+20px in `sm`) and is customized through `dismiss-icon` (an icon name or an explicit render, default
+`close`).
 
-> Les icônes rendues par le DS lui-même sont des SVG embarqués : aucune police n'est requise.
-> Vos propres noms d'icônes, eux, viennent de la police ou de la bibliothèque que vous
-> branchez (voir le README).
+> The icons the design system renders itself are embedded SVGs: no font is required. Your own icon
+> names, on the other hand, come from the font or the library you wire in (see the README).
 
-<Canvas of={VChipStories.IconeDeRetraitCustom} />
+<Canvas of={VChipStories.CustomDismissIcon} />
 
-Sélection et suppression se combinent — deux boutons frères, jamais imbriqués :
+Selection and removal combine — two sibling buttons, never nested:
 
-<Canvas of={VChipStories.SelectionnableEtSupprimable} />
+<Canvas of={VChipStories.SelectableAndDismissible} />
 
-## Icônes
+## Icons
 
-`icon-start` / `icon-end` acceptent un nom d'icône ou un rendu explicite (`{ src }`).
-Les slots `#start` / `#end` priment sur les props pour du contenu custom.
-Sans libellé (aucun slot par défaut), le chip devient **carré** (largeur = hauteur, modèle
-VIconButton) : penser à l'`aria-label`.
+`icon-start` / `icon-end` accept an icon name or an explicit render (`{ src }`). The `#start` /
+`#end` slots win over the props for custom content. With no label (no default slot), the chip
+becomes **square** (width = height, the VIconButton model): remember the `aria-label`.
 
-<Canvas of={VChipStories.Icones} />
+<Canvas of={VChipStories.Icons} />
 
-## Tailles
+## Sizes
 
-Deux tailles (`xs` 24px — défaut — et `sm` 32px, tokens `--vectis-control-height-*`) ;
-`compact` retire 4px de hauteur sans toucher au padding, à la typographie ni aux icônes.
-Le mapping taille → hauteur/typo/icône est partagé par tous les contrôles (classe
-`v-control`, voir `styles/control-size.css`).
+Two sizes (`xs` 24px — the default — and `sm` 32px, the `--vectis-control-height-*` tokens);
+`compact` removes 4px of height without touching the padding, the typography or the icons. The size
+→ height/type/icon mapping is shared by every control (the `v-control` class, see
+`styles/control-size.css`).
 
-<Canvas of={VChipStories.Tailles} />
+<Canvas of={VChipStories.Sizes} />
 
-## Désactivé
+## Disabled
 
-`disabled` bascule tous les variants sur des nuances de gris (`--vectis-color-surface-muted`,
-`--vectis-color-text-subtle`) — pas de jeu d'opacité, rendu suivi en thème dark. Les boutons
-internes sont désactivés nativement, un lien devient inerte.
+`disabled` switches every variant to greys (`--vectis-color-surface-muted`,
+`--vectis-color-text-subtle`) — no opacity trick, and the rendering follows in the dark theme. The
+internal buttons are natively disabled, and a link becomes inert.
 
 <Canvas of={VChipStories.Disabled} />
 
-## Accessibilité
+## Accessibility
 
-- VChip statique = simple `<span>` : aucun rôle interactif annoncé à tort.
-- `selectable` → `aria-pressed` synchronisé avec `v-model:selected` (pattern toggle
-  button) ; grouper les filtres dans un conteneur `role="group"` nommé.
-- Le retrait est un bouton dédié (`aria-label` « Retirer ») **frère** de l'action — jamais
-  de bouton dans un bouton.
-- VChip icône seule : fournir un nom accessible via `aria-label` (posé en fallthrough sur
-  l'élément d'action).
-- Focus visible par anneau (`--vectis-focus-ring-*`) ; les transitions respectent
+- A static chip = a plain `<span>`: no interactive role wrongly announced.
+- `selectable` → `aria-pressed` synchronized with `v-model:selected` (the toggle button pattern);
+  group the filters inside a named `role="group"` container.
+- Removal is a dedicated button (`aria-label` "Remove") **sibling** of the action — never a button
+  inside a button.
+- An icon-only chip: supply an accessible name through `aria-label` (set through fallthrough on the
+  action element).
+- Focus is visible through a ring (`--vectis-focus-ring-*`); the transitions respect
   `prefers-reduced-motion`.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.

@@ -7,7 +7,7 @@ import VSideNavigationGroup from './VSideNavigationGroup.vue'
 import VSideNavigationItem from './VSideNavigationItem.vue'
 import VSideNavigationSeparator from './VSideNavigationSeparator.vue'
 
-/** Harnais unique : contenu de la nav, attributs bruts de la racine, état exposé. */
+/** Single harness: the nav's content, the root's raw attributes, the exposed state. */
 function renderNav(inner: string, navAttrs = '', state: Record<string, unknown> = {}) {
   const Harness = defineComponent({
     components: {
@@ -22,11 +22,11 @@ function renderNav(inner: string, navAttrs = '', state: Record<string, unknown> 
   return render(Harness)
 }
 
-/** Arbre de référence : 3 niveaux, un groupe, un séparateur, une feuille active. */
-const ARBRE = `
-  <VSideNavigationItem href="/" active icon="home">Accueil</VSideNavigationItem>
+/** Reference tree: 3 levels, a group, a separator, an active leaf. */
+const TREE = `
+  <VSideNavigationItem href="/" active icon="home">Home</VSideNavigationItem>
   <VSideNavigationItem icon="folder" default-open>
-    Projets
+    Projects
     <template #items>
       <VSideNavigationItem href="/a">Alpha</VSideNavigationItem>
       <VSideNavigationItem>
@@ -38,39 +38,39 @@ const ARBRE = `
     </template>
   </VSideNavigationItem>
   <VSideNavigationSeparator />
-  <VSideNavigationGroup label="Réglages">
-    <VSideNavigationItem href="/profil">Profil</VSideNavigationItem>
+  <VSideNavigationGroup label="Settings">
+    <VSideNavigationItem href="/profile">Profile</VSideNavigationItem>
   </VSideNavigationGroup>
 `
 
-const renderTree = (navAttrs = '') => renderNav(ARBRE, navAttrs)
+const renderTree = (navAttrs = '') => renderNav(TREE, navAttrs)
 
-/** Rangée d'un item, par son libellé — <summary> pour une branche, sinon le conteneur. */
+/** An item's row, by its label — a <summary> for a branch, otherwise the container. */
 function row(container: Element, label: string): HTMLElement {
   const found = [...container.querySelectorAll<HTMLElement>('.v-side-nav-row')].find(
     (el) => el.querySelector('.v-side-nav-label')?.textContent?.trim() === label,
   )
-  if (!found) throw new Error(`Rangée « ${label} » introuvable`)
+  if (!found) throw new Error(`Row "${label}" not found`)
   return found
 }
 
-/** Noms des <VIcon> d'une rangée — `data-icon` est posé quelle que soit la source. */
-const icones = (rangee: Element) =>
-  [...rangee.querySelectorAll<HTMLElement>('.v-icon')].map((el) => el.dataset.icon)
+/** Names of a row's <VIcon>s — `data-icon` is set whatever the source. */
+const icons = (rowEl: Element) =>
+  [...rowEl.querySelectorAll<HTMLElement>('.v-icon')].map((el) => el.dataset.icon)
 
 describe('VSideNavigation', () => {
-  describe('racine', () => {
-    it('nomme la <nav> : dictionnaire, puis prop `label`, puis attributs du consommateur', () => {
+  describe('root', () => {
+    it('names the <nav>: the dictionary, then the `label` prop, then the consumer attributes', () => {
       const nav = (attrs: string) => renderTree(attrs).container.querySelector('nav')
       expect(nav('')?.getAttribute('aria-label')).toBe('Navigation')
-      expect(nav('label="Menu principal"')?.getAttribute('aria-label')).toBe('Menu principal')
-      // fallthrough : l'attribut du consommateur prime sur la prop
+      expect(nav('label="Main menu"')?.getAttribute('aria-label')).toBe('Main menu')
+      // fallthrough: the consumer's attribute wins over the prop
       expect(nav('label="Menu" aria-label="Sections"')?.getAttribute('aria-label')).toBe('Sections')
-      // aria-labelledby supprime le défaut, sinon deux noms cohabiteraient
-      expect(nav('aria-labelledby="titre"')?.hasAttribute('aria-label')).toBe(false)
+      // aria-labelledby removes the default, or two names would coexist
+      expect(nav('aria-labelledby="title"')?.hasAttribute('aria-label')).toBe(false)
     })
 
-    it('rend une liste : nav > ul, items en <li> enfants directs', () => {
+    it('renders a list: nav > ul, items as direct <li> children', () => {
       const { container } = renderTree()
       const list = container.querySelector('nav > ul.v-side-nav-list')
       expect(list).not.toBeNull()
@@ -79,7 +79,7 @@ describe('VSideNavigation', () => {
       expect(list?.querySelector(':scope > li.v-side-nav-group')).not.toBeNull()
     })
 
-    it("`v-control` n'est posé QUE sur la <nav> — sinon le compact serait perdu dès le niveau 2", () => {
+    it('`v-control` is set ONLY on the <nav> — otherwise compact would be lost from level 2 on', () => {
       const { container } = renderTree('size="sm" compact')
       expect(container.querySelectorAll('.v-control')).toHaveLength(1)
       const nav = container.querySelector('nav')
@@ -90,20 +90,20 @@ describe('VSideNavigation', () => {
     })
   })
 
-  describe('feuille', () => {
-    it('rend un <a href> avec href, un <button type=button> sinon', () => {
+  describe('leaf', () => {
+    it('renders an <a href> with href, a <button type=button> otherwise', () => {
       const { container } = renderNav(`
-        <VSideNavigationItem href="/x">Lien</VSideNavigationItem>
+        <VSideNavigationItem href="/x">Link</VSideNavigationItem>
         <VSideNavigationItem>Action</VSideNavigationItem>
       `)
-      const [lien, bouton] = [...container.querySelectorAll('.v-side-nav-action')]
-      expect(lien?.tagName).toBe('A')
-      expect(lien?.getAttribute('href')).toBe('/x')
-      expect(bouton?.tagName).toBe('BUTTON')
-      expect(bouton?.getAttribute('type')).toBe('button')
+      const [link, button] = [...container.querySelectorAll('.v-side-nav-action')]
+      expect(link?.tagName).toBe('A')
+      expect(link?.getAttribute('href')).toBe('/x')
+      expect(button?.tagName).toBe('BUTTON')
+      expect(button?.getAttribute('type')).toBe('button')
     })
 
-    it('émet `select` à l’activation', async () => {
+    it('emits `select` on activation', async () => {
       const onSelect = vi.fn()
       const { container } = renderNav(
         `<VSideNavigationItem @select="onSelect">Action</VSideNavigationItem>`,
@@ -114,107 +114,107 @@ describe('VSideNavigation', () => {
       expect(onSelect).toHaveBeenCalledTimes(1)
     })
 
-    it('active : aria-current="page" sur un lien, "true" sur un bouton, data-active sur la rangée', () => {
+    it('active: aria-current="page" on a link, "true" on a button, data-active on the row', () => {
       const { container } = renderNav(`
-        <VSideNavigationItem href="/x" active>Lien</VSideNavigationItem>
-        <VSideNavigationItem active>Bouton</VSideNavigationItem>
+        <VSideNavigationItem href="/x" active>Link</VSideNavigationItem>
+        <VSideNavigationItem active>Button</VSideNavigationItem>
       `)
-      expect(row(container, 'Lien').dataset.active).toBe('')
-      expect(row(container, 'Lien').querySelector('a')?.getAttribute('aria-current')).toBe('page')
-      expect(row(container, 'Bouton').querySelector('button')?.getAttribute('aria-current')).toBe(
+      expect(row(container, 'Link').dataset.active).toBe('')
+      expect(row(container, 'Link').querySelector('a')?.getAttribute('aria-current')).toBe('page')
+      expect(row(container, 'Button').querySelector('button')?.getAttribute('aria-current')).toBe(
         'true',
       )
     })
 
-    it('désactivée : bouton inerte natif, lien inerte par aria-disabled, aucun `select`', async () => {
+    it('disabled: a natively inert button, an inert link through aria-disabled, no `select`', async () => {
       const onSelect = vi.fn()
       const { container } = renderNav(
         `
-          <VSideNavigationItem disabled @select="onSelect">Bouton</VSideNavigationItem>
-          <VSideNavigationItem href="/x" disabled @select="onSelect">Lien</VSideNavigationItem>
+          <VSideNavigationItem disabled @select="onSelect">Button</VSideNavigationItem>
+          <VSideNavigationItem href="/x" disabled @select="onSelect">Link</VSideNavigationItem>
         `,
         '',
         { onSelect },
       )
-      const [bouton, lien] = [...container.querySelectorAll<HTMLElement>('.v-side-nav-action')]
-      expect(bouton).toHaveProperty('disabled', true)
-      expect(lien?.hasAttribute('href')).toBe(false)
-      expect(lien?.getAttribute('aria-disabled')).toBe('true')
-      expect(row(container, 'Lien').dataset.disabled).toBe('')
+      const [button, link] = [...container.querySelectorAll<HTMLElement>('.v-side-nav-action')]
+      expect(button).toHaveProperty('disabled', true)
+      expect(link?.hasAttribute('href')).toBe(false)
+      expect(link?.getAttribute('aria-disabled')).toBe('true')
+      expect(row(container, 'Link').dataset.disabled).toBe('')
 
-      await fireEvent.click(lien!)
+      await fireEvent.click(link!)
       expect(onSelect).not.toHaveBeenCalled()
     })
 
-    it('slot #end : frère de l’action, jamais un contrôle imbriqué dans un lien', () => {
+    it('the #end slot: a sibling of the action, never a control nested inside a link', () => {
       const { container } = renderNav(`
         <VSideNavigationItem href="/x">
-          Lien
-          <template #end><button type="button" data-testid="action">Plus</button></template>
+          Link
+          <template #end><button type="button" data-testid="action">More</button></template>
         </VSideNavigationItem>
       `)
       const action = container.querySelector('.v-side-nav-action')!
-      const fin = container.querySelector('[data-testid="action"]')!
-      expect(action.contains(fin)).toBe(false)
-      expect(container.querySelector('.v-side-nav-end')?.contains(fin)).toBe(true)
+      const end = container.querySelector('[data-testid="action"]')!
+      expect(action.contains(end)).toBe(false)
+      expect(container.querySelector('.v-side-nav-end')?.contains(end)).toBe(true)
     })
   })
 
-  describe('branche', () => {
-    const BRANCHE = `
+  describe('branch', () => {
+    const BRANCH = `
       <VSideNavigationItem @select="onSelect">
         Parent
         <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
       </VSideNavigationItem>
     `
 
-    it('rend <details> + sous-liste, un chevron, et n’émet pas `select`', async () => {
+    it('renders <details> + a sublist, one chevron, and emits no `select`', async () => {
       const onSelect = vi.fn()
-      const { container } = renderNav(BRANCHE, '', { onSelect })
+      const { container } = renderNav(BRANCH, '', { onSelect })
       const details = container.querySelector('details.v-side-nav-branch')!
       const summary = details.querySelector(':scope > summary.v-side-nav-row')
       expect(summary).not.toBeNull()
       expect(details.querySelector(':scope > ul.v-side-nav-children')).not.toBeNull()
-      expect(icones(summary!)).toEqual(['expand_more'])
+      expect(icons(summary!)).toEqual(['expand_more'])
       expect(details.hasAttribute('data-swap')).toBe(false)
 
       await fireEvent.click(summary!)
       expect(onSelect).not.toHaveBeenCalled()
     })
 
-    it('`default-open` ouvre au premier rendu', () => {
+    it('`default-open` opens on the first render', () => {
       const { container } = renderTree()
-      const [projets, beta] = [...container.querySelectorAll('details')]
-      expect(projets?.open).toBe(true)
+      const [projects, beta] = [...container.querySelectorAll('details')]
+      expect(projects?.open).toBe(true)
       expect(beta?.open).toBe(false)
     })
 
-    it('v-model:open — piloté depuis le parent, et réécrit par l’événement natif `toggle`', async () => {
-      const ouvert = ref(false)
+    it('v-model:open — driven from the parent, and rewritten by the native `toggle` event', async () => {
+      const open = ref(false)
       const { container } = renderNav(
         `
-          <VSideNavigationItem v-model:open="ouvert">
+          <VSideNavigationItem v-model:open="open">
             Parent
             <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
           </VSideNavigationItem>
         `,
         '',
-        { ouvert },
+        { open },
       )
       const details = container.querySelector('details')!
       expect(details.open).toBe(false)
 
-      ouvert.value = true
+      open.value = true
       await Promise.resolve()
       expect(details.open).toBe(true)
 
-      // le DOM est la source de vérité : le modèle est alimenté par `toggle`
+      // the DOM is the source of truth: the model is fed by `toggle`
       details.open = false
       await fireEvent(details, new Event('toggle'))
-      expect(ouvert.value).toBe(false)
+      expect(open.value).toBe(false)
     })
 
-    it('désactivée : summary hors tabulation et basculement annulé', async () => {
+    it('disabled: the summary is out of the tab order and the toggling is cancelled', async () => {
       const { container } = renderNav(`
         <VSideNavigationItem disabled>
           Parent
@@ -229,7 +229,7 @@ describe('VSideNavigation', () => {
       expect(container.querySelector('details')?.open).toBe(false)
     })
 
-    it('slot #end rendu avant le chevron', () => {
+    it('the #end slot is rendered before the chevron', () => {
       const { container } = renderNav(`
         <VSideNavigationItem>
           Parent
@@ -237,14 +237,14 @@ describe('VSideNavigation', () => {
           <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
         </VSideNavigationItem>
       `)
-      const enfants = [...container.querySelector('summary')!.children]
-      const fin = enfants.findIndex((el) => el.classList.contains('v-side-nav-end'))
-      const chevron = enfants.findIndex((el) => el.classList.contains('v-side-nav-chevron'))
-      expect(fin).toBeGreaterThan(-1)
-      expect(chevron).toBeGreaterThan(fin)
+      const children = [...container.querySelector('summary')!.children]
+      const end = children.findIndex((el) => el.classList.contains('v-side-nav-end'))
+      const chevron = children.findIndex((el) => el.classList.contains('v-side-nav-chevron'))
+      expect(end).toBeGreaterThan(-1)
+      expect(chevron).toBeGreaterThan(end)
     })
 
-    it('`collapseIcon` : deux chevrons rendus et marqueur data-swap (permutation CSS)', () => {
+    it('`collapseIcon`: two chevrons rendered and a data-swap marker (CSS swap)', () => {
       const { container } = renderNav(
         `
           <VSideNavigationItem>
@@ -256,21 +256,21 @@ describe('VSideNavigation', () => {
       )
       const details = container.querySelector('details')!
       expect(details.hasAttribute('data-swap')).toBe(true)
-      expect(icones(details.querySelector('summary')!)).toEqual(['add', 'remove'])
+      expect(icons(details.querySelector('summary')!)).toEqual(['add', 'remove'])
     })
   })
 
-  describe('exclusivité', () => {
-    it('même `name` entre frères, `name` différent d’un niveau à l’autre', () => {
+  describe('exclusivity', () => {
+    it('the same `name` between siblings, a different `name` from one level to the next', () => {
       const { container } = renderTree('exclusive')
-      const [projets, beta] = [...container.querySelectorAll('details')]
-      // « Beta » est un enfant de « Projets » : il appartient à un autre niveau
-      expect(projets?.getAttribute('name')).toBeTruthy()
+      const [projects, beta] = [...container.querySelectorAll('details')]
+      // "Beta" is a child of "Projects": it belongs to another level
+      expect(projects?.getAttribute('name')).toBeTruthy()
       expect(beta?.getAttribute('name')).toBeTruthy()
-      expect(beta?.getAttribute('name')).not.toBe(projets?.getAttribute('name'))
+      expect(beta?.getAttribute('name')).not.toBe(projects?.getAttribute('name'))
     })
 
-    it('sans `exclusive`, aucun name : ouvertures multiples', () => {
+    it('without `exclusive`, no name: multiple can be open', () => {
       const { container } = renderTree()
       for (const details of container.querySelectorAll('details')) {
         expect(details.hasAttribute('name')).toBe(false)
@@ -278,33 +278,33 @@ describe('VSideNavigation', () => {
     })
   })
 
-  describe('hiérarchie', () => {
-    it('récursion sans limite, et profondeur portée par la seule cascade CSS', () => {
+  describe('hierarchy', () => {
+    it('recursion with no limit, and depth carried by the CSS cascade alone', () => {
       const { container } = renderTree()
       expect(container.querySelectorAll('ul.v-side-nav-children')).toHaveLength(2)
-      for (const rangee of container.querySelectorAll<HTMLElement>('.v-side-nav-row')) {
-        expect(rangee.getAttribute('style')).toBeNull()
-        expect(rangee.dataset.depth).toBeUndefined()
+      for (const rowEl of container.querySelectorAll<HTMLElement>('.v-side-nav-row')) {
+        expect(rowEl.getAttribute('style')).toBeNull()
+        expect(rowEl.dataset.depth).toBeUndefined()
       }
     })
 
-    it('groupe : <li> + liste nommée par son libellé ; le séparateur est un <hr>', () => {
+    it('group: a <li> + a list named by its label; the separator is an <hr>', () => {
       const { container } = renderTree()
-      const groupe = container.querySelector('li.v-side-nav-group')!
-      const label = groupe.querySelector('.v-side-nav-group-label')!
-      expect(label.textContent).toBe('Réglages')
+      const group = container.querySelector('li.v-side-nav-group')!
+      const label = group.querySelector('.v-side-nav-group-label')!
+      expect(label.textContent).toBe('Settings')
       expect(label.id).toBeTruthy()
-      expect(groupe.querySelector('ul')?.getAttribute('aria-labelledby')).toBe(label.id)
+      expect(group.querySelector('ul')?.getAttribute('aria-labelledby')).toBe(label.id)
       expect(container.querySelector('hr.v-side-nav-separator')).not.toBeNull()
     })
   })
 
-  describe('icônes et attributs', () => {
-    it('`icon` accepte un nom comme un rendu explicite ; le slot #start prime', () => {
+  describe('icons and attributes', () => {
+    it('`icon` accepts a name as well as an explicit render; the #start slot wins', () => {
       const { container } = renderNav(
         `
-          <VSideNavigationItem href="/a" icon="home">Nom</VSideNavigationItem>
-          <VSideNavigationItem href="/b" :icon="logo">Rendu</VSideNavigationItem>
+          <VSideNavigationItem href="/a" icon="home">Name</VSideNavigationItem>
+          <VSideNavigationItem href="/b" :icon="logo">Render</VSideNavigationItem>
           <VSideNavigationItem href="/c" icon="home">
             Slot
             <template #start><span data-testid="avatar" /></template>
@@ -313,86 +313,86 @@ describe('VSideNavigation', () => {
         '',
         { logo: { src: '/logo.svg' } },
       )
-      expect(icones(row(container, 'Nom'))).toEqual(['home'])
-      expect(row(container, 'Rendu').querySelector('img')?.getAttribute('src')).toBe('/logo.svg')
-      expect(icones(row(container, 'Slot'))).toEqual([])
+      expect(icons(row(container, 'Name'))).toEqual(['home'])
+      expect(row(container, 'Render').querySelector('img')?.getAttribute('src')).toBe('/logo.svg')
+      expect(icons(row(container, 'Slot'))).toEqual([])
       expect(row(container, 'Slot').querySelector('[data-testid="avatar"]')).not.toBeNull()
     })
 
-    it('wrapper-root : class/style sur le <li>, le reste sur le contrôle', () => {
+    it('wrapper-root: class/style on the <li>, the rest on the control', () => {
       const { container } = renderNav(`
-        <VSideNavigationItem href="/x" class="perso" target="_blank" data-tracking="nav">
-          Externe
+        <VSideNavigationItem href="/x" class="custom" target="_blank" data-tracking="nav">
+          External
         </VSideNavigationItem>
       `)
       const li = container.querySelector('li.v-side-nav-item')!
       const action = container.querySelector('.v-side-nav-action')!
-      expect(li.classList.contains('perso')).toBe(true)
+      expect(li.classList.contains('custom')).toBe(true)
       expect(li.hasAttribute('target')).toBe(false)
       expect(action.getAttribute('target')).toBe('_blank')
       expect(action.getAttribute('data-tracking')).toBe('nav')
     })
 
-    it('le sous-libellé accepte la prop comme le slot', () => {
+    it('the sublabel accepts the prop as well as the slot', () => {
       const { container } = renderNav(`
-        <VSideNavigationItem href="/a" sublabel="3 projets">Prop</VSideNavigationItem>
+        <VSideNavigationItem href="/a" sublabel="3 projects">Prop</VSideNavigationItem>
         <VSideNavigationItem href="/b">
           Slot
-          <template #sublabel>hier</template>
+          <template #sublabel>yesterday</template>
         </VSideNavigationItem>
       `)
-      const texte = (label: string) =>
+      const text = (label: string) =>
         row(container, label).querySelector('.v-side-nav-sublabel')?.textContent?.trim()
-      expect(texte('Prop')).toBe('3 projets')
-      expect(texte('Slot')).toBe('hier')
+      expect(text('Prop')).toBe('3 projects')
+      expect(text('Slot')).toBe('yesterday')
     })
   })
 
-  describe('clavier', () => {
-    /** Liens seuls : le focus programmatique d'un <summary> n'est pas modélisé
-        par jsdom, le déplacement vers une branche part en play function. */
-    const LIENS = `
-      <VSideNavigationItem href="/1">Un</VSideNavigationItem>
-      <VSideNavigationItem href="/2" disabled>Deux</VSideNavigationItem>
-      <VSideNavigationItem href="/3">Trois</VSideNavigationItem>
+  describe('keyboard', () => {
+    /** Links only: the programmatic focus of a <summary> is not modelled by jsdom, so
+        moving to a branch is covered by a play function. */
+    const LINKS = `
+      <VSideNavigationItem href="/1">One</VSideNavigationItem>
+      <VSideNavigationItem href="/2" disabled>Two</VSideNavigationItem>
+      <VSideNavigationItem href="/3">Three</VSideNavigationItem>
       <VSideNavigationItem href="/4">
-        Quatre
-        <template #items><VSideNavigationItem href="/4-1">Caché</VSideNavigationItem></template>
+        Four
+        <template #items><VSideNavigationItem href="/4-1">Hidden</VSideNavigationItem></template>
       </VSideNavigationItem>
     `
 
-    it('les flèches déplacent le focus dans les deux sens et sautent les items désactivés', async () => {
-      const { container } = renderNav(LIENS)
+    it('the arrows move the focus both ways and skip disabled items', async () => {
+      const { container } = renderNav(LINKS)
       const nav = container.querySelector('nav')!
-      // [Un, Deux (désactivé), Trois, Caché] — « Quatre » est une branche, donc
-      // un <summary>, pas un <a>.
-      const [un, , trois] = [...container.querySelectorAll<HTMLElement>('a.v-side-nav-action')]
+      // [One, Two (disabled), Three, Hidden] — "Four" is a branch, hence a <summary>,
+      // not an <a>.
+      const [one, , three] = [...container.querySelectorAll<HTMLElement>('a.v-side-nav-action')]
 
-      un!.focus()
+      one!.focus()
       await fireEvent.keyDown(nav, { key: 'ArrowDown' })
-      expect(document.activeElement).toBe(trois)
+      expect(document.activeElement).toBe(three)
       await fireEvent.keyDown(nav, { key: 'ArrowUp' })
-      expect(document.activeElement).toBe(un)
+      expect(document.activeElement).toBe(one)
       await fireEvent.keyDown(nav, { key: 'Home' })
-      expect(document.activeElement).toBe(un)
+      expect(document.activeElement).toBe(one)
     })
 
-    it('les items d’une branche repliée sont ignorés, et le parcours boucle', async () => {
-      const { container } = renderNav(LIENS)
+    it('the items of a collapsed branch are ignored, and the run wraps around', async () => {
+      const { container } = renderNav(LINKS)
       const nav = container.querySelector('nav')!
-      const un = container.querySelector<HTMLElement>('a.v-side-nav-action')!
-      const cache = container.querySelector<HTMLElement>('.v-side-nav-children a')!
+      const one = container.querySelector<HTMLElement>('a.v-side-nav-action')!
+      const hidden = container.querySelector<HTMLElement>('.v-side-nav-children a')!
 
-      un.focus()
+      one.focus()
       await fireEvent.keyDown(nav, { key: 'End' })
-      expect(document.activeElement).not.toBe(cache)
+      expect(document.activeElement).not.toBe(hidden)
 
-      // ouverte, la même rangée redevient le dernier arrêt du parcours
+      // once open, the same row becomes the last stop of the run again
       container.querySelector('details')!.open = true
       await fireEvent.keyDown(nav, { key: 'End' })
-      expect(document.activeElement).toBe(cache)
+      expect(document.activeElement).toBe(hidden)
       await fireEvent.keyDown(nav, { key: 'ArrowDown' })
-      expect(document.activeElement).toBe(un)
+      expect(document.activeElement).toBe(one)
     })
   })
 })

@@ -2,100 +2,158 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { computed, ref } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VChip from '../VChip/VChip.vue'
 import VCombobox from './VCombobox.vue'
 import type { ComboboxItem, ComboboxOption } from './VCombobox.vue'
 
-const PAYS = [
+// `Réunion` keeps its accent on purpose: it is what the accent-insensitive search is
+// demonstrated on in the Default story.
+const COUNTRIES = [
   { value: 'fr', label: 'France' },
-  { value: 'be', label: 'Belgique' },
-  { value: 'ch', label: 'Suisse' },
+  { value: 'be', label: 'Belgium' },
+  { value: 'ch', label: 'Switzerland' },
   { value: 'ca', label: 'Canada' },
   { value: 'lu', label: 'Luxembourg' },
   { value: 'mc', label: 'Monaco', disabled: true },
-  { value: 'sn', label: 'Sénégal' },
+  { value: 're', label: 'Réunion' },
   { value: 'ci', label: "Côte d'Ivoire" },
 ]
 
-// Groupes et séparateurs : une entrée de `options` peut être un groupe nommé
-// (`{ label, options }`), un séparateur (`{ separator: true }`) ou une option
-// nue — les trois se mélangent librement.
-const PAYS_GROUPES: ComboboxItem[] = [
+// Groups and separators: an entry of `options` may be a named group
+// (`{ label, options }`), a separator (`{ separator: true }`) or a bare option — the
+// three mix freely.
+const GROUPED_COUNTRIES: ComboboxItem[] = [
   {
     label: 'Europe',
     options: [
       { value: 'fr', label: 'France' },
-      { value: 'be', label: 'Belgique' },
-      { value: 'ch', label: 'Suisse' },
+      { value: 'be', label: 'Belgium' },
+      { value: 'ch', label: 'Switzerland' },
       { value: 'lu', label: 'Luxembourg' },
       { value: 'mc', label: 'Monaco', disabled: true },
     ],
   },
   { separator: true },
   {
-    label: 'Afrique',
+    label: 'Africa',
     options: [
-      { value: 'sn', label: 'Sénégal' },
+      { value: 're', label: 'Réunion' },
       { value: 'ci', label: "Côte d'Ivoire" },
-      { value: 'ma', label: 'Maroc' },
-      { value: 'cm', label: 'Cameroun' },
+      { value: 'ma', label: 'Morocco' },
+      { value: 'cm', label: 'Cameroon' },
     ],
   },
   {
-    label: 'Amérique',
+    label: 'America',
     options: [
       { value: 'ca', label: 'Canada' },
-      { value: 'us', label: 'États-Unis' },
-      { value: 'br', label: 'Brésil' },
+      { value: 'us', label: 'United States' },
+      { value: 'br', label: 'Brazil' },
     ],
   },
   { separator: true },
-  // hors groupe : reste une entrée valide au milieu des autres
-  { value: 'other', label: 'Autre / non listé', icon: 'help' },
+  // outside any group: still a valid entry among the others
+  { value: 'other', label: 'Other / not listed', icon: 'help' },
 ]
 
-const CAPITALES: Record<string, string> = {
+const CAPITALS: Record<string, string> = {
   fr: 'Paris',
-  be: 'Bruxelles',
-  ch: 'Berne',
+  be: 'Brussels',
+  ch: 'Bern',
   ca: 'Ottawa',
   lu: 'Luxembourg',
   mc: 'Monaco',
-  sn: 'Dakar',
+  re: 'Saint-Denis',
   ci: 'Yamoussoukro',
 }
 
-// « API » simulée pour les stories asynchrones : latence réseau, filtrage et
-// pagination côté source (le composant n'en refait aucun).
+const t = storyText({
+  en: {
+    chooseCountry: 'Choose a country…',
+    country: 'Country',
+    servedCountries: 'Served countries',
+    otherCountries: 'Other countries',
+    clearingOn: 'Clearing enabled (the default)',
+    clearingOff: 'Clearing disabled (clearable=false)',
+    noCountryFound: 'No country found',
+    neighbour: 'Neighbouring element (to move the focus away)',
+    reference: 'Reference',
+    searchReference: 'Search for a reference…',
+    noReference: 'No reference',
+    fileType: 'File type',
+    fileTypes: 'File types',
+    chooseType: 'Choose a type…',
+    addType: 'Add a type…',
+    document: 'Document',
+    image: 'Image',
+    video: 'Video',
+    remoteIcon: 'Remote icon (explicit image)',
+    archiveNoIcon: 'Archive (no icon)',
+    executable: 'Executable',
+    countryA: 'Country A',
+    countryB: 'Country B',
+    remove: (label: string) => `Remove ${label}`,
+  },
+  fr: {
+    chooseCountry: 'Choisir un pays…',
+    country: 'Pays',
+    servedCountries: 'Pays desservis',
+    otherCountries: 'Autres pays',
+    clearingOn: 'Effacement activé (défaut)',
+    clearingOff: 'Effacement désactivé (clearable=false)',
+    noCountryFound: 'Aucun pays trouvé',
+    neighbour: 'Élément voisin (pour retirer le focus)',
+    reference: 'Référence',
+    searchReference: 'Rechercher une référence…',
+    noReference: 'Aucune référence',
+    fileType: 'Type de fichier',
+    fileTypes: 'Types de fichier',
+    chooseType: 'Choisir un type…',
+    addType: 'Ajouter un type…',
+    document: 'Document',
+    image: 'Image',
+    video: 'Vidéo',
+    remoteIcon: 'Icône distante (image explicite)',
+    archiveNoIcon: 'Archive (sans icône)',
+    executable: 'Exécutable',
+    countryA: 'Pays A',
+    countryB: 'Pays B',
+    remove: (label: string) => `Retirer ${label}`,
+  },
+})
+
+// A simulated "API" for the asynchronous stories: network latency, filtering and
+// pagination on the source side (the component redoes none of it).
 const CATALOGUE: ComboboxOption[] = Array.from({ length: 120 }, (_, i) => ({
   value: `ref-${i + 1}`,
-  label: `Référence ${String(i + 1).padStart(3, '0')}`,
+  label: `Reference ${String(i + 1).padStart(3, '0')}`,
 }))
-const TAILLE_PAGE = 20
-const attendre = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+const PAGE_SIZE = 20
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-async function chercher(query: string, page: number) {
-  await attendre(400)
-  const trouves = CATALOGUE.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
+async function search(query: string, page: number) {
+  await wait(400)
+  const found = CATALOGUE.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
   return {
-    items: trouves.slice(page * TAILLE_PAGE, (page + 1) * TAILLE_PAGE),
-    total: trouves.length,
+    items: found.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE),
+    total: found.length,
   }
 }
 
 const meta = {
-  title: 'Composants/Combobox',
+  title: 'Components/Combobox',
   component: VCombobox,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     compact: { control: 'boolean' },
     clearable: { control: 'boolean' },
     loading: { control: 'boolean' },
-    // union booléen | prédicat : pas de contrôle possible
+    // a boolean | predicate union: no control is possible
     filter: { control: false },
     hasMore: { control: false },
   },
-  args: { options: PAYS, placeholder: 'Choisir un pays…' },
+  args: { options: COUNTRIES },
 } satisfies Meta<typeof VCombobox>
 
 export default meta
@@ -104,10 +162,10 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: (args) => ({
     components: { VCombobox },
-    setup: () => ({ args, value: ref('') }),
+    setup: () => ({ args, t, value: ref('') }),
     template: `
       <div style="display: grid; gap: 8px; width: 300px">
-        <VCombobox v-bind="args" v-model="value" aria-label="Pays" />
+        <VCombobox v-bind="args" v-model="value" :placeholder="t.chooseCountry" :aria-label="t.country" />
         <output data-testid="mirror">{{ value }}</output>
       </div>
     `,
@@ -116,32 +174,31 @@ export const Default: Story = {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('combobox')
 
-    // recherche insensible aux accents, navigation clavier, sélection
+    // accent-insensitive search, keyboard navigation, selection
     await userEvent.click(input)
-    await userEvent.keyboard('sene')
-    await waitFor(() => expect(canvas.getByRole('option', { name: /Sénégal/ })).toBeVisible())
+    await userEvent.keyboard('reun')
+    await waitFor(() => expect(canvas.getByRole('option', { name: /Réunion/ })).toBeVisible())
     await userEvent.keyboard('{ArrowDown}{Enter}')
-    await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('sn'))
-    await expect(input).toHaveValue('Sénégal')
+    await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('re'))
+    await expect(input).toHaveValue('Réunion')
   },
 }
 
 /**
- * Une entrée de `options` peut être un **groupe nommé** (`{ label, options }`,
- * rendu en `role="group"`) ou un **séparateur** (`{ separator: true }`), mêlés à
- * des options nues. Les groupes ne sont que du rendu : la navigation clavier
- * traverse la liste à plat sans jamais s'arrêter sur un libellé. Au filtrage, un
- * groupe dont plus aucune option ne correspond disparaît (libellé compris) et
- * les séparateurs devenus orphelins ne sont pas rendus.
+ * An entry of `options` may be a **named group** (`{ label, options }`, rendered as
+ * `role="group"`) or a **separator** (`{ separator: true }`), mixed with bare
+ * options. Groups are only rendering: the keyboard navigation crosses the list flat
+ * without ever stopping on a label. On filtering, a group no option of which matches
+ * disappears (label included) and the separators left orphaned are not rendered.
  */
-export const Groupes: Story = {
-  args: { options: PAYS_GROUPES },
+export const Groups: Story = {
+  args: { options: GROUPED_COUNTRIES },
   render: (args) => ({
     components: { VCombobox },
-    setup: () => ({ args, value: ref('') }),
+    setup: () => ({ args, t, value: ref('') }),
     template: `
       <div style="display: grid; gap: 8px; width: 300px">
-        <VCombobox v-bind="args" v-model="value" aria-label="Pays" />
+        <VCombobox v-bind="args" v-model="value" :placeholder="t.chooseCountry" :aria-label="t.country" />
         <output data-testid="mirror">{{ value }}</output>
       </div>
     `,
@@ -152,36 +209,36 @@ export const Groupes: Story = {
 
     await userEvent.click(input)
     const listbox = await waitFor(() => canvas.getByRole('listbox'))
-    // waitFor : le panneau ouvre en transition d'opacité
+    // waitFor: the panel opens on an opacity transition
     await waitFor(() => expect(canvas.getByRole('group', { name: 'Europe' })).toBeVisible())
 
-    // l'en-tête de section tient la hauteur d'une option : le rythme vertical
-    // de la liste ne casse pas (hauteurs non mesurables en jsdom). Tolérance :
-    // le panneau porte une transition `transform`, les rects mesurés en fin
-    // d'animation diffèrent au 100 000e de pixel.
-    const groupe = canvas.getByRole('group', { name: 'Europe' })
-    const hauteur = (selecteur: string) =>
-      (groupe.querySelector(selecteur) as HTMLElement).getBoundingClientRect().height
-    await expect(hauteur('.v-combobox-group-label')).toBeCloseTo(hauteur('.v-combobox-option'), 1)
+    // the section header holds the height of an option: the list's vertical rhythm
+    // does not break (heights are not measurable in jsdom). Tolerance: the panel
+    // carries a `transform` transition, and the rects measured at the end of the
+    // animation differ by a hundred-thousandth of a pixel.
+    const group = canvas.getByRole('group', { name: 'Europe' })
+    const heightOf = (selector: string) =>
+      (group.querySelector(selector) as HTMLElement).getBoundingClientRect().height
+    await expect(heightOf('.v-combobox-group-label')).toBeCloseTo(heightOf('.v-combobox-option'), 1)
 
-    // Le panneau déborde : l'option active doit être amenée dans la vue à
-    // travers le wrapper de groupe (le conteneur défilant reste le panneau).
-    // Non mesurable en jsdom — c'est la raison d'être de cette play function.
+    // The panel overflows: the active option must be brought into view through the
+    // group wrapper (the scroll container stays the panel). Not measurable in jsdom —
+    // which is the whole point of this play function.
     await userEvent.keyboard('{ArrowUp}')
-    const derniere = canvas.getByRole('option', { name: /Autre/ })
+    const last = canvas.getByRole('option', { name: /Other/ })
     await waitFor(() => {
-      expect(derniere.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      expect(last.getBoundingClientRect().bottom).toBeLessThanOrEqual(
         listbox.getBoundingClientRect().bottom + 1,
       )
-      expect(derniere.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+      expect(last.getBoundingClientRect().top).toBeGreaterThanOrEqual(
         listbox.getBoundingClientRect().top - 1,
       )
     })
 
-    // filtrage : « Europe » se vide, son libellé disparaît avec lui, et plus
-    // aucun filet ne subsiste en tête ni en fin de panneau
-    await userEvent.keyboard('ma')
-    await waitFor(() => expect(canvas.queryByRole('group', { name: 'Afrique' })).toBeVisible())
+    // filtering: "Europe" empties out, its label disappears with it, and no rule is
+    // left at the head or at the tail of the panel
+    await userEvent.keyboard('mo')
+    await waitFor(() => expect(canvas.queryByRole('group', { name: 'Africa' })).toBeVisible())
     expect(canvas.queryByRole('group', { name: 'Europe' })).toBeNull()
     expect(listbox.querySelectorAll('.v-combobox-separator').length).toBe(0)
 
@@ -190,20 +247,25 @@ export const Groupes: Story = {
   },
 }
 
-export const SelectionMultiple: Story = {
+export const MultipleSelection: Story = {
   render: (args) => ({
     components: { VCombobox },
-    setup: () => ({ args, value: ref<string[]>(['fr']), other: ref<string[]>(['ch', 'ca']) }),
+    setup: () => ({
+      args,
+      t,
+      value: ref<string[]>(['fr']),
+      other: ref<string[]>(['ch', 'ca']),
+    }),
     template: `
       <div style="display: grid; gap: 16px; width: 340px">
         <div style="display: grid; gap: 4px">
-          <span style="font: 12px sans-serif; color: #888">Effacement activé (défaut)</span>
-          <VCombobox v-bind="args" multiple v-model="value" aria-label="Pays desservis" />
+          <span style="font: 12px sans-serif; color: #888">{{ t.clearingOn }}</span>
+          <VCombobox v-bind="args" multiple v-model="value" :placeholder="t.chooseCountry" :aria-label="t.servedCountries" />
           <output data-testid="mirror">{{ value.join(',') }}</output>
         </div>
         <div style="display: grid; gap: 4px">
-          <span style="font: 12px sans-serif; color: #888">Effacement désactivé (clearable=false)</span>
-          <VCombobox v-bind="args" multiple :clearable="false" v-model="other" aria-label="Autres pays" />
+          <span style="font: 12px sans-serif; color: #888">{{ t.clearingOff }}</span>
+          <VCombobox v-bind="args" multiple :clearable="false" v-model="other" :aria-label="t.otherCountries" />
         </div>
       </div>
     `,
@@ -212,35 +274,35 @@ export const SelectionMultiple: Story = {
     const canvas = within(canvasElement)
     const input = canvas.getAllByRole('combobox')[0]!
 
-    // sélection multiple : le panneau reste ouvert, des tags apparaissent
+    // multiple selection: the panel stays open, tags appear
     await userEvent.click(input)
     await userEvent.keyboard('bel')
     await userEvent.keyboard('{Enter}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('fr,be'))
 
-    // Backspace sur champ vide retire le dernier tag
+    // Backspace on an empty field removes the last tag
     await userEvent.keyboard('{Backspace}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^fr$/))
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Retirer France' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove France' }))
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^$/))
 
-    // la croix (clearable) est visible dès qu'il y a une sélection et vide tout
+    // the cross (clearable) shows as soon as there is a selection, and empties it all
     await userEvent.keyboard('bel')
     await userEvent.keyboard('{Enter}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('be'))
-    await userEvent.click(canvas.getByRole('button', { name: 'Effacer la sélection' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear selection' }))
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^$/))
   },
 }
 
-export const AucunResultat: Story = {
+export const NoResults: Story = {
   render: (args) => ({
     components: { VCombobox },
-    setup: () => ({ args, value: ref('') }),
+    setup: () => ({ args, t, value: ref('') }),
     template: `
       <div style="width: 300px">
-        <VCombobox v-bind="args" v-model="value" aria-label="Pays" empty-text="Aucun pays trouvé" />
+        <VCombobox v-bind="args" v-model="value" :placeholder="t.chooseCountry" :aria-label="t.country" :empty-text="t.noCountryFound" />
       </div>
     `,
   }),
@@ -248,17 +310,17 @@ export const AucunResultat: Story = {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('combobox'))
     await userEvent.keyboard('zzz')
-    await waitFor(() => expect(canvas.getByText('Aucun pays trouvé')).toBeVisible())
+    await waitFor(() => expect(canvas.getByText('No country found')).toBeVisible())
   },
 }
 
-export const Invalide: Story = {
+export const Invalid: Story = {
   render: (args) => ({
     components: { VCombobox },
-    setup: () => ({ args, value: ref('') }),
+    setup: () => ({ args, t, value: ref('') }),
     template: `
       <div style="width: 300px">
-        <VCombobox v-bind="args" v-model="value" invalid aria-label="Pays" />
+        <VCombobox v-bind="args" v-model="value" invalid :placeholder="t.chooseCountry" :aria-label="t.country" />
       </div>
     `,
   }),
@@ -267,27 +329,28 @@ export const Invalide: Story = {
 export const Disabled: Story = {
   render: (args) => ({
     components: { VCombobox },
-    setup: () => ({ args, value: ref('fr') }),
+    setup: () => ({ args, t, value: ref('fr') }),
     template: `
       <div style="width: 300px">
-        <VCombobox v-bind="args" v-model="value" disabled aria-label="Pays" />
+        <VCombobox v-bind="args" v-model="value" disabled :placeholder="t.chooseCountry" :aria-label="t.country" />
       </div>
     `,
   }),
 }
 
 /**
- * Tailles `sm` (32px), `md` (40px, défaut) et `lg` (48px), combinables avec
- * `compact` (-4px). En multiple, les Chips restent un cran sous le champ :
- * `xs` (24px) jusqu'à `md`, `sm` (32px) en `lg` — le rattrapage sous le cran
- * le plus bas de chaque paire passe par `compact` (20px en `sm`, 28px en
- * `lg compact`). Le panneau d'options suit la taille du champ.
+ * Sizes `sm` (32px), `md` (40px, the default) and `lg` (48px), combinable with
+ * `compact` (-4px). In multiple mode, the Chips stay one step below the field: `xs`
+ * (24px) up to `md`, `sm` (32px) at `lg` — the catch-up below the lowest step of each
+ * pair goes through `compact` (20px at `sm`, 28px at `lg compact`). The options panel
+ * follows the field's size.
  */
-export const Tailles: Story = {
+export const Sizes: Story = {
   render: (args) => ({
     components: { VCombobox },
     setup: () => ({
       args,
+      t,
       variants: [
         { label: 'sm', props: { size: 'sm' } },
         { label: 'sm compact', props: { size: 'sm', compact: true } },
@@ -302,7 +365,7 @@ export const Tailles: Story = {
       <div style="display: grid; gap: 16px; width: 340px">
         <div v-for="v in variants" :key="v.label" style="display: grid; gap: 4px">
           <span style="font: 12px sans-serif; color: #888">{{ v.label }}</span>
-          <VCombobox v-bind="{ ...args, ...v.props }" multiple :model-value="value" aria-label="Pays" />
+          <VCombobox v-bind="{ ...args, ...v.props }" multiple :model-value="value" :aria-label="t.country" />
         </div>
       </div>
     `,
@@ -310,17 +373,17 @@ export const Tailles: Story = {
 }
 
 /**
- * Hors focus, en mode multiple, le champ de saisie est replié : seuls les Chips
- * restent, sans espace vide. Au focus, le champ de recherche réapparaît.
+ * Out of focus, in multiple mode, the search input folds away: only the Chips stay,
+ * with no empty space. On focus, the search field reappears.
  */
-export const RepliAuBlur: Story = {
+export const FoldedOnBlur: Story = {
   render: (args) => ({
     components: { VCombobox },
-    setup: () => ({ args, value: ref<string[]>(['fr', 'be', 'ch']) }),
+    setup: () => ({ args, t, value: ref<string[]>(['fr', 'be', 'ch']) }),
     template: `
       <div style="display: grid; gap: 8px; width: 340px">
-        <button type="button">Élément voisin (pour retirer le focus)</button>
-        <VCombobox v-bind="args" multiple v-model="value" aria-label="Pays desservis" />
+        <button type="button">{{ t.neighbour }}</button>
+        <VCombobox v-bind="args" multiple v-model="value" :aria-label="t.servedCountries" />
       </div>
     `,
   }),
@@ -328,45 +391,45 @@ export const RepliAuBlur: Story = {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('combobox') as HTMLInputElement
 
-    // au focus, le champ de recherche est développé (largeur non nulle)
+    // on focus, the search field is expanded (a non-zero width)
     await userEvent.click(input)
     await waitFor(() => expect(input.offsetWidth).toBeGreaterThan(0))
 
-    // hors focus, le champ est replié (largeur nulle), seuls les Chips subsistent
-    await userEvent.click(canvas.getByRole('button', { name: /voisin/ }))
+    // out of focus, the field is folded away (zero width), only the Chips remain
+    await userEvent.click(canvas.getByRole('button', { name: /Neighbouring/ }))
     await waitFor(() => expect(input.offsetWidth).toBe(0))
-    await expect(canvas.getByRole('button', { name: 'Retirer France' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Remove France' })).toBeVisible()
   },
 }
 
 /**
- * Recherche serveur : `filter: false` (la source a déjà filtré), `@search`
- * débouncé pour lancer la requête, `loading` pendant l'attente. Le composant
- * n'annule pas les requêtes : c'est au consommateur d'ignorer les réponses
- * obsolètes (jeton d'appel ci-dessous).
+ * Server-side search: `filter: false` (the source has already filtered), a debounced
+ * `@search` to launch the request, and `loading` during the wait. The component does
+ * not cancel requests: it is up to the consumer to ignore stale responses (the call
+ * token below).
  */
-export const RechercheAsynchrone: Story = {
+export const AsynchronousSearch: Story = {
   render: (args) => ({
     components: { VCombobox },
     setup: () => {
       const value = ref('')
       const options = ref<ComboboxOption[]>([])
       const loading = ref(false)
-      const requetes = ref(0)
-      let jeton = 0
+      const requests = ref(0)
+      let token = 0
 
       async function onSearch(query: string) {
-        const courant = ++jeton
-        requetes.value += 1
+        const current = ++token
+        requests.value += 1
         loading.value = true
-        const { items } = await chercher(query, 0)
-        // réponse obsolète (une frappe plus récente est partie) : on l'ignore
-        if (courant !== jeton) return
+        const { items } = await search(query, 0)
+        // a stale response (a more recent keystroke has gone out): ignore it
+        if (current !== token) return
         options.value = items
         loading.value = false
       }
 
-      return { args, value, options, loading, requetes, onSearch }
+      return { args, t, value, options, loading, requests, onSearch }
     },
     template: `
       <div style="display: grid; gap: 8px; width: 340px">
@@ -377,13 +440,13 @@ export const RechercheAsynchrone: Story = {
           :loading="loading"
           :search-debounce="400"
           v-model="value"
-          aria-label="Référence"
-          placeholder="Rechercher une référence…"
-          empty-text="Aucune référence"
+          :aria-label="t.reference"
+          :placeholder="t.searchReference"
+          :empty-text="t.noReference"
           @search="onSearch"
         />
         <output data-testid="mirror">{{ value }}</output>
-        <output data-testid="requetes">{{ requetes }}</output>
+        <output data-testid="requests">{{ requests }}</output>
       </div>
     `,
   }),
@@ -391,14 +454,14 @@ export const RechercheAsynchrone: Story = {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('combobox')
 
-    // ouverture : premier chargement immédiat (pas de debounce)
+    // opening: the first load is immediate (no debounce)
     await userEvent.click(input)
-    await waitFor(() => expect(canvas.getByRole('option', { name: /Référence 001/ })).toBeVisible())
+    await waitFor(() => expect(canvas.getByRole('option', { name: /Reference 001/ })).toBeVisible())
 
-    // rafale de frappes : le debounce ne laisse partir qu'une requête
+    // a burst of keystrokes: the debounce lets a single request through
     await userEvent.keyboard('042')
-    await waitFor(() => expect(canvas.getByRole('option', { name: /Référence 042/ })).toBeVisible())
-    await expect(Number(canvas.getByTestId('requetes').textContent)).toBeLessThanOrEqual(2)
+    await waitFor(() => expect(canvas.getByRole('option', { name: /Reference 042/ })).toBeVisible())
+    await expect(Number(canvas.getByTestId('requests').textContent)).toBeLessThanOrEqual(2)
 
     await userEvent.keyboard('{Enter}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('ref-42'))
@@ -406,11 +469,11 @@ export const RechercheAsynchrone: Story = {
 }
 
 /**
- * VPagination : `hasMore` rend une sentinelle en pied de panneau, dont l'entrée
- * dans la vue émet `load-more`. Le spinner de page suivante s'affiche au même
- * endroit, sans remplacer les options déjà chargées.
+ * Pagination: `hasMore` renders a sentinel at the foot of the panel, whose entry into
+ * view emits `load-more`. The next-page spinner appears in the same place, without
+ * replacing the options already loaded.
  */
-export const ScrollInfini: Story = {
+export const InfiniteScroll: Story = {
   render: (args) => ({
     components: { VCombobox },
     setup: () => {
@@ -419,32 +482,32 @@ export const ScrollInfini: Story = {
       const loading = ref(false)
       const total = ref(0)
       const page = ref(0)
-      const requete = ref('')
-      let jeton = 0
+      const request = ref('')
+      let token = 0
 
       async function onSearch(query: string) {
-        const courant = ++jeton
-        requete.value = query
+        const current = ++token
+        request.value = query
         page.value = 0
         loading.value = true
-        const resultat = await chercher(query, 0)
-        if (courant !== jeton) return
-        options.value = resultat.items
-        total.value = resultat.total
+        const result = await search(query, 0)
+        if (current !== token) return
+        options.value = result.items
+        total.value = result.total
         loading.value = false
       }
 
       async function onLoadMore() {
         loading.value = true
-        const resultat = await chercher(requete.value, page.value + 1)
+        const result = await search(request.value, page.value + 1)
         page.value += 1
-        options.value = [...options.value, ...resultat.items]
+        options.value = [...options.value, ...result.items]
         loading.value = false
       }
 
       const hasMore = computed(() => options.value.length < total.value)
 
-      return { args, value, options, loading, hasMore, total, onSearch, onLoadMore }
+      return { args, t, value, options, loading, hasMore, total, onSearch, onLoadMore }
     },
     template: `
       <div style="display: grid; gap: 8px; width: 340px">
@@ -455,58 +518,58 @@ export const ScrollInfini: Story = {
           :loading="loading"
           :has-more="hasMore"
           v-model="value"
-          aria-label="Référence"
-          placeholder="Rechercher une référence…"
+          :aria-label="t.reference"
+          :placeholder="t.searchReference"
           @search="onSearch"
           @load-more="onLoadMore"
         />
-        <output data-testid="compte">{{ options.length }} / {{ total }}</output>
+        <output data-testid="count">{{ options.length }} / {{ total }}</output>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('combobox'))
-    await waitFor(() => expect(canvas.getByTestId('compte')).toHaveTextContent('20 / 120'))
+    await waitFor(() => expect(canvas.getByTestId('count')).toHaveTextContent('20 / 120'))
 
-    // défiler jusqu'en bas du panneau charge la page suivante
+    // scrolling to the bottom of the panel loads the next page
     const listbox = canvas.getByRole('listbox')
     listbox.scrollTop = listbox.scrollHeight
-    await waitFor(() => expect(canvas.getByTestId('compte')).toHaveTextContent('40 / 120'))
+    await waitFor(() => expect(canvas.getByTestId('count')).toHaveTextContent('40 / 120'))
   },
 }
 
 /**
- * Le champ `icon` d'une option affiche une icône avant son libellé, à
- * l'emplacement prévu par la rangée (donc aligné et espacé comme le reste,
- * contrairement à une icône posée dans le slot `#option`, qui atterrirait
- * dans le libellé). Il accepte un nom Material Symbols **ou** une URL
- * d'image/SVG — ici les deux dans la même liste.
+ * An option's `icon` field displays an icon before its label, in the slot the row
+ * provides (so aligned and spaced like the rest, unlike an icon placed in the
+ * `#option` slot, which would land inside the label). It accepts a Material Symbols
+ * name **or** an image/SVG URL — here both in the same list.
  */
-export const AvecIcones: Story = {
-  args: {
-    options: [
-      { value: 'doc', label: 'Document', icon: 'description' },
-      { value: 'img', label: 'Image', icon: 'image' },
-      { value: 'vid', label: 'Vidéo', icon: 'movie' },
-      {
-        value: 'svg',
-        label: 'Icône distante (image explicite)',
-        icon: {
-          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='%236366f1'/%3E%3C/svg%3E",
-        },
-      },
-      { value: 'zip', label: 'Archive (sans icône)' },
-      { value: 'exe', label: 'Exécutable', icon: 'terminal', disabled: true },
-    ],
-    placeholder: 'Choisir un type…',
-  },
+export const WithIcons: Story = {
   render: (args) => ({
     components: { VCombobox },
-    setup: () => ({ args, value: ref('img') }),
+    setup: () => ({
+      args,
+      t,
+      value: ref('img'),
+      options: computed<ComboboxItem[]>(() => [
+        { value: 'doc', label: t.value.document, icon: 'description' },
+        { value: 'img', label: t.value.image, icon: 'image' },
+        { value: 'vid', label: t.value.video, icon: 'movie' },
+        {
+          value: 'svg',
+          label: t.value.remoteIcon,
+          icon: {
+            src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='%236366f1'/%3E%3C/svg%3E",
+          },
+        },
+        { value: 'zip', label: t.value.archiveNoIcon },
+        { value: 'exe', label: t.value.executable, icon: 'terminal', disabled: true },
+      ]),
+    }),
     template: `
       <div style="width: 340px">
-        <VCombobox v-bind="args" v-model="value" aria-label="Type de fichier" />
+        <VCombobox v-bind="args" :options="options" v-model="value" :placeholder="t.chooseType" :aria-label="t.fileType" />
       </div>
     `,
   }),
@@ -514,35 +577,36 @@ export const AvecIcones: Story = {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('combobox'))
     const options = await canvas.findAllByRole('option')
-    // l'icône est le PREMIER enfant de la rangée : elle précède le libellé,
-    // la coche de sélection venant après
+    // the icon is the FIRST child of the row: it precedes the label, the selection
+    // tick coming after
     await expect(options[0]!.firstElementChild).not.toHaveClass('v-combobox-option-label')
-    // une option sans `icon` commence directement par son libellé
+    // an option with no `icon` starts directly with its label
     await expect(options[4]!.firstElementChild).toHaveClass('v-combobox-option-label')
   },
 }
 
 /**
- * Le slot `#chip` remplace le VChip d'une valeur sélectionnée (mode multiple).
- * Il reçoit `option` — donc son `icon` — ainsi que `remove` pour rester
- * retirable, et `size`/`compact` pour garder le gabarit calculé par le champ.
+ * The `#chip` slot replaces the VChip of a selected value (multiple mode). It
+ * receives `option` — hence its `icon` — as well as `remove` so it stays removable,
+ * and `size`/`compact` to keep the template computed by the field.
  */
-export const ChipPersonnalise: Story = {
-  args: {
-    multiple: true,
-    options: [
-      { value: 'doc', label: 'Document', icon: 'description' },
-      { value: 'img', label: 'Image', icon: 'image' },
-      { value: 'vid', label: 'Vidéo', icon: 'movie' },
-    ],
-    placeholder: 'Ajouter un type…',
-  },
+export const CustomChip: Story = {
+  args: { multiple: true },
   render: (args) => ({
     components: { VCombobox, VChip },
-    setup: () => ({ args, value: ref(['doc', 'img']) }),
+    setup: () => ({
+      args,
+      t,
+      value: ref(['doc', 'img']),
+      options: computed<ComboboxItem[]>(() => [
+        { value: 'doc', label: t.value.document, icon: 'description' },
+        { value: 'img', label: t.value.image, icon: 'image' },
+        { value: 'vid', label: t.value.video, icon: 'movie' },
+      ]),
+    }),
     template: `
       <div style="width: 380px">
-        <VCombobox v-bind="args" v-model="value" aria-label="Types de fichier">
+        <VCombobox v-bind="args" :options="options" v-model="value" :placeholder="t.addType" :aria-label="t.fileTypes">
           <template #chip="{ option, label, remove, size, compact }">
             <VChip
               tone="neutral"
@@ -551,7 +615,7 @@ export const ChipPersonnalise: Story = {
               :size="size"
               :compact="compact"
               dismissible
-              :dismiss-label="\`Retirer \${label}\`"
+              :dismiss-label="t.remove(label)"
               @dismiss="remove"
               >{{ label }}</VChip
             >
@@ -563,22 +627,22 @@ export const ChipPersonnalise: Story = {
 }
 
 /**
- * Le slot `#option` remplace le libellé par le contenu de son choix (ici la
- * capitale en second niveau). Il reçoit l'option et son état (`active`,
- * `selected`, `index`). Pour une simple icône, préférer le champ `icon` de
- * l'option : le contenu de ce slot est rendu à l'intérieur du libellé.
+ * The `#option` slot replaces the label with content of your choosing (here the
+ * capital on a second line). It receives the option and its state (`active`,
+ * `selected`, `index`). For a simple icon, prefer the option's `icon` field: this
+ * slot's content is rendered inside the label.
  */
-export const OptionPersonnalisee: Story = {
+export const CustomOption: Story = {
   render: (args) => ({
     components: { VCombobox },
-    setup: () => ({ args, value: ref('fr'), capitales: CAPITALES }),
+    setup: () => ({ args, t, value: ref('fr'), capitals: CAPITALS }),
     template: `
       <div style="width: 340px">
-        <VCombobox v-bind="args" v-model="value" aria-label="Pays">
+        <VCombobox v-bind="args" v-model="value" :placeholder="t.chooseCountry" :aria-label="t.country">
           <template #option="{ option }">
             <span style="display: grid">
               <span>{{ option.label }}</span>
-              <small style="opacity: 0.6">{{ capitales[option.value] }}</small>
+              <small style="opacity: 0.6">{{ capitals[option.value] }}</small>
             </span>
           </template>
         </VCombobox>
@@ -588,17 +652,17 @@ export const OptionPersonnalisee: Story = {
 }
 
 /**
- * Deux VCombobox côte à côte : chaque panneau s'ancre à SON contrôle grâce à
- * `anchor-scope` (le nom d'ancre est confiné à chaque instance).
+ * Two comboboxes side by side: each panel anchors to ITS control thanks to
+ * `anchor-scope` (the anchor name is confined to each instance).
  */
-export const DeuxComboboxes: Story = {
+export const TwoComboboxes: Story = {
   render: (args) => ({
     components: { VCombobox },
-    setup: () => ({ args, a: ref(''), b: ref('') }),
+    setup: () => ({ args, t, a: ref(''), b: ref('') }),
     template: `
       <div style="display: flex; gap: 16px; width: 640px">
-        <VCombobox v-bind="args" v-model="a" aria-label="Pays A" />
-        <VCombobox v-bind="args" v-model="b" aria-label="Pays B" />
+        <VCombobox v-bind="args" v-model="a" :placeholder="t.chooseCountry" :aria-label="t.countryA" />
+        <VCombobox v-bind="args" v-model="b" :placeholder="t.chooseCountry" :aria-label="t.countryB" />
       </div>
     `,
   }),
@@ -608,7 +672,7 @@ export const DeuxComboboxes: Story = {
 
     await userEvent.click(first!)
     await waitFor(() => expect(canvas.getByRole('option', { name: 'France' })).toBeVisible())
-    // le second reste fermé et indépendant
+    // the second stays closed and independent
     await expect(second!).toHaveAttribute('aria-expanded', 'false')
   },
 }
