@@ -1,0 +1,93 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VAccordionStories from './VAccordion.stories'
+
+<Meta of={VAccordionStories} />
+
+# Accordion
+
+Collapsible panels built on **native** `<details>`/`<summary>`: the state, the keyboard and the
+accessibility semantics come from the browser, with no state JS at all. Exclusive mode — a single
+panel open at a time — rests on the native `name` attribute shared between the items, supplied by
+the group. The opening is animated in pure CSS (`::details-content` + `interpolate-size`): with
+no support, it is simply instant.
+
+<Canvas of={VAccordionStories.Default} />
+
+<Controls of={VAccordionStories.Default} />
+
+## Multiple open panels
+
+`exclusive={false}` removes the shared `name`: each panel opens and closes independently.
+
+<Canvas of={VAccordionStories.MultipleOpen} />
+
+## Rich title
+
+The `#title` slot replaces the `title` prop to compose a heading (emphasis, badge, icon…).
+
+<Canvas of={VAccordionStories.RichTitle} />
+
+## Subtitle and start icon
+
+Each item can complete its title: `subtitle` adds a secondary line under the title (replaceable
+through the `#subtitle` slot for rich content), and `iconStart` places an icon before the text
+block — an icon name **or** an explicit render (`{ src }`, `{ component }`), as everywhere else.
+The `#start` slot wins over `iconStart` for free content (an avatar, a badge…). The two combine
+freely and stay independent of the opening chevron.
+
+<Canvas of={VAccordionStories.SubtitleAndIcon} />
+
+## Icons
+
+By default, a chevron rotates 180° on opening. Two props set **on the group** customize the
+iconography of every item: `expandIcon` (closed state) and `collapseIcon` (open state). Each
+accepts an icon name **or** an explicit render.
+
+Supplying `collapseIcon` switches the component into swap mode: both icons are rendered and
+exchanged in CSS according to the `<details>` state — useful for a non-directional pair such as
+"plus / minus". Without `collapseIcon`, the single icon stays rotated on opening.
+
+<Canvas of={VAccordionStories.CustomIcons} />
+
+## Variants
+
+`variant` drives the group's decoration, on a scale shared with `VDataTable` and `VTabs`. `flat`
+(the default) sets none — no border, no radius, no background: it is the variant for an accordion
+placed inside a container that already carries its own frame (a side panel, a card, a sheet),
+whose surface it then inherits. `outlined` presents it as a card: a 1px rule, rounded corners and
+a raised background.
+
+The separators between items, on the other hand, stay in place in both variants: they belong to
+reading the list, not to framing it.
+
+<Canvas of={VAccordionStories.Variants} />
+
+## Compact
+
+`compact` removes 4px from **every** padding — vertical as well as horizontal, header as well as
+panel — and touches nothing else: the typography, the gutter and the icon (20px) stay those of
+normal density. It is the same delta as the `compact` of the fixed-height controls (VButton,
+VInput…); since the accordion has no imposed height, the delta applies here to the paddings,
+driven by a single delta set on the group and inherited by the items.
+
+<Canvas of={VAccordionStories.Compact} />
+
+## Disabled item
+
+`disabled` on a `VAccordionItem` makes it inert: it can no longer be opened by click nor reached
+by keyboard, and switches to greys through the tokens (never opacity). Since `<summary>` exposes
+no native `disabled` attribute, the inertness is obtained by cancelling the activation and
+removing the item from the tab order.
+
+<Canvas of={VAccordionStories.DisabledItem} />
+
+## Accessibility
+
+- The semantics are those of `<details>`/`<summary>`: state exposed natively, `Enter` and `Space`
+  toggle the focused panel, and no ARIA attribute to set on the consumer side.
+- A disabled item carries `aria-disabled` and leaves the keyboard path (`tabindex="-1"`): it stays
+  readable and announced, but is no longer activable.
+- The expand/collapse icons are decorative (hidden from assistive technologies) — the state
+  information is already carried by `<details>`.
+- Every transition (the icon's rotation, the panel's opening) is neutralized under
+  `prefers-reduced-motion`.
