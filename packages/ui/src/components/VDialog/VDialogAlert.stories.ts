@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Button from '../Button/Button.vue'
-import Typography from '../Typography/Typography.vue'
-import DialogAlert from './DialogAlert.vue'
+import Button from '../VButton/VButton.vue'
+import Typography from '../VTypography/VTypography.vue'
+import DialogAlert from './VDialogAlert.vue'
 
 const meta = {
   title: 'Composants/DialogAlert',

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, provide, ref, useId, watch } from 'vue'
 
-import MenuPanel from './MenuPanel.vue'
+import MenuPanel from './VMenuPanel.vue'
 import { menuInvoker, menuKey } from './context'
 import type { MenuPlacement } from './context'
 

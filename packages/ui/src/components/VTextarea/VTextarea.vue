@@ -13,11 +13,11 @@
  */
 import { computed, ref } from 'vue'
 
-import Icon from '../Icon/Icon.vue'
-import { iconName, iconProps } from '../Icon/iconProps'
-import type { IconSource } from '../Icon/types'
-import Spinner from '../Spinner/Spinner.vue'
-import Typography from '../Typography/Typography.vue'
+import Icon from '../VIcon/VIcon.vue'
+import { iconName, iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
+import Spinner from '../VSpinner/VSpinner.vue'
+import Typography from '../VTypography/VTypography.vue'
 
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useIconClickHandlers } from '../../composables/useIconClickHandlers'

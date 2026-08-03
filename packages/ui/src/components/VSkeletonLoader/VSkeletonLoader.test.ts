@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import SkeletonLoader from './SkeletonLoader.vue'
+import SkeletonLoader from './VSkeletonLoader.vue'
 
 /** Racine du composant (elle porte la table des variantes et les dimensions). */
 const rootOf = (container: Element) => container.querySelector('.v-skeleton') as HTMLElement

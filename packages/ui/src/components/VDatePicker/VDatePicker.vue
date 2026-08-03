@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, ref, useId, watch, watchEffect } from 'vue'
 
-import Calendar from '../Calendar/Calendar.vue'
+import Calendar from '../VCalendar/VCalendar.vue'
 import type {
   CalendarEvent,
   CalendarSelection,
   CalendarValue,
   DateMatcher,
   DateRange,
-} from '../Calendar/Calendar.vue'
+} from '../VCalendar/VCalendar.vue'
 import {
   caretAfterDigits,
   dateMaskFor,
@@ -24,9 +24,9 @@ import {
 import { digitsOf } from '../../utils/text'
 import { resolveMatcher } from '../../utils/matcher'
 import { isDev } from '../../utils/env'
-import type { IconSource } from '../Icon/types'
-import Input from '../Input/Input.vue'
-import Popover from '../Popover/Popover.vue'
+import type { IconSource } from '../VIcon/types'
+import Input from '../VInput/VInput.vue'
+import Popover from '../VPopover/VPopover.vue'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
 

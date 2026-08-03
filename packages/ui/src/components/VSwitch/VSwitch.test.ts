@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Switch from './Switch.vue'
+import Switch from './VSwitch.vue'
 
 describe('Switch', () => {
   it('expose role="switch" et synchronise v-model', async () => {

@@ -1,6 +1,6 @@
 import type { InjectionKey } from 'vue'
 
-import type { IconSource } from '../Icon/types'
+import type { IconSource } from '../VIcon/types'
 
 /**
  * Contrat parent→items : le nom partagé posé sur chaque <details> active le

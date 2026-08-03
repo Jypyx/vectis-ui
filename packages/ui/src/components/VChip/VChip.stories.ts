@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Chip from './Chip.vue'
+import Chip from './VChip.vue'
 
 const meta = {
   title: 'Composants/Chip',

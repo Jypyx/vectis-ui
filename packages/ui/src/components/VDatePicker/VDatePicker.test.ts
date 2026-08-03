@@ -2,7 +2,7 @@ import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
-import DatePicker from './DatePicker.vue'
+import DatePicker from './VDatePicker.vue'
 
 const JUNE = '2026-06-10'
 

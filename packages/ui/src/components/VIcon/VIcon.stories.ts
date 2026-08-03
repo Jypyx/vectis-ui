@@ -2,15 +2,15 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 import { defineComponent, h } from 'vue'
 
-import Accordion from '../Accordion/Accordion.vue'
-import AccordionItem from '../Accordion/AccordionItem.vue'
-import Breadcrumb from '../Breadcrumb/Breadcrumb.vue'
-import Button from '../Button/Button.vue'
-import Chip from '../Chip/Chip.vue'
-import Input from '../Input/Input.vue'
-import Pagination from '../Pagination/Pagination.vue'
+import Accordion from '../VAccordion/VAccordion.vue'
+import AccordionItem from '../VAccordion/VAccordionItem.vue'
+import Breadcrumb from '../VBreadcrumb/VBreadcrumb.vue'
+import Button from '../VButton/VButton.vue'
+import Chip from '../VChip/VChip.vue'
+import Input from '../VInput/VInput.vue'
+import Pagination from '../VPagination/VPagination.vue'
 
-import Icon from './Icon.vue'
+import Icon from './VIcon.vue'
 import { builtinIcons, type DsIconName } from './icons'
 import {
   classIconResolver,

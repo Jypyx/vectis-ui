@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide, useId } from 'vue'
 
-import type { IconSource } from '../Icon/types'
+import type { IconSource } from '../VIcon/types'
 
 import { accordionKey } from './context'
 

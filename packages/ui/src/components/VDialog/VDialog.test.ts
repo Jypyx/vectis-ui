@@ -2,7 +2,7 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
-import Dialog from './Dialog.vue'
+import Dialog from './VDialog.vue'
 
 /**
  * Logique uniquement (jsdom + stub showModal/close, voir vitest.setup.ts). Le

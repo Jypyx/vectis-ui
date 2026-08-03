@@ -2,7 +2,7 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
-import Popover from './Popover.vue'
+import Popover from './VPopover.vue'
 
 /** Unique fabrique de composant du fichier (vue/one-component-per-file). */
 function renderHarness(template: string, bindings: Record<string, unknown> = {}) {

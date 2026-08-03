@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import Chip from './Chip.vue'
+import Chip from './VChip.vue'
 
 describe('Chip', () => {
   it('statique sans interaction : aucun bouton ni lien, action rendue en span', () => {

@@ -2,8 +2,8 @@
 import { Comment, Fragment, Text, computed, provide, useSlots } from 'vue'
 import type { StyleValue, VNode } from 'vue'
 
-import Avatar from './Avatar.vue'
-import type { AvatarSize } from './Avatar.vue'
+import Avatar from './VAvatar.vue'
+import type { AvatarSize } from './VAvatar.vue'
 import { avatarGroupKey } from './context'
 
 /**

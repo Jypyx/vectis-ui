@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Dialog from './Dialog.vue'
+import Dialog from './VDialog.vue'
 
 /**
  * Variante d'alerte : même design que <Dialog>, mais `role="alertdialog"` —

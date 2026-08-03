@@ -2,7 +2,7 @@ import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
-import TimePicker from './TimePicker.vue'
+import TimePicker from './VTimePicker.vue'
 
 /** Ouvre le panneau par clic sur le contrôle. */
 async function openPanel(container: Element) {

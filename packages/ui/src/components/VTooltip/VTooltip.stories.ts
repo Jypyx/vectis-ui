@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
-import Button from '../Button/Button.vue'
-import IconButton from '../IconButton/IconButton.vue'
-import Typography from '../Typography/Typography.vue'
-import Tooltip from './Tooltip.vue'
+import Button from '../VButton/VButton.vue'
+import IconButton from '../VIconButton/VIconButton.vue'
+import Typography from '../VTypography/VTypography.vue'
+import Tooltip from './VTooltip.vue'
 
 const meta = {
   title: 'Composants/Tooltip',

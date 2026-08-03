@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { ref, useId } from 'vue'
 
-import Popover from '../Popover/Popover.vue'
+import Popover from '../VPopover/VPopover.vue'
 
 import { useTimer } from '../../composables/useTimer'
 

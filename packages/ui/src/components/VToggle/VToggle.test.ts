@@ -2,9 +2,9 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, ref } from 'vue'
 
-import Toggle from './Toggle.vue'
-import type { ToggleModelValue } from './Toggle.vue'
-import ToggleItem from './ToggleItem.vue'
+import Toggle from './VToggle.vue'
+import type { ToggleModelValue } from './VToggle.vue'
+import ToggleItem from './VToggleItem.vue'
 
 /**
  * Harnais : le v-model doit être vivant (sans ref locale, cliquer un item ne

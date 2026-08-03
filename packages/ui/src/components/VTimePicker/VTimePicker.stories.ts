@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import TimePicker from './TimePicker.vue'
+import TimePicker from './VTimePicker.vue'
 
 const meta = {
   title: 'Composants/TimePicker',

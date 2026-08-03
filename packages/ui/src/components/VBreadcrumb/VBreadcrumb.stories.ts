@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
-import Breadcrumb from './Breadcrumb.vue'
+import Breadcrumb from './VBreadcrumb.vue'
 
 const meta = {
   title: 'Composants/Breadcrumb',

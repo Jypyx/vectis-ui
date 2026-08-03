@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import Button from './Button.vue'
+import Button from './VButton.vue'
 
 describe('Button', () => {
   it('rend le libellé et les data-attributes de variante', () => {

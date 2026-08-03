@@ -36,7 +36,7 @@ export { fr } from './i18n/fr'
 export { en } from './i18n/en'
 export type { DsMessages, DsMessagesInput } from './i18n/types'
 
-export { default as Icon } from './components/Icon/Icon.vue'
+export { default as Icon } from './components/VIcon/VIcon.vue'
 // Branchement d'une bibliothèque d'icônes tierce — modules TS purs, donc sans
 // effet sur l'ordre du CSS bundlé.
 export {
@@ -44,19 +44,19 @@ export {
   ligatureIconResolver,
   classIconResolver,
   componentIconResolver,
-} from './components/Icon/resolver'
-export type { IconResolver, IconAliases } from './components/Icon/resolver'
-export type { IconContext, IconRender, IconSource } from './components/Icon/types'
-export type { DsIconName } from './components/Icon/icons'
-export { default as Typography } from './components/Typography/Typography.vue'
-export type { TypographyTone, TypographyVariant } from './components/Typography/Typography.vue'
-export { default as Popover } from './components/Popover/Popover.vue'
-export type { PopoverPlacement, PopoverTriggerProps } from './components/Popover/Popover.vue'
-export { default as Button } from './components/Button/Button.vue'
-export { default as IconButton } from './components/IconButton/IconButton.vue'
-export { default as ButtonGroup } from './components/Button/ButtonGroup.vue'
-export { default as Pagination } from './components/Pagination/Pagination.vue'
-export { default as Tabs } from './components/Tabs/Tabs.vue'
+} from './components/VIcon/resolver'
+export type { IconResolver, IconAliases } from './components/VIcon/resolver'
+export type { IconContext, IconRender, IconSource } from './components/VIcon/types'
+export type { DsIconName } from './components/VIcon/icons'
+export { default as Typography } from './components/VTypography/VTypography.vue'
+export type { TypographyTone, TypographyVariant } from './components/VTypography/VTypography.vue'
+export { default as Popover } from './components/VPopover/VPopover.vue'
+export type { PopoverPlacement, PopoverTriggerProps } from './components/VPopover/VPopover.vue'
+export { default as Button } from './components/VButton/VButton.vue'
+export { default as IconButton } from './components/VIconButton/VIconButton.vue'
+export { default as ButtonGroup } from './components/VButton/VButtonGroup.vue'
+export { default as Pagination } from './components/VPagination/VPagination.vue'
+export { default as Tabs } from './components/VTabs/VTabs.vue'
 export type {
   TabsActivation,
   TabsAlign,
@@ -64,10 +64,10 @@ export type {
   TabsSize,
   TabsTone,
   TabsVariant,
-} from './components/Tabs/Tabs.vue'
-export { default as Tab } from './components/Tabs/Tab.vue'
-export { default as TabPanel } from './components/Tabs/TabPanel.vue'
-export { default as Toggle } from './components/Toggle/Toggle.vue'
+} from './components/VTabs/VTabs.vue'
+export { default as Tab } from './components/VTabs/VTab.vue'
+export { default as TabPanel } from './components/VTabs/VTabPanel.vue'
+export { default as Toggle } from './components/VToggle/VToggle.vue'
 export type {
   ToggleModelValue,
   ToggleOrientation,
@@ -75,74 +75,74 @@ export type {
   ToggleTone,
   ToggleValue,
   ToggleVariant,
-} from './components/Toggle/Toggle.vue'
-export { default as ToggleItem } from './components/Toggle/ToggleItem.vue'
-export { default as Input } from './components/Input/Input.vue'
-export { default as Textarea } from './components/Textarea/Textarea.vue'
-export { default as Checkbox } from './components/Checkbox/Checkbox.vue'
-export { default as Radio } from './components/Radio/Radio.vue'
-export { default as Switch } from './components/Switch/Switch.vue'
-export { default as Tooltip } from './components/Tooltip/Tooltip.vue'
-export { default as Menu } from './components/Menu/Menu.vue'
-export { default as MenuItem } from './components/Menu/MenuItem.vue'
-export { default as MenuGroup } from './components/Menu/MenuGroup.vue'
-export { default as MenuSeparator } from './components/Menu/MenuSeparator.vue'
-export { default as Accordion } from './components/Accordion/Accordion.vue'
-export { default as AccordionItem } from './components/Accordion/AccordionItem.vue'
-export { default as Toaster } from './components/Toast/Toaster.vue'
-export { toast, dismissToast } from './components/Toast/state'
-export type { ToastOptions, ToastTone, ToastPlacement } from './components/Toast/state'
-export { default as Badge } from './components/Badge/Badge.vue'
-export type { BadgeTone } from './components/Badge/Badge.vue'
-export { default as Avatar } from './components/Avatar/Avatar.vue'
-export type { AvatarSize } from './components/Avatar/Avatar.vue'
-export { default as AvatarGroup } from './components/Avatar/AvatarGroup.vue'
-export { default as Spinner } from './components/Spinner/Spinner.vue'
-export { default as SkeletonLoader } from './components/SkeletonLoader/SkeletonLoader.vue'
+} from './components/VToggle/VToggle.vue'
+export { default as ToggleItem } from './components/VToggle/VToggleItem.vue'
+export { default as Input } from './components/VInput/VInput.vue'
+export { default as Textarea } from './components/VTextarea/VTextarea.vue'
+export { default as Checkbox } from './components/VCheckbox/VCheckbox.vue'
+export { default as Radio } from './components/VRadio/VRadio.vue'
+export { default as Switch } from './components/VSwitch/VSwitch.vue'
+export { default as Tooltip } from './components/VTooltip/VTooltip.vue'
+export { default as Menu } from './components/VMenu/VMenu.vue'
+export { default as MenuItem } from './components/VMenu/VMenuItem.vue'
+export { default as MenuGroup } from './components/VMenu/VMenuGroup.vue'
+export { default as MenuSeparator } from './components/VMenu/VMenuSeparator.vue'
+export { default as Accordion } from './components/VAccordion/VAccordion.vue'
+export { default as AccordionItem } from './components/VAccordion/VAccordionItem.vue'
+export { default as Toaster } from './components/VToast/VToaster.vue'
+export { toast, dismissToast } from './components/VToast/state'
+export type { ToastOptions, ToastTone, ToastPlacement } from './components/VToast/state'
+export { default as Badge } from './components/VBadge/VBadge.vue'
+export type { BadgeTone } from './components/VBadge/VBadge.vue'
+export { default as Avatar } from './components/VAvatar/VAvatar.vue'
+export type { AvatarSize } from './components/VAvatar/VAvatar.vue'
+export { default as AvatarGroup } from './components/VAvatar/VAvatarGroup.vue'
+export { default as Spinner } from './components/VSpinner/VSpinner.vue'
+export { default as SkeletonLoader } from './components/VSkeletonLoader/VSkeletonLoader.vue'
 export type {
   SkeletonShape,
   SkeletonAnimation,
   SkeletonSize,
-} from './components/SkeletonLoader/SkeletonLoader.vue'
-export { default as Combobox } from './components/Combobox/Combobox.vue'
+} from './components/VSkeletonLoader/VSkeletonLoader.vue'
+export { default as Combobox } from './components/VCombobox/VCombobox.vue'
 export type {
   ComboboxOption,
   ComboboxGroup,
   ComboboxSeparator,
   ComboboxItem,
   ComboboxFilter,
-} from './components/Combobox/Combobox.vue'
-export { default as Breadcrumb } from './components/Breadcrumb/Breadcrumb.vue'
-export type { BreadcrumbItem } from './components/Breadcrumb/Breadcrumb.vue'
-export { default as SideNavigation } from './components/SideNavigation/SideNavigation.vue'
-export { default as SideNavigationItem } from './components/SideNavigation/SideNavigationItem.vue'
-export { default as SideNavigationGroup } from './components/SideNavigation/SideNavigationGroup.vue'
-export { default as SideNavigationSeparator } from './components/SideNavigation/SideNavigationSeparator.vue'
-export { default as Chip } from './components/Chip/Chip.vue'
-export { default as DataTable } from './components/DataTable/DataTable.vue'
+} from './components/VCombobox/VCombobox.vue'
+export { default as Breadcrumb } from './components/VBreadcrumb/VBreadcrumb.vue'
+export type { BreadcrumbItem } from './components/VBreadcrumb/VBreadcrumb.vue'
+export { default as SideNavigation } from './components/VSideNavigation/VSideNavigation.vue'
+export { default as SideNavigationItem } from './components/VSideNavigation/VSideNavigationItem.vue'
+export { default as SideNavigationGroup } from './components/VSideNavigation/VSideNavigationGroup.vue'
+export { default as SideNavigationSeparator } from './components/VSideNavigation/VSideNavigationSeparator.vue'
+export { default as Chip } from './components/VChip/VChip.vue'
+export { default as DataTable } from './components/VDataTable/VDataTable.vue'
 export type {
   DataTableColumn,
   DataTableSort,
   DataTableRowId,
   DataTableParams,
   DataTableProps,
-} from './components/DataTable/DataTable.vue'
-export { default as InputOTP } from './components/InputOTP/InputOTP.vue'
-export { default as ProgressCircular } from './components/ProgressCircular/ProgressCircular.vue'
-export { default as ProgressLinear } from './components/ProgressLinear/ProgressLinear.vue'
-export { default as Slider } from './components/Slider/Slider.vue'
-export type { SliderLabel } from './components/Slider/Slider.vue'
-export { default as Dialog } from './components/Dialog/Dialog.vue'
-export { default as DialogAlert } from './components/Dialog/DialogAlert.vue'
-export { default as Calendar } from './components/Calendar/Calendar.vue'
+} from './components/VDataTable/VDataTable.vue'
+export { default as InputOTP } from './components/VInputOTP/VInputOTP.vue'
+export { default as ProgressCircular } from './components/VProgressCircular/VProgressCircular.vue'
+export { default as ProgressLinear } from './components/VProgressLinear/VProgressLinear.vue'
+export { default as Slider } from './components/VSlider/VSlider.vue'
+export type { SliderLabel } from './components/VSlider/VSlider.vue'
+export { default as Dialog } from './components/VDialog/VDialog.vue'
+export { default as DialogAlert } from './components/VDialog/VDialogAlert.vue'
+export { default as Calendar } from './components/VCalendar/VCalendar.vue'
 export type {
   CalendarSelection,
   CalendarValue,
   DateRange,
   CalendarEvent,
   DateMatcher,
-} from './components/Calendar/Calendar.vue'
-export { default as DatePicker } from './components/DatePicker/DatePicker.vue'
-export type { DatePickerMode } from './components/DatePicker/DatePicker.vue'
-export { default as TimePicker } from './components/TimePicker/TimePicker.vue'
-export type { TimePickerFormat, TimePickerMode } from './components/TimePicker/TimePicker.vue'
+} from './components/VCalendar/VCalendar.vue'
+export { default as DatePicker } from './components/VDatePicker/VDatePicker.vue'
+export type { DatePickerMode } from './components/VDatePicker/VDatePicker.vue'
+export { default as TimePicker } from './components/VTimePicker/VTimePicker.vue'
+export type { TimePickerFormat, TimePickerMode } from './components/VTimePicker/VTimePicker.vue'

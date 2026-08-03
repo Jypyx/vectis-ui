@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Radio from './Radio.vue'
+import Radio from './VRadio.vue'
 
 const meta = {
   title: 'Composants/Radio',

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, useAttrs, useId, watch } from 'vue'
 
-import Icon from '../Icon/Icon.vue'
-import IconButton from '../IconButton/IconButton.vue'
-import Typography from '../Typography/Typography.vue'
+import Icon from '../VIcon/VIcon.vue'
+import IconButton from '../VIconButton/VIconButton.vue'
+import Typography from '../VTypography/VTypography.vue'
 import { useMessages } from '../../i18n/state'
 
 /**

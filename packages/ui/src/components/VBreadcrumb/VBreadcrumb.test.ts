@@ -2,8 +2,8 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { nextTick } from 'vue'
 
-import Breadcrumb from './Breadcrumb.vue'
-import type { BreadcrumbItem } from './Breadcrumb.vue'
+import Breadcrumb from './VBreadcrumb.vue'
+import type { BreadcrumbItem } from './VBreadcrumb.vue'
 
 const items: BreadcrumbItem[] = [
   { label: 'Accueil', href: '/' },

@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Slider from './Slider.vue'
+import Slider from './VSlider.vue'
 
 describe('Slider', () => {
   it('mode simple : un seul input range, v-model numérique', async () => {

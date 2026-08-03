@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Icon from '../Icon/Icon.vue'
-import { iconProps } from '../Icon/iconProps'
-import type { IconSource } from '../Icon/types'
+import Icon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
 
 /**
  * Rangée d'option du Combobox (`role="option"`), composant INTERNE non exporté.

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide } from 'vue'
 
-import ButtonGroup from '../Button/ButtonGroup.vue'
+import ButtonGroup from '../VButton/VButtonGroup.vue'
 import { toggleKey } from './context'
 
 import { toggleValue } from '../../utils/array'

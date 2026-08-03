@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Icon from './Icon.vue'
+import Icon from './VIcon.vue'
 import { builtinIcons } from './icons'
 
 describe('Icon', () => {

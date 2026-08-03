@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, useId, watch } from 'vue'
 
-import Button from '../Button/Button.vue'
-import Icon from '../Icon/Icon.vue'
-import IconButton from '../IconButton/IconButton.vue'
+import Button from '../VButton/VButton.vue'
+import Icon from '../VIcon/VIcon.vue'
+import IconButton from '../VIconButton/VIconButton.vue'
 import {
   addDays,
   addMonths,

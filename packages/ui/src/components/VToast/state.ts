@@ -1,6 +1,6 @@
 import { reactive } from 'vue'
 
-import type { IconSource } from '../Icon/types'
+import type { IconSource } from '../VIcon/types'
 
 /**
  * File de notifications globale. JS justifié : aucune primitive HTML ne

@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import InputOTP from './InputOTP.vue'
+import InputOTP from './VInputOTP.vue'
 
 function renderOtp(props: Record<string, unknown> = {}) {
   return render(InputOTP, { props: { modelValue: '', ...props } })

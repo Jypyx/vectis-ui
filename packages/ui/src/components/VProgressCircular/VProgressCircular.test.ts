@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import ProgressCircular from './ProgressCircular.vue'
+import ProgressCircular from './VProgressCircular.vue'
 
 /** Style inline de la racine (les custom properties y sont posées). */
 const styleOf = (container: Element) =>

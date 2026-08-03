@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { usePopover } from '../../composables/usePopover'
-import Toast from './Toast.vue'
+import Toast from './VToast.vue'
 import { dismissToast, toasts, type ToastItem, type ToastPlacement } from './state'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'

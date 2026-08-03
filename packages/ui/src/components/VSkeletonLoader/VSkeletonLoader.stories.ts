@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Avatar from '../Avatar/Avatar.vue'
-import Button from '../Button/Button.vue'
-import Chip from '../Chip/Chip.vue'
-import Input from '../Input/Input.vue'
-import Typography from '../Typography/Typography.vue'
-import SkeletonLoader from './SkeletonLoader.vue'
+import Avatar from '../VAvatar/VAvatar.vue'
+import Button from '../VButton/VButton.vue'
+import Chip from '../VChip/VChip.vue'
+import Input from '../VInput/VInput.vue'
+import Typography from '../VTypography/VTypography.vue'
+import SkeletonLoader from './VSkeletonLoader.vue'
 
 const meta = {
   title: 'Composants/SkeletonLoader',

@@ -2,7 +2,7 @@ import { render } from '@testing-library/vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent } from 'vue'
 
-import Tooltip from './Tooltip.vue'
+import Tooltip from './VTooltip.vue'
 
 const Harness = defineComponent({
   components: { Tooltip },

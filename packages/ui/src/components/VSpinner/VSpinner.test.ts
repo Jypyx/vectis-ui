@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Spinner from './Spinner.vue'
+import Spinner from './VSpinner.vue'
 
 describe('Spinner', () => {
   it('expose role="status" avec un libellé accessible par défaut', () => {

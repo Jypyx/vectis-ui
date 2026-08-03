@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
-import Accordion from './Accordion.vue'
-import AccordionItem from './AccordionItem.vue'
+import Accordion from './VAccordion.vue'
+import AccordionItem from './VAccordionItem.vue'
 
 const meta = {
   title: 'Composants/Accordion',

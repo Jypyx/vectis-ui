@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { computed, ref } from 'vue'
 
-import Checkbox from './Checkbox.vue'
+import Checkbox from './VCheckbox.vue'
 
 const meta = {
   title: 'Composants/Checkbox',

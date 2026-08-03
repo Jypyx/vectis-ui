@@ -2,10 +2,10 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, ref } from 'vue'
 
-import SideNavigation from './SideNavigation.vue'
-import SideNavigationGroup from './SideNavigationGroup.vue'
-import SideNavigationItem from './SideNavigationItem.vue'
-import SideNavigationSeparator from './SideNavigationSeparator.vue'
+import SideNavigation from './VSideNavigation.vue'
+import SideNavigationGroup from './VSideNavigationGroup.vue'
+import SideNavigationItem from './VSideNavigationItem.vue'
+import SideNavigationSeparator from './VSideNavigationSeparator.vue'
 
 /** Harnais unique : contenu de la nav, attributs bruts de la racine, état exposé. */
 function renderNav(inner: string, navAttrs = '', state: Record<string, unknown> = {}) {

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, waitFor, within } from 'storybook/test'
 
-import Typography from '../Typography/Typography.vue'
-import ProgressCircular from './ProgressCircular.vue'
+import Typography from '../VTypography/VTypography.vue'
+import ProgressCircular from './VProgressCircular.vue'
 
 const meta = {
   title: 'Composants/ProgressCircular',

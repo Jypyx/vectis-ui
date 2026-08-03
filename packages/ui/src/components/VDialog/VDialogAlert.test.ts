@@ -2,7 +2,7 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
-import DialogAlert from './DialogAlert.vue'
+import DialogAlert from './VDialogAlert.vue'
 
 async function flush() {
   await nextTick()

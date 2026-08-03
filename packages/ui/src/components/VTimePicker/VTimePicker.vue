@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, ref, useId, watch, watchEffect } from 'vue'
 
-import Button from '../Button/Button.vue'
-import type { IconSource } from '../Icon/types'
-import Input from '../Input/Input.vue'
-import Popover from '../Popover/Popover.vue'
-import Toggle from '../Toggle/Toggle.vue'
-import type { ToggleModelValue } from '../Toggle/Toggle.vue'
-import ToggleItem from '../Toggle/ToggleItem.vue'
-import TimePickerDial from './TimePickerDial.vue'
+import Button from '../VButton/VButton.vue'
+import type { IconSource } from '../VIcon/types'
+import Input from '../VInput/VInput.vue'
+import Popover from '../VPopover/VPopover.vue'
+import Toggle from '../VToggle/VToggle.vue'
+import type { ToggleModelValue } from '../VToggle/VToggle.vue'
+import ToggleItem from '../VToggle/VToggleItem.vue'
+import TimePickerDial from './VTimePickerDial.vue'
 import {
   formatDisplay,
   formatTime,

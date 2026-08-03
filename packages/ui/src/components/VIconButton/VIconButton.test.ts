@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import IconButton from './IconButton.vue'
+import IconButton from './VIconButton.vue'
 
 describe('IconButton', () => {
   it('expose le libellé accessible via aria-label', () => {

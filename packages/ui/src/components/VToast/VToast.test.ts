@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Toast from './Toast.vue'
+import Toast from './VToast.vue'
 import type { ToastItem } from './state'
 
 const makeItem = (overrides: Partial<ToastItem> = {}): ToastItem => ({

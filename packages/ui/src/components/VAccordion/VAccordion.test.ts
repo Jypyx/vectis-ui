@@ -2,8 +2,8 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent } from 'vue'
 
-import Accordion from './Accordion.vue'
-import AccordionItem from './AccordionItem.vue'
+import Accordion from './VAccordion.vue'
+import AccordionItem from './VAccordionItem.vue'
 
 /** Attributs bruts posés sur le groupe et sur le 1er item. */
 function renderWith(accordionAttrs = '', firstItemAttrs = '') {

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Badge from './Badge.vue'
+import Badge from './VBadge.vue'
 
 describe('Badge', () => {
   it('standalone par défaut : racine .v-badge seule, tone accent, count rendu', () => {

@@ -1,5 +1,5 @@
 /**
- * Génère `src/components/Icon/icons.ts` : les paths SVG des icônes que le DS
+ * Génère `src/components/VIcon/icons.ts` : les paths SVG des icônes que le DS
  * rend LUI-MÊME par défaut, répliques exactes de Material Symbols Rounded
  * (wght 400 · GRAD 0 · opsz 24). C'est ce registre qui rend le design system
  * utilisable sans aucune police d'icônes.
@@ -123,8 +123,8 @@ export type DsIconName = keyof typeof builtinIcons
 `
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-writeFileSync(resolve(pkgRoot, 'src/components/Icon/icons.ts'), ts, 'utf8')
+writeFileSync(resolve(pkgRoot, 'src/components/VIcon/icons.ts'), ts, 'utf8')
 
 console.log(
-  `icons: ${entries.length} icônes (dont ${filledCount} avec variante FILL) → src/components/Icon/icons.ts`,
+  `icons: ${entries.length} icônes (dont ${filledCount} avec variante FILL) → src/components/VIcon/icons.ts`,
 )

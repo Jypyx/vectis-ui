@@ -2,7 +2,7 @@ import { render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { h } from 'vue'
 
-import Icon from './Icon.vue'
+import Icon from './VIcon.vue'
 import { builtinIcons } from './icons'
 import {
   classIconResolver,

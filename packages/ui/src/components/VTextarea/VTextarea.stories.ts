@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Textarea from './Textarea.vue'
+import Textarea from './VTextarea.vue'
 
 const meta = {
   title: 'Composants/Textarea',

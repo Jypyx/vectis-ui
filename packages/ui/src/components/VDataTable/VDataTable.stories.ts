@@ -3,10 +3,10 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import type { Component } from 'vue'
 import { ref } from 'vue'
 
-import Chip from '../Chip/Chip.vue'
-import Typography from '../Typography/Typography.vue'
-import DataTableSfc from './DataTable.vue'
-import type { DataTableParams, DataTableRowId } from './DataTable.vue'
+import Chip from '../VChip/VChip.vue'
+import Typography from '../VTypography/VTypography.vue'
+import DataTableSfc from './VDataTable.vue'
+import type { DataTableParams, DataTableRowId } from './VDataTable.vue'
 
 // SFC générique : sa signature de fonction générique n'est pas assignable aux
 // types Component de Storybook — on l'efface pour les stories.

@@ -2,10 +2,10 @@
 import { computed, useAttrs } from 'vue'
 import type { ButtonHTMLAttributes } from 'vue'
 
-import Icon from '../Icon/Icon.vue'
-import { iconProps } from '../Icon/iconProps'
-import type { IconSource } from '../Icon/types'
-import Spinner from '../Spinner/Spinner.vue'
+import Icon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
+import Spinner from '../VSpinner/VSpinner.vue'
 
 /**
  * Le <button> natif (ou <a> en mode lien) couvre focus, clavier et

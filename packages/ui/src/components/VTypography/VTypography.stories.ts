@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
-import Typography from './Typography.vue'
+import Typography from './VTypography.vue'
 
 const VARIANTS = [
   'display',

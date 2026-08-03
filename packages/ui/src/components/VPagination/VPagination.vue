@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import Button from '../Button/Button.vue'
-import ButtonGroup from '../Button/ButtonGroup.vue'
-import Icon from '../Icon/Icon.vue'
-import { iconProps } from '../Icon/iconProps'
-import type { IconSource } from '../Icon/types'
-import IconButton from '../IconButton/IconButton.vue'
+import Button from '../VButton/VButton.vue'
+import ButtonGroup from '../VButton/VButtonGroup.vue'
+import Icon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
+import IconButton from '../VIconButton/VIconButton.vue'
 
 import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
 import { clamp } from '../../utils/number'

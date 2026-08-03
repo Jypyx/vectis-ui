@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Toggle from './Toggle.vue'
-import ToggleItem from './ToggleItem.vue'
+import Toggle from './VToggle.vue'
+import ToggleItem from './VToggleItem.vue'
 
 const meta = {
   title: 'Composants/Toggle',

@@ -2,9 +2,9 @@ import { render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
-import Calendar from '../components/Calendar/Calendar.vue'
-import Pagination from '../components/Pagination/Pagination.vue'
-import Spinner from '../components/Spinner/Spinner.vue'
+import Calendar from '../components/VCalendar/VCalendar.vue'
+import Pagination from '../components/VPagination/VPagination.vue'
+import Spinner from '../components/VSpinner/VSpinner.vue'
 
 import { en } from './en'
 import { fr } from './fr'

@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
-import Chip from '../Chip/Chip.vue'
-import IconButton from '../IconButton/IconButton.vue'
-import SideNavigation from './SideNavigation.vue'
-import SideNavigationGroup from './SideNavigationGroup.vue'
-import SideNavigationItem from './SideNavigationItem.vue'
-import SideNavigationSeparator from './SideNavigationSeparator.vue'
+import Chip from '../VChip/VChip.vue'
+import IconButton from '../VIconButton/VIconButton.vue'
+import SideNavigation from './VSideNavigation.vue'
+import SideNavigationGroup from './VSideNavigationGroup.vue'
+import SideNavigationItem from './VSideNavigationItem.vue'
+import SideNavigationSeparator from './VSideNavigationSeparator.vue'
 
 const components = {
   SideNavigation,

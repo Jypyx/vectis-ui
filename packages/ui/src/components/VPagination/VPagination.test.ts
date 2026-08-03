@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Pagination from './Pagination.vue'
+import Pagination from './VPagination.vue'
 
 /** Libellés des pastilles de page, dans l'ordre du DOM. */
 function pageLabels(container: Element): string[] {

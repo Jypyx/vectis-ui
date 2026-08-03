@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 
-import Icon from '../Icon/Icon.vue'
-import IconButton from './IconButton.vue'
+import Icon from '../VIcon/VIcon.vue'
+import IconButton from './VIconButton.vue'
 
 const ICON = `
   <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">

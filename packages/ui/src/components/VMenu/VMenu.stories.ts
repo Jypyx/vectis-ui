@@ -1,11 +1,11 @@
 ﻿import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
-import Button from '../Button/Button.vue'
-import Menu from './Menu.vue'
-import MenuGroup from './MenuGroup.vue'
-import MenuItem from './MenuItem.vue'
-import MenuSeparator from './MenuSeparator.vue'
+import Button from '../VButton/VButton.vue'
+import Menu from './VMenu.vue'
+import MenuGroup from './VMenuGroup.vue'
+import MenuItem from './VMenuItem.vue'
+import MenuSeparator from './VMenuSeparator.vue'
 
 const meta = {
   title: 'Composants/Menu',

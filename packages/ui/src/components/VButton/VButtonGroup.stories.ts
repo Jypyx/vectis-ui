@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 
-import IconButton from '../IconButton/IconButton.vue'
-import Button from './Button.vue'
-import ButtonGroup from './ButtonGroup.vue'
+import IconButton from '../VIconButton/VIconButton.vue'
+import Button from './VButton.vue'
+import ButtonGroup from './VButtonGroup.vue'
 
 const meta = {
   title: 'Composants/ButtonGroup',

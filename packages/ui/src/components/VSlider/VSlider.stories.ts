@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Slider from './Slider.vue'
+import Slider from './VSlider.vue'
 
 const meta = {
   title: 'Composants/Slider',

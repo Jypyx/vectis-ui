@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import Icon from '../Icon/Icon.vue'
-import { iconProps } from '../Icon/iconProps'
-import type { IconSource } from '../Icon/types'
+import Icon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
 
 import { isDev } from '../../utils/env'
 

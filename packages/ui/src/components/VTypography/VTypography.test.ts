@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Typography from './Typography.vue'
+import Typography from './VTypography.vue'
 
 describe('Typography', () => {
   it('défaut : <p> body-md, sans data-tone ni data-truncate', () => {

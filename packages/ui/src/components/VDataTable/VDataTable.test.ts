@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
-import DataTable from './DataTable.vue'
+import DataTable from './VDataTable.vue'
 
 const COLUMNS = [
   { key: 'name', label: 'Nom', sortable: true },

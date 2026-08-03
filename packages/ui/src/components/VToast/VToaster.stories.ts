@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
-import Button from '../Button/Button.vue'
-import Toaster from './Toaster.vue'
+import Button from '../VButton/VButton.vue'
+import Toaster from './VToaster.vue'
 import { dismissToast, toast } from './state'
 
 const PLACEMENTS = [

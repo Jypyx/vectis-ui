@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed, nextTick, reactive, ref, useId, watch, watchEffect } from 'vue'
 
-import Chip from '../Chip/Chip.vue'
-import Icon from '../Icon/Icon.vue'
-import type { IconSource } from '../Icon/types'
-import Input from '../Input/Input.vue'
-import Popover from '../Popover/Popover.vue'
+import Chip from '../VChip/VChip.vue'
+import Icon from '../VIcon/VIcon.vue'
+import type { IconSource } from '../VIcon/types'
+import Input from '../VInput/VInput.vue'
+import Popover from '../VPopover/VPopover.vue'
 // alias : les types publics `ComboboxOption`/`ComboboxGroup`/`ComboboxSeparator`
 // occupent déjà ces noms dans ce module
-import OptionRow from './ComboboxOption.vue'
-import OptionGroup from './ComboboxGroup.vue'
-import OptionSeparator from './ComboboxSeparator.vue'
-import Spinner from '../Spinner/Spinner.vue'
+import OptionRow from './VComboboxOption.vue'
+import OptionGroup from './VComboboxGroup.vue'
+import OptionSeparator from './VComboboxSeparator.vue'
+import Spinner from '../VSpinner/VSpinner.vue'
 
 import { toggleValue } from '../../utils/array'
 import { normalizeText } from '../../utils/text'

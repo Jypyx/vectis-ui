@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Button from '../Button/Button.vue'
-import Calendar from './Calendar.vue'
-import type { DateRange } from './Calendar.vue'
+import Button from '../VButton/VButton.vue'
+import Calendar from './VCalendar.vue'
+import type { DateRange } from './VCalendar.vue'
 
 const meta = {
   title: 'Composants/Calendar',

@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import Input from './Input.vue'
+import Input from './VInput.vue'
 
 describe('Input', () => {
   it('synchronise v-model (update:modelValue)', async () => {

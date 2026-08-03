@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Button from '../Button/Button.vue'
-import Input from './Input.vue'
+import Button from '../VButton/VButton.vue'
+import Input from './VInput.vue'
 
 const meta = {
   title: 'Composants/Input',

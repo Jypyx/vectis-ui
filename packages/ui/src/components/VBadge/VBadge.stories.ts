@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
-import Avatar from '../Avatar/Avatar.vue'
-import Button from '../Button/Button.vue'
-import Icon from '../Icon/Icon.vue'
-import IconButton from '../IconButton/IconButton.vue'
-import Badge from './Badge.vue'
+import Avatar from '../VAvatar/VAvatar.vue'
+import Button from '../VButton/VButton.vue'
+import Icon from '../VIcon/VIcon.vue'
+import IconButton from '../VIconButton/VIconButton.vue'
+import Badge from './VBadge.vue'
 
 const meta = {
   title: 'Composants/Badge',

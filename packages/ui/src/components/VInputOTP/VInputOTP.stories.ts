@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import InputOTP from './InputOTP.vue'
+import InputOTP from './VInputOTP.vue'
 
 const meta = {
   title: 'Composants/InputOTP',

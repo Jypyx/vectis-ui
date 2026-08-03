@@ -2,8 +2,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, ref } from 'vue'
 
-import Combobox from './Combobox.vue'
-import type { ComboboxOption } from './Combobox.vue'
+import Combobox from './VCombobox.vue'
+import type { ComboboxOption } from './VCombobox.vue'
 
 const OPTIONS = [
   { value: 'fr', label: 'France' },

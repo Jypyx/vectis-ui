@@ -1,6 +1,6 @@
 import type { InjectionKey } from 'vue'
 
-import type { ToggleSize, ToggleTone, ToggleValue, ToggleVariant } from './Toggle.vue'
+import type { ToggleSize, ToggleTone, ToggleValue, ToggleVariant } from './VToggle.vue'
 
 /**
  * Contrat Toggle → ToggleItem. Getters : les props de la racine restent

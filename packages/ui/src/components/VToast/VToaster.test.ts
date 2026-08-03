@@ -2,7 +2,7 @@ import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
-import Toaster from './Toaster.vue'
+import Toaster from './VToaster.vue'
 import { dismissToast, toast, toasts } from './state'
 
 const getStack = (container: Element, placement: string) =>

@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Button from '../Button/Button.vue'
-import Input from '../Input/Input.vue'
-import Typography from '../Typography/Typography.vue'
-import Popover from './Popover.vue'
+import Button from '../VButton/VButton.vue'
+import Input from '../VInput/VInput.vue'
+import Typography from '../VTypography/VTypography.vue'
+import Popover from './VPopover.vue'
 
 const meta = {
   title: 'Composants/Popover',

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { ButtonHTMLAttributes } from 'vue'
 
-import Button from '../Button/Button.vue'
-import Icon from '../Icon/Icon.vue'
-import { iconProps } from '../Icon/iconProps'
-import type { IconSource } from '../Icon/types'
+import Button from '../VButton/VButton.vue'
+import Icon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
 
 /**
  * Bouton icône : même API visuelle que Button, mais carré et avec un libellé

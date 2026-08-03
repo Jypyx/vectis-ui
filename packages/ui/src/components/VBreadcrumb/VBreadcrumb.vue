@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import Icon from '../Icon/Icon.vue'
-import { iconProps } from '../Icon/iconProps'
-import type { IconSource } from '../Icon/types'
-import IconButton from '../IconButton/IconButton.vue'
-import Menu from '../Menu/Menu.vue'
-import MenuItem from '../Menu/MenuItem.vue'
+import Icon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
+import IconButton from '../VIconButton/VIconButton.vue'
+import Menu from '../VMenu/VMenu.vue'
+import MenuItem from '../VMenu/VMenuItem.vue'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'

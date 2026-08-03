@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, inject, ref, useId, useSlots } from 'vue'
 
-import Icon from '../Icon/Icon.vue'
-import { iconProps } from '../Icon/iconProps'
-import type { IconSource } from '../Icon/types'
-import MenuPanel from './MenuPanel.vue'
+import Icon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
+import MenuPanel from './VMenuPanel.vue'
 import { menuKey, SUBMENU_HOVER_DELAY } from './context'
 
 import { useTimer } from '../../composables/useTimer'

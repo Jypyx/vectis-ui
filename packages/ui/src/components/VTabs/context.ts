@@ -1,6 +1,6 @@
 import type { InjectionKey } from 'vue'
 
-import type { TabsActivation, TabsSize, TabsTone, TabsVariant } from './Tabs.vue'
+import type { TabsActivation, TabsSize, TabsTone, TabsVariant } from './VTabs.vue'
 
 /**
  * Contrat Tabs → Tab / TabPanel. Les ids sont dérivés d'un `useId()` unique

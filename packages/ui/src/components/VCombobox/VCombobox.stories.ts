@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { computed, ref } from 'vue'
 
-import Chip from '../Chip/Chip.vue'
-import Combobox from './Combobox.vue'
-import type { ComboboxItem, ComboboxOption } from './Combobox.vue'
+import Chip from '../VChip/VChip.vue'
+import Combobox from './VCombobox.vue'
+import type { ComboboxItem, ComboboxOption } from './VCombobox.vue'
 
 const PAYS = [
   { value: 'fr', label: 'France' },

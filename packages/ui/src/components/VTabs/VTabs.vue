@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, provide, ref, useId, useSlots, watch } from 'vue'
 
-import Icon from '../Icon/Icon.vue'
-import { iconProps } from '../Icon/iconProps'
-import type { IconSource } from '../Icon/types'
-import IconButton from '../IconButton/IconButton.vue'
+import Icon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
+import IconButton from '../VIconButton/VIconButton.vue'
 import { panelIdFor, tabIdFor, tabsKey } from './context'
 
 import { arrowNavigate, navigableItems } from '../../utils/arrowNav'

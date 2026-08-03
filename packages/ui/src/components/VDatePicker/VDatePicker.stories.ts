@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Button from '../Button/Button.vue'
-import type { DateRange } from '../Calendar/Calendar.vue'
-import DatePicker from './DatePicker.vue'
+import Button from '../VButton/VButton.vue'
+import type { DateRange } from '../VCalendar/VCalendar.vue'
+import DatePicker from './VDatePicker.vue'
 
 const meta = {
   title: 'Composants/DatePicker',

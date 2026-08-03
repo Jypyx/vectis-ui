@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide, ref, useId } from 'vue'
 
-import type { IconSource } from '../Icon/types'
+import type { IconSource } from '../VIcon/types'
 import { sideNavigationKey } from './context'
 
 import { arrowNavigate } from '../../utils/arrowNav'

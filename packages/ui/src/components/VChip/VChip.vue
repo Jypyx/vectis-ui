@@ -2,9 +2,9 @@
 import { computed, useAttrs, useSlots } from 'vue'
 import type { StyleValue } from 'vue'
 
-import Icon from '../Icon/Icon.vue'
-import { iconProps } from '../Icon/iconProps'
-import type { IconSource } from '../Icon/types'
+import Icon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
 import { useMessages } from '../../i18n/state'
 
 /**

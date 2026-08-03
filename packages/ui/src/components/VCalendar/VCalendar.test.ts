@@ -2,7 +2,7 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { nextTick } from 'vue'
 
-import Calendar from './Calendar.vue'
+import Calendar from './VCalendar.vue'
 
 // Grille de référence : juin 2026 (le 10 est un mercredi).
 const JUNE = '2026-06-10'

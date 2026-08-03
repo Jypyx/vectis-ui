@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import Icon from '../Icon/Icon.vue'
-import { iconProps } from '../Icon/iconProps'
-import IconButton from '../IconButton/IconButton.vue'
+import Icon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import IconButton from '../VIconButton/VIconButton.vue'
 import type { ToastItem, ToastTone } from './state'
 
 /**

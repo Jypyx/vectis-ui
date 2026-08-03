@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import ButtonGroup from './ButtonGroup.vue'
+import ButtonGroup from './VButtonGroup.vue'
 
 describe('ButtonGroup', () => {
   it('rend un role="group" avec la classe v-button-group', () => {

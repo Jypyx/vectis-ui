@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Badge from '../Badge/Badge.vue'
-import Tab from './Tab.vue'
-import TabPanel from './TabPanel.vue'
-import Tabs from './Tabs.vue'
+import Badge from '../VBadge/VBadge.vue'
+import Tab from './VTab.vue'
+import TabPanel from './VTabPanel.vue'
+import Tabs from './VTabs.vue'
 
 /** Jeu d'onglets assez long pour déborder d'un conteneur étroit. */
 const VILLES = [

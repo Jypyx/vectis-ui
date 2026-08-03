@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
-import Tooltip from '../Tooltip/Tooltip.vue'
-import Avatar from './Avatar.vue'
-import AvatarGroup from './AvatarGroup.vue'
+import Tooltip from '../VTooltip/VTooltip.vue'
+import Avatar from './VAvatar.vue'
+import AvatarGroup from './VAvatarGroup.vue'
 
 const NAMES = [
   'Ada Lovelace',

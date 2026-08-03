@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import Textarea from './Textarea.vue'
+import Textarea from './VTextarea.vue'
 
 describe('Textarea', () => {
   it('synchronise v-model (update:modelValue)', async () => {

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
-import Tooltip from '../Tooltip/Tooltip.vue'
-import Avatar from './Avatar.vue'
+import Tooltip from '../VTooltip/VTooltip.vue'
+import Avatar from './VAvatar.vue'
 
 const PORTRAIT =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="%236366f1"/><circle cx="20" cy="15" r="7" fill="white"/><ellipse cx="20" cy="34" rx="12" ry="9" fill="white"/></svg>'

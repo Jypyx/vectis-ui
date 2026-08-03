@@ -2,7 +2,7 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { nextTick } from 'vue'
 
-import Checkbox from './Checkbox.vue'
+import Checkbox from './VCheckbox.vue'
 
 describe('Checkbox', () => {
   it('synchronise v-model au clic', async () => {

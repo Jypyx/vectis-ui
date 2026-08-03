@@ -2,10 +2,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick } from 'vue'
 
-import Menu from './Menu.vue'
-import MenuGroup from './MenuGroup.vue'
-import MenuItem from './MenuItem.vue'
-import MenuSeparator from './MenuSeparator.vue'
+import Menu from './VMenu.vue'
+import MenuGroup from './VMenuGroup.vue'
+import MenuItem from './VMenuItem.vue'
+import MenuSeparator from './VMenuSeparator.vue'
 import { SUBMENU_HOVER_DELAY } from './context'
 
 function renderHarness(template: string, onSelect = vi.fn()) {

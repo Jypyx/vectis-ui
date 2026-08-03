@@ -1,6 +1,6 @@
 import type { InjectionKey } from 'vue'
 
-import type { AvatarSize } from './Avatar.vue'
+import type { AvatarSize } from './VAvatar.vue'
 
 /**
  * Contrat AvatarGroup → Avatar : le groupe propage taille/compact pour éviter

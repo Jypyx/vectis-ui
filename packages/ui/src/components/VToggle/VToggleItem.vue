@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, inject, useSlots } from 'vue'
 
-import Button from '../Button/Button.vue'
-import Icon from '../Icon/Icon.vue'
-import { iconProps } from '../Icon/iconProps'
-import type { IconSource } from '../Icon/types'
+import Button from '../VButton/VButton.vue'
+import Icon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
 import { toggleKey } from './context'
-import type { ToggleValue } from './Toggle.vue'
+import type { ToggleValue } from './VToggle.vue'
 
 /**
  * Un item de Toggle. C'est un `Button` : tone, variante, taille, focus et

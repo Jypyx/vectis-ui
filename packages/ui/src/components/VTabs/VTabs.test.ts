@@ -2,9 +2,9 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
-import Tab from './Tab.vue'
-import TabPanel from './TabPanel.vue'
-import Tabs from './Tabs.vue'
+import Tab from './VTab.vue'
+import TabPanel from './VTabPanel.vue'
+import Tabs from './VTabs.vue'
 
 /**
  * Harnais : le v-model doit être vivant (sans ref locale, cliquer un onglet ne

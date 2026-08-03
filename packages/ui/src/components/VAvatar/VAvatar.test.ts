@@ -2,8 +2,8 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { h } from 'vue'
 
-import Avatar from './Avatar.vue'
-import AvatarGroup from './AvatarGroup.vue'
+import Avatar from './VAvatar.vue'
+import AvatarGroup from './VAvatarGroup.vue'
 
 describe('Avatar', () => {
   it('affiche les initiales des deux premiers mots du nom', () => {

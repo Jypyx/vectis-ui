@@ -2,7 +2,7 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, ref } from 'vue'
 
-import Radio from './Radio.vue'
+import Radio from './VRadio.vue'
 
 describe('Radio', () => {
   it('coché quand le modèle correspond à value, émet la sélection sinon', async () => {

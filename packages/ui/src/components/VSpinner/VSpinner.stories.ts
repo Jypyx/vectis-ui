@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 
-import Spinner from './Spinner.vue'
+import Spinner from './VSpinner.vue'
 
 const meta = {
   title: 'Composants/Spinner',
