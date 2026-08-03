@@ -5,21 +5,21 @@ import * as VMenuStories from './VMenu.stories'
 
 # Menu
 
-VMenu déroulant d'actions (pattern ARIA menu) construit sur la **Popover API** et le **CSS Anchor
-Positioning** : le déclencheur invoque le panneau par `popovertarget` (ancre implicite,
-light dismiss natif, top-layer sans z-index), aucune dépendance externe. Le JavaScript se
-limite au roving focus, à la navigation clavier et à l'orchestration des sous-menus.
+A dropdown action menu (the ARIA menu pattern) built on the **Popover API** and **CSS Anchor
+Positioning**: the trigger invokes the panel through `popovertarget` (implicit anchor, native
+light dismiss, top layer with no z-index), with no external dependency. The JavaScript is
+limited to the roving focus, the keyboard navigation and the submenu orchestration.
 
-Le déclencheur est fourni par un slot scopé — poser `triggerProps` tel quel :
+The trigger is supplied by a scoped slot — set `triggerProps` as they come:
 
 ```vue
 <VMenu>
   <template #trigger="{ triggerProps }">
     <VButton v-bind="triggerProps">Actions</VButton>
   </template>
-  <VMenuItem label="Renommer" icon-start="edit" @select="rename" />
+  <VMenuItem label="Rename" icon-start="edit" @select="rename" />
   <VMenuSeparator />
-  <VMenuItem label="Supprimer" icon-start="delete" danger @select="remove" />
+  <VMenuItem label="Delete" icon-start="delete" danger @select="remove" />
 </VMenu>
 ```
 
@@ -29,118 +29,112 @@ Le déclencheur est fourni par un slot scopé — poser `triggerProps` tel quel 
 
 ## Items
 
-`VMenuItem` : `label` + `sublabel` (description secondaire), `icon-start` / `icon-end`
-(nom d'icône ou rendu explicite `{ src }` / `{ component }`),
-et les slots `#default` / `#sublabel` / `#start` / `#end` qui priment. La sélection d'un
-item émet `select` et **ferme le menu** (focus rendu au déclencheur).
+`VMenuItem`: `label` + `sublabel` (a secondary description), `icon-start` / `icon-end` (an icon
+name or an explicit render `{ src }` / `{ component }`), and the `#default` / `#sublabel` /
+`#start` / `#end` slots, which win. Selecting an item emits `select` and **closes the menu**
+(focus handed back to the trigger).
 
-> Les icônes rendues par le DS lui-même sont des SVG embarqués : aucune police n'est requise.
-> Vos propres noms d'icônes, eux, viennent de la police ou de la bibliothèque que vous
-> branchez (voir le README).
+> The icons the design system renders itself are embedded SVGs: no font is required. Your own
+> icon names, on the other hand, come from the font or the library you wire in (see the README).
 
-<Canvas of={VMenuStories.SousLabels} />
+<Canvas of={VMenuStories.Sublabels} />
 
-`selected` marque l'item courant (`aria-current="true"`, fond accent) — pour les menus de
-tri ou de choix persistant :
+`selected` marks the current item (`aria-current="true"`, accent background) — for sorting menus
+or persistent choices:
 
 <Canvas of={VMenuStories.Selection} />
 
-## Groupes et séparateurs
+## Groups and separators
 
-`VMenuGroup` (`role="group"` nommé par `aria-labelledby`, libellé non focusable) structure
-les longues listes ; `VMenuSeparator` rend un `<hr>` (rôle implicite). Le roving focus
-traverse les groupes, les libellés sont sautés.
+`VMenuGroup` (`role="group"` named through `aria-labelledby`, the label not focusable) structures
+long lists; `VMenuSeparator` renders an `<hr>` (implicit role). The roving focus crosses the
+groups, and the labels are skipped.
 
-L'en-tête de section occupe la hauteur d'une rangée, texte centré verticalement : le rythme
-vertical de la liste reste le même de bout en bout, quelle que soit la taille du menu et en
-densité compacte.
+A section header occupies the height of a row, its text vertically centred: the list's vertical
+rhythm stays the same from end to end, whatever the menu size and in compact density too.
 
-<Canvas of={VMenuStories.Groupes} />
+<Canvas of={VMenuStories.Groups} />
 
-## Items de navigation
+## Navigation items
 
-`href` rend l'item en `<a role="menuitem">` — vrai lien (ouvrable dans un nouvel onglet,
-attributs `target`/`rel` en fallthrough). Un lien `disabled` devient inerte (`href` retiré,
-`aria-disabled="true"`) et le roving focus le saute.
+`href` renders the item as an `<a role="menuitem">` — a real link (openable in a new tab,
+`target`/`rel` attributes through fallthrough). A `disabled` link becomes inert (`href` removed,
+`aria-disabled="true"`) and the roving focus skips it.
 
-<Canvas of={VMenuStories.ItemsDeNavigation} />
+<Canvas of={VMenuStories.NavigationItems} />
 
-## Sous-menus
+## Submenus
 
-Le slot `#submenu` d'un `VMenuItem` rend un panneau imbriqué **récursif** : l'item devient
-l'invocateur du sous-panneau (un chevron remplace `icon-end` ; `href` et `select` sont
-ignorés). La pile de popovers native gère le light dismiss et la fermeture en cascade —
-ouvrir une branche ferme la branche sœur.
+A `VMenuItem`'s `#submenu` slot renders a **recursive** nested panel: the item becomes the
+invoker of the subpanel (a chevron replaces `icon-end`; `href` and `select` are ignored). The
+native popover stack handles the light dismiss and the cascading close — opening a branch closes
+its sibling.
 
-Ouverture : clic, Flèche droite / Entrée / Espace (avec focus du premier sous-item), ou
-survol après un **délai d'intention** de 150 ms. Flèche gauche et Échap referment **un
-niveau** à la fois (focus rendu à l'item parent) ; sur le panneau racine, Échap ferme le
-menu.
+Opening: click, ArrowRight / Enter / Space (focusing the first subitem), or hover after a
+**150 ms intent delay**. ArrowLeft and Escape each close **one level** at a time (focus handed
+back to the parent item); on the root panel, Escape closes the menu.
 
-<Canvas of={VMenuStories.SousMenus} />
+<Canvas of={VMenuStories.Submenus} />
 
-Au survol, l'item survolé prend le focus (hover et roving focus restent synchronisés :
-une seule surbrillance à la fois) ; l'item parent d'un sous-menu ouvert garde son fond via
-`aria-expanded` :
+On hover, the hovered item takes the focus (hover and roving focus stay synchronized: a single
+highlight at a time); the parent item of an open submenu keeps its background through
+`aria-expanded`:
 
-<Canvas of={VMenuStories.SousMenusSurvol} />
+<Canvas of={VMenuStories.SubmenusOnHover} />
 
-## Tailles
+## Sizes
 
-Trois tailles de panneau (`sm` — défaut — items 32px min, `md` 40px min, `lg` 48px min) ;
-`compact` retire 4px. Les items ne sont pas dimensionnés à part : le panneau porte la classe
-partagée `v-control` et les items consomment la table commune du design system — hauteur,
-retrait, écart icône/libellé, typographie et icônes. `sm` et `md` partagent la typographie
-(14px), les icônes (20px) et l'écart (8px) ; `lg` passe à 16px, 24px et 12px — un menu ouvert
-depuis un bouton `lg` est ainsi à son échelle. La taille est posée sur le panneau **racine**
-et héritée par tous les sous-menus.
+Three panel sizes (`sm` — the default — items 32px min, `md` 40px min, `lg` 48px min); `compact`
+removes 4px. The items are not sized separately: the panel carries the shared `v-control` class
+and the items consume the design system's common table — height, indent, icon/label gap,
+typography and icons. `sm` and `md` share their typography (14px), icons (20px) and gap (8px);
+`lg` moves to 16px, 24px and 12px — so a menu opened from an `lg` button is at its scale. The
+size is set on the **root** panel and inherited by every submenu.
 
-<Canvas of={VMenuStories.Tailles} />
+<Canvas of={VMenuStories.Sizes} />
 
-## Largeur
+## Width
 
-Par défaut, le panneau adopte la largeur de son contenu, bornée par des tokens (minimale et
-maximale — le plafond reste toujours inférieur au viewport). La prop `width` la fixe
-explicitement : toute longueur ou mot-clé CSS (`16rem`, `max-content` pour épouser l'item le
-plus large). Elle ne s'applique qu'au panneau **racine** : les sous-menus gardent la largeur
-par défaut. Une largeur plus étroite que le contenu tronque les libellés.
+By default the panel takes the width of its content, bounded by tokens (a minimum and a maximum —
+the ceiling always stays below the viewport). The `width` prop sets it explicitly: any CSS length
+or keyword (`16rem`, `max-content` to match the widest item). It applies to the **root** panel
+only: submenus keep the default width. A width narrower than the content truncates the labels.
 
-`matchTrigger` prend le problème par l'autre bout : il remplace la largeur minimale par celle
-du **déclencheur**, si bien que le panneau ne peut jamais paraître rétréci sous le bouton qui
-l'ouvre, tout en restant libre de s'élargir pour son contenu (c'est le réglage du menu
-« lignes par page » du VDataTable). Les deux props se cumulent — le plancher du déclencheur
-l'emporte alors sur `width`. Un déclencheur plus large que la largeur maximale déborde
-volontairement ce plafond : la demande d'alignement prime. Le plancher est mesuré en CSS sur
-l'ancre du panneau, sans une ligne de JavaScript ; comme le reste de l'ancrage, il suppose un
-navigateur qui implémente le positionnement par ancre.
+`matchTrigger` takes the problem from the other end: it replaces the minimum width with the
+**trigger's**, so the panel can never look shrunken under the button that opens it, while staying
+free to widen for its content (this is the setting of VDataTable's "rows per page" menu). The two
+props combine — the trigger floor then wins over `width`. A trigger wider than the maximum width
+deliberately overflows that ceiling: the alignment request takes precedence. The floor is measured
+in CSS on the panel's anchor, without a line of JavaScript; like the rest of the anchoring, it
+assumes a browser that implements anchor positioning.
 
-<Canvas of={VMenuStories.Largeur} />
+<Canvas of={VMenuStories.Width} />
 
 ## Placement
 
-`placement` (`bottom-start` par défaut, `bottom`, `bottom-end`, `top-start`, `top`,
-`top-end`) s'appuie sur `position-area` avec retournement automatique
-(`position-try-fallbacks`) quand la place manque. Les sous-menus s'ouvrent en
-`right-start`. Les libellés sont bornés par la largeur maximale du panneau :
+`placement` (`bottom-start` by default, `bottom`, `bottom-end`, `top-start`, `top`, `top-end`)
+rests on `position-area` with automatic flipping (`position-try-fallbacks`) when room runs out.
+Submenus open in `right-start`. Labels are bounded by the panel's maximum width:
 
-<Canvas of={VMenuStories.LibellesLongs} />
+<Canvas of={VMenuStories.LongLabels} />
 
-## Accessibilité
+## Accessibility
 
-- Rôles ARIA : `role="menu"` sur le panneau, `role="menuitem"` par item (bouton ou lien),
-  `aria-haspopup`/`aria-expanded` sur le déclencheur et les items à sous-menu.
-- **Roving focus** : un seul item tabbable à la fois ; Flèches haut/bas avec bouclage, les
-  items désactivés sont sautés.
-- Clavier : Entrée/Espace sélectionne, Échap et Flèche gauche remontent d'un niveau, Tab
-  ferme tout le menu. La fermeture rend le focus au déclencheur.
-- Light dismiss natif (clic hors du menu, perte de focus) via la Popover API.
-- Jamais de focus automatique au survol d'un item à sous-menu : l'ouverture au survol
-  n'arrache pas le focus clavier.
-- Les animations d'ouverture respectent `prefers-reduced-motion`.
+- ARIA roles: `role="menu"` on the panel, `role="menuitem"` per item (button or link),
+  `aria-haspopup`/`aria-expanded` on the trigger and on the items carrying a submenu.
+- **Roving focus**: a single tabbable item at a time; Up/Down arrows with wrap-around, disabled
+  items skipped.
+- Keyboard: Enter/Space selects, Escape and ArrowLeft go up one level, Tab closes the whole menu.
+  Closing hands the focus back to the trigger.
+- Native light dismiss (a click outside the menu, a loss of focus) through the Popover API.
+- Hover moves the focus to the hovered item, so there is never more than one highlight; closing a
+  submenu on pointerleave is refused while the focus is inside it, so a stray pointer cannot cut
+  off a keyboard user.
+- The opening animations respect `prefers-reduced-motion`.
 
-## Support navigateur
+## Browser support
 
-Popover API + CSS Anchor Positioning **sans fallback** (décision du projet) : Chrome/Edge
-125+, Safari 26+ — Firefox non supporté tant que l'anchor positioning n'y est pas stable.
-Les ouvertures programmatiques de sous-menus (clavier, survol) utilisent
-`showPopover({ source })`, qui relève le plancher effectif à Chrome/Edge 129+.
+Popover API + CSS Anchor Positioning **with no fallback** (a project decision): Chrome/Edge 125+,
+Safari 26+ — Firefox unsupported until anchor positioning is stable there. Programmatic submenu
+openings (keyboard, hover) use `showPopover({ source })`, which raises the effective floor to
+Chrome/Edge 129+.

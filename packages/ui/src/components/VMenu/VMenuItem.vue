@@ -10,42 +10,40 @@ import { menuKey, SUBMENU_HOVER_DELAY } from './context'
 import { useTimer } from '../../composables/useTimer'
 
 /**
- * Item de menu (role="menuitem") : le focus est piloté par le panneau (roving
- * focus), la sélection ferme toute la pile via le contexte injecté. Avec
- * `href`, l'item est un <a> ; un <a> n'ayant pas de `disabled` natif, il passe
- * par le pont « lien inerte » (href retiré + aria-disabled).
+ * Menu item (role="menuitem"): the focus is driven by the panel (roving focus),
+ * and selecting closes the whole stack through the injected context. With `href`,
+ * the item is an <a>; since an <a> has no native `disabled`, it goes through the
+ * "inert link" bridge (href removed + aria-disabled).
  *
- * Avec le slot #submenu, l'item devient l'invocateur `popovertarget` d'un
- * panneau imbriqué (= son ancre implicite ; le panneau est un descendant DOM
- * du panneau parent → pile native de popovers : light dismiss total, ouvrir
- * une branche sœur ferme l'autre, fermeture en cascade). JS justifié :
- * ouverture clavier et survol avec délai d'intention — le clic passe par le
- * toggle natif.
+ * With the #submenu slot, the item becomes the `popovertarget` invoker of a nested
+ * panel (= its implicit anchor; the panel is a DOM descendant of the parent panel →
+ * a native popover stack: full light dismiss, opening a sibling branch closes the
+ * other, cascading close). JS justified: keyboard opening and hover with an intent
+ * delay — the click goes through the native toggle.
  */
 interface MenuItemProps {
-  /** Libellé de l'item (le slot #default prime). */
+  /** Label of the item (the #default slot wins). */
   label?: string
-  /** Sous-libellé sous le label (le slot #sublabel prime). */
+  /** Sublabel under the label (the #sublabel slot wins). */
   sublabel?: string
   /**
-   * Icône avant le libellé : nom Material Symbols Rounded, ou URL
-   * d'icône, ou rendu explicite (`{ src }`, `{ component }`…). Le slot #start
-   * prime.
+   * Icon before the label: a Material Symbols Rounded name, an icon URL, or an
+   * explicit render (`{ src }`, `{ component }`…). The #start slot wins.
    */
   iconStart?: IconSource
-  /** Icône après le libellé (mêmes formes). Le slot #end prime. */
+  /** Icon after the label (same forms). The #end slot wins. */
   iconEnd?: IconSource
-  /** État sélectionné (accent + aria-current). */
+  /** Selected state (accent + aria-current). */
   selected?: boolean
-  /** Item destructif (couleur danger). */
+  /** Destructive item (danger colour). */
   danger?: boolean
   disabled?: boolean
-  /** Rendu <a role="menuitem"> (item de navigation). disabled → lien inerte. */
+  /** Rendered as <a role="menuitem"> (a navigation item). disabled → an inert link. */
   href?: string
 }
 
-// Racine multi-nœuds quand #submenu est présent (item + panneau imbriqué) :
-// les attrs (name, aria-*, class…) vont explicitement sur l'item.
+// Multi-node root when #submenu is present (the item + the nested panel): the
+// attrs (name, aria-*, class…) go explicitly on the item.
 defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<MenuItemProps>(), {
@@ -60,20 +58,20 @@ const props = withDefaults(defineProps<MenuItemProps>(), {
 })
 
 const emit = defineEmits<{
-  /** Émis à l'activation (clic ou Entrée/Espace), avant fermeture du menu. */
+  /** Emitted on activation (click or Enter/Space), before the menu closes. */
   select: []
 }>()
 
 defineSlots<{
-  /** Libellé de l'item (prime sur la prop `label`). */
+  /** Label of the item (wins over the `label` prop). */
   default?(): unknown
-  /** Sous-libellé (prime sur la prop `sublabel`). */
+  /** Sublabel (wins over the `sublabel` prop). */
   sublabel?(): unknown
-  /** Contenu libre avant le libellé (prime sur `iconStart`). */
+  /** Free content before the label (wins over `iconStart`). */
   start?(): unknown
-  /** Contenu libre après le libellé (prime sur `iconEnd`). */
+  /** Free content after the label (wins over `iconEnd`). */
   end?(): unknown
-  /** Contenu du sous-menu (VMenuItem/VMenuGroup/VMenuSeparator, récursif). */
+  /** Content of the submenu (VMenuItem/VMenuGroup/VMenuSeparator, recursive). */
   submenu?(): unknown
 }>()
 
@@ -94,31 +92,32 @@ function onClick() {
 const subId = useId()
 const subOpen = ref(false)
 const subPanel = ref<InstanceType<typeof VMenuPanel> | null>(null)
-// Ouvertures programmatiques : l'item est passé en `source` à showPopover(),
-// sinon le sous-panneau n'a pas d'ancre implicite (posée nativement au clic
-// seulement) et perd son positionnement.
+// Programmatic openings: the item is passed as `source` to showPopover(), or the
+// subpanel has no implicit anchor (set natively on click only) and loses its
+// positioning.
 const itemEl = ref<HTMLElement | null>(null)
 
-// Ouverture clavier : le toggle natif ne couvre que le clic.
+// Keyboard opening: the native toggle only covers the click.
 function onKeydown(event: KeyboardEvent) {
   if (!hasSubmenu.value || props.disabled) return
   if (!['ArrowRight', 'Enter', ' '].includes(event.key)) return
-  // bloque l'activation native du bouton (clic synthétique → toggle) : on
+  // Blocks the button's native activation (a synthetic click would toggle the
+  // panel back shut behind the show() below).
   event.preventDefault()
   subPanel.value?.show(itemEl.value ?? undefined)
   subPanel.value?.focusFirst()
 }
 
-// Survol avec délai d'intention (cf. useTimer). Une seule instance : ouverture
-// et fermeture s'excluent — armer l'une annule toujours l'autre.
-// La fermeture est refusée si le focus est dans le sous-panneau : un pointeur
-// qui traîne ne doit pas couper un utilisateur clavier.
+// Hover with an intent delay (see useTimer). A single instance: opening and
+// closing are mutually exclusive — arming one always cancels the other. Closing is
+// refused while the focus is inside the subpanel: a stray pointer must not cut off
+// a keyboard user.
 const hoverTimer = useTimer()
 
 function onPointerEnter() {
   if (props.disabled) return
-  // le survol pilote aussi le focus : hover et roving focus restent
-  // synchronisés, une seule surbrillance à la fois (pattern menu)
+  // Hovering also drives the focus: hover and roving focus stay synchronized, a
+  // single highlight at a time (the menu pattern)
   itemEl.value?.focus({ preventScroll: true })
   if (!hasSubmenu.value) return
   hoverTimer.start(() => subPanel.value?.show(itemEl.value ?? undefined), SUBMENU_HOVER_DELAY)
@@ -168,7 +167,7 @@ function onPointerLeave() {
         <slot name="sublabel">{{ sublabel }}</slot>
       </span>
     </span>
-    <!-- un item à sous-menu signale l'ouverture latérale : chevron, jamais iconEnd -->
+    <!-- An item with a submenu signals its sideways opening: a chevron, never iconEnd -->
     <VIcon v-if="hasSubmenu" name="chevron_right" class="v-menu-item-chevron" />
     <slot v-else name="end">
       <VIcon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
@@ -192,15 +191,15 @@ function onPointerLeave() {
 @layer vectis.components {
   .v-menu-item {
     /*
-     * Taille : variables `--control-*` héritées du panneau racine, qui porte
-     * `v-control` (styles/control-size.css) — une seule table pour tout le
-     * DS. Les icônes suivent sans rien écrire : `--vectis-icon-size`/`-opsz` font
-     * partie du même bloc et héritent aussi.
+     * Size: the `--control-*` variables inherited from the root panel, which carries
+     * `v-control` (styles/control-size.css) — a single table for the whole DS. The
+     * icons follow without a line written: `--vectis-icon-size`/`-opsz` are part of
+     * the same block and inherit too.
      *
-     * Seule la typo est composite : la TAILLE vient de l'échelle, le leading
-     * reste celui de `body-md` (ratio unitless, donc il suit) et le poids
-     * reste regular. Pas la recette `control` complète : elle vaut medium/1,
-     * or une rangée peut passer à la ligne et porter un sous-libellé.
+     * Only the typography is composite: the SIZE comes from the scale, the leading
+     * stays that of `body-md` (a unitless ratio, so it follows) and the weight stays
+     * regular. Not the full `control` recipe: that means medium/1, and a row may wrap
+     * and carry a sublabel.
      */
     display: flex;
     align-items: center;
@@ -240,14 +239,14 @@ function onPointerLeave() {
     transform: scaleX(-1);
   }
 
-  /* Le focus EST la surbrillance (roving focus programmatique → :focus, pas :focus-visible) */
+  /* The focus IS the highlight (programmatic roving focus → :focus, not :focus-visible) */
   .v-menu-item:hover:not(:disabled, [aria-disabled='true']),
   .v-menu-item:focus {
     background: var(--vectis-color-surface-muted);
     outline: none;
   }
 
-  /* sous-menu ouvert : la surbrillance persiste sur l'item parent */
+  /* Open submenu: the highlight persists on the parent item */
   .v-menu-item[aria-expanded='true'] {
     background: var(--vectis-color-surface-muted);
   }
@@ -264,7 +263,7 @@ function onPointerLeave() {
   .v-menu-item[data-selected]:hover:not(:disabled, [aria-disabled='true']),
   .v-menu-item[data-selected]:focus,
   .v-menu-item[data-selected][aria-expanded='true'] {
-    /* assombrit légèrement la surface accent */
+    /* Slightly darkens the accent surface */
     background: color-mix(
       in oklab,
       var(--vectis-color-accent-surface),
@@ -286,7 +285,7 @@ function onPointerLeave() {
     background: var(--vectis-color-danger-surface);
   }
 
-  /* :disabled ne s'applique qu'au <button> ; le lien inerte passe par aria-disabled */
+  /* :disabled only applies to <button>; the inert link goes through aria-disabled */
   .v-menu-item:disabled,
   .v-menu-item[aria-disabled='true'] {
     background: transparent;

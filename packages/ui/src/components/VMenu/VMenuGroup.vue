@@ -2,18 +2,18 @@
 import { useId } from 'vue'
 
 /**
- * Groupe d'items nommé (role="group" + aria-labelledby, pattern ARIA menu).
- * Le libellé n'est pas sélectionnable : simple texte hors roving focus.
+ * A named group of items (role="group" + aria-labelledby, the ARIA menu pattern).
+ * The label is not selectable: plain text, outside the roving focus.
  */
 interface MenuGroupProps {
-  /** Nom du groupe (non sélectionnable). */
+  /** Name of the group (not selectable). */
   label: string
 }
 
 defineProps<MenuGroupProps>()
 
 defineSlots<{
-  /** Les VMenuItem du groupe. */
+  /** The group's VMenuItem elements. */
   default(): unknown
 }>()
 
@@ -35,12 +35,12 @@ const labelId = useId()
     gap: var(--vectis-space-1);
   }
 
-  /* Micro-label de section : rôle overline (sans capitales forcées — la casse
-     du libellé appartient au consommateur). Retrait ET hauteur décalquent la
-     recette des items (`--control-padding-inline` et `--control-height`
-     héritées du panneau) : l'en-tête tient la même hauteur qu'une rangée,
-     compact compris, et le rythme vertical de la liste ne casse pas. Seule la
-     typo ne suit pas l'échelle (rôle overline), d'où le centrage vertical. */
+  /* Section micro-label: the overline role (no forced capitals — the label's case
+     belongs to the consumer). Indent AND height trace the items' recipe
+     (`--control-padding-inline` and `--control-height`, inherited from the panel):
+     the header holds the same height as a row, compact included, so the list's
+     vertical rhythm does not break. Only the typography stays outside the scale
+     (the overline role), hence the vertical centring. */
   .v-menu-group-label {
     display: flex;
     align-items: center;

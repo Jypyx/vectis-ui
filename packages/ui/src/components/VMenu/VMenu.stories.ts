@@ -1,14 +1,90 @@
 ﻿import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
+import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
 import VMenu from './VMenu.vue'
 import VMenuGroup from './VMenuGroup.vue'
 import VMenuItem from './VMenuItem.vue'
 import VMenuSeparator from './VMenuSeparator.vue'
 
+const t = storyText({
+  en: {
+    actions: 'Actions',
+    rename: 'Rename',
+    duplicate: 'Duplicate',
+    archiveUnavailable: 'Archive (unavailable)',
+    delete: 'Delete',
+    export: 'Export',
+    pdfSublabel: 'Faithful layout, not editable',
+    csvSublabel: 'Raw data, comma separated',
+    pngSublabel: 'Image of the current view',
+    sortBy: 'Sort by',
+    name: 'Name',
+    modifiedDate: 'Date modified',
+    size: 'Size',
+    document: 'Document',
+    file: 'File',
+    sharing: 'Sharing',
+    invite: 'Invite',
+    copyLink: 'Copy link',
+    sortAlphabetically: 'Sort alphabetically',
+    menu: 'Menu',
+    first: 'First',
+    second: 'Second',
+    goTo: 'Go to',
+    profile: 'Profile',
+    billing: 'Billing',
+    archivesUnavailable: 'Archives (unavailable)',
+    new: 'New',
+    faithfulLayout: 'Faithful layout',
+    image: 'Image',
+    share: 'Share',
+    options: 'Options',
+    exportSelectionCsv: 'Export the selection as CSV with the headers',
+    longLabel: 'An abnormally long label that must be bounded by the menu maximum width',
+    longSublabel: 'An equally verbose sublabel that wraps over several lines without overflowing',
+  },
+  fr: {
+    actions: 'Actions',
+    rename: 'Renommer',
+    duplicate: 'Dupliquer',
+    archiveUnavailable: 'Archiver (indisponible)',
+    delete: 'Supprimer',
+    export: 'Exporter',
+    pdfSublabel: 'Mise en page fidèle, non éditable',
+    csvSublabel: 'Données brutes, séparateur virgule',
+    pngSublabel: 'Image de la vue courante',
+    sortBy: 'Trier par',
+    name: 'Nom',
+    modifiedDate: 'Date de modification',
+    size: 'Taille',
+    document: 'Document',
+    file: 'Fichier',
+    sharing: 'Partage',
+    invite: 'Inviter',
+    copyLink: 'Copier le lien',
+    sortAlphabetically: 'Trier par ordre alphabétique',
+    menu: 'Menu',
+    first: 'Premier',
+    second: 'Second',
+    goTo: 'Aller à',
+    profile: 'Profil',
+    billing: 'Facturation',
+    archivesUnavailable: 'Archives (indisponible)',
+    new: 'Nouveau',
+    faithfulLayout: 'Mise en page fidèle',
+    image: 'Image',
+    share: 'Partager',
+    options: 'Options',
+    exportSelectionCsv: 'Exporter la sélection au format CSV avec les en-têtes',
+    longLabel: 'Un libellé anormalement long qui doit être borné par la largeur maximale du menu',
+    longSublabel: 'Un sous-libellé tout aussi verbeux qui passe sur plusieurs lignes sans déborder',
+  },
+})
+
 const meta = {
-  title: 'Composants/Menu',
+  title: 'Components/Menu',
   component: VMenu,
   argTypes: {
     placement: {
@@ -27,17 +103,17 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: (args) => ({
     components: { VMenu, VMenuItem, VMenuSeparator, VButton },
-    setup: () => ({ args, onSelect: fn() }),
+    setup: () => ({ args, t, onSelect: fn() }),
     template: `
       <VMenu v-bind="args">
         <template #trigger="{ triggerProps }">
-          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Actions</VButton>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.actions }}</VButton>
         </template>
-        <VMenuItem label="Renommer" icon-start="edit" @select="onSelect" />
-        <VMenuItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
-        <VMenuItem label="Archiver (indisponible)" icon-start="archive" disabled />
+        <VMenuItem :label="t.rename" icon-start="edit" @select="onSelect" />
+        <VMenuItem :label="t.duplicate" icon-start="content_copy" @select="onSelect" />
+        <VMenuItem :label="t.archiveUnavailable" icon-start="archive" disabled />
         <VMenuSeparator />
-        <VMenuItem label="Supprimer" icon-start="delete" danger @select="onSelect" />
+        <VMenuItem :label="t.delete" icon-start="delete" danger @select="onSelect" />
       </VMenu>
     `,
   }),
@@ -46,41 +122,42 @@ export const Default: Story = {
     const menu = canvasElement.querySelector('[role="menu"]') as HTMLElement
     const trigger = canvas.getByRole('button', { name: 'Actions' })
 
-    // fermé, le panneau est hors layout (display none) : il ne doit jamais
-    // intercepter les clics du contenu qu'il recouvrirait (garde-fou floating.css)
+    // when closed, the panel is out of the layout (display none): it must never
+    // intercept clicks on the content it would cover (the floating.css guard)
     await expect(getComputedStyle(menu).display).toBe('none')
 
-    // ouverture déclarative (popovertarget) + focus automatique du 1er item
+    // declarative opening (popovertarget) + automatic focus on the first item
     await userEvent.click(trigger)
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
-    await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'Renommer' })).toHaveFocus())
+    await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'Rename' })).toHaveFocus())
 
-    // roving focus : flèches avec bouclage, les items désactivés sont sautés
+    // roving focus: arrows with wrap-around, disabled items are skipped
     await userEvent.keyboard('{ArrowDown}')
-    await expect(canvas.getByRole('menuitem', { name: 'Dupliquer' })).toHaveFocus()
+    await expect(canvas.getByRole('menuitem', { name: 'Duplicate' })).toHaveFocus()
     await userEvent.keyboard('{ArrowDown}')
-    await expect(canvas.getByRole('menuitem', { name: 'Supprimer' })).toHaveFocus()
+    await expect(canvas.getByRole('menuitem', { name: 'Delete' })).toHaveFocus()
     await userEvent.keyboard('{ArrowDown}')
-    await expect(canvas.getByRole('menuitem', { name: 'Renommer' })).toHaveFocus()
+    await expect(canvas.getByRole('menuitem', { name: 'Rename' })).toHaveFocus()
 
-    // la sélection ferme le menu et rend le focus au déclencheur
+    // selecting closes the menu and hands focus back to the trigger
     await userEvent.keyboard('{Enter}')
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(false))
     await waitFor(() => expect(trigger).toHaveFocus())
   },
 }
 
-export const SousLabels: Story = {
+export const Sublabels: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VButton },
+    setup: () => ({ t }),
     template: `
       <VMenu>
         <template #trigger="{ triggerProps }">
-          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Exporter</VButton>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.export }}</VButton>
         </template>
-        <VMenuItem label="PDF" sublabel="Mise en page fidèle, non éditable" icon-start="picture_as_pdf" />
-        <VMenuItem label="CSV" sublabel="Données brutes, séparateur virgule" icon-start="csv" />
-        <VMenuItem label="PNG" sublabel="Image de la vue courante" icon-start="image" />
+        <VMenuItem label="PDF" :sublabel="t.pdfSublabel" icon-start="picture_as_pdf" />
+        <VMenuItem label="CSV" :sublabel="t.csvSublabel" icon-start="csv" />
+        <VMenuItem label="PNG" :sublabel="t.pngSublabel" icon-start="image" />
       </VMenu>
     `,
   }),
@@ -89,14 +166,15 @@ export const SousLabels: Story = {
 export const Selection: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VButton },
+    setup: () => ({ t }),
     template: `
       <VMenu>
         <template #trigger="{ triggerProps }">
-          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Trier par</VButton>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.sortBy }}</VButton>
         </template>
-        <VMenuItem label="Nom" selected icon-end="check" />
-        <VMenuItem label="Date de modification" />
-        <VMenuItem label="Taille" />
+        <VMenuItem :label="t.name" selected icon-end="check" />
+        <VMenuItem :label="t.modifiedDate" />
+        <VMenuItem :label="t.size" />
       </VMenu>
     `,
   }),
@@ -104,34 +182,35 @@ export const Selection: Story = {
     const canvas = within(canvasElement)
     const menu = canvasElement.querySelector('[role="menu"]') as HTMLElement
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Trier par' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Sort by' }))
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
 
-    // l'item sélectionné est signalé aux technologies d'assistance
-    const selected = canvas.getByRole('menuitem', { name: 'Nom' })
+    // the selected item is signalled to assistive technologies
+    const selected = canvas.getByRole('menuitem', { name: 'Name' })
     await expect(selected).toHaveAttribute('aria-current', 'true')
   },
 }
 
-export const Groupes: Story = {
+export const Groups: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VMenuGroup, VMenuSeparator, VButton },
+    setup: () => ({ t }),
     template: `
       <VMenu>
         <template #trigger="{ triggerProps }">
-          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Document</VButton>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.document }}</VButton>
         </template>
-        <VMenuGroup label="Fichier">
-          <VMenuItem label="Renommer" icon-start="edit" />
-          <VMenuItem label="Dupliquer" icon-start="content_copy" />
+        <VMenuGroup :label="t.file">
+          <VMenuItem :label="t.rename" icon-start="edit" />
+          <VMenuItem :label="t.duplicate" icon-start="content_copy" />
         </VMenuGroup>
         <VMenuSeparator />
-        <VMenuGroup label="Partage">
-          <VMenuItem label="Inviter" icon-start="person_add" />
-          <VMenuItem label="Copier le lien" icon-start="link" />
+        <VMenuGroup :label="t.sharing">
+          <VMenuItem :label="t.invite" icon-start="person_add" />
+          <VMenuItem :label="t.copyLink" icon-start="link" />
         </VMenuGroup>
         <VMenuSeparator />
-        <VMenuItem label="Supprimer" icon-start="delete" danger />
+        <VMenuItem :label="t.delete" icon-start="delete" danger />
       </VMenu>
     `,
   }),
@@ -142,34 +221,35 @@ export const Groupes: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Document' }))
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
 
-    // groupes nommés + roving focus qui les traverse (les libellés sont sautés).
-    // waitFor : le panneau vient de s'ouvrir, la transition d'entrée part
-    // d'opacity 0 (@starting-style) et toBeVisible l'évalue.
-    await waitFor(() => expect(canvas.getByRole('group', { name: 'Fichier' })).toBeVisible())
+    // named groups + a roving focus that crosses them (the labels are skipped).
+    // waitFor: the panel has just opened, its entry transition starts from
+    // opacity 0 (@starting-style) and toBeVisible evaluates it.
+    await waitFor(() => expect(canvas.getByRole('group', { name: 'File' })).toBeVisible())
 
-    // l'en-tête de section tient la hauteur d'une rangée : le rythme vertical
-    // de la liste ne casse pas (hauteurs non mesurables en jsdom). Tolérance :
-    // le panneau porte une transition `transform`, les rects mesurés en fin
-    // d'animation diffèrent au 100 000e de pixel.
-    const libelle = menu.querySelector('.v-menu-group-label') as HTMLElement
-    await expect(libelle.getBoundingClientRect().height).toBeCloseTo(
-      canvas.getByRole('menuitem', { name: 'Renommer' }).getBoundingClientRect().height,
+    // the section header holds the height of a row: the list's vertical rhythm
+    // does not break (heights are not measurable in jsdom). Tolerance: the panel
+    // carries a `transform` transition, and the rects measured at the end of the
+    // animation differ by a hundred-thousandth of a pixel.
+    const groupLabel = menu.querySelector('.v-menu-group-label') as HTMLElement
+    await expect(groupLabel.getBoundingClientRect().height).toBeCloseTo(
+      canvas.getByRole('menuitem', { name: 'Rename' }).getBoundingClientRect().height,
       1,
     )
 
-    await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'Renommer' })).toHaveFocus())
+    await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'Rename' })).toHaveFocus())
     await userEvent.keyboard('{ArrowDown}{ArrowDown}')
-    await expect(canvas.getByRole('menuitem', { name: 'Inviter' })).toHaveFocus()
+    await expect(canvas.getByRole('menuitem', { name: 'Invite' })).toHaveFocus()
   },
 }
 
 /**
- * sm 32px (défaut) / md 40px / lg 48px — hauteur minimale des items et padding
- * inline ; `compact` retire 4px, combinable avec les trois.
+ * sm 32px (the default) / md 40px / lg 48px — minimum item height and inline
+ * padding; `compact` removes 4px, combinable with all three.
  */
-export const Tailles: Story = {
+export const Sizes: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VMenuSeparator, VButton },
+    setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 8px">
         <VMenu v-for="variant in [
@@ -183,23 +263,23 @@ export const Tailles: Story = {
           <template #trigger="{ triggerProps }">
             <VButton size="sm" variant="outline" tone="neutral" v-bind="triggerProps">{{ variant.label }}</VButton>
           </template>
-          <VMenuItem label="Renommer" icon-start="edit" />
-          <VMenuItem label="Dupliquer" icon-start="content_copy" />
+          <VMenuItem :label="t.rename" icon-start="edit" />
+          <VMenuItem :label="t.duplicate" icon-start="content_copy" />
           <VMenuSeparator />
-          <VMenuItem label="Supprimer" icon-start="delete" danger />
+          <VMenuItem :label="t.delete" icon-start="delete" danger />
         </VMenu>
       </div>
     `,
   }),
 }
 
-/** Largeur explicite du panneau racine : `max-content` (épouse l'item le plus
-    large) ou toute longueur CSS. `match-trigger` pose comme plancher la largeur
-    du déclencheur. Les sous-menus ne sont pas affectés. */
-export const Largeur: Story = {
+/** Explicit width of the root panel: `max-content` (matching the widest item) or
+    any CSS length. `match-trigger` sets the trigger's width as a floor. Submenus
+    are unaffected. */
+export const Width: Story = {
   render: (args) => ({
     components: { VMenu, VMenuItem, VButton },
-    setup: () => ({ args, onSelect: fn() }),
+    setup: () => ({ args, t, onSelect: fn() }),
     template: `
       <div style="display: flex; gap: var(--vectis-space-8)">
         <VMenu v-bind="args" width="max-content">
@@ -212,15 +292,15 @@ export const Largeur: Story = {
         </VMenu>
         <VMenu v-bind="args" width="16rem">
           <template #trigger="{ triggerProps }">
-            <VButton variant="outline" tone="neutral" v-bind="triggerProps">Actions (16rem)</VButton>
+            <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.actions }} (16rem)</VButton>
           </template>
-          <VMenuItem label="Renommer" icon-start="edit" @select="onSelect" />
-          <VMenuItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
+          <VMenuItem :label="t.rename" icon-start="edit" @select="onSelect" />
+          <VMenuItem :label="t.duplicate" icon-start="content_copy" @select="onSelect" />
         </VMenu>
         <VMenu v-bind="args" match-trigger>
           <template #trigger="{ triggerProps }">
             <VButton variant="outline" tone="neutral" v-bind="triggerProps">
-              Trier par ordre alphabétique
+              {{ t.sortAlphabetically }}
             </VButton>
           </template>
           <VMenuItem label="A → Z" selected @select="onSelect" />
@@ -231,8 +311,8 @@ export const Largeur: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const trigger = canvas.getByRole('button', { name: 'Trier par ordre alphabétique' })
-    // le panneau est celui que le déclencheur invoque (popovertarget)
+    const trigger = canvas.getByRole('button', { name: 'Sort alphabetically' })
+    // the panel is the one the trigger invokes (popovertarget)
     const panel = document.getElementById(
       trigger.getAttribute('popovertarget') ?? '',
     ) as HTMLElement
@@ -240,10 +320,10 @@ export const Largeur: Story = {
     await userEvent.click(trigger)
     await waitFor(() => expect(panel.matches(':popover-open')).toBe(true))
 
-    // Les items (« A → Z ») sont bien plus étroits que le déclencheur : sans le
-    // plancher `anchor-size(width)`, le panneau se réduirait à leur largeur.
-    // C'est aussi la seule preuve que anchor-size() résout sur l'ancre
-    // IMPLICITE du popover (invocateur popovertarget), jamais nommée ici.
+    // The items ("A → Z") are far narrower than the trigger: without the
+    // `anchor-size(width)` floor, the panel would shrink to their width. It is also
+    // the only proof that anchor-size() resolves against the popover's IMPLICIT
+    // anchor (the popovertarget invoker), never named here.
     const triggerWidth = trigger.getBoundingClientRect().width
     await waitFor(() =>
       expect(panel.getBoundingClientRect().width).toBeGreaterThanOrEqual(triggerWidth - 1),
@@ -253,16 +333,17 @@ export const Largeur: Story = {
   },
 }
 
-export const FermetureEscape: Story = {
+export const EscapeDismiss: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VButton },
+    setup: () => ({ t }),
     template: `
       <VMenu>
         <template #trigger="{ triggerProps }">
-          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Menu</VButton>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.menu }}</VButton>
         </template>
-        <VMenuItem label="Premier" />
-        <VMenuItem label="Second" />
+        <VMenuItem :label="t.first" />
+        <VMenuItem :label="t.second" />
       </VMenu>
     `,
   }),
@@ -273,24 +354,25 @@ export const FermetureEscape: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Menu' }))
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
 
-    // Échap ferme le niveau courant — ici le panneau racine, donc le menu
+    // Escape closes the current level — here the root panel, hence the menu
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(false))
     await waitFor(() => expect(canvas.getByRole('button', { name: 'Menu' })).toHaveFocus())
   },
 }
 
-export const ItemsDeNavigation: Story = {
+export const NavigationItems: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VButton },
+    setup: () => ({ t }),
     template: `
       <VMenu>
         <template #trigger="{ triggerProps }">
-          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Aller à</VButton>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.goTo }}</VButton>
         </template>
-        <VMenuItem href="#profil" label="Profil" icon-start="person" />
-        <VMenuItem href="#facturation" label="Facturation" icon-start="credit_card" />
-        <VMenuItem href="#archives" label="Archives (indisponible)" icon-start="archive" disabled />
+        <VMenuItem href="#profile" :label="t.profile" icon-start="person" />
+        <VMenuItem href="#billing" :label="t.billing" icon-start="credit_card" />
+        <VMenuItem href="#archives" :label="t.archivesUnavailable" icon-start="archive" disabled />
       </VMenu>
     `,
   }),
@@ -298,43 +380,43 @@ export const ItemsDeNavigation: Story = {
     const canvas = within(canvasElement)
     const menu = canvasElement.querySelector('[role="menu"]') as HTMLElement
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Aller à' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Go to' }))
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
 
-    // les items href sont de vrais liens ; le lien désactivé est inerte
-    const profil = canvas.getByRole('menuitem', { name: 'Profil' })
-    await expect(profil).toHaveAttribute('href', '#profil')
-    await expect(profil.tagName).toBe('A')
-    const archives = canvas.getByRole('menuitem', { name: 'Archives (indisponible)' })
+    // href items are real links; the disabled link is inert
+    const profile = canvas.getByRole('menuitem', { name: 'Profile' })
+    await expect(profile).toHaveAttribute('href', '#profile')
+    await expect(profile.tagName).toBe('A')
+    const archives = canvas.getByRole('menuitem', { name: 'Archives (unavailable)' })
     await expect(archives).not.toHaveAttribute('href')
     await expect(archives).toHaveAttribute('aria-disabled', 'true')
 
-    // le roving focus saute le lien inerte
-    await waitFor(() => expect(profil).toHaveFocus())
+    // the roving focus skips the inert link
+    await waitFor(() => expect(profile).toHaveFocus())
     await userEvent.keyboard('{ArrowDown}')
-    await expect(canvas.getByRole('menuitem', { name: 'Facturation' })).toHaveFocus()
+    await expect(canvas.getByRole('menuitem', { name: 'Billing' })).toHaveFocus()
     await userEvent.keyboard('{ArrowDown}')
-    await expect(profil).toHaveFocus()
+    await expect(profile).toHaveFocus()
 
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(false))
   },
 }
 
-export const SousMenus: Story = {
+export const Submenus: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VMenuSeparator, VButton },
-    setup: () => ({ onSelect: fn() }),
+    setup: () => ({ t, onSelect: fn() }),
     template: `
       <VMenu>
         <template #trigger="{ triggerProps }">
-          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Fichier</VButton>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.file }}</VButton>
         </template>
-        <VMenuItem label="Nouveau" icon-start="note_add" />
-        <VMenuItem label="Exporter" icon-start="download">
+        <VMenuItem :label="t.new" icon-start="note_add" />
+        <VMenuItem :label="t.export" icon-start="download">
           <template #submenu>
-            <VMenuItem label="PDF" sublabel="Mise en page fidèle" />
-            <VMenuItem label="Image">
+            <VMenuItem label="PDF" :sublabel="t.faithfulLayout" />
+            <VMenuItem :label="t.image">
               <template #submenu>
                 <VMenuItem label="PNG" @select="onSelect" />
                 <VMenuItem label="JPEG" />
@@ -342,75 +424,76 @@ export const SousMenus: Story = {
             </VMenuItem>
           </template>
         </VMenuItem>
-        <VMenuItem label="Partager" icon-start="share">
+        <VMenuItem :label="t.share" icon-start="share">
           <template #submenu>
-            <VMenuItem label="Inviter" icon-start="person_add" />
-            <VMenuItem label="Copier le lien" icon-start="link" />
+            <VMenuItem :label="t.invite" icon-start="person_add" />
+            <VMenuItem :label="t.copyLink" icon-start="link" />
           </template>
         </VMenuItem>
         <VMenuSeparator />
-        <VMenuItem label="Supprimer" icon-start="delete" danger />
+        <VMenuItem :label="t.delete" icon-start="delete" danger />
       </VMenu>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const trigger = canvas.getByRole('button', { name: 'Fichier' })
+    const trigger = canvas.getByRole('button', { name: 'File' })
     const root = canvasElement.querySelector('[role="menu"]') as HTMLElement
 
     await userEvent.click(trigger)
     await waitFor(() => expect(root.matches(':popover-open')).toBe(true))
-    await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'Nouveau' })).toHaveFocus())
+    await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'New' })).toHaveFocus())
 
-    // Flèche droite : ouvre le sous-menu et focus son premier item ; l'item
-    // parent garde sa surbrillance (aria-expanded pilote le fond)
+    // ArrowRight: opens the submenu and focuses its first item; the parent item
+    // keeps its highlight (aria-expanded drives the background)
     await userEvent.keyboard('{ArrowDown}')
-    const exporter = canvas.getByRole('menuitem', { name: 'Exporter' })
-    await expect(exporter).toHaveFocus()
+    const exportItem = canvas.getByRole('menuitem', { name: 'Export' })
+    await expect(exportItem).toHaveFocus()
     await userEvent.keyboard('{ArrowRight}')
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: /PDF/ })).toHaveFocus())
-    await expect(exporter).toHaveAttribute('aria-expanded', 'true')
+    await expect(exportItem).toHaveAttribute('aria-expanded', 'true')
 
     await userEvent.keyboard('{ArrowDown}')
     await userEvent.keyboard('{ArrowRight}')
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'PNG' })).toHaveFocus())
 
-    // Flèche gauche : remonte d'un niveau seulement
+    // ArrowLeft: goes up one level only
     await userEvent.keyboard('{ArrowLeft}')
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'Image' })).toHaveFocus())
-    await expect(exporter).toHaveAttribute('aria-expanded', 'true')
+    await expect(exportItem).toHaveAttribute('aria-expanded', 'true')
 
-    // Échap : ferme le niveau courant seulement, focus sur l'item parent
+    // Escape: closes the current level only, focus on the parent item
     await userEvent.keyboard('{Escape}')
-    await waitFor(() => expect(exporter).toHaveAttribute('aria-expanded', 'false'))
+    await waitFor(() => expect(exportItem).toHaveAttribute('aria-expanded', 'false'))
     await expect(root.matches(':popover-open')).toBe(true)
-    await waitFor(() => expect(exporter).toHaveFocus())
+    await waitFor(() => expect(exportItem).toHaveFocus())
 
-    // Échap sur le panneau racine : ferme le menu, focus au déclencheur
+    // Escape on the root panel: closes the menu, focus back on the trigger
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(root.matches(':popover-open')).toBe(false))
     await waitFor(() => expect(trigger).toHaveFocus())
   },
 }
 
-export const SousMenusSurvol: Story = {
+export const SubmenusOnHover: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VButton },
+    setup: () => ({ t }),
     template: `
       <VMenu>
         <template #trigger="{ triggerProps }">
-          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Fichier</VButton>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.file }}</VButton>
         </template>
-        <VMenuItem label="Nouveau" icon-start="note_add" />
-        <VMenuItem label="Exporter" icon-start="download">
+        <VMenuItem :label="t.new" icon-start="note_add" />
+        <VMenuItem :label="t.export" icon-start="download">
           <template #submenu>
             <VMenuItem label="PDF" />
             <VMenuItem label="CSV" />
           </template>
         </VMenuItem>
-        <VMenuItem label="Partager" icon-start="share">
+        <VMenuItem :label="t.share" icon-start="share">
           <template #submenu>
-            <VMenuItem label="Inviter" />
+            <VMenuItem :label="t.invite" />
           </template>
         </VMenuItem>
       </VMenu>
@@ -418,50 +501,48 @@ export const SousMenusSurvol: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('button', { name: 'Fichier' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'File' }))
     const root = canvasElement.querySelector('[role="menu"]') as HTMLElement
     await waitFor(() => expect(root.matches(':popover-open')).toBe(true))
 
-    // survol : l'item survolé prend le focus (une seule surbrillance),
-    // puis le sous-menu s'ouvre après le délai d'intention
-    const exporter = canvas.getByRole('menuitem', { name: 'Exporter' })
-    await userEvent.hover(exporter)
-    await expect(exporter).toHaveFocus()
-    await waitFor(() => expect(exporter).toHaveAttribute('aria-expanded', 'true'))
-    // waitFor : transition d'entrée du sous-panneau (opacity 0 au premier instant)
+    // hover: the hovered item takes the focus (a single highlight), then the
+    // submenu opens after the intent delay
+    const exportItem = canvas.getByRole('menuitem', { name: 'Export' })
+    await userEvent.hover(exportItem)
+    await expect(exportItem).toHaveFocus()
+    await waitFor(() => expect(exportItem).toHaveAttribute('aria-expanded', 'true'))
+    // waitFor: the subpanel's entry transition (opacity 0 at the first instant)
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'PDF' })).toBeVisible())
 
-    // bascule de branche : survoler un autre item à sous-menu ferme la première.
-    // unhover explicite : l'API directe de userEvent ne trace pas le pointeur
-    // entre deux hover(), le pointerleave du précédent ne serait jamais émis
-    // (un vrai pointeur le fait en quittant l'item).
-    const partager = canvas.getByRole('menuitem', { name: 'Partager' })
-    await userEvent.unhover(exporter)
-    await userEvent.hover(partager)
-    await waitFor(() => expect(partager).toHaveAttribute('aria-expanded', 'true'))
-    await waitFor(() => expect(exporter).toHaveAttribute('aria-expanded', 'false'))
+    // switching branch: hovering another item with a submenu closes the first.
+    // explicit unhover: userEvent's direct API does not track the pointer between
+    // two hover() calls, so the previous item's pointerleave would never be
+    // emitted (a real pointer emits it when leaving the item).
+    const shareItem = canvas.getByRole('menuitem', { name: 'Share' })
+    await userEvent.unhover(exportItem)
+    await userEvent.hover(shareItem)
+    await waitFor(() => expect(shareItem).toHaveAttribute('aria-expanded', 'true'))
+    await waitFor(() => expect(exportItem).toHaveAttribute('aria-expanded', 'false'))
 
-    // survoler un item simple referme la branche voisine (fermeture au
-    // pointerleave après le délai d'intention)
-    await userEvent.unhover(partager)
-    await userEvent.hover(canvas.getByRole('menuitem', { name: 'Nouveau' }))
-    await waitFor(() => expect(partager).toHaveAttribute('aria-expanded', 'false'))
+    // hovering a plain item closes the neighbouring branch (closing on
+    // pointerleave after the intent delay)
+    await userEvent.unhover(shareItem)
+    await userEvent.hover(canvas.getByRole('menuitem', { name: 'New' }))
+    await waitFor(() => expect(shareItem).toHaveAttribute('aria-expanded', 'false'))
   },
 }
 
-export const LibellesLongs: Story = {
+export const LongLabels: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VButton },
+    setup: () => ({ t }),
     template: `
       <VMenu placement="bottom-end">
         <template #trigger="{ triggerProps }">
-          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Options</VButton>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.options }}</VButton>
         </template>
-        <VMenuItem label="Exporter la sélection au format CSV avec les en-têtes" />
-        <VMenuItem
-          label="Un libellé anormalement long qui doit être borné par la largeur maximale du menu"
-          sublabel="Un sous-libellé tout aussi verbeux qui passe sur plusieurs lignes sans déborder"
-        />
+        <VMenuItem :label="t.exportSelectionCsv" />
+        <VMenuItem :label="t.longLabel" :sublabel="t.longSublabel" />
       </VMenu>
     `,
   }),

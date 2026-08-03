@@ -6,34 +6,33 @@ import { menuInvoker, menuKey } from './context'
 import type { MenuPlacement } from './context'
 
 /**
- * VMenu d'actions (pattern ARIA menu) : Popover API (light dismiss natif ;
- * positionnement pur CSS). Le déclencheur invoque le panneau par
- * `popovertarget` (ancre implicite), le focus va au 1er item à l'ouverture,
- * le clavier (roving focus) vit dans VMenuPanel.
+ * An action menu (the ARIA menu pattern): Popover API (native light dismiss; pure
+ * CSS positioning). The trigger invokes the panel through `popovertarget` (the
+ * implicit anchor), focus goes to the first item on opening, and the keyboard
+ * (roving focus) lives in VMenuPanel.
  *
- * JS justifié ici : pont v-model ↔ API impérative du popover, focus du 1er item
- * et retour du focus au déclencheur à la fermeture.
+ * JS justified here: the v-model ↔ imperative popover API bridge, focusing the
+ * first item, and returning focus to the trigger on closing.
  */
 interface MenuProps {
   placement?: MenuPlacement
-  /** Hauteur minimale des items : 32px (sm), 40px (md) ou 48px (lg) ; héritée par les sous-menus. */
+  /** Minimum height of the items: 32px (sm), 40px (md) or 48px (lg); inherited by the submenus. */
   size?: 'sm' | 'md' | 'lg'
-  /** Hauteur minimale des items réduite de 4px ; héritée par les sous-menus. */
+  /** Minimum height of the items reduced by 4px; inherited by the submenus. */
   compact?: boolean
   /**
-   * Largeur du panneau racine (toute longueur/mot-clé CSS, ex. `max-content`,
-   * `16rem`). Les sous-menus gardent la largeur par défaut.
+   * Width of the root panel (any CSS length/keyword, e.g. `max-content`, `16rem`).
+   * The submenus keep the default width.
    */
   width?: string
   /**
-   * Le panneau racine ne peut pas être plus étroit que son déclencheur (il
-   * reste libre de s'élargir pour son contenu). Les sous-menus ne sont pas
-   * affectés.
+   * The root panel cannot be narrower than its trigger (it stays free to widen for
+   * its content). Submenus are unaffected.
    */
   matchTrigger?: boolean
 }
 
-// Non assigné : le template lit les props directement.
+// Not assigned: the template reads the props directly.
 withDefaults(defineProps<MenuProps>(), {
   placement: 'bottom-start',
   size: 'sm',
@@ -44,7 +43,7 @@ withDefaults(defineProps<MenuProps>(), {
 
 const open = defineModel<boolean>('open', { default: false })
 
-/** Props ARIA à poser sur le déclencheur. */
+/** ARIA props to set on the trigger. */
 type MenuTriggerProps = {
   popovertarget: string
   'aria-haspopup': 'menu'
@@ -53,9 +52,9 @@ type MenuTriggerProps = {
 }
 
 defineSlots<{
-  /** Déclencheur : poser `v-bind="triggerProps"` sur un <VButton>/<button>. */
+  /** Trigger: set `v-bind="triggerProps"` on a <VButton>/<button>. */
   trigger(props: { triggerProps: MenuTriggerProps }): unknown
-  /** Les <VMenuItem> / <VMenuGroup> / <VMenuSeparator> */
+  /** The <VMenuItem> / <VMenuGroup> / <VMenuSeparator> elements. */
   default(): unknown
 }>()
 
@@ -70,8 +69,8 @@ const triggerProps = computed<MenuTriggerProps>(() => ({
   'aria-controls': menuId,
 }))
 
-// Fermer le panneau racine ferme toute la pile (les sous-panneaux sont ses
-// descendants DOM : cascade native du popover).
+// Closing the root panel closes the whole stack (the subpanels are its DOM
+// descendants: the popover's native cascade).
 provide(menuKey, { closeAll: () => panelRef.value?.hide() })
 
 function onToggle(value: boolean) {
@@ -80,7 +79,7 @@ function onToggle(value: boolean) {
   if (value) {
     panelRef.value?.focusFirst()
   } else {
-    // Le light dismiss laisse le focus orphelin (body) : on le rend au déclencheur.
+    // Light dismiss leaves the focus orphaned (on body): hand it back to the trigger.
     const active = document.activeElement
     if (!active || active === document.body || panelRef.value?.el?.contains(active)) {
       menuInvoker(menuId)?.focus()
@@ -88,7 +87,7 @@ function onToggle(value: boolean) {
   }
 }
 
-// Ouverture/fermeture programmatique via v-model (client uniquement).
+// Programmatic opening/closing through v-model (client only).
 watch(open, (value) => {
   if (value === shown.value) return
   if (value) panelRef.value?.show()
