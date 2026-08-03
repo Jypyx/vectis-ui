@@ -5,137 +5,138 @@ import * as VIconStories from './VIcon.stories'
 
 # Icon
 
-Icône à quatre sources, résolues dans un ordre fixe : image (`src`), puis `name` — d'abord le
-**registre intégré**, sinon la **ligature** de la police du consommateur — sinon le **SVG
-inline** passé en slot.
+Icon with four sources, resolved in a fixed order: image (`src`), then `name` — first the
+**built-in registry**, otherwise the **ligature** of the consumer's font — otherwise the
+**inline SVG** passed in the slot.
 
-> Les icônes que la librairie rend elle-même (croix, chevrons, icônes de tone des toasts…)
-> sont des SVG **embarqués**, répliques exactes de
+> The icons the library renders itself (crosses, chevrons, the toast tone icons…) are
+> **embedded** SVGs, exact replicas of
 > [Material Symbols Rounded](https://fonts.google.com/icons) (wght 400 · GRAD 0 · opsz 24).
-> **Le design system ne requiert donc aucune police d'icônes.** La police reste utile pour vos
-> propres noms d'icônes ; elle est chargée par l'application consommatrice (voir le README).
+> **The design system therefore requires no icon font.** The font stays useful for your own
+> icon names; it is loaded by the consuming application (see the README).
 
 <Canvas of={VIconStories.Default} />
 
 <Controls of={VIconStories.Default} />
 
-## Taille
+## Size
 
-**1em par défaut** : l'icône suit la taille du texte environnant, sans configuration. La prop
-`size` (nombre, en pixels) permet une surcharge libre : `:size="32"` → 32px.
+**1em by default**: the icon follows the size of the surrounding text, with no configuration.
+The `size` prop (a number, in pixels) allows a free override: `:size="32"` → 32px.
 
-<Canvas of={VIconStories.AdapteeAuTexte} />
+<Canvas of={VIconStories.TextAdapted} />
 
-## Quatre sources
+## Four sources
 
-`src` prime sur `name`, qui prime sur le slot. Un `name` du registre intégré donne un SVG ;
-tout autre nom retombe sur la ligature, donc sur la police du consommateur. L'image reçoit un
-`alt` vide (le nom accessible vient de `label`, jamais de la source) ; le SVG inline remplit le
-carré de l'icône.
+`src` wins over `name`, which wins over the slot. A `name` from the built-in registry gives an
+SVG; any other name falls back to the ligature, hence to the consumer's font. The image gets an
+empty `alt` (the accessible name comes from `label`, never from the source); the inline SVG
+fills the icon's square.
 
-<Canvas of={VIconStories.QuatreSources} />
+<Canvas of={VIconStories.FourSources} />
 
-L'attribut **`data-icon`** porte le nom demandé quelle que soit la source effective — accroche
-stable pour du CSS consommateur (`.v-icon[data-icon='close'] { … }`) comme pour les tests.
+The **`data-icon`** attribute carries the requested name whatever the effective source — a
+stable hook for consumer CSS (`.v-icon[data-icon='close'] { … }`) as well as for tests.
 
-## Bibliothèque intégrée
+## Built-in library
 
-<Canvas of={VIconStories.Bibliotheque} />
+<Canvas of={VIconStories.Library} />
 
-Cette liste n'est pas une bibliothèque d'icônes à disposition : c'est exactement l'ensemble de
-ce que les composants rendent **par défaut**. Elle grandit quand un composant se met à rendre
-une nouvelle icône, jamais pour offrir un catalogue.
+This list is not an icon library on offer: it is exactly the set of what the components render
+**by default**. It grows when a component starts rendering a new icon, never to provide a
+catalogue.
 
-<Canvas of={VIconStories.SansPolice} />
+<Canvas of={VIconStories.WithoutFont} />
 
-## Pilotage par le parent
+## Driven by the parent
 
-Sans prop `size`, tout parent peut dimensionner ses icônes en posant les custom properties
-**`--vectis-icon-size`** (taille) et **`--vectis-icon-opsz`** (axe optique). C'est ce que font `VButton`,
-`VInput` et `VTextarea` selon leur propre taille (sm → 16px/opsz 20, md → 20px/opsz 20,
-lg → 24px/opsz 24). La résolution suit la priorité : prop `size` numérique > contexte
-parent > 1em.
+Without a `size` prop, any parent can size its icons by setting the custom properties
+**`--vectis-icon-size`** (size) and **`--vectis-icon-opsz`** (optical axis). That is what
+`VButton`, `VInput` and `VTextarea` do according to their own size (sm → 16px/opsz 20,
+md → 20px/opsz 20, lg → 24px/opsz 24). Resolution follows the priority: numeric `size` prop >
+parent context > 1em.
 
-**`--vectis-icon-opsz` ne s'applique qu'à la ligature** : c'est un axe variable de police, sans
-prise sur un SVG intégré (dessiné à opsz 24), une image ou un SVG inline. La taille, elle, vaut
-pour toutes les sources.
+**`--vectis-icon-opsz` only applies to the ligature**: it is a variable font axis, with no
+purchase on an embedded SVG (drawn at opsz 24), an image or an inline SVG. The size, on the
+other hand, applies to every source.
 
-<Canvas of={VIconStories.PiloteParLeParent} />
+<Canvas of={VIconStories.DrivenByParent} />
 
-## Remplissage
+## Fill
 
-La prop `filled` demande la variante pleine (axe **`FILL`** de Material Symbols, 0 = contour →
-1 = plein). Elle est honorée par la **ligature** et par le **registre intégré**, qui embarque un
-second path pour les icônes dont la géométrie change réellement (`check_circle`, `warning`,
-`info`…) — les icônes purement linéaires (`close`, chevrons, flèches) sont identiques dans les
-deux états. Sans effet sur une image (`src`) ou un SVG inline.
+The `filled` prop asks for the filled variant (the Material Symbols **`FILL`** axis, 0 = outline
+→ 1 = filled). It is honoured by the **ligature** and by the **built-in registry**, which embeds
+a second path for the icons whose geometry really changes (`check_circle`, `warning`, `info`…) —
+the purely linear icons (`close`, chevrons, arrows) are identical in both states. No effect on
+an image (`src`) or an inline SVG.
 
 <Canvas of={VIconStories.Filled} />
 
-## Brancher une bibliothèque d'icônes
+## Wiring in an icon library
 
-`setIconResolver` est consulté **avant** le registre intégré : c'est ce qui permet de faire
-passer toutes les icônes du DS sur votre propre source. Rendre `undefined` signifie « je ne
-connais pas ce nom » et laisse la main au registre, puis à la ligature — les mappings
-**partiels** sont donc utilisables.
+`setIconResolver` is consulted **before** the built-in registry: that is what lets you move all
+of the DS's icons onto your own source. Returning `undefined` means "I do not know this name"
+and hands over to the registry, then to the ligature — so **partial** mappings are usable.
 
-À poser au niveau **module** (plugin Nuxt, `main.ts`), jamais dans un `setup()`, et jamais en
-client-only : le serveur rendrait le SVG intégré et le client votre bibliothèque.
+Set it at **module** level (a Nuxt plugin, `main.ts`), never inside a `setup()`, and never
+client-only: the server would render the embedded SVG and the client your library.
 
-Les stories ci-dessous rendent toutes **la même vitrine** — VButton, VInput, VChip, VBreadcrumb,
-VAccordion, VPagination, plus la grille complète des icônes intégrées. Seul le résolveur change.
-Les polices sont chargées par `.storybook/preview-head.html` depuis un CDN : aucune n'est une
-dépendance du package.
+The stories below all render **the same showcase** — VButton, VInput, VChip, VBreadcrumb,
+VAccordion, VPagination, plus the full grid of built-in icons. Only the resolver changes. The
+fonts are loaded by `.storybook/preview-head.html` from a CDN: none of them is a dependency of
+the package.
 
-### Polices à classes
+### Class fonts
 
-Font Awesome, Phosphor, Bootstrap Icons… — le glyphe vient d'un `::before` porté par des
-classes. `classIconResolver` les couvre toutes ; VIcon rend alors un
-`<span class="v-icon-glyph …">` qui lui appartient, donc qu'il normalise d'une seule règle.
+Font Awesome, Phosphor, Bootstrap Icons… — the glyph comes from a `::before` carried by
+classes. `classIconResolver` covers them all; VIcon then renders a
+`<span class="v-icon-glyph …">` that belongs to it, and which it therefore normalizes in a
+single rule.
 
-<Canvas of={VIconStories.PolicePhosphor} />
+<Canvas of={VIconStories.PhosphorFont} />
 
-<Canvas of={VIconStories.PoliceFontAwesome} />
+<Canvas of={VIconStories.FontAwesomeFont} />
 
-<Canvas of={VIconStories.PoliceBootstrapIcons} />
+<Canvas of={VIconStories.BootstrapIconsFont} />
 
-Le paramètre `strict` (défaut) protège les icônes du DS : un nom du registre **absent** de
-votre table d'alias retomberait sur une classe inexistante — donc un carré vide — alors il
-retombe sur le SVG intégré. Vos propres noms, eux, passent toujours : ils sont déjà écrits
-dans le vocabulaire de votre bibliothèque.
+The `strict` parameter (the default) protects the DS's icons: a registry name **absent** from
+your alias table would fall onto a non-existent class — hence an empty square — so it falls back
+to the embedded SVG instead. Your own names always pass: they are already written in your
+library's vocabulary.
 
-<Canvas of={VIconStories.MappingPartiel} />
+<Canvas of={VIconStories.PartialMapping} />
 
-### Jeux SVG en composants
+### SVG sets as components
 
-Lucide, Untitled UI… — `componentIconResolver` rend le composant tel quel. Contrat : **racine
-`<svg>` unique**, c'est elle que le CSS dimensionne, y compris contre un `width`/`height` en
-dur (Lucide écrit `width="24"` : un attribut de présentation, battu par toute règle d'auteur).
+Lucide, Untitled UI… — `componentIconResolver` renders the component as-is. Contract: a
+**single `<svg>` root**, since that is what the CSS sizes, even against a hardcoded
+`width`/`height` (Lucide writes `width="24"`: a presentation attribute, beaten by any author
+rule).
 
-<Canvas of={VIconStories.JeuDeComposants} />
+<Canvas of={VIconStories.ComponentSet} />
 
-### Polices à ligatures
+### Ligature fonts
 
-Material Symbols (toutes variantes) et les builds IcoMoon à ligatures. `ligatureIconResolver()`
-renvoie **aussi** les icônes du DS vers la police : c'est la façon de retrouver l'axe optique
-`--vectis-icon-opsz`, que le registre — dessiné à opsz 24 — ne peut pas reproduire. Pour changer
-seulement de variante (Outlined, Sharp), surcharger le token `--vectis-font-family-icon` suffit,
-sans résolveur.
+Material Symbols (every variant) and the ligature IcoMoon builds. `ligatureIconResolver()` sends
+the DS's icons back to the font **as well**: this is how to get back the optical axis
+`--vectis-icon-opsz`, which the registry — drawn at opsz 24 — cannot reproduce. To change only
+the variant (Outlined, Sharp), overriding the `--vectis-font-family-icon` token is enough, with
+no resolver.
 
-<Canvas of={VIconStories.PoliceLigature} />
+<Canvas of={VIconStories.LigatureFont} />
 
-### Sans résolveur du tout
+### With no resolver at all
 
-Les icônes du DS s'affichent (registre intégré) ; **vos** noms tombent sur la branche ligature,
-donc sur `--vectis-font-family-icon`. Avec une police à classes chargée mais aucun résolveur, ils
-apparaissent en fragments de mots rognés au carré de l'icône — visible et local, jamais une
-mise en page cassée, et jamais annoncé (l'icône est `aria-hidden`). Sinon, chaque prop accepte
-aussi un rendu explicite ponctuel : `:icon-start="{ class: 'ph ph-house' }"`.
+The DS's icons show up (built-in registry); **your** names land on the ligature branch, hence on
+`--vectis-font-family-icon`. With a class font loaded but no resolver, they appear as fragments
+of words clipped to the icon's square — visible and local, never a broken layout, and never
+announced (the icon is `aria-hidden`). Otherwise, every prop also accepts a one-off explicit
+render: `:icon-start="{ class: 'ph ph-house' }"`.
 
-## Accessibilité
+## Accessibility
 
-L'icône est **décorative par défaut** (`aria-hidden="true"`) : dans un bouton ou un champ,
-le nom accessible vient du libellé, pas de l'icône. La prop `label` la rend informative :
-`role="img"` + `aria-label`, sans `aria-hidden`.
+The icon is **decorative by default** (`aria-hidden="true"`): inside a button or a field, the
+accessible name comes from the label, not from the icon. The `label` prop makes it informative:
+`role="img"` + `aria-label`, with no `aria-hidden`.
 
-<Canvas of={VIconStories.AvecLabel} />
+<Canvas of={VIconStories.WithLabel} />
