@@ -6,34 +6,34 @@ import VAvatar from './VAvatar.vue'
 import VAvatarGroup from './VAvatarGroup.vue'
 
 describe('VAvatar', () => {
-  it('affiche les initiales des deux premiers mots du nom', () => {
+  it('displays the initials of the first two words of the name', () => {
     const { getByText } = render(VAvatar, { props: { name: 'Ada Byron Lovelace' } })
     expect(getByText('AB')).toBeTruthy()
   })
 
-  it("affiche l'image quand src est fourni, avec le nom en alt par défaut", () => {
+  it('displays the image when src is supplied, with the name as the default alt', () => {
     const { getByRole } = render(VAvatar, {
-      props: { src: 'https://exemple.test/a.png', name: 'Ada Lovelace' },
+      props: { src: 'https://example.test/a.png', name: 'Ada Lovelace' },
     })
     expect(getByRole('img').getAttribute('alt')).toBe('Ada Lovelace')
   })
 
-  it("bascule sur les initiales si l'image échoue", async () => {
+  it('falls back to the initials when the image fails', async () => {
     const { getByRole, getByText } = render(VAvatar, {
-      props: { src: 'https://exemple.test/casse.png', name: 'Grace Hopper' },
+      props: { src: 'https://example.test/broken.png', name: 'Grace Hopper' },
     })
     await fireEvent.error(getByRole('img'))
     expect(getByText('GH')).toBeTruthy()
   })
 
-  it("rend une icône Material quand `icon` est un nom (pas d'URL)", () => {
+  it('renders a Material icon when `icon` is a name (not a URL)', () => {
     const { container, queryByText } = render(VAvatar, { props: { icon: 'star' } })
-    // pas d'initiales, la ligature Material est présente
+    // no initials, the Material ligature is present
     expect(container.querySelector('.v-avatar-icon')).toBeTruthy()
     expect(queryByText('star')).toBeTruthy()
   })
 
-  it('dérive une teinte auto déterministe du nom (--avatar-hue stable + data-auto)', () => {
+  it('derives a deterministic auto hue from the name (a stable --avatar-hue + data-auto)', () => {
     const first = render(VAvatar, { props: { name: 'Ada Lovelace' } })
     const a = first.container.querySelector('.v-avatar') as HTMLElement
     expect(a.getAttribute('data-auto')).toBe('')
@@ -45,7 +45,7 @@ describe('VAvatar', () => {
     expect(b.style.getPropertyValue('--avatar-hue')).toBe(hueA)
   })
 
-  it('la couleur custom prime sur la teinte auto (data-custom + --custom-color, pas de data-auto)', () => {
+  it('the custom colour wins over the auto hue (data-custom + --custom-color, no data-auto)', () => {
     const { container } = render(VAvatar, { props: { name: 'Ada Lovelace', color: '#ff0000' } })
     const el = container.querySelector('.v-avatar') as HTMLElement
     expect(el.getAttribute('data-custom')).toBe('')
@@ -53,21 +53,21 @@ describe('VAvatar', () => {
     expect(el.style.getPropertyValue('--custom-color')).toBe('#ff0000')
   })
 
-  it('cliquable → <button>, avec le nom en aria-label', () => {
+  it('clickable → <button>, with the name as aria-label', () => {
     const { getByRole } = render(VAvatar, { props: { name: 'Ada Lovelace', clickable: true } })
     const btn = getByRole('button')
     expect(btn.tagName).toBe('BUTTON')
     expect(btn.getAttribute('aria-label')).toBe('Ada Lovelace')
   })
 
-  it('href → <a> avec href', () => {
+  it('href → <a> with an href', () => {
     const { getByRole } = render(VAvatar, { props: { name: 'Ada', href: '/u/ada' } })
     const link = getByRole('link')
     expect(link.tagName).toBe('A')
     expect(link.getAttribute('href')).toBe('/u/ada')
   })
 
-  it('lien inerte quand disabled (href retiré + aria-disabled)', () => {
+  it('an inert link when disabled (href removed + aria-disabled)', () => {
     const { container } = render(VAvatar, {
       props: { name: 'Ada', href: '/u/ada', disabled: true },
     })
@@ -76,7 +76,7 @@ describe('VAvatar', () => {
     expect(a.getAttribute('aria-disabled')).toBe('true')
   })
 
-  it('sans nom ni image : décoratif (pas de role="img")', () => {
+  it('with neither name nor image: decorative (no role="img")', () => {
     const { container } = render(VAvatar, { props: { icon: 'star' } })
     const el = container.querySelector('.v-avatar') as HTMLElement
     expect(el.getAttribute('role')).toBeNull()
@@ -84,7 +84,7 @@ describe('VAvatar', () => {
 })
 
 describe('VAvatarGroup', () => {
-  it('tronque à `max` et affiche l’agrégat +X avec le bon compte', () => {
+  it('truncates at `max` and displays the +X aggregate with the right count', () => {
     const { getByText, container } = render(VAvatarGroup, {
       props: { max: 2 },
       slots: {
@@ -98,7 +98,7 @@ describe('VAvatarGroup', () => {
     expect(getByText('+2')).toBeTruthy()
   })
 
-  it('sans `max` : rend tous les avatars, aucun agrégat', () => {
+  it('without `max`: renders every avatar, no aggregate', () => {
     const { container, queryByText } = render(VAvatarGroup, {
       slots: {
         default: () => ['Ada Lovelace', 'Grace Hopper'].map((name) => h(VAvatar, { name })),
@@ -108,7 +108,7 @@ describe('VAvatarGroup', () => {
     expect(queryByText(/^\+/)).toBeNull()
   })
 
-  it('propage la taille aux enfants (à défaut de prop size explicite)', () => {
+  it('propagates the size to the children (absent an explicit size prop)', () => {
     const { container } = render(VAvatarGroup, {
       props: { size: 'lg' },
       slots: {
@@ -116,7 +116,7 @@ describe('VAvatarGroup', () => {
       },
     })
     const avatars = container.querySelectorAll('.v-avatar')
-    // 1er hérite lg, 2e garde sa prop xs
+    // the first inherits lg, the second keeps its xs prop
     expect(avatars[0]?.getAttribute('data-size')).toBe('lg')
     expect(avatars[1]?.getAttribute('data-size')).toBe('xs')
   })

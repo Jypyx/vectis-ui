@@ -5,56 +5,56 @@ import * as VAvatarGroupStories from './VAvatarGroup.stories'
 
 # AvatarGroup
 
-Empile des `VAvatar` en pile chevauchante : le disque de **droite passe par-dessus** celui de
-gauche (chevauchement négatif + ordre de peinture DOM, sans JS de positionnement), séparés par
-un anneau. Une prop `max` limite le nombre d'avatars visibles et pousse un agrégat **« +X »**.
+Stacks `VAvatar`s into an overlapping pile: the **right-hand** disc paints **over** the left-hand
+one (a negative overlap + the DOM paint order, with no positioning JS), separated by a ring. A
+`max` prop limits the number of visible avatars and pushes a **"+X"** aggregate.
 
-<Canvas of={VAvatarGroupStories.Empilement} />
+<Canvas of={VAvatarGroupStories.Stacking} />
 
-<Controls of={VAvatarGroupStories.Empilement} />
+<Controls of={VAvatarGroupStories.Stacking} />
 
-## Débordement (`max`)
+## Overflow (`max`)
 
-`max` borne le nombre d'avatars affichés ; les suivants sont résumés par un avatar agrégat
-statique et neutre « +X ». Le comptage/troncature des enfants du slot est le seul JS du
-composant (impossible en HTML/CSS), avec dépliage des fragments produits par `v-for`.
+`max` bounds the number of avatars displayed; the rest are summarized by a static, neutral "+X"
+aggregate avatar. Counting and truncating the slot's children is the component's only JS
+(impossible in HTML/CSS), including unwrapping the fragments produced by `v-for`.
 
 <Canvas of={VAvatarGroupStories.Overflow} />
 
-## Taille héritée
+## Inherited size
 
-`size` (et `compact`) posés sur le groupe se **propagent** à tous les enfants via un contexte
-`provide`/`inject` — inutile de les répéter sur chaque `VAvatar`. Une prop `size` explicite sur
-un enfant reprend la priorité.
+`size` (and `compact`) set on the group **propagate** to every child through a `provide`/`inject`
+context — no need to repeat them on each `VAvatar`. An explicit `size` prop on a child takes the
+priority back.
 
-<Canvas of={VAvatarGroupStories.TailleHeritee} />
+<Canvas of={VAvatarGroupStories.InheritedSize} />
 
-## Agrégat personnalisé
+## Custom aggregate
 
-Le slot `#overflow` (portée : `{ count }`) remplace l'agrégat par défaut — pour le rendre
-cliquable, y attacher un menu, un tooltip, etc.
+The `#overflow` slot (scope: `{ count }`) replaces the default aggregate — to make it clickable,
+attach a menu or a tooltip to it, and so on.
 
-<Canvas of={VAvatarGroupStories.OverflowPersonnalise} />
+<Canvas of={VAvatarGroupStories.CustomOverflow} />
 
-## Avec des tooltips
+## With tooltips
 
-Chaque `VAvatar` (et l'agrégat) peut être enveloppé dans un `VTooltip`. L'empilement reste
-correct **même si le trigger est enveloppé** : le groupe cible l'enfant direct générique et
-porte lui-même `v-control`, si bien que la distance de chevauchement (`--control-height`)
-reste résolue à travers le `<span>` que le `VTooltip` insère autour de sa cible.
+Each `VAvatar` (and the aggregate) can be wrapped in a `VTooltip`. The stacking stays correct
+**even when the trigger is wrapped**: the group targets the generic direct child and carries
+`v-control` itself, so the overlap distance (`--control-height`) stays resolved through the
+`<span>` the `VTooltip` inserts around its target.
 
-<Canvas of={VAvatarGroupStories.AvecTooltips} />
+<Canvas of={VAvatarGroupStories.WithTooltips} />
 
-## Anneau de séparation
+## Separation ring
 
-Chaque avatar porte un anneau `box-shadow` (token `--vectis-control-size-avatar-ring`, 2px) de la
-couleur du fond derrière (`--vectis-color-surface` par défaut, surchargeable via `ringColor`) — il
-détache les disques qui se chevauchent. Sur un fond différent (carte, bandeau), passer la
-couleur adéquate à `ringColor`.
+Each avatar carries a `box-shadow` ring (the `--vectis-control-size-avatar-ring` token, 2px) in
+the colour of the background behind (`--vectis-color-surface` by default, overridable through
+`ringColor`) — it detaches the overlapping discs. On a different background (a card, a banner),
+pass the appropriate colour to `ringColor`.
 
-## Accessibilité
+## Accessibility
 
-- Le groupe est un conteneur `role="group"`.
-- Chaque avatar garde sa propre sémantique (image, `role="img"` + `aria-label`, ou interactif).
-- L'agrégat par défaut affiche « +X » ; pour une formulation explicite (« 3 autres membres »),
-  utiliser le slot `#overflow` avec un `aria-label` dédié.
+- The group is a `role="group"` container.
+- Each avatar keeps its own semantics (image, `role="img"` + `aria-label`, or interactive).
+- The default aggregate displays "+X"; for an explicit phrasing ("3 other members"), use the
+  `#overflow` slot with a dedicated `aria-label`.

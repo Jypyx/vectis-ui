@@ -5,10 +5,10 @@ import * as VToasterStories from './VToaster.stories'
 
 # Toast
 
-Notifications déclenchées **par programme** : monter `<VToaster />` une fois (racine de
-l'app), puis appeler `toast(options)` depuis n'importe où — composant, store, retour d'API
-asynchrone. La file est un état réactif au niveau module (pas de provide/inject) ; elle est
-**client-only** : ne jamais appeler `toast()` pendant le rendu SSR.
+Notifications triggered **programmatically**: mount `<VToaster />` once (at the app root), then
+call `toast(options)` from anywhere — a component, a store, an asynchronous API return. The queue
+is reactive state at module level (no provide/inject); it is **client-only**: never call `toast()`
+during SSR rendering.
 
 ```vue
 <!-- App.vue -->
@@ -21,16 +21,16 @@ import { toast, dismissToast } from '@vectis/ui'
 async function save() {
   try {
     await api.save()
-    toast({ tone: 'success', message: 'Modifications enregistrées.' })
+    toast({ tone: 'success', message: 'Changes saved.' })
   } catch {
-    toast({ tone: 'danger', title: 'Erreur', message: 'Le serveur ne répond pas.', duration: 0 })
+    toast({ tone: 'danger', title: 'Error', message: 'The server is not responding.', duration: 0 })
   }
 }
 ```
 
-L'affichage passe par la Popover API : un `popover="manual"` **par placement** porte la
-pile (top-layer natif, aucun z-index), l'empilement est du pur CSS — le JavaScript se
-limite au pont file → `showPopover()`/`hidePopover()` et aux timers d'auto-fermeture.
+The display goes through the Popover API: one `popover="manual"` **per placement** carries the
+stack (the native top layer, no z-index), and the stacking is pure CSS — the JavaScript is limited
+to the queue → `showPopover()`/`hidePopover()` bridge and to the auto-dismiss timers.
 
 <Canvas of={VToasterStories.Default} />
 
@@ -38,81 +38,80 @@ limite au pont file → `showPopover()`/`hidePopover()` et aux timers d'auto-fer
 
 ## Tones
 
-Cinq tones × deux variants. `tonal` (défaut) : fond `-surface`, bordure `-border`, icône et
-titre teintés. Le tone `neutral` s'appuie sur `surface-overlay`.
+Five tones × two variants. `tonal` (the default): a `-surface` background, a `-border` border, a
+tinted icon and title. The `neutral` tone rests on `surface-overlay`.
 
 <Canvas of={VToasterStories.Tones} />
 
-`solid` : couleur pleine du tone. `warning` utilise `--vectis-color-text-on-warning` (texte
-sombre, le blanc échoue AA sur amber) ; `neutral` passe en contraste inversé
-(`surface-inverse`, style tooltip), lisible dans les deux thèmes.
+`solid`: the tone's full colour. `warning` uses `--vectis-color-text-on-warning` (dark text, white
+fails AA on amber); `neutral` switches to an inverted contrast (`surface-inverse`, tooltip style),
+readable in both themes.
 
 <Canvas of={VToasterStories.Solid} />
 
 ## Placements
 
-Six positions d'écran, en piles indépendantes. La prop `placement` du VToaster fixe le
-défaut ; l'option `placement` d'un toast le surcharge. Coordonnées **physiques**
-(`top/left`…) : une notification est une position d'écran, indépendante de la direction de
-lecture — comme les notifications de l'OS.
+Six screen positions, in independent stacks. The VToaster's `placement` prop sets the default; a
+toast's `placement` option overrides it. **Physical** coordinates (`top/left`…): a notification is
+a screen position, independent of the reading direction — like the OS notifications.
 
 <Canvas of={VToasterStories.Placements} />
 
-## Durée d'affichage
+## Display duration
 
-`duration` (prop du VToaster : défaut 5000 ms, surchargeable par toast) pilote la fermeture
-automatique. Survoler une pile **suspend ses timers** ; ils repartent à la durée pleine au
-départ du pointeur (WCAG 2.2.1).
+`duration` (a VToaster prop: 5000 ms by default, overridable per toast) drives the automatic
+dismissal. Hovering a stack **suspends its timers**; they restart at the full duration when the
+pointer leaves (WCAG 2.2.1).
 
-<Canvas of={VToasterStories.AutoFermeture} />
+<Canvas of={VToasterStories.AutoDismiss} />
 
-`duration: 0` rend le toast persistant : il reste affiché jusqu'à fermeture par la croix
-(VIconButton `close`, masquable via `closable: false`) ou par `dismissToast(id)`.
+`duration: 0` makes the toast persistent: it stays until dismissed through the cross (a `close`
+VIconButton, hideable through `closable: false`) or by `dismissToast(id)`.
 
-<Canvas of={VToasterStories.Persistant} />
+<Canvas of={VToasterStories.Persistent} />
 
-## Contenus
+## Contents
 
-`message` est requis, `title` et l'icône sont optionnels — les quatre combinaisons :
+`message` is required, `title` and the icon are optional — the four combinations:
 
-<Canvas of={VToasterStories.Contenus} />
+<Canvas of={VToasterStories.Contents} />
 
-## Icônes
+## Icons
 
-Chaque tone a son icône Material Symbols par défaut : `notifications` (neutral), `info`
-(accent), `check_circle` (success), `error` (danger), `warning` (warning). L'option `icon`
-accepte tout nom d'icône ou un rendu explicite (`{ src }`, comme partout ailleurs) ;
-`icon: false` la retire. Les icônes de tone sont des SVG embarqués : elles s'affichent sans
-aucune police (voir VIcon).
+Each tone has its default Material Symbols icon: `notifications` (neutral), `info` (accent),
+`check_circle` (success), `error` (danger), `warning` (warning). The `icon` option accepts any icon
+name or an explicit render (`{ src }`, as everywhere else); `icon: false` removes it. The tone
+icons are embedded SVGs: they display with no font at all (see VIcon).
 
-<Canvas of={VToasterStories.IconePersonnalisee} />
+<Canvas of={VToasterStories.CustomIcon} />
 
-## Largeur
+## Width
 
-Largeur par défaut : token `--vectis-control-size-toast-width` (22rem). L'option `width`
-(longueur CSS) la remplace par toast — toujours bornée à `100vw − marges`, un toast ne
-déborde jamais du viewport.
+Default width: the `--vectis-control-size-toast-width` token (22rem). The `width` option (a CSS
+length) replaces it per toast — always bounded by `100vw − margins`, so a toast never overflows the
+viewport.
 
-<Canvas of={VToasterStories.Largeur} />
+<Canvas of={VToasterStories.Width} />
 
-## Empilement
+## Stacking
 
-Les toasts d'un même placement s'empilent, le plus récent près du bord de l'écran (pur
-CSS `column`/`column-reverse`, la file reste append-only). L'entrée glisse depuis le bord
-via `@starting-style` ; la sortie individuelle n'est pas animée (choix de simplicité), la
-pile qui se vide fait un fondu.
+The toasts of a given placement stack up, the most recent near the screen edge (pure CSS
+`column`/`column-reverse`, the queue staying append-only). The entry slides in from the edge
+through `@starting-style`; the individual exit is not animated (a simplicity choice), and the stack
+emptying fades out.
 
-<Canvas of={VToasterStories.Empilement} />
+<Canvas of={VToasterStories.Stacking} />
 
-## Accessibilité
+## Accessibility
 
-- Rôle par toast : `role="alert"` (interruptif) pour `danger`/`warning`, `role="status"`
-  (poli) sinon — l'annonce du premier toast poli d'une pile peut être manquée par certains
-  lecteurs d'écran (la live region naît avec son contenu) ; les `alert` sont annoncés à
-  l'insertion.
-- Chaque pile est un landmark `role="region"` nommé par la prop `label`
-  (« Notifications ») ; la croix reçoit `closeLabel` (« Fermer »).
-- Le focus n'est jamais volé : un toast s'affiche sans interrompre la saisie en cours.
-- Pause des timers au survol ; les animations respectent `prefers-reduced-motion`.
+- Role per toast: `role="alert"` (interruptive) for `danger`/`warning`, `role="status"` (polite)
+  otherwise — the announcement of a stack's first polite toast may be missed by some screen readers
+  (the live region is born with its content); `alert`s are announced on insertion.
+- Each stack is a `role="region"` landmark named by the `label` prop ("Notifications"); the cross
+  receives `closeLabel` ("Close").
+- The focus is never stolen: a toast appears without interrupting the current input.
+- Timers pause on hover; the animations respect `prefers-reduced-motion`.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.

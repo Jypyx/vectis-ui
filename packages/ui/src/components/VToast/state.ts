@@ -3,15 +3,15 @@ import { reactive } from 'vue'
 import type { IconSource } from '../VIcon/types'
 
 /**
- * File de notifications globale. JS justifié : aucune primitive HTML ne
- * couvre une file de notifications programmatique — l'état vit au niveau
- * module (pattern sonner) pour que `toast()` soit appelable PARTOUT
- * (composant, store, helper d'API), sans provide/inject.
+ * The global notification queue. JS justified: no HTML primitive covers a
+ * programmatic notification queue — the state lives at module level (the sonner
+ * pattern) so `toast()` can be called ANYWHERE (a component, a store, an API
+ * helper), with no provide/inject.
  *
- * SSR-safe par contrat : `toast()` ne s'appelle que côté client (handlers,
- * retours d'API asynchrones), jamais pendant le rendu serveur — où l'état
- * module serait partagé entre requêtes. Seul le <VToaster> monté touche le
- * DOM (Popover API) et arme les timers d'auto-fermeture.
+ * SSR-safe by contract: `toast()` is only called client-side (handlers,
+ * asynchronous API returns), never during server rendering — where module state
+ * would be shared between requests. Only the mounted <VToaster> touches the DOM
+ * (Popover API) and arms the auto-dismiss timers.
  */
 
 export type ToastTone = 'neutral' | 'accent' | 'success' | 'danger' | 'warning'
@@ -20,34 +20,34 @@ export type ToastPlacement =
   'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
 
 export interface ToastOptions {
-  /** Corps de la notification. */
+  /** Body of the notification. */
   message: string
   title?: string
   tone?: ToastTone
-  /** `tonal` : fond teinté + bordure ; `solid` : couleur pleine. */
+  /** `tonal`: tinted background + border; `solid`: full colour. */
   variant?: 'tonal' | 'solid'
   /**
-   * Nom d'icône ou rendu explicite ; `false` = pas d'icône ;
-   * absent = icône par défaut du tone.
+   * An icon name or an explicit render; `false` = no icon; absent = the tone's
+   * default icon.
    */
   icon?: IconSource | false
   /**
-   * Durée d'affichage en ms ; `0` = reste affiché jusqu'à fermeture
-   * manuelle ; absent = durée du VToaster (5000 par défaut).
+   * Display duration in ms; `0` = stays until manually dismissed; absent = the
+   * VToaster's duration (5000 by default).
    */
   duration?: number
-  /** Absent = placement du VToaster (`bottom-right` par défaut). */
+  /** Absent = the VToaster's placement (`bottom-right` by default). */
   placement?: ToastPlacement
-  /** Affiche la croix de fermeture. */
+  /** Displays the close cross. */
   closable?: boolean
   /**
-   * Largeur (longueur CSS) ; défaut `--vectis-control-size-toast-width`.
-   * Toujours bornée à la largeur du viewport moins les marges.
+   * Width (a CSS length); default `--vectis-control-size-toast-width`. Always bounded
+   * by the viewport width minus the margins.
    */
   width?: string
 }
 
-/** Un toast normalisé dans la file (interne, rendu par <VToaster>). */
+/** A normalized toast in the queue (internal, rendered by <VToaster>). */
 export interface ToastItem extends ToastOptions {
   id: number
   tone: ToastTone
@@ -55,15 +55,15 @@ export interface ToastItem extends ToastOptions {
   closable: boolean
 }
 
-/** File réactive, consommée par <VToaster> — non réexportée par index.ts. */
+/** The reactive queue, consumed by <VToaster> — not re-exported by index.ts. */
 export const toasts = reactive<ToastItem[]>([])
 
 let nextId = 0
 
 /**
- * Ajoute une notification à la file et retourne son id (utilisable avec
- * `dismissToast`). Les défauts dépendant du VToaster (placement, duration)
- * sont résolus par lui — seule source de vérité de ses props.
+ * Adds a notification to the queue and returns its id (usable with `dismissToast`).
+ * The defaults that depend on the VToaster (placement, duration) are resolved by it
+ * — the single source of truth for its own props.
  */
 export function toast(options: ToastOptions): number {
   const id = nextId++
@@ -71,7 +71,7 @@ export function toast(options: ToastOptions): number {
   return id
 }
 
-/** Retire un toast par id ; sans argument, vide toute la file. */
+/** Removes a toast by id; with no argument, empties the whole queue. */
 export function dismissToast(id?: number): void {
   if (id === undefined) {
     toasts.length = 0

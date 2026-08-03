@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VAvatar from '../VAvatar/VAvatar.vue'
 import VButton from '../VButton/VButton.vue'
 import VChip from '../VChip/VChip.vue'
@@ -9,8 +10,50 @@ import VInput from '../VInput/VInput.vue'
 import VTypography from '../VTypography/VTypography.vue'
 import VSkeletonLoader from './VSkeletonLoader.vue'
 
+const t = storyText({
+  en: {
+    component: 'Component',
+    skeleton: 'Skeleton',
+    save: 'Save',
+    activeFilter: 'Active filter',
+    name: 'Name',
+    salesAnalysis: 'Sales analysis',
+    salesBody: 'The quarter closes on a 12% rise in revenue.',
+    salesBodyLong: 'The quarter closes on a 12% rise in revenue, driven by annual subscriptions.',
+    load: 'Load',
+    reload: 'Reload',
+    loadingResults: 'Loading the results…',
+    zeroLines: 'lines = 0 → one line all the same',
+    twelveLines: '12 lines in 120px of height (compression)',
+    surfaceInParent: 'a surface in a parent with a defined height: it takes it',
+    circleInWideParent: 'a circle in a very wide parent: it stays round',
+    tightLeading: 'tight line-height: the gutter does not go negative',
+    explicitHeight: 'explicit height: it wins over shape and size',
+  },
+  fr: {
+    component: 'Composant',
+    skeleton: 'Skeleton',
+    save: 'Enregistrer',
+    activeFilter: 'Filtre actif',
+    name: 'Nom',
+    salesAnalysis: 'Analyse des ventes',
+    salesBody: "Le trimestre s'achève sur une progression de 12 % du chiffre d'affaires.",
+    salesBodyLong:
+      "Le trimestre s'achève sur une progression de 12 % du chiffre d'affaires, portée par les abonnements annuels.",
+    load: 'Charger',
+    reload: 'Recharger',
+    loadingResults: 'Chargement des résultats…',
+    zeroLines: 'lines = 0 → une ligne quand même',
+    twelveLines: '12 lignes dans 120px de haut (compression)',
+    surfaceInParent: 'surface dans un parent de hauteur définie : elle la prend',
+    circleInWideParent: 'cercle dans un parent très large : il reste rond',
+    tightLeading: 'line-height serré : la gouttière ne devient pas négative',
+    explicitHeight: 'hauteur explicite : elle prime sur shape et size',
+  },
+})
+
 const meta = {
-  title: 'Composants/SkeletonLoader',
+  title: 'Components/SkeletonLoader',
   component: VSkeletonLoader,
   argTypes: {
     shape: { control: 'select', options: ['text', 'control', 'pill', 'circle', 'surface'] },
@@ -30,8 +73,8 @@ const meta = {
   render: (args) => ({
     components: { VSkeletonLoader },
     setup: () => ({ args }),
-    // une silhouette a besoin d'une largeur pour se voir : le composant n'en a
-    // pas d'intrinsèque, c'est au conteneur de la donner (idiome VProgressLinear)
+    // a silhouette needs a width to be seen: the component has no intrinsic one,
+    // it is up to the container to give it (the VProgressLinear idiom)
     template: '<div style="width: 320px"><VSkeletonLoader v-bind="args" /></div>',
   }),
 } satisfies Meta<typeof VSkeletonLoader>
@@ -43,20 +86,20 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const item = canvasElement.querySelector('.v-skeleton-item')!
 
-    // Canari de câblage : jsdom ne voit ni pseudo-élément ni keyframes. Rougit
-    // si l'animation est renommée, mal layerisée, ou si le ::after disparaît.
+    // Wiring canary: jsdom sees neither pseudo-elements nor keyframes. Goes red if
+    // the animation is renamed, mis-layered, or if the ::after disappears.
     await waitFor(() =>
       expect(getComputedStyle(item, '::after').animationName).toBe('v-skeleton-wave'),
     )
 
-    // Canari de la syntaxe de couleur relative : si `oklch(from …)` n'était pas
-    // supporté, `--skeleton-highlight` serait invalide au calcul, la déclaration
-    // entière le deviendrait avec elle (elle contient un var()) et le dégradé
-    // retomberait à `none` — bande invisible, sans la moindre erreur console.
+    // Relative colour syntax canary: were `oklch(from …)` unsupported,
+    // `--skeleton-highlight` would be invalid at computed-value time, the whole
+    // declaration would go with it (it contains a var()) and the gradient would fall
+    // back to `none` — an invisible band, with no console error at all.
     await expect(getComputedStyle(item, '::after').backgroundImage).not.toBe('none')
 
-    // La dernière ligne d'un paragraphe est raccourcie : c'est ce détail qui
-    // fait lire « bloc de texte » plutôt que « tableau ».
+    // The last line of a paragraph is shortened: that detail is what reads as a
+    // "block of text" rather than a "table".
     const items = canvasElement.querySelectorAll('.v-skeleton-item')
     const first = items[0]!.getBoundingClientRect().width
     const last = items[items.length - 1]!.getBoundingClientRect().width
@@ -65,43 +108,43 @@ export const Default: Story = {
 }
 
 /**
- * Chaque forme pose un rayon du design system et une règle de hauteur. `text`
- * suit la typo héritée, `control`/`pill`/`circle` l'échelle des contrôles,
- * `surface` un token dédié.
+ * Each shape sets a design system radius and a height rule. `text` follows the
+ * inherited typography, `control`/`pill`/`circle` the control scale, and `surface` a
+ * dedicated token.
  */
-export const Formes: Story = {
+export const Shapes: Story = {
   render: () => ({
     components: { VSkeletonLoader },
     setup: () => ({
-      formes: ['text', 'control', 'pill', 'circle', 'surface'] as const,
+      shapes: ['text', 'control', 'pill', 'circle', 'surface'] as const,
     }),
     template: `
       <div style="display: grid; gap: 20px; width: 320px">
-        <div v-for="forme in formes" :key="forme" style="display: grid; gap: 4px">
-          <small style="color: var(--vectis-color-text-muted)">{{ forme }}</small>
-          <VSkeletonLoader :shape="forme" />
+        <div v-for="shape in shapes" :key="shape" style="display: grid; gap: 4px">
+          <small style="color: var(--vectis-color-text-muted)">{{ shape }}</small>
+          <VSkeletonLoader :shape="shape" />
         </div>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
-    // une silhouette par forme, dans l'ordre du tableau `formes`
+    // one silhouette per shape, in the order of the `shapes` array
     const items = canvasElement.querySelectorAll('.v-skeleton-item')
 
-    // le cercle transfère sa largeur depuis sa hauteur
+    // the circle transfers its width from its height
     const circle = items[3]!.getBoundingClientRect()
     await waitFor(() => expect(circle.width).toBeCloseTo(circle.height, 0))
-    // la surface prend la hauteur de son token (96px)
+    // the surface takes the height of its token (96px)
     await expect(items[4]!.getBoundingClientRect().height).toBeCloseTo(96, 0)
-    // la ligne de texte est à la hauteur de la police, pas d'un contrôle
+    // the line of text is at the font's height, not a control's
     await expect(items[0]!.getBoundingClientRect().height).toBeLessThan(24)
   },
 }
 
 /**
- * Les deux animations éclaircissent la silhouette avec le même reflet dérivé du
- * fond : `wave` le fait traverser, `pulse` le fait monter et redescendre sur
- * place. `none` fige. La wave se lit surtout sur les grandes surfaces.
+ * Both animations lighten the silhouette with the same highlight derived from the
+ * background: `wave` sends it across, `pulse` raises and lowers it in place. `none`
+ * freezes. The wave reads mostly on large surfaces.
  */
 export const Animations: Story = {
   render: () => ({
@@ -119,38 +162,38 @@ export const Animations: Story = {
   play: async ({ canvasElement }) => {
     const [wave, pulse, none] = canvasElement.querySelectorAll('.v-skeleton-item')
 
-    // Les deux animations partagent le calque et ÉCLAIRCISSENT : un pulse rendu
-    // par l'opacité de la silhouette ferait fondre vers le fond de la page,
-    // donc assombrirait en thème sombre. Le calque du pulse est un aplat.
+    // Both animations share the layer and LIGHTEN: a pulse rendered through the
+    // silhouette's opacity would fade towards the page background, hence darken in a
+    // dark theme. The pulse's layer is a flat fill.
     await waitFor(() =>
       expect(getComputedStyle(pulse!, '::after').animationName).toBe('v-skeleton-pulse'),
     )
     await expect(getComputedStyle(pulse!, '::after').backgroundImage).toBe('none')
     await expect(getComputedStyle(wave!, '::after').backgroundImage).not.toBe('none')
-    // `none` ne pose aucun calque : la règle est qualifiée par data-animation
+    // `none` sets no layer at all: the rule is qualified by data-animation
     await expect(getComputedStyle(none!, '::after').content).toBe('none')
   },
 }
 
 /**
- * `size` et `compact` reprennent l'échelle des contrôles du design system
- * (24/32/40/48/56px) : un skeleton `md` fait exactement la hauteur d'un VButton
- * `md`. Sans effet sur `text` et `surface`, qui ont leur propre règle.
+ * `size` and `compact` take the design system's control scale (24/32/40/48/56px): an
+ * `md` skeleton is exactly the height of an `md` VButton. No effect on `text` and
+ * `surface`, which have a rule of their own.
  */
-export const Tailles: Story = {
+export const Sizes: Story = {
   render: () => ({
     components: { VSkeletonLoader },
-    setup: () => ({ tailles: ['xs', 'sm', 'md', 'lg', 'xl'] as const }),
+    setup: () => ({ sizes: ['xs', 'sm', 'md', 'lg', 'xl'] as const }),
     template: `
       <div style="display: grid; gap: 20px">
         <div style="display: flex; gap: 12px; align-items: flex-start">
-          <VSkeletonLoader v-for="t in tailles" :key="t" shape="circle" :size="t" />
+          <VSkeletonLoader v-for="s in sizes" :key="s" shape="circle" :size="s" />
         </div>
         <div style="display: grid; gap: 8px; width: 240px">
-          <VSkeletonLoader v-for="t in tailles" :key="t" shape="control" :size="t" />
+          <VSkeletonLoader v-for="s in sizes" :key="s" shape="control" :size="s" />
         </div>
         <div style="display: grid; gap: 8px; width: 240px">
-          <!-- compact : -4px de hauteur, comme partout ailleurs dans le DS -->
+          <!-- compact: -4px of height, as everywhere else in the DS -->
           <VSkeletonLoader shape="control" size="md" />
           <VSkeletonLoader shape="control" size="md" compact />
         </div>
@@ -160,12 +203,11 @@ export const Tailles: Story = {
 }
 
 /**
- * En `shape="text"`, la hauteur vaut `1em` et la gouttière l'interlignage : N
- * lignes occupent exactement N lignes de texte, quelle que soit la typo du
- * parent — le remplacement par le contenu réel ne fait pas sauter la mise en
- * page.
+ * In `shape="text"`, the height is `1em` and the gutter the leading: N lines occupy
+ * exactly N lines of text, whatever the parent's typography — replacing them with the
+ * real content does not shift the layout.
  */
-export const Paragraphe: Story = {
+export const Paragraph: Story = {
   render: () => ({
     components: { VSkeletonLoader },
     template: `
@@ -182,39 +224,38 @@ export const Paragraphe: Story = {
 }
 
 /**
- * La promesse du composant : reproduire la silhouette de n'importe quel
- * composant du design system. À gauche le composant réel, à droite son
- * skeleton — même forme, même taille, même rythme.
+ * The component's promise: reproducing the silhouette of any design system
+ * component. On the left the real component, on the right its skeleton — same shape,
+ * same size, same rhythm.
  */
-export const SilhouettesDuDesignSystem: Story = {
+export const DesignSystemSilhouettes: Story = {
   render: () => ({
     components: { VSkeletonLoader, VAvatar, VButton, VChip, VInput, VTypography },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px 32px; width: 560px; align-items: start">
-        <VTypography variant="overline" tone="muted" as="p">Composant</VTypography>
-        <VTypography variant="overline" tone="muted" as="p">Skeleton</VTypography>
+        <VTypography variant="overline" tone="muted" as="p">{{ t.component }}</VTypography>
+        <VTypography variant="overline" tone="muted" as="p">{{ t.skeleton }}</VTypography>
 
-        <VButton size="md">Enregistrer</VButton>
+        <VButton size="md">{{ t.save }}</VButton>
         <VSkeletonLoader shape="control" size="md" width="128" />
 
         <VAvatar size="lg" name="Ada Lovelace" />
         <VSkeletonLoader shape="circle" size="lg" />
 
-        <VChip size="xs">Filtre actif</VChip>
+        <VChip size="xs">{{ t.activeFilter }}</VChip>
         <VSkeletonLoader shape="pill" size="xs" width="88" />
 
-        <VInput size="md" label="Nom" model-value="Ada Lovelace" />
-        <!-- l'étiquette est une ligne de texte, le champ une silhouette de contrôle -->
+        <VInput size="md" :label="t.name" model-value="Ada Lovelace" />
+        <!-- the label is a line of text, the field a control silhouette -->
         <div style="display: grid; gap: 4px">
           <VSkeletonLoader width="40%" />
           <VSkeletonLoader shape="control" size="md" />
         </div>
 
         <div style="border: 1px solid var(--vectis-color-border); border-radius: var(--vectis-radius-surface); padding: 16px; display: grid; gap: 12px">
-          <VTypography variant="heading-4">Analyse des ventes</VTypography>
-          <VTypography variant="body-sm" tone="muted">
-            Le trimestre s'achève sur une progression de 12 % du chiffre d'affaires.
-          </VTypography>
+          <VTypography variant="heading-4">{{ t.salesAnalysis }}</VTypography>
+          <VTypography variant="body-sm" tone="muted">{{ t.salesBody }}</VTypography>
         </div>
         <div style="border: 1px solid var(--vectis-color-border); border-radius: var(--vectis-radius-surface); padding: 16px; display: grid; gap: 12px">
           <VSkeletonLoader shape="control" size="sm" width="60%" />
@@ -226,18 +267,18 @@ export const SilhouettesDuDesignSystem: Story = {
 }
 
 /**
- * Il n'existe pas de mode enveloppe : le composant ne mesure jamais le contenu
- * qu'il remplace. L'idiome est un `v-if`/`v-else`, avec `aria-busy` sur le
- * conteneur — c'est lui qui porte l'annonce, pas le placeholder.
+ * There is no wrapper mode: the component never measures the content it replaces.
+ * The idiom is a `v-if`/`v-else`, with `aria-busy` on the container — it is the
+ * container that carries the announcement, not the placeholder.
  */
-export const RemplacementProgressif: Story = {
+export const ProgressiveReplacement: Story = {
   render: () => ({
     components: { VSkeletonLoader, VButton, VTypography },
-    setup: () => ({ pending: ref(true) }),
+    setup: () => ({ pending: ref(true), t }),
     template: `
       <div style="display: grid; gap: 16px; width: 360px">
         <VButton size="sm" variant="outline" @click="pending = !pending">
-          {{ pending ? 'Charger' : 'Recharger' }}
+          {{ pending ? t.load : t.reload }}
         </VButton>
         <div :aria-busy="pending || undefined" style="display: grid; gap: 8px">
           <template v-if="pending">
@@ -245,11 +286,8 @@ export const RemplacementProgressif: Story = {
             <VSkeletonLoader :lines="3" />
           </template>
           <template v-else>
-            <VTypography variant="heading-4">Analyse des ventes</VTypography>
-            <VTypography variant="body-sm" tone="muted">
-              Le trimestre s'achève sur une progression de 12 % du chiffre d'affaires,
-              portée par les abonnements annuels.
-            </VTypography>
+            <VTypography variant="heading-4">{{ t.salesAnalysis }}</VTypography>
+            <VTypography variant="body-sm" tone="muted">{{ t.salesBodyLong }}</VTypography>
           </template>
         </div>
       </div>
@@ -259,17 +297,17 @@ export const RemplacementProgressif: Story = {
     const canvas = within(canvasElement)
     await expect(canvasElement.querySelectorAll('.v-skeleton-item').length).toBeGreaterThan(0)
 
-    await canvas.getByRole('button', { name: 'Charger' }).click()
+    await canvas.getByRole('button', { name: 'Load' }).click()
     await waitFor(() => expect(canvasElement.querySelector('.v-skeleton')).toBeNull())
   },
 }
 
 /**
- * `color` remplace le fond ; le reflet de la wave en est dérivé par un delta de
- * clarté OKLCH, il reste donc correct sur une surface inhabituelle comme en
- * thème sombre, sans second réglage.
+ * `color` replaces the background; the wave's highlight is derived from it by an
+ * OKLCH lightness delta, so it stays correct on an unusual surface as well as in a
+ * dark theme, with no second setting.
  */
-export const CouleurCustom: Story = {
+export const CustomColor: Story = {
   render: () => ({
     components: { VSkeletonLoader },
     template: `
@@ -285,17 +323,18 @@ export const CouleurCustom: Story = {
 }
 
 /**
- * Un skeleton est décoratif par défaut : douze silhouettes ne doivent pas
- * produire douze annonces. `announce` (ou `label`, qui l'implique) n'est posé
- * que sur **une** instance par zone.
+ * A skeleton is decorative by default: twelve silhouettes must not produce twelve
+ * announcements. `announce` (or `label`, which implies it) is set on **one** instance
+ * per zone only.
  */
-export const Annonce: Story = {
+export const Announcement: Story = {
   render: () => ({
     components: { VSkeletonLoader },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 8px; width: 320px">
-        <!-- une seule annonce, située ; les suivantes sont muettes -->
-        <VSkeletonLoader shape="control" size="sm" label="Chargement des résultats…" />
+        <!-- a single, situated announcement; the rest stay silent -->
+        <VSkeletonLoader shape="control" size="sm" :label="t.loadingResults" />
         <VSkeletonLoader v-for="n in 11" :key="n" shape="control" size="sm" />
       </div>
     `,
@@ -306,41 +345,42 @@ export const Annonce: Story = {
 }
 
 /**
- * Conteneurs dégénérés, hauteurs imposées et valeurs hors bornes : la
- * silhouette se dégrade sans jamais disparaître.
+ * Degenerate containers, imposed heights and out-of-bounds values: the silhouette
+ * degrades without ever disappearing.
  */
-export const CasLimites: Story = {
+export const EdgeCases: Story = {
   render: () => ({
     components: { VSkeletonLoader },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 24px">
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--vectis-color-text-muted)">lines = 0 → une ligne quand même</small>
+          <small style="color: var(--vectis-color-text-muted)">{{ t.zeroLines }}</small>
           <div style="width: 200px"><VSkeletonLoader :lines="0" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--vectis-color-text-muted)">12 lignes dans 120px de haut (compression)</small>
+          <small style="color: var(--vectis-color-text-muted)">{{ t.twelveLines }}</small>
           <div style="width: 200px; height: 120px"><VSkeletonLoader :lines="12" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--vectis-color-text-muted)">surface dans un parent de hauteur définie : elle la prend</small>
+          <small style="color: var(--vectis-color-text-muted)">{{ t.surfaceInParent }}</small>
           <div style="width: 200px; height: 40px"><VSkeletonLoader shape="surface" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--vectis-color-text-muted)">cercle dans un parent très large : il reste rond</small>
+          <small style="color: var(--vectis-color-text-muted)">{{ t.circleInWideParent }}</small>
           <div style="width: 480px"><VSkeletonLoader shape="circle" size="xl" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--vectis-color-text-muted)">line-height serré : la gouttière ne devient pas négative</small>
+          <small style="color: var(--vectis-color-text-muted)">{{ t.tightLeading }}</small>
           <div style="width: 200px; line-height: 0.5"><VSkeletonLoader :lines="3" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--vectis-color-text-muted)">hauteur explicite : elle prime sur shape et size</small>
+          <small style="color: var(--vectis-color-text-muted)">{{ t.explicitHeight }}</small>
           <div style="width: 200px"><VSkeletonLoader shape="control" size="xs" height="72" /></div>
         </div>
       </div>

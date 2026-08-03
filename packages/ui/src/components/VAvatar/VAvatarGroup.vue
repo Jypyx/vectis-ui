@@ -7,21 +7,21 @@ import type { AvatarSize } from './VAvatar.vue'
 import { avatarGroupKey } from './context'
 
 /**
- * Empile des VAvatar (celui de droite passe par-dessus celui de gauche, via un
- * chevauchement négatif + l'ordre de peinture DOM naturel — aucun JS de
- * positionnement). L'anneau `--avatar-ring-color` sépare visuellement les disques.
+ * Stacks VAvatars (the right-hand one paints over the left-hand one, through a
+ * negative overlap + the natural DOM paint order — no positioning JS). The
+ * `--avatar-ring-color` ring visually separates the discs.
  *
- * JS justifié : compter/tronquer les enfants du slot (impossible en HTML/CSS)
- * pour l'agrégat « +X » ; la propagation taille/compact passe par provide.
+ * JS justified: counting/truncating the slot's children (impossible in HTML/CSS)
+ * for the "+X" aggregate; the size/compact propagation goes through provide.
  */
 interface AvatarGroupProps {
-  /** Nombre max d'Avatars affichés avant l'agrégat « +X » (0/absent = tous). */
+  /** Maximum number of Avatars shown before the "+X" aggregate (0/absent = all). */
   max?: number
-  /** Taille propagée aux Avatars enfants (sauf prop `size` explicite sur l'enfant). */
+  /** Size propagated to the child Avatars (unless the child sets an explicit `size`). */
   size?: AvatarSize
-  /** Compact propagé aux Avatars enfants. */
+  /** Compact propagated to the child Avatars. */
   compact?: boolean
-  /** Couleur de l'anneau de séparation (défaut : fond de page). */
+  /** Colour of the separation ring (default: the page background). */
   ringColor?: string
 }
 
@@ -33,9 +33,9 @@ const props = withDefaults(defineProps<AvatarGroupProps>(), {
 })
 
 defineSlots<{
-  /** Les Avatars à empiler. */
+  /** The Avatars to stack. */
   default?(): unknown
-  /** Agrégat des Avatars masqués ; `count` = nombre restant. */
+  /** Aggregate of the hidden Avatars; `count` = the remaining number. */
   overflow?(props: { count: number }): unknown
 }>()
 
@@ -50,8 +50,8 @@ provide(avatarGroupKey, {
 
 const slots = useSlots()
 
-// Aplatit les VNodes du slot : les Fragments (v-for) sont dépliés, les
-// commentaires (v-if faux) et textes blancs ignorés — pour un comptage exact.
+// Flattens the slot's VNodes: Fragments (v-for) are unwrapped, comments (a false
+// v-if) and whitespace text ignored — for an exact count.
 const flatten = (nodes: VNode[] | undefined): VNode[] => {
   const out: VNode[] = []
   for (const node of nodes ?? []) {
@@ -74,18 +74,18 @@ const visibleItems = computed(() =>
 )
 const overflowCount = computed(() => items.value.length - visibleItems.value.length)
 
-// Composant fonctionnel : rend les VNodes déjà capturés (impossible via
-// <component :is> qui attend une définition, pas un vnode).
+// A functional component: renders the already-captured VNodes (impossible through
+// <component :is>, which expects a definition, not a vnode).
 const VisibleAvatars = () => visibleItems.value
 
 const rootStyle = computed<StyleValue>(() =>
   props.ringColor !== undefined ? { '--avatar-ring-color': props.ringColor } : undefined,
 )
 
-// Le groupe porte v-control pour définir --control-height à SON niveau : le
-// chevauchement reste calculable même si un enfant est enveloppé (ex. un
-// VTooltip pose un <span> entre le groupe et le VAvatar). Un VAvatar de taille
-// propre redéfinit --control-height sur lui-même → son overlap suit sa taille.
+// The group carries v-control so --control-height is defined at ITS level: the
+// overlap stays computable even when a child is wrapped (e.g. a VTooltip puts a
+// <span> between the group and the VAvatar). A VAvatar with a size of its own
+// redefines --control-height on itself → its overlap follows its size.
 const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? 'md')
 </script>
 
@@ -107,21 +107,21 @@ const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? 'md')
 <style>
 @layer vectis.components {
   .v-avatar-group {
-    /* anneau de séparation hérité par chaque .v-avatar enfant */
+    /* Separation ring, inherited by every child .v-avatar */
     --avatar-ring-color: var(--vectis-color-surface);
     display: inline-flex;
     align-items: center;
   }
 
-  /* Chevauchement : chaque disque mord sur le précédent ; l'ordre DOM fait que
-     le suivant (à droite) peint par-dessus. Cible l'enfant direct quel qu'il
-     soit (VAvatar nu OU wrapper d'un VTooltip) → --control-height vient du
-     groupe, un VAvatar de taille propre l'écrase sur lui-même. Ratio unitless. */
+  /* Overlap: each disc bites into the previous one; the DOM order makes the next
+     (right-hand) one paint over it. Targets the direct child whatever it is (a bare
+     VAvatar OR a VTooltip wrapper) → --control-height comes from the group, and a
+     VAvatar with a size of its own overrides it on itself. A unitless ratio. */
   .v-avatar-group > * + * {
     margin-inline-start: calc(var(--control-height) * -0.3);
   }
 
-  /* Au survol/focus, l'élément remonte au-dessus de ses voisins. */
+  /* On hover/focus, the element rises above its neighbours. */
   .v-avatar-group > *:hover,
   .v-avatar-group > *:focus-within {
     z-index: 1;

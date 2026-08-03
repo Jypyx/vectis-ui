@@ -5,96 +5,94 @@ import * as VAvatarStories from './VAvatar.stories'
 
 # Avatar
 
-Représentation ronde d'une personne (ou entité) avec une **cascade de contenu** : image →
-icône → initiales (dérivées du nom) → slot de repli. La taille suit l'échelle unifiée des
-contrôles (`xs`/`sm`/`md`/`lg`/`xl`, comme `VButton`), la couleur est dérivée automatiquement
-du nom ou fournie par le consommateur, et l'avatar peut devenir **cliquable** (lien ou bouton)
-au besoin.
+A round representation of a person (or entity) with a **content cascade**: image → icon →
+initials (derived from the name) → fallback slot. The size follows the unified control scale
+(`xs`/`sm`/`md`/`lg`/`xl`, like `VButton`), the colour is derived automatically from the name or
+supplied by the consumer, and the avatar can become **clickable** (a link or a button) when
+needed.
 
-<Canvas of={VAvatarStories.Initiales} />
+<Canvas of={VAvatarStories.Initials} />
 
-<Controls of={VAvatarStories.Initiales} />
+<Controls of={VAvatarStories.Initials} />
 
-## Tailles
+## Sizes
 
-Échelle partagée `xs`/`sm`/`md`/`lg`/`xl` (24 → 56px) via la classe `v-control` — la même
-que `VButton`, `VInput`, etc. Le disque est carré (`--control-height`), les initiales suivent
-la typo tokenisée du contrôle (`--control-font-size`).
+The shared `xs`/`sm`/`md`/`lg`/`xl` scale (24 → 56px) through the `v-control` class — the same
+one as `VButton`, `VInput`, and the rest. The disc is square (`--control-height`), and the
+initials follow the control's tokenized typography (`--control-font-size`).
 
-<Canvas of={VAvatarStories.Tailles} />
+<Canvas of={VAvatarStories.Sizes} />
 
 ## Compact
 
-`compact` retranche 4px à la hauteur à chaque taille (typo et icône inchangées) — cohérent
-avec les autres contrôles.
+`compact` takes 4px off the height at every size (type and icon unchanged) — consistent with the
+other controls.
 
 <Canvas of={VAvatarStories.Compact} />
 
-## Contenu : image, icône, initiales
+## Content: image, icon, initials
 
-La source affichée suit une priorité stricte :
+The displayed source follows a strict priority:
 
-1. **`src`** — l'image. Si son chargement échoue (`error`), l'avatar bascule automatiquement
-   sur le repli suivant.
-2. **`icon`** — nom d'icône **ou** rendu explicite (`{ src: '/logo.svg' }`, `{ component }`).
-   L'icône occupe ~55% du disque.
-3. **`name`** — les **initiales** (deux premiers mots, en majuscules).
-4. Le **slot par défaut** — échappatoire (ex. l'agrégat « +X » de `VAvatarGroup`), remplace les
-   initiales.
+1. **`src`** — the image. If its loading fails (`error`), the avatar automatically falls through
+   to the next fallback.
+2. **`icon`** — an icon name **or** an explicit render (`{ src: '/logo.svg' }`, `{ component }`).
+   The icon occupies ~55% of the disc.
+3. **`name`** — the **initials** (the first two words, in capitals).
+4. The **default slot** — the escape hatch (e.g. `VAvatarGroup`'s "+X" aggregate), replacing the
+   initials.
 
-<Canvas of={VAvatarStories.AvecImage} />
-<Canvas of={VAvatarStories.Icone} />
+<Canvas of={VAvatarStories.WithImage} />
+<Canvas of={VAvatarStories.Icon} />
 
-> Les icônes rendues par le DS lui-même sont des SVG embarqués : aucune police n'est requise.
-> Vos propres noms d'icônes, eux, viennent de la police ou de la bibliothèque que vous
-> branchez (voir le README).
+> The icons the design system renders itself are embedded SVGs: no font is required. Your own
+> icon names, on the other hand, come from the font or the library you wire in (see the README).
 
-Si l'image est cassée, le repli initiales prend le relais sans intervention :
+If the image is broken, the initials fallback takes over with no intervention:
 
-<Canvas of={VAvatarStories.ImageCassee} />
+<Canvas of={VAvatarStories.BrokenImage} />
 
-## Couleur automatique
+## Automatic colour
 
-À défaut d'image ou de couleur custom, une **teinte OKLCH déterministe** est dérivée du `name`
-(hash pur JS, donc SSR-safe) : chaque personne obtient une couleur stable et distincte. Seule
-la teinte est posée en ligne (`--avatar-hue`, scalaire) ; le CSS compose fond et texte avec des
-clartés/chromas fixés **par thème**, donc l'adaptation clair/sombre se fait sans dépendre de
+In the absence of an image or a custom colour, a **deterministic OKLCH hue** is derived from
+`name` (a pure JS hash, hence SSR-safe): each person gets a stable, distinct colour. Only the hue
+is set inline (`--avatar-hue`, a scalar); the CSS composes the background and the text with
+lightness/chroma fixed **per theme**, so the light/dark adaptation happens without depending on
 `contrast-color()`.
 
-<Canvas of={VAvatarStories.CouleurAuto} />
+<Canvas of={VAvatarStories.AutoColor} />
 
-> Comme pour la couleur custom de `VChip`/`VBadge`, la teinte auto est une couleur **calculée
-> hors tokens** — exception assumée à la règle « aucune valeur brute », circonscrite au cas des
-> avatars.
+> As with the custom colour of `VChip`/`VBadge`, the auto hue is a colour **computed outside the
+> tokens** — a deliberate exception to the "no raw value" rule, confined to the avatar case.
 
-## Couleur custom
+## Custom colour
 
-La prop `color` (hexadécimal, nom CSS ou `oklch()`) **remplace la teinte auto**, avec un texte
-blanc fixe (le contraste d'une couleur claire est à la charge du consommateur).
+The `color` prop (hexadecimal, a CSS name or `oklch()`) **replaces the auto hue**, with a fixed
+white text (the contrast of a light colour is the consumer's responsibility).
 
-<Canvas of={VAvatarStories.CouleurCustom} />
+<Canvas of={VAvatarStories.CustomColor} />
 
-## Cliquable
+## Clickable
 
-Par priorité : `href` → `<a>`, sinon `clickable` → `<button>`, sinon `<span>` statique. Un lien
-`disabled` devient **inerte** (href retiré + `aria-disabled`, modèle `VButton`). Seul l'avatar
-interactif expose un survol et un anneau de focus clavier.
+By priority: `href` → `<a>`, otherwise `clickable` → `<button>`, otherwise a static `<span>`. A
+`disabled` link becomes **inert** (href removed + `aria-disabled`, the `VButton` model). Only the
+interactive avatar exposes a hover state and a keyboard focus ring.
 
-<Canvas of={VAvatarStories.Cliquable} />
+<Canvas of={VAvatarStories.Clickable} />
 
 ## VTooltip
 
-L'avatar ne porte aucune API de tooltip dédiée : on l'enveloppe dans un `VTooltip` et on lui
-transmet `triggerProps` par fallthrough. Le tooltip s'ouvrant au survol **et au focus**,
-l'avatar doit être focusable — le rendre `clickable` (bouton).
+The avatar carries no dedicated tooltip API: wrap it in a `VTooltip` and pass it `triggerProps`
+through fallthrough. Since the tooltip opens on hover **and on focus**, the avatar must be
+focusable — make it `clickable` (a button).
 
-<Canvas of={VAvatarStories.AvecTooltip} />
+<Canvas of={VAvatarStories.WithTooltip} />
 
-## Accessibilité
+## Accessibility
 
-- **Repli avec nom, non interactif** : l'avatar porte `role="img"` + `aria-label` (le `alt`
-  prime sur le `name`). Les initiales/icône visibles sont `aria-hidden`.
-- **Sans nom ni image** : décoratif — aucun rôle annoncé à tort.
-- **Image** : le texte alternatif est porté par l'`alt` de l'`<img>` (`alt` ou `name`).
-- **Interactif** (`<a>`/`<button>`) : le nom accessible vient de l'`aria-label` ; pas de
-  `role="img"` superflu.
+- **Name fallback, non-interactive**: the avatar carries `role="img"` + `aria-label` (`alt` wins
+  over `name`). The visible initials/icon are `aria-hidden`.
+- **With neither name nor image**: decorative — no role wrongly announced.
+- **Image**: the alternative text is carried by the `<img>`'s `alt` (`alt` or `name`).
+- **Interactive** (`<a>`/`<button>`): the accessible name comes from `aria-label`; no superfluous
+  `role="img"`.

@@ -1,19 +1,17 @@
 <script setup lang="ts">
 /**
- * Placeholder de chargement 100 % CSS : la silhouette d'un composant du design
- * system pendant que son contenu arrive.
+ * A 100% CSS loading placeholder: the silhouette of a design system component
+ * while its content is on its way.
  *
- * La racine est un CONTENEUR (modèle VSpinner) et non la silhouette peinte
- * (modèle VProgressLinear) : c'est ce qui rend `lines` gratuit et garde TOUS les
- * sélecteurs uniformes — pas un cas « racine peinte » et un cas « enfant
- * peint ». Elle porte `v-control`, donc `size`/`compact` réutilisent la table
- * unique des hauteurs du DS : un skeleton `md` fait exactement la hauteur d'un
- * VButton `md`.
+ * The root is a CONTAINER (the VSpinner model) and not the painted silhouette (the
+ * VProgressLinear model): that is what makes `lines` free and keeps EVERY selector
+ * uniform — not one "painted root" case and one "painted child" case. It carries
+ * `v-control`, so `size`/`compact` reuse the DS's single height table: an `md`
+ * skeleton is exactly the height of an `md` VButton.
  *
- * Le composant ne MESURE jamais rien : aucune silhouette n'est déduite du
- * contenu qu'elle remplace, elle est déclarée. Les trois `computed` sont le
- * seul JS — ni événement, ni cycle de vie, ni DOM (précédent assumé de VSpinner
- * depuis son libellé).
+ * The component never MEASURES anything: no silhouette is deduced from the content
+ * it replaces, it is declared. The three `computed`s are the only JS — no event, no
+ * lifecycle, no DOM.
  */
 import { computed } from 'vue'
 
@@ -26,60 +24,57 @@ export type SkeletonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 interface SkeletonLoaderProps {
   /**
-   * Silhouette à épouser — chaque valeur pose un rayon du DS et une règle de
-   * hauteur :
-   * - `text` (défaut) : hauteur `1em`, centrée dans la boîte de ligne héritée —
-   *   la silhouette suit la typo du parent et N lignes occupent exactement
-   *   N lignes de texte ; rayon pilule.
-   * - `control` : hauteur prise sur l'échelle des contrôles (`size`), rayon
-   *   interactif — VButton, VInput, Select.
-   * - `pill` : idem `control` en rayon pilule — VChip, VBadge.
-   * - `circle` : idem `control` en ratio 1:1 — VAvatar, VIconButton rond.
-   * - `surface` : rayon de surface, hauteur par défaut au token — carte, image.
+   * Silhouette to match — each value sets a DS radius and a height rule:
+   * - `text` (the default): height `1em`, centred in the inherited line box — the
+   *   silhouette follows the parent's typography and N lines occupy exactly N lines
+   *   of text; pill radius.
+   * - `control`: height taken from the control scale (`size`), interactive radius —
+   *   VButton, VInput, a select.
+   * - `pill`: as `control` with a pill radius — VChip, VBadge.
+   * - `circle`: as `control` in a 1:1 ratio — VAvatar, a round VIconButton.
+   * - `surface`: surface radius, default height from the token — a card, an image.
    */
   shape?: SkeletonShape
   /**
-   * Taille sur l'échelle des contrôles du DS (24/32/40/48/56px). N'agit que sur
-   * `control`, `pill` et `circle` : `text` suit la typo héritée et `surface` a
-   * sa propre hauteur.
+   * Size on the DS control scale (24/32/40/48/56px). It only acts on `control`,
+   * `pill` and `circle`: `text` follows the inherited typography and `surface` has a
+   * height of its own.
    */
   size?: SkeletonSize
-  /** Hauteur réduite de 4px, comme partout ailleurs dans le DS. */
+  /** Height reduced by 4px, as everywhere else in the DS. */
   compact?: boolean
   /**
-   * Largeur : nombre → px, chaîne CSS libre sinon (`'100%'`, `'12ch'`). À
-   * défaut, la silhouette occupe la largeur disponible.
+   * Width: a number → px, otherwise a free CSS string (`'100%'`, `'12ch'`). By
+   * default the silhouette takes the available width.
    */
   width?: number | string
-  /** Hauteur, mêmes règles que `width` — prime sur `shape` et `size`. */
+  /** Height, same rules as `width` — wins over `shape` and `size`. */
   height?: number | string
   /**
-   * Nombre de silhouettes empilées. En `shape="text"`, la DERNIÈRE est
-   * raccourcie : c'est ce détail qui fait lire « paragraphe » plutôt que
-   * « tableau ». Borné à 1 minimum.
+   * Number of stacked silhouettes. In `shape="text"` the LAST one is shortened:
+   * that detail is what reads as a "paragraph" rather than a "table". Floored at 1.
    */
   lines?: number
   /**
-   * Animation de chargement. `none` fige la silhouette (impression, capture,
-   * ou animation pilotée par un parent).
+   * Loading animation. `none` freezes the silhouette (printing, a screenshot, or an
+   * animation driven by a parent).
    */
   animation?: SkeletonAnimation
   /**
-   * Fond custom (hex, nom CSS ou `oklch()`) — remplace le token. Le reflet de
-   * la `wave` en est DÉRIVÉ : il reste correct sans second réglage.
+   * Custom background (hex, CSS name or `oklch()`) — replaces the token. The
+   * `wave`'s highlight is DERIVED from it: it stays correct with no second setting.
    */
   color?: string
   /**
-   * Annonce le chargement (`role="status"`). **Faux par défaut : un skeleton
-   * est décoratif** — une page en contient une dizaine, et autant d'annonces
-   * concurrentes seraient illisibles. L'annonce appartient au conteneur, qui
-   * porte `aria-busy` (précédent VButton).
+   * Announces the loading (`role="status"`). **False by default: a skeleton is
+   * decorative** — a page holds a dozen of them, and as many competing announcements
+   * would be unreadable. The announcement belongs to the container, which carries
+   * `aria-busy`.
    */
   announce?: boolean
   /**
-   * Texte annoncé ; **implique `announce`**. Défaut : dictionnaire du DS.
-   * Préférer un libellé situé (« Chargement des résultats… ») : c'est tout
-   * l'intérêt d'annoncer.
+   * Announced text; **implies `announce`**. Default: the DS dictionary. Prefer a
+   * situated label ("Loading the results…"): that is the whole point of announcing.
    */
   label?: string
 }
@@ -97,15 +92,15 @@ const props = withDefaults(defineProps<SkeletonLoaderProps>(), {
   label: undefined,
 })
 
-// Garde-fou : `v-for="n in 0"` ne rendrait RIEN — un skeleton invisible, donc
-// un bug muet. Un flottant rendrait un nombre de lignes surprenant.
+// Guard: `v-for="n in 0"` would render NOTHING — an invisible skeleton, hence a
+// silent bug. A float would render a surprising number of lines.
 const count = computed(() => Math.max(1, Math.trunc(props.lines)))
 
-// Fournir un `label` vaut demande d'annonce, sinon la prop serait inerte.
+// Supplying a `label` counts as asking for an announcement, or the prop would be inert.
 const announced = computed(() => props.announce || props.label !== undefined)
 
 const m = useMessages()
-// Jamais `.value.x` dans le corps du setup : la valeur serait figée.
+// Never `.value.x` in the setup body: the value would be frozen.
 const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 </script>
 
@@ -126,12 +121,11 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     }"
   >
     <!--
-      Le libellé est rendu AVANT les silhouettes, et c'est structurel : la règle
-      « dernière ligne raccourcie » s'appuie sur `.v-skeleton-item:last-child`,
-      qu'un libellé rendu en dernier casserait. Verrouillé par un test unitaire.
-      Il est absolument positionné (.v-visually-hidden), donc jamais un item
-      flex. Rendu CONDITIONNEL : dans un sous-arbre `aria-hidden`, ce serait un
-      texte mort.
+      The label is rendered BEFORE the silhouettes, and that is structural: the
+      "shortened last line" rule rests on `.v-skeleton-item:last-child`, which a label
+      rendered last would break. Locked by a unit test. It is absolutely positioned
+      (.v-visually-hidden), so never a flex item. Rendered CONDITIONALLY: inside an
+      `aria-hidden` subtree it would be dead text.
     -->
     <span v-if="announced" class="v-visually-hidden">{{ resolvedLabel }}</span>
     <span v-for="n in count" :key="n" class="v-skeleton-item" />
@@ -141,23 +135,23 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 <style>
 @layer vectis.components {
   /*
-   * Toute la géométrie tient dans quatre variables locales, posées par la table
-   * `[data-shape]` et surchargeables inline par les props de dimension (un
-   * style inline gagne toujours sur une règle visant le même élément).
+   * The whole geometry fits in four local variables, set by the `[data-shape]` table
+   * and overridable inline by the dimension props (an inline style always beats a
+   * rule targeting the same element).
    */
   .v-skeleton {
-    /* Fond : token dédié. Aucun rôle existant n'a la bonne valeur dans les DEUX
-       thèmes — `surface-muted` est trop pâle en clair pour qu'une pulsation se
-       voie, et `border` aurait le bon ton mais le mauvais rôle. */
+    /* Background: a dedicated token. No existing role has the right value in BOTH
+       themes — `surface-muted` is too pale in light for a pulse to show, and `border`
+       would have the right tone but the wrong role. */
     --skeleton-base: var(--vectis-color-surface-skeleton);
     /*
-     * Reflet DÉRIVÉ du fond (relative color syntax) : +0,06 de clarté OKLCH.
-     * Une même déclaration éclaircit correctement en clair — l'écrêtage naturel
-     * à L=1 tombe pile sur le blanc de la page — ET en sombre, où le fond
-     * (neutral.800) est plus CLAIR que la page (neutral.950) : viser une
-     * couleur cible par `color-mix` s'inverserait d'un thème à l'autre, un
-     * DELTA de clarté non. Elle suit aussi un `color` custom sans second
-     * réglage. Le delta est un ratio, même famille que les opacités.
+     * Highlight DERIVED from the background (relative color syntax): +0.06 of OKLCH
+     * lightness. One declaration lightens correctly in light — the natural clamp at
+     * L=1 lands exactly on the page white — AND in dark, where the background
+     * (neutral.800) is LIGHTER than the page (neutral.950): aiming at a target colour
+     * through `color-mix` would invert from one theme to the other, a lightness DELTA
+     * would not. It also follows a custom `color` with no second setting. The delta is
+     * a ratio, the same family as the opacities.
      */
     --skeleton-highlight: oklch(from var(--skeleton-base) calc(l + 0.06) c h);
     --skeleton-h: var(--control-height);
@@ -168,35 +162,33 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     gap: var(--skeleton-gap);
   }
 
-  /* Spécificité (0,2,0) > (0,1,0) : indépendant de l'ordre, contrairement aux
-     tones de VProgressLinear qui sont tous au même niveau. */
+  /* Specificity (0,2,0) > (0,1,0): independent of order, unlike VProgressLinear's
+     tones, which all sit at the same level. */
   .v-skeleton[data-custom] {
     --skeleton-base: var(--custom-color);
   }
 
   .v-skeleton-item {
-    /* ancre du ::after de la wave */
+    /* Anchor of the wave's ::after */
     position: relative;
-    /* la hauteur du token est un DÉFAUT : dans un parent de hauteur définie, la
-       silhouette la prend (une carte remplit son emplacement) */
+    /* The token height is a DEFAULT: inside a parent with a defined height the
+       silhouette takes it (a card fills its slot) */
     flex: 1 1 auto;
     inline-size: var(--skeleton-w, 100%);
     block-size: var(--skeleton-h);
-    /* `clip` et non `hidden` : `hidden` ferait de chaque silhouette un
-       conteneur de défilement (précédent VDataTable) */
+    /* `clip` and not `hidden`: `hidden` would make every silhouette a scroll
+       container */
     overflow: clip;
     border-radius: var(--skeleton-radius);
     background: var(--skeleton-base);
   }
 
-  /* --- Silhouettes ----------------------------------------------------- */
-
   /*
-   * Ligne de texte : hauteur = 1em, donc la TYPO héritée, barre centrée dans la
-   * boîte de ligne. Gouttière et padding dérivent du même interlignage, si bien
-   * que N lignes occupent exactement N lignes de texte — le remplacement par le
-   * contenu réel ne fait pas sauter la mise en page. `max()` protège d'un
-   * parent en `line-height` serré, où l'écart deviendrait négatif.
+   * A line of text: height = 1em, hence the INHERITED typography, the bar centred in
+   * the line box. Gutter and padding derive from the same leading, so that N lines
+   * occupy exactly N lines of text — replacing them with the real content does not
+   * shift the layout. `max()` protects against a parent with a tight `line-height`,
+   * where the gap would go negative.
    */
   .v-skeleton[data-shape='text'] {
     --skeleton-h: 1em;
@@ -205,16 +197,16 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     padding-block: calc(max(0px, calc(1lh - 1em)) / 2);
   }
 
-  /* Une ligne de texte garde sa hauteur typographique : elle ne s'étire pas
-     dans un parent haut et ne s'écrase pas dans un parent bas. */
+  /* A line of text keeps its typographic height: it neither stretches in a tall
+     parent nor squashes in a short one. */
   .v-skeleton[data-shape='text'] .v-skeleton-item {
     flex: none;
   }
 
   /*
-   * Dernière ligne raccourcie — le détail qui fait lire « paragraphe ». Le
-   * sélecteur `+` garantit à lui seul qu'il y a au moins deux lignes, et le
-   * ratio s'applique à la largeur EFFECTIVE, prop `width` comprise.
+   * A shortened last line — the detail that reads as a "paragraph". The `+` selector
+   * alone guarantees there are at least two lines, and the ratio applies to the
+   * EFFECTIVE width, the `width` prop included.
    */
   .v-skeleton[data-shape='text'] .v-skeleton-item + .v-skeleton-item:last-child {
     --skeleton-last-line: 0.6;
@@ -226,10 +218,10 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
   }
 
   /*
-   * Cercle : la largeur est TRANSFÉRÉE depuis la hauteur par `aspect-ratio` —
-   * `size` seul suffit donc à changer le diamètre. La racine se compose en
-   * ligne (comme un VAvatar) au lieu de barrer toute la largeur, et
-   * `align-items: start` empêche l'étirement inline : un cercle reste rond.
+   * Circle: the width is TRANSFERRED from the height by `aspect-ratio` — so `size`
+   * alone is enough to change the diameter. The root composes inline (like a VAvatar)
+   * instead of spanning the full width, and `align-items: start` prevents the inline
+   * stretch: a circle stays round.
    */
   .v-skeleton[data-shape='circle'] {
     --skeleton-radius: var(--vectis-radius-pill);
@@ -238,33 +230,30 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
   }
 
   .v-skeleton[data-shape='circle'] .v-skeleton-item {
-    /* `auto` et non 100% : c'est le ratio qui dérive la largeur. Une prop
-       `width` explicite reprend la main et assume l'ovale. */
+    /* `auto` and not 100%: the ratio is what derives the width. An explicit `width`
+       prop takes over and accepts the oval. */
     inline-size: var(--skeleton-w, auto);
     aspect-ratio: 1;
   }
 
   /*
-   * Surface (carte, image, bloc) : sa hauteur ne peut pas être devinée sans
-   * mesurer le DOM. Token de défaut, qu'une prop `height` — ou un style
-   * consommateur, non layerisé — surcharge. Même précédent que la longueur du
-   * VProgressLinear vertical.
+   * Surface (a card, an image, a block): its height cannot be guessed without
+   * measuring the DOM. A default token, which a `height` prop — or a consumer style,
+   * outside any layer — overrides.
    */
   .v-skeleton[data-shape='surface'] {
     --skeleton-h: var(--vectis-control-size-skeleton-surface);
     --skeleton-radius: var(--vectis-radius-surface);
   }
 
-  /* --- Animations ------------------------------------------------------ */
-
   /*
-   * Pulse : un aplat du reflet monte et redescend PAR-DESSUS la silhouette.
+   * Pulse: a flat fill of the highlight rises and falls OVER the silhouette.
    *
-   * Faire varier l'opacité de la silhouette elle-même serait plus court, mais
-   * la ferait fondre vers le fond de la PAGE — donc éclaircir en thème clair et
-   * ASSOMBRIR en thème sombre, à rebours de la wave. Passer par un calque au
-   * reflet dérivé donne le même sens dans les deux thèmes, et reste composité
-   * (c'est toujours une opacité qu'on anime, sur un pseudo-élément).
+   * Varying the opacity of the silhouette itself would be shorter, but it would fade
+   * towards the PAGE background — so lighten in light and DARKEN in dark, the
+   * opposite of the wave. Going through a layer with the derived highlight gives the
+   * same direction in both themes, and stays composited (it is still an opacity being
+   * animated, on a pseudo-element).
    */
   .v-skeleton[data-animation='pulse'] .v-skeleton-item::after {
     content: '';
@@ -276,19 +265,19 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
   }
 
   /*
-   * Wave : une bande de brillance traverse la silhouette.
+   * Wave: a band of brightness crosses the silhouette.
    *
-   * Le dégradé est SYMÉTRIQUE (transparent → reflet → transparent) : son angle
-   * physique est donc sans effet observable, il n'y a rien à inverser en RTL.
-   * Seul le SENS de la course compte, et il s'inverse par `animation-direction`
-   * — exact ici parce que la course est `linear`, donc réversible à l'identique
-   * (même argument que le mode indéterminé de VProgressLinear, dont la courbe
-   * symétrique autorise la relecture à l'envers).
+   * The gradient is SYMMETRIC (transparent → highlight → transparent): its physical
+   * angle therefore has no observable effect, and there is nothing to flip in RTL.
+   * Only the DIRECTION of the run matters, and it flips through `animation-direction`
+   * — exact here because the run is `linear`, hence reversible identically (the same
+   * argument as VProgressLinear's indeterminate mode, whose symmetric curve allows
+   * reading it backwards).
    *
-   * `translate` (composited) plutôt qu'une course en propriétés logiques comme
-   * VProgressLinear : ce composant n'a pas d'orientation verticale, la seule
-   * variable est le RTL — une règle. Le compromis s'inverse donc : une page
-   * peut contenir douze skeletons, la composition n'est plus négociable.
+   * `translate` (composited) rather than a run in logical properties as in
+   * VProgressLinear: this component has no vertical orientation, and the only
+   * variable is RTL — one rule. The trade-off therefore flips: a page may hold twelve
+   * skeletons, so compositing is no longer negotiable.
    */
   .v-skeleton[data-animation='wave'] .v-skeleton-item::after {
     content: '';
@@ -298,16 +287,15 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     animation: v-skeleton-wave calc(var(--vectis-duration-slow) * 5) linear infinite;
   }
 
-  /* Qualifié `wave` : le pulse partage ce calque mais sa course est symétrique,
-     l'inverser n'y voudrait rien dire. */
+  /* Qualified `wave`: the pulse shares this layer but its run is symmetric, so
+     reversing it would mean nothing. */
   .v-skeleton[data-animation='wave']:dir(rtl) .v-skeleton-item::after {
     animation-direction: reverse;
   }
 
-  /* Keyframes LOCALES : elles ne servent qu'à ce composant, elles restent donc
-     dans son <style>, à l'intérieur du layer (précédent
-     `v-progress-linear-indeterminate`). Seule `v-spin`, partagée par deux
-     composants, vit hors layer dans styles/utilities.css. */
+  /* LOCAL keyframes: they serve this component only, so they stay in its <style>,
+     inside the layer. Only `v-spin`, shared by two components, lives outside any
+     layer in styles/utilities.css. */
   @keyframes v-skeleton-pulse {
     from,
     to {
@@ -331,15 +319,14 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 
   @media (prefers-reduced-motion: reduce) {
     /*
-     * Doctrine du DS : ralentir, pas supprimer — un placeholder immobile ne dit
-     * plus « en cours ». Mais la wave est un DÉPLACEMENT, précisément ce que
-     * ces utilisateurs signalent : elle RETOMBE sur la pulsation, qui garde le
-     * signal sans translation. Les deux sont fortement ralenties.
+     * DS doctrine: slow down, do not remove — a motionless placeholder no longer says
+     * "in progress". But the wave is a TRANSLATION, precisely what these users are
+     * flagging: it FALLS BACK to the pulse, which keeps the signal with no motion.
+     * Both are heavily slowed.
      *
-     * Les deux animations partagent le même calque : il ne reste qu'à troquer
-     * le dégradé mobile contre l'aplat du reflet. La règle est à spécificité
-     * ÉGALE de celles de `wave` et de `pulse` — c'est sa position en fin de
-     * feuille qui tranche.
+     * The two animations share the same layer: all that is left is swapping the moving
+     * gradient for the flat highlight. This rule is at EQUAL specificity with those of
+     * `wave` and `pulse` — its position at the end of the sheet is what decides.
      */
     .v-skeleton:is([data-animation='wave'], [data-animation='pulse']) .v-skeleton-item::after {
       background-image: none;

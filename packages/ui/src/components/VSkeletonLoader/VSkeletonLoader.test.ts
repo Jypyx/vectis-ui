@@ -3,16 +3,16 @@ import { describe, expect, it } from 'vitest'
 
 import VSkeletonLoader from './VSkeletonLoader.vue'
 
-/** Racine du composant (elle porte la table des variantes et les dimensions). */
+/** Root of the component (it carries the variant table and the dimensions). */
 const rootOf = (container: Element) => container.querySelector('.v-skeleton') as HTMLElement
 
-/** Style inline de la racine (les custom properties y sont posées). */
+/** Inline style of the root (the custom properties are set there). */
 const styleOf = (container: Element) => rootOf(container).getAttribute('style') ?? ''
 
 const itemsOf = (container: Element) => container.querySelectorAll('.v-skeleton-item')
 
 describe('VSkeletonLoader', () => {
-  it('défauts : forme text, taille md, animation wave, une seule silhouette', () => {
+  it('defaults: text shape, md size, wave animation, a single silhouette', () => {
     const { container } = render(VSkeletonLoader)
     const root = rootOf(container)
 
@@ -22,12 +22,12 @@ describe('VSkeletonLoader', () => {
     expect(itemsOf(container)).toHaveLength(1)
   })
 
-  it('porte la classe v-control : sans elle --control-height est indéfinie et la hauteur s’effondre', () => {
+  it('carries the v-control class: without it --control-height is undefined and the height collapses', () => {
     const { container } = render(VSkeletonLoader)
     expect(rootOf(container).classList.contains('v-control')).toBe(true)
   })
 
-  it('lines : une silhouette par ligne', async () => {
+  it('lines: one silhouette per line', async () => {
     const { container, rerender } = render(VSkeletonLoader, { props: { lines: 4 } })
     expect(itemsOf(container)).toHaveLength(4)
 
@@ -35,9 +35,9 @@ describe('VSkeletonLoader', () => {
     expect(itemsOf(container)).toHaveLength(2)
   })
 
-  it('lines est borné à au moins une ligne entière : 0, négatif et décimal', async () => {
+  it('lines is floored at one whole line: 0, negative and decimal', async () => {
     const { container, rerender } = render(VSkeletonLoader, { props: { lines: 0 } })
-    // `v-for="n in 0"` ne rendrait rien : un skeleton invisible, donc un bug muet
+    // `v-for="n in 0"` would render nothing: an invisible skeleton, hence a silent bug
     expect(itemsOf(container)).toHaveLength(1)
 
     await rerender({ lines: -3 })
@@ -47,17 +47,17 @@ describe('VSkeletonLoader', () => {
     expect(itemsOf(container)).toHaveLength(3)
   })
 
-  it('shape et animation se reflètent en data-*', async () => {
+  it('shape and animation are reflected as data-*', async () => {
     const { container, rerender } = render(VSkeletonLoader, { props: { shape: 'circle' } })
     expect(rootOf(container).getAttribute('data-shape')).toBe('circle')
 
     await rerender({ shape: 'surface', animation: 'none' })
     expect(rootOf(container).getAttribute('data-shape')).toBe('surface')
-    // l'attribut reste posé : le consommateur peut cibler [data-animation='none']
+    // the attribute stays set: the consumer can target [data-animation='none']
     expect(rootOf(container).getAttribute('data-animation')).toBe('none')
   })
 
-  it('compact pose data-compact, sinon l’attribut est absent', async () => {
+  it('compact sets data-compact, otherwise the attribute is absent', async () => {
     const { container, rerender } = render(VSkeletonLoader)
     expect(rootOf(container).hasAttribute('data-compact')).toBe(false)
 
@@ -65,7 +65,7 @@ describe('VSkeletonLoader', () => {
     expect(rootOf(container).hasAttribute('data-compact')).toBe(true)
   })
 
-  it('width/height : nombre → px, chaîne CSS telle quelle, absentes → aucune custom property', async () => {
+  it('width/height: a number → px, a CSS string as-is, absent → no custom property', async () => {
     const { container, rerender } = render(VSkeletonLoader)
     expect(styleOf(container)).not.toContain('--skeleton-w')
     expect(styleOf(container)).not.toContain('--skeleton-h')
@@ -74,14 +74,14 @@ describe('VSkeletonLoader', () => {
     expect(styleOf(container)).toContain('--skeleton-w: 200px')
     expect(styleOf(container)).toContain('--skeleton-h: 48px')
 
-    // unité libre, contrairement à `px()` : la chaîne n'est pas interprétée
+    // a free unit, unlike `px()`: the string is not interpreted
     await rerender({ width: '100%', height: '12ch' })
     expect(styleOf(container)).toContain('--skeleton-w: 100%')
     expect(styleOf(container)).toContain('--skeleton-h: 12ch')
     expect(styleOf(container)).not.toContain('NaN')
   })
 
-  it('color pose data-custom et --custom-color ; sinon ni l’un ni l’autre', async () => {
+  it('color sets data-custom and --custom-color; otherwise neither', async () => {
     const { container, rerender } = render(VSkeletonLoader)
     expect(rootOf(container).hasAttribute('data-custom')).toBe(false)
     expect(styleOf(container)).not.toContain('--custom-color')
@@ -91,7 +91,7 @@ describe('VSkeletonLoader', () => {
     expect(rootOf(container).style.getPropertyValue('--custom-color')).toBe('oklch(60% 0.2 250)')
   })
 
-  it('décoratif par défaut : aria-hidden, aucun rôle, aucun texte', () => {
+  it('decorative by default: aria-hidden, no role, no text', () => {
     const { container, queryByRole } = render(VSkeletonLoader)
 
     expect(rootOf(container).getAttribute('aria-hidden')).toBe('true')
@@ -99,23 +99,23 @@ describe('VSkeletonLoader', () => {
     expect(rootOf(container).textContent).toBe('')
   })
 
-  it('announce : role="status", libellé du dictionnaire et aria-hidden retiré', () => {
+  it('announce: role="status", the dictionary label and aria-hidden removed', () => {
     const { container, getByRole } = render(VSkeletonLoader, { props: { announce: true } })
 
-    expect(getByRole('status').textContent).toContain('Chargement…')
+    expect(getByRole('status').textContent).toContain('Loading…')
     expect(rootOf(container).hasAttribute('aria-hidden')).toBe(false)
   })
 
-  it('label implique announce et prime sur le dictionnaire', () => {
-    const { getByRole } = render(VSkeletonLoader, { props: { label: 'Chargement des résultats…' } })
-    // `announce` n'est pas fourni : sans l'implication, la prop serait inerte
-    expect(getByRole('status').textContent).toContain('Chargement des résultats…')
+  it('label implies announce and wins over the dictionary', () => {
+    const { getByRole } = render(VSkeletonLoader, { props: { label: 'Loading the results…' } })
+    // `announce` is not supplied: without the implication, the prop would be inert
+    expect(getByRole('status').textContent).toContain('Loading the results…')
   })
 
-  it('le libellé masqué est rendu AVANT les silhouettes', () => {
-    // Non-régression du sélecteur `.v-skeleton-item + .v-skeleton-item:last-child` :
-    // un libellé rendu en dernier ferait cesser le raccourcissement de la
-    // dernière ligne sans qu'aucun autre test ne rougisse.
+  it('the hidden label is rendered BEFORE the silhouettes', () => {
+    // The `.v-skeleton-item + .v-skeleton-item:last-child` selector depends on it: a
+    // label rendered last would stop the last line being shortened without any other
+    // test going red.
     const { container } = render(VSkeletonLoader, { props: { announce: true, lines: 3 } })
     const first = rootOf(container).firstElementChild as HTMLElement
 
@@ -123,16 +123,16 @@ describe('VSkeletonLoader', () => {
     expect(rootOf(container).lastElementChild?.classList.contains('v-skeleton-item')).toBe(true)
   })
 
-  it('fallthrough : class, id et style du consommateur cohabitent avec les custom properties', () => {
+  it('fallthrough: the consumer class, id and style coexist with the custom properties', () => {
     const { container } = render(VSkeletonLoader, {
       props: { width: 120 },
-      attrs: { class: 'ma-classe', id: 'chargement', style: 'margin-block: 8px' },
+      attrs: { class: 'my-class', id: 'loading', style: 'margin-block: 8px' },
     })
     const root = rootOf(container)
 
-    expect(root.classList.contains('ma-classe')).toBe(true)
+    expect(root.classList.contains('my-class')).toBe(true)
     expect(root.classList.contains('v-skeleton')).toBe(true)
-    expect(root.getAttribute('id')).toBe('chargement')
+    expect(root.getAttribute('id')).toBe('loading')
     expect(styleOf(container)).toContain('margin-block: 8px')
     expect(styleOf(container)).toContain('--skeleton-w: 120px')
   })

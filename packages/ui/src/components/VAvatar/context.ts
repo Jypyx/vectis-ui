@@ -3,9 +3,9 @@ import type { InjectionKey } from 'vue'
 import type { AvatarSize } from './VAvatar.vue'
 
 /**
- * Contrat VAvatarGroup → VAvatar : le groupe propage taille/compact pour éviter
- * de les répéter sur chaque VAvatar. Chaque VAvatar n'y recourt qu'à défaut de
- * prop explicite (`props.size ?? group.size ?? 'md'`).
+ * The VAvatarGroup → VAvatar contract: the group propagates size/compact so they
+ * need not be repeated on every VAvatar. Each VAvatar only falls back to it in the
+ * absence of an explicit prop (`props.size ?? group.size ?? 'md'`).
  */
 export interface AvatarGroupContext {
   size?: AvatarSize

@@ -18,18 +18,18 @@ describe('VToaster', () => {
     vi.useRealTimers()
   })
 
-  it('ouvre la pile du placement par défaut à l’ajout d’un toast', async () => {
+  it('opens the default placement stack when a toast is added', async () => {
     const { container, getByText } = render(VToaster)
     const stack = getStack(container, 'bottom-right')
     expect(stack.hasAttribute('data-popover-open')).toBe(false)
 
-    toast({ message: 'Enregistré' })
+    toast({ message: 'Saved' })
     await nextTick()
     expect(stack.hasAttribute('data-popover-open')).toBe(true)
-    expect(getByText('Enregistré')).toBeTruthy()
+    expect(getByText('Saved')).toBeTruthy()
   })
 
-  it('le placement du toast prime sur la prop du VToaster', async () => {
+  it("the toast's placement wins over the VToaster's prop", async () => {
     const { container } = render(VToaster, { props: { placement: 'top-left' } })
     toast({ message: 'A' })
     toast({ message: 'B', placement: 'bottom-center' })
@@ -39,9 +39,9 @@ describe('VToaster', () => {
     expect(getStack(container, 'bottom-right').hasAttribute('data-popover-open')).toBe(false)
   })
 
-  it('ferme automatiquement après la durée par défaut (5000 ms) et referme la pile', async () => {
+  it('dismisses automatically after the default duration (5000 ms) and closes the stack', async () => {
     const { container } = render(VToaster)
-    toast({ message: 'Éphémère' })
+    toast({ message: 'Ephemeral' })
     await nextTick()
 
     vi.advanceTimersByTime(4999)
@@ -54,18 +54,18 @@ describe('VToaster', () => {
     expect(getStack(container, 'bottom-right').hasAttribute('data-popover-open')).toBe(false)
   })
 
-  it('duration: 0 rend le toast persistant', async () => {
+  it('duration: 0 makes the toast persistent', async () => {
     render(VToaster)
-    toast({ message: 'Persistant', duration: 0 })
+    toast({ message: 'Persistent', duration: 0 })
     await nextTick()
     vi.advanceTimersByTime(60_000)
     await nextTick()
     expect(toasts).toHaveLength(1)
   })
 
-  it('la prop duration du VToaster remplace le défaut ; duration du toast prime', async () => {
+  it("the VToaster's duration prop replaces the default; the toast's duration wins", async () => {
     render(VToaster, { props: { duration: 1000 } })
-    toast({ message: 'Court' })
+    toast({ message: 'Short' })
     toast({ message: 'Long', duration: 3000 })
     await nextTick()
 
@@ -78,9 +78,9 @@ describe('VToaster', () => {
     expect(toasts).toHaveLength(0)
   })
 
-  it('le survol de la pile suspend les timers, le leave les réarme à la durée pleine', async () => {
+  it('hovering the stack suspends the timers, leaving re-arms them at the full duration', async () => {
     const { container } = render(VToaster)
-    toast({ message: 'Survolé' })
+    toast({ message: 'Hovered' })
     await nextTick()
     const stack = getStack(container, 'bottom-right')
 
@@ -98,31 +98,31 @@ describe('VToaster', () => {
     expect(toasts).toHaveLength(0)
   })
 
-  it('la croix retire le toast de la file', async () => {
+  it('the cross removes the toast from the queue', async () => {
     const { getByRole } = render(VToaster)
-    toast({ message: 'À fermer', duration: 0 })
+    toast({ message: 'To be closed', duration: 0 })
     await nextTick()
 
-    await fireEvent.click(getByRole('button', { name: 'Fermer' }))
+    await fireEvent.click(getByRole('button', { name: 'Close' }))
     expect(toasts).toHaveLength(0)
   })
 
-  it('un toast émis AVANT le montage s’affiche au montage (et son timer démarre)', async () => {
-    toast({ message: 'Précoce' })
+  it('a toast emitted BEFORE mounting shows up on mount (and its timer starts)', async () => {
+    toast({ message: 'Early' })
     const { container, getByText } = render(VToaster)
     await nextTick()
     expect(getStack(container, 'bottom-right').hasAttribute('data-popover-open')).toBe(true)
-    expect(getByText('Précoce')).toBeTruthy()
+    expect(getByText('Early')).toBeTruthy()
 
     vi.advanceTimersByTime(5000)
     await nextTick()
     expect(toasts).toHaveLength(0)
   })
 
-  it('pose role="region" et le label accessible sur les piles', () => {
-    const { container } = render(VToaster, { props: { label: 'Alertes' } })
+  it('sets role="region" and the accessible label on the stacks', () => {
+    const { container } = render(VToaster, { props: { label: 'Alerts' } })
     const stack = getStack(container, 'bottom-right')
     expect(stack.getAttribute('role')).toBe('region')
-    expect(stack.getAttribute('aria-label')).toBe('Alertes')
+    expect(stack.getAttribute('aria-label')).toBe('Alerts')
   })
 })

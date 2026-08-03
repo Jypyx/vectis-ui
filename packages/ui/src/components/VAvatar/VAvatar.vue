@@ -10,37 +10,37 @@ import { avatarGroupKey } from './context'
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 /**
- * VAvatar rond. Cascade de contenu : image → icône → initiales (dérivées du
- * nom) → slot par défaut (échappatoire, ex. l'agrégat « +X » de VAvatarGroup).
+ * A round avatar. Content cascade: image → icon → initials (derived from the name)
+ * → default slot (the escape hatch, e.g. VAvatarGroup's "+X" aggregate).
  *
- * JS justifié : la détection d'échec de chargement d'image (`error`) n'existe
- * qu'en événement DOM ; les initiales et la teinte auto sont dérivées du nom ;
- * le pont « lien inerte » (href retiré + aria-disabled + onClick filtré) ; la
- * répartition des attrs (style hors fallthrough pour y injecter
- * --avatar-hue/--custom-color).
+ * JS justified: detecting an image load failure (`error`) only exists as a DOM
+ * event; the initials and the auto hue are derived from the name; the "inert link"
+ * bridge (href removed + aria-disabled + onClick filtered); and the attrs split
+ * (style kept out of the fallthrough so --avatar-hue/--custom-color can be injected
+ * into it).
  */
 interface AvatarProps {
-  /** URL de l'image (priorité 1). */
+  /** Image URL (priority 1). */
   src?: string
-  /** Icône affichée à défaut d'image (priorité 2) : nom, ou rendu explicite. */
+  /** Icon shown in the absence of an image (priority 2): a name, or an explicit render. */
   icon?: IconSource
-  /** Nom complet — alt par défaut, source des initiales et graine de la teinte auto. */
+  /** Full name — the default alt, the source of the initials and the seed of the auto hue. */
   name?: string
-  /** Alt/libellé explicite (prioritaire sur `name`). */
+  /** Explicit alt/label (wins over `name`). */
   alt?: string
   /**
-   * Couleur custom (hex, nom CSS ou oklch()) qui REMPLACE la teinte auto :
-   * posée en `--custom-color` inline. Sinon, à défaut d'image, une teinte OKLCH
-   * déterministe est dérivée du `name`.
+   * Custom colour (hex, CSS name or oklch()) which REPLACES the auto hue: set inline
+   * as `--custom-color`. Otherwise, in the absence of an image, a deterministic OKLCH
+   * hue is derived from `name`.
    */
   color?: string
-  /** Défaut `md`. `undefined` = hérité d'un VAvatarGroup englobant. */
+  /** Default `md`. `undefined` = inherited from an enclosing VAvatarGroup. */
   size?: AvatarSize
-  /** Hauteur réduite de 4px (comme les autres contrôles). */
+  /** Height reduced by 4px (like the other controls). */
   compact?: boolean
-  /** Rendu `<a>`. disabled → lien inerte (href retiré + aria-disabled). */
+  /** Rendered as `<a>`. disabled → an inert link (href removed + aria-disabled). */
   href?: string
-  /** Rendu `<button type="button">` (le slot #trigger d'un VTooltip s'y branche par fallthrough). */
+  /** Rendered as `<button type="button">` (a VTooltip's #trigger slot plugs in through fallthrough). */
   clickable?: boolean
   disabled?: boolean
 }
@@ -59,7 +59,7 @@ const props = withDefaults(defineProps<AvatarProps>(), {
 })
 
 defineSlots<{
-  /** Contenu de repli (remplace les initiales), ex. « +X » de VAvatarGroup. */
+  /** Fallback content (replaces the initials), e.g. VAvatarGroup's "+X". */
   default?(): unknown
 }>()
 
@@ -68,11 +68,11 @@ defineOptions({ inheritAttrs: false })
 const attrs = useAttrs()
 const group = inject(avatarGroupKey, null)
 
-// Taille/compact : prop explicite, sinon héritage du groupe, sinon défaut.
+// Size/compact: the explicit prop, else the group's, else the default.
 const resolvedSize = computed<AvatarSize>(() => props.size ?? group?.size ?? 'md')
 const resolvedCompact = computed(() => props.compact || (group?.compact ?? false))
 
-/* Priorité d'interactivité : href > clickable > statique. */
+/* Interactivity priority: href > clickable > static. */
 const isLink = computed(() => props.href !== undefined)
 const isInteractive = computed(() => isLink.value || props.clickable)
 const tag = computed(() => (isLink.value ? 'a' : props.clickable ? 'button' : 'span'))
@@ -99,10 +99,10 @@ const initials = computed(() => {
 })
 
 /*
- * Teinte auto : hash pur JS du nom → teinte OKLCH (0–359). Seule la teinte est
- * inline (scalaire unitless) ; le CSS compose fond/texte avec des L/C fixés par
- * thème (adaptation light/dark sans dépendre de contrast-color). Couleur
- * calculée hors tokens, exception assumée. SSR-safe : aucune API navigateur.
+ * Auto hue: a pure JS hash of the name → an OKLCH hue (0–359). Only the hue is
+ * inline (a unitless scalar); the CSS composes background/text with L/C fixed per
+ * theme (light/dark adaptation without depending on contrast-color). A colour
+ * computed outside the tokens, a deliberate exception. SSR-safe: no browser API.
  */
 const hue = computed(() => {
   if (!props.name) return null
@@ -123,7 +123,7 @@ const rootStyle = computed<StyleValue>(() => [
   attrs.style as StyleValue,
 ])
 
-// Fallthrough sans `style` (géré par rootStyle) ; onClick retiré si lien inerte.
+// Fallthrough without `style` (handled by rootStyle); onClick removed on an inert link.
 const passedAttrs = computed(() => {
   const rest = { ...(attrs as Record<string, unknown>) }
   delete rest.style
@@ -166,8 +166,8 @@ const passedAttrs = computed(() => {
 <style>
 @layer vectis.components {
   .v-avatar {
-    /* Tailles/compact : hauteur explicite via la classe partagée v-control
-       (styles/control-size.css) ; le carré rond réutilise --control-height. */
+    /* Sizes/compact: explicit height through the shared v-control class
+       (styles/control-size.css); the round square reuses --control-height. */
     --avatar-bg: var(--vectis-color-surface-muted);
     --avatar-text: var(--vectis-color-text-muted);
     display: inline-flex;
@@ -177,45 +177,45 @@ const passedAttrs = computed(() => {
     block-size: var(--control-height);
     flex: none;
     overflow: hidden;
-    /* reset des styles UA du <button> en mode cliquable (bordure/padding) */
+    /* Resets the <button> UA styles in clickable mode (border/padding) */
     padding: 0;
     border: none;
     background: var(--avatar-bg);
     color: var(--avatar-text);
     border-radius: var(--vectis-radius-full);
     font-family: var(--vectis-text-family);
-    /* initiales : typo du contrôle (token de l'échelle de tailles), jamais un
-       ratio brut sur la hauteur — la typo passe par des tokens (philosophie #3) */
+    /* Initials: the control typography (a token of the size scale), never a raw
+       ratio on the height — typography goes through tokens (philosophy #3) */
     font-size: var(--control-font-size);
-    /* semibold : emphase d'état, pas un rôle typo (initiales plus lisibles à
-       petite taille) */
+    /* semibold: state emphasis, not a type role (initials are more legible at small
+       sizes) */
     font-weight: var(--vectis-font-weight-semibold);
     line-height: var(--vectis-text-control-leading);
     text-decoration: none;
     user-select: none;
-    /* Anneau de séparation en pile (transparent hors VAvatarGroup, qui pose
-       --avatar-ring-color) — ne rogne pas la boîte (box-shadow, pas de border). */
+    /* Separation ring when stacked (transparent outside VAvatarGroup, which sets
+       --avatar-ring-color) — it does not shrink the box (box-shadow, not border). */
     box-shadow: 0 0 0 var(--vectis-control-size-avatar-ring) var(--avatar-ring-color, transparent);
     transition:
       background-color var(--vectis-duration-fast) var(--vectis-ease-default),
       box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  /* Teinte auto (name, pas de color custom) : L/C fixes, teinte inline. */
+  /* Auto hue (name, no custom colour): fixed L/C, the hue inline. */
   .v-avatar[data-auto] {
     --avatar-bg: oklch(0.9 0.06 var(--avatar-hue));
     --avatar-text: oklch(0.42 0.13 var(--avatar-hue));
   }
 
-  /* Couleur custom (--custom-color inline) : prime, texte blanc fixe (contraste à la
-     charge du consommateur). Bloc après data-auto. */
+  /* Custom colour (--custom-color inline): wins, with a fixed white text (contrast
+     is the consumer's responsibility). Block placed after data-auto. */
   .v-avatar[data-custom] {
     --avatar-bg: var(--custom-color);
     --avatar-text: var(--vectis-color-text-on-accent);
   }
 
-  /* Dark : fond sombre teinté + texte clair (le système de thème est opt-in par
-     [data-theme='dark'], jamais par media query — cf. tokens.css). */
+  /* Dark: a tinted dark background + light text (the theme system is opt-in through
+     [data-theme='dark'], never a media query — see tokens.css). */
   [data-theme='dark'] .v-avatar[data-auto] {
     --avatar-bg: oklch(0.42 0.09 var(--avatar-hue));
     --avatar-text: oklch(0.92 0.05 var(--avatar-hue));
@@ -227,7 +227,7 @@ const passedAttrs = computed(() => {
     object-fit: cover;
   }
 
-  /* L'icône occupe ~55% du disque (ratio unitless, comme la font-size). */
+  /* The icon occupies ~55% of the disc (a unitless ratio, like the font-size). */
   .v-avatar-icon {
     --vectis-icon-size: calc(var(--control-height) * 0.55);
   }

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import VBadge from './VBadge.vue'
 
 describe('VBadge', () => {
-  it('standalone par défaut : racine .v-badge seule, tone accent, count rendu', () => {
+  it('standalone by default: a lone .v-badge root, accent tone, count rendered', () => {
     const { container, getByText } = render(VBadge, { props: { count: 3 } })
     const root = container.firstElementChild!
     expect(root.classList.contains('v-badge')).toBe(true)
@@ -13,12 +13,12 @@ describe('VBadge', () => {
     expect(getByText('3')).toBeTruthy()
   })
 
-  it('tone explicite posé en data-tone', () => {
+  it('an explicit tone is set as data-tone', () => {
     const { container } = render(VBadge, { props: { tone: 'danger', count: 3 } })
     expect(container.querySelector('.v-badge')!.getAttribute('data-tone')).toBe('danger')
   })
 
-  it('color : data-custom + --custom-color inline ; absents sans color', () => {
+  it('color: data-custom + an inline --custom-color; both absent without color', () => {
     const { container } = render(VBadge, { props: { color: 'hotpink', count: 3 } })
     const badge = container.querySelector('.v-badge')!
     expect(badge.hasAttribute('data-custom')).toBe(true)
@@ -30,7 +30,7 @@ describe('VBadge', () => {
     expect(bareBadge.getAttribute('style')).toBeNull()
   })
 
-  it('plafonnement : count > 99 affiché « 99+ », 99 inchangé', () => {
+  it('capping: count > 99 displayed as "99+", 99 unchanged', () => {
     const { container } = render(VBadge, { props: { count: 100 } })
     expect(container.querySelector('.v-badge')!.textContent).toBe('99+')
 
@@ -38,7 +38,7 @@ describe('VBadge', () => {
     expect(at99.querySelector('.v-badge')!.textContent).toBe('99')
   })
 
-  it('icon : data-icon-only, .v-icon rendu, prime sur count', () => {
+  it('icon: data-icon-only, .v-icon rendered, wins over count', () => {
     const { container } = render(VBadge, { props: { icon: 'notifications', count: 3 } })
     const badge = container.querySelector('.v-badge')!
     expect(badge.hasAttribute('data-icon-only')).toBe(true)
@@ -46,7 +46,7 @@ describe('VBadge', () => {
     expect(badge.textContent).not.toContain('3')
   })
 
-  it('dot : data-dot, aucun contenu, icon et count ignorés', () => {
+  it('dot: data-dot, no content, icon and count ignored', () => {
     const { container } = render(VBadge, {
       props: { dot: true, icon: 'notifications', count: 3 },
     })
@@ -57,7 +57,7 @@ describe('VBadge', () => {
     expect(badge.textContent).toBe('')
   })
 
-  it('slot défaut : racine .v-badge-host, cible rendue, badge en dernier enfant', () => {
+  it('default slot: a .v-badge-host root, the target rendered, the badge last child', () => {
     const { container, getByText } = render(VBadge, {
       props: { count: 3 },
       slots: { default: '<button type="button">Messages</button>' },
@@ -69,32 +69,32 @@ describe('VBadge', () => {
     expect(host.lastElementChild!.classList.contains('v-badge')).toBe(true)
   })
 
-  it('overlay : data-overlay posé sur le host', () => {
+  it('overlay: data-overlay set on the host', () => {
     const { container } = render(VBadge, {
       props: { count: 3, overlay: true },
-      slots: { default: '<span>Cible</span>' },
+      slots: { default: '<span>Target</span>' },
     })
     expect(container.querySelector('.v-badge-host')!.hasAttribute('data-overlay')).toBe(true)
   })
 
-  it('bordered : data-bordered posé sur le badge', () => {
+  it('bordered: data-bordered set on the badge', () => {
     const { container } = render(VBadge, { props: { count: 3, bordered: true } })
     expect(container.querySelector('.v-badge')!.hasAttribute('data-bordered')).toBe(true)
   })
 
-  it('fallthrough : class sur .v-badge en standalone, sur .v-badge-host avec cible', () => {
+  it('fallthrough: class on .v-badge when standalone, on .v-badge-host with a target', () => {
     const { container } = render(VBadge, {
       props: { count: 3 },
-      attrs: { class: 'extra', 'data-testid': 'seul' },
+      attrs: { class: 'extra', 'data-testid': 'alone' },
     })
     const badge = container.querySelector('.v-badge')!
     expect(badge.classList.contains('extra')).toBe(true)
-    expect(badge.getAttribute('data-testid')).toBe('seul')
+    expect(badge.getAttribute('data-testid')).toBe('alone')
 
     const { container: hosted } = render(VBadge, {
       props: { count: 3 },
       attrs: { class: 'extra' },
-      slots: { default: '<span>Cible</span>' },
+      slots: { default: '<span>Target</span>' },
     })
     expect(hosted.querySelector('.v-badge-host')!.classList.contains('extra')).toBe(true)
     expect(hosted.querySelector('.v-badge')!.classList.contains('extra')).toBe(false)

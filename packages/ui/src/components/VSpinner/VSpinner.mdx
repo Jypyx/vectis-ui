@@ -5,39 +5,40 @@ import * as VSpinnerStories from './VSpinner.stories'
 
 # Spinner
 
-Indicateur de chargement **100 % CSS** : un cercle animé (`border` + rotation), sans SVG ni
-JavaScript. La racine porte `role="status"` avec un libellé masqué visuellement — annoncé par
-les lecteurs d'écran sans bruit visuel.
+A **100% CSS** loading indicator: an animated circle (`border` + rotation), with no SVG and no
+JavaScript. The root carries `role="status"` with a visually hidden label — announced by screen
+readers with no visual noise.
 
 <Canvas of={VSpinnerStories.Default} />
 
 <Controls of={VSpinnerStories.Default} />
 
-## Taille
+## Size
 
-**1em par défaut** : le spinner suit la taille du texte environnant ; un parent peut aussi le
-dimensionner en posant `font-size` sur son conteneur (c'est ce que font `VButton`, `VInput` et
-`VTextarea`, qui le calent sur la taille de leurs icônes). La prop `size` (nombre, en pixels)
-permet une surcharge libre : `:size="32"` → 32px. L'épaisseur du cercle est proportionnelle
-(⅛ de la taille : 2px à 16px, 3px à 24px).
+**1em by default**: the spinner follows the size of the surrounding text; a parent can also size
+it by setting `font-size` on its container (this is what `VButton`, `VInput` and `VTextarea` do,
+aligning it on the size of their icons). The `size` prop (a number, in pixels) allows a free
+override: `:size="32"` → 32px. The circle's thickness is proportional (an eighth of the size: 2px
+at 16px, 3px at 24px).
 
-<Canvas of={VSpinnerStories.Tailles} />
+<Canvas of={VSpinnerStories.Sizes} />
 
-## Couleur
+## Colour
 
-Le cercle suit `currentcolor` : il hérite de la couleur de texte du parent, sans prop dédiée.
+The circle follows `currentcolor`: it inherits the parent's text colour, with no dedicated prop.
 
-<Canvas of={VSpinnerStories.Colore} />
+<Canvas of={VSpinnerStories.Coloured} />
 
-## Accessibilité
+## Accessibility
 
-- `role="status"` + libellé masqué (`label`, défaut « Chargement… ») : l'état est annoncé
-  par les lecteurs d'écran ; personnaliser le libellé selon le contexte (« Envoi en
-  cours… »).
-- Le cercle animé est `aria-hidden` : seul le libellé porte l'information.
-- `prefers-reduced-motion` ralentit fortement la rotation au lieu de la supprimer :
-  l'information « ça charge » reste perceptible.
-- Dans `VButton`, `VInput` et `VTextarea`, le composant parent gère l'annonce (`aria-busy`,
-  libellé dédié) — le spinner y est purement visuel.
+- `role="status"` + a hidden label (`label`, default "Loading…"): the state is announced by
+  screen readers; customize the label to the context ("Sending…").
+- The animated circle is `aria-hidden`: only the label carries the information.
+- `prefers-reduced-motion` slows the rotation right down instead of removing it: the "something
+  is loading" information stays perceivable.
+- Inside `VButton`, `VInput` and `VTextarea`, the parent component owns the announcement
+  (`aria-busy`, a dedicated label) — the spinner is purely visual there.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system dictionary: they translate
+globally (see **Foundations › Internationalization**), and the text props stay authoritative for
+a case-by-case adjustment.

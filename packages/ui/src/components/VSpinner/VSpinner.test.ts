@@ -4,23 +4,23 @@ import { describe, expect, it } from 'vitest'
 import VSpinner from './VSpinner.vue'
 
 describe('VSpinner', () => {
-  it('expose role="status" avec un libellé accessible par défaut', () => {
+  it('exposes role="status" with a default accessible label', () => {
     const { getByRole } = render(VSpinner)
-    expect(getByRole('status').textContent).toContain('Chargement…')
+    expect(getByRole('status').textContent).toContain('Loading…')
   })
 
-  it('le libellé est personnalisable', () => {
-    const { getByRole } = render(VSpinner, { props: { label: 'Envoi en cours…' } })
-    expect(getByRole('status').textContent).toContain('Envoi en cours…')
+  it('the label is customizable', () => {
+    const { getByRole } = render(VSpinner, { props: { label: 'Sending…' } })
+    expect(getByRole('status').textContent).toContain('Sending…')
   })
 
-  it('prop size numérique : pose --spinner-size en style inline, sinon rien', () => {
-    const explicite = render(VSpinner, { props: { size: 32 } })
-    const spinnerExplicite = explicite.container.querySelector('.v-spinner') as HTMLElement
-    expect(spinnerExplicite.style.getPropertyValue('--spinner-size')).toBe('32px')
+  it('numeric size prop: sets --spinner-size inline, nothing otherwise', () => {
+    const explicit = render(VSpinner, { props: { size: 32 } })
+    const explicitSpinner = explicit.container.querySelector('.v-spinner') as HTMLElement
+    expect(explicitSpinner.style.getPropertyValue('--spinner-size')).toBe('32px')
 
-    const implicite = render(VSpinner)
-    const spinnerImplicite = implicite.container.querySelector('.v-spinner') as HTMLElement
-    expect(spinnerImplicite.hasAttribute('style')).toBe(false)
+    const implicit = render(VSpinner)
+    const implicitSpinner = implicit.container.querySelector('.v-spinner') as HTMLElement
+    expect(implicitSpinner.hasAttribute('style')).toBe(false)
   })
 })

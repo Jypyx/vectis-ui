@@ -5,128 +5,125 @@ import * as VSkeletonLoaderStories from './VSkeletonLoader.stories'
 
 # SkeletonLoader
 
-Placeholder de chargement **100 % CSS** : la silhouette d'un composant du design system pendant
-que son contenu arrive. Deux animations au choix — une bande de brillance qui traverse (`wave`) ou
-un reflet qui monte et redescend (`pulse`) — plus `none` pour figer.
+A **100% CSS** loading placeholder: the silhouette of a design system component while its content
+is on its way. Two animations to choose from — a band of brightness crossing it (`wave`) or a
+highlight rising and falling (`pulse`) — plus `none` to freeze it.
 
-Le principe est **une silhouette déclarée, jamais mesurée** : le composant ne lit pas le DOM et ne
-déduit rien du contenu qu'il remplace. C'est vous qui dites quelle forme prendre, et le composant
-la construit à partir des tokens du design system — l'échelle des contrôles pour les hauteurs, la
-typographie héritée pour les lignes de texte. Aucun JavaScript de comportement, aucun accès au
-navigateur, donc rien à hydrater côté serveur.
+The principle is **a declared silhouette, never a measured one**: the component does not read the
+DOM and deduces nothing from the content it replaces. You say which shape to take, and the
+component builds it from the design system tokens — the control scale for the heights, the
+inherited typography for the lines of text. No behavioural JavaScript, no browser access, hence
+nothing to hydrate on the server side.
 
 <Canvas of={VSkeletonLoaderStories.Default} />
 
 <Controls of={VSkeletonLoaderStories.Default} />
 
-## Formes
+## Shapes
 
-Chaque valeur de `shape` répond à une question que le CSS seul ne peut pas deviner : quel rayon, et
-d'où vient la hauteur.
+Each `shape` value answers a question CSS alone cannot guess: which radius, and where the height
+comes from.
 
-| `shape`   | Vise                       | Rayon        | Hauteur                          |
-| --------- | -------------------------- | ------------ | -------------------------------- |
-| `text`    | ligne de texte, paragraphe | pilule       | la typo héritée (`1em`)          |
-| `control` | VButton, VInput, Select    | interactif   | l'échelle des contrôles (`size`) |
-| `pill`    | VChip, VBadge              | pilule       | l'échelle des contrôles          |
-| `circle`  | VAvatar, bouton icône rond | pilule + 1:1 | l'échelle des contrôles          |
-| `surface` | carte, image, bloc         | surface      | un token dédié                   |
+| `shape`   | Targets                      | Radius      | Height                           |
+| --------- | ---------------------------- | ----------- | -------------------------------- |
+| `text`    | a line of text, a paragraph  | pill        | the inherited typography (`1em`) |
+| `control` | VButton, VInput, a select    | interactive | the control scale (`size`)       |
+| `pill`    | VChip, VBadge                | pill        | the control scale                |
+| `circle`  | VAvatar, a round icon button | pill + 1:1  | the control scale                |
+| `surface` | a card, an image, a block    | surface     | a dedicated token                |
 
-<Canvas of={VSkeletonLoaderStories.Formes} />
+<Canvas of={VSkeletonLoaderStories.Shapes} />
 
-Le cercle transfère sa largeur depuis sa hauteur : `size` seul suffit à en changer le diamètre.
+The circle transfers its width from its height: `size` alone is enough to change its diameter.
 
-## Remplacer un composant du design system
+## Replacing a design system component
 
-La recette tient en deux gestes : choisir la forme qui correspond au rôle du composant, et lui
-donner la même taille. Comme les hauteurs viennent de la même table que celle des contrôles, un
-skeleton `md` fait exactement la hauteur d'un VButton `md` — la page ne bouge pas au remplacement.
+The recipe is two gestures: pick the shape matching the component's role, and give it the same
+size. Since the heights come from the same table as the controls', an `md` skeleton is exactly the
+height of an `md` VButton — the page does not move on replacement.
 
-<Canvas of={VSkeletonLoaderStories.SilhouettesDuDesignSystem} />
+<Canvas of={VSkeletonLoaderStories.DesignSystemSilhouettes} />
 
-Pour un composant fait de plusieurs parties — un champ avec son étiquette, une carte avec son titre
-et son texte — empilez plusieurs skeletons plutôt que d'en chercher un qui ferait tout : c'est la
-composition qui reproduit la structure.
+For a component made of several parts — a field with its label, a card with its title and its text
+— stack several skeletons rather than looking for one that would do everything: composition is
+what reproduces the structure.
 
-## Tailles
+## Sizes
 
-`size` et `compact` reprennent l'échelle des contrôles du design system. Ils n'agissent que sur
-`control`, `pill` et `circle` : une ligne de texte suit la typographie de son parent, et une
-surface a sa propre hauteur.
+`size` and `compact` take the design system's control scale. They only act on `control`, `pill` and
+`circle`: a line of text follows its parent's typography, and a surface has a height of its own.
 
-<Canvas of={VSkeletonLoaderStories.Tailles} />
+<Canvas of={VSkeletonLoaderStories.Sizes} />
 
-## Dimensionner
+## Sizing
 
-`width` et `height` acceptent un nombre — interprété en pixels — ou n'importe quelle longueur CSS.
-Ils priment sur `shape` et sur `size`.
+`width` and `height` accept a number — read as pixels — or any CSS length. They win over `shape`
+and over `size`.
 
-Aucun des deux n'est obligatoire : sans dimension, la silhouette occupe la largeur disponible et
-prend la hauteur de sa forme. Le style d'un consommateur reste par ailleurs toujours prioritaire —
-le CSS du design system vit dans une couche en cascade, que toute règle non calquée sur elle
-emporte sans avoir besoin d'y insister. Un skeleton se dimensionne donc aussi bien par sa grille
-parente que par ses props.
+Neither is mandatory: with no dimension, the silhouette takes the available width and the height of
+its shape. A consumer's style also stays authoritative throughout — the design system CSS lives in
+a cascade layer, which any rule outside it wins over without having to insist. So a skeleton is
+sized just as well by its parent grid as by its props.
 
-## Paragraphes
+## Paragraphs
 
-`lines` empile plusieurs silhouettes. En forme `text`, la dernière est raccourcie : c'est ce détail
-qui fait lire « bloc de texte » plutôt que « tableau ».
+`lines` stacks several silhouettes. In the `text` shape, the last one is shortened: that detail is
+what reads as a "block of text" rather than a "table".
 
-<Canvas of={VSkeletonLoaderStories.Paragraphe} />
+<Canvas of={VSkeletonLoaderStories.Paragraph} />
 
-La hauteur d'une ligne vaut un cadratin et la gouttière l'interlignage restant, si bien que N lignes
-occupent exactement N lignes de texte quelle que soit la typographie du parent.
+A line's height is one em and the gutter is the remaining leading, so that N lines occupy exactly N
+lines of text whatever the parent's typography.
 
 ## Animations
 
 <Canvas of={VSkeletonLoaderStories.Animations} />
 
-`wave` est la plus démonstrative, et c'est le défaut ; son intérêt commence sur les grandes
-surfaces, une bande qui traverse un cercle de petite taille n'étant plus qu'un scintillement — là,
-`pulse` reste lisible. `none` sert à l'impression, aux captures et au cas où l'animation est déjà
-portée par un parent.
+`wave` is the most demonstrative, and it is the default; its interest starts on large surfaces,
+since a band crossing a small circle is no more than a flicker — there, `pulse` stays readable.
+`none` serves printing, screenshots, and the case where the animation is already carried by a
+parent.
 
-## Couleur
+## Colour
 
-<Canvas of={VSkeletonLoaderStories.CouleurCustom} />
+<Canvas of={VSkeletonLoaderStories.CustomColor} />
 
-`color` remplace le fond. Le reflet de la `wave` n'a pas de réglage séparé : il est **dérivé** du
-fond par un éclaircissement, ce qui le garde juste sur une couleur arbitraire comme d'un thème à
-l'autre. C'est aussi la raison pour laquelle le composant fonctionne en thème sombre sans règle
-dédiée : viser une couleur cible s'inverserait d'un thème à l'autre, appliquer un écart de clarté
-non.
+`color` replaces the background. The wave's highlight has no separate setting: it is **derived**
+from the background by a lightening, which keeps it right on an arbitrary colour as well as from
+one theme to the other. That is also why the component works in a dark theme with no dedicated
+rule: aiming at a target colour would invert from one theme to the other, applying a lightness
+delta would not.
 
-Il n'y a délibérément pas de `tone` sémantique : un skeleton représente du contenu inconnu, le
-teinter en succès ou en danger lui ferait dire quelque chose de faux.
+There is deliberately no semantic `tone`: a skeleton represents unknown content, and tinting it
+success or danger would make it say something false.
 
-## Remplacement du contenu
+## Content replacement
 
-<Canvas of={VSkeletonLoaderStories.RemplacementProgressif} />
+<Canvas of={VSkeletonLoaderStories.ProgressiveReplacement} />
 
-Il n'existe pas de mode enveloppe qui prendrait le contenu en slot. Ce serait ouvrir la porte à la
-mesure du DOM, et cela ne dispenserait de toute façon pas de déclarer la forme : l'idiome reste un
-`v-if`/`v-else`, avec `aria-busy` sur la zone qui recevra le contenu.
+There is no wrapper mode taking the content in a slot. That would open the door to measuring the
+DOM, and it would not spare you declaring the shape anyway: the idiom stays a `v-if`/`v-else`, with
+`aria-busy` on the zone that will receive the content.
 
-## Accessibilité
+## Accessibility
 
-- **Décoratif par défaut.** Le composant est masqué aux technologies d'assistance : une page de
-  chargement contient couramment une dizaine de silhouettes, et autant d'annonces concurrentes
-  rendraient l'attente illisible.
-- **L'annonce appartient au conteneur, pas au placeholder.** Posez `aria-busy` sur la zone qui
-  recevra le contenu — c'est le même partage que dans `VButton`, où le bouton porte l'état et le
-  spinner n'est qu'un dessin.
-- `announce` (et `label`, qui l'implique) est l'échappatoire : la silhouette devient une région de
-  statut avec un libellé masqué visuellement. À réserver à **une** instance par zone, et de
-  préférence avec un libellé situé — « Chargement des résultats… » plutôt que le défaut générique.
-  <Canvas of={VSkeletonLoaderStories.Annonce} />
-- Ne cumulez pas `announce` et `aria-busy` sur le même sous-arbre : l'information serait annoncée
-  deux fois.
-- Aucune information n'est portée par la couleur ou par le contraste : il n'y a pas de texte à lire
-  dans une silhouette.
-- `prefers-reduced-motion` : la `wave` retombe sur la pulsation, fortement ralentie. Une
-  translation est précisément ce que ces utilisateurs signalent, mais un placeholder immobile ne
-  dirait plus « en cours » — l'animation est donc transformée, jamais supprimée.
+- **Decorative by default.** The component is hidden from assistive technologies: a loading page
+  commonly holds a dozen silhouettes, and as many competing announcements would make the wait
+  unreadable.
+- **The announcement belongs to the container, not to the placeholder.** Set `aria-busy` on the
+  zone that will receive the content — the same split as in `VButton`, where the button carries the
+  state and the spinner is only a drawing.
+- `announce` (and `label`, which implies it) is the escape hatch: the silhouette becomes a status
+  region with a visually hidden label. Reserve it for **one** instance per zone, and preferably
+  with a situated label — "Loading the results…" rather than the generic default.
+  <Canvas of={VSkeletonLoaderStories.Announcement} />
+- Do not combine `announce` and `aria-busy` on the same subtree: the information would be announced
+  twice.
+- No information is carried by colour or by contrast: there is no text to read in a silhouette.
+- `prefers-reduced-motion`: the `wave` falls back to the pulse, heavily slowed. A translation is
+  precisely what these users are flagging, but a motionless placeholder would no longer say "in
+  progress" — the animation is therefore transformed, never removed.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se
-traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent
-prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.

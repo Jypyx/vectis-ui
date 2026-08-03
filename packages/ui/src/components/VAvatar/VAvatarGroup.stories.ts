@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
+import { storyText } from '../../stories/storyText'
 import VTooltip from '../VTooltip/VTooltip.vue'
 import VAvatar from './VAvatar.vue'
 import VAvatarGroup from './VAvatarGroup.vue'
@@ -14,8 +15,19 @@ const NAMES = [
   'Barbara Liskov',
 ]
 
+const t = storyText({
+  en: {
+    moreMembers: (count: number) => `${count} more members`,
+    otherMembers: (count: number) => `${count} other members`,
+  },
+  fr: {
+    moreMembers: (count: number) => `${count} membres de plus`,
+    otherMembers: (count: number) => `${count} autres membres`,
+  },
+})
+
 const meta = {
-  title: 'Composants/AvatarGroup',
+  title: 'Components/AvatarGroup',
   component: VAvatarGroup,
   argTypes: {
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
@@ -27,8 +39,8 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Empilement : le disque de droite passe par-dessus celui de gauche, séparé par l'anneau. */
-export const Empilement: Story = {
+/** Stacking: the right-hand disc paints over the left-hand one, separated by the ring. */
+export const Stacking: Story = {
   render: () => ({
     components: { VAvatarGroup, VAvatar },
     setup: () => ({ names: NAMES.slice(0, 4) }),
@@ -40,7 +52,7 @@ export const Empilement: Story = {
   }),
 }
 
-/** `max` tronque et pousse un agrégat « +X » (statique, neutre). */
+/** `max` truncates and pushes a "+X" aggregate (static, neutral). */
 export const Overflow: Story = {
   render: () => ({
     components: { VAvatarGroup, VAvatar },
@@ -56,8 +68,8 @@ export const Overflow: Story = {
   },
 }
 
-/** La taille se propage à tous les enfants. */
-export const TailleHeritee: Story = {
+/** The size propagates to every child. */
+export const InheritedSize: Story = {
   render: () => ({
     components: { VAvatarGroup, VAvatar },
     setup: () => ({ names: NAMES.slice(0, 4) }),
@@ -69,16 +81,16 @@ export const TailleHeritee: Story = {
   }),
 }
 
-/** Slot #overflow : rendre l'agrégat cliquable / y attacher un comportement. */
-export const OverflowPersonnalise: Story = {
+/** The #overflow slot: making the aggregate clickable / attaching behaviour to it. */
+export const CustomOverflow: Story = {
   render: () => ({
     components: { VAvatarGroup, VAvatar },
-    setup: () => ({ names: NAMES }),
+    setup: () => ({ names: NAMES, t }),
     template: `
       <VAvatarGroup :max="3">
         <VAvatar v-for="n in names" :key="n" :name="n" />
         <template #overflow="{ count }">
-          <VAvatar clickable :aria-label="count + ' membres de plus'">+{{ count }}</VAvatar>
+          <VAvatar clickable :aria-label="t.moreMembers(count)">+{{ count }}</VAvatar>
         </template>
       </VAvatarGroup>
     `,
@@ -86,17 +98,18 @@ export const OverflowPersonnalise: Story = {
 }
 
 /**
- * VTooltip par VAvatar (le nom) + VTooltip sur l'agrégat (les membres masqués).
- * Chaque VAvatar est `clickable` (donc focusable) et reçoit `triggerProps` par
- * fallthrough. Le VTooltip enveloppe le trigger dans un <span> : l'empilement
- * du groupe reste correct car il cible l'enfant direct, wrapper compris.
+ * A VTooltip per VAvatar (the name) + a VTooltip on the aggregate (the hidden
+ * members). Each VAvatar is `clickable` (hence focusable) and receives
+ * `triggerProps` through fallthrough. The VTooltip wraps the trigger in a `<span>`:
+ * the group's stacking stays correct because it targets the direct child, wrapper
+ * included.
  */
-export const AvecTooltips: Story = {
+export const WithTooltips: Story = {
   render: () => {
     const max = 4
     return {
       components: { VAvatarGroup, VAvatar, VTooltip },
-      setup: () => ({ names: NAMES, max, hidden: NAMES.slice(max) }),
+      setup: () => ({ names: NAMES, max, hidden: NAMES.slice(max), t }),
       template: `
         <VAvatarGroup :max="max">
           <VTooltip v-for="n in names" :key="n" :text="n">
@@ -110,7 +123,7 @@ export const AvecTooltips: Story = {
                 <VAvatar
                   v-bind="triggerProps"
                   clickable
-                  :aria-label="count + ' autres membres'"
+                  :aria-label="t.otherMembers(count)"
                 >+{{ count }}</VAvatar>
               </template>
             </VTooltip>
@@ -120,7 +133,7 @@ export const AvecTooltips: Story = {
     }
   },
   play: async ({ canvasElement }) => {
-    // survol de l'agrégat +X → tooltip listant les membres masqués
+    // hovering the +X aggregate → a tooltip listing the hidden members
     const overflow = within(canvasElement).getByText('+2')
     await userEvent.hover(overflow)
     await waitFor(() => expect(within(document.body).getByText(/Barbara Liskov/)).toBeVisible())

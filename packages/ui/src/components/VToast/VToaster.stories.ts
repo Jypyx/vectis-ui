@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
+import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
 import VToaster from './VToaster.vue'
 import { dismissToast, toast } from './state'
@@ -16,16 +17,81 @@ const PLACEMENTS = [
 
 const TONES = ['neutral', 'accent', 'success', 'danger', 'warning'] as const
 
+const t = storyText({
+  en: {
+    notify: 'Notify',
+    changesSaved: 'Changes saved.',
+    tonalNotification: 'A notification in the tonal variant.',
+    solidNotification: 'A notification in the solid variant.',
+    placement: (p: string) => `Placement "${p}".`,
+    sendFailed: 'Sending failed',
+    serverNotResponding: 'The server is not responding.',
+    disappearsIn800: 'Disappears in 800 ms.',
+    message: 'Message',
+    messageAlone: 'Message alone.',
+    title: 'Title',
+    titleAndMessage: 'Title and message',
+    titleAndMessageNoIcon: 'Title and message, with no icon.',
+    iconAndMessage: 'Icon + message',
+    iconAndMessageBody: 'Icon and message.',
+    iconTitleMessage: 'Icon + title + message',
+    exportDone: 'Export finished',
+    iconTitleMessageBody: 'Icon, title and message.',
+    deploymentStarted: 'Deployment started',
+    deploymentBody: 'The release to production is under way.',
+    wide: 'Wide (36rem)',
+    customWidth: 'Custom width',
+    customWidthBody:
+      'This toast uses width: 36rem — useful for detailed messages, without ever exceeding the viewport width minus the margins.',
+    longText: 'Long text (default)',
+    longTextBody:
+      'A deliberately long message to check that the default width bounds the text and that wrapping happens cleanly, even with an-especially-interminable-unbreakable-string.',
+    stack: 'Stack',
+    notification: 'Notification',
+  },
+  fr: {
+    notify: 'Notifier',
+    changesSaved: 'Modifications enregistrées.',
+    tonalNotification: 'Notification en variant tonal.',
+    solidNotification: 'Notification en variant solid.',
+    placement: (p: string) => `Placement « ${p} ».`,
+    sendFailed: "Échec de l'envoi",
+    serverNotResponding: 'Le serveur ne répond pas.',
+    disappearsIn800: 'Disparaît en 800 ms.',
+    message: 'Message',
+    messageAlone: 'Message seul.',
+    title: 'Titre',
+    titleAndMessage: 'Titre + message',
+    titleAndMessageNoIcon: 'Titre et message, sans icône.',
+    iconAndMessage: 'Icône + message',
+    iconAndMessageBody: 'Icône et message.',
+    iconTitleMessage: 'Icône + titre + message',
+    exportDone: 'Export terminé',
+    iconTitleMessageBody: 'Icône, titre et message.',
+    deploymentStarted: 'Déploiement lancé',
+    deploymentBody: 'La mise en production est en cours.',
+    wide: 'Large (36rem)',
+    customWidth: 'Largeur personnalisée',
+    customWidthBody:
+      'Ce toast utilise width: 36rem — utile pour des messages détaillés, sans jamais dépasser la largeur du viewport moins les marges.',
+    longText: 'Texte long (défaut)',
+    longTextBody:
+      'Un message volontairement long pour vérifier que la largeur par défaut borne le texte et que le retour à la ligne se fait proprement, même avec une-chaîne-insécable-particulièrement-interminable.',
+    stack: 'Empiler',
+    notification: 'Notification',
+  },
+})
+
 const meta = {
-  title: 'Composants/Toast',
+  title: 'Components/Toast',
   component: VToaster,
   argTypes: {
     placement: { control: 'select', options: [...PLACEMENTS] },
     duration: { control: 'number' },
   },
   args: { placement: 'bottom-right', duration: 5000 },
-  // la file est un état de module qui survit à la navigation entre stories :
-  // on la vide avant chaque rendu pour éviter toute pollution
+  // the queue is module state that survives navigation between stories: it is
+  // emptied before each render to avoid any pollution
   decorators: [
     (story) => {
       dismissToast()
@@ -34,15 +100,15 @@ const meta = {
   ],
   render: (args) => ({
     components: { VToaster, VButton },
-    setup: () => ({ args, toast }),
+    setup: () => ({ args, toast, t }),
     template: `
       <VToaster v-bind="args" />
       <VButton
         variant="outline"
         tone="neutral"
-        @click="toast({ tone: 'success', message: 'Modifications enregistrées.' })"
+        @click="toast({ tone: 'success', message: t.changesSaved })"
       >
-        Notifier
+        {{ t.notify }}
       </VButton>
     `,
   }),
@@ -58,20 +124,18 @@ export const Default: Story = {
       ".v-toast-stack[data-placement='bottom-right']",
     ) as HTMLElement
 
-    // déclenchement programmatique : la pile passe en top-layer
-    await userEvent.click(canvas.getByRole('button', { name: 'Notifier' }))
+    // programmatic trigger: the stack moves to the top layer
+    await userEvent.click(canvas.getByRole('button', { name: 'Notify' }))
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(true))
-    // waitFor : le toast entre en transition depuis opacity 0 (@starting-style)
-    await waitFor(() =>
-      expect(within(stack).getByText('Modifications enregistrées.')).toBeVisible(),
-    )
+    // waitFor: the toast transitions in from opacity 0 (@starting-style)
+    await waitFor(() => expect(within(stack).getByText('Changes saved.')).toBeVisible())
   },
 }
 
 export const Tones: Story = {
   render: (args) => ({
     components: { VToaster, VButton },
-    setup: () => ({ args, toast, TONES }),
+    setup: () => ({ args, toast, TONES, t }),
     template: `
       <VToaster v-bind="args" />
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
@@ -80,7 +144,7 @@ export const Tones: Story = {
           :key="tone"
           variant="outline"
           tone="neutral"
-          @click="toast({ tone, title: tone, message: 'Notification en variant tonal.', duration: 0 })"
+          @click="toast({ tone, title: tone, message: t.tonalNotification, duration: 0 })"
         >
           {{ tone }}
         </VButton>
@@ -92,7 +156,7 @@ export const Tones: Story = {
 export const Solid: Story = {
   render: (args) => ({
     components: { VToaster, VButton },
-    setup: () => ({ args, toast, TONES }),
+    setup: () => ({ args, toast, TONES, t }),
     template: `
       <VToaster v-bind="args" />
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
@@ -101,7 +165,7 @@ export const Solid: Story = {
           :key="tone"
           variant="outline"
           tone="neutral"
-          @click="toast({ tone, variant: 'solid', title: tone, message: 'Notification en variant solid.', duration: 0 })"
+          @click="toast({ tone, variant: 'solid', title: tone, message: t.solidNotification, duration: 0 })"
         >
           {{ tone }}
         </VButton>
@@ -113,7 +177,7 @@ export const Solid: Story = {
 export const Placements: Story = {
   render: (args) => ({
     components: { VToaster, VButton },
-    setup: () => ({ args, toast, PLACEMENTS }),
+    setup: () => ({ args, toast, PLACEMENTS, t }),
     template: `
       <VToaster v-bind="args" />
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
@@ -122,7 +186,7 @@ export const Placements: Story = {
           :key="p"
           variant="outline"
           tone="neutral"
-          @click="toast({ message: 'Placement « ' + p + ' ».', placement: p })"
+          @click="toast({ message: t.placement(p), placement: p })"
         >
           {{ p }}
         </VButton>
@@ -131,19 +195,19 @@ export const Placements: Story = {
   }),
 }
 
-/** `duration: 0` : le toast reste affiché jusqu'à fermeture par la croix. */
-export const Persistant: Story = {
+/** `duration: 0`: the toast stays until dismissed through the cross. */
+export const Persistent: Story = {
   render: (args) => ({
     components: { VToaster, VButton },
-    setup: () => ({ args, toast }),
+    setup: () => ({ args, toast, t }),
     template: `
       <VToaster v-bind="args" />
       <VButton
         variant="outline"
         tone="neutral"
-        @click="toast({ tone: 'danger', title: 'Échec de l\\'envoi', message: 'Le serveur ne répond pas.', duration: 0 })"
+        @click="toast({ tone: 'danger', title: t.sendFailed, message: t.serverNotResponding, duration: 0 })"
       >
-        Notifier
+        {{ t.notify }}
       </VButton>
     `,
   }),
@@ -153,27 +217,27 @@ export const Persistant: Story = {
       ".v-toast-stack[data-placement='bottom-right']",
     ) as HTMLElement
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Notifier' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Notify' }))
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(true))
 
-    // fermeture manuelle via le VIconButton « Fermer »
-    await userEvent.click(within(stack).getByRole('button', { name: 'Fermer' }))
+    // manual dismissal through the "Close" VIconButton
+    await userEvent.click(within(stack).getByRole('button', { name: 'Close' }))
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(false))
   },
 }
 
-export const AutoFermeture: Story = {
+export const AutoDismiss: Story = {
   render: (args) => ({
     components: { VToaster, VButton },
-    setup: () => ({ args, toast }),
+    setup: () => ({ args, toast, t }),
     template: `
       <VToaster v-bind="args" />
       <VButton
         variant="outline"
         tone="neutral"
-        @click="toast({ message: 'Disparaît en 800 ms.', duration: 800 })"
+        @click="toast({ message: t.disappearsIn800, duration: 800 })"
       >
-        Notifier
+        {{ t.notify }}
       </VButton>
     `,
   }),
@@ -183,104 +247,104 @@ export const AutoFermeture: Story = {
       ".v-toast-stack[data-placement='bottom-right']",
     ) as HTMLElement
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Notifier' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Notify' }))
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(true))
-    // fermeture automatique après la durée demandée
+    // automatic dismissal after the requested duration
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(false), { timeout: 3000 })
   },
 }
 
-/** Les quatre formes de contenu : le titre et l'icône sont optionnels. */
-export const Contenus: Story = {
+/** The four content shapes: the title and the icon are optional. */
+export const Contents: Story = {
   render: (args) => ({
     components: { VToaster, VButton },
-    setup: () => ({ args, toast }),
+    setup: () => ({ args, toast, t }),
     template: `
       <VToaster v-bind="args" />
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
         <VButton variant="outline" tone="neutral"
-          @click="toast({ message: 'Message seul.', icon: false, duration: 0 })">
-          Message
+          @click="toast({ message: t.messageAlone, icon: false, duration: 0 })">
+          {{ t.message }}
         </VButton>
         <VButton variant="outline" tone="neutral"
-          @click="toast({ title: 'Titre', message: 'Titre et message, sans icône.', icon: false, duration: 0 })">
-          Titre + message
+          @click="toast({ title: t.title, message: t.titleAndMessageNoIcon, icon: false, duration: 0 })">
+          {{ t.titleAndMessage }}
         </VButton>
         <VButton variant="outline" tone="neutral"
-          @click="toast({ tone: 'success', message: 'Icône et message.', duration: 0 })">
-          Icône + message
+          @click="toast({ tone: 'success', message: t.iconAndMessageBody, duration: 0 })">
+          {{ t.iconAndMessage }}
         </VButton>
         <VButton variant="outline" tone="neutral"
-          @click="toast({ tone: 'success', title: 'Export terminé', message: 'Icône, titre et message.', duration: 0 })">
-          Icône + titre + message
+          @click="toast({ tone: 'success', title: t.exportDone, message: t.iconTitleMessageBody, duration: 0 })">
+          {{ t.iconTitleMessage }}
         </VButton>
       </div>
     `,
   }),
 }
 
-/** `icon` accepte tout nom Material Symbols (ou une URL d'image). */
-export const IconePersonnalisee: Story = {
+/** `icon` accepts any Material Symbols name (or an image URL). */
+export const CustomIcon: Story = {
   render: (args) => ({
     components: { VToaster, VButton },
-    setup: () => ({ args, toast }),
+    setup: () => ({ args, toast, t }),
     template: `
       <VToaster v-bind="args" />
       <VButton
         variant="outline"
         tone="neutral"
-        @click="toast({ tone: 'accent', icon: 'rocket_launch', title: 'Déploiement lancé', message: 'La mise en production est en cours.', duration: 0 })"
+        @click="toast({ tone: 'accent', icon: 'rocket_launch', title: t.deploymentStarted, message: t.deploymentBody, duration: 0 })"
       >
-        Notifier
+        {{ t.notify }}
       </VButton>
     `,
   }),
 }
 
-/** `width` par toast ; les textes longs restent bornés au viewport. */
-export const Largeur: Story = {
+/** `width` per toast; long texts stay bounded by the viewport. */
+export const Width: Story = {
   render: (args) => ({
     components: { VToaster, VButton },
-    setup: () => ({ args, toast }),
+    setup: () => ({ args, toast, t }),
     template: `
       <VToaster v-bind="args" />
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
         <VButton variant="outline" tone="neutral"
-          @click="toast({ width: '36rem', title: 'Largeur personnalisée', message: 'Ce toast utilise width: 36rem — utile pour des messages détaillés, sans jamais dépasser la largeur du viewport moins les marges.', duration: 0 })">
-          Large (36rem)
+          @click="toast({ width: '36rem', title: t.customWidth, message: t.customWidthBody, duration: 0 })">
+          {{ t.wide }}
         </VButton>
         <VButton variant="outline" tone="neutral"
-          @click="toast({ message: 'Un message volontairement long pour vérifier que la largeur par défaut borne le texte et que le retour à la ligne se fait proprement, même avec une-chaîne-insécable-particulièrement-interminable.', duration: 0 })">
-          Texte long (défaut)
+          @click="toast({ message: t.longTextBody, duration: 0 })">
+          {{ t.longText }}
         </VButton>
       </div>
     `,
   }),
 }
 
-export const Empilement: Story = {
+export const Stacking: Story = {
   render: (args) => ({
     components: { VToaster, VButton },
-    setup: () => ({ args, toast }),
+    setup: () => ({ args, toast, t }),
     template: `
       <VToaster v-bind="args" />
       <VButton
         variant="outline"
         tone="neutral"
-        @click="toast({ tone: 'accent', message: 'Notification ' + Date.now() + '.', duration: 0 })"
+        @click="toast({ tone: 'accent', message: t.notification + ' ' + Date.now() + '.', duration: 0 })"
       >
-        Empiler
+        {{ t.stack }}
       </VButton>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const button = canvas.getByRole('button', { name: 'Empiler' })
+    const button = canvas.getByRole('button', { name: 'Stack' })
 
     await userEvent.click(button)
     await userEvent.click(button)
     await userEvent.click(button)
-    // les trois toasts cohabitent dans la même pile
+    // the three toasts coexist in the same stack
     await waitFor(() => expect(canvasElement.querySelectorAll('.v-toast')).toHaveLength(3))
   },
 }

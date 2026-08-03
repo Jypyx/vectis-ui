@@ -1,21 +1,20 @@
 <script setup lang="ts">
 /**
- * Indicateur de chargement 100 % CSS. role="status" + libellé masqué :
- * annoncé par les lecteurs d'écran sans bruit visuel.
+ * 100% CSS loading indicator. role="status" + a hidden label: announced by screen
+ * readers with no visual noise.
  *
- * Le `computed` de libellé est le seul JS : ce n'est pas du comportement (ni
- * événement, ni cycle de vie, ni DOM), mais le composant perd sa propriété
- * « zéro import » — précédent assumé de VIcon depuis son résolveur.
+ * The label `computed` is the only JS: not behaviour (no event, no lifecycle, no
+ * DOM), just the dictionary lookup that makes its default translatable.
  */
 import { computed } from 'vue'
 
 import { useMessages } from '../../i18n/state'
 
 interface SpinnerProps {
-  /** Taille explicite en pixels (ex. :size="32"). Sans elle : 1em — le
-   * spinner suit le texte du parent. */
+  /** Explicit size in pixels (e.g. :size="32"). Without it: 1em — the spinner
+   * follows the parent's text. */
   size?: number
-  /** Libellé pour les lecteurs d'écran. Défaut : dictionnaire du DS. */
+  /** Label for screen readers. Default: the design system dictionary. */
   label?: string
 }
 
@@ -25,8 +24,6 @@ const props = withDefaults(defineProps<SpinnerProps>(), {
 })
 
 const m = useMessages()
-// Cascade prop > dictionnaire : la prop garde la priorité (aucun breaking
-// change), mais son défaut devient traduisible par `setLocale`.
 const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 </script>
 
@@ -44,9 +41,9 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 <style>
 @layer vectis.components {
   .v-spinner {
-    /* 1em : le spinner suit le texte du parent (un consommateur le
-       dimensionne par font-size, ex. VButton pose font-size: var(--vectis-icon-size)
-       sur sa boîte). La prop `size` pose --spinner-size en px inline et prime. */
+    /* 1em: the spinner follows the parent's text (a consumer sizes it through
+       font-size, e.g. VButton sets font-size: var(--vectis-icon-size) on its box).
+       The `size` prop sets --spinner-size in px inline and wins. */
     --spinner-size: 1em;
     display: inline-flex;
   }
@@ -54,9 +51,8 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
   .v-spinner-circle {
     width: var(--spinner-size);
     height: var(--spinner-size);
-    /* épaisseur proportionnelle (ratio technique toléré, comme les
-       opacités) : 16px → 2px, 24px → 3px ; plancher 1px aux très petites
-       tailles */
+    /* Proportional thickness (a tolerated technical ratio, like the opacities):
+       16px → 2px, 24px → 3px; 1px floor at very small sizes */
     border: max(1px, calc(var(--spinner-size) / 8)) solid
       color-mix(in oklab, currentcolor, transparent 75%);
     border-block-start-color: currentcolor;
@@ -64,8 +60,8 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     animation: v-spin calc(var(--vectis-duration-slow) * 3.5) linear infinite;
   }
 
-  /* La keyframe `v-spin` est partagée (styles/utilities.css) : globale, donc
-     hors layer et déclarée une seule fois pour tout le DS. */
+  /* The `v-spin` keyframe is shared (styles/utilities.css): global, hence outside
+     any layer and declared once for the whole DS. */
 
   @media (prefers-reduced-motion: reduce) {
     .v-spinner-circle {

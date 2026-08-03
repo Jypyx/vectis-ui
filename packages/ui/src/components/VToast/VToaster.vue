@@ -9,26 +9,25 @@ import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
 /**
- * Hôte des notifications, à monter UNE fois (racine de l'app). Rend un
- * popover="manual" PAR PLACEMENT (pile flex — l'empilement est du pur CSS) :
- * des popovers individuels, fixes et sans ancre, se superposeraient tous au
- * même point du top-layer et exigeraient des offsets JS. Les six conteneurs
- * existent en permanence (refs stables, coût nul : divs vides cachées par le
- * style UA `[popover] { display: none }`, SSR inoffensif).
+ * The notification host, to be mounted ONCE (at the app root). It renders one
+ * popover="manual" PER PLACEMENT (a flex stack — the stacking is pure CSS):
+ * individual popovers, fixed and anchorless, would all pile up at the same point of
+ * the top layer and would require JS offsets. The six containers exist permanently
+ * (stable refs, zero cost: empty divs hidden by the UA style
+ * `[popover] { display: none }`, harmless in SSR).
  *
- * JS justifié : pont entre la file réactive (state.ts) et l'API impérative
- * VPopover (showPopover/hidePopover — seule voie vers le top-layer), timers
- * d'auto-fermeture et leur pause au survol (WCAG 2.2.1, contrôle des limites
- * de temps).
+ * JS justified: the bridge between the reactive queue (state.ts) and the imperative
+ * popover API (showPopover/hidePopover — the only route to the top layer), the
+ * auto-dismiss timers and their pause on hover (WCAG 2.2.1, control of time limits).
  */
 interface ToasterProps {
-  /** Placement par défaut (surchargeable par toast). */
+  /** Default placement (overridable per toast). */
   placement?: ToastPlacement
-  /** Durée d'affichage par défaut en ms (surchargeable par toast ; 0 = persistant). */
+  /** Default display duration in ms (overridable per toast; 0 = persistent). */
   duration?: number
-  /** Libellé accessible de la croix de fermeture. Défaut : dictionnaire du DS. */
+  /** Accessible label of the close cross. Default: the DS dictionary. */
   closeLabel?: string
-  /** Libellé accessible des régions de notifications (landmarks). Défaut : dictionnaire du DS. */
+  /** Accessible label of the notification regions (landmarks). Default: the DS dictionary. */
   label?: string
 }
 
@@ -52,7 +51,7 @@ const PLACEMENTS: ToastPlacement[] = [
   'bottom-right',
 ]
 
-/** File groupée par placement effectif (option du toast, sinon prop). */
+/** The queue grouped by effective placement (the toast's option, else the prop). */
 const groups = computed(() => {
   const map = new Map<ToastPlacement, ToastItem[]>()
   for (const item of toasts) {
@@ -65,11 +64,10 @@ const groups = computed(() => {
 })
 
 /*
- * Une instance de usePopover PAR placement : elle porte la ref de l'élément,
- * l'état d'ouverture (alimenté par les événements du popover, cf. syncStack) et
- * les gardes d'idempotence — re-showPopover() sur un popover déjà ouvert lève
- * InvalidStateError. Les six conteneurs étant permanents, la fabrique ne tourne
- * qu'une fois au setup.
+ * One usePopover instance PER placement: it carries the element ref, the open state
+ * (fed by the popover's events, see syncStack) and the idempotence guards — calling
+ * showPopover() again on an already-open popover throws InvalidStateError. Since the
+ * six containers are permanent, the factory only runs once at setup.
  */
 const stacks = new Map(
   PLACEMENTS.map((placement) => {
@@ -87,10 +85,10 @@ function syncStack(placement: ToastPlacement, event: Event) {
   stacks.get(placement)?.syncShown(event)
 }
 
-/* Timers d'auto-fermeture — ids déjà armés (un toast n'est armé qu'une fois). */
+/* Auto-dismiss timers — ids already armed (a toast is armed only once). */
 const timers = new Map<number, ReturnType<typeof setTimeout>>()
 const armed = new Set<number>()
-/* Piles survolées : timers suspendus (repartent à la durée pleine au leave). */
+/* Hovered stacks: timers suspended (they restart at the full duration on leave). */
 const paused = new Set<ToastPlacement>()
 
 function effectivePlacement(item: ToastItem): ToastPlacement {
@@ -110,9 +108,9 @@ function startTimer(item: ToastItem) {
 }
 
 /**
- * Synchronise file → DOM : arme les timers des nouveaux toasts, purge ceux
- * des disparus, ouvre les piles non vides et ferme les vides. Appelé au
- * montage (toasts émis avant — ils s'affichent) puis à chaque changement.
+ * Synchronizes queue → DOM: arms the timers of new toasts, purges those of the ones
+ * gone, opens the non-empty stacks and closes the empty ones. Called on mount (for
+ * toasts emitted before it — they show up) then on every change.
  */
 function sync() {
   const alive = new Set(toasts.map((item) => item.id))
@@ -129,8 +127,8 @@ function sync() {
     if (!paused.has(effectivePlacement(item))) startTimer(item)
   }
 
-  // Les gardes de usePopover rendent show()/hide() idempotents : pas de suivi
-  // manuel des piles déjà ouvertes.
+  // usePopover's guards make show()/hide() idempotent: no manual tracking of the
+  // already-open stacks.
   for (const placement of PLACEMENTS) {
     const stack = stacks.get(placement)
     if (!stack?.el.value) continue
@@ -140,17 +138,17 @@ function sync() {
 }
 
 /*
- * `groups` couvre tout changement de la file ET du placement par défaut ;
- * flush post : le toast est dans le DOM avant showPopover(). onMounted gère
- * les toasts émis avant le montage (les watchers ne tournent pas en SSR).
+ * `groups` covers any change of the queue AND of the default placement; flush post:
+ * the toast is in the DOM before showPopover(). onMounted handles the toasts emitted
+ * before mounting (watchers do not run in SSR).
  */
 watch(groups, sync, { flush: 'post' })
 onMounted(sync)
 
 /*
- * Pause au survol : suspend les timers de la pile ; au leave ils repartent à
- * la durée PLEINE (pas de décompte du temps restant — plus simple et plus
- * généreux pour l'utilisateur).
+ * Pause on hover: suspends the stack's timers; on leave they restart at the FULL
+ * duration (no accounting of the time left — simpler, and more generous to the
+ * user).
  */
 function pause(placement: ToastPlacement) {
   paused.add(placement)
@@ -171,8 +169,8 @@ function resume(placement: ToastPlacement) {
   }
 }
 
-/* La file (état module) survit à un démontage/remontage du VToaster — seuls
-   les timers sont nettoyés (ils repartiront au prochain montage). */
+/* The queue (module state) survives a VToaster unmount/remount — only the timers
+   are cleaned up (they will restart on the next mount). */
 onBeforeUnmount(() => {
   for (const timer of timers.values()) clearTimeout(timer)
   timers.clear()
@@ -206,10 +204,10 @@ onBeforeUnmount(() => {
 
 <style>
 @layer vectis.components {
-  /* `position: fixed`, `inset: auto` et le garde-fou `display: none` du popover
-     fermé viennent de `.v-overlay` (styles/floating.css), posée avec cette
-     classe. Ne restent ici que les neutralisations UA propres à une pile
-     (bordure, padding, fond Canvas, overflow) et sa mise en page. */
+  /* `position: fixed`, `inset: auto` and the closed-popover `display: none` guard
+     come from `.v-overlay` (styles/floating.css), set alongside this class. Only the
+     UA neutralizations specific to a stack (border, padding, Canvas background,
+     overflow) and its layout stay here. */
   .v-toast-stack {
     margin: 0;
     border: none;
@@ -223,13 +221,12 @@ onBeforeUnmount(() => {
   }
 
   /*
-   * Coordonnées PHYSIQUES (top/left…) : une notification est une position
-   * d'écran, indépendante de la direction de lecture (comme les
-   * notifications de l'OS).
+   * PHYSICAL coordinates (top/left…): a notification is a screen position,
+   * independent of the reading direction (like the OS notifications).
    */
   .v-toast-stack[data-placement^='top-'] {
     top: var(--vectis-space-4);
-    /* le plus récent près du bord : la file est append-only, le CSS inverse */
+    /* The most recent near the edge: the queue is append-only, the CSS reverses it */
     flex-direction: column-reverse;
     --toast-enter-y: calc(-1 * var(--vectis-space-4));
   }
@@ -253,8 +250,8 @@ onBeforeUnmount(() => {
     margin-inline: auto;
   }
 
-  /* Entrée/sortie animées de la pile (allow-discrete + @starting-style) —
-     progressive enhancement, comme floating.css */
+  /* Animated entry/exit of the stack (allow-discrete + @starting-style) —
+     progressive enhancement, as in floating.css */
   .v-toast-stack {
     opacity: 1;
     transition:

@@ -7,20 +7,20 @@ import VIconButton from '../VIconButton/VIconButton.vue'
 import type { ToastItem, ToastTone } from './state'
 
 /**
- * Carte de notification — présentationnel pur, interne (rendue par <VToaster>,
- * non exportée). role="alert" (interruptif) pour danger/warning, role="status"
- * (poli) sinon. Compromis assumé : l'annonce du premier toast « poli » d'une
- * pile peut être manquée par certains lecteurs d'écran (la live region naît
- * avec son contenu) ; les role="alert" sont, eux, annoncés à l'insertion.
+ * A notification card — purely presentational, internal (rendered by <VToaster>,
+ * not exported). role="alert" (interruptive) for danger/warning, role="status"
+ * (polite) otherwise. A deliberate trade-off: the announcement of a stack's first
+ * "polite" toast may be missed by some screen readers (the live region is born with
+ * its content); role="alert" ones are announced on insertion.
  */
 const props = defineProps<{
   item: ToastItem
-  /** Libellé accessible de la croix de fermeture. */
+  /** Accessible label of the close cross. */
   closeLabel: string
 }>()
 
 const emit = defineEmits<{
-  /** Demande de fermeture (croix) — la file est gérée par le VToaster. */
+  /** Dismiss request (the cross) — the queue is managed by the VToaster. */
   close: [id: number]
 }>()
 
@@ -36,7 +36,7 @@ const DEFAULT_ICONS: Record<ToastTone, string> = {
   warning: 'warning',
 }
 
-/** `false` = pas d'icône ; nom Material ou URL détectés par iconProps. */
+/** `false` = no icon; a Material name or a URL, detected by iconProps. */
 const icon = computed(() =>
   props.item.icon === false
     ? undefined
@@ -78,7 +78,7 @@ const icon = computed(() =>
     gap: var(--vectis-space-3);
     padding: var(--vectis-space-3) var(--vectis-space-4);
     width: var(--toast-width, var(--vectis-control-size-toast-width));
-    /* responsive : jamais plus large que le viewport moins les marges de la pile */
+    /* Responsive: never wider than the viewport minus the stack's margins */
     max-width: calc(100vw - 2 * var(--vectis-space-4));
     border-radius: var(--vectis-radius-overlay);
     box-shadow: var(--vectis-shadow-4);
@@ -88,8 +88,8 @@ const icon = computed(() =>
   }
 
   .v-toast[data-tone='neutral'] {
-    /* pas de déclinaisons -surface/-border/-text pour neutral : surface
-       d'overlay en tonal, contraste inversé (style tooltip) en solid */
+    /* No -surface/-border/-text variants for neutral: an overlay surface in tonal,
+       an inverted contrast (tooltip style) in solid */
     --tone-bg-tonal: var(--vectis-color-surface-overlay);
     --tone-border-tonal: var(--vectis-color-border);
     --toast-accent: var(--vectis-color-text);
@@ -126,7 +126,7 @@ const icon = computed(() =>
     --tone-border-tonal: var(--vectis-color-warning-border);
     --toast-accent: var(--vectis-color-warning-text);
     --tone-bg-solid: var(--vectis-color-warning);
-    /* amber trop clair pour du blanc : token dédié (texte sombre) */
+    /* Amber is too light for white: a dedicated token (dark text) */
     --tone-text-solid: var(--vectis-color-text-on-warning);
   }
 
@@ -151,11 +151,10 @@ const icon = computed(() =>
   }
 
   /*
-   * Croix de fermeture : VIconButton ghost/neutral, recoloré via les
-   * variables locales de VButton (--tone-text-tinted / --tone-bg-soft) — spécificité
-   * supérieure aux règles de tone de VButton, et VToast est bundlé après lui.
-   * En tonal : croix à la couleur d'accent du tone ; en solid : currentcolor
-   * (lisible sur le fond plein).
+   * Close cross: a ghost/neutral VIconButton, recoloured through VButton's local
+   * variables (--tone-text-tinted / --tone-bg-soft) — a higher specificity than
+   * VButton's tone rules, and VToast is bundled after it. In tonal: a cross in the
+   * tone's accent colour; in solid: currentcolor (readable on the full background).
    */
   .v-toast[data-variant='tonal'] .v-toast-close[data-tone] {
     --tone-text-tinted: var(--toast-accent);
@@ -169,42 +168,41 @@ const icon = computed(() =>
 
   .v-toast-icon {
     --vectis-icon-size: var(--vectis-icon-size-md);
-    /* aligne l'icône (20px) sur le centre de la première ligne de texte */
+    /* Aligns the icon (20px) on the centre of the first line of text */
     margin-block-start: calc(var(--vectis-space-1) / 2);
   }
 
   .v-toast-body {
     flex: 1;
     min-width: 0;
-    /* les messages peuvent contenir des chaînes insécables (URLs, ids) */
+    /* Messages may contain unbreakable strings (URLs, ids) */
     overflow-wrap: anywhere;
   }
 
   .v-toast-title {
     margin-block-end: var(--vectis-space-1);
-    /* semibold : emphase d'état, pas un rôle typo */
+    /* semibold: state emphasis, not a type role */
     font-weight: var(--vectis-font-weight-semibold);
   }
 
   .v-toast-close {
-    /* Réduit l'emprise visuelle du bouton dans le padding de la carte. Le
-       retrait block est SYMÉTRIQUE : la croix (28px) reste alignée en tête de
-       carte comme l'icône (align-items: flex-start, donc accrochée à la
-       première ligne quel que soit le nombre de lignes), mais son débord ne
-       tire plus le contenu vers le haut — sur une seule ligne, elle se
-       retrouve centrée verticalement. */
+    /* Reduces the button's visual footprint inside the card's padding. The block
+       inset is SYMMETRIC: the cross (28px) stays aligned at the head of the card like
+       the icon (align-items: flex-start, hence hooked to the first line whatever the
+       number of lines), but its overhang no longer pulls the content upwards — on a
+       single line, it ends up vertically centred. */
     margin-block: calc(-1 * var(--vectis-space-1));
     margin-inline-end: calc(-1 * var(--vectis-space-1));
   }
 
   /*
-   * Entrée d'un toast inséré dans une pile déjà ouverte : glisse depuis le
-   * bord (--toast-enter-y posée par .v-toast-stack selon le placement).
-   * @starting-style s'applique à toute insertion DOM — progressive
-   * enhancement, apparition sans animation à défaut. La sortie n'est pas
-   * animée : il faudrait retenir l'item dans la file pendant la transition
-   * (choix de simplicité) ; la pile qui se vide fait, elle, un fondu via
-   * hidePopover() + allow-discrete (voir VToaster).
+   * Entry of a toast inserted into an already-open stack: it slides in from the edge
+   * (--toast-enter-y set by .v-toast-stack according to the placement).
+   * @starting-style applies to any DOM insertion — progressive enhancement, an
+   * appearance with no animation otherwise. The exit is not animated: that would mean
+   * holding the item in the queue for the duration of the transition (a simplicity
+   * choice); the stack emptying does fade out, through hidePopover() + allow-discrete
+   * (see VToaster).
    */
   .v-toast {
     transition:

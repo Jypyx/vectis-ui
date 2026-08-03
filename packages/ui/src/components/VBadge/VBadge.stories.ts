@@ -1,13 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
+import { storyText } from '../../stories/storyText'
 import VAvatar from '../VAvatar/VAvatar.vue'
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import VBadge from './VBadge.vue'
 
+const t = storyText({
+  en: { messages: 'Messages', notifications: 'Notifications' },
+  fr: { messages: 'Messages', notifications: 'Notifications' },
+})
+
 const meta = {
-  title: 'Composants/Badge',
+  title: 'Components/Badge',
   component: VBadge,
   argTypes: {
     tone: { control: 'select', options: ['neutral', 'accent', 'danger', 'success', 'warning'] },
@@ -37,7 +43,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/** Les 5 tones en rendu plein-couleur — vérifier `neutral` dans les deux thèmes. */
+/** The 5 tones in full-colour rendering — check `neutral` in both themes. */
 export const Tones: Story = {
   render: () => ({
     components: { VBadge },
@@ -54,11 +60,11 @@ export const Tones: Story = {
 }
 
 /**
- * Couleur libre (hex, nom CSS, oklch()) : le texte s'adapte noir/blanc via
- * contrast-color() (Safari 26+) ; ailleurs, fallback blanc — le contraste
- * d'une couleur claire est à la charge du consommateur.
+ * A free colour (hex, CSS name, oklch()): the text adapts black/white through
+ * contrast-color() (Safari 26+); elsewhere, a white fallback — the contrast of a
+ * light colour is the consumer's responsibility.
  */
-export const CouleurCustom: Story = {
+export const CustomColor: Story = {
   render: () => ({
     components: { VBadge },
     setup: () => ({ colors: ['#7c3aed', 'oklch(70% 0.15 180)', 'hotpink', 'gold'] }),
@@ -74,10 +80,10 @@ export const CouleurCustom: Story = {
 }
 
 /**
- * `count` est un nombre ; au-delà de 99 l'affichage est plafonné à « 99+ ».
- * Le padding réduit garde le badge rond à un ou deux chiffres.
+ * `count` is a number; past 99 the display is capped at "99+". The reduced padding
+ * keeps the badge round at one or two digits.
  */
-export const Compteurs: Story = {
+export const Counters: Story = {
   render: () => ({
     components: { VBadge },
     setup: () => ({ counts: [3, 12, 99, 100, 1000] }),
@@ -89,12 +95,12 @@ export const Compteurs: Story = {
   }),
 }
 
-/** Icône seule (nom, ou `{ src }`) : badge circulaire de 20px, icône 16px. */
-export const Icone: Story = {
+/** An icon alone (a name, or `{ src }`): a circular 20px badge, a 16px icon. */
+export const Icon: Story = {
   render: () => ({
     components: { VBadge },
     setup: () => ({
-      etoile: {
+      star: {
         src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8Z' fill='white'/%3E%3C/svg%3E",
       },
     }),
@@ -103,13 +109,13 @@ export const Icone: Story = {
         <VBadge icon="notifications" />
         <VBadge tone="success" icon="check" />
         <VBadge tone="warning" icon="priority_high" />
-        <VBadge :icon="etoile" />
+        <VBadge :icon="star" />
       </div>
     `,
   }),
 }
 
-/** `dot` réduit le badge à un rond de 10px sans contenu — présence, statut. */
+/** `dot` reduces the badge to a 10px circle with no content — presence, status. */
 export const Dot: Story = {
   render: () => ({
     components: { VBadge },
@@ -123,23 +129,25 @@ export const Dot: Story = {
   }),
 }
 
-/** Avec une cible en slot par défaut, le badge se place à sa droite. */
+/** With a target in the default slot, the badge sits to its right. */
 export const Inline: Story = {
   render: () => ({
     components: { VBadge },
+    setup: () => ({ t }),
     template: `
       <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 12px">
-        <VBadge tone="danger" :count="3"><span>Messages</span></VBadge>
+        <VBadge tone="danger" :count="3"><span>{{ t.messages }}</span></VBadge>
         <VBadge dot tone="success"><span>Xavier Darmet</span></VBadge>
       </div>
     `,
   }),
 }
 
-/** `overlay` pose le badge sur le coin haut-droit, décalé vers l'intérieur. */
+/** `overlay` places the badge on the top-right corner, shifted inwards. */
 export const Overlay: Story = {
   render: () => ({
     components: { VAvatar, VBadge, VButton },
+    setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 24px; align-items: center">
         <VBadge overlay tone="danger" :count="8">
@@ -152,7 +160,7 @@ export const Overlay: Story = {
           <VAvatar name="Xavier Darmet" />
         </VBadge>
         <VBadge overlay tone="danger" :count="120">
-          <VButton variant="outline" tone="neutral">Notifications</VButton>
+          <VButton variant="outline" tone="neutral">{{ t.notifications }}</VButton>
         </VBadge>
       </div>
     `,
@@ -160,18 +168,19 @@ export const Overlay: Story = {
 }
 
 /**
- * `bordered` trace un liseré de 2px couleur du fond derrière
- * (`--vectis-color-surface`, surchargeable localement quand le fond diffère).
- * Sur un VIconButton, le comparatif sans/avec montre le détachement du badge.
+ * `bordered` draws a 2px ring in the colour of the background behind
+ * (`--vectis-color-surface`, overridable locally when the background differs). On a
+ * VIconButton, the with/without comparison shows the badge detaching.
  */
 export const Bordered: Story = {
   render: () => ({
     components: { VBadge, VIcon, VIconButton },
+    setup: () => ({ t }),
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px; align-items: flex-start">
         <div style="display: flex; gap: 24px; align-items: center; padding: 16px; background: var(--vectis-color-accent); border-radius: var(--vectis-radius-surface); --vectis-color-surface: var(--vectis-color-accent)">
           <VBadge overlay tone="danger" :count="3" bordered>
-            <VIconButton label="Notifications" variant="elevated" tone="accent">
+            <VIconButton :label="t.notifications" variant="elevated" tone="accent">
               <VIcon name="notifications" />
             </VIconButton>
           </VBadge>

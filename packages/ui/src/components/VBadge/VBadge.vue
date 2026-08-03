@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
- * Pastille d'information non interactive : compteur ou icône. HTML + CSS
- * uniquement — le seul JS est du calcul de rendu (détection du slot cible,
- * plafonnement « 99+ », pont couleur custom → --custom-color).
+ * A non-interactive information pill: a counter or an icon. HTML + CSS only — the
+ * only JS is render computation (detecting the target slot, the "99+" cap, the
+ * custom colour → --custom-color bridge).
  */
 import { computed, useSlots } from 'vue'
 
@@ -13,29 +13,29 @@ import type { IconSource } from '../VIcon/types'
 export type BadgeTone = 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
 
 interface BadgeProps {
-  /** Couleur sémantique (rendu plein-couleur unique). */
+  /** Semantic colour (a single full-colour rendering). */
   tone?: BadgeTone
   /**
-   * Couleur custom (hex, nom CSS ou oklch()) — remplace le tone. Le texte
-   * s'adapte noir/blanc via contrast-color() sur les navigateurs qui le
-   * supportent ; ailleurs il retombe sur du blanc (contraste d'une couleur
-   * claire à la charge du consommateur, comme le solid custom du VChip).
+   * Custom colour (hex, CSS name or oklch()) — replaces the tone. The text adapts
+   * black/white through contrast-color() on the browsers supporting it; elsewhere it
+   * falls back to white (the contrast of a light colour is the consumer's
+   * responsibility, as with VChip's custom solid).
    */
   color?: string
-  /** Compteur numérique. Au-delà de 99, l'affichage devient « 99+ ». */
+  /** Numeric counter. Past 99, the display becomes "99+". */
   count?: number
   /**
-   * Icône seule (nom Material Symbols ou URL d'image) — prime sur `count`,
-   * ignorée en mode `dot`. Nom d'icône, ou rendu explicite (contrat VIcon).
+   * Icon alone (a Material Symbols name or an image URL) — wins over `count`,
+   * ignored in `dot` mode. An icon name, or an explicit render (the VIcon contract).
    */
   icon?: IconSource
-  /** Rond de 10px sans contenu visible. */
+  /** A 10px dot with no visible content. */
   dot?: boolean
-  /** Avec une cible : coin haut-droit au lieu d'inline. Ignoré sans cible. */
+  /** With a target: top-right corner instead of inline. Ignored with no target. */
   overlay?: boolean
   /**
-   * Liseré de 2px couleur du fond derrière (`--vectis-color-surface`,
-   * surchargeable par sous-arbre) pour détacher le badge de sa cible.
+   * A 2px ring in the colour of the background behind (`--vectis-color-surface`,
+   * overridable per subtree) to detach the badge from its target.
    */
   bordered?: boolean
 }
@@ -48,19 +48,19 @@ const props = withDefaults(defineProps<BadgeProps>(), {
 })
 
 defineSlots<{
-  /** Élément cible. Absent → standalone ; présent → inline ou overlay. */
+  /** Target element. Absent → standalone; present → inline or overlay. */
   default?(): unknown
 }>()
 
 const slots = useSlots()
 const hasTarget = computed(() => slots.default !== undefined)
 
-/** Compteur plafonné : au-delà de 99, l'affichage devient « 99+ ». */
+/** Capped counter: past 99, the display becomes "99+". */
 const displayCount = computed(() =>
   props.count !== undefined && props.count > 99 ? '99+' : props.count,
 )
 
-/* Attributs du badge lui-même, partagés entre les deux racines du template. */
+/* Attributes of the badge itself, shared between the template's two roots. */
 const badgeAttrs = computed(() => ({
   'data-tone': props.tone,
   'data-custom': props.color !== undefined ? '' : undefined,
@@ -95,7 +95,7 @@ const badgeAttrs = computed(() => ({
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: var(--vectis-space-2); /* écart cible ↔ badge en mode inline */
+    gap: var(--vectis-space-2); /* target ↔ badge gap in inline mode */
   }
 
   .v-badge {
@@ -103,7 +103,7 @@ const badgeAttrs = computed(() => ({
     align-items: center;
     justify-content: center;
     height: var(--vectis-control-size-badge-h);
-    /* min-width = height + padding réduit → compteur à 1 ou 2 chiffres rond */
+    /* min-width = height + reduced padding → a round 1- or 2-digit counter */
     min-width: var(--vectis-control-size-badge-h);
     padding-inline: var(--vectis-space-1);
     border-radius: var(--vectis-radius-pill);
@@ -113,22 +113,21 @@ const badgeAttrs = computed(() => ({
     font-weight: var(--vectis-text-control-weight);
     line-height: var(--vectis-text-control-leading);
 
-    /* Contexte icône : mapping xs de l'échelle de tailles (16px, opsz 20 —
-       littéral, contrat de la police Material Symbols). */
+    /* Icon context: the xs mapping of the size scale (16px, opsz 20 — literal, the
+       Material Symbols font contract). */
     --vectis-icon-size: var(--vectis-icon-size-sm);
     --vectis-icon-opsz: 20;
 
-    /* Fallback par tone (tones ci-dessous). contrast-color() ne peut
-       PAS être une simple seconde déclaration : contenant un var(), elle
-       n'est jamais rejetée au parsing par les navigateurs sans support —
-       elle gagnerait la cascade puis deviendrait invalide au calcul (IACVT →
-       color: unset → héritage, le fallback ne s'applique jamais). D'où le
-       @supports ci-dessous, évalué, lui, sans substitution de var(). */
+    /* Per-tone fallback (the tones below). contrast-color() can NOT be a plain
+       second declaration: containing a var(), it is never rejected at parse time by
+       browsers without support — it would win the cascade then become invalid at
+       computed-value time (IACVT → color: unset → inheritance, and the fallback would
+       never apply). Hence the @supports below, which IS evaluated without var()
+       substitution. */
     color: var(--tone-text-fallback);
   }
 
-  /* Texte adaptatif noir/blanc là où contrast-color() existe (Safari 26+,
-     Edge 150+). */
+  /* Adaptive black/white text where contrast-color() exists (Safari 26+, Edge 150+). */
   @supports (color: contrast-color(red)) {
     .v-badge {
       color: contrast-color(var(--badge-bg));
@@ -155,26 +154,26 @@ const badgeAttrs = computed(() => ({
     --tone-text-fallback: var(--vectis-color-text-on-warning);
   }
 
-  /* Neutral : inversion text/surface — un gris type text-muted vaudrait
-     neutral-400 en dark, où le fallback blanc échouerait ; ici fallback et
-     contrast-color() concordent dans les deux thèmes. */
+  /* Neutral: a text/surface inversion — a text-muted-like grey would be neutral-400
+     in dark, where the white fallback would fail; here the fallback and
+     contrast-color() agree in both themes. */
   .v-badge[data-tone='neutral'] {
     --badge-bg: var(--vectis-color-text);
     --tone-text-fallback: var(--vectis-color-surface);
   }
 
-  /* Après les tones : même spécificité, le dernier gagne. */
+  /* After the tones: equal specificity, the last one wins. */
   .v-badge[data-custom] {
     --badge-bg: var(--custom-color);
     --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
-  /* Icône seule : le min-width fait le cercle, padding retiré. */
+  /* Icon alone: min-width makes the circle, the padding is removed. */
   .v-badge[data-icon-only] {
     padding: 0;
   }
 
-  /* min-width neutralisé : il battrait le width du dot. */
+  /* min-width neutralized: it would beat the dot's width. */
   .v-badge[data-dot] {
     width: var(--vectis-control-size-badge-dot);
     height: var(--vectis-control-size-badge-dot);
@@ -182,14 +181,14 @@ const badgeAttrs = computed(() => ({
     padding: 0;
   }
 
-  /* Anneau extérieur en box-shadow : ne modifie pas les dimensions (le dot
-     reste 10px pleins) et suit le border-radius. */
+  /* Outer ring as a box-shadow: it does not change the dimensions (the dot stays a
+     full 10px) and follows the border-radius. */
   .v-badge[data-bordered] {
     box-shadow: 0 0 0 2px var(--vectis-color-surface);
   }
 
-  /* Les % de translate sont des ratios de la taille du badge lui-même
-     (50% = centré sur le coin) — pas des espacements, pas de token. */
+  /* The translate percentages are ratios of the badge's own size (50% = centred on
+     the corner) — not spacing, so no token. */
   .v-badge-host[data-overlay] > .v-badge {
     position: absolute;
     inset-block-start: 0;
@@ -197,7 +196,7 @@ const badgeAttrs = computed(() => ({
     translate: 25% -25%;
   }
 
-  /* RTL : le coin logique passe à gauche, la translation X s'inverse */
+  /* RTL: the logical corner moves left, so the X translation flips */
   .v-badge-host[data-overlay]:dir(rtl) > .v-badge {
     translate: -25% -25%;
   }
