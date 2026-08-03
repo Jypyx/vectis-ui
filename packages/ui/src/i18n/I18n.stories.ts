@@ -4,7 +4,7 @@ import type { Component } from 'vue'
 import VBreadcrumb from '../components/VBreadcrumb/VBreadcrumb.vue'
 import VChip from '../components/VChip/VChip.vue'
 import VCombobox from '../components/VCombobox/VCombobox.vue'
-import DataTableSfc from '../components/VDataTable/VDataTable.vue'
+import VDataTableSfc from '../components/VDataTable/VDataTable.vue'
 import VDatePicker from '../components/VDatePicker/VDatePicker.vue'
 import VInput from '../components/VInput/VInput.vue'
 import VPagination from '../components/VPagination/VPagination.vue'
@@ -17,7 +17,7 @@ import { DEFAULT_LOCALE, registerMessages, setLocale } from './state'
 
 // SFC générique : le typage `Component` ne s'y applique pas, cast obligatoire
 // dans les stories et les tests (convention du repo).
-const VDataTable = DataTableSfc as unknown as Component
+const VDataTable = VDataTableSfc as unknown as Component
 
 const meta = {
   title: 'Fondations/Internationalisation',

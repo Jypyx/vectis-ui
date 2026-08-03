@@ -4,7 +4,7 @@ import { computed, ref } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
 import VCombobox from './VCombobox.vue'
-import type { ComboboxItem, VComboboxOption } from './VCombobox.vue'
+import type { ComboboxItem, ComboboxOption } from './VCombobox.vue'
 
 const PAYS = [
   { value: 'fr', label: 'France' },
@@ -67,7 +67,7 @@ const CAPITALES: Record<string, string> = {
 
 // « API » simulée pour les stories asynchrones : latence réseau, filtrage et
 // pagination côté source (le composant n'en refait aucun).
-const CATALOGUE: VComboboxOption[] = Array.from({ length: 120 }, (_, i) => ({
+const CATALOGUE: ComboboxOption[] = Array.from({ length: 120 }, (_, i) => ({
   value: `ref-${i + 1}`,
   label: `Référence ${String(i + 1).padStart(3, '0')}`,
 }))
@@ -350,7 +350,7 @@ export const RechercheAsynchrone: Story = {
     components: { VCombobox },
     setup: () => {
       const value = ref('')
-      const options = ref<VComboboxOption[]>([])
+      const options = ref<ComboboxOption[]>([])
       const loading = ref(false)
       const requetes = ref(0)
       let jeton = 0
@@ -415,7 +415,7 @@ export const ScrollInfini: Story = {
     components: { VCombobox },
     setup: () => {
       const value = ref('')
-      const options = ref<VComboboxOption[]>([])
+      const options = ref<ComboboxOption[]>([])
       const loading = ref(false)
       const total = ref(0)
       const page = ref(0)

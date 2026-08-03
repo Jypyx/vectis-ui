@@ -22,7 +22,7 @@
  *   (`.v-tooltip-panel`…) sont posées sur le MÊME élément que
  *   `.v-popover-panel`, à spécificité égale (0,1,0).
  *
- * Les composants internes (VComboboxOption, VMenuPanel…) et les composables ne
+ * Les composants internes (ComboboxOption, VMenuPanel…) et les composables ne
  * sont pas exportés.
  */
 import './styles/index.css'
@@ -106,9 +106,9 @@ export type {
 } from './components/VSkeletonLoader/VSkeletonLoader.vue'
 export { default as VCombobox } from './components/VCombobox/VCombobox.vue'
 export type {
-  VComboboxOption,
-  VComboboxGroup,
-  VComboboxSeparator,
+  ComboboxOption,
+  ComboboxGroup,
+  ComboboxSeparator,
   ComboboxItem,
   ComboboxFilter,
 } from './components/VCombobox/VCombobox.vue'

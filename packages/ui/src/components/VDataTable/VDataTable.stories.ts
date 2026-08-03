@@ -5,12 +5,12 @@ import { ref } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
 import VTypography from '../VTypography/VTypography.vue'
-import DataTableSfc from './VDataTable.vue'
+import VDataTableSfc from './VDataTable.vue'
 import type { DataTableParams, DataTableRowId } from './VDataTable.vue'
 
 // SFC générique : sa signature de fonction générique n'est pas assignable aux
 // types Component de Storybook — on l'efface pour les stories.
-const VDataTable = DataTableSfc as unknown as Component
+const VDataTable = VDataTableSfc as unknown as Component
 
 const COLUMNS = [
   { key: 'name', label: 'Projet', sortable: true },

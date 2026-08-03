@@ -133,10 +133,10 @@ const gridLabelId = useId()
 // Libellés de navigation : aucune prop dédiée, le dictionnaire est le seul
 // point de surcharge (globale ou par langue) — cf. `src/i18n/`.
 const m = useMessages()
-const dsLocale = useLocale()
+const vectisLocale = useLocale()
 /* Prop prioritaire, sinon locale globale du DS (idiome `props.x ?? contexte`
    de VAvatar). Une seule dérivation : toutes les lectures passent par elle. */
-const resolvedLocale = computed(() => props.locale ?? dsLocale.value)
+const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
 
 const resolvedFirstDay = computed(
   () => props.firstDayOfWeek ?? firstDayOfWeekFor(resolvedLocale.value),

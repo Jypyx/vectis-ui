@@ -254,11 +254,11 @@ const hasValue = computed(() => {
   return typeof model.value === 'string' && !!model.value
 })
 
-const dsLocale = useLocale()
+const vectisLocale = useLocale()
 /* Prop prioritaire, sinon locale globale du DS. VDatePicker est la source
    UNIQUE : c'est `resolvedLocale` qui descend au VCalendar, jamais `locale`
    (qui vaudrait `undefined`), sinon la balise serait résolue deux fois. */
-const resolvedLocale = computed(() => props.locale ?? dsLocale.value)
+const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
 
 const displayText = computed(() => {
   const locale = resolvedLocale.value

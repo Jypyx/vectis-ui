@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VCombobox from './VCombobox.vue'
-import type { VComboboxOption } from './VCombobox.vue'
+import type { ComboboxOption } from './VCombobox.vue'
 
 const OPTIONS = [
   { value: 'fr', label: 'France' },
@@ -353,7 +353,7 @@ describe('VCombobox asynchrone', () => {
     const seen: string[] = []
     const { getByRole, container, emitted } = renderCombobox({
       searchDebounce: 0,
-      filter: (option: VComboboxOption, query: string) => {
+      filter: (option: ComboboxOption, query: string) => {
         seen.push(query)
         return option.value.startsWith(query)
       },
@@ -528,7 +528,7 @@ describe('VCombobox asynchrone', () => {
       props: { options: OPTIONS, modelValue: '' },
       attrs: { 'aria-label': 'Pays' },
       slots: {
-        option: (slotProps: { option: VComboboxOption; active: boolean; index: number }) =>
+        option: (slotProps: { option: ComboboxOption; active: boolean; index: number }) =>
           h(
             'span',
             { class: 'v-test-option' },
@@ -592,7 +592,7 @@ describe('VCombobox asynchrone', () => {
       slots: {
         chip: (slotProps: {
           value: string
-          option: VComboboxOption | undefined
+          option: ComboboxOption | undefined
           label: string
           remove: () => void
           size: string
@@ -624,7 +624,7 @@ describe('VCombobox asynchrone', () => {
       },
       attrs: { 'aria-label': 'Pays' },
       slots: {
-        chip: (slotProps: { option: VComboboxOption | undefined; label: string }) =>
+        chip: (slotProps: { option: ComboboxOption | undefined; label: string }) =>
           h('span', { class: 'v-test-chip' }, `${slotProps.label}/${slotProps.option?.icon}`),
       },
     })

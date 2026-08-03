@@ -3,7 +3,7 @@ import { useId } from 'vue'
 
 /**
  * Groupe nommé d'options (interne — rendu par `VCombobox` à partir d'une entrée
- * `VComboboxGroup` de sa prop `options`, jamais écrit par le consommateur).
+ * `ComboboxGroup` de sa prop `options`, jamais écrit par le consommateur).
  *
  * `role="group"` est un enfant AUTORISÉ d'un `role="listbox"` (ARIA 1.2) : c'est
  * le pendant du `<optgroup>` natif. Le libellé n'est ni focusable ni

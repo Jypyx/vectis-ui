@@ -175,7 +175,7 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
 // Cascade prop > dictionnaire : les props gardent la priorité, leurs défauts
 // suivent désormais la locale du DS.
 const m = useMessages()
-const dsLocale = useLocale()
+const vectisLocale = useLocale()
 const resolvedEmptyText = computed(() => props.emptyText ?? m.value.dataTable.empty)
 const resolvedSearchPlaceholder = computed(
   () => props.searchPlaceholder ?? m.value.dataTable.searchPlaceholder,
@@ -252,7 +252,8 @@ const sortedRows = computed(() => {
     const bv = b[current.key]
     if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * factor
     return (
-      String(av ?? '').localeCompare(String(bv ?? ''), dsLocale.value, { numeric: true }) * factor
+      String(av ?? '').localeCompare(String(bv ?? ''), vectisLocale.value, { numeric: true }) *
+      factor
     )
   })
 })

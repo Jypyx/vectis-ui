@@ -22,9 +22,9 @@ l'ouverture est pilotée par l'état interne, la fermeture par le light dismiss 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { VCombobox, type VComboboxOption } from '@vectis/ui'
+import { VCombobox, type ComboboxOption } from '@vectis/ui'
 
-const pays: VComboboxOption[] = [
+const pays: ComboboxOption[] = [
   { value: 'fr', label: 'France' },
   { value: 'be', label: 'Belgique' },
   { value: 'sn', label: 'Sénégal' },
@@ -43,7 +43,7 @@ const value = ref('')
 
 ## Options
 
-Chaque option est un `VComboboxOption` — `{ value, label, disabled? }`. Le `label` est
+Chaque option est un `ComboboxOption` — `{ value, label, disabled? }`. Le `label` est
 affiché et filtré, la `value` alimente le `v-model` ; une option `disabled` est
 présentée mais ni sélectionnable ni atteignable au clavier.
 

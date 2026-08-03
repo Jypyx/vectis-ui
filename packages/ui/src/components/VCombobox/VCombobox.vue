@@ -6,11 +6,9 @@ import VIcon from '../VIcon/VIcon.vue'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import VPopover from '../VPopover/VPopover.vue'
-// alias : les types publics `VComboboxOption`/`VComboboxGroup`/`VComboboxSeparator`
-// occupent déjà ces noms dans ce module
-import OptionRow from './VComboboxOption.vue'
-import OptionGroup from './VComboboxGroup.vue'
-import OptionSeparator from './VComboboxSeparator.vue'
+import VComboboxOption from './VComboboxOption.vue'
+import VComboboxGroup from './VComboboxGroup.vue'
+import VComboboxSeparator from './VComboboxSeparator.vue'
 import VSpinner from '../VSpinner/VSpinner.vue'
 
 import { toggleValue } from '../../utils/array'
@@ -33,7 +31,7 @@ import { useMessages } from '../../i18n/state'
  * ARIA du champ. Fermeture au `focusout` : le champ vit hors du panneau, ouvert
  * en `mode="manual"` (pas de light dismiss).
  */
-export interface VComboboxOption {
+export interface ComboboxOption {
   value: string
   label: string
   /**
@@ -48,9 +46,9 @@ export interface VComboboxOption {
  * pendant du `<optgroup>` natif). Un groupe dont plus aucune option ne passe le
  * filtre disparaît, libellé compris.
  */
-export interface VComboboxGroup {
+export interface ComboboxGroup {
   label: string
-  options: VComboboxOption[]
+  options: ComboboxOption[]
 }
 
 /**
@@ -58,26 +56,26 @@ export interface VComboboxGroup {
  * séparateurs devenus orphelins au filtrage (en tête, en fin, ou consécutifs)
  * ne sont pas rendus.
  */
-export interface VComboboxSeparator {
+export interface ComboboxSeparator {
   separator: true
 }
 
 /** Une entrée de la prop `options` : option, groupe ou séparateur. */
-export type ComboboxItem = VComboboxOption | VComboboxGroup | VComboboxSeparator
+export type ComboboxItem = ComboboxOption | ComboboxGroup | ComboboxSeparator
 
-const isGroup = (item: ComboboxItem): item is VComboboxGroup => 'options' in item
-const isSeparator = (item: ComboboxItem): item is VComboboxSeparator => 'separator' in item
+const isGroup = (item: ComboboxItem): item is ComboboxGroup => 'options' in item
+const isSeparator = (item: ComboboxItem): item is ComboboxSeparator => 'separator' in item
 
 /**
  * Filtrage local : `true` (défaut), `false` (les options arrivent déjà filtrées
  * — recherche serveur) ou un prédicat de correspondance personnalisé.
  */
-export type ComboboxFilter = boolean | ((option: VComboboxOption, query: string) => boolean)
+export type ComboboxFilter = boolean | ((option: ComboboxOption, query: string) => boolean)
 
 interface ComboboxProps {
   /**
-   * Options du panneau. Une entrée peut aussi être un `VComboboxGroup` (bloc
-   * nommé) ou un `VComboboxSeparator` ; une liste plate d'options reste valide.
+   * Options du panneau. Une entrée peut aussi être un `ComboboxGroup` (bloc
+   * nommé) ou un `ComboboxSeparator` ; une liste plate d'options reste valide.
    */
   options: ComboboxItem[]
   /** Sélection multiple — le v-model devient string[] et des Chips s'affichent. */
@@ -149,7 +147,7 @@ const emit = defineEmits<{
 defineSlots<{
   /** Contenu d'une option (défaut : son libellé). */
   option?(props: {
-    option: VComboboxOption
+    option: ComboboxOption
     index: number
     active: boolean
     selected: boolean
@@ -162,7 +160,7 @@ defineSlots<{
    */
   chip?(props: {
     value: string
-    option: VComboboxOption | undefined
+    option: ComboboxOption | undefined
     label: string
     remove: () => void
     size: 'xs' | 'sm'
@@ -217,7 +215,7 @@ const selectedValues = computed<string[]>(() => {
 // dans l'ordre du source. C'est l'UNIQUE lecture des options par le reste du
 // composant : filtrage, cache, libellés et pagination ignorent la hiérarchie,
 // que seul le rendu (`rendered`) connaît.
-const allOptions = computed<VComboboxOption[]>(() =>
+const allOptions = computed<ComboboxOption[]>(() =>
   props.options.flatMap((item) => {
     if (isSeparator(item)) return []
     return isGroup(item) ? item.options : [item]
@@ -231,7 +229,7 @@ const allOptions = computed<VComboboxOption[]>(() =>
 // watchEffect (et non watch sur `props.options`) : il traque l'itération, donc
 // aussi les ajouts en place d'une page (scroll infini). Borné à la sélection :
 // les autres options se relisent dans `options`.
-const optionCache = reactive(new Map<string, VComboboxOption>())
+const optionCache = reactive(new Map<string, ComboboxOption>())
 watchEffect(() => {
   const wanted = new Set(selectedValues.value)
   for (const option of allOptions.value) {
@@ -275,7 +273,7 @@ const filtered = computed(() => {
 // Seul endroit qui connaît la hiérarchie. Chaque option y porte son index DANS
 // `filtered` (et non sa position dans l'arbre) : ids, surbrillance et slot
 // #option restent alignés sur la navigation clavier.
-type RenderedOption = { kind: 'option'; key: string; option: VComboboxOption; index: number }
+type RenderedOption = { kind: 'option'; key: string; option: ComboboxOption; index: number }
 type RenderedNode =
   | RenderedOption
   | { kind: 'group'; key: string; label: string; options: RenderedOption[] }
@@ -285,7 +283,7 @@ const rendered = computed<RenderedNode[]>(() => {
   const indexOf = new Map<string, number>()
   filtered.value.forEach((option, index) => indexOf.set(option.value, index))
 
-  const entryOf = (option: VComboboxOption): RenderedOption | null => {
+  const entryOf = (option: ComboboxOption): RenderedOption | null => {
     const index = indexOf.get(option.value)
     if (index === undefined) return null
     return { kind: 'option', key: `option:${option.value}`, option, index }
@@ -514,7 +512,7 @@ function onControlClick() {
   selectQuery()
 }
 
-function select(option: VComboboxOption) {
+function select(option: ComboboxOption) {
   if (option.disabled) return
   // mémorisée tout de suite : l'option peut disparaître d'`options` (recherche
   // suivante) avant que le parent n'ait propagé le modèle
@@ -758,10 +756,10 @@ watch(
       <!-- Groupes et séparateurs ne sont QUE du rendu : la navigation clavier
            indexe `filtered`, plat, et ne les rencontre donc jamais. -->
       <template v-for="node in rendered" :key="node.key">
-        <OptionSeparator v-if="node.kind === 'separator'" />
+        <VComboboxSeparator v-if="node.kind === 'separator'" />
 
-        <OptionGroup v-else-if="node.kind === 'group'" :label="node.label">
-          <OptionRow
+        <VComboboxGroup v-else-if="node.kind === 'group'" :label="node.label">
+          <VComboboxOption
             v-for="entry in node.options"
             :key="entry.key"
             v-bind="rowProps(entry)"
@@ -769,17 +767,17 @@ watch(
             @pointermove="hover(entry)"
           >
             <slot name="option" v-bind="optionSlotProps(entry)">{{ entry.option.label }}</slot>
-          </OptionRow>
-        </OptionGroup>
+          </VComboboxOption>
+        </VComboboxGroup>
 
-        <OptionRow
+        <VComboboxOption
           v-else
           v-bind="rowProps(node)"
           @select="select(node.option)"
           @pointermove="hover(node)"
         >
           <slot name="option" v-bind="optionSlotProps(node)">{{ node.option.label }}</slot>
-        </OptionRow>
+        </VComboboxOption>
       </template>
 
       <!-- Ordre chargement → vide → contenu : pendant une

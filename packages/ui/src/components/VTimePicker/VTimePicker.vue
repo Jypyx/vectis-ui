@@ -157,9 +157,9 @@ const hasDial = computed(
 )
 const hasPanel = computed(() => hasDial.value || isList.value)
 
-const dsLocale = useLocale()
+const vectisLocale = useLocale()
 /* Prop prioritaire, sinon locale globale du DS. */
-const resolvedLocale = computed(() => props.locale ?? dsLocale.value)
+const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
 
 const resolvedFormat = computed<TimePickerFormat>(
   () => props.format ?? hourCycleFor(resolvedLocale.value),
