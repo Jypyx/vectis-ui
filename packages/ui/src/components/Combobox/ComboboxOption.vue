@@ -76,23 +76,23 @@ function onClick() {
 <style>
 @layer ds.components {
   .ds-combobox-option {
-    /* Taille : `--_control-*` héritées du panneau, qui porte `ds-control`
+    /* Taille : `--control-*` héritées du panneau, qui porte `ds-control`
        (styles/control-size.css) ; les icônes suivent par le même héritage.
        Typo composite comme MenuItem : taille de l'échelle, leading `body-md`
        (ratio unitless) et poids regular. */
     display: flex;
     align-items: center;
-    gap: var(--_control-gap);
+    gap: var(--control-gap);
     width: 100%;
-    min-height: var(--_control-height);
-    padding: var(--ds-space-1) var(--_control-padding-inline);
+    min-height: var(--control-height);
+    padding: var(--vectis-space-1) var(--control-padding-inline);
     border: none;
     background: transparent;
-    color: var(--ds-color-text);
-    border-radius: var(--ds-radius-sm);
+    color: var(--vectis-color-text);
+    border-radius: var(--vectis-radius-sm);
     font-family: inherit;
-    font-size: var(--_control-font-size);
-    line-height: var(--ds-text-body-md-leading);
+    font-size: var(--control-font-size);
+    line-height: var(--vectis-text-body-md-leading);
     text-align: start;
     cursor: pointer;
   }
@@ -108,18 +108,18 @@ function onClick() {
      ici : il reste dans le champ). */
   .ds-combobox-option:hover:not([aria-disabled='true']),
   .ds-combobox-option[data-active] {
-    background: var(--ds-color-surface-muted);
+    background: var(--vectis-color-surface-muted);
     outline: none;
   }
 
   .ds-combobox-option[aria-selected='true'] {
-    color: var(--ds-color-accent-text);
+    color: var(--vectis-color-accent-text);
   }
 
   /* pas de `disabled` natif ici (l'option reste dans l'arbre a11y du champ) */
   .ds-combobox-option[aria-disabled='true'] {
     background: transparent;
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 }

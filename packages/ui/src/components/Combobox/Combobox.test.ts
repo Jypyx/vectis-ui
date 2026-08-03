@@ -489,7 +489,7 @@ describe('Combobox asynchrone', () => {
   })
 
   it('tailles : les Chips restent un cran sous le champ, le panneau suit sa taille', async () => {
-    // Mapping unique (script) que le CSS `--_chip-height` doit refléter :
+    // Mapping unique (script) que le CSS `--chip-height` doit refléter :
     // xs jusqu'à md, sm en lg ; le cran du dessous passe par `compact`.
     const { container, rerender } = renderCombobox({ multiple: true, modelValue: ['fr'] })
     const chip = () => container.querySelector('.ds-chip') as HTMLElement

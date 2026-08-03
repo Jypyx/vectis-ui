@@ -634,7 +634,7 @@ const close = () => closeAndFocus()
       ref="panelRef"
       v-model:open="open"
       mode="manual"
-      anchor="--ds-datepicker-anchor"
+      anchor="--datepicker-anchor"
       :placement="placement"
       surface
       role="dialog"
@@ -671,14 +671,14 @@ const close = () => closeAndFocus()
 @layer ds.components {
   .ds-datepicker {
     /* confine l'ancre à cette instance (racine = ancêtre commun contrôle/panneau) */
-    anchor-scope: --ds-datepicker-anchor;
+    anchor-scope: --datepicker-anchor;
     display: block;
     width: 100%;
-    font-family: var(--ds-text-family);
+    font-family: var(--vectis-text-family);
   }
 
   .ds-datepicker-control {
-    anchor-name: --ds-datepicker-anchor;
+    anchor-name: --datepicker-anchor;
     display: block;
     cursor: pointer;
   }

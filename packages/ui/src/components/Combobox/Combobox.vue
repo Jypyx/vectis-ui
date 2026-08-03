@@ -180,7 +180,7 @@ defineSlots<{
 // taille de moins — d'où `sm` → xs compact (20px dans 32px) et `lg` compact →
 // sm compact (28px dans 44px). En `md` la marge suffit déjà, le `compact` du
 // Combobox ne touche donc pas les Chips.
-// Toute évolution de ce mapping doit être reportée sur `--_chip-height` (CSS
+// Toute évolution de ce mapping doit être reportée sur `--chip-height` (CSS
 // plus bas) : la hauteur est redite côté champ, hors de portée du sous-arbre.
 const chipSize = computed(() => (props.size === 'lg' ? 'sm' : 'xs'))
 const chipCompact = computed(() => (props.size === 'lg' ? props.compact : props.size === 'sm'))
@@ -727,7 +727,7 @@ watch(
         <!-- Chevron posé en absolu à droite (cf. CSS), pivote à l'ouverture.
              La croix vient de la prop `clearable` d'Input, rendue à sa gauche.
              En chargement, le spinner prend EXACTEMENT sa place (Input pose
-             `font-size: var(--ds-icon-size)` sur les spinners enfants directs
+             `font-size: var(--vectis-icon-size)` sur les spinners enfants directs
              du champ) : aucun saut de largeur. On ne passe pas par la prop
              `loading` d'Input, qui écraserait ce slot — donc le chevron.
              `aria-hidden` sur la racine du Spinner neutralise son
@@ -746,7 +746,7 @@ watch(
       :id="optionsId"
       v-model:open="open"
       mode="manual"
-      anchor="--ds-combobox-anchor"
+      anchor="--combobox-anchor"
       placement="bottom-start"
       role="listbox"
       class="ds-combobox-panel ds-control"
@@ -809,24 +809,24 @@ watch(
   .ds-combobox {
     /* confine l'ancre à cette instance (posée sur la racine, ancêtre commun du
        contrôle et du panneau — même en top-layer le panneau reste descendant) */
-    anchor-scope: --ds-combobox-anchor;
+    anchor-scope: --combobox-anchor;
     width: 100%;
-    font-family: var(--ds-text-family);
+    font-family: var(--vectis-text-family);
   }
 
   .ds-combobox-control {
-    anchor-name: --ds-combobox-anchor;
+    anchor-name: --combobox-anchor;
     display: block;
   }
 
   /* Le panneau vient de `Popover` : élément popover, état, ancrage, placement et
      chrome (`.ds-panel` via `surface`). Il porte aussi `ds-control` (le template)
-     — les options et les rangées d'état lisent les `--_control-*` hérités, aucune
+     — les options et les rangées d'état lisent les `--control-*` hérités, aucune
      table de tailles locale. Ne restent ici que les règles propres à la liste :
      largeur calée sur l'ancre et zone défilante. */
   .ds-combobox-panel {
     min-inline-size: anchor-size(width);
-    max-block-size: var(--ds-control-size-combobox-list-max-block);
+    max-block-size: var(--vectis-control-size-combobox-list-max-block);
     overflow: auto;
   }
 
@@ -838,31 +838,31 @@ watch(
   .ds-combobox .ds-input-field {
     position: relative;
     padding-inline-end: calc(
-      var(--_control-padding-inline-field) + var(--ds-icon-size) + var(--ds-space-2)
+      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--vectis-space-2)
     );
   }
 
   .ds-combobox[data-can-clear] .ds-input-field {
     padding-inline-end: calc(
-      var(--_control-padding-inline-field) + var(--_control-action-size) + var(--ds-icon-size) +
-        var(--ds-space-2)
+      var(--control-padding-inline-field) + var(--control-action-size) + var(--vectis-icon-size) +
+        var(--vectis-space-2)
     );
   }
 
-  /* Chevron et spinner partagent l'emplacement : même boîte (--ds-icon-size,
+  /* Chevron et spinner partagent l'emplacement : même boîte (--vectis-icon-size,
      posée par Input sur les spinners enfants directs du champ), donc le padding
      réservé ci-dessus vaut pour les deux et l'échange ne décale rien. */
   .ds-combobox-chevron,
   .ds-combobox-spinner {
     position: absolute;
-    inset-inline-end: var(--_control-padding-inline-field);
+    inset-inline-end: var(--control-padding-inline-field);
     top: 50%;
     translate: 0 -50%;
-    color: var(--ds-color-text-muted);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-combobox-chevron {
-    transition: rotate var(--ds-duration-fast) var(--ds-ease-default);
+    transition: rotate var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-combobox[data-open] .ds-combobox-chevron {
@@ -873,7 +873,7 @@ watch(
   .ds-combobox .ds-input-clear {
     position: absolute;
     inset-inline-end: calc(
-      var(--_control-padding-inline-field) + var(--ds-icon-size) + var(--ds-space-1)
+      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--vectis-space-1)
     );
     top: 50%;
     translate: 0 -50%;
@@ -881,40 +881,40 @@ watch(
   }
 
   /* multiple : le champ accueille les Chips (retour à la ligne). Hauteur calée
-     sur le contrôle (`--_control-height`, size/compact via .ds-control d'Input).
-     La hauteur des Chips est redite ici en `--_chip-height` parce qu'elle vit
+     sur le contrôle (`--control-height`, size/compact via .ds-control d'Input).
+     La hauteur des Chips est redite ici en `--chip-height` parce qu'elle vit
      dans le sous-arbre du Chip, hors de portée du champ : ces quatre règles
      doivent rester le miroir exact de `chipSize`/`chipCompact` (script).
      L'input est forcé à cette MÊME hauteur au lieu du `100%` hérité d'Input :
      sinon sa hauteur intrinsèque dépasse les Chips et fait grandir le champ.
-     Résultat : champ = --_control-height constant, input jamais plus haut que
+     Résultat : champ = --control-height constant, input jamais plus haut que
      les Chips, aucun saut au focus. Ordre significatif : les tailles sont à
      spécificité égale entre elles, la variante compact vient en dernier. */
   .ds-combobox[data-multiple] {
-    --_chip-height: var(--ds-control-height-xs);
+    --chip-height: var(--vectis-control-height-xs);
   }
 
   .ds-combobox[data-multiple][data-size='sm'] {
-    --_chip-height: calc(var(--ds-control-height-xs) - var(--ds-space-1));
+    --chip-height: calc(var(--vectis-control-height-xs) - var(--vectis-space-1));
   }
 
   .ds-combobox[data-multiple][data-size='lg'] {
-    --_chip-height: var(--ds-control-height-sm);
+    --chip-height: var(--vectis-control-height-sm);
   }
 
   .ds-combobox[data-multiple][data-size='lg'][data-compact] {
-    --_chip-height: calc(var(--ds-control-height-sm) - var(--ds-space-1));
+    --chip-height: calc(var(--vectis-control-height-sm) - var(--vectis-space-1));
   }
 
   .ds-combobox[data-multiple] .ds-input-field {
     flex-wrap: wrap;
     height: auto;
-    min-height: var(--_control-height);
-    padding-block: var(--ds-space-1);
+    min-height: var(--control-height);
+    padding-block: var(--vectis-space-1);
   }
 
   .ds-combobox[data-multiple] .ds-input-control {
-    height: var(--_chip-height);
+    height: var(--chip-height);
   }
 
   /* hors édition (avec sélection) : sortir l'input du flux (position absolue,
@@ -929,18 +929,18 @@ watch(
   }
 
   /* États plein panneau (« aucun résultat », chargement) : même gabarit qu'une
-     option — mêmes `--_control-*` héritées du panneau, qui porte `ds-control`
+     option — mêmes `--control-*` héritées du panneau, qui porte `ds-control`
      (le spinner suit aussi, via le contexte Icon du même bloc).
      `flex: none` : le panneau est un flex column, l'état ne doit pas s'écraser. */
   .ds-combobox-state {
     display: flex;
     flex: none;
     align-items: center;
-    gap: var(--_control-gap);
-    min-height: var(--_control-height);
-    padding: var(--ds-space-1) var(--_control-padding-inline);
-    font-size: var(--_control-font-size);
-    color: var(--ds-color-text-muted);
+    gap: var(--control-gap);
+    min-height: var(--control-height);
+    padding: var(--vectis-space-1) var(--control-padding-inline);
+    font-size: var(--control-font-size);
+    color: var(--vectis-color-text-muted);
   }
 
   /* Pied de liste : sentinelle du scroll infini (une boîte de hauteur nulle
@@ -950,8 +950,8 @@ watch(
     flex: none;
     align-items: center;
     justify-content: center;
-    min-height: var(--ds-space-6);
-    color: var(--ds-color-text-muted);
+    min-height: var(--vectis-space-6);
+    color: var(--vectis-color-text-muted);
   }
 
   @media (prefers-reduced-motion: reduce) {

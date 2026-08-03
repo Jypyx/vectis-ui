@@ -628,7 +628,7 @@ defineExpose({ focus })
                 v-for="(ev, ei) in cell.events.slice(0, 3)"
                 :key="ei"
                 class="ds-calendar-dot"
-                :style="ev.color ? { '--_dot-color': ev.color } : undefined"
+                :style="ev.color ? { '--calendar-dot-color': ev.color } : undefined"
               />
             </span>
           </button>
@@ -719,14 +719,17 @@ defineExpose({ focus })
   .ds-calendar {
     /* Taille du rond (jour) configurable par le consommateur ; la cellule (zone
        de survol / colonne) s'agrandit avec, sans jamais passer sous le token. */
-    --_day-size: var(--ds-calendar-day-size, var(--ds-control-height-md));
-    --_cell: max(var(--ds-control-size-calendar-cell), calc(var(--_day-size) + var(--ds-space-1)));
+    --calendar-day-size: var(--vectis-calendar-day-size, var(--vectis-control-height-md));
+    --calendar-cell: max(
+      var(--vectis-control-size-calendar-cell),
+      calc(var(--calendar-day-size) + var(--vectis-space-1))
+    );
     display: inline-flex;
     flex-direction: column;
-    gap: var(--ds-space-2);
-    padding: var(--ds-space-3);
-    font-family: var(--ds-text-family);
-    color: var(--ds-color-text);
+    gap: var(--vectis-space-2);
+    padding: var(--vectis-space-3);
+    font-family: var(--vectis-text-family);
+    color: var(--vectis-color-text);
   }
 
   /* Tous les blocs s'étirent sur la largeur du calendrier (stretch par défaut) :
@@ -735,21 +738,21 @@ defineExpose({ focus })
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--ds-space-2);
+    gap: var(--vectis-space-2);
   }
 
   .ds-calendar-nav {
     display: flex;
     align-items: center;
-    gap: var(--ds-space-1);
+    gap: var(--vectis-space-1);
   }
 
   /* largeur minimale stable pour que les chevrons ne se décalent pas selon la
      longueur du libellé mois/année */
   .ds-calendar-picker-toggle {
-    min-inline-size: var(--ds-control-size-calendar-nav-min);
+    min-inline-size: var(--vectis-control-size-calendar-nav-min);
     /* semibold : emphase du libellé mois/année (repère principal de la grille) */
-    font-weight: var(--ds-font-weight-semibold);
+    font-weight: var(--vectis-font-weight-semibold);
     text-transform: capitalize;
   }
 
@@ -757,7 +760,7 @@ defineExpose({ focus })
   /* Largeur plancher = 7 cellules ; sinon la grille s'étire à la largeur du
      calendrier (imposée par l'en-tête) et les colonnes 1fr se répartissent. */
   .ds-calendar-grid {
-    min-inline-size: calc(7 * var(--_cell));
+    min-inline-size: calc(7 * var(--calendar-cell));
   }
 
   .ds-calendar-weekdays,
@@ -770,13 +773,13 @@ defineExpose({ focus })
     display: flex;
     align-items: center;
     justify-content: center;
-    height: var(--ds-control-height-sm);
+    height: var(--vectis-control-height-sm);
     /* Micro-en-tête de colonne : rôle overline (la casse reste `capitalize`,
        convention des calendriers, pas les capitales de la variante Typography) */
-    font-size: var(--ds-text-overline-size);
-    font-weight: var(--ds-text-overline-weight);
-    letter-spacing: var(--ds-text-overline-tracking);
-    color: var(--ds-color-text-muted);
+    font-size: var(--vectis-text-overline-size);
+    font-weight: var(--vectis-text-overline-weight);
+    letter-spacing: var(--vectis-text-overline-tracking);
+    color: var(--vectis-color-text-muted);
     text-transform: capitalize;
   }
 
@@ -785,7 +788,7 @@ defineExpose({ focus })
     display: flex;
     align-items: center;
     justify-content: center;
-    height: var(--_cell);
+    height: var(--calendar-cell);
   }
 
   /* Bande de plage : fond teinté à la HAUTEUR du rond (pas de la cellule), posé
@@ -797,20 +800,20 @@ defineExpose({ focus })
   .ds-calendar-cell[data-in-range]::before {
     content: '';
     position: absolute;
-    inset-block: calc((100% - var(--_day-size)) / 2);
+    inset-block: calc((100% - var(--calendar-day-size)) / 2);
     inset-inline: 0;
-    background: var(--ds-color-accent-surface);
+    background: var(--vectis-color-accent-surface);
     z-index: 0;
   }
   .ds-calendar-cell[data-range-start]::before {
-    inset-inline-start: calc((100% - var(--_day-size)) / 2);
-    border-start-start-radius: var(--ds-radius-pill);
-    border-end-start-radius: var(--ds-radius-pill);
+    inset-inline-start: calc((100% - var(--calendar-day-size)) / 2);
+    border-start-start-radius: var(--vectis-radius-pill);
+    border-end-start-radius: var(--vectis-radius-pill);
   }
   .ds-calendar-cell[data-range-end]::before {
-    inset-inline-end: calc((100% - var(--_day-size)) / 2);
-    border-start-end-radius: var(--ds-radius-pill);
-    border-end-end-radius: var(--ds-radius-pill);
+    inset-inline-end: calc((100% - var(--calendar-day-size)) / 2);
+    border-start-end-radius: var(--vectis-radius-pill);
+    border-end-end-radius: var(--vectis-radius-pill);
   }
   .ds-calendar-cell[data-range-start][data-range-end]::before {
     content: none;
@@ -823,19 +826,19 @@ defineExpose({ focus })
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    inline-size: var(--_day-size);
-    block-size: var(--_day-size);
+    inline-size: var(--calendar-day-size);
+    block-size: var(--calendar-day-size);
     padding: 0;
     border: none;
-    border-radius: var(--ds-radius-pill);
+    border-radius: var(--vectis-radius-pill);
     background: transparent;
     color: inherit;
     font: inherit;
-    font-size: var(--ds-text-body-md-size);
+    font-size: var(--vectis-text-body-md-size);
     cursor: pointer;
     transition:
-      background-color var(--ds-duration-fast) var(--ds-ease-default),
-      color var(--ds-duration-fast) var(--ds-ease-default);
+      background-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   /* hover réservé aux jours cliquables : ni désactivés, ni sélectionnés, ni les
@@ -843,35 +846,35 @@ defineExpose({ focus })
   .ds-calendar-day:hover:not([aria-disabled='true']):not([data-selected]):not(
       .ds-calendar-day--static
     ) {
-    background: var(--ds-color-surface-muted);
+    background: var(--vectis-color-surface-muted);
   }
 
   .ds-calendar-day[data-outside] {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
   }
 
   /* semibold ci-dessous : emphases d'état (aujourd'hui, sélection), pas des
      rôles typographiques */
   .ds-calendar-day[data-today]:not([data-selected]) {
-    box-shadow: inset 0 0 0 1px var(--ds-color-accent-border);
-    color: var(--ds-color-accent-text);
-    font-weight: var(--ds-font-weight-semibold);
+    box-shadow: inset 0 0 0 1px var(--vectis-color-accent-border);
+    color: var(--vectis-color-accent-text);
+    font-weight: var(--vectis-font-weight-semibold);
   }
 
   .ds-calendar-day[data-selected] {
-    background: var(--ds-color-accent);
-    color: var(--ds-color-text-on-accent);
-    font-weight: var(--ds-font-weight-semibold);
+    background: var(--vectis-color-accent);
+    color: var(--vectis-color-text-on-accent);
+    font-weight: var(--vectis-font-weight-semibold);
   }
 
   .ds-calendar-day[aria-disabled='true'] {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
     text-decoration: line-through;
     cursor: not-allowed;
   }
 
   .ds-calendar-day--static {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
     cursor: default;
   }
 
@@ -882,28 +885,28 @@ defineExpose({ focus })
   }
 
   .ds-calendar-day:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   .ds-calendar-day-num {
-    line-height: var(--ds-text-control-leading);
+    line-height: var(--vectis-text-control-leading);
   }
 
   .ds-calendar-dots {
     position: absolute;
-    inset-block-end: calc(var(--ds-space-1) * 0.5);
+    inset-block-end: calc(var(--vectis-space-1) * 0.5);
     display: flex;
     gap: 2px;
   }
   .ds-calendar-dot {
-    inline-size: var(--ds-control-size-calendar-dot);
-    block-size: var(--ds-control-size-calendar-dot);
-    border-radius: var(--ds-radius-pill);
-    background: var(--_dot-color, var(--ds-color-accent));
+    inline-size: var(--vectis-control-size-calendar-dot);
+    block-size: var(--vectis-control-size-calendar-dot);
+    border-radius: var(--vectis-radius-pill);
+    background: var(--calendar-dot-color, var(--vectis-color-accent));
   }
   .ds-calendar-day[data-selected] .ds-calendar-dot {
-    background: var(--ds-color-text-on-accent);
+    background: var(--vectis-color-text-on-accent);
   }
 
   /* ── Vues mois / années ── */
@@ -911,11 +914,11 @@ defineExpose({ focus })
   .ds-calendar-picker {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--ds-space-1);
-    min-inline-size: calc(7 * var(--_cell));
+    gap: var(--vectis-space-1);
+    min-inline-size: calc(7 * var(--calendar-cell));
   }
   .ds-calendar-picker--years {
-    max-block-size: calc(6 * var(--_cell));
+    max-block-size: calc(6 * var(--calendar-cell));
     overflow-y: auto;
   }
 
@@ -923,33 +926,33 @@ defineExpose({ focus })
     display: flex;
     align-items: center;
     justify-content: center;
-    block-size: var(--ds-control-height-lg);
+    block-size: var(--vectis-control-height-lg);
     border: none;
-    border-radius: var(--ds-radius-pill);
+    border-radius: var(--vectis-radius-pill);
     background: transparent;
     color: inherit;
     font: inherit;
-    font-size: var(--ds-text-body-md-size);
+    font-size: var(--vectis-text-body-md-size);
     text-transform: capitalize;
     cursor: pointer;
-    transition: background-color var(--ds-duration-fast) var(--ds-ease-default);
+    transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
   .ds-calendar-picker-cell:hover:not(:disabled):not([data-selected]) {
-    background: var(--ds-color-surface-muted);
+    background: var(--vectis-color-surface-muted);
   }
   .ds-calendar-picker-cell[data-selected] {
-    background: var(--ds-color-accent);
-    color: var(--ds-color-text-on-accent);
+    background: var(--vectis-color-accent);
+    color: var(--vectis-color-text-on-accent);
     /* semibold : emphase d'état, pas un rôle typo */
-    font-weight: var(--ds-font-weight-semibold);
+    font-weight: var(--vectis-font-weight-semibold);
   }
   .ds-calendar-picker-cell:disabled {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
   .ds-calendar-picker-cell:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: calc(-1 * var(--ds-focus-ring-width));
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
   /* ── Footer ── */
@@ -957,9 +960,9 @@ defineExpose({ focus })
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--ds-space-2);
-    padding-block-start: var(--ds-space-2);
-    border-block-start: 1px solid var(--ds-color-border);
+    gap: var(--vectis-space-2);
+    padding-block-start: var(--vectis-space-2);
+    border-block-start: 1px solid var(--vectis-color-border);
   }
 
   @media (prefers-reduced-motion: reduce) {

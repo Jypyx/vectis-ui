@@ -41,7 +41,7 @@ export interface ToastOptions {
   /** Affiche la croix de fermeture. */
   closable?: boolean
   /**
-   * Largeur (longueur CSS) ; défaut `--ds-control-size-toast-width`.
+   * Largeur (longueur CSS) ; défaut `--vectis-control-size-toast-width`.
    * Toujours bornée à la largeur du viewport moins les marges.
    */
   width?: string

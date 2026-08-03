@@ -116,156 +116,164 @@ const passedAttrs = computed(() => {
   .ds-button {
     /*
      * Tailles/compact : la classe partagée ds-control (styles/control-size.css)
-     * pose les variables --_control-* et le contexte d'Icon selon
-     * data-size/data-compact. IconButton lit aussi --_control-height pour sa
+     * pose les variables --control-* et le contexte d'Icon selon
+     * data-size/data-compact. IconButton lit aussi --control-height pour sa
      * largeur carrée (même élément rendu).
      */
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--_control-gap);
-    height: var(--_control-height);
-    padding-inline: var(--_control-padding-inline);
+    gap: var(--control-gap);
+    height: var(--control-height);
+    padding-inline: var(--control-padding-inline);
     border: 1px solid transparent;
-    border-radius: var(--ds-radius-interactive);
-    font-family: var(--ds-text-family);
-    font-size: var(--_control-font-size);
-    font-weight: var(--ds-text-control-weight);
-    line-height: var(--ds-text-control-leading);
+    border-radius: var(--vectis-radius-interactive);
+    font-family: var(--vectis-text-family);
+    font-size: var(--control-font-size);
+    font-weight: var(--vectis-text-control-weight);
+    line-height: var(--vectis-text-control-leading);
     text-decoration: none;
     cursor: pointer;
     transition:
-      background-color var(--ds-duration-fast) var(--ds-ease-default),
-      border-color var(--ds-duration-fast) var(--ds-ease-default),
-      color var(--ds-duration-fast) var(--ds-ease-default),
-      box-shadow var(--ds-duration-fast) var(--ds-ease-default);
+      background-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      border-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      color var(--vectis-duration-fast) var(--vectis-ease-default),
+      box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-button:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   /* --- Tones : ne définissent que des variables locales --- */
   .ds-button[data-tone='accent'] {
-    --_bg-solid: var(--ds-color-accent);
-    --_bg-solid-hover: var(--ds-color-accent-hover);
-    --_bg-solid-active: var(--ds-color-accent-active);
-    --_text-solid: var(--ds-color-text-on-accent);
-    --_text-tinted: var(--ds-color-accent-text);
-    --_bg-soft: var(--ds-color-accent-surface);
-    --_border-soft: var(--ds-color-accent-border);
+    --tone-bg-solid: var(--vectis-color-accent);
+    --tone-bg-solid-hover: var(--vectis-color-accent-hover);
+    --tone-bg-solid-active: var(--vectis-color-accent-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-accent-text);
+    --tone-bg-soft: var(--vectis-color-accent-surface);
+    --tone-border-soft: var(--vectis-color-accent-border);
   }
 
   .ds-button[data-tone='danger'] {
-    --_bg-solid: var(--ds-color-danger);
-    --_bg-solid-hover: var(--ds-color-danger-hover);
-    --_bg-solid-active: var(--ds-color-danger-active);
-    --_text-solid: var(--ds-color-text-on-accent);
-    --_text-tinted: var(--ds-color-danger-text);
-    --_bg-soft: var(--ds-color-danger-surface);
-    --_border-soft: var(--ds-color-danger-border);
+    --tone-bg-solid: var(--vectis-color-danger);
+    --tone-bg-solid-hover: var(--vectis-color-danger-hover);
+    --tone-bg-solid-active: var(--vectis-color-danger-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-danger-text);
+    --tone-bg-soft: var(--vectis-color-danger-surface);
+    --tone-border-soft: var(--vectis-color-danger-border);
   }
 
   .ds-button[data-tone='success'] {
-    --_bg-solid: var(--ds-color-success);
-    --_bg-solid-hover: var(--ds-color-success-hover);
-    --_bg-solid-active: var(--ds-color-success-active);
-    --_text-solid: var(--ds-color-text-on-accent);
-    --_text-tinted: var(--ds-color-success-text);
-    --_bg-soft: var(--ds-color-success-surface);
-    --_border-soft: var(--ds-color-success-border);
+    --tone-bg-solid: var(--vectis-color-success);
+    --tone-bg-solid-hover: var(--vectis-color-success-hover);
+    --tone-bg-solid-active: var(--vectis-color-success-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-success-text);
+    --tone-bg-soft: var(--vectis-color-success-surface);
+    --tone-border-soft: var(--vectis-color-success-border);
   }
 
   .ds-button[data-tone='warning'] {
-    --_bg-solid: var(--ds-color-warning);
-    --_bg-solid-hover: var(--ds-color-warning-hover);
-    --_bg-solid-active: var(--ds-color-warning-active);
+    --tone-bg-solid: var(--vectis-color-warning);
+    --tone-bg-solid-hover: var(--vectis-color-warning-hover);
+    --tone-bg-solid-active: var(--vectis-color-warning-active);
     /* amber trop clair pour du blanc : token dédié (texte sombre) */
-    --_text-solid: var(--ds-color-text-on-warning);
-    --_text-tinted: var(--ds-color-warning-text);
-    --_bg-soft: var(--ds-color-warning-surface);
-    --_border-soft: var(--ds-color-warning-border);
+    --tone-text-solid: var(--vectis-color-text-on-warning);
+    --tone-text-tinted: var(--vectis-color-warning-text);
+    --tone-bg-soft: var(--vectis-color-warning-surface);
+    --tone-border-soft: var(--vectis-color-warning-border);
   }
 
   .ds-button[data-tone='neutral'] {
-    --_bg-solid: var(--ds-color-surface-muted);
-    --_bg-solid-hover: color-mix(in oklab, var(--ds-color-surface-muted), var(--ds-color-text) 8%);
-    --_bg-solid-active: color-mix(
+    --tone-bg-solid: var(--vectis-color-surface-muted);
+    --tone-bg-solid-hover: color-mix(
       in oklab,
-      var(--ds-color-surface-muted),
-      var(--ds-color-text) 14%
+      var(--vectis-color-surface-muted),
+      var(--vectis-color-text) 8%
     );
-    --_text-solid: var(--ds-color-text);
-    --_text-tinted: var(--ds-color-text);
-    --_bg-soft: var(--ds-color-surface-muted);
-    --_border-soft: var(--ds-color-border-strong);
+    --tone-bg-solid-active: color-mix(
+      in oklab,
+      var(--vectis-color-surface-muted),
+      var(--vectis-color-text) 14%
+    );
+    --tone-text-solid: var(--vectis-color-text);
+    --tone-text-tinted: var(--vectis-color-text);
+    --tone-bg-soft: var(--vectis-color-surface-muted);
+    --tone-border-soft: var(--vectis-color-border-strong);
   }
 
   /* --- Variantes : consomment les variables du tone --- */
   .ds-button[data-variant='solid'] {
-    background: var(--_bg-solid);
-    color: var(--_text-solid);
+    background: var(--tone-bg-solid);
+    color: var(--tone-text-solid);
   }
 
   .ds-button[data-variant='solid']:hover:not(:disabled, [aria-disabled='true']) {
-    background: var(--_bg-solid-hover);
+    background: var(--tone-bg-solid-hover);
   }
 
   .ds-button[data-variant='solid']:active:not(:disabled, [aria-disabled='true']) {
-    background: var(--_bg-solid-active);
+    background: var(--tone-bg-solid-active);
   }
 
   .ds-button[data-variant='outline'] {
     background: transparent;
-    color: var(--_text-tinted);
-    border-color: var(--_border-soft);
+    color: var(--tone-text-tinted);
+    border-color: var(--tone-border-soft);
   }
 
   .ds-button[data-variant='ghost'] {
     background: transparent;
-    color: var(--_text-tinted);
+    color: var(--tone-text-tinted);
   }
 
   .ds-button[data-variant='outline']:hover:not(:disabled, [aria-disabled='true']),
   .ds-button[data-variant='ghost']:hover:not(:disabled, [aria-disabled='true']) {
-    background: var(--_bg-soft);
+    background: var(--tone-bg-soft);
   }
 
   .ds-button[data-variant='outline']:active:not(:disabled, [aria-disabled='true']),
   .ds-button[data-variant='ghost']:active:not(:disabled, [aria-disabled='true']) {
-    background: color-mix(in oklab, var(--_bg-soft), var(--_text-tinted) 8%);
+    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
   /* Elevated (Material 3) : surface surélevée + state layer teinté */
   .ds-button[data-variant='elevated'] {
-    background: var(--ds-color-surface-raised);
-    color: var(--_text-tinted);
-    box-shadow: var(--ds-shadow-2);
+    background: var(--vectis-color-surface-raised);
+    color: var(--tone-text-tinted);
+    box-shadow: var(--vectis-shadow-2);
   }
 
   .ds-button[data-variant='elevated']:hover:not(:disabled, [aria-disabled='true']) {
-    background: color-mix(in oklab, var(--ds-color-surface-raised), var(--_text-tinted) 8%);
-    box-shadow: var(--ds-shadow-3);
+    background: color-mix(in oklab, var(--vectis-color-surface-raised), var(--tone-text-tinted) 8%);
+    box-shadow: var(--vectis-shadow-3);
   }
 
   .ds-button[data-variant='elevated']:active:not(:disabled, [aria-disabled='true']) {
-    background: color-mix(in oklab, var(--ds-color-surface-raised), var(--_text-tinted) 12%);
-    box-shadow: var(--ds-shadow-2);
+    background: color-mix(
+      in oklab,
+      var(--vectis-color-surface-raised),
+      var(--tone-text-tinted) 12%
+    );
+    box-shadow: var(--vectis-shadow-2);
   }
 
   /* Tonal (Material 3 filled tonal) : fond teinté + texte teinté */
   .ds-button[data-variant='tonal'] {
-    background: var(--_bg-soft);
-    color: var(--_text-tinted);
+    background: var(--tone-bg-soft);
+    color: var(--tone-text-tinted);
   }
 
   .ds-button[data-variant='tonal']:hover:not(:disabled, [aria-disabled='true']) {
-    background: color-mix(in oklab, var(--_bg-soft), var(--_text-tinted) 8%);
+    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
   .ds-button[data-variant='tonal']:active:not(:disabled, [aria-disabled='true']) {
-    background: color-mix(in oklab, var(--_bg-soft), var(--_text-tinted) 14%);
+    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 14%);
   }
 
   .ds-button:is(:disabled, [aria-disabled='true']) {
@@ -283,29 +291,29 @@ const passedAttrs = computed(() => {
       [data-variant='elevated'],
       [data-variant='tonal']
     ) {
-    background: var(--ds-color-surface-muted);
-    color: var(--ds-color-text-subtle);
+    background: var(--vectis-color-surface-muted);
+    color: var(--vectis-color-text-subtle);
     box-shadow: none;
   }
 
   .ds-button:is(:disabled, [aria-disabled='true']):not([data-loading])[data-variant='outline'] {
     background: transparent;
-    color: var(--ds-color-text-subtle);
-    border-color: var(--ds-color-border);
+    color: var(--vectis-color-text-subtle);
+    border-color: var(--vectis-color-border);
   }
 
   .ds-button:is(:disabled, [aria-disabled='true']):not([data-loading])[data-variant='ghost'] {
     background: transparent;
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
   }
 
   .ds-button-spinner {
     /* boîte à la taille des icônes (le spinner remplace iconStart) :
        aucun décalage de largeur au passage en loading. font-size = taille de
        la boîte : le Spinner (1em) la remplit exactement */
-    width: var(--ds-icon-size);
-    height: var(--ds-icon-size);
-    font-size: var(--ds-icon-size);
+    width: var(--vectis-icon-size);
+    height: var(--vectis-icon-size);
+    font-size: var(--vectis-icon-size);
     flex: none;
     display: inline-flex;
     align-items: center;

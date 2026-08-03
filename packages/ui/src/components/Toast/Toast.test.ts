@@ -74,9 +74,9 @@ describe('Toast (carte interne)', () => {
     expect(container.querySelector('button')).toBeNull()
   })
 
-  it('width est posée en custom property --_width', () => {
+  it('width est posée en custom property --toast-width', () => {
     const { container } = renderToast({ width: '30rem' })
     const root = container.firstElementChild as HTMLElement
-    expect(root.style.getPropertyValue('--_width')).toBe('30rem')
+    expect(root.style.getPropertyValue('--toast-width')).toBe('30rem')
   })
 })

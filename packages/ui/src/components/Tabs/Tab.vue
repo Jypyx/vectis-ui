@@ -106,7 +106,7 @@ function onFocus() {
 
   .ds-tab[data-size][data-icon-only] {
     padding-inline: 0;
-    min-inline-size: var(--_control-height);
+    min-inline-size: var(--control-height);
   }
 
   /*
@@ -114,7 +114,7 @@ function onFocus() {
    * outline-offset positif : anneau intérieur.
    */
   .ds-tab[data-size]:focus-visible {
-    outline-offset: calc(var(--ds-focus-ring-offset) * -1);
+    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
   .ds-tab-label {
@@ -129,7 +129,7 @@ function onFocus() {
 
   /* Rayon emboîté dans la piste creuse (rayon de surface moins son padding) */
   .ds-tabs[data-variant='inset'] .ds-tab[data-size] {
-    border-radius: calc(var(--ds-radius-surface) - var(--ds-space-1));
+    border-radius: calc(var(--vectis-radius-surface) - var(--vectis-space-1));
   }
 
   /*
@@ -155,17 +155,17 @@ function onFocus() {
    * onglets les seuls `button`).
    */
   .ds-tabs[data-variant='outlined'] .ds-tab[data-size]:first-of-type {
-    border-start-start-radius: var(--ds-radius-interactive);
+    border-start-start-radius: var(--vectis-radius-interactive);
   }
 
   .ds-tabs[data-variant='outlined'][data-orientation='horizontal'] .ds-tab[data-size]:last-of-type {
-    border-start-end-radius: var(--ds-radius-interactive);
+    border-start-end-radius: var(--vectis-radius-interactive);
   }
 
   /* vertical : la piste ayant migré au bord de fin, le bord libre est celui de
      départ — les extrémités de la colonne y arrondissent leurs coins */
   .ds-tabs[data-variant='outlined'][data-orientation='vertical'] .ds-tab[data-size]:last-of-type {
-    border-end-start-radius: var(--ds-radius-interactive);
+    border-end-start-radius: var(--vectis-radius-interactive);
   }
 
   /*
@@ -178,10 +178,10 @@ function onFocus() {
     position: absolute;
     inset-inline: 0;
     inset-block-end: 0;
-    block-size: var(--ds-control-size-tab-indicator);
+    block-size: var(--vectis-control-size-tab-indicator);
     background: currentColor;
     opacity: 0;
-    transition: opacity var(--ds-duration-fast) var(--ds-ease-default);
+    transition: opacity var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
@@ -190,7 +190,7 @@ function onFocus() {
     inset-inline: auto;
     inset-inline-start: 0;
     block-size: auto;
-    inline-size: var(--ds-control-size-tab-indicator);
+    inline-size: var(--vectis-control-size-tab-indicator);
   }
 
   .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])

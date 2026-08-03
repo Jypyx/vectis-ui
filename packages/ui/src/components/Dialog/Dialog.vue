@@ -150,7 +150,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     ref="dialogEl"
     v-bind="rootAttrs"
     class="ds-dialog"
-    :style="{ '--_dialog-width': width }"
+    :style="{ '--dialog-width': width }"
     :role="role === 'alertdialog' ? 'alertdialog' : undefined"
     :aria-labelledby="title ? titleId : undefined"
     :aria-describedby="subtitle ? subtitleId : undefined"
@@ -220,9 +220,9 @@ defineExpose({ show, close: requestClose, el: dialogEl })
   .ds-dialog {
     /* largeur posée inline (prop width) ; jamais plus large/haut que le viewport
        moins les marges */
-    inline-size: var(--_dialog-width);
-    max-inline-size: calc(100dvi - 2 * var(--ds-space-4));
-    max-block-size: calc(100dvb - 2 * var(--ds-space-4));
+    inline-size: var(--dialog-width);
+    max-inline-size: calc(100dvi - 2 * var(--vectis-space-4));
+    max-block-size: calc(100dvb - 2 * var(--vectis-space-4));
     /* recentre la modale : l'UA centre les <dialog> modaux via `margin: auto`,
        mais notre reset (`* { margin: 0 }`, layer ds.reset) l'écrase — on le
        restaure ici (layer ds.components, plus fort que ds.reset) */
@@ -234,11 +234,11 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     overflow: hidden;
     padding: 0;
     border: none;
-    border-radius: var(--ds-radius-overlay);
-    background: var(--ds-color-surface-overlay);
-    color: var(--ds-color-text);
-    box-shadow: var(--ds-shadow-5);
-    font-family: var(--ds-text-family);
+    border-radius: var(--vectis-radius-overlay);
+    background: var(--vectis-color-surface-overlay);
+    color: var(--vectis-color-text);
+    box-shadow: var(--vectis-shadow-5);
+    font-family: var(--vectis-text-family);
   }
 
   /*
@@ -300,8 +300,8 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--ds-space-4);
-    padding: var(--ds-space-6) var(--ds-space-6) var(--ds-space-3);
+    gap: var(--vectis-space-4);
+    padding: var(--vectis-space-6) var(--vectis-space-6) var(--vectis-space-3);
   }
 
   .ds-dialog-titles {
@@ -317,20 +317,20 @@ defineExpose({ show, close: requestClose, el: dialogEl })
   .ds-dialog-header-actions {
     display: flex;
     align-items: center;
-    gap: var(--ds-space-1);
+    gap: var(--vectis-space-1);
     /* réduit l'emprise de la croix dans le padding du header */
-    margin-block-start: calc(-1 * var(--ds-space-1));
-    margin-inline-end: calc(-1 * var(--ds-space-2));
+    margin-block-start: calc(-1 * var(--vectis-space-1));
+    margin-inline-end: calc(-1 * var(--vectis-space-2));
   }
 
   .ds-dialog-body {
     /* grandit pour remplir la zone quand le contenu est court ; garde sa hauteur
        naturelle (donc déborde et fait défiler) quand il est long */
     flex: 1 0 auto;
-    padding: var(--ds-space-1) var(--ds-space-6) var(--ds-space-3);
-    color: var(--ds-color-text);
-    font-size: var(--ds-text-body-md-size);
-    line-height: var(--ds-text-body-md-leading);
+    padding: var(--vectis-space-1) var(--vectis-space-6) var(--vectis-space-3);
+    color: var(--vectis-color-text);
+    font-size: var(--vectis-text-body-md-size);
+    line-height: var(--vectis-text-body-md-leading);
   }
 
   .ds-dialog-footer {
@@ -339,8 +339,8 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     align-items: center;
     justify-content: flex-end;
     flex-wrap: wrap;
-    gap: var(--ds-space-3);
-    padding: var(--ds-space-3) var(--ds-space-6) var(--ds-space-6);
+    gap: var(--vectis-space-3);
+    padding: var(--vectis-space-3) var(--vectis-space-6) var(--vectis-space-6);
   }
 
   /*
@@ -354,13 +354,13 @@ defineExpose({ show, close: requestClose, el: dialogEl })
    */
   @container scroll-state(scrollable: top) {
     .ds-dialog-edge--top {
-      background: var(--ds-color-border);
+      background: var(--vectis-color-border);
     }
   }
 
   @container scroll-state(scrollable: bottom) {
     .ds-dialog-edge--bottom {
-      background: var(--ds-color-border);
+      background: var(--vectis-color-border);
     }
   }
 
@@ -373,8 +373,8 @@ defineExpose({ show, close: requestClose, el: dialogEl })
    */
   .ds-dialog {
     transition:
-      opacity var(--ds-duration-base) var(--ds-ease-default),
-      transform var(--ds-duration-base) var(--ds-ease-default);
+      opacity var(--vectis-duration-base) var(--vectis-ease-default),
+      transform var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   @starting-style {
@@ -385,8 +385,8 @@ defineExpose({ show, close: requestClose, el: dialogEl })
   }
 
   .ds-dialog::backdrop {
-    background: var(--ds-color-backdrop);
-    transition: opacity var(--ds-duration-base) var(--ds-ease-default);
+    background: var(--vectis-color-backdrop);
+    transition: opacity var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   @starting-style {

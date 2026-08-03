@@ -185,8 +185,8 @@ export const Evenements: Story = {
       args,
       value: ref('2026-06-10'),
       events: [
-        { date: '2026-06-10', color: 'var(--ds-color-accent)' },
-        { date: '2026-06-18', color: 'var(--ds-color-danger)' },
+        { date: '2026-06-10', color: 'var(--vectis-color-accent)' },
+        { date: '2026-06-18', color: 'var(--vectis-color-danger)' },
       ],
     }),
     template: `

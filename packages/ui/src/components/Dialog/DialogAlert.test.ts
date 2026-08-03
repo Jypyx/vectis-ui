@@ -43,7 +43,7 @@ describe('DialogAlert', () => {
   })
 
   it('défaut width=400px', async () => {
-    expect((await openHarness()).dialog.style.getPropertyValue('--_dialog-width')).toBe('400px')
+    expect((await openHarness()).dialog.style.getPropertyValue('--dialog-width')).toBe('400px')
   })
 
   it('reste piloté par le v-model (bouton d’action ferme)', async () => {

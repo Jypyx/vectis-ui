@@ -201,7 +201,7 @@ export const Largeur: Story = {
     components: { Menu, MenuItem, Button },
     setup: () => ({ args, onSelect: fn() }),
     template: `
-      <div style="display: flex; gap: var(--ds-space-8)">
+      <div style="display: flex; gap: var(--vectis-space-8)">
         <Menu v-bind="args" width="max-content">
           <template #trigger="{ triggerProps }">
             <Button variant="outline" tone="neutral" v-bind="triggerProps">10</Button>

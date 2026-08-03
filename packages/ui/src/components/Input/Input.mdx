@@ -21,8 +21,8 @@ validation.
 ## Tailles
 
 Trois tailles (`sm` 32px, `md` 40px — défaut —, `lg` 48px, via les tokens
-`--ds-control-height-*`). Les icônes internes suivent automatiquement (sm/md → 20px,
-lg → 24px via le contexte `--ds-icon-size`). Les extrêmes de l'échelle du DS (`xs`, `xl`)
+`--vectis-control-height-*`). Les icônes internes suivent automatiquement (sm/md → 20px,
+lg → 24px via le contexte `--vectis-icon-size`). Les extrêmes de l'échelle du DS (`xs`, `xl`)
 ne sont pas exposées : elles sont hors gabarit pour un champ de saisie.
 
 <Canvas of={InputStories.Tailles} />
@@ -97,7 +97,7 @@ d'effacement masqué :
 <Canvas of={InputStories.Readonly} />
 
 `disabled` bascule tout le champ (fond, texte, icônes) sur des nuances de gris
-(`--ds-color-surface-muted`, `--ds-color-text-subtle`) — pas de jeu d'opacité, et le rendu
+(`--vectis-color-surface-muted`, `--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu
 suit automatiquement le thème dark :
 
 <Canvas of={InputStories.Disabled} />

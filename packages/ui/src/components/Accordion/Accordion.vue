@@ -68,18 +68,18 @@ provide(accordionKey, {
      * échelle : l'accordéon n'a pas de hauteur imposée). Un seul delta pilote
      * les trois mesures, les valeurs de base ne sont donc écrites qu'ici.
      */
-    --_accordion-pad-delta: 0px;
-    --_accordion-pad-block: calc(var(--ds-space-4) - var(--_accordion-pad-delta));
-    --_accordion-pad-inline: calc(var(--ds-space-5) - var(--_accordion-pad-delta));
-    --_accordion-content-pad-start: calc(var(--ds-space-2) - var(--_accordion-pad-delta));
+    --accordion-pad-delta: 0px;
+    --accordion-pad-block: calc(var(--vectis-space-4) - var(--accordion-pad-delta));
+    --accordion-pad-inline: calc(var(--vectis-space-5) - var(--accordion-pad-delta));
+    --accordion-content-pad-start: calc(var(--vectis-space-2) - var(--accordion-pad-delta));
 
-    font-family: var(--ds-text-family);
+    font-family: var(--vectis-text-family);
     overflow: hidden;
   }
 
   /* Compact : paddings resserrés seuls — typo, gouttière et icône inchangées */
   .ds-accordion[data-compact] {
-    --_accordion-pad-delta: var(--ds-space-1);
+    --accordion-pad-delta: var(--vectis-space-1);
   }
 
   /* Carte bordée ; `flat` (défaut) n'a rien à annuler — y compris le fond, qui
@@ -90,11 +90,11 @@ provide(accordionKey, {
      * d'extrémité : `overflow: hidden` découpe tout le sous-arbre sur cette
      * courbe, un anneau de focus à angles droits y perdrait ses coins.
      */
-    --_accordion-corner-radius: calc(var(--ds-radius-surface) - 1px);
+    --accordion-corner-radius: calc(var(--vectis-radius-surface) - 1px);
 
-    background: var(--ds-color-surface-raised);
-    border: 1px solid var(--ds-color-border);
-    border-radius: var(--ds-radius-surface);
+    background: var(--vectis-color-surface-raised);
+    border: 1px solid var(--vectis-color-border);
+    border-radius: var(--vectis-radius-surface);
   }
 }
 </style>

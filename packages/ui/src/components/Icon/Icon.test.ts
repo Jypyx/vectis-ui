@@ -98,10 +98,10 @@ describe('Icon', () => {
     expect(iconContour.hasAttribute('data-filled')).toBe(false)
   })
 
-  it('prop size numérique : pose --ds-icon-size en style inline, sinon rien', () => {
+  it('prop size numérique : pose --vectis-icon-size en style inline, sinon rien', () => {
     const explicite = render(Icon, { props: { name: 'add', size: 32 } })
     const iconExplicite = explicite.container.querySelector('.ds-icon') as HTMLElement
-    expect(iconExplicite.style.getPropertyValue('--ds-icon-size')).toBe('32px')
+    expect(iconExplicite.style.getPropertyValue('--vectis-icon-size')).toBe('32px')
 
     const contextuelle = render(Icon, { props: { name: 'add' } })
     const iconContextuelle = contextuelle.container.querySelector('.ds-icon') as HTMLElement

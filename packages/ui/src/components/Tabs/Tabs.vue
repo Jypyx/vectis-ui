@@ -317,16 +317,16 @@ watch(model, () => {
   .ds-tabs {
     /*
      * Gouttière du cadre : nulle à plat (barre et panneaux à fleur du conteneur
-     * d'accueil), posée par `outlined` — idiome `--_table-frame-pad` du
+     * d'accueil), posée par `outlined` — idiome `--table-frame-pad` du
      * DataTable. Fixe, PAS indexée sur `data-size`/`compact` : c'est une mesure
-     * de carte, et les `--_control-*` vivent sur les Button descendants (chaque
+     * de carte, et les `--control-*` vivent sur les Button descendants (chaque
      * Tab pose son propre `ds-control`), donc hors de portée de la racine.
      */
-    --_tabs-frame-pad: 0px;
+    --tabs-frame-pad: 0px;
 
     display: flex;
     flex-direction: column;
-    font-family: var(--ds-text-family);
+    font-family: var(--vectis-text-family);
   }
 
   /* Vertical : la barre et les panneaux se placent côte à côte */
@@ -349,11 +349,11 @@ watch(model, () => {
    * de panneau à fleur de bord.
    */
   .ds-tabs[data-variant='outlined'] {
-    --_tabs-frame-pad: var(--ds-space-3);
+    --tabs-frame-pad: var(--vectis-space-3);
 
-    background: var(--ds-color-surface-raised);
-    border: 1px solid var(--ds-color-border);
-    border-radius: var(--ds-radius-surface);
+    background: var(--vectis-color-surface-raised);
+    border: 1px solid var(--vectis-color-border);
+    border-radius: var(--vectis-radius-surface);
   }
 
   .ds-tabs-bar {
@@ -369,18 +369,18 @@ watch(model, () => {
      * inatteignable — `scrollLeft` ne peut pas être négatif en LTR.
      */
     justify-content: flex-start;
-    gap: var(--ds-space-1);
+    gap: var(--vectis-space-1);
     /* Gouttière du cadre (0 à plat). Rien au bord de FIN : c'est celui que la
        piste occupe, les onglets doivent rester posés dessus. */
-    padding-block-start: var(--_tabs-frame-pad);
-    padding-inline: var(--_tabs-frame-pad);
+    padding-block-start: var(--tabs-frame-pad);
+    padding-inline: var(--tabs-frame-pad);
   }
 
   .ds-tabs[data-orientation='vertical'] .ds-tabs-bar {
     flex-direction: column;
     align-items: stretch;
     /* l'axe de la piste bascule : c'est le bord inline de FIN qui reste à fleur */
-    padding-block: var(--_tabs-frame-pad);
+    padding-block: var(--tabs-frame-pad);
     padding-inline-end: 0;
   }
 
@@ -397,13 +397,13 @@ watch(model, () => {
      qui sépare la barre des panneaux — d'où le bord de fin laissé sans
      gouttière, sinon elle ne séparerait plus rien. */
   .ds-tabs:is([data-variant='flat'], [data-variant='outlined']) .ds-tabs-bar {
-    border-block-end: 1px solid var(--ds-color-border);
+    border-block-end: 1px solid var(--vectis-color-border);
   }
 
   .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
     .ds-tabs-bar {
     border-block-end: none;
-    border-inline-start: 1px solid var(--ds-color-border);
+    border-inline-start: 1px solid var(--vectis-color-border);
   }
 
   /*
@@ -415,13 +415,13 @@ watch(model, () => {
    */
   .ds-tabs[data-variant='outlined'][data-orientation='vertical'] .ds-tabs-bar {
     border-inline-start: none;
-    border-inline-end: 1px solid var(--ds-color-border);
+    border-inline-end: 1px solid var(--vectis-color-border);
   }
 
   .ds-tabs-list {
     display: flex;
     align-items: center;
-    gap: var(--ds-space-1);
+    gap: var(--vectis-space-1);
     overflow: auto;
     /* la liste doit pouvoir passer sous sa taille de contenu, sinon elle
        pousse la barre au lieu de défiler */
@@ -474,8 +474,8 @@ watch(model, () => {
   .ds-tabs[data-variant='outlined']:not(:has(> .ds-tabs-panels)) .ds-tabs-bar {
     border-block-end: none;
     border-inline-end: none;
-    padding-block-end: var(--_tabs-frame-pad);
-    padding-inline-end: var(--_tabs-frame-pad);
+    padding-block-end: var(--tabs-frame-pad);
+    padding-inline-end: var(--tabs-frame-pad);
   }
 
   .ds-tabs[data-variant='outlined']:not(:has(> .ds-tabs-panels)) .ds-tabs-list {
@@ -485,9 +485,9 @@ watch(model, () => {
   /* Piste creuse de la variante `inset` : portée par le conteneur défilant
      lui-même, sinon son padding ne protège pas l'ombre de l'onglet actif */
   .ds-tabs[data-variant='inset'] .ds-tabs-list {
-    background: var(--ds-color-surface-sunken);
-    padding: var(--ds-space-1);
-    border-radius: var(--ds-radius-surface);
+    background: var(--vectis-color-surface-sunken);
+    padding: var(--vectis-space-1);
+    border-radius: var(--vectis-radius-surface);
   }
 
   .ds-tabs[data-grow] .ds-tabs-list {
@@ -515,7 +515,7 @@ watch(model, () => {
     min-inline-size: 0;
     /* gouttière du cadre (0 à plat) : le panneau est la zone de contenu de la
        carte, il la prend sur ses quatre côtés */
-    padding: var(--_tabs-frame-pad);
+    padding: var(--tabs-frame-pad);
   }
 
   .ds-tabs[data-orientation='vertical'] .ds-tabs-panels {

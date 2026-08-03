@@ -672,7 +672,7 @@ function onEndIcon() {
       ref="panelRef"
       v-model:open="open"
       mode="manual"
-      anchor="--ds-timepicker-anchor"
+      anchor="--timepicker-anchor"
       :placement="placement"
       surface
       :role="isList ? 'listbox' : 'dialog'"
@@ -756,10 +756,10 @@ function onEndIcon() {
 @layer ds.components {
   .ds-timepicker {
     /* confine l'ancre à cette instance (racine = ancêtre commun contrôle/panneau) */
-    anchor-scope: --ds-timepicker-anchor;
+    anchor-scope: --timepicker-anchor;
     display: block;
     width: 100%;
-    font-family: var(--ds-text-family);
+    font-family: var(--vectis-text-family);
   }
 
   /* Rangée du champ : le champ prend la place restante, le Toggle AM/PM sa
@@ -767,11 +767,11 @@ function onEndIcon() {
   .ds-timepicker-row {
     display: flex;
     align-items: stretch;
-    gap: var(--ds-space-2);
+    gap: var(--vectis-space-2);
   }
 
   .ds-timepicker-control {
-    anchor-name: --ds-timepicker-anchor;
+    anchor-name: --timepicker-anchor;
     flex: 1;
     /* sans lui, le minimum automatique du flex item ferait déborder le champ */
     min-inline-size: 0;
@@ -799,13 +799,13 @@ function onEndIcon() {
 
   .ds-timepicker-row:has(.ds-input-label) .ds-timepicker-meridiem {
     margin-block-start: calc(
-      var(--ds-text-label-size) * var(--ds-text-label-leading) + var(--ds-space-1)
+      var(--vectis-text-label-size) * var(--vectis-text-label-leading) + var(--vectis-space-1)
     );
   }
 
   .ds-timepicker-row:has(.ds-input-hint) .ds-timepicker-meridiem {
     margin-block-end: calc(
-      var(--ds-text-caption-size) * var(--ds-text-caption-leading) + var(--ds-space-1)
+      var(--vectis-text-caption-size) * var(--vectis-text-caption-leading) + var(--vectis-space-1)
     );
   }
 
@@ -817,10 +817,10 @@ function onEndIcon() {
   .ds-timepicker-panel {
     display: flex;
     flex-direction: column;
-    gap: var(--ds-space-4);
+    gap: var(--vectis-space-4);
     width: max-content;
-    padding: var(--ds-space-3);
-    color: var(--ds-color-text);
+    padding: var(--vectis-space-3);
+    color: var(--vectis-color-text);
   }
 
   /* Une heure numérique se lit toujours HH:MM : sans ce ltr forcé, le bidi
@@ -829,27 +829,27 @@ function onEndIcon() {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--ds-space-2);
+    gap: var(--vectis-space-2);
     direction: ltr;
   }
 
   /* Cellules HH/MM : des Button du DS (variant `tonal`, tone accent à l'étape
-     active — leur couple `--_bg-soft`/`--_text-tinted` reproduit exactement
+     active — leur couple `--tone-bg-soft`/`--tone-text-tinted` reproduit exactement
      l'ancien surface-muted/text ↔ accent-surface/accent-text). La surcharge se
      limite au gabarit « grand chiffre » : hauteur, états, focus et transitions
      viennent de Button. Qualifiée [data-size] (modèle IconButton/Tabs) :
      l'ordre d'export n'est pas contraignant. */
   .ds-timepicker-cell[data-size] {
-    width: var(--_control-height);
-    font-size: var(--ds-text-heading-1-size);
-    font-weight: var(--ds-text-heading-2-weight);
+    width: var(--control-height);
+    font-size: var(--vectis-text-heading-1-size);
+    font-weight: var(--vectis-text-heading-2-weight);
     /* « 11 » et « 00 » ne doivent pas décaler la cellule */
     font-variant-numeric: tabular-nums;
   }
 
   .ds-timepicker-sep {
-    font-size: var(--ds-text-heading-2-size);
-    color: var(--ds-color-text);
+    font-size: var(--vectis-text-heading-2-size);
+    color: var(--vectis-color-text);
     user-select: none;
   }
 
@@ -862,7 +862,7 @@ function onEndIcon() {
      dimensions restent ici — `panel.css` n'en porte aucune. */
   .ds-timepicker-list {
     min-inline-size: anchor-size(width);
-    max-block-size: var(--ds-control-size-timepicker-list-max-block);
+    max-block-size: var(--vectis-control-size-timepicker-list-max-block);
     overflow: auto;
   }
 
@@ -870,41 +870,41 @@ function onEndIcon() {
     display: flex;
     align-items: center;
     width: 100%;
-    min-height: var(--_control-height);
-    padding: var(--ds-space-1) var(--_control-padding-inline);
+    min-height: var(--control-height);
+    padding: var(--vectis-space-1) var(--control-padding-inline);
     border: none;
-    border-radius: var(--ds-radius-sm);
+    border-radius: var(--vectis-radius-sm);
     background: transparent;
-    color: var(--ds-color-text);
+    color: var(--vectis-color-text);
     font-family: inherit;
-    font-size: var(--_control-font-size);
-    line-height: var(--ds-text-body-md-leading);
+    font-size: var(--control-font-size);
+    line-height: var(--vectis-text-body-md-leading);
     font-variant-numeric: tabular-nums;
     text-align: start;
     cursor: pointer;
   }
 
   .ds-timepicker-option:hover {
-    background: var(--ds-color-surface-muted);
+    background: var(--vectis-color-surface-muted);
   }
 
   /* Anneau INTÉRIEUR : le panneau défile, un offset positif serait rogné
      (précédent Tabs). */
   .ds-timepicker-option:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: calc(-1 * var(--ds-focus-ring-width));
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
   .ds-timepicker-option[aria-selected='true'] {
-    background: var(--ds-color-accent-surface);
-    color: var(--ds-color-accent-text);
+    background: var(--vectis-color-accent-surface);
+    color: var(--vectis-color-accent-text);
   }
 
   .ds-timepicker-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--ds-space-2);
+    gap: var(--vectis-space-2);
   }
 }
 </style>

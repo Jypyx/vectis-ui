@@ -127,27 +127,27 @@ const visibleItems = computed(() =>
   .ds-breadcrumb {
     /* API de contexte d'Icon : icônes d'items et séparateurs suivent la
        typo sm du fil d'Ariane */
-    --ds-icon-size: var(--ds-icon-size-sm);
-    --ds-icon-opsz: 20;
+    --vectis-icon-size: var(--vectis-icon-size-sm);
+    --vectis-icon-opsz: 20;
   }
 
   .ds-breadcrumb-list {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: var(--ds-space-2);
+    gap: var(--vectis-space-2);
     margin: 0;
     padding: 0;
     list-style: none;
-    font-family: var(--ds-text-family);
-    font-size: var(--ds-text-body-md-size);
+    font-family: var(--vectis-text-family);
+    font-size: var(--vectis-text-body-md-size);
   }
 
   .ds-breadcrumb-item {
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-2);
-    color: var(--ds-color-text-muted);
+    gap: var(--vectis-space-2);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-breadcrumb-list > .ds-breadcrumb-item:first-child > .ds-breadcrumb-separator {
@@ -155,32 +155,32 @@ const visibleItems = computed(() =>
   }
 
   .ds-breadcrumb-separator {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
   }
 
   .ds-breadcrumb-link {
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-1);
-    color: var(--ds-color-text-muted);
+    gap: var(--vectis-space-1);
+    color: var(--vectis-color-text-muted);
     text-decoration: none;
-    border-radius: var(--ds-radius-xs);
-    transition: color var(--ds-duration-fast) var(--ds-ease-default);
+    border-radius: var(--vectis-radius-xs);
+    transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-breadcrumb-link:hover {
-    color: var(--ds-color-text);
+    color: var(--vectis-color-text);
     text-decoration: underline;
   }
 
   .ds-breadcrumb-link:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   .ds-breadcrumb-link[aria-current='page'] {
-    color: var(--ds-color-text);
-    font-weight: var(--ds-text-label-weight);
+    color: var(--vectis-color-text);
+    font-weight: var(--vectis-text-label-weight);
   }
 
   @media (prefers-reduced-motion: reduce) {

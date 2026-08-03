@@ -41,7 +41,7 @@ describe('Popover', () => {
 
   it('anchor est exposée en variable inline (position-anchor en CSS)', () => {
     const { container } = renderHarness('<Popover anchor="--ancre-test">Contenu</Popover>')
-    expect(panelOf(container).style.getPropertyValue('--_anchor')).toBe('--ancre-test')
+    expect(panelOf(container).style.getPropertyValue('--anchor-name')).toBe('--ancre-test')
   })
 
   it('sans déclencheur le wrapper n’est pas ancré (display: contents en CSS)', () => {

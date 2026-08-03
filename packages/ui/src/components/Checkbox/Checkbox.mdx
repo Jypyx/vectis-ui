@@ -11,8 +11,8 @@ son rendu est masqué. La racine est un `<label>` englobant — cliquer le libel
 sans `for`/`id`. Le seul JavaScript au-delà du pont v-model est `indeterminate`, qui n'existe
 qu'en propriété DOM.
 
-Taille unique : boîte de 20px, bordure de 2px (tokens `--ds-control-size-check` et
-`--ds-control-border-width`), coche de 14px (`--ds-control-size-check-mark`).
+Taille unique : boîte de 20px, bordure de 2px (tokens `--vectis-control-size-check` et
+`--vectis-control-border-width`), coche de 14px (`--vectis-control-size-check-mark`).
 
 <Canvas of={CheckboxStories.Default} />
 
@@ -42,8 +42,8 @@ la valeur du v-model et n'existe qu'en propriété DOM (aucun attribut HTML équ
 
 ## États
 
-`disabled` bascule la case sur des nuances de gris (`--ds-color-surface-muted`,
-`--ds-color-text-subtle`) — pas de jeu d'opacité, et le rendu suit automatiquement le thème
+`disabled` bascule la case sur des nuances de gris (`--vectis-color-surface-muted`,
+`--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu suit automatiquement le thème
 dark :
 
 <Canvas of={CheckboxStories.Disabled} />
@@ -66,5 +66,5 @@ le forcer côté serveur — elle pose `aria-invalid`.
   `aria-label` en fallthrough à défaut.
 - L'input est masqué via `opacity: 0` (jamais `display: none`) : il reste focusable au clavier
   et soumis au formulaire.
-- Focus visible par anneau (`--ds-focus-ring-*`) sur la boîte, jamais supprimé.
+- Focus visible par anneau (`--vectis-focus-ring-*`) sur la boîte, jamais supprimé.
 - Les transitions respectent `prefers-reduced-motion`.

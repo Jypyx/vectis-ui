@@ -45,33 +45,35 @@ const labelId = useId()
 @layer ds.components {
   .ds-side-nav-group + .ds-side-nav-group,
   .ds-side-nav-item + .ds-side-nav-group {
-    margin-block-start: var(--ds-space-3);
+    margin-block-start: var(--vectis-space-3);
   }
 
   /*
    * Micro-label de section : rôle overline (sans capitales forcées — la casse
    * du libellé appartient au consommateur). Retrait ET hauteur décalquent la
    * recette des rangées — l'en-tête tient la même hauteur qu'une rangée,
-   * compact compris (`--_control-height` en dérive déjà), et le rythme vertical
+   * compact compris (`--control-height` en dérive déjà), et le rythme vertical
    * de la liste ne casse pas ; seule la typo ne suit pas l'échelle (rôle
    * overline), d'où le centrage vertical.
    *
    * Le retrait redit le `calc` des rangées, délibérément : une custom property
    * est substituée sur l'élément qui la DÉCLARE, une variable partagée posée
-   * plus haut serait figée au niveau 0 (précédent : le `--_chip-height` redit
+   * plus haut serait figée au niveau 0 (précédent : le `--chip-height` redit
    * du Combobox).
    */
   .ds-side-nav-group-label {
     display: flex;
     align-items: center;
-    min-block-size: var(--_control-height);
-    padding-block: var(--ds-space-1);
-    padding-inline: calc(var(--_control-padding-inline) + var(--_level, 0) * var(--_indent))
-      var(--_control-padding-inline);
-    font-size: var(--ds-text-overline-size);
-    font-weight: var(--ds-text-overline-weight);
-    letter-spacing: var(--ds-text-overline-tracking);
-    color: var(--ds-color-text-muted);
+    min-block-size: var(--control-height);
+    padding-block: var(--vectis-space-1);
+    padding-inline: calc(
+        var(--control-padding-inline) + var(--side-nav-level, 0) * var(--side-nav-indent)
+      )
+      var(--control-padding-inline);
+    font-size: var(--vectis-text-overline-size);
+    font-weight: var(--vectis-text-overline-weight);
+    letter-spacing: var(--vectis-text-overline-tracking);
+    color: var(--vectis-color-text-muted);
   }
 }
 </style>

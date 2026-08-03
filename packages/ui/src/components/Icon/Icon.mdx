@@ -51,12 +51,12 @@ une nouvelle icône, jamais pour offrir un catalogue.
 ## Pilotage par le parent
 
 Sans prop `size`, tout parent peut dimensionner ses icônes en posant les custom properties
-**`--ds-icon-size`** (taille) et **`--ds-icon-opsz`** (axe optique). C'est ce que font `Button`,
+**`--vectis-icon-size`** (taille) et **`--vectis-icon-opsz`** (axe optique). C'est ce que font `Button`,
 `Input` et `Textarea` selon leur propre taille (sm → 16px/opsz 20, md → 20px/opsz 20,
 lg → 24px/opsz 24). La résolution suit la priorité : prop `size` numérique > contexte
 parent > 1em.
 
-**`--ds-icon-opsz` ne s'applique qu'à la ligature** : c'est un axe variable de police, sans
+**`--vectis-icon-opsz` ne s'applique qu'à la ligature** : c'est un axe variable de police, sans
 prise sur un SVG intégré (dessiné à opsz 24), une image ou un SVG inline. La taille, elle, vaut
 pour toutes les sources.
 
@@ -118,8 +118,8 @@ dur (Lucide écrit `width="24"` : un attribut de présentation, battu par toute 
 
 Material Symbols (toutes variantes) et les builds IcoMoon à ligatures. `ligatureIconResolver()`
 renvoie **aussi** les icônes du DS vers la police : c'est la façon de retrouver l'axe optique
-`--ds-icon-opsz`, que le registre — dessiné à opsz 24 — ne peut pas reproduire. Pour changer
-seulement de variante (Outlined, Sharp), surcharger le token `--ds-font-family-icon` suffit,
+`--vectis-icon-opsz`, que le registre — dessiné à opsz 24 — ne peut pas reproduire. Pour changer
+seulement de variante (Outlined, Sharp), surcharger le token `--vectis-font-family-icon` suffit,
 sans résolveur.
 
 <Canvas of={IconStories.PoliceLigature} />
@@ -127,7 +127,7 @@ sans résolveur.
 ### Sans résolveur du tout
 
 Les icônes du DS s'affichent (registre intégré) ; **vos** noms tombent sur la branche ligature,
-donc sur `--ds-font-family-icon`. Avec une police à classes chargée mais aucun résolveur, ils
+donc sur `--vectis-font-family-icon`. Avec une police à classes chargée mais aucun résolveur, ils
 apparaissent en fragments de mots rognés au carré de l'icône — visible et local, jamais une
 mise en page cassée, et jamais annoncé (l'icône est `aria-hidden`). Sinon, chaque prop accepte
 aussi un rendu explicite ponctuel : `:icon-start="{ class: 'ph ph-house' }"`.

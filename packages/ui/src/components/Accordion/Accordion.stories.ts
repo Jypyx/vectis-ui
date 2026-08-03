@@ -24,7 +24,7 @@ const ITEMS = `
     Un design system Vue 3 fondé sur les primitives natives de la plateforme.
   </AccordionItem>
   <AccordionItem title="Comment personnaliser le thème ?">
-    Redéfinissez n'importe quelle custom property --ds-* sur :root ou un sous-arbre.
+    Redéfinissez n'importe quelle custom property --vectis-* sur :root ou un sous-arbre.
   </AccordionItem>
   <AccordionItem title="Quels navigateurs sont supportés ?">
     Les navigateurs modernes : Chrome/Edge 125+, Safari 26+.

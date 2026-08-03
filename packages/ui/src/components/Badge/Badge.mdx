@@ -19,7 +19,7 @@ trois placements (standalone, inline, `overlay`), et un rendu plein-couleur uniq
 Cinq tones (`neutral`, `accent` — défaut —, `success`, `warning`, `danger`) en rendu
 plein-couleur. La couleur du texte s'adapte **noir/blanc** via `contrast-color()`
 (Safari 26+) ; les navigateurs sans support retombent sur un fallback par tone
-(`--ds-color-text-on-accent`, `--ds-color-text-on-warning`…) — le rendu solid classique de
+(`--vectis-color-text-on-accent`, `--vectis-color-text-on-warning`…) — le rendu solid classique de
 la librairie, sans régression.
 
 Particularité du tone `neutral` : inversion `text`/`surface` (fond sombre en light, fond
@@ -83,9 +83,9 @@ badge lui-même : il reste proportionné entre pilule, dot et icône.
 
 ## Bordered
 
-`bordered` trace un liseré de 2px de la **couleur du fond derrière** (`--ds-color-surface`)
+`bordered` trace un liseré de 2px de la **couleur du fond derrière** (`--vectis-color-surface`)
 autour du badge, pour le détacher de l'élément qu'il chevauche. Sur un fond différent
-(carte, bandeau coloré…), surcharger `--ds-color-surface` sur le sous-arbre suffit.
+(carte, bandeau coloré…), surcharger `--vectis-color-surface` sur le sous-arbre suffit.
 
 <Canvas of={BadgeStories.Bordered} />
 

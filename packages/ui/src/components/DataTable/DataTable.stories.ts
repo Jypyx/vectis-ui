@@ -393,7 +393,7 @@ export const ResponsiveStack: Story = {
     components: { DataTable },
     setup: () => ({ args, selected: ref<DataTableRowId[]>([]) }),
     template: `
-      <div style="width: 360px; border: 1px dashed var(--ds-color-border); padding: 8px">
+      <div style="width: 360px; border: 1px dashed var(--vectis-color-border); padding: 8px">
         <DataTable v-bind="args" v-model:selected="selected" />
       </div>
     `,

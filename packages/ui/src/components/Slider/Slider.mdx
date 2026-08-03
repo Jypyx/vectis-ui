@@ -10,11 +10,11 @@ participation aux formulaires gratuits. Le JavaScript se limite à l'anti-croise
 range, au pont des champs numériques et à la dérivation des positions de pas
 (ticks/labels/tooltips) ; aucun comportement navigateur n'est réimplémenté.
 
-La piste (6px, token `--ds-control-size-slider-track`), le remplissage, les ticks, les
+La piste (6px, token `--vectis-control-size-slider-track`), le remplissage, les ticks, les
 labels et les bulles s'alignent tous sur le **centre réel du thumb** — qui parcourt
 `[thumb/2, 100% − thumb/2]`, pas `[0, 100%]` — via des fractions unitless posées en custom
 properties. Cliquer la piste déplace la valeur (saut + drag immédiat, natif) ; au survol, le
-thumb prend un fond teinté `--ds-color-accent-surface`.
+thumb prend un fond teinté `--vectis-color-accent-surface`.
 
 <Canvas of={SliderStories.Default} />
 
@@ -74,7 +74,7 @@ d'anchor positioning : le thumb natif est un pseudo-élément non ancrable.
 `orientation="vertical"` : min en bas, max en haut, via `writing-mode: vertical-lr` +
 `direction: rtl` sur le sous-conteneur de la piste — le natif gère l'axe de drag, le
 clavier (flèche haut = +) et l'orientation ARIA. Longueur par défaut
-`--ds-control-size-slider-length` (10rem), surchargeable en posant le token sur l'élément.
+`--vectis-control-size-slider-length` (10rem), surchargeable en posant le token sur l'élément.
 Support : Chrome/Edge 129+, Safari 18.1+ (léger relèvement du plancher assumé, voir
 CLAUDE.md).
 
@@ -88,7 +88,7 @@ les champs numériques au-dessus/en-dessous :
 ## États
 
 `disabled` bascule piste, remplissage, ticks, labels et thumb sur des nuances de gris
-(`--ds-color-surface-muted`, `--ds-color-text-subtle`) — pas de jeu d'opacité, et le rendu
+(`--vectis-color-surface-muted`, `--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu
 suit automatiquement le thème dark :
 
 <Canvas of={SliderStories.Disabled} />
@@ -101,7 +101,7 @@ suit automatiquement le thème dark :
   icônes des labels portent leur libellé accessible (`aria-label` via Icon).
 - Les bulles de tooltip sont `aria-hidden` : la valeur est déjà annoncée par le rôle
   slider.
-- Focus visible par anneau (`--ds-focus-ring-*`) sur le thumb ; la bulle s'affiche aussi au
+- Focus visible par anneau (`--vectis-focus-ring-*`) sur le thumb ; la bulle s'affiche aussi au
   focus clavier.
 - Les transitions (fond du thumb, bulles) respectent `prefers-reduced-motion`.
 

@@ -229,9 +229,9 @@ const { counterText, over } = useTextLimit({
   .ds-textarea {
     display: flex;
     flex-direction: column;
-    gap: var(--ds-space-1);
+    gap: var(--vectis-space-1);
     width: 100%;
-    font-family: var(--ds-text-family);
+    font-family: var(--vectis-text-family);
   }
 
   /* Label et hint : rendus par Typography (label / caption muted) — les classes
@@ -241,55 +241,55 @@ const { counterText, over } = useTextLimit({
   .ds-textarea-meta {
     display: flex;
     align-items: baseline;
-    gap: var(--ds-space-2);
+    gap: var(--vectis-space-2);
   }
 
   /* Le compteur reste stylé localement : tabular-nums et l'état de dépassement
      ne sont pas des rôles typographiques. */
   .ds-textarea-counter {
     margin-inline-start: auto;
-    font-size: var(--ds-text-caption-size);
-    color: var(--ds-color-text-muted);
+    font-size: var(--vectis-text-caption-size);
+    color: var(--vectis-color-text-muted);
     font-variant-numeric: tabular-nums;
   }
 
   .ds-textarea-counter[data-over] {
-    color: var(--ds-color-danger-text);
+    color: var(--vectis-color-danger-text);
   }
 
   /* Le field porte bordure, fond, focus ET le redimensionnement (resize exige
-     overflow ≠ visible) ; --_border-color est la seule source de vérité de la
+     overflow ≠ visible) ; --field-border-color est la seule source de vérité de la
      couleur (hover/erreur/disabled la redéfinissent) */
   .ds-textarea-field {
-    --_border-color: var(--ds-color-border-strong);
+    --field-border-color: var(--vectis-color-border-strong);
 
     /*
-     * Tailles/compact : variables --_control-* héritées de la racine
+     * Tailles/compact : variables --control-* héritées de la racine
      * ds-control (styles/control-size.css), contexte d'Icon compris.
      * Hauteur minimale = 2 lignes : base + hauteur effective — vaut 2×base
      * sans compact, 2×base - 4px avec (la hauteur effective porte le delta).
      */
-    --_min-height: calc(var(--_control-height-base) + var(--_control-height));
+    --textarea-min-height: calc(var(--control-height-base) + var(--control-height));
 
     display: flex;
     align-items: flex-start;
-    gap: var(--_control-gap);
-    min-height: var(--_min-height);
-    padding: var(--ds-space-2) var(--_control-padding-inline-field);
-    background: var(--ds-color-surface);
-    color: var(--ds-color-text);
-    border: 1px solid var(--_border-color);
-    border-radius: var(--ds-radius-interactive);
-    font-size: var(--_control-font-size);
+    gap: var(--control-gap);
+    min-height: var(--textarea-min-height);
+    padding: var(--vectis-space-2) var(--control-padding-inline-field);
+    background: var(--vectis-color-surface);
+    color: var(--vectis-color-text);
+    border: 1px solid var(--field-border-color);
+    border-radius: var(--vectis-radius-interactive);
+    font-size: var(--control-font-size);
     /* texte multiligne : interlignage du corps de texte (le rôle `control`
        en leading-none ne vaut que pour les étiquettes d'une ligne) */
-    line-height: var(--ds-text-body-md-leading);
+    line-height: var(--vectis-text-body-md-leading);
     resize: vertical;
     overflow: hidden;
     transition:
-      border-color var(--ds-duration-fast) var(--ds-ease-default),
-      background-color var(--ds-duration-fast) var(--ds-ease-default),
-      box-shadow var(--ds-duration-fast) var(--ds-ease-default);
+      border-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      background-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-textarea-control {
@@ -306,26 +306,26 @@ const { counterText, over } = useTextLimit({
   }
 
   .ds-textarea-control::placeholder {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
   }
 
   /* icônes et boutons centrés sur la première ligne de texte */
   .ds-textarea-field > .ds-icon,
   .ds-textarea-field > .ds-spinner {
-    margin-block-start: calc((1lh - var(--ds-icon-size)) / 2);
+    margin-block-start: calc((1lh - var(--vectis-icon-size)) / 2);
   }
 
   .ds-textarea-field > .ds-textarea-action {
-    margin-block-start: calc((1lh - var(--_control-action-size)) / 2);
+    margin-block-start: calc((1lh - var(--control-action-size)) / 2);
   }
 
   /* Icônes décoratives : gris foncé, moins présentes que le texte saisi */
   .ds-textarea-field > .ds-icon {
-    color: var(--ds-color-text-muted);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-textarea-field > .ds-spinner {
-    font-size: var(--ds-icon-size);
+    font-size: var(--vectis-icon-size);
   }
 
   .ds-textarea-field:hover:not(:has(.ds-textarea-control:focus)):not(
@@ -335,7 +335,11 @@ const { counterText, over } = useTextLimit({
         .ds-textarea-control[aria-invalid='true']
       )
     ) {
-    --_border-color: color-mix(in oklab, var(--ds-color-border-strong), var(--ds-color-text) 15%);
+    --field-border-color: color-mix(
+      in oklab,
+      var(--vectis-color-border-strong),
+      var(--vectis-color-text) 15%
+    );
   }
 
   /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur,
@@ -346,17 +350,17 @@ const { counterText, over } = useTextLimit({
      souris comprise. L'outline transparent est le filet forced-colors
      (Windows High Contrast supprime les box-shadow). */
   .ds-textarea-field:has(.ds-textarea-control:focus) {
-    --_border-color: var(--ds-color-accent);
+    --field-border-color: var(--vectis-color-accent);
 
-    box-shadow: 0 0 0 1px var(--_border-color);
-    outline: var(--ds-focus-ring-width) solid transparent;
+    box-shadow: 0 0 0 1px var(--field-border-color);
+    outline: var(--vectis-focus-ring-width) solid transparent;
   }
 
   /* État invalide : pseudo-classe native d'abord, prop (aria-invalid) ensuite.
      Seule la variable change → la bordure ET le ring focus passent en rouge. */
   .ds-textarea-field:has(.ds-textarea-control:user-invalid),
   .ds-textarea-field:has(.ds-textarea-control[aria-invalid='true']) {
-    --_border-color: var(--ds-color-danger);
+    --field-border-color: var(--vectis-color-danger);
   }
 
   /* Boutons internes (effacer, icône cliquable) : gris foncé → noir au hover,
@@ -365,43 +369,43 @@ const { counterText, over } = useTextLimit({
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--_control-action-size);
-    height: var(--_control-action-size);
-    margin-inline: calc(var(--ds-space-1) * -1);
+    width: var(--control-action-size);
+    height: var(--control-action-size);
+    margin-inline: calc(var(--vectis-space-1) * -1);
     padding: 0;
     border: none;
     background: transparent;
-    color: var(--ds-color-text-muted);
-    border-radius: var(--ds-radius-interactive);
+    color: var(--vectis-color-text-muted);
+    border-radius: var(--vectis-radius-interactive);
     cursor: pointer;
     flex: none;
-    transition: color var(--ds-duration-fast) var(--ds-ease-default);
+    transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-textarea-action:hover:not(:disabled) {
-    color: var(--ds-color-text);
+    color: var(--vectis-color-text);
   }
 
   .ds-textarea-action:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: calc(var(--ds-focus-ring-offset) * -1);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
   /* Readonly : fond légèrement enfoncé, texte normal (la valeur reste lisible),
      focus accent conservé. [data-readonly] et jamais :read-only (matche :disabled). */
   .ds-textarea[data-readonly] .ds-textarea-field {
-    --_border-color: var(--ds-color-border);
+    --field-border-color: var(--vectis-color-border);
 
-    background: var(--ds-color-surface-sunken);
+    background: var(--vectis-color-surface-sunken);
   }
 
   /* Disabled : nuance de gris sans opacité (mêmes tokens que Checkbox/Radio).
      Placé après les états erreur/readonly : à spécificité égale, il gagne. */
   .ds-textarea[data-disabled] .ds-textarea-field {
-    --_border-color: var(--ds-color-border);
+    --field-border-color: var(--vectis-color-border);
 
-    background: var(--ds-color-surface-muted);
-    color: var(--ds-color-text-subtle);
+    background: var(--vectis-color-surface-muted);
+    color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
     resize: none;
   }
@@ -409,7 +413,7 @@ const { counterText, over } = useTextLimit({
   .ds-textarea[data-disabled] .ds-textarea-label,
   .ds-textarea[data-disabled] .ds-textarea-hint,
   .ds-textarea[data-disabled] .ds-textarea-counter {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
   }
 
   .ds-textarea[data-disabled] .ds-textarea-action,
@@ -435,11 +439,11 @@ const { counterText, over } = useTextLimit({
   /* --- Tailles : seul le padding-block reste local, le reste vient de
      ds-control ; suit la formule (hauteur - 1lh) / 2 par cran --- */
   .ds-textarea[data-size='sm'] .ds-textarea-field {
-    padding-block: var(--ds-space-1);
+    padding-block: var(--vectis-space-1);
   }
 
   .ds-textarea[data-size='lg'] .ds-textarea-field {
-    padding-block: var(--ds-space-3);
+    padding-block: var(--vectis-space-3);
   }
 
   @media (prefers-reduced-motion: reduce) {

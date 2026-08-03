@@ -97,10 +97,10 @@ watchEffect(
   .ds-checkbox {
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-2);
-    font-family: var(--ds-text-family);
-    font-size: var(--ds-text-label-size);
-    color: var(--ds-color-text);
+    gap: var(--vectis-space-2);
+    font-family: var(--vectis-text-family);
+    font-size: var(--vectis-text-label-size);
+    color: var(--vectis-color-text);
     cursor: pointer;
   }
 
@@ -128,46 +128,50 @@ watchEffect(
   .ds-checkbox-box {
     display: inline-grid;
     place-items: center;
-    width: var(--ds-control-size-check);
-    height: var(--ds-control-size-check);
+    width: var(--vectis-control-size-check);
+    height: var(--vectis-control-size-check);
     flex: none;
-    background: var(--ds-color-surface);
-    border: var(--ds-control-border-width) solid var(--ds-color-border-strong);
-    border-radius: var(--ds-radius-sm);
-    color: var(--ds-color-text-on-accent);
+    background: var(--vectis-color-surface);
+    border: var(--vectis-control-border-width) solid var(--vectis-color-border-strong);
+    border-radius: var(--vectis-radius-sm);
+    color: var(--vectis-color-text-on-accent);
     transition:
-      background-color var(--ds-duration-fast) var(--ds-ease-default),
-      border-color var(--ds-duration-fast) var(--ds-ease-default);
+      background-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      border-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-checkbox-mark {
-    width: var(--ds-control-size-check-mark);
-    height: var(--ds-control-size-check-mark);
+    width: var(--vectis-control-size-check-mark);
+    height: var(--vectis-control-size-check-mark);
   }
 
   .ds-checkbox-mark-check,
   .ds-checkbox-mark-dash {
     opacity: 0;
-    transition: opacity var(--ds-duration-fast) var(--ds-ease-default);
+    transition: opacity var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-checkbox:hover
     .ds-checkbox-input:not(:disabled, :checked, :indeterminate)
     + .ds-checkbox-box {
-    border-color: color-mix(in oklab, var(--ds-color-border-strong), var(--ds-color-text) 15%);
+    border-color: color-mix(
+      in oklab,
+      var(--vectis-color-border-strong),
+      var(--vectis-color-text) 15%
+    );
   }
 
   .ds-checkbox-input:checked + .ds-checkbox-box,
   .ds-checkbox-input:indeterminate + .ds-checkbox-box {
-    background: var(--ds-color-accent);
-    border-color: var(--ds-color-accent);
+    background: var(--vectis-color-accent);
+    border-color: var(--vectis-color-accent);
   }
 
   .ds-checkbox:hover
     .ds-checkbox-input:not(:disabled):is(:checked, :indeterminate)
     + .ds-checkbox-box {
-    background: var(--ds-color-accent-hover);
-    border-color: var(--ds-color-accent-hover);
+    background: var(--vectis-color-accent-hover);
+    border-color: var(--vectis-color-accent-hover);
   }
 
   .ds-checkbox-input:checked + .ds-checkbox-box .ds-checkbox-mark-check {
@@ -183,25 +187,25 @@ watchEffect(
   }
 
   .ds-checkbox-input:focus-visible + .ds-checkbox-box {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   .ds-checkbox-input:user-invalid + .ds-checkbox-box,
   .ds-checkbox-input[aria-invalid='true'] + .ds-checkbox-box {
-    border-color: var(--ds-color-danger);
+    border-color: var(--vectis-color-danger);
   }
 
   /* Disabled : nuances de gris (mêmes tokens que Button), pas d'opacité */
   .ds-checkbox:has(.ds-checkbox-input:disabled) {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
   .ds-checkbox-input:disabled + .ds-checkbox-box {
-    background: var(--ds-color-surface-muted);
-    border-color: var(--ds-color-border);
-    color: var(--ds-color-text-subtle);
+    background: var(--vectis-color-surface-muted);
+    border-color: var(--vectis-color-border);
+    color: var(--vectis-color-text-subtle);
   }
 
   @media (prefers-reduced-motion: reduce) {

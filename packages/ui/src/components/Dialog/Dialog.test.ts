@@ -126,10 +126,10 @@ describe('Dialog', () => {
     ).toBe('none')
   })
 
-  it('width est posée en style inline --_dialog-width', async () => {
-    expect((await openHarness()).dialog.style.getPropertyValue('--_dialog-width')).toBe('400px')
+  it('width est posée en style inline --dialog-width', async () => {
+    expect((await openHarness()).dialog.style.getPropertyValue('--dialog-width')).toBe('400px')
     expect(
-      (await openHarness({ width: '640px' })).dialog.style.getPropertyValue('--_dialog-width'),
+      (await openHarness({ width: '640px' })).dialog.style.getPropertyValue('--dialog-width'),
     ).toBe('640px')
   })
 

@@ -21,7 +21,7 @@ describe('ProgressLinear', () => {
     expect(bar.getAttribute('aria-valuemin')).toBe('0')
     // borne haute fidèle (« 30 sur 60 »), pas de normalisation sur 100
     expect(bar.getAttribute('aria-valuemax')).toBe('60')
-    expect(styleOf(container)).toContain('--_f: 0.5')
+    expect(styleOf(container)).toContain('--fill-fraction: 0.5')
   })
 
   it('clampe au-dessus du max', () => {
@@ -30,7 +30,7 @@ describe('ProgressLinear', () => {
       attrs: { 'aria-label': 'x' },
     })
     expect(getByRole('progressbar').getAttribute('aria-valuenow')).toBe('100')
-    expect(styleOf(container)).toContain('--_f: 1')
+    expect(styleOf(container)).toContain('--fill-fraction: 1')
   })
 
   it('clampe en dessous de zéro', () => {
@@ -39,7 +39,7 @@ describe('ProgressLinear', () => {
       attrs: { 'aria-label': 'x' },
     })
     expect(getByRole('progressbar').getAttribute('aria-valuenow')).toBe('0')
-    expect(styleOf(container)).toContain('--_f: 0')
+    expect(styleOf(container)).toContain('--fill-fraction: 0')
   })
 
   it('max: 0 ne produit ni NaN ni Infinity', () => {
@@ -48,12 +48,12 @@ describe('ProgressLinear', () => {
       attrs: { 'aria-label': 'x' },
     })
     const style = styleOf(container)
-    expect(style).toContain('--_f: 0')
+    expect(style).toContain('--fill-fraction: 0')
     expect(style).not.toContain('NaN')
     expect(style).not.toContain('Infinity')
   })
 
-  it('indéterminé : pas d’aria-valuenow, data-indeterminate, --_f toujours posée', () => {
+  it('indéterminé : pas d’aria-valuenow, data-indeterminate, --fill-fraction toujours posée', () => {
     const { getByRole, container } = render(ProgressLinear, {
       props: { indeterminate: true },
       attrs: { 'aria-label': 'Chargement' },
@@ -61,8 +61,8 @@ describe('ProgressLinear', () => {
     const bar = getByRole('progressbar')
     expect(bar.hasAttribute('aria-valuenow')).toBe(false)
     expect(bar.hasAttribute('data-indeterminate')).toBe(true)
-    // toujours posée, sinon calc(100% * var(--_f)) serait invalide
-    expect(styleOf(container)).toContain('--_f: 0')
+    // toujours posée, sinon calc(100% * var(--fill-fraction)) serait invalide
+    expect(styleOf(container)).toContain('--fill-fraction: 0')
   })
 
   it('indéterminé : showValue est ignoré (aucun texte rendu)', () => {
@@ -83,16 +83,16 @@ describe('ProgressLinear', () => {
     expect(getByRole('progressbar').getAttribute('data-tone')).toBe('warning')
   })
 
-  it('couleur custom : data-custom + --_custom (absents sinon)', async () => {
+  it('couleur custom : data-custom + --custom-color (absents sinon)', async () => {
     const { getByRole, container, rerender } = render(ProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
     expect(getByRole('progressbar').hasAttribute('data-custom')).toBe(false)
-    expect(styleOf(container)).not.toContain('--_custom')
+    expect(styleOf(container)).not.toContain('--custom-color')
     await rerender({ color: 'hotpink' })
     expect(getByRole('progressbar').hasAttribute('data-custom')).toBe(true)
-    expect(styleOf(container)).toContain('--_custom: hotpink')
+    expect(styleOf(container)).toContain('--custom-color: hotpink')
   })
 
   it('thickness : number → px, string telle quelle, absente si non fournie', async () => {
@@ -100,15 +100,15 @@ describe('ProgressLinear', () => {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
-    expect(styleOf(container)).not.toContain('--_thickness')
+    expect(styleOf(container)).not.toContain('--progress-thickness')
     await rerender({ thickness: 12 })
-    expect(styleOf(container)).toContain('--_thickness: 12px')
+    expect(styleOf(container)).toContain('--progress-thickness: 12px')
     // string numérique : même résultat, toujours des pixels
     await rerender({ thickness: '12' })
-    expect(styleOf(container)).toContain('--_thickness: 12px')
+    expect(styleOf(container)).toContain('--progress-thickness: 12px')
     // valeur non numérique : ignorée plutôt que custom property invalide
     await rerender({ thickness: 'auto' })
-    expect(styleOf(container)).not.toContain('--_thickness')
+    expect(styleOf(container)).not.toContain('--progress-thickness')
   })
 
   it('shape : rounded par défaut, square reporté', async () => {
@@ -231,6 +231,6 @@ describe('ProgressLinear', () => {
     expect(bar.id).toBe('up')
     const style = bar.getAttribute('style') ?? ''
     expect(style).toContain('margin-top: 4px')
-    expect(style).toContain('--_f: 0.4')
+    expect(style).toContain('--fill-fraction: 0.4')
   })
 })

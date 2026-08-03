@@ -250,7 +250,7 @@ export const SansHabillage: Story = {
             alt="Aperçu du document"
             width="240"
             height="160"
-            style="display: block; border-radius: 12px; box-shadow: var(--ds-shadow-4);"
+            style="display: block; border-radius: 12px; box-shadow: var(--vectis-shadow-4);"
           />
         </Popover>
       </div>

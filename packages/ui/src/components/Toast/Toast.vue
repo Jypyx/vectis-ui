@@ -50,7 +50,7 @@ const icon = computed(() =>
     :data-tone="item.tone"
     :data-variant="item.variant"
     :role="role"
-    :style="item.width ? { '--_width': item.width } : undefined"
+    :style="item.width ? { '--toast-width': item.width } : undefined"
   >
     <Icon v-if="icon" class="ds-toast-icon" v-bind="icon" />
     <div class="ds-toast-body">
@@ -75,102 +75,102 @@ const icon = computed(() =>
   .ds-toast {
     display: flex;
     align-items: flex-start;
-    gap: var(--ds-space-3);
-    padding: var(--ds-space-3) var(--ds-space-4);
-    width: var(--_width, var(--ds-control-size-toast-width));
+    gap: var(--vectis-space-3);
+    padding: var(--vectis-space-3) var(--vectis-space-4);
+    width: var(--toast-width, var(--vectis-control-size-toast-width));
     /* responsive : jamais plus large que le viewport moins les marges de la pile */
-    max-width: calc(100vw - 2 * var(--ds-space-4));
-    border-radius: var(--ds-radius-overlay);
-    box-shadow: var(--ds-shadow-4);
-    font-family: var(--ds-text-family);
-    font-size: var(--ds-text-body-md-size);
-    line-height: var(--ds-text-body-md-leading);
+    max-width: calc(100vw - 2 * var(--vectis-space-4));
+    border-radius: var(--vectis-radius-overlay);
+    box-shadow: var(--vectis-shadow-4);
+    font-family: var(--vectis-text-family);
+    font-size: var(--vectis-text-body-md-size);
+    line-height: var(--vectis-text-body-md-leading);
   }
 
   .ds-toast[data-tone='neutral'] {
     /* pas de déclinaisons -surface/-border/-text pour neutral : surface
        d'overlay en tonal, contraste inversé (style tooltip) en solid */
-    --_bg-tonal: var(--ds-color-surface-overlay);
-    --_border-tonal: var(--ds-color-border);
-    --_accent: var(--ds-color-text);
-    --_bg-solid: var(--ds-color-surface-inverse);
-    --_text-solid: var(--ds-color-text-on-inverse);
+    --tone-bg-tonal: var(--vectis-color-surface-overlay);
+    --tone-border-tonal: var(--vectis-color-border);
+    --toast-accent: var(--vectis-color-text);
+    --tone-bg-solid: var(--vectis-color-surface-inverse);
+    --tone-text-solid: var(--vectis-color-text-on-inverse);
   }
 
   .ds-toast[data-tone='accent'] {
-    --_bg-tonal: var(--ds-color-accent-surface);
-    --_border-tonal: var(--ds-color-accent-border);
-    --_accent: var(--ds-color-accent-text);
-    --_bg-solid: var(--ds-color-accent);
-    --_text-solid: var(--ds-color-text-on-accent);
+    --tone-bg-tonal: var(--vectis-color-accent-surface);
+    --tone-border-tonal: var(--vectis-color-accent-border);
+    --toast-accent: var(--vectis-color-accent-text);
+    --tone-bg-solid: var(--vectis-color-accent);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
   }
 
   .ds-toast[data-tone='success'] {
-    --_bg-tonal: var(--ds-color-success-surface);
-    --_border-tonal: var(--ds-color-success-border);
-    --_accent: var(--ds-color-success-text);
-    --_bg-solid: var(--ds-color-success);
-    --_text-solid: var(--ds-color-text-on-accent);
+    --tone-bg-tonal: var(--vectis-color-success-surface);
+    --tone-border-tonal: var(--vectis-color-success-border);
+    --toast-accent: var(--vectis-color-success-text);
+    --tone-bg-solid: var(--vectis-color-success);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
   }
 
   .ds-toast[data-tone='danger'] {
-    --_bg-tonal: var(--ds-color-danger-surface);
-    --_border-tonal: var(--ds-color-danger-border);
-    --_accent: var(--ds-color-danger-text);
-    --_bg-solid: var(--ds-color-danger);
-    --_text-solid: var(--ds-color-text-on-accent);
+    --tone-bg-tonal: var(--vectis-color-danger-surface);
+    --tone-border-tonal: var(--vectis-color-danger-border);
+    --toast-accent: var(--vectis-color-danger-text);
+    --tone-bg-solid: var(--vectis-color-danger);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
   }
 
   .ds-toast[data-tone='warning'] {
-    --_bg-tonal: var(--ds-color-warning-surface);
-    --_border-tonal: var(--ds-color-warning-border);
-    --_accent: var(--ds-color-warning-text);
-    --_bg-solid: var(--ds-color-warning);
+    --tone-bg-tonal: var(--vectis-color-warning-surface);
+    --tone-border-tonal: var(--vectis-color-warning-border);
+    --toast-accent: var(--vectis-color-warning-text);
+    --tone-bg-solid: var(--vectis-color-warning);
     /* amber trop clair pour du blanc : token dédié (texte sombre) */
-    --_text-solid: var(--ds-color-text-on-warning);
+    --tone-text-solid: var(--vectis-color-text-on-warning);
   }
 
   .ds-toast[data-variant='tonal'] {
-    background: var(--_bg-tonal);
-    border: 1px solid var(--_border-tonal);
-    color: var(--ds-color-text);
+    background: var(--tone-bg-tonal);
+    border: 1px solid var(--tone-border-tonal);
+    color: var(--vectis-color-text);
   }
 
   .ds-toast[data-variant='tonal'] .ds-toast-icon,
   .ds-toast[data-variant='tonal'] .ds-toast-title {
-    color: var(--_accent);
+    color: var(--toast-accent);
   }
 
   .ds-toast[data-variant='tonal'] .ds-toast-message {
-    color: var(--ds-color-text-muted);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-toast[data-variant='solid'] {
-    background: var(--_bg-solid);
-    color: var(--_text-solid);
+    background: var(--tone-bg-solid);
+    color: var(--tone-text-solid);
   }
 
   /*
    * Croix de fermeture : IconButton ghost/neutral, recoloré via les
-   * variables locales de Button (--_text-tinted / --_bg-soft) — spécificité
+   * variables locales de Button (--tone-text-tinted / --tone-bg-soft) — spécificité
    * supérieure aux règles de tone de Button, et Toast est bundlé après lui.
    * En tonal : croix à la couleur d'accent du tone ; en solid : currentcolor
    * (lisible sur le fond plein).
    */
   .ds-toast[data-variant='tonal'] .ds-toast-close[data-tone] {
-    --_text-tinted: var(--_accent);
-    --_bg-soft: color-mix(in oklab, var(--_accent), transparent 88%);
+    --tone-text-tinted: var(--toast-accent);
+    --tone-bg-soft: color-mix(in oklab, var(--toast-accent), transparent 88%);
   }
 
   .ds-toast[data-variant='solid'] .ds-toast-close[data-tone] {
-    --_text-tinted: currentcolor;
-    --_bg-soft: color-mix(in oklab, currentcolor, transparent 85%);
+    --tone-text-tinted: currentcolor;
+    --tone-bg-soft: color-mix(in oklab, currentcolor, transparent 85%);
   }
 
   .ds-toast-icon {
-    --ds-icon-size: var(--ds-icon-size-md);
+    --vectis-icon-size: var(--vectis-icon-size-md);
     /* aligne l'icône (20px) sur le centre de la première ligne de texte */
-    margin-block-start: calc(var(--ds-space-1) / 2);
+    margin-block-start: calc(var(--vectis-space-1) / 2);
   }
 
   .ds-toast-body {
@@ -181,9 +181,9 @@ const icon = computed(() =>
   }
 
   .ds-toast-title {
-    margin-block-end: var(--ds-space-1);
+    margin-block-end: var(--vectis-space-1);
     /* semibold : emphase d'état, pas un rôle typo */
-    font-weight: var(--ds-font-weight-semibold);
+    font-weight: var(--vectis-font-weight-semibold);
   }
 
   .ds-toast-close {
@@ -193,13 +193,13 @@ const icon = computed(() =>
        première ligne quel que soit le nombre de lignes), mais son débord ne
        tire plus le contenu vers le haut — sur une seule ligne, elle se
        retrouve centrée verticalement. */
-    margin-block: calc(-1 * var(--ds-space-1));
-    margin-inline-end: calc(-1 * var(--ds-space-1));
+    margin-block: calc(-1 * var(--vectis-space-1));
+    margin-inline-end: calc(-1 * var(--vectis-space-1));
   }
 
   /*
    * Entrée d'un toast inséré dans une pile déjà ouverte : glisse depuis le
-   * bord (--_enter-y posée par .ds-toast-stack selon le placement).
+   * bord (--toast-enter-y posée par .ds-toast-stack selon le placement).
    * @starting-style s'applique à toute insertion DOM — progressive
    * enhancement, apparition sans animation à défaut. La sortie n'est pas
    * animée : il faudrait retenir l'item dans la file pendant la transition
@@ -208,14 +208,14 @@ const icon = computed(() =>
    */
   .ds-toast {
     transition:
-      opacity var(--ds-duration-base) var(--ds-ease-default),
-      translate var(--ds-duration-base) var(--ds-ease-default);
+      opacity var(--vectis-duration-base) var(--vectis-ease-default),
+      translate var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   @starting-style {
     .ds-toast {
       opacity: 0;
-      translate: 0 var(--_enter-y, 0);
+      translate: 0 var(--toast-enter-y, 0);
     }
   }
 

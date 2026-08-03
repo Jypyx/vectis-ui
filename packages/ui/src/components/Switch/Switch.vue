@@ -51,15 +51,15 @@ defineSlots<{
 <style>
 @layer ds.components {
   .ds-switch {
-    --_track-w: var(--ds-control-size-switch-w);
-    --_track-h: var(--ds-control-size-switch-h);
-    --_pad: 2px;
+    --switch-track-w: var(--vectis-control-size-switch-w);
+    --switch-track-h: var(--vectis-control-size-switch-h);
+    --switch-pad: 2px;
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-2);
-    font-family: var(--ds-text-family);
-    font-size: var(--ds-text-label-size);
-    color: var(--ds-color-text);
+    gap: var(--vectis-space-2);
+    font-family: var(--vectis-text-family);
+    font-size: var(--vectis-text-label-size);
+    color: var(--vectis-color-text);
     cursor: pointer;
   }
 
@@ -86,56 +86,60 @@ defineSlots<{
   .ds-switch-track {
     display: inline-flex;
     align-items: center;
-    width: var(--_track-w);
-    height: var(--_track-h);
-    padding: var(--_pad);
+    width: var(--switch-track-w);
+    height: var(--switch-track-h);
+    padding: var(--switch-pad);
     flex: none;
-    background: var(--ds-color-border-strong);
-    border-radius: var(--ds-radius-full);
-    transition: background-color var(--ds-duration-fast) var(--ds-ease-default);
+    background: var(--vectis-color-border-strong);
+    border-radius: var(--vectis-radius-full);
+    transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-switch-thumb {
-    width: calc(var(--_track-h) - var(--_pad) * 2);
-    height: calc(var(--_track-h) - var(--_pad) * 2);
-    background: var(--ds-color-surface);
-    border-radius: var(--ds-radius-full);
-    box-shadow: var(--ds-shadow-1);
+    width: calc(var(--switch-track-h) - var(--switch-pad) * 2);
+    height: calc(var(--switch-track-h) - var(--switch-pad) * 2);
+    background: var(--vectis-color-surface);
+    border-radius: var(--vectis-radius-full);
+    box-shadow: var(--vectis-shadow-1);
     /* margin-inline plutôt que translateX : le déplacement suit la direction (RTL-safe) */
-    transition: margin-inline-start var(--ds-duration-base) var(--ds-ease-default);
+    transition: margin-inline-start var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   .ds-switch-input:checked + .ds-switch-track {
-    background: var(--ds-color-accent);
+    background: var(--vectis-color-accent);
   }
 
   .ds-switch-input:checked + .ds-switch-track .ds-switch-thumb {
-    margin-inline-start: calc(var(--_track-w) - var(--_track-h));
+    margin-inline-start: calc(var(--switch-track-w) - var(--switch-track-h));
   }
 
   .ds-switch:hover .ds-switch-input:not(:disabled):not(:checked) + .ds-switch-track {
-    background: color-mix(in oklab, var(--ds-color-border-strong), var(--ds-color-text) 12%);
+    background: color-mix(
+      in oklab,
+      var(--vectis-color-border-strong),
+      var(--vectis-color-text) 12%
+    );
   }
 
   .ds-switch-input:focus-visible + .ds-switch-track {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   /* Disabled : nuances de gris (mêmes tokens que Checkbox/Radio), pas d'opacité.
      Le thumb reprend text-subtle — la couleur de la coche/du point disabled de
      Checkbox/Radio — pour rester visible sur le track gris dans les deux thèmes. */
   .ds-switch:has(.ds-switch-input:disabled) {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
   .ds-switch-input:disabled + .ds-switch-track {
-    background: var(--ds-color-surface-muted);
+    background: var(--vectis-color-surface-muted);
   }
 
   .ds-switch-input:disabled + .ds-switch-track .ds-switch-thumb {
-    background: var(--ds-color-text-subtle);
+    background: var(--vectis-color-text-subtle);
     box-shadow: none;
   }
 

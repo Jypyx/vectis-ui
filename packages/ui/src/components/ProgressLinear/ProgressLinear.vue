@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * Barre de progression. La racine EST la piste ; toute la géométrie dérive
- * d'une fraction unitless `--_f` inline, en propriétés logiques — l'orientation
+ * d'une fraction unitless `--fill-fraction` inline, en propriétés logiques — l'orientation
  * verticale ne demande alors qu'un `writing-mode`. Aucun JS de comportement.
  *
  * Nom accessible : passer `aria-label` (fallthrough). Le rôle progressbar est
@@ -87,7 +87,11 @@ const { clamped, fraction } = useProgressValue(
     :aria-valuenow="indeterminate ? undefined : clamped"
     aria-valuemin="0"
     :aria-valuemax="max"
-    :style="{ '--_f': String(fraction), '--_custom': color, '--_thickness': px(thickness) }"
+    :style="{
+      '--fill-fraction': String(fraction),
+      '--custom-color': color,
+      '--progress-thickness': px(thickness),
+    }"
   >
     <span class="ds-progress-linear-fill" />
     <!--
@@ -119,17 +123,17 @@ const { clamped, fraction } = useProgressValue(
    * direct, qui bat ce layer).
    */
   .ds-progress-linear {
-    --_thickness: var(--ds-control-size-progress-linear-thickness);
+    --progress-thickness: var(--vectis-control-size-progress-linear-thickness);
     position: relative;
     display: block;
     inline-size: 100%;
-    block-size: var(--_thickness);
-    border-radius: var(--ds-radius-pill);
-    background: var(--_track);
-    font-family: var(--ds-text-family);
-    font-size: var(--ds-text-caption-size);
-    font-weight: var(--ds-text-control-weight);
-    line-height: var(--ds-text-control-leading);
+    block-size: var(--progress-thickness);
+    border-radius: var(--vectis-radius-pill);
+    background: var(--progress-track);
+    font-family: var(--vectis-text-family);
+    font-size: var(--vectis-text-caption-size);
+    font-weight: var(--vectis-text-control-weight);
+    line-height: var(--vectis-text-control-leading);
   }
 
   .ds-progress-linear[data-shape='square'] {
@@ -140,9 +144,9 @@ const { clamped, fraction } = useProgressValue(
     position: absolute;
     inset-block: 0;
     inset-inline-start: 0;
-    inline-size: calc(100% * var(--_f));
+    inline-size: calc(100% * var(--fill-fraction));
     border-radius: inherit;
-    background: var(--_fill);
+    background: var(--progress-fill);
     /*
      * L'animation porte sur inline-size (propriété de layout, non composited :
      * compromis assumé — `scale` est physique et casserait le vertical et le
@@ -150,48 +154,48 @@ const { clamped, fraction } = useProgressValue(
      * contrasté, sinon la frontière de couleur décrocherait du bord du
      * remplissage pendant la transition.
      */
-    transition: inline-size var(--ds-duration-base) var(--ds-ease-default);
+    transition: inline-size var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   /* --- Tones : variables locales uniquement --- */
   .ds-progress-linear[data-tone='accent'] {
-    --_fill: var(--ds-color-accent);
-    --_track: var(--ds-color-accent-surface);
-    --_text-fallback: var(--ds-color-text-on-accent);
+    --progress-fill: var(--vectis-color-accent);
+    --progress-track: var(--vectis-color-accent-surface);
+    --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
   .ds-progress-linear[data-tone='success'] {
-    --_fill: var(--ds-color-success);
-    --_track: var(--ds-color-success-surface);
-    --_text-fallback: var(--ds-color-text-on-accent);
+    --progress-fill: var(--vectis-color-success);
+    --progress-track: var(--vectis-color-success-surface);
+    --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
   .ds-progress-linear[data-tone='danger'] {
-    --_fill: var(--ds-color-danger);
-    --_track: var(--ds-color-danger-surface);
-    --_text-fallback: var(--ds-color-text-on-accent);
+    --progress-fill: var(--vectis-color-danger);
+    --progress-track: var(--vectis-color-danger-surface);
+    --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
   .ds-progress-linear[data-tone='warning'] {
-    --_fill: var(--ds-color-warning);
-    --_track: var(--ds-color-warning-surface);
+    --progress-fill: var(--vectis-color-warning);
+    --progress-track: var(--vectis-color-warning-surface);
     /* le blanc échoue AA sur amber : token dédié */
-    --_text-fallback: var(--ds-color-text-on-warning);
+    --tone-text-fallback: var(--vectis-color-text-on-warning);
   }
 
   /* Neutral : inversion text/surface — un gris moyen serait illisible dans
      l'un des deux thèmes. */
   .ds-progress-linear[data-tone='neutral'] {
-    --_fill: var(--ds-color-text);
-    --_track: var(--ds-color-surface-muted);
-    --_text-fallback: var(--ds-color-surface);
+    --progress-fill: var(--vectis-color-text);
+    --progress-track: var(--vectis-color-surface-muted);
+    --tone-text-fallback: var(--vectis-color-surface);
   }
 
   /* --- Couleur custom : après les tones (même spécificité, dernier gagne) --- */
   .ds-progress-linear[data-custom] {
-    --_fill: var(--_custom);
-    --_track: color-mix(in oklab, var(--_custom), var(--ds-color-surface) 85%);
-    --_text-fallback: var(--ds-color-text-on-accent);
+    --progress-fill: var(--custom-color);
+    --progress-track: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
+    --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
   /* --- Texte dans la barre : deux copies superposées, toutes deux calées sur
@@ -204,8 +208,8 @@ const { clamped, fraction } = useProgressValue(
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-inline: var(--ds-space-2);
-    color: var(--ds-color-text);
+    padding-inline: var(--vectis-space-2);
+    color: var(--vectis-color-text);
     /* la racine bascule en écriture verticale ; le texte, lui, reste horizontal */
     writing-mode: horizontal-tb;
     white-space: nowrap;
@@ -227,24 +231,24 @@ const { clamped, fraction } = useProgressValue(
        deviendrait invalide au calcul (IACVT → color: unset → héritage, le
        fallback ne s'applique jamais). D'où le @supports ci-dessous, évalué,
        lui, sans substitution de var(). */
-    color: var(--_text-fallback);
+    color: var(--tone-text-fallback);
     /* inset() est physique : un jeu de valeurs par orientation et direction.
        Le débord négatif sur les trois autres côtés évite de rogner un texte
        plus haut (ou plus large) que la barre. */
-    clip-path: inset(-100vmax calc(100% * (1 - var(--_f))) -100vmax -100vmax);
-    transition: clip-path var(--ds-duration-base) var(--ds-ease-default);
+    clip-path: inset(-100vmax calc(100% * (1 - var(--fill-fraction))) -100vmax -100vmax);
+    transition: clip-path var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   /* Texte adaptatif noir/blanc là où contrast-color() existe (Safari 26+,
      Edge 150+). */
   @supports (color: contrast-color(red)) {
     .ds-progress-linear-text[data-on-fill] {
-      color: contrast-color(var(--_fill));
+      color: contrast-color(var(--progress-fill));
     }
   }
 
   .ds-progress-linear:dir(rtl) .ds-progress-linear-text[data-on-fill] {
-    clip-path: inset(-100vmax -100vmax -100vmax calc(100% * (1 - var(--_f))));
+    clip-path: inset(-100vmax -100vmax -100vmax calc(100% * (1 - var(--fill-fraction))));
   }
 
   /* --- Vertical : 0 en bas, max en haut ---
@@ -261,7 +265,7 @@ const { clamped, fraction } = useProgressValue(
      layerisé, la surcharge. */
   .ds-progress-linear[data-orientation='vertical'] {
     writing-mode: vertical-lr;
-    inline-size: var(--ds-control-size-progress-linear-length);
+    inline-size: var(--vectis-control-size-progress-linear-length);
   }
 
   .ds-progress-linear[data-orientation='vertical'] .ds-progress-linear-fill {
@@ -273,7 +277,7 @@ const { clamped, fraction } = useProgressValue(
   .ds-progress-linear[data-orientation='vertical'] .ds-progress-linear-text {
     flex-direction: column-reverse;
     padding-inline: 0;
-    padding-block: var(--ds-space-2);
+    padding-block: var(--vectis-space-2);
   }
 
   /* Le clip passe sur l'axe vertical (le remplissage monte depuis le bas) —
@@ -281,7 +285,7 @@ const { clamped, fraction } = useProgressValue(
      :dir(rtl) horizontale ci-dessus. */
   .ds-progress-linear[data-orientation='vertical'] .ds-progress-linear-text[data-on-fill],
   .ds-progress-linear[data-orientation='vertical']:dir(rtl) .ds-progress-linear-text[data-on-fill] {
-    clip-path: inset(calc(100% * (1 - var(--_f))) -100vmax -100vmax -100vmax);
+    clip-path: inset(calc(100% * (1 - var(--fill-fraction))) -100vmax -100vmax -100vmax);
   }
 
   /* --- Indéterminé : une barre de taille fixe traverse la piste, du bord
@@ -304,22 +308,22 @@ const { clamped, fraction } = useProgressValue(
   .ds-progress-linear[data-indeterminate] .ds-progress-linear-fill {
     /* La position de départ dérive de cette taille (les deux doivent rester
        égales pour que la barre parte pile hors piste). */
-    --_bar: 40%;
+    --progress-bar: 40%;
     /* on reprend l'ancrage au début de l'axe inline, y compris en vertical où
        le mode déterminé ancre à la fin (voir plus haut) */
     inset-inline-start: 0;
     inset-inline-end: auto;
-    inline-size: var(--_bar);
+    inline-size: var(--progress-bar);
     /* la transition de progression n'a pas lieu d'être ici, et ferait grandir
        la barre au passage en indéterminé */
     transition: none;
-    animation: ds-progress-linear-indeterminate calc(var(--ds-duration-slow) * 5)
-      var(--ds-ease-in-out) infinite;
+    animation: ds-progress-linear-indeterminate calc(var(--vectis-duration-slow) * 5)
+      var(--vectis-ease-in-out) infinite;
   }
 
   @keyframes ds-progress-linear-indeterminate {
     from {
-      inset-inline-start: calc(-1 * var(--_bar));
+      inset-inline-start: calc(-1 * var(--progress-bar));
     }
 
     to {
@@ -345,7 +349,7 @@ const { clamped, fraction } = useProgressValue(
 
     /* Un loader immobile perdrait sa fonction : ralentir, pas supprimer. */
     .ds-progress-linear[data-indeterminate] .ds-progress-linear-fill {
-      animation-duration: calc(var(--ds-duration-slow) * 15);
+      animation-duration: calc(var(--vectis-duration-slow) * 15);
     }
   }
 }

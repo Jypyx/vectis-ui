@@ -171,7 +171,7 @@ export const Responsive: Story = {
           max-width: 100%;
           resize: horizontal;
           overflow: hidden;
-          border: 1px dashed var(--ds-color-border);
+          border: 1px dashed var(--vectis-color-border);
           padding: 8px;
         "
       >
@@ -198,7 +198,7 @@ export const Alignement: Story = {
     // La nav est block-level et occupe toute la largeur disponible :
     // l'alignement passe donc par la prop `align`.
     template: `
-      <div style="display: grid; gap: 16px; border: 1px dashed var(--ds-color-border); padding: 8px">
+      <div style="display: grid; gap: 16px; border: 1px dashed var(--vectis-color-border); padding: 8px">
         <Pagination v-for="a in aligns" :key="a" :length="8" :align="a" v-model="page" />
       </div>
     `,

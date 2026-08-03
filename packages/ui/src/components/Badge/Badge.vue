@@ -2,7 +2,7 @@
 /**
  * Pastille d'information non interactive : compteur ou icône. HTML + CSS
  * uniquement — le seul JS est du calcul de rendu (détection du slot cible,
- * plafonnement « 99+ », pont couleur custom → --_custom).
+ * plafonnement « 99+ », pont couleur custom → --custom-color).
  */
 import { computed, useSlots } from 'vue'
 
@@ -34,7 +34,7 @@ interface BadgeProps {
   /** Avec une cible : coin haut-droit au lieu d'inline. Ignoré sans cible. */
   overlay?: boolean
   /**
-   * Liseré de 2px couleur du fond derrière (`--ds-color-surface`,
+   * Liseré de 2px couleur du fond derrière (`--vectis-color-surface`,
    * surchargeable par sous-arbre) pour détacher le badge de sa cible.
    */
   bordered?: boolean
@@ -67,7 +67,7 @@ const badgeAttrs = computed(() => ({
   'data-dot': props.dot ? '' : undefined,
   'data-icon-only': !props.dot && props.icon ? '' : undefined,
   'data-bordered': props.bordered ? '' : undefined,
-  style: props.color !== undefined ? { '--_custom': props.color } : undefined,
+  style: props.color !== undefined ? { '--custom-color': props.color } : undefined,
 }))
 </script>
 
@@ -95,28 +95,28 @@ const badgeAttrs = computed(() => ({
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-2); /* écart cible ↔ badge en mode inline */
+    gap: var(--vectis-space-2); /* écart cible ↔ badge en mode inline */
   }
 
   .ds-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: var(--ds-control-size-badge-h);
+    height: var(--vectis-control-size-badge-h);
     /* min-width = height + padding réduit → compteur à 1 ou 2 chiffres rond */
-    min-width: var(--ds-control-size-badge-h);
-    padding-inline: var(--ds-space-1);
-    border-radius: var(--ds-radius-pill);
-    background: var(--_bg);
-    font-family: var(--ds-text-family);
-    font-size: var(--ds-text-caption-size);
-    font-weight: var(--ds-text-control-weight);
-    line-height: var(--ds-text-control-leading);
+    min-width: var(--vectis-control-size-badge-h);
+    padding-inline: var(--vectis-space-1);
+    border-radius: var(--vectis-radius-pill);
+    background: var(--badge-bg);
+    font-family: var(--vectis-text-family);
+    font-size: var(--vectis-text-caption-size);
+    font-weight: var(--vectis-text-control-weight);
+    line-height: var(--vectis-text-control-leading);
 
     /* Contexte icône : mapping xs de l'échelle de tailles (16px, opsz 20 —
        littéral, contrat de la police Material Symbols). */
-    --ds-icon-size: var(--ds-icon-size-sm);
-    --ds-icon-opsz: 20;
+    --vectis-icon-size: var(--vectis-icon-size-sm);
+    --vectis-icon-opsz: 20;
 
     /* Fallback par tone (tones ci-dessous). contrast-color() ne peut
        PAS être une simple seconde déclaration : contenant un var(), elle
@@ -124,49 +124,49 @@ const badgeAttrs = computed(() => ({
        elle gagnerait la cascade puis deviendrait invalide au calcul (IACVT →
        color: unset → héritage, le fallback ne s'applique jamais). D'où le
        @supports ci-dessous, évalué, lui, sans substitution de var(). */
-    color: var(--_text-fallback);
+    color: var(--tone-text-fallback);
   }
 
   /* Texte adaptatif noir/blanc là où contrast-color() existe (Safari 26+,
      Edge 150+). */
   @supports (color: contrast-color(red)) {
     .ds-badge {
-      color: contrast-color(var(--_bg));
+      color: contrast-color(var(--badge-bg));
     }
   }
 
   .ds-badge[data-tone='accent'] {
-    --_bg: var(--ds-color-accent);
-    --_text-fallback: var(--ds-color-text-on-accent);
+    --badge-bg: var(--vectis-color-accent);
+    --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
   .ds-badge[data-tone='danger'] {
-    --_bg: var(--ds-color-danger);
-    --_text-fallback: var(--ds-color-text-on-accent);
+    --badge-bg: var(--vectis-color-danger);
+    --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
   .ds-badge[data-tone='success'] {
-    --_bg: var(--ds-color-success);
-    --_text-fallback: var(--ds-color-text-on-accent);
+    --badge-bg: var(--vectis-color-success);
+    --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
   .ds-badge[data-tone='warning'] {
-    --_bg: var(--ds-color-warning);
-    --_text-fallback: var(--ds-color-text-on-warning);
+    --badge-bg: var(--vectis-color-warning);
+    --tone-text-fallback: var(--vectis-color-text-on-warning);
   }
 
   /* Neutral : inversion text/surface — un gris type text-muted vaudrait
      neutral-400 en dark, où le fallback blanc échouerait ; ici fallback et
      contrast-color() concordent dans les deux thèmes. */
   .ds-badge[data-tone='neutral'] {
-    --_bg: var(--ds-color-text);
-    --_text-fallback: var(--ds-color-surface);
+    --badge-bg: var(--vectis-color-text);
+    --tone-text-fallback: var(--vectis-color-surface);
   }
 
   /* Après les tones : même spécificité, le dernier gagne. */
   .ds-badge[data-custom] {
-    --_bg: var(--_custom);
-    --_text-fallback: var(--ds-color-text-on-accent);
+    --badge-bg: var(--custom-color);
+    --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
   /* Icône seule : le min-width fait le cercle, padding retiré. */
@@ -176,8 +176,8 @@ const badgeAttrs = computed(() => ({
 
   /* min-width neutralisé : il battrait le width du dot. */
   .ds-badge[data-dot] {
-    width: var(--ds-control-size-badge-dot);
-    height: var(--ds-control-size-badge-dot);
+    width: var(--vectis-control-size-badge-dot);
+    height: var(--vectis-control-size-badge-dot);
     min-width: 0;
     padding: 0;
   }
@@ -185,7 +185,7 @@ const badgeAttrs = computed(() => ({
   /* Anneau extérieur en box-shadow : ne modifie pas les dimensions (le dot
      reste 10px pleins) et suit le border-radius. */
   .ds-badge[data-bordered] {
-    box-shadow: 0 0 0 2px var(--ds-color-surface);
+    box-shadow: 0 0 0 2px var(--vectis-color-surface);
   }
 
   /* Les % de translate sont des ratios de la taille du badge lui-même

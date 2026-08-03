@@ -219,7 +219,7 @@ onBeforeUnmount(() => {
     width: fit-content;
     display: flex;
     flex-direction: column;
-    gap: var(--ds-space-3);
+    gap: var(--vectis-space-3);
   }
 
   /*
@@ -228,23 +228,23 @@ onBeforeUnmount(() => {
    * notifications de l'OS).
    */
   .ds-toast-stack[data-placement^='top-'] {
-    top: var(--ds-space-4);
+    top: var(--vectis-space-4);
     /* le plus récent près du bord : la file est append-only, le CSS inverse */
     flex-direction: column-reverse;
-    --_enter-y: calc(-1 * var(--ds-space-4));
+    --toast-enter-y: calc(-1 * var(--vectis-space-4));
   }
 
   .ds-toast-stack[data-placement^='bottom-'] {
-    bottom: var(--ds-space-4);
-    --_enter-y: var(--ds-space-4);
+    bottom: var(--vectis-space-4);
+    --toast-enter-y: var(--vectis-space-4);
   }
 
   .ds-toast-stack[data-placement$='-left'] {
-    left: var(--ds-space-4);
+    left: var(--vectis-space-4);
   }
 
   .ds-toast-stack[data-placement$='-right'] {
-    right: var(--ds-space-4);
+    right: var(--vectis-space-4);
   }
 
   .ds-toast-stack[data-placement$='-center'] {
@@ -258,9 +258,9 @@ onBeforeUnmount(() => {
   .ds-toast-stack {
     opacity: 1;
     transition:
-      opacity var(--ds-duration-base) var(--ds-ease-default),
-      overlay var(--ds-duration-base) allow-discrete,
-      display var(--ds-duration-base) allow-discrete;
+      opacity var(--vectis-duration-base) var(--vectis-ease-default),
+      overlay var(--vectis-duration-base) allow-discrete,
+      display var(--vectis-duration-base) allow-discrete;
   }
 
   .ds-toast-stack:not(:popover-open) {

@@ -257,36 +257,36 @@ defineExpose({
   .ds-input {
     display: flex;
     flex-direction: column;
-    gap: var(--ds-space-1);
+    gap: var(--vectis-space-1);
     width: 100%;
-    font-family: var(--ds-text-family);
+    font-family: var(--vectis-text-family);
   }
 
   /* Label et hint : rendus par Typography (label / caption muted) — les classes
      .ds-input-label/.ds-input-hint restent posées comme points d'accroche
      (surcharges consommateur, état disabled ci-dessous). */
 
-  /* Le field porte bordure, fond et focus ; --_border-color est la seule
+  /* Le field porte bordure, fond et focus ; --field-border-color est la seule
      source de vérité de la couleur (hover/erreur/disabled la redéfinissent).
-     Tailles/compact : variables --_control-* héritées de la racine ds-control
+     Tailles/compact : variables --control-* héritées de la racine ds-control
      (styles/control-size.css), contexte d'Icon compris. */
   .ds-input-field {
-    --_border-color: var(--ds-color-border-strong);
+    --field-border-color: var(--vectis-color-border-strong);
 
     display: flex;
     align-items: center;
-    gap: var(--_control-gap);
-    height: var(--_control-height);
-    padding-inline: var(--_control-padding-inline-field);
-    background: var(--ds-color-surface);
-    color: var(--ds-color-text);
-    border: 1px solid var(--_border-color);
-    border-radius: var(--ds-radius-interactive);
-    font-size: var(--_control-font-size);
+    gap: var(--control-gap);
+    height: var(--control-height);
+    padding-inline: var(--control-padding-inline-field);
+    background: var(--vectis-color-surface);
+    color: var(--vectis-color-text);
+    border: 1px solid var(--field-border-color);
+    border-radius: var(--vectis-radius-interactive);
+    font-size: var(--control-font-size);
     transition:
-      border-color var(--ds-duration-fast) var(--ds-ease-default),
-      background-color var(--ds-duration-fast) var(--ds-ease-default),
-      box-shadow var(--ds-duration-fast) var(--ds-ease-default);
+      border-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      background-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-input-control {
@@ -302,7 +302,7 @@ defineExpose({
   }
 
   .ds-input-control::placeholder {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
   }
 
   /* Décorations natives neutralisées : les contrôles internes viennent du DS
@@ -330,7 +330,7 @@ defineExpose({
   /* le fond autofill du navigateur est peint sur l'input interne : au moins
      suivre le radius du champ (compromis, la couleur reste celle du navigateur) */
   .ds-input-control:-webkit-autofill {
-    border-radius: var(--ds-radius-interactive);
+    border-radius: var(--vectis-radius-interactive);
   }
 
   .ds-input-field:hover:not(:has(.ds-input-control:focus)):not(
@@ -340,7 +340,11 @@ defineExpose({
         .ds-input-control[aria-invalid='true']
       )
     ) {
-    --_border-color: color-mix(in oklab, var(--ds-color-border-strong), var(--ds-color-text) 15%);
+    --field-border-color: color-mix(
+      in oklab,
+      var(--vectis-color-border-strong),
+      var(--vectis-color-text) 15%
+    );
   }
 
   /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur,
@@ -351,39 +355,39 @@ defineExpose({
      souris comprise. L'outline transparent est le filet forced-colors
      (Windows High Contrast supprime les box-shadow). */
   .ds-input-field:has(.ds-input-control:focus) {
-    --_border-color: var(--ds-color-accent);
+    --field-border-color: var(--vectis-color-accent);
 
-    box-shadow: 0 0 0 1px var(--_border-color);
-    outline: var(--ds-focus-ring-width) solid transparent;
+    box-shadow: 0 0 0 1px var(--field-border-color);
+    outline: var(--vectis-focus-ring-width) solid transparent;
   }
 
   /* État invalide : pseudo-classe native d'abord, prop (aria-invalid) ensuite.
      Seule la variable change → la bordure ET le ring focus passent en rouge. */
   .ds-input-field:has(.ds-input-control:user-invalid),
   .ds-input-field:has(.ds-input-control[aria-invalid='true']) {
-    --_border-color: var(--ds-color-danger);
+    --field-border-color: var(--vectis-color-danger);
   }
 
   /* Le compteur reste stylé localement : tabular-nums et l'état de dépassement
      ne sont pas des rôles typographiques. */
   .ds-input-counter {
     flex: none;
-    font-size: var(--ds-text-caption-size);
-    color: var(--ds-color-text-muted);
+    font-size: var(--vectis-text-caption-size);
+    color: var(--vectis-color-text-muted);
     font-variant-numeric: tabular-nums;
   }
 
   .ds-input-counter[data-over] {
-    color: var(--ds-color-danger-text);
+    color: var(--vectis-color-danger-text);
   }
 
   /* Icônes décoratives : gris foncé, moins présentes que le texte saisi */
   .ds-input-field > .ds-icon {
-    color: var(--ds-color-text-muted);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-input-field > .ds-spinner {
-    font-size: var(--ds-icon-size);
+    font-size: var(--vectis-icon-size);
   }
 
   /* Boutons internes (effacer, icône cliquable) : gris foncé → noir au hover,
@@ -392,50 +396,50 @@ defineExpose({
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--_control-action-size);
-    height: var(--_control-action-size);
-    margin-inline: calc(var(--ds-space-1) * -1);
+    width: var(--control-action-size);
+    height: var(--control-action-size);
+    margin-inline: calc(var(--vectis-space-1) * -1);
     padding: 0;
     border: none;
     background: transparent;
-    color: var(--ds-color-text-muted);
-    border-radius: var(--ds-radius-interactive);
+    color: var(--vectis-color-text-muted);
+    border-radius: var(--vectis-radius-interactive);
     cursor: pointer;
     flex: none;
-    transition: color var(--ds-duration-fast) var(--ds-ease-default);
+    transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-input-action:hover:not(:disabled) {
-    color: var(--ds-color-text);
+    color: var(--vectis-color-text);
   }
 
   .ds-input-action:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: calc(var(--ds-focus-ring-offset) * -1);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
   /* Readonly : fond légèrement enfoncé, texte normal (la valeur reste lisible),
      focus accent conservé. [data-readonly] et jamais :read-only (matche :disabled). */
   .ds-input[data-readonly] .ds-input-field {
-    --_border-color: var(--ds-color-border);
+    --field-border-color: var(--vectis-color-border);
 
-    background: var(--ds-color-surface-sunken);
+    background: var(--vectis-color-surface-sunken);
   }
 
   /* Disabled : nuance de gris sans opacité (mêmes tokens que Checkbox/Radio).
      Placé après les états erreur/readonly : à spécificité égale, il gagne. */
   .ds-input[data-disabled] .ds-input-field {
-    --_border-color: var(--ds-color-border);
+    --field-border-color: var(--vectis-color-border);
 
-    background: var(--ds-color-surface-muted);
-    color: var(--ds-color-text-subtle);
+    background: var(--vectis-color-surface-muted);
+    color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
   .ds-input[data-disabled] .ds-input-label,
   .ds-input[data-disabled] .ds-input-hint,
   .ds-input[data-disabled] .ds-input-counter {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
   }
 
   .ds-input[data-disabled] .ds-input-action,

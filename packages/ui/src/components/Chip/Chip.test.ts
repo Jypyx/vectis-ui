@@ -168,7 +168,7 @@ describe('Chip', () => {
     expect(action.classList.contains('extra')).toBe(false)
   })
 
-  it('data-attributes par défaut, couleur custom en --_custom inline', () => {
+  it('data-attributes par défaut, couleur custom en --custom-color inline', () => {
     const { container, rerender } = render(Chip, { slots: { default: 'Tag' } })
     const root = container.querySelector('.ds-chip') as HTMLElement
     expect(root.getAttribute('data-variant')).toBe('tonal')
@@ -179,7 +179,7 @@ describe('Chip', () => {
       expect(root.getAttribute('data-variant')).toBe('solid')
       expect(root.getAttribute('data-shape')).toBe('pill')
       expect(root.hasAttribute('data-custom')).toBe(true)
-      expect(root.style.getPropertyValue('--_custom')).toBe('hotpink')
+      expect(root.style.getPropertyValue('--custom-color')).toBe('hotpink')
     })
   })
 

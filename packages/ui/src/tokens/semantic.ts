@@ -143,7 +143,7 @@ export const semantic = {
       leading: dimension('{font.leading.normal}'),
     },
     /* Rôle technique : étiquette de contrôle interactif (Button, Chip, Badge…).
-     * Pas de `size` : elle vient de l'échelle de tailles (`--_control-font-size`). */
+     * Pas de `size` : elle vient de l'échelle de tailles (`--control-font-size`). */
     control: {
       weight: fontWeight('{font.weight.medium}'),
       leading: dimension('{font.leading.none}'),

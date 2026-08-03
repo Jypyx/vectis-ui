@@ -98,7 +98,7 @@ export const Vertical: Story = {
           v-bind="args"
           orientation="vertical"
           v-model="value"
-          style="--ds-control-size-slider-length: 16rem"
+          style="--vectis-control-size-slider-length: 16rem"
         />
       </div>
     `,

@@ -18,8 +18,8 @@ au besoin.
 ## Tailles
 
 Échelle partagée `xs`/`sm`/`md`/`lg`/`xl` (24 → 56px) via la classe `ds-control` — la même
-que `Button`, `Input`, etc. Le disque est carré (`--_control-height`), les initiales suivent
-la typo tokenisée du contrôle (`--_control-font-size`).
+que `Button`, `Input`, etc. Le disque est carré (`--control-height`), les initiales suivent
+la typo tokenisée du contrôle (`--control-font-size`).
 
 <Canvas of={AvatarStories.Tailles} />
 
@@ -57,7 +57,7 @@ Si l'image est cassée, le repli initiales prend le relais sans intervention :
 
 À défaut d'image ou de couleur custom, une **teinte OKLCH déterministe** est dérivée du `name`
 (hash pur JS, donc SSR-safe) : chaque personne obtient une couleur stable et distincte. Seule
-la teinte est posée en ligne (`--_hue`, scalaire) ; le CSS compose fond et texte avec des
+la teinte est posée en ligne (`--avatar-hue`, scalaire) ; le CSS compose fond et texte avec des
 clartés/chromas fixés **par thème**, donc l'adaptation clair/sombre se fait sans dépendre de
 `contrast-color()`.
 

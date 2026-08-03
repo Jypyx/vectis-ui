@@ -34,7 +34,7 @@ handler `input` couvre saisie et collage, aucun événement `paste` dédié :
 ## Tailles
 
 Trois tailles (`sm` 32px, `md` 40px — défaut —, `lg` 48px, via les tokens
-`--ds-control-height-*`) ; comme pour `Input`, les extrêmes de l'échelle du DS (`xs`, `xl`)
+`--vectis-control-height-*`) ; comme pour `Input`, les extrêmes de l'échelle du DS (`xs`, `xl`)
 ne sont pas exposées.
 Les cases sont carrées : la largeur suit la hauteur, la typographie et les icônes de
 séparateur s'ajustent avec. `compact` réduit la hauteur (et donc la largeur) de 4px sans
@@ -72,7 +72,7 @@ Un préfixe textuel (`GT-###`) est rendu comme littéraux ; coller `GT-123` ne g
 
 `separator-icon` (nom d'icône ou rendu explicite) remplace **tous** les littéraux du pattern par une
 icône — réservé aux gabarits purement séparateurs (`####-####`), ne pas le combiner avec
-un préfixe textuel. L'icône suit la taille du composant via le contexte `--ds-icon-size`
+un préfixe textuel. L'icône suit la taille du composant via le contexte `--vectis-icon-size`
 et hérite sa couleur (currentcolor) :
 
 <Canvas of={InputOTPStories.SeparateurIcone} />
@@ -85,7 +85,7 @@ La prop `invalid` force l'état d'erreur (validation serveur) — bordures rouge
 <Canvas of={InputOTPStories.Invalide} />
 
 `disabled` bascule les cases et les littéraux sur des nuances de gris
-(`--ds-color-surface-muted`, `--ds-color-text-subtle`) — pas de jeu d'opacité, et le rendu
+(`--vectis-color-surface-muted`, `--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu
 suit automatiquement le thème dark :
 
 <Canvas of={InputOTPStories.Disabled} />

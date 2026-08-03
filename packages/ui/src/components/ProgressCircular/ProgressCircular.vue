@@ -84,10 +84,10 @@ const { clamped, fraction } = useProgressValue(
     aria-valuemin="0"
     :aria-valuemax="max"
     :style="{
-      '--_f': String(fraction),
-      '--_custom': color,
-      '--_diameter': px(size),
-      '--_thickness': px(thickness),
+      '--fill-fraction': String(fraction),
+      '--custom-color': color,
+      '--progress-diameter': px(size),
+      '--progress-thickness': px(thickness),
     }"
   >
     <svg class="ds-progress-circular-svg" aria-hidden="true">
@@ -107,11 +107,11 @@ const { clamped, fraction } = useProgressValue(
   /* Les custom properties de dimension sont déclarées sur la racine : le style
      inline posé par les props gagne ainsi systématiquement. */
   .ds-progress-circular {
-    --_diameter: var(--ds-control-size-progress-circular-diameter);
-    --_thickness: var(--ds-control-size-progress-circular-thickness);
+    --progress-diameter: var(--vectis-control-size-progress-circular-diameter);
+    --progress-thickness: var(--vectis-control-size-progress-circular-thickness);
     display: inline-grid;
-    inline-size: var(--_diameter);
-    block-size: var(--_diameter);
+    inline-size: var(--progress-diameter);
+    block-size: var(--progress-diameter);
     vertical-align: middle;
   }
 
@@ -140,25 +140,25 @@ const { clamped, fraction } = useProgressValue(
      s'y exposer puisque le diamètre est toujours une longueur). */
   .ds-progress-circular-track,
   .ds-progress-circular-bar {
-    cx: calc(var(--_diameter) / 2);
-    cy: calc(var(--_diameter) / 2);
+    cx: calc(var(--progress-diameter) / 2);
+    cy: calc(var(--progress-diameter) / 2);
     /* max(0px, …) : une épaisseur ≥ diamètre donnerait un rayon négatif, qui
        est une erreur SVG (élément non rendu) — on dégrade sur un rayon nul. */
-    r: max(0px, calc((var(--_diameter) - var(--_thickness)) / 2));
+    r: max(0px, calc((var(--progress-diameter) - var(--progress-thickness)) / 2));
     fill: none;
-    stroke-width: var(--_thickness);
+    stroke-width: var(--progress-thickness);
   }
 
   .ds-progress-circular-track {
-    stroke: var(--_track);
+    stroke: var(--progress-track);
   }
 
   .ds-progress-circular-bar {
-    stroke: var(--_fill);
+    stroke: var(--progress-fill);
     stroke-linecap: round;
     stroke-dasharray: 100;
-    stroke-dashoffset: calc(100 - 100 * var(--_f));
-    transition: stroke-dashoffset var(--ds-duration-base) var(--ds-ease-default);
+    stroke-dashoffset: calc(100 - 100 * var(--fill-fraction));
+    transition: stroke-dashoffset var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   .ds-progress-circular[data-shape='square'] .ds-progress-circular-bar {
@@ -168,35 +168,35 @@ const { clamped, fraction } = useProgressValue(
   /* Pas de couleur de repli du texte : le label est dans le trou du donut, sur
      le fond de page, donc en couleur de texte courante. */
   .ds-progress-circular[data-tone='accent'] {
-    --_fill: var(--ds-color-accent);
-    --_track: var(--ds-color-accent-surface);
+    --progress-fill: var(--vectis-color-accent);
+    --progress-track: var(--vectis-color-accent-surface);
   }
 
   .ds-progress-circular[data-tone='success'] {
-    --_fill: var(--ds-color-success);
-    --_track: var(--ds-color-success-surface);
+    --progress-fill: var(--vectis-color-success);
+    --progress-track: var(--vectis-color-success-surface);
   }
 
   .ds-progress-circular[data-tone='danger'] {
-    --_fill: var(--ds-color-danger);
-    --_track: var(--ds-color-danger-surface);
+    --progress-fill: var(--vectis-color-danger);
+    --progress-track: var(--vectis-color-danger-surface);
   }
 
   .ds-progress-circular[data-tone='warning'] {
-    --_fill: var(--ds-color-warning);
-    --_track: var(--ds-color-warning-surface);
+    --progress-fill: var(--vectis-color-warning);
+    --progress-track: var(--vectis-color-warning-surface);
   }
 
   /* Neutral : inversion text/surface. */
   .ds-progress-circular[data-tone='neutral'] {
-    --_fill: var(--ds-color-text);
-    --_track: var(--ds-color-surface-muted);
+    --progress-fill: var(--vectis-color-text);
+    --progress-track: var(--vectis-color-surface-muted);
   }
 
   /* Après les tones : même spécificité, le dernier gagne. */
   .ds-progress-circular[data-custom] {
-    --_fill: var(--_custom);
-    --_track: color-mix(in oklab, var(--_custom), var(--ds-color-surface) 85%);
+    --progress-fill: var(--custom-color);
+    --progress-track: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
   }
 
   .ds-progress-circular-label {
@@ -207,14 +207,14 @@ const { clamped, fraction } = useProgressValue(
        ci-dessous empêche l'étirement par défaut, et un `stretch` inapplicable
        retombe sur `start` — sans ce place-self, le label serait collé au bord. */
     place-self: center;
-    max-inline-size: calc(var(--_diameter) - var(--_thickness) * 2);
-    color: var(--ds-color-text);
-    font-family: var(--ds-text-family);
+    max-inline-size: calc(var(--progress-diameter) - var(--progress-thickness) * 2);
+    color: var(--vectis-color-text);
+    font-family: var(--vectis-text-family);
     /* ratio proportionnel au diamètre (tolérance déjà admise pour l'épaisseur
        du Spinner), avec plancher au token le plus petit */
-    font-size: max(var(--ds-text-caption-size), calc(var(--_diameter) / 4));
-    font-weight: var(--ds-text-control-weight);
-    line-height: var(--ds-text-control-leading);
+    font-size: max(var(--vectis-text-caption-size), calc(var(--progress-diameter) / 4));
+    font-weight: var(--vectis-text-control-weight);
+    line-height: var(--vectis-text-control-leading);
     text-align: center;
   }
 
@@ -222,12 +222,12 @@ const { clamped, fraction } = useProgressValue(
      volontairement différentes (×4 et ×5) — un rapport entier donnerait un
      battement mécanique. */
   .ds-progress-circular[data-indeterminate] .ds-progress-circular-svg {
-    animation: ds-spin calc(var(--ds-duration-slow) * 4) linear infinite;
+    animation: ds-spin calc(var(--vectis-duration-slow) * 4) linear infinite;
   }
 
   .ds-progress-circular[data-indeterminate] .ds-progress-circular-bar {
-    animation: ds-progress-circular-dash calc(var(--ds-duration-slow) * 5) var(--ds-ease-default)
-      infinite;
+    animation: ds-progress-circular-dash calc(var(--vectis-duration-slow) * 5)
+      var(--vectis-ease-default) infinite;
     transition: none;
   }
 
@@ -260,11 +260,11 @@ const { clamped, fraction } = useProgressValue(
 
     /* Un loader immobile perdrait sa fonction : ralentir, pas supprimer. */
     .ds-progress-circular[data-indeterminate] .ds-progress-circular-svg {
-      animation-duration: calc(var(--ds-duration-slow) * 12);
+      animation-duration: calc(var(--vectis-duration-slow) * 12);
     }
 
     .ds-progress-circular[data-indeterminate] .ds-progress-circular-bar {
-      animation-duration: calc(var(--ds-duration-slow) * 15);
+      animation-duration: calc(var(--vectis-duration-slow) * 15);
     }
   }
 }

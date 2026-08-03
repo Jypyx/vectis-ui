@@ -84,7 +84,7 @@ export const Tones: Story = {
     template: `
       <div style="display: flex; flex-direction: column; gap: 8px">
         <template v-for="tone in tones" :key="tone">
-          <div v-if="tone === 'on-inverse'" style="background: var(--ds-color-surface-inverse); border-radius: var(--ds-radius-surface); padding: 8px 12px; align-self: flex-start">
+          <div v-if="tone === 'on-inverse'" style="background: var(--vectis-color-surface-inverse); border-radius: var(--vectis-radius-surface); padding: 8px 12px; align-self: flex-start">
             <Typography :tone="tone">on-inverse — sur surface inversée</Typography>
           </div>
           <Typography v-else :tone="tone">{{ tone }} — Portez ce vieux whisky au juge blond</Typography>
@@ -117,7 +117,7 @@ export const Truncate: Story = {
   render: () => ({
     components: { Typography },
     template: `
-      <div style="width: 240px; border: 1px dashed var(--ds-color-border); border-radius: var(--ds-radius-surface); padding: 12px">
+      <div style="width: 240px; border: 1px dashed var(--vectis-color-border); border-radius: var(--vectis-radius-surface); padding: 12px">
         <Typography truncate>
           Un texte volontairement trop long pour la largeur de son conteneur,
           coupé net avec une ellipse.

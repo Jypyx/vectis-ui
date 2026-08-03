@@ -115,9 +115,9 @@ export function distanceFraction(dx: number, dy: number, radius: number): number
 /**
  * Fraction de rayon sous laquelle un pointeur vise l'anneau INTÉRIEUR (24 h) :
  * mi-chemin entre les centres des deux anneaux de chiffres. Dérivé des tokens
- * `--ds-control-size-timepicker-dial` (16rem → R = 128px) et `-number`
+ * `--vectis-control-size-timepicker-dial` (16rem → R = 128px) et `-number`
  * (3rem → 48px) : ((128 − 24) + (128 − 72)) / 2 / 128 = 0.625 — à garder en
- * phase avec les `--_r` du CSS de TimePickerDial.vue.
+ * phase avec les `--dial-radius` du CSS de TimePickerDial.vue.
  */
 export const DIAL_INNER_THRESHOLD = 0.625
 

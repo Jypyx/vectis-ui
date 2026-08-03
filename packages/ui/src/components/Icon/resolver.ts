@@ -51,7 +51,7 @@ export function resolveIcon(name: string, ctx: IconContext): IconRender | undefi
  * Police à LIGATURES : Material Symbols (toutes variantes), build IcoMoon à
  * ligatures. Répond à tous les noms — c'est aussi la façon de rendre les icônes
  * du DS avec la police plutôt qu'avec les SVG intégrés, et donc de retrouver
- * l'axe optique `--ds-icon-opsz`, que le registre (dessiné à opsz 24) ignore.
+ * l'axe optique `--vectis-icon-opsz`, que le registre (dessiné à opsz 24) ignore.
  */
 export function ligatureIconResolver(options: { aliases?: IconAliases } = {}): IconResolver {
   const { aliases } = options

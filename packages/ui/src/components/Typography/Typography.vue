@@ -2,7 +2,7 @@
 /**
  * Élément de texte du design system : `variant` sélectionne une recette
  * typographique complète (famille, taille, graisse, interlignage, tracking)
- * issue des tokens sémantiques `--ds-text-*`, `tone` une couleur sémantique.
+ * issue des tokens sémantiques `--vectis-text-*`, `tone` une couleur sémantique.
  * 100 % HTML/CSS — le seul JS est la dérivation de la balise par défaut.
  *
  * La racine est unique : les attributs natifs (id, for, aria-*…) tombent
@@ -30,7 +30,7 @@ export type TypographyTone =
   'default' | 'muted' | 'subtle' | 'accent' | 'danger' | 'success' | 'warning' | 'on-inverse'
 
 interface TypographyProps {
-  /** Rôle typographique — une recette complète de tokens `--ds-text-*`. */
+  /** Rôle typographique — une recette complète de tokens `--vectis-text-*`. */
   variant?: TypographyVariant
   /** Balise rendue ; par défaut dérivée de la variante (h1…h4, p, span, code). */
   as?: string
@@ -92,136 +92,136 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
   .ds-typography {
     /* Défauts re-posés sur chaque instance : les custom properties héritent,
        sans quoi un Typography imbriqué sous une variante à tracking (display,
-       headings) ou sous `code` hériterait de --_tracking / --_family. Les
+       headings) ou sous `code` hériterait de --typography-tracking / --typography-family. Les
        blocs [data-variant] (spécificité supérieure) les surchargent. */
-    --_family: var(--ds-text-family);
-    --_tracking: normal;
+    --typography-family: var(--vectis-text-family);
+    --typography-tracking: normal;
 
     margin: 0; /* aucune marge : l'espacement appartient au layout parent */
-    font-family: var(--_family);
-    font-size: var(--_size);
-    font-weight: var(--_weight);
-    line-height: var(--_leading);
-    letter-spacing: var(--_tracking);
+    font-family: var(--typography-family);
+    font-size: var(--typography-size);
+    font-weight: var(--typography-weight);
+    line-height: var(--typography-leading);
+    letter-spacing: var(--typography-tracking);
     /* Tone `default` = héritage : composable dans les contextes déjà colorés
        (surface inversée, tones de Toast…). */
-    color: var(--_color, inherit);
+    color: var(--typography-color, inherit);
     overflow-wrap: break-word;
   }
 
   .ds-typography[data-variant='display'] {
-    --_size: var(--ds-text-display-size);
-    --_weight: var(--ds-text-display-weight);
-    --_leading: var(--ds-text-display-leading);
-    --_tracking: var(--ds-text-display-tracking);
+    --typography-size: var(--vectis-text-display-size);
+    --typography-weight: var(--vectis-text-display-weight);
+    --typography-leading: var(--vectis-text-display-leading);
+    --typography-tracking: var(--vectis-text-display-tracking);
   }
 
   .ds-typography[data-variant='heading-1'] {
-    --_size: var(--ds-text-heading-1-size);
-    --_weight: var(--ds-text-heading-1-weight);
-    --_leading: var(--ds-text-heading-1-leading);
-    --_tracking: var(--ds-text-heading-1-tracking);
+    --typography-size: var(--vectis-text-heading-1-size);
+    --typography-weight: var(--vectis-text-heading-1-weight);
+    --typography-leading: var(--vectis-text-heading-1-leading);
+    --typography-tracking: var(--vectis-text-heading-1-tracking);
   }
 
   .ds-typography[data-variant='heading-2'] {
-    --_size: var(--ds-text-heading-2-size);
-    --_weight: var(--ds-text-heading-2-weight);
-    --_leading: var(--ds-text-heading-2-leading);
-    --_tracking: var(--ds-text-heading-2-tracking);
+    --typography-size: var(--vectis-text-heading-2-size);
+    --typography-weight: var(--vectis-text-heading-2-weight);
+    --typography-leading: var(--vectis-text-heading-2-leading);
+    --typography-tracking: var(--vectis-text-heading-2-tracking);
   }
 
   .ds-typography[data-variant='heading-3'] {
-    --_size: var(--ds-text-heading-3-size);
-    --_weight: var(--ds-text-heading-3-weight);
-    --_leading: var(--ds-text-heading-3-leading);
+    --typography-size: var(--vectis-text-heading-3-size);
+    --typography-weight: var(--vectis-text-heading-3-weight);
+    --typography-leading: var(--vectis-text-heading-3-leading);
   }
 
   .ds-typography[data-variant='heading-4'] {
-    --_size: var(--ds-text-heading-4-size);
-    --_weight: var(--ds-text-heading-4-weight);
-    --_leading: var(--ds-text-heading-4-leading);
+    --typography-size: var(--vectis-text-heading-4-size);
+    --typography-weight: var(--vectis-text-heading-4-weight);
+    --typography-leading: var(--vectis-text-heading-4-leading);
   }
 
   .ds-typography[data-variant='subtitle'] {
-    --_size: var(--ds-text-subtitle-size);
-    --_weight: var(--ds-text-subtitle-weight);
-    --_leading: var(--ds-text-subtitle-leading);
+    --typography-size: var(--vectis-text-subtitle-size);
+    --typography-weight: var(--vectis-text-subtitle-weight);
+    --typography-leading: var(--vectis-text-subtitle-leading);
   }
 
   .ds-typography[data-variant='body-lg'] {
-    --_size: var(--ds-text-body-lg-size);
-    --_weight: var(--ds-text-body-lg-weight);
-    --_leading: var(--ds-text-body-lg-leading);
+    --typography-size: var(--vectis-text-body-lg-size);
+    --typography-weight: var(--vectis-text-body-lg-weight);
+    --typography-leading: var(--vectis-text-body-lg-leading);
   }
 
   .ds-typography[data-variant='body-md'] {
-    --_size: var(--ds-text-body-md-size);
-    --_weight: var(--ds-text-body-md-weight);
-    --_leading: var(--ds-text-body-md-leading);
+    --typography-size: var(--vectis-text-body-md-size);
+    --typography-weight: var(--vectis-text-body-md-weight);
+    --typography-leading: var(--vectis-text-body-md-leading);
   }
 
   .ds-typography[data-variant='body-sm'] {
-    --_size: var(--ds-text-body-sm-size);
-    --_weight: var(--ds-text-body-sm-weight);
-    --_leading: var(--ds-text-body-sm-leading);
+    --typography-size: var(--vectis-text-body-sm-size);
+    --typography-weight: var(--vectis-text-body-sm-weight);
+    --typography-leading: var(--vectis-text-body-sm-leading);
   }
 
   .ds-typography[data-variant='label'] {
-    --_size: var(--ds-text-label-size);
-    --_weight: var(--ds-text-label-weight);
-    --_leading: var(--ds-text-label-leading);
+    --typography-size: var(--vectis-text-label-size);
+    --typography-weight: var(--vectis-text-label-weight);
+    --typography-leading: var(--vectis-text-label-leading);
   }
 
   .ds-typography[data-variant='caption'] {
-    --_size: var(--ds-text-caption-size);
-    --_weight: var(--ds-text-caption-weight);
-    --_leading: var(--ds-text-caption-leading);
+    --typography-size: var(--vectis-text-caption-size);
+    --typography-weight: var(--vectis-text-caption-weight);
+    --typography-leading: var(--vectis-text-caption-leading);
   }
 
   .ds-typography[data-variant='overline'] {
-    --_size: var(--ds-text-overline-size);
-    --_weight: var(--ds-text-overline-weight);
-    --_leading: var(--ds-text-overline-leading);
-    --_tracking: var(--ds-text-overline-tracking);
+    --typography-size: var(--vectis-text-overline-size);
+    --typography-weight: var(--vectis-text-overline-weight);
+    --typography-leading: var(--vectis-text-overline-leading);
+    --typography-tracking: var(--vectis-text-overline-tracking);
 
     text-transform: uppercase;
   }
 
   .ds-typography[data-variant='code'] {
-    --_family: var(--ds-text-family-code);
-    --_size: var(--ds-text-code-size);
-    --_weight: var(--ds-text-code-weight);
-    --_leading: var(--ds-text-code-leading);
+    --typography-family: var(--vectis-text-family-code);
+    --typography-size: var(--vectis-text-code-size);
+    --typography-weight: var(--vectis-text-code-weight);
+    --typography-leading: var(--vectis-text-code-leading);
   }
 
-  /* `default` n'a pas de bloc : sans --_color, le texte hérite du contexte —
+  /* `default` n'a pas de bloc : sans --typography-color, le texte hérite du contexte —
      ce qui le rend composable dans une surface inversée ou un Toast teinté. */
   .ds-typography[data-tone='muted'] {
-    --_color: var(--ds-color-text-muted);
+    --typography-color: var(--vectis-color-text-muted);
   }
 
   .ds-typography[data-tone='subtle'] {
-    --_color: var(--ds-color-text-subtle);
+    --typography-color: var(--vectis-color-text-subtle);
   }
 
   .ds-typography[data-tone='accent'] {
-    --_color: var(--ds-color-accent-text);
+    --typography-color: var(--vectis-color-accent-text);
   }
 
   .ds-typography[data-tone='danger'] {
-    --_color: var(--ds-color-danger-text);
+    --typography-color: var(--vectis-color-danger-text);
   }
 
   .ds-typography[data-tone='success'] {
-    --_color: var(--ds-color-success-text);
+    --typography-color: var(--vectis-color-success-text);
   }
 
   .ds-typography[data-tone='warning'] {
-    --_color: var(--ds-color-warning-text);
+    --typography-color: var(--vectis-color-warning-text);
   }
 
   .ds-typography[data-tone='on-inverse'] {
-    --_color: var(--ds-color-text-on-inverse);
+    --typography-color: var(--vectis-color-text-on-inverse);
   }
 
   .ds-typography[data-truncate] {

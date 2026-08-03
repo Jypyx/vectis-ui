@@ -9,7 +9,7 @@ import { avatarGroupKey } from './context'
 /**
  * Empile des Avatar (celui de droite passe par-dessus celui de gauche, via un
  * chevauchement négatif + l'ordre de peinture DOM naturel — aucun JS de
- * positionnement). L'anneau `--_ring-color` sépare visuellement les disques.
+ * positionnement). L'anneau `--avatar-ring-color` sépare visuellement les disques.
  *
  * JS justifié : compter/tronquer les enfants du slot (impossible en HTML/CSS)
  * pour l'agrégat « +X » ; la propagation taille/compact passe par provide.
@@ -79,13 +79,13 @@ const overflowCount = computed(() => items.value.length - visibleItems.value.len
 const VisibleAvatars = () => visibleItems.value
 
 const rootStyle = computed<StyleValue>(() =>
-  props.ringColor !== undefined ? { '--_ring-color': props.ringColor } : undefined,
+  props.ringColor !== undefined ? { '--avatar-ring-color': props.ringColor } : undefined,
 )
 
-// Le groupe porte ds-control pour définir --_control-height à SON niveau : le
+// Le groupe porte ds-control pour définir --control-height à SON niveau : le
 // chevauchement reste calculable même si un enfant est enveloppé (ex. un
 // Tooltip pose un <span> entre le groupe et l'Avatar). Un Avatar de taille
-// propre redéfinit --_control-height sur lui-même → son overlap suit sa taille.
+// propre redéfinit --control-height sur lui-même → son overlap suit sa taille.
 const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? 'md')
 </script>
 
@@ -108,17 +108,17 @@ const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? 'md')
 @layer ds.components {
   .ds-avatar-group {
     /* anneau de séparation hérité par chaque .ds-avatar enfant */
-    --_ring-color: var(--ds-color-surface);
+    --avatar-ring-color: var(--vectis-color-surface);
     display: inline-flex;
     align-items: center;
   }
 
   /* Chevauchement : chaque disque mord sur le précédent ; l'ordre DOM fait que
      le suivant (à droite) peint par-dessus. Cible l'enfant direct quel qu'il
-     soit (Avatar nu OU wrapper d'un Tooltip) → --_control-height vient du
+     soit (Avatar nu OU wrapper d'un Tooltip) → --control-height vient du
      groupe, un Avatar de taille propre l'écrase sur lui-même. Ratio unitless. */
   .ds-avatar-group > * + * {
-    margin-inline-start: calc(var(--_control-height) * -0.3);
+    margin-inline-start: calc(var(--control-height) * -0.3);
   }
 
   /* Au survol/focus, l'élément remonte au-dessus de ses voisins. */

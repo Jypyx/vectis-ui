@@ -6,7 +6,7 @@ Design system **Vue 3 + TypeScript**, compatible **Nuxt 3 (SSR)**, construit sur
 
 - **HTML et CSS d'abord.** Les menus, tooltips et toasts reposent sur la Popover API (`popovertarget`, top-layer, light dismiss natif) et l'anchor positioning CSS — **aucune librairie de positionnement**. Les accordéons sont des `<details name>`. Quand du JS existe, il est justifié par un commentaire dans le composant.
 - **Zéro dépendance runtime** hors `vue` (peer dependency).
-- **Tout le style passe par des design tokens** (`--ds-*`), surchargeables au runtime sans rebuild.
+- **Tout le style passe par des design tokens** (`--vectis-*`), surchargeables au runtime sans rebuild.
 - **Tree-shaking réel** : ESM, un module par composant, imports nommés.
 
 ## Installation
@@ -63,8 +63,8 @@ Pour la locale et les icônes, posez la configuration dans un plugin **universel
 
 Deux niveaux de custom properties, générés depuis une source TypeScript typée (format inspiré du [W3C DTCG](https://design-tokens.github.io/community-group/format/)) :
 
-- **Primitifs** : palettes OKLCH (`--ds-color-indigo-500`), échelles d'espacement (`--ds-space-4`), typo, radii, ombres, durées/easings.
-- **Sémantiques** — les seuls consommés par les composants : `--ds-color-surface`, `--ds-color-text-muted`, `--ds-color-accent`, `--ds-radius-interactive`, `--ds-focus-ring-color`…
+- **Primitifs** : palettes OKLCH (`--vectis-color-indigo-500`), échelles d'espacement (`--vectis-space-4`), typo, radii, ombres, durées/easings.
+- **Sémantiques** — les seuls consommés par les composants : `--vectis-color-surface`, `--vectis-color-text-muted`, `--vectis-color-accent`, `--vectis-radius-interactive`, `--vectis-focus-ring-color`…
 
 ### Dark mode
 
@@ -81,16 +81,16 @@ Toute personnalisation est une redéfinition de custom properties, en CSS :
 ```css
 /* charte "corail" : accent + arrondis pilule */
 :root {
-  --ds-color-accent: oklch(58% 0.2 25);
-  --ds-color-accent-hover: oklch(51% 0.19 25);
-  --ds-radius-interactive: 9999px;
+  --vectis-color-accent: oklch(58% 0.2 25);
+  --vectis-color-accent-hover: oklch(51% 0.19 25);
+  --vectis-radius-interactive: 9999px;
 }
 ```
 
 …ou en JavaScript, y compris sur un sous-arbre :
 
 ```ts
-panel.style.setProperty('--ds-color-accent', 'oklch(58% 0.2 25)')
+panel.style.setProperty('--vectis-color-accent', 'oklch(58% 0.2 25)')
 ```
 
 Le CSS du DS vit dans des layers (`ds.reset < ds.tokens < ds.components < ds.utilities`) : **tout style consommateur non-layerisé gagne automatiquement** — surcharger un composant ne demande jamais de guerre de spécificité.
@@ -100,7 +100,7 @@ Le CSS du DS vit dans des layers (`ds.reset < ds.tokens < ds.components < ds.uti
 ```ts
 import { tokens, flattenTokens } from '@vectis/ui/tokens'
 
-// [{ path: ['color', 'surface'], cssName: '--ds-color-surface', token: {...} }, …]
+// [{ path: ['color', 'surface'], cssName: '--vectis-color-surface', token: {...} }, …]
 const semanticColors = flattenTokens(tokens.semantic.color, ['color'])
 ```
 
@@ -125,8 +125,8 @@ Le composant `Icon` résout sa source dans cet ordre : **`render` explicite → 
 
 - **Décorative par défaut** (`aria-hidden`) ; la prop `label` la rend informative (`role="img"` + `aria-label`).
 - L'attribut **`data-icon`** porte le nom demandé quelle que soit la source — accroche stable pour du CSS consommateur et pour les tests.
-- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--ds-icon-size`** et **`--ds-icon-opsz`** (c'est ce que fait la classe partagée `ds-control` — Button, Input, Textarea, InputOTP, Chip… — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `Spinner` suit le même principe (1em + `:size` en px), sans API de contexte.
-- **`--ds-icon-opsz` ne s'applique qu'à la ligature** : c'est un axe variable de police, sans prise sur un SVG intégré, une image ou un composant tiers. La taille, elle, vaut pour toutes les sources.
+- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--vectis-icon-size`** et **`--vectis-icon-opsz`** (c'est ce que fait la classe partagée `ds-control` — Button, Input, Textarea, InputOTP, Chip… — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `Spinner` suit le même principe (1em + `:size` en px), sans API de contexte.
+- **`--vectis-icon-opsz` ne s'applique qu'à la ligature** : c'est un axe variable de police, sans prise sur un SVG intégré, une image ou un composant tiers. La taille, elle, vaut pour toutes les sources.
 
 ### Toute prop d'icône accepte un nom **ou** un rendu explicite
 
@@ -170,7 +170,7 @@ setIconResolver(
 )
 
 // Material Symbols, IcoMoon à ligatures… — rend AUSSI les 20 icônes du DS via
-// la police, ce qui restitue l'axe optique --ds-icon-opsz (20 en xs/sm/md).
+// la police, ce qui restitue l'axe optique --vectis-icon-opsz (20 en xs/sm/md).
 import { ligatureIconResolver } from '@vectis/ui'
 setIconResolver(ligatureIconResolver())
 ```
@@ -192,7 +192,7 @@ Pour un besoin ponctuel, `setIconResolver` accepte n'importe quelle fonction ren
 />
 ```
 
-(ou en self-host du woff2 variable, ex. paquet npm `material-symbols`). `display=block` évite le flash du nom d'icône en toutes lettres. Sans police chargée, la mise en page est préservée (le nom textuel est contenu dans le carré de l'icône). Surcharger le token `--ds-font-family-icon` suffit pour basculer sur une autre police **à ligatures** (Material Symbols Outlined/Sharp, build IcoMoon) — sans résolveur.
+(ou en self-host du woff2 variable, ex. paquet npm `material-symbols`). `display=block` évite le flash du nom d'icône en toutes lettres. Sans police chargée, la mise en page est préservée (le nom textuel est contenu dans le carré de l'icône). Surcharger le token `--vectis-font-family-icon` suffit pour basculer sur une autre police **à ligatures** (Material Symbols Outlined/Sharp, build IcoMoon) — sans résolveur.
 
 Sur `Button` : les props `icon-start` / `icon-end` prennent un nom d'icône ou un rendu explicite (les slots `#start`/`#end` restent disponibles pour du contenu custom et priment sur les props). `Button` accepte aussi `href` (rendu `<a>` ; `disabled`/`loading` produisent un lien inerte : `href` retiré + `aria-disabled`) et `compact` (hauteur réduite de 4 px : 20/28/36/44/52 px selon la taille `xs`–`xl`).
 

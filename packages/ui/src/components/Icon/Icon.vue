@@ -40,7 +40,7 @@ interface IconProps {
   src?: string
   /**
    * Taille explicite en pixels (ex. :size="32"). Sans elle : taille du
-   * contexte (`--ds-icon-size` posée par un parent, ex. Button), sinon 1em —
+   * contexte (`--vectis-icon-size` posée par un parent, ex. Button), sinon 1em —
    * l'icône suit le texte environnant.
    */
   size?: number
@@ -110,7 +110,7 @@ const resolved = computed<Resolved | undefined>(() => {
 <template>
   <span
     class="ds-icon"
-    :style="size !== undefined ? { '--ds-icon-size': `${size}px` } : undefined"
+    :style="size !== undefined ? { '--vectis-icon-size': `${size}px` } : undefined"
     :data-icon="name"
     :data-filled="filled || undefined"
     :role="label ? 'img' : undefined"
@@ -150,22 +150,22 @@ const resolved = computed<Resolved | undefined>(() => {
   .ds-icon {
     /*
      * Résolution de la taille, par priorité :
-     * 1. prop `size` (px) — posée en --ds-icon-size inline sur l'élément :
+     * 1. prop `size` (px) — posée en --vectis-icon-size inline sur l'élément :
      *    une déclaration propre prime sur l'héritage et sur la layer ;
-     * 2. --ds-icon-size / --ds-icon-opsz héritées d'un parent (API de
+     * 2. --vectis-icon-size / --vectis-icon-opsz héritées d'un parent (API de
      *    contexte : Button les pose selon sa propre taille) ;
      * 3. 1em — l'icône suit la taille de texte du parent.
      */
-    --_size: var(--ds-icon-size, 1em);
-    --_opsz: var(--ds-icon-opsz, 24);
+    --icon-size: var(--vectis-icon-size, 1em);
+    --icon-opsz: var(--vectis-icon-opsz, 24);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex: none;
-    inline-size: var(--_size);
-    block-size: var(--_size);
+    inline-size: var(--icon-size);
+    block-size: var(--icon-size);
     /* la ligature Material Symbols se dimensionne par font-size */
-    font-size: var(--_size);
+    font-size: var(--icon-size);
   }
 
   /* Dégradé si la police n'est pas chargée : le nom textuel reste contenu dans
@@ -177,10 +177,10 @@ const resolved = computed<Resolved | undefined>(() => {
   }
 
   .ds-icon-symbol {
-    font-family: var(--ds-font-family-icon);
-    font-weight: var(--ds-font-weight-regular);
+    font-family: var(--vectis-font-family-icon);
+    font-weight: var(--vectis-font-weight-regular);
     font-style: normal;
-    line-height: var(--ds-font-leading-none);
+    line-height: var(--vectis-font-leading-none);
     letter-spacing: normal;
     text-transform: none;
     white-space: nowrap;
@@ -189,14 +189,14 @@ const resolved = computed<Resolved | undefined>(() => {
        technique de la police, pas des tokens de design — valeurs littérales
        tolérées, comme les opacités */
     font-variation-settings:
-      'FILL' var(--_fill, 0),
+      'FILL' var(--icon-fill, 0),
       'wght' 400,
       'GRAD' 0,
-      'opsz' var(--_opsz);
+      'opsz' var(--icon-opsz);
   }
 
   .ds-icon[data-filled] .ds-icon-symbol {
-    --_fill: 1;
+    --icon-fill: 1;
   }
 
   .ds-icon-img,
@@ -214,7 +214,7 @@ const resolved = computed<Resolved | undefined>(() => {
   .ds-icon-glyph {
     display: block;
     font-style: normal;
-    line-height: var(--ds-font-leading-none);
+    line-height: var(--vectis-font-leading-none);
   }
 
   /* SVG du registre intégré. `fill` est posé sur NOTRE classe et jamais sur

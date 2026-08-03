@@ -201,8 +201,8 @@ function resyncFields() {
     :data-disabled="disabled ? '' : undefined"
     :data-orientation="orientation === 'vertical' ? 'vertical' : undefined"
     :style="{
-      '--_start-f': String(frac(startValue)),
-      '--_end-f': String(frac(endValue)),
+      '--start-fraction': String(frac(startValue)),
+      '--end-fraction': String(frac(endValue)),
     }"
   >
     <Input
@@ -227,7 +227,7 @@ function resyncFields() {
             :key="i"
             class="ds-slider-tick"
             :data-filled="tick.filled ? '' : undefined"
-            :style="{ '--_f': String(tick.f) }"
+            :style="{ '--fill-fraction': String(tick.f) }"
           />
         </span>
         <input
@@ -260,7 +260,7 @@ function resyncFields() {
         v-if="tooltip && range"
         class="ds-slider-tooltip ds-slider-tooltip-start"
         aria-hidden="true"
-        :style="{ '--_f': String(frac(startValue)) }"
+        :style="{ '--fill-fraction': String(frac(startValue)) }"
       >
         <span class="ds-slider-tooltip-bubble">{{ startValueText ?? startValue }}</span>
       </span>
@@ -268,7 +268,7 @@ function resyncFields() {
         v-if="tooltip"
         class="ds-slider-tooltip ds-slider-tooltip-end"
         aria-hidden="true"
-        :style="{ '--_f': String(frac(endValue)) }"
+        :style="{ '--fill-fraction': String(frac(endValue)) }"
       >
         <span class="ds-slider-tooltip-bubble">{{ endValueText ?? endValue }}</span>
       </span>
@@ -278,7 +278,7 @@ function resyncFields() {
         v-for="(item, i) in labels"
         :key="i"
         class="ds-slider-label"
-        :style="{ '--_f': String(labelFraction(i)) }"
+        :style="{ '--fill-fraction': String(labelFraction(i)) }"
       >
         <template v-if="typeof item === 'string'">{{ item }}</template>
         <Icon v-else v-bind="iconProps(item.icon)" :label="item.label" />
@@ -303,17 +303,17 @@ function resyncFields() {
 <style>
 @layer ds.components {
   .ds-slider {
-    --_thumb: var(--ds-control-size-slider-thumb);
-    --_track: var(--ds-control-size-slider-track);
+    --slider-thumb: var(--vectis-control-size-slider-thumb);
+    --slider-track: var(--vectis-control-size-slider-track);
     /* Position du centre du thumb pour une fraction f (course insetée de ½ thumb). */
     display: grid;
     grid-template-areas: 'rail';
     grid-template-columns: minmax(0, 1fr);
     align-items: center;
-    column-gap: var(--ds-space-2);
-    row-gap: var(--ds-space-1);
+    column-gap: var(--vectis-space-2);
+    row-gap: var(--vectis-space-1);
     width: 100%;
-    font-family: var(--ds-text-family);
+    font-family: var(--vectis-text-family);
   }
 
   .ds-slider:has(.ds-slider-labels) {
@@ -341,7 +341,7 @@ function resyncFields() {
   .ds-slider-rail {
     grid-area: rail;
     position: relative;
-    block-size: var(--_thumb);
+    block-size: var(--slider-thumb);
   }
 
   .ds-slider-control {
@@ -354,9 +354,9 @@ function resyncFields() {
     inset-inline: 0;
     inset-block: 0;
     margin-block: auto;
-    block-size: var(--_track);
-    border-radius: var(--ds-radius-full);
-    background: var(--ds-color-border);
+    block-size: var(--slider-track);
+    border-radius: var(--vectis-radius-full);
+    background: var(--vectis-color-border);
     overflow: hidden;
   }
 
@@ -364,31 +364,34 @@ function resyncFields() {
     position: absolute;
     inset-block: 0;
     inset-inline-start: 0;
-    inline-size: calc(var(--_thumb) / 2 + (100% - var(--_thumb)) * var(--_end-f));
-    background: var(--ds-color-accent);
+    inline-size: calc(var(--slider-thumb) / 2 + (100% - var(--slider-thumb)) * var(--end-fraction));
+    background: var(--vectis-color-accent);
   }
 
   .ds-slider[data-range] .ds-slider-fill {
-    inset-inline-start: calc(var(--_thumb) / 2 + (100% - var(--_thumb)) * var(--_start-f));
-    inline-size: calc((100% - var(--_thumb)) * (var(--_end-f) - var(--_start-f)));
+    inset-inline-start: calc(
+      var(--slider-thumb) / 2 + (100% - var(--slider-thumb)) * var(--start-fraction)
+    );
+    inline-size: calc((100% - var(--slider-thumb)) * (var(--end-fraction) - var(--start-fraction)));
   }
 
   .ds-slider-tick {
-    --_tick: calc(var(--_track) / 3 * 2);
+    --slider-tick: calc(var(--slider-track) / 3 * 2);
     position: absolute;
     inset-block: 0;
     margin-block: auto;
     inset-inline-start: calc(
-      var(--_thumb) / 2 + (100% - var(--_thumb)) * var(--_f) - var(--_tick) / 2
+      var(--slider-thumb) / 2 + (100% - var(--slider-thumb)) * var(--fill-fraction) -
+        var(--slider-tick) / 2
     );
-    inline-size: var(--_tick);
-    block-size: var(--_tick);
-    border-radius: var(--ds-radius-full);
-    background: var(--ds-color-border-strong);
+    inline-size: var(--slider-tick);
+    block-size: var(--slider-tick);
+    border-radius: var(--vectis-radius-full);
+    background: var(--vectis-color-border-strong);
   }
 
   .ds-slider-tick[data-filled] {
-    background: var(--ds-color-text-on-accent);
+    background: var(--vectis-color-text-on-accent);
   }
 
   /* Les inputs se superposent ; seuls leurs pouces captent le pointeur
@@ -415,38 +418,38 @@ function resyncFields() {
   .ds-slider-input::-webkit-slider-thumb {
     appearance: none;
     pointer-events: auto;
-    width: var(--_thumb);
-    height: var(--_thumb);
-    border-radius: var(--ds-radius-full);
-    background: var(--ds-color-surface);
-    border: var(--ds-control-border-width) solid var(--ds-color-accent);
-    box-shadow: var(--ds-shadow-1);
+    width: var(--slider-thumb);
+    height: var(--slider-thumb);
+    border-radius: var(--vectis-radius-full);
+    background: var(--vectis-color-surface);
+    border: var(--vectis-control-border-width) solid var(--vectis-color-accent);
+    box-shadow: var(--vectis-shadow-1);
     cursor: pointer;
-    transition: background-color var(--ds-duration-fast) var(--ds-ease-default);
+    transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-slider-input::-moz-range-thumb {
     pointer-events: auto;
-    width: var(--_thumb);
-    height: var(--_thumb);
-    border-radius: var(--ds-radius-full);
-    background: var(--ds-color-surface);
-    border: var(--ds-control-border-width) solid var(--ds-color-accent);
-    box-shadow: var(--ds-shadow-1);
+    width: var(--slider-thumb);
+    height: var(--slider-thumb);
+    border-radius: var(--vectis-radius-full);
+    background: var(--vectis-color-surface);
+    border: var(--vectis-control-border-width) solid var(--vectis-color-accent);
+    box-shadow: var(--vectis-shadow-1);
     cursor: pointer;
-    transition: background-color var(--ds-duration-fast) var(--ds-ease-default);
+    transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   /* Hover/drag : fond teinté du thumb. États posés sur l'input host — les
      pseudo-classes chaînées après le pseudo-thumb sont peu fiables. */
   .ds-slider-input:hover:not(:disabled)::-webkit-slider-thumb,
   .ds-slider-input:active:not(:disabled)::-webkit-slider-thumb {
-    background: var(--ds-color-accent-surface);
+    background: var(--vectis-color-accent-surface);
   }
 
   .ds-slider-input:hover:not(:disabled)::-moz-range-thumb,
   .ds-slider-input:active:not(:disabled)::-moz-range-thumb {
-    background: var(--ds-color-accent-surface);
+    background: var(--vectis-color-accent-surface);
   }
 
   .ds-slider-input:focus-visible {
@@ -454,29 +457,31 @@ function resyncFields() {
   }
 
   .ds-slider-input:focus-visible::-webkit-slider-thumb {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   .ds-slider-input:focus-visible::-moz-range-thumb {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   /* --- Tooltip de valeur : apparence du Tooltip, mais position par fraction —
      le thumb natif est un pseudo-élément, non ancrable en anchor positioning. */
   .ds-slider-tooltip {
     position: absolute;
-    inset-block-end: calc(100% + var(--ds-space-2));
-    inset-inline-start: calc(var(--_thumb) / 2 + (100% - var(--_thumb)) * var(--_f));
+    inset-block-end: calc(100% + var(--vectis-space-2));
+    inset-inline-start: calc(
+      var(--slider-thumb) / 2 + (100% - var(--slider-thumb)) * var(--fill-fraction)
+    );
     inline-size: 0;
     display: flex;
     justify-content: center;
     opacity: 0;
     visibility: hidden;
     transition:
-      opacity var(--ds-duration-fast) var(--ds-ease-default),
-      visibility var(--ds-duration-fast) var(--ds-ease-default);
+      opacity var(--vectis-duration-fast) var(--vectis-ease-default),
+      visibility var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-slider:has(.ds-slider-input-start:active) .ds-slider-tooltip-start,
@@ -488,13 +493,13 @@ function resyncFields() {
   }
 
   .ds-slider-tooltip-bubble {
-    padding: var(--ds-space-1) var(--ds-space-2);
-    background: var(--ds-color-surface-inverse);
-    color: var(--ds-color-text-on-inverse);
-    font-size: var(--ds-text-caption-size);
-    line-height: var(--ds-text-caption-leading);
-    border-radius: var(--ds-radius-sm);
-    box-shadow: var(--ds-shadow-2);
+    padding: var(--vectis-space-1) var(--vectis-space-2);
+    background: var(--vectis-color-surface-inverse);
+    color: var(--vectis-color-text-on-inverse);
+    font-size: var(--vectis-text-caption-size);
+    line-height: var(--vectis-text-caption-leading);
+    border-radius: var(--vectis-radius-sm);
+    box-shadow: var(--vectis-shadow-2);
     white-space: nowrap;
   }
 
@@ -503,10 +508,10 @@ function resyncFields() {
     grid-area: labels;
     position: relative;
     /* Enfants absolus : réserve la hauteur (couvre texte xs ET icônes md). */
-    min-block-size: var(--ds-icon-size-md);
-    --ds-icon-size: var(--ds-icon-size-md);
-    font-size: var(--ds-text-caption-size);
-    color: var(--ds-color-text-muted);
+    min-block-size: var(--vectis-icon-size-md);
+    --vectis-icon-size: var(--vectis-icon-size-md);
+    font-size: var(--vectis-text-caption-size);
+    color: var(--vectis-color-text-muted);
   }
 
   /* Boîte de largeur nulle : le contenu déborde symétriquement, donc centré
@@ -514,7 +519,9 @@ function resyncFields() {
   .ds-slider-label {
     position: absolute;
     inset-block-start: 0;
-    inset-inline-start: calc(var(--_thumb) / 2 + (100% - var(--_thumb)) * var(--_f));
+    inset-inline-start: calc(
+      var(--slider-thumb) / 2 + (100% - var(--slider-thumb)) * var(--fill-fraction)
+    );
     inline-size: 0;
     display: flex;
     justify-content: center;
@@ -523,7 +530,7 @@ function resyncFields() {
 
   /* --- Champs numériques -------------------------------------------------- */
   .ds-slider-field.ds-input {
-    inline-size: var(--ds-control-size-slider-field);
+    inline-size: var(--vectis-control-size-slider-field);
   }
 
   .ds-slider-field-start {
@@ -568,8 +575,8 @@ function resyncFields() {
   }
 
   .ds-slider[data-orientation='vertical'] .ds-slider-rail {
-    inline-size: var(--_thumb);
-    block-size: var(--ds-control-size-slider-length);
+    inline-size: var(--slider-thumb);
+    block-size: var(--vectis-control-size-slider-length);
   }
 
   /* Le sous-conteneur porte seul le mode d'écriture : la géométrie logique
@@ -581,9 +588,11 @@ function resyncFields() {
   }
 
   .ds-slider[data-orientation='vertical'] .ds-slider-tooltip {
-    inset-block-end: calc(var(--_thumb) / 2 + (100% - var(--_thumb)) * var(--_f));
+    inset-block-end: calc(
+      var(--slider-thumb) / 2 + (100% - var(--slider-thumb)) * var(--fill-fraction)
+    );
     inset-inline-start: auto;
-    inset-inline-end: calc(100% + var(--ds-space-2));
+    inset-inline-end: calc(100% + var(--vectis-space-2));
     inline-size: auto;
     block-size: 0;
     align-items: center;
@@ -597,7 +606,9 @@ function resyncFields() {
 
   .ds-slider[data-orientation='vertical'] .ds-slider-label {
     inset-block-start: auto;
-    inset-block-end: calc(var(--_thumb) / 2 + (100% - var(--_thumb)) * var(--_f));
+    inset-block-end: calc(
+      var(--slider-thumb) / 2 + (100% - var(--slider-thumb)) * var(--fill-fraction)
+    );
     inset-inline-start: 0;
     inline-size: auto;
     block-size: 0;
@@ -611,24 +622,24 @@ function resyncFields() {
   }
 
   .ds-slider[data-disabled] .ds-slider-track {
-    background: var(--ds-color-surface-muted);
+    background: var(--vectis-color-surface-muted);
   }
 
   .ds-slider[data-disabled] .ds-slider-fill {
-    background: var(--ds-color-text-subtle);
+    background: var(--vectis-color-text-subtle);
   }
 
   .ds-slider[data-disabled] .ds-slider-tick {
-    background: var(--ds-color-text-subtle);
+    background: var(--vectis-color-text-subtle);
   }
 
   /* Sur le fill gris, le tick repasse en clair (la « coche grise » de Checkbox). */
   .ds-slider[data-disabled] .ds-slider-tick[data-filled] {
-    background: var(--ds-color-surface-muted);
+    background: var(--vectis-color-surface-muted);
   }
 
   .ds-slider[data-disabled] .ds-slider-labels {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
   }
 
   .ds-slider[data-disabled] .ds-slider-input {
@@ -636,15 +647,15 @@ function resyncFields() {
   }
 
   .ds-slider[data-disabled] .ds-slider-input::-webkit-slider-thumb {
-    background: var(--ds-color-surface-muted);
-    border-color: var(--ds-color-text-subtle);
+    background: var(--vectis-color-surface-muted);
+    border-color: var(--vectis-color-text-subtle);
     box-shadow: none;
     cursor: not-allowed;
   }
 
   .ds-slider[data-disabled] .ds-slider-input::-moz-range-thumb {
-    background: var(--ds-color-surface-muted);
-    border-color: var(--ds-color-text-subtle);
+    background: var(--vectis-color-surface-muted);
+    border-color: var(--vectis-color-text-subtle);
     box-shadow: none;
     cursor: not-allowed;
   }

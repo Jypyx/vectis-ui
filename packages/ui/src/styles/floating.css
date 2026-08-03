@@ -44,7 +44,7 @@
 
   .ds-floating {
     /* l'écart avec l'ancre ET la marge minimale au bord du viewport */
-    margin: var(--ds-space-2);
+    margin: var(--vectis-space-2);
     position-try-fallbacks: flip-block, flip-inline;
   }
 
@@ -122,7 +122,7 @@
 
   .ds-floating[data-placement^='right-'],
   .ds-floating[data-placement^='left-'] {
-    margin-inline: var(--ds-space-2);
+    margin-inline: var(--vectis-space-2);
   }
 
   .ds-floating:is([data-placement='right-start'], [data-placement='left-start']) {
@@ -138,10 +138,10 @@
     opacity: 0;
     transform: scale(0.97);
     transition:
-      opacity var(--ds-duration-fast) var(--ds-ease-default),
-      transform var(--ds-duration-fast) var(--ds-ease-default),
-      overlay var(--ds-duration-fast) allow-discrete,
-      display var(--ds-duration-fast) allow-discrete;
+      opacity var(--vectis-duration-fast) var(--vectis-ease-default),
+      transform var(--vectis-duration-fast) var(--vectis-ease-default),
+      overlay var(--vectis-duration-fast) allow-discrete,
+      display var(--vectis-duration-fast) allow-discrete;
   }
 
   .ds-floating:popover-open {

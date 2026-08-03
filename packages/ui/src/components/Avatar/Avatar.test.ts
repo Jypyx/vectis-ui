@@ -33,24 +33,24 @@ describe('Avatar', () => {
     expect(queryByText('star')).toBeTruthy()
   })
 
-  it('dérive une teinte auto déterministe du nom (--_hue stable + data-auto)', () => {
+  it('dérive une teinte auto déterministe du nom (--avatar-hue stable + data-auto)', () => {
     const first = render(Avatar, { props: { name: 'Ada Lovelace' } })
     const a = first.container.querySelector('.ds-avatar') as HTMLElement
     expect(a.getAttribute('data-auto')).toBe('')
-    const hueA = a.style.getPropertyValue('--_hue')
+    const hueA = a.style.getPropertyValue('--avatar-hue')
     expect(hueA).not.toBe('')
 
     const second = render(Avatar, { props: { name: 'Ada Lovelace' } })
     const b = second.container.querySelector('.ds-avatar') as HTMLElement
-    expect(b.style.getPropertyValue('--_hue')).toBe(hueA)
+    expect(b.style.getPropertyValue('--avatar-hue')).toBe(hueA)
   })
 
-  it('la couleur custom prime sur la teinte auto (data-custom + --_custom, pas de data-auto)', () => {
+  it('la couleur custom prime sur la teinte auto (data-custom + --custom-color, pas de data-auto)', () => {
     const { container } = render(Avatar, { props: { name: 'Ada Lovelace', color: '#ff0000' } })
     const el = container.querySelector('.ds-avatar') as HTMLElement
     expect(el.getAttribute('data-custom')).toBe('')
     expect(el.getAttribute('data-auto')).toBeNull()
-    expect(el.style.getPropertyValue('--_custom')).toBe('#ff0000')
+    expect(el.style.getPropertyValue('--custom-color')).toBe('#ff0000')
   })
 
   it('cliquable → <button>, avec le nom en aria-label', () => {

@@ -579,20 +579,20 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   .ds-table-wrapper {
     /* Densité : paddings de cellules, réduits d'un cran en compact (modèle
        Accordion — pas d'échelle .ds-control : aucune hauteur de contrôle unique). */
-    --_table-pad-block: var(--ds-space-3);
-    --_table-pad-inline: var(--ds-space-3);
-    --_table-head-pad-block: var(--ds-space-2);
+    --table-pad-block: var(--vectis-space-3);
+    --table-pad-inline: var(--vectis-space-3);
+    --table-head-pad-block: var(--vectis-space-2);
 
     /* Marge intérieure du cadre : nulle à plat (légende, toolbar et footer
        restent à fleur de bord), alignée sur le padding inline des cellules dès
        qu'une variante encadre la table. */
-    --_table-frame-pad: 0px;
+    --table-frame-pad: 0px;
     /* Fond des en-têtes figés : suit celui du cadre — sans quoi la couture
        serait visible en thème sombre (surface ≠ surface-raised). */
-    --_table-surface: var(--ds-color-surface);
+    --table-surface: var(--vectis-color-surface);
 
     container-type: inline-size;
-    font-family: var(--ds-text-family);
+    font-family: var(--vectis-text-family);
 
     /*
      * Colonne toolbar / scroller / footer : le composant prend
@@ -611,20 +611,20 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .ds-table-wrapper[data-compact] {
-    --_table-pad-block: var(--ds-space-2);
-    --_table-pad-inline: var(--ds-space-2);
-    --_table-head-pad-block: var(--ds-space-1);
+    --table-pad-block: var(--vectis-space-2);
+    --table-pad-inline: var(--vectis-space-2);
+    --table-head-pad-block: var(--vectis-space-1);
   }
 
   /* Carte bordée ; `flat` (défaut) n'a rien à annuler, il n'ajoute simplement
      rien — c'est l'hôte qui porte le cadre et la surface. */
   .ds-table-wrapper[data-variant='outlined'] {
-    --_table-frame-pad: var(--_table-pad-inline);
-    --_table-surface: var(--ds-color-surface-raised);
+    --table-frame-pad: var(--table-pad-inline);
+    --table-surface: var(--vectis-color-surface-raised);
 
-    background: var(--_table-surface);
-    border: 1px solid var(--ds-color-border);
-    border-radius: var(--ds-radius-surface);
+    background: var(--table-surface);
+    border: 1px solid var(--vectis-color-border);
+    border-radius: var(--vectis-radius-surface);
     /*
      * Contrepartie du rayon : fonds de lignes (zébrage, sélection), fond
      * opaque de l'en-tête figé et coins carrés du scroller déborderaient
@@ -660,53 +660,53 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--ds-space-3);
-    padding-block-start: var(--_table-frame-pad);
-    padding-block-end: var(--ds-space-3);
-    padding-inline: var(--_table-frame-pad);
+    gap: var(--vectis-space-3);
+    padding-block-start: var(--table-frame-pad);
+    padding-block-end: var(--vectis-space-3);
+    padding-inline: var(--table-frame-pad);
   }
 
   /* Titre : rendu par Typography (heading-4) — la couleur reste explicite,
      la toolbar peut vivre dans un contexte de texte atténué. */
   .ds-table-title {
-    color: var(--ds-color-text);
+    color: var(--vectis-color-text);
   }
 
   /* Surcharge qualifiée (0,2,0) du `.ds-input { width: 100% }` (0,1,0)
      d'Input — indépendante de l'ordre du bundle. */
   .ds-table-toolbar .ds-input {
-    inline-size: var(--ds-control-size-table-search);
+    inline-size: var(--vectis-control-size-table-search);
     max-inline-size: 100%;
   }
 
   .ds-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: var(--ds-text-body-md-size);
-    color: var(--ds-color-text);
+    font-size: var(--vectis-text-body-md-size);
+    color: var(--vectis-color-text);
   }
 
   .ds-table-caption {
-    padding-block-end: var(--ds-space-3);
-    padding-inline: var(--_table-frame-pad);
+    padding-block-end: var(--vectis-space-3);
+    padding-inline: var(--table-frame-pad);
     text-align: start;
-    font-size: var(--ds-text-body-md-size);
-    color: var(--ds-color-text-muted);
+    font-size: var(--vectis-text-body-md-size);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-table th {
-    padding: var(--_table-head-pad-block) var(--_table-pad-inline);
+    padding: var(--table-head-pad-block) var(--table-pad-inline);
     text-align: start;
-    font-size: var(--ds-text-body-md-size);
+    font-size: var(--vectis-text-body-md-size);
     /* semibold : emphase d'état, pas un rôle typo */
-    font-weight: var(--ds-font-weight-semibold);
-    color: var(--ds-color-text-muted);
-    border-block-end: 1px solid var(--ds-color-border);
+    font-weight: var(--vectis-font-weight-semibold);
+    color: var(--vectis-color-text-muted);
+    border-block-end: 1px solid var(--vectis-color-border);
   }
 
   .ds-table td {
-    padding: var(--_table-pad-block) var(--_table-pad-inline);
-    border-block-end: 1px solid var(--ds-color-border);
+    padding: var(--table-pad-block) var(--table-pad-inline);
+    border-block-end: 1px solid var(--vectis-color-border);
   }
 
   .ds-table tbody tr:last-child td {
@@ -727,12 +727,12 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .ds-table-wrapper[data-striped] tbody tr:nth-child(even) {
-    background-color: var(--ds-color-surface-sunken);
+    background-color: var(--vectis-color-surface-sunken);
   }
 
   /* Après le zébrage : à spécificité égale, la sélection gagne à l'ordre. */
   .ds-table-wrapper[data-selectable] tbody tr[data-selected] {
-    background-color: var(--ds-color-accent-surface);
+    background-color: var(--vectis-color-accent-surface);
   }
 
   /* Fond opaque obligatoire : le contenu défile sous l'en-tête figé. Il doit
@@ -742,34 +742,34 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     position: sticky;
     inset-block-start: 0;
     z-index: 1;
-    background-color: var(--_table-surface);
+    background-color: var(--table-surface);
   }
 
   .ds-table-sort {
     /* Contexte d'Icon : 20px, opsz 20.
        Sans lui l'icône retomberait sur 1em, soit la taille de texte du th. */
-    --ds-icon-size: var(--ds-icon-size-md);
-    --ds-icon-opsz: 20;
+    --vectis-icon-size: var(--vectis-icon-size-md);
+    --vectis-icon-opsz: 20;
 
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-1);
+    gap: var(--vectis-space-1);
     border: none;
     background: transparent;
     padding: 0;
     color: inherit;
     font: inherit;
     cursor: pointer;
-    border-radius: var(--ds-radius-xs);
+    border-radius: var(--vectis-radius-xs);
   }
 
   .ds-table-sort:hover {
-    color: var(--ds-color-text);
+    color: var(--vectis-color-text);
   }
 
   .ds-table-sort:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   /* atténuée tant que la colonne n'est pas celle qui porte le tri : le glyphe
@@ -783,9 +783,9 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .ds-table-state {
-    padding: var(--ds-space-6);
+    padding: var(--vectis-space-6);
     text-align: center;
-    color: var(--ds-color-text-muted);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-table-footer {
@@ -794,10 +794,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--ds-space-4);
-    padding-block-start: var(--ds-space-3);
-    padding-block-end: var(--_table-frame-pad);
-    padding-inline: var(--_table-frame-pad);
+    gap: var(--vectis-space-4);
+    padding-block-start: var(--vectis-space-3);
+    padding-block-end: var(--table-frame-pad);
+    padding-inline: var(--table-frame-pad);
   }
 
   /*
@@ -811,21 +811,21 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--ds-space-4);
+    gap: var(--vectis-space-4);
     margin-inline-start: auto;
   }
 
   .ds-table-selection,
   .ds-table-range,
   .ds-table-per-page-label {
-    font-size: var(--ds-text-body-md-size);
-    color: var(--ds-color-text-muted);
+    font-size: var(--vectis-text-body-md-size);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-table-per-page {
     display: flex;
     align-items: center;
-    gap: var(--ds-space-2);
+    gap: var(--vectis-space-2);
   }
 
   /* --- Mode stack : cartes sous 640px de conteneur, pur CSS --- */
@@ -841,8 +841,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
     .ds-table-wrapper[data-responsive='stack'] tbody tr {
       display: block;
-      padding-block: var(--ds-space-2);
-      border-block-end: 1px solid var(--ds-color-border);
+      padding-block: var(--vectis-space-2);
+      border-block-end: 1px solid var(--vectis-color-border);
     }
 
     .ds-table-wrapper[data-responsive='stack'] tbody tr:last-child {
@@ -853,8 +853,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      gap: var(--ds-space-4);
-      padding: var(--ds-space-1) var(--ds-space-2);
+      gap: var(--vectis-space-4);
+      padding: var(--vectis-space-1) var(--vectis-space-2);
       border: none;
       text-align: end;
     }
@@ -862,10 +862,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     /* Pseudo-en-tête de carte : rôle overline (sans capitales forcées) */
     .ds-table-wrapper[data-responsive='stack'] td::before {
       content: attr(data-label);
-      font-size: var(--ds-text-overline-size);
-      font-weight: var(--ds-text-overline-weight);
-      letter-spacing: var(--ds-text-overline-tracking);
-      color: var(--ds-color-text-muted);
+      font-size: var(--vectis-text-overline-size);
+      font-weight: var(--vectis-text-overline-weight);
+      letter-spacing: var(--vectis-text-overline-tracking);
+      color: var(--vectis-color-text-muted);
     }
 
     /* La case de sélection n'a pas de data-label : pas de pseudo-en-tête,

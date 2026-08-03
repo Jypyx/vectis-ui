@@ -364,7 +364,7 @@ export const Defilement: Story = {
     // le conteneur est volontairement étroit : la liste défile au doigt, au
     // trackpad et au clavier, sans barre de défilement visible
     template: `
-      <div style="max-width: 420px; border: 1px dashed var(--ds-color-border); padding: 8px">
+      <div style="max-width: 420px; border: 1px dashed var(--vectis-color-border); padding: 8px">
         <Tabs v-model="onglet">
           <Tab v-for="v in villes" :key="v" :value="v" :label="v" />
         </Tabs>
@@ -378,7 +378,7 @@ export const BoutonsDefilement: Story = {
     components: { Tabs, Tab },
     setup: () => ({ villes: VILLES, onglet: ref('Paris') }),
     template: `
-      <div style="max-width: 420px; border: 1px dashed var(--ds-color-border); padding: 8px">
+      <div style="max-width: 420px; border: 1px dashed var(--vectis-color-border); padding: 8px">
         <Tabs scroll-buttons variant="inset" v-model="onglet">
           <Tab v-for="v in villes" :key="v" :value="v" :label="v" />
         </Tabs>
@@ -417,7 +417,7 @@ export const FlechesPersonnalisees: Story = {
       <div style="display: grid; gap: 24px; max-width: 420px">
         <!-- min-width: 0 : un item de grid ne descend pas sous son min-content
              (min-width: auto), la liste d'onglets ne déborderait jamais -->
-        <div style="min-width: 0; border: 1px dashed var(--ds-color-border); padding: 8px">
+        <div style="min-width: 0; border: 1px dashed var(--vectis-color-border); padding: 8px">
           <Tabs
             scroll-buttons
             prev-icon="keyboard_double_arrow_left"
@@ -430,7 +430,7 @@ export const FlechesPersonnalisees: Story = {
           </Tabs>
         </div>
 
-        <div style="min-width: 0; border: 1px dashed var(--ds-color-border); padding: 8px">
+        <div style="min-width: 0; border: 1px dashed var(--vectis-color-border); padding: 8px">
           <Tabs
             orientation="vertical"
             variant="inset"

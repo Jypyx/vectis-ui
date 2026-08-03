@@ -23,13 +23,13 @@ interface ChipProps {
   tone?: 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
   /**
    * Couleur custom du consommateur (hex, nom CSS ou oklch()) qui REMPLACE le
-   * tone : posée en `--_custom` inline, toutes les nuances (fond doux, texte
+   * tone : posée en `--custom-color` inline, toutes les nuances (fond doux, texte
    * teinté, hover…) sont dérivées par color-mix avec les tokens de thème —
    * s'adapte light/dark sans rebuild. Le contraste du texte en solid (blanc)
    * reste à la charge du consommateur.
    */
   color?: string
-  /** chip = coins arrondis --ds-radius-interactive (défaut), pill = pilule. */
+  /** chip = coins arrondis --vectis-radius-interactive (défaut), pill = pilule. */
   shape?: 'chip' | 'pill'
   size?: 'xs' | 'sm'
   /** Hauteur réduite de 4px ; padding, typo et icônes inchangés. */
@@ -108,7 +108,7 @@ const actionTag = computed(() =>
 const isInertLink = computed(() => isLink.value && props.disabled)
 
 const rootStyle = computed<StyleValue>(() => [
-  props.color !== undefined ? { '--_custom': props.color } : undefined,
+  props.color !== undefined ? { '--custom-color': props.color } : undefined,
   attrs.style as StyleValue,
 ])
 const actionAttrs = computed(() => {
@@ -183,63 +183,63 @@ const iconOnly = computed(
   .ds-chip {
     display: inline-flex;
     align-items: center;
-    height: var(--_control-height);
+    height: var(--control-height);
     border: 1px solid transparent;
-    border-radius: var(--ds-radius-interactive);
-    font-family: var(--ds-text-family);
-    font-size: var(--_control-font-size);
-    font-weight: var(--ds-text-control-weight);
-    line-height: var(--ds-text-control-leading);
+    border-radius: var(--vectis-radius-interactive);
+    font-family: var(--vectis-text-family);
+    font-size: var(--control-font-size);
+    font-weight: var(--vectis-text-control-weight);
+    line-height: var(--vectis-text-control-leading);
     transition:
-      background-color var(--ds-duration-fast) var(--ds-ease-default),
-      border-color var(--ds-duration-fast) var(--ds-ease-default),
-      color var(--ds-duration-fast) var(--ds-ease-default);
+      background-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      border-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-chip[data-shape='pill'] {
-    border-radius: var(--ds-radius-pill);
+    border-radius: var(--vectis-radius-pill);
   }
 
   /* --- Tones : ne définissent que des variables locales --- */
   .ds-chip[data-tone='accent'] {
-    --_bg-solid: var(--ds-color-accent);
-    --_bg-solid-hover: var(--ds-color-accent-hover);
-    --_bg-solid-active: var(--ds-color-accent-active);
-    --_text-solid: var(--ds-color-text-on-accent);
-    --_text-tinted: var(--ds-color-accent-text);
-    --_bg-soft: var(--ds-color-accent-surface);
-    --_border-soft: var(--ds-color-accent-border);
+    --tone-bg-solid: var(--vectis-color-accent);
+    --tone-bg-solid-hover: var(--vectis-color-accent-hover);
+    --tone-bg-solid-active: var(--vectis-color-accent-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-accent-text);
+    --tone-bg-soft: var(--vectis-color-accent-surface);
+    --tone-border-soft: var(--vectis-color-accent-border);
   }
 
   .ds-chip[data-tone='danger'] {
-    --_bg-solid: var(--ds-color-danger);
-    --_bg-solid-hover: var(--ds-color-danger-hover);
-    --_bg-solid-active: var(--ds-color-danger-active);
-    --_text-solid: var(--ds-color-text-on-accent);
-    --_text-tinted: var(--ds-color-danger-text);
-    --_bg-soft: var(--ds-color-danger-surface);
-    --_border-soft: var(--ds-color-danger-border);
+    --tone-bg-solid: var(--vectis-color-danger);
+    --tone-bg-solid-hover: var(--vectis-color-danger-hover);
+    --tone-bg-solid-active: var(--vectis-color-danger-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-danger-text);
+    --tone-bg-soft: var(--vectis-color-danger-surface);
+    --tone-border-soft: var(--vectis-color-danger-border);
   }
 
   .ds-chip[data-tone='success'] {
-    --_bg-solid: var(--ds-color-success);
-    --_bg-solid-hover: var(--ds-color-success-hover);
-    --_bg-solid-active: var(--ds-color-success-active);
-    --_text-solid: var(--ds-color-text-on-accent);
-    --_text-tinted: var(--ds-color-success-text);
-    --_bg-soft: var(--ds-color-success-surface);
-    --_border-soft: var(--ds-color-success-border);
+    --tone-bg-solid: var(--vectis-color-success);
+    --tone-bg-solid-hover: var(--vectis-color-success-hover);
+    --tone-bg-solid-active: var(--vectis-color-success-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-success-text);
+    --tone-bg-soft: var(--vectis-color-success-surface);
+    --tone-border-soft: var(--vectis-color-success-border);
   }
 
   .ds-chip[data-tone='warning'] {
-    --_bg-solid: var(--ds-color-warning);
-    --_bg-solid-hover: var(--ds-color-warning-hover);
-    --_bg-solid-active: var(--ds-color-warning-active);
+    --tone-bg-solid: var(--vectis-color-warning);
+    --tone-bg-solid-hover: var(--vectis-color-warning-hover);
+    --tone-bg-solid-active: var(--vectis-color-warning-active);
     /* amber trop clair pour du blanc : token dédié (texte sombre) */
-    --_text-solid: var(--ds-color-text-on-warning);
-    --_text-tinted: var(--ds-color-warning-text);
-    --_bg-soft: var(--ds-color-warning-surface);
-    --_border-soft: var(--ds-color-warning-border);
+    --tone-text-solid: var(--vectis-color-text-on-warning);
+    --tone-text-tinted: var(--vectis-color-warning-text);
+    --tone-bg-soft: var(--vectis-color-warning-surface);
+    --tone-border-soft: var(--vectis-color-warning-border);
   }
 
   /* Divergence vs Button : le solid neutre de Button (surface-muted) serait
@@ -248,53 +248,61 @@ const iconOnly = computed(
      un chip neutre sélectionné serait invisible — text (neutral-50 en dark,
      neutral-900 en light) reste distinct du fond tonal dans les deux thèmes */
   .ds-chip[data-tone='neutral'] {
-    --_bg-solid: var(--ds-color-text);
-    --_bg-solid-hover: color-mix(in oklab, var(--ds-color-text), var(--ds-color-surface) 8%);
-    --_bg-solid-active: color-mix(in oklab, var(--ds-color-text), var(--ds-color-surface) 14%);
-    --_text-solid: var(--ds-color-surface);
-    --_text-tinted: var(--ds-color-text);
-    --_bg-soft: var(--ds-color-surface-muted);
-    --_border-soft: var(--ds-color-border-strong);
+    --tone-bg-solid: var(--vectis-color-text);
+    --tone-bg-solid-hover: color-mix(
+      in oklab,
+      var(--vectis-color-text),
+      var(--vectis-color-surface) 8%
+    );
+    --tone-bg-solid-active: color-mix(
+      in oklab,
+      var(--vectis-color-text),
+      var(--vectis-color-surface) 14%
+    );
+    --tone-text-solid: var(--vectis-color-surface);
+    --tone-text-tinted: var(--vectis-color-text);
+    --tone-bg-soft: var(--vectis-color-surface-muted);
+    --tone-border-soft: var(--vectis-color-border-strong);
   }
 
-  /* Couleur custom (--_custom inline) : remplace le tone, toutes les nuances
+  /* Couleur custom (--custom-color inline) : remplace le tone, toutes les nuances
      dérivées par color-mix avec les tokens de thème (surface/text s'inversent
      entre light et dark → adaptation automatique). Bloc APRÈS les tones :
      même spécificité, le dernier gagne. */
   .ds-chip[data-custom] {
-    --_bg-solid: var(--_custom);
-    --_bg-solid-hover: color-mix(in oklab, var(--_custom), var(--ds-color-text) 8%);
-    --_bg-solid-active: color-mix(in oklab, var(--_custom), var(--ds-color-text) 14%);
+    --tone-bg-solid: var(--custom-color);
+    --tone-bg-solid-hover: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 8%);
+    --tone-bg-solid-active: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 14%);
     /* blanc fixe : le contraste avec une couleur claire est à la charge du
        consommateur (même limite que warning avant text-on-warning) */
-    --_text-solid: var(--ds-color-text-on-accent);
-    --_text-tinted: color-mix(in oklab, var(--_custom), var(--ds-color-text) 30%);
-    --_bg-soft: color-mix(in oklab, var(--_custom), var(--ds-color-surface) 85%);
-    --_border-soft: color-mix(in oklab, var(--_custom), var(--ds-color-surface) 60%);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 30%);
+    --tone-bg-soft: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
+    --tone-border-soft: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 60%);
   }
 
   /* --- Variantes : consomment les variables du tone --- */
   .ds-chip[data-variant='tonal'] {
-    background: var(--_bg-soft);
-    color: var(--_text-tinted);
+    background: var(--tone-bg-soft);
+    color: var(--tone-text-tinted);
   }
 
   .ds-chip[data-variant='solid'] {
-    background: var(--_bg-solid);
-    color: var(--_text-solid);
+    background: var(--tone-bg-solid);
+    color: var(--tone-text-solid);
   }
 
   .ds-chip[data-variant='outline'] {
     background: transparent;
-    color: var(--_text-tinted);
-    border-color: var(--_border-soft);
+    color: var(--tone-text-tinted);
+    border-color: var(--tone-border-soft);
   }
 
   /* Sélectionné : rendu solid du tone/de la couleur COURANTE, quel que soit
      le variant (bloc après les variants, même spécificité) */
   .ds-chip[data-selected] {
-    background: var(--_bg-solid);
-    color: var(--_text-solid);
+    background: var(--tone-bg-solid);
+    color: var(--tone-text-solid);
     border-color: transparent;
   }
 
@@ -304,44 +312,44 @@ const iconOnly = computed(
   .ds-chip[data-variant='tonal']:not([data-disabled], [data-selected]):has(
       :is(button, a).ds-chip-action:hover
     ) {
-    background: color-mix(in oklab, var(--_bg-soft), var(--_text-tinted) 8%);
+    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
   .ds-chip[data-variant='tonal']:not([data-disabled], [data-selected]):has(
       :is(button, a).ds-chip-action:active
     ) {
-    background: color-mix(in oklab, var(--_bg-soft), var(--_text-tinted) 14%);
+    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 14%);
   }
 
   .ds-chip[data-variant='outline']:not([data-disabled], [data-selected]):has(
       :is(button, a).ds-chip-action:hover
     ) {
-    background: var(--_bg-soft);
+    background: var(--tone-bg-soft);
   }
 
   .ds-chip[data-variant='outline']:not([data-disabled], [data-selected]):has(
       :is(button, a).ds-chip-action:active
     ) {
-    background: color-mix(in oklab, var(--_bg-soft), var(--_text-tinted) 8%);
+    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
   .ds-chip[data-variant='solid']:not([data-disabled]):has(:is(button, a).ds-chip-action:hover),
   .ds-chip[data-selected]:not([data-disabled]):has(:is(button, a).ds-chip-action:hover) {
-    background: var(--_bg-solid-hover);
+    background: var(--tone-bg-solid-hover);
   }
 
   .ds-chip[data-variant='solid']:not([data-disabled]):has(:is(button, a).ds-chip-action:active),
   .ds-chip[data-selected]:not([data-disabled]):has(:is(button, a).ds-chip-action:active) {
-    background: var(--_bg-solid-active);
+    background: var(--tone-bg-solid-active);
   }
 
   .ds-chip-action {
     display: inline-flex;
     align-items: center;
-    gap: var(--_control-gap);
+    gap: var(--control-gap);
     height: 100%;
     padding-block: 0;
-    padding-inline: var(--_control-padding-inline);
+    padding-inline: var(--control-padding-inline);
     border: none;
     background: transparent;
     color: inherit;
@@ -364,8 +372,8 @@ const iconOnly = computed(
   }
 
   :is(button, a).ds-chip-action:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   /* Pas de fond, même au survol (pattern .ds-input-action) : seule la couleur
@@ -375,17 +383,17 @@ const iconOnly = computed(
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--_control-action-size);
-    height: var(--_control-action-size);
-    margin-inline: calc(var(--ds-space-1) * -1) var(--ds-space-1);
+    width: var(--control-action-size);
+    height: var(--control-action-size);
+    margin-inline: calc(var(--vectis-space-1) * -1) var(--vectis-space-1);
     padding: 0;
     border: none;
     background: transparent;
     color: color-mix(in oklab, currentcolor, transparent 30%);
-    border-radius: var(--ds-radius-full);
+    border-radius: var(--vectis-radius-full);
     cursor: pointer;
     flex: none;
-    transition: color var(--ds-duration-fast) var(--ds-ease-default);
+    transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .ds-chip-remove:hover:not(:disabled) {
@@ -393,20 +401,20 @@ const iconOnly = computed(
   }
 
   .ds-chip-remove:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: calc(var(--ds-focus-ring-offset) * -1);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
   /* --- Désactivé : nuances de gris par tokens (surchargés par le thème dark) --- */
   .ds-chip[data-disabled] {
-    background: var(--ds-color-surface-muted);
-    color: var(--ds-color-text-subtle);
+    background: var(--vectis-color-surface-muted);
+    color: var(--vectis-color-text-subtle);
     border-color: transparent;
   }
 
   .ds-chip[data-disabled][data-variant='outline'] {
     background: transparent;
-    border-color: var(--ds-color-border);
+    border-color: var(--vectis-color-border);
   }
 
   .ds-chip[data-disabled] :is(:is(button, a).ds-chip-action, .ds-chip-remove) {

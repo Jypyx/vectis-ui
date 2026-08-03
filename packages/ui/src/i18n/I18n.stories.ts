@@ -59,22 +59,22 @@ const FIL = [
 ]
 
 const VITRINE = `
-  <div style="display: grid; gap: var(--ds-space-6); max-width: 44rem;">
+  <div style="display: grid; gap: var(--vectis-space-6); max-width: 44rem;">
     <Breadcrumb :items="fil" current-path="/composants" />
 
-    <div style="display: flex; gap: var(--ds-space-3); align-items: end; flex-wrap: wrap;">
+    <div style="display: flex; gap: var(--vectis-space-3); align-items: end; flex-wrap: wrap;">
       <Input label="Champ" clearable model-value="Du texte" style="flex: 1; min-inline-size: 12rem;" />
       <Input label="En chargement" loading style="flex: 1; min-inline-size: 12rem;" />
     </div>
 
-    <div style="display: flex; gap: var(--ds-space-3); flex-wrap: wrap;">
+    <div style="display: flex; gap: var(--vectis-space-3); flex-wrap: wrap;">
       <DatePicker label="Date" show-calendar />
       <TimePicker label="Heure" show-dial />
     </div>
 
     <Combobox label="Recherche" :options="options" placeholder="Filtrer…" />
 
-    <div style="display: flex; gap: var(--ds-space-2); align-items: center;">
+    <div style="display: flex; gap: var(--vectis-space-2); align-items: center;">
       <Chip dismissible>Étiquette</Chip>
       <Spinner />
     </div>

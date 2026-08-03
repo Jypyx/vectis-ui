@@ -40,15 +40,15 @@ cliquable, y attacher un menu, un tooltip, etc.
 
 Chaque `Avatar` (et l'agrégat) peut être enveloppé dans un `Tooltip`. L'empilement reste
 correct **même si le trigger est enveloppé** : le groupe cible l'enfant direct générique et
-porte lui-même `ds-control`, si bien que la distance de chevauchement (`--_control-height`)
+porte lui-même `ds-control`, si bien que la distance de chevauchement (`--control-height`)
 reste résolue à travers le `<span>` que le `Tooltip` insère autour de sa cible.
 
 <Canvas of={AvatarGroupStories.AvecTooltips} />
 
 ## Anneau de séparation
 
-Chaque avatar porte un anneau `box-shadow` (token `--ds-control-size-avatar-ring`, 2px) de la
-couleur du fond derrière (`--ds-color-surface` par défaut, surchargeable via `ringColor`) — il
+Chaque avatar porte un anneau `box-shadow` (token `--vectis-control-size-avatar-ring`, 2px) de la
+couleur du fond derrière (`--vectis-color-surface` par défaut, surchargeable via `ringColor`) — il
 détache les disques qui se chevauchent. Sur un fond différent (carte, bandeau), passer la
 couleur adéquate à `ringColor`.
 

@@ -119,7 +119,11 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     :data-custom="color !== undefined ? '' : undefined"
     :role="announced ? 'status' : undefined"
     :aria-hidden="announced ? undefined : 'true'"
-    :style="{ '--_custom': color, '--_w': cssSize(width), '--_h': cssSize(height) }"
+    :style="{
+      '--custom-color': color,
+      '--skeleton-w': cssSize(width),
+      '--skeleton-h': cssSize(height),
+    }"
   >
     <!--
       Le libellé est rendu AVANT les silhouettes, et c'est structurel : la règle
@@ -145,7 +149,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     /* Fond : token dédié. Aucun rôle existant n'a la bonne valeur dans les DEUX
        thèmes — `surface-muted` est trop pâle en clair pour qu'une pulsation se
        voie, et `border` aurait le bon ton mais le mauvais rôle. */
-    --_base: var(--ds-color-surface-skeleton);
+    --skeleton-base: var(--vectis-color-surface-skeleton);
     /*
      * Reflet DÉRIVÉ du fond (relative color syntax) : +0,06 de clarté OKLCH.
      * Une même déclaration éclaircit correctement en clair — l'écrêtage naturel
@@ -155,19 +159,19 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
      * DELTA de clarté non. Elle suit aussi un `color` custom sans second
      * réglage. Le delta est un ratio, même famille que les opacités.
      */
-    --_highlight: oklch(from var(--_base) calc(l + 0.06) c h);
-    --_h: var(--_control-height);
-    --_radius: var(--ds-radius-interactive);
-    --_gap: var(--ds-space-2);
+    --skeleton-highlight: oklch(from var(--skeleton-base) calc(l + 0.06) c h);
+    --skeleton-h: var(--control-height);
+    --skeleton-radius: var(--vectis-radius-interactive);
+    --skeleton-gap: var(--vectis-space-2);
     display: flex;
     flex-direction: column;
-    gap: var(--_gap);
+    gap: var(--skeleton-gap);
   }
 
   /* Spécificité (0,2,0) > (0,1,0) : indépendant de l'ordre, contrairement aux
      tones de ProgressLinear qui sont tous au même niveau. */
   .ds-skeleton[data-custom] {
-    --_base: var(--_custom);
+    --skeleton-base: var(--custom-color);
   }
 
   .ds-skeleton-item {
@@ -176,13 +180,13 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     /* la hauteur du token est un DÉFAUT : dans un parent de hauteur définie, la
        silhouette la prend (une carte remplit son emplacement) */
     flex: 1 1 auto;
-    inline-size: var(--_w, 100%);
-    block-size: var(--_h);
+    inline-size: var(--skeleton-w, 100%);
+    block-size: var(--skeleton-h);
     /* `clip` et non `hidden` : `hidden` ferait de chaque silhouette un
        conteneur de défilement (précédent DataTable) */
     overflow: clip;
-    border-radius: var(--_radius);
-    background: var(--_base);
+    border-radius: var(--skeleton-radius);
+    background: var(--skeleton-base);
   }
 
   /* --- Silhouettes ----------------------------------------------------- */
@@ -195,9 +199,9 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * parent en `line-height` serré, où l'écart deviendrait négatif.
    */
   .ds-skeleton[data-shape='text'] {
-    --_h: 1em;
-    --_radius: var(--ds-radius-pill);
-    --_gap: max(0px, calc(1lh - 1em));
+    --skeleton-h: 1em;
+    --skeleton-radius: var(--vectis-radius-pill);
+    --skeleton-gap: max(0px, calc(1lh - 1em));
     padding-block: calc(max(0px, calc(1lh - 1em)) / 2);
   }
 
@@ -213,12 +217,12 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * ratio s'applique à la largeur EFFECTIVE, prop `width` comprise.
    */
   .ds-skeleton[data-shape='text'] .ds-skeleton-item + .ds-skeleton-item:last-child {
-    --_last-line: 0.6;
-    inline-size: calc(var(--_w, 100%) * var(--_last-line));
+    --skeleton-last-line: 0.6;
+    inline-size: calc(var(--skeleton-w, 100%) * var(--skeleton-last-line));
   }
 
   .ds-skeleton[data-shape='pill'] {
-    --_radius: var(--ds-radius-pill);
+    --skeleton-radius: var(--vectis-radius-pill);
   }
 
   /*
@@ -228,7 +232,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * `align-items: start` empêche l'étirement inline : un cercle reste rond.
    */
   .ds-skeleton[data-shape='circle'] {
-    --_radius: var(--ds-radius-pill);
+    --skeleton-radius: var(--vectis-radius-pill);
     display: inline-flex;
     align-items: start;
   }
@@ -236,7 +240,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
   .ds-skeleton[data-shape='circle'] .ds-skeleton-item {
     /* `auto` et non 100% : c'est le ratio qui dérive la largeur. Une prop
        `width` explicite reprend la main et assume l'ovale. */
-    inline-size: var(--_w, auto);
+    inline-size: var(--skeleton-w, auto);
     aspect-ratio: 1;
   }
 
@@ -247,8 +251,8 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * ProgressLinear vertical.
    */
   .ds-skeleton[data-shape='surface'] {
-    --_h: var(--ds-control-size-skeleton-surface);
-    --_radius: var(--ds-radius-surface);
+    --skeleton-h: var(--vectis-control-size-skeleton-surface);
+    --skeleton-radius: var(--vectis-radius-surface);
   }
 
   /* --- Animations ------------------------------------------------------ */
@@ -266,8 +270,9 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     content: '';
     position: absolute;
     inset: 0;
-    background-color: var(--_highlight);
-    animation: ds-skeleton-pulse calc(var(--ds-duration-slow) * 5) var(--ds-ease-in-out) infinite;
+    background-color: var(--skeleton-highlight);
+    animation: ds-skeleton-pulse calc(var(--vectis-duration-slow) * 5) var(--vectis-ease-in-out)
+      infinite;
   }
 
   /*
@@ -289,8 +294,8 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     content: '';
     position: absolute;
     inset: 0;
-    background-image: linear-gradient(90deg, transparent, var(--_highlight), transparent);
-    animation: ds-skeleton-wave calc(var(--ds-duration-slow) * 5) linear infinite;
+    background-image: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
+    animation: ds-skeleton-wave calc(var(--vectis-duration-slow) * 5) linear infinite;
   }
 
   /* Qualifié `wave` : le pulse partage ce calque mais sa course est symétrique,
@@ -338,8 +343,9 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
      */
     .ds-skeleton:is([data-animation='wave'], [data-animation='pulse']) .ds-skeleton-item::after {
       background-image: none;
-      background-color: var(--_highlight);
-      animation: ds-skeleton-pulse calc(var(--ds-duration-slow) * 15) var(--ds-ease-in-out) infinite;
+      background-color: var(--skeleton-highlight);
+      animation: ds-skeleton-pulse calc(var(--vectis-duration-slow) * 15) var(--vectis-ease-in-out)
+        infinite;
     }
   }
 }

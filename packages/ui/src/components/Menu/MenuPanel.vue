@@ -125,7 +125,7 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 // Style inline : largeur explicite (prop width) uniquement.
-const panelStyle = computed(() => (props.width ? { '--_menu-width': props.width } : undefined))
+const panelStyle = computed(() => (props.width ? { '--menu-width': props.width } : undefined))
 
 defineExpose({ show, hide, focusFirst, el: panelEl })
 </script>
@@ -139,11 +139,11 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     class="ds-overlay ds-panel ds-menu ds-floating"
     :class="{
       /*
-       * `ds-control` sur la RACINE seulement : elle pose les `--_control-*`
+       * `ds-control` sur la RACINE seulement : elle pose les `--control-*`
        * (hauteur, paddings, gap, typo, contexte Icon) depuis
        * styles/control-size.css, et les sous-panneaux — descendants DOM —
        * en héritent. La poser aussi sur eux les casserait : `.ds-control`
-       * redéfinit `--_control-height` depuis `--_control-height-base` SANS
+       * redéfinit `--control-height` depuis `--control-height-base` SANS
        * la condition `[data-compact]` (absente des sous-panneaux), qui y
        * reviendrait donc à sa valeur non compacte.
        */
@@ -168,16 +168,16 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
   /* Chrome (surface, bordure, ombre, rythme interne) : classe partagée
      `.ds-panel` (styles/panel.css). Tailles : classe partagée `ds-control`
      posée ci-dessus sur le panneau RACINE (voir le template) — aucune table
-     locale, les items consomment les `--_control-*` hérités. Ne restent ici
+     locale, les items consomment les `--control-*` hérités. Ne restent ici
      que les règles propres au menu déroulant. */
   .ds-menu {
-    min-inline-size: var(--ds-control-size-menu-min);
-    max-inline-size: min(var(--ds-control-size-menu-max), calc(100vw - var(--ds-space-8)));
+    min-inline-size: var(--vectis-control-size-menu-min);
+    max-inline-size: min(var(--vectis-control-size-menu-max), calc(100vw - var(--vectis-space-8)));
   }
 
   /* aligne le 1er sous-item sur l'item parent (compense padding + bordure) */
   .ds-menu .ds-menu[data-placement='right-start'] {
-    margin-block-start: calc(-1 * (var(--ds-space-1) + 1px));
+    margin-block-start: calc(-1 * (var(--vectis-space-1) + 1px));
   }
 
   /* Largeur explicite (prop width) : rendue par le panneau RACINE seulement —
@@ -185,7 +185,7 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
      inerte chez eux. Le plafond viewport de max-inline-size reste. */
   .ds-menu[data-width] {
     min-inline-size: 0;
-    inline-size: var(--_menu-width);
+    inline-size: var(--menu-width);
   }
 
   /* Plancher de largeur = largeur du déclencheur (prop matchTrigger). Le

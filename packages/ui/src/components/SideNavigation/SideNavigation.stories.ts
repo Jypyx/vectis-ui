@@ -19,7 +19,7 @@ const components = {
 
 /** Encadre la nav dans une largeur de barre latérale réaliste. */
 const aside = (inner: string, attrs = 'v-bind="args"') => `
-  <div style="inline-size: 17rem; padding: var(--ds-space-2); border-inline-end: 1px solid var(--ds-color-border);">
+  <div style="inline-size: 17rem; padding: var(--vectis-space-2); border-inline-end: 1px solid var(--vectis-color-border);">
     <SideNavigation ${attrs}>${inner}</SideNavigation>
   </div>
 `
@@ -111,14 +111,14 @@ export const Tailles: Story = {
     components,
     setup: () => ({ args }),
     template: `
-      <div style="display: flex; gap: var(--ds-space-6);">
+      <div style="display: flex; gap: var(--vectis-space-6);">
         ${['sm', 'md'].map((size) => aside(TAILLES_ITEMS, `size="${size}"`)).join('')}
         ${aside(TAILLES_ITEMS, 'size="md" compact')}
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
-    // Rangées de NIVEAU 2 : elles prouvent que les `--_control-*` héritent
+    // Rangées de NIVEAU 2 : elles prouvent que les `--control-*` héritent
     // jusqu'au bout sans jamais reposer `ds-control` sur une sous-liste.
     const rangees = [...canvasElement.querySelectorAll('.ds-side-nav-children a')].map(
       (el) => (el.closest('.ds-side-nav-row') as HTMLElement).getBoundingClientRect().height,
@@ -170,7 +170,7 @@ export const SousItemsProfonds: Story = {
     }
 
     // Le compteur CSS à DEUX noms alternés : la forme auto-référentielle
-    // (`--_level: calc(var(--_level, 0) + 1)`) est un cycle et rendrait ces
+    // (`--side-nav-level: calc(var(--side-nav-level, 0) + 1)`) est un cycle et rendrait ces
     // quatre valeurs égales, sans la moindre erreur console.
     const retraits = ['Niveau 0', 'Niveau 1', 'Niveau 2', 'Niveau 3'].map(retrait)
     for (let i = 1; i < retraits.length; i++) {

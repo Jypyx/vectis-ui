@@ -79,7 +79,7 @@ const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.de
    */
   .ds-toggle-item[data-size][data-icon-only] {
     padding-inline: 0;
-    min-inline-size: var(--_control-height);
+    min-inline-size: var(--control-height);
   }
 }
 </style>

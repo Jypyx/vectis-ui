@@ -26,10 +26,10 @@ export const Tailles: Story = {
     components: { Spinner },
     template: `
       <div style="display: flex; flex-direction: column; gap: 12px">
-        <span style="font-size: var(--ds-font-size-sm); display: inline-flex; gap: 8px; align-items: center">
+        <span style="font-size: var(--vectis-font-size-sm); display: inline-flex; gap: 8px; align-items: center">
           <Spinner /> Suit un texte sm (1em)
         </span>
-        <span style="font-size: var(--ds-font-size-xl); display: inline-flex; gap: 8px; align-items: center">
+        <span style="font-size: var(--vectis-font-size-xl); display: inline-flex; gap: 8px; align-items: center">
           <Spinner /> Suit un texte xl (1em)
         </span>
         <span style="display: inline-flex; gap: 8px; align-items: center">
@@ -46,7 +46,7 @@ export const Colore: Story = {
     components: { Spinner },
     template: `
       <!-- le spinner hérite de currentcolor : il suit le texte environnant -->
-      <div style="color: var(--ds-color-accent); display: flex; gap: 8px; align-items: center">
+      <div style="color: var(--vectis-color-accent); display: flex; gap: 8px; align-items: center">
         <Spinner label="Envoi en cours…" />
         <span>Envoi en cours…</span>
       </div>

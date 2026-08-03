@@ -192,9 +192,9 @@ function onPointerLeave() {
 @layer ds.components {
   .ds-menu-item {
     /*
-     * Taille : variables `--_control-*` héritées du panneau racine, qui porte
+     * Taille : variables `--control-*` héritées du panneau racine, qui porte
      * `ds-control` (styles/control-size.css) — une seule table pour tout le
-     * DS. Les icônes suivent sans rien écrire : `--ds-icon-size`/`-opsz` font
+     * DS. Les icônes suivent sans rien écrire : `--vectis-icon-size`/`-opsz` font
      * partie du même bloc et héritent aussi.
      *
      * Seule la typo est composite : la TAILLE vient de l'échelle, le leading
@@ -204,17 +204,17 @@ function onPointerLeave() {
      */
     display: flex;
     align-items: center;
-    gap: var(--_control-gap);
+    gap: var(--control-gap);
     width: 100%;
-    min-height: var(--_control-height);
-    padding: var(--ds-space-1) var(--_control-padding-inline);
+    min-height: var(--control-height);
+    padding: var(--vectis-space-1) var(--control-padding-inline);
     border: none;
     background: transparent;
-    color: var(--ds-color-text);
-    border-radius: var(--ds-radius-sm);
+    color: var(--vectis-color-text);
+    border-radius: var(--vectis-radius-sm);
     font-family: inherit;
-    font-size: var(--_control-font-size);
-    line-height: var(--ds-text-body-md-leading);
+    font-size: var(--control-font-size);
+    line-height: var(--vectis-text-body-md-leading);
     text-align: start;
     text-decoration: none;
     cursor: pointer;
@@ -228,12 +228,12 @@ function onPointerLeave() {
   }
 
   .ds-menu-item-sublabel {
-    font-size: var(--ds-text-caption-size);
-    color: var(--ds-color-text-muted);
+    font-size: var(--vectis-text-caption-size);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-menu-item-chevron {
-    color: var(--ds-color-text-muted);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-menu-item-chevron:dir(rtl) {
@@ -243,18 +243,18 @@ function onPointerLeave() {
   /* Le focus EST la surbrillance (roving focus programmatique → :focus, pas :focus-visible) */
   .ds-menu-item:hover:not(:disabled, [aria-disabled='true']),
   .ds-menu-item:focus {
-    background: var(--ds-color-surface-muted);
+    background: var(--vectis-color-surface-muted);
     outline: none;
   }
 
   /* sous-menu ouvert : la surbrillance persiste sur l'item parent */
   .ds-menu-item[aria-expanded='true'] {
-    background: var(--ds-color-surface-muted);
+    background: var(--vectis-color-surface-muted);
   }
 
   .ds-menu-item[data-selected] {
-    background: var(--ds-color-accent-surface);
-    color: var(--ds-color-accent-text);
+    background: var(--vectis-color-accent-surface);
+    color: var(--vectis-color-accent-text);
   }
 
   .ds-menu-item[data-selected] .ds-menu-item-sublabel {
@@ -265,11 +265,15 @@ function onPointerLeave() {
   .ds-menu-item[data-selected]:focus,
   .ds-menu-item[data-selected][aria-expanded='true'] {
     /* assombrit légèrement la surface accent */
-    background: color-mix(in oklab, var(--ds-color-accent-surface), var(--ds-color-accent-text) 8%);
+    background: color-mix(
+      in oklab,
+      var(--vectis-color-accent-surface),
+      var(--vectis-color-accent-text) 8%
+    );
   }
 
   .ds-menu-item[data-danger] {
-    color: var(--ds-color-danger-text);
+    color: var(--vectis-color-danger-text);
   }
 
   .ds-menu-item[data-danger] .ds-menu-item-sublabel {
@@ -279,14 +283,14 @@ function onPointerLeave() {
   .ds-menu-item[data-danger]:hover:not(:disabled, [aria-disabled='true']),
   .ds-menu-item[data-danger]:focus,
   .ds-menu-item[data-danger][aria-expanded='true'] {
-    background: var(--ds-color-danger-surface);
+    background: var(--vectis-color-danger-surface);
   }
 
   /* :disabled ne s'applique qu'au <button> ; le lien inerte passe par aria-disabled */
   .ds-menu-item:disabled,
   .ds-menu-item[aria-disabled='true'] {
     background: transparent;
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 

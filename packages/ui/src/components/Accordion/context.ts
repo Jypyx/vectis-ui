@@ -7,7 +7,7 @@ import type { IconSource } from '../Icon/types'
  * mode exclusif NATIF (attribut `name`, Baseline 2024) — un seul item ouvert,
  * sans le moindre JS. Les icônes sont posées sur le groupe (densité et
  * iconographie homogènes) ; `compact` ne transite PAS ici, il descend par
- * héritage CSS (variables --_accordion-* posées sur la racine).
+ * héritage CSS (variables --accordion-* posées sur la racine).
  */
 export interface AccordionContext {
   /** Nom de groupe pour <details name> ; undefined = ouvertures multiples. */

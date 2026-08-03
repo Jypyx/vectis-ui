@@ -46,7 +46,7 @@ defineSlots<{
      aussi les coins et bordures latérales en mode vertical. */
   .ds-button-group[data-orientation='horizontal'] > .ds-button:not(:first-child) {
     margin-inline-start: -1px;
-    border-inline-start-color: var(--ds-color-border);
+    border-inline-start-color: var(--vectis-color-border);
     border-start-start-radius: 0;
     border-end-start-radius: 0;
   }
@@ -58,7 +58,7 @@ defineSlots<{
 
   .ds-button-group[data-orientation='vertical'] > .ds-button:not(:first-child) {
     margin-block-start: -1px;
-    border-block-start-color: var(--ds-color-border);
+    border-block-start-color: var(--vectis-color-border);
     border-start-start-radius: 0;
     border-start-end-radius: 0;
   }

@@ -17,7 +17,7 @@ export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
  * qu'en événement DOM ; les initiales et la teinte auto sont dérivées du nom ;
  * le pont « lien inerte » (href retiré + aria-disabled + onClick filtré) ; la
  * répartition des attrs (style hors fallthrough pour y injecter
- * --_hue/--_custom).
+ * --avatar-hue/--custom-color).
  */
 interface AvatarProps {
   /** URL de l'image (priorité 1). */
@@ -30,7 +30,7 @@ interface AvatarProps {
   alt?: string
   /**
    * Couleur custom (hex, nom CSS ou oklch()) qui REMPLACE la teinte auto :
-   * posée en `--_custom` inline. Sinon, à défaut d'image, une teinte OKLCH
+   * posée en `--custom-color` inline. Sinon, à défaut d'image, une teinte OKLCH
    * déterministe est dérivée du `name`.
    */
   color?: string
@@ -116,9 +116,9 @@ const isAuto = computed(() => props.color === undefined && hue.value !== null)
 
 const rootStyle = computed<StyleValue>(() => [
   props.color !== undefined
-    ? { '--_custom': props.color }
+    ? { '--custom-color': props.color }
     : isAuto.value
-      ? { '--_hue': String(hue.value) }
+      ? { '--avatar-hue': String(hue.value) }
       : undefined,
   attrs.style as StyleValue,
 ])
@@ -167,58 +167,58 @@ const passedAttrs = computed(() => {
 @layer ds.components {
   .ds-avatar {
     /* Tailles/compact : hauteur explicite via la classe partagée ds-control
-       (styles/control-size.css) ; le carré rond réutilise --_control-height. */
-    --_bg: var(--ds-color-surface-muted);
-    --_text: var(--ds-color-text-muted);
+       (styles/control-size.css) ; le carré rond réutilise --control-height. */
+    --avatar-bg: var(--vectis-color-surface-muted);
+    --avatar-text: var(--vectis-color-text-muted);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    inline-size: var(--_control-height);
-    block-size: var(--_control-height);
+    inline-size: var(--control-height);
+    block-size: var(--control-height);
     flex: none;
     overflow: hidden;
     /* reset des styles UA du <button> en mode cliquable (bordure/padding) */
     padding: 0;
     border: none;
-    background: var(--_bg);
-    color: var(--_text);
-    border-radius: var(--ds-radius-full);
-    font-family: var(--ds-text-family);
+    background: var(--avatar-bg);
+    color: var(--avatar-text);
+    border-radius: var(--vectis-radius-full);
+    font-family: var(--vectis-text-family);
     /* initiales : typo du contrôle (token de l'échelle de tailles), jamais un
        ratio brut sur la hauteur — la typo passe par des tokens (philosophie #3) */
-    font-size: var(--_control-font-size);
+    font-size: var(--control-font-size);
     /* semibold : emphase d'état, pas un rôle typo (initiales plus lisibles à
        petite taille) */
-    font-weight: var(--ds-font-weight-semibold);
-    line-height: var(--ds-text-control-leading);
+    font-weight: var(--vectis-font-weight-semibold);
+    line-height: var(--vectis-text-control-leading);
     text-decoration: none;
     user-select: none;
     /* Anneau de séparation en pile (transparent hors AvatarGroup, qui pose
-       --_ring-color) — ne rogne pas la boîte (box-shadow, pas de border). */
-    box-shadow: 0 0 0 var(--ds-control-size-avatar-ring) var(--_ring-color, transparent);
+       --avatar-ring-color) — ne rogne pas la boîte (box-shadow, pas de border). */
+    box-shadow: 0 0 0 var(--vectis-control-size-avatar-ring) var(--avatar-ring-color, transparent);
     transition:
-      background-color var(--ds-duration-fast) var(--ds-ease-default),
-      box-shadow var(--ds-duration-fast) var(--ds-ease-default);
+      background-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   /* Teinte auto (name, pas de color custom) : L/C fixes, teinte inline. */
   .ds-avatar[data-auto] {
-    --_bg: oklch(0.9 0.06 var(--_hue));
-    --_text: oklch(0.42 0.13 var(--_hue));
+    --avatar-bg: oklch(0.9 0.06 var(--avatar-hue));
+    --avatar-text: oklch(0.42 0.13 var(--avatar-hue));
   }
 
-  /* Couleur custom (--_custom inline) : prime, texte blanc fixe (contraste à la
+  /* Couleur custom (--custom-color inline) : prime, texte blanc fixe (contraste à la
      charge du consommateur). Bloc après data-auto. */
   .ds-avatar[data-custom] {
-    --_bg: var(--_custom);
-    --_text: var(--ds-color-text-on-accent);
+    --avatar-bg: var(--custom-color);
+    --avatar-text: var(--vectis-color-text-on-accent);
   }
 
   /* Dark : fond sombre teinté + texte clair (le système de thème est opt-in par
      [data-theme='dark'], jamais par media query — cf. tokens.css). */
   [data-theme='dark'] .ds-avatar[data-auto] {
-    --_bg: oklch(0.42 0.09 var(--_hue));
-    --_text: oklch(0.92 0.05 var(--_hue));
+    --avatar-bg: oklch(0.42 0.09 var(--avatar-hue));
+    --avatar-text: oklch(0.92 0.05 var(--avatar-hue));
   }
 
   .ds-avatar-image {
@@ -229,7 +229,7 @@ const passedAttrs = computed(() => {
 
   /* L'icône occupe ~55% du disque (ratio unitless, comme la font-size). */
   .ds-avatar-icon {
-    --ds-icon-size: calc(var(--_control-height) * 0.55);
+    --vectis-icon-size: calc(var(--control-height) * 0.55);
   }
 
   :is(a, button).ds-avatar {
@@ -237,18 +237,18 @@ const passedAttrs = computed(() => {
   }
 
   :is(a, button).ds-avatar:hover:not([aria-disabled='true'], :disabled) {
-    background: color-mix(in oklab, var(--_bg), var(--ds-color-text) 10%);
+    background: color-mix(in oklab, var(--avatar-bg), var(--vectis-color-text) 10%);
   }
 
   :is(a, button).ds-avatar:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   .ds-avatar:is(:disabled, [aria-disabled='true']) {
     cursor: not-allowed;
-    background: var(--ds-color-surface-muted);
-    color: var(--ds-color-text-subtle);
+    background: var(--vectis-color-surface-muted);
+    color: var(--vectis-color-text-subtle);
   }
 
   @media (prefers-reduced-motion: reduce) {

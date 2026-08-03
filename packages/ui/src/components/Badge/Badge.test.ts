@@ -18,11 +18,11 @@ describe('Badge', () => {
     expect(container.querySelector('.ds-badge')!.getAttribute('data-tone')).toBe('danger')
   })
 
-  it('color : data-custom + --_custom inline ; absents sans color', () => {
+  it('color : data-custom + --custom-color inline ; absents sans color', () => {
     const { container } = render(Badge, { props: { color: 'hotpink', count: 3 } })
     const badge = container.querySelector('.ds-badge')!
     expect(badge.hasAttribute('data-custom')).toBe(true)
-    expect(badge.getAttribute('style')).toContain('--_custom: hotpink')
+    expect(badge.getAttribute('style')).toContain('--custom-color: hotpink')
 
     const { container: bare } = render(Badge, { props: { count: 3 } })
     const bareBadge = bare.querySelector('.ds-badge')!

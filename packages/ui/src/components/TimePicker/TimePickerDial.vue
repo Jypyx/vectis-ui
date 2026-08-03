@@ -23,7 +23,7 @@ import { useMessages } from '../../i18n/state'
  * trigonométrie PURE dans `utils/time` — atan2, seuil d'anneau) et (2) le pattern
  * ARIA « slider » au clavier (flèches / Home / End / PageUp-Down). Tout le
  * rendu — position des chiffres, aiguille — est du CSS (`sin()`/`cos()` sur la
- * fraction de tour unitless `--_turn` inline).
+ * fraction de tour unitless `--dial-turn` inline).
  *
  * Un unique élément focusable `role="slider"` (1 arrêt de tabulation,
  * `aria-valuetext` localisé) : les chiffres sont des repères purement visuels
@@ -247,7 +247,7 @@ function onKeydown(event: KeyboardEvent) {
       aria-hidden="true"
       :data-ring="handRing"
       :data-minor="handMinor ? '' : undefined"
-      :style="{ '--_turn': String(handTurn) }"
+      :style="{ '--dial-turn': String(handTurn) }"
     />
     <span class="ds-timepicker-dial-center" aria-hidden="true" />
     <span
@@ -257,7 +257,7 @@ function onKeydown(event: KeyboardEvent) {
       aria-hidden="true"
       :data-ring="cell.ring"
       :data-selected="cell.selected ? '' : undefined"
-      :style="{ '--_turn': String(cell.turn) }"
+      :style="{ '--dial-turn': String(cell.turn) }"
       >{{ cell.label }}</span
     >
   </div>
@@ -267,10 +267,10 @@ function onKeydown(event: KeyboardEvent) {
 @layer ds.components {
   .ds-timepicker-dial-face {
     position: relative;
-    inline-size: var(--ds-control-size-timepicker-dial);
-    block-size: var(--ds-control-size-timepicker-dial);
-    border-radius: var(--ds-radius-pill);
-    background: var(--ds-color-surface-muted);
+    inline-size: var(--vectis-control-size-timepicker-dial);
+    block-size: var(--vectis-control-size-timepicker-dial);
+    border-radius: var(--vectis-radius-pill);
+    background: var(--vectis-color-surface-muted);
     /* le drag sélectionne, il ne doit ni scroller (tactile) ni sélectionner du texte */
     touch-action: none;
     user-select: none;
@@ -278,35 +278,36 @@ function onKeydown(event: KeyboardEvent) {
     /* Rayon du centre des chiffres (anneau extérieur). Hérité par chiffres et
        aiguille ; l'anneau intérieur le redéfinit. À garder en phase avec
        DIAL_INNER_THRESHOLD (`utils/time`). */
-    --_r: calc(
-      var(--ds-control-size-timepicker-dial) / 2 - var(--ds-control-size-timepicker-number) / 2
+    --dial-radius: calc(
+      var(--vectis-control-size-timepicker-dial) / 2 -
+        var(--vectis-control-size-timepicker-number) / 2
     );
   }
 
   .ds-timepicker-dial-face:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: var(--ds-focus-ring-offset);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   /*
    * Chiffres positionnés par trigonométrie CSS sur la fraction de tour
-   * `--_turn` inline (sin()/cos() : Chrome 111+ / Safari 15.4+, très en deçà
+   * `--dial-turn` inline (sin()/cos() : Chrome 111+ / Safari 15.4+, très en deçà
    * du plancher du repo). `left`/`top`/`rotate` PHYSIQUES délibérés : une
    * horloge ne se miroite jamais en RTL (le sens horaire est universel).
    */
   .ds-timepicker-number {
     position: absolute;
-    left: calc(50% + var(--_r) * sin(var(--_turn) * 1turn));
-    top: calc(50% - var(--_r) * cos(var(--_turn) * 1turn));
+    left: calc(50% + var(--dial-radius) * sin(var(--dial-turn) * 1turn));
+    top: calc(50% - var(--dial-radius) * cos(var(--dial-turn) * 1turn));
     translate: -50% -50%;
-    inline-size: var(--ds-control-size-timepicker-number);
-    block-size: var(--ds-control-size-timepicker-number);
+    inline-size: var(--vectis-control-size-timepicker-number);
+    block-size: var(--vectis-control-size-timepicker-number);
     display: grid;
     place-items: center;
-    border-radius: var(--ds-radius-pill);
+    border-radius: var(--vectis-radius-pill);
     /* anneau extérieur : lisibilité du cadran, taille du corps de texte large */
-    font-size: var(--ds-text-body-lg-size);
-    color: var(--ds-color-text);
+    font-size: var(--vectis-text-body-lg-size);
+    color: var(--vectis-color-text);
     /* au-dessus de l'aiguille : le chiffre visé se lit sur sa pastille */
     z-index: 1;
     pointer-events: none;
@@ -314,18 +315,19 @@ function onKeydown(event: KeyboardEvent) {
 
   .ds-timepicker-number[data-ring='inner'],
   .ds-timepicker-hand[data-ring='inner'] {
-    --_r: calc(
-      var(--ds-control-size-timepicker-dial) / 2 - var(--ds-control-size-timepicker-number) * 1.5
+    --dial-radius: calc(
+      var(--vectis-control-size-timepicker-dial) / 2 -
+        var(--vectis-control-size-timepicker-number) * 1.5
     );
   }
 
   .ds-timepicker-number[data-ring='inner'] {
-    font-size: var(--ds-text-body-md-size);
-    color: var(--ds-color-text-muted);
+    font-size: var(--vectis-text-body-md-size);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-timepicker-number[data-selected] {
-    color: var(--ds-color-text-on-accent);
+    color: var(--vectis-color-text-on-accent);
   }
 
   /*
@@ -336,13 +338,13 @@ function onKeydown(event: KeyboardEvent) {
    */
   .ds-timepicker-hand {
     position: absolute;
-    left: calc(50% - var(--ds-control-size-timepicker-hand) / 2);
+    left: calc(50% - var(--vectis-control-size-timepicker-hand) / 2);
     bottom: 50%;
-    inline-size: var(--ds-control-size-timepicker-hand);
-    block-size: var(--_r);
-    background: var(--ds-color-accent);
+    inline-size: var(--vectis-control-size-timepicker-hand);
+    block-size: var(--dial-radius);
+    background: var(--vectis-color-accent);
     transform-origin: 50% 100%;
-    rotate: calc(var(--_turn) * 1turn);
+    rotate: calc(var(--dial-turn) * 1turn);
   }
 
   /* Pastille de pointe : recouvre le chiffre visé (le texte passe en
@@ -353,16 +355,16 @@ function onKeydown(event: KeyboardEvent) {
     top: 0;
     left: 50%;
     translate: -50% -50%;
-    inline-size: var(--ds-control-size-timepicker-number);
-    block-size: var(--ds-control-size-timepicker-number);
-    border-radius: var(--ds-radius-pill);
-    background: var(--ds-color-accent);
+    inline-size: var(--vectis-control-size-timepicker-number);
+    block-size: var(--vectis-control-size-timepicker-number);
+    border-radius: var(--vectis-radius-pill);
+    background: var(--vectis-color-accent);
     /* Seule la BASCULE DE TAILLE (repère ↔ [data-minor]) s'anime : elle
        interpole entre deux valeurs bornées, contrairement au `rotate` de
        l'aiguille, laissé sans transition (cf. plus haut). */
     transition:
-      inline-size var(--ds-duration-fast) var(--ds-ease-default),
-      block-size var(--ds-duration-fast) var(--ds-ease-default);
+      inline-size var(--vectis-duration-fast) var(--vectis-ease-default),
+      block-size var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   /*
@@ -370,12 +372,12 @@ function onKeydown(event: KeyboardEvent) {
    * déborderait sur les deux voisins → réduite, elle devient à elle seule le
    * repère précis (d'où l'abandon du point clair central de M3, qui ferait un
    * anneau à cette taille). Seule la taille du pseudo change : redéfinir
-   * --ds-control-size-timepicker-number ici déplacerait aussi --_r, donc la
+   * --vectis-control-size-timepicker-number ici déplacerait aussi --dial-radius, donc la
    * longueur de l'aiguille et le rayon des anneaux.
    */
   .ds-timepicker-hand[data-minor]::before {
-    inline-size: var(--ds-control-size-timepicker-hand-minor);
-    block-size: var(--ds-control-size-timepicker-hand-minor);
+    inline-size: var(--vectis-control-size-timepicker-hand-minor);
+    block-size: var(--vectis-control-size-timepicker-hand-minor);
   }
 
   .ds-timepicker-dial-center {
@@ -383,10 +385,10 @@ function onKeydown(event: KeyboardEvent) {
     left: 50%;
     top: 50%;
     translate: -50% -50%;
-    inline-size: var(--ds-control-size-timepicker-center);
-    block-size: var(--ds-control-size-timepicker-center);
-    border-radius: var(--ds-radius-pill);
-    background: var(--ds-color-accent);
+    inline-size: var(--vectis-control-size-timepicker-center);
+    block-size: var(--vectis-control-size-timepicker-center);
+    border-radius: var(--vectis-radius-pill);
+    background: var(--vectis-color-accent);
   }
 
   @media (prefers-reduced-motion: reduce) {

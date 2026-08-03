@@ -175,7 +175,7 @@ function onKeydown(event: KeyboardEvent) {
   .ds-toggle:not(.ds-button-group) {
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-1);
+    gap: var(--vectis-space-1);
   }
 
   .ds-toggle:not(.ds-button-group)[data-orientation='vertical'] {

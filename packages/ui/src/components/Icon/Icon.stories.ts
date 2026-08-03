@@ -46,10 +46,10 @@ export const AdapteeAuTexte: Story = {
     components: { Icon },
     template: `
       <div style="display: flex; flex-direction: column; gap: 12px">
-        <span style="font-size: var(--ds-font-size-sm); display: inline-flex; gap: 8px; align-items: center">
+        <span style="font-size: var(--vectis-font-size-sm); display: inline-flex; gap: 8px; align-items: center">
           <Icon name="favorite" /> Suit un texte sm (1em)
         </span>
-        <span style="font-size: var(--ds-font-size-xl); display: inline-flex; gap: 8px; align-items: center">
+        <span style="font-size: var(--vectis-font-size-xl); display: inline-flex; gap: 8px; align-items: center">
           <Icon name="favorite" /> Suit un texte xl (1em)
         </span>
         <span style="display: inline-flex; gap: 8px; align-items: center">
@@ -94,7 +94,7 @@ export const Bibliotheque: Story = {
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px">
         <div v-for="nom in noms" :key="nom" style="display: flex; gap: 8px; align-items: center">
           <Icon :name="nom" :size="24" />
-          <code style="font-size: var(--ds-font-size-xs)">{{ nom }}</code>
+          <code style="font-size: var(--vectis-font-size-xs)">{{ nom }}</code>
         </div>
       </div>
     `,
@@ -103,7 +103,7 @@ export const Bibliotheque: Story = {
 
 /**
  * Critère d'acceptation de l'autonomie : la police d'icônes est neutralisée
- * (`--ds-font-family-icon: sans-serif`). Tout ce qui reste une ligature apparaît
+ * (`--vectis-font-family-icon: sans-serif`). Tout ce qui reste une ligature apparaît
  * alors EN TOUTES LETTRES — les icônes du DS, elles, ne bougent pas.
  */
 export const SansPolice: Story = {
@@ -111,13 +111,13 @@ export const SansPolice: Story = {
     components: { Icon },
     setup: () => ({ noms: Object.keys(builtinIcons) }),
     template: `
-      <div style="--ds-font-family-icon: sans-serif; display: flex; flex-direction: column; gap: 16px">
+      <div style="--vectis-font-family-icon: sans-serif; display: flex; flex-direction: column; gap: 16px">
         <div style="display: flex; gap: 12px; flex-wrap: wrap">
           <Icon v-for="nom in noms" :key="nom" :name="nom" :size="24" />
         </div>
         <div style="display: flex; gap: 12px; align-items: center">
           <Icon name="favorite" :size="24" />
-          <span style="font-size: var(--ds-font-size-sm)">
+          <span style="font-size: var(--vectis-font-size-sm)">
             ↖ hors registre : la ligature retombe sur la police du consommateur, absente ici
           </span>
         </div>
@@ -246,7 +246,7 @@ export const PiloteParLeParent: Story = {
     components: { Icon },
     template: `
       <!-- Le conteneur pose l'API de contexte ; la prop size numérique prime -->
-      <div style="--ds-icon-size: var(--ds-icon-size-lg); --ds-icon-opsz: 24; display: flex; gap: 12px; align-items: center">
+      <div style="--vectis-icon-size: var(--vectis-icon-size-lg); --vectis-icon-opsz: 24; display: flex; gap: 12px; align-items: center">
         <Icon name="palette" />
         <Icon name="palette" :size="16" />
         <span>(contexte lg / prop 16px qui prime)</span>
@@ -479,7 +479,7 @@ export const PoliceBootstrapIcons: Story = {
 /**
  * **Material Symbols en ligature** — `ligatureIconResolver()` renvoie les icônes
  * du DS vers la POLICE au lieu du registre intégré. Seul intérêt : retrouver
- * l'axe optique `--ds-icon-opsz` (20 en xs/sm/md, 24 en lg/xl), que le registre
+ * l'axe optique `--vectis-icon-opsz` (20 en xs/sm/md, 24 en lg/xl), que le registre
  * — dessiné à opsz 24 — ne peut pas reproduire. Sert aussi aux builds IcoMoon à
  * ligatures et aux variantes Outlined/Sharp.
  */

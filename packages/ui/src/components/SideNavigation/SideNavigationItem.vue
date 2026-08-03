@@ -264,17 +264,17 @@ function onActionClick(event: MouseEvent) {
    * éléments par niveau (<li> puis <ul>), et chaque élément lit un nom qu'il ne
    * DÉCLARE pas.
    *
-   * ⚠ La forme à un seul nom — `--_level: calc(var(--_level, 0) + 1)` — est un
+   * ⚠ La forme à un seul nom — `--side-nav-level: calc(var(--side-nav-level, 0) + 1)` — est un
    * CYCLE (CSS Variables §3), y compris quand la valeur lue est celle héritée :
-   * la propriété tombe en « guaranteed-invalid », `var(--_level, 0)` retombe
+   * la propriété tombe en « guaranteed-invalid », `var(--side-nav-level, 0)` retombe
    * partout sur 0 et l'arbre s'affiche PLAT, sans la moindre erreur console.
    */
   .ds-side-nav-item {
-    --_parent-level: var(--_level, 0);
+    --side-nav-parent-level: var(--side-nav-level, 0);
   }
 
   .ds-side-nav-children {
-    --_level: calc(var(--_parent-level) + 1);
+    --side-nav-level: calc(var(--side-nav-parent-level) + 1);
   }
 
   .ds-side-nav-branch {
@@ -284,9 +284,9 @@ function onActionClick(event: MouseEvent) {
 
   .ds-side-nav-row {
     /*
-     * Taille : variables `--_control-*` héritées du <nav>, seul porteur de
+     * Taille : variables `--control-*` héritées du <nav>, seul porteur de
      * `ds-control` (styles/control-size.css) — les icônes suivent sans une
-     * ligne de CSS, `--ds-icon-size`/`-opsz` font partie du même bloc.
+     * ligne de CSS, `--vectis-icon-size`/`-opsz` font partie du même bloc.
      *
      * Typo composite, comme .ds-menu-item : la TAILLE vient de l'échelle, le
      * leading reste celui de `body-md` (ratio unitless, donc il suit) et le
@@ -295,20 +295,22 @@ function onActionClick(event: MouseEvent) {
      *
      * Le `calc` du retrait est écrit ICI et non dans une variable posée plus
      * haut : une custom property est substituée sur l'élément qui la DÉCLARE,
-     * une `--_pad-start` posée sur la racine serait figée au niveau 0.
+     * une `--side-nav-pad-start` posée sur la racine serait figée au niveau 0.
      */
     position: relative;
     display: flex;
     align-items: center;
-    gap: var(--_control-gap);
-    min-block-size: var(--_control-height);
-    padding-block: var(--ds-space-1);
-    padding-inline: calc(var(--_control-padding-inline) + var(--_level, 0) * var(--_indent))
-      var(--_control-padding-inline);
-    border-radius: var(--ds-radius-sm);
-    color: var(--ds-color-text);
-    font-size: var(--_control-font-size);
-    line-height: var(--ds-text-body-md-leading);
+    gap: var(--control-gap);
+    min-block-size: var(--control-height);
+    padding-block: var(--vectis-space-1);
+    padding-inline: calc(
+        var(--control-padding-inline) + var(--side-nav-level, 0) * var(--side-nav-indent)
+      )
+      var(--control-padding-inline);
+    border-radius: var(--vectis-radius-sm);
+    color: var(--vectis-color-text);
+    font-size: var(--control-font-size);
+    line-height: var(--vectis-text-body-md-leading);
     list-style: none;
     cursor: pointer;
   }
@@ -325,7 +327,7 @@ function onActionClick(event: MouseEvent) {
     min-inline-size: 0;
     display: flex;
     align-items: center;
-    gap: var(--_control-gap);
+    gap: var(--control-gap);
     padding: 0;
     border: none;
     background: transparent;
@@ -348,7 +350,7 @@ function onActionClick(event: MouseEvent) {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: var(--ds-radius-sm);
+    border-radius: var(--vectis-radius-sm);
   }
 
   .ds-side-nav-content {
@@ -366,15 +368,15 @@ function onActionClick(event: MouseEvent) {
 
   .ds-side-nav-sublabel {
     overflow: hidden;
-    font-size: var(--ds-text-caption-size);
-    color: var(--ds-color-text-muted);
+    font-size: var(--vectis-text-caption-size);
+    color: var(--vectis-color-text-muted);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .ds-side-nav-icon {
     flex: none;
-    color: var(--ds-color-text-muted);
+    color: var(--vectis-color-text-muted);
   }
 
   /* Positionné → peint au-dessus de la zone cliquable étendue, donc cliquable. */
@@ -383,15 +385,15 @@ function onActionClick(event: MouseEvent) {
     flex: none;
     display: flex;
     align-items: center;
-    gap: var(--ds-space-1);
+    gap: var(--vectis-space-1);
   }
 
   /* Chevron : bas quand fermé, retourné quand ouvert. Rotation sur l'axe
      vertical → aucun miroir RTL (contrairement au chevron latéral de Menu). */
   .ds-side-nav-chevron {
     flex: none;
-    color: var(--ds-color-text-muted);
-    transition: rotate var(--ds-duration-base) var(--ds-ease-default);
+    color: var(--vectis-color-text-muted);
+    transition: rotate var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   .ds-side-nav-branch[open]:not([data-swap]) > .ds-side-nav-row > .ds-side-nav-chevron {
@@ -407,7 +409,7 @@ function onActionClick(event: MouseEvent) {
   }
 
   .ds-side-nav-row:hover:not([data-disabled]) {
-    background: var(--ds-color-surface-muted);
+    background: var(--vectis-color-surface-muted);
   }
 
   /*
@@ -419,8 +421,8 @@ function onActionClick(event: MouseEvent) {
    */
   .ds-side-nav-row:focus-visible,
   .ds-side-nav-action:focus-visible::after {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: calc(var(--ds-focus-ring-offset) * -1);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
   .ds-side-nav-action:focus-visible {
@@ -429,12 +431,12 @@ function onActionClick(event: MouseEvent) {
 
   /* Page courante */
   .ds-side-nav-row[data-active] {
-    background: var(--ds-color-accent-surface);
-    color: var(--ds-color-accent-text);
+    background: var(--vectis-color-accent-surface);
+    color: var(--vectis-color-accent-text);
   }
 
   .ds-side-nav-row[data-active] .ds-side-nav-label {
-    font-weight: var(--ds-text-label-weight);
+    font-weight: var(--vectis-text-label-weight);
   }
 
   .ds-side-nav-row[data-active] .ds-side-nav-icon,
@@ -445,19 +447,23 @@ function onActionClick(event: MouseEvent) {
 
   .ds-side-nav-row[data-active]:hover {
     /* assombrit légèrement la surface accent (idiome MenuItem) */
-    background: color-mix(in oklab, var(--ds-color-accent-surface), var(--ds-color-accent-text) 8%);
+    background: color-mix(
+      in oklab,
+      var(--vectis-color-accent-surface),
+      var(--vectis-color-accent-text) 8%
+    );
   }
 
   /* Une branche REPLIÉE qui contient la page courante reste signalée. Le
      `:has()` est volontairement descendant : il doit matcher à toute profondeur. */
   .ds-side-nav-branch:not([open]):has(.ds-side-nav-children [aria-current])
     > .ds-side-nav-row:not([data-active]) {
-    color: var(--ds-color-accent-text);
+    color: var(--vectis-color-accent-text);
   }
 
   /* Désactivé : nuances de gris par tokens (jamais d'opacité) */
   .ds-side-nav-row[data-disabled] {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
@@ -473,8 +479,8 @@ function onActionClick(event: MouseEvent) {
     block-size: 0;
     overflow: clip;
     transition:
-      block-size var(--ds-duration-base) var(--ds-ease-default),
-      content-visibility var(--ds-duration-base) allow-discrete;
+      block-size var(--vectis-duration-base) var(--vectis-ease-default),
+      content-visibility var(--vectis-duration-base) allow-discrete;
   }
 
   .ds-side-nav-branch[open]::details-content {

@@ -50,7 +50,7 @@ export const Default: Story = {
     )
 
     // Canari de la syntaxe de couleur relative : si `oklch(from …)` n'était pas
-    // supporté, `--_highlight` serait invalide au calcul, la déclaration
+    // supporté, `--skeleton-highlight` serait invalide au calcul, la déclaration
     // entière le deviendrait avec elle (elle contient un var()) et le dégradé
     // retomberait à `none` — bande invisible, sans la moindre erreur console.
     await expect(getComputedStyle(item, '::after').backgroundImage).not.toBe('none')
@@ -78,7 +78,7 @@ export const Formes: Story = {
     template: `
       <div style="display: grid; gap: 20px; width: 320px">
         <div v-for="forme in formes" :key="forme" style="display: grid; gap: 4px">
-          <small style="color: var(--ds-color-text-muted)">{{ forme }}</small>
+          <small style="color: var(--vectis-color-text-muted)">{{ forme }}</small>
           <SkeletonLoader :shape="forme" />
         </div>
       </div>
@@ -110,7 +110,7 @@ export const Animations: Story = {
     template: `
       <div style="display: grid; gap: 20px; width: 360px">
         <div v-for="a in animations" :key="a" style="display: grid; gap: 4px">
-          <small style="color: var(--ds-color-text-muted)">{{ a }}</small>
+          <small style="color: var(--vectis-color-text-muted)">{{ a }}</small>
           <SkeletonLoader shape="surface" :animation="a" />
         </div>
       </div>
@@ -170,10 +170,10 @@ export const Paragraphe: Story = {
     components: { SkeletonLoader },
     template: `
       <div style="display: grid; gap: 24px; width: 360px">
-        <div style="font-size: var(--ds-text-body-sm-size); line-height: var(--ds-text-body-sm-leading)">
+        <div style="font-size: var(--vectis-text-body-sm-size); line-height: var(--vectis-text-body-sm-leading)">
           <SkeletonLoader :lines="5" />
         </div>
-        <div style="font-size: var(--ds-text-heading-2-size); line-height: var(--ds-text-heading-2-leading)">
+        <div style="font-size: var(--vectis-text-heading-2-size); line-height: var(--vectis-text-heading-2-leading)">
           <SkeletonLoader :lines="2" />
         </div>
       </div>
@@ -210,13 +210,13 @@ export const SilhouettesDuDesignSystem: Story = {
           <SkeletonLoader shape="control" size="md" />
         </div>
 
-        <div style="border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-surface); padding: 16px; display: grid; gap: 12px">
+        <div style="border: 1px solid var(--vectis-color-border); border-radius: var(--vectis-radius-surface); padding: 16px; display: grid; gap: 12px">
           <Typography variant="heading-4">Analyse des ventes</Typography>
           <Typography variant="body-sm" tone="muted">
             Le trimestre s'achève sur une progression de 12 % du chiffre d'affaires.
           </Typography>
         </div>
-        <div style="border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-surface); padding: 16px; display: grid; gap: 12px">
+        <div style="border: 1px solid var(--vectis-color-border); border-radius: var(--vectis-radius-surface); padding: 16px; display: grid; gap: 12px">
           <SkeletonLoader shape="control" size="sm" width="60%" />
           <SkeletonLoader :lines="3" />
         </div>
@@ -275,7 +275,7 @@ export const CouleurCustom: Story = {
     template: `
       <div style="display: grid; gap: 20px; width: 360px">
         <SkeletonLoader shape="surface" color="oklch(55% 0.14 265)" />
-        <div style="background: var(--ds-color-surface-inverse); border-radius: var(--ds-radius-surface); padding: 16px; display: grid; gap: 8px">
+        <div style="background: var(--vectis-color-surface-inverse); border-radius: var(--vectis-radius-surface); padding: 16px; display: grid; gap: 8px">
           <SkeletonLoader shape="control" size="sm" color="oklch(38% 0.01 260)" width="60%" />
           <SkeletonLoader :lines="3" color="oklch(38% 0.01 260)" />
         </div>
@@ -315,32 +315,32 @@ export const CasLimites: Story = {
     template: `
       <div style="display: grid; gap: 24px">
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--ds-color-text-muted)">lines = 0 → une ligne quand même</small>
+          <small style="color: var(--vectis-color-text-muted)">lines = 0 → une ligne quand même</small>
           <div style="width: 200px"><SkeletonLoader :lines="0" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--ds-color-text-muted)">12 lignes dans 120px de haut (compression)</small>
+          <small style="color: var(--vectis-color-text-muted)">12 lignes dans 120px de haut (compression)</small>
           <div style="width: 200px; height: 120px"><SkeletonLoader :lines="12" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--ds-color-text-muted)">surface dans un parent de hauteur définie : elle la prend</small>
+          <small style="color: var(--vectis-color-text-muted)">surface dans un parent de hauteur définie : elle la prend</small>
           <div style="width: 200px; height: 40px"><SkeletonLoader shape="surface" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--ds-color-text-muted)">cercle dans un parent très large : il reste rond</small>
+          <small style="color: var(--vectis-color-text-muted)">cercle dans un parent très large : il reste rond</small>
           <div style="width: 480px"><SkeletonLoader shape="circle" size="xl" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--ds-color-text-muted)">line-height serré : la gouttière ne devient pas négative</small>
+          <small style="color: var(--vectis-color-text-muted)">line-height serré : la gouttière ne devient pas négative</small>
           <div style="width: 200px; line-height: 0.5"><SkeletonLoader :lines="3" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
-          <small style="color: var(--ds-color-text-muted)">hauteur explicite : elle prime sur shape et size</small>
+          <small style="color: var(--vectis-color-text-muted)">hauteur explicite : elle prime sur shape et size</small>
           <div style="width: 200px"><SkeletonLoader shape="control" size="xs" height="72" /></div>
         </div>
       </div>

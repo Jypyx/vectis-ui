@@ -8,7 +8,7 @@ import type { IconSource } from '../Icon/types'
  * c'est ce qui rend l'exclusivité locale à un niveau plutôt que globale.
  *
  * Ce qui n'y transite PAS, délibérément :
- * - `size`/`compact`, portés par l'héritage CSS des `--_control-*` (la classe
+ * - `size`/`compact`, portés par l'héritage CSS des `--control-*` (la classe
  *   `ds-control` n'est posée que sur le <nav>) — les y mettre serait une
  *   seconde incarnation de la même information ;
  * - la PROFONDEUR, portée par la cascade (compteur CSS à deux noms alternés,

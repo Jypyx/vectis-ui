@@ -36,8 +36,8 @@ describe('Slider', () => {
       props: { modelValue: [25, 75], range: true, label: 'x' },
     })
     const style = container.querySelector('.ds-slider')?.getAttribute('style') ?? ''
-    expect(style).toContain('--_start-f: 0.25')
-    expect(style).toContain('--_end-f: 0.75')
+    expect(style).toContain('--start-fraction: 0.25')
+    expect(style).toContain('--end-fraction: 0.75')
   })
 
   it('orientation : data-orientation posé uniquement en vertical', async () => {

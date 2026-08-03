@@ -11,11 +11,11 @@
     flex: none;
     /* Le retrait n'a pas cours ici : un filet sépare des sections, il ne
        s'aligne pas sur la hiérarchie des rangées qu'il encadre. */
-    margin-block: var(--ds-space-2);
-    margin-inline: var(--_control-padding-inline);
+    margin-block: var(--vectis-space-2);
+    margin-inline: var(--control-padding-inline);
     border: none;
     block-size: 1px;
-    background: var(--ds-color-border);
+    background: var(--vectis-color-border);
   }
 }
 </style>

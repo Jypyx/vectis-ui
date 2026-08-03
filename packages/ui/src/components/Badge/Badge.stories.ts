@@ -161,7 +161,7 @@ export const Overlay: Story = {
 
 /**
  * `bordered` trace un liseré de 2px couleur du fond derrière
- * (`--ds-color-surface`, surchargeable localement quand le fond diffère).
+ * (`--vectis-color-surface`, surchargeable localement quand le fond diffère).
  * Sur un IconButton, le comparatif sans/avec montre le détachement du badge.
  */
 export const Bordered: Story = {
@@ -169,7 +169,7 @@ export const Bordered: Story = {
     components: { Badge, Icon, IconButton },
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px; align-items: flex-start">
-        <div style="display: flex; gap: 24px; align-items: center; padding: 16px; background: var(--ds-color-accent); border-radius: var(--ds-radius-surface); --ds-color-surface: var(--ds-color-accent)">
+        <div style="display: flex; gap: 24px; align-items: center; padding: 16px; background: var(--vectis-color-accent); border-radius: var(--vectis-radius-surface); --vectis-color-surface: var(--vectis-color-accent)">
           <Badge overlay tone="danger" :count="3" bordered>
             <IconButton label="Notifications" variant="elevated" tone="accent">
               <Icon name="notifications" />

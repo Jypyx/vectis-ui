@@ -17,7 +17,7 @@ près : le pont « lien inerte » (voir [Lien](#lien)).
 
 Cinq variants (`solid`, `outline`, `ghost`, `elevated`, `tonal`) croisés avec cinq tones
 (`accent`, `neutral`, `danger`, `success`, `warning`). Les tones ne définissent que des
-variables CSS locales (`--_bg-solid`, `--_text-tinted`…) que les variants consomment : toute
+variables CSS locales (`--tone-bg-solid`, `--tone-text-tinted`…) que les variants consomment : toute
 combinaison est valide.
 
 - **solid** : fond plein, action principale.
@@ -31,7 +31,7 @@ combinaison est valide.
 ## Tailles
 
 Cinq tailles (`xs` 24px, `sm` 32px, `md` 40px, `lg` 48px, `xl` 56px, via les tokens
-`--ds-control-height-*`). La prop `compact` réduit la hauteur de 4px (20/28/36/44/52px)
+`--vectis-control-height-*`). La prop `compact` réduit la hauteur de 4px (20/28/36/44/52px)
 **sans toucher** au padding, à la typographie ni à la taille des icônes. Le mapping
 taille → hauteur/typo/icône/padding est partagé par tous les contrôles du design system
 (classe `ds-control`, voir `styles/control-size.css`).
@@ -86,15 +86,15 @@ affiché :
 
 <Canvas of={ButtonStories.Loading} />
 
-`disabled` bascule tous les variants sur des nuances de gris (`--ds-color-surface-muted`,
-`--ds-color-text-subtle`) — pas de jeu d'opacité, et le rendu suit automatiquement le thème
+`disabled` bascule tous les variants sur des nuances de gris (`--vectis-color-surface-muted`,
+`--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu suit automatiquement le thème
 dark :
 
 <Canvas of={ButtonStories.Disabled} />
 
 ## Accessibilité
 
-- Focus visible par anneau (`--ds-focus-ring-*`), jamais supprimé.
+- Focus visible par anneau (`--vectis-focus-ring-*`), jamais supprimé.
 - Icônes décoratives : le nom accessible est toujours le libellé du slot par défaut. Pour un
   bouton à icône seule, utiliser `IconButton` (libellé `aria-label` obligatoire).
 - `loading` → `aria-busy="true"` ; lien inerte → `aria-disabled="true"` sans `href`.

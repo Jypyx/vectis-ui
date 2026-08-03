@@ -92,7 +92,7 @@ function onKeydown(event: KeyboardEvent) {
       :id="tooltipId"
       ref="popoverRef"
       mode="manual"
-      anchor="--ds-tooltip-anchor"
+      anchor="--tooltip-anchor"
       :placement="placement"
       :surface="false"
       role="tooltip"
@@ -107,26 +107,26 @@ function onKeydown(event: KeyboardEvent) {
 @layer ds.components {
   .ds-tooltip {
     display: inline-block;
-    anchor-name: --ds-tooltip-anchor;
+    anchor-name: --tooltip-anchor;
     /* confine le nom d'ancre à ce sous-arbre : chaque panneau (même en top
        layer) résout SON wrapper, pas le dernier wrapper nommé de la page */
-    anchor-scope: --ds-tooltip-anchor;
+    anchor-scope: --tooltip-anchor;
   }
 
   /* `position-anchor` vient de Popover (prop `anchor`) */
   .ds-tooltip-panel {
     width: max-content;
-    max-width: min(18rem, calc(100vw - var(--ds-space-8)));
-    padding: var(--ds-space-1) var(--ds-space-2);
+    max-width: min(18rem, calc(100vw - var(--vectis-space-8)));
+    padding: var(--vectis-space-1) var(--vectis-space-2);
     /* contraste inversé : gris sombre dans les deux thèmes (plus sombre en dark) */
-    background: var(--ds-color-surface-inverse);
-    color: var(--ds-color-text-on-inverse);
+    background: var(--vectis-color-surface-inverse);
+    color: var(--vectis-color-text-on-inverse);
     border: none;
-    border-radius: var(--ds-radius-sm);
-    box-shadow: var(--ds-shadow-2);
-    font-family: var(--ds-text-family);
-    font-size: var(--ds-text-caption-size);
-    line-height: var(--ds-text-caption-leading);
+    border-radius: var(--vectis-radius-sm);
+    box-shadow: var(--vectis-shadow-2);
+    font-family: var(--vectis-text-family);
+    font-size: var(--vectis-text-caption-size);
+    line-height: var(--vectis-text-caption-leading);
   }
 }
 </style>

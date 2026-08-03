@@ -53,7 +53,7 @@ describe('Menu', () => {
     `)
     const menu = container.querySelector('[role="menu"]') as HTMLElement
     expect(menu.hasAttribute('data-width')).toBe(true)
-    expect(menu.style.getPropertyValue('--_menu-width')).toBe('max-content')
+    expect(menu.style.getPropertyValue('--menu-width')).toBe('max-content')
   })
 
   it('les sous-panneaux ne rendent pas data-width (largeur par défaut)', () => {
@@ -282,8 +282,8 @@ describe('Menu', () => {
   })
 
   it('ds-control n’est posée QUE sur le panneau racine (le compact hérité en dépend)', () => {
-    // Sur un sous-panneau, `.ds-control` redéfinirait --_control-height depuis
-    // --_control-height-base SANS la condition [data-compact] (qu'il ne porte
+    // Sur un sous-panneau, `.ds-control` redéfinirait --control-height depuis
+    // --control-height-base SANS la condition [data-compact] (qu'il ne porte
     // pas) : la hauteur y repasserait à sa valeur non compacte.
     const { container } = renderHarness(`
       <Menu size="md" compact>

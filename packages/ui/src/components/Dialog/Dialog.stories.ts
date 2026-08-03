@@ -161,7 +161,7 @@ export const HeaderPersonnalise: Story = {
         <template #header>
           <div style="display: flex; align-items: center; gap: 12px">
             <span
-              style="display: grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; background: var(--ds-color-accent-surface); color: var(--ds-color-accent-text)"
+              style="display: grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; background: var(--vectis-color-accent-surface); color: var(--vectis-color-accent-text)"
             >
               ✦
             </span>

@@ -351,7 +351,7 @@ function onKeydown(event: KeyboardEvent) {
   .ds-pagination-items {
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-1);
+    gap: var(--vectis-space-1);
   }
 
   /* attached : l'assemblage est fait par les marges négatives de ButtonGroup */
@@ -363,8 +363,8 @@ function onKeydown(event: KeyboardEvent) {
     /* Pastille carrée à un chiffre, qui s'élargit d'elle-même au-delà : la
        variable est posée par ds-control sur ce même élément, une seule règle
        couvre donc les 5 tailles × compact. */
-    min-inline-size: var(--_control-height);
-    padding-inline: var(--ds-space-2);
+    min-inline-size: var(--control-height);
+    padding-inline: var(--vectis-space-2);
   }
 
   /* l'ellipse n'est pas un bouton désactivé au sens de l'utilisateur */

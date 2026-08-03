@@ -231,74 +231,74 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
      * La typo garde son échelle propre, majorée d'un à deux crans par rapport
      * aux autres champs : les chiffres remplissent les cases carrées.
      */
-    --_font-size: var(--ds-font-size-lg);
+    --otp-font-size: var(--vectis-font-size-lg);
 
     display: inline-flex;
     align-items: center;
-    gap: var(--_control-gap);
+    gap: var(--control-gap);
   }
 
   .ds-otp-input {
     /* cases carrées : size/compact scalent les deux dimensions d'un coup */
-    width: var(--_control-height);
-    height: var(--_control-height);
+    width: var(--control-height);
+    height: var(--control-height);
     text-align: center;
-    background: var(--ds-color-surface);
-    color: var(--ds-color-text);
-    border: 1px solid var(--ds-color-border-strong);
-    border-radius: var(--ds-radius-interactive);
-    font-family: var(--ds-text-family-code);
-    font-size: var(--_font-size);
-    transition: border-color var(--ds-duration-fast) var(--ds-ease-default);
+    background: var(--vectis-color-surface);
+    color: var(--vectis-color-text);
+    border: 1px solid var(--vectis-color-border-strong);
+    border-radius: var(--vectis-radius-interactive);
+    font-family: var(--vectis-text-family-code);
+    font-size: var(--otp-font-size);
+    transition: border-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur
      (aligné sur Input/Textarea) ; l'outline transparent est le filet
      forced-colors (Windows High Contrast supprime les box-shadow) */
   .ds-otp-input:focus-visible {
-    border-color: var(--ds-color-accent);
-    box-shadow: 0 0 0 1px var(--ds-color-accent);
-    outline: var(--ds-focus-ring-width) solid transparent;
+    border-color: var(--vectis-color-accent);
+    box-shadow: 0 0 0 1px var(--vectis-color-accent);
+    outline: var(--vectis-focus-ring-width) solid transparent;
   }
 
   .ds-otp[data-invalid] .ds-otp-input {
-    border-color: var(--ds-color-danger);
+    border-color: var(--vectis-color-danger);
   }
 
   .ds-otp[data-invalid] .ds-otp-input:focus-visible {
-    box-shadow: 0 0 0 1px var(--ds-color-danger);
+    box-shadow: 0 0 0 1px var(--vectis-color-danger);
   }
 
   .ds-otp-literal {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--ds-color-text-muted);
-    font-family: var(--ds-text-family-code);
-    font-size: var(--_font-size);
+    color: var(--vectis-color-text-muted);
+    font-family: var(--vectis-text-family-code);
+    font-size: var(--otp-font-size);
     user-select: none;
   }
 
   /* Disabled : gris par tokens, sans opacité (aligné sur Input) */
   .ds-otp[data-disabled] .ds-otp-input {
-    background: var(--ds-color-surface-muted);
-    color: var(--ds-color-text-subtle);
-    border-color: var(--ds-color-border);
+    background: var(--vectis-color-surface-muted);
+    color: var(--vectis-color-text-subtle);
+    border-color: var(--vectis-color-border);
     cursor: not-allowed;
   }
 
   .ds-otp[data-disabled] .ds-otp-literal {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
   }
 
   /* --- Tailles : seule la typo majorée reste locale, le reste vient de
      ds-control --- */
   .ds-otp[data-size='sm'] {
-    --_font-size: var(--ds-font-size-md);
+    --otp-font-size: var(--vectis-font-size-md);
   }
 
   .ds-otp[data-size='lg'] {
-    --_font-size: var(--ds-font-size-xl);
+    --otp-font-size: var(--vectis-font-size-xl);
   }
 
   @media (prefers-reduced-motion: reduce) {

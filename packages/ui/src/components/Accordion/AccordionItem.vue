@@ -112,26 +112,26 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   .ds-accordion-item + .ds-accordion-item {
-    border-block-start: 1px solid var(--ds-color-border);
+    border-block-start: 1px solid var(--vectis-color-border);
   }
 
   .ds-accordion-summary {
     /* Contexte d'Icon : 20px quelle que soit la densité (seuls les paddings
        varient en compact), opsz 20 comme le mapping md de la table des tailles */
-    --ds-icon-size: var(--ds-icon-size-md);
-    --ds-icon-opsz: 20;
+    --vectis-icon-size: var(--vectis-icon-size-md);
+    --vectis-icon-opsz: 20;
 
     display: flex;
     align-items: center;
-    gap: var(--ds-space-3);
+    gap: var(--vectis-space-3);
     /* Densité : variables héritées du groupe, fallbacks = taille normale */
-    padding: var(--_accordion-pad-block, var(--ds-space-4))
-      var(--_accordion-pad-inline, var(--ds-space-5));
+    padding: var(--accordion-pad-block, var(--vectis-space-4))
+      var(--accordion-pad-inline, var(--vectis-space-5));
     list-style: none;
     cursor: pointer;
-    font-size: var(--ds-text-label-size);
-    font-weight: var(--ds-text-label-weight);
-    color: var(--ds-color-text);
+    font-size: var(--vectis-text-label-size);
+    font-weight: var(--vectis-text-label-weight);
+    color: var(--vectis-color-text);
   }
 
   .ds-accordion-summary::-webkit-details-marker {
@@ -139,12 +139,12 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   .ds-accordion-item:not([data-disabled]) > .ds-accordion-summary:hover {
-    background: var(--ds-color-surface-muted);
+    background: var(--vectis-color-surface-muted);
   }
 
   .ds-accordion-summary:focus-visible {
-    outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring-color);
-    outline-offset: calc(var(--ds-focus-ring-offset) * -1);
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
   /*
@@ -154,13 +154,13 @@ function onSummaryClick(event: MouseEvent) {
    * Le dernier summary n'est au bord bas que panneau fermé.
    */
   .ds-accordion-item:first-child > .ds-accordion-summary {
-    border-start-start-radius: var(--_accordion-corner-radius, 0);
-    border-start-end-radius: var(--_accordion-corner-radius, 0);
+    border-start-start-radius: var(--accordion-corner-radius, 0);
+    border-start-end-radius: var(--accordion-corner-radius, 0);
   }
 
   .ds-accordion-item:last-child:not([open]) > .ds-accordion-summary {
-    border-end-start-radius: var(--_accordion-corner-radius, 0);
-    border-end-end-radius: var(--_accordion-corner-radius, 0);
+    border-end-start-radius: var(--accordion-corner-radius, 0);
+    border-end-end-radius: var(--accordion-corner-radius, 0);
   }
 
   /* Bloc textuel : titre seul, ou titre + sous-titre empilés */
@@ -168,7 +168,7 @@ function onSummaryClick(event: MouseEvent) {
     flex: 1;
     display: flex;
     flex-direction: column;
-    line-height: var(--ds-text-label-leading);
+    line-height: var(--vectis-text-label-leading);
   }
 
   /* Sous-titre : rendu par Typography (caption muted) — la classe
@@ -178,13 +178,13 @@ function onSummaryClick(event: MouseEvent) {
   /* Classe dédiée (pas .ds-accordion-icon : rotation/permutation réservées au chevron) */
   .ds-accordion-icon-start {
     flex: none;
-    color: var(--ds-color-text-muted);
+    color: var(--vectis-color-text-muted);
   }
 
   .ds-accordion-icon {
     flex: none;
-    color: var(--ds-color-text-muted);
-    transition: rotate var(--ds-duration-base) var(--ds-ease-default);
+    color: var(--vectis-color-text-muted);
+    transition: rotate var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   .ds-accordion-item[open]:not([data-swap]) > .ds-accordion-summary .ds-accordion-icon {
@@ -201,7 +201,7 @@ function onSummaryClick(event: MouseEvent) {
 
   /* Désactivé : nuances de gris par tokens (jamais d'opacité) */
   .ds-accordion-item[data-disabled] > .ds-accordion-summary {
-    color: var(--ds-color-text-subtle);
+    color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
@@ -217,8 +217,8 @@ function onSummaryClick(event: MouseEvent) {
     block-size: 0;
     overflow: clip;
     transition:
-      block-size var(--ds-duration-base) var(--ds-ease-default),
-      content-visibility var(--ds-duration-base) allow-discrete;
+      block-size var(--vectis-duration-base) var(--vectis-ease-default),
+      content-visibility var(--vectis-duration-base) allow-discrete;
   }
 
   .ds-accordion-item[open]::details-content {
@@ -227,11 +227,12 @@ function onSummaryClick(event: MouseEvent) {
 
   .ds-accordion-content {
     /* Respiration sous le summary, réduite en compact (variables du groupe) */
-    padding: var(--_accordion-content-pad-start, var(--ds-space-2))
-      var(--_accordion-pad-inline, var(--ds-space-5)) var(--_accordion-pad-block, var(--ds-space-4));
-    font-size: var(--ds-text-body-md-size);
-    line-height: var(--ds-text-body-md-leading);
-    color: var(--ds-color-text-muted);
+    padding: var(--accordion-content-pad-start, var(--vectis-space-2))
+      var(--accordion-pad-inline, var(--vectis-space-5))
+      var(--accordion-pad-block, var(--vectis-space-4));
+    font-size: var(--vectis-text-body-md-size);
+    line-height: var(--vectis-text-body-md-leading);
+    color: var(--vectis-color-text-muted);
   }
 
   @media (prefers-reduced-motion: reduce) {

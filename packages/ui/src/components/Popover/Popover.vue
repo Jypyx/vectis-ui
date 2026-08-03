@@ -56,7 +56,7 @@ interface PopoverProps {
    */
   mode?: 'auto' | 'manual'
   /**
-   * Ancre statique (dashed-ident, ex. `--ds-tooltip-anchor`) posée par le
+   * Ancre statique (dashed-ident, ex. `--tooltip-anchor`) posée par le
    * consommateur sur son contrôle. Prime sur le wrapper interne.
    */
   anchor?: string
@@ -108,7 +108,7 @@ const triggerProps = computed<PopoverTriggerProps>(() => ({
 
 // Une seule déclaration CSS couvre les deux modes : `position-anchor` retombe
 // sur le nom du wrapper quand la variable n'est pas posée.
-const panelStyle = computed(() => (props.anchor ? { '--_anchor': props.anchor } : undefined))
+const panelStyle = computed(() => (props.anchor ? { '--anchor-name': props.anchor } : undefined))
 
 function onToggle(event: Event) {
   syncShown(event)
@@ -163,10 +163,10 @@ defineExpose({ show, hide, el: panelEl })
 
   .ds-popover[data-trigger] {
     display: inline-block;
-    anchor-name: --ds-popover-anchor;
+    anchor-name: --popover-anchor;
     /* confine le nom d'ancre à ce sous-arbre : chaque panneau (même en top
        layer) résout SON wrapper, pas le dernier wrapper nommé de la page */
-    anchor-scope: --ds-popover-anchor;
+    anchor-scope: --popover-anchor;
   }
 
   /*
@@ -175,7 +175,7 @@ defineExpose({ show, hide, el: panelEl })
    * seraient arbitrés par l'ordre du bundle à spécificité égale (0,1,0).
    */
   .ds-popover-panel {
-    position-anchor: var(--_anchor, --ds-popover-anchor);
+    position-anchor: var(--anchor-name, --popover-anchor);
   }
 }
 </style>

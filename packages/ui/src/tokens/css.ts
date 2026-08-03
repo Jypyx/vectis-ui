@@ -16,7 +16,7 @@ export function flattenTokens(group: TokenGroup, prefix: string[] = []): FlatTok
   for (const [key, node] of Object.entries(group)) {
     const path = [...prefix, key]
     if (isToken(node)) {
-      out.push({ path, cssName: `--ds-${path.join('-')}`, token: node })
+      out.push({ path, cssName: `--vectis-${path.join('-')}`, token: node })
     } else {
       out.push(...flattenTokens(node, path))
     }
@@ -27,12 +27,12 @@ export function flattenTokens(group: TokenGroup, prefix: string[] = []): FlatTok
 const ALIAS_RE = /\{([^}]+)\}/g
 
 /**
- * Résout les alias DTCG `{path.to.token}` en `var(--ds-path-to-token)`.
+ * Résout les alias DTCG `{path.to.token}` en `var(--vectis-path-to-token)`.
  * Lève une erreur si l'alias ne correspond à aucun token connu.
  */
 export function resolveTokenValue(value: string, known: ReadonlySet<string>): string {
   return value.replace(ALIAS_RE, (_match, ref: string) => {
-    const cssName = `--ds-${ref.trim().split('.').join('-')}`
+    const cssName = `--vectis-${ref.trim().split('.').join('-')}`
     if (!known.has(cssName)) {
       throw new Error(`Alias de token inconnu : {${ref}}`)
     }

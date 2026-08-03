@@ -67,12 +67,12 @@ defineSlots<{
   /*
    * Sélecteur avec [data-size] pour battre la règle de padding de Button
    * quel que soit l'ordre du CSS bundlé (ce fichier reste importé APRÈS
-   * Button dans index.ts). La largeur lit --_control-height, posée par la
+   * Button dans index.ts). La largeur lit --control-height, posée par la
    * classe partagée ds-control sur ce même élément rendu (compact inclus) :
    * une seule règle couvre toutes les tailles.
    */
   .ds-icon-button[data-size] {
-    width: var(--_control-height);
+    width: var(--control-height);
     padding-inline: 0;
   }
 }

@@ -148,11 +148,11 @@ function onKeydown(event: KeyboardEvent) {
      * tombe sur la MÊME VERTICALE que celui de son parent. Les deux variables
      * sont posées par `ds-control` sur cette même racine — le retrait suit donc
      * l'échelle des tailles sans table locale, et un consommateur qui repose
-     * `--ds-icon-size` le voit suivre. Hérité par tous les niveaux.
+     * `--vectis-icon-size` le voit suivre. Hérité par tous les niveaux.
      */
-    --_indent: calc(var(--ds-icon-size) + var(--_control-gap));
+    --side-nav-indent: calc(var(--vectis-icon-size) + var(--control-gap));
 
-    font-family: var(--ds-text-family);
+    font-family: var(--vectis-text-family);
     /* Repli animé de `::details-content` : autorise block-size 0 → auto
        (progressive enhancement, idiome Accordion). Hérité par les items. */
     interpolate-size: allow-keywords;

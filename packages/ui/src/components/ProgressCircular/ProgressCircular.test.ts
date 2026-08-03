@@ -21,7 +21,7 @@ describe('ProgressCircular', () => {
     expect(bar.getAttribute('aria-valuemin')).toBe('0')
     // borne haute fidèle, pas de normalisation sur 100
     expect(bar.getAttribute('aria-valuemax')).toBe('60')
-    expect(styleOf(container)).toContain('--_f: 0.5')
+    expect(styleOf(container)).toContain('--fill-fraction: 0.5')
   })
 
   it('clampe au-dessus du max et en dessous de zéro', async () => {
@@ -30,10 +30,10 @@ describe('ProgressCircular', () => {
       attrs: { 'aria-label': 'x' },
     })
     expect(getByRole('progressbar').getAttribute('aria-valuenow')).toBe('100')
-    expect(styleOf(container)).toContain('--_f: 1')
+    expect(styleOf(container)).toContain('--fill-fraction: 1')
     await rerender({ value: -10 })
     expect(getByRole('progressbar').getAttribute('aria-valuenow')).toBe('0')
-    expect(styleOf(container)).toContain('--_f: 0')
+    expect(styleOf(container)).toContain('--fill-fraction: 0')
   })
 
   it('max: 0 ne produit ni NaN ni Infinity', () => {
@@ -42,7 +42,7 @@ describe('ProgressCircular', () => {
       attrs: { 'aria-label': 'x' },
     })
     const style = styleOf(container)
-    expect(style).toContain('--_f: 0')
+    expect(style).toContain('--fill-fraction: 0')
     expect(style).not.toContain('NaN')
     expect(style).not.toContain('Infinity')
   })
@@ -57,7 +57,7 @@ describe('ProgressCircular', () => {
     expect(bar.hasAttribute('data-indeterminate')).toBe(true)
     expect(container.querySelector('.ds-progress-circular-label')).toBeNull()
     // toujours posée, sinon le calc() du dashoffset serait invalide
-    expect(styleOf(container)).toContain('--_f: 0')
+    expect(styleOf(container)).toContain('--fill-fraction: 0')
   })
 
   it('size et thickness : number → px, string telle quelle, absentes si non fournies', async () => {
@@ -65,19 +65,19 @@ describe('ProgressCircular', () => {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
-    expect(styleOf(container)).not.toContain('--_diameter')
-    expect(styleOf(container)).not.toContain('--_thickness')
+    expect(styleOf(container)).not.toContain('--progress-diameter')
+    expect(styleOf(container)).not.toContain('--progress-thickness')
     await rerender({ size: 96, thickness: 8 })
-    expect(styleOf(container)).toContain('--_diameter: 96px')
-    expect(styleOf(container)).toContain('--_thickness: 8px')
+    expect(styleOf(container)).toContain('--progress-diameter: 96px')
+    expect(styleOf(container)).toContain('--progress-thickness: 8px')
     // strings numériques : même résultat, toujours des pixels
     await rerender({ size: '96', thickness: '8' })
-    expect(styleOf(container)).toContain('--_diameter: 96px')
-    expect(styleOf(container)).toContain('--_thickness: 8px')
+    expect(styleOf(container)).toContain('--progress-diameter: 96px')
+    expect(styleOf(container)).toContain('--progress-thickness: 8px')
     // valeurs non numériques : ignorées plutôt que custom properties invalides
     await rerender({ size: 'auto', thickness: 'auto' })
-    expect(styleOf(container)).not.toContain('--_diameter')
-    expect(styleOf(container)).not.toContain('--_thickness')
+    expect(styleOf(container)).not.toContain('--progress-diameter')
+    expect(styleOf(container)).not.toContain('--progress-thickness')
   })
 
   it('shape : rounded par défaut, square reporté', async () => {
@@ -113,7 +113,7 @@ describe('ProgressCircular', () => {
     await rerender({ tone: 'success', color: 'hotpink' })
     expect(getByRole('progressbar').getAttribute('data-tone')).toBe('success')
     expect(getByRole('progressbar').hasAttribute('data-custom')).toBe(true)
-    expect(styleOf(container)).toContain('--_custom: hotpink')
+    expect(styleOf(container)).toContain('--custom-color: hotpink')
   })
 
   it('showValue : un seul label centré, non masqué', () => {
@@ -141,7 +141,7 @@ describe('ProgressCircular', () => {
     expect(labels[0]!.textContent?.trim()).toBe('3/8 — 38')
   })
 
-  it('non-régression d’API : nom par fallthrough, plus de --ds-progress-value', () => {
+  it('non-régression d’API : nom par fallthrough, plus de --vectis-progress-value', () => {
     const { getByRole, container } = render(ProgressCircular, {
       props: { value: 40 },
       attrs: { 'aria-label': 'Nom par fallthrough' },
@@ -149,7 +149,7 @@ describe('ProgressCircular', () => {
     // le nom vient d'aria-label en fallthrough, pas d'une prop `label` dédiée
     expect(getByRole('progressbar', { name: 'Nom par fallthrough' })).toBeTruthy()
     // la fraction est une custom property PRIVÉE : rien de public n'est exposé
-    expect(styleOf(container)).not.toContain('--ds-progress-value')
+    expect(styleOf(container)).not.toContain('--vectis-progress-value')
   })
 
   it('fallthrough : class, id et style du consommateur cohabitent avec les custom properties', () => {
@@ -163,6 +163,6 @@ describe('ProgressCircular', () => {
     expect(bar.id).toBe('donut')
     const style = bar.getAttribute('style') ?? ''
     expect(style).toContain('margin: 4px')
-    expect(style).toContain('--_f: 0.4')
+    expect(style).toContain('--fill-fraction: 0.4')
   })
 })

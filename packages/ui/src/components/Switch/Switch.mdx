@@ -11,7 +11,7 @@ Le rendu track/thumb est du pur CSS piloté par `:checked` ; le JavaScript se li
 v-model. La racine est un `<label>` englobant : cliquer le libellé bascule l'interrupteur,
 sans `for`/`id`.
 
-Taille unique : track de 40×20px (tokens `--ds-control-size-switch-w/h`), aligné sur la
+Taille unique : track de 40×20px (tokens `--vectis-control-size-switch-w/h`), aligné sur la
 hauteur des Checkbox/Radio.
 
 <Canvas of={SwitchStories.Default} />
@@ -34,8 +34,8 @@ quel côté part l'interrupteur.
 
 ## États
 
-`disabled` bascule l'interrupteur sur des nuances de gris : track `--ds-color-surface-muted`
-(coché ou non), thumb `--ds-color-text-subtle` sans ombre — la couleur de la coche/du point
+`disabled` bascule l'interrupteur sur des nuances de gris : track `--vectis-color-surface-muted`
+(coché ou non), thumb `--vectis-color-text-subtle` sans ombre — la couleur de la coche/du point
 désactivé de Checkbox/Radio, visible dans les deux thèmes. Pas de jeu d'opacité.
 
 <Canvas of={SwitchStories.Disabled} />
@@ -58,5 +58,5 @@ l'input, pas sur le label : l'interrupteur participe normalement aux formulaires
   « coché/décoché ».
 - L'input est masqué via `opacity: 0` (jamais `display: none`) : il reste focusable au
   clavier (Espace bascule) et soumis au formulaire.
-- Focus visible par anneau (`--ds-focus-ring-*`) sur le track, jamais supprimé.
+- Focus visible par anneau (`--vectis-focus-ring-*`) sur le track, jamais supprimé.
 - La transition du thumb respecte `prefers-reduced-motion`.

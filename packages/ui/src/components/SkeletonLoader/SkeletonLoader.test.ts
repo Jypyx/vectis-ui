@@ -22,7 +22,7 @@ describe('SkeletonLoader', () => {
     expect(itemsOf(container)).toHaveLength(1)
   })
 
-  it('porte la classe ds-control : sans elle --_control-height est indéfinie et la hauteur s’effondre', () => {
+  it('porte la classe ds-control : sans elle --control-height est indéfinie et la hauteur s’effondre', () => {
     const { container } = render(SkeletonLoader)
     expect(rootOf(container).classList.contains('ds-control')).toBe(true)
   })
@@ -67,28 +67,28 @@ describe('SkeletonLoader', () => {
 
   it('width/height : nombre → px, chaîne CSS telle quelle, absentes → aucune custom property', async () => {
     const { container, rerender } = render(SkeletonLoader)
-    expect(styleOf(container)).not.toContain('--_w')
-    expect(styleOf(container)).not.toContain('--_h')
+    expect(styleOf(container)).not.toContain('--skeleton-w')
+    expect(styleOf(container)).not.toContain('--skeleton-h')
 
     await rerender({ width: 200, height: 48 })
-    expect(styleOf(container)).toContain('--_w: 200px')
-    expect(styleOf(container)).toContain('--_h: 48px')
+    expect(styleOf(container)).toContain('--skeleton-w: 200px')
+    expect(styleOf(container)).toContain('--skeleton-h: 48px')
 
     // unité libre, contrairement à `px()` : la chaîne n'est pas interprétée
     await rerender({ width: '100%', height: '12ch' })
-    expect(styleOf(container)).toContain('--_w: 100%')
-    expect(styleOf(container)).toContain('--_h: 12ch')
+    expect(styleOf(container)).toContain('--skeleton-w: 100%')
+    expect(styleOf(container)).toContain('--skeleton-h: 12ch')
     expect(styleOf(container)).not.toContain('NaN')
   })
 
-  it('color pose data-custom et --_custom ; sinon ni l’un ni l’autre', async () => {
+  it('color pose data-custom et --custom-color ; sinon ni l’un ni l’autre', async () => {
     const { container, rerender } = render(SkeletonLoader)
     expect(rootOf(container).hasAttribute('data-custom')).toBe(false)
-    expect(styleOf(container)).not.toContain('--_custom')
+    expect(styleOf(container)).not.toContain('--custom-color')
 
     await rerender({ color: 'oklch(60% 0.2 250)' })
     expect(rootOf(container).hasAttribute('data-custom')).toBe(true)
-    expect(rootOf(container).style.getPropertyValue('--_custom')).toBe('oklch(60% 0.2 250)')
+    expect(rootOf(container).style.getPropertyValue('--custom-color')).toBe('oklch(60% 0.2 250)')
   })
 
   it('décoratif par défaut : aria-hidden, aucun rôle, aucun texte', () => {
@@ -134,6 +134,6 @@ describe('SkeletonLoader', () => {
     expect(root.classList.contains('ds-skeleton')).toBe(true)
     expect(root.getAttribute('id')).toBe('chargement')
     expect(styleOf(container)).toContain('margin-block: 8px')
-    expect(styleOf(container)).toContain('--_w: 120px')
+    expect(styleOf(container)).toContain('--skeleton-w: 120px')
   })
 })

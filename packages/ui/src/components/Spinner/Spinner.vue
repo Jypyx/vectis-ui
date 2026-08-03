@@ -33,7 +33,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 <template>
   <span
     class="ds-spinner"
-    :style="size !== undefined ? { '--_size': `${size}px` } : undefined"
+    :style="size !== undefined ? { '--spinner-size': `${size}px` } : undefined"
     role="status"
   >
     <span class="ds-spinner-circle" aria-hidden="true" />
@@ -45,23 +45,23 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 @layer ds.components {
   .ds-spinner {
     /* 1em : le spinner suit le texte du parent (un consommateur le
-       dimensionne par font-size, ex. Button pose font-size: var(--ds-icon-size)
-       sur sa boîte). La prop `size` pose --_size en px inline et prime. */
-    --_size: 1em;
+       dimensionne par font-size, ex. Button pose font-size: var(--vectis-icon-size)
+       sur sa boîte). La prop `size` pose --spinner-size en px inline et prime. */
+    --spinner-size: 1em;
     display: inline-flex;
   }
 
   .ds-spinner-circle {
-    width: var(--_size);
-    height: var(--_size);
+    width: var(--spinner-size);
+    height: var(--spinner-size);
     /* épaisseur proportionnelle (ratio technique toléré, comme les
        opacités) : 16px → 2px, 24px → 3px ; plancher 1px aux très petites
        tailles */
-    border: max(1px, calc(var(--_size) / 8)) solid
+    border: max(1px, calc(var(--spinner-size) / 8)) solid
       color-mix(in oklab, currentcolor, transparent 75%);
     border-block-start-color: currentcolor;
-    border-radius: var(--ds-radius-full);
-    animation: ds-spin calc(var(--ds-duration-slow) * 3.5) linear infinite;
+    border-radius: var(--vectis-radius-full);
+    animation: ds-spin calc(var(--vectis-duration-slow) * 3.5) linear infinite;
   }
 
   /* La keyframe `ds-spin` est partagée (styles/utilities.css) : globale, donc
@@ -69,7 +69,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 
   @media (prefers-reduced-motion: reduce) {
     .ds-spinner-circle {
-      animation-duration: calc(var(--ds-duration-slow) * 8);
+      animation-duration: calc(var(--vectis-duration-slow) * 8);
     }
   }
 }

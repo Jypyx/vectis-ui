@@ -10,8 +10,8 @@ pastille stylée (même approche que `Checkbox` : l'input reste dans l'arbre, se
 masqué). Le groupe est **natif** : plusieurs Radio partageant le même `name` (fallthrough) et
 le même v-model — la navigation aux flèches est fournie par le navigateur, zéro JavaScript.
 
-Taille unique : pastille de 20px, bordure de 2px (tokens `--ds-control-size-check` et
-`--ds-control-border-width`), point intérieur de 8px (`--ds-control-size-check-dot`).
+Taille unique : pastille de 20px, bordure de 2px (tokens `--vectis-control-size-check` et
+`--vectis-control-border-width`), point intérieur de 8px (`--vectis-control-size-check-dot`).
 
 <Canvas of={RadioStories.Groupe} />
 
@@ -36,8 +36,8 @@ pastille.
 
 ## États
 
-`disabled` bascule la pastille sur des nuances de gris (`--ds-color-surface-muted`,
-`--ds-color-text-subtle`) — pas de jeu d'opacité, et le rendu suit automatiquement le thème
+`disabled` bascule la pastille sur des nuances de gris (`--vectis-color-surface-muted`,
+`--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu suit automatiquement le thème
 dark :
 
 <Canvas of={RadioStories.Disabled} />
@@ -55,5 +55,5 @@ Les attributs natifs (`name` surtout, pour former le groupe, mais aussi `require
   `<fieldset>` avec `<legend>` pour nommer la question.
 - L'input est masqué via `opacity: 0` (jamais `display: none`) : il reste focusable et soumis
   au formulaire ; les flèches naviguent dans le groupe (comportement natif).
-- Focus visible par anneau (`--ds-focus-ring-*`) sur la pastille, jamais supprimé.
+- Focus visible par anneau (`--vectis-focus-ring-*`) sur la pastille, jamais supprimé.
 - Les transitions respectent `prefers-reduced-motion`.
