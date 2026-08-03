@@ -15,23 +15,23 @@
  * - ce qu'`Intl` dérive déjà de la balise de locale (noms de mois et de jours,
  *   ordre des champs de date, séparateur de date, cycle horaire) ;
  * - ce qui n'est fait que de chiffres et de ponctuation universelle (`99+` de
- *   Badge, `+N` d'AvatarGroup, le compteur `N/M`, le `:` de l'heure) ;
+ *   VBadge, `+N` de VAvatarGroup, le compteur `N/M`, le `:` de l'heure) ;
  * - les messages DÉVELOPPEUR (`[Composant] …`), qui ne sont pas traduits.
  */
-export interface DsMessages {
+export interface VectisMessages {
   /** Mots partagés par plusieurs composants — un seul endroit à traduire. */
   common: {
-    /** Spinner, `loadingLabel` d'Input/Textarea, `loadingText` de Combobox. */
+    /** VSpinner, `loadingLabel` de VInput/VTextarea, `loadingText` de VCombobox. */
     loading: string
-    /** `clearLabel` d'Input et Textarea. */
+    /** `clearLabel` de VInput et VTextarea. */
     clear: string
-    /** `closeLabel` de Dialog et Toaster. */
+    /** `closeLabel` de VDialog et VToaster. */
     close: string
-    /** `dismissLabel` de Chip. */
+    /** `dismissLabel` de VChip. */
     dismiss: string
-    /** Pied du cadran TimePicker. */
+    /** Pied du cadran VTimePicker. */
     cancel: string
-    /** Pied du cadran TimePicker. */
+    /** Pied du cadran VTimePicker. */
     confirm: string
   }
   pagination: {
@@ -83,7 +83,7 @@ export interface DsMessages {
     rangeStart: (label: string) => string
     rangeEnd: (label: string) => string
   }
-  /** Partagé par Input et Textarea via `composables/useTextLimit`. */
+  /** Partagé par VInput et VTextarea via `composables/useTextLimit`. */
   field: { limitExceeded: (max: number) => string }
   progress: {
     /** `50 %` en français (espace INSÉCABLE avant le signe), `50%` en anglais. */
@@ -132,8 +132,8 @@ export interface DsMessages {
  * pas retombe sur le dictionnaire de base — jamais sur une chaîne vide (même
  * contrat que les mappings partiels de `setIconResolver`).
  *
- * `Partial<DsMessages[K]>` ne descend PAS dans les valeurs : une fonction reste
+ * `Partial<VectisMessages[K]>` ne descend PAS dans les valeurs : une fonction reste
  * une fonction entière. Un `DeepPartial<T>` récursif, lui, transformerait
  * `(n: number) => string` en `{}`.
  */
-export type DsMessagesInput = { [K in keyof DsMessages]?: Partial<DsMessages[K]> }
+export type VectisMessagesInput = { [K in keyof VectisMessages]?: Partial<VectisMessages[K]> }

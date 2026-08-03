@@ -1,0 +1,60 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VButtonGroupStories from './VButtonGroup.stories'
+
+<Meta of={VButtonGroupStories} />
+
+# ButtonGroup
+
+Rattache visuellement plusieurs `VButton`/`VIconButton` en un **contrôle segmenté** : bordures
+adjacentes fusionnées, coins arrondis aux seules extrémités du groupe. Tout le rendu est en CSS
+(aucun `provide`/`inject`) — chaque bouton conserve ses propres props ; poser les mêmes
+`variant`/`tone`/`size` sur les enfants donne un rendu homogène.
+
+<Canvas of={VButtonGroupStories.Default} />
+
+<Controls of={VButtonGroupStories.Default} />
+
+## Variantes
+
+La couture entre segments s'adapte : pour les variantes pleines (`solid`/`tonal`, bordure
+transparente) une fine ligne `--vectis-color-border` matérialise la séparation ; pour `outline`, elle
+uniformise la jointure. On applique la même `variant` sur tous les boutons d'un groupe.
+
+<Canvas of={VButtonGroupStories.Variants} />
+
+## Orientation verticale
+
+`orientation="vertical"` empile les boutons : fusion et coins arrondis basculent sur l'axe block
+(coins hauts du premier, coins bas du dernier). Les boutons sont égalisés en largeur.
+
+<Canvas of={VButtonGroupStories.Vertical} />
+
+## Barre d'outils d'icônes
+
+Un groupe de `VIconButton` forme une barre d'outils compacte. Surcharger le `role` par défaut en
+`role="toolbar"` (fallthrough sur la racine) et fournir un `aria-label` au groupe.
+
+<Canvas of={VButtonGroupStories.WithIconButton} />
+
+## Tailles
+
+Approche CSS-only : la taille se pose sur **chaque** bouton (mêmes valeurs → cohérence). Le
+groupe ne propage rien.
+
+<Canvas of={VButtonGroupStories.Sizes} />
+
+## Cas limites
+
+Un bouton seul garde ses quatre coins arrondis (aucune jointure). Les libellés longs restent
+alignés.
+
+<Canvas of={VButtonGroupStories.CasLimites} />
+
+## Accessibilité
+
+- La racine est un conteneur `role="group"` (surchargeable en `role="toolbar"` par fallthrough) —
+  lui fournir un `aria-label` qui décrit le groupe (ex. « Alignement », « Mise en forme »).
+- Chaque `VButton`/`VIconButton` garde sa propre sémantique et son nom accessible ; un `VIconButton`
+  reste tenu de porter un `label`.
+- Le bouton survolé/focus/actif passe au-dessus de ses voisins (`z-index`) : son focus-ring et sa
+  bordure ne sont jamais rognés par le segment adjacent.

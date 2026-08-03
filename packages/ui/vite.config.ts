@@ -9,7 +9,7 @@ import { tokens } from './src/tokens'
 /** Émet `dist/tokens.json` (export map `./tokens.json`) depuis la source typée. */
 function emitTokensJson(): Plugin {
   return {
-    name: 'socle:emit-tokens-json',
+    name: 'vectis:emit-tokens-json',
     apply: 'build',
     generateBundle() {
       this.emitFile({

@@ -1,23 +1,23 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import type { Component } from 'vue'
 
-import Breadcrumb from '../components/Breadcrumb/Breadcrumb.vue'
-import Chip from '../components/Chip/Chip.vue'
-import Combobox from '../components/Combobox/Combobox.vue'
-import DataTableSfc from '../components/DataTable/DataTable.vue'
-import DatePicker from '../components/DatePicker/DatePicker.vue'
-import Input from '../components/Input/Input.vue'
-import Pagination from '../components/Pagination/Pagination.vue'
-import ProgressLinear from '../components/ProgressLinear/ProgressLinear.vue'
-import Spinner from '../components/Spinner/Spinner.vue'
-import TimePicker from '../components/TimePicker/TimePicker.vue'
+import VBreadcrumb from '../components/VBreadcrumb/VBreadcrumb.vue'
+import VChip from '../components/VChip/VChip.vue'
+import VCombobox from '../components/VCombobox/VCombobox.vue'
+import VDataTableSfc from '../components/VDataTable/VDataTable.vue'
+import VDatePicker from '../components/VDatePicker/VDatePicker.vue'
+import VInput from '../components/VInput/VInput.vue'
+import VPagination from '../components/VPagination/VPagination.vue'
+import VProgressLinear from '../components/VProgressLinear/VProgressLinear.vue'
+import VSpinner from '../components/VSpinner/VSpinner.vue'
+import VTimePicker from '../components/VTimePicker/VTimePicker.vue'
 
 import { en } from './en'
 import { DEFAULT_LOCALE, registerMessages, setLocale } from './state'
 
 // SFC générique : le typage `Component` ne s'y applique pas, cast obligatoire
 // dans les stories et les tests (convention du repo).
-const DataTable = DataTableSfc as unknown as Component
+const VDataTable = VDataTableSfc as unknown as Component
 
 const meta = {
   title: 'Fondations/Internationalisation',
@@ -27,16 +27,16 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const COMPOSANTS = {
-  Breadcrumb,
-  Chip,
-  Combobox,
-  DataTable,
-  DatePicker,
-  Input,
-  Pagination,
-  ProgressLinear,
-  Spinner,
-  TimePicker,
+  VBreadcrumb,
+  VChip,
+  VCombobox,
+  VDataTable,
+  VDatePicker,
+  VInput,
+  VPagination,
+  VProgressLinear,
+  VSpinner,
+  VTimePicker,
 }
 
 const COLONNES = [
@@ -59,29 +59,29 @@ const FIL = [
 ]
 
 const VITRINE = `
-  <div style="display: grid; gap: var(--ds-space-6); max-width: 44rem;">
-    <Breadcrumb :items="fil" current-path="/composants" />
+  <div style="display: grid; gap: var(--vectis-space-6); max-width: 44rem;">
+    <VBreadcrumb :items="fil" current-path="/composants" />
 
-    <div style="display: flex; gap: var(--ds-space-3); align-items: end; flex-wrap: wrap;">
-      <Input label="Champ" clearable model-value="Du texte" style="flex: 1; min-inline-size: 12rem;" />
-      <Input label="En chargement" loading style="flex: 1; min-inline-size: 12rem;" />
+    <div style="display: flex; gap: var(--vectis-space-3); align-items: end; flex-wrap: wrap;">
+      <VInput label="Champ" clearable model-value="Du texte" style="flex: 1; min-inline-size: 12rem;" />
+      <VInput label="En chargement" loading style="flex: 1; min-inline-size: 12rem;" />
     </div>
 
-    <div style="display: flex; gap: var(--ds-space-3); flex-wrap: wrap;">
-      <DatePicker label="Date" show-calendar />
-      <TimePicker label="Heure" show-dial />
+    <div style="display: flex; gap: var(--vectis-space-3); flex-wrap: wrap;">
+      <VDatePicker label="Date" show-calendar />
+      <VTimePicker label="Heure" show-dial />
     </div>
 
-    <Combobox label="Recherche" :options="options" placeholder="Filtrer…" />
+    <VCombobox label="Recherche" :options="options" placeholder="Filtrer…" />
 
-    <div style="display: flex; gap: var(--ds-space-2); align-items: center;">
-      <Chip dismissible>Étiquette</Chip>
-      <Spinner />
+    <div style="display: flex; gap: var(--vectis-space-2); align-items: center;">
+      <VChip dismissible>Étiquette</VChip>
+      <VSpinner />
     </div>
 
-    <ProgressLinear :value="42" show-value :thickness="20" />
+    <VProgressLinear :value="42" show-value :thickness="20" />
 
-    <DataTable
+    <VDataTable
       :columns="colonnes"
       :rows="lignes"
       row-key="nom"
@@ -93,7 +93,7 @@ const VITRINE = `
       show-range
     />
 
-    <Pagination :length="8" :model-value="3" />
+    <VPagination :length="8" :model-value="3" />
   </div>
 `
 
@@ -119,7 +119,7 @@ export const Francais: Story = {
  *
  * Le teardown n'est pas décoratif : l'état vit au niveau module et SURVIT à la
  * navigation Storybook (même piège que le `dismissToast()` des stories de
- * Toast). Sans lui, toutes les stories visitées ensuite s'afficheraient en
+ * VToast). Sans lui, toutes les stories visitées ensuite s'afficheraient en
  * anglais, et les play functions qui assertent du français rougiraient.
  */
 export const Anglais: Story = {

@@ -1,9 +1,9 @@
-# Socle
+# Vectis UI
 
-Monorepo pnpm du design system **[@socle/ui](packages/ui/README.md)** — Vue 3 + TypeScript, HTML/CSS d'abord, tokens surchargeables au runtime, compatible Nuxt 3.
+Monorepo pnpm du design system **[@vectis/ui](packages/ui/README.md)** — Vue 3 + TypeScript, HTML/CSS d'abord, tokens surchargeables au runtime, compatible Nuxt 3.
 
 ```
-packages/ui   → le design system (@socle/ui) — voir son README pour tout : installation, theming, contribution
+packages/ui   → le design system (@vectis/ui) — voir son README pour tout : installation, theming, contribution
 apps/         → réservé à la future app de theming temps réel
 ```
 

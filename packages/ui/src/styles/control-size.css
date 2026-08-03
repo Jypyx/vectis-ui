@@ -3,88 +3,88 @@
  * correspondance du design system (hauteur / icône / opsz / typo / paddings
  * par taille xs → xl).
  *
- * Chaque composant interactif pose `ds-control` sur sa RACINE (celle qui
- * porte `data-size`/`data-compact`) et consomme les variables `--_control-*`
+ * Chaque composant interactif pose `v-control` sur sa RACINE (celle qui
+ * porte `data-size`/`data-compact`) et consomme les variables `--control-*`
  * dans son propre CSS ; elles héritent jusqu'aux enfants (ex. le field
- * d'Input). Les blocs ne définissent QUE des custom properties — jamais de
+ * de VInput). Les blocs ne définissent QUE des custom properties — jamais de
  * propriété de layout — donc aucun conflit de spécificité avec les SFC.
  *
- * Deux colonnes de padding-inline : `--_control-padding-inline` pour les
- * contrôles pleins (Button, Chip, rangées de panneau…),
- * `--_control-padding-inline-field` pour les champs de saisie (Input,
- * Textarea, DatePicker), plus serrés.
- * `--_control-gap` : espacement interne (icône/libellé, cases OTP…).
+ * Deux colonnes de padding-inline : `--control-padding-inline` pour les
+ * contrôles pleins (VButton, VChip, rangées de panneau…),
+ * `--control-padding-inline-field` pour les champs de saisie (VInput,
+ * VTextarea, VDatePicker), plus serrés.
+ * `--control-gap` : espacement interne (icône/libellé, cases OTP…).
  *
- * `--ds-icon-size`/`--ds-icon-opsz` = API de contexte publique d'Icon ;
+ * `--vectis-icon-size`/`--vectis-icon-opsz` = API de contexte publique de VIcon ;
  * l'opsz reste un littéral (axe de la police Material Symbols : contrat
- * technique, pas un token de design — voir Icon.vue).
+ * technique, pas un token de design — voir VIcon.vue).
  */
-@layer ds.components {
-  .ds-control {
+@layer vectis.components {
+  .v-control {
     /*
-     * Hauteur en deux temps : les tailles posent --_control-height-base,
+     * Hauteur en deux temps : les tailles posent --control-height-base,
      * compact dérive la hauteur effective (-4px, padding/typo/icônes
      * inchangés).
      */
-    --_control-height: var(--_control-height-base);
+    --control-height: var(--control-height-base);
   }
 
-  .ds-control[data-compact] {
-    --_control-height: calc(var(--_control-height-base) - var(--ds-space-1));
+  .v-control[data-compact] {
+    --control-height: calc(var(--control-height-base) - var(--vectis-space-1));
   }
 
-  .ds-control[data-size='xs'] {
-    --_control-height-base: var(--ds-control-height-xs);
-    --_control-font-size: var(--ds-font-size-xs);
-    --_control-padding-inline: var(--ds-space-2);
-    --_control-padding-inline-field: var(--ds-space-1);
-    --_control-gap: var(--ds-space-1);
-    --_control-action-size: var(--ds-control-action-size-sm);
-    --ds-icon-size: var(--ds-icon-size-sm);
-    --ds-icon-opsz: 20;
+  .v-control[data-size='xs'] {
+    --control-height-base: var(--vectis-control-height-xs);
+    --control-font-size: var(--vectis-font-size-xs);
+    --control-padding-inline: var(--vectis-space-2);
+    --control-padding-inline-field: var(--vectis-space-1);
+    --control-gap: var(--vectis-space-1);
+    --control-action-size: var(--vectis-control-action-size-sm);
+    --vectis-icon-size: var(--vectis-icon-size-sm);
+    --vectis-icon-opsz: 20;
   }
 
-  .ds-control[data-size='sm'] {
-    --_control-height-base: var(--ds-control-height-sm);
-    --_control-font-size: var(--ds-font-size-sm);
-    --_control-padding-inline: var(--ds-space-3);
-    --_control-padding-inline-field: var(--ds-space-2);
-    --_control-gap: var(--ds-space-2);
-    --_control-action-size: var(--ds-control-action-size-md);
-    --ds-icon-size: var(--ds-icon-size-md);
-    --ds-icon-opsz: 20;
+  .v-control[data-size='sm'] {
+    --control-height-base: var(--vectis-control-height-sm);
+    --control-font-size: var(--vectis-font-size-sm);
+    --control-padding-inline: var(--vectis-space-3);
+    --control-padding-inline-field: var(--vectis-space-2);
+    --control-gap: var(--vectis-space-2);
+    --control-action-size: var(--vectis-control-action-size-md);
+    --vectis-icon-size: var(--vectis-icon-size-md);
+    --vectis-icon-opsz: 20;
   }
 
-  .ds-control[data-size='md'] {
-    --_control-height-base: var(--ds-control-height-md);
-    --_control-font-size: var(--ds-font-size-sm);
-    --_control-padding-inline: var(--ds-space-4);
-    --_control-padding-inline-field: var(--ds-space-3);
-    --_control-gap: var(--ds-space-2);
-    --_control-action-size: var(--ds-control-action-size-md);
-    --ds-icon-size: var(--ds-icon-size-md);
-    --ds-icon-opsz: 20;
+  .v-control[data-size='md'] {
+    --control-height-base: var(--vectis-control-height-md);
+    --control-font-size: var(--vectis-font-size-sm);
+    --control-padding-inline: var(--vectis-space-4);
+    --control-padding-inline-field: var(--vectis-space-3);
+    --control-gap: var(--vectis-space-2);
+    --control-action-size: var(--vectis-control-action-size-md);
+    --vectis-icon-size: var(--vectis-icon-size-md);
+    --vectis-icon-opsz: 20;
   }
 
-  .ds-control[data-size='lg'] {
-    --_control-height-base: var(--ds-control-height-lg);
-    --_control-font-size: var(--ds-font-size-md);
-    --_control-padding-inline: var(--ds-space-5);
-    --_control-padding-inline-field: var(--ds-space-4);
-    --_control-gap: var(--ds-space-3);
-    --_control-action-size: var(--ds-control-action-size-lg);
-    --ds-icon-size: var(--ds-icon-size-lg);
-    --ds-icon-opsz: 24;
+  .v-control[data-size='lg'] {
+    --control-height-base: var(--vectis-control-height-lg);
+    --control-font-size: var(--vectis-font-size-md);
+    --control-padding-inline: var(--vectis-space-5);
+    --control-padding-inline-field: var(--vectis-space-4);
+    --control-gap: var(--vectis-space-3);
+    --control-action-size: var(--vectis-control-action-size-lg);
+    --vectis-icon-size: var(--vectis-icon-size-lg);
+    --vectis-icon-opsz: 24;
   }
 
-  .ds-control[data-size='xl'] {
-    --_control-height-base: var(--ds-control-height-xl);
-    --_control-font-size: var(--ds-font-size-md);
-    --_control-padding-inline: var(--ds-space-6);
-    --_control-padding-inline-field: var(--ds-space-5);
-    --_control-gap: var(--ds-space-3);
-    --_control-action-size: var(--ds-control-action-size-lg);
-    --ds-icon-size: var(--ds-icon-size-lg);
-    --ds-icon-opsz: 24;
+  .v-control[data-size='xl'] {
+    --control-height-base: var(--vectis-control-height-xl);
+    --control-font-size: var(--vectis-font-size-md);
+    --control-padding-inline: var(--vectis-space-6);
+    --control-padding-inline-field: var(--vectis-space-5);
+    --control-gap: var(--vectis-space-3);
+    --control-action-size: var(--vectis-control-action-size-lg);
+    --vectis-icon-size: var(--vectis-icon-size-lg);
+    --vectis-icon-opsz: 24;
   }
 }

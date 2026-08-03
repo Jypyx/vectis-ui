@@ -1,0 +1,60 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VAvatarGroupStories from './VAvatarGroup.stories'
+
+<Meta of={VAvatarGroupStories} />
+
+# AvatarGroup
+
+Empile des `VAvatar` en pile chevauchante : le disque de **droite passe par-dessus** celui de
+gauche (chevauchement négatif + ordre de peinture DOM, sans JS de positionnement), séparés par
+un anneau. Une prop `max` limite le nombre d'avatars visibles et pousse un agrégat **« +X »**.
+
+<Canvas of={VAvatarGroupStories.Empilement} />
+
+<Controls of={VAvatarGroupStories.Empilement} />
+
+## Débordement (`max`)
+
+`max` borne le nombre d'avatars affichés ; les suivants sont résumés par un avatar agrégat
+statique et neutre « +X ». Le comptage/troncature des enfants du slot est le seul JS du
+composant (impossible en HTML/CSS), avec dépliage des fragments produits par `v-for`.
+
+<Canvas of={VAvatarGroupStories.Overflow} />
+
+## Taille héritée
+
+`size` (et `compact`) posés sur le groupe se **propagent** à tous les enfants via un contexte
+`provide`/`inject` — inutile de les répéter sur chaque `VAvatar`. Une prop `size` explicite sur
+un enfant reprend la priorité.
+
+<Canvas of={VAvatarGroupStories.TailleHeritee} />
+
+## Agrégat personnalisé
+
+Le slot `#overflow` (portée : `{ count }`) remplace l'agrégat par défaut — pour le rendre
+cliquable, y attacher un menu, un tooltip, etc.
+
+<Canvas of={VAvatarGroupStories.OverflowPersonnalise} />
+
+## Avec des tooltips
+
+Chaque `VAvatar` (et l'agrégat) peut être enveloppé dans un `VTooltip`. L'empilement reste
+correct **même si le trigger est enveloppé** : le groupe cible l'enfant direct générique et
+porte lui-même `v-control`, si bien que la distance de chevauchement (`--control-height`)
+reste résolue à travers le `<span>` que le `VTooltip` insère autour de sa cible.
+
+<Canvas of={VAvatarGroupStories.AvecTooltips} />
+
+## Anneau de séparation
+
+Chaque avatar porte un anneau `box-shadow` (token `--vectis-control-size-avatar-ring`, 2px) de la
+couleur du fond derrière (`--vectis-color-surface` par défaut, surchargeable via `ringColor`) — il
+détache les disques qui se chevauchent. Sur un fond différent (carte, bandeau), passer la
+couleur adéquate à `ringColor`.
+
+## Accessibilité
+
+- Le groupe est un conteneur `role="group"`.
+- Chaque avatar garde sa propre sémantique (image, `role="img"` + `aria-label`, ou interactif).
+- L'agrégat par défaut affiche « +X » ; pour une formulation explicite (« 3 autres membres »),
+  utiliser le slot `#overflow` avec un `aria-label` dédié.

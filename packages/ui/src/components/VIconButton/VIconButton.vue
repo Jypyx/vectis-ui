@@ -1,0 +1,79 @@
+<script setup lang="ts">
+import type { ButtonHTMLAttributes } from 'vue'
+
+import VButton from '../VButton/VButton.vue'
+import VIcon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
+
+/**
+ * Bouton icône : même API visuelle que VButton, mais carré et avec un libellé
+ * accessible OBLIGATOIRE (l'icône seule ne suffit pas aux lecteurs d'écran).
+ */
+interface IconButtonProps {
+  /** Libellé accessible, posé en aria-label. */
+  label: string
+  variant?: 'solid' | 'outline' | 'ghost' | 'elevated' | 'tonal'
+  tone?: 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  /** Hauteur (et largeur) réduites de 4px. */
+  compact?: boolean
+  type?: ButtonHTMLAttributes['type']
+  disabled?: boolean
+  loading?: boolean
+  /** Icône rendue : nom, ou rendu explicite (le slot par défaut prime en fallback). */
+  icon?: IconSource
+  /** Remplit l'icône `icon` (axe `FILL` de la police). */
+  iconFilled?: boolean
+}
+
+withDefaults(defineProps<IconButtonProps>(), {
+  variant: 'ghost',
+  tone: 'neutral',
+  size: 'md',
+  compact: false,
+  type: 'button',
+  disabled: false,
+  loading: false,
+  icon: undefined,
+  iconFilled: false,
+})
+
+defineSlots<{
+  /** L'icône (composant VIcon ou SVG avec aria-hidden="true"), si `icon` n'est pas fourni */
+  default(): unknown
+}>()
+</script>
+
+<template>
+  <VButton
+    class="v-icon-button"
+    :variant="variant"
+    :tone="tone"
+    :size="size"
+    :compact="compact"
+    :type="type"
+    :disabled="disabled"
+    :loading="loading"
+    :aria-label="label"
+  >
+    <VIcon v-if="icon" v-bind="iconProps(icon)" :filled="iconFilled" />
+    <slot v-else />
+  </VButton>
+</template>
+
+<style>
+@layer vectis.components {
+  /*
+   * Sélecteur avec [data-size] pour battre la règle de padding de VButton
+   * quel que soit l'ordre du CSS bundlé (ce fichier reste importé APRÈS
+   * VButton dans index.ts). La largeur lit --control-height, posée par la
+   * classe partagée v-control sur ce même élément rendu (compact inclus) :
+   * une seule règle couvre toutes les tailles.
+   */
+  .v-icon-button[data-size] {
+    width: var(--control-height);
+    padding-inline: 0;
+  }
+}
+</style>

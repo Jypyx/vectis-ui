@@ -1,7 +1,7 @@
 <!--
-  Police Material Symbols Rounded pour les stories d'Icon et Button.
+  Police Material Symbols Rounded pour les stories de VIcon et VButton.
   En production, c'est le CONSOMMATEUR qui charge cette police (voir le
-  README de @socle/ui) : elle n'est pas embarquée dans le package — et depuis
+  README de @vectis/ui) : elle n'est pas embarquée dans le package — et depuis
   le registre d'icônes intégré, elle ne sert plus qu'aux noms d'icônes des
   STORIES (`favorite`, `edit`…), jamais aux icônes rendues par le DS.
   display=block évite le flash du nom d'icône en toutes lettres.
@@ -15,13 +15,13 @@
 
 <!--
   Polices d'icônes TIERCES, uniquement pour les stories « Polices d'icônes »
-  d'Icon : elles démontrent `setIconResolver` sur de vraies bibliothèques, pas
+  de VIcon : elles démontrent `setIconResolver` sur de vraies bibliothèques, pas
   sur des maquettes. Aucune n'est une dépendance du package — ni npm, ni
   runtime : ce sont des feuilles CDN chargées par cette page de preview.
 
   Les trois sont des polices À CLASSES (glyphe en `::before`), donc servies par
   `classIconResolver`. Leurs sélecteurs de base sont compatibles avec le
-  `<span class="ds-icon-glyph …">` que rend Icon :
+  `<span class="v-icon-glyph …">` que rend VIcon :
     - Phosphor  : `.ph { font-family }` + `.ph.ph-x:before { content }`
     - FA 6      : `.fa-solid:before { content: var(--fa) }` + `.fa-xmark { --fa }`
     - Bootstrap : `.bi::before { font-family }` + `.bi-x-lg::before { content }`

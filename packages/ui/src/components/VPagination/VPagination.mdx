@@ -1,0 +1,133 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+
+import * as VPaginationStories from './VPagination.stories'
+
+<Meta of={VPaginationStories} />
+
+# Pagination
+
+Navigation entre les pages d'un jeu de résultats. Le composant n'invente aucun bouton : chaque
+pastille est un `VButton`, les contrôles précédent/suivant un `VButton` ou un `VIconButton`, et
+l'option `attached` rattache le tout dans un `VButtonGroup`. Hover, focus, désactivation et respect
+de `prefers-reduced-motion` viennent donc directement de `VButton`, sans une seule règle d'état
+redéfinie ici.
+
+La troncature se joue à deux niveaux, volontairement distincts. Le premier est **logique** : par
+défaut toutes les pages sont rendues, et `totalVisible` fixe le nombre total d'emplacements affichés
+(ellipses comprises) — c'est une pure dérivation d'état, sans aucune API navigateur. Le second est
+**responsive** et entièrement en CSS : la barre est son propre conteneur de requête, et des paliers
+`@container` retirent les voisines les plus éloignées quand la place manque. Aucun `ResizeObserver`,
+aucune mesure en JavaScript.
+
+<Canvas of={VPaginationStories.Default} />
+<Controls of={VPaginationStories.Default} />
+
+## Attaché
+
+`attached` place tous les boutons dans un `VButtonGroup` : bordures fusionnées, coins arrondis aux
+seules extrémités. C'est cette contrainte qui dicte la structure interne — `VButtonGroup` ne stylise
+que ses enfants **directs**, d'où l'absence de `<ul>`/`<li>` et une ellipse rendue en bouton inerte
+plutôt qu'en `<span>` : la couture reste continue, y compris quand une voisine est masquée par la
+troncature responsive.
+
+<Canvas of={VPaginationStories.Attached} />
+
+## Variantes et tones
+
+La page active est **toujours** `solid` ; `variant` ne concerne que les pages inactives et les
+contrôles, en `ghost` (défaut) ou `outline`. `tone` colore la page active, les pages inactives
+restant neutres pour que le numéro courant se détache seul.
+
+<Canvas of={VPaginationStories.Variants} />
+<Canvas of={VPaginationStories.Tones} />
+
+## Tailles
+
+`size` et `compact` sont propagés à l'identique à tous les boutons — l'échelle unifiée des contrôles
+s'applique donc sans réglage supplémentaire. Les pastilles sont carrées à un chiffre puis
+s'élargissent d'elles-mêmes : leur largeur minimale dérive de la hauteur de contrôle, la même
+variable que celle utilisée par `VIconButton`.
+
+<Canvas of={VPaginationStories.Sizes} />
+<Canvas of={VPaginationStories.Compact} />
+
+## Contrôles précédent / suivant
+
+`showControls` les affiche ou non, `controlsDisplay` choisit entre icône seule, texte seul ou les
+deux. `prevIcon` et `nextIcon` acceptent un nom d'icône **ou** un rendu explicite, et
+`prevLabel`/`nextLabel` fournissent à la fois le texte visible et le nom accessible.
+
+Les contrôles avancent d'une page activable, pas d'une page : ils enjambent les pages désactivées
+jusqu'à la plus proche atteignable, et se désactivent d'eux-mêmes quand il n'en reste aucune — ce
+qui couvre aussi les deux extrémités, sans test séparé.
+
+<Canvas of={VPaginationStories.Controles} />
+
+## Troncature logique
+
+Sans `totalVisible`, aucune troncature : la barre rend autant de pastilles que `length`. Renseignée,
+`totalVisible` fixe le nombre total d'emplacements rendus, **ellipses comprises** (minimum utile : 5,
+soit première + ellipse + courante + ellipse + dernière). La première et la dernière page sont
+toujours conservées, et la fenêtre centrée sur la page courante se **décale** près des extrémités au
+lieu de rétrécir : la barre garde exactement la même largeur quelle que soit la page courante.
+
+<Canvas of={VPaginationStories.BeaucoupDePages} />
+
+## Troncature responsive
+
+La barre déclare son propre conteneur de requête : les paliers dépendent de la place réellement
+allouée au composant, jamais de la largeur du viewport. Les voisines les plus éloignées disparaissent
+en premier ; la première page, la dernière et la page courante ne sont jamais masquées. Au palier le
+plus étroit, un contrôle en mode `both` se replie en icône seule.
+
+Deux conséquences à connaître. D'abord, la barre est de niveau bloc et occupe la largeur de son
+parent — c'est ce qui rend la troncature dépendante du conteneur — donc l'alignement passe par la
+prop `align` plutôt que par le contexte. Ensuite, les seuils sont des valeurs littérales, les
+conditions `@container` n'acceptant pas de variables ; ils sont calibrés sur la taille `md`. Pour un
+très grand nombre de pages ou une taille `xl`, préférez ajuster `totalVisible`, ou couper la couche
+responsive avec `responsive: false`.
+
+Aucune ellipse supplémentaire n'apparaît en compensation d'une voisine masquée : elle occuperait
+exactement la largeur d'une pastille, elle ne ferait donc rien gagner.
+
+<Canvas of={VPaginationStories.Responsive} />
+<Canvas of={VPaginationStories.Alignement} />
+
+## Pages désactivées
+
+`disabledPages` accepte une liste de numéros **ou** un prédicat, comme `disabledDates` du `VCalendar`.
+Une page désactivée reste visible et lisible, simplement inerte. `disabled` désactive l'ensemble du
+composant.
+
+<Canvas of={VPaginationStories.PagesDesactivees} />
+
+## Cas limites
+
+Une page unique rend une seule pastille et deux contrôles en butée. Une page courante hors bornes est
+ramenée dans l'intervalle. Les numéros à plusieurs chiffres élargissent les pastilles sans casser
+l'alignement.
+
+<Canvas of={VPaginationStories.CasLimites} />
+
+## Accessibilité
+
+- La racine est un `<nav>` nommé par `label`, et la page active porte `aria-current="page"` tout en
+  restant activable (recommandation APG).
+- Chaque pastille reçoit un nom accessible explicite — « Page 7 » par défaut, personnalisable par
+  `pageLabel` — car un numéro isolé n'a pas de sens hors contexte.
+- Les contrôles gardent leur `aria-label` même quand leur libellé est visible : la troncature
+  responsive peut masquer le texte, le nom accessible doit y survivre.
+- L'ellipse est un bouton inerte masqué aux technologies d'assistance : elle n'est ni annoncée ni
+  atteignable au clavier.
+- La tabulation est naturelle — chaque bouton visible est un arrêt, comme dans une liste de liens.
+  Les flèches gauche/droite et Home/End ne font que **déplacer** le focus, sans changer de page :
+  une pagination qui s'activerait au focus déclencherait des navigations involontaires. Les flèches
+  sont physiques, donc inversées en RTL, où les chevrons se retournent également.
+- Une page masquée par la troncature responsive l'est en `display: none` : elle sort à la fois de
+  l'arbre d'accessibilité et de l'ordre de tabulation. Corollaire connu : si le focus était sur une
+  voisine au moment où le conteneur rétrécit, il retombe sur le document.
+- Il n'y a pas de `<ul>`/`<li>` : `VButtonGroup` ne stylise que ses enfants directs et un élément de
+  liste intercalé casserait la fusion des bordures. Le `<nav>` nommé et le `role="group"` du mode
+  attaché fournissent le regroupement.
+
+Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.

@@ -11,8 +11,8 @@ const Wrapper = defineComponent({
   setup() {
     const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
     return () =>
-      h('div', { class: ['ds-root', rootClass.value], style: rootStyle.value }, [
-        h('input', { class: 'ds-control', ...forwardedAttrs.value }),
+      h('div', { class: ['v-root', rootClass.value], style: rootStyle.value }, [
+        h('input', { class: 'v-control', ...forwardedAttrs.value }),
       ])
   },
 })
@@ -22,8 +22,8 @@ describe('useRootAttrs', () => {
     const { container } = render(Wrapper, {
       attrs: { class: 'custom', style: 'color: red', name: 'champ', required: '' },
     })
-    const root = container.querySelector('.ds-root') as HTMLElement
-    const control = container.querySelector('.ds-control') as HTMLInputElement
+    const root = container.querySelector('.v-root') as HTMLElement
+    const control = container.querySelector('.v-control') as HTMLInputElement
 
     expect(root.classList.contains('custom')).toBe(true)
     expect(root.style.color).toBe('red')

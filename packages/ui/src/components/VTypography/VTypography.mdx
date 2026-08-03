@@ -1,0 +1,71 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VTypographyStories from './VTypography.stories'
+
+<Meta of={VTypographyStories} />
+
+# Typography
+
+Élément de texte du design system : la prop `variant` sélectionne une **recette
+typographique complète** (famille, taille, graisse, interlignage, espacement de lettres)
+issue des tokens sémantiques `--vectis-text-*`, et `tone` une couleur sémantique. C'est la voie
+unique pour écrire du texte cohérent avec les composants : titres, corps de texte, libellés,
+légendes et code partagent exactement les mêmes tokens que le texte interne des composants
+(VDialog, VInput, VDataTable…).
+
+Le composant ne porte **aucune marge** : l'espacement vertical appartient au layout parent
+(pile flex/grid avec `gap`).
+
+<Canvas of={VTypographyStories.Default} />
+
+<Controls of={VTypographyStories.Default} />
+
+## Variantes
+
+Treize rôles : `display`, `heading-1…4`, `subtitle`, `body-lg/md/sm`, `label`, `caption`,
+`overline` (rendu en capitales, tracking élargi) et `code` (pile monospace). Chaque rôle est
+une recette fermée — pas de props `size`/`weight` à composer : si un rendu intermédiaire
+manque, c'est un rôle à ajouter aux tokens, pas une combinaison à improviser.
+
+<Canvas of={VTypographyStories.Variantes} />
+
+## Tones
+
+`default` (héritage — le texte suit la couleur du contexte, y compris sur une surface
+inversée ou dans un toast coloré), `muted`, `subtle`, `accent`, `danger`, `success`,
+`warning` et `on-inverse`.
+
+<Canvas of={VTypographyStories.Tones} />
+
+## Balises
+
+Chaque variante rend une balise sémantique par défaut (`heading-1` → `h1`, corps de texte →
+`p`, `label`/`overline` → `span`, `code` → `code`). La prop `as` en change librement : la
+hiérarchie **visuelle** (la variante) et la hiérarchie **de document** (la balise) sont
+indépendantes — un titre de section secondaire peut être un `h2` stylé en `heading-4`.
+
+Les attributs natifs tombent sur la racine par fallthrough : `as="label"` + `for` produit un
+vrai label de champ (c'est ainsi que VInput consomme le composant en interne).
+
+<Canvas of={VTypographyStories.Balises} />
+
+## Troncature
+
+`truncate` coupe le texte sur une ligne avec une ellipse. L'élément doit disposer d'une
+largeur contrainte (bloc dans un conteneur dimensionné, ou flex item avec `min-width: 0`).
+
+<Canvas of={VTypographyStories.Truncate} />
+
+## Texte courant
+
+<Canvas of={VTypographyStories.Paragraphe} />
+
+## Accessibilité
+
+- La hiérarchie de titres du document doit rester logique : choisir la balise avec `as`
+  indépendamment du rendu visuel (ne pas sauter de niveaux).
+- `tone="subtle"` est réservé aux textes non essentiels (placeholders, états désactivés) :
+  son contraste est volontairement faible.
+- `overline` passe le texte en capitales via CSS (`text-transform`) : les lecteurs d'écran
+  lisent le texte source tel quel, sans l'épeler.
+- Le composant ne rend aucun rôle ARIA : c'est du texte, la sémantique vient de la balise
+  choisie.

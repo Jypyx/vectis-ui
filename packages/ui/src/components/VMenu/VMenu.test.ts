@@ -1,0 +1,596 @@
+﻿import { render } from '@testing-library/vue'
+import { describe, expect, it, vi } from 'vitest'
+import { defineComponent, nextTick } from 'vue'
+
+import VMenu from './VMenu.vue'
+import VMenuGroup from './VMenuGroup.vue'
+import VMenuItem from './VMenuItem.vue'
+import VMenuSeparator from './VMenuSeparator.vue'
+import { SUBMENU_HOVER_DELAY } from './context'
+
+function renderHarness(template: string, onSelect = vi.fn()) {
+  const Harness = defineComponent({
+    components: { VMenu, VMenuItem, VMenuGroup, VMenuSeparator },
+    setup: () => ({ onSelect }),
+    template,
+  })
+  return { onSelect, ...render(Harness) }
+}
+
+function renderMenu(onSelect = vi.fn()) {
+  return renderHarness(
+    `
+      <VMenu>
+        <template #trigger="{ triggerProps }">
+          <button data-testid="trigger" v-bind="triggerProps">Actions</button>
+        </template>
+        <VMenuItem label="Renommer" @select="onSelect" />
+        <VMenuItem label="Archiver" disabled />
+        <VMenuItem label="Supprimer" danger />
+      </VMenu>
+    `,
+    onSelect,
+  )
+}
+
+/** Ouvre le panneau racine (stub popover jsdom) et rend le menu interrogeable. */
+async function openMenu(container: Element): Promise<HTMLElement> {
+  const menu = container.querySelector('[role="menu"]') as HTMLElement
+  menu.showPopover()
+  await nextTick()
+  return menu
+}
+
+describe('VMenu', () => {
+  it('prop width : data-width + variable inline sur le panneau racine', () => {
+    const { container } = renderHarness(`
+      <VMenu width="max-content">
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <VMenuItem label="Renommer" />
+      </VMenu>
+    `)
+    const menu = container.querySelector('[role="menu"]') as HTMLElement
+    expect(menu.hasAttribute('data-width')).toBe(true)
+    expect(menu.style.getPropertyValue('--menu-width')).toBe('max-content')
+  })
+
+  it('les sous-panneaux ne rendent pas data-width (largeur par défaut)', () => {
+    const { container } = renderHarness(`
+      <VMenu width="max-content">
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <VMenuItem label="Exporter">
+          <template #submenu>
+            <VMenuItem label="PDF" />
+          </template>
+        </VMenuItem>
+      </VMenu>
+    `)
+    const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
+    expect(root?.hasAttribute('data-width')).toBe(true)
+    expect(sub?.hasAttribute('data-width')).toBe(false)
+  })
+
+  // Le plancher lui-même (`min-inline-size: anchor-size(width)`) n'est pas
+  // observable ici — jsdom ne résout ni l'ancre ni la mise en page : c'est la
+  // play function `VMenu/Largeur` qui le couvre. Ne reste que le câblage.
+  it('prop matchTrigger : data-match-trigger sur le panneau racine seul', () => {
+    const { container } = renderHarness(`
+      <VMenu match-trigger>
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <VMenuItem label="Exporter">
+          <template #submenu>
+            <VMenuItem label="PDF" />
+          </template>
+        </VMenuItem>
+      </VMenu>
+    `)
+    const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
+    expect(root?.hasAttribute('data-match-trigger')).toBe(true)
+    expect(sub?.hasAttribute('data-match-trigger')).toBe(false)
+  })
+
+  it('sans matchTrigger, aucun data-match-trigger (largeur par défaut)', () => {
+    const { container } = renderHarness(`
+      <VMenu>
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <VMenuItem label="Renommer" />
+      </VMenu>
+    `)
+    const menu = container.querySelector('[role="menu"]') as HTMLElement
+    expect(menu.hasAttribute('data-match-trigger')).toBe(false)
+  })
+
+  it('pose le contrat ARIA sur le déclencheur et le panneau', () => {
+    // menu fermé ([popover] est display:none) : requête hors arbre d'accessibilité
+    const { getByTestId, container } = renderMenu()
+    const trigger = getByTestId('trigger')
+    const menu = container.querySelector('[role="menu"]') as HTMLElement
+    expect(trigger.getAttribute('popovertarget')).toBe(menu.id)
+    expect(trigger.getAttribute('aria-haspopup')).toBe('menu')
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+    expect(trigger.getAttribute('aria-controls')).toBe(menu.id)
+  })
+
+  it("focus le premier item à l'ouverture et met à jour aria-expanded", async () => {
+    const { getByTestId, getByRole, container } = renderMenu()
+    await openMenu(container)
+    expect(getByRole('menuitem', { name: 'Renommer' })).toBe(document.activeElement)
+    expect(getByTestId('trigger').getAttribute('aria-expanded')).toBe('true')
+  })
+
+  it('navigue aux flèches en sautant les items désactivés, avec bouclage', async () => {
+    const { getByRole, container } = renderMenu()
+    const menu = await openMenu(container)
+
+    const arrowDown = () =>
+      menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+
+    arrowDown()
+    // « Archiver » (disabled) est sauté
+    expect(getByRole('menuitem', { name: 'Supprimer' })).toBe(document.activeElement)
+    arrowDown()
+    expect(getByRole('menuitem', { name: 'Renommer' })).toBe(document.activeElement)
+
+    menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+    expect(getByRole('menuitem', { name: 'Supprimer' })).toBe(document.activeElement)
+  })
+
+  it('la sélection émet select, ferme le menu et rend le focus au déclencheur', async () => {
+    const { onSelect, getByRole, getByTestId, container } = renderMenu()
+    const menu = await openMenu(container)
+
+    getByRole('menuitem', { name: 'Renommer' }).click()
+    await nextTick()
+    expect(onSelect).toHaveBeenCalledOnce()
+    expect(menu.hasAttribute('data-popover-open')).toBe(false)
+    expect(getByTestId('trigger')).toBe(document.activeElement)
+  })
+
+  it('un item désactivé ne déclenche pas select', async () => {
+    const { onSelect, getByRole, container } = renderMenu()
+    await openMenu(container)
+
+    getByRole('menuitem', { name: 'Archiver' }).click()
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  it("le survol d'un item lui donne le focus (jamais aux items désactivés)", async () => {
+    const { getByRole, container } = renderMenu()
+    await openMenu(container)
+    const danger = getByRole('menuitem', { name: 'Supprimer' })
+
+    // le survol transfère le focus : une seule surbrillance à la fois
+    danger.dispatchEvent(new Event('pointerenter'))
+    expect(danger).toBe(document.activeElement)
+
+    // survoler un item désactivé ne déplace pas le focus
+    getByRole('menuitem', { name: 'Archiver' }).dispatchEvent(new Event('pointerenter'))
+    expect(danger).toBe(document.activeElement)
+  })
+
+  describe("anatomie de l'item", () => {
+    it('les slots priment sur les props label/sublabel', async () => {
+      const { getByRole, container } = renderHarness(`
+        <VMenu>
+          <template #trigger="{ triggerProps }">
+            <button v-bind="triggerProps">Actions</button>
+          </template>
+          <VMenuItem label="Ignoré" sublabel="Ignoré aussi">
+            Partager
+            <template #sublabel>Vers un autre espace</template>
+          </VMenuItem>
+          <VMenuItem label="Dupliquer" sublabel="Copie dans le dossier courant" />
+        </VMenu>
+      `)
+      await openMenu(container)
+
+      const slotted = getByRole('menuitem', { name: /Partager/ })
+      expect(slotted.querySelector('.v-menu-item-label')?.textContent).toContain('Partager')
+      expect(slotted.querySelector('.v-menu-item-sublabel')?.textContent).toBe(
+        'Vers un autre espace',
+      )
+
+      const fromProps = getByRole('menuitem', { name: /Dupliquer/ })
+      expect(fromProps.querySelector('.v-menu-item-label')?.textContent).toBe('Dupliquer')
+      expect(fromProps.querySelector('.v-menu-item-sublabel')?.textContent).toBe(
+        'Copie dans le dossier courant',
+      )
+    })
+
+    it('iconStart accepte un nom ou un rendu explicite `{ src }`', async () => {
+      const { getByRole, container } = renderHarness(`
+        <VMenu>
+          <template #trigger="{ triggerProps }">
+            <button v-bind="triggerProps">Actions</button>
+          </template>
+          <VMenuItem label="Renommer" icon-start="edit" icon-end="chevron_right" />
+          <VMenuItem label="Logo" :icon-start="{ src: '/logo.svg' }" />
+        </VMenu>
+      `)
+      await openMenu(container)
+
+      const named = getByRole('menuitem', { name: 'Renommer' })
+      const icones = [...named.querySelectorAll<HTMLElement>('.v-icon')].map(
+        (el) => el.dataset.icon,
+      )
+      expect(icones).toEqual(['edit', 'chevron_right'])
+
+      const img = getByRole('menuitem', { name: 'Logo' }).querySelector('.v-icon-img')
+      expect(img?.getAttribute('src')).toBe('/logo.svg')
+    })
+
+    it('selected pose data-selected et aria-current', async () => {
+      const { getByRole, container } = renderHarness(`
+        <VMenu>
+          <template #trigger="{ triggerProps }">
+            <button v-bind="triggerProps">Tri</button>
+          </template>
+          <VMenuItem label="Par nom" selected />
+          <VMenuItem label="Par date" />
+        </VMenu>
+      `)
+      await openMenu(container)
+
+      const selected = getByRole('menuitem', { name: 'Par nom' })
+      expect(selected.hasAttribute('data-selected')).toBe(true)
+      expect(selected.getAttribute('aria-current')).toBe('true')
+      const other = getByRole('menuitem', { name: 'Par date' })
+      expect(other.hasAttribute('data-selected')).toBe(false)
+      expect(other.hasAttribute('aria-current')).toBe(false)
+    })
+  })
+
+  it('size/compact posent data-size/data-compact sur le panneau racine', () => {
+    const { container } = renderHarness(`
+      <VMenu size="md" compact>
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <VMenuItem label="Renommer" />
+      </VMenu>
+    `)
+    const menu = container.querySelector('[role="menu"]') as HTMLElement
+    expect(menu.getAttribute('data-size')).toBe('md')
+    expect(menu.hasAttribute('data-compact')).toBe(true)
+  })
+
+  it('les sous-panneaux ne rendent ni data-size ni data-compact (héritage CSS)', () => {
+    const { container } = renderHarness(`
+      <VMenu size="md" compact>
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <VMenuItem label="Exporter">
+          <template #submenu>
+            <VMenuItem label="PDF" />
+          </template>
+        </VMenuItem>
+      </VMenu>
+    `)
+    const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
+    expect(root?.getAttribute('data-size')).toBe('md')
+    expect(sub?.hasAttribute('data-size')).toBe(false)
+    expect(sub?.hasAttribute('data-compact')).toBe(false)
+  })
+
+  it('v-control n’est posée QUE sur le panneau racine (le compact hérité en dépend)', () => {
+    // Sur un sous-panneau, `.v-control` redéfinirait --control-height depuis
+    // --control-height-base SANS la condition [data-compact] (qu'il ne porte
+    // pas) : la hauteur y repasserait à sa valeur non compacte.
+    const { container } = renderHarness(`
+      <VMenu size="md" compact>
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <VMenuItem label="Exporter">
+          <template #submenu>
+            <VMenuItem label="PDF" />
+          </template>
+        </VMenuItem>
+      </VMenu>
+    `)
+    const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
+    expect(root?.classList.contains('v-control')).toBe(true)
+    expect(sub?.classList.contains('v-control')).toBe(false)
+  })
+
+  describe('groupes et séparateurs', () => {
+    function renderGrouped() {
+      return renderHarness(`
+        <VMenu>
+          <template #trigger="{ triggerProps }">
+            <button v-bind="triggerProps">Actions</button>
+          </template>
+          <VMenuGroup label="Fichier">
+            <VMenuItem label="Renommer" />
+            <VMenuItem label="Dupliquer" />
+          </VMenuGroup>
+          <VMenuSeparator />
+          <VMenuItem label="Supprimer" danger />
+        </VMenu>
+      `)
+    }
+
+    it('le groupe expose role="group" nommé par son libellé, hors roving focus', async () => {
+      const { getByRole, container } = renderGrouped()
+      const menu = await openMenu(container)
+
+      const group = getByRole('group', { name: 'Fichier' })
+      const labelId = group.getAttribute('aria-labelledby') as string
+      expect(document.getElementById(labelId)?.textContent).toBe('Fichier')
+      // le libellé du groupe n'est pas un item : jamais focusé par le roving
+      expect(getByRole('menuitem', { name: 'Renommer' })).toBe(document.activeElement)
+      menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }))
+      expect(getByRole('menuitem', { name: 'Renommer' })).toBe(document.activeElement)
+    })
+
+    it('le roving focus traverse les groupes et ignore les séparateurs', async () => {
+      const { getByRole, container } = renderGrouped()
+      const menu = await openMenu(container)
+
+      const arrowDown = () =>
+        menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+      arrowDown()
+      expect(getByRole('menuitem', { name: 'Dupliquer' })).toBe(document.activeElement)
+      arrowDown()
+      // le séparateur (role="separator") est ignoré : item suivant hors groupe
+      expect(getByRole('menuitem', { name: 'Supprimer' })).toBe(document.activeElement)
+      expect(getByRole('separator')).toBeTruthy()
+    })
+  })
+
+  describe('sous-menus', () => {
+    function renderSubmenu(onSelect = vi.fn()) {
+      return renderHarness(
+        `
+          <VMenu>
+            <template #trigger="{ triggerProps }">
+              <button data-testid="trigger" v-bind="triggerProps">Actions</button>
+            </template>
+            <VMenuItem label="Renommer" @select="onSelect" />
+            <VMenuItem label="Exporter" icon-end="download" @select="onSelect">
+              <template #submenu>
+                <VMenuItem label="PDF" @select="onSelect" />
+                <VMenuItem label="PNG" />
+              </template>
+            </VMenuItem>
+          </VMenu>
+        `,
+        onSelect,
+      )
+    }
+
+    function panels(container: Element): HTMLElement[] {
+      return [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
+    }
+
+    it("l'item parent est câblé en invocateur du sous-panneau, chevron à la place d'iconEnd", async () => {
+      const { getByRole, container } = renderSubmenu()
+      await openMenu(container)
+
+      const parent = getByRole('menuitem', { name: 'Exporter' })
+      const sub = panels(container)[1] as HTMLElement
+      expect(parent.getAttribute('aria-haspopup')).toBe('menu')
+      expect(parent.getAttribute('aria-expanded')).toBe('false')
+      expect(parent.getAttribute('popovertarget')).toBe(sub.id)
+      expect(parent.getAttribute('aria-controls')).toBe(sub.id)
+      // le sous-panneau est un descendant DOM du panneau parent (pile native)
+      expect(panels(container)[0]?.contains(sub)).toBe(true)
+      expect(parent.querySelector<HTMLElement>('.v-menu-item-chevron')?.dataset.icon).toBe(
+        'chevron_right',
+      )
+      const icones = [...parent.querySelectorAll<HTMLElement>('.v-icon')].map(
+        (el) => el.dataset.icon,
+      )
+      expect(icones).not.toContain('download')
+    })
+
+    it("Flèche droite ouvre le sous-menu, focus son premier item et n'émet pas select", async () => {
+      const { onSelect, getByRole, container } = renderSubmenu()
+      await openMenu(container)
+
+      const parent = getByRole('menuitem', { name: 'Exporter' })
+      parent.focus()
+      parent.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+      await nextTick()
+
+      const sub = panels(container)[1] as HTMLElement
+      expect(sub.hasAttribute('data-popover-open')).toBe(true)
+      expect(parent.getAttribute('aria-expanded')).toBe('true')
+      expect(getByRole('menuitem', { name: 'PDF' })).toBe(document.activeElement)
+      expect(onSelect).not.toHaveBeenCalled()
+    })
+
+    it('le roving focus est confiné au sous-panneau ouvert', async () => {
+      const { getByRole, container } = renderSubmenu()
+      await openMenu(container)
+
+      const parent = getByRole('menuitem', { name: 'Exporter' })
+      parent.focus()
+      parent.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+      await nextTick()
+
+      const arrowDown = () =>
+        document.activeElement?.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }),
+        )
+      arrowDown()
+      expect(getByRole('menuitem', { name: 'PNG' })).toBe(document.activeElement)
+      // bouclage dans le sous-panneau : jamais de fuite vers les items du parent
+      arrowDown()
+      expect(getByRole('menuitem', { name: 'PDF' })).toBe(document.activeElement)
+    })
+
+    it("Flèche gauche referme le sous-menu et rend le focus à l'item parent", async () => {
+      const { getByRole, container } = renderSubmenu()
+      await openMenu(container)
+
+      const parent = getByRole('menuitem', { name: 'Exporter' })
+      parent.focus()
+      parent.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+      await nextTick()
+
+      document.activeElement?.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }),
+      )
+      await nextTick()
+      const sub = panels(container)[1] as HTMLElement
+      expect(sub.hasAttribute('data-popover-open')).toBe(false)
+      expect(parent).toBe(document.activeElement)
+    })
+
+    it('Échap ferme le sous-menu courant, puis le menu au second appui', async () => {
+      const { getByRole, getByTestId, container } = renderSubmenu()
+      const menu = await openMenu(container)
+
+      const parent = getByRole('menuitem', { name: 'Exporter' })
+      parent.focus()
+      parent.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+      await nextTick()
+
+      const escape = () =>
+        document.activeElement?.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+        )
+
+      // 1er Échap : seul le niveau courant se ferme, focus sur l'item parent
+      escape()
+      await nextTick()
+      expect(panels(container)[1]?.hasAttribute('data-popover-open')).toBe(false)
+      expect(menu.hasAttribute('data-popover-open')).toBe(true)
+      expect(parent).toBe(document.activeElement)
+
+      // 2e Échap : le panneau racine se ferme, focus sur le déclencheur
+      escape()
+      await nextTick()
+      expect(menu.hasAttribute('data-popover-open')).toBe(false)
+      expect(getByTestId('trigger')).toBe(document.activeElement)
+    })
+
+    it("la sélection d'une feuille de sous-menu émet select et ferme toute la pile", async () => {
+      const { onSelect, getByRole, container } = renderSubmenu()
+      const menu = await openMenu(container)
+
+      const parent = getByRole('menuitem', { name: 'Exporter' })
+      parent.focus()
+      parent.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+      await nextTick()
+
+      getByRole('menuitem', { name: 'PDF' }).click()
+      await nextTick()
+      expect(onSelect).toHaveBeenCalledOnce()
+      expect(panels(container)[1]?.hasAttribute('data-popover-open')).toBe(false)
+      expect(menu.hasAttribute('data-popover-open')).toBe(false)
+    })
+
+    it("l'activation d'un item à sous-menu n'émet jamais select", async () => {
+      const { onSelect, getByRole, container } = renderSubmenu()
+      await openMenu(container)
+
+      getByRole('menuitem', { name: 'Exporter' }).click()
+      expect(onSelect).not.toHaveBeenCalled()
+    })
+
+    it("ouvre au survol après le délai d'intention et referme quand le pointeur part", async () => {
+      vi.useFakeTimers()
+      try {
+        const { getByRole, container } = renderSubmenu()
+        await openMenu(container)
+
+        const parent = getByRole('menuitem', { name: 'Exporter' })
+        const sub = panels(container)[1] as HTMLElement
+
+        parent.dispatchEvent(new Event('pointerenter'))
+        // pas d'ouverture avant le délai d'intention
+        expect(sub.hasAttribute('data-popover-open')).toBe(false)
+        vi.advanceTimersByTime(SUBMENU_HOVER_DELAY)
+        expect(sub.hasAttribute('data-popover-open')).toBe(true)
+
+        parent.dispatchEvent(new Event('pointerleave'))
+        vi.advanceTimersByTime(SUBMENU_HOVER_DELAY)
+        expect(sub.hasAttribute('data-popover-open')).toBe(false)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('le survol ne referme pas un sous-menu dans lequel le clavier navigue', async () => {
+      vi.useFakeTimers()
+      try {
+        const { getByRole, container } = renderSubmenu()
+        await openMenu(container)
+
+        const parent = getByRole('menuitem', { name: 'Exporter' })
+        parent.focus()
+        parent.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+        await nextTick()
+        // le focus est sur « PDF », dans le sous-panneau
+
+        parent.dispatchEvent(new Event('pointerleave'))
+        vi.advanceTimersByTime(SUBMENU_HOVER_DELAY)
+        expect(panels(container)[1]?.hasAttribute('data-popover-open')).toBe(true)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+  })
+
+  describe('items de navigation (href)', () => {
+    function renderNavMenu(onSelect = vi.fn()) {
+      return renderHarness(
+        `
+          <VMenu>
+            <template #trigger="{ triggerProps }">
+              <button data-testid="trigger" v-bind="triggerProps">Aller à</button>
+            </template>
+            <VMenuItem href="#profil" label="Profil" @select="onSelect" />
+            <VMenuItem href="#archives" label="Archives" disabled />
+            <VMenuItem label="Action" @select="onSelect" />
+          </VMenu>
+        `,
+        onSelect,
+      )
+    }
+
+    it('href rend un <a role="menuitem"> avec le lien', async () => {
+      const { getByRole, container } = renderNavMenu()
+      await openMenu(container)
+      const item = getByRole('menuitem', { name: 'Profil' })
+      expect(item.tagName).toBe('A')
+      expect(item.getAttribute('href')).toBe('#profil')
+      // l'item sans href reste un <button>
+      expect(getByRole('menuitem', { name: 'Action' }).tagName).toBe('BUTTON')
+    })
+
+    it('la sélection d’un lien émet select et ferme le menu', async () => {
+      const { onSelect, getByRole, container } = renderNavMenu()
+      const menu = await openMenu(container)
+
+      getByRole('menuitem', { name: 'Profil' }).click()
+      await nextTick()
+      expect(onSelect).toHaveBeenCalledOnce()
+      expect(menu.hasAttribute('data-popover-open')).toBe(false)
+    })
+
+    it('un lien désactivé est inerte et exclu du roving focus', async () => {
+      const { getByRole, container } = renderNavMenu()
+      const menu = await openMenu(container)
+
+      const inert = getByRole('menuitem', { name: 'Archives' })
+      expect(inert.hasAttribute('href')).toBe(false)
+      expect(inert.getAttribute('aria-disabled')).toBe('true')
+      // « Archives » est sauté par la navigation aux flèches
+      expect(getByRole('menuitem', { name: 'Profil' })).toBe(document.activeElement)
+      menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+      expect(getByRole('menuitem', { name: 'Action' })).toBe(document.activeElement)
+    })
+  })
+})

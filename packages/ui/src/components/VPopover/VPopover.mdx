@@ -1,0 +1,110 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VPopoverStories from './VPopover.stories'
+
+<Meta of={VPopoverStories} />
+
+# Popover
+
+Panneau flottant générique, pour afficher n'importe quel contenu ancré à un déclencheur.
+Il repose sur la **Popover API** native (top layer, light dismiss) et le **CSS Anchor
+Positioning** : aucune dépendance, aucun calcul de position en JavaScript. Le seul JS du
+composant est le pont entre `v-model:open` et l'API impérative du popover.
+
+Le VPopover porte **la plomberie et rien d'autre** : l'élément `[popover]` et son mode,
+l'état d'ouverture, l'ancrage, le placement et l'habillage. Il n'impose **ni rôle ARIA, ni
+raccourci clavier, ni gestion de focus** — c'est précisément ce qui distingue un menu d'une
+liste ou d'un sélecteur de date, et cela reste la responsabilité du composant qui
+l'utilise. C'est à ce titre qu'il sert de brique aux panneaux du design system (VCombobox,
+VTooltip, VDatePicker, VTimePicker), chacun gardant sa sémantique et son clavier propres.
+
+<Canvas of={VPopoverStories.Default} />
+
+<Controls of={VPopoverStories.Default} />
+
+## Déclencheur
+
+Le déclencheur est fourni par le slot scopé `#trigger` : poser `v-bind="triggerProps"` sur
+l'élément lui attache `popovertarget`, `aria-expanded` et `aria-controls` — le pattern
+_disclosure_. C'est l'attribut natif `popovertarget` qui ouvre et ferme le panneau : aucun
+gestionnaire de clic n'est nécessaire, et l'élément invoqué devient l'**ancre implicite**
+du panneau.
+
+Le wrapper qui entoure le déclencheur porte l'`anchor-name`, confiné à son sous-arbre par
+`anchor-scope`. Ce confinement est ce qui permet un nom d'ancre **statique et partagé** par
+toutes les instances de la page : sans lui, un panneau affiché — donc en top layer, considéré
+comme « après » tout le document — se rattacherait au dernier wrapper nommé de la page.
+
+<Canvas of={VPopoverStories.DeuxInstances} />
+
+## Ouverture et fermeture
+
+`v-model:open` reflète l'état réel du panneau dans les deux sens : le modèle ouvre et ferme,
+et toute fermeture venue du navigateur (light dismiss, Échap) le remet à `false`. L'état
+n'est jamais posé à la main dans le composant, il est toujours lu depuis les événements
+`beforetoggle`/`toggle` du panneau — c'est ce qui garantit qu'il ne dérive jamais.
+
+Deux modes :
+
+- **`auto`** (défaut) — light dismiss natif : un clic à l'extérieur ou Échap ferme le
+  panneau, et les popovers ouverts forment une pile (ouvrir le second ferme le premier).
+- **`manual`** — rien n'est automatique. À réserver aux cas où le composant consommateur
+  pilote lui-même la fermeture (perte de focus, sélection, validation), comme le font le
+  VTooltip et les sélecteurs de date et d'heure.
+
+Le déclencheur n'a besoin d'aucun gestionnaire de clic : `popovertarget` bascule le panneau
+nativement, et `aria-expanded` suit l'état réel.
+
+<Canvas of={VPopoverStories.OuvertureParLeDeclencheur} />
+
+## Placements
+
+Douze placements via `data-placement` → `position-area` (feuille partagée `floating.css`,
+commune au VMenu et au VTooltip). Les placements alignés (`top-start`, `right-end`…) annulent
+la marge du côté aligné pour rester au bord du déclencheur.
+
+<Canvas of={VPopoverStories.Placements} />
+
+Au bord de l'écran, `position-try-fallbacks: flip-block, flip-inline` retourne le panneau du
+côté opposé — sans aucun JS :
+
+<Canvas of={VPopoverStories.EdgeFlipping} />
+
+## Habillage
+
+Par défaut le panneau porte la surface commune du design system (fond, bordure, ombre,
+rayon). `surface: false` la retire entièrement : le contenu fournit alors son propre
+habillage. C'est le mode qu'utilisent les panneaux du DS qui ont un chrome propre — le
+VTooltip (contraste inversé) et les sélecteurs de date et d'heure.
+
+<Canvas of={VPopoverStories.SansHabillage} />
+
+## Contenu interactif
+
+Contrairement au VTooltip, le panneau est persistant et le focus peut y entrer : formulaires,
+liens et boutons y sont utilisables. Le composant n'imposant aucun rôle, un contenu de type
+dialogue doit être déclaré explicitement par le consommateur.
+
+<Canvas of={VPopoverStories.ContenuInteractif} />
+
+## Ancrage fourni par le consommateur
+
+Quand le composant qui utilise le VPopover possède déjà une racine et un contrôle — un champ
+de saisie, par exemple, sur lequel `popovertarget` serait invalide — il pose lui-même
+`anchor-scope` sur sa racine et `anchor-name` sur son contrôle, puis passe le nom en prop
+`anchor`. Le VPopover ne rend alors **aucun nœud de layout** : le slot `#trigger` est omis et
+son wrapper passe en `display: contents`.
+
+<Canvas of={VPopoverStories.AncrageFourni} />
+
+## Accessibilité
+
+- **Aucun rôle par défaut.** Le panneau est un conteneur neutre : à un contenu de type
+  dialogue, poser `role="dialog"` et un nom accessible (`aria-label` ou `aria-labelledby`)
+  sur le VPopover, et `aria-haspopup="dialog"` sur le déclencheur.
+- `triggerProps` fournit `aria-expanded` et `aria-controls` : l'état du panneau est annoncé
+  sur le déclencheur, qui reste l'élément focusable.
+- **Le focus n'est pas déplacé** à l'ouverture et n'est pas piégé dans le panneau : c'est un
+  panneau non modal. Un contenu qui doit capturer le focus relève du composant VDialog.
+- En mode `auto`, Échap ferme le panneau et le navigateur rend le focus au déclencheur. En
+  mode `manual`, ces deux comportements appartiennent au consommateur.
+- L'animation d'apparition (commune à `.v-floating`) respecte `prefers-reduced-motion`.

@@ -1,0 +1,62 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VSwitchStories from './VSwitch.stories'
+
+<Meta of={VSwitchStories} />
+
+# Switch
+
+Interrupteur construit sur l'`<input type="checkbox" role="switch">` natif — sémantique
+« activé/désactivé » correcte pour les lecteurs d'écran, clavier et formulaires gratuits.
+Le rendu track/thumb est du pur CSS piloté par `:checked` ; le JavaScript se limite au pont
+v-model. La racine est un `<label>` englobant : cliquer le libellé bascule l'interrupteur,
+sans `for`/`id`.
+
+Taille unique : track de 40×20px (tokens `--vectis-control-size-switch-w/h`), aligné sur la
+hauteur des VCheckbox/VRadio.
+
+<Canvas of={VSwitchStories.Default} />
+
+<Controls of={VSwitchStories.Default} />
+
+## Position du libellé
+
+`label-position` place le libellé après (`end`, défaut) ou avant (`start`) l'interrupteur.
+
+<Canvas of={VSwitchStories.PositionDuLibelle} />
+
+## Spread
+
+`spread` fait passer la racine en flex pleine largeur : libellé et interrupteur sont
+repoussés aux extrémités du conteneur. Se combine avec `label-position` pour choisir de
+quel côté part l'interrupteur.
+
+<Canvas of={VSwitchStories.Spread} />
+
+## États
+
+`disabled` bascule l'interrupteur sur des nuances de gris : track `--vectis-color-surface-muted`
+(coché ou non), thumb `--vectis-color-text-subtle` sans ombre — la couleur de la coche/du point
+désactivé de VCheckbox/VRadio, visible dans les deux thèmes. Pas de jeu d'opacité.
+
+<Canvas of={VSwitchStories.Disabled} />
+
+## Sans libellé visible
+
+Sans slot, fournir un `aria-label` : il passe en fallthrough sur l'input (la racine
+`<label>` ne reçoit pas les attributs natifs).
+
+<Canvas of={VSwitchStories.SansLibelle} />
+
+## Formulaires
+
+Les attributs natifs (`name`, `value`, `required`, `aria-*`…) passent en fallthrough sur
+l'input, pas sur le label : l'interrupteur participe normalement aux formulaires.
+
+## Accessibilité
+
+- `role="switch"` : les lecteurs d'écran annoncent « activé/désactivé » plutôt que
+  « coché/décoché ».
+- L'input est masqué via `opacity: 0` (jamais `display: none`) : il reste focusable au
+  clavier (Espace bascule) et soumis au formulaire.
+- Focus visible par anneau (`--vectis-focus-ring-*`) sur le track, jamais supprimé.
+- La transition du thumb respecte `prefers-reduced-motion`.

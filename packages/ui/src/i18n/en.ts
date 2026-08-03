@@ -1,4 +1,4 @@
-import type { DsMessages } from './types'
+import type { VectisMessages } from './types'
 
 /**
  * Anglais. **Opt-in** : ce module n'est atteint que si vous l'importez, donc
@@ -8,11 +8,11 @@ import type { DsMessages } from './types'
  * L'activer et ajouter une langue que le DS ne fournit pas sont le MÊME geste —
  * il n'y a pas deux catégories de dictionnaires :
  *
- *     import { en, registerMessages, setLocale } from '@socle/ui'
+ *     import { en, registerMessages, setLocale } from '@vectis/ui'
  *     registerMessages('en', en)
  *     setLocale('en-GB')
  */
-export const en: DsMessages = {
+export const en: VectisMessages = {
   common: {
     loading: 'Loading…',
     clear: 'Clear',

@@ -1,0 +1,111 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VProgressCircularStories from './VProgressCircular.stories'
+
+<Meta of={VProgressCircularStories} />
+
+# ProgressCircular
+
+Progression en donut : mêmes couleurs et même contrat que le VProgressLinear, avec diamètre et
+épaisseur indépendants, bouts de trait arrondis ou francs, et un centre libre où placer ce que
+l'on veut.
+
+Il n'existe aucune primitive native pour un progrès circulaire — mais le SVG suffit, sans
+calcul en JavaScript.
+
+<Canvas of={VProgressCircularStories.Default} />
+
+<Controls of={VProgressCircularStories.Default} />
+
+## Géométrie sans JavaScript
+
+Le `<svg>` n'a **pas de `viewBox`** : sa boîte est en pixels réels, donc une unité utilisateur
+vaut un pixel et il n'y a aucun facteur d'échelle à compenser. Les cercles sont alors
+positionnés par les propriétés CSS de géométrie (`cx`, `cy`, `r`), dérivées des mêmes custom
+properties que la boîte — le rayon vaut la moitié du diamètre moins la moitié de l'épaisseur.
+
+L'approche classique, un `viewBox` fixe, obligerait à convertir l'épaisseur en unités de
+`viewBox` — donc à connaître le rapport entre le diamètre et le `viewBox`, et à le recalculer
+en JavaScript à chaque changement de taille.
+
+La longueur du trait, elle, passe par `pathLength` : le chemin est normalisé à cent unités,
+si bien que le décalage du pointillé s'exprime directement en pourcentage de progression.
+
+## Tones
+
+Les cinq couleurs du design system, chacune posant un trait et une piste teintée de la même
+famille. Le tone `neutral` inverse texte et surface plutôt que d'employer un gris moyen.
+
+<Canvas of={VProgressCircularStories.Tones} />
+
+## Couleur custom
+
+`color` remplace le tone et accepte n'importe quelle couleur CSS. La piste en est dérivée par
+`color-mix` vers la surface courante, donc adaptée automatiquement au thème.
+
+<Canvas of={VProgressCircularStories.CouleurCustom} />
+
+## Taille et épaisseur
+
+`size` (diamètre) et `thickness` sont indépendants et s'expriment **toujours en pixels** :
+`96` comme `'96'` donnent quatre-vingt-seize pixels. Sans valeur, le diamètre vaut 48 pixels
+et l'épaisseur 4.
+
+<Canvas of={VProgressCircularStories.Taille} />
+
+Réduire le trou jusqu'à obtenir un disque est parfaitement légitime :
+
+<Canvas of={VProgressCircularStories.Epaisseur} />
+
+## Label au centre
+
+`showValue` affiche le pourcentage au centre du donut, dans une taille proportionnelle au
+diamètre (avec un plancher au plus petit token typographique) et bornée au trou du donut.
+
+<Canvas of={VProgressCircularStories.Valeur} />
+
+Le slot par défaut reçoit `{ value, max, percent }` et remplace ce pourcentage : un ratio, une
+icône de validation, deux lignes de texte hiérarchisées…
+
+<Canvas of={VProgressCircularStories.LabelCentre} />
+
+## Bouts du trait
+
+`shape` pilote les extrémités du trait de remplissage — arrondies par défaut, franches en
+`square`. Mêmes valeurs que sur le VProgressLinear, où elles arrondissent la barre.
+
+<Canvas of={VProgressCircularStories.Carre} />
+
+## Indéterminé
+
+La prop `indeterminate` fait disparaître `aria-valuenow` et passe le donut en animation continue —
+une rotation d'ensemble combinée à un arc dont la longueur varie, les deux périodes étant
+volontairement décalées pour éviter un battement mécanique.
+
+Pour un simple « chargement » sans notion de progression, préférer le **VSpinner**, qui porte
+`role="status"` et suit la taille du texte environnant. Ce composant-ci conserve
+`role="progressbar"` et la continuité visuelle avec son mode déterminé.
+
+<Canvas of={VProgressCircularStories.Indetermine} />
+
+## Cas limites
+
+Valeur nulle ou complète, épaisseur supérieure au diamètre (le rayon dégrade sur zéro au lieu
+de produire une erreur SVG), label plus large que le trou du donut.
+
+<Canvas of={VProgressCircularStories.CasLimites} />
+
+## Accessibilité
+
+- **Toujours fournir `aria-label`** (ou `aria-labelledby`) : le composant n'a pas de prop de
+  libellé, l'attribut passe par fallthrough.
+- Le rôle `progressbar` est « children presentational » : le label affiché au centre **n'est
+  pas annoncé**. Il complète le libellé accessible, il ne le remplace pas — une icône de
+  validation seule au centre a d'autant plus besoin d'un `aria-label` explicite.
+- Les bornes annoncées sont fidèles à `max` (« 7 sur 10 ») plutôt que normalisées sur 100.
+- `aria-valuenow` est absent en indéterminé, ce qui est la façon d'annoncer une progression
+  inconnue.
+- Le SVG est purement décoratif et masqué aux technologies d'assistance.
+- Transition et animation continue respectent `prefers-reduced-motion` — l'animation est
+  ralentie, jamais figée.
+
+Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.

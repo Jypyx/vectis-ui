@@ -1,0 +1,59 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VRadioStories from './VRadio.stories'
+
+<Meta of={VRadioStories} />
+
+# Radio
+
+Bouton radio construit sur l'`<input type="radio">` natif, visuellement remplacé par une
+pastille stylée (même approche que `VCheckbox` : l'input reste dans l'arbre, seul son rendu est
+masqué). Le groupe est **natif** : plusieurs VRadio partageant le même `name` (fallthrough) et
+le même v-model — la navigation aux flèches est fournie par le navigateur, zéro JavaScript.
+
+Taille unique : pastille de 20px, bordure de 2px (tokens `--vectis-control-size-check` et
+`--vectis-control-border-width`), point intérieur de 8px (`--vectis-control-size-check-dot`).
+
+<Canvas of={VRadioStories.Groupe} />
+
+<Controls of={VRadioStories.Groupe} />
+
+Chaque VRadio porte une prop `value` ; le v-model du groupe vaut la `value` du bouton
+sélectionné.
+
+## Position du libellé
+
+`label-position` place le libellé après (`end`, défaut) ou avant (`start`) la pastille.
+
+<Canvas of={VRadioStories.PositionDuLibelle} />
+
+## Spread
+
+`spread` fait passer la racine en flex pleine largeur : libellé et pastille sont repoussés aux
+extrémités du conteneur. Se combine avec `label-position` pour choisir de quel côté part la
+pastille.
+
+<Canvas of={VRadioStories.Spread} />
+
+## États
+
+`disabled` bascule la pastille sur des nuances de gris (`--vectis-color-surface-muted`,
+`--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu suit automatiquement le thème
+dark :
+
+<Canvas of={VRadioStories.Disabled} />
+
+## Formulaires et validation
+
+Les attributs natifs (`name` surtout, pour former le groupe, mais aussi `required`,
+`aria-*`…) passent en fallthrough sur l'input, pas sur le label. L'état invalide est stylé via
+`:user-invalid` (validation native) ; la prop `invalid` permet de le forcer — elle pose
+`aria-invalid`.
+
+## Accessibilité
+
+- Le libellé du slot nomme le contrôle (label englobant) ; envelopper le groupe dans un
+  `<fieldset>` avec `<legend>` pour nommer la question.
+- L'input est masqué via `opacity: 0` (jamais `display: none`) : il reste focusable et soumis
+  au formulaire ; les flèches naviguent dans le groupe (comportement natif).
+- Focus visible par anneau (`--vectis-focus-ring-*`) sur la pastille, jamais supprimé.
+- Les transitions respectent `prefers-reduced-motion`.

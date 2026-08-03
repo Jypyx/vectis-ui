@@ -1,8 +1,8 @@
 /**
- * Utilitaires d'heures PURS (TimePicker, TimePickerDial).
+ * Utilitaires d'heures PURS (VTimePicker, VTimePickerDial).
  *
  * Contrat : l'API publique manipule des chaînes `HH:mm` en **24 h canonique**
- * (le v-model du TimePicker, quel que soit l'affichage 12 h / 24 h). Les objets
+ * (le v-model du VTimePicker, quel que soit l'affichage 12 h / 24 h). Les objets
  * `Date` ne servent qu'à `Intl` sur des instants de RÉFÉRENCE en
  * `timeZone: 'UTC'`, pour que le rendu ne dépende jamais du fuseau machine
  * (SSR-safe).
@@ -115,9 +115,9 @@ export function distanceFraction(dx: number, dy: number, radius: number): number
 /**
  * Fraction de rayon sous laquelle un pointeur vise l'anneau INTÉRIEUR (24 h) :
  * mi-chemin entre les centres des deux anneaux de chiffres. Dérivé des tokens
- * `--ds-control-size-timepicker-dial` (16rem → R = 128px) et `-number`
+ * `--vectis-control-size-timepicker-dial` (16rem → R = 128px) et `-number`
  * (3rem → 48px) : ((128 − 24) + (128 − 72)) / 2 / 128 = 0.625 — à garder en
- * phase avec les `--_r` du CSS de TimePickerDial.vue.
+ * phase avec les `--dial-radius` du CSS de VTimePickerDial.vue.
  */
 export const DIAL_INNER_THRESHOLD = 0.625
 
@@ -138,7 +138,7 @@ export function hour24ToDial(hour: number): { index: number; ring: 'outer' | 'in
   return { index: hour, ring: 'outer' }
 }
 
-/* ── Liste d'heures (TimePicker `mode="list"`) ──────────────────────────── */
+/* ── Liste d'heures (VTimePicker `mode="list"`) ──────────────────────────── */
 
 export interface TimeOption {
   /** Valeur canonique `'HH:mm'` 24 h — celle du v-model. */
@@ -156,7 +156,7 @@ export function minutesOf(time: string | null | undefined): number | null {
 /**
  * Les heures d'une journée par pas de `step` minutes, de `00:00` à la dernière
  * avant minuit. PURE : `formatDisplay` passe par un instant de référence UTC.
- * Aucune borne min/max — le TimePicker n'en a pas, ne pas en inventer ici.
+ * Aucune borne min/max — le VTimePicker n'en a pas, ne pas en inventer ici.
  * `step` invalide (≤ 0, non entier, > 60) → repli 60 : la liste doit rester
  * finie même si le garde-fou de développement du composant a été ignoré.
  */
@@ -170,10 +170,10 @@ export function timeList(step: number, locale: string, format: HourFormat): Time
   return out
 }
 
-/* ── Masque de saisie `HH:MM` (TimePicker `mode="input"`) ───────────────── */
+/* ── Masque de saisie `HH:MM` (VTimePicker `mode="input"`) ───────────────── */
 
 /**
- * Le séparateur du masque est UNIVERSEL, contrairement à celui du DatePicker :
+ * Le séparateur du masque est UNIVERSEL, contrairement à celui du VDatePicker :
  * une heure se lit « HH:MM » dans toutes les locales — `Intl` n'y fait varier
  * que le cycle horaire, jamais le deux-points.
  *
@@ -208,7 +208,7 @@ export function timeCaret(n: number, skipSeparator = false): number {
 
 /**
  * `'HH:mm'` 24 h → texte masqué DU FORMAT AFFICHÉ. En 12 h l'heure est ramenée
- * à 1–12 : le méridien est porté par le Toggle à côté du champ, jamais par le
+ * à 1–12 : le méridien est porté par le VToggle à côté du champ, jamais par le
  * masque.
  */
 export function timeToMask(time: string | null | undefined, format: HourFormat): string {
@@ -220,7 +220,7 @@ export function timeToMask(time: string | null | undefined, format: HourFormat):
 
 /**
  * Texte masqué → `'HH:mm'` 24 h canonique, ou `null` si la saisie est
- * incomplète, surnuméraire ou impossible. En 12 h, `meridiem` vient du Toggle :
+ * incomplète, surnuméraire ou impossible. En 12 h, `meridiem` vient du VToggle :
  * c'est le SEUL endroit où le texte tapé et le méridien se rejoignent.
  */
 export function parseTimeMask(

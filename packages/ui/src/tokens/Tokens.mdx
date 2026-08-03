@@ -3,7 +3,7 @@ import { tokens, flattenTokens } from './index'
 
 <Meta title="Fondations/Tokens" />
 
-export const mono = { fontFamily: 'var(--ds-font-family-mono)', fontSize: 12 }
+export const mono = { fontFamily: 'var(--vectis-font-family-mono)', fontSize: 12 }
 
 export const Swatch = ({ cssName, label }) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
@@ -13,7 +13,7 @@ export const Swatch = ({ cssName, label }) => (
         height: 44,
         borderRadius: 8,
         background: `var(${cssName})`,
-        border: '1px solid var(--ds-color-border)',
+        border: '1px solid var(--vectis-color-border)',
       }}
     />
     <code style={{ ...mono, fontSize: 11 }}>{label}</code>
@@ -40,7 +40,7 @@ export const TokenTable = ({ flat, preview }) => (
     </thead>
     <tbody>
       {flat.map((f) => (
-        <tr key={f.cssName} style={{ borderTop: '1px solid var(--ds-color-border)' }}>
+        <tr key={f.cssName} style={{ borderTop: '1px solid var(--vectis-color-border)' }}>
           <td style={{ padding: 6 }}>{preview(f)}</td>
           <td style={{ padding: 6 }}>
             <code style={mono}>{f.cssName}</code>
@@ -61,7 +61,7 @@ Cette page est **générée depuis la source typée** (`src/tokens/`) — elle n
 diverger du code. Les composants ne consomment que les tokens **sémantiques** ;
 les primitifs ne servent qu'à les définir.
 
-Surcharge runtime : redéfinissez n'importe quelle custom property `--ds-*` sur
+Surcharge runtime : redéfinissez n'importe quelle custom property `--vectis-*` sur
 `:root` ou sur un sous-arbre DOM (aucun rebuild). Dark mode : `data-theme="dark"`.
 
 ## Palettes primitives
@@ -97,7 +97,7 @@ Surcharge runtime : redéfinissez n'importe quelle custom property `--ds-*` sur
         height: 28,
         borderRadius: 6,
         background: `var(${f.cssName})`,
-        border: '1px solid var(--ds-color-border)',
+        border: '1px solid var(--vectis-color-border)',
       }}
     />
   )}
@@ -110,7 +110,7 @@ Surcharge runtime : redéfinissez n'importe quelle custom property `--ds-*` sur
     <div key={f.cssName} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
       <code style={{ ...mono, width: 140 }}>{f.cssName}</code>
       <div
-        style={{ height: 12, width: `var(${f.cssName})`, background: 'var(--ds-color-accent)' }}
+        style={{ height: 12, width: `var(${f.cssName})`, background: 'var(--vectis-color-accent)' }}
       />
       <code style={mono}>{f.token.$value}</code>
     </div>
@@ -158,8 +158,8 @@ Surcharge runtime : redéfinissez n'importe quelle custom property `--ds-*` sur
 
 ### Échelle sémantique (rôles de texte)
 
-Chaque rôle est une recette complète (`--ds-text-<rôle>-size/weight/leading[/tracking]`),
-consommée par le composant **Typography** et par le CSS des composants. Le rôle `control`
+Chaque rôle est une recette complète (`--vectis-text-<rôle>-size/weight/leading[/tracking]`),
+consommée par le composant **VTypography** et par le CSS des composants. Le rôle `control`
 est technique (étiquettes de contrôles interactifs) : sa taille vient de l'échelle de
 tailles des contrôles, pas d'un token propre.
 
@@ -171,11 +171,11 @@ tailles des contrôles, pas d'un token propre.
         <code style={{ ...mono, width: 140, flexShrink: 0 }}>{role}</code>
         <span
           style={{
-            fontFamily: 'var(--ds-text-family)',
-            fontSize: `var(--ds-text-${role}-size, var(--ds-font-size-sm))`,
-            fontWeight: `var(--ds-text-${role}-weight)`,
-            lineHeight: `var(--ds-text-${role}-leading)`,
-            letterSpacing: `var(--ds-text-${role}-tracking, normal)`,
+            fontFamily: 'var(--vectis-text-family)',
+            fontSize: `var(--vectis-text-${role}-size, var(--vectis-font-size-sm))`,
+            fontWeight: `var(--vectis-text-${role}-weight)`,
+            lineHeight: `var(--vectis-text-${role}-leading)`,
+            letterSpacing: `var(--vectis-text-${role}-tracking, normal)`,
           }}
         >
           Portez ce vieux whisky au juge blond
@@ -184,7 +184,7 @@ tailles des contrôles, pas d'un token propre.
     ))}
 </div>
 
-Familles sémantiques : `--ds-text-family` (texte courant) et `--ds-text-family-code`
+Familles sémantiques : `--vectis-text-family` (texte courant) et `--vectis-text-family-code`
 (contenus code).
 
 ## Radii
@@ -197,8 +197,8 @@ Familles sémantiques : `--ds-text-family` (texte courant) et `--ds-text-family-
           width: 56,
           height: 56,
           borderRadius: `var(${f.cssName})`,
-          background: 'var(--ds-color-accent-surface)',
-          border: '1px solid var(--ds-color-accent-border)',
+          background: 'var(--vectis-color-accent-surface)',
+          border: '1px solid var(--vectis-color-accent-border)',
         }}
       />
       <code style={{ ...mono, fontSize: 11 }}>{f.path[f.path.length - 1]}</code>
@@ -218,7 +218,7 @@ Sémantiques : <code style={mono}>interactive · surface · overlay · pill</cod
           width: 72,
           height: 72,
           borderRadius: 12,
-          background: 'var(--ds-color-surface-raised)',
+          background: 'var(--vectis-color-surface-raised)',
           boxShadow: `var(${f.cssName})`,
         }}
       />

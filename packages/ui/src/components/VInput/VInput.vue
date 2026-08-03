@@ -1,0 +1,462 @@
+<script setup lang="ts">
+/**
+ * Champ de saisie complet : label, icônes internes (cliquables), compteur,
+ * limite souple, loading, clearable — autour d'un <input> natif stylé.
+ * Wrapper-root : class/style restent sur la racine, tout le reste est reporté
+ * sur l'<input>. La validation reste native (`:user-invalid`) ; la limite
+ * souple passe par setCustomValidity, jamais par un événement maison.
+ *
+ * JS de comportement propre au composant : le pont v-model et le clear +
+ * refocus (le bouton disparaît au clic, sinon le focus serait perdu).
+ */
+import { computed, ref } from 'vue'
+
+import VIcon from '../VIcon/VIcon.vue'
+import { iconName, iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
+import VSpinner from '../VSpinner/VSpinner.vue'
+import VTypography from '../VTypography/VTypography.vue'
+
+import { useFieldIds } from '../../composables/useFieldIds'
+import { useIconClickHandlers } from '../../composables/useIconClickHandlers'
+import { useRootAttrs } from '../../composables/useRootAttrs'
+import { useTextLimit } from '../../composables/useTextLimit'
+import { useMessages } from '../../i18n/state'
+
+interface InputProps {
+  /** Hauteur du champ : sm 32px, md 40px (défaut), lg 48px. */
+  size?: 'sm' | 'md' | 'lg'
+  /** Hauteur réduite de 4px ; padding, typo et icônes inchangés. */
+  compact?: boolean
+  /** Type de saisie natif — les claviers virtuels s'adaptent automatiquement. */
+  type?: 'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url'
+  /** Force l'état invalide (validation serveur) — pose aria-invalid. */
+  invalid?: boolean
+  disabled?: boolean
+  /** Lecture seule : focusable, non modifiable ; masque le bouton d'effacement
+      (sauf `clearVisible` explicite, qui fait autorité). */
+  readonly?: boolean
+  /** Libellé au-dessus du champ, associé via for/id. */
+  label?: string
+  /** Texte d'aide sous le champ, lié via aria-describedby. */
+  hint?: string
+  /** Icône à gauche dans le champ (le slot #start prime).
+      Décorative ; devient un bouton si un listener @click:icon-start est attaché. */
+  iconStart?: IconSource
+  /** Idem à droite (slot #end prime). Remplacée par le spinner en loading. */
+  iconEnd?: IconSource
+  /** Libellé accessible du bouton icône start (si cliquable). */
+  iconStartLabel?: string
+  /** Libellé accessible du bouton icône end (si cliquable). */
+  iconEndLabel?: string
+  /** VSpinner à droite, à la place de iconEnd / #end. */
+  loading?: boolean
+  /** Libellé du spinner pour les lecteurs d'écran. Défaut : dictionnaire du DS. */
+  loadingLabel?: string
+  /** Bouton croix qui vide le champ (visible si non-vide, hors disabled/readonly). */
+  clearable?: boolean
+  /** Force la visibilité de la croix (sinon : champ non-vide et modifiable) —
+      readonly compris. Utile quand le « contenu à effacer » vit hors du champ
+      texte (VCombobox : des Chips) ou se modifie autrement que par la frappe
+      (VDatePicker/VTimePicker en lecture seule : par leur panneau). */
+  clearVisible?: boolean
+  /** Libellé accessible du bouton d'effacement. Défaut : dictionnaire du DS. */
+  clearLabel?: string
+  /** Limite de caractères. Par défaut : attribut natif maxlength (saisie bloquée). */
+  maxlength?: number
+  /** Limite souple : la saisie peut dépasser maxlength, le champ passe en erreur
+      (setCustomValidity → :user-invalid) au lieu de bloquer. */
+  softLimit?: boolean
+  /** Compteur de caractères (« 12/80 », ou « 12 » sans maxlength), à droite dans le champ. */
+  counter?: boolean
+}
+
+defineOptions({ inheritAttrs: false })
+
+const props = withDefaults(defineProps<InputProps>(), {
+  size: 'md',
+  compact: false,
+  type: 'text',
+  invalid: false,
+  disabled: false,
+  readonly: false,
+  label: undefined,
+  hint: undefined,
+  iconStart: undefined,
+  iconEnd: undefined,
+  iconStartLabel: undefined,
+  iconEndLabel: undefined,
+  loading: false,
+  loadingLabel: undefined,
+  clearable: false,
+  clearVisible: undefined,
+  clearLabel: undefined,
+  maxlength: undefined,
+  softLimit: false,
+  counter: false,
+})
+
+const emit = defineEmits<{
+  'click:icon-start': [event: MouseEvent]
+  'click:icon-end': [event: MouseEvent]
+  clear: []
+}>()
+
+defineSlots<{
+  /** Contenu au début du champ (prime sur iconStart). */
+  start?(): unknown
+  /** Contenu à la fin du champ (prime sur iconEnd, masqué en loading). */
+  end?(): unknown
+}>()
+
+/**
+ * `string | number` et non `string` seul : sur un `<input type="number">`, Vue
+ * convertit d'office la valeur de `v-model` en nombre (`vModelText` caste dès
+ * que `el.type === 'number'`).
+ */
+const model = defineModel<string | number>({ default: '' })
+
+/** Projection texte du modèle : toutes les mesures de longueur (compteur,
+ * limite souple, visibilité de la croix) passent par elle — un nombre n'a pas
+ * de `.length`. */
+const modelText = computed(() => String(model.value ?? ''))
+
+const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
+
+// Cascade prop > dictionnaire : la prop garde la priorité, son défaut suit
+// désormais la locale du DS.
+const m = useMessages()
+const resolvedLoadingLabel = computed(() => props.loadingLabel ?? m.value.common.loading)
+const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
+
+const { fieldId, hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
+
+const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
+  name: 'VInput',
+  iconStartLabel: props.iconStartLabel,
+  iconEndLabel: props.iconEndLabel,
+})
+
+const controlEl = ref<HTMLInputElement | null>(null)
+
+const showClear = computed(() => {
+  if (!props.clearable || props.disabled) return false
+  // `clearVisible` fourni = réponse EXPLICITE du consommateur à « y a-t-il
+  // quelque chose à effacer ? », readonly compris : la valeur d'un VDatePicker /
+  // VTimePicker en lecture seule se modifie par son panneau, pas par la frappe.
+  // Sinon : défaut « champ non-vide ET modifiable ».
+  return props.clearVisible ?? (!props.readonly && modelText.value.length > 0)
+})
+
+function onClear() {
+  model.value = ''
+  emit('clear')
+  controlEl.value?.focus()
+}
+
+// Compteur et limite souple : mesurés sur `modelText`, un nombre n'a pas de `.length`.
+const { counterText, over } = useTextLimit({
+  el: controlEl,
+  text: () => modelText.value,
+  maxlength: () => props.maxlength,
+  softLimit: () => props.softLimit,
+})
+
+// Le contrôle interne est masqué par le wrapper : exposer focus()/select()/el
+// pour les composants qui le composent (ex. VCombobox, refocus + select-all).
+defineExpose({
+  focus: (options?: FocusOptions) => controlEl.value?.focus(options),
+  select: () => controlEl.value?.select(),
+  el: controlEl,
+})
+</script>
+
+<template>
+  <div
+    class="v-input v-control"
+    :class="rootClass"
+    :style="rootStyle"
+    :data-size="size"
+    :data-compact="compact ? '' : undefined"
+    :data-disabled="disabled ? '' : undefined"
+    :data-readonly="readonly ? '' : undefined"
+  >
+    <VTypography v-if="label" as="label" variant="label" class="v-input-label" :for="fieldId">
+      {{ label }}
+    </VTypography>
+
+    <div class="v-input-field">
+      <slot name="start">
+        <button
+          v-if="iconStart && hasIconStartHandler"
+          type="button"
+          class="v-input-action"
+          :aria-label="iconStartLabel ?? iconName(iconStart)"
+          :disabled="disabled"
+          @click="emit('click:icon-start', $event)"
+        >
+          <VIcon v-bind="iconProps(iconStart)" />
+        </button>
+        <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
+      </slot>
+
+      <input
+        v-bind="restAttrs"
+        :id="fieldId"
+        ref="controlEl"
+        v-model="model"
+        class="v-input-control"
+        :type="type"
+        :maxlength="softLimit ? undefined : maxlength"
+        :disabled="disabled"
+        :readonly="readonly || undefined"
+        :aria-invalid="invalid || undefined"
+        :aria-describedby="describedBy"
+      />
+
+      <span v-if="counter" class="v-input-counter" :data-over="over ? '' : undefined">
+        {{ counterText }}
+      </span>
+
+      <button
+        v-if="showClear"
+        type="button"
+        class="v-input-action v-input-clear"
+        :aria-label="resolvedClearLabel"
+        @click="onClear"
+      >
+        <!-- croix Material Symbols : même graisse de trait que les autres icônes
+             (iconStart/iconEnd, chevrons…) ; police chargée par le consommateur -->
+        <VIcon name="close" />
+      </button>
+
+      <VSpinner v-if="loading" :label="resolvedLoadingLabel" />
+      <slot v-else name="end">
+        <button
+          v-if="iconEnd && hasIconEndHandler"
+          type="button"
+          class="v-input-action"
+          :aria-label="iconEndLabel ?? iconName(iconEnd)"
+          :disabled="disabled"
+          @click="emit('click:icon-end', $event)"
+        >
+          <VIcon v-bind="iconProps(iconEnd)" />
+        </button>
+        <VIcon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" />
+      </slot>
+    </div>
+
+    <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-input-hint">
+      {{ hint }}
+    </VTypography>
+  </div>
+</template>
+
+<style>
+@layer vectis.components {
+  .v-input {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vectis-space-1);
+    width: 100%;
+    font-family: var(--vectis-text-family);
+  }
+
+  /* Label et hint : rendus par VTypography (label / caption muted) — les classes
+     .v-input-label/.v-input-hint restent posées comme points d'accroche
+     (surcharges consommateur, état disabled ci-dessous). */
+
+  /* Le field porte bordure, fond et focus ; --field-border-color est la seule
+     source de vérité de la couleur (hover/erreur/disabled la redéfinissent).
+     Tailles/compact : variables --control-* héritées de la racine v-control
+     (styles/control-size.css), contexte de VIcon compris. */
+  .v-input-field {
+    --field-border-color: var(--vectis-color-border-strong);
+
+    display: flex;
+    align-items: center;
+    gap: var(--control-gap);
+    height: var(--control-height);
+    padding-inline: var(--control-padding-inline-field);
+    background: var(--vectis-color-surface);
+    color: var(--vectis-color-text);
+    border: 1px solid var(--field-border-color);
+    border-radius: var(--vectis-radius-interactive);
+    font-size: var(--control-font-size);
+    transition:
+      border-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      background-color var(--vectis-duration-fast) var(--vectis-ease-default),
+      box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
+  }
+
+  .v-input-control {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    outline: none; /* le focus est porté par le field (focus-within) */
+  }
+
+  .v-input-control::placeholder {
+    color: var(--vectis-color-text-subtle);
+  }
+
+  /* Décorations natives neutralisées : les contrôles internes viennent du DS
+     (croix `clearable`, icônes) — la croix WebKit de type=search, les spinners
+     de type=number et l'œil de révélation d'Edge feraient doublon ou
+     détonneraient visuellement. */
+  .v-input-control::-webkit-search-cancel-button,
+  .v-input-control::-webkit-search-decoration,
+  .v-input-control::-webkit-search-results-button,
+  .v-input-control::-webkit-search-results-decoration,
+  .v-input-control::-webkit-inner-spin-button,
+  .v-input-control::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .v-input-control[type='number'] {
+    appearance: textfield;
+  }
+
+  .v-input-control::-ms-reveal {
+    display: none;
+  }
+
+  /* le fond autofill du navigateur est peint sur l'input interne : au moins
+     suivre le radius du champ (compromis, la couleur reste celle du navigateur) */
+  .v-input-control:-webkit-autofill {
+    border-radius: var(--vectis-radius-interactive);
+  }
+
+  .v-input-field:hover:not(:has(.v-input-control:focus)):not(
+      :has(
+        .v-input-control:disabled,
+        .v-input-control:user-invalid,
+        .v-input-control[aria-invalid='true']
+      )
+    ) {
+    --field-border-color: color-mix(
+      in oklab,
+      var(--vectis-color-border-strong),
+      var(--vectis-color-text) 15%
+    );
+  }
+
+  /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur,
+     sans saut de layout. On cible le focus du seul CONTRÔLE (pas :focus-within) :
+     quand un bouton interne (clear, icône) est focus au clavier, seul son
+     outline propre s'allume — sinon deux indicateurs simultanés, illisible.
+     :focus (pas :focus-visible) : un champ texte montre toujours son focus,
+     souris comprise. L'outline transparent est le filet forced-colors
+     (Windows High Contrast supprime les box-shadow). */
+  .v-input-field:has(.v-input-control:focus) {
+    --field-border-color: var(--vectis-color-accent);
+
+    box-shadow: 0 0 0 1px var(--field-border-color);
+    outline: var(--vectis-focus-ring-width) solid transparent;
+  }
+
+  /* État invalide : pseudo-classe native d'abord, prop (aria-invalid) ensuite.
+     Seule la variable change → la bordure ET le ring focus passent en rouge. */
+  .v-input-field:has(.v-input-control:user-invalid),
+  .v-input-field:has(.v-input-control[aria-invalid='true']) {
+    --field-border-color: var(--vectis-color-danger);
+  }
+
+  /* Le compteur reste stylé localement : tabular-nums et l'état de dépassement
+     ne sont pas des rôles typographiques. */
+  .v-input-counter {
+    flex: none;
+    font-size: var(--vectis-text-caption-size);
+    color: var(--vectis-color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .v-input-counter[data-over] {
+    color: var(--vectis-color-danger-text);
+  }
+
+  /* Icônes décoratives : gris foncé, moins présentes que le texte saisi */
+  .v-input-field > .v-icon {
+    color: var(--vectis-color-text-muted);
+  }
+
+  .v-input-field > .v-spinner {
+    font-size: var(--vectis-icon-size);
+  }
+
+  /* Boutons internes (effacer, icône cliquable) : gris foncé → noir au hover,
+     radius aligné sur VButton (focus ring carré aux bords arrondis) */
+  .v-input-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--control-action-size);
+    height: var(--control-action-size);
+    margin-inline: calc(var(--vectis-space-1) * -1);
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--vectis-color-text-muted);
+    border-radius: var(--vectis-radius-interactive);
+    cursor: pointer;
+    flex: none;
+    transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
+  }
+
+  .v-input-action:hover:not(:disabled) {
+    color: var(--vectis-color-text);
+  }
+
+  .v-input-action:focus-visible {
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
+  }
+
+  /* Readonly : fond légèrement enfoncé, texte normal (la valeur reste lisible),
+     focus accent conservé. [data-readonly] et jamais :read-only (matche :disabled). */
+  .v-input[data-readonly] .v-input-field {
+    --field-border-color: var(--vectis-color-border);
+
+    background: var(--vectis-color-surface-sunken);
+  }
+
+  /* Disabled : nuance de gris sans opacité (mêmes tokens que VCheckbox/VRadio).
+     Placé après les états erreur/readonly : à spécificité égale, il gagne. */
+  .v-input[data-disabled] .v-input-field {
+    --field-border-color: var(--vectis-color-border);
+
+    background: var(--vectis-color-surface-muted);
+    color: var(--vectis-color-text-subtle);
+    cursor: not-allowed;
+  }
+
+  .v-input[data-disabled] .v-input-label,
+  .v-input[data-disabled] .v-input-hint,
+  .v-input[data-disabled] .v-input-counter {
+    color: var(--vectis-color-text-subtle);
+  }
+
+  .v-input[data-disabled] .v-input-action,
+  .v-input[data-disabled] .v-input-field > .v-icon {
+    color: inherit;
+    cursor: not-allowed;
+  }
+
+  .v-input-control:disabled {
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .v-input-field,
+    .v-input-action {
+      transition: none;
+    }
+  }
+}
+</style>

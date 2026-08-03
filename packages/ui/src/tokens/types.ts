@@ -2,7 +2,7 @@
  * Format de tokens inspiré du W3C Design Tokens Community Group (DTCG) :
  * un token est un objet `{ $value, $type, $description? }`, les groupes sont
  * des objets imbriqués. Les alias utilisent la syntaxe DTCG `{path.to.token}`
- * et sont résolus en `var(--ds-path-to-token)` par le build.
+ * et sont résolus en `var(--vectis-path-to-token)` par le build.
  *
  * Cette source typée est LA source de vérité : le CSS est généré depuis elle,
  * et la future app de theming la manipulera programmatiquement.

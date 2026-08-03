@@ -34,7 +34,7 @@ if (!('showPopover' in HTMLElement.prototype)) {
 
 /**
  * jsdom ne connaît pas `HTMLDialogElement.prototype.showModal` (« Not
- * implemented »). Stub minimal pour tester la LOGIQUE de <Dialog> (sync
+ * implemented »). Stub minimal pour tester la LOGIQUE de <VDialog> (sync
  * v-model ↔ .open, ARIA, croix) — le comportement navigateur réel (top-layer,
  * ::backdrop, piège de focus, light dismiss, scroll-state) reste couvert par
  * les play functions Storybook.

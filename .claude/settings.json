@@ -10,7 +10,7 @@
       "PowerShell(pnpm build-storybook*)",
       "PowerShell(pnpm tokens*)",
       "PowerShell(pnpm exec vitest run *)",
-      "PowerShell(pnpm --filter @socle/ui exec vitest run *)",
+      "PowerShell(pnpm --filter @vectis/ui exec vitest run *)",
       "PowerShell(npx vitest run *)",
       "Bash(pnpm lint*)",
       "Bash(pnpm typecheck*)",
@@ -21,7 +21,7 @@
       "Bash(pnpm build-storybook*)",
       "Bash(pnpm tokens*)",
       "Bash(pnpm exec vitest run *)",
-      "Bash(pnpm --filter @socle/ui exec vitest run *)",
+      "Bash(pnpm --filter @vectis/ui exec vitest run *)",
       "Bash(npx vitest run *)"
     ]
   }

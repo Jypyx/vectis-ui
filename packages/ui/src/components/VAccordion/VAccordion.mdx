@@ -1,0 +1,94 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VAccordionStories from './VAccordion.stories'
+
+<Meta of={VAccordionStories} />
+
+# Accordion
+
+Panneaux repliables bâtis sur `<details>`/`<summary>` **natifs** : l'état, le clavier et la
+sémantique d'accessibilité viennent du navigateur, sans aucun JS d'état. Le mode exclusif — un
+seul panneau ouvert à la fois — repose sur l'attribut natif `name` partagé entre les items,
+fourni par le groupe. L'ouverture est animée en pur CSS (`::details-content` +
+`interpolate-size`) : sans support, elle est simplement instantanée.
+
+<Canvas of={VAccordionStories.Default} />
+
+<Controls of={VAccordionStories.Default} />
+
+## Ouvertures multiples
+
+`exclusive={false}` retire le `name` partagé : chaque panneau s'ouvre et se ferme
+indépendamment.
+
+<Canvas of={VAccordionStories.OuverturesMultiples} />
+
+## Titre riche
+
+Le slot `#title` remplace la prop `title` pour composer un intitulé (emphase, badge, icône…).
+
+<Canvas of={VAccordionStories.TitreRiche} />
+
+## Sous-titre et icône de début
+
+Chaque item peut compléter son titre : `subtitle` ajoute une ligne secondaire sous le titre
+(remplaçable par le slot `#subtitle` pour un contenu riche), et `iconStart` place une icône
+devant le bloc textuel — nom d'icône **ou** rendu explicite (`{ src }`, `{ component }`), comme
+partout ailleurs. Le
+slot `#start` prime sur `iconStart` pour un contenu libre (avatar, badge…). Les deux se
+combinent librement et restent indépendants du chevron d'ouverture.
+
+<Canvas of={VAccordionStories.SousTitreEtIcone} />
+
+## Icônes
+
+Par défaut, un chevron pivote de 180° à l'ouverture. Deux props posées **sur le groupe**
+personnalisent l'iconographie de tous les items : `expandIcon` (état fermé) et `collapseIcon`
+(état ouvert). Chacune accepte un nom d'icône **ou** un rendu explicite.
+
+Fournir `collapseIcon` bascule le composant en mode permutation : les deux icônes sont rendues
+et échangées en CSS selon l'état du `<details>` — utile pour un couple non directionnel comme
+« plus / moins ». Sans `collapseIcon`, l'icône unique reste pivotée à l'ouverture.
+
+<Canvas of={VAccordionStories.IconesPersonnalisees} />
+
+## Variantes
+
+`variant` pilote l'habillage du groupe, sur une échelle commune au `VDataTable` et aux `VTabs`. `flat` (défaut)
+n'en pose aucun — ni bordure, ni rayon, ni fond : c'est la variante d'un accordéon placé dans un
+conteneur qui porte déjà son propre cadre (panneau latéral, carte, feuille), dont il hérite alors
+la surface. `outlined` le présente en carte : filet de 1px, coins arrondis et fond surélevé.
+
+Les séparateurs entre items, eux, restent en place dans les deux variantes : ils appartiennent à
+la lecture de la liste, pas à son cadre.
+
+<Canvas of={VAccordionStories.Variantes} />
+
+## Compact
+
+`compact` retire 4px à **tous** les paddings — verticaux comme horizontaux, en-tête comme
+panneau — et ne touche à rien d'autre : la typographie, la gouttière et l'icône (20px) restent
+celles de la densité normale. C'est le même écart que le `compact` des contrôles à hauteur fixe
+(VButton, VInput…) ; l'accordéon n'ayant pas de hauteur imposée, l'écart porte ici sur les
+paddings, pilotés par un delta unique posé sur le groupe et hérité par les items.
+
+<Canvas of={VAccordionStories.Compact} />
+
+## Item désactivé
+
+`disabled` sur un `VAccordionItem` le rend inerte : il n'est plus ouvrable au clic ni atteignable
+au clavier, et passe en nuances de gris par les tokens (jamais d'opacité). Comme `<summary>`
+n'expose pas d'attribut `disabled` natif, l'inertie est obtenue en annulant l'activation et en
+retirant l'item du parcours de tabulation.
+
+<Canvas of={VAccordionStories.ItemDesactive} />
+
+## Accessibilité
+
+- La sémantique est celle de `<details>`/`<summary>` : état exposé nativement, `Entrée` et
+  `Espace` basculent le panneau focalisé, aucun attribut ARIA à poser côté consommateur.
+- Un item désactivé porte `aria-disabled` et sort du parcours clavier (`tabindex="-1"`) : il
+  reste lisible et annoncé, mais n'est plus activable.
+- Les icônes d'ouverture/fermeture sont décoratives (masquées aux technologies d'assistance) —
+  l'information d'état est déjà portée par `<details>`.
+- Toutes les transitions (rotation de l'icône, ouverture du panneau) sont neutralisées sous
+  `prefers-reduced-motion`.
