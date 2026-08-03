@@ -2,10 +2,16 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VPagination from './VPagination.vue'
 
+const t = storyText({
+  en: { back: 'Back', forward: 'Forward' },
+  fr: { back: 'Reculer', forward: 'Avancer' },
+})
+
 const meta = {
-  title: 'Composants/Pagination',
+  title: 'Components/Pagination',
   component: VPagination,
   argTypes: {
     variant: { control: 'inline-radio', options: ['ghost', 'outline'] },
@@ -31,7 +37,7 @@ const meta = {
     disabled: false,
     responsive: true,
   },
-  // v-model vivant : sans ref locale, cliquer une page ne changerait rien.
+  // A live v-model: without a local ref, clicking a page would change nothing.
   render: (args) => ({
     components: { VPagination },
     setup: () => ({ args, page: ref(10) }),
@@ -50,7 +56,7 @@ export const Default: Story = {
       'page',
     )
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Page suivante' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Next page' }))
 
     await waitFor(async () => {
       await expect(canvas.getByRole('button', { name: 'Page 11' })).toHaveAttribute(
@@ -69,7 +75,7 @@ export const Variants: Story = {
   render: () => ({
     components: { VPagination },
     setup: () => ({ ghost: ref(6), outline: ref(6) }),
-    // La page active est toujours `solid` : seules les pages inactives suivent la variante.
+    // The active page is always `solid`: only the inactive pages follow the variant.
     template: `
       <div style="display: grid; gap: 16px">
         <VPagination :length="12" variant="ghost" v-model="ghost" />
@@ -116,11 +122,11 @@ export const Compact: Story = {
   }),
 }
 
-export const Controles: Story = {
+export const Controls: Story = {
   render: () => ({
     components: { VPagination },
-    setup: () => ({ a: ref(4), b: ref(4), c: ref(4), d: ref(4), e: ref(4) }),
-    // Icônes personnalisées : nom Material Symbols OU URL d'image.
+    setup: () => ({ a: ref(4), b: ref(4), c: ref(4), d: ref(4), e: ref(4), t }),
+    // Custom icons: a Material Symbols name OR an image URL.
     template: `
       <div style="display: grid; gap: 16px">
         <VPagination :length="10" controls-display="icon" v-model="a" />
@@ -131,8 +137,8 @@ export const Controles: Story = {
           controls-display="both"
           prev-icon="first_page"
           next-icon="last_page"
-          prev-label="Reculer"
-          next-label="Avancer"
+          :prev-label="t.back"
+          :next-label="t.forward"
           v-model="d"
         />
         <VPagination :length="10" :show-controls="false" v-model="e" />
@@ -141,15 +147,15 @@ export const Controles: Story = {
   }),
 }
 
-export const PagesDesactivees: Story = {
+export const DisabledPages: Story = {
   render: () => ({
     components: { VPagination },
-    setup: () => ({ liste: ref(5), predicat: ref(5) }),
-    // Les contrôles enjambent les pages désactivées jusqu'à la plus proche activable.
+    setup: () => ({ list: ref(5), predicate: ref(5) }),
+    // The controls step over the disabled pages to the nearest activatable one.
     template: `
       <div style="display: grid; gap: 16px">
-        <VPagination :length="12" :disabled-pages="[4, 6]" v-model="liste" />
-        <VPagination :length="12" :disabled-pages="(p) => p % 2 === 0" v-model="predicat" />
+        <VPagination :length="12" :disabled-pages="[4, 6]" v-model="list" />
+        <VPagination :length="12" :disabled-pages="(p) => p % 2 === 0" v-model="predicate" />
       </div>
     `,
   }),
@@ -159,11 +165,11 @@ export const Responsive: Story = {
   render: () => ({
     components: { VPagination },
     setup: () => ({ page: ref(10) }),
-    // La nav est son propre conteneur de requête : la troncature suit la largeur
-    // du décor, pas celle du viewport. Le panneau est redimensionnable à la
-    // poignée (coin inférieur droit, resize CSS — d'où l'overflow: hidden) :
-    // les voisines tombent par paliers en le rétrécissant, la première, la
-    // dernière et la page courante restent toujours.
+    // The nav is its own query container: the truncation follows the width of the
+    // frame, not the viewport's. The panel is resizable by its handle (bottom
+    // right corner, CSS resize — hence the overflow: hidden): the neighbours fall
+    // away in steps as it narrows, while the first, the last and the current page
+    // always remain.
     template: `
       <div
         style="
@@ -180,8 +186,8 @@ export const Responsive: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // À la largeur initiale (~39rem), la fenêtre complète tient : les paliers
-    // suivants (1 … 9 10 11 … 40, puis 1 … 10 … 40) s'observent à la poignée.
+    // At the initial width (~39rem) the full window fits: the next steps
+    // (1 … 9 10 11 … 40, then 1 … 10 … 40) are observed with the handle.
     const nav = canvasElement.querySelector('.v-pagination')
     const visiblePages = [...nav!.querySelectorAll<HTMLElement>('.v-pagination-page')]
       .filter((el) => getComputedStyle(el).display !== 'none')
@@ -191,12 +197,12 @@ export const Responsive: Story = {
   },
 }
 
-export const Alignement: Story = {
+export const Alignment: Story = {
   render: () => ({
     components: { VPagination },
     setup: () => ({ aligns: ['start', 'center', 'end'], page: ref(3) }),
-    // La nav est block-level et occupe toute la largeur disponible :
-    // l'alignement passe donc par la prop `align`.
+    // The nav is block-level and takes the full available width, so the alignment
+    // goes through the `align` prop.
     template: `
       <div style="display: grid; gap: 16px; border: 1px dashed var(--vectis-color-border); padding: 8px">
         <VPagination v-for="a in aligns" :key="a" :length="8" :align="a" v-model="page" />
@@ -205,7 +211,7 @@ export const Alignement: Story = {
   }),
 }
 
-export const BeaucoupDePages: Story = {
+export const ManyPages: Story = {
   args: { length: 120, totalVisible: 9 },
   render: (args) => ({
     components: { VPagination },
@@ -214,20 +220,19 @@ export const BeaucoupDePages: Story = {
   }),
 }
 
-export const CasLimites: Story = {
+export const EdgeCases: Story = {
   render: () => ({
     components: { VPagination },
-    setup: () => ({ une: ref(1), deux: ref(1), longs: ref(9999) }),
+    setup: () => ({ one: ref(1), two: ref(1), long: ref(9999) }),
     template: `
       <div style="display: grid; gap: 16px">
-        <!-- Page unique : les deux contrôles sont en butée. -->
-        <VPagination :length="1" v-model="une" />
-        <VPagination :length="2" v-model="deux" />
-        <!-- Numéros à 4 chiffres : les pastilles s'élargissent au-delà du carré.
-             Sans totalVisible, les 12 000 pages seraient toutes rendues. -->
-        <VPagination :length="12000" :total-visible="7" v-model="longs" />
-        <!-- Troncature responsive désactivée : la rangée déborde plutôt que de se réduire. -->
-        <VPagination :length="12000" :total-visible="7" :responsive="false" v-model="longs" />
+        <VPagination :length="1" v-model="one" />
+        <VPagination :length="2" v-model="two" />
+        <!-- 4-digit numbers: the pills widen beyond the square. Without
+             totalVisible, all 12,000 pages would be rendered. -->
+        <VPagination :length="12000" :total-visible="7" v-model="long" />
+        <!-- Responsive truncation off: the row overflows rather than shrinking. -->
+        <VPagination :length="12000" :total-visible="7" :responsive="false" v-model="long" />
       </div>
     `,
   }),

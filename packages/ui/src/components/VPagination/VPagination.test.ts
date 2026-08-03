@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import VPagination from './VPagination.vue'
 
-/** Libellés des pastilles de page, dans l'ordre du DOM. */
+/** Labels of the page pills, in DOM order. */
 function pageLabels(container: Element): string[] {
   return [...container.querySelectorAll('.v-pagination-page')].map(
     (el) => el.textContent?.trim() ?? '',
@@ -16,15 +16,15 @@ function slotCount(container: Element): number {
 }
 
 describe('VPagination', () => {
-  describe('troncature logique', () => {
-    it('rend toutes les pages quand totalVisible est absente', () => {
+  describe('logical truncation', () => {
+    it('renders every page when totalVisible is absent', () => {
       const { container } = render(VPagination, { props: { length: 8, modelValue: 2 } })
 
       expect(pageLabels(container)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8'])
       expect(container.querySelectorAll('.v-pagination-ellipsis')).toHaveLength(0)
     })
 
-    it('encadre la page courante, garde les bornes et intercale deux ellipses', () => {
+    it('frames the current page, keeps the bounds and inserts two ellipses', () => {
       const { container } = render(VPagination, {
         props: { length: 20, modelValue: 10, totalVisible: 7 },
       })
@@ -33,7 +33,7 @@ describe('VPagination', () => {
       expect(container.querySelectorAll('.v-pagination-ellipsis')).toHaveLength(2)
     })
 
-    it('garde un nombre d’emplacements constant en décalant la fenêtre aux extrémités', () => {
+    it('keeps a constant slot count by shifting the window at the ends', () => {
       const cases: Array<[number, string[]]> = [
         [1, ['1', '2', '3', '4', '5', '20']],
         [10, ['1', '9', '10', '11', '20']],
@@ -45,13 +45,13 @@ describe('VPagination', () => {
         })
 
         expect(pageLabels(container)).toEqual(expected)
-        // ellipses comprises : la barre garde exactement la même largeur
+        // ellipses included: the bar keeps exactly the same width
         expect(slotCount(container)).toBe(7)
         unmount()
       }
     })
 
-    it("n'intercale aucune ellipse quand totalVisible couvre toutes les pages", () => {
+    it('inserts no ellipsis when totalVisible covers every page', () => {
       const { container } = render(VPagination, {
         props: { length: 4, modelValue: 2, totalVisible: 10 },
       })
@@ -60,7 +60,7 @@ describe('VPagination', () => {
       expect(container.querySelectorAll('.v-pagination-ellipsis')).toHaveLength(0)
     })
 
-    it('clampe totalVisible au minimum utile de 5', () => {
+    it('clamps totalVisible to the useful minimum of 5', () => {
       const { container } = render(VPagination, {
         props: { length: 20, modelValue: 10, totalVisible: 3 },
       })
@@ -69,7 +69,7 @@ describe('VPagination', () => {
       expect(slotCount(container)).toBe(5)
     })
 
-    it('marque les bornes en data-edge et les voisines de leur distance à la page courante', () => {
+    it('marks the bounds with data-edge and the neighbours with their distance to the current page', () => {
       const { container } = render(VPagination, {
         props: { length: 20, modelValue: 10, totalVisible: 7 },
       })
@@ -87,7 +87,7 @@ describe('VPagination', () => {
   })
 
   describe('v-model', () => {
-    it('émet la page cliquée', async () => {
+    it('emits the clicked page', async () => {
       const { getByRole, emitted } = render(VPagination, { props: { length: 20, modelValue: 10 } })
 
       await fireEvent.click(getByRole('button', { name: 'Page 11' }))
@@ -95,36 +95,36 @@ describe('VPagination', () => {
       expect(emitted('update:modelValue')).toEqual([[11]])
     })
 
-    it('avance et recule d’une page avec les contrôles', async () => {
+    it('moves forward and back one page with the controls', async () => {
       const next = render(VPagination, { props: { length: 20, modelValue: 10 } })
-      await fireEvent.click(next.getByRole('button', { name: 'Page suivante' }))
+      await fireEvent.click(next.getByRole('button', { name: 'Next page' }))
       expect(next.emitted('update:modelValue')).toEqual([[11]])
       next.unmount()
 
       const previous = render(VPagination, { props: { length: 20, modelValue: 10 } })
-      await fireEvent.click(previous.getByRole('button', { name: 'Page précédente' }))
+      await fireEvent.click(previous.getByRole('button', { name: 'Previous page' }))
       expect(previous.emitted('update:modelValue')).toEqual([[9]])
     })
 
-    it('désactive le contrôle en butée à chaque extrémité', () => {
+    it('disables the control at the end of the line on each side', () => {
       const first = render(VPagination, { props: { length: 5, modelValue: 1 } })
       expect(
-        (first.getByRole('button', { name: 'Page précédente' }) as HTMLButtonElement).disabled,
+        (first.getByRole('button', { name: 'Previous page' }) as HTMLButtonElement).disabled,
       ).toBe(true)
-      expect(
-        (first.getByRole('button', { name: 'Page suivante' }) as HTMLButtonElement).disabled,
-      ).toBe(false)
+      expect((first.getByRole('button', { name: 'Next page' }) as HTMLButtonElement).disabled).toBe(
+        false,
+      )
       first.unmount()
 
       const last = render(VPagination, { props: { length: 5, modelValue: 5 } })
-      expect(
-        (last.getByRole('button', { name: 'Page suivante' }) as HTMLButtonElement).disabled,
-      ).toBe(true)
+      expect((last.getByRole('button', { name: 'Next page' }) as HTMLButtonElement).disabled).toBe(
+        true,
+      )
     })
   })
 
-  describe('accessibilité', () => {
-    it('pose aria-current="page" sur la seule page active', () => {
+  describe('accessibility', () => {
+    it('sets aria-current="page" on the active page alone', () => {
       const { container, getByRole } = render(VPagination, {
         props: { length: 20, modelValue: 10 },
       })
@@ -133,21 +133,21 @@ describe('VPagination', () => {
       expect(getByRole('button', { name: 'Page 10' }).getAttribute('aria-current')).toBe('page')
     })
 
-    it('nomme la navigation et accepte un libellé de page personnalisé', () => {
+    it('names the navigation and accepts a custom page label', () => {
       const { getByRole } = render(VPagination, {
         props: {
           length: 5,
           modelValue: 2,
-          label: 'Résultats',
-          pageLabel: (n: number) => `Aller à la page ${n}`,
+          label: 'Results',
+          pageLabel: (n: number) => `Go to page ${n}`,
         },
       })
 
-      expect(getByRole('navigation').getAttribute('aria-label')).toBe('Résultats')
-      expect(getByRole('button', { name: 'Aller à la page 3' })).toBeTruthy()
+      expect(getByRole('navigation').getAttribute('aria-label')).toBe('Results')
+      expect(getByRole('button', { name: 'Go to page 3' })).toBeTruthy()
     })
 
-    it("masque l'ellipse aux technologies d'assistance et la sort de la tabulation", () => {
+    it('hides the ellipsis from assistive technologies and takes it out of the tab order', () => {
       const { container } = render(VPagination, {
         props: { length: 20, modelValue: 10, totalVisible: 7 },
       })
@@ -158,10 +158,10 @@ describe('VPagination', () => {
     })
   })
 
-  describe('pages désactivées', () => {
-    // l'inertie elle-même est native (<button disabled>, fourni par VButton) :
-    // jsdom la contourne en dispatchant l'événement, on n'asserte donc que le marquage
-    it('accepte une liste', () => {
+  describe('disabled pages', () => {
+    // the inertness itself is native (<button disabled>, supplied by VButton):
+    // jsdom bypasses it by dispatching the event, so only the marking is asserted
+    it('accepts a list', () => {
       const { getByRole } = render(VPagination, {
         props: { length: 5, modelValue: 2, disabledPages: [3] },
       })
@@ -170,7 +170,7 @@ describe('VPagination', () => {
       expect((getByRole('button', { name: 'Page 2' }) as HTMLButtonElement).disabled).toBe(false)
     })
 
-    it('accepte un prédicat', () => {
+    it('accepts a predicate', () => {
       const { getByRole } = render(VPagination, {
         props: { length: 5, modelValue: 1, disabledPages: (n: number) => n > 3 },
       })
@@ -179,17 +179,17 @@ describe('VPagination', () => {
       expect((getByRole('button', { name: 'Page 4' }) as HTMLButtonElement).disabled).toBe(true)
     })
 
-    it('enjambe les pages désactivées avec les contrôles', async () => {
+    it('steps over the disabled pages with the controls', async () => {
       const { getByRole, emitted } = render(VPagination, {
         props: { length: 5, modelValue: 3, disabledPages: [2] },
       })
 
-      await fireEvent.click(getByRole('button', { name: 'Page précédente' }))
+      await fireEvent.click(getByRole('button', { name: 'Previous page' }))
 
       expect(emitted('update:modelValue')).toEqual([[1]])
     })
 
-    it('désactive tout le composant avec disabled', () => {
+    it('disables the whole component with disabled', () => {
       const { container } = render(VPagination, {
         props: { length: 5, modelValue: 3, disabled: true },
       })
@@ -200,7 +200,7 @@ describe('VPagination', () => {
   })
 
   describe('attached', () => {
-    it('rattache les boutons dans un VButtonGroup', () => {
+    it('joins the buttons inside a VButtonGroup', () => {
       const { container, getByRole } = render(VPagination, {
         props: { length: 5, modelValue: 1, attached: true },
       })
@@ -209,7 +209,7 @@ describe('VPagination', () => {
       expect(getByRole('group')).toBeTruthy()
     })
 
-    it('reste une simple rangée par défaut', () => {
+    it('stays a plain row by default', () => {
       const { container, queryByRole } = render(VPagination, {
         props: { length: 5, modelValue: 1 },
       })
@@ -219,8 +219,8 @@ describe('VPagination', () => {
     })
   })
 
-  describe('contrôles', () => {
-    it("n'affiche aucun contrôle avec showControls: false", () => {
+  describe('controls', () => {
+    it('shows no control with showControls: false', () => {
       const { container } = render(VPagination, {
         props: { length: 5, modelValue: 3, showControls: false },
       })
@@ -228,19 +228,19 @@ describe('VPagination', () => {
       expect(container.querySelectorAll('.v-pagination-control')).toHaveLength(0)
     })
 
-    it('rend un libellé visible en mode text, sans icône', () => {
+    it('renders a visible label in text mode, with no icon', () => {
       const { container } = render(VPagination, {
         props: { length: 5, modelValue: 3, controlsDisplay: 'text' },
       })
       const control = container.querySelector('.v-pagination-control')
 
       expect(control?.querySelector('.v-pagination-control-label')?.textContent).toBe(
-        'Page précédente',
+        'Previous page',
       )
       expect(control?.querySelector('.v-icon')).toBeNull()
     })
 
-    it('cumule icône et libellé en mode both', () => {
+    it('combines icon and label in both mode', () => {
       const { container } = render(VPagination, {
         props: { length: 5, modelValue: 3, controlsDisplay: 'both' },
       })
@@ -250,15 +250,15 @@ describe('VPagination', () => {
       expect(control?.querySelector('.v-icon')).toBeTruthy()
     })
 
-    it('garde le nom accessible même quand le libellé est visible', () => {
+    it('keeps the accessible name even when the label is visible', () => {
       const { getByRole } = render(VPagination, {
         props: { length: 5, modelValue: 3, controlsDisplay: 'both' },
       })
 
-      expect(getByRole('button', { name: 'Page précédente' })).toBeTruthy()
+      expect(getByRole('button', { name: 'Previous page' })).toBeTruthy()
     })
 
-    it('accepte un nom ou un rendu explicite pour les icônes personnalisées', () => {
+    it('accepts a name or an explicit render for the custom icons', () => {
       const { container } = render(VPagination, {
         props: {
           length: 5,
@@ -275,17 +275,17 @@ describe('VPagination', () => {
       )
     })
 
-    it('reprend les libellés personnalisés', () => {
+    it('picks up the custom labels', () => {
       const { getByRole } = render(VPagination, {
-        props: { length: 5, modelValue: 3, prevLabel: 'Précédent', nextLabel: 'Suivant' },
+        props: { length: 5, modelValue: 3, prevLabel: 'Previous', nextLabel: 'Next' },
       })
 
-      expect(getByRole('button', { name: 'Suivant' })).toBeTruthy()
+      expect(getByRole('button', { name: 'Next' })).toBeTruthy()
     })
   })
 
-  describe('taille', () => {
-    it('propage size et compact à tous les boutons', () => {
+  describe('size', () => {
+    it('propagates size and compact to every button', () => {
       const { container } = render(VPagination, {
         props: { length: 20, modelValue: 10, size: 'sm', compact: true },
       })
@@ -295,7 +295,7 @@ describe('VPagination', () => {
       expect(buttons.every((el) => el.hasAttribute('data-compact'))).toBe(true)
     })
 
-    it('rend la page active en solid et les autres dans la variante demandée', () => {
+    it('renders the active page as solid and the others in the requested variant', () => {
       const { container } = render(VPagination, {
         props: { length: 5, modelValue: 3, variant: 'outline' },
       })
@@ -308,8 +308,8 @@ describe('VPagination', () => {
     })
   })
 
-  describe('navigation clavier', () => {
-    it('déplace le focus avec les flèches sans changer de page', async () => {
+  describe('keyboard navigation', () => {
+    it('moves focus with the arrows without changing page', async () => {
       const { container, getByRole, emitted } = render(VPagination, {
         props: { length: 20, modelValue: 10 },
       })
@@ -322,7 +322,7 @@ describe('VPagination', () => {
       expect(emitted('update:modelValue')).toBeUndefined()
     })
 
-    it('boucle en arrière et saute aux extrémités avec Home/End', async () => {
+    it('wraps backwards and jumps to the ends with Home/End', async () => {
       const { container, getByRole } = render(VPagination, {
         props: { length: 20, modelValue: 10 },
       })
@@ -340,7 +340,7 @@ describe('VPagination', () => {
       expect(document.activeElement).toBe(pages[pages.length - 1])
     })
 
-    it('ignore les pages désactivées', async () => {
+    it('ignores the disabled pages', async () => {
       const { container, getByRole } = render(VPagination, {
         props: { length: 5, modelValue: 1, disabledPages: [2] },
       })
@@ -353,17 +353,15 @@ describe('VPagination', () => {
     })
   })
 
-  describe('cas limites', () => {
-    it('rend une seule pastille pour une page unique, contrôles en butée', () => {
+  describe('edge cases', () => {
+    it('renders a single pill for a single page, with both controls at the end of the line', () => {
       const { container, getByRole } = render(VPagination, { props: { length: 1, modelValue: 1 } })
 
       expect(pageLabels(container)).toEqual(['1'])
-      expect((getByRole('button', { name: 'Page suivante' }) as HTMLButtonElement).disabled).toBe(
-        true,
-      )
+      expect((getByRole('button', { name: 'Next page' }) as HTMLButtonElement).disabled).toBe(true)
     })
 
-    it('borne une page courante hors limites', () => {
+    it('clamps an out-of-range current page', () => {
       const { getByRole } = render(VPagination, { props: { length: 5, modelValue: 99 } })
 
       expect(getByRole('button', { name: 'Page 5' }).getAttribute('aria-current')).toBe('page')

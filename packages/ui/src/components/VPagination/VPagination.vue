@@ -1,4 +1,14 @@
 <script setup lang="ts">
+/**
+ * Composed pagination: every pill is a VButton, the previous/next controls a
+ * VButton or a VIconButton, and `attached` joins the whole thing in a
+ * VButtonGroup. No state rule is redefined here.
+ *
+ * Double truncation: logical (`totalVisible`, pure SSR-safe derivation) and
+ * responsive (100% CSS through container queries on the nav itself, so no
+ * ResizeObserver). The only behavioural JS is keyboard navigation, justified at
+ * the head of `onKeydown`.
+ */
 import { computed, ref } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
@@ -15,63 +25,52 @@ import { resolveMatcher } from '../../utils/matcher'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
-/**
- * VPagination composée : chaque pastille est un VButton, les contrôles
- * précédent/suivant un VButton ou un VIconButton, et `attached` rattache le tout
- * dans un VButtonGroup. Aucune règle d'état n'est redéfinie ici.
- *
- * Double troncature : logique (`totalVisible`, pure dérivation SSR-safe) et
- * responsive (100 % CSS par container queries sur la nav elle-même, donc aucun
- * ResizeObserver). Seul JS de comportement : la navigation clavier, justifiée
- * en tête de `onKeydown`.
- */
 interface PaginationProps {
-  /** Nombre total de pages. */
+  /** Total number of pages. */
   length?: number
   /**
-   * Nombre total d'emplacements rendus, ellipses comprises (minimum 5 :
-   * première + ellipse + courante + ellipse + dernière). La fenêtre se décale
-   * aux extrémités au lieu de rétrécir : la largeur de la barre est stable.
-   * Absente : toutes les pages sont rendues.
+   * Total number of rendered slots, ellipses included (minimum 5: first +
+   * ellipsis + current + ellipsis + last). The window shifts at the ends instead
+   * of shrinking: the bar's width is stable. Absent: every page is rendered.
    */
   totalVisible?: number
 
-  /** Rattache tous les boutons en contrôle segmenté (VButtonGroup). */
+  /** Joins every button into a segmented control (VButtonGroup). */
   attached?: boolean
-  /** Variante des pages NON actives et des contrôles. La page active est toujours `solid`. */
+  /** Variant of the NON-active pages and of the controls. The active page is always `solid`. */
   variant?: 'ghost' | 'outline'
-  /** Tone de la page active ; les pages inactives et les contrôles restent neutral. */
+  /** Tone of the active page; inactive pages and the controls stay neutral. */
   tone?: 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  /** Hauteur réduite de 4px, propagée à tous les boutons. */
+  /** Height reduced by 4px, propagated to every button. */
   compact?: boolean
-  /** Alignement dans le conteneur : la nav occupe toute la largeur disponible (cf. CSS). */
+  /** Alignment within the container: the nav takes the full available width (see CSS). */
   align?: 'start' | 'center' | 'end'
 
-  /** Affiche les boutons précédent / suivant. */
+  /** Shows the previous / next buttons. */
   showControls?: boolean
-  /** Rendu des contrôles : icône seule, texte seul, ou les deux. */
+  /** Rendering of the controls: icon only, text only, or both. */
   controlsDisplay?: 'icon' | 'text' | 'both'
-  /** Icône du contrôle précédent : nom, ou rendu explicite. */
+  /** Icon of the previous control: a name, or an explicit render. */
   prevIcon?: IconSource
-  /** Icône du contrôle suivant : nom, ou rendu explicite. */
+  /** Icon of the next control: a name, or an explicit render. */
   nextIcon?: IconSource
-  /** Libellé du contrôle précédent (texte visible et nom accessible). Défaut : dictionnaire du DS. */
+  /** Label of the previous control (visible text and accessible name). Default: the DS dictionary. */
   prevLabel?: string
-  /** Libellé du contrôle suivant (texte visible et nom accessible). Défaut : dictionnaire du DS. */
+  /** Label of the next control (visible text and accessible name). Default: the DS dictionary. */
   nextLabel?: string
 
-  /** Désactive l'ensemble du composant. */
+  /** Disables the whole component. */
   disabled?: boolean
-  /** Pages désactivées : liste OU prédicat (même convention que `disabledDates` de VCalendar). */
+  /** Disabled pages: a list OR a predicate (the same convention as VCalendar's `disabledDates`). */
   disabledPages?: number[] | ((page: number) => boolean)
 
-  /** Troncature responsive par container queries. */
+  /** Responsive truncation through container queries. */
   responsive?: boolean
 
-  /** Nom accessible de la navigation. Défaut : dictionnaire du DS. */
+  /** Accessible name of the navigation. Default: the DS dictionary. */
   label?: string
-  /** Nom accessible d'une pastille de page. Défaut : dictionnaire du DS. */
+  /** Accessible name of a page pill. Default: the DS dictionary. */
   pageLabel?: (page: number) => string
 }
 
@@ -97,8 +96,8 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   pageLabel: undefined,
 })
 
-// Cascade prop > dictionnaire ; pour le nom de la nav, `useAriaLabel` place
-// encore `aria-labelledby` et `aria-label` du consommateur au-dessus.
+// Cascade prop > dictionary; for the nav's name, `useAriaLabel` still places the
+// consumer's `aria-labelledby` and `aria-label` above it.
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.pagination.label)
 const resolvedPrevLabel = computed(() => props.prevLabel ?? m.value.pagination.previous)
@@ -106,7 +105,7 @@ const resolvedNextLabel = computed(() => props.nextLabel ?? m.value.pagination.n
 
 const page = defineModel<number>({ default: 1 })
 
-/** Entrée rendue : une pastille de page, ou un marqueur d'ellipse. */
+/** A rendered entry: a page pill, or an ellipsis marker. */
 type PaginationItem =
   | { kind: 'page'; key: string; page: number; edge: boolean; distance: number }
   | { kind: 'gap'; key: string }
@@ -121,13 +120,12 @@ function pageLabelFor(n: number): string {
 }
 
 /**
- * Troncature logique à emplacements constants : `totalVisible` compte TOUT ce
- * qui est rendu, ellipses comprises. La fenêtre centrale (totalVisible - 4
- * pages) est centrée sur la page courante et se DÉCALE près des extrémités au
- * lieu de rétrécir — la barre garde exactement la même largeur quelle que
- * soit la page courante. Chaque pastille porte sa distance à la page courante
- * — c'est la clé de tri du masquage responsive, plafonnée à 3 : au-delà, les
- * voisins les plus lointains partagent le premier palier.
+ * Logical truncation with a constant slot count: `totalVisible` counts EVERYTHING
+ * rendered, ellipses included. The central window (totalVisible - 4 pages) is
+ * centred on the current page and SHIFTS near the ends instead of shrinking — the
+ * bar keeps exactly the same width whatever the current page. Each pill carries
+ * its distance to the current page — the sort key of the responsive hiding,
+ * capped at 3: beyond that, the most distant neighbours share the first step.
  */
 const items = computed<PaginationItem[]>(() => {
   const count = total.value
@@ -147,8 +145,8 @@ const items = computed<PaginationItem[]>(() => {
   }
   const gap = (after: number): PaginationItem => ({ kind: 'gap', key: `gap-${after}` })
 
-  // Sans totalVisible : aucune troncature, toutes les pages sont rendues.
-  // Minimum utile : 5 (première + ellipse + courante + ellipse + dernière).
+  // Without totalVisible: no truncation, every page is rendered.
+  // Useful minimum: 5 (first + ellipsis + current + ellipsis + last).
   const visible =
     props.totalVisible === undefined ? count : Math.max(Math.trunc(props.totalVisible), 5)
   if (visible >= count) return pages(1, count)
@@ -156,17 +154,17 @@ const items = computed<PaginationItem[]>(() => {
   const start = current - Math.floor((visible - 5) / 2)
   const end = start + (visible - 5)
 
-  // Près d'une extrémité (l'ellipse de ce côté ne sauterait aucun numéro),
-  // la fenêtre s'étire jusqu'à la borne : toujours `visible` emplacements.
+  // Near an end (the ellipsis on that side would skip no number), the window
+  // stretches to the bound: always `visible` slots.
   if (start <= 3) return [...pages(1, visible - 2), gap(visible - 2), pageItem(count)]
   if (end >= count - 2) return [pageItem(1), gap(1), ...pages(count - visible + 3, count)]
   return [pageItem(1), gap(1), ...pages(start, end), gap(end), pageItem(count)]
 })
 
 /**
- * Cible d'un contrôle : la page activable la plus proche dans la direction
- * donnée — les pages désactivées sont enjambées. `undefined` = butée, donc
- * contrôle désactivé (couvre aussi les extrémités, sans test séparé).
+ * Target of a control: the nearest activatable page in the given direction —
+ * disabled pages are stepped over. `undefined` = the end of the line, hence a
+ * disabled control (which also covers the extremities, with no separate test).
  */
 function step(direction: -1 | 1): number | undefined {
   for (let n = currentPage.value + direction; n >= 1 && n <= total.value; n += direction) {
@@ -188,10 +186,10 @@ function goTo(n: number | undefined) {
 const navEl = ref<HTMLElement | null>(null)
 
 /**
- * Navigation clavier (implémentation partagée : `utils/arrowNav`). Tab reste
- * naturel — chaque pastille visible est un arrêt de tabulation, comme dans une
- * liste de liens. Les pastilles que les container queries ont masquées sont
- * écartées par le filtre `display` du helper : elles ne captent pas le focus.
+ * Keyboard navigation (shared implementation: `utils/arrowNav`). Tab stays
+ * natural — every visible pill is a tab stop, as in a list of links. The pills
+ * hidden by the container queries are excluded by the helper's `display` filter:
+ * they do not take focus.
  */
 function onKeydown(event: KeyboardEvent) {
   const nav = navEl.value
@@ -210,9 +208,9 @@ function onKeydown(event: KeyboardEvent) {
     :data-responsive="responsive ? '' : undefined"
     @keydown="onKeydown"
   >
-    <!-- attached : VButtonGroup fusionne les bordures. Il cible ses enfants
-         DIRECTS `.v-button` — d'où l'absence de <ul>/<li>, et une ellipse
-         rendue en VIconButton plutôt qu'en <span>. -->
+    <!-- attached: VButtonGroup merges the borders. It targets its DIRECT
+         `.v-button` children — hence no <ul>/<li>, and an ellipsis rendered as a
+         VIconButton rather than a <span>. -->
     <component :is="attached ? VButtonGroup : 'div'" class="v-pagination-items">
       <template v-if="showControls">
         <VIconButton
@@ -228,9 +226,8 @@ function onKeydown(event: KeyboardEvent) {
         >
           <VIcon v-bind="iconProps(prevIcon)" />
         </VIconButton>
-        <!-- aria-label posé même quand le libellé est visible : les container
-             queries le masquent aux largeurs étroites, le nom accessible doit
-             y survivre. -->
+        <!-- aria-label set even when the label is visible: the container queries
+             hide it at narrow widths, and the accessible name must survive that. -->
         <VButton
           v-else
           class="v-pagination-control"
@@ -266,9 +263,9 @@ function onKeydown(event: KeyboardEvent) {
         >
           {{ item.page }}
         </VButton>
-        <!-- Ellipse : VIconButton inerte (donc un `.v-button`, la couture du
-             groupe reste continue et la hauteur suit size/compact). Masquée
-             aux technologies d'assistance, hors tabulation via disabled. -->
+        <!-- Ellipsis: an inert VIconButton (hence a `.v-button`, so the group's
+             seam stays continuous and the height follows size/compact). Hidden
+             from assistive technologies, out of the tab order through disabled. -->
         <VIconButton
           v-else
           class="v-pagination-ellipsis"
@@ -326,14 +323,14 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   /*
-   * Confinement réservé au mode responsive (toutes les @container ci-dessous en
-   * dépendent) : `container-type: inline-size` calcule la taille inline SANS le
-   * contenu, la nav doit donc être block-level (une inline-flex se réduirait à
-   * zéro) et occupe la largeur de son parent — c'est ce qui rend la troncature
-   * dépendante de la place réellement allouée, et ce qui oblige un parent flex
-   * à lui donner une largeur (`flex: 1`). Hors responsive, la nav retrouve une
-   * largeur intrinsèque et se pose comme n'importe quel contenu. Dans les deux
-   * cas l'alignement passe par `data-align`, jamais par le contexte.
+   * Containment reserved for responsive mode (every @container below depends on
+   * it): `container-type: inline-size` computes the inline size WITHOUT the
+   * content, so the nav must be block-level (an inline-flex would collapse to
+   * zero) and takes its parent's width — that is what makes the truncation depend
+   * on the space actually allocated, and what obliges a flex parent to give it a
+   * width (`flex: 1`). Outside responsive mode the nav regains an intrinsic width
+   * and sits like any other content. In both cases the alignment goes through
+   * `data-align`, never through the context.
    */
   .v-pagination[data-responsive] {
     container-type: inline-size;
@@ -354,52 +351,51 @@ function onKeydown(event: KeyboardEvent) {
     gap: var(--vectis-space-1);
   }
 
-  /* attached : l'assemblage est fait par les marges négatives de VButtonGroup */
+  /* attached: the joining is done by VButtonGroup's negative margins */
   .v-button-group.v-pagination-items {
     gap: 0;
   }
 
   .v-pagination-page {
-    /* Pastille carrée à un chiffre, qui s'élargit d'elle-même au-delà : la
-       variable est posée par v-control sur ce même élément, une seule règle
-       couvre donc les 5 tailles × compact. */
+    /* A square pill at one digit, widening by itself beyond that: the variable is
+       set by v-control on this same element, so one rule covers all 5 sizes ×
+       compact. */
     min-inline-size: var(--control-height);
     padding-inline: var(--vectis-space-2);
   }
 
-  /* l'ellipse n'est pas un bouton désactivé au sens de l'utilisateur */
+  /* the ellipsis is not a disabled button in the user's sense */
   .v-pagination-ellipsis {
     cursor: default;
   }
 
-  /* chevrons : la direction est physique, l'icône se retourne en RTL */
+  /* chevrons: the direction is physical, so the icon flips in RTL */
   [dir='rtl'] .v-pagination-control .v-icon {
     scale: -1 1;
   }
 
   /*
-   * Troncature responsive — la nav est son propre conteneur de requête, donc
-   * les paliers suivent la place allouée au composant, jamais le viewport
-   * (aucun ResizeObserver). Les seuils sont des littéraux :
-   * les conditions @container n'acceptent pas var(). Ils sont calibrés sur
-   * size="md" ; pour les cas extrêmes (size xl, length à 5 chiffres),
-   * l'échappatoire est `totalVisible` ou `responsive: false`.
+   * Responsive truncation — the nav is its own query container, so the steps
+   * follow the space allocated to the component, never the viewport (no
+   * ResizeObserver). The thresholds are literals: @container conditions do not
+   * accept var(). They are calibrated on size="md"; for the extreme cases (size
+   * xl, a 5-digit length), the escape hatch is `totalVisible` or
+   * `responsive: false`.
    *
-   * Chaque seuil est la largeur qu'il FAUT pour afficher le niveau concerné —
-   * pas celle qui reste après masquage, sinon la rangée déborde pendant tout
-   * l'intervalle. À size md : pastille et contrôle font une hauteur de
-   * contrôle de large (2.5rem), la gouttière 0.25rem, soit 2.75rem par
-   * élément. Une rangée à 13 éléments (totalVisible 11) demande ~35.5rem,
-   * 11 éléments ~30rem, 9 éléments ~24.5rem — d'où 36 / 31 / 25rem, marge
-   * comprise.
+   * Each threshold is the width NEEDED to display the level concerned — not what
+   * is left after hiding, otherwise the row overflows for the whole interval. At
+   * size md: a pill and a control are one control height wide (2.5rem), the gutter
+   * 0.25rem, so 2.75rem per element. A 13-element row (totalVisible 11) needs
+   * ~35.5rem, 11 elements ~30rem, 9 elements ~24.5rem — hence 36 / 31 / 25rem,
+   * margin included.
    *
-   * Les voisins les plus éloignés tombent en premier. `[data-edge]` (bornes)
-   * et la page courante ne portent pas de `data-distance` : ils ne sont donc
-   * jamais ciblés. `display: none` les retire aussi de l'ordre de tabulation
-   * et de l'arbre d'accessibilité — c'est voulu.
+   * The most distant neighbours fall first. `[data-edge]` (the bounds) and the
+   * current page carry no `data-distance`, so they are never targeted.
+   * `display: none` also removes them from the tab order and the accessibility
+   * tree — that is intended.
    *
-   * Aucune ellipse n'est ajoutée en compensation d'un voisin masqué : elle
-   * occupe exactement la largeur d'une pastille, elle ne ferait rien gagner.
+   * No ellipsis is added to compensate for a hidden neighbour: it occupies exactly
+   * the width of a pill, so it would gain nothing.
    */
   @container v-pagination (max-width: 36rem) {
     .v-pagination[data-responsive] .v-pagination-page[data-distance='3'] {
@@ -412,10 +408,9 @@ function onKeydown(event: KeyboardEvent) {
       display: none;
     }
 
-    /* Un contrôle en mode 'both' coûte ~4× une pastille : le replier en icône
-       seule rend plus de place que de sacrifier une voisine, il passe donc
-       avant le dernier palier. Jamais en mode 'text' — il ne resterait rien
-       de cliquable. */
+    /* A control in 'both' mode costs ~4× a pill: folding it down to icon-only
+       frees more room than sacrificing a neighbour, so it comes before the last
+       step. Never in 'text' mode — nothing clickable would be left. */
     .v-pagination[data-responsive][data-controls-display='both'] .v-pagination-control-label {
       display: none;
     }
