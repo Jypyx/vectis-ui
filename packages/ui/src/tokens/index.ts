@@ -1,6 +1,6 @@
 /**
- * Point d'entrée `@vectis/ui/tokens` : la source de vérité des tokens et les
- * utilitaires pour les transformer (flatten, résolution d'alias, CSS).
+ * `@vectis/ui/tokens` entry point: the token source of truth and the utilities
+ * to transform it (flatten, alias resolution, CSS).
  */
 import { primitives } from './primitives'
 import { semantic } from './semantic'

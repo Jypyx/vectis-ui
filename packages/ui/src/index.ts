@@ -1,44 +1,44 @@
 /**
- * Entrée de `@vectis/ui`. Exports nommés uniquement (tree-shaking).
+ * Entry point of `@vectis/ui`. Named exports only (tree-shaking).
  *
- * L'import CSS ci-dessous alimente l'extraction vers `dist/styles.css` ; en
- * mode librairie, Vite le retire du JS émis. Le consommateur importe donc
- * explicitement `@vectis/ui/styles.css`.
+ * The CSS import below feeds the extraction into `dist/styles.css`; in library
+ * mode Vite strips it from the emitted JS. The consumer therefore imports
+ * `@vectis/ui/styles.css` explicitly.
  *
- * L'ordre des exports fixe l'ordre du CSS bundlé. La plupart des composants
- * sont rangés par cohérence (dépendance → dépendant) sans que leur position
- * soit contraignante : leurs surcharges sont qualifiées (`.v-tab[data-size]`,
- * `.v-table-toolbar .v-input`…), donc indépendantes de l'ordre. Cinq
- * contraintes sont réelles, parce qu'elles jouent à spécificité égale :
- * - VIconButton après VButton (surcharge padding et largeur) ;
- * - VPagination après VButtonGroup (ses pastilles surchargent largeur et padding
- *   de `.v-button`) ;
- * - VSlider après VInput (surcharge la largeur de `.v-slider-field`) ;
- * - VTypography en TÊTE, avant tout composant qui le rend en interne (VInput,
- *   VTextarea, VDialog, VAccordion, VDataTable) : leurs classes
- *   (`.v-input-label`…) surchargent `.v-typography` ;
- * - VPopover en TÊTE aussi, avant les panneaux qui le rendent en interne
- *   (VTooltip, VCombobox, VDatePicker, VTimePicker) : leurs classes
- *   (`.v-tooltip-panel`…) sont posées sur le MÊME élément que
- *   `.v-popover-panel`, à spécificité égale (0,1,0).
+ * The export order fixes the bundled CSS order. Most components are arranged for
+ * coherence (dependency → dependent) without their position being constraining:
+ * their overrides are qualified (`.v-tab[data-size]`, `.v-table-toolbar .v-input`…)
+ * and therefore order-independent. Five constraints are real, because they play
+ * out at equal specificity:
+ * - VIconButton after VButton (overrides padding and width);
+ * - VPagination after VButtonGroup (its pills override the width and padding of
+ *   `.v-button`);
+ * - VSlider after VInput (overrides the width of `.v-slider-field`);
+ * - VTypography FIRST, before any component that renders it internally (VInput,
+ *   VTextarea, VDialog, VAccordion, VDataTable): their classes
+ *   (`.v-input-label`…) override `.v-typography`;
+ * - VPopover FIRST as well, before the panels that render it internally
+ *   (VTooltip, VCombobox, VDatePicker, VTimePicker): their classes
+ *   (`.v-tooltip-panel`…) sit on the SAME element as `.v-popover-panel`, at
+ *   equal specificity (0,1,0).
  *
- * Les composants internes (ComboboxOption, VMenuPanel…) et les composables ne
- * sont pas exportés.
+ * Internal components (VComboboxOption, VMenuPanel…) and the composables are not
+ * exported.
  */
 import './styles/index.css'
 
-// Internationalisation — modules TS purs, donc sans effet sur l'ordre du CSS
-// bundlé (même statut que le bloc `setIconResolver` ci-dessous). En tête parce
-// que c'est de la configuration du DS entier, pas d'un composant. `en` est
-// opt-in : ne pas l'importer suffit à l'élaguer du bundle.
+// Internationalization — pure TS modules, so no effect on the bundled CSS order
+// (same status as the `setIconResolver` block below). First because this is
+// configuration for the whole DS, not for a component. `fr` is opt-in: not
+// importing it is enough to prune it from the bundle.
 export { setLocale, registerMessages } from './i18n/state'
-export { fr } from './i18n/fr'
 export { en } from './i18n/en'
+export { fr } from './i18n/fr'
 export type { VectisMessages, VectisMessagesInput } from './i18n/types'
 
 export { default as VIcon } from './components/VIcon/VIcon.vue'
-// Branchement d'une bibliothèque d'icônes tierce — modules TS purs, donc sans
-// effet sur l'ordre du CSS bundlé.
+// Hook for a third-party icon library — pure TS modules, so no effect on the
+// bundled CSS order.
 export {
   setIconResolver,
   ligatureIconResolver,

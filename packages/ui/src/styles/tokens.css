@@ -1,6 +1,6 @@
 /*
- * FICHIER GÉNÉRÉ — ne pas éditer à la main.
- * Source : src/tokens/  ·  Régénérer : pnpm tokens
+ * GENERATED FILE — do not edit by hand.
+ * Source: src/tokens/  ·  Regenerate: pnpm tokens
  */
 @layer vectis.tokens {
   :root {
@@ -259,7 +259,7 @@
     --vectis-icon-size-lg: 1.5rem;
   }
 
-  /* Réapplication explicite du light : permet un sous-arbre light dans un arbre dark. */
+  /* Explicit re-application of light: allows a light subtree inside a dark tree. */
   [data-theme='light'] {
     color-scheme: light;
     --vectis-color-surface: var(--vectis-color-white);

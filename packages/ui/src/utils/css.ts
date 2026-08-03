@@ -1,7 +1,7 @@
 /**
- * Dimensions toujours en pixels : `12` comme `'12'` donnent `12px`. Une valeur
- * non numérique retourne undefined plutôt qu'une custom property invalide, qui
- * casserait la géométrie au lieu de retomber sur le token.
+ * Dimensions always in pixels: `12` and `'12'` both give `12px`. A non-numeric
+ * value returns undefined rather than an invalid custom property, which would
+ * break the geometry instead of falling back to the token.
  */
 export function px(v: number | string | undefined): string | undefined {
   if (v === undefined) return undefined
@@ -10,10 +10,10 @@ export function px(v: number | string | undefined): string | undefined {
 }
 
 /**
- * Dimension à unité LIBRE : `12` donne `12px`, mais toute chaîne passe telle
- * quelle (`'100%'`, `'50vh'`, `'max-content'`). Contrairement à `px`, la chaîne
- * n'est pas interprétée — c'est au CSS de la valider, une valeur fautive
- * retombant sur la déclaration du composant.
+ * Dimension with a FREE unit: `12` gives `12px`, but any string passes through
+ * as-is (`'100%'`, `'50vh'`, `'max-content'`). Unlike `px`, the string is not
+ * interpreted — it is up to CSS to validate it, a faulty value falling back to
+ * the component's own declaration.
  */
 export function cssSize(v: number | string | undefined): string | undefined {
   if (v === undefined) return undefined

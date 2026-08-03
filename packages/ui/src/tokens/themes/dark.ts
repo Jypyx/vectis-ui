@@ -1,6 +1,6 @@
 /**
- * Thème dark : surcharge UNIQUEMENT des tokens sémantiques (les primitifs
- * sont invariants). Le build vérifie que chaque clé existe dans `semantic`.
+ * Dark theme: overrides ONLY semantic tokens (the primitives are invariant). The
+ * build checks that every key exists in `semantic`.
  */
 import { color, type TokenGroup } from '../types'
 

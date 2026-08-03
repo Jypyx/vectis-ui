@@ -1,7 +1,7 @@
 /**
- * Utilitaires de transformation tokens → CSS. Utilisés par le script de build
- * et exposés via `@vectis/ui/tokens` pour la future app de theming
- * (génération de surcharges runtime, export de config).
+ * Token → CSS transformation utilities. Used by the build script and exposed
+ * through `@vectis/ui/tokens` for the future theming app (generating runtime
+ * overrides, exporting a config).
  */
 import { isToken, type DesignToken, type TokenGroup } from './types'
 
@@ -27,8 +27,8 @@ export function flattenTokens(group: TokenGroup, prefix: string[] = []): FlatTok
 const ALIAS_RE = /\{([^}]+)\}/g
 
 /**
- * Résout les alias DTCG `{path.to.token}` en `var(--vectis-path-to-token)`.
- * Lève une erreur si l'alias ne correspond à aucun token connu.
+ * Resolves DTCG aliases `{path.to.token}` into `var(--vectis-path-to-token)`.
+ * Throws if the alias matches no known token.
  */
 export function resolveTokenValue(value: string, known: ReadonlySet<string>): string {
   return value.replace(ALIAS_RE, (_match, ref: string) => {

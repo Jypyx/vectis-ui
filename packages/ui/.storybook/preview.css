@@ -2,7 +2,7 @@ body {
   background: var(--vectis-color-surface);
 }
 
-/* Wrapper posé par le decorator de thème. */
+/* Wrapper set by the globals decorator. */
 .sb-theme-root {
   padding: 2rem;
   background: var(--vectis-color-surface);

@@ -1,16 +1,12 @@
 import type { VectisMessages } from './types'
 
 /**
- * Anglais. **Opt-in** : ce module n'est atteint que si vous l'importez, donc
- * élagué du bundle des projets qui ne s'en servent pas (`preserveModules` +
- * `sideEffects: ["**\/*.css"]`).
+ * English — the base dictionary, always bundled. It is what any locale with no
+ * registered dictionary falls back to, key by key.
  *
- * L'activer et ajouter une langue que le DS ne fournit pas sont le MÊME geste —
- * il n'y a pas deux catégories de dictionnaires :
- *
- *     import { en, registerMessages, setLocale } from '@vectis/ui'
- *     registerMessages('en', en)
- *     setLocale('en-GB')
+ * ⚠ These strings are asserted character for character by the unit tests, and
+ * they are the accessible names the play functions query. Changing one means
+ * changing its assertions.
  */
 export const en: VectisMessages = {
   common: {
@@ -49,11 +45,10 @@ export const en: VectisMessages = {
     searchLabel: 'Search the table',
     searchPlaceholder: 'Search…',
     perPage: 'Rows per page',
-    // Pas d'espace avant le deux-points, contrairement au français.
     perPageValue: (label, value) => `${label}: ${value}`,
     selectAll: 'Select all',
     selectRow: (index) => `Select row ${index}`,
-    // Le pluriel est un ternaire — c'est tout le moteur de pluriel du DS.
+    // The plural is a ternary — that is the whole plural engine of the DS.
     selection: (count) => `${count} item${count === 1 ? '' : 's'} selected`,
     range: ({ start, end, total }) => `${start}–${end} of ${total}`,
   },
@@ -72,7 +67,6 @@ export const en: VectisMessages = {
   field: {
     limitExceeded: (max) => `Exceeds the limit of ${max} characters`,
   },
-  // Aucun espace avant le signe, contrairement au français.
   progress: { percent: (percent) => `${percent}%` },
   calendar: {
     previousMonth: 'Previous month',

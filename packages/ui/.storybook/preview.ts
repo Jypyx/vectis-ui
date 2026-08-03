@@ -1,16 +1,23 @@
 import type { Decorator, Preview } from '@storybook/vue3-vite'
 
+import { fr } from '../src/i18n/fr'
+import { registerMessages, setLocale } from '../src/i18n/state'
+
 import '../src/styles/index.css'
 import './preview.css'
 
 /*
- * Thème et direction sont appliqués en effets de bord sur <html> plutôt que
- * via l'état d'un wrapper templaté : le renderer vue3 de Storybook ne
- * remonte pas l'arbre quand un global du toolbar change (il ne patche que
- * les args réactifs), un état capturé dans setup() resterait donc figé. Le
- * corps du decorator, lui, est bien ré-exécuté à chaque changement.
+ * Theme, direction and locale are applied as side effects rather than through
+ * the state of a templated wrapper: Storybook's vue3 renderer does not re-mount
+ * the tree when a toolbar global changes (it only patches reactive args), so
+ * state captured in setup() would stay frozen. The decorator body, however, is
+ * re-run on every change — and the DS locale is a shallowRef, so already-mounted
+ * components re-render on setLocale.
  */
 const darkMedia = window.matchMedia('(prefers-color-scheme: dark)')
+
+// `en` is the base dictionary; French is opt-in, so the toolbar needs it registered.
+registerMessages('fr', fr)
 
 const applySystemTheme = () => {
   document.documentElement.dataset.theme = darkMedia.matches ? 'dark' : 'light'
@@ -20,16 +27,17 @@ const applyTheme = (theme: string) => {
   darkMedia.removeEventListener('change', applySystemTheme)
   if (theme === 'system') {
     applySystemTheme()
-    // Suit les changements de préférence OS tant que le preset System est actif.
+    // Follows OS preference changes for as long as the System preset is active.
     darkMedia.addEventListener('change', applySystemTheme)
   } else {
     document.documentElement.dataset.theme = theme
   }
 }
 
-const withTheme: Decorator = (story, context) => {
+const withGlobals: Decorator = (story, context) => {
   applyTheme((context.globals.theme as string | undefined) ?? 'system')
   document.documentElement.dir = (context.globals.direction as string | undefined) ?? 'ltr'
+  setLocale((context.globals.locale as string | undefined) ?? 'en-US')
   return {
     components: { story },
     template: '<div class="sb-theme-root"><story /></div>',
@@ -47,9 +55,9 @@ const preview: Preview = {
   },
   globalTypes: {
     theme: {
-      description: 'Thème du design system',
+      description: 'Design system theme',
       toolbar: {
-        title: 'Thème',
+        title: 'Theme',
         icon: 'paintbrush',
         items: [
           { value: 'system', title: 'System' },
@@ -60,7 +68,7 @@ const preview: Preview = {
       },
     },
     direction: {
-      description: 'Direction du texte',
+      description: 'Text direction',
       toolbar: {
         title: 'Direction',
         icon: 'transfer',
@@ -71,12 +79,25 @@ const preview: Preview = {
         dynamicTitle: true,
       },
     },
+    locale: {
+      description: 'Design system locale',
+      toolbar: {
+        title: 'Locale',
+        icon: 'globe',
+        items: [
+          { value: 'en-US', title: 'English' },
+          { value: 'fr-FR', title: 'Français' },
+        ],
+        dynamicTitle: true,
+      },
+    },
   },
   initialGlobals: {
     theme: 'system',
     direction: 'ltr',
+    locale: 'en-US',
   },
-  decorators: [withTheme],
+  decorators: [withGlobals],
 }
 
 export default preview

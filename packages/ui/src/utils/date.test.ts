@@ -22,25 +22,25 @@ import {
 } from './date'
 
 describe('utils/date', () => {
-  it('valide et parse un ISO en heure locale (sans dérive UTC)', () => {
+  it('validates and parses an ISO in local time (no UTC drift)', () => {
     expect(isValidISO('2026-06-10')).toBe(true)
     expect(isValidISO('2026-13-01')).toBe(false)
     expect(isValidISO('2026-02-30')).toBe(false)
     expect(isValidISO('boom')).toBe(false)
     const d = parseISO('2026-06-10')!
-    // le jour local est bien le 10 (pas décalé par le fuseau)
+    // the local day really is the 10th (not shifted by the time zone)
     expect(d.getDate()).toBe(10)
     expect(d.getMonth()).toBe(5)
   })
 
-  it('additionne jours et mois avec report et clamp de fin de mois', () => {
+  it('adds days and months with carry and end-of-month clamping', () => {
     expect(addDays('2026-06-30', 1)).toBe('2026-07-01')
     expect(addDays('2026-01-01', -1)).toBe('2025-12-31')
-    // 31 janvier + 1 mois → 28 février (clamp), pas mars
+    // 31 January + 1 month → 28 February (clamped), not March
     expect(addMonths('2026-01-31', 1)).toBe('2026-02-28')
   })
 
-  it('compare, clampe et teste l’appartenance à un intervalle', () => {
+  it('compares, clamps and tests membership of an interval', () => {
     expect(compareISO('2026-06-10', '2026-06-11')).toBe(-1)
     expect(clampISO('2026-06-01', '2026-06-05', '2026-06-20')).toBe('2026-06-05')
     expect(clampISO('2026-06-25', '2026-06-05', '2026-06-20')).toBe('2026-06-20')
@@ -48,30 +48,30 @@ describe('utils/date', () => {
     expect(isWithin('2026-06-30', '2026-06-05', '2026-06-20')).toBe(false)
   })
 
-  it('construit une grille de 42 cellules pour un mois', () => {
-    const grid = buildMonthGrid(2026, 5, 1) // juin 2026, semaine débutant lundi
+  it('builds a 42-cell grid for a month', () => {
+    const grid = buildMonthGrid(2026, 5, 1) // June 2026, week starting on Monday
     expect(grid).toHaveLength(42)
-    // contient bien le 1er et le 30 juin marqués « in month »
+    // contains both 1 and 30 June, marked as in-month
     const inMonth = grid.filter((c) => c.adjacent === null)
     expect(inMonth).toHaveLength(30)
   })
 
-  it('produit des noms localisés indépendants du fuseau', () => {
+  it('produces localized names that are independent of the time zone', () => {
     expect(monthNames('fr-FR', 'long')[5]).toBe('juin')
-    // premier jour de semaine lundi → lundi en tête
+    // first day of week Monday → Monday first
     expect(weekdayNames('fr-FR', 1, 'long')[0]?.toLowerCase()).toContain('lundi')
   })
 
-  it('abrège les mois : entier si ≤4 caractères, sinon 3 + point', () => {
+  it('abbreviates the months: whole if ≤4 characters, otherwise 3 + a dot', () => {
     const m = monthNamesCompact('fr-FR')
-    expect(m[4]).toBe('mai') // 3 car. → entier
-    expect(m[5]).toBe('juin') // 4 car. → entier
-    expect(m[7]).toBe('août') // 4 car. (accent compté comme 1) → entier
-    expect(m[0]).toBe('jan.') // « janvier » → 3 + point
-    expect(m[1]).toBe('fév.') // « février » → 3 + point
+    expect(m[4]).toBe('mai') // 3 chars → kept whole
+    expect(m[5]).toBe('juin') // 4 chars → kept whole
+    expect(m[7]).toBe('août') // 4 chars (the accent counts as 1) → kept whole
+    expect(m[0]).toBe('jan.') // "janvier" → 3 + a dot
+    expect(m[1]).toBe('fév.') // "février" → 3 + a dot
   })
 
-  it('formate une plage via Intl.formatRange', () => {
+  it('formats a range through Intl.formatRange', () => {
     const out = formatDisplayRange('2026-06-19', '2026-06-26', 'fr-FR', {
       day: 'numeric',
       month: 'short',
@@ -82,10 +82,10 @@ describe('utils/date', () => {
   })
 })
 
-describe('utils/date — masque de saisie', () => {
+describe('utils/date — input mask', () => {
   const FR = dateMaskFor('fr-FR')
 
-  it('dérive l’ordre des champs et le séparateur de la locale', () => {
+  it('derives the field order and the separator from the locale', () => {
     expect(FR.order).toEqual(['day', 'month', 'year'])
     expect(FR.separator).toBe('/')
     expect(dateMaskFor('en-US').order).toEqual(['month', 'day', 'year'])
@@ -94,36 +94,36 @@ describe('utils/date — masque de saisie', () => {
     expect(dateMaskFor('sv-SE').separator).toBe('-')
   })
 
-  it('nettoie les séparateurs exotiques et force le calendrier grégorien', () => {
-    // hu-HU formate « 2021. 11. 22. » : littéral avec espace, plus une queue.
+  it('cleans exotic separators and forces the Gregorian calendar', () => {
+    // hu-HU formats "2021. 11. 22.": a literal with a space, plus a trailing one.
     expect(dateMaskFor('hu-HU').separator).toBe('.')
-    // ar-EG préfixe son « / » d'une marque bidi U+200F.
+    // ar-EG prefixes its "/" with a U+200F bidi mark.
     expect(dateMaskFor('ar-EG').separator).toBe('/')
-    // fa-IR renverrait une année persane (1400) sans `calendar: 'gregory'`.
+    // fa-IR would return a Persian year (1400) without `calendar: 'gregory'`.
     expect(isoToMask('2026-06-10', dateMaskFor('fa-IR'))).toBe('2026/06/10')
-    // locale invalide (RangeError) → repli jour/mois/année « / »
+    // invalid locale (RangeError) → day/month/year "/" fallback
     expect(dateMaskFor('fr_FR')).toEqual(FR)
   })
 
-  it('pose le séparateur dès que le champ précédent est plein', () => {
+  it('places the separator as soon as the previous field is full', () => {
     expect(formatDateMask('', FR)).toBe('')
     expect(formatDateMask('1', FR)).toBe('1')
     expect(formatDateMask('22', FR)).toBe('22/')
     expect(formatDateMask('221', FR)).toBe('22/1')
     expect(formatDateMask('2211', FR)).toBe('22/11/')
     expect(formatDateMask('22112021', FR)).toBe('22/11/2021')
-    // au-delà du gabarit, les chiffres surnuméraires sont ignorés
+    // beyond the template, extra digits are ignored
     expect(formatDateMask('221120215', FR)).toBe('22/11/2021')
   })
 
-  it('formate un ISO selon l’ordre de la locale', () => {
+  it('formats an ISO following the locale order', () => {
     expect(isoToMask('2026-06-10', FR)).toBe('10/06/2026')
     expect(isoToMask('2026-06-10', dateMaskFor('en-US'))).toBe('06/10/2026')
     expect(isoToMask('2026-06-10', dateMaskFor('ja-JP'))).toBe('2026/06/10')
     expect(isoToMask('boom', FR)).toBe('')
   })
 
-  it('parse une saisie masquée et rejette l’impossible', () => {
+  it('parses masked input and rejects the impossible', () => {
     expect(parseDateMask('10/06/2026', FR)).toBe('2026-06-10')
     expect(parseDateMask('06/10/2026', dateMaskFor('en-US'))).toBe('2026-06-10')
     expect(parseDateMask('31/02/2026', FR)).toBeNull()
@@ -134,27 +134,27 @@ describe('utils/date — masque de saisie', () => {
     expect(parseDateMask('', FR)).toBeNull()
   })
 
-  it('n’étend une année à 2 chiffres que si un pivot est fourni', () => {
+  it('expands a 2-digit year only when a pivot is provided', () => {
     expect(parseDateMask('10/06/26', FR)).toBeNull()
     expect(parseDateMask('10/06/26', FR, { yearPivot: 2000 })).toBe('2026-06-10')
     expect(parseDateMask('10/06/00', FR, { yearPivot: 2000 })).toBe('2000-06-10')
-    // année en tête (ja-JP) : pas de raccourci possible, elle reste à 4 chiffres
+    // year first (ja-JP): no shortcut possible, it stays at 4 digits
     expect(parseDateMask('26/06/10', dateMaskFor('ja-JP'), { yearPivot: 2000 })).toBeNull()
   })
 
-  it('replace le caret sur le n-ième chiffre, en franchissant le séparateur à la frappe', () => {
+  it('puts the caret back on the nth digit, stepping over the separator while typing', () => {
     expect(caretAfterDigits('22/11/2021', 0)).toBe(0)
     expect(caretAfterDigits('22/11/2021', 2)).toBe(2)
-    expect(caretAfterDigits('22/11/2021', 2, '/')).toBe(3) // insertion : on entre dans le champ suivant
+    expect(caretAfterDigits('22/11/2021', 2, '/')).toBe(3) // insertion: enters the next field
     expect(caretAfterDigits('22/', 2, '/')).toBe(3)
-    expect(caretAfterDigits('22/11/2021', 99)).toBe(10) // au-delà → fin du texte
+    expect(caretAfterDigits('22/11/2021', 99)).toBe(10) // beyond → end of the text
   })
 
-  it('dérive un gabarit de placeholder des noms de champs localisés', () => {
+  it('derives a placeholder template from the localized field names', () => {
     expect(maskPlaceholder('fr-FR', FR)).toBe('jj/mm/aaaa')
     expect(maskPlaceholder('en-US', dateMaskFor('en-US'))).toBe('mm/dd/yyyy')
     expect(maskPlaceholder('de-DE', dateMaskFor('de-DE'))).toBe('tt.mm.jjjj')
-    // script idéographique (« 日日/月月/年年年年 » serait illisible) → repli latin
+    // ideographic script ("日日/月月/年年年年" would be unreadable) → Latin fallback
     expect(maskPlaceholder('ja-JP', dateMaskFor('ja-JP'))).toBe('yyyy/mm/dd')
   })
 })

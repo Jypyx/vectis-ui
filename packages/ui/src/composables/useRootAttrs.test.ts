@@ -4,8 +4,8 @@ import { defineComponent, h } from 'vue'
 
 import { useRootAttrs } from './useRootAttrs'
 
-// Composant minimal en pattern wrapper-root : racine porteuse de class/style,
-// enfant fonctionnel porteur de tout le reste.
+// Minimal wrapper-root component: a root carrying class/style, a functional child
+// carrying everything else.
 const Wrapper = defineComponent({
   inheritAttrs: false,
   setup() {
@@ -18,18 +18,18 @@ const Wrapper = defineComponent({
 })
 
 describe('useRootAttrs', () => {
-  it('garde class/style sur la racine et reporte le reste sur le contrôle', () => {
+  it('keeps class/style on the root and forwards the rest to the control', () => {
     const { container } = render(Wrapper, {
-      attrs: { class: 'custom', style: 'color: red', name: 'champ', required: '' },
+      attrs: { class: 'custom', style: 'color: red', name: 'field', required: '' },
     })
     const root = container.querySelector('.v-root') as HTMLElement
     const control = container.querySelector('.v-control') as HTMLInputElement
 
     expect(root.classList.contains('custom')).toBe(true)
     expect(root.style.color).toBe('red')
-    // le nom et la contrainte doivent atterrir sur le contrôle, pas sur le wrapper
+    // the name and the constraint must land on the control, not on the wrapper
     expect(root.hasAttribute('name')).toBe(false)
-    expect(control.getAttribute('name')).toBe('champ')
+    expect(control.getAttribute('name')).toBe('field')
     expect(control.hasAttribute('required')).toBe(true)
     expect(control.hasAttribute('class')).toBe(true)
   })

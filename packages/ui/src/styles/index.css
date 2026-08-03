@@ -1,11 +1,11 @@
 /*
- * Point d'entrée CSS du design system (`@vectis/ui/styles.css`).
+ * CSS entry point of the design system (`@vectis/ui/styles.css`).
  *
- * L'ordre des layers est déclaré ici, une fois pour toutes :
+ * The layer order is declared here, once and for all:
  *   vectis.reset < vectis.tokens < vectis.components < vectis.utilities
- * Tout style consommateur NON layerisé gagne automatiquement sur ces layers —
- * c'est le mécanisme de surcharge voulu. Pour surcharger finement en gardant
- * la cascade du DS, un consommateur peut aussi écrire dans `vectis.utilities`.
+ * Any NON-layered consumer style automatically wins over these layers — that is
+ * the intended override mechanism. To override finely while keeping the DS
+ * cascade, a consumer can also write into `vectis.utilities`.
  */
 @layer vectis.reset, vectis.tokens, vectis.components, vectis.utilities;
 

@@ -1,17 +1,17 @@
 import { onBeforeUnmount } from 'vue'
 
 /**
- * Un `setTimeout` réarmable, annulé au démontage.
+ * A re-armable `setTimeout`, cancelled on unmount.
  *
- * Trois règles :
- * - le handle vit dans un `let` NON réactif : personne ne le rend, en faire une
- *   `ref` déclencherait des rendus pour rien ;
- * - `start()` annule toujours le précédent, sinon deux timers courent ;
- * - annulation au démontage, sinon le callback s'exécute sur un composant mort.
+ * Three rules:
+ * - the handle lives in a NON-reactive `let`: nobody renders it, and making it a
+ *   `ref` would trigger renders for nothing;
+ * - `start()` always cancels the previous one, otherwise two timers run;
+ * - cancelled on unmount, otherwise the callback runs on a dead component.
  *
- * `start()` avec un délai ≤ 0 exécute **synchroniquement** : `setTimeout(…, 0)`
- * ne l'est pas, et la convention du DS est que 0 désarme le report (débounce
- * synchrone, toast persistant).
+ * `start()` with a delay ≤ 0 runs **synchronously**: `setTimeout(…, 0)` is not,
+ * and the DS convention is that 0 disarms the deferral (synchronous debounce,
+ * persistent toast).
  */
 export function useTimer(): { start: (fn: () => void, delay: number) => void; cancel: () => void } {
   let timer: ReturnType<typeof setTimeout> | undefined

@@ -1,40 +1,41 @@
 ﻿/*
- * Plomberie commune des éléments flottants (VPopover, VMenu, VTooltip…).
+ * Common plumbing of the floating elements (VPopover, VMenu, VTooltip…).
  *
- * Deux classes, à poser ensemble : `.v-overlay` (socle de tout popover du DS,
- * partagé avec les piles de toasts) et `.v-floating` (ancrage + placements).
+ * Two classes, to be set together: `.v-overlay` (the foundation of every popover
+ * in the DS, shared with the toast stacks) and `.v-floating` (anchoring +
+ * placements).
  *
- * 100 % CSS Anchor Positioning — AUCUN fallback JS : le projet cible les
- * navigateurs modernes (Chrome/Edge 125+, Safari 26+ ; Firefox pas encore
- * stable — choix assumé, voir CLAUDE.md/README).
+ * 100% CSS Anchor Positioning — NO JS fallback: the project targets modern
+ * browsers (Chrome/Edge 125+, Safari 26+; Firefox not yet stable — an accepted
+ * choice, see CLAUDE.md/README).
  *
- * Trois cas d'ancrage, tous couverts par la même table de placements :
- * - implicite : l'invocateur `popovertarget` est l'ancre (VMenu) ;
- * - `anchor-name` statique posé par le composant sur son propre wrapper
- *   (VTooltip) ou par `VPopover` sur le sien quand un `#trigger` est fourni ;
- * - nom transmis à `VPopover` par la prop `anchor`, le consommateur ayant déjà
- *   une racine et un contrôle à ancrer (VCombobox, VDatePicker, VTimePicker).
+ * Three anchoring cases, all covered by the same placement table:
+ * - implicit: the `popovertarget` invoker is the anchor (VMenu);
+ * - a static `anchor-name` set by the component on its own wrapper (VTooltip) or
+ *   by `VPopover` on its own when a `#trigger` is provided;
+ * - a name passed to `VPopover` through the `anchor` prop, the consumer already
+ *   owning a root and a control to anchor to (VCombobox, VDatePicker,
+ *   VTimePicker).
  *
- * `position-try-fallbacks` retourne le panneau quand la place manque.
+ * `position-try-fallbacks` flips the panel when there is no room.
  */
 @layer vectis.components {
   /*
-   * Socle de TOUT popover du DS, ancré ou non — `.v-floating` (panneaux
-   * ancrés) comme `.v-toast-stack` (piles positionnées en coordonnées
-   * physiques, sans ancre).
+   * The foundation of EVERY popover in the DS, anchored or not — `.v-floating`
+   * (anchored panels) as well as `.v-toast-stack` (stacks positioned in physical
+   * coordinates, with no anchor).
    *
-   * Le garde-fou `display: none` est ici et pas dans chaque composant : un
-   * panneau qui pose son propre `display` (`.v-panel` en flex, la pile de
-   * toasts en colonne) écrase le `[popover] { display: none }` du style UA —
-   * les styles auteur battent toujours l'UA, layers ou non — et resterait alors
-   * en layout, invisible mais cliquable par-dessus le contenu. Sa spécificité
-   * (0,2,0) le met hors de portée d'un `display` de composant, quel que soit
-   * l'ordre du bundle. Les transitions `display … allow-discrete` de chaque
-   * famille préservent l'animation de sortie.
+   * The `display: none` guard is here rather than in each component: a panel that
+   * sets its own `display` (`.v-panel` as flex, the toast stack as a column)
+   * overrides the UA `[popover] { display: none }` — author styles always beat the
+   * UA, layers or not — and would then stay in layout, invisible but clickable on
+   * top of the content. Its specificity (0,2,0) puts it out of reach of a
+   * component `display`, whatever the bundle order. Each family's
+   * `display … allow-discrete` transitions preserve the exit animation.
    */
   .v-overlay {
     position: fixed;
-    /* neutralise les styles UA de [popover] (inset: 0 ; margin: auto) */
+    /* neutralizes the UA styles of [popover] (inset: 0; margin: auto) */
     inset: auto;
   }
 
@@ -43,15 +44,15 @@
   }
 
   .v-floating {
-    /* l'écart avec l'ancre ET la marge minimale au bord du viewport */
+    /* both the gap from the anchor AND the minimum margin to the viewport edge */
     margin: var(--vectis-space-2);
     position-try-fallbacks: flip-block, flip-inline;
   }
 
   /*
-   * Placements alignés (`span-inline-*`) : la marge inline du côté aligné
-   * décalerait le panneau de 8px par rapport au bord du trigger — on
-   * l'annule, la marge opposée garde l'écart minimal avec le viewport.
+   * Aligned placements (`span-inline-*`): the inline margin on the aligned side
+   * would offset the panel by 8px from the trigger's edge — it is cancelled, and
+   * the opposite margin keeps the minimum gap to the viewport.
    */
   .v-floating[data-placement$='-start'] {
     margin-inline-start: 0;
@@ -98,11 +99,11 @@
   }
 
   /*
-   * Placements latéraux alignés (sous-menus du VMenu). Axe inversé par rapport
-   * aux placements top/bottom : l'écart avec l'ancre est INLINE, l'alignement
-   * est BLOCK — on restaure donc la marge inline annulée par les règles
-   * génériques `$='-start'`/`$='-end'` ci-dessus (même spécificité, l'ordre
-   * source tranche), et on annule la marge block du côté aligné.
+   * Aligned side placements (VMenu submenus). The axis is swapped compared to the
+   * top/bottom placements: the gap from the anchor is INLINE and the alignment is
+   * BLOCK — so the inline margin cancelled by the generic `$='-start'`/`$='-end'`
+   * rules above is restored (same specificity, source order decides), and the
+   * block margin on the aligned side is cancelled instead.
    */
   .v-floating[data-placement='right-start'] {
     position-area: inline-end span-block-end;
@@ -133,7 +134,7 @@
     margin-block-end: 0;
   }
 
-  /* Entrée/sortie animées communes (allow-discrete + @starting-style) */
+  /* Common animated entry/exit (allow-discrete + @starting-style) */
   .v-floating {
     opacity: 0;
     transform: scale(0.97);

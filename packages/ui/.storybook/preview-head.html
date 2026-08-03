@@ -1,10 +1,10 @@
 <!--
-  Police Material Symbols Rounded pour les stories de VIcon et VButton.
-  En production, c'est le CONSOMMATEUR qui charge cette police (voir le
-  README de @vectis/ui) : elle n'est pas embarquée dans le package — et depuis
-  le registre d'icônes intégré, elle ne sert plus qu'aux noms d'icônes des
-  STORIES (`favorite`, `edit`…), jamais aux icônes rendues par le DS.
-  display=block évite le flash du nom d'icône en toutes lettres.
+  Material Symbols Rounded font, for the VIcon and VButton stories.
+  In production it is the CONSUMER who loads this font (see the @vectis/ui
+  README): it is not bundled in the package. Here it only serves the icon names
+  used by the STORIES (`favorite`, `edit`…), never the icons the DS renders,
+  which come from the built-in registry.
+  display=block avoids the flash of the icon name spelled out in full.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,14 +14,14 @@
 />
 
 <!--
-  Polices d'icônes TIERCES, uniquement pour les stories « Polices d'icônes »
-  de VIcon : elles démontrent `setIconResolver` sur de vraies bibliothèques, pas
-  sur des maquettes. Aucune n'est une dépendance du package — ni npm, ni
-  runtime : ce sont des feuilles CDN chargées par cette page de preview.
+  THIRD-PARTY icon fonts, only for VIcon's "Icon fonts" stories: they demonstrate
+  `setIconResolver` against real libraries rather than mock-ups. None is a
+  dependency of the package — neither npm nor runtime: they are CDN stylesheets
+  loaded by this preview page.
 
-  Les trois sont des polices À CLASSES (glyphe en `::before`), donc servies par
-  `classIconResolver`. Leurs sélecteurs de base sont compatibles avec le
-  `<span class="v-icon-glyph …">` que rend VIcon :
+  All three are CLASS-based fonts (glyph in `::before`), so they are served by
+  `classIconResolver`. Their base selectors are compatible with the
+  `<span class="v-icon-glyph …">` that VIcon renders:
     - Phosphor  : `.ph { font-family }` + `.ph.ph-x:before { content }`
     - FA 6      : `.fa-solid:before { content: var(--fa) }` + `.fa-xmark { --fa }`
     - Bootstrap : `.bi::before { font-family }` + `.bi-x-lg::before { content }`

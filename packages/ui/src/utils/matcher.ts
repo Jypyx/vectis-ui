@@ -1,10 +1,10 @@
 /**
- * Convention du DS pour les props « quelles entrées sont désactivées » :
- * un TABLEAU de valeurs ou un PRÉDICAT (`disabledDates`, `disabledPages`…).
+ * The DS convention for "which entries are disabled" props: either an ARRAY of
+ * values or a PREDICATE (`disabledDates`, `disabledPages`…).
  *
- * Résoudre une fois pour toutes (dans un `computed`) plutôt qu'à chaque appel :
- * le tableau devient un `Set`, donc une appartenance en temps constant là où un
- * `includes` serait relu linéairement pour chaque cellule rendue.
+ * Resolve once and for all (inside a `computed`) rather than on every call: the
+ * array becomes a `Set`, hence constant-time membership where an `includes`
+ * would be re-scanned linearly for every rendered cell.
  */
 export function resolveMatcher<T>(
   matcher: readonly T[] | ((value: T) => boolean) | undefined,

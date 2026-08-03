@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
-import type { Component } from 'vue'
+import { computed, type Component } from 'vue'
 
 import VBreadcrumb from '../components/VBreadcrumb/VBreadcrumb.vue'
 import VChip from '../components/VChip/VChip.vue'
@@ -11,22 +11,22 @@ import VPagination from '../components/VPagination/VPagination.vue'
 import VProgressLinear from '../components/VProgressLinear/VProgressLinear.vue'
 import VSpinner from '../components/VSpinner/VSpinner.vue'
 import VTimePicker from '../components/VTimePicker/VTimePicker.vue'
+import { storyText } from '../stories/storyText'
 
-import { en } from './en'
-import { DEFAULT_LOCALE, registerMessages, setLocale } from './state'
+import { registerMessages } from './state'
 
-// SFC générique : le typage `Component` ne s'y applique pas, cast obligatoire
-// dans les stories et les tests (convention du repo).
+// Generic SFC: the `Component` typing does not apply to it, so a cast is
+// mandatory in the stories and the tests (repo convention).
 const VDataTable = VDataTableSfc as unknown as Component
 
 const meta = {
-  title: 'Fondations/Internationalisation',
+  title: 'Foundations/Internationalization',
 } satisfies Meta
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-const COMPOSANTS = {
+const COMPONENTS = {
   VBreadcrumb,
   VChip,
   VCombobox,
@@ -39,52 +39,73 @@ const COMPOSANTS = {
   VTimePicker,
 }
 
-const COLONNES = [
-  { key: 'nom', label: 'Nom', sortable: true, searchable: true },
-  { key: 'total', label: 'Total', sortable: true, align: 'end' as const },
-]
+const t = storyText({
+  en: {
+    name: 'Name',
+    total: 'Total',
+    field: 'Field',
+    someText: 'Some text',
+    loadingField: 'Loading',
+    date: 'Date',
+    time: 'Time',
+    search: 'Search',
+    filter: 'Filter…',
+    tag: 'Tag',
+    home: 'Home',
+    components: 'Components',
+  },
+  fr: {
+    name: 'Nom',
+    total: 'Total',
+    field: 'Champ',
+    someText: 'Du texte',
+    loadingField: 'En chargement',
+    date: 'Date',
+    time: 'Heure',
+    search: 'Recherche',
+    filter: 'Filtrer…',
+    tag: 'Étiquette',
+    home: 'Accueil',
+    components: 'Composants',
+  },
+})
 
-/* Aucune ligne : c'est l'état VIDE qui porte du texte du dictionnaire, et le
-   footer de sélection reste rendu — deux chaînes visibles d'un coup. */
-const LIGNES: { nom: string; total: number }[] = []
+/* No row at all: the EMPTY state is what carries dictionary text, and the
+   selection footer stays rendered — two visible strings at once. */
+const ROWS: { name: string; total: number }[] = []
 
 const OPTIONS = [
   { value: 'a', label: 'Alpha' },
   { value: 'b', label: 'Bravo' },
 ]
 
-const FIL = [
-  { label: 'Accueil', href: '/' },
-  { label: 'Composants', href: '/composants' },
-]
-
-const VITRINE = `
+const SHOWCASE = `
   <div style="display: grid; gap: var(--vectis-space-6); max-width: 44rem;">
-    <VBreadcrumb :items="fil" current-path="/composants" />
+    <VBreadcrumb :items="trail" current-path="/components" />
 
     <div style="display: flex; gap: var(--vectis-space-3); align-items: end; flex-wrap: wrap;">
-      <VInput label="Champ" clearable model-value="Du texte" style="flex: 1; min-inline-size: 12rem;" />
-      <VInput label="En chargement" loading style="flex: 1; min-inline-size: 12rem;" />
+      <VInput :label="t.field" clearable :model-value="t.someText" style="flex: 1; min-inline-size: 12rem;" />
+      <VInput :label="t.loadingField" loading style="flex: 1; min-inline-size: 12rem;" />
     </div>
 
     <div style="display: flex; gap: var(--vectis-space-3); flex-wrap: wrap;">
-      <VDatePicker label="Date" show-calendar />
-      <VTimePicker label="Heure" show-dial />
+      <VDatePicker :label="t.date" show-calendar />
+      <VTimePicker :label="t.time" show-dial />
     </div>
 
-    <VCombobox label="Recherche" :options="options" placeholder="Filtrer…" />
+    <VCombobox :label="t.search" :options="options" :placeholder="t.filter" />
 
     <div style="display: flex; gap: var(--vectis-space-2); align-items: center;">
-      <VChip dismissible>Étiquette</VChip>
+      <VChip dismissible>{{ t.tag }}</VChip>
       <VSpinner />
     </div>
 
     <VProgressLinear :value="42" show-value :thickness="20" />
 
     <VDataTable
-      :columns="colonnes"
-      :rows="lignes"
-      row-key="nom"
+      :columns="columns"
+      :rows="rows"
+      row-key="name"
       searchable
       selectable
       variant="outlined"
@@ -97,72 +118,72 @@ const VITRINE = `
   </div>
 `
 
-function vitrine(): Story['render'] {
+/* `columns` and `trail` must be computed, not plain arrays built from `t.value`:
+   reading `.value` in the setup body would freeze the labels in the language of
+   the first render while everything else switched. */
+const columns = computed(() => [
+  { key: 'name', label: t.value.name, sortable: true, searchable: true },
+  { key: 'total', label: t.value.total, sortable: true, align: 'end' as const },
+])
+
+const trail = computed(() => [
+  { label: t.value.home, href: '/' },
+  { label: t.value.components, href: '/components' },
+])
+
+function showcase(): Story['render'] {
   return () => ({
-    components: COMPOSANTS,
-    setup: () => ({ colonnes: COLONNES, lignes: LIGNES, options: OPTIONS, fil: FIL }),
-    template: VITRINE,
+    components: COMPONENTS,
+    setup: () => ({ t, rows: ROWS, options: OPTIONS, columns, trail }),
+    template: SHOWCASE,
   })
 }
 
 /**
- * Configuration par défaut : le français est le socle, aucun appel n'est
- * nécessaire.
- */
-export const Francais: Story = {
-  name: 'Français (défaut)',
-  render: vitrine(),
-}
-
-/**
- * `registerMessages('en', en)` + `setLocale('en-GB')`.
+ * Default configuration: English is the base, no call is needed.
  *
- * Le teardown n'est pas décoratif : l'état vit au niveau module et SURVIT à la
- * navigation Storybook (même piège que le `dismissToast()` des stories de
- * VToast). Sans lui, toutes les stories visitées ensuite s'afficheraient en
- * anglais, et les play functions qui assertent du français rougiraient.
+ * Every story here drives the locale through story-level `globals`, which the
+ * `preview.ts` decorator turns into a `setLocale`. Doing it in a `beforeEach`
+ * would not work: the decorator body runs after it and would win.
  */
-export const Anglais: Story = {
-  name: 'Anglais',
-  beforeEach: () => {
-    registerMessages('en', en)
-    setLocale('en-GB')
-    return () => {
-      setLocale(DEFAULT_LOCALE)
-      registerMessages('en', undefined)
-    }
-  },
-  render: vitrine(),
+export const English: Story = {
+  globals: { locale: 'en-US' },
+  render: showcase(),
+}
+
+/** `registerMessages('fr', fr)` + `setLocale('fr-FR')`, both done by the toolbar. */
+export const French: Story = {
+  globals: { locale: 'fr-FR' },
+  render: showcase(),
 }
 
 /**
- * Surcharge PARTIELLE : quelques clés seulement, le reste garde le socle
- * français — c'est aussi la façon d'ajouter une langue non fournie.
+ * PARTIAL override: a few keys only, the rest keeps the English base — this is
+ * also how you add a language the DS does not ship.
+ *
+ * The teardown is not decorative: the registry lives at module level and SURVIVES
+ * Storybook navigation (the same trap as `dismissToast()` in the VToast stories).
+ * Without it, every story visited afterwards would keep these strings.
  */
-export const SurchargePartielle: Story = {
-  name: 'Surcharge partielle',
+export const PartialOverride: Story = {
+  globals: { locale: 'en-US' },
   beforeEach: () => {
-    registerMessages('fr', {
-      dataTable: { empty: 'Rien à afficher pour le moment' },
-      combobox: { empty: 'Aucune correspondance' },
-      common: { dismiss: 'Enlever' },
+    registerMessages('en', {
+      dataTable: { empty: 'Nothing to show right now' },
+      combobox: { empty: 'No match' },
+      common: { dismiss: 'Take off' },
     })
-    return () => registerMessages('fr', undefined)
+    return () => registerMessages('en', undefined)
   },
-  render: vitrine(),
+  render: showcase(),
 }
 
 /**
- * `setLocale('de-DE')` sans dictionnaire allemand : les MOTS restent français,
- * mais les FORMATS (mois, premier jour de semaine, cycle horaire) suivent déjà
- * la balise — ils viennent d'`Intl`, pas du dictionnaire. État dégradé
- * cohérent, pas un bug.
+ * `setLocale('de-DE')` with no German dictionary: the WORDS stay English, but the
+ * FORMATS (months, first day of week, hour cycle) already follow the tag — they
+ * come from `Intl`, not from the dictionary. A coherent degraded state, not a bug.
  */
-export const LangueSansDictionnaire: Story = {
-  name: 'Langue sans dictionnaire',
-  beforeEach: () => {
-    setLocale('de-DE')
-    return () => setLocale(DEFAULT_LOCALE)
-  },
-  render: vitrine(),
+export const LanguageWithoutDictionary: Story = {
+  globals: { locale: 'de-DE' },
+  render: showcase(),
 }

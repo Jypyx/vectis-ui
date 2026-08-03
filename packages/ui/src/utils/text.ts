@@ -1,7 +1,7 @@
 /**
- * Forme de comparaison d'un texte : insensible à la casse ET aux accents
- * (décomposition NFD puis retrait des diacritiques). Utilisée partout où le DS
- * filtre une liste sur une saisie utilisateur — « e » doit trouver « é ».
+ * Comparison form of a text: insensitive to case AND to accents (NFD
+ * decomposition, then diacritics removed). Used everywhere the DS filters a list
+ * against user input — "e" must find "é".
  */
 export function normalizeText(s: string): string {
   return s
@@ -10,14 +10,14 @@ export function normalizeText(s: string): string {
     .toLowerCase()
 }
 
-/** Entier sur deux chiffres (`7` → `'07'`) — composantes de date et d'heure. */
+/** Two-digit integer (`7` → `'07'`) — date and time components. */
 export function pad2(n: number): string {
   return String(n).padStart(2, '0')
 }
 
 /**
- * Chiffres d'un texte. Helper purement lexical, sans domaine : les masques de
- * saisie du DS (date du VDatePicker, heure du VTimePicker) ne connaissent que la
- * suite de chiffres, jamais les séparateurs, qu'ils posent eux-mêmes.
+ * The digits of a text. A purely lexical helper, with no domain: the DS's input
+ * masks (VDatePicker's date, VTimePicker's time) only ever know the digit run,
+ * never the separators, which they place themselves.
  */
 export const digitsOf = (text: string): string => text.replace(/\D/g, '')

@@ -5,8 +5,8 @@ const config: StorybookConfig = {
   addons: [
     '@storybook/addon-docs',
     '@storybook/addon-a11y',
-    // Exécute les play functions dans un vrai navigateur (Vitest browser mode,
-    // projet `storybook` de vitest.config.ts) et les expose dans l'UI.
+    // Runs the play functions in a real browser (Vitest browser mode, the
+    // `storybook` project of vitest.config.ts) and surfaces them in the UI.
     '@storybook/addon-vitest',
   ],
   framework: {

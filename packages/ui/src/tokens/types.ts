@@ -1,11 +1,11 @@
 /**
- * Format de tokens inspiré du W3C Design Tokens Community Group (DTCG) :
- * un token est un objet `{ $value, $type, $description? }`, les groupes sont
- * des objets imbriqués. Les alias utilisent la syntaxe DTCG `{path.to.token}`
- * et sont résolus en `var(--vectis-path-to-token)` par le build.
+ * Token format inspired by the W3C Design Tokens Community Group (DTCG): a token
+ * is an object `{ $value, $type, $description? }`, and groups are nested objects.
+ * Aliases use the DTCG syntax `{path.to.token}` and are resolved to
+ * `var(--vectis-path-to-token)` by the build.
  *
- * Cette source typée est LA source de vérité : le CSS est généré depuis elle,
- * et la future app de theming la manipulera programmatiquement.
+ * This typed source is THE source of truth: the CSS is generated from it, and the
+ * future theming app will manipulate it programmatically.
  */
 export type TokenType =
   | 'color'

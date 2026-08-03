@@ -1,27 +1,27 @@
 /**
- * Génère `src/components/VIcon/icons.ts` : les paths SVG des icônes que le DS
- * rend LUI-MÊME par défaut, répliques exactes de Material Symbols Rounded
- * (wght 400 · GRAD 0 · opsz 24). C'est ce registre qui rend le design system
- * utilisable sans aucune police d'icônes.
+ * Generates `src/components/VIcon/icons.ts`: the SVG paths of the icons the DS
+ * renders ITSELF by default, exact replicas of Material Symbols Rounded
+ * (wght 400 · GRAD 0 · opsz 24). This registry is what makes the design system
+ * usable with no icon font at all.
  *
- * Exécution : `pnpm icons` — à la demande, PAS en prebuild : la liste ci-dessous
- * ne bouge qu'en ajoutant un défaut à un composant, et le build ne doit pas
- * dépendre du réseau (le fichier généré est committé).
+ * Run with `pnpm icons` — on demand, NOT in prebuild: the list below only moves
+ * when a component gains a new default, and the build must not depend on the
+ * network (the generated file is committed).
  *
- * Source : dépôt google/material-design-icons, révision épinglée (REVISION).
- * Licence Apache-2.0 © Google.
+ * Source: the google/material-design-icons repository, at a pinned revision
+ * (REVISION). Apache-2.0 licence © Google.
  */
 import { writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-/** Révision épinglée du dépôt source (2026-07-24). */
+/** Pinned revision of the source repository (2026-07-24). */
 const REVISION = '528cb964c01fb2b09bc3b9208f82b6d8f8c1c1e2'
 
 /**
- * Les icônes rendues par défaut par la librairie — et elles seules : tout ce que
- * le consommateur passe lui-même relève de SA source d'icônes. Ajouter un nom
- * ici quand un composant se met à rendre une nouvelle icône par défaut.
+ * The icons the library renders by default — and only those: anything the
+ * consumer passes in is THEIR icon source's business. Add a name here when a
+ * component starts rendering a new icon by default.
  */
 const ICONS = [
   'arrow_downward',
@@ -46,7 +46,7 @@ const ICONS = [
   'warning',
 ] as const
 
-/** Grille d'export de Google — le registre la partage, elle n'est pas répétée par icône. */
+/** Google's export grid — the registry shares it, it is not repeated per icon. */
 const VIEW_BOX = '0 -960 960 960'
 
 const url = (name: string, fill: boolean) =>
@@ -54,20 +54,20 @@ const url = (name: string, fill: boolean) =>
   `/symbols/web/${name}/materialsymbolsrounded/${name}${fill ? '_fill1' : ''}_24px.svg`
 
 /**
- * Extrait le `d` unique du fichier. Échoue bruyamment plutôt que de produire un
- * rendu faux : un SVG multi-path concaténé serait invalide, et un autre viewBox
- * dessinerait l'icône hors du cadre.
+ * Extracts the file's single `d`. Fails loudly rather than producing a wrong
+ * rendering: a concatenated multi-path SVG would be invalid, and a different
+ * viewBox would draw the icon outside the frame.
  */
 function pathOf(svg: string, source: string): string {
   const viewBox = /viewBox="([^"]+)"/.exec(svg)?.[1]
   if (viewBox !== VIEW_BOX) {
-    throw new Error(`${source} : viewBox inattendu (${viewBox ?? 'absent'}), attendu ${VIEW_BOX}`)
+    throw new Error(`${source}: unexpected viewBox (${viewBox ?? 'missing'}), expected ${VIEW_BOX}`)
   }
 
   const paths = [...svg.matchAll(/<path[^>]*\sd="([^"]+)"/g)].map((m) => m[1]!)
   if (paths.length !== 1) {
     throw new Error(
-      `${source} : ${paths.length} <path> au lieu d'un seul — le registre suppose un path unique`,
+      `${source}: ${paths.length} <path> instead of one — the registry assumes a single path`,
     )
   }
   return paths[0]!
@@ -77,7 +77,7 @@ async function fetchPath(name: string, fill: boolean): Promise<string | undefine
   const source = url(name, fill)
   const response = await fetch(source)
   if (!response.ok) {
-    // La variante FILL 1 peut manquer pour une icône purement linéaire.
+    // The FILL 1 variant may be missing for a purely linear icon.
     if (fill && response.status === 404) return undefined
     throw new Error(`${source} : HTTP ${response.status}`)
   }
@@ -87,8 +87,8 @@ async function fetchPath(name: string, fill: boolean): Promise<string | undefine
 const entries = await Promise.all(
   ICONS.map(async (name) => {
     const [outline, filled] = await Promise.all([fetchPath(name, false), fetchPath(name, true)])
-    // Le path plein n'est émis QUE s'il change la géométrie : une majorité des
-    // icônes (chevrons, flèches, close, check…) ont FILL 0 et FILL 1 identiques.
+    // The filled path is emitted ONLY if it changes the geometry: most icons
+    // (chevrons, arrows, close, check…) have identical FILL 0 and FILL 1.
     return [
       name,
       filled !== undefined && filled !== outline ? [outline!, filled] : [outline!],
@@ -99,26 +99,26 @@ const entries = await Promise.all(
 const filledCount = entries.filter(([, paths]) => paths.length === 2).length
 
 const ts = `/*
- * FICHIER GÉNÉRÉ — ne pas éditer à la main.
- * Régénérer : pnpm icons  ·  Source : scripts/build-icons.ts
+ * GENERATED FILE — do not edit by hand.
+ * Regenerate: pnpm icons  ·  Source: scripts/build-icons.ts
  *
  * Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24)
  * google/material-design-icons @ ${REVISION}
- * Licence Apache-2.0 © Google.
+ * Apache-2.0 licence © Google.
  */
 
-/** Grille d'export Material Symbols, partagée par tous les paths du registre. */
+/** Material Symbols export grid, shared by every path in the registry. */
 export const ICON_VIEW_BOX = '${VIEW_BOX}'
 
 /**
- * Icônes rendues par défaut par le DS, sous la forme \`[contour, plein?]\` — le
- * second path n'existe que si l'axe FILL change réellement la géométrie.
+ * Icons the DS renders by default, in the form \`[outline, filled?]\` — the second
+ * path exists only if the FILL axis really changes the geometry.
  */
 export const builtinIcons = {
 ${entries.map(([name, paths]) => `  ${name}: [${paths.map((d) => `'${d}'`).join(', ')}],`).join('\n')}
 } as const satisfies Record<string, readonly [string] | readonly [string, string]>
 
-/** Les noms d'icônes que le DS rend lui-même — contrat d'un résolveur consommateur. */
+/** The icon names the DS renders itself — the contract of a consumer resolver. */
 export type VectisIconName = keyof typeof builtinIcons
 `
 
@@ -126,5 +126,5 @@ const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 writeFileSync(resolve(pkgRoot, 'src/components/VIcon/icons.ts'), ts, 'utf8')
 
 console.log(
-  `icons: ${entries.length} icônes (dont ${filledCount} avec variante FILL) → src/components/VIcon/icons.ts`,
+  `icons: ${entries.length} icons (${filledCount} of them with a FILL variant) → src/components/VIcon/icons.ts`,
 )

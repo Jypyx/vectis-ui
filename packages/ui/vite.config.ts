@@ -6,7 +6,7 @@ import dts from 'vite-plugin-dts'
 
 import { tokens } from './src/tokens'
 
-/** Émet `dist/tokens.json` (export map `./tokens.json`) depuis la source typée. */
+/** Emits `dist/tokens.json` (export map `./tokens.json`) from the typed source. */
 function emitTokensJson(): Plugin {
   return {
     name: 'vectis:emit-tokens-json',
@@ -39,7 +39,7 @@ export default defineConfig({
     rollupOptions: {
       external: ['vue'],
       output: {
-        // Un module JS par fichier source → tree-shaking par composant chez le consommateur
+        // One JS module per source file → per-component tree-shaking for the consumer
         preserveModules: true,
         preserveModulesRoot: 'src',
         entryFileNames: '[name].js',

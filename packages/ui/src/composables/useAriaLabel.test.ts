@@ -5,7 +5,7 @@ import { defineComponent, h } from 'vue'
 import { useAriaLabel } from './useAriaLabel'
 
 const Named = defineComponent({
-  props: { label: { type: String, default: 'Défaut' } },
+  props: { label: { type: String, default: 'Default' } },
   setup(props) {
     const ariaLabel = useAriaLabel(() => props.label)
     return () => h('div', { role: 'group', 'aria-label': ariaLabel.value })
@@ -15,23 +15,23 @@ const Named = defineComponent({
 const groupOf = (container: Element) => container.querySelector('[role="group"]')
 
 describe('useAriaLabel', () => {
-  it('sans attribut du consommateur, la prop label fait le nom', () => {
-    const { container } = render(Named, { props: { label: 'Alignement' } })
-    expect(groupOf(container)?.getAttribute('aria-label')).toBe('Alignement')
+  it('with no consumer attribute, the label prop makes the name', () => {
+    const { container } = render(Named, { props: { label: 'Alignment' } })
+    expect(groupOf(container)?.getAttribute('aria-label')).toBe('Alignment')
   })
 
-  it('un aria-label du consommateur remplace le défaut', () => {
+  it('a consumer aria-label replaces the default', () => {
     const { container } = render(Named, {
-      props: { label: 'Alignement' },
-      attrs: { 'aria-label': 'Du consommateur' },
+      props: { label: 'Alignment' },
+      attrs: { 'aria-label': 'From the consumer' },
     })
-    expect(groupOf(container)?.getAttribute('aria-label')).toBe('Du consommateur')
+    expect(groupOf(container)?.getAttribute('aria-label')).toBe('From the consumer')
   })
 
-  it('un aria-labelledby supprime le défaut (pas deux noms concurrents)', () => {
+  it('an aria-labelledby removes the default (never two competing names)', () => {
     const { container } = render(Named, {
-      props: { label: 'Alignement' },
-      attrs: { 'aria-labelledby': 'titre' },
+      props: { label: 'Alignment' },
+      attrs: { 'aria-labelledby': 'heading' },
     })
     expect(groupOf(container)?.hasAttribute('aria-label')).toBe(false)
   })

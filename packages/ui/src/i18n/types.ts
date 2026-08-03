@@ -1,37 +1,37 @@
 /**
- * Dictionnaire du DS. Profondeur EXACTEMENT 2 : `namespace.clé`, où la valeur
- * est une feuille — chaîne, ou fonction typée pour un message paramétré.
+ * The DS dictionary. Depth EXACTLY 2: `namespace.key`, where the value is a
+ * leaf — a string, or a typed function for a parameterized message.
  *
- * Aucun moteur de pluriel, aucun ICU, aucun interpolateur : une entrée
- * paramétrée EST une fonction TypeScript. Le typage de ses arguments est le
- * contrat (une traduction qui oublie un paramètre ne compile pas), et une règle
- * de pluriel s'écrit avec un ternaire — cf. `dataTable.selection`.
+ * No plural engine, no ICU, no interpolator: a parameterized entry IS a
+ * TypeScript function. The typing of its arguments is the contract (a
+ * translation that forgets a parameter does not compile), and a plural rule is
+ * written with a ternary — see `dataTable.selection`.
  *
- * La profondeur 2 n'est pas décorative : elle est ce qui rend la fusion des
- * surcharges partielles non récursive (`state.ts`), donc incapable par
- * construction de descendre dans une valeur FONCTION comme si c'était un objet.
+ * Depth 2 is not decorative: it is what makes merging partial overrides
+ * non-recursive (`state.ts`), hence incapable by construction of descending
+ * into a FUNCTION value as if it were an object.
  *
- * Ce qui n'est PAS ici, délibérément :
- * - ce qu'`Intl` dérive déjà de la balise de locale (noms de mois et de jours,
- *   ordre des champs de date, séparateur de date, cycle horaire) ;
- * - ce qui n'est fait que de chiffres et de ponctuation universelle (`99+` de
- *   VBadge, `+N` de VAvatarGroup, le compteur `N/M`, le `:` de l'heure) ;
- * - les messages DÉVELOPPEUR (`[Composant] …`), qui ne sont pas traduits.
+ * What is deliberately NOT here:
+ * - whatever `Intl` already derives from the locale tag (month and day names,
+ *   date field order, date separator, hour cycle);
+ * - whatever is made only of digits and universal punctuation (VBadge's `99+`,
+ *   VAvatarGroup's `+N`, the `N/M` counter, the `:` of a time);
+ * - DEVELOPER messages (`[Component] …`), which are not translated.
  */
 export interface VectisMessages {
-  /** Mots partagés par plusieurs composants — un seul endroit à traduire. */
+  /** Words shared by several components — a single place to translate. */
   common: {
-    /** VSpinner, `loadingLabel` de VInput/VTextarea, `loadingText` de VCombobox. */
+    /** VSpinner, `loadingLabel` of VInput/VTextarea, `loadingText` of VCombobox. */
     loading: string
-    /** `clearLabel` de VInput et VTextarea. */
+    /** `clearLabel` of VInput and VTextarea. */
     clear: string
-    /** `closeLabel` de VDialog et VToaster. */
+    /** `closeLabel` of VDialog and VToaster. */
     close: string
-    /** `dismissLabel` de VChip. */
+    /** `dismissLabel` of VChip. */
     dismiss: string
-    /** Pied du cadran VTimePicker. */
+    /** VTimePicker dial footer. */
     cancel: string
-    /** Pied du cadran VTimePicker. */
+    /** VTimePicker dial footer. */
     confirm: string
   }
   pagination: {
@@ -39,15 +39,16 @@ export interface VectisMessages {
     previous: string
     next: string
     page: (page: number) => string
-    /** Ellipse de pages masquées — élément décoratif (`aria-hidden`). */
+    /** Hidden-pages ellipsis — a decorative element (`aria-hidden`). */
     hiddenPages: string
   }
   tabs: { label: string; previous: string; next: string }
   breadcrumb: { label: string; ellipsis: string }
   sideNavigation: {
     /**
-     * Nom accessible du `<nav>`. Seule chaîne du composant : les libellés
-     * viennent des slots, et l'état déplié/replié est porté par `<details>`.
+     * Accessible name of the `<nav>`. The component's only string: the labels
+     * come from the slots, and the expanded/collapsed state is carried by
+     * `<details>`.
      */
     label: string
   }
@@ -62,10 +63,10 @@ export interface VectisMessages {
     searchLabel: string
     searchPlaceholder: string
     perPage: string
-    /** Bouton du menu « lignes par page » : libellé + valeur courante. */
+    /** "Rows per page" menu button: label + current value. */
     perPageValue: (label: string, value: number) => string
     selectAll: string
-    /** `index` est l'index HUMAIN (1-based) : l'appelant passe `index + 1`. */
+    /** `index` is the HUMAN index (1-based): the caller passes `index + 1`. */
     selectRow: (index: number) => string
     selection: (count: number) => string
     range: (range: { start: number; end: number; total: number }) => string
@@ -73,7 +74,7 @@ export interface VectisMessages {
   toaster: { label: string }
   inputOTP: {
     label: string
-    /** `index` est l'index HUMAIN (1-based) : l'appelant passe `slotIndex + 1`. */
+    /** `index` is the HUMAN index (1-based): the caller passes `slotIndex + 1`. */
     slot: (index: number, total: number) => string
   }
   slider: {
@@ -83,10 +84,10 @@ export interface VectisMessages {
     rangeStart: (label: string) => string
     rangeEnd: (label: string) => string
   }
-  /** Partagé par VInput et VTextarea via `composables/useTextLimit`. */
+  /** Shared by VInput and VTextarea through `composables/useTextLimit`. */
   field: { limitExceeded: (max: number) => string }
   progress: {
-    /** `50 %` en français (espace INSÉCABLE avant le signe), `50%` en anglais. */
+    /** `50%` in English, `50 %` in French (NON-BREAKING space before the sign). */
     percent: (percent: number) => string
   }
   calendar: {
@@ -109,18 +110,18 @@ export interface VectisMessages {
     pm: string
     selectHour: string
     selectMinute: string
-    /** Live region : étape en cours de sélection. */
+    /** Live region: the step currently being selected. */
     hourStep: string
     minuteStep: string
-    /** Nom accessible du cadran selon l'étape. */
+    /** Accessible name of the dial, per step. */
     hour: string
     minutes: string
-    /** `aria-valuetext` du cadran. */
+    /** `aria-valuetext` of the dial. */
     hoursValue: (hour: number) => string
     minutesValue: (minute: number) => string
     /**
-     * Gabarit du champ masqué (`hh:mm`). Traduisible parce que `h` et `m` sont
-     * les initiales de MOTS — contrairement au `:`, universel, qui reste dans
+     * Template of the masked field (`hh:mm`). Translatable because `h` and `m`
+     * are the initials of WORDS — unlike the universal `:`, which stays in
      * `utils/time.ts`.
      */
     maskPlaceholder: string
@@ -128,12 +129,12 @@ export interface VectisMessages {
 }
 
 /**
- * Surcharge PARTIELLE : namespaces et clés facultatifs. Ce que vous n'écrivez
- * pas retombe sur le dictionnaire de base — jamais sur une chaîne vide (même
- * contrat que les mappings partiels de `setIconResolver`).
+ * PARTIAL override: namespaces and keys are optional. Whatever you do not write
+ * falls back to the base dictionary — never to an empty string (the same
+ * contract as the partial mappings of `setIconResolver`).
  *
- * `Partial<VectisMessages[K]>` ne descend PAS dans les valeurs : une fonction reste
- * une fonction entière. Un `DeepPartial<T>` récursif, lui, transformerait
- * `(n: number) => string` en `{}`.
+ * `Partial<VectisMessages[K]>` does NOT descend into the values: a function
+ * stays a whole function. A recursive `DeepPartial<T>` would turn
+ * `(n: number) => string` into `{}`.
  */
 export type VectisMessagesInput = { [K in keyof VectisMessages]?: Partial<VectisMessages[K]> }

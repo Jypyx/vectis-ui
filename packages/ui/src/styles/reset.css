@@ -1,6 +1,6 @@
 /*
- * Reset minimal, volontairement dans la layer la plus faible (vectis.reset) :
- * n'importe quel style consommateur le surcharge sans effort.
+ * Minimal reset, deliberately in the weakest layer (vectis.reset): any consumer
+ * style overrides it effortlessly.
  */
 @layer vectis.reset {
   *,

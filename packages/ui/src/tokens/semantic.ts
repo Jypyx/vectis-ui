@@ -1,7 +1,7 @@
 /**
- * Tokens sémantiques (thème light, valeurs par défaut).
- * SEULS tokens consommés par les composants. Ils référencent les primitifs
- * via des alias DTCG `{path.to.token}`.
+ * Semantic tokens (light theme, default values).
+ * The ONLY tokens consumed by the components. They reference the primitives
+ * through DTCG aliases `{path.to.token}`.
  */
 import { color, dimension, fontFamily, fontWeight, type TokenGroup } from './types'
 
@@ -63,9 +63,9 @@ export const semantic = {
     backdrop: color('oklch(0% 0 0 / 0.45)', 'Voile derrière les dialogs modaux'),
   },
   /**
-   * Échelle typographique sémantique : un rôle = une recette complète
-   * (taille, graisse, interlignage, éventuel espacement de lettres).
-   * Consommée par le composant VTypography et par le CSS des composants.
+   * Semantic typographic scale: one role = one complete recipe (size, weight,
+   * leading, and optionally letter spacing). Consumed by the VTypography
+   * component and by the components' CSS.
    */
   text: {
     family: fontFamily('{font.family.sans}', 'Police de tout le texte du design system'),
@@ -142,8 +142,8 @@ export const semantic = {
       weight: fontWeight('{font.weight.regular}'),
       leading: dimension('{font.leading.normal}'),
     },
-    /* Rôle technique : étiquette de contrôle interactif (VButton, VChip, VBadge…).
-     * Pas de `size` : elle vient de l'échelle de tailles (`--control-font-size`). */
+    /* Technical role: the label of an interactive control (VButton, VChip,
+     * VBadge…). No `size`: it comes from the size scale (`--control-font-size`). */
     control: {
       weight: fontWeight('{font.weight.medium}'),
       leading: dimension('{font.leading.none}'),

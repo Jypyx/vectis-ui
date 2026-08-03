@@ -1,18 +1,17 @@
 import { computed, useAttrs, type ComputedRef } from 'vue'
 
 /**
- * Nom accessible d'un conteneur nommé (tablist, group, nav…) selon la
- * précédence ARIA : `aria-labelledby` > `aria-label` > prop `label`.
+ * Accessible name of a named container (tablist, group, nav…) following the ARIA
+ * precedence: `aria-labelledby` > `aria-label` > `label` prop.
  *
- * La prop `label` n'est qu'un DÉFAUT. Un `aria-label` du consommateur le
- * remplace ; un `aria-labelledby` le supprime, sinon les deux noms
- * cohabiteraient sur l'élément.
+ * The `label` prop is only a DEFAULT. A consumer `aria-label` replaces it; an
+ * `aria-labelledby` removes it, otherwise both names would coexist on the
+ * element.
  *
- * Indispensable dès que le composant est en `inheritAttrs: false` et rend
- * lui-même `v-bind="forwardedAttrs"` **et** `:aria-label` : sans arbitrage, les
- * deux s'appliquent. En fallthrough naturel, Vue laisse déjà l'attribut du
- * consommateur gagner — le composable n'y sert alors qu'à retirer le défaut
- * devenu redondant.
+ * Required as soon as the component is in `inheritAttrs: false` and renders both
+ * `v-bind="forwardedAttrs"` **and** `:aria-label`: without arbitration, both
+ * apply. Under natural fallthrough, Vue already lets the consumer's attribute
+ * win — there the composable only removes the now-redundant default.
  */
 export function useAriaLabel(label: () => string | undefined): ComputedRef<string | undefined> {
   const attrs = useAttrs()

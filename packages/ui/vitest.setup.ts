@@ -1,9 +1,9 @@
 /**
- * jsdom n'implémente pas la Popover API. Stub minimal pour tester la LOGIQUE
- * des composants (sync v-model, focus, ARIA) — le comportement navigateur
- * réel (top-layer, light dismiss) est couvert par les play functions
- * Storybook. Le marqueur `data-popover-open` remplace `:popover-open`,
- * qu'aucun sélecteur jsdom ne sait évaluer.
+ * jsdom does not implement the Popover API. A minimal stub, to test component
+ * LOGIC (v-model sync, focus, ARIA) — the real browser behaviour (top layer,
+ * light dismiss) is covered by the Storybook play functions. The
+ * `data-popover-open` marker stands in for `:popover-open`, which no jsdom
+ * selector can evaluate.
  */
 if (!('showPopover' in HTMLElement.prototype)) {
   const fireToggle = (el: HTMLElement, newState: 'open' | 'closed') => {
@@ -15,15 +15,15 @@ if (!('showPopover' in HTMLElement.prototype)) {
     showPopover(this: HTMLElement) {
       if (this.hasAttribute('data-popover-open')) return
       this.setAttribute('data-popover-open', '')
-      // contre le style UA `[popover] { display: none }` : rend le panneau
-      // visible pour les requêtes par rôle de testing-library
+      // counters the UA style `[popover] { display: none }`: makes the panel
+      // visible to testing-library's role queries
       this.style.display = 'block'
       fireToggle(this, 'open')
     },
     hidePopover(this: HTMLElement) {
       if (!this.hasAttribute('data-popover-open')) return
-      // cascade de la pile : fermer un popover ferme ses popovers descendants
-      // (fidèle au spec pour nos panneaux imbriqués, qui sont des descendants DOM)
+      // stack cascade: closing a popover closes its descendant popovers (faithful
+      // to the spec for our nested panels, which are DOM descendants)
       this.querySelectorAll<HTMLElement>('[data-popover-open]').forEach((el) => el.hidePopover())
       this.removeAttribute('data-popover-open')
       this.style.display = ''
@@ -33,11 +33,11 @@ if (!('showPopover' in HTMLElement.prototype)) {
 }
 
 /**
- * jsdom ne connaît pas `HTMLDialogElement.prototype.showModal` (« Not
- * implemented »). Stub minimal pour tester la LOGIQUE de <VDialog> (sync
- * v-model ↔ .open, ARIA, croix) — le comportement navigateur réel (top-layer,
- * ::backdrop, piège de focus, light dismiss, scroll-state) reste couvert par
- * les play functions Storybook.
+ * jsdom does not know `HTMLDialogElement.prototype.showModal` ("Not
+ * implemented"). A minimal stub, to test the LOGIC of <VDialog> (v-model ↔ .open
+ * sync, ARIA, close cross) — the real browser behaviour (top layer, ::backdrop,
+ * focus trap, light dismiss, scroll state) stays covered by the Storybook play
+ * functions.
  */
 if (typeof HTMLDialogElement !== 'undefined') {
   const dispatchClose = (el: HTMLDialogElement) => el.dispatchEvent(new Event('close'))

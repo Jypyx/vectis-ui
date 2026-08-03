@@ -1,16 +1,16 @@
 import type { Ref } from 'vue'
 
 /**
- * Handler `@focusout` de racine : ferme quand le focus quitte le composant,
- * panneau flottant compris — un popover est un descendant DOM de la racine même
- * quand il est peint en top layer, donc `contains` suffit et il n'y a rien à
- * observer côté document.
+ * Root `@focusout` handler: closes when focus leaves the component, floating
+ * panel included — a popover is a DOM descendant of the root even when painted
+ * in the top layer, so `contains` is enough and there is nothing to observe at
+ * document level.
  *
- * `relatedTarget` nul = le focus part hors de la fenêtre (ou vers le body) :
- * c'est aussi une sortie, on ferme.
+ * A null `relatedTarget` means focus is leaving the window (or going to the
+ * body): that is also an exit, so it closes.
  *
- * Nécessaire parce qu'un popover `manual` n'a pas de light dismiss ; les
- * panneaux `auto` (VMenu) n'en ont pas besoin, le natif s'en charge.
+ * Needed because a `manual` popover has no light dismiss; `auto` panels (VMenu)
+ * do not need it, the platform handles it.
  */
 export function useFocusoutDismiss(
   root: Ref<HTMLElement | null>,

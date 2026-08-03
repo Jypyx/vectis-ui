@@ -1,18 +1,18 @@
 /*
- * FICHIER GÉNÉRÉ — ne pas éditer à la main.
- * Régénérer : pnpm icons  ·  Source : scripts/build-icons.ts
+ * GENERATED FILE — do not edit by hand.
+ * Regenerate: pnpm icons  ·  Source: scripts/build-icons.ts
  *
  * Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24)
  * google/material-design-icons @ 528cb964c01fb2b09bc3b9208f82b6d8f8c1c1e2
- * Licence Apache-2.0 © Google.
+ * Apache-2.0 licence © Google.
  */
 
-/** Grille d'export Material Symbols, partagée par tous les paths du registre. */
+/** Material Symbols export grid, shared by every path in the registry. */
 export const ICON_VIEW_BOX = '0 -960 960 960'
 
 /**
- * Icônes rendues par défaut par le DS, sous la forme `[contour, plein?]` — le
- * second path n'existe que si l'axe FILL change réellement la géométrie.
+ * Icons the DS renders by default, in the form `[outline, filled?]` — the second
+ * path exists only if the FILL axis really changes the geometry.
  */
 export const builtinIcons = {
   arrow_downward: ['M440-313v-447q0-17 11.5-28.5T480-800q17 0 28.5 11.5T520-760v447l196-196q12-12 28-11.5t28 12.5q11 12 11.5 28T772-452L508-188q-6 6-13 8.5t-15 2.5q-8 0-15-2.5t-13-8.5L188-452q-11-11-11-27.5t11-28.5q12-12 28.5-12t28.5 12l195 195Z'],
@@ -37,5 +37,5 @@ export const builtinIcons = {
   warning: ['M109-120q-11 0-20-5.5T75-140q-5-9-5.5-19.5T75-180l370-640q6-10 15.5-15t19.5-5q10 0 19.5 5t15.5 15l370 640q6 10 5.5 20.5T885-140q-5 9-14 14.5t-20 5.5H109Zm69-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm0-120q17 0 28.5-11.5T520-400v-120q0-17-11.5-28.5T480-560q-17 0-28.5 11.5T440-520v120q0 17 11.5 28.5T480-360Zm0-100Z', 'M109-120q-11 0-20-5.5T75-140q-5-9-5.5-19.5T75-180l370-640q6-10 15.5-15t19.5-5q10 0 19.5 5t15.5 15l370 640q6 10 5.5 20.5T885-140q-5 9-14 14.5t-20 5.5H109Zm371-120q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm0-120q17 0 28.5-11.5T520-400v-120q0-17-11.5-28.5T480-560q-17 0-28.5 11.5T440-520v120q0 17 11.5 28.5T480-360Z'],
 } as const satisfies Record<string, readonly [string] | readonly [string, string]>
 
-/** Les noms d'icônes que le DS rend lui-même — contrat d'un résolveur consommateur. */
+/** The icon names the DS renders itself — the contract of a consumer resolver. */
 export type VectisIconName = keyof typeof builtinIcons

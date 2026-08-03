@@ -4,5 +4,5 @@
     "types": []
   },
   "include": ["src/**/*", "src/**/*.vue"],
-  "exclude": ["src/**/*.stories.ts", "src/**/*.test.ts", "src/**/*.mdx"]
+  "exclude": ["src/**/*.stories.ts", "src/**/*.test.ts", "src/**/*.mdx", "src/stories/**"]
 }

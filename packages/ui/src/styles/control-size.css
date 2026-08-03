@@ -1,30 +1,27 @@
 /*
- * Table des tailles de contrôle — incarnation CSS unique du tableau de
- * correspondance du design system (hauteur / icône / opsz / typo / paddings
- * par taille xs → xl).
+ * Control size table — the single CSS incarnation of the design system's mapping
+ * (height / icon / opsz / type / paddings per size, xs → xl).
  *
- * Chaque composant interactif pose `v-control` sur sa RACINE (celle qui
- * porte `data-size`/`data-compact`) et consomme les variables `--control-*`
- * dans son propre CSS ; elles héritent jusqu'aux enfants (ex. le field
- * de VInput). Les blocs ne définissent QUE des custom properties — jamais de
- * propriété de layout — donc aucun conflit de spécificité avec les SFC.
+ * Every interactive component sets `v-control` on its ROOT (the one carrying
+ * `data-size`/`data-compact`) and consumes the `--control-*` variables in its own
+ * CSS; they inherit down to the children (e.g. VInput's field). The blocks define
+ * ONLY custom properties — never a layout property — so there is no specificity
+ * conflict with the SFCs.
  *
- * Deux colonnes de padding-inline : `--control-padding-inline` pour les
- * contrôles pleins (VButton, VChip, rangées de panneau…),
- * `--control-padding-inline-field` pour les champs de saisie (VInput,
- * VTextarea, VDatePicker), plus serrés.
- * `--control-gap` : espacement interne (icône/libellé, cases OTP…).
+ * Two padding-inline columns: `--control-padding-inline` for solid controls
+ * (VButton, VChip, panel rows…), `--control-padding-inline-field` for text inputs
+ * (VInput, VTextarea, VDatePicker), which are tighter.
+ * `--control-gap`: internal spacing (icon/label, OTP cells…).
  *
- * `--vectis-icon-size`/`--vectis-icon-opsz` = API de contexte publique de VIcon ;
- * l'opsz reste un littéral (axe de la police Material Symbols : contrat
- * technique, pas un token de design — voir VIcon.vue).
+ * `--vectis-icon-size`/`--vectis-icon-opsz` = VIcon's public context API; the
+ * opsz stays a literal (a Material Symbols font axis: a technical contract, not a
+ * design token — see VIcon.vue).
  */
 @layer vectis.components {
   .v-control {
     /*
-     * Hauteur en deux temps : les tailles posent --control-height-base,
-     * compact dérive la hauteur effective (-4px, padding/typo/icônes
-     * inchangés).
+     * Height in two steps: the sizes set --control-height-base, and compact
+     * derives the effective height (-4px, padding/type/icons unchanged).
      */
     --control-height: var(--control-height-base);
   }

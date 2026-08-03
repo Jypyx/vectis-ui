@@ -1,21 +1,21 @@
 /**
- * Navigation clavier par flèches dans une rangée/colonne d'éléments frères.
+ * Arrow-key navigation within a row/column of sibling elements.
  *
- * JS justifié : aucune primitive native ne déplace le focus entre des boutons
- * frères. Le contrat est le même partout dans le DS — les flèches et Home/End
- * ne font que **DÉPLACER le focus**, jamais activer : activer au focus
- * déclencherait une navigation ou une bascule de valeur involontaire. Un
- * composant qui veut l'activation au focus (VTabs en `activation: 'automatic'`)
- * la pose lui-même, dans son propre `@focus`.
+ * Justified JS: no native primitive moves focus between sibling buttons. The
+ * contract is the same everywhere in the DS — the arrows and Home/End only ever
+ * **MOVE focus**, never activate: activating on focus would trigger an
+ * unintended navigation or value toggle. A component that wants activation on
+ * focus (VTabs with `activation: 'automatic'`) sets it itself, in its own
+ * `@focus`.
  *
- * Incarnation unique pour VPagination, VTabs, VToggle et VMenu.
+ * Single incarnation for VPagination, VTabs, VToggle and VMenu.
  */
 
 /**
- * Éléments navigables d'un conteneur : le sélecteur exclut les désactivés, et
- * le filtre `display` écarte ceux qu'une container query (VPagination) ou le
- * consommateur (VTabs, VToggle) a masqués — un élément masqué ne doit pas capter
- * le focus.
+ * The navigable elements of a container: the selector excludes disabled ones,
+ * and the `display` filter drops those hidden by a container query
+ * (VPagination) or by the consumer (VTabs, VToggle) — a hidden element must not
+ * take focus.
  */
 export function navigableItems(container: HTMLElement, selector: string): HTMLElement[] {
   return [...container.querySelectorAll<HTMLElement>(selector)].filter(
@@ -24,14 +24,14 @@ export function navigableItems(container: HTMLElement, selector: string): HTMLEl
 }
 
 /**
- * Traite ArrowUp/Down/Left/Right + Home/End sur `items` et déplace le focus.
- * Retourne `true` si la touche a été consommée (`preventDefault` déjà appliqué),
- * `false` sinon — l'appelant peut alors laisser passer l'événement.
+ * Handles ArrowUp/Down/Left/Right + Home/End over `items` and moves focus.
+ * Returns `true` if the key was consumed (`preventDefault` already applied),
+ * `false` otherwise — the caller can then let the event through.
  *
- * - Wrap modulo aux extrémités ; sans focus courant dans la liste, on repart du
- *   premier élément quel que soit le sens.
- * - Les flèches de l'axe INLINE sont physiques, donc inversées en RTL ; celles
- *   de l'axe block ne le sont pas (l'axe block ne se retourne pas).
+ * - Modulo wrap at the ends; with no current focus in the list, it starts from
+ *   the first element whatever the direction.
+ * - The INLINE-axis arrows are physical, hence inverted in RTL; the block-axis
+ *   ones are not (the block axis does not flip).
  */
 export function arrowNavigate(
   event: KeyboardEvent,

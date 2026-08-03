@@ -23,15 +23,15 @@ export default tseslint.config(
   },
   {
     rules: {
-      // Les SFC du DS portent des noms d'éléments simples (VButton, VInput…) : voulu.
+      // The DS SFCs carry simple element names (VButton, VInput…): intended.
       'vue/multi-word-component-names': 'off',
-      // VMenu est un nom voulu ; la casse distingue <VMenu> du <menu> natif dans les SFC.
+      // VMenu is an intended name; the casing distinguishes <VMenu> from the native <menu>.
       'vue/no-reserved-component-names': 'off',
     },
   },
   {
-    // TypeScript vérifie déjà les identifiants ; no-undef produit des faux
-    // positifs sur les globals DOM (HTMLDialogElement, MouseEvent…).
+    // TypeScript already checks the identifiers; no-undef produces false positives
+    // on DOM globals (HTMLDialogElement, MouseEvent…).
     files: ['**/*.ts', '**/*.vue'],
     rules: {
       'no-undef': 'off',

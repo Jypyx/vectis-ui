@@ -1,26 +1,26 @@
 import { computed, useAttrs, type ComputedRef, type StyleValue } from 'vue'
 
 /**
- * Forme d'un binding `:class`. Redéclarée ici : `@vue/runtime-dom` l'exporte
- * sous le nom `ClassValue`, mais le paquet `vue` ne la réexporte pas — et sans
- * elle, `attrs.class` reste `unknown`, que le template refuse.
+ * Shape of a `:class` binding. Redeclared here: `@vue/runtime-dom` exports it as
+ * `ClassValue`, but the `vue` package does not re-export it — and without it
+ * `attrs.class` stays `unknown`, which the template rejects.
  */
 type ClassBinding = false | null | undefined | string | Record<string, unknown> | ClassBinding[]
 
 /**
- * Plomberie du **pattern wrapper-root** : un composant dont la racine n'est
- * qu'un conteneur (champs VInput/VTextarea, VCombobox, VDataTable, VDatePicker,
- * VTimePicker, barre de VTabs) doit répartir ses attributs hérités en deux —
- * `class`/`style` restent sur la racine (c'est elle que le consommateur
- * stylise), tout le reste descend sur l'élément FONCTIONNEL. Sans cette
- * répartition, `name`, `required` ou les `aria-*` atterrissent sur le wrapper
- * et cassent formulaires et accessibilité.
+ * Plumbing of the **wrapper-root pattern**: a component whose root is only a
+ * container (VInput/VTextarea fields, VCombobox, VDataTable, VDatePicker,
+ * VTimePicker, the VTabs bar) must split its inherited attributes in two —
+ * `class`/`style` stay on the root (that is what the consumer styles), and
+ * everything else goes down to the FUNCTIONAL element. Without that split,
+ * `name`, `required` or the `aria-*` land on the wrapper and break forms and
+ * accessibility.
  *
- * `defineOptions({ inheritAttrs: false })` reste à la charge du composant :
- * c'est une option de compilation du SFC, pas un état.
+ * `defineOptions({ inheritAttrs: false })` stays the component's responsibility:
+ * it is an SFC compilation option, not state.
  *
- * `attrs` est renvoyé tel quel pour les rares lectures ciblées (`attrs.id` qui
- * doit primer sur un `useId()`, `attrs['aria-describedby']` à agréger).
+ * `attrs` is returned as-is for the rare targeted reads (`attrs.id`, which must
+ * win over a `useId()`; `attrs['aria-describedby']`, to be aggregated).
  */
 export function useRootAttrs(): {
   attrs: Record<string, unknown>

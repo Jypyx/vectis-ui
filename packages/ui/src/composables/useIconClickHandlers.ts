@@ -3,16 +3,16 @@ import { getCurrentInstance } from 'vue'
 import { isDev } from '../utils/env'
 
 /**
- * Les icônes internes d'un champ deviennent des `<button>` dès qu'un listener
- * `@click:icon-start` / `@click:icon-end` est attaché. Ces emits étant déclarés,
- * Vue les retire de `$attrs` : leur présence ne se lit que dans `vnode.props`,
- * et dans les DEUX graphies (kebab côté template, camel côté fonction render).
+ * A field's internal icons become `<button>`s as soon as a `@click:icon-start` /
+ * `@click:icon-end` listener is attached. Since those emits are declared, Vue
+ * removes them from `$attrs`: their presence can only be read in `vnode.props`,
+ * and in BOTH spellings (kebab from a template, camel from a render function).
  *
- * La liste est considérée STATIQUE : un listener ajouté dynamiquement après le
- * montage n'est pas re-détecté (cas marginal, assumé).
+ * The list is treated as STATIC: a listener added dynamically after mount is not
+ * re-detected (a marginal, accepted case).
  *
- * Le garde-fou a11y est ici et pas chez l'appelant : un bouton sans nom
- * accessible est un défaut du pattern, pas du composant qui l'emploie.
+ * The a11y guard lives here rather than in the caller: a button with no
+ * accessible name is a flaw of the pattern, not of the component using it.
  */
 export function useIconClickHandlers(options: {
   name: string
@@ -27,11 +27,11 @@ export function useIconClickHandlers(options: {
   if (isDev) {
     if (hasIconStartHandler && !options.iconStartLabel)
       console.warn(
-        `[${options.name}] icône start cliquable sans iconStartLabel — fournir un libellé accessible.`,
+        `[${options.name}] clickable start icon without iconStartLabel — provide an accessible label.`,
       )
     if (hasIconEndHandler && !options.iconEndLabel)
       console.warn(
-        `[${options.name}] icône end cliquable sans iconEndLabel — fournir un libellé accessible.`,
+        `[${options.name}] clickable end icon without iconEndLabel — provide an accessible label.`,
       )
   }
 

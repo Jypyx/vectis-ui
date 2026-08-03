@@ -2,23 +2,23 @@ import { computed, watchEffect, type ComputedRef, type Ref } from 'vue'
 
 import { useMessages } from '../i18n/state'
 
-/** Contrat minimal du contrôle natif : `<input>` comme `<textarea>` l'exposent. */
+/** Minimal contract of the native control: both `<input>` and `<textarea>` expose it. */
 interface ValidatableControl {
   setCustomValidity: (message: string) => void
 }
 
 /**
- * Longueur saisie vs `maxlength` : le texte du compteur, le dépassement et la
- * **limite souple**.
+ * Typed length vs `maxlength`: the counter text, the overflow and the **soft
+ * limit**.
  *
- * Limite souple = la saisie n'est pas bloquée, le champ passe en erreur. Elle
- * passe par `setCustomValidity` plutôt que par un événement maison : le rouge
- * n'apparaît qu'après interaction (`:user-invalid`, même timing que le natif),
- * la soumission est bloquée, et l'état se lit par l'API standard `el.validity`.
- * Le composant POSSÈDE donc la custom validity tant que `softLimit` est actif.
+ * Soft limit = typing is not blocked, the field goes into error. It goes through
+ * `setCustomValidity` rather than a custom event: the red only appears after
+ * interaction (`:user-invalid`, the same timing as native), submission is
+ * blocked, and the state is readable through the standard `el.validity` API. The
+ * component therefore OWNS the custom validity for as long as `softLimit` is on.
  *
- * `flush: 'post'` : la ref template n'est pas encore posée en flush `pre`.
- * Inerte côté serveur, où la ref reste nulle.
+ * `flush: 'post'`: the template ref is not set yet in `pre` flush. Inert on the
+ * server, where the ref stays null.
  */
 export function useTextLimit(options: {
   el: Ref<ValidatableControl | null>
@@ -30,9 +30,9 @@ export function useTextLimit(options: {
   const max = computed(() => options.maxlength())
   const m = useMessages()
 
-  // La lecture du dictionnaire est DANS l'effet : le message de validation se
-  // réécrit donc tout seul si `setLocale` est appelé après le montage.
-  // `if/else` plutôt qu'un ternaire, pour que TS restreigne `limit` à `number`.
+  // The dictionary read is INSIDE the effect, so the validation message rewrites
+  // itself if `setLocale` is called after mount. `if/else` rather than a ternary,
+  // so that TS narrows `limit` to `number`.
   watchEffect(
     () => {
       const el = options.el.value

@@ -1,15 +1,19 @@
 import type { VectisMessages } from './types'
 
 /**
- * Français — socle du DS. C'est à la fois la langue par défaut et la BASE de
- * repli de toute surcharge partielle : une clé absente d'un autre dictionnaire
- * retombe ici, jamais sur une chaîne vide.
+ * French. **Opt-in**: this module is only reached if you import it, so it is
+ * pruned from the bundle of projects that do not use it (`preserveModules` +
+ * `sideEffects: ["**\/*.css"]`).
  *
- * Toujours embarqué (importé par `state.ts`). Les autres langues sont opt-in,
- * cf. `en.ts`.
+ * Enabling it and adding a language the DS does not ship are the SAME gesture —
+ * there are no two categories of dictionary:
  *
- * ⚠ Les chaînes sont COPIÉES des composants, apostrophes typographiques
- * comprises : plusieurs tests unitaires les ciblent au caractère près.
+ *     import { fr, registerMessages, setLocale } from '@vectis/ui'
+ *     registerMessages('fr', fr)
+ *     setLocale('fr-FR')
+ *
+ * ⚠ Typographic apostrophes are meaningful here: some assertions target these
+ * strings character for character.
  */
 export const fr: VectisMessages = {
   common: {
@@ -70,10 +74,9 @@ export const fr: VectisMessages = {
   field: {
     limitExceeded: (max) => `Dépasse la limite de ${max} caractères`,
   },
-  // `\u00A0` = l'entité `&nbsp;` du template : espace INSÉCABLE avant le signe,
-  // convention typographique française. Échappé et non littéral : ESLint refuse
-  // le caractère (`no-irregular-whitespace`), et il serait invisible en revue.
-  // L'anglais n'en met aucun.
+  // `\u00A0` = a NON-BREAKING space before the sign, a French typographic
+  // convention (English has none). Escaped rather than literal: ESLint rejects
+  // the character (`no-irregular-whitespace`), and it would be invisible in review.
   progress: { percent: (percent) => `${percent}\u00A0%` },
   calendar: {
     previousMonth: 'Mois précédent',

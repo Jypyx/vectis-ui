@@ -1,15 +1,14 @@
 /**
- * Utilitaires d'heures PURS (VTimePicker, VTimePickerDial).
+ * PURE time utilities (VTimePicker, VTimePickerDial).
  *
- * Contrat : l'API publique manipule des chaînes `HH:mm` en **24 h canonique**
- * (le v-model du VTimePicker, quel que soit l'affichage 12 h / 24 h). Les objets
- * `Date` ne servent qu'à `Intl` sur des instants de RÉFÉRENCE en
- * `timeZone: 'UTC'`, pour que le rendu ne dépende jamais du fuseau machine
- * (SSR-safe).
+ * Contract: the public API deals in `HH:mm` strings in **canonical 24 h** (the
+ * VTimePicker v-model, whatever the 12 h / 24 h display). `Date` objects only
+ * serve `Intl`, on REFERENCE instants in `timeZone: 'UTC'`, so the output never
+ * depends on the machine's zone (SSR-safe).
  *
- * La géométrie du cadran (conversion pointeur → secteur/anneau) vit ici en
- * fonctions pures : jsdom ne mesure rien (`getBoundingClientRect` à zéro),
- * c'est donc la seule façon de la couvrir en vitest.
+ * The dial geometry (pointer → sector/ring conversion) lives here as pure
+ * functions: jsdom measures nothing (`getBoundingClientRect` returns zeroes), so
+ * this is the only way to cover it in vitest.
  */
 import { clamp } from './number'
 import { digitsOf, pad2 } from './text'
@@ -18,7 +17,7 @@ export type HourFormat = '12h' | '24h'
 export type Meridiem = 'AM' | 'PM'
 
 export interface TimeParts {
-  /** Heure 24 h canonique (0–23). */
+  /** Canonical 24 h hour (0–23). */
   hour: number
   minute: number
 }
@@ -39,22 +38,22 @@ export function formatTime(hour: number, minute: number): string {
   return `${pad2(hour)}:${pad2(minute)}`
 }
 
-/** 24 h → cadran 12 h : 0 → {12, AM}, 12 → {12, PM}, 23 → {11, PM}. */
+/** 24 h → 12 h dial: 0 → {12, AM}, 12 → {12, PM}, 23 → {11, PM}. */
 export function to12h(hour24: number): { hour: number; meridiem: Meridiem } {
   const meridiem: Meridiem = hour24 >= 12 ? 'PM' : 'AM'
   const hour = hour24 % 12 === 0 ? 12 : hour24 % 12
   return { hour, meridiem }
 }
 
-/** Cadran 12 h + méridien → 24 h : (12, AM) → 0, (12, PM) → 12. */
+/** 12 h dial + meridiem → 24 h: (12, AM) → 0, (12, PM) → 12. */
 export function to24h(hour12: number, meridiem: Meridiem): number {
   const base = hour12 % 12 // 12 → 0
   return meridiem === 'PM' ? base + 12 : base
 }
 
 /**
- * Cycle horaire de la locale : `h11`/`h12` → 12 h (AM/PM), `h23`/`h24` → 24 h.
- * Repli 24 h si la locale est invalide.
+ * Hour cycle of the locale: `h11`/`h12` → 12 h (AM/PM), `h23`/`h24` → 24 h.
+ * Falls back to 24 h if the locale is invalid.
  */
 export function hourCycleFor(locale: string): HourFormat {
   try {
@@ -66,9 +65,9 @@ export function hourCycleFor(locale: string): HourFormat {
 }
 
 /**
- * Affichage localisé du champ (« 19:05 », « 7:05 PM »). Le `hourCycle` est
- * forcé (h23/h12) pour suivre le `format` résolu du composant, pas la
- * préférence brute de la locale.
+ * Localized display of the field ("19:05", "7:05 PM"). The `hourCycle` is forced
+ * (h23/h12) so it follows the component's resolved `format`, not the locale's raw
+ * preference.
  */
 export function formatDisplay(time: string, locale: string, format: HourFormat): string {
   const parts = parseTime(time)
@@ -82,14 +81,14 @@ export function formatDisplay(time: string, locale: string, format: HourFormat):
   return fmt.format(Date.UTC(2021, 0, 1, parts.hour, parts.minute))
 }
 
-/** Borne un entier à `[min, max]` (arrondi d'abord : les saisies sont libres). */
+/** Clamps an integer to `[min, max]` (rounded first: input is free-form). */
 export function clampInt(n: number, min: number, max: number): number {
   return clamp(Math.round(n), min, max)
 }
 
 /**
- * Arrondit au multiple de `step` le plus proche, modulo 60 normalisé
- * (58, pas 5 → 0 ; −1, pas 1 → 59 — le wrap clavier passe par des négatifs).
+ * Rounds to the nearest multiple of `step`, normalized modulo 60
+ * (58, step 5 → 0; −1, step 1 → 59 — the keyboard wrap goes through negatives).
  */
 export function snapMinute(minute: number, step: number): number {
   const snapped = step <= 1 ? Math.round(minute) : Math.round(minute / step) * step
@@ -97,40 +96,40 @@ export function snapMinute(minute: number, step: number): number {
 }
 
 /**
- * (dx, dy) relatifs au centre du cadran (repère écran : y vers le BAS) →
- * index de secteur `0..segments-1`. Secteur 0 à midi, sens horaire, arrondi
- * au secteur le plus proche. `atan2(dx, -dy)` mesure l'angle depuis le haut.
+ * (dx, dy) relative to the dial centre (screen axes: y pointing DOWN) → a sector
+ * index `0..segments-1`. Sector 0 at twelve o'clock, clockwise, rounded to the
+ * nearest sector. `atan2(dx, -dy)` measures the angle from the top.
  */
 export function angleToIndex(dx: number, dy: number, segments: number): number {
-  const angle = Math.atan2(dx, -dy) // [-π, π], 0 = midi, positif = horaire
+  const angle = Math.atan2(dx, -dy) // [-π, π], 0 = twelve o'clock, positive = clockwise
   const turn = (angle / (2 * Math.PI) + 1) % 1 // [0, 1)
   return Math.round(turn * segments) % segments
 }
 
-/** Distance au centre normalisée par le rayon (0 = centre, 1 = bord). */
+/** Distance to the centre, normalized by the radius (0 = centre, 1 = edge). */
 export function distanceFraction(dx: number, dy: number, radius: number): number {
   return radius > 0 ? Math.hypot(dx, dy) / radius : 0
 }
 
 /**
- * Fraction de rayon sous laquelle un pointeur vise l'anneau INTÉRIEUR (24 h) :
- * mi-chemin entre les centres des deux anneaux de chiffres. Dérivé des tokens
- * `--vectis-control-size-timepicker-dial` (16rem → R = 128px) et `-number`
- * (3rem → 48px) : ((128 − 24) + (128 − 72)) / 2 / 128 = 0.625 — à garder en
- * phase avec les `--dial-radius` du CSS de VTimePickerDial.vue.
+ * Radius fraction below which a pointer targets the INNER ring (24 h): halfway
+ * between the centres of the two numeral rings. Derived from the tokens
+ * `--vectis-control-size-timepicker-dial` (16rem → R = 128px) and `-number`
+ * (3rem → 48px): ((128 − 24) + (128 − 72)) / 2 / 128 = 0.625 — keep it in step
+ * with the `--dial-radius` in VTimePickerDial.vue's CSS.
  */
 export const DIAL_INNER_THRESHOLD = 0.625
 
 /**
- * Cadran 24 h (layout M3/Android) : anneau extérieur `12, 1 … 11`, anneau
- * intérieur `00, 13 … 23` (index 0 = position de midi).
+ * 24 h dial (M3/Android layout): outer ring `12, 1 … 11`, inner ring
+ * `00, 13 … 23` (index 0 = the twelve o'clock position).
  */
 export function dialIndexToHour24(index: number, ring: 'outer' | 'inner'): number {
   if (ring === 'outer') return index === 0 ? 12 : index
   return index === 0 ? 0 : index + 12
 }
 
-/** Inverse (position de l'aiguille) : 0 → {0, inner}, 12 → {0, outer}, 15 → {3, inner}. */
+/** The inverse (hand position): 0 → {0, inner}, 12 → {0, outer}, 15 → {3, inner}. */
 export function hour24ToDial(hour: number): { index: number; ring: 'outer' | 'inner' } {
   if (hour === 0) return { index: 0, ring: 'inner' }
   if (hour === 12) return { index: 0, ring: 'outer' }
@@ -138,27 +137,27 @@ export function hour24ToDial(hour: number): { index: number; ring: 'outer' | 'in
   return { index: hour, ring: 'outer' }
 }
 
-/* ── Liste d'heures (VTimePicker `mode="list"`) ──────────────────────────── */
+/* Time list (VTimePicker `mode="list"`). */
 
 export interface TimeOption {
-  /** Valeur canonique `'HH:mm'` 24 h — celle du v-model. */
+  /** Canonical 24 h `'HH:mm'` value — the v-model one. */
   value: string
-  /** Libellé localisé (« 07:30 », « 7:30 AM »). */
+  /** Localized label ("07:30", "7:30 AM"). */
   label: string
 }
 
-/** `'HH:mm'` → minutes depuis minuit, `null` si invalide (index d'une liste). */
+/** `'HH:mm'` → minutes since midnight, `null` if invalid (a list index). */
 export function minutesOf(time: string | null | undefined): number | null {
   const parts = parseTime(time)
   return parts ? parts.hour * 60 + parts.minute : null
 }
 
 /**
- * Les heures d'une journée par pas de `step` minutes, de `00:00` à la dernière
- * avant minuit. PURE : `formatDisplay` passe par un instant de référence UTC.
- * Aucune borne min/max — le VTimePicker n'en a pas, ne pas en inventer ici.
- * `step` invalide (≤ 0, non entier, > 60) → repli 60 : la liste doit rester
- * finie même si le garde-fou de développement du composant a été ignoré.
+ * The times of a day in `step`-minute increments, from `00:00` to the last one
+ * before midnight. PURE: `formatDisplay` goes through a UTC reference instant. No
+ * min/max bound — VTimePicker has none, do not invent one here. An invalid `step`
+ * (≤ 0, non-integer, > 60) falls back to 60: the list must stay finite even if
+ * the component's dev guard was ignored.
  */
 export function timeList(step: number, locale: string, format: HourFormat): TimeOption[] {
   const safe = Number.isInteger(step) && step >= 1 && step <= 60 ? step : 60
@@ -170,22 +169,21 @@ export function timeList(step: number, locale: string, format: HourFormat): Time
   return out
 }
 
-/* ── Masque de saisie `HH:MM` (VTimePicker `mode="input"`) ───────────────── */
-
-/**
- * Le séparateur du masque est UNIVERSEL, contrairement à celui du VDatePicker :
- * une heure se lit « HH:MM » dans toutes les locales — `Intl` n'y fait varier
- * que le cycle horaire, jamais le deux-points.
+/*
+ * `HH:MM` input mask (VTimePicker `mode="input"`).
  *
- * Le GABARIT du placeholder, lui, a quitté ce fichier pour le dictionnaire
- * (`timePicker.maskPlaceholder`) : `hh:mm` est fait d'initiales de MOTS, donc
- * traduisible, là où le `:` ci-dessous ne l'est pas.
+ * The mask separator is UNIVERSAL, unlike VDatePicker's: a time reads "HH:MM" in
+ * every locale — `Intl` only varies the hour cycle there, never the colon.
+ *
+ * The placeholder TEMPLATE lives in the dictionary instead
+ * (`timePicker.maskPlaceholder`): `hh:mm` is made of the initials of WORDS, hence
+ * translatable, where the `:` below is not.
  */
 export const TIME_SEPARATOR = ':'
 
 /**
- * Suite de chiffres → texte masqué. Le `:` est posé DÈS que l'heure est
- * complète (« 09 » → « 09: »), comme le séparateur du masque de date.
+ * Digit run → masked text. The `:` is placed AS SOON AS the hour is complete
+ * ("09" → "09:"), like the date mask's separator.
  */
 export function formatTimeMask(digits: string): string {
   const all = digitsOf(digits).slice(0, 4)
@@ -193,12 +191,12 @@ export function formatTimeMask(digits: string): string {
 }
 
 /**
- * Position de caret « juste après le n-ième chiffre » dans « HH:MM ». Forme
- * CLOSE — le séparateur est toujours en 3e position, d'où l'absence d'un
- * équivalent du `caretAfterDigits` du masque de date, qui doit balayer le texte
- * parce que l'ordre et les longueurs de ses champs varient avec la locale.
- * `skipSeparator` = insertion : le curseur entre dans les minutes ; à la
- * suppression on reste devant le `:`, sinon la touche ne progresse jamais.
+ * Caret position "just after the nth digit" within "HH:MM". A CLOSED form — the
+ * separator is always in 3rd position, hence no equivalent of the date mask's
+ * `caretAfterDigits`, which has to scan the text because its field order and
+ * lengths vary with the locale. `skipSeparator` = insertion: the caret enters the
+ * minutes; on deletion it stays before the `:`, otherwise the key never makes
+ * progress.
  */
 export function timeCaret(n: number, skipSeparator = false): number {
   if (n < 2) return n
@@ -207,9 +205,9 @@ export function timeCaret(n: number, skipSeparator = false): number {
 }
 
 /**
- * `'HH:mm'` 24 h → texte masqué DU FORMAT AFFICHÉ. En 12 h l'heure est ramenée
- * à 1–12 : le méridien est porté par le VToggle à côté du champ, jamais par le
- * masque.
+ * 24 h `'HH:mm'` → masked text OF THE DISPLAYED FORMAT. In 12 h the hour is
+ * brought back to 1–12: the meridiem is carried by the VToggle next to the field,
+ * never by the mask.
  */
 export function timeToMask(time: string | null | undefined, format: HourFormat): string {
   const parts = parseTime(time)
@@ -219,9 +217,9 @@ export function timeToMask(time: string | null | undefined, format: HourFormat):
 }
 
 /**
- * Texte masqué → `'HH:mm'` 24 h canonique, ou `null` si la saisie est
- * incomplète, surnuméraire ou impossible. En 12 h, `meridiem` vient du VToggle :
- * c'est le SEUL endroit où le texte tapé et le méridien se rejoignent.
+ * Masked text → canonical 24 h `'HH:mm'`, or `null` if the input is incomplete,
+ * over-long or impossible. In 12 h, `meridiem` comes from the VToggle: this is
+ * the ONLY place where the typed text and the meridiem meet.
  */
 export function parseTimeMask(
   text: string,

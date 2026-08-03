@@ -1,9 +1,9 @@
 /**
- * Tokens primitifs : palettes, échelles. Jamais consommés directement par les
- * composants — uniquement référencés par les tokens sémantiques.
- * Couleurs en OKLCH (interpolation perceptuelle, gamut large).
- * Palettes reprises de Tailwind CSS 4 (`theme.css`) ; la clé `neutral`
- * correspond à la palette `gray` de Tailwind.
+ * Primitive tokens: palettes, scales. Never consumed directly by the components —
+ * only referenced by the semantic tokens.
+ * Colours in OKLCH (perceptual interpolation, wide gamut).
+ * Palettes taken from Tailwind CSS 4 (`theme.css`); the `neutral` key matches
+ * Tailwind's `gray` palette.
  */
 import {
   color,
@@ -111,8 +111,8 @@ export const primitives = {
       mono: fontFamily(
         "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace",
       ),
-      // Police d'icônes (chargée par le consommateur, voir README) ; surcharger
-      // ce token permet de basculer sur Material Symbols Outlined/Sharp.
+      // Icon font (loaded by the consumer, see README); overriding this token is
+      // what switches to Material Symbols Outlined/Sharp.
       icon: fontFamily("'Material Symbols Rounded'"),
     },
     weight: {

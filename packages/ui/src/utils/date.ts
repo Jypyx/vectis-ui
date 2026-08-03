@@ -1,29 +1,29 @@
 /**
- * Utilitaires de dates PURS (VCalendar, VDatePicker).
+ * PURE date utilities (VCalendar, VDatePicker).
  *
- * Contrat : l'API publique manipule des chaînes ISO `YYYY-MM-DD` et tout se
- * calcule en **heure locale** — on ne passe JAMAIS par `new Date('YYYY-MM-DD')`
- * (interprété en UTC → dérive d'un jour selon le fuseau) ni par `toISOString()`
- * (renvoie de l'UTC). Les objets `Date` restent internes, construits via
- * `new Date(y, m, d)` (minuit local) et reformatés par concaténation manuelle.
+ * Contract: the public API deals in ISO `YYYY-MM-DD` strings and everything is
+ * computed in **local time** — NEVER through `new Date('YYYY-MM-DD')`
+ * (interpreted as UTC → a one-day drift depending on the zone) nor through
+ * `toISOString()` (which returns UTC). `Date` objects stay internal, built with
+ * `new Date(y, m, d)` (local midnight) and reformatted by manual concatenation.
  *
- * Les noms de mois/jours passent par `Intl` (dispo côté serveur → SSR-safe) sur
- * des dates de RÉFÉRENCE en `timeZone: 'UTC'`, pour que le libellé ne dépende
- * pas du fuseau de la machine.
+ * Month and day names go through `Intl` (available server-side → SSR-safe) on
+ * REFERENCE dates in `timeZone: 'UTC'`, so the label does not depend on the
+ * machine's zone.
  */
 
 import { digitsOf, pad2 } from './text'
 
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/
 
-/** Vrai si `iso` est une chaîne `YYYY-MM-DD` valide (mois/jour cohérents). */
+/** True if `iso` is a valid `YYYY-MM-DD` string (coherent month/day). */
 export function isValidISO(iso: unknown): iso is string {
   if (typeof iso !== 'string' || !ISO_RE.test(iso)) return false
   const d = parseISO(iso)
   return d !== null && formatISO(d) === iso
 }
 
-/** ISO `YYYY-MM-DD` → `Date` à minuit local (ou `null` si mal formé). */
+/** ISO `YYYY-MM-DD` → a `Date` at local midnight (or `null` if malformed). */
 export function parseISO(iso: string | null | undefined): Date | null {
   if (typeof iso !== 'string' || !ISO_RE.test(iso)) return null
   const parts = iso.split('-')
@@ -35,12 +35,12 @@ export function formatISO(date: Date): string {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
 }
 
-/** Construit un ISO depuis des composantes locales (mois 0-indexé). */
+/** Builds an ISO from local components (0-indexed month). */
 export function isoOf(year: number, month0: number, day: number): string {
   return formatISO(new Date(year, month0, day))
 }
 
-/** Ajoute `n` jours à un ISO (report de mois/année géré par `Date`). */
+/** Adds `n` days to an ISO (month/year carry handled by `Date`). */
 export function addDays(iso: string, n: number): string {
   const d = parseISO(iso)
   if (!d) return iso
@@ -49,8 +49,8 @@ export function addDays(iso: string, n: number): string {
 }
 
 /**
- * Ajoute `n` mois en conservant le jour, clampé au dernier jour du mois cible
- * (31 janv. + 1 mois → 28/29 févr., pas un débordement en mars).
+ * Adds `n` months keeping the day, clamped to the last day of the target month
+ * (31 Jan + 1 month → 28/29 Feb, not an overflow into March).
  */
 export function addMonths(iso: string, n: number): string {
   const d = parseISO(iso)
@@ -67,8 +67,8 @@ export function daysInMonth(year: number, month0: number): number {
 }
 
 /**
- * Comparaison chronologique de deux ISO. Comme le format `YYYY-MM-DD` est
- * lexicographiquement ordonné, une comparaison de chaînes suffit.
+ * Chronological comparison of two ISO strings. Since the `YYYY-MM-DD` format is
+ * lexicographically ordered, a string comparison is enough.
  */
 export function compareISO(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0
@@ -76,14 +76,14 @@ export function compareISO(a: string, b: string): number {
 
 export const isSameISO = (a: string | null, b: string | null) => !!a && a === b
 
-/** Restreint `iso` à l'intervalle `[min, max]` (bornes optionnelles). */
+/** Restricts `iso` to the `[min, max]` interval (bounds optional). */
 export function clampISO(iso: string, min?: string, max?: string): string {
   if (min && compareISO(iso, min) < 0) return min
   if (max && compareISO(iso, max) > 0) return max
   return iso
 }
 
-/** Vrai si `iso` est dans `[min, max]` (bornes optionnelles). */
+/** True if `iso` is within `[min, max]` (bounds optional). */
 export function isWithin(iso: string, min?: string, max?: string): boolean {
   if (min && compareISO(iso, min) < 0) return false
   if (max && compareISO(iso, max) > 0) return false
@@ -92,18 +92,18 @@ export function isWithin(iso: string, min?: string, max?: string): boolean {
 
 export interface MonthCell {
   iso: string
-  /** Position hors du mois affiché (jour d'un mois adjacent), sinon `null`. */
+  /** Position outside the displayed month (a day of an adjacent month), else `null`. */
   adjacent: 'prev' | 'next' | null
 }
 
 /**
- * Matrice de 42 cellules (6 lignes × 7 colonnes) couvrant le mois `month0` de
- * `year`, complétée par les jours des mois adjacents. Hauteur de grille stable
- * quel que soit le mois. `firstDayOfWeek` : 0 = dimanche … 6 = samedi.
+ * A 42-cell matrix (6 rows × 7 columns) covering month `month0` of `year`,
+ * completed with the days of the adjacent months. Stable grid height whatever
+ * the month. `firstDayOfWeek`: 0 = Sunday … 6 = Saturday.
  */
 export function buildMonthGrid(year: number, month0: number, firstDayOfWeek: number): MonthCell[] {
   const first = new Date(year, month0, 1)
-  // Décalage du 1er du mois par rapport au 1er jour de semaine (0..6).
+  // Offset of the 1st of the month relative to the first day of the week (0..6).
   const offset = (first.getDay() - firstDayOfWeek + 7) % 7
   const cells: MonthCell[] = []
   const start = new Date(year, month0, 1 - offset)
@@ -121,28 +121,29 @@ export function buildMonthGrid(year: number, month0: number, firstDayOfWeek: num
 }
 
 /**
- * Premier jour de semaine de la locale (0 = dimanche … 6 = samedi). Dérivé de
- * `Intl.Locale.weekInfo` (1 = lundi … 7 = dimanche) ; repli lundi si l'API est
- * absente (Node/SSR selon la version) — surchargeable par prop côté composant.
+ * First day of the week for the locale (0 = Sunday … 6 = Saturday). Derived from
+ * `Intl.Locale.weekInfo` (1 = Monday … 7 = Sunday); falls back to Monday if the
+ * API is absent (Node/SSR depending on the version) — overridable by a prop on
+ * the component side.
  */
 export function firstDayOfWeekFor(locale: string): number {
   try {
-    // `weekInfo` : getter (Chrome/Safari) ou méthode `getWeekInfo()` selon impl.
+    // `weekInfo`: a getter (Chrome/Safari) or a `getWeekInfo()` method, per impl.
     const loc = new Intl.Locale(locale) as Intl.Locale & {
       weekInfo?: { firstDay: number }
       getWeekInfo?: () => { firstDay: number }
     }
     const info = loc.getWeekInfo?.() ?? loc.weekInfo
-    if (info?.firstDay) return info.firstDay % 7 // 7 (dimanche) → 0
+    if (info?.firstDay) return info.firstDay % 7 // 7 (Sunday) → 0
   } catch {
-    /* locale invalide → repli */
+    /* invalid locale → fallback */
   }
-  return 1 // lundi
+  return 1 // Monday
 }
 
-// Dates de référence en UTC : le dimanche 2021-08-01 pour les jours de semaine,
-// n'importe quelle année pour les mois. `timeZone: 'UTC'` fige le rendu.
-const REF_SUNDAY = Date.UTC(2021, 7, 1) // 1er août 2021 = dimanche
+// Reference dates in UTC: Sunday 2021-08-01 for the weekdays, any year for the
+// months. `timeZone: 'UTC'` pins the output.
+const REF_SUNDAY = Date.UTC(2021, 7, 1) // 1 August 2021 = a Sunday
 const MS_DAY = 86_400_000
 
 export function weekdayNames(
@@ -162,9 +163,9 @@ export function monthNames(locale: string, month: 'long' | 'short' = 'long'): st
 }
 
 /**
- * Noms de mois compacts pour le sélecteur : nom entier s'il tient en 4
- * caractères (« Mai », « Juin », « Août »), sinon 3 premiers + point
- * (« janvier » → « jan. »). `[...n]` compte les graphèmes (accents inclus).
+ * Compact month names for the picker: the whole name if it fits in 4 characters
+ * ("May", "June", "July"), otherwise the first 3 + a dot ("January" → "Jan.").
+ * `[...n]` counts graphemes (accents included).
  */
 export function monthNamesCompact(locale: string): string[] {
   return monthNames(locale, 'long').map((n) => {
@@ -183,7 +184,7 @@ export function monthName(
   )
 }
 
-/** Affichage localisé d'une date isolée pour le champ du VDatePicker. */
+/** Localized display of a single date, for the VDatePicker field. */
 export function formatDisplay(
   iso: string,
   locale: string,
@@ -193,7 +194,7 @@ export function formatDisplay(
   return d ? new Intl.DateTimeFormat(locale, options).format(d) : ''
 }
 
-/** Affichage localisé d'une plage (`formatRange` → « 19–26 juin 2026 »). */
+/** Localized display of a range (`formatRange` → "19–26 June 2026"). */
 export function formatDisplayRange(
   start: string,
   end: string,
@@ -207,23 +208,24 @@ export function formatDisplayRange(
   return compareISO(start, end) === 0 ? fmt.format(a) : fmt.formatRange(a, b)
 }
 
-/* ── Masque de saisie numérique (VDatePicker `entry="input"`) ────────────────
+/*
+ * Numeric input mask (VDatePicker `mode="input"`).
  *
- * Le champ de saisie n'affiche JAMAIS le `displayFormat` du VDatePicker (« 10
- * juin 2026 » ne se tape pas) mais un masque purement numérique : l'ordre des
- * champs et le séparateur sont DÉRIVÉS de la locale, jamais codés en dur.
+ * The typing field NEVER shows VDatePicker's `displayFormat` ("10 June 2026" is
+ * not typeable) but a purely numeric mask: the field order and the separator are
+ * DERIVED from the locale, never hardcoded.
  */
 
 export type DateMaskField = 'day' | 'month' | 'year'
 
 export interface DateMask {
-  /** Ordre d'affichage (fr `day,month,year` · en-US `month,day,year` · ja `year,month,day`). */
+  /** Display order (en-GB `day,month,year` · en-US `month,day,year` · ja `year,month,day`). */
   order: readonly DateMaskField[]
-  /** Séparateur unique, nettoyé de ses marques bidi et de ses espaces. */
+  /** Single separator, stripped of its bidi marks and whitespace. */
   separator: string
-  /** Longueurs alignées sur `order` : année 4, jour et mois 2. */
+  /** Lengths aligned with `order`: year 4, day and month 2. */
   lengths: readonly number[]
-  /** Nombre total de chiffres du masque (8). */
+  /** Total number of digits in the mask (8). */
   size: number
 }
 
@@ -234,17 +236,17 @@ const MASK_FALLBACK: DateMask = {
   size: 8,
 }
 
-/** 22 novembre 2021 : jour ≠ mois ≠ année → l'ordre des champs est déductible. */
+/** 22 November 2021: day ≠ month ≠ year → the field order is deducible. */
 const REF_MASK_DATE = Date.UTC(2021, 10, 22)
 
-/** Marques directionnelles insérées par certaines locales (ar-EG : U+200F avant « / »). */
+/** Directional marks inserted by some locales (ar-EG: U+200F before "/"). */
 const BIDI_MARKS = /[‎‏؜]/g
 
 /**
- * Masque de saisie de la locale. `calendar` et `numberingSystem` sont FORCÉS :
- * sans eux `fa-IR` renvoie une année persane (1400) et `ar-EG` des chiffres
- * arabes-indiens — deux valeurs qu'un champ numérique ne saurait ni afficher ni
- * relire. Repli jour/mois/année « / » si la locale est invalide (`RangeError`).
+ * Input mask of the locale. `calendar` and `numberingSystem` are FORCED: without
+ * them `fa-IR` returns a Persian year (1400) and `ar-EG` Arabic-Indic digits —
+ * two values a numeric field could neither display nor read back. Falls back to
+ * day/month/year with "/" if the locale is invalid (`RangeError`).
  */
 export function dateMaskFor(locale: string): DateMask {
   try {
@@ -261,8 +263,8 @@ export function dateMaskFor(locale: string): DateMask {
       .map((p) => p.type)
       .filter((t): t is DateMaskField => t === 'day' || t === 'month' || t === 'year')
 
-    // Premier littéral situé APRÈS le premier champ : hu-HU/ko-KR suffixent le
-    // format d'un point (« 2021. 11. 22. ») qu'il ne faut pas prendre pour lui.
+    // The first literal located AFTER the first field: hu-HU/ko-KR suffix the
+    // format with a dot ("2021. 11. 22.") that must not be mistaken for it.
     const firstField = parts.findIndex((p) => p.type !== 'literal')
     const separator = parts
       .slice(firstField)
@@ -275,17 +277,17 @@ export function dateMaskFor(locale: string): DateMask {
       return { order, separator, lengths, size: 8 }
     }
   } catch {
-    /* locale invalide → repli */
+    /* invalid locale → fallback */
   }
   return MASK_FALLBACK
 }
 
 /**
- * Suite de chiffres → texte masqué. Le séparateur est posé DÈS QUE le champ qui
- * le précède est complet (« 22 » → « 22/ ») : il montre l'avancement de la
- * frappe sans que l'utilisateur ait à le taper. Corollaire côté composant : un
- * Retour arrière sur ce séparateur doit effacer le CHIFFRE qui le précède,
- * sinon le masque le réécrit aussitôt et la touche paraît morte.
+ * Digit run → masked text. The separator is placed AS SOON AS the field before
+ * it is complete ("22" → "22/"): it shows typing progress without the user
+ * having to type it. Corollary on the component side: a Backspace on that
+ * separator must delete the DIGIT before it, otherwise the mask rewrites it
+ * straight away and the key looks dead.
  */
 export function formatDateMask(digits: string, mask: DateMask): string {
   const all = digitsOf(digits).slice(0, mask.size)
@@ -297,13 +299,13 @@ export function formatDateMask(digits: string, mask: DateMask): string {
     if (!chunk) break
     out += chunk
     i += len
-    if (chunk.length < len) break // champ en cours de frappe
+    if (chunk.length < len) break // field still being typed
     if (f < mask.lengths.length - 1) out += mask.separator
   }
   return out
 }
 
-/** ISO `YYYY-MM-DD` → texte masqué de la locale (« 10/06/2026 »). */
+/** ISO `YYYY-MM-DD` → masked text of the locale ("10/06/2026"). */
 export function isoToMask(iso: string, mask: DateMask): string {
   if (!isValidISO(iso)) return ''
   const [year, month, day] = iso.split('-') as [string, string, string]
@@ -313,19 +315,19 @@ export function isoToMask(iso: string, mask: DateMask): string {
 
 export interface ParseMaskOptions {
   /**
-   * Siècle d'expansion d'une année à 2 chiffres (« 10/06/26 » → 2026 avec 2000),
-   * tolérée seulement si l'année est le DERNIER champ du masque. Absent = saisie
-   * refusée tant que l'année n'a pas ses 4 chiffres : c'est le mode utilisé
-   * pendant la frappe, pour ne pas commiter « 26 » comme année.
+   * Expansion century for a 2-digit year ("10/06/26" → 2026 with 2000),
+   * tolerated only if the year is the LAST field of the mask. Absent = input
+   * refused until the year has its 4 digits: that is the mode used while typing,
+   * so as not to commit "26" as a year.
    */
   yearPivot?: number
 }
 
 /**
- * Texte masqué → ISO, ou `null` si la saisie est incomplète, surnuméraire ou
- * impossible (31/02 : `isValidISO` fait l'aller-retour `parseISO`/`formatISO`).
- * Les bornes `min`/`max` et les dates désactivées restent l'affaire du
- * composant : ce helper ne connaît pas les props.
+ * Masked text → ISO, or `null` if the input is incomplete, over-long or
+ * impossible (31/02: `isValidISO` does the `parseISO`/`formatISO` round trip).
+ * The `min`/`max` bounds and the disabled dates stay the component's business:
+ * this helper knows nothing about props.
  */
 export function parseDateMask(
   text: string,
@@ -350,7 +352,7 @@ export function parseDateMask(
     else return null
     by[field] = chunk
   }
-  if (i !== digits.length) return null // chiffres en trop
+  if (i !== digits.length) return null // too many digits
   const year =
     (by.year as string).length === 2
       ? String((options.yearPivot as number) + Number(by.year))
@@ -360,12 +362,12 @@ export function parseDateMask(
 }
 
 /**
- * Position de caret équivalente à « juste après le n-ième chiffre » — le seul
- * repère stable d'un reformatage, les positions absolues sautant dès qu'un
- * séparateur apparaît ou disparaît. Si `separator` est fourni et suit cette
- * position, on le franchit : à la frappe le curseur doit se poser dans le champ
- * SUIVANT, pas devant le séparateur qui vient d'apparaître. À la suppression on
- * ne le passe pas (`separator` omis).
+ * Caret position equivalent to "just after the nth digit" — the only stable
+ * landmark across a reformat, since absolute positions jump as soon as a
+ * separator appears or disappears. If `separator` is given and follows that
+ * position, it is stepped over: while typing, the caret must land in the NEXT
+ * field, not in front of the separator that has just appeared. On deletion it is
+ * not stepped over (`separator` omitted).
  */
 export function caretAfterDigits(text: string, n: number, separator?: string): number {
   let pos = 0
@@ -386,15 +388,15 @@ export function caretAfterDigits(text: string, n: number, separator?: string): n
 
 const PLACEHOLDER_FALLBACK: Record<DateMaskField, string> = { day: 'd', month: 'm', year: 'y' }
 
-/** Scripts idéographiques : « 日 » répété ne forme pas un gabarit lisible. */
+/** Ideographic scripts: a repeated "日" does not form a readable template. */
 const IDEOGRAPHIC = /[\p{sc=Han}\p{sc=Hangul}\p{sc=Hiragana}\p{sc=Katakana}]/u
 
 /**
- * Gabarit du champ (fr « jj/mm/aaaa », en « dd/mm/yyyy », de « tt.mm.jjjj »,
- * ru « дд/мм/гггг »). La lettre vient du nom localisé du champ
- * (`Intl.DisplayNames`), ce qui retombe sur les conventions attestées de tous
- * les scripts alphabétiques ; repli latin si l'API manque (ICU réduit) ou si le
- * script est idéographique.
+ * Field template (en "dd/mm/yyyy", fr "jj/mm/aaaa", de "tt.mm.jjjj",
+ * ru "дд/мм/гггг"). The letter comes from the localized field name
+ * (`Intl.DisplayNames`), which lands on the attested conventions of every
+ * alphabetic script; falls back to Latin if the API is missing (reduced ICU) or
+ * if the script is ideographic.
  */
 export function maskPlaceholder(locale: string, mask: DateMask): string {
   const letters = { ...PLACEHOLDER_FALLBACK }
@@ -406,7 +408,7 @@ export function maskPlaceholder(locale: string, mask: DateMask): string {
         letters[field] = first.toLocaleLowerCase(locale)
     }
   } catch {
-    /* Intl.DisplayNames indisponible → repli */
+    /* Intl.DisplayNames unavailable → fallback */
   }
   return mask.order.map((f, k) => letters[f].repeat(mask.lengths[k] as number)).join(mask.separator)
 }

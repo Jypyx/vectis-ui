@@ -3,12 +3,12 @@ import type { Ref } from 'vue'
 
 import { useFocusoutDismiss } from './useFocusoutDismiss'
 
-/** Contrat minimal du champ interne : VDatePicker/VTimePicker exposent un `VInput`. */
+/** Minimal contract of the inner field: VDatePicker/VTimePicker expose a `VInput`. */
 interface FocusableField {
   focus: () => void
 }
 
-/** Contrat minimal du panneau : VDatePicker/VTimePicker rendent un `VPopover`. */
+/** Minimal contract of the panel: VDatePicker/VTimePicker render a `VPopover`. */
 interface PanelControl {
   show: () => void
   hide: () => void
@@ -19,35 +19,35 @@ export interface UseFieldPanelOptions {
   panelRef: Ref<PanelControl | null>
   fieldEl: Ref<FocusableField | null>
   disabled: () => boolean
-  /** Place le focus DANS le panneau ouvert (appelé sous `requestAnimationFrame`). */
+  /** Moves focus INTO the open panel (called under `requestAnimationFrame`). */
   focusInPanel: () => void
-  /** Prologue d'ouverture (init d'un brouillon, remise à zéro d'une étape…). */
+  /** Opening prologue (initializing a draft, resetting a step…). */
   onOpen?: () => void
-  /** Épilogue de fermeture (vidage d'une live region…). */
+  /** Closing epilogue (clearing a live region…). */
   onClose?: () => void
   /**
-   * Le focus doit-il entrer DANS le panneau à l'ouverture ? Défaut : oui. Un
-   * champ de SAISIE (VDatePicker `entry="input"`) ouvre son panneau sans déplacer
-   * le curseur : le clavier continue d'écrire dans le champ, et la flèche bas
-   * reste le seul chemin explicite vers le panneau.
+   * Should focus enter the panel on opening? Default: yes. A TYPING field
+   * (VDatePicker `mode="input"`) opens its panel without moving the caret: the
+   * keyboard keeps writing in the field, and the down arrow stays the only
+   * explicit route to the panel.
    */
   focusOnOpen?: () => boolean
 }
 
 /**
- * Coquille « champ en lecture seule + panneau flottant `mode="manual"` »,
- * partagée par VDatePicker et VTimePicker. Aucun des deux n'en est propriétaire.
+ * The "field + floating `mode="manual"` panel" shell, shared by VDatePicker and
+ * VTimePicker. Neither of them owns it.
  *
- * Un popover `manual` ne fait RIEN tout seul : ni light dismiss, ni déplacement
- * du focus, ni retour du focus au déclencheur. Tout ce qui suit est ce minimum,
- * et rien de plus — les comportements propres à chaque composant passent par
+ * A `manual` popover does NOTHING on its own: no light dismiss, no focus move, no
+ * focus return to the trigger. Everything below is that minimum and nothing more
+ * — behaviour specific to each component goes through
  * `onOpen`/`onClose`/`focusInPanel`.
  *
- * Le panneau est ÉCRIT impérativement (`show`/`hide` de VPopover) et LU par
- * modèle : `open` est à brancher en `v-model:open` sur le VPopover, qui l'alimente
- * depuis les événements du DOM. L'écriture doit rester synchrone — le `rAF` qui
- * déplace le focus suppose que le panneau est déjà ouvert au moment où il est
- * armé ; passer par le modèle intercalerait un tick.
+ * The panel is WRITTEN imperatively (VPopover's `show`/`hide`) and READ by model:
+ * `open` is to be bound as `v-model:open` on the VPopover, which feeds it from DOM
+ * events. The write must stay synchronous — the `rAF` that moves focus assumes the
+ * panel is already open when it is armed; going through the model would insert a
+ * tick.
  */
 export function useFieldPanel(options: UseFieldPanelOptions) {
   const open = ref(false)
@@ -56,8 +56,8 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     if (options.disabled() || open.value) return
     options.onOpen?.()
     options.panelRef.value?.show()
-    // Le focus DOM doit être déplacé à la main : le natif ne le fait pas pour un
-    // popover `manual`. rAF : le panneau n'est pas encore peint au retour de show().
+    // DOM focus has to be moved by hand: the platform does not do it for a
+    // `manual` popover. rAF: the panel is not painted yet when show() returns.
     if (moveFocus) requestAnimationFrame(() => options.focusInPanel())
   }
 
@@ -69,29 +69,29 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
   }
 
   function onControlClick(event: MouseEvent) {
-    // clic sur un bouton interne (croix/icône) : laisser son handler agir
+    // click on an internal button (cross/icon): let its own handler act
     if ((event.target as HTMLElement).closest('.v-input-action')) return
     if (options.disabled()) return
     openPanel()
   }
 
-  /** Fermeture quand le focus sort du composant (panneau compris, descendant DOM). */
+  /** Closes when focus leaves the component (panel included, a DOM descendant). */
   const onFocusout = useFocusoutDismiss(options.rootEl, () => closePanel(false))
 
   /*
-   * Clic sur une zone NON interactive du panneau (padding, gouttière entre les
-   * cellules, barre de navigation hors boutons) : le navigateur retire le focus
-   * de l'élément courant et le rend au <body>. Le `focusout` remonte alors à la
-   * racine avec un `relatedTarget` nul — que `useFocusoutDismiss` lit, à raison,
-   * comme une sortie — et ferme un panneau sur lequel on vient de cliquer.
+   * Click on a NON-interactive area of the panel (padding, the gutter between
+   * cells, the navigation bar outside its buttons): the browser removes focus from
+   * the current element and hands it back to <body>. The `focusout` then reaches
+   * the root with a null `relatedTarget` — which `useFocusoutDismiss` rightly
+   * reads as an exit — and closes a panel that was just clicked.
    *
-   * On garde donc le focus en place, mais SEULEMENT hors des éléments
-   * interactifs : un `preventDefault` inconditionnel (celui du VCombobox, dont le
-   * focus ne quitte jamais le champ) priverait de focus les jours et les flèches
-   * de navigation, et désynchroniserait le roving tabindex du VCalendar.
+   * So focus is kept in place, but ONLY outside interactive elements: an
+   * unconditional `preventDefault` (VCombobox's, whose focus never leaves the
+   * field) would rob the days and the navigation arrows of focus, and
+   * desynchronize VCalendar's roving tabindex.
    *
-   * Invisible en jsdom, qui ne simule pas le focus au clic : couvert par des
-   * play functions.
+   * Invisible in jsdom, which does not simulate focus on click: covered by play
+   * functions.
    */
   function onPanelMousedown(event: MouseEvent) {
     const target = event.target as HTMLElement | null
@@ -106,18 +106,17 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
       }
       return
     }
-    // `defaultPrevented` : une Entrée déjà consommée DANS le panneau (sélection
-    // d'un jour, commit du cadran) vient de le fermer — sans ce garde, elle le
-    // rouvrirait aussitôt en atteignant la racine par bubbling.
+    // `defaultPrevented`: an Enter already consumed INSIDE the panel (selecting a
+    // day, committing the dial) has just closed it — without this guard it would
+    // reopen it straight away as it bubbles up to the root.
     if (
       (event.key === 'ArrowDown' || event.key === 'Enter') &&
       !open.value &&
       !event.defaultPrevented
     ) {
       event.preventDefault()
-      // Ouverture au CLAVIER : le focus suit toujours, quel que soit
-      // `focusOnOpen` — sans quoi la flèche bas ouvrirait un panneau que rien
-      // n'atteindrait.
+      // KEYBOARD opening: focus always follows, whatever `focusOnOpen` says —
+      // otherwise the down arrow would open a panel nothing could reach.
       openPanel(true)
     }
   }

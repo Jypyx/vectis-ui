@@ -1,16 +1,16 @@
 import { computed, useId, type ComputedRef } from 'vue'
 
 /**
- * Identifiants d'un champ à wrapper (VInput, VTextarea) : association
- * label/`for`, id du hint, et agrégation d'`aria-describedby`.
+ * Identifiers of a wrapped field (VInput, VTextarea): label/`for` association,
+ * hint id, and `aria-describedby` aggregation.
  *
- * Deux subtilités :
- * - un `id` fourni par le consommateur PRIME sur le `useId()` interne, sinon
- *   son `<label for>` externe ne pointerait sur rien ;
- * - `aria-describedby` est une LISTE d'IDREF : le hint interne s'ajoute à celui
- *   du consommateur au lieu de l'écraser.
+ * Two subtleties:
+ * - an `id` supplied by the consumer WINS over the internal `useId()`, otherwise
+ *   their external `<label for>` would point at nothing;
+ * - `aria-describedby` is a LIST of IDREFs: the internal hint is added to the
+ *   consumer's rather than overwriting it.
  *
- * `useId()` (et non un compteur) : SSR-safe, identique serveur et client.
+ * `useId()` (and not a counter): SSR-safe, identical on server and client.
  */
 export function useFieldIds(
   attrs: Record<string, unknown>,

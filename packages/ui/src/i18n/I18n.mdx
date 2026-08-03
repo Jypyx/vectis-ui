@@ -1,7 +1,7 @@
 import { Canvas, Meta } from '@storybook/addon-docs/blocks'
 import * as I18nStories from './I18n.stories'
-import { fr } from './fr'
 import { en } from './en'
+import { fr } from './fr'
 
 <Meta of={I18nStories} />
 
@@ -11,13 +11,13 @@ export const Keys = ({ namespace }) => (
   <table>
     <thead>
       <tr>
-        <th>Clé</th>
-        <th>Français</th>
-        <th>Anglais</th>
+        <th>Key</th>
+        <th>English</th>
+        <th>French</th>
       </tr>
     </thead>
     <tbody>
-      {Object.keys(fr[namespace]).map((key) => (
+      {Object.keys(en[namespace]).map((key) => (
         <tr key={key}>
           <td>
             <code style={mono}>
@@ -25,10 +25,10 @@ export const Keys = ({ namespace }) => (
             </code>
           </td>
           <td>
-            {typeof fr[namespace][key] === 'function' ? <em>fonction</em> : fr[namespace][key]}
+            {typeof en[namespace][key] === 'function' ? <em>function</em> : en[namespace][key]}
           </td>
           <td>
-            {typeof en[namespace][key] === 'function' ? <em>fonction</em> : en[namespace][key]}
+            {typeof fr[namespace][key] === 'function' ? <em>function</em> : fr[namespace][key]}
           </td>
         </tr>
       ))}
@@ -38,76 +38,73 @@ export const Keys = ({ namespace }) => (
 
 export const Namespaces = () => (
   <ul>
-    {Object.keys(fr).map((ns) => (
+    {Object.keys(en).map((ns) => (
       <li key={ns}>
-        <code style={mono}>{ns}</code> — {Object.keys(fr[ns]).length} clés
+        <code style={mono}>{ns}</code> — {Object.keys(en[ns]).length} keys
       </li>
     ))}
   </ul>
 )
 
-# Internationalisation
+# Internationalization
 
-Aucun texte utilisateur n'est en dur dans les composants : tout vient d'un dictionnaire.
-Le design system est **français par défaut** et fournit l'anglais ; toute autre langue
-s'ajoute côté consommateur.
+No user-facing text is hardcoded in the components: it all comes from a dictionary. The design
+system is **English by default** and ships French; any other language is added on the consumer
+side.
 
-Deux choses se règlent séparément, et c'est volontaire :
+Two things are settled separately, and that is deliberate:
 
-- les **mots** (libellés de boutons, noms accessibles, états vides) viennent du dictionnaire ;
-- les **formats** (noms de mois et de jours, ordre des champs de date, cycle horaire 12/24 h,
-  premier jour de la semaine) sont dérivés d'`Intl` à partir de la balise de locale — ils ne
-  sont jamais traduits à la main.
+- the **words** (button labels, accessible names, empty states) come from the dictionary;
+- the **formats** (month and day names, date field order, 12/24 h cycle, first day of the week)
+  are derived from `Intl` using the locale tag — they are never translated by hand.
 
-Conséquence : poser une locale sans dictionnaire correspondant donne déjà des dates et des
-heures correctes, avec des libellés restés en français. C'est un état dégradé cohérent, pas
-un bug.
+Consequence: setting a locale with no matching dictionary already yields correct dates and
+times, with the labels left in English. That is a coherent degraded state, not a bug.
 
-<Canvas of={I18nStories.Francais} />
+<Canvas of={I18nStories.English} />
 
-## Passer le design system en anglais
+## Switching the design system to French
 
-`setLocale` et `registerMessages` sont de la **configuration globale** : à appeler au niveau
-module (`main.ts`, un plugin Nuxt), jamais dans un `setup()`.
+`setLocale` and `registerMessages` are **global configuration**: call them at module level
+(`main.ts`, a Nuxt plugin), never inside a `setup()`.
 
 ```ts
-// main.ts, ou plugins/vectis.ts en Nuxt
-import { en, registerMessages, setLocale } from '@vectis/ui'
+// main.ts, or plugins/vectis.ts in Nuxt
+import { fr, registerMessages, setLocale } from '@vectis/ui'
 
-registerMessages('en', en)
-setLocale('en-GB')
+registerMessages('fr', fr)
+setLocale('fr-FR')
 ```
 
-L'anglais est **opt-in** : il n'entre dans votre bundle que si vous l'importez. Un projet
-francophone ne paie donc rien pour lui.
+French is **opt-in**: it only enters your bundle if you import it. An English-speaking project
+therefore pays nothing for it.
 
-Posez une balise BCP 47 **complète**. `Intl` accepte `'en'`, mais lui applique les conventions
-par défaut de la langue — `'en'` signifie 12 h et semaine commençant le dimanche, ce qui n'est
-pas `'en-GB'`.
+Pass a **complete** BCP 47 tag. `Intl` accepts `'fr'`, but applies the language's default
+conventions to it — a bare tag will not give you the regional settings of `'fr-CA'`.
 
-<Canvas of={I18nStories.Anglais} />
+<Canvas of={I18nStories.French} />
 
-## Ajuster quelques mots
+## Adjusting a few words
 
-Une surcharge est **partielle** : ce que vous n'écrivez pas reste inchangé. Les appels
-successifs sur une même langue se cumulent.
+An override is **partial**: whatever you do not write stays unchanged. Successive calls on the
+same language accumulate.
 
 ```ts
 import { registerMessages } from '@vectis/ui'
 
-registerMessages('fr', {
-  dataTable: { empty: 'Rien à afficher' },
-  common: { close: 'Quitter' },
+registerMessages('en', {
+  dataTable: { empty: 'Nothing to show' },
+  common: { close: 'Dismiss' },
 })
 ```
 
-<Canvas of={I18nStories.SurchargePartielle} />
+<Canvas of={I18nStories.PartialOverride} />
 
-## Ajouter une langue non fournie
+## Adding a language that is not shipped
 
-C'est exactement le même geste que d'activer l'anglais — il n'y a pas deux catégories de
-dictionnaires. Ce que vous n'écrivez pas retombe sur le français, jamais sur une chaîne vide :
-un dictionnaire partiel est utilisable dès la première clé.
+This is exactly the same gesture as enabling French — there are no two categories of
+dictionary. Whatever you do not write falls back to English, never to an empty string: a
+partial dictionary is usable from its very first key.
 
 ```ts
 import { registerMessages, setLocale, type VectisMessagesInput } from '@vectis/ui'
@@ -121,80 +118,81 @@ registerMessages('de', de)
 setLocale('de-DE')
 ```
 
-Typez la constante `VectisMessagesInput` pour obtenir l'autocomplétion des clés et le contrôle des
-signatures. Pour exiger du compilateur une couverture **totale**, typez-la `VectisMessages` :
-il refusera alors toute clé manquante.
+Type the constant as `VectisMessagesInput` to get key autocompletion and signature checking. To
+make the compiler demand **total** coverage, type it `VectisMessages`: it will then reject any
+missing key.
 
-Le dictionnaire est indexé par **sous-balise de langue** : `registerMessages('de', …)` couvre
-`de-DE`, `de-AT` et `de-CH`, qui partagent leurs mots. Ce qui les distingue vient d'`Intl`.
+The dictionary is indexed by **language subtag**: `registerMessages('de', …)` covers `de-DE`,
+`de-AT` and `de-CH`, which share their words. What distinguishes them comes from `Intl`.
 
-Ci-dessous, `setLocale('de-DE')` SANS dictionnaire allemand : les mois et le premier
-jour de semaine sont déjà allemands (ils viennent d'`Intl`), les libellés restent français.
+Below, `setLocale('de-DE')` WITHOUT a German dictionary: the months and the first day of the
+week are already German (they come from `Intl`), while the labels stay English.
 
-<Canvas of={I18nStories.LangueSansDictionnaire} />
+<Canvas of={I18nStories.LanguageWithoutDictionary} />
 
-## Messages paramétrés
+## Parameterized messages
 
-Une entrée qui dépend d'une valeur est une **fonction TypeScript**, pas une chaîne à
-placeholders. Il n'y a donc ni moteur de pluriel, ni syntaxe ICU à apprendre : chaque langue
-écrit sa propre règle, et le typage des arguments est le contrat.
+An entry that depends on a value is a **TypeScript function**, not a string with placeholders.
+So there is no plural engine and no ICU syntax to learn: each language writes its own rule, and
+the typing of the arguments is the contract.
 
 ```ts
-registerMessages('en', {
+registerMessages('fr', {
   dataTable: {
-    selection: (count) => `${count} item${count === 1 ? '' : 's'} selected`,
-    range: ({ start, end, total }) => `${start}–${end} of ${total}`,
+    selection: (count) =>
+      `${count} élément${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`,
+    range: ({ start, end, total }) => `${start}–${end} sur ${total}`,
   },
 })
 ```
 
-## Précédence
+## Precedence
 
-Une prop texte posée sur un composant reste **prioritaire** sur le dictionnaire : la
-traduction globale ne change que les défauts. Pour les noms accessibles de conteneurs, la
-chaîne complète est :
+A text prop set on a component stays **authoritative** over the dictionary: a global
+translation only changes the defaults. For the accessible names of containers, the full chain
+is:
 
-`aria-labelledby` › `aria-label` › prop `label` › dictionnaire › français
+`aria-labelledby` › `aria-label` › `label` prop › dictionary › English
 
-## Dates et heures
+## Dates and times
 
-`VCalendar`, `VDatePicker` et `VTimePicker` gardent leur prop `locale`, qui reste prioritaire.
-Sans elle, ils suivent désormais la locale globale — un seul réglage pour toute l'application,
-avec la possibilité de forcer un calendrier au cas par cas.
+`VCalendar`, `VDatePicker` and `VTimePicker` keep their `locale` prop, which stays
+authoritative. Without it, they follow the global locale — one setting for the whole
+application, with the option of forcing a calendar case by case.
 
 ```jsx
-<VDatePicker />                  {/* locale globale */}
-<VDatePicker locale="ja-JP" />   {/* forcé */}
+<VDatePicker />                  {/* global locale */}
+<VDatePicker locale="ja-JP" />   {/* forced */}
 ```
 
-## Limite connue : une locale par processus
+## Known limit: one locale per process
 
-La configuration vit au niveau module, comme celle des icônes. C'est correct pour de la
-configuration, mais cela signifie **une seule locale par processus** : un site rendu côté
-serveur qui sert `/fr` et `/en` depuis le même processus Node ne peut pas s'appuyer dessus
-pour varier la langue par requête — il doit passer les props texte explicitement.
+The configuration lives at module level, like the icon configuration. That is correct for
+configuration, but it means **one locale per process**: a server-rendered site serving `/en` and
+`/fr` from the same Node process cannot rely on it to vary the language per request — it must
+pass the text props explicitly.
 
-Attention également au client-only : `setLocale` posé dans un `plugins/*.client.ts` fait
-diverger le rendu serveur et le rendu client, donc un mismatch d'hydratation.
+Beware of client-only too: a `setLocale` placed in a `plugins/*.client.ts` makes the server and
+client renders diverge, hence a hydration mismatch.
 
-## Ce qui n'est pas traduisible
+## What is not translatable
 
-Délibérément hors du dictionnaire :
+Deliberately outside the dictionary:
 
-- ce qu'`Intl` dérive déjà de la balise de locale (noms de mois et de jours, ordre des champs
-  de date, séparateur de date, cycle horaire) ;
-- ce qui n'est fait que de chiffres et de ponctuation universelle : le `99+` du VBadge, le `+N`
-  de VAvatarGroup, le compteur `N/M` des champs, le `:` de l'heure. Ces composants exposent un
-  slot quand une reformulation est nécessaire ;
-- les messages **développeur** (`[Composant] …`), qui s'adressent à l'intégrateur.
+- whatever `Intl` already derives from the locale tag (month and day names, date field order,
+  date separator, hour cycle);
+- whatever is made only of digits and universal punctuation: VBadge's `99+`, VAvatarGroup's
+  `+N`, the `N/M` counter of the fields, the `:` of a time. These components expose a slot when
+  a rephrasing is needed;
+- **developer** messages (`[Component] …`), which address the integrator.
 
-## Référence
+## Reference
 
 <Namespaces />
 
 ### `common`
 
-Mots partagés par plusieurs composants — un seul endroit à traduire.
+Words shared by several components — a single place to translate.
 
 <Keys namespace="common" />
 
