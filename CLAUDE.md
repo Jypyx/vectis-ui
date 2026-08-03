@@ -25,6 +25,8 @@ pnpm build-storybook
 
 A single test: `pnpm --filter @vectis/ui exec vitest run --project unit src/components/VButton/VButton.test.ts` (or `-t 'test name'`).
 
+**Never prefix a shell command with `cd` or `Set-Location`** — the working directory is already the repo root. Use paths relative to it (`pnpm --filter @vectis/ui exec …`, `packages/ui/src/…`). A leading `cd` turns the call into a compound command, and the permission allowlist arbitrates each segment separately: the prefix alone is what makes an otherwise-allowed `pnpm lint` prompt.
+
 Checkpoint before wrapping up a step: `pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm build-storybook` must all pass. `pnpm test:stories` is **outside the checkpoint** (it needs the Playwright binaries, ~115 MB, via `pnpm --filter @vectis/ui exec playwright install chromium`): run it as soon as you touch a play function or browser behaviour.
 
 ## Philosophy (non-negotiable — from the project brief)
