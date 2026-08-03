@@ -1,5 +1,5 @@
 /*
- * Point d'entrée CSS du design system (`@socle/ui/styles.css`).
+ * Point d'entrée CSS du design system (`@vectis/ui/styles.css`).
  *
  * L'ordre des layers est déclaré ici, une fois pour toutes :
  *   ds.reset < ds.tokens < ds.components < ds.utilities

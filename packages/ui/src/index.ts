@@ -1,9 +1,9 @@
 /**
- * Entrée de `@socle/ui`. Exports nommés uniquement (tree-shaking).
+ * Entrée de `@vectis/ui`. Exports nommés uniquement (tree-shaking).
  *
  * L'import CSS ci-dessous alimente l'extraction vers `dist/styles.css` ; en
  * mode librairie, Vite le retire du JS émis. Le consommateur importe donc
- * explicitement `@socle/ui/styles.css`.
+ * explicitement `@vectis/ui/styles.css`.
  *
  * L'ordre des exports fixe l'ordre du CSS bundlé. La plupart des composants
  * sont rangés par cohérence (dépendance → dépendant) sans que leur position

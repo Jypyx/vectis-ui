@@ -86,8 +86,8 @@ export function setLocale(locale: string): void {
   const lang = langOf(locale)
   if (isDev && !registry.has(lang)) {
     console.warn(
-      `[socle] Aucun dictionnaire enregistré pour « ${lang} » : les textes restent en ` +
-        `« ${DEFAULT_LANG} ». L'anglais est fourni — import { en } from '@socle/ui' puis ` +
+      `[vectis] Aucun dictionnaire enregistré pour « ${lang} » : les textes restent en ` +
+        `« ${DEFAULT_LANG} ». L'anglais est fourni — import { en } from '@vectis/ui' puis ` +
         `registerMessages('en', en). Pour une autre langue : registerMessages('${lang}', { … }).`,
     )
   }
@@ -116,7 +116,7 @@ export function registerMessages(lang: string, messages: DsMessagesInput | undef
   const key = langOf(lang)
   if (isDev && key !== lang.toLowerCase()) {
     console.warn(
-      `[socle] registerMessages('${lang}', …) : la clé attendue est une sous-balise de ` +
+      `[vectis] registerMessages('${lang}', …) : la clé attendue est une sous-balise de ` +
         `langue seule — enregistré sous « ${key} », qui couvre toutes ses variantes régionales.`,
     )
   }

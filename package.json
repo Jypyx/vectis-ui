@@ -1,5 +1,5 @@
 {
-  "name": "socle-monorepo",
+  "name": "vectis-monorepo",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.15.1",
@@ -9,13 +9,13 @@
     "format:fix": "prettier --write .",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "test:stories": "pnpm --filter @socle/ui test:stories",
+    "test:stories": "pnpm --filter @vectis/ui test:stories",
     "build": "pnpm -r build",
-    "tokens": "pnpm --filter @socle/ui tokens",
-    "icons": "pnpm --filter @socle/ui icons",
-    "storybook": "pnpm --filter @socle/ui storybook",
-    "build-storybook": "pnpm --filter @socle/ui build-storybook",
-    "chromatic": "pnpm --filter @socle/ui chromatic"
+    "tokens": "pnpm --filter @vectis/ui tokens",
+    "icons": "pnpm --filter @vectis/ui icons",
+    "storybook": "pnpm --filter @vectis/ui storybook",
+    "build-storybook": "pnpm --filter @vectis/ui build-storybook",
+    "chromatic": "pnpm --filter @vectis/ui chromatic"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -8,7 +8,7 @@ import type { DsMessages } from './types'
  * L'activer et ajouter une langue que le DS ne fournit pas sont le MÊME geste —
  * il n'y a pas deux catégories de dictionnaires :
  *
- *     import { en, registerMessages, setLocale } from '@socle/ui'
+ *     import { en, registerMessages, setLocale } from '@vectis/ui'
  *     registerMessages('en', en)
  *     setLocale('en-GB')
  */

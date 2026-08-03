@@ -1,5 +1,5 @@
 {
-  "name": "@socle/ui",
+  "name": "@vectis/ui",
   "version": "0.1.0",
   "description": "Design system Vue 3 — HTML/CSS d'abord, tokens CSS, compatible Nuxt 3 (SSR)",
   "type": "module",

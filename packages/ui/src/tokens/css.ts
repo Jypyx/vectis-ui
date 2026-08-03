@@ -1,6 +1,6 @@
 /**
  * Utilitaires de transformation tokens → CSS. Utilisés par le script de build
- * et exposés via `@socle/ui/tokens` pour la future app de theming
+ * et exposés via `@vectis/ui/tokens` pour la future app de theming
  * (génération de surcharges runtime, export de config).
  */
 import { isToken, type DesignToken, type TokenGroup } from './types'

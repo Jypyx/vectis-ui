@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Le projet
 
-**Socle** (`@socle/ui`) : design system Vue 3 + TypeScript distribué en librairie npm, compatible Nuxt 3 (SSR). Monorepo pnpm — `packages/ui` contient tout ; `apps/` est réservé à une future app de theming temps réel qui manipulera la source des tokens programmatiquement et importera `@socle/ui` en `workspace:*`. Langue du projet : français (commentaires, stories, docs).
+**Vectis UI** (`@vectis/ui`) : design system Vue 3 + TypeScript distribué en librairie npm, compatible Nuxt 3 (SSR). Monorepo pnpm — `packages/ui` contient tout ; `apps/` est réservé à une future app de theming temps réel qui manipulera la source des tokens programmatiquement et importera `@vectis/ui` en `workspace:*`. Langue du projet : français (commentaires, stories, docs).
 
 ## Commandes
 
@@ -23,9 +23,9 @@ pnpm storybook         # dev server port 6006
 pnpm build-storybook
 ```
 
-Un seul test : `pnpm --filter @socle/ui exec vitest run --project unit src/components/Button/Button.test.ts` (ou `-t 'nom du test'`).
+Un seul test : `pnpm --filter @vectis/ui exec vitest run --project unit src/components/Button/Button.test.ts` (ou `-t 'nom du test'`).
 
-Checkpoint avant de conclure une étape : `pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm build-storybook` doivent tous passer. `pnpm test:stories` est **hors checkpoint** (il exige les binaires Playwright, ~115 Mo, via `pnpm --filter @socle/ui exec playwright install chromium`) : à lancer dès qu'on touche à une play function ou au comportement navigateur.
+Checkpoint avant de conclure une étape : `pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm build-storybook` doivent tous passer. `pnpm test:stories` est **hors checkpoint** (il exige les binaires Playwright, ~115 Mo, via `pnpm --filter @vectis/ui exec playwright install chromium`) : à lancer dès qu'on touche à une play function ou au comportement navigateur.
 
 ## Philosophie (non négociable — vient du cahier des charges)
 
@@ -38,7 +38,7 @@ Checkpoint avant de conclure une étape : `pnpm lint && pnpm typecheck && pnpm t
 
 Chaîne : `src/tokens/*.ts` (source de vérité typée, format DTCG `{ $value, $type, $description? }`) → `scripts/build-tokens.ts` (via `pnpm tokens`, auto-lancé en `prebuild`/`prestorybook`) → `src/styles/tokens.css` + `src/tokens/tokens.json`. Un plugin Vite inline (`vite.config.ts`) émet aussi `dist/tokens.json`.
 
-- **Deux niveaux** : primitifs (`primitives.ts` — palettes OKLCH, échelles) et sémantiques (`semantic.ts` — seuls consommés par les composants). Les alias DTCG `{color.neutral.500}` sont résolus en `var(--ds-color-neutral-500)` au build (`css.ts`, aussi exporté via `@socle/ui/tokens` pour la future app de theming).
+- **Deux niveaux** : primitifs (`primitives.ts` — palettes OKLCH, échelles) et sémantiques (`semantic.ts` — seuls consommés par les composants). Les alias DTCG `{color.neutral.500}` sont résolus en `var(--ds-color-neutral-500)` au build (`css.ts`, aussi exporté via `@vectis/ui/tokens` pour la future app de theming).
 - **Thèmes** : `themes/dark.ts` ne peut surcharger QUE des clés sémantiques existantes (le build le vérifie et échoue sinon). Le CSS généré pose `:root` (tout) + `[data-theme='light']` et `[data-theme='dark']` (sémantiques seulement) → theming par sous-arbre DOM, surcharge runtime sans rebuild.
 - **`src/styles/tokens.css` et `src/tokens/tokens.json` sont GÉNÉRÉS** : ne jamais les éditer à la main (ils sont dans .prettierignore ; toute modif passe par la source TS + `pnpm tokens`). **Second artefact généré du repo : `src/components/Icon/icons.ts`** (`pnpm icons`) — même discipline, mais déclencheur différent : il n'est PAS branché sur `prebuild` (son script télécharge depuis `google/material-design-icons` à une révision épinglée, et le build ne doit pas dépendre du réseau).
 - **Tokens de dimension dédiés** : jamais `--ds-space-*` pour une taille de composant (track, thumb, hauteur de pastille…) — créer un token sémantique dédié. Un vrai espacement (gouttière, offset, delta compact, padding) reste légitime en `--ds-space-*`.
@@ -214,6 +214,6 @@ Règles transverses déjà couvertes plus haut : tone/variant (Button = référe
 
 ### Suite
 
-App de theming temps réel dans `apps/` (manipule `@socle/ui/tokens`, injecte les `--ds-*`, exporte une config) ; playground Nuxt pour valider le SSR de bout en bout.
+App de theming temps réel dans `apps/` (manipule `@vectis/ui/tokens`, injecte les `--ds-*`, exporte une config) ; playground Nuxt pour valider le SSR de bout en bout.
 
 **Méthode validée** : implémenter par lots, checkpoint complet (lint/format/typecheck/test/build/build-storybook) à chaque lot, signaler explicitement tout compromis de support navigateur.

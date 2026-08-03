@@ -1,5 +1,5 @@
 /**
- * Point d'entrée `@socle/ui/tokens` : la source de vérité des tokens et les
+ * Point d'entrée `@vectis/ui/tokens` : la source de vérité des tokens et les
  * utilitaires pour les transformer (flatten, résolution d'alias, CSS).
  */
 import { primitives } from './primitives'

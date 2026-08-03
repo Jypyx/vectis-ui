@@ -71,8 +71,8 @@ un bug.
 module (`main.ts`, un plugin Nuxt), jamais dans un `setup()`.
 
 ```ts
-// main.ts, ou plugins/socle.ts en Nuxt
-import { en, registerMessages, setLocale } from '@socle/ui'
+// main.ts, ou plugins/vectis.ts en Nuxt
+import { en, registerMessages, setLocale } from '@vectis/ui'
 
 registerMessages('en', en)
 setLocale('en-GB')
@@ -93,7 +93,7 @@ Une surcharge est **partielle** : ce que vous n'écrivez pas reste inchangé. Le
 successifs sur une même langue se cumulent.
 
 ```ts
-import { registerMessages } from '@socle/ui'
+import { registerMessages } from '@vectis/ui'
 
 registerMessages('fr', {
   dataTable: { empty: 'Rien à afficher' },
@@ -110,7 +110,7 @@ dictionnaires. Ce que vous n'écrivez pas retombe sur le français, jamais sur u
 un dictionnaire partiel est utilisable dès la première clé.
 
 ```ts
-import { registerMessages, setLocale, type DsMessagesInput } from '@socle/ui'
+import { registerMessages, setLocale, type DsMessagesInput } from '@vectis/ui'
 
 const de: DsMessagesInput = {
   common: { loading: 'Wird geladen…', close: 'Schließen' },

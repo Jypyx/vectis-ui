@@ -1,4 +1,4 @@
-﻿# @socle/ui
+﻿# @vectis/ui
 
 Design system **Vue 3 + TypeScript**, compatible **Nuxt 3 (SSR)**, construit sur les primitives natives de la plateforme : Popover API, CSS Anchor Positioning, `<details name>`, `:user-invalid`… Le JavaScript est un dernier recours, jamais un réflexe.
 
@@ -12,18 +12,18 @@ Design system **Vue 3 + TypeScript**, compatible **Nuxt 3 (SSR)**, construit sur
 ## Installation
 
 ```bash
-pnpm add @socle/ui vue
+pnpm add @vectis/ui vue
 ```
 
 ```ts
 // main.ts
-import '@socle/ui/styles.css'
+import '@vectis/ui/styles.css'
 ```
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Button, Input, toast } from '@socle/ui'
+import { Button, Input, toast } from '@vectis/ui'
 
 const email = ref('')
 </script>
@@ -43,19 +43,19 @@ La librairie est pré-buildée en ESM et SSR-safe (aucun accès `window`/`docume
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  css: ['@socle/ui/styles.css'],
+  css: ['@vectis/ui/styles.css'],
 })
 ```
 
 ```vue
 <script setup lang="ts">
-import { Button, Badge } from '@socle/ui'
+import { Button, Badge } from '@vectis/ui'
 </script>
 ```
 
 Les imports nommés sont tree-shakés par Vite/Nitro. Pas besoin de `build.transpile`.
 
-Pour la locale et les icônes, posez la configuration dans un plugin **universel** — `plugins/socle.ts`, jamais `plugins/socle.client.ts` : une configuration client-only ferait diverger le rendu serveur et le rendu client, donc un mismatch d'hydratation. Voir [Internationalisation](#internationalisation).
+Pour la locale et les icônes, posez la configuration dans un plugin **universel** — `plugins/vectis.ts`, jamais `plugins/vectis.client.ts` : une configuration client-only ferait diverger le rendu serveur et le rendu client, donc un mismatch d'hydratation. Voir [Internationalisation](#internationalisation).
 
 ## Theming
 
@@ -98,13 +98,13 @@ Le CSS du DS vit dans des layers (`ds.reset < ds.tokens < ds.components < ds.uti
 ### Accès programmatique aux tokens
 
 ```ts
-import { tokens, flattenTokens } from '@socle/ui/tokens'
+import { tokens, flattenTokens } from '@vectis/ui/tokens'
 
 // [{ path: ['color', 'surface'], cssName: '--ds-color-surface', token: {...} }, …]
 const semanticColors = flattenTokens(tokens.semantic.color, ['color'])
 ```
 
-`@socle/ui/tokens.json` expose la même source en JSON brut (outillage, export de configuration). C'est la fondation de l'app de theming à venir : modifier l'objet, injecter les variables, exporter la config.
+`@vectis/ui/tokens.json` expose la même source en JSON brut (outillage, export de configuration). C'est la fondation de l'app de theming à venir : modifier l'objet, injecter les variables, exporter la config.
 
 ## Icônes
 
@@ -146,7 +146,7 @@ Une chaîne est **toujours** un nom d'icône : le DS ne devine plus qu'une valeu
 
 ```ts
 // main.ts / plugins/icons.ts — au niveau MODULE, jamais dans un setup()
-import { setIconResolver, classIconResolver } from '@socle/ui'
+import { setIconResolver, classIconResolver } from '@vectis/ui'
 
 // Font Awesome, Phosphor, Bootstrap Icons… (polices à classes + ::before)
 // `fa-solid` sans condition : le tier Free ne dessine qu'une petite fraction du
@@ -160,7 +160,7 @@ setIconResolver(
 )
 
 // Lucide, Untitled UI… (jeux SVG en composants Vue, racine <svg> unique)
-import { componentIconResolver } from '@socle/ui'
+import { componentIconResolver } from '@vectis/ui'
 import { X, Check, ChevronDown } from 'lucide-vue-next'
 setIconResolver(
   componentIconResolver({
@@ -171,7 +171,7 @@ setIconResolver(
 
 // Material Symbols, IcoMoon à ligatures… — rend AUSSI les 20 icônes du DS via
 // la police, ce qui restitue l'axe optique --ds-icon-opsz (20 en xs/sm/md).
-import { ligatureIconResolver } from '@socle/ui'
+import { ligatureIconResolver } from '@vectis/ui'
 setIconResolver(ligatureIconResolver())
 ```
 
@@ -208,7 +208,7 @@ Deux choses se règlent séparément : les **mots** viennent du dictionnaire, le
 
 ```ts
 // main.ts
-import { en, registerMessages, setLocale } from '@socle/ui'
+import { en, registerMessages, setLocale } from '@vectis/ui'
 
 registerMessages('en', en)
 setLocale('en-GB')
@@ -223,7 +223,7 @@ Posez une balise BCP 47 **complète**. `Intl` accepte `'en'`, mais lui applique 
 Une surcharge est **partielle** : ce que vous n'écrivez pas reste inchangé, et les appels successifs sur une même langue se cumulent.
 
 ```ts
-import { registerMessages } from '@socle/ui'
+import { registerMessages } from '@vectis/ui'
 
 registerMessages('fr', {
   dataTable: { empty: 'Rien à afficher' },
@@ -236,7 +236,7 @@ registerMessages('fr', {
 Même geste que pour activer l'anglais — il n'y a pas deux catégories de dictionnaires. Ce que vous n'écrivez pas retombe sur le français, jamais sur une chaîne vide : un dictionnaire partiel est utilisable dès la première clé.
 
 ```ts
-import { registerMessages, setLocale, type DsMessagesInput } from '@socle/ui'
+import { registerMessages, setLocale, type DsMessagesInput } from '@vectis/ui'
 
 const de: DsMessagesInput = {
   common: { loading: 'Wird geladen…', close: 'Schließen' },
