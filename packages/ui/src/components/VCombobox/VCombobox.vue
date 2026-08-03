@@ -24,7 +24,7 @@ import { useTimer } from '../../composables/useTimer'
 import { useMessages } from '../../i18n/state'
 
 /**
- * VCombobox avec recherche et sélection multiple, composé d'`VInput`, `VChip` et
+ * VCombobox avec recherche et sélection multiple, composé de `VInput`, `VChip` et
  * d'un `VPopover` qui porte lui-même `role="listbox"`. Le JS implémente le
  * pattern ARIA combobox/listbox que le natif ne couvre pas (pas de `<datalist>`
  * stylable/multiple) : filtrage, navigation par `aria-activedescendant` (le

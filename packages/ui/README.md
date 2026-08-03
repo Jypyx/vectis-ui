@@ -36,6 +36,26 @@ const email = ref('')
 </template>
 ```
 
+### Migration depuis `@socle/ui`
+
+Le design system s'appelait **Socle**. Le renommage touche toutes les surfaces publiques d'un coup — c'est un **major**, mais chaque règle est mécanique :
+
+| Avant                                    | Après                                    |
+| ---------------------------------------- | ---------------------------------------- |
+| `@socle/ui`                              | `@vectis/ui`                             |
+| `<Button>`, `<Input>`, `<DataTable>`…    | `<VButton>`, `<VInput>`, `<VDataTable>`… |
+| `--ds-color-accent`                      | `--vectis-color-accent`                  |
+| `.ds-button`, `.ds-control`, `.ds-panel` | `.v-button`, `.v-control`, `.v-panel`    |
+| `@layer ds.components`                   | `@layer vectis.components`               |
+| `DsMessages`, `DsIconName`               | `VectisMessages`, `VectisIconName`       |
+
+Deux points qui ne se déduisent pas du tableau :
+
+- **Les types portés par un composant ne prennent PAS de `V`** : `ButtonTone`, `TabsVariant`, `ComboboxOption`, `DataTableColumn`, `CalendarSelection` gardent leur nom. Seuls les composants et les trois types de marque changent.
+- **Les libellés Storybook restent sans `V`** (`Composants/Button`), donc vos liens de doc existants continuent de fonctionner.
+
+Si vous surchargiez le CSS du DS, `.ds-*` → `.v-*` et `--ds-*` → `--vectis-*` sont deux substitutions littérales sûres : aucune classe ne changeait de spécificité, aucune règle d'ordre n'a bougé.
+
 ## Nuxt 3
 
 La librairie est pré-buildée en ESM et SSR-safe (aucun accès `window`/`document` hors cycle de vie client). Aucun module ni plugin nécessaire :
@@ -316,5 +336,5 @@ pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm build && pnpm bu
 ```
 
 - **Tokens** : ne jamais éditer `src/styles/tokens.css` ni `src/tokens/tokens.json` (générés) — modifier la source `src/tokens/*.ts` puis `pnpm tokens`.
-- **Nouveau composant** : un dossier `src/components/X/` avec `X.vue` (styles non-scoped dans `@layer vectis.components`, tokens sémantiques uniquement, variantes en `data-*`), `X.stories.ts` (défaut, variantes, états, cas limites, play functions), `X.test.ts` (logique seulement — le comportement navigateur se teste dans les play functions), et l'export nommé dans `src/index.ts`.
+- **Nouveau composant** : un dossier `src/components/VX/` avec `VX.vue` (styles non-scoped dans `@layer vectis.components`, tokens sémantiques uniquement, variantes en `data-*`), `VX.stories.ts` (défaut, variantes, états, cas limites, play functions), `VX.test.ts` (logique seulement — le comportement navigateur se teste dans les play functions), et l'export nommé dans `src/index.ts`. Le `title` Storybook et le titre du `.mdx` s'écrivent **sans le `V`** — seule exception au préfixe.
 - Tout JS de comportement doit être justifié par un commentaire : « est-ce que HTML/CSS moderne sait le faire ? » d'abord.
