@@ -1,24 +1,24 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
-import Breadcrumb from './VBreadcrumb.vue'
+import VBreadcrumb from './VBreadcrumb.vue'
 
 const meta = {
   title: 'Composants/Breadcrumb',
-  component: Breadcrumb,
-} satisfies Meta<typeof Breadcrumb>
+  component: VBreadcrumb,
+} satisfies Meta<typeof VBreadcrumb>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    currentPath: '/projets/socle/parametres',
+    currentPath: '/projets/vectis/parametres',
     items: [
       { label: 'Accueil', href: '/' },
       { label: 'Projets', href: '/projets' },
-      { label: 'Socle', href: '/projets/socle' },
-      { label: 'Paramètres', href: '/projets/socle/parametres' },
+      { label: 'Vectis', href: '/projets/vectis' },
+      { label: 'Paramètres', href: '/projets/vectis/parametres' },
     ],
   },
   play: async ({ canvasElement }) => {
@@ -29,7 +29,7 @@ export const Default: Story = {
       'aria-current',
       'page',
     )
-    await expect(canvas.getByRole('link', { name: 'Socle' })).not.toHaveAttribute('aria-current')
+    await expect(canvas.getByRole('link', { name: 'Vectis' })).not.toHaveAttribute('aria-current')
   },
 }
 
@@ -39,11 +39,11 @@ export const SeparateurIcone: Story = {
   // pas automatiquement — à vérifier avec le toggle de la toolbar.
   args: {
     separator: 'arrow_forward',
-    currentPath: '/projets/socle',
+    currentPath: '/projets/vectis',
     items: [
       { label: 'Accueil', href: '/' },
       { label: 'Projets', href: '/projets' },
-      { label: 'Socle', href: '/projets/socle' },
+      { label: 'Vectis', href: '/projets/vectis' },
     ],
   },
   play: async ({ canvasElement }) => {
@@ -62,24 +62,24 @@ export const SeparateurImage: Story = {
     separator: {
       src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800px' height='800px' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M10 3V6H4L4 10H10L10 13L11 13L16 8L11 3L10 3Z' fill='%23000000'/%3E%3Cpath d='M0 2L1.38281e-06 14H2L2 2L0 2Z' fill='%23000000'/%3E%3C/svg%3E",
     },
-    currentPath: '/projets/socle',
+    currentPath: '/projets/vectis',
     items: [
       { label: 'Accueil', href: '/' },
       { label: 'Projets', href: '/projets' },
-      { label: 'Socle', href: '/projets/socle' },
+      { label: 'Vectis', href: '/projets/vectis' },
     ],
   },
 }
 
 export const AvecIcones: Story = {
   args: {
-    currentPath: '/projets/socle',
+    currentPath: '/projets/vectis',
     items: [
       { label: 'Accueil', href: '/', iconStart: 'home' },
       { label: 'Projets', href: '/projets', iconStart: 'folder' },
       {
-        label: 'Socle',
-        href: '/projets/socle',
+        label: 'Vectis',
+        href: '/projets/vectis',
         iconStart: {
           src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2' y='2' width='12' height='12' rx='3' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E",
         },
@@ -96,7 +96,7 @@ export const Tronque: Story = {
       { label: 'Accueil', href: '/', iconStart: 'home' },
       { label: 'Projets', href: '/a' },
       { label: 'Design system', href: '/a/b' },
-      { label: 'Socle', href: '/a/b/c' },
+      { label: 'Vectis', href: '/a/b/c' },
       { label: 'Composants', href: '/a/b/c/d' },
       { label: 'Navigation', href: '/a/b/c/d/e' },
       { label: 'Breadcrumb', href: '/a/b/c/d/e/f' },
@@ -127,11 +127,11 @@ export const Tronque: Story = {
     await expect(items.map((item) => item.textContent?.trim())).toEqual([
       'Projets',
       'Design system',
-      'Socle',
+      'Vectis',
       'Composants',
       'Navigation',
     ])
-    await expect(canvas.getByRole('menuitem', { name: 'Socle' })).toHaveAttribute('href', '/a/b/c')
+    await expect(canvas.getByRole('menuitem', { name: 'Vectis' })).toHaveAttribute('href', '/a/b/c')
 
     // Esc referme et rend le focus au déclencheur
     await userEvent.keyboard('{Escape}')
@@ -150,11 +150,11 @@ export const LibellesLongs: Story = {
     ],
   },
   render: (args) => ({
-    components: { Breadcrumb },
+    components: { VBreadcrumb },
     setup: () => ({ args }),
     template: `
       <div style="max-width: 280px">
-        <Breadcrumb v-bind="args" />
+        <VBreadcrumb v-bind="args" />
       </div>
     `,
   }),

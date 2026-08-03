@@ -9,8 +9,8 @@ type ClassBinding = false | null | undefined | string | Record<string, unknown> 
 
 /**
  * Plomberie du **pattern wrapper-root** : un composant dont la racine n'est
- * qu'un conteneur (champs Input/Textarea, Combobox, DataTable, DatePicker,
- * TimePicker, barre de Tabs) doit répartir ses attributs hérités en deux —
+ * qu'un conteneur (champs VInput/VTextarea, VCombobox, VDataTable, VDatePicker,
+ * VTimePicker, barre de VTabs) doit répartir ses attributs hérités en deux —
  * `class`/`style` restent sur la racine (c'est elle que le consommateur
  * stylise), tout le reste descend sur l'élément FONCTIONNEL. Sans cette
  * répartition, `name`, `required` ou les `aria-*` atterrissent sur le wrapper

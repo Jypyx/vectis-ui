@@ -1,39 +1,39 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
-import Chip from '../VChip/VChip.vue'
-import IconButton from '../VIconButton/VIconButton.vue'
-import SideNavigation from './VSideNavigation.vue'
-import SideNavigationGroup from './VSideNavigationGroup.vue'
-import SideNavigationItem from './VSideNavigationItem.vue'
-import SideNavigationSeparator from './VSideNavigationSeparator.vue'
+import VChip from '../VChip/VChip.vue'
+import VIconButton from '../VIconButton/VIconButton.vue'
+import VSideNavigation from './VSideNavigation.vue'
+import VSideNavigationGroup from './VSideNavigationGroup.vue'
+import VSideNavigationItem from './VSideNavigationItem.vue'
+import VSideNavigationSeparator from './VSideNavigationSeparator.vue'
 
 const components = {
-  SideNavigation,
-  SideNavigationItem,
-  SideNavigationGroup,
-  SideNavigationSeparator,
-  Chip,
-  IconButton,
+  VSideNavigation,
+  VSideNavigationItem,
+  VSideNavigationGroup,
+  VSideNavigationSeparator,
+  VChip,
+  VIconButton,
 }
 
 /** Encadre la nav dans une largeur de barre latérale réaliste. */
 const aside = (inner: string, attrs = 'v-bind="args"') => `
   <div style="inline-size: 17rem; padding: var(--vectis-space-2); border-inline-end: 1px solid var(--vectis-color-border);">
-    <SideNavigation ${attrs}>${inner}</SideNavigation>
+    <VSideNavigation ${attrs}>${inner}</VSideNavigation>
   </div>
 `
 
 const meta = {
   title: 'Composants/SideNavigation',
-  component: SideNavigation,
+  component: VSideNavigation,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md'] },
     compact: { control: 'boolean' },
     exclusive: { control: 'boolean' },
   },
   args: { size: 'md', compact: false, exclusive: false },
-} satisfies Meta<typeof SideNavigation>
+} satisfies Meta<typeof VSideNavigation>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -43,25 +43,25 @@ export const Default: Story = {
     components,
     setup: () => ({ args }),
     template: aside(`
-      <SideNavigationItem href="#accueil" icon="home" active>Accueil</SideNavigationItem>
-      <SideNavigationItem icon="folder" default-open>
+      <VSideNavigationItem href="#accueil" icon="home" active>Accueil</VSideNavigationItem>
+      <VSideNavigationItem icon="folder" default-open>
         Projets
         <template #items>
-          <SideNavigationItem href="#alpha">Alpha</SideNavigationItem>
-          <SideNavigationItem>
+          <VSideNavigationItem href="#alpha">Alpha</VSideNavigationItem>
+          <VSideNavigationItem>
             Beta
             <template #items>
-              <SideNavigationItem href="#beta-api">API</SideNavigationItem>
-              <SideNavigationItem href="#beta-web">Web</SideNavigationItem>
+              <VSideNavigationItem href="#beta-api">API</VSideNavigationItem>
+              <VSideNavigationItem href="#beta-web">Web</VSideNavigationItem>
             </template>
-          </SideNavigationItem>
+          </VSideNavigationItem>
         </template>
-      </SideNavigationItem>
-      <SideNavigationSeparator />
-      <SideNavigationGroup label="Réglages">
-        <SideNavigationItem href="#equipe" icon="group">Équipe</SideNavigationItem>
-        <SideNavigationItem href="#facturation" icon="payments">Facturation</SideNavigationItem>
-      </SideNavigationGroup>
+      </VSideNavigationItem>
+      <VSideNavigationSeparator />
+      <VSideNavigationGroup label="Réglages">
+        <VSideNavigationItem href="#equipe" icon="group">Équipe</VSideNavigationItem>
+        <VSideNavigationItem href="#facturation" icon="payments">Facturation</VSideNavigationItem>
+      </VSideNavigationGroup>
     `),
   }),
   play: async ({ canvasElement }) => {
@@ -96,14 +96,14 @@ export const Default: Story = {
 }
 
 const TAILLES_ITEMS = `
-  <SideNavigationGroup label="Espace de travail">
-    <SideNavigationItem icon="folder" default-open>
+  <VSideNavigationGroup label="Espace de travail">
+    <VSideNavigationItem icon="folder" default-open>
       Projets
       <template #items>
-        <SideNavigationItem href="#alpha">Alpha</SideNavigationItem>
+        <VSideNavigationItem href="#alpha">Alpha</VSideNavigationItem>
       </template>
-    </SideNavigationItem>
-  </SideNavigationGroup>
+    </VSideNavigationItem>
+  </VSideNavigationGroup>
 `
 
 export const Tailles: Story = {
@@ -141,25 +141,25 @@ export const SousItemsProfonds: Story = {
     components,
     setup: () => ({ args }),
     template: aside(`
-      <SideNavigationItem href="#n0" icon="folder">Niveau 0</SideNavigationItem>
-      <SideNavigationItem icon="folder" default-open>
+      <VSideNavigationItem href="#n0" icon="folder">Niveau 0</VSideNavigationItem>
+      <VSideNavigationItem icon="folder" default-open>
         Niveau 0 (branche)
         <template #items>
-          <SideNavigationItem href="#n1">Niveau 1</SideNavigationItem>
-          <SideNavigationItem icon="folder" default-open>
+          <VSideNavigationItem href="#n1">Niveau 1</VSideNavigationItem>
+          <VSideNavigationItem icon="folder" default-open>
             Niveau 1 (branche)
             <template #items>
-              <SideNavigationItem href="#n2">Niveau 2</SideNavigationItem>
-              <SideNavigationItem icon="folder" default-open>
+              <VSideNavigationItem href="#n2">Niveau 2</VSideNavigationItem>
+              <VSideNavigationItem icon="folder" default-open>
                 Niveau 2 (branche)
                 <template #items>
-                  <SideNavigationItem href="#n3">Niveau 3</SideNavigationItem>
+                  <VSideNavigationItem href="#n3">Niveau 3</VSideNavigationItem>
                 </template>
-              </SideNavigationItem>
+              </VSideNavigationItem>
             </template>
-          </SideNavigationItem>
+          </VSideNavigationItem>
         </template>
-      </SideNavigationItem>
+      </VSideNavigationItem>
     `),
   }),
   play: async ({ canvasElement }) => {
@@ -192,28 +192,28 @@ export const ContenuDeFin: Story = {
     components,
     setup: () => ({ args, onSelect: fn() }),
     template: aside(`
-      <SideNavigationItem @select="onSelect">
+      <VSideNavigationItem @select="onSelect">
         Messages
         <template #end>
-          <IconButton label="Nouveau message" icon="add" size="xs" data-testid="action" />
+          <VIconButton label="Nouveau message" icon="add" size="xs" data-testid="action" />
         </template>
-      </SideNavigationItem>
-      <SideNavigationItem icon="folder">
+      </VSideNavigationItem>
+      <VSideNavigationItem icon="folder">
         Projets
-        <template #end><Chip size="xs" tone="accent">12</Chip></template>
+        <template #end><VChip size="xs" tone="accent">12</VChip></template>
         <template #items>
-          <SideNavigationItem href="#alpha">Alpha</SideNavigationItem>
+          <VSideNavigationItem href="#alpha">Alpha</VSideNavigationItem>
         </template>
-      </SideNavigationItem>
-      <SideNavigationItem icon="group">
+      </VSideNavigationItem>
+      <VSideNavigationItem icon="group">
         Équipe
         <template #end>
-          <IconButton label="Inviter" icon="person_add" size="xs" data-testid="inviter" />
+          <VIconButton label="Inviter" icon="person_add" size="xs" data-testid="inviter" />
         </template>
         <template #items>
-          <SideNavigationItem href="#membres">Membres</SideNavigationItem>
+          <VSideNavigationItem href="#membres">Membres</VSideNavigationItem>
         </template>
-      </SideNavigationItem>
+      </VSideNavigationItem>
     `),
   }),
   play: async ({ canvasElement }) => {
@@ -260,14 +260,14 @@ export const Exclusif: Story = {
     components,
     setup: () => ({ args }),
     template: aside(`
-      <SideNavigationItem icon="folder" default-open>
+      <VSideNavigationItem icon="folder" default-open>
         Projets
-        <template #items><SideNavigationItem href="#alpha">Alpha</SideNavigationItem></template>
-      </SideNavigationItem>
-      <SideNavigationItem icon="group">
+        <template #items><VSideNavigationItem href="#alpha">Alpha</VSideNavigationItem></template>
+      </VSideNavigationItem>
+      <VSideNavigationItem icon="group">
         Équipe
-        <template #items><SideNavigationItem href="#membres">Membres</SideNavigationItem></template>
-      </SideNavigationItem>
+        <template #items><VSideNavigationItem href="#membres">Membres</VSideNavigationItem></template>
+      </VSideNavigationItem>
     `),
   }),
   play: async ({ canvasElement }) => {
@@ -287,13 +287,13 @@ export const SousLabels: Story = {
     components,
     setup: () => ({ args }),
     template: aside(`
-      <SideNavigationItem href="#alpha" icon="folder" sublabel="12 tâches ouvertes">Alpha</SideNavigationItem>
-      <SideNavigationItem icon="cloud" sublabel="Synchronisé il y a 2 min" default-open>
+      <VSideNavigationItem href="#alpha" icon="folder" sublabel="12 tâches ouvertes">Alpha</VSideNavigationItem>
+      <VSideNavigationItem icon="cloud" sublabel="Synchronisé il y a 2 min" default-open>
         Stockage
         <template #items>
-          <SideNavigationItem href="#archives" sublabel="4,2 Go">Archives</SideNavigationItem>
+          <VSideNavigationItem href="#archives" sublabel="4,2 Go">Archives</VSideNavigationItem>
         </template>
-      </SideNavigationItem>
+      </VSideNavigationItem>
     `),
   }),
 }
@@ -303,11 +303,11 @@ export const Liens: Story = {
     components,
     setup: () => ({ args, onSelect: fn() }),
     template: aside(`
-      <SideNavigationItem href="#tableau" icon="dashboard" active>Tableau de bord</SideNavigationItem>
-      <SideNavigationItem href="https://example.com" icon="open_in_new" target="_blank" rel="noreferrer">
+      <VSideNavigationItem href="#tableau" icon="dashboard" active>Tableau de bord</VSideNavigationItem>
+      <VSideNavigationItem href="https://example.com" icon="open_in_new" target="_blank" rel="noreferrer">
         Documentation
-      </SideNavigationItem>
-      <SideNavigationItem icon="tune" @select="onSelect">Préférences</SideNavigationItem>
+      </VSideNavigationItem>
+      <VSideNavigationItem icon="tune" @select="onSelect">Préférences</VSideNavigationItem>
     `),
   }),
 }
@@ -318,14 +318,14 @@ export const IconesPersonnalisees: Story = {
     setup: () => ({ args }),
     template: aside(
       `
-      <SideNavigationItem default-open>
+      <VSideNavigationItem default-open>
         Ouvert
-        <template #items><SideNavigationItem href="#a">Alpha</SideNavigationItem></template>
-      </SideNavigationItem>
-      <SideNavigationItem>
+        <template #items><VSideNavigationItem href="#a">Alpha</VSideNavigationItem></template>
+      </VSideNavigationItem>
+      <VSideNavigationItem>
         Fermé
-        <template #items><SideNavigationItem href="#b">Beta</SideNavigationItem></template>
-      </SideNavigationItem>
+        <template #items><VSideNavigationItem href="#b">Beta</VSideNavigationItem></template>
+      </VSideNavigationItem>
     `,
       'v-bind="args" expand-icon="add" collapse-icon="remove"',
     ),
@@ -337,12 +337,12 @@ export const ItemDesactive: Story = {
     components,
     setup: () => ({ args }),
     template: aside(`
-      <SideNavigationItem href="#actif" icon="home">Disponible</SideNavigationItem>
-      <SideNavigationItem href="#inactif" icon="lock" disabled>Lien indisponible</SideNavigationItem>
-      <SideNavigationItem icon="folder" disabled>
+      <VSideNavigationItem href="#actif" icon="home">Disponible</VSideNavigationItem>
+      <VSideNavigationItem href="#inactif" icon="lock" disabled>Lien indisponible</VSideNavigationItem>
+      <VSideNavigationItem icon="folder" disabled>
         Branche indisponible
-        <template #items><SideNavigationItem href="#x">Jamais atteignable</SideNavigationItem></template>
-      </SideNavigationItem>
+        <template #items><VSideNavigationItem href="#x">Jamais atteignable</VSideNavigationItem></template>
+      </VSideNavigationItem>
     `),
   }),
 }
@@ -352,16 +352,16 @@ export const TextesLongs: Story = {
     components,
     setup: () => ({ args }),
     template: aside(`
-      <SideNavigationItem href="#long" icon="description" sublabel="Un sous-libellé lui aussi beaucoup trop long pour la barre">
+      <VSideNavigationItem href="#long" icon="description" sublabel="Un sous-libellé lui aussi beaucoup trop long pour la barre">
         Un libellé beaucoup trop long pour une barre latérale
-      </SideNavigationItem>
-      <SideNavigationItem icon="folder" default-open>
+      </VSideNavigationItem>
+      <VSideNavigationItem icon="folder" default-open>
         Dossier au nom interminable qui ne tient pas
-        <template #end><Chip size="xs">99+</Chip></template>
+        <template #end><VChip size="xs">99+</VChip></template>
         <template #items>
-          <SideNavigationItem href="#imbrique">Et un sous-item tout aussi bavard que son parent</SideNavigationItem>
+          <VSideNavigationItem href="#imbrique">Et un sous-item tout aussi bavard que son parent</VSideNavigationItem>
         </template>
-      </SideNavigationItem>
+      </VSideNavigationItem>
     `),
   }),
 }

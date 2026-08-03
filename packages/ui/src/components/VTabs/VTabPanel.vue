@@ -10,7 +10,7 @@ import { tabsKey } from './context'
  * d'onglet.
  */
 interface TabPanelProps {
-  /** Doit correspondre au `value` d'un `Tab`. */
+  /** Doit correspondre au `value` d'un `VTab`. */
   value: string | number
   /** Diffère le montage du contenu au premier affichage, puis le conserve. */
   lazy?: boolean
@@ -54,7 +54,7 @@ watchEffect(() => {
   /*
    * Garde-fou : [hidden] ne vient que de la feuille UA, que la moindre
    * déclaration `display` d'auteur écrase — y compris un style consommateur
-   * non layerisé. Spécificité (0,2,0), et surtout pas d'!important : Tabs
+   * non layerisé. Spécificité (0,2,0), et surtout pas d'!important : VTabs
    * resterait sinon le seul composant du DS impossible à surcharger. Pour
    * poser un display sur le panneau, cibler .v-tabs-panel:not([hidden]).
    */

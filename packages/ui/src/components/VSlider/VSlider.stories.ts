@@ -2,24 +2,24 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Slider from './VSlider.vue'
+import VSlider from './VSlider.vue'
 
 const meta = {
   title: 'Composants/Slider',
-  component: Slider,
+  component: VSlider,
   args: { min: 0, max: 100, step: 1, label: 'Volume' },
-} satisfies Meta<typeof Slider>
+} satisfies Meta<typeof VSlider>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: (args) => ({
-    components: { Slider },
+    components: { VSlider },
     setup: () => ({ args, value: ref(40) }),
     template: `
       <div style="display: grid; gap: 8px; width: 320px">
-        <Slider v-bind="args" v-model="value" />
+        <VSlider v-bind="args" v-model="value" />
         <output>{{ value }}</output>
       </div>
     `,
@@ -40,11 +40,11 @@ export const Default: Story = {
 
 export const Range: Story = {
   render: (args) => ({
-    components: { Slider },
+    components: { VSlider },
     setup: () => ({ args, value: ref<[number, number]>([20, 60]) }),
     template: `
       <div style="display: grid; gap: 8px; width: 320px">
-        <Slider v-bind="args" range v-model="value" label="Budget" />
+        <VSlider v-bind="args" range v-model="value" label="Budget" />
         <output>{{ value[0] }} – {{ value[1] }}</output>
       </div>
     `,
@@ -61,12 +61,12 @@ export const Range: Story = {
 // trop fragile pour une play function).
 export const Pas: Story = {
   render: (args) => ({
-    components: { Slider },
+    components: { VSlider },
     setup: () => ({ args, value: ref(50), valueSansTicks: ref(50) }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <Slider v-bind="args" v-model="value" :step="10" ticks label="Par pas de 10" />
-        <Slider v-bind="args" v-model="valueSansTicks" :step="10" label="Par pas de 10, sans ticks" />
+        <VSlider v-bind="args" v-model="value" :step="10" ticks label="Par pas de 10" />
+        <VSlider v-bind="args" v-model="valueSansTicks" :step="10" label="Par pas de 10, sans ticks" />
       </div>
     `,
   }),
@@ -74,12 +74,12 @@ export const Pas: Story = {
 
 export const Disabled: Story = {
   render: (args) => ({
-    components: { Slider },
+    components: { VSlider },
     setup: () => ({ args, value: ref(30), rangeValue: ref<[number, number]>([20, 60]) }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <Slider v-bind="args" v-model="value" disabled />
-        <Slider v-bind="args" range v-model="rangeValue" :step="10" ticks disabled label="Plage" />
+        <VSlider v-bind="args" v-model="value" disabled />
+        <VSlider v-bind="args" range v-model="rangeValue" :step="10" ticks disabled label="Plage" />
       </div>
     `,
   }),
@@ -87,14 +87,14 @@ export const Disabled: Story = {
 
 export const Vertical: Story = {
   render: (args) => ({
-    components: { Slider },
+    components: { VSlider },
     setup: () => ({ args, value: ref(40), rangeValue: ref<[number, number]>([20, 60]) }),
     template: `
       <div style="display: flex; gap: 48px; align-items: start">
-        <Slider v-bind="args" orientation="vertical" v-model="value" />
-        <Slider v-bind="args" orientation="vertical" range v-model="rangeValue" label="Budget" />
+        <VSlider v-bind="args" orientation="vertical" v-model="value" />
+        <VSlider v-bind="args" orientation="vertical" range v-model="rangeValue" label="Budget" />
         <!-- longueur surchargée via le token, sans style inline dans le composant -->
-        <Slider
+        <VSlider
           v-bind="args"
           orientation="vertical"
           v-model="value"
@@ -107,13 +107,13 @@ export const Vertical: Story = {
 
 export const AvecInputs: Story = {
   render: (args) => ({
-    components: { Slider },
+    components: { VSlider },
     setup: () => ({ args, value: ref(40), rangeValue: ref<[number, number]>([20, 60]) }),
     template: `
       <div style="display: grid; gap: 24px; width: 420px">
-        <Slider v-bind="args" inputs v-model="value" />
+        <VSlider v-bind="args" inputs v-model="value" />
         <output>{{ value }}</output>
-        <Slider v-bind="args" inputs range v-model="rangeValue" label="Budget" />
+        <VSlider v-bind="args" inputs range v-model="rangeValue" label="Budget" />
       </div>
     `,
   }),
@@ -133,11 +133,11 @@ export const AvecInputs: Story = {
 
 export const LabelsTexte: Story = {
   render: (args) => ({
-    components: { Slider },
+    components: { VSlider },
     setup: () => ({ args, value: ref(2) }),
     template: `
       <div style="width: 320px; padding-inline: 16px">
-        <Slider
+        <VSlider
           v-bind="args"
           v-model="value"
           :min="0"
@@ -164,11 +164,11 @@ export const LabelsTexte: Story = {
 
 export const LabelsIcones: Story = {
   render: (args) => ({
-    components: { Slider },
+    components: { VSlider },
     setup: () => ({ args, value: ref(1) }),
     template: `
       <div style="width: 320px; padding-inline: 16px">
-        <Slider
+        <VSlider
           v-bind="args"
           v-model="value"
           :min="0"
@@ -188,12 +188,12 @@ export const LabelsIcones: Story = {
 
 export const AvecTooltip: Story = {
   render: (args) => ({
-    components: { Slider },
+    components: { VSlider },
     setup: () => ({ args, value: ref(40), rangeValue: ref<[number, number]>([20, 60]) }),
     template: `
       <div style="display: grid; gap: 32px; width: 320px; padding-top: 32px">
-        <Slider v-bind="args" tooltip v-model="value" />
-        <Slider v-bind="args" tooltip range v-model="rangeValue" label="Budget" />
+        <VSlider v-bind="args" tooltip v-model="value" />
+        <VSlider v-bind="args" tooltip range v-model="rangeValue" label="Budget" />
       </div>
     `,
   }),
@@ -207,11 +207,11 @@ export const AvecTooltip: Story = {
 
 export const VerticalComplet: Story = {
   render: (args) => ({
-    components: { Slider },
+    components: { VSlider },
     setup: () => ({ args, value: ref(2), rangeValue: ref<[number, number]>([20, 60]) }),
     template: `
       <div style="display: flex; gap: 96px; align-items: start; padding-inline-start: 48px">
-        <Slider
+        <VSlider
           v-bind="args"
           orientation="vertical"
           v-model="value"
@@ -222,7 +222,7 @@ export const VerticalComplet: Story = {
           tooltip
           label="Taille"
         />
-        <Slider v-bind="args" orientation="vertical" inputs range tooltip v-model="rangeValue" label="Budget" />
+        <VSlider v-bind="args" orientation="vertical" inputs range tooltip v-model="rangeValue" label="Budget" />
       </div>
     `,
   }),

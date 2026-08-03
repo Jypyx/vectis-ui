@@ -1,19 +1,19 @@
 ﻿import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as DataTableStories from './VDataTable.stories'
+import * as VDataTableStories from './VDataTable.stories'
 
-<Meta of={DataTableStories} />
+<Meta of={VDataTableStories} />
 
 # DataTable
 
 Tableau de données en HTML strictement sémantique (`<table>`, `caption`, `scope`, `aria-sort`),
-composé des briques du design system : `Input` pour la recherche, `Checkbox` pour la sélection,
-`Menu` + `Button` pour les lignes par page, `Pagination` pour le footer. Toute la mécanique
+composé des briques du design system : `VInput` pour la recherche, `VCheckbox` pour la sélection,
+`VMenu` + `VButton` pour les lignes par page, `VPagination` pour le footer. Toute la mécanique
 locale (filtrage → tri → pagination) est une chaîne de dérivations pures ; un mode serveur la
 court-circuite entièrement.
 
-<Canvas of={DataTableStories.Default} />
+<Canvas of={VDataTableStories.Default} />
 
-<Controls of={DataTableStories.Default} />
+<Controls of={VDataTableStories.Default} />
 
 ## Tri
 
@@ -30,31 +30,31 @@ Les trois glyphes se remplacent indépendamment par `sortIcon` (triable, non tri
 et `sortDescIcon` — un nom d'icône ou un rendu explicite, comme partout dans le DS. N'en
 surcharger qu'un laisse les deux autres à leur valeur par défaut.
 
-<Canvas of={DataTableStories.Tri} />
+<Canvas of={VDataTableStories.Tri} />
 
 ## Header et recherche
 
 `title` (ou le slot `#header`, qui prime) remplit la zone gauche du header global ; `searchable`
-affiche à droite un champ `Input` type search, effaçable, relié à `v-model:search`. Le filtre
+affiche à droite un champ `VInput` type search, effaçable, relié à `v-model:search`. Le filtre
 local est insensible à la casse et aux accents et ne parcourt que les **colonnes déclarées** —
 jamais les autres champs des lignes. Un changement de terme ramène à la page 1.
 
-<Canvas of={DataTableStories.Recherche} />
+<Canvas of={VDataTableStories.Recherche} />
 
-## Pagination
+## VPagination
 
 La pagination locale s'active dès que `perPage` est défini (`v-model:per-page`, ou `:per-page`
 one-way) : le footer apparaît. Sa zone droite groupe, dans cet ordre, le sélecteur de lignes par
-page (`perPageOptions`, un `Menu` d'items sélectionnés), le texte « X–Y sur Z » (`showRange`,
-formatable par `rangeLabel`) et la `Pagination` du DS pilotée par `v-model:page` ; la zone gauche
+page (`perPageOptions`, un `VMenu` d'items sélectionnés), le texte « X–Y sur Z » (`showRange`,
+formatable par `rangeLabel`) et la `VPagination` du DS pilotée par `v-model:page` ; la zone gauche
 reste vide hors sélection. Si un filtre réduit le nombre de pages, l'affichage retombe sur la
 dernière page par **dérivation**, sans muter le modèle.
 
-<Canvas of={DataTableStories.PaginationLocale} />
+<Canvas of={VDataTableStories.PaginationLocale} />
 
 ## Sélection
 
-`selectable` ajoute une colonne de `Checkbox` à l'extrême gauche et une case « master » dans le
+`selectable` ajoute une colonne de `VCheckbox` à l'extrême gauche et une case « master » dans le
 `<thead>` : cochée quand toute la **page visible** est sélectionnée, indéterminée quand elle
 l'est partiellement, elle ne touche jamais aux sélections des autres pages (modèle Material).
 `v-model:selected` reçoit les identités de lignes (`DataTableRowId[]`), dérivées de `rowKey` —
@@ -64,7 +64,7 @@ le reformuler), dans une région live annoncée à chaque changement : elle est 
 `selectable` — vide tant que rien n'est sélectionné — et fait apparaître le footer même sans
 pagination.
 
-<Canvas of={DataTableStories.Selection} />
+<Canvas of={VDataTableStories.Selection} />
 
 ## Mode serveur
 
@@ -76,18 +76,18 @@ par page ou de recherche émet `update:params` (type exporté `DataTableParams` 
 Fournir `total` (nombre de lignes côté serveur) pour le calcul des pages et du range. Aucune
 émission au montage : le fetch initial appartient au consommateur.
 
-<Canvas of={DataTableStories.ServerSide} />
+<Canvas of={VDataTableStories.ServerSide} />
 
 ## Habillage
 
-`variant` pilote le cadre du tableau, sur l'échelle commune à l'`Accordion` et aux `Tabs`. `flat` (défaut)
+`variant` pilote le cadre du tableau, sur l'échelle commune à l'`VAccordion` et aux `VTabs`. `flat` (défaut)
 n'ajoute rien : le tableau se pose nu, en-tête, filets et footer à fleur du conteneur d'accueil.
 `outlined` l'enferme dans une surface propre et arrondie, cernée d'un filet ; la barre de titre,
 le résumé et le footer prennent alors la gouttière du cadre, calée sur le padding des cellules —
 leur contenu s'aligne exactement sur le texte de la première colonne et suit `compact`. Seule la
 table continue de défiler bord à bord.
 
-<Canvas of={DataTableStories.Variantes} />
+<Canvas of={VDataTableStories.Variantes} />
 
 ## Apparence
 
@@ -97,11 +97,11 @@ d'en-têtes au défilement vertical — il suppose une zone défilante bornée, 
 parent de hauteur définie (cf. **Hauteur**), sinon rien ne défile sous l'en-tête. Son fond opaque
 reprend la surface de la variante : aucune couture au bord du cadre, y compris en thème sombre.
 
-<Canvas of={DataTableStories.Striped} />
+<Canvas of={VDataTableStories.Striped} />
 
-<Canvas of={DataTableStories.Compact} />
+<Canvas of={VDataTableStories.Compact} />
 
-<Canvas of={DataTableStories.StickyHeader} />
+<Canvas of={VDataTableStories.StickyHeader} />
 
 ## Hauteur
 
@@ -120,7 +120,7 @@ L'espace laissé libre sous les dernières lignes reste nu : le zébrage ne se p
 lignes qui n'existent pas — les lignes n'ayant pas de hauteur fixe, un motif de fond se
 décalerait dès qu'une cellule passe sur deux lignes.
 
-<Canvas of={DataTableStories.PleineHauteur} />
+<Canvas of={VDataTableStories.PleineHauteur} />
 
 ## Responsive
 
@@ -129,7 +129,7 @@ restent en place, seule la table bouge. `responsive="stack"` transforme chaque l
 sous 640px de **conteneur** (container query, aucun JS de mesure) : les en-têtes sont réinjectés
 devant chaque cellule via `data-label`, et la case de sélection ouvre la carte.
 
-<Canvas of={DataTableStories.ResponsiveStack} />
+<Canvas of={VDataTableStories.ResponsiveStack} />
 
 ## Slots
 
@@ -138,9 +138,9 @@ devant chaque cellule via `data-label`, et la case de sélection ouvre la carte.
   bouton de tri si la colonne est triable, y placer du contenu non interactif seulement.
 - `#cell-<key>` (portée : `{ row, value, column }`) : contenu d'une cellule.
 
-<Canvas of={DataTableStories.EnTetesPersonnalises} />
+<Canvas of={VDataTableStories.EnTetesPersonnalises} />
 
-<Canvas of={DataTableStories.CellulesPersonnalisees} />
+<Canvas of={VDataTableStories.CellulesPersonnalisees} />
 
 ## Accessibilité
 

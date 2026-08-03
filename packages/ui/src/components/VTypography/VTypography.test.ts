@@ -1,11 +1,11 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Typography from './VTypography.vue'
+import VTypography from './VTypography.vue'
 
-describe('Typography', () => {
+describe('VTypography', () => {
   it('défaut : <p> body-md, sans data-tone ni data-truncate', () => {
-    const { container } = render(Typography, { slots: { default: 'Texte' } })
+    const { container } = render(VTypography, { slots: { default: 'Texte' } })
     const root = container.firstElementChild!
     expect(root.tagName).toBe('P')
     expect(root.classList.contains('v-typography')).toBe(true)
@@ -32,7 +32,7 @@ describe('Typography', () => {
       ['code', 'CODE'],
     ]
     for (const [variant, tagName] of cases) {
-      const { container } = render(Typography, {
+      const { container } = render(VTypography, {
         props: { variant: variant as never },
         slots: { default: 'x' },
       })
@@ -43,7 +43,7 @@ describe('Typography', () => {
   })
 
   it('`as` prime sur la balise par défaut de la variante', () => {
-    const { container } = render(Typography, {
+    const { container } = render(VTypography, {
       props: { variant: 'heading-1', as: 'strong' },
       slots: { default: 'x' },
     })
@@ -51,7 +51,7 @@ describe('Typography', () => {
   })
 
   it('tone explicite posé en data-tone', () => {
-    const { container } = render(Typography, {
+    const { container } = render(VTypography, {
       props: { tone: 'muted' },
       slots: { default: 'x' },
     })
@@ -59,7 +59,7 @@ describe('Typography', () => {
   })
 
   it('truncate : data-truncate posé', () => {
-    const { container } = render(Typography, {
+    const { container } = render(VTypography, {
       props: { truncate: true },
       slots: { default: 'x' },
     })
@@ -67,7 +67,7 @@ describe('Typography', () => {
   })
 
   it('fallthrough : for/id/class atterrissent sur la racine (usage label de champ)', () => {
-    const { container } = render(Typography, {
+    const { container } = render(VTypography, {
       props: { variant: 'label', as: 'label' },
       attrs: { for: 'champ', id: 'mon-label', class: 'extra' },
       slots: { default: 'Nom' },

@@ -17,7 +17,7 @@ export function pad2(n: number): string {
 
 /**
  * Chiffres d'un texte. Helper purement lexical, sans domaine : les masques de
- * saisie du DS (date du DatePicker, heure du TimePicker) ne connaissent que la
+ * saisie du DS (date du VDatePicker, heure du VTimePicker) ne connaissent que la
  * suite de chiffres, jamais les séparateurs, qu'ils posent eux-mêmes.
  */
 export const digitsOf = (text: string): string => text.replace(/\D/g, '')

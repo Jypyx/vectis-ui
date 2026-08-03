@@ -6,7 +6,7 @@
  */
 import { computed, useSlots } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 
@@ -19,14 +19,14 @@ interface BadgeProps {
    * Couleur custom (hex, nom CSS ou oklch()) — remplace le tone. Le texte
    * s'adapte noir/blanc via contrast-color() sur les navigateurs qui le
    * supportent ; ailleurs il retombe sur du blanc (contraste d'une couleur
-   * claire à la charge du consommateur, comme le solid custom du Chip).
+   * claire à la charge du consommateur, comme le solid custom du VChip).
    */
   color?: string
   /** Compteur numérique. Au-delà de 99, l'affichage devient « 99+ ». */
   count?: number
   /**
    * Icône seule (nom Material Symbols ou URL d'image) — prime sur `count`,
-   * ignorée en mode `dot`. Nom d'icône, ou rendu explicite (contrat Icon).
+   * ignorée en mode `dot`. Nom d'icône, ou rendu explicite (contrat VIcon).
    */
   icon?: IconSource
   /** Rond de 10px sans contenu visible. */
@@ -76,14 +76,14 @@ const badgeAttrs = computed(() => ({
     <slot />
     <span class="v-badge" v-bind="badgeAttrs">
       <template v-if="!dot">
-        <Icon v-if="icon" v-bind="iconProps(icon)" />
+        <VIcon v-if="icon" v-bind="iconProps(icon)" />
         <template v-else>{{ displayCount }}</template>
       </template>
     </span>
   </span>
   <span v-else class="v-badge" v-bind="badgeAttrs">
     <template v-if="!dot">
-      <Icon v-if="icon" v-bind="iconProps(icon)" />
+      <VIcon v-if="icon" v-bind="iconProps(icon)" />
       <template v-else>{{ displayCount }}</template>
     </template>
   </span>

@@ -2,27 +2,27 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import InputOTP from './VInputOTP.vue'
+import VInputOTP from './VInputOTP.vue'
 
 const meta = {
   title: 'Composants/InputOTP',
-  component: InputOTP,
+  component: VInputOTP,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
   },
   args: { length: 6, format: 'numeric' },
-} satisfies Meta<typeof InputOTP>
+} satisfies Meta<typeof VInputOTP>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: (args) => ({
-    components: { InputOTP },
+    components: { VInputOTP },
     setup: () => ({ args, code: ref(''), onComplete: fn() }),
     template: `
       <div style="display: grid; gap: 8px; justify-items: start">
-        <InputOTP v-bind="args" v-model="code" @complete="onComplete" />
+        <VInputOTP v-bind="args" v-model="code" @complete="onComplete" />
         <output data-testid="mirror">{{ code }}</output>
       </div>
     `,
@@ -39,11 +39,11 @@ export const Default: Story = {
 
 export const CollageDistribue: Story = {
   render: (args) => ({
-    components: { InputOTP },
+    components: { VInputOTP },
     setup: () => ({ args, code: ref('') }),
     template: `
       <div style="display: grid; gap: 8px; justify-items: start">
-        <InputOTP v-bind="args" v-model="code" />
+        <VInputOTP v-bind="args" v-model="code" />
         <output data-testid="mirror">{{ code }}</output>
       </div>
     `,
@@ -59,16 +59,16 @@ export const CollageDistribue: Story = {
 export const QuatreCases: Story = {
   args: { length: 4 },
   render: (args) => ({
-    components: { InputOTP },
+    components: { VInputOTP },
     setup: () => ({ args, code: ref('') }),
-    template: '<InputOTP v-bind="args" v-model="code" />',
+    template: '<VInputOTP v-bind="args" v-model="code" />',
   }),
 }
 
 export const Tailles: Story = {
   args: { length: 4 },
   render: (args) => ({
-    components: { InputOTP },
+    components: { VInputOTP },
     setup: () => ({
       args,
       sm: ref(''),
@@ -78,10 +78,10 @@ export const Tailles: Story = {
     }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <InputOTP v-bind="args" v-model="sm" size="sm" label="Code (sm)" />
-        <InputOTP v-bind="args" v-model="md" size="md" label="Code (md)" />
-        <InputOTP v-bind="args" v-model="lg" size="lg" label="Code (lg)" />
-        <InputOTP v-bind="args" v-model="compact" compact label="Code (compact)" />
+        <VInputOTP v-bind="args" v-model="sm" size="sm" label="Code (sm)" />
+        <VInputOTP v-bind="args" v-model="md" size="md" label="Code (md)" />
+        <VInputOTP v-bind="args" v-model="lg" size="lg" label="Code (lg)" />
+        <VInputOTP v-bind="args" v-model="compact" compact label="Code (compact)" />
       </div>
     `,
   }),
@@ -90,11 +90,11 @@ export const Tailles: Story = {
 export const FormatAlphanumerique: Story = {
   args: { format: 'alphanumeric' },
   render: (args) => ({
-    components: { InputOTP },
+    components: { VInputOTP },
     setup: () => ({ args, code: ref('') }),
     template: `
       <div style="display: grid; gap: 8px; justify-items: start">
-        <InputOTP v-bind="args" v-model="code" />
+        <VInputOTP v-bind="args" v-model="code" />
         <output data-testid="mirror">{{ code }}</output>
       </div>
     `,
@@ -111,11 +111,11 @@ export const FormatAlphanumerique: Story = {
 export const AvecPattern: Story = {
   args: { pattern: '###.###.###' },
   render: (args) => ({
-    components: { InputOTP },
+    components: { VInputOTP },
     setup: () => ({ args, code: ref('') }),
     template: `
       <div style="display: grid; gap: 8px; justify-items: start">
-        <InputOTP v-bind="args" v-model="code" />
+        <VInputOTP v-bind="args" v-model="code" />
         <output data-testid="mirror">{{ code }}</output>
       </div>
     `,
@@ -132,33 +132,33 @@ export const AvecPattern: Story = {
 export const PatternPrefixe: Story = {
   args: { pattern: 'GT-###', format: 'alphanumeric' },
   render: (args) => ({
-    components: { InputOTP },
+    components: { VInputOTP },
     setup: () => ({ args, code: ref('') }),
-    template: '<InputOTP v-bind="args" v-model="code" />',
+    template: '<VInputOTP v-bind="args" v-model="code" />',
   }),
 }
 
 export const SeparateurIcone: Story = {
   args: { pattern: '####-####', separatorIcon: 'horizontal_rule', length: 8 },
   render: (args) => ({
-    components: { InputOTP },
+    components: { VInputOTP },
     setup: () => ({ args, code: ref('') }),
-    template: '<InputOTP v-bind="args" v-model="code" />',
+    template: '<VInputOTP v-bind="args" v-model="code" />',
   }),
 }
 
 export const Invalide: Story = {
   render: (args) => ({
-    components: { InputOTP },
+    components: { VInputOTP },
     setup: () => ({ args, code: ref('123456') }),
-    template: '<InputOTP v-bind="args" v-model="code" invalid />',
+    template: '<VInputOTP v-bind="args" v-model="code" invalid />',
   }),
 }
 
 export const Disabled: Story = {
   render: (args) => ({
-    components: { InputOTP },
+    components: { VInputOTP },
     setup: () => ({ args, code: ref('123') }),
-    template: '<InputOTP v-bind="args" v-model="code" disabled />',
+    template: '<VInputOTP v-bind="args" v-model="code" disabled />',
   }),
 }

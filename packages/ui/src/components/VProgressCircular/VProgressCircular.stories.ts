@@ -1,23 +1,23 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, waitFor, within } from 'storybook/test'
 
-import Typography from '../VTypography/VTypography.vue'
-import ProgressCircular from './VProgressCircular.vue'
+import VTypography from '../VTypography/VTypography.vue'
+import VProgressCircular from './VProgressCircular.vue'
 
 const meta = {
   title: 'Composants/ProgressCircular',
-  component: ProgressCircular,
+  component: VProgressCircular,
   argTypes: {
     tone: { control: 'select', options: ['accent', 'success', 'warning', 'danger', 'neutral'] },
     shape: { control: 'select', options: ['rounded', 'square'] },
   },
   args: { value: 65, max: 100, indeterminate: false, tone: 'accent', shape: 'rounded' },
   render: (args) => ({
-    components: { ProgressCircular },
+    components: { VProgressCircular },
     setup: () => ({ args }),
-    template: '<ProgressCircular v-bind="args" aria-label="Progression" />',
+    template: '<VProgressCircular v-bind="args" aria-label="Progression" />',
   }),
-} satisfies Meta<typeof ProgressCircular>
+} satisfies Meta<typeof VProgressCircular>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -46,14 +46,14 @@ export const Default: Story = {
 
 export const Tones: Story = {
   render: () => ({
-    components: { ProgressCircular },
+    components: { VProgressCircular },
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <ProgressCircular tone="accent" :value="40" show-value aria-label="Accent" />
-        <ProgressCircular tone="success" :value="100" show-value aria-label="Succès" />
-        <ProgressCircular tone="warning" :value="70" show-value aria-label="Avertissement" />
-        <ProgressCircular tone="danger" :value="25" show-value aria-label="Erreur" />
-        <ProgressCircular tone="neutral" :value="55" show-value aria-label="Neutre" />
+        <VProgressCircular tone="accent" :value="40" show-value aria-label="Accent" />
+        <VProgressCircular tone="success" :value="100" show-value aria-label="Succès" />
+        <VProgressCircular tone="warning" :value="70" show-value aria-label="Avertissement" />
+        <VProgressCircular tone="danger" :value="25" show-value aria-label="Erreur" />
+        <VProgressCircular tone="neutral" :value="55" show-value aria-label="Neutre" />
       </div>
     `,
   }),
@@ -66,12 +66,12 @@ export const Tones: Story = {
  */
 export const CouleurCustom: Story = {
   render: () => ({
-    components: { ProgressCircular },
+    components: { VProgressCircular },
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <ProgressCircular color="#7c3aed" :value="45" show-value aria-label="Violet" />
-        <ProgressCircular color="teal" :value="65" show-value aria-label="Teal" />
-        <ProgressCircular color="oklch(72% 0.18 45)" :value="85" show-value aria-label="Orange" />
+        <VProgressCircular color="#7c3aed" :value="45" show-value aria-label="Violet" />
+        <VProgressCircular color="teal" :value="65" show-value aria-label="Teal" />
+        <VProgressCircular color="oklch(72% 0.18 45)" :value="85" show-value aria-label="Orange" />
       </div>
     `,
   }),
@@ -79,14 +79,14 @@ export const CouleurCustom: Story = {
 
 export const Taille: Story = {
   render: () => ({
-    components: { ProgressCircular },
+    components: { VProgressCircular },
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <ProgressCircular :size="24" :thickness="3" :value="60" aria-label="24px" />
-        <ProgressCircular :size="48" :value="60" aria-label="48px (défaut)" />
-        <ProgressCircular :size="80" :value="60" show-value aria-label="80px" />
+        <VProgressCircular :size="24" :thickness="3" :value="60" aria-label="24px" />
+        <VProgressCircular :size="48" :value="60" aria-label="48px (défaut)" />
+        <VProgressCircular :size="80" :value="60" show-value aria-label="80px" />
         <!-- toujours des pixels : une string numérique équivaut au number -->
-        <ProgressCircular size="96" :value="60" show-value aria-label="96px (string)" />
+        <VProgressCircular size="96" :value="60" show-value aria-label="96px (string)" />
       </div>
     `,
   }),
@@ -95,13 +95,13 @@ export const Taille: Story = {
 /** L'épaisseur est indépendante du diamètre — le donut peut devenir un disque. */
 export const Epaisseur: Story = {
   render: () => ({
-    components: { ProgressCircular },
+    components: { VProgressCircular },
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <ProgressCircular :size="72" :thickness="2" :value="60" aria-label="2px" />
-        <ProgressCircular :size="72" :thickness="4" :value="60" aria-label="4px (défaut)" />
-        <ProgressCircular :size="72" :thickness="8" :value="60" aria-label="8px" />
-        <ProgressCircular :size="72" :thickness="16" :value="60" aria-label="16px" />
+        <VProgressCircular :size="72" :thickness="2" :value="60" aria-label="2px" />
+        <VProgressCircular :size="72" :thickness="4" :value="60" aria-label="4px (défaut)" />
+        <VProgressCircular :size="72" :thickness="8" :value="60" aria-label="8px" />
+        <VProgressCircular :size="72" :thickness="16" :value="60" aria-label="16px" />
       </div>
     `,
   }),
@@ -110,12 +110,12 @@ export const Epaisseur: Story = {
 /** La taille du texte suit le diamètre, avec un plancher au plus petit token. */
 export const Valeur: Story = {
   render: () => ({
-    components: { ProgressCircular },
+    components: { VProgressCircular },
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <ProgressCircular :size="48" :value="35" show-value aria-label="48px" />
-        <ProgressCircular :size="72" :value="35" show-value aria-label="72px" />
-        <ProgressCircular :size="112" :value="35" show-value aria-label="112px" />
+        <VProgressCircular :size="48" :value="35" show-value aria-label="48px" />
+        <VProgressCircular :size="72" :value="35" show-value aria-label="72px" />
+        <VProgressCircular :size="112" :value="35" show-value aria-label="112px" />
       </div>
     `,
   }),
@@ -124,23 +124,23 @@ export const Valeur: Story = {
 /** Le slot par défaut reçoit `{ value, max, percent }` : au centre, tout est permis. */
 export const LabelCentre: Story = {
   render: () => ({
-    components: { ProgressCircular, Typography },
+    components: { VProgressCircular, VTypography },
     template: `
       <div style="display: flex; gap: 24px; align-items: center">
-        <ProgressCircular :size="112" :thickness="10" :value="7" :max="10" aria-label="Étapes">
+        <VProgressCircular :size="112" :thickness="10" :value="7" :max="10" aria-label="Étapes">
           <template #default="{ value, max }">
             <span style="display: grid; gap: 2px; justify-items: center">
-              <Typography variant="heading-2" as="strong">{{ value }}</Typography>
+              <VTypography variant="heading-2" as="strong">{{ value }}</VTypography>
               <small style="opacity: 0.7">sur {{ max }}</small>
             </span>
           </template>
-        </ProgressCircular>
-        <ProgressCircular :size="96" :value="100" tone="success" aria-label="Terminé">
+        </VProgressCircular>
+        <VProgressCircular :size="96" :value="100" tone="success" aria-label="Terminé">
           <template #default>
             <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 2rem">check</span>
           </template>
-        </ProgressCircular>
-        <ProgressCircular :size="96" :thickness="8" :value="42" show-value aria-label="Compression" />
+        </VProgressCircular>
+        <VProgressCircular :size="96" :thickness="8" :value="42" show-value aria-label="Compression" />
       </div>
     `,
   }),
@@ -148,11 +148,11 @@ export const LabelCentre: Story = {
 
 export const Carre: Story = {
   render: () => ({
-    components: { ProgressCircular },
+    components: { VProgressCircular },
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <ProgressCircular :size="72" :thickness="10" :value="35" shape="rounded" aria-label="Bouts arrondis (défaut)" />
-        <ProgressCircular :size="72" :thickness="10" :value="35" shape="square" aria-label="Bouts francs" />
+        <VProgressCircular :size="72" :thickness="10" :value="35" shape="rounded" aria-label="Bouts arrondis (défaut)" />
+        <VProgressCircular :size="72" :thickness="10" :value="35" shape="square" aria-label="Bouts francs" />
       </div>
     `,
   }),
@@ -161,12 +161,12 @@ export const Carre: Story = {
 export const Indetermine: Story = {
   args: { indeterminate: true },
   render: () => ({
-    components: { ProgressCircular },
+    components: { VProgressCircular },
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <ProgressCircular indeterminate aria-label="Chargement" />
-        <ProgressCircular indeterminate :size="72" :thickness="8" tone="success" aria-label="Synchronisation" />
-        <ProgressCircular indeterminate :size="96" :thickness="4" shape="square" color="teal" aria-label="Analyse" />
+        <VProgressCircular indeterminate aria-label="Chargement" />
+        <VProgressCircular indeterminate :size="72" :thickness="8" tone="success" aria-label="Synchronisation" />
+        <VProgressCircular indeterminate :size="96" :thickness="4" shape="square" color="teal" aria-label="Analyse" />
       </div>
     `,
   }),
@@ -174,17 +174,17 @@ export const Indetermine: Story = {
 
 export const CasLimites: Story = {
   render: () => ({
-    components: { ProgressCircular },
+    components: { VProgressCircular },
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <ProgressCircular :value="0" show-value aria-label="Zéro" />
-        <ProgressCircular :value="100" show-value aria-label="Complet" />
+        <VProgressCircular :value="0" show-value aria-label="Zéro" />
+        <VProgressCircular :value="100" show-value aria-label="Complet" />
         <!-- épaisseur ≥ diamètre : rayon nul, dégradation propre (pas d'erreur SVG) -->
-        <ProgressCircular :size="48" :thickness="64" :value="50" aria-label="Épaisseur excessive" />
+        <VProgressCircular :size="48" :thickness="64" :value="50" aria-label="Épaisseur excessive" />
         <!-- label trop long pour le trou du donut -->
-        <ProgressCircular :size="72" :thickness="6" :value="50" aria-label="Label trop long">
+        <VProgressCircular :size="72" :thickness="6" :value="50" aria-label="Label trop long">
           <template #default>Compression en cours</template>
-        </ProgressCircular>
+        </VProgressCircular>
       </div>
     `,
   }),

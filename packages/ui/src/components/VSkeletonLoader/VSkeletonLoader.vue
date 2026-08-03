@@ -3,16 +3,16 @@
  * Placeholder de chargement 100 % CSS : la silhouette d'un composant du design
  * system pendant que son contenu arrive.
  *
- * La racine est un CONTENEUR (modèle Spinner) et non la silhouette peinte
- * (modèle ProgressLinear) : c'est ce qui rend `lines` gratuit et garde TOUS les
+ * La racine est un CONTENEUR (modèle VSpinner) et non la silhouette peinte
+ * (modèle VProgressLinear) : c'est ce qui rend `lines` gratuit et garde TOUS les
  * sélecteurs uniformes — pas un cas « racine peinte » et un cas « enfant
  * peint ». Elle porte `v-control`, donc `size`/`compact` réutilisent la table
  * unique des hauteurs du DS : un skeleton `md` fait exactement la hauteur d'un
- * Button `md`.
+ * VButton `md`.
  *
  * Le composant ne MESURE jamais rien : aucune silhouette n'est déduite du
  * contenu qu'elle remplace, elle est déclarée. Les trois `computed` sont le
- * seul JS — ni événement, ni cycle de vie, ni DOM (précédent assumé de Spinner
+ * seul JS — ni événement, ni cycle de vie, ni DOM (précédent assumé de VSpinner
  * depuis son libellé).
  */
 import { computed } from 'vue'
@@ -32,9 +32,9 @@ interface SkeletonLoaderProps {
    *   la silhouette suit la typo du parent et N lignes occupent exactement
    *   N lignes de texte ; rayon pilule.
    * - `control` : hauteur prise sur l'échelle des contrôles (`size`), rayon
-   *   interactif — Button, Input, Select.
-   * - `pill` : idem `control` en rayon pilule — Chip, Badge.
-   * - `circle` : idem `control` en ratio 1:1 — Avatar, IconButton rond.
+   *   interactif — VButton, VInput, Select.
+   * - `pill` : idem `control` en rayon pilule — VChip, VBadge.
+   * - `circle` : idem `control` en ratio 1:1 — VAvatar, VIconButton rond.
    * - `surface` : rayon de surface, hauteur par défaut au token — carte, image.
    */
   shape?: SkeletonShape
@@ -73,7 +73,7 @@ interface SkeletonLoaderProps {
    * Annonce le chargement (`role="status"`). **Faux par défaut : un skeleton
    * est décoratif** — une page en contient une dizaine, et autant d'annonces
    * concurrentes seraient illisibles. L'annonce appartient au conteneur, qui
-   * porte `aria-busy` (précédent Button).
+   * porte `aria-busy` (précédent VButton).
    */
   announce?: boolean
   /**
@@ -169,7 +169,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
   }
 
   /* Spécificité (0,2,0) > (0,1,0) : indépendant de l'ordre, contrairement aux
-     tones de ProgressLinear qui sont tous au même niveau. */
+     tones de VProgressLinear qui sont tous au même niveau. */
   .v-skeleton[data-custom] {
     --skeleton-base: var(--custom-color);
   }
@@ -183,7 +183,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     inline-size: var(--skeleton-w, 100%);
     block-size: var(--skeleton-h);
     /* `clip` et non `hidden` : `hidden` ferait de chaque silhouette un
-       conteneur de défilement (précédent DataTable) */
+       conteneur de défilement (précédent VDataTable) */
     overflow: clip;
     border-radius: var(--skeleton-radius);
     background: var(--skeleton-base);
@@ -228,7 +228,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
   /*
    * Cercle : la largeur est TRANSFÉRÉE depuis la hauteur par `aspect-ratio` —
    * `size` seul suffit donc à changer le diamètre. La racine se compose en
-   * ligne (comme un Avatar) au lieu de barrer toute la largeur, et
+   * ligne (comme un VAvatar) au lieu de barrer toute la largeur, et
    * `align-items: start` empêche l'étirement inline : un cercle reste rond.
    */
   .v-skeleton[data-shape='circle'] {
@@ -248,7 +248,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * Surface (carte, image, bloc) : sa hauteur ne peut pas être devinée sans
    * mesurer le DOM. Token de défaut, qu'une prop `height` — ou un style
    * consommateur, non layerisé — surcharge. Même précédent que la longueur du
-   * ProgressLinear vertical.
+   * VProgressLinear vertical.
    */
   .v-skeleton[data-shape='surface'] {
     --skeleton-h: var(--vectis-control-size-skeleton-surface);
@@ -282,11 +282,11 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * physique est donc sans effet observable, il n'y a rien à inverser en RTL.
    * Seul le SENS de la course compte, et il s'inverse par `animation-direction`
    * — exact ici parce que la course est `linear`, donc réversible à l'identique
-   * (même argument que le mode indéterminé de ProgressLinear, dont la courbe
+   * (même argument que le mode indéterminé de VProgressLinear, dont la courbe
    * symétrique autorise la relecture à l'envers).
    *
    * `translate` (composited) plutôt qu'une course en propriétés logiques comme
-   * ProgressLinear : ce composant n'a pas d'orientation verticale, la seule
+   * VProgressLinear : ce composant n'a pas d'orientation verticale, la seule
    * variable est le RTL — une règle. Le compromis s'inverse donc : une page
    * peut contenir douze skeletons, la composition n'est plus négociable.
    */

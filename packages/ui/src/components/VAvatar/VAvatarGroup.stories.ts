@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
-import Tooltip from '../VTooltip/VTooltip.vue'
-import Avatar from './VAvatar.vue'
-import AvatarGroup from './VAvatarGroup.vue'
+import VTooltip from '../VTooltip/VTooltip.vue'
+import VAvatar from './VAvatar.vue'
+import VAvatarGroup from './VAvatarGroup.vue'
 
 const NAMES = [
   'Ada Lovelace',
@@ -16,13 +16,13 @@ const NAMES = [
 
 const meta = {
   title: 'Composants/AvatarGroup',
-  component: AvatarGroup,
+  component: VAvatarGroup,
   argTypes: {
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     compact: { control: 'boolean' },
     max: { control: { type: 'number' } },
   },
-} satisfies Meta<typeof AvatarGroup>
+} satisfies Meta<typeof VAvatarGroup>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -30,12 +30,12 @@ type Story = StoryObj<typeof meta>
 /** Empilement : le disque de droite passe par-dessus celui de gauche, séparé par l'anneau. */
 export const Empilement: Story = {
   render: () => ({
-    components: { AvatarGroup, Avatar },
+    components: { VAvatarGroup, VAvatar },
     setup: () => ({ names: NAMES.slice(0, 4) }),
     template: `
-      <AvatarGroup>
-        <Avatar v-for="n in names" :key="n" :name="n" />
-      </AvatarGroup>
+      <VAvatarGroup>
+        <VAvatar v-for="n in names" :key="n" :name="n" />
+      </VAvatarGroup>
     `,
   }),
 }
@@ -43,12 +43,12 @@ export const Empilement: Story = {
 /** `max` tronque et pousse un agrégat « +X » (statique, neutre). */
 export const Overflow: Story = {
   render: () => ({
-    components: { AvatarGroup, Avatar },
+    components: { VAvatarGroup, VAvatar },
     setup: () => ({ names: NAMES }),
     template: `
-      <AvatarGroup :max="3">
-        <Avatar v-for="n in names" :key="n" :name="n" />
-      </AvatarGroup>
+      <VAvatarGroup :max="3">
+        <VAvatar v-for="n in names" :key="n" :name="n" />
+      </VAvatarGroup>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -59,12 +59,12 @@ export const Overflow: Story = {
 /** La taille se propage à tous les enfants. */
 export const TailleHeritee: Story = {
   render: () => ({
-    components: { AvatarGroup, Avatar },
+    components: { VAvatarGroup, VAvatar },
     setup: () => ({ names: NAMES.slice(0, 4) }),
     template: `
-      <AvatarGroup size="lg" :max="3">
-        <Avatar v-for="n in names" :key="n" :name="n" />
-      </AvatarGroup>
+      <VAvatarGroup size="lg" :max="3">
+        <VAvatar v-for="n in names" :key="n" :name="n" />
+      </VAvatarGroup>
     `,
   }),
 }
@@ -72,50 +72,50 @@ export const TailleHeritee: Story = {
 /** Slot #overflow : rendre l'agrégat cliquable / y attacher un comportement. */
 export const OverflowPersonnalise: Story = {
   render: () => ({
-    components: { AvatarGroup, Avatar },
+    components: { VAvatarGroup, VAvatar },
     setup: () => ({ names: NAMES }),
     template: `
-      <AvatarGroup :max="3">
-        <Avatar v-for="n in names" :key="n" :name="n" />
+      <VAvatarGroup :max="3">
+        <VAvatar v-for="n in names" :key="n" :name="n" />
         <template #overflow="{ count }">
-          <Avatar clickable :aria-label="count + ' membres de plus'">+{{ count }}</Avatar>
+          <VAvatar clickable :aria-label="count + ' membres de plus'">+{{ count }}</VAvatar>
         </template>
-      </AvatarGroup>
+      </VAvatarGroup>
     `,
   }),
 }
 
 /**
- * Tooltip par Avatar (le nom) + Tooltip sur l'agrégat (les membres masqués).
- * Chaque Avatar est `clickable` (donc focusable) et reçoit `triggerProps` par
- * fallthrough. Le Tooltip enveloppe le trigger dans un <span> : l'empilement
+ * VTooltip par VAvatar (le nom) + VTooltip sur l'agrégat (les membres masqués).
+ * Chaque VAvatar est `clickable` (donc focusable) et reçoit `triggerProps` par
+ * fallthrough. Le VTooltip enveloppe le trigger dans un <span> : l'empilement
  * du groupe reste correct car il cible l'enfant direct, wrapper compris.
  */
 export const AvecTooltips: Story = {
   render: () => {
     const max = 4
     return {
-      components: { AvatarGroup, Avatar, Tooltip },
+      components: { VAvatarGroup, VAvatar, VTooltip },
       setup: () => ({ names: NAMES, max, hidden: NAMES.slice(max) }),
       template: `
-        <AvatarGroup :max="max">
-          <Tooltip v-for="n in names" :key="n" :text="n">
+        <VAvatarGroup :max="max">
+          <VTooltip v-for="n in names" :key="n" :text="n">
             <template #default="{ triggerProps }">
-              <Avatar v-bind="triggerProps" :name="n" clickable />
+              <VAvatar v-bind="triggerProps" :name="n" clickable />
             </template>
-          </Tooltip>
+          </VTooltip>
           <template #overflow="{ count }">
-            <Tooltip :text="hidden.join(', ')">
+            <VTooltip :text="hidden.join(', ')">
               <template #default="{ triggerProps }">
-                <Avatar
+                <VAvatar
                   v-bind="triggerProps"
                   clickable
                   :aria-label="count + ' autres membres'"
-                >+{{ count }}</Avatar>
+                >+{{ count }}</VAvatar>
               </template>
-            </Tooltip>
+            </VTooltip>
           </template>
-        </AvatarGroup>
+        </VAvatarGroup>
       `,
     }
   },

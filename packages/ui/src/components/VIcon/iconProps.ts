@@ -1,7 +1,7 @@
 import type { IconSource } from './types'
 
 /**
- * Résout une source d'icône vers les props d'`Icon`.
+ * Résout une source d'icône vers les props d'`VIcon`.
  *
  * AUCUNE heuristique : une chaîne est TOUJOURS un nom d'icône ; une image ou un
  * composant se déclare explicitement (`{ src: '/logo.svg' }`). Ce helper a

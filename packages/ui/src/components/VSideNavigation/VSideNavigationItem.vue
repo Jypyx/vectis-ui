@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, provide, useId, useSlots } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import { sideNavigationKey } from './context'
@@ -85,7 +85,7 @@ defineSlots<{
   start?(): unknown
   /** Contenu libre à droite, avant le chevron. */
   end?(): unknown
-  /** Sous-items (SideNavigationItem/Group/Separator, récursif sans limite). */
+  /** Sous-items (VSideNavigationItem/Group/Separator, récursif sans limite). */
   items?(): unknown
 }>()
 
@@ -93,8 +93,8 @@ const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const slots = useSlots()
 /**
- * Présence STATIQUE du slot (modèle `hasSubmenu` de MenuItem, `hasPanels` de
- * Tabs) : déterministe en SSR, donc aucun registre réactif ni mismatch
+ * Présence STATIQUE du slot (modèle `hasSubmenu` de VMenuItem, `hasPanels` de
+ * VTabs) : déterministe en SSR, donc aucun registre réactif ni mismatch
  * d'hydratation. Contrepartie : un #items présent mais vide affiche un chevron
  * sur une liste vide.
  */
@@ -145,7 +145,7 @@ const ariaCurrent = computed(() =>
 /*
  * <summary> n'a pas d'attribut `disabled` natif : annuler le clic est le seul
  * moyen de bloquer le basculement (le clavier, lui, est couvert par
- * `tabindex="-1"`). Idiome AccordionItem — surtout pas `pointer-events: none`,
+ * `tabindex="-1"`). Idiome VAccordionItem — surtout pas `pointer-events: none`,
  * qui tuerait `cursor: not-allowed`.
  */
 function onSummaryClick(event: MouseEvent) {
@@ -198,7 +198,7 @@ function onActionClick(event: MouseEvent) {
         @click="onSummaryClick"
       >
         <slot name="start">
-          <Icon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
+          <VIcon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
         </slot>
         <span class="v-side-nav-content">
           <span class="v-side-nav-label"><slot /></span>
@@ -211,9 +211,9 @@ function onActionClick(event: MouseEvent) {
         <span v-if="$slots.end" class="v-side-nav-end" @click="onEndClick"
           ><slot name="end"
         /></span>
-        <Icon class="v-side-nav-chevron" v-bind="iconProps(expandIcon)" />
-        <!-- Deux chevrons rendus, permutation 100 % CSS sur [open] (idiome Accordion) -->
-        <Icon
+        <VIcon class="v-side-nav-chevron" v-bind="iconProps(expandIcon)" />
+        <!-- Deux chevrons rendus, permutation 100 % CSS sur [open] (idiome VAccordion) -->
+        <VIcon
           v-if="collapseIcon"
           class="v-side-nav-chevron v-side-nav-chevron-open"
           v-bind="iconProps(collapseIcon)"
@@ -242,7 +242,7 @@ function onActionClick(event: MouseEvent) {
         @click="onActionClick"
       >
         <slot name="start">
-          <Icon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
+          <VIcon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
         </slot>
         <span class="v-side-nav-content">
           <span class="v-side-nav-label"><slot /></span>
@@ -389,7 +389,7 @@ function onActionClick(event: MouseEvent) {
   }
 
   /* Chevron : bas quand fermé, retourné quand ouvert. Rotation sur l'axe
-     vertical → aucun miroir RTL (contrairement au chevron latéral de Menu). */
+     vertical → aucun miroir RTL (contrairement au chevron latéral de VMenu). */
   .v-side-nav-chevron {
     flex: none;
     color: var(--vectis-color-text-muted);
@@ -446,7 +446,7 @@ function onActionClick(event: MouseEvent) {
   }
 
   .v-side-nav-row[data-active]:hover {
-    /* assombrit légèrement la surface accent (idiome MenuItem) */
+    /* assombrit légèrement la surface accent (idiome VMenuItem) */
     background: color-mix(
       in oklab,
       var(--vectis-color-accent-surface),

@@ -13,14 +13,14 @@ describe('toast (état module)', () => {
     expect(toasts.map((item) => item.message)).toEqual(['Un', 'Deux'])
   })
 
-  it('normalise les défauts indépendants du Toaster', () => {
+  it('normalise les défauts indépendants du VToaster', () => {
     toast({ message: 'Défauts' })
     expect(toasts[0]).toMatchObject({
       tone: 'neutral',
       variant: 'tonal',
       closable: true,
     })
-    // placement et duration restent indéfinis : résolus par le Toaster
+    // placement et duration restent indéfinis : résolus par le VToaster
     expect(toasts[0]?.placement).toBeUndefined()
     expect(toasts[0]?.duration).toBeUndefined()
   })

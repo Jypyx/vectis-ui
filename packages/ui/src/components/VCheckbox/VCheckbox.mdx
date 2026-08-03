@@ -1,7 +1,7 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as CheckboxStories from './VCheckbox.stories'
+import * as VCheckboxStories from './VCheckbox.stories'
 
-<Meta of={CheckboxStories} />
+<Meta of={VCheckboxStories} />
 
 # Checkbox
 
@@ -14,15 +14,15 @@ qu'en propriété DOM.
 Taille unique : boîte de 20px, bordure de 2px (tokens `--vectis-control-size-check` et
 `--vectis-control-border-width`), coche de 14px (`--vectis-control-size-check-mark`).
 
-<Canvas of={CheckboxStories.Default} />
+<Canvas of={VCheckboxStories.Default} />
 
-<Controls of={CheckboxStories.Default} />
+<Controls of={VCheckboxStories.Default} />
 
 ## Position du libellé
 
 `label-position` place le libellé après (`end`, défaut) ou avant (`start`) la boîte.
 
-<Canvas of={CheckboxStories.PositionDuLibelle} />
+<Canvas of={VCheckboxStories.PositionDuLibelle} />
 
 ## Spread
 
@@ -30,7 +30,7 @@ Taille unique : boîte de 20px, bordure de 2px (tokens `--vectis-control-size-ch
 extrémités du conteneur. Se combine avec `label-position` pour choisir de quel côté part la
 boîte.
 
-<Canvas of={CheckboxStories.Spread} />
+<Canvas of={VCheckboxStories.Spread} />
 
 ## Indeterminate
 
@@ -38,7 +38,7 @@ boîte.
 « tout sélectionner » au-dessus d'une liste. C'est un état purement visuel : il ne modifie pas
 la valeur du v-model et n'existe qu'en propriété DOM (aucun attribut HTML équivalent).
 
-<Canvas of={CheckboxStories.Indeterminate} />
+<Canvas of={VCheckboxStories.Indeterminate} />
 
 ## États
 
@@ -46,12 +46,12 @@ la valeur du v-model et n'existe qu'en propriété DOM (aucun attribut HTML équ
 `--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu suit automatiquement le thème
 dark :
 
-<Canvas of={CheckboxStories.Disabled} />
+<Canvas of={VCheckboxStories.Disabled} />
 
 Un libellé long revient à la ligne, la boîte reste alignée sur la première ligne et ne se
 compresse pas :
 
-<Canvas of={CheckboxStories.LibelleLong} />
+<Canvas of={VCheckboxStories.LibelleLong} />
 
 ## Formulaires et validation
 

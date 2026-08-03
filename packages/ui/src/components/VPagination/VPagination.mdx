@@ -1,15 +1,15 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
 
-import * as PaginationStories from './VPagination.stories'
+import * as VPaginationStories from './VPagination.stories'
 
-<Meta of={PaginationStories} />
+<Meta of={VPaginationStories} />
 
 # Pagination
 
 Navigation entre les pages d'un jeu de résultats. Le composant n'invente aucun bouton : chaque
-pastille est un `Button`, les contrôles précédent/suivant un `Button` ou un `IconButton`, et
-l'option `attached` rattache le tout dans un `ButtonGroup`. Hover, focus, désactivation et respect
-de `prefers-reduced-motion` viennent donc directement de `Button`, sans une seule règle d'état
+pastille est un `VButton`, les contrôles précédent/suivant un `VButton` ou un `VIconButton`, et
+l'option `attached` rattache le tout dans un `VButtonGroup`. Hover, focus, désactivation et respect
+de `prefers-reduced-motion` viennent donc directement de `VButton`, sans une seule règle d'état
 redéfinie ici.
 
 La troncature se joue à deux niveaux, volontairement distincts. Le premier est **logique** : par
@@ -19,18 +19,18 @@ défaut toutes les pages sont rendues, et `totalVisible` fixe le nombre total d'
 `@container` retirent les voisines les plus éloignées quand la place manque. Aucun `ResizeObserver`,
 aucune mesure en JavaScript.
 
-<Canvas of={PaginationStories.Default} />
-<Controls of={PaginationStories.Default} />
+<Canvas of={VPaginationStories.Default} />
+<Controls of={VPaginationStories.Default} />
 
 ## Attaché
 
-`attached` place tous les boutons dans un `ButtonGroup` : bordures fusionnées, coins arrondis aux
-seules extrémités. C'est cette contrainte qui dicte la structure interne — `ButtonGroup` ne stylise
+`attached` place tous les boutons dans un `VButtonGroup` : bordures fusionnées, coins arrondis aux
+seules extrémités. C'est cette contrainte qui dicte la structure interne — `VButtonGroup` ne stylise
 que ses enfants **directs**, d'où l'absence de `<ul>`/`<li>` et une ellipse rendue en bouton inerte
 plutôt qu'en `<span>` : la couture reste continue, y compris quand une voisine est masquée par la
 troncature responsive.
 
-<Canvas of={PaginationStories.Attached} />
+<Canvas of={VPaginationStories.Attached} />
 
 ## Variantes et tones
 
@@ -38,18 +38,18 @@ La page active est **toujours** `solid` ; `variant` ne concerne que les pages in
 contrôles, en `ghost` (défaut) ou `outline`. `tone` colore la page active, les pages inactives
 restant neutres pour que le numéro courant se détache seul.
 
-<Canvas of={PaginationStories.Variants} />
-<Canvas of={PaginationStories.Tones} />
+<Canvas of={VPaginationStories.Variants} />
+<Canvas of={VPaginationStories.Tones} />
 
 ## Tailles
 
 `size` et `compact` sont propagés à l'identique à tous les boutons — l'échelle unifiée des contrôles
 s'applique donc sans réglage supplémentaire. Les pastilles sont carrées à un chiffre puis
 s'élargissent d'elles-mêmes : leur largeur minimale dérive de la hauteur de contrôle, la même
-variable que celle utilisée par `IconButton`.
+variable que celle utilisée par `VIconButton`.
 
-<Canvas of={PaginationStories.Sizes} />
-<Canvas of={PaginationStories.Compact} />
+<Canvas of={VPaginationStories.Sizes} />
+<Canvas of={VPaginationStories.Compact} />
 
 ## Contrôles précédent / suivant
 
@@ -61,7 +61,7 @@ Les contrôles avancent d'une page activable, pas d'une page : ils enjambent les
 jusqu'à la plus proche atteignable, et se désactivent d'eux-mêmes quand il n'en reste aucune — ce
 qui couvre aussi les deux extrémités, sans test séparé.
 
-<Canvas of={PaginationStories.Controles} />
+<Canvas of={VPaginationStories.Controles} />
 
 ## Troncature logique
 
@@ -71,7 +71,7 @@ soit première + ellipse + courante + ellipse + dernière). La première et la d
 toujours conservées, et la fenêtre centrée sur la page courante se **décale** près des extrémités au
 lieu de rétrécir : la barre garde exactement la même largeur quelle que soit la page courante.
 
-<Canvas of={PaginationStories.BeaucoupDePages} />
+<Canvas of={VPaginationStories.BeaucoupDePages} />
 
 ## Troncature responsive
 
@@ -90,16 +90,16 @@ responsive avec `responsive: false`.
 Aucune ellipse supplémentaire n'apparaît en compensation d'une voisine masquée : elle occuperait
 exactement la largeur d'une pastille, elle ne ferait donc rien gagner.
 
-<Canvas of={PaginationStories.Responsive} />
-<Canvas of={PaginationStories.Alignement} />
+<Canvas of={VPaginationStories.Responsive} />
+<Canvas of={VPaginationStories.Alignement} />
 
 ## Pages désactivées
 
-`disabledPages` accepte une liste de numéros **ou** un prédicat, comme `disabledDates` du `Calendar`.
+`disabledPages` accepte une liste de numéros **ou** un prédicat, comme `disabledDates` du `VCalendar`.
 Une page désactivée reste visible et lisible, simplement inerte. `disabled` désactive l'ensemble du
 composant.
 
-<Canvas of={PaginationStories.PagesDesactivees} />
+<Canvas of={VPaginationStories.PagesDesactivees} />
 
 ## Cas limites
 
@@ -107,7 +107,7 @@ Une page unique rend une seule pastille et deux contrôles en butée. Une page c
 ramenée dans l'intervalle. Les numéros à plusieurs chiffres élargissent les pastilles sans casser
 l'alignement.
 
-<Canvas of={PaginationStories.CasLimites} />
+<Canvas of={VPaginationStories.CasLimites} />
 
 ## Accessibilité
 
@@ -126,7 +126,7 @@ l'alignement.
 - Une page masquée par la troncature responsive l'est en `display: none` : elle sort à la fois de
   l'arbre d'accessibilité et de l'ordre de tabulation. Corollaire connu : si le focus était sur une
   voisine au moment où le conteneur rétrécit, il retombe sur le document.
-- Il n'y a pas de `<ul>`/`<li>` : `ButtonGroup` ne stylise que ses enfants directs et un élément de
+- Il n'y a pas de `<ul>`/`<li>` : `VButtonGroup` ne stylise que ses enfants directs et un élément de
   liste intercalé casserait la fusion des bordures. Le `<nav>` nommé et le `role="group"` du mode
   attaché fournissent le regroupement.
 

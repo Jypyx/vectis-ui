@@ -2,45 +2,45 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, ref } from 'vue'
 
-import SideNavigation from './VSideNavigation.vue'
-import SideNavigationGroup from './VSideNavigationGroup.vue'
-import SideNavigationItem from './VSideNavigationItem.vue'
-import SideNavigationSeparator from './VSideNavigationSeparator.vue'
+import VSideNavigation from './VSideNavigation.vue'
+import VSideNavigationGroup from './VSideNavigationGroup.vue'
+import VSideNavigationItem from './VSideNavigationItem.vue'
+import VSideNavigationSeparator from './VSideNavigationSeparator.vue'
 
 /** Harnais unique : contenu de la nav, attributs bruts de la racine, état exposé. */
 function renderNav(inner: string, navAttrs = '', state: Record<string, unknown> = {}) {
   const Harness = defineComponent({
     components: {
-      SideNavigation,
-      SideNavigationItem,
-      SideNavigationGroup,
-      SideNavigationSeparator,
+      VSideNavigation,
+      VSideNavigationItem,
+      VSideNavigationGroup,
+      VSideNavigationSeparator,
     },
     setup: () => state,
-    template: `<SideNavigation ${navAttrs}>${inner}</SideNavigation>`,
+    template: `<VSideNavigation ${navAttrs}>${inner}</VSideNavigation>`,
   })
   return render(Harness)
 }
 
 /** Arbre de référence : 3 niveaux, un groupe, un séparateur, une feuille active. */
 const ARBRE = `
-  <SideNavigationItem href="/" active icon="home">Accueil</SideNavigationItem>
-  <SideNavigationItem icon="folder" default-open>
+  <VSideNavigationItem href="/" active icon="home">Accueil</VSideNavigationItem>
+  <VSideNavigationItem icon="folder" default-open>
     Projets
     <template #items>
-      <SideNavigationItem href="/a">Alpha</SideNavigationItem>
-      <SideNavigationItem>
+      <VSideNavigationItem href="/a">Alpha</VSideNavigationItem>
+      <VSideNavigationItem>
         Beta
         <template #items>
-          <SideNavigationItem href="/b/1">Beta 1</SideNavigationItem>
+          <VSideNavigationItem href="/b/1">Beta 1</VSideNavigationItem>
         </template>
-      </SideNavigationItem>
+      </VSideNavigationItem>
     </template>
-  </SideNavigationItem>
-  <SideNavigationSeparator />
-  <SideNavigationGroup label="Réglages">
-    <SideNavigationItem href="/profil">Profil</SideNavigationItem>
-  </SideNavigationGroup>
+  </VSideNavigationItem>
+  <VSideNavigationSeparator />
+  <VSideNavigationGroup label="Réglages">
+    <VSideNavigationItem href="/profil">Profil</VSideNavigationItem>
+  </VSideNavigationGroup>
 `
 
 const renderTree = (navAttrs = '') => renderNav(ARBRE, navAttrs)
@@ -54,11 +54,11 @@ function row(container: Element, label: string): HTMLElement {
   return found
 }
 
-/** Noms des <Icon> d'une rangée — `data-icon` est posé quelle que soit la source. */
+/** Noms des <VIcon> d'une rangée — `data-icon` est posé quelle que soit la source. */
 const icones = (rangee: Element) =>
   [...rangee.querySelectorAll<HTMLElement>('.v-icon')].map((el) => el.dataset.icon)
 
-describe('SideNavigation', () => {
+describe('VSideNavigation', () => {
   describe('racine', () => {
     it('nomme la <nav> : dictionnaire, puis prop `label`, puis attributs du consommateur', () => {
       const nav = (attrs: string) => renderTree(attrs).container.querySelector('nav')
@@ -93,8 +93,8 @@ describe('SideNavigation', () => {
   describe('feuille', () => {
     it('rend un <a href> avec href, un <button type=button> sinon', () => {
       const { container } = renderNav(`
-        <SideNavigationItem href="/x">Lien</SideNavigationItem>
-        <SideNavigationItem>Action</SideNavigationItem>
+        <VSideNavigationItem href="/x">Lien</VSideNavigationItem>
+        <VSideNavigationItem>Action</VSideNavigationItem>
       `)
       const [lien, bouton] = [...container.querySelectorAll('.v-side-nav-action')]
       expect(lien?.tagName).toBe('A')
@@ -106,7 +106,7 @@ describe('SideNavigation', () => {
     it('émet `select` à l’activation', async () => {
       const onSelect = vi.fn()
       const { container } = renderNav(
-        `<SideNavigationItem @select="onSelect">Action</SideNavigationItem>`,
+        `<VSideNavigationItem @select="onSelect">Action</VSideNavigationItem>`,
         '',
         { onSelect },
       )
@@ -116,8 +116,8 @@ describe('SideNavigation', () => {
 
     it('active : aria-current="page" sur un lien, "true" sur un bouton, data-active sur la rangée', () => {
       const { container } = renderNav(`
-        <SideNavigationItem href="/x" active>Lien</SideNavigationItem>
-        <SideNavigationItem active>Bouton</SideNavigationItem>
+        <VSideNavigationItem href="/x" active>Lien</VSideNavigationItem>
+        <VSideNavigationItem active>Bouton</VSideNavigationItem>
       `)
       expect(row(container, 'Lien').dataset.active).toBe('')
       expect(row(container, 'Lien').querySelector('a')?.getAttribute('aria-current')).toBe('page')
@@ -130,8 +130,8 @@ describe('SideNavigation', () => {
       const onSelect = vi.fn()
       const { container } = renderNav(
         `
-          <SideNavigationItem disabled @select="onSelect">Bouton</SideNavigationItem>
-          <SideNavigationItem href="/x" disabled @select="onSelect">Lien</SideNavigationItem>
+          <VSideNavigationItem disabled @select="onSelect">Bouton</VSideNavigationItem>
+          <VSideNavigationItem href="/x" disabled @select="onSelect">Lien</VSideNavigationItem>
         `,
         '',
         { onSelect },
@@ -148,10 +148,10 @@ describe('SideNavigation', () => {
 
     it('slot #end : frère de l’action, jamais un contrôle imbriqué dans un lien', () => {
       const { container } = renderNav(`
-        <SideNavigationItem href="/x">
+        <VSideNavigationItem href="/x">
           Lien
           <template #end><button type="button" data-testid="action">Plus</button></template>
-        </SideNavigationItem>
+        </VSideNavigationItem>
       `)
       const action = container.querySelector('.v-side-nav-action')!
       const fin = container.querySelector('[data-testid="action"]')!
@@ -162,10 +162,10 @@ describe('SideNavigation', () => {
 
   describe('branche', () => {
     const BRANCHE = `
-      <SideNavigationItem @select="onSelect">
+      <VSideNavigationItem @select="onSelect">
         Parent
-        <template #items><SideNavigationItem href="/a">Alpha</SideNavigationItem></template>
-      </SideNavigationItem>
+        <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+      </VSideNavigationItem>
     `
 
     it('rend <details> + sous-liste, un chevron, et n’émet pas `select`', async () => {
@@ -193,10 +193,10 @@ describe('SideNavigation', () => {
       const ouvert = ref(false)
       const { container } = renderNav(
         `
-          <SideNavigationItem v-model:open="ouvert">
+          <VSideNavigationItem v-model:open="ouvert">
             Parent
-            <template #items><SideNavigationItem href="/a">Alpha</SideNavigationItem></template>
-          </SideNavigationItem>
+            <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+          </VSideNavigationItem>
         `,
         '',
         { ouvert },
@@ -216,10 +216,10 @@ describe('SideNavigation', () => {
 
     it('désactivée : summary hors tabulation et basculement annulé', async () => {
       const { container } = renderNav(`
-        <SideNavigationItem disabled>
+        <VSideNavigationItem disabled>
           Parent
-          <template #items><SideNavigationItem href="/a">Alpha</SideNavigationItem></template>
-        </SideNavigationItem>
+          <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+        </VSideNavigationItem>
       `)
       const summary = container.querySelector('summary')!
       expect(summary.getAttribute('aria-disabled')).toBe('true')
@@ -231,11 +231,11 @@ describe('SideNavigation', () => {
 
     it('slot #end rendu avant le chevron', () => {
       const { container } = renderNav(`
-        <SideNavigationItem>
+        <VSideNavigationItem>
           Parent
           <template #end><span data-testid="badge">3</span></template>
-          <template #items><SideNavigationItem href="/a">Alpha</SideNavigationItem></template>
-        </SideNavigationItem>
+          <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+        </VSideNavigationItem>
       `)
       const enfants = [...container.querySelector('summary')!.children]
       const fin = enfants.findIndex((el) => el.classList.contains('v-side-nav-end'))
@@ -247,10 +247,10 @@ describe('SideNavigation', () => {
     it('`collapseIcon` : deux chevrons rendus et marqueur data-swap (permutation CSS)', () => {
       const { container } = renderNav(
         `
-          <SideNavigationItem>
+          <VSideNavigationItem>
             Parent
-            <template #items><SideNavigationItem href="/a">Alpha</SideNavigationItem></template>
-          </SideNavigationItem>
+            <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+          </VSideNavigationItem>
         `,
         'expand-icon="add" collapse-icon="remove"',
       )
@@ -303,12 +303,12 @@ describe('SideNavigation', () => {
     it('`icon` accepte un nom comme un rendu explicite ; le slot #start prime', () => {
       const { container } = renderNav(
         `
-          <SideNavigationItem href="/a" icon="home">Nom</SideNavigationItem>
-          <SideNavigationItem href="/b" :icon="logo">Rendu</SideNavigationItem>
-          <SideNavigationItem href="/c" icon="home">
+          <VSideNavigationItem href="/a" icon="home">Nom</VSideNavigationItem>
+          <VSideNavigationItem href="/b" :icon="logo">Rendu</VSideNavigationItem>
+          <VSideNavigationItem href="/c" icon="home">
             Slot
             <template #start><span data-testid="avatar" /></template>
-          </SideNavigationItem>
+          </VSideNavigationItem>
         `,
         '',
         { logo: { src: '/logo.svg' } },
@@ -321,9 +321,9 @@ describe('SideNavigation', () => {
 
     it('wrapper-root : class/style sur le <li>, le reste sur le contrôle', () => {
       const { container } = renderNav(`
-        <SideNavigationItem href="/x" class="perso" target="_blank" data-tracking="nav">
+        <VSideNavigationItem href="/x" class="perso" target="_blank" data-tracking="nav">
           Externe
-        </SideNavigationItem>
+        </VSideNavigationItem>
       `)
       const li = container.querySelector('li.v-side-nav-item')!
       const action = container.querySelector('.v-side-nav-action')!
@@ -335,11 +335,11 @@ describe('SideNavigation', () => {
 
     it('le sous-libellé accepte la prop comme le slot', () => {
       const { container } = renderNav(`
-        <SideNavigationItem href="/a" sublabel="3 projets">Prop</SideNavigationItem>
-        <SideNavigationItem href="/b">
+        <VSideNavigationItem href="/a" sublabel="3 projets">Prop</VSideNavigationItem>
+        <VSideNavigationItem href="/b">
           Slot
           <template #sublabel>hier</template>
-        </SideNavigationItem>
+        </VSideNavigationItem>
       `)
       const texte = (label: string) =>
         row(container, label).querySelector('.v-side-nav-sublabel')?.textContent?.trim()
@@ -352,13 +352,13 @@ describe('SideNavigation', () => {
     /** Liens seuls : le focus programmatique d'un <summary> n'est pas modélisé
         par jsdom, le déplacement vers une branche part en play function. */
     const LIENS = `
-      <SideNavigationItem href="/1">Un</SideNavigationItem>
-      <SideNavigationItem href="/2" disabled>Deux</SideNavigationItem>
-      <SideNavigationItem href="/3">Trois</SideNavigationItem>
-      <SideNavigationItem href="/4">
+      <VSideNavigationItem href="/1">Un</VSideNavigationItem>
+      <VSideNavigationItem href="/2" disabled>Deux</VSideNavigationItem>
+      <VSideNavigationItem href="/3">Trois</VSideNavigationItem>
+      <VSideNavigationItem href="/4">
         Quatre
-        <template #items><SideNavigationItem href="/4-1">Caché</SideNavigationItem></template>
-      </SideNavigationItem>
+        <template #items><VSideNavigationItem href="/4-1">Caché</VSideNavigationItem></template>
+      </VSideNavigationItem>
     `
 
     it('les flèches déplacent le focus dans les deux sens et sautent les items désactivés', async () => {

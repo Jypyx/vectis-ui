@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
-import IconButton from '../VIconButton/VIconButton.vue'
+import VIconButton from '../VIconButton/VIconButton.vue'
 import type { ToastItem, ToastTone } from './state'
 
 /**
- * Carte de notification — présentationnel pur, interne (rendue par <Toaster>,
+ * Carte de notification — présentationnel pur, interne (rendue par <VToaster>,
  * non exportée). role="alert" (interruptif) pour danger/warning, role="status"
  * (poli) sinon. Compromis assumé : l'annonce du premier toast « poli » d'une
  * pile peut être manquée par certains lecteurs d'écran (la live region naît
@@ -20,7 +20,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  /** Demande de fermeture (croix) — la file est gérée par le Toaster. */
+  /** Demande de fermeture (croix) — la file est gérée par le VToaster. */
   close: [id: number]
 }>()
 
@@ -52,12 +52,12 @@ const icon = computed(() =>
     :role="role"
     :style="item.width ? { '--toast-width': item.width } : undefined"
   >
-    <Icon v-if="icon" class="v-toast-icon" v-bind="icon" />
+    <VIcon v-if="icon" class="v-toast-icon" v-bind="icon" />
     <div class="v-toast-body">
       <p v-if="item.title" class="v-toast-title">{{ item.title }}</p>
       <p class="v-toast-message">{{ item.message }}</p>
     </div>
-    <IconButton
+    <VIconButton
       v-if="item.closable"
       class="v-toast-close"
       :label="closeLabel"
@@ -65,8 +65,8 @@ const icon = computed(() =>
       compact
       @click="emit('close', item.id)"
     >
-      <Icon name="close" />
-    </IconButton>
+      <VIcon name="close" />
+    </VIconButton>
   </div>
 </template>
 
@@ -151,9 +151,9 @@ const icon = computed(() =>
   }
 
   /*
-   * Croix de fermeture : IconButton ghost/neutral, recoloré via les
-   * variables locales de Button (--tone-text-tinted / --tone-bg-soft) — spécificité
-   * supérieure aux règles de tone de Button, et Toast est bundlé après lui.
+   * Croix de fermeture : VIconButton ghost/neutral, recoloré via les
+   * variables locales de VButton (--tone-text-tinted / --tone-bg-soft) — spécificité
+   * supérieure aux règles de tone de VButton, et VToast est bundlé après lui.
    * En tonal : croix à la couleur d'accent du tone ; en solid : currentcolor
    * (lisible sur le fond plein).
    */
@@ -204,7 +204,7 @@ const icon = computed(() =>
    * enhancement, apparition sans animation à défaut. La sortie n'est pas
    * animée : il faudrait retenir l'item dans la file pendant la transition
    * (choix de simplicité) ; la pile qui se vide fait, elle, un fondu via
-   * hidePopover() + allow-discrete (voir Toaster).
+   * hidePopover() + allow-discrete (voir VToaster).
    */
   .v-toast {
     transition:

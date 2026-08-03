@@ -2,8 +2,8 @@ import { computed, type ComputedRef } from 'vue'
 import { clamp } from '../utils/number'
 
 /**
- * Valeur normalisée d'une barre de progression, partagée par ProgressLinear et
- * ProgressCircular : tout leur rendu (remplissage, dash-offset, texte, ARIA)
+ * Valeur normalisée d'une barre de progression, partagée par VProgressLinear et
+ * VProgressCircular : tout leur rendu (remplissage, dash-offset, texte, ARIA)
  * dérive de ces deux valeurs.
  */
 export function useProgressValue(

@@ -2,16 +2,16 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 import { defineComponent, h } from 'vue'
 
-import Accordion from '../VAccordion/VAccordion.vue'
-import AccordionItem from '../VAccordion/VAccordionItem.vue'
-import Breadcrumb from '../VBreadcrumb/VBreadcrumb.vue'
-import Button from '../VButton/VButton.vue'
-import Chip from '../VChip/VChip.vue'
-import Input from '../VInput/VInput.vue'
-import Pagination from '../VPagination/VPagination.vue'
+import VAccordion from '../VAccordion/VAccordion.vue'
+import VAccordionItem from '../VAccordion/VAccordionItem.vue'
+import VBreadcrumb from '../VBreadcrumb/VBreadcrumb.vue'
+import VButton from '../VButton/VButton.vue'
+import VChip from '../VChip/VChip.vue'
+import VInput from '../VInput/VInput.vue'
+import VPagination from '../VPagination/VPagination.vue'
 
-import Icon from './VIcon.vue'
-import { builtinIcons, type DsIconName } from './icons'
+import VIcon from './VIcon.vue'
+import { builtinIcons, type VectisIconName } from './icons'
 import {
   classIconResolver,
   componentIconResolver,
@@ -23,7 +23,7 @@ import {
 
 const meta = {
   title: 'Composants/Icon',
-  component: Icon,
+  component: VIcon,
   argTypes: {
     size: { control: { type: 'number', min: 12, max: 96, step: 4 } },
     name: { control: 'text' },
@@ -34,7 +34,7 @@ const meta = {
   args: {
     name: 'favorite',
   },
-} satisfies Meta<typeof Icon>
+} satisfies Meta<typeof VIcon>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -43,19 +43,19 @@ export const Default: Story = {}
 
 export const AdapteeAuTexte: Story = {
   render: () => ({
-    components: { Icon },
+    components: { VIcon },
     template: `
       <div style="display: flex; flex-direction: column; gap: 12px">
         <span style="font-size: var(--vectis-font-size-sm); display: inline-flex; gap: 8px; align-items: center">
-          <Icon name="favorite" /> Suit un texte sm (1em)
+          <VIcon name="favorite" /> Suit un texte sm (1em)
         </span>
         <span style="font-size: var(--vectis-font-size-xl); display: inline-flex; gap: 8px; align-items: center">
-          <Icon name="favorite" /> Suit un texte xl (1em)
+          <VIcon name="favorite" /> Suit un texte xl (1em)
         </span>
         <span style="display: inline-flex; gap: 8px; align-items: center">
-          <Icon name="favorite" :size="16" />
-          <Icon name="favorite" :size="24" />
-          <Icon name="favorite" :size="48" />
+          <VIcon name="favorite" :size="16" />
+          <VIcon name="favorite" :size="24" />
+          <VIcon name="favorite" :size="48" />
           <span>(surcharges numériques 16 / 24 / 48)</span>
         </span>
       </div>
@@ -65,20 +65,20 @@ export const AdapteeAuTexte: Story = {
 
 export const QuatreSources: Story = {
   render: () => ({
-    components: { Icon },
+    components: { VIcon },
     template: `
       <div style="display: flex; gap: 12px; align-items: center">
-        <Icon name="close" :size="24" />
-        <Icon name="rocket_launch" :size="24" />
-        <Icon
+        <VIcon name="close" :size="24" />
+        <VIcon name="rocket_launch" :size="24" />
+        <VIcon
           :size="24"
           src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1'/%3E%3C/svg%3E"
         />
-        <Icon :size="24">
+        <VIcon :size="24">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 12h16M12 4v16" stroke="currentcolor" stroke-width="2" stroke-linecap="round" />
           </svg>
-        </Icon>
+        </VIcon>
         <span>(SVG intégré / ligature / image / SVG inline)</span>
       </div>
     `,
@@ -88,12 +88,12 @@ export const QuatreSources: Story = {
 /** Les icônes que la librairie rend elle-même — embarquées, aucune police requise. */
 export const Bibliotheque: Story = {
   render: () => ({
-    components: { Icon },
+    components: { VIcon },
     setup: () => ({ noms: Object.keys(builtinIcons) }),
     template: `
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px">
         <div v-for="nom in noms" :key="nom" style="display: flex; gap: 8px; align-items: center">
-          <Icon :name="nom" :size="24" />
+          <VIcon :name="nom" :size="24" />
           <code style="font-size: var(--vectis-font-size-xs)">{{ nom }}</code>
         </div>
       </div>
@@ -108,15 +108,15 @@ export const Bibliotheque: Story = {
  */
 export const SansPolice: Story = {
   render: () => ({
-    components: { Icon },
+    components: { VIcon },
     setup: () => ({ noms: Object.keys(builtinIcons) }),
     template: `
       <div style="--vectis-font-family-icon: sans-serif; display: flex; flex-direction: column; gap: 16px">
         <div style="display: flex; gap: 12px; flex-wrap: wrap">
-          <Icon v-for="nom in noms" :key="nom" :name="nom" :size="24" />
+          <VIcon v-for="nom in noms" :key="nom" :name="nom" :size="24" />
         </div>
         <div style="display: flex; gap: 12px; align-items: center">
-          <Icon name="favorite" :size="24" />
+          <VIcon name="favorite" :size="24" />
           <span style="font-size: var(--vectis-font-size-sm)">
             ↖ hors registre : la ligature retombe sur la police du consommateur, absente ici
           </span>
@@ -134,20 +134,20 @@ export const SansPolice: Story = {
 
 export const Filled: Story = {
   render: () => ({
-    components: { Icon },
+    components: { VIcon },
     template: `
       <div style="display: flex; flex-direction: column; gap: 12px">
         <div style="display: flex; gap: 16px; align-items: center">
           <span v-for="name in ['check_circle', 'warning', 'info', 'notifications']" :key="name" style="display: inline-flex; gap: 8px; align-items: center">
-            <Icon :name="name" :size="24" />
-            <Icon :name="name" :size="24" filled />
+            <VIcon :name="name" :size="24" />
+            <VIcon :name="name" :size="24" filled />
           </span>
           <span>(registre intégré : second path embarqué)</span>
         </div>
         <div style="display: flex; gap: 16px; align-items: center">
           <span v-for="name in ['favorite', 'home', 'settings', 'star']" :key="name" style="display: inline-flex; gap: 8px; align-items: center">
-            <Icon :name="name" :size="24" />
-            <Icon :name="name" :size="24" filled />
+            <VIcon :name="name" :size="24" />
+            <VIcon :name="name" :size="24" filled />
           </span>
           <span>(ligature : axe FILL de la police)</span>
         </div>
@@ -158,7 +158,7 @@ export const Filled: Story = {
 
 /**
  * L'invariant du DS : quelle que soit la SOURCE de l'icône, sa taille reste celle
- * du contexte (ici celle du Button — lg → 24px, xs → 16px). Mesuré pour de vrai :
+ * du contexte (ici celle du VButton — lg → 24px, xs → 16px). Mesuré pour de vrai :
  * jsdom ne fait pas de layout, ce contrôle n'existe qu'ici.
  */
 export const InvariantDeTaille: Story = {
@@ -188,21 +188,21 @@ export const InvariantDeTaille: Story = {
     }
   },
   render: () => ({
-    components: { Button, Icon },
+    components: { VButton, VIcon },
     setup: () => ({ sources: ['close', 'favorite', 'composant', 'classe'] }),
     template: `
       <div style="display: flex; flex-direction: column; gap: 12px; align-items: start">
         <div v-for="size in ['lg', 'xs']" :key="size" :data-taille="size" style="display: flex; gap: 8px">
-          <Button v-for="nom in sources" :key="nom" :size="size" variant="outline" tone="neutral">
-            <template #start><Icon :name="nom" /></template>
+          <VButton v-for="nom in sources" :key="nom" :size="size" variant="outline" tone="neutral">
+            <template #start><VIcon :name="nom" /></template>
             {{ nom }}
-          </Button>
-          <Button :size="size" variant="outline" tone="neutral">
+          </VButton>
+          <VButton :size="size" variant="outline" tone="neutral">
             <template #start>
-              <Icon src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1'/%3E%3C/svg%3E" />
+              <VIcon src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1'/%3E%3C/svg%3E" />
             </template>
             image
-          </Button>
+          </VButton>
         </div>
       </div>
     `,
@@ -243,12 +243,12 @@ export const AvecLabel: Story = {
 
 export const PiloteParLeParent: Story = {
   render: () => ({
-    components: { Icon },
+    components: { VIcon },
     template: `
       <!-- Le conteneur pose l'API de contexte ; la prop size numérique prime -->
       <div style="--vectis-icon-size: var(--vectis-icon-size-lg); --vectis-icon-opsz: 24; display: flex; gap: 12px; align-items: center">
-        <Icon name="palette" />
-        <Icon name="palette" :size="16" />
+        <VIcon name="palette" />
+        <VIcon name="palette" :size="16" />
         <span>(contexte lg / prop 16px qui prime)</span>
       </div>
     `,
@@ -262,7 +262,7 @@ export const PiloteParLeParent: Story = {
  * dépendance npm ajoutée au package. Chaque story pose SON résolveur dans
  * `beforeEach` et le retire par la fonction de nettoyage : l'état est
  * module-level, il fuiterait sinon d'une story à l'autre (même discipline que
- * le décorateur `dismissToast()` des stories de Toast).
+ * le décorateur `dismissToast()` des stories de VToast).
  *
  * Les tables d'alias ci-dessous ont été vérifiées classe par classe contre les
  * feuilles CSS réelles de chaque bibliothèque. Un nom inexistant ne lève rien :
@@ -283,39 +283,39 @@ const traitSvg = (d: string) => (props: Record<string, unknown>) =>
 /** Vitrine commune : des composants dont les icônes PAR DÉFAUT viennent du DS —
     c'est ce qui rend le changement de bibliothèque visible d'un coup d'œil. */
 const VITRINE_COMPOSANTS = {
-  Accordion,
-  AccordionItem,
-  Breadcrumb,
-  Button,
-  Chip,
-  Icon,
-  Input,
-  Pagination,
+  VAccordion,
+  VAccordionItem,
+  VBreadcrumb,
+  VButton,
+  VChip,
+  VIcon,
+  VInput,
+  VPagination,
 }
 
 const VITRINE = `
   <div style="display: flex; flex-direction: column; gap: 20px; max-inline-size: 640px">
     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-      <Button icon-start="search">Rechercher</Button>
-      <Button variant="outline" tone="neutral" icon-end="expand_more">Filtres</Button>
-      <Chip dismissible>Étiquette</Chip>
-      <Chip selectable check :selected="true" tone="accent">Sélectionné</Chip>
+      <VButton icon-start="search">Rechercher</VButton>
+      <VButton variant="outline" tone="neutral" icon-end="expand_more">Filtres</VButton>
+      <VChip dismissible>Étiquette</VChip>
+      <VChip selectable check :selected="true" tone="accent">Sélectionné</VChip>
     </div>
 
-    <Input v-model="recherche" label="Recherche" icon-start="search" clearable />
+    <VInput v-model="recherche" label="Recherche" icon-start="search" clearable />
 
-    <Breadcrumb :items="fil" current-path="/projets/socle" />
+    <VBreadcrumb :items="fil" current-path="/projets/vectis" />
 
-    <Accordion>
-      <AccordionItem title="Panneau replié" icon-start="notifications">
+    <VAccordion>
+      <VAccordionItem title="Panneau replié" icon-start="notifications">
         Le chevron, la croix, la coche et les flèches viennent tous du DS.
-      </AccordionItem>
-    </Accordion>
+      </VAccordionItem>
+    </VAccordion>
 
-    <Pagination v-model="page" :length="12" :total-visible="7" />
+    <VPagination v-model="page" :length="12" :total-visible="7" />
 
     <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-block-start: 4px">
-      <Icon v-for="nom in noms" :key="nom" :name="nom" :size="24" :title="nom" />
+      <VIcon v-for="nom in noms" :key="nom" :name="nom" :size="24" :title="nom" />
     </div>
   </div>
 `
@@ -330,13 +330,13 @@ function vitrinePolice(resolver: IconResolver): Story {
     render: () => ({
       components: VITRINE_COMPOSANTS,
       setup: () => ({
-        recherche: 'Socle',
+        recherche: 'Vectis',
         page: 4,
         noms: Object.keys(builtinIcons),
         fil: [
           { label: 'Accueil', href: '/' },
           { label: 'Projets', href: '/projets' },
-          { label: 'Socle', href: '/projets/socle' },
+          { label: 'Vectis', href: '/projets/vectis' },
         ],
       }),
       template: VITRINE,
@@ -344,10 +344,10 @@ function vitrinePolice(resolver: IconResolver): Story {
   }
 }
 
-/** Typé `Record<DsIconName, string>` (et non Partial) : TS refuse de compiler
+/** Typé `Record<VectisIconName, string>` (et non Partial) : TS refuse de compiler
     tant qu'une icône du DS n'est pas mappée. C'est le garde-fou d'exhaustivité
     à recommander aux consommateurs. */
-const PHOSPHOR: Record<DsIconName, string> = {
+const PHOSPHOR: Record<VectisIconName, string> = {
   arrow_downward: 'arrow-down',
   arrow_drop_down: 'caret-down',
   arrow_drop_up: 'caret-up',
@@ -370,7 +370,7 @@ const PHOSPHOR: Record<DsIconName, string> = {
   warning: 'warning',
 }
 
-const FONT_AWESOME: Record<DsIconName, string> = {
+const FONT_AWESOME: Record<VectisIconName, string> = {
   arrow_downward: 'arrow-down',
   arrow_drop_down: 'caret-down',
   arrow_drop_up: 'caret-up',
@@ -393,7 +393,7 @@ const FONT_AWESOME: Record<DsIconName, string> = {
   warning: 'triangle-exclamation',
 }
 
-const BOOTSTRAP: Record<DsIconName, string> = {
+const BOOTSTRAP: Record<VectisIconName, string> = {
   arrow_downward: 'arrow-down',
   arrow_drop_down: 'caret-down-fill',
   arrow_drop_up: 'caret-up-fill',
@@ -429,7 +429,7 @@ export const PolicePhosphor: Story = {
     }),
   ),
   play: async ({ canvasElement }) => {
-    // Le résolveur est bien branché : la croix du Chip porte les classes Phosphor.
+    // Le résolveur est bien branché : la croix du VChip porte les classes Phosphor.
     const croix = canvasElement.querySelector("[data-icon='close'] .v-icon-glyph")
     await expect(croix).toHaveClass('ph', 'ph-x')
     // …et le nom LOGIQUE survit au changement de bibliothèque.

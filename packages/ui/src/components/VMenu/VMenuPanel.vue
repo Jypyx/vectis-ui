@@ -7,8 +7,8 @@ import type { MenuPanelPlacement } from './context'
 import { arrowNavigate } from '../../utils/arrowNav'
 
 /**
- * Panneau popover INTERNE (non exporté), partagé par Menu (panneau racine)
- * et MenuItem (sous-menus). Popover API : light dismiss natif, l'invocateur
+ * Panneau popover INTERNE (non exporté), partagé par VMenu (panneau racine)
+ * et VMenuItem (sous-menus). Popover API : light dismiss natif, l'invocateur
  * `popovertarget` est l'ancre implicite, positionnement pur CSS (floating.css),
  * chrome commun via `.v-panel` (panel.css).
  *
@@ -62,7 +62,7 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  /** Les MenuItem / MenuGroup / MenuSeparator. */
+  /** Les VMenuItem / VMenuGroup / VMenuSeparator. */
   default(): unknown
 }>()
 
@@ -112,7 +112,7 @@ function onKeydown(event: KeyboardEvent) {
     // Échap ne ferme QUE ce niveau. preventDefault : le close request natif
     // fermerait le popover sans rendre le focus à l'item parent (et notre
     // hide() l'aurait déjà fermé). Racine : le retour de focus au déclencheur
-    // est géré par le onToggle de Menu.
+    // est géré par le onToggle de VMenu.
     event.preventDefault()
     hide()
     if (props.submenu) menuInvoker(props.id)?.focus()
@@ -140,7 +140,7 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     :class="{
       /*
        * `v-control` sur la RACINE seulement : elle pose les `--control-*`
-       * (hauteur, paddings, gap, typo, contexte Icon) depuis
+       * (hauteur, paddings, gap, typo, contexte VIcon) depuis
        * styles/control-size.css, et les sous-panneaux — descendants DOM —
        * en héritent. La poser aussi sur eux les casserait : `.v-control`
        * redéfinit `--control-height` depuis `--control-height-base` SANS
@@ -190,7 +190,7 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
 
   /* Plancher de largeur = largeur du déclencheur (prop matchTrigger). Le
      panneau s'ancre implicitement à son invocateur `popovertarget`, donc
-     anchor-size() résout sans anchor-name — là où Combobox et TimePicker,
+     anchor-size() résout sans anchor-name — là où VCombobox et VTimePicker,
      ancrés à un <input>, doivent nommer leur ancre. Rendu par le panneau
      RACINE seulement.
      Placée APRÈS [data-width] (spécificité égale) : combinée à `width`, c'est

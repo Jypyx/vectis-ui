@@ -211,7 +211,7 @@ const { clamped, fraction } = useProgressValue(
     color: var(--vectis-color-text);
     font-family: var(--vectis-text-family);
     /* ratio proportionnel au diamètre (tolérance déjà admise pour l'épaisseur
-       du Spinner), avec plancher au token le plus petit */
+       du VSpinner), avec plancher au token le plus petit */
     font-size: max(var(--vectis-text-caption-size), calc(var(--progress-diameter) / 4));
     font-weight: var(--vectis-text-control-weight);
     line-height: var(--vectis-text-control-leading);

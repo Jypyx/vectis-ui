@@ -1,4 +1,4 @@
-import type { DsMessages } from './types'
+import type { VectisMessages } from './types'
 
 /**
  * Français — socle du DS. C'est à la fois la langue par défaut et la BASE de
@@ -11,7 +11,7 @@ import type { DsMessages } from './types'
  * ⚠ Les chaînes sont COPIÉES des composants, apostrophes typographiques
  * comprises : plusieurs tests unitaires les ciblent au caractère près.
  */
-export const fr: DsMessages = {
+export const fr: VectisMessages = {
   common: {
     loading: 'Chargement…',
     clear: 'Effacer',

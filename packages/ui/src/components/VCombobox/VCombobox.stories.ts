@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { computed, ref } from 'vue'
 
-import Chip from '../VChip/VChip.vue'
-import Combobox from './VCombobox.vue'
-import type { ComboboxItem, ComboboxOption } from './VCombobox.vue'
+import VChip from '../VChip/VChip.vue'
+import VCombobox from './VCombobox.vue'
+import type { ComboboxItem, VComboboxOption } from './VCombobox.vue'
 
 const PAYS = [
   { value: 'fr', label: 'France' },
@@ -67,7 +67,7 @@ const CAPITALES: Record<string, string> = {
 
 // « API » simulée pour les stories asynchrones : latence réseau, filtrage et
 // pagination côté source (le composant n'en refait aucun).
-const CATALOGUE: ComboboxOption[] = Array.from({ length: 120 }, (_, i) => ({
+const CATALOGUE: VComboboxOption[] = Array.from({ length: 120 }, (_, i) => ({
   value: `ref-${i + 1}`,
   label: `Référence ${String(i + 1).padStart(3, '0')}`,
 }))
@@ -85,7 +85,7 @@ async function chercher(query: string, page: number) {
 
 const meta = {
   title: 'Composants/Combobox',
-  component: Combobox,
+  component: VCombobox,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     compact: { control: 'boolean' },
@@ -96,18 +96,18 @@ const meta = {
     hasMore: { control: false },
   },
   args: { options: PAYS, placeholder: 'Choisir un pays…' },
-} satisfies Meta<typeof Combobox>
+} satisfies Meta<typeof VCombobox>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => ({ args, value: ref('') }),
     template: `
       <div style="display: grid; gap: 8px; width: 300px">
-        <Combobox v-bind="args" v-model="value" aria-label="Pays" />
+        <VCombobox v-bind="args" v-model="value" aria-label="Pays" />
         <output data-testid="mirror">{{ value }}</output>
       </div>
     `,
@@ -137,11 +137,11 @@ export const Default: Story = {
 export const Groupes: Story = {
   args: { options: PAYS_GROUPES },
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => ({ args, value: ref('') }),
     template: `
       <div style="display: grid; gap: 8px; width: 300px">
-        <Combobox v-bind="args" v-model="value" aria-label="Pays" />
+        <VCombobox v-bind="args" v-model="value" aria-label="Pays" />
         <output data-testid="mirror">{{ value }}</output>
       </div>
     `,
@@ -192,18 +192,18 @@ export const Groupes: Story = {
 
 export const SelectionMultiple: Story = {
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => ({ args, value: ref<string[]>(['fr']), other: ref<string[]>(['ch', 'ca']) }),
     template: `
       <div style="display: grid; gap: 16px; width: 340px">
         <div style="display: grid; gap: 4px">
           <span style="font: 12px sans-serif; color: #888">Effacement activé (défaut)</span>
-          <Combobox v-bind="args" multiple v-model="value" aria-label="Pays desservis" />
+          <VCombobox v-bind="args" multiple v-model="value" aria-label="Pays desservis" />
           <output data-testid="mirror">{{ value.join(',') }}</output>
         </div>
         <div style="display: grid; gap: 4px">
           <span style="font: 12px sans-serif; color: #888">Effacement désactivé (clearable=false)</span>
-          <Combobox v-bind="args" multiple :clearable="false" v-model="other" aria-label="Autres pays" />
+          <VCombobox v-bind="args" multiple :clearable="false" v-model="other" aria-label="Autres pays" />
         </div>
       </div>
     `,
@@ -236,11 +236,11 @@ export const SelectionMultiple: Story = {
 
 export const AucunResultat: Story = {
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => ({ args, value: ref('') }),
     template: `
       <div style="width: 300px">
-        <Combobox v-bind="args" v-model="value" aria-label="Pays" empty-text="Aucun pays trouvé" />
+        <VCombobox v-bind="args" v-model="value" aria-label="Pays" empty-text="Aucun pays trouvé" />
       </div>
     `,
   }),
@@ -254,11 +254,11 @@ export const AucunResultat: Story = {
 
 export const Invalide: Story = {
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => ({ args, value: ref('') }),
     template: `
       <div style="width: 300px">
-        <Combobox v-bind="args" v-model="value" invalid aria-label="Pays" />
+        <VCombobox v-bind="args" v-model="value" invalid aria-label="Pays" />
       </div>
     `,
   }),
@@ -266,11 +266,11 @@ export const Invalide: Story = {
 
 export const Disabled: Story = {
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => ({ args, value: ref('fr') }),
     template: `
       <div style="width: 300px">
-        <Combobox v-bind="args" v-model="value" disabled aria-label="Pays" />
+        <VCombobox v-bind="args" v-model="value" disabled aria-label="Pays" />
       </div>
     `,
   }),
@@ -285,7 +285,7 @@ export const Disabled: Story = {
  */
 export const Tailles: Story = {
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => ({
       args,
       variants: [
@@ -302,7 +302,7 @@ export const Tailles: Story = {
       <div style="display: grid; gap: 16px; width: 340px">
         <div v-for="v in variants" :key="v.label" style="display: grid; gap: 4px">
           <span style="font: 12px sans-serif; color: #888">{{ v.label }}</span>
-          <Combobox v-bind="{ ...args, ...v.props }" multiple :model-value="value" aria-label="Pays" />
+          <VCombobox v-bind="{ ...args, ...v.props }" multiple :model-value="value" aria-label="Pays" />
         </div>
       </div>
     `,
@@ -315,12 +315,12 @@ export const Tailles: Story = {
  */
 export const RepliAuBlur: Story = {
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => ({ args, value: ref<string[]>(['fr', 'be', 'ch']) }),
     template: `
       <div style="display: grid; gap: 8px; width: 340px">
         <button type="button">Élément voisin (pour retirer le focus)</button>
-        <Combobox v-bind="args" multiple v-model="value" aria-label="Pays desservis" />
+        <VCombobox v-bind="args" multiple v-model="value" aria-label="Pays desservis" />
       </div>
     `,
   }),
@@ -347,10 +347,10 @@ export const RepliAuBlur: Story = {
  */
 export const RechercheAsynchrone: Story = {
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => {
       const value = ref('')
-      const options = ref<ComboboxOption[]>([])
+      const options = ref<VComboboxOption[]>([])
       const loading = ref(false)
       const requetes = ref(0)
       let jeton = 0
@@ -370,7 +370,7 @@ export const RechercheAsynchrone: Story = {
     },
     template: `
       <div style="display: grid; gap: 8px; width: 340px">
-        <Combobox
+        <VCombobox
           v-bind="args"
           :options="options"
           :filter="false"
@@ -406,16 +406,16 @@ export const RechercheAsynchrone: Story = {
 }
 
 /**
- * Pagination : `hasMore` rend une sentinelle en pied de panneau, dont l'entrée
+ * VPagination : `hasMore` rend une sentinelle en pied de panneau, dont l'entrée
  * dans la vue émet `load-more`. Le spinner de page suivante s'affiche au même
  * endroit, sans remplacer les options déjà chargées.
  */
 export const ScrollInfini: Story = {
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => {
       const value = ref('')
-      const options = ref<ComboboxOption[]>([])
+      const options = ref<VComboboxOption[]>([])
       const loading = ref(false)
       const total = ref(0)
       const page = ref(0)
@@ -448,7 +448,7 @@ export const ScrollInfini: Story = {
     },
     template: `
       <div style="display: grid; gap: 8px; width: 340px">
-        <Combobox
+        <VCombobox
           v-bind="args"
           :options="options"
           :filter="false"
@@ -502,11 +502,11 @@ export const AvecIcones: Story = {
     placeholder: 'Choisir un type…',
   },
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => ({ args, value: ref('img') }),
     template: `
       <div style="width: 340px">
-        <Combobox v-bind="args" v-model="value" aria-label="Type de fichier" />
+        <VCombobox v-bind="args" v-model="value" aria-label="Type de fichier" />
       </div>
     `,
   }),
@@ -523,7 +523,7 @@ export const AvecIcones: Story = {
 }
 
 /**
- * Le slot `#chip` remplace le Chip d'une valeur sélectionnée (mode multiple).
+ * Le slot `#chip` remplace le VChip d'une valeur sélectionnée (mode multiple).
  * Il reçoit `option` — donc son `icon` — ainsi que `remove` pour rester
  * retirable, et `size`/`compact` pour garder le gabarit calculé par le champ.
  */
@@ -538,13 +538,13 @@ export const ChipPersonnalise: Story = {
     placeholder: 'Ajouter un type…',
   },
   render: (args) => ({
-    components: { Combobox, Chip },
+    components: { VCombobox, VChip },
     setup: () => ({ args, value: ref(['doc', 'img']) }),
     template: `
       <div style="width: 380px">
-        <Combobox v-bind="args" v-model="value" aria-label="Types de fichier">
+        <VCombobox v-bind="args" v-model="value" aria-label="Types de fichier">
           <template #chip="{ option, label, remove, size, compact }">
-            <Chip
+            <VChip
               tone="neutral"
               variant="outline"
               :icon-start="option?.icon"
@@ -553,10 +553,10 @@ export const ChipPersonnalise: Story = {
               dismissible
               :dismiss-label="\`Retirer \${label}\`"
               @dismiss="remove"
-              >{{ label }}</Chip
+              >{{ label }}</VChip
             >
           </template>
-        </Combobox>
+        </VCombobox>
       </div>
     `,
   }),
@@ -570,35 +570,35 @@ export const ChipPersonnalise: Story = {
  */
 export const OptionPersonnalisee: Story = {
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => ({ args, value: ref('fr'), capitales: CAPITALES }),
     template: `
       <div style="width: 340px">
-        <Combobox v-bind="args" v-model="value" aria-label="Pays">
+        <VCombobox v-bind="args" v-model="value" aria-label="Pays">
           <template #option="{ option }">
             <span style="display: grid">
               <span>{{ option.label }}</span>
               <small style="opacity: 0.6">{{ capitales[option.value] }}</small>
             </span>
           </template>
-        </Combobox>
+        </VCombobox>
       </div>
     `,
   }),
 }
 
 /**
- * Deux Combobox côte à côte : chaque panneau s'ancre à SON contrôle grâce à
+ * Deux VCombobox côte à côte : chaque panneau s'ancre à SON contrôle grâce à
  * `anchor-scope` (le nom d'ancre est confiné à chaque instance).
  */
 export const DeuxComboboxes: Story = {
   render: (args) => ({
-    components: { Combobox },
+    components: { VCombobox },
     setup: () => ({ args, a: ref(''), b: ref('') }),
     template: `
       <div style="display: flex; gap: 16px; width: 640px">
-        <Combobox v-bind="args" v-model="a" aria-label="Pays A" />
-        <Combobox v-bind="args" v-model="b" aria-label="Pays B" />
+        <VCombobox v-bind="args" v-model="a" aria-label="Pays A" />
+        <VCombobox v-bind="args" v-model="b" aria-label="Pays B" />
       </div>
     `,
   }),

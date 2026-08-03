@@ -1,5 +1,5 @@
 /*
- * Chrome commun des panneaux flottants listant des rangées (Menu, Combobox).
+ * Chrome commun des panneaux flottants listant des rangées (VMenu, VCombobox).
  *
  * Pendant de `floating.css`, qui porte le POSITIONNEMENT du même sujet : ici
  * c'est l'habillage (surface, bordure, ombre, rythme interne). Les deux
@@ -11,17 +11,17 @@
  * égale (0,1,0) — à déclaration commune, c'est l'ordre du bundle qui
  * trancherait. Restent donc chez chaque panneau : `min/max-inline-size`,
  * `max-block-size`, `overflow`, la marge des sous-panneaux, `[data-width]`
- * (`position-anchor` vient de `Popover`).
+ * (`position-anchor` vient de `VPopover`).
  *
  * Rien ici sur les TAILLES : le panneau porte `v-control` (avec son
  * `data-size`/`data-compact`) et les rangées consomment les `--control-*`
  * hérités — une seule table, `styles/control-size.css`. C'est aussi pourquoi
- * le contexte Icon n'est PAS posé ici : cette feuille s'applique à chaque
+ * le contexte VIcon n'est PAS posé ici : cette feuille s'applique à chaque
  * panneau, un sous-menu écraserait donc la valeur héritée de sa racine.
  *
- * Cette classe est posée par la prop `surface` de `Popover` (défaut true), qui
+ * Cette classe est posée par la prop `surface` de `VPopover` (défaut true), qui
  * porte la plomberie du popover — élément, état, ancrage, placement. La
- * granularité de partage est donc : la plomberie (`Popover`), le chrome (ce
+ * granularité de partage est donc : la plomberie (`VPopover`), le chrome (ce
  * fichier), le positionnement (`floating.css`) et les tailles
  * (`control-size.css`). Ce qui reste PROSCRIT est un panneau paramétré par
  * `role`, qui absorberait en plus le rôle ARIA, le clavier, le focus et la

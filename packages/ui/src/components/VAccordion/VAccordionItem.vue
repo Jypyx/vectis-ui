@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import Typography from '../VTypography/VTypography.vue'
+import VTypography from '../VTypography/VTypography.vue'
 import { accordionKey } from './context'
 
 /**
@@ -76,24 +76,24 @@ function onSummaryClick(event: MouseEvent) {
       @click="onSummaryClick"
     >
       <slot name="start">
-        <Icon v-if="iconStart" class="v-accordion-icon-start" v-bind="iconProps(iconStart)" />
+        <VIcon v-if="iconStart" class="v-accordion-icon-start" v-bind="iconProps(iconStart)" />
       </slot>
       <span class="v-accordion-heading">
         <span class="v-accordion-title"
           ><slot name="title">{{ title }}</slot></span
         >
-        <Typography
+        <VTypography
           v-if="subtitle || $slots.subtitle"
           as="span"
           variant="caption"
           tone="muted"
           class="v-accordion-subtitle"
-          ><slot name="subtitle">{{ subtitle }}</slot></Typography
+          ><slot name="subtitle">{{ subtitle }}</slot></VTypography
         >
       </span>
-      <Icon class="v-accordion-icon" v-bind="iconProps(expandIcon)" />
+      <VIcon class="v-accordion-icon" v-bind="iconProps(expandIcon)" />
       <!-- Deux icônes rendues, permutation 100 % CSS sur [open] -->
-      <Icon
+      <VIcon
         v-if="collapseIcon"
         class="v-accordion-icon v-accordion-icon-open"
         v-bind="iconProps(collapseIcon)"
@@ -116,7 +116,7 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   .v-accordion-summary {
-    /* Contexte d'Icon : 20px quelle que soit la densité (seuls les paddings
+    /* Contexte de VIcon : 20px quelle que soit la densité (seuls les paddings
        varient en compact), opsz 20 comme le mapping md de la table des tailles */
     --vectis-icon-size: var(--vectis-icon-size-md);
     --vectis-icon-opsz: 20;
@@ -171,7 +171,7 @@ function onSummaryClick(event: MouseEvent) {
     line-height: var(--vectis-text-label-leading);
   }
 
-  /* Sous-titre : rendu par Typography (caption muted) — la classe
+  /* Sous-titre : rendu par VTypography (caption muted) — la classe
      .v-accordion-subtitle reste posée comme point d'accroche (état
      disabled ci-dessous). */
 

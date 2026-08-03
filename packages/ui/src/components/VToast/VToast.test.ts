@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Toast from './VToast.vue'
+import VToast from './VToast.vue'
 import type { ToastItem } from './state'
 
 const makeItem = (overrides: Partial<ToastItem> = {}): ToastItem => ({
@@ -14,9 +14,9 @@ const makeItem = (overrides: Partial<ToastItem> = {}): ToastItem => ({
 })
 
 const renderToast = (overrides: Partial<ToastItem> = {}) =>
-  render(Toast, { props: { item: makeItem(overrides), closeLabel: 'Fermer' } })
+  render(VToast, { props: { item: makeItem(overrides), closeLabel: 'Fermer' } })
 
-describe('Toast (carte interne)', () => {
+describe('VToast (carte interne)', () => {
   it('role="status" (poli) sauf danger/warning en role="alert"', () => {
     // plusieurs rendus dans le même test : on lit l'attribut sur chaque racine
     const roleOf = (tone: ToastItem['tone']) =>

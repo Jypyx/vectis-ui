@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, useId, watch } from 'vue'
 
-import Button from '../VButton/VButton.vue'
-import Icon from '../VIcon/VIcon.vue'
-import IconButton from '../VIconButton/VIconButton.vue'
+import VButton from '../VButton/VButton.vue'
+import VIcon from '../VIcon/VIcon.vue'
+import VIconButton from '../VIconButton/VIconButton.vue'
 import {
   addDays,
   addMonths,
@@ -31,7 +31,7 @@ import { useLocale, useMessages } from '../../i18n/state'
 /**
  * Calendrier inline (grille) réutilisable, inspiration Material. Contient TOUTE
  * la logique de dates, de vues (jours / mois / années) et du clavier ; le
- * DatePicker se contente de l'habiller d'un champ + popover.
+ * VDatePicker se contente de l'habiller d'un champ + popover.
  *
  * Le natif ne fournit pas de grille de dates accessible (`<input type=date>`
  * n'est ni stylable ni composable) : le JS implémente donc le pattern ARIA
@@ -106,7 +106,7 @@ const props = withDefaults(defineProps<CalendarProps>(), {
 const model = defineModel<CalendarValue>({ default: null })
 
 const emit = defineEmits<{
-  /** Émis à chaque sélection (valeur complète courante). Le DatePicker s'en sert
+  /** Émis à chaque sélection (valeur complète courante). Le VDatePicker s'en sert
       pour fermer en sélection simple. */
   select: [value: CalendarValue]
 }>()
@@ -135,7 +135,7 @@ const gridLabelId = useId()
 const m = useMessages()
 const dsLocale = useLocale()
 /* Prop prioritaire, sinon locale globale du DS (idiome `props.x ?? contexte`
-   d'Avatar). Une seule dérivation : toutes les lectures passent par elle. */
+   de VAvatar). Une seule dérivation : toutes les lectures passent par elle. */
 const resolvedLocale = computed(() => props.locale ?? dsLocale.value)
 
 const resolvedFirstDay = computed(
@@ -487,7 +487,7 @@ watch(
   },
 )
 
-/** Amène le focus dans la grille (utilisé par le DatePicker à l'ouverture). */
+/** Amène le focus dans la grille (utilisé par le VDatePicker à l'ouverture). */
 function focus() {
   view.value = 'days'
   focusDay(focusedISO.value)
@@ -505,14 +505,14 @@ defineExpose({ focus })
     <!-- En-tête : sélecteurs mois & année avec chevrons ± -->
     <div class="v-calendar-header">
       <div class="v-calendar-nav">
-        <IconButton
+        <VIconButton
           icon="chevron_left"
           :label="m.calendar.previousMonth"
           size="sm"
           :disabled="!canPrevMonth"
           @click="stepMonth(-1)"
         />
-        <Button
+        <VButton
           variant="ghost"
           tone="neutral"
           size="sm"
@@ -522,12 +522,12 @@ defineExpose({ focus })
           @click="toggleView('months')"
         >
           {{ monthLabels[viewMonth0] }}
-          <Icon
+          <VIcon
             :name="view === 'months' ? 'arrow_drop_up' : 'arrow_drop_down'"
             aria-hidden="true"
           />
-        </Button>
-        <IconButton
+        </VButton>
+        <VIconButton
           icon="chevron_right"
           :label="m.calendar.nextMonth"
           size="sm"
@@ -537,14 +537,14 @@ defineExpose({ focus })
       </div>
 
       <div class="v-calendar-nav">
-        <IconButton
+        <VIconButton
           icon="chevron_left"
           :label="m.calendar.previousYear"
           size="sm"
           :disabled="!canPrevYear"
           @click="stepYear(-1)"
         />
-        <Button
+        <VButton
           variant="ghost"
           tone="neutral"
           size="sm"
@@ -553,9 +553,12 @@ defineExpose({ focus })
           @click="toggleView('years')"
         >
           {{ viewYear }}
-          <Icon :name="view === 'years' ? 'arrow_drop_up' : 'arrow_drop_down'" aria-hidden="true" />
-        </Button>
-        <IconButton
+          <VIcon
+            :name="view === 'years' ? 'arrow_drop_up' : 'arrow_drop_down'"
+            aria-hidden="true"
+          />
+        </VButton>
+        <VIconButton
           icon="chevron_right"
           :label="m.calendar.nextYear"
           size="sm"
@@ -775,7 +778,7 @@ defineExpose({ focus })
     justify-content: center;
     height: var(--vectis-control-height-sm);
     /* Micro-en-tête de colonne : rôle overline (la casse reste `capitalize`,
-       convention des calendriers, pas les capitales de la variante Typography) */
+       convention des calendriers, pas les capitales de la variante VTypography) */
     font-size: var(--vectis-text-overline-size);
     font-weight: var(--vectis-text-overline-weight);
     letter-spacing: var(--vectis-text-overline-tracking);

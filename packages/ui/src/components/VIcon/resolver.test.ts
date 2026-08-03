@@ -2,7 +2,7 @@ import { render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { h } from 'vue'
 
-import Icon from './VIcon.vue'
+import VIcon from './VIcon.vue'
 import { builtinIcons } from './icons'
 import {
   classIconResolver,
@@ -11,7 +11,7 @@ import {
   setIconResolver,
 } from './resolver'
 
-// L'état est module-level (comme Toast/state.ts) : il survit d'un test à l'autre.
+// L'état est module-level (comme VToast/state.ts) : il survit d'un test à l'autre.
 afterEach(() => setIconResolver(undefined))
 
 /** Faux jeu d'icônes en composants (à la Lucide) — fonctionnel, donc une seule
@@ -20,7 +20,7 @@ afterEach(() => setIconResolver(undefined))
     le spread est ce qui les fait atterrir sur le SVG. */
 const Lucide = (props: Record<string, unknown>) => h('svg', { 'data-testid': 'lucide', ...props })
 
-const iconOf = (props: Record<string, unknown>) => render(Icon, { props }).container
+const iconOf = (props: Record<string, unknown>) => render(VIcon, { props }).container
 
 describe('setIconResolver', () => {
   it('passe AVANT le registre intégré', () => {

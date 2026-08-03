@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { usePopover } from '../../composables/usePopover'
-import Toast from './VToast.vue'
+import VToast from './VToast.vue'
 import { dismissToast, toasts, type ToastItem, type ToastPlacement } from './state'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
@@ -17,7 +17,7 @@ import { useMessages } from '../../i18n/state'
  * style UA `[popover] { display: none }`, SSR inoffensif).
  *
  * JS justifié : pont entre la file réactive (state.ts) et l'API impérative
- * Popover (showPopover/hidePopover — seule voie vers le top-layer), timers
+ * VPopover (showPopover/hidePopover — seule voie vers le top-layer), timers
  * d'auto-fermeture et leur pause au survol (WCAG 2.2.1, contrôle des limites
  * de temps).
  */
@@ -171,7 +171,7 @@ function resume(placement: ToastPlacement) {
   }
 }
 
-/* La file (état module) survit à un démontage/remontage du Toaster — seuls
+/* La file (état module) survit à un démontage/remontage du VToaster — seuls
    les timers sont nettoyés (ils repartiront au prochain montage). */
 onBeforeUnmount(() => {
   for (const timer of timers.values()) clearTimeout(timer)
@@ -194,7 +194,7 @@ onBeforeUnmount(() => {
     @beforetoggle="syncStack(p, $event)"
     @toggle="syncStack(p, $event)"
   >
-    <Toast
+    <VToast
       v-for="item in groups.get(p) ?? []"
       :key="item.id"
       :item="item"

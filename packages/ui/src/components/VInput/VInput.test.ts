@@ -1,11 +1,11 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import Input from './VInput.vue'
+import VInput from './VInput.vue'
 
-describe('Input', () => {
+describe('VInput', () => {
   it('synchronise v-model (update:modelValue)', async () => {
-    const { getByRole, emitted } = render(Input, {
+    const { getByRole, emitted } = render(VInput, {
       props: { modelValue: '' },
     })
     const input = getByRole('textbox') as HTMLInputElement
@@ -14,14 +14,14 @@ describe('Input', () => {
   })
 
   it('affiche la valeur du modèle', () => {
-    const { getByRole } = render(Input, {
+    const { getByRole } = render(VInput, {
       props: { modelValue: 'initial' },
     })
     expect((getByRole('textbox') as HTMLInputElement).value).toBe('initial')
   })
 
   it('invalid pose aria-invalid, sinon rien', async () => {
-    const { getByRole, rerender } = render(Input, {
+    const { getByRole, rerender } = render(VInput, {
       props: { modelValue: '', invalid: true },
     })
     expect(getByRole('textbox').getAttribute('aria-invalid')).toBe('true')
@@ -30,7 +30,7 @@ describe('Input', () => {
   })
 
   it('laisse passer les attributs natifs sur le contrôle (type, required, name)', () => {
-    const { getByRole } = render(Input, {
+    const { getByRole } = render(VInput, {
       props: { modelValue: '' },
       attrs: { type: 'email', required: true, name: 'email', placeholder: 'votre@email.fr' },
     })
@@ -42,7 +42,7 @@ describe('Input', () => {
   })
 
   it('class et style atterrissent sur la racine, pas sur le contrôle', () => {
-    const { container, getByRole } = render(Input, {
+    const { container, getByRole } = render(VInput, {
       props: { modelValue: '' },
       attrs: { class: 'consommateur', style: 'width: 320px' },
     })
@@ -55,7 +55,7 @@ describe('Input', () => {
   })
 
   it('label est associé au contrôle via for/id', () => {
-    const { getByLabelText } = render(Input, {
+    const { getByLabelText } = render(VInput, {
       props: { modelValue: '', label: 'Email' },
     })
     const input = getByLabelText('Email')
@@ -63,7 +63,7 @@ describe('Input', () => {
   })
 
   it('hint est rendu et lié via aria-describedby (fusion avec celui du consommateur)', () => {
-    const { getByRole, getByText } = render(Input, {
+    const { getByRole, getByText } = render(VInput, {
       props: { modelValue: '', hint: 'Format attendu : a@b.fr' },
       attrs: { 'aria-describedby': 'externe' },
     })
@@ -74,7 +74,7 @@ describe('Input', () => {
   })
 
   it('icônes décoratives : aucun bouton rendu', () => {
-    const { queryByRole } = render(Input, {
+    const { queryByRole } = render(VInput, {
       props: { modelValue: '', iconStart: 'search', iconEnd: 'visibility' },
     })
     expect(queryByRole('button')).toBeNull()
@@ -82,7 +82,7 @@ describe('Input', () => {
 
   it("icône cliquable : bouton accessible, émission de l'événement, pas de fuite sur l'input", async () => {
     const onClick = vi.fn()
-    const { getByRole, emitted } = render(Input, {
+    const { getByRole, emitted } = render(VInput, {
       props: { modelValue: '', iconEnd: 'visibility', iconEndLabel: 'Afficher le mot de passe' },
       attrs: { 'onClick:iconEnd': onClick },
     })
@@ -94,7 +94,7 @@ describe('Input', () => {
   })
 
   it('clear : visible seulement si non-vide, vide le champ et refocus le contrôle', async () => {
-    const { getByRole, queryByRole, rerender, emitted } = render(Input, {
+    const { getByRole, queryByRole, rerender, emitted } = render(VInput, {
       props: { modelValue: '', clearable: true },
     })
     expect(queryByRole('button', { name: 'Effacer' })).toBeNull()
@@ -107,13 +107,13 @@ describe('Input', () => {
   })
 
   it('clear : masqué en disabled et en readonly', () => {
-    const { queryByRole, container } = render(Input, {
+    const { queryByRole, container } = render(VInput, {
       props: { modelValue: 'texte', clearable: true, disabled: true },
     })
     expect(queryByRole('button', { name: 'Effacer' })).toBeNull()
     expect(container.querySelector('.v-input')?.hasAttribute('data-disabled')).toBe(true)
 
-    const readonly = render(Input, {
+    const readonly = render(VInput, {
       props: { modelValue: 'texte', clearable: true, readonly: true },
     })
     expect(readonly.queryByRole('button', { name: 'Effacer' })).toBeNull()
@@ -121,7 +121,7 @@ describe('Input', () => {
   })
 
   it("loading : spinner présent, l'icône end absente", () => {
-    const { getByRole, container } = render(Input, {
+    const { getByRole, container } = render(VInput, {
       props: { modelValue: '', loading: true, iconEnd: 'visibility' },
     })
     expect(getByRole('status')).toBeTruthy()
@@ -129,14 +129,14 @@ describe('Input', () => {
   })
 
   it('maxlength bloquant : attribut natif posé', () => {
-    const { getByRole } = render(Input, {
+    const { getByRole } = render(VInput, {
       props: { modelValue: '', maxlength: 10 },
     })
     expect(getByRole('textbox').getAttribute('maxlength')).toBe('10')
   })
 
   it('softLimit : pas de maxlength natif, customError au-delà de la limite', async () => {
-    const { getByRole, rerender } = render(Input, {
+    const { getByRole, rerender } = render(VInput, {
       props: { modelValue: 'ok', maxlength: 5, softLimit: true },
     })
     const input = getByRole('textbox') as HTMLInputElement
@@ -149,7 +149,7 @@ describe('Input', () => {
   })
 
   it('compteur : « n/max », data-over au-delà', async () => {
-    const { container, rerender } = render(Input, {
+    const { container, rerender } = render(VInput, {
       props: { modelValue: 'abc', maxlength: 10, softLimit: true, counter: true },
     })
     const counter = container.querySelector('.v-input-counter') as HTMLElement
@@ -163,7 +163,7 @@ describe('Input', () => {
   it('modèle numérique : valeur rendue, compteur et croix mesurés sur le texte', () => {
     // Sur `type="number"`, Vue caste la valeur de v-model en nombre : le
     // modèle doit accepter un nombre sans casser les mesures de longueur.
-    const { container, getByRole } = render(Input, {
+    const { container, getByRole } = render(VInput, {
       props: { modelValue: 150, type: 'number', maxlength: 2, counter: true, clearable: true },
     })
     expect((getByRole('spinbutton') as HTMLInputElement).value).toBe('150')
@@ -175,7 +175,7 @@ describe('Input', () => {
 
   it('disabled : boutons internes désactivés', () => {
     const onClick = vi.fn()
-    const { getByRole } = render(Input, {
+    const { getByRole } = render(VInput, {
       props: { modelValue: '', iconStart: 'search', iconStartLabel: 'Rechercher', disabled: true },
       attrs: { 'onClick:iconStart': onClick },
     })
@@ -184,14 +184,14 @@ describe('Input', () => {
   })
 
   it('readonly : attribut natif posé sur le contrôle', () => {
-    const { getByRole } = render(Input, {
+    const { getByRole } = render(VInput, {
       props: { modelValue: '', readonly: true },
     })
     expect(getByRole('textbox').hasAttribute('readonly')).toBe(true)
   })
 
   it("type : 'text' par défaut, la prop est posée sur le contrôle", () => {
-    const { getByRole, rerender } = render(Input, {
+    const { getByRole, rerender } = render(VInput, {
       props: { modelValue: '' },
     })
     expect(getByRole('textbox').getAttribute('type')).toBe('text')
@@ -201,7 +201,7 @@ describe('Input', () => {
   })
 
   it('compact : data-compact posé sur la racine', () => {
-    const { container } = render(Input, {
+    const { container } = render(VInput, {
       props: { modelValue: '', compact: true },
     })
     expect(container.querySelector('.v-input')?.hasAttribute('data-compact')).toBe(true)

@@ -5,7 +5,7 @@ import { useId } from 'vue'
  * Section nommée de la navigation. Le libellé n'est pas focusable : c'est du
  * texte, la liste qu'il coiffe est nommée par `aria-labelledby`.
  *
- * Pas de `role="group"` (contrairement à MenuGroup) : il ne peut pas être
+ * Pas de `role="group"` (contrairement à VMenuGroup) : il ne peut pas être
  * enfant direct d'une `<ul>` sans casser ses *required owned elements*. Une
  * `<ul>` NOMMÉE dit la même chose, en HTML strictement valide — et un groupe
  * prend alors exactement la même forme qu'une branche.
@@ -59,7 +59,7 @@ const labelId = useId()
    * Le retrait redit le `calc` des rangées, délibérément : une custom property
    * est substituée sur l'élément qui la DÉCLARE, une variable partagée posée
    * plus haut serait figée au niveau 0 (précédent : le `--chip-height` redit
-   * du Combobox).
+   * du VCombobox).
    */
   .v-side-nav-group-label {
     display: flex;

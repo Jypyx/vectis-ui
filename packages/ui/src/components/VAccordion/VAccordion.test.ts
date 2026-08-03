@@ -2,18 +2,18 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent } from 'vue'
 
-import Accordion from './VAccordion.vue'
-import AccordionItem from './VAccordionItem.vue'
+import VAccordion from './VAccordion.vue'
+import VAccordionItem from './VAccordionItem.vue'
 
 /** Attributs bruts posés sur le groupe et sur le 1er item. */
 function renderWith(accordionAttrs = '', firstItemAttrs = '') {
   const Harness = defineComponent({
-    components: { Accordion, AccordionItem },
+    components: { VAccordion, VAccordionItem },
     template: `
-      <Accordion ${accordionAttrs}>
-        <AccordionItem title="Premier" ${firstItemAttrs}>Contenu 1</AccordionItem>
-        <AccordionItem title="Second">Contenu 2</AccordionItem>
-      </Accordion>
+      <VAccordion ${accordionAttrs}>
+        <VAccordionItem title="Premier" ${firstItemAttrs}>Contenu 1</VAccordionItem>
+        <VAccordionItem title="Second">Contenu 2</VAccordionItem>
+      </VAccordion>
     `,
   })
   return render(Harness)
@@ -22,13 +22,13 @@ function renderWith(accordionAttrs = '', firstItemAttrs = '') {
 const renderAccordion = (exclusive = true) =>
   renderWith(`:exclusive="${exclusive}"`, 'default-open')
 
-/** Noms des <Icon> rendues dans un item — `data-icon` est posé quelle que soit
+/** Noms des <VIcon> rendues dans un item — `data-icon` est posé quelle que soit
     la source effective (SVG intégré, ligature, police tierce). */
 function icones(item: Element) {
   return [...item.querySelectorAll<HTMLElement>('summary .v-icon')].map((el) => el.dataset.icon)
 }
 
-describe('Accordion', () => {
+describe('VAccordion', () => {
   it('mode exclusif : les items partagent le même attribut name natif', () => {
     const { container } = renderAccordion(true)
     const [first, second] = [...container.querySelectorAll('details')]

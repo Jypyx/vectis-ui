@@ -1,7 +1,7 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as ButtonStories from './VButton.stories'
+import * as VButtonStories from './VButton.stories'
 
-<Meta of={ButtonStories} />
+<Meta of={VButtonStories} />
 
 # Button
 
@@ -9,9 +9,9 @@ Bouton d'action construit sur le `<button>` natif (focus, clavier et désactivat
 ou rendu en lien `<a>` via la prop `href`. Aucun JavaScript de comportement, à une exception
 près : le pont « lien inerte » (voir [Lien](#lien)).
 
-<Canvas of={ButtonStories.Default} />
+<Canvas of={VButtonStories.Default} />
 
-<Controls of={ButtonStories.Default} />
+<Controls of={VButtonStories.Default} />
 
 ## Variants et tones
 
@@ -26,7 +26,7 @@ combinaison est valide.
   monte au survol et retombe au press.
 - **tonal** : fond teinté doux + texte teinté, entre solid et ghost.
 
-<Canvas of={ButtonStories.Variants} />
+<Canvas of={VButtonStories.Variants} />
 
 ## Tailles
 
@@ -36,12 +36,12 @@ Cinq tailles (`xs` 24px, `sm` 32px, `md` 40px, `lg` 48px, `xl` 56px, via les tok
 taille → hauteur/typo/icône/padding est partagé par tous les contrôles du design system
 (classe `v-control`, voir `styles/control-size.css`).
 
-<Canvas of={ButtonStories.Sizes} />
+<Canvas of={VButtonStories.Sizes} />
 
 ## Icônes
 
 Les props `icon-start` / `icon-end` prennent un nom
-[Material Symbols Rounded](https://fonts.google.com/icons) et rendent le composant `Icon` en
+[Material Symbols Rounded](https://fonts.google.com/icons) et rendent le composant `VIcon` en
 interne. La taille et l'axe `opsz` de l'icône suivent automatiquement la taille du bouton
 (xs → 16px, sm/md → 20px, lg/xl → 24px). Les icônes sont décoratives (`aria-hidden`) : le nom
 accessible du bouton reste son libellé.
@@ -50,32 +50,32 @@ accessible du bouton reste son libellé.
 > Vos propres noms d'icônes, eux, viennent de la police ou de la bibliothèque que vous
 > branchez (voir le README).
 
-<Canvas of={ButtonStories.Icons} />
+<Canvas of={VButtonStories.Icons} />
 
 La prop `icon-filled` remplit les icônes `icon-start` / `icon-end` (axe `FILL` de la police),
 sans avoir à passer par les slots :
 
-<Canvas of={ButtonStories.IconsFilled} />
+<Canvas of={VButtonStories.IconsFilled} />
 
 Les slots `#start` / `#end` restent disponibles pour du contenu custom (SVG inline, image) et
-**priment** sur les props (leur remplissage se pilote alors directement sur l'`Icon` via sa
+**priment** sur les props (leur remplissage se pilote alors directement sur l'`VIcon` via sa
 prop `filled`) :
 
-<Canvas of={ButtonStories.IconsTypes} />
+<Canvas of={VButtonStories.IconsTypes} />
 
 ## Lien
 
 Avec `href`, le composant rend un `<a>` : `type` et `disabled` natifs ne sont pas posés, les
 attributs de lien (`target`, `rel`…) passent en fallthrough.
 
-<Canvas of={ButtonStories.Link} />
+<Canvas of={VButtonStories.Link} />
 
 Un `<a>` n'ayant pas de `disabled` natif, un lien `disabled` (ou `loading`) devient un
 **lien inerte** : `href` retiré (non focusable, aucune navigation), `aria-disabled="true"`
 pour les technologies d'assistance, handlers `click` filtrés. C'est le seul JavaScript de
 comportement du composant.
 
-<Canvas of={ButtonStories.DisabledLink} />
+<Canvas of={VButtonStories.DisabledLink} />
 
 ## États
 
@@ -84,18 +84,18 @@ opacité (il garde ses couleurs). Le spinner **remplace** l'emplacement de débu
 (`icon-start` / slot `#start`) — jamais de spinner et d'icône côte à côte ; `icon-end` reste
 affiché :
 
-<Canvas of={ButtonStories.Loading} />
+<Canvas of={VButtonStories.Loading} />
 
 `disabled` bascule tous les variants sur des nuances de gris (`--vectis-color-surface-muted`,
 `--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu suit automatiquement le thème
 dark :
 
-<Canvas of={ButtonStories.Disabled} />
+<Canvas of={VButtonStories.Disabled} />
 
 ## Accessibilité
 
 - Focus visible par anneau (`--vectis-focus-ring-*`), jamais supprimé.
 - Icônes décoratives : le nom accessible est toujours le libellé du slot par défaut. Pour un
-  bouton à icône seule, utiliser `IconButton` (libellé `aria-label` obligatoire).
+  bouton à icône seule, utiliser `VIconButton` (libellé `aria-label` obligatoire).
 - `loading` → `aria-busy="true"` ; lien inerte → `aria-disabled="true"` sans `href`.
 - Les transitions respectent `prefers-reduced-motion`.

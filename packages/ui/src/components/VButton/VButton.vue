@@ -2,10 +2,10 @@
 import { computed, useAttrs } from 'vue'
 import type { ButtonHTMLAttributes } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import Spinner from '../VSpinner/VSpinner.vue'
+import VSpinner from '../VSpinner/VSpinner.vue'
 
 /**
  * Le <button> natif (ou <a> en mode lien) couvre focus, clavier et
@@ -38,7 +38,7 @@ interface ButtonProps {
   iconEnd?: IconSource
   /**
    * Remplit iconStart/iconEnd (axe `FILL` de la police). Sans effet sur les
-   * slots #start/#end, dont l'Icon est fournie par le consommateur.
+   * slots #start/#end, dont le VIcon est fournie par le consommateur.
    */
   iconFilled?: boolean
 }
@@ -97,16 +97,16 @@ const passedAttrs = computed(() => {
     :aria-busy="loading || undefined"
   >
     <!-- wrapper aria-hidden : le bouton porte déjà aria-busy, on évite la
-         double annonce du role="status" du Spinner -->
+         double annonce du role="status" du VSpinner -->
     <span v-if="loading" class="v-button-spinner" aria-hidden="true">
-      <Spinner />
+      <VSpinner />
     </span>
     <slot v-else name="start">
-      <Icon v-if="iconStart" v-bind="iconProps(iconStart)" :filled="iconFilled" />
+      <VIcon v-if="iconStart" v-bind="iconProps(iconStart)" :filled="iconFilled" />
     </slot>
     <slot />
     <slot name="end">
-      <Icon v-if="iconEnd" v-bind="iconProps(iconEnd)" :filled="iconFilled" />
+      <VIcon v-if="iconEnd" v-bind="iconProps(iconEnd)" :filled="iconFilled" />
     </slot>
   </component>
 </template>
@@ -116,8 +116,8 @@ const passedAttrs = computed(() => {
   .v-button {
     /*
      * Tailles/compact : la classe partagée v-control (styles/control-size.css)
-     * pose les variables --control-* et le contexte d'Icon selon
-     * data-size/data-compact. IconButton lit aussi --control-height pour sa
+     * pose les variables --control-* et le contexte de VIcon selon
+     * data-size/data-compact. VIconButton lit aussi --control-height pour sa
      * largeur carrée (même élément rendu).
      */
     display: inline-flex;
@@ -310,7 +310,7 @@ const passedAttrs = computed(() => {
   .v-button-spinner {
     /* boîte à la taille des icônes (le spinner remplace iconStart) :
        aucun décalage de largeur au passage en loading. font-size = taille de
-       la boîte : le Spinner (1em) la remplit exactement */
+       la boîte : le VSpinner (1em) la remplit exactement */
     width: var(--vectis-icon-size);
     height: var(--vectis-icon-size);
     font-size: var(--vectis-icon-size);

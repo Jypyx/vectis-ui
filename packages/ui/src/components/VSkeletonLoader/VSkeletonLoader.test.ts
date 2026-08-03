@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import SkeletonLoader from './VSkeletonLoader.vue'
+import VSkeletonLoader from './VSkeletonLoader.vue'
 
 /** Racine du composant (elle porte la table des variantes et les dimensions). */
 const rootOf = (container: Element) => container.querySelector('.v-skeleton') as HTMLElement
@@ -11,9 +11,9 @@ const styleOf = (container: Element) => rootOf(container).getAttribute('style') 
 
 const itemsOf = (container: Element) => container.querySelectorAll('.v-skeleton-item')
 
-describe('SkeletonLoader', () => {
+describe('VSkeletonLoader', () => {
   it('défauts : forme text, taille md, animation wave, une seule silhouette', () => {
-    const { container } = render(SkeletonLoader)
+    const { container } = render(VSkeletonLoader)
     const root = rootOf(container)
 
     expect(root.getAttribute('data-shape')).toBe('text')
@@ -23,12 +23,12 @@ describe('SkeletonLoader', () => {
   })
 
   it('porte la classe v-control : sans elle --control-height est indéfinie et la hauteur s’effondre', () => {
-    const { container } = render(SkeletonLoader)
+    const { container } = render(VSkeletonLoader)
     expect(rootOf(container).classList.contains('v-control')).toBe(true)
   })
 
   it('lines : une silhouette par ligne', async () => {
-    const { container, rerender } = render(SkeletonLoader, { props: { lines: 4 } })
+    const { container, rerender } = render(VSkeletonLoader, { props: { lines: 4 } })
     expect(itemsOf(container)).toHaveLength(4)
 
     await rerender({ lines: 2 })
@@ -36,7 +36,7 @@ describe('SkeletonLoader', () => {
   })
 
   it('lines est borné à au moins une ligne entière : 0, négatif et décimal', async () => {
-    const { container, rerender } = render(SkeletonLoader, { props: { lines: 0 } })
+    const { container, rerender } = render(VSkeletonLoader, { props: { lines: 0 } })
     // `v-for="n in 0"` ne rendrait rien : un skeleton invisible, donc un bug muet
     expect(itemsOf(container)).toHaveLength(1)
 
@@ -48,7 +48,7 @@ describe('SkeletonLoader', () => {
   })
 
   it('shape et animation se reflètent en data-*', async () => {
-    const { container, rerender } = render(SkeletonLoader, { props: { shape: 'circle' } })
+    const { container, rerender } = render(VSkeletonLoader, { props: { shape: 'circle' } })
     expect(rootOf(container).getAttribute('data-shape')).toBe('circle')
 
     await rerender({ shape: 'surface', animation: 'none' })
@@ -58,7 +58,7 @@ describe('SkeletonLoader', () => {
   })
 
   it('compact pose data-compact, sinon l’attribut est absent', async () => {
-    const { container, rerender } = render(SkeletonLoader)
+    const { container, rerender } = render(VSkeletonLoader)
     expect(rootOf(container).hasAttribute('data-compact')).toBe(false)
 
     await rerender({ compact: true })
@@ -66,7 +66,7 @@ describe('SkeletonLoader', () => {
   })
 
   it('width/height : nombre → px, chaîne CSS telle quelle, absentes → aucune custom property', async () => {
-    const { container, rerender } = render(SkeletonLoader)
+    const { container, rerender } = render(VSkeletonLoader)
     expect(styleOf(container)).not.toContain('--skeleton-w')
     expect(styleOf(container)).not.toContain('--skeleton-h')
 
@@ -82,7 +82,7 @@ describe('SkeletonLoader', () => {
   })
 
   it('color pose data-custom et --custom-color ; sinon ni l’un ni l’autre', async () => {
-    const { container, rerender } = render(SkeletonLoader)
+    const { container, rerender } = render(VSkeletonLoader)
     expect(rootOf(container).hasAttribute('data-custom')).toBe(false)
     expect(styleOf(container)).not.toContain('--custom-color')
 
@@ -92,7 +92,7 @@ describe('SkeletonLoader', () => {
   })
 
   it('décoratif par défaut : aria-hidden, aucun rôle, aucun texte', () => {
-    const { container, queryByRole } = render(SkeletonLoader)
+    const { container, queryByRole } = render(VSkeletonLoader)
 
     expect(rootOf(container).getAttribute('aria-hidden')).toBe('true')
     expect(queryByRole('status')).toBeNull()
@@ -100,14 +100,14 @@ describe('SkeletonLoader', () => {
   })
 
   it('announce : role="status", libellé du dictionnaire et aria-hidden retiré', () => {
-    const { container, getByRole } = render(SkeletonLoader, { props: { announce: true } })
+    const { container, getByRole } = render(VSkeletonLoader, { props: { announce: true } })
 
     expect(getByRole('status').textContent).toContain('Chargement…')
     expect(rootOf(container).hasAttribute('aria-hidden')).toBe(false)
   })
 
   it('label implique announce et prime sur le dictionnaire', () => {
-    const { getByRole } = render(SkeletonLoader, { props: { label: 'Chargement des résultats…' } })
+    const { getByRole } = render(VSkeletonLoader, { props: { label: 'Chargement des résultats…' } })
     // `announce` n'est pas fourni : sans l'implication, la prop serait inerte
     expect(getByRole('status').textContent).toContain('Chargement des résultats…')
   })
@@ -116,7 +116,7 @@ describe('SkeletonLoader', () => {
     // Non-régression du sélecteur `.v-skeleton-item + .v-skeleton-item:last-child` :
     // un libellé rendu en dernier ferait cesser le raccourcissement de la
     // dernière ligne sans qu'aucun autre test ne rougisse.
-    const { container } = render(SkeletonLoader, { props: { announce: true, lines: 3 } })
+    const { container } = render(VSkeletonLoader, { props: { announce: true, lines: 3 } })
     const first = rootOf(container).firstElementChild as HTMLElement
 
     expect(first.classList.contains('v-visually-hidden')).toBe(true)
@@ -124,7 +124,7 @@ describe('SkeletonLoader', () => {
   })
 
   it('fallthrough : class, id et style du consommateur cohabitent avec les custom properties', () => {
-    const { container } = render(SkeletonLoader, {
+    const { container } = render(VSkeletonLoader, {
       props: { width: 120 },
       attrs: { class: 'ma-classe', id: 'chargement', style: 'margin-block: 8px' },
     })

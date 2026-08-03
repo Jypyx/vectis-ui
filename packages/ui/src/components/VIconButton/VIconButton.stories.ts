@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 
-import Icon from '../VIcon/VIcon.vue'
-import IconButton from './VIconButton.vue'
+import VIcon from '../VIcon/VIcon.vue'
+import VIconButton from './VIconButton.vue'
 
 const ICON = `
   <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
@@ -12,7 +12,7 @@ const ICON = `
 
 const meta = {
   title: 'Composants/IconButton',
-  component: IconButton,
+  component: VIconButton,
   argTypes: {
     variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'elevated', 'tonal'] },
     tone: { control: 'select', options: ['accent', 'neutral', 'danger', 'success', 'warning'] },
@@ -31,11 +31,11 @@ const meta = {
     loading: false,
   },
   render: (args) => ({
-    components: { IconButton, Icon },
+    components: { VIconButton, VIcon },
     setup: () => ({ args }),
-    template: '<IconButton v-bind="args"><Icon name="add" /></IconButton>',
+    template: '<VIconButton v-bind="args"><VIcon name="add" /></VIconButton>',
   }),
-} satisfies Meta<typeof IconButton>
+} satisfies Meta<typeof VIconButton>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -50,20 +50,20 @@ export const Default: Story = {
 
 export const Variants: Story = {
   render: (args) => ({
-    components: { IconButton, Icon },
+    components: { VIconButton, VIcon },
     setup: () => ({ args }),
     template: `
       <div style="display: grid; gap: 12px">
         <div v-for="tone in ['accent', 'neutral', 'danger', 'success', 'warning']" :key="tone" style="display: flex; gap: 8px; flex-wrap: wrap">
-          <IconButton
+          <VIconButton
             v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']"
             :key="variant"
             :label="args.label"
             :tone="tone"
             :variant="variant"
           >
-            <Icon name="favorite" />
-          </IconButton>
+            <VIcon name="favorite" />
+          </VIconButton>
         </div>
       </div>
     `,
@@ -72,23 +72,23 @@ export const Variants: Story = {
 
 export const Sizes: Story = {
   render: (args) => ({
-    components: { IconButton, Icon },
+    components: { VIconButton, VIcon },
     setup: () => ({ args }),
     template: `
       <div style="display: grid; gap: 12px">
         <div style="display: flex; gap: 8px; align-items: center">
-          <IconButton v-bind="args" size="xs"><Icon name="add" /></IconButton>
-          <IconButton v-bind="args" size="sm"><Icon name="add" /></IconButton>
-          <IconButton v-bind="args" size="md"><Icon name="add" /></IconButton>
-          <IconButton v-bind="args" size="lg"><Icon name="add" /></IconButton>
-          <IconButton v-bind="args" size="xl"><Icon name="add" /></IconButton>
+          <VIconButton v-bind="args" size="xs"><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="sm"><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="md"><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="lg"><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="xl"><VIcon name="add" /></VIconButton>
         </div>
         <div style="display: flex; gap: 8px; align-items: center">
-          <IconButton v-bind="args" size="xs" compact><Icon name="add" /></IconButton>
-          <IconButton v-bind="args" size="sm" compact><Icon name="add" /></IconButton>
-          <IconButton v-bind="args" size="md" compact><Icon name="add" /></IconButton>
-          <IconButton v-bind="args" size="lg" compact><Icon name="add" /></IconButton>
-          <IconButton v-bind="args" size="xl" compact><Icon name="add" /></IconButton>
+          <VIconButton v-bind="args" size="xs" compact><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="sm" compact><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="md" compact><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="lg" compact><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="xl" compact><VIcon name="add" /></VIconButton>
         </div>
       </div>
     `,
@@ -97,20 +97,20 @@ export const Sizes: Story = {
 
 export const IconsTypes: Story = {
   render: (args) => ({
-    components: { IconButton, Icon },
+    components: { VIconButton, VIcon },
     setup: () => ({ args }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
         <!-- Ligature Material Symbols -->
-        <IconButton label="Paramètres"><Icon name="settings" /></IconButton>
+        <VIconButton label="Paramètres"><VIcon name="settings" /></VIconButton>
 
         <!-- SVG inline -->
-        <IconButton label="Ajouter">${ICON}</IconButton>
+        <VIconButton label="Ajouter">${ICON}</VIconButton>
 
         <!-- Image -->
-        <IconButton label="Profil" variant="outline">
-          <Icon src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1'/%3E%3C/svg%3E" />
-        </IconButton>
+        <VIconButton label="Profil" variant="outline">
+          <VIcon src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1'/%3E%3C/svg%3E" />
+        </VIconButton>
       </div>
     `,
   }),
@@ -118,13 +118,13 @@ export const IconsTypes: Story = {
 
 export const IconProp: Story = {
   render: (args) => ({
-    components: { IconButton },
+    components: { VIconButton },
     setup: () => ({ args }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
         <!-- Icône par prop, sans passer par le slot -->
-        <IconButton :label="args.label" icon="favorite" />
-        <IconButton :label="args.label" icon="favorite" icon-filled />
+        <VIconButton :label="args.label" icon="favorite" />
+        <VIconButton :label="args.label" icon="favorite" icon-filled />
         <span>(prop icon : contour / plein)</span>
       </div>
     `,
@@ -147,19 +147,19 @@ export const Loading: Story = {
 
 export const Disabled: Story = {
   render: (args) => ({
-    components: { IconButton, Icon },
+    components: { VIconButton, VIcon },
     setup: () => ({ args }),
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <IconButton
+        <VIconButton
           v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']"
           :key="variant"
           :label="args.label"
           :variant="variant"
           disabled
         >
-          <Icon name="favorite" />
-        </IconButton>
+          <VIcon name="favorite" />
+        </VIconButton>
       </div>
     `,
   }),

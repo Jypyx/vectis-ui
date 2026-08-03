@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, provide, ref, useId, useSlots, watch } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import IconButton from '../VIconButton/VIconButton.vue'
+import VIconButton from '../VIconButton/VIconButton.vue'
 import { panelIdFor, tabIdFor, tabsKey } from './context'
 
 import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
@@ -23,10 +23,10 @@ export type TabsActivation = 'manual' | 'automatic'
 /**
  * Barre d'onglets (pattern ARIA tabs) et, optionnellement, ses panneaux.
  *
- * Le composant n'invente aucun bouton : chaque onglet est un `Button` (ghost,
+ * Le composant n'invente aucun bouton : chaque onglet est un `VButton` (ghost,
  * ou elevated quand il est actif en variante `inset`), les contrôles de
- * défilement des `IconButton`. Hover, focus, désactivation et
- * `prefers-reduced-motion` viennent donc de `Button`, sans une règle d'état
+ * défilement des `VIconButton`. Hover, focus, désactivation et
+ * `prefers-reduced-motion` viennent donc de `VButton`, sans une règle d'état
  * redéfinie ici.
  *
  * SSR-safe : aucun accès DOM hors handlers et `watch({ flush: 'post' })`.
@@ -82,9 +82,9 @@ const props = withDefaults(defineProps<TabsProps>(), {
 })
 
 defineSlots<{
-  /** Les <Tab> */
+  /** Les <VTab> */
   default(): unknown
-  /** Les <TabPanel> ; absent, aucun conteneur de panneaux n'est rendu. */
+  /** Les <VTabPanel> ; absent, aucun conteneur de panneaux n'est rendu. */
   panels?(): unknown
 }>()
 
@@ -155,7 +155,7 @@ const listEl = ref<HTMLElement | null>(null)
 /*
  * Navigation clavier (implémentation partagée : `utils/arrowNav`). Le handler
  * ne fait QUE déplacer le focus : la sélection au focus (mode `automatic`) est
- * posée par Tab, qui connaît sa valeur typée et n'a donc pas à la faire
+ * posée par VTab, qui connaît sa valeur typée et n'a donc pas à la faire
  * transiter par un attribut du DOM. Un onglet masqué par le consommateur est
  * écarté par le filtre `display` du helper.
  */
@@ -177,7 +177,7 @@ function onKeydown(event: KeyboardEvent) {
  * observateur le défilement, le redimensionnement du conteneur et l'ajout ou
  * le retrait d'onglets — là où un ResizeObserver imposerait un second
  * mécanisme pour le même signal (précédent : la sentinelle de pagination du
- * Combobox). Défauts à `true` : boutons désactivés au premier rendu et en SSR,
+ * VCombobox). Défauts à `true` : boutons désactivés au premier rendu et en SSR,
  * jamais d'état faux. Rien ne déborde ⇒ les deux sentinelles sont visibles ⇒
  * les deux boutons désactivés, sans test séparé.
  */
@@ -253,7 +253,7 @@ watch(model, () => {
     :data-grow="grow ? '' : undefined"
   >
     <div class="v-tabs-bar">
-      <IconButton
+      <VIconButton
         v-if="scrollButtons"
         class="v-tabs-scroll"
         :label="resolvedPrevLabel"
@@ -263,8 +263,8 @@ watch(model, () => {
         :disabled="atStart"
         @click="scrollStep(-1)"
       >
-        <Icon v-bind="iconProps(resolvedPrevIcon)" />
-      </IconButton>
+        <VIcon v-bind="iconProps(resolvedPrevIcon)" />
+      </VIconButton>
 
       <div
         ref="listEl"
@@ -287,7 +287,7 @@ watch(model, () => {
         <span v-if="scrollButtons" ref="endSentinelEl" class="v-tabs-sentinel" aria-hidden="true" />
       </div>
 
-      <IconButton
+      <VIconButton
         v-if="scrollButtons"
         class="v-tabs-scroll"
         :label="resolvedNextLabel"
@@ -297,8 +297,8 @@ watch(model, () => {
         :disabled="atEnd"
         @click="scrollStep(1)"
       >
-        <Icon v-bind="iconProps(resolvedNextIcon)" />
-      </IconButton>
+        <VIcon v-bind="iconProps(resolvedNextIcon)" />
+      </VIconButton>
     </div>
 
     <div v-if="$slots.panels" class="v-tabs-panels">
@@ -313,9 +313,9 @@ watch(model, () => {
     /*
      * Gouttière du cadre : nulle à plat (barre et panneaux à fleur du conteneur
      * d'accueil), posée par `outlined` — idiome `--table-frame-pad` du
-     * DataTable. Fixe, PAS indexée sur `data-size`/`compact` : c'est une mesure
-     * de carte, et les `--control-*` vivent sur les Button descendants (chaque
-     * Tab pose son propre `v-control`), donc hors de portée de la racine.
+     * VDataTable. Fixe, PAS indexée sur `data-size`/`compact` : c'est une mesure
+     * de carte, et les `--control-*` vivent sur les VButton descendants (chaque
+     * VTab pose son propre `v-control`), donc hors de portée de la racine.
      */
     --tabs-frame-pad: 0px;
 
@@ -330,16 +330,16 @@ watch(model, () => {
   }
 
   /*
-   * Carte bordée — échelle d'habillage partagée avec Accordion et DataTable ;
+   * Carte bordée — échelle d'habillage partagée avec VAccordion et VDataTable ;
    * `flat` (défaut) n'a rien à annuler. Le cadre est sur la RACINE, donc autour
    * de la barre ET des panneaux : la piste de la barre devient le filet de
    * séparation entre les deux, à l'intérieur du cadre.
    *
-   * Pas d'`overflow: clip` contrairement au DataTable, dont la table est bord à
+   * Pas d'`overflow: clip` contrairement au VDataTable, dont la table est bord à
    * bord par construction : ici la gouttière laisse partout une bande au moins
    * égale au rayon intérieur (aucune boîte n'atteint un angle, donc aucun rayon
    * emboîté en `calc()` à prévoir), la liste rogne déjà son propre débordement,
-   * et une découpe rognerait l'anneau de focus EXTÉRIEUR du TabPanel — le seul
+   * et une découpe rognerait l'anneau de focus EXTÉRIEUR du VTabPanel — le seul
    * qui sorte du composant — en plus d'interdire au consommateur tout contenu
    * de panneau à fleur de bord.
    */
@@ -436,7 +436,7 @@ watch(model, () => {
   .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tabs-list {
     margin-block-end: -1px;
     /* onglets contigus : sur une piste ils forment une rangée de segments (cf.
-       le rayon nul posé par Tab.vue), pas une file de boutons */
+       le rayon nul posé par VTab.vue), pas une file de boutons */
     gap: 0;
   }
 

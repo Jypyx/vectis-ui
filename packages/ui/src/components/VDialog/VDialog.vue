@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, useAttrs, useId, watch } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
-import IconButton from '../VIconButton/VIconButton.vue'
-import Typography from '../VTypography/VTypography.vue'
+import VIcon from '../VIcon/VIcon.vue'
+import VIconButton from '../VIconButton/VIconButton.vue'
+import VTypography from '../VTypography/VTypography.vue'
 import { useMessages } from '../../i18n/state'
 
 /**
@@ -20,7 +20,7 @@ interface DialogProps {
   subtitle?: string
   /** Largeur de la modale (toute unité CSS) ; bornée à 100 % du viewport. */
   width?: string
-  /** `alertdialog` pour une modale exigeant une action explicite (cf. DialogAlert). */
+  /** `alertdialog` pour une modale exigeant une action explicite (cf. VDialogAlert). */
   role?: 'dialog' | 'alertdialog'
   /** Affiche la croix de fermeture dans le header. */
   closable?: boolean
@@ -65,7 +65,7 @@ defineSlots<{
   headerActions?(): unknown
   /** Actions du footer (boutons). */
   footer?(): unknown
-  /** Déclencheur : `v-bind="triggerProps"` sur un <Button>/<button>. */
+  /** Déclencheur : `v-bind="triggerProps"` sur un <VButton>/<button>. */
   trigger?(props: { triggerProps: TriggerProps }): unknown
 }>()
 
@@ -167,10 +167,16 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     <header class="v-dialog-header">
       <slot name="header">
         <div class="v-dialog-titles">
-          <Typography v-if="title" :id="titleId" as="h2" variant="heading-3" class="v-dialog-title">
+          <VTypography
+            v-if="title"
+            :id="titleId"
+            as="h2"
+            variant="heading-3"
+            class="v-dialog-title"
+          >
             {{ title }}
-          </Typography>
-          <Typography
+          </VTypography>
+          <VTypography
             v-if="subtitle"
             :id="subtitleId"
             variant="subtitle"
@@ -178,12 +184,12 @@ defineExpose({ show, close: requestClose, el: dialogEl })
             class="v-dialog-subtitle"
           >
             {{ subtitle }}
-          </Typography>
+          </VTypography>
         </div>
       </slot>
       <div v-if="closable || $slots.headerActions" class="v-dialog-header-actions">
         <slot name="headerActions" />
-        <IconButton
+        <VIconButton
           v-if="closable"
           class="v-dialog-close"
           :label="resolvedCloseLabel"
@@ -192,8 +198,8 @@ defineExpose({ show, close: requestClose, el: dialogEl })
           size="sm"
           @click="requestClose"
         >
-          <Icon name="close" />
-        </IconButton>
+          <VIcon name="close" />
+        </VIconButton>
       </div>
     </header>
     <div class="v-dialog-scroll">
@@ -304,7 +310,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     min-inline-size: 0;
   }
 
-  /* Titre et sous-titre : rendus par Typography (heading-3 / subtitle muted) —
+  /* Titre et sous-titre : rendus par VTypography (heading-3 / subtitle muted) —
      les classes .v-dialog-title/.v-dialog-subtitle restent posées comme
      points d'accroche (surcharges consommateur, tests). */
 

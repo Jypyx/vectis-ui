@@ -3,18 +3,18 @@
  * consulté AVANT le registre intégré : c'est ce qui permet à un consommateur de
  * faire passer TOUTES les icônes du DS sur sa propre source.
  *
- * État module-level (précédent : `Toast/state.ts`) plutôt que plugin Vue : c'est
+ * État module-level (précédent : `VToast/state.ts`) plutôt que plugin Vue : c'est
  * de la configuration, identique pour toutes les requêtes d'un processus, et
  * elle doit rester posable depuis un `.ts` quelconque (plugin Nuxt, main.ts).
  */
 import { shallowRef, type Component } from 'vue'
 
-import { builtinIcons, type DsIconName } from './icons'
+import { builtinIcons, type VectisIconName } from './icons'
 import type { IconContext, IconRender } from './types'
 
 /**
  * Traduit un nom d'icône en rendu. Rendre `undefined` signifie « je ne connais
- * pas ce nom » — pas « ne rien afficher » : Icon retombe alors sur le registre
+ * pas ce nom » — pas « ne rien afficher » : VIcon retombe alors sur le registre
  * intégré, puis sur la ligature. C'est ce qui rend les mappings PARTIELS
  * utilisables (mapper cinq noms, garder les autres).
  */
@@ -25,7 +25,7 @@ export type IconResolver = (name: string, ctx: IconContext) => IconRender | unde
  * intégré sont suggérées par l'IDE ; toute autre clé reste acceptée (vos propres
  * icônes ont aussi le droit d'être aliasées).
  */
-export type IconAliases = Partial<Record<DsIconName, string>> & Record<string, string>
+export type IconAliases = Partial<Record<VectisIconName, string>> & Record<string, string>
 
 const resolver = shallowRef<IconResolver | undefined>(undefined)
 
@@ -42,7 +42,7 @@ export function setIconResolver(next: IconResolver | undefined): void {
   resolver.value = next
 }
 
-/** Interne — consommé par `Icon.vue`, non exporté publiquement. */
+/** Interne — consommé par `VIcon.vue`, non exporté publiquement. */
 export function resolveIcon(name: string, ctx: IconContext): IconRender | undefined {
   return resolver.value?.(name, ctx)
 }
@@ -87,7 +87,7 @@ export function classIconResolver(options: {
  * que le CSS dimensionne.
  */
 export function componentIconResolver(options: {
-  components: Partial<Record<DsIconName, Component>> & Record<string, Component>
+  components: Partial<Record<VectisIconName, Component>> & Record<string, Component>
   props?: (name: string, filled: boolean) => Record<string, unknown>
 }): IconResolver {
   const { components, props } = options

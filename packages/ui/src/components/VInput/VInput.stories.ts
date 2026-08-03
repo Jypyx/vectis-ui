@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Button from '../VButton/VButton.vue'
-import Input from './VInput.vue'
+import VButton from '../VButton/VButton.vue'
+import VInput from './VInput.vue'
 
 const meta = {
   title: 'Composants/Input',
-  component: Input,
+  component: VInput,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     type: {
@@ -22,12 +22,12 @@ const meta = {
     disabled: false,
   },
   render: (args) => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({ args, value: ref('') }),
     template:
-      '<Input v-bind="args" v-model="value" placeholder="votre@email.fr" aria-label="Email" />',
+      '<VInput v-bind="args" v-model="value" placeholder="votre@email.fr" aria-label="Email" />',
   }),
-} satisfies Meta<typeof Input>
+} satisfies Meta<typeof VInput>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -36,26 +36,26 @@ export const Default: Story = {}
 
 export const Tailles: Story = {
   render: () => ({
-    components: { Input },
+    components: { VInput },
     template: `
       <div style="display: grid; gap: 8px; width: 260px">
-        <Input size="sm" placeholder="Small" aria-label="Small" />
-        <Input size="md" placeholder="Medium" aria-label="Medium" />
-        <Input size="lg" placeholder="Large" aria-label="Large" />
+        <VInput size="sm" placeholder="Small" aria-label="Small" />
+        <VInput size="md" placeholder="Medium" aria-label="Medium" />
+        <VInput size="lg" placeholder="Large" aria-label="Large" />
       </div>
     `,
   }),
 }
 
-/** Hauteur réduite de 4px, padding/typo/icônes inchangés (comme Button). */
+/** Hauteur réduite de 4px, padding/typo/icônes inchangés (comme VButton). */
 export const Compact: Story = {
   render: () => ({
-    components: { Input },
+    components: { VInput },
     template: `
       <div style="display: grid; gap: 8px; width: 260px">
-        <Input placeholder="Normal" aria-label="Normal" />
-        <Input compact placeholder="Compact" aria-label="Compact" />
-        <Input compact size="lg" placeholder="Large compact" aria-label="Large compact" />
+        <VInput placeholder="Normal" aria-label="Normal" />
+        <VInput compact placeholder="Compact" aria-label="Compact" />
+        <VInput compact size="lg" placeholder="Large compact" aria-label="Large compact" />
       </div>
     `,
   }),
@@ -67,9 +67,9 @@ export const LabelEtHint: Story = {
     hint: 'Utilisée uniquement pour la confirmation de commande.',
   },
   render: (args) => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({ args, value: ref('') }),
-    template: '<Input v-bind="args" v-model="value" placeholder="votre@email.fr" />',
+    template: '<VInput v-bind="args" v-model="value" placeholder="votre@email.fr" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -95,9 +95,9 @@ export const IconesCliquables: Story = {
     'onClick:icon-end': fn(),
   },
   render: (args) => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({ args, value: ref('') }),
-    template: '<Input v-bind="args" v-model="value" type="password" aria-label="Mot de passe" />',
+    template: '<VInput v-bind="args" v-model="value" type="password" aria-label="Mot de passe" />',
   }),
   play: async ({ canvasElement, args }) => {
     const button = within(canvasElement).getByRole('button', {
@@ -111,9 +111,9 @@ export const IconesCliquables: Story = {
 export const Compteur: Story = {
   args: { counter: true, maxlength: 20, label: 'Pseudo' },
   render: (args) => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({ args, value: ref('') }),
-    template: '<Input v-bind="args" v-model="value" />',
+    template: '<VInput v-bind="args" v-model="value" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -132,9 +132,9 @@ export const Compteur: Story = {
 export const CompteurSoft: Story = {
   args: { counter: true, maxlength: 10, softLimit: true, label: 'Titre' },
   render: (args) => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({ args, value: ref('') }),
-    template: '<Input v-bind="args" v-model="value" />',
+    template: '<VInput v-bind="args" v-model="value" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -154,10 +154,10 @@ export const CompteurSoft: Story = {
 /** Le `pattern` reste l'attribut natif en fallthrough — zéro JS. */
 export const Pattern: Story = {
   render: () => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({ value: ref('') }),
     template: `
-      <Input
+      <VInput
         v-model="value"
         label="Code postal"
         hint="5 chiffres"
@@ -178,9 +178,9 @@ export const Pattern: Story = {
 export const Loading: Story = {
   args: { loading: true, iconEnd: 'search', label: 'Recherche' },
   render: (args) => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({ args, value: ref('métro') }),
-    template: '<Input v-bind="args" v-model="value" />',
+    template: '<VInput v-bind="args" v-model="value" />',
   }),
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByRole('status')).toBeInTheDocument()
@@ -190,9 +190,9 @@ export const Loading: Story = {
 export const Clearable: Story = {
   args: { clearable: true, label: 'Recherche' },
   render: (args) => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({ args, value: ref('') }),
-    template: '<Input v-bind="args" v-model="value" />',
+    template: '<VInput v-bind="args" v-model="value" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -223,27 +223,27 @@ export const Disabled: Story = {
     iconStart: 'mail',
   },
   render: (args) => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({ args, value: ref('gris@partout.fr') }),
-    template: '<Input v-bind="args" v-model="value" />',
+    template: '<VInput v-bind="args" v-model="value" />',
   }),
 }
 
 export const Readonly: Story = {
   args: { readonly: true, label: 'Référence', clearable: true },
   render: (args) => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({ args, value: ref('CMD-2026-0042') }),
-    template: '<Input v-bind="args" v-model="value" />',
+    template: '<VInput v-bind="args" v-model="value" />',
   }),
 }
 
 export const PlaceholderLong: Story = {
   render: () => ({
-    components: { Input },
+    components: { VInput },
     template: `
       <div style="width: 200px">
-        <Input
+        <VInput
           placeholder="Un placeholder anormalement long qui doit être tronqué proprement"
           aria-label="Démo placeholder long"
         />
@@ -258,12 +258,12 @@ export const PlaceholderLong: Story = {
  */
 export const ValidationNative: Story = {
   render: () => ({
-    components: { Input, Button },
+    components: { VInput, VButton },
     setup: () => ({ email: ref('') }),
     template: `
       <form novalidate="false" style="display: flex; gap: 8px; align-items: start" @submit.prevent>
-        <Input v-model="email" type="email" required placeholder="votre@email.fr" aria-label="Email" />
-        <Button type="submit">S'abonner</Button>
+        <VInput v-model="email" type="email" required placeholder="votre@email.fr" aria-label="Email" />
+        <VButton type="submit">S'abonner</VButton>
       </form>
     `,
   }),
@@ -280,11 +280,11 @@ export const ValidationNative: Story = {
 
 export const VModel: Story = {
   render: () => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({ value: ref('') }),
     template: `
       <div style="display: grid; gap: 8px; width: 260px">
-        <Input v-model="value" placeholder="Tapez ici" aria-label="Démo v-model" />
+        <VInput v-model="value" placeholder="Tapez ici" aria-label="Démo v-model" />
         <output data-testid="mirror">{{ value }}</output>
       </div>
     `,
@@ -299,7 +299,7 @@ export const VModel: Story = {
 /** Vitrine : combinaisons de props pour voir toutes les possibilités d'un coup. */
 export const Showcase: Story = {
   render: () => ({
-    components: { Input },
+    components: { VInput },
     setup: () => ({
       search: ref(''),
       pseudo: ref('Xavier'),
@@ -310,7 +310,7 @@ export const Showcase: Story = {
     }),
     template: `
       <div style="display: grid; gap: 24px; width: 340px">
-        <Input
+        <VInput
           v-model="search"
           label="Recherche"
           hint="Appuyez sur Entrée pour lancer la recherche."
@@ -318,14 +318,14 @@ export const Showcase: Story = {
           clearable
           placeholder="Que cherchez-vous ?"
         />
-        <Input
+        <VInput
           v-model="pseudo"
           label="Pseudo"
           hint="Visible par les autres membres."
           counter
           :maxlength="20"
         />
-        <Input
+        <VInput
           v-model="bio"
           label="Titre"
           hint="La limite est souple : le dépassement passe le champ en erreur."
@@ -333,7 +333,7 @@ export const Showcase: Story = {
           :maxlength="20"
           soft-limit
         />
-        <Input
+        <VInput
           v-model="password"
           type="password"
           label="Mot de passe"
@@ -342,7 +342,7 @@ export const Showcase: Story = {
           icon-end-label="Afficher le mot de passe"
           @click:icon-end="onSearch"
         />
-        <Input
+        <VInput
           v-model="search"
           size="sm"
           label="Chargement"
@@ -350,7 +350,7 @@ export const Showcase: Story = {
           loading
           placeholder="Recherche en cours…"
         />
-        <Input
+        <VInput
           v-model="search"
           compact
           label="Compact"
@@ -358,8 +358,8 @@ export const Showcase: Story = {
           clearable
           placeholder="Hauteur réduite de 4px"
         />
-        <Input v-model="ref_" label="Référence" readonly icon-start="tag" />
-        <Input
+        <VInput v-model="ref_" label="Référence" readonly icon-start="tag" />
+        <VInput
           v-model="ref_"
           label="Désactivé"
           hint="Tout passe en gris, sans opacité."

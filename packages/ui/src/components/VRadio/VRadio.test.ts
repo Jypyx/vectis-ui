@@ -2,16 +2,16 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, ref } from 'vue'
 
-import Radio from './VRadio.vue'
+import VRadio from './VRadio.vue'
 
-describe('Radio', () => {
+describe('VRadio', () => {
   it('coché quand le modèle correspond à value, émet la sélection sinon', async () => {
     const Harness = defineComponent({
-      components: { Radio },
+      components: { VRadio },
       setup: () => ({ plan: ref('a') }),
       template: `
-        <Radio v-model="plan" name="plan" value="a">Alpha</Radio>
-        <Radio v-model="plan" name="plan" value="b">Beta</Radio>
+        <VRadio v-model="plan" name="plan" value="a">Alpha</VRadio>
+        <VRadio v-model="plan" name="plan" value="b">Beta</VRadio>
       `,
     })
     const { getByRole } = render(Harness)
@@ -25,7 +25,7 @@ describe('Radio', () => {
   })
 
   it('labelPosition et spread posent les attributs data-* sur la racine', () => {
-    const { container } = render(Radio, {
+    const { container } = render(VRadio, {
       props: { modelValue: '', value: 'x', labelPosition: 'start', spread: true },
       slots: { default: 'X' },
     })
@@ -35,7 +35,7 @@ describe('Radio', () => {
   })
 
   it('name (fallthrough) atterrit sur l’input pour former le groupe natif', () => {
-    const { getByRole } = render(Radio, {
+    const { getByRole } = render(VRadio, {
       props: { modelValue: '', value: 'x' },
       attrs: { name: 'groupe' },
       slots: { default: 'X' },

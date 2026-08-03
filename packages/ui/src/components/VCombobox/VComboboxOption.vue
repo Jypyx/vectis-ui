@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 
 /**
- * Rangée d'option du Combobox (`role="option"`), composant INTERNE non exporté.
+ * Rangée d'option du VCombobox (`role="option"`), composant INTERNE non exporté.
  * Le focus DOM reste dans le champ : la surbrillance vient de la prop `active`
  * (posée via `aria-activedescendant`), jamais du focus. La sélection ne ferme
- * pas le panneau — le Combobox décide.
+ * pas le panneau — le VCombobox décide.
  *
  * `disabled` ne pose PAS l'attribut natif : une option désactivée doit rester
  * dans l'arbre d'accessibilité que le champ parcourt, d'où `aria-disabled`.
@@ -15,11 +15,11 @@ import type { IconSource } from '../VIcon/types'
  * Racine unique : `id` et les écouteurs du consommateur (`@pointermove`…)
  * arrivent par fallthrough natif.
  *
- * Surface volontairement réduite à ce que le Combobox utilise : le libellé
- * passe par le slot #default (que le Combobox alimente avec son propre slot
+ * Surface volontairement réduite à ce que le VCombobox utilise : le libellé
+ * passe par le slot #default (que le VCombobox alimente avec son propre slot
  * scopé `#option`), pas par une prop. Un seul emplacement d'icône, au début —
  * la fin est occupée par la coche de sélection — d'où `icon` et non
- * `iconStart` (convention Badge/Tab/ToggleItem).
+ * `iconStart` (convention VBadge/VTab/VToggleItem).
  */
 interface ComboboxOptionProps {
   /**
@@ -67,9 +67,9 @@ function onClick() {
     :data-active="active ? '' : undefined"
     @click="onClick"
   >
-    <Icon v-if="icon" v-bind="iconProps(icon)" />
+    <VIcon v-if="icon" v-bind="iconProps(icon)" />
     <span class="v-combobox-option-label"><slot /></span>
-    <Icon v-if="selected" name="check" class="v-combobox-option-check" />
+    <VIcon v-if="selected" name="check" class="v-combobox-option-check" />
   </button>
 </template>
 
@@ -78,7 +78,7 @@ function onClick() {
   .v-combobox-option {
     /* Taille : `--control-*` héritées du panneau, qui porte `v-control`
        (styles/control-size.css) ; les icônes suivent par le même héritage.
-       Typo composite comme MenuItem : taille de l'échelle, leading `body-md`
+       Typo composite comme VMenuItem : taille de l'échelle, leading `body-md`
        (ratio unitless) et poids regular. */
     display: flex;
     align-items: center;

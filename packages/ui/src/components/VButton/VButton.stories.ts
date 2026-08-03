@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 
-import Icon from '../VIcon/VIcon.vue'
-import Button from './VButton.vue'
+import VIcon from '../VIcon/VIcon.vue'
+import VButton from './VButton.vue'
 
 const meta = {
   title: 'Composants/Button',
-  component: Button,
+  component: VButton,
   argTypes: {
     variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'elevated', 'tonal'] },
     tone: { control: 'select', options: ['accent', 'neutral', 'danger', 'success', 'warning'] },
@@ -26,11 +26,11 @@ const meta = {
     loading: false,
   },
   render: (args) => ({
-    components: { Button },
+    components: { VButton },
     setup: () => ({ args }),
-    template: '<Button v-bind="args">Enregistrer</Button>',
+    template: '<VButton v-bind="args">Enregistrer</VButton>',
   }),
-} satisfies Meta<typeof Button>
+} satisfies Meta<typeof VButton>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -39,13 +39,13 @@ export const Default: Story = {}
 
 export const Variants: Story = {
   render: () => ({
-    components: { Button },
+    components: { VButton },
     template: `
       <div style="display: grid; gap: 12px">
         <div v-for="tone in ['accent', 'neutral', 'danger', 'success', 'warning']" :key="tone" style="display: flex; gap: 8px; flex-wrap: wrap">
-          <Button v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']" :key="variant" :tone="tone" :variant="variant">
+          <VButton v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']" :key="variant" :tone="tone" :variant="variant">
             {{ tone }} / {{ variant }}
-          </Button>
+          </VButton>
         </div>
       </div>
     `,
@@ -54,22 +54,22 @@ export const Variants: Story = {
 
 export const Sizes: Story = {
   render: () => ({
-    components: { Button },
+    components: { VButton },
     template: `
       <div style="display: grid; gap: 12px">
         <div style="display: flex; gap: 8px; align-items: center">
-          <Button size="xs">XSmall 24px</Button>
-          <Button size="sm">Small 32px</Button>
-          <Button size="md">Medium 40px</Button>
-          <Button size="lg">Large 48px</Button>
-          <Button size="xl">XLarge 56px</Button>
+          <VButton size="xs">XSmall 24px</VButton>
+          <VButton size="sm">Small 32px</VButton>
+          <VButton size="md">Medium 40px</VButton>
+          <VButton size="lg">Large 48px</VButton>
+          <VButton size="xl">XLarge 56px</VButton>
         </div>
         <div style="display: flex; gap: 8px; align-items: center">
-          <Button size="xs" compact>XSmall 20px</Button>
-          <Button size="sm" compact>Small 28px</Button>
-          <Button size="md" compact>Medium 36px</Button>
-          <Button size="lg" compact>Large 44px</Button>
-          <Button size="xl" compact>XLarge 52px</Button>
+          <VButton size="xs" compact>XSmall 20px</VButton>
+          <VButton size="sm" compact>Small 28px</VButton>
+          <VButton size="md" compact>Medium 36px</VButton>
+          <VButton size="lg" compact>Large 44px</VButton>
+          <VButton size="xl" compact>XLarge 52px</VButton>
         </div>
       </div>
     `,
@@ -78,19 +78,19 @@ export const Sizes: Story = {
 
 export const Icons: Story = {
   render: () => ({
-    components: { Button },
+    components: { VButton },
     template: `
       <div style="display: grid; gap: 12px">
         <div style="display: flex; gap: 8px; align-items: center">
-          <Button icon-start="add" size="sm">Ajouter</Button>
-          <Button icon-start="add" size="md">Ajouter</Button>
-          <Button icon-end="arrow_forward" size="lg">Suivant</Button>
+          <VButton icon-start="add" size="sm">Ajouter</VButton>
+          <VButton icon-start="add" size="md">Ajouter</VButton>
+          <VButton icon-end="arrow_forward" size="lg">Suivant</VButton>
         </div>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-          <Button icon-start="check" variant="outline" tone="success">Valider</Button>
-          <Button icon-start="warning" variant="tonal" tone="warning">Attention</Button>
-          <Button icon-start="delete" variant="ghost" tone="danger">Supprimer</Button>
-          <Button icon-start="cloud_upload" icon-end="expand_more" variant="elevated" tone="neutral">Importer</Button>
+          <VButton icon-start="check" variant="outline" tone="success">Valider</VButton>
+          <VButton icon-start="warning" variant="tonal" tone="warning">Attention</VButton>
+          <VButton icon-start="delete" variant="ghost" tone="danger">Supprimer</VButton>
+          <VButton icon-start="cloud_upload" icon-end="expand_more" variant="elevated" tone="neutral">Importer</VButton>
         </div>
       </div>
     `,
@@ -107,12 +107,12 @@ export const Icons: Story = {
 
 export const IconsFilled: Story = {
   render: () => ({
-    components: { Button },
+    components: { VButton },
     template: `
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-        <Button icon-start="favorite" variant="tonal">Contour</Button>
-        <Button icon-start="favorite" icon-filled variant="tonal">Plein</Button>
-        <Button icon-start="home" icon-end="star" icon-filled variant="solid">Début + fin pleins</Button>
+        <VButton icon-start="favorite" variant="tonal">Contour</VButton>
+        <VButton icon-start="favorite" icon-filled variant="tonal">Plein</VButton>
+        <VButton icon-start="home" icon-end="star" icon-filled variant="solid">Début + fin pleins</VButton>
       </div>
     `,
   }),
@@ -125,31 +125,31 @@ export const IconsFilled: Story = {
 
 export const IconsTypes: Story = {
   render: () => ({
-    components: { Button, Icon },
+    components: { VButton, VIcon },
     template: `
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
         <!-- Par props : nom Material Symbols -->
-        <Button icon-start="add">Par props</Button>
+        <VButton icon-start="add">Par props</VButton>
 
         <!-- Par slot : SVG inline -->
-        <Button>
+        <VButton>
           <template #start>
-            <Icon>
+            <VIcon>
               <svg viewBox="0 0 16 16" aria-hidden="true">
                 <path d="M8 2v12M2 8h12" stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" />
               </svg>
-            </Icon>
+            </VIcon>
           </template>
           Par SVG
-        </Button>
+        </VButton>
 
         <!-- Par slot : image -->
-        <Button variant="outline" tone="neutral">
+        <VButton variant="outline" tone="neutral">
           <template #start>
-            <Icon src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1'/%3E%3C/svg%3E" />
+            <VIcon src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1'/%3E%3C/svg%3E" />
           </template>
           Par image
-        </Button>
+        </VButton>
       </div>
     `,
   }),
@@ -157,11 +157,11 @@ export const IconsTypes: Story = {
 
 export const Link: Story = {
   render: () => ({
-    components: { Button },
+    components: { VButton },
     template: `
-      <Button href="https://exemple.fr" target="_blank" rel="noreferrer" icon-end="open_in_new">
+      <VButton href="https://exemple.fr" target="_blank" rel="noreferrer" icon-end="open_in_new">
         Documentation
-      </Button>
+      </VButton>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -174,11 +174,11 @@ export const Link: Story = {
 
 export const DisabledLink: Story = {
   render: () => ({
-    components: { Button },
+    components: { VButton },
     template: `
-      <Button href="https://exemple.fr" disabled>
+      <VButton href="https://exemple.fr" disabled>
         Lien désactivé
-      </Button>
+      </VButton>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -202,12 +202,12 @@ export const Loading: Story = {
 
 export const Disabled: Story = {
   render: () => ({
-    components: { Button },
+    components: { VButton },
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <Button v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']" :key="variant" :variant="variant" disabled>
+        <VButton v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']" :key="variant" :variant="variant" disabled>
           {{ variant }}
-        </Button>
+        </VButton>
       </div>
     `,
   }),

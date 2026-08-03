@@ -6,18 +6,18 @@
  * Chaque composant interactif pose `v-control` sur sa RACINE (celle qui
  * porte `data-size`/`data-compact`) et consomme les variables `--control-*`
  * dans son propre CSS ; elles héritent jusqu'aux enfants (ex. le field
- * d'Input). Les blocs ne définissent QUE des custom properties — jamais de
+ * de VInput). Les blocs ne définissent QUE des custom properties — jamais de
  * propriété de layout — donc aucun conflit de spécificité avec les SFC.
  *
  * Deux colonnes de padding-inline : `--control-padding-inline` pour les
- * contrôles pleins (Button, Chip, rangées de panneau…),
- * `--control-padding-inline-field` pour les champs de saisie (Input,
- * Textarea, DatePicker), plus serrés.
+ * contrôles pleins (VButton, VChip, rangées de panneau…),
+ * `--control-padding-inline-field` pour les champs de saisie (VInput,
+ * VTextarea, VDatePicker), plus serrés.
  * `--control-gap` : espacement interne (icône/libellé, cases OTP…).
  *
- * `--vectis-icon-size`/`--vectis-icon-opsz` = API de contexte publique d'Icon ;
+ * `--vectis-icon-size`/`--vectis-icon-opsz` = API de contexte publique de VIcon ;
  * l'opsz reste un littéral (axe de la police Material Symbols : contrat
- * technique, pas un token de design — voir Icon.vue).
+ * technique, pas un token de design — voir VIcon.vue).
  */
 @layer vectis.components {
   .v-control {

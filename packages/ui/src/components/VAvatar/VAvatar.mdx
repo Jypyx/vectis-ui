@@ -1,34 +1,34 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as AvatarStories from './VAvatar.stories'
+import * as VAvatarStories from './VAvatar.stories'
 
-<Meta of={AvatarStories} />
+<Meta of={VAvatarStories} />
 
 # Avatar
 
 Représentation ronde d'une personne (ou entité) avec une **cascade de contenu** : image →
 icône → initiales (dérivées du nom) → slot de repli. La taille suit l'échelle unifiée des
-contrôles (`xs`/`sm`/`md`/`lg`/`xl`, comme `Button`), la couleur est dérivée automatiquement
+contrôles (`xs`/`sm`/`md`/`lg`/`xl`, comme `VButton`), la couleur est dérivée automatiquement
 du nom ou fournie par le consommateur, et l'avatar peut devenir **cliquable** (lien ou bouton)
 au besoin.
 
-<Canvas of={AvatarStories.Initiales} />
+<Canvas of={VAvatarStories.Initiales} />
 
-<Controls of={AvatarStories.Initiales} />
+<Controls of={VAvatarStories.Initiales} />
 
 ## Tailles
 
 Échelle partagée `xs`/`sm`/`md`/`lg`/`xl` (24 → 56px) via la classe `v-control` — la même
-que `Button`, `Input`, etc. Le disque est carré (`--control-height`), les initiales suivent
+que `VButton`, `VInput`, etc. Le disque est carré (`--control-height`), les initiales suivent
 la typo tokenisée du contrôle (`--control-font-size`).
 
-<Canvas of={AvatarStories.Tailles} />
+<Canvas of={VAvatarStories.Tailles} />
 
 ## Compact
 
 `compact` retranche 4px à la hauteur à chaque taille (typo et icône inchangées) — cohérent
 avec les autres contrôles.
 
-<Canvas of={AvatarStories.Compact} />
+<Canvas of={VAvatarStories.Compact} />
 
 ## Contenu : image, icône, initiales
 
@@ -39,11 +39,11 @@ La source affichée suit une priorité stricte :
 2. **`icon`** — nom d'icône **ou** rendu explicite (`{ src: '/logo.svg' }`, `{ component }`).
    L'icône occupe ~55% du disque.
 3. **`name`** — les **initiales** (deux premiers mots, en majuscules).
-4. Le **slot par défaut** — échappatoire (ex. l'agrégat « +X » d'`AvatarGroup`), remplace les
+4. Le **slot par défaut** — échappatoire (ex. l'agrégat « +X » d'`VAvatarGroup`), remplace les
    initiales.
 
-<Canvas of={AvatarStories.AvecImage} />
-<Canvas of={AvatarStories.Icone} />
+<Canvas of={VAvatarStories.AvecImage} />
+<Canvas of={VAvatarStories.Icone} />
 
 > Les icônes rendues par le DS lui-même sont des SVG embarqués : aucune police n'est requise.
 > Vos propres noms d'icônes, eux, viennent de la police ou de la bibliothèque que vous
@@ -51,7 +51,7 @@ La source affichée suit une priorité stricte :
 
 Si l'image est cassée, le repli initiales prend le relais sans intervention :
 
-<Canvas of={AvatarStories.ImageCassee} />
+<Canvas of={VAvatarStories.ImageCassee} />
 
 ## Couleur automatique
 
@@ -61,9 +61,9 @@ la teinte est posée en ligne (`--avatar-hue`, scalaire) ; le CSS compose fond e
 clartés/chromas fixés **par thème**, donc l'adaptation clair/sombre se fait sans dépendre de
 `contrast-color()`.
 
-<Canvas of={AvatarStories.CouleurAuto} />
+<Canvas of={VAvatarStories.CouleurAuto} />
 
-> Comme pour la couleur custom de `Chip`/`Badge`, la teinte auto est une couleur **calculée
+> Comme pour la couleur custom de `VChip`/`VBadge`, la teinte auto est une couleur **calculée
 > hors tokens** — exception assumée à la règle « aucune valeur brute », circonscrite au cas des
 > avatars.
 
@@ -72,23 +72,23 @@ clartés/chromas fixés **par thème**, donc l'adaptation clair/sombre se fait s
 La prop `color` (hexadécimal, nom CSS ou `oklch()`) **remplace la teinte auto**, avec un texte
 blanc fixe (le contraste d'une couleur claire est à la charge du consommateur).
 
-<Canvas of={AvatarStories.CouleurCustom} />
+<Canvas of={VAvatarStories.CouleurCustom} />
 
 ## Cliquable
 
 Par priorité : `href` → `<a>`, sinon `clickable` → `<button>`, sinon `<span>` statique. Un lien
-`disabled` devient **inerte** (href retiré + `aria-disabled`, modèle `Button`). Seul l'avatar
+`disabled` devient **inerte** (href retiré + `aria-disabled`, modèle `VButton`). Seul l'avatar
 interactif expose un survol et un anneau de focus clavier.
 
-<Canvas of={AvatarStories.Cliquable} />
+<Canvas of={VAvatarStories.Cliquable} />
 
-## Tooltip
+## VTooltip
 
-L'avatar ne porte aucune API de tooltip dédiée : on l'enveloppe dans un `Tooltip` et on lui
+L'avatar ne porte aucune API de tooltip dédiée : on l'enveloppe dans un `VTooltip` et on lui
 transmet `triggerProps` par fallthrough. Le tooltip s'ouvrant au survol **et au focus**,
 l'avatar doit être focusable — le rendre `clickable` (bouton).
 
-<Canvas of={AvatarStories.AvecTooltip} />
+<Canvas of={VAvatarStories.AvecTooltip} />
 
 ## Accessibilité
 

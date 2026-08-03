@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide } from 'vue'
 
-import ButtonGroup from '../VButton/VButtonGroup.vue'
+import VButtonGroup from '../VButton/VButtonGroup.vue'
 import { toggleKey } from './context'
 
 import { toggleValue } from '../../utils/array'
@@ -19,10 +19,10 @@ export type ToggleOrientation = 'horizontal' | 'vertical'
 
 /**
  * Groupe de boutons sélectionnables pilotés par un seul v-model. Composé :
- * chaque item est un `Button` (l'item sélectionné en `solid`, les autres en
+ * chaque item est un `VButton` (l'item sélectionné en `solid`, les autres en
  * `ghost`/`outline`) et `attached` (défaut) rattache le tout dans un
- * ButtonGroup en contrôle segmenté. Aucune règle d'état n'est redéfinie ici —
- * hover, focus, disabled, `prefers-reduced-motion` viennent de Button.
+ * VButtonGroup en contrôle segmenté. Aucune règle d'état n'est redéfinie ici —
+ * hover, focus, disabled, `prefers-reduced-motion` viennent de VButton.
  *
  * Le JS de comportement se limite au pont clic → v-model (`select` : bascule
  * simple/multiple + garde `mandatory`, irréalisable en HTML/CSS) et à la
@@ -36,7 +36,7 @@ interface ToggleProps {
    * garde à la désélection : ne force AUCUNE sélection initiale.
    */
   mandatory?: boolean
-  /** Rattache les items en contrôle segmenté (ButtonGroup). `false` : boutons séparés. */
+  /** Rattache les items en contrôle segmenté (VButtonGroup). `false` : boutons séparés. */
   attached?: boolean
   orientation?: ToggleOrientation
   /** Variante des items NON sélectionnés. L'item sélectionné est toujours `solid`. */
@@ -69,7 +69,7 @@ const props = withDefaults(defineProps<ToggleProps>(), {
 })
 
 defineSlots<{
-  /** Les <ToggleItem>. */
+  /** Les <VToggleItem>. */
   default(): unknown
 }>()
 
@@ -129,11 +129,11 @@ provide(toggleKey, {
 /*
  * Navigation clavier (implémentation partagée : `utils/arrowNav`). Pas de
  * roving tabindex — chaque item visible est un arrêt de tabulation (modèle
- * Pagination ; le roving est réservé aux composites tablist/radiogroup). Les
+ * VPagination ; le roving est réservé aux composites tablist/radiogroup). Les
  * items disabled sont des <button disabled>, exclus par le sélecteur.
  *
  * `event.currentTarget` plutôt qu'une ref template : sur `<component :is>`,
- * une ref renverrait tantôt un élément (div), tantôt une instance (ButtonGroup).
+ * une ref renverrait tantôt un élément (div), tantôt une instance (VButtonGroup).
  */
 function onKeydown(event: KeyboardEvent) {
   const group = event.currentTarget as HTMLElement
@@ -144,16 +144,16 @@ function onKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <!-- attached : ButtonGroup fusionne les bordures. Il cible ses enfants
-       DIRECTS `.v-button` — ToggleItem a le Button pour racine, jamais de
+  <!-- attached : VButtonGroup fusionne les bordures. Il cible ses enfants
+       DIRECTS `.v-button` — VToggleItem a le VButton pour racine, jamais de
        wrapper intermédiaire. `orientation`/`data-orientation` en miroir, via
        UNE seule clé (un binding même `undefined` traverserait en fallthrough
-       et écraserait le data-orientation que ButtonGroup pose lui-même) :
-       ButtonGroup reçoit sa prop, le div détaché l'attribut directement.
+       et écraserait le data-orientation que VButtonGroup pose lui-même) :
+       VButtonGroup reçoit sa prop, le div détaché l'attribut directement.
        `role="group"` : nécessaire pour la branche div, coïncide avec celui de
-       ButtonGroup en attached. -->
+       VButtonGroup en attached. -->
   <component
-    :is="attached ? ButtonGroup : 'div'"
+    :is="attached ? VButtonGroup : 'div'"
     v-bind="attached ? { orientation } : { 'data-orientation': orientation }"
     class="v-toggle"
     role="group"
@@ -169,7 +169,7 @@ function onKeydown(event: KeyboardEvent) {
   /*
    * Mode détaché seulement. `:not(.v-button-group)` : en attached la racine
    * porte les DEUX classes — sans cette garde, `align-items: center` entrerait
-   * en conflit d'ordre avec le `stretch` de ButtonGroup (même spécificité).
+   * en conflit d'ordre avec le `stretch` de VButtonGroup (même spécificité).
    * Rend aussi l'ordre d'export non contraignant.
    */
   .v-toggle:not(.v-button-group) {

@@ -24,7 +24,7 @@ export function menuInvoker(id: string): HTMLElement | null {
   return document.querySelector(`[popovertarget="${id}"]`)
 }
 
-/** Placements du panneau racine (API publique de Menu). */
+/** Placements du panneau racine (API publique de VMenu). */
 export type MenuPlacement =
   'bottom-start' | 'bottom-end' | 'bottom' | 'top-start' | 'top-end' | 'top'
 

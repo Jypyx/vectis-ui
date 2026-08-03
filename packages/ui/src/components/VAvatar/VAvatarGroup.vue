@@ -2,12 +2,12 @@
 import { Comment, Fragment, Text, computed, provide, useSlots } from 'vue'
 import type { StyleValue, VNode } from 'vue'
 
-import Avatar from './VAvatar.vue'
+import VAvatar from './VAvatar.vue'
 import type { AvatarSize } from './VAvatar.vue'
 import { avatarGroupKey } from './context'
 
 /**
- * Empile des Avatar (celui de droite passe par-dessus celui de gauche, via un
+ * Empile des VAvatar (celui de droite passe par-dessus celui de gauche, via un
  * chevauchement négatif + l'ordre de peinture DOM naturel — aucun JS de
  * positionnement). L'anneau `--avatar-ring-color` sépare visuellement les disques.
  *
@@ -84,7 +84,7 @@ const rootStyle = computed<StyleValue>(() =>
 
 // Le groupe porte v-control pour définir --control-height à SON niveau : le
 // chevauchement reste calculable même si un enfant est enveloppé (ex. un
-// Tooltip pose un <span> entre le groupe et l'Avatar). Un Avatar de taille
+// VTooltip pose un <span> entre le groupe et le VAvatar). Un VAvatar de taille
 // propre redéfinit --control-height sur lui-même → son overlap suit sa taille.
 const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? 'md')
 </script>
@@ -99,7 +99,7 @@ const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? 'md')
   >
     <component :is="VisibleAvatars" />
     <slot v-if="overflowCount > 0" name="overflow" :count="overflowCount">
-      <Avatar>+{{ overflowCount }}</Avatar>
+      <VAvatar>+{{ overflowCount }}</VAvatar>
     </slot>
   </div>
 </template>
@@ -115,8 +115,8 @@ const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? 'md')
 
   /* Chevauchement : chaque disque mord sur le précédent ; l'ordre DOM fait que
      le suivant (à droite) peint par-dessus. Cible l'enfant direct quel qu'il
-     soit (Avatar nu OU wrapper d'un Tooltip) → --control-height vient du
-     groupe, un Avatar de taille propre l'écrase sur lui-même. Ratio unitless. */
+     soit (VAvatar nu OU wrapper d'un VTooltip) → --control-height vient du
+     groupe, un VAvatar de taille propre l'écrase sur lui-même. Ratio unitless. */
   .v-avatar-group > * + * {
     margin-inline-start: calc(var(--control-height) * -0.3);
   }

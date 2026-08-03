@@ -2,7 +2,7 @@ import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
-import DatePicker from './VDatePicker.vue'
+import VDatePicker from './VDatePicker.vue'
 
 const JUNE = '2026-06-10'
 
@@ -16,13 +16,13 @@ async function type(input: HTMLInputElement, value: string) {
   await fireEvent.input(input)
 }
 
-describe('DatePicker — défaut', () => {
+describe('VDatePicker — défaut', () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
   it('est un champ de saisie masqué, sans calendrier ni ARIA de popup', async () => {
-    const { container } = render(DatePicker, { props: { modelValue: JUNE, locale: 'fr-FR' } })
+    const { container } = render(VDatePicker, { props: { modelValue: JUNE, locale: 'fr-FR' } })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.readOnly).toBe(false)
     expect(input.value).toBe('10/06/2026')
@@ -38,7 +38,7 @@ describe('DatePicker — défaut', () => {
   })
 
   it('calendarIcon : surcharge l’icône d’ouverture, que la croix d’effacement ne remplace pas', async () => {
-    const { container, rerender } = render(DatePicker, {
+    const { container, rerender } = render(VDatePicker, {
       props: { modelValue: null, showCalendar: true, calendarIcon: 'event' },
     })
     // `:not(.v-input-clear)` : la croix est rendue AVANT l'icône de fin.
@@ -48,7 +48,7 @@ describe('DatePicker — défaut', () => {
     expect(endIcon()).toBe('event')
 
     // Avec de quoi effacer, les deux coexistent — c'est la convention
-    // Input/Textarea/Combobox, qui casserait silencieusement.
+    // VInput/VTextarea/VCombobox, qui casserait silencieusement.
     await rerender({ modelValue: JUNE })
     expect(endIcon()).toBe('event')
 
@@ -63,12 +63,12 @@ describe('DatePicker — défaut', () => {
 
   it('n’avertit ni à vide, ni sur une sélection range (qui retombe en lecture seule)', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    render(DatePicker, { props: { modelValue: JUNE } })
+    render(VDatePicker, { props: { modelValue: JUNE } })
     expect(warn).not.toHaveBeenCalled()
 
     // `mode` n'est pas fourni : le repli en lecture seule est le comportement
     // attendu, pas une erreur du consommateur.
-    const { container, getByRole } = render(DatePicker, {
+    const { container, getByRole } = render(VDatePicker, {
       props: { selection: 'range', modelValue: { start: '2026-06-19', end: '2026-06-26' } },
     })
     expect(warn).not.toHaveBeenCalled()
@@ -81,16 +81,16 @@ describe('DatePicker — défaut', () => {
 
   it('avertit quand mode="input" est explicitement demandé hors sélection simple', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    render(DatePicker, {
+    render(VDatePicker, {
       props: { mode: 'input', selection: 'range', modelValue: { start: null, end: null } },
     })
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('mode="input" ignoré'))
   })
 })
 
-describe('DatePicker — lecture seule', () => {
+describe('VDatePicker — lecture seule', () => {
   const mount = (props: Record<string, unknown> = {}) =>
-    render(DatePicker, {
+    render(VDatePicker, {
       props: { mode: 'readonly', locale: 'fr-FR', label: 'Date', ...props },
     })
 
@@ -139,7 +139,7 @@ describe('DatePicker — lecture seule', () => {
   })
 
   it('l’Entrée qui sélectionne dans la grille ne rouvre pas le panneau', async () => {
-    // L'Entrée du Calendar fait preventDefault puis ferme (mode simple) ; elle
+    // L'Entrée du VCalendar fait preventDefault puis ferme (mode simple) ; elle
     // remonte ensuite à la racine, où ArrowDown/Entrée ouvrent. Sans la garde
     // `defaultPrevented` du composable, le panneau se rouvrait aussitôt.
     const { container, getByRole } = mount({ modelValue: JUNE })
@@ -158,7 +158,7 @@ describe('DatePicker — lecture seule', () => {
     const clearBtn = container.querySelector('button[aria-label="Effacer la date"]') as HTMLElement
     expect(clearBtn).toBeTruthy()
     // Le champ est readonly dans ce mode : la croix n'y survit que parce que
-    // `clearVisible` fait autorité côté Input.
+    // `clearVisible` fait autorité côté VInput.
     expect((container.querySelector('input') as HTMLInputElement).readOnly).toBe(true)
     expect(container.querySelector('button[aria-label="Ouvrir le calendrier"]')).toBeTruthy()
 
@@ -196,13 +196,13 @@ describe('DatePicker — lecture seule', () => {
   })
 })
 
-describe('DatePicker — mode saisie', () => {
+describe('VDatePicker — mode saisie', () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
   const mount = (props: Record<string, unknown> = {}) =>
-    render(DatePicker, {
+    render(VDatePicker, {
       props: { mode: 'input', locale: 'fr-FR', label: 'Date', ...props },
     })
 
@@ -233,7 +233,7 @@ describe('DatePicker — mode saisie', () => {
 
   it('ignore les caractères refusés sans que le texte brut ne reparaisse', async () => {
     // Le masque ne change pas → Vue ne repatche rien. Sans le `v-model` sur
-    // l'Input (dont l'état interne recopierait le texte brut) le 9e chiffre et
+    // le VInput (dont l'état interne recopierait le texte brut) le 9e chiffre et
     // la lettre réapparaîtraient dans le DOM au patch suivant.
     const { container } = mount({ modelValue: JUNE })
     const input = container.querySelector('input') as HTMLInputElement
@@ -361,7 +361,7 @@ describe('DatePicker — mode saisie', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { container } = mount({ selection: 'range', modelValue: { start: null, end: null } })
     expect((container.querySelector('input') as HTMLInputElement).readOnly).toBe(true)
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[DatePicker]'))
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[VDatePicker]'))
   })
 
   // « aucun calendrier sans showCalendar » est désormais le comportement PAR

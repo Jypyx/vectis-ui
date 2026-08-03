@@ -1,30 +1,30 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as RadioStories from './VRadio.stories'
+import * as VRadioStories from './VRadio.stories'
 
-<Meta of={RadioStories} />
+<Meta of={VRadioStories} />
 
 # Radio
 
 Bouton radio construit sur l'`<input type="radio">` natif, visuellement remplacé par une
-pastille stylée (même approche que `Checkbox` : l'input reste dans l'arbre, seul son rendu est
-masqué). Le groupe est **natif** : plusieurs Radio partageant le même `name` (fallthrough) et
+pastille stylée (même approche que `VCheckbox` : l'input reste dans l'arbre, seul son rendu est
+masqué). Le groupe est **natif** : plusieurs VRadio partageant le même `name` (fallthrough) et
 le même v-model — la navigation aux flèches est fournie par le navigateur, zéro JavaScript.
 
 Taille unique : pastille de 20px, bordure de 2px (tokens `--vectis-control-size-check` et
 `--vectis-control-border-width`), point intérieur de 8px (`--vectis-control-size-check-dot`).
 
-<Canvas of={RadioStories.Groupe} />
+<Canvas of={VRadioStories.Groupe} />
 
-<Controls of={RadioStories.Groupe} />
+<Controls of={VRadioStories.Groupe} />
 
-Chaque Radio porte une prop `value` ; le v-model du groupe vaut la `value` du bouton
+Chaque VRadio porte une prop `value` ; le v-model du groupe vaut la `value` du bouton
 sélectionné.
 
 ## Position du libellé
 
 `label-position` place le libellé après (`end`, défaut) ou avant (`start`) la pastille.
 
-<Canvas of={RadioStories.PositionDuLibelle} />
+<Canvas of={VRadioStories.PositionDuLibelle} />
 
 ## Spread
 
@@ -32,7 +32,7 @@ sélectionné.
 extrémités du conteneur. Se combine avec `label-position` pour choisir de quel côté part la
 pastille.
 
-<Canvas of={RadioStories.Spread} />
+<Canvas of={VRadioStories.Spread} />
 
 ## États
 
@@ -40,7 +40,7 @@ pastille.
 `--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu suit automatiquement le thème
 dark :
 
-<Canvas of={RadioStories.Disabled} />
+<Canvas of={VRadioStories.Disabled} />
 
 ## Formulaires et validation
 

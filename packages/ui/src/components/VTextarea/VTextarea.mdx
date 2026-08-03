@@ -1,12 +1,12 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as TextareaStories from './VTextarea.stories'
+import * as VTextareaStories from './VTextarea.stories'
 
-<Meta of={TextareaStories} />
+<Meta of={VTextareaStories} />
 
 # Textarea
 
 Zone de texte complète — label, icônes internes (cliquables), compteur, limite souple,
-loading, effacement — construite autour d'un `<textarea>` natif stylé. Miroir d'`Input` avec
+loading, effacement — construite autour d'un `<textarea>` natif stylé. Miroir d'`VInput` avec
 deux différences : la prop `auto-grow` (hauteur qui suit le contenu, pur CSS) et le compteur
 rendu **sous** le champ (sur la ligne du hint), jamais dedans.
 
@@ -14,9 +14,9 @@ Pas de prop `pattern` : `<textarea>` ne le supporte pas nativement et le composa
 l'émule pas (décision projet). La racine est un wrapper : les attributs natifs passent en
 fallthrough sur le `<textarea>`, sauf `class`/`style` qui restent sur la racine.
 
-<Canvas of={TextareaStories.Default} />
+<Canvas of={VTextareaStories.Default} />
 
-<Controls of={TextareaStories.Default} />
+<Controls of={VTextareaStories.Default} />
 
 ## Auto-grow
 
@@ -25,63 +25,63 @@ de mesure. Sans support navigateur, le champ reste un textarea classique (progre
 enhancement). Le redimensionnement manuel (`resize`) est porté par le wrapper du champ, pas
 par le `<textarea>`.
 
-<Canvas of={TextareaStories.AutoGrow} />
+<Canvas of={VTextareaStories.AutoGrow} />
 
 ## Tailles
 
 Trois tailles (`sm` 32px, `md` 40px — défaut —, `lg` 48px) qui jouent sur la typographie, le
 padding et la hauteur minimale ; les icônes internes suivent (sm/md → 20px, lg → 24px via le
 contexte `--vectis-icon-size`) et restent **alignées sur la première ligne** de texte. Comme pour
-`Input`, les extrêmes de l'échelle du DS (`xs`, `xl`) ne sont pas exposées.
+`VInput`, les extrêmes de l'échelle du DS (`xs`, `xl`) ne sont pas exposées.
 
-<Canvas of={TextareaStories.Tailles} />
+<Canvas of={VTextareaStories.Tailles} />
 
 `compact` réduit la hauteur minimale de 4px sans toucher au padding ni à la typographie.
 
-<Canvas of={TextareaStories.Compact} />
+<Canvas of={VTextareaStories.Compact} />
 
 ## Label, hint et compteur
 
 `label` est associé via `for`/`id`, `hint` via `aria-describedby`. Le compteur (`counter`)
 s'affiche sous le champ, à droite, sur la même ligne que le hint.
 
-<Canvas of={TextareaStories.LabelHintCompteur} />
+<Canvas of={VTextareaStories.LabelHintCompteur} />
 
 `soft-limit` rend `maxlength` souple : la saisie peut dépasser, le champ passe en erreur via
 la validation native (`setCustomValidity` → `:user-invalid` après interaction) et la
 soumission est bloquée — la validité est exposée par l'API standard (`el.validity`).
 
-<Canvas of={TextareaStories.CompteurSoft} />
+<Canvas of={VTextareaStories.CompteurSoft} />
 
 ## États
 
 `loading` affiche un spinner qui **remplace** l'emplacement de fin (`icon-end` / slot
 `#end`) ; son libellé (`loading-label`) est annoncé via `role="status"` :
 
-<Canvas of={TextareaStories.Loading} />
+<Canvas of={VTextareaStories.Loading} />
 
 `clearable` affiche une croix quand le champ est non-vide (hors disabled/readonly) : elle
 vide le champ, émet `clear` et rend le focus au champ :
 
-<Canvas of={TextareaStories.Clearable} />
+<Canvas of={VTextareaStories.Clearable} />
 
 `readonly` : champ focusable et soumis mais non modifiable, fond légèrement enfoncé, bouton
 d'effacement masqué :
 
-<Canvas of={TextareaStories.Readonly} />
+<Canvas of={VTextareaStories.Readonly} />
 
 `disabled` bascule tout le champ sur des nuances de gris — pas de jeu d'opacité, rendu
 compatible thème dark :
 
-<Canvas of={TextareaStories.Disabled} />
+<Canvas of={VTextareaStories.Disabled} />
 
 La prop `invalid` force l'état d'erreur (validation serveur) — elle pose `aria-invalid` :
 
-<Canvas of={TextareaStories.Invalide} />
+<Canvas of={VTextareaStories.Invalide} />
 
 ## Vitrine
 
-<Canvas of={TextareaStories.Showcase} />
+<Canvas of={VTextareaStories.Showcase} />
 
 ## Accessibilité
 

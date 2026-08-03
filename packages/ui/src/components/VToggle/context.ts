@@ -3,7 +3,7 @@ import type { InjectionKey } from 'vue'
 import type { ToggleSize, ToggleTone, ToggleValue, ToggleVariant } from './VToggle.vue'
 
 /**
- * Contrat Toggle → ToggleItem. Getters : les props de la racine restent
+ * Contrat VToggle → VToggleItem. Getters : les props de la racine restent
  * réactives à travers l'injection. Pas d'ids ni de registre :
  * aucun aria-controls dans ce pattern, et la sélection est une pure
  * comparaison de valeurs — déterministe SSR/client.
@@ -12,7 +12,7 @@ import type { ToggleSize, ToggleTone, ToggleValue, ToggleVariant } from './VTogg
  * n'est pas une égalité simple, elle doit vivre côté racine.
  *
  * `size`/`compact` transitent par l'injection (et non par héritage CSS comme
- * dans Accordion) : chaque ToggleItem rend un Button, qui pose lui-même
+ * dans VAccordion) : chaque VToggleItem rend un VButton, qui pose lui-même
  * `v-control[data-size]` sur son propre élément.
  */
 export interface ToggleContext {

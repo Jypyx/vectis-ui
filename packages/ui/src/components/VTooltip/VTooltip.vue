@@ -1,12 +1,12 @@
 ﻿<script setup lang="ts">
 import { ref, useId } from 'vue'
 
-import Popover from '../VPopover/VPopover.vue'
+import VPopover from '../VPopover/VPopover.vue'
 
 import { useTimer } from '../../composables/useTimer'
 
 /**
- * Tooltip sur `Popover` (`mode="manual"` : pas de light dismiss, c'est le
+ * VTooltip sur `VPopover` (`mode="manual"` : pas de light dismiss, c'est le
  * composant qui pilote). JS justifié : aucune primitive HTML stable ne
  * couvre « montrer au survol/focus avec délai » (`interestfor` est encore
  * expérimental) — le JS gère le délai, pointer/focus et Échap (WCAG 1.4.13).
@@ -16,7 +16,7 @@ import { useTimer } from '../../composables/useTimer'
  * panneau affiché (top layer, donc « après » tout le document pour la
  * résolution d'ancre) se rattacherait au DERNIER wrapper nommé de la page.
  * Le wrapper reste ici (il porte les gestionnaires pointer/focus) : le
- * `#trigger` de Popover n'est pas utilisé, un déclencheur d'infobulle n'étant
+ * `#trigger` de VPopover n'est pas utilisé, un déclencheur d'infobulle n'étant
  * pas un invocateur `popovertarget` — il serait basculé au clic — mais un
  * élément DÉCRIT par le panneau.
  */
@@ -45,20 +45,20 @@ defineSlots<{
    * forme, kbd, icônes) : le tooltip se ferme dès que le pointeur quitte le
    * déclencheur et `aria-describedby` aplatit le contenu en texte — un lien
    * ou bouton y serait inatteignable. Pour de l'interactif, préférer un
-   * panneau flottant persistant (Menu).
+   * panneau flottant persistant (VMenu).
    */
   content?(): unknown
 }>()
 
 const tooltipId = useId()
 /*
- * Popover est piloté impérativement (et non par `v-model:open`) : le focus
+ * VPopover est piloté impérativement (et non par `v-model:open`) : le focus
  * clavier doit ouvrir SYNCHRONEMENT — un modèle passerait par le watch de
- * Popover, donc par un tick. Le tooltip ne publie aucun état d'ouverture, il
+ * VPopover, donc par un tick. Le tooltip ne publie aucun état d'ouverture, il
  * n'a rien à faire d'un modèle. Les gardes d'idempotence sont dans usePopover,
  * en amont.
  */
-const popoverRef = ref<InstanceType<typeof Popover> | null>(null)
+const popoverRef = ref<InstanceType<typeof VPopover> | null>(null)
 
 // Délai d'apparition (cf. useTimer : réarmement et annulation au démontage).
 const timer = useTimer()
@@ -88,7 +88,7 @@ function onKeydown(event: KeyboardEvent) {
     @keydown="onKeydown"
   >
     <slot :trigger-props="{ 'aria-describedby': tooltipId }" />
-    <Popover
+    <VPopover
       :id="tooltipId"
       ref="popoverRef"
       mode="manual"
@@ -99,7 +99,7 @@ function onKeydown(event: KeyboardEvent) {
       class="v-tooltip-panel"
     >
       <slot name="content">{{ text }}</slot>
-    </Popover>
+    </VPopover>
   </span>
 </template>
 
@@ -113,7 +113,7 @@ function onKeydown(event: KeyboardEvent) {
     anchor-scope: --tooltip-anchor;
   }
 
-  /* `position-anchor` vient de Popover (prop `anchor`) */
+  /* `position-anchor` vient de VPopover (prop `anchor`) */
   .v-tooltip-panel {
     width: max-content;
     max-width: min(18rem, calc(100vw - var(--vectis-space-8)));

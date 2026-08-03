@@ -2,7 +2,7 @@
 /**
  * Zone de texte complète : label, icônes internes (cliquables), compteur,
  * limite souple, loading, clearable — autour d'un <textarea> natif stylé.
- * Miroir d'Input, avec `autoGrow` (pur CSS, `field-sizing: content`) et le
+ * Miroir de VInput, avec `autoGrow` (pur CSS, `field-sizing: content`) et le
  * compteur rendu SOUS le champ, jamais dedans. Wrapper-root : class/style
  * restent sur la racine, tout le reste est reporté sur le <textarea>. La
  * validation reste native (`:user-invalid`) ; la limite souple passe par
@@ -13,11 +13,11 @@
  */
 import { computed, ref } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconName, iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import Spinner from '../VSpinner/VSpinner.vue'
-import Typography from '../VTypography/VTypography.vue'
+import VSpinner from '../VSpinner/VSpinner.vue'
+import VTypography from '../VTypography/VTypography.vue'
 
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useIconClickHandlers } from '../../composables/useIconClickHandlers'
@@ -50,7 +50,7 @@ interface TextareaProps {
   iconStartLabel?: string
   /** Libellé accessible du bouton icône end (si cliquable). */
   iconEndLabel?: string
-  /** Spinner à droite, à la place de iconEnd / #end. */
+  /** VSpinner à droite, à la place de iconEnd / #end. */
   loading?: boolean
   /** Libellé du spinner pour les lecteurs d'écran. Défaut : dictionnaire du DS. */
   loadingLabel?: string
@@ -118,7 +118,7 @@ const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.cle
 const { fieldId, hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
 
 const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
-  name: 'Textarea',
+  name: 'VTextarea',
   iconStartLabel: props.iconStartLabel,
   iconEndLabel: props.iconEndLabel,
 })
@@ -153,9 +153,9 @@ const { counterText, over } = useTextLimit({
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
   >
-    <Typography v-if="label" as="label" variant="label" class="v-textarea-label" :for="fieldId">
+    <VTypography v-if="label" as="label" variant="label" class="v-textarea-label" :for="fieldId">
       {{ label }}
-    </Typography>
+    </VTypography>
 
     <div class="v-textarea-field" :data-auto-grow="autoGrow ? '' : undefined">
       <slot name="start">
@@ -167,9 +167,9 @@ const { counterText, over } = useTextLimit({
           :disabled="disabled"
           @click="emit('click:icon-start', $event)"
         >
-          <Icon v-bind="iconProps(iconStart)" />
+          <VIcon v-bind="iconProps(iconStart)" />
         </button>
-        <Icon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
+        <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
       </slot>
 
       <textarea
@@ -194,10 +194,10 @@ const { counterText, over } = useTextLimit({
       >
         <!-- croix Material Symbols : même graisse de trait que les autres icônes
              (iconStart/iconEnd…) ; police chargée par le consommateur -->
-        <Icon name="close" />
+        <VIcon name="close" />
       </button>
 
-      <Spinner v-if="loading" :label="resolvedLoadingLabel" />
+      <VSpinner v-if="loading" :label="resolvedLoadingLabel" />
       <slot v-else name="end">
         <button
           v-if="iconEnd && hasIconEndHandler"
@@ -207,16 +207,16 @@ const { counterText, over } = useTextLimit({
           :disabled="disabled"
           @click="emit('click:icon-end', $event)"
         >
-          <Icon v-bind="iconProps(iconEnd)" />
+          <VIcon v-bind="iconProps(iconEnd)" />
         </button>
-        <Icon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" />
+        <VIcon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" />
       </slot>
     </div>
 
     <div v-if="hint || counter" class="v-textarea-meta">
-      <Typography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-textarea-hint">
+      <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-textarea-hint">
         {{ hint }}
-      </Typography>
+      </VTypography>
       <span v-if="counter" class="v-textarea-counter" :data-over="over ? '' : undefined">
         {{ counterText }}
       </span>
@@ -234,7 +234,7 @@ const { counterText, over } = useTextLimit({
     font-family: var(--vectis-text-family);
   }
 
-  /* Label et hint : rendus par Typography (label / caption muted) — les classes
+  /* Label et hint : rendus par VTypography (label / caption muted) — les classes
      .v-textarea-label/.v-textarea-hint restent posées comme points d'accroche
      (surcharges consommateur, état disabled ci-dessous). */
 
@@ -265,7 +265,7 @@ const { counterText, over } = useTextLimit({
 
     /*
      * Tailles/compact : variables --control-* héritées de la racine
-     * v-control (styles/control-size.css), contexte d'Icon compris.
+     * v-control (styles/control-size.css), contexte de VIcon compris.
      * Hauteur minimale = 2 lignes : base + hauteur effective — vaut 2×base
      * sans compact, 2×base - 4px avec (la hauteur effective porte le delta).
      */
@@ -364,7 +364,7 @@ const { counterText, over } = useTextLimit({
   }
 
   /* Boutons internes (effacer, icône cliquable) : gris foncé → noir au hover,
-     radius aligné sur Button (focus ring carré aux bords arrondis) */
+     radius aligné sur VButton (focus ring carré aux bords arrondis) */
   .v-textarea-action {
     display: inline-flex;
     align-items: center;
@@ -399,7 +399,7 @@ const { counterText, over } = useTextLimit({
     background: var(--vectis-color-surface-sunken);
   }
 
-  /* Disabled : nuance de gris sans opacité (mêmes tokens que Checkbox/Radio).
+  /* Disabled : nuance de gris sans opacité (mêmes tokens que VCheckbox/VRadio).
      Placé après les états erreur/readonly : à spécificité égale, il gagne. */
   .v-textarea[data-disabled] .v-textarea-field {
     --field-border-color: var(--vectis-color-border);

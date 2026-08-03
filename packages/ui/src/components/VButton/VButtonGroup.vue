@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * Rattache visuellement plusieurs Button/IconButton en un contrôle segmenté :
+ * Rattache visuellement plusieurs VButton/VIconButton en un contrôle segmenté :
  * bordures fusionnées, coins arrondis aux seules extrémités du groupe. Tout est
  * en CSS (aucun provide/inject) — chaque bouton garde ses propres props ; poser
  * les mêmes variant/tone/size sur les enfants donne un rendu cohérent.
@@ -15,7 +15,7 @@ withDefaults(defineProps<ButtonGroupProps>(), {
 })
 
 defineSlots<{
-  /** Les Button/IconButton à rattacher. */
+  /** Les VButton/VIconButton à rattacher. */
   default(): unknown
 }>()
 </script>

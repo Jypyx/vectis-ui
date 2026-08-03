@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Textarea from './VTextarea.vue'
+import VTextarea from './VTextarea.vue'
 
 const meta = {
   title: 'Composants/Textarea',
-  component: Textarea,
+  component: VTextarea,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
   },
@@ -17,12 +17,12 @@ const meta = {
     disabled: false,
   },
   render: (args) => ({
-    components: { Textarea },
+    components: { VTextarea },
     setup: () => ({ args, value: ref('') }),
     template:
-      '<Textarea v-bind="args" v-model="value" placeholder="Votre message…" aria-label="Message" style="width: 320px" />',
+      '<VTextarea v-bind="args" v-model="value" placeholder="Votre message…" aria-label="Message" style="width: 320px" />',
   }),
-} satisfies Meta<typeof Textarea>
+} satisfies Meta<typeof VTextarea>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -32,34 +32,34 @@ export const Default: Story = {}
 export const AutoGrow: Story = {
   args: { autoGrow: true },
   render: (args) => ({
-    components: { Textarea },
+    components: { VTextarea },
     setup: () => ({ args, value: ref('La hauteur suit le contenu.\nAjoutez des lignes…') }),
     template:
-      '<Textarea v-bind="args" v-model="value" aria-label="Message auto-grow" style="width: 320px" />',
+      '<VTextarea v-bind="args" v-model="value" aria-label="Message auto-grow" style="width: 320px" />',
   }),
 }
 
 export const Tailles: Story = {
   render: () => ({
-    components: { Textarea },
+    components: { VTextarea },
     template: `
       <div style="display: grid; gap: 8px; width: 320px">
-        <Textarea size="sm" placeholder="Small" aria-label="Small" />
-        <Textarea size="md" placeholder="Medium" aria-label="Medium" />
-        <Textarea size="lg" placeholder="Large" aria-label="Large" />
+        <VTextarea size="sm" placeholder="Small" aria-label="Small" />
+        <VTextarea size="md" placeholder="Medium" aria-label="Medium" />
+        <VTextarea size="lg" placeholder="Large" aria-label="Large" />
       </div>
     `,
   }),
 }
 
-/** Hauteur minimale réduite de 4px, padding/typo/icônes inchangés (comme Button). */
+/** Hauteur minimale réduite de 4px, padding/typo/icônes inchangés (comme VButton). */
 export const Compact: Story = {
   render: () => ({
-    components: { Textarea },
+    components: { VTextarea },
     template: `
       <div style="display: grid; gap: 8px; width: 320px">
-        <Textarea placeholder="Normal" aria-label="Normal" />
-        <Textarea compact placeholder="Compact" aria-label="Compact" />
+        <VTextarea placeholder="Normal" aria-label="Normal" />
+        <VTextarea compact placeholder="Compact" aria-label="Compact" />
       </div>
     `,
   }),
@@ -74,9 +74,9 @@ export const LabelHintCompteur: Story = {
     maxlength: 200,
   },
   render: (args) => ({
-    components: { Textarea },
+    components: { VTextarea },
     setup: () => ({ args, value: ref('Développeuse Vue à Lyon.') }),
-    template: '<Textarea v-bind="args" v-model="value" style="width: 320px" />',
+    template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -94,9 +94,9 @@ export const LabelHintCompteur: Story = {
 export const CompteurSoft: Story = {
   args: { counter: true, maxlength: 10, softLimit: true, label: 'Titre' },
   render: (args) => ({
-    components: { Textarea },
+    components: { VTextarea },
     setup: () => ({ args, value: ref('') }),
-    template: '<Textarea v-bind="args" v-model="value" style="width: 320px" />',
+    template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -114,9 +114,9 @@ export const CompteurSoft: Story = {
 export const Clearable: Story = {
   args: { clearable: true, label: 'Message' },
   render: (args) => ({
-    components: { Textarea },
+    components: { VTextarea },
     setup: () => ({ args, value: ref('') }),
-    template: '<Textarea v-bind="args" v-model="value" style="width: 320px" />',
+    template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -132,9 +132,9 @@ export const Clearable: Story = {
 export const Loading: Story = {
   args: { loading: true, iconEnd: 'edit', label: 'Génération' },
   render: (args) => ({
-    components: { Textarea },
+    components: { VTextarea },
     setup: () => ({ args, value: ref('Rédaction en cours…') }),
-    template: '<Textarea v-bind="args" v-model="value" style="width: 320px" />',
+    template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
   play: async ({ canvasElement }) => {
     // le spinner remplace l'icône end
@@ -158,28 +158,28 @@ export const Disabled: Story = {
     iconStart: 'chat',
   },
   render: (args) => ({
-    components: { Textarea },
+    components: { VTextarea },
     setup: () => ({ args, value: ref('Tout passe en gris, sans opacité.') }),
-    template: '<Textarea v-bind="args" v-model="value" style="width: 320px" />',
+    template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
 }
 
 export const Readonly: Story = {
   args: { readonly: true, label: 'Conditions', clearable: true },
   render: (args) => ({
-    components: { Textarea },
+    components: { VTextarea },
     setup: () => ({ args, value: ref('Contenu en lecture seule, non modifiable.') }),
-    template: '<Textarea v-bind="args" v-model="value" style="width: 320px" />',
+    template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
 }
 
 export const VModel: Story = {
   render: () => ({
-    components: { Textarea },
+    components: { VTextarea },
     setup: () => ({ value: ref('') }),
     template: `
       <div style="display: grid; gap: 8px; width: 320px">
-        <Textarea v-model="value" aria-label="Démo v-model" />
+        <VTextarea v-model="value" aria-label="Démo v-model" />
         <output data-testid="mirror">{{ value }}</output>
       </div>
     `,
@@ -194,7 +194,7 @@ export const VModel: Story = {
 /** Vitrine : combinaisons de props pour voir toutes les possibilités d'un coup. */
 export const Showcase: Story = {
   render: () => ({
-    components: { Textarea },
+    components: { VTextarea },
     setup: () => ({
       bio: ref('Développeuse Vue à Lyon.'),
       titre: ref('Un titre qui dépasse la limite autorisée'),
@@ -203,7 +203,7 @@ export const Showcase: Story = {
     }),
     template: `
       <div style="display: grid; gap: 24px; width: 360px">
-        <Textarea
+        <VTextarea
           v-model="bio"
           label="Bio"
           hint="Présentez-vous en quelques mots."
@@ -212,7 +212,7 @@ export const Showcase: Story = {
           icon-start="person"
           clearable
         />
-        <Textarea
+        <VTextarea
           v-model="titre"
           label="Titre"
           hint="La limite est souple : le dépassement passe le champ en erreur."
@@ -220,7 +220,7 @@ export const Showcase: Story = {
           :maxlength="20"
           soft-limit
         />
-        <Textarea
+        <VTextarea
           v-model="note"
           size="sm"
           label="Note auto-grow"
@@ -228,9 +228,9 @@ export const Showcase: Story = {
           auto-grow
           placeholder="Écrivez, le champ grandit…"
         />
-        <Textarea v-model="journal" label="Génération" icon-end="edit" loading />
-        <Textarea v-model="journal" label="Archive" readonly />
-        <Textarea
+        <VTextarea v-model="journal" label="Génération" icon-end="edit" loading />
+        <VTextarea v-model="journal" label="Archive" readonly />
+        <VTextarea
           v-model="journal"
           label="Désactivé"
           hint="Tout passe en gris, sans opacité."

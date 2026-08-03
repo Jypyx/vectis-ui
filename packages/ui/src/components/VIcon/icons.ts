@@ -38,4 +38,4 @@ export const builtinIcons = {
 } as const satisfies Record<string, readonly [string] | readonly [string, string]>
 
 /** Les noms d'icônes que le DS rend lui-même — contrat d'un résolveur consommateur. */
-export type DsIconName = keyof typeof builtinIcons
+export type VectisIconName = keyof typeof builtinIcons

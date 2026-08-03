@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { computed, ref } from 'vue'
 
-import Checkbox from './VCheckbox.vue'
+import VCheckbox from './VCheckbox.vue'
 
 const meta = {
   title: 'Composants/Checkbox',
-  component: Checkbox,
+  component: VCheckbox,
   argTypes: {
     labelPosition: { control: 'select', options: ['start', 'end'] },
   },
@@ -18,11 +18,11 @@ const meta = {
     disabled: false,
   },
   render: (args) => ({
-    components: { Checkbox },
+    components: { VCheckbox },
     setup: () => ({ args, checked: ref(false) }),
-    template: '<Checkbox v-bind="args" v-model="checked">Recevoir la newsletter</Checkbox>',
+    template: '<VCheckbox v-bind="args" v-model="checked">Recevoir la newsletter</VCheckbox>',
   }),
-} satisfies Meta<typeof Checkbox>
+} satisfies Meta<typeof VCheckbox>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -44,11 +44,11 @@ export const Default: Story = {
 
 export const PositionDuLibelle: Story = {
   render: () => ({
-    components: { Checkbox },
+    components: { VCheckbox },
     template: `
       <div style="display: grid; gap: 8px; justify-items: start">
-        <Checkbox label-position="end">Libellé après (défaut)</Checkbox>
-        <Checkbox label-position="start">Libellé avant</Checkbox>
+        <VCheckbox label-position="end">Libellé après (défaut)</VCheckbox>
+        <VCheckbox label-position="start">Libellé avant</VCheckbox>
       </div>
     `,
   }),
@@ -60,11 +60,11 @@ export const PositionDuLibelle: Story = {
  */
 export const Spread: Story = {
   render: () => ({
-    components: { Checkbox },
+    components: { VCheckbox },
     template: `
       <div style="display: grid; gap: 8px; max-width: 320px">
-        <Checkbox spread>Boîte à droite</Checkbox>
-        <Checkbox spread label-position="start">Boîte à gauche</Checkbox>
+        <VCheckbox spread>Boîte à droite</VCheckbox>
+        <VCheckbox spread label-position="start">Boîte à gauche</VCheckbox>
       </div>
     `,
   }),
@@ -72,7 +72,7 @@ export const Spread: Story = {
 
 export const Indeterminate: Story = {
   render: () => ({
-    components: { Checkbox },
+    components: { VCheckbox },
     setup: () => {
       const fruits = ref([true, false, true])
       const all = computed({
@@ -86,11 +86,11 @@ export const Indeterminate: Story = {
     },
     template: `
       <div style="display: grid; gap: 8px">
-        <Checkbox v-model="all" :indeterminate="some">Tout sélectionner</Checkbox>
+        <VCheckbox v-model="all" :indeterminate="some">Tout sélectionner</VCheckbox>
         <div style="display: grid; gap: 8px; padding-inline-start: 24px">
-          <Checkbox v-model="fruits[0]">Pommes</Checkbox>
-          <Checkbox v-model="fruits[1]">Poires</Checkbox>
-          <Checkbox v-model="fruits[2]">Cerises</Checkbox>
+          <VCheckbox v-model="fruits[0]">Pommes</VCheckbox>
+          <VCheckbox v-model="fruits[1]">Poires</VCheckbox>
+          <VCheckbox v-model="fruits[2]">Cerises</VCheckbox>
         </div>
       </div>
     `,
@@ -107,12 +107,12 @@ export const Indeterminate: Story = {
 
 export const Disabled: Story = {
   render: () => ({
-    components: { Checkbox },
+    components: { VCheckbox },
     setup: () => ({ on: ref(true), off: ref(false) }),
     template: `
       <div style="display: grid; gap: 8px">
-        <Checkbox v-model="off" disabled>Désactivée</Checkbox>
-        <Checkbox v-model="on" disabled>Désactivée cochée</Checkbox>
+        <VCheckbox v-model="off" disabled>Désactivée</VCheckbox>
+        <VCheckbox v-model="on" disabled>Désactivée cochée</VCheckbox>
       </div>
     `,
   }),
@@ -120,13 +120,13 @@ export const Disabled: Story = {
 
 export const LibelleLong: Story = {
   render: () => ({
-    components: { Checkbox },
+    components: { VCheckbox },
     template: `
       <div style="max-width: 260px">
-        <Checkbox>
+        <VCheckbox>
           J'accepte les conditions générales d'utilisation ainsi que la politique de
           confidentialité, y compris le traitement de mes données personnelles.
-        </Checkbox>
+        </VCheckbox>
       </div>
     `,
   }),

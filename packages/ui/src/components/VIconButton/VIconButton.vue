@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { ButtonHTMLAttributes } from 'vue'
 
-import Button from '../VButton/VButton.vue'
-import Icon from '../VIcon/VIcon.vue'
+import VButton from '../VButton/VButton.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 
 /**
- * Bouton icône : même API visuelle que Button, mais carré et avec un libellé
+ * Bouton icône : même API visuelle que VButton, mais carré et avec un libellé
  * accessible OBLIGATOIRE (l'icône seule ne suffit pas aux lecteurs d'écran).
  */
 interface IconButtonProps {
@@ -40,13 +40,13 @@ withDefaults(defineProps<IconButtonProps>(), {
 })
 
 defineSlots<{
-  /** L'icône (composant Icon ou SVG avec aria-hidden="true"), si `icon` n'est pas fourni */
+  /** L'icône (composant VIcon ou SVG avec aria-hidden="true"), si `icon` n'est pas fourni */
   default(): unknown
 }>()
 </script>
 
 <template>
-  <Button
+  <VButton
     class="v-icon-button"
     :variant="variant"
     :tone="tone"
@@ -57,17 +57,17 @@ defineSlots<{
     :loading="loading"
     :aria-label="label"
   >
-    <Icon v-if="icon" v-bind="iconProps(icon)" :filled="iconFilled" />
+    <VIcon v-if="icon" v-bind="iconProps(icon)" :filled="iconFilled" />
     <slot v-else />
-  </Button>
+  </VButton>
 </template>
 
 <style>
 @layer vectis.components {
   /*
-   * Sélecteur avec [data-size] pour battre la règle de padding de Button
+   * Sélecteur avec [data-size] pour battre la règle de padding de VButton
    * quel que soit l'ordre du CSS bundlé (ce fichier reste importé APRÈS
-   * Button dans index.ts). La largeur lit --control-height, posée par la
+   * VButton dans index.ts). La largeur lit --control-height, posée par la
    * classe partagée v-control sur ce même élément rendu (compact inclus) :
    * une seule règle couvre toutes les tailles.
    */

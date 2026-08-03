@@ -2,13 +2,13 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Button from '../VButton/VButton.vue'
+import VButton from '../VButton/VButton.vue'
 import type { DateRange } from '../VCalendar/VCalendar.vue'
-import DatePicker from './VDatePicker.vue'
+import VDatePicker from './VDatePicker.vue'
 
 const meta = {
   title: 'Composants/DatePicker',
-  component: DatePicker,
+  component: VDatePicker,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     selection: { control: 'inline-radio', options: ['single', 'range', 'multiple'] },
@@ -23,7 +23,7 @@ const meta = {
     size: 'md',
     clearable: true,
   },
-} satisfies Meta<typeof DatePicker>
+} satisfies Meta<typeof VDatePicker>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -36,11 +36,11 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: { hint: 'Format jj/mm/aaaa' },
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({ args, value: ref<string | null>(null) }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <DatePicker v-bind="args" v-model="value" />
+        <VDatePicker v-bind="args" v-model="value" />
         <output>{{ value ?? '—' }}</output>
       </div>
     `,
@@ -84,11 +84,11 @@ export const Default: Story = {
 export const LectureSeule: Story = {
   args: { mode: 'readonly' },
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({ args, value: ref('2026-06-10') }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <DatePicker v-bind="args" v-model="value" />
+        <VDatePicker v-bind="args" v-model="value" />
         <output>{{ value ?? '—' }}</output>
       </div>
     `,
@@ -109,11 +109,11 @@ export const LectureSeule: Story = {
 export const Plage: Story = {
   args: { selection: 'range' },
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({ args, value: ref<DateRange>({ start: '2026-06-19', end: '2026-06-26' }) }),
     template: `
       <div style="width: 300px">
-        <DatePicker v-bind="args" label="Période" v-model="value" />
+        <VDatePicker v-bind="args" label="Période" v-model="value" />
       </div>
     `,
   }),
@@ -122,11 +122,11 @@ export const Plage: Story = {
 export const Multiple: Story = {
   args: { selection: 'multiple' },
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({ args, value: ref<string[]>(['2026-06-05', '2026-06-12']) }),
     template: `
       <div style="width: 300px">
-        <DatePicker v-bind="args" label="Dates" v-model="value" />
+        <VDatePicker v-bind="args" label="Dates" v-model="value" />
       </div>
     `,
   }),
@@ -136,7 +136,7 @@ export const Multiple: Story = {
 export const AvecPresets: Story = {
   args: { mode: 'readonly' },
   render: (args) => ({
-    components: { DatePicker, Button },
+    components: { VDatePicker, VButton },
     setup: () => {
       const value = ref('2026-06-10')
       const fmt = (d: Date) =>
@@ -151,13 +151,13 @@ export const AvecPresets: Story = {
     },
     template: `
       <div style="width: 280px">
-        <DatePicker v-bind="args" v-model="value">
+        <VDatePicker v-bind="args" v-model="value">
           <template #footer="{ close }">
-            <Button variant="ghost" size="sm" @click="setIn(0, close)">Aujourd'hui</Button>
-            <Button variant="ghost" size="sm" @click="setIn(1, close)">Demain</Button>
-            <Button variant="ghost" size="sm" @click="setIn(3, close)">Dans 3 jours</Button>
+            <VButton variant="ghost" size="sm" @click="setIn(0, close)">Aujourd'hui</VButton>
+            <VButton variant="ghost" size="sm" @click="setIn(1, close)">Demain</VButton>
+            <VButton variant="ghost" size="sm" @click="setIn(3, close)">Dans 3 jours</VButton>
           </template>
-        </DatePicker>
+        </VDatePicker>
       </div>
     `,
   }),
@@ -166,11 +166,11 @@ export const AvecPresets: Story = {
 export const MinMax: Story = {
   args: { mode: 'readonly' },
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({ args, value: ref('2026-06-15') }),
     template: `
       <div style="width: 280px">
-        <DatePicker v-bind="args" v-model="value" min="2026-06-05" max="2026-06-24"
+        <VDatePicker v-bind="args" v-model="value" min="2026-06-05" max="2026-06-24"
           hint="Du 5 au 24 juin uniquement" />
       </div>
     `,
@@ -180,7 +180,7 @@ export const MinMax: Story = {
 export const Evenements: Story = {
   args: { mode: 'readonly' },
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({
       args,
       value: ref('2026-06-10'),
@@ -191,7 +191,7 @@ export const Evenements: Story = {
     }),
     template: `
       <div style="width: 280px">
-        <DatePicker v-bind="args" v-model="value" :events="events" />
+        <VDatePicker v-bind="args" v-model="value" :events="events" />
       </div>
     `,
   }),
@@ -199,13 +199,13 @@ export const Evenements: Story = {
 
 export const Tailles: Story = {
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({ args, value: ref('2026-06-10') }),
     template: `
       <div style="width: 280px; display:grid; gap:12px">
-        <DatePicker v-bind="args" v-model="value" size="sm" label="sm" />
-        <DatePicker v-bind="args" v-model="value" size="md" label="md" />
-        <DatePicker v-bind="args" v-model="value" size="lg" label="lg" />
+        <VDatePicker v-bind="args" v-model="value" size="sm" label="sm" />
+        <VDatePicker v-bind="args" v-model="value" size="md" label="md" />
+        <VDatePicker v-bind="args" v-model="value" size="lg" label="lg" />
       </div>
     `,
   }),
@@ -213,11 +213,11 @@ export const Tailles: Story = {
 
 export const Desactive: Story = {
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({ args, value: ref('2026-06-10') }),
     template: `
       <div style="width: 280px">
-        <DatePicker v-bind="args" v-model="value" disabled />
+        <VDatePicker v-bind="args" v-model="value" disabled />
       </div>
     `,
   }),
@@ -234,11 +234,11 @@ export const Desactive: Story = {
 export const ClicDansLeVide: Story = {
   args: { mode: 'readonly' },
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({ args, value: ref('2026-06-10') }),
     template: `
       <div style="width: 280px">
-        <DatePicker v-bind="args" v-model="value" />
+        <VDatePicker v-bind="args" v-model="value" />
       </div>
     `,
   }),
@@ -275,11 +275,11 @@ export const ClicDansLeVide: Story = {
 export const SaisieAvecCalendrier: Story = {
   args: { showCalendar: true, hint: 'Format jj/mm/aaaa' },
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({ args, value: ref<string | null>(null) }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <DatePicker v-bind="args" v-model="value" />
+        <VDatePicker v-bind="args" v-model="value" />
         <output>{{ value ?? '—' }}</output>
       </div>
     `,
@@ -314,11 +314,11 @@ export const SaisieAvecCalendrier: Story = {
  */
 export const SaisieCollage: Story = {
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({ args, value: ref<string | null>(null) }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <DatePicker v-bind="args" v-model="value" />
+        <VDatePicker v-bind="args" v-model="value" />
         <output>{{ value ?? '—' }}</output>
       </div>
     `,
@@ -339,14 +339,14 @@ export const SaisieCollage: Story = {
  */
 export const SaisieLocales: Story = {
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({ args, value: ref('2026-06-10') }),
     template: `
       <div style="width: 280px; display:grid; gap:12px">
-        <DatePicker v-bind="args" v-model="value" locale="fr-FR" label="fr-FR" />
-        <DatePicker v-bind="args" v-model="value" locale="en-US" label="en-US" />
-        <DatePicker v-bind="args" v-model="value" locale="de-DE" label="de-DE" />
-        <DatePicker v-bind="args" v-model="value" locale="ja-JP" label="ja-JP" />
+        <VDatePicker v-bind="args" v-model="value" locale="fr-FR" label="fr-FR" />
+        <VDatePicker v-bind="args" v-model="value" locale="en-US" label="en-US" />
+        <VDatePicker v-bind="args" v-model="value" locale="de-DE" label="de-DE" />
+        <VDatePicker v-bind="args" v-model="value" locale="ja-JP" label="ja-JP" />
       </div>
     `,
   }),
@@ -358,7 +358,7 @@ export const SaisieLocales: Story = {
  */
 export const SaisieBornee: Story = {
   render: (args) => ({
-    components: { DatePicker },
+    components: { VDatePicker },
     setup: () => ({
       args,
       value: ref('2026-06-10'),
@@ -366,7 +366,7 @@ export const SaisieBornee: Story = {
     }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <DatePicker v-bind="args" v-model="value" min="2026-06-01" max="2026-06-30"
+        <VDatePicker v-bind="args" v-model="value" min="2026-06-01" max="2026-06-30"
           :disabled-dates="weekends" hint="Juin 2026, jours ouvrés" />
         <output>{{ value ?? '—' }}</output>
       </div>

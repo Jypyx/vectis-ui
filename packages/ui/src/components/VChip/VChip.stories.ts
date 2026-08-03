@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Chip from './VChip.vue'
+import VChip from './VChip.vue'
 
 const meta = {
   title: 'Composants/Chip',
-  component: Chip,
+  component: VChip,
   argTypes: {
     variant: { control: 'select', options: ['tonal', 'solid', 'outline'] },
     tone: { control: 'select', options: ['neutral', 'accent', 'danger', 'success', 'warning'] },
@@ -28,21 +28,21 @@ const meta = {
     check: false,
   },
   render: (args) => ({
-    components: { Chip },
+    components: { VChip },
     setup: () => ({ args }),
-    template: '<Chip v-bind="args">Design system</Chip>',
+    template: '<VChip v-bind="args">Design system</VChip>',
   }),
-} satisfies Meta<typeof Chip>
+} satisfies Meta<typeof VChip>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/** `solid` neutral passe en contraste inversé (style Toast), lisible dans les deux thèmes. */
+/** `solid` neutral passe en contraste inversé (style VToast), lisible dans les deux thèmes. */
 export const Variants: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     setup: () => ({
       variants: ['tonal', 'solid', 'outline'],
       tones: ['neutral', 'accent', 'success', 'warning', 'danger'],
@@ -50,9 +50,9 @@ export const Variants: Story = {
     template: `
       <div style="display: flex; flex-direction: column; gap: 8px">
         <div v-for="variant in variants" :key="variant" style="display: flex; gap: 8px; flex-wrap: wrap">
-          <Chip v-for="tone in tones" :key="tone" :variant="variant" :tone="tone">
+          <VChip v-for="tone in tones" :key="tone" :variant="variant" :tone="tone">
             {{ variant }} {{ tone }}
-          </Chip>
+          </VChip>
         </div>
       </div>
     `,
@@ -62,11 +62,11 @@ export const Variants: Story = {
 /** `chip` (défaut) : coins arrondis rectangulaires ; `pill` : pilule. */
 export const Formes: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <Chip shape="chip" tone="accent">Chip (défaut)</Chip>
-        <Chip shape="pill" tone="accent">Pill</Chip>
+        <VChip shape="chip" tone="accent">VChip (défaut)</VChip>
+        <VChip shape="pill" tone="accent">Pill</VChip>
       </div>
     `,
   }),
@@ -80,15 +80,15 @@ export const Formes: Story = {
  */
 export const CouleurCustom: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     setup: () => ({ selected: ref(true) }),
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <Chip color="hotpink" variant="tonal" clickable>tonal</Chip>
-        <Chip color="hotpink" variant="solid" clickable>solid</Chip>
-        <Chip color="hotpink" variant="outline" clickable>outline</Chip>
-        <Chip color="oklch(55% 0.15 150)" variant="tonal" clickable>oklch()</Chip>
-        <Chip color="rebeccapurple" selectable check v-model:selected="selected">sélectionné</Chip>
+        <VChip color="hotpink" variant="tonal" clickable>tonal</VChip>
+        <VChip color="hotpink" variant="solid" clickable>solid</VChip>
+        <VChip color="hotpink" variant="outline" clickable>outline</VChip>
+        <VChip color="oklch(55% 0.15 150)" variant="tonal" clickable>oklch()</VChip>
+        <VChip color="rebeccapurple" selectable check v-model:selected="selected">sélectionné</VChip>
       </div>
     `,
   }),
@@ -97,13 +97,13 @@ export const CouleurCustom: Story = {
 /** Cliquable = vrai bouton (hover, active, focus clavier) ; statique = aucun hover. */
 export const Cliquable: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     setup: () => ({ count: ref(0) }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
-        <Chip clickable tone="accent" @click="count++">Cliqué {{ count }} fois</Chip>
-        <Chip tone="accent">Statique (sans hover)</Chip>
-        <Chip clickable disabled tone="accent">Désactivé</Chip>
+        <VChip clickable tone="accent" @click="count++">Cliqué {{ count }} fois</VChip>
+        <VChip tone="accent">Statique (sans hover)</VChip>
+        <VChip clickable disabled tone="accent">Désactivé</VChip>
       </div>
     `,
   }),
@@ -117,13 +117,13 @@ export const Cliquable: Story = {
 /** `href` rend un lien ; disabled → lien inerte (href retiré + aria-disabled). */
 export const Lien: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     template: `
       <div style="display: flex; gap: 8px">
-        <Chip href="https://vuejs.org" target="_blank" rel="noopener" tone="accent" iconStart="open_in_new">
+        <VChip href="https://vuejs.org" target="_blank" rel="noopener" tone="accent" iconStart="open_in_new">
           vuejs.org
-        </Chip>
-        <Chip href="https://vuejs.org" disabled tone="accent">Lien inerte</Chip>
+        </VChip>
+        <VChip href="https://vuejs.org" disabled tone="accent">Lien inerte</VChip>
       </div>
     `,
   }),
@@ -131,13 +131,13 @@ export const Lien: Story = {
 
 export const Selectionnable: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     setup: () => ({ vue: ref(true), react: ref(false), svelte: ref(false) }),
     template: `
       <div style="display: flex; gap: 8px" role="group" aria-label="Frameworks">
-        <Chip selectable v-model:selected="vue" tone="accent">Vue</Chip>
-        <Chip selectable v-model:selected="react" tone="accent">React</Chip>
-        <Chip selectable v-model:selected="svelte" tone="accent">Svelte</Chip>
+        <VChip selectable v-model:selected="vue" tone="accent">Vue</VChip>
+        <VChip selectable v-model:selected="react" tone="accent">React</VChip>
+        <VChip selectable v-model:selected="svelte" tone="accent">Svelte</VChip>
       </div>
     `,
   }),
@@ -153,12 +153,12 @@ export const Selectionnable: Story = {
 /** `check` affiche une coche quand sélectionné, à la place d'`iconStart`. */
 export const SelectionnableAvecCheck: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     setup: () => ({ selected: ref(true) }),
     template: `
-      <Chip selectable check iconStart="palette" v-model:selected="selected" tone="accent">
+      <VChip selectable check iconStart="palette" v-model:selected="selected" tone="accent">
         Design
-      </Chip>
+      </VChip>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -176,17 +176,17 @@ export const SelectionnableAvecCheck: Story = {
 /** Sélectionné = rendu solid du tone (ou de la couleur custom) courant. */
 export const SelectionParTone: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     setup: () => ({
       tones: ['neutral', 'accent', 'success', 'warning', 'danger'],
       selected: ref(true),
     }),
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <Chip v-for="tone in tones" :key="tone" :tone="tone" selectable :selected="true">
+        <VChip v-for="tone in tones" :key="tone" :tone="tone" selectable :selected="true">
           {{ tone }}
-        </Chip>
-        <Chip color="hotpink" selectable :selected="true">custom</Chip>
+        </VChip>
+        <VChip color="hotpink" selectable :selected="true">custom</VChip>
       </div>
     `,
   }),
@@ -194,13 +194,13 @@ export const SelectionParTone: Story = {
 
 export const Supprimable: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     setup: () => ({ tags: ref(['Vue', 'TypeScript', 'CSS']) }),
     template: `
       <div style="display: flex; gap: 8px">
-        <Chip v-for="tag in tags" :key="tag" dismissible @dismiss="tags = tags.filter(t => t !== tag)">
+        <VChip v-for="tag in tags" :key="tag" dismissible @dismiss="tags = tags.filter(t => t !== tag)">
           {{ tag }}
-        </Chip>
+        </VChip>
       </div>
     `,
   }),
@@ -214,12 +214,12 @@ export const Supprimable: Story = {
 /** `dismissIcon` : nom Material Symbols ou URL d'image. */
 export const IconeDeRetraitCustom: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     template: `
       <div style="display: flex; gap: 8px">
-        <Chip dismissible tone="accent">close (défaut)</Chip>
-        <Chip dismissible dismissIcon="cancel" tone="accent">cancel</Chip>
-        <Chip dismissible dismissIcon="backspace" tone="accent">backspace</Chip>
+        <VChip dismissible tone="accent">close (défaut)</VChip>
+        <VChip dismissible dismissIcon="cancel" tone="accent">cancel</VChip>
+        <VChip dismissible dismissIcon="backspace" tone="accent">backspace</VChip>
       </div>
     `,
   }),
@@ -228,17 +228,17 @@ export const IconeDeRetraitCustom: Story = {
 /** Icônes par props (nom Material ou URL) ou slots #start/#end ; icône seule = pas de libellé. */
 export const Icones: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     template: `
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-        <Chip iconStart="palette" tone="accent">Icône début</Chip>
-        <Chip iconEnd="arrow_forward" tone="accent">Icône fin</Chip>
-        <Chip iconStart="favorite" iconEnd="arrow_forward" tone="accent">Les deux</Chip>
-        <Chip iconStart="favorite" tone="danger" clickable aria-label="Favori" />
-        <Chip tone="success">
+        <VChip iconStart="palette" tone="accent">Icône début</VChip>
+        <VChip iconEnd="arrow_forward" tone="accent">Icône fin</VChip>
+        <VChip iconStart="favorite" iconEnd="arrow_forward" tone="accent">Les deux</VChip>
+        <VChip iconStart="favorite" tone="danger" clickable aria-label="Favori" />
+        <VChip tone="success">
           <template #start><span aria-hidden="true">✓</span></template>
           Slot #start
-        </Chip>
+        </VChip>
       </div>
     `,
   }),
@@ -246,10 +246,10 @@ export const Icones: Story = {
 
 export const SelectionnableEtSupprimable: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     setup: () => ({ selected: ref(true) }),
     template: `
-      <Chip selectable check dismissible v-model:selected="selected" tone="accent">Filtre actif</Chip>
+      <VChip selectable check dismissible v-model:selected="selected" tone="accent">Filtre actif</VChip>
     `,
   }),
 }
@@ -257,13 +257,13 @@ export const SelectionnableEtSupprimable: Story = {
 /** xs 24px (défaut) / sm 32px ; `compact` retire 4px de hauteur. */
 export const Tailles: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     template: `
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-        <Chip size="xs" dismissible>XSmall 24px</Chip>
-        <Chip size="sm" dismissible>Small 32px</Chip>
-        <Chip size="xs" compact dismissible>XSmall compact 20px</Chip>
-        <Chip size="sm" compact dismissible>Small compact 28px</Chip>
+        <VChip size="xs" dismissible>XSmall 24px</VChip>
+        <VChip size="sm" dismissible>Small 32px</VChip>
+        <VChip size="xs" compact dismissible>XSmall compact 20px</VChip>
+        <VChip size="sm" compact dismissible>Small compact 28px</VChip>
       </div>
     `,
   }),
@@ -272,14 +272,14 @@ export const Tailles: Story = {
 /** Désactivé : gris par tokens (plus d'opacité), lien inerte compris. */
 export const Disabled: Story = {
   render: () => ({
-    components: { Chip },
+    components: { VChip },
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <Chip variant="tonal" tone="accent" disabled clickable>tonal</Chip>
-        <Chip variant="solid" tone="accent" disabled clickable>solid</Chip>
-        <Chip variant="outline" tone="accent" disabled clickable>outline</Chip>
-        <Chip selectable :selected="true" dismissible disabled>Sélectionné</Chip>
-        <Chip href="https://vuejs.org" disabled>Lien inerte</Chip>
+        <VChip variant="tonal" tone="accent" disabled clickable>tonal</VChip>
+        <VChip variant="solid" tone="accent" disabled clickable>solid</VChip>
+        <VChip variant="outline" tone="accent" disabled clickable>outline</VChip>
+        <VChip selectable :selected="true" dismissible disabled>Sélectionné</VChip>
+        <VChip href="https://vuejs.org" disabled>Lien inerte</VChip>
       </div>
     `,
   }),

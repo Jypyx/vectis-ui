@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, provide, ref, useId, watch } from 'vue'
 
-import MenuPanel from './VMenuPanel.vue'
+import VMenuPanel from './VMenuPanel.vue'
 import { menuInvoker, menuKey } from './context'
 import type { MenuPlacement } from './context'
 
 /**
- * Menu d'actions (pattern ARIA menu) : Popover API (light dismiss natif ;
+ * VMenu d'actions (pattern ARIA menu) : Popover API (light dismiss natif ;
  * positionnement pur CSS). Le déclencheur invoque le panneau par
  * `popovertarget` (ancre implicite), le focus va au 1er item à l'ouverture,
- * le clavier (roving focus) vit dans MenuPanel.
+ * le clavier (roving focus) vit dans VMenuPanel.
  *
  * JS justifié ici : pont v-model ↔ API impérative du popover, focus du 1er item
  * et retour du focus au déclencheur à la fermeture.
@@ -53,13 +53,13 @@ type MenuTriggerProps = {
 }
 
 defineSlots<{
-  /** Déclencheur : poser `v-bind="triggerProps"` sur un <Button>/<button>. */
+  /** Déclencheur : poser `v-bind="triggerProps"` sur un <VButton>/<button>. */
   trigger(props: { triggerProps: MenuTriggerProps }): unknown
-  /** Les <MenuItem> / <MenuGroup> / <MenuSeparator> */
+  /** Les <VMenuItem> / <VMenuGroup> / <VMenuSeparator> */
   default(): unknown
 }>()
 
-const panelRef = ref<InstanceType<typeof MenuPanel> | null>(null)
+const panelRef = ref<InstanceType<typeof VMenuPanel> | null>(null)
 const menuId = useId()
 const shown = ref(false)
 
@@ -102,7 +102,7 @@ onMounted(() => {
 
 <template>
   <slot name="trigger" :trigger-props="triggerProps" />
-  <MenuPanel
+  <VMenuPanel
     :id="menuId"
     ref="panelRef"
     :placement="placement"
@@ -113,5 +113,5 @@ onMounted(() => {
     @toggle="onToggle"
   >
     <slot />
-  </MenuPanel>
+  </VMenuPanel>
 </template>

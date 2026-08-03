@@ -190,7 +190,7 @@ watchEffect(
     border-color: var(--vectis-color-danger);
   }
 
-  /* Disabled : nuances de gris (mêmes tokens que Button), pas d'opacité */
+  /* Disabled : nuances de gris (mêmes tokens que VButton), pas d'opacité */
   .v-checkbox:has(.v-checkbox-input:disabled) {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;

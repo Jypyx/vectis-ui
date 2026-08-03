@@ -2,12 +2,12 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
-import Popover from './VPopover.vue'
+import VPopover from './VPopover.vue'
 
 /** Unique fabrique de composant du fichier (vue/one-component-per-file). */
 function renderHarness(template: string, bindings: Record<string, unknown> = {}) {
   const Harness = defineComponent({
-    components: { Popover },
+    components: { VPopover },
     setup: () => bindings,
     template,
   })
@@ -16,9 +16,9 @@ function renderHarness(template: string, bindings: Record<string, unknown> = {})
 
 const panelOf = (container: Element) => container.querySelector('.v-popover-panel') as HTMLElement
 
-describe('Popover', () => {
+describe('VPopover', () => {
   it('rend un panneau [popover] portant le socle flottant et la surface par défaut', () => {
-    const { container } = renderHarness('<Popover>Contenu</Popover>')
+    const { container } = renderHarness('<VPopover>Contenu</VPopover>')
     const panel = panelOf(container)
     expect(panel.getAttribute('popover')).toBe('auto')
     expect(panel.getAttribute('data-placement')).toBe('bottom-start')
@@ -30,22 +30,22 @@ describe('Popover', () => {
   })
 
   it('surface=false retire l’habillage (le consommateur pose le sien)', () => {
-    const { container } = renderHarness('<Popover :surface="false">Contenu</Popover>')
+    const { container } = renderHarness('<VPopover :surface="false">Contenu</VPopover>')
     expect(panelOf(container).classList.contains('v-panel')).toBe(false)
   })
 
   it('mode=manual coupe le light dismiss natif', () => {
-    const { container } = renderHarness('<Popover mode="manual">Contenu</Popover>')
+    const { container } = renderHarness('<VPopover mode="manual">Contenu</VPopover>')
     expect(panelOf(container).getAttribute('popover')).toBe('manual')
   })
 
   it('anchor est exposée en variable inline (position-anchor en CSS)', () => {
-    const { container } = renderHarness('<Popover anchor="--ancre-test">Contenu</Popover>')
+    const { container } = renderHarness('<VPopover anchor="--ancre-test">Contenu</VPopover>')
     expect(panelOf(container).style.getPropertyValue('--anchor-name')).toBe('--ancre-test')
   })
 
   it('sans déclencheur le wrapper n’est pas ancré (display: contents en CSS)', () => {
-    const { container } = renderHarness('<Popover anchor="--a">Contenu</Popover>')
+    const { container } = renderHarness('<VPopover anchor="--a">Contenu</VPopover>')
     expect(container.querySelector('.v-popover')?.hasAttribute('data-trigger')).toBe(false)
   })
 
@@ -53,12 +53,12 @@ describe('Popover', () => {
     const open = ref(false)
     const { container, getByRole } = renderHarness(
       `
-        <Popover v-model:open="open">
+        <VPopover v-model:open="open">
           <template #trigger="{ triggerProps }">
             <button v-bind="triggerProps">Ouvrir</button>
           </template>
           Contenu
-        </Popover>
+        </VPopover>
       `,
       { open },
     )
@@ -77,13 +77,15 @@ describe('Popover', () => {
   })
 
   it('l’id du consommateur prime sur l’id généré', () => {
-    const { container } = renderHarness('<Popover id="mon-panneau">Contenu</Popover>')
+    const { container } = renderHarness('<VPopover id="mon-panneau">Contenu</VPopover>')
     expect(panelOf(container).id).toBe('mon-panneau')
   })
 
   it('v-model:open pilote le panneau dans les deux sens', async () => {
     const open = ref(false)
-    const { container } = renderHarness('<Popover v-model:open="open">Contenu</Popover>', { open })
+    const { container } = renderHarness('<VPopover v-model:open="open">Contenu</VPopover>', {
+      open,
+    })
     const panel = panelOf(container)
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
 
@@ -103,14 +105,14 @@ describe('Popover', () => {
   })
 
   it('ouvre au montage quand open vaut déjà true', async () => {
-    const { container } = renderHarness('<Popover :open="true">Contenu</Popover>')
+    const { container } = renderHarness('<VPopover :open="true">Contenu</VPopover>')
     await nextTick()
     expect(panelOf(container).hasAttribute('data-popover-open')).toBe(true)
   })
 
   it('les attributs du consommateur atterrissent sur le panneau, pas sur le wrapper', () => {
     const { container } = renderHarness(
-      '<Popover role="dialog" aria-label="Détails" class="v-perso" data-x="1">Contenu</Popover>',
+      '<VPopover role="dialog" aria-label="Détails" class="v-perso" data-x="1">Contenu</VPopover>',
     )
     const panel = panelOf(container)
     expect(panel.getAttribute('role')).toBe('dialog')

@@ -1,6 +1,6 @@
 <template>
   <!-- role="presentation" : le rôle implicite `separator` du <hr> est légitime
-       dans un role="menu" (cf. MenuSeparator) mais pas parmi les enfants d'un
+       dans un role="menu" (cf. VMenuSeparator) mais pas parmi les enfants d'un
        role="listbox", qui n'admet que `option` et `group`. Ici le filet est
        purement visuel — le regroupement est déjà porté par les `role="group"`
        et leurs libellés. -->

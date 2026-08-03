@@ -1,7 +1,7 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as ProgressLinearStories from './VProgressLinear.stories'
+import * as VProgressLinearStories from './VProgressLinear.stories'
 
-<Meta of={ProgressLinearStories} />
+<Meta of={VProgressLinearStories} />
 
 # ProgressLinear
 
@@ -17,9 +17,9 @@ explicitement. Aucun JavaScript de comportement n'est introduit en échange : to
 géométrie dérive d'**une fraction sans unité** posée en custom property, et les propriétés
 logiques font basculer l'axe en vertical sans dupliquer une règle.
 
-<Canvas of={ProgressLinearStories.Default} />
+<Canvas of={VProgressLinearStories.Default} />
 
-<Controls of={ProgressLinearStories.Default} />
+<Controls of={VProgressLinearStories.Default} />
 
 ## Tones
 
@@ -28,7 +28,7 @@ remplissage, une piste teintée de la même famille, et la couleur de texte de r
 là où le contraste automatique n'est pas disponible. Le tone `neutral` inverse texte et
 surface plutôt que d'employer un gris moyen, qui serait illisible dans l'un des deux thèmes.
 
-<Canvas of={ProgressLinearStories.Tones} />
+<Canvas of={VProgressLinearStories.Tones} />
 
 ## Couleur custom
 
@@ -37,7 +37,7 @@ surface plutôt que d'employer un gris moyen, qui serait illisible dans l'un des
 donc automatiquement le thème clair ou sombre, sans que le consommateur ait deux valeurs à
 fournir.
 
-<Canvas of={ProgressLinearStories.CouleurCustom} />
+<Canvas of={VProgressLinearStories.CouleurCustom} />
 
 ## Épaisseur
 
@@ -48,7 +48,7 @@ accueillir un texte, qui suppose donc une `thickness` explicite.
 La **longueur**, elle, n'est pas une prop : la barre occupe toute la place disponible et c'est
 au conteneur de la définir — `width` en horizontal, `height` en vertical.
 
-<Canvas of={ProgressLinearStories.Epaisseur} />
+<Canvas of={VProgressLinearStories.Epaisseur} />
 
 ## Texte dans la barre
 
@@ -59,21 +59,21 @@ par contraste sur celui-ci. Un texte à cheval sur les deux fonds reste donc lis
 et d'autre de la frontière, à 5 % comme à 95 %.
 
 Le contraste automatique repose sur `contrast-color()` (Safari 26+) ; ailleurs, la couleur de
-repli du tone s'applique — c'est le même compromis, déjà documenté, que le Badge.
+repli du tone s'applique — c'est le même compromis, déjà documenté, que le VBadge.
 
-<Canvas of={ProgressLinearStories.Valeur} />
+<Canvas of={VProgressLinearStories.Valeur} />
 
 Le slot par défaut reçoit `{ value, max, percent }` et remplace le pourcentage par ce que l'on
 veut. Il est évalué deux fois, une par copie : son contenu doit être pur.
 
-<Canvas of={ProgressLinearStories.ContenuPersonnalise} />
+<Canvas of={VProgressLinearStories.ContenuPersonnalise} />
 
 ## Forme
 
 `shape` bascule entre extrémités arrondies (défaut) et angles droits — mêmes valeurs que sur
-le ProgressCircular, où elles pilotent les bouts du trait.
+le VProgressCircular, où elles pilotent les bouts du trait.
 
-<Canvas of={ProgressLinearStories.Carre} />
+<Canvas of={VProgressLinearStories.Carre} />
 
 ## Indéterminé
 
@@ -89,7 +89,7 @@ La course est décrite sur des propriétés logiques plutôt qu'avec une transfo
 serait physique : une seule définition sert l'horizontal, le vertical et le sens de lecture
 inversé.
 
-<Canvas of={ProgressLinearStories.Indetermine} />
+<Canvas of={VProgressLinearStories.Indetermine} />
 
 ## Vertical
 
@@ -99,21 +99,21 @@ sans règle supplémentaire. Le texte, lui, reste écrit horizontalement — pr�
 suffisante pour l'accueillir. La hauteur se pose en CSS, faute d'un parent de hauteur connue
 sur lequel s'aligner.
 
-<Canvas of={ProgressLinearStories.Vertical} />
+<Canvas of={VProgressLinearStories.Vertical} />
 
 ## Progression
 
 Tout changement de valeur est animé, remplissage et frontière du texte contrasté partageant
 exactement la même durée et la même courbe.
 
-<Canvas of={ProgressLinearStories.Progression} />
+<Canvas of={VProgressLinearStories.Progression} />
 
 ## Cas limites
 
 Valeur nulle, complète ou hors bornes (clampée), barre à l'épaisseur par défaut portant un
 texte (qui déborde sans être rogné), libellé très long.
 
-<Canvas of={ProgressLinearStories.CasLimites} />
+<Canvas of={VProgressLinearStories.CasLimites} />
 
 ## Accessibilité
 

@@ -126,9 +126,9 @@ defineSlots<{
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* Disabled : nuances de gris (mêmes tokens que Checkbox/Radio), pas d'opacité.
+  /* Disabled : nuances de gris (mêmes tokens que VCheckbox/VRadio), pas d'opacité.
      Le thumb reprend text-subtle — la couleur de la coche/du point disabled de
-     Checkbox/Radio — pour rester visible sur le track gris dans les deux thèmes. */
+     VCheckbox/VRadio — pour rester visible sur le track gris dans les deux thèmes. */
   .v-switch:has(.v-switch-input:disabled) {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;

@@ -2,13 +2,13 @@
 import { computed, useAttrs, useSlots } from 'vue'
 import type { StyleValue } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import { useMessages } from '../../i18n/state'
 
 /**
- * Chip. Les éléments natifs couvrent focus, clavier et désactivation :
+ * VChip. Les éléments natifs couvrent focus, clavier et désactivation :
  * sélectionnable → <button aria-pressed> (v-model:selected), cliquable →
  * <button> (clic natif en fallthrough), href → <a>. Supprimable → second
  * <button> frère — jamais de bouton imbriqué (HTML invalide). Sans
@@ -38,7 +38,7 @@ interface ChipProps {
   clickable?: boolean
   /** Rendu <a>. disabled → lien inerte (href retiré + aria-disabled). */
   href?: string
-  /** Toggle : bouton aria-pressed lié à v-model:selected. Prime sur href/clickable. */
+  /** VToggle : bouton aria-pressed lié à v-model:selected. Prime sur href/clickable. */
   selectable?: boolean
   /** Icône check devant le libellé quand sélectionné — REMPLACE l'emplacement
       start (iconStart / slot #start) pour ne jamais cumuler les deux. */
@@ -154,13 +154,13 @@ const iconOnly = computed(
       :aria-pressed="selectable ? selected : undefined"
       @click="selectable && !disabled && (selected = !selected)"
     >
-      <Icon v-if="showCheck" name="check" />
+      <VIcon v-if="showCheck" name="check" />
       <slot v-else name="start">
-        <Icon v-if="iconStart" v-bind="iconProps(iconStart)" />
+        <VIcon v-if="iconStart" v-bind="iconProps(iconStart)" />
       </slot>
       <slot />
       <slot name="end">
-        <Icon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
+        <VIcon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
       </slot>
     </component>
     <button
@@ -171,7 +171,7 @@ const iconOnly = computed(
       :disabled="disabled"
       @click="$emit('dismiss')"
     >
-      <Icon v-bind="iconProps(dismissIcon)" />
+      <VIcon v-bind="iconProps(dismissIcon)" />
     </button>
   </span>
 </template>
@@ -242,7 +242,7 @@ const iconOnly = computed(
     --tone-border-soft: var(--vectis-color-warning-border);
   }
 
-  /* Divergence vs Button : le solid neutre de Button (surface-muted) serait
+  /* Divergence vs VButton : le solid neutre de VButton (surface-muted) serait
      indistinguable du tonal. Inversion totale text/surface plutôt que
      surface-inverse : en dark, surface-inverse = surface-muted (neutral-800),
      un chip neutre sélectionné serait invisible — text (neutral-50 en dark,

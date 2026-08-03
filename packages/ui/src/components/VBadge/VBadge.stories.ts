@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
-import Avatar from '../VAvatar/VAvatar.vue'
-import Button from '../VButton/VButton.vue'
-import Icon from '../VIcon/VIcon.vue'
-import IconButton from '../VIconButton/VIconButton.vue'
-import Badge from './VBadge.vue'
+import VAvatar from '../VAvatar/VAvatar.vue'
+import VButton from '../VButton/VButton.vue'
+import VIcon from '../VIcon/VIcon.vue'
+import VIconButton from '../VIconButton/VIconButton.vue'
+import VBadge from './VBadge.vue'
 
 const meta = {
   title: 'Composants/Badge',
-  component: Badge,
+  component: VBadge,
   argTypes: {
     tone: { control: 'select', options: ['neutral', 'accent', 'danger', 'success', 'warning'] },
     color: { control: 'color' },
@@ -26,11 +26,11 @@ const meta = {
     bordered: false,
   },
   render: (args) => ({
-    components: { Badge },
+    components: { VBadge },
     setup: () => ({ args }),
-    template: '<Badge v-bind="args" />',
+    template: '<VBadge v-bind="args" />',
   }),
-} satisfies Meta<typeof Badge>
+} satisfies Meta<typeof VBadge>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -40,12 +40,12 @@ export const Default: Story = {}
 /** Les 5 tones en rendu plein-couleur — vérifier `neutral` dans les deux thèmes. */
 export const Tones: Story = {
   render: () => ({
-    components: { Badge },
+    components: { VBadge },
     setup: () => ({ tones: ['neutral', 'accent', 'success', 'warning', 'danger'] }),
     template: `
       <div style="display: flex; gap: 16px; flex-wrap: wrap">
         <div v-for="tone in tones" :key="tone" style="display: flex; flex-direction: column; align-items: center; gap: 4px">
-          <Badge :tone="tone" :count="8" />
+          <VBadge :tone="tone" :count="8" />
           <small>{{ tone }}</small>
         </div>
       </div>
@@ -60,12 +60,12 @@ export const Tones: Story = {
  */
 export const CouleurCustom: Story = {
   render: () => ({
-    components: { Badge },
+    components: { VBadge },
     setup: () => ({ colors: ['#7c3aed', 'oklch(70% 0.15 180)', 'hotpink', 'gold'] }),
     template: `
       <div style="display: flex; gap: 16px; flex-wrap: wrap">
         <div v-for="color in colors" :key="color" style="display: flex; flex-direction: column; align-items: center; gap: 4px">
-          <Badge :color="color" :count="8" />
+          <VBadge :color="color" :count="8" />
           <small>{{ color }}</small>
         </div>
       </div>
@@ -79,11 +79,11 @@ export const CouleurCustom: Story = {
  */
 export const Compteurs: Story = {
   render: () => ({
-    components: { Badge },
+    components: { VBadge },
     setup: () => ({ counts: [3, 12, 99, 100, 1000] }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
-        <Badge v-for="count in counts" :key="count" tone="danger" :count="count" />
+        <VBadge v-for="count in counts" :key="count" tone="danger" :count="count" />
       </div>
     `,
   }),
@@ -92,7 +92,7 @@ export const Compteurs: Story = {
 /** Icône seule (nom, ou `{ src }`) : badge circulaire de 20px, icône 16px. */
 export const Icone: Story = {
   render: () => ({
-    components: { Badge },
+    components: { VBadge },
     setup: () => ({
       etoile: {
         src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8Z' fill='white'/%3E%3C/svg%3E",
@@ -100,10 +100,10 @@ export const Icone: Story = {
     }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
-        <Badge icon="notifications" />
-        <Badge tone="success" icon="check" />
-        <Badge tone="warning" icon="priority_high" />
-        <Badge :icon="etoile" />
+        <VBadge icon="notifications" />
+        <VBadge tone="success" icon="check" />
+        <VBadge tone="warning" icon="priority_high" />
+        <VBadge :icon="etoile" />
       </div>
     `,
   }),
@@ -112,12 +112,12 @@ export const Icone: Story = {
 /** `dot` réduit le badge à un rond de 10px sans contenu — présence, statut. */
 export const Dot: Story = {
   render: () => ({
-    components: { Badge },
+    components: { VBadge },
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
-        <Badge dot />
-        <Badge dot tone="success" />
-        <Badge dot tone="danger" />
+        <VBadge dot />
+        <VBadge dot tone="success" />
+        <VBadge dot tone="danger" />
       </div>
     `,
   }),
@@ -126,11 +126,11 @@ export const Dot: Story = {
 /** Avec une cible en slot par défaut, le badge se place à sa droite. */
 export const Inline: Story = {
   render: () => ({
-    components: { Badge },
+    components: { VBadge },
     template: `
       <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 12px">
-        <Badge tone="danger" :count="3"><span>Messages</span></Badge>
-        <Badge dot tone="success"><span>Xavier Darmet</span></Badge>
+        <VBadge tone="danger" :count="3"><span>Messages</span></VBadge>
+        <VBadge dot tone="success"><span>Xavier Darmet</span></VBadge>
       </div>
     `,
   }),
@@ -139,21 +139,21 @@ export const Inline: Story = {
 /** `overlay` pose le badge sur le coin haut-droit, décalé vers l'intérieur. */
 export const Overlay: Story = {
   render: () => ({
-    components: { Avatar, Badge, Button },
+    components: { VAvatar, VBadge, VButton },
     template: `
       <div style="display: flex; gap: 24px; align-items: center">
-        <Badge overlay tone="danger" :count="8">
-          <Avatar name="Xavier Darmet" />
-        </Badge>
-        <Badge overlay dot tone="success" bordered>
-          <Avatar name="Xavier Darmet" />
-        </Badge>
-        <Badge overlay icon="priority_high" tone="warning" bordered>
-          <Avatar name="Xavier Darmet" />
-        </Badge>
-        <Badge overlay tone="danger" :count="120">
-          <Button variant="outline" tone="neutral">Notifications</Button>
-        </Badge>
+        <VBadge overlay tone="danger" :count="8">
+          <VAvatar name="Xavier Darmet" />
+        </VBadge>
+        <VBadge overlay dot tone="success" bordered>
+          <VAvatar name="Xavier Darmet" />
+        </VBadge>
+        <VBadge overlay icon="priority_high" tone="warning" bordered>
+          <VAvatar name="Xavier Darmet" />
+        </VBadge>
+        <VBadge overlay tone="danger" :count="120">
+          <VButton variant="outline" tone="neutral">Notifications</VButton>
+        </VBadge>
       </div>
     `,
   }),
@@ -162,22 +162,22 @@ export const Overlay: Story = {
 /**
  * `bordered` trace un liseré de 2px couleur du fond derrière
  * (`--vectis-color-surface`, surchargeable localement quand le fond diffère).
- * Sur un IconButton, le comparatif sans/avec montre le détachement du badge.
+ * Sur un VIconButton, le comparatif sans/avec montre le détachement du badge.
  */
 export const Bordered: Story = {
   render: () => ({
-    components: { Badge, Icon, IconButton },
+    components: { VBadge, VIcon, VIconButton },
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px; align-items: flex-start">
         <div style="display: flex; gap: 24px; align-items: center; padding: 16px; background: var(--vectis-color-accent); border-radius: var(--vectis-radius-surface); --vectis-color-surface: var(--vectis-color-accent)">
-          <Badge overlay tone="danger" :count="3" bordered>
-            <IconButton label="Notifications" variant="elevated" tone="accent">
-              <Icon name="notifications" />
-            </IconButton>
-          </Badge>
-          <Badge tone="danger" :count="3" bordered />
-          <Badge dot tone="success" bordered />
-          <Badge tone="neutral" :count="5" bordered />
+          <VBadge overlay tone="danger" :count="3" bordered>
+            <VIconButton label="Notifications" variant="elevated" tone="accent">
+              <VIcon name="notifications" />
+            </VIconButton>
+          </VBadge>
+          <VBadge tone="danger" :count="3" bordered />
+          <VBadge dot tone="success" bordered />
+          <VBadge tone="neutral" :count="5" bordered />
         </div>
       </div>
     `,

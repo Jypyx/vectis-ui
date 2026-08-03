@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed, nextTick, reactive, ref, useId, watch, watchEffect } from 'vue'
 
-import Chip from '../VChip/VChip.vue'
-import Icon from '../VIcon/VIcon.vue'
+import VChip from '../VChip/VChip.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import type { IconSource } from '../VIcon/types'
-import Input from '../VInput/VInput.vue'
-import Popover from '../VPopover/VPopover.vue'
-// alias : les types publics `ComboboxOption`/`ComboboxGroup`/`ComboboxSeparator`
+import VInput from '../VInput/VInput.vue'
+import VPopover from '../VPopover/VPopover.vue'
+// alias : les types publics `VComboboxOption`/`VComboboxGroup`/`VComboboxSeparator`
 // occupent déjà ces noms dans ce module
 import OptionRow from './VComboboxOption.vue'
 import OptionGroup from './VComboboxGroup.vue'
 import OptionSeparator from './VComboboxSeparator.vue'
-import Spinner from '../VSpinner/VSpinner.vue'
+import VSpinner from '../VSpinner/VSpinner.vue'
 
 import { toggleValue } from '../../utils/array'
 import { normalizeText } from '../../utils/text'
@@ -24,8 +24,8 @@ import { useTimer } from '../../composables/useTimer'
 import { useMessages } from '../../i18n/state'
 
 /**
- * Combobox avec recherche et sélection multiple, composé d'`Input`, `Chip` et
- * d'un `Popover` qui porte lui-même `role="listbox"`. Le JS implémente le
+ * VCombobox avec recherche et sélection multiple, composé d'`VInput`, `VChip` et
+ * d'un `VPopover` qui porte lui-même `role="listbox"`. Le JS implémente le
  * pattern ARIA combobox/listbox que le natif ne couvre pas (pas de `<datalist>`
  * stylable/multiple) : filtrage, navigation par `aria-activedescendant` (le
  * focus DOM reste dans l'input — le panneau n'a donc aucun clavier propre),
@@ -33,7 +33,7 @@ import { useMessages } from '../../i18n/state'
  * ARIA du champ. Fermeture au `focusout` : le champ vit hors du panneau, ouvert
  * en `mode="manual"` (pas de light dismiss).
  */
-export interface ComboboxOption {
+export interface VComboboxOption {
   value: string
   label: string
   /**
@@ -48,9 +48,9 @@ export interface ComboboxOption {
  * pendant du `<optgroup>` natif). Un groupe dont plus aucune option ne passe le
  * filtre disparaît, libellé compris.
  */
-export interface ComboboxGroup {
+export interface VComboboxGroup {
   label: string
-  options: ComboboxOption[]
+  options: VComboboxOption[]
 }
 
 /**
@@ -58,31 +58,31 @@ export interface ComboboxGroup {
  * séparateurs devenus orphelins au filtrage (en tête, en fin, ou consécutifs)
  * ne sont pas rendus.
  */
-export interface ComboboxSeparator {
+export interface VComboboxSeparator {
   separator: true
 }
 
 /** Une entrée de la prop `options` : option, groupe ou séparateur. */
-export type ComboboxItem = ComboboxOption | ComboboxGroup | ComboboxSeparator
+export type ComboboxItem = VComboboxOption | VComboboxGroup | VComboboxSeparator
 
-const isGroup = (item: ComboboxItem): item is ComboboxGroup => 'options' in item
-const isSeparator = (item: ComboboxItem): item is ComboboxSeparator => 'separator' in item
+const isGroup = (item: ComboboxItem): item is VComboboxGroup => 'options' in item
+const isSeparator = (item: ComboboxItem): item is VComboboxSeparator => 'separator' in item
 
 /**
  * Filtrage local : `true` (défaut), `false` (les options arrivent déjà filtrées
  * — recherche serveur) ou un prédicat de correspondance personnalisé.
  */
-export type ComboboxFilter = boolean | ((option: ComboboxOption, query: string) => boolean)
+export type ComboboxFilter = boolean | ((option: VComboboxOption, query: string) => boolean)
 
 interface ComboboxProps {
   /**
-   * Options du panneau. Une entrée peut aussi être un `ComboboxGroup` (bloc
-   * nommé) ou un `ComboboxSeparator` ; une liste plate d'options reste valide.
+   * Options du panneau. Une entrée peut aussi être un `VComboboxGroup` (bloc
+   * nommé) ou un `VComboboxSeparator` ; une liste plate d'options reste valide.
    */
   options: ComboboxItem[]
   /** Sélection multiple — le v-model devient string[] et des Chips s'affichent. */
   multiple?: boolean
-  /** Hauteur du champ : sm 32px, md 40px (défaut — aligné sur Input), lg 48px. */
+  /** Hauteur du champ : sm 32px, md 40px (défaut — aligné sur VInput), lg 48px. */
   size?: 'sm' | 'md' | 'lg'
   /** Hauteur réduite de 4px (comme les autres contrôles). */
   compact?: boolean
@@ -149,20 +149,20 @@ const emit = defineEmits<{
 defineSlots<{
   /** Contenu d'une option (défaut : son libellé). */
   option?(props: {
-    option: ComboboxOption
+    option: VComboboxOption
     index: number
     active: boolean
     selected: boolean
   }): unknown
   /**
-   * Chip d'une valeur sélectionnée en mode multiple (défaut : un `Chip`
+   * VChip d'une valeur sélectionnée en mode multiple (défaut : un `VChip`
    * dismissible portant le libellé). `option` peut être `undefined` si la
    * valeur n'a jamais été vue dans `options` ; `size`/`compact` sont ceux
    * calculés pour tenir dans le champ, les reprendre pour garder le gabarit.
    */
   chip?(props: {
     value: string
-    option: ComboboxOption | undefined
+    option: VComboboxOption | undefined
     label: string
     remove: () => void
     size: 'xs' | 'sm'
@@ -179,7 +179,7 @@ defineSlots<{
 // bas de chaque paire, le rattrapage passe par `compact` plutôt que par une
 // taille de moins — d'où `sm` → xs compact (20px dans 32px) et `lg` compact →
 // sm compact (28px dans 44px). En `md` la marge suffit déjà, le `compact` du
-// Combobox ne touche donc pas les Chips.
+// VCombobox ne touche donc pas les Chips.
 // Toute évolution de ce mapping doit être reportée sur `--chip-height` (CSS
 // plus bas) : la hauteur est redite côté champ, hors de portée du sous-arbre.
 const chipSize = computed(() => (props.size === 'lg' ? 'sm' : 'xs'))
@@ -188,12 +188,12 @@ const chipCompact = computed(() => (props.size === 'lg' ? props.compact : props.
 const model = defineModel<string | string[]>({ default: '' })
 
 // Racine wrapper : class/style restent sur la racine, le reste (aria-label…)
-// est reporté sur l'Input pour nommer le role="combobox".
+// est reporté sur le VInput pour nommer le role="combobox".
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const rootEl = ref<HTMLElement | null>(null)
-const inputRef = ref<InstanceType<typeof Input> | null>(null)
+const inputRef = ref<InstanceType<typeof VInput> | null>(null)
 // Sert à la fois d'id du panneau Listbox (cible d'`aria-controls`) et de
 // préfixe des ids d'options (`optionId`) : chaînes distinctes, pas de collision.
 const optionsId = useId()
@@ -217,7 +217,7 @@ const selectedValues = computed<string[]>(() => {
 // dans l'ordre du source. C'est l'UNIQUE lecture des options par le reste du
 // composant : filtrage, cache, libellés et pagination ignorent la hiérarchie,
 // que seul le rendu (`rendered`) connaît.
-const allOptions = computed<ComboboxOption[]>(() =>
+const allOptions = computed<VComboboxOption[]>(() =>
   props.options.flatMap((item) => {
     if (isSeparator(item)) return []
     return isGroup(item) ? item.options : [item]
@@ -226,12 +226,12 @@ const allOptions = computed<ComboboxOption[]>(() =>
 
 // Mémoire des options SÉLECTIONNÉES : en source asynchrone, `options` ne
 // contient que le dernier jeu de résultats et une valeur déjà choisie en est
-// souvent absente — sans cache, le Chip afficherait son identifiant brut (et le
+// souvent absente — sans cache, le VChip afficherait son identifiant brut (et le
 // slot #chip perdrait l'icône de l'option).
 // watchEffect (et non watch sur `props.options`) : il traque l'itération, donc
 // aussi les ajouts en place d'une page (scroll infini). Borné à la sélection :
 // les autres options se relisent dans `options`.
-const optionCache = reactive(new Map<string, ComboboxOption>())
+const optionCache = reactive(new Map<string, VComboboxOption>())
 watchEffect(() => {
   const wanted = new Set(selectedValues.value)
   for (const option of allOptions.value) {
@@ -275,7 +275,7 @@ const filtered = computed(() => {
 // Seul endroit qui connaît la hiérarchie. Chaque option y porte son index DANS
 // `filtered` (et non sa position dans l'arbre) : ids, surbrillance et slot
 // #option restent alignés sur la navigation clavier.
-type RenderedOption = { kind: 'option'; key: string; option: ComboboxOption; index: number }
+type RenderedOption = { kind: 'option'; key: string; option: VComboboxOption; index: number }
 type RenderedNode =
   | RenderedOption
   | { kind: 'group'; key: string; label: string; options: RenderedOption[] }
@@ -285,7 +285,7 @@ const rendered = computed<RenderedNode[]>(() => {
   const indexOf = new Map<string, number>()
   filtered.value.forEach((option, index) => indexOf.set(option.value, index))
 
-  const entryOf = (option: ComboboxOption): RenderedOption | null => {
+  const entryOf = (option: VComboboxOption): RenderedOption | null => {
     const index = indexOf.get(option.value)
     if (index === undefined) return null
     return { kind: 'option', key: `option:${option.value}`, option, index }
@@ -329,7 +329,7 @@ const rendered = computed<RenderedNode[]>(() => {
 // ── Recherche (source externe) ──────────────────────────────────────────────
 // JS justifié : aucune primitive native ne débounce ni ne dédoublonne une
 // requête. Le report est délégué à `useTimer` (réarmement, délai ≤ 0 synchrone,
-// annulation au démontage) ; ne reste ici que ce qui est propre au Combobox :
+// annulation au démontage) ; ne reste ici que ce qui est propre au VCombobox :
 // le dédoublonnage par terme et l'annulation à la fermeture du panneau.
 const searchTimer = useTimer()
 // undefined = jamais émis. Dédoublonnage : rouvrir le panneau sur le même terme
@@ -402,9 +402,9 @@ const collapsed = computed(
   () => props.multiple && !focused.value && selectedValues.value.length > 0,
 )
 
-// La croix (prop `clearable` d'Input) doit apparaître dès qu'il y a QUELQUE CHOSE
+// La croix (prop `clearable` de VInput) doit apparaître dès qu'il y a QUELQUE CHOSE
 // à effacer — une sélection (Chips) OU une recherche — pas seulement quand le
-// champ texte est non-vide. On pilote donc explicitement sa visibilité (Input
+// champ texte est non-vide. On pilote donc explicitement sa visibilité (VInput
 // l'expose via `clearVisible`) et on réserve la place à droite en conséquence.
 const canClear = computed(
   () =>
@@ -514,7 +514,7 @@ function onControlClick() {
   selectQuery()
 }
 
-function select(option: ComboboxOption) {
+function select(option: VComboboxOption) {
   if (option.disabled) return
   // mémorisée tout de suite : l'option peut disparaître d'`options` (recherche
   // suivante) avant que le parent n'ait propagé le modèle
@@ -545,7 +545,7 @@ function removeValue(value: string) {
   inputRef.value?.focus()
 }
 
-/** Événement `clear` d'Input (croix) : Input a déjà vidé la recherche (query) ;
+/** Événement `clear` de VInput (croix) : VInput a déjà vidé la recherche (query) ;
     on vide aussi toute la sélection (valeur en simple, Chips en multiple). */
 function onClear() {
   model.value = props.multiple ? [] : ''
@@ -675,7 +675,7 @@ watch(
     @focusout="onFocusout"
   >
     <div class="v-combobox-control" @click="onControlClick">
-      <Input
+      <VInput
         ref="inputRef"
         v-model="query"
         role="combobox"
@@ -710,7 +710,7 @@ watch(
               :size="chipSize"
               :compact="chipCompact"
             >
-              <Chip
+              <VChip
                 tone="accent"
                 :size="chipSize"
                 :compact="chipCompact"
@@ -718,31 +718,31 @@ watch(
                 :dismiss-label="m.combobox.remove(labelOf(value))"
                 :disabled="disabled"
                 @dismiss="removeValue(value)"
-                >{{ labelOf(value) }}</Chip
+                >{{ labelOf(value) }}</VChip
               >
             </slot>
           </template>
         </template>
 
         <!-- Chevron posé en absolu à droite (cf. CSS), pivote à l'ouverture.
-             La croix vient de la prop `clearable` d'Input, rendue à sa gauche.
-             En chargement, le spinner prend EXACTEMENT sa place (Input pose
+             La croix vient de la prop `clearable` de VInput, rendue à sa gauche.
+             En chargement, le spinner prend EXACTEMENT sa place (VInput pose
              `font-size: var(--vectis-icon-size)` sur les spinners enfants directs
              du champ) : aucun saut de largeur. On ne passe pas par la prop
-             `loading` d'Input, qui écraserait ce slot — donc le chevron.
-             `aria-hidden` sur la racine du Spinner neutralise son
+             `loading` de VInput, qui écraserait ce slot — donc le chevron.
+             `aria-hidden` sur la racine du VSpinner neutralise son
              role="status" : l'annonce vient du panneau, pas deux fois. -->
         <template #end>
-          <Spinner v-if="loading" class="v-combobox-spinner" aria-hidden="true" />
-          <Icon v-else name="expand_more" class="v-combobox-chevron" aria-hidden="true" />
+          <VSpinner v-if="loading" class="v-combobox-spinner" aria-hidden="true" />
+          <VIcon v-else name="expand_more" class="v-combobox-chevron" aria-hidden="true" />
         </template>
-      </Input>
+      </VInput>
     </div>
 
     <!-- Le panneau porte lui-même `role="listbox"` ET le défilement : c'est le
          contrat sur lequel s'appuient le `root` de l'IntersectionObserver et le
          `scrollIntoView` de l'option active — ne jamais intercaler de wrapper. -->
-    <Popover
+    <VPopover
       :id="optionsId"
       v-model:open="open"
       mode="manual"
@@ -786,7 +786,7 @@ watch(
            requête, le panneau ne doit pas annoncer « aucun résultat ». -->
       <div v-if="loading && filtered.length === 0" class="v-combobox-state">
         <slot name="loading">
-          <Spinner :label="resolvedLoadingText" />
+          <VSpinner :label="resolvedLoadingText" />
           <span aria-hidden="true">{{ resolvedLoadingText }}</span>
         </slot>
       </div>
@@ -798,9 +798,9 @@ watch(
            suivante : un seul nœud, donc stable — un `v-if` sur `loading`
            détruirait la sentinelle et invaliderait l'observation. -->
       <div v-if="hasMore" ref="sentinelEl" class="v-combobox-more" aria-hidden="true">
-        <Spinner v-if="loading" :label="resolvedLoadingText" />
+        <VSpinner v-if="loading" :label="resolvedLoadingText" />
       </div>
-    </Popover>
+    </VPopover>
   </div>
 </template>
 
@@ -819,7 +819,7 @@ watch(
     display: block;
   }
 
-  /* Le panneau vient de `Popover` : élément popover, état, ancrage, placement et
+  /* Le panneau vient de `VPopover` : élément popover, état, ancrage, placement et
      chrome (`.v-panel` via `surface`). Il porte aussi `v-control` (le template)
      — les options et les rangées d'état lisent les `--control-*` hérités, aucune
      table de tailles locale. Ne restent ici que les règles propres à la liste :
@@ -830,7 +830,7 @@ watch(
     overflow: auto;
   }
 
-  /* Chevron + croix (clearable d'Input) posés en ABSOLU à droite du champ : ils
+  /* Chevron + croix (clearable de VInput) posés en ABSOLU à droite du champ : ils
      restent alignés à droite/centrés quels que soient les Chips (retour à la
      ligne) ou le repli de l'input. On réserve la place correspondante à droite
      pour que le texte/les Chips ne passent pas dessous (chevron seul, ou croix
@@ -850,7 +850,7 @@ watch(
   }
 
   /* Chevron et spinner partagent l'emplacement : même boîte (--vectis-icon-size,
-     posée par Input sur les spinners enfants directs du champ), donc le padding
+     posée par VInput sur les spinners enfants directs du champ), donc le padding
      réservé ci-dessus vaut pour les deux et l'échange ne décale rien. */
   .v-combobox-chevron,
   .v-combobox-spinner {
@@ -869,7 +869,7 @@ watch(
     rotate: 180deg;
   }
 
-  /* croix d'Input : posée à gauche du chevron, centrée, marge négative annulée */
+  /* croix de VInput : posée à gauche du chevron, centrée, marge négative annulée */
   .v-combobox .v-input-clear {
     position: absolute;
     inset-inline-end: calc(
@@ -881,11 +881,11 @@ watch(
   }
 
   /* multiple : le champ accueille les Chips (retour à la ligne). Hauteur calée
-     sur le contrôle (`--control-height`, size/compact via .v-control d'Input).
+     sur le contrôle (`--control-height`, size/compact via .v-control de VInput).
      La hauteur des Chips est redite ici en `--chip-height` parce qu'elle vit
-     dans le sous-arbre du Chip, hors de portée du champ : ces quatre règles
+     dans le sous-arbre du VChip, hors de portée du champ : ces quatre règles
      doivent rester le miroir exact de `chipSize`/`chipCompact` (script).
-     L'input est forcé à cette MÊME hauteur au lieu du `100%` hérité d'Input :
+     L'input est forcé à cette MÊME hauteur au lieu du `100%` hérité de VInput :
      sinon sa hauteur intrinsèque dépasse les Chips et fait grandir le champ.
      Résultat : champ = --control-height constant, input jamais plus haut que
      les Chips, aucun saut au focus. Ordre significatif : les tailles sont à
@@ -930,7 +930,7 @@ watch(
 
   /* États plein panneau (« aucun résultat », chargement) : même gabarit qu'une
      option — mêmes `--control-*` héritées du panneau, qui porte `v-control`
-     (le spinner suit aussi, via le contexte Icon du même bloc).
+     (le spinner suit aussi, via le contexte VIcon du même bloc).
      `flex: none` : le panneau est un flex column, l'état ne doit pas s'écraser. */
   .v-combobox-state {
     display: flex;

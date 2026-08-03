@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import Button from '../VButton/VButton.vue'
-import ButtonGroup from '../VButton/VButtonGroup.vue'
-import Icon from '../VIcon/VIcon.vue'
+import VButton from '../VButton/VButton.vue'
+import VButtonGroup from '../VButton/VButtonGroup.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import IconButton from '../VIconButton/VIconButton.vue'
+import VIconButton from '../VIconButton/VIconButton.vue'
 
 import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
 import { clamp } from '../../utils/number'
@@ -16,9 +16,9 @@ import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
 /**
- * Pagination composée : chaque pastille est un Button, les contrôles
- * précédent/suivant un Button ou un IconButton, et `attached` rattache le tout
- * dans un ButtonGroup. Aucune règle d'état n'est redéfinie ici.
+ * VPagination composée : chaque pastille est un VButton, les contrôles
+ * précédent/suivant un VButton ou un VIconButton, et `attached` rattache le tout
+ * dans un VButtonGroup. Aucune règle d'état n'est redéfinie ici.
  *
  * Double troncature : logique (`totalVisible`, pure dérivation SSR-safe) et
  * responsive (100 % CSS par container queries sur la nav elle-même, donc aucun
@@ -36,7 +36,7 @@ interface PaginationProps {
    */
   totalVisible?: number
 
-  /** Rattache tous les boutons en contrôle segmenté (ButtonGroup). */
+  /** Rattache tous les boutons en contrôle segmenté (VButtonGroup). */
   attached?: boolean
   /** Variante des pages NON actives et des contrôles. La page active est toujours `solid`. */
   variant?: 'ghost' | 'outline'
@@ -63,7 +63,7 @@ interface PaginationProps {
 
   /** Désactive l'ensemble du composant. */
   disabled?: boolean
-  /** Pages désactivées : liste OU prédicat (même convention que `disabledDates` de Calendar). */
+  /** Pages désactivées : liste OU prédicat (même convention que `disabledDates` de VCalendar). */
   disabledPages?: number[] | ((page: number) => boolean)
 
   /** Troncature responsive par container queries. */
@@ -210,12 +210,12 @@ function onKeydown(event: KeyboardEvent) {
     :data-responsive="responsive ? '' : undefined"
     @keydown="onKeydown"
   >
-    <!-- attached : ButtonGroup fusionne les bordures. Il cible ses enfants
+    <!-- attached : VButtonGroup fusionne les bordures. Il cible ses enfants
          DIRECTS `.v-button` — d'où l'absence de <ul>/<li>, et une ellipse
-         rendue en IconButton plutôt qu'en <span>. -->
-    <component :is="attached ? ButtonGroup : 'div'" class="v-pagination-items">
+         rendue en VIconButton plutôt qu'en <span>. -->
+    <component :is="attached ? VButtonGroup : 'div'" class="v-pagination-items">
       <template v-if="showControls">
-        <IconButton
+        <VIconButton
           v-if="controlsDisplay === 'icon'"
           class="v-pagination-control"
           :label="resolvedPrevLabel"
@@ -226,12 +226,12 @@ function onKeydown(event: KeyboardEvent) {
           :disabled="prevDisabled"
           @click="goTo(prevTarget)"
         >
-          <Icon v-bind="iconProps(prevIcon)" />
-        </IconButton>
+          <VIcon v-bind="iconProps(prevIcon)" />
+        </VIconButton>
         <!-- aria-label posé même quand le libellé est visible : les container
              queries le masquent aux largeurs étroites, le nom accessible doit
              y survivre. -->
-        <Button
+        <VButton
           v-else
           class="v-pagination-control"
           :variant="variant"
@@ -243,14 +243,14 @@ function onKeydown(event: KeyboardEvent) {
           @click="goTo(prevTarget)"
         >
           <template v-if="controlsDisplay === 'both'" #start>
-            <Icon v-bind="iconProps(prevIcon)" />
+            <VIcon v-bind="iconProps(prevIcon)" />
           </template>
           <span class="v-pagination-control-label">{{ resolvedPrevLabel }}</span>
-        </Button>
+        </VButton>
       </template>
 
       <template v-for="item in items" :key="item.key">
-        <Button
+        <VButton
           v-if="item.kind === 'page'"
           class="v-pagination-page"
           :variant="item.page === currentPage ? 'solid' : variant"
@@ -265,11 +265,11 @@ function onKeydown(event: KeyboardEvent) {
           @click="goTo(item.page)"
         >
           {{ item.page }}
-        </Button>
-        <!-- Ellipse : IconButton inerte (donc un `.v-button`, la couture du
+        </VButton>
+        <!-- Ellipse : VIconButton inerte (donc un `.v-button`, la couture du
              groupe reste continue et la hauteur suit size/compact). Masquée
              aux technologies d'assistance, hors tabulation via disabled. -->
-        <IconButton
+        <VIconButton
           v-else
           class="v-pagination-ellipsis"
           :label="m.pagination.hiddenPages"
@@ -280,12 +280,12 @@ function onKeydown(event: KeyboardEvent) {
           :compact="compact"
           disabled
         >
-          <Icon name="more_horiz" />
-        </IconButton>
+          <VIcon name="more_horiz" />
+        </VIconButton>
       </template>
 
       <template v-if="showControls">
-        <IconButton
+        <VIconButton
           v-if="controlsDisplay === 'icon'"
           class="v-pagination-control"
           :label="resolvedNextLabel"
@@ -296,9 +296,9 @@ function onKeydown(event: KeyboardEvent) {
           :disabled="nextDisabled"
           @click="goTo(nextTarget)"
         >
-          <Icon v-bind="iconProps(nextIcon)" />
-        </IconButton>
-        <Button
+          <VIcon v-bind="iconProps(nextIcon)" />
+        </VIconButton>
+        <VButton
           v-else
           class="v-pagination-control"
           :variant="variant"
@@ -310,10 +310,10 @@ function onKeydown(event: KeyboardEvent) {
           @click="goTo(nextTarget)"
         >
           <template v-if="controlsDisplay === 'both'" #end>
-            <Icon v-bind="iconProps(nextIcon)" />
+            <VIcon v-bind="iconProps(nextIcon)" />
           </template>
           <span class="v-pagination-control-label">{{ resolvedNextLabel }}</span>
-        </Button>
+        </VButton>
       </template>
     </component>
   </nav>
@@ -354,7 +354,7 @@ function onKeydown(event: KeyboardEvent) {
     gap: var(--vectis-space-1);
   }
 
-  /* attached : l'assemblage est fait par les marges négatives de ButtonGroup */
+  /* attached : l'assemblage est fait par les marges négatives de VButtonGroup */
   .v-button-group.v-pagination-items {
     gap: 0;
   }

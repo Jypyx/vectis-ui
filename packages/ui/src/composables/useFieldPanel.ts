@@ -3,12 +3,12 @@ import type { Ref } from 'vue'
 
 import { useFocusoutDismiss } from './useFocusoutDismiss'
 
-/** Contrat minimal du champ interne : DatePicker/TimePicker exposent un `Input`. */
+/** Contrat minimal du champ interne : VDatePicker/VTimePicker exposent un `VInput`. */
 interface FocusableField {
   focus: () => void
 }
 
-/** Contrat minimal du panneau : DatePicker/TimePicker rendent un `Popover`. */
+/** Contrat minimal du panneau : VDatePicker/VTimePicker rendent un `VPopover`. */
 interface PanelControl {
   show: () => void
   hide: () => void
@@ -27,7 +27,7 @@ export interface UseFieldPanelOptions {
   onClose?: () => void
   /**
    * Le focus doit-il entrer DANS le panneau à l'ouverture ? Défaut : oui. Un
-   * champ de SAISIE (DatePicker `entry="input"`) ouvre son panneau sans déplacer
+   * champ de SAISIE (VDatePicker `entry="input"`) ouvre son panneau sans déplacer
    * le curseur : le clavier continue d'écrire dans le champ, et la flèche bas
    * reste le seul chemin explicite vers le panneau.
    */
@@ -36,15 +36,15 @@ export interface UseFieldPanelOptions {
 
 /**
  * Coquille « champ en lecture seule + panneau flottant `mode="manual"` »,
- * partagée par DatePicker et TimePicker. Aucun des deux n'en est propriétaire.
+ * partagée par VDatePicker et VTimePicker. Aucun des deux n'en est propriétaire.
  *
  * Un popover `manual` ne fait RIEN tout seul : ni light dismiss, ni déplacement
  * du focus, ni retour du focus au déclencheur. Tout ce qui suit est ce minimum,
  * et rien de plus — les comportements propres à chaque composant passent par
  * `onOpen`/`onClose`/`focusInPanel`.
  *
- * Le panneau est ÉCRIT impérativement (`show`/`hide` de Popover) et LU par
- * modèle : `open` est à brancher en `v-model:open` sur le Popover, qui l'alimente
+ * Le panneau est ÉCRIT impérativement (`show`/`hide` de VPopover) et LU par
+ * modèle : `open` est à brancher en `v-model:open` sur le VPopover, qui l'alimente
  * depuis les événements du DOM. L'écriture doit rester synchrone — le `rAF` qui
  * déplace le focus suppose que le panneau est déjà ouvert au moment où il est
  * armé ; passer par le modèle intercalerait un tick.
@@ -86,9 +86,9 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
    * comme une sortie — et ferme un panneau sur lequel on vient de cliquer.
    *
    * On garde donc le focus en place, mais SEULEMENT hors des éléments
-   * interactifs : un `preventDefault` inconditionnel (celui du Combobox, dont le
+   * interactifs : un `preventDefault` inconditionnel (celui du VCombobox, dont le
    * focus ne quitte jamais le champ) priverait de focus les jours et les flèches
-   * de navigation, et désynchroniserait le roving tabindex du Calendar.
+   * de navigation, et désynchroniserait le roving tabindex du VCalendar.
    *
    * Invisible en jsdom, qui ne simule pas le focus au clic : couvert par des
    * play functions.

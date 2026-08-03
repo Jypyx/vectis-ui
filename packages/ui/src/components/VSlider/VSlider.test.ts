@@ -1,11 +1,11 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Slider from './VSlider.vue'
+import VSlider from './VSlider.vue'
 
-describe('Slider', () => {
+describe('VSlider', () => {
   it('mode simple : un seul input range, v-model numérique', async () => {
-    const { getAllByRole, emitted } = render(Slider, {
+    const { getAllByRole, emitted } = render(VSlider, {
       props: { modelValue: 40, label: 'Volume' },
     })
     const sliders = getAllByRole('slider')
@@ -15,7 +15,7 @@ describe('Slider', () => {
   })
 
   it('mode range : deux inputs nommés début/fin', () => {
-    const { getByRole } = render(Slider, {
+    const { getByRole } = render(VSlider, {
       props: { modelValue: [20, 60], range: true, label: 'Budget' },
     })
     expect(getByRole('slider', { name: 'Budget (début)' })).toBeTruthy()
@@ -23,7 +23,7 @@ describe('Slider', () => {
   })
 
   it('empêche le croisement des deux curseurs', async () => {
-    const { getByRole, emitted } = render(Slider, {
+    const { getByRole, emitted } = render(VSlider, {
       props: { modelValue: [20, 60], range: true, label: 'Budget' },
     })
     // le curseur de début tente de dépasser la fin → recalé sur 60
@@ -32,7 +32,7 @@ describe('Slider', () => {
   })
 
   it('la piste de remplissage suit les valeurs (fractions unitless)', () => {
-    const { container } = render(Slider, {
+    const { container } = render(VSlider, {
       props: { modelValue: [25, 75], range: true, label: 'x' },
     })
     const style = container.querySelector('.v-slider')?.getAttribute('style') ?? ''
@@ -41,7 +41,7 @@ describe('Slider', () => {
   })
 
   it('orientation : data-orientation posé uniquement en vertical', async () => {
-    const { container, rerender } = render(Slider, {
+    const { container, rerender } = render(VSlider, {
       props: { modelValue: 40, label: 'x' },
     })
     const root = () => container.querySelector('.v-slider')!
@@ -51,7 +51,7 @@ describe('Slider', () => {
   })
 
   it('ticks : un point par pas, data-filled sous la valeur', () => {
-    const { container } = render(Slider, {
+    const { container } = render(VSlider, {
       props: { modelValue: 50, ticks: true, step: 25, label: 'x' },
     })
     const ticks = container.querySelectorAll('.v-slider-tick')
@@ -62,7 +62,7 @@ describe('Slider', () => {
   })
 
   it('ticks range : remplis entre début et fin', () => {
-    const { container } = render(Slider, {
+    const { container } = render(VSlider, {
       props: { modelValue: [25, 75], range: true, ticks: true, step: 25, label: 'x' },
     })
     const filled = container.querySelectorAll('.v-slider-tick[data-filled]')
@@ -70,14 +70,14 @@ describe('Slider', () => {
   })
 
   it('ticks : garde-fou au-delà de 50 pas (aucun rendu)', () => {
-    const { container } = render(Slider, {
+    const { container } = render(VSlider, {
       props: { modelValue: 50, ticks: true, step: 1, label: 'x' },
     })
     expect(container.querySelectorAll('.v-slider-tick')).toHaveLength(0)
   })
 
   it('labels texte : rendus par pas et annoncés via aria-valuetext', async () => {
-    const { container, getByRole } = render(Slider, {
+    const { container, getByRole } = render(VSlider, {
       props: {
         modelValue: 2,
         min: 0,
@@ -97,8 +97,8 @@ describe('Slider', () => {
     expect(slider.getAttribute('aria-valuetext')).toBe('L')
   })
 
-  it('labels icônes : Icon avec libellé accessible', () => {
-    const { getByLabelText } = render(Slider, {
+  it('labels icônes : VIcon avec libellé accessible', () => {
+    const { getByLabelText } = render(VSlider, {
       props: {
         modelValue: 0,
         min: 0,
@@ -116,7 +116,7 @@ describe('Slider', () => {
   })
 
   it('inputs : un champ numérique en simple, commit au change avec clamp et snap', async () => {
-    const { getAllByRole, getByRole, emitted } = render(Slider, {
+    const { getAllByRole, getByRole, emitted } = render(VSlider, {
       props: { modelValue: 40, inputs: true, step: 10, label: 'Volume' },
     })
     const fields = getAllByRole('spinbutton')
@@ -133,7 +133,7 @@ describe('Slider', () => {
   })
 
   it('inputs : champ vide → revert silencieux, aucune émission', async () => {
-    const { getByRole, emitted } = render(Slider, {
+    const { getByRole, emitted } = render(VSlider, {
       props: { modelValue: 40, inputs: true, label: 'Volume' },
     })
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
@@ -144,7 +144,7 @@ describe('Slider', () => {
   })
 
   it('inputs range : deux champs, anti-croisement au commit', async () => {
-    const { getAllByRole, getByRole, emitted } = render(Slider, {
+    const { getAllByRole, getByRole, emitted } = render(VSlider, {
       props: { modelValue: [20, 60], range: true, inputs: true, label: 'Budget' },
     })
     expect(getAllByRole('spinbutton')).toHaveLength(2)
@@ -155,20 +155,20 @@ describe('Slider', () => {
   })
 
   it('tooltip : bulles présentes (1 en simple, 2 en range), masquées par défaut', () => {
-    const simple = render(Slider, {
+    const simple = render(VSlider, {
       props: { modelValue: 40, tooltip: true, label: 'x' },
     })
     expect(simple.container.querySelectorAll('.v-slider-tooltip')).toHaveLength(1)
     expect(simple.container.querySelector('.v-slider-tooltip')?.textContent).toBe('40')
 
-    const range = render(Slider, {
+    const range = render(VSlider, {
       props: { modelValue: [20, 60], range: true, tooltip: true, label: 'x' },
     })
     expect(range.container.querySelectorAll('.v-slider-tooltip')).toHaveLength(2)
   })
 
   it('tooltip : affiche le label du pas quand labels est fourni', () => {
-    const { container } = render(Slider, {
+    const { container } = render(VSlider, {
       props: {
         modelValue: 1,
         min: 0,
@@ -183,7 +183,7 @@ describe('Slider', () => {
   })
 
   it('disabled : data-disabled sur la racine, contrôles désactivés', () => {
-    const { container, getByRole } = render(Slider, {
+    const { container, getByRole } = render(VSlider, {
       props: { modelValue: 40, disabled: true, inputs: true, label: 'Volume' },
     })
     expect(container.querySelector('.v-slider[data-disabled]')).toBeTruthy()
@@ -196,7 +196,7 @@ describe('Slider', () => {
      matrice complète est ce qui verrouille la factorisation. */
   describe('noms accessibles des poignées', () => {
     it('sans label : « Début »/« Fin » en range, « Valeur » sur le champ simple', () => {
-      const range = render(Slider, {
+      const range = render(VSlider, {
         props: { modelValue: [20, 60], range: true, inputs: true },
       })
       expect(range.getByRole('slider', { name: 'Début' })).toBeTruthy()
@@ -204,14 +204,14 @@ describe('Slider', () => {
       expect(range.getByRole('spinbutton', { name: 'Début' })).toBeTruthy()
       expect(range.getByRole('spinbutton', { name: 'Fin' })).toBeTruthy()
 
-      const single = render(Slider, { props: { modelValue: 40, inputs: true } })
+      const single = render(VSlider, { props: { modelValue: 40, inputs: true } })
       // Hors range, la poignée EST la valeur : sans label du consommateur elle
       // reste sans nom, seul le champ numérique a besoin d'un repli.
       expect(single.getByRole('spinbutton', { name: 'Valeur' })).toBeTruthy()
     })
 
     it('avec label : suffixé « (début) »/« (fin) » en range, tel quel en simple', () => {
-      const range = render(Slider, {
+      const range = render(VSlider, {
         props: { modelValue: [20, 60], range: true, inputs: true, label: 'Budget' },
       })
       expect(range.getByRole('slider', { name: 'Budget (début)' })).toBeTruthy()
@@ -219,7 +219,7 @@ describe('Slider', () => {
       expect(range.getByRole('spinbutton', { name: 'Budget (début)' })).toBeTruthy()
       expect(range.getByRole('spinbutton', { name: 'Budget (fin)' })).toBeTruthy()
 
-      const single = render(Slider, {
+      const single = render(VSlider, {
         props: { modelValue: 40, inputs: true, label: 'Volume' },
       })
       expect(single.getByRole('slider', { name: 'Volume' })).toBeTruthy()

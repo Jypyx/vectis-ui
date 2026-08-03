@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 
-import IconButton from '../VIconButton/VIconButton.vue'
-import Button from './VButton.vue'
-import ButtonGroup from './VButtonGroup.vue'
+import VIconButton from '../VIconButton/VIconButton.vue'
+import VButton from './VButton.vue'
+import VButtonGroup from './VButtonGroup.vue'
 
 const meta = {
   title: 'Composants/ButtonGroup',
-  component: ButtonGroup,
+  component: VButtonGroup,
   argTypes: {
     orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
   },
@@ -15,17 +15,17 @@ const meta = {
     orientation: 'horizontal',
   },
   render: (args) => ({
-    components: { ButtonGroup, Button },
+    components: { VButtonGroup, VButton },
     setup: () => ({ args }),
     template: `
-      <ButtonGroup v-bind="args" aria-label="Alignement">
-        <Button variant="outline" tone="neutral">Gauche</Button>
-        <Button variant="outline" tone="neutral">Centre</Button>
-        <Button variant="outline" tone="neutral">Droite</Button>
-      </ButtonGroup>
+      <VButtonGroup v-bind="args" aria-label="Alignement">
+        <VButton variant="outline" tone="neutral">Gauche</VButton>
+        <VButton variant="outline" tone="neutral">Centre</VButton>
+        <VButton variant="outline" tone="neutral">Droite</VButton>
+      </VButtonGroup>
     `,
   }),
-} satisfies Meta<typeof ButtonGroup>
+} satisfies Meta<typeof VButtonGroup>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -34,24 +34,24 @@ export const Default: Story = {}
 
 export const Variants: Story = {
   render: () => ({
-    components: { ButtonGroup, Button },
+    components: { VButtonGroup, VButton },
     template: `
       <div style="display: grid; gap: 16px">
-        <ButtonGroup aria-label="Solid">
-          <Button variant="solid">Jour</Button>
-          <Button variant="solid">Semaine</Button>
-          <Button variant="solid">Mois</Button>
-        </ButtonGroup>
-        <ButtonGroup aria-label="Outline">
-          <Button variant="outline" tone="neutral">Jour</Button>
-          <Button variant="outline" tone="neutral">Semaine</Button>
-          <Button variant="outline" tone="neutral">Mois</Button>
-        </ButtonGroup>
-        <ButtonGroup aria-label="Tonal">
-          <Button variant="tonal">Jour</Button>
-          <Button variant="tonal">Semaine</Button>
-          <Button variant="tonal">Mois</Button>
-        </ButtonGroup>
+        <VButtonGroup aria-label="Solid">
+          <VButton variant="solid">Jour</VButton>
+          <VButton variant="solid">Semaine</VButton>
+          <VButton variant="solid">Mois</VButton>
+        </VButtonGroup>
+        <VButtonGroup aria-label="Outline">
+          <VButton variant="outline" tone="neutral">Jour</VButton>
+          <VButton variant="outline" tone="neutral">Semaine</VButton>
+          <VButton variant="outline" tone="neutral">Mois</VButton>
+        </VButtonGroup>
+        <VButtonGroup aria-label="Tonal">
+          <VButton variant="tonal">Jour</VButton>
+          <VButton variant="tonal">Semaine</VButton>
+          <VButton variant="tonal">Mois</VButton>
+        </VButtonGroup>
       </div>
     `,
   }),
@@ -59,52 +59,52 @@ export const Variants: Story = {
 
 export const Vertical: Story = {
   render: () => ({
-    components: { ButtonGroup, Button },
+    components: { VButtonGroup, VButton },
     template: `
-      <ButtonGroup orientation="vertical" aria-label="Navigation">
-        <Button variant="outline" tone="neutral" icon-start="home">Accueil</Button>
-        <Button variant="outline" tone="neutral" icon-start="folder">Projets</Button>
-        <Button variant="outline" tone="neutral" icon-start="settings">Réglages</Button>
-      </ButtonGroup>
+      <VButtonGroup orientation="vertical" aria-label="Navigation">
+        <VButton variant="outline" tone="neutral" icon-start="home">Accueil</VButton>
+        <VButton variant="outline" tone="neutral" icon-start="folder">Projets</VButton>
+        <VButton variant="outline" tone="neutral" icon-start="settings">Réglages</VButton>
+      </VButtonGroup>
     `,
   }),
 }
 
 export const WithIconButton: Story = {
   render: () => ({
-    components: { ButtonGroup, IconButton },
+    components: { VButtonGroup, VIconButton },
     // role="toolbar" (surcharge du role par défaut) : barre d'outils de mise en forme.
     template: `
-      <ButtonGroup role="toolbar" aria-label="Mise en forme">
-        <IconButton variant="outline" tone="neutral" label="Gras">
+      <VButtonGroup role="toolbar" aria-label="Mise en forme">
+        <VIconButton variant="outline" tone="neutral" label="Gras">
           <span style="font-weight: 700">B</span>
-        </IconButton>
-        <IconButton variant="outline" tone="neutral" label="Italique">
+        </VIconButton>
+        <VIconButton variant="outline" tone="neutral" label="Italique">
           <span style="font-style: italic">I</span>
-        </IconButton>
-        <IconButton variant="outline" tone="neutral" label="Souligné">
+        </VIconButton>
+        <VIconButton variant="outline" tone="neutral" label="Souligné">
           <span style="text-decoration: underline">U</span>
-        </IconButton>
-      </ButtonGroup>
+        </VIconButton>
+      </VButtonGroup>
     `,
   }),
 }
 
 export const Sizes: Story = {
   render: () => ({
-    components: { ButtonGroup, Button },
+    components: { VButtonGroup, VButton },
     // L'approche CSS-only : la taille se pose sur CHAQUE bouton (mêmes valeurs → cohérence).
     template: `
       <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap">
-        <ButtonGroup aria-label="Small">
-          <Button v-for="l in ['A', 'B', 'C']" :key="l" size="sm" variant="outline" tone="neutral">{{ l }}</Button>
-        </ButtonGroup>
-        <ButtonGroup aria-label="Medium">
-          <Button v-for="l in ['A', 'B', 'C']" :key="l" size="md" variant="outline" tone="neutral">{{ l }}</Button>
-        </ButtonGroup>
-        <ButtonGroup aria-label="Large">
-          <Button v-for="l in ['A', 'B', 'C']" :key="l" size="lg" variant="outline" tone="neutral">{{ l }}</Button>
-        </ButtonGroup>
+        <VButtonGroup aria-label="Small">
+          <VButton v-for="l in ['A', 'B', 'C']" :key="l" size="sm" variant="outline" tone="neutral">{{ l }}</VButton>
+        </VButtonGroup>
+        <VButtonGroup aria-label="Medium">
+          <VButton v-for="l in ['A', 'B', 'C']" :key="l" size="md" variant="outline" tone="neutral">{{ l }}</VButton>
+        </VButtonGroup>
+        <VButtonGroup aria-label="Large">
+          <VButton v-for="l in ['A', 'B', 'C']" :key="l" size="lg" variant="outline" tone="neutral">{{ l }}</VButton>
+        </VButtonGroup>
       </div>
     `,
   }),
@@ -112,18 +112,18 @@ export const Sizes: Story = {
 
 export const CasLimites: Story = {
   render: () => ({
-    components: { ButtonGroup, Button },
+    components: { VButtonGroup, VButton },
     template: `
       <div style="display: grid; gap: 16px; max-width: 420px">
         <!-- Un seul bouton : coins tous arrondis (aucune jointure). -->
-        <ButtonGroup aria-label="Seul">
-          <Button variant="outline" tone="neutral">Bouton unique</Button>
-        </ButtonGroup>
+        <VButtonGroup aria-label="Seul">
+          <VButton variant="outline" tone="neutral">Bouton unique</VButton>
+        </VButtonGroup>
         <!-- Libellés longs. -->
-        <ButtonGroup aria-label="Longs libellés">
-          <Button variant="outline" tone="neutral">Exporter en CSV</Button>
-          <Button variant="outline" tone="neutral">Exporter en PDF</Button>
-        </ButtonGroup>
+        <VButtonGroup aria-label="Longs libellés">
+          <VButton variant="outline" tone="neutral">Exporter en CSV</VButton>
+          <VButton variant="outline" tone="neutral">Exporter en PDF</VButton>
+        </VButtonGroup>
       </div>
     `,
   }),

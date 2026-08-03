@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, ref, useId, watch, watchEffect } from 'vue'
 
-import Button from '../VButton/VButton.vue'
+import VButton from '../VButton/VButton.vue'
 import type { IconSource } from '../VIcon/types'
-import Input from '../VInput/VInput.vue'
-import Popover from '../VPopover/VPopover.vue'
-import Toggle from '../VToggle/VToggle.vue'
+import VInput from '../VInput/VInput.vue'
+import VPopover from '../VPopover/VPopover.vue'
+import VToggle from '../VToggle/VToggle.vue'
 import type { ToggleModelValue } from '../VToggle/VToggle.vue'
-import ToggleItem from '../VToggle/VToggleItem.vue'
-import TimePickerDial from './VTimePickerDial.vue'
+import VToggleItem from '../VToggle/VToggleItem.vue'
+import VTimePickerDial from './VTimePickerDial.vue'
 import {
   formatDisplay,
   formatTime,
@@ -37,8 +37,8 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 import { useLocale, useMessages } from '../../i18n/state'
 
 /**
- * Sélecteur d'heure : champ `Input` + panneau flottant optionnel. Coquille
- * identique au DatePicker (`Popover` en `mode="manual"` ancré en pur CSS,
+ * Sélecteur d'heure : champ `VInput` + panneau flottant optionnel. Coquille
+ * identique au VDatePicker (`VPopover` en `mode="manual"` ancré en pur CSS,
  * ouverture programmatique pour déplacer le focus dans le panneau, fermeture
  * par `@focusout` racine + Échap).
  *
@@ -99,7 +99,7 @@ interface TimePickerProps {
   clearable?: boolean
   /**
    * Icône d'ouverture du CADRAN, à la fin du champ. Sans effet en `mode="list"`,
-   * dont le chevron suit la convention du Combobox. La croix d'effacement de
+   * dont le chevron suit la convention du VCombobox. La croix d'effacement de
    * `clearable` s'affiche à sa gauche sans la remplacer.
    */
   clockIcon?: IconSource
@@ -131,16 +131,16 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
 /** Heure `'HH:mm'` 24 h canonique, quel que soit l'affichage 12 h / 24 h. */
 const model = defineModel<string | null>({ default: null })
 
-// ── Wrapper-root : class/style sur la racine, reste reporté sur l'Input ──────
+// ── Wrapper-root : class/style sur la racine, reste reporté sur le VInput ──────
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const rootEl = ref<HTMLElement | null>(null)
-const panelRef = ref<InstanceType<typeof Popover> | null>(null)
-const inputRef = ref<InstanceType<typeof Input> | null>(null)
+const panelRef = ref<InstanceType<typeof VPopover> | null>(null)
+const inputRef = ref<InstanceType<typeof VInput> | null>(null)
 const panelId = useId()
 
-/** L'`<input>` natif du champ (masque, caret) — exposé par `Input`. */
+/** L'`<input>` natif du champ (masque, caret) — exposé par `VInput`. */
 const fieldEl = computed<HTMLInputElement | null>(() => inputRef.value?.el ?? null)
 
 const resolvedMode = computed<TimePickerMode>(() => {
@@ -168,22 +168,22 @@ const resolvedFormat = computed<TimePickerFormat>(
 if (isDev) {
   watchEffect(() => {
     if (props.minuteStep < 1 || 60 % props.minuteStep !== 0)
-      console.warn(`[TimePicker] minuteStep ${props.minuteStep} — un diviseur de 60 est attendu.`)
+      console.warn(`[VTimePicker] minuteStep ${props.minuteStep} — un diviseur de 60 est attendu.`)
     if (props.mode !== undefined && !MODES.includes(props.mode))
       console.warn(
-        `[TimePicker] mode « ${props.mode} » inconnu : utilisez « input » (défaut), « readonly » ou « list » — l'ancien « dial » s'appelle désormais « readonly ».`,
+        `[VTimePicker] mode « ${props.mode} » inconnu : utilisez « input » (défaut), « readonly » ou « list » — l'ancien « dial » s'appelle désormais « readonly ».`,
       )
     if (resolvedMode.value === 'readonly' && props.showDial === false)
       console.warn(
-        '[TimePicker] showDial est forcé à true en mode « readonly » : sans cadran, un champ en lecture seule serait impossible à remplir.',
+        '[VTimePicker] showDial est forcé à true en mode « readonly » : sans cadran, un champ en lecture seule serait impossible à remplir.',
       )
     if (isList.value && props.showDial === true)
       console.warn(
-        '[TimePicker] showDial est ignoré en mode « list » : la liste des heures est le seul panneau.',
+        '[VTimePicker] showDial est ignoré en mode « list » : la liste des heures est le seul panneau.',
       )
     if (isList.value && props.minuteStep < 5)
       console.warn(
-        `[TimePicker] minuteStep ${props.minuteStep} en mode « list » rendrait ${Math.ceil(1440 / props.minuteStep)} rangées : un pas de 15 ou 30 minutes est attendu.`,
+        `[VTimePicker] minuteStep ${props.minuteStep} en mode « list » rendrait ${Math.ceil(1440 / props.minuteStep)} rangées : un pas de 15 ou 30 minutes est attendu.`,
       )
   })
 }
@@ -197,14 +197,14 @@ const draftMinute = ref(0)
 const modelParts = computed(() => parseTime(model.value))
 
 /**
- * Méridien retenu tant qu'AUCUNE heure n'est posée : le Toggle est `mandatory`,
+ * Méridien retenu tant qu'AUCUNE heure n'est posée : le VToggle est `mandatory`,
  * il lui faut toujours une valeur, et `null` n'en est pas une. 'AM' en dur (et
  * non l'heure courante) : déterministe, donc SSR-safe et testable.
  */
 const pendingMeridiem = ref<Meridiem>('AM')
 
 /**
- * Le Toggle AM/PM vit HORS du panneau, sur la rangée du champ : il pilote donc
+ * Le VToggle AM/PM vit HORS du panneau, sur la rangée du champ : il pilote donc
  * le v-model, et non plus le brouillon du cadran.
  */
 const meridiemModel = computed<ToggleModelValue>({
@@ -237,14 +237,14 @@ function focusInPanel() {
   if (!panel) return
   if (isList.value) focusListSelection(panel)
   // Le panneau ne montre plus que le cadran : le slider est la cible utile. Une
-  // requête DOM plutôt qu'un expose — TimePickerDial n'en a aucun, et n'a donc
+  // requête DOM plutôt qu'un expose — VTimePickerDial n'en a aucun, et n'a donc
   // pas à changer.
   else panel.querySelector<HTMLElement>('[role="slider"]')?.focus()
 }
 
-// Coquille champ + panneau `manual` partagée avec le DatePicker. Le prologue
+// Coquille champ + panneau `manual` partagée avec le VDatePicker. Le prologue
 // d'ouverture (brouillon, étape) et l'épilogue de fermeture (live region) sont
-// les seules parties propres au TimePicker.
+// les seules parties propres au VTimePicker.
 const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPanelMousedown } =
   useFieldPanel({
     rootEl,
@@ -307,8 +307,8 @@ function onDialConfirm(via: 'pointer' | 'keyboard') {
 }
 
 /*
- * Appelé par `@clear` de l'Input, DANS son `emit` : le `focus()` posé ici sous
- * verrou rend le `controlEl.focus()` qu'Input exécute juste après inopérant
+ * Appelé par `@clear` de le VInput, DANS son `emit` : le `focus()` posé ici sous
+ * verrou rend le `controlEl.focus()` que VInput exécute juste après inopérant
  * (élément déjà focalisé = aucun événement `focus` émis), donc le panneau ne se
  * rouvre pas. Retirer le verrou d'ici le rouvrirait.
  */
@@ -517,7 +517,7 @@ const options = computed<TimeOption[]>(() =>
 )
 
 /**
- * Liste PROPRE (idiome MenuPanel) et non `navigableItems` : celui-ci appelle
+ * Liste PROPRE (idiome VMenuPanel) et non `navigableItems` : celui-ci appelle
  * `getComputedStyle` sur CHAQUE élément — inacceptable sur des dizaines de
  * rangées, et aucune n'est masquée ici.
  */
@@ -535,13 +535,13 @@ function focusListSelection(panel: HTMLElement) {
     minutes === null ? 0 : clamp(Math.round(minutes / props.minuteStep), 0, items.length - 1)
   const el = items[index]
   // `?.()` : jsdom n'implémente pas scrollIntoView. Pas de `behavior`, qui
-  // ignorerait `scroll-behavior` et prefers-reduced-motion (précédent Tabs).
+  // ignorerait `scroll-behavior` et prefers-reduced-motion (précédent VTabs).
   el?.scrollIntoView?.({ block: 'center' })
   el?.focus({ preventScroll: true })
 }
 
 /** Clic ou Entrée sur une rangée : commit DIRECT + fermeture (modèle
-    `DatePicker.onSelect`) — ni brouillon, ni pied de panneau. */
+    `VDatePicker.onSelect`) — ni brouillon, ni pied de panneau. */
 function selectTime(value: string) {
   model.value = value
   closeAndFocus()
@@ -570,9 +570,9 @@ function onPanelKeydown(event: KeyboardEvent) {
 /* ── Croix d'effacement et icône de fin ─────────────────────────────────── */
 
 /*
- * La croix passe par le `clearable` de l'Input, qui la rend À GAUCHE de l'icône
- * de fin (convention Input/Textarea/Combobox) : les deux affordances coexistent,
- * et en mode liste on retrouve exactement le couple croix + chevron du Combobox.
+ * La croix passe par le `clearable` de le VInput, qui la rend À GAUCHE de l'icône
+ * de fin (convention VInput/VTextarea/VCombobox) : les deux affordances coexistent,
+ * et en mode liste on retrouve exactement le couple croix + chevron du VCombobox.
  * `clearVisible` est indispensable ici — le champ est readonly hors saisie, et
  * la valeur y vient du panneau.
  */
@@ -613,7 +613,7 @@ function onEndIcon() {
   >
     <div class="v-timepicker-row">
       <div class="v-timepicker-control" @click="onControlClick">
-        <Input
+        <VInput
           ref="inputRef"
           v-model="fieldModel"
           :inputmode="typing ? 'numeric' : undefined"
@@ -649,7 +649,7 @@ function onEndIcon() {
       <!-- Le méridien vit HORS du panneau : il sert les trois modes et pilote
            directement le v-model. Toujours dans la racine, donc cliquer dessus
            ne déclenche pas le `focusout` qui fermerait le panneau. -->
-      <Toggle
+      <VToggle
         v-if="resolvedFormat === '12h'"
         v-model="meridiemModel"
         class="v-timepicker-meridiem"
@@ -659,14 +659,14 @@ function onEndIcon() {
         :compact="compact"
         :label="m.timePicker.meridiem"
       >
-        <ToggleItem value="AM" :label="m.timePicker.am" />
-        <ToggleItem value="PM" :label="m.timePicker.pm" />
-      </Toggle>
+        <VToggleItem value="AM" :label="m.timePicker.am" />
+        <VToggleItem value="PM" :label="m.timePicker.pm" />
+      </VToggle>
     </div>
 
     <!-- Sans panneau monté, `panelRef` est nul : `open`, alimenté par le DOM du
          popover, ne peut plus passer à `true`. -->
-    <Popover
+    <VPopover
       v-if="hasPanel"
       :id="panelId"
       ref="panelRef"
@@ -684,7 +684,7 @@ function onEndIcon() {
       @keydown="onPanelKeydown"
     >
       <!-- Mode liste : rangées `option`, focus DOM dans le panneau (modèle
-           Menu/Calendar), commit direct au clic ou à l'Entrée. -->
+           VMenu/VCalendar), commit direct au clic ou à l'Entrée. -->
       <template v-if="isList">
         <button
           v-for="option in options"
@@ -705,7 +705,7 @@ function onEndIcon() {
         <!-- Les cellules basculent l'étape active : `tone` accent = étape en
              cours (variant tonal → le couple de fonds de l'ancien aria-pressed). -->
         <div class="v-timepicker-time">
-          <Button
+          <VButton
             class="v-timepicker-cell"
             variant="ghost"
             size="lg"
@@ -715,9 +715,9 @@ function onEndIcon() {
             @click="activeStep = 'hour'"
           >
             {{ displayHourText }}
-          </Button>
+          </VButton>
           <span class="v-timepicker-sep" aria-hidden="true">:</span>
-          <Button
+          <VButton
             class="v-timepicker-cell"
             variant="ghost"
             size="lg"
@@ -727,10 +727,10 @@ function onEndIcon() {
             @click="activeStep = 'minute'"
           >
             {{ pad2(draftMinute) }}
-          </Button>
+          </VButton>
         </div>
 
-        <TimePickerDial
+        <VTimePickerDial
           :step="activeStep"
           :format="resolvedFormat"
           :hour="draftHour"
@@ -744,11 +744,11 @@ function onEndIcon() {
         <div class="v-visually-hidden" aria-live="polite">{{ liveMessage }}</div>
 
         <div class="v-timepicker-footer">
-          <Button variant="ghost" tone="neutral" @click="cancel">{{ m.common.cancel }}</Button>
-          <Button @click="confirm">{{ m.common.confirm }}</Button>
+          <VButton variant="ghost" tone="neutral" @click="cancel">{{ m.common.cancel }}</VButton>
+          <VButton @click="confirm">{{ m.common.confirm }}</VButton>
         </div>
       </template>
-    </Popover>
+    </VPopover>
   </div>
 </template>
 
@@ -762,7 +762,7 @@ function onEndIcon() {
     font-family: var(--vectis-text-family);
   }
 
-  /* Rangée du champ : le champ prend la place restante, le Toggle AM/PM sa
+  /* Rangée du champ : le champ prend la place restante, le VToggle AM/PM sa
      largeur intrinsèque. */
   .v-timepicker-row {
     display: flex;
@@ -789,7 +789,7 @@ function onEndIcon() {
     font-variant-numeric: tabular-nums;
   }
 
-  /* Le Toggle s'aligne sur le CHAMP, pas sur le bloc Input (qui empile
+  /* Le VToggle s'aligne sur le CHAMP, pas sur le bloc VInput (qui empile
      label / champ / hint) : on compense en marges la hauteur du label et du
      hint. Sa propre hauteur égale celle du champ (mêmes size/compact). */
   .v-timepicker-meridiem {
@@ -809,7 +809,7 @@ function onEndIcon() {
     );
   }
 
-  /* `position-anchor` et le chrome viennent de Popover (props `anchor` et
+  /* `position-anchor` et le chrome viennent de VPopover (props `anchor` et
      `surface`, cette dernière posant `.v-panel`) : il ne reste ici que la mise
      en colonne et le padding propres au cadran. Le `display: flex` d'auteur
      écrase le `display: none` UA de [popover] : c'est le garde-fou
@@ -833,11 +833,11 @@ function onEndIcon() {
     direction: ltr;
   }
 
-  /* Cellules HH/MM : des Button du DS (variant `tonal`, tone accent à l'étape
+  /* Cellules HH/MM : des VButton du DS (variant `tonal`, tone accent à l'étape
      active — leur couple `--tone-bg-soft`/`--tone-text-tinted` reproduit exactement
      l'ancien surface-muted/text ↔ accent-surface/accent-text). La surcharge se
      limite au gabarit « grand chiffre » : hauteur, états, focus et transitions
-     viennent de Button. Qualifiée [data-size] (modèle IconButton/Tabs) :
+     viennent de VButton. Qualifiée [data-size] (modèle VIconButton/VTabs) :
      l'ordre d'export n'est pas contraignant. */
   .v-timepicker-cell[data-size] {
     width: var(--control-height);
@@ -857,7 +857,7 @@ function onEndIcon() {
     align-self: center;
   }
 
-  /* Mode liste : le chrome vient de `.v-panel` (prop `surface` de Popover) et
+  /* Mode liste : le chrome vient de `.v-panel` (prop `surface` de VPopover) et
      le gabarit des rangées de `v-control` posé sur le PANNEAU. Seules les
      dimensions restent ici — `panel.css` n'en porte aucune. */
   .v-timepicker-list {
@@ -889,7 +889,7 @@ function onEndIcon() {
   }
 
   /* Anneau INTÉRIEUR : le panneau défile, un offset positif serait rogné
-     (précédent Tabs). */
+     (précédent VTabs). */
   .v-timepicker-option:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(-1 * var(--vectis-focus-ring-width));

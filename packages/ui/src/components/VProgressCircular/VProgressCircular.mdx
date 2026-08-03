@@ -1,20 +1,20 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as ProgressCircularStories from './VProgressCircular.stories'
+import * as VProgressCircularStories from './VProgressCircular.stories'
 
-<Meta of={ProgressCircularStories} />
+<Meta of={VProgressCircularStories} />
 
 # ProgressCircular
 
-Progression en donut : mêmes couleurs et même contrat que le ProgressLinear, avec diamètre et
+Progression en donut : mêmes couleurs et même contrat que le VProgressLinear, avec diamètre et
 épaisseur indépendants, bouts de trait arrondis ou francs, et un centre libre où placer ce que
 l'on veut.
 
 Il n'existe aucune primitive native pour un progrès circulaire — mais le SVG suffit, sans
 calcul en JavaScript.
 
-<Canvas of={ProgressCircularStories.Default} />
+<Canvas of={VProgressCircularStories.Default} />
 
-<Controls of={ProgressCircularStories.Default} />
+<Controls of={VProgressCircularStories.Default} />
 
 ## Géométrie sans JavaScript
 
@@ -35,14 +35,14 @@ si bien que le décalage du pointillé s'exprime directement en pourcentage de p
 Les cinq couleurs du design system, chacune posant un trait et une piste teintée de la même
 famille. Le tone `neutral` inverse texte et surface plutôt que d'employer un gris moyen.
 
-<Canvas of={ProgressCircularStories.Tones} />
+<Canvas of={VProgressCircularStories.Tones} />
 
 ## Couleur custom
 
 `color` remplace le tone et accepte n'importe quelle couleur CSS. La piste en est dérivée par
 `color-mix` vers la surface courante, donc adaptée automatiquement au thème.
 
-<Canvas of={ProgressCircularStories.CouleurCustom} />
+<Canvas of={VProgressCircularStories.CouleurCustom} />
 
 ## Taille et épaisseur
 
@@ -50,30 +50,30 @@ famille. Le tone `neutral` inverse texte et surface plutôt que d'employer un gr
 `96` comme `'96'` donnent quatre-vingt-seize pixels. Sans valeur, le diamètre vaut 48 pixels
 et l'épaisseur 4.
 
-<Canvas of={ProgressCircularStories.Taille} />
+<Canvas of={VProgressCircularStories.Taille} />
 
 Réduire le trou jusqu'à obtenir un disque est parfaitement légitime :
 
-<Canvas of={ProgressCircularStories.Epaisseur} />
+<Canvas of={VProgressCircularStories.Epaisseur} />
 
 ## Label au centre
 
 `showValue` affiche le pourcentage au centre du donut, dans une taille proportionnelle au
 diamètre (avec un plancher au plus petit token typographique) et bornée au trou du donut.
 
-<Canvas of={ProgressCircularStories.Valeur} />
+<Canvas of={VProgressCircularStories.Valeur} />
 
 Le slot par défaut reçoit `{ value, max, percent }` et remplace ce pourcentage : un ratio, une
 icône de validation, deux lignes de texte hiérarchisées…
 
-<Canvas of={ProgressCircularStories.LabelCentre} />
+<Canvas of={VProgressCircularStories.LabelCentre} />
 
 ## Bouts du trait
 
 `shape` pilote les extrémités du trait de remplissage — arrondies par défaut, franches en
-`square`. Mêmes valeurs que sur le ProgressLinear, où elles arrondissent la barre.
+`square`. Mêmes valeurs que sur le VProgressLinear, où elles arrondissent la barre.
 
-<Canvas of={ProgressCircularStories.Carre} />
+<Canvas of={VProgressCircularStories.Carre} />
 
 ## Indéterminé
 
@@ -81,18 +81,18 @@ La prop `indeterminate` fait disparaître `aria-valuenow` et passe le donut en a
 une rotation d'ensemble combinée à un arc dont la longueur varie, les deux périodes étant
 volontairement décalées pour éviter un battement mécanique.
 
-Pour un simple « chargement » sans notion de progression, préférer le **Spinner**, qui porte
+Pour un simple « chargement » sans notion de progression, préférer le **VSpinner**, qui porte
 `role="status"` et suit la taille du texte environnant. Ce composant-ci conserve
 `role="progressbar"` et la continuité visuelle avec son mode déterminé.
 
-<Canvas of={ProgressCircularStories.Indetermine} />
+<Canvas of={VProgressCircularStories.Indetermine} />
 
 ## Cas limites
 
 Valeur nulle ou complète, épaisseur supérieure au diamètre (le rayon dégrade sur zéro au lieu
 de produire une erreur SVG), label plus large que le trou du donut.
 
-<Canvas of={ProgressCircularStories.CasLimites} />
+<Canvas of={VProgressCircularStories.CasLimites} />
 
 ## Accessibilité
 

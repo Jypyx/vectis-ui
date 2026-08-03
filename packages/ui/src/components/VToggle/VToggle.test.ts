@@ -2,9 +2,9 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, ref } from 'vue'
 
-import Toggle from './VToggle.vue'
+import VToggle from './VToggle.vue'
 import type { ToggleModelValue } from './VToggle.vue'
-import ToggleItem from './VToggleItem.vue'
+import VToggleItem from './VToggleItem.vue'
 
 /**
  * Harnais : le v-model doit être vivant (sans ref locale, cliquer un item ne
@@ -12,7 +12,7 @@ import ToggleItem from './VToggleItem.vue'
  */
 function mount(
   options: {
-    /** Attributs bruts posés sur <Toggle>. */
+    /** Attributs bruts posés sur <VToggle>. */
     toggleAttrs?: string
     /** Corps du slot par défaut ; par défaut trois items a/b/c. */
     items?: string
@@ -22,17 +22,17 @@ function mount(
   const model = ref<ToggleModelValue>(options.initial ?? null)
   const items =
     options.items ??
-    `<ToggleItem value="a" label="Un" />
-     <ToggleItem value="b" label="Deux" />
-     <ToggleItem value="c" label="Trois" />`
+    `<VToggleItem value="a" label="Un" />
+     <VToggleItem value="b" label="Deux" />
+     <VToggleItem value="c" label="Trois" />`
 
   const Harness = defineComponent({
-    components: { Toggle, ToggleItem },
+    components: { VToggle, VToggleItem },
     setup: () => ({ model }),
     template: `
-      <Toggle v-model="model" ${options.toggleAttrs ?? ''}>
+      <VToggle v-model="model" ${options.toggleAttrs ?? ''}>
         ${items}
-      </Toggle>
+      </VToggle>
     `,
   })
   return { model, ...render(Harness) }
@@ -46,7 +46,7 @@ const itemsOf = (container: Element) => [
 const pressedOf = (container: Element) =>
   itemsOf(container).map((el) => el.getAttribute('aria-pressed'))
 
-describe('Toggle', () => {
+describe('VToggle', () => {
   describe('accessibilité', () => {
     it('rend un groupe nommé de boutons bascule', () => {
       const { container } = mount({ toggleAttrs: 'label="Alignement"' })
@@ -82,14 +82,14 @@ describe('Toggle', () => {
   })
 
   describe('structure', () => {
-    it('attached (défaut) : les items sont enfants DIRECTS du ButtonGroup (couture)', () => {
+    it('attached (défaut) : les items sont enfants DIRECTS du VButtonGroup (couture)', () => {
       const { container } = mount()
       expect(container.querySelector('.v-toggle.v-button-group')).not.toBeNull()
       // garde structurelle : un wrapper intercalé casserait silencieusement la couture
       expect(container.querySelector('.v-button-group > .v-toggle-item')).not.toBeNull()
     })
 
-    it('attached : l’orientation transite par la prop de ButtonGroup', () => {
+    it('attached : l’orientation transite par la prop de VButtonGroup', () => {
       const { container } = mount({ toggleAttrs: 'orientation="vertical"' })
       expect(container.querySelector('.v-button-group')?.getAttribute('data-orientation')).toBe(
         'vertical',
@@ -197,8 +197,8 @@ describe('Toggle', () => {
       grouped.unmount()
 
       const { container } = mount({
-        items: `<ToggleItem value="a" label="Un" />
-                <ToggleItem value="b" label="Deux" disabled />`,
+        items: `<VToggleItem value="a" label="Un" />
+                <VToggleItem value="b" label="Deux" disabled />`,
       })
       const [first, second] = itemsOf(container) as HTMLButtonElement[]
       expect(first?.disabled).toBe(false)
@@ -207,8 +207,8 @@ describe('Toggle', () => {
   })
 
   describe('icônes', () => {
-    const iconItems = `<ToggleItem value="a" icon="favorite" label="Un" />
-                       <ToggleItem value="b" icon="star" label="Deux" />`
+    const iconItems = `<VToggleItem value="a" icon="favorite" label="Un" />
+                       <VToggleItem value="b" icon="star" label="Deux" />`
 
     it('selectedIconFilled remplit l’icône du seul item sélectionné', () => {
       const { container } = mount({
@@ -230,7 +230,7 @@ describe('Toggle', () => {
 
     it('icône seule : item carré, nom accessible par fallthrough', () => {
       const { container } = mount({
-        items: `<ToggleItem value="a" icon="favorite" aria-label="Favori" />`,
+        items: `<VToggleItem value="a" icon="favorite" aria-label="Favori" />`,
       })
       const item = itemsOf(container)[0]
       expect(item?.hasAttribute('data-icon-only')).toBe(true)
@@ -239,7 +239,7 @@ describe('Toggle', () => {
 
     it('un libellé annule le mode icône seule', () => {
       const { container } = mount({
-        items: `<ToggleItem value="a" icon="favorite" label="Favori" />`,
+        items: `<VToggleItem value="a" icon="favorite" label="Favori" />`,
       })
       expect(itemsOf(container)[0]?.hasAttribute('data-icon-only')).toBe(false)
     })
@@ -277,9 +277,9 @@ describe('Toggle', () => {
 
     it('saute les items désactivés', async () => {
       const { container } = mount({
-        items: `<ToggleItem value="a" label="Un" />
-                <ToggleItem value="b" label="Deux" disabled />
-                <ToggleItem value="c" label="Trois" />`,
+        items: `<VToggleItem value="a" label="Un" />
+                <VToggleItem value="b" label="Deux" disabled />
+                <VToggleItem value="c" label="Trois" />`,
       })
       const items = itemsOf(container)
       const group = container.querySelector('[role="group"]') as HTMLElement
@@ -305,8 +305,8 @@ describe('Toggle', () => {
   })
 
   describe('hors contexte', () => {
-    it('un ToggleItem seul se rend, jamais sélectionné, sans erreur au clic', async () => {
-      const { container } = render(ToggleItem, { props: { value: 'a', label: 'Seul' } })
+    it('un VToggleItem seul se rend, jamais sélectionné, sans erreur au clic', async () => {
+      const { container } = render(VToggleItem, { props: { value: 'a', label: 'Seul' } })
       const item = container.querySelector('.v-toggle-item')
       expect(item?.getAttribute('aria-pressed')).toBe('false')
       await fireEvent.click(item as HTMLElement)

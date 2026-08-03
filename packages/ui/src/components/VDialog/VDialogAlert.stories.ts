@@ -2,13 +2,13 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Button from '../VButton/VButton.vue'
-import Typography from '../VTypography/VTypography.vue'
-import DialogAlert from './VDialogAlert.vue'
+import VButton from '../VButton/VButton.vue'
+import VTypography from '../VTypography/VTypography.vue'
+import VDialogAlert from './VDialogAlert.vue'
 
 const meta = {
   title: 'Composants/DialogAlert',
-  component: DialogAlert,
+  component: VDialogAlert,
   argTypes: {
     title: { control: 'text' },
     subtitle: { control: 'text' },
@@ -20,28 +20,28 @@ const meta = {
     width: '400px',
   },
   render: (args) => ({
-    components: { DialogAlert, Button, Typography },
+    components: { VDialogAlert, VButton, VTypography },
     setup() {
       const open = ref(false)
       return { args, open }
     },
     template: `
-      <DialogAlert v-bind="args" v-model:open="open">
+      <VDialogAlert v-bind="args" v-model:open="open">
         <template #trigger="{ triggerProps }">
-          <Button tone="danger" v-bind="triggerProps">Supprimer</Button>
+          <VButton tone="danger" v-bind="triggerProps">Supprimer</VButton>
         </template>
-        <Typography>
+        <VTypography>
           Le projet et toutes ses données seront supprimés. Cette action ne peut pas être
           annulée.
-        </Typography>
+        </VTypography>
         <template #footer>
-          <Button variant="ghost" tone="neutral" @click="open = false">Annuler</Button>
-          <Button tone="danger" @click="open = false">Supprimer définitivement</Button>
+          <VButton variant="ghost" tone="neutral" @click="open = false">Annuler</VButton>
+          <VButton tone="danger" @click="open = false">Supprimer définitivement</VButton>
         </template>
-      </DialogAlert>
+      </VDialogAlert>
     `,
   }),
-} satisfies Meta<typeof DialogAlert>
+} satisfies Meta<typeof VDialogAlert>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -81,22 +81,22 @@ export const Confirmation: Story = {
     subtitle: 'Vos modifications seront perdues.',
   },
   render: (args) => ({
-    components: { DialogAlert, Button, Typography },
+    components: { VDialogAlert, VButton, VTypography },
     setup() {
       const open = ref(false)
       return { args, open }
     },
     template: `
-      <DialogAlert v-bind="args" v-model:open="open">
+      <VDialogAlert v-bind="args" v-model:open="open">
         <template #trigger="{ triggerProps }">
-          <Button variant="outline" tone="neutral" v-bind="triggerProps">Quitter</Button>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Quitter</VButton>
         </template>
-        <Typography>Un brouillon non enregistré sera définitivement perdu.</Typography>
+        <VTypography>Un brouillon non enregistré sera définitivement perdu.</VTypography>
         <template #footer>
-          <Button variant="ghost" tone="neutral" @click="open = false">Continuer l'édition</Button>
-          <Button @click="open = false">Quitter</Button>
+          <VButton variant="ghost" tone="neutral" @click="open = false">Continuer l'édition</VButton>
+          <VButton @click="open = false">Quitter</VButton>
         </template>
-      </DialogAlert>
+      </VDialogAlert>
     `,
   }),
 }

@@ -1,11 +1,11 @@
 ﻿import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as MenuStories from './VMenu.stories'
+import * as VMenuStories from './VMenu.stories'
 
-<Meta of={MenuStories} />
+<Meta of={VMenuStories} />
 
 # Menu
 
-Menu déroulant d'actions (pattern ARIA menu) construit sur la **Popover API** et le **CSS Anchor
+VMenu déroulant d'actions (pattern ARIA menu) construit sur la **Popover API** et le **CSS Anchor
 Positioning** : le déclencheur invoque le panneau par `popovertarget` (ancre implicite,
 light dismiss natif, top-layer sans z-index), aucune dépendance externe. Le JavaScript se
 limite au roving focus, à la navigation clavier et à l'orchestration des sous-menus.
@@ -13,23 +13,23 @@ limite au roving focus, à la navigation clavier et à l'orchestration des sous-
 Le déclencheur est fourni par un slot scopé — poser `triggerProps` tel quel :
 
 ```vue
-<Menu>
+<VMenu>
   <template #trigger="{ triggerProps }">
-    <Button v-bind="triggerProps">Actions</Button>
+    <VButton v-bind="triggerProps">Actions</VButton>
   </template>
-  <MenuItem label="Renommer" icon-start="edit" @select="rename" />
-  <MenuSeparator />
-  <MenuItem label="Supprimer" icon-start="delete" danger @select="remove" />
-</Menu>
+  <VMenuItem label="Renommer" icon-start="edit" @select="rename" />
+  <VMenuSeparator />
+  <VMenuItem label="Supprimer" icon-start="delete" danger @select="remove" />
+</VMenu>
 ```
 
-<Canvas of={MenuStories.Default} />
+<Canvas of={VMenuStories.Default} />
 
-<Controls of={MenuStories.Default} />
+<Controls of={VMenuStories.Default} />
 
 ## Items
 
-`MenuItem` : `label` + `sublabel` (description secondaire), `icon-start` / `icon-end`
+`VMenuItem` : `label` + `sublabel` (description secondaire), `icon-start` / `icon-end`
 (nom d'icône ou rendu explicite `{ src }` / `{ component }`),
 et les slots `#default` / `#sublabel` / `#start` / `#end` qui priment. La sélection d'un
 item émet `select` et **ferme le menu** (focus rendu au déclencheur).
@@ -38,24 +38,24 @@ item émet `select` et **ferme le menu** (focus rendu au déclencheur).
 > Vos propres noms d'icônes, eux, viennent de la police ou de la bibliothèque que vous
 > branchez (voir le README).
 
-<Canvas of={MenuStories.SousLabels} />
+<Canvas of={VMenuStories.SousLabels} />
 
 `selected` marque l'item courant (`aria-current="true"`, fond accent) — pour les menus de
 tri ou de choix persistant :
 
-<Canvas of={MenuStories.Selection} />
+<Canvas of={VMenuStories.Selection} />
 
 ## Groupes et séparateurs
 
-`MenuGroup` (`role="group"` nommé par `aria-labelledby`, libellé non focusable) structure
-les longues listes ; `MenuSeparator` rend un `<hr>` (rôle implicite). Le roving focus
+`VMenuGroup` (`role="group"` nommé par `aria-labelledby`, libellé non focusable) structure
+les longues listes ; `VMenuSeparator` rend un `<hr>` (rôle implicite). Le roving focus
 traverse les groupes, les libellés sont sautés.
 
 L'en-tête de section occupe la hauteur d'une rangée, texte centré verticalement : le rythme
 vertical de la liste reste le même de bout en bout, quelle que soit la taille du menu et en
 densité compacte.
 
-<Canvas of={MenuStories.Groupes} />
+<Canvas of={VMenuStories.Groupes} />
 
 ## Items de navigation
 
@@ -63,11 +63,11 @@ densité compacte.
 attributs `target`/`rel` en fallthrough). Un lien `disabled` devient inerte (`href` retiré,
 `aria-disabled="true"`) et le roving focus le saute.
 
-<Canvas of={MenuStories.ItemsDeNavigation} />
+<Canvas of={VMenuStories.ItemsDeNavigation} />
 
 ## Sous-menus
 
-Le slot `#submenu` d'un `MenuItem` rend un panneau imbriqué **récursif** : l'item devient
+Le slot `#submenu` d'un `VMenuItem` rend un panneau imbriqué **récursif** : l'item devient
 l'invocateur du sous-panneau (un chevron remplace `icon-end` ; `href` et `select` sont
 ignorés). La pile de popovers native gère le light dismiss et la fermeture en cascade —
 ouvrir une branche ferme la branche sœur.
@@ -77,13 +77,13 @@ survol après un **délai d'intention** de 150 ms. Flèche gauche et Échap refe
 niveau** à la fois (focus rendu à l'item parent) ; sur le panneau racine, Échap ferme le
 menu.
 
-<Canvas of={MenuStories.SousMenus} />
+<Canvas of={VMenuStories.SousMenus} />
 
 Au survol, l'item survolé prend le focus (hover et roving focus restent synchronisés :
 une seule surbrillance à la fois) ; l'item parent d'un sous-menu ouvert garde son fond via
 `aria-expanded` :
 
-<Canvas of={MenuStories.SousMenusSurvol} />
+<Canvas of={VMenuStories.SousMenusSurvol} />
 
 ## Tailles
 
@@ -95,7 +95,7 @@ retrait, écart icône/libellé, typographie et icônes. `sm` et `md` partagent 
 depuis un bouton `lg` est ainsi à son échelle. La taille est posée sur le panneau **racine**
 et héritée par tous les sous-menus.
 
-<Canvas of={MenuStories.Tailles} />
+<Canvas of={VMenuStories.Tailles} />
 
 ## Largeur
 
@@ -108,13 +108,13 @@ par défaut. Une largeur plus étroite que le contenu tronque les libellés.
 `matchTrigger` prend le problème par l'autre bout : il remplace la largeur minimale par celle
 du **déclencheur**, si bien que le panneau ne peut jamais paraître rétréci sous le bouton qui
 l'ouvre, tout en restant libre de s'élargir pour son contenu (c'est le réglage du menu
-« lignes par page » du DataTable). Les deux props se cumulent — le plancher du déclencheur
+« lignes par page » du VDataTable). Les deux props se cumulent — le plancher du déclencheur
 l'emporte alors sur `width`. Un déclencheur plus large que la largeur maximale déborde
 volontairement ce plafond : la demande d'alignement prime. Le plancher est mesuré en CSS sur
 l'ancre du panneau, sans une ligne de JavaScript ; comme le reste de l'ancrage, il suppose un
 navigateur qui implémente le positionnement par ancre.
 
-<Canvas of={MenuStories.Largeur} />
+<Canvas of={VMenuStories.Largeur} />
 
 ## Placement
 
@@ -123,7 +123,7 @@ navigateur qui implémente le positionnement par ancre.
 (`position-try-fallbacks`) quand la place manque. Les sous-menus s'ouvrent en
 `right-start`. Les libellés sont bornés par la largeur maximale du panneau :
 
-<Canvas of={MenuStories.LibellesLongs} />
+<Canvas of={VMenuStories.LibellesLongs} />
 
 ## Accessibilité
 

@@ -2,7 +2,7 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
-import DialogAlert from './VDialogAlert.vue'
+import VDialogAlert from './VDialogAlert.vue'
 
 async function flush() {
   await nextTick()
@@ -13,13 +13,13 @@ async function flush() {
 async function openHarness(props: Record<string, unknown> = {}) {
   const open = ref(true)
   const Harness = defineComponent({
-    components: { DialogAlert },
+    components: { VDialogAlert },
     setup: () => ({ open, props }),
     template: `
-      <DialogAlert v-model:open="open" v-bind="props">
+      <VDialogAlert v-model:open="open" v-bind="props">
         Voulez-vous vraiment supprimer ?
         <template #footer><button>Confirmer</button></template>
-      </DialogAlert>
+      </VDialogAlert>
     `,
   })
   const utils = render(Harness)
@@ -28,7 +28,7 @@ async function openHarness(props: Record<string, unknown> = {}) {
   return { open, dialog, ...utils }
 }
 
-describe('DialogAlert', () => {
+describe('VDialogAlert', () => {
   it('pose role="alertdialog"', async () => {
     expect((await openHarness()).dialog.getAttribute('role')).toBe('alertdialog')
   })

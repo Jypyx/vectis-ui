@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Toggle from './VToggle.vue'
-import ToggleItem from './VToggleItem.vue'
+import VToggle from './VToggle.vue'
+import VToggleItem from './VToggleItem.vue'
 
 const meta = {
   title: 'Composants/Toggle',
-  component: Toggle,
+  component: VToggle,
   argTypes: {
     variant: { control: 'inline-radio', options: ['ghost', 'outline'] },
     tone: {
@@ -32,17 +32,17 @@ const meta = {
   },
   // v-model vivant : sans ref locale, cliquer un item ne changerait rien.
   render: (args) => ({
-    components: { Toggle, ToggleItem },
+    components: { VToggle, VToggleItem },
     setup: () => ({ args, alignement: ref('gauche') }),
     template: `
-      <Toggle v-bind="args" v-model="alignement">
-        <ToggleItem value="gauche" label="Gauche" />
-        <ToggleItem value="centre" label="Centre" />
-        <ToggleItem value="droite" label="Droite" />
-      </Toggle>
+      <VToggle v-bind="args" v-model="alignement">
+        <VToggleItem value="gauche" label="Gauche" />
+        <VToggleItem value="centre" label="Centre" />
+        <VToggleItem value="droite" label="Droite" />
+      </VToggle>
     `,
   }),
-} satisfies Meta<typeof Toggle>
+} satisfies Meta<typeof VToggle>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -84,7 +84,7 @@ export const Detache: Story = {
 
 export const Variantes: Story = {
   render: () => ({
-    components: { Toggle, ToggleItem },
+    components: { VToggle, VToggleItem },
     setup: () => ({
       variants: ['ghost', 'outline'],
       attachements: [true, false],
@@ -93,7 +93,7 @@ export const Variantes: Story = {
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
         <template v-for="v in variants" :key="v">
-          <Toggle
+          <VToggle
             v-for="a in attachements"
             :key="v + a"
             :variant="v"
@@ -101,10 +101,10 @@ export const Variantes: Story = {
             label="Alignement"
             v-model="selection"
           >
-            <ToggleItem value="gauche" label="Gauche" />
-            <ToggleItem value="centre" label="Centre" />
-            <ToggleItem value="droite" label="Droite" />
-          </Toggle>
+            <VToggleItem value="gauche" label="Gauche" />
+            <VToggleItem value="centre" label="Centre" />
+            <VToggleItem value="droite" label="Droite" />
+          </VToggle>
         </template>
       </div>
     `,
@@ -113,18 +113,18 @@ export const Variantes: Story = {
 
 export const Tones: Story = {
   render: () => ({
-    components: { Toggle, ToggleItem },
+    components: { VToggle, VToggleItem },
     setup: () => ({
       tones: ['accent', 'neutral', 'success', 'warning', 'danger'],
       selection: ref('centre'),
     }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <Toggle v-for="t in tones" :key="t" :tone="t" variant="outline" label="Alignement" v-model="selection">
-          <ToggleItem value="gauche" label="Gauche" />
-          <ToggleItem value="centre" label="Centre" />
-          <ToggleItem value="droite" label="Droite" />
-        </Toggle>
+        <VToggle v-for="t in tones" :key="t" :tone="t" variant="outline" label="Alignement" v-model="selection">
+          <VToggleItem value="gauche" label="Gauche" />
+          <VToggleItem value="centre" label="Centre" />
+          <VToggleItem value="droite" label="Droite" />
+        </VToggle>
       </div>
     `,
   }),
@@ -132,14 +132,14 @@ export const Tones: Story = {
 
 export const Multiple: Story = {
   render: (args) => ({
-    components: { Toggle, ToggleItem },
+    components: { VToggle, VToggleItem },
     setup: () => ({ args, format: ref(['gras']) }),
     template: `
-      <Toggle v-bind="args" v-model="format">
-        <ToggleItem value="gras" icon="format_bold" aria-label="Gras" />
-        <ToggleItem value="italique" icon="format_italic" aria-label="Italique" />
-        <ToggleItem value="souligne" icon="format_underlined" aria-label="Souligné" />
-      </Toggle>
+      <VToggle v-bind="args" v-model="format">
+        <VToggleItem value="gras" icon="format_bold" aria-label="Gras" />
+        <VToggleItem value="italique" icon="format_italic" aria-label="Italique" />
+        <VToggleItem value="souligne" icon="format_underlined" aria-label="Souligné" />
+      </VToggle>
     `,
   }),
   args: { multiple: true, label: 'Format' },
@@ -174,14 +174,14 @@ export const Mandatory: Story = {
 
 export const IconesRemplies: Story = {
   render: (args) => ({
-    components: { Toggle, ToggleItem },
+    components: { VToggle, VToggleItem },
     setup: () => ({ args, affichage: ref(['favoris']) }),
     template: `
-      <Toggle v-bind="args" v-model="affichage">
-        <ToggleItem value="favoris" icon="favorite" label="Favoris" />
-        <ToggleItem value="suivis" icon="star" label="Suivis" />
-        <ToggleItem value="enregistres" icon="bookmark" label="Enregistrés" />
-      </Toggle>
+      <VToggle v-bind="args" v-model="affichage">
+        <VToggleItem value="favoris" icon="favorite" label="Favoris" />
+        <VToggleItem value="suivis" icon="star" label="Suivis" />
+        <VToggleItem value="enregistres" icon="bookmark" label="Enregistrés" />
+      </VToggle>
     `,
   }),
   args: { multiple: true, selectedIconFilled: true, label: 'Collections' },
@@ -189,23 +189,23 @@ export const IconesRemplies: Story = {
 
 export const TaillesEtCompact: Story = {
   render: () => ({
-    components: { Toggle, ToggleItem },
+    components: { VToggle, VToggleItem },
     setup: () => ({
       sizes: ['xs', 'sm', 'md', 'lg', 'xl'],
       selection: ref('centre'),
     }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <Toggle v-for="s in sizes" :key="s" :size="s" label="Alignement" v-model="selection">
-          <ToggleItem value="gauche" label="Gauche" />
-          <ToggleItem value="centre" label="Centre" />
-          <ToggleItem value="droite" label="Droite" />
-        </Toggle>
-        <Toggle size="md" compact label="Alignement (compact)" v-model="selection">
-          <ToggleItem value="gauche" label="Gauche" />
-          <ToggleItem value="centre" label="Centre" />
-          <ToggleItem value="droite" label="Droite" />
-        </Toggle>
+        <VToggle v-for="s in sizes" :key="s" :size="s" label="Alignement" v-model="selection">
+          <VToggleItem value="gauche" label="Gauche" />
+          <VToggleItem value="centre" label="Centre" />
+          <VToggleItem value="droite" label="Droite" />
+        </VToggle>
+        <VToggle size="md" compact label="Alignement (compact)" v-model="selection">
+          <VToggleItem value="gauche" label="Gauche" />
+          <VToggleItem value="centre" label="Centre" />
+          <VToggleItem value="droite" label="Droite" />
+        </VToggle>
       </div>
     `,
   }),
@@ -213,20 +213,20 @@ export const TaillesEtCompact: Story = {
 
 export const Desactive: Story = {
   render: () => ({
-    components: { Toggle, ToggleItem },
+    components: { VToggle, VToggleItem },
     setup: () => ({ groupe: ref('gauche'), item: ref('gauche') }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <Toggle disabled label="Groupe désactivé" v-model="groupe">
-          <ToggleItem value="gauche" label="Gauche" />
-          <ToggleItem value="centre" label="Centre" />
-          <ToggleItem value="droite" label="Droite" />
-        </Toggle>
-        <Toggle label="Item désactivé" v-model="item">
-          <ToggleItem value="gauche" label="Gauche" />
-          <ToggleItem value="centre" label="Centre" disabled />
-          <ToggleItem value="droite" label="Droite" />
-        </Toggle>
+        <VToggle disabled label="Groupe désactivé" v-model="groupe">
+          <VToggleItem value="gauche" label="Gauche" />
+          <VToggleItem value="centre" label="Centre" />
+          <VToggleItem value="droite" label="Droite" />
+        </VToggle>
+        <VToggle label="Item désactivé" v-model="item">
+          <VToggleItem value="gauche" label="Gauche" />
+          <VToggleItem value="centre" label="Centre" disabled />
+          <VToggleItem value="droite" label="Droite" />
+        </VToggle>
       </div>
     `,
   }),
@@ -234,20 +234,20 @@ export const Desactive: Story = {
 
 export const Vertical: Story = {
   render: () => ({
-    components: { Toggle, ToggleItem },
+    components: { VToggle, VToggleItem },
     setup: () => ({ selection: ref('centre') }),
     template: `
       <div style="display: flex; gap: 32px; align-items: start">
-        <Toggle orientation="vertical" label="Alignement" v-model="selection">
-          <ToggleItem value="gauche" label="Gauche" />
-          <ToggleItem value="centre" label="Centre" />
-          <ToggleItem value="droite" label="Droite" />
-        </Toggle>
-        <Toggle orientation="vertical" :attached="false" variant="outline" label="Alignement" v-model="selection">
-          <ToggleItem value="gauche" label="Gauche" />
-          <ToggleItem value="centre" label="Centre" />
-          <ToggleItem value="droite" label="Droite" />
-        </Toggle>
+        <VToggle orientation="vertical" label="Alignement" v-model="selection">
+          <VToggleItem value="gauche" label="Gauche" />
+          <VToggleItem value="centre" label="Centre" />
+          <VToggleItem value="droite" label="Droite" />
+        </VToggle>
+        <VToggle orientation="vertical" :attached="false" variant="outline" label="Alignement" v-model="selection">
+          <VToggleItem value="gauche" label="Gauche" />
+          <VToggleItem value="centre" label="Centre" />
+          <VToggleItem value="droite" label="Droite" />
+        </VToggle>
       </div>
     `,
   }),
@@ -255,15 +255,15 @@ export const Vertical: Story = {
 
 export const CasLimites: Story = {
   render: () => ({
-    components: { Toggle, ToggleItem },
+    components: { VToggle, VToggleItem },
     setup: () => ({ selection: ref('long') }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start; max-width: 480px">
-        <Toggle label="Périodes" v-model="selection">
-          <ToggleItem value="court" label="Jour" />
-          <ToggleItem value="long" label="Une période de temps particulièrement longue" />
-          <ToggleItem value="autre" label="Semaine glissante personnalisée" />
-        </Toggle>
+        <VToggle label="Périodes" v-model="selection">
+          <VToggleItem value="court" label="Jour" />
+          <VToggleItem value="long" label="Une période de temps particulièrement longue" />
+          <VToggleItem value="autre" label="Semaine glissante personnalisée" />
+        </VToggle>
       </div>
     `,
   }),

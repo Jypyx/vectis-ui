@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Dialog from './VDialog.vue'
+import VDialog from './VDialog.vue'
 
 /**
- * Variante d'alerte : même design que <Dialog>, mais `role="alertdialog"` —
+ * Variante d'alerte : même design que <VDialog>, mais `role="alertdialog"` —
  * une modale qui exige une action EXPLICITE de l'utilisateur. Un simple wrapper
- * de <Dialog> suffit : il verrouille la sémantique et coupe tout light dismiss.
+ * de <VDialog> suffit : il verrouille la sémantique et coupe tout light dismiss.
  * Pas de croix (`closable=false`), ni clic backdrop, NI Échap (`closedby="none"`
  * dérivé de closeOnBackdrop/closeOnEscape à false) : seuls les boutons du footer
  * ferment la modale.
@@ -38,13 +38,13 @@ defineSlots<{
   header?(): unknown
   /** Actions du footer — obligatoires pour fermer l'alerte. */
   footer?(): unknown
-  /** Déclencheur : `v-bind="triggerProps"` sur un <Button>/<button>. */
+  /** Déclencheur : `v-bind="triggerProps"` sur un <VButton>/<button>. */
   trigger?(props: { triggerProps: TriggerProps }): unknown
 }>()
 </script>
 
 <template>
-  <Dialog
+  <VDialog
     v-model:open="open"
     role="alertdialog"
     :title="title"
@@ -64,5 +64,5 @@ defineSlots<{
     <template v-if="$slots.footer" #footer>
       <slot name="footer" />
     </template>
-  </Dialog>
+  </VDialog>
 </template>

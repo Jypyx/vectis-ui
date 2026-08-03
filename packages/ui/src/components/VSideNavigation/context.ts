@@ -3,7 +3,7 @@ import type { InjectionKey } from 'vue'
 import type { IconSource } from '../VIcon/types'
 
 /**
- * Contrat niveau→niveau de la SideNavigation. Chaque `SideNavigationItem`
+ * Contrat niveau→niveau de la VSideNavigation. Chaque `VSideNavigationItem`
  * injecte le contexte de SON niveau et en fournit un nouveau à ses sous-items :
  * c'est ce qui rend l'exclusivité locale à un niveau plutôt que globale.
  *
@@ -12,7 +12,7 @@ import type { IconSource } from '../VIcon/types'
  *   `v-control` n'est posée que sur le <nav>) — les y mettre serait une
  *   seconde incarnation de la même information ;
  * - la PROFONDEUR, portée par la cascade (compteur CSS à deux noms alternés,
- *   cf. SideNavigationItem.vue) : ni registre, ni style inline.
+ *   cf. VSideNavigationItem.vue) : ni registre, ni style inline.
  */
 export interface SideNavigationContext {
   /**

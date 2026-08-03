@@ -1,27 +1,27 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as ToggleStories from './VToggle.stories'
+import * as VToggleStories from './VToggle.stories'
 
-<Meta of={ToggleStories} />
+<Meta of={VToggleStories} />
 
 # Toggle
 
-Groupe de boutons sélectionnables pilotés par un **seul v-model**. API composée : `Toggle`
-englobe des `ToggleItem`, et chaque item est un `Button` — hover, focus, désactivation et
+Groupe de boutons sélectionnables pilotés par un **seul v-model**. API composée : `VToggle`
+englobe des `VToggleItem`, et chaque item est un `VButton` — hover, focus, désactivation et
 `prefers-reduced-motion` viennent de lui, aucune règle d'état n'est redéfinie. L'item
 sélectionné est toujours rendu en `solid` (au `tone` du groupe), les autres en `ghost` ou
 `outline`.
 
-<Canvas of={ToggleStories.Default} />
+<Canvas of={VToggleStories.Default} />
 
-<Controls of={ToggleStories.Default} />
+<Controls of={VToggleStories.Default} />
 
 ## Rattaché ou détaché
 
-Par défaut les items sont **rattachés** dans un `ButtonGroup` (contrôle segmenté, bordures
+Par défaut les items sont **rattachés** dans un `VButtonGroup` (contrôle segmenté, bordures
 fusionnées). `attached: false` les sépare par une gouttière, chaque bouton retrouvant ses
 coins arrondis.
 
-<Canvas of={ToggleStories.Variantes} />
+<Canvas of={VToggleStories.Variantes} />
 
 ## Sélection
 
@@ -34,16 +34,16 @@ coins arrondis.
   la désélection : aucune sélection initiale n'est forcée — poser la valeur de départ dans le
   v-model.
 
-<Canvas of={ToggleStories.Multiple} />
+<Canvas of={VToggleStories.Multiple} />
 
-<Canvas of={ToggleStories.Mandatory} />
+<Canvas of={VToggleStories.Mandatory} />
 
 ## Tones
 
 Le `tone` colore l'item sélectionné ; les items non sélectionnés restent neutres, comme les
-pages inactives d'une Pagination.
+pages inactives d'une VPagination.
 
-<Canvas of={ToggleStories.Tones} />
+<Canvas of={VToggleStories.Tones} />
 
 ## Icônes
 
@@ -52,21 +52,21 @@ réduit à un carré (poser alors un `aria-label`). Avec `selectedIconFilled` su
 l'icône de l'item sélectionné passe en variante **remplie** (axe FILL de la police) — sans
 effet sur une icône fournie par URL.
 
-<Canvas of={ToggleStories.IconesRemplies} />
+<Canvas of={VToggleStories.IconesRemplies} />
 
 ## Tailles
 
 L'échelle unifiée `xs`–`xl` et `compact` (hauteur réduite de 4px) se posent sur le groupe et
 se propagent à tous les items.
 
-<Canvas of={ToggleStories.TaillesEtCompact} />
+<Canvas of={VToggleStories.TaillesEtCompact} />
 
 ## Orientation
 
 `orientation="vertical"` empile les items — rattachés (couture horizontale) ou détachés
 (largeurs égalisées).
 
-<Canvas of={ToggleStories.Vertical} />
+<Canvas of={VToggleStories.Vertical} />
 
 ## Désactivation
 
@@ -74,7 +74,7 @@ se propagent à tous les items.
 lui. Un item désactivé est un `<button disabled>` natif : ni cliquable, ni atteignable au
 clavier.
 
-<Canvas of={ToggleStories.Desactive} />
+<Canvas of={VToggleStories.Desactive} />
 
 ## Accessibilité
 
@@ -87,4 +87,4 @@ clavier.
   basculerait des valeurs involontairement. Les items désactivés sont sautés.
 - En icône seule, poser un `aria-label` sur l'item (il traverse jusqu'au bouton rendu).
 
-<Canvas of={ToggleStories.Clavier} />
+<Canvas of={VToggleStories.Clavier} />

@@ -2,16 +2,16 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Avatar from '../VAvatar/VAvatar.vue'
-import Button from '../VButton/VButton.vue'
-import Chip from '../VChip/VChip.vue'
-import Input from '../VInput/VInput.vue'
-import Typography from '../VTypography/VTypography.vue'
-import SkeletonLoader from './VSkeletonLoader.vue'
+import VAvatar from '../VAvatar/VAvatar.vue'
+import VButton from '../VButton/VButton.vue'
+import VChip from '../VChip/VChip.vue'
+import VInput from '../VInput/VInput.vue'
+import VTypography from '../VTypography/VTypography.vue'
+import VSkeletonLoader from './VSkeletonLoader.vue'
 
 const meta = {
   title: 'Composants/SkeletonLoader',
-  component: SkeletonLoader,
+  component: VSkeletonLoader,
   argTypes: {
     shape: { control: 'select', options: ['text', 'control', 'pill', 'circle', 'surface'] },
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
@@ -28,13 +28,13 @@ const meta = {
     announce: false,
   },
   render: (args) => ({
-    components: { SkeletonLoader },
+    components: { VSkeletonLoader },
     setup: () => ({ args }),
     // une silhouette a besoin d'une largeur pour se voir : le composant n'en a
-    // pas d'intrinsèque, c'est au conteneur de la donner (idiome ProgressLinear)
-    template: '<div style="width: 320px"><SkeletonLoader v-bind="args" /></div>',
+    // pas d'intrinsèque, c'est au conteneur de la donner (idiome VProgressLinear)
+    template: '<div style="width: 320px"><VSkeletonLoader v-bind="args" /></div>',
   }),
-} satisfies Meta<typeof SkeletonLoader>
+} satisfies Meta<typeof VSkeletonLoader>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -71,7 +71,7 @@ export const Default: Story = {
  */
 export const Formes: Story = {
   render: () => ({
-    components: { SkeletonLoader },
+    components: { VSkeletonLoader },
     setup: () => ({
       formes: ['text', 'control', 'pill', 'circle', 'surface'] as const,
     }),
@@ -79,7 +79,7 @@ export const Formes: Story = {
       <div style="display: grid; gap: 20px; width: 320px">
         <div v-for="forme in formes" :key="forme" style="display: grid; gap: 4px">
           <small style="color: var(--vectis-color-text-muted)">{{ forme }}</small>
-          <SkeletonLoader :shape="forme" />
+          <VSkeletonLoader :shape="forme" />
         </div>
       </div>
     `,
@@ -105,13 +105,13 @@ export const Formes: Story = {
  */
 export const Animations: Story = {
   render: () => ({
-    components: { SkeletonLoader },
+    components: { VSkeletonLoader },
     setup: () => ({ animations: ['wave', 'pulse', 'none'] as const }),
     template: `
       <div style="display: grid; gap: 20px; width: 360px">
         <div v-for="a in animations" :key="a" style="display: grid; gap: 4px">
           <small style="color: var(--vectis-color-text-muted)">{{ a }}</small>
-          <SkeletonLoader shape="surface" :animation="a" />
+          <VSkeletonLoader shape="surface" :animation="a" />
         </div>
       </div>
     `,
@@ -134,25 +134,25 @@ export const Animations: Story = {
 
 /**
  * `size` et `compact` reprennent l'échelle des contrôles du design system
- * (24/32/40/48/56px) : un skeleton `md` fait exactement la hauteur d'un Button
+ * (24/32/40/48/56px) : un skeleton `md` fait exactement la hauteur d'un VButton
  * `md`. Sans effet sur `text` et `surface`, qui ont leur propre règle.
  */
 export const Tailles: Story = {
   render: () => ({
-    components: { SkeletonLoader },
+    components: { VSkeletonLoader },
     setup: () => ({ tailles: ['xs', 'sm', 'md', 'lg', 'xl'] as const }),
     template: `
       <div style="display: grid; gap: 20px">
         <div style="display: flex; gap: 12px; align-items: flex-start">
-          <SkeletonLoader v-for="t in tailles" :key="t" shape="circle" :size="t" />
+          <VSkeletonLoader v-for="t in tailles" :key="t" shape="circle" :size="t" />
         </div>
         <div style="display: grid; gap: 8px; width: 240px">
-          <SkeletonLoader v-for="t in tailles" :key="t" shape="control" :size="t" />
+          <VSkeletonLoader v-for="t in tailles" :key="t" shape="control" :size="t" />
         </div>
         <div style="display: grid; gap: 8px; width: 240px">
           <!-- compact : -4px de hauteur, comme partout ailleurs dans le DS -->
-          <SkeletonLoader shape="control" size="md" />
-          <SkeletonLoader shape="control" size="md" compact />
+          <VSkeletonLoader shape="control" size="md" />
+          <VSkeletonLoader shape="control" size="md" compact />
         </div>
       </div>
     `,
@@ -167,14 +167,14 @@ export const Tailles: Story = {
  */
 export const Paragraphe: Story = {
   render: () => ({
-    components: { SkeletonLoader },
+    components: { VSkeletonLoader },
     template: `
       <div style="display: grid; gap: 24px; width: 360px">
         <div style="font-size: var(--vectis-text-body-sm-size); line-height: var(--vectis-text-body-sm-leading)">
-          <SkeletonLoader :lines="5" />
+          <VSkeletonLoader :lines="5" />
         </div>
         <div style="font-size: var(--vectis-text-heading-2-size); line-height: var(--vectis-text-heading-2-leading)">
-          <SkeletonLoader :lines="2" />
+          <VSkeletonLoader :lines="2" />
         </div>
       </div>
     `,
@@ -188,37 +188,37 @@ export const Paragraphe: Story = {
  */
 export const SilhouettesDuDesignSystem: Story = {
   render: () => ({
-    components: { SkeletonLoader, Avatar, Button, Chip, Input, Typography },
+    components: { VSkeletonLoader, VAvatar, VButton, VChip, VInput, VTypography },
     template: `
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px 32px; width: 560px; align-items: start">
-        <Typography variant="overline" tone="muted" as="p">Composant</Typography>
-        <Typography variant="overline" tone="muted" as="p">Skeleton</Typography>
+        <VTypography variant="overline" tone="muted" as="p">Composant</VTypography>
+        <VTypography variant="overline" tone="muted" as="p">Skeleton</VTypography>
 
-        <Button size="md">Enregistrer</Button>
-        <SkeletonLoader shape="control" size="md" width="128" />
+        <VButton size="md">Enregistrer</VButton>
+        <VSkeletonLoader shape="control" size="md" width="128" />
 
-        <Avatar size="lg" name="Ada Lovelace" />
-        <SkeletonLoader shape="circle" size="lg" />
+        <VAvatar size="lg" name="Ada Lovelace" />
+        <VSkeletonLoader shape="circle" size="lg" />
 
-        <Chip size="xs">Filtre actif</Chip>
-        <SkeletonLoader shape="pill" size="xs" width="88" />
+        <VChip size="xs">Filtre actif</VChip>
+        <VSkeletonLoader shape="pill" size="xs" width="88" />
 
-        <Input size="md" label="Nom" model-value="Ada Lovelace" />
+        <VInput size="md" label="Nom" model-value="Ada Lovelace" />
         <!-- l'étiquette est une ligne de texte, le champ une silhouette de contrôle -->
         <div style="display: grid; gap: 4px">
-          <SkeletonLoader width="40%" />
-          <SkeletonLoader shape="control" size="md" />
+          <VSkeletonLoader width="40%" />
+          <VSkeletonLoader shape="control" size="md" />
         </div>
 
         <div style="border: 1px solid var(--vectis-color-border); border-radius: var(--vectis-radius-surface); padding: 16px; display: grid; gap: 12px">
-          <Typography variant="heading-4">Analyse des ventes</Typography>
-          <Typography variant="body-sm" tone="muted">
+          <VTypography variant="heading-4">Analyse des ventes</VTypography>
+          <VTypography variant="body-sm" tone="muted">
             Le trimestre s'achève sur une progression de 12 % du chiffre d'affaires.
-          </Typography>
+          </VTypography>
         </div>
         <div style="border: 1px solid var(--vectis-color-border); border-radius: var(--vectis-radius-surface); padding: 16px; display: grid; gap: 12px">
-          <SkeletonLoader shape="control" size="sm" width="60%" />
-          <SkeletonLoader :lines="3" />
+          <VSkeletonLoader shape="control" size="sm" width="60%" />
+          <VSkeletonLoader :lines="3" />
         </div>
       </div>
     `,
@@ -232,24 +232,24 @@ export const SilhouettesDuDesignSystem: Story = {
  */
 export const RemplacementProgressif: Story = {
   render: () => ({
-    components: { SkeletonLoader, Button, Typography },
+    components: { VSkeletonLoader, VButton, VTypography },
     setup: () => ({ pending: ref(true) }),
     template: `
       <div style="display: grid; gap: 16px; width: 360px">
-        <Button size="sm" variant="outline" @click="pending = !pending">
+        <VButton size="sm" variant="outline" @click="pending = !pending">
           {{ pending ? 'Charger' : 'Recharger' }}
-        </Button>
+        </VButton>
         <div :aria-busy="pending || undefined" style="display: grid; gap: 8px">
           <template v-if="pending">
-            <SkeletonLoader shape="control" size="sm" width="55%" />
-            <SkeletonLoader :lines="3" />
+            <VSkeletonLoader shape="control" size="sm" width="55%" />
+            <VSkeletonLoader :lines="3" />
           </template>
           <template v-else>
-            <Typography variant="heading-4">Analyse des ventes</Typography>
-            <Typography variant="body-sm" tone="muted">
+            <VTypography variant="heading-4">Analyse des ventes</VTypography>
+            <VTypography variant="body-sm" tone="muted">
               Le trimestre s'achève sur une progression de 12 % du chiffre d'affaires,
               portée par les abonnements annuels.
-            </Typography>
+            </VTypography>
           </template>
         </div>
       </div>
@@ -271,13 +271,13 @@ export const RemplacementProgressif: Story = {
  */
 export const CouleurCustom: Story = {
   render: () => ({
-    components: { SkeletonLoader },
+    components: { VSkeletonLoader },
     template: `
       <div style="display: grid; gap: 20px; width: 360px">
-        <SkeletonLoader shape="surface" color="oklch(55% 0.14 265)" />
+        <VSkeletonLoader shape="surface" color="oklch(55% 0.14 265)" />
         <div style="background: var(--vectis-color-surface-inverse); border-radius: var(--vectis-radius-surface); padding: 16px; display: grid; gap: 8px">
-          <SkeletonLoader shape="control" size="sm" color="oklch(38% 0.01 260)" width="60%" />
-          <SkeletonLoader :lines="3" color="oklch(38% 0.01 260)" />
+          <VSkeletonLoader shape="control" size="sm" color="oklch(38% 0.01 260)" width="60%" />
+          <VSkeletonLoader :lines="3" color="oklch(38% 0.01 260)" />
         </div>
       </div>
     `,
@@ -291,12 +291,12 @@ export const CouleurCustom: Story = {
  */
 export const Annonce: Story = {
   render: () => ({
-    components: { SkeletonLoader },
+    components: { VSkeletonLoader },
     template: `
       <div style="display: grid; gap: 8px; width: 320px">
         <!-- une seule annonce, située ; les suivantes sont muettes -->
-        <SkeletonLoader shape="control" size="sm" label="Chargement des résultats…" />
-        <SkeletonLoader v-for="n in 11" :key="n" shape="control" size="sm" />
+        <VSkeletonLoader shape="control" size="sm" label="Chargement des résultats…" />
+        <VSkeletonLoader v-for="n in 11" :key="n" shape="control" size="sm" />
       </div>
     `,
   }),
@@ -311,37 +311,37 @@ export const Annonce: Story = {
  */
 export const CasLimites: Story = {
   render: () => ({
-    components: { SkeletonLoader },
+    components: { VSkeletonLoader },
     template: `
       <div style="display: grid; gap: 24px">
         <div style="display: grid; gap: 4px">
           <small style="color: var(--vectis-color-text-muted)">lines = 0 → une ligne quand même</small>
-          <div style="width: 200px"><SkeletonLoader :lines="0" /></div>
+          <div style="width: 200px"><VSkeletonLoader :lines="0" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
           <small style="color: var(--vectis-color-text-muted)">12 lignes dans 120px de haut (compression)</small>
-          <div style="width: 200px; height: 120px"><SkeletonLoader :lines="12" /></div>
+          <div style="width: 200px; height: 120px"><VSkeletonLoader :lines="12" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
           <small style="color: var(--vectis-color-text-muted)">surface dans un parent de hauteur définie : elle la prend</small>
-          <div style="width: 200px; height: 40px"><SkeletonLoader shape="surface" /></div>
+          <div style="width: 200px; height: 40px"><VSkeletonLoader shape="surface" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
           <small style="color: var(--vectis-color-text-muted)">cercle dans un parent très large : il reste rond</small>
-          <div style="width: 480px"><SkeletonLoader shape="circle" size="xl" /></div>
+          <div style="width: 480px"><VSkeletonLoader shape="circle" size="xl" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
           <small style="color: var(--vectis-color-text-muted)">line-height serré : la gouttière ne devient pas négative</small>
-          <div style="width: 200px; line-height: 0.5"><SkeletonLoader :lines="3" /></div>
+          <div style="width: 200px; line-height: 0.5"><VSkeletonLoader :lines="3" /></div>
         </div>
 
         <div style="display: grid; gap: 4px">
           <small style="color: var(--vectis-color-text-muted)">hauteur explicite : elle prime sur shape et size</small>
-          <div style="width: 200px"><SkeletonLoader shape="control" size="xs" height="72" /></div>
+          <div style="width: 200px"><VSkeletonLoader shape="control" size="xs" height="72" /></div>
         </div>
       </div>
     `,

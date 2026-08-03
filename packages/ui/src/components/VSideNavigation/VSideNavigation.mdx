@@ -1,13 +1,13 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as SideNavigationStories from './VSideNavigation.stories'
+import * as VSideNavigationStories from './VSideNavigation.stories'
 
-<Meta of={SideNavigationStories} />
+<Meta of={VSideNavigationStories} />
 
 # SideNavigation
 
 Navigation verticale d'application : une arborescence de liens **rendue inline** dans une barre
 latérale, repliable niveau par niveau. Elle se compose de sous-composants —
-`SideNavigationItem`, `SideNavigationGroup`, `SideNavigationSeparator` — plutôt que d'un tableau
+`VSideNavigationItem`, `VSideNavigationGroup`, `VSideNavigationSeparator` — plutôt que d'un tableau
 d'items passé en prop : les libellés restent des slots, donc composables.
 
 Le repli est **natif** : chaque branche est un `<details>`/`<summary>`, ce qui donne l'état,
@@ -16,9 +16,9 @@ JavaScript d'état. La structure est celle d'une liste (`<nav>` + `<ul>`/`<li>` 
 comptage des éléments et la relation d'imbrication annoncés par les lecteurs d'écran _sont_
 l'information de hiérarchie.
 
-<Canvas of={SideNavigationStories.Default} />
+<Canvas of={VSideNavigationStories.Default} />
 
-<Controls of={SideNavigationStories.Default} />
+<Controls of={VSideNavigationStories.Default} />
 
 ## Anatomie d'un item
 
@@ -28,19 +28,19 @@ libellé (nom d'icône **ou** rendu explicite `{ src }` / `{ component }`, comme
 dans le DS ; le slot `#start` prime pour un contenu libre), et le slot `#end` accueille ce qu'on
 veut à droite — compteur, pastille, action.
 
-<Canvas of={SideNavigationStories.SousLabels} />
+<Canvas of={VSideNavigationStories.SousLabels} />
 
 Un item **sans** sous-items est soit un lien (`href`, rendu en `<a>`), soit un bouton qui émet
 `select`. Les attributs du consommateur (`target`, `rel`, `data-*`…) atterrissent sur le contrôle,
 jamais sur l'élément de liste.
 
-<Canvas of={SideNavigationStories.Liens} />
+<Canvas of={VSideNavigationStories.Liens} />
 
 ## Sous-items
 
 Le slot `#items` transforme l'item en branche : un chevron apparaît à droite, la rangée devient
 le déclencheur, et le clic déplie les sous-items. C'est récursif **sans limite de profondeur** —
-un sous-item est un `SideNavigationItem` comme un autre, qui peut à son tour porter un `#items`.
+un sous-item est un `VSideNavigationItem` comme un autre, qui peut à son tour porter un `#items`.
 
 Le retrait d'un niveau vaut **exactement la place que tient une icône de début** — icône plus
 gouttière : le libellé d'un sous-item tombe donc sur la même verticale que celui de sa branche
@@ -50,13 +50,13 @@ surbrillance de survol et celle de la page courante, elles, restent pleine large
 `defaultOpen` ouvre une branche au premier rendu ; `v-model:open` la pilote depuis le
 consommateur (pour déplier la branche qui contient la route courante, par exemple).
 
-<Canvas of={SideNavigationStories.SousItemsProfonds} />
+<Canvas of={VSideNavigationStories.SousItemsProfonds} />
 
 `exclusive` limite l'ouverture à **une branche par niveau** : ouvrir une section referme sa sœur.
 Le mécanisme est l'attribut natif `<details name>`, appliqué niveau par niveau — une branche
 profonde ne referme jamais une branche d'un autre niveau.
 
-<Canvas of={SideNavigationStories.Exclusif} />
+<Canvas of={VSideNavigationStories.Exclusif} />
 
 ## Contenu à droite
 
@@ -71,12 +71,12 @@ branche — mais le sous-arbre d'un `<summary>` sert de nom accessible et peut �
 certains lecteurs d'écran : le bouton n'est alors plus annoncé. Une action sur une section
 repliable se pose donc à côté de la navigation, pas dedans.
 
-<Canvas of={SideNavigationStories.ContenuDeFin} />
+<Canvas of={VSideNavigationStories.ContenuDeFin} />
 
 ## Groupes et séparateurs
 
-`SideNavigationGroup` coiffe une série d'items d'un intitulé de section, qui nomme la liste
-qu'il introduit. `SideNavigationSeparator` trace un filet entre deux blocs. Ni l'un ni l'autre ne
+`VSideNavigationGroup` coiffe une série d'items d'un intitulé de section, qui nomme la liste
+qu'il introduit. `VSideNavigationSeparator` trace un filet entre deux blocs. Ni l'un ni l'autre ne
 comptent comme un niveau de hiérarchie : les items qu'ils encadrent gardent le retrait de leur
 niveau réel.
 
@@ -94,10 +94,10 @@ sans être dépliée.
 
 `size` vaut `sm` (32px) ou `md` (40px, défaut) et vient de l'échelle de tailles commune du DS ;
 `compact` retire 4px de hauteur. **`compact` n'est pas un mode « rail d'icônes replié »** : c'est
-la même densité que celle de `Button` ou `Input`. La taille est posée une seule fois sur la
+la même densité que celle de `VButton` ou `VInput`. La taille est posée une seule fois sur la
 racine et descend à tous les niveaux, sous-listes comprises.
 
-<Canvas of={SideNavigationStories.Tailles} />
+<Canvas of={VSideNavigationStories.Tailles} />
 
 ## Icônes d'ouverture
 
@@ -106,7 +106,7 @@ la racine**, personnalisent l'iconographie de toutes les branches ; fournir `col
 bascule en mode permutation (les deux icônes sont rendues et échangées en CSS), utile pour un
 couple non directionnel comme « plus / moins ».
 
-<Canvas of={SideNavigationStories.IconesPersonnalisees} />
+<Canvas of={VSideNavigationStories.IconesPersonnalisees} />
 
 ## Item désactivé
 
@@ -114,14 +114,14 @@ couple non directionnel comme « plus / moins ».
 passe en nuances de gris par les tokens, jamais par de l'opacité. Il sort aussi du parcours des
 flèches.
 
-<Canvas of={SideNavigationStories.ItemDesactive} />
+<Canvas of={VSideNavigationStories.ItemDesactive} />
 
 ## Textes longs
 
 Libellé et sous-libellé sont tronqués par ellipse : la barre garde sa largeur quelle que soit la
 longueur des intitulés.
 
-<Canvas of={SideNavigationStories.TextesLongs} />
+<Canvas of={VSideNavigationStories.TextesLongs} />
 
 ## Accessibilité
 

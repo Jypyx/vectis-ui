@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import Input from '../VInput/VInput.vue'
+import VInput from '../VInput/VInput.vue'
 
 import { isDev } from '../../utils/env'
 import { useMessages } from '../../i18n/state'
@@ -140,10 +140,10 @@ const endValueText = computed(() => (props.labels ? labelTextAt(endValue.value) 
 
 if (isDev) {
   if ((props.ticks || props.labels) && stepCount.value > 50)
-    console.warn(`[Slider] ${stepCount.value} pas — ticks/labels non rendus au-delà de 50.`)
+    console.warn(`[VSlider] ${stepCount.value} pas — ticks/labels non rendus au-delà de 50.`)
   if (props.labels && props.labels.length !== stepCount.value + 1)
     console.warn(
-      `[Slider] ${props.labels.length} labels pour ${stepCount.value + 1} pas — un libellé par pas attendu.`,
+      `[VSlider] ${props.labels.length} labels pour ${stepCount.value + 1} pas — un libellé par pas attendu.`,
     )
 }
 
@@ -205,7 +205,7 @@ function resyncFields() {
       '--end-fraction': String(frac(endValue)),
     }"
   >
-    <Input
+    <VInput
       v-if="inputs && range"
       v-model="startFieldText"
       class="v-slider-field v-slider-field-start"
@@ -281,10 +281,10 @@ function resyncFields() {
         :style="{ '--fill-fraction': String(labelFraction(i)) }"
       >
         <template v-if="typeof item === 'string'">{{ item }}</template>
-        <Icon v-else v-bind="iconProps(item.icon)" :label="item.label" />
+        <VIcon v-else v-bind="iconProps(item.icon)" :label="item.label" />
       </span>
     </div>
-    <Input
+    <VInput
       v-if="inputs"
       v-model="endFieldText"
       class="v-slider-field v-slider-field-end"
@@ -466,7 +466,7 @@ function resyncFields() {
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* --- Tooltip de valeur : apparence du Tooltip, mais position par fraction —
+  /* --- VTooltip de valeur : apparence du VTooltip, mais position par fraction —
      le thumb natif est un pseudo-élément, non ancrable en anchor positioning. */
   .v-slider-tooltip {
     position: absolute;
@@ -616,7 +616,7 @@ function resyncFields() {
     justify-content: flex-start;
   }
 
-  /* --- Disabled : nuances de gris (tokens Checkbox/Switch), pas d'opacité -- */
+  /* --- Disabled : nuances de gris (tokens VCheckbox/VSwitch), pas d'opacité -- */
   .v-slider[data-disabled] {
     cursor: not-allowed;
   }
@@ -633,7 +633,7 @@ function resyncFields() {
     background: var(--vectis-color-text-subtle);
   }
 
-  /* Sur le fill gris, le tick repasse en clair (la « coche grise » de Checkbox). */
+  /* Sur le fill gris, le tick repasse en clair (la « coche grise » de VCheckbox). */
   .v-slider[data-disabled] .v-slider-tick[data-filled] {
     background: var(--vectis-color-surface-muted);
   }

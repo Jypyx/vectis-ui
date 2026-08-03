@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import IconButton from '../VIconButton/VIconButton.vue'
-import Menu from '../VMenu/VMenu.vue'
-import MenuItem from '../VMenu/VMenuItem.vue'
+import VIconButton from '../VIconButton/VIconButton.vue'
+import VMenu from '../VMenu/VMenu.vue'
+import VMenuItem from '../VMenu/VMenuItem.vue'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
@@ -14,11 +14,11 @@ import { useMessages } from '../../i18n/state'
 /**
  * Fil d'Ariane : <nav> + liste ordonnée, piloté par la prop `items` (pure
  * dérivation de données, aucune API navigateur — SSR-safe). Les séparateurs
- * sont des Icon décoratifs (aria-hidden), le premier est masqué en CSS.
+ * sont des VIcon décoratifs (aria-hidden), le premier est masqué en CSS.
  * L'item actif est dérivé de `currentPath` (aria-current="page" sur l'item
  * au href correspondant, qui reste un lien cliquable — pattern ARIA APG).
  * Au-delà de `maxItems`, les items intermédiaires sont repliés dans un
- * Menu ouvert par un bouton « … ».
+ * VMenu ouvert par un bouton « … ».
  */
 export interface BreadcrumbItem {
   /** Libellé du segment. */
@@ -90,30 +90,30 @@ const visibleItems = computed(() =>
       <template v-for="(item, index) in visibleItems" :key="item.href">
         <!-- le menu « … » s'insère entre le 1er item et l'avant-dernier -->
         <li v-if="truncated && index === 1" class="v-breadcrumb-item v-breadcrumb-ellipsis">
-          <Icon class="v-breadcrumb-separator" v-bind="iconProps(separator)" />
-          <Menu compact>
+          <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separator)" />
+          <VMenu compact>
             <template #trigger="{ triggerProps }">
-              <IconButton size="sm" compact :label="resolvedEllipsisLabel" v-bind="triggerProps">
-                <Icon name="more_horiz" />
-              </IconButton>
+              <VIconButton size="sm" compact :label="resolvedEllipsisLabel" v-bind="triggerProps">
+                <VIcon name="more_horiz" />
+              </VIconButton>
             </template>
-            <MenuItem
+            <VMenuItem
               v-for="hidden in hiddenItems"
               :key="hidden.href"
               :href="hidden.href"
               :label="hidden.label"
               :icon-start="hidden.iconStart"
             />
-          </Menu>
+          </VMenu>
         </li>
         <li class="v-breadcrumb-item">
-          <Icon class="v-breadcrumb-separator" v-bind="iconProps(separator)" />
+          <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separator)" />
           <a
             class="v-breadcrumb-link"
             :href="item.href"
             :aria-current="isCurrent(item) ? 'page' : undefined"
           >
-            <Icon v-if="item.iconStart" v-bind="iconProps(item.iconStart)" />
+            <VIcon v-if="item.iconStart" v-bind="iconProps(item.iconStart)" />
             {{ item.label }}
           </a>
         </li>
@@ -125,7 +125,7 @@ const visibleItems = computed(() =>
 <style>
 @layer vectis.components {
   .v-breadcrumb {
-    /* API de contexte d'Icon : icônes d'items et séparateurs suivent la
+    /* API de contexte de VIcon : icônes d'items et séparateurs suivent la
        typo sm du fil d'Ariane */
     --vectis-icon-size: var(--vectis-icon-size-sm);
     --vectis-icon-opsz: 20;

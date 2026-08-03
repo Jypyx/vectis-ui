@@ -1,7 +1,7 @@
 ﻿import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as TooltipStories from './VTooltip.stories'
+import * as VTooltipStories from './VTooltip.stories'
 
-<Meta of={TooltipStories} />
+<Meta of={VTooltipStories} />
 
 # Tooltip
 
@@ -15,9 +15,9 @@ Le déclencheur est fourni par le slot par défaut scopé : poser `v-bind="trigg
 l'élément focusable lui attache `aria-describedby` — la voie explicite est préférée à un
 pont automatique au mount.
 
-<Canvas of={TooltipStories.Default} />
+<Canvas of={VTooltipStories.Default} />
 
-<Controls of={TooltipStories.Default} />
+<Controls of={VTooltipStories.Default} />
 
 ## Ouverture au focus
 
@@ -25,43 +25,43 @@ Le survol ouvre après `delay` (300ms par défaut) ; le **focus clavier ouvre im
 et Échap ferme sans déplacer le focus — conforme WCAG 1.4.13 (dismissable, hoverable,
 persistent).
 
-<Canvas of={TooltipStories.OuvertureAuFocus} />
+<Canvas of={VTooltipStories.OuvertureAuFocus} />
 
-## Sur un IconButton
+## Sur un VIconButton
 
 Cas d'usage typique : doubler le libellé accessible d'un bouton icône d'une confirmation
-visuelle. Le tooltip décrit (`aria-describedby`), il ne nomme pas — l'IconButton garde son
+visuelle. Le tooltip décrit (`aria-describedby`), il ne nomme pas — le VIconButton garde son
 propre `label`.
 
-<Canvas of={TooltipStories.SurIconButton} />
+<Canvas of={VTooltipStories.SurIconButton} />
 
 ## Placements
 
 Huit placements via `data-placement` → `position-area` (voir `floating.css`, partagé avec
-Popover et Menu). Les placements alignés (`top-start`…) annulent la marge du côté
+VPopover et VMenu). Les placements alignés (`top-start`…) annulent la marge du côté
 aligné pour rester au bord du déclencheur.
 
-<Canvas of={TooltipStories.Placements} />
+<Canvas of={VTooltipStories.Placements} />
 
 Au bord de l'écran, `position-try-fallbacks: flip-block, flip-inline` retourne le panneau
 du côté opposé — sans aucun JS :
 
-<Canvas of={TooltipStories.EdgeFlipping} />
+<Canvas of={VTooltipStories.EdgeFlipping} />
 
 ## Contenu riche
 
 Le slot `#content` prime sur la prop `text`. Réservé au contenu **non interactif** (mise en
 forme, `<kbd>`, icônes) : le tooltip se ferme dès que le pointeur quitte le déclencheur et
 `aria-describedby` aplatit le contenu en texte — un lien ou un bouton y serait
-inatteignable. Pour de l'interactif, utiliser Popover.
+inatteignable. Pour de l'interactif, utiliser VPopover.
 
-<Canvas of={TooltipStories.ContenuRiche} />
+<Canvas of={VTooltipStories.ContenuRiche} />
 
 ## Cas limites
 
 Un texte long passe à la ligne dans la largeur maximale du panneau :
 
-<Canvas of={TooltipStories.TexteLong} />
+<Canvas of={VTooltipStories.TexteLong} />
 
 ## Accessibilité
 

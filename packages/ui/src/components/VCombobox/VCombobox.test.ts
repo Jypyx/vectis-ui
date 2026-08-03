@@ -2,8 +2,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, ref } from 'vue'
 
-import Combobox from './VCombobox.vue'
-import type { ComboboxOption } from './VCombobox.vue'
+import VCombobox from './VCombobox.vue'
+import type { VComboboxOption } from './VCombobox.vue'
 
 const OPTIONS = [
   { value: 'fr', label: 'France' },
@@ -13,13 +13,13 @@ const OPTIONS = [
 ]
 
 function renderCombobox(props: Record<string, unknown> = {}) {
-  return render(Combobox, {
+  return render(VCombobox, {
     props: { options: OPTIONS, modelValue: '', ...props },
     attrs: { 'aria-label': 'Pays' },
   })
 }
 
-describe('Combobox', () => {
+describe('VCombobox', () => {
   it('contrat ARIA : combobox lié au listbox, activedescendant en navigation', async () => {
     const { getByRole, container } = renderCombobox()
     const input = getByRole('combobox')
@@ -58,9 +58,9 @@ describe('Combobox', () => {
     // après l'avoir écrit renvoie l'ancienne valeur — le libellé affiché doit
     // venir de l'option choisie, pas d'une re-dérivation depuis le modèle.
     const Harness = defineComponent({
-      components: { Combobox },
+      components: { VCombobox },
       setup: () => ({ options: OPTIONS, value: ref('') }),
-      template: `<Combobox :options="options" v-model="value" aria-label="Pays" />
+      template: `<VCombobox :options="options" v-model="value" aria-label="Pays" />
                  <output>{{ value }}</output>`,
     })
     const { getByRole, container } = render(Harness)
@@ -175,7 +175,7 @@ describe('Combobox', () => {
     expect(emitted('update:modelValue').at(-1)).toEqual([[]])
   })
 
-  it('la croix (clearable d’Input) vide la valeur en simple', async () => {
+  it('la croix (clearable de VInput) vide la valeur en simple', async () => {
     const { getByRole, emitted } = renderCombobox({ modelValue: 'fr' })
     const input = getByRole('combobox') as HTMLInputElement
     expect(input.value).toBe('France')
@@ -214,7 +214,7 @@ describe('Combobox', () => {
 
 // ── Groupes et séparateurs ──────────────────────────────────────────────────
 
-describe('Combobox groupé', () => {
+describe('VCombobox groupé', () => {
   const GROUPES = [
     {
       label: 'Europe',
@@ -236,7 +236,7 @@ describe('Combobox groupé', () => {
   ]
 
   const renderGroupe = (props: Record<string, unknown> = {}) =>
-    render(Combobox, {
+    render(VCombobox, {
       props: { options: GROUPES, modelValue: '', ...props },
       attrs: { 'aria-label': 'Pays' },
     })
@@ -312,7 +312,7 @@ describe('Combobox groupé', () => {
     await fireEvent.click(option)
     expect(emitted('update:modelValue').at(-1)).toEqual([['sn']])
 
-    // le libellé du Chip vient bien de l'option dépliée du groupe (`allOptions`)
+    // le libellé du VChip vient bien de l'option dépliée du groupe (`allOptions`)
     // — requêtes bornées au `container` : les deux rendus partagent document.body
     const second = renderGroupe({ multiple: true, modelValue: ['sn'] })
     expect(
@@ -325,7 +325,7 @@ describe('Combobox groupé', () => {
 
 // ── Source asynchrone (recherche serveur, chargement, pagination) ────────────
 
-describe('Combobox asynchrone', () => {
+describe('VCombobox asynchrone', () => {
   afterEach(() => {
     vi.useRealTimers()
   })
@@ -353,7 +353,7 @@ describe('Combobox asynchrone', () => {
     const seen: string[] = []
     const { getByRole, container, emitted } = renderCombobox({
       searchDebounce: 0,
-      filter: (option: ComboboxOption, query: string) => {
+      filter: (option: VComboboxOption, query: string) => {
         seen.push(query)
         return option.value.startsWith(query)
       },
@@ -495,7 +495,7 @@ describe('Combobox asynchrone', () => {
     const chip = () => container.querySelector('.v-chip') as HTMLElement
     const panel = () => container.querySelector('[role="listbox"]') as HTMLElement
 
-    // défaut (md) : Chip xs plein
+    // défaut (md) : VChip xs plein
     expect(chip().getAttribute('data-size')).toBe('xs')
     expect(chip().hasAttribute('data-compact')).toBe(false)
 
@@ -524,11 +524,11 @@ describe('Combobox asynchrone', () => {
   })
 
   it('slot #option : contenu personnalisé, avec l’état de l’option', async () => {
-    const { getByRole, container } = render(Combobox, {
+    const { getByRole, container } = render(VCombobox, {
       props: { options: OPTIONS, modelValue: '' },
       attrs: { 'aria-label': 'Pays' },
       slots: {
-        option: (slotProps: { option: ComboboxOption; active: boolean; index: number }) =>
+        option: (slotProps: { option: VComboboxOption; active: boolean; index: number }) =>
           h(
             'span',
             { class: 'v-test-option' },
@@ -546,7 +546,7 @@ describe('Combobox asynchrone', () => {
   })
 
   it('slots #empty et #loading : remplacent les contenus par défaut', async () => {
-    const { getByRole, container } = render(Combobox, {
+    const { getByRole, container } = render(VCombobox, {
       props: { options: OPTIONS, modelValue: '', searchDebounce: 0 },
       attrs: { 'aria-label': 'Pays' },
       slots: {
@@ -557,7 +557,7 @@ describe('Combobox asynchrone', () => {
     await fireEvent.update(getByRole('combobox'), 'zzz')
     expect(container.querySelector('.v-test-empty')?.textContent).toBe('créer « zzz »')
 
-    const chargement = render(Combobox, {
+    const chargement = render(VCombobox, {
       props: { options: [], modelValue: '', loading: true },
       attrs: { 'aria-label': 'Pays' },
       slots: { loading: () => h('span', { class: 'v-test-loading' }, 'patientez') },
@@ -585,14 +585,14 @@ describe('Combobox asynchrone', () => {
     expect(sans.firstElementChild?.classList.contains('v-combobox-option-label')).toBe(true)
   })
 
-  it('slot #chip : remplace le Chip par défaut, `remove` retire la valeur', async () => {
-    const { getByRole, container, emitted } = render(Combobox, {
+  it('slot #chip : remplace le VChip par défaut, `remove` retire la valeur', async () => {
+    const { getByRole, container, emitted } = render(VCombobox, {
       props: { options: OPTIONS, modelValue: ['fr'], multiple: true },
       attrs: { 'aria-label': 'Pays' },
       slots: {
         chip: (slotProps: {
           value: string
-          option: ComboboxOption | undefined
+          option: VComboboxOption | undefined
           label: string
           remove: () => void
           size: string
@@ -605,7 +605,7 @@ describe('Combobox asynchrone', () => {
           ),
       },
     })
-    // le Chip par défaut a bien cédé la place
+    // le VChip par défaut a bien cédé la place
     expect(container.querySelector('.v-chip')).toBeNull()
     const chip = container.querySelector('.v-test-chip') as HTMLElement
     expect(chip.textContent).toBe('France/—/xs')
@@ -616,7 +616,7 @@ describe('Combobox asynchrone', () => {
   })
 
   it('le slot #chip garde l’option quand elle sort des options reçues (source async)', async () => {
-    const { container, rerender } = render(Combobox, {
+    const { container, rerender } = render(VCombobox, {
       props: {
         options: [{ value: 'fr', label: 'France', icon: 'flag' }],
         modelValue: ['fr'],
@@ -624,14 +624,14 @@ describe('Combobox asynchrone', () => {
       },
       attrs: { 'aria-label': 'Pays' },
       slots: {
-        chip: (slotProps: { option: ComboboxOption | undefined; label: string }) =>
+        chip: (slotProps: { option: VComboboxOption | undefined; label: string }) =>
           h('span', { class: 'v-test-chip' }, `${slotProps.label}/${slotProps.option?.icon}`),
       },
     })
     expect(container.querySelector('.v-test-chip')?.textContent).toBe('France/flag')
 
     // la recherche suivante ne renvoie plus l'option : le cache la garde entière
-    // (sans lui, le Chip afficherait l'identifiant brut et perdrait son icône)
+    // (sans lui, le VChip afficherait l'identifiant brut et perdrait son icône)
     await rerender({ options: [] })
     expect(container.querySelector('.v-test-chip')?.textContent).toBe('France/flag')
   })

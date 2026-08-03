@@ -13,12 +13,12 @@
  * ce qui rend les mappings partiels utilisables.
  *
  * Le registre est ce qui rend le DS utilisable SANS police d'icônes : les icônes
- * que la librairie rend elle-même (croix, chevrons, tones de Toast…) ne
+ * que la librairie rend elle-même (croix, chevrons, tones de VToast…) ne
  * dépendent plus de rien. La ligature reste le repli pour tout autre nom.
  *
  * Aucun JS de COMPORTEMENT ici malgré le `computed` : ni événement, ni cycle de
  * vie, ni accès DOM — une résolution de source pure, évaluée identiquement au
- * serveur et au client. La propriété « zéro JS » d'Icon était un corollaire de
+ * serveur et au client. La propriété « zéro JS » de VIcon était un corollaire de
  * « la police fait tout » ; s'en affranchir la retire nécessairement.
  */
 import { computed, type Component } from 'vue'
@@ -40,7 +40,7 @@ interface IconProps {
   src?: string
   /**
    * Taille explicite en pixels (ex. :size="32"). Sans elle : taille du
-   * contexte (`--vectis-icon-size` posée par un parent, ex. Button), sinon 1em —
+   * contexte (`--vectis-icon-size` posée par un parent, ex. VButton), sinon 1em —
    * l'icône suit le texte environnant.
    */
   size?: number
@@ -153,7 +153,7 @@ const resolved = computed<Resolved | undefined>(() => {
      * 1. prop `size` (px) — posée en --vectis-icon-size inline sur l'élément :
      *    une déclaration propre prime sur l'héritage et sur la layer ;
      * 2. --vectis-icon-size / --vectis-icon-opsz héritées d'un parent (API de
-     *    contexte : Button les pose selon sa propre taille) ;
+     *    contexte : VButton les pose selon sa propre taille) ;
      * 3. 1em — l'icône suit la taille de texte du parent.
      */
     --icon-size: var(--vectis-icon-size, 1em);

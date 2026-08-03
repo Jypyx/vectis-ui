@@ -119,7 +119,7 @@ ${entries.map(([name, paths]) => `  ${name}: [${paths.map((d) => `'${d}'`).join(
 } as const satisfies Record<string, readonly [string] | readonly [string, string]>
 
 /** Les noms d'icônes que le DS rend lui-même — contrat d'un résolveur consommateur. */
-export type DsIconName = keyof typeof builtinIcons
+export type VectisIconName = keyof typeof builtinIcons
 `
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')

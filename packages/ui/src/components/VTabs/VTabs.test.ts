@@ -2,9 +2,9 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
-import Tab from './VTab.vue'
-import TabPanel from './VTabPanel.vue'
-import Tabs from './VTabs.vue'
+import VTab from './VTab.vue'
+import VTabPanel from './VTabPanel.vue'
+import VTabs from './VTabs.vue'
 
 /**
  * Harnais : le v-model doit être vivant (sans ref locale, cliquer un onglet ne
@@ -12,7 +12,7 @@ import Tabs from './VTabs.vue'
  */
 function mount(
   options: {
-    /** Attributs bruts posés sur <Tabs>. */
+    /** Attributs bruts posés sur <VTabs>. */
     tabsAttrs?: string
     /** Corps du slot par défaut ; par défaut trois onglets a/b/c. */
     tabs?: string
@@ -24,27 +24,27 @@ function mount(
   const model = ref<string | number | undefined>('initial' in options ? options.initial : 'a')
   const tabs =
     options.tabs ??
-    `<Tab value="a" label="Un" />
-     <Tab value="b" label="Deux" />
-     <Tab value="c" label="Trois" />`
+    `<VTab value="a" label="Un" />
+     <VTab value="b" label="Deux" />
+     <VTab value="c" label="Trois" />`
   const panelsBody =
     typeof options.panels === 'string'
       ? options.panels
       : options.panels
-        ? `<TabPanel value="a">Contenu A</TabPanel>
-           <TabPanel value="b">Contenu B</TabPanel>
-           <TabPanel value="c">Contenu C</TabPanel>`
+        ? `<VTabPanel value="a">Contenu A</VTabPanel>
+           <VTabPanel value="b">Contenu B</VTabPanel>
+           <VTabPanel value="c">Contenu C</VTabPanel>`
         : ''
   const panels = panelsBody ? `<template #panels>${panelsBody}</template>` : ''
 
   const Harness = defineComponent({
-    components: { Tabs, Tab, TabPanel },
+    components: { VTabs, VTab, VTabPanel },
     setup: () => ({ model }),
     template: `
-      <Tabs v-model="model" ${options.tabsAttrs ?? ''}>
+      <VTabs v-model="model" ${options.tabsAttrs ?? ''}>
         ${tabs}
         ${panels}
-      </Tabs>
+      </VTabs>
     `,
   })
   return { model, ...render(Harness) }
@@ -53,7 +53,7 @@ function mount(
 /** Onglets dans l'ordre du DOM. */
 const tabsOf = (container: Element) => [...container.querySelectorAll<HTMLElement>('[role="tab"]')]
 
-describe('Tabs', () => {
+describe('VTabs', () => {
   describe('accessibilité', () => {
     it('rend une tablist nommée et des onglets liés à leurs panneaux', () => {
       const { container } = mount({ panels: true })
@@ -95,7 +95,7 @@ describe('Tabs', () => {
     it("les ids sont assainis : aria-controls est une liste d'IDREF", () => {
       const { container } = mount({
         initial: 'mon onglet',
-        tabs: `<Tab value="mon onglet" label="Un" />`,
+        tabs: `<VTab value="mon onglet" label="Un" />`,
         panels: false,
       })
       // le panneau vient du même dérivateur : on vérifie l'onglet, sans blanc
@@ -175,11 +175,11 @@ describe('Tabs', () => {
   })
 
   describe('onglet désactivé', () => {
-    const tabs = `<Tab value="a" label="Un" />
-                  <Tab value="b" label="Deux" disabled />
-                  <Tab value="c" label="Trois" />`
+    const tabs = `<VTab value="a" label="Un" />
+                  <VTab value="b" label="Deux" disabled />
+                  <VTab value="c" label="Trois" />`
 
-    it('rend un <button disabled> (les états viennent de Button)', () => {
+    it('rend un <button disabled> (les états viennent de VButton)', () => {
       const { container } = mount({ tabs })
       const [, second] = tabsOf(container) as HTMLButtonElement[]
       expect(second?.disabled).toBe(true)
@@ -212,9 +212,9 @@ describe('Tabs', () => {
 
     it('lazy : le contenu n’est monté qu’au premier affichage, puis conservé', async () => {
       const { container, model } = mount({
-        panels: `<TabPanel value="a">Contenu A</TabPanel>
-                 <TabPanel value="b" lazy>Contenu B</TabPanel>
-                 <TabPanel value="c">Contenu C</TabPanel>`,
+        panels: `<VTabPanel value="a">Contenu A</VTabPanel>
+                 <VTabPanel value="b" lazy>Contenu B</VTabPanel>
+                 <VTabPanel value="c">Contenu C</VTabPanel>`,
       })
       expect(container.textContent).not.toContain('Contenu B')
 
@@ -231,7 +231,7 @@ describe('Tabs', () => {
   describe('contenu et fallthrough', () => {
     it('icône seule : marqueur data-icon-only, aucun conteneur de libellé', () => {
       const { container } = mount({
-        tabs: `<Tab value="a" icon="home" aria-label="Accueil" />`,
+        tabs: `<VTab value="a" icon="home" aria-label="Accueil" />`,
       })
       const tab = tabsOf(container)[0]
       expect(tab?.hasAttribute('data-icon-only')).toBe(true)
@@ -240,7 +240,7 @@ describe('Tabs', () => {
     })
 
     it('un libellé ou un slot annule le mode icône seule', () => {
-      const { container } = mount({ tabs: `<Tab value="a" icon="home" label="Accueil" />` })
+      const { container } = mount({ tabs: `<VTab value="a" icon="home" label="Accueil" />` })
       const tab = tabsOf(container)[0]
       expect(tab?.hasAttribute('data-icon-only')).toBe(false)
       expect(tab?.querySelector('.v-tab-label')?.textContent).toBe('Accueil')
@@ -291,7 +291,7 @@ describe('Tabs', () => {
      * jsdom) : `outlined` est `flat` habillé, il ne surélève donc pas l'onglet
      * actif — dans une carte, c'est le cadre qui porte l'élévation.
      */
-    it('seul `inset` surélève l’onglet actif (mapping vers la variante de Button)', () => {
+    it('seul `inset` surélève l’onglet actif (mapping vers la variante de VButton)', () => {
       const activeVariantOf = (tabsAttrs?: string) =>
         tabsOf(mount({ tabsAttrs }).container)[0]?.getAttribute('data-variant')
       expect(activeVariantOf()).toBe('ghost')

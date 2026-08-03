@@ -1,11 +1,11 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import Switch from './VSwitch.vue'
+import VSwitch from './VSwitch.vue'
 
-describe('Switch', () => {
+describe('VSwitch', () => {
   it('expose role="switch" et synchronise v-model', async () => {
-    const { getByRole, emitted } = render(Switch, {
+    const { getByRole, emitted } = render(VSwitch, {
       props: { modelValue: false },
       slots: { default: 'Notifications' },
     })
@@ -15,7 +15,7 @@ describe('Switch', () => {
   })
 
   it('aria-label (fallthrough) nomme le contrôle sans libellé visible', () => {
-    const { getByRole } = render(Switch, {
+    const { getByRole } = render(VSwitch, {
       props: { modelValue: false },
       attrs: { 'aria-label': 'Activer les notifications' },
     })
@@ -23,14 +23,14 @@ describe('Switch', () => {
   })
 
   it('disabled bloque le contrôle', () => {
-    const { getByRole } = render(Switch, {
+    const { getByRole } = render(VSwitch, {
       props: { modelValue: false, disabled: true },
     })
     expect((getByRole('switch') as HTMLInputElement).disabled).toBe(true)
   })
 
   it('labelPosition et spread posent les attributs data-* sur la racine', () => {
-    const { container } = render(Switch, {
+    const { container } = render(VSwitch, {
       props: { modelValue: false, labelPosition: 'start', spread: true },
       slots: { default: 'Notifications' },
     })
@@ -40,7 +40,7 @@ describe('Switch', () => {
   })
 
   it('spread absent par défaut (pas d’attribut data-spread)', () => {
-    const { container } = render(Switch, { props: { modelValue: false } })
+    const { container } = render(VSwitch, { props: { modelValue: false } })
     const root = container.querySelector('.v-switch') as HTMLElement
     expect(root.getAttribute('data-label-position')).toBe('end')
     expect(root.hasAttribute('data-spread')).toBe(false)

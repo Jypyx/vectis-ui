@@ -1,21 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
-import Tooltip from '../VTooltip/VTooltip.vue'
-import Avatar from './VAvatar.vue'
+import VTooltip from '../VTooltip/VTooltip.vue'
+import VAvatar from './VAvatar.vue'
 
 const PORTRAIT =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="%236366f1"/><circle cx="20" cy="15" r="7" fill="white"/><ellipse cx="20" cy="34" rx="12" ry="9" fill="white"/></svg>'
 
 const meta = {
   title: 'Composants/Avatar',
-  component: Avatar,
+  component: VAvatar,
   argTypes: {
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     compact: { control: 'boolean' },
   },
   args: { size: 'md', compact: false, name: 'Xavier Darmet' },
-} satisfies Meta<typeof Avatar>
+} satisfies Meta<typeof VAvatar>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -45,14 +45,14 @@ export const ImageCassee: Story = {
 
 export const Tailles: Story = {
   render: () => ({
-    components: { Avatar },
+    components: { VAvatar },
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
-        <Avatar size="xs" name="Ada Lovelace" />
-        <Avatar size="sm" name="Grace Hopper" />
-        <Avatar size="md" name="Margaret Hamilton" />
-        <Avatar size="lg" name="Katherine Johnson" />
-        <Avatar size="xl" name="Radia Perlman" />
+        <VAvatar size="xs" name="Ada Lovelace" />
+        <VAvatar size="sm" name="Grace Hopper" />
+        <VAvatar size="md" name="Margaret Hamilton" />
+        <VAvatar size="lg" name="Katherine Johnson" />
+        <VAvatar size="xl" name="Radia Perlman" />
       </div>
     `,
   }),
@@ -61,15 +61,15 @@ export const Tailles: Story = {
 /** Compact : hauteur réduite de 4px à chaque taille (typo/icône inchangées). */
 export const Compact: Story = {
   render: () => ({
-    components: { Avatar },
+    components: { VAvatar },
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
-        <Avatar size="sm" name="Ada Lovelace" />
-        <Avatar size="sm" compact name="Ada Lovelace" />
-        <Avatar size="md" name="Grace Hopper" />
-        <Avatar size="md" compact name="Grace Hopper" />
-        <Avatar size="lg" name="Margaret Hamilton" />
-        <Avatar size="lg" compact name="Margaret Hamilton" />
+        <VAvatar size="sm" name="Ada Lovelace" />
+        <VAvatar size="sm" compact name="Ada Lovelace" />
+        <VAvatar size="md" name="Grace Hopper" />
+        <VAvatar size="md" compact name="Grace Hopper" />
+        <VAvatar size="lg" name="Margaret Hamilton" />
+        <VAvatar size="lg" compact name="Margaret Hamilton" />
       </div>
     `,
   }),
@@ -78,16 +78,16 @@ export const Compact: Story = {
 /** Teinte OKLCH dérivée du nom : chaque personne obtient une couleur stable et distincte. */
 export const CouleurAuto: Story = {
   render: () => ({
-    components: { Avatar },
+    components: { VAvatar },
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <Avatar name="Ada Lovelace" />
-        <Avatar name="Grace Hopper" />
-        <Avatar name="Margaret Hamilton" />
-        <Avatar name="Katherine Johnson" />
-        <Avatar name="Radia Perlman" />
-        <Avatar name="Barbara Liskov" />
-        <Avatar name="Frances Allen" />
+        <VAvatar name="Ada Lovelace" />
+        <VAvatar name="Grace Hopper" />
+        <VAvatar name="Margaret Hamilton" />
+        <VAvatar name="Katherine Johnson" />
+        <VAvatar name="Radia Perlman" />
+        <VAvatar name="Barbara Liskov" />
+        <VAvatar name="Frances Allen" />
       </div>
     `,
   }),
@@ -108,16 +108,16 @@ export const Cliquable: Story = {
   },
 }
 
-/** Tooltip attaché : l'Avatar (cliquable = focusable) reçoit `triggerProps` par fallthrough. */
+/** VTooltip attaché : le VAvatar (cliquable = focusable) reçoit `triggerProps` par fallthrough. */
 export const AvecTooltip: Story = {
   render: () => ({
-    components: { Avatar, Tooltip },
+    components: { VAvatar, VTooltip },
     template: `
-      <Tooltip text="Ada Lovelace">
+      <VTooltip text="Ada Lovelace">
         <template #default="{ triggerProps }">
-          <Avatar v-bind="triggerProps" name="Ada Lovelace" clickable />
+          <VAvatar v-bind="triggerProps" name="Ada Lovelace" clickable />
         </template>
-      </Tooltip>
+      </VTooltip>
     `,
   }),
   play: async ({ canvasElement }) => {

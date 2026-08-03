@@ -2,15 +2,15 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Radio from './VRadio.vue'
+import VRadio from './VRadio.vue'
 
 const meta = {
   title: 'Composants/Radio',
-  component: Radio,
+  component: VRadio,
   argTypes: {
     labelPosition: { control: 'select', options: ['start', 'end'] },
   },
-} satisfies Meta<typeof Radio>
+} satisfies Meta<typeof VRadio>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -22,14 +22,14 @@ type Story = StoryObj<typeof meta>
 export const Groupe: Story = {
   args: { value: 'standard' },
   render: () => ({
-    components: { Radio },
+    components: { VRadio },
     setup: () => ({ plan: ref('standard') }),
     template: `
       <fieldset style="border: none; display: grid; gap: 8px">
         <legend style="margin-bottom: 8px">Formule</legend>
-        <Radio v-model="plan" name="plan" value="gratuit">Gratuit</Radio>
-        <Radio v-model="plan" name="plan" value="standard">Standard</Radio>
-        <Radio v-model="plan" name="plan" value="pro">Pro</Radio>
+        <VRadio v-model="plan" name="plan" value="gratuit">Gratuit</VRadio>
+        <VRadio v-model="plan" name="plan" value="standard">Standard</VRadio>
+        <VRadio v-model="plan" name="plan" value="pro">Pro</VRadio>
       </fieldset>
       <output data-testid="mirror">{{ plan }}</output>
     `,
@@ -47,16 +47,16 @@ export const Groupe: Story = {
 export const PositionDuLibelle: Story = {
   args: { value: 'x' },
   render: () => ({
-    components: { Radio },
+    components: { VRadio },
     setup: () => ({ v: ref('end') }),
     template: `
       <div style="display: grid; gap: 8px; justify-items: start">
-        <Radio v-model="v" name="position" value="end" label-position="end">
+        <VRadio v-model="v" name="position" value="end" label-position="end">
           Libellé après (défaut)
-        </Radio>
-        <Radio v-model="v" name="position" value="start" label-position="start">
+        </VRadio>
+        <VRadio v-model="v" name="position" value="start" label-position="start">
           Libellé avant
-        </Radio>
+        </VRadio>
       </div>
     `,
   }),
@@ -69,14 +69,14 @@ export const PositionDuLibelle: Story = {
 export const Spread: Story = {
   args: { value: 'x' },
   render: () => ({
-    components: { Radio },
+    components: { VRadio },
     setup: () => ({ v: ref('a') }),
     template: `
       <div style="display: grid; gap: 8px; max-width: 320px">
-        <Radio v-model="v" name="spread-demo" value="a" spread>Pastille à droite</Radio>
-        <Radio v-model="v" name="spread-demo" value="b" spread label-position="start">
+        <VRadio v-model="v" name="spread-demo" value="a" spread>Pastille à droite</VRadio>
+        <VRadio v-model="v" name="spread-demo" value="b" spread label-position="start">
           Pastille à gauche
-        </Radio>
+        </VRadio>
       </div>
     `,
   }),
@@ -85,12 +85,12 @@ export const Spread: Story = {
 export const Disabled: Story = {
   args: { value: 'x' },
   render: () => ({
-    components: { Radio },
+    components: { VRadio },
     setup: () => ({ v: ref('b') }),
     template: `
       <div style="display: grid; gap: 8px">
-        <Radio v-model="v" name="disabled-demo" value="a" disabled>Désactivé</Radio>
-        <Radio v-model="v" name="disabled-demo" value="b" disabled>Désactivé sélectionné</Radio>
+        <VRadio v-model="v" name="disabled-demo" value="a" disabled>Désactivé</VRadio>
+        <VRadio v-model="v" name="disabled-demo" value="b" disabled>Désactivé sélectionné</VRadio>
       </div>
     `,
   }),

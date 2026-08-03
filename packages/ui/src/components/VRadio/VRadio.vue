@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
  * <input type="radio"> natif, rendu remplacé par une pastille stylée (même
- * approche que Checkbox : l'input reste dans l'arbre, seul son rendu est
- * masqué). Le groupe est natif : plusieurs Radio partageant le même `name`
+ * approche que VCheckbox : l'input reste dans l'arbre, seul son rendu est
+ * masqué). Le groupe est natif : plusieurs VRadio partageant le même `name`
  * (fallthrough) et le même v-model — la navigation flèches est fournie par
  * le navigateur, zéro JS.
  */
@@ -85,7 +85,7 @@ defineSlots<{
     pointer-events: none;
   }
 
-  /* Pastille : même mécanique que la boîte du Checkbox (fond accent quand
+  /* Pastille : même mécanique que la boîte du VCheckbox (fond accent quand
      coché), le point intérieur est un pseudo-élément en currentcolor */
   .v-radio-dot {
     display: inline-grid;
@@ -144,7 +144,7 @@ defineSlots<{
     border-color: var(--vectis-color-danger);
   }
 
-  /* Disabled : nuances de gris (mêmes tokens que Button), pas d'opacité */
+  /* Disabled : nuances de gris (mêmes tokens que VButton), pas d'opacité */
   .v-radio:has(.v-radio-input:disabled) {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;

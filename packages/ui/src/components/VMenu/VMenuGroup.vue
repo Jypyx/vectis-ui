@@ -13,7 +13,7 @@ interface MenuGroupProps {
 defineProps<MenuGroupProps>()
 
 defineSlots<{
-  /** Les MenuItem du groupe. */
+  /** Les VMenuItem du groupe. */
   default(): unknown
 }>()
 

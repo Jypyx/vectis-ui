@@ -2,17 +2,17 @@
 import { computed, ref, watch } from 'vue'
 import type { StyleValue } from 'vue'
 
-import Button from '../VButton/VButton.vue'
-import Checkbox from '../VCheckbox/VCheckbox.vue'
-import Icon from '../VIcon/VIcon.vue'
+import VButton from '../VButton/VButton.vue'
+import VCheckbox from '../VCheckbox/VCheckbox.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import Input from '../VInput/VInput.vue'
-import Menu from '../VMenu/VMenu.vue'
-import MenuItem from '../VMenu/VMenuItem.vue'
-import Pagination from '../VPagination/VPagination.vue'
-import Spinner from '../VSpinner/VSpinner.vue'
-import Typography from '../VTypography/VTypography.vue'
+import VInput from '../VInput/VInput.vue'
+import VMenu from '../VMenu/VMenu.vue'
+import VMenuItem from '../VMenu/VMenuItem.vue'
+import VPagination from '../VPagination/VPagination.vue'
+import VSpinner from '../VSpinner/VSpinner.vue'
+import VTypography from '../VTypography/VTypography.vue'
 
 import { toggleValue } from '../../utils/array'
 import { cssSize } from '../../utils/css'
@@ -27,8 +27,8 @@ import { useLocale, useMessages } from '../../i18n/state'
 
 /**
  * Tableau de données : <table> sémantique (caption, scope, aria-sort), composé
- * des briques du DS — Input (recherche), Checkbox (sélection), Menu+Button
- * (lignes par page), Pagination. Le JS se limite à des dérivations pures
+ * des briques du DS — VInput (recherche), VCheckbox (sélection), VMenu+VButton
+ * (lignes par page), VPagination. Le JS se limite à des dérivations pures
  * (filtrage → tri → pagination, états de sélection) et à deux effets justifiés
  * en place : reset de page et debounce de la recherche serveur.
  *
@@ -187,7 +187,7 @@ const resolvedSelectAllLabel = computed(() => props.selectAllLabel ?? m.value.da
 /** Tri contrôlable de l'extérieur (v-model:sort) ou interne. */
 const sort = defineModel<DataTableSort | null>('sort', { default: null })
 const page = defineModel<number>('page', { default: 1 })
-/** Pagination active ssi > 0 (`:per-page="10"` one-way suffit à l'activer). */
+/** VPagination active ssi > 0 (`:per-page="10"` one-way suffit à l'activer). */
 const perPage = defineModel<number | undefined>('perPage', { default: undefined })
 const selected = defineModel<DataTableRowId[]>('selected', { default: () => [] })
 const search = defineModel<string>('search', { default: '' })
@@ -222,7 +222,7 @@ const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 if (isDev) {
   if (props.selectable && !props.rowKey)
     console.warn(
-      '[DataTable] `selectable` sans `rowKey` — les identités par index se corrompent au tri, au filtrage et à la pagination.',
+      '[VDataTable] `selectable` sans `rowKey` — les identités par index se corrompent au tri, au filtrage et à la pagination.',
     )
 }
 
@@ -419,10 +419,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     :data-selectable="selectable ? '' : undefined"
   >
     <div v-if="title || $slots.header || searchable" class="v-table-toolbar">
-      <Typography as="div" variant="heading-4" class="v-table-title">
+      <VTypography as="div" variant="heading-4" class="v-table-title">
         <slot name="header">{{ title }}</slot>
-      </Typography>
-      <Input
+      </VTypography>
+      <VInput
         v-if="searchable"
         v-model="search"
         class="v-table-search"
@@ -447,7 +447,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
         <thead class="v-table-head">
           <tr>
             <th v-if="selectable" scope="col" class="v-table-select">
-              <Checkbox
+              <VCheckbox
                 :model-value="allVisibleSelected"
                 :indeterminate="masterIndeterminate"
                 :aria-label="resolvedSelectAllLabel"
@@ -469,9 +469,9 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 @click="toggleSort(column.key)"
               >
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
-                <!-- décorative : sans `label`, Icon pose aria-hidden lui-même —
+                <!-- décorative : sans `label`, VIcon pose aria-hidden lui-même —
                      l'état de tri est porté par l'aria-sort du th. -->
-                <Icon class="v-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
+                <VIcon class="v-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
               </button>
               <template v-else>
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
@@ -483,7 +483,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
           <!-- Ordre des états : chargement → vide → contenu. -->
           <tr v-if="loading">
             <td :colspan="colCount" class="v-table-state">
-              <Spinner :label="m.dataTable.loading" />
+              <VSpinner :label="m.dataTable.loading" />
             </td>
           </tr>
           <tr v-else-if="displayedRows.length === 0">
@@ -498,7 +498,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
               <!-- data-selected et non aria-selected : invalide sur une row de
                    role=table (grid seulement) — l'état accessible est la case cochée. -->
               <td v-if="selectable" class="v-table-select">
-                <Checkbox
+                <VCheckbox
                   :model-value="isSelected(row, index)"
                   :aria-label="rowSelectLabel(row, index)"
                   @update:model-value="toggleRow(row, index)"
@@ -536,9 +536,9 @@ const heightStyle = computed<StyleValue | undefined>(() =>
           <!-- match-trigger : le panneau épouse l'option la plus large (« 10 »,
                « 25 »…) au lieu de la largeur minimale par défaut, sans jamais
                être plus étroit que le bouton qui l'ouvre. -->
-          <Menu size="sm" :compact="compact" placement="top-end" match-trigger>
+          <VMenu size="sm" :compact="compact" placement="top-end" match-trigger>
             <template #trigger="{ triggerProps }">
-              <Button
+              <VButton
                 variant="ghost"
                 tone="neutral"
                 size="sm"
@@ -547,20 +547,20 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 :aria-label="m.dataTable.perPageValue(resolvedPerPageLabel, perPage ?? 0)"
               >
                 {{ perPage }}
-                <Icon name="arrow_drop_down" />
-              </Button>
+                <VIcon name="arrow_drop_down" />
+              </VButton>
             </template>
-            <MenuItem
+            <VMenuItem
               v-for="option in perPageOptions"
               :key="option"
               :label="String(option)"
               :selected="option === perPage"
               @select="setPerPage(option)"
             />
-          </Menu>
+          </VMenu>
         </div>
         <span v-if="showRange" class="v-table-range" aria-live="polite">{{ rangeText }}</span>
-        <Pagination
+        <VPagination
           v-model="page"
           :length="pageCount"
           size="sm"
@@ -578,7 +578,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 @layer vectis.components {
   .v-table-wrapper {
     /* Densité : paddings de cellules, réduits d'un cran en compact (modèle
-       Accordion — pas d'échelle .v-control : aucune hauteur de contrôle unique). */
+       VAccordion — pas d'échelle .v-control : aucune hauteur de contrôle unique). */
     --table-pad-block: var(--vectis-space-3);
     --table-pad-inline: var(--vectis-space-3);
     --table-head-pad-block: var(--vectis-space-2);
@@ -666,14 +666,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     padding-inline: var(--table-frame-pad);
   }
 
-  /* Titre : rendu par Typography (heading-4) — la couleur reste explicite,
+  /* Titre : rendu par VTypography (heading-4) — la couleur reste explicite,
      la toolbar peut vivre dans un contexte de texte atténué. */
   .v-table-title {
     color: var(--vectis-color-text);
   }
 
   /* Surcharge qualifiée (0,2,0) du `.v-input { width: 100% }` (0,1,0)
-     d'Input — indépendante de l'ordre du bundle. */
+     de VInput — indépendante de l'ordre du bundle. */
   .v-table-toolbar .v-input {
     inline-size: var(--vectis-control-size-table-search);
     max-inline-size: 100%;
@@ -746,7 +746,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .v-table-sort {
-    /* Contexte d'Icon : 20px, opsz 20.
+    /* Contexte de VIcon : 20px, opsz 20.
        Sans lui l'icône retomberait sur 1em, soit la taille de texte du th. */
     --vectis-icon-size: var(--vectis-icon-size-md);
     --vectis-icon-opsz: 20;

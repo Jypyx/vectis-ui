@@ -2,7 +2,7 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
-import Dialog from './VDialog.vue'
+import VDialog from './VDialog.vue'
 
 /**
  * Logique uniquement (jsdom + stub showModal/close, voir vitest.setup.ts). Le
@@ -23,17 +23,17 @@ async function flush() {
 function renderHarness(props: Record<string, unknown> = {}, slots = '') {
   const open = ref((props.open as boolean) ?? false)
   const Harness = defineComponent({
-    components: { Dialog },
+    components: { VDialog },
     setup: () => ({ open, props }),
     template: `
       <button data-testid="ext" @click="open = true">Ouvrir</button>
-      <Dialog v-model:open="open" v-bind="props">
+      <VDialog v-model:open="open" v-bind="props">
         <template #trigger="{ triggerProps }">
           <button data-testid="trigger" v-bind="triggerProps">Ouvrir</button>
         </template>
         Contenu de la modale.
         ${slots}
-      </Dialog>
+      </VDialog>
     `,
   })
   const utils = render(Harness)
@@ -49,7 +49,7 @@ async function openHarness(props: Record<string, unknown> = {}, slots = '') {
   return { ...h, dialog: h.getDialog() as HTMLDialogElement }
 }
 
-describe('Dialog', () => {
+describe('VDialog', () => {
   it('pose aria-labelledby/aria-describedby depuis title/subtitle', async () => {
     const { dialog } = await openHarness({ title: 'Confirmer', subtitle: 'Action irréversible' })
     const labelId = dialog.getAttribute('aria-labelledby')

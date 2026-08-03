@@ -5,16 +5,16 @@
  * frères. Le contrat est le même partout dans le DS — les flèches et Home/End
  * ne font que **DÉPLACER le focus**, jamais activer : activer au focus
  * déclencherait une navigation ou une bascule de valeur involontaire. Un
- * composant qui veut l'activation au focus (Tabs en `activation: 'automatic'`)
+ * composant qui veut l'activation au focus (VTabs en `activation: 'automatic'`)
  * la pose lui-même, dans son propre `@focus`.
  *
- * Incarnation unique pour Pagination, Tabs, Toggle et Menu.
+ * Incarnation unique pour VPagination, VTabs, VToggle et VMenu.
  */
 
 /**
  * Éléments navigables d'un conteneur : le sélecteur exclut les désactivés, et
- * le filtre `display` écarte ceux qu'une container query (Pagination) ou le
- * consommateur (Tabs, Toggle) a masqués — un élément masqué ne doit pas capter
+ * le filtre `display` écarte ceux qu'une container query (VPagination) ou le
+ * consommateur (VTabs, VToggle) a masqués — un élément masqué ne doit pas capter
  * le focus.
  */
 export function navigableItems(container: HTMLElement, selector: string): HTMLElement[] {

@@ -10,7 +10,7 @@ import type { Ref } from 'vue'
  * c'est aussi une sortie, on ferme.
  *
  * Nécessaire parce qu'un popover `manual` n'a pas de light dismiss ; les
- * panneaux `auto` (Menu) n'en ont pas besoin, le natif s'en charge.
+ * panneaux `auto` (VMenu) n'en ont pas besoin, le natif s'en charge.
  */
 export function useFocusoutDismiss(
   root: Ref<HTMLElement | null>,

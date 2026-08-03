@@ -10,7 +10,7 @@ import type { IconSource } from '../VIcon/types'
  *
  * SSR-safe par contrat : `toast()` ne s'appelle que côté client (handlers,
  * retours d'API asynchrones), jamais pendant le rendu serveur — où l'état
- * module serait partagé entre requêtes. Seul le <Toaster> monté touche le
+ * module serait partagé entre requêtes. Seul le <VToaster> monté touche le
  * DOM (Popover API) et arme les timers d'auto-fermeture.
  */
 
@@ -33,10 +33,10 @@ export interface ToastOptions {
   icon?: IconSource | false
   /**
    * Durée d'affichage en ms ; `0` = reste affiché jusqu'à fermeture
-   * manuelle ; absent = durée du Toaster (5000 par défaut).
+   * manuelle ; absent = durée du VToaster (5000 par défaut).
    */
   duration?: number
-  /** Absent = placement du Toaster (`bottom-right` par défaut). */
+  /** Absent = placement du VToaster (`bottom-right` par défaut). */
   placement?: ToastPlacement
   /** Affiche la croix de fermeture. */
   closable?: boolean
@@ -47,7 +47,7 @@ export interface ToastOptions {
   width?: string
 }
 
-/** Un toast normalisé dans la file (interne, rendu par <Toaster>). */
+/** Un toast normalisé dans la file (interne, rendu par <VToaster>). */
 export interface ToastItem extends ToastOptions {
   id: number
   tone: ToastTone
@@ -55,14 +55,14 @@ export interface ToastItem extends ToastOptions {
   closable: boolean
 }
 
-/** File réactive, consommée par <Toaster> — non réexportée par index.ts. */
+/** File réactive, consommée par <VToaster> — non réexportée par index.ts. */
 export const toasts = reactive<ToastItem[]>([])
 
 let nextId = 0
 
 /**
  * Ajoute une notification à la file et retourne son id (utilisable avec
- * `dismissToast`). Les défauts dépendant du Toaster (placement, duration)
+ * `dismissToast`). Les défauts dépendant du VToaster (placement, duration)
  * sont résolus par lui — seule source de vérité de ses props.
  */
 export function toast(options: ToastOptions): number {

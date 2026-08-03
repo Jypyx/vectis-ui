@@ -1,18 +1,18 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as ToasterStories from './VToaster.stories'
+import * as VToasterStories from './VToaster.stories'
 
-<Meta of={ToasterStories} />
+<Meta of={VToasterStories} />
 
 # Toast
 
-Notifications déclenchées **par programme** : monter `<Toaster />` une fois (racine de
+Notifications déclenchées **par programme** : monter `<VToaster />` une fois (racine de
 l'app), puis appeler `toast(options)` depuis n'importe où — composant, store, retour d'API
 asynchrone. La file est un état réactif au niveau module (pas de provide/inject) ; elle est
 **client-only** : ne jamais appeler `toast()` pendant le rendu SSR.
 
 ```vue
 <!-- App.vue -->
-<Toaster placement="bottom-right" :duration="5000" />
+<VToaster placement="bottom-right" :duration="5000" />
 ```
 
 ```ts
@@ -32,50 +32,50 @@ L'affichage passe par la Popover API : un `popover="manual"` **par placement** p
 pile (top-layer natif, aucun z-index), l'empilement est du pur CSS — le JavaScript se
 limite au pont file → `showPopover()`/`hidePopover()` et aux timers d'auto-fermeture.
 
-<Canvas of={ToasterStories.Default} />
+<Canvas of={VToasterStories.Default} />
 
-<Controls of={ToasterStories.Default} />
+<Controls of={VToasterStories.Default} />
 
 ## Tones
 
 Cinq tones × deux variants. `tonal` (défaut) : fond `-surface`, bordure `-border`, icône et
 titre teintés. Le tone `neutral` s'appuie sur `surface-overlay`.
 
-<Canvas of={ToasterStories.Tones} />
+<Canvas of={VToasterStories.Tones} />
 
 `solid` : couleur pleine du tone. `warning` utilise `--vectis-color-text-on-warning` (texte
 sombre, le blanc échoue AA sur amber) ; `neutral` passe en contraste inversé
 (`surface-inverse`, style tooltip), lisible dans les deux thèmes.
 
-<Canvas of={ToasterStories.Solid} />
+<Canvas of={VToasterStories.Solid} />
 
 ## Placements
 
-Six positions d'écran, en piles indépendantes. La prop `placement` du Toaster fixe le
+Six positions d'écran, en piles indépendantes. La prop `placement` du VToaster fixe le
 défaut ; l'option `placement` d'un toast le surcharge. Coordonnées **physiques**
 (`top/left`…) : une notification est une position d'écran, indépendante de la direction de
 lecture — comme les notifications de l'OS.
 
-<Canvas of={ToasterStories.Placements} />
+<Canvas of={VToasterStories.Placements} />
 
 ## Durée d'affichage
 
-`duration` (prop du Toaster : défaut 5000 ms, surchargeable par toast) pilote la fermeture
+`duration` (prop du VToaster : défaut 5000 ms, surchargeable par toast) pilote la fermeture
 automatique. Survoler une pile **suspend ses timers** ; ils repartent à la durée pleine au
 départ du pointeur (WCAG 2.2.1).
 
-<Canvas of={ToasterStories.AutoFermeture} />
+<Canvas of={VToasterStories.AutoFermeture} />
 
 `duration: 0` rend le toast persistant : il reste affiché jusqu'à fermeture par la croix
-(IconButton `close`, masquable via `closable: false`) ou par `dismissToast(id)`.
+(VIconButton `close`, masquable via `closable: false`) ou par `dismissToast(id)`.
 
-<Canvas of={ToasterStories.Persistant} />
+<Canvas of={VToasterStories.Persistant} />
 
 ## Contenus
 
 `message` est requis, `title` et l'icône sont optionnels — les quatre combinaisons :
 
-<Canvas of={ToasterStories.Contenus} />
+<Canvas of={VToasterStories.Contenus} />
 
 ## Icônes
 
@@ -83,9 +83,9 @@ Chaque tone a son icône Material Symbols par défaut : `notifications` (neutral
 (accent), `check_circle` (success), `error` (danger), `warning` (warning). L'option `icon`
 accepte tout nom d'icône ou un rendu explicite (`{ src }`, comme partout ailleurs) ;
 `icon: false` la retire. Les icônes de tone sont des SVG embarqués : elles s'affichent sans
-aucune police (voir Icon).
+aucune police (voir VIcon).
 
-<Canvas of={ToasterStories.IconePersonnalisee} />
+<Canvas of={VToasterStories.IconePersonnalisee} />
 
 ## Largeur
 
@@ -93,7 +93,7 @@ Largeur par défaut : token `--vectis-control-size-toast-width` (22rem). L'optio
 (longueur CSS) la remplace par toast — toujours bornée à `100vw − marges`, un toast ne
 déborde jamais du viewport.
 
-<Canvas of={ToasterStories.Largeur} />
+<Canvas of={VToasterStories.Largeur} />
 
 ## Empilement
 
@@ -102,7 +102,7 @@ CSS `column`/`column-reverse`, la file reste append-only). L'entrée glisse depu
 via `@starting-style` ; la sortie individuelle n'est pas animée (choix de simplicité), la
 pile qui se vide fait un fondu.
 
-<Canvas of={ToasterStories.Empilement} />
+<Canvas of={VToasterStories.Empilement} />
 
 ## Accessibilité
 

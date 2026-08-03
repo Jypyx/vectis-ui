@@ -2,15 +2,15 @@
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick } from 'vue'
 
-import Menu from './VMenu.vue'
-import MenuGroup from './VMenuGroup.vue'
-import MenuItem from './VMenuItem.vue'
-import MenuSeparator from './VMenuSeparator.vue'
+import VMenu from './VMenu.vue'
+import VMenuGroup from './VMenuGroup.vue'
+import VMenuItem from './VMenuItem.vue'
+import VMenuSeparator from './VMenuSeparator.vue'
 import { SUBMENU_HOVER_DELAY } from './context'
 
 function renderHarness(template: string, onSelect = vi.fn()) {
   const Harness = defineComponent({
-    components: { Menu, MenuItem, MenuGroup, MenuSeparator },
+    components: { VMenu, VMenuItem, VMenuGroup, VMenuSeparator },
     setup: () => ({ onSelect }),
     template,
   })
@@ -20,14 +20,14 @@ function renderHarness(template: string, onSelect = vi.fn()) {
 function renderMenu(onSelect = vi.fn()) {
   return renderHarness(
     `
-      <Menu>
+      <VMenu>
         <template #trigger="{ triggerProps }">
           <button data-testid="trigger" v-bind="triggerProps">Actions</button>
         </template>
-        <MenuItem label="Renommer" @select="onSelect" />
-        <MenuItem label="Archiver" disabled />
-        <MenuItem label="Supprimer" danger />
-      </Menu>
+        <VMenuItem label="Renommer" @select="onSelect" />
+        <VMenuItem label="Archiver" disabled />
+        <VMenuItem label="Supprimer" danger />
+      </VMenu>
     `,
     onSelect,
   )
@@ -41,15 +41,15 @@ async function openMenu(container: Element): Promise<HTMLElement> {
   return menu
 }
 
-describe('Menu', () => {
+describe('VMenu', () => {
   it('prop width : data-width + variable inline sur le panneau racine', () => {
     const { container } = renderHarness(`
-      <Menu width="max-content">
+      <VMenu width="max-content">
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
-        <MenuItem label="Renommer" />
-      </Menu>
+        <VMenuItem label="Renommer" />
+      </VMenu>
     `)
     const menu = container.querySelector('[role="menu"]') as HTMLElement
     expect(menu.hasAttribute('data-width')).toBe(true)
@@ -58,16 +58,16 @@ describe('Menu', () => {
 
   it('les sous-panneaux ne rendent pas data-width (largeur par défaut)', () => {
     const { container } = renderHarness(`
-      <Menu width="max-content">
+      <VMenu width="max-content">
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
-        <MenuItem label="Exporter">
+        <VMenuItem label="Exporter">
           <template #submenu>
-            <MenuItem label="PDF" />
+            <VMenuItem label="PDF" />
           </template>
-        </MenuItem>
-      </Menu>
+        </VMenuItem>
+      </VMenu>
     `)
     const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
     expect(root?.hasAttribute('data-width')).toBe(true)
@@ -76,19 +76,19 @@ describe('Menu', () => {
 
   // Le plancher lui-même (`min-inline-size: anchor-size(width)`) n'est pas
   // observable ici — jsdom ne résout ni l'ancre ni la mise en page : c'est la
-  // play function `Menu/Largeur` qui le couvre. Ne reste que le câblage.
+  // play function `VMenu/Largeur` qui le couvre. Ne reste que le câblage.
   it('prop matchTrigger : data-match-trigger sur le panneau racine seul', () => {
     const { container } = renderHarness(`
-      <Menu match-trigger>
+      <VMenu match-trigger>
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
-        <MenuItem label="Exporter">
+        <VMenuItem label="Exporter">
           <template #submenu>
-            <MenuItem label="PDF" />
+            <VMenuItem label="PDF" />
           </template>
-        </MenuItem>
-      </Menu>
+        </VMenuItem>
+      </VMenu>
     `)
     const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
     expect(root?.hasAttribute('data-match-trigger')).toBe(true)
@@ -97,12 +97,12 @@ describe('Menu', () => {
 
   it('sans matchTrigger, aucun data-match-trigger (largeur par défaut)', () => {
     const { container } = renderHarness(`
-      <Menu>
+      <VMenu>
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
-        <MenuItem label="Renommer" />
-      </Menu>
+        <VMenuItem label="Renommer" />
+      </VMenu>
     `)
     const menu = container.querySelector('[role="menu"]') as HTMLElement
     expect(menu.hasAttribute('data-match-trigger')).toBe(false)
@@ -179,16 +179,16 @@ describe('Menu', () => {
   describe("anatomie de l'item", () => {
     it('les slots priment sur les props label/sublabel', async () => {
       const { getByRole, container } = renderHarness(`
-        <Menu>
+        <VMenu>
           <template #trigger="{ triggerProps }">
             <button v-bind="triggerProps">Actions</button>
           </template>
-          <MenuItem label="Ignoré" sublabel="Ignoré aussi">
+          <VMenuItem label="Ignoré" sublabel="Ignoré aussi">
             Partager
             <template #sublabel>Vers un autre espace</template>
-          </MenuItem>
-          <MenuItem label="Dupliquer" sublabel="Copie dans le dossier courant" />
-        </Menu>
+          </VMenuItem>
+          <VMenuItem label="Dupliquer" sublabel="Copie dans le dossier courant" />
+        </VMenu>
       `)
       await openMenu(container)
 
@@ -207,13 +207,13 @@ describe('Menu', () => {
 
     it('iconStart accepte un nom ou un rendu explicite `{ src }`', async () => {
       const { getByRole, container } = renderHarness(`
-        <Menu>
+        <VMenu>
           <template #trigger="{ triggerProps }">
             <button v-bind="triggerProps">Actions</button>
           </template>
-          <MenuItem label="Renommer" icon-start="edit" icon-end="chevron_right" />
-          <MenuItem label="Logo" :icon-start="{ src: '/logo.svg' }" />
-        </Menu>
+          <VMenuItem label="Renommer" icon-start="edit" icon-end="chevron_right" />
+          <VMenuItem label="Logo" :icon-start="{ src: '/logo.svg' }" />
+        </VMenu>
       `)
       await openMenu(container)
 
@@ -229,13 +229,13 @@ describe('Menu', () => {
 
     it('selected pose data-selected et aria-current', async () => {
       const { getByRole, container } = renderHarness(`
-        <Menu>
+        <VMenu>
           <template #trigger="{ triggerProps }">
             <button v-bind="triggerProps">Tri</button>
           </template>
-          <MenuItem label="Par nom" selected />
-          <MenuItem label="Par date" />
-        </Menu>
+          <VMenuItem label="Par nom" selected />
+          <VMenuItem label="Par date" />
+        </VMenu>
       `)
       await openMenu(container)
 
@@ -250,12 +250,12 @@ describe('Menu', () => {
 
   it('size/compact posent data-size/data-compact sur le panneau racine', () => {
     const { container } = renderHarness(`
-      <Menu size="md" compact>
+      <VMenu size="md" compact>
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
-        <MenuItem label="Renommer" />
-      </Menu>
+        <VMenuItem label="Renommer" />
+      </VMenu>
     `)
     const menu = container.querySelector('[role="menu"]') as HTMLElement
     expect(menu.getAttribute('data-size')).toBe('md')
@@ -264,16 +264,16 @@ describe('Menu', () => {
 
   it('les sous-panneaux ne rendent ni data-size ni data-compact (héritage CSS)', () => {
     const { container } = renderHarness(`
-      <Menu size="md" compact>
+      <VMenu size="md" compact>
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
-        <MenuItem label="Exporter">
+        <VMenuItem label="Exporter">
           <template #submenu>
-            <MenuItem label="PDF" />
+            <VMenuItem label="PDF" />
           </template>
-        </MenuItem>
-      </Menu>
+        </VMenuItem>
+      </VMenu>
     `)
     const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
     expect(root?.getAttribute('data-size')).toBe('md')
@@ -286,16 +286,16 @@ describe('Menu', () => {
     // --control-height-base SANS la condition [data-compact] (qu'il ne porte
     // pas) : la hauteur y repasserait à sa valeur non compacte.
     const { container } = renderHarness(`
-      <Menu size="md" compact>
+      <VMenu size="md" compact>
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
-        <MenuItem label="Exporter">
+        <VMenuItem label="Exporter">
           <template #submenu>
-            <MenuItem label="PDF" />
+            <VMenuItem label="PDF" />
           </template>
-        </MenuItem>
-      </Menu>
+        </VMenuItem>
+      </VMenu>
     `)
     const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
     expect(root?.classList.contains('v-control')).toBe(true)
@@ -305,17 +305,17 @@ describe('Menu', () => {
   describe('groupes et séparateurs', () => {
     function renderGrouped() {
       return renderHarness(`
-        <Menu>
+        <VMenu>
           <template #trigger="{ triggerProps }">
             <button v-bind="triggerProps">Actions</button>
           </template>
-          <MenuGroup label="Fichier">
-            <MenuItem label="Renommer" />
-            <MenuItem label="Dupliquer" />
-          </MenuGroup>
-          <MenuSeparator />
-          <MenuItem label="Supprimer" danger />
-        </Menu>
+          <VMenuGroup label="Fichier">
+            <VMenuItem label="Renommer" />
+            <VMenuItem label="Dupliquer" />
+          </VMenuGroup>
+          <VMenuSeparator />
+          <VMenuItem label="Supprimer" danger />
+        </VMenu>
       `)
     }
 
@@ -351,18 +351,18 @@ describe('Menu', () => {
     function renderSubmenu(onSelect = vi.fn()) {
       return renderHarness(
         `
-          <Menu>
+          <VMenu>
             <template #trigger="{ triggerProps }">
               <button data-testid="trigger" v-bind="triggerProps">Actions</button>
             </template>
-            <MenuItem label="Renommer" @select="onSelect" />
-            <MenuItem label="Exporter" icon-end="download" @select="onSelect">
+            <VMenuItem label="Renommer" @select="onSelect" />
+            <VMenuItem label="Exporter" icon-end="download" @select="onSelect">
               <template #submenu>
-                <MenuItem label="PDF" @select="onSelect" />
-                <MenuItem label="PNG" />
+                <VMenuItem label="PDF" @select="onSelect" />
+                <VMenuItem label="PNG" />
               </template>
-            </MenuItem>
-          </Menu>
+            </VMenuItem>
+          </VMenu>
         `,
         onSelect,
       )
@@ -547,14 +547,14 @@ describe('Menu', () => {
     function renderNavMenu(onSelect = vi.fn()) {
       return renderHarness(
         `
-          <Menu>
+          <VMenu>
             <template #trigger="{ triggerProps }">
               <button data-testid="trigger" v-bind="triggerProps">Aller à</button>
             </template>
-            <MenuItem href="#profil" label="Profil" @select="onSelect" />
-            <MenuItem href="#archives" label="Archives" disabled />
-            <MenuItem label="Action" @select="onSelect" />
-          </Menu>
+            <VMenuItem href="#profil" label="Profil" @select="onSelect" />
+            <VMenuItem href="#archives" label="Archives" disabled />
+            <VMenuItem label="Action" @select="onSelect" />
+          </VMenu>
         `,
         onSelect,
       )

@@ -1,7 +1,7 @@
 import { computed, useId, type ComputedRef } from 'vue'
 
 /**
- * Identifiants d'un champ à wrapper (Input, Textarea) : association
+ * Identifiants d'un champ à wrapper (VInput, VTextarea) : association
  * label/`for`, id du hint, et agrégation d'`aria-describedby`.
  *
  * Deux subtilités :

@@ -16,7 +16,7 @@ import { pad2 } from '../../utils/text'
 import { useMessages } from '../../i18n/state'
 
 /**
- * Cadran horloge du TimePicker (interne, non exporté).
+ * Cadran horloge du VTimePicker (interne, non exporté).
  *
  * Aucune primitive native ne couvre la sélection angulaire : le JS se limite à
  * (1) la conversion pointeur → valeur (pointerdown/move : mesure du rect puis
@@ -181,7 +181,7 @@ function moveHour(delta: number) {
     emit('update:hour', (props.hour + delta + 24) % 24)
     return
   }
-  // 12h : cycle 1–12 dans le méridien courant (l'AM/PM se change au Toggle).
+  // 12h : cycle 1–12 dans le méridien courant (l'AM/PM se change au VToggle).
   const { hour, meridiem } = to12h(props.hour)
   emit('update:hour', to24h(((hour - 1 + delta + 12) % 12) + 1, meridiem))
 }

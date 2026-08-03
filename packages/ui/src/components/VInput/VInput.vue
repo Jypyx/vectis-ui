@@ -11,11 +11,11 @@
  */
 import { computed, ref } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconName, iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import Spinner from '../VSpinner/VSpinner.vue'
-import Typography from '../VTypography/VTypography.vue'
+import VSpinner from '../VSpinner/VSpinner.vue'
+import VTypography from '../VTypography/VTypography.vue'
 
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useIconClickHandlers } from '../../composables/useIconClickHandlers'
@@ -49,7 +49,7 @@ interface InputProps {
   iconStartLabel?: string
   /** Libellé accessible du bouton icône end (si cliquable). */
   iconEndLabel?: string
-  /** Spinner à droite, à la place de iconEnd / #end. */
+  /** VSpinner à droite, à la place de iconEnd / #end. */
   loading?: boolean
   /** Libellé du spinner pour les lecteurs d'écran. Défaut : dictionnaire du DS. */
   loadingLabel?: string
@@ -57,8 +57,8 @@ interface InputProps {
   clearable?: boolean
   /** Force la visibilité de la croix (sinon : champ non-vide et modifiable) —
       readonly compris. Utile quand le « contenu à effacer » vit hors du champ
-      texte (Combobox : des Chips) ou se modifie autrement que par la frappe
-      (DatePicker/TimePicker en lecture seule : par leur panneau). */
+      texte (VCombobox : des Chips) ou se modifie autrement que par la frappe
+      (VDatePicker/VTimePicker en lecture seule : par leur panneau). */
   clearVisible?: boolean
   /** Libellé accessible du bouton d'effacement. Défaut : dictionnaire du DS. */
   clearLabel?: string
@@ -132,7 +132,7 @@ const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.cle
 const { fieldId, hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
 
 const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
-  name: 'Input',
+  name: 'VInput',
   iconStartLabel: props.iconStartLabel,
   iconEndLabel: props.iconEndLabel,
 })
@@ -142,8 +142,8 @@ const controlEl = ref<HTMLInputElement | null>(null)
 const showClear = computed(() => {
   if (!props.clearable || props.disabled) return false
   // `clearVisible` fourni = réponse EXPLICITE du consommateur à « y a-t-il
-  // quelque chose à effacer ? », readonly compris : la valeur d'un DatePicker /
-  // TimePicker en lecture seule se modifie par son panneau, pas par la frappe.
+  // quelque chose à effacer ? », readonly compris : la valeur d'un VDatePicker /
+  // VTimePicker en lecture seule se modifie par son panneau, pas par la frappe.
   // Sinon : défaut « champ non-vide ET modifiable ».
   return props.clearVisible ?? (!props.readonly && modelText.value.length > 0)
 })
@@ -163,7 +163,7 @@ const { counterText, over } = useTextLimit({
 })
 
 // Le contrôle interne est masqué par le wrapper : exposer focus()/select()/el
-// pour les composants qui le composent (ex. Combobox, refocus + select-all).
+// pour les composants qui le composent (ex. VCombobox, refocus + select-all).
 defineExpose({
   focus: (options?: FocusOptions) => controlEl.value?.focus(options),
   select: () => controlEl.value?.select(),
@@ -181,9 +181,9 @@ defineExpose({
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
   >
-    <Typography v-if="label" as="label" variant="label" class="v-input-label" :for="fieldId">
+    <VTypography v-if="label" as="label" variant="label" class="v-input-label" :for="fieldId">
       {{ label }}
-    </Typography>
+    </VTypography>
 
     <div class="v-input-field">
       <slot name="start">
@@ -195,9 +195,9 @@ defineExpose({
           :disabled="disabled"
           @click="emit('click:icon-start', $event)"
         >
-          <Icon v-bind="iconProps(iconStart)" />
+          <VIcon v-bind="iconProps(iconStart)" />
         </button>
-        <Icon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
+        <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
       </slot>
 
       <input
@@ -227,10 +227,10 @@ defineExpose({
       >
         <!-- croix Material Symbols : même graisse de trait que les autres icônes
              (iconStart/iconEnd, chevrons…) ; police chargée par le consommateur -->
-        <Icon name="close" />
+        <VIcon name="close" />
       </button>
 
-      <Spinner v-if="loading" :label="resolvedLoadingLabel" />
+      <VSpinner v-if="loading" :label="resolvedLoadingLabel" />
       <slot v-else name="end">
         <button
           v-if="iconEnd && hasIconEndHandler"
@@ -240,15 +240,15 @@ defineExpose({
           :disabled="disabled"
           @click="emit('click:icon-end', $event)"
         >
-          <Icon v-bind="iconProps(iconEnd)" />
+          <VIcon v-bind="iconProps(iconEnd)" />
         </button>
-        <Icon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" />
+        <VIcon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" />
       </slot>
     </div>
 
-    <Typography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-input-hint">
+    <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-input-hint">
       {{ hint }}
-    </Typography>
+    </VTypography>
   </div>
 </template>
 
@@ -262,14 +262,14 @@ defineExpose({
     font-family: var(--vectis-text-family);
   }
 
-  /* Label et hint : rendus par Typography (label / caption muted) — les classes
+  /* Label et hint : rendus par VTypography (label / caption muted) — les classes
      .v-input-label/.v-input-hint restent posées comme points d'accroche
      (surcharges consommateur, état disabled ci-dessous). */
 
   /* Le field porte bordure, fond et focus ; --field-border-color est la seule
      source de vérité de la couleur (hover/erreur/disabled la redéfinissent).
      Tailles/compact : variables --control-* héritées de la racine v-control
-     (styles/control-size.css), contexte d'Icon compris. */
+     (styles/control-size.css), contexte de VIcon compris. */
   .v-input-field {
     --field-border-color: var(--vectis-color-border-strong);
 
@@ -391,7 +391,7 @@ defineExpose({
   }
 
   /* Boutons internes (effacer, icône cliquable) : gris foncé → noir au hover,
-     radius aligné sur Button (focus ring carré aux bords arrondis) */
+     radius aligné sur VButton (focus ring carré aux bords arrondis) */
   .v-input-action {
     display: inline-flex;
     align-items: center;
@@ -426,7 +426,7 @@ defineExpose({
     background: var(--vectis-color-surface-sunken);
   }
 
-  /* Disabled : nuance de gris sans opacité (mêmes tokens que Checkbox/Radio).
+  /* Disabled : nuance de gris sans opacité (mêmes tokens que VCheckbox/VRadio).
      Placé après les états erreur/readonly : à spécificité égale, il gagne. */
   .v-input[data-disabled] .v-input-field {
     --field-border-color: var(--vectis-color-border);

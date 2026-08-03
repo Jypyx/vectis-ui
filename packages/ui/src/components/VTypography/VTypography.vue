@@ -91,7 +91,7 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
 @layer vectis.components {
   .v-typography {
     /* Défauts re-posés sur chaque instance : les custom properties héritent,
-       sans quoi un Typography imbriqué sous une variante à tracking (display,
+       sans quoi un VTypography imbriqué sous une variante à tracking (display,
        headings) ou sous `code` hériterait de --typography-tracking / --typography-family. Les
        blocs [data-variant] (spécificité supérieure) les surchargent. */
     --typography-family: var(--vectis-text-family);
@@ -104,7 +104,7 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
     line-height: var(--typography-leading);
     letter-spacing: var(--typography-tracking);
     /* Tone `default` = héritage : composable dans les contextes déjà colorés
-       (surface inversée, tones de Toast…). */
+       (surface inversée, tones de VToast…). */
     color: var(--typography-color, inherit);
     overflow-wrap: break-word;
   }
@@ -195,7 +195,7 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
   }
 
   /* `default` n'a pas de bloc : sans --typography-color, le texte hérite du contexte —
-     ce qui le rend composable dans une surface inversée ou un Toast teinté. */
+     ce qui le rend composable dans une surface inversée ou un VToast teinté. */
   .v-typography[data-tone='muted'] {
     --typography-color: var(--vectis-color-text-muted);
   }

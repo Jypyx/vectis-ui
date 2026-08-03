@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
-import Typography from './VTypography.vue'
+import VTypography from './VTypography.vue'
 
 const VARIANTS = [
   'display',
@@ -31,7 +31,7 @@ const TONES = [
 
 const meta = {
   title: 'Composants/Typography',
-  component: Typography,
+  component: VTypography,
   argTypes: {
     variant: { control: 'select', options: [...VARIANTS] },
     tone: { control: 'select', options: [...TONES] },
@@ -44,12 +44,12 @@ const meta = {
     truncate: false,
   },
   render: (args) => ({
-    components: { Typography },
+    components: { VTypography },
     setup: () => ({ args }),
     template:
-      '<Typography v-bind="args">Portez ce vieux whisky au juge blond qui fume</Typography>',
+      '<VTypography v-bind="args">Portez ce vieux whisky au juge blond qui fume</VTypography>',
   }),
-} satisfies Meta<typeof Typography>
+} satisfies Meta<typeof VTypography>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -63,13 +63,13 @@ export const Default: Story = {}
  */
 export const Variantes: Story = {
   render: () => ({
-    components: { Typography },
+    components: { VTypography },
     setup: () => ({ variants: VARIANTS }),
     template: `
       <div style="display: flex; flex-direction: column; gap: 12px">
         <div v-for="variant in variants" :key="variant" style="display: flex; align-items: baseline; gap: 16px">
-          <Typography variant="code" as="span" tone="muted" style="width: 96px; flex-shrink: 0">{{ variant }}</Typography>
-          <Typography :variant="variant" as="p">Portez ce vieux whisky au juge blond</Typography>
+          <VTypography variant="code" as="span" tone="muted" style="width: 96px; flex-shrink: 0">{{ variant }}</VTypography>
+          <VTypography :variant="variant" as="p">Portez ce vieux whisky au juge blond</VTypography>
         </div>
       </div>
     `,
@@ -79,15 +79,15 @@ export const Variantes: Story = {
 /** Les tones sémantiques ; `default` hérite de la couleur du contexte. */
 export const Tones: Story = {
   render: () => ({
-    components: { Typography },
+    components: { VTypography },
     setup: () => ({ tones: TONES }),
     template: `
       <div style="display: flex; flex-direction: column; gap: 8px">
         <template v-for="tone in tones" :key="tone">
           <div v-if="tone === 'on-inverse'" style="background: var(--vectis-color-surface-inverse); border-radius: var(--vectis-radius-surface); padding: 8px 12px; align-self: flex-start">
-            <Typography :tone="tone">on-inverse — sur surface inversée</Typography>
+            <VTypography :tone="tone">on-inverse — sur surface inversée</VTypography>
           </div>
-          <Typography v-else :tone="tone">{{ tone }} — Portez ce vieux whisky au juge blond</Typography>
+          <VTypography v-else :tone="tone">{{ tone }} — Portez ce vieux whisky au juge blond</VTypography>
         </template>
       </div>
     `,
@@ -101,12 +101,12 @@ export const Tones: Story = {
  */
 export const Balises: Story = {
   render: () => ({
-    components: { Typography },
+    components: { VTypography },
     template: `
       <div style="display: flex; flex-direction: column; gap: 8px">
-        <Typography variant="heading-4">heading-4 rendu en &lt;h4&gt; (défaut)</Typography>
-        <Typography variant="heading-4" as="h2">heading-4 rendu en &lt;h2&gt; (as)</Typography>
-        <Typography variant="label" as="label">label rendu en &lt;label&gt; (as)</Typography>
+        <VTypography variant="heading-4">heading-4 rendu en &lt;h4&gt; (défaut)</VTypography>
+        <VTypography variant="heading-4" as="h2">heading-4 rendu en &lt;h2&gt; (as)</VTypography>
+        <VTypography variant="label" as="label">label rendu en &lt;label&gt; (as)</VTypography>
       </div>
     `,
   }),
@@ -115,13 +115,13 @@ export const Balises: Story = {
 /** `truncate` coupe sur une ligne avec ellipse — la largeur vient du parent. */
 export const Truncate: Story = {
   render: () => ({
-    components: { Typography },
+    components: { VTypography },
     template: `
       <div style="width: 240px; border: 1px dashed var(--vectis-color-border); border-radius: var(--vectis-radius-surface); padding: 12px">
-        <Typography truncate>
+        <VTypography truncate>
           Un texte volontairement trop long pour la largeur de son conteneur,
           coupé net avec une ellipse.
-        </Typography>
+        </VTypography>
       </div>
     `,
   }),
@@ -130,22 +130,22 @@ export const Truncate: Story = {
 /** Un paragraphe long : interlignage et overflow-wrap en conditions réelles. */
 export const Paragraphe: Story = {
   render: () => ({
-    components: { Typography },
+    components: { VTypography },
     template: `
       <div style="max-width: 560px; display: flex; flex-direction: column; gap: 12px">
-        <Typography variant="heading-3" as="p">Une politique typographique unique</Typography>
-        <Typography variant="body-lg">
+        <VTypography variant="heading-3" as="p">Une politique typographique unique</VTypography>
+        <VTypography variant="body-lg">
           Les recettes typographiques vivent dans les tokens sémantiques du design
           system : chaque variante compose famille, taille, graisse, interlignage et
           espacement de lettres depuis la même source, en light comme en dark.
-        </Typography>
-        <Typography variant="body-md" tone="muted">
+        </VTypography>
+        <VTypography variant="body-md" tone="muted">
           Les composants consomment les mêmes tokens en interne — le texte d'une boîte
           de dialogue, le libellé d'un champ ou une légende de tableau partagent
           exactement ces recettes, sans duplication locale. Le rôle
-          <Typography variant="code" as="span">code</Typography> utilise la pile
+          <VTypography variant="code" as="span">code</VTypography> utilise la pile
           monospace du système.
-        </Typography>
+        </VTypography>
       </div>
     `,
   }),

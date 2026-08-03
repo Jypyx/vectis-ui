@@ -12,13 +12,13 @@ import { usePopover } from '../../composables/usePopover'
  * (cf. `usePopover`), l'ancrage et le placement (`.v-overlay`/`.v-floating`),
  * et l'habillage optionnel (`.v-panel`). Il ne porte NI rôle ARIA, NI clavier,
  * NI gestion de focus, NI politique de fermeture : c'est ce qui distingue
- * chaque panneau, et ce qui reste chez ses consommateurs (Tooltip, Listbox,
- * DatePicker, TimePicker). Un panneau paramétré par `role` reste proscrit.
+ * chaque panneau, et ce qui reste chez ses consommateurs (VTooltip, Listbox,
+ * VDatePicker, VTimePicker). Un panneau paramétré par `role` reste proscrit.
  *
  * Deux modes d'ancrage, exclusifs :
  * - slot `#trigger` → le wrapper `.v-popover` porte l'`anchor-name`, confiné
  *   par `anchor-scope` (nom statique partagé : chaque panneau résout SON
- *   wrapper, pas le dernier nommé de la page — cf. Tooltip) ;
+ *   wrapper, pas le dernier nommé de la page — cf. VTooltip) ;
  * - prop `anchor` → le consommateur possède déjà racine et contrôle, il pose
  *   lui-même `anchor-scope`/`anchor-name` et ne fournit que le nom. Le wrapper
  *   passe alors en `display: contents` : aucun nœud de layout ajouté.
@@ -75,7 +75,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
 const open = defineModel<boolean>('open', { default: false })
 
 const slots = defineSlots<{
-  /** Déclencheur : poser `v-bind="triggerProps"` sur un <Button>/<button>. */
+  /** Déclencheur : poser `v-bind="triggerProps"` sur un <VButton>/<button>. */
   trigger?(props: { triggerProps: PopoverTriggerProps }): unknown
   /** Contenu du panneau. */
   default(): unknown

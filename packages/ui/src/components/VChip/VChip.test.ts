@@ -1,11 +1,11 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import Chip from './VChip.vue'
+import VChip from './VChip.vue'
 
-describe('Chip', () => {
+describe('VChip', () => {
   it('statique sans interaction : aucun bouton ni lien, action rendue en span', () => {
-    const { container, queryByRole, getByText } = render(Chip, {
+    const { container, queryByRole, getByText } = render(VChip, {
       slots: { default: 'Étiquette' },
     })
     expect(queryByRole('button')).toBeNull()
@@ -16,7 +16,7 @@ describe('Chip', () => {
 
   it('clickable : bouton natif, le @click fallthrough atterrit sur le bouton', async () => {
     const onClick = vi.fn()
-    const { getByRole } = render(Chip, {
+    const { getByRole } = render(VChip, {
       props: { clickable: true },
       attrs: { onClick },
       slots: { default: 'Action' },
@@ -28,7 +28,7 @@ describe('Chip', () => {
   })
 
   it('clickable disabled : attribut disabled natif posé', () => {
-    const { getByRole } = render(Chip, {
+    const { getByRole } = render(VChip, {
       props: { clickable: true, disabled: true },
       slots: { default: 'Action' },
     })
@@ -36,7 +36,7 @@ describe('Chip', () => {
   })
 
   it('href : rendu <a>, les attrs target/rel tombent sur le lien', () => {
-    const { getByRole } = render(Chip, {
+    const { getByRole } = render(VChip, {
       props: { href: '/docs' },
       attrs: { target: '_blank', rel: 'noopener' },
       slots: { default: 'Docs' },
@@ -49,7 +49,7 @@ describe('Chip', () => {
 
   it('lien inerte : disabled retire le href, pose aria-disabled et filtre onClick', async () => {
     const onClick = vi.fn()
-    const { container } = render(Chip, {
+    const { container } = render(VChip, {
       props: { href: '/docs', disabled: true },
       attrs: { onClick },
       slots: { default: 'Docs' },
@@ -63,7 +63,7 @@ describe('Chip', () => {
   })
 
   it('priorité selectable > href : bouton aria-pressed, pas de lien', () => {
-    const { getByRole, queryByRole } = render(Chip, {
+    const { getByRole, queryByRole } = render(VChip, {
       props: { selectable: true, href: '/docs' },
       slots: { default: 'Filtre' },
     })
@@ -72,7 +72,7 @@ describe('Chip', () => {
   })
 
   it('selectable : bouton aria-pressed synchronisé avec v-model:selected', async () => {
-    const { getByRole, emitted } = render(Chip, {
+    const { getByRole, emitted } = render(VChip, {
       props: { selectable: true, selected: false },
       slots: { default: 'Filtre' },
     })
@@ -83,7 +83,7 @@ describe('Chip', () => {
   })
 
   it('selectable disabled : aucun update:selected émis', async () => {
-    const { getByRole, emitted } = render(Chip, {
+    const { getByRole, emitted } = render(VChip, {
       props: { selectable: true, selected: false, disabled: true },
       slots: { default: 'Filtre' },
     })
@@ -92,7 +92,7 @@ describe('Chip', () => {
   })
 
   it('check : remplace iconStart quand sélectionné', async () => {
-    const { container, rerender } = render(Chip, {
+    const { container, rerender } = render(VChip, {
       props: { selectable: true, check: true, iconStart: 'star', selected: true },
       slots: { default: 'Filtre' },
     })
@@ -105,7 +105,7 @@ describe('Chip', () => {
   })
 
   it('dismissible : émet dismiss sans imbriquer de boutons', async () => {
-    const { getAllByRole, emitted } = render(Chip, {
+    const { getAllByRole, emitted } = render(VChip, {
       props: { selectable: true, dismissible: true, selected: true },
       slots: { default: 'Tag' },
     })
@@ -117,7 +117,7 @@ describe('Chip', () => {
   })
 
   it('dismissIcon : croix intégrée par défaut (close), `{ src }` rendu en <img>', () => {
-    const { container, rerender } = render(Chip, {
+    const { container, rerender } = render(VChip, {
       props: { dismissible: true },
       slots: { default: 'Tag' },
     })
@@ -132,7 +132,7 @@ describe('Chip', () => {
   })
 
   it('slots #start/#end priment sur iconStart/iconEnd', () => {
-    const { queryByText, getByText } = render(Chip, {
+    const { queryByText, getByText } = render(VChip, {
       props: { iconStart: 'star', iconEnd: 'cancel' },
       slots: { default: 'Tag', start: '<b>S</b>', end: '<b>E</b>' },
     })
@@ -143,16 +143,16 @@ describe('Chip', () => {
   })
 
   it('icône seule : data-icon-only posé seulement sans libellé', () => {
-    const { container } = render(Chip, { props: { iconStart: 'favorite' } })
+    const { container } = render(VChip, { props: { iconStart: 'favorite' } })
     expect(container.querySelector('.v-chip')?.hasAttribute('data-icon-only')).toBe(true)
-    const withLabel = render(Chip, { props: { iconStart: 'favorite' }, slots: { default: 'Tag' } })
+    const withLabel = render(VChip, { props: { iconStart: 'favorite' }, slots: { default: 'Tag' } })
     expect(withLabel.container.querySelector('.v-chip')?.hasAttribute('data-icon-only')).toBe(false)
-    const noIcon = render(Chip, {})
+    const noIcon = render(VChip, {})
     expect(noIcon.container.querySelector('.v-chip')?.hasAttribute('data-icon-only')).toBe(false)
   })
 
   it('répartit les attrs : class/style sur la racine, le reste sur l’action', () => {
-    const { container } = render(Chip, {
+    const { container } = render(VChip, {
       props: { clickable: true },
       attrs: { class: 'extra', style: 'margin: 4px;', 'data-x': '1' },
       slots: { default: 'Tag' },
@@ -167,7 +167,7 @@ describe('Chip', () => {
   })
 
   it('data-attributes par défaut, couleur custom en --custom-color inline', () => {
-    const { container, rerender } = render(Chip, { slots: { default: 'Tag' } })
+    const { container, rerender } = render(VChip, { slots: { default: 'Tag' } })
     const root = container.querySelector('.v-chip') as HTMLElement
     expect(root.getAttribute('data-variant')).toBe('tonal')
     expect(root.getAttribute('data-tone')).toBe('neutral')
@@ -182,7 +182,7 @@ describe('Chip', () => {
   })
 
   it('pose data-size/data-compact sur la racine v-control (défaut xs)', () => {
-    const { container, rerender } = render(Chip, { slots: { default: 'Tag' } })
+    const { container, rerender } = render(VChip, { slots: { default: 'Tag' } })
     const root = container.querySelector('.v-chip') as HTMLElement
     expect(root.classList.contains('v-control')).toBe(true)
     expect(root.getAttribute('data-size')).toBe('xs')

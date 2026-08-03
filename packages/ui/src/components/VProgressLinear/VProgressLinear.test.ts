@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import ProgressLinear from './VProgressLinear.vue'
+import VProgressLinear from './VProgressLinear.vue'
 
 /** Style inline de la racine (les custom properties y sont posées). */
 const styleOf = (container: Element) =>
@@ -10,9 +10,9 @@ const styleOf = (container: Element) =>
 /** Le pourcentage est rendu avec une espace insécable (typographie française). */
 const NBSP = ' '
 
-describe('ProgressLinear', () => {
+describe('VProgressLinear', () => {
   it('contrat ARIA : rôle, bornes fidèles et fraction unitless', () => {
-    const { getByRole, container } = render(ProgressLinear, {
+    const { getByRole, container } = render(VProgressLinear, {
       props: { value: 30, max: 60 },
       attrs: { 'aria-label': 'Progression' },
     })
@@ -25,7 +25,7 @@ describe('ProgressLinear', () => {
   })
 
   it('clampe au-dessus du max', () => {
-    const { getByRole, container } = render(ProgressLinear, {
+    const { getByRole, container } = render(VProgressLinear, {
       props: { value: 250, max: 100 },
       attrs: { 'aria-label': 'x' },
     })
@@ -34,7 +34,7 @@ describe('ProgressLinear', () => {
   })
 
   it('clampe en dessous de zéro', () => {
-    const { getByRole, container } = render(ProgressLinear, {
+    const { getByRole, container } = render(VProgressLinear, {
       props: { value: -10 },
       attrs: { 'aria-label': 'x' },
     })
@@ -43,7 +43,7 @@ describe('ProgressLinear', () => {
   })
 
   it('max: 0 ne produit ni NaN ni Infinity', () => {
-    const { container } = render(ProgressLinear, {
+    const { container } = render(VProgressLinear, {
       props: { value: 10, max: 0 },
       attrs: { 'aria-label': 'x' },
     })
@@ -54,7 +54,7 @@ describe('ProgressLinear', () => {
   })
 
   it('indéterminé : pas d’aria-valuenow, data-indeterminate, --fill-fraction toujours posée', () => {
-    const { getByRole, container } = render(ProgressLinear, {
+    const { getByRole, container } = render(VProgressLinear, {
       props: { indeterminate: true },
       attrs: { 'aria-label': 'Chargement' },
     })
@@ -66,7 +66,7 @@ describe('ProgressLinear', () => {
   })
 
   it('indéterminé : showValue est ignoré (aucun texte rendu)', () => {
-    const { container } = render(ProgressLinear, {
+    const { container } = render(VProgressLinear, {
       props: { indeterminate: true, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
@@ -74,7 +74,7 @@ describe('ProgressLinear', () => {
   })
 
   it('tone : accent par défaut, valeur explicite reportée', async () => {
-    const { getByRole, rerender } = render(ProgressLinear, {
+    const { getByRole, rerender } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
@@ -84,7 +84,7 @@ describe('ProgressLinear', () => {
   })
 
   it('couleur custom : data-custom + --custom-color (absents sinon)', async () => {
-    const { getByRole, container, rerender } = render(ProgressLinear, {
+    const { getByRole, container, rerender } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
@@ -96,7 +96,7 @@ describe('ProgressLinear', () => {
   })
 
   it('thickness : number → px, string telle quelle, absente si non fournie', async () => {
-    const { container, rerender } = render(ProgressLinear, {
+    const { container, rerender } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
@@ -112,7 +112,7 @@ describe('ProgressLinear', () => {
   })
 
   it('shape : rounded par défaut, square reporté', async () => {
-    const { getByRole, rerender } = render(ProgressLinear, {
+    const { getByRole, rerender } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
@@ -122,7 +122,7 @@ describe('ProgressLinear', () => {
   })
 
   it('orientation : data-orientation posé uniquement en vertical', async () => {
-    const { getByRole, rerender } = render(ProgressLinear, {
+    const { getByRole, rerender } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
@@ -132,7 +132,7 @@ describe('ProgressLinear', () => {
   })
 
   it('showValue : deux copies du texte, seule la clippée est aria-hidden', () => {
-    const { container } = render(ProgressLinear, {
+    const { container } = render(VProgressLinear, {
       props: { value: 50, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
@@ -148,7 +148,7 @@ describe('ProgressLinear', () => {
   })
 
   it('DOM minimal : la racine EST la piste, le remplissage son seul enfant', () => {
-    const { getByRole, container } = render(ProgressLinear, {
+    const { getByRole, container } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
@@ -161,7 +161,7 @@ describe('ProgressLinear', () => {
   })
 
   it('showValue : le pourcentage est arrondi et dérivé de max', () => {
-    const { container } = render(ProgressLinear, {
+    const { container } = render(VProgressLinear, {
       props: { value: 1, max: 3, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
@@ -171,7 +171,7 @@ describe('ProgressLinear', () => {
   })
 
   it('slot scopé : reçoit value/max/percent et prime sur showValue', () => {
-    const { container } = render(ProgressLinear, {
+    const { container } = render(VProgressLinear, {
       props: { value: 30, max: 60, showValue: true },
       attrs: { 'aria-label': 'x' },
       slots: {
@@ -184,7 +184,7 @@ describe('ProgressLinear', () => {
   })
 
   it('le slot seul suffit à rendre le texte (sans showValue)', () => {
-    const { container } = render(ProgressLinear, {
+    const { container } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
       slots: { default: 'Envoi…' },
@@ -195,7 +195,7 @@ describe('ProgressLinear', () => {
   })
 
   it('sans showValue ni slot : aucun texte rendu', () => {
-    const { container } = render(ProgressLinear, {
+    const { container } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
@@ -203,7 +203,7 @@ describe('ProgressLinear', () => {
   })
 
   it('vertical : le texte est rendu comme en horizontal', () => {
-    const { container } = render(ProgressLinear, {
+    const { container } = render(VProgressLinear, {
       props: { value: 40, orientation: 'vertical', showValue: true },
       attrs: { 'aria-label': 'x' },
     })
@@ -211,7 +211,7 @@ describe('ProgressLinear', () => {
   })
 
   it('valuePosition : center par défaut, valeur explicite reportée', async () => {
-    const { getByRole, rerender } = render(ProgressLinear, {
+    const { getByRole, rerender } = render(VProgressLinear, {
       props: { value: 40, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
@@ -221,7 +221,7 @@ describe('ProgressLinear', () => {
   })
 
   it('fallthrough : class, id et style du consommateur cohabitent avec les custom properties', () => {
-    const { getByRole } = render(ProgressLinear, {
+    const { getByRole } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'Envoi', class: 'mon-upload', id: 'up', style: 'margin-top: 4px' },
     })

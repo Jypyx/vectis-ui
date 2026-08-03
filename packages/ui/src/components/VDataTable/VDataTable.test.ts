@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
-import DataTable from './VDataTable.vue'
+import VDataTable from './VDataTable.vue'
 
 const COLUMNS = [
   { key: 'name', label: 'Nom', sortable: true },
@@ -12,14 +12,14 @@ const COLUMNS = [
 const ROWS = [
   { name: 'Brume', count: 12 },
   { name: 'Atlas', count: 3 },
-  { name: 'Socle', count: 47 },
+  { name: 'Vectis', count: 47 },
 ]
 
 // Jeu étendu pour la pagination/sélection (5 lignes, un nom accentué).
 const ROWS_MANY = [
   { name: 'Brume', count: 12 },
   { name: 'Atlas', count: 3 },
-  { name: 'Socle', count: 47 },
+  { name: 'Vectis', count: 47 },
   { name: 'Éclair', count: 8 },
   { name: 'Granit', count: 21 },
 ]
@@ -38,20 +38,20 @@ function bodyRowCount(container: Element) {
 // générique du SFC incompatible avec le type Component attendu ici.
 function harness(setup: () => Record<string, unknown>, template: string) {
   return defineComponent({
-    components: { DataTable: DataTable as object },
+    components: { VDataTable: VDataTable as object },
     setup,
     template,
   })
 }
 
-describe('DataTable', () => {
+describe('VDataTable', () => {
   afterEach(() => {
     vi.restoreAllMocks()
     vi.useRealTimers()
   })
 
   it('rend caption, th scope=col et cellules avec data-label (mode stack)', () => {
-    const { container, getByText } = render(DataTable, {
+    const { container, getByText } = render(VDataTable, {
       props: { columns: COLUMNS, rows: ROWS, caption: 'Projets', responsive: 'stack' },
     })
     expect(getByText('Projets').tagName).toBe('CAPTION')
@@ -61,7 +61,7 @@ describe('DataTable', () => {
 
   it('variant : data-variant posé sur la racine, flat par défaut', () => {
     const variantOf = (variant?: 'flat' | 'outlined') =>
-      render(DataTable, { props: { columns: COLUMNS, rows: ROWS, variant } })
+      render(VDataTable, { props: { columns: COLUMNS, rows: ROWS, variant } })
         .container.querySelector('.v-table-wrapper')
         ?.getAttribute('data-variant')
     expect(variantOf()).toBe('flat')
@@ -69,7 +69,7 @@ describe('DataTable', () => {
   })
 
   it('tri : asc → desc → aucun, avec aria-sort', async () => {
-    const { container, getByRole } = render(DataTable, {
+    const { container, getByRole } = render(VDataTable, {
       props: { columns: COLUMNS, rows: ROWS },
     })
     const sortButton = getByRole('button', { name: 'Total' })
@@ -81,23 +81,23 @@ describe('DataTable', () => {
     expect(glyph()).toBe('swap_vert')
 
     await fireEvent.click(sortButton)
-    expect(firstColumnCells(container)).toEqual(['Atlas', 'Brume', 'Socle'])
+    expect(firstColumnCells(container)).toEqual(['Atlas', 'Brume', 'Vectis'])
     expect(th.getAttribute('aria-sort')).toBe('ascending')
     expect(glyph()).toBe('arrow_downward')
 
     await fireEvent.click(sortButton)
-    expect(firstColumnCells(container)).toEqual(['Socle', 'Brume', 'Atlas'])
+    expect(firstColumnCells(container)).toEqual(['Vectis', 'Brume', 'Atlas'])
     expect(th.getAttribute('aria-sort')).toBe('descending')
     expect(glyph()).toBe('arrow_upward')
 
     await fireEvent.click(sortButton)
-    expect(firstColumnCells(container)).toEqual(['Brume', 'Atlas', 'Socle'])
+    expect(firstColumnCells(container)).toEqual(['Brume', 'Atlas', 'Vectis'])
     expect(th.hasAttribute('aria-sort')).toBe(false)
     expect(glyph()).toBe('swap_vert')
   })
 
   it('sortIcon/sortAscIcon/sortDescIcon : les trois états se surchargent', async () => {
-    const { getByRole } = render(DataTable, {
+    const { getByRole } = render(VDataTable, {
       props: {
         columns: COLUMNS,
         rows: ROWS,
@@ -119,7 +119,7 @@ describe('DataTable', () => {
   })
 
   it('états vide et chargement', async () => {
-    const { getByText, rerender, getByRole } = render(DataTable, {
+    const { getByText, rerender, getByRole } = render(VDataTable, {
       props: { columns: COLUMNS, rows: [], emptyText: 'Rien à afficher' },
     })
     expect(getByText('Rien à afficher')).toBeTruthy()
@@ -131,10 +131,10 @@ describe('DataTable', () => {
     const Harness = harness(
       () => ({ columns: COLUMNS, rows: [ROWS[0]] }),
       `
-        <DataTable :columns="columns" :rows="rows">
+        <VDataTable :columns="columns" :rows="rows">
           <template #head-name="{ column }"><span>{{ column.label }} (col)</span></template>
           <template #cell-count="{ value, column }"><em>{{ column.label }} : {{ value }}</em></template>
-        </DataTable>
+        </VDataTable>
       `,
     )
     const { getByText, getByRole } = render(Harness)
@@ -145,7 +145,7 @@ describe('DataTable', () => {
 
   it('recherche locale : filtre insensible aux accents, colonnes déclarées seulement', async () => {
     const rows = ROWS_MANY.map((row) => ({ ...row, secret: 'zzz' }))
-    const { container, getByRole, getByText } = render(DataTable, {
+    const { container, getByRole, getByText } = render(VDataTable, {
       props: { columns: COLUMNS, rows, searchable: true },
     })
     const field = getByRole('searchbox', { name: 'Rechercher dans le tableau' })
@@ -161,7 +161,7 @@ describe('DataTable', () => {
   })
 
   it('pagination locale : découpage, page contrôlée et clamp par dérivation', async () => {
-    const { container, getByRole } = render(DataTable, {
+    const { container, getByRole } = render(VDataTable, {
       props: { columns: COLUMNS, rows: ROWS_MANY, perPage: 2, page: 3, searchable: true },
     })
     // page 3 de 3 (5 lignes / 2) → dernière ligne seule
@@ -177,12 +177,12 @@ describe('DataTable', () => {
     const Harness = harness(
       () => ({ columns: COLUMNS, rows: ROWS_MANY, page: ref(2), perPage: ref(2) }),
       `
-        <DataTable :columns="columns" :rows="rows" row-key="name"
+        <VDataTable :columns="columns" :rows="rows" row-key="name"
           v-model:page="page" v-model:per-page="perPage" :per-page-options="[2, 4]" />
       `,
     )
     const { container, getByRole } = render(Harness)
-    expect(firstColumnCells(container)).toEqual(['Socle', 'Éclair'])
+    expect(firstColumnCells(container)).toEqual(['Vectis', 'Éclair'])
     expect(getByRole('button', { name: 'Lignes par page : 2' })).toBeTruthy()
 
     // ouverture via le stub popover jsdom
@@ -191,7 +191,7 @@ describe('DataTable', () => {
     await nextTick()
     await fireEvent.click(getByRole('menuitem', { name: '4' }))
     // 4 lignes par page ET retour page 1
-    expect(firstColumnCells(container)).toEqual(['Brume', 'Atlas', 'Socle', 'Éclair'])
+    expect(firstColumnCells(container)).toEqual(['Brume', 'Atlas', 'Vectis', 'Éclair'])
   })
 
   /* Le nom du bouton est COMPOSITE : la prop `perPageLabel` (ou son défaut de
@@ -200,7 +200,7 @@ describe('DataTable', () => {
      anglais). Une prop personnalisée doit donc traverser la fonction, pas la
      court-circuiter. */
   it('sélecteur « lignes par page » : une prop personnalisée traverse le format', () => {
-    const { getByRole } = render(DataTable, {
+    const { getByRole } = render(VDataTable, {
       props: {
         columns: COLUMNS,
         rows: ROWS_MANY,
@@ -218,15 +218,15 @@ describe('DataTable', () => {
     const Harness = harness(
       () => ({ columns: COLUMNS, rows: ROWS_MANY, selected, page: ref(2) }),
       `
-        <DataTable :columns="columns" :rows="rows" row-key="name" selectable
+        <VDataTable :columns="columns" :rows="rows" row-key="name" selectable
           v-model:selected="selected" v-model:page="page" :per-page="2" />
       `,
     )
     const { container, getByRole } = render(Harness)
 
-    // page 2 → Socle / Éclair visibles ; une ligne cochée → identité rowKey
+    // page 2 → Vectis / Éclair visibles ; une ligne cochée → identité rowKey
     await fireEvent.click(getByRole('checkbox', { name: 'Sélectionner la ligne 1' }))
-    expect(selected.value).toEqual(['Socle'])
+    expect(selected.value).toEqual(['Vectis'])
     expect(container.querySelector('tbody tr')?.hasAttribute('data-selected')).toBe(true)
 
     // master à moitié coché → propriété DOM indeterminate (watchEffect flush post)
@@ -235,7 +235,7 @@ describe('DataTable', () => {
 
     // master : complète la page visible sans toucher au reste
     await fireEvent.click(master)
-    expect(selected.value).toEqual(['Socle', 'Éclair'])
+    expect(selected.value).toEqual(['Vectis', 'Éclair'])
     await waitFor(() => expect(master.indeterminate).toBe(false))
 
     // re-clic : vide la page visible seulement (ici tout, rien hors page)
@@ -248,7 +248,7 @@ describe('DataTable', () => {
     const Harness = harness(
       () => ({ columns: COLUMNS, rows: ROWS_MANY, selected }),
       `
-        <DataTable :columns="columns" :rows="rows" row-key="name" selectable show-range
+        <VDataTable :columns="columns" :rows="rows" row-key="name" selectable show-range
           v-model:selected="selected" :per-page="2" :per-page-options="[2, 4]" />
       `,
     )
@@ -275,12 +275,12 @@ describe('DataTable', () => {
 
   it('avertit en DEV si selectable sans rowKey', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    render(DataTable, { props: { columns: COLUMNS, rows: ROWS, selectable: true } })
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[DataTable]'))
+    render(VDataTable, { props: { columns: COLUMNS, rows: ROWS, selectable: true } })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[VDataTable]'))
   })
 
   it('serverSide : aucun tri local, émission update:params au tri et à la page', async () => {
-    const { container, getByRole, emitted } = render(DataTable, {
+    const { container, getByRole, emitted } = render(VDataTable, {
       props: {
         columns: COLUMNS,
         rows: ROWS,
@@ -291,9 +291,9 @@ describe('DataTable', () => {
       },
     })
     // tri contrôlé posé mais AUCUN réordonnancement local
-    expect(firstColumnCells(container)).toEqual(['Brume', 'Atlas', 'Socle'])
+    expect(firstColumnCells(container)).toEqual(['Brume', 'Atlas', 'Vectis'])
 
-    // page suivante (Pagination composée) → état complet émis
+    // page suivante (VPagination composée) → état complet émis
     await fireEvent.click(getByRole('button', { name: 'Page suivante' }))
     const payloads = emitted('update:params') as [unknown][]
     expect(payloads.at(-1)).toEqual([
@@ -303,7 +303,7 @@ describe('DataTable', () => {
 
   it('serverSide : recherche débouncée, une seule émission avec retour page 1', async () => {
     vi.useFakeTimers()
-    const { getByRole, emitted } = render(DataTable, {
+    const { getByRole, emitted } = render(VDataTable, {
       props: {
         columns: COLUMNS,
         rows: ROWS,
@@ -330,7 +330,7 @@ describe('DataTable', () => {
   })
 
   it('serverSide : searchDebounce 0 émet de façon synchrone', async () => {
-    const { getByRole, emitted } = render(DataTable, {
+    const { getByRole, emitted } = render(VDataTable, {
       props: {
         columns: COLUMNS,
         rows: ROWS,
@@ -346,7 +346,7 @@ describe('DataTable', () => {
   })
 
   it('fallthrough : class sur le wrapper, le reste sur la table', () => {
-    const { container } = render(DataTable, {
+    const { container } = render(VDataTable, {
       props: { columns: COLUMNS, rows: ROWS },
       attrs: { class: 'ma-classe', 'aria-describedby': 'legende' },
     })
@@ -362,7 +362,7 @@ describe('DataTable', () => {
   it('height : block-size sur la racine, jamais sur le scroller', () => {
     const heights: Array<number | string> = [320, '60vh']
     for (const height of heights) {
-      const { container } = render(DataTable, {
+      const { container } = render(VDataTable, {
         props: { columns: COLUMNS, rows: ROWS, height },
         attrs: { style: 'width: 640px' },
       })
@@ -375,7 +375,7 @@ describe('DataTable', () => {
   })
 
   it('sans height : aucune hauteur inline, le parent décide', () => {
-    const { container } = render(DataTable, { props: { columns: COLUMNS, rows: ROWS } })
+    const { container } = render(VDataTable, { props: { columns: COLUMNS, rows: ROWS } })
     const wrapper = container.querySelector('.v-table-wrapper') as HTMLElement
     expect(wrapper.style.blockSize).toBe('')
     expect(container.querySelector('.v-table-scroller')?.hasAttribute('style')).toBe(false)

@@ -15,7 +15,7 @@ export const semantic = {
     'surface-inverse': color('{color.neutral.900}', 'Surfaces à contraste inversé : tooltips'),
     'surface-skeleton': color(
       '{color.neutral.200}',
-      'Fond des silhouettes de chargement (SkeletonLoader) ; le reflet en est dérivé en CSS',
+      'Fond des silhouettes de chargement (VSkeletonLoader) ; le reflet en est dérivé en CSS',
     ),
 
     'text-on-inverse': color('{color.white}', 'Texte posé sur une surface inversée'),
@@ -65,13 +65,13 @@ export const semantic = {
   /**
    * Échelle typographique sémantique : un rôle = une recette complète
    * (taille, graisse, interlignage, éventuel espacement de lettres).
-   * Consommée par le composant Typography et par le CSS des composants.
+   * Consommée par le composant VTypography et par le CSS des composants.
    */
   text: {
     family: fontFamily('{font.family.sans}', 'Police de tout le texte du design system'),
     'family-code': fontFamily(
       '{font.family.mono}',
-      'Police des contenus code (variante code, InputOTP)',
+      'Police des contenus code (variante code, VInputOTP)',
     ),
     display: {
       size: dimension('{font.size.5xl}'),
@@ -142,7 +142,7 @@ export const semantic = {
       weight: fontWeight('{font.weight.regular}'),
       leading: dimension('{font.leading.normal}'),
     },
-    /* Rôle technique : étiquette de contrôle interactif (Button, Chip, Badge…).
+    /* Rôle technique : étiquette de contrôle interactif (VButton, VChip, VBadge…).
      * Pas de `size` : elle vient de l'échelle de tailles (`--control-font-size`). */
     control: {
       weight: fontWeight('{font.weight.medium}'),
@@ -166,15 +166,15 @@ export const semantic = {
     'height-md': dimension('2.5rem'),
     'height-lg': dimension('3rem'),
     'height-xl': dimension('3.5rem'),
-    'border-width': dimension('2px', 'Bordure des contrôles cochables (Checkbox, Radio)'),
-    'size-check': dimension('1.25rem', 'Boîte des contrôles cochables (Checkbox, Radio)'),
-    'size-check-mark': dimension('0.875rem', 'Coche SVG du Checkbox'),
-    'size-check-dot': dimension('0.5rem', 'Point intérieur du Radio'),
-    'size-switch-w': dimension('2.5rem', 'Largeur du track du Switch'),
-    'size-switch-h': dimension('1.25rem', 'Hauteur du track du Switch'),
+    'border-width': dimension('2px', 'Bordure des contrôles cochables (VCheckbox, VRadio)'),
+    'size-check': dimension('1.25rem', 'Boîte des contrôles cochables (VCheckbox, VRadio)'),
+    'size-check-mark': dimension('0.875rem', 'Coche SVG du VCheckbox'),
+    'size-check-dot': dimension('0.5rem', 'Point intérieur du VRadio'),
+    'size-switch-w': dimension('2.5rem', 'Largeur du track du VSwitch'),
+    'size-switch-h': dimension('1.25rem', 'Hauteur du track du VSwitch'),
     'action-size-xs': dimension(
       '1rem',
-      'Boutons internes les plus compacts (retrait des tags du Combobox)',
+      'Boutons internes les plus compacts (retrait des tags du VCombobox)',
     ),
     'action-size-sm': dimension(
       '1.25rem',
@@ -188,73 +188,76 @@ export const semantic = {
       '1.75rem',
       'Boutons internes des champs de saisie lg (effacer, icône cliquable)',
     ),
-    'size-slider-track': dimension('0.375rem', 'Épaisseur de la piste du Slider'),
-    'size-slider-thumb': dimension('1.25rem', 'Diamètre du curseur du Slider'),
-    'size-slider-length': dimension('10rem', 'Longueur par défaut du Slider vertical'),
-    'size-slider-field': dimension('5rem', 'Largeur des champs numériques du Slider'),
+    'size-slider-track': dimension('0.375rem', 'Épaisseur de la piste du VSlider'),
+    'size-slider-thumb': dimension('1.25rem', 'Diamètre du curseur du VSlider'),
+    'size-slider-length': dimension('10rem', 'Longueur par défaut du VSlider vertical'),
+    'size-slider-field': dimension('5rem', 'Largeur des champs numériques du VSlider'),
     'size-combobox-input-min': dimension(
       '4rem',
-      'Largeur minimale de la zone de saisie du Combobox',
+      'Largeur minimale de la zone de saisie du VCombobox',
     ),
     'size-combobox-list-max-block': dimension(
       '18rem',
-      'Hauteur maximale du panneau de liste du Combobox (zone défilante)',
+      'Hauteur maximale du panneau de liste du VCombobox (zone défilante)',
     ),
-    'size-menu-min': dimension('11rem', 'Largeur minimale du panneau du Menu'),
-    'size-menu-max': dimension('20rem', 'Largeur maximale du panneau du Menu'),
+    'size-menu-min': dimension('11rem', 'Largeur minimale du panneau du VMenu'),
+    'size-menu-max': dimension('20rem', 'Largeur maximale du panneau du VMenu'),
     'size-progress-linear-thickness': dimension(
       '0.25rem',
-      'Épaisseur par défaut de la barre du ProgressLinear (4px)',
+      'Épaisseur par défaut de la barre du VProgressLinear (4px)',
     ),
     'size-progress-linear-length': dimension(
       '10rem',
-      'Longueur par défaut du ProgressLinear vertical (surchargeable par `height`)',
+      'Longueur par défaut du VProgressLinear vertical (surchargeable par `height`)',
     ),
-    'size-progress-circular-diameter': dimension('3rem', 'Diamètre par défaut du ProgressCircular'),
+    'size-progress-circular-diameter': dimension(
+      '3rem',
+      'Diamètre par défaut du VProgressCircular',
+    ),
     'size-progress-circular-thickness': dimension(
       '0.25rem',
-      'Épaisseur par défaut du trait du ProgressCircular (4px)',
+      'Épaisseur par défaut du trait du VProgressCircular (4px)',
     ),
     'size-skeleton-surface': dimension(
       '6rem',
-      'Hauteur par défaut du SkeletonLoader en forme de surface — carte, image (96px)',
+      'Hauteur par défaut du VSkeletonLoader en forme de surface — carte, image (96px)',
     ),
     'size-toast-width': dimension('22rem', "Largeur par défaut d'un toast"),
-    'size-badge-h': dimension('1.25rem', 'Hauteur du Badge (pilule)'),
-    'size-badge-dot': dimension('0.625rem', 'Diamètre du Badge en mode point'),
-    'size-avatar-ring': dimension('2px', 'Anneau de séparation des Avatars empilés (AvatarGroup)'),
+    'size-badge-h': dimension('1.25rem', 'Hauteur du VBadge (pilule)'),
+    'size-badge-dot': dimension('0.625rem', 'Diamètre du VBadge en mode point'),
+    'size-avatar-ring': dimension('2px', 'Anneau de séparation des Avatars empilés (VAvatarGroup)'),
     'size-calendar-cell': dimension(
       '2.5rem',
-      'Côté (hauteur/largeur) d’une cellule jour du Calendar',
+      'Côté (hauteur/largeur) d’une cellule jour du VCalendar',
     ),
-    'size-calendar-dot': dimension('0.25rem', 'Diamètre d’une pastille d’événement du Calendar'),
+    'size-calendar-dot': dimension('0.25rem', 'Diamètre d’une pastille d’événement du VCalendar'),
     'size-calendar-nav-min': dimension(
       '5.375rem',
-      'Largeur minimale des boutons sélecteurs mois/année du Calendar (≈86px)',
+      'Largeur minimale des boutons sélecteurs mois/année du VCalendar (≈86px)',
     ),
     'size-tab-indicator': dimension(
       '2px',
-      "Épaisseur de l'indicateur d'onglet actif (Tabs, flat/outlined)",
+      "Épaisseur de l'indicateur d'onglet actif (VTabs, flat/outlined)",
     ),
-    'size-table-search': dimension('16rem', 'Largeur du champ de recherche du DataTable'),
-    'size-timepicker-dial': dimension('16rem', 'Diamètre du cadran du TimePicker (spec M3)'),
+    'size-table-search': dimension('16rem', 'Largeur du champ de recherche du VDataTable'),
+    'size-timepicker-dial': dimension('16rem', 'Diamètre du cadran du VTimePicker (spec M3)'),
     'size-timepicker-number': dimension(
       '3rem',
-      "Cellule d'un chiffre du cadran du TimePicker et pastille de l'aiguille sur un repère",
+      "Cellule d'un chiffre du cadran du VTimePicker et pastille de l'aiguille sur un repère",
     ),
-    'size-timepicker-center': dimension('0.5rem', 'Point central du cadran du TimePicker'),
-    'size-timepicker-hand': dimension('2px', "Épaisseur de l'aiguille du cadran du TimePicker"),
+    'size-timepicker-center': dimension('0.5rem', 'Point central du cadran du VTimePicker'),
+    'size-timepicker-hand': dimension('2px', "Épaisseur de l'aiguille du cadran du VTimePicker"),
     'size-timepicker-hand-minor': dimension(
       '1rem',
-      "Pastille de l'aiguille du cadran du TimePicker sur une minute hors repère 5 min",
+      "Pastille de l'aiguille du cadran du VTimePicker sur une minute hors repère 5 min",
     ),
     'size-timepicker-cell-w': dimension(
       '6rem',
-      "Largeur d'un sélecteur heure/minute du panneau du TimePicker (la hauteur vient de l'échelle de contrôles)",
+      "Largeur d'un sélecteur heure/minute du panneau du VTimePicker (la hauteur vient de l'échelle de contrôles)",
     ),
     'size-timepicker-list-max-block': dimension(
       '18rem',
-      'Hauteur maximale du panneau de liste du TimePicker (zone défilante)',
+      'Hauteur maximale du panneau de liste du VTimePicker (zone défilante)',
     ),
   },
   icon: {

@@ -1,7 +1,7 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as BreadcrumbStories from './VBreadcrumb.stories'
+import * as VBreadcrumbStories from './VBreadcrumb.stories'
 
-<Meta of={BreadcrumbStories} />
+<Meta of={VBreadcrumbStories} />
 
 # Breadcrumb
 
@@ -11,12 +11,12 @@ de données, aucune API navigateur, SSR-safe. Chaque item est un lien ; l'item *
 dérivé de `currentPath` : celui dont le `href` correspond (slash final normalisé) reste un
 lien cliquable et reçoit `aria-current="page"` — pattern ARIA APG.
 
-Les séparateurs sont des `<Icon>` décoratifs (`aria-hidden`) placés en tête de chaque item,
+Les séparateurs sont des `<VIcon>` décoratifs (`aria-hidden`) placés en tête de chaque item,
 le premier étant masqué en CSS (`:first-child`).
 
-<Canvas of={BreadcrumbStories.Default} />
+<Canvas of={VBreadcrumbStories.Default} />
 
-<Controls of={BreadcrumbStories.Default} />
+<Controls of={VBreadcrumbStories.Default} />
 
 ## Séparateur
 
@@ -25,9 +25,9 @@ le premier étant masqué en CSS (`:first-child`).
 RTL : une icône directionnelle ne se retourne pas
 automatiquement.
 
-<Canvas of={BreadcrumbStories.SeparateurIcone} />
+<Canvas of={VBreadcrumbStories.SeparateurIcone} />
 
-<Canvas of={BreadcrumbStories.SeparateurImage} />
+<Canvas of={VBreadcrumbStories.SeparateurImage} />
 
 ## Icônes d'items
 
@@ -35,22 +35,22 @@ automatiquement.
 séparateur. Les icônes suivent la taille et la couleur du texte via le contexte
 `--vectis-icon-size`.
 
-<Canvas of={BreadcrumbStories.AvecIcones} />
+<Canvas of={VBreadcrumbStories.AvecIcones} />
 
 ## Troncature
 
 Au-delà de `maxItems` (minimum effectif : 3), la liste affiche le 1er item + un bouton
-« … » + l'avant-dernier + le dernier. Le bouton ouvre un Menu listant uniquement
+« … » + l'avant-dernier + le dernier. Le bouton ouvre un VMenu listant uniquement
 les items masqués, rendus en vrais liens (`<a role="menuitem">`). Clavier : flèches pour
 naviguer, Échap referme et rend le focus au déclencheur.
 
-<Canvas of={BreadcrumbStories.Tronque} />
+<Canvas of={VBreadcrumbStories.Tronque} />
 
 ## Cas limites
 
 Les libellés longs sont tronqués par ellipsis, la liste passe à la ligne si nécessaire :
 
-<Canvas of={BreadcrumbStories.LibellesLongs} />
+<Canvas of={VBreadcrumbStories.LibellesLongs} />
 
 ## Accessibilité
 

@@ -3,14 +3,14 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import type { Component } from 'vue'
 import { ref } from 'vue'
 
-import Chip from '../VChip/VChip.vue'
-import Typography from '../VTypography/VTypography.vue'
+import VChip from '../VChip/VChip.vue'
+import VTypography from '../VTypography/VTypography.vue'
 import DataTableSfc from './VDataTable.vue'
 import type { DataTableParams, DataTableRowId } from './VDataTable.vue'
 
 // SFC générique : sa signature de fonction générique n'est pas assignable aux
 // types Component de Storybook — on l'efface pour les stories.
-const DataTable = DataTableSfc as unknown as Component
+const VDataTable = DataTableSfc as unknown as Component
 
 const COLUMNS = [
   { key: 'name', label: 'Projet', sortable: true },
@@ -20,7 +20,7 @@ const COLUMNS = [
 ]
 
 const ROWS = [
-  { name: 'Socle', owner: 'Xavier', status: 'actif', commits: 320 },
+  { name: 'Vectis', owner: 'Xavier', status: 'actif', commits: 320 },
   { name: 'Atlas', owner: 'Nadia', status: 'actif', commits: 87 },
   { name: 'Brume', owner: 'Louis', status: 'archivé', commits: 1204 },
   { name: 'Granit', owner: 'Emma', status: 'actif', commits: 45 },
@@ -28,7 +28,7 @@ const ROWS = [
 
 // Jeu étoffé (22 lignes) pour la recherche, la pagination et le sticky header.
 const PROJETS = [
-  'Socle',
+  'Vectis',
   'Atlas',
   'Brume',
   'Granit',
@@ -61,7 +61,7 @@ const ROWS_MANY = PROJETS.map((name, index) => ({
 
 const meta: Meta = {
   title: 'Composants/DataTable',
-  component: DataTable as Meta['component'],
+  component: VDataTable as Meta['component'],
   argTypes: {
     variant: { control: 'inline-radio', options: ['flat', 'outlined'] },
   },
@@ -78,17 +78,17 @@ type Story = StoryObj
 
 export const Default: Story = {
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args }),
-    template: '<DataTable v-bind="args" style="width: 640px" />',
+    template: '<VDataTable v-bind="args" style="width: 640px" />',
   }),
 }
 
 export const Tri: Story = {
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args }),
-    template: '<DataTable v-bind="args" style="width: 640px" />',
+    template: '<VDataTable v-bind="args" style="width: 640px" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -111,9 +111,9 @@ export const Tri: Story = {
 export const Recherche: Story = {
   args: { title: 'Projets', searchable: true },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args }),
-    template: '<DataTable v-bind="args" style="width: 640px" />',
+    template: '<VDataTable v-bind="args" style="width: 640px" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -124,7 +124,7 @@ export const Recherche: Story = {
     await waitFor(() => {
       expect(canvasElement.querySelectorAll('tbody tr').length).toBe(1)
     })
-    // la croix d'effacement (Input clearable) restaure la liste
+    // la croix d'effacement (VInput clearable) restaure la liste
     await userEvent.click(canvas.getByRole('button', { name: 'Effacer' }))
     await waitFor(() => {
       expect(canvasElement.querySelectorAll('tbody tr').length).toBe(4)
@@ -132,14 +132,14 @@ export const Recherche: Story = {
   },
 }
 
-/** Footer : lignes par page, « X–Y sur Z » puis Pagination, groupés à droite. */
+/** Footer : lignes par page, « X–Y sur Z » puis VPagination, groupés à droite. */
 export const PaginationLocale: Story = {
   args: { rows: ROWS_MANY, showRange: true },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args, perPage: ref(5), page: ref(1) }),
     template: `
-      <DataTable v-bind="args" v-model:per-page="perPage" v-model:page="page"
+      <VDataTable v-bind="args" v-model:per-page="perPage" v-model:page="page"
         :per-page-options="[5, 10, 20]" style="width: 760px" />
     `,
   }),
@@ -163,10 +163,10 @@ export const PaginationLocale: Story = {
 export const LignesParPage: Story = {
   args: { rows: ROWS_MANY, showRange: true },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args, perPage: ref(5), page: ref(2) }),
     template: `
-      <DataTable v-bind="args" v-model:per-page="perPage" v-model:page="page"
+      <VDataTable v-bind="args" v-model:per-page="perPage" v-model:page="page"
         :per-page-options="[5, 10, 20]" style="width: 760px" />
     `,
   }),
@@ -179,7 +179,7 @@ export const LignesParPage: Story = {
       expect(canvasElement.querySelectorAll('tbody tr').length).toBe(10)
       // retour page 1 : la première ligne du jeu réapparaît
       expect(canvasElement.querySelector('tbody tr td:nth-child(1)')?.textContent).toContain(
-        'Socle',
+        'Vectis',
       )
     })
   },
@@ -189,14 +189,14 @@ export const LignesParPage: Story = {
 export const Selection: Story = {
   args: { rows: ROWS_MANY, selectable: true, showRange: true },
   render: (args) => ({
-    components: { DataTable, Typography },
+    components: { VDataTable, VTypography },
     setup: () => ({ args, selected: ref<DataTableRowId[]>([]), perPage: ref(5) }),
     template: `
-      <DataTable v-bind="args" v-model:selected="selected" v-model:per-page="perPage"
+      <VDataTable v-bind="args" v-model:selected="selected" v-model:per-page="perPage"
         :per-page-options="[5, 10]" style="width: 760px" />
-      <Typography tone="muted" style="margin-block-start: 8px">
+      <VTypography tone="muted" style="margin-block-start: 8px">
         Sélection : {{ selected.length ? selected.join(', ') : 'aucune' }}
-      </Typography>
+      </VTypography>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -240,7 +240,7 @@ export const TableauComplet: Story = {
     showRange: true,
   },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({
       args,
       selected: ref<DataTableRowId[]>([]),
@@ -248,7 +248,7 @@ export const TableauComplet: Story = {
       page: ref(1),
     }),
     template: `
-      <DataTable v-bind="args" v-model:selected="selected" v-model:per-page="perPage"
+      <VDataTable v-bind="args" v-model:selected="selected" v-model:per-page="perPage"
         v-model:page="page" :per-page-options="[5, 10, 20]" style="width: 760px" />
     `,
   }),
@@ -256,14 +256,14 @@ export const TableauComplet: Story = {
 
 export const CellulesPersonnalisees: Story = {
   render: (args) => ({
-    components: { DataTable, Chip },
+    components: { VDataTable, VChip },
     setup: () => ({ args }),
     template: `
-      <DataTable v-bind="args" style="width: 640px">
+      <VDataTable v-bind="args" style="width: 640px">
         <template #cell-status="{ value }">
-          <Chip :tone="value === 'actif' ? 'success' : 'neutral'">{{ value }}</Chip>
+          <VChip :tone="value === 'actif' ? 'success' : 'neutral'">{{ value }}</VChip>
         </template>
-      </DataTable>
+      </VDataTable>
     `,
   }),
 }
@@ -271,28 +271,28 @@ export const CellulesPersonnalisees: Story = {
 /** Slot `head-<key>` : libellé d'en-tête enrichi (rendu dans le bouton de tri). */
 export const EnTetesPersonnalises: Story = {
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args }),
     template: `
-      <DataTable v-bind="args" style="width: 640px">
+      <VDataTable v-bind="args" style="width: 640px">
         <template #head-commits="{ column }">
           <span>{{ column.label }} (30 j)</span>
         </template>
-      </DataTable>
+      </VDataTable>
     `,
   }),
 }
 
 /** Densité réduite : paddings de cellules -1 cran, composés en compact. */
-/** Habillage du conteneur — même échelle que l'Accordion : `flat` (défaut) et `outlined`. */
+/** Habillage du conteneur — même échelle que le VAccordion : `flat` (défaut) et `outlined`. */
 export const Variantes: Story = {
   args: { title: 'Projets', searchable: true, caption: undefined },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args, variants: ['flat', 'outlined'] as const }),
     template: `
       <div style="display: grid; gap: 32px; width: 680px">
-        <DataTable
+        <VDataTable
           v-for="variant in variants"
           :key="variant"
           v-bind="args"
@@ -307,10 +307,10 @@ export const Variantes: Story = {
 export const Compact: Story = {
   args: { rows: ROWS_MANY, title: 'Projets', searchable: true, compact: true, showRange: true },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args, perPage: ref(10) }),
     template: `
-      <DataTable v-bind="args" v-model:per-page="perPage" :per-page-options="[10, 20]"
+      <VDataTable v-bind="args" v-model:per-page="perPage" :per-page-options="[10, 20]"
         style="width: 760px" />
     `,
   }),
@@ -324,9 +324,9 @@ export const Compact: Story = {
 export const StickyHeader: Story = {
   args: { rows: ROWS_MANY, stickyHeader: true, height: 320, caption: undefined },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args }),
-    template: '<DataTable v-bind="args" style="width: 640px" />',
+    template: '<VDataTable v-bind="args" style="width: 640px" />',
   }),
 }
 
@@ -348,11 +348,11 @@ export const PleineHauteur: Story = {
     caption: undefined,
   },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args, perPage: ref(10), page: ref(1) }),
     template: `
       <div style="block-size: 460px; inline-size: 760px">
-        <DataTable v-bind="args" v-model:per-page="perPage" v-model:page="page"
+        <VDataTable v-bind="args" v-model:per-page="perPage" v-model:page="page"
           :per-page-options="[10, 20]" />
       </div>
     `,
@@ -380,9 +380,9 @@ export const PleineHauteur: Story = {
 export const Striped: Story = {
   args: { rows: ROWS_MANY.slice(0, 8), striped: true },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args }),
-    template: '<DataTable v-bind="args" style="width: 640px" />',
+    template: '<VDataTable v-bind="args" style="width: 640px" />',
   }),
 }
 
@@ -390,11 +390,11 @@ export const Striped: Story = {
 export const ResponsiveStack: Story = {
   args: { responsive: 'stack', selectable: true },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args, selected: ref<DataTableRowId[]>([]) }),
     template: `
       <div style="width: 360px; border: 1px dashed var(--vectis-color-border); padding: 8px">
-        <DataTable v-bind="args" v-model:selected="selected" />
+        <VDataTable v-bind="args" v-model:selected="selected" />
       </div>
     `,
   }),
@@ -414,7 +414,7 @@ export const ServerSide: Story = {
     caption: undefined,
   },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => {
       const rows = ref(ROWS_MANY.slice(0, 5))
       const total = ref(ROWS_MANY.length)
@@ -445,7 +445,7 @@ export const ServerSide: Story = {
       return { args, rows, total, loading, perPage, page, onParams }
     },
     template: `
-      <DataTable v-bind="args" :rows="rows" :total="total" :loading="loading"
+      <VDataTable v-bind="args" :rows="rows" :total="total" :loading="loading"
         v-model:per-page="perPage" v-model:page="page" :per-page-options="[5, 10]"
         style="width: 760px" @update:params="onParams" />
     `,
@@ -455,17 +455,17 @@ export const ServerSide: Story = {
 export const Chargement: Story = {
   args: { loading: true },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args }),
-    template: '<DataTable v-bind="args" style="width: 640px" />',
+    template: '<VDataTable v-bind="args" style="width: 640px" />',
   }),
 }
 
 export const Vide: Story = {
   args: { rows: [], emptyText: 'Aucun projet pour le moment' },
   render: (args) => ({
-    components: { DataTable },
+    components: { VDataTable },
     setup: () => ({ args }),
-    template: '<DataTable v-bind="args" style="width: 640px" />',
+    template: '<VDataTable v-bind="args" style="width: 640px" />',
   }),
 }

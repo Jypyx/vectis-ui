@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { computed, inject, useSlots } from 'vue'
 
-import Button from '../VButton/VButton.vue'
-import Icon from '../VIcon/VIcon.vue'
+import VButton from '../VButton/VButton.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import { toggleKey } from './context'
 import type { ToggleValue } from './VToggle.vue'
 
 /**
- * Un item de Toggle. C'est un `Button` : tone, variante, taille, focus et
+ * Un item de VToggle. C'est un `VButton` : tone, variante, taille, focus et
  * désactivation viennent de lui, seul l'état bascule (`aria-pressed`) est
- * ajouté — il traverse le fallthrough de Button jusqu'au <button> rendu, qui
- * reste ainsi l'enfant direct exigé par la couture de ButtonGroup.
+ * ajouté — il traverse le fallthrough de VButton jusqu'au <button> rendu, qui
+ * reste ainsi l'enfant direct exigé par la couture de VButtonGroup.
  *
- * L'item reste rendu hors d'un `Toggle` (comme Tab hors Tabs), simplement
+ * L'item reste rendu hors d'un `VToggle` (comme VTab hors VTabs), simplement
  * jamais sélectionné.
  */
 interface ToggleItemProps {
@@ -44,15 +44,15 @@ const toggle = inject(toggleKey, null)
 
 const selected = computed(() => toggle != null && toggle.isSelected(props.value))
 
-/** Aucun libellé visible : l'item se réduit à un carré, comme un IconButton. */
+/** Aucun libellé visible : l'item se réduit à un carré, comme un VIconButton. */
 const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.default)
 </script>
 
 <template>
   <!-- aria-pressed toujours posé (même à 'false') : c'est sa présence qui fait
-       annoncer « bouton bascule ». `filled` posé directement sur Icon : la prop
-       `iconFilled` de Button est sans effet sur les slots. -->
-  <Button
+       annoncer « bouton bascule ». `filled` posé directement sur VIcon : la prop
+       `iconFilled` de VButton est sans effet sur les slots. -->
+  <VButton
     class="v-toggle-item"
     :aria-pressed="selected ? 'true' : 'false'"
     :variant="selected ? 'solid' : (toggle?.variant ?? 'ghost')"
@@ -64,17 +64,17 @@ const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.de
     @click="toggle?.select(value)"
   >
     <template v-if="icon" #start>
-      <Icon v-bind="iconProps(icon)" :filled="selected && (toggle?.selectedIconFilled ?? false)" />
+      <VIcon v-bind="iconProps(icon)" :filled="selected && (toggle?.selectedIconFilled ?? false)" />
     </template>
     <slot v-if="!iconOnly">{{ label }}</slot>
-  </Button>
+  </VButton>
 </template>
 
 <style>
 @layer vectis.components {
   /*
-   * Item réduit à son icône : carré, comme IconButton. [data-size] (toujours
-   * rendu par Button) qualifie le sélecteur pour battre le padding de
+   * Item réduit à son icône : carré, comme VIconButton. [data-size] (toujours
+   * rendu par VButton) qualifie le sélecteur pour battre le padding de
    * .v-button[data-variant='…'] quel que soit l'ordre du CSS bundlé.
    */
   .v-toggle-item[data-size][data-icon-only] {

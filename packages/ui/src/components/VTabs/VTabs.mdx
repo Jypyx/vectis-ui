@@ -1,28 +1,28 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
 
-import * as TabsStories from './VTabs.stories'
+import * as VTabsStories from './VTabs.stories'
 
-<Meta of={TabsStories} />
+<Meta of={VTabsStories} />
 
 # Tabs
 
 Navigation entre des sections de même niveau. Le composant n'invente aucun bouton : chaque onglet est
-un `Button`, les contrôles de défilement des `IconButton`. Hover, focus, désactivation, gris des
-états inertes et respect de `prefers-reduced-motion` viennent donc directement de `Button`, sans une
+un `VButton`, les contrôles de défilement des `VIconButton`. Hover, focus, désactivation, gris des
+états inertes et respect de `prefers-reduced-motion` viennent donc directement de `VButton`, sans une
 seule règle d'état redéfinie ici.
 
-L'API est **composée** : `Tabs` porte la configuration et le `v-model`, `Tab` déclare un onglet,
-`TabPanel` son panneau. Les deux familles vivent dans deux slots distincts — le slot par défaut pour
+L'API est **composée** : `VTabs` porte la configuration et le `v-model`, `VTab` déclare un onglet,
+`VTabPanel` son panneau. Les deux familles vivent dans deux slots distincts — le slot par défaut pour
 les onglets, `#panels` pour les panneaux — parce que rien ne permettrait sinon de les répartir dans
-deux conteneurs du DOM. Le slot `#panels` est facultatif : sans lui, `Tabs` n'est qu'une barre, et
+deux conteneurs du DOM. Le slot `#panels` est facultatif : sans lui, `VTabs` n'est qu'une barre, et
 peut servir de contrôle segmenté.
 
-Les identifiants ARIA ne demandent aucun câblage : `Tab` et `TabPanel` dérivent le même identifiant
+Les identifiants ARIA ne demandent aucun câblage : `VTab` et `VTabPanel` dérivent le même identifiant
 de leur `value`, à partir d'un identifiant unique posé par la racine. Il n'y a donc ni registre ni
 échange d'état entre eux.
 
-<Canvas of={TabsStories.Default} />
-<Controls of={TabsStories.Default} />
+<Canvas of={VTabsStories.Default} />
+<Controls of={VTabsStories.Default} />
 
 ## Variantes
 
@@ -36,19 +36,19 @@ contigus et à angles droits** : ce sont l'indicateur et la piste qui découpent
 silhouette des boutons.
 
 `outlined` reprend `flat` trait pour trait et l'enferme dans une carte : filet, coins arrondis et
-fond surélevé, sur l'échelle d'habillage commune à l'`Accordion` et au `DataTable`. Le cadre entoure
+fond surélevé, sur l'échelle d'habillage commune à l'`VAccordion` et au `VDataTable`. Le cadre entoure
 le composant **entier**, barre et panneaux : la piste change alors de rôle sans changer de trait —
 elle devient le filet qui sépare les onglets de leur contenu, à l'intérieur du cadre. La barre et les
 panneaux prennent la gouttière du cadre ; seule la piste reste à fleur, d'un bord à l'autre, sinon
 elle ne séparerait plus rien. La rangée d'onglets y reprend son rayon aux seules extrémités — les
-coutures internes restent carrées, sur l'idiome du `ButtonGroup` — du côté que la piste n'occupe pas.
+coutures internes restent carrées, sur l'idiome du `VButtonGroup` — du côté que la piste n'occupe pas.
 Sans slot `#panels` il n'y a rien à séparer : la piste s'efface et la bordure de la carte la
 remplace.
 
 `inset` pose les onglets dans une piste creuse et surélève l'actif — c'est la variante `elevated` de
-`Button`, ombre comprise. Elle ne s'encadre pas : c'est un contrôle segmenté, déjà sa propre surface.
+`VButton`, ombre comprise. Elle ne s'encadre pas : c'est un contrôle segmenté, déjà sa propre surface.
 
-<Canvas of={TabsStories.Variantes} />
+<Canvas of={VTabsStories.Variantes} />
 
 ## Tones
 
@@ -57,16 +57,16 @@ seule. L'indicateur des variantes `flat` et `outlined` est peint en `currentColo
 couplé, et vire au gris avec le texte quand l'onglet est désactivé. Il n'y a pas de couleur custom
 ici — un onglet est une navigation, pas une étiquette.
 
-<Canvas of={TabsStories.Tones} />
+<Canvas of={VTabsStories.Tones} />
 
 ## Tailles
 
 `size` et `compact` suivent l'échelle unifiée des contrôles et sont propagés à tous les boutons, y
 compris les contrôles de défilement. Un onglet réduit à son icône devient carré, sur le modèle
-d'`IconButton`.
+d'`VIconButton`.
 
-<Canvas of={TabsStories.Sizes} />
-<Canvas of={TabsStories.Compact} />
+<Canvas of={VTabsStories.Sizes} />
+<Canvas of={VTabsStories.Compact} />
 
 ## Contenu d'un onglet
 
@@ -75,7 +75,7 @@ deux se combinent. Une icône sans libellé donne un onglet carré : il faut alo
 accessible avec `aria-label`, qui traverse jusqu'au `<button>` rendu. Enfin, le slot par défaut
 remplace le libellé pour tout contenu riche.
 
-<Canvas of={TabsStories.ContenuOnglet} />
+<Canvas of={VTabsStories.ContenuOnglet} />
 
 ## Orientation et alignement
 
@@ -92,8 +92,8 @@ dépassant du côté départ définitivement inatteignable. Corollaire visible d
 ci-dessous : en vertical, `align` joue sur l'axe block, il n'a donc d'effet que si la barre reçoit
 une hauteur.
 
-<Canvas of={TabsStories.Vertical} />
-<Canvas of={TabsStories.Alignement} />
+<Canvas of={VTabsStories.Vertical} />
+<Canvas of={VTabsStories.Alignement} />
 
 ## Occuper toute la place
 
@@ -101,7 +101,7 @@ une hauteur.
 longs. C'est par construction incompatible avec le défilement : plus rien ne déborde, les contrôles
 de défilement resteraient donc désactivés.
 
-<Canvas of={TabsStories.Grow} />
+<Canvas of={VTabsStories.Grow} />
 
 ## Défilement
 
@@ -115,19 +115,19 @@ Ces butées sont mesurées par deux sentinelles observées dans la liste : un se
 défilement, le redimensionnement du conteneur et l'ajout ou le retrait d'onglets. Aucun `ResizeObserver`,
 aucun écouteur de défilement.
 
-<Canvas of={TabsStories.Defilement} />
-<Canvas of={TabsStories.BoutonsDefilement} />
+<Canvas of={VTabsStories.Defilement} />
+<Canvas of={VTabsStories.BoutonsDefilement} />
 
 Les icônes par défaut suivent l'orientation — chevrons en horizontal, `expand_less`/`expand_more` en
 vertical. `prevIcon` et `nextIcon` les remplacent, et acceptent aussi bien un nom d'icône
 qu'un rendu explicite ; `prevLabel` et `nextLabel` fournissent le nom accessible correspondant, qu'il
 faut penser à adapter en même temps que l'icône.
 
-<Canvas of={TabsStories.FlechesPersonnalisees} />
+<Canvas of={VTabsStories.FlechesPersonnalisees} />
 
 ## Panneaux
 
-Les `TabPanel` sont tous rendus ; les inactifs portent l'attribut natif `hidden`. Aucun JavaScript
+Les `VTabPanel` sont tous rendus ; les inactifs portent l'attribut natif `hidden`. Aucun JavaScript
 n'est nécessaire, et l'état du contenu — une saisie en cours, une position de défilement — survit au
 changement d'onglet. La contrepartie est que ce contenu est monté d'emblée et que les champs des
 panneaux masqués restent soumis avec le formulaire ; `lazy` diffère le montage d'un panneau à son
@@ -138,19 +138,19 @@ Le panneau masqué l'est par la feuille de style du navigateur, qu'une simple d�
 rester surchargeable comme le reste du design system. Pour donner un `display` au panneau, cibler
 `.v-tabs-panel:not([hidden])`.
 
-<Canvas of={TabsStories.Panneaux} />
+<Canvas of={VTabsStories.Panneaux} />
 
 ## Onglets désactivés et cas limites
 
 Un onglet `disabled` est un `<button disabled>` : gris par tokens, inerte, et sauté par les flèches —
-le même choix que les pages désactivées de la `Pagination`.
+le même choix que les pages désactivées de la `VPagination`.
 
 Le `v-model` doit référencer un onglet existant et activable : c'est la valeur qui décide à la fois
 du panneau affiché et du seul onglet présent dans l'ordre de tabulation. Une valeur hors liste ne
 casse rien, mais laisse la barre entière hors tabulation.
 
-<Canvas of={TabsStories.Desactive} />
-<Canvas of={TabsStories.CasLimites} />
+<Canvas of={VTabsStories.Desactive} />
+<Canvas of={VTabsStories.CasLimites} />
 
 ## Accessibilité
 

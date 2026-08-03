@@ -2,7 +2,7 @@ import type { Component } from 'vue'
 
 /** Contexte d'une demande d'icône. Objet plutôt qu'un booléen nu, pour rester extensible. */
 export interface IconContext {
-  /** `filled` demandé par l'appelant (prop d'Icon, `iconFilled` de Button…). */
+  /** `filled` demandé par l'appelant (prop de VIcon, `iconFilled` de VButton…). */
   filled: boolean
 }
 
@@ -13,7 +13,7 @@ export interface IconContext {
  * à classes + pseudo-élément (Font Awesome, Phosphor, Bootstrap Icons).
  *
  * Union non taguée : c'est ce que le consommateur écrit à la main, autant qu'il
- * n'ait rien à taguer. La précédence est fixée côté Icon, dans cet ordre :
+ * n'ait rien à taguer. La précédence est fixée côté VIcon, dans cet ordre :
  * path > component > src > text > class.
  */
 export type IconRender =

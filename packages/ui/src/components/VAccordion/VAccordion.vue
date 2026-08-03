@@ -32,7 +32,7 @@ const props = withDefaults(defineProps<AccordionProps>(), {
 })
 
 defineSlots<{
-  /** Les <AccordionItem> */
+  /** Les <VAccordionItem> */
   default(): unknown
 }>()
 
@@ -62,7 +62,7 @@ provide(accordionKey, {
     /*
      * Densité : variables posées sur la RACINE seulement (seule à rendre
      * data-compact) et héritées par les items — les fallbacks vivent côté
-     * AccordionItem, qui reste utilisable hors groupe.
+     * VAccordionItem, qui reste utilisable hors groupe.
      *
      * Compact = -4px sur TOUS les paddings (hors
      * échelle : l'accordéon n'a pas de hauteur imposée). Un seul delta pilote

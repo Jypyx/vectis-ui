@@ -1,28 +1,28 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as DialogAlertStories from './VDialogAlert.stories'
+import * as VDialogAlertStories from './VDialogAlert.stories'
 
-<Meta of={DialogAlertStories} />
+<Meta of={VDialogAlertStories} />
 
 # DialogAlert
 
-Variante d'alerte de `Dialog` : **même design**, mais `role="alertdialog"` — une modale qui
+Variante d'alerte de `VDialog` : **même design**, mais `role="alertdialog"` — une modale qui
 **exige une action explicite** de l'utilisateur (confirmation destructive, perte de données…).
-C'est un simple wrapper de `Dialog` qui verrouille la sémantique et **coupe tout light
+C'est un simple wrapper de `VDialog` qui verrouille la sémantique et **coupe tout light
 dismiss** : pas de croix, ni clic sur le backdrop, **ni touche Échap** (`closedby="none"`).
 Seuls les boutons du footer ferment la modale.
 
-<Canvas of={DialogAlertStories.Default} />
+<Canvas of={VDialogAlertStories.Default} />
 
-<Controls of={DialogAlertStories.Default} />
+<Controls of={VDialogAlertStories.Default} />
 
 ## Pourquoi un wrapper
 
-`DialogAlert` force `role="alertdialog"`, `closable=false`, `closeOnBackdrop=false` et
-`closeOnEscape=false` sur `Dialog`. Toute la mécanique (top-layer, piège de focus, fond inerte,
+`VDialogAlert` force `role="alertdialog"`, `closable=false`, `closeOnBackdrop=false` et
+`closeOnEscape=false` sur `VDialog`. Toute la mécanique (top-layer, piège de focus, fond inerte,
 sticky header/footer, séparateurs au défilement, montage paresseux) est héritée telle quelle —
 inutile de dupliquer le composant. La largeur par défaut est `400px` (prop `width`).
 
-<Canvas of={DialogAlertStories.Confirmation} />
+<Canvas of={VDialogAlertStories.Confirmation} />
 
 ## Accessibilité
 

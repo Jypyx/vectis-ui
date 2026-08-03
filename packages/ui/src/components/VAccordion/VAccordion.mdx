@@ -1,7 +1,7 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as AccordionStories from './VAccordion.stories'
+import * as VAccordionStories from './VAccordion.stories'
 
-<Meta of={AccordionStories} />
+<Meta of={VAccordionStories} />
 
 # Accordion
 
@@ -11,22 +11,22 @@ seul panneau ouvert à la fois — repose sur l'attribut natif `name` partagé e
 fourni par le groupe. L'ouverture est animée en pur CSS (`::details-content` +
 `interpolate-size`) : sans support, elle est simplement instantanée.
 
-<Canvas of={AccordionStories.Default} />
+<Canvas of={VAccordionStories.Default} />
 
-<Controls of={AccordionStories.Default} />
+<Controls of={VAccordionStories.Default} />
 
 ## Ouvertures multiples
 
 `exclusive={false}` retire le `name` partagé : chaque panneau s'ouvre et se ferme
 indépendamment.
 
-<Canvas of={AccordionStories.OuverturesMultiples} />
+<Canvas of={VAccordionStories.OuverturesMultiples} />
 
 ## Titre riche
 
 Le slot `#title` remplace la prop `title` pour composer un intitulé (emphase, badge, icône…).
 
-<Canvas of={AccordionStories.TitreRiche} />
+<Canvas of={VAccordionStories.TitreRiche} />
 
 ## Sous-titre et icône de début
 
@@ -37,7 +37,7 @@ partout ailleurs. Le
 slot `#start` prime sur `iconStart` pour un contenu libre (avatar, badge…). Les deux se
 combinent librement et restent indépendants du chevron d'ouverture.
 
-<Canvas of={AccordionStories.SousTitreEtIcone} />
+<Canvas of={VAccordionStories.SousTitreEtIcone} />
 
 ## Icônes
 
@@ -49,11 +49,11 @@ Fournir `collapseIcon` bascule le composant en mode permutation : les deux icôn
 et échangées en CSS selon l'état du `<details>` — utile pour un couple non directionnel comme
 « plus / moins ». Sans `collapseIcon`, l'icône unique reste pivotée à l'ouverture.
 
-<Canvas of={AccordionStories.IconesPersonnalisees} />
+<Canvas of={VAccordionStories.IconesPersonnalisees} />
 
 ## Variantes
 
-`variant` pilote l'habillage du groupe, sur une échelle commune au `DataTable` et aux `Tabs`. `flat` (défaut)
+`variant` pilote l'habillage du groupe, sur une échelle commune au `VDataTable` et aux `VTabs`. `flat` (défaut)
 n'en pose aucun — ni bordure, ni rayon, ni fond : c'est la variante d'un accordéon placé dans un
 conteneur qui porte déjà son propre cadre (panneau latéral, carte, feuille), dont il hérite alors
 la surface. `outlined` le présente en carte : filet de 1px, coins arrondis et fond surélevé.
@@ -61,26 +61,26 @@ la surface. `outlined` le présente en carte : filet de 1px, coins arrondis et f
 Les séparateurs entre items, eux, restent en place dans les deux variantes : ils appartiennent à
 la lecture de la liste, pas à son cadre.
 
-<Canvas of={AccordionStories.Variantes} />
+<Canvas of={VAccordionStories.Variantes} />
 
 ## Compact
 
 `compact` retire 4px à **tous** les paddings — verticaux comme horizontaux, en-tête comme
 panneau — et ne touche à rien d'autre : la typographie, la gouttière et l'icône (20px) restent
 celles de la densité normale. C'est le même écart que le `compact` des contrôles à hauteur fixe
-(Button, Input…) ; l'accordéon n'ayant pas de hauteur imposée, l'écart porte ici sur les
+(VButton, VInput…) ; l'accordéon n'ayant pas de hauteur imposée, l'écart porte ici sur les
 paddings, pilotés par un delta unique posé sur le groupe et hérité par les items.
 
-<Canvas of={AccordionStories.Compact} />
+<Canvas of={VAccordionStories.Compact} />
 
 ## Item désactivé
 
-`disabled` sur un `AccordionItem` le rend inerte : il n'est plus ouvrable au clic ni atteignable
+`disabled` sur un `VAccordionItem` le rend inerte : il n'est plus ouvrable au clic ni atteignable
 au clavier, et passe en nuances de gris par les tokens (jamais d'opacité). Comme `<summary>`
 n'expose pas d'attribut `disabled` natif, l'inertie est obtenue en annulant l'activation et en
 retirant l'item du parcours de tabulation.
 
-<Canvas of={AccordionStories.ItemDesactive} />
+<Canvas of={VAccordionStories.ItemDesactive} />
 
 ## Accessibilité
 

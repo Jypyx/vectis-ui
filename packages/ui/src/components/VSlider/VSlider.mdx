@@ -1,7 +1,7 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as SliderStories from './VSlider.stories'
+import * as VSliderStories from './VSlider.stories'
 
-<Meta of={SliderStories} />
+<Meta of={VSliderStories} />
 
 # Slider
 
@@ -16,9 +16,9 @@ labels et les bulles s'alignent tous sur le **centre réel du thumb** — qui pa
 properties. Cliquer la piste déplace la valeur (saut + drag immédiat, natif) ; au survol, le
 thumb prend un fond teinté `--vectis-color-accent-surface`.
 
-<Canvas of={SliderStories.Default} />
+<Canvas of={VSliderStories.Default} />
 
-<Controls of={SliderStories.Default} />
+<Controls of={VSliderStories.Default} />
 
 ## Range
 
@@ -27,7 +27,7 @@ leurs thumbs captent le pointeur, le JS empêche le croisement des valeurs. Le v
 devient un tuple `[début, fin]` et les libellés accessibles sont suffixés « (début) » /
 « (fin) ». Le clic sur la piste est désactivé dans ce mode (il serait ambigu).
 
-<Canvas of={SliderStories.Range} />
+<Canvas of={VSliderStories.Range} />
 
 ## Pas et ticks
 
@@ -36,7 +36,7 @@ matérialise chaque pas par un point sur la piste (4px, dérivé du token de pis
 selon qu'il est couvert par le remplissage ou non. Garde-fou : au-delà de 50 pas, les ticks
 ne sont pas rendus (avertissement en développement).
 
-<Canvas of={SliderStories.Pas} />
+<Canvas of={VSliderStories.Pas} />
 
 ## Labels de pas
 
@@ -45,29 +45,29 @@ une chaîne est rendue en texte, un objet `{ icon, label }` en icône (nom ou re
 libellé accessible. Fournir les labels active les ticks implicitement et pose
 `aria-valuetext` sur les inputs : les lecteurs d'écran annoncent « M », pas « 2 ».
 
-<Canvas of={SliderStories.LabelsTexte} />
+<Canvas of={VSliderStories.LabelsTexte} />
 
 Valeurs non numériques par icônes (ces noms-là viennent de la police du consommateur) :
 
-<Canvas of={SliderStories.LabelsIcones} />
+<Canvas of={VSliderStories.LabelsIcones} />
 
 ## Champs numériques
 
-`inputs` ajoute des champs `<Input type="number">` d'ajustement précis : un après le slider
+`inputs` ajoute des champs `<VInput type="number">` d'ajustement précis : un après le slider
 en mode simple, un par borne en mode range. La saisie est validée au `change` (blur ou
 Entrée), jamais à la frappe : parse, clamp aux bornes, snap au pas et anti-croisement ; une
 saisie vide ou invalide revient silencieusement à la valeur courante.
 
-<Canvas of={SliderStories.AvecInputs} />
+<Canvas of={VSliderStories.AvecInputs} />
 
-## Tooltip
+## VTooltip
 
 `tooltip` affiche une bulle de valeur qui suit le thumb pendant le drag et au focus clavier
 (seule la bulle du thumb manipulé apparaît). Elle affiche le label du pas si `labels` est
 fourni, la valeur sinon. Positionnée par les mêmes fractions que le remplissage — pas
 d'anchor positioning : le thumb natif est un pseudo-élément non ancrable.
 
-<Canvas of={SliderStories.AvecTooltip} />
+<Canvas of={VSliderStories.AvecTooltip} />
 
 ## Vertical
 
@@ -78,12 +78,12 @@ clavier (flèche haut = +) et l'orientation ARIA. Longueur par défaut
 Support : Chrome/Edge 129+, Safari 18.1+ (léger relèvement du plancher assumé, voir
 CLAUDE.md).
 
-<Canvas of={SliderStories.Vertical} />
+<Canvas of={VSliderStories.Vertical} />
 
 Toutes les options se combinent en vertical — labels et tooltips passent sur les côtés,
 les champs numériques au-dessus/en-dessous :
 
-<Canvas of={SliderStories.VerticalComplet} />
+<Canvas of={VSliderStories.VerticalComplet} />
 
 ## États
 
@@ -91,14 +91,14 @@ les champs numériques au-dessus/en-dessous :
 (`--vectis-color-surface-muted`, `--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu
 suit automatiquement le thème dark :
 
-<Canvas of={SliderStories.Disabled} />
+<Canvas of={VSliderStories.Disabled} />
 
 ## Accessibilité
 
 - Toujours fournir `label` : il nomme le ou les inputs range (suffixé « (début) » /
   « (fin) » en mode range) ainsi que les champs numériques.
 - Avec `labels`, `aria-valuetext` traduit la valeur numérique en libellé de pas ; les
-  icônes des labels portent leur libellé accessible (`aria-label` via Icon).
+  icônes des labels portent leur libellé accessible (`aria-label` via VIcon).
 - Les bulles de tooltip sont `aria-hidden` : la valeur est déjà annoncée par le rôle
   slider.
 - Focus visible par anneau (`--vectis-focus-ring-*`) sur le thumb ; la bulle s'affiche aussi au

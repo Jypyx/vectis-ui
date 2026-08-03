@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
-import Button from '../VButton/VButton.vue'
-import IconButton from '../VIconButton/VIconButton.vue'
-import Typography from '../VTypography/VTypography.vue'
-import Tooltip from './VTooltip.vue'
+import VButton from '../VButton/VButton.vue'
+import VIconButton from '../VIconButton/VIconButton.vue'
+import VTypography from '../VTypography/VTypography.vue'
+import VTooltip from './VTooltip.vue'
 
 const meta = {
   title: 'Composants/Tooltip',
-  component: Tooltip,
+  component: VTooltip,
   argTypes: {
     placement: {
       control: 'select',
@@ -30,19 +30,19 @@ const meta = {
     delay: 300,
   },
   render: (args) => ({
-    components: { Tooltip, Button },
+    components: { VTooltip, VButton },
     setup: () => ({ args }),
     template: `
       <div style="padding: 60px">
-        <Tooltip v-bind="args">
+        <VTooltip v-bind="args">
           <template #default="{ triggerProps }">
-            <Button variant="outline" tone="neutral" v-bind="triggerProps">Copier</Button>
+            <VButton variant="outline" tone="neutral" v-bind="triggerProps">Copier</VButton>
           </template>
-        </Tooltip>
+        </VTooltip>
       </div>
     `,
   }),
-} satisfies Meta<typeof Tooltip>
+} satisfies Meta<typeof VTooltip>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -70,19 +70,19 @@ export const OuvertureAuFocus: Story = {
 
 export const SurIconButton: Story = {
   render: (args) => ({
-    components: { Tooltip, IconButton },
+    components: { VTooltip, VIconButton },
     setup: () => ({ args }),
     template: `
       <div style="padding: 60px">
-        <Tooltip v-bind="args" text="Supprimer l'élément" placement="bottom">
+        <VTooltip v-bind="args" text="Supprimer l'élément" placement="bottom">
           <template #default="{ triggerProps }">
-            <IconButton label="Supprimer l'élément" tone="danger" v-bind="triggerProps">
+            <VIconButton label="Supprimer l'élément" tone="danger" v-bind="triggerProps">
               <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
                 <path d="M4 4l8 8M12 4l-8 8" stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" />
               </svg>
-            </IconButton>
+            </VIconButton>
           </template>
-        </Tooltip>
+        </VTooltip>
       </div>
     `,
   }),
@@ -97,7 +97,7 @@ export const TexteLong: Story = {
 /** Les huit placements disponibles, disposés autour d'un centre vide. */
 export const Placements: Story = {
   render: (args) => ({
-    components: { Tooltip, Button },
+    components: { VTooltip, VButton },
     setup: () => ({
       args,
       placements: [
@@ -123,7 +123,7 @@ export const Placements: Story = {
         "
       >
         <template v-for="placement in placements">
-          <Tooltip
+          <VTooltip
             v-if="placement"
             :key="placement"
             :text="args.text"
@@ -131,11 +131,11 @@ export const Placements: Story = {
             :placement="placement"
           >
             <template #default="{ triggerProps }">
-              <Button variant="outline" tone="neutral" v-bind="triggerProps">
+              <VButton variant="outline" tone="neutral" v-bind="triggerProps">
                 {{ placement }}
-              </Button>
+              </VButton>
             </template>
-          </Tooltip>
+          </VTooltip>
           <span v-else aria-hidden="true"></span>
         </template>
       </div>
@@ -147,17 +147,17 @@ export const Placements: Story = {
  * Contenu riche via le slot `#content` (prime sur la prop `text`). Réservé au
  * contenu NON interactif : le tooltip se ferme dès que le pointeur quitte le
  * déclencheur et `aria-describedby` aplatit le contenu en texte — un lien ou
- * un bouton y serait inatteignable (utiliser Popover dans ce cas).
+ * un bouton y serait inatteignable (utiliser VPopover dans ce cas).
  */
 export const ContenuRiche: Story = {
   render: (args) => ({
-    components: { Tooltip, Button },
+    components: { VTooltip, VButton },
     setup: () => ({ args }),
     template: `
       <div style="padding: 100px 60px">
-        <Tooltip :delay="args.delay" placement="bottom-start">
+        <VTooltip :delay="args.delay" placement="bottom-start">
           <template #default="{ triggerProps }">
-            <Button variant="outline" tone="neutral" v-bind="triggerProps">Rechercher</Button>
+            <VButton variant="outline" tone="neutral" v-bind="triggerProps">Rechercher</VButton>
           </template>
           <template #content>
             <div style="display: grid; gap: 4px; padding: 4px 0;">
@@ -171,7 +171,7 @@ export const ContenuRiche: Story = {
               </span>
             </div>
           </template>
-        </Tooltip>
+        </VTooltip>
       </div>
     `,
   }),
@@ -186,45 +186,45 @@ export const ContenuRiche: Story = {
 export const EdgeFlipping: Story = {
   parameters: { layout: 'fullscreen' },
   render: (args) => ({
-    components: { Tooltip, Button, Typography },
+    components: { VTooltip, VButton, VTypography },
     setup: () => ({ args }),
     template: `
       <div style="position: relative; height: 100dvh;">
-        <Typography
+        <VTypography
           tone="muted"
           style="position: absolute; inset: 50% auto auto 50%; translate: -50% -50%; max-width: 28rem; text-align: center;"
         >
           Chaque bouton demande un placement orienté vers le bord dont il est
           proche : le tooltip bascule automatiquement du côté opposé
           (<code>position-try-fallbacks</code>).
-        </Typography>
+        </VTypography>
         <div style="position: absolute; top: 8px; left: 50%; translate: -50%;">
-          <Tooltip :text="args.text" :delay="args.delay" placement="top">
+          <VTooltip :text="args.text" :delay="args.delay" placement="top">
             <template #default="{ triggerProps }">
-              <Button variant="outline" tone="neutral" v-bind="triggerProps">top → bottom</Button>
+              <VButton variant="outline" tone="neutral" v-bind="triggerProps">top → bottom</VButton>
             </template>
-          </Tooltip>
+          </VTooltip>
         </div>
         <div style="position: absolute; bottom: 8px; left: 50%; translate: -50%;">
-          <Tooltip :text="args.text" :delay="args.delay" placement="bottom">
+          <VTooltip :text="args.text" :delay="args.delay" placement="bottom">
             <template #default="{ triggerProps }">
-              <Button variant="outline" tone="neutral" v-bind="triggerProps">bottom → top</Button>
+              <VButton variant="outline" tone="neutral" v-bind="triggerProps">bottom → top</VButton>
             </template>
-          </Tooltip>
+          </VTooltip>
         </div>
         <div style="position: absolute; left: 8px; top: 50%; translate: 0 -50%;">
-          <Tooltip :text="args.text" :delay="args.delay" placement="left">
+          <VTooltip :text="args.text" :delay="args.delay" placement="left">
             <template #default="{ triggerProps }">
-              <Button variant="outline" tone="neutral" v-bind="triggerProps">left → right</Button>
+              <VButton variant="outline" tone="neutral" v-bind="triggerProps">left → right</VButton>
             </template>
-          </Tooltip>
+          </VTooltip>
         </div>
         <div style="position: absolute; right: 8px; top: 50%; translate: 0 -50%;">
-          <Tooltip :text="args.text" :delay="args.delay" placement="right">
+          <VTooltip :text="args.text" :delay="args.delay" placement="right">
             <template #default="{ triggerProps }">
-              <Button variant="outline" tone="neutral" v-bind="triggerProps">right → left</Button>
+              <VButton variant="outline" tone="neutral" v-bind="triggerProps">right → left</VButton>
             </template>
-          </Tooltip>
+          </VTooltip>
         </div>
       </div>
     `,

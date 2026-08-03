@@ -11,14 +11,14 @@ import { useMessages } from '../../i18n/state'
 /**
  * Navigation verticale de barre latérale : une arborescence de liens rendue
  * INLINE (rien ne flotte), repliable niveau par niveau, composée par
- * sous-composants — `SideNavigationItem`, `SideNavigationGroup`,
- * `SideNavigationSeparator`.
+ * sous-composants — `VSideNavigationItem`, `VSideNavigationGroup`,
+ * `VSideNavigationSeparator`.
  *
- * `<ul>`/`<li>` et non des div comme Menu : le pattern ARIA `menu` interdit les
+ * `<ul>`/`<li>` et non des div comme VMenu : le pattern ARIA `menu` interdit les
  * listes (il n'admet que `menuitem`/`group`), une navigation est l'inverse — le
  * comptage et la relation d'imbrication SONT l'information de hiérarchie.
  *
- * Le repli est natif (`<details>`/`<summary>`, cf. SideNavigationItem) : état,
+ * Le repli est natif (`<details>`/`<summary>`, cf. VSideNavigationItem) : état,
  * clavier d'activation, exclusivité entre frères (`<details name>`) et
  * animation viennent du navigateur. Seul JS de comportement du composant : la
  * navigation aux flèches ci-dessous.
@@ -52,7 +52,7 @@ const props = withDefaults(defineProps<SideNavigationProps>(), {
 })
 
 defineSlots<{
-  /** Les `SideNavigationItem` / `SideNavigationGroup` / `SideNavigationSeparator`. */
+  /** Les `VSideNavigationItem` / `VSideNavigationGroup` / `VSideNavigationSeparator`. */
   default(): unknown
 }>()
 
@@ -83,7 +83,7 @@ const rootEl = ref<HTMLElement | null>(null)
 /**
  * Cibles du focus : le <summary> d'une branche, l'action d'une feuille. Les
  * items désactivés sont écartés — `:disabled` ne matche que les <button>, un
- * lien inerte et un summary passent par `aria-disabled` (modèle MenuPanel).
+ * lien inerte et un summary passent par `aria-disabled` (modèle VMenuPanel).
  */
 const ROW_SELECTOR = ':is(summary, .v-side-nav-action):not(:disabled):not([aria-disabled="true"])'
 
@@ -92,7 +92,7 @@ const ROW_SELECTOR = ':is(summary, .v-side-nav-action):not(:disabled):not([aria-
  * qui reste focusable. Le contenu d'un <details> fermé n'est pas `display:
  * none` (le navigateur le « saute ») : le filtre de `navigableItems` ne le
  * verrait pas. On passe donc notre PROPRE liste à `arrowNavigate`, ce qui évite
- * au passage un `getComputedStyle` par rangée (précédent TimePicker).
+ * au passage un `getComputedStyle` par rangée (précédent VTimePicker).
  */
 function reachable(el: HTMLElement, root: HTMLElement): boolean {
   for (
@@ -111,7 +111,7 @@ function reachable(el: HTMLElement, root: HTMLElement): boolean {
  * Seul JS de comportement : aucune primitive native ne déplace le focus entre
  * des liens frères. Contrat du DS (utils/arrowNav) — les flèches DÉPLACENT le
  * focus, jamais elles n'activent. Pas de roving tabindex : chaque rangée
- * visible reste un arrêt de tabulation (modèle Toggle), comme le veut le
+ * visible reste un arrêt de tabulation (modèle VToggle), comme le veut le
  * pattern « disclosure navigation ».
  */
 function onKeydown(event: KeyboardEvent) {
@@ -154,7 +154,7 @@ function onKeydown(event: KeyboardEvent) {
 
     font-family: var(--vectis-text-family);
     /* Repli animé de `::details-content` : autorise block-size 0 → auto
-       (progressive enhancement, idiome Accordion). Hérité par les items. */
+       (progressive enhancement, idiome VAccordion). Hérité par les items. */
     interpolate-size: allow-keywords;
   }
 

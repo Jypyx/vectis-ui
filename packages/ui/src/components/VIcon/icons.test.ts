@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { builtinIcons, ICON_VIEW_BOX, type DsIconName } from './icons'
+import { builtinIcons, ICON_VIEW_BOX, type VectisIconName } from './icons'
 
 /**
  * Verrous sur le fichier GÉNÉRÉ (`pnpm icons`) : ce qui est testé ici, c'est que
@@ -31,7 +31,7 @@ const ATTENDUES = [
   'search',
   'swap_vert',
   'warning',
-] as const satisfies readonly DsIconName[]
+] as const satisfies readonly VectisIconName[]
 
 describe('registre d’icônes intégré', () => {
   it('contient exactement les icônes rendues par défaut par le DS', () => {

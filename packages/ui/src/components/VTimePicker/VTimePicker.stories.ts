@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import TimePicker from './VTimePicker.vue'
+import VTimePicker from './VTimePicker.vue'
 
 const meta = {
   title: 'Composants/TimePicker',
-  component: TimePicker,
+  component: VTimePicker,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     mode: { control: 'inline-radio', options: ['readonly', 'input', 'list'] },
@@ -19,7 +19,7 @@ const meta = {
     size: 'md',
     clearable: true,
   },
-} satisfies Meta<typeof TimePicker>
+} satisfies Meta<typeof VTimePicker>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -50,11 +50,11 @@ function tapDial(face: HTMLElement, turn: number, radiusFraction = 0.8) {
 export const Default: Story = {
   args: { format: '24h', hint: 'Format hh:mm' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref(null) }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <TimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" />
         <output data-testid="valeur">{{ value ?? '—' }}</output>
       </div>
     `,
@@ -98,11 +98,11 @@ export const Default: Story = {
 export const LectureSeule: Story = {
   args: { mode: 'readonly' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('09:15') }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <TimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" />
         <output>{{ value ?? '—' }}</output>
       </div>
     `,
@@ -125,11 +125,11 @@ export const LectureSeule: Story = {
 export const SelectionAuCadran: Story = {
   args: { mode: 'readonly', format: '24h' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('09:15') }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <TimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" />
         <output data-testid="valeur">{{ value }}</output>
       </div>
     `,
@@ -158,11 +158,11 @@ export const SelectionAuCadran: Story = {
 export const AnneauInterieur: Story = {
   args: { mode: 'readonly', format: '24h' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('09:15') }),
     template: `
       <div style="width: 280px">
-        <TimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" />
       </div>
     `,
   }),
@@ -192,11 +192,11 @@ export const AnneauInterieur: Story = {
 export const SaisieAvecCadran: Story = {
   args: { showDial: true, format: '24h' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref(null) }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <TimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" />
         <output data-testid="valeur">{{ value ?? '—' }}</output>
       </div>
     `,
@@ -230,11 +230,11 @@ export const SaisieAvecCadran: Story = {
 export const ListeDHeures: Story = {
   args: { mode: 'list', minuteStep: 30, format: '24h' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('14:30') }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <TimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" />
         <output data-testid="valeur">{{ value ?? '—' }}</output>
       </div>
     `,
@@ -261,11 +261,11 @@ export const ListeDHeures: Story = {
 export const ListeClavier: Story = {
   args: { mode: 'list', minuteStep: 30, format: '24h' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('00:00') }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <TimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" />
         <output data-testid="valeur">{{ value }}</output>
       </div>
     `,
@@ -289,16 +289,16 @@ export const ListeClavier: Story = {
   },
 }
 
-// Le v-model reste en 24 h canonique : 7 h + PM → '19:00'. Le Toggle vit à côté
+// Le v-model reste en 24 h canonique : 7 h + PM → '19:00'. Le VToggle vit à côté
 // du champ, hors du panneau : aucune ouverture ni validation nécessaire.
 export const DouzeHeures: Story = {
   args: { locale: 'en-US', label: 'Time' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('07:00') }),
     template: `
       <div style="width: 320px; display:grid; gap:8px">
-        <TimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" />
         <output data-testid="valeur">{{ value }}</output>
       </div>
     `,
@@ -314,11 +314,11 @@ export const DouzeHeures: Story = {
 export const Annulation: Story = {
   args: { mode: 'readonly', format: '24h' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('09:15') }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <TimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" />
         <output data-testid="valeur">{{ value }}</output>
       </div>
     `,
@@ -340,11 +340,11 @@ export const Annulation: Story = {
 export const PasDeCinqMinutes: Story = {
   args: { mode: 'readonly', format: '24h', minuteStep: 5, hint: 'Minutes par pas de 5' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('14:35') }),
     template: `
       <div style="width: 280px">
-        <TimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" />
       </div>
     `,
   }),
@@ -352,31 +352,31 @@ export const PasDeCinqMinutes: Story = {
 
 export const Tailles: Story = {
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('09:15') }),
     template: `
       <div style="width: 280px; display:grid; gap:12px">
-        <TimePicker v-bind="args" v-model="value" size="sm" label="sm" />
-        <TimePicker v-bind="args" v-model="value" size="md" label="md" />
-        <TimePicker v-bind="args" v-model="value" size="lg" label="lg" />
+        <VTimePicker v-bind="args" v-model="value" size="sm" label="sm" />
+        <VTimePicker v-bind="args" v-model="value" size="md" label="md" />
+        <VTimePicker v-bind="args" v-model="value" size="lg" label="lg" />
       </div>
     `,
   }),
 }
 
-/** En 12 h, le Toggle AM/PM s'aligne sur le CHAMP, pas sur le bloc : sa position
+/** En 12 h, le VToggle AM/PM s'aligne sur le CHAMP, pas sur le bloc : sa position
     est compensée par la hauteur du label et du hint. */
 export const MeridienAligne: Story = {
   args: { locale: 'en-US', label: 'Time' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('07:00') }),
     template: `
       <div style="width: 320px; display:grid; gap:12px">
-        <TimePicker v-bind="args" v-model="value" :label="undefined" />
-        <TimePicker v-bind="args" v-model="value" />
-        <TimePicker v-bind="args" v-model="value" hint="Heure de rendez-vous" />
-        <TimePicker v-bind="args" v-model="value" :label="undefined" hint="Sans étiquette" />
+        <VTimePicker v-bind="args" v-model="value" :label="undefined" />
+        <VTimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" hint="Heure de rendez-vous" />
+        <VTimePicker v-bind="args" v-model="value" :label="undefined" hint="Sans étiquette" />
       </div>
     `,
   }),
@@ -384,11 +384,11 @@ export const MeridienAligne: Story = {
 
 export const Desactive: Story = {
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('09:15') }),
     template: `
       <div style="width: 280px">
-        <TimePicker v-bind="args" v-model="value" disabled />
+        <VTimePicker v-bind="args" v-model="value" disabled />
       </div>
     `,
   }),
@@ -406,11 +406,11 @@ export const Desactive: Story = {
 export const ClicDansLeVide: Story = {
   args: { mode: 'readonly', format: '24h' },
   render: (args) => ({
-    components: { TimePicker },
+    components: { VTimePicker },
     setup: () => ({ args, value: ref('09:15') }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <TimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" />
         <output data-testid="valeur">{{ value }}</output>
       </div>
     `,

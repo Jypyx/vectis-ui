@@ -1,11 +1,11 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import Button from './VButton.vue'
+import VButton from './VButton.vue'
 
-describe('Button', () => {
+describe('VButton', () => {
   it('rend le libellé et les data-attributes de variante', () => {
-    const { getByRole } = render(Button, {
+    const { getByRole } = render(VButton, {
       props: { variant: 'outline', tone: 'danger', size: 'lg' },
       slots: { default: 'Supprimer' },
     })
@@ -17,7 +17,7 @@ describe('Button', () => {
   })
 
   it('supporte les nouveaux variants/tones et pose data-compact', () => {
-    const { getByRole } = render(Button, {
+    const { getByRole } = render(VButton, {
       props: { variant: 'tonal', tone: 'warning', compact: true },
       slots: { default: 'Attention' },
     })
@@ -28,26 +28,26 @@ describe('Button', () => {
   })
 
   it('sans compact : pas de data-compact', () => {
-    const { getByRole } = render(Button, { slots: { default: 'Ok' } })
+    const { getByRole } = render(VButton, { slots: { default: 'Ok' } })
     expect(getByRole('button').dataset.compact).toBeUndefined()
   })
 
   it('en loading : désactivé, aria-busy, spinner présent', () => {
-    const { getByRole } = render(Button, {
+    const { getByRole } = render(VButton, {
       props: { loading: true },
       slots: { default: 'Envoyer' },
     })
     const button = getByRole('button') as HTMLButtonElement
     expect(button.disabled).toBe(true)
     expect(button.getAttribute('aria-busy')).toBe('true')
-    // le composant Spinner est rendu dans la boîte, masqué aux AT (aria-busy suffit)
+    // le composant VSpinner est rendu dans la boîte, masqué aux AT (aria-busy suffit)
     const box = button.querySelector('.v-button-spinner') as HTMLElement
     expect(box.getAttribute('aria-hidden')).toBe('true')
     expect(box.querySelector('.v-spinner')).not.toBeNull()
   })
 
   it('laisse passer les attributs natifs (fallthrough)', () => {
-    const { getByRole } = render(Button, {
+    const { getByRole } = render(VButton, {
       attrs: { name: 'action', form: 'mon-formulaire' },
       slots: { default: 'Ok' },
     })
@@ -57,7 +57,7 @@ describe('Button', () => {
   })
 
   it('iconStart/iconEnd : icônes décoratives, nom accessible = libellé seul', () => {
-    const { getByRole } = render(Button, {
+    const { getByRole } = render(VButton, {
       props: { iconStart: 'add', iconEnd: 'arrow_forward' },
       slots: { default: 'Ajouter' },
     })
@@ -69,7 +69,7 @@ describe('Button', () => {
   })
 
   it('iconFilled : pose data-filled sur iconStart et iconEnd, absent par défaut', () => {
-    const plein = render(Button, {
+    const plein = render(VButton, {
       props: { iconStart: 'add', iconEnd: 'arrow_forward', iconFilled: true },
       slots: { default: 'Ajouter' },
     })
@@ -77,7 +77,7 @@ describe('Button', () => {
     expect(iconsPleins).toHaveLength(2)
     expect(iconsPleins.every((icon) => icon.hasAttribute('data-filled'))).toBe(true)
 
-    const contour = render(Button, {
+    const contour = render(VButton, {
       props: { iconStart: 'add', iconEnd: 'arrow_forward' },
       slots: { default: 'Ajouter' },
     })
@@ -87,7 +87,7 @@ describe('Button', () => {
   })
 
   it('en loading : le spinner remplace iconStart, iconEnd reste affiché', () => {
-    const { getByRole } = render(Button, {
+    const { getByRole } = render(VButton, {
       props: { loading: true, iconStart: 'add', iconEnd: 'arrow_forward' },
       slots: { default: 'Envoyer' },
     })
@@ -98,7 +98,7 @@ describe('Button', () => {
   })
 
   it('le slot #start prime sur iconStart', () => {
-    const { getByRole } = render(Button, {
+    const { getByRole } = render(VButton, {
       props: { iconStart: 'add' },
       slots: { default: 'Ajouter', start: '<svg data-testid="custom" aria-hidden="true" />' },
     })
@@ -108,7 +108,7 @@ describe('Button', () => {
   })
 
   it('avec href : rend un lien <a> sans type ni disabled', () => {
-    const { getByRole } = render(Button, {
+    const { getByRole } = render(VButton, {
       props: { href: 'https://exemple.fr' },
       attrs: { target: '_blank', rel: 'noreferrer' },
       slots: { default: 'Documentation' },
@@ -124,7 +124,7 @@ describe('Button', () => {
 
   it('lien désactivé : inerte (sans href, aria-disabled, click filtré)', async () => {
     const onClick = vi.fn()
-    const { container } = render(Button, {
+    const { container } = render(VButton, {
       props: { href: 'https://exemple.fr', disabled: true },
       attrs: { onClick },
       slots: { default: 'Lien désactivé' },
@@ -138,7 +138,7 @@ describe('Button', () => {
   })
 
   it('lien en loading : inerte + aria-busy + spinner', () => {
-    const { container } = render(Button, {
+    const { container } = render(VButton, {
       props: { href: 'https://exemple.fr', loading: true },
       slots: { default: 'Envoi…' },
     })

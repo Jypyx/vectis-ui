@@ -1,7 +1,7 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as ComboboxStories from './VCombobox.stories'
+import * as VComboboxStories from './VCombobox.stories'
 
-<Meta of={ComboboxStories} />
+<Meta of={VComboboxStories} />
 
 # Combobox
 
@@ -10,10 +10,10 @@ pattern ARIA **combobox/listbox** qu'aucune primitive native ne couvre (`<datali
 n'est ni stylable ni multiple). Le composant est **assemblé à partir des briques du
 DS** :
 
-- **`Input`** pour le champ de recherche (`role="combobox"`) ;
-- **`Popover`** pour la liste, qui porte elle-même `role="listbox"` (top layer, ancrée en
+- **`VInput`** pour le champ de recherche (`role="combobox"`) ;
+- **`VPopover`** pour la liste, qui porte elle-même `role="listbox"` (top layer, ancrée en
   pur CSS sur le contrôle) ;
-- **`Chip`** pour les valeurs sélectionnées en mode multiple.
+- **`VChip`** pour les valeurs sélectionnées en mode multiple.
 
 Le focus DOM reste dans l'input pendant la navigation (`aria-activedescendant`) ;
 l'ouverture est pilotée par l'état interne, la fermeture par le light dismiss maison
@@ -22,9 +22,9 @@ l'ouverture est pilotée par l'état interne, la fermeture par le light dismiss 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Combobox, type ComboboxOption } from '@vectis/ui'
+import { VCombobox, type VComboboxOption } from '@vectis/ui'
 
-const pays: ComboboxOption[] = [
+const pays: VComboboxOption[] = [
   { value: 'fr', label: 'France' },
   { value: 'be', label: 'Belgique' },
   { value: 'sn', label: 'Sénégal' },
@@ -33,17 +33,17 @@ const value = ref('')
 </script>
 
 <template>
-  <Combobox v-model="value" :options="pays" placeholder="Choisir un pays…" aria-label="Pays" />
+  <VCombobox v-model="value" :options="pays" placeholder="Choisir un pays…" aria-label="Pays" />
 </template>
 ```
 
-<Canvas of={ComboboxStories.Default} />
+<Canvas of={VComboboxStories.Default} />
 
-<Controls of={ComboboxStories.Default} />
+<Controls of={VComboboxStories.Default} />
 
 ## Options
 
-Chaque option est un `ComboboxOption` — `{ value, label, disabled? }`. Le `label` est
+Chaque option est un `VComboboxOption` — `{ value, label, disabled? }`. Le `label` est
 affiché et filtré, la `value` alimente le `v-model` ; une option `disabled` est
 présentée mais ni sélectionnable ni atteignable au clavier.
 
@@ -76,7 +76,7 @@ filtrage, un groupe dont plus aucune option ne correspond **disparaît, libellé
 et les séparateurs devenus orphelins (en tête, en fin, ou deux d'affilée) ne sont pas
 rendus — la liste filtrée ne laisse donc jamais de filet flottant.
 
-<Canvas of={ComboboxStories.Groupes} />
+<Canvas of={VComboboxStories.Groupes} />
 
 ## Recherche
 
@@ -87,7 +87,7 @@ liste se réduit. **Entrée** sélectionne l'option active — ou l'unique résu
 il n'en reste qu'un.
 
 Un **chevron** à droite indique l'état et pivote à l'ouverture. Une **croix**
-(`clearable`, activée par défaut — la prop `clearable` d'`Input`, rendue à gauche
+(`clearable`, activée par défaut — la prop `clearable` d'`VInput`, rendue à gauche
 du chevron) apparaît dès qu'il y a **quelque chose à effacer** (une valeur, des Chips
 ou une recherche) et vide **toute la sélection**.
 
@@ -108,10 +108,10 @@ fermé, y compris pour une frappe dont le délai n'était pas écoulé.
 Le composant n'annule pas les requêtes en vol : c'est au consommateur d'ignorer les
 réponses obsolètes (jeton d'appel, `AbortController`…).
 
-<Canvas of={ComboboxStories.RechercheAsynchrone} />
+<Canvas of={VComboboxStories.RechercheAsynchrone} />
 
 Les **libellés des valeurs sélectionnées sont mémorisés** : une valeur choisie garde
-son libellé (Chip, texte du champ) même quand la recherche suivante la fait disparaître
+son libellé (VChip, texte du champ) même quand la recherche suivante la fait disparaître
 des options. Une valeur qui n'a jamais figuré dans aucune page reste affichée telle
 quelle — pour l'éviter sur un formulaire d'édition, inclure l'option correspondante
 dans le premier `options` rendu.
@@ -131,7 +131,7 @@ exemple.
 l'évaluation à chaque page reçue, de sorte qu'une page trop courte pour remplir le
 panneau n'interrompt pas la pagination.
 
-<Canvas of={ComboboxStories.ScrollInfini} />
+<Canvas of={VComboboxStories.ScrollInfini} />
 
 ## Icône d'option
 
@@ -144,28 +144,28 @@ est rendu **à l'intérieur** du libellé, une icône qu'on y placerait n'attein
 l'emplacement de début ni sa gouttière. La fin de la rangée, elle, est réservée à la coche
 de sélection.
 
-<Canvas of={ComboboxStories.AvecIcones} />
+<Canvas of={VComboboxStories.AvecIcones} />
 
 ## Personnaliser une option
 
 Le slot **`#option`** remplace le contenu d'une option et reçoit `{ option, index,
 active, selected }`. La coche de sélection reste gérée par le composant.
 
-<Canvas of={ComboboxStories.OptionPersonnalisee} />
+<Canvas of={VComboboxStories.OptionPersonnalisee} />
 
 ## Sélection multiple
 
 Avec `multiple`, le `v-model` devient un `string[]` et chaque valeur s'affiche en
-`Chip` retirable. Le panneau reste ouvert après un choix (on enchaîne les
+`VChip` retirable. Le panneau reste ouvert après un choix (on enchaîne les
 sélections) ; **Retour arrière** sur un champ de recherche vide retire la dernière
 valeur. Hors focus, le champ de saisie se replie pour ne laisser que les Chips, sans
 espace vide.
 
-<Canvas of={ComboboxStories.SelectionMultiple} />
+<Canvas of={VComboboxStories.SelectionMultiple} />
 
 ### Personnaliser les Chips
 
-Le slot **`#chip`** remplace le Chip d'une valeur sélectionnée. Il reçoit :
+Le slot **`#chip`** remplace le VChip d'une valeur sélectionnée. Il reçoit :
 
 - `value` et `label` — la valeur et son libellé résolu ;
 - `option` — l'option complète (donc son `icon`), ou `undefined` si cette valeur n'a jamais
@@ -174,13 +174,13 @@ Le slot **`#chip`** remplace le Chip d'une valeur sélectionnée. Il reçoit :
   ni son icône ;
 - `remove` — à câbler sur l'action de retrait, sans quoi la valeur ne serait plus retirable ;
 - `size` et `compact` — le gabarit calculé pour tenir dans le champ. Les reprendre sur le
-  Chip personnalisé évite de faire grandir le champ.
+  VChip personnalisé évite de faire grandir le champ.
 
-<Canvas of={ComboboxStories.ChipPersonnalise} />
+<Canvas of={VComboboxStories.ChipPersonnalise} />
 
 ## Tailles
 
-`size` accepte `sm` (32 px), `md` (40 px, défaut — aligné sur `Input`) et `lg` (48 px),
+`size` accepte `sm` (32 px), `md` (40 px, défaut — aligné sur `VInput`) et `lg` (48 px),
 combinable avec `compact` (-4 px). En multiple, les Chips restent **un cran sous le champ**
 pour tenir dedans sans le faire grandir : `xs` (24 px) jusqu'à `md`, `sm` (32 px) en `lg`.
 Sous le cran le plus bas de chaque paire, le rattrapage passe par `compact` plutôt que par
@@ -189,7 +189,7 @@ une taille de moins — `size="sm"` donne des Chips `xs` compact (20 px), `size=
 rangées de 32/40/48 px, et en `lg` la même typographie (16 px) et les mêmes icônes (24 px)
 que le champ — le libellé d'une option ne change pas de taille en passant dans le champ.
 
-<Canvas of={ComboboxStories.Tailles} />
+<Canvas of={VComboboxStories.Tailles} />
 
 ## États
 
@@ -197,11 +197,11 @@ que le champ — le libellé d'une option ne change pas de taille en passant dan
 `disabled` grise le champ (nuances par tokens, sans opacité). `placeholder` et
 `empty-text` (message quand aucune option ne correspond) sont personnalisables.
 
-<Canvas of={ComboboxStories.Invalide} />
+<Canvas of={VComboboxStories.Invalide} />
 
-<Canvas of={ComboboxStories.AucunResultat} />
+<Canvas of={VComboboxStories.AucunResultat} />
 
-<Canvas of={ComboboxStories.Disabled} />
+<Canvas of={VComboboxStories.Disabled} />
 
 ## Accessibilité
 

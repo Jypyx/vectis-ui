@@ -2,24 +2,24 @@ import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { h } from 'vue'
 
-import Avatar from './VAvatar.vue'
-import AvatarGroup from './VAvatarGroup.vue'
+import VAvatar from './VAvatar.vue'
+import VAvatarGroup from './VAvatarGroup.vue'
 
-describe('Avatar', () => {
+describe('VAvatar', () => {
   it('affiche les initiales des deux premiers mots du nom', () => {
-    const { getByText } = render(Avatar, { props: { name: 'Ada Byron Lovelace' } })
+    const { getByText } = render(VAvatar, { props: { name: 'Ada Byron Lovelace' } })
     expect(getByText('AB')).toBeTruthy()
   })
 
   it("affiche l'image quand src est fourni, avec le nom en alt par défaut", () => {
-    const { getByRole } = render(Avatar, {
+    const { getByRole } = render(VAvatar, {
       props: { src: 'https://exemple.test/a.png', name: 'Ada Lovelace' },
     })
     expect(getByRole('img').getAttribute('alt')).toBe('Ada Lovelace')
   })
 
   it("bascule sur les initiales si l'image échoue", async () => {
-    const { getByRole, getByText } = render(Avatar, {
+    const { getByRole, getByText } = render(VAvatar, {
       props: { src: 'https://exemple.test/casse.png', name: 'Grace Hopper' },
     })
     await fireEvent.error(getByRole('img'))
@@ -27,26 +27,26 @@ describe('Avatar', () => {
   })
 
   it("rend une icône Material quand `icon` est un nom (pas d'URL)", () => {
-    const { container, queryByText } = render(Avatar, { props: { icon: 'star' } })
+    const { container, queryByText } = render(VAvatar, { props: { icon: 'star' } })
     // pas d'initiales, la ligature Material est présente
     expect(container.querySelector('.v-avatar-icon')).toBeTruthy()
     expect(queryByText('star')).toBeTruthy()
   })
 
   it('dérive une teinte auto déterministe du nom (--avatar-hue stable + data-auto)', () => {
-    const first = render(Avatar, { props: { name: 'Ada Lovelace' } })
+    const first = render(VAvatar, { props: { name: 'Ada Lovelace' } })
     const a = first.container.querySelector('.v-avatar') as HTMLElement
     expect(a.getAttribute('data-auto')).toBe('')
     const hueA = a.style.getPropertyValue('--avatar-hue')
     expect(hueA).not.toBe('')
 
-    const second = render(Avatar, { props: { name: 'Ada Lovelace' } })
+    const second = render(VAvatar, { props: { name: 'Ada Lovelace' } })
     const b = second.container.querySelector('.v-avatar') as HTMLElement
     expect(b.style.getPropertyValue('--avatar-hue')).toBe(hueA)
   })
 
   it('la couleur custom prime sur la teinte auto (data-custom + --custom-color, pas de data-auto)', () => {
-    const { container } = render(Avatar, { props: { name: 'Ada Lovelace', color: '#ff0000' } })
+    const { container } = render(VAvatar, { props: { name: 'Ada Lovelace', color: '#ff0000' } })
     const el = container.querySelector('.v-avatar') as HTMLElement
     expect(el.getAttribute('data-custom')).toBe('')
     expect(el.getAttribute('data-auto')).toBeNull()
@@ -54,21 +54,21 @@ describe('Avatar', () => {
   })
 
   it('cliquable → <button>, avec le nom en aria-label', () => {
-    const { getByRole } = render(Avatar, { props: { name: 'Ada Lovelace', clickable: true } })
+    const { getByRole } = render(VAvatar, { props: { name: 'Ada Lovelace', clickable: true } })
     const btn = getByRole('button')
     expect(btn.tagName).toBe('BUTTON')
     expect(btn.getAttribute('aria-label')).toBe('Ada Lovelace')
   })
 
   it('href → <a> avec href', () => {
-    const { getByRole } = render(Avatar, { props: { name: 'Ada', href: '/u/ada' } })
+    const { getByRole } = render(VAvatar, { props: { name: 'Ada', href: '/u/ada' } })
     const link = getByRole('link')
     expect(link.tagName).toBe('A')
     expect(link.getAttribute('href')).toBe('/u/ada')
   })
 
   it('lien inerte quand disabled (href retiré + aria-disabled)', () => {
-    const { container } = render(Avatar, {
+    const { container } = render(VAvatar, {
       props: { name: 'Ada', href: '/u/ada', disabled: true },
     })
     const a = container.querySelector('a.v-avatar') as HTMLElement
@@ -77,20 +77,20 @@ describe('Avatar', () => {
   })
 
   it('sans nom ni image : décoratif (pas de role="img")', () => {
-    const { container } = render(Avatar, { props: { icon: 'star' } })
+    const { container } = render(VAvatar, { props: { icon: 'star' } })
     const el = container.querySelector('.v-avatar') as HTMLElement
     expect(el.getAttribute('role')).toBeNull()
   })
 })
 
-describe('AvatarGroup', () => {
+describe('VAvatarGroup', () => {
   it('tronque à `max` et affiche l’agrégat +X avec le bon compte', () => {
-    const { getByText, container } = render(AvatarGroup, {
+    const { getByText, container } = render(VAvatarGroup, {
       props: { max: 2 },
       slots: {
         default: () =>
           ['Ada Lovelace', 'Grace Hopper', 'Margaret Hamilton', 'Katherine Johnson'].map((name) =>
-            h(Avatar, { name }),
+            h(VAvatar, { name }),
           ),
       },
     })
@@ -99,9 +99,9 @@ describe('AvatarGroup', () => {
   })
 
   it('sans `max` : rend tous les avatars, aucun agrégat', () => {
-    const { container, queryByText } = render(AvatarGroup, {
+    const { container, queryByText } = render(VAvatarGroup, {
       slots: {
-        default: () => ['Ada Lovelace', 'Grace Hopper'].map((name) => h(Avatar, { name })),
+        default: () => ['Ada Lovelace', 'Grace Hopper'].map((name) => h(VAvatar, { name })),
       },
     })
     expect(container.querySelectorAll('.v-avatar')).toHaveLength(2)
@@ -109,10 +109,10 @@ describe('AvatarGroup', () => {
   })
 
   it('propage la taille aux enfants (à défaut de prop size explicite)', () => {
-    const { container } = render(AvatarGroup, {
+    const { container } = render(VAvatarGroup, {
       props: { size: 'lg' },
       slots: {
-        default: () => [h(Avatar, { name: 'Ada' }), h(Avatar, { name: 'Grace', size: 'xs' })],
+        default: () => [h(VAvatar, { name: 'Ada' }), h(VAvatar, { name: 'Grace', size: 'xs' })],
       },
     })
     const avatars = container.querySelectorAll('.v-avatar')

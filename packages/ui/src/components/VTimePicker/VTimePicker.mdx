@@ -1,11 +1,11 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as TimePickerStories from './VTimePicker.stories'
+import * as VTimePickerStories from './VTimePicker.stories'
 
-<Meta of={TimePickerStories} />
+<Meta of={VTimePickerStories} />
 
 # TimePicker
 
-Sélecteur d'heure : un champ [Input](?path=/docs/composants-input--docs) et,
+Sélecteur d'heure : un champ [VInput](?path=/docs/composants-input--docs) et,
 optionnellement, un panneau flottant. Trois façons de remplir le champ, choisies
 par la prop `mode` — une **saisie masquée**, un **cadran** ou une **liste
 d'heures**.
@@ -13,7 +13,7 @@ d'heures**.
 **Par défaut, l'heure se tape au clavier et il n'y a pas de panneau** : `mode`
 vaut `input` et `showDial` `false`.
 
-La coquille est celle du [DatePicker](?path=/docs/composants-datepicker--docs) :
+La coquille est celle du [VDatePicker](?path=/docs/composants-datepicker--docs) :
 panneau `popover="manual"` ancré en **pur CSS** (`anchor-scope` sur la racine +
 `anchor-name` sur le contrôle → `position-anchor`), ouverture programmatique qui
 déplace le focus dans le panneau, fermeture par `focusout` racine + `Échap`.
@@ -21,8 +21,8 @@ déplace le focus dans le panneau, fermeture par `focusout` racine + `Échap`.
 Quel que soit le mode, le **v-model reste `'HH:mm'` en 24 h canonique** (`null`
 si vide) : choisir 7 h PM produit `'19:00'`.
 
-<Canvas of={TimePickerStories.Default} />
-<Controls of={TimePickerStories.Default} />
+<Canvas of={VTimePickerStories.Default} />
+<Controls of={VTimePickerStories.Default} />
 
 ## Trois modes de champ
 
@@ -36,7 +36,7 @@ si vide) : choisir 7 h PM produit `'19:00'`.
 ## Saisie masquée (défaut)
 
 L'utilisateur ne tape que **des chiffres** : le deux-points est posé dès que
-l'heure est complète. Contrairement au masque du DatePicker, dont l'ordre des
+l'heure est complète. Contrairement au masque du VDatePicker, dont l'ordre des
 champs et le séparateur sont dérivés de la locale, celui-ci est **universel** —
 `Intl` ne fait varier que le cycle horaire, jamais le deux-points.
 
@@ -55,10 +55,10 @@ au focus **sans prendre le focus**, la frappe continue dans le champ, et la
 `flèche bas` reste le chemin explicite vers le cadran.
 
 `clockIcon` remplace cette icône-là et elle seule : en `mode="list"` le chevron
-suit la convention du Combobox. La croix de `clearable` se pose **à sa gauche**
-sans la remplacer — croix + chevron, exactement comme le Combobox.
+suit la convention du VCombobox. La croix de `clearable` se pose **à sa gauche**
+sans la remplacer — croix + chevron, exactement comme le VCombobox.
 
-<Canvas of={TimePickerStories.SaisieAvecCadran} />
+<Canvas of={VTimePickerStories.SaisieAvecCadran} />
 
 ## Le cadran
 
@@ -81,10 +81,10 @@ Les chiffres et l'aiguille sont positionnés en **CSS pur** — trigonométrie
 une fraction de tour posée en variable inline. Le JS se limite à la conversion
 pointeur → valeur et au clavier.
 
-<Canvas of={TimePickerStories.LectureSeule} />
-<Canvas of={TimePickerStories.SelectionAuCadran} />
-<Canvas of={TimePickerStories.AnneauInterieur} />
-<Canvas of={TimePickerStories.PasDeCinqMinutes} />
+<Canvas of={VTimePickerStories.LectureSeule} />
+<Canvas of={VTimePickerStories.SelectionAuCadran} />
+<Canvas of={VTimePickerStories.AnneauInterieur} />
+<Canvas of={VTimePickerStories.PasDeCinqMinutes} />
 
 ## Liste d'heures
 
@@ -96,8 +96,8 @@ plus proche — a le focus et la liste est défilée dessus.
 Choisir une heure **commite immédiatement et ferme** : un choix dans une liste
 est un geste unique, il n'y a donc ni brouillon ni bouton OK ici.
 
-<Canvas of={TimePickerStories.ListeDHeures} />
-<Canvas of={TimePickerStories.ListeClavier} />
+<Canvas of={VTimePickerStories.ListeDHeures} />
+<Canvas of={VTimePickerStories.ListeClavier} />
 
 ## Format 12 h / 24 h et AM/PM
 
@@ -114,8 +114,8 @@ basculer d'un coup la valeur retenue.
 
 Le champ affiche la valeur formatée par `Intl` selon la locale.
 
-<Canvas of={TimePickerStories.DouzeHeures} />
-<Canvas of={TimePickerStories.MeridienAligne} />
+<Canvas of={VTimePickerStories.DouzeHeures} />
+<Canvas of={VTimePickerStories.MeridienAligne} />
 
 ## États
 
@@ -125,9 +125,9 @@ ses dimensions —, est effaçable (`clearable` : la croix apparaît à gauche d
 l'icône de fin dès qu'une valeur est posée, y compris pendant une saisie en
 cours) et supporte `disabled`. Annuler restaure toujours la dernière valeur commitée.
 
-<Canvas of={TimePickerStories.Annulation} />
-<Canvas of={TimePickerStories.Tailles} />
-<Canvas of={TimePickerStories.Desactive} />
+<Canvas of={VTimePickerStories.Annulation} />
+<Canvas of={VTimePickerStories.Tailles} />
+<Canvas of={VTimePickerStories.Desactive} />
 
 ## Accessibilité
 

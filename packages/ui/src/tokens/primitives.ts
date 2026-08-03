@@ -171,7 +171,7 @@ export const primitives = {
     out: cubicBezier('cubic-bezier(0, 0, 0.2, 1)'),
     'in-out': cubicBezier(
       'cubic-bezier(0.4, 0, 0.2, 1)',
-      'Symétrique : départ et arrivée amortis. Animations en boucle qui traversent (ProgressLinear indéterminé).',
+      'Symétrique : départ et arrivée amortis. Animations en boucle qui traversent (VProgressLinear indéterminé).',
     ),
   },
 } satisfies TokenGroup

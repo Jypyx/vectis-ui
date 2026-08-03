@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, inject, ref, useId, useSlots } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import MenuPanel from './VMenuPanel.vue'
+import VMenuPanel from './VMenuPanel.vue'
 import { menuKey, SUBMENU_HOVER_DELAY } from './context'
 
 import { useTimer } from '../../composables/useTimer'
@@ -73,7 +73,7 @@ defineSlots<{
   start?(): unknown
   /** Contenu libre après le libellé (prime sur `iconEnd`). */
   end?(): unknown
-  /** Contenu du sous-menu (MenuItem/MenuGroup/MenuSeparator, récursif). */
+  /** Contenu du sous-menu (VMenuItem/VMenuGroup/VMenuSeparator, récursif). */
   submenu?(): unknown
 }>()
 
@@ -93,7 +93,7 @@ function onClick() {
 
 const subId = useId()
 const subOpen = ref(false)
-const subPanel = ref<InstanceType<typeof MenuPanel> | null>(null)
+const subPanel = ref<InstanceType<typeof VMenuPanel> | null>(null)
 // Ouvertures programmatiques : l'item est passé en `source` à showPopover(),
 // sinon le sous-panneau n'a pas d'ancre implicite (posée nativement au clic
 // seulement) et perd son positionnement.
@@ -158,7 +158,7 @@ function onPointerLeave() {
     @pointerleave="onPointerLeave"
   >
     <slot name="start">
-      <Icon v-if="iconStart" v-bind="iconProps(iconStart)" />
+      <VIcon v-if="iconStart" v-bind="iconProps(iconStart)" />
     </slot>
     <span class="v-menu-item-content">
       <span class="v-menu-item-label"
@@ -169,12 +169,12 @@ function onPointerLeave() {
       </span>
     </span>
     <!-- un item à sous-menu signale l'ouverture latérale : chevron, jamais iconEnd -->
-    <Icon v-if="hasSubmenu" name="chevron_right" class="v-menu-item-chevron" />
+    <VIcon v-if="hasSubmenu" name="chevron_right" class="v-menu-item-chevron" />
     <slot v-else name="end">
-      <Icon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
+      <VIcon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
     </slot>
   </component>
-  <MenuPanel
+  <VMenuPanel
     v-if="hasSubmenu"
     :id="subId"
     ref="subPanel"
@@ -185,7 +185,7 @@ function onPointerLeave() {
     @pointerleave="onPointerLeave"
   >
     <slot name="submenu" />
-  </MenuPanel>
+  </VMenuPanel>
 </template>
 
 <style>

@@ -2,13 +2,13 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Button from '../VButton/VButton.vue'
-import Typography from '../VTypography/VTypography.vue'
-import Dialog from './VDialog.vue'
+import VButton from '../VButton/VButton.vue'
+import VTypography from '../VTypography/VTypography.vue'
+import VDialog from './VDialog.vue'
 
 const meta = {
   title: 'Composants/Dialog',
-  component: Dialog,
+  component: VDialog,
   argTypes: {
     title: { control: 'text' },
     subtitle: { control: 'text' },
@@ -27,28 +27,28 @@ const meta = {
     closeOnEscape: true,
   },
   render: (args) => ({
-    components: { Dialog, Button, Typography },
+    components: { VDialog, VButton, VTypography },
     setup() {
       const open = ref(false)
       return { args, open }
     },
     template: `
-      <Dialog v-bind="args" v-model:open="open">
+      <VDialog v-bind="args" v-model:open="open">
         <template #trigger="{ triggerProps }">
-          <Button v-bind="triggerProps">Ouvrir la modale</Button>
+          <VButton v-bind="triggerProps">Ouvrir la modale</VButton>
         </template>
-        <Typography>
+        <VTypography>
           Toute personne disposant du lien pourra consulter le document. Vous pouvez
           révoquer l'accès à tout moment depuis les paramètres de partage.
-        </Typography>
+        </VTypography>
         <template #footer>
-          <Button variant="ghost" tone="neutral" @click="open = false">Annuler</Button>
-          <Button @click="open = false">Partager</Button>
+          <VButton variant="ghost" tone="neutral" @click="open = false">Annuler</VButton>
+          <VButton @click="open = false">Partager</VButton>
         </template>
-      </Dialog>
+      </VDialog>
     `,
   }),
-} satisfies Meta<typeof Dialog>
+} satisfies Meta<typeof VDialog>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -79,7 +79,7 @@ export const Default: Story = {
  */
 export const Largeur: Story = {
   render: (args) => ({
-    components: { Dialog, Button, Typography },
+    components: { VDialog, VButton, VTypography },
     setup() {
       const opened = ref<string | null>(null)
       const widths = ['320px', '480px', '640px'] as const
@@ -87,11 +87,11 @@ export const Largeur: Story = {
     },
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <Button v-for="w in widths" :key="w" variant="outline" tone="neutral" @click="opened = w">
+        <VButton v-for="w in widths" :key="w" variant="outline" tone="neutral" @click="opened = w">
           {{ w }}
-        </Button>
+        </VButton>
       </div>
-      <Dialog
+      <VDialog
         v-for="w in widths"
         :key="w"
         :width="w"
@@ -100,11 +100,11 @@ export const Largeur: Story = {
         :open="opened === w"
         @update:open="(v) => { if (!v) opened = null }"
       >
-        <Typography>Contenu de la modale en largeur {{ w }}.</Typography>
+        <VTypography>Contenu de la modale en largeur {{ w }}.</VTypography>
         <template #footer>
-          <Button @click="opened = null">Fermer</Button>
+          <VButton @click="opened = null">Fermer</VButton>
         </template>
-      </Dialog>
+      </VDialog>
     `,
   }),
 }
@@ -116,20 +116,20 @@ export const Largeur: Story = {
  */
 export const ContenuLong: Story = {
   render: (args) => ({
-    components: { Dialog, Button, Typography },
+    components: { VDialog, VButton, VTypography },
     setup() {
       const open = ref(false)
       const paragraphs = Array.from({ length: 12 }, (_, i) => i + 1)
       return { args, open, paragraphs }
     },
     template: `
-      <Dialog
+      <VDialog
         title="Conditions d'utilisation"
         subtitle="Faites défiler pour tout lire."
         v-model:open="open"
       >
         <template #trigger="{ triggerProps }">
-          <Button v-bind="triggerProps">Lire les conditions</Button>
+          <VButton v-bind="triggerProps">Lire les conditions</VButton>
         </template>
         <p v-for="n in paragraphs" :key="n" style="margin: 0 0 12px">
           {{ n }}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
@@ -137,10 +137,10 @@ export const ContenuLong: Story = {
           nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
         </p>
         <template #footer>
-          <Button variant="ghost" tone="neutral" @click="open = false">Refuser</Button>
-          <Button @click="open = false">Accepter</Button>
+          <VButton variant="ghost" tone="neutral" @click="open = false">Refuser</VButton>
+          <VButton @click="open = false">Accepter</VButton>
         </template>
-      </Dialog>
+      </VDialog>
     `,
   }),
 }
@@ -148,15 +148,15 @@ export const ContenuLong: Story = {
 /** Le slot `#header` remplace entièrement le bloc titre/sous-titre. */
 export const HeaderPersonnalise: Story = {
   render: (args) => ({
-    components: { Dialog, Button, Typography },
+    components: { VDialog, VButton, VTypography },
     setup() {
       const open = ref(false)
       return { args, open }
     },
     template: `
-      <Dialog v-model:open="open" aria-label="Nouvelle version disponible">
+      <VDialog v-model:open="open" aria-label="Nouvelle version disponible">
         <template #trigger="{ triggerProps }">
-          <Button v-bind="triggerProps">Header personnalisé</Button>
+          <VButton v-bind="triggerProps">Header personnalisé</VButton>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 12px">
@@ -165,14 +165,14 @@ export const HeaderPersonnalise: Story = {
             >
               ✦
             </span>
-            <Typography variant="heading-3" as="strong">Nouvelle version</Typography>
+            <VTypography variant="heading-3" as="strong">Nouvelle version</VTypography>
           </div>
         </template>
-        <Typography>La version 2.0 est prête à être installée.</Typography>
+        <VTypography>La version 2.0 est prête à être installée.</VTypography>
         <template #footer>
-          <Button @click="open = false">Plus tard</Button>
+          <VButton @click="open = false">Plus tard</VButton>
         </template>
-      </Dialog>
+      </VDialog>
     `,
   }),
 }
@@ -180,22 +180,22 @@ export const HeaderPersonnalise: Story = {
 /** Le slot `#headerActions` ajoute des contrôles juste à gauche de la croix. */
 export const ActionsHeader: Story = {
   render: (args) => ({
-    components: { Dialog, Button, Typography },
+    components: { VDialog, VButton, VTypography },
     setup() {
       const open = ref(false)
       return { args, open }
     },
     template: `
-      <Dialog title="Aperçu" subtitle="document.pdf" v-model:open="open">
+      <VDialog title="Aperçu" subtitle="document.pdf" v-model:open="open">
         <template #trigger="{ triggerProps }">
-          <Button v-bind="triggerProps">Ouvrir l'aperçu</Button>
+          <VButton v-bind="triggerProps">Ouvrir l'aperçu</VButton>
         </template>
         <template #headerActions>
-          <Button variant="ghost" tone="neutral" size="sm" iconStart="download" aria-label="Télécharger" />
-          <Button variant="ghost" tone="neutral" size="sm" iconStart="open_in_full" aria-label="Plein écran" />
+          <VButton variant="ghost" tone="neutral" size="sm" iconStart="download" aria-label="Télécharger" />
+          <VButton variant="ghost" tone="neutral" size="sm" iconStart="open_in_full" aria-label="Plein écran" />
         </template>
-        <Typography>Zone d'aperçu du document.</Typography>
-      </Dialog>
+        <VTypography>Zone d'aperçu du document.</VTypography>
+      </VDialog>
     `,
   }),
 }
@@ -204,22 +204,22 @@ export const ActionsHeader: Story = {
 export const SansCroix: Story = {
   args: { closable: false },
   render: (args) => ({
-    components: { Dialog, Button, Typography },
+    components: { VDialog, VButton, VTypography },
     setup() {
       const open = ref(false)
       return { args, open }
     },
     template: `
-      <Dialog v-bind="args" v-model:open="open">
+      <VDialog v-bind="args" v-model:open="open">
         <template #trigger="{ triggerProps }">
-          <Button v-bind="triggerProps">Ouvrir sans croix</Button>
+          <VButton v-bind="triggerProps">Ouvrir sans croix</VButton>
         </template>
-        <Typography>Pas de croix : utilisez les actions ci-dessous.</Typography>
+        <VTypography>Pas de croix : utilisez les actions ci-dessous.</VTypography>
         <template #footer>
-          <Button variant="ghost" tone="neutral" @click="open = false">Annuler</Button>
-          <Button @click="open = false">Valider</Button>
+          <VButton variant="ghost" tone="neutral" @click="open = false">Annuler</VButton>
+          <VButton @click="open = false">Valider</VButton>
         </template>
-      </Dialog>
+      </VDialog>
     `,
   }),
 }

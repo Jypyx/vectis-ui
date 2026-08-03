@@ -236,7 +236,7 @@ describe('masque HH:MM', () => {
     expect(parseTimeMask('', '24h')).toBeNull()
   })
 
-  it('parse en 12 h avec le méridien du Toggle', () => {
+  it('parse en 12 h avec le méridien du VToggle', () => {
     expect(parseTimeMask('07:00', '12h', 'PM')).toBe('19:00')
     expect(parseTimeMask('12:00', '12h', 'AM')).toBe('00:00')
     expect(parseTimeMask('12:00', '12h', 'PM')).toBe('12:00')

@@ -1,15 +1,15 @@
 ﻿import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
-import Button from '../VButton/VButton.vue'
-import Menu from './VMenu.vue'
-import MenuGroup from './VMenuGroup.vue'
-import MenuItem from './VMenuItem.vue'
-import MenuSeparator from './VMenuSeparator.vue'
+import VButton from '../VButton/VButton.vue'
+import VMenu from './VMenu.vue'
+import VMenuGroup from './VMenuGroup.vue'
+import VMenuItem from './VMenuItem.vue'
+import VMenuSeparator from './VMenuSeparator.vue'
 
 const meta = {
   title: 'Composants/Menu',
-  component: Menu,
+  component: VMenu,
   argTypes: {
     placement: {
       control: 'select',
@@ -19,26 +19,26 @@ const meta = {
     compact: { control: 'boolean' },
   },
   args: { placement: 'bottom-start', size: 'sm', compact: false },
-} satisfies Meta<typeof Menu>
+} satisfies Meta<typeof VMenu>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: (args) => ({
-    components: { Menu, MenuItem, MenuSeparator, Button },
+    components: { VMenu, VMenuItem, VMenuSeparator, VButton },
     setup: () => ({ args, onSelect: fn() }),
     template: `
-      <Menu v-bind="args">
+      <VMenu v-bind="args">
         <template #trigger="{ triggerProps }">
-          <Button variant="outline" tone="neutral" v-bind="triggerProps">Actions</Button>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Actions</VButton>
         </template>
-        <MenuItem label="Renommer" icon-start="edit" @select="onSelect" />
-        <MenuItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
-        <MenuItem label="Archiver (indisponible)" icon-start="archive" disabled />
-        <MenuSeparator />
-        <MenuItem label="Supprimer" icon-start="delete" danger @select="onSelect" />
-      </Menu>
+        <VMenuItem label="Renommer" icon-start="edit" @select="onSelect" />
+        <VMenuItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
+        <VMenuItem label="Archiver (indisponible)" icon-start="archive" disabled />
+        <VMenuSeparator />
+        <VMenuItem label="Supprimer" icon-start="delete" danger @select="onSelect" />
+      </VMenu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -72,32 +72,32 @@ export const Default: Story = {
 
 export const SousLabels: Story = {
   render: () => ({
-    components: { Menu, MenuItem, Button },
+    components: { VMenu, VMenuItem, VButton },
     template: `
-      <Menu>
+      <VMenu>
         <template #trigger="{ triggerProps }">
-          <Button variant="outline" tone="neutral" v-bind="triggerProps">Exporter</Button>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Exporter</VButton>
         </template>
-        <MenuItem label="PDF" sublabel="Mise en page fidèle, non éditable" icon-start="picture_as_pdf" />
-        <MenuItem label="CSV" sublabel="Données brutes, séparateur virgule" icon-start="csv" />
-        <MenuItem label="PNG" sublabel="Image de la vue courante" icon-start="image" />
-      </Menu>
+        <VMenuItem label="PDF" sublabel="Mise en page fidèle, non éditable" icon-start="picture_as_pdf" />
+        <VMenuItem label="CSV" sublabel="Données brutes, séparateur virgule" icon-start="csv" />
+        <VMenuItem label="PNG" sublabel="Image de la vue courante" icon-start="image" />
+      </VMenu>
     `,
   }),
 }
 
 export const Selection: Story = {
   render: () => ({
-    components: { Menu, MenuItem, Button },
+    components: { VMenu, VMenuItem, VButton },
     template: `
-      <Menu>
+      <VMenu>
         <template #trigger="{ triggerProps }">
-          <Button variant="outline" tone="neutral" v-bind="triggerProps">Trier par</Button>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Trier par</VButton>
         </template>
-        <MenuItem label="Nom" selected icon-end="check" />
-        <MenuItem label="Date de modification" />
-        <MenuItem label="Taille" />
-      </Menu>
+        <VMenuItem label="Nom" selected icon-end="check" />
+        <VMenuItem label="Date de modification" />
+        <VMenuItem label="Taille" />
+      </VMenu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -115,24 +115,24 @@ export const Selection: Story = {
 
 export const Groupes: Story = {
   render: () => ({
-    components: { Menu, MenuItem, MenuGroup, MenuSeparator, Button },
+    components: { VMenu, VMenuItem, VMenuGroup, VMenuSeparator, VButton },
     template: `
-      <Menu>
+      <VMenu>
         <template #trigger="{ triggerProps }">
-          <Button variant="outline" tone="neutral" v-bind="triggerProps">Document</Button>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Document</VButton>
         </template>
-        <MenuGroup label="Fichier">
-          <MenuItem label="Renommer" icon-start="edit" />
-          <MenuItem label="Dupliquer" icon-start="content_copy" />
-        </MenuGroup>
-        <MenuSeparator />
-        <MenuGroup label="Partage">
-          <MenuItem label="Inviter" icon-start="person_add" />
-          <MenuItem label="Copier le lien" icon-start="link" />
-        </MenuGroup>
-        <MenuSeparator />
-        <MenuItem label="Supprimer" icon-start="delete" danger />
-      </Menu>
+        <VMenuGroup label="Fichier">
+          <VMenuItem label="Renommer" icon-start="edit" />
+          <VMenuItem label="Dupliquer" icon-start="content_copy" />
+        </VMenuGroup>
+        <VMenuSeparator />
+        <VMenuGroup label="Partage">
+          <VMenuItem label="Inviter" icon-start="person_add" />
+          <VMenuItem label="Copier le lien" icon-start="link" />
+        </VMenuGroup>
+        <VMenuSeparator />
+        <VMenuItem label="Supprimer" icon-start="delete" danger />
+      </VMenu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -169,10 +169,10 @@ export const Groupes: Story = {
  */
 export const Tailles: Story = {
   render: () => ({
-    components: { Menu, MenuItem, MenuSeparator, Button },
+    components: { VMenu, VMenuItem, VMenuSeparator, VButton },
     template: `
       <div style="display: flex; gap: 8px">
-        <Menu v-for="variant in [
+        <VMenu v-for="variant in [
           { label: 'sm', props: {} },
           { label: 'md', props: { size: 'md' } },
           { label: 'lg', props: { size: 'lg' } },
@@ -181,13 +181,13 @@ export const Tailles: Story = {
           { label: 'lg compact', props: { size: 'lg', compact: true } },
         ]" :key="variant.label" v-bind="variant.props">
           <template #trigger="{ triggerProps }">
-            <Button size="sm" variant="outline" tone="neutral" v-bind="triggerProps">{{ variant.label }}</Button>
+            <VButton size="sm" variant="outline" tone="neutral" v-bind="triggerProps">{{ variant.label }}</VButton>
           </template>
-          <MenuItem label="Renommer" icon-start="edit" />
-          <MenuItem label="Dupliquer" icon-start="content_copy" />
-          <MenuSeparator />
-          <MenuItem label="Supprimer" icon-start="delete" danger />
-        </Menu>
+          <VMenuItem label="Renommer" icon-start="edit" />
+          <VMenuItem label="Dupliquer" icon-start="content_copy" />
+          <VMenuSeparator />
+          <VMenuItem label="Supprimer" icon-start="delete" danger />
+        </VMenu>
       </div>
     `,
   }),
@@ -198,34 +198,34 @@ export const Tailles: Story = {
     du déclencheur. Les sous-menus ne sont pas affectés. */
 export const Largeur: Story = {
   render: (args) => ({
-    components: { Menu, MenuItem, Button },
+    components: { VMenu, VMenuItem, VButton },
     setup: () => ({ args, onSelect: fn() }),
     template: `
       <div style="display: flex; gap: var(--vectis-space-8)">
-        <Menu v-bind="args" width="max-content">
+        <VMenu v-bind="args" width="max-content">
           <template #trigger="{ triggerProps }">
-            <Button variant="outline" tone="neutral" v-bind="triggerProps">10</Button>
+            <VButton variant="outline" tone="neutral" v-bind="triggerProps">10</VButton>
           </template>
-          <MenuItem label="10" selected @select="onSelect" />
-          <MenuItem label="25" @select="onSelect" />
-          <MenuItem label="50" @select="onSelect" />
-        </Menu>
-        <Menu v-bind="args" width="16rem">
+          <VMenuItem label="10" selected @select="onSelect" />
+          <VMenuItem label="25" @select="onSelect" />
+          <VMenuItem label="50" @select="onSelect" />
+        </VMenu>
+        <VMenu v-bind="args" width="16rem">
           <template #trigger="{ triggerProps }">
-            <Button variant="outline" tone="neutral" v-bind="triggerProps">Actions (16rem)</Button>
+            <VButton variant="outline" tone="neutral" v-bind="triggerProps">Actions (16rem)</VButton>
           </template>
-          <MenuItem label="Renommer" icon-start="edit" @select="onSelect" />
-          <MenuItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
-        </Menu>
-        <Menu v-bind="args" match-trigger>
+          <VMenuItem label="Renommer" icon-start="edit" @select="onSelect" />
+          <VMenuItem label="Dupliquer" icon-start="content_copy" @select="onSelect" />
+        </VMenu>
+        <VMenu v-bind="args" match-trigger>
           <template #trigger="{ triggerProps }">
-            <Button variant="outline" tone="neutral" v-bind="triggerProps">
+            <VButton variant="outline" tone="neutral" v-bind="triggerProps">
               Trier par ordre alphabétique
-            </Button>
+            </VButton>
           </template>
-          <MenuItem label="A → Z" selected @select="onSelect" />
-          <MenuItem label="Z → A" @select="onSelect" />
-        </Menu>
+          <VMenuItem label="A → Z" selected @select="onSelect" />
+          <VMenuItem label="Z → A" @select="onSelect" />
+        </VMenu>
       </div>
     `,
   }),
@@ -255,15 +255,15 @@ export const Largeur: Story = {
 
 export const FermetureEscape: Story = {
   render: () => ({
-    components: { Menu, MenuItem, Button },
+    components: { VMenu, VMenuItem, VButton },
     template: `
-      <Menu>
+      <VMenu>
         <template #trigger="{ triggerProps }">
-          <Button variant="outline" tone="neutral" v-bind="triggerProps">Menu</Button>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Menu</VButton>
         </template>
-        <MenuItem label="Premier" />
-        <MenuItem label="Second" />
-      </Menu>
+        <VMenuItem label="Premier" />
+        <VMenuItem label="Second" />
+      </VMenu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -282,16 +282,16 @@ export const FermetureEscape: Story = {
 
 export const ItemsDeNavigation: Story = {
   render: () => ({
-    components: { Menu, MenuItem, Button },
+    components: { VMenu, VMenuItem, VButton },
     template: `
-      <Menu>
+      <VMenu>
         <template #trigger="{ triggerProps }">
-          <Button variant="outline" tone="neutral" v-bind="triggerProps">Aller à</Button>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Aller à</VButton>
         </template>
-        <MenuItem href="#profil" label="Profil" icon-start="person" />
-        <MenuItem href="#facturation" label="Facturation" icon-start="credit_card" />
-        <MenuItem href="#archives" label="Archives (indisponible)" icon-start="archive" disabled />
-      </Menu>
+        <VMenuItem href="#profil" label="Profil" icon-start="person" />
+        <VMenuItem href="#facturation" label="Facturation" icon-start="credit_card" />
+        <VMenuItem href="#archives" label="Archives (indisponible)" icon-start="archive" disabled />
+      </VMenu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -323,34 +323,34 @@ export const ItemsDeNavigation: Story = {
 
 export const SousMenus: Story = {
   render: () => ({
-    components: { Menu, MenuItem, MenuSeparator, Button },
+    components: { VMenu, VMenuItem, VMenuSeparator, VButton },
     setup: () => ({ onSelect: fn() }),
     template: `
-      <Menu>
+      <VMenu>
         <template #trigger="{ triggerProps }">
-          <Button variant="outline" tone="neutral" v-bind="triggerProps">Fichier</Button>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Fichier</VButton>
         </template>
-        <MenuItem label="Nouveau" icon-start="note_add" />
-        <MenuItem label="Exporter" icon-start="download">
+        <VMenuItem label="Nouveau" icon-start="note_add" />
+        <VMenuItem label="Exporter" icon-start="download">
           <template #submenu>
-            <MenuItem label="PDF" sublabel="Mise en page fidèle" />
-            <MenuItem label="Image">
+            <VMenuItem label="PDF" sublabel="Mise en page fidèle" />
+            <VMenuItem label="Image">
               <template #submenu>
-                <MenuItem label="PNG" @select="onSelect" />
-                <MenuItem label="JPEG" />
+                <VMenuItem label="PNG" @select="onSelect" />
+                <VMenuItem label="JPEG" />
               </template>
-            </MenuItem>
+            </VMenuItem>
           </template>
-        </MenuItem>
-        <MenuItem label="Partager" icon-start="share">
+        </VMenuItem>
+        <VMenuItem label="Partager" icon-start="share">
           <template #submenu>
-            <MenuItem label="Inviter" icon-start="person_add" />
-            <MenuItem label="Copier le lien" icon-start="link" />
+            <VMenuItem label="Inviter" icon-start="person_add" />
+            <VMenuItem label="Copier le lien" icon-start="link" />
           </template>
-        </MenuItem>
-        <MenuSeparator />
-        <MenuItem label="Supprimer" icon-start="delete" danger />
-      </Menu>
+        </VMenuItem>
+        <VMenuSeparator />
+        <VMenuItem label="Supprimer" icon-start="delete" danger />
+      </VMenu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -395,25 +395,25 @@ export const SousMenus: Story = {
 
 export const SousMenusSurvol: Story = {
   render: () => ({
-    components: { Menu, MenuItem, Button },
+    components: { VMenu, VMenuItem, VButton },
     template: `
-      <Menu>
+      <VMenu>
         <template #trigger="{ triggerProps }">
-          <Button variant="outline" tone="neutral" v-bind="triggerProps">Fichier</Button>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Fichier</VButton>
         </template>
-        <MenuItem label="Nouveau" icon-start="note_add" />
-        <MenuItem label="Exporter" icon-start="download">
+        <VMenuItem label="Nouveau" icon-start="note_add" />
+        <VMenuItem label="Exporter" icon-start="download">
           <template #submenu>
-            <MenuItem label="PDF" />
-            <MenuItem label="CSV" />
+            <VMenuItem label="PDF" />
+            <VMenuItem label="CSV" />
           </template>
-        </MenuItem>
-        <MenuItem label="Partager" icon-start="share">
+        </VMenuItem>
+        <VMenuItem label="Partager" icon-start="share">
           <template #submenu>
-            <MenuItem label="Inviter" />
+            <VMenuItem label="Inviter" />
           </template>
-        </MenuItem>
-      </Menu>
+        </VMenuItem>
+      </VMenu>
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -451,18 +451,18 @@ export const SousMenusSurvol: Story = {
 
 export const LibellesLongs: Story = {
   render: () => ({
-    components: { Menu, MenuItem, Button },
+    components: { VMenu, VMenuItem, VButton },
     template: `
-      <Menu placement="bottom-end">
+      <VMenu placement="bottom-end">
         <template #trigger="{ triggerProps }">
-          <Button variant="outline" tone="neutral" v-bind="triggerProps">Options</Button>
+          <VButton variant="outline" tone="neutral" v-bind="triggerProps">Options</VButton>
         </template>
-        <MenuItem label="Exporter la sélection au format CSV avec les en-têtes" />
-        <MenuItem
+        <VMenuItem label="Exporter la sélection au format CSV avec les en-têtes" />
+        <VMenuItem
           label="Un libellé anormalement long qui doit être borné par la largeur maximale du menu"
           sublabel="Un sous-libellé tout aussi verbeux qui passe sur plusieurs lignes sans déborder"
         />
-      </Menu>
+      </VMenu>
     `,
   }),
 }

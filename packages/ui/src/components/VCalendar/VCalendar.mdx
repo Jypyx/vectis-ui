@@ -1,13 +1,13 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as CalendarStories from './VCalendar.stories'
+import * as VCalendarStories from './VCalendar.stories'
 
-<Meta of={CalendarStories} />
+<Meta of={VCalendarStories} />
 
 # Calendar
 
 Calendrier inline (grille) inspiré de Material. Il porte **toute la logique** de
 sélection, de navigation par vues (jours / mois / années) et du clavier ; le
-[DatePicker](?path=/docs/composants-datepicker--docs) se contente de l'habiller
+[VDatePicker](?path=/docs/composants-datepicker--docs) se contente de l'habiller
 d'un champ et d'un panneau flottant.
 
 Le natif ne propose pas de grille de dates accessible et composable
@@ -16,23 +16,23 @@ le pattern ARIA **grid** — roving tabindex, flèches, `PageUp`/`PageDown`,
 sélection simple / plage / multiple. Tout se calcule en **heure locale** via des
 chaînes ISO `YYYY-MM-DD` (aucune dérive de fuseau, SSR-safe).
 
-<Canvas of={CalendarStories.Default} />
-<Controls of={CalendarStories.Default} />
+<Canvas of={VCalendarStories.Default} />
+<Controls of={VCalendarStories.Default} />
 
 ## Modes de sélection
 
 `selection` accepte `single` (défaut), `range` et `multiple`. Le type du v-model
 suit la sélection : `string | null`, `{ start, end }` (`DateRange`), ou `string[]`.
 
-<Canvas of={CalendarStories.Plage} />
-<Canvas of={CalendarStories.Multiple} />
+<Canvas of={VCalendarStories.Plage} />
+<Canvas of={VCalendarStories.Multiple} />
 
 ## Bornes min / max
 
 `min` et `max` (ISO) verrouillent la navigation **et** la sélection : les mois
 hors plage ne sont plus atteignables et les jours hors plage sont désactivés.
 
-<Canvas of={CalendarStories.MinMax} />
+<Canvas of={VCalendarStories.MinMax} />
 
 ## Dates désactivées
 
@@ -40,24 +40,24 @@ hors plage ne sont plus atteignables et les jours hors plage sont désactivés.
 Les dates concernées sont barrées et non sélectionnables (mais restent
 focusables au clavier, conformément au pattern ARIA).
 
-<Canvas of={CalendarStories.DatesDesactivees} />
+<Canvas of={VCalendarStories.DatesDesactivees} />
 
 ## Mois adjacents
 
 `showAdjacentDays` (désactivé par défaut) affiche les jours des mois
 précédent/suivant en grisé — activez-le par simple présence :
-`<Calendar show-adjacent-days />`. `selectAdjacentDays` les rend cliquables (et
+`<VCalendar show-adjacent-days />`. `selectAdjacentDays` les rend cliquables (et
 implique leur affichage) — un clic navigue alors vers leur mois et les
 sélectionne.
 
-<Canvas of={CalendarStories.MoisAdjacents} />
+<Canvas of={VCalendarStories.MoisAdjacents} />
 
 ## Événements
 
 `events` (`{ date, color?, label? }[]`) affiche jusqu'à trois pastilles colorées
 sous une date.
 
-<Canvas of={CalendarStories.Evenements} />
+<Canvas of={VCalendarStories.Evenements} />
 
 ## Contenu personnalisé (slot `#day`)
 
@@ -75,14 +75,14 @@ que leur numéro reste aligné sur celui des jours du mois : utilisez `inMonth`
 pour n'afficher les données que sur les jours du mois affiché, en gardant la
 même hauteur de contenu.
 
-<Canvas of={CalendarStories.SlotJour} />
+<Canvas of={VCalendarStories.SlotJour} />
 
 ## Zone footer
 
 Le slot `#footer` accueille des boutons d'action ou des presets
 (« Aujourd'hui », « Demain », …).
 
-<Canvas of={CalendarStories.AvecFooter} />
+<Canvas of={VCalendarStories.AvecFooter} />
 
 ## Localisation
 
@@ -90,7 +90,7 @@ Le slot `#footer` accueille des boutons d'action ou des presets
 semaine (dérivé de la locale, surchargeable par `firstDayOfWeek`). Les libellés
 passent par `Intl`, disponible côté serveur.
 
-<Canvas of={CalendarStories.Localisation} />
+<Canvas of={VCalendarStories.Localisation} />
 
 ## Accessibilité
 

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import ProgressCircular from './VProgressCircular.vue'
+import VProgressCircular from './VProgressCircular.vue'
 
 /** Style inline de la racine (les custom properties y sont posées). */
 const styleOf = (container: Element) =>
@@ -10,9 +10,9 @@ const styleOf = (container: Element) =>
 /** Le pourcentage est rendu avec une espace insécable (typographie française). */
 const NBSP = ' '
 
-describe('ProgressCircular', () => {
+describe('VProgressCircular', () => {
   it('contrat ARIA : rôle, bornes fidèles et fraction unitless', () => {
-    const { getByRole, container } = render(ProgressCircular, {
+    const { getByRole, container } = render(VProgressCircular, {
       props: { value: 30, max: 60 },
       attrs: { 'aria-label': 'Envoi' },
     })
@@ -25,7 +25,7 @@ describe('ProgressCircular', () => {
   })
 
   it('clampe au-dessus du max et en dessous de zéro', async () => {
-    const { getByRole, container, rerender } = render(ProgressCircular, {
+    const { getByRole, container, rerender } = render(VProgressCircular, {
       props: { value: 250, max: 100 },
       attrs: { 'aria-label': 'x' },
     })
@@ -37,7 +37,7 @@ describe('ProgressCircular', () => {
   })
 
   it('max: 0 ne produit ni NaN ni Infinity', () => {
-    const { container } = render(ProgressCircular, {
+    const { container } = render(VProgressCircular, {
       props: { value: 10, max: 0 },
       attrs: { 'aria-label': 'x' },
     })
@@ -48,7 +48,7 @@ describe('ProgressCircular', () => {
   })
 
   it('indéterminé : pas d’aria-valuenow, data-indeterminate, aucun label', () => {
-    const { getByRole, container } = render(ProgressCircular, {
+    const { getByRole, container } = render(VProgressCircular, {
       props: { indeterminate: true, showValue: true },
       attrs: { 'aria-label': 'Chargement' },
     })
@@ -61,7 +61,7 @@ describe('ProgressCircular', () => {
   })
 
   it('size et thickness : number → px, string telle quelle, absentes si non fournies', async () => {
-    const { container, rerender } = render(ProgressCircular, {
+    const { container, rerender } = render(VProgressCircular, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
@@ -81,7 +81,7 @@ describe('ProgressCircular', () => {
   })
 
   it('shape : rounded par défaut, square reporté', async () => {
-    const { getByRole, rerender } = render(ProgressCircular, {
+    const { getByRole, rerender } = render(VProgressCircular, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
@@ -91,7 +91,7 @@ describe('ProgressCircular', () => {
   })
 
   it('SVG décoratif : aria-hidden et pathLength normalisé sur les deux cercles', () => {
-    const { container } = render(ProgressCircular, {
+    const { container } = render(VProgressCircular, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
@@ -104,7 +104,7 @@ describe('ProgressCircular', () => {
   })
 
   it('tone et couleur custom', async () => {
-    const { getByRole, container, rerender } = render(ProgressCircular, {
+    const { getByRole, container, rerender } = render(VProgressCircular, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
@@ -117,7 +117,7 @@ describe('ProgressCircular', () => {
   })
 
   it('showValue : un seul label centré, non masqué', () => {
-    const { container } = render(ProgressCircular, {
+    const { container } = render(VProgressCircular, {
       props: { value: 65, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
@@ -128,7 +128,7 @@ describe('ProgressCircular', () => {
   })
 
   it('slot scopé : reçoit value/max/percent et prime sur showValue', () => {
-    const { container } = render(ProgressCircular, {
+    const { container } = render(VProgressCircular, {
       props: { value: 3, max: 8, showValue: true },
       attrs: { 'aria-label': 'x' },
       slots: {
@@ -142,7 +142,7 @@ describe('ProgressCircular', () => {
   })
 
   it('non-régression d’API : nom par fallthrough, plus de --vectis-progress-value', () => {
-    const { getByRole, container } = render(ProgressCircular, {
+    const { getByRole, container } = render(VProgressCircular, {
       props: { value: 40 },
       attrs: { 'aria-label': 'Nom par fallthrough' },
     })
@@ -153,7 +153,7 @@ describe('ProgressCircular', () => {
   })
 
   it('fallthrough : class, id et style du consommateur cohabitent avec les custom properties', () => {
-    const { getByRole } = render(ProgressCircular, {
+    const { getByRole } = render(VProgressCircular, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x', class: 'mon-donut', id: 'donut', style: 'margin: 4px' },
     })

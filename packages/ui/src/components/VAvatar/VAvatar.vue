@@ -2,7 +2,7 @@
 import { computed, inject, ref, useAttrs, watch } from 'vue'
 import type { StyleValue } from 'vue'
 
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import { avatarGroupKey } from './context'
@@ -10,8 +10,8 @@ import { avatarGroupKey } from './context'
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 /**
- * Avatar rond. Cascade de contenu : image → icône → initiales (dérivées du
- * nom) → slot par défaut (échappatoire, ex. l'agrégat « +X » d'AvatarGroup).
+ * VAvatar rond. Cascade de contenu : image → icône → initiales (dérivées du
+ * nom) → slot par défaut (échappatoire, ex. l'agrégat « +X » de VAvatarGroup).
  *
  * JS justifié : la détection d'échec de chargement d'image (`error`) n'existe
  * qu'en événement DOM ; les initiales et la teinte auto sont dérivées du nom ;
@@ -34,13 +34,13 @@ interface AvatarProps {
    * déterministe est dérivée du `name`.
    */
   color?: string
-  /** Défaut `md`. `undefined` = hérité d'un AvatarGroup englobant. */
+  /** Défaut `md`. `undefined` = hérité d'un VAvatarGroup englobant. */
   size?: AvatarSize
   /** Hauteur réduite de 4px (comme les autres contrôles). */
   compact?: boolean
   /** Rendu `<a>`. disabled → lien inerte (href retiré + aria-disabled). */
   href?: string
-  /** Rendu `<button type="button">` (le slot #trigger d'un Tooltip s'y branche par fallthrough). */
+  /** Rendu `<button type="button">` (le slot #trigger d'un VTooltip s'y branche par fallthrough). */
   clickable?: boolean
   disabled?: boolean
 }
@@ -59,7 +59,7 @@ const props = withDefaults(defineProps<AvatarProps>(), {
 })
 
 defineSlots<{
-  /** Contenu de repli (remplace les initiales), ex. « +X » d'AvatarGroup. */
+  /** Contenu de repli (remplace les initiales), ex. « +X » de VAvatarGroup. */
   default?(): unknown
 }>()
 
@@ -156,7 +156,7 @@ const passedAttrs = computed(() => {
       :alt="alt ?? name ?? ''"
       @error="failed = true"
     />
-    <Icon v-else-if="icon" v-bind="iconProps(icon)" class="v-avatar-icon" />
+    <VIcon v-else-if="icon" v-bind="iconProps(icon)" class="v-avatar-icon" />
     <slot v-else>
       <span class="v-avatar-initials" aria-hidden="true">{{ initials }}</span>
     </slot>
@@ -193,7 +193,7 @@ const passedAttrs = computed(() => {
     line-height: var(--vectis-text-control-leading);
     text-decoration: none;
     user-select: none;
-    /* Anneau de séparation en pile (transparent hors AvatarGroup, qui pose
+    /* Anneau de séparation en pile (transparent hors VAvatarGroup, qui pose
        --avatar-ring-color) — ne rogne pas la boîte (box-shadow, pas de border). */
     box-shadow: 0 0 0 var(--vectis-control-size-avatar-ring) var(--avatar-ring-color, transparent);
     transition:

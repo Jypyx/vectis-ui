@@ -1,13 +1,13 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import InputOTP from './VInputOTP.vue'
+import VInputOTP from './VInputOTP.vue'
 
 function renderOtp(props: Record<string, unknown> = {}) {
-  return render(InputOTP, { props: { modelValue: '', ...props } })
+  return render(VInputOTP, { props: { modelValue: '', ...props } })
 }
 
-describe('InputOTP', () => {
+describe('VInputOTP', () => {
   it('rend N cases nommées, groupe étiqueté', () => {
     const { getByRole, getAllByRole } = renderOtp({ length: 4 })
     expect(getByRole('group', { name: 'Code de vérification' })).toBeTruthy()

@@ -2,16 +2,16 @@ import { render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
-import Calendar from '../components/VCalendar/VCalendar.vue'
-import Pagination from '../components/VPagination/VPagination.vue'
-import Spinner from '../components/VSpinner/VSpinner.vue'
+import VCalendar from '../components/VCalendar/VCalendar.vue'
+import VPagination from '../components/VPagination/VPagination.vue'
+import VSpinner from '../components/VSpinner/VSpinner.vue'
 
 import { en } from './en'
 import { fr } from './fr'
 import { DEFAULT_LOCALE, registerMessages, setLocale, useMessages } from './state'
-import type { DsMessages } from './types'
+import type { VectisMessages } from './types'
 
-// L'état est module-level (comme Toast/state.ts et Icon/resolver.ts) : il
+// L'état est module-level (comme VToast/state.ts et VIcon/resolver.ts) : il
 // survit d'un test à l'autre DANS ce fichier. Vitest isolant les modules par
 // fichier, aucune fuite vers les tests de composants.
 afterEach(() => {
@@ -22,11 +22,11 @@ afterEach(() => {
 })
 
 const messages = () => useMessages().value
-const namespaces = Object.keys(fr) as (keyof DsMessages)[]
+const namespaces = Object.keys(fr) as (keyof VectisMessages)[]
 
 describe('parité des dictionnaires', () => {
   // Le typecheck garantit déjà que `en` n'oublie aucune clé (les deux sont
-  // ANNOTÉS `: DsMessages`). Ce test couvre ce que le type ne voit pas : un
+  // ANNOTÉS `: VectisMessages`). Ce test couvre ce que le type ne voit pas : un
   // `as` glissé plus tard, une arité de fonction divergente.
   it('fr et en ont exactement les mêmes namespaces', () => {
     expect(Object.keys(en).sort()).toEqual(Object.keys(fr).sort())
@@ -180,7 +180,7 @@ describe('pluriels et conventions typographiques', () => {
 describe('mécanisme, côté composant', () => {
   it('rafraîchit un composant DÉJÀ MONTÉ quand la locale change', async () => {
     registerMessages('en', en)
-    const { container } = render(Spinner)
+    const { container } = render(VSpinner)
     expect(container.textContent).toContain('Chargement…')
 
     setLocale('en')
@@ -193,7 +193,7 @@ describe('mécanisme, côté composant', () => {
   it('laisse la prop primer sur le dictionnaire', () => {
     registerMessages('en', en)
     setLocale('en')
-    const { container } = render(Spinner, { props: { label: 'Merci de patienter' } })
+    const { container } = render(VSpinner, { props: { label: 'Merci de patienter' } })
 
     expect(container.textContent).toContain('Merci de patienter')
   })
@@ -202,7 +202,7 @@ describe('mécanisme, côté composant', () => {
     registerMessages('en', en)
     setLocale('en')
 
-    const { getByRole } = render(Pagination, {
+    const { getByRole } = render(VPagination, {
       props: { length: 3, label: 'Prop' },
       attrs: { 'aria-label': 'Attribut' },
     })
@@ -215,7 +215,7 @@ describe('mécanisme, côté composant', () => {
     registerMessages('en', en)
     setLocale('en')
 
-    const { getByRole } = render(Pagination, { props: { length: 3 } })
+    const { getByRole } = render(VPagination, { props: { length: 3 } })
 
     expect(getByRole('navigation').getAttribute('aria-label')).toBe('Pagination')
     expect(getByRole('button', { name: 'Previous page' })).toBeTruthy()
@@ -232,17 +232,17 @@ describe('locale des composants de date', () => {
     r.container.querySelector('.v-calendar-picker-toggle')?.getAttribute('aria-label')
 
   it('suit la locale globale du DS quand la prop est absente', () => {
-    const fr = render(Calendar, { props: { modelValue: '2026-03-15' } })
+    const fr = render(VCalendar, { props: { modelValue: '2026-03-15' } })
     expect(monthToggle(fr)).toBe('mars')
 
     setLocale('en-GB')
-    const en = render(Calendar, { props: { modelValue: '2026-03-15' } })
+    const en = render(VCalendar, { props: { modelValue: '2026-03-15' } })
     expect(monthToggle(en)).toBe('March')
   })
 
   it('laisse la prop `locale` primer sur la locale globale', () => {
     setLocale('en-GB')
-    const forced = render(Calendar, {
+    const forced = render(VCalendar, {
       props: { modelValue: '2026-03-15', locale: 'de-DE' },
     })
     expect(monthToggle(forced)).toBe('März')
@@ -251,7 +251,7 @@ describe('locale des composants de date', () => {
   it('traduit les formats même sans dictionnaire pour cette langue', () => {
     // 'de' n'a aucun dictionnaire : les LIBELLÉS restent français…
     setLocale('de-DE')
-    const de = render(Calendar, { props: { modelValue: '2026-03-15' } })
+    const de = render(VCalendar, { props: { modelValue: '2026-03-15' } })
     expect(de.getByRole('button', { name: 'Mois précédent' })).toBeTruthy()
     // …mais le mois, lui, vient d'Intl et suit bien la balise.
     expect(monthToggle(de)).toBe('März')

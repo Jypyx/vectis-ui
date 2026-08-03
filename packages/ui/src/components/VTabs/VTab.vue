@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { computed, inject, useSlots } from 'vue'
 
-import Button from '../VButton/VButton.vue'
-import Icon from '../VIcon/VIcon.vue'
+import VButton from '../VButton/VButton.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import { tabsKey } from './context'
 
 /**
- * Un onglet. C'est un `Button` : tone, variante, taille, focus et
+ * Un onglet. C'est un `VButton` : tone, variante, taille, focus et
  * désactivation viennent de lui, seuls les attributs ARIA du pattern tabs sont
- * ajoutés (ils traversent le fallthrough de Button jusqu'au <button> rendu).
+ * ajoutés (ils traversent le fallthrough de VButton jusqu'au <button> rendu).
  *
- * L'onglet reste rendu hors d'un `Tabs` (comme AccordionItem hors Accordion),
+ * L'onglet reste rendu hors d'un `VTabs` (comme VAccordionItem hors VAccordion),
  * simplement jamais sélectionné.
  */
 interface TabProps {
-  /** Identifie l'onglet et le `TabPanel` correspondant. */
+  /** Identifie l'onglet et le `VTabPanel` correspondant. */
   value: string | number
   /** Libellé visible ; le slot par défaut prime. */
   label?: string
@@ -44,12 +44,12 @@ const selected = computed(() => tabs != null && tabs.value === props.value)
 const tabId = computed(() => tabs?.tabId(props.value))
 const panelId = computed(() => (tabs?.hasPanels ? tabs.panelId(props.value) : undefined))
 
-/** Aucun libellé visible : l'onglet se réduit à un carré, comme un IconButton. */
+/** Aucun libellé visible : l'onglet se réduit à un carré, comme un VIconButton. */
 const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.default)
 
 /*
  * Activation automatique (option APG) : la sélection suit le focus. Elle vit
- * ici et non dans le handler clavier de Tabs, qui devrait sinon faire transiter
+ * ici et non dans le handler clavier de VTabs, qui devrait sinon faire transiter
  * la valeur par un attribut du DOM — et perdrait l'union `string | number`.
  */
 function onFocus() {
@@ -58,7 +58,7 @@ function onFocus() {
 </script>
 
 <template>
-  <Button
+  <VButton
     :id="tabId"
     class="v-tab"
     role="tab"
@@ -75,21 +75,21 @@ function onFocus() {
     @focus="onFocus"
   >
     <template v-if="icon" #start>
-      <Icon v-bind="iconProps(icon)" />
+      <VIcon v-bind="iconProps(icon)" />
     </template>
     <!-- le libellé est enveloppé : `text-overflow` ne s'applique pas au texte
          anonyme d'un conteneur flex, et `grow` doit pouvoir le tronquer -->
     <span v-if="!iconOnly" class="v-tab-label"
       ><slot>{{ label }}</slot></span
     >
-  </Button>
+  </VButton>
 </template>
 
 <style>
 @layer vectis.components {
   /*
-   * Surcharges de Button qualifiées par [data-size] (toujours rendu par
-   * Button) : elles battent .v-button[data-variant='…'] quel que soit l'ordre
+   * Surcharges de VButton qualifiées par [data-size] (toujours rendu par
+   * VButton) : elles battent .v-button[data-variant='…'] quel que soit l'ordre
    * du CSS bundlé — même hack de spécificité que .v-icon-button.
    */
   .v-tab[data-size] {
@@ -146,7 +146,7 @@ function onFocus() {
 
   /*
    * Encadrée, la rangée reprend son rayon aux seules EXTRÉMITÉS — coutures
-   * internes carrées, idiome ButtonGroup, mais transposé sur le seul bord que la
+   * internes carrées, idiome VButtonGroup, mais transposé sur le seul bord que la
    * piste n'occupe pas (elle tient l'autre). Le rayon est celui du bouton et non
    * celui de la carte : la rangée est en retrait du cadre par la gouttière, elle
    * n'a pas sa découpe à épouser. `:first-of-type`/`:last-of-type` et non
@@ -170,7 +170,7 @@ function onFocus() {
 
   /*
    * Indicateur des variantes `flat` et `outlined`. `currentColor` plutôt qu'une
-   * variable privée de Button : il suit le tone de l'onglet actif ET le gris de
+   * variable privée de VButton : il suit le tone de l'onglet actif ET le gris de
    * l'état désactivé, sans couplage.
    */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tab[data-size]::after {

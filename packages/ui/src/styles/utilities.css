@@ -1,7 +1,7 @@
 /* Utilities du DS — layer la plus forte : gagne sur les composants. */
 
 /*
- * Rotation continue, partagée par Spinner et ProgressCircular (chacun fixe sa
+ * Rotation continue, partagée par VSpinner et VProgressCircular (chacun fixe sa
  * durée à partir d'un token). Les @keyframes sont GLOBALES : elles ne sont pas
  * arbitrées comme les déclarations, le layer n'a donc pas d'effet ici — d'où
  * cette définition hors layer, une seule fois pour tout le DS.

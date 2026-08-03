@@ -1,4 +1,4 @@
-import type { DsMessages } from './types'
+import type { VectisMessages } from './types'
 
 /**
  * Anglais. **Opt-in** : ce module n'est atteint que si vous l'importez, donc
@@ -12,7 +12,7 @@ import type { DsMessages } from './types'
  *     registerMessages('en', en)
  *     setLocale('en-GB')
  */
-export const en: DsMessages = {
+export const en: VectisMessages = {
   common: {
     loading: 'Loading…',
     clear: 'Clear',

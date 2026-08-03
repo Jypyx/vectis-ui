@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Pagination from './VPagination.vue'
+import VPagination from './VPagination.vue'
 
 const meta = {
   title: 'Composants/Pagination',
-  component: Pagination,
+  component: VPagination,
   argTypes: {
     variant: { control: 'inline-radio', options: ['ghost', 'outline'] },
     tone: {
@@ -33,11 +33,11 @@ const meta = {
   },
   // v-model vivant : sans ref locale, cliquer une page ne changerait rien.
   render: (args) => ({
-    components: { Pagination },
+    components: { VPagination },
     setup: () => ({ args, page: ref(10) }),
-    template: `<Pagination v-bind="args" v-model="page" />`,
+    template: `<VPagination v-bind="args" v-model="page" />`,
   }),
-} satisfies Meta<typeof Pagination>
+} satisfies Meta<typeof VPagination>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -67,13 +67,13 @@ export const Attached: Story = {
 
 export const Variants: Story = {
   render: () => ({
-    components: { Pagination },
+    components: { VPagination },
     setup: () => ({ ghost: ref(6), outline: ref(6) }),
     // La page active est toujours `solid` : seules les pages inactives suivent la variante.
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination :length="12" variant="ghost" v-model="ghost" />
-        <Pagination :length="12" variant="outline" v-model="outline" />
+        <VPagination :length="12" variant="ghost" v-model="ghost" />
+        <VPagination :length="12" variant="outline" v-model="outline" />
       </div>
     `,
   }),
@@ -81,11 +81,11 @@ export const Variants: Story = {
 
 export const Tones: Story = {
   render: () => ({
-    components: { Pagination },
+    components: { VPagination },
     setup: () => ({ tones: ['accent', 'neutral', 'success', 'warning', 'danger'], page: ref(3) }),
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination v-for="t in tones" :key="t" :length="8" :tone="t" v-model="page" />
+        <VPagination v-for="t in tones" :key="t" :length="8" :tone="t" v-model="page" />
       </div>
     `,
   }),
@@ -93,11 +93,11 @@ export const Tones: Story = {
 
 export const Sizes: Story = {
   render: () => ({
-    components: { Pagination },
+    components: { VPagination },
     setup: () => ({ sizes: ['xs', 'sm', 'md', 'lg', 'xl'], page: ref(3) }),
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination v-for="s in sizes" :key="s" :length="8" :size="s" v-model="page" />
+        <VPagination v-for="s in sizes" :key="s" :length="8" :size="s" v-model="page" />
       </div>
     `,
   }),
@@ -105,12 +105,12 @@ export const Sizes: Story = {
 
 export const Compact: Story = {
   render: () => ({
-    components: { Pagination },
+    components: { VPagination },
     setup: () => ({ normal: ref(3), compact: ref(3) }),
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination :length="8" v-model="normal" />
-        <Pagination :length="8" compact v-model="compact" />
+        <VPagination :length="8" v-model="normal" />
+        <VPagination :length="8" compact v-model="compact" />
       </div>
     `,
   }),
@@ -118,15 +118,15 @@ export const Compact: Story = {
 
 export const Controles: Story = {
   render: () => ({
-    components: { Pagination },
+    components: { VPagination },
     setup: () => ({ a: ref(4), b: ref(4), c: ref(4), d: ref(4), e: ref(4) }),
     // Icônes personnalisées : nom Material Symbols OU URL d'image.
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination :length="10" controls-display="icon" v-model="a" />
-        <Pagination :length="10" controls-display="text" v-model="b" />
-        <Pagination :length="10" controls-display="both" v-model="c" />
-        <Pagination
+        <VPagination :length="10" controls-display="icon" v-model="a" />
+        <VPagination :length="10" controls-display="text" v-model="b" />
+        <VPagination :length="10" controls-display="both" v-model="c" />
+        <VPagination
           :length="10"
           controls-display="both"
           prev-icon="first_page"
@@ -135,7 +135,7 @@ export const Controles: Story = {
           next-label="Avancer"
           v-model="d"
         />
-        <Pagination :length="10" :show-controls="false" v-model="e" />
+        <VPagination :length="10" :show-controls="false" v-model="e" />
       </div>
     `,
   }),
@@ -143,13 +143,13 @@ export const Controles: Story = {
 
 export const PagesDesactivees: Story = {
   render: () => ({
-    components: { Pagination },
+    components: { VPagination },
     setup: () => ({ liste: ref(5), predicat: ref(5) }),
     // Les contrôles enjambent les pages désactivées jusqu'à la plus proche activable.
     template: `
       <div style="display: grid; gap: 16px">
-        <Pagination :length="12" :disabled-pages="[4, 6]" v-model="liste" />
-        <Pagination :length="12" :disabled-pages="(p) => p % 2 === 0" v-model="predicat" />
+        <VPagination :length="12" :disabled-pages="[4, 6]" v-model="liste" />
+        <VPagination :length="12" :disabled-pages="(p) => p % 2 === 0" v-model="predicat" />
       </div>
     `,
   }),
@@ -157,7 +157,7 @@ export const PagesDesactivees: Story = {
 
 export const Responsive: Story = {
   render: () => ({
-    components: { Pagination },
+    components: { VPagination },
     setup: () => ({ page: ref(10) }),
     // La nav est son propre conteneur de requête : la troncature suit la largeur
     // du décor, pas celle du viewport. Le panneau est redimensionnable à la
@@ -175,7 +175,7 @@ export const Responsive: Story = {
           padding: 8px;
         "
       >
-        <Pagination :length="40" :total-visible="9" v-model="page" />
+        <VPagination :length="40" :total-visible="9" v-model="page" />
       </div>
     `,
   }),
@@ -193,13 +193,13 @@ export const Responsive: Story = {
 
 export const Alignement: Story = {
   render: () => ({
-    components: { Pagination },
+    components: { VPagination },
     setup: () => ({ aligns: ['start', 'center', 'end'], page: ref(3) }),
     // La nav est block-level et occupe toute la largeur disponible :
     // l'alignement passe donc par la prop `align`.
     template: `
       <div style="display: grid; gap: 16px; border: 1px dashed var(--vectis-color-border); padding: 8px">
-        <Pagination v-for="a in aligns" :key="a" :length="8" :align="a" v-model="page" />
+        <VPagination v-for="a in aligns" :key="a" :length="8" :align="a" v-model="page" />
       </div>
     `,
   }),
@@ -208,26 +208,26 @@ export const Alignement: Story = {
 export const BeaucoupDePages: Story = {
   args: { length: 120, totalVisible: 9 },
   render: (args) => ({
-    components: { Pagination },
+    components: { VPagination },
     setup: () => ({ args, page: ref(60) }),
-    template: `<Pagination v-bind="args" v-model="page" />`,
+    template: `<VPagination v-bind="args" v-model="page" />`,
   }),
 }
 
 export const CasLimites: Story = {
   render: () => ({
-    components: { Pagination },
+    components: { VPagination },
     setup: () => ({ une: ref(1), deux: ref(1), longs: ref(9999) }),
     template: `
       <div style="display: grid; gap: 16px">
         <!-- Page unique : les deux contrôles sont en butée. -->
-        <Pagination :length="1" v-model="une" />
-        <Pagination :length="2" v-model="deux" />
+        <VPagination :length="1" v-model="une" />
+        <VPagination :length="2" v-model="deux" />
         <!-- Numéros à 4 chiffres : les pastilles s'élargissent au-delà du carré.
              Sans totalVisible, les 12 000 pages seraient toutes rendues. -->
-        <Pagination :length="12000" :total-visible="7" v-model="longs" />
+        <VPagination :length="12000" :total-visible="7" v-model="longs" />
         <!-- Troncature responsive désactivée : la rangée déborde plutôt que de se réduire. -->
-        <Pagination :length="12000" :total-visible="7" :responsive="false" v-model="longs" />
+        <VPagination :length="12000" :total-visible="7" :responsive="false" v-model="longs" />
       </div>
     `,
   }),

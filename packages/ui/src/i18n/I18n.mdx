@@ -110,9 +110,9 @@ dictionnaires. Ce que vous n'écrivez pas retombe sur le français, jamais sur u
 un dictionnaire partiel est utilisable dès la première clé.
 
 ```ts
-import { registerMessages, setLocale, type DsMessagesInput } from '@vectis/ui'
+import { registerMessages, setLocale, type VectisMessagesInput } from '@vectis/ui'
 
-const de: DsMessagesInput = {
+const de: VectisMessagesInput = {
   common: { loading: 'Wird geladen…', close: 'Schließen' },
   pagination: { previous: 'Vorherige Seite', next: 'Nächste Seite', page: (p) => `Seite ${p}` },
 }
@@ -121,8 +121,8 @@ registerMessages('de', de)
 setLocale('de-DE')
 ```
 
-Typez la constante `DsMessagesInput` pour obtenir l'autocomplétion des clés et le contrôle des
-signatures. Pour exiger du compilateur une couverture **totale**, typez-la `DsMessages` :
+Typez la constante `VectisMessagesInput` pour obtenir l'autocomplétion des clés et le contrôle des
+signatures. Pour exiger du compilateur une couverture **totale**, typez-la `VectisMessages` :
 il refusera alors toute clé manquante.
 
 Le dictionnaire est indexé par **sous-balise de langue** : `registerMessages('de', …)` couvre
@@ -158,13 +158,13 @@ chaîne complète est :
 
 ## Dates et heures
 
-`Calendar`, `DatePicker` et `TimePicker` gardent leur prop `locale`, qui reste prioritaire.
+`VCalendar`, `VDatePicker` et `VTimePicker` gardent leur prop `locale`, qui reste prioritaire.
 Sans elle, ils suivent désormais la locale globale — un seul réglage pour toute l'application,
 avec la possibilité de forcer un calendrier au cas par cas.
 
 ```jsx
-<DatePicker />                  {/* locale globale */}
-<DatePicker locale="ja-JP" />   {/* forcé */}
+<VDatePicker />                  {/* locale globale */}
+<VDatePicker locale="ja-JP" />   {/* forcé */}
 ```
 
 ## Limite connue : une locale par processus
@@ -183,8 +183,8 @@ Délibérément hors du dictionnaire :
 
 - ce qu'`Intl` dérive déjà de la balise de locale (noms de mois et de jours, ordre des champs
   de date, séparateur de date, cycle horaire) ;
-- ce qui n'est fait que de chiffres et de ponctuation universelle : le `99+` du Badge, le `+N`
-  d'AvatarGroup, le compteur `N/M` des champs, le `:` de l'heure. Ces composants exposent un
+- ce qui n'est fait que de chiffres et de ponctuation universelle : le `99+` du VBadge, le `+N`
+  de VAvatarGroup, le compteur `N/M` des champs, le `:` de l'heure. Ces composants exposent un
   slot quand une reformulation est nécessaire ;
 - les messages **développeur** (`[Composant] …`), qui s'adressent à l'intégrateur.
 

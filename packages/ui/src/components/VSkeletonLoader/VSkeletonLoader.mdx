@@ -1,7 +1,7 @@
 import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
-import * as SkeletonLoaderStories from './VSkeletonLoader.stories'
+import * as VSkeletonLoaderStories from './VSkeletonLoader.stories'
 
-<Meta of={SkeletonLoaderStories} />
+<Meta of={VSkeletonLoaderStories} />
 
 # SkeletonLoader
 
@@ -15,9 +15,9 @@ la construit à partir des tokens du design system — l'échelle des contrôles
 typographie héritée pour les lignes de texte. Aucun JavaScript de comportement, aucun accès au
 navigateur, donc rien à hydrater côté serveur.
 
-<Canvas of={SkeletonLoaderStories.Default} />
+<Canvas of={VSkeletonLoaderStories.Default} />
 
-<Controls of={SkeletonLoaderStories.Default} />
+<Controls of={VSkeletonLoaderStories.Default} />
 
 ## Formes
 
@@ -27,12 +27,12 @@ d'où vient la hauteur.
 | `shape`   | Vise                       | Rayon        | Hauteur                          |
 | --------- | -------------------------- | ------------ | -------------------------------- |
 | `text`    | ligne de texte, paragraphe | pilule       | la typo héritée (`1em`)          |
-| `control` | Button, Input, Select      | interactif   | l'échelle des contrôles (`size`) |
-| `pill`    | Chip, Badge                | pilule       | l'échelle des contrôles          |
-| `circle`  | Avatar, bouton icône rond  | pilule + 1:1 | l'échelle des contrôles          |
+| `control` | VButton, VInput, Select    | interactif   | l'échelle des contrôles (`size`) |
+| `pill`    | VChip, VBadge              | pilule       | l'échelle des contrôles          |
+| `circle`  | VAvatar, bouton icône rond | pilule + 1:1 | l'échelle des contrôles          |
 | `surface` | carte, image, bloc         | surface      | un token dédié                   |
 
-<Canvas of={SkeletonLoaderStories.Formes} />
+<Canvas of={VSkeletonLoaderStories.Formes} />
 
 Le cercle transfère sa largeur depuis sa hauteur : `size` seul suffit à en changer le diamètre.
 
@@ -40,9 +40,9 @@ Le cercle transfère sa largeur depuis sa hauteur : `size` seul suffit à en cha
 
 La recette tient en deux gestes : choisir la forme qui correspond au rôle du composant, et lui
 donner la même taille. Comme les hauteurs viennent de la même table que celle des contrôles, un
-skeleton `md` fait exactement la hauteur d'un Button `md` — la page ne bouge pas au remplacement.
+skeleton `md` fait exactement la hauteur d'un VButton `md` — la page ne bouge pas au remplacement.
 
-<Canvas of={SkeletonLoaderStories.SilhouettesDuDesignSystem} />
+<Canvas of={VSkeletonLoaderStories.SilhouettesDuDesignSystem} />
 
 Pour un composant fait de plusieurs parties — un champ avec son étiquette, une carte avec son titre
 et son texte — empilez plusieurs skeletons plutôt que d'en chercher un qui ferait tout : c'est la
@@ -54,7 +54,7 @@ composition qui reproduit la structure.
 `control`, `pill` et `circle` : une ligne de texte suit la typographie de son parent, et une
 surface a sa propre hauteur.
 
-<Canvas of={SkeletonLoaderStories.Tailles} />
+<Canvas of={VSkeletonLoaderStories.Tailles} />
 
 ## Dimensionner
 
@@ -72,14 +72,14 @@ parente que par ses props.
 `lines` empile plusieurs silhouettes. En forme `text`, la dernière est raccourcie : c'est ce détail
 qui fait lire « bloc de texte » plutôt que « tableau ».
 
-<Canvas of={SkeletonLoaderStories.Paragraphe} />
+<Canvas of={VSkeletonLoaderStories.Paragraphe} />
 
 La hauteur d'une ligne vaut un cadratin et la gouttière l'interlignage restant, si bien que N lignes
 occupent exactement N lignes de texte quelle que soit la typographie du parent.
 
 ## Animations
 
-<Canvas of={SkeletonLoaderStories.Animations} />
+<Canvas of={VSkeletonLoaderStories.Animations} />
 
 `wave` est la plus démonstrative, et c'est le défaut ; son intérêt commence sur les grandes
 surfaces, une bande qui traverse un cercle de petite taille n'étant plus qu'un scintillement — là,
@@ -88,7 +88,7 @@ portée par un parent.
 
 ## Couleur
 
-<Canvas of={SkeletonLoaderStories.CouleurCustom} />
+<Canvas of={VSkeletonLoaderStories.CouleurCustom} />
 
 `color` remplace le fond. Le reflet de la `wave` n'a pas de réglage séparé : il est **dérivé** du
 fond par un éclaircissement, ce qui le garde juste sur une couleur arbitraire comme d'un thème à
@@ -101,7 +101,7 @@ teinter en succès ou en danger lui ferait dire quelque chose de faux.
 
 ## Remplacement du contenu
 
-<Canvas of={SkeletonLoaderStories.RemplacementProgressif} />
+<Canvas of={VSkeletonLoaderStories.RemplacementProgressif} />
 
 Il n'existe pas de mode enveloppe qui prendrait le contenu en slot. Ce serait ouvrir la porte à la
 mesure du DOM, et cela ne dispenserait de toute façon pas de déclarer la forme : l'idiome reste un
@@ -113,12 +113,12 @@ mesure du DOM, et cela ne dispenserait de toute façon pas de déclarer la forme
   chargement contient couramment une dizaine de silhouettes, et autant d'annonces concurrentes
   rendraient l'attente illisible.
 - **L'annonce appartient au conteneur, pas au placeholder.** Posez `aria-busy` sur la zone qui
-  recevra le contenu — c'est le même partage que dans `Button`, où le bouton porte l'état et le
+  recevra le contenu — c'est le même partage que dans `VButton`, où le bouton porte l'état et le
   spinner n'est qu'un dessin.
 - `announce` (et `label`, qui l'implique) est l'échappatoire : la silhouette devient une région de
   statut avec un libellé masqué visuellement. À réserver à **une** instance par zone, et de
   préférence avec un libellé situé — « Chargement des résultats… » plutôt que le défaut générique.
-  <Canvas of={SkeletonLoaderStories.Annonce} />
+  <Canvas of={VSkeletonLoaderStories.Annonce} />
 - Ne cumulez pas `announce` et `aria-busy` sur le même sous-arbre : l'information serait annoncée
   deux fois.
 - Aucune information n'est portée par la couleur ou par le contraste : il n'y a pas de texte à lire

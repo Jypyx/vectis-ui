@@ -3,12 +3,12 @@ import type { InjectionKey } from 'vue'
 import type { TabsActivation, TabsSize, TabsTone, TabsVariant } from './VTabs.vue'
 
 /**
- * Contrat Tabs → Tab / TabPanel. Les ids sont dérivés d'un `useId()` unique
- * posé par la racine : Tab et TabPanel calculent le même identifiant à partir
+ * Contrat VTabs → VTab / VTabPanel. Les ids sont dérivés d'un `useId()` unique
+ * posé par la racine : VTab et VTabPanel calculent le même identifiant à partir
  * de leur `value`, sans registre ni échange d'état.
  *
  * `size`/`compact` transitent par l'injection (et non par héritage CSS comme
- * dans Accordion) : chaque Tab rend un Button, qui pose lui-même
+ * dans VAccordion) : chaque VTab rend un VButton, qui pose lui-même
  * `v-control[data-size]` sur son propre élément.
  */
 export interface TabsContext {

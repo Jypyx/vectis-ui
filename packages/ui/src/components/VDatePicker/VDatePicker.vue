@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, useId, watch, watchEffect } from 'vue'
 
-import Calendar from '../VCalendar/VCalendar.vue'
+import VCalendar from '../VCalendar/VCalendar.vue'
 import type {
   CalendarEvent,
   CalendarSelection,
@@ -25,8 +25,8 @@ import { digitsOf } from '../../utils/text'
 import { resolveMatcher } from '../../utils/matcher'
 import { isDev } from '../../utils/env'
 import type { IconSource } from '../VIcon/types'
-import Input from '../VInput/VInput.vue'
-import Popover from '../VPopover/VPopover.vue'
+import VInput from '../VInput/VInput.vue'
+import VPopover from '../VPopover/VPopover.vue'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
@@ -34,9 +34,9 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 import { useLocale, useMessages } from '../../i18n/state'
 
 /**
- * Sélecteur de date : champ `Input` + `Calendar` dans un `Popover` en
+ * Sélecteur de date : champ `VInput` + `VCalendar` dans un `VPopover` en
  * `mode="manual"`, ancré en pur CSS. On ne passe pas par le `#trigger` de
- * Popover (`popovertarget` est invalide sur un `<input>` texte) : l'ouverture
+ * VPopover (`popovertarget` est invalide sur un `<input>` texte) : l'ouverture
  * est programmatique, ce qui permet de déplacer le focus DOM dans la grille du
  * calendrier. Fermeture par `@focusout` sur la racine + Échap.
  *
@@ -44,7 +44,7 @@ import { useLocale, useMessages } from '../../i18n/state'
  * clavier derrière un masque numérique dérivé de la locale — l'utilisateur ne
  * saisit que des chiffres, les séparateurs sont posés au fil de la frappe — et
  * `readonly`, où la date ne se choisit qu'au calendrier. La prop `selection`,
- * elle, est le passe-plat du mode de sélection du Calendar.
+ * elle, est le passe-plat du mode de sélection du VCalendar.
  */
 type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
 
@@ -57,7 +57,7 @@ const MODES: DatePickerMode[] = ['readonly', 'input']
  * Siècle d'expansion d'une année à 2 chiffres (« 10/06/26 » → 2026), appliqué à
  * la sortie du champ seulement. Pivot FIXE et non glissant : une règle dérivée
  * de l'année courante rendrait le composant non déterministe (même raison que
- * le `today` posé en `onMounted` du Calendar) et daterait ses tests.
+ * le `today` posé en `onMounted` du VCalendar) et daterait ses tests.
  */
 const YEAR_PIVOT = 2000
 
@@ -68,7 +68,7 @@ const DEFAULT_DISPLAY_FORMAT: Intl.DateTimeFormatOptions = {
 }
 
 interface DatePickerProps {
-  // Passe-plat vers Calendar.
+  // Passe-plat vers VCalendar.
   selection?: CalendarSelection
   /**
    * Locale BCP 47 (noms de mois/jours, 1er jour de semaine). PRIORITAIRE sur la
@@ -158,7 +158,7 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
 const model = defineModel<CalendarValue>({ default: null })
 
 defineSlots<{
-  /** Contenu personnalisé d'une cellule jour (relayé vers Calendar). */
+  /** Contenu personnalisé d'une cellule jour (relayé vers VCalendar). */
   day?(props: {
     iso: string
     day: number
@@ -173,17 +173,17 @@ defineSlots<{
   footer?(props: { close: () => void }): unknown
 }>()
 
-// Wrapper-root : class/style sur la racine, le reste reporté sur l'Input.
+// Wrapper-root : class/style sur la racine, le reste reporté sur le VInput.
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const rootEl = ref<HTMLElement | null>(null)
-const panelRef = ref<InstanceType<typeof Popover> | null>(null)
-const inputRef = ref<InstanceType<typeof Input> | null>(null)
-const calendarRef = ref<InstanceType<typeof Calendar> | null>(null)
+const panelRef = ref<InstanceType<typeof VPopover> | null>(null)
+const inputRef = ref<InstanceType<typeof VInput> | null>(null)
+const calendarRef = ref<InstanceType<typeof VCalendar> | null>(null)
 const panelId = useId()
 
-/** L'`<input>` natif du champ (masque, caret) — exposé par `Input`. */
+/** L'`<input>` natif du champ (masque, caret) — exposé par `VInput`. */
 const fieldEl = computed<HTMLInputElement | null>(() => inputRef.value?.el ?? null)
 
 /** Mode demandé, replié sur le défaut si la valeur est absente ou inconnue. */
@@ -209,25 +209,25 @@ if (isDev) {
   watchEffect(() => {
     if (props.mode !== undefined && !MODES.includes(props.mode))
       console.warn(
-        `[DatePicker] mode « ${props.mode} » inconnu : utilisez « input » (défaut) ou « readonly ».`,
+        `[VDatePicker] mode « ${props.mode} » inconnu : utilisez « input » (défaut) ou « readonly ».`,
       )
     // `props.mode` et NON `requestedMode` : « input » étant le défaut, une
     // sélection range/multiple y retombe d'elle-même — seul celui qui a
     // explicitement demandé la saisie doit être averti.
     if (props.mode === 'input' && props.selection !== 'single')
       console.warn(
-        `[DatePicker] mode="input" ignoré en sélection « ${props.selection} » : une plage ou une liste de dates ne se saisit pas au clavier.`,
+        `[VDatePicker] mode="input" ignoré en sélection « ${props.selection} » : une plage ou une liste de dates ne se saisit pas au clavier.`,
       )
     // `typing` et non `props.mode` : la prop a bien été fournie et se trouve
     // réellement sans effet — l'avertissement reste actionnable.
     if (props.displayFormat && typing.value)
       console.warn(
-        '[DatePicker] displayFormat est ignoré en mode « input » (défaut) : le champ affiche le masque numérique de la locale, seul format saisissable. Passez mode="readonly" pour un affichage formaté.',
+        '[VDatePicker] displayFormat est ignoré en mode « input » (défaut) : le champ affiche le masque numérique de la locale, seul format saisissable. Passez mode="readonly" pour un affichage formaté.',
       )
   })
 }
 
-// Coquille champ + panneau `manual` partagée avec le TimePicker : ouverture,
+// Coquille champ + panneau `manual` partagée avec le VTimePicker : ouverture,
 // fermeture, sortie de focus, clic sur le contrôle, Échap/ArrowDown/Entrée.
 const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPanelMousedown } =
   useFieldPanel({
@@ -255,8 +255,8 @@ const hasValue = computed(() => {
 })
 
 const dsLocale = useLocale()
-/* Prop prioritaire, sinon locale globale du DS. DatePicker est la source
-   UNIQUE : c'est `resolvedLocale` qui descend au Calendar, jamais `locale`
+/* Prop prioritaire, sinon locale globale du DS. VDatePicker est la source
+   UNIQUE : c'est `resolvedLocale` qui descend au VCalendar, jamais `locale`
    (qui vaudrait `undefined`), sinon la balise serait résolue deux fois. */
 const resolvedLocale = computed(() => props.locale ?? dsLocale.value)
 
@@ -302,7 +302,7 @@ function syncDraftFromModel() {
 watch([model, mask], syncDraftFromModel, { immediate: true })
 
 /**
- * `v-model` et non `:model-value` : sans écouteur `onUpdate:modelValue`, l'Input
+ * `v-model` et non `:model-value` : sans écouteur `onUpdate:modelValue`, le VInput
  * recopierait en interne le texte BRUT tapé (via son propre `v-model`) et le
  * réécrirait dans le DOM au patch suivant, effaçant le masque dès qu'il ne
  * change pas lui-même (9e chiffre, caractère refusé). Avec l'écouteur, son état
@@ -522,8 +522,8 @@ function onRootKeydown(event: KeyboardEvent) {
 }
 
 /*
- * La croix d'effacement passe par le `clearable` de l'Input, qui la rend À
- * GAUCHE de l'icône de fin (convention Input/Textarea/Combobox) : les deux
+ * La croix d'effacement passe par le `clearable` de le VInput, qui la rend À
+ * GAUCHE de l'icône de fin (convention VInput/VTextarea/VCombobox) : les deux
  * affordances coexistent. `clearVisible` est indispensable ici — le champ est
  * readonly hors saisie, et la valeur y vient du panneau.
  */
@@ -553,8 +553,8 @@ function onEndIcon() {
   else openPanel(true)
 }
 /*
- * Appelé par `@clear` de l'Input, DANS son `emit` : le `focus()` posé ici sous
- * verrou rend le `controlEl.focus()` qu'Input exécute juste après inopérant
+ * Appelé par `@clear` de le VInput, DANS son `emit` : le `focus()` posé ici sous
+ * verrou rend le `controlEl.focus()` que VInput exécute juste après inopérant
  * (élément déjà focalisé = aucun événement `focus` émis), donc le panneau ne se
  * rouvre pas. Retirer le verrou d'ici le rouvrirait.
  */
@@ -593,7 +593,7 @@ const close = () => closeAndFocus()
     @keydown="onRootKeydown"
   >
     <div class="v-datepicker-control" @click="onControlClick">
-      <Input
+      <VInput
         ref="inputRef"
         v-model="fieldModel"
         :inputmode="typing ? 'numeric' : undefined"
@@ -628,7 +628,7 @@ const close = () => closeAndFocus()
 
     <!-- Sans panneau monté, `panelRef` est nul : `open`, alimenté par le DOM du
          popover, ne peut plus passer à `true`. -->
-    <Popover
+    <VPopover
       v-if="hasPanel"
       :id="panelId"
       ref="panelRef"
@@ -642,7 +642,7 @@ const close = () => closeAndFocus()
       class="v-datepicker-panel"
       @mousedown="onPanelMousedown"
     >
-      <Calendar
+      <VCalendar
         ref="calendarRef"
         v-model="model"
         :selection="selection"
@@ -662,8 +662,8 @@ const close = () => closeAndFocus()
         <template v-if="$slots.footer" #footer>
           <slot name="footer" :close="close" />
         </template>
-      </Calendar>
-    </Popover>
+      </VCalendar>
+    </VPopover>
   </div>
 </template>
 
@@ -695,10 +695,10 @@ const close = () => closeAndFocus()
     font-variant-numeric: tabular-nums;
   }
 
-  /* `position-anchor` et le chrome viennent de Popover (props `anchor` et
+  /* `position-anchor` et le chrome viennent de VPopover (props `anchor` et
      `surface`, cette dernière posant `.v-panel`) : il ne reste ici que les
      dimensions, que `panel.css` ne porte volontairement pas. Padding annulé —
-     le Calendar gère sa propre respiration. */
+     le VCalendar gère sa propre respiration. */
   .v-datepicker-panel {
     width: max-content;
     padding: 0;

@@ -5,7 +5,7 @@
  *
  * Le `computed` de libellé est le seul JS : ce n'est pas du comportement (ni
  * événement, ni cycle de vie, ni DOM), mais le composant perd sa propriété
- * « zéro import » — précédent assumé d'Icon depuis son résolveur.
+ * « zéro import » — précédent assumé de VIcon depuis son résolveur.
  */
 import { computed } from 'vue'
 
@@ -45,7 +45,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 @layer vectis.components {
   .v-spinner {
     /* 1em : le spinner suit le texte du parent (un consommateur le
-       dimensionne par font-size, ex. Button pose font-size: var(--vectis-icon-size)
+       dimensionne par font-size, ex. VButton pose font-size: var(--vectis-icon-size)
        sur sa boîte). La prop `size` pose --spinner-size en px inline et prime. */
     --spinner-size: 1em;
     display: inline-flex;

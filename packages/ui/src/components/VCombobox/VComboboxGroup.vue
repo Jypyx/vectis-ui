@@ -2,12 +2,12 @@
 import { useId } from 'vue'
 
 /**
- * Groupe nommé d'options (interne — rendu par `Combobox` à partir d'une entrée
- * `ComboboxGroup` de sa prop `options`, jamais écrit par le consommateur).
+ * Groupe nommé d'options (interne — rendu par `VCombobox` à partir d'une entrée
+ * `VComboboxGroup` de sa prop `options`, jamais écrit par le consommateur).
  *
  * `role="group"` est un enfant AUTORISÉ d'un `role="listbox"` (ARIA 1.2) : c'est
  * le pendant du `<optgroup>` natif. Le libellé n'est ni focusable ni
- * sélectionnable — la navigation clavier du Combobox indexe `filtered`, une
+ * sélectionnable — la navigation clavier du VCombobox indexe `filtered`, une
  * liste plate d'options, et ne voit donc jamais ce nœud.
  */
 interface ComboboxGroupProps {
@@ -34,7 +34,7 @@ const labelId = useId()
 
 <style>
 @layer vectis.components {
-  /* `flex: none` (contrairement à `.v-menu-group`) : le panneau du Combobox est
+  /* `flex: none` (contrairement à `.v-menu-group`) : le panneau du VCombobox est
      un flex column borné (`max-block-size` + `overflow: auto`), un groupe s'y
      écraserait — même raison que `.v-combobox-state` et `.v-combobox-more`. */
   .v-combobox-group {

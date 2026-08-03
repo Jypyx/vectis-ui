@@ -1,5 +1,5 @@
 /**
- * Utilitaires de dates PURS (Calendar, DatePicker).
+ * Utilitaires de dates PURS (VCalendar, VDatePicker).
  *
  * Contrat : l'API publique manipule des chaînes ISO `YYYY-MM-DD` et tout se
  * calcule en **heure locale** — on ne passe JAMAIS par `new Date('YYYY-MM-DD')`
@@ -183,7 +183,7 @@ export function monthName(
   )
 }
 
-/** Affichage localisé d'une date isolée pour le champ du DatePicker. */
+/** Affichage localisé d'une date isolée pour le champ du VDatePicker. */
 export function formatDisplay(
   iso: string,
   locale: string,
@@ -207,9 +207,9 @@ export function formatDisplayRange(
   return compareISO(start, end) === 0 ? fmt.format(a) : fmt.formatRange(a, b)
 }
 
-/* ── Masque de saisie numérique (DatePicker `entry="input"`) ────────────────
+/* ── Masque de saisie numérique (VDatePicker `entry="input"`) ────────────────
  *
- * Le champ de saisie n'affiche JAMAIS le `displayFormat` du DatePicker (« 10
+ * Le champ de saisie n'affiche JAMAIS le `displayFormat` du VDatePicker (« 10
  * juin 2026 » ne se tape pas) mais un masque purement numérique : l'ordre des
  * champs et le séparateur sont DÉRIVÉS de la locale, jamais codés en dur.
  */

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import Icon from '../VIcon/VIcon.vue'
+import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 
@@ -40,7 +40,7 @@ interface InputOTPProps {
   separatorIcon?: IconSource
   /** Côté des cases : sm 32px, md 40px (défaut), lg 48px. */
   size?: 'sm' | 'md' | 'lg'
-  /** Hauteur réduite de 4px ; typo et icônes inchangées (comme Button/Input). */
+  /** Hauteur réduite de 4px ; typo et icônes inchangées (comme VButton/VInput). */
   compact?: boolean
   disabled?: boolean
   invalid?: boolean
@@ -85,7 +85,7 @@ const slotCount = computed(() => cells.value.filter((cell) => cell.type === 'slo
 
 if (isDev) {
   if (props.pattern && !props.pattern.includes('#'))
-    console.warn("[InputOTP] pattern sans '#' — repli sur `length`.")
+    console.warn("[VInputOTP] pattern sans '#' — repli sur `length`.")
 }
 
 const filters: Record<NonNullable<InputOTPProps['format']>, RegExp> = {
@@ -216,7 +216,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
       />
       <!-- littéral décoratif du gabarit : jamais focusable, hors v-model -->
       <span v-else class="v-otp-literal" aria-hidden="true">
-        <Icon v-if="separatorIcon" v-bind="iconProps(separatorIcon)" />
+        <VIcon v-if="separatorIcon" v-bind="iconProps(separatorIcon)" />
         <template v-else>{{ cell.char }}</template>
       </span>
     </template>
@@ -253,7 +253,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
   }
 
   /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur
-     (aligné sur Input/Textarea) ; l'outline transparent est le filet
+     (aligné sur VInput/VTextarea) ; l'outline transparent est le filet
      forced-colors (Windows High Contrast supprime les box-shadow) */
   .v-otp-input:focus-visible {
     border-color: var(--vectis-color-accent);
@@ -279,7 +279,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     user-select: none;
   }
 
-  /* Disabled : gris par tokens, sans opacité (aligné sur Input) */
+  /* Disabled : gris par tokens, sans opacité (aligné sur VInput) */
   .v-otp[data-disabled] .v-otp-input {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);

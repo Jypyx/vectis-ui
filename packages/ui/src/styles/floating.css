@@ -1,5 +1,5 @@
 ﻿/*
- * Plomberie commune des éléments flottants (Popover, Menu, Tooltip…).
+ * Plomberie commune des éléments flottants (VPopover, VMenu, VTooltip…).
  *
  * Deux classes, à poser ensemble : `.v-overlay` (socle de tout popover du DS,
  * partagé avec les piles de toasts) et `.v-floating` (ancrage + placements).
@@ -9,11 +9,11 @@
  * stable — choix assumé, voir CLAUDE.md/README).
  *
  * Trois cas d'ancrage, tous couverts par la même table de placements :
- * - implicite : l'invocateur `popovertarget` est l'ancre (Menu) ;
+ * - implicite : l'invocateur `popovertarget` est l'ancre (VMenu) ;
  * - `anchor-name` statique posé par le composant sur son propre wrapper
- *   (Tooltip) ou par `Popover` sur le sien quand un `#trigger` est fourni ;
- * - nom transmis à `Popover` par la prop `anchor`, le consommateur ayant déjà
- *   une racine et un contrôle à ancrer (Combobox, DatePicker, TimePicker).
+ *   (VTooltip) ou par `VPopover` sur le sien quand un `#trigger` est fourni ;
+ * - nom transmis à `VPopover` par la prop `anchor`, le consommateur ayant déjà
+ *   une racine et un contrôle à ancrer (VCombobox, VDatePicker, VTimePicker).
  *
  * `position-try-fallbacks` retourne le panneau quand la place manque.
  */
@@ -98,7 +98,7 @@
   }
 
   /*
-   * Placements latéraux alignés (sous-menus du Menu). Axe inversé par rapport
+   * Placements latéraux alignés (sous-menus du VMenu). Axe inversé par rapport
    * aux placements top/bottom : l'écart avec l'ancre est INLINE, l'alignement
    * est BLOCK — on restaure donc la marge inline annulée par les règles
    * génériques `$='-start'`/`$='-end'` ci-dessus (même spécificité, l'ordre

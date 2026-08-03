@@ -2,20 +2,20 @@ import { render } from '@testing-library/vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent } from 'vue'
 
-import Tooltip from './VTooltip.vue'
+import VTooltip from './VTooltip.vue'
 
 const Harness = defineComponent({
-  components: { Tooltip },
+  components: { VTooltip },
   template: `
-    <Tooltip text="Aide contextuelle" :delay="300">
+    <VTooltip text="Aide contextuelle" :delay="300">
       <template #default="{ triggerProps }">
         <button data-testid="trigger" v-bind="triggerProps">?</button>
       </template>
-    </Tooltip>
+    </VTooltip>
   `,
 })
 
-describe('Tooltip', () => {
+describe('VTooltip', () => {
   beforeEach(() => vi.useFakeTimers())
   afterEach(() => vi.useRealTimers())
 

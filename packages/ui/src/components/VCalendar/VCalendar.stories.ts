@@ -2,31 +2,31 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
-import Button from '../VButton/VButton.vue'
-import Calendar from './VCalendar.vue'
+import VButton from '../VButton/VButton.vue'
+import VCalendar from './VCalendar.vue'
 import type { DateRange } from './VCalendar.vue'
 
 const meta = {
   title: 'Composants/Calendar',
-  component: Calendar,
+  component: VCalendar,
   args: {
     selection: 'single',
     locale: 'fr-FR',
     showAdjacentDays: true,
     selectAdjacentDays: false,
   },
-} satisfies Meta<typeof Calendar>
+} satisfies Meta<typeof VCalendar>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: (args) => ({
-    components: { Calendar },
+    components: { VCalendar },
     setup: () => ({ args, value: ref('2026-06-10') }),
     template: `
       <div style="display: grid; gap: 12px; justify-items: start">
-        <Calendar v-bind="args" v-model="value" />
+        <VCalendar v-bind="args" v-model="value" />
         <output>{{ value ?? '—' }}</output>
       </div>
     `,
@@ -44,11 +44,11 @@ export const Default: Story = {
 
 export const Plage: Story = {
   render: (args) => ({
-    components: { Calendar },
+    components: { VCalendar },
     setup: () => ({ args, value: ref<DateRange>({ start: '2026-06-19', end: '2026-06-26' }) }),
     template: `
       <div style="display: grid; gap: 12px; justify-items: start">
-        <Calendar v-bind="args" selection="range" v-model="value" />
+        <VCalendar v-bind="args" selection="range" v-model="value" />
         <output>{{ value.start ?? '—' }} → {{ value.end ?? '—' }}</output>
       </div>
     `,
@@ -57,11 +57,11 @@ export const Plage: Story = {
 
 export const Multiple: Story = {
   render: (args) => ({
-    components: { Calendar },
+    components: { VCalendar },
     setup: () => ({ args, value: ref<string[]>(['2026-06-05', '2026-06-12', '2026-06-20']) }),
     template: `
       <div style="display: grid; gap: 12px; justify-items: start">
-        <Calendar v-bind="args" selection="multiple" v-model="value"/>
+        <VCalendar v-bind="args" selection="multiple" v-model="value"/>
         <output>{{ value.join(', ') || '—' }}</output>
       </div>
     `,
@@ -70,10 +70,10 @@ export const Multiple: Story = {
 
 export const MinMax: Story = {
   render: (args) => ({
-    components: { Calendar },
+    components: { VCalendar },
     setup: () => ({ args, value: ref('2026-06-15') }),
     template: `
-      <Calendar v-bind="args" v-model="value" min="2026-06-05" max="2026-06-24" />
+      <VCalendar v-bind="args" v-model="value" min="2026-06-05" max="2026-06-24" />
     `,
   }),
 }
@@ -81,7 +81,7 @@ export const MinMax: Story = {
 // Week-ends non sélectionnables (barrés) via un prédicat.
 export const DatesDesactivees: Story = {
   render: (args) => ({
-    components: { Calendar },
+    components: { VCalendar },
     setup: () => {
       const isWeekend = (iso: string) => {
         const d = new Date(iso + 'T00:00:00').getDay()
@@ -89,17 +89,17 @@ export const DatesDesactivees: Story = {
       }
       return { args, value: ref('2026-06-10'), isWeekend }
     },
-    template: `<Calendar v-bind="args" v-model="value" :disabled-dates="isWeekend" />`,
+    template: `<VCalendar v-bind="args" v-model="value" :disabled-dates="isWeekend" />`,
   }),
 }
 
 // Jours des mois adjacents affichés ET cliquables.
 export const MoisAdjacents: Story = {
   render: (args) => ({
-    components: { Calendar },
+    components: { VCalendar },
     setup: () => ({ args, value: ref('2026-06-10') }),
     template: `
-      <Calendar v-bind="args" v-model="value" show-adjacent-days select-adjacent-days />
+      <VCalendar v-bind="args" v-model="value" show-adjacent-days select-adjacent-days />
     `,
   }),
 }
@@ -107,7 +107,7 @@ export const MoisAdjacents: Story = {
 // Pastilles d'événements sous les dates.
 export const Evenements: Story = {
   render: (args) => ({
-    components: { Calendar },
+    components: { VCalendar },
     setup: () => ({
       args,
       value: ref('2026-06-10'),
@@ -118,14 +118,14 @@ export const Evenements: Story = {
         { date: '2026-06-24', color: 'var(--vectis-color-warning)' },
       ],
     }),
-    template: `<Calendar v-bind="args" v-model="value" :events="events" />`,
+    template: `<VCalendar v-bind="args" v-model="value" :events="events" />`,
   }),
 }
 
 // Slot #day : afficher un prix sous le numéro (ex. billets d'avion).
 export const SlotJour: Story = {
   render: (args) => ({
-    components: { Calendar },
+    components: { VCalendar },
     setup: () => {
       const value = ref('2026-06-10')
       const prices: Record<number, string> = { 10: '89€', 11: '120€', 12: '75€', 15: '99€' }
@@ -135,14 +135,14 @@ export const SlotJour: Story = {
     // TOUJOURS rendue (vide si absente, et sur les jours adjacents auxquels le
     // slot s'applique aussi) pour que tous les numéros s'alignent.
     template: `
-      <Calendar v-bind="args" v-model="value" show-adjacent-days style="--vectis-calendar-day-size: 48px">
+      <VCalendar v-bind="args" v-model="value" show-adjacent-days style="--vectis-calendar-day-size: 48px">
         <template #day="{ day, inMonth, selected }">
           <span style="line-height:1.2">{{ day }}</span>
           <span :style="{ fontSize: '0.625rem', lineHeight: 1.2, minHeight: '0.75rem', color: selected ? 'inherit' : 'var(--vectis-color-success-text)' }">
             {{ inMonth ? prices[day] ?? '' : '' }}
           </span>
         </template>
-      </Calendar>
+      </VCalendar>
     `,
   }),
 }
@@ -150,7 +150,7 @@ export const SlotJour: Story = {
 // Zone footer : presets + actions.
 export const AvecFooter: Story = {
   render: (args) => ({
-    components: { Calendar, Button },
+    components: { VCalendar, VButton },
     setup: () => {
       const value = ref('2026-06-10')
       const fmt = (d: Date) =>
@@ -163,31 +163,31 @@ export const AvecFooter: Story = {
       return { args, value, inDays }
     },
     template: `
-      <Calendar v-bind="args" v-model="value">
+      <VCalendar v-bind="args" v-model="value">
         <template #footer>
-          <Button variant="ghost" size="sm" @click="inDays(0)">Aujourd'hui</Button>
-          <Button variant="ghost" size="sm" @click="inDays(1)">Demain</Button>
-          <Button variant="ghost" size="sm" @click="inDays(3)">Dans 3 jours</Button>
+          <VButton variant="ghost" size="sm" @click="inDays(0)">Aujourd'hui</VButton>
+          <VButton variant="ghost" size="sm" @click="inDays(1)">Demain</VButton>
+          <VButton variant="ghost" size="sm" @click="inDays(3)">Dans 3 jours</VButton>
         </template>
-      </Calendar>
+      </VCalendar>
     `,
   }),
 }
 
 export const Localisation: Story = {
   render: (args) => ({
-    components: { Calendar },
+    components: { VCalendar },
     setup: () => ({ args, value: ref('2026-06-10') }),
     template: `
       <div style="display:flex; gap:24px; flex-wrap:wrap">
-        <Calendar v-bind="args" v-model="value" locale="fr-FR" />
-        <Calendar v-bind="args" v-model="value" locale="ar-EG" />
-        <Calendar v-bind="args" v-model="value" locale="en-US" />
-        <Calendar v-bind="args" v-model="value" locale="ru-RU" />
-        <Calendar v-bind="args" v-model="value" locale="el-GR" />
-        <Calendar v-bind="args" v-model="value" locale="ja-JP" />
-        <Calendar v-bind="args" v-model="value" locale="zh-CN" />
-        <Calendar v-bind="args" v-model="value" locale="th-TH" />
+        <VCalendar v-bind="args" v-model="value" locale="fr-FR" />
+        <VCalendar v-bind="args" v-model="value" locale="ar-EG" />
+        <VCalendar v-bind="args" v-model="value" locale="en-US" />
+        <VCalendar v-bind="args" v-model="value" locale="ru-RU" />
+        <VCalendar v-bind="args" v-model="value" locale="el-GR" />
+        <VCalendar v-bind="args" v-model="value" locale="ja-JP" />
+        <VCalendar v-bind="args" v-model="value" locale="zh-CN" />
+        <VCalendar v-bind="args" v-model="value" locale="th-TH" />
       </div>
     `,
   }),

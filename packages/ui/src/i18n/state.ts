@@ -2,15 +2,15 @@
  * Locale et dictionnaire du DS. Aucun texte utilisateur n'est en dur dans un
  * SFC : tout passe par ce module.
  *
- * État module-level (précédents : `Icon/resolver.ts`, `Toast/state.ts` — c'est
+ * État module-level (précédents : `VIcon/resolver.ts`, `VToast/state.ts` — c'est
  * le 3e état global du repo) plutôt que plugin Vue ou provide/inject : c'est de
  * la configuration, identique pour toutes les requêtes d'un processus, et elle
  * doit rester posable depuis un `.ts` quelconque (plugin Nuxt, `main.ts`).
  *
  * CONSÉQUENCE ASSUMÉE : une seule locale par processus. Le SSR multi-locale PAR
  * REQUÊTE n'est pas couvert — un site qui sert /fr et /en depuis le même
- * processus Node doit passer les props texte (et `locale` sur Calendar /
- * DatePicker / TimePicker) explicitement. Cette limite est levable sans toucher
+ * processus Node doit passer les props texte (et `locale` sur VCalendar /
+ * VDatePicker / VTimePicker) explicitement. Cette limite est levable sans toucher
  * aux composants : cf. `useMessages` en fin de fichier.
  */
 import { shallowRef, type ShallowRef } from 'vue'
@@ -18,9 +18,9 @@ import { shallowRef, type ShallowRef } from 'vue'
 import { isDev } from '../utils/env'
 
 import { fr } from './fr'
-import type { DsMessages, DsMessagesInput } from './types'
+import type { VectisMessages, VectisMessagesInput } from './types'
 
-/** Balise BCP 47 par défaut — celle qu'avaient en dur Calendar/DatePicker/TimePicker. */
+/** Balise BCP 47 par défaut — celle qu'avaient en dur VCalendar/VDatePicker/VTimePicker. */
 export const DEFAULT_LOCALE = 'fr-FR'
 const DEFAULT_LANG = 'fr'
 
@@ -34,34 +34,34 @@ const DEFAULT_LANG = 'fr'
  * Map non réactive : la réactivité est portée par `currentMessages`, que toute
  * mutation du registre recalcule.
  */
-const registry = new Map<string, DsMessages>([[DEFAULT_LANG, fr]])
+const registry = new Map<string, VectisMessages>([[DEFAULT_LANG, fr]])
 
 const currentLocale = shallowRef<string>(DEFAULT_LOCALE)
-const currentMessages = shallowRef<DsMessages>(fr)
+const currentMessages = shallowRef<VectisMessages>(fr)
 
 /** `'fr-CA'` → `'fr'`. Une balise invalide ressort telle quelle : elle ne matchera rien. */
 function langOf(locale: string): string {
   return locale.toLowerCase().split('-')[0] ?? locale
 }
 
-function resolve(locale: string): DsMessages {
+function resolve(locale: string): VectisMessages {
   return registry.get(langOf(locale)) ?? registry.get(DEFAULT_LANG) ?? fr
 }
 
 /**
  * Fusion d'une surcharge partielle sur un dictionnaire complet.
  *
- * DEUX niveaux, et deux seulement — le type `DsMessages` garantit que le niveau
+ * DEUX niveaux, et deux seulement — le type `VectisMessages` garantit que le niveau
  * 2 ne contient que des feuilles (chaîne ou fonction). Aucune récursion, donc
  * aucun risque qu'une valeur FONCTION soit traversée comme un objet et revienne
  * en `{}` : elle est copiée par référence, exactement comme une chaîne.
  */
-function mergeMessages(base: DsMessages, patch: DsMessagesInput): DsMessages {
+function mergeMessages(base: VectisMessages, patch: VectisMessagesInput): VectisMessages {
   const out: Record<string, object> = { ...base }
   for (const [namespace, section] of Object.entries(patch)) {
     if (section) out[namespace] = { ...out[namespace], ...section }
   }
-  return out as unknown as DsMessages
+  return out as unknown as VectisMessages
 }
 
 /**
@@ -71,7 +71,7 @@ function mergeMessages(base: DsMessages, patch: DsMessagesInput): DsMessages {
  * non un code langue nu — elle sert à deux choses :
  *
  * 1. choisir le dictionnaire, par sa sous-balise de langue (`'en-GB'` → `'en'`) ;
- * 2. alimenter `Intl` chez Calendar / DatePicker / TimePicker, dont la prop
+ * 2. alimenter `Intl` chez VCalendar / VDatePicker / VTimePicker, dont la prop
  *    `locale` reste PRIORITAIRE. `Intl` accepte une balise nue (`'en'`) mais lui
  *    applique les conventions par défaut de la langue — `'en'` vaut 12 h et
  *    semaine au dimanche, ce qui n'est pas `'en-GB'`.
@@ -112,7 +112,7 @@ export function setLocale(locale: string): void {
  *
  * `undefined` RETIRE la surcharge (et restaure le socle pour `'fr'`).
  */
-export function registerMessages(lang: string, messages: DsMessagesInput | undefined): void {
+export function registerMessages(lang: string, messages: VectisMessagesInput | undefined): void {
   const key = langOf(lang)
   if (isDev && key !== lang.toLowerCase()) {
     console.warn(
@@ -148,13 +148,13 @@ export function registerMessages(lang: string, messages: DsMessagesInput | undef
  * (elle ne fait que retourner un ref) ; un futur `inject` devra donc être gardé
  * par `getCurrentInstance()`.
  */
-export function useMessages(): ShallowRef<DsMessages> {
+export function useMessages(): ShallowRef<VectisMessages> {
   return currentMessages
 }
 
 /**
  * Locale BCP 47 courante. Interne — sert de défaut à la prop `locale` de
- * Calendar / DatePicker / TimePicker, et de locale de tri à DataTable.
+ * VCalendar / VDatePicker / VTimePicker, et de locale de tri à VDataTable.
  */
 export function useLocale(): ShallowRef<string> {
   return currentLocale

@@ -1,11 +1,11 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
-import ButtonGroup from './VButtonGroup.vue'
+import VButtonGroup from './VButtonGroup.vue'
 
-describe('ButtonGroup', () => {
+describe('VButtonGroup', () => {
   it('rend un role="group" avec la classe v-button-group', () => {
-    const { getByRole } = render(ButtonGroup, {
+    const { getByRole } = render(VButtonGroup, {
       slots: { default: '<button>A</button>' },
     })
     const group = getByRole('group')
@@ -13,14 +13,14 @@ describe('ButtonGroup', () => {
   })
 
   it('par défaut : data-orientation horizontal', () => {
-    const { getByRole } = render(ButtonGroup, {
+    const { getByRole } = render(VButtonGroup, {
       slots: { default: '<button>A</button>' },
     })
     expect(getByRole('group').dataset.orientation).toBe('horizontal')
   })
 
   it('orientation="vertical" : pose data-orientation vertical', () => {
-    const { getByRole } = render(ButtonGroup, {
+    const { getByRole } = render(VButtonGroup, {
       props: { orientation: 'vertical' },
       slots: { default: '<button>A</button>' },
     })
@@ -28,7 +28,7 @@ describe('ButtonGroup', () => {
   })
 
   it('rend les boutons enfants du slot', () => {
-    const { getAllByRole } = render(ButtonGroup, {
+    const { getAllByRole } = render(VButtonGroup, {
       slots: { default: '<button>Un</button><button>Deux</button><button>Trois</button>' },
     })
     const buttons = getAllByRole('button')
@@ -37,7 +37,7 @@ describe('ButtonGroup', () => {
   })
 
   it('laisse passer les attributs natifs sur la racine (fallthrough)', () => {
-    const { getByRole } = render(ButtonGroup, {
+    const { getByRole } = render(VButtonGroup, {
       attrs: { 'aria-label': 'Format du texte' },
       slots: { default: '<button>A</button>' },
     })
@@ -45,7 +45,7 @@ describe('ButtonGroup', () => {
   })
 
   it('un role surchargé (toolbar) atterrit sur la racine', () => {
-    const { getByRole } = render(ButtonGroup, {
+    const { getByRole } = render(VButtonGroup, {
       attrs: { role: 'toolbar' },
       slots: { default: '<button>A</button>' },
     })

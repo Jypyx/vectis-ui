@@ -23,16 +23,16 @@ import '@vectis/ui/styles.css'
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Button, Input, toast } from '@vectis/ui'
+import { VButton, VInput, toast } from '@vectis/ui'
 
 const email = ref('')
 </script>
 
 <template>
-  <Input v-model="email" type="email" required placeholder="votre@email.fr" aria-label="Email" />
-  <Button @click="toast({ message: `Confirmation envoyée à ${email}`, tone: 'success' })">
+  <VInput v-model="email" type="email" required placeholder="votre@email.fr" aria-label="Email" />
+  <VButton @click="toast({ message: `Confirmation envoyée à ${email}`, tone: 'success' })">
     S'abonner
-  </Button>
+  </VButton>
 </template>
 ```
 
@@ -49,7 +49,7 @@ export default defineNuxtConfig({
 
 ```vue
 <script setup lang="ts">
-import { Button, Badge } from '@vectis/ui'
+import { VButton, VBadge } from '@vectis/ui'
 </script>
 ```
 
@@ -108,32 +108,32 @@ const semanticColors = flattenTokens(tokens.semantic.color, ['color'])
 
 ## Icônes
 
-**Aucune police d'icônes n'est requise.** Les icônes que la librairie rend elle-même — croix de `Dialog`, chevrons de `Calendar` et `Menu`, icônes de tone des toasts, tri de `DataTable`… — sont des **SVG embarqués**, répliques exactes de Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24, Apache-2.0 © Google). Elles pèsent ~2 Ko gzip, non tree-shakables : c'est le prix de l'autonomie du DS.
+**Aucune police d'icônes n'est requise.** Les icônes que la librairie rend elle-même — croix de `VDialog`, chevrons de `VCalendar` et `VMenu`, icônes de tone des toasts, tri de `VDataTable`… — sont des **SVG embarqués**, répliques exactes de Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24, Apache-2.0 © Google). Elles pèsent ~2 Ko gzip, non tree-shakables : c'est le prix de l'autonomie du DS.
 
-Le composant `Icon` résout sa source dans cet ordre : **`render` explicite → `src` → `name` (résolveur consommateur, puis registre intégré, puis ligature) → slot**.
+Le composant `VIcon` résout sa source dans cet ordre : **`render` explicite → `src` → `name` (résolveur consommateur, puis registre intégré, puis ligature) → slot**.
 
 ```vue
-<Icon name="close" />
+<VIcon name="close" />
 <!-- registre intégré : SVG, aucune police nécessaire -->
-<Icon name="favorite" />
+<VIcon name="favorite" />
 <!-- hors registre : ligature de VOTRE police d'icônes -->
-<Icon src="/logo.svg" label="Logo" />
+<VIcon src="/logo.svg" label="Logo" />
 <!-- image -->
-<Icon><svg …/></Icon>
+<VIcon><svg …/></VIcon>
 <!-- SVG inline (slot) -->
 ```
 
 - **Décorative par défaut** (`aria-hidden`) ; la prop `label` la rend informative (`role="img"` + `aria-label`).
 - L'attribut **`data-icon`** porte le nom demandé quelle que soit la source — accroche stable pour du CSS consommateur et pour les tests.
-- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--vectis-icon-size`** et **`--vectis-icon-opsz`** (c'est ce que fait la classe partagée `v-control` — Button, Input, Textarea, InputOTP, Chip… — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `Spinner` suit le même principe (1em + `:size` en px), sans API de contexte.
+- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--vectis-icon-size`** et **`--vectis-icon-opsz`** (c'est ce que fait la classe partagée `v-control` — VButton, VInput, VTextarea, VInputOTP, VChip… — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `VSpinner` suit le même principe (1em + `:size` en px), sans API de contexte.
 - **`--vectis-icon-opsz` ne s'applique qu'à la ligature** : c'est un axe variable de police, sans prise sur un SVG intégré, une image ou un composant tiers. La taille, elle, vaut pour toutes les sources.
 
 ### Toute prop d'icône accepte un nom **ou** un rendu explicite
 
 ```vue
-<Button icon-start="download">Exporter</Button>
-<Breadcrumb :separator="{ src: '/chevron.svg' }" :items="items" />
-<MenuItem label="Ouvrir" :icon-start="{ component: FolderIcon }" />
+<VButton icon-start="download">Exporter</VButton>
+<VBreadcrumb :separator="{ src: '/chevron.svg' }" :items="items" />
+<VMenuItem label="Ouvrir" :icon-start="{ component: FolderIcon }" />
 ```
 
 Une chaîne est **toujours** un nom d'icône : le DS ne devine plus qu'une valeur contenant `.`, `/` ou `:` serait une URL. C'est ce qui permet aux conventions de nommage type Iconify (`mdi:close`, `fa6-solid:xmark`) de fonctionner.
@@ -142,7 +142,7 @@ Une chaîne est **toujours** un nom d'icône : le DS ne devine plus qu'une valeu
 
 ### Brancher votre propre bibliothèque d'icônes
 
-`setIconResolver` est consulté **avant** le registre intégré ; rendre `undefined` signifie « je ne connais pas ce nom » et laisse la main au registre, puis à la ligature. Les mappings **partiels** sont donc utilisables. Le type `DsIconName` énumère les noms à couvrir.
+`setIconResolver` est consulté **avant** le registre intégré ; rendre `undefined` signifie « je ne connais pas ce nom » et laisse la main au registre, puis à la ligature. Les mappings **partiels** sont donc utilisables. Le type `VectisIconName` énumère les noms à couvrir.
 
 ```ts
 // main.ts / plugins/icons.ts — au niveau MODULE, jamais dans un setup()
@@ -194,9 +194,9 @@ Pour un besoin ponctuel, `setIconResolver` accepte n'importe quelle fonction ren
 
 (ou en self-host du woff2 variable, ex. paquet npm `material-symbols`). `display=block` évite le flash du nom d'icône en toutes lettres. Sans police chargée, la mise en page est préservée (le nom textuel est contenu dans le carré de l'icône). Surcharger le token `--vectis-font-family-icon` suffit pour basculer sur une autre police **à ligatures** (Material Symbols Outlined/Sharp, build IcoMoon) — sans résolveur.
 
-Sur `Button` : les props `icon-start` / `icon-end` prennent un nom d'icône ou un rendu explicite (les slots `#start`/`#end` restent disponibles pour du contenu custom et priment sur les props). `Button` accepte aussi `href` (rendu `<a>` ; `disabled`/`loading` produisent un lien inerte : `href` retiré + `aria-disabled`) et `compact` (hauteur réduite de 4 px : 20/28/36/44/52 px selon la taille `xs`–`xl`).
+Sur `VButton` : les props `icon-start` / `icon-end` prennent un nom d'icône ou un rendu explicite (les slots `#start`/`#end` restent disponibles pour du contenu custom et priment sur les props). `VButton` accepte aussi `href` (rendu `<a>` ; `disabled`/`loading` produisent un lien inerte : `href` retiré + `aria-disabled`) et `compact` (hauteur réduite de 4 px : 20/28/36/44/52 px selon la taille `xs`–`xl`).
 
-L'échelle `xs`–`xl` n'est pas exposée par tous les composants : ceux qui embarquent un champ de saisie (`Input`, `Textarea`, `InputOTP`, `Combobox`, `DatePicker`, `TimePicker`) se limitent à **`sm` / `md` / `lg`** (32/40/48 px, défaut `md`), `compact` restant disponible ; `Chip` se limite à `xs`/`sm`.
+L'échelle `xs`–`xl` n'est pas exposée par tous les composants : ceux qui embarquent un champ de saisie (`VInput`, `VTextarea`, `VInputOTP`, `VCombobox`, `VDatePicker`, `VTimePicker`) se limitent à **`sm` / `md` / `lg`** (32/40/48 px, défaut `md`), `compact` restant disponible ; `VChip` se limite à `xs`/`sm`.
 
 ## Internationalisation
 
@@ -236,9 +236,9 @@ registerMessages('fr', {
 Même geste que pour activer l'anglais — il n'y a pas deux catégories de dictionnaires. Ce que vous n'écrivez pas retombe sur le français, jamais sur une chaîne vide : un dictionnaire partiel est utilisable dès la première clé.
 
 ```ts
-import { registerMessages, setLocale, type DsMessagesInput } from '@vectis/ui'
+import { registerMessages, setLocale, type VectisMessagesInput } from '@vectis/ui'
 
-const de: DsMessagesInput = {
+const de: VectisMessagesInput = {
   common: { loading: 'Wird geladen…', close: 'Schließen' },
   pagination: { previous: 'Vorherige Seite', next: 'Nächste Seite', page: (p) => `Seite ${p}` },
 }
@@ -247,7 +247,7 @@ registerMessages('de', de)
 setLocale('de-DE')
 ```
 
-Une entrée qui dépend d'une valeur est une **fonction TypeScript**, pas une chaîne à placeholders : ni moteur de pluriel, ni syntaxe ICU à apprendre. Typez la constante `DsMessagesInput` pour l'autocomplétion des clés, ou `DsMessages` pour que le compilateur exige une couverture totale.
+Une entrée qui dépend d'une valeur est une **fonction TypeScript**, pas une chaîne à placeholders : ni moteur de pluriel, ni syntaxe ICU à apprendre. Typez la constante `VectisMessagesInput` pour l'autocomplétion des clés, ou `VectisMessages` pour que le compilateur exige une couverture totale.
 
 La clé est la **sous-balise de langue** seule : `registerMessages('de', …)` couvre `de-DE`, `de-AT` et `de-CH`.
 
@@ -255,12 +255,12 @@ La clé est la **sous-balise de langue** seule : `registerMessages('de', …)` c
 
 Une prop texte posée sur un composant reste **prioritaire** : la traduction globale ne change que les défauts. Pour les noms accessibles de conteneurs, la chaîne complète est `aria-labelledby` › `aria-label` › prop `label` › dictionnaire › français.
 
-`Calendar`, `DatePicker` et `TimePicker` gardent leur prop `locale`, prioritaire ; sans elle, ils suivent la locale globale.
+`VCalendar`, `VDatePicker` et `VTimePicker` gardent leur prop `locale`, prioritaire ; sans elle, ils suivent la locale globale.
 
 ```vue
-<DatePicker />
+<VDatePicker />
 <!-- locale globale -->
-<DatePicker locale="ja-JP" />
+<VDatePicker locale="ja-JP" />
 <!-- forcé -->
 ```
 
@@ -270,26 +270,26 @@ La configuration vit au niveau module, comme celle des icônes : **une seule loc
 
 ## Composants
 
-| Domaine     | Composants                                                                                                                                                                                                  |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                                                                                |
-| Formulaires | `Input`, `Textarea`, `Checkbox`, `Radio`, `Switch`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                                                                                      |
-| Overlays    | `Tooltip`, `Menu` + `MenuItem`/`MenuGroup`/`MenuSeparator` (sous-menus récursifs)                                                                                                                           |
-| Structure   | `Accordion` + `AccordionItem`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature)                                                                                                        |
-| Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `SkeletonLoader` (silhouettes de chargement), `ProgressLinear`, `ProgressCircular`, `Icon` (SVG intégrés, police, image ou SVG inline) |
+| Domaine     | Composants                                                                                                                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actions     | `VButton`, `VIconButton`, `VChip` (sélectionnable, supprimable)                                                                                                                                                     |
+| Formulaires | `VInput`, `VTextarea`, `VCheckbox`, `VRadio`, `VSwitch`, `VSlider` (single/range), `VInputOTP`, `VCombobox` (recherche, multi)                                                                                      |
+| Overlays    | `VTooltip`, `VMenu` + `VMenuItem`/`VMenuGroup`/`VMenuSeparator` (sous-menus récursifs)                                                                                                                              |
+| Structure   | `VAccordion` + `VAccordionItem`, `VDataTable` (tri, responsive), `VBreadcrumb` (data-driven, troncature)                                                                                                            |
+| Feedback    | `VToaster` + `toast()` (notifications), `VBadge`, `VAvatar`, `VSpinner`, `VSkeletonLoader` (silhouettes de chargement), `VProgressLinear`, `VProgressCircular`, `VIcon` (SVG intégrés, police, image ou SVG inline) |
 
 Notes d'implémentation notables :
 
-- **Slider range** superpose deux `<input type="range">` natifs (chaque curseur reste un vrai slider clavier/ARIA) ; le JS empêche seulement le croisement.
-- **DataTable responsive** : mode `stack` en pur CSS (container queries) — sous 640px de conteneur, les lignes deviennent des cartes, les en-têtes sont réinjectés par `::before + data-label`.
-- **Combobox** suit le pattern ARIA combobox/listbox (`aria-activedescendant`, le focus reste dans l'input) ; le panneau est aligné sur le contrôle via `anchor-size(width)`.
-- **Toast** : monter `<Toaster />` une fois (racine de l'app), puis appeler `toast({ message, tone, ... })` depuis n'importe où — composant, store, retour d'API (client uniquement, jamais pendant le rendu SSR). Placements en piles Popover API (top-layer), auto-fermeture (défaut 5 s, `duration: 0` = persistant, pause au survol), `dismissToast(id?)` pour fermer par programme.
+- **VSlider range** superpose deux `<input type="range">` natifs (chaque curseur reste un vrai slider clavier/ARIA) ; le JS empêche seulement le croisement.
+- **VDataTable responsive** : mode `stack` en pur CSS (container queries) — sous 640px de conteneur, les lignes deviennent des cartes, les en-têtes sont réinjectés par `::before + data-label`.
+- **VCombobox** suit le pattern ARIA combobox/listbox (`aria-activedescendant`, le focus reste dans l'input) ; le panneau est aligné sur le contrôle via `anchor-size(width)`.
+- **VToast** : monter `<VToaster />` une fois (racine de l'app), puis appeler `toast({ message, tone, ... })` depuis n'importe où — composant, store, retour d'API (client uniquement, jamais pendant le rendu SSR). Placements en piles Popover API (top-layer), auto-fermeture (défaut 5 s, `duration: 0` = persistant, pause au survol), `dismissToast(id?)` pour fermer par programme.
 
 Conventions transverses :
 
 - Variantes pilotées par props → attributs `data-variant` / `data-tone` / `data-size` (ciblables en CSS).
-- `v-model` partout où un état existe (`v-model:open` pour Menu).
-- Les flottants prennent leur déclencheur en slot scopé : `<template #trigger="{ triggerProps }"><Button v-bind="triggerProps">…</Button></template>` — `popovertarget` et les attributs ARIA sont posés pour vous.
+- `v-model` partout où un état existe (`v-model:open` pour VMenu).
+- Les flottants prennent leur déclencheur en slot scopé : `<template #trigger="{ triggerProps }"><VButton v-bind="triggerProps">…</VButton></template>` — `popovertarget` et les attributs ARIA sont posés pour vous.
 - Formulaires : l'état d'erreur visuel vient de `:user-invalid` natif (zéro JS de validation) ; la prop `invalid` force l'état pour la validation serveur.
 
 La documentation vivante (stories, page tokens, switch de thème) : `pnpm storybook`.
@@ -299,12 +299,12 @@ La documentation vivante (stories, page tokens, switch de thème) : `pnpm storyb
 Cible : **navigateurs modernes** — Chrome/Edge 125+, Safari 26+.
 
 - Baseline, sans compromis : Popover API, `<dialog>`, `<details name>`, `:user-invalid`, `:has()`, `color-mix()`, `@layer`, custom properties.
-- **CSS Anchor Positioning** (Tooltip, Menu et ses sous-menus, Combobox) : pas encore stable sur Firefox — choix assumé de ne pas embarquer de fallback JS ; sur Firefox, les panneaux s'ouvrent (Popover API supportée) mais ne sont pas ancrés à leur déclencheur. Le reste du DS y fonctionne normalement.
-- Progressive enhancement pur (dégradation propre si non supporté) : animations `@starting-style`/`allow-discrete`, `field-sizing: content` (Textarea `auto-grow`), `::details-content` + `interpolate-size` (animation Accordion).
+- **CSS Anchor Positioning** (VTooltip, VMenu et ses sous-menus, VCombobox) : pas encore stable sur Firefox — choix assumé de ne pas embarquer de fallback JS ; sur Firefox, les panneaux s'ouvrent (Popover API supportée) mais ne sont pas ancrés à leur déclencheur. Le reste du DS y fonctionne normalement.
+- Progressive enhancement pur (dégradation propre si non supporté) : animations `@starting-style`/`allow-discrete`, `field-sizing: content` (VTextarea `auto-grow`), `::details-content` + `interpolate-size` (animation VAccordion).
 
 ## Accessibilité
 
-Navigation clavier et sémantique ARIA sur tous les composants : pattern ARIA menu (roving focus, retour du focus au déclencheur), `role="switch"`, tooltips liés par `aria-describedby` et fermables à Échap (WCAG 1.4.13), `role="status"`/`role="alert"` selon la criticité, libellé accessible **obligatoire** sur `IconButton`. `prefers-reduced-motion` respecté partout. L'addon a11y de Storybook audite chaque story.
+Navigation clavier et sémantique ARIA sur tous les composants : pattern ARIA menu (roving focus, retour du focus au déclencheur), `role="switch"`, tooltips liés par `aria-describedby` et fermables à Échap (WCAG 1.4.13), `role="status"`/`role="alert"` selon la criticité, libellé accessible **obligatoire** sur `VIconButton`. `prefers-reduced-motion` respecté partout. L'addon a11y de Storybook audite chaque story.
 
 ## Contribuer
 
