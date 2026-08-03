@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import VButtonGroup from './VButtonGroup.vue'
 
 describe('VButtonGroup', () => {
-  it('rend un role="group" avec la classe v-button-group', () => {
+  it('renders a role="group" with the v-button-group class', () => {
     const { getByRole } = render(VButtonGroup, {
       slots: { default: '<button>A</button>' },
     })
@@ -12,14 +12,14 @@ describe('VButtonGroup', () => {
     expect(group.classList.contains('v-button-group')).toBe(true)
   })
 
-  it('par défaut : data-orientation horizontal', () => {
+  it('by default: data-orientation horizontal', () => {
     const { getByRole } = render(VButtonGroup, {
       slots: { default: '<button>A</button>' },
     })
     expect(getByRole('group').dataset.orientation).toBe('horizontal')
   })
 
-  it('orientation="vertical" : pose data-orientation vertical', () => {
+  it('orientation="vertical": sets data-orientation vertical', () => {
     const { getByRole } = render(VButtonGroup, {
       props: { orientation: 'vertical' },
       slots: { default: '<button>A</button>' },
@@ -27,24 +27,24 @@ describe('VButtonGroup', () => {
     expect(getByRole('group').dataset.orientation).toBe('vertical')
   })
 
-  it('rend les boutons enfants du slot', () => {
+  it('renders the slot child buttons', () => {
     const { getAllByRole } = render(VButtonGroup, {
-      slots: { default: '<button>Un</button><button>Deux</button><button>Trois</button>' },
+      slots: { default: '<button>One</button><button>Two</button><button>Three</button>' },
     })
     const buttons = getAllByRole('button')
     expect(buttons).toHaveLength(3)
-    expect(buttons.map((button) => button.textContent?.trim())).toEqual(['Un', 'Deux', 'Trois'])
+    expect(buttons.map((button) => button.textContent?.trim())).toEqual(['One', 'Two', 'Three'])
   })
 
-  it('laisse passer les attributs natifs sur la racine (fallthrough)', () => {
+  it('lets the native attributes through on the root (fallthrough)', () => {
     const { getByRole } = render(VButtonGroup, {
-      attrs: { 'aria-label': 'Format du texte' },
+      attrs: { 'aria-label': 'Text format' },
       slots: { default: '<button>A</button>' },
     })
-    expect(getByRole('group').getAttribute('aria-label')).toBe('Format du texte')
+    expect(getByRole('group').getAttribute('aria-label')).toBe('Text format')
   })
 
-  it('un role surchargé (toolbar) atterrit sur la racine', () => {
+  it('an overridden role (toolbar) lands on the root', () => {
     const { getByRole } = render(VButtonGroup, {
       attrs: { role: 'toolbar' },
       slots: { default: '<button>A</button>' },

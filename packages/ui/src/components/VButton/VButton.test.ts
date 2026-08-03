@@ -4,22 +4,22 @@ import { describe, expect, it, vi } from 'vitest'
 import VButton from './VButton.vue'
 
 describe('VButton', () => {
-  it('rend le libellé et les data-attributes de variante', () => {
+  it('renders the label and the variant data-attributes', () => {
     const { getByRole } = render(VButton, {
       props: { variant: 'outline', tone: 'danger', size: 'lg' },
-      slots: { default: 'Supprimer' },
+      slots: { default: 'Delete' },
     })
-    const button = getByRole('button', { name: 'Supprimer' })
+    const button = getByRole('button', { name: 'Delete' })
     expect(button.dataset.variant).toBe('outline')
     expect(button.dataset.tone).toBe('danger')
     expect(button.dataset.size).toBe('lg')
     expect(button.getAttribute('type')).toBe('button')
   })
 
-  it('supporte les nouveaux variants/tones et pose data-compact', () => {
+  it('supports every variant/tone and sets data-compact', () => {
     const { getByRole } = render(VButton, {
       props: { variant: 'tonal', tone: 'warning', compact: true },
-      slots: { default: 'Attention' },
+      slots: { default: 'Warning' },
     })
     const button = getByRole('button')
     expect(button.dataset.variant).toBe('tonal')
@@ -27,69 +27,69 @@ describe('VButton', () => {
     expect(button.dataset.compact).toBe('')
   })
 
-  it('sans compact : pas de data-compact', () => {
+  it('without compact: no data-compact', () => {
     const { getByRole } = render(VButton, { slots: { default: 'Ok' } })
     expect(getByRole('button').dataset.compact).toBeUndefined()
   })
 
-  it('en loading : désactivé, aria-busy, spinner présent', () => {
+  it('when loading: disabled, aria-busy, spinner present', () => {
     const { getByRole } = render(VButton, {
       props: { loading: true },
-      slots: { default: 'Envoyer' },
+      slots: { default: 'Send' },
     })
     const button = getByRole('button') as HTMLButtonElement
     expect(button.disabled).toBe(true)
     expect(button.getAttribute('aria-busy')).toBe('true')
-    // le composant VSpinner est rendu dans la boîte, masqué aux AT (aria-busy suffit)
+    // the VSpinner is rendered inside the box, hidden from AT (aria-busy is enough)
     const box = button.querySelector('.v-button-spinner') as HTMLElement
     expect(box.getAttribute('aria-hidden')).toBe('true')
     expect(box.querySelector('.v-spinner')).not.toBeNull()
   })
 
-  it('laisse passer les attributs natifs (fallthrough)', () => {
+  it('lets the native attributes through (fallthrough)', () => {
     const { getByRole } = render(VButton, {
-      attrs: { name: 'action', form: 'mon-formulaire' },
+      attrs: { name: 'action', form: 'my-form' },
       slots: { default: 'Ok' },
     })
     const button = getByRole('button')
     expect(button.getAttribute('name')).toBe('action')
-    expect(button.getAttribute('form')).toBe('mon-formulaire')
+    expect(button.getAttribute('form')).toBe('my-form')
   })
 
-  it('iconStart/iconEnd : icônes décoratives, nom accessible = libellé seul', () => {
+  it('iconStart/iconEnd: decorative icons, the accessible name is the label alone', () => {
     const { getByRole } = render(VButton, {
       props: { iconStart: 'add', iconEnd: 'arrow_forward' },
-      slots: { default: 'Ajouter' },
+      slots: { default: 'Add' },
     })
-    const button = getByRole('button', { name: 'Ajouter' })
+    const button = getByRole('button', { name: 'Add' })
     const icons = Array.from(button.querySelectorAll('.v-icon'))
     expect(icons).toHaveLength(2)
     expect(icons.map((icon) => icon.textContent)).toEqual(['add', 'arrow_forward'])
     expect(icons.every((icon) => icon.getAttribute('aria-hidden') === 'true')).toBe(true)
   })
 
-  it('iconFilled : pose data-filled sur iconStart et iconEnd, absent par défaut', () => {
-    const plein = render(VButton, {
+  it('iconFilled: sets data-filled on iconStart and iconEnd, absent by default', () => {
+    const filled = render(VButton, {
       props: { iconStart: 'add', iconEnd: 'arrow_forward', iconFilled: true },
-      slots: { default: 'Ajouter' },
+      slots: { default: 'Add' },
     })
-    const iconsPleins = Array.from(plein.container.querySelectorAll('.v-icon'))
-    expect(iconsPleins).toHaveLength(2)
-    expect(iconsPleins.every((icon) => icon.hasAttribute('data-filled'))).toBe(true)
+    const filledIcons = Array.from(filled.container.querySelectorAll('.v-icon'))
+    expect(filledIcons).toHaveLength(2)
+    expect(filledIcons.every((icon) => icon.hasAttribute('data-filled'))).toBe(true)
 
-    const contour = render(VButton, {
+    const outline = render(VButton, {
       props: { iconStart: 'add', iconEnd: 'arrow_forward' },
-      slots: { default: 'Ajouter' },
+      slots: { default: 'Add' },
     })
-    const iconsContour = Array.from(contour.container.querySelectorAll('.v-icon'))
-    expect(iconsContour).toHaveLength(2)
-    expect(iconsContour.some((icon) => icon.hasAttribute('data-filled'))).toBe(false)
+    const outlineIcons = Array.from(outline.container.querySelectorAll('.v-icon'))
+    expect(outlineIcons).toHaveLength(2)
+    expect(outlineIcons.some((icon) => icon.hasAttribute('data-filled'))).toBe(false)
   })
 
-  it('en loading : le spinner remplace iconStart, iconEnd reste affiché', () => {
+  it('when loading: the spinner replaces iconStart, iconEnd stays visible', () => {
     const { getByRole } = render(VButton, {
       props: { loading: true, iconStart: 'add', iconEnd: 'arrow_forward' },
-      slots: { default: 'Envoyer' },
+      slots: { default: 'Send' },
     })
     const button = getByRole('button')
     expect(button.querySelector('.v-button-spinner')).not.toBeNull()
@@ -97,37 +97,37 @@ describe('VButton', () => {
     expect(icons.map((icon) => icon.textContent)).toEqual(['arrow_forward'])
   })
 
-  it('le slot #start prime sur iconStart', () => {
+  it('the #start slot wins over iconStart', () => {
     const { getByRole } = render(VButton, {
       props: { iconStart: 'add' },
-      slots: { default: 'Ajouter', start: '<svg data-testid="custom" aria-hidden="true" />' },
+      slots: { default: 'Add', start: '<svg data-testid="custom" aria-hidden="true" />' },
     })
     const button = getByRole('button')
     expect(button.querySelector('[data-testid="custom"]')).not.toBeNull()
     expect(button.querySelector('.v-icon')).toBeNull()
   })
 
-  it('avec href : rend un lien <a> sans type ni disabled', () => {
+  it('with href: renders an <a> link with no type and no disabled', () => {
     const { getByRole } = render(VButton, {
-      props: { href: 'https://exemple.fr' },
+      props: { href: 'https://example.com' },
       attrs: { target: '_blank', rel: 'noreferrer' },
       slots: { default: 'Documentation' },
     })
     const link = getByRole('link', { name: 'Documentation' })
     expect(link.tagName).toBe('A')
-    expect(link.getAttribute('href')).toBe('https://exemple.fr')
+    expect(link.getAttribute('href')).toBe('https://example.com')
     expect(link.getAttribute('type')).toBeNull()
     expect(link.getAttribute('disabled')).toBeNull()
     expect(link.getAttribute('target')).toBe('_blank')
     expect(link.getAttribute('rel')).toBe('noreferrer')
   })
 
-  it('lien désactivé : inerte (sans href, aria-disabled, click filtré)', async () => {
+  it('disabled link: inert (no href, aria-disabled, click filtered out)', async () => {
     const onClick = vi.fn()
     const { container } = render(VButton, {
-      props: { href: 'https://exemple.fr', disabled: true },
+      props: { href: 'https://example.com', disabled: true },
       attrs: { onClick },
-      slots: { default: 'Lien désactivé' },
+      slots: { default: 'Disabled link' },
     })
     const anchor = container.querySelector('a.v-button') as HTMLAnchorElement
     expect(anchor).not.toBeNull()
@@ -137,10 +137,10 @@ describe('VButton', () => {
     expect(onClick).not.toHaveBeenCalled()
   })
 
-  it('lien en loading : inerte + aria-busy + spinner', () => {
+  it('loading link: inert + aria-busy + spinner', () => {
     const { container } = render(VButton, {
-      props: { href: 'https://exemple.fr', loading: true },
-      slots: { default: 'Envoi…' },
+      props: { href: 'https://example.com', loading: true },
+      slots: { default: 'Sending…' },
     })
     const anchor = container.querySelector('a.v-button') as HTMLAnchorElement
     expect(anchor.getAttribute('href')).toBeNull()

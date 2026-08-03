@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 
+import { storyText } from '../../stories/storyText'
 import VIcon from '../VIcon/VIcon.vue'
 import VIconButton from './VIconButton.vue'
 
@@ -10,8 +11,23 @@ const ICON = `
   </svg>
 `
 
+const t = storyText({
+  en: {
+    settings: 'Settings',
+    add: 'Add',
+    profile: 'Profile',
+    iconPropHint: '(icon prop: outline / filled)',
+  },
+  fr: {
+    settings: 'Paramètres',
+    add: 'Ajouter',
+    profile: 'Profil',
+    iconPropHint: '(prop icon : contour / plein)',
+  },
+})
+
 const meta = {
-  title: 'Composants/IconButton',
+  title: 'Components/IconButton',
   component: VIconButton,
   argTypes: {
     variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'elevated', 'tonal'] },
@@ -22,7 +38,7 @@ const meta = {
     iconFilled: { control: 'boolean' },
   },
   args: {
-    label: 'Ajouter un élément',
+    label: 'Add an item',
     variant: 'ghost',
     tone: 'neutral',
     size: 'md',
@@ -42,8 +58,8 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   play: async ({ canvasElement }) => {
-    // Le libellé accessible est obligatoire : vérifie qu'il est bien exposé.
-    const button = within(canvasElement).getByRole('button', { name: 'Ajouter un élément' })
+    // The accessible label is mandatory: check that it is actually exposed.
+    const button = within(canvasElement).getByRole('button', { name: 'Add an item' })
     await expect(button).toBeVisible()
   },
 }
@@ -98,17 +114,14 @@ export const Sizes: Story = {
 export const IconsTypes: Story = {
   render: (args) => ({
     components: { VIconButton, VIcon },
-    setup: () => ({ args }),
+    setup: () => ({ args, t }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
-        <!-- Ligature Material Symbols -->
-        <VIconButton label="Paramètres"><VIcon name="settings" /></VIconButton>
+        <VIconButton :label="t.settings"><VIcon name="settings" /></VIconButton>
 
-        <!-- SVG inline -->
-        <VIconButton label="Ajouter">${ICON}</VIconButton>
+        <VIconButton :label="t.add">${ICON}</VIconButton>
 
-        <!-- Image -->
-        <VIconButton label="Profil" variant="outline">
+        <VIconButton :label="t.profile" variant="outline">
           <VIcon src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1'/%3E%3C/svg%3E" />
         </VIconButton>
       </div>
@@ -119,13 +132,12 @@ export const IconsTypes: Story = {
 export const IconProp: Story = {
   render: (args) => ({
     components: { VIconButton },
-    setup: () => ({ args }),
+    setup: () => ({ args, t }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
-        <!-- Icône par prop, sans passer par le slot -->
         <VIconButton :label="args.label" icon="favorite" />
         <VIconButton :label="args.label" icon="favorite" icon-filled />
-        <span>(prop icon : contour / plein)</span>
+        <span>{{ t.iconPropHint }}</span>
       </div>
     `,
   }),

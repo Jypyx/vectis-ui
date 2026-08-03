@@ -4,19 +4,19 @@ import { describe, expect, it } from 'vitest'
 import VIconButton from './VIconButton.vue'
 
 describe('VIconButton', () => {
-  it('expose le libellé accessible via aria-label', () => {
+  it('exposes the accessible label through aria-label', () => {
     const { getByRole } = render(VIconButton, {
-      props: { label: 'Fermer le panneau' },
+      props: { label: 'Close the panel' },
       slots: { default: '<svg aria-hidden="true" />' },
     })
-    const button = getByRole('button', { name: 'Fermer le panneau' })
+    const button = getByRole('button', { name: 'Close the panel' })
     expect(button.classList.contains('v-icon-button')).toBe(true)
     expect(button.classList.contains('v-button')).toBe(true)
   })
 
-  it('transmet variant/tone/size au VButton sous-jacent', () => {
+  it('forwards variant/tone/size to the underlying VButton', () => {
     const { getByRole } = render(VIconButton, {
-      props: { label: 'Ajouter', variant: 'solid', tone: 'accent', size: 'sm' },
+      props: { label: 'Add', variant: 'solid', tone: 'accent', size: 'sm' },
       slots: { default: '<svg aria-hidden="true" />' },
     })
     const button = getByRole('button')
@@ -25,11 +25,11 @@ describe('VIconButton', () => {
     expect(button.dataset.size).toBe('sm')
   })
 
-  it('prop icon : rend une VIcon décorative avec la ligature (sans slot)', () => {
+  it('icon prop: renders a decorative VIcon with the ligature (no slot)', () => {
     const { getByRole } = render(VIconButton, {
-      props: { label: 'Favori', icon: 'favorite' },
+      props: { label: 'Favourite', icon: 'favorite' },
     })
-    const button = getByRole('button', { name: 'Favori' })
+    const button = getByRole('button', { name: 'Favourite' })
     const icon = button.querySelector('.v-icon') as HTMLElement
     expect(icon).not.toBeNull()
     expect(icon.textContent).toBe('favorite')
@@ -37,26 +37,26 @@ describe('VIconButton', () => {
     expect(icon.hasAttribute('data-filled')).toBe(false)
   })
 
-  it('prop iconFilled : pose data-filled sur l’icône', () => {
+  it('iconFilled prop: sets data-filled on the icon', () => {
     const { getByRole } = render(VIconButton, {
-      props: { label: 'Favori', icon: 'favorite', iconFilled: true },
+      props: { label: 'Favourite', icon: 'favorite', iconFilled: true },
     })
     const icon = getByRole('button').querySelector('.v-icon') as HTMLElement
     expect(icon.hasAttribute('data-filled')).toBe(true)
   })
 
-  it('sans prop icon : le slot par défaut est rendu (fallback)', () => {
+  it('without the icon prop: the default slot is rendered (fallback)', () => {
     const { getByRole } = render(VIconButton, {
-      props: { label: 'Fermer' },
+      props: { label: 'Close' },
       slots: { default: '<svg data-testid="slot-svg" aria-hidden="true" />' },
     })
-    const button = getByRole('button', { name: 'Fermer' })
+    const button = getByRole('button', { name: 'Close' })
     expect(button.querySelector('[data-testid="slot-svg"]')).not.toBeNull()
   })
 
-  it('supporte les nouveaux variants/tones et transmet compact', () => {
+  it('supports every variant/tone and forwards compact', () => {
     const { getByRole } = render(VIconButton, {
-      props: { label: 'Valider', variant: 'tonal', tone: 'success', compact: true },
+      props: { label: 'Confirm', variant: 'tonal', tone: 'success', compact: true },
       slots: { default: '<svg aria-hidden="true" />' },
     })
     const button = getByRole('button')

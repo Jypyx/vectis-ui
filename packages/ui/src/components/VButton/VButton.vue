@@ -1,4 +1,14 @@
 <script setup lang="ts">
+/**
+ * Action button, and the reference model for the tone/variant tables.
+ *
+ * The native <button> (or <a> in link mode) covers focus, keyboard and
+ * disabling. The only behavioural JS is the "inert link" bridge: an <a> has no
+ * native `disabled`, so disabled/loading on a link removes the href (not
+ * focusable, no navigation), sets aria-disabled for assistive technologies, and
+ * filters the click handlers out of the fallthrough to reproduce the total
+ * inertness of a <button disabled>.
+ */
 import { computed, useAttrs } from 'vue'
 import type { ButtonHTMLAttributes } from 'vue'
 
@@ -7,38 +17,30 @@ import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import VSpinner from '../VSpinner/VSpinner.vue'
 
-/**
- * Le <button> natif (ou <a> en mode lien) couvre focus, clavier et
- * désactivation. Le seul JS de comportement est le pont « lien inerte » :
- * un <a> n'a pas de `disabled` natif, donc disabled/loading sur un lien
- * retire le href (non focusable, pas de navigation), pose aria-disabled
- * pour les technologies d'assistance, et filtre les handlers click du
- * fallthrough pour reproduire l'inertie totale d'un <button disabled>.
- */
 interface ButtonProps {
   variant?: 'solid' | 'outline' | 'ghost' | 'elevated' | 'tonal'
   tone?: 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  /** Hauteur réduite de 4px ; padding, typo et icônes inchangés. */
+  /** Height reduced by 4px; padding, type and icons unchanged. */
   compact?: boolean
-  /** Rendu <a> au lieu de <button>. disabled/loading → lien inerte (sans href). */
+  /** Renders an <a> instead of a <button>. disabled/loading → an inert link (no href). */
   href?: string
-  /** Ignoré en rendu lien. */
+  /** Ignored in link rendering. */
   type?: ButtonHTMLAttributes['type']
   disabled?: boolean
   /**
-   * Affiche un spinner, désactive le bouton et pose aria-busy. Le spinner
-   * REMPLACE l'emplacement de début (iconStart / slot #start) pour ne jamais
-   * cumuler spinner et icône.
+   * Shows a spinner, disables the button and sets aria-busy. The spinner
+   * REPLACES the start slot (iconStart / #start) so a spinner and an icon are
+   * never shown together.
    */
   loading?: boolean
-  /** Icône rendue avant le libellé (le slot #start prime). */
+  /** Icon rendered before the label (the #start slot wins). */
   iconStart?: IconSource
-  /** Icône rendue après le libellé (le slot #end prime). */
+  /** Icon rendered after the label (the #end slot wins). */
   iconEnd?: IconSource
   /**
-   * Remplit iconStart/iconEnd (axe `FILL` de la police). Sans effet sur les
-   * slots #start/#end, dont le VIcon est fournie par le consommateur.
+   * Fills iconStart/iconEnd (the font's `FILL` axis). No effect on the
+   * #start/#end slots, whose VIcon is supplied by the consumer.
    */
   iconFilled?: boolean
 }
@@ -58,11 +60,11 @@ const props = withDefaults(defineProps<ButtonProps>(), {
 })
 
 defineSlots<{
-  /** Libellé du bouton */
+  /** The button label */
   default(): unknown
-  /** Contenu avant le libellé (icône, aria-hidden conseillé) */
+  /** Content before the label (an icon; aria-hidden is advised) */
   start?(): unknown
-  /** Contenu après le libellé */
+  /** Content after the label */
   end?(): unknown
 }>()
 
@@ -96,8 +98,8 @@ const passedAttrs = computed(() => {
     :data-loading="loading ? '' : undefined"
     :aria-busy="loading || undefined"
   >
-    <!-- wrapper aria-hidden : le bouton porte déjà aria-busy, on évite la
-         double annonce du role="status" du VSpinner -->
+    <!-- aria-hidden: the button already carries aria-busy, so this avoids the
+         VSpinner's role="status" announcing a second time -->
     <span v-if="loading" class="v-button-spinner" aria-hidden="true">
       <VSpinner />
     </span>
@@ -114,12 +116,6 @@ const passedAttrs = computed(() => {
 <style>
 @layer vectis.components {
   .v-button {
-    /*
-     * Tailles/compact : la classe partagée v-control (styles/control-size.css)
-     * pose les variables --control-* et le contexte de VIcon selon
-     * data-size/data-compact. VIconButton lit aussi --control-height pour sa
-     * largeur carrée (même élément rendu).
-     */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -146,7 +142,6 @@ const passedAttrs = computed(() => {
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* --- Tones : ne définissent que des variables locales --- */
   .v-button[data-tone='accent'] {
     --tone-bg-solid: var(--vectis-color-accent);
     --tone-bg-solid-hover: var(--vectis-color-accent-hover);
@@ -181,7 +176,7 @@ const passedAttrs = computed(() => {
     --tone-bg-solid: var(--vectis-color-warning);
     --tone-bg-solid-hover: var(--vectis-color-warning-hover);
     --tone-bg-solid-active: var(--vectis-color-warning-active);
-    /* amber trop clair pour du blanc : token dédié (texte sombre) */
+    /* amber is too light for white: dedicated token (dark text) */
     --tone-text-solid: var(--vectis-color-text-on-warning);
     --tone-text-tinted: var(--vectis-color-warning-text);
     --tone-bg-soft: var(--vectis-color-warning-surface);
@@ -206,7 +201,6 @@ const passedAttrs = computed(() => {
     --tone-border-soft: var(--vectis-color-border-strong);
   }
 
-  /* --- Variantes : consomment les variables du tone --- */
   .v-button[data-variant='solid'] {
     background: var(--tone-bg-solid);
     color: var(--tone-text-solid);
@@ -241,7 +235,6 @@ const passedAttrs = computed(() => {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
-  /* Elevated (Material 3) : surface surélevée + state layer teinté */
   .v-button[data-variant='elevated'] {
     background: var(--vectis-color-surface-raised);
     color: var(--tone-text-tinted);
@@ -262,7 +255,6 @@ const passedAttrs = computed(() => {
     box-shadow: var(--vectis-shadow-2);
   }
 
-  /* Tonal (Material 3 filled tonal) : fond teinté + texte teinté */
   .v-button[data-variant='tonal'] {
     background: var(--tone-bg-soft);
     color: var(--tone-text-tinted);
@@ -280,12 +272,11 @@ const passedAttrs = computed(() => {
     cursor: not-allowed;
   }
 
-  /* Loading : le bouton garde ses couleurs, simplement atténuées */
   .v-button[data-loading] {
     opacity: 0.5;
   }
 
-  /* Désactivé (hors loading) : nuances de gris (tokens surchargés par le thème dark) */
+  /* Disabled (outside loading): greys through tokens, never opacity. */
   .v-button:is(:disabled, [aria-disabled='true']):not([data-loading]):is(
       [data-variant='solid'],
       [data-variant='elevated'],
@@ -308,9 +299,9 @@ const passedAttrs = computed(() => {
   }
 
   .v-button-spinner {
-    /* boîte à la taille des icônes (le spinner remplace iconStart) :
-       aucun décalage de largeur au passage en loading. font-size = taille de
-       la boîte : le VSpinner (1em) la remplit exactement */
+    /* A box the size of an icon (the spinner replaces iconStart): no width jump
+       when switching to loading. font-size = the box size, so the VSpinner (1em)
+       fills it exactly. */
     width: var(--vectis-icon-size);
     height: var(--vectis-icon-size);
     font-size: var(--vectis-icon-size);

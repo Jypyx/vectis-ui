@@ -1,11 +1,47 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 
+import { storyText } from '../../stories/storyText'
 import VIcon from '../VIcon/VIcon.vue'
 import VButton from './VButton.vue'
 
+const t = storyText({
+  en: {
+    save: 'Save',
+    add: 'Add',
+    next: 'Next',
+    confirm: 'Confirm',
+    warning: 'Warning',
+    delete: 'Delete',
+    import: 'Import',
+    outline: 'Outline',
+    filled: 'Filled',
+    bothFilled: 'Start + end filled',
+    byProps: 'By props',
+    bySvg: 'By SVG',
+    byImage: 'By image',
+    disabledLink: 'Disabled link',
+  },
+  fr: {
+    save: 'Enregistrer',
+    add: 'Ajouter',
+    next: 'Suivant',
+    confirm: 'Valider',
+    warning: 'Attention',
+    delete: 'Supprimer',
+    import: 'Importer',
+    outline: 'Contour',
+    filled: 'Plein',
+    bothFilled: 'Début + fin pleins',
+    byProps: 'Par props',
+    bySvg: 'Par SVG',
+    byImage: 'Par image',
+    disabledLink: 'Lien désactivé',
+  },
+})
+
 const meta = {
-  title: 'Composants/Button',
+  title: 'Components/Button',
   component: VButton,
   argTypes: {
     variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'elevated', 'tonal'] },
@@ -27,8 +63,8 @@ const meta = {
   },
   render: (args) => ({
     components: { VButton },
-    setup: () => ({ args }),
-    template: '<VButton v-bind="args">Enregistrer</VButton>',
+    setup: () => ({ args, t }),
+    template: '<VButton v-bind="args">{{ t.save }}</VButton>',
   }),
 } satisfies Meta<typeof VButton>
 
@@ -79,26 +115,27 @@ export const Sizes: Story = {
 export const Icons: Story = {
   render: () => ({
     components: { VButton },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 12px">
         <div style="display: flex; gap: 8px; align-items: center">
-          <VButton icon-start="add" size="sm">Ajouter</VButton>
-          <VButton icon-start="add" size="md">Ajouter</VButton>
-          <VButton icon-end="arrow_forward" size="lg">Suivant</VButton>
+          <VButton icon-start="add" size="sm">{{ t.add }}</VButton>
+          <VButton icon-start="add" size="md">{{ t.add }}</VButton>
+          <VButton icon-end="arrow_forward" size="lg">{{ t.next }}</VButton>
         </div>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-          <VButton icon-start="check" variant="outline" tone="success">Valider</VButton>
-          <VButton icon-start="warning" variant="tonal" tone="warning">Attention</VButton>
-          <VButton icon-start="delete" variant="ghost" tone="danger">Supprimer</VButton>
-          <VButton icon-start="cloud_upload" icon-end="expand_more" variant="elevated" tone="neutral">Importer</VButton>
+          <VButton icon-start="check" variant="outline" tone="success">{{ t.confirm }}</VButton>
+          <VButton icon-start="warning" variant="tonal" tone="warning">{{ t.warning }}</VButton>
+          <VButton icon-start="delete" variant="ghost" tone="danger">{{ t.delete }}</VButton>
+          <VButton icon-start="cloud_upload" icon-end="expand_more" variant="elevated" tone="neutral">{{ t.import }}</VButton>
         </div>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // Les icônes sont décoratives : le nom accessible reste le libellé seul.
-    const button = canvas.getByRole('button', { name: 'Suivant' })
+    // The icons are decorative: the accessible name stays the label alone.
+    const button = canvas.getByRole('button', { name: 'Next' })
     const icon = button.querySelector('.v-icon')
     await expect(icon).not.toBeNull()
     await expect(icon).toHaveAttribute('aria-hidden', 'true')
@@ -108,16 +145,17 @@ export const Icons: Story = {
 export const IconsFilled: Story = {
   render: () => ({
     components: { VButton },
+    setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-        <VButton icon-start="favorite" variant="tonal">Contour</VButton>
-        <VButton icon-start="favorite" icon-filled variant="tonal">Plein</VButton>
-        <VButton icon-start="home" icon-end="star" icon-filled variant="solid">Début + fin pleins</VButton>
+        <VButton icon-start="favorite" variant="tonal">{{ t.outline }}</VButton>
+        <VButton icon-start="favorite" icon-filled variant="tonal">{{ t.filled }}</VButton>
+        <VButton icon-start="home" icon-end="star" icon-filled variant="solid">{{ t.bothFilled }}</VButton>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
-    const button = within(canvasElement).getByRole('button', { name: 'Plein' })
+    const button = within(canvasElement).getByRole('button', { name: 'Filled' })
     const icon = button.querySelector('.v-icon')
     await expect(icon).toHaveAttribute('data-filled')
   },
@@ -126,12 +164,11 @@ export const IconsFilled: Story = {
 export const IconsTypes: Story = {
   render: () => ({
     components: { VButton, VIcon },
+    setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-        <!-- Par props : nom Material Symbols -->
-        <VButton icon-start="add">Par props</VButton>
+        <VButton icon-start="add">{{ t.byProps }}</VButton>
 
-        <!-- Par slot : SVG inline -->
         <VButton>
           <template #start>
             <VIcon>
@@ -140,15 +177,14 @@ export const IconsTypes: Story = {
               </svg>
             </VIcon>
           </template>
-          Par SVG
+          {{ t.bySvg }}
         </VButton>
 
-        <!-- Par slot : image -->
         <VButton variant="outline" tone="neutral">
           <template #start>
             <VIcon src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%236366f1'/%3E%3C/svg%3E" />
           </template>
-          Par image
+          {{ t.byImage }}
         </VButton>
       </div>
     `,
@@ -159,14 +195,14 @@ export const Link: Story = {
   render: () => ({
     components: { VButton },
     template: `
-      <VButton href="https://exemple.fr" target="_blank" rel="noreferrer" icon-end="open_in_new">
+      <VButton href="https://example.com" target="_blank" rel="noreferrer" icon-end="open_in_new">
         Documentation
       </VButton>
     `,
   }),
   play: async ({ canvasElement }) => {
     const link = within(canvasElement).getByRole('link', { name: 'Documentation' })
-    await expect(link).toHaveAttribute('href', 'https://exemple.fr')
+    await expect(link).toHaveAttribute('href', 'https://example.com')
     await expect(link).not.toHaveAttribute('type')
     await expect(link).toHaveAttribute('target', '_blank')
   },
@@ -175,15 +211,17 @@ export const Link: Story = {
 export const DisabledLink: Story = {
   render: () => ({
     components: { VButton },
+    setup: () => ({ t }),
     template: `
-      <VButton href="https://exemple.fr" disabled>
-        Lien désactivé
+      <VButton href="https://example.com" disabled>
+        {{ t.disabledLink }}
       </VButton>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // Un <a> sans href n'a pas le rôle link : le lien inerte disparaît de l'arbre d'accessibilité en tant que lien.
+    // An <a> with no href has no link role: the inert link leaves the
+    // accessibility tree as a link.
     await expect(canvas.queryByRole('link')).toBeNull()
     const anchor = canvasElement.querySelector('a.v-button') as HTMLAnchorElement
     await expect(anchor).not.toHaveAttribute('href')

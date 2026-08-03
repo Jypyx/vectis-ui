@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * Icon button: the same visual API as VButton, but square and with a MANDATORY
+ * accessible label (an icon alone is not enough for screen readers).
+ */
 import type { ButtonHTMLAttributes } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
@@ -6,24 +10,20 @@ import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 
-/**
- * Bouton icône : même API visuelle que VButton, mais carré et avec un libellé
- * accessible OBLIGATOIRE (l'icône seule ne suffit pas aux lecteurs d'écran).
- */
 interface IconButtonProps {
-  /** Libellé accessible, posé en aria-label. */
+  /** Accessible label, set as aria-label. */
   label: string
   variant?: 'solid' | 'outline' | 'ghost' | 'elevated' | 'tonal'
   tone?: 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  /** Hauteur (et largeur) réduites de 4px. */
+  /** Height (and width) reduced by 4px. */
   compact?: boolean
   type?: ButtonHTMLAttributes['type']
   disabled?: boolean
   loading?: boolean
-  /** Icône rendue : nom, ou rendu explicite (le slot par défaut prime en fallback). */
+  /** The icon rendered: a name, or an explicit render (the default slot is the fallback). */
   icon?: IconSource
-  /** Remplit l'icône `icon` (axe `FILL` de la police). */
+  /** Fills the `icon` (the font's `FILL` axis). */
   iconFilled?: boolean
 }
 
@@ -40,7 +40,7 @@ withDefaults(defineProps<IconButtonProps>(), {
 })
 
 defineSlots<{
-  /** L'icône (composant VIcon ou SVG avec aria-hidden="true"), si `icon` n'est pas fourni */
+  /** The icon (a VIcon component or an SVG with aria-hidden="true"), when `icon` is not given */
   default(): unknown
 }>()
 </script>
@@ -65,11 +65,10 @@ defineSlots<{
 <style>
 @layer vectis.components {
   /*
-   * Sélecteur avec [data-size] pour battre la règle de padding de VButton
-   * quel que soit l'ordre du CSS bundlé (ce fichier reste importé APRÈS
-   * VButton dans index.ts). La largeur lit --control-height, posée par la
-   * classe partagée v-control sur ce même élément rendu (compact inclus) :
-   * une seule règle couvre toutes les tailles.
+   * The [data-size] selector beats VButton's padding rule whatever the bundled
+   * CSS order (this file is still imported AFTER VButton in index.ts). The width
+   * reads --control-height, set by the shared v-control class on that same
+   * rendered element (compact included): a single rule covers every size.
    */
   .v-icon-button[data-size] {
     width: var(--control-height);

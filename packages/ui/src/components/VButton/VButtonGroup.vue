@@ -1,12 +1,12 @@
 <script setup lang="ts">
 /**
- * Rattache visuellement plusieurs VButton/VIconButton en un contrôle segmenté :
- * bordures fusionnées, coins arrondis aux seules extrémités du groupe. Tout est
- * en CSS (aucun provide/inject) — chaque bouton garde ses propres props ; poser
- * les mêmes variant/tone/size sur les enfants donne un rendu cohérent.
+ * Visually joins several VButton/VIconButton into a segmented control: merged
+ * borders, rounded corners only at the ends of the group. It is all CSS (no
+ * provide/inject) — each button keeps its own props; setting the same
+ * variant/tone/size on the children gives a coherent rendering.
  */
 interface ButtonGroupProps {
-  /** Sens du rattachement. Défaut horizontal. */
+  /** Direction of the joining. Defaults to horizontal. */
   orientation?: 'horizontal' | 'vertical'
 }
 
@@ -15,13 +15,12 @@ withDefaults(defineProps<ButtonGroupProps>(), {
 })
 
 defineSlots<{
-  /** Les VButton/VIconButton à rattacher. */
+  /** The VButton/VIconButton elements to join. */
   default(): unknown
 }>()
 </script>
 
 <template>
-  <!-- La racine EST le div : aria-label / role="toolbar" custom tombent dessus par fallthrough. -->
   <div class="v-button-group" role="group" :data-orientation="orientation">
     <slot />
   </div>
@@ -31,7 +30,7 @@ defineSlots<{
 @layer vectis.components {
   .v-button-group {
     display: inline-flex;
-    /* hauteurs (horizontal) ou largeurs (vertical) égalisées entre segments */
+    /* equalizes heights (horizontal) or widths (vertical) across the segments */
     align-items: stretch;
   }
 
@@ -39,11 +38,11 @@ defineSlots<{
     flex-direction: column;
   }
 
-  /* Collapse la bordure 1px partagée (margin négatif) et pose une couture neutre
-     qui matérialise la séparation pour les variantes pleines (bordure
-     transparente) et uniformise la jointure des variantes outline. Chaque bloc
-     est scopé à son orientation : sinon les règles horizontales zéroïseraient
-     aussi les coins et bordures latérales en mode vertical. */
+  /* Collapses the shared 1px border (negative margin) and lays a neutral seam
+     that materializes the separation for the filled variants (transparent
+     border) and unifies the joint of the outline ones. Each block is scoped to
+     its orientation: otherwise the horizontal rules would also zero out the side
+     corners and borders in vertical mode. */
   .v-button-group[data-orientation='horizontal'] > .v-button:not(:first-child) {
     margin-inline-start: -1px;
     border-inline-start-color: var(--vectis-color-border);
@@ -68,8 +67,8 @@ defineSlots<{
     border-end-end-radius: 0;
   }
 
-  /* Le bouton survolé/focus/actif remonte au-dessus des voisins : sinon sa
-     bordure teintée et son focus-ring sont rognés par le segment adjacent. */
+  /* The hovered/focused/active button rises above its neighbours: otherwise its
+     tinted border and focus ring are clipped by the adjacent segment. */
   .v-button-group > .v-button:hover,
   .v-button-group > .v-button:focus-visible,
   .v-button-group > .v-button:active {
