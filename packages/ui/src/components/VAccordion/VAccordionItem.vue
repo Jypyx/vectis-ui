@@ -8,21 +8,20 @@ import VTypography from '../VTypography/VTypography.vue'
 import { accordionKey } from './context'
 
 /**
- * Item d'accordéon : <details>/<summary> natifs — état, clavier et
- * accessibilité gratuits. L'animation d'ouverture utilise
- * `::details-content` + `interpolate-size` (progressive enhancement : sans
- * support, ouverture instantanée).
+ * Accordion item: native <details>/<summary> — state, keyboard and accessibility
+ * for free. The opening animation uses `::details-content` + `interpolate-size`
+ * (progressive enhancement: with no support, it opens instantly).
  */
 interface AccordionItemProps {
-  /** Titre du résumé ; remplaçable par le slot #title. */
+  /** Title of the summary; replaceable through the #title slot. */
   title?: string
-  /** Sous-titre sous le titre ; remplaçable par le slot #subtitle. */
+  /** Subtitle under the title; replaceable through the #subtitle slot. */
   subtitle?: string
-  /** Icône devant le titre : nom, ou rendu explicite (`{ src }`, `{ component }`…). */
+  /** Icon before the title: a name, or an explicit render (`{ src }`, `{ component }`…). */
   iconStart?: IconSource
-  /** Ouvert au premier rendu (état ensuite géré nativement). */
+  /** Open on the first render (the state is then handled natively). */
   defaultOpen?: boolean
-  /** Item inerte : ni cliquable ni atteignable au clavier, gris par tokens. */
+  /** Inert item: neither clickable nor keyboard-reachable, greyed through tokens. */
   disabled?: boolean
 }
 
@@ -47,14 +46,14 @@ defineSlots<{
 
 const accordion = inject(accordionKey, null)
 
-/** Icônes posées par le groupe ; l'item reste utilisable seul. */
+/** Icons set by the group; the item stays usable on its own. */
 const expandIcon = computed(() => accordion?.expandIcon ?? 'expand_more')
 const collapseIcon = computed(() => accordion?.collapseIcon)
 
 /*
- * Seul JS de comportement du composant : <summary> n'a pas d'attribut
- * `disabled` natif, le basculement de <details> ne peut être bloqué
- * autrement — le clavier, lui, est couvert sans handler par `tabindex="-1"`.
+ * The component's only behavioural JS: <summary> has no native `disabled`
+ * attribute, so the toggling of <details> cannot be blocked any other way — the
+ * keyboard, on the other hand, is covered with no handler by `tabindex="-1"`.
  */
 function onSummaryClick(event: MouseEvent) {
   if (props.disabled) event.preventDefault()
@@ -92,7 +91,7 @@ function onSummaryClick(event: MouseEvent) {
         >
       </span>
       <VIcon class="v-accordion-icon" v-bind="iconProps(expandIcon)" />
-      <!-- Deux icônes rendues, permutation 100 % CSS sur [open] -->
+      <!-- Two icons rendered, swapped 100% in CSS on [open] -->
       <VIcon
         v-if="collapseIcon"
         class="v-accordion-icon v-accordion-icon-open"
@@ -116,15 +115,15 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   .v-accordion-summary {
-    /* Contexte de VIcon : 20px quelle que soit la densité (seuls les paddings
-       varient en compact), opsz 20 comme le mapping md de la table des tailles */
+    /* VIcon context: 20px whatever the density (only the paddings vary in compact),
+       opsz 20 as in the md mapping of the size table */
     --vectis-icon-size: var(--vectis-icon-size-md);
     --vectis-icon-opsz: 20;
 
     display: flex;
     align-items: center;
     gap: var(--vectis-space-3);
-    /* Densité : variables héritées du groupe, fallbacks = taille normale */
+    /* Density: variables inherited from the group, fallbacks = normal size */
     padding: var(--accordion-pad-block, var(--vectis-space-4))
       var(--accordion-pad-inline, var(--vectis-space-5));
     list-style: none;
@@ -148,10 +147,10 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   /*
-   * Coins des summary d'extrémité alignés sur le rayon intérieur du groupe
-   * (0 hors groupe encadré) : l'outline suit le border-radius, l'anneau devient
-   * donc parallèle à la découpe `overflow: hidden` au lieu d'y être rogné.
-   * Le dernier summary n'est au bord bas que panneau fermé.
+   * Corners of the end summaries aligned on the group's inner radius (0 outside a
+   * framed group): the outline follows the border-radius, so the ring becomes
+   * parallel to the `overflow: hidden` clip instead of being cropped by it. The last
+   * summary is only at the bottom edge while the panel is closed.
    */
   .v-accordion-item:first-child > .v-accordion-summary {
     border-start-start-radius: var(--accordion-corner-radius, 0);
@@ -163,7 +162,7 @@ function onSummaryClick(event: MouseEvent) {
     border-end-end-radius: var(--accordion-corner-radius, 0);
   }
 
-  /* Bloc textuel : titre seul, ou titre + sous-titre empilés */
+  /* Text block: title alone, or title + subtitle stacked */
   .v-accordion-heading {
     flex: 1;
     display: flex;
@@ -171,11 +170,11 @@ function onSummaryClick(event: MouseEvent) {
     line-height: var(--vectis-text-label-leading);
   }
 
-  /* Sous-titre : rendu par VTypography (caption muted) — la classe
-     .v-accordion-subtitle reste posée comme point d'accroche (état
-     disabled ci-dessous). */
+  /* Subtitle: rendered by VTypography (a muted caption) — the
+     .v-accordion-subtitle class stays in place as a hook (the disabled state
+     below). */
 
-  /* Classe dédiée (pas .v-accordion-icon : rotation/permutation réservées au chevron) */
+  /* A dedicated class (not .v-accordion-icon: rotation/swap are reserved for the chevron) */
   .v-accordion-icon-start {
     flex: none;
     color: var(--vectis-color-text-muted);
@@ -191,7 +190,7 @@ function onSummaryClick(event: MouseEvent) {
     rotate: 180deg;
   }
 
-  /* Permutation des deux icônes (data-swap = collapseIcon fournie) */
+  /* Swapping the two icons (data-swap = collapseIcon provided) */
   .v-accordion-item[data-swap][open]
     > .v-accordion-summary
     .v-accordion-icon:not(.v-accordion-icon-open),
@@ -199,20 +198,20 @@ function onSummaryClick(event: MouseEvent) {
     display: none;
   }
 
-  /* Désactivé : nuances de gris par tokens (jamais d'opacité) */
+  /* Disabled: greys through tokens (never opacity) */
   .v-accordion-item[data-disabled] > .v-accordion-summary {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
-  /* text-muted est plus foncé que text-subtle : icônes et sous-titre suivent le titre */
+  /* text-muted is darker than text-subtle: icons and subtitle follow the title */
   .v-accordion-item[data-disabled] .v-accordion-icon,
   .v-accordion-item[data-disabled] .v-accordion-icon-start,
   .v-accordion-item[data-disabled] .v-accordion-subtitle {
     color: inherit;
   }
 
-  /* Ouverture animée en pur CSS (::details-content, progressive enhancement) */
+  /* Animated opening in pure CSS (::details-content, progressive enhancement) */
   .v-accordion-item::details-content {
     block-size: 0;
     overflow: clip;
@@ -226,7 +225,7 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   .v-accordion-content {
-    /* Respiration sous le summary, réduite en compact (variables du groupe) */
+    /* Breathing room under the summary, reduced in compact (the group's variables) */
     padding: var(--accordion-content-pad-start, var(--vectis-space-2))
       var(--accordion-pad-inline, var(--vectis-space-5))
       var(--accordion-pad-block, var(--vectis-space-4));

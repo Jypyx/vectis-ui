@@ -5,7 +5,7 @@ import { defineComponent, ref } from 'vue'
 import VRadio from './VRadio.vue'
 
 describe('VRadio', () => {
-  it('coché quand le modèle correspond à value, émet la sélection sinon', async () => {
+  it('checked when the model matches value, emits the selection otherwise', async () => {
     const Harness = defineComponent({
       components: { VRadio },
       setup: () => ({ plan: ref('a') }),
@@ -24,7 +24,7 @@ describe('VRadio', () => {
     expect(alpha.checked).toBe(false)
   })
 
-  it('labelPosition et spread posent les attributs data-* sur la racine', () => {
+  it('labelPosition and spread set the data-* attributes on the root', () => {
     const { container } = render(VRadio, {
       props: { modelValue: '', value: 'x', labelPosition: 'start', spread: true },
       slots: { default: 'X' },
@@ -34,7 +34,7 @@ describe('VRadio', () => {
     expect(root.hasAttribute('data-spread')).toBe(true)
   })
 
-  it('name (fallthrough) atterrit sur l’input pour former le groupe natif', () => {
+  it('name (fallthrough) lands on the input to form the native group', () => {
     const { getByRole } = render(VRadio, {
       props: { modelValue: '', value: 'x' },
       attrs: { name: 'groupe' },

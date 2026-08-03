@@ -2,20 +2,20 @@
 import { ref, watchEffect } from 'vue'
 
 /**
- * <input type="checkbox"> natif, visuellement remplacé par une boîte stylée :
+ * A native <input type="checkbox">, visually replaced by a styled box:
  * l'input reste dans l'arbre (focus, clavier, formulaires, :user-invalid),
- * seul son rendu est masqué. Toute la logique d'état est native ; le seul JS
- * au-delà du pont v-model est `indeterminate`, qui n'existe qu'en propriété
- * DOM (aucun attribut HTML équivalent).
+ * only its rendering is hidden. All the state logic is native; the only JS beyond
+ * the v-model bridge is `indeterminate`, which exists solely as a DOM property
+ * (there is no equivalent HTML attribute).
  */
 interface CheckboxProps {
-  /** État visuel « partiellement coché » (listes imbriquées). */
+  /** The "partially checked" visual state (nested lists). */
   indeterminate?: boolean
-  /** Position du libellé par rapport à la boîte. */
+  /** Position of the label relative to the box. */
   labelPosition?: 'start' | 'end'
-  /** Écarte libellé et boîte aux extrémités (la racine devient block, pleine largeur). */
+  /** Pushes label and box to opposite ends (the root becomes block, full width). */
   spread?: boolean
-  /** Force l'état invalide — pose aria-invalid. */
+  /** Forces the invalid state — sets aria-invalid. */
   invalid?: boolean
   disabled?: boolean
 }
@@ -29,21 +29,21 @@ const props = withDefaults(defineProps<CheckboxProps>(), {
 })
 
 // La racine est un <label> : les attributs natifs (name, value, required,
-// aria-*…) doivent atterrir sur l'input.
+// aria-*…) must land on the input.
 defineOptions({ inheritAttrs: false })
 
 const model = defineModel<boolean>({ default: false })
 
 defineSlots<{
-  /** Libellé, cliquable (le <label> englobe tout) */
+  /** Label, clickable (the <label> wraps everything) */
   default?(): unknown
 }>()
 
 const inputEl = ref<HTMLInputElement | null>(null)
 
-// SSR-safe : inputEl est null côté serveur, l'effet ne fait rien.
-// flush: 'post' → l'effet tourne après la mise à jour du DOM, quand la ref
-// template est posée.
+// SSR-safe: inputEl is null on the server, so the effect does nothing.
+// flush: 'post' → the effect runs after the DOM update, once the template ref is
+// set.
 watchEffect(
   () => {
     if (inputEl.value) inputEl.value.indeterminate = props.indeterminate
@@ -100,8 +100,8 @@ watchEffect(
     cursor: pointer;
   }
 
-  /* L'input est en position: absolute → hors du flux flex, l'ordre visuel ne
-     concerne que la boîte et le libellé */
+  /* The input is position: absolute → outside the flex flow, so the visual order
+     concerns only the box and the label */
   .v-checkbox[data-label-position='start'] {
     flex-direction: row-reverse;
   }
@@ -111,7 +111,7 @@ watchEffect(
     justify-content: space-between;
   }
 
-  /* L'input reste focusable et soumis au formulaire ; seul son rendu disparaît */
+  /* The input stays focusable and submitted with the form; only its rendering goes */
   .v-checkbox-input {
     position: absolute;
     opacity: 0;
@@ -190,7 +190,7 @@ watchEffect(
     border-color: var(--vectis-color-danger);
   }
 
-  /* Disabled : nuances de gris (mêmes tokens que VButton), pas d'opacité */
+  /* Disabled: greys (the same tokens as VButton), no opacity */
   .v-checkbox:has(.v-checkbox-input:disabled) {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;

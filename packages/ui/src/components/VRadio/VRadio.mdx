@@ -5,55 +5,55 @@ import * as VRadioStories from './VRadio.stories'
 
 # Radio
 
-Bouton radio construit sur l'`<input type="radio">` natif, visuellement remplacé par une
-pastille stylée (même approche que `VCheckbox` : l'input reste dans l'arbre, seul son rendu est
-masqué). Le groupe est **natif** : plusieurs VRadio partageant le même `name` (fallthrough) et
-le même v-model — la navigation aux flèches est fournie par le navigateur, zéro JavaScript.
+Radio button built on the native `<input type="radio">`, visually replaced by a styled dot (the
+same approach as `VCheckbox`: the input stays in the tree, and only its rendering is hidden). The
+group is **native**: several VRadio sharing the same `name` (fallthrough) and the same v-model —
+arrow navigation is supplied by the browser, zero JavaScript.
 
-Taille unique : pastille de 20px, bordure de 2px (tokens `--vectis-control-size-check` et
-`--vectis-control-border-width`), point intérieur de 8px (`--vectis-control-size-check-dot`).
+A single size: a 20px dot with a 2px border (the `--vectis-control-size-check` and
+`--vectis-control-border-width` tokens), and an 8px inner dot
+(`--vectis-control-size-check-dot`).
 
-<Canvas of={VRadioStories.Groupe} />
+<Canvas of={VRadioStories.Group} />
 
-<Controls of={VRadioStories.Groupe} />
+<Controls of={VRadioStories.Group} />
 
-Chaque VRadio porte une prop `value` ; le v-model du groupe vaut la `value` du bouton
-sélectionné.
+Every VRadio carries a `value` prop; the group's v-model holds the `value` of the selected
+button.
 
-## Position du libellé
+## Label position
 
-`label-position` place le libellé après (`end`, défaut) ou avant (`start`) la pastille.
+`label-position` places the label after (`end`, the default) or before (`start`) the dot.
 
-<Canvas of={VRadioStories.PositionDuLibelle} />
+<Canvas of={VRadioStories.LabelPosition} />
 
 ## Spread
 
-`spread` fait passer la racine en flex pleine largeur : libellé et pastille sont repoussés aux
-extrémités du conteneur. Se combine avec `label-position` pour choisir de quel côté part la
-pastille.
+`spread` switches the root to full-width flex: label and dot are pushed to the container's
+opposite ends. It combines with `label-position` to choose which side the dot goes to.
 
 <Canvas of={VRadioStories.Spread} />
 
-## États
+## States
 
-`disabled` bascule la pastille sur des nuances de gris (`--vectis-color-surface-muted`,
-`--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu suit automatiquement le thème
-dark :
+`disabled` switches the dot to greys (`--vectis-color-surface-muted`,
+`--vectis-color-text-subtle`) — no opacity trick, and the rendering follows the dark theme
+automatically:
 
 <Canvas of={VRadioStories.Disabled} />
 
-## Formulaires et validation
+## Forms and validation
 
-Les attributs natifs (`name` surtout, pour former le groupe, mais aussi `required`,
-`aria-*`…) passent en fallthrough sur l'input, pas sur le label. L'état invalide est stylé via
-`:user-invalid` (validation native) ; la prop `invalid` permet de le forcer — elle pose
+The native attributes (`name` above all, to form the group, but also `required`, `aria-*`…) pass
+through by fallthrough onto the input, not onto the label. The invalid state is styled through
+`:user-invalid` (native validation); the `invalid` prop allows forcing it — it sets
 `aria-invalid`.
 
-## Accessibilité
+## Accessibility
 
-- Le libellé du slot nomme le contrôle (label englobant) ; envelopper le groupe dans un
-  `<fieldset>` avec `<legend>` pour nommer la question.
-- L'input est masqué via `opacity: 0` (jamais `display: none`) : il reste focusable et soumis
-  au formulaire ; les flèches naviguent dans le groupe (comportement natif).
-- Focus visible par anneau (`--vectis-focus-ring-*`) sur la pastille, jamais supprimé.
-- Les transitions respectent `prefers-reduced-motion`.
+- The slot label names the control (a wrapping label); wrap the group in a `<fieldset>` with a
+  `<legend>` to name the question.
+- The input is hidden with `opacity: 0` (never `display: none`): it stays focusable and submitted
+  with the form; the arrows navigate within the group (native behaviour).
+- Visible focus through a ring (`--vectis-focus-ring-*`) on the dot, never removed.
+- The transitions respect `prefers-reduced-motion`.

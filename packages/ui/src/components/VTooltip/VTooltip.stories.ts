@@ -4,10 +4,32 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import VButton from '../VButton/VButton.vue'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import VTypography from '../VTypography/VTypography.vue'
+import { storyText } from '../../stories/storyText'
 import VTooltip from './VTooltip.vue'
 
+const t = storyText({
+  en: {
+    deleteItem: 'Delete the item',
+    search: 'Search',
+    globalSearch: 'Global search',
+    searchesIn: 'Searches the files, symbols and commands of the project.',
+    shortcut: 'Shortcut:',
+    edgeIntro:
+      'Each button asks for a placement pointing at the edge it sits near: the tooltip flips automatically to the opposite side',
+  },
+  fr: {
+    deleteItem: "Supprimer l'élément",
+    search: 'Rechercher',
+    globalSearch: 'Recherche globale',
+    searchesIn: 'Cherche dans les fichiers, les symboles et les commandes du projet.',
+    shortcut: 'Raccourci :',
+    edgeIntro:
+      'Chaque bouton demande un placement orienté vers le bord dont il est proche : le tooltip bascule automatiquement du côté opposé',
+  },
+})
+
 const meta = {
-  title: 'Composants/Tooltip',
+  title: 'Components/Tooltip',
   component: VTooltip,
   argTypes: {
     placement: {
@@ -25,7 +47,7 @@ const meta = {
     },
   },
   args: {
-    text: 'Copier dans le presse-papiers',
+    text: 'Copy to the clipboard',
     placement: 'top',
     delay: 300,
   },
@@ -36,7 +58,7 @@ const meta = {
       <div style="padding: 60px">
         <VTooltip v-bind="args">
           <template #default="{ triggerProps }">
-            <VButton variant="outline" tone="neutral" v-bind="triggerProps">Copier</VButton>
+            <VButton variant="outline" tone="neutral" v-bind="triggerProps">Copy</VButton>
           </template>
         </VTooltip>
       </div>
@@ -49,34 +71,34 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/** Le focus clavier ouvre immédiatement (sans délai) — WCAG. */
-export const OuvertureAuFocus: Story = {
+/** Keyboard focus opens immediately (with no delay) — WCAG. */
+export const OpenOnFocus: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const tooltip = canvasElement.querySelector('[role="tooltip"]') as HTMLElement
-    const trigger = canvas.getByRole('button', { name: 'Copier' })
+    const trigger = canvas.getByRole('button', { name: 'Copy' })
 
     await userEvent.tab()
     await expect(trigger).toHaveFocus()
     await waitFor(() => expect(tooltip.matches(':popover-open')).toBe(true))
-    // le trigger est décrit par le tooltip
+    // the trigger is described by the tooltip
     await expect(trigger).toHaveAttribute('aria-describedby', tooltip.id)
 
-    // Échap ferme (WCAG 1.4.13)
+    // Escape closes (WCAG 1.4.13)
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(tooltip.matches(':popover-open')).toBe(false))
   },
 }
 
-export const SurIconButton: Story = {
+export const OnIconButton: Story = {
   render: (args) => ({
     components: { VTooltip, VIconButton },
-    setup: () => ({ args }),
+    setup: () => ({ args, t }),
     template: `
       <div style="padding: 60px">
-        <VTooltip v-bind="args" text="Supprimer l'élément" placement="bottom">
+        <VTooltip v-bind="args" :text="t.deleteItem" placement="bottom">
           <template #default="{ triggerProps }">
-            <VIconButton label="Supprimer l'élément" tone="danger" v-bind="triggerProps">
+            <VIconButton :label="t.deleteItem" tone="danger" v-bind="triggerProps">
               <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
                 <path d="M4 4l8 8M12 4l-8 8" stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" />
               </svg>
@@ -88,13 +110,13 @@ export const SurIconButton: Story = {
   }),
 }
 
-export const TexteLong: Story = {
+export const LongText: Story = {
   args: {
-    text: 'Une description anormalement longue qui doit passer à la ligne proprement sans dépasser la largeur maximale du panneau.',
+    text: 'An abnormally long description that must wrap cleanly without exceeding the panel maximum width.',
   },
 }
 
-/** Les huit placements disponibles, disposés autour d'un centre vide. */
+/** The eight available placements, laid out around an empty centre. */
 export const Placements: Story = {
   render: (args) => ({
     components: { VTooltip, VButton },
@@ -144,27 +166,27 @@ export const Placements: Story = {
 }
 
 /**
- * Contenu riche via le slot `#content` (prime sur la prop `text`). Réservé au
- * contenu NON interactif : le tooltip se ferme dès que le pointeur quitte le
- * déclencheur et `aria-describedby` aplatit le contenu en texte — un lien ou
- * un bouton y serait inatteignable (utiliser VPopover dans ce cas).
+ * Rich content through the `#content` slot (which wins over the `text` prop).
+ * Reserved for NON-interactive content: the tooltip closes as soon as the pointer
+ * leaves the trigger, and `aria-describedby` flattens the content to text — a link
+ * or a button would be unreachable there (use VPopover in that case).
  */
-export const ContenuRiche: Story = {
+export const RichContent: Story = {
   render: (args) => ({
     components: { VTooltip, VButton },
-    setup: () => ({ args }),
+    setup: () => ({ args, t }),
     template: `
       <div style="padding: 100px 60px">
         <VTooltip :delay="args.delay" placement="bottom-start">
           <template #default="{ triggerProps }">
-            <VButton variant="outline" tone="neutral" v-bind="triggerProps">Rechercher</VButton>
+            <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.search }}</VButton>
           </template>
           <template #content>
             <div style="display: grid; gap: 4px; padding: 4px 0;">
-              <strong>Recherche globale</strong>
-              <span>Cherche dans les fichiers, les symboles et les commandes du projet.</span>
+              <strong>{{ t.globalSearch }}</strong>
+              <span>{{ t.searchesIn }}</span>
               <span style="opacity: 0.75;">
-                Raccourci&nbsp;:
+                {{ t.shortcut }}
                 <kbd style="border: 1px solid currentcolor; border-radius: 4px; padding: 0 4px;">Ctrl</kbd>
                 +
                 <kbd style="border: 1px solid currentcolor; border-radius: 4px; padding: 0 4px;">K</kbd>
@@ -178,24 +200,23 @@ export const ContenuRiche: Story = {
 }
 
 /**
- * Repli automatique au bord de l'écran (`position-try-fallbacks: flip-block,
- * flip-inline` — voir floating.css) : chaque déclencheur est collé à un bord
- * du viewport avec un placement qui pointe vers ce bord. Faute de place, le
- * navigateur retourne le panneau du côté opposé, sans aucun JS.
+ * Automatic flipping at the screen edge (`position-try-fallbacks: flip-block,
+ * flip-inline` — see floating.css): each trigger is stuck to a viewport edge with a
+ * placement pointing at that edge. With no room, the browser flips the panel to the
+ * opposite side, with no JS at all.
  */
 export const EdgeFlipping: Story = {
   parameters: { layout: 'fullscreen' },
   render: (args) => ({
     components: { VTooltip, VButton, VTypography },
-    setup: () => ({ args }),
+    setup: () => ({ args, t }),
     template: `
       <div style="position: relative; height: 100dvh;">
         <VTypography
           tone="muted"
           style="position: absolute; inset: 50% auto auto 50%; translate: -50% -50%; max-width: 28rem; text-align: center;"
         >
-          Chaque bouton demande un placement orienté vers le bord dont il est
-          proche : le tooltip bascule automatiquement du côté opposé
+          {{ t.edgeIntro }}
           (<code>position-try-fallbacks</code>).
         </VTypography>
         <div style="position: absolute; top: 8px; left: 50%; translate: -50%;">

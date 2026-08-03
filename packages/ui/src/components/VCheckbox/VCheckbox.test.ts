@@ -5,7 +5,7 @@ import { nextTick } from 'vue'
 import VCheckbox from './VCheckbox.vue'
 
 describe('VCheckbox', () => {
-  it('synchronise v-model au clic', async () => {
+  it('syncs v-model on click', async () => {
     const { getByRole, emitted } = render(VCheckbox, {
       props: { modelValue: false },
       slots: { default: 'Cocher' },
@@ -14,7 +14,7 @@ describe('VCheckbox', () => {
     expect(emitted('update:modelValue')).toEqual([[true]])
   })
 
-  it('le libellé du slot nomme le contrôle (label englobant)', () => {
+  it('the slot label names the control (a wrapping label)', () => {
     const { getByRole } = render(VCheckbox, {
       props: { modelValue: false },
       slots: { default: 'Recevoir la newsletter' },
@@ -22,7 +22,7 @@ describe('VCheckbox', () => {
     expect(getByRole('checkbox', { name: 'Recevoir la newsletter' })).toBeTruthy()
   })
 
-  it('applique la propriété DOM indeterminate (pas d’attribut HTML équivalent)', async () => {
+  it('applies the indeterminate DOM property (there is no equivalent HTML attribute)', async () => {
     const { getByRole, rerender } = render(VCheckbox, {
       props: { modelValue: false, indeterminate: true },
     })
@@ -33,7 +33,7 @@ describe('VCheckbox', () => {
     expect(input.indeterminate).toBe(false)
   })
 
-  it('labelPosition et spread posent les attributs data-* sur la racine', () => {
+  it('labelPosition and spread set the data-* attributes on the root', () => {
     const { container } = render(VCheckbox, {
       props: { modelValue: false, labelPosition: 'start', spread: true },
       slots: { default: 'Cocher' },
@@ -43,14 +43,14 @@ describe('VCheckbox', () => {
     expect(root.hasAttribute('data-spread')).toBe(true)
   })
 
-  it('spread absent par défaut (pas d’attribut data-spread)', () => {
+  it('spread absent by default (no data-spread attribute)', () => {
     const { container } = render(VCheckbox, { props: { modelValue: false } })
     const root = container.querySelector('.v-checkbox') as HTMLElement
     expect(root.getAttribute('data-label-position')).toBe('end')
     expect(root.hasAttribute('data-spread')).toBe(false)
   })
 
-  it('les attributs natifs atterrissent sur l’input, pas sur le label', () => {
+  it('the native attributes land on the input, not on the label', () => {
     const { getByRole } = render(VCheckbox, {
       props: { modelValue: false },
       attrs: { name: 'cgu', required: true },

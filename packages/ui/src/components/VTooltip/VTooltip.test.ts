@@ -19,13 +19,13 @@ describe('VTooltip', () => {
   beforeEach(() => vi.useFakeTimers())
   afterEach(() => vi.useRealTimers())
 
-  it('relie le déclencheur au tooltip par aria-describedby', () => {
+  it('links the trigger to the tooltip through aria-describedby', () => {
     const { getByTestId, container } = render(Harness)
     const panel = container.querySelector('[role="tooltip"]') as HTMLElement
     expect(getByTestId('trigger').getAttribute('aria-describedby')).toBe(panel.id)
   })
 
-  it("s'ouvre au survol après le délai, pas avant", async () => {
+  it('opens on hover after the delay, not before', async () => {
     const { container } = render(Harness)
     const wrapper = container.querySelector('.v-tooltip') as HTMLElement
     const panel = container.querySelector('[role="tooltip"]') as HTMLElement
@@ -37,7 +37,7 @@ describe('VTooltip', () => {
     expect(panel.hasAttribute('data-popover-open')).toBe(true)
   })
 
-  it('se ferme quand le pointeur sort (délai en cours annulé compris)', () => {
+  it('closes when the pointer leaves (including cancelling a pending delay)', () => {
     const { container } = render(Harness)
     const wrapper = container.querySelector('.v-tooltip') as HTMLElement
     const panel = container.querySelector('[role="tooltip"]') as HTMLElement
@@ -49,14 +49,14 @@ describe('VTooltip', () => {
     wrapper.dispatchEvent(new Event('pointerleave'))
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
 
-    // délai annulé : entrer puis sortir avant l'échéance ne doit rien ouvrir
+    // delay cancelled: entering then leaving before it fires must open nothing
     wrapper.dispatchEvent(new Event('pointerenter'))
     wrapper.dispatchEvent(new Event('pointerleave'))
     vi.advanceTimersByTime(500)
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
   })
 
-  it('le focus ouvre immédiatement, Échap ferme (WCAG 1.4.13)', () => {
+  it('focus opens immediately, Escape closes (WCAG 1.4.13)', () => {
     const { container } = render(Harness)
     const wrapper = container.querySelector('.v-tooltip') as HTMLElement
     const panel = container.querySelector('[role="tooltip"]') as HTMLElement

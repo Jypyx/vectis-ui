@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import VSwitch from './VSwitch.vue'
 
 describe('VSwitch', () => {
-  it('expose role="switch" et synchronise v-model', async () => {
+  it('exposes role="switch" and syncs v-model', async () => {
     const { getByRole, emitted } = render(VSwitch, {
       props: { modelValue: false },
       slots: { default: 'Notifications' },
@@ -14,7 +14,7 @@ describe('VSwitch', () => {
     expect(emitted('update:modelValue')).toEqual([[true]])
   })
 
-  it('aria-label (fallthrough) nomme le contrôle sans libellé visible', () => {
+  it('aria-label (fallthrough) names the control with no visible label', () => {
     const { getByRole } = render(VSwitch, {
       props: { modelValue: false },
       attrs: { 'aria-label': 'Activer les notifications' },
@@ -22,14 +22,14 @@ describe('VSwitch', () => {
     expect(getByRole('switch', { name: 'Activer les notifications' })).toBeTruthy()
   })
 
-  it('disabled bloque le contrôle', () => {
+  it('disabled blocks the control', () => {
     const { getByRole } = render(VSwitch, {
       props: { modelValue: false, disabled: true },
     })
     expect((getByRole('switch') as HTMLInputElement).disabled).toBe(true)
   })
 
-  it('labelPosition et spread posent les attributs data-* sur la racine', () => {
+  it('labelPosition and spread set the data-* attributes on the root', () => {
     const { container } = render(VSwitch, {
       props: { modelValue: false, labelPosition: 'start', spread: true },
       slots: { default: 'Notifications' },
@@ -39,7 +39,7 @@ describe('VSwitch', () => {
     expect(root.hasAttribute('data-spread')).toBe(true)
   })
 
-  it('spread absent par défaut (pas d’attribut data-spread)', () => {
+  it('spread absent by default (no data-spread attribute)', () => {
     const { container } = render(VSwitch, { props: { modelValue: false } })
     const root = container.querySelector('.v-switch') as HTMLElement
     expect(root.getAttribute('data-label-position')).toBe('end')

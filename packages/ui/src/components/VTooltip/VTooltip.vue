@@ -6,28 +6,27 @@ import VPopover from '../VPopover/VPopover.vue'
 import { useTimer } from '../../composables/useTimer'
 
 /**
- * VTooltip sur `VPopover` (`mode="manual"` : pas de light dismiss, c'est le
- * composant qui pilote). JS justifié : aucune primitive HTML stable ne
- * couvre « montrer au survol/focus avec délai » (`interestfor` est encore
- * expérimental) — le JS gère le délai, pointer/focus et Échap (WCAG 1.4.13).
+ * VTooltip on top of `VPopover` (`mode="manual"`: no light dismiss, the component
+ * drives it). Justified JS: no stable HTML primitive covers "show on hover/focus
+ * with a delay" (`interestfor` is still experimental) — the JS handles the delay,
+ * pointer/focus and Escape (WCAG 1.4.13).
  *
- * Ancrage 100 % CSS sans ID unique : `anchor-name` statique sur le wrapper,
- * confiné à son sous-arbre par `anchor-scope`. Sans ce confinement, un
- * panneau affiché (top layer, donc « après » tout le document pour la
- * résolution d'ancre) se rattacherait au DERNIER wrapper nommé de la page.
- * Le wrapper reste ici (il porte les gestionnaires pointer/focus) : le
- * `#trigger` de VPopover n'est pas utilisé, un déclencheur d'infobulle n'étant
- * pas un invocateur `popovertarget` — il serait basculé au clic — mais un
- * élément DÉCRIT par le panneau.
+ * 100% CSS anchoring with no unique ID: a static `anchor-name` on the wrapper,
+ * confined to its subtree by `anchor-scope`. Without that confinement, a shown
+ * panel (in the top layer, hence "after" the whole document for anchor resolution)
+ * would attach to the LAST named wrapper on the page. The wrapper stays here (it
+ * carries the pointer/focus handlers): VPopover's `#trigger` is not used, since a
+ * tooltip trigger is not a `popovertarget` invoker — it would toggle on click — but
+ * an element DESCRIBED by the panel.
  */
 type Placement =
   'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'right'
 
 interface TooltipProps {
-  /** Contenu texte du tooltip (le slot #content prime s'il est fourni). */
+  /** Text content of the tooltip (the #content slot wins when provided). */
   text?: string
   placement?: Placement
-  /** Délai d'ouverture au survol, en ms (le focus clavier ouvre immédiatement). */
+  /** Opening delay on hover, in ms (keyboard focus opens immediately). */
   delay?: number
 }
 
@@ -38,33 +37,32 @@ const props = withDefaults(defineProps<TooltipProps>(), {
 })
 
 defineSlots<{
-  /** Déclencheur : poser `v-bind="triggerProps"` (aria-describedby) sur l'élément focusable. */
+  /** Trigger: set `v-bind="triggerProps"` (aria-describedby) on the focusable element. */
   default(props: { triggerProps: { 'aria-describedby': string } }): unknown
   /**
-   * Contenu riche à la place de `text`. NON interactif uniquement (mise en
-   * forme, kbd, icônes) : le tooltip se ferme dès que le pointeur quitte le
-   * déclencheur et `aria-describedby` aplatit le contenu en texte — un lien
-   * ou bouton y serait inatteignable. Pour de l'interactif, préférer un
-   * panneau flottant persistant (VMenu).
+   * Rich content in place of `text`. NON-interactive only (formatting, kbd, icons):
+   * the tooltip closes as soon as the pointer leaves the trigger, and
+   * `aria-describedby` flattens the content to text — a link or button would be
+   * unreachable there. For interactive content, prefer a persistent floating panel
+   * (VMenu).
    */
   content?(): unknown
 }>()
 
 const tooltipId = useId()
 /*
- * VPopover est piloté impérativement (et non par `v-model:open`) : le focus
- * clavier doit ouvrir SYNCHRONEMENT — un modèle passerait par le watch de
- * VPopover, donc par un tick. Le tooltip ne publie aucun état d'ouverture, il
- * n'a rien à faire d'un modèle. Les gardes d'idempotence sont dans usePopover,
- * en amont.
+ * VPopover is driven imperatively (and not through `v-model:open`): keyboard focus
+ * must open it SYNCHRONOUSLY — a model would go through VPopover's watch, hence
+ * through a tick. The tooltip publishes no open state, so it has no use for a
+ * model. The idempotence guards live upstream, in usePopover.
  */
 const popoverRef = ref<InstanceType<typeof VPopover> | null>(null)
 
-// Délai d'apparition (cf. useTimer : réarmement et annulation au démontage).
+// Appearance delay (see useTimer: re-arming and cancellation on unmount).
 const timer = useTimer()
 
 function show(immediate = false) {
-  // délai 0 = exécution synchrone (convention useTimer)
+  // a delay of 0 = synchronous execution (the useTimer convention)
   timer.start(() => popoverRef.value?.show(), immediate ? 0 : props.delay)
 }
 
@@ -108,17 +106,17 @@ function onKeydown(event: KeyboardEvent) {
   .v-tooltip {
     display: inline-block;
     anchor-name: --tooltip-anchor;
-    /* confine le nom d'ancre à ce sous-arbre : chaque panneau (même en top
-       layer) résout SON wrapper, pas le dernier wrapper nommé de la page */
+    /* confines the anchor name to this subtree: each panel (even in the top layer)
+       resolves ITS wrapper, not the last named wrapper on the page */
     anchor-scope: --tooltip-anchor;
   }
 
-  /* `position-anchor` vient de VPopover (prop `anchor`) */
+  /* `position-anchor` comes from VPopover (the `anchor` prop) */
   .v-tooltip-panel {
     width: max-content;
     max-width: min(18rem, calc(100vw - var(--vectis-space-8)));
     padding: var(--vectis-space-1) var(--vectis-space-2);
-    /* contraste inversé : gris sombre dans les deux thèmes (plus sombre en dark) */
+    /* inverted contrast: dark grey in both themes (darker in dark) */
     background: var(--vectis-color-surface-inverse);
     color: var(--vectis-color-text-on-inverse);
     border: none;

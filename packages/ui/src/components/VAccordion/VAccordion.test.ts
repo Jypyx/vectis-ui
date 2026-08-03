@@ -5,7 +5,7 @@ import { defineComponent } from 'vue'
 import VAccordion from './VAccordion.vue'
 import VAccordionItem from './VAccordionItem.vue'
 
-/** Attributs bruts posés sur le groupe et sur le 1er item. */
+/** Raw attributes set on the group and on the first item. */
 function renderWith(accordionAttrs = '', firstItemAttrs = '') {
   const Harness = defineComponent({
     components: { VAccordion, VAccordionItem },
@@ -22,35 +22,35 @@ function renderWith(accordionAttrs = '', firstItemAttrs = '') {
 const renderAccordion = (exclusive = true) =>
   renderWith(`:exclusive="${exclusive}"`, 'default-open')
 
-/** Noms des <VIcon> rendues dans un item — `data-icon` est posé quelle que soit
-    la source effective (SVG intégré, ligature, police tierce). */
+/** Names of the <VIcon> rendered inside an item — `data-icon` is set whatever the
+    effective source (embedded SVG, ligature, third-party font). */
 function icones(item: Element) {
   return [...item.querySelectorAll<HTMLElement>('summary .v-icon')].map((el) => el.dataset.icon)
 }
 
 describe('VAccordion', () => {
-  it('mode exclusif : les items partagent le même attribut name natif', () => {
+  it('exclusive mode: the items share the same native name attribute', () => {
     const { container } = renderAccordion(true)
     const [first, second] = [...container.querySelectorAll('details')]
     expect(first?.getAttribute('name')).toBeTruthy()
     expect(first?.getAttribute('name')).toBe(second?.getAttribute('name'))
   })
 
-  it('exclusive=false : aucun name, ouvertures multiples possibles', () => {
+  it('exclusive=false: no name, multiple items can be open', () => {
     const { container } = renderAccordion(false)
     for (const details of container.querySelectorAll('details')) {
       expect(details.hasAttribute('name')).toBe(false)
     }
   })
 
-  it('default-open ouvre au premier rendu', () => {
+  it('default-open opens on the first render', () => {
     const { container } = renderAccordion()
     const [first, second] = [...container.querySelectorAll('details')]
     expect(first?.open).toBe(true)
     expect(second?.open).toBe(false)
   })
 
-  it('icône par défaut : une seule icône expand_more par item (rotation CSS)', () => {
+  it('default icon: a single expand_more icon per item (CSS rotation)', () => {
     const { container } = renderWith()
     for (const details of container.querySelectorAll('details')) {
       expect(icones(details)).toEqual(['expand_more'])
@@ -58,7 +58,7 @@ describe('VAccordion', () => {
     }
   })
 
-  it('expand-icon/collapse-icon : deux icônes rendues et marqueur data-swap', () => {
+  it('expand-icon/collapse-icon: two icons rendered and a data-swap marker', () => {
     const { container } = renderWith('expand-icon="add" collapse-icon="remove"')
     for (const details of container.querySelectorAll('details')) {
       expect(icones(details)).toEqual(['add', 'remove'])
@@ -66,17 +66,17 @@ describe('VAccordion', () => {
     }
   })
 
-  it('subtitle : rendu sous le titre, absent sans prop ni slot', () => {
+  it('subtitle: rendered under the title, absent with neither prop nor slot', () => {
     const { container } = renderWith('', 'subtitle="Sous-titre du premier"')
     const [first, second] = [...container.querySelectorAll('details')]
     expect(first?.querySelector('.v-accordion-subtitle')?.textContent).toBe('Sous-titre du premier')
     expect(second?.querySelector('.v-accordion-subtitle')).toBeNull()
   })
 
-  it('icon-start : icône dédiée devant le titre, distincte du chevron', () => {
+  it('icon-start: a dedicated icon before the title, distinct from the chevron', () => {
     const { container } = renderWith('', 'icon-start="settings"')
     const [first, second] = [...container.querySelectorAll('details')]
-    // les deux icônes cohabitent : icône de début puis chevron
+    // both icons coexist: the start icon, then the chevron
     expect(icones(first as Element)).toEqual(['settings', 'expand_more'])
     expect(first?.querySelector<HTMLElement>('.v-accordion-icon-start')?.dataset.icon).toBe(
       'settings',
@@ -84,14 +84,14 @@ describe('VAccordion', () => {
     expect(second?.querySelector('.v-accordion-icon-start')).toBeNull()
   })
 
-  it('variant : data-variant posé sur la racine, flat par défaut', () => {
+  it('variant: data-variant set on the root, flat by default', () => {
     const variantOf = (attrs = '') =>
       renderWith(attrs).container.querySelector('.v-accordion')?.getAttribute('data-variant')
     expect(variantOf()).toBe('flat')
     expect(variantOf('variant="outlined"')).toBe('outlined')
   })
 
-  it('compact : data-compact posé sur la racine seulement si demandé', () => {
+  it('compact: data-compact set on the root only when requested', () => {
     expect(renderWith().container.querySelector('.v-accordion')?.hasAttribute('data-compact')).toBe(
       false,
     )
@@ -100,7 +100,7 @@ describe('VAccordion', () => {
     ).toBe(true)
   })
 
-  it('disabled : summary inerte (aria-disabled, hors tabulation, clic annulé)', () => {
+  it('disabled: an inert summary (aria-disabled, out of the tab order, click cancelled)', () => {
     const { container } = renderWith('', 'disabled')
     const [first, second] = [...container.querySelectorAll('summary')]
     expect(first?.getAttribute('aria-disabled')).toBe('true')
@@ -108,7 +108,7 @@ describe('VAccordion', () => {
     expect(second?.hasAttribute('aria-disabled')).toBe(false)
     expect(second?.hasAttribute('tabindex')).toBe(false)
 
-    // <summary> n'a pas de `disabled` natif : le clic est annulé par preventDefault
+    // <summary> has no native `disabled`: the click is cancelled by preventDefault
     const clickOn = (el: Element) => {
       const event = new MouseEvent('click', { bubbles: true, cancelable: true })
       el.dispatchEvent(event)

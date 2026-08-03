@@ -1,19 +1,19 @@
 <script setup lang="ts">
 /**
- * <input type="radio"> natif, rendu remplacé par une pastille stylée (même
+ * A native <input type="radio">, its rendering replaced by a styled dot (the same
  * approche que VCheckbox : l'input reste dans l'arbre, seul son rendu est
- * masqué). Le groupe est natif : plusieurs VRadio partageant le même `name`
- * (fallthrough) et le même v-model — la navigation flèches est fournie par
- * le navigateur, zéro JS.
+ * hidden). The group is native: several VRadio sharing the same `name`
+ * (fallthrough) and the same v-model — arrow navigation is supplied by the
+ * browser, zero JS.
  */
 interface RadioProps {
-  /** Valeur portée par ce bouton, comparée au v-model du groupe. */
+  /** Value carried by this button, compared against the group's v-model. */
   value: string
-  /** Position du libellé par rapport à la pastille. */
+  /** Position of the label relative to the dot. */
   labelPosition?: 'start' | 'end'
-  /** Écarte libellé et pastille aux extrémités (la racine devient block, pleine largeur). */
+  /** Pushes label and dot to opposite ends (the root becomes block, full width). */
   spread?: boolean
-  /** Force l'état invalide — pose aria-invalid. */
+  /** Forces the invalid state — sets aria-invalid. */
   invalid?: boolean
   disabled?: boolean
 }
@@ -32,7 +32,7 @@ defineOptions({ inheritAttrs: false })
 const model = defineModel<string>({ default: '' })
 
 defineSlots<{
-  /** Libellé, cliquable (le <label> englobe tout) */
+  /** Label, clickable (the <label> wraps everything) */
   default?(): unknown
 }>()
 </script>
@@ -65,8 +65,8 @@ defineSlots<{
     cursor: pointer;
   }
 
-  /* L'input est en position: absolute → hors du flux flex, l'ordre visuel ne
-     concerne que la pastille et le libellé */
+  /* The input is position: absolute → outside the flex flow, so the visual order
+     concerns only the dot and the label */
   .v-radio[data-label-position='start'] {
     flex-direction: row-reverse;
   }
@@ -85,8 +85,8 @@ defineSlots<{
     pointer-events: none;
   }
 
-  /* Pastille : même mécanique que la boîte du VCheckbox (fond accent quand
-     coché), le point intérieur est un pseudo-élément en currentcolor */
+  /* Dot: the same mechanics as VCheckbox's box (accent background when checked),
+     with the inner dot as a pseudo-element in currentcolor */
   .v-radio-dot {
     display: inline-grid;
     place-items: center;
@@ -144,7 +144,7 @@ defineSlots<{
     border-color: var(--vectis-color-danger);
   }
 
-  /* Disabled : nuances de gris (mêmes tokens que VButton), pas d'opacité */
+  /* Disabled: greys (the same tokens as VButton), no opacity */
   .v-radio:has(.v-radio-input:disabled) {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;

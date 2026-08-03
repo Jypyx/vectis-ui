@@ -1,14 +1,13 @@
 <script setup lang="ts">
 /**
- * Interrupteur : <input type="checkbox" role="switch"> natif — sémantique
- * lecteur d'écran correcte (état « activé/désactivé »), clavier et formulaires
- * gratuits. Le rendu track/thumb est du pur CSS piloté par :checked.
- * JS limité au pont v-model.
+ * Switch: a native <input type="checkbox" role="switch"> — correct screen-reader
+ * semantics (an on/off state), with keyboard and forms for free. The track/thumb
+ * rendering is pure CSS driven by :checked. JS limited to the v-model bridge.
  */
 interface SwitchProps {
-  /** Position du libellé par rapport au switch. */
+  /** Position of the label relative to the switch. */
   labelPosition?: 'start' | 'end'
-  /** Écarte libellé et switch aux extrémités (la racine devient block, pleine largeur). */
+  /** Pushes label and switch to opposite ends (the root becomes block, full width). */
   spread?: boolean
   disabled?: boolean
 }
@@ -19,14 +18,14 @@ withDefaults(defineProps<SwitchProps>(), {
   disabled: false,
 })
 
-// La racine est un <label> : les attributs natifs (name, aria-label…)
+// The root is a <label>: the native attributes (name, aria-label…)
 // doivent atterrir sur l'input.
 defineOptions({ inheritAttrs: false })
 
 const model = defineModel<boolean>({ default: false })
 
 defineSlots<{
-  /** Libellé, cliquable (le <label> englobe tout) */
+  /** Label, clickable (the <label> wraps everything) */
   default?(): unknown
 }>()
 </script>
@@ -63,8 +62,8 @@ defineSlots<{
     cursor: pointer;
   }
 
-  /* L'input est en position: absolute → hors du flux flex, l'ordre visuel ne
-     concerne que le track et le libellé */
+  /* The input is position: absolute → outside the flex flow, so the visual order
+     concerns only the track and the label */
   .v-switch[data-label-position='start'] {
     flex-direction: row-reverse;
   }
@@ -101,7 +100,7 @@ defineSlots<{
     background: var(--vectis-color-surface);
     border-radius: var(--vectis-radius-full);
     box-shadow: var(--vectis-shadow-1);
-    /* margin-inline plutôt que translateX : le déplacement suit la direction (RTL-safe) */
+    /* margin-inline rather than translateX: the movement follows the direction (RTL-safe) */
     transition: margin-inline-start var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
@@ -126,9 +125,9 @@ defineSlots<{
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* Disabled : nuances de gris (mêmes tokens que VCheckbox/VRadio), pas d'opacité.
-     Le thumb reprend text-subtle — la couleur de la coche/du point disabled de
-     VCheckbox/VRadio — pour rester visible sur le track gris dans les deux thèmes. */
+  /* Disabled: greys (the same tokens as VCheckbox/VRadio), no opacity. The thumb
+     takes text-subtle — the colour of VCheckbox/VRadio's disabled tick and dot — so
+     it stays visible on the grey track in both themes. */
   .v-switch:has(.v-switch-input:disabled) {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;

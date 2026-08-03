@@ -1,73 +1,71 @@
-﻿import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
 import * as VTooltipStories from './VTooltip.stories'
 
 <Meta of={VTooltipStories} />
 
 # Tooltip
 
-Infobulle sur la Popover API (`popover="manual"` : pas de light dismiss, le composant
-pilote). Le JavaScript est justifié par l'absence de primitive HTML stable pour « montrer
-au survol/focus avec délai » : il gère le délai d'ouverture, pointer/focus et Échap
-(WCAG 1.4.13). L'ancrage est 100 % CSS — `anchor-name` statique sur le wrapper, confiné à
-son sous-arbre par `anchor-scope`, sans ID unique ni style inline.
+Tooltip on the Popover API (`popover="manual"`: no light dismiss, the component drives it). The
+JavaScript is justified by the absence of a stable HTML primitive for "show on hover/focus with
+a delay": it handles the opening delay, pointer/focus and Escape (WCAG 1.4.13). The anchoring is
+100% CSS — a static `anchor-name` on the wrapper, confined to its subtree by `anchor-scope`,
+with no unique ID and no inline style.
 
-Le déclencheur est fourni par le slot par défaut scopé : poser `v-bind="triggerProps"` sur
-l'élément focusable lui attache `aria-describedby` — la voie explicite est préférée à un
-pont automatique au mount.
+The trigger is supplied by the scoped default slot: setting `v-bind="triggerProps"` on the
+focusable element attaches `aria-describedby` to it — the explicit route is preferred over an
+automatic bridge at mount.
 
 <Canvas of={VTooltipStories.Default} />
 
 <Controls of={VTooltipStories.Default} />
 
-## Ouverture au focus
+## Opening on focus
 
-Le survol ouvre après `delay` (300ms par défaut) ; le **focus clavier ouvre immédiatement**
-et Échap ferme sans déplacer le focus — conforme WCAG 1.4.13 (dismissable, hoverable,
-persistent).
+Hover opens after `delay` (300ms by default); **keyboard focus opens immediately** and Escape
+closes without moving focus — in line with WCAG 1.4.13 (dismissable, hoverable, persistent).
 
-<Canvas of={VTooltipStories.OuvertureAuFocus} />
+<Canvas of={VTooltipStories.OpenOnFocus} />
 
-## Sur un VIconButton
+## On a VIconButton
 
-Cas d'usage typique : doubler le libellé accessible d'un bouton icône d'une confirmation
-visuelle. Le tooltip décrit (`aria-describedby`), il ne nomme pas — le VIconButton garde son
-propre `label`.
+A typical use case: backing up an icon button's accessible label with a visual confirmation. The
+tooltip describes (`aria-describedby`), it does not name — the VIconButton keeps its own `label`.
 
-<Canvas of={VTooltipStories.SurIconButton} />
+<Canvas of={VTooltipStories.OnIconButton} />
 
 ## Placements
 
-Huit placements via `data-placement` → `position-area` (voir `floating.css`, partagé avec
-VPopover et VMenu). Les placements alignés (`top-start`…) annulent la marge du côté
-aligné pour rester au bord du déclencheur.
+Eight placements through `data-placement` → `position-area` (see `floating.css`, shared with
+VPopover and VMenu). The aligned placements (`top-start`…) cancel the margin on the aligned side
+so they stay flush with the trigger's edge.
 
 <Canvas of={VTooltipStories.Placements} />
 
-Au bord de l'écran, `position-try-fallbacks: flip-block, flip-inline` retourne le panneau
-du côté opposé — sans aucun JS :
+At the screen edge, `position-try-fallbacks: flip-block, flip-inline` flips the panel to the
+opposite side — with no JS at all:
 
 <Canvas of={VTooltipStories.EdgeFlipping} />
 
-## Contenu riche
+## Rich content
 
-Le slot `#content` prime sur la prop `text`. Réservé au contenu **non interactif** (mise en
-forme, `<kbd>`, icônes) : le tooltip se ferme dès que le pointeur quitte le déclencheur et
-`aria-describedby` aplatit le contenu en texte — un lien ou un bouton y serait
-inatteignable. Pour de l'interactif, utiliser VPopover.
+The `#content` slot wins over the `text` prop. Reserved for **non-interactive** content
+(formatting, `<kbd>`, icons): the tooltip closes as soon as the pointer leaves the trigger, and
+`aria-describedby` flattens the content to text — a link or a button would be unreachable there.
+For interactive content, use VPopover.
 
-<Canvas of={VTooltipStories.ContenuRiche} />
+<Canvas of={VTooltipStories.RichContent} />
 
-## Cas limites
+## Edge cases
 
-Un texte long passe à la ligne dans la largeur maximale du panneau :
+A long text wraps within the panel's maximum width:
 
-<Canvas of={VTooltipStories.TexteLong} />
+<Canvas of={VTooltipStories.LongText} />
 
-## Accessibilité
+## Accessibility
 
-- `role="tooltip"` + `aria-describedby` posé sur le déclencheur via `triggerProps` : le
-  contenu est annoncé à la prise de focus.
-- Focus clavier : ouverture immédiate (sans délai), fermeture par Échap ou perte de focus.
-- Le tooltip complète, il ne remplace pas : l'information essentielle doit rester
-  disponible autrement (libellé du contrôle).
-- L'animation d'apparition (commune à `.v-floating`) respecte `prefers-reduced-motion`.
+- `role="tooltip"` + an `aria-describedby` set on the trigger through `triggerProps`: the content
+  is announced when focus is taken.
+- Keyboard focus: immediate opening (with no delay), closing through Escape or focus loss.
+- The tooltip complements, it does not replace: essential information must stay available
+  otherwise (the control's label).
+- The appearance animation (shared with `.v-floating`) respects `prefers-reduced-motion`.

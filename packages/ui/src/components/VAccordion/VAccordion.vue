@@ -6,20 +6,20 @@ import type { IconSource } from '../VIcon/types'
 import { accordionKey } from './context'
 
 /**
- * Accordéon 100 % natif : <details>/<summary>. Le mode exclusif repose sur
- * l'attribut `name` partagé entre items (fourni ici par provide/inject) —
- * aucun JS d'état.
+ * 100% native accordion: <details>/<summary>. Exclusive mode rests on the `name`
+ * attribute shared between items (supplied here through provide/inject) — no state
+ * JS at all.
  */
 interface AccordionProps {
-  /** Un seul item ouvert à la fois (attribut natif <details name>). */
+  /** A single item open at a time (the native <details name> attribute). */
   exclusive?: boolean
-  /** `flat` : aucun habillage. `outlined` : fond surélevé, bordure et rayon. */
+  /** `flat`: no decoration. `outlined`: raised background, border and radius. */
   variant?: 'flat' | 'outlined'
-  /** Icône des items fermés : nom, ou `{ src }` / `{ component }`. Défaut : chevron pivotant. */
+  /** Icon of closed items: a name, or `{ src }` / `{ component }`. Default: a rotating chevron. */
   expandIcon?: IconSource
-  /** Icône des items ouverts ; absente = `expandIcon` pivotée de 180°. */
+  /** Icon of open items; absent = `expandIcon` rotated 180°. */
   collapseIcon?: IconSource
-  /** Densité réduite : -4px sur tous les paddings (typo et icône inchangées). */
+  /** Reduced density: -4px on every padding (type and icon unchanged). */
   compact?: boolean
 }
 
@@ -60,13 +60,13 @@ provide(accordionKey, {
 @layer vectis.components {
   .v-accordion {
     /*
-     * Densité : variables posées sur la RACINE seulement (seule à rendre
-     * data-compact) et héritées par les items — les fallbacks vivent côté
-     * VAccordionItem, qui reste utilisable hors groupe.
+     * Density: variables set on the ROOT only (the only element rendering
+     * data-compact) and inherited by the items — the fallbacks live in
+     * VAccordionItem, which stays usable outside a group.
      *
-     * Compact = -4px sur TOUS les paddings (hors
-     * échelle : l'accordéon n'a pas de hauteur imposée). Un seul delta pilote
-     * les trois mesures, les valeurs de base ne sont donc écrites qu'ici.
+     * Compact = -4px on EVERY padding (outside the size scale: the accordion has no
+     * imposed height). A single delta drives all three measurements, so the base
+     * values are written only here.
      */
     --accordion-pad-delta: 0px;
     --accordion-pad-block: calc(var(--vectis-space-4) - var(--accordion-pad-delta));
@@ -77,18 +77,19 @@ provide(accordionKey, {
     overflow: hidden;
   }
 
-  /* Compact : paddings resserrés seuls — typo, gouttière et icône inchangées */
+  /* Compact: tightened paddings only — type, gutter and icon unchanged */
   .v-accordion[data-compact] {
     --accordion-pad-delta: var(--vectis-space-1);
   }
 
-  /* Carte bordée ; `flat` (défaut) n'a rien à annuler — y compris le fond, qui
-     appartient au cadre : à plat, l'accordéon hérite de la surface d'accueil. */
+  /* Bordered card; `flat` (the default) has nothing to cancel — including the
+     background, which belongs to the frame: when flat, the accordion inherits the
+     host surface. */
   .v-accordion[data-variant='outlined'] {
     /*
-     * Rayon EMBOÎTÉ (moins la bordure) repris par les summary des items
-     * d'extrémité : `overflow: hidden` découpe tout le sous-arbre sur cette
-     * courbe, un anneau de focus à angles droits y perdrait ses coins.
+     * NESTED radius (minus the border), picked up by the summaries of the end items:
+     * `overflow: hidden` clips the whole subtree along that curve, so a
+     * square-cornered focus ring would lose its corners there.
      */
     --accordion-corner-radius: calc(var(--vectis-radius-surface) - 1px);
 
