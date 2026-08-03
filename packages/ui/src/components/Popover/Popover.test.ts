@@ -14,7 +14,7 @@ function renderHarness(template: string, bindings: Record<string, unknown> = {})
   return render(Harness)
 }
 
-const panelOf = (container: Element) => container.querySelector('.ds-popover-panel') as HTMLElement
+const panelOf = (container: Element) => container.querySelector('.v-popover-panel') as HTMLElement
 
 describe('Popover', () => {
   it('rend un panneau [popover] portant le socle flottant et la surface par défaut', () => {
@@ -23,15 +23,15 @@ describe('Popover', () => {
     expect(panel.getAttribute('popover')).toBe('auto')
     expect(panel.getAttribute('data-placement')).toBe('bottom-start')
     // garde-fou du panneau fermé + placements : cf. styles/floating.css
-    expect(panel.classList.contains('ds-overlay')).toBe(true)
-    expect(panel.classList.contains('ds-floating')).toBe(true)
+    expect(panel.classList.contains('v-overlay')).toBe(true)
+    expect(panel.classList.contains('v-floating')).toBe(true)
     // habillage par défaut (styles/panel.css)
-    expect(panel.classList.contains('ds-panel')).toBe(true)
+    expect(panel.classList.contains('v-panel')).toBe(true)
   })
 
   it('surface=false retire l’habillage (le consommateur pose le sien)', () => {
     const { container } = renderHarness('<Popover :surface="false">Contenu</Popover>')
-    expect(panelOf(container).classList.contains('ds-panel')).toBe(false)
+    expect(panelOf(container).classList.contains('v-panel')).toBe(false)
   })
 
   it('mode=manual coupe le light dismiss natif', () => {
@@ -46,7 +46,7 @@ describe('Popover', () => {
 
   it('sans déclencheur le wrapper n’est pas ancré (display: contents en CSS)', () => {
     const { container } = renderHarness('<Popover anchor="--a">Contenu</Popover>')
-    expect(container.querySelector('.ds-popover')?.hasAttribute('data-trigger')).toBe(false)
+    expect(container.querySelector('.v-popover')?.hasAttribute('data-trigger')).toBe(false)
   })
 
   it('le slot #trigger fournit les props de disclosure et marque le wrapper ancré', async () => {
@@ -65,8 +65,8 @@ describe('Popover', () => {
     const panel = panelOf(container)
     const trigger = getByRole('button', { name: 'Ouvrir' })
 
-    // le wrapper porte alors l'anchor-name (cf. .ds-popover[data-trigger])
-    expect(container.querySelector('.ds-popover')?.hasAttribute('data-trigger')).toBe(true)
+    // le wrapper porte alors l'anchor-name (cf. .v-popover[data-trigger])
+    expect(container.querySelector('.v-popover')?.hasAttribute('data-trigger')).toBe(true)
     expect(trigger.getAttribute('popovertarget')).toBe(panel.id)
     expect(trigger.getAttribute('aria-controls')).toBe(panel.id)
     expect(trigger.getAttribute('aria-expanded')).toBe('false')
@@ -110,14 +110,14 @@ describe('Popover', () => {
 
   it('les attributs du consommateur atterrissent sur le panneau, pas sur le wrapper', () => {
     const { container } = renderHarness(
-      '<Popover role="dialog" aria-label="Détails" class="ds-perso" data-x="1">Contenu</Popover>',
+      '<Popover role="dialog" aria-label="Détails" class="v-perso" data-x="1">Contenu</Popover>',
     )
     const panel = panelOf(container)
     expect(panel.getAttribute('role')).toBe('dialog')
     expect(panel.getAttribute('aria-label')).toBe('Détails')
     expect(panel.getAttribute('data-x')).toBe('1')
     // class/style vont AUSSI sur le panneau (le wrapper n'est qu'une ancre)
-    expect(panel.classList.contains('ds-perso')).toBe(true)
-    expect(container.querySelector('.ds-popover')?.classList.contains('ds-perso')).toBe(false)
+    expect(panel.classList.contains('v-perso')).toBe(true)
+    expect(container.querySelector('.v-popover')?.classList.contains('v-perso')).toBe(false)
   })
 })

@@ -6,7 +6,7 @@ import Toaster from './Toaster.vue'
 import { dismissToast, toast, toasts } from './state'
 
 const getStack = (container: Element, placement: string) =>
-  container.querySelector(`.ds-toast-stack[data-placement='${placement}']`) as HTMLElement
+  container.querySelector(`.v-toast-stack[data-placement='${placement}']`) as HTMLElement
 
 describe('Toaster', () => {
   beforeEach(() => {

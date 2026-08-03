@@ -21,15 +21,15 @@ const labelId = useId()
 </script>
 
 <template>
-  <div role="group" class="ds-menu-group" :aria-labelledby="labelId">
-    <span :id="labelId" class="ds-menu-group-label">{{ label }}</span>
+  <div role="group" class="v-menu-group" :aria-labelledby="labelId">
+    <span :id="labelId" class="v-menu-group-label">{{ label }}</span>
     <slot />
   </div>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-menu-group {
+@layer vectis.components {
+  .v-menu-group {
     display: flex;
     flex-direction: column;
     gap: var(--vectis-space-1);
@@ -41,7 +41,7 @@ const labelId = useId()
      héritées du panneau) : l'en-tête tient la même hauteur qu'une rangée,
      compact compris, et le rythme vertical de la liste ne casse pas. Seule la
      typo ne suit pas l'échelle (rôle overline), d'où le centrage vertical. */
-  .ds-menu-group-label {
+  .v-menu-group-label {
     display: flex;
     align-items: center;
     min-height: var(--control-height);

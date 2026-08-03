@@ -663,7 +663,7 @@ watch(
 <template>
   <div
     ref="rootEl"
-    class="ds-combobox"
+    class="v-combobox"
     :class="rootClass"
     :style="rootStyle"
     :data-size="size"
@@ -674,7 +674,7 @@ watch(
     :data-can-clear="canClear ? '' : undefined"
     @focusout="onFocusout"
   >
-    <div class="ds-combobox-control" @click="onControlClick">
+    <div class="v-combobox-control" @click="onControlClick">
       <Input
         ref="inputRef"
         v-model="query"
@@ -733,8 +733,8 @@ watch(
              `aria-hidden` sur la racine du Spinner neutralise son
              role="status" : l'annonce vient du panneau, pas deux fois. -->
         <template #end>
-          <Spinner v-if="loading" class="ds-combobox-spinner" aria-hidden="true" />
-          <Icon v-else name="expand_more" class="ds-combobox-chevron" aria-hidden="true" />
+          <Spinner v-if="loading" class="v-combobox-spinner" aria-hidden="true" />
+          <Icon v-else name="expand_more" class="v-combobox-chevron" aria-hidden="true" />
         </template>
       </Input>
     </div>
@@ -749,7 +749,7 @@ watch(
       anchor="--combobox-anchor"
       placement="bottom-start"
       role="listbox"
-      class="ds-combobox-panel ds-control"
+      class="v-combobox-panel v-control"
       :data-size="size"
       :data-compact="compact ? '' : undefined"
       :aria-multiselectable="multiple ? 'true' : undefined"
@@ -784,20 +784,20 @@ watch(
 
       <!-- Ordre chargement → vide → contenu : pendant une
            requête, le panneau ne doit pas annoncer « aucun résultat ». -->
-      <div v-if="loading && filtered.length === 0" class="ds-combobox-state">
+      <div v-if="loading && filtered.length === 0" class="v-combobox-state">
         <slot name="loading">
           <Spinner :label="resolvedLoadingText" />
           <span aria-hidden="true">{{ resolvedLoadingText }}</span>
         </slot>
       </div>
-      <div v-else-if="filtered.length === 0" class="ds-combobox-state">
+      <div v-else-if="filtered.length === 0" class="v-combobox-state">
         <slot name="empty" :query="searchTerm">{{ resolvedEmptyText }}</slot>
       </div>
 
       <!-- Sentinelle du scroll infini ET emplacement du spinner de page
            suivante : un seul nœud, donc stable — un `v-if` sur `loading`
            détruirait la sentinelle et invaliderait l'observation. -->
-      <div v-if="hasMore" ref="sentinelEl" class="ds-combobox-more" aria-hidden="true">
+      <div v-if="hasMore" ref="sentinelEl" class="v-combobox-more" aria-hidden="true">
         <Spinner v-if="loading" :label="resolvedLoadingText" />
       </div>
     </Popover>
@@ -805,8 +805,8 @@ watch(
 </template>
 
 <style>
-@layer ds.components {
-  .ds-combobox {
+@layer vectis.components {
+  .v-combobox {
     /* confine l'ancre à cette instance (posée sur la racine, ancêtre commun du
        contrôle et du panneau — même en top-layer le panneau reste descendant) */
     anchor-scope: --combobox-anchor;
@@ -814,17 +814,17 @@ watch(
     font-family: var(--vectis-text-family);
   }
 
-  .ds-combobox-control {
+  .v-combobox-control {
     anchor-name: --combobox-anchor;
     display: block;
   }
 
   /* Le panneau vient de `Popover` : élément popover, état, ancrage, placement et
-     chrome (`.ds-panel` via `surface`). Il porte aussi `ds-control` (le template)
+     chrome (`.v-panel` via `surface`). Il porte aussi `v-control` (le template)
      — les options et les rangées d'état lisent les `--control-*` hérités, aucune
      table de tailles locale. Ne restent ici que les règles propres à la liste :
      largeur calée sur l'ancre et zone défilante. */
-  .ds-combobox-panel {
+  .v-combobox-panel {
     min-inline-size: anchor-size(width);
     max-block-size: var(--vectis-control-size-combobox-list-max-block);
     overflow: auto;
@@ -835,14 +835,14 @@ watch(
      ligne) ou le repli de l'input. On réserve la place correspondante à droite
      pour que le texte/les Chips ne passent pas dessous (chevron seul, ou croix
      + chevron). Vertical : translate séparé du rotate (le chevron pivote). */
-  .ds-combobox .ds-input-field {
+  .v-combobox .v-input-field {
     position: relative;
     padding-inline-end: calc(
       var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--vectis-space-2)
     );
   }
 
-  .ds-combobox[data-can-clear] .ds-input-field {
+  .v-combobox[data-can-clear] .v-input-field {
     padding-inline-end: calc(
       var(--control-padding-inline-field) + var(--control-action-size) + var(--vectis-icon-size) +
         var(--vectis-space-2)
@@ -852,8 +852,8 @@ watch(
   /* Chevron et spinner partagent l'emplacement : même boîte (--vectis-icon-size,
      posée par Input sur les spinners enfants directs du champ), donc le padding
      réservé ci-dessus vaut pour les deux et l'échange ne décale rien. */
-  .ds-combobox-chevron,
-  .ds-combobox-spinner {
+  .v-combobox-chevron,
+  .v-combobox-spinner {
     position: absolute;
     inset-inline-end: var(--control-padding-inline-field);
     top: 50%;
@@ -861,16 +861,16 @@ watch(
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-combobox-chevron {
+  .v-combobox-chevron {
     transition: rotate var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-combobox[data-open] .ds-combobox-chevron {
+  .v-combobox[data-open] .v-combobox-chevron {
     rotate: 180deg;
   }
 
   /* croix d'Input : posée à gauche du chevron, centrée, marge négative annulée */
-  .ds-combobox .ds-input-clear {
+  .v-combobox .v-input-clear {
     position: absolute;
     inset-inline-end: calc(
       var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--vectis-space-1)
@@ -881,7 +881,7 @@ watch(
   }
 
   /* multiple : le champ accueille les Chips (retour à la ligne). Hauteur calée
-     sur le contrôle (`--control-height`, size/compact via .ds-control d'Input).
+     sur le contrôle (`--control-height`, size/compact via .v-control d'Input).
      La hauteur des Chips est redite ici en `--chip-height` parce qu'elle vit
      dans le sous-arbre du Chip, hors de portée du champ : ces quatre règles
      doivent rester le miroir exact de `chipSize`/`chipCompact` (script).
@@ -890,30 +890,30 @@ watch(
      Résultat : champ = --control-height constant, input jamais plus haut que
      les Chips, aucun saut au focus. Ordre significatif : les tailles sont à
      spécificité égale entre elles, la variante compact vient en dernier. */
-  .ds-combobox[data-multiple] {
+  .v-combobox[data-multiple] {
     --chip-height: var(--vectis-control-height-xs);
   }
 
-  .ds-combobox[data-multiple][data-size='sm'] {
+  .v-combobox[data-multiple][data-size='sm'] {
     --chip-height: calc(var(--vectis-control-height-xs) - var(--vectis-space-1));
   }
 
-  .ds-combobox[data-multiple][data-size='lg'] {
+  .v-combobox[data-multiple][data-size='lg'] {
     --chip-height: var(--vectis-control-height-sm);
   }
 
-  .ds-combobox[data-multiple][data-size='lg'][data-compact] {
+  .v-combobox[data-multiple][data-size='lg'][data-compact] {
     --chip-height: calc(var(--vectis-control-height-sm) - var(--vectis-space-1));
   }
 
-  .ds-combobox[data-multiple] .ds-input-field {
+  .v-combobox[data-multiple] .v-input-field {
     flex-wrap: wrap;
     height: auto;
     min-height: var(--control-height);
     padding-block: var(--vectis-space-1);
   }
 
-  .ds-combobox[data-multiple] .ds-input-control {
+  .v-combobox[data-multiple] .v-input-control {
     height: var(--chip-height);
   }
 
@@ -921,7 +921,7 @@ watch(
      taille nulle) — sinon, même à largeur nulle, il déborde sur une seconde
      ligne sous les Chips et laisse un vide. Il reste dans le DOM et focusable :
      onControlClick / Tab le réaffichent (data-collapsed retombe au focus). */
-  .ds-combobox[data-collapsed] .ds-input-control {
+  .v-combobox[data-collapsed] .v-input-control {
     position: absolute;
     width: 0;
     height: 0;
@@ -929,10 +929,10 @@ watch(
   }
 
   /* États plein panneau (« aucun résultat », chargement) : même gabarit qu'une
-     option — mêmes `--control-*` héritées du panneau, qui porte `ds-control`
+     option — mêmes `--control-*` héritées du panneau, qui porte `v-control`
      (le spinner suit aussi, via le contexte Icon du même bloc).
      `flex: none` : le panneau est un flex column, l'état ne doit pas s'écraser. */
-  .ds-combobox-state {
+  .v-combobox-state {
     display: flex;
     flex: none;
     align-items: center;
@@ -945,7 +945,7 @@ watch(
 
   /* Pied de liste : sentinelle du scroll infini (une boîte de hauteur nulle
      rendrait l'intersection fragile) et emplacement du spinner de page suivante. */
-  .ds-combobox-more {
+  .v-combobox-more {
     display: flex;
     flex: none;
     align-items: center;
@@ -955,7 +955,7 @@ watch(
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-combobox-chevron {
+    .v-combobox-chevron {
       transition: none;
     }
   }

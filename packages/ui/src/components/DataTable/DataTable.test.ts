@@ -62,7 +62,7 @@ describe('DataTable', () => {
   it('variant : data-variant posé sur la racine, flat par défaut', () => {
     const variantOf = (variant?: 'flat' | 'outlined') =>
       render(DataTable, { props: { columns: COLUMNS, rows: ROWS, variant } })
-        .container.querySelector('.ds-table-wrapper')
+        .container.querySelector('.v-table-wrapper')
         ?.getAttribute('data-variant')
     expect(variantOf()).toBe('flat')
     expect(variantOf('outlined')).toBe('outlined')
@@ -75,7 +75,7 @@ describe('DataTable', () => {
     const sortButton = getByRole('button', { name: 'Total' })
     const th = sortButton.closest('th') as HTMLElement
     // `data-icon` nomme l'icône quelle que soit sa source (SVG intégré, ligature…)
-    const glyph = () => sortButton.querySelector<HTMLElement>('.ds-table-sort-icon')?.dataset.icon
+    const glyph = () => sortButton.querySelector<HTMLElement>('.v-table-sort-icon')?.dataset.icon
 
     // le nom accessible ne retient que le libellé : l'icône est décorative
     expect(glyph()).toBe('swap_vert')
@@ -107,7 +107,7 @@ describe('DataTable', () => {
       },
     })
     const sortButton = getByRole('button', { name: 'Total' })
-    const glyph = () => sortButton.querySelector<HTMLElement>('.ds-table-sort-icon')?.dataset.icon
+    const glyph = () => sortButton.querySelector<HTMLElement>('.v-table-sort-icon')?.dataset.icon
 
     expect(glyph()).toBe('unfold_more')
     await fireEvent.click(sortButton)
@@ -253,8 +253,8 @@ describe('DataTable', () => {
       `,
     )
     const { container, getByRole } = render(Harness)
-    const footer = container.querySelector('.ds-table-footer') as HTMLElement
-    const selection = footer.querySelector('.ds-table-selection') as HTMLElement
+    const footer = container.querySelector('.v-table-footer') as HTMLElement
+    const selection = footer.querySelector('.v-table-selection') as HTMLElement
 
     // région live posée dès `selectable` (vide à zéro sélection)
     expect([...footer.children].indexOf(selection)).toBe(0)
@@ -265,11 +265,11 @@ describe('DataTable', () => {
     await fireEvent.click(getByRole('checkbox', { name: 'Sélectionner la ligne 2' }))
     expect(selection.textContent).toBe('2 éléments sélectionnés')
 
-    const end = footer.querySelector('.ds-table-footer-end') as HTMLElement
+    const end = footer.querySelector('.v-table-footer-end') as HTMLElement
     expect([...end.children].map((el) => el.classList[0])).toEqual([
-      'ds-table-per-page',
-      'ds-table-range',
-      'ds-pagination',
+      'v-table-per-page',
+      'v-table-range',
+      'v-pagination',
     ])
   })
 
@@ -350,7 +350,7 @@ describe('DataTable', () => {
       props: { columns: COLUMNS, rows: ROWS },
       attrs: { class: 'ma-classe', 'aria-describedby': 'legende' },
     })
-    const wrapper = container.querySelector('.ds-table-wrapper') as HTMLElement
+    const wrapper = container.querySelector('.v-table-wrapper') as HTMLElement
     expect(wrapper.classList.contains('ma-classe')).toBe(true)
     expect(wrapper.hasAttribute('aria-describedby')).toBe(false)
     expect(container.querySelector('table')?.getAttribute('aria-describedby')).toBe('legende')
@@ -366,18 +366,18 @@ describe('DataTable', () => {
         props: { columns: COLUMNS, rows: ROWS, height },
         attrs: { style: 'width: 640px' },
       })
-      const wrapper = container.querySelector('.ds-table-wrapper') as HTMLElement
+      const wrapper = container.querySelector('.v-table-wrapper') as HTMLElement
       expect(wrapper.style.blockSize).toBe(typeof height === 'number' ? '320px' : '60vh')
       // le style du consommateur passe après celui de la prop : il survit
       expect(wrapper.style.width).toBe('640px')
-      expect(container.querySelector('.ds-table-scroller')?.hasAttribute('style')).toBe(false)
+      expect(container.querySelector('.v-table-scroller')?.hasAttribute('style')).toBe(false)
     }
   })
 
   it('sans height : aucune hauteur inline, le parent décide', () => {
     const { container } = render(DataTable, { props: { columns: COLUMNS, rows: ROWS } })
-    const wrapper = container.querySelector('.ds-table-wrapper') as HTMLElement
+    const wrapper = container.querySelector('.v-table-wrapper') as HTMLElement
     expect(wrapper.style.blockSize).toBe('')
-    expect(container.querySelector('.ds-table-scroller')?.hasAttribute('style')).toBe(false)
+    expect(container.querySelector('.v-table-scroller')?.hasAttribute('style')).toBe(false)
   })
 })

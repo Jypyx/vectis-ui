@@ -7,20 +7,20 @@
  *
  * L'ordre des exports fixe l'ordre du CSS bundlé. La plupart des composants
  * sont rangés par cohérence (dépendance → dépendant) sans que leur position
- * soit contraignante : leurs surcharges sont qualifiées (`.ds-tab[data-size]`,
- * `.ds-table-toolbar .ds-input`…), donc indépendantes de l'ordre. Cinq
+ * soit contraignante : leurs surcharges sont qualifiées (`.v-tab[data-size]`,
+ * `.v-table-toolbar .v-input`…), donc indépendantes de l'ordre. Cinq
  * contraintes sont réelles, parce qu'elles jouent à spécificité égale :
  * - IconButton après Button (surcharge padding et largeur) ;
  * - Pagination après ButtonGroup (ses pastilles surchargent largeur et padding
- *   de `.ds-button`) ;
- * - Slider après Input (surcharge la largeur de `.ds-slider-field`) ;
+ *   de `.v-button`) ;
+ * - Slider après Input (surcharge la largeur de `.v-slider-field`) ;
  * - Typography en TÊTE, avant tout composant qui le rend en interne (Input,
  *   Textarea, Dialog, Accordion, DataTable) : leurs classes
- *   (`.ds-input-label`…) surchargent `.ds-typography` ;
+ *   (`.v-input-label`…) surchargent `.v-typography` ;
  * - Popover en TÊTE aussi, avant les panneaux qui le rendent en interne
  *   (Tooltip, Combobox, DatePicker, TimePicker) : leurs classes
- *   (`.ds-tooltip-panel`…) sont posées sur le MÊME élément que
- *   `.ds-popover-panel`, à spécificité égale (0,1,0).
+ *   (`.v-tooltip-panel`…) sont posées sur le MÊME élément que
+ *   `.v-popover-panel`, à spécificité égale (0,1,0).
  *
  * Les composants internes (ComboboxOption, MenuPanel…) et les composables ne
  * sont pas exportés.

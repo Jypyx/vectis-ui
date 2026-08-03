@@ -22,20 +22,20 @@ defineSlots<{
 
 <template>
   <!-- La racine EST le div : aria-label / role="toolbar" custom tombent dessus par fallthrough. -->
-  <div class="ds-button-group" role="group" :data-orientation="orientation">
+  <div class="v-button-group" role="group" :data-orientation="orientation">
     <slot />
   </div>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-button-group {
+@layer vectis.components {
+  .v-button-group {
     display: inline-flex;
     /* hauteurs (horizontal) ou largeurs (vertical) égalisées entre segments */
     align-items: stretch;
   }
 
-  .ds-button-group[data-orientation='vertical'] {
+  .v-button-group[data-orientation='vertical'] {
     flex-direction: column;
   }
 
@@ -44,35 +44,35 @@ defineSlots<{
      transparente) et uniformise la jointure des variantes outline. Chaque bloc
      est scopé à son orientation : sinon les règles horizontales zéroïseraient
      aussi les coins et bordures latérales en mode vertical. */
-  .ds-button-group[data-orientation='horizontal'] > .ds-button:not(:first-child) {
+  .v-button-group[data-orientation='horizontal'] > .v-button:not(:first-child) {
     margin-inline-start: -1px;
     border-inline-start-color: var(--vectis-color-border);
     border-start-start-radius: 0;
     border-end-start-radius: 0;
   }
 
-  .ds-button-group[data-orientation='horizontal'] > .ds-button:not(:last-child) {
+  .v-button-group[data-orientation='horizontal'] > .v-button:not(:last-child) {
     border-start-end-radius: 0;
     border-end-end-radius: 0;
   }
 
-  .ds-button-group[data-orientation='vertical'] > .ds-button:not(:first-child) {
+  .v-button-group[data-orientation='vertical'] > .v-button:not(:first-child) {
     margin-block-start: -1px;
     border-block-start-color: var(--vectis-color-border);
     border-start-start-radius: 0;
     border-start-end-radius: 0;
   }
 
-  .ds-button-group[data-orientation='vertical'] > .ds-button:not(:last-child) {
+  .v-button-group[data-orientation='vertical'] > .v-button:not(:last-child) {
     border-end-start-radius: 0;
     border-end-end-radius: 0;
   }
 
   /* Le bouton survolé/focus/actif remonte au-dessus des voisins : sinon sa
      bordure teintée et son focus-ring sont rognés par le segment adjacent. */
-  .ds-button-group > .ds-button:hover,
-  .ds-button-group > .ds-button:focus-visible,
-  .ds-button-group > .ds-button:active {
+  .v-button-group > .v-button:hover,
+  .v-button-group > .v-button:focus-visible,
+  .v-button-group > .v-button:active {
     z-index: 1;
   }
 }

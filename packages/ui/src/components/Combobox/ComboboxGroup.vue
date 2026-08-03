@@ -26,18 +26,18 @@ const labelId = useId()
 </script>
 
 <template>
-  <div role="group" class="ds-combobox-group" :aria-labelledby="labelId">
-    <span :id="labelId" class="ds-combobox-group-label">{{ label }}</span>
+  <div role="group" class="v-combobox-group" :aria-labelledby="labelId">
+    <span :id="labelId" class="v-combobox-group-label">{{ label }}</span>
     <slot />
   </div>
 </template>
 
 <style>
-@layer ds.components {
-  /* `flex: none` (contrairement à `.ds-menu-group`) : le panneau du Combobox est
+@layer vectis.components {
+  /* `flex: none` (contrairement à `.v-menu-group`) : le panneau du Combobox est
      un flex column borné (`max-block-size` + `overflow: auto`), un groupe s'y
-     écraserait — même raison que `.ds-combobox-state` et `.ds-combobox-more`. */
-  .ds-combobox-group {
+     écraserait — même raison que `.v-combobox-state` et `.v-combobox-more`. */
+  .v-combobox-group {
     display: flex;
     flex: none;
     flex-direction: column;
@@ -50,7 +50,7 @@ const labelId = useId()
      héritées du panneau) : l'en-tête tient la même hauteur qu'une rangée,
      compact compris, et le rythme vertical de la liste ne casse pas. Seule la
      typo ne suit pas l'échelle (rôle overline), d'où le centrage vertical. */
-  .ds-combobox-group-label {
+  .v-combobox-group-label {
     display: flex;
     align-items: center;
     min-height: var(--control-height);

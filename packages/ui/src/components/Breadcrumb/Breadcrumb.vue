@@ -85,12 +85,12 @@ const visibleItems = computed(() =>
 </script>
 
 <template>
-  <nav class="ds-breadcrumb" :aria-label="ariaLabel">
-    <ol class="ds-breadcrumb-list">
+  <nav class="v-breadcrumb" :aria-label="ariaLabel">
+    <ol class="v-breadcrumb-list">
       <template v-for="(item, index) in visibleItems" :key="item.href">
         <!-- le menu « … » s'insère entre le 1er item et l'avant-dernier -->
-        <li v-if="truncated && index === 1" class="ds-breadcrumb-item ds-breadcrumb-ellipsis">
-          <Icon class="ds-breadcrumb-separator" v-bind="iconProps(separator)" />
+        <li v-if="truncated && index === 1" class="v-breadcrumb-item v-breadcrumb-ellipsis">
+          <Icon class="v-breadcrumb-separator" v-bind="iconProps(separator)" />
           <Menu compact>
             <template #trigger="{ triggerProps }">
               <IconButton size="sm" compact :label="resolvedEllipsisLabel" v-bind="triggerProps">
@@ -106,10 +106,10 @@ const visibleItems = computed(() =>
             />
           </Menu>
         </li>
-        <li class="ds-breadcrumb-item">
-          <Icon class="ds-breadcrumb-separator" v-bind="iconProps(separator)" />
+        <li class="v-breadcrumb-item">
+          <Icon class="v-breadcrumb-separator" v-bind="iconProps(separator)" />
           <a
-            class="ds-breadcrumb-link"
+            class="v-breadcrumb-link"
             :href="item.href"
             :aria-current="isCurrent(item) ? 'page' : undefined"
           >
@@ -123,15 +123,15 @@ const visibleItems = computed(() =>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-breadcrumb {
+@layer vectis.components {
+  .v-breadcrumb {
     /* API de contexte d'Icon : icônes d'items et séparateurs suivent la
        typo sm du fil d'Ariane */
     --vectis-icon-size: var(--vectis-icon-size-sm);
     --vectis-icon-opsz: 20;
   }
 
-  .ds-breadcrumb-list {
+  .v-breadcrumb-list {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -143,22 +143,22 @@ const visibleItems = computed(() =>
     font-size: var(--vectis-text-body-md-size);
   }
 
-  .ds-breadcrumb-item {
+  .v-breadcrumb-item {
     display: inline-flex;
     align-items: center;
     gap: var(--vectis-space-2);
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-breadcrumb-list > .ds-breadcrumb-item:first-child > .ds-breadcrumb-separator {
+  .v-breadcrumb-list > .v-breadcrumb-item:first-child > .v-breadcrumb-separator {
     display: none;
   }
 
-  .ds-breadcrumb-separator {
+  .v-breadcrumb-separator {
     color: var(--vectis-color-text-subtle);
   }
 
-  .ds-breadcrumb-link {
+  .v-breadcrumb-link {
     display: inline-flex;
     align-items: center;
     gap: var(--vectis-space-1);
@@ -168,23 +168,23 @@ const visibleItems = computed(() =>
     transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-breadcrumb-link:hover {
+  .v-breadcrumb-link:hover {
     color: var(--vectis-color-text);
     text-decoration: underline;
   }
 
-  .ds-breadcrumb-link:focus-visible {
+  .v-breadcrumb-link:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  .ds-breadcrumb-link[aria-current='page'] {
+  .v-breadcrumb-link[aria-current='page'] {
     color: var(--vectis-color-text);
     font-weight: var(--vectis-text-label-weight);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-breadcrumb-link {
+    .v-breadcrumb-link {
       transition: none;
     }
   }

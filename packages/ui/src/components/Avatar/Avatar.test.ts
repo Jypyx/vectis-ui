@@ -29,25 +29,25 @@ describe('Avatar', () => {
   it("rend une icône Material quand `icon` est un nom (pas d'URL)", () => {
     const { container, queryByText } = render(Avatar, { props: { icon: 'star' } })
     // pas d'initiales, la ligature Material est présente
-    expect(container.querySelector('.ds-avatar-icon')).toBeTruthy()
+    expect(container.querySelector('.v-avatar-icon')).toBeTruthy()
     expect(queryByText('star')).toBeTruthy()
   })
 
   it('dérive une teinte auto déterministe du nom (--avatar-hue stable + data-auto)', () => {
     const first = render(Avatar, { props: { name: 'Ada Lovelace' } })
-    const a = first.container.querySelector('.ds-avatar') as HTMLElement
+    const a = first.container.querySelector('.v-avatar') as HTMLElement
     expect(a.getAttribute('data-auto')).toBe('')
     const hueA = a.style.getPropertyValue('--avatar-hue')
     expect(hueA).not.toBe('')
 
     const second = render(Avatar, { props: { name: 'Ada Lovelace' } })
-    const b = second.container.querySelector('.ds-avatar') as HTMLElement
+    const b = second.container.querySelector('.v-avatar') as HTMLElement
     expect(b.style.getPropertyValue('--avatar-hue')).toBe(hueA)
   })
 
   it('la couleur custom prime sur la teinte auto (data-custom + --custom-color, pas de data-auto)', () => {
     const { container } = render(Avatar, { props: { name: 'Ada Lovelace', color: '#ff0000' } })
-    const el = container.querySelector('.ds-avatar') as HTMLElement
+    const el = container.querySelector('.v-avatar') as HTMLElement
     expect(el.getAttribute('data-custom')).toBe('')
     expect(el.getAttribute('data-auto')).toBeNull()
     expect(el.style.getPropertyValue('--custom-color')).toBe('#ff0000')
@@ -71,14 +71,14 @@ describe('Avatar', () => {
     const { container } = render(Avatar, {
       props: { name: 'Ada', href: '/u/ada', disabled: true },
     })
-    const a = container.querySelector('a.ds-avatar') as HTMLElement
+    const a = container.querySelector('a.v-avatar') as HTMLElement
     expect(a.getAttribute('href')).toBeNull()
     expect(a.getAttribute('aria-disabled')).toBe('true')
   })
 
   it('sans nom ni image : décoratif (pas de role="img")', () => {
     const { container } = render(Avatar, { props: { icon: 'star' } })
-    const el = container.querySelector('.ds-avatar') as HTMLElement
+    const el = container.querySelector('.v-avatar') as HTMLElement
     expect(el.getAttribute('role')).toBeNull()
   })
 })
@@ -94,7 +94,7 @@ describe('AvatarGroup', () => {
           ),
       },
     })
-    expect(container.querySelectorAll('.ds-avatar')).toHaveLength(3)
+    expect(container.querySelectorAll('.v-avatar')).toHaveLength(3)
     expect(getByText('+2')).toBeTruthy()
   })
 
@@ -104,7 +104,7 @@ describe('AvatarGroup', () => {
         default: () => ['Ada Lovelace', 'Grace Hopper'].map((name) => h(Avatar, { name })),
       },
     })
-    expect(container.querySelectorAll('.ds-avatar')).toHaveLength(2)
+    expect(container.querySelectorAll('.v-avatar')).toHaveLength(2)
     expect(queryByText(/^\+/)).toBeNull()
   })
 
@@ -115,7 +115,7 @@ describe('AvatarGroup', () => {
         default: () => [h(Avatar, { name: 'Ada' }), h(Avatar, { name: 'Grace', size: 'xs' })],
       },
     })
-    const avatars = container.querySelectorAll('.ds-avatar')
+    const avatars = container.querySelectorAll('.v-avatar')
     // 1er hérite lg, 2e garde sa prop xs
     expect(avatars[0]?.getAttribute('data-size')).toBe('lg')
     expect(avatars[1]?.getAttribute('data-size')).toBe('xs')

@@ -245,17 +245,17 @@ watch(model, () => {
 
 <template>
   <div
-    :class="['ds-tabs', rootClass]"
+    :class="['v-tabs', rootClass]"
     :style="rootStyle"
     :data-variant="variant"
     :data-orientation="orientation"
     :data-align="align"
     :data-grow="grow ? '' : undefined"
   >
-    <div class="ds-tabs-bar">
+    <div class="v-tabs-bar">
       <IconButton
         v-if="scrollButtons"
-        class="ds-tabs-scroll"
+        class="v-tabs-scroll"
         :label="resolvedPrevLabel"
         tone="neutral"
         :size="size"
@@ -269,7 +269,7 @@ watch(model, () => {
       <div
         ref="listEl"
         v-bind="listAttrs"
-        class="ds-tabs-list"
+        class="v-tabs-list"
         role="tablist"
         :aria-label="ariaLabel"
         :aria-orientation="isVertical ? 'vertical' : undefined"
@@ -280,21 +280,16 @@ watch(model, () => {
         <span
           v-if="scrollButtons"
           ref="startSentinelEl"
-          class="ds-tabs-sentinel"
+          class="v-tabs-sentinel"
           aria-hidden="true"
         />
         <slot />
-        <span
-          v-if="scrollButtons"
-          ref="endSentinelEl"
-          class="ds-tabs-sentinel"
-          aria-hidden="true"
-        />
+        <span v-if="scrollButtons" ref="endSentinelEl" class="v-tabs-sentinel" aria-hidden="true" />
       </div>
 
       <IconButton
         v-if="scrollButtons"
-        class="ds-tabs-scroll"
+        class="v-tabs-scroll"
         :label="resolvedNextLabel"
         tone="neutral"
         :size="size"
@@ -306,21 +301,21 @@ watch(model, () => {
       </IconButton>
     </div>
 
-    <div v-if="$slots.panels" class="ds-tabs-panels">
+    <div v-if="$slots.panels" class="v-tabs-panels">
       <slot name="panels" />
     </div>
   </div>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-tabs {
+@layer vectis.components {
+  .v-tabs {
     /*
      * Gouttière du cadre : nulle à plat (barre et panneaux à fleur du conteneur
      * d'accueil), posée par `outlined` — idiome `--table-frame-pad` du
      * DataTable. Fixe, PAS indexée sur `data-size`/`compact` : c'est une mesure
      * de carte, et les `--control-*` vivent sur les Button descendants (chaque
-     * Tab pose son propre `ds-control`), donc hors de portée de la racine.
+     * Tab pose son propre `v-control`), donc hors de portée de la racine.
      */
     --tabs-frame-pad: 0px;
 
@@ -330,7 +325,7 @@ watch(model, () => {
   }
 
   /* Vertical : la barre et les panneaux se placent côte à côte */
-  .ds-tabs[data-orientation='vertical'] {
+  .v-tabs[data-orientation='vertical'] {
     flex-direction: row;
   }
 
@@ -348,7 +343,7 @@ watch(model, () => {
    * qui sorte du composant — en plus d'interdire au consommateur tout contenu
    * de panneau à fleur de bord.
    */
-  .ds-tabs[data-variant='outlined'] {
+  .v-tabs[data-variant='outlined'] {
     --tabs-frame-pad: var(--vectis-space-3);
 
     background: var(--vectis-color-surface-raised);
@@ -356,7 +351,7 @@ watch(model, () => {
     border-radius: var(--vectis-radius-surface);
   }
 
-  .ds-tabs-bar {
+  .v-tabs-bar {
     display: flex;
     /* stretch, pas center : la liste déborde d'1px dans la piste par marge
        négative, un centrage la décalerait d'un demi-pixel */
@@ -376,7 +371,7 @@ watch(model, () => {
     padding-inline: var(--tabs-frame-pad);
   }
 
-  .ds-tabs[data-orientation='vertical'] .ds-tabs-bar {
+  .v-tabs[data-orientation='vertical'] .v-tabs-bar {
     flex-direction: column;
     align-items: stretch;
     /* l'axe de la piste bascule : c'est le bord inline de FIN qui reste à fleur */
@@ -384,11 +379,11 @@ watch(model, () => {
     padding-inline-end: 0;
   }
 
-  .ds-tabs[data-align='center'] .ds-tabs-bar {
+  .v-tabs[data-align='center'] .v-tabs-bar {
     justify-content: center;
   }
 
-  .ds-tabs[data-align='end'] .ds-tabs-bar {
+  .v-tabs[data-align='end'] .v-tabs-bar {
     justify-content: flex-end;
   }
 
@@ -396,12 +391,12 @@ watch(model, () => {
      sous les boutons de défilement (frères de la liste). Encadrée, c'est elle
      qui sépare la barre des panneaux — d'où le bord de fin laissé sans
      gouttière, sinon elle ne séparerait plus rien. */
-  .ds-tabs:is([data-variant='flat'], [data-variant='outlined']) .ds-tabs-bar {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tabs-bar {
     border-block-end: 1px solid var(--vectis-color-border);
   }
 
-  .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
-    .ds-tabs-bar {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+    .v-tabs-bar {
     border-block-end: none;
     border-inline-start: 1px solid var(--vectis-color-border);
   }
@@ -413,12 +408,12 @@ watch(model, () => {
    * est la frontière barre/panneaux. Spécificité ÉGALE à la règle ci-dessus
    * (0,4,0) : l'ordre tranche, ne pas remonter ce bloc.
    */
-  .ds-tabs[data-variant='outlined'][data-orientation='vertical'] .ds-tabs-bar {
+  .v-tabs[data-variant='outlined'][data-orientation='vertical'] .v-tabs-bar {
     border-inline-start: none;
     border-inline-end: 1px solid var(--vectis-color-border);
   }
 
-  .ds-tabs-list {
+  .v-tabs-list {
     display: flex;
     align-items: center;
     gap: var(--vectis-space-1);
@@ -431,14 +426,14 @@ watch(model, () => {
     scroll-behavior: smooth;
   }
 
-  .ds-tabs[data-orientation='vertical'] .ds-tabs-list {
+  .v-tabs[data-orientation='vertical'] .v-tabs-list {
     flex-direction: column;
     align-items: stretch;
   }
 
   /* L'indicateur de 2px recouvre la piste de 1px au lieu de s'empiler dessus
      (marges négatives) */
-  .ds-tabs:is([data-variant='flat'], [data-variant='outlined']) .ds-tabs-list {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tabs-list {
     margin-block-end: -1px;
     /* onglets contigus : sur une piste ils forment une rangée de segments (cf.
        le rayon nul posé par Tab.vue), pas une file de boutons */
@@ -447,13 +442,13 @@ watch(model, () => {
 
   /* la liste étant 1px plus haute que les onglets, ceux-ci s'appuient sur son
      bord de fin : l'indicateur tombe alors pile sur la piste */
-  .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='horizontal']
-    .ds-tabs-list {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='horizontal']
+    .v-tabs-list {
     align-items: flex-end;
   }
 
-  .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
-    .ds-tabs-list {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+    .v-tabs-list {
     margin-block-end: 0;
     margin-inline-start: -1px;
   }
@@ -461,7 +456,7 @@ watch(model, () => {
   /* Encadré et vertical : plus aucune piste au bord de départ à recouvrir — le
      débordement d'1px glisserait la liste sous la bordure du cadre. Même
      spécificité que la règle ci-dessus : l'ordre tranche. */
-  .ds-tabs[data-variant='outlined'][data-orientation='vertical'] .ds-tabs-list {
+  .v-tabs[data-variant='outlined'][data-orientation='vertical'] .v-tabs-list {
     margin-inline-start: 0;
   }
 
@@ -471,35 +466,35 @@ watch(model, () => {
    * cadre, collée à elle : le cadre la remplace, la gouttière se referme sur le
    * bord de fin et la liste cesse de déborder.
    */
-  .ds-tabs[data-variant='outlined']:not(:has(> .ds-tabs-panels)) .ds-tabs-bar {
+  .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) .v-tabs-bar {
     border-block-end: none;
     border-inline-end: none;
     padding-block-end: var(--tabs-frame-pad);
     padding-inline-end: var(--tabs-frame-pad);
   }
 
-  .ds-tabs[data-variant='outlined']:not(:has(> .ds-tabs-panels)) .ds-tabs-list {
+  .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) .v-tabs-list {
     margin-block-end: 0;
   }
 
   /* Piste creuse de la variante `inset` : portée par le conteneur défilant
      lui-même, sinon son padding ne protège pas l'ombre de l'onglet actif */
-  .ds-tabs[data-variant='inset'] .ds-tabs-list {
+  .v-tabs[data-variant='inset'] .v-tabs-list {
     background: var(--vectis-color-surface-sunken);
     padding: var(--vectis-space-1);
     border-radius: var(--vectis-radius-surface);
   }
 
-  .ds-tabs[data-grow] .ds-tabs-list {
+  .v-tabs[data-grow] .v-tabs-list {
     flex: 1;
   }
 
-  .ds-tabs-sentinel {
+  .v-tabs-sentinel {
     flex: 0 0 1px;
     align-self: stretch;
   }
 
-  .ds-tabs-scroll {
+  .v-tabs-scroll {
     flex: none;
     /* la barre est en stretch pour la piste : les contrôles, eux, se centrent
        sur la liste (qui est plus haute qu'eux en variante inset) */
@@ -507,23 +502,23 @@ watch(model, () => {
   }
 
   /* chevrons : la direction est physique, l'icône se retourne en RTL */
-  [dir='rtl'] .ds-tabs[data-orientation='horizontal'] .ds-tabs-scroll .ds-icon {
+  [dir='rtl'] .v-tabs[data-orientation='horizontal'] .v-tabs-scroll .v-icon {
     scale: -1 1;
   }
 
-  .ds-tabs-panels {
+  .v-tabs-panels {
     min-inline-size: 0;
     /* gouttière du cadre (0 à plat) : le panneau est la zone de contenu de la
        carte, il la prend sur ses quatre côtés */
     padding: var(--tabs-frame-pad);
   }
 
-  .ds-tabs[data-orientation='vertical'] .ds-tabs-panels {
+  .v-tabs[data-orientation='vertical'] .v-tabs-panels {
     flex: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-tabs-list {
+    .v-tabs-list {
       scroll-behavior: auto;
     }
   }

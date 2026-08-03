@@ -53,7 +53,7 @@ const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.de
        annoncer « bouton bascule ». `filled` posé directement sur Icon : la prop
        `iconFilled` de Button est sans effet sur les slots. -->
   <Button
-    class="ds-toggle-item"
+    class="v-toggle-item"
     :aria-pressed="selected ? 'true' : 'false'"
     :variant="selected ? 'solid' : (toggle?.variant ?? 'ghost')"
     :tone="selected ? (toggle?.tone ?? 'accent') : 'neutral'"
@@ -71,13 +71,13 @@ const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.de
 </template>
 
 <style>
-@layer ds.components {
+@layer vectis.components {
   /*
    * Item réduit à son icône : carré, comme IconButton. [data-size] (toujours
    * rendu par Button) qualifie le sélecteur pour battre le padding de
-   * .ds-button[data-variant='…'] quel que soit l'ordre du CSS bundlé.
+   * .v-button[data-variant='…'] quel que soit l'ordre du CSS bundlé.
    */
-  .ds-toggle-item[data-size][data-icon-only] {
+  .v-toggle-item[data-size][data-icon-only] {
     padding-inline: 0;
     min-inline-size: var(--control-height);
   }

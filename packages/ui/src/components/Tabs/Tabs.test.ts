@@ -236,19 +236,19 @@ describe('Tabs', () => {
       const tab = tabsOf(container)[0]
       expect(tab?.hasAttribute('data-icon-only')).toBe(true)
       expect(tab?.getAttribute('aria-label')).toBe('Accueil')
-      expect(tab?.querySelector('.ds-tab-label')).toBeNull()
+      expect(tab?.querySelector('.v-tab-label')).toBeNull()
     })
 
     it('un libellé ou un slot annule le mode icône seule', () => {
       const { container } = mount({ tabs: `<Tab value="a" icon="home" label="Accueil" />` })
       const tab = tabsOf(container)[0]
       expect(tab?.hasAttribute('data-icon-only')).toBe(false)
-      expect(tab?.querySelector('.ds-tab-label')?.textContent).toBe('Accueil')
+      expect(tab?.querySelector('.v-tab-label')?.textContent).toBe('Accueil')
     })
 
     it('pattern wrapper-root : class sur la racine, le reste sur la tablist', () => {
       const { container } = mount({ tabsAttrs: 'class="custom" data-testid="barre"' })
-      const root = container.querySelector('.ds-tabs')
+      const root = container.querySelector('.v-tabs')
       const list = container.querySelector('[role="tablist"]')
       expect(root?.classList.contains('custom')).toBe(true)
       expect(root?.hasAttribute('data-testid')).toBe(false)
@@ -269,18 +269,18 @@ describe('Tabs', () => {
       expect(list?.getAttribute('aria-labelledby')).toBe('titre')
     })
 
-    it('l’onglet reste un .ds-button : la classe est fusionnée, pas remplacée', () => {
+    it('l’onglet reste un .v-button : la classe est fusionnée, pas remplacée', () => {
       const { container } = mount()
       const tab = tabsOf(container)[0]
-      expect(tab?.classList.contains('ds-button')).toBe(true)
-      expect(tab?.classList.contains('ds-tab')).toBe(true)
+      expect(tab?.classList.contains('v-button')).toBe(true)
+      expect(tab?.classList.contains('v-tab')).toBe(true)
     })
   })
 
   describe('variantes', () => {
     it('variant : data-variant posé sur la racine, flat par défaut', () => {
       const variantOf = (tabsAttrs?: string) =>
-        mount({ tabsAttrs }).container.querySelector('.ds-tabs')?.getAttribute('data-variant')
+        mount({ tabsAttrs }).container.querySelector('.v-tabs')?.getAttribute('data-variant')
       expect(variantOf()).toBe('flat')
       expect(variantOf('variant="outlined"')).toBe('outlined')
       expect(variantOf('variant="inset"')).toBe('inset')
@@ -303,17 +303,17 @@ describe('Tabs', () => {
   describe('boutons de défilement', () => {
     it('absents par défaut', () => {
       const { container } = mount()
-      expect(container.querySelector('.ds-tabs-scroll')).toBeNull()
-      expect(container.querySelector('.ds-tabs-sentinel')).toBeNull()
+      expect(container.querySelector('.v-tabs-scroll')).toBeNull()
+      expect(container.querySelector('.v-tabs-sentinel')).toBeNull()
     })
 
     it('rendus et désactivés tant que les butées ne sont pas mesurées', () => {
       const { container } = mount({ tabsAttrs: 'scroll-buttons' })
-      const controls = [...container.querySelectorAll<HTMLButtonElement>('.ds-tabs-scroll')]
+      const controls = [...container.querySelectorAll<HTMLButtonElement>('.v-tabs-scroll')]
       expect(controls).toHaveLength(2)
       // IntersectionObserver n'existe pas en jsdom : l'état sûr est « en butée »
       expect(controls.every((el) => el.disabled)).toBe(true)
-      expect(container.querySelectorAll('.ds-tabs-sentinel')).toHaveLength(2)
+      expect(container.querySelectorAll('.v-tabs-sentinel')).toHaveLength(2)
     })
   })
 })

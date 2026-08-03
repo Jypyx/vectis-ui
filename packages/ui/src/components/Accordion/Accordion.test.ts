@@ -25,7 +25,7 @@ const renderAccordion = (exclusive = true) =>
 /** Noms des <Icon> rendues dans un item — `data-icon` est posé quelle que soit
     la source effective (SVG intégré, ligature, police tierce). */
 function icones(item: Element) {
-  return [...item.querySelectorAll<HTMLElement>('summary .ds-icon')].map((el) => el.dataset.icon)
+  return [...item.querySelectorAll<HTMLElement>('summary .v-icon')].map((el) => el.dataset.icon)
 }
 
 describe('Accordion', () => {
@@ -69,10 +69,8 @@ describe('Accordion', () => {
   it('subtitle : rendu sous le titre, absent sans prop ni slot', () => {
     const { container } = renderWith('', 'subtitle="Sous-titre du premier"')
     const [first, second] = [...container.querySelectorAll('details')]
-    expect(first?.querySelector('.ds-accordion-subtitle')?.textContent).toBe(
-      'Sous-titre du premier',
-    )
-    expect(second?.querySelector('.ds-accordion-subtitle')).toBeNull()
+    expect(first?.querySelector('.v-accordion-subtitle')?.textContent).toBe('Sous-titre du premier')
+    expect(second?.querySelector('.v-accordion-subtitle')).toBeNull()
   })
 
   it('icon-start : icône dédiée devant le titre, distincte du chevron', () => {
@@ -80,25 +78,25 @@ describe('Accordion', () => {
     const [first, second] = [...container.querySelectorAll('details')]
     // les deux icônes cohabitent : icône de début puis chevron
     expect(icones(first as Element)).toEqual(['settings', 'expand_more'])
-    expect(first?.querySelector<HTMLElement>('.ds-accordion-icon-start')?.dataset.icon).toBe(
+    expect(first?.querySelector<HTMLElement>('.v-accordion-icon-start')?.dataset.icon).toBe(
       'settings',
     )
-    expect(second?.querySelector('.ds-accordion-icon-start')).toBeNull()
+    expect(second?.querySelector('.v-accordion-icon-start')).toBeNull()
   })
 
   it('variant : data-variant posé sur la racine, flat par défaut', () => {
     const variantOf = (attrs = '') =>
-      renderWith(attrs).container.querySelector('.ds-accordion')?.getAttribute('data-variant')
+      renderWith(attrs).container.querySelector('.v-accordion')?.getAttribute('data-variant')
     expect(variantOf()).toBe('flat')
     expect(variantOf('variant="outlined"')).toBe('outlined')
   })
 
   it('compact : data-compact posé sur la racine seulement si demandé', () => {
+    expect(renderWith().container.querySelector('.v-accordion')?.hasAttribute('data-compact')).toBe(
+      false,
+    )
     expect(
-      renderWith().container.querySelector('.ds-accordion')?.hasAttribute('data-compact'),
-    ).toBe(false)
-    expect(
-      renderWith('compact').container.querySelector('.ds-accordion')?.hasAttribute('data-compact'),
+      renderWith('compact').container.querySelector('.v-accordion')?.hasAttribute('data-compact'),
     ).toBe(true)
   })
 

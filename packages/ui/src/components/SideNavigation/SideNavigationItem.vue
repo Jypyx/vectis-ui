@@ -178,10 +178,10 @@ function onActionClick(event: MouseEvent) {
 </script>
 
 <template>
-  <li class="ds-side-nav-item" :class="rootClass" :style="rootStyle">
+  <li class="v-side-nav-item" :class="rootClass" :style="rootStyle">
     <details
       v-if="hasChildren"
-      class="ds-side-nav-branch"
+      class="v-side-nav-branch"
       :name="parent?.name"
       :open="openAttr"
       :data-swap="collapseIcon ? '' : undefined"
@@ -189,7 +189,7 @@ function onActionClick(event: MouseEvent) {
     >
       <summary
         v-bind="forwardedAttrs"
-        class="ds-side-nav-row"
+        class="v-side-nav-row"
         :data-active="active ? '' : undefined"
         :data-disabled="disabled ? '' : undefined"
         :aria-current="ariaCurrent"
@@ -198,42 +198,42 @@ function onActionClick(event: MouseEvent) {
         @click="onSummaryClick"
       >
         <slot name="start">
-          <Icon v-if="icon" class="ds-side-nav-icon" v-bind="iconProps(icon)" />
+          <Icon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
         </slot>
-        <span class="ds-side-nav-content">
-          <span class="ds-side-nav-label"><slot /></span>
-          <span v-if="sublabel !== undefined || $slots.sublabel" class="ds-side-nav-sublabel">
+        <span class="v-side-nav-content">
+          <span class="v-side-nav-label"><slot /></span>
+          <span v-if="sublabel !== undefined || $slots.sublabel" class="v-side-nav-sublabel">
             <slot name="sublabel">{{ sublabel }}</slot>
           </span>
         </span>
         <!-- Le slot vit DANS le <summary>, dont TOUT clic bascule le <details> :
              sans `onEndClick`, une pastille ouvrirait la branche. -->
-        <span v-if="$slots.end" class="ds-side-nav-end" @click="onEndClick"
+        <span v-if="$slots.end" class="v-side-nav-end" @click="onEndClick"
           ><slot name="end"
         /></span>
-        <Icon class="ds-side-nav-chevron" v-bind="iconProps(expandIcon)" />
+        <Icon class="v-side-nav-chevron" v-bind="iconProps(expandIcon)" />
         <!-- Deux chevrons rendus, permutation 100 % CSS sur [open] (idiome Accordion) -->
         <Icon
           v-if="collapseIcon"
-          class="ds-side-nav-chevron ds-side-nav-chevron-open"
+          class="v-side-nav-chevron v-side-nav-chevron-open"
           v-bind="iconProps(collapseIcon)"
         />
       </summary>
-      <ul class="ds-side-nav-children">
+      <ul class="v-side-nav-children">
         <slot name="items" />
       </ul>
     </details>
 
     <div
       v-else
-      class="ds-side-nav-row"
+      class="v-side-nav-row"
       :data-active="active ? '' : undefined"
       :data-disabled="disabled ? '' : undefined"
     >
       <component
         :is="tag"
         v-bind="forwardedAttrs"
-        class="ds-side-nav-action"
+        class="v-side-nav-action"
         :type="tag === 'button' ? 'button' : undefined"
         :disabled="tag === 'button' ? disabled : undefined"
         :href="tag === 'a' && !disabled ? href : undefined"
@@ -242,22 +242,22 @@ function onActionClick(event: MouseEvent) {
         @click="onActionClick"
       >
         <slot name="start">
-          <Icon v-if="icon" class="ds-side-nav-icon" v-bind="iconProps(icon)" />
+          <Icon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
         </slot>
-        <span class="ds-side-nav-content">
-          <span class="ds-side-nav-label"><slot /></span>
-          <span v-if="sublabel !== undefined || $slots.sublabel" class="ds-side-nav-sublabel">
+        <span class="v-side-nav-content">
+          <span class="v-side-nav-label"><slot /></span>
+          <span v-if="sublabel !== undefined || $slots.sublabel" class="v-side-nav-sublabel">
             <slot name="sublabel">{{ sublabel }}</slot>
           </span>
         </span>
       </component>
-      <span v-if="$slots.end" class="ds-side-nav-end"><slot name="end" /></span>
+      <span v-if="$slots.end" class="v-side-nav-end"><slot name="end" /></span>
     </div>
   </li>
 </template>
 
 <style>
-@layer ds.components {
+@layer vectis.components {
   /*
    * PROFONDEUR — compteur 100 % CSS : ni registre, ni provide/inject, ni style
    * inline, ni prop `level` à passer à la main. La structure fournit deux
@@ -269,26 +269,26 @@ function onActionClick(event: MouseEvent) {
    * la propriété tombe en « guaranteed-invalid », `var(--side-nav-level, 0)` retombe
    * partout sur 0 et l'arbre s'affiche PLAT, sans la moindre erreur console.
    */
-  .ds-side-nav-item {
+  .v-side-nav-item {
     --side-nav-parent-level: var(--side-nav-level, 0);
   }
 
-  .ds-side-nav-children {
+  .v-side-nav-children {
     --side-nav-level: calc(var(--side-nav-parent-level) + 1);
   }
 
-  .ds-side-nav-branch {
+  .v-side-nav-branch {
     /* Le repli natif : l'animation vit sur ::details-content, plus bas. */
     min-inline-size: 0;
   }
 
-  .ds-side-nav-row {
+  .v-side-nav-row {
     /*
      * Taille : variables `--control-*` héritées du <nav>, seul porteur de
-     * `ds-control` (styles/control-size.css) — les icônes suivent sans une
+     * `v-control` (styles/control-size.css) — les icônes suivent sans une
      * ligne de CSS, `--vectis-icon-size`/`-opsz` font partie du même bloc.
      *
-     * Typo composite, comme .ds-menu-item : la TAILLE vient de l'échelle, le
+     * Typo composite, comme .v-menu-item : la TAILLE vient de l'échelle, le
      * leading reste celui de `body-md` (ratio unitless, donc il suit) et le
      * poids reste regular — la recette `control` vaut medium/1, or une rangée
      * peut passer à la ligne et porter un sous-libellé.
@@ -316,11 +316,11 @@ function onActionClick(event: MouseEvent) {
   }
 
   /* Le marqueur natif du <summary> : list-style ne suffit pas sur WebKit */
-  .ds-side-nav-row::-webkit-details-marker {
+  .v-side-nav-row::-webkit-details-marker {
     display: none;
   }
 
-  .ds-side-nav-action {
+  .v-side-nav-action {
     /* Rangée feuille : l'action est un enfant, le retrait reste porté par la
        rangée — c'est le fond de survol qui doit rester pleine largeur. */
     flex: 1;
@@ -343,30 +343,30 @@ function onActionClick(event: MouseEvent) {
   /*
    * Zone cliquable étendue à TOUTE la rangée, sans envelopper le slot de fin.
    * Peinte comme descendant positionné (CSS 2.1 App. E, étape 8) : elle
-   * recouvre le chevron, non positionné, mais passe SOUS `.ds-side-nav-end`,
+   * recouvre le chevron, non positionné, mais passe SOUS `.v-side-nav-end`,
    * postérieur dans l'arbre et positionné lui aussi.
    */
-  .ds-side-nav-action::after {
+  .v-side-nav-action::after {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: var(--vectis-radius-sm);
   }
 
-  .ds-side-nav-content {
+  .v-side-nav-content {
     flex: 1;
     min-inline-size: 0;
     display: flex;
     flex-direction: column;
   }
 
-  .ds-side-nav-label {
+  .v-side-nav-label {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .ds-side-nav-sublabel {
+  .v-side-nav-sublabel {
     overflow: hidden;
     font-size: var(--vectis-text-caption-size);
     color: var(--vectis-color-text-muted);
@@ -374,13 +374,13 @@ function onActionClick(event: MouseEvent) {
     white-space: nowrap;
   }
 
-  .ds-side-nav-icon {
+  .v-side-nav-icon {
     flex: none;
     color: var(--vectis-color-text-muted);
   }
 
   /* Positionné → peint au-dessus de la zone cliquable étendue, donc cliquable. */
-  .ds-side-nav-end {
+  .v-side-nav-end {
     position: relative;
     flex: none;
     display: flex;
@@ -390,25 +390,25 @@ function onActionClick(event: MouseEvent) {
 
   /* Chevron : bas quand fermé, retourné quand ouvert. Rotation sur l'axe
      vertical → aucun miroir RTL (contrairement au chevron latéral de Menu). */
-  .ds-side-nav-chevron {
+  .v-side-nav-chevron {
     flex: none;
     color: var(--vectis-color-text-muted);
     transition: rotate var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
-  .ds-side-nav-branch[open]:not([data-swap]) > .ds-side-nav-row > .ds-side-nav-chevron {
+  .v-side-nav-branch[open]:not([data-swap]) > .v-side-nav-row > .v-side-nav-chevron {
     rotate: 180deg;
   }
 
   /* Permutation des deux chevrons (data-swap = collapseIcon fournie) */
-  .ds-side-nav-branch[data-swap][open]
-    > .ds-side-nav-row
-    > .ds-side-nav-chevron:not(.ds-side-nav-chevron-open),
-  .ds-side-nav-branch[data-swap]:not([open]) > .ds-side-nav-row > .ds-side-nav-chevron-open {
+  .v-side-nav-branch[data-swap][open]
+    > .v-side-nav-row
+    > .v-side-nav-chevron:not(.v-side-nav-chevron-open),
+  .v-side-nav-branch[data-swap]:not([open]) > .v-side-nav-row > .v-side-nav-chevron-open {
     display: none;
   }
 
-  .ds-side-nav-row:hover:not([data-disabled]) {
+  .v-side-nav-row:hover:not([data-disabled]) {
     background: var(--vectis-color-surface-muted);
   }
 
@@ -419,33 +419,33 @@ function onActionClick(event: MouseEvent) {
    * `::details-content` est en `overflow: clip`, un anneau tiré vers
    * l'extérieur y serait rogné.
    */
-  .ds-side-nav-row:focus-visible,
-  .ds-side-nav-action:focus-visible::after {
+  .v-side-nav-row:focus-visible,
+  .v-side-nav-action:focus-visible::after {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
-  .ds-side-nav-action:focus-visible {
+  .v-side-nav-action:focus-visible {
     outline: none;
   }
 
   /* Page courante */
-  .ds-side-nav-row[data-active] {
+  .v-side-nav-row[data-active] {
     background: var(--vectis-color-accent-surface);
     color: var(--vectis-color-accent-text);
   }
 
-  .ds-side-nav-row[data-active] .ds-side-nav-label {
+  .v-side-nav-row[data-active] .v-side-nav-label {
     font-weight: var(--vectis-text-label-weight);
   }
 
-  .ds-side-nav-row[data-active] .ds-side-nav-icon,
-  .ds-side-nav-row[data-active] .ds-side-nav-sublabel,
-  .ds-side-nav-row[data-active] .ds-side-nav-chevron {
+  .v-side-nav-row[data-active] .v-side-nav-icon,
+  .v-side-nav-row[data-active] .v-side-nav-sublabel,
+  .v-side-nav-row[data-active] .v-side-nav-chevron {
     color: inherit;
   }
 
-  .ds-side-nav-row[data-active]:hover {
+  .v-side-nav-row[data-active]:hover {
     /* assombrit légèrement la surface accent (idiome MenuItem) */
     background: color-mix(
       in oklab,
@@ -456,26 +456,26 @@ function onActionClick(event: MouseEvent) {
 
   /* Une branche REPLIÉE qui contient la page courante reste signalée. Le
      `:has()` est volontairement descendant : il doit matcher à toute profondeur. */
-  .ds-side-nav-branch:not([open]):has(.ds-side-nav-children [aria-current])
-    > .ds-side-nav-row:not([data-active]) {
+  .v-side-nav-branch:not([open]):has(.v-side-nav-children [aria-current])
+    > .v-side-nav-row:not([data-active]) {
     color: var(--vectis-color-accent-text);
   }
 
   /* Désactivé : nuances de gris par tokens (jamais d'opacité) */
-  .ds-side-nav-row[data-disabled] {
+  .v-side-nav-row[data-disabled] {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
   /* text-muted est plus foncé que text-subtle : tout suit le libellé */
-  .ds-side-nav-row[data-disabled] .ds-side-nav-icon,
-  .ds-side-nav-row[data-disabled] .ds-side-nav-sublabel,
-  .ds-side-nav-row[data-disabled] .ds-side-nav-chevron {
+  .v-side-nav-row[data-disabled] .v-side-nav-icon,
+  .v-side-nav-row[data-disabled] .v-side-nav-sublabel,
+  .v-side-nav-row[data-disabled] .v-side-nav-chevron {
     color: inherit;
   }
 
   /* Ouverture animée en pur CSS (::details-content, progressive enhancement) */
-  .ds-side-nav-branch::details-content {
+  .v-side-nav-branch::details-content {
     block-size: 0;
     overflow: clip;
     transition:
@@ -483,13 +483,13 @@ function onActionClick(event: MouseEvent) {
       content-visibility var(--vectis-duration-base) allow-discrete;
   }
 
-  .ds-side-nav-branch[open]::details-content {
+  .v-side-nav-branch[open]::details-content {
     block-size: auto;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-side-nav-chevron,
-    .ds-side-nav-branch::details-content {
+    .v-side-nav-chevron,
+    .v-side-nav-branch::details-content {
       transition: none;
     }
   }

@@ -5,7 +5,7 @@ import ProgressLinear from './ProgressLinear.vue'
 
 /** Style inline de la racine (les custom properties y sont posées). */
 const styleOf = (container: Element) =>
-  container.querySelector('.ds-progress-linear')?.getAttribute('style') ?? ''
+  container.querySelector('.v-progress-linear')?.getAttribute('style') ?? ''
 
 /** Le pourcentage est rendu avec une espace insécable (typographie française). */
 const NBSP = ' '
@@ -70,7 +70,7 @@ describe('ProgressLinear', () => {
       props: { indeterminate: true, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
-    expect(container.querySelectorAll('.ds-progress-linear-text')).toHaveLength(0)
+    expect(container.querySelectorAll('.v-progress-linear-text')).toHaveLength(0)
   })
 
   it('tone : accent par défaut, valeur explicite reportée', async () => {
@@ -136,7 +136,7 @@ describe('ProgressLinear', () => {
       props: { value: 50, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
-    const copies = [...container.querySelectorAll('.ds-progress-linear-text')]
+    const copies = [...container.querySelectorAll('.v-progress-linear-text')]
     expect(copies).toHaveLength(2)
     for (const copy of copies) expect(copy.textContent?.trim()).toBe(`50${NBSP}%`)
     // copie de base : annoncée par personne (children presentational) mais non masquée
@@ -153,11 +153,11 @@ describe('ProgressLinear', () => {
       attrs: { 'aria-label': 'x' },
     })
     const root = getByRole('progressbar')
-    expect(root.classList.contains('ds-progress-linear')).toBe(true)
+    expect(root.classList.contains('v-progress-linear')).toBe(true)
     // pas d'élément de piste intermédiaire
-    expect(container.querySelector('.ds-progress-linear-track')).toBeNull()
+    expect(container.querySelector('.v-progress-linear-track')).toBeNull()
     expect(root.children).toHaveLength(1)
-    expect(root.firstElementChild!.classList.contains('ds-progress-linear-fill')).toBe(true)
+    expect(root.firstElementChild!.classList.contains('v-progress-linear-fill')).toBe(true)
   })
 
   it('showValue : le pourcentage est arrondi et dérivé de max', () => {
@@ -165,7 +165,7 @@ describe('ProgressLinear', () => {
       props: { value: 1, max: 3, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
-    expect(container.querySelector('.ds-progress-linear-text')?.textContent?.trim()).toBe(
+    expect(container.querySelector('.v-progress-linear-text')?.textContent?.trim()).toBe(
       `33${NBSP}%`,
     )
   })
@@ -178,7 +178,7 @@ describe('ProgressLinear', () => {
         default: '<template #default="s">{{ s.value }}/{{ s.max }} — {{ s.percent }}</template>',
       },
     })
-    const copies = [...container.querySelectorAll('.ds-progress-linear-text')]
+    const copies = [...container.querySelectorAll('.v-progress-linear-text')]
     expect(copies).toHaveLength(2)
     for (const copy of copies) expect(copy.textContent?.trim()).toBe('30/60 — 50')
   })
@@ -189,7 +189,7 @@ describe('ProgressLinear', () => {
       attrs: { 'aria-label': 'x' },
       slots: { default: 'Envoi…' },
     })
-    const copies = [...container.querySelectorAll('.ds-progress-linear-text')]
+    const copies = [...container.querySelectorAll('.v-progress-linear-text')]
     expect(copies).toHaveLength(2)
     for (const copy of copies) expect(copy.textContent?.trim()).toBe('Envoi…')
   })
@@ -199,7 +199,7 @@ describe('ProgressLinear', () => {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
-    expect(container.querySelectorAll('.ds-progress-linear-text')).toHaveLength(0)
+    expect(container.querySelectorAll('.v-progress-linear-text')).toHaveLength(0)
   })
 
   it('vertical : le texte est rendu comme en horizontal', () => {
@@ -207,7 +207,7 @@ describe('ProgressLinear', () => {
       props: { value: 40, orientation: 'vertical', showValue: true },
       attrs: { 'aria-label': 'x' },
     })
-    expect(container.querySelectorAll('.ds-progress-linear-text')).toHaveLength(2)
+    expect(container.querySelectorAll('.v-progress-linear-text')).toHaveLength(2)
   })
 
   it('valuePosition : center par défaut, valeur explicite reportée', async () => {
@@ -226,7 +226,7 @@ describe('ProgressLinear', () => {
       attrs: { 'aria-label': 'Envoi', class: 'mon-upload', id: 'up', style: 'margin-top: 4px' },
     })
     const bar = getByRole('progressbar', { name: 'Envoi' })
-    expect(bar.classList.contains('ds-progress-linear')).toBe(true)
+    expect(bar.classList.contains('v-progress-linear')).toBe(true)
     expect(bar.classList.contains('mon-upload')).toBe(true)
     expect(bar.id).toBe('up')
     const style = bar.getAttribute('style') ?? ''

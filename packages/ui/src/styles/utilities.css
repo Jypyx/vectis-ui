@@ -6,14 +6,14 @@
  * arbitrées comme les déclarations, le layer n'a donc pas d'effet ici — d'où
  * cette définition hors layer, une seule fois pour tout le DS.
  */
-@keyframes ds-spin {
+@keyframes v-spin {
   to {
     transform: rotate(1turn);
   }
 }
 
-@layer ds.utilities {
-  .ds-visually-hidden {
+@layer vectis.utilities {
+  .v-visually-hidden {
     position: absolute;
     width: 1px;
     height: 1px;

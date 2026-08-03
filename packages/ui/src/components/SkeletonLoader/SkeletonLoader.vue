@@ -6,7 +6,7 @@
  * La racine est un CONTENEUR (modèle Spinner) et non la silhouette peinte
  * (modèle ProgressLinear) : c'est ce qui rend `lines` gratuit et garde TOUS les
  * sélecteurs uniformes — pas un cas « racine peinte » et un cas « enfant
- * peint ». Elle porte `ds-control`, donc `size`/`compact` réutilisent la table
+ * peint ». Elle porte `v-control`, donc `size`/`compact` réutilisent la table
  * unique des hauteurs du DS : un skeleton `md` fait exactement la hauteur d'un
  * Button `md`.
  *
@@ -111,7 +111,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 
 <template>
   <span
-    class="ds-skeleton ds-control"
+    class="v-skeleton v-control"
     :data-shape="shape"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
@@ -127,25 +127,25 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
   >
     <!--
       Le libellé est rendu AVANT les silhouettes, et c'est structurel : la règle
-      « dernière ligne raccourcie » s'appuie sur `.ds-skeleton-item:last-child`,
+      « dernière ligne raccourcie » s'appuie sur `.v-skeleton-item:last-child`,
       qu'un libellé rendu en dernier casserait. Verrouillé par un test unitaire.
-      Il est absolument positionné (.ds-visually-hidden), donc jamais un item
+      Il est absolument positionné (.v-visually-hidden), donc jamais un item
       flex. Rendu CONDITIONNEL : dans un sous-arbre `aria-hidden`, ce serait un
       texte mort.
     -->
-    <span v-if="announced" class="ds-visually-hidden">{{ resolvedLabel }}</span>
-    <span v-for="n in count" :key="n" class="ds-skeleton-item" />
+    <span v-if="announced" class="v-visually-hidden">{{ resolvedLabel }}</span>
+    <span v-for="n in count" :key="n" class="v-skeleton-item" />
   </span>
 </template>
 
 <style>
-@layer ds.components {
+@layer vectis.components {
   /*
    * Toute la géométrie tient dans quatre variables locales, posées par la table
    * `[data-shape]` et surchargeables inline par les props de dimension (un
    * style inline gagne toujours sur une règle visant le même élément).
    */
-  .ds-skeleton {
+  .v-skeleton {
     /* Fond : token dédié. Aucun rôle existant n'a la bonne valeur dans les DEUX
        thèmes — `surface-muted` est trop pâle en clair pour qu'une pulsation se
        voie, et `border` aurait le bon ton mais le mauvais rôle. */
@@ -170,11 +170,11 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 
   /* Spécificité (0,2,0) > (0,1,0) : indépendant de l'ordre, contrairement aux
      tones de ProgressLinear qui sont tous au même niveau. */
-  .ds-skeleton[data-custom] {
+  .v-skeleton[data-custom] {
     --skeleton-base: var(--custom-color);
   }
 
-  .ds-skeleton-item {
+  .v-skeleton-item {
     /* ancre du ::after de la wave */
     position: relative;
     /* la hauteur du token est un DÉFAUT : dans un parent de hauteur définie, la
@@ -198,7 +198,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * contenu réel ne fait pas sauter la mise en page. `max()` protège d'un
    * parent en `line-height` serré, où l'écart deviendrait négatif.
    */
-  .ds-skeleton[data-shape='text'] {
+  .v-skeleton[data-shape='text'] {
     --skeleton-h: 1em;
     --skeleton-radius: var(--vectis-radius-pill);
     --skeleton-gap: max(0px, calc(1lh - 1em));
@@ -207,7 +207,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 
   /* Une ligne de texte garde sa hauteur typographique : elle ne s'étire pas
      dans un parent haut et ne s'écrase pas dans un parent bas. */
-  .ds-skeleton[data-shape='text'] .ds-skeleton-item {
+  .v-skeleton[data-shape='text'] .v-skeleton-item {
     flex: none;
   }
 
@@ -216,12 +216,12 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * sélecteur `+` garantit à lui seul qu'il y a au moins deux lignes, et le
    * ratio s'applique à la largeur EFFECTIVE, prop `width` comprise.
    */
-  .ds-skeleton[data-shape='text'] .ds-skeleton-item + .ds-skeleton-item:last-child {
+  .v-skeleton[data-shape='text'] .v-skeleton-item + .v-skeleton-item:last-child {
     --skeleton-last-line: 0.6;
     inline-size: calc(var(--skeleton-w, 100%) * var(--skeleton-last-line));
   }
 
-  .ds-skeleton[data-shape='pill'] {
+  .v-skeleton[data-shape='pill'] {
     --skeleton-radius: var(--vectis-radius-pill);
   }
 
@@ -231,13 +231,13 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * ligne (comme un Avatar) au lieu de barrer toute la largeur, et
    * `align-items: start` empêche l'étirement inline : un cercle reste rond.
    */
-  .ds-skeleton[data-shape='circle'] {
+  .v-skeleton[data-shape='circle'] {
     --skeleton-radius: var(--vectis-radius-pill);
     display: inline-flex;
     align-items: start;
   }
 
-  .ds-skeleton[data-shape='circle'] .ds-skeleton-item {
+  .v-skeleton[data-shape='circle'] .v-skeleton-item {
     /* `auto` et non 100% : c'est le ratio qui dérive la largeur. Une prop
        `width` explicite reprend la main et assume l'ovale. */
     inline-size: var(--skeleton-w, auto);
@@ -250,7 +250,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * consommateur, non layerisé — surcharge. Même précédent que la longueur du
    * ProgressLinear vertical.
    */
-  .ds-skeleton[data-shape='surface'] {
+  .v-skeleton[data-shape='surface'] {
     --skeleton-h: var(--vectis-control-size-skeleton-surface);
     --skeleton-radius: var(--vectis-radius-surface);
   }
@@ -266,12 +266,12 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * reflet dérivé donne le même sens dans les deux thèmes, et reste composité
    * (c'est toujours une opacité qu'on anime, sur un pseudo-élément).
    */
-  .ds-skeleton[data-animation='pulse'] .ds-skeleton-item::after {
+  .v-skeleton[data-animation='pulse'] .v-skeleton-item::after {
     content: '';
     position: absolute;
     inset: 0;
     background-color: var(--skeleton-highlight);
-    animation: ds-skeleton-pulse calc(var(--vectis-duration-slow) * 5) var(--vectis-ease-in-out)
+    animation: v-skeleton-pulse calc(var(--vectis-duration-slow) * 5) var(--vectis-ease-in-out)
       infinite;
   }
 
@@ -290,25 +290,25 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * variable est le RTL — une règle. Le compromis s'inverse donc : une page
    * peut contenir douze skeletons, la composition n'est plus négociable.
    */
-  .ds-skeleton[data-animation='wave'] .ds-skeleton-item::after {
+  .v-skeleton[data-animation='wave'] .v-skeleton-item::after {
     content: '';
     position: absolute;
     inset: 0;
     background-image: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
-    animation: ds-skeleton-wave calc(var(--vectis-duration-slow) * 5) linear infinite;
+    animation: v-skeleton-wave calc(var(--vectis-duration-slow) * 5) linear infinite;
   }
 
   /* Qualifié `wave` : le pulse partage ce calque mais sa course est symétrique,
      l'inverser n'y voudrait rien dire. */
-  .ds-skeleton[data-animation='wave']:dir(rtl) .ds-skeleton-item::after {
+  .v-skeleton[data-animation='wave']:dir(rtl) .v-skeleton-item::after {
     animation-direction: reverse;
   }
 
   /* Keyframes LOCALES : elles ne servent qu'à ce composant, elles restent donc
      dans son <style>, à l'intérieur du layer (précédent
-     `ds-progress-linear-indeterminate`). Seule `ds-spin`, partagée par deux
+     `v-progress-linear-indeterminate`). Seule `v-spin`, partagée par deux
      composants, vit hors layer dans styles/utilities.css. */
-  @keyframes ds-skeleton-pulse {
+  @keyframes v-skeleton-pulse {
     from,
     to {
       opacity: 0;
@@ -319,7 +319,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     }
   }
 
-  @keyframes ds-skeleton-wave {
+  @keyframes v-skeleton-wave {
     from {
       translate: -100% 0;
     }
@@ -341,10 +341,10 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
      * ÉGALE de celles de `wave` et de `pulse` — c'est sa position en fin de
      * feuille qui tranche.
      */
-    .ds-skeleton:is([data-animation='wave'], [data-animation='pulse']) .ds-skeleton-item::after {
+    .v-skeleton:is([data-animation='wave'], [data-animation='pulse']) .v-skeleton-item::after {
       background-image: none;
       background-color: var(--skeleton-highlight);
-      animation: ds-skeleton-pulse calc(var(--vectis-duration-slow) * 15) var(--vectis-ease-in-out)
+      animation: v-skeleton-pulse calc(var(--vectis-duration-slow) * 15) var(--vectis-ease-in-out)
         infinite;
     }
   }

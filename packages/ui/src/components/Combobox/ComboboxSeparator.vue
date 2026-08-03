@@ -4,12 +4,12 @@
        role="listbox", qui n'admet que `option` et `group`. Ici le filet est
        purement visuel — le regroupement est déjà porté par les `role="group"`
        et leurs libellés. -->
-  <hr role="presentation" class="ds-combobox-separator" />
+  <hr role="presentation" class="v-combobox-separator" />
 </template>
 
 <style>
-@layer ds.components {
-  .ds-combobox-separator {
+@layer vectis.components {
+  .v-combobox-separator {
     flex: none;
     margin-block: 0;
     /* pleine largeur jusqu'aux bords du panneau (compense son padding) ;

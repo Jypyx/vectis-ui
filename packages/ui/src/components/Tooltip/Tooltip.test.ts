@@ -27,7 +27,7 @@ describe('Tooltip', () => {
 
   it("s'ouvre au survol après le délai, pas avant", async () => {
     const { container } = render(Harness)
-    const wrapper = container.querySelector('.ds-tooltip') as HTMLElement
+    const wrapper = container.querySelector('.v-tooltip') as HTMLElement
     const panel = container.querySelector('[role="tooltip"]') as HTMLElement
 
     wrapper.dispatchEvent(new Event('pointerenter'))
@@ -39,7 +39,7 @@ describe('Tooltip', () => {
 
   it('se ferme quand le pointeur sort (délai en cours annulé compris)', () => {
     const { container } = render(Harness)
-    const wrapper = container.querySelector('.ds-tooltip') as HTMLElement
+    const wrapper = container.querySelector('.v-tooltip') as HTMLElement
     const panel = container.querySelector('[role="tooltip"]') as HTMLElement
 
     wrapper.dispatchEvent(new Event('pointerenter'))
@@ -58,7 +58,7 @@ describe('Tooltip', () => {
 
   it('le focus ouvre immédiatement, Échap ferme (WCAG 1.4.13)', () => {
     const { container } = render(Harness)
-    const wrapper = container.querySelector('.ds-tooltip') as HTMLElement
+    const wrapper = container.querySelector('.v-tooltip') as HTMLElement
     const panel = container.querySelector('[role="tooltip"]') as HTMLElement
 
     wrapper.dispatchEvent(new Event('focusin'))

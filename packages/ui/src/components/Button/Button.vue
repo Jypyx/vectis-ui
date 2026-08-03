@@ -84,7 +84,7 @@ const passedAttrs = computed(() => {
   <component
     :is="isLink ? 'a' : 'button'"
     v-bind="passedAttrs"
-    class="ds-button ds-control"
+    class="v-button v-control"
     :href="isLink && !isInert ? href : undefined"
     :type="isLink ? undefined : type"
     :disabled="isLink ? undefined : disabled || loading"
@@ -98,7 +98,7 @@ const passedAttrs = computed(() => {
   >
     <!-- wrapper aria-hidden : le bouton porte déjà aria-busy, on évite la
          double annonce du role="status" du Spinner -->
-    <span v-if="loading" class="ds-button-spinner" aria-hidden="true">
+    <span v-if="loading" class="v-button-spinner" aria-hidden="true">
       <Spinner />
     </span>
     <slot v-else name="start">
@@ -112,10 +112,10 @@ const passedAttrs = computed(() => {
 </template>
 
 <style>
-@layer ds.components {
-  .ds-button {
+@layer vectis.components {
+  .v-button {
     /*
-     * Tailles/compact : la classe partagée ds-control (styles/control-size.css)
+     * Tailles/compact : la classe partagée v-control (styles/control-size.css)
      * pose les variables --control-* et le contexte d'Icon selon
      * data-size/data-compact. IconButton lit aussi --control-height pour sa
      * largeur carrée (même élément rendu).
@@ -141,13 +141,13 @@ const passedAttrs = computed(() => {
       box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-button:focus-visible {
+  .v-button:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
   /* --- Tones : ne définissent que des variables locales --- */
-  .ds-button[data-tone='accent'] {
+  .v-button[data-tone='accent'] {
     --tone-bg-solid: var(--vectis-color-accent);
     --tone-bg-solid-hover: var(--vectis-color-accent-hover);
     --tone-bg-solid-active: var(--vectis-color-accent-active);
@@ -157,7 +157,7 @@ const passedAttrs = computed(() => {
     --tone-border-soft: var(--vectis-color-accent-border);
   }
 
-  .ds-button[data-tone='danger'] {
+  .v-button[data-tone='danger'] {
     --tone-bg-solid: var(--vectis-color-danger);
     --tone-bg-solid-hover: var(--vectis-color-danger-hover);
     --tone-bg-solid-active: var(--vectis-color-danger-active);
@@ -167,7 +167,7 @@ const passedAttrs = computed(() => {
     --tone-border-soft: var(--vectis-color-danger-border);
   }
 
-  .ds-button[data-tone='success'] {
+  .v-button[data-tone='success'] {
     --tone-bg-solid: var(--vectis-color-success);
     --tone-bg-solid-hover: var(--vectis-color-success-hover);
     --tone-bg-solid-active: var(--vectis-color-success-active);
@@ -177,7 +177,7 @@ const passedAttrs = computed(() => {
     --tone-border-soft: var(--vectis-color-success-border);
   }
 
-  .ds-button[data-tone='warning'] {
+  .v-button[data-tone='warning'] {
     --tone-bg-solid: var(--vectis-color-warning);
     --tone-bg-solid-hover: var(--vectis-color-warning-hover);
     --tone-bg-solid-active: var(--vectis-color-warning-active);
@@ -188,7 +188,7 @@ const passedAttrs = computed(() => {
     --tone-border-soft: var(--vectis-color-warning-border);
   }
 
-  .ds-button[data-tone='neutral'] {
+  .v-button[data-tone='neutral'] {
     --tone-bg-solid: var(--vectis-color-surface-muted);
     --tone-bg-solid-hover: color-mix(
       in oklab,
@@ -207,53 +207,53 @@ const passedAttrs = computed(() => {
   }
 
   /* --- Variantes : consomment les variables du tone --- */
-  .ds-button[data-variant='solid'] {
+  .v-button[data-variant='solid'] {
     background: var(--tone-bg-solid);
     color: var(--tone-text-solid);
   }
 
-  .ds-button[data-variant='solid']:hover:not(:disabled, [aria-disabled='true']) {
+  .v-button[data-variant='solid']:hover:not(:disabled, [aria-disabled='true']) {
     background: var(--tone-bg-solid-hover);
   }
 
-  .ds-button[data-variant='solid']:active:not(:disabled, [aria-disabled='true']) {
+  .v-button[data-variant='solid']:active:not(:disabled, [aria-disabled='true']) {
     background: var(--tone-bg-solid-active);
   }
 
-  .ds-button[data-variant='outline'] {
+  .v-button[data-variant='outline'] {
     background: transparent;
     color: var(--tone-text-tinted);
     border-color: var(--tone-border-soft);
   }
 
-  .ds-button[data-variant='ghost'] {
+  .v-button[data-variant='ghost'] {
     background: transparent;
     color: var(--tone-text-tinted);
   }
 
-  .ds-button[data-variant='outline']:hover:not(:disabled, [aria-disabled='true']),
-  .ds-button[data-variant='ghost']:hover:not(:disabled, [aria-disabled='true']) {
+  .v-button[data-variant='outline']:hover:not(:disabled, [aria-disabled='true']),
+  .v-button[data-variant='ghost']:hover:not(:disabled, [aria-disabled='true']) {
     background: var(--tone-bg-soft);
   }
 
-  .ds-button[data-variant='outline']:active:not(:disabled, [aria-disabled='true']),
-  .ds-button[data-variant='ghost']:active:not(:disabled, [aria-disabled='true']) {
+  .v-button[data-variant='outline']:active:not(:disabled, [aria-disabled='true']),
+  .v-button[data-variant='ghost']:active:not(:disabled, [aria-disabled='true']) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
   /* Elevated (Material 3) : surface surélevée + state layer teinté */
-  .ds-button[data-variant='elevated'] {
+  .v-button[data-variant='elevated'] {
     background: var(--vectis-color-surface-raised);
     color: var(--tone-text-tinted);
     box-shadow: var(--vectis-shadow-2);
   }
 
-  .ds-button[data-variant='elevated']:hover:not(:disabled, [aria-disabled='true']) {
+  .v-button[data-variant='elevated']:hover:not(:disabled, [aria-disabled='true']) {
     background: color-mix(in oklab, var(--vectis-color-surface-raised), var(--tone-text-tinted) 8%);
     box-shadow: var(--vectis-shadow-3);
   }
 
-  .ds-button[data-variant='elevated']:active:not(:disabled, [aria-disabled='true']) {
+  .v-button[data-variant='elevated']:active:not(:disabled, [aria-disabled='true']) {
     background: color-mix(
       in oklab,
       var(--vectis-color-surface-raised),
@@ -263,30 +263,30 @@ const passedAttrs = computed(() => {
   }
 
   /* Tonal (Material 3 filled tonal) : fond teinté + texte teinté */
-  .ds-button[data-variant='tonal'] {
+  .v-button[data-variant='tonal'] {
     background: var(--tone-bg-soft);
     color: var(--tone-text-tinted);
   }
 
-  .ds-button[data-variant='tonal']:hover:not(:disabled, [aria-disabled='true']) {
+  .v-button[data-variant='tonal']:hover:not(:disabled, [aria-disabled='true']) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
-  .ds-button[data-variant='tonal']:active:not(:disabled, [aria-disabled='true']) {
+  .v-button[data-variant='tonal']:active:not(:disabled, [aria-disabled='true']) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 14%);
   }
 
-  .ds-button:is(:disabled, [aria-disabled='true']) {
+  .v-button:is(:disabled, [aria-disabled='true']) {
     cursor: not-allowed;
   }
 
   /* Loading : le bouton garde ses couleurs, simplement atténuées */
-  .ds-button[data-loading] {
+  .v-button[data-loading] {
     opacity: 0.5;
   }
 
   /* Désactivé (hors loading) : nuances de gris (tokens surchargés par le thème dark) */
-  .ds-button:is(:disabled, [aria-disabled='true']):not([data-loading]):is(
+  .v-button:is(:disabled, [aria-disabled='true']):not([data-loading]):is(
       [data-variant='solid'],
       [data-variant='elevated'],
       [data-variant='tonal']
@@ -296,18 +296,18 @@ const passedAttrs = computed(() => {
     box-shadow: none;
   }
 
-  .ds-button:is(:disabled, [aria-disabled='true']):not([data-loading])[data-variant='outline'] {
+  .v-button:is(:disabled, [aria-disabled='true']):not([data-loading])[data-variant='outline'] {
     background: transparent;
     color: var(--vectis-color-text-subtle);
     border-color: var(--vectis-color-border);
   }
 
-  .ds-button:is(:disabled, [aria-disabled='true']):not([data-loading])[data-variant='ghost'] {
+  .v-button:is(:disabled, [aria-disabled='true']):not([data-loading])[data-variant='ghost'] {
     background: transparent;
     color: var(--vectis-color-text-subtle);
   }
 
-  .ds-button-spinner {
+  .v-button-spinner {
     /* boîte à la taille des icônes (le spinner remplace iconStart) :
        aucun décalage de largeur au passage en loading. font-size = taille de
        la boîte : le Spinner (1em) la remplit exactement */
@@ -321,7 +321,7 @@ const passedAttrs = computed(() => {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-button {
+    .v-button {
       transition: none;
     }
   }

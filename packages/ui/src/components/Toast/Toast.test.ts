@@ -36,33 +36,31 @@ describe('Toast (carte interne)', () => {
 
   it("affiche l'icône par défaut du tone", () => {
     const { container } = renderToast({ tone: 'success' })
-    expect(container.querySelector<HTMLElement>('.ds-toast-icon')?.dataset.icon).toBe(
-      'check_circle',
-    )
+    expect(container.querySelector<HTMLElement>('.v-toast-icon')?.dataset.icon).toBe('check_circle')
   })
 
   it("icon: nom personnalisé remplace l'icône du tone", () => {
     const { container } = renderToast({ icon: 'rocket' })
-    expect(container.querySelector<HTMLElement>('.ds-toast-icon')?.dataset.icon).toBe('rocket')
+    expect(container.querySelector<HTMLElement>('.v-toast-icon')?.dataset.icon).toBe('rocket')
   })
 
   it('icon: `{ src }` rendu en image', () => {
     const { container } = renderToast({ icon: { src: 'https://example.test/icon.svg' } })
-    const img = container.querySelector('.ds-toast-icon img') as HTMLImageElement
+    const img = container.querySelector('.v-toast-icon img') as HTMLImageElement
     expect(img.getAttribute('src')).toBe('https://example.test/icon.svg')
   })
 
   it("icon: false n'affiche aucune icône", () => {
     const { container } = renderToast({ icon: false })
-    expect(container.querySelector('.ds-toast-icon')).toBeNull()
+    expect(container.querySelector('.v-toast-icon')).toBeNull()
   })
 
   it('titre optionnel : rendu seulement s’il est fourni', () => {
     const { container } = renderToast()
-    expect(container.querySelector('.ds-toast-title')).toBeNull()
+    expect(container.querySelector('.v-toast-title')).toBeNull()
 
     const withTitle = renderToast({ title: 'Bravo' })
-    expect(withTitle.container.querySelector('.ds-toast-title')?.textContent).toBe('Bravo')
+    expect(withTitle.container.querySelector('.v-toast-title')?.textContent).toBe('Bravo')
   })
 
   it('closable: la croix émet close avec l’id ; closable: false la masque', async () => {

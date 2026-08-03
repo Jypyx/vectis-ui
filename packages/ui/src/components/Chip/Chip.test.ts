@@ -10,7 +10,7 @@ describe('Chip', () => {
     })
     expect(queryByRole('button')).toBeNull()
     expect(queryByRole('link')).toBeNull()
-    expect(container.querySelector('.ds-chip-action')?.tagName).toBe('SPAN')
+    expect(container.querySelector('.v-chip-action')?.tagName).toBe('SPAN')
     expect(getByText('Étiquette')).toBeTruthy()
   })
 
@@ -54,7 +54,7 @@ describe('Chip', () => {
       attrs: { onClick },
       slots: { default: 'Docs' },
     })
-    const action = container.querySelector('.ds-chip-action')!
+    const action = container.querySelector('.v-chip-action')!
     expect(action.tagName).toBe('A')
     expect(action.hasAttribute('href')).toBe(false)
     expect(action.getAttribute('aria-disabled')).toBe('true')
@@ -96,7 +96,7 @@ describe('Chip', () => {
       props: { selectable: true, check: true, iconStart: 'star', selected: true },
       slots: { default: 'Filtre' },
     })
-    const icone = (nom: string) => container.querySelector(`.ds-icon[data-icon='${nom}']`)
+    const icone = (nom: string) => container.querySelector(`.v-icon[data-icon='${nom}']`)
     expect(icone('check')).toBeTruthy()
     expect(icone('star')).toBeNull()
     await rerender({ selected: false })
@@ -121,11 +121,11 @@ describe('Chip', () => {
       props: { dismissible: true },
       slots: { default: 'Tag' },
     })
-    expect(container.querySelector<HTMLElement>('.ds-chip-remove .ds-icon')?.dataset.icon).toBe(
+    expect(container.querySelector<HTMLElement>('.v-chip-remove .v-icon')?.dataset.icon).toBe(
       'close',
     )
     return rerender({ dismissIcon: { src: 'https://example.com/x.svg' } }).then(() => {
-      expect(container.querySelector('.ds-chip-remove img')?.getAttribute('src')).toBe(
+      expect(container.querySelector('.v-chip-remove img')?.getAttribute('src')).toBe(
         'https://example.com/x.svg',
       )
     })
@@ -144,13 +144,11 @@ describe('Chip', () => {
 
   it('icône seule : data-icon-only posé seulement sans libellé', () => {
     const { container } = render(Chip, { props: { iconStart: 'favorite' } })
-    expect(container.querySelector('.ds-chip')?.hasAttribute('data-icon-only')).toBe(true)
+    expect(container.querySelector('.v-chip')?.hasAttribute('data-icon-only')).toBe(true)
     const withLabel = render(Chip, { props: { iconStart: 'favorite' }, slots: { default: 'Tag' } })
-    expect(withLabel.container.querySelector('.ds-chip')?.hasAttribute('data-icon-only')).toBe(
-      false,
-    )
+    expect(withLabel.container.querySelector('.v-chip')?.hasAttribute('data-icon-only')).toBe(false)
     const noIcon = render(Chip, {})
-    expect(noIcon.container.querySelector('.ds-chip')?.hasAttribute('data-icon-only')).toBe(false)
+    expect(noIcon.container.querySelector('.v-chip')?.hasAttribute('data-icon-only')).toBe(false)
   })
 
   it('répartit les attrs : class/style sur la racine, le reste sur l’action', () => {
@@ -159,8 +157,8 @@ describe('Chip', () => {
       attrs: { class: 'extra', style: 'margin: 4px;', 'data-x': '1' },
       slots: { default: 'Tag' },
     })
-    const root = container.querySelector('.ds-chip') as HTMLElement
-    const action = container.querySelector('.ds-chip-action') as HTMLElement
+    const root = container.querySelector('.v-chip') as HTMLElement
+    const action = container.querySelector('.v-chip-action') as HTMLElement
     expect(root.classList.contains('extra')).toBe(true)
     expect(root.style.margin).toBe('4px')
     expect(root.hasAttribute('data-x')).toBe(false)
@@ -170,7 +168,7 @@ describe('Chip', () => {
 
   it('data-attributes par défaut, couleur custom en --custom-color inline', () => {
     const { container, rerender } = render(Chip, { slots: { default: 'Tag' } })
-    const root = container.querySelector('.ds-chip') as HTMLElement
+    const root = container.querySelector('.v-chip') as HTMLElement
     expect(root.getAttribute('data-variant')).toBe('tonal')
     expect(root.getAttribute('data-tone')).toBe('neutral')
     expect(root.getAttribute('data-shape')).toBe('chip')
@@ -183,10 +181,10 @@ describe('Chip', () => {
     })
   })
 
-  it('pose data-size/data-compact sur la racine ds-control (défaut xs)', () => {
+  it('pose data-size/data-compact sur la racine v-control (défaut xs)', () => {
     const { container, rerender } = render(Chip, { slots: { default: 'Tag' } })
-    const root = container.querySelector('.ds-chip') as HTMLElement
-    expect(root.classList.contains('ds-control')).toBe(true)
+    const root = container.querySelector('.v-chip') as HTMLElement
+    expect(root.classList.contains('v-control')).toBe(true)
     expect(root.getAttribute('data-size')).toBe('xs')
     expect(root.hasAttribute('data-compact')).toBe(false)
     return rerender({ size: 'sm', compact: true }).then(() => {

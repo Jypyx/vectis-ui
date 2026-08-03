@@ -2,12 +2,12 @@
  * Point d'entrée CSS du design system (`@vectis/ui/styles.css`).
  *
  * L'ordre des layers est déclaré ici, une fois pour toutes :
- *   ds.reset < ds.tokens < ds.components < ds.utilities
+ *   vectis.reset < vectis.tokens < vectis.components < vectis.utilities
  * Tout style consommateur NON layerisé gagne automatiquement sur ces layers —
  * c'est le mécanisme de surcharge voulu. Pour surcharger finement en gardant
- * la cascade du DS, un consommateur peut aussi écrire dans `ds.utilities`.
+ * la cascade du DS, un consommateur peut aussi écrire dans `vectis.utilities`.
  */
-@layer ds.reset, ds.tokens, ds.components, ds.utilities;
+@layer vectis.reset, vectis.tokens, vectis.components, vectis.utilities;
 
 @import './reset.css';
 @import './tokens.css';

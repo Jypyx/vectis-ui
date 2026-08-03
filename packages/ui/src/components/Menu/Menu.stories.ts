@@ -151,7 +151,7 @@ export const Groupes: Story = {
     // de la liste ne casse pas (hauteurs non mesurables en jsdom). Tolérance :
     // le panneau porte une transition `transform`, les rects mesurés en fin
     // d'animation diffèrent au 100 000e de pixel.
-    const libelle = menu.querySelector('.ds-menu-group-label') as HTMLElement
+    const libelle = menu.querySelector('.v-menu-group-label') as HTMLElement
     await expect(libelle.getBoundingClientRect().height).toBeCloseTo(
       canvas.getByRole('menuitem', { name: 'Renommer' }).getBoundingClientRect().height,
       1,

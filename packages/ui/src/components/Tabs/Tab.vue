@@ -60,7 +60,7 @@ function onFocus() {
 <template>
   <Button
     :id="tabId"
-    class="ds-tab"
+    class="v-tab"
     role="tab"
     :aria-selected="selected ? 'true' : 'false'"
     :aria-controls="panelId"
@@ -79,21 +79,21 @@ function onFocus() {
     </template>
     <!-- le libellé est enveloppé : `text-overflow` ne s'applique pas au texte
          anonyme d'un conteneur flex, et `grow` doit pouvoir le tronquer -->
-    <span v-if="!iconOnly" class="ds-tab-label"
+    <span v-if="!iconOnly" class="v-tab-label"
       ><slot>{{ label }}</slot></span
     >
   </Button>
 </template>
 
 <style>
-@layer ds.components {
+@layer vectis.components {
   /*
    * Surcharges de Button qualifiées par [data-size] (toujours rendu par
-   * Button) : elles battent .ds-button[data-variant='…'] quel que soit l'ordre
-   * du CSS bundlé — même hack de spécificité que .ds-icon-button.
+   * Button) : elles battent .v-button[data-variant='…'] quel que soit l'ordre
+   * du CSS bundlé — même hack de spécificité que .v-icon-button.
    */
-  .ds-tab[data-size] {
-    /* ancre de l'indicateur ::after ; .ds-button ne pose pas de position */
+  .v-tab[data-size] {
+    /* ancre de l'indicateur ::after ; .v-button ne pose pas de position */
     position: relative;
     /*
      * Jamais compressé : c'est CE QUI produit le débordement de la liste. Sans
@@ -104,7 +104,7 @@ function onFocus() {
     white-space: nowrap;
   }
 
-  .ds-tab[data-size][data-icon-only] {
+  .v-tab[data-size][data-icon-only] {
     padding-inline: 0;
     min-inline-size: var(--control-height);
   }
@@ -113,22 +113,22 @@ function onFocus() {
    * L'onglet vit dans un conteneur `overflow: auto` qui rognerait un
    * outline-offset positif : anneau intérieur.
    */
-  .ds-tab[data-size]:focus-visible {
+  .v-tab[data-size]:focus-visible {
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
-  .ds-tab-label {
+  .v-tab-label {
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  .ds-tabs[data-grow] .ds-tab[data-size] {
+  .v-tabs[data-grow] .v-tab[data-size] {
     flex: 1 1 0;
     min-inline-size: 0;
   }
 
   /* Rayon emboîté dans la piste creuse (rayon de surface moins son padding) */
-  .ds-tabs[data-variant='inset'] .ds-tab[data-size] {
+  .v-tabs[data-variant='inset'] .v-tab[data-size] {
     border-radius: calc(var(--vectis-radius-surface) - var(--vectis-space-1));
   }
 
@@ -140,7 +140,7 @@ function onFocus() {
    * sur la liste et non ici (c'est elle qui le pose) ; celui de la barre reste,
    * il sépare les boutons de défilement, pas les onglets.
    */
-  .ds-tabs:is([data-variant='flat'], [data-variant='outlined']) .ds-tab[data-size] {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tab[data-size] {
     border-radius: 0;
   }
 
@@ -154,17 +154,17 @@ function onFocus() {
    * les vrais premier et dernier enfants de la liste (ce sont des `span`, les
    * onglets les seuls `button`).
    */
-  .ds-tabs[data-variant='outlined'] .ds-tab[data-size]:first-of-type {
+  .v-tabs[data-variant='outlined'] .v-tab[data-size]:first-of-type {
     border-start-start-radius: var(--vectis-radius-interactive);
   }
 
-  .ds-tabs[data-variant='outlined'][data-orientation='horizontal'] .ds-tab[data-size]:last-of-type {
+  .v-tabs[data-variant='outlined'][data-orientation='horizontal'] .v-tab[data-size]:last-of-type {
     border-start-end-radius: var(--vectis-radius-interactive);
   }
 
   /* vertical : la piste ayant migré au bord de fin, le bord libre est celui de
      départ — les extrémités de la colonne y arrondissent leurs coins */
-  .ds-tabs[data-variant='outlined'][data-orientation='vertical'] .ds-tab[data-size]:last-of-type {
+  .v-tabs[data-variant='outlined'][data-orientation='vertical'] .v-tab[data-size]:last-of-type {
     border-end-start-radius: var(--vectis-radius-interactive);
   }
 
@@ -173,7 +173,7 @@ function onFocus() {
    * variable privée de Button : il suit le tone de l'onglet actif ET le gris de
    * l'état désactivé, sans couplage.
    */
-  .ds-tabs:is([data-variant='flat'], [data-variant='outlined']) .ds-tab[data-size]::after {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tab[data-size]::after {
     content: '';
     position: absolute;
     inset-inline: 0;
@@ -184,8 +184,8 @@ function onFocus() {
     transition: opacity var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
-    .ds-tab[data-size]::after {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+    .v-tab[data-size]::after {
     inset-block: 0;
     inset-inline: auto;
     inset-inline-start: 0;
@@ -193,13 +193,13 @@ function onFocus() {
     inline-size: var(--vectis-control-size-tab-indicator);
   }
 
-  .ds-tabs:is([data-variant='flat'], [data-variant='outlined'])
-    .ds-tab[data-size][aria-selected='true']::after {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])
+    .v-tab[data-size][aria-selected='true']::after {
     opacity: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-tabs:is([data-variant='flat'], [data-variant='outlined']) .ds-tab[data-size]::after {
+    .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tab[data-size]::after {
       transition: none;
     }
   }

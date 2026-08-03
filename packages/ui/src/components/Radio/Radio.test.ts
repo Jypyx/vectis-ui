@@ -29,7 +29,7 @@ describe('Radio', () => {
       props: { modelValue: '', value: 'x', labelPosition: 'start', spread: true },
       slots: { default: 'X' },
     })
-    const root = container.querySelector('.ds-radio') as HTMLElement
+    const root = container.querySelector('.v-radio') as HTMLElement
     expect(root.getAttribute('data-label-position')).toBe('start')
     expect(root.hasAttribute('data-spread')).toBe(true)
   })

@@ -149,7 +149,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     v-if="rendered"
     ref="dialogEl"
     v-bind="rootAttrs"
-    class="ds-dialog"
+    class="v-dialog"
     :style="{ '--dialog-width': width }"
     :role="role === 'alertdialog' ? 'alertdialog' : undefined"
     :aria-labelledby="title ? titleId : undefined"
@@ -164,16 +164,10 @@ defineExpose({ show, close: requestClose, el: dialogEl })
       sticky À L'INTÉRIEUR (donc descendantes interrogeables — les container
       queries stylent les descendants, jamais les frères).
     -->
-    <header class="ds-dialog-header">
+    <header class="v-dialog-header">
       <slot name="header">
-        <div class="ds-dialog-titles">
-          <Typography
-            v-if="title"
-            :id="titleId"
-            as="h2"
-            variant="heading-3"
-            class="ds-dialog-title"
-          >
+        <div class="v-dialog-titles">
+          <Typography v-if="title" :id="titleId" as="h2" variant="heading-3" class="v-dialog-title">
             {{ title }}
           </Typography>
           <Typography
@@ -181,17 +175,17 @@ defineExpose({ show, close: requestClose, el: dialogEl })
             :id="subtitleId"
             variant="subtitle"
             tone="muted"
-            class="ds-dialog-subtitle"
+            class="v-dialog-subtitle"
           >
             {{ subtitle }}
           </Typography>
         </div>
       </slot>
-      <div v-if="closable || $slots.headerActions" class="ds-dialog-header-actions">
+      <div v-if="closable || $slots.headerActions" class="v-dialog-header-actions">
         <slot name="headerActions" />
         <IconButton
           v-if="closable"
-          class="ds-dialog-close"
+          class="v-dialog-close"
           :label="resolvedCloseLabel"
           variant="ghost"
           tone="neutral"
@@ -202,32 +196,32 @@ defineExpose({ show, close: requestClose, el: dialogEl })
         </IconButton>
       </div>
     </header>
-    <div class="ds-dialog-scroll">
-      <span class="ds-dialog-edge ds-dialog-edge--top" aria-hidden="true" />
-      <div class="ds-dialog-body">
+    <div class="v-dialog-scroll">
+      <span class="v-dialog-edge v-dialog-edge--top" aria-hidden="true" />
+      <div class="v-dialog-body">
         <slot />
       </div>
-      <span class="ds-dialog-edge ds-dialog-edge--bottom" aria-hidden="true" />
+      <span class="v-dialog-edge v-dialog-edge--bottom" aria-hidden="true" />
     </div>
-    <footer v-if="$slots.footer" class="ds-dialog-footer">
+    <footer v-if="$slots.footer" class="v-dialog-footer">
       <slot name="footer" />
     </footer>
   </dialog>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-dialog {
+@layer vectis.components {
+  .v-dialog {
     /* largeur posée inline (prop width) ; jamais plus large/haut que le viewport
        moins les marges */
     inline-size: var(--dialog-width);
     max-inline-size: calc(100dvi - 2 * var(--vectis-space-4));
     max-block-size: calc(100dvb - 2 * var(--vectis-space-4));
     /* recentre la modale : l'UA centre les <dialog> modaux via `margin: auto`,
-       mais notre reset (`* { margin: 0 }`, layer ds.reset) l'écrase — on le
-       restaure ici (layer ds.components, plus fort que ds.reset) */
+       mais notre reset (`* { margin: 0 }`, layer vectis.reset) l'écrase — on le
+       restaure ici (layer vectis.components, plus fort que vectis.reset) */
     margin: auto;
-    /* header/footer fixes, seul .ds-dialog-scroll défile ; overflow:hidden
+    /* header/footer fixes, seul .v-dialog-scroll défile ; overflow:hidden
        clippe les coins arrondis */
     display: flex;
     flex-direction: column;
@@ -242,23 +236,23 @@ defineExpose({ show, close: requestClose, el: dialogEl })
   }
 
   /*
-   * Garde-fou indispensable : `.ds-dialog { display: flex }` (auteur) battrait le
+   * Garde-fou indispensable : `.v-dialog { display: flex }` (auteur) battrait le
    * `dialog:not([open]) { display: none }` de l'UA — une modale fermée resterait
    * dans le flux, en haut à gauche, captant les clics. On restaure le display:none
-   * fermé (même rôle que `.ds-overlay:not(:popover-open)`). Utile aussi le temps
+   * fermé (même rôle que `.v-overlay:not(:popover-open)`). Utile aussi le temps
    * de la frame montage → showModal() et en SSR.
    */
-  .ds-dialog:not([open]) {
+  .v-dialog:not([open]) {
     display: none;
   }
 
   /* le conteneur reçoit le focus à l'ouverture (showModal) : pas d'anneau
      autour de toute la modale, le focus utile est sur les contrôles internes */
-  .ds-dialog:focus-visible {
+  .v-dialog:focus-visible {
     outline: none;
   }
 
-  .ds-dialog-scroll {
+  .v-dialog-scroll {
     /* la SEULE zone qui défile : occupe l'espace entre header et footer, la
        barre de défilement y reste donc confinée */
     flex: 1 1 auto;
@@ -278,24 +272,24 @@ defineExpose({ show, close: requestClose, el: dialogEl })
    * évitent qu'elles n'occupent de l'espace. Transparentes par défaut, révélées
    * au débordement plus bas.
    */
-  .ds-dialog-edge {
+  .v-dialog-edge {
     flex: none;
     block-size: 1px;
     position: sticky;
     background: transparent;
   }
 
-  .ds-dialog-edge--top {
+  .v-dialog-edge--top {
     inset-block-start: 0;
     margin-block-end: -1px;
   }
 
-  .ds-dialog-edge--bottom {
+  .v-dialog-edge--bottom {
     inset-block-end: 0;
     margin-block-start: -1px;
   }
 
-  .ds-dialog-header {
+  .v-dialog-header {
     flex: none; /* fixe en haut, hors zone de défilement */
     display: flex;
     align-items: flex-start;
@@ -304,17 +298,17 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     padding: var(--vectis-space-6) var(--vectis-space-6) var(--vectis-space-3);
   }
 
-  .ds-dialog-titles {
+  .v-dialog-titles {
     display: flex;
     flex-direction: column;
     min-inline-size: 0;
   }
 
   /* Titre et sous-titre : rendus par Typography (heading-3 / subtitle muted) —
-     les classes .ds-dialog-title/.ds-dialog-subtitle restent posées comme
+     les classes .v-dialog-title/.v-dialog-subtitle restent posées comme
      points d'accroche (surcharges consommateur, tests). */
 
-  .ds-dialog-header-actions {
+  .v-dialog-header-actions {
     display: flex;
     align-items: center;
     gap: var(--vectis-space-1);
@@ -323,7 +317,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     margin-inline-end: calc(-1 * var(--vectis-space-2));
   }
 
-  .ds-dialog-body {
+  .v-dialog-body {
     /* grandit pour remplir la zone quand le contenu est court ; garde sa hauteur
        naturelle (donc déborde et fait défiler) quand il est long */
     flex: 1 0 auto;
@@ -333,7 +327,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     line-height: var(--vectis-text-body-md-leading);
   }
 
-  .ds-dialog-footer {
+  .v-dialog-footer {
     flex: none; /* fixe en bas, hors zone de défilement */
     display: flex;
     align-items: center;
@@ -353,13 +347,13 @@ defineExpose({ show, close: requestClose, el: dialogEl })
    * Dégradation gracieuse : là où non supporté, les traits restent transparents.
    */
   @container scroll-state(scrollable: top) {
-    .ds-dialog-edge--top {
+    .v-dialog-edge--top {
       background: var(--vectis-color-border);
     }
   }
 
   @container scroll-state(scrollable: bottom) {
-    .ds-dialog-edge--bottom {
+    .v-dialog-edge--bottom {
       background: var(--vectis-color-border);
     }
   }
@@ -371,33 +365,33 @@ defineExpose({ show, close: requestClose, el: dialogEl })
    * donc pas besoin de `overlay`/`display allow-discrete`. L'élément fraîchement
    * monté part des valeurs @starting-style puis rejoint l'état ouvert.
    */
-  .ds-dialog {
+  .v-dialog {
     transition:
       opacity var(--vectis-duration-base) var(--vectis-ease-default),
       transform var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   @starting-style {
-    .ds-dialog[open] {
+    .v-dialog[open] {
       opacity: 0;
       transform: scale(0.97);
     }
   }
 
-  .ds-dialog::backdrop {
+  .v-dialog::backdrop {
     background: var(--vectis-color-backdrop);
     transition: opacity var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   @starting-style {
-    .ds-dialog[open]::backdrop {
+    .v-dialog[open]::backdrop {
       opacity: 0;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-dialog,
-    .ds-dialog::backdrop {
+    .v-dialog,
+    .v-dialog::backdrop {
       transition: none;
     }
   }

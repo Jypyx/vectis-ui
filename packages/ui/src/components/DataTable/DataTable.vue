@@ -408,7 +408,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
 <template>
   <div
-    class="ds-table-wrapper"
+    class="v-table-wrapper"
     :class="rootClass"
     :style="[heightStyle, rootStyle]"
     :data-variant="variant"
@@ -418,14 +418,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     :data-sticky-header="stickyHeader ? '' : undefined"
     :data-selectable="selectable ? '' : undefined"
   >
-    <div v-if="title || $slots.header || searchable" class="ds-table-toolbar">
-      <Typography as="div" variant="heading-4" class="ds-table-title">
+    <div v-if="title || $slots.header || searchable" class="v-table-toolbar">
+      <Typography as="div" variant="heading-4" class="v-table-title">
         <slot name="header">{{ title }}</slot>
       </Typography>
       <Input
         v-if="searchable"
         v-model="search"
-        class="ds-table-search"
+        class="v-table-search"
         type="search"
         size="sm"
         :compact="compact"
@@ -437,16 +437,16 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     </div>
 
     <!-- Seule la table défile : toolbar et footer restent en place. -->
-    <div class="ds-table-scroller">
-      <table class="ds-table" v-bind="forwardedAttrs">
-        <caption v-if="caption" class="ds-table-caption">
+    <div class="v-table-scroller">
+      <table class="v-table" v-bind="forwardedAttrs">
+        <caption v-if="caption" class="v-table-caption">
           {{
             caption
           }}
         </caption>
-        <thead class="ds-table-head">
+        <thead class="v-table-head">
           <tr>
-            <th v-if="selectable" scope="col" class="ds-table-select">
+            <th v-if="selectable" scope="col" class="v-table-select">
               <Checkbox
                 :model-value="allVisibleSelected"
                 :indeterminate="masterIndeterminate"
@@ -464,14 +464,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
               <button
                 v-if="column.sortable"
                 type="button"
-                class="ds-table-sort"
+                class="v-table-sort"
                 :data-direction="sort?.key === column.key ? sort.direction : undefined"
                 @click="toggleSort(column.key)"
               >
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
                 <!-- décorative : sans `label`, Icon pose aria-hidden lui-même —
                      l'état de tri est porté par l'aria-sort du th. -->
-                <Icon class="ds-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
+                <Icon class="v-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
               </button>
               <template v-else>
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
@@ -482,12 +482,12 @@ const heightStyle = computed<StyleValue | undefined>(() =>
         <tbody>
           <!-- Ordre des états : chargement → vide → contenu. -->
           <tr v-if="loading">
-            <td :colspan="colCount" class="ds-table-state">
+            <td :colspan="colCount" class="v-table-state">
               <Spinner :label="m.dataTable.loading" />
             </td>
           </tr>
           <tr v-else-if="displayedRows.length === 0">
-            <td :colspan="colCount" class="ds-table-state">{{ resolvedEmptyText }}</td>
+            <td :colspan="colCount" class="v-table-state">{{ resolvedEmptyText }}</td>
           </tr>
           <template v-else>
             <tr
@@ -497,7 +497,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
             >
               <!-- data-selected et non aria-selected : invalide sur une row de
                    role=table (grid seulement) — l'état accessible est la case cochée. -->
-              <td v-if="selectable" class="ds-table-select">
+              <td v-if="selectable" class="v-table-select">
                 <Checkbox
                   :model-value="isSelected(row, index)"
                   :aria-label="rowSelectLabel(row, index)"
@@ -526,13 +526,13 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     </div>
 
     <!-- Footer : sélection à gauche, lignes par page → plage → pagination à droite. -->
-    <div v-if="paginated || selectable" class="ds-table-footer">
-      <span v-if="selectable" class="ds-table-selection" aria-live="polite">{{
+    <div v-if="paginated || selectable" class="v-table-footer">
+      <span v-if="selectable" class="v-table-selection" aria-live="polite">{{
         selectionText
       }}</span>
-      <div v-if="paginated" class="ds-table-footer-end">
-        <div v-if="perPageOptions?.length" class="ds-table-per-page">
-          <span class="ds-table-per-page-label" aria-hidden="true">{{ resolvedPerPageLabel }}</span>
+      <div v-if="paginated" class="v-table-footer-end">
+        <div v-if="perPageOptions?.length" class="v-table-per-page">
+          <span class="v-table-per-page-label" aria-hidden="true">{{ resolvedPerPageLabel }}</span>
           <!-- match-trigger : le panneau épouse l'option la plus large (« 10 »,
                « 25 »…) au lieu de la largeur minimale par défaut, sans jamais
                être plus étroit que le bouton qui l'ouvre. -->
@@ -559,7 +559,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
             />
           </Menu>
         </div>
-        <span v-if="showRange" class="ds-table-range" aria-live="polite">{{ rangeText }}</span>
+        <span v-if="showRange" class="v-table-range" aria-live="polite">{{ rangeText }}</span>
         <Pagination
           v-model="page"
           :length="pageCount"
@@ -575,10 +575,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-table-wrapper {
+@layer vectis.components {
+  .v-table-wrapper {
     /* Densité : paddings de cellules, réduits d'un cran en compact (modèle
-       Accordion — pas d'échelle .ds-control : aucune hauteur de contrôle unique). */
+       Accordion — pas d'échelle .v-control : aucune hauteur de contrôle unique). */
     --table-pad-block: var(--vectis-space-3);
     --table-pad-inline: var(--vectis-space-3);
     --table-head-pad-block: var(--vectis-space-2);
@@ -610,7 +610,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     block-size: 100%;
   }
 
-  .ds-table-wrapper[data-compact] {
+  .v-table-wrapper[data-compact] {
     --table-pad-block: var(--vectis-space-2);
     --table-pad-inline: var(--vectis-space-2);
     --table-head-pad-block: var(--vectis-space-1);
@@ -618,7 +618,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
   /* Carte bordée ; `flat` (défaut) n'a rien à annuler, il n'ajoute simplement
      rien — c'est l'hôte qui porte le cadre et la surface. */
-  .ds-table-wrapper[data-variant='outlined'] {
+  .v-table-wrapper[data-variant='outlined'] {
     --table-frame-pad: var(--table-pad-inline);
     --table-surface: var(--vectis-color-surface-raised);
 
@@ -648,13 +648,13 @@ const heightStyle = computed<StyleValue | undefined>(() =>
    * plus haut que son hôte doit défiler — sinon il serait rogné, et
    * inatteignable, par le `overflow: clip` de la variante `outlined`.
    */
-  .ds-table-scroller {
+  .v-table-scroller {
     flex: 1 1 auto;
     min-block-size: 0;
     overflow: auto;
   }
 
-  .ds-table-toolbar {
+  .v-table-toolbar {
     flex: none; /* fixe en haut, hors zone de défilement */
     display: flex;
     flex-wrap: wrap;
@@ -668,25 +668,25 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
   /* Titre : rendu par Typography (heading-4) — la couleur reste explicite,
      la toolbar peut vivre dans un contexte de texte atténué. */
-  .ds-table-title {
+  .v-table-title {
     color: var(--vectis-color-text);
   }
 
-  /* Surcharge qualifiée (0,2,0) du `.ds-input { width: 100% }` (0,1,0)
+  /* Surcharge qualifiée (0,2,0) du `.v-input { width: 100% }` (0,1,0)
      d'Input — indépendante de l'ordre du bundle. */
-  .ds-table-toolbar .ds-input {
+  .v-table-toolbar .v-input {
     inline-size: var(--vectis-control-size-table-search);
     max-inline-size: 100%;
   }
 
-  .ds-table {
+  .v-table {
     width: 100%;
     border-collapse: collapse;
     font-size: var(--vectis-text-body-md-size);
     color: var(--vectis-color-text);
   }
 
-  .ds-table-caption {
+  .v-table-caption {
     padding-block-end: var(--vectis-space-3);
     padding-inline: var(--table-frame-pad);
     text-align: start;
@@ -694,7 +694,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-table th {
+  .v-table th {
     padding: var(--table-head-pad-block) var(--table-pad-inline);
     text-align: start;
     font-size: var(--vectis-text-body-md-size);
@@ -704,48 +704,48 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     border-block-end: 1px solid var(--vectis-color-border);
   }
 
-  .ds-table td {
+  .v-table td {
     padding: var(--table-pad-block) var(--table-pad-inline);
     border-block-end: 1px solid var(--vectis-color-border);
   }
 
-  .ds-table tbody tr:last-child td {
+  .v-table tbody tr:last-child td {
     border-block-end: none;
   }
 
-  .ds-table [data-align='end'] {
+  .v-table [data-align='end'] {
     text-align: end;
   }
 
-  .ds-table [data-align='center'] {
+  .v-table [data-align='center'] {
     text-align: center;
   }
 
   /* Colonne de sélection rétrécie au contenu (layout table auto). */
-  .ds-table .ds-table-select {
+  .v-table .v-table-select {
     inline-size: 0;
   }
 
-  .ds-table-wrapper[data-striped] tbody tr:nth-child(even) {
+  .v-table-wrapper[data-striped] tbody tr:nth-child(even) {
     background-color: var(--vectis-color-surface-sunken);
   }
 
   /* Après le zébrage : à spécificité égale, la sélection gagne à l'ordre. */
-  .ds-table-wrapper[data-selectable] tbody tr[data-selected] {
+  .v-table-wrapper[data-selectable] tbody tr[data-selected] {
     background-color: var(--vectis-color-accent-surface);
   }
 
   /* Fond opaque obligatoire : le contenu défile sous l'en-tête figé. Il doit
      valoir la surface réelle du tableau, d'où la variable — une valeur en dur
      laisserait une couture au bord du cadre en thème sombre. */
-  .ds-table-wrapper[data-sticky-header] th {
+  .v-table-wrapper[data-sticky-header] th {
     position: sticky;
     inset-block-start: 0;
     z-index: 1;
     background-color: var(--table-surface);
   }
 
-  .ds-table-sort {
+  .v-table-sort {
     /* Contexte d'Icon : 20px, opsz 20.
        Sans lui l'icône retomberait sur 1em, soit la taille de texte du th. */
     --vectis-icon-size: var(--vectis-icon-size-md);
@@ -763,32 +763,32 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     border-radius: var(--vectis-radius-xs);
   }
 
-  .ds-table-sort:hover {
+  .v-table-sort:hover {
     color: var(--vectis-color-text);
   }
 
-  .ds-table-sort:focus-visible {
+  .v-table-sort:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
   /* atténuée tant que la colonne n'est pas celle qui porte le tri : le glyphe
      neutre annonce l'affordance sans concurrencer la direction active */
-  .ds-table-sort-icon {
+  .v-table-sort-icon {
     opacity: 0.35;
   }
 
-  .ds-table-sort[data-direction] .ds-table-sort-icon {
+  .v-table-sort[data-direction] .v-table-sort-icon {
     opacity: 1;
   }
 
-  .ds-table-state {
+  .v-table-state {
     padding: var(--vectis-space-6);
     text-align: center;
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-table-footer {
+  .v-table-footer {
     flex: none; /* fixe en bas, hors zone de défilement */
     display: flex;
     flex-wrap: wrap;
@@ -806,7 +806,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
    * justify-content ne suffirait pas — les deux zones sont des items frères et
    * le décompte doit rester au bord opposé).
    */
-  .ds-table-footer-end {
+  .v-table-footer-end {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -815,14 +815,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     margin-inline-start: auto;
   }
 
-  .ds-table-selection,
-  .ds-table-range,
-  .ds-table-per-page-label {
+  .v-table-selection,
+  .v-table-range,
+  .v-table-per-page-label {
     font-size: var(--vectis-text-body-md-size);
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-table-per-page {
+  .v-table-per-page {
     display: flex;
     align-items: center;
     gap: var(--vectis-space-2);
@@ -830,7 +830,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
   /* --- Mode stack : cartes sous 640px de conteneur, pur CSS --- */
   @container (max-width: 640px) {
-    .ds-table-wrapper[data-responsive='stack'] .ds-table-head {
+    .v-table-wrapper[data-responsive='stack'] .v-table-head {
       position: absolute;
       width: 1px;
       height: 1px;
@@ -839,17 +839,17 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       clip-path: inset(50%);
     }
 
-    .ds-table-wrapper[data-responsive='stack'] tbody tr {
+    .v-table-wrapper[data-responsive='stack'] tbody tr {
       display: block;
       padding-block: var(--vectis-space-2);
       border-block-end: 1px solid var(--vectis-color-border);
     }
 
-    .ds-table-wrapper[data-responsive='stack'] tbody tr:last-child {
+    .v-table-wrapper[data-responsive='stack'] tbody tr:last-child {
       border-block-end: none;
     }
 
-    .ds-table-wrapper[data-responsive='stack'] td {
+    .v-table-wrapper[data-responsive='stack'] td {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
@@ -860,7 +860,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     }
 
     /* Pseudo-en-tête de carte : rôle overline (sans capitales forcées) */
-    .ds-table-wrapper[data-responsive='stack'] td::before {
+    .v-table-wrapper[data-responsive='stack'] td::before {
       content: attr(data-label);
       font-size: var(--vectis-text-overline-size);
       font-weight: var(--vectis-text-overline-weight);
@@ -870,17 +870,17 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
     /* La case de sélection n'a pas de data-label : pas de pseudo-en-tête,
        elle ouvre la carte. */
-    .ds-table-wrapper[data-responsive='stack'] td.ds-table-select {
+    .v-table-wrapper[data-responsive='stack'] td.v-table-select {
       justify-content: flex-start;
     }
 
-    .ds-table-wrapper[data-responsive='stack'] td.ds-table-select::before {
+    .v-table-wrapper[data-responsive='stack'] td.v-table-select::before {
       content: none;
     }
 
     /* Toolbar étroite : le champ de recherche passe sous le titre, pleine
        largeur (vaut pour scroll ET stack — la toolbar ne défile jamais). */
-    .ds-table-search {
+    .v-table-search {
       flex: 1 1 100%;
     }
   }

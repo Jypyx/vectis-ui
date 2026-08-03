@@ -16,11 +16,11 @@ describe('Spinner', () => {
 
   it('prop size numérique : pose --spinner-size en style inline, sinon rien', () => {
     const explicite = render(Spinner, { props: { size: 32 } })
-    const spinnerExplicite = explicite.container.querySelector('.ds-spinner') as HTMLElement
+    const spinnerExplicite = explicite.container.querySelector('.v-spinner') as HTMLElement
     expect(spinnerExplicite.style.getPropertyValue('--spinner-size')).toBe('32px')
 
     const implicite = render(Spinner)
-    const spinnerImplicite = implicite.container.querySelector('.ds-spinner') as HTMLElement
+    const spinnerImplicite = implicite.container.querySelector('.v-spinner') as HTMLElement
     expect(spinnerImplicite.hasAttribute('style')).toBe(false)
   })
 })

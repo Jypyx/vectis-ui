@@ -92,7 +92,7 @@ describe('Combobox', () => {
     const input = getByRole('combobox') as HTMLInputElement
     expect(input.value).toBe('France') // le libellé reste affiché
     const labels = () =>
-      [...container.querySelectorAll('[role="option"] .ds-combobox-option-label')].map((o) =>
+      [...container.querySelectorAll('[role="option"] .v-combobox-option-label')].map((o) =>
         o.textContent?.trim(),
       )
 
@@ -207,8 +207,8 @@ describe('Combobox', () => {
         o.textContent?.includes(text),
       )
     // France est sélectionnée → coche ; Belgique non → pas de coche
-    expect(optionByText('France')?.querySelector('.ds-combobox-option-check')).toBeTruthy()
-    expect(optionByText('Belgique')?.querySelector('.ds-combobox-option-check')).toBeFalsy()
+    expect(optionByText('France')?.querySelector('.v-combobox-option-check')).toBeTruthy()
+    expect(optionByText('Belgique')?.querySelector('.v-combobox-option-check')).toBeFalsy()
   })
 })
 
@@ -242,7 +242,7 @@ describe('Combobox groupé', () => {
     })
 
   const labels = (container: Element) =>
-    [...container.querySelectorAll('[role="option"] .ds-combobox-option-label')].map((o) =>
+    [...container.querySelectorAll('[role="option"] .v-combobox-option-label')].map((o) =>
       o.textContent?.trim(),
     )
 
@@ -287,7 +287,7 @@ describe('Combobox groupé', () => {
 
   it('les séparateurs orphelins ne sont pas rendus (tête, fin, consécutifs)', async () => {
     const { getByRole, container } = renderGroupe()
-    const separators = () => container.querySelectorAll('.ds-combobox-separator').length
+    const separators = () => container.querySelectorAll('.v-combobox-separator').length
     const panel = () => container.querySelector('[role="listbox"]')!
     expect(separators()).toBe(2)
 
@@ -300,8 +300,8 @@ describe('Combobox groupé', () => {
     await fireEvent.update(getByRole('combobox') as HTMLInputElement, 'n')
     expect(labels(container)).toEqual(['France', 'Sénégal', 'Japon'])
     expect(separators()).toBe(2)
-    expect(panel().firstElementChild?.classList.contains('ds-combobox-separator')).toBe(false)
-    expect(panel().lastElementChild?.classList.contains('ds-combobox-separator')).toBe(false)
+    expect(panel().firstElementChild?.classList.contains('v-combobox-separator')).toBe(false)
+    expect(panel().lastElementChild?.classList.contains('v-combobox-separator')).toBe(false)
   })
 
   it('une option de groupe se sélectionne et alimente les Chips comme une option nue', async () => {
@@ -316,7 +316,7 @@ describe('Combobox groupé', () => {
     // — requêtes bornées au `container` : les deux rendus partagent document.body
     const second = renderGroupe({ multiple: true, modelValue: ['sn'] })
     expect(
-      [...second.container.querySelectorAll('.ds-chip [aria-label]')].map((b) =>
+      [...second.container.querySelectorAll('.v-chip [aria-label]')].map((b) =>
         b.getAttribute('aria-label'),
       ),
     ).toEqual(['Retirer Sénégal'])
@@ -331,7 +331,7 @@ describe('Combobox asynchrone', () => {
   })
 
   const labels = (container: Element) =>
-    [...container.querySelectorAll('[role="option"] .ds-combobox-option-label')].map((o) =>
+    [...container.querySelectorAll('[role="option"] .v-combobox-option-label')].map((o) =>
       o.textContent?.trim(),
     )
 
@@ -455,7 +455,7 @@ describe('Combobox asynchrone', () => {
     expect(
       getAllByRole('button', { name: /Retirer/ }).map((b) => b.getAttribute('aria-label')),
     ).toEqual(['Retirer France'])
-    expect(container.querySelector('.ds-chip')?.textContent).toContain('France')
+    expect(container.querySelector('.v-chip')?.textContent).toContain('France')
   })
 
   it('le champ affiche le libellé dès que les options arrivent (montage sans options)', async () => {
@@ -469,7 +469,7 @@ describe('Combobox asynchrone', () => {
 
   it('loading sans option : état de chargement, jamais « aucun résultat »', () => {
     const { container } = renderCombobox({ options: [], loading: true })
-    const state = container.querySelector('.ds-combobox-state')
+    const state = container.querySelector('.v-combobox-state')
     expect(state?.textContent).toContain('Chargement…')
     expect(state?.textContent).not.toContain('Aucun résultat')
   })
@@ -477,13 +477,13 @@ describe('Combobox asynchrone', () => {
   it('loading avec options : les options restent affichées', () => {
     const { container } = renderCombobox({ loading: true })
     expect(container.querySelectorAll('[role="option"]').length).toBe(4)
-    expect(container.querySelector('.ds-combobox-state')).toBeNull()
+    expect(container.querySelector('.v-combobox-state')).toBeNull()
   })
 
   it('loading : le champ échange son chevron contre un spinner décoratif', () => {
     const { container } = renderCombobox({ loading: true })
-    expect(container.querySelector('.ds-combobox-chevron')).toBeNull()
-    const spinner = container.querySelector('.ds-input-field > .ds-spinner')
+    expect(container.querySelector('.v-combobox-chevron')).toBeNull()
+    const spinner = container.querySelector('.v-input-field > .v-spinner')
     // décoratif : son role="status" ne doit pas doubler l'annonce du panneau
     expect(spinner?.getAttribute('aria-hidden')).toBe('true')
   })
@@ -492,7 +492,7 @@ describe('Combobox asynchrone', () => {
     // Mapping unique (script) que le CSS `--chip-height` doit refléter :
     // xs jusqu'à md, sm en lg ; le cran du dessous passe par `compact`.
     const { container, rerender } = renderCombobox({ multiple: true, modelValue: ['fr'] })
-    const chip = () => container.querySelector('.ds-chip') as HTMLElement
+    const chip = () => container.querySelector('.v-chip') as HTMLElement
     const panel = () => container.querySelector('[role="listbox"]') as HTMLElement
 
     // défaut (md) : Chip xs plein
@@ -513,14 +513,14 @@ describe('Combobox asynchrone', () => {
     expect(chip().getAttribute('data-size')).toBe('sm')
     expect(chip().hasAttribute('data-compact')).toBe(true)
     // data-compact sur la racine : c'est lui qui arme la règle CSS lg+compact
-    expect(container.querySelector('.ds-combobox')?.hasAttribute('data-compact')).toBe(true)
+    expect(container.querySelector('.v-combobox')?.hasAttribute('data-compact')).toBe(true)
   })
 
   it('hasMore : une sentinelle ferme la liste (support du scroll infini)', () => {
     const { container } = renderCombobox({ hasMore: true })
     const listbox = container.querySelector('[role="listbox"]') as HTMLElement
-    expect(listbox.lastElementChild?.className).toContain('ds-combobox-more')
-    expect(renderCombobox().container.querySelector('.ds-combobox-more')).toBeNull()
+    expect(listbox.lastElementChild?.className).toContain('v-combobox-more')
+    expect(renderCombobox().container.querySelector('.v-combobox-more')).toBeNull()
   })
 
   it('slot #option : contenu personnalisé, avec l’état de l’option', async () => {
@@ -531,13 +531,13 @@ describe('Combobox asynchrone', () => {
         option: (slotProps: { option: ComboboxOption; active: boolean; index: number }) =>
           h(
             'span',
-            { class: 'ds-test-option' },
+            { class: 'v-test-option' },
             `${slotProps.index}:${slotProps.option.label}${slotProps.active ? '*' : ''}`,
           ),
       },
     })
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
-    expect([...container.querySelectorAll('.ds-test-option')].map((o) => o.textContent)).toEqual([
+    expect([...container.querySelectorAll('.v-test-option')].map((o) => o.textContent)).toEqual([
       '0:France*',
       '1:Belgique',
       '2:Sénégal',
@@ -551,18 +551,18 @@ describe('Combobox asynchrone', () => {
       attrs: { 'aria-label': 'Pays' },
       slots: {
         empty: (slotProps: { query: string }) =>
-          h('span', { class: 'ds-test-empty' }, `créer « ${slotProps.query} »`),
+          h('span', { class: 'v-test-empty' }, `créer « ${slotProps.query} »`),
       },
     })
     await fireEvent.update(getByRole('combobox'), 'zzz')
-    expect(container.querySelector('.ds-test-empty')?.textContent).toBe('créer « zzz »')
+    expect(container.querySelector('.v-test-empty')?.textContent).toBe('créer « zzz »')
 
     const chargement = render(Combobox, {
       props: { options: [], modelValue: '', loading: true },
       attrs: { 'aria-label': 'Pays' },
-      slots: { loading: () => h('span', { class: 'ds-test-loading' }, 'patientez') },
+      slots: { loading: () => h('span', { class: 'v-test-loading' }, 'patientez') },
     })
-    expect(chargement.container.querySelector('.ds-test-loading')?.textContent).toBe('patientez')
+    expect(chargement.container.querySelector('.v-test-loading')?.textContent).toBe('patientez')
   })
 
   it('option.icon rend une icône dans la rangée, son absence n’en rend aucune', async () => {
@@ -578,11 +578,11 @@ describe('Combobox asynchrone', () => {
       HTMLElement,
     ]
     // ligature Material : le nom de l'icône est le contenu du symbole
-    expect(avec.querySelector('.ds-icon-symbol')?.textContent).toBe('flag')
+    expect(avec.querySelector('.v-icon-symbol')?.textContent).toBe('flag')
     // l'icône précède le libellé (la coche, elle, vient après)
-    expect(avec.firstElementChild?.classList.contains('ds-combobox-option-label')).toBe(false)
-    expect(sans.querySelector('.ds-icon-symbol')).toBeNull()
-    expect(sans.firstElementChild?.classList.contains('ds-combobox-option-label')).toBe(true)
+    expect(avec.firstElementChild?.classList.contains('v-combobox-option-label')).toBe(false)
+    expect(sans.querySelector('.v-icon-symbol')).toBeNull()
+    expect(sans.firstElementChild?.classList.contains('v-combobox-option-label')).toBe(true)
   })
 
   it('slot #chip : remplace le Chip par défaut, `remove` retire la valeur', async () => {
@@ -600,14 +600,14 @@ describe('Combobox asynchrone', () => {
         }) =>
           h(
             'button',
-            { class: 'ds-test-chip', onClick: slotProps.remove },
+            { class: 'v-test-chip', onClick: slotProps.remove },
             `${slotProps.label}/${slotProps.option?.icon ?? '—'}/${slotProps.size}`,
           ),
       },
     })
     // le Chip par défaut a bien cédé la place
-    expect(container.querySelector('.ds-chip')).toBeNull()
-    const chip = container.querySelector('.ds-test-chip') as HTMLElement
+    expect(container.querySelector('.v-chip')).toBeNull()
+    const chip = container.querySelector('.v-test-chip') as HTMLElement
     expect(chip.textContent).toBe('France/—/xs')
 
     await fireEvent.click(chip)
@@ -625,14 +625,14 @@ describe('Combobox asynchrone', () => {
       attrs: { 'aria-label': 'Pays' },
       slots: {
         chip: (slotProps: { option: ComboboxOption | undefined; label: string }) =>
-          h('span', { class: 'ds-test-chip' }, `${slotProps.label}/${slotProps.option?.icon}`),
+          h('span', { class: 'v-test-chip' }, `${slotProps.label}/${slotProps.option?.icon}`),
       },
     })
-    expect(container.querySelector('.ds-test-chip')?.textContent).toBe('France/flag')
+    expect(container.querySelector('.v-test-chip')?.textContent).toBe('France/flag')
 
     // la recherche suivante ne renvoie plus l'option : le cache la garde entière
     // (sans lui, le Chip afficherait l'identifiant brut et perdrait son icône)
     await rerender({ options: [] })
-    expect(container.querySelector('.ds-test-chip')?.textContent).toBe('France/flag')
+    expect(container.querySelector('.v-test-chip')?.textContent).toBe('France/flag')
   })
 })

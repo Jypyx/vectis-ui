@@ -40,7 +40,7 @@ function mount(
 
 /** Items dans l'ordre du DOM. */
 const itemsOf = (container: Element) => [
-  ...container.querySelectorAll<HTMLElement>('.ds-toggle-item'),
+  ...container.querySelectorAll<HTMLElement>('.v-toggle-item'),
 ]
 
 const pressedOf = (container: Element) =>
@@ -72,10 +72,10 @@ describe('Toggle', () => {
       expect(group?.getAttribute('aria-labelledby')).toBe('titre')
     })
 
-    it('chaque item reste un .ds-button (classes fusionnées, pas remplacées)', () => {
+    it('chaque item reste un .v-button (classes fusionnées, pas remplacées)', () => {
       const { container } = mount()
       for (const item of itemsOf(container)) {
-        expect(item.classList.contains('ds-button')).toBe(true)
+        expect(item.classList.contains('v-button')).toBe(true)
         expect(item.tagName).toBe('BUTTON')
       }
     })
@@ -84,22 +84,22 @@ describe('Toggle', () => {
   describe('structure', () => {
     it('attached (défaut) : les items sont enfants DIRECTS du ButtonGroup (couture)', () => {
       const { container } = mount()
-      expect(container.querySelector('.ds-toggle.ds-button-group')).not.toBeNull()
+      expect(container.querySelector('.v-toggle.v-button-group')).not.toBeNull()
       // garde structurelle : un wrapper intercalé casserait silencieusement la couture
-      expect(container.querySelector('.ds-button-group > .ds-toggle-item')).not.toBeNull()
+      expect(container.querySelector('.v-button-group > .v-toggle-item')).not.toBeNull()
     })
 
     it('attached : l’orientation transite par la prop de ButtonGroup', () => {
       const { container } = mount({ toggleAttrs: 'orientation="vertical"' })
-      expect(container.querySelector('.ds-button-group')?.getAttribute('data-orientation')).toBe(
+      expect(container.querySelector('.v-button-group')?.getAttribute('data-orientation')).toBe(
         'vertical',
       )
     })
 
     it('détaché : un simple div porte le rôle et data-orientation', () => {
       const { container } = mount({ toggleAttrs: ':attached="false" orientation="vertical"' })
-      expect(container.querySelector('.ds-button-group')).toBeNull()
-      const group = container.querySelector('.ds-toggle')
+      expect(container.querySelector('.v-button-group')).toBeNull()
+      const group = container.querySelector('.v-toggle')
       expect(group?.getAttribute('role')).toBe('group')
       expect(group?.getAttribute('data-orientation')).toBe('vertical')
     })
@@ -217,13 +217,13 @@ describe('Toggle', () => {
         items: iconItems,
       })
       const [first, second] = itemsOf(container)
-      expect(first?.querySelector('.ds-icon')?.hasAttribute('data-filled')).toBe(true)
-      expect(second?.querySelector('.ds-icon')?.hasAttribute('data-filled')).toBe(false)
+      expect(first?.querySelector('.v-icon')?.hasAttribute('data-filled')).toBe(true)
+      expect(second?.querySelector('.v-icon')?.hasAttribute('data-filled')).toBe(false)
     })
 
     it('sans la prop, l’icône sélectionnée reste creuse', () => {
       const { container } = mount({ initial: 'a', items: iconItems })
-      expect(itemsOf(container)[0]?.querySelector('.ds-icon')?.hasAttribute('data-filled')).toBe(
+      expect(itemsOf(container)[0]?.querySelector('.v-icon')?.hasAttribute('data-filled')).toBe(
         false,
       )
     })
@@ -307,7 +307,7 @@ describe('Toggle', () => {
   describe('hors contexte', () => {
     it('un ToggleItem seul se rend, jamais sélectionné, sans erreur au clic', async () => {
       const { container } = render(ToggleItem, { props: { value: 'a', label: 'Seul' } })
-      const item = container.querySelector('.ds-toggle-item')
+      const item = container.querySelector('.v-toggle-item')
       expect(item?.getAttribute('aria-pressed')).toBe('false')
       await fireEvent.click(item as HTMLElement)
       expect(item?.getAttribute('aria-pressed')).toBe('false')

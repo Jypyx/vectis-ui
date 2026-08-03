@@ -12,4 +12,4 @@ export interface AvatarGroupContext {
   compact?: boolean
 }
 
-export const avatarGroupKey: InjectionKey<AvatarGroupContext> = Symbol('ds-avatar-group')
+export const avatarGroupKey: InjectionKey<AvatarGroupContext> = Symbol('v-avatar-group')

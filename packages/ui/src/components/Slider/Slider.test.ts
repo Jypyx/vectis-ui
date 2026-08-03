@@ -35,7 +35,7 @@ describe('Slider', () => {
     const { container } = render(Slider, {
       props: { modelValue: [25, 75], range: true, label: 'x' },
     })
-    const style = container.querySelector('.ds-slider')?.getAttribute('style') ?? ''
+    const style = container.querySelector('.v-slider')?.getAttribute('style') ?? ''
     expect(style).toContain('--start-fraction: 0.25')
     expect(style).toContain('--end-fraction: 0.75')
   })
@@ -44,7 +44,7 @@ describe('Slider', () => {
     const { container, rerender } = render(Slider, {
       props: { modelValue: 40, label: 'x' },
     })
-    const root = () => container.querySelector('.ds-slider')!
+    const root = () => container.querySelector('.v-slider')!
     expect(root().hasAttribute('data-orientation')).toBe(false)
     await rerender({ orientation: 'vertical' })
     expect(root().getAttribute('data-orientation')).toBe('vertical')
@@ -54,9 +54,9 @@ describe('Slider', () => {
     const { container } = render(Slider, {
       props: { modelValue: 50, ticks: true, step: 25, label: 'x' },
     })
-    const ticks = container.querySelectorAll('.ds-slider-tick')
+    const ticks = container.querySelectorAll('.v-slider-tick')
     expect(ticks).toHaveLength(5)
-    const filled = container.querySelectorAll('.ds-slider-tick[data-filled]')
+    const filled = container.querySelectorAll('.v-slider-tick[data-filled]')
     // 0, 25, 50 remplis (≤ valeur)
     expect(filled).toHaveLength(3)
   })
@@ -65,7 +65,7 @@ describe('Slider', () => {
     const { container } = render(Slider, {
       props: { modelValue: [25, 75], range: true, ticks: true, step: 25, label: 'x' },
     })
-    const filled = container.querySelectorAll('.ds-slider-tick[data-filled]')
+    const filled = container.querySelectorAll('.v-slider-tick[data-filled]')
     expect(filled).toHaveLength(3)
   })
 
@@ -73,7 +73,7 @@ describe('Slider', () => {
     const { container } = render(Slider, {
       props: { modelValue: 50, ticks: true, step: 1, label: 'x' },
     })
-    expect(container.querySelectorAll('.ds-slider-tick')).toHaveLength(0)
+    expect(container.querySelectorAll('.v-slider-tick')).toHaveLength(0)
   })
 
   it('labels texte : rendus par pas et annoncés via aria-valuetext', async () => {
@@ -87,10 +87,10 @@ describe('Slider', () => {
         label: 'Taille',
       },
     })
-    const rendered = [...container.querySelectorAll('.ds-slider-label')].map((el) => el.textContent)
+    const rendered = [...container.querySelectorAll('.v-slider-label')].map((el) => el.textContent)
     expect(rendered).toEqual(['XS', 'S', 'M', 'L', 'XL'])
     // labels implique ticks
-    expect(container.querySelectorAll('.ds-slider-tick')).toHaveLength(5)
+    expect(container.querySelectorAll('.v-slider-tick')).toHaveLength(5)
     const slider = getByRole('slider', { name: 'Taille' })
     expect(slider.getAttribute('aria-valuetext')).toBe('M')
     await fireEvent.update(slider, '3')
@@ -158,13 +158,13 @@ describe('Slider', () => {
     const simple = render(Slider, {
       props: { modelValue: 40, tooltip: true, label: 'x' },
     })
-    expect(simple.container.querySelectorAll('.ds-slider-tooltip')).toHaveLength(1)
-    expect(simple.container.querySelector('.ds-slider-tooltip')?.textContent).toBe('40')
+    expect(simple.container.querySelectorAll('.v-slider-tooltip')).toHaveLength(1)
+    expect(simple.container.querySelector('.v-slider-tooltip')?.textContent).toBe('40')
 
     const range = render(Slider, {
       props: { modelValue: [20, 60], range: true, tooltip: true, label: 'x' },
     })
-    expect(range.container.querySelectorAll('.ds-slider-tooltip')).toHaveLength(2)
+    expect(range.container.querySelectorAll('.v-slider-tooltip')).toHaveLength(2)
   })
 
   it('tooltip : affiche le label du pas quand labels est fourni', () => {
@@ -179,14 +179,14 @@ describe('Slider', () => {
         label: 'x',
       },
     })
-    expect(container.querySelector('.ds-slider-tooltip')?.textContent).toBe('Milieu')
+    expect(container.querySelector('.v-slider-tooltip')?.textContent).toBe('Milieu')
   })
 
   it('disabled : data-disabled sur la racine, contrôles désactivés', () => {
     const { container, getByRole } = render(Slider, {
       props: { modelValue: 40, disabled: true, inputs: true, label: 'Volume' },
     })
-    expect(container.querySelector('.ds-slider[data-disabled]')).toBeTruthy()
+    expect(container.querySelector('.v-slider[data-disabled]')).toBeTruthy()
     expect((getByRole('slider', { name: 'Volume' }) as HTMLInputElement).disabled).toBe(true)
     expect((getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement).disabled).toBe(true)
   })

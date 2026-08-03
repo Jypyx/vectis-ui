@@ -80,7 +80,7 @@ function onKeydown(event: KeyboardEvent) {
 
 <template>
   <span
-    class="ds-tooltip"
+    class="v-tooltip"
     @pointerenter="show()"
     @pointerleave="hide"
     @focusin="show(true)"
@@ -96,7 +96,7 @@ function onKeydown(event: KeyboardEvent) {
       :placement="placement"
       :surface="false"
       role="tooltip"
-      class="ds-tooltip-panel"
+      class="v-tooltip-panel"
     >
       <slot name="content">{{ text }}</slot>
     </Popover>
@@ -104,8 +104,8 @@ function onKeydown(event: KeyboardEvent) {
 </template>
 
 <style>
-@layer ds.components {
-  .ds-tooltip {
+@layer vectis.components {
+  .v-tooltip {
     display: inline-block;
     anchor-name: --tooltip-anchor;
     /* confine le nom d'ancre à ce sous-arbre : chaque panneau (même en top
@@ -114,7 +114,7 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   /* `position-anchor` vient de Popover (prop `anchor`) */
-  .ds-tooltip-panel {
+  .v-tooltip-panel {
     width: max-content;
     max-width: min(18rem, calc(100vw - var(--vectis-space-8)));
     padding: var(--vectis-space-1) var(--vectis-space-2);

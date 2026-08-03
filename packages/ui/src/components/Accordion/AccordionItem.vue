@@ -63,23 +63,23 @@ function onSummaryClick(event: MouseEvent) {
 
 <template>
   <details
-    class="ds-accordion-item"
+    class="v-accordion-item"
     :name="accordion?.name"
     :open="defaultOpen || undefined"
     :data-swap="collapseIcon ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
   >
     <summary
-      class="ds-accordion-summary"
+      class="v-accordion-summary"
       :aria-disabled="disabled || undefined"
       :tabindex="disabled ? -1 : undefined"
       @click="onSummaryClick"
     >
       <slot name="start">
-        <Icon v-if="iconStart" class="ds-accordion-icon-start" v-bind="iconProps(iconStart)" />
+        <Icon v-if="iconStart" class="v-accordion-icon-start" v-bind="iconProps(iconStart)" />
       </slot>
-      <span class="ds-accordion-heading">
-        <span class="ds-accordion-title"
+      <span class="v-accordion-heading">
+        <span class="v-accordion-title"
           ><slot name="title">{{ title }}</slot></span
         >
         <Typography
@@ -87,35 +87,35 @@ function onSummaryClick(event: MouseEvent) {
           as="span"
           variant="caption"
           tone="muted"
-          class="ds-accordion-subtitle"
+          class="v-accordion-subtitle"
           ><slot name="subtitle">{{ subtitle }}</slot></Typography
         >
       </span>
-      <Icon class="ds-accordion-icon" v-bind="iconProps(expandIcon)" />
+      <Icon class="v-accordion-icon" v-bind="iconProps(expandIcon)" />
       <!-- Deux icônes rendues, permutation 100 % CSS sur [open] -->
       <Icon
         v-if="collapseIcon"
-        class="ds-accordion-icon ds-accordion-icon-open"
+        class="v-accordion-icon v-accordion-icon-open"
         v-bind="iconProps(collapseIcon)"
       />
     </summary>
-    <div class="ds-accordion-content">
+    <div class="v-accordion-content">
       <slot />
     </div>
   </details>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-accordion-item {
+@layer vectis.components {
+  .v-accordion-item {
     interpolate-size: allow-keywords;
   }
 
-  .ds-accordion-item + .ds-accordion-item {
+  .v-accordion-item + .v-accordion-item {
     border-block-start: 1px solid var(--vectis-color-border);
   }
 
-  .ds-accordion-summary {
+  .v-accordion-summary {
     /* Contexte d'Icon : 20px quelle que soit la densité (seuls les paddings
        varient en compact), opsz 20 comme le mapping md de la table des tailles */
     --vectis-icon-size: var(--vectis-icon-size-md);
@@ -134,15 +134,15 @@ function onSummaryClick(event: MouseEvent) {
     color: var(--vectis-color-text);
   }
 
-  .ds-accordion-summary::-webkit-details-marker {
+  .v-accordion-summary::-webkit-details-marker {
     display: none;
   }
 
-  .ds-accordion-item:not([data-disabled]) > .ds-accordion-summary:hover {
+  .v-accordion-item:not([data-disabled]) > .v-accordion-summary:hover {
     background: var(--vectis-color-surface-muted);
   }
 
-  .ds-accordion-summary:focus-visible {
+  .v-accordion-summary:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
@@ -153,18 +153,18 @@ function onSummaryClick(event: MouseEvent) {
    * donc parallèle à la découpe `overflow: hidden` au lieu d'y être rogné.
    * Le dernier summary n'est au bord bas que panneau fermé.
    */
-  .ds-accordion-item:first-child > .ds-accordion-summary {
+  .v-accordion-item:first-child > .v-accordion-summary {
     border-start-start-radius: var(--accordion-corner-radius, 0);
     border-start-end-radius: var(--accordion-corner-radius, 0);
   }
 
-  .ds-accordion-item:last-child:not([open]) > .ds-accordion-summary {
+  .v-accordion-item:last-child:not([open]) > .v-accordion-summary {
     border-end-start-radius: var(--accordion-corner-radius, 0);
     border-end-end-radius: var(--accordion-corner-radius, 0);
   }
 
   /* Bloc textuel : titre seul, ou titre + sous-titre empilés */
-  .ds-accordion-heading {
+  .v-accordion-heading {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -172,48 +172,48 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   /* Sous-titre : rendu par Typography (caption muted) — la classe
-     .ds-accordion-subtitle reste posée comme point d'accroche (état
+     .v-accordion-subtitle reste posée comme point d'accroche (état
      disabled ci-dessous). */
 
-  /* Classe dédiée (pas .ds-accordion-icon : rotation/permutation réservées au chevron) */
-  .ds-accordion-icon-start {
+  /* Classe dédiée (pas .v-accordion-icon : rotation/permutation réservées au chevron) */
+  .v-accordion-icon-start {
     flex: none;
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-accordion-icon {
+  .v-accordion-icon {
     flex: none;
     color: var(--vectis-color-text-muted);
     transition: rotate var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
-  .ds-accordion-item[open]:not([data-swap]) > .ds-accordion-summary .ds-accordion-icon {
+  .v-accordion-item[open]:not([data-swap]) > .v-accordion-summary .v-accordion-icon {
     rotate: 180deg;
   }
 
   /* Permutation des deux icônes (data-swap = collapseIcon fournie) */
-  .ds-accordion-item[data-swap][open]
-    > .ds-accordion-summary
-    .ds-accordion-icon:not(.ds-accordion-icon-open),
-  .ds-accordion-item[data-swap]:not([open]) > .ds-accordion-summary .ds-accordion-icon-open {
+  .v-accordion-item[data-swap][open]
+    > .v-accordion-summary
+    .v-accordion-icon:not(.v-accordion-icon-open),
+  .v-accordion-item[data-swap]:not([open]) > .v-accordion-summary .v-accordion-icon-open {
     display: none;
   }
 
   /* Désactivé : nuances de gris par tokens (jamais d'opacité) */
-  .ds-accordion-item[data-disabled] > .ds-accordion-summary {
+  .v-accordion-item[data-disabled] > .v-accordion-summary {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
   /* text-muted est plus foncé que text-subtle : icônes et sous-titre suivent le titre */
-  .ds-accordion-item[data-disabled] .ds-accordion-icon,
-  .ds-accordion-item[data-disabled] .ds-accordion-icon-start,
-  .ds-accordion-item[data-disabled] .ds-accordion-subtitle {
+  .v-accordion-item[data-disabled] .v-accordion-icon,
+  .v-accordion-item[data-disabled] .v-accordion-icon-start,
+  .v-accordion-item[data-disabled] .v-accordion-subtitle {
     color: inherit;
   }
 
   /* Ouverture animée en pur CSS (::details-content, progressive enhancement) */
-  .ds-accordion-item::details-content {
+  .v-accordion-item::details-content {
     block-size: 0;
     overflow: clip;
     transition:
@@ -221,11 +221,11 @@ function onSummaryClick(event: MouseEvent) {
       content-visibility var(--vectis-duration-base) allow-discrete;
   }
 
-  .ds-accordion-item[open]::details-content {
+  .v-accordion-item[open]::details-content {
     block-size: auto;
   }
 
-  .ds-accordion-content {
+  .v-accordion-content {
     /* Respiration sous le summary, réduite en compact (variables du groupe) */
     padding: var(--accordion-content-pad-start, var(--vectis-space-2))
       var(--accordion-pad-inline, var(--vectis-space-5))
@@ -236,11 +236,11 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-accordion-icon {
+    .v-accordion-icon {
       transition: none;
     }
 
-    .ds-accordion-item::details-content {
+    .v-accordion-item::details-content {
       transition: none;
     }
   }

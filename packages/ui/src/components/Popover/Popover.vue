@@ -9,14 +9,14 @@ import { usePopover } from '../../composables/usePopover'
  *
  * Ce composant porte UNIQUEMENT la plomberie commune à tous les panneaux du
  * DS : l'élément `[popover]` et son mode, le pont d'état DOM ↔ `v-model:open`
- * (cf. `usePopover`), l'ancrage et le placement (`.ds-overlay`/`.ds-floating`),
- * et l'habillage optionnel (`.ds-panel`). Il ne porte NI rôle ARIA, NI clavier,
+ * (cf. `usePopover`), l'ancrage et le placement (`.v-overlay`/`.v-floating`),
+ * et l'habillage optionnel (`.v-panel`). Il ne porte NI rôle ARIA, NI clavier,
  * NI gestion de focus, NI politique de fermeture : c'est ce qui distingue
  * chaque panneau, et ce qui reste chez ses consommateurs (Tooltip, Listbox,
  * DatePicker, TimePicker). Un panneau paramétré par `role` reste proscrit.
  *
  * Deux modes d'ancrage, exclusifs :
- * - slot `#trigger` → le wrapper `.ds-popover` porte l'`anchor-name`, confiné
+ * - slot `#trigger` → le wrapper `.v-popover` porte l'`anchor-name`, confiné
  *   par `anchor-scope` (nom statique partagé : chaque panneau résout SON
  *   wrapper, pas le dernier nommé de la page — cf. Tooltip) ;
  * - prop `anchor` → le consommateur possède déjà racine et contrôle, il pose
@@ -60,7 +60,7 @@ interface PopoverProps {
    * consommateur sur son contrôle. Prime sur le wrapper interne.
    */
   anchor?: string
-  /** Habillage de surface (`.ds-panel` : fond, bordure, ombre, rayon). */
+  /** Habillage de surface (`.v-panel` : fond, bordure, ombre, rayon). */
   surface?: boolean
 }
 
@@ -130,14 +130,14 @@ defineExpose({ show, hide, el: panelEl })
 </script>
 
 <template>
-  <span class="ds-popover" :data-trigger="hasTrigger ? '' : undefined">
+  <span class="v-popover" :data-trigger="hasTrigger ? '' : undefined">
     <slot name="trigger" :trigger-props="triggerProps" />
     <div
       :id="panelId"
       ref="panelEl"
       :popover="mode"
-      class="ds-overlay ds-popover-panel ds-floating"
-      :class="{ 'ds-panel': surface }"
+      class="v-overlay v-popover-panel v-floating"
+      :class="{ 'v-panel': surface }"
       :data-placement="placement"
       :style="panelStyle"
       v-bind="$attrs"
@@ -150,18 +150,18 @@ defineExpose({ show, hide, el: panelEl })
 </template>
 
 <style>
-@layer ds.components {
+@layer vectis.components {
   /*
    * Sans déclencheur, le wrapper ne sert à rien : `display: contents` le retire
    * du layout (le panneau est en `position: fixed`, il n'en dépend pas) — un
    * `inline-block` vide créerait une line box, donc de la hauteur, chez tous
    * les consommateurs internes.
    */
-  .ds-popover {
+  .v-popover {
     display: contents;
   }
 
-  .ds-popover[data-trigger] {
+  .v-popover[data-trigger] {
     display: inline-block;
     anchor-name: --popover-anchor;
     /* confine le nom d'ancre à ce sous-arbre : chaque panneau (même en top
@@ -174,7 +174,7 @@ defineExpose({ show, hide, el: panelEl })
    * `max-block-size` et `overflow` varient d'un consommateur à l'autre et
    * seraient arbitrés par l'ordre du bundle à spécificité égale (0,1,0).
    */
-  .ds-popover-panel {
+  .v-popover-panel {
     position-anchor: var(--anchor-name, --popover-anchor);
   }
 }

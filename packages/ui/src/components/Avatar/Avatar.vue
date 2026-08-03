@@ -136,7 +136,7 @@ const passedAttrs = computed(() => {
   <component
     :is="tag"
     v-bind="passedAttrs"
-    class="ds-avatar ds-control"
+    class="v-avatar v-control"
     :style="rootStyle"
     :data-size="resolvedSize"
     :data-compact="resolvedCompact ? '' : undefined"
@@ -151,22 +151,22 @@ const passedAttrs = computed(() => {
   >
     <img
       v-if="showImage"
-      class="ds-avatar-image"
+      class="v-avatar-image"
       :src="src"
       :alt="alt ?? name ?? ''"
       @error="failed = true"
     />
-    <Icon v-else-if="icon" v-bind="iconProps(icon)" class="ds-avatar-icon" />
+    <Icon v-else-if="icon" v-bind="iconProps(icon)" class="v-avatar-icon" />
     <slot v-else>
-      <span class="ds-avatar-initials" aria-hidden="true">{{ initials }}</span>
+      <span class="v-avatar-initials" aria-hidden="true">{{ initials }}</span>
     </slot>
   </component>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-avatar {
-    /* Tailles/compact : hauteur explicite via la classe partagée ds-control
+@layer vectis.components {
+  .v-avatar {
+    /* Tailles/compact : hauteur explicite via la classe partagée v-control
        (styles/control-size.css) ; le carré rond réutilise --control-height. */
     --avatar-bg: var(--vectis-color-surface-muted);
     --avatar-text: var(--vectis-color-text-muted);
@@ -202,57 +202,57 @@ const passedAttrs = computed(() => {
   }
 
   /* Teinte auto (name, pas de color custom) : L/C fixes, teinte inline. */
-  .ds-avatar[data-auto] {
+  .v-avatar[data-auto] {
     --avatar-bg: oklch(0.9 0.06 var(--avatar-hue));
     --avatar-text: oklch(0.42 0.13 var(--avatar-hue));
   }
 
   /* Couleur custom (--custom-color inline) : prime, texte blanc fixe (contraste à la
      charge du consommateur). Bloc après data-auto. */
-  .ds-avatar[data-custom] {
+  .v-avatar[data-custom] {
     --avatar-bg: var(--custom-color);
     --avatar-text: var(--vectis-color-text-on-accent);
   }
 
   /* Dark : fond sombre teinté + texte clair (le système de thème est opt-in par
      [data-theme='dark'], jamais par media query — cf. tokens.css). */
-  [data-theme='dark'] .ds-avatar[data-auto] {
+  [data-theme='dark'] .v-avatar[data-auto] {
     --avatar-bg: oklch(0.42 0.09 var(--avatar-hue));
     --avatar-text: oklch(0.92 0.05 var(--avatar-hue));
   }
 
-  .ds-avatar-image {
+  .v-avatar-image {
     inline-size: 100%;
     block-size: 100%;
     object-fit: cover;
   }
 
   /* L'icône occupe ~55% du disque (ratio unitless, comme la font-size). */
-  .ds-avatar-icon {
+  .v-avatar-icon {
     --vectis-icon-size: calc(var(--control-height) * 0.55);
   }
 
-  :is(a, button).ds-avatar {
+  :is(a, button).v-avatar {
     cursor: pointer;
   }
 
-  :is(a, button).ds-avatar:hover:not([aria-disabled='true'], :disabled) {
+  :is(a, button).v-avatar:hover:not([aria-disabled='true'], :disabled) {
     background: color-mix(in oklab, var(--avatar-bg), var(--vectis-color-text) 10%);
   }
 
-  :is(a, button).ds-avatar:focus-visible {
+  :is(a, button).v-avatar:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  .ds-avatar:is(:disabled, [aria-disabled='true']) {
+  .v-avatar:is(:disabled, [aria-disabled='true']) {
     cursor: not-allowed;
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-avatar {
+    .v-avatar {
       transition: none;
     }
   }

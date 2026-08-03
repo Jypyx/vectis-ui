@@ -5,7 +5,7 @@ import ProgressCircular from './ProgressCircular.vue'
 
 /** Style inline de la racine (les custom properties y sont posées). */
 const styleOf = (container: Element) =>
-  container.querySelector('.ds-progress-circular')?.getAttribute('style') ?? ''
+  container.querySelector('.v-progress-circular')?.getAttribute('style') ?? ''
 
 /** Le pourcentage est rendu avec une espace insécable (typographie française). */
 const NBSP = ' '
@@ -55,7 +55,7 @@ describe('ProgressCircular', () => {
     const bar = getByRole('progressbar')
     expect(bar.hasAttribute('aria-valuenow')).toBe(false)
     expect(bar.hasAttribute('data-indeterminate')).toBe(true)
-    expect(container.querySelector('.ds-progress-circular-label')).toBeNull()
+    expect(container.querySelector('.v-progress-circular-label')).toBeNull()
     // toujours posée, sinon le calc() du dashoffset serait invalide
     expect(styleOf(container)).toContain('--fill-fraction: 0')
   })
@@ -95,7 +95,7 @@ describe('ProgressCircular', () => {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
-    expect(container.querySelector('.ds-progress-circular-svg')!.getAttribute('aria-hidden')).toBe(
+    expect(container.querySelector('.v-progress-circular-svg')!.getAttribute('aria-hidden')).toBe(
       'true',
     )
     const circles = [...container.querySelectorAll('circle')]
@@ -121,7 +121,7 @@ describe('ProgressCircular', () => {
       props: { value: 65, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
-    const labels = [...container.querySelectorAll('.ds-progress-circular-label')]
+    const labels = [...container.querySelectorAll('.v-progress-circular-label')]
     expect(labels).toHaveLength(1)
     expect(labels[0]!.textContent?.trim()).toBe(`65${NBSP}%`)
     expect(labels[0]!.hasAttribute('aria-hidden')).toBe(false)
@@ -136,7 +136,7 @@ describe('ProgressCircular', () => {
           '<template #default="s">{{ s.value }}/{{ s.max }} — {{ Math.round(s.percent) }}</template>',
       },
     })
-    const labels = [...container.querySelectorAll('.ds-progress-circular-label')]
+    const labels = [...container.querySelectorAll('.v-progress-circular-label')]
     expect(labels).toHaveLength(1)
     expect(labels[0]!.textContent?.trim()).toBe('3/8 — 38')
   })
@@ -158,7 +158,7 @@ describe('ProgressCircular', () => {
       attrs: { 'aria-label': 'x', class: 'mon-donut', id: 'donut', style: 'margin: 4px' },
     })
     const bar = getByRole('progressbar')
-    expect(bar.classList.contains('ds-progress-circular')).toBe(true)
+    expect(bar.classList.contains('v-progress-circular')).toBe(true)
     expect(bar.classList.contains('mon-donut')).toBe(true)
     expect(bar.id).toBe('donut')
     const style = bar.getAttribute('style') ?? ''

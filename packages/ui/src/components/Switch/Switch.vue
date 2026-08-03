@@ -32,25 +32,25 @@ defineSlots<{
 </script>
 
 <template>
-  <label class="ds-switch" :data-label-position="labelPosition" :data-spread="spread || undefined">
+  <label class="v-switch" :data-label-position="labelPosition" :data-spread="spread || undefined">
     <input
       v-model="model"
       type="checkbox"
       role="switch"
-      class="ds-switch-input"
+      class="v-switch-input"
       v-bind="$attrs"
       :disabled="disabled"
     />
-    <span class="ds-switch-track" aria-hidden="true">
-      <span class="ds-switch-thumb" />
+    <span class="v-switch-track" aria-hidden="true">
+      <span class="v-switch-thumb" />
     </span>
-    <span v-if="$slots.default" class="ds-switch-label"><slot /></span>
+    <span v-if="$slots.default" class="v-switch-label"><slot /></span>
   </label>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-switch {
+@layer vectis.components {
+  .v-switch {
     --switch-track-w: var(--vectis-control-size-switch-w);
     --switch-track-h: var(--vectis-control-size-switch-h);
     --switch-pad: 2px;
@@ -65,16 +65,16 @@ defineSlots<{
 
   /* L'input est en position: absolute → hors du flux flex, l'ordre visuel ne
      concerne que le track et le libellé */
-  .ds-switch[data-label-position='start'] {
+  .v-switch[data-label-position='start'] {
     flex-direction: row-reverse;
   }
 
-  .ds-switch[data-spread] {
+  .v-switch[data-spread] {
     display: flex;
     justify-content: space-between;
   }
 
-  .ds-switch-input {
+  .v-switch-input {
     position: absolute;
     opacity: 0;
     width: 1px;
@@ -83,7 +83,7 @@ defineSlots<{
     pointer-events: none;
   }
 
-  .ds-switch-track {
+  .v-switch-track {
     display: inline-flex;
     align-items: center;
     width: var(--switch-track-w);
@@ -95,7 +95,7 @@ defineSlots<{
     transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-switch-thumb {
+  .v-switch-thumb {
     width: calc(var(--switch-track-h) - var(--switch-pad) * 2);
     height: calc(var(--switch-track-h) - var(--switch-pad) * 2);
     background: var(--vectis-color-surface);
@@ -105,15 +105,15 @@ defineSlots<{
     transition: margin-inline-start var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
-  .ds-switch-input:checked + .ds-switch-track {
+  .v-switch-input:checked + .v-switch-track {
     background: var(--vectis-color-accent);
   }
 
-  .ds-switch-input:checked + .ds-switch-track .ds-switch-thumb {
+  .v-switch-input:checked + .v-switch-track .v-switch-thumb {
     margin-inline-start: calc(var(--switch-track-w) - var(--switch-track-h));
   }
 
-  .ds-switch:hover .ds-switch-input:not(:disabled):not(:checked) + .ds-switch-track {
+  .v-switch:hover .v-switch-input:not(:disabled):not(:checked) + .v-switch-track {
     background: color-mix(
       in oklab,
       var(--vectis-color-border-strong),
@@ -121,7 +121,7 @@ defineSlots<{
     );
   }
 
-  .ds-switch-input:focus-visible + .ds-switch-track {
+  .v-switch-input:focus-visible + .v-switch-track {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
@@ -129,23 +129,23 @@ defineSlots<{
   /* Disabled : nuances de gris (mêmes tokens que Checkbox/Radio), pas d'opacité.
      Le thumb reprend text-subtle — la couleur de la coche/du point disabled de
      Checkbox/Radio — pour rester visible sur le track gris dans les deux thèmes. */
-  .ds-switch:has(.ds-switch-input:disabled) {
+  .v-switch:has(.v-switch-input:disabled) {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
-  .ds-switch-input:disabled + .ds-switch-track {
+  .v-switch-input:disabled + .v-switch-track {
     background: var(--vectis-color-surface-muted);
   }
 
-  .ds-switch-input:disabled + .ds-switch-track .ds-switch-thumb {
+  .v-switch-input:disabled + .v-switch-track .v-switch-thumb {
     background: var(--vectis-color-text-subtle);
     box-shadow: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-switch-track,
-    .ds-switch-thumb {
+    .v-switch-track,
+    .v-switch-thumb {
       transition: none;
     }
   }

@@ -27,9 +27,9 @@ describe('Calendar', () => {
     const { container, emitted } = render(Calendar, {
       props: { modelValue: JUNE },
     })
-    const btn = container.querySelector('.ds-calendar-day[data-selected]') as HTMLElement
+    const btn = container.querySelector('.v-calendar-day[data-selected]') as HTMLElement
     expect(btn.textContent).toContain('10')
-    const cell15 = [...container.querySelectorAll('.ds-calendar-day')].find(
+    const cell15 = [...container.querySelectorAll('.v-calendar-day')].find(
       (b) => b.textContent?.trim() === '15' && !b.hasAttribute('data-outside'),
     ) as HTMLElement
     await fireEvent.click(cell15)
@@ -44,7 +44,7 @@ describe('Calendar', () => {
     // navigue vers juin 2026 via un modelValue de départ n'est pas donné → mois courant.
     // On force plutôt le mois via clic sur des jours du mois affiché.
     const days = [
-      ...container.querySelectorAll('.ds-calendar-day:not([data-outside])'),
+      ...container.querySelectorAll('.v-calendar-day:not([data-outside])'),
     ] as HTMLElement[]
     const d20 = days.find((d) => d.textContent?.trim() === '20')!
     const d10 = days.find((d) => d.textContent?.trim() === '10')!
@@ -64,7 +64,7 @@ describe('Calendar', () => {
       props: { selection: 'multiple', modelValue: [] as string[] },
     })
     const days = [
-      ...container.querySelectorAll('.ds-calendar-day:not([data-outside])'),
+      ...container.querySelectorAll('.v-calendar-day:not([data-outside])'),
     ] as HTMLElement[]
     const d5 = days.find((d) => d.textContent?.trim() === '5')!
     await fireEvent.click(d5)
@@ -80,7 +80,7 @@ describe('Calendar', () => {
     const { container, emitted } = render(Calendar, {
       props: { modelValue: JUNE, min: '2026-06-05', max: '2026-06-20' },
     })
-    const days = [...container.querySelectorAll('.ds-calendar-day')] as HTMLElement[]
+    const days = [...container.querySelectorAll('.v-calendar-day')] as HTMLElement[]
     const d1 = days.find((d) => d.textContent?.trim() === '1' && !d.hasAttribute('data-outside'))!
     expect(d1.getAttribute('aria-disabled')).toBe('true')
     await fireEvent.click(d1)
@@ -94,7 +94,7 @@ describe('Calendar', () => {
         disabledDates: (iso: string) => iso === '2026-06-12',
       },
     })
-    const days = [...container.querySelectorAll('.ds-calendar-day')] as HTMLElement[]
+    const days = [...container.querySelectorAll('.v-calendar-day')] as HTMLElement[]
     const d12 = days.find((d) => d.textContent?.trim() === '12' && !d.hasAttribute('data-outside'))!
     expect(d12.getAttribute('aria-disabled')).toBe('true')
   })
@@ -106,7 +106,7 @@ describe('Calendar', () => {
       props: { modelValue: JUNE, showAdjacentDays: false },
     })
     const adjacent = (c: HTMLElement) =>
-      c.querySelectorAll('.ds-calendar-day--static, .ds-calendar-day[data-outside]').length
+      c.querySelectorAll('.v-calendar-day--static, .v-calendar-day[data-outside]').length
     expect(adjacent(withAdjacent.container as HTMLElement)).toBeGreaterThan(0)
     expect(adjacent(withoutAdjacent.container as HTMLElement)).toBe(0)
   })
@@ -114,7 +114,7 @@ describe('Calendar', () => {
   it('n’affiche pas les jours adjacents par défaut', () => {
     const { container } = render(Calendar, { props: { modelValue: JUNE } })
     const adjacent = container.querySelectorAll(
-      '.ds-calendar-day--static, .ds-calendar-day[data-outside]',
+      '.v-calendar-day--static, .v-calendar-day[data-outside]',
     )
     expect(adjacent).toHaveLength(0)
   })
@@ -124,7 +124,7 @@ describe('Calendar', () => {
     const { container } = render(Calendar, {
       props: { modelValue: JUNE, max: '2026-06-24', showAdjacentDays: true },
     })
-    const struck = container.querySelectorAll('.ds-calendar-day--static[data-disabled]')
+    const struck = container.querySelectorAll('.v-calendar-day--static[data-disabled]')
     expect(struck.length).toBeGreaterThan(0)
   })
 
@@ -135,7 +135,7 @@ describe('Calendar', () => {
       props: { modelValue: JUNE, showAdjacentDays: true },
       slots: { day: '<span class="marqueur">{{ params.day }}</span>' },
     })
-    const statics = [...container.querySelectorAll('.ds-calendar-day--static')]
+    const statics = [...container.querySelectorAll('.v-calendar-day--static')]
     expect(statics.length).toBeGreaterThan(0)
     expect(statics.every((s) => s.querySelector('.marqueur') !== null)).toBe(true)
   })
@@ -146,7 +146,7 @@ describe('Calendar', () => {
     })
     // ils deviennent des boutons marqués data-outside
     expect(
-      container.querySelectorAll('button.ds-calendar-day[data-outside]').length,
+      container.querySelectorAll('button.v-calendar-day[data-outside]').length,
     ).toBeGreaterThan(0)
   })
 
@@ -160,8 +160,8 @@ describe('Calendar', () => {
         ],
       },
     })
-    const selected = container.querySelector('.ds-calendar-day[data-selected]') as HTMLElement
-    expect(selected.querySelectorAll('.ds-calendar-dot')).toHaveLength(2)
+    const selected = container.querySelector('.v-calendar-day[data-selected]') as HTMLElement
+    expect(selected.querySelectorAll('.v-calendar-dot')).toHaveLength(2)
   })
 
   it('change de mois via les chevrons', async () => {
@@ -189,7 +189,7 @@ describe('Calendar', () => {
   it('navigue au clavier (flèches) et sélectionne avec Entrée', async () => {
     const { container, emitted } = render(Calendar, { props: { modelValue: JUNE } })
     const grid = container.querySelector('[role="grid"]') as HTMLElement
-    const focused = container.querySelector('.ds-calendar-day[tabindex="0"]') as HTMLElement
+    const focused = container.querySelector('.v-calendar-day[tabindex="0"]') as HTMLElement
     focused.focus()
     keydown(grid, 'ArrowRight') // 10 → 11
     await nextTick()

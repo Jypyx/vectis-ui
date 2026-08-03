@@ -93,7 +93,7 @@ Toute personnalisation est une redéfinition de custom properties, en CSS :
 panel.style.setProperty('--vectis-color-accent', 'oklch(58% 0.2 25)')
 ```
 
-Le CSS du DS vit dans des layers (`ds.reset < ds.tokens < ds.components < ds.utilities`) : **tout style consommateur non-layerisé gagne automatiquement** — surcharger un composant ne demande jamais de guerre de spécificité.
+Le CSS du DS vit dans des layers (`vectis.reset < vectis.tokens < vectis.components < vectis.utilities`) : **tout style consommateur non-layerisé gagne automatiquement** — surcharger un composant ne demande jamais de guerre de spécificité.
 
 ### Accès programmatique aux tokens
 
@@ -125,7 +125,7 @@ Le composant `Icon` résout sa source dans cet ordre : **`render` explicite → 
 
 - **Décorative par défaut** (`aria-hidden`) ; la prop `label` la rend informative (`role="img"` + `aria-label`).
 - L'attribut **`data-icon`** porte le nom demandé quelle que soit la source — accroche stable pour du CSS consommateur et pour les tests.
-- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--vectis-icon-size`** et **`--vectis-icon-opsz`** (c'est ce que fait la classe partagée `ds-control` — Button, Input, Textarea, InputOTP, Chip… — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `Spinner` suit le même principe (1em + `:size` en px), sans API de contexte.
+- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--vectis-icon-size`** et **`--vectis-icon-opsz`** (c'est ce que fait la classe partagée `v-control` — Button, Input, Textarea, InputOTP, Chip… — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `Spinner` suit le même principe (1em + `:size` en px), sans API de contexte.
 - **`--vectis-icon-opsz` ne s'applique qu'à la ligature** : c'est un axe variable de police, sans prise sur un SVG intégré, une image ou un composant tiers. La taille, elle, vaut pour toutes les sources.
 
 ### Toute prop d'icône accepte un nom **ou** un rendu explicite
@@ -316,5 +316,5 @@ pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm build && pnpm bu
 ```
 
 - **Tokens** : ne jamais éditer `src/styles/tokens.css` ni `src/tokens/tokens.json` (générés) — modifier la source `src/tokens/*.ts` puis `pnpm tokens`.
-- **Nouveau composant** : un dossier `src/components/X/` avec `X.vue` (styles non-scoped dans `@layer ds.components`, tokens sémantiques uniquement, variantes en `data-*`), `X.stories.ts` (défaut, variantes, états, cas limites, play functions), `X.test.ts` (logique seulement — le comportement navigateur se teste dans les play functions), et l'export nommé dans `src/index.ts`.
+- **Nouveau composant** : un dossier `src/components/X/` avec `X.vue` (styles non-scoped dans `@layer vectis.components`, tokens sémantiques uniquement, variantes en `data-*`), `X.stories.ts` (défaut, variantes, états, cas limites, play functions), `X.test.ts` (logique seulement — le comportement navigateur se teste dans les play functions), et l'export nommé dans `src/index.ts`.
 - Tout JS de comportement doit être justifié par un commentaire : « est-ce que HTML/CSS moderne sait le faire ? » d'abord.

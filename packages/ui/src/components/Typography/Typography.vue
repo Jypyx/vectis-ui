@@ -78,7 +78,7 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
 <template>
   <component
     :is="tag"
-    class="ds-typography"
+    class="v-typography"
     :data-variant="variant"
     :data-tone="tone === 'default' ? undefined : tone"
     :data-truncate="truncate ? '' : undefined"
@@ -88,8 +88,8 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
 </template>
 
 <style>
-@layer ds.components {
-  .ds-typography {
+@layer vectis.components {
+  .v-typography {
     /* Défauts re-posés sur chaque instance : les custom properties héritent,
        sans quoi un Typography imbriqué sous une variante à tracking (display,
        headings) ou sous `code` hériterait de --typography-tracking / --typography-family. Les
@@ -109,76 +109,76 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
     overflow-wrap: break-word;
   }
 
-  .ds-typography[data-variant='display'] {
+  .v-typography[data-variant='display'] {
     --typography-size: var(--vectis-text-display-size);
     --typography-weight: var(--vectis-text-display-weight);
     --typography-leading: var(--vectis-text-display-leading);
     --typography-tracking: var(--vectis-text-display-tracking);
   }
 
-  .ds-typography[data-variant='heading-1'] {
+  .v-typography[data-variant='heading-1'] {
     --typography-size: var(--vectis-text-heading-1-size);
     --typography-weight: var(--vectis-text-heading-1-weight);
     --typography-leading: var(--vectis-text-heading-1-leading);
     --typography-tracking: var(--vectis-text-heading-1-tracking);
   }
 
-  .ds-typography[data-variant='heading-2'] {
+  .v-typography[data-variant='heading-2'] {
     --typography-size: var(--vectis-text-heading-2-size);
     --typography-weight: var(--vectis-text-heading-2-weight);
     --typography-leading: var(--vectis-text-heading-2-leading);
     --typography-tracking: var(--vectis-text-heading-2-tracking);
   }
 
-  .ds-typography[data-variant='heading-3'] {
+  .v-typography[data-variant='heading-3'] {
     --typography-size: var(--vectis-text-heading-3-size);
     --typography-weight: var(--vectis-text-heading-3-weight);
     --typography-leading: var(--vectis-text-heading-3-leading);
   }
 
-  .ds-typography[data-variant='heading-4'] {
+  .v-typography[data-variant='heading-4'] {
     --typography-size: var(--vectis-text-heading-4-size);
     --typography-weight: var(--vectis-text-heading-4-weight);
     --typography-leading: var(--vectis-text-heading-4-leading);
   }
 
-  .ds-typography[data-variant='subtitle'] {
+  .v-typography[data-variant='subtitle'] {
     --typography-size: var(--vectis-text-subtitle-size);
     --typography-weight: var(--vectis-text-subtitle-weight);
     --typography-leading: var(--vectis-text-subtitle-leading);
   }
 
-  .ds-typography[data-variant='body-lg'] {
+  .v-typography[data-variant='body-lg'] {
     --typography-size: var(--vectis-text-body-lg-size);
     --typography-weight: var(--vectis-text-body-lg-weight);
     --typography-leading: var(--vectis-text-body-lg-leading);
   }
 
-  .ds-typography[data-variant='body-md'] {
+  .v-typography[data-variant='body-md'] {
     --typography-size: var(--vectis-text-body-md-size);
     --typography-weight: var(--vectis-text-body-md-weight);
     --typography-leading: var(--vectis-text-body-md-leading);
   }
 
-  .ds-typography[data-variant='body-sm'] {
+  .v-typography[data-variant='body-sm'] {
     --typography-size: var(--vectis-text-body-sm-size);
     --typography-weight: var(--vectis-text-body-sm-weight);
     --typography-leading: var(--vectis-text-body-sm-leading);
   }
 
-  .ds-typography[data-variant='label'] {
+  .v-typography[data-variant='label'] {
     --typography-size: var(--vectis-text-label-size);
     --typography-weight: var(--vectis-text-label-weight);
     --typography-leading: var(--vectis-text-label-leading);
   }
 
-  .ds-typography[data-variant='caption'] {
+  .v-typography[data-variant='caption'] {
     --typography-size: var(--vectis-text-caption-size);
     --typography-weight: var(--vectis-text-caption-weight);
     --typography-leading: var(--vectis-text-caption-leading);
   }
 
-  .ds-typography[data-variant='overline'] {
+  .v-typography[data-variant='overline'] {
     --typography-size: var(--vectis-text-overline-size);
     --typography-weight: var(--vectis-text-overline-weight);
     --typography-leading: var(--vectis-text-overline-leading);
@@ -187,7 +187,7 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
     text-transform: uppercase;
   }
 
-  .ds-typography[data-variant='code'] {
+  .v-typography[data-variant='code'] {
     --typography-family: var(--vectis-text-family-code);
     --typography-size: var(--vectis-text-code-size);
     --typography-weight: var(--vectis-text-code-weight);
@@ -196,35 +196,35 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
 
   /* `default` n'a pas de bloc : sans --typography-color, le texte hérite du contexte —
      ce qui le rend composable dans une surface inversée ou un Toast teinté. */
-  .ds-typography[data-tone='muted'] {
+  .v-typography[data-tone='muted'] {
     --typography-color: var(--vectis-color-text-muted);
   }
 
-  .ds-typography[data-tone='subtle'] {
+  .v-typography[data-tone='subtle'] {
     --typography-color: var(--vectis-color-text-subtle);
   }
 
-  .ds-typography[data-tone='accent'] {
+  .v-typography[data-tone='accent'] {
     --typography-color: var(--vectis-color-accent-text);
   }
 
-  .ds-typography[data-tone='danger'] {
+  .v-typography[data-tone='danger'] {
     --typography-color: var(--vectis-color-danger-text);
   }
 
-  .ds-typography[data-tone='success'] {
+  .v-typography[data-tone='success'] {
     --typography-color: var(--vectis-color-success-text);
   }
 
-  .ds-typography[data-tone='warning'] {
+  .v-typography[data-tone='warning'] {
     --typography-color: var(--vectis-color-warning-text);
   }
 
-  .ds-typography[data-tone='on-inverse'] {
+  .v-typography[data-tone='on-inverse'] {
     --typography-color: var(--vectis-color-text-on-inverse);
   }
 
-  .ds-typography[data-truncate] {
+  .v-typography[data-truncate] {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

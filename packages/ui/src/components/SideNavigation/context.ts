@@ -9,7 +9,7 @@ import type { IconSource } from '../Icon/types'
  *
  * Ce qui n'y transite PAS, délibérément :
  * - `size`/`compact`, portés par l'héritage CSS des `--control-*` (la classe
- *   `ds-control` n'est posée que sur le <nav>) — les y mettre serait une
+ *   `v-control` n'est posée que sur le <nav>) — les y mettre serait une
  *   seconde incarnation de la même information ;
  * - la PROFONDEUR, portée par la cascade (compteur CSS à deux noms alternés,
  *   cf. SideNavigationItem.vue) : ni registre, ni style inline.
@@ -29,4 +29,4 @@ export interface SideNavigationContext {
   collapseIcon: IconSource | undefined
 }
 
-export const sideNavigationKey: InjectionKey<SideNavigationContext> = Symbol('ds-side-navigation')
+export const sideNavigationKey: InjectionKey<SideNavigationContext> = Symbol('v-side-navigation')

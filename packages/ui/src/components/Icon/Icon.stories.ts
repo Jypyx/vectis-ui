@@ -126,9 +126,9 @@ export const SansPolice: Story = {
   }),
   play: async ({ canvasElement }) => {
     // Aucune des icônes intégrées ne dépend d'une police : toutes sont des SVG.
-    const svgs = canvasElement.querySelectorAll('.ds-icon-svg')
+    const svgs = canvasElement.querySelectorAll('.v-icon-svg')
     await expect(svgs).toHaveLength(Object.keys(builtinIcons).length)
-    await expect(canvasElement.querySelectorAll('.ds-icon-symbol')).toHaveLength(1)
+    await expect(canvasElement.querySelectorAll('.v-icon-symbol')).toHaveLength(1)
   },
 }
 
@@ -213,7 +213,7 @@ export const InvariantDeTaille: Story = {
       ['xs', 16],
     ] as const) {
       const rangee = canvasElement.querySelector(`[data-taille='${taille}']`) as HTMLElement
-      const icones = [...rangee.querySelectorAll('.ds-icon')]
+      const icones = [...rangee.querySelectorAll('.v-icon')]
       await expect(icones).toHaveLength(5)
 
       for (const icone of icones) {
@@ -430,7 +430,7 @@ export const PolicePhosphor: Story = {
   ),
   play: async ({ canvasElement }) => {
     // Le résolveur est bien branché : la croix du Chip porte les classes Phosphor.
-    const croix = canvasElement.querySelector("[data-icon='close'] .ds-icon-glyph")
+    const croix = canvasElement.querySelector("[data-icon='close'] .v-icon-glyph")
     await expect(croix).toHaveClass('ph', 'ph-x')
     // …et le nom LOGIQUE survit au changement de bibliothèque.
     await expect(canvasElement.querySelector("[data-icon='search']")).toBeTruthy()
@@ -457,7 +457,7 @@ export const PoliceFontAwesome: Story = {
     }),
   ),
   play: async ({ canvasElement }) => {
-    const croix = canvasElement.querySelector("[data-icon='close'] .ds-icon-glyph")
+    const croix = canvasElement.querySelector("[data-icon='close'] .v-icon-glyph")
     await expect(croix).toHaveClass('fa-xmark')
   },
 }
@@ -471,7 +471,7 @@ export const PoliceBootstrapIcons: Story = {
     }),
   ),
   play: async ({ canvasElement }) => {
-    const croix = canvasElement.querySelector("[data-icon='close'] .ds-icon-glyph")
+    const croix = canvasElement.querySelector("[data-icon='close'] .v-icon-glyph")
     await expect(croix).toHaveClass('bi', 'bi-x-lg')
   },
 }
@@ -486,7 +486,7 @@ export const PoliceBootstrapIcons: Story = {
 export const PoliceLigature: Story = {
   ...vitrinePolice(ligatureIconResolver()),
   play: async ({ canvasElement }) => {
-    const croix = canvasElement.querySelector("[data-icon='close'] .ds-icon-symbol")
+    const croix = canvasElement.querySelector("[data-icon='close'] .v-icon-symbol")
     await expect(croix).toHaveTextContent('close')
   },
 }
@@ -495,7 +495,7 @@ export const PoliceLigature: Story = {
  * **Jeu SVG en composants** (Lucide, Untitled UI…) via `componentIconResolver`.
  * Ici les composants sont fabriqués sur place — le DS n'ajoute aucune
  * dépendance — mais le contrat est le vrai : racine `<svg>` unique, c'est elle
- * que `.ds-icon > svg` dimensionne, y compris contre un `width`/`height` en dur.
+ * que `.v-icon > svg` dimensionne, y compris contre un `width`/`height` en dur.
  *
  * La table est volontairement PARTIELLE : les icônes non mappées retombent sur
  * le registre intégré. C'est ce qui rend une adoption progressive possible.
@@ -518,7 +518,7 @@ export const JeuDeComposants: Story = {
     // Mappé → composant ; non mappé (notifications) → registre intégré.
     await expect(canvasElement.querySelector("[data-icon='close'] [data-jeu]")).toBeTruthy()
     await expect(
-      canvasElement.querySelector("[data-icon='notifications'] .ds-icon-svg"),
+      canvasElement.querySelector("[data-icon='notifications'] .v-icon-svg"),
     ).toBeTruthy()
   },
 }

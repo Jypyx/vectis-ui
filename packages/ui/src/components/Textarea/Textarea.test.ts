@@ -18,7 +18,7 @@ describe('Textarea', () => {
       props: { modelValue: '', invalid: true, autoGrow: true },
     })
     expect(getByRole('textbox').getAttribute('aria-invalid')).toBe('true')
-    const field = container.querySelector('.ds-textarea-field') as HTMLElement
+    const field = container.querySelector('.v-textarea-field') as HTMLElement
     expect(field.hasAttribute('data-auto-grow')).toBe(true)
   })
 
@@ -38,7 +38,7 @@ describe('Textarea', () => {
       props: { modelValue: '' },
       attrs: { class: 'consommateur', style: 'width: 320px' },
     })
-    const root = container.querySelector('.ds-textarea') as HTMLElement
+    const root = container.querySelector('.v-textarea') as HTMLElement
     expect(root.classList.contains('consommateur')).toBe(true)
     expect(root.style.width).toBe('320px')
     expect(getByRole('textbox').classList.contains('consommateur')).toBe(false)
@@ -49,7 +49,7 @@ describe('Textarea', () => {
       props: { modelValue: '', label: 'Bio', hint: '500 caractères max' },
     })
     const textarea = getByLabelText('Bio')
-    expect(textarea.classList.contains('ds-textarea-control')).toBe(true)
+    expect(textarea.classList.contains('v-textarea-control')).toBe(true)
     const hint = getByText('500 caractères max')
     expect(textarea.getAttribute('aria-describedby')).toContain(hint.id)
   })
@@ -85,7 +85,7 @@ describe('Textarea', () => {
       props: { modelValue: '', loading: true, iconEnd: 'edit' },
     })
     expect(getByRole('status')).toBeTruthy()
-    expect(container.querySelectorAll('.ds-icon')).toHaveLength(0)
+    expect(container.querySelectorAll('.v-icon')).toHaveLength(0)
   })
 
   it('softLimit : pas de maxlength natif, customError au-delà de la limite', async () => {
@@ -103,10 +103,10 @@ describe('Textarea', () => {
     const { container, rerender } = render(Textarea, {
       props: { modelValue: 'abc', maxlength: 10, softLimit: true, counter: true },
     })
-    const counter = container.querySelector('.ds-textarea-meta .ds-textarea-counter') as HTMLElement
+    const counter = container.querySelector('.v-textarea-meta .v-textarea-counter') as HTMLElement
     expect(counter.textContent?.trim()).toBe('3/10')
     // jamais de compteur dans le field (différence avec Input)
-    expect(container.querySelector('.ds-textarea-field .ds-textarea-counter')).toBeNull()
+    expect(container.querySelector('.v-textarea-field .v-textarea-counter')).toBeNull()
     await rerender({ modelValue: 'abcdefghijk' })
     expect(counter.hasAttribute('data-over')).toBe(true)
   })
@@ -115,13 +115,13 @@ describe('Textarea', () => {
     const { container, getByRole } = render(Textarea, {
       props: { modelValue: '', readonly: true },
     })
-    expect(container.querySelector('.ds-textarea')?.hasAttribute('data-readonly')).toBe(true)
+    expect(container.querySelector('.v-textarea')?.hasAttribute('data-readonly')).toBe(true)
     expect(getByRole('textbox').hasAttribute('readonly')).toBe(true)
 
     const disabled = render(Textarea, {
       props: { modelValue: '', disabled: true },
     })
-    expect(disabled.container.querySelector('.ds-textarea')?.hasAttribute('data-disabled')).toBe(
+    expect(disabled.container.querySelector('.v-textarea')?.hasAttribute('data-disabled')).toBe(
       true,
     )
   })
@@ -130,6 +130,6 @@ describe('Textarea', () => {
     const { container } = render(Textarea, {
       props: { modelValue: '', compact: true },
     })
-    expect(container.querySelector('.ds-textarea')?.hasAttribute('data-compact')).toBe(true)
+    expect(container.querySelector('.v-textarea')?.hasAttribute('data-compact')).toBe(true)
   })
 })

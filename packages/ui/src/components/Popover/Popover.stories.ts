@@ -75,7 +75,7 @@ export const Default: Story = {}
 export const OuvertureParLeDeclencheur: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const panel = canvasElement.querySelector('.ds-popover-panel') as HTMLElement
+    const panel = canvasElement.querySelector('.v-popover-panel') as HTMLElement
     const trigger = canvas.getByRole('button', { name: 'Ouvrir' })
 
     await expect(trigger).toHaveAttribute('aria-expanded', 'false')
@@ -121,7 +121,7 @@ export const DeuxInstances: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const [first, second] = [
-      ...canvasElement.querySelectorAll<HTMLElement>('.ds-popover-panel'),
+      ...canvasElement.querySelectorAll<HTMLElement>('.v-popover-panel'),
     ] as [HTMLElement, HTMLElement]
 
     await userEvent.click(canvas.getByRole('button', { name: 'Gauche' }))
@@ -230,7 +230,7 @@ export const ContenuInteractif: Story = {
 }
 
 /**
- * `surface: false` retire l'habillage (`.ds-panel`) : le consommateur fournit
+ * `surface: false` retire l'habillage (`.v-panel`) : le consommateur fournit
  * le sien. C'est le mode par lequel passent les panneaux du DS qui ont leur
  * propre chrome — Tooltip (contraste inversé), DatePicker et TimePicker.
  */

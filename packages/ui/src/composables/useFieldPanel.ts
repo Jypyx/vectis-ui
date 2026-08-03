@@ -70,7 +70,7 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
 
   function onControlClick(event: MouseEvent) {
     // clic sur un bouton interne (croix/icône) : laisser son handler agir
-    if ((event.target as HTMLElement).closest('.ds-input-action')) return
+    if ((event.target as HTMLElement).closest('.v-input-action')) return
     if (options.disabled()) return
     openPanel()
   }

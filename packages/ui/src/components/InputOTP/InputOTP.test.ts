@@ -71,7 +71,7 @@ describe('InputOTP', () => {
     const inputs = getAllByRole('textbox')
     expect(inputs).toHaveLength(9)
     expect(inputs[3]?.getAttribute('aria-label')).toBe('Caractère 4 sur 9')
-    const literals = container.querySelectorAll('.ds-otp-literal')
+    const literals = container.querySelectorAll('.v-otp-literal')
     expect(literals).toHaveLength(2)
     expect(literals[0]?.textContent).toBe('.')
     expect(literals[0]?.getAttribute('aria-hidden')).toBe('true')
@@ -115,9 +115,9 @@ describe('InputOTP', () => {
 
   it('separatorIcon remplace les littéraux par une icône', () => {
     const { container } = renderOtp({ pattern: '##-##', separatorIcon: 'horizontal_rule' })
-    const literal = container.querySelector('.ds-otp-literal')
+    const literal = container.querySelector('.v-otp-literal')
     expect(literal?.textContent).not.toContain('-')
-    expect(literal?.querySelector('.ds-icon-symbol')?.textContent).toBe('horizontal_rule')
+    expect(literal?.querySelector('.v-icon-symbol')?.textContent).toBe('horizontal_rule')
   })
 
   it('pose data-size/data-compact/data-disabled sur la racine', () => {

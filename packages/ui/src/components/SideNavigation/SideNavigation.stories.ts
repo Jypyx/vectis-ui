@@ -68,7 +68,7 @@ export const Default: Story = {
     const canvas = within(canvasElement)
     const beta = canvas.getByText('Beta').closest('summary') as HTMLElement
     const branche = beta.closest('details') as HTMLDetailsElement
-    const chevron = beta.querySelector('.ds-side-nav-chevron') as HTMLElement
+    const chevron = beta.querySelector('.v-side-nav-chevron') as HTMLElement
 
     // Le retrait vaut la place d'une icône (icône + gouttière) : le libellé
     // d'un sous-item tombe sur la MÊME VERTICALE que celui de son parent.
@@ -119,16 +119,16 @@ export const Tailles: Story = {
   }),
   play: async ({ canvasElement }) => {
     // Rangées de NIVEAU 2 : elles prouvent que les `--control-*` héritent
-    // jusqu'au bout sans jamais reposer `ds-control` sur une sous-liste.
-    const rangees = [...canvasElement.querySelectorAll('.ds-side-nav-children a')].map(
-      (el) => (el.closest('.ds-side-nav-row') as HTMLElement).getBoundingClientRect().height,
+    // jusqu'au bout sans jamais reposer `v-control` sur une sous-liste.
+    const rangees = [...canvasElement.querySelectorAll('.v-side-nav-children a')].map(
+      (el) => (el.closest('.v-side-nav-row') as HTMLElement).getBoundingClientRect().height,
     )
     const [sm, md, compact] = rangees
     await expect(md! - sm!).toBe(8) // 40px − 32px
     await expect(md! - compact!).toBe(4) // le compact du DS
 
     // L'en-tête de section tient la hauteur d'une rangée, aux trois densités.
-    const libelles = [...canvasElement.querySelectorAll('.ds-side-nav-group-label')].map(
+    const libelles = [...canvasElement.querySelectorAll('.v-side-nav-group-label')].map(
       (el) => (el as HTMLElement).getBoundingClientRect().height,
     )
     await expect(libelles).toEqual(rangees)
@@ -165,7 +165,7 @@ export const SousItemsProfonds: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const retrait = (nom: string) => {
-      const rangee = canvas.getByRole('link', { name: nom }).closest('.ds-side-nav-row')!
+      const rangee = canvas.getByRole('link', { name: nom }).closest('.v-side-nav-row')!
       return Number.parseFloat(getComputedStyle(rangee).paddingInlineStart)
     }
 
@@ -218,8 +218,8 @@ export const ContenuDeFin: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const rangee = canvas.getByText('Messages').closest('.ds-side-nav-row') as HTMLElement
-    const action = rangee.querySelector('.ds-side-nav-action') as HTMLElement
+    const rangee = canvas.getByText('Messages').closest('.v-side-nav-row') as HTMLElement
+    const action = rangee.querySelector('.v-side-nav-action') as HTMLElement
     const bouton = canvas.getByTestId('action')
 
     // Feuille : la zone cliquable de l'action couvre TOUTE la rangée — y compris
@@ -242,7 +242,7 @@ export const ContenuDeFin: Story = {
     // ni sur une pastille inerte…
     const projets = canvas.getByText('Projets').closest('summary') as HTMLElement
     const branche = projets.closest('details') as HTMLDetailsElement
-    await userEvent.click(projets.querySelector('.ds-side-nav-end') as HTMLElement)
+    await userEvent.click(projets.querySelector('.v-side-nav-end') as HTMLElement)
     await expect(branche.open).toBe(false)
     await userEvent.click(projets)
     await waitFor(() => expect(branche.open).toBe(true))

@@ -41,12 +41,12 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   play: async ({ canvasElement }) => {
-    const item = canvasElement.querySelector('.ds-skeleton-item')!
+    const item = canvasElement.querySelector('.v-skeleton-item')!
 
     // Canari de câblage : jsdom ne voit ni pseudo-élément ni keyframes. Rougit
     // si l'animation est renommée, mal layerisée, ou si le ::after disparaît.
     await waitFor(() =>
-      expect(getComputedStyle(item, '::after').animationName).toBe('ds-skeleton-wave'),
+      expect(getComputedStyle(item, '::after').animationName).toBe('v-skeleton-wave'),
     )
 
     // Canari de la syntaxe de couleur relative : si `oklch(from …)` n'était pas
@@ -57,7 +57,7 @@ export const Default: Story = {
 
     // La dernière ligne d'un paragraphe est raccourcie : c'est ce détail qui
     // fait lire « bloc de texte » plutôt que « tableau ».
-    const items = canvasElement.querySelectorAll('.ds-skeleton-item')
+    const items = canvasElement.querySelectorAll('.v-skeleton-item')
     const first = items[0]!.getBoundingClientRect().width
     const last = items[items.length - 1]!.getBoundingClientRect().width
     await expect(last).toBeLessThan(first)
@@ -86,7 +86,7 @@ export const Formes: Story = {
   }),
   play: async ({ canvasElement }) => {
     // une silhouette par forme, dans l'ordre du tableau `formes`
-    const items = canvasElement.querySelectorAll('.ds-skeleton-item')
+    const items = canvasElement.querySelectorAll('.v-skeleton-item')
 
     // le cercle transfère sa largeur depuis sa hauteur
     const circle = items[3]!.getBoundingClientRect()
@@ -117,13 +117,13 @@ export const Animations: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    const [wave, pulse, none] = canvasElement.querySelectorAll('.ds-skeleton-item')
+    const [wave, pulse, none] = canvasElement.querySelectorAll('.v-skeleton-item')
 
     // Les deux animations partagent le calque et ÉCLAIRCISSENT : un pulse rendu
     // par l'opacité de la silhouette ferait fondre vers le fond de la page,
     // donc assombrirait en thème sombre. Le calque du pulse est un aplat.
     await waitFor(() =>
-      expect(getComputedStyle(pulse!, '::after').animationName).toBe('ds-skeleton-pulse'),
+      expect(getComputedStyle(pulse!, '::after').animationName).toBe('v-skeleton-pulse'),
     )
     await expect(getComputedStyle(pulse!, '::after').backgroundImage).toBe('none')
     await expect(getComputedStyle(wave!, '::after').backgroundImage).not.toBe('none')
@@ -257,10 +257,10 @@ export const RemplacementProgressif: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(canvasElement.querySelectorAll('.ds-skeleton-item').length).toBeGreaterThan(0)
+    await expect(canvasElement.querySelectorAll('.v-skeleton-item').length).toBeGreaterThan(0)
 
     await canvas.getByRole('button', { name: 'Charger' }).click()
-    await waitFor(() => expect(canvasElement.querySelector('.ds-skeleton')).toBeNull())
+    await waitFor(() => expect(canvasElement.querySelector('.v-skeleton')).toBeNull())
   },
 }
 

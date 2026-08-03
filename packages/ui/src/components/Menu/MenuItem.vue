@@ -140,7 +140,7 @@ function onPointerLeave() {
     v-bind="$attrs"
     role="menuitem"
     tabindex="-1"
-    class="ds-menu-item"
+    class="v-menu-item"
     :type="tag === 'button' ? 'button' : undefined"
     :disabled="tag === 'button' ? disabled : undefined"
     :href="tag === 'a' && !disabled ? href : undefined"
@@ -160,16 +160,16 @@ function onPointerLeave() {
     <slot name="start">
       <Icon v-if="iconStart" v-bind="iconProps(iconStart)" />
     </slot>
-    <span class="ds-menu-item-content">
-      <span class="ds-menu-item-label"
+    <span class="v-menu-item-content">
+      <span class="v-menu-item-label"
         ><slot>{{ label }}</slot></span
       >
-      <span v-if="sublabel !== undefined || $slots.sublabel" class="ds-menu-item-sublabel">
+      <span v-if="sublabel !== undefined || $slots.sublabel" class="v-menu-item-sublabel">
         <slot name="sublabel">{{ sublabel }}</slot>
       </span>
     </span>
     <!-- un item à sous-menu signale l'ouverture latérale : chevron, jamais iconEnd -->
-    <Icon v-if="hasSubmenu" name="chevron_right" class="ds-menu-item-chevron" />
+    <Icon v-if="hasSubmenu" name="chevron_right" class="v-menu-item-chevron" />
     <slot v-else name="end">
       <Icon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
     </slot>
@@ -189,11 +189,11 @@ function onPointerLeave() {
 </template>
 
 <style>
-@layer ds.components {
-  .ds-menu-item {
+@layer vectis.components {
+  .v-menu-item {
     /*
      * Taille : variables `--control-*` héritées du panneau racine, qui porte
-     * `ds-control` (styles/control-size.css) — une seule table pour tout le
+     * `v-control` (styles/control-size.css) — une seule table pour tout le
      * DS. Les icônes suivent sans rien écrire : `--vectis-icon-size`/`-opsz` font
      * partie du même bloc et héritent aussi.
      *
@@ -220,50 +220,50 @@ function onPointerLeave() {
     cursor: pointer;
   }
 
-  .ds-menu-item-content {
+  .v-menu-item-content {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
   }
 
-  .ds-menu-item-sublabel {
+  .v-menu-item-sublabel {
     font-size: var(--vectis-text-caption-size);
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-menu-item-chevron {
+  .v-menu-item-chevron {
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-menu-item-chevron:dir(rtl) {
+  .v-menu-item-chevron:dir(rtl) {
     transform: scaleX(-1);
   }
 
   /* Le focus EST la surbrillance (roving focus programmatique → :focus, pas :focus-visible) */
-  .ds-menu-item:hover:not(:disabled, [aria-disabled='true']),
-  .ds-menu-item:focus {
+  .v-menu-item:hover:not(:disabled, [aria-disabled='true']),
+  .v-menu-item:focus {
     background: var(--vectis-color-surface-muted);
     outline: none;
   }
 
   /* sous-menu ouvert : la surbrillance persiste sur l'item parent */
-  .ds-menu-item[aria-expanded='true'] {
+  .v-menu-item[aria-expanded='true'] {
     background: var(--vectis-color-surface-muted);
   }
 
-  .ds-menu-item[data-selected] {
+  .v-menu-item[data-selected] {
     background: var(--vectis-color-accent-surface);
     color: var(--vectis-color-accent-text);
   }
 
-  .ds-menu-item[data-selected] .ds-menu-item-sublabel {
+  .v-menu-item[data-selected] .v-menu-item-sublabel {
     color: inherit;
   }
 
-  .ds-menu-item[data-selected]:hover:not(:disabled, [aria-disabled='true']),
-  .ds-menu-item[data-selected]:focus,
-  .ds-menu-item[data-selected][aria-expanded='true'] {
+  .v-menu-item[data-selected]:hover:not(:disabled, [aria-disabled='true']),
+  .v-menu-item[data-selected]:focus,
+  .v-menu-item[data-selected][aria-expanded='true'] {
     /* assombrit légèrement la surface accent */
     background: color-mix(
       in oklab,
@@ -272,30 +272,30 @@ function onPointerLeave() {
     );
   }
 
-  .ds-menu-item[data-danger] {
+  .v-menu-item[data-danger] {
     color: var(--vectis-color-danger-text);
   }
 
-  .ds-menu-item[data-danger] .ds-menu-item-sublabel {
+  .v-menu-item[data-danger] .v-menu-item-sublabel {
     color: inherit;
   }
 
-  .ds-menu-item[data-danger]:hover:not(:disabled, [aria-disabled='true']),
-  .ds-menu-item[data-danger]:focus,
-  .ds-menu-item[data-danger][aria-expanded='true'] {
+  .v-menu-item[data-danger]:hover:not(:disabled, [aria-disabled='true']),
+  .v-menu-item[data-danger]:focus,
+  .v-menu-item[data-danger][aria-expanded='true'] {
     background: var(--vectis-color-danger-surface);
   }
 
   /* :disabled ne s'applique qu'au <button> ; le lien inerte passe par aria-disabled */
-  .ds-menu-item:disabled,
-  .ds-menu-item[aria-disabled='true'] {
+  .v-menu-item:disabled,
+  .v-menu-item[aria-disabled='true'] {
     background: transparent;
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
-  .ds-menu-item:disabled .ds-menu-item-sublabel,
-  .ds-menu-item[aria-disabled='true'] .ds-menu-item-sublabel {
+  .v-menu-item:disabled .v-menu-item-sublabel,
+  .v-menu-item[aria-disabled='true'] .v-menu-item-sublabel {
     color: inherit;
   }
 }

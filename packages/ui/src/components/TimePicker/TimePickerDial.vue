@@ -229,7 +229,7 @@ function onKeydown(event: KeyboardEvent) {
     ref="faceEl"
     role="slider"
     tabindex="0"
-    class="ds-timepicker-dial-face"
+    class="v-timepicker-dial-face"
     :aria-label="step === 'hour' ? m.timePicker.hour : m.timePicker.minutes"
     :aria-valuemin="ariaValueMin"
     :aria-valuemax="ariaValueMax"
@@ -243,17 +243,17 @@ function onKeydown(event: KeyboardEvent) {
     @keydown="onKeydown"
   >
     <div
-      class="ds-timepicker-hand"
+      class="v-timepicker-hand"
       aria-hidden="true"
       :data-ring="handRing"
       :data-minor="handMinor ? '' : undefined"
       :style="{ '--dial-turn': String(handTurn) }"
     />
-    <span class="ds-timepicker-dial-center" aria-hidden="true" />
+    <span class="v-timepicker-dial-center" aria-hidden="true" />
     <span
       v-for="cell in cells"
       :key="cell.key"
-      class="ds-timepicker-number"
+      class="v-timepicker-number"
       aria-hidden="true"
       :data-ring="cell.ring"
       :data-selected="cell.selected ? '' : undefined"
@@ -264,8 +264,8 @@ function onKeydown(event: KeyboardEvent) {
 </template>
 
 <style>
-@layer ds.components {
-  .ds-timepicker-dial-face {
+@layer vectis.components {
+  .v-timepicker-dial-face {
     position: relative;
     inline-size: var(--vectis-control-size-timepicker-dial);
     block-size: var(--vectis-control-size-timepicker-dial);
@@ -284,7 +284,7 @@ function onKeydown(event: KeyboardEvent) {
     );
   }
 
-  .ds-timepicker-dial-face:focus-visible {
+  .v-timepicker-dial-face:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
@@ -295,7 +295,7 @@ function onKeydown(event: KeyboardEvent) {
    * du plancher du repo). `left`/`top`/`rotate` PHYSIQUES délibérés : une
    * horloge ne se miroite jamais en RTL (le sens horaire est universel).
    */
-  .ds-timepicker-number {
+  .v-timepicker-number {
     position: absolute;
     left: calc(50% + var(--dial-radius) * sin(var(--dial-turn) * 1turn));
     top: calc(50% - var(--dial-radius) * cos(var(--dial-turn) * 1turn));
@@ -313,20 +313,20 @@ function onKeydown(event: KeyboardEvent) {
     pointer-events: none;
   }
 
-  .ds-timepicker-number[data-ring='inner'],
-  .ds-timepicker-hand[data-ring='inner'] {
+  .v-timepicker-number[data-ring='inner'],
+  .v-timepicker-hand[data-ring='inner'] {
     --dial-radius: calc(
       var(--vectis-control-size-timepicker-dial) / 2 -
         var(--vectis-control-size-timepicker-number) * 1.5
     );
   }
 
-  .ds-timepicker-number[data-ring='inner'] {
+  .v-timepicker-number[data-ring='inner'] {
     font-size: var(--vectis-text-body-md-size);
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-timepicker-number[data-selected] {
+  .v-timepicker-number[data-selected] {
     color: var(--vectis-color-text-on-accent);
   }
 
@@ -336,7 +336,7 @@ function onKeydown(event: KeyboardEvent) {
    * de 0.916turn à 0turn, l'interpolation ferait le grand tour à l'envers
    * (compromis assumé vs Material).
    */
-  .ds-timepicker-hand {
+  .v-timepicker-hand {
     position: absolute;
     left: calc(50% - var(--vectis-control-size-timepicker-hand) / 2);
     bottom: 50%;
@@ -349,7 +349,7 @@ function onKeydown(event: KeyboardEvent) {
 
   /* Pastille de pointe : recouvre le chiffre visé (le texte passe en
      text-on-accent via [data-selected]) */
-  .ds-timepicker-hand::before {
+  .v-timepicker-hand::before {
     content: '';
     position: absolute;
     top: 0;
@@ -375,12 +375,12 @@ function onKeydown(event: KeyboardEvent) {
    * --vectis-control-size-timepicker-number ici déplacerait aussi --dial-radius, donc la
    * longueur de l'aiguille et le rayon des anneaux.
    */
-  .ds-timepicker-hand[data-minor]::before {
+  .v-timepicker-hand[data-minor]::before {
     inline-size: var(--vectis-control-size-timepicker-hand-minor);
     block-size: var(--vectis-control-size-timepicker-hand-minor);
   }
 
-  .ds-timepicker-dial-center {
+  .v-timepicker-dial-center {
     position: absolute;
     left: 50%;
     top: 50%;
@@ -392,7 +392,7 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-timepicker-hand::before {
+    .v-timepicker-hand::before {
       transition: none;
     }
   }

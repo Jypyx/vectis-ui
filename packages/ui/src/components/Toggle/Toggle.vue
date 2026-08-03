@@ -137,7 +137,7 @@ provide(toggleKey, {
  */
 function onKeydown(event: KeyboardEvent) {
   const group = event.currentTarget as HTMLElement
-  arrowNavigate(event, group, navigableItems(group, '.ds-toggle-item:not(:disabled)'), {
+  arrowNavigate(event, group, navigableItems(group, '.v-toggle-item:not(:disabled)'), {
     vertical: props.orientation === 'vertical',
   })
 }
@@ -145,7 +145,7 @@ function onKeydown(event: KeyboardEvent) {
 
 <template>
   <!-- attached : ButtonGroup fusionne les bordures. Il cible ses enfants
-       DIRECTS `.ds-button` — ToggleItem a le Button pour racine, jamais de
+       DIRECTS `.v-button` — ToggleItem a le Button pour racine, jamais de
        wrapper intermédiaire. `orientation`/`data-orientation` en miroir, via
        UNE seule clé (un binding même `undefined` traverserait en fallthrough
        et écraserait le data-orientation que ButtonGroup pose lui-même) :
@@ -155,7 +155,7 @@ function onKeydown(event: KeyboardEvent) {
   <component
     :is="attached ? ButtonGroup : 'div'"
     v-bind="attached ? { orientation } : { 'data-orientation': orientation }"
-    class="ds-toggle"
+    class="v-toggle"
     role="group"
     :aria-label="ariaLabel"
     @keydown="onKeydown"
@@ -165,20 +165,20 @@ function onKeydown(event: KeyboardEvent) {
 </template>
 
 <style>
-@layer ds.components {
+@layer vectis.components {
   /*
-   * Mode détaché seulement. `:not(.ds-button-group)` : en attached la racine
+   * Mode détaché seulement. `:not(.v-button-group)` : en attached la racine
    * porte les DEUX classes — sans cette garde, `align-items: center` entrerait
    * en conflit d'ordre avec le `stretch` de ButtonGroup (même spécificité).
    * Rend aussi l'ordre d'export non contraignant.
    */
-  .ds-toggle:not(.ds-button-group) {
+  .v-toggle:not(.v-button-group) {
     display: inline-flex;
     align-items: center;
     gap: var(--vectis-space-1);
   }
 
-  .ds-toggle:not(.ds-button-group)[data-orientation='vertical'] {
+  .v-toggle:not(.v-button-group)[data-orientation='vertical'] {
     flex-direction: column;
     align-items: stretch;
   }

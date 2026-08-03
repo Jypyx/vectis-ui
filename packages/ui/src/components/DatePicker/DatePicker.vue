@@ -584,7 +584,7 @@ const close = () => closeAndFocus()
 <template>
   <div
     ref="rootEl"
-    class="ds-datepicker"
+    class="v-datepicker"
     :class="rootClass"
     :style="rootStyle"
     :data-open="open ? '' : undefined"
@@ -592,7 +592,7 @@ const close = () => closeAndFocus()
     @focusout="onFocusout"
     @keydown="onRootKeydown"
   >
-    <div class="ds-datepicker-control" @click="onControlClick">
+    <div class="v-datepicker-control" @click="onControlClick">
       <Input
         ref="inputRef"
         v-model="fieldModel"
@@ -639,7 +639,7 @@ const close = () => closeAndFocus()
       surface
       role="dialog"
       :aria-label="label ?? m.datePicker.label"
-      class="ds-datepicker-panel"
+      class="v-datepicker-panel"
       @mousedown="onPanelMousedown"
     >
       <Calendar
@@ -668,8 +668,8 @@ const close = () => closeAndFocus()
 </template>
 
 <style>
-@layer ds.components {
-  .ds-datepicker {
+@layer vectis.components {
+  .v-datepicker {
     /* confine l'ancre à cette instance (racine = ancêtre commun contrôle/panneau) */
     anchor-scope: --datepicker-anchor;
     display: block;
@@ -677,7 +677,7 @@ const close = () => closeAndFocus()
     font-family: var(--vectis-text-family);
   }
 
-  .ds-datepicker-control {
+  .v-datepicker-control {
     anchor-name: --datepicker-anchor;
     display: block;
     cursor: pointer;
@@ -687,19 +687,19 @@ const close = () => closeAndFocus()
      la main sur le `pointer` du contrôle (qui, lui, signale « ceci ouvre un
      panneau »). Le masque a une largeur fixe : chasse tabulaire, sinon le caret
      vibre d'un chiffre à l'autre. */
-  .ds-datepicker[data-mode='input'] .ds-datepicker-control {
+  .v-datepicker[data-mode='input'] .v-datepicker-control {
     cursor: text;
   }
 
-  .ds-datepicker[data-mode='input'] .ds-input-control {
+  .v-datepicker[data-mode='input'] .v-input-control {
     font-variant-numeric: tabular-nums;
   }
 
   /* `position-anchor` et le chrome viennent de Popover (props `anchor` et
-     `surface`, cette dernière posant `.ds-panel`) : il ne reste ici que les
+     `surface`, cette dernière posant `.v-panel`) : il ne reste ici que les
      dimensions, que `panel.css` ne porte volontairement pas. Padding annulé —
      le Calendar gère sa propre respiration. */
-  .ds-datepicker-panel {
+  .v-datepicker-panel {
     width: max-content;
     padding: 0;
   }

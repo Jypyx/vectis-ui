@@ -50,11 +50,11 @@ describe('Breadcrumb', () => {
   describe('séparateurs', () => {
     it('un séparateur décoratif (aria-hidden) par item, chevron_right par défaut', () => {
       const { container } = render(Breadcrumb, { props: { items } })
-      const separators = container.querySelectorAll('.ds-breadcrumb-separator')
+      const separators = container.querySelectorAll('.v-breadcrumb-separator')
       expect(separators).toHaveLength(3)
       for (const sep of separators) {
         expect(sep.getAttribute('aria-hidden')).toBe('true')
-        // la classe est posée SUR l'Icon : le séparateur est lui-même la racine .ds-icon
+        // la classe est posée SUR l'Icon : le séparateur est lui-même la racine .v-icon
         expect((sep as HTMLElement).dataset.icon).toBe('chevron_right')
       }
     })
@@ -63,7 +63,7 @@ describe('Breadcrumb', () => {
       const { container } = render(Breadcrumb, {
         props: { items, separator: 'arrow_forward' },
       })
-      const icone = container.querySelector<HTMLElement>('.ds-breadcrumb-separator')
+      const icone = container.querySelector<HTMLElement>('.v-breadcrumb-separator')
       expect(icone?.dataset.icon).toBe('arrow_forward')
     })
 
@@ -71,9 +71,9 @@ describe('Breadcrumb', () => {
       const { container } = render(Breadcrumb, {
         props: { items, separator: { src: '/sep.svg' } },
       })
-      const img = container.querySelector('.ds-breadcrumb-separator img')
+      const img = container.querySelector('.v-breadcrumb-separator img')
       expect(img?.getAttribute('src')).toBe('/sep.svg')
-      expect(container.querySelector('.ds-breadcrumb-separator .ds-icon-symbol')).toBeNull()
+      expect(container.querySelector('.v-breadcrumb-separator .v-icon-symbol')).toBeNull()
     })
   })
 
@@ -83,7 +83,7 @@ describe('Breadcrumb', () => {
         props: { items: [{ label: 'Accueil', href: '/', iconStart: 'home' }] },
       })
       const link = getByRole('link', { name: 'Accueil' })
-      expect(link.querySelector<HTMLElement>('.ds-icon')?.dataset.icon).toBe('home')
+      expect(link.querySelector<HTMLElement>('.v-icon')?.dataset.icon).toBe('home')
     })
 
     it('`{ src }` → image', () => {
@@ -133,7 +133,7 @@ describe('Breadcrumb', () => {
       expect(getByRole('menuitem', { name: 'Bravo' }).getAttribute('href')).toBe('/a/b')
       // l'icône de l'item masqué est reprise dans le menu
       expect(
-        getByRole('menuitem', { name: 'Alpha' }).querySelector('.ds-icon-symbol')?.textContent,
+        getByRole('menuitem', { name: 'Alpha' }).querySelector('.v-icon-symbol')?.textContent,
       ).toBe('folder')
     })
 

@@ -47,8 +47,8 @@ const renderTree = (navAttrs = '') => renderNav(ARBRE, navAttrs)
 
 /** Rangée d'un item, par son libellé — <summary> pour une branche, sinon le conteneur. */
 function row(container: Element, label: string): HTMLElement {
-  const found = [...container.querySelectorAll<HTMLElement>('.ds-side-nav-row')].find(
-    (el) => el.querySelector('.ds-side-nav-label')?.textContent?.trim() === label,
+  const found = [...container.querySelectorAll<HTMLElement>('.v-side-nav-row')].find(
+    (el) => el.querySelector('.v-side-nav-label')?.textContent?.trim() === label,
   )
   if (!found) throw new Error(`Rangée « ${label} » introuvable`)
   return found
@@ -56,7 +56,7 @@ function row(container: Element, label: string): HTMLElement {
 
 /** Noms des <Icon> d'une rangée — `data-icon` est posé quelle que soit la source. */
 const icones = (rangee: Element) =>
-  [...rangee.querySelectorAll<HTMLElement>('.ds-icon')].map((el) => el.dataset.icon)
+  [...rangee.querySelectorAll<HTMLElement>('.v-icon')].map((el) => el.dataset.icon)
 
 describe('SideNavigation', () => {
   describe('racine', () => {
@@ -72,18 +72,18 @@ describe('SideNavigation', () => {
 
     it('rend une liste : nav > ul, items en <li> enfants directs', () => {
       const { container } = renderTree()
-      const list = container.querySelector('nav > ul.ds-side-nav-list')
+      const list = container.querySelector('nav > ul.v-side-nav-list')
       expect(list).not.toBeNull()
-      expect(list?.querySelector(':scope > li.ds-side-nav-item')).not.toBeNull()
-      expect(list?.querySelector(':scope > hr.ds-side-nav-separator')).not.toBeNull()
-      expect(list?.querySelector(':scope > li.ds-side-nav-group')).not.toBeNull()
+      expect(list?.querySelector(':scope > li.v-side-nav-item')).not.toBeNull()
+      expect(list?.querySelector(':scope > hr.v-side-nav-separator')).not.toBeNull()
+      expect(list?.querySelector(':scope > li.v-side-nav-group')).not.toBeNull()
     })
 
-    it("`ds-control` n'est posé QUE sur la <nav> — sinon le compact serait perdu dès le niveau 2", () => {
+    it("`v-control` n'est posé QUE sur la <nav> — sinon le compact serait perdu dès le niveau 2", () => {
       const { container } = renderTree('size="sm" compact')
-      expect(container.querySelectorAll('.ds-control')).toHaveLength(1)
+      expect(container.querySelectorAll('.v-control')).toHaveLength(1)
       const nav = container.querySelector('nav')
-      expect(nav?.classList.contains('ds-control')).toBe(true)
+      expect(nav?.classList.contains('v-control')).toBe(true)
       expect(nav?.dataset.size).toBe('sm')
       expect(nav?.dataset.compact).toBe('')
       expect(container.querySelectorAll('[data-size], [data-compact]')).toHaveLength(1)
@@ -96,7 +96,7 @@ describe('SideNavigation', () => {
         <SideNavigationItem href="/x">Lien</SideNavigationItem>
         <SideNavigationItem>Action</SideNavigationItem>
       `)
-      const [lien, bouton] = [...container.querySelectorAll('.ds-side-nav-action')]
+      const [lien, bouton] = [...container.querySelectorAll('.v-side-nav-action')]
       expect(lien?.tagName).toBe('A')
       expect(lien?.getAttribute('href')).toBe('/x')
       expect(bouton?.tagName).toBe('BUTTON')
@@ -110,7 +110,7 @@ describe('SideNavigation', () => {
         '',
         { onSelect },
       )
-      await fireEvent.click(container.querySelector('.ds-side-nav-action')!)
+      await fireEvent.click(container.querySelector('.v-side-nav-action')!)
       expect(onSelect).toHaveBeenCalledTimes(1)
     })
 
@@ -136,7 +136,7 @@ describe('SideNavigation', () => {
         '',
         { onSelect },
       )
-      const [bouton, lien] = [...container.querySelectorAll<HTMLElement>('.ds-side-nav-action')]
+      const [bouton, lien] = [...container.querySelectorAll<HTMLElement>('.v-side-nav-action')]
       expect(bouton).toHaveProperty('disabled', true)
       expect(lien?.hasAttribute('href')).toBe(false)
       expect(lien?.getAttribute('aria-disabled')).toBe('true')
@@ -153,10 +153,10 @@ describe('SideNavigation', () => {
           <template #end><button type="button" data-testid="action">Plus</button></template>
         </SideNavigationItem>
       `)
-      const action = container.querySelector('.ds-side-nav-action')!
+      const action = container.querySelector('.v-side-nav-action')!
       const fin = container.querySelector('[data-testid="action"]')!
       expect(action.contains(fin)).toBe(false)
-      expect(container.querySelector('.ds-side-nav-end')?.contains(fin)).toBe(true)
+      expect(container.querySelector('.v-side-nav-end')?.contains(fin)).toBe(true)
     })
   })
 
@@ -171,10 +171,10 @@ describe('SideNavigation', () => {
     it('rend <details> + sous-liste, un chevron, et n’émet pas `select`', async () => {
       const onSelect = vi.fn()
       const { container } = renderNav(BRANCHE, '', { onSelect })
-      const details = container.querySelector('details.ds-side-nav-branch')!
-      const summary = details.querySelector(':scope > summary.ds-side-nav-row')
+      const details = container.querySelector('details.v-side-nav-branch')!
+      const summary = details.querySelector(':scope > summary.v-side-nav-row')
       expect(summary).not.toBeNull()
-      expect(details.querySelector(':scope > ul.ds-side-nav-children')).not.toBeNull()
+      expect(details.querySelector(':scope > ul.v-side-nav-children')).not.toBeNull()
       expect(icones(summary!)).toEqual(['expand_more'])
       expect(details.hasAttribute('data-swap')).toBe(false)
 
@@ -238,8 +238,8 @@ describe('SideNavigation', () => {
         </SideNavigationItem>
       `)
       const enfants = [...container.querySelector('summary')!.children]
-      const fin = enfants.findIndex((el) => el.classList.contains('ds-side-nav-end'))
-      const chevron = enfants.findIndex((el) => el.classList.contains('ds-side-nav-chevron'))
+      const fin = enfants.findIndex((el) => el.classList.contains('v-side-nav-end'))
+      const chevron = enfants.findIndex((el) => el.classList.contains('v-side-nav-chevron'))
       expect(fin).toBeGreaterThan(-1)
       expect(chevron).toBeGreaterThan(fin)
     })
@@ -281,8 +281,8 @@ describe('SideNavigation', () => {
   describe('hiérarchie', () => {
     it('récursion sans limite, et profondeur portée par la seule cascade CSS', () => {
       const { container } = renderTree()
-      expect(container.querySelectorAll('ul.ds-side-nav-children')).toHaveLength(2)
-      for (const rangee of container.querySelectorAll<HTMLElement>('.ds-side-nav-row')) {
+      expect(container.querySelectorAll('ul.v-side-nav-children')).toHaveLength(2)
+      for (const rangee of container.querySelectorAll<HTMLElement>('.v-side-nav-row')) {
         expect(rangee.getAttribute('style')).toBeNull()
         expect(rangee.dataset.depth).toBeUndefined()
       }
@@ -290,12 +290,12 @@ describe('SideNavigation', () => {
 
     it('groupe : <li> + liste nommée par son libellé ; le séparateur est un <hr>', () => {
       const { container } = renderTree()
-      const groupe = container.querySelector('li.ds-side-nav-group')!
-      const label = groupe.querySelector('.ds-side-nav-group-label')!
+      const groupe = container.querySelector('li.v-side-nav-group')!
+      const label = groupe.querySelector('.v-side-nav-group-label')!
       expect(label.textContent).toBe('Réglages')
       expect(label.id).toBeTruthy()
       expect(groupe.querySelector('ul')?.getAttribute('aria-labelledby')).toBe(label.id)
-      expect(container.querySelector('hr.ds-side-nav-separator')).not.toBeNull()
+      expect(container.querySelector('hr.v-side-nav-separator')).not.toBeNull()
     })
   })
 
@@ -325,8 +325,8 @@ describe('SideNavigation', () => {
           Externe
         </SideNavigationItem>
       `)
-      const li = container.querySelector('li.ds-side-nav-item')!
-      const action = container.querySelector('.ds-side-nav-action')!
+      const li = container.querySelector('li.v-side-nav-item')!
+      const action = container.querySelector('.v-side-nav-action')!
       expect(li.classList.contains('perso')).toBe(true)
       expect(li.hasAttribute('target')).toBe(false)
       expect(action.getAttribute('target')).toBe('_blank')
@@ -342,7 +342,7 @@ describe('SideNavigation', () => {
         </SideNavigationItem>
       `)
       const texte = (label: string) =>
-        row(container, label).querySelector('.ds-side-nav-sublabel')?.textContent?.trim()
+        row(container, label).querySelector('.v-side-nav-sublabel')?.textContent?.trim()
       expect(texte('Prop')).toBe('3 projets')
       expect(texte('Slot')).toBe('hier')
     })
@@ -366,7 +366,7 @@ describe('SideNavigation', () => {
       const nav = container.querySelector('nav')!
       // [Un, Deux (désactivé), Trois, Caché] — « Quatre » est une branche, donc
       // un <summary>, pas un <a>.
-      const [un, , trois] = [...container.querySelectorAll<HTMLElement>('a.ds-side-nav-action')]
+      const [un, , trois] = [...container.querySelectorAll<HTMLElement>('a.v-side-nav-action')]
 
       un!.focus()
       await fireEvent.keyDown(nav, { key: 'ArrowDown' })
@@ -380,8 +380,8 @@ describe('SideNavigation', () => {
     it('les items d’une branche repliée sont ignorés, et le parcours boucle', async () => {
       const { container } = renderNav(LIENS)
       const nav = container.querySelector('nav')!
-      const un = container.querySelector<HTMLElement>('a.ds-side-nav-action')!
-      const cache = container.querySelector<HTMLElement>('.ds-side-nav-children a')!
+      const un = container.querySelector<HTMLElement>('a.v-side-nav-action')!
+      const cache = container.querySelector<HTMLElement>('.v-side-nav-children a')!
 
       un.focus()
       await fireEvent.keyDown(nav, { key: 'End' })

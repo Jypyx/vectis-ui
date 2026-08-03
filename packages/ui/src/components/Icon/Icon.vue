@@ -109,7 +109,7 @@ const resolved = computed<Resolved | undefined>(() => {
 
 <template>
   <span
-    class="ds-icon"
+    class="v-icon"
     :style="size !== undefined ? { '--vectis-icon-size': `${size}px` } : undefined"
     :data-icon="name"
     :data-filled="filled || undefined"
@@ -120,7 +120,7 @@ const resolved = computed<Resolved | undefined>(() => {
     <template v-if="resolved">
       <svg
         v-if="resolved.kind === 'path'"
-        class="ds-icon-svg"
+        class="v-icon-svg"
         :viewBox="resolved.viewBox"
         aria-hidden="true"
         focusable="false"
@@ -132,22 +132,22 @@ const resolved = computed<Resolved | undefined>(() => {
         v-else-if="resolved.kind === 'component'"
         v-bind="resolved.props"
       />
-      <img v-else-if="resolved.kind === 'src'" class="ds-icon-img" :src="resolved.src" alt="" />
+      <img v-else-if="resolved.kind === 'src'" class="v-icon-img" :src="resolved.src" alt="" />
       <!-- l'interpolation touche les balises : une ligature ne tolère pas d'espace autour -->
-      <span v-else-if="resolved.kind === 'text'" class="ds-icon-symbol" :class="resolved.class">{{
+      <span v-else-if="resolved.kind === 'text'" class="v-icon-symbol" :class="resolved.class">{{
         resolved.text
       }}</span>
-      <span v-else class="ds-icon-glyph" :class="resolved.class" />
+      <span v-else class="v-icon-glyph" :class="resolved.class" />
     </template>
-    <img v-else-if="src" class="ds-icon-img" :src="src" alt="" />
-    <span v-else-if="name" class="ds-icon-symbol">{{ name }}</span>
+    <img v-else-if="src" class="v-icon-img" :src="src" alt="" />
+    <span v-else-if="name" class="v-icon-symbol">{{ name }}</span>
     <slot v-else />
   </span>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-icon {
+@layer vectis.components {
+  .v-icon {
     /*
      * Résolution de la taille, par priorité :
      * 1. prop `size` (px) — posée en --vectis-icon-size inline sur l'élément :
@@ -170,13 +170,13 @@ const resolved = computed<Resolved | undefined>(() => {
 
   /* Dégradé si la police n'est pas chargée : le nom textuel reste contenu dans
      le carré au lieu de casser la mise en page. Posé sur la SEULE branche qu'il
-     protège et non sur `.ds-icon` : une police d'icônes tierce peut dessiner un
+     protège et non sur `.v-icon` : une police d'icônes tierce peut dessiner un
      glyphe hors de son cadran 1em, qui serait alors rogné. */
-  .ds-icon:has(> .ds-icon-symbol) {
+  .v-icon:has(> .v-icon-symbol) {
     overflow: hidden;
   }
 
-  .ds-icon-symbol {
+  .v-icon-symbol {
     font-family: var(--vectis-font-family-icon);
     font-weight: var(--vectis-font-weight-regular);
     font-style: normal;
@@ -195,32 +195,32 @@ const resolved = computed<Resolved | undefined>(() => {
       'opsz' var(--icon-opsz);
   }
 
-  .ds-icon[data-filled] .ds-icon-symbol {
+  .v-icon[data-filled] .v-icon-symbol {
     --icon-fill: 1;
   }
 
-  .ds-icon-img,
-  .ds-icon > svg {
+  .v-icon-img,
+  .v-icon > svg {
     inline-size: 100%;
     block-size: 100%;
     object-fit: contain;
   }
 
   /* Police à classes fournie par un résolveur (Font Awesome, Phosphor…) : le
-     glyphe vient d'un `::before`, dimensionné par le `font-size` de `.ds-icon`.
+     glyphe vient d'un `::before`, dimensionné par le `font-size` de `.v-icon`.
      C'est le DS qui possède l'élément, donc une seule règle suffit — `font-style`
      couvre d'avance les conventions en `<i>`, et `line-height` empêche la line
      box héritée de décentrer le glyphe dans le carré. */
-  .ds-icon-glyph {
+  .v-icon-glyph {
     display: block;
     font-style: normal;
     line-height: var(--vectis-font-leading-none);
   }
 
   /* SVG du registre intégré. `fill` est posé sur NOTRE classe et jamais sur
-     `.ds-icon > svg` : un SVG multicolore passé par le slot garde ses couleurs.
+     `.v-icon > svg` : un SVG multicolore passé par le slot garde ses couleurs.
      `display: block` supprime le gap de ligne de base sous l'élément inline. */
-  .ds-icon-svg {
+  .v-icon-svg {
     display: block;
     fill: currentcolor;
   }

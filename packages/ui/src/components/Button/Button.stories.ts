@@ -99,7 +99,7 @@ export const Icons: Story = {
     const canvas = within(canvasElement)
     // Les icônes sont décoratives : le nom accessible reste le libellé seul.
     const button = canvas.getByRole('button', { name: 'Suivant' })
-    const icon = button.querySelector('.ds-icon')
+    const icon = button.querySelector('.v-icon')
     await expect(icon).not.toBeNull()
     await expect(icon).toHaveAttribute('aria-hidden', 'true')
   },
@@ -118,7 +118,7 @@ export const IconsFilled: Story = {
   }),
   play: async ({ canvasElement }) => {
     const button = within(canvasElement).getByRole('button', { name: 'Plein' })
-    const icon = button.querySelector('.ds-icon')
+    const icon = button.querySelector('.v-icon')
     await expect(icon).toHaveAttribute('data-filled')
   },
 }
@@ -185,7 +185,7 @@ export const DisabledLink: Story = {
     const canvas = within(canvasElement)
     // Un <a> sans href n'a pas le rôle link : le lien inerte disparaît de l'arbre d'accessibilité en tant que lien.
     await expect(canvas.queryByRole('link')).toBeNull()
-    const anchor = canvasElement.querySelector('a.ds-button') as HTMLAnchorElement
+    const anchor = canvasElement.querySelector('a.v-button') as HTMLAnchorElement
     await expect(anchor).not.toHaveAttribute('href')
     await expect(anchor).toHaveAttribute('aria-disabled', 'true')
   },

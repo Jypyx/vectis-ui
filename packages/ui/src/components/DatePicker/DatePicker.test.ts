@@ -34,17 +34,17 @@ describe('DatePicker — défaut', () => {
     await fireEvent.focus(input)
     await fireEvent.keyDown(input, { key: 'ArrowDown', bubbles: true })
     await nextTick()
-    expect(container.querySelector('.ds-datepicker-panel')).toBeNull()
+    expect(container.querySelector('.v-datepicker-panel')).toBeNull()
   })
 
   it('calendarIcon : surcharge l’icône d’ouverture, que la croix d’effacement ne remplace pas', async () => {
     const { container, rerender } = render(DatePicker, {
       props: { modelValue: null, showCalendar: true, calendarIcon: 'event' },
     })
-    // `:not(.ds-input-clear)` : la croix est rendue AVANT l'icône de fin.
+    // `:not(.v-input-clear)` : la croix est rendue AVANT l'icône de fin.
     const endIcon = () =>
-      container.querySelector<HTMLElement>('.ds-input-action:not(.ds-input-clear) .ds-icon')
-        ?.dataset.icon
+      container.querySelector<HTMLElement>('.v-input-action:not(.v-input-clear) .v-icon')?.dataset
+        .icon
     expect(endIcon()).toBe('event')
 
     // Avec de quoi effacer, les deux coexistent — c'est la convention
@@ -53,12 +53,12 @@ describe('DatePicker — défaut', () => {
     expect(endIcon()).toBe('event')
 
     // La croix EN PREMIER : à gauche de l'icône d'ouverture.
-    const actions = [...container.querySelectorAll('.ds-input-field .ds-input-action')]
+    const actions = [...container.querySelectorAll('.v-input-field .v-input-action')]
     expect(actions.map((el) => el.getAttribute('aria-label'))).toEqual([
       'Effacer la date',
       'Ouvrir le calendrier',
     ])
-    expect(actions.at(0)?.classList.contains('ds-input-clear')).toBe(true)
+    expect(actions.at(0)?.classList.contains('v-input-clear')).toBe(true)
   })
 
   it('n’avertit ni à vide, ni sur une sélection range (qui retombe en lecture seule)', async () => {
@@ -74,7 +74,7 @@ describe('DatePicker — défaut', () => {
     expect(warn).not.toHaveBeenCalled()
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.readOnly).toBe(true)
-    await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
+    await fireEvent.click(container.querySelector('.v-datepicker-control') as HTMLElement)
     await nextTick()
     expect(getByRole('grid')).toBeTruthy()
   })
@@ -106,7 +106,7 @@ describe('DatePicker — lecture seule', () => {
 
   it('ouvre le panneau au clic et rend la grille', async () => {
     const { container, getByRole } = mount({ modelValue: JUNE })
-    const control = container.querySelector('.ds-datepicker-control') as HTMLElement
+    const control = container.querySelector('.v-datepicker-control') as HTMLElement
     await fireEvent.click(control)
     await nextTick()
     expect(getByRole('dialog')).toBeTruthy()
@@ -117,23 +117,23 @@ describe('DatePicker — lecture seule', () => {
   it('ignore showCalendar (le calendrier y est le seul chemin)', async () => {
     const { container, getByRole } = mount({ modelValue: JUNE, showCalendar: false })
     expect(container.querySelector('button[aria-label="Effacer la date"]')).toBeTruthy()
-    await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
+    await fireEvent.click(container.querySelector('.v-datepicker-control') as HTMLElement)
     await nextTick()
     expect(getByRole('grid')).toBeTruthy()
   })
 
   it('sélectionne une date, met à jour le modèle et ferme (single)', async () => {
     const { container, emitted, getByRole } = mount({ modelValue: JUNE })
-    await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
+    await fireEvent.click(container.querySelector('.v-datepicker-control') as HTMLElement)
     await nextTick()
-    const day15 = [...getByRole('grid').querySelectorAll('.ds-calendar-day')].find(
+    const day15 = [...getByRole('grid').querySelectorAll('.v-calendar-day')].find(
       (b) => b.textContent?.trim() === '15' && !b.hasAttribute('data-outside'),
     ) as HTMLElement
     await fireEvent.click(day15)
     await nextTick()
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['2026-06-15'])
     // fermé : le panneau n'est plus marqué ouvert
-    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
   })
@@ -143,12 +143,12 @@ describe('DatePicker — lecture seule', () => {
     // remonte ensuite à la racine, où ArrowDown/Entrée ouvrent. Sans la garde
     // `defaultPrevented` du composable, le panneau se rouvrait aussitôt.
     const { container, getByRole } = mount({ modelValue: JUNE })
-    await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
+    await fireEvent.click(container.querySelector('.v-datepicker-control') as HTMLElement)
     await nextTick()
     const grid = getByRole('grid')
     await fireEvent.keyDown(grid, { key: 'Enter', bubbles: true })
     await nextTick()
-    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
   })
@@ -165,22 +165,22 @@ describe('DatePicker — lecture seule', () => {
     await fireEvent.click(clearBtn)
     expect(emitted('update:modelValue')?.at(-1)).toEqual([null])
     // Le panneau ne s'ouvre pas au refocus rendu au champ.
-    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
   })
 
   it('ferme quand le focus sort du composant', async () => {
     const { container } = mount({ modelValue: JUNE })
-    const root = container.querySelector('.ds-datepicker') as HTMLElement
-    await fireEvent.click(container.querySelector('.ds-datepicker-control') as HTMLElement)
+    const root = container.querySelector('.v-datepicker') as HTMLElement
+    await fireEvent.click(container.querySelector('.v-datepicker-control') as HTMLElement)
     await nextTick()
-    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       true,
     )
     root.dispatchEvent(new FocusEvent('focusout', { relatedTarget: null, bubbles: true }))
     await nextTick()
-    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
   })
@@ -321,7 +321,7 @@ describe('DatePicker — mode saisie', () => {
     await fireEvent.focus(input)
     await nextTick()
     // le panneau s'ouvre mais le curseur reste dans le champ
-    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       true,
     )
     await fireEvent.keyDown(input, { key: 'ArrowDown', bubbles: true })
@@ -336,7 +336,7 @@ describe('DatePicker — mode saisie', () => {
     await nextTick()
     await fireEvent.keyDown(input, { key: 'Escape', bubbles: true })
     await nextTick()
-    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
   })
@@ -346,13 +346,13 @@ describe('DatePicker — mode saisie', () => {
     const input = container.querySelector('input') as HTMLInputElement
     await fireEvent.focus(input)
     await nextTick()
-    const day15 = [...getByRole('grid').querySelectorAll('.ds-calendar-day')].find(
+    const day15 = [...getByRole('grid').querySelectorAll('.v-calendar-day')].find(
       (b) => b.textContent?.trim() === '15' && !b.hasAttribute('data-outside'),
     ) as HTMLElement
     await fireEvent.click(day15)
     await nextTick()
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['2026-06-15'])
-    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
   })
@@ -373,7 +373,7 @@ describe('DatePicker — mode saisie', () => {
     expect(input.getAttribute('aria-haspopup')).toBe('dialog')
     await fireEvent.focus(input)
     await nextTick()
-    expect(container.querySelector('.ds-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       true,
     )
   })

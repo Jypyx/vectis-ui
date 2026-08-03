@@ -8,7 +8,7 @@ describe('Typography', () => {
     const { container } = render(Typography, { slots: { default: 'Texte' } })
     const root = container.firstElementChild!
     expect(root.tagName).toBe('P')
-    expect(root.classList.contains('ds-typography')).toBe(true)
+    expect(root.classList.contains('v-typography')).toBe(true)
     expect(root.getAttribute('data-variant')).toBe('body-md')
     expect(root.hasAttribute('data-tone')).toBe(false)
     expect(root.hasAttribute('data-truncate')).toBe(false)
@@ -77,6 +77,6 @@ describe('Typography', () => {
     expect(root.getAttribute('for')).toBe('champ')
     expect(root.getAttribute('id')).toBe('mon-label')
     expect(root.classList.contains('extra')).toBe(true)
-    expect(root.classList.contains('ds-typography')).toBe(true)
+    expect(root.classList.contains('v-typography')).toBe(true)
   })
 })

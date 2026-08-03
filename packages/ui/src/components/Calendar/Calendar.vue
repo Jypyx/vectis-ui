@@ -497,14 +497,14 @@ defineExpose({ focus })
 
 <template>
   <div
-    class="ds-calendar"
+    class="v-calendar"
     :data-view="view"
     :data-selection="selection"
     @pointerleave="hoverISO = null"
   >
     <!-- En-tête : sélecteurs mois & année avec chevrons ± -->
-    <div class="ds-calendar-header">
-      <div class="ds-calendar-nav">
+    <div class="v-calendar-header">
+      <div class="v-calendar-nav">
         <IconButton
           icon="chevron_left"
           :label="m.calendar.previousMonth"
@@ -516,7 +516,7 @@ defineExpose({ focus })
           variant="ghost"
           tone="neutral"
           size="sm"
-          class="ds-calendar-picker-toggle"
+          class="v-calendar-picker-toggle"
           :aria-expanded="view === 'months'"
           :aria-label="monthLabel"
           @click="toggleView('months')"
@@ -536,7 +536,7 @@ defineExpose({ focus })
         />
       </div>
 
-      <div class="ds-calendar-nav">
+      <div class="v-calendar-nav">
         <IconButton
           icon="chevron_left"
           :label="m.calendar.previousYear"
@@ -548,7 +548,7 @@ defineExpose({ focus })
           variant="ghost"
           tone="neutral"
           size="sm"
-          class="ds-calendar-picker-toggle"
+          class="v-calendar-picker-toggle"
           :aria-expanded="view === 'years'"
           @click="toggleView('years')"
         >
@@ -568,27 +568,27 @@ defineExpose({ focus })
     <!-- Vue jours -->
     <div
       v-show="view === 'days'"
-      class="ds-calendar-grid"
+      class="v-calendar-grid"
       role="grid"
       :aria-label="gridLabel"
       :aria-multiselectable="selection === 'multiple' ? 'true' : undefined"
       @keydown="onDaysKeydown"
     >
-      <div class="ds-calendar-weekdays" role="row">
+      <div class="v-calendar-weekdays" role="row">
         <span
           v-for="(w, i) in weekdays"
           :key="w"
-          class="ds-calendar-weekday"
+          class="v-calendar-weekday"
           role="columnheader"
           :aria-label="weekdaysLong[i]"
           >{{ w }}</span
         >
       </div>
-      <div v-for="(week, wi) in weeks" :key="wi" class="ds-calendar-week" role="row">
+      <div v-for="(week, wi) in weeks" :key="wi" class="v-calendar-week" role="row">
         <div
           v-for="cell in week"
           :key="cell.iso"
-          class="ds-calendar-cell"
+          class="v-calendar-cell"
           role="gridcell"
           :aria-selected="cell.kind === 'button' ? cell.selected : undefined"
           :data-in-range="cell.inRange ? '' : undefined"
@@ -599,7 +599,7 @@ defineExpose({ focus })
             v-if="cell.kind === 'button'"
             :id="dayId(cell.iso)"
             type="button"
-            class="ds-calendar-day"
+            class="v-calendar-day"
             :tabindex="cell.iso === focusedISO ? 0 : -1"
             :data-outside="!cell.inMonth ? '' : undefined"
             :data-selected="cell.selected ? '' : undefined"
@@ -621,13 +621,13 @@ defineExpose({ focus })
               :in-range="cell.inRange"
               :events="cell.events"
             >
-              <span class="ds-calendar-day-num">{{ cell.day }}</span>
+              <span class="v-calendar-day-num">{{ cell.day }}</span>
             </slot>
-            <span v-if="cell.events.length" class="ds-calendar-dots" aria-hidden="true">
+            <span v-if="cell.events.length" class="v-calendar-dots" aria-hidden="true">
               <span
                 v-for="(ev, ei) in cell.events.slice(0, 3)"
                 :key="ei"
-                class="ds-calendar-dot"
+                class="v-calendar-dot"
                 :style="ev.color ? { '--calendar-dot-color': ev.color } : undefined"
               />
             </span>
@@ -638,7 +638,7 @@ defineExpose({ focus })
                l'autre (le slot reçoit `inMonth` pour différencier le rendu) -->
           <span
             v-else-if="cell.kind === 'static'"
-            class="ds-calendar-day ds-calendar-day--static"
+            class="v-calendar-day v-calendar-day--static"
             :data-disabled="cell.disabled ? '' : undefined"
           >
             <slot
@@ -652,7 +652,7 @@ defineExpose({ focus })
               :in-range="cell.inRange"
               :events="cell.events"
             >
-              <span class="ds-calendar-day-num">{{ cell.day }}</span>
+              <span class="v-calendar-day-num">{{ cell.day }}</span>
             </slot>
           </span>
         </div>
@@ -662,7 +662,7 @@ defineExpose({ focus })
     <!-- Vue mois -->
     <div
       v-if="view === 'months'"
-      class="ds-calendar-picker"
+      class="v-calendar-picker"
       role="grid"
       :aria-label="m.calendar.monthPicker"
       @keydown="onMonthsKeydown"
@@ -672,7 +672,7 @@ defineExpose({ focus })
         :id="`${gridLabelId}-m-${i}`"
         :key="name"
         type="button"
-        class="ds-calendar-picker-cell"
+        class="v-calendar-picker-cell"
         role="gridcell"
         :tabindex="i === focusedMonth ? 0 : -1"
         :data-selected="i === viewMonth0 ? '' : undefined"
@@ -687,7 +687,7 @@ defineExpose({ focus })
     <!-- Vue années -->
     <div
       v-if="view === 'years'"
-      class="ds-calendar-picker ds-calendar-picker--years"
+      class="v-calendar-picker v-calendar-picker--years"
       role="grid"
       :aria-label="m.calendar.yearPicker"
       @keydown="onYearsKeydown"
@@ -697,7 +697,7 @@ defineExpose({ focus })
         :id="`${gridLabelId}-y-${y}`"
         :key="y"
         type="button"
-        class="ds-calendar-picker-cell"
+        class="v-calendar-picker-cell"
         role="gridcell"
         :tabindex="y === focusedYear ? 0 : -1"
         :data-selected="y === viewYear ? '' : undefined"
@@ -708,15 +708,15 @@ defineExpose({ focus })
       </button>
     </div>
 
-    <div v-if="$slots.footer" class="ds-calendar-footer">
+    <div v-if="$slots.footer" class="v-calendar-footer">
       <slot name="footer" />
     </div>
   </div>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-calendar {
+@layer vectis.components {
+  .v-calendar {
     /* Taille du rond (jour) configurable par le consommateur ; la cellule (zone
        de survol / colonne) s'agrandit avec, sans jamais passer sous le token. */
     --calendar-day-size: var(--vectis-calendar-day-size, var(--vectis-control-height-md));
@@ -734,14 +734,14 @@ defineExpose({ focus })
 
   /* Tous les blocs s'étirent sur la largeur du calendrier (stretch par défaut) :
      la grille jours occupe 100 % via des colonnes 1fr, largeur plancher = 7 cellules. */
-  .ds-calendar-header {
+  .v-calendar-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--vectis-space-2);
   }
 
-  .ds-calendar-nav {
+  .v-calendar-nav {
     display: flex;
     align-items: center;
     gap: var(--vectis-space-1);
@@ -749,7 +749,7 @@ defineExpose({ focus })
 
   /* largeur minimale stable pour que les chevrons ne se décalent pas selon la
      longueur du libellé mois/année */
-  .ds-calendar-picker-toggle {
+  .v-calendar-picker-toggle {
     min-inline-size: var(--vectis-control-size-calendar-nav-min);
     /* semibold : emphase du libellé mois/année (repère principal de la grille) */
     font-weight: var(--vectis-font-weight-semibold);
@@ -759,17 +759,17 @@ defineExpose({ focus })
   /* ── Grille jours ── */
   /* Largeur plancher = 7 cellules ; sinon la grille s'étire à la largeur du
      calendrier (imposée par l'en-tête) et les colonnes 1fr se répartissent. */
-  .ds-calendar-grid {
+  .v-calendar-grid {
     min-inline-size: calc(7 * var(--calendar-cell));
   }
 
-  .ds-calendar-weekdays,
-  .ds-calendar-week {
+  .v-calendar-weekdays,
+  .v-calendar-week {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
   }
 
-  .ds-calendar-weekday {
+  .v-calendar-weekday {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -783,7 +783,7 @@ defineExpose({ focus })
     text-transform: capitalize;
   }
 
-  .ds-calendar-cell {
+  .v-calendar-cell {
     position: relative;
     display: flex;
     align-items: center;
@@ -797,7 +797,7 @@ defineExpose({ focus })
      s'arrête pile au bord du rond (inset du côté extérieur) et son coin s'arrondit
      au rayon du rond (pill plafonné à la moitié de la hauteur = rayon du cercle),
      sans dépasser. */
-  .ds-calendar-cell[data-in-range]::before {
+  .v-calendar-cell[data-in-range]::before {
     content: '';
     position: absolute;
     inset-block: calc((100% - var(--calendar-day-size)) / 2);
@@ -805,21 +805,21 @@ defineExpose({ focus })
     background: var(--vectis-color-accent-surface);
     z-index: 0;
   }
-  .ds-calendar-cell[data-range-start]::before {
+  .v-calendar-cell[data-range-start]::before {
     inset-inline-start: calc((100% - var(--calendar-day-size)) / 2);
     border-start-start-radius: var(--vectis-radius-pill);
     border-end-start-radius: var(--vectis-radius-pill);
   }
-  .ds-calendar-cell[data-range-end]::before {
+  .v-calendar-cell[data-range-end]::before {
     inset-inline-end: calc((100% - var(--calendar-day-size)) / 2);
     border-start-end-radius: var(--vectis-radius-pill);
     border-end-end-radius: var(--vectis-radius-pill);
   }
-  .ds-calendar-cell[data-range-start][data-range-end]::before {
+  .v-calendar-cell[data-range-start][data-range-end]::before {
     content: none;
   }
 
-  .ds-calendar-day {
+  .v-calendar-day {
     position: relative;
     z-index: 1;
     display: inline-flex;
@@ -843,86 +843,86 @@ defineExpose({ focus })
 
   /* hover réservé aux jours cliquables : ni désactivés, ni sélectionnés, ni les
      jours adjacents non sélectionnables (spans statiques) */
-  .ds-calendar-day:hover:not([aria-disabled='true']):not([data-selected]):not(
-      .ds-calendar-day--static
+  .v-calendar-day:hover:not([aria-disabled='true']):not([data-selected]):not(
+      .v-calendar-day--static
     ) {
     background: var(--vectis-color-surface-muted);
   }
 
-  .ds-calendar-day[data-outside] {
+  .v-calendar-day[data-outside] {
     color: var(--vectis-color-text-subtle);
   }
 
   /* semibold ci-dessous : emphases d'état (aujourd'hui, sélection), pas des
      rôles typographiques */
-  .ds-calendar-day[data-today]:not([data-selected]) {
+  .v-calendar-day[data-today]:not([data-selected]) {
     box-shadow: inset 0 0 0 1px var(--vectis-color-accent-border);
     color: var(--vectis-color-accent-text);
     font-weight: var(--vectis-font-weight-semibold);
   }
 
-  .ds-calendar-day[data-selected] {
+  .v-calendar-day[data-selected] {
     background: var(--vectis-color-accent);
     color: var(--vectis-color-text-on-accent);
     font-weight: var(--vectis-font-weight-semibold);
   }
 
-  .ds-calendar-day[aria-disabled='true'] {
+  .v-calendar-day[aria-disabled='true'] {
     color: var(--vectis-color-text-subtle);
     text-decoration: line-through;
     cursor: not-allowed;
   }
 
-  .ds-calendar-day--static {
+  .v-calendar-day--static {
     color: var(--vectis-color-text-subtle);
     cursor: default;
   }
 
   /* jour adjacent hors [min,max] ou désactivé : barré comme une date désactivée */
-  .ds-calendar-day--static[data-disabled] {
+  .v-calendar-day--static[data-disabled] {
     text-decoration: line-through;
     cursor: not-allowed;
   }
 
-  .ds-calendar-day:focus-visible {
+  .v-calendar-day:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  .ds-calendar-day-num {
+  .v-calendar-day-num {
     line-height: var(--vectis-text-control-leading);
   }
 
-  .ds-calendar-dots {
+  .v-calendar-dots {
     position: absolute;
     inset-block-end: calc(var(--vectis-space-1) * 0.5);
     display: flex;
     gap: 2px;
   }
-  .ds-calendar-dot {
+  .v-calendar-dot {
     inline-size: var(--vectis-control-size-calendar-dot);
     block-size: var(--vectis-control-size-calendar-dot);
     border-radius: var(--vectis-radius-pill);
     background: var(--calendar-dot-color, var(--vectis-color-accent));
   }
-  .ds-calendar-day[data-selected] .ds-calendar-dot {
+  .v-calendar-day[data-selected] .v-calendar-dot {
     background: var(--vectis-color-text-on-accent);
   }
 
   /* ── Vues mois / années ── */
   /* Pleine largeur (comme la grille jours) via stretch + colonnes 1fr. */
-  .ds-calendar-picker {
+  .v-calendar-picker {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--vectis-space-1);
     min-inline-size: calc(7 * var(--calendar-cell));
   }
-  .ds-calendar-picker--years {
+  .v-calendar-picker--years {
     max-block-size: calc(6 * var(--calendar-cell));
     overflow-y: auto;
   }
 
-  .ds-calendar-picker-cell {
+  .v-calendar-picker-cell {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -937,26 +937,26 @@ defineExpose({ focus })
     cursor: pointer;
     transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
-  .ds-calendar-picker-cell:hover:not(:disabled):not([data-selected]) {
+  .v-calendar-picker-cell:hover:not(:disabled):not([data-selected]) {
     background: var(--vectis-color-surface-muted);
   }
-  .ds-calendar-picker-cell[data-selected] {
+  .v-calendar-picker-cell[data-selected] {
     background: var(--vectis-color-accent);
     color: var(--vectis-color-text-on-accent);
     /* semibold : emphase d'état, pas un rôle typo */
     font-weight: var(--vectis-font-weight-semibold);
   }
-  .ds-calendar-picker-cell:disabled {
+  .v-calendar-picker-cell:disabled {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
-  .ds-calendar-picker-cell:focus-visible {
+  .v-calendar-picker-cell:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
   /* ── Footer ── */
-  .ds-calendar-footer {
+  .v-calendar-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -966,8 +966,8 @@ defineExpose({ focus })
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-calendar-day,
-    .ds-calendar-picker-cell {
+    .v-calendar-day,
+    .v-calendar-picker-cell {
       transition: none;
     }
   }

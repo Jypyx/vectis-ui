@@ -182,8 +182,8 @@ export const Responsive: Story = {
   play: async ({ canvasElement }) => {
     // À la largeur initiale (~39rem), la fenêtre complète tient : les paliers
     // suivants (1 … 9 10 11 … 40, puis 1 … 10 … 40) s'observent à la poignée.
-    const nav = canvasElement.querySelector('.ds-pagination')
-    const visiblePages = [...nav!.querySelectorAll<HTMLElement>('.ds-pagination-page')]
+    const nav = canvasElement.querySelector('.v-pagination')
+    const visiblePages = [...nav!.querySelectorAll<HTMLElement>('.v-pagination-page')]
       .filter((el) => getComputedStyle(el).display !== 'none')
       .map((el) => el.textContent?.trim())
 

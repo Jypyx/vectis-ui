@@ -2,12 +2,12 @@
   <!-- <hr> : role="separator" implicite, non focusable, hors tabulation.
        Enfant direct d'une <ul>, ce que le HTML autorise explicitement entre
        deux groupes d'items de liste. -->
-  <hr class="ds-side-nav-separator" />
+  <hr class="v-side-nav-separator" />
 </template>
 
 <style>
-@layer ds.components {
-  .ds-side-nav-separator {
+@layer vectis.components {
+  .v-side-nav-separator {
     flex: none;
     /* Le retrait n'a pas cours ici : un filet sépare des sections, il ne
        s'aligne pas sur la hiérarchie des rangées qu'il encadre. */

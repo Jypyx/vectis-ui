@@ -6,12 +6,12 @@ import TimePicker from './TimePicker.vue'
 
 /** Ouvre le panneau par clic sur le contrôle. */
 async function openPanel(container: Element) {
-  await fireEvent.click(container.querySelector('.ds-timepicker-control') as HTMLElement)
+  await fireEvent.click(container.querySelector('.v-timepicker-control') as HTMLElement)
   await nextTick()
 }
 
 const panelOpen = (container: Element) =>
-  container.querySelector('.ds-timepicker-panel')?.hasAttribute('data-popover-open') === true
+  container.querySelector('.v-timepicker-panel')?.hasAttribute('data-popover-open') === true
 
 const hourCell = (container: Element) =>
   container.querySelector('button[aria-label="Sélectionner l’heure"]') as HTMLButtonElement
@@ -30,7 +30,7 @@ describe('TimePicker — défaut', () => {
     await fireEvent.focus(input)
     await fireEvent.keyDown(input, { key: 'ArrowDown', bubbles: true })
     await nextTick()
-    expect(container.querySelector('.ds-timepicker-panel')).toBeNull()
+    expect(container.querySelector('.v-timepicker-panel')).toBeNull()
   })
 
   it('n’avertit pas dans sa configuration par défaut', () => {
@@ -41,10 +41,10 @@ describe('TimePicker — défaut', () => {
   })
 
   it('clockIcon : surcharge l’icône du CADRAN, sans effet en mode liste', () => {
-    // `:not(.ds-input-clear)` : la croix est rendue AVANT l'icône de fin.
+    // `:not(.v-input-clear)` : la croix est rendue AVANT l'icône de fin.
     const endIcon = (props: Record<string, unknown>) =>
       render(TimePicker, { props }).container.querySelector<HTMLElement>(
-        '.ds-input-action:not(.ds-input-clear) .ds-icon',
+        '.v-input-action:not(.v-input-clear) .v-icon',
       )?.dataset.icon
 
     expect(endIcon({ modelValue: null, showDial: true, clockIcon: 'alarm' })).toBe('alarm')
@@ -61,12 +61,12 @@ describe('TimePicker — défaut', () => {
       props: { modelValue: '09:30', mode: 'list', clearable: true },
     })
     // Croix en premier, chevron ensuite — exactement le couple du Combobox.
-    const actions = [...container.querySelectorAll('.ds-input-field .ds-input-action')]
+    const actions = [...container.querySelectorAll('.v-input-field .v-input-action')]
     expect(actions.map((el) => el.getAttribute('aria-label'))).toEqual([
       "Effacer l'heure",
       'Ouvrir la liste des heures',
     ])
-    expect(actions.at(0)?.classList.contains('ds-input-clear')).toBe(true)
+    expect(actions.at(0)?.classList.contains('v-input-clear')).toBe(true)
   })
 })
 
@@ -126,7 +126,7 @@ describe('TimePicker — lecture seule', () => {
     expect(panelOpen(container)).toBe(false)
 
     await openPanel(container)
-    const root = container.querySelector('.ds-timepicker') as HTMLElement
+    const root = container.querySelector('.v-timepicker') as HTMLElement
     root.dispatchEvent(new FocusEvent('focusout', { relatedTarget: null, bubbles: true }))
     await nextTick()
     expect(emitted('update:modelValue')).toBeUndefined()
@@ -174,7 +174,7 @@ describe('TimePicker — lecture seule', () => {
 
   it('n’a plus de bascule de mode dans le pied du panneau', () => {
     const { container } = render(TimePicker, { props: { mode: 'readonly', modelValue: '09:15' } })
-    expect(container.querySelector('.ds-timepicker-mode')).toBeNull()
+    expect(container.querySelector('.v-timepicker-mode')).toBeNull()
   })
 
   it('dérive le format de la locale (en-US → 12h)', async () => {
@@ -184,7 +184,7 @@ describe('TimePicker — lecture seule', () => {
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.value).toMatch(/PM/)
     // le Toggle vit hors du panneau : présent sans même l'ouvrir
-    expect(container.querySelector('.ds-timepicker-meridiem')).toBeTruthy()
+    expect(container.querySelector('.v-timepicker-meridiem')).toBeTruthy()
     await openPanel(container)
     // cadran 12h : valeur affichée 7, max 12
     expect(getByRole('slider').getAttribute('aria-valuenow')).toBe('7')
@@ -223,7 +223,7 @@ describe('TimePicker — lecture seule', () => {
     await fireEvent.click(clearBtn)
     expect(emitted('update:modelValue')?.at(-1)).toEqual([null])
     // Le panneau ne s'ouvre pas au refocus rendu au champ.
-    expect(container.querySelector('.ds-timepicker-panel')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-timepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
   })
@@ -380,11 +380,11 @@ describe('TimePicker — mode liste', () => {
   it('commite directement au clic et ferme (ni brouillon ni OK)', async () => {
     const { container, emitted } = mount({ modelValue: '14:30' })
     await openPanel(container)
-    expect(container.querySelector('.ds-timepicker-footer')).toBeNull()
+    expect(container.querySelector('.v-timepicker-footer')).toBeNull()
     await fireEvent.click(optionsOf(container)[3] as HTMLElement) // 01:30
     await nextTick()
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['01:30'])
-    expect(container.querySelector('.ds-timepicker-list')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-timepicker-list')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
   })
@@ -400,7 +400,7 @@ describe('TimePicker — mode liste', () => {
     await fireEvent.keyDown(option, { key: 'Enter', bubbles: true })
     await nextTick()
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['02:30'])
-    expect(container.querySelector('.ds-timepicker-list')?.hasAttribute('data-popover-open')).toBe(
+    expect(container.querySelector('.v-timepicker-list')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
   })
@@ -409,7 +409,7 @@ describe('TimePicker — mode liste', () => {
     const { container } = mount({ modelValue: '00:00' })
     await openPanel(container)
     const options = optionsOf(container)
-    const panel = container.querySelector('.ds-timepicker-list') as HTMLElement
+    const panel = container.querySelector('.v-timepicker-list') as HTMLElement
     options[0]?.focus()
     await fireEvent.keyDown(panel, { key: 'ArrowDown', bubbles: true })
     expect(document.activeElement).toBe(options[1])
@@ -430,7 +430,7 @@ describe('TimePicker — mode liste', () => {
 
 describe('TimePicker — méridien hors du panneau', () => {
   const pmOf = (container: Element) =>
-    [...container.querySelectorAll('.ds-timepicker-meridiem button')].find(
+    [...container.querySelectorAll('.v-timepicker-meridiem button')].find(
       (b) => b.textContent?.trim() === 'PM',
     ) as HTMLElement
 

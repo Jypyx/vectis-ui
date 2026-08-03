@@ -4,12 +4,12 @@ import { describe, expect, it } from 'vitest'
 import SkeletonLoader from './SkeletonLoader.vue'
 
 /** Racine du composant (elle porte la table des variantes et les dimensions). */
-const rootOf = (container: Element) => container.querySelector('.ds-skeleton') as HTMLElement
+const rootOf = (container: Element) => container.querySelector('.v-skeleton') as HTMLElement
 
 /** Style inline de la racine (les custom properties y sont posées). */
 const styleOf = (container: Element) => rootOf(container).getAttribute('style') ?? ''
 
-const itemsOf = (container: Element) => container.querySelectorAll('.ds-skeleton-item')
+const itemsOf = (container: Element) => container.querySelectorAll('.v-skeleton-item')
 
 describe('SkeletonLoader', () => {
   it('défauts : forme text, taille md, animation wave, une seule silhouette', () => {
@@ -22,9 +22,9 @@ describe('SkeletonLoader', () => {
     expect(itemsOf(container)).toHaveLength(1)
   })
 
-  it('porte la classe ds-control : sans elle --control-height est indéfinie et la hauteur s’effondre', () => {
+  it('porte la classe v-control : sans elle --control-height est indéfinie et la hauteur s’effondre', () => {
     const { container } = render(SkeletonLoader)
-    expect(rootOf(container).classList.contains('ds-control')).toBe(true)
+    expect(rootOf(container).classList.contains('v-control')).toBe(true)
   })
 
   it('lines : une silhouette par ligne', async () => {
@@ -113,14 +113,14 @@ describe('SkeletonLoader', () => {
   })
 
   it('le libellé masqué est rendu AVANT les silhouettes', () => {
-    // Non-régression du sélecteur `.ds-skeleton-item + .ds-skeleton-item:last-child` :
+    // Non-régression du sélecteur `.v-skeleton-item + .v-skeleton-item:last-child` :
     // un libellé rendu en dernier ferait cesser le raccourcissement de la
     // dernière ligne sans qu'aucun autre test ne rougisse.
     const { container } = render(SkeletonLoader, { props: { announce: true, lines: 3 } })
     const first = rootOf(container).firstElementChild as HTMLElement
 
-    expect(first.classList.contains('ds-visually-hidden')).toBe(true)
-    expect(rootOf(container).lastElementChild?.classList.contains('ds-skeleton-item')).toBe(true)
+    expect(first.classList.contains('v-visually-hidden')).toBe(true)
+    expect(rootOf(container).lastElementChild?.classList.contains('v-skeleton-item')).toBe(true)
   })
 
   it('fallthrough : class, id et style du consommateur cohabitent avec les custom properties', () => {
@@ -131,7 +131,7 @@ describe('SkeletonLoader', () => {
     const root = rootOf(container)
 
     expect(root.classList.contains('ma-classe')).toBe(true)
-    expect(root.classList.contains('ds-skeleton')).toBe(true)
+    expect(root.classList.contains('v-skeleton')).toBe(true)
     expect(root.getAttribute('id')).toBe('chargement')
     expect(styleOf(container)).toContain('margin-block: 8px')
     expect(styleOf(container)).toContain('--skeleton-w: 120px')

@@ -162,7 +162,7 @@ export const Groupes: Story = {
     const groupe = canvas.getByRole('group', { name: 'Europe' })
     const hauteur = (selecteur: string) =>
       (groupe.querySelector(selecteur) as HTMLElement).getBoundingClientRect().height
-    await expect(hauteur('.ds-combobox-group-label')).toBeCloseTo(hauteur('.ds-combobox-option'), 1)
+    await expect(hauteur('.v-combobox-group-label')).toBeCloseTo(hauteur('.v-combobox-option'), 1)
 
     // Le panneau déborde : l'option active doit être amenée dans la vue à
     // travers le wrapper de groupe (le conteneur défilant reste le panneau).
@@ -183,7 +183,7 @@ export const Groupes: Story = {
     await userEvent.keyboard('ma')
     await waitFor(() => expect(canvas.queryByRole('group', { name: 'Afrique' })).toBeVisible())
     expect(canvas.queryByRole('group', { name: 'Europe' })).toBeNull()
-    expect(listbox.querySelectorAll('.ds-combobox-separator').length).toBe(0)
+    expect(listbox.querySelectorAll('.v-combobox-separator').length).toBe(0)
 
     await userEvent.keyboard('{ArrowDown}{Enter}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('ma'))
@@ -516,9 +516,9 @@ export const AvecIcones: Story = {
     const options = await canvas.findAllByRole('option')
     // l'icône est le PREMIER enfant de la rangée : elle précède le libellé,
     // la coche de sélection venant après
-    await expect(options[0]!.firstElementChild).not.toHaveClass('ds-combobox-option-label')
+    await expect(options[0]!.firstElementChild).not.toHaveClass('v-combobox-option-label')
     // une option sans `icon` commence directement par son libellé
-    await expect(options[4]!.firstElementChild).toHaveClass('ds-combobox-option-label')
+    await expect(options[4]!.firstElementChild).toHaveClass('v-combobox-option-label')
   },
 }
 

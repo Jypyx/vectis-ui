@@ -193,14 +193,14 @@ describe('Menu', () => {
       await openMenu(container)
 
       const slotted = getByRole('menuitem', { name: /Partager/ })
-      expect(slotted.querySelector('.ds-menu-item-label')?.textContent).toContain('Partager')
-      expect(slotted.querySelector('.ds-menu-item-sublabel')?.textContent).toBe(
+      expect(slotted.querySelector('.v-menu-item-label')?.textContent).toContain('Partager')
+      expect(slotted.querySelector('.v-menu-item-sublabel')?.textContent).toBe(
         'Vers un autre espace',
       )
 
       const fromProps = getByRole('menuitem', { name: /Dupliquer/ })
-      expect(fromProps.querySelector('.ds-menu-item-label')?.textContent).toBe('Dupliquer')
-      expect(fromProps.querySelector('.ds-menu-item-sublabel')?.textContent).toBe(
+      expect(fromProps.querySelector('.v-menu-item-label')?.textContent).toBe('Dupliquer')
+      expect(fromProps.querySelector('.v-menu-item-sublabel')?.textContent).toBe(
         'Copie dans le dossier courant',
       )
     })
@@ -218,12 +218,12 @@ describe('Menu', () => {
       await openMenu(container)
 
       const named = getByRole('menuitem', { name: 'Renommer' })
-      const icones = [...named.querySelectorAll<HTMLElement>('.ds-icon')].map(
+      const icones = [...named.querySelectorAll<HTMLElement>('.v-icon')].map(
         (el) => el.dataset.icon,
       )
       expect(icones).toEqual(['edit', 'chevron_right'])
 
-      const img = getByRole('menuitem', { name: 'Logo' }).querySelector('.ds-icon-img')
+      const img = getByRole('menuitem', { name: 'Logo' }).querySelector('.v-icon-img')
       expect(img?.getAttribute('src')).toBe('/logo.svg')
     })
 
@@ -281,8 +281,8 @@ describe('Menu', () => {
     expect(sub?.hasAttribute('data-compact')).toBe(false)
   })
 
-  it('ds-control n’est posée QUE sur le panneau racine (le compact hérité en dépend)', () => {
-    // Sur un sous-panneau, `.ds-control` redéfinirait --control-height depuis
+  it('v-control n’est posée QUE sur le panneau racine (le compact hérité en dépend)', () => {
+    // Sur un sous-panneau, `.v-control` redéfinirait --control-height depuis
     // --control-height-base SANS la condition [data-compact] (qu'il ne porte
     // pas) : la hauteur y repasserait à sa valeur non compacte.
     const { container } = renderHarness(`
@@ -298,8 +298,8 @@ describe('Menu', () => {
       </Menu>
     `)
     const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
-    expect(root?.classList.contains('ds-control')).toBe(true)
-    expect(sub?.classList.contains('ds-control')).toBe(false)
+    expect(root?.classList.contains('v-control')).toBe(true)
+    expect(sub?.classList.contains('v-control')).toBe(false)
   })
 
   describe('groupes et séparateurs', () => {
@@ -384,10 +384,10 @@ describe('Menu', () => {
       expect(parent.getAttribute('aria-controls')).toBe(sub.id)
       // le sous-panneau est un descendant DOM du panneau parent (pile native)
       expect(panels(container)[0]?.contains(sub)).toBe(true)
-      expect(parent.querySelector<HTMLElement>('.ds-menu-item-chevron')?.dataset.icon).toBe(
+      expect(parent.querySelector<HTMLElement>('.v-menu-item-chevron')?.dataset.icon).toBe(
         'chevron_right',
       )
-      const icones = [...parent.querySelectorAll<HTMLElement>('.ds-icon')].map(
+      const icones = [...parent.querySelectorAll<HTMLElement>('.v-icon')].map(
         (el) => el.dataset.icon,
       )
       expect(icones).not.toContain('download')

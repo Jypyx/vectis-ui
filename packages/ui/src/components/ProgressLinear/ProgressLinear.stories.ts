@@ -39,7 +39,7 @@ export const Default: Story = {
     await expect(bar).toHaveAttribute('aria-valuenow', '40')
     // géométrie réelle : le remplissage vaut 40 % de la piste — la racine EST
     // la piste (invérifiable en jsdom)
-    const fill = bar.querySelector('.ds-progress-linear-fill')!
+    const fill = bar.querySelector('.v-progress-linear-fill')!
     await waitFor(() =>
       expect(fill.getBoundingClientRect().width).toBeCloseTo(
         bar.getBoundingClientRect().width * 0.4,
@@ -118,7 +118,7 @@ export const Valeur: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const bar = canvas.getByRole('progressbar', { name: 'Centre' })
-    const [base, onFill] = [...bar.querySelectorAll('.ds-progress-linear-text')]
+    const [base, onFill] = [...bar.querySelectorAll('.v-progress-linear-text')]
     // la copie clippée est colorée par contraste : couleur distincte de la copie de base
     await expect(getComputedStyle(base!).color).not.toBe(getComputedStyle(onFill!).color)
     await expect(getComputedStyle(onFill!).clipPath).not.toBe('none')
@@ -218,7 +218,7 @@ export const Progression: Story = {
     await userEvent.click(canvas.getByRole('button', { name: '80 %' }))
     await waitFor(() => expect(bar).toHaveAttribute('aria-valuenow', '80'))
     // la transition converge sur la largeur cible
-    const fill = bar.querySelector('.ds-progress-linear-fill')!
+    const fill = bar.querySelector('.v-progress-linear-fill')!
     await waitFor(() =>
       expect(fill.getBoundingClientRect().width).toBeCloseTo(
         bar.getBoundingClientRect().width * 0.8,

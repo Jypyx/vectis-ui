@@ -13,7 +13,7 @@ import type { ToggleSize, ToggleTone, ToggleValue, ToggleVariant } from './Toggl
  *
  * `size`/`compact` transitent par l'injection (et non par héritage CSS comme
  * dans Accordion) : chaque ToggleItem rend un Button, qui pose lui-même
- * `ds-control[data-size]` sur son propre élément.
+ * `v-control[data-size]` sur son propre élément.
  */
 export interface ToggleContext {
   isSelected: (value: ToggleValue) => boolean
@@ -26,4 +26,4 @@ export interface ToggleContext {
   readonly selectedIconFilled: boolean
 }
 
-export const toggleKey: InjectionKey<ToggleContext> = Symbol('ds-toggle')
+export const toggleKey: InjectionKey<ToggleContext> = Symbol('v-toggle')

@@ -3,7 +3,7 @@
  * correspondance du design system (hauteur / icône / opsz / typo / paddings
  * par taille xs → xl).
  *
- * Chaque composant interactif pose `ds-control` sur sa RACINE (celle qui
+ * Chaque composant interactif pose `v-control` sur sa RACINE (celle qui
  * porte `data-size`/`data-compact`) et consomme les variables `--control-*`
  * dans son propre CSS ; elles héritent jusqu'aux enfants (ex. le field
  * d'Input). Les blocs ne définissent QUE des custom properties — jamais de
@@ -19,8 +19,8 @@
  * l'opsz reste un littéral (axe de la police Material Symbols : contrat
  * technique, pas un token de design — voir Icon.vue).
  */
-@layer ds.components {
-  .ds-control {
+@layer vectis.components {
+  .v-control {
     /*
      * Hauteur en deux temps : les tailles posent --control-height-base,
      * compact dérive la hauteur effective (-4px, padding/typo/icônes
@@ -29,11 +29,11 @@
     --control-height: var(--control-height-base);
   }
 
-  .ds-control[data-compact] {
+  .v-control[data-compact] {
     --control-height: calc(var(--control-height-base) - var(--vectis-space-1));
   }
 
-  .ds-control[data-size='xs'] {
+  .v-control[data-size='xs'] {
     --control-height-base: var(--vectis-control-height-xs);
     --control-font-size: var(--vectis-font-size-xs);
     --control-padding-inline: var(--vectis-space-2);
@@ -44,7 +44,7 @@
     --vectis-icon-opsz: 20;
   }
 
-  .ds-control[data-size='sm'] {
+  .v-control[data-size='sm'] {
     --control-height-base: var(--vectis-control-height-sm);
     --control-font-size: var(--vectis-font-size-sm);
     --control-padding-inline: var(--vectis-space-3);
@@ -55,7 +55,7 @@
     --vectis-icon-opsz: 20;
   }
 
-  .ds-control[data-size='md'] {
+  .v-control[data-size='md'] {
     --control-height-base: var(--vectis-control-height-md);
     --control-font-size: var(--vectis-font-size-sm);
     --control-padding-inline: var(--vectis-space-4);
@@ -66,7 +66,7 @@
     --vectis-icon-opsz: 20;
   }
 
-  .ds-control[data-size='lg'] {
+  .v-control[data-size='lg'] {
     --control-height-base: var(--vectis-control-height-lg);
     --control-font-size: var(--vectis-font-size-md);
     --control-padding-inline: var(--vectis-space-5);
@@ -77,7 +77,7 @@
     --vectis-icon-opsz: 24;
   }
 
-  .ds-control[data-size='xl'] {
+  .v-control[data-size='xl'] {
     --control-height-base: var(--vectis-control-height-xl);
     --control-font-size: var(--vectis-font-size-md);
     --control-padding-inline: var(--vectis-space-6);

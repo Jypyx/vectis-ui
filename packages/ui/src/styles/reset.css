@@ -1,8 +1,8 @@
 /*
- * Reset minimal, volontairement dans la layer la plus faible (ds.reset) :
+ * Reset minimal, volontairement dans la layer la plus faible (vectis.reset) :
  * n'importe quel style consommateur le surcharge sans effort.
  */
-@layer ds.reset {
+@layer vectis.reset {
   *,
   *::before,
   *::after {

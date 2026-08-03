@@ -229,7 +229,7 @@ describe('locale des composants de date', () => {
   /* Le bouton AFFICHE le mois abrégé ('mars', 'Mar.') ; c'est son aria-label
      qui porte le nom long, plus lisible en assertion. */
   const monthToggle = (r: ReturnType<typeof render>) =>
-    r.container.querySelector('.ds-calendar-picker-toggle')?.getAttribute('aria-label')
+    r.container.querySelector('.v-calendar-picker-toggle')?.getAttribute('aria-label')
 
   it('suit la locale globale du DS quand la prop est absente', () => {
     const fr = render(Calendar, { props: { modelValue: '2026-03-15' } })

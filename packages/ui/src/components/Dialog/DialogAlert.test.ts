@@ -24,7 +24,7 @@ async function openHarness(props: Record<string, unknown> = {}) {
   })
   const utils = render(Harness)
   await flush()
-  const dialog = utils.container.querySelector('.ds-dialog') as HTMLDialogElement
+  const dialog = utils.container.querySelector('.v-dialog') as HTMLDialogElement
   return { open, dialog, ...utils }
 }
 
@@ -48,9 +48,9 @@ describe('DialogAlert', () => {
 
   it('reste piloté par le v-model (bouton d’action ferme)', async () => {
     const { open, container } = await openHarness()
-    expect(container.querySelector('.ds-dialog')).not.toBeNull()
+    expect(container.querySelector('.v-dialog')).not.toBeNull()
     open.value = false
     await flush()
-    expect(container.querySelector('.ds-dialog')).toBeNull()
+    expect(container.querySelector('.v-dialog')).toBeNull()
   })
 })

@@ -33,7 +33,7 @@ export const Default: Story = {
      * qu'à l'œil (impossible en jsdom, qui n'a pas de layout SVG).
      * Diamètre par défaut 48px, épaisseur 4px → r = 22px.
      */
-    const barCircle = bar.querySelector('.ds-progress-circular-bar')!
+    const barCircle = bar.querySelector('.v-progress-circular-bar')!
     await waitFor(() => expect(getComputedStyle(barCircle).r).toBe('22px'))
     // Chromium sérialise le calc() résolu en « calc(35px) » dans getComputedStyle
     // (parseFloat → NaN) : on lit la valeur via l'OM typé.

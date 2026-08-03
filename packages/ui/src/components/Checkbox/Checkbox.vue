@@ -53,24 +53,20 @@ watchEffect(
 </script>
 
 <template>
-  <label
-    class="ds-checkbox"
-    :data-label-position="labelPosition"
-    :data-spread="spread || undefined"
-  >
+  <label class="v-checkbox" :data-label-position="labelPosition" :data-spread="spread || undefined">
     <input
       ref="inputEl"
       v-model="model"
       type="checkbox"
-      class="ds-checkbox-input"
+      class="v-checkbox-input"
       v-bind="$attrs"
       :disabled="disabled"
       :aria-invalid="invalid || undefined"
     />
-    <span class="ds-checkbox-box" aria-hidden="true">
-      <svg class="ds-checkbox-mark" viewBox="0 0 12 12">
+    <span class="v-checkbox-box" aria-hidden="true">
+      <svg class="v-checkbox-mark" viewBox="0 0 12 12">
         <path
-          class="ds-checkbox-mark-check"
+          class="v-checkbox-mark-check"
           d="M2.5 6.5l2.5 2.5 4.5-5.5"
           fill="none"
           stroke="currentcolor"
@@ -79,7 +75,7 @@ watchEffect(
           stroke-linejoin="round"
         />
         <path
-          class="ds-checkbox-mark-dash"
+          class="v-checkbox-mark-dash"
           d="M3 6h6"
           fill="none"
           stroke="currentcolor"
@@ -88,13 +84,13 @@ watchEffect(
         />
       </svg>
     </span>
-    <span v-if="$slots.default" class="ds-checkbox-label"><slot /></span>
+    <span v-if="$slots.default" class="v-checkbox-label"><slot /></span>
   </label>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-checkbox {
+@layer vectis.components {
+  .v-checkbox {
     display: inline-flex;
     align-items: center;
     gap: var(--vectis-space-2);
@@ -106,17 +102,17 @@ watchEffect(
 
   /* L'input est en position: absolute → hors du flux flex, l'ordre visuel ne
      concerne que la boîte et le libellé */
-  .ds-checkbox[data-label-position='start'] {
+  .v-checkbox[data-label-position='start'] {
     flex-direction: row-reverse;
   }
 
-  .ds-checkbox[data-spread] {
+  .v-checkbox[data-spread] {
     display: flex;
     justify-content: space-between;
   }
 
   /* L'input reste focusable et soumis au formulaire ; seul son rendu disparaît */
-  .ds-checkbox-input {
+  .v-checkbox-input {
     position: absolute;
     opacity: 0;
     width: 1px;
@@ -125,7 +121,7 @@ watchEffect(
     pointer-events: none;
   }
 
-  .ds-checkbox-box {
+  .v-checkbox-box {
     display: inline-grid;
     place-items: center;
     width: var(--vectis-control-size-check);
@@ -140,20 +136,18 @@ watchEffect(
       border-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-checkbox-mark {
+  .v-checkbox-mark {
     width: var(--vectis-control-size-check-mark);
     height: var(--vectis-control-size-check-mark);
   }
 
-  .ds-checkbox-mark-check,
-  .ds-checkbox-mark-dash {
+  .v-checkbox-mark-check,
+  .v-checkbox-mark-dash {
     opacity: 0;
     transition: opacity var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-checkbox:hover
-    .ds-checkbox-input:not(:disabled, :checked, :indeterminate)
-    + .ds-checkbox-box {
+  .v-checkbox:hover .v-checkbox-input:not(:disabled, :checked, :indeterminate) + .v-checkbox-box {
     border-color: color-mix(
       in oklab,
       var(--vectis-color-border-strong),
@@ -161,57 +155,57 @@ watchEffect(
     );
   }
 
-  .ds-checkbox-input:checked + .ds-checkbox-box,
-  .ds-checkbox-input:indeterminate + .ds-checkbox-box {
+  .v-checkbox-input:checked + .v-checkbox-box,
+  .v-checkbox-input:indeterminate + .v-checkbox-box {
     background: var(--vectis-color-accent);
     border-color: var(--vectis-color-accent);
   }
 
-  .ds-checkbox:hover
-    .ds-checkbox-input:not(:disabled):is(:checked, :indeterminate)
-    + .ds-checkbox-box {
+  .v-checkbox:hover
+    .v-checkbox-input:not(:disabled):is(:checked, :indeterminate)
+    + .v-checkbox-box {
     background: var(--vectis-color-accent-hover);
     border-color: var(--vectis-color-accent-hover);
   }
 
-  .ds-checkbox-input:checked + .ds-checkbox-box .ds-checkbox-mark-check {
+  .v-checkbox-input:checked + .v-checkbox-box .v-checkbox-mark-check {
     opacity: 1;
   }
 
-  .ds-checkbox-input:indeterminate + .ds-checkbox-box .ds-checkbox-mark-check {
+  .v-checkbox-input:indeterminate + .v-checkbox-box .v-checkbox-mark-check {
     opacity: 0;
   }
 
-  .ds-checkbox-input:indeterminate + .ds-checkbox-box .ds-checkbox-mark-dash {
+  .v-checkbox-input:indeterminate + .v-checkbox-box .v-checkbox-mark-dash {
     opacity: 1;
   }
 
-  .ds-checkbox-input:focus-visible + .ds-checkbox-box {
+  .v-checkbox-input:focus-visible + .v-checkbox-box {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  .ds-checkbox-input:user-invalid + .ds-checkbox-box,
-  .ds-checkbox-input[aria-invalid='true'] + .ds-checkbox-box {
+  .v-checkbox-input:user-invalid + .v-checkbox-box,
+  .v-checkbox-input[aria-invalid='true'] + .v-checkbox-box {
     border-color: var(--vectis-color-danger);
   }
 
   /* Disabled : nuances de gris (mêmes tokens que Button), pas d'opacité */
-  .ds-checkbox:has(.ds-checkbox-input:disabled) {
+  .v-checkbox:has(.v-checkbox-input:disabled) {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
-  .ds-checkbox-input:disabled + .ds-checkbox-box {
+  .v-checkbox-input:disabled + .v-checkbox-box {
     background: var(--vectis-color-surface-muted);
     border-color: var(--vectis-color-border);
     color: var(--vectis-color-text-subtle);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-checkbox-box,
-    .ds-checkbox-mark-check,
-    .ds-checkbox-mark-dash {
+    .v-checkbox-box,
+    .v-checkbox-mark-check,
+    .v-checkbox-mark-dash {
       transition: none;
     }
   }

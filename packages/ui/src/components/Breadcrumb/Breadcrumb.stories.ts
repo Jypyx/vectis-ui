@@ -47,7 +47,7 @@ export const SeparateurIcone: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    const separators = canvasElement.querySelectorAll('.ds-breadcrumb-separator')
+    const separators = canvasElement.querySelectorAll('.v-breadcrumb-separator')
     await expect(separators).toHaveLength(3)
     // le premier item n'est précédé d'aucun séparateur (règle :first-child)
     await expect(separators[0]).not.toBeVisible()

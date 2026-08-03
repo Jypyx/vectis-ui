@@ -603,7 +603,7 @@ function onEndIcon() {
 <template>
   <div
     ref="rootEl"
-    class="ds-timepicker"
+    class="v-timepicker"
     :class="rootClass"
     :style="rootStyle"
     :data-open="open ? '' : undefined"
@@ -611,8 +611,8 @@ function onEndIcon() {
     @focusout="onFocusout"
     @keydown="onRootKeydown"
   >
-    <div class="ds-timepicker-row">
-      <div class="ds-timepicker-control" @click="onControlClick">
+    <div class="v-timepicker-row">
+      <div class="v-timepicker-control" @click="onControlClick">
         <Input
           ref="inputRef"
           v-model="fieldModel"
@@ -652,7 +652,7 @@ function onEndIcon() {
       <Toggle
         v-if="resolvedFormat === '12h'"
         v-model="meridiemModel"
-        class="ds-timepicker-meridiem"
+        class="v-timepicker-meridiem"
         mandatory
         variant="outline"
         :size="size"
@@ -676,7 +676,7 @@ function onEndIcon() {
       :placement="placement"
       surface
       :role="isList ? 'listbox' : 'dialog'"
-      :class="isList ? 'ds-timepicker-list ds-control' : 'ds-timepicker-panel'"
+      :class="isList ? 'v-timepicker-list v-control' : 'v-timepicker-panel'"
       :data-size="isList ? size : undefined"
       :data-compact="isList && compact ? '' : undefined"
       :aria-label="label ?? (isList ? m.timePicker.listLabel : m.timePicker.dialLabel)"
@@ -692,7 +692,7 @@ function onEndIcon() {
           type="button"
           role="option"
           tabindex="-1"
-          class="ds-timepicker-option"
+          class="v-timepicker-option"
           :data-value="option.value"
           :aria-selected="option.value === model ? 'true' : 'false'"
           @click="selectTime(option.value)"
@@ -704,9 +704,9 @@ function onEndIcon() {
       <template v-else>
         <!-- Les cellules basculent l'étape active : `tone` accent = étape en
              cours (variant tonal → le couple de fonds de l'ancien aria-pressed). -->
-        <div class="ds-timepicker-time">
+        <div class="v-timepicker-time">
           <Button
-            class="ds-timepicker-cell"
+            class="v-timepicker-cell"
             variant="ghost"
             size="lg"
             :tone="activeStep === 'hour' ? 'accent' : 'neutral'"
@@ -716,9 +716,9 @@ function onEndIcon() {
           >
             {{ displayHourText }}
           </Button>
-          <span class="ds-timepicker-sep" aria-hidden="true">:</span>
+          <span class="v-timepicker-sep" aria-hidden="true">:</span>
           <Button
-            class="ds-timepicker-cell"
+            class="v-timepicker-cell"
             variant="ghost"
             size="lg"
             :tone="activeStep === 'minute' ? 'accent' : 'neutral'"
@@ -741,9 +741,9 @@ function onEndIcon() {
           @confirm-step="onDialConfirm"
         />
 
-        <div class="ds-visually-hidden" aria-live="polite">{{ liveMessage }}</div>
+        <div class="v-visually-hidden" aria-live="polite">{{ liveMessage }}</div>
 
-        <div class="ds-timepicker-footer">
+        <div class="v-timepicker-footer">
           <Button variant="ghost" tone="neutral" @click="cancel">{{ m.common.cancel }}</Button>
           <Button @click="confirm">{{ m.common.confirm }}</Button>
         </div>
@@ -753,8 +753,8 @@ function onEndIcon() {
 </template>
 
 <style>
-@layer ds.components {
-  .ds-timepicker {
+@layer vectis.components {
+  .v-timepicker {
     /* confine l'ancre à cette instance (racine = ancêtre commun contrôle/panneau) */
     anchor-scope: --timepicker-anchor;
     display: block;
@@ -764,13 +764,13 @@ function onEndIcon() {
 
   /* Rangée du champ : le champ prend la place restante, le Toggle AM/PM sa
      largeur intrinsèque. */
-  .ds-timepicker-row {
+  .v-timepicker-row {
     display: flex;
     align-items: stretch;
     gap: var(--vectis-space-2);
   }
 
-  .ds-timepicker-control {
+  .v-timepicker-control {
     anchor-name: --timepicker-anchor;
     flex: 1;
     /* sans lui, le minimum automatique du flex item ferait déborder le champ */
@@ -781,40 +781,40 @@ function onEndIcon() {
   /* Mode saisie : le champ est éditable, le curseur texte reprend la main sur
      le `pointer` du contrôle. Le masque a une largeur fixe : chasse tabulaire,
      sinon le caret vibre d'un chiffre à l'autre. */
-  .ds-timepicker[data-mode='input'] .ds-timepicker-control {
+  .v-timepicker[data-mode='input'] .v-timepicker-control {
     cursor: text;
   }
 
-  .ds-timepicker[data-mode='input'] .ds-input-control {
+  .v-timepicker[data-mode='input'] .v-input-control {
     font-variant-numeric: tabular-nums;
   }
 
   /* Le Toggle s'aligne sur le CHAMP, pas sur le bloc Input (qui empile
      label / champ / hint) : on compense en marges la hauteur du label et du
      hint. Sa propre hauteur égale celle du champ (mêmes size/compact). */
-  .ds-timepicker-meridiem {
+  .v-timepicker-meridiem {
     flex: none;
     align-self: center;
   }
 
-  .ds-timepicker-row:has(.ds-input-label) .ds-timepicker-meridiem {
+  .v-timepicker-row:has(.v-input-label) .v-timepicker-meridiem {
     margin-block-start: calc(
       var(--vectis-text-label-size) * var(--vectis-text-label-leading) + var(--vectis-space-1)
     );
   }
 
-  .ds-timepicker-row:has(.ds-input-hint) .ds-timepicker-meridiem {
+  .v-timepicker-row:has(.v-input-hint) .v-timepicker-meridiem {
     margin-block-end: calc(
       var(--vectis-text-caption-size) * var(--vectis-text-caption-leading) + var(--vectis-space-1)
     );
   }
 
   /* `position-anchor` et le chrome viennent de Popover (props `anchor` et
-     `surface`, cette dernière posant `.ds-panel`) : il ne reste ici que la mise
+     `surface`, cette dernière posant `.v-panel`) : il ne reste ici que la mise
      en colonne et le padding propres au cadran. Le `display: flex` d'auteur
      écrase le `display: none` UA de [popover] : c'est le garde-fou
-     `.ds-overlay:not(:popover-open)` qui referme. */
-  .ds-timepicker-panel {
+     `.v-overlay:not(:popover-open)` qui referme. */
+  .v-timepicker-panel {
     display: flex;
     flex-direction: column;
     gap: var(--vectis-space-4);
@@ -825,7 +825,7 @@ function onEndIcon() {
 
   /* Une heure numérique se lit toujours HH:MM : sans ce ltr forcé, le bidi
      réordonnerait les cellules en RTL. */
-  .ds-timepicker-time {
+  .v-timepicker-time {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -839,7 +839,7 @@ function onEndIcon() {
      limite au gabarit « grand chiffre » : hauteur, états, focus et transitions
      viennent de Button. Qualifiée [data-size] (modèle IconButton/Tabs) :
      l'ordre d'export n'est pas contraignant. */
-  .ds-timepicker-cell[data-size] {
+  .v-timepicker-cell[data-size] {
     width: var(--control-height);
     font-size: var(--vectis-text-heading-1-size);
     font-weight: var(--vectis-text-heading-2-weight);
@@ -847,26 +847,26 @@ function onEndIcon() {
     font-variant-numeric: tabular-nums;
   }
 
-  .ds-timepicker-sep {
+  .v-timepicker-sep {
     font-size: var(--vectis-text-heading-2-size);
     color: var(--vectis-color-text);
     user-select: none;
   }
 
-  .ds-timepicker-panel .ds-timepicker-dial-face {
+  .v-timepicker-panel .v-timepicker-dial-face {
     align-self: center;
   }
 
-  /* Mode liste : le chrome vient de `.ds-panel` (prop `surface` de Popover) et
-     le gabarit des rangées de `ds-control` posé sur le PANNEAU. Seules les
+  /* Mode liste : le chrome vient de `.v-panel` (prop `surface` de Popover) et
+     le gabarit des rangées de `v-control` posé sur le PANNEAU. Seules les
      dimensions restent ici — `panel.css` n'en porte aucune. */
-  .ds-timepicker-list {
+  .v-timepicker-list {
     min-inline-size: anchor-size(width);
     max-block-size: var(--vectis-control-size-timepicker-list-max-block);
     overflow: auto;
   }
 
-  .ds-timepicker-option {
+  .v-timepicker-option {
     display: flex;
     align-items: center;
     width: 100%;
@@ -884,23 +884,23 @@ function onEndIcon() {
     cursor: pointer;
   }
 
-  .ds-timepicker-option:hover {
+  .v-timepicker-option:hover {
     background: var(--vectis-color-surface-muted);
   }
 
   /* Anneau INTÉRIEUR : le panneau défile, un offset positif serait rogné
      (précédent Tabs). */
-  .ds-timepicker-option:focus-visible {
+  .v-timepicker-option:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
-  .ds-timepicker-option[aria-selected='true'] {
+  .v-timepicker-option[aria-selected='true'] {
     background: var(--vectis-color-accent-surface);
     color: var(--vectis-color-accent-text);
   }
 
-  .ds-timepicker-footer {
+  .v-timepicker-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;

@@ -57,7 +57,7 @@ export const Default: Story = {
     // montage paresseux : le <dialog> n'est requêtable qu'une fois ouvert
     await userEvent.click(canvas.getByRole('button', { name: 'Supprimer' }))
     const dialog = await waitFor(() => {
-      const el = canvasElement.querySelector('.ds-dialog') as HTMLDialogElement | null
+      const el = canvasElement.querySelector('.v-dialog') as HTMLDialogElement | null
       expect(el?.open).toBe(true)
       return el!
     })
@@ -70,7 +70,7 @@ export const Default: Story = {
 
     // seule une action explicite ferme (le <dialog> est alors démonté)
     await userEvent.click(within(dialog).getByRole('button', { name: 'Annuler' }))
-    await waitFor(() => expect(canvasElement.querySelector('.ds-dialog')).toBeNull())
+    await waitFor(() => expect(canvasElement.querySelector('.v-dialog')).toBeNull())
   },
 }
 

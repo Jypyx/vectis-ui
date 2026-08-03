@@ -10,8 +10,8 @@ describe('IconButton', () => {
       slots: { default: '<svg aria-hidden="true" />' },
     })
     const button = getByRole('button', { name: 'Fermer le panneau' })
-    expect(button.classList.contains('ds-icon-button')).toBe(true)
-    expect(button.classList.contains('ds-button')).toBe(true)
+    expect(button.classList.contains('v-icon-button')).toBe(true)
+    expect(button.classList.contains('v-button')).toBe(true)
   })
 
   it('transmet variant/tone/size au Button sous-jacent', () => {
@@ -30,7 +30,7 @@ describe('IconButton', () => {
       props: { label: 'Favori', icon: 'favorite' },
     })
     const button = getByRole('button', { name: 'Favori' })
-    const icon = button.querySelector('.ds-icon') as HTMLElement
+    const icon = button.querySelector('.v-icon') as HTMLElement
     expect(icon).not.toBeNull()
     expect(icon.textContent).toBe('favorite')
     expect(icon.getAttribute('aria-hidden')).toBe('true')
@@ -41,7 +41,7 @@ describe('IconButton', () => {
     const { getByRole } = render(IconButton, {
       props: { label: 'Favori', icon: 'favorite', iconFilled: true },
     })
-    const icon = getByRole('button').querySelector('.ds-icon') as HTMLElement
+    const icon = getByRole('button').querySelector('.v-icon') as HTMLElement
     expect(icon.hasAttribute('data-filled')).toBe(true)
   })
 

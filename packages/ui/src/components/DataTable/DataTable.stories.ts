@@ -146,9 +146,9 @@ export const PaginationLocale: Story = {
   // Layout non mesurable en jsdom : la nav (responsive off, donc non confinée)
   // a une largeur intrinsèque et le groupe droit est collé au bord du footer.
   play: async ({ canvasElement }) => {
-    const footer = canvasElement.querySelector('.ds-table-footer') as HTMLElement
-    const nav = footer.querySelector('.ds-pagination') as HTMLElement
-    const perPage = footer.querySelector('.ds-table-per-page') as HTMLElement
+    const footer = canvasElement.querySelector('.v-table-footer') as HTMLElement
+    const nav = footer.querySelector('.v-pagination') as HTMLElement
+    const perPage = footer.querySelector('.v-table-per-page') as HTMLElement
     await waitFor(() => {
       expect(nav.getBoundingClientRect().width).toBeGreaterThan(0)
       expect(perPage.getBoundingClientRect().right).toBeLessThanOrEqual(
@@ -359,8 +359,8 @@ export const PleineHauteur: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const wrapper = canvasElement.querySelector('.ds-table-wrapper') as HTMLElement
-    const scroller = canvasElement.querySelector('.ds-table-scroller') as HTMLElement
+    const wrapper = canvasElement.querySelector('.v-table-wrapper') as HTMLElement
+    const scroller = canvasElement.querySelector('.v-table-scroller') as HTMLElement
 
     // le composant épouse le parent, et le trop-plein défile (au lieu d'être
     // rogné par le `overflow: clip` de la variante outlined)

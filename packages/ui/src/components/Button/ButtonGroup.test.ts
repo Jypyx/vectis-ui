@@ -4,12 +4,12 @@ import { describe, expect, it } from 'vitest'
 import ButtonGroup from './ButtonGroup.vue'
 
 describe('ButtonGroup', () => {
-  it('rend un role="group" avec la classe ds-button-group', () => {
+  it('rend un role="group" avec la classe v-button-group', () => {
     const { getByRole } = render(ButtonGroup, {
       slots: { default: '<button>A</button>' },
     })
     const group = getByRole('group')
-    expect(group.classList.contains('ds-button-group')).toBe(true)
+    expect(group.classList.contains('v-button-group')).toBe(true)
   })
 
   it('par défaut : data-orientation horizontal', () => {
@@ -50,6 +50,6 @@ describe('ButtonGroup', () => {
       slots: { default: '<button>A</button>' },
     })
     const toolbar = getByRole('toolbar')
-    expect(toolbar.classList.contains('ds-button-group')).toBe(true)
+    expect(toolbar.classList.contains('v-button-group')).toBe(true)
   })
 })

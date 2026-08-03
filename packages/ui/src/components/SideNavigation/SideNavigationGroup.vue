@@ -31,20 +31,20 @@ const labelId = useId()
 </script>
 
 <template>
-  <li class="ds-side-nav-group">
-    <span :id="labelId" class="ds-side-nav-group-label"
+  <li class="v-side-nav-group">
+    <span :id="labelId" class="v-side-nav-group-label"
       ><slot name="label">{{ label }}</slot></span
     >
-    <ul class="ds-side-nav-group-list" :aria-labelledby="labelId">
+    <ul class="v-side-nav-group-list" :aria-labelledby="labelId">
       <slot />
     </ul>
   </li>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-side-nav-group + .ds-side-nav-group,
-  .ds-side-nav-item + .ds-side-nav-group {
+@layer vectis.components {
+  .v-side-nav-group + .v-side-nav-group,
+  .v-side-nav-item + .v-side-nav-group {
     margin-block-start: var(--vectis-space-3);
   }
 
@@ -61,7 +61,7 @@ const labelId = useId()
    * plus haut serait figée au niveau 0 (précédent : le `--chip-height` redit
    * du Combobox).
    */
-  .ds-side-nav-group-label {
+  .v-side-nav-group-label {
     display: flex;
     align-items: center;
     min-block-size: var(--control-height);

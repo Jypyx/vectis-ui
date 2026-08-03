@@ -51,14 +51,14 @@ provide(accordionKey, {
 </script>
 
 <template>
-  <div class="ds-accordion" :data-variant="variant" :data-compact="compact ? '' : undefined">
+  <div class="v-accordion" :data-variant="variant" :data-compact="compact ? '' : undefined">
     <slot />
   </div>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-accordion {
+@layer vectis.components {
+  .v-accordion {
     /*
      * Densité : variables posées sur la RACINE seulement (seule à rendre
      * data-compact) et héritées par les items — les fallbacks vivent côté
@@ -78,13 +78,13 @@ provide(accordionKey, {
   }
 
   /* Compact : paddings resserrés seuls — typo, gouttière et icône inchangées */
-  .ds-accordion[data-compact] {
+  .v-accordion[data-compact] {
     --accordion-pad-delta: var(--vectis-space-1);
   }
 
   /* Carte bordée ; `flat` (défaut) n'a rien à annuler — y compris le fond, qui
      appartient au cadre : à plat, l'accordéon hérite de la surface d'accueil. */
-  .ds-accordion[data-variant='outlined'] {
+  .v-accordion[data-variant='outlined'] {
     /*
      * Rayon EMBOÎTÉ (moins la bordure) repris par les summary des items
      * d'extrémité : `overflow: hidden` découpe tout le sous-arbre sur cette

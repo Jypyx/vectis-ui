@@ -196,14 +196,14 @@ const navEl = ref<HTMLElement | null>(null)
 function onKeydown(event: KeyboardEvent) {
   const nav = navEl.value
   if (!nav) return
-  arrowNavigate(event, nav, navigableItems(nav, '.ds-pagination-page:not(:disabled)'))
+  arrowNavigate(event, nav, navigableItems(nav, '.v-pagination-page:not(:disabled)'))
 }
 </script>
 
 <template>
   <nav
     ref="navEl"
-    class="ds-pagination"
+    class="v-pagination"
     :aria-label="ariaLabel"
     :data-align="align"
     :data-controls-display="controlsDisplay"
@@ -211,13 +211,13 @@ function onKeydown(event: KeyboardEvent) {
     @keydown="onKeydown"
   >
     <!-- attached : ButtonGroup fusionne les bordures. Il cible ses enfants
-         DIRECTS `.ds-button` — d'où l'absence de <ul>/<li>, et une ellipse
+         DIRECTS `.v-button` — d'où l'absence de <ul>/<li>, et une ellipse
          rendue en IconButton plutôt qu'en <span>. -->
-    <component :is="attached ? ButtonGroup : 'div'" class="ds-pagination-items">
+    <component :is="attached ? ButtonGroup : 'div'" class="v-pagination-items">
       <template v-if="showControls">
         <IconButton
           v-if="controlsDisplay === 'icon'"
-          class="ds-pagination-control"
+          class="v-pagination-control"
           :label="resolvedPrevLabel"
           :variant="variant"
           tone="neutral"
@@ -233,7 +233,7 @@ function onKeydown(event: KeyboardEvent) {
              y survivre. -->
         <Button
           v-else
-          class="ds-pagination-control"
+          class="v-pagination-control"
           :variant="variant"
           tone="neutral"
           :size="size"
@@ -245,14 +245,14 @@ function onKeydown(event: KeyboardEvent) {
           <template v-if="controlsDisplay === 'both'" #start>
             <Icon v-bind="iconProps(prevIcon)" />
           </template>
-          <span class="ds-pagination-control-label">{{ resolvedPrevLabel }}</span>
+          <span class="v-pagination-control-label">{{ resolvedPrevLabel }}</span>
         </Button>
       </template>
 
       <template v-for="item in items" :key="item.key">
         <Button
           v-if="item.kind === 'page'"
-          class="ds-pagination-page"
+          class="v-pagination-page"
           :variant="item.page === currentPage ? 'solid' : variant"
           :tone="item.page === currentPage ? tone : 'neutral'"
           :size="size"
@@ -266,12 +266,12 @@ function onKeydown(event: KeyboardEvent) {
         >
           {{ item.page }}
         </Button>
-        <!-- Ellipse : IconButton inerte (donc un `.ds-button`, la couture du
+        <!-- Ellipse : IconButton inerte (donc un `.v-button`, la couture du
              groupe reste continue et la hauteur suit size/compact). Masquée
              aux technologies d'assistance, hors tabulation via disabled. -->
         <IconButton
           v-else
-          class="ds-pagination-ellipsis"
+          class="v-pagination-ellipsis"
           :label="m.pagination.hiddenPages"
           aria-hidden="true"
           :variant="variant"
@@ -287,7 +287,7 @@ function onKeydown(event: KeyboardEvent) {
       <template v-if="showControls">
         <IconButton
           v-if="controlsDisplay === 'icon'"
-          class="ds-pagination-control"
+          class="v-pagination-control"
           :label="resolvedNextLabel"
           :variant="variant"
           tone="neutral"
@@ -300,7 +300,7 @@ function onKeydown(event: KeyboardEvent) {
         </IconButton>
         <Button
           v-else
-          class="ds-pagination-control"
+          class="v-pagination-control"
           :variant="variant"
           tone="neutral"
           :size="size"
@@ -312,7 +312,7 @@ function onKeydown(event: KeyboardEvent) {
           <template v-if="controlsDisplay === 'both'" #end>
             <Icon v-bind="iconProps(nextIcon)" />
           </template>
-          <span class="ds-pagination-control-label">{{ resolvedNextLabel }}</span>
+          <span class="v-pagination-control-label">{{ resolvedNextLabel }}</span>
         </Button>
       </template>
     </component>
@@ -320,8 +320,8 @@ function onKeydown(event: KeyboardEvent) {
 </template>
 
 <style>
-@layer ds.components {
-  .ds-pagination {
+@layer vectis.components {
+  .v-pagination {
     display: flex;
   }
 
@@ -335,45 +335,45 @@ function onKeydown(event: KeyboardEvent) {
    * largeur intrinsèque et se pose comme n'importe quel contenu. Dans les deux
    * cas l'alignement passe par `data-align`, jamais par le contexte.
    */
-  .ds-pagination[data-responsive] {
+  .v-pagination[data-responsive] {
     container-type: inline-size;
-    container-name: ds-pagination;
+    container-name: v-pagination;
   }
 
-  .ds-pagination[data-align='center'] {
+  .v-pagination[data-align='center'] {
     justify-content: center;
   }
 
-  .ds-pagination[data-align='end'] {
+  .v-pagination[data-align='end'] {
     justify-content: flex-end;
   }
 
-  .ds-pagination-items {
+  .v-pagination-items {
     display: inline-flex;
     align-items: center;
     gap: var(--vectis-space-1);
   }
 
   /* attached : l'assemblage est fait par les marges négatives de ButtonGroup */
-  .ds-button-group.ds-pagination-items {
+  .v-button-group.v-pagination-items {
     gap: 0;
   }
 
-  .ds-pagination-page {
+  .v-pagination-page {
     /* Pastille carrée à un chiffre, qui s'élargit d'elle-même au-delà : la
-       variable est posée par ds-control sur ce même élément, une seule règle
+       variable est posée par v-control sur ce même élément, une seule règle
        couvre donc les 5 tailles × compact. */
     min-inline-size: var(--control-height);
     padding-inline: var(--vectis-space-2);
   }
 
   /* l'ellipse n'est pas un bouton désactivé au sens de l'utilisateur */
-  .ds-pagination-ellipsis {
+  .v-pagination-ellipsis {
     cursor: default;
   }
 
   /* chevrons : la direction est physique, l'icône se retourne en RTL */
-  [dir='rtl'] .ds-pagination-control .ds-icon {
+  [dir='rtl'] .v-pagination-control .v-icon {
     scale: -1 1;
   }
 
@@ -401,14 +401,14 @@ function onKeydown(event: KeyboardEvent) {
    * Aucune ellipse n'est ajoutée en compensation d'un voisin masqué : elle
    * occupe exactement la largeur d'une pastille, elle ne ferait rien gagner.
    */
-  @container ds-pagination (max-width: 36rem) {
-    .ds-pagination[data-responsive] .ds-pagination-page[data-distance='3'] {
+  @container v-pagination (max-width: 36rem) {
+    .v-pagination[data-responsive] .v-pagination-page[data-distance='3'] {
       display: none;
     }
   }
 
-  @container ds-pagination (max-width: 31rem) {
-    .ds-pagination[data-responsive] .ds-pagination-page[data-distance='2'] {
+  @container v-pagination (max-width: 31rem) {
+    .v-pagination[data-responsive] .v-pagination-page[data-distance='2'] {
       display: none;
     }
 
@@ -416,13 +416,13 @@ function onKeydown(event: KeyboardEvent) {
        seule rend plus de place que de sacrifier une voisine, il passe donc
        avant le dernier palier. Jamais en mode 'text' — il ne resterait rien
        de cliquable. */
-    .ds-pagination[data-responsive][data-controls-display='both'] .ds-pagination-control-label {
+    .v-pagination[data-responsive][data-controls-display='both'] .v-pagination-control-label {
       display: none;
     }
   }
 
-  @container ds-pagination (max-width: 25rem) {
-    .ds-pagination[data-responsive] .ds-pagination-page[data-distance='1'] {
+  @container v-pagination (max-width: 25rem) {
+    .v-pagination[data-responsive] .v-pagination-page[data-distance='1'] {
       display: none;
     }
   }

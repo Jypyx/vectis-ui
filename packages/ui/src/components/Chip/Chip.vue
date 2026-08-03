@@ -130,7 +130,7 @@ const iconOnly = computed(
 
 <template>
   <span
-    class="ds-chip ds-control"
+    class="v-chip v-control"
     :class="$attrs.class"
     :style="rootStyle"
     :data-variant="variant"
@@ -146,7 +146,7 @@ const iconOnly = computed(
     <component
       :is="actionTag"
       v-bind="actionAttrs"
-      class="ds-chip-action"
+      class="v-chip-action"
       :type="actionTag === 'button' ? 'button' : undefined"
       :href="isLink && !disabled ? href : undefined"
       :disabled="actionTag === 'button' ? disabled : undefined"
@@ -166,7 +166,7 @@ const iconOnly = computed(
     <button
       v-if="dismissible"
       type="button"
-      class="ds-chip-remove"
+      class="v-chip-remove"
       :aria-label="resolvedDismissLabel"
       :disabled="disabled"
       @click="$emit('dismiss')"
@@ -177,10 +177,10 @@ const iconOnly = computed(
 </template>
 
 <style>
-@layer ds.components {
-  /* Tailles/compact : hauteur explicite via la classe partagée ds-control
+@layer vectis.components {
+  /* Tailles/compact : hauteur explicite via la classe partagée v-control
      (styles/control-size.css), l'union TS restreint à xs/sm */
-  .ds-chip {
+  .v-chip {
     display: inline-flex;
     align-items: center;
     height: var(--control-height);
@@ -196,12 +196,12 @@ const iconOnly = computed(
       color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-chip[data-shape='pill'] {
+  .v-chip[data-shape='pill'] {
     border-radius: var(--vectis-radius-pill);
   }
 
   /* --- Tones : ne définissent que des variables locales --- */
-  .ds-chip[data-tone='accent'] {
+  .v-chip[data-tone='accent'] {
     --tone-bg-solid: var(--vectis-color-accent);
     --tone-bg-solid-hover: var(--vectis-color-accent-hover);
     --tone-bg-solid-active: var(--vectis-color-accent-active);
@@ -211,7 +211,7 @@ const iconOnly = computed(
     --tone-border-soft: var(--vectis-color-accent-border);
   }
 
-  .ds-chip[data-tone='danger'] {
+  .v-chip[data-tone='danger'] {
     --tone-bg-solid: var(--vectis-color-danger);
     --tone-bg-solid-hover: var(--vectis-color-danger-hover);
     --tone-bg-solid-active: var(--vectis-color-danger-active);
@@ -221,7 +221,7 @@ const iconOnly = computed(
     --tone-border-soft: var(--vectis-color-danger-border);
   }
 
-  .ds-chip[data-tone='success'] {
+  .v-chip[data-tone='success'] {
     --tone-bg-solid: var(--vectis-color-success);
     --tone-bg-solid-hover: var(--vectis-color-success-hover);
     --tone-bg-solid-active: var(--vectis-color-success-active);
@@ -231,7 +231,7 @@ const iconOnly = computed(
     --tone-border-soft: var(--vectis-color-success-border);
   }
 
-  .ds-chip[data-tone='warning'] {
+  .v-chip[data-tone='warning'] {
     --tone-bg-solid: var(--vectis-color-warning);
     --tone-bg-solid-hover: var(--vectis-color-warning-hover);
     --tone-bg-solid-active: var(--vectis-color-warning-active);
@@ -247,7 +247,7 @@ const iconOnly = computed(
      surface-inverse : en dark, surface-inverse = surface-muted (neutral-800),
      un chip neutre sélectionné serait invisible — text (neutral-50 en dark,
      neutral-900 en light) reste distinct du fond tonal dans les deux thèmes */
-  .ds-chip[data-tone='neutral'] {
+  .v-chip[data-tone='neutral'] {
     --tone-bg-solid: var(--vectis-color-text);
     --tone-bg-solid-hover: color-mix(
       in oklab,
@@ -269,7 +269,7 @@ const iconOnly = computed(
      dérivées par color-mix avec les tokens de thème (surface/text s'inversent
      entre light et dark → adaptation automatique). Bloc APRÈS les tones :
      même spécificité, le dernier gagne. */
-  .ds-chip[data-custom] {
+  .v-chip[data-custom] {
     --tone-bg-solid: var(--custom-color);
     --tone-bg-solid-hover: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 8%);
     --tone-bg-solid-active: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 14%);
@@ -282,17 +282,17 @@ const iconOnly = computed(
   }
 
   /* --- Variantes : consomment les variables du tone --- */
-  .ds-chip[data-variant='tonal'] {
+  .v-chip[data-variant='tonal'] {
     background: var(--tone-bg-soft);
     color: var(--tone-text-tinted);
   }
 
-  .ds-chip[data-variant='solid'] {
+  .v-chip[data-variant='solid'] {
     background: var(--tone-bg-solid);
     color: var(--tone-text-solid);
   }
 
-  .ds-chip[data-variant='outline'] {
+  .v-chip[data-variant='outline'] {
     background: transparent;
     color: var(--tone-text-tinted);
     border-color: var(--tone-border-soft);
@@ -300,7 +300,7 @@ const iconOnly = computed(
 
   /* Sélectionné : rendu solid du tone/de la couleur COURANTE, quel que soit
      le variant (bloc après les variants, même spécificité) */
-  .ds-chip[data-selected] {
+  .v-chip[data-selected] {
     background: var(--tone-bg-solid);
     color: var(--tone-text-solid);
     border-color: transparent;
@@ -309,41 +309,41 @@ const iconOnly = computed(
   /* --- Hover/active : scopés à l'élément d'action interactif — un chip
      statique n'a aucun hover, et survoler le bouton de retrait ne change pas
      le fond du chip --- */
-  .ds-chip[data-variant='tonal']:not([data-disabled], [data-selected]):has(
-      :is(button, a).ds-chip-action:hover
+  .v-chip[data-variant='tonal']:not([data-disabled], [data-selected]):has(
+      :is(button, a).v-chip-action:hover
     ) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
-  .ds-chip[data-variant='tonal']:not([data-disabled], [data-selected]):has(
-      :is(button, a).ds-chip-action:active
+  .v-chip[data-variant='tonal']:not([data-disabled], [data-selected]):has(
+      :is(button, a).v-chip-action:active
     ) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 14%);
   }
 
-  .ds-chip[data-variant='outline']:not([data-disabled], [data-selected]):has(
-      :is(button, a).ds-chip-action:hover
+  .v-chip[data-variant='outline']:not([data-disabled], [data-selected]):has(
+      :is(button, a).v-chip-action:hover
     ) {
     background: var(--tone-bg-soft);
   }
 
-  .ds-chip[data-variant='outline']:not([data-disabled], [data-selected]):has(
-      :is(button, a).ds-chip-action:active
+  .v-chip[data-variant='outline']:not([data-disabled], [data-selected]):has(
+      :is(button, a).v-chip-action:active
     ) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
-  .ds-chip[data-variant='solid']:not([data-disabled]):has(:is(button, a).ds-chip-action:hover),
-  .ds-chip[data-selected]:not([data-disabled]):has(:is(button, a).ds-chip-action:hover) {
+  .v-chip[data-variant='solid']:not([data-disabled]):has(:is(button, a).v-chip-action:hover),
+  .v-chip[data-selected]:not([data-disabled]):has(:is(button, a).v-chip-action:hover) {
     background: var(--tone-bg-solid-hover);
   }
 
-  .ds-chip[data-variant='solid']:not([data-disabled]):has(:is(button, a).ds-chip-action:active),
-  .ds-chip[data-selected]:not([data-disabled]):has(:is(button, a).ds-chip-action:active) {
+  .v-chip[data-variant='solid']:not([data-disabled]):has(:is(button, a).v-chip-action:active),
+  .v-chip[data-selected]:not([data-disabled]):has(:is(button, a).v-chip-action:active) {
     background: var(--tone-bg-solid-active);
   }
 
-  .ds-chip-action {
+  .v-chip-action {
     display: inline-flex;
     align-items: center;
     gap: var(--control-gap);
@@ -361,25 +361,25 @@ const iconOnly = computed(
 
   /* Icône seule : action carrée — l'aspect-ratio suit la hauteur du chip
      (sans nouvelle dimension) */
-  .ds-chip[data-icon-only] .ds-chip-action {
+  .v-chip[data-icon-only] .v-chip-action {
     aspect-ratio: 1;
     justify-content: center;
     padding-inline: 0;
   }
 
-  :is(button, a).ds-chip-action {
+  :is(button, a).v-chip-action {
     cursor: pointer;
   }
 
-  :is(button, a).ds-chip-action:focus-visible {
+  :is(button, a).v-chip-action:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* Pas de fond, même au survol (pattern .ds-input-action) : seule la couleur
+  /* Pas de fond, même au survol (pattern .v-input-action) : seule la couleur
      de l'icône passe de currentcolor atténué à la pleine couleur — text-muted
      serait illisible sur les fonds teintés/solid */
-  .ds-chip-remove {
+  .v-chip-remove {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -396,38 +396,38 @@ const iconOnly = computed(
     transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-chip-remove:hover:not(:disabled) {
+  .v-chip-remove:hover:not(:disabled) {
     color: inherit;
   }
 
-  .ds-chip-remove:focus-visible {
+  .v-chip-remove:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
   /* --- Désactivé : nuances de gris par tokens (surchargés par le thème dark) --- */
-  .ds-chip[data-disabled] {
+  .v-chip[data-disabled] {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);
     border-color: transparent;
   }
 
-  .ds-chip[data-disabled][data-variant='outline'] {
+  .v-chip[data-disabled][data-variant='outline'] {
     background: transparent;
     border-color: var(--vectis-color-border);
   }
 
-  .ds-chip[data-disabled] :is(:is(button, a).ds-chip-action, .ds-chip-remove) {
+  .v-chip[data-disabled] :is(:is(button, a).v-chip-action, .v-chip-remove) {
     cursor: not-allowed;
   }
 
-  .ds-chip[data-disabled] .ds-chip-remove {
+  .v-chip[data-disabled] .v-chip-remove {
     color: inherit;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-chip,
-    .ds-chip-remove {
+    .v-chip,
+    .v-chip-remove {
       transition: none;
     }
   }

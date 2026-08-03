@@ -1,6 +1,6 @@
 /**
  * Génère depuis la source typée (`src/tokens/`) :
- *   - `src/styles/tokens.css` : custom properties dans `@layer ds.tokens`
+ *   - `src/styles/tokens.css` : custom properties dans `@layer vectis.tokens`
  *     (`:root` = primitifs + sémantiques light, `[data-theme]` = thèmes)
  *   - `src/tokens/tokens.json` : export JSON brut (outillage externe)
  *
@@ -33,7 +33,7 @@ const css = `/*
  * FICHIER GÉNÉRÉ — ne pas éditer à la main.
  * Source : src/tokens/  ·  Régénérer : pnpm tokens
  */
-@layer ds.tokens {
+@layer vectis.tokens {
   :root {
     color-scheme: light;
 ${toCssDeclarations(primitives, known, INDENT)}

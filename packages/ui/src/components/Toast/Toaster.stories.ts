@@ -55,7 +55,7 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const stack = canvasElement.querySelector(
-      ".ds-toast-stack[data-placement='bottom-right']",
+      ".v-toast-stack[data-placement='bottom-right']",
     ) as HTMLElement
 
     // déclenchement programmatique : la pile passe en top-layer
@@ -150,7 +150,7 @@ export const Persistant: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const stack = canvasElement.querySelector(
-      ".ds-toast-stack[data-placement='bottom-right']",
+      ".v-toast-stack[data-placement='bottom-right']",
     ) as HTMLElement
 
     await userEvent.click(canvas.getByRole('button', { name: 'Notifier' }))
@@ -180,7 +180,7 @@ export const AutoFermeture: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const stack = canvasElement.querySelector(
-      ".ds-toast-stack[data-placement='bottom-right']",
+      ".v-toast-stack[data-placement='bottom-right']",
     ) as HTMLElement
 
     await userEvent.click(canvas.getByRole('button', { name: 'Notifier' }))
@@ -281,6 +281,6 @@ export const Empilement: Story = {
     await userEvent.click(button)
     await userEvent.click(button)
     // les trois toasts cohabitent dans la même pile
-    await waitFor(() => expect(canvasElement.querySelectorAll('.ds-toast')).toHaveLength(3))
+    await waitFor(() => expect(canvasElement.querySelectorAll('.v-toast')).toHaveLength(3))
   },
 }

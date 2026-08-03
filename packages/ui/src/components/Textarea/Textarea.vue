@@ -145,7 +145,7 @@ const { counterText, over } = useTextLimit({
 
 <template>
   <div
-    class="ds-textarea ds-control"
+    class="v-textarea v-control"
     :class="rootClass"
     :style="rootStyle"
     :data-size="size"
@@ -153,16 +153,16 @@ const { counterText, over } = useTextLimit({
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
   >
-    <Typography v-if="label" as="label" variant="label" class="ds-textarea-label" :for="fieldId">
+    <Typography v-if="label" as="label" variant="label" class="v-textarea-label" :for="fieldId">
       {{ label }}
     </Typography>
 
-    <div class="ds-textarea-field" :data-auto-grow="autoGrow ? '' : undefined">
+    <div class="v-textarea-field" :data-auto-grow="autoGrow ? '' : undefined">
       <slot name="start">
         <button
           v-if="iconStart && hasIconStartHandler"
           type="button"
-          class="ds-textarea-action"
+          class="v-textarea-action"
           :aria-label="iconStartLabel ?? iconName(iconStart)"
           :disabled="disabled"
           @click="emit('click:icon-start', $event)"
@@ -177,7 +177,7 @@ const { counterText, over } = useTextLimit({
         :id="fieldId"
         ref="controlEl"
         v-model="model"
-        class="ds-textarea-control"
+        class="v-textarea-control"
         :maxlength="softLimit ? undefined : maxlength"
         :disabled="disabled"
         :readonly="readonly || undefined"
@@ -188,7 +188,7 @@ const { counterText, over } = useTextLimit({
       <button
         v-if="showClear"
         type="button"
-        class="ds-textarea-action ds-textarea-clear"
+        class="v-textarea-action v-textarea-clear"
         :aria-label="resolvedClearLabel"
         @click="onClear"
       >
@@ -202,7 +202,7 @@ const { counterText, over } = useTextLimit({
         <button
           v-if="iconEnd && hasIconEndHandler"
           type="button"
-          class="ds-textarea-action"
+          class="v-textarea-action"
           :aria-label="iconEndLabel ?? iconName(iconEnd)"
           :disabled="disabled"
           @click="emit('click:icon-end', $event)"
@@ -213,11 +213,11 @@ const { counterText, over } = useTextLimit({
       </slot>
     </div>
 
-    <div v-if="hint || counter" class="ds-textarea-meta">
-      <Typography v-if="hint" :id="hintId" variant="caption" tone="muted" class="ds-textarea-hint">
+    <div v-if="hint || counter" class="v-textarea-meta">
+      <Typography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-textarea-hint">
         {{ hint }}
       </Typography>
-      <span v-if="counter" class="ds-textarea-counter" :data-over="over ? '' : undefined">
+      <span v-if="counter" class="v-textarea-counter" :data-over="over ? '' : undefined">
         {{ counterText }}
       </span>
     </div>
@@ -225,8 +225,8 @@ const { counterText, over } = useTextLimit({
 </template>
 
 <style>
-@layer ds.components {
-  .ds-textarea {
+@layer vectis.components {
+  .v-textarea {
     display: flex;
     flex-direction: column;
     gap: var(--vectis-space-1);
@@ -235,10 +235,10 @@ const { counterText, over } = useTextLimit({
   }
 
   /* Label et hint : rendus par Typography (label / caption muted) — les classes
-     .ds-textarea-label/.ds-textarea-hint restent posées comme points d'accroche
+     .v-textarea-label/.v-textarea-hint restent posées comme points d'accroche
      (surcharges consommateur, état disabled ci-dessous). */
 
-  .ds-textarea-meta {
+  .v-textarea-meta {
     display: flex;
     align-items: baseline;
     gap: var(--vectis-space-2);
@@ -246,26 +246,26 @@ const { counterText, over } = useTextLimit({
 
   /* Le compteur reste stylé localement : tabular-nums et l'état de dépassement
      ne sont pas des rôles typographiques. */
-  .ds-textarea-counter {
+  .v-textarea-counter {
     margin-inline-start: auto;
     font-size: var(--vectis-text-caption-size);
     color: var(--vectis-color-text-muted);
     font-variant-numeric: tabular-nums;
   }
 
-  .ds-textarea-counter[data-over] {
+  .v-textarea-counter[data-over] {
     color: var(--vectis-color-danger-text);
   }
 
   /* Le field porte bordure, fond, focus ET le redimensionnement (resize exige
      overflow ≠ visible) ; --field-border-color est la seule source de vérité de la
      couleur (hover/erreur/disabled la redéfinissent) */
-  .ds-textarea-field {
+  .v-textarea-field {
     --field-border-color: var(--vectis-color-border-strong);
 
     /*
      * Tailles/compact : variables --control-* héritées de la racine
-     * ds-control (styles/control-size.css), contexte d'Icon compris.
+     * v-control (styles/control-size.css), contexte d'Icon compris.
      * Hauteur minimale = 2 lignes : base + hauteur effective — vaut 2×base
      * sans compact, 2×base - 4px avec (la hauteur effective porte le delta).
      */
@@ -292,7 +292,7 @@ const { counterText, over } = useTextLimit({
       box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-textarea-control {
+  .v-textarea-control {
     flex: 1;
     min-width: 0;
     align-self: stretch;
@@ -305,34 +305,34 @@ const { counterText, over } = useTextLimit({
     resize: none; /* le redimensionnement est porté par le field */
   }
 
-  .ds-textarea-control::placeholder {
+  .v-textarea-control::placeholder {
     color: var(--vectis-color-text-subtle);
   }
 
   /* icônes et boutons centrés sur la première ligne de texte */
-  .ds-textarea-field > .ds-icon,
-  .ds-textarea-field > .ds-spinner {
+  .v-textarea-field > .v-icon,
+  .v-textarea-field > .v-spinner {
     margin-block-start: calc((1lh - var(--vectis-icon-size)) / 2);
   }
 
-  .ds-textarea-field > .ds-textarea-action {
+  .v-textarea-field > .v-textarea-action {
     margin-block-start: calc((1lh - var(--control-action-size)) / 2);
   }
 
   /* Icônes décoratives : gris foncé, moins présentes que le texte saisi */
-  .ds-textarea-field > .ds-icon {
+  .v-textarea-field > .v-icon {
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-textarea-field > .ds-spinner {
+  .v-textarea-field > .v-spinner {
     font-size: var(--vectis-icon-size);
   }
 
-  .ds-textarea-field:hover:not(:has(.ds-textarea-control:focus)):not(
+  .v-textarea-field:hover:not(:has(.v-textarea-control:focus)):not(
       :has(
-        .ds-textarea-control:disabled,
-        .ds-textarea-control:user-invalid,
-        .ds-textarea-control[aria-invalid='true']
+        .v-textarea-control:disabled,
+        .v-textarea-control:user-invalid,
+        .v-textarea-control[aria-invalid='true']
       )
     ) {
     --field-border-color: color-mix(
@@ -349,7 +349,7 @@ const { counterText, over } = useTextLimit({
      :focus (pas :focus-visible) : un champ texte montre toujours son focus,
      souris comprise. L'outline transparent est le filet forced-colors
      (Windows High Contrast supprime les box-shadow). */
-  .ds-textarea-field:has(.ds-textarea-control:focus) {
+  .v-textarea-field:has(.v-textarea-control:focus) {
     --field-border-color: var(--vectis-color-accent);
 
     box-shadow: 0 0 0 1px var(--field-border-color);
@@ -358,14 +358,14 @@ const { counterText, over } = useTextLimit({
 
   /* État invalide : pseudo-classe native d'abord, prop (aria-invalid) ensuite.
      Seule la variable change → la bordure ET le ring focus passent en rouge. */
-  .ds-textarea-field:has(.ds-textarea-control:user-invalid),
-  .ds-textarea-field:has(.ds-textarea-control[aria-invalid='true']) {
+  .v-textarea-field:has(.v-textarea-control:user-invalid),
+  .v-textarea-field:has(.v-textarea-control[aria-invalid='true']) {
     --field-border-color: var(--vectis-color-danger);
   }
 
   /* Boutons internes (effacer, icône cliquable) : gris foncé → noir au hover,
      radius aligné sur Button (focus ring carré aux bords arrondis) */
-  .ds-textarea-action {
+  .v-textarea-action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -382,18 +382,18 @@ const { counterText, over } = useTextLimit({
     transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-textarea-action:hover:not(:disabled) {
+  .v-textarea-action:hover:not(:disabled) {
     color: var(--vectis-color-text);
   }
 
-  .ds-textarea-action:focus-visible {
+  .v-textarea-action:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
   /* Readonly : fond légèrement enfoncé, texte normal (la valeur reste lisible),
      focus accent conservé. [data-readonly] et jamais :read-only (matche :disabled). */
-  .ds-textarea[data-readonly] .ds-textarea-field {
+  .v-textarea[data-readonly] .v-textarea-field {
     --field-border-color: var(--vectis-color-border);
 
     background: var(--vectis-color-surface-sunken);
@@ -401,7 +401,7 @@ const { counterText, over } = useTextLimit({
 
   /* Disabled : nuance de gris sans opacité (mêmes tokens que Checkbox/Radio).
      Placé après les états erreur/readonly : à spécificité égale, il gagne. */
-  .ds-textarea[data-disabled] .ds-textarea-field {
+  .v-textarea[data-disabled] .v-textarea-field {
     --field-border-color: var(--vectis-color-border);
 
     background: var(--vectis-color-surface-muted);
@@ -410,45 +410,45 @@ const { counterText, over } = useTextLimit({
     resize: none;
   }
 
-  .ds-textarea[data-disabled] .ds-textarea-label,
-  .ds-textarea[data-disabled] .ds-textarea-hint,
-  .ds-textarea[data-disabled] .ds-textarea-counter {
+  .v-textarea[data-disabled] .v-textarea-label,
+  .v-textarea[data-disabled] .v-textarea-hint,
+  .v-textarea[data-disabled] .v-textarea-counter {
     color: var(--vectis-color-text-subtle);
   }
 
-  .ds-textarea[data-disabled] .ds-textarea-action,
-  .ds-textarea[data-disabled] .ds-textarea-field > .ds-icon {
+  .v-textarea[data-disabled] .v-textarea-action,
+  .v-textarea[data-disabled] .v-textarea-field > .v-icon {
     color: inherit;
     cursor: not-allowed;
   }
 
-  .ds-textarea-control:disabled {
+  .v-textarea-control:disabled {
     cursor: not-allowed;
   }
 
   /* Auto-grow 100 % CSS : la hauteur du contrôle suit le contenu (progressive
      enhancement), le field suit ; plus de poignée de redimensionnement */
-  .ds-textarea-field[data-auto-grow] {
+  .v-textarea-field[data-auto-grow] {
     resize: none;
   }
 
-  .ds-textarea-field[data-auto-grow] .ds-textarea-control {
+  .v-textarea-field[data-auto-grow] .v-textarea-control {
     field-sizing: content;
   }
 
   /* --- Tailles : seul le padding-block reste local, le reste vient de
-     ds-control ; suit la formule (hauteur - 1lh) / 2 par cran --- */
-  .ds-textarea[data-size='sm'] .ds-textarea-field {
+     v-control ; suit la formule (hauteur - 1lh) / 2 par cran --- */
+  .v-textarea[data-size='sm'] .v-textarea-field {
     padding-block: var(--vectis-space-1);
   }
 
-  .ds-textarea[data-size='lg'] .ds-textarea-field {
+  .v-textarea[data-size='lg'] .v-textarea-field {
     padding-block: var(--vectis-space-3);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-textarea-field,
-    .ds-textarea-action {
+    .v-textarea-field,
+    .v-textarea-action {
       transition: none;
     }
   }

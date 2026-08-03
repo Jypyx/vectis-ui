@@ -138,7 +138,7 @@ export const SelectionAuCadran: Story = {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
-    const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
+    const face = canvasElement.querySelector('.v-timepicker-dial-face') as HTMLElement
 
     // heure 3 = quart de tour ; le relâcher passe à l'étape minutes
     tapDial(face, 3 / 12)
@@ -170,7 +170,7 @@ export const AnneauInterieur: Story = {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
-    const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
+    const face = canvasElement.querySelector('.v-timepicker-dial-face') as HTMLElement
     const hourCell = () => canvas.getByRole('button', { name: 'Sélectionner l’heure' })
 
     // minuit : position de midi, anneau intérieur (mi-rayon)
@@ -327,7 +327,7 @@ export const Annulation: Story = {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('textbox', { name: 'Heure' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
-    const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
+    const face = canvasElement.querySelector('.v-timepicker-dial-face') as HTMLElement
     tapDial(face, 10 / 12)
     await waitFor(() =>
       expect(canvas.getByRole('button', { name: 'Sélectionner l’heure' })).toHaveTextContent('10'),
@@ -423,7 +423,7 @@ export const ClicDansLeVide: Story = {
     await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
 
     // brouillon en cours : 10 h choisi au cadran, pas encore commité
-    const face = canvasElement.querySelector('.ds-timepicker-dial-face') as HTMLElement
+    const face = canvasElement.querySelector('.v-timepicker-dial-face') as HTMLElement
     tapDial(face, 10 / 12)
     await waitFor(() =>
       expect(canvas.getByRole('button', { name: 'Sélectionner l’heure' })).toHaveTextContent('10'),

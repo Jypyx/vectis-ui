@@ -46,20 +46,20 @@ const icon = computed(() =>
 
 <template>
   <div
-    class="ds-toast"
+    class="v-toast"
     :data-tone="item.tone"
     :data-variant="item.variant"
     :role="role"
     :style="item.width ? { '--toast-width': item.width } : undefined"
   >
-    <Icon v-if="icon" class="ds-toast-icon" v-bind="icon" />
-    <div class="ds-toast-body">
-      <p v-if="item.title" class="ds-toast-title">{{ item.title }}</p>
-      <p class="ds-toast-message">{{ item.message }}</p>
+    <Icon v-if="icon" class="v-toast-icon" v-bind="icon" />
+    <div class="v-toast-body">
+      <p v-if="item.title" class="v-toast-title">{{ item.title }}</p>
+      <p class="v-toast-message">{{ item.message }}</p>
     </div>
     <IconButton
       v-if="item.closable"
-      class="ds-toast-close"
+      class="v-toast-close"
       :label="closeLabel"
       size="sm"
       compact
@@ -71,8 +71,8 @@ const icon = computed(() =>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-toast {
+@layer vectis.components {
+  .v-toast {
     display: flex;
     align-items: flex-start;
     gap: var(--vectis-space-3);
@@ -87,7 +87,7 @@ const icon = computed(() =>
     line-height: var(--vectis-text-body-md-leading);
   }
 
-  .ds-toast[data-tone='neutral'] {
+  .v-toast[data-tone='neutral'] {
     /* pas de déclinaisons -surface/-border/-text pour neutral : surface
        d'overlay en tonal, contraste inversé (style tooltip) en solid */
     --tone-bg-tonal: var(--vectis-color-surface-overlay);
@@ -97,7 +97,7 @@ const icon = computed(() =>
     --tone-text-solid: var(--vectis-color-text-on-inverse);
   }
 
-  .ds-toast[data-tone='accent'] {
+  .v-toast[data-tone='accent'] {
     --tone-bg-tonal: var(--vectis-color-accent-surface);
     --tone-border-tonal: var(--vectis-color-accent-border);
     --toast-accent: var(--vectis-color-accent-text);
@@ -105,7 +105,7 @@ const icon = computed(() =>
     --tone-text-solid: var(--vectis-color-text-on-accent);
   }
 
-  .ds-toast[data-tone='success'] {
+  .v-toast[data-tone='success'] {
     --tone-bg-tonal: var(--vectis-color-success-surface);
     --tone-border-tonal: var(--vectis-color-success-border);
     --toast-accent: var(--vectis-color-success-text);
@@ -113,7 +113,7 @@ const icon = computed(() =>
     --tone-text-solid: var(--vectis-color-text-on-accent);
   }
 
-  .ds-toast[data-tone='danger'] {
+  .v-toast[data-tone='danger'] {
     --tone-bg-tonal: var(--vectis-color-danger-surface);
     --tone-border-tonal: var(--vectis-color-danger-border);
     --toast-accent: var(--vectis-color-danger-text);
@@ -121,7 +121,7 @@ const icon = computed(() =>
     --tone-text-solid: var(--vectis-color-text-on-accent);
   }
 
-  .ds-toast[data-tone='warning'] {
+  .v-toast[data-tone='warning'] {
     --tone-bg-tonal: var(--vectis-color-warning-surface);
     --tone-border-tonal: var(--vectis-color-warning-border);
     --toast-accent: var(--vectis-color-warning-text);
@@ -130,22 +130,22 @@ const icon = computed(() =>
     --tone-text-solid: var(--vectis-color-text-on-warning);
   }
 
-  .ds-toast[data-variant='tonal'] {
+  .v-toast[data-variant='tonal'] {
     background: var(--tone-bg-tonal);
     border: 1px solid var(--tone-border-tonal);
     color: var(--vectis-color-text);
   }
 
-  .ds-toast[data-variant='tonal'] .ds-toast-icon,
-  .ds-toast[data-variant='tonal'] .ds-toast-title {
+  .v-toast[data-variant='tonal'] .v-toast-icon,
+  .v-toast[data-variant='tonal'] .v-toast-title {
     color: var(--toast-accent);
   }
 
-  .ds-toast[data-variant='tonal'] .ds-toast-message {
+  .v-toast[data-variant='tonal'] .v-toast-message {
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-toast[data-variant='solid'] {
+  .v-toast[data-variant='solid'] {
     background: var(--tone-bg-solid);
     color: var(--tone-text-solid);
   }
@@ -157,36 +157,36 @@ const icon = computed(() =>
    * En tonal : croix à la couleur d'accent du tone ; en solid : currentcolor
    * (lisible sur le fond plein).
    */
-  .ds-toast[data-variant='tonal'] .ds-toast-close[data-tone] {
+  .v-toast[data-variant='tonal'] .v-toast-close[data-tone] {
     --tone-text-tinted: var(--toast-accent);
     --tone-bg-soft: color-mix(in oklab, var(--toast-accent), transparent 88%);
   }
 
-  .ds-toast[data-variant='solid'] .ds-toast-close[data-tone] {
+  .v-toast[data-variant='solid'] .v-toast-close[data-tone] {
     --tone-text-tinted: currentcolor;
     --tone-bg-soft: color-mix(in oklab, currentcolor, transparent 85%);
   }
 
-  .ds-toast-icon {
+  .v-toast-icon {
     --vectis-icon-size: var(--vectis-icon-size-md);
     /* aligne l'icône (20px) sur le centre de la première ligne de texte */
     margin-block-start: calc(var(--vectis-space-1) / 2);
   }
 
-  .ds-toast-body {
+  .v-toast-body {
     flex: 1;
     min-width: 0;
     /* les messages peuvent contenir des chaînes insécables (URLs, ids) */
     overflow-wrap: anywhere;
   }
 
-  .ds-toast-title {
+  .v-toast-title {
     margin-block-end: var(--vectis-space-1);
     /* semibold : emphase d'état, pas un rôle typo */
     font-weight: var(--vectis-font-weight-semibold);
   }
 
-  .ds-toast-close {
+  .v-toast-close {
     /* Réduit l'emprise visuelle du bouton dans le padding de la carte. Le
        retrait block est SYMÉTRIQUE : la croix (28px) reste alignée en tête de
        carte comme l'icône (align-items: flex-start, donc accrochée à la
@@ -199,28 +199,28 @@ const icon = computed(() =>
 
   /*
    * Entrée d'un toast inséré dans une pile déjà ouverte : glisse depuis le
-   * bord (--toast-enter-y posée par .ds-toast-stack selon le placement).
+   * bord (--toast-enter-y posée par .v-toast-stack selon le placement).
    * @starting-style s'applique à toute insertion DOM — progressive
    * enhancement, apparition sans animation à défaut. La sortie n'est pas
    * animée : il faudrait retenir l'item dans la file pendant la transition
    * (choix de simplicité) ; la pile qui se vide fait, elle, un fondu via
    * hidePopover() + allow-discrete (voir Toaster).
    */
-  .ds-toast {
+  .v-toast {
     transition:
       opacity var(--vectis-duration-base) var(--vectis-ease-default),
       translate var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   @starting-style {
-    .ds-toast {
+    .v-toast {
       opacity: 0;
       translate: 0 var(--toast-enter-y, 0);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-toast {
+    .v-toast {
       transition: none;
     }
   }

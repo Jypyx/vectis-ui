@@ -32,18 +32,18 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 
 <template>
   <span
-    class="ds-spinner"
+    class="v-spinner"
     :style="size !== undefined ? { '--spinner-size': `${size}px` } : undefined"
     role="status"
   >
-    <span class="ds-spinner-circle" aria-hidden="true" />
-    <span class="ds-visually-hidden">{{ resolvedLabel }}</span>
+    <span class="v-spinner-circle" aria-hidden="true" />
+    <span class="v-visually-hidden">{{ resolvedLabel }}</span>
   </span>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-spinner {
+@layer vectis.components {
+  .v-spinner {
     /* 1em : le spinner suit le texte du parent (un consommateur le
        dimensionne par font-size, ex. Button pose font-size: var(--vectis-icon-size)
        sur sa boîte). La prop `size` pose --spinner-size en px inline et prime. */
@@ -51,7 +51,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     display: inline-flex;
   }
 
-  .ds-spinner-circle {
+  .v-spinner-circle {
     width: var(--spinner-size);
     height: var(--spinner-size);
     /* épaisseur proportionnelle (ratio technique toléré, comme les
@@ -61,14 +61,14 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
       color-mix(in oklab, currentcolor, transparent 75%);
     border-block-start-color: currentcolor;
     border-radius: var(--vectis-radius-full);
-    animation: ds-spin calc(var(--vectis-duration-slow) * 3.5) linear infinite;
+    animation: v-spin calc(var(--vectis-duration-slow) * 3.5) linear infinite;
   }
 
-  /* La keyframe `ds-spin` est partagée (styles/utilities.css) : globale, donc
+  /* La keyframe `v-spin` est partagée (styles/utilities.css) : globale, donc
      hors layer et déclarée une seule fois pour tout le DS. */
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-spinner-circle {
+    .v-spinner-circle {
       animation-duration: calc(var(--vectis-duration-slow) * 8);
     }
   }

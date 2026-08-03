@@ -82,7 +82,7 @@ const rootStyle = computed<StyleValue>(() =>
   props.ringColor !== undefined ? { '--avatar-ring-color': props.ringColor } : undefined,
 )
 
-// Le groupe porte ds-control pour définir --control-height à SON niveau : le
+// Le groupe porte v-control pour définir --control-height à SON niveau : le
 // chevauchement reste calculable même si un enfant est enveloppé (ex. un
 // Tooltip pose un <span> entre le groupe et l'Avatar). Un Avatar de taille
 // propre redéfinit --control-height sur lui-même → son overlap suit sa taille.
@@ -91,7 +91,7 @@ const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? 'md')
 
 <template>
   <div
-    class="ds-avatar-group ds-control"
+    class="v-avatar-group v-control"
     role="group"
     :style="rootStyle"
     :data-size="resolvedGroupSize"
@@ -105,9 +105,9 @@ const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? 'md')
 </template>
 
 <style>
-@layer ds.components {
-  .ds-avatar-group {
-    /* anneau de séparation hérité par chaque .ds-avatar enfant */
+@layer vectis.components {
+  .v-avatar-group {
+    /* anneau de séparation hérité par chaque .v-avatar enfant */
     --avatar-ring-color: var(--vectis-color-surface);
     display: inline-flex;
     align-items: center;
@@ -117,13 +117,13 @@ const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? 'md')
      le suivant (à droite) peint par-dessus. Cible l'enfant direct quel qu'il
      soit (Avatar nu OU wrapper d'un Tooltip) → --control-height vient du
      groupe, un Avatar de taille propre l'écrase sur lui-même. Ratio unitless. */
-  .ds-avatar-group > * + * {
+  .v-avatar-group > * + * {
     margin-inline-start: calc(var(--control-height) * -0.3);
   }
 
   /* Au survol/focus, l'élément remonte au-dessus de ses voisins. */
-  .ds-avatar-group > *:hover,
-  .ds-avatar-group > *:focus-within {
+  .v-avatar-group > *:hover,
+  .v-avatar-group > *:focus-within {
     z-index: 1;
   }
 }

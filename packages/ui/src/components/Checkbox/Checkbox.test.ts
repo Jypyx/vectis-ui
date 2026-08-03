@@ -38,14 +38,14 @@ describe('Checkbox', () => {
       props: { modelValue: false, labelPosition: 'start', spread: true },
       slots: { default: 'Cocher' },
     })
-    const root = container.querySelector('.ds-checkbox') as HTMLElement
+    const root = container.querySelector('.v-checkbox') as HTMLElement
     expect(root.getAttribute('data-label-position')).toBe('start')
     expect(root.hasAttribute('data-spread')).toBe(true)
   })
 
   it('spread absent par défaut (pas d’attribut data-spread)', () => {
     const { container } = render(Checkbox, { props: { modelValue: false } })
-    const root = container.querySelector('.ds-checkbox') as HTMLElement
+    const root = container.querySelector('.v-checkbox') as HTMLElement
     expect(root.getAttribute('data-label-position')).toBe('end')
     expect(root.hasAttribute('data-spread')).toBe(false)
   })

@@ -10,7 +10,7 @@ import { arrowNavigate } from '../../utils/arrowNav'
  * Panneau popover INTERNE (non exporté), partagé par Menu (panneau racine)
  * et MenuItem (sous-menus). Popover API : light dismiss natif, l'invocateur
  * `popovertarget` est l'ancre implicite, positionnement pur CSS (floating.css),
- * chrome commun via `.ds-panel` (panel.css).
+ * chrome commun via `.v-panel` (panel.css).
  *
  * JS justifié : le pattern ARIA menu n'est pas couvert par le natif —
  * - roving focus aux flèches/Home/End, confiné au panneau courant (les keydown
@@ -136,18 +136,18 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     ref="panelEl"
     popover="auto"
     role="menu"
-    class="ds-overlay ds-panel ds-menu ds-floating"
+    class="v-overlay v-panel v-menu v-floating"
     :class="{
       /*
-       * `ds-control` sur la RACINE seulement : elle pose les `--control-*`
+       * `v-control` sur la RACINE seulement : elle pose les `--control-*`
        * (hauteur, paddings, gap, typo, contexte Icon) depuis
        * styles/control-size.css, et les sous-panneaux — descendants DOM —
-       * en héritent. La poser aussi sur eux les casserait : `.ds-control`
+       * en héritent. La poser aussi sur eux les casserait : `.v-control`
        * redéfinit `--control-height` depuis `--control-height-base` SANS
        * la condition `[data-compact]` (absente des sous-panneaux), qui y
        * reviendrait donc à sa valeur non compacte.
        */
-      'ds-control': !submenu,
+      'v-control': !submenu,
     }"
     :data-placement="placement"
     :data-size="size"
@@ -164,26 +164,26 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
 </template>
 
 <style>
-@layer ds.components {
+@layer vectis.components {
   /* Chrome (surface, bordure, ombre, rythme interne) : classe partagée
-     `.ds-panel` (styles/panel.css). Tailles : classe partagée `ds-control`
+     `.v-panel` (styles/panel.css). Tailles : classe partagée `v-control`
      posée ci-dessus sur le panneau RACINE (voir le template) — aucune table
      locale, les items consomment les `--control-*` hérités. Ne restent ici
      que les règles propres au menu déroulant. */
-  .ds-menu {
+  .v-menu {
     min-inline-size: var(--vectis-control-size-menu-min);
     max-inline-size: min(var(--vectis-control-size-menu-max), calc(100vw - var(--vectis-space-8)));
   }
 
   /* aligne le 1er sous-item sur l'item parent (compense padding + bordure) */
-  .ds-menu .ds-menu[data-placement='right-start'] {
+  .v-menu .v-menu[data-placement='right-start'] {
     margin-block-start: calc(-1 * (var(--vectis-space-1) + 1px));
   }
 
   /* Largeur explicite (prop width) : rendue par le panneau RACINE seulement —
      les sous-panneaux ne posent pas data-width, la variable héritée est donc
      inerte chez eux. Le plafond viewport de max-inline-size reste. */
-  .ds-menu[data-width] {
+  .v-menu[data-width] {
     min-inline-size: 0;
     inline-size: var(--menu-width);
   }
@@ -196,7 +196,7 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
      Placée APRÈS [data-width] (spécificité égale) : combinée à `width`, c'est
      ce plancher qui gagne. Un déclencheur plus large que le plafond élargit le
      panneau au-delà (min-inline-size prime sur max-inline-size) : voulu. */
-  .ds-menu[data-match-trigger] {
+  .v-menu[data-match-trigger] {
     min-inline-size: anchor-size(width);
   }
 }

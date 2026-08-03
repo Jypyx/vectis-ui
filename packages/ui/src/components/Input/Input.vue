@@ -173,7 +173,7 @@ defineExpose({
 
 <template>
   <div
-    class="ds-input ds-control"
+    class="v-input v-control"
     :class="rootClass"
     :style="rootStyle"
     :data-size="size"
@@ -181,16 +181,16 @@ defineExpose({
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
   >
-    <Typography v-if="label" as="label" variant="label" class="ds-input-label" :for="fieldId">
+    <Typography v-if="label" as="label" variant="label" class="v-input-label" :for="fieldId">
       {{ label }}
     </Typography>
 
-    <div class="ds-input-field">
+    <div class="v-input-field">
       <slot name="start">
         <button
           v-if="iconStart && hasIconStartHandler"
           type="button"
-          class="ds-input-action"
+          class="v-input-action"
           :aria-label="iconStartLabel ?? iconName(iconStart)"
           :disabled="disabled"
           @click="emit('click:icon-start', $event)"
@@ -205,7 +205,7 @@ defineExpose({
         :id="fieldId"
         ref="controlEl"
         v-model="model"
-        class="ds-input-control"
+        class="v-input-control"
         :type="type"
         :maxlength="softLimit ? undefined : maxlength"
         :disabled="disabled"
@@ -214,14 +214,14 @@ defineExpose({
         :aria-describedby="describedBy"
       />
 
-      <span v-if="counter" class="ds-input-counter" :data-over="over ? '' : undefined">
+      <span v-if="counter" class="v-input-counter" :data-over="over ? '' : undefined">
         {{ counterText }}
       </span>
 
       <button
         v-if="showClear"
         type="button"
-        class="ds-input-action ds-input-clear"
+        class="v-input-action v-input-clear"
         :aria-label="resolvedClearLabel"
         @click="onClear"
       >
@@ -235,7 +235,7 @@ defineExpose({
         <button
           v-if="iconEnd && hasIconEndHandler"
           type="button"
-          class="ds-input-action"
+          class="v-input-action"
           :aria-label="iconEndLabel ?? iconName(iconEnd)"
           :disabled="disabled"
           @click="emit('click:icon-end', $event)"
@@ -246,15 +246,15 @@ defineExpose({
       </slot>
     </div>
 
-    <Typography v-if="hint" :id="hintId" variant="caption" tone="muted" class="ds-input-hint">
+    <Typography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-input-hint">
       {{ hint }}
     </Typography>
   </div>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-input {
+@layer vectis.components {
+  .v-input {
     display: flex;
     flex-direction: column;
     gap: var(--vectis-space-1);
@@ -263,14 +263,14 @@ defineExpose({
   }
 
   /* Label et hint : rendus par Typography (label / caption muted) — les classes
-     .ds-input-label/.ds-input-hint restent posées comme points d'accroche
+     .v-input-label/.v-input-hint restent posées comme points d'accroche
      (surcharges consommateur, état disabled ci-dessous). */
 
   /* Le field porte bordure, fond et focus ; --field-border-color est la seule
      source de vérité de la couleur (hover/erreur/disabled la redéfinissent).
-     Tailles/compact : variables --control-* héritées de la racine ds-control
+     Tailles/compact : variables --control-* héritées de la racine v-control
      (styles/control-size.css), contexte d'Icon compris. */
-  .ds-input-field {
+  .v-input-field {
     --field-border-color: var(--vectis-color-border-strong);
 
     display: flex;
@@ -289,7 +289,7 @@ defineExpose({
       box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-input-control {
+  .v-input-control {
     flex: 1;
     min-width: 0;
     height: 100%;
@@ -301,7 +301,7 @@ defineExpose({
     outline: none; /* le focus est porté par le field (focus-within) */
   }
 
-  .ds-input-control::placeholder {
+  .v-input-control::placeholder {
     color: var(--vectis-color-text-subtle);
   }
 
@@ -309,35 +309,35 @@ defineExpose({
      (croix `clearable`, icônes) — la croix WebKit de type=search, les spinners
      de type=number et l'œil de révélation d'Edge feraient doublon ou
      détonneraient visuellement. */
-  .ds-input-control::-webkit-search-cancel-button,
-  .ds-input-control::-webkit-search-decoration,
-  .ds-input-control::-webkit-search-results-button,
-  .ds-input-control::-webkit-search-results-decoration,
-  .ds-input-control::-webkit-inner-spin-button,
-  .ds-input-control::-webkit-outer-spin-button {
+  .v-input-control::-webkit-search-cancel-button,
+  .v-input-control::-webkit-search-decoration,
+  .v-input-control::-webkit-search-results-button,
+  .v-input-control::-webkit-search-results-decoration,
+  .v-input-control::-webkit-inner-spin-button,
+  .v-input-control::-webkit-outer-spin-button {
     -webkit-appearance: none;
     appearance: none;
   }
 
-  .ds-input-control[type='number'] {
+  .v-input-control[type='number'] {
     appearance: textfield;
   }
 
-  .ds-input-control::-ms-reveal {
+  .v-input-control::-ms-reveal {
     display: none;
   }
 
   /* le fond autofill du navigateur est peint sur l'input interne : au moins
      suivre le radius du champ (compromis, la couleur reste celle du navigateur) */
-  .ds-input-control:-webkit-autofill {
+  .v-input-control:-webkit-autofill {
     border-radius: var(--vectis-radius-interactive);
   }
 
-  .ds-input-field:hover:not(:has(.ds-input-control:focus)):not(
+  .v-input-field:hover:not(:has(.v-input-control:focus)):not(
       :has(
-        .ds-input-control:disabled,
-        .ds-input-control:user-invalid,
-        .ds-input-control[aria-invalid='true']
+        .v-input-control:disabled,
+        .v-input-control:user-invalid,
+        .v-input-control[aria-invalid='true']
       )
     ) {
     --field-border-color: color-mix(
@@ -354,7 +354,7 @@ defineExpose({
      :focus (pas :focus-visible) : un champ texte montre toujours son focus,
      souris comprise. L'outline transparent est le filet forced-colors
      (Windows High Contrast supprime les box-shadow). */
-  .ds-input-field:has(.ds-input-control:focus) {
+  .v-input-field:has(.v-input-control:focus) {
     --field-border-color: var(--vectis-color-accent);
 
     box-shadow: 0 0 0 1px var(--field-border-color);
@@ -363,36 +363,36 @@ defineExpose({
 
   /* État invalide : pseudo-classe native d'abord, prop (aria-invalid) ensuite.
      Seule la variable change → la bordure ET le ring focus passent en rouge. */
-  .ds-input-field:has(.ds-input-control:user-invalid),
-  .ds-input-field:has(.ds-input-control[aria-invalid='true']) {
+  .v-input-field:has(.v-input-control:user-invalid),
+  .v-input-field:has(.v-input-control[aria-invalid='true']) {
     --field-border-color: var(--vectis-color-danger);
   }
 
   /* Le compteur reste stylé localement : tabular-nums et l'état de dépassement
      ne sont pas des rôles typographiques. */
-  .ds-input-counter {
+  .v-input-counter {
     flex: none;
     font-size: var(--vectis-text-caption-size);
     color: var(--vectis-color-text-muted);
     font-variant-numeric: tabular-nums;
   }
 
-  .ds-input-counter[data-over] {
+  .v-input-counter[data-over] {
     color: var(--vectis-color-danger-text);
   }
 
   /* Icônes décoratives : gris foncé, moins présentes que le texte saisi */
-  .ds-input-field > .ds-icon {
+  .v-input-field > .v-icon {
     color: var(--vectis-color-text-muted);
   }
 
-  .ds-input-field > .ds-spinner {
+  .v-input-field > .v-spinner {
     font-size: var(--vectis-icon-size);
   }
 
   /* Boutons internes (effacer, icône cliquable) : gris foncé → noir au hover,
      radius aligné sur Button (focus ring carré aux bords arrondis) */
-  .ds-input-action {
+  .v-input-action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -409,18 +409,18 @@ defineExpose({
     transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-input-action:hover:not(:disabled) {
+  .v-input-action:hover:not(:disabled) {
     color: var(--vectis-color-text);
   }
 
-  .ds-input-action:focus-visible {
+  .v-input-action:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
   /* Readonly : fond légèrement enfoncé, texte normal (la valeur reste lisible),
      focus accent conservé. [data-readonly] et jamais :read-only (matche :disabled). */
-  .ds-input[data-readonly] .ds-input-field {
+  .v-input[data-readonly] .v-input-field {
     --field-border-color: var(--vectis-color-border);
 
     background: var(--vectis-color-surface-sunken);
@@ -428,7 +428,7 @@ defineExpose({
 
   /* Disabled : nuance de gris sans opacité (mêmes tokens que Checkbox/Radio).
      Placé après les états erreur/readonly : à spécificité égale, il gagne. */
-  .ds-input[data-disabled] .ds-input-field {
+  .v-input[data-disabled] .v-input-field {
     --field-border-color: var(--vectis-color-border);
 
     background: var(--vectis-color-surface-muted);
@@ -436,25 +436,25 @@ defineExpose({
     cursor: not-allowed;
   }
 
-  .ds-input[data-disabled] .ds-input-label,
-  .ds-input[data-disabled] .ds-input-hint,
-  .ds-input[data-disabled] .ds-input-counter {
+  .v-input[data-disabled] .v-input-label,
+  .v-input[data-disabled] .v-input-hint,
+  .v-input[data-disabled] .v-input-counter {
     color: var(--vectis-color-text-subtle);
   }
 
-  .ds-input[data-disabled] .ds-input-action,
-  .ds-input[data-disabled] .ds-input-field > .ds-icon {
+  .v-input[data-disabled] .v-input-action,
+  .v-input[data-disabled] .v-input-field > .v-icon {
     color: inherit;
     cursor: not-allowed;
   }
 
-  .ds-input-control:disabled {
+  .v-input-control:disabled {
     cursor: not-allowed;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-input-field,
-    .ds-input-action {
+    .v-input-field,
+    .v-input-action {
       transition: none;
     }
   }

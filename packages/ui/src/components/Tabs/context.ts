@@ -9,7 +9,7 @@ import type { TabsActivation, TabsSize, TabsTone, TabsVariant } from './Tabs.vue
  *
  * `size`/`compact` transitent par l'injection (et non par héritage CSS comme
  * dans Accordion) : chaque Tab rend un Button, qui pose lui-même
- * `ds-control[data-size]` sur son propre élément.
+ * `v-control[data-size]` sur son propre élément.
  */
 export interface TabsContext {
   /** Valeur sélectionnée ; undefined si le v-model ne référence aucun onglet. */
@@ -26,7 +26,7 @@ export interface TabsContext {
   readonly activation: TabsActivation
 }
 
-export const tabsKey: InjectionKey<TabsContext> = Symbol('ds-tabs')
+export const tabsKey: InjectionKey<TabsContext> = Symbol('v-tabs')
 
 /**
  * `aria-controls` est une LISTE d'IDREF séparée par des espaces : une valeur

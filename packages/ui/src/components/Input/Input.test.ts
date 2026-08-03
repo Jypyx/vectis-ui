@@ -46,7 +46,7 @@ describe('Input', () => {
       props: { modelValue: '' },
       attrs: { class: 'consommateur', style: 'width: 320px' },
     })
-    const root = container.querySelector('.ds-input') as HTMLElement
+    const root = container.querySelector('.v-input') as HTMLElement
     const input = getByRole('textbox')
     expect(root.classList.contains('consommateur')).toBe(true)
     expect(root.style.width).toBe('320px')
@@ -59,7 +59,7 @@ describe('Input', () => {
       props: { modelValue: '', label: 'Email' },
     })
     const input = getByLabelText('Email')
-    expect(input.classList.contains('ds-input-control')).toBe(true)
+    expect(input.classList.contains('v-input-control')).toBe(true)
   })
 
   it('hint est rendu et lié via aria-describedby (fusion avec celui du consommateur)', () => {
@@ -111,13 +111,13 @@ describe('Input', () => {
       props: { modelValue: 'texte', clearable: true, disabled: true },
     })
     expect(queryByRole('button', { name: 'Effacer' })).toBeNull()
-    expect(container.querySelector('.ds-input')?.hasAttribute('data-disabled')).toBe(true)
+    expect(container.querySelector('.v-input')?.hasAttribute('data-disabled')).toBe(true)
 
     const readonly = render(Input, {
       props: { modelValue: 'texte', clearable: true, readonly: true },
     })
     expect(readonly.queryByRole('button', { name: 'Effacer' })).toBeNull()
-    expect(readonly.container.querySelector('.ds-input')?.hasAttribute('data-readonly')).toBe(true)
+    expect(readonly.container.querySelector('.v-input')?.hasAttribute('data-readonly')).toBe(true)
   })
 
   it("loading : spinner présent, l'icône end absente", () => {
@@ -125,7 +125,7 @@ describe('Input', () => {
       props: { modelValue: '', loading: true, iconEnd: 'visibility' },
     })
     expect(getByRole('status')).toBeTruthy()
-    expect(container.querySelectorAll('.ds-icon')).toHaveLength(0)
+    expect(container.querySelectorAll('.v-icon')).toHaveLength(0)
   })
 
   it('maxlength bloquant : attribut natif posé', () => {
@@ -152,7 +152,7 @@ describe('Input', () => {
     const { container, rerender } = render(Input, {
       props: { modelValue: 'abc', maxlength: 10, softLimit: true, counter: true },
     })
-    const counter = container.querySelector('.ds-input-counter') as HTMLElement
+    const counter = container.querySelector('.v-input-counter') as HTMLElement
     expect(counter.textContent?.trim()).toBe('3/10')
     expect(counter.hasAttribute('data-over')).toBe(false)
     await rerender({ modelValue: 'abcdefghijk' })
@@ -167,10 +167,10 @@ describe('Input', () => {
       props: { modelValue: 150, type: 'number', maxlength: 2, counter: true, clearable: true },
     })
     expect((getByRole('spinbutton') as HTMLInputElement).value).toBe('150')
-    const counter = container.querySelector('.ds-input-counter') as HTMLElement
+    const counter = container.querySelector('.v-input-counter') as HTMLElement
     expect(counter.textContent?.trim()).toBe('3/2')
     expect(counter.hasAttribute('data-over')).toBe(true)
-    expect(container.querySelector('.ds-input-clear')).toBeTruthy()
+    expect(container.querySelector('.v-input-clear')).toBeTruthy()
   })
 
   it('disabled : boutons internes désactivés', () => {
@@ -204,6 +204,6 @@ describe('Input', () => {
     const { container } = render(Input, {
       props: { modelValue: '', compact: true },
     })
-    expect(container.querySelector('.ds-input')?.hasAttribute('data-compact')).toBe(true)
+    expect(container.querySelector('.v-input')?.hasAttribute('data-compact')).toBe(true)
   })
 })

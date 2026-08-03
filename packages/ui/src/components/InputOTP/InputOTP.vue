@@ -186,7 +186,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
 
 <template>
   <div
-    class="ds-otp ds-control"
+    class="v-otp v-control"
     role="group"
     :aria-label="ariaLabel"
     :data-invalid="invalid ? '' : undefined"
@@ -203,7 +203,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
           }
         "
         type="text"
-        class="ds-otp-input"
+        class="v-otp-input"
         :inputmode="format === 'numeric' ? 'numeric' : 'text'"
         :autocomplete="cell.slotIndex === 0 ? 'one-time-code' : 'off'"
         :value="digits[cell.slotIndex]"
@@ -215,7 +215,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
         @focus="($event.target as HTMLInputElement).select()"
       />
       <!-- littéral décoratif du gabarit : jamais focusable, hors v-model -->
-      <span v-else class="ds-otp-literal" aria-hidden="true">
+      <span v-else class="v-otp-literal" aria-hidden="true">
         <Icon v-if="separatorIcon" v-bind="iconProps(separatorIcon)" />
         <template v-else>{{ cell.char }}</template>
       </span>
@@ -224,10 +224,10 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
 </template>
 
 <style>
-@layer ds.components {
-  .ds-otp {
+@layer vectis.components {
+  .v-otp {
     /*
-     * Hauteur/icônes : classe partagée ds-control (styles/control-size.css).
+     * Hauteur/icônes : classe partagée v-control (styles/control-size.css).
      * La typo garde son échelle propre, majorée d'un à deux crans par rapport
      * aux autres champs : les chiffres remplissent les cases carrées.
      */
@@ -238,7 +238,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     gap: var(--control-gap);
   }
 
-  .ds-otp-input {
+  .v-otp-input {
     /* cases carrées : size/compact scalent les deux dimensions d'un coup */
     width: var(--control-height);
     height: var(--control-height);
@@ -255,21 +255,21 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
   /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur
      (aligné sur Input/Textarea) ; l'outline transparent est le filet
      forced-colors (Windows High Contrast supprime les box-shadow) */
-  .ds-otp-input:focus-visible {
+  .v-otp-input:focus-visible {
     border-color: var(--vectis-color-accent);
     box-shadow: 0 0 0 1px var(--vectis-color-accent);
     outline: var(--vectis-focus-ring-width) solid transparent;
   }
 
-  .ds-otp[data-invalid] .ds-otp-input {
+  .v-otp[data-invalid] .v-otp-input {
     border-color: var(--vectis-color-danger);
   }
 
-  .ds-otp[data-invalid] .ds-otp-input:focus-visible {
+  .v-otp[data-invalid] .v-otp-input:focus-visible {
     box-shadow: 0 0 0 1px var(--vectis-color-danger);
   }
 
-  .ds-otp-literal {
+  .v-otp-literal {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -280,29 +280,29 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
   }
 
   /* Disabled : gris par tokens, sans opacité (aligné sur Input) */
-  .ds-otp[data-disabled] .ds-otp-input {
+  .v-otp[data-disabled] .v-otp-input {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);
     border-color: var(--vectis-color-border);
     cursor: not-allowed;
   }
 
-  .ds-otp[data-disabled] .ds-otp-literal {
+  .v-otp[data-disabled] .v-otp-literal {
     color: var(--vectis-color-text-subtle);
   }
 
   /* --- Tailles : seule la typo majorée reste locale, le reste vient de
-     ds-control --- */
-  .ds-otp[data-size='sm'] {
+     v-control --- */
+  .v-otp[data-size='sm'] {
     --otp-font-size: var(--vectis-font-size-md);
   }
 
-  .ds-otp[data-size='lg'] {
+  .v-otp[data-size='lg'] {
     --otp-font-size: var(--vectis-font-size-xl);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-otp-input {
+    .v-otp-input {
       transition: none;
     }
   }

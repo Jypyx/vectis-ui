@@ -5,14 +5,14 @@ import Pagination from './Pagination.vue'
 
 /** Libellés des pastilles de page, dans l'ordre du DOM. */
 function pageLabels(container: Element): string[] {
-  return [...container.querySelectorAll('.ds-pagination-page')].map(
+  return [...container.querySelectorAll('.v-pagination-page')].map(
     (el) => el.textContent?.trim() ?? '',
   )
 }
 
 /** Nombre total d'emplacements rendus : pastilles + ellipses. */
 function slotCount(container: Element): number {
-  return container.querySelectorAll('.ds-pagination-page, .ds-pagination-ellipsis').length
+  return container.querySelectorAll('.v-pagination-page, .v-pagination-ellipsis').length
 }
 
 describe('Pagination', () => {
@@ -21,7 +21,7 @@ describe('Pagination', () => {
       const { container } = render(Pagination, { props: { length: 8, modelValue: 2 } })
 
       expect(pageLabels(container)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8'])
-      expect(container.querySelectorAll('.ds-pagination-ellipsis')).toHaveLength(0)
+      expect(container.querySelectorAll('.v-pagination-ellipsis')).toHaveLength(0)
     })
 
     it('encadre la page courante, garde les bornes et intercale deux ellipses', () => {
@@ -30,7 +30,7 @@ describe('Pagination', () => {
       })
 
       expect(pageLabels(container)).toEqual(['1', '9', '10', '11', '20'])
-      expect(container.querySelectorAll('.ds-pagination-ellipsis')).toHaveLength(2)
+      expect(container.querySelectorAll('.v-pagination-ellipsis')).toHaveLength(2)
     })
 
     it('garde un nombre d’emplacements constant en décalant la fenêtre aux extrémités', () => {
@@ -57,7 +57,7 @@ describe('Pagination', () => {
       })
 
       expect(pageLabels(container)).toEqual(['1', '2', '3', '4'])
-      expect(container.querySelectorAll('.ds-pagination-ellipsis')).toHaveLength(0)
+      expect(container.querySelectorAll('.v-pagination-ellipsis')).toHaveLength(0)
     })
 
     it('clampe totalVisible au minimum utile de 5', () => {
@@ -74,7 +74,7 @@ describe('Pagination', () => {
         props: { length: 20, modelValue: 10, totalVisible: 7 },
       })
       const [first, before, current, after, last] = [
-        ...container.querySelectorAll<HTMLElement>('.ds-pagination-page'),
+        ...container.querySelectorAll<HTMLElement>('.v-pagination-page'),
       ]
 
       expect(first?.hasAttribute('data-edge')).toBe(true)
@@ -151,7 +151,7 @@ describe('Pagination', () => {
       const { container } = render(Pagination, {
         props: { length: 20, modelValue: 10, totalVisible: 7 },
       })
-      const ellipsis = container.querySelector<HTMLButtonElement>('.ds-pagination-ellipsis')
+      const ellipsis = container.querySelector<HTMLButtonElement>('.v-pagination-ellipsis')
 
       expect(ellipsis?.getAttribute('aria-hidden')).toBe('true')
       expect(ellipsis?.disabled).toBe(true)
@@ -205,16 +205,14 @@ describe('Pagination', () => {
         props: { length: 5, modelValue: 1, attached: true },
       })
 
-      expect(container.querySelector('.ds-pagination-items')?.classList).toContain(
-        'ds-button-group',
-      )
+      expect(container.querySelector('.v-pagination-items')?.classList).toContain('v-button-group')
       expect(getByRole('group')).toBeTruthy()
     })
 
     it('reste une simple rangée par défaut', () => {
       const { container, queryByRole } = render(Pagination, { props: { length: 5, modelValue: 1 } })
 
-      expect(container.querySelector('.ds-button-group')).toBeNull()
+      expect(container.querySelector('.v-button-group')).toBeNull()
       expect(queryByRole('group')).toBeNull()
     })
   })
@@ -225,29 +223,29 @@ describe('Pagination', () => {
         props: { length: 5, modelValue: 3, showControls: false },
       })
 
-      expect(container.querySelectorAll('.ds-pagination-control')).toHaveLength(0)
+      expect(container.querySelectorAll('.v-pagination-control')).toHaveLength(0)
     })
 
     it('rend un libellé visible en mode text, sans icône', () => {
       const { container } = render(Pagination, {
         props: { length: 5, modelValue: 3, controlsDisplay: 'text' },
       })
-      const control = container.querySelector('.ds-pagination-control')
+      const control = container.querySelector('.v-pagination-control')
 
-      expect(control?.querySelector('.ds-pagination-control-label')?.textContent).toBe(
+      expect(control?.querySelector('.v-pagination-control-label')?.textContent).toBe(
         'Page précédente',
       )
-      expect(control?.querySelector('.ds-icon')).toBeNull()
+      expect(control?.querySelector('.v-icon')).toBeNull()
     })
 
     it('cumule icône et libellé en mode both', () => {
       const { container } = render(Pagination, {
         props: { length: 5, modelValue: 3, controlsDisplay: 'both' },
       })
-      const control = container.querySelector('.ds-pagination-control')
+      const control = container.querySelector('.v-pagination-control')
 
-      expect(control?.querySelector('.ds-pagination-control-label')).toBeTruthy()
-      expect(control?.querySelector('.ds-icon')).toBeTruthy()
+      expect(control?.querySelector('.v-pagination-control-label')).toBeTruthy()
+      expect(control?.querySelector('.v-icon')).toBeTruthy()
     })
 
     it('garde le nom accessible même quand le libellé est visible', () => {
@@ -267,10 +265,10 @@ describe('Pagination', () => {
           nextIcon: { src: 'https://cdn.test/next.svg' },
         },
       })
-      const [prev, next] = [...container.querySelectorAll('.ds-pagination-control')]
+      const [prev, next] = [...container.querySelectorAll('.v-pagination-control')]
 
-      expect(prev?.querySelector<HTMLElement>('.ds-icon')?.dataset.icon).toBe('first_page')
-      expect(next?.querySelector('.ds-icon-img')?.getAttribute('src')).toBe(
+      expect(prev?.querySelector<HTMLElement>('.v-icon')?.dataset.icon).toBe('first_page')
+      expect(next?.querySelector('.v-icon-img')?.getAttribute('src')).toBe(
         'https://cdn.test/next.svg',
       )
     })
@@ -289,7 +287,7 @@ describe('Pagination', () => {
       const { container } = render(Pagination, {
         props: { length: 20, modelValue: 10, size: 'sm', compact: true },
       })
-      const buttons = [...container.querySelectorAll<HTMLElement>('.ds-button')]
+      const buttons = [...container.querySelectorAll<HTMLElement>('.v-button')]
 
       expect(buttons.every((el) => el.dataset.size === 'sm')).toBe(true)
       expect(buttons.every((el) => el.hasAttribute('data-compact'))).toBe(true)
@@ -299,7 +297,7 @@ describe('Pagination', () => {
       const { container } = render(Pagination, {
         props: { length: 5, modelValue: 3, variant: 'outline' },
       })
-      const pages = [...container.querySelectorAll<HTMLElement>('.ds-pagination-page')]
+      const pages = [...container.querySelectorAll<HTMLElement>('.v-pagination-page')]
 
       expect(pages[2]?.dataset.variant).toBe('solid')
       expect(pages[2]?.dataset.tone).toBe('accent')
@@ -313,7 +311,7 @@ describe('Pagination', () => {
       const { container, getByRole, emitted } = render(Pagination, {
         props: { length: 20, modelValue: 10 },
       })
-      const pages = [...container.querySelectorAll<HTMLElement>('.ds-pagination-page')]
+      const pages = [...container.querySelectorAll<HTMLElement>('.v-pagination-page')]
       pages[1]?.focus()
 
       await fireEvent.keyDown(getByRole('navigation'), { key: 'ArrowRight' })
@@ -327,7 +325,7 @@ describe('Pagination', () => {
         props: { length: 20, modelValue: 10 },
       })
       const nav = getByRole('navigation')
-      const pages = [...container.querySelectorAll<HTMLElement>('.ds-pagination-page')]
+      const pages = [...container.querySelectorAll<HTMLElement>('.v-pagination-page')]
       pages[0]?.focus()
 
       await fireEvent.keyDown(nav, { key: 'ArrowLeft' })
@@ -344,7 +342,7 @@ describe('Pagination', () => {
       const { container, getByRole } = render(Pagination, {
         props: { length: 5, modelValue: 1, disabledPages: [2] },
       })
-      const pages = [...container.querySelectorAll<HTMLElement>('.ds-pagination-page')]
+      const pages = [...container.querySelectorAll<HTMLElement>('.v-pagination-page')]
       pages[0]?.focus()
 
       await fireEvent.keyDown(getByRole('navigation'), { key: 'ArrowRight' })

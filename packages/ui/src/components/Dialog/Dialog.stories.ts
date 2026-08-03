@@ -62,14 +62,14 @@ export const Default: Story = {
     // il ne peut être requêté qu'après le clic.
     await userEvent.click(canvas.getByRole('button', { name: 'Ouvrir la modale' }))
     const dialog = await waitFor(() => {
-      const el = canvasElement.querySelector('.ds-dialog') as HTMLDialogElement | null
+      const el = canvasElement.querySelector('.v-dialog') as HTMLDialogElement | null
       expect(el?.open).toBe(true)
       return el!
     })
 
     // fermeture par la croix : le <dialog> est entièrement démonté
     await userEvent.click(within(dialog).getByRole('button', { name: 'Fermer' }))
-    await waitFor(() => expect(canvasElement.querySelector('.ds-dialog')).toBeNull())
+    await waitFor(() => expect(canvasElement.querySelector('.v-dialog')).toBeNull())
   },
 }
 
@@ -232,7 +232,7 @@ export const FermetureEscape: Story = {
     // montage paresseux : le <dialog> n'est requêtable qu'une fois ouvert
     await userEvent.click(canvas.getByRole('button', { name: 'Ouvrir la modale' }))
     const dialog = await waitFor(() => {
-      const el = canvasElement.querySelector('.ds-dialog') as HTMLDialogElement | null
+      const el = canvasElement.querySelector('.v-dialog') as HTMLDialogElement | null
       expect(el?.open).toBe(true)
       return el!
     })
@@ -242,6 +242,6 @@ export const FermetureEscape: Story = {
     // voie native (close() → événement 'close') pour vérifier NOTRE pont :
     // resynchronisation du v-model puis démontage complet.
     dialog.close()
-    await waitFor(() => expect(canvasElement.querySelector('.ds-dialog')).toBeNull())
+    await waitFor(() => expect(canvasElement.querySelector('.v-dialog')).toBeNull())
   },
 }

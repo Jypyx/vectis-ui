@@ -184,7 +184,7 @@ onBeforeUnmount(() => {
     v-for="p in PLACEMENTS"
     :key="p"
     :ref="(el) => setStackEl(p, el)"
-    class="ds-overlay ds-toast-stack"
+    class="v-overlay v-toast-stack"
     popover="manual"
     :data-placement="p"
     role="region"
@@ -205,12 +205,12 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
-@layer ds.components {
+@layer vectis.components {
   /* `position: fixed`, `inset: auto` et le garde-fou `display: none` du popover
-     fermé viennent de `.ds-overlay` (styles/floating.css), posée avec cette
+     fermé viennent de `.v-overlay` (styles/floating.css), posée avec cette
      classe. Ne restent ici que les neutralisations UA propres à une pile
      (bordure, padding, fond Canvas, overflow) et sa mise en page. */
-  .ds-toast-stack {
+  .v-toast-stack {
     margin: 0;
     border: none;
     padding: 0;
@@ -227,27 +227,27 @@ onBeforeUnmount(() => {
    * d'écran, indépendante de la direction de lecture (comme les
    * notifications de l'OS).
    */
-  .ds-toast-stack[data-placement^='top-'] {
+  .v-toast-stack[data-placement^='top-'] {
     top: var(--vectis-space-4);
     /* le plus récent près du bord : la file est append-only, le CSS inverse */
     flex-direction: column-reverse;
     --toast-enter-y: calc(-1 * var(--vectis-space-4));
   }
 
-  .ds-toast-stack[data-placement^='bottom-'] {
+  .v-toast-stack[data-placement^='bottom-'] {
     bottom: var(--vectis-space-4);
     --toast-enter-y: var(--vectis-space-4);
   }
 
-  .ds-toast-stack[data-placement$='-left'] {
+  .v-toast-stack[data-placement$='-left'] {
     left: var(--vectis-space-4);
   }
 
-  .ds-toast-stack[data-placement$='-right'] {
+  .v-toast-stack[data-placement$='-right'] {
     right: var(--vectis-space-4);
   }
 
-  .ds-toast-stack[data-placement$='-center'] {
+  .v-toast-stack[data-placement$='-center'] {
     left: 0;
     right: 0;
     margin-inline: auto;
@@ -255,7 +255,7 @@ onBeforeUnmount(() => {
 
   /* Entrée/sortie animées de la pile (allow-discrete + @starting-style) —
      progressive enhancement, comme floating.css */
-  .ds-toast-stack {
+  .v-toast-stack {
     opacity: 1;
     transition:
       opacity var(--vectis-duration-base) var(--vectis-ease-default),
@@ -263,18 +263,18 @@ onBeforeUnmount(() => {
       display var(--vectis-duration-base) allow-discrete;
   }
 
-  .ds-toast-stack:not(:popover-open) {
+  .v-toast-stack:not(:popover-open) {
     opacity: 0;
   }
 
   @starting-style {
-    .ds-toast-stack:popover-open {
+    .v-toast-stack:popover-open {
       opacity: 0;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-toast-stack {
+    .v-toast-stack {
       transition: none;
     }
   }

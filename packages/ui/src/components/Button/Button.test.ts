@@ -41,9 +41,9 @@ describe('Button', () => {
     expect(button.disabled).toBe(true)
     expect(button.getAttribute('aria-busy')).toBe('true')
     // le composant Spinner est rendu dans la boîte, masqué aux AT (aria-busy suffit)
-    const box = button.querySelector('.ds-button-spinner') as HTMLElement
+    const box = button.querySelector('.v-button-spinner') as HTMLElement
     expect(box.getAttribute('aria-hidden')).toBe('true')
-    expect(box.querySelector('.ds-spinner')).not.toBeNull()
+    expect(box.querySelector('.v-spinner')).not.toBeNull()
   })
 
   it('laisse passer les attributs natifs (fallthrough)', () => {
@@ -62,7 +62,7 @@ describe('Button', () => {
       slots: { default: 'Ajouter' },
     })
     const button = getByRole('button', { name: 'Ajouter' })
-    const icons = Array.from(button.querySelectorAll('.ds-icon'))
+    const icons = Array.from(button.querySelectorAll('.v-icon'))
     expect(icons).toHaveLength(2)
     expect(icons.map((icon) => icon.textContent)).toEqual(['add', 'arrow_forward'])
     expect(icons.every((icon) => icon.getAttribute('aria-hidden') === 'true')).toBe(true)
@@ -73,7 +73,7 @@ describe('Button', () => {
       props: { iconStart: 'add', iconEnd: 'arrow_forward', iconFilled: true },
       slots: { default: 'Ajouter' },
     })
-    const iconsPleins = Array.from(plein.container.querySelectorAll('.ds-icon'))
+    const iconsPleins = Array.from(plein.container.querySelectorAll('.v-icon'))
     expect(iconsPleins).toHaveLength(2)
     expect(iconsPleins.every((icon) => icon.hasAttribute('data-filled'))).toBe(true)
 
@@ -81,7 +81,7 @@ describe('Button', () => {
       props: { iconStart: 'add', iconEnd: 'arrow_forward' },
       slots: { default: 'Ajouter' },
     })
-    const iconsContour = Array.from(contour.container.querySelectorAll('.ds-icon'))
+    const iconsContour = Array.from(contour.container.querySelectorAll('.v-icon'))
     expect(iconsContour).toHaveLength(2)
     expect(iconsContour.some((icon) => icon.hasAttribute('data-filled'))).toBe(false)
   })
@@ -92,8 +92,8 @@ describe('Button', () => {
       slots: { default: 'Envoyer' },
     })
     const button = getByRole('button')
-    expect(button.querySelector('.ds-button-spinner')).not.toBeNull()
-    const icons = Array.from(button.querySelectorAll('.ds-icon'))
+    expect(button.querySelector('.v-button-spinner')).not.toBeNull()
+    const icons = Array.from(button.querySelectorAll('.v-icon'))
     expect(icons.map((icon) => icon.textContent)).toEqual(['arrow_forward'])
   })
 
@@ -104,7 +104,7 @@ describe('Button', () => {
     })
     const button = getByRole('button')
     expect(button.querySelector('[data-testid="custom"]')).not.toBeNull()
-    expect(button.querySelector('.ds-icon')).toBeNull()
+    expect(button.querySelector('.v-icon')).toBeNull()
   })
 
   it('avec href : rend un lien <a> sans type ni disabled', () => {
@@ -129,7 +129,7 @@ describe('Button', () => {
       attrs: { onClick },
       slots: { default: 'Lien désactivé' },
     })
-    const anchor = container.querySelector('a.ds-button') as HTMLAnchorElement
+    const anchor = container.querySelector('a.v-button') as HTMLAnchorElement
     expect(anchor).not.toBeNull()
     expect(anchor.getAttribute('href')).toBeNull()
     expect(anchor.getAttribute('aria-disabled')).toBe('true')
@@ -142,10 +142,10 @@ describe('Button', () => {
       props: { href: 'https://exemple.fr', loading: true },
       slots: { default: 'Envoi…' },
     })
-    const anchor = container.querySelector('a.ds-button') as HTMLAnchorElement
+    const anchor = container.querySelector('a.v-button') as HTMLAnchorElement
     expect(anchor.getAttribute('href')).toBeNull()
     expect(anchor.getAttribute('aria-disabled')).toBe('true')
     expect(anchor.getAttribute('aria-busy')).toBe('true')
-    expect(anchor.querySelector('.ds-button-spinner')).not.toBeNull()
+    expect(anchor.querySelector('.v-button-spinner')).not.toBeNull()
   })
 })

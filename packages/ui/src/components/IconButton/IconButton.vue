@@ -47,7 +47,7 @@ defineSlots<{
 
 <template>
   <Button
-    class="ds-icon-button"
+    class="v-icon-button"
     :variant="variant"
     :tone="tone"
     :size="size"
@@ -63,15 +63,15 @@ defineSlots<{
 </template>
 
 <style>
-@layer ds.components {
+@layer vectis.components {
   /*
    * Sélecteur avec [data-size] pour battre la règle de padding de Button
    * quel que soit l'ordre du CSS bundlé (ce fichier reste importé APRÈS
    * Button dans index.ts). La largeur lit --control-height, posée par la
-   * classe partagée ds-control sur ce même élément rendu (compact inclus) :
+   * classe partagée v-control sur ce même élément rendu (compact inclus) :
    * une seule règle couvre toutes les tailles.
    */
-  .ds-icon-button[data-size] {
+  .v-icon-button[data-size] {
     width: var(--control-height);
     padding-inline: 0;
   }

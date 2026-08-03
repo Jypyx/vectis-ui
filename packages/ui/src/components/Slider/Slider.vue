@@ -196,7 +196,7 @@ function resyncFields() {
 
 <template>
   <div
-    class="ds-slider"
+    class="v-slider"
     :data-range="range ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
     :data-orientation="orientation === 'vertical' ? 'vertical' : undefined"
@@ -208,7 +208,7 @@ function resyncFields() {
     <Input
       v-if="inputs && range"
       v-model="startFieldText"
-      class="ds-slider-field ds-slider-field-start"
+      class="v-slider-field v-slider-field-start"
       type="number"
       size="sm"
       :min="min"
@@ -218,14 +218,14 @@ function resyncFields() {
       :aria-label="startLabel"
       @change="commitField('start')"
     />
-    <div class="ds-slider-rail">
-      <span class="ds-slider-control">
-        <span class="ds-slider-track" aria-hidden="true">
-          <span class="ds-slider-fill" />
+    <div class="v-slider-rail">
+      <span class="v-slider-control">
+        <span class="v-slider-track" aria-hidden="true">
+          <span class="v-slider-fill" />
           <span
             v-for="(tick, i) in tickItems"
             :key="i"
-            class="ds-slider-tick"
+            class="v-slider-tick"
             :data-filled="tick.filled ? '' : undefined"
             :style="{ '--fill-fraction': String(tick.f) }"
           />
@@ -233,7 +233,7 @@ function resyncFields() {
         <input
           v-if="range"
           type="range"
-          class="ds-slider-input ds-slider-input-start"
+          class="v-slider-input v-slider-input-start"
           :min="min"
           :max="max"
           :step="step"
@@ -245,7 +245,7 @@ function resyncFields() {
         />
         <input
           type="range"
-          class="ds-slider-input ds-slider-input-end"
+          class="v-slider-input v-slider-input-end"
           :min="min"
           :max="max"
           :step="step"
@@ -258,26 +258,26 @@ function resyncFields() {
       </span>
       <span
         v-if="tooltip && range"
-        class="ds-slider-tooltip ds-slider-tooltip-start"
+        class="v-slider-tooltip v-slider-tooltip-start"
         aria-hidden="true"
         :style="{ '--fill-fraction': String(frac(startValue)) }"
       >
-        <span class="ds-slider-tooltip-bubble">{{ startValueText ?? startValue }}</span>
+        <span class="v-slider-tooltip-bubble">{{ startValueText ?? startValue }}</span>
       </span>
       <span
         v-if="tooltip"
-        class="ds-slider-tooltip ds-slider-tooltip-end"
+        class="v-slider-tooltip v-slider-tooltip-end"
         aria-hidden="true"
         :style="{ '--fill-fraction': String(frac(endValue)) }"
       >
-        <span class="ds-slider-tooltip-bubble">{{ endValueText ?? endValue }}</span>
+        <span class="v-slider-tooltip-bubble">{{ endValueText ?? endValue }}</span>
       </span>
     </div>
-    <div v-if="labels" class="ds-slider-labels">
+    <div v-if="labels" class="v-slider-labels">
       <span
         v-for="(item, i) in labels"
         :key="i"
-        class="ds-slider-label"
+        class="v-slider-label"
         :style="{ '--fill-fraction': String(labelFraction(i)) }"
       >
         <template v-if="typeof item === 'string'">{{ item }}</template>
@@ -287,7 +287,7 @@ function resyncFields() {
     <Input
       v-if="inputs"
       v-model="endFieldText"
-      class="ds-slider-field ds-slider-field-end"
+      class="v-slider-field v-slider-field-end"
       type="number"
       size="sm"
       :min="min"
@@ -301,8 +301,8 @@ function resyncFields() {
 </template>
 
 <style>
-@layer ds.components {
-  .ds-slider {
+@layer vectis.components {
+  .v-slider {
     --slider-thumb: var(--vectis-control-size-slider-thumb);
     --slider-track: var(--vectis-control-size-slider-track);
     /* Position du centre du thumb pour une fraction f (course insetée de ½ thumb). */
@@ -316,40 +316,40 @@ function resyncFields() {
     font-family: var(--vectis-text-family);
   }
 
-  .ds-slider:has(.ds-slider-labels) {
+  .v-slider:has(.v-slider-labels) {
     grid-template-areas: 'rail' 'labels';
   }
 
-  .ds-slider:has(.ds-slider-field-end) {
+  .v-slider:has(.v-slider-field-end) {
     grid-template-areas: 'rail field-end';
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .ds-slider:has(.ds-slider-field-end):has(.ds-slider-labels) {
+  .v-slider:has(.v-slider-field-end):has(.v-slider-labels) {
     grid-template-areas: 'rail field-end' 'labels .';
   }
 
-  .ds-slider:has(.ds-slider-field-start) {
+  .v-slider:has(.v-slider-field-start) {
     grid-template-areas: 'field-start rail field-end';
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
-  .ds-slider:has(.ds-slider-field-start):has(.ds-slider-labels) {
+  .v-slider:has(.v-slider-field-start):has(.v-slider-labels) {
     grid-template-areas: 'field-start rail field-end' '. labels .';
   }
 
-  .ds-slider-rail {
+  .v-slider-rail {
     grid-area: rail;
     position: relative;
     block-size: var(--slider-thumb);
   }
 
-  .ds-slider-control {
+  .v-slider-control {
     position: absolute;
     inset: 0;
   }
 
-  .ds-slider-track {
+  .v-slider-track {
     position: absolute;
     inset-inline: 0;
     inset-block: 0;
@@ -360,7 +360,7 @@ function resyncFields() {
     overflow: hidden;
   }
 
-  .ds-slider-fill {
+  .v-slider-fill {
     position: absolute;
     inset-block: 0;
     inset-inline-start: 0;
@@ -368,14 +368,14 @@ function resyncFields() {
     background: var(--vectis-color-accent);
   }
 
-  .ds-slider[data-range] .ds-slider-fill {
+  .v-slider[data-range] .v-slider-fill {
     inset-inline-start: calc(
       var(--slider-thumb) / 2 + (100% - var(--slider-thumb)) * var(--start-fraction)
     );
     inline-size: calc((100% - var(--slider-thumb)) * (var(--end-fraction) - var(--start-fraction)));
   }
 
-  .ds-slider-tick {
+  .v-slider-tick {
     --slider-tick: calc(var(--slider-track) / 3 * 2);
     position: absolute;
     inset-block: 0;
@@ -390,13 +390,13 @@ function resyncFields() {
     background: var(--vectis-color-border-strong);
   }
 
-  .ds-slider-tick[data-filled] {
+  .v-slider-tick[data-filled] {
     background: var(--vectis-color-text-on-accent);
   }
 
   /* Les inputs se superposent ; seuls leurs pouces captent le pointeur
      (indispensable en mode range pour que les deux restent utilisables). */
-  .ds-slider-input {
+  .v-slider-input {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -410,12 +410,12 @@ function resyncFields() {
   /* En simple, tout l'input capte le pointeur : cliquer la piste déplace la
      valeur nativement (saut + drag immédiat), zéro JS. Effet assumé : le
      hover du thumb se déclenche au survol de toute la piste. */
-  .ds-slider:not([data-range]) .ds-slider-input {
+  .v-slider:not([data-range]) .v-slider-input {
     pointer-events: auto;
     cursor: pointer;
   }
 
-  .ds-slider-input::-webkit-slider-thumb {
+  .v-slider-input::-webkit-slider-thumb {
     appearance: none;
     pointer-events: auto;
     width: var(--slider-thumb);
@@ -428,7 +428,7 @@ function resyncFields() {
     transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-slider-input::-moz-range-thumb {
+  .v-slider-input::-moz-range-thumb {
     pointer-events: auto;
     width: var(--slider-thumb);
     height: var(--slider-thumb);
@@ -442,33 +442,33 @@ function resyncFields() {
 
   /* Hover/drag : fond teinté du thumb. États posés sur l'input host — les
      pseudo-classes chaînées après le pseudo-thumb sont peu fiables. */
-  .ds-slider-input:hover:not(:disabled)::-webkit-slider-thumb,
-  .ds-slider-input:active:not(:disabled)::-webkit-slider-thumb {
+  .v-slider-input:hover:not(:disabled)::-webkit-slider-thumb,
+  .v-slider-input:active:not(:disabled)::-webkit-slider-thumb {
     background: var(--vectis-color-accent-surface);
   }
 
-  .ds-slider-input:hover:not(:disabled)::-moz-range-thumb,
-  .ds-slider-input:active:not(:disabled)::-moz-range-thumb {
+  .v-slider-input:hover:not(:disabled)::-moz-range-thumb,
+  .v-slider-input:active:not(:disabled)::-moz-range-thumb {
     background: var(--vectis-color-accent-surface);
   }
 
-  .ds-slider-input:focus-visible {
+  .v-slider-input:focus-visible {
     outline: none;
   }
 
-  .ds-slider-input:focus-visible::-webkit-slider-thumb {
+  .v-slider-input:focus-visible::-webkit-slider-thumb {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  .ds-slider-input:focus-visible::-moz-range-thumb {
+  .v-slider-input:focus-visible::-moz-range-thumb {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
   /* --- Tooltip de valeur : apparence du Tooltip, mais position par fraction —
      le thumb natif est un pseudo-élément, non ancrable en anchor positioning. */
-  .ds-slider-tooltip {
+  .v-slider-tooltip {
     position: absolute;
     inset-block-end: calc(100% + var(--vectis-space-2));
     inset-inline-start: calc(
@@ -484,15 +484,15 @@ function resyncFields() {
       visibility var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .ds-slider:has(.ds-slider-input-start:active) .ds-slider-tooltip-start,
-  .ds-slider:has(.ds-slider-input-start:focus-visible) .ds-slider-tooltip-start,
-  .ds-slider:has(.ds-slider-input-end:active) .ds-slider-tooltip-end,
-  .ds-slider:has(.ds-slider-input-end:focus-visible) .ds-slider-tooltip-end {
+  .v-slider:has(.v-slider-input-start:active) .v-slider-tooltip-start,
+  .v-slider:has(.v-slider-input-start:focus-visible) .v-slider-tooltip-start,
+  .v-slider:has(.v-slider-input-end:active) .v-slider-tooltip-end,
+  .v-slider:has(.v-slider-input-end:focus-visible) .v-slider-tooltip-end {
     opacity: 1;
     visibility: visible;
   }
 
-  .ds-slider-tooltip-bubble {
+  .v-slider-tooltip-bubble {
     padding: var(--vectis-space-1) var(--vectis-space-2);
     background: var(--vectis-color-surface-inverse);
     color: var(--vectis-color-text-on-inverse);
@@ -504,7 +504,7 @@ function resyncFields() {
   }
 
   /* --- Labels de pas ------------------------------------------------------ */
-  .ds-slider-labels {
+  .v-slider-labels {
     grid-area: labels;
     position: relative;
     /* Enfants absolus : réserve la hauteur (couvre texte xs ET icônes md). */
@@ -516,7 +516,7 @@ function resyncFields() {
 
   /* Boîte de largeur nulle : le contenu déborde symétriquement, donc centré
      sur le pas — sans transform (physique, casserait en vertical/RTL). */
-  .ds-slider-label {
+  .v-slider-label {
     position: absolute;
     inset-block-start: 0;
     inset-inline-start: calc(
@@ -529,52 +529,52 @@ function resyncFields() {
   }
 
   /* --- Champs numériques -------------------------------------------------- */
-  .ds-slider-field.ds-input {
+  .v-slider-field.v-input {
     inline-size: var(--vectis-control-size-slider-field);
   }
 
-  .ds-slider-field-start {
+  .v-slider-field-start {
     grid-area: field-start;
   }
 
-  .ds-slider-field-end {
+  .v-slider-field-end {
     grid-area: field-end;
   }
 
   /* --- Vertical : min en bas, max en haut --------------------------------- */
-  .ds-slider[data-orientation='vertical'] {
+  .v-slider[data-orientation='vertical'] {
     grid-template-areas: 'rail';
     grid-template-columns: none;
     inline-size: fit-content;
     justify-items: center;
   }
 
-  .ds-slider[data-orientation='vertical']:has(.ds-slider-labels) {
+  .v-slider[data-orientation='vertical']:has(.v-slider-labels) {
     grid-template-areas: 'rail labels';
     grid-template-columns: auto auto;
   }
 
-  .ds-slider[data-orientation='vertical']:has(.ds-slider-field-end) {
+  .v-slider[data-orientation='vertical']:has(.v-slider-field-end) {
     grid-template-areas: 'field-end' 'rail';
     grid-template-columns: none;
   }
 
-  .ds-slider[data-orientation='vertical']:has(.ds-slider-field-end):has(.ds-slider-labels) {
+  .v-slider[data-orientation='vertical']:has(.v-slider-field-end):has(.v-slider-labels) {
     grid-template-areas: 'field-end .' 'rail labels';
     grid-template-columns: auto auto;
   }
 
-  .ds-slider[data-orientation='vertical']:has(.ds-slider-field-start) {
+  .v-slider[data-orientation='vertical']:has(.v-slider-field-start) {
     grid-template-areas: 'field-end' 'rail' 'field-start';
     grid-template-columns: none;
   }
 
-  .ds-slider[data-orientation='vertical']:has(.ds-slider-field-start):has(.ds-slider-labels) {
+  .v-slider[data-orientation='vertical']:has(.v-slider-field-start):has(.v-slider-labels) {
     grid-template-areas: 'field-end .' 'rail labels' 'field-start .';
     grid-template-columns: auto auto;
   }
 
-  .ds-slider[data-orientation='vertical'] .ds-slider-rail {
+  .v-slider[data-orientation='vertical'] .v-slider-rail {
     inline-size: var(--slider-thumb);
     block-size: var(--vectis-control-size-slider-length);
   }
@@ -582,12 +582,12 @@ function resyncFields() {
   /* Le sous-conteneur porte seul le mode d'écriture : la géométrie logique
      (inset-inline-*) de track/fill/ticks bascule sans dupliquer de règles ;
      tooltips et labels restent hors de ce contexte (texte horizontal). */
-  .ds-slider[data-orientation='vertical'] .ds-slider-control {
+  .v-slider[data-orientation='vertical'] .v-slider-control {
     writing-mode: vertical-lr;
     direction: rtl;
   }
 
-  .ds-slider[data-orientation='vertical'] .ds-slider-tooltip {
+  .v-slider[data-orientation='vertical'] .v-slider-tooltip {
     inset-block-end: calc(
       var(--slider-thumb) / 2 + (100% - var(--slider-thumb)) * var(--fill-fraction)
     );
@@ -599,12 +599,12 @@ function resyncFields() {
     justify-content: flex-end;
   }
 
-  .ds-slider[data-orientation='vertical'] .ds-slider-labels {
+  .v-slider[data-orientation='vertical'] .v-slider-labels {
     align-self: stretch;
     min-block-size: auto;
   }
 
-  .ds-slider[data-orientation='vertical'] .ds-slider-label {
+  .v-slider[data-orientation='vertical'] .v-slider-label {
     inset-block-start: auto;
     inset-block-end: calc(
       var(--slider-thumb) / 2 + (100% - var(--slider-thumb)) * var(--fill-fraction)
@@ -617,43 +617,43 @@ function resyncFields() {
   }
 
   /* --- Disabled : nuances de gris (tokens Checkbox/Switch), pas d'opacité -- */
-  .ds-slider[data-disabled] {
+  .v-slider[data-disabled] {
     cursor: not-allowed;
   }
 
-  .ds-slider[data-disabled] .ds-slider-track {
+  .v-slider[data-disabled] .v-slider-track {
     background: var(--vectis-color-surface-muted);
   }
 
-  .ds-slider[data-disabled] .ds-slider-fill {
+  .v-slider[data-disabled] .v-slider-fill {
     background: var(--vectis-color-text-subtle);
   }
 
-  .ds-slider[data-disabled] .ds-slider-tick {
+  .v-slider[data-disabled] .v-slider-tick {
     background: var(--vectis-color-text-subtle);
   }
 
   /* Sur le fill gris, le tick repasse en clair (la « coche grise » de Checkbox). */
-  .ds-slider[data-disabled] .ds-slider-tick[data-filled] {
+  .v-slider[data-disabled] .v-slider-tick[data-filled] {
     background: var(--vectis-color-surface-muted);
   }
 
-  .ds-slider[data-disabled] .ds-slider-labels {
+  .v-slider[data-disabled] .v-slider-labels {
     color: var(--vectis-color-text-subtle);
   }
 
-  .ds-slider[data-disabled] .ds-slider-input {
+  .v-slider[data-disabled] .v-slider-input {
     cursor: not-allowed;
   }
 
-  .ds-slider[data-disabled] .ds-slider-input::-webkit-slider-thumb {
+  .v-slider[data-disabled] .v-slider-input::-webkit-slider-thumb {
     background: var(--vectis-color-surface-muted);
     border-color: var(--vectis-color-text-subtle);
     box-shadow: none;
     cursor: not-allowed;
   }
 
-  .ds-slider[data-disabled] .ds-slider-input::-moz-range-thumb {
+  .v-slider[data-disabled] .v-slider-input::-moz-range-thumb {
     background: var(--vectis-color-surface-muted);
     border-color: var(--vectis-color-text-subtle);
     box-shadow: none;
@@ -661,15 +661,15 @@ function resyncFields() {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ds-slider-input::-webkit-slider-thumb {
+    .v-slider-input::-webkit-slider-thumb {
       transition: none;
     }
 
-    .ds-slider-input::-moz-range-thumb {
+    .v-slider-input::-moz-range-thumb {
       transition: none;
     }
 
-    .ds-slider-tooltip {
+    .v-slider-tooltip {
       transition: none;
     }
   }

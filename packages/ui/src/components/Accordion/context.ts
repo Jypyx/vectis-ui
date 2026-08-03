@@ -18,4 +18,4 @@ export interface AccordionContext {
   collapseIcon: IconSource | undefined
 }
 
-export const accordionKey: InjectionKey<AccordionContext> = Symbol('ds-accordion')
+export const accordionKey: InjectionKey<AccordionContext> = Symbol('v-accordion')

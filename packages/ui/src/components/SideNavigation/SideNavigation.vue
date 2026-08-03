@@ -85,7 +85,7 @@ const rootEl = ref<HTMLElement | null>(null)
  * items désactivés sont écartés — `:disabled` ne matche que les <button>, un
  * lien inerte et un summary passent par `aria-disabled` (modèle MenuPanel).
  */
-const ROW_SELECTOR = ':is(summary, .ds-side-nav-action):not(:disabled):not([aria-disabled="true"])'
+const ROW_SELECTOR = ':is(summary, .v-side-nav-action):not(:disabled):not([aria-disabled="true"])'
 
 /**
  * Écarte tout ce qui vit sous une branche REPLIÉE — sauf son propre <summary>,
@@ -127,26 +127,26 @@ function onKeydown(event: KeyboardEvent) {
 <template>
   <nav
     ref="rootEl"
-    class="ds-side-nav ds-control"
+    class="v-side-nav v-control"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
     :aria-label="ariaLabel"
     @keydown="onKeydown"
   >
-    <ul class="ds-side-nav-list">
+    <ul class="v-side-nav-list">
       <slot />
     </ul>
   </nav>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-side-nav {
+@layer vectis.components {
+  .v-side-nav {
     /*
      * Retrait d'un niveau de hiérarchie : exactement la place que tient une
      * icône de début (icône + gouttière), pour que le libellé d'un sous-item
      * tombe sur la MÊME VERTICALE que celui de son parent. Les deux variables
-     * sont posées par `ds-control` sur cette même racine — le retrait suit donc
+     * sont posées par `v-control` sur cette même racine — le retrait suit donc
      * l'échelle des tailles sans table locale, et un consommateur qui repose
      * `--vectis-icon-size` le voit suivre. Hérité par tous les niveaux.
      */
@@ -166,9 +166,9 @@ function onKeydown(event: KeyboardEvent) {
    * `flex` et non `block` : il supprime tout margin collapsing, donc la marge
    * d'un groupe ne peut pas fuir hors d'une branche repliée (block-size: 0).
    */
-  .ds-side-nav-list,
-  .ds-side-nav-children,
-  .ds-side-nav-group-list {
+  .v-side-nav-list,
+  .v-side-nav-children,
+  .v-side-nav-group-list {
     display: flex;
     flex-direction: column;
     margin: 0;

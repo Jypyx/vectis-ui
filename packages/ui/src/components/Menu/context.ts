@@ -9,7 +9,7 @@ export interface MenuContext {
   closeAll: () => void
 }
 
-export const menuKey: InjectionKey<MenuContext> = Symbol('ds-menu')
+export const menuKey: InjectionKey<MenuContext> = Symbol('v-menu')
 
 /** Délai d'intention (ms) avant ouverture/fermeture d'un sous-menu au survol. */
 export const SUBMENU_HOVER_DELAY = 150

@@ -130,7 +130,7 @@ export const IconProp: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    const icons = canvasElement.querySelectorAll('.ds-icon')
+    const icons = canvasElement.querySelectorAll('.v-icon')
     await expect(icons[0]).not.toHaveAttribute('data-filled')
     await expect(icons[1]).toHaveAttribute('data-filled')
   },

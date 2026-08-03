@@ -26,16 +26,16 @@ describe('setIconResolver', () => {
   it('passe AVANT le registre intégré', () => {
     setIconResolver(() => ({ text: 'xmark' }))
     const container = iconOf({ name: 'close' })
-    expect(container.querySelector('.ds-icon-symbol')?.textContent).toBe('xmark')
-    expect(container.querySelector('.ds-icon-svg')).toBeNull()
+    expect(container.querySelector('.v-icon-symbol')?.textContent).toBe('xmark')
+    expect(container.querySelector('.v-icon-svg')).toBeNull()
   })
 
   it('undefined = « je ne connais pas » → repli sur le registre, puis la ligature', () => {
     setIconResolver(() => undefined)
-    expect(iconOf({ name: 'close' }).querySelector('.ds-icon-svg path')?.getAttribute('d')).toBe(
+    expect(iconOf({ name: 'close' }).querySelector('.v-icon-svg path')?.getAttribute('d')).toBe(
       builtinIcons.close[0],
     )
-    expect(iconOf({ name: 'favorite' }).querySelector('.ds-icon-symbol')?.textContent).toBe(
+    expect(iconOf({ name: 'favorite' }).querySelector('.v-icon-symbol')?.textContent).toBe(
       'favorite',
     )
   })
@@ -50,12 +50,12 @@ describe('setIconResolver', () => {
   it('setIconResolver(undefined) restaure le comportement par défaut', () => {
     setIconResolver(() => ({ text: 'xmark' }))
     setIconResolver(undefined)
-    expect(iconOf({ name: 'close' }).querySelector('.ds-icon-svg')).not.toBeNull()
+    expect(iconOf({ name: 'close' }).querySelector('.v-icon-svg')).not.toBeNull()
   })
 
   it('data-icon reste le nom DEMANDÉ, quelle que soit la source', () => {
     setIconResolver(() => ({ class: 'fa-solid fa-xmark' }))
-    expect(iconOf({ name: 'close' }).querySelector('.ds-icon')?.getAttribute('data-icon')).toBe(
+    expect(iconOf({ name: 'close' }).querySelector('.v-icon')?.getAttribute('data-icon')).toBe(
       'close',
     )
   })
@@ -63,7 +63,7 @@ describe('setIconResolver', () => {
   describe('les cinq formes de rendu', () => {
     it('path : SVG inline, viewBox surchargeable', () => {
       setIconResolver(() => ({ path: 'M0 0h24v24H0z', viewBox: '0 0 24 24' }))
-      const svg = iconOf({ name: 'close' }).querySelector('.ds-icon-svg')
+      const svg = iconOf({ name: 'close' }).querySelector('.v-icon-svg')
       expect(svg?.getAttribute('viewBox')).toBe('0 0 24 24')
       expect(svg?.querySelector('path')?.getAttribute('d')).toBe('M0 0h24v24H0z')
     })
@@ -76,21 +76,21 @@ describe('setIconResolver', () => {
 
     it('src : image neutre (alt vide)', () => {
       setIconResolver(() => ({ src: '/sprite.svg#close' }))
-      const img = iconOf({ name: 'close' }).querySelector('.ds-icon-img')
+      const img = iconOf({ name: 'close' }).querySelector('.v-icon-img')
       expect(img?.getAttribute('src')).toBe('/sprite.svg#close')
       expect(img?.getAttribute('alt')).toBe('')
     })
 
     it('text : ligature ou codepoint, classe optionnelle', () => {
       setIconResolver(() => ({ text: '', class: 'icomoon' }))
-      const symbol = iconOf({ name: 'close' }).querySelector('.ds-icon-symbol')
+      const symbol = iconOf({ name: 'close' }).querySelector('.v-icon-symbol')
       expect(symbol?.textContent).toBe('')
       expect(symbol?.classList.contains('icomoon')).toBe(true)
     })
 
     it('class : glyphe de pseudo-élément, sans texte', () => {
       setIconResolver(() => ({ class: 'ph ph-x' }))
-      const glyph = iconOf({ name: 'close' }).querySelector('.ds-icon-glyph')
+      const glyph = iconOf({ name: 'close' }).querySelector('.v-icon-glyph')
       expect(glyph?.classList.contains('ph-x')).toBe(true)
       expect(glyph?.textContent).toBe('')
     })
@@ -101,14 +101,14 @@ describe('ligatureIconResolver', () => {
   it('remet TOUTES les icônes en ligature — dont celles du registre', () => {
     setIconResolver(ligatureIconResolver())
     const container = iconOf({ name: 'close' })
-    expect(container.querySelector('.ds-icon-symbol')?.textContent).toBe('close')
-    expect(container.querySelector('.ds-icon-svg')).toBeNull()
+    expect(container.querySelector('.v-icon-symbol')?.textContent).toBe('close')
+    expect(container.querySelector('.v-icon-svg')).toBeNull()
   })
 
   it('applique la table d’alias', () => {
     setIconResolver(ligatureIconResolver({ aliases: { close: 'cancel' } }))
-    expect(iconOf({ name: 'close' }).querySelector('.ds-icon-symbol')?.textContent).toBe('cancel')
-    expect(iconOf({ name: 'favorite' }).querySelector('.ds-icon-symbol')?.textContent).toBe(
+    expect(iconOf({ name: 'close' }).querySelector('.v-icon-symbol')?.textContent).toBe('cancel')
+    expect(iconOf({ name: 'favorite' }).querySelector('.v-icon-symbol')?.textContent).toBe(
       'favorite',
     )
   })
@@ -124,17 +124,17 @@ describe('classIconResolver', () => {
 
   it('alias + variante filled', () => {
     setIconResolver(resolver())
-    expect(iconOf({ name: 'close' }).querySelector('.ds-icon-glyph')?.className).toBe(
-      'ds-icon-glyph fa-regular fa-xmark',
+    expect(iconOf({ name: 'close' }).querySelector('.v-icon-glyph')?.className).toBe(
+      'v-icon-glyph fa-regular fa-xmark',
     )
     expect(
-      iconOf({ name: 'close', filled: true }).querySelector('.ds-icon-glyph')?.className,
+      iconOf({ name: 'close', filled: true }).querySelector('.v-icon-glyph')?.className,
     ).toContain('fa-solid')
   })
 
   it('les noms du consommateur passent toujours, même hors table', () => {
     setIconResolver(resolver())
-    expect(iconOf({ name: 'house' }).querySelector('.ds-icon-glyph')?.className).toContain(
+    expect(iconOf({ name: 'house' }).querySelector('.v-icon-glyph')?.className).toContain(
       'fa-house',
     )
   })
@@ -142,10 +142,10 @@ describe('classIconResolver', () => {
   it('strict (défaut) : une icône du DS non aliasée retombe sur le SVG intégré', () => {
     // Sans ce garde-fou, `swap_vert` produirait `fa-swap_vert` — un carré vide.
     setIconResolver(resolver())
-    expect(iconOf({ name: 'swap_vert' }).querySelector('.ds-icon-svg')).not.toBeNull()
+    expect(iconOf({ name: 'swap_vert' }).querySelector('.v-icon-svg')).not.toBeNull()
 
     setIconResolver(resolver(false))
-    expect(iconOf({ name: 'swap_vert' }).querySelector('.ds-icon-glyph')?.className).toContain(
+    expect(iconOf({ name: 'swap_vert' }).querySelector('.v-icon-glyph')?.className).toContain(
       'fa-swap_vert',
     )
   })
@@ -166,8 +166,8 @@ describe('componentIconResolver', () => {
 
   it('strict par construction : un nom non mappé retombe sur le registre', () => {
     setIconResolver(componentIconResolver({ components: { close: Lucide } }))
-    expect(iconOf({ name: 'check' }).querySelector('.ds-icon-svg')).not.toBeNull()
-    expect(iconOf({ name: 'favorite' }).querySelector('.ds-icon-symbol')?.textContent).toBe(
+    expect(iconOf({ name: 'check' }).querySelector('.v-icon-svg')).not.toBeNull()
+    expect(iconOf({ name: 'favorite' }).querySelector('.v-icon-symbol')?.textContent).toBe(
       'favorite',
     )
   })

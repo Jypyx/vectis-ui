@@ -72,16 +72,16 @@ const badgeAttrs = computed(() => ({
 </script>
 
 <template>
-  <span v-if="hasTarget" class="ds-badge-host" :data-overlay="overlay ? '' : undefined">
+  <span v-if="hasTarget" class="v-badge-host" :data-overlay="overlay ? '' : undefined">
     <slot />
-    <span class="ds-badge" v-bind="badgeAttrs">
+    <span class="v-badge" v-bind="badgeAttrs">
       <template v-if="!dot">
         <Icon v-if="icon" v-bind="iconProps(icon)" />
         <template v-else>{{ displayCount }}</template>
       </template>
     </span>
   </span>
-  <span v-else class="ds-badge" v-bind="badgeAttrs">
+  <span v-else class="v-badge" v-bind="badgeAttrs">
     <template v-if="!dot">
       <Icon v-if="icon" v-bind="iconProps(icon)" />
       <template v-else>{{ displayCount }}</template>
@@ -90,15 +90,15 @@ const badgeAttrs = computed(() => ({
 </template>
 
 <style>
-@layer ds.components {
-  .ds-badge-host {
+@layer vectis.components {
+  .v-badge-host {
     position: relative;
     display: inline-flex;
     align-items: center;
     gap: var(--vectis-space-2); /* écart cible ↔ badge en mode inline */
   }
 
-  .ds-badge {
+  .v-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -130,27 +130,27 @@ const badgeAttrs = computed(() => ({
   /* Texte adaptatif noir/blanc là où contrast-color() existe (Safari 26+,
      Edge 150+). */
   @supports (color: contrast-color(red)) {
-    .ds-badge {
+    .v-badge {
       color: contrast-color(var(--badge-bg));
     }
   }
 
-  .ds-badge[data-tone='accent'] {
+  .v-badge[data-tone='accent'] {
     --badge-bg: var(--vectis-color-accent);
     --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
-  .ds-badge[data-tone='danger'] {
+  .v-badge[data-tone='danger'] {
     --badge-bg: var(--vectis-color-danger);
     --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
-  .ds-badge[data-tone='success'] {
+  .v-badge[data-tone='success'] {
     --badge-bg: var(--vectis-color-success);
     --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
-  .ds-badge[data-tone='warning'] {
+  .v-badge[data-tone='warning'] {
     --badge-bg: var(--vectis-color-warning);
     --tone-text-fallback: var(--vectis-color-text-on-warning);
   }
@@ -158,24 +158,24 @@ const badgeAttrs = computed(() => ({
   /* Neutral : inversion text/surface — un gris type text-muted vaudrait
      neutral-400 en dark, où le fallback blanc échouerait ; ici fallback et
      contrast-color() concordent dans les deux thèmes. */
-  .ds-badge[data-tone='neutral'] {
+  .v-badge[data-tone='neutral'] {
     --badge-bg: var(--vectis-color-text);
     --tone-text-fallback: var(--vectis-color-surface);
   }
 
   /* Après les tones : même spécificité, le dernier gagne. */
-  .ds-badge[data-custom] {
+  .v-badge[data-custom] {
     --badge-bg: var(--custom-color);
     --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
   /* Icône seule : le min-width fait le cercle, padding retiré. */
-  .ds-badge[data-icon-only] {
+  .v-badge[data-icon-only] {
     padding: 0;
   }
 
   /* min-width neutralisé : il battrait le width du dot. */
-  .ds-badge[data-dot] {
+  .v-badge[data-dot] {
     width: var(--vectis-control-size-badge-dot);
     height: var(--vectis-control-size-badge-dot);
     min-width: 0;
@@ -184,13 +184,13 @@ const badgeAttrs = computed(() => ({
 
   /* Anneau extérieur en box-shadow : ne modifie pas les dimensions (le dot
      reste 10px pleins) et suit le border-radius. */
-  .ds-badge[data-bordered] {
+  .v-badge[data-bordered] {
     box-shadow: 0 0 0 2px var(--vectis-color-surface);
   }
 
   /* Les % de translate sont des ratios de la taille du badge lui-même
      (50% = centré sur le coin) — pas des espacements, pas de token. */
-  .ds-badge-host[data-overlay] > .ds-badge {
+  .v-badge-host[data-overlay] > .v-badge {
     position: absolute;
     inset-block-start: 0;
     inset-inline-end: 0;
@@ -198,7 +198,7 @@ const badgeAttrs = computed(() => ({
   }
 
   /* RTL : le coin logique passe à gauche, la translation X s'inverse */
-  .ds-badge-host[data-overlay]:dir(rtl) > .ds-badge {
+  .v-badge-host[data-overlay]:dir(rtl) > .v-badge {
     translate: -25% -25%;
   }
 }

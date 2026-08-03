@@ -61,22 +61,22 @@ function onClick() {
     type="button"
     role="option"
     tabindex="-1"
-    class="ds-combobox-option"
+    class="v-combobox-option"
     :aria-selected="selected"
     :aria-disabled="disabled ? 'true' : undefined"
     :data-active="active ? '' : undefined"
     @click="onClick"
   >
     <Icon v-if="icon" v-bind="iconProps(icon)" />
-    <span class="ds-combobox-option-label"><slot /></span>
-    <Icon v-if="selected" name="check" class="ds-combobox-option-check" />
+    <span class="v-combobox-option-label"><slot /></span>
+    <Icon v-if="selected" name="check" class="v-combobox-option-check" />
   </button>
 </template>
 
 <style>
-@layer ds.components {
-  .ds-combobox-option {
-    /* Taille : `--control-*` héritées du panneau, qui porte `ds-control`
+@layer vectis.components {
+  .v-combobox-option {
+    /* Taille : `--control-*` héritées du panneau, qui porte `v-control`
        (styles/control-size.css) ; les icônes suivent par le même héritage.
        Typo composite comme MenuItem : taille de l'échelle, leading `body-md`
        (ratio unitless) et poids regular. */
@@ -99,25 +99,25 @@ function onClick() {
 
   /* `min-inline-size: 0` : sans lui le minimum automatique du flex item
      empêcherait un libellé long de se comprimer. */
-  .ds-combobox-option-label {
+  .v-combobox-option-label {
     flex: 1;
     min-inline-size: 0;
   }
 
   /* La surbrillance vient du survol ou de `active` (le focus ne vient jamais
      ici : il reste dans le champ). */
-  .ds-combobox-option:hover:not([aria-disabled='true']),
-  .ds-combobox-option[data-active] {
+  .v-combobox-option:hover:not([aria-disabled='true']),
+  .v-combobox-option[data-active] {
     background: var(--vectis-color-surface-muted);
     outline: none;
   }
 
-  .ds-combobox-option[aria-selected='true'] {
+  .v-combobox-option[aria-selected='true'] {
     color: var(--vectis-color-accent-text);
   }
 
   /* pas de `disabled` natif ici (l'option reste dans l'arbre a11y du champ) */
-  .ds-combobox-option[aria-disabled='true'] {
+  .v-combobox-option[aria-disabled='true'] {
     background: transparent;
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;

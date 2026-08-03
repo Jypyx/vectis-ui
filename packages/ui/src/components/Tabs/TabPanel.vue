@@ -39,7 +39,7 @@ watchEffect(() => {
 <template>
   <div
     :id="panelId"
-    class="ds-tabs-panel"
+    class="v-tabs-panel"
     role="tabpanel"
     :aria-labelledby="tabId"
     tabindex="0"
@@ -50,19 +50,19 @@ watchEffect(() => {
 </template>
 
 <style>
-@layer ds.components {
+@layer vectis.components {
   /*
    * Garde-fou : [hidden] ne vient que de la feuille UA, que la moindre
    * déclaration `display` d'auteur écrase — y compris un style consommateur
    * non layerisé. Spécificité (0,2,0), et surtout pas d'!important : Tabs
    * resterait sinon le seul composant du DS impossible à surcharger. Pour
-   * poser un display sur le panneau, cibler .ds-tabs-panel:not([hidden]).
+   * poser un display sur le panneau, cibler .v-tabs-panel:not([hidden]).
    */
-  .ds-tabs-panel[hidden] {
+  .v-tabs-panel[hidden] {
     display: none;
   }
 
-  .ds-tabs-panel:focus-visible {
+  .v-tabs-panel:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }

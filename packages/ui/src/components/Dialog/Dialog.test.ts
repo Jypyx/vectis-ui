@@ -37,7 +37,7 @@ function renderHarness(props: Record<string, unknown> = {}, slots = '') {
     `,
   })
   const utils = render(Harness)
-  const getDialog = () => utils.container.querySelector('.ds-dialog') as HTMLDialogElement | null
+  const getDialog = () => utils.container.querySelector('.v-dialog') as HTMLDialogElement | null
   return { open, getDialog, ...utils }
 }
 
@@ -134,9 +134,9 @@ describe('Dialog', () => {
   })
 
   it('le footer n’est rendu que si le slot #footer est fourni', async () => {
-    expect((await openHarness()).dialog.querySelector('.ds-dialog-footer')).toBeNull()
+    expect((await openHarness()).dialog.querySelector('.v-dialog-footer')).toBeNull()
     const withFooter = await openHarness({}, '<template #footer><button>OK</button></template>')
-    expect(withFooter.dialog.querySelector('.ds-dialog-footer')).not.toBeNull()
+    expect(withFooter.dialog.querySelector('.v-dialog-footer')).not.toBeNull()
   })
 
   it('les attributs de fallthrough atterrissent sur le <dialog>', async () => {
