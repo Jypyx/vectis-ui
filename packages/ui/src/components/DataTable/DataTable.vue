@@ -15,6 +15,7 @@ import Spinner from '../Spinner/Spinner.vue'
 import Typography from '../Typography/Typography.vue'
 
 import { toggleValue } from '../../utils/array'
+import { cssSize } from '../../utils/css'
 import { isDev } from '../../utils/env'
 import { clamp } from '../../utils/number'
 import { normalizeText } from '../../utils/text'
@@ -401,9 +402,7 @@ const rangeText = computed(() => {
 // souple reste accessible au consommateur (`style="max-block-size: …"`), la
 // racine étant une colonne flex dont le scroller peut se comprimer.
 const heightStyle = computed<StyleValue | undefined>(() =>
-  props.height !== undefined
-    ? { blockSize: typeof props.height === 'number' ? `${props.height}px` : props.height }
-    : undefined,
+  props.height !== undefined ? { blockSize: cssSize(props.height) } : undefined,
 )
 </script>
 

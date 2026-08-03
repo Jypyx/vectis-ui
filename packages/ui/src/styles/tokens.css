@@ -122,6 +122,7 @@
     --ds-color-surface-overlay: var(--ds-color-white);
     --ds-color-surface-sunken: var(--ds-color-neutral-50);
     --ds-color-surface-inverse: var(--ds-color-neutral-900);
+    --ds-color-surface-skeleton: var(--ds-color-neutral-200);
     --ds-color-text-on-inverse: var(--ds-color-white);
     --ds-color-text: var(--ds-color-neutral-900);
     --ds-color-text-muted: var(--ds-color-neutral-600);
@@ -236,6 +237,7 @@
     --ds-control-size-progress-linear-length: 10rem;
     --ds-control-size-progress-circular-diameter: 3rem;
     --ds-control-size-progress-circular-thickness: 0.25rem;
+    --ds-control-size-skeleton-surface: 6rem;
     --ds-control-size-toast-width: 22rem;
     --ds-control-size-badge-h: 1.25rem;
     --ds-control-size-badge-dot: 0.625rem;
@@ -266,6 +268,7 @@
     --ds-color-surface-overlay: var(--ds-color-white);
     --ds-color-surface-sunken: var(--ds-color-neutral-50);
     --ds-color-surface-inverse: var(--ds-color-neutral-900);
+    --ds-color-surface-skeleton: var(--ds-color-neutral-200);
     --ds-color-text-on-inverse: var(--ds-color-white);
     --ds-color-text: var(--ds-color-neutral-900);
     --ds-color-text-muted: var(--ds-color-neutral-600);
@@ -380,6 +383,7 @@
     --ds-control-size-progress-linear-length: 10rem;
     --ds-control-size-progress-circular-diameter: 3rem;
     --ds-control-size-progress-circular-thickness: 0.25rem;
+    --ds-control-size-skeleton-surface: 6rem;
     --ds-control-size-toast-width: 22rem;
     --ds-control-size-badge-h: 1.25rem;
     --ds-control-size-badge-dot: 0.625rem;
@@ -409,6 +413,7 @@
     --ds-color-surface-overlay: var(--ds-color-neutral-900);
     --ds-color-surface-sunken: oklch(11% 0.006 260);
     --ds-color-surface-inverse: var(--ds-color-neutral-800);
+    --ds-color-surface-skeleton: var(--ds-color-neutral-800);
     --ds-color-text-on-inverse: var(--ds-color-neutral-50);
     --ds-color-text: var(--ds-color-neutral-50);
     --ds-color-text-muted: var(--ds-color-neutral-400);
