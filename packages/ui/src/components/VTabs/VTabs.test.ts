@@ -7,16 +7,16 @@ import VTabPanel from './VTabPanel.vue'
 import VTabs from './VTabs.vue'
 
 /**
- * Harnais : le v-model doit être vivant (sans ref locale, cliquer un onglet ne
- * changerait rien) et la ref est renvoyée pour asserter la valeur émise.
+ * Harness: the v-model must be live (without a local ref, clicking a tab would
+ * change nothing) and the ref is returned so the emitted value can be asserted.
  */
 function mount(
   options: {
-    /** Attributs bruts posés sur <VTabs>. */
+    /** Raw attributes set on <VTabs>. */
     tabsAttrs?: string
-    /** Corps du slot par défaut ; par défaut trois onglets a/b/c. */
+    /** Body of the default slot; three a/b/c tabs by default. */
     tabs?: string
-    /** `true` rend trois panneaux a/b/c ; une chaîne remplace leur contenu. */
+    /** `true` renders three a/b/c panels; a string replaces their content. */
     panels?: boolean | string
     initial?: string | number
   } = {},
@@ -54,11 +54,11 @@ function mount(
 const tabsOf = (container: Element) => [...container.querySelectorAll<HTMLElement>('[role="tab"]')]
 
 describe('VTabs', () => {
-  describe('accessibilité', () => {
-    it('rend une tablist nommée et des onglets liés à leurs panneaux', () => {
+  describe('accessibility', () => {
+    it('renders a named tablist and tabs linked to their panels', () => {
       const { container } = mount({ panels: true })
       const list = container.querySelector('[role="tablist"]')
-      expect(list?.getAttribute('aria-label')).toBe('Onglets')
+      expect(list?.getAttribute('aria-label')).toBe('Tabs')
 
       const [first, second] = tabsOf(container)
       expect(first?.getAttribute('aria-selected')).toBe('true')
@@ -71,7 +71,7 @@ describe('VTabs', () => {
       expect(panels[0]?.id).toBeTruthy()
     })
 
-    it('sans slot #panels, aucun aria-controls ne pointe dans le vide', () => {
+    it('without a #panels slot, no aria-controls points at nothing', () => {
       const { container } = mount()
       expect(container.querySelector('[role="tabpanel"]')).toBeNull()
       for (const tab of tabsOf(container)) {
@@ -79,7 +79,7 @@ describe('VTabs', () => {
       }
     })
 
-    it('aria-orientation posé en vertical seulement', () => {
+    it('aria-orientation set in vertical mode only', () => {
       const horizontal = mount()
       expect(
         horizontal.container.querySelector('[role="tablist"]')?.hasAttribute('aria-orientation'),
@@ -92,24 +92,24 @@ describe('VTabs', () => {
       )
     })
 
-    it("les ids sont assainis : aria-controls est une liste d'IDREF", () => {
+    it('the ids are sanitized: aria-controls is a list of IDREFs', () => {
       const { container } = mount({
         initial: 'mon onglet',
         tabs: `<VTab value="mon onglet" label="Un" />`,
         panels: false,
       })
-      // le panneau vient du même dérivateur : on vérifie l'onglet, sans blanc
+      // the panel comes from the same deriver: check the tab, with no blank
       expect(container.querySelector('[role="tab"]')?.id).not.toContain(' ')
     })
 
-    it('roving tabindex : seul l’onglet actif est dans l’ordre de tabulation', () => {
+    it('roving tabindex: only the active tab is in the tab order', () => {
       const { container } = mount()
       expect(tabsOf(container).map((el) => el.getAttribute('tabindex'))).toEqual(['0', '-1', '-1'])
     })
   })
 
   describe('v-model', () => {
-    it('un clic sélectionne l’onglet', async () => {
+    it('a click selects the tab', async () => {
       const { container, model } = mount()
       await fireEvent.click(tabsOf(container)[1] as HTMLElement)
       expect(model.value).toBe('b')
@@ -120,7 +120,7 @@ describe('VTabs', () => {
       ])
     })
 
-    it('une valeur ne correspondant à aucun onglet ne sélectionne rien', () => {
+    it('a value matching no tab selects nothing', () => {
       const { container } = mount({ initial: 'inconnu' })
       for (const tab of tabsOf(container)) {
         expect(tab.getAttribute('aria-selected')).toBe('false')
@@ -128,8 +128,8 @@ describe('VTabs', () => {
     })
   })
 
-  describe('navigation clavier', () => {
-    it('les flèches déplacent le focus sans changer la sélection (activation manuelle)', async () => {
+  describe('keyboard navigation', () => {
+    it('the arrows move focus without changing the selection (manual activation)', async () => {
       const { container, model } = mount()
       const tabs = tabsOf(container)
       tabs[0]?.focus()
@@ -151,7 +151,7 @@ describe('VTabs', () => {
       expect(document.activeElement).toBe(tabs[0])
     })
 
-    it('en vertical, ce sont les flèches haut/bas', async () => {
+    it('in vertical mode, it is the up/down arrows', async () => {
       const { container } = mount({ tabsAttrs: 'orientation="vertical"' })
       const tabs = tabsOf(container)
       tabs[0]?.focus()
@@ -166,7 +166,7 @@ describe('VTabs', () => {
       expect(document.activeElement).toBe(tabs[0])
     })
 
-    it('activation automatique : la sélection suit le focus', async () => {
+    it('automatic activation: the selection follows focus', async () => {
       const { container, model } = mount({ tabsAttrs: 'activation="automatic"' })
       tabsOf(container)[1]?.focus()
       await nextTick()
@@ -174,18 +174,18 @@ describe('VTabs', () => {
     })
   })
 
-  describe('onglet désactivé', () => {
+  describe('disabled tab', () => {
     const tabs = `<VTab value="a" label="Un" />
                   <VTab value="b" label="Deux" disabled />
                   <VTab value="c" label="Trois" />`
 
-    it('rend un <button disabled> (les états viennent de VButton)', () => {
+    it('renders a <button disabled> (the states come from VButton)', () => {
       const { container } = mount({ tabs })
       const [, second] = tabsOf(container) as HTMLButtonElement[]
       expect(second?.disabled).toBe(true)
     })
 
-    it('est sauté par les flèches', async () => {
+    it('is skipped by the arrows', async () => {
       const { container } = mount({ tabs })
       const all = tabsOf(container)
       all[0]?.focus()
@@ -194,8 +194,8 @@ describe('VTabs', () => {
     })
   })
 
-  describe('panneaux', () => {
-    it('seul le panneau actif est visible, les autres portent hidden', async () => {
+  describe('panels', () => {
+    it('only the active panel is visible, the others carry hidden', async () => {
       const { container, model } = mount({ panels: true })
       const panels = [...container.querySelectorAll<HTMLElement>('[role="tabpanel"]')]
       expect(panels.map((el) => el.hidden)).toEqual([false, true, true])
@@ -205,12 +205,12 @@ describe('VTabs', () => {
       expect(panels.map((el) => el.hidden)).toEqual([true, true, false])
     })
 
-    it('le contenu des panneaux inactifs reste monté (hidden, pas v-if)', () => {
+    it('the content of inactive panels stays mounted (hidden, not v-if)', () => {
       const { container } = mount({ panels: true })
       expect(container.textContent).toContain('Contenu B')
     })
 
-    it('lazy : le contenu n’est monté qu’au premier affichage, puis conservé', async () => {
+    it('lazy: the content is only mounted on first display, then kept', async () => {
       const { container, model } = mount({
         panels: `<VTabPanel value="a">Contenu A</VTabPanel>
                  <VTabPanel value="b" lazy>Contenu B</VTabPanel>
@@ -228,8 +228,8 @@ describe('VTabs', () => {
     })
   })
 
-  describe('contenu et fallthrough', () => {
-    it('icône seule : marqueur data-icon-only, aucun conteneur de libellé', () => {
+  describe('content and fallthrough', () => {
+    it('icon only: a data-icon-only marker, no label container', () => {
       const { container } = mount({
         tabs: `<VTab value="a" icon="home" aria-label="Accueil" />`,
       })
@@ -239,14 +239,14 @@ describe('VTabs', () => {
       expect(tab?.querySelector('.v-tab-label')).toBeNull()
     })
 
-    it('un libellé ou un slot annule le mode icône seule', () => {
+    it('a label or a slot cancels icon-only mode', () => {
       const { container } = mount({ tabs: `<VTab value="a" icon="home" label="Accueil" />` })
       const tab = tabsOf(container)[0]
       expect(tab?.hasAttribute('data-icon-only')).toBe(false)
       expect(tab?.querySelector('.v-tab-label')?.textContent).toBe('Accueil')
     })
 
-    it('pattern wrapper-root : class sur la racine, le reste sur la tablist', () => {
+    it('wrapper-root pattern: class on the root, the rest on the tablist', () => {
       const { container } = mount({ tabsAttrs: 'class="custom" data-testid="barre"' })
       const root = container.querySelector('.v-tabs')
       const list = container.querySelector('[role="tablist"]')
@@ -255,21 +255,21 @@ describe('VTabs', () => {
       expect(list?.getAttribute('data-testid')).toBe('barre')
     })
 
-    it('un aria-label du consommateur prime sur la prop label', () => {
+    it('a consumer aria-label wins over the label prop', () => {
       const { container } = mount({ tabsAttrs: 'aria-label="Sections"' })
       expect(container.querySelector('[role="tablist"]')?.getAttribute('aria-label')).toBe(
         'Sections',
       )
     })
 
-    it('un aria-labelledby retire l’aria-label par défaut', () => {
+    it('an aria-labelledby removes the default aria-label', () => {
       const { container } = mount({ tabsAttrs: 'aria-labelledby="titre"' })
       const list = container.querySelector('[role="tablist"]')
       expect(list?.hasAttribute('aria-label')).toBe(false)
       expect(list?.getAttribute('aria-labelledby')).toBe('titre')
     })
 
-    it('l’onglet reste un .v-button : la classe est fusionnée, pas remplacée', () => {
+    it('the tab stays a .v-button: the class is merged, not replaced', () => {
       const { container } = mount()
       const tab = tabsOf(container)[0]
       expect(tab?.classList.contains('v-button')).toBe(true)
@@ -277,8 +277,8 @@ describe('VTabs', () => {
     })
   })
 
-  describe('variantes', () => {
-    it('variant : data-variant posé sur la racine, flat par défaut', () => {
+  describe('variants', () => {
+    it('variant: data-variant set on the root, flat by default', () => {
       const variantOf = (tabsAttrs?: string) =>
         mount({ tabsAttrs }).container.querySelector('.v-tabs')?.getAttribute('data-variant')
       expect(variantOf()).toBe('flat')
@@ -287,11 +287,11 @@ describe('VTabs', () => {
     })
 
     /*
-     * Seule vraie logique de l'axe (tout le reste est du CSS, hors de portée de
-     * jsdom) : `outlined` est `flat` habillé, il ne surélève donc pas l'onglet
-     * actif — dans une carte, c'est le cadre qui porte l'élévation.
+     * The only real logic on this axis (everything else is CSS, out of jsdom's
+     * reach): `outlined` is a decorated `flat`, so it does not raise the active tab
+     * — inside a card, the frame is what carries the elevation.
      */
-    it('seul `inset` surélève l’onglet actif (mapping vers la variante de VButton)', () => {
+    it("only `inset` raises the active tab (mapping to VButton's variant)", () => {
       const activeVariantOf = (tabsAttrs?: string) =>
         tabsOf(mount({ tabsAttrs }).container)[0]?.getAttribute('data-variant')
       expect(activeVariantOf()).toBe('ghost')
@@ -300,18 +300,18 @@ describe('VTabs', () => {
     })
   })
 
-  describe('boutons de défilement', () => {
-    it('absents par défaut', () => {
+  describe('scroll buttons', () => {
+    it('absent by default', () => {
       const { container } = mount()
       expect(container.querySelector('.v-tabs-scroll')).toBeNull()
       expect(container.querySelector('.v-tabs-sentinel')).toBeNull()
     })
 
-    it('rendus et désactivés tant que les butées ne sont pas mesurées', () => {
+    it('rendered and disabled until the ends are measured', () => {
       const { container } = mount({ tabsAttrs: 'scroll-buttons' })
       const controls = [...container.querySelectorAll<HTMLButtonElement>('.v-tabs-scroll')]
       expect(controls).toHaveLength(2)
-      // IntersectionObserver n'existe pas en jsdom : l'état sûr est « en butée »
+      // IntersectionObserver does not exist in jsdom: the safe state is "at the end"
       expect(controls.every((el) => el.disabled)).toBe(true)
       expect(container.querySelectorAll('.v-tabs-sentinel')).toHaveLength(2)
     })

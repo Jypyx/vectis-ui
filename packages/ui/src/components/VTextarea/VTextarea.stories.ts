@@ -2,10 +2,64 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VTextarea from './VTextarea.vue'
 
+const t = storyText({
+  en: {
+    yourMessage: 'Your message…',
+    heightFollows: 'The height follows the content.\nAdd some lines…',
+    autoGrowMessage: 'Auto-grow message',
+    bioHint: 'Introduce yourself in a few words.',
+    bioValue: 'Vue developer in Lyon.',
+    tooLong: 'far too long a value',
+    draft: 'draft',
+    generation: 'Generation',
+    writing: 'Writing…',
+    disabledField: 'Disabled field',
+    allGrey: 'Everything goes grey, with no opacity.',
+    terms: 'Terms',
+    readOnlyContent: 'Read-only content, not editable.',
+    vModelDemo: 'v-model demo',
+    hello: 'Hello',
+    overLimit: 'A title that goes over the allowed limit',
+    journalEntry: 'Entry of 22 July: all is well.',
+    softHint: 'The limit is soft: exceeding it puts the field into error.',
+    autoGrowNote: 'Auto-grow note',
+    writeAndGrow: 'Write, and the field grows…',
+    archive: 'Archive',
+    disabled: 'Disabled',
+    title: 'Title',
+  },
+  fr: {
+    yourMessage: 'Votre message…',
+    heightFollows: 'La hauteur suit le contenu.\nAjoutez des lignes…',
+    autoGrowMessage: 'Message auto-grow',
+    bioHint: 'Présentez-vous en quelques mots.',
+    bioValue: 'Développeuse Vue à Lyon.',
+    tooLong: 'beaucoup trop long',
+    draft: 'brouillon',
+    generation: 'Génération',
+    writing: 'Rédaction en cours…',
+    disabledField: 'Champ désactivé',
+    allGrey: 'Tout passe en gris, sans opacité.',
+    terms: 'Conditions',
+    readOnlyContent: 'Contenu en lecture seule, non modifiable.',
+    vModelDemo: 'Démo v-model',
+    hello: 'Bonjour',
+    overLimit: 'Un titre qui dépasse la limite autorisée',
+    journalEntry: 'Entrée du 22 juillet : tout va bien.',
+    softHint: 'La limite est souple : le dépassement passe le champ en erreur.',
+    autoGrowNote: 'Note auto-grow',
+    writeAndGrow: 'Écrivez, le champ grandit…',
+    archive: 'Archive',
+    disabled: 'Désactivé',
+    title: 'Titre',
+  },
+})
+
 const meta = {
-  title: 'Composants/Textarea',
+  title: 'Components/Textarea',
   component: VTextarea,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
@@ -18,9 +72,9 @@ const meta = {
   },
   render: (args) => ({
     components: { VTextarea },
-    setup: () => ({ args, value: ref('') }),
+    setup: () => ({ args, value: ref(''), t }),
     template:
-      '<VTextarea v-bind="args" v-model="value" placeholder="Votre message…" aria-label="Message" style="width: 320px" />',
+      '<VTextarea v-bind="args" v-model="value" :placeholder="t.yourMessage" aria-label="Message" style="width: 320px" />',
   }),
 } satisfies Meta<typeof VTextarea>
 
@@ -33,13 +87,13 @@ export const AutoGrow: Story = {
   args: { autoGrow: true },
   render: (args) => ({
     components: { VTextarea },
-    setup: () => ({ args, value: ref('La hauteur suit le contenu.\nAjoutez des lignes…') }),
+    setup: () => ({ args, value: ref(t.value.heightFollows), t }),
     template:
-      '<VTextarea v-bind="args" v-model="value" aria-label="Message auto-grow" style="width: 320px" />',
+      '<VTextarea v-bind="args" v-model="value" :aria-label="t.autoGrowMessage" style="width: 320px" />',
   }),
 }
 
-export const Tailles: Story = {
+export const Sizes: Story = {
   render: () => ({
     components: { VTextarea },
     template: `
@@ -52,7 +106,7 @@ export const Tailles: Story = {
   }),
 }
 
-/** Hauteur minimale réduite de 4px, padding/typo/icônes inchangés (comme VButton). */
+/** Minimum height reduced by 4px, padding/type/icons unchanged (as in VButton). */
 export const Compact: Story = {
   render: () => ({
     components: { VTextarea },
@@ -65,34 +119,34 @@ export const Compact: Story = {
   }),
 }
 
-/** Compteur sous le champ à droite, sur la même ligne que le hint. */
-export const LabelHintCompteur: Story = {
+/** Counter under the field on the right, on the same line as the hint. */
+export const LabelHintCounter: Story = {
   args: {
     label: 'Bio',
-    hint: 'Présentez-vous en quelques mots.',
+    hint: 'Introduce yourself in a few words.',
     counter: true,
     maxlength: 200,
   },
   render: (args) => ({
     components: { VTextarea },
-    setup: () => ({ args, value: ref('Développeuse Vue à Lyon.') }),
+    setup: () => ({ args, value: ref('Vue developer in Lyon.') }),
     template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const textarea = canvas.getByLabelText('Bio')
-    const hint = canvas.getByText('Présentez-vous en quelques mots.')
+    const hint = canvas.getByText('Introduce yourself in a few words.')
     await expect(textarea.getAttribute('aria-describedby')).toContain(hint.id)
-    await expect(canvas.getByText('24/200')).toBeInTheDocument()
+    await expect(canvas.getByText('22/200')).toBeInTheDocument()
   },
 }
 
 /**
- * Limite souple : la saisie dépasse, le champ passe en erreur via la
- * validation native (setCustomValidity → `:user-invalid` après interaction).
+ * Soft limit: input goes over and the field enters error through native validation
+ * (setCustomValidity → `:user-invalid` after interaction).
  */
-export const CompteurSoft: Story = {
-  args: { counter: true, maxlength: 10, softLimit: true, label: 'Titre' },
+export const SoftCounter: Story = {
+  args: { counter: true, maxlength: 10, softLimit: true, label: 'Title' },
   render: (args) => ({
     components: { VTextarea },
     setup: () => ({ args, value: ref('') }),
@@ -100,12 +154,12 @@ export const CompteurSoft: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const textarea = canvas.getByLabelText('Titre') as HTMLTextAreaElement
-    await userEvent.type(textarea, 'beaucoup trop long')
-    await waitFor(() => expect(textarea.value).toBe('beaucoup trop long'))
-    await expect(canvas.getByText('18/10')).toHaveAttribute('data-over')
-    // validité native : setCustomValidity a invalidé le champ (on ne peut pas
-    // asserter :user-invalid, qui exige une interaction *trusted*)
+    const textarea = canvas.getByLabelText('Title') as HTMLTextAreaElement
+    await userEvent.type(textarea, 'far too long a value')
+    await waitFor(() => expect(textarea.value).toBe('far too long a value'))
+    await expect(canvas.getByText('21/10')).toHaveAttribute('data-over')
+    // native validity: setCustomValidity invalidated the field (:user-invalid
+    // cannot be asserted, as it requires a *trusted* interaction)
     await waitFor(() => expect(textarea.validity.customError).toBe(true))
     await expect(textarea.matches(':invalid')).toBe(true)
   },
@@ -121,8 +175,8 @@ export const Clearable: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const textarea = canvas.getByLabelText('Message') as HTMLTextAreaElement
-    await userEvent.type(textarea, 'brouillon')
-    const clear = await canvas.findByRole('button', { name: 'Effacer' })
+    await userEvent.type(textarea, 'draft')
+    const clear = await canvas.findByRole('button', { name: 'Clear' })
     await userEvent.click(clear)
     await waitFor(() => expect(textarea.value).toBe(''))
     await expect(textarea).toHaveFocus()
@@ -130,19 +184,19 @@ export const Clearable: Story = {
 }
 
 export const Loading: Story = {
-  args: { loading: true, iconEnd: 'edit', label: 'Génération' },
+  args: { loading: true, iconEnd: 'edit', label: 'Generation' },
   render: (args) => ({
     components: { VTextarea },
-    setup: () => ({ args, value: ref('Rédaction en cours…') }),
+    setup: () => ({ args, value: ref('Writing…') }),
     template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
   play: async ({ canvasElement }) => {
-    // le spinner remplace l'icône end
+    // the spinner replaces the end icon
     await expect(within(canvasElement).getByRole('status')).toBeInTheDocument()
   },
 }
 
-export const Invalide: Story = {
+export const Invalid: Story = {
   args: { invalid: true },
   play: async ({ canvasElement }) => {
     const textarea = within(canvasElement).getByRole('textbox')
@@ -154,21 +208,21 @@ export const Disabled: Story = {
   args: {
     disabled: true,
     label: 'Message',
-    hint: 'Champ désactivé',
+    hint: 'Disabled field',
     iconStart: 'chat',
   },
   render: (args) => ({
     components: { VTextarea },
-    setup: () => ({ args, value: ref('Tout passe en gris, sans opacité.') }),
+    setup: () => ({ args, value: ref('Everything goes grey, with no opacity.') }),
     template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
 }
 
 export const Readonly: Story = {
-  args: { readonly: true, label: 'Conditions', clearable: true },
+  args: { readonly: true, label: 'Terms', clearable: true },
   render: (args) => ({
     components: { VTextarea },
-    setup: () => ({ args, value: ref('Contenu en lecture seule, non modifiable.') }),
+    setup: () => ({ args, value: ref('Read-only content, not editable.') }),
     template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
 }
@@ -176,46 +230,47 @@ export const Readonly: Story = {
 export const VModel: Story = {
   render: () => ({
     components: { VTextarea },
-    setup: () => ({ value: ref('') }),
+    setup: () => ({ value: ref(''), t }),
     template: `
       <div style="display: grid; gap: 8px; width: 320px">
-        <VTextarea v-model="value" aria-label="Démo v-model" />
+        <VTextarea v-model="value" :aria-label="t.vModelDemo" />
         <output data-testid="mirror">{{ value }}</output>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.type(canvas.getByRole('textbox'), 'Bonjour')
-    await expect(canvas.getByTestId('mirror')).toHaveTextContent('Bonjour')
+    await userEvent.type(canvas.getByRole('textbox'), 'Hello')
+    await expect(canvas.getByTestId('mirror')).toHaveTextContent('Hello')
   },
 }
 
-/** Vitrine : combinaisons de props pour voir toutes les possibilités d'un coup. */
+/** Showcase: prop combinations, to see every possibility at once. */
 export const Showcase: Story = {
   render: () => ({
     components: { VTextarea },
     setup: () => ({
-      bio: ref('Développeuse Vue à Lyon.'),
-      titre: ref('Un titre qui dépasse la limite autorisée'),
+      bio: ref('Vue developer in Lyon.'),
+      heading: ref('A title that goes over the allowed limit'),
       note: ref(''),
-      journal: ref('Entrée du 22 juillet : tout va bien.'),
+      journal: ref('Entry of 22 July: all is well.'),
+      t,
     }),
     template: `
       <div style="display: grid; gap: 24px; width: 360px">
         <VTextarea
           v-model="bio"
           label="Bio"
-          hint="Présentez-vous en quelques mots."
+          :hint="t.bioHint"
           counter
           :maxlength="200"
           icon-start="person"
           clearable
         />
         <VTextarea
-          v-model="titre"
-          label="Titre"
-          hint="La limite est souple : le dépassement passe le champ en erreur."
+          v-model="heading"
+          :label="t.title"
+          :hint="t.softHint"
           counter
           :maxlength="20"
           soft-limit
@@ -223,17 +278,17 @@ export const Showcase: Story = {
         <VTextarea
           v-model="note"
           size="sm"
-          label="Note auto-grow"
-          hint="La hauteur suit le contenu."
+          :label="t.autoGrowNote"
+          hint="The height follows the content."
           auto-grow
-          placeholder="Écrivez, le champ grandit…"
+          :placeholder="t.writeAndGrow"
         />
-        <VTextarea v-model="journal" label="Génération" icon-end="edit" loading />
-        <VTextarea v-model="journal" label="Archive" readonly />
+        <VTextarea v-model="journal" :label="t.generation" icon-end="edit" loading />
+        <VTextarea v-model="journal" :label="t.archive" readonly />
         <VTextarea
           v-model="journal"
-          label="Désactivé"
-          hint="Tout passe en gris, sans opacité."
+          :label="t.disabled"
+          :hint="t.allGrey"
           icon-start="lock"
           disabled
         />

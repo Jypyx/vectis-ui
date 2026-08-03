@@ -2,11 +2,85 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
 import VInput from './VInput.vue'
 
+const t = storyText({
+  en: {
+    emailLabel: 'Email address',
+    emailHint: 'Used only for order confirmation.',
+    emailPlaceholder: 'you@example.com',
+    showPassword: 'Show the password',
+    password: 'Password',
+    nickname: 'Nickname',
+    title: 'Title',
+    postcode: 'Postcode',
+    fiveDigits: '5 digits',
+    searchLabel: 'Search',
+    metro: 'metro',
+    socks: 'socks',
+    disabledField: 'Disabled field',
+    reference: 'Reference',
+    longPlaceholder: 'An abnormally long placeholder that must be truncated cleanly',
+    longPlaceholderDemo: 'Long placeholder demo',
+    subscribe: 'Subscribe',
+    notAnEmail: 'not-an-email',
+    typeHere: 'Type here',
+    vModelDemo: 'v-model demo',
+    hello: 'Hello',
+    searchHint: 'Press Enter to run the search.',
+    searchPlaceholder: 'What are you looking for?',
+    nicknameHint: 'Visible to other members.',
+    softHint: 'The limit is soft: exceeding it puts the field into error.',
+    loading: 'Loading',
+    searching: 'Searching…',
+    compact: 'Compact',
+    reducedHeight: 'Height reduced by 4px',
+    disabled: 'Disabled',
+    greyHint: 'Everything goes grey, with no opacity.',
+    overLimit: 'A sentence that goes over the limit',
+    tooLong: 'far too long a value',
+  },
+  fr: {
+    emailLabel: 'Adresse email',
+    emailHint: 'Utilisée uniquement pour la confirmation de commande.',
+    emailPlaceholder: 'votre@email.fr',
+    showPassword: 'Afficher le mot de passe',
+    password: 'Mot de passe',
+    nickname: 'Pseudo',
+    title: 'Titre',
+    postcode: 'Code postal',
+    fiveDigits: '5 chiffres',
+    searchLabel: 'Recherche',
+    metro: 'métro',
+    socks: 'chaussettes',
+    disabledField: 'Champ désactivé',
+    reference: 'Référence',
+    longPlaceholder: 'Un placeholder anormalement long qui doit être tronqué proprement',
+    longPlaceholderDemo: 'Démo placeholder long',
+    subscribe: "S'abonner",
+    notAnEmail: 'pas-un-email',
+    typeHere: 'Tapez ici',
+    vModelDemo: 'Démo v-model',
+    hello: 'Bonjour',
+    searchHint: 'Appuyez sur Entrée pour lancer la recherche.',
+    searchPlaceholder: 'Que cherchez-vous ?',
+    nicknameHint: 'Visible par les autres membres.',
+    softHint: 'La limite est souple : le dépassement passe le champ en erreur.',
+    loading: 'Chargement',
+    searching: 'Recherche en cours…',
+    compact: 'Compact',
+    reducedHeight: 'Hauteur réduite de 4px',
+    disabled: 'Désactivé',
+    greyHint: 'Tout passe en gris, sans opacité.',
+    overLimit: 'Une phrase qui dépasse la limite',
+    tooLong: 'beaucoup trop long',
+  },
+})
+
 const meta = {
-  title: 'Composants/Input',
+  title: 'Components/Input',
   component: VInput,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
@@ -34,7 +108,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-export const Tailles: Story = {
+export const Sizes: Story = {
   render: () => ({
     components: { VInput },
     template: `
@@ -47,7 +121,7 @@ export const Tailles: Story = {
   }),
 }
 
-/** Hauteur réduite de 4px, padding/typo/icônes inchangés (comme VButton). */
+/** Height reduced by 4px, padding/type/icons unchanged (as in VButton). */
 export const Compact: Story = {
   render: () => ({
     components: { VInput },
@@ -61,55 +135,55 @@ export const Compact: Story = {
   }),
 }
 
-export const LabelEtHint: Story = {
+export const LabelAndHint: Story = {
   args: {
-    label: 'Adresse email',
-    hint: 'Utilisée uniquement pour la confirmation de commande.',
+    label: 'Email address',
+    hint: 'Used only for order confirmation.',
   },
   render: (args) => ({
     components: { VInput },
-    setup: () => ({ args, value: ref('') }),
-    template: '<VInput v-bind="args" v-model="value" placeholder="votre@email.fr" />',
+    setup: () => ({ args, value: ref(''), t }),
+    template: '<VInput v-bind="args" v-model="value" :placeholder="t.emailPlaceholder" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // l'association for/id rend le champ requêtable par son label
+    // the for/id association makes the field queryable by its label
     const input = canvas.getByLabelText('Adresse email')
-    const hint = canvas.getByText('Utilisée uniquement pour la confirmation de commande.')
+    const hint = canvas.getByText('Used only for order confirmation.')
     await expect(input.getAttribute('aria-describedby')).toContain(hint.id)
   },
 }
 
-export const Icones: Story = {
+export const Icons: Story = {
   args: { iconStart: 'search', iconEnd: 'tune' },
   play: async ({ canvasElement }) => {
-    // icônes décoratives : aucun bouton dans le champ
+    // decorative icons: no button inside the field
     await expect(within(canvasElement).queryByRole('button')).toBeNull()
   },
 }
 
-export const IconesCliquables: Story = {
+export const ClickableIcons: Story = {
   args: {
     iconEnd: 'visibility',
-    iconEndLabel: 'Afficher le mot de passe',
+    iconEndLabel: 'Show the password',
     'onClick:icon-end': fn(),
   },
   render: (args) => ({
     components: { VInput },
-    setup: () => ({ args, value: ref('') }),
-    template: '<VInput v-bind="args" v-model="value" type="password" aria-label="Mot de passe" />',
+    setup: () => ({ args, value: ref(''), t }),
+    template: '<VInput v-bind="args" v-model="value" type="password" :aria-label="t.password" />',
   }),
   play: async ({ canvasElement, args }) => {
     const button = within(canvasElement).getByRole('button', {
-      name: 'Afficher le mot de passe',
+      name: 'Show the password',
     })
     await userEvent.click(button)
     await expect(args['onClick:icon-end']).toHaveBeenCalled()
   },
 }
 
-export const Compteur: Story = {
-  args: { counter: true, maxlength: 20, label: 'Pseudo' },
+export const Counter: Story = {
+  args: { counter: true, maxlength: 20, label: 'Nickname' },
   render: (args) => ({
     components: { VInput },
     setup: () => ({ args, value: ref('') }),
@@ -117,8 +191,8 @@ export const Compteur: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const input = canvas.getByLabelText('Pseudo') as HTMLInputElement
-    // maxlength natif : la saisie est tronquée à 20
+    const input = canvas.getByLabelText('Nickname') as HTMLInputElement
+    // native maxlength: input is truncated at 20
     await userEvent.type(input, 'abcdefghijklmnopqrstuvwxy')
     await waitFor(() => expect(input.value).toHaveLength(20))
     await expect(canvas.getByText('20/20')).toBeInTheDocument()
@@ -126,11 +200,11 @@ export const Compteur: Story = {
 }
 
 /**
- * Limite souple : la saisie dépasse, le champ passe en erreur via la
- * validation native (setCustomValidity → `:user-invalid` après interaction).
+ * Soft limit: input goes over and the field enters error through native validation
+ * (setCustomValidity → `:user-invalid` after interaction).
  */
-export const CompteurSoft: Story = {
-  args: { counter: true, maxlength: 10, softLimit: true, label: 'Titre' },
+export const SoftCounter: Story = {
+  args: { counter: true, maxlength: 10, softLimit: true, label: 'Title' },
   render: (args) => ({
     components: { VInput },
     setup: () => ({ args, value: ref('') }),
@@ -138,48 +212,48 @@ export const CompteurSoft: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const input = canvas.getByLabelText('Titre') as HTMLInputElement
-    await userEvent.type(input, 'beaucoup trop long')
-    // la saisie n'est pas tronquée, le compteur passe en dépassement
-    await waitFor(() => expect(input.value).toBe('beaucoup trop long'))
-    await expect(canvas.getByText('18/10')).toHaveAttribute('data-over')
-    // le dépassement invalide le champ via setCustomValidity. On asserte sur la
-    // validité native, pas sur :user-invalid : ce pseudo-état exige une
-    // interaction *trusted* que les événements synthétiques ne fournissent pas.
+    const input = canvas.getByLabelText('Title') as HTMLInputElement
+    await userEvent.type(input, 'far too long a value')
+    // the input is not truncated, the counter goes into overflow
+    await waitFor(() => expect(input.value).toBe('far too long a value'))
+    await expect(canvas.getByText('21/10')).toHaveAttribute('data-over')
+    // the overflow invalidates the field through setCustomValidity. Assert on
+    // native validity, not on :user-invalid: that pseudo-state requires a
+    // *trusted* interaction, which synthetic events do not provide.
     await waitFor(() => expect(input.validity.customError).toBe(true))
     await expect(input.matches(':invalid')).toBe(true)
   },
 }
 
-/** Le `pattern` reste l'attribut natif en fallthrough — zéro JS. */
+/** `pattern` stays the native attribute through fallthrough — zero JS. */
 export const Pattern: Story = {
   render: () => ({
     components: { VInput },
-    setup: () => ({ value: ref('') }),
+    setup: () => ({ value: ref(''), t }),
     template: `
       <VInput
         v-model="value"
-        label="Code postal"
-        hint="5 chiffres"
+        :label="t.postcode"
+        :hint="t.fiveDigits"
         pattern="[0-9]{5}"
       />
     `,
   }),
   play: async ({ canvasElement }) => {
-    const input = within(canvasElement).getByLabelText('Code postal') as HTMLInputElement
+    const input = within(canvasElement).getByLabelText('Postcode') as HTMLInputElement
     await userEvent.type(input, 'abc')
-    // validité native : patternMismatch (on ne peut pas asserter :user-invalid,
-    // qui exige une interaction *trusted* — cf. CompteurSoft)
+    // native validity: patternMismatch (:user-invalid cannot be asserted, as it
+    // requires a *trusted* interaction — see SoftCounter)
     await waitFor(() => expect(input.validity.patternMismatch).toBe(true))
     await expect(input.matches(':invalid')).toBe(true)
   },
 }
 
 export const Loading: Story = {
-  args: { loading: true, iconEnd: 'search', label: 'Recherche' },
+  args: { loading: true, iconEnd: 'search', label: 'Search' },
   render: (args) => ({
     components: { VInput },
-    setup: () => ({ args, value: ref('métro') }),
+    setup: () => ({ args, value: ref('metro') }),
     template: '<VInput v-bind="args" v-model="value" />',
   }),
   play: async ({ canvasElement }) => {
@@ -188,7 +262,7 @@ export const Loading: Story = {
 }
 
 export const Clearable: Story = {
-  args: { clearable: true, label: 'Recherche' },
+  args: { clearable: true, label: 'Search' },
   render: (args) => ({
     components: { VInput },
     setup: () => ({ args, value: ref('') }),
@@ -196,18 +270,18 @@ export const Clearable: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const input = canvas.getByLabelText('Recherche') as HTMLInputElement
-    await userEvent.type(input, 'chaussettes')
-    const clear = await canvas.findByRole('button', { name: 'Effacer' })
+    const input = canvas.getByLabelText('Search') as HTMLInputElement
+    await userEvent.type(input, 'socks')
+    const clear = await canvas.findByRole('button', { name: 'Clear' })
     await userEvent.click(clear)
     await waitFor(() => expect(input.value).toBe(''))
-    // le bouton disparaît et le focus revient au champ
-    await expect(canvas.queryByRole('button', { name: 'Effacer' })).toBeNull()
+    // the button disappears and focus returns to the field
+    await expect(canvas.queryByRole('button', { name: 'Clear' })).toBeNull()
     await expect(input).toHaveFocus()
   },
 }
 
-export const Invalide: Story = {
+export const Invalid: Story = {
   args: { invalid: true },
   play: async ({ canvasElement }) => {
     const input = within(canvasElement).getByRole('textbox')
@@ -219,18 +293,18 @@ export const Disabled: Story = {
   args: {
     disabled: true,
     label: 'Email',
-    hint: 'Champ désactivé',
+    hint: 'Disabled field',
     iconStart: 'mail',
   },
   render: (args) => ({
     components: { VInput },
-    setup: () => ({ args, value: ref('gris@partout.fr') }),
+    setup: () => ({ args, value: ref('grey@everywhere.com') }),
     template: '<VInput v-bind="args" v-model="value" />',
   }),
 }
 
 export const Readonly: Story = {
-  args: { readonly: true, label: 'Référence', clearable: true },
+  args: { readonly: true, label: 'Reference', clearable: true },
   render: (args) => ({
     components: { VInput },
     setup: () => ({ args, value: ref('CMD-2026-0042') }),
@@ -238,14 +312,15 @@ export const Readonly: Story = {
   }),
 }
 
-export const PlaceholderLong: Story = {
+export const LongPlaceholder: Story = {
   render: () => ({
     components: { VInput },
+    setup: () => ({ t }),
     template: `
       <div style="width: 200px">
         <VInput
-          placeholder="Un placeholder anormalement long qui doit être tronqué proprement"
-          aria-label="Démo placeholder long"
+          :placeholder="t.longPlaceholder"
+          :aria-label="t.longPlaceholderDemo"
         />
       </div>
     `,
@@ -253,26 +328,26 @@ export const PlaceholderLong: Story = {
 }
 
 /**
- * Validation native : `required` + soumission → le style d'erreur vient de
- * `:user-invalid`, sans le moindre JS de validation.
+ * Native validation: `required` + submission → the error styling comes from
+ * `:user-invalid`, with no validation JS at all.
  */
-export const ValidationNative: Story = {
+export const NativeValidation: Story = {
   render: () => ({
     components: { VInput, VButton },
-    setup: () => ({ email: ref('') }),
+    setup: () => ({ email: ref(''), t }),
     template: `
       <form novalidate="false" style="display: flex; gap: 8px; align-items: start" @submit.prevent>
-        <VInput v-model="email" type="email" required placeholder="votre@email.fr" aria-label="Email" />
-        <VButton type="submit">S'abonner</VButton>
+        <VInput v-model="email" type="email" required :placeholder="t.emailPlaceholder" aria-label="Email" />
+        <VButton type="submit">{{ t.subscribe }}</VButton>
       </form>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('textbox') as HTMLInputElement
-    // saisir une valeur invalide puis tenter de soumettre déclenche :user-invalid
-    await userEvent.type(input, 'pas-un-email')
-    await userEvent.click(canvas.getByRole('button', { name: "S'abonner" }))
+    // typing an invalid value then attempting to submit triggers :user-invalid
+    await userEvent.type(input, 'not-an-email')
+    await userEvent.click(canvas.getByRole('button', { name: 'Subscribe' }))
     await expect(input.validity.valid).toBe(false)
     await expect(input.matches(':user-invalid')).toBe(true)
   },
@@ -281,54 +356,55 @@ export const ValidationNative: Story = {
 export const VModel: Story = {
   render: () => ({
     components: { VInput },
-    setup: () => ({ value: ref('') }),
+    setup: () => ({ value: ref(''), t }),
     template: `
       <div style="display: grid; gap: 8px; width: 260px">
-        <VInput v-model="value" placeholder="Tapez ici" aria-label="Démo v-model" />
+        <VInput v-model="value" :placeholder="t.typeHere" :aria-label="t.vModelDemo" />
         <output data-testid="mirror">{{ value }}</output>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.type(canvas.getByRole('textbox'), 'Bonjour')
-    await expect(canvas.getByTestId('mirror')).toHaveTextContent('Bonjour')
+    await userEvent.type(canvas.getByRole('textbox'), 'Hello')
+    await expect(canvas.getByTestId('mirror')).toHaveTextContent('Hello')
   },
 }
 
-/** Vitrine : combinaisons de props pour voir toutes les possibilités d'un coup. */
+/** Showcase: prop combinations, to see every possibility at once. */
 export const Showcase: Story = {
   render: () => ({
     components: { VInput },
     setup: () => ({
       search: ref(''),
-      pseudo: ref('Xavier'),
-      bio: ref('Une phrase qui dépasse la limite'),
+      nickname: ref('Xavier'),
+      bio: ref('A sentence that goes over the limit'),
       password: ref('hunter2'),
       ref_: ref('CMD-2026-0042'),
       onSearch: () => {},
+      t,
     }),
     template: `
       <div style="display: grid; gap: 24px; width: 340px">
         <VInput
           v-model="search"
-          label="Recherche"
-          hint="Appuyez sur Entrée pour lancer la recherche."
+          :label="t.searchLabel"
+          :hint="t.searchHint"
           icon-start="search"
           clearable
-          placeholder="Que cherchez-vous ?"
+          :placeholder="t.searchPlaceholder"
         />
         <VInput
-          v-model="pseudo"
-          label="Pseudo"
-          hint="Visible par les autres membres."
+          v-model="nickname"
+          :label="t.nickname"
+          :hint="t.nicknameHint"
           counter
           :maxlength="20"
         />
         <VInput
           v-model="bio"
-          label="Titre"
-          hint="La limite est souple : le dépassement passe le champ en erreur."
+          :label="t.title"
+          :hint="t.softHint"
           counter
           :maxlength="20"
           soft-limit
@@ -336,33 +412,33 @@ export const Showcase: Story = {
         <VInput
           v-model="password"
           type="password"
-          label="Mot de passe"
+          :label="t.password"
           icon-start="lock"
           icon-end="visibility"
-          icon-end-label="Afficher le mot de passe"
+          :icon-end-label="t.showPassword"
           @click:icon-end="onSearch"
         />
         <VInput
           v-model="search"
           size="sm"
-          label="Chargement"
+          :label="t.loading"
           icon-end="search"
           loading
-          placeholder="Recherche en cours…"
+          :placeholder="t.searching"
         />
         <VInput
           v-model="search"
           compact
-          label="Compact"
+          :label="t.compact"
           icon-start="search"
           clearable
-          placeholder="Hauteur réduite de 4px"
+          :placeholder="t.reducedHeight"
         />
-        <VInput v-model="ref_" label="Référence" readonly icon-start="tag" />
+        <VInput v-model="ref_" :label="t.reference" readonly icon-start="tag" />
         <VInput
           v-model="ref_"
-          label="Désactivé"
-          hint="Tout passe en gris, sans opacité."
+          :label="t.disabled"
+          :hint="t.greyHint"
           icon-start="lock"
           disabled
         />

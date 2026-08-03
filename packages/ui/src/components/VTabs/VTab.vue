@@ -8,21 +8,21 @@ import type { IconSource } from '../VIcon/types'
 import { tabsKey } from './context'
 
 /**
- * Un onglet. C'est un `VButton` : tone, variante, taille, focus et
- * désactivation viennent de lui, seuls les attributs ARIA du pattern tabs sont
- * ajoutés (ils traversent le fallthrough de VButton jusqu'au <button> rendu).
+ * One tab. It IS a `VButton`: tone, variant, size, focus and disabling all come
+ * from it, and only the ARIA attributes of the tabs pattern are added (they travel
+ * through VButton's fallthrough to the rendered <button>).
  *
- * L'onglet reste rendu hors d'un `VTabs` (comme VAccordionItem hors VAccordion),
- * simplement jamais sélectionné.
+ * The tab still renders outside a `VTabs` (as VAccordionItem does outside
+ * VAccordion), simply never selected.
  */
 interface TabProps {
-  /** Identifie l'onglet et le `VTabPanel` correspondant. */
+  /** Identifies the tab and its matching `VTabPanel`. */
   value: string | number
-  /** Libellé visible ; le slot par défaut prime. */
+  /** Visible label; the default slot wins. */
   label?: string
-  /** Icône de début : nom, ou rendu explicite. */
+  /** Start icon: a name, or an explicit render. */
   icon?: IconSource
-  /** Onglet inerte : ni cliquable ni atteignable, gris par tokens. */
+  /** Inert tab: neither clickable nor reachable, greyed through tokens. */
   disabled?: boolean
 }
 
@@ -33,7 +33,7 @@ const props = withDefaults(defineProps<TabProps>(), {
 })
 
 defineSlots<{
-  /** Contenu libre de l'onglet (remplace `label`). */
+  /** Free content of the tab (replaces `label`). */
   default?(): unknown
 }>()
 
@@ -44,13 +44,13 @@ const selected = computed(() => tabs != null && tabs.value === props.value)
 const tabId = computed(() => tabs?.tabId(props.value))
 const panelId = computed(() => (tabs?.hasPanels ? tabs.panelId(props.value) : undefined))
 
-/** Aucun libellé visible : l'onglet se réduit à un carré, comme un VIconButton. */
+/** No visible label: the tab shrinks to a square, like a VIconButton. */
 const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.default)
 
 /*
- * Activation automatique (option APG) : la sélection suit le focus. Elle vit
- * ici et non dans le handler clavier de VTabs, qui devrait sinon faire transiter
- * la valeur par un attribut du DOM — et perdrait l'union `string | number`.
+ * Automatic activation (an APG option): selection follows focus. It lives here
+ * rather than in VTabs' keyboard handler, which would otherwise have to route the
+ * value through a DOM attribute — and would lose the `string | number` union.
  */
 function onFocus() {
   if (tabs?.activation === 'automatic' && !props.disabled) tabs.select(props.value)
@@ -77,8 +77,8 @@ function onFocus() {
     <template v-if="icon" #start>
       <VIcon v-bind="iconProps(icon)" />
     </template>
-    <!-- le libellé est enveloppé : `text-overflow` ne s'applique pas au texte
-         anonyme d'un conteneur flex, et `grow` doit pouvoir le tronquer -->
+    <!-- the label is wrapped: `text-overflow` does not apply to the anonymous text
+         of a flex container, and `grow` must be able to truncate it -->
     <span v-if="!iconOnly" class="v-tab-label"
       ><slot>{{ label }}</slot></span
     >
@@ -88,17 +88,17 @@ function onFocus() {
 <style>
 @layer vectis.components {
   /*
-   * Surcharges de VButton qualifiées par [data-size] (toujours rendu par
-   * VButton) : elles battent .v-button[data-variant='…'] quel que soit l'ordre
-   * du CSS bundlé — même hack de spécificité que .v-icon-button.
+   * VButton overrides qualified by [data-size] (always rendered by VButton): they
+   * beat .v-button[data-variant='…'] whatever the bundled CSS order — the same
+   * specificity trick as .v-icon-button.
    */
   .v-tab[data-size] {
-    /* ancre de l'indicateur ::after ; .v-button ne pose pas de position */
+    /* anchor for the ::after indicator; .v-button sets no position */
     position: relative;
     /*
-     * Jamais compressé : c'est CE QUI produit le débordement de la liste. Sans
-     * `flex: none`, les onglets rétréciraient jusqu'à leur taille min-content
-     * et le défilement ne se déclencherait jamais.
+     * Never compressed: this is WHAT produces the list's overflow. Without
+     * `flex: none`, the tabs would shrink to their min-content size and scrolling
+     * would never trigger.
      */
     flex: none;
     white-space: nowrap;
@@ -110,8 +110,8 @@ function onFocus() {
   }
 
   /*
-   * L'onglet vit dans un conteneur `overflow: auto` qui rognerait un
-   * outline-offset positif : anneau intérieur.
+   * The tab lives in an `overflow: auto` container that would crop a positive
+   * outline-offset: hence an inner ring.
    */
   .v-tab[data-size]:focus-visible {
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
@@ -127,32 +127,31 @@ function onFocus() {
     min-inline-size: 0;
   }
 
-  /* Rayon emboîté dans la piste creuse (rayon de surface moins son padding) */
+  /* Nested radius inside the hollow track (the surface radius minus its padding) */
   .v-tabs[data-variant='inset'] .v-tab[data-size] {
     border-radius: calc(var(--vectis-radius-surface) - var(--vectis-space-1));
   }
 
   /*
-   * Sur une piste, les onglets sont des SEGMENTS contigus et à angles droits :
-   * ce sont l'indicateur et la piste qui découpent la barre, pas la silhouette
-   * des boutons. Un rayon laisserait des angles clairs au-dessus du filet, et un
-   * écart couperait la rangée de surbrillances au survol. Le `gap` est retiré
-   * sur la liste et non ici (c'est elle qui le pose) ; celui de la barre reste,
-   * il sépare les boutons de défilement, pas les onglets.
+   * On a track, the tabs are contiguous SEGMENTS with square corners: it is the
+   * indicator and the track that carve the bar, not the buttons' silhouette. A
+   * radius would leave light corners above the rule, and a gap would cut the row of
+   * hover highlights. The `gap` is removed on the list rather than here (the list is
+   * what sets it); the bar's own gap stays, since it separates the scroll buttons,
+   * not the tabs.
    */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tab[data-size] {
     border-radius: 0;
   }
 
   /*
-   * Encadrée, la rangée reprend son rayon aux seules EXTRÉMITÉS — coutures
-   * internes carrées, idiome VButtonGroup, mais transposé sur le seul bord que la
-   * piste n'occupe pas (elle tient l'autre). Le rayon est celui du bouton et non
-   * celui de la carte : la rangée est en retrait du cadre par la gouttière, elle
-   * n'a pas sa découpe à épouser. `:first-of-type`/`:last-of-type` et non
-   * `:first-child`/`:last-child` — les sentinelles de butée du défilement sont
-   * les vrais premier et dernier enfants de la liste (ce sont des `span`, les
-   * onglets les seuls `button`).
+   * When framed, the row takes its radius back at the ENDS only — square internal
+   * seams, the VButtonGroup idiom, but transposed onto the one edge the track does
+   * not occupy (it holds the other). The radius is the button's, not the card's: the
+   * row is set back from the frame by the gutter, so it has no clip to follow.
+   * `:first-of-type`/`:last-of-type` and not `:first-child`/`:last-child` — the
+   * scroll end sentinels are the real first and last children of the list (they are
+   * `span`s, the tabs being the only `button`s).
    */
   .v-tabs[data-variant='outlined'] .v-tab[data-size]:first-of-type {
     border-start-start-radius: var(--vectis-radius-interactive);
@@ -162,16 +161,16 @@ function onFocus() {
     border-start-end-radius: var(--vectis-radius-interactive);
   }
 
-  /* vertical : la piste ayant migré au bord de fin, le bord libre est celui de
-     départ — les extrémités de la colonne y arrondissent leurs coins */
+  /* vertical: since the track migrated to the end edge, the free edge is the start
+     one — the column's ends round their corners there */
   .v-tabs[data-variant='outlined'][data-orientation='vertical'] .v-tab[data-size]:last-of-type {
     border-end-start-radius: var(--vectis-radius-interactive);
   }
 
   /*
-   * Indicateur des variantes `flat` et `outlined`. `currentColor` plutôt qu'une
-   * variable privée de VButton : il suit le tone de l'onglet actif ET le gris de
-   * l'état désactivé, sans couplage.
+   * Indicator of the `flat` and `outlined` variants. `currentColor` rather than a
+   * private VButton variable: it follows both the active tab's tone AND the grey of
+   * the disabled state, with no coupling.
    */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tab[data-size]::after {
     content: '';

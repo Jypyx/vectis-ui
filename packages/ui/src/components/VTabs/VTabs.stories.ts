@@ -2,13 +2,14 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VBadge from '../VBadge/VBadge.vue'
 import VTab from './VTab.vue'
 import VTabPanel from './VTabPanel.vue'
 import VTabs from './VTabs.vue'
 
-/** Jeu d'onglets assez long pour déborder d'un conteneur étroit. */
-const VILLES = [
+/** A tab set long enough to overflow a narrow container. */
+const CITIES = [
   'Paris',
   'Lyon',
   'Marseille',
@@ -23,8 +24,51 @@ const VILLES = [
   'Toulon',
 ]
 
+const t = storyText({
+  en: {
+    overviewPanel: 'Overview panel — variant',
+    detailsPanel: 'Details panel.',
+    historyPanel: 'History panel.',
+    settings: 'Settings',
+    messages: 'Messages',
+    textOnly: 'Text only',
+    textAndIcon: 'Text and icon',
+    activeOnly: 'The active panel is the only visible one; the others carry the native attribute',
+    andKeepState: 'and keep their state.',
+    keptInput: 'An entry kept from one tab to the next:',
+    lazyPanel: 'This panel is',
+    mountedOnFirst: ': its content was only mounted on its first display.',
+    seePrevious: 'See the previous tabs',
+    seeNext: 'See the next tabs',
+    singleTab: 'Single tab',
+    veryLongLabel: 'A particularly long tab label',
+    anotherEndless: 'Another equally endless label',
+    longHistory: 'A very long history that must be truncated',
+  },
+  fr: {
+    overviewPanel: 'Panneau « Aperçu » — variante',
+    detailsPanel: 'Panneau « Détails ».',
+    historyPanel: 'Panneau « Historique ».',
+    settings: 'Réglages',
+    messages: 'Messages',
+    textOnly: 'Texte seul',
+    textAndIcon: 'Texte et icône',
+    activeOnly: "Le panneau actif est le seul visible ; les autres portent l'attribut natif",
+    andKeepState: 'et gardent leur état.',
+    keptInput: "Une saisie conservée d'un onglet à l'autre :",
+    lazyPanel: 'Ce panneau est',
+    mountedOnFirst: " : son contenu n'a été monté qu'à son premier affichage.",
+    seePrevious: 'Voir les onglets précédents',
+    seeNext: 'Voir les onglets suivants',
+    singleTab: 'Onglet unique',
+    veryLongLabel: "Un libellé d'onglet particulièrement long",
+    anotherEndless: 'Un autre libellé tout aussi interminable',
+    longHistory: 'Un historique très long qui doit être tronqué',
+  },
+})
+
 const meta = {
-  title: 'Composants/Tabs',
+  title: 'Components/Tabs',
   component: VTabs,
   argTypes: {
     variant: { control: 'inline-radio', options: ['flat', 'outlined', 'inset'] },
@@ -48,15 +92,15 @@ const meta = {
     scrollButtons: false,
     activation: 'manual',
   },
-  // v-model vivant : sans ref locale, cliquer un onglet ne changerait rien.
+  // A live v-model: without a local ref, clicking a tab would change nothing.
   render: (args) => ({
     components: { VTabs, VTab, VTabPanel },
-    setup: () => ({ args, onglet: ref('apercu') }),
+    setup: () => ({ args, tab: ref('overview') }),
     template: `
-      <VTabs v-bind="args" v-model="onglet">
-        <VTab value="apercu" label="Aperçu" />
-        <VTab value="details" label="Détails" />
-        <VTab value="historique" label="Historique" />
+      <VTabs v-bind="args" v-model="tab">
+        <VTab value="overview" label="Overview" />
+        <VTab value="details" label="Details" />
+        <VTab value="history" label="History" />
       </VTabs>
     `,
   }),
@@ -68,15 +112,15 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(canvas.getByRole('tab', { name: 'Aperçu' })).toHaveAttribute(
+    await expect(canvas.getByRole('tab', { name: 'Overview' })).toHaveAttribute(
       'aria-selected',
       'true',
     )
 
-    await userEvent.click(canvas.getByRole('tab', { name: 'Détails' }))
+    await userEvent.click(canvas.getByRole('tab', { name: 'Details' }))
 
     await waitFor(async () => {
-      await expect(canvas.getByRole('tab', { name: 'Détails' })).toHaveAttribute(
+      await expect(canvas.getByRole('tab', { name: 'Details' })).toHaveAttribute(
         'aria-selected',
         'true',
       )
@@ -84,39 +128,40 @@ export const Default: Story = {
   },
 }
 
-/** Les trois habillages : `flat` (défaut), `outlined` (carte) et `inset` (piste creuse). */
-export const Variantes: Story = {
+/** The three decorations: `flat` (default), `outlined` (a card) and `inset` (a hollow track). */
+export const Variants: Story = {
   render: () => ({
     components: { VTabs, VTab, VTabPanel },
     setup: () => ({
       variants: ['flat', 'outlined', 'inset'],
-      onglets: ref({ flat: 'a', outlined: 'a', inset: 'a', seule: 'a' }),
+      tabs: ref({ flat: 'a', outlined: 'a', inset: 'a', bar: 'a' }),
+      t,
     }),
     /*
-     * Les panneaux sont rendus : c'est le composant ENTIER que `outlined`
-     * enferme dans une carte, et la piste de la barre y devient le filet qui les
-     * sépare. Aucun padding n'est posé sur les panneaux — c'est la gouttière du
-     * cadre qui les écarte en `outlined`, là où `flat` et `inset` les laissent à
-     * fleur, à la charge du consommateur. La dernière barre est le cas limite
-     * `outlined` sans slot #panels : plus rien à séparer, la piste s'efface.
+     * The panels are rendered: it is the WHOLE component that `outlined` encloses in
+     * a card, and the bar's track becomes the rule separating them. No padding is set
+     * on the panels — the frame's gutter is what spaces them out in `outlined`, where
+     * `flat` and `inset` leave them flush, at the consumer's charge. The last bar is
+     * the `outlined` edge case with no #panels slot: nothing left to separate, so the
+     * track fades away.
      */
     template: `
       <div style="display: grid; gap: 32px; width: 480px">
-        <VTabs v-for="v in variants" :key="v" :variant="v" v-model="onglets[v]">
-          <VTab value="a" label="Aperçu" />
-          <VTab value="b" label="Détails" />
-          <VTab value="c" label="Historique" />
+        <VTabs v-for="v in variants" :key="v" :variant="v" v-model="tabs[v]">
+          <VTab value="a" label="Overview" />
+          <VTab value="b" label="Details" />
+          <VTab value="c" label="History" />
           <template #panels>
-            <VTabPanel value="a">Panneau « Aperçu » — variante {{ v }}.</VTabPanel>
-            <VTabPanel value="b">Panneau « Détails ».</VTabPanel>
-            <VTabPanel value="c">Panneau « Historique ».</VTabPanel>
+            <VTabPanel value="a">{{ t.overviewPanel }} {{ v }}.</VTabPanel>
+            <VTabPanel value="b">{{ t.detailsPanel }}</VTabPanel>
+            <VTabPanel value="c">{{ t.historyPanel }}</VTabPanel>
           </template>
         </VTabs>
 
-        <VTabs variant="outlined" v-model="onglets.seule">
-          <VTab value="a" label="Aperçu" />
-          <VTab value="b" label="Détails" />
-          <VTab value="c" label="Historique" />
+        <VTabs variant="outlined" v-model="tabs.bar">
+          <VTab value="a" label="Overview" />
+          <VTab value="b" label="Details" />
+          <VTab value="c" label="History" />
         </VTabs>
       </div>
     `,
@@ -128,18 +173,18 @@ export const Tones: Story = {
     components: { VTabs, VTab },
     setup: () => ({
       tones: ['accent', 'neutral', 'success', 'warning', 'danger'],
-      // `outlined` rend les tones à l'identique de `flat` (le cadre est agnostique
-      // du tone) : l'ajouter ne ferait que doubler la planche.
+      // `outlined` renders the tones identically to `flat` (the frame is agnostic
+      // to the tone): adding it would only double the board.
       variants: ['flat', 'inset'],
-      onglet: ref('b'),
+      tab: ref('b'),
     }),
     template: `
       <div style="display: grid; gap: 32px">
         <div v-for="v in variants" :key="v" style="display: grid; gap: 16px">
-          <VTabs v-for="t in tones" :key="t" :variant="v" :tone="t" v-model="onglet">
-            <VTab value="a" label="Aperçu" />
-            <VTab value="b" label="Détails" />
-            <VTab value="c" label="Historique" />
+          <VTabs v-for="tone in tones" :key="tone" :variant="v" :tone="tone" v-model="tab">
+            <VTab value="a" label="Overview" />
+            <VTab value="b" label="Details" />
+            <VTab value="c" label="History" />
           </VTabs>
         </div>
       </div>
@@ -150,12 +195,12 @@ export const Tones: Story = {
 export const Sizes: Story = {
   render: () => ({
     components: { VTabs, VTab },
-    setup: () => ({ sizes: ['xs', 'sm', 'md', 'lg', 'xl'], onglet: ref('a') }),
+    setup: () => ({ sizes: ['xs', 'sm', 'md', 'lg', 'xl'], tab: ref('a') }),
     template: `
       <div style="display: grid; gap: 24px">
-        <VTabs v-for="s in sizes" :key="s" :size="s" variant="inset" v-model="onglet">
-          <VTab value="a" label="Aperçu" />
-          <VTab value="b" label="Détails" icon="tune" />
+        <VTabs v-for="s in sizes" :key="s" :size="s" variant="inset" v-model="tab">
+          <VTab value="a" label="Overview" />
+          <VTab value="b" label="Details" icon="tune" />
           <VTab value="c" icon="more_horiz" aria-label="Plus" />
         </VTabs>
       </div>
@@ -167,33 +212,33 @@ export const Compact: Story = {
   render: () => ({
     components: { VTabs, VTab },
     setup: () => ({ normal: ref('a'), compact: ref('a') }),
-    // compact = -4px de hauteur ; padding, typo et icônes inchangés
+    // compact = -4px of height; padding, type and icons unchanged
     template: `
       <div style="display: grid; gap: 24px">
         <VTabs variant="inset" v-model="normal">
-          <VTab value="a" label="Aperçu" />
-          <VTab value="b" label="Détails" />
+          <VTab value="a" label="Overview" />
+          <VTab value="b" label="Details" />
         </VTabs>
         <VTabs variant="inset" compact v-model="compact">
-          <VTab value="a" label="Aperçu" />
-          <VTab value="b" label="Détails" />
+          <VTab value="a" label="Overview" />
+          <VTab value="b" label="Details" />
         </VTabs>
       </div>
     `,
   }),
 }
 
-export const ContenuOnglet: Story = {
+export const TabContent: Story = {
   render: () => ({
     components: { VTabs, VTab, VBadge },
-    setup: () => ({ onglet: ref('texte') }),
+    setup: () => ({ tab: ref('text'), t }),
     template: `
-      <VTabs v-model="onglet">
-        <VTab value="texte" label="Texte seul" />
-        <VTab value="icone" label="Texte et icône" icon="tune" />
-        <VTab value="seule" icon="settings" aria-label="Réglages" />
+      <VTabs v-model="tab">
+        <VTab value="text" :label="t.textOnly" />
+        <VTab value="icon" :label="t.textAndIcon" icon="tune" />
+        <VTab value="iconOnly" icon="settings" :aria-label="t.settings" />
         <VTab value="slot">
-          <VBadge :count="3">Messages</VBadge>
+          <VBadge :count="3">{{ t.messages }}</VBadge>
         </VTab>
       </VTabs>
     `,
@@ -204,34 +249,34 @@ export const Vertical: Story = {
   args: { orientation: 'vertical' },
   render: (args) => ({
     components: { VTabs, VTab, VTabPanel },
-    setup: () => ({ args, onglet: ref('apercu'), encadre: ref('apercu') }),
+    setup: () => ({ args, tab: ref('overview'), framed: ref('overview'), t }),
     /*
-     * L'indicateur reste au bord de départ dans les deux habillages. La PISTE,
-     * elle, migre : à plat elle délimite la colonne d'onglets (bord de départ) ;
-     * encadrée, ce bord est déjà tenu par la bordure de la carte et le filet
-     * passe au bord opposé, où il sépare enfin les onglets de leur contenu.
+     * The indicator stays at the start edge in both decorations. The TRACK, on the
+     * other hand, migrates: when flat it delimits the tab column (the start edge);
+     * when framed, that edge is already held by the card's border and the rule moves
+     * to the opposite edge, where it finally separates the tabs from their content.
      */
     template: `
       <div style="display: grid; grid-auto-flow: column; gap: 32px; justify-content: start">
-        <VTabs v-bind="args" orientation="vertical" v-model="onglet" style="min-height: 220px">
-          <VTab value="apercu" label="Aperçu" icon="dashboard" />
-          <VTab value="details" label="Détails" icon="tune" />
-          <VTab value="historique" label="Historique" icon="history" />
+        <VTabs v-bind="args" orientation="vertical" v-model="tab" style="min-height: 220px">
+          <VTab value="overview" label="Overview" icon="dashboard" />
+          <VTab value="details" label="Details" icon="tune" />
+          <VTab value="history" label="History" icon="history" />
           <template #panels>
-            <VTabPanel value="apercu" style="padding: 16px">Panneau « Aperçu »</VTabPanel>
-            <VTabPanel value="details" style="padding: 16px">Panneau « Détails »</VTabPanel>
-            <VTabPanel value="historique" style="padding: 16px">Panneau « Historique »</VTabPanel>
+            <VTabPanel value="overview" style="padding: 16px">{{ t.overviewPanel }}</VTabPanel>
+            <VTabPanel value="details" style="padding: 16px">{{ t.detailsPanel }}</VTabPanel>
+            <VTabPanel value="history" style="padding: 16px">{{ t.historyPanel }}</VTabPanel>
           </template>
         </VTabs>
 
-        <VTabs variant="outlined" orientation="vertical" v-model="encadre" style="min-height: 220px">
-          <VTab value="apercu" label="Aperçu" icon="dashboard" />
-          <VTab value="details" label="Détails" icon="tune" />
-          <VTab value="historique" label="Historique" icon="history" />
+        <VTabs variant="outlined" orientation="vertical" v-model="framed" style="min-height: 220px">
+          <VTab value="overview" label="Overview" icon="dashboard" />
+          <VTab value="details" label="Details" icon="tune" />
+          <VTab value="history" label="History" icon="history" />
           <template #panels>
-            <VTabPanel value="apercu">Panneau « Aperçu »</VTabPanel>
-            <VTabPanel value="details">Panneau « Détails »</VTabPanel>
-            <VTabPanel value="historique">Panneau « Historique »</VTabPanel>
+            <VTabPanel value="overview">{{ t.overviewPanel }}</VTabPanel>
+            <VTabPanel value="details">{{ t.detailsPanel }}</VTabPanel>
+            <VTabPanel value="history">{{ t.historyPanel }}</VTabPanel>
           </template>
         </VTabs>
       </div>
@@ -239,7 +284,7 @@ export const Vertical: Story = {
   }),
 }
 
-export const Alignement: Story = {
+export const Alignment: Story = {
   render: () => ({
     components: { VTabs, VTab },
     setup: () => ({
@@ -248,15 +293,15 @@ export const Alignement: Story = {
       vertical: ref('a'),
     }),
     /*
-     * En vertical, `align` joue sur l'axe block : il n'a d'effet que si la
-     * barre reçoit une hauteur — d'où le `height` posé sur chaque exemple.
+     * In vertical mode, `align` acts on the block axis: it only has an effect if the
+     * bar is given a height — hence the `height` set on each example.
      */
     template: `
       <div style="display: grid; gap: 24px">
         <VTabs v-for="a in aligns" :key="a" :align="a" variant="inset" v-model="horizontal">
-          <VTab value="a" label="Aperçu" />
-          <VTab value="b" label="Détails" />
-          <VTab value="c" label="Historique" />
+          <VTab value="a" label="Overview" />
+          <VTab value="b" label="Details" />
+          <VTab value="c" label="History" />
         </VTabs>
 
         <div style="display: grid; grid-auto-flow: column; gap: 24px; justify-content: start">
@@ -269,9 +314,9 @@ export const Alignement: Story = {
             v-model="vertical"
             style="height: 240px"
           >
-            <VTab value="a" label="Aperçu" />
-            <VTab value="b" label="Détails" />
-            <VTab value="c" label="Historique" />
+            <VTab value="a" label="Overview" />
+            <VTab value="b" label="Details" />
+            <VTab value="c" label="History" />
           </VTabs>
         </div>
       </div>
@@ -283,35 +328,35 @@ export const Grow: Story = {
   args: { grow: true },
   render: (args) => ({
     components: { VTabs, VTab },
-    setup: () => ({ args, onglet: ref('a') }),
+    setup: () => ({ args, tab: ref('a'), t }),
     template: `
-      <VTabs v-bind="args" grow v-model="onglet">
-        <VTab value="a" label="Aperçu" />
-        <VTab value="b" label="Détails" />
-        <VTab value="c" label="Historique très long qui doit être tronqué" />
+      <VTabs v-bind="args" grow v-model="tab">
+        <VTab value="a" label="Overview" />
+        <VTab value="b" label="Details" />
+        <VTab value="c" :label="t.longHistory" />
       </VTabs>
     `,
   }),
 }
 
-export const Desactive: Story = {
+export const Disabled: Story = {
   render: () => ({
     components: { VTabs, VTab },
-    setup: () => ({ onglet: ref('a') }),
-    // l'onglet inerte est un <button disabled> : gris par tokens, sauté par les flèches
+    setup: () => ({ tab: ref('a') }),
+    // the inert tab is a <button disabled>: greyed through tokens, skipped by the arrows
     template: `
-      <VTabs v-model="onglet">
-        <VTab value="a" label="Aperçu" />
-        <VTab value="b" label="Détails" disabled />
-        <VTab value="c" label="Historique" />
+      <VTabs v-model="tab">
+        <VTab value="a" label="Overview" />
+        <VTab value="b" label="Details" disabled />
+        <VTab value="c" label="History" />
       </VTabs>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(canvas.getByRole('tab', { name: 'Détails' })).toBeDisabled()
+    await expect(canvas.getByRole('tab', { name: 'Details' })).toBeDisabled()
 
-    canvas.getByRole('tab', { name: 'Aperçu' }).focus()
+    canvas.getByRole('tab', { name: 'Overview' }).focus()
     await userEvent.keyboard('{ArrowRight}')
 
     await waitFor(async () => {
@@ -320,25 +365,25 @@ export const Desactive: Story = {
   },
 }
 
-export const Panneaux: Story = {
+export const Panels: Story = {
   render: () => ({
     components: { VTabs, VTab, VTabPanel },
-    setup: () => ({ onglet: ref('apercu') }),
+    setup: () => ({ tab: ref('overview'), t }),
     template: `
-      <VTabs v-model="onglet">
-        <VTab value="apercu" label="Aperçu" />
-        <VTab value="details" label="Détails" />
-        <VTab value="historique" label="Historique" />
+      <VTabs v-model="tab">
+        <VTab value="overview" label="Overview" />
+        <VTab value="details" label="Details" />
+        <VTab value="history" label="History" />
         <template #panels>
-          <VTabPanel value="apercu" style="padding: 16px 0">
-            Le panneau actif est le seul visible ; les autres portent l'attribut natif
-            <code>hidden</code> et gardent leur état.
+          <VTabPanel value="overview" style="padding: 16px 0">
+            {{ t.activeOnly }}
+            <code>hidden</code> {{ t.andKeepState }}
           </VTabPanel>
           <VTabPanel value="details" style="padding: 16px 0">
-            <label>Une saisie conservée d'un onglet à l'autre : <input type="text" /></label>
+            <label>{{ t.keptInput }} <input type="text" /></label>
           </VTabPanel>
-          <VTabPanel value="historique" style="padding: 16px 0" lazy>
-            Ce panneau est <code>lazy</code> : son contenu n'a été monté qu'à son premier affichage.
+          <VTabPanel value="history" style="padding: 16px 0" lazy>
+            {{ t.lazyPanel }} <code>lazy</code>{{ t.mountedOnFirst }}
           </VTabPanel>
         </template>
       </VTabs>
@@ -346,87 +391,87 @@ export const Panneaux: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('tab', { name: 'Détails' }))
+    await userEvent.click(canvas.getByRole('tab', { name: 'Details' }))
 
     await waitFor(async () => {
       await expect(canvas.getByRole('tabpanel')).toHaveAttribute(
         'aria-labelledby',
-        canvas.getByRole('tab', { name: 'Détails' }).id,
+        canvas.getByRole('tab', { name: 'Details' }).id,
       )
     })
   },
 }
 
-export const Defilement: Story = {
+export const Scrolling: Story = {
   render: () => ({
     components: { VTabs, VTab },
-    setup: () => ({ villes: VILLES, onglet: ref('Paris') }),
-    // le conteneur est volontairement étroit : la liste défile au doigt, au
-    // trackpad et au clavier, sans barre de défilement visible
+    setup: () => ({ cities: CITIES, tab: ref('Paris') }),
+    // the container is deliberately narrow: the list scrolls by touch, trackpad and
+    // keyboard, with no visible scrollbar
     template: `
       <div style="max-width: 420px; border: 1px dashed var(--vectis-color-border); padding: 8px">
-        <VTabs v-model="onglet">
-          <VTab v-for="v in villes" :key="v" :value="v" :label="v" />
+        <VTabs v-model="tab">
+          <VTab v-for="v in cities" :key="v" :value="v" :label="v" />
         </VTabs>
       </div>
     `,
   }),
 }
 
-export const BoutonsDefilement: Story = {
+export const ScrollButtons: Story = {
   render: () => ({
     components: { VTabs, VTab },
-    setup: () => ({ villes: VILLES, onglet: ref('Paris') }),
+    setup: () => ({ cities: CITIES, tab: ref('Paris') }),
     template: `
       <div style="max-width: 420px; border: 1px dashed var(--vectis-color-border); padding: 8px">
-        <VTabs scroll-buttons variant="inset" v-model="onglet">
-          <VTab v-for="v in villes" :key="v" :value="v" :label="v" />
+        <VTabs scroll-buttons variant="inset" v-model="tab">
+          <VTab v-for="v in cities" :key="v" :value="v" :label="v" />
         </VTabs>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const suivants = canvas.getByRole('button', { name: 'Onglets suivants' })
+    const next = canvas.getByRole('button', { name: 'Next tabs' })
 
-    // en butée de départ, seul le contrôle aval est actif
+    // at the start of the line, only the downstream control is enabled
     await waitFor(async () => {
-      await expect(canvas.getByRole('button', { name: 'Onglets précédents' })).toBeDisabled()
-      await expect(suivants).toBeEnabled()
+      await expect(canvas.getByRole('button', { name: 'Previous tabs' })).toBeDisabled()
+      await expect(next).toBeEnabled()
     })
 
-    await userEvent.click(suivants)
+    await userEvent.click(next)
 
     await waitFor(async () => {
-      await expect(canvas.getByRole('button', { name: 'Onglets précédents' })).toBeEnabled()
+      await expect(canvas.getByRole('button', { name: 'Previous tabs' })).toBeEnabled()
     })
   },
 }
 
-export const FlechesPersonnalisees: Story = {
+export const CustomArrows: Story = {
   render: () => ({
     components: { VTabs, VTab },
-    setup: () => ({ villes: VILLES, horizontal: ref('Paris'), vertical: ref('Paris') }),
+    setup: () => ({ cities: CITIES, horizontal: ref('Paris'), vertical: ref('Paris'), t }),
     /*
-     * `prevIcon`/`nextIcon` acceptent un nom Material Symbols ou une URL
-     * d'image, et `prevLabel`/`nextLabel` fournissent le nom accessible. Les
-     * défauts suivent l'orientation (chevrons en horizontal, expand_less /
-     * expand_more en vertical) ; ici on les remplace dans les deux axes.
+     * `prevIcon`/`nextIcon` accept a Material Symbols name or an image URL, and
+     * `prevLabel`/`nextLabel` supply the accessible name. The defaults follow the
+     * orientation (chevrons when horizontal, expand_less / expand_more when
+     * vertical); here they are replaced on both axes.
      */
     template: `
       <div style="display: grid; gap: 24px; max-width: 420px">
-        <!-- min-width: 0 : un item de grid ne descend pas sous son min-content
-             (min-width: auto), la liste d'onglets ne déborderait jamais -->
+        <!-- min-width: 0: a grid item does not go below its min-content
+             (min-width: auto), so the tab list would never overflow -->
         <div style="min-width: 0; border: 1px dashed var(--vectis-color-border); padding: 8px">
           <VTabs
             scroll-buttons
             prev-icon="keyboard_double_arrow_left"
             next-icon="keyboard_double_arrow_right"
-            prev-label="Voir les onglets précédents"
-            next-label="Voir les onglets suivants"
+            :prev-label="t.seePrevious"
+            :next-label="t.seeNext"
             v-model="horizontal"
           >
-            <VTab v-for="v in villes" :key="v" :value="v" :label="v" />
+            <VTab v-for="v in cities" :key="v" :value="v" :label="v" />
           </VTabs>
         </div>
 
@@ -442,7 +487,7 @@ export const FlechesPersonnalisees: Story = {
             v-model="vertical"
             style="height: 180px"
           >
-            <VTab v-for="v in villes" :key="v" :value="v" :label="v" />
+            <VTab v-for="v in cities" :key="v" :value="v" :label="v" />
           </VTabs>
         </div>
       </div>
@@ -450,42 +495,38 @@ export const FlechesPersonnalisees: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const suivants = canvas.getByRole('button', { name: 'Voir les onglets suivants' })
+    const next = canvas.getByRole('button', { name: 'See the next tabs' })
 
     await waitFor(async () => {
-      await expect(
-        canvas.getByRole('button', { name: 'Voir les onglets précédents' }),
-      ).toBeDisabled()
-      await expect(suivants).toBeEnabled()
+      await expect(canvas.getByRole('button', { name: 'See the previous tabs' })).toBeDisabled()
+      await expect(next).toBeEnabled()
     })
 
-    await userEvent.click(suivants)
+    await userEvent.click(next)
 
     await waitFor(async () => {
-      await expect(
-        canvas.getByRole('button', { name: 'Voir les onglets précédents' }),
-      ).toBeEnabled()
+      await expect(canvas.getByRole('button', { name: 'See the previous tabs' })).toBeEnabled()
     })
   },
 }
 
-export const CasLimites: Story = {
+export const EdgeCases: Story = {
   render: () => ({
     components: { VTabs, VTab },
-    setup: () => ({ unique: ref('a'), longs: ref('a'), inconnu: ref('zzz') }),
+    setup: () => ({ single: ref('a'), long: ref('a'), unknown: ref('zzz'), t }),
     template: `
       <div style="display: grid; gap: 24px">
-        <VTabs v-model="unique"><VTab value="a" label="Onglet unique" /></VTabs>
+        <VTabs v-model="single"><VTab value="a" :label="t.singleTab" /></VTabs>
 
-        <VTabs variant="inset" v-model="longs">
-          <VTab value="a" label="Un libellé d'onglet particulièrement long" />
-          <VTab value="b" label="Un autre libellé tout aussi interminable" />
+        <VTabs variant="inset" v-model="long">
+          <VTab value="a" :label="t.veryLongLabel" />
+          <VTab value="b" :label="t.anotherEndless" />
         </VTabs>
 
-        <!-- valeur hors liste : aucun onglet actif, la barre sort de la tabulation -->
-        <VTabs v-model="inconnu">
-          <VTab value="a" label="Aperçu" />
-          <VTab value="b" label="Détails" />
+        <!-- a value outside the list: no active tab, and the bar leaves the tab order -->
+        <VTabs v-model="unknown">
+          <VTab value="a" label="Overview" />
+          <VTab value="b" label="Details" />
         </VTabs>
       </div>
     `,

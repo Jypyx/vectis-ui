@@ -4,22 +4,21 @@ import { computed, inject, ref, watchEffect } from 'vue'
 import { tabsKey } from './context'
 
 /**
- * Panneau associé à un onglet de même `value`. Il est toujours rendu et
- * masqué par l'attribut natif `hidden` quand il n'est pas actif : zéro JS,
- * l'état du contenu (saisie en cours, défilement) survit au changement
- * d'onglet.
+ * Panel associated with the tab of the same `value`. It is always rendered and
+ * hidden by the native `hidden` attribute when inactive: zero JS, and the
+ * content's state (typing in progress, scroll position) survives a tab change.
  */
 interface TabPanelProps {
-  /** Doit correspondre au `value` d'un `VTab`. */
+  /** Must match the `value` of a `VTab`. */
   value: string | number
-  /** Diffère le montage du contenu au premier affichage, puis le conserve. */
+  /** Defers mounting the content until first shown, then keeps it. */
   lazy?: boolean
 }
 
 const props = withDefaults(defineProps<TabPanelProps>(), { lazy: false })
 
 defineSlots<{
-  /** Contenu du panneau */
+  /** Panel content */
   default(): unknown
 }>()
 
@@ -29,7 +28,7 @@ const selected = computed(() => tabs != null && tabs.value === props.value)
 const tabId = computed(() => tabs?.tabId(props.value))
 const panelId = computed(() => tabs?.panelId(props.value))
 
-/** `lazy` : une fois révélé, le contenu reste monté (l'état n'est pas perdu). */
+/** `lazy`: once revealed, the content stays mounted (no state is lost). */
 const revealed = ref(false)
 watchEffect(() => {
   if (selected.value) revealed.value = true
@@ -52,11 +51,11 @@ watchEffect(() => {
 <style>
 @layer vectis.components {
   /*
-   * Garde-fou : [hidden] ne vient que de la feuille UA, que la moindre
-   * déclaration `display` d'auteur écrase — y compris un style consommateur
-   * non layerisé. Spécificité (0,2,0), et surtout pas d'!important : VTabs
-   * resterait sinon le seul composant du DS impossible à surcharger. Pour
-   * poser un display sur le panneau, cibler .v-tabs-panel:not([hidden]).
+   * Guard: [hidden] comes only from the UA sheet, which the slightest author
+   * `display` declaration overrides — including a non-layered consumer style.
+   * Specificity (0,2,0), and definitely no !important: VTabs would otherwise be the
+   * only component in the DS impossible to override. To set a display on the panel,
+   * target .v-tabs-panel:not([hidden]).
    */
   .v-tabs-panel[hidden] {
     display: none;

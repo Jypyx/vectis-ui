@@ -6,176 +6,169 @@ import * as VTabsStories from './VTabs.stories'
 
 # Tabs
 
-Navigation entre des sections de même niveau. Le composant n'invente aucun bouton : chaque onglet est
-un `VButton`, les contrôles de défilement des `VIconButton`. Hover, focus, désactivation, gris des
-états inertes et respect de `prefers-reduced-motion` viennent donc directement de `VButton`, sans une
-seule règle d'état redéfinie ici.
+Navigation between sections of the same level. The component invents no button: every tab is a
+`VButton`, and the scroll controls are `VIconButton`. Hover, focus, disabling, the grey of inert
+states and respect for `prefers-reduced-motion` therefore come straight from `VButton`, without a
+single state rule redefined here.
 
-L'API est **composée** : `VTabs` porte la configuration et le `v-model`, `VTab` déclare un onglet,
-`VTabPanel` son panneau. Les deux familles vivent dans deux slots distincts — le slot par défaut pour
-les onglets, `#panels` pour les panneaux — parce que rien ne permettrait sinon de les répartir dans
-deux conteneurs du DOM. Le slot `#panels` est facultatif : sans lui, `VTabs` n'est qu'une barre, et
-peut servir de contrôle segmenté.
+The API is **composed**: `VTabs` carries the configuration and the `v-model`, `VTab` declares a tab,
+`VTabPanel` its panel. The two families live in two distinct slots — the default slot for the tabs,
+`#panels` for the panels — because nothing else would allow them to be split across two DOM
+containers. The `#panels` slot is optional: without it, `VTabs` is only a bar, and can serve as a
+segmented control.
 
-Les identifiants ARIA ne demandent aucun câblage : `VTab` et `VTabPanel` dérivent le même identifiant
-de leur `value`, à partir d'un identifiant unique posé par la racine. Il n'y a donc ni registre ni
-échange d'état entre eux.
+The ARIA identifiers need no wiring: `VTab` and `VTabPanel` derive the same identifier from their
+`value`, starting from a unique identifier set by the root. There is therefore neither a registry nor
+any state exchange between them.
 
 <Canvas of={VTabsStories.Default} />
 <Controls of={VTabsStories.Default} />
 
-## Variantes
+## Variants
 
-`variant` cumule deux décisions dans un seul axe : la **piste** sur laquelle vivent les onglets, et
-l'**habillage** du composant.
+`variant` packs two decisions into a single axis: the **track** the tabs live on, and the
+**decoration** of the component.
 
-`flat` (défaut) souligne l'onglet actif d'un indicateur qui recouvre la piste de la barre ; les
-onglets restent `ghost`, et rien n'est peint autour — la barre et les panneaux se posent nus dans le
-conteneur d'accueil, dont ils héritent la surface. Sur une piste, les onglets sont des **segments
-contigus et à angles droits** : ce sont l'indicateur et la piste qui découpent la barre, pas la
-silhouette des boutons.
+`flat` (the default) underlines the active tab with an indicator that covers the bar's track; the
+tabs stay `ghost`, and nothing is painted around them — the bar and the panels sit bare in the host
+container, whose surface they inherit. On a track, the tabs are **contiguous, square-cornered
+segments**: it is the indicator and the track that carve the bar, not the buttons' silhouette.
 
-`outlined` reprend `flat` trait pour trait et l'enferme dans une carte : filet, coins arrondis et
-fond surélevé, sur l'échelle d'habillage commune à le `VAccordion` et au `VDataTable`. Le cadre entoure
-le composant **entier**, barre et panneaux : la piste change alors de rôle sans changer de trait —
-elle devient le filet qui sépare les onglets de leur contenu, à l'intérieur du cadre. La barre et les
-panneaux prennent la gouttière du cadre ; seule la piste reste à fleur, d'un bord à l'autre, sinon
-elle ne séparerait plus rien. La rangée d'onglets y reprend son rayon aux seules extrémités — les
-coutures internes restent carrées, sur l'idiome du `VButtonGroup` — du côté que la piste n'occupe pas.
-Sans slot `#panels` il n'y a rien à séparer : la piste s'efface et la bordure de la carte la
-remplace.
+`outlined` takes `flat` line for line and encloses it in a card: a rule, rounded corners and a raised
+background, on the decoration scale shared with `VAccordion` and `VDataTable`. The frame surrounds
+the **whole** component, bar and panels: the track then changes role without changing appearance — it
+becomes the rule that separates the tabs from their content, inside the frame. The bar and the panels
+take the frame's gutter; only the track stays flush, edge to edge, since otherwise it would separate
+nothing. The tab row takes its radius back at the ends only — the internal seams stay square, on the
+`VButtonGroup` idiom — on the side the track does not occupy. With no `#panels` slot there is nothing
+to separate: the track fades away and the card's border replaces it.
 
-`inset` pose les onglets dans une piste creuse et surélève l'actif — c'est la variante `elevated` de
-`VButton`, ombre comprise. Elle ne s'encadre pas : c'est un contrôle segmenté, déjà sa propre surface.
+`inset` places the tabs in a hollow track and raises the active one — that is `VButton`'s `elevated`
+variant, shadow included. It is never framed: it is a segmented control, already its own surface.
 
-<Canvas of={VTabsStories.Variantes} />
+<Canvas of={VTabsStories.Variants} />
 
 ## Tones
 
-`tone` colore l'onglet actif ; les onglets inactifs restent neutres pour que la sélection se détache
-seule. L'indicateur des variantes `flat` et `outlined` est peint en `currentColor` : il suit le tone sans lui être
-couplé, et vire au gris avec le texte quand l'onglet est désactivé. Il n'y a pas de couleur custom
-ici — un onglet est une navigation, pas une étiquette.
+`tone` colours the active tab; the inactive tabs stay neutral so the selection stands out on its own.
+The indicator of the `flat` and `outlined` variants is painted in `currentColor`: it follows the tone
+without being coupled to it, and turns grey along with the text when the tab is disabled. There is no
+custom colour here — a tab is navigation, not a label.
 
 <Canvas of={VTabsStories.Tones} />
 
-## Tailles
+## Sizes
 
-`size` et `compact` suivent l'échelle unifiée des contrôles et sont propagés à tous les boutons, y
-compris les contrôles de défilement. Un onglet réduit à son icône devient carré, sur le modèle
-de `VIconButton`.
+`size` and `compact` follow the unified control scale and are propagated to every button, including
+the scroll controls. A tab reduced to its icon becomes square, on the `VIconButton` model.
 
 <Canvas of={VTabsStories.Sizes} />
 <Canvas of={VTabsStories.Compact} />
 
-## Contenu d'un onglet
+## Tab content
 
-`label` fournit le texte, `icon` une icône de début — nom d'icône **ou** rendu explicite. Les
-deux se combinent. Une icône sans libellé donne un onglet carré : il faut alors lui donner un nom
-accessible avec `aria-label`, qui traverse jusqu'au `<button>` rendu. Enfin, le slot par défaut
-remplace le libellé pour tout contenu riche.
+`label` supplies the text, `icon` a start icon — an icon name **or** an explicit render. The two
+combine. An icon with no label gives a square tab: it then needs an accessible name through
+`aria-label`, which travels through to the rendered `<button>`. Finally, the default slot replaces the
+label for any rich content.
 
-<Canvas of={VTabsStories.ContenuOnglet} />
+<Canvas of={VTabsStories.TabContent} />
 
-## Orientation et alignement
+## Orientation and alignment
 
-En vertical, la barre et les panneaux se placent côte à côte, et l'indicateur passe au bord de départ
-des onglets (à gauche en LTR, à droite en RTL — tout est décrit en propriétés logiques). La piste,
-elle, dépend de l'habillage : à plat elle délimite la colonne d'onglets et se tient au bord de
-départ ; encadrée, ce bord est déjà tenu par la bordure de la carte, et la piste passe au bord opposé,
-là où elle sépare vraiment les onglets de leur contenu.
+In vertical mode, the bar and the panels sit side by side, and the indicator moves to the tabs' start
+edge (left in LTR, right in RTL — everything is described in logical properties). The track, on the
+other hand, depends on the decoration: when flat it delimits the tab column and stays at the start
+edge; when framed, that edge is already held by the card's border, and the track moves to the
+opposite edge, where it genuinely separates the tabs from their content.
 
-`align` place le groupe d'onglets au début (défaut), au centre ou à la fin — à gauche, au centre ou à
-droite en horizontal ; en haut, au milieu ou en bas en vertical. L'alignement est posé sur la barre
-et non sur la liste défilante : un `justify-content` sur un conteneur qui déborde rendrait la partie
-dépassant du côté départ définitivement inatteignable. Corollaire visible dans la seconde rangée
-ci-dessous : en vertical, `align` joue sur l'axe block, il n'a donc d'effet que si la barre reçoit
-une hauteur.
+`align` places the tab group at the start (the default), the centre or the end — left, centre or
+right when horizontal; top, middle or bottom when vertical. The alignment is set on the bar and not
+on the scrolling list: a `justify-content` on an overflowing container would make the part past the
+start edge permanently unreachable. A visible corollary in the second row below: in vertical mode
+`align` acts on the block axis, so it only has an effect if the bar is given a height.
 
 <Canvas of={VTabsStories.Vertical} />
-<Canvas of={VTabsStories.Alignement} />
+<Canvas of={VTabsStories.Alignment} />
 
-## Occuper toute la place
+## Filling the available space
 
-`grow` répartit la largeur (ou la hauteur) disponible entre les onglets, et tronque les libellés trop
-longs. C'est par construction incompatible avec le défilement : plus rien ne déborde, les contrôles
-de défilement resteraient donc désactivés.
+`grow` distributes the available width (or height) between the tabs, and truncates over-long labels.
+That is incompatible with scrolling by construction: nothing overflows any more, so the scroll
+controls would stay disabled.
 
 <Canvas of={VTabsStories.Grow} />
 
-## Défilement
+## Scrolling
 
-Quand les onglets dépassent, la liste défile — au doigt, au trackpad et au clavier. La barre de
-défilement native est masquée : elle traverserait l'indicateur et la piste. `scrollButtons` ajoute
-deux contrôles explicites, dont l'icône se choisit par `prevIcon`/`nextIcon` (nom Material ou URL) et
-le nom accessible par `prevLabel`/`nextLabel` ; ils se désactivent d'eux-mêmes en butée, et tous les
-deux quand rien ne déborde.
+When the tabs overflow, the list scrolls — by touch, trackpad and keyboard. The native scrollbar is
+hidden: it would cross the indicator and the track. `scrollButtons` adds two explicit controls, whose
+icon is chosen through `prevIcon`/`nextIcon` (a Material name or a URL) and whose accessible name
+comes from `prevLabel`/`nextLabel`; they disable themselves at the ends, and both of them when
+nothing overflows.
 
-Ces butées sont mesurées par deux sentinelles observées dans la liste : un seul observateur couvre le
-défilement, le redimensionnement du conteneur et l'ajout ou le retrait d'onglets. Aucun `ResizeObserver`,
-aucun écouteur de défilement.
+Those ends are measured by two sentinels observed inside the list: a single observer covers
+scrolling, container resizing and the addition or removal of tabs. No `ResizeObserver`, no scroll
+listener.
 
-<Canvas of={VTabsStories.Defilement} />
-<Canvas of={VTabsStories.BoutonsDefilement} />
+<Canvas of={VTabsStories.Scrolling} />
+<Canvas of={VTabsStories.ScrollButtons} />
 
-Les icônes par défaut suivent l'orientation — chevrons en horizontal, `expand_less`/`expand_more` en
-vertical. `prevIcon` et `nextIcon` les remplacent, et acceptent aussi bien un nom d'icône
-qu'un rendu explicite ; `prevLabel` et `nextLabel` fournissent le nom accessible correspondant, qu'il
-faut penser à adapter en même temps que l'icône.
+The default icons follow the orientation — chevrons when horizontal, `expand_less`/`expand_more` when
+vertical. `prevIcon` and `nextIcon` replace them, and accept either an icon name or an explicit
+render; `prevLabel` and `nextLabel` supply the matching accessible name, which must be adapted at the
+same time as the icon.
 
-<Canvas of={VTabsStories.FlechesPersonnalisees} />
+<Canvas of={VTabsStories.CustomArrows} />
 
-## Panneaux
+## Panels
 
-Les `VTabPanel` sont tous rendus ; les inactifs portent l'attribut natif `hidden`. Aucun JavaScript
-n'est nécessaire, et l'état du contenu — une saisie en cours, une position de défilement — survit au
-changement d'onglet. La contrepartie est que ce contenu est monté d'emblée et que les champs des
-panneaux masqués restent soumis avec le formulaire ; `lazy` diffère le montage d'un panneau à son
-premier affichage, puis le conserve.
+The `VTabPanel` elements are all rendered; the inactive ones carry the native `hidden` attribute. No
+JavaScript is needed, and the content's state — typing in progress, a scroll position — survives a
+tab change. The trade-off is that this content is mounted from the start and that the fields of
+hidden panels are still submitted with the form; `lazy` defers mounting a panel until its first
+display, then keeps it.
 
-Le panneau masqué l'est par la feuille de style du navigateur, qu'une simple déclaration `display`
-écrase. Le composant pose donc un garde-fou de spécificité supérieure — mais sans `!important`, pour
-rester surchargeable comme le reste du design system. Pour donner un `display` au panneau, cibler
+A hidden panel is hidden by the browser's stylesheet, which the simplest `display` declaration
+overrides. The component therefore sets a guard of higher specificity — but without `!important`, so
+it stays overridable like the rest of the design system. To give the panel a `display`, target
 `.v-tabs-panel:not([hidden])`.
 
-<Canvas of={VTabsStories.Panneaux} />
+<Canvas of={VTabsStories.Panels} />
 
-## Onglets désactivés et cas limites
+## Disabled tabs and edge cases
 
-Un onglet `disabled` est un `<button disabled>` : gris par tokens, inerte, et sauté par les flèches —
-le même choix que les pages désactivées de la `VPagination`.
+A `disabled` tab is a `<button disabled>`: greyed through tokens, inert, and skipped by the arrows —
+the same choice as `VPagination`'s disabled pages.
 
-Le `v-model` doit référencer un onglet existant et activable : c'est la valeur qui décide à la fois
-du panneau affiché et du seul onglet présent dans l'ordre de tabulation. Une valeur hors liste ne
-casse rien, mais laisse la barre entière hors tabulation.
+The `v-model` must reference an existing, activatable tab: the value decides both the panel shown and
+the only tab present in the tab order. A value outside the list breaks nothing, but leaves the entire
+bar out of the tab order.
 
-<Canvas of={VTabsStories.Desactive} />
-<Canvas of={VTabsStories.CasLimites} />
+<Canvas of={VTabsStories.Disabled} />
+<Canvas of={VTabsStories.EdgeCases} />
 
-## Accessibilité
+## Accessibility
 
-- La barre est un `role="tablist"` nommé par `label` ; un `aria-label` ou un `aria-labelledby` posé
-  par le consommateur prime, et atterrit bien sur la liste et non sur le conteneur — la racine n'est
-  qu'un wrapper, seuls `class` et `style` y restent.
-- `aria-orientation="vertical"` est posé en orientation verticale : le rôle `tablist` est horizontal
-  par défaut, une barre verticale serait sinon mal annoncée.
-- Chaque onglet possède un `id`, et son panneau y répond par `aria-labelledby` ; `aria-controls`
-  n'est posé que si le slot `#panels` existe, pour ne jamais référencer un identifiant absent. Les
-  identifiants sont dérivés de `value` puis assainis : `aria-controls` est une liste séparée par des
-  espaces, une valeur en contenant un y désignerait deux éléments inexistants.
-- Le focus est en **roving tabindex** : un seul onglet est un arrêt de tabulation, les flèches
-  circulent entre les autres. Les flèches gauche/droite (haut/bas en vertical) et Home/Fin ne font
-  que **déplacer** le focus : `activation` vaut `manual` par défaut, la sélection attend Entrée ou
-  Espace — les activations natives du `<button>`, donc aucun code ajouté. `activation="automatic"`
-  rétablit le comportement recommandé par l'APG où la sélection suit le focus, à réserver aux
-  panneaux dont l'affichage est instantané.
-- Les flèches horizontales sont physiques, donc inversées en RTL, où les chevrons des contrôles de
-  défilement se retournent également.
-- L'anneau de focus des onglets est tracé vers l'intérieur : la liste est un conteneur défilant, un
-  décalage vers l'extérieur y serait rogné.
-- Le panneau actif est focusable (`tabindex="0"`) afin d'être atteignable même sans contenu
-  interactif, conformément à l'exemple de l'APG.
-- Les sentinelles de mesure du défilement sont retirées de l'arbre d'accessibilité : un `tablist` ne
-  possède que des `tab`.
-
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+- The bar is a `role="tablist"` named by `label`; an `aria-label` or an `aria-labelledby` set by the
+  consumer wins, and lands on the list rather than on the container — the root is only a wrapper, and
+  only `class` and `style` stay on it.
+- `aria-orientation="vertical"` is set in vertical orientation: the `tablist` role is horizontal by
+  default, so a vertical bar would otherwise be announced wrongly.
+- Every tab has an `id`, and its panel answers with `aria-labelledby`; `aria-controls` is only set
+  when the `#panels` slot exists, so it never references a missing identifier. The identifiers derive
+  from `value` and are then sanitized: `aria-controls` is a space-separated list, so a value
+  containing one would designate two non-existent elements.
+- Focus uses a **roving tabindex**: a single tab is a tab stop, and the arrows move between the
+  others. The left/right arrows (up/down when vertical) and Home/End only **move** focus:
+  `activation` is `manual` by default, and the selection waits for Enter or Space — the native
+  `<button>` activations, hence no added code. `activation="automatic"` restores the APG-recommended
+  behaviour where the selection follows focus, to be reserved for panels that display instantly.
+- The horizontal arrows are physical, hence inverted in RTL, where the chevrons of the scroll controls
+  flip as well.
+- The tabs' focus ring is drawn inwards: the list is a scrolling container, and an outward offset
+  would be cropped there.
+- The active panel is focusable (`tabindex="0"`) so it is reachable even with no interactive content,
+  in line with the APG example.
+- The scroll-measuring sentinels are removed from the accessibility tree: a `tablist` owns nothing but
+  `tab` children.

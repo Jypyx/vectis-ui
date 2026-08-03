@@ -3,21 +3,21 @@ import type { InjectionKey } from 'vue'
 import type { TabsActivation, TabsSize, TabsTone, TabsVariant } from './VTabs.vue'
 
 /**
- * Contrat VTabs → VTab / VTabPanel. Les ids sont dérivés d'un `useId()` unique
- * posé par la racine : VTab et VTabPanel calculent le même identifiant à partir
- * de leur `value`, sans registre ni échange d'état.
+ * The VTabs → VTab / VTabPanel contract. The ids derive from a single `useId()` set
+ * by the root: VTab and VTabPanel compute the same identifier from their `value`,
+ * with no registry and no state exchange.
  *
- * `size`/`compact` transitent par l'injection (et non par héritage CSS comme
- * dans VAccordion) : chaque VTab rend un VButton, qui pose lui-même
- * `v-control[data-size]` sur son propre élément.
+ * `size`/`compact` travel through the injection (and not through CSS inheritance as
+ * in VAccordion): every VTab renders a VButton, which sets `v-control[data-size]`
+ * on its own element.
  */
 export interface TabsContext {
-  /** Valeur sélectionnée ; undefined si le v-model ne référence aucun onglet. */
+  /** The selected value; undefined when the v-model references no tab. */
   readonly value: string | number | undefined
   select: (value: string | number) => void
   tabId: (value: string | number) => string
   panelId: (value: string | number) => string
-  /** Le slot #panels est fourni : les onglets peuvent poser aria-controls. */
+  /** The #panels slot is provided: the tabs may set aria-controls. */
   readonly hasPanels: boolean
   readonly variant: TabsVariant
   readonly tone: TabsTone
@@ -29,9 +29,9 @@ export interface TabsContext {
 export const tabsKey: InjectionKey<TabsContext> = Symbol('v-tabs')
 
 /**
- * `aria-controls` est une LISTE d'IDREF séparée par des espaces : une valeur
- * contenant un blanc y référencerait deux ids inexistants. Les caractères
- * hostiles aux sélecteurs sont écartés au passage.
+ * `aria-controls` is a space-separated LIST of IDREFs: a value containing a blank
+ * would reference two non-existent ids there. Characters hostile to selectors are
+ * dropped along the way.
  */
 const slug = (value: string | number) => String(value).replace(/[^\w-]+/g, '_')
 

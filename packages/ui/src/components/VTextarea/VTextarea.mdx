@@ -5,14 +5,14 @@ import * as VTextareaStories from './VTextarea.stories'
 
 # Textarea
 
-Zone de texte complète — label, icônes internes (cliquables), compteur, limite souple,
-loading, effacement — construite autour d'un `<textarea>` natif stylé. Miroir de `VInput` avec
-deux différences : la prop `auto-grow` (hauteur qui suit le contenu, pur CSS) et le compteur
-rendu **sous** le champ (sur la ligne du hint), jamais dedans.
+Complete text area — label, internal (clickable) icons, counter, soft limit, loading, clearing —
+built around a styled native `<textarea>`. A mirror of `VInput` with two differences: the
+`auto-grow` prop (height following the content, pure CSS) and the counter rendered **under** the
+field (on the hint's line), never inside it.
 
-Pas de prop `pattern` : `<textarea>` ne le supporte pas nativement et le composant ne
-l'émule pas (décision projet). La racine est un wrapper : les attributs natifs passent en
-fallthrough sur le `<textarea>`, sauf `class`/`style` qui restent sur la racine.
+There is no `pattern` prop: `<textarea>` does not support it natively and the component does not
+emulate it (a project decision). The root is a wrapper: the native attributes pass through by
+fallthrough onto the `<textarea>`, except `class`/`style`, which stay on the root.
 
 <Canvas of={VTextareaStories.Default} />
 
@@ -20,78 +20,79 @@ fallthrough sur le `<textarea>`, sauf `class`/`style` qui restent sur la racine.
 
 ## Auto-grow
 
-`auto-grow` fait suivre la hauteur au contenu via `field-sizing: content` — aucun JavaScript
-de mesure. Sans support navigateur, le champ reste un textarea classique (progressive
-enhancement). Le redimensionnement manuel (`resize`) est porté par le wrapper du champ, pas
-par le `<textarea>`.
+`auto-grow` makes the height follow the content through `field-sizing: content` — no measurement
+JavaScript. Without browser support, the field stays a classic textarea (progressive
+enhancement). Manual resizing (`resize`) is carried by the field's wrapper, not by the
+`<textarea>`.
 
 <Canvas of={VTextareaStories.AutoGrow} />
 
-## Tailles
+## Sizes
 
-Trois tailles (`sm` 32px, `md` 40px — défaut —, `lg` 48px) qui jouent sur la typographie, le
-padding et la hauteur minimale ; les icônes internes suivent (sm/md → 20px, lg → 24px via le
-contexte `--vectis-icon-size`) et restent **alignées sur la première ligne** de texte. Comme pour
-`VInput`, les extrêmes de l'échelle du DS (`xs`, `xl`) ne sont pas exposées.
+Three sizes (`sm` 32px, `md` 40px — the default —, `lg` 48px) acting on the typography, the
+padding and the minimum height; the internal icons follow (sm/md → 20px, lg → 24px through the
+`--vectis-icon-size` context) and stay **aligned on the first line** of text. As with `VInput`,
+the extremes of the DS scale (`xs`, `xl`) are not exposed.
 
-<Canvas of={VTextareaStories.Tailles} />
+<Canvas of={VTextareaStories.Sizes} />
 
-`compact` réduit la hauteur minimale de 4px sans toucher au padding ni à la typographie.
+`compact` reduces the minimum height by 4px without touching the padding or the typography.
 
 <Canvas of={VTextareaStories.Compact} />
 
-## Label, hint et compteur
+## Label, hint and counter
 
-`label` est associé via `for`/`id`, `hint` via `aria-describedby`. Le compteur (`counter`)
-s'affiche sous le champ, à droite, sur la même ligne que le hint.
+`label` is associated through `for`/`id`, `hint` through `aria-describedby`. The counter
+(`counter`) appears under the field, on the right, on the same line as the hint.
 
-<Canvas of={VTextareaStories.LabelHintCompteur} />
+<Canvas of={VTextareaStories.LabelHintCounter} />
 
-`soft-limit` rend `maxlength` souple : la saisie peut dépasser, le champ passe en erreur via
-la validation native (`setCustomValidity` → `:user-invalid` après interaction) et la
-soumission est bloquée — la validité est exposée par l'API standard (`el.validity`).
+`soft-limit` makes `maxlength` soft: input may go over, the field enters error through native
+validation (`setCustomValidity` → `:user-invalid` after interaction) and submission is blocked —
+the validity is exposed by the standard API (`el.validity`).
 
-<Canvas of={VTextareaStories.CompteurSoft} />
+<Canvas of={VTextareaStories.SoftCounter} />
 
-## États
+## States
 
-`loading` affiche un spinner qui **remplace** l'emplacement de fin (`icon-end` / slot
-`#end`) ; son libellé (`loading-label`) est annoncé via `role="status"` :
+`loading` shows a spinner that **replaces** the end slot (`icon-end` / `#end`); its label
+(`loading-label`) is announced through `role="status"`:
 
 <Canvas of={VTextareaStories.Loading} />
 
-`clearable` affiche une croix quand le champ est non-vide (hors disabled/readonly) : elle
-vide le champ, émet `clear` et rend le focus au champ :
+`clearable` shows a cross when the field is non-empty (outside disabled/readonly): it empties the
+field, emits `clear` and returns focus to the field:
 
 <Canvas of={VTextareaStories.Clearable} />
 
-`readonly` : champ focusable et soumis mais non modifiable, fond légèrement enfoncé, bouton
-d'effacement masqué :
+`readonly`: a field that is focusable and submitted but not editable, with a slightly sunken
+background and the clear button hidden:
 
 <Canvas of={VTextareaStories.Readonly} />
 
-`disabled` bascule tout le champ sur des nuances de gris — pas de jeu d'opacité, rendu
-compatible thème dark :
+`disabled` switches the whole field to greys — no opacity trick, and the rendering is dark-theme
+compatible:
 
 <Canvas of={VTextareaStories.Disabled} />
 
-La prop `invalid` force l'état d'erreur (validation serveur) — elle pose `aria-invalid` :
+The `invalid` prop forces the error state (server-side validation) — it sets `aria-invalid`:
 
-<Canvas of={VTextareaStories.Invalide} />
+<Canvas of={VTextareaStories.Invalid} />
 
-## Vitrine
+## Showcase
 
 <Canvas of={VTextareaStories.Showcase} />
 
-## Accessibilité
+## Accessibility
 
-- Toujours un nom accessible : `label`, ou `aria-label` en fallthrough à défaut.
-- `hint` lié via `aria-describedby` (cumulable avec un `aria-describedby` fourni).
-- Icônes décoratives (`aria-hidden`) ; icône cliquable → `<button>` avec
-  `icon-*-label` obligatoire (un avertissement est émis en dev sans libellé).
-- Focus visible : la bordure passe à 2px visuels (bordure + `box-shadow` même couleur) via
-  `:focus-within`, rouge si invalide ; filet `outline` transparent pour le mode
-  forced-colors.
-- Erreur stylée par `:user-invalid` (après interaction) ; `invalid` pose `aria-invalid`.
+- Always an accessible name: `label`, or `aria-label` by fallthrough failing that.
+- `hint` linked through `aria-describedby` (which stacks with a supplied `aria-describedby`).
+- Decorative icons (`aria-hidden`); a clickable icon → a `<button>` with a mandatory
+  `icon-*-label` (a warning is emitted in dev when the label is missing).
+- Visible focus: the border goes to a visual 2px (border + a `box-shadow` of the same colour)
+  through `:focus-within`, red when invalid; a transparent `outline` rule for forced-colors mode.
+- Errors styled by `:user-invalid` (after interaction); `invalid` sets `aria-invalid`.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system's dictionary: they translate
+globally (see **Foundations › Internationalization**), and the text props stay authoritative for
+a case-by-case adjustment.
