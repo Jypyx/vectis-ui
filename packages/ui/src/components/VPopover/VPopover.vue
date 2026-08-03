@@ -1,30 +1,30 @@
 <script setup lang="ts">
+/**
+ * Generic floating panel: the native Popover API + 100% CSS anchoring
+ * (`position-anchor`), with no dependency and no JS positioning.
+ *
+ * This component carries ONLY the plumbing common to every panel in the DS: the
+ * `[popover]` element and its mode, the DOM ↔ `v-model:open` state bridge (see
+ * `usePopover`), the anchoring and placement (`.v-overlay`/`.v-floating`), and
+ * the optional surface (`.v-panel`). It carries NO ARIA role, NO keyboard, NO
+ * focus management and NO dismissal policy: that is what distinguishes each
+ * panel, and it stays with the consumers (VTooltip, VCombobox, VDatePicker,
+ * VTimePicker). A panel parameterized by `role` stays forbidden.
+ *
+ * Two mutually exclusive anchoring modes:
+ * - the `#trigger` slot → the `.v-popover` wrapper carries the `anchor-name`,
+ *   confined by `anchor-scope` (a shared static name: each panel resolves ITS
+ *   wrapper, not the last one named on the page — see VTooltip);
+ * - the `anchor` prop → the consumer already owns the root and the control, sets
+ *   `anchor-scope`/`anchor-name` itself and supplies only the name. The wrapper
+ *   then switches to `display: contents`: no layout node added.
+ *
+ * Justified JS: the v-model ↔ imperative popover API bridge, nothing else.
+ */
 import { computed, onMounted, ref, useId, watch } from 'vue'
 
 import { usePopover } from '../../composables/usePopover'
 
-/**
- * Panneau flottant générique : Popover API native + ancrage 100 % CSS
- * (`position-anchor`), sans dépendance ni positionnement JS.
- *
- * Ce composant porte UNIQUEMENT la plomberie commune à tous les panneaux du
- * DS : l'élément `[popover]` et son mode, le pont d'état DOM ↔ `v-model:open`
- * (cf. `usePopover`), l'ancrage et le placement (`.v-overlay`/`.v-floating`),
- * et l'habillage optionnel (`.v-panel`). Il ne porte NI rôle ARIA, NI clavier,
- * NI gestion de focus, NI politique de fermeture : c'est ce qui distingue
- * chaque panneau, et ce qui reste chez ses consommateurs (VTooltip, Listbox,
- * VDatePicker, VTimePicker). Un panneau paramétré par `role` reste proscrit.
- *
- * Deux modes d'ancrage, exclusifs :
- * - slot `#trigger` → le wrapper `.v-popover` porte l'`anchor-name`, confiné
- *   par `anchor-scope` (nom statique partagé : chaque panneau résout SON
- *   wrapper, pas le dernier nommé de la page — cf. VTooltip) ;
- * - prop `anchor` → le consommateur possède déjà racine et contrôle, il pose
- *   lui-même `anchor-scope`/`anchor-name` et ne fournit que le nom. Le wrapper
- *   passe alors en `display: contents` : aucun nœud de layout ajouté.
- *
- * JS justifié : pont v-model ↔ API impérative du popover, rien d'autre.
- */
 export type PopoverPlacement =
   | 'top'
   | 'top-start'
@@ -39,7 +39,7 @@ export type PopoverPlacement =
   | 'right-start'
   | 'right-end'
 
-/** Props à poser sur le déclencheur (pattern disclosure). */
+/** Props to set on the trigger (the disclosure pattern). */
 export type PopoverTriggerProps = {
   popovertarget: string
   'aria-expanded': boolean
@@ -47,20 +47,20 @@ export type PopoverTriggerProps = {
 }
 
 interface PopoverProps {
-  /** Id du panneau (cible de `popovertarget`/`aria-controls`). Défaut : généré. */
+  /** Id of the panel (target of `popovertarget`/`aria-controls`). Default: generated. */
   id?: string
   placement?: PopoverPlacement
   /**
-   * `auto` : light dismiss natif (clic dehors, Échap) et pile de popovers.
-   * `manual` : rien n'est automatique, le consommateur ferme lui-même.
+   * `auto`: native light dismiss (click outside, Escape) and a popover stack.
+   * `manual`: nothing is automatic, the consumer closes it itself.
    */
   mode?: 'auto' | 'manual'
   /**
-   * Ancre statique (dashed-ident, ex. `--tooltip-anchor`) posée par le
-   * consommateur sur son contrôle. Prime sur le wrapper interne.
+   * Static anchor (a dashed-ident, e.g. `--tooltip-anchor`) set by the consumer
+   * on its control. Takes precedence over the internal wrapper.
    */
   anchor?: string
-  /** Habillage de surface (`.v-panel` : fond, bordure, ombre, rayon). */
+  /** Surface decoration (`.v-panel`: background, border, shadow, radius). */
   surface?: boolean
 }
 
@@ -75,18 +75,17 @@ const props = withDefaults(defineProps<PopoverProps>(), {
 const open = defineModel<boolean>('open', { default: false })
 
 const slots = defineSlots<{
-  /** Déclencheur : poser `v-bind="triggerProps"` sur un <VButton>/<button>. */
+  /** Trigger: set `v-bind="triggerProps"` on a <VButton>/<button>. */
   trigger?(props: { triggerProps: PopoverTriggerProps }): unknown
-  /** Contenu du panneau. */
+  /** Panel content. */
   default(): unknown
 }>()
 
 /*
- * Les attributs du consommateur (rôle ARIA, aria-*, data-*, class, style,
- * listeners) vont sur le PANNEAU, pas sur le wrapper d'ancrage : c'est le
- * panneau qui est le sujet visuel et sémantique. Variante assumée du pattern
- * wrapper-root du DS, qui garde class/style sur la racine — `useRootAttrs` ne
- * s'applique donc pas ici.
+ * The consumer's attributes (ARIA role, aria-*, data-*, class, style, listeners)
+ * go on the PANEL, not on the anchoring wrapper: the panel is the visual and
+ * semantic subject. A deliberate variant of the DS's wrapper-root pattern, which
+ * keeps class/style on the root — so `useRootAttrs` does not apply here.
  */
 defineOptions({ inheritAttrs: false })
 
@@ -94,8 +93,8 @@ const panelEl = ref<HTMLElement | null>(null)
 const generatedId = useId()
 const panelId = computed(() => props.id ?? generatedId)
 
-// État d'ouverture et gardes d'idempotence : cf. usePopover. `shown` est
-// alimentée par les événements du panneau, jamais posée à la main.
+// Open state and idempotence guards: see usePopover. `shown` is fed by the
+// panel's events, never set by hand.
 const { shown, syncShown, show, hide } = usePopover(panelEl)
 
 const hasTrigger = computed(() => slots.trigger !== undefined)
@@ -106,8 +105,8 @@ const triggerProps = computed<PopoverTriggerProps>(() => ({
   'aria-controls': panelId.value,
 }))
 
-// Une seule déclaration CSS couvre les deux modes : `position-anchor` retombe
-// sur le nom du wrapper quand la variable n'est pas posée.
+// A single CSS declaration covers both modes: `position-anchor` falls back to the
+// wrapper's name when the variable is not set.
 const panelStyle = computed(() => (props.anchor ? { '--anchor-name': props.anchor } : undefined))
 
 function onToggle(event: Event) {
@@ -115,7 +114,7 @@ function onToggle(event: Event) {
   open.value = shown.value
 }
 
-// Ouverture/fermeture programmatique via v-model (client uniquement).
+// Programmatic open/close through v-model (client only).
 watch(open, (value) => {
   if (value === shown.value) return
   if (value) show()
@@ -152,10 +151,10 @@ defineExpose({ show, hide, el: panelEl })
 <style>
 @layer vectis.components {
   /*
-   * Sans déclencheur, le wrapper ne sert à rien : `display: contents` le retire
-   * du layout (le panneau est en `position: fixed`, il n'en dépend pas) — un
-   * `inline-block` vide créerait une line box, donc de la hauteur, chez tous
-   * les consommateurs internes.
+   * With no trigger the wrapper serves no purpose: `display: contents` removes it
+   * from the layout (the panel is `position: fixed` and does not depend on it) —
+   * an empty `inline-block` would create a line box, hence height, for every
+   * internal consumer.
    */
   .v-popover {
     display: contents;
@@ -164,15 +163,15 @@ defineExpose({ show, hide, el: panelEl })
   .v-popover[data-trigger] {
     display: inline-block;
     anchor-name: --popover-anchor;
-    /* confine le nom d'ancre à ce sous-arbre : chaque panneau (même en top
-       layer) résout SON wrapper, pas le dernier wrapper nommé de la page */
+    /* confines the anchor name to this subtree: each panel (even in the top
+       layer) resolves ITS wrapper, not the last named wrapper on the page */
     anchor-scope: --popover-anchor;
   }
 
   /*
-   * Seule déclaration du panneau : AUCUNE dimension ici. `min/max-inline-size`,
-   * `max-block-size` et `overflow` varient d'un consommateur à l'autre et
-   * seraient arbitrés par l'ordre du bundle à spécificité égale (0,1,0).
+   * The panel's only declaration: NO dimension here. `min/max-inline-size`,
+   * `max-block-size` and `overflow` vary from one consumer to the next and would
+   * be arbitrated by bundle order at equal specificity (0,1,0).
    */
   .v-popover-panel {
     position-anchor: var(--anchor-name, --popover-anchor);

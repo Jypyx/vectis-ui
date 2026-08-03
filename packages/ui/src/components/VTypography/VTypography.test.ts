@@ -4,18 +4,18 @@ import { describe, expect, it } from 'vitest'
 import VTypography from './VTypography.vue'
 
 describe('VTypography', () => {
-  it('défaut : <p> body-md, sans data-tone ni data-truncate', () => {
-    const { container } = render(VTypography, { slots: { default: 'Texte' } })
+  it('default: a body-md <p>, with no data-tone and no data-truncate', () => {
+    const { container } = render(VTypography, { slots: { default: 'Text' } })
     const root = container.firstElementChild!
     expect(root.tagName).toBe('P')
     expect(root.classList.contains('v-typography')).toBe(true)
     expect(root.getAttribute('data-variant')).toBe('body-md')
     expect(root.hasAttribute('data-tone')).toBe(false)
     expect(root.hasAttribute('data-truncate')).toBe(false)
-    expect(root.textContent).toBe('Texte')
+    expect(root.textContent).toBe('Text')
   })
 
-  it('balise par défaut dérivée de la variante', () => {
+  it('default tag derived from the variant', () => {
     const cases: Array<[string, string]> = [
       ['display', 'P'],
       ['heading-1', 'H1'],
@@ -42,7 +42,7 @@ describe('VTypography', () => {
     }
   })
 
-  it('`as` prime sur la balise par défaut de la variante', () => {
+  it("`as` wins over the variant's default tag", () => {
     const { container } = render(VTypography, {
       props: { variant: 'heading-1', as: 'strong' },
       slots: { default: 'x' },
@@ -50,7 +50,7 @@ describe('VTypography', () => {
     expect(container.firstElementChild!.tagName).toBe('STRONG')
   })
 
-  it('tone explicite posé en data-tone', () => {
+  it('an explicit tone is set as data-tone', () => {
     const { container } = render(VTypography, {
       props: { tone: 'muted' },
       slots: { default: 'x' },
@@ -58,7 +58,7 @@ describe('VTypography', () => {
     expect(container.firstElementChild!.getAttribute('data-tone')).toBe('muted')
   })
 
-  it('truncate : data-truncate posé', () => {
+  it('truncate: data-truncate is set', () => {
     const { container } = render(VTypography, {
       props: { truncate: true },
       slots: { default: 'x' },
@@ -66,16 +66,16 @@ describe('VTypography', () => {
     expect(container.firstElementChild!.hasAttribute('data-truncate')).toBe(true)
   })
 
-  it('fallthrough : for/id/class atterrissent sur la racine (usage label de champ)', () => {
+  it('fallthrough: for/id/class land on the root (field-label usage)', () => {
     const { container } = render(VTypography, {
       props: { variant: 'label', as: 'label' },
-      attrs: { for: 'champ', id: 'mon-label', class: 'extra' },
-      slots: { default: 'Nom' },
+      attrs: { for: 'field', id: 'my-label', class: 'extra' },
+      slots: { default: 'Name' },
     })
     const root = container.firstElementChild!
     expect(root.tagName).toBe('LABEL')
-    expect(root.getAttribute('for')).toBe('champ')
-    expect(root.getAttribute('id')).toBe('mon-label')
+    expect(root.getAttribute('for')).toBe('field')
+    expect(root.getAttribute('id')).toBe('my-label')
     expect(root.classList.contains('extra')).toBe(true)
     expect(root.classList.contains('v-typography')).toBe(true)
   })

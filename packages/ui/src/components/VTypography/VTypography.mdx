@@ -5,67 +5,65 @@ import * as VTypographyStories from './VTypography.stories'
 
 # Typography
 
-Élément de texte du design system : la prop `variant` sélectionne une **recette
-typographique complète** (famille, taille, graisse, interlignage, espacement de lettres)
-issue des tokens sémantiques `--vectis-text-*`, et `tone` une couleur sémantique. C'est la voie
-unique pour écrire du texte cohérent avec les composants : titres, corps de texte, libellés,
-légendes et code partagent exactement les mêmes tokens que le texte interne des composants
-(VDialog, VInput, VDataTable…).
+The design system's text element: the `variant` prop selects a **complete typographic recipe**
+(family, size, weight, leading, letter spacing) taken from the semantic `--vectis-text-*`
+tokens, and `tone` a semantic colour. It is the single route to writing text coherent with the
+components: headings, body copy, labels, captions and code all share exactly the same tokens as
+the components' internal text (VDialog, VInput, VDataTable…).
 
-Le composant ne porte **aucune marge** : l'espacement vertical appartient au layout parent
-(pile flex/grid avec `gap`).
+The component carries **no margin**: vertical spacing belongs to the parent layout (a flex/grid
+stack with `gap`).
 
 <Canvas of={VTypographyStories.Default} />
 
 <Controls of={VTypographyStories.Default} />
 
-## Variantes
+## Variants
 
-Treize rôles : `display`, `heading-1…4`, `subtitle`, `body-lg/md/sm`, `label`, `caption`,
-`overline` (rendu en capitales, tracking élargi) et `code` (pile monospace). Chaque rôle est
-une recette fermée — pas de props `size`/`weight` à composer : si un rendu intermédiaire
-manque, c'est un rôle à ajouter aux tokens, pas une combinaison à improviser.
+Thirteen roles: `display`, `heading-1…4`, `subtitle`, `body-lg/md/sm`, `label`, `caption`,
+`overline` (rendered in capitals, with widened tracking) and `code` (monospace stack). Each role
+is a closed recipe — there are no `size`/`weight` props to compose: if an intermediate rendering
+is missing, that is a role to add to the tokens, not a combination to improvise.
 
-<Canvas of={VTypographyStories.Variantes} />
+<Canvas of={VTypographyStories.Variants} />
 
 ## Tones
 
-`default` (héritage — le texte suit la couleur du contexte, y compris sur une surface
-inversée ou dans un toast coloré), `muted`, `subtle`, `accent`, `danger`, `success`,
-`warning` et `on-inverse`.
+`default` (inheritance — the text follows the colour of the context, including on an inverted
+surface or inside a coloured toast), `muted`, `subtle`, `accent`, `danger`, `success`, `warning`
+and `on-inverse`.
 
 <Canvas of={VTypographyStories.Tones} />
 
-## Balises
+## Tags
 
-Chaque variante rend une balise sémantique par défaut (`heading-1` → `h1`, corps de texte →
-`p`, `label`/`overline` → `span`, `code` → `code`). La prop `as` en change librement : la
-hiérarchie **visuelle** (la variante) et la hiérarchie **de document** (la balise) sont
-indépendantes — un titre de section secondaire peut être un `h2` stylé en `heading-4`.
+Each variant renders a default semantic tag (`heading-1` → `h1`, body copy → `p`,
+`label`/`overline` → `span`, `code` → `code`). The `as` prop changes it freely: the **visual**
+hierarchy (the variant) and the **document** hierarchy (the tag) are independent — a secondary
+section heading can be an `h2` styled as `heading-4`.
 
-Les attributs natifs tombent sur la racine par fallthrough : `as="label"` + `for` produit un
-vrai label de champ (c'est ainsi que VInput consomme le composant en interne).
+Native attributes land on the root by fallthrough: `as="label"` + `for` produces a real field
+label (that is how VInput consumes the component internally).
 
-<Canvas of={VTypographyStories.Balises} />
+<Canvas of={VTypographyStories.Tags} />
 
-## Troncature
+## Truncation
 
-`truncate` coupe le texte sur une ligne avec une ellipse. L'élément doit disposer d'une
-largeur contrainte (bloc dans un conteneur dimensionné, ou flex item avec `min-width: 0`).
+`truncate` cuts the text on a single line with an ellipsis. The element must have a constrained
+width (a block inside a sized container, or a flex item with `min-width: 0`).
 
 <Canvas of={VTypographyStories.Truncate} />
 
-## Texte courant
+## Running text
 
-<Canvas of={VTypographyStories.Paragraphe} />
+<Canvas of={VTypographyStories.Paragraph} />
 
-## Accessibilité
+## Accessibility
 
-- La hiérarchie de titres du document doit rester logique : choisir la balise avec `as`
-  indépendamment du rendu visuel (ne pas sauter de niveaux).
-- `tone="subtle"` est réservé aux textes non essentiels (placeholders, états désactivés) :
-  son contraste est volontairement faible.
-- `overline` passe le texte en capitales via CSS (`text-transform`) : les lecteurs d'écran
-  lisent le texte source tel quel, sans l'épeler.
-- Le composant ne rend aucun rôle ARIA : c'est du texte, la sémantique vient de la balise
-  choisie.
+- The document's heading hierarchy must stay logical: choose the tag with `as` independently of
+  the visual rendering (do not skip levels).
+- `tone="subtle"` is reserved for non-essential text (placeholders, disabled states): its
+  contrast is deliberately low.
+- `overline` uppercases the text through CSS (`text-transform`): screen readers read the source
+  text as-is, without spelling it out.
+- The component renders no ARIA role: it is text, and the semantics come from the chosen tag.
