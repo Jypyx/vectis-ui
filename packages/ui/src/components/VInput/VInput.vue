@@ -1,13 +1,13 @@
 <script setup lang="ts">
 /**
- * Champ de saisie complet : label, icônes internes (cliquables), compteur,
- * limite souple, loading, clearable — autour d'un <input> natif stylé.
- * Wrapper-root : class/style restent sur la racine, tout le reste est reporté
- * sur l'<input>. La validation reste native (`:user-invalid`) ; la limite
- * souple passe par setCustomValidity, jamais par un événement maison.
+ * Complete text field: label, internal (clickable) icons, counter, soft limit,
+ * loading, clearable — around a styled native <input>. Wrapper-root: class/style
+ * stay on the root, everything else is forwarded to the <input>. Validation stays
+ * native (`:user-invalid`); the soft limit goes through setCustomValidity, never
+ * through a custom event.
  *
- * JS de comportement propre au composant : le pont v-model et le clear +
- * refocus (le bouton disparaît au clic, sinon le focus serait perdu).
+ * Behavioural JS specific to the component: the v-model bridge and clear +
+ * refocus (the button disappears on click, so focus would otherwise be lost).
  */
 import { computed, ref } from 'vue'
 
@@ -24,50 +24,50 @@ import { useTextLimit } from '../../composables/useTextLimit'
 import { useMessages } from '../../i18n/state'
 
 interface InputProps {
-  /** Hauteur du champ : sm 32px, md 40px (défaut), lg 48px. */
+  /** Field height: sm 32px, md 40px (default), lg 48px. */
   size?: 'sm' | 'md' | 'lg'
-  /** Hauteur réduite de 4px ; padding, typo et icônes inchangés. */
+  /** Height reduced by 4px; padding, type and icons unchanged. */
   compact?: boolean
-  /** Type de saisie natif — les claviers virtuels s'adaptent automatiquement. */
+  /** Native input type — virtual keyboards adapt automatically. */
   type?: 'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url'
-  /** Force l'état invalide (validation serveur) — pose aria-invalid. */
+  /** Forces the invalid state (server-side validation) — sets aria-invalid. */
   invalid?: boolean
   disabled?: boolean
-  /** Lecture seule : focusable, non modifiable ; masque le bouton d'effacement
-      (sauf `clearVisible` explicite, qui fait autorité). */
+  /** Read-only: focusable, not editable; hides the clear button (unless an
+      explicit `clearVisible`, which is authoritative). */
   readonly?: boolean
-  /** Libellé au-dessus du champ, associé via for/id. */
+  /** Label above the field, associated through for/id. */
   label?: string
-  /** Texte d'aide sous le champ, lié via aria-describedby. */
+  /** Help text under the field, linked through aria-describedby. */
   hint?: string
-  /** Icône à gauche dans le champ (le slot #start prime).
-      Décorative ; devient un bouton si un listener @click:icon-start est attaché. */
+  /** Icon on the left inside the field (the #start slot wins). Decorative; becomes
+      a button if a @click:icon-start listener is attached. */
   iconStart?: IconSource
-  /** Idem à droite (slot #end prime). Remplacée par le spinner en loading. */
+  /** Same on the right (the #end slot wins). Replaced by the spinner when loading. */
   iconEnd?: IconSource
-  /** Libellé accessible du bouton icône start (si cliquable). */
+  /** Accessible label of the start icon button (when clickable). */
   iconStartLabel?: string
-  /** Libellé accessible du bouton icône end (si cliquable). */
+  /** Accessible label of the end icon button (when clickable). */
   iconEndLabel?: string
-  /** VSpinner à droite, à la place de iconEnd / #end. */
+  /** A VSpinner on the right, in place of iconEnd / #end. */
   loading?: boolean
-  /** Libellé du spinner pour les lecteurs d'écran. Défaut : dictionnaire du DS. */
+  /** Spinner label for screen readers. Default: the DS dictionary. */
   loadingLabel?: string
-  /** Bouton croix qui vide le champ (visible si non-vide, hors disabled/readonly). */
+  /** Cross button that empties the field (visible when non-empty, outside disabled/readonly). */
   clearable?: boolean
-  /** Force la visibilité de la croix (sinon : champ non-vide et modifiable) —
-      readonly compris. Utile quand le « contenu à effacer » vit hors du champ
-      texte (VCombobox : des Chips) ou se modifie autrement que par la frappe
-      (VDatePicker/VTimePicker en lecture seule : par leur panneau). */
+  /** Forces the cross's visibility (otherwise: a non-empty, editable field) —
+      readonly included. Useful when the "content to clear" lives outside the text
+      field (VCombobox: Chips) or changes by means other than typing (a read-only
+      VDatePicker/VTimePicker: through its panel). */
   clearVisible?: boolean
-  /** Libellé accessible du bouton d'effacement. Défaut : dictionnaire du DS. */
+  /** Accessible label of the clear button. Default: the DS dictionary. */
   clearLabel?: string
-  /** Limite de caractères. Par défaut : attribut natif maxlength (saisie bloquée). */
+  /** Character limit. By default: the native maxlength attribute (input blocked). */
   maxlength?: number
-  /** Limite souple : la saisie peut dépasser maxlength, le champ passe en erreur
-      (setCustomValidity → :user-invalid) au lieu de bloquer. */
+  /** Soft limit: input may exceed maxlength and the field goes into error
+      (setCustomValidity → :user-invalid) instead of blocking. */
   softLimit?: boolean
-  /** Compteur de caractères (« 12/80 », ou « 12 » sans maxlength), à droite dans le champ. */
+  /** Character counter ("12/80", or "12" without maxlength), on the right inside the field. */
   counter?: boolean
 }
 
@@ -103,28 +103,27 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  /** Contenu au début du champ (prime sur iconStart). */
+  /** Content at the start of the field (wins over iconStart). */
   start?(): unknown
-  /** Contenu à la fin du champ (prime sur iconEnd, masqué en loading). */
+  /** Content at the end of the field (wins over iconEnd, hidden when loading). */
   end?(): unknown
 }>()
 
 /**
- * `string | number` et non `string` seul : sur un `<input type="number">`, Vue
- * convertit d'office la valeur de `v-model` en nombre (`vModelText` caste dès
- * que `el.type === 'number'`).
+ * `string | number` rather than `string` alone: on an `<input type="number">`, Vue
+ * automatically converts the `v-model` value to a number (`vModelText` casts as
+ * soon as `el.type === 'number'`).
  */
 const model = defineModel<string | number>({ default: '' })
 
-/** Projection texte du modèle : toutes les mesures de longueur (compteur,
- * limite souple, visibilité de la croix) passent par elle — un nombre n'a pas
- * de `.length`. */
+/** Text projection of the model: every length measurement (counter, soft limit,
+ * cross visibility) goes through it — a number has no `.length`. */
 const modelText = computed(() => String(model.value ?? ''))
 
 const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
 
-// Cascade prop > dictionnaire : la prop garde la priorité, son défaut suit
-// désormais la locale du DS.
+// Cascade prop > dictionary: the prop keeps priority, its default follows the DS
+// locale.
 const m = useMessages()
 const resolvedLoadingLabel = computed(() => props.loadingLabel ?? m.value.common.loading)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
@@ -141,10 +140,10 @@ const controlEl = ref<HTMLInputElement | null>(null)
 
 const showClear = computed(() => {
   if (!props.clearable || props.disabled) return false
-  // `clearVisible` fourni = réponse EXPLICITE du consommateur à « y a-t-il
-  // quelque chose à effacer ? », readonly compris : la valeur d'un VDatePicker /
-  // VTimePicker en lecture seule se modifie par son panneau, pas par la frappe.
-  // Sinon : défaut « champ non-vide ET modifiable ».
+  // A supplied `clearVisible` is the consumer's EXPLICIT answer to "is there
+  // anything to clear?", readonly included: the value of a read-only VDatePicker /
+  // VTimePicker changes through its panel, not through typing. Otherwise the
+  // default is "field non-empty AND editable".
   return props.clearVisible ?? (!props.readonly && modelText.value.length > 0)
 })
 
@@ -154,7 +153,7 @@ function onClear() {
   controlEl.value?.focus()
 }
 
-// Compteur et limite souple : mesurés sur `modelText`, un nombre n'a pas de `.length`.
+// Counter and soft limit: measured on `modelText`, since a number has no `.length`.
 const { counterText, over } = useTextLimit({
   el: controlEl,
   text: () => modelText.value,
@@ -162,8 +161,8 @@ const { counterText, over } = useTextLimit({
   softLimit: () => props.softLimit,
 })
 
-// Le contrôle interne est masqué par le wrapper : exposer focus()/select()/el
-// pour les composants qui le composent (ex. VCombobox, refocus + select-all).
+// The internal control is hidden by the wrapper: expose focus()/select()/el for
+// the components that compose it (e.g. VCombobox, refocus + select-all).
 defineExpose({
   focus: (options?: FocusOptions) => controlEl.value?.focus(options),
   select: () => controlEl.value?.select(),
@@ -225,8 +224,6 @@ defineExpose({
         :aria-label="resolvedClearLabel"
         @click="onClear"
       >
-        <!-- croix Material Symbols : même graisse de trait que les autres icônes
-             (iconStart/iconEnd, chevrons…) ; police chargée par le consommateur -->
         <VIcon name="close" />
       </button>
 
@@ -262,13 +259,13 @@ defineExpose({
     font-family: var(--vectis-text-family);
   }
 
-  /* Label et hint : rendus par VTypography (label / caption muted) — les classes
-     .v-input-label/.v-input-hint restent posées comme points d'accroche
-     (surcharges consommateur, état disabled ci-dessous). */
+  /* Label and hint: rendered by VTypography (label / muted caption) — the
+     .v-input-label/.v-input-hint classes stay in place as hooks (consumer
+     overrides, the disabled state below). */
 
   /* Le field porte bordure, fond et focus ; --field-border-color est la seule
-     source de vérité de la couleur (hover/erreur/disabled la redéfinissent).
-     Tailles/compact : variables --control-* héritées de la racine v-control
+     source of truth for the colour (hover/error/disabled redefine it).
+     Sizes/compact: --control-* variables inherited from the v-control root
      (styles/control-size.css), contexte de VIcon compris. */
   .v-input-field {
     --field-border-color: var(--vectis-color-border-strong);
@@ -298,17 +295,17 @@ defineExpose({
     background: none;
     color: inherit;
     font: inherit;
-    outline: none; /* le focus est porté par le field (focus-within) */
+    outline: none; /* focus is carried by the field (focus-within) */
   }
 
   .v-input-control::placeholder {
     color: var(--vectis-color-text-subtle);
   }
 
-  /* Décorations natives neutralisées : les contrôles internes viennent du DS
-     (croix `clearable`, icônes) — la croix WebKit de type=search, les spinners
-     de type=number et l'œil de révélation d'Edge feraient doublon ou
-     détonneraient visuellement. */
+  /* Native decorations neutralized: the internal controls come from the DS (the
+     `clearable` cross, the icons) — WebKit's type=search cross, the type=number
+     spinners and Edge's reveal eye would either duplicate them or clash
+     visually. */
   .v-input-control::-webkit-search-cancel-button,
   .v-input-control::-webkit-search-decoration,
   .v-input-control::-webkit-search-results-button,
@@ -347,10 +344,10 @@ defineExpose({
     );
   }
 
-  /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur,
-     sans saut de layout. On cible le focus du seul CONTRÔLE (pas :focus-within) :
-     quand un bouton interne (clear, icône) est focus au clavier, seul son
-     outline propre s'allume — sinon deux indicateurs simultanés, illisible.
+  /* "2px border" focus: a 1px border + a 1px outer shadow of the same colour, with
+     no layout jump. Only the CONTROL's focus is targeted (not :focus-within): when
+     an internal button (clear, icon) has keyboard focus, only its own outline
+     lights up — otherwise two simultaneous indicators, unreadable.
      :focus (pas :focus-visible) : un champ texte montre toujours son focus,
      souris comprise. L'outline transparent est le filet forced-colors
      (Windows High Contrast supprime les box-shadow). */
@@ -361,15 +358,15 @@ defineExpose({
     outline: var(--vectis-focus-ring-width) solid transparent;
   }
 
-  /* État invalide : pseudo-classe native d'abord, prop (aria-invalid) ensuite.
-     Seule la variable change → la bordure ET le ring focus passent en rouge. */
+  /* Invalid state: the native pseudo-class first, the prop (aria-invalid) second.
+     Only the variable changes → both the border AND the focus ring go red. */
   .v-input-field:has(.v-input-control:user-invalid),
   .v-input-field:has(.v-input-control[aria-invalid='true']) {
     --field-border-color: var(--vectis-color-danger);
   }
 
-  /* Le compteur reste stylé localement : tabular-nums et l'état de dépassement
-     ne sont pas des rôles typographiques. */
+  /* The counter stays styled locally: tabular-nums and the overflow state are not
+     typographic roles. */
   .v-input-counter {
     flex: none;
     font-size: var(--vectis-text-caption-size);
@@ -381,7 +378,7 @@ defineExpose({
     color: var(--vectis-color-danger-text);
   }
 
-  /* Icônes décoratives : gris foncé, moins présentes que le texte saisi */
+  /* Decorative icons: dark grey, less present than the typed text */
   .v-input-field > .v-icon {
     color: var(--vectis-color-text-muted);
   }
@@ -390,8 +387,8 @@ defineExpose({
     font-size: var(--vectis-icon-size);
   }
 
-  /* Boutons internes (effacer, icône cliquable) : gris foncé → noir au hover,
-     radius aligné sur VButton (focus ring carré aux bords arrondis) */
+  /* Internal buttons (clear, clickable icon): dark grey → black on hover, radius
+     aligned with VButton (a square focus ring with rounded edges) */
   .v-input-action {
     display: inline-flex;
     align-items: center;
@@ -418,16 +415,17 @@ defineExpose({
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
-  /* Readonly : fond légèrement enfoncé, texte normal (la valeur reste lisible),
-     focus accent conservé. [data-readonly] et jamais :read-only (matche :disabled). */
+  /* Readonly: a slightly sunken background, normal text (the value stays
+     readable), accent focus kept. [data-readonly] and never :read-only (which also
+     matches :disabled). */
   .v-input[data-readonly] .v-input-field {
     --field-border-color: var(--vectis-color-border);
 
     background: var(--vectis-color-surface-sunken);
   }
 
-  /* Disabled : nuance de gris sans opacité (mêmes tokens que VCheckbox/VRadio).
-     Placé après les états erreur/readonly : à spécificité égale, il gagne. */
+  /* Disabled: a grey shade with no opacity (the same tokens as VCheckbox/VRadio).
+     Placed after the error/readonly states: at equal specificity, it wins. */
   .v-input[data-disabled] .v-input-field {
     --field-border-color: var(--vectis-color-border);
 

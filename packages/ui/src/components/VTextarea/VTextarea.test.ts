@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import VTextarea from './VTextarea.vue'
 
 describe('VTextarea', () => {
-  it('synchronise v-model (update:modelValue)', async () => {
+  it('syncs v-model (update:modelValue)', async () => {
     const { getByRole, emitted } = render(VTextarea, {
       props: { modelValue: '' },
     })
@@ -13,7 +13,7 @@ describe('VTextarea', () => {
     expect(emitted('update:modelValue')).toEqual([['ligne 1\nligne 2']])
   })
 
-  it('invalid pose aria-invalid, autoGrow pose data-auto-grow sur le field', () => {
+  it('invalid sets aria-invalid, autoGrow sets data-auto-grow on the field', () => {
     const { getByRole, container } = render(VTextarea, {
       props: { modelValue: '', invalid: true, autoGrow: true },
     })
@@ -22,7 +22,7 @@ describe('VTextarea', () => {
     expect(field.hasAttribute('data-auto-grow')).toBe(true)
   })
 
-  it('laisse passer les attributs natifs sur le contrôle (required, name, rows)', () => {
+  it('lets the native attributes through onto the control (required, name, rows)', () => {
     const { getByRole } = render(VTextarea, {
       props: { modelValue: '' },
       attrs: { required: true, name: 'bio', rows: 5 },
@@ -33,7 +33,7 @@ describe('VTextarea', () => {
     expect(textarea.getAttribute('rows')).toBe('5')
   })
 
-  it('class et style atterrissent sur la racine, pas sur le contrôle', () => {
+  it('class and style land on the root, not on the control', () => {
     const { container, getByRole } = render(VTextarea, {
       props: { modelValue: '' },
       attrs: { class: 'consommateur', style: 'width: 320px' },
@@ -44,7 +44,7 @@ describe('VTextarea', () => {
     expect(getByRole('textbox').classList.contains('consommateur')).toBe(false)
   })
 
-  it('label est associé au contrôle via for/id, hint lié via aria-describedby', () => {
+  it('the label is associated with the control through for/id, the hint linked through aria-describedby', () => {
     const { getByLabelText, getByText } = render(VTextarea, {
       props: { modelValue: '', label: 'Bio', hint: '500 caractères max' },
     })
@@ -54,7 +54,7 @@ describe('VTextarea', () => {
     expect(textarea.getAttribute('aria-describedby')).toContain(hint.id)
   })
 
-  it("icône cliquable : bouton accessible et émission de l'événement", async () => {
+  it('clickable icon: an accessible button and the event emitted', async () => {
     const onClick = vi.fn()
     const { getByRole, emitted } = render(VTextarea, {
       props: { modelValue: '', iconEnd: 'edit', iconEndLabel: 'Modifier' },
@@ -65,22 +65,22 @@ describe('VTextarea', () => {
     expect(emitted('click:icon-end')).toHaveLength(1)
   })
 
-  it('clear : vide le champ, émet clear et refocus le contrôle ; masqué en readonly', async () => {
+  it('clear: empties the field, emits clear and refocuses the control; hidden when readonly', async () => {
     const { getByRole, emitted } = render(VTextarea, {
-      props: { modelValue: 'texte', clearable: true },
+      props: { modelValue: 'text', clearable: true },
     })
-    await fireEvent.click(getByRole('button', { name: 'Effacer' }))
+    await fireEvent.click(getByRole('button', { name: 'Clear' }))
     expect(emitted('update:modelValue')).toEqual([['']])
     expect(emitted('clear')).toHaveLength(1)
     expect(document.activeElement).toBe(getByRole('textbox'))
 
     const readonly = render(VTextarea, {
-      props: { modelValue: 'texte', clearable: true, readonly: true },
+      props: { modelValue: 'text', clearable: true, readonly: true },
     })
-    expect(readonly.queryByRole('button', { name: 'Effacer' })).toBeNull()
+    expect(readonly.queryByRole('button', { name: 'Clear' })).toBeNull()
   })
 
-  it("loading : spinner présent, l'icône end absente", () => {
+  it('loading: the spinner is present, the end icon absent', () => {
     const { getByRole, container } = render(VTextarea, {
       props: { modelValue: '', loading: true, iconEnd: 'edit' },
     })
@@ -88,7 +88,7 @@ describe('VTextarea', () => {
     expect(container.querySelectorAll('.v-icon')).toHaveLength(0)
   })
 
-  it('softLimit : pas de maxlength natif, customError au-delà de la limite', async () => {
+  it('softLimit: no native maxlength, customError beyond the limit', async () => {
     const { getByRole, rerender } = render(VTextarea, {
       props: { modelValue: 'ok', maxlength: 5, softLimit: true },
     })
@@ -99,7 +99,7 @@ describe('VTextarea', () => {
     expect(textarea.validity.customError).toBe(true)
   })
 
-  it('compteur : sous le champ dans la ligne meta, data-over au-delà', async () => {
+  it('counter: under the field in the meta row, data-over beyond the limit', async () => {
     const { container, rerender } = render(VTextarea, {
       props: { modelValue: 'abc', maxlength: 10, softLimit: true, counter: true },
     })
@@ -111,7 +111,7 @@ describe('VTextarea', () => {
     expect(counter.hasAttribute('data-over')).toBe(true)
   })
 
-  it('disabled et readonly : data-attributes sur la racine, attributs natifs sur le contrôle', () => {
+  it('disabled and readonly: data-attributes on the root, native attributes on the control', () => {
     const { container, getByRole } = render(VTextarea, {
       props: { modelValue: '', readonly: true },
     })
@@ -126,7 +126,7 @@ describe('VTextarea', () => {
     )
   })
 
-  it('compact : data-compact posé sur la racine', () => {
+  it('compact: data-compact set on the root', () => {
     const { container } = render(VTextarea, {
       props: { modelValue: '', compact: true },
     })

@@ -1,15 +1,14 @@
 <script setup lang="ts">
 /**
- * Zone de texte complète : label, icônes internes (cliquables), compteur,
- * limite souple, loading, clearable — autour d'un <textarea> natif stylé.
- * Miroir de VInput, avec `autoGrow` (pur CSS, `field-sizing: content`) et le
- * compteur rendu SOUS le champ, jamais dedans. Wrapper-root : class/style
- * restent sur la racine, tout le reste est reporté sur le <textarea>. La
- * validation reste native (`:user-invalid`) ; la limite souple passe par
- * setCustomValidity.
+ * Complete text area: label, internal (clickable) icons, counter, soft limit,
+ * loading, clearable — around a styled native <textarea>. A mirror of VInput,
+ * with `autoGrow` (pure CSS, `field-sizing: content`) and the counter rendered
+ * UNDER the field, never inside it. Wrapper-root: class/style stay on the root,
+ * everything else is forwarded to the <textarea>. Validation stays native
+ * (`:user-invalid`); the soft limit goes through setCustomValidity.
  *
- * JS de comportement propre au composant : le pont v-model et le clear +
- * refocus (le bouton disparaît au clic, sinon le focus serait perdu).
+ * Behavioural JS specific to the component: the v-model bridge and clear +
+ * refocus (the button disappears on click, so focus would otherwise be lost).
  */
 import { computed, ref } from 'vue'
 
@@ -26,44 +25,44 @@ import { useTextLimit } from '../../composables/useTextLimit'
 import { useMessages } from '../../i18n/state'
 
 interface TextareaProps {
-  /** Hauteur du champ : sm 32px, md 40px (défaut), lg 48px. */
+  /** Field height: sm 32px, md 40px (default), lg 48px. */
   size?: 'sm' | 'md' | 'lg'
-  /** Hauteur minimale réduite de 4px ; padding, typo et icônes inchangés. */
+  /** Minimum height reduced by 4px; padding, type and icons unchanged. */
   compact?: boolean
   /** Hauteur qui suit le contenu (field-sizing: content ; sans support, textarea classique). */
   autoGrow?: boolean
-  /** Force l'état invalide (validation serveur) — pose aria-invalid. */
+  /** Forces the invalid state (server-side validation) — sets aria-invalid. */
   invalid?: boolean
   disabled?: boolean
   /** Lecture seule : focusable, non modifiable ; masque le bouton d'effacement. */
   readonly?: boolean
-  /** Libellé au-dessus du champ, associé via for/id. */
+  /** Label above the field, associated through for/id. */
   label?: string
-  /** Texte d'aide sous le champ, lié via aria-describedby. */
+  /** Help text under the field, linked through aria-describedby. */
   hint?: string
-  /** Icône à gauche dans le champ (le slot #start prime).
-      Décorative ; devient un bouton si un listener @click:icon-start est attaché. */
+  /** Icon on the left inside the field (the #start slot wins). Decorative; becomes
+      a button if a @click:icon-start listener is attached. */
   iconStart?: IconSource
-  /** Idem à droite (slot #end prime). Remplacée par le spinner en loading. */
+  /** Same on the right (the #end slot wins). Replaced by the spinner when loading. */
   iconEnd?: IconSource
-  /** Libellé accessible du bouton icône start (si cliquable). */
+  /** Accessible label of the start icon button (when clickable). */
   iconStartLabel?: string
-  /** Libellé accessible du bouton icône end (si cliquable). */
+  /** Accessible label of the end icon button (when clickable). */
   iconEndLabel?: string
-  /** VSpinner à droite, à la place de iconEnd / #end. */
+  /** A VSpinner on the right, in place of iconEnd / #end. */
   loading?: boolean
-  /** Libellé du spinner pour les lecteurs d'écran. Défaut : dictionnaire du DS. */
+  /** Spinner label for screen readers. Default: the DS dictionary. */
   loadingLabel?: string
   /** Bouton croix qui vide le champ (visible si non-vide, hors disabled/readonly). */
   clearable?: boolean
-  /** Libellé accessible du bouton d'effacement. Défaut : dictionnaire du DS. */
+  /** Accessible label of the clear button. Default: the DS dictionary. */
   clearLabel?: string
-  /** Limite de caractères. Par défaut : attribut natif maxlength (saisie bloquée). */
+  /** Character limit. By default: the native maxlength attribute (input blocked). */
   maxlength?: number
-  /** Limite souple : la saisie peut dépasser maxlength, le champ passe en erreur
-      (setCustomValidity → :user-invalid) au lieu de bloquer. */
+  /** Soft limit: input may exceed maxlength and the field goes into error
+      (setCustomValidity → :user-invalid) instead of blocking. */
   softLimit?: boolean
-  /** Compteur de caractères (« 12/80 », ou « 12 » sans maxlength), sous le champ à droite. */
+  /** Character counter ("12/80", or "12" without maxlength), under the field on the right. */
   counter?: boolean
 }
 
@@ -98,19 +97,19 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  /** Contenu au début du champ (prime sur iconStart). */
+  /** Content at the start of the field (wins over iconStart). */
   start?(): unknown
-  /** Contenu à la fin du champ (prime sur iconEnd, masqué en loading). */
+  /** Content at the end of the field (wins over iconEnd, hidden when loading). */
   end?(): unknown
 }>()
 
 const model = defineModel<string>({ default: '' })
 
-// class/style sur la racine ; tout le reste sur le contrôle natif
+// class/style on the root; everything else on the native control
 const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
 
-// Cascade prop > dictionnaire : la prop garde la priorité, son défaut suit
-// désormais la locale du DS.
+// Cascade prop > dictionary: the prop keeps priority, its default follows the DS
+// locale.
 const m = useMessages()
 const resolvedLoadingLabel = computed(() => props.loadingLabel ?? m.value.common.loading)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
@@ -192,8 +191,6 @@ const { counterText, over } = useTextLimit({
         :aria-label="resolvedClearLabel"
         @click="onClear"
       >
-        <!-- croix Material Symbols : même graisse de trait que les autres icônes
-             (iconStart/iconEnd…) ; police chargée par le consommateur -->
         <VIcon name="close" />
       </button>
 
@@ -234,9 +231,9 @@ const { counterText, over } = useTextLimit({
     font-family: var(--vectis-text-family);
   }
 
-  /* Label et hint : rendus par VTypography (label / caption muted) — les classes
-     .v-textarea-label/.v-textarea-hint restent posées comme points d'accroche
-     (surcharges consommateur, état disabled ci-dessous). */
+  /* Label and hint: rendered by VTypography (label / muted caption) — the
+     .v-textarea-label/.v-textarea-hint classes stay in place as hooks (consumer
+     overrides, the disabled state below). */
 
   .v-textarea-meta {
     display: flex;
@@ -244,8 +241,8 @@ const { counterText, over } = useTextLimit({
     gap: var(--vectis-space-2);
   }
 
-  /* Le compteur reste stylé localement : tabular-nums et l'état de dépassement
-     ne sont pas des rôles typographiques. */
+  /* The counter stays styled locally: tabular-nums and the overflow state are not
+     typographic roles. */
   .v-textarea-counter {
     margin-inline-start: auto;
     font-size: var(--vectis-text-caption-size);
@@ -258,16 +255,16 @@ const { counterText, over } = useTextLimit({
   }
 
   /* Le field porte bordure, fond, focus ET le redimensionnement (resize exige
-     overflow ≠ visible) ; --field-border-color est la seule source de vérité de la
-     couleur (hover/erreur/disabled la redéfinissent) */
+     overflow ≠ visible); --field-border-color is the single source of truth for the
+     colour (hover/error/disabled redefine it) */
   .v-textarea-field {
     --field-border-color: var(--vectis-color-border-strong);
 
     /*
-     * Tailles/compact : variables --control-* héritées de la racine
+     * Sizes/compact: --control-* variables inherited from the root
      * v-control (styles/control-size.css), contexte de VIcon compris.
-     * Hauteur minimale = 2 lignes : base + hauteur effective — vaut 2×base
-     * sans compact, 2×base - 4px avec (la hauteur effective porte le delta).
+     * Minimum height = 2 lines: base + effective height — that is 2×base without
+     * compact, 2×base - 4px with it (the effective height carries the delta).
      */
     --textarea-min-height: calc(var(--control-height-base) + var(--control-height));
 
@@ -281,8 +278,8 @@ const { counterText, over } = useTextLimit({
     border: 1px solid var(--field-border-color);
     border-radius: var(--vectis-radius-interactive);
     font-size: var(--control-font-size);
-    /* texte multiligne : interlignage du corps de texte (le rôle `control`
-       en leading-none ne vaut que pour les étiquettes d'une ligne) */
+    /* multi-line text: body leading (the `control` role at leading-none only holds
+       for single-line labels) */
     line-height: var(--vectis-text-body-md-leading);
     resize: vertical;
     overflow: hidden;
@@ -301,15 +298,15 @@ const { counterText, over } = useTextLimit({
     background: none;
     color: inherit;
     font: inherit;
-    outline: none; /* le focus est porté par le field (focus-within) */
-    resize: none; /* le redimensionnement est porté par le field */
+    outline: none; /* focus is carried by the field (focus-within) */
+    resize: none; /* resizing is carried by the field */
   }
 
   .v-textarea-control::placeholder {
     color: var(--vectis-color-text-subtle);
   }
 
-  /* icônes et boutons centrés sur la première ligne de texte */
+  /* icons and buttons centred on the first line of text */
   .v-textarea-field > .v-icon,
   .v-textarea-field > .v-spinner {
     margin-block-start: calc((1lh - var(--vectis-icon-size)) / 2);
@@ -319,7 +316,7 @@ const { counterText, over } = useTextLimit({
     margin-block-start: calc((1lh - var(--control-action-size)) / 2);
   }
 
-  /* Icônes décoratives : gris foncé, moins présentes que le texte saisi */
+  /* Decorative icons: dark grey, less present than the typed text */
   .v-textarea-field > .v-icon {
     color: var(--vectis-color-text-muted);
   }
@@ -342,10 +339,10 @@ const { counterText, over } = useTextLimit({
     );
   }
 
-  /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur,
-     sans saut de layout. On cible le focus du seul CONTRÔLE (pas :focus-within) :
-     quand un bouton interne (clear, icône) est focus au clavier, seul son
-     outline propre s'allume — sinon deux indicateurs simultanés, illisible.
+  /* "2px border" focus: a 1px border + a 1px outer shadow of the same colour, with
+     no layout jump. Only the CONTROL's focus is targeted (not :focus-within): when
+     an internal button (clear, icon) has keyboard focus, only its own outline
+     lights up — otherwise two simultaneous indicators, unreadable.
      :focus (pas :focus-visible) : un champ texte montre toujours son focus,
      souris comprise. L'outline transparent est le filet forced-colors
      (Windows High Contrast supprime les box-shadow). */
@@ -356,15 +353,15 @@ const { counterText, over } = useTextLimit({
     outline: var(--vectis-focus-ring-width) solid transparent;
   }
 
-  /* État invalide : pseudo-classe native d'abord, prop (aria-invalid) ensuite.
-     Seule la variable change → la bordure ET le ring focus passent en rouge. */
+  /* Invalid state: the native pseudo-class first, the prop (aria-invalid) second.
+     Only the variable changes → both the border AND the focus ring go red. */
   .v-textarea-field:has(.v-textarea-control:user-invalid),
   .v-textarea-field:has(.v-textarea-control[aria-invalid='true']) {
     --field-border-color: var(--vectis-color-danger);
   }
 
-  /* Boutons internes (effacer, icône cliquable) : gris foncé → noir au hover,
-     radius aligné sur VButton (focus ring carré aux bords arrondis) */
+  /* Internal buttons (clear, clickable icon): dark grey → black on hover, radius
+     aligned with VButton (a square focus ring with rounded edges) */
   .v-textarea-action {
     display: inline-flex;
     align-items: center;
@@ -391,16 +388,17 @@ const { counterText, over } = useTextLimit({
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
-  /* Readonly : fond légèrement enfoncé, texte normal (la valeur reste lisible),
-     focus accent conservé. [data-readonly] et jamais :read-only (matche :disabled). */
+  /* Readonly: a slightly sunken background, normal text (the value stays
+     readable), accent focus kept. [data-readonly] and never :read-only (which also
+     matches :disabled). */
   .v-textarea[data-readonly] .v-textarea-field {
     --field-border-color: var(--vectis-color-border);
 
     background: var(--vectis-color-surface-sunken);
   }
 
-  /* Disabled : nuance de gris sans opacité (mêmes tokens que VCheckbox/VRadio).
-     Placé après les états erreur/readonly : à spécificité égale, il gagne. */
+  /* Disabled: a grey shade with no opacity (the same tokens as VCheckbox/VRadio).
+     Placed after the error/readonly states: at equal specificity, it wins. */
   .v-textarea[data-disabled] .v-textarea-field {
     --field-border-color: var(--vectis-color-border);
 
@@ -426,8 +424,8 @@ const { counterText, over } = useTextLimit({
     cursor: not-allowed;
   }
 
-  /* Auto-grow 100 % CSS : la hauteur du contrôle suit le contenu (progressive
-     enhancement), le field suit ; plus de poignée de redimensionnement */
+  /* 100% CSS auto-grow: the control's height follows the content (progressive
+     enhancement) and the field follows; no resize handle */
   .v-textarea-field[data-auto-grow] {
     resize: none;
   }
