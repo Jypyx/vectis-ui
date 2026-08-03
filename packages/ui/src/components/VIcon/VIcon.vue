@@ -1,25 +1,23 @@
 <script setup lang="ts">
 /**
- * Icône, résolue dans cet ordre : image (`src`), puis `name` — d'abord le
- * RÉSOLVEUR consommateur s'il est posé (`setIconResolver`, cf. `resolver.ts`),
- * puis le REGISTRE INTÉGRÉ (SVG Material Symbols Rounded embarqués, cf.
- * `icons.ts`), sinon la ligature (police chargée par le CONSOMMATEUR, voir
- * README) — sinon SVG inline par le slot. Décorative par défaut (aria-hidden) ;
- * `label` la rend informative (role="img" + aria-label).
+ * Icon, resolved in this order: image (`src`), then `name` — first the consumer
+ * RESOLVER if one is set (`setIconResolver`, see `resolver.ts`), then the
+ * BUILT-IN REGISTRY (embedded Material Symbols Rounded SVGs, see `icons.ts`),
+ * otherwise the ligature (a font loaded by the CONSUMER, see the README) —
+ * otherwise inline SVG through the slot. Decorative by default (aria-hidden);
+ * `label` makes it informative (role="img" + aria-label).
  *
- * L'ordre EST le contrat : le résolveur passe avant le registre, sinon les
- * icônes du DS resteraient en Material chez qui a branché sa propre
- * bibliothèque ; et un résolveur qui rend `undefined` laisse la main au registre,
- * ce qui rend les mappings partiels utilisables.
+ * The order IS the contract: the resolver comes before the registry, otherwise
+ * the DS's icons would stay Material for anyone who wired in their own library;
+ * and a resolver returning `undefined` hands over to the registry, which is what
+ * makes partial mappings usable.
  *
- * Le registre est ce qui rend le DS utilisable SANS police d'icônes : les icônes
- * que la librairie rend elle-même (croix, chevrons, tones de VToast…) ne
- * dépendent plus de rien. La ligature reste le repli pour tout autre nom.
+ * The registry is what makes the DS usable WITHOUT an icon font: the icons the
+ * library renders itself (crosses, chevrons, VToast tones…) depend on nothing.
+ * The ligature stays the fallback for any other name.
  *
- * Aucun JS de COMPORTEMENT ici malgré le `computed` : ni événement, ni cycle de
- * vie, ni accès DOM — une résolution de source pure, évaluée identiquement au
- * serveur et au client. La propriété « zéro JS » de VIcon était un corollaire de
- * « la police fait tout » ; s'en affranchir la retire nécessairement.
+ * No BEHAVIOURAL JS here despite the `computed`: no event, no lifecycle, no DOM
+ * access — a pure source resolution, evaluated identically on server and client.
  */
 import { computed, type Component } from 'vue'
 
@@ -28,28 +26,28 @@ import { resolveIcon } from './resolver'
 import type { IconRender } from './types'
 
 interface IconProps {
-  /** Nom d'icône : une des icônes intégrées, sinon ligature de la police du consommateur. */
+  /** Icon name: one of the built-in icons, otherwise a ligature of the consumer's font. */
   name?: string
   /**
-   * Rendu explicite (image, composant, path, classe…) — prioritaire sur tout le
-   * reste. C'est par là que passent les props `IconSource` des composants du DS
-   * quand le consommateur ne fournit pas un simple nom.
+   * Explicit render (image, component, path, class…) — takes precedence over
+   * everything else. This is the route the `IconSource` props of the DS's
+   * components take when the consumer does not supply a plain name.
    */
   render?: IconRender
-  /** Source image (URL). Prioritaire sur `name`. */
+  /** Image source (URL). Takes precedence over `name`. */
   src?: string
   /**
-   * Taille explicite en pixels (ex. :size="32"). Sans elle : taille du
-   * contexte (`--vectis-icon-size` posée par un parent, ex. VButton), sinon 1em —
-   * l'icône suit le texte environnant.
+   * Explicit size in pixels (e.g. :size="32"). Without it: the context size
+   * (`--vectis-icon-size` set by a parent, e.g. VButton), otherwise 1em — the
+   * icon follows the surrounding text.
    */
   size?: number
-  /** Libellé accessible ; absent = icône décorative (aria-hidden). */
+  /** Accessible label; absent = a decorative icon (aria-hidden). */
   label?: string
   /**
-   * Variante pleine (axe `FILL` 1 au lieu de 0) : honorée par le registre
-   * intégré quand la géométrie diffère, et par la ligature. Sans effet sur les
-   * sources `src` (image) et SVG inline.
+   * Filled variant (`FILL` axis 1 instead of 0): honoured by the built-in
+   * registry when the geometry differs, and by the ligature. No effect on the
+   * `src` (image) and inline-SVG sources.
    */
   filled?: boolean
 }
@@ -64,14 +62,14 @@ const props = withDefaults(defineProps<IconProps>(), {
 })
 
 defineSlots<{
-  /** SVG inline (utilisé si ni `src` ni `name`). */
+  /** Inline SVG (used when neither `src` nor `name` is given). */
   default?(): unknown
 }>()
 
 /**
- * Forme retenue, taguée : l'union publique `IconRender` n'est pas discriminée
- * (le consommateur n'a rien à taguer), mais le template a besoin d'un
- * discriminant fiable — et le tag encode au passage la précédence documentée.
+ * The chosen shape, tagged: the public `IconRender` union is not discriminated
+ * (the consumer has nothing to tag), but the template needs a reliable
+ * discriminant — and the tag encodes the documented precedence along the way.
  */
 type Resolved =
   | { kind: 'path'; path: string; viewBox: string }
@@ -90,7 +88,7 @@ function tag(render: IconRender): Resolved {
   return { kind: 'class', class: render.class }
 }
 
-/** `render` explicite, puis résolveur consommateur, puis registre intégré ; sinon ligature. */
+/** Explicit `render`, then the consumer resolver, then the built-in registry; otherwise the ligature. */
 const resolved = computed<Resolved | undefined>(() => {
   if (props.render) return tag(props.render)
   if (props.src !== undefined || props.name === undefined) return undefined
@@ -101,7 +99,7 @@ const resolved = computed<Resolved | undefined>(() => {
   const paths: readonly string[] | undefined = (
     builtinIcons as Record<string, readonly string[] | undefined>
   )[props.name]
-  // Le path plein n'existe que si l'axe FILL change la géométrie (cf. icons.ts).
+  // The filled path only exists if the FILL axis changes the geometry (see icons.ts).
   const path = paths && ((props.filled ? paths[1] : undefined) ?? paths[0])
   return path ? { kind: 'path', path, viewBox: ICON_VIEW_BOX } : undefined
 })
@@ -133,7 +131,7 @@ const resolved = computed<Resolved | undefined>(() => {
         v-bind="resolved.props"
       />
       <img v-else-if="resolved.kind === 'src'" class="v-icon-img" :src="resolved.src" alt="" />
-      <!-- l'interpolation touche les balises : une ligature ne tolère pas d'espace autour -->
+      <!-- the interpolation touches the tags: a ligature tolerates no surrounding whitespace -->
       <span v-else-if="resolved.kind === 'text'" class="v-icon-symbol" :class="resolved.class">{{
         resolved.text
       }}</span>
@@ -149,12 +147,12 @@ const resolved = computed<Resolved | undefined>(() => {
 @layer vectis.components {
   .v-icon {
     /*
-     * Résolution de la taille, par priorité :
-     * 1. prop `size` (px) — posée en --vectis-icon-size inline sur l'élément :
-     *    une déclaration propre prime sur l'héritage et sur la layer ;
-     * 2. --vectis-icon-size / --vectis-icon-opsz héritées d'un parent (API de
-     *    contexte : VButton les pose selon sa propre taille) ;
-     * 3. 1em — l'icône suit la taille de texte du parent.
+     * Size resolution, by priority:
+     * 1. the `size` prop (px) — set as an inline --vectis-icon-size on the
+     *    element: an own declaration beats inheritance and the layer;
+     * 2. --vectis-icon-size / --vectis-icon-opsz inherited from a parent (the
+     *    context API: VButton sets them from its own size);
+     * 3. 1em — the icon follows the parent's text size.
      */
     --icon-size: var(--vectis-icon-size, 1em);
     --icon-opsz: var(--vectis-icon-opsz, 24);
@@ -164,14 +162,14 @@ const resolved = computed<Resolved | undefined>(() => {
     flex: none;
     inline-size: var(--icon-size);
     block-size: var(--icon-size);
-    /* la ligature Material Symbols se dimensionne par font-size */
+    /* the Material Symbols ligature is sized through font-size */
     font-size: var(--icon-size);
   }
 
-  /* Dégradé si la police n'est pas chargée : le nom textuel reste contenu dans
-     le carré au lieu de casser la mise en page. Posé sur la SEULE branche qu'il
-     protège et non sur `.v-icon` : une police d'icônes tierce peut dessiner un
-     glyphe hors de son cadran 1em, qui serait alors rogné. */
+  /* Degraded state when the font is not loaded: the textual name stays inside the
+     square instead of breaking the layout. Set on the ONLY branch it protects and
+     not on `.v-icon`: a third-party icon font may draw a glyph outside its 1em
+     box, which would then be clipped. */
   .v-icon:has(> .v-icon-symbol) {
     overflow: hidden;
   }
@@ -185,9 +183,8 @@ const resolved = computed<Resolved | undefined>(() => {
     text-transform: none;
     white-space: nowrap;
     direction: ltr;
-    /* axes de la police Material Symbols (FILL/wght/GRAD/opsz) : contrat
-       technique de la police, pas des tokens de design — valeurs littérales
-       tolérées, comme les opacités */
+    /* Material Symbols font axes (FILL/wght/GRAD/opsz): a technical contract of
+       the font, not design tokens — literal values tolerated, like opacities */
     font-variation-settings:
       'FILL' var(--icon-fill, 0),
       'wght' 400,
@@ -206,20 +203,19 @@ const resolved = computed<Resolved | undefined>(() => {
     object-fit: contain;
   }
 
-  /* Police à classes fournie par un résolveur (Font Awesome, Phosphor…) : le
-     glyphe vient d'un `::before`, dimensionné par le `font-size` de `.v-icon`.
-     C'est le DS qui possède l'élément, donc une seule règle suffit — `font-style`
-     couvre d'avance les conventions en `<i>`, et `line-height` empêche la line
-     box héritée de décentrer le glyphe dans le carré. */
+  /* Class font supplied by a resolver (Font Awesome, Phosphor…): the glyph comes
+     from a `::before`, sized by `.v-icon`'s `font-size`. The DS owns the element,
+     so one rule is enough — `font-style` pre-empts the `<i>` conventions, and
+     `line-height` stops the inherited line box off-centring the glyph. */
   .v-icon-glyph {
     display: block;
     font-style: normal;
     line-height: var(--vectis-font-leading-none);
   }
 
-  /* SVG du registre intégré. `fill` est posé sur NOTRE classe et jamais sur
-     `.v-icon > svg` : un SVG multicolore passé par le slot garde ses couleurs.
-     `display: block` supprime le gap de ligne de base sous l'élément inline. */
+  /* SVG from the built-in registry. `fill` is set on OUR class and never on
+     `.v-icon > svg`: a multicolour SVG passed through the slot keeps its colours.
+     `display: block` removes the baseline gap under the inline element. */
   .v-icon-svg {
     display: block;
     fill: currentcolor;

@@ -1,38 +1,38 @@
 import type { Component } from 'vue'
 
-/** Contexte d'une demande d'icône. Objet plutôt qu'un booléen nu, pour rester extensible. */
+/** Context of an icon request. An object rather than a bare boolean, to stay extensible. */
 export interface IconContext {
-  /** `filled` demandé par l'appelant (prop de VIcon, `iconFilled` de VButton…). */
+  /** `filled` as requested by the caller (VIcon's prop, VButton's `iconFilled`…). */
   filled: boolean
 }
 
 /**
- * Les cinq formes de rendu d'une icône — elles couvrent les quatre familles de
- * sources du marché : paths bruts, jeux SVG en composants (Lucide, Untitled UI),
- * sprites/URL, polices à ligatures ou à codepoints (Material, IcoMoon), polices
- * à classes + pseudo-élément (Font Awesome, Phosphor, Bootstrap Icons).
+ * The five rendering shapes of an icon — they cover the four families of source
+ * on the market: raw paths, SVG sets as components (Lucide, Untitled UI),
+ * sprites/URLs, ligature or codepoint fonts (Material, IcoMoon), and class +
+ * pseudo-element fonts (Font Awesome, Phosphor, Bootstrap Icons).
  *
- * Union non taguée : c'est ce que le consommateur écrit à la main, autant qu'il
- * n'ait rien à taguer. La précédence est fixée côté VIcon, dans cet ordre :
+ * An untagged union: this is what the consumer writes by hand, so there is
+ * nothing for them to tag. Precedence is fixed on the VIcon side, in this order:
  * path > component > src > text > class.
  */
 export type IconRender =
-  /** Données de path SVG. `viewBox` défaut : la grille Material Symbols. */
+  /** SVG path data. Default `viewBox`: the Material Symbols grid. */
   | { path: string; viewBox?: string }
-  /** Composant Vue à racine `<svg>` UNIQUE (contrat du dimensionnement). */
+  /** A Vue component with a SINGLE `<svg>` root (the sizing contract). */
   | { component: Component; props?: Record<string, unknown> }
-  /** Image : sprite, data-URL, fichier. */
+  /** An image: sprite, data URL, file. */
   | { src: string }
-  /** Police à ligatures ou à codepoints : le texte est le glyphe. */
+  /** A ligature or codepoint font: the text IS the glyph. */
   | { text: string; class?: string }
-  /** Police à classes : le glyphe vient d'un `::before` porté par ces classes. */
+  /** A class font: the glyph comes from a `::before` carried by these classes. */
   | { class: string }
 
 /**
- * Ce qu'accepte toute prop d'icône du DS. **Aucune heuristique** : une chaîne est
- * TOUJOURS un nom d'icône, une URL ou un composant passe explicitement par un
- * objet (`{ src: '/logo.svg' }`). C'est ce qui permet à n'importe quelle
- * convention de nommage (`mdi:close`, `fa6-solid:xmark`) d'atteindre le
- * résolveur au lieu d'être prise pour une URL.
+ * What every icon prop in the DS accepts. **No heuristic**: a string is ALWAYS an
+ * icon name, while a URL or a component goes explicitly through an object
+ * (`{ src: '/logo.svg' }`). That is what lets any naming convention
+ * (`mdi:close`, `fa6-solid:xmark`) reach the resolver instead of being taken for
+ * a URL.
  */
 export type IconSource = string | IconRender

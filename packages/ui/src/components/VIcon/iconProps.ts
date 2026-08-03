@@ -1,23 +1,21 @@
 import type { IconSource } from './types'
 
 /**
- * Résout une source d'icône vers les props de `VIcon`.
+ * Resolves an icon source into `VIcon` props.
  *
- * AUCUNE heuristique : une chaîne est TOUJOURS un nom d'icône ; une image ou un
- * composant se déclare explicitement (`{ src: '/logo.svg' }`). Ce helper a
- * longtemps deviné par regex `[./:]` qu'une chaîne contenant un point, un slash
- * ou un deux-points était une URL — ce qui interdisait les conventions de
- * nommage courantes (`mdi:close`, `fa6-solid:xmark`) : elles partaient en
- * `<img>` sans jamais atteindre le résolveur d'icônes.
+ * NO heuristic: a string is ALWAYS an icon name; an image or a component is
+ * declared explicitly (`{ src: '/logo.svg' }`). This is what keeps the common
+ * naming conventions (`mdi:close`, `fa6-solid:xmark`) reaching the icon
+ * resolver instead of being mistaken for URLs.
  */
 export const iconProps = (icon: IconSource) =>
   typeof icon === 'string' ? { name: icon } : { render: icon }
 
 /**
- * Nom lisible d'une source, pour servir de libellé accessible de repli quand le
- * consommateur n'en fournit pas. `undefined` dès que la source est un rendu
- * explicite : un objet n'a pas de nom, et un `[object Object]` dans l'arbre
- * d'accessibilité serait pire que rien (`useIconClickHandlers` avertit alors).
+ * Readable name of a source, to serve as a fallback accessible label when the
+ * consumer provides none. `undefined` as soon as the source is an explicit
+ * render: an object has no name, and an `[object Object]` in the accessibility
+ * tree would be worse than nothing (`useIconClickHandlers` warns in that case).
  */
 export const iconName = (icon: IconSource | undefined) =>
   typeof icon === 'string' ? icon : undefined

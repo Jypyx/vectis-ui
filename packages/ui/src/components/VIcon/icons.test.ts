@@ -3,14 +3,14 @@ import { describe, expect, it } from 'vitest'
 import { builtinIcons, ICON_VIEW_BOX, type VectisIconName } from './icons'
 
 /**
- * Verrous sur le fichier GÉNÉRÉ (`pnpm icons`) : ce qui est testé ici, c'est que
- * la génération a bien tourné — pas la géométrie des icônes, qui relève du diff
- * visuel (story `Bibliotheque` + Chromatic).
+ * Locks on the GENERATED file (`pnpm icons`): what is tested here is that the
+ * generation ran correctly — not the icons' geometry, which belongs to visual
+ * diffing (the `Library` story + Chromatic).
  */
 
-/** Les icônes que la librairie rend elle-même. Toute entrée retirée d'ici doit
-    l'être aussi de `scripts/build-icons.ts` — et inversement. */
-const ATTENDUES = [
+/** The icons the library renders itself. Any entry removed from here must also be
+    removed from `scripts/build-icons.ts` — and the other way round. */
+const EXPECTED = [
   'arrow_downward',
   'arrow_drop_down',
   'arrow_drop_up',
@@ -33,12 +33,12 @@ const ATTENDUES = [
   'warning',
 ] as const satisfies readonly VectisIconName[]
 
-describe('registre d’icônes intégré', () => {
-  it('contient exactement les icônes rendues par défaut par le DS', () => {
-    expect(Object.keys(builtinIcons).sort()).toEqual([...ATTENDUES].sort())
+describe('built-in icon registry', () => {
+  it('contains exactly the icons the DS renders by default', () => {
+    expect(Object.keys(builtinIcons).sort()).toEqual([...EXPECTED].sort())
   })
 
-  it('expose la grille Material Symbols', () => {
+  it('exposes the Material Symbols grid', () => {
     expect(ICON_VIEW_BOX).toBe('0 -960 960 960')
   })
 
@@ -47,23 +47,23 @@ describe('registre d’icônes intégré', () => {
     expect(paths.length).toBeLessThanOrEqual(2)
     for (const d of paths) {
       expect(d.length).toBeGreaterThan(0)
-      // Tout path SVG commence par un moveto.
+      // Every SVG path starts with a moveto.
       expect(d[0]!.toLowerCase()).toBe('m')
     }
   })
 
-  it('n’émet un path plein que s’il change la géométrie', () => {
-    // Sans ce dédoublonnage le registre doublerait pour rien : une majorité des
-    // icônes (chevrons, flèches, close, check…) ont FILL 0 et FILL 1 identiques.
-    // Le registre est typé en littéraux (`as const`) : sans cet élargissement,
-    // TS considère la comparaison impossible et refuse de compiler le test.
+  it('emits a filled path only when it changes the geometry', () => {
+    // Without that de-duplication the registry would double for nothing: most
+    // icons (chevrons, arrows, close, check…) have identical FILL 0 and FILL 1.
+    // The registry is typed in literals (`as const`): without this widening, TS
+    // considers the comparison impossible and refuses to compile the test.
     const registre: Record<string, readonly string[]> = builtinIcons
     const doublons = Object.entries(registre).filter(
       ([, paths]) => paths.length === 2 && paths[0] === paths[1],
     )
     expect(doublons).toEqual([])
 
-    // Et le dédoublonnage n'a pas tout écrasé : les icônes pleines existent.
+    // And the de-duplication did not flatten everything: the filled icons exist.
     const avecVariante = Object.values(builtinIcons).filter((paths) => paths.length === 2)
     expect(avecVariante.length).toBeGreaterThan(0)
   })

@@ -5,34 +5,34 @@ import VIcon from './VIcon.vue'
 import { builtinIcons } from './icons'
 
 describe('VIcon', () => {
-  it('est décorative par défaut (aria-hidden, sans role)', () => {
+  it('is decorative by default (aria-hidden, no role)', () => {
     const { container } = render(VIcon, { props: { name: 'favorite' } })
     const icon = container.querySelector('.v-icon') as HTMLElement
     expect(icon.getAttribute('aria-hidden')).toBe('true')
     expect(icon.getAttribute('role')).toBeNull()
   })
 
-  it('avec label : role img + aria-label, sans aria-hidden', () => {
+  it('with a label: role img + aria-label, no aria-hidden', () => {
     const { getByRole } = render(VIcon, { props: { name: 'warning', label: 'Attention' } })
     const icon = getByRole('img', { name: 'Attention' })
     expect(icon.getAttribute('aria-hidden')).toBeNull()
   })
 
-  it('icône du registre intégré : SVG inline, sans dépendre d’une police', () => {
+  it('icon from the built-in registry: inline SVG, with no font dependency', () => {
     const { container } = render(VIcon, { props: { name: 'close' } })
     const path = container.querySelector('.v-icon-svg path') as SVGPathElement
     expect(path.getAttribute('d')).toBe(builtinIcons.close[0])
     expect(container.querySelector('.v-icon-symbol')).toBeNull()
   })
 
-  it('nom hors registre : repli sur la ligature de la police du consommateur', () => {
+  it("name outside the registry: falls back to the consumer font's ligature", () => {
     const { container } = render(VIcon, { props: { name: 'favorite' } })
     const symbol = container.querySelector('.v-icon-symbol') as HTMLElement
     expect(symbol.textContent).toBe('favorite')
     expect(container.querySelector('svg')).toBeNull()
   })
 
-  it('data-icon : posé quelle que soit la source effective', () => {
+  it('data-icon: set whatever the effective source is', () => {
     const integree = render(VIcon, { props: { name: 'close' } })
     expect(integree.container.querySelector('.v-icon')?.getAttribute('data-icon')).toBe('close')
 
@@ -43,20 +43,20 @@ describe('VIcon', () => {
     expect(image.container.querySelector('.v-icon')?.hasAttribute('data-icon')).toBe(false)
   })
 
-  it('filled : path plein quand la géométrie diffère, contour sinon', () => {
+  it('filled: the filled path when the geometry differs, the outline otherwise', () => {
     const plein = render(VIcon, { props: { name: 'check_circle', filled: true } })
     expect(plein.container.querySelector('.v-icon-svg path')?.getAttribute('d')).toBe(
       builtinIcons.check_circle[1],
     )
 
-    // `close` n'a pas de variante FILL distincte : le contour sert aux deux.
+    // `close` has no distinct FILL variant: the outline serves both.
     const trait = render(VIcon, { props: { name: 'close', filled: true } })
     expect(trait.container.querySelector('.v-icon-svg path')?.getAttribute('d')).toBe(
       builtinIcons.close[0],
     )
   })
 
-  it('src prime sur name et rend une image neutre (alt vide)', () => {
+  it('src wins over name and renders a neutral image (empty alt)', () => {
     const { container } = render(VIcon, { props: { name: 'close', src: '/logo.png' } })
     const img = container.querySelector('img') as HTMLImageElement
     expect(img.getAttribute('src')).toBe('/logo.png')
@@ -65,15 +65,15 @@ describe('VIcon', () => {
     expect(container.querySelector('svg')).toBeNull()
   })
 
-  it('un nom contenant « / » ou « : » reste un NOM (plus aucune détection d’URL)', () => {
-    // C'est ce qui permet aux conventions type Iconify (`mdi:close`) d'atteindre
-    // le résolveur d'icônes au lieu de partir en <img>.
+  it('a name containing "/" or ":" stays a NAME (no URL detection)', () => {
+    // This is what lets Iconify-style conventions (`mdi:close`) reach the icon
+    // resolver instead of going out as an <img>.
     const { container } = render(VIcon, { props: { name: 'mdi:close' } })
     expect(container.querySelector('.v-icon-symbol')?.textContent).toBe('mdi:close')
     expect(container.querySelector('img')).toBeNull()
   })
 
-  it('render : rendu explicite, prioritaire sur name et src', () => {
+  it('render: explicit render, taking precedence over name and src', () => {
     const { container } = render(VIcon, {
       props: { name: 'close', src: '/logo.png', render: { src: '/explicite.svg' } },
     })
@@ -81,14 +81,14 @@ describe('VIcon', () => {
     expect(container.querySelector('.v-icon-svg')).toBeNull()
   })
 
-  it('rend le slot SVG sans src ni name', () => {
+  it('renders the SVG slot when there is neither src nor name', () => {
     const { container } = render(VIcon, {
       slots: { default: '<svg viewBox="0 0 16 16" data-testid="svg-inline" />' },
     })
     expect(container.querySelector('[data-testid="svg-inline"]')).not.toBeNull()
   })
 
-  it('filled : pose data-filled sur la racine, absent par défaut', () => {
+  it('filled: sets data-filled on the root, absent by default', () => {
     const plein = render(VIcon, { props: { name: 'favorite', filled: true } })
     const iconPlein = plein.container.querySelector('.v-icon') as HTMLElement
     expect(iconPlein.hasAttribute('data-filled')).toBe(true)
@@ -98,7 +98,7 @@ describe('VIcon', () => {
     expect(iconContour.hasAttribute('data-filled')).toBe(false)
   })
 
-  it('prop size numérique : pose --vectis-icon-size en style inline, sinon rien', () => {
+  it('numeric size prop: sets --vectis-icon-size as an inline style, nothing otherwise', () => {
     const explicite = render(VIcon, { props: { name: 'add', size: 32 } })
     const iconExplicite = explicite.container.querySelector('.v-icon') as HTMLElement
     expect(iconExplicite.style.getPropertyValue('--vectis-icon-size')).toBe('32px')
