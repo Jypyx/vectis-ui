@@ -98,6 +98,12 @@ export { default as Avatar } from './components/Avatar/Avatar.vue'
 export type { AvatarSize } from './components/Avatar/Avatar.vue'
 export { default as AvatarGroup } from './components/Avatar/AvatarGroup.vue'
 export { default as Spinner } from './components/Spinner/Spinner.vue'
+export { default as SkeletonLoader } from './components/SkeletonLoader/SkeletonLoader.vue'
+export type {
+  SkeletonShape,
+  SkeletonAnimation,
+  SkeletonSize,
+} from './components/SkeletonLoader/SkeletonLoader.vue'
 export { default as Combobox } from './components/Combobox/Combobox.vue'
 export type {
   ComboboxOption,

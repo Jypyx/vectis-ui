@@ -13,6 +13,10 @@ export const semantic = {
     'surface-overlay': color('{color.white}', 'Surfaces flottantes : dialogs, popovers, menus'),
     'surface-sunken': color('{color.neutral.50}', 'Surfaces en creux : wells, zones de code'),
     'surface-inverse': color('{color.neutral.900}', 'Surfaces à contraste inversé : tooltips'),
+    'surface-skeleton': color(
+      '{color.neutral.200}',
+      'Fond des silhouettes de chargement (SkeletonLoader) ; le reflet en est dérivé en CSS',
+    ),
 
     'text-on-inverse': color('{color.white}', 'Texte posé sur une surface inversée'),
 
@@ -210,6 +214,10 @@ export const semantic = {
     'size-progress-circular-thickness': dimension(
       '0.25rem',
       'Épaisseur par défaut du trait du ProgressCircular (4px)',
+    ),
+    'size-skeleton-surface': dimension(
+      '6rem',
+      'Hauteur par défaut du SkeletonLoader en forme de surface — carte, image (96px)',
     ),
     'size-toast-width': dimension('22rem', "Largeur par défaut d'un toast"),
     'size-badge-h': dimension('1.25rem', 'Hauteur du Badge (pilule)'),

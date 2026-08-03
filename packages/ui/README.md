@@ -270,13 +270,13 @@ La configuration vit au niveau module, comme celle des icônes : **une seule loc
 
 ## Composants
 
-| Domaine     | Composants                                                                                                                                                    |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                                  |
-| Formulaires | `Input`, `Textarea`, `Checkbox`, `Radio`, `Switch`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                                        |
-| Overlays    | `Tooltip`, `Menu` + `MenuItem`/`MenuGroup`/`MenuSeparator` (sous-menus récursifs)                                                                             |
-| Structure   | `Accordion` + `AccordionItem`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature)                                                          |
-| Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `ProgressLinear`, `ProgressCircular`, `Icon` (SVG intégrés, police, image ou SVG inline) |
+| Domaine     | Composants                                                                                                                                                                                                  |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actions     | `Button`, `IconButton`, `Chip` (sélectionnable, supprimable)                                                                                                                                                |
+| Formulaires | `Input`, `Textarea`, `Checkbox`, `Radio`, `Switch`, `Slider` (single/range), `InputOTP`, `Combobox` (recherche, multi)                                                                                      |
+| Overlays    | `Tooltip`, `Menu` + `MenuItem`/`MenuGroup`/`MenuSeparator` (sous-menus récursifs)                                                                                                                           |
+| Structure   | `Accordion` + `AccordionItem`, `DataTable` (tri, responsive), `Breadcrumb` (data-driven, troncature)                                                                                                        |
+| Feedback    | `Toaster` + `toast()` (notifications), `Badge`, `Avatar`, `Spinner`, `SkeletonLoader` (silhouettes de chargement), `ProgressLinear`, `ProgressCircular`, `Icon` (SVG intégrés, police, image ou SVG inline) |
 
 Notes d'implémentation notables :
 
