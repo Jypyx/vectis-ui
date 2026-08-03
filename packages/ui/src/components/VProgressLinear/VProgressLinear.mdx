@@ -5,17 +5,16 @@ import * as VProgressLinearStories from './VProgressLinear.stories'
 
 # ProgressLinear
 
-Barre de progression : cinq couleurs sémantiques ou une couleur libre, épaisseur et longueur
-au pixel, extrémités arrondies ou franches, texte de progression lisible dans la barre, état
-indéterminé et orientation verticale.
+A progress bar: five semantic colours or a free one, thickness and length to the pixel, rounded or
+blunt ends, progress text readable inside the bar, an indeterminate state and a vertical
+orientation.
 
-C'est le seul composant du design system qui **renonce à sa primitive native**. `<progress>`
-offre le rôle, la valeur et `:indeterminate` gratuitement, mais ses pseudo-éléments ne se
-stylent qu'en fond plat, n'acceptent aucun enfant — donc aucun texte dans la barre — et ne
-basculent pas en écriture verticale. Le contrat ARIA `progressbar` est donc porté
-explicitement. Aucun JavaScript de comportement n'est introduit en échange : toute la
-géométrie dérive d'**une fraction sans unité** posée en custom property, et les propriétés
-logiques font basculer l'axe en vertical sans dupliquer une règle.
+It is the only component of the design system that **gives up its native primitive**. `<progress>`
+offers the role, the value and `:indeterminate` for free, but its pseudo-elements can only be styled
+as a flat background, accept no child — hence no text inside the bar — and do not switch to vertical
+writing. The `progressbar` ARIA contract is therefore carried explicitly. No behavioural JavaScript
+is introduced in exchange: the whole geometry derives from **a unitless fraction** set as a custom
+property, and the logical properties switch the axis in vertical without duplicating a rule.
 
 <Canvas of={VProgressLinearStories.Default} />
 
@@ -23,111 +22,108 @@ logiques font basculer l'axe en vertical sans dupliquer une règle.
 
 ## Tones
 
-Les cinq couleurs du design system. Chaque tone ne définit que des variables locales — un
-remplissage, une piste teintée de la même famille, et la couleur de texte de repli utilisée
-là où le contraste automatique n'est pas disponible. Le tone `neutral` inverse texte et
-surface plutôt que d'employer un gris moyen, qui serait illisible dans l'un des deux thèmes.
+The design system's five colours. Each tone defines only local variables — a fill, a track tinted
+from the same family, and the fallback text colour used where automatic contrast is not available.
+The `neutral` tone inverts text and surface rather than using a mid grey, which would be unreadable
+in one of the two themes.
 
 <Canvas of={VProgressLinearStories.Tones} />
 
-## Couleur custom
+## Custom colour
 
-`color` remplace le tone et accepte n'importe quelle couleur CSS (hexadécimal, mot-clé,
-`oklch()`). La piste en est dérivée par `color-mix` vers la surface courante : le rendu suit
-donc automatiquement le thème clair ou sombre, sans que le consommateur ait deux valeurs à
-fournir.
+`color` replaces the tone and accepts any CSS colour (hexadecimal, a keyword, `oklch()`). The track
+is derived from it by `color-mix` towards the current surface: the rendering therefore follows the
+light or dark theme automatically, without the consumer having to supply two values.
 
-<Canvas of={VProgressLinearStories.CouleurCustom} />
+<Canvas of={VProgressLinearStories.CustomColor} />
 
-## Épaisseur
+## Thickness
 
-`thickness` s'exprime **toujours en pixels** : `12`
-comme `'12'` donnent douze pixels. Sans valeur, l'épaisseur vaut 4 pixels — trop peu pour
-accueillir un texte, qui suppose donc une `thickness` explicite.
+`thickness` is **always expressed in pixels**: `12` as well as `'12'` gives twelve pixels. With no
+value, the thickness is 4 pixels — too little to host text, which therefore implies an explicit
+`thickness`.
 
-La **longueur**, elle, n'est pas une prop : la barre occupe toute la place disponible et c'est
-au conteneur de la définir — `width` en horizontal, `height` en vertical.
+The **length**, on the other hand, is not a prop: the bar takes all the available room and it is up
+to the container to define it — `width` in horizontal, `height` in vertical.
 
-<Canvas of={VProgressLinearStories.Epaisseur} />
+<Canvas of={VProgressLinearStories.Thickness} />
 
-## Texte dans la barre
+## Text inside the bar
 
-`showValue` affiche le pourcentage, `valuePosition` le place au début, au centre (défaut) ou
-à la fin. Le texte est rendu en **deux copies superposées** : l'une en couleur de texte
-courante au-dessus de la piste, l'autre découpée exactement au bord du remplissage et colorée
-par contraste sur celui-ci. Un texte à cheval sur les deux fonds reste donc lisible de part
-et d'autre de la frontière, à 5 % comme à 95 %.
+`showValue` displays the percentage, and `valuePosition` places it at the start, in the centre (the
+default) or at the end. The text is rendered as **two superimposed copies**: one in the current text
+colour above the track, the other cut exactly at the fill's edge and coloured by contrast on it.
+Text straddling the two backgrounds therefore stays readable on both sides of the boundary, at 5% as
+well as at 95%.
 
-Le contraste automatique repose sur `contrast-color()` (Safari 26+) ; ailleurs, la couleur de
-repli du tone s'applique — c'est le même compromis, déjà documenté, que le VBadge.
+The automatic contrast rests on `contrast-color()` (Safari 26+); elsewhere, the tone's fallback
+colour applies — the same trade-off already documented for VBadge.
 
-<Canvas of={VProgressLinearStories.Valeur} />
+<Canvas of={VProgressLinearStories.Value} />
 
-Le slot par défaut reçoit `{ value, max, percent }` et remplace le pourcentage par ce que l'on
-veut. Il est évalué deux fois, une par copie : son contenu doit être pur.
+The default slot receives `{ value, max, percent }` and replaces the percentage with whatever you
+want. It is evaluated twice, once per copy: its content must be pure.
 
-<Canvas of={VProgressLinearStories.ContenuPersonnalise} />
+<Canvas of={VProgressLinearStories.CustomContent} />
 
-## Forme
+## Shape
 
-`shape` bascule entre extrémités arrondies (défaut) et angles droits — mêmes valeurs que sur
-le VProgressCircular, où elles pilotent les bouts du trait.
+`shape` switches between rounded ends (the default) and square corners — the same values as on
+VProgressCircular, where they drive the stroke's ends.
 
-<Canvas of={VProgressLinearStories.Carre} />
+<Canvas of={VProgressLinearStories.Square} />
 
-## Indéterminé
+## Indeterminate
 
-La prop `indeterminate` bascule la barre en animation continue ; `value` est alors ignorée et
-`aria-valuenow` disparaît.
+The `indeterminate` prop switches the bar to a continuous animation; `value` is then ignored and
+`aria-valuenow` disappears.
 
-Une barre de taille fixe traverse la piste, du bord extérieur de départ au bord extérieur
-d'arrivée. Aux deux extrémités elle affleure exactement le bord sans jamais s'en éloigner :
-le rebouclage est invisible et la piste n'est jamais vide. Toute la qualité du mouvement
-tient à la courbe symétrique — entrée progressive, traversée rapide, sortie amortie.
+A fixed-size bar crosses the track, from the outer starting edge to the outer finishing edge. At
+both extremes it is exactly flush with the edge without ever moving away from it: the loop is
+invisible and the track is never empty. The whole quality of the motion rests on the symmetric curve
+— a gradual entry, a fast crossing, a damped exit.
 
-La course est décrite sur des propriétés logiques plutôt qu'avec une transformation, qui
-serait physique : une seule définition sert l'horizontal, le vertical et le sens de lecture
-inversé.
+The run is described on logical properties rather than with a transform, which would be physical: a
+single definition serves horizontal, vertical and the reversed reading direction.
 
-<Canvas of={VProgressLinearStories.Indetermine} />
+<Canvas of={VProgressLinearStories.Indeterminate} />
 
 ## Vertical
 
-`orientation="vertical"` place 0 en bas et le maximum en haut, par un simple mode d'écriture
-posé sur la racine : remplissage, découpe du texte et animation indéterminée changent d'axe
-sans règle supplémentaire. Le texte, lui, reste écrit horizontalement — prévoir une épaisseur
-suffisante pour l'accueillir. La hauteur se pose en CSS, faute d'un parent de hauteur connue
-sur lequel s'aligner.
+`orientation="vertical"` puts 0 at the bottom and the maximum at the top, through a plain writing
+mode set on the root: the fill, the text's clip and the indeterminate animation all change axis with
+no extra rule. The text itself stays written horizontally — plan a thickness sufficient to host it.
+The height is set in CSS, for want of a parent of known height to align on.
 
 <Canvas of={VProgressLinearStories.Vertical} />
 
 ## Progression
 
-Tout changement de valeur est animé, remplissage et frontière du texte contrasté partageant
-exactement la même durée et la même courbe.
+Every change of value is animated, the fill and the contrasted text's boundary sharing exactly the
+same duration and the same curve.
 
 <Canvas of={VProgressLinearStories.Progression} />
 
-## Cas limites
+## Edge cases
 
-Valeur nulle, complète ou hors bornes (clampée), barre à l'épaisseur par défaut portant un
-texte (qui déborde sans être rogné), libellé très long.
+A zero, complete or out-of-bounds value (clamped), a bar at the default thickness carrying text
+(which overflows without being cropped), a very long label.
 
-<Canvas of={VProgressLinearStories.CasLimites} />
+<Canvas of={VProgressLinearStories.EdgeCases} />
 
-## Accessibilité
+## Accessibility
 
-- **Toujours fournir `aria-label`** (ou `aria-labelledby`) : le composant n'a pas de prop de
-  libellé, l'attribut passe par fallthrough.
-- Le rôle `progressbar` est « children presentational » : le texte visible dans la barre
-  **n'est pas annoncé** par les technologies d'assistance. Il complète le libellé, il ne le
-  remplace jamais.
-- Les bornes annoncées sont fidèles à `max` (« 3 sur 8 ») plutôt que normalisées sur 100.
-- `aria-valuenow` est absent en indéterminé, ce qui est précisément la façon d'annoncer une
-  progression inconnue.
-- La copie de texte contrastée duplique du contenu visible : elle est masquée aux lecteurs
-  d'écran.
-- Transitions et animation continue respectent `prefers-reduced-motion` — l'animation est
-  ralentie, jamais figée, un loader immobile perdant sa fonction.
+- **Always supply `aria-label`** (or `aria-labelledby`): the component has no label prop, and the
+  attribute passes through fallthrough.
+- The `progressbar` role is "children presentational": the text visible in the bar is **not
+  announced** by assistive technologies. It complements the label, it never replaces it.
+- The announced bounds are faithful to `max` ("3 of 8") rather than normalized to 100.
+- `aria-valuenow` is absent when indeterminate, which is precisely how unknown progress is
+  announced.
+- The contrasted text copy duplicates visible content: it is hidden from screen readers.
+- Transitions and the continuous animation respect `prefers-reduced-motion` — the animation is
+  slowed, never frozen, since a motionless loader would lose its purpose.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.

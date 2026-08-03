@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import VSlider from './VSlider.vue'
 
 describe('VSlider', () => {
-  it('mode simple : un seul input range, v-model numérique', async () => {
+  it('single mode: a single range input, a numeric v-model', async () => {
     const { getAllByRole, emitted } = render(VSlider, {
       props: { modelValue: 40, label: 'Volume' },
     })
@@ -14,24 +14,24 @@ describe('VSlider', () => {
     expect(emitted('update:modelValue')).toEqual([[55]])
   })
 
-  it('mode range : deux inputs nommés début/fin', () => {
+  it('range mode: two inputs named start/end', () => {
     const { getByRole } = render(VSlider, {
       props: { modelValue: [20, 60], range: true, label: 'Budget' },
     })
-    expect(getByRole('slider', { name: 'Budget (début)' })).toBeTruthy()
-    expect(getByRole('slider', { name: 'Budget (fin)' })).toBeTruthy()
+    expect(getByRole('slider', { name: 'Budget (start)' })).toBeTruthy()
+    expect(getByRole('slider', { name: 'Budget (end)' })).toBeTruthy()
   })
 
-  it('empêche le croisement des deux curseurs', async () => {
+  it('prevents the two thumbs from crossing', async () => {
     const { getByRole, emitted } = render(VSlider, {
       props: { modelValue: [20, 60], range: true, label: 'Budget' },
     })
-    // le curseur de début tente de dépasser la fin → recalé sur 60
-    await fireEvent.update(getByRole('slider', { name: 'Budget (début)' }), '80')
+    // the start thumb tries to go past the end → pulled back to 60
+    await fireEvent.update(getByRole('slider', { name: 'Budget (start)' }), '80')
     expect(emitted('update:modelValue')).toEqual([[[60, 60]]])
   })
 
-  it('la piste de remplissage suit les valeurs (fractions unitless)', () => {
+  it('the fill follows the values (unitless fractions)', () => {
     const { container } = render(VSlider, {
       props: { modelValue: [25, 75], range: true, label: 'x' },
     })
@@ -40,7 +40,7 @@ describe('VSlider', () => {
     expect(style).toContain('--end-fraction: 0.75')
   })
 
-  it('orientation : data-orientation posé uniquement en vertical', async () => {
+  it('orientation: data-orientation set only when vertical', async () => {
     const { container, rerender } = render(VSlider, {
       props: { modelValue: 40, label: 'x' },
     })
@@ -50,18 +50,18 @@ describe('VSlider', () => {
     expect(root().getAttribute('data-orientation')).toBe('vertical')
   })
 
-  it('ticks : un point par pas, data-filled sous la valeur', () => {
+  it('ticks: one dot per step, data-filled below the value', () => {
     const { container } = render(VSlider, {
       props: { modelValue: 50, ticks: true, step: 25, label: 'x' },
     })
     const ticks = container.querySelectorAll('.v-slider-tick')
     expect(ticks).toHaveLength(5)
     const filled = container.querySelectorAll('.v-slider-tick[data-filled]')
-    // 0, 25, 50 remplis (≤ valeur)
+    // 0, 25, 50 are filled (≤ the value)
     expect(filled).toHaveLength(3)
   })
 
-  it('ticks range : remplis entre début et fin', () => {
+  it('ticks in range mode: filled between the start and the end', () => {
     const { container } = render(VSlider, {
       props: { modelValue: [25, 75], range: true, ticks: true, step: 25, label: 'x' },
     })
@@ -69,14 +69,14 @@ describe('VSlider', () => {
     expect(filled).toHaveLength(3)
   })
 
-  it('ticks : garde-fou au-delà de 50 pas (aucun rendu)', () => {
+  it('ticks: a guard past 50 steps (nothing rendered)', () => {
     const { container } = render(VSlider, {
       props: { modelValue: 50, ticks: true, step: 1, label: 'x' },
     })
     expect(container.querySelectorAll('.v-slider-tick')).toHaveLength(0)
   })
 
-  it('labels texte : rendus par pas et annoncés via aria-valuetext', async () => {
+  it('text labels: rendered per step and announced through aria-valuetext', async () => {
     const { container, getByRole } = render(VSlider, {
       props: {
         modelValue: 2,
@@ -84,20 +84,20 @@ describe('VSlider', () => {
         max: 4,
         step: 1,
         labels: ['XS', 'S', 'M', 'L', 'XL'],
-        label: 'Taille',
+        label: 'Size',
       },
     })
     const rendered = [...container.querySelectorAll('.v-slider-label')].map((el) => el.textContent)
     expect(rendered).toEqual(['XS', 'S', 'M', 'L', 'XL'])
-    // labels implique ticks
+    // labels implies ticks
     expect(container.querySelectorAll('.v-slider-tick')).toHaveLength(5)
-    const slider = getByRole('slider', { name: 'Taille' })
+    const slider = getByRole('slider', { name: 'Size' })
     expect(slider.getAttribute('aria-valuetext')).toBe('M')
     await fireEvent.update(slider, '3')
     expect(slider.getAttribute('aria-valuetext')).toBe('L')
   })
 
-  it('labels icônes : VIcon avec libellé accessible', () => {
+  it('icon labels: a VIcon with an accessible label', () => {
     const { getByLabelText } = render(VSlider, {
       props: {
         modelValue: 0,
@@ -105,34 +105,34 @@ describe('VSlider', () => {
         max: 1,
         step: 1,
         labels: [
-          { icon: 'volume_mute', label: 'Muet' },
-          { icon: 'volume_up', label: 'Fort' },
+          { icon: 'volume_mute', label: 'Muted' },
+          { icon: 'volume_up', label: 'Loud' },
         ],
         label: 'x',
       },
     })
-    expect(getByLabelText('Muet')).toBeTruthy()
-    expect(getByLabelText('Fort')).toBeTruthy()
+    expect(getByLabelText('Muted')).toBeTruthy()
+    expect(getByLabelText('Loud')).toBeTruthy()
   })
 
-  it('inputs : un champ numérique en simple, commit au change avec clamp et snap', async () => {
+  it('inputs: one numeric field in single mode, committing on change with clamp and snap', async () => {
     const { getAllByRole, getByRole, emitted } = render(VSlider, {
       props: { modelValue: 40, inputs: true, step: 10, label: 'Volume' },
     })
     const fields = getAllByRole('spinbutton')
     expect(fields).toHaveLength(1)
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
-    // hors bornes → clamp à max
+    // out of bounds → clamped to max
     await fireEvent.update(field, '150')
     await fireEvent.change(field)
     expect(emitted('update:modelValue').at(-1)).toEqual([100])
-    // valeur hors pas → snap (42 → 40)
+    // a value off the step → snapped (42 → 40)
     await fireEvent.update(field, '42')
     await fireEvent.change(field)
     expect(emitted('update:modelValue').at(-1)).toEqual([40])
   })
 
-  it('inputs : champ vide → revert silencieux, aucune émission', async () => {
+  it('inputs: an empty field → a silent revert, nothing emitted', async () => {
     const { getByRole, emitted } = render(VSlider, {
       props: { modelValue: 40, inputs: true, label: 'Volume' },
     })
@@ -143,18 +143,18 @@ describe('VSlider', () => {
     expect(field.value).toBe('40')
   })
 
-  it('inputs range : deux champs, anti-croisement au commit', async () => {
+  it('inputs in range mode: two fields, anti-crossing at commit time', async () => {
     const { getAllByRole, getByRole, emitted } = render(VSlider, {
       props: { modelValue: [20, 60], range: true, inputs: true, label: 'Budget' },
     })
     expect(getAllByRole('spinbutton')).toHaveLength(2)
-    const start = getByRole('spinbutton', { name: 'Budget (début)' })
+    const start = getByRole('spinbutton', { name: 'Budget (start)' })
     await fireEvent.update(start, '80')
     await fireEvent.change(start)
     expect(emitted('update:modelValue').at(-1)).toEqual([[60, 60]])
   })
 
-  it('tooltip : bulles présentes (1 en simple, 2 en range), masquées par défaut', () => {
+  it('tooltip: the bubbles are present (1 in single, 2 in range), hidden by default', () => {
     const simple = render(VSlider, {
       props: { modelValue: 40, tooltip: true, label: 'x' },
     })
@@ -167,7 +167,7 @@ describe('VSlider', () => {
     expect(range.container.querySelectorAll('.v-slider-tooltip')).toHaveLength(2)
   })
 
-  it('tooltip : affiche le label du pas quand labels est fourni', () => {
+  it("tooltip: it displays the step's label when labels is supplied", () => {
     const { container } = render(VSlider, {
       props: {
         modelValue: 1,
@@ -175,14 +175,14 @@ describe('VSlider', () => {
         max: 2,
         step: 1,
         tooltip: true,
-        labels: ['Bas', 'Milieu', 'Haut'],
+        labels: ['Low', 'Middle', 'High'],
         label: 'x',
       },
     })
-    expect(container.querySelector('.v-slider-tooltip')?.textContent).toBe('Milieu')
+    expect(container.querySelector('.v-slider-tooltip')?.textContent).toBe('Middle')
   })
 
-  it('disabled : data-disabled sur la racine, contrôles désactivés', () => {
+  it('disabled: data-disabled on the root, the controls disabled', () => {
     const { container, getByRole } = render(VSlider, {
       props: { modelValue: 40, disabled: true, inputs: true, label: 'Volume' },
     })
@@ -191,33 +191,32 @@ describe('VSlider', () => {
     expect((getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement).disabled).toBe(true)
   })
 
-  /* Les 4 libellés sont désormais des computed partagés entre le champ
-     numérique et l'input range (ils étaient dupliqués dans le template) : la
-     matrice complète est ce qui verrouille la factorisation. */
-  describe('noms accessibles des poignées', () => {
-    it('sans label : « Début »/« Fin » en range, « Valeur » sur le champ simple', () => {
+  /* The four labels are computeds shared between the numeric field and the range
+     input: the complete matrix is what locks that sharing down. */
+  describe('accessible names of the thumbs', () => {
+    it('without a label: "Start"/"End" in range, "Value" on the single field', () => {
       const range = render(VSlider, {
         props: { modelValue: [20, 60], range: true, inputs: true },
       })
-      expect(range.getByRole('slider', { name: 'Début' })).toBeTruthy()
-      expect(range.getByRole('slider', { name: 'Fin' })).toBeTruthy()
-      expect(range.getByRole('spinbutton', { name: 'Début' })).toBeTruthy()
-      expect(range.getByRole('spinbutton', { name: 'Fin' })).toBeTruthy()
+      expect(range.getByRole('slider', { name: 'Start' })).toBeTruthy()
+      expect(range.getByRole('slider', { name: 'End' })).toBeTruthy()
+      expect(range.getByRole('spinbutton', { name: 'Start' })).toBeTruthy()
+      expect(range.getByRole('spinbutton', { name: 'End' })).toBeTruthy()
 
       const single = render(VSlider, { props: { modelValue: 40, inputs: true } })
-      // Hors range, la poignée EST la valeur : sans label du consommateur elle
-      // reste sans nom, seul le champ numérique a besoin d'un repli.
-      expect(single.getByRole('spinbutton', { name: 'Valeur' })).toBeTruthy()
+      // Outside range mode, the thumb IS the value: with no consumer label it stays
+      // nameless, and only the numeric field needs a fallback.
+      expect(single.getByRole('spinbutton', { name: 'Value' })).toBeTruthy()
     })
 
-    it('avec label : suffixé « (début) »/« (fin) » en range, tel quel en simple', () => {
+    it('with a label: suffixed "(start)"/"(end)" in range, as-is in single', () => {
       const range = render(VSlider, {
         props: { modelValue: [20, 60], range: true, inputs: true, label: 'Budget' },
       })
-      expect(range.getByRole('slider', { name: 'Budget (début)' })).toBeTruthy()
-      expect(range.getByRole('slider', { name: 'Budget (fin)' })).toBeTruthy()
-      expect(range.getByRole('spinbutton', { name: 'Budget (début)' })).toBeTruthy()
-      expect(range.getByRole('spinbutton', { name: 'Budget (fin)' })).toBeTruthy()
+      expect(range.getByRole('slider', { name: 'Budget (start)' })).toBeTruthy()
+      expect(range.getByRole('slider', { name: 'Budget (end)' })).toBeTruthy()
+      expect(range.getByRole('spinbutton', { name: 'Budget (start)' })).toBeTruthy()
+      expect(range.getByRole('spinbutton', { name: 'Budget (end)' })).toBeTruthy()
 
       const single = render(VSlider, {
         props: { modelValue: 40, inputs: true, label: 'Volume' },

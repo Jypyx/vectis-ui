@@ -1,101 +1,99 @@
-﻿import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
 import * as VDataTableStories from './VDataTable.stories'
 
 <Meta of={VDataTableStories} />
 
 # DataTable
 
-Tableau de données en HTML strictement sémantique (`<table>`, `caption`, `scope`, `aria-sort`),
-composé des briques du design system : `VInput` pour la recherche, `VCheckbox` pour la sélection,
-`VMenu` + `VButton` pour les lignes par page, `VPagination` pour le footer. Toute la mécanique
-locale (filtrage → tri → pagination) est une chaîne de dérivations pures ; un mode serveur la
-court-circuite entièrement.
+A data table in strictly semantic HTML (`<table>`, `caption`, `scope`, `aria-sort`), composed of
+the design system's bricks: `VInput` for the search, `VCheckbox` for the selection, `VMenu` +
+`VButton` for the rows per page, `VPagination` for the footer. The whole local machinery (filtering
+→ sorting → pagination) is a chain of pure derivations; a server mode short-circuits it entirely.
 
 <Canvas of={VDataTableStories.Default} />
 
 <Controls of={VDataTableStories.Default} />
 
-## Tri
+## Sorting
 
-Une colonne `sortable` rend son en-tête en bouton : le clic cycle **croissant → décroissant →
-aucun**, l'état vit dans `v-model:sort` (type exporté `DataTableSort`) et le `<th>` porte
-`aria-sort`. Le tri ne réinitialise pas la page courante : on trie ce que l'on regarde.
+A `sortable` column renders its header as a button: clicking cycles **ascending → descending →
+none**, the state lives in `v-model:sort` (the exported `DataTableSort` type) and the `<th>` carries
+`aria-sort`. Sorting does not reset the current page: you sort what you are looking at.
 
-L'indicateur suit ces trois états : un glyphe neutre, atténué, signale l'affordance sur les
-colonnes triables, remplacé sur la colonne active par la flèche de la direction — vers le bas en
-croissant, vers le haut en décroissant, selon la convention des tableurs. Purement décoratif :
-c'est `aria-sort` qui porte l'information pour les technologies d'assistance.
+The indicator follows those three states: a neutral, dimmed glyph signals the affordance on sortable
+columns, replaced on the active column by the direction's arrow — pointing down when ascending, up
+when descending, following the spreadsheet convention. Purely decorative: `aria-sort` is what
+carries the information for assistive technologies.
 
-Les trois glyphes se remplacent indépendamment par `sortIcon` (triable, non trié), `sortAscIcon`
-et `sortDescIcon` — un nom d'icône ou un rendu explicite, comme partout dans le DS. N'en
-surcharger qu'un laisse les deux autres à leur valeur par défaut.
+The three glyphs are replaced independently through `sortIcon` (sortable but unsorted), `sortAscIcon`
+and `sortDescIcon` — an icon name or an explicit render, as everywhere in the design system.
+Overriding only one leaves the other two at their default.
 
-<Canvas of={VDataTableStories.Tri} />
+<Canvas of={VDataTableStories.Sorting} />
 
-## Header et recherche
+## Header and search
 
-`title` (ou le slot `#header`, qui prime) remplit la zone gauche du header global ; `searchable`
-affiche à droite un champ `VInput` type search, effaçable, relié à `v-model:search`. Le filtre
-local est insensible à la casse et aux accents et ne parcourt que les **colonnes déclarées** —
-jamais les autres champs des lignes. Un changement de terme ramène à la page 1.
+`title` (or the `#header` slot, which wins) fills the left zone of the global header; `searchable`
+displays a clearable search-type `VInput` on the right, bound to `v-model:search`. The local filter
+is case- and accent-insensitive and only walks the **declared columns** — never the rows' other
+fields. A change of term returns to page 1.
 
-<Canvas of={VDataTableStories.Recherche} />
+<Canvas of={VDataTableStories.Search} />
 
-## VPagination
+## Pagination
 
-La pagination locale s'active dès que `perPage` est défini (`v-model:per-page`, ou `:per-page`
-one-way) : le footer apparaît. Sa zone droite groupe, dans cet ordre, le sélecteur de lignes par
-page (`perPageOptions`, un `VMenu` d'items sélectionnés), le texte « X–Y sur Z » (`showRange`,
-formatable par `rangeLabel`) et la `VPagination` du DS pilotée par `v-model:page` ; la zone gauche
-reste vide hors sélection. Si un filtre réduit le nombre de pages, l'affichage retombe sur la
-dernière page par **dérivation**, sans muter le modèle.
+Local pagination activates as soon as `perPage` is defined (`v-model:per-page`, or a one-way
+`:per-page`): the footer appears. Its right zone groups, in this order, the rows-per-page selector
+(`perPageOptions`, a `VMenu` of selected items), the "X–Y of Z" text (`showRange`, formattable
+through `rangeLabel`) and the design system's `VPagination` driven by `v-model:page`; the left zone
+stays empty outside selection. If a filter reduces the number of pages, the display falls back to
+the last page by **derivation**, without mutating the model.
 
-<Canvas of={VDataTableStories.PaginationLocale} />
+<Canvas of={VDataTableStories.LocalPagination} />
 
-## Sélection
+## Selection
 
-`selectable` ajoute une colonne de `VCheckbox` à l'extrême gauche et une case « master » dans le
-`<thead>` : cochée quand toute la **page visible** est sélectionnée, indéterminée quand elle
-l'est partiellement, elle ne touche jamais aux sélections des autres pages (modèle Material).
-`v-model:selected` reçoit les identités de lignes (`DataTableRowId[]`), dérivées de `rowKey` —
-requis en pratique : sans lui les identités par index se corrompent au tri et à la pagination
-(avertissement en développement). Le décompte s'affiche à gauche du footer (`selectionLabel` pour
-le reformuler), dans une région live annoncée à chaque changement : elle est posée dès
-`selectable` — vide tant que rien n'est sélectionné — et fait apparaître le footer même sans
-pagination.
+`selectable` adds a `VCheckbox` column at the far left and a "master" box in the `<thead>`: checked
+when the whole **visible page** is selected, indeterminate when it is partially, it never touches
+the selections of other pages (the Material model). `v-model:selected` receives the row identities
+(`DataTableRowId[]`), derived from `rowKey` — required in practice: without it, index-based
+identities are corrupted by sorting and pagination (with a development warning). The count appears
+on the left of the footer (`selectionLabel` to rephrase it), in a live region announced on every
+change: it is set as soon as `selectable` is — empty while nothing is selected — and makes the
+footer appear even with no pagination.
 
 <Canvas of={VDataTableStories.Selection} />
 
-## Mode serveur
+## Server mode
 
-`serverSide` désactive **tout** traitement local : les lignes reçues sont affichées telles
-quelles (elles représentent la page courante) et chaque changement de page, de tri, de lignes
-par page ou de recherche émet `update:params` (type exporté `DataTableParams` : `page`,
-`perPage`, `sortKey`, `sortDirection`, `search`). La recherche est débouncée (`searchDebounce`,
-250 ms par défaut, `0` = synchrone) et son commit revient page 1 dans la **même** émission.
-Fournir `total` (nombre de lignes côté serveur) pour le calcul des pages et du range. Aucune
-émission au montage : le fetch initial appartient au consommateur.
+`serverSide` disables **all** local processing: the rows received are displayed as they come (they
+represent the current page) and every change of page, sort, rows per page or search emits
+`update:params` (the exported `DataTableParams` type: `page`, `perPage`, `sortKey`, `sortDirection`,
+`search`). The search is debounced (`searchDebounce`, 250 ms by default, `0` = synchronous) and its
+commit returns to page 1 within the **same** emission. Supply `total` (the number of rows on the
+server) for the page and range computation. Nothing is emitted on mount: the initial fetch belongs
+to the consumer.
 
 <Canvas of={VDataTableStories.ServerSide} />
 
-## Habillage
+## Decoration
 
-`variant` pilote le cadre du tableau, sur l'échelle commune à le `VAccordion` et aux `VTabs`. `flat` (défaut)
-n'ajoute rien : le tableau se pose nu, en-tête, filets et footer à fleur du conteneur d'accueil.
-`outlined` l'enferme dans une surface propre et arrondie, cernée d'un filet ; la barre de titre,
-le résumé et le footer prennent alors la gouttière du cadre, calée sur le padding des cellules —
-leur contenu s'aligne exactement sur le texte de la première colonne et suit `compact`. Seule la
-table continue de défiler bord à bord.
+`variant` drives the table's frame, on the scale shared with `VAccordion` and `VTabs`. `flat` (the
+default) adds nothing: the table sits bare, its header, rules and footer flush with the host
+container. `outlined` encloses it in a surface of its own, rounded and ringed by a rule; the title
+bar, the caption and the footer then take the frame's gutter, aligned on the cells' padding — their
+content lines up exactly with the first column's text and follows `compact`. Only the table keeps
+scrolling edge to edge.
 
-<Canvas of={VDataTableStories.Variantes} />
+<Canvas of={VDataTableStories.Variants} />
 
-## Apparence
+## Appearance
 
-`striped` alterne le fond des lignes paires ; `compact` réduit les paddings de cellules d'un
-cran et passe les composés (recherche, footer) en compact ; `stickyHeader` fige la rangée
-d'en-têtes au défilement vertical — il suppose une zone défilante bornée, par `height` ou par un
-parent de hauteur définie (cf. **Hauteur**), sinon rien ne défile sous l'en-tête. Son fond opaque
-reprend la surface de la variante : aucune couture au bord du cadre, y compris en thème sombre.
+`striped` alternates the background of even rows; `compact` reduces the cell paddings by one notch
+and switches the composed parts (the search, the footer) to compact; `stickyHeader` freezes the
+header row on vertical scrolling — it assumes a bounded scroll area, through `height` or through a
+parent with a defined height (see **Height**), otherwise nothing scrolls under the header. Its
+opaque background takes the variant's surface: no seam at the frame's edge, dark theme included.
 
 <Canvas of={VDataTableStories.Striped} />
 
@@ -103,58 +101,59 @@ reprend la surface de la variante : aucune couture au bord du cadre, y compris e
 
 <Canvas of={VDataTableStories.StickyHeader} />
 
-## Hauteur
+## Height
 
-Le tableau occupe **100 % de la hauteur de son parent** dès que celui-ci en a une : sa hauteur
-cesse alors de dépendre du nombre de lignes rendues, et une dernière page incomplète ne le fait
-plus se contracter — la pagination reste collée en bas, seule la table défile. Aucune prop, aucun
-JS de mesure : la racine est une colonne flex de hauteur `100 %`, un pourcentage qui retombe sur
-`auto` quand le parent se dimensionne à son contenu. Les tableaux existants sont donc inchangés
-tant qu'on ne borne pas leur hôte.
+The table takes **100% of its parent's height** as soon as the parent has one: its height then stops
+depending on the number of rows rendered, and an incomplete last page no longer makes it contract —
+the pagination stays stuck to the bottom and only the table scrolls. No prop, no measuring JS: the
+root is a flex column of height `100%`, a percentage that falls back to `auto` when the parent sizes
+itself to its content. Existing tables are therefore unchanged as long as their host is not bounded.
 
-`height` (nombre → px, ou toute longueur CSS) borne le **composant entier**, barre de titre et
-pagination comprises. Pour un simple plafond, poser `style="max-block-size: …"` ; dans un parent
-en colonne flex, préférer `style="flex: 1; min-block-size: 0"` à une hauteur en dur.
+`height` (a number → px, or any CSS length) bounds the **whole component**, the title bar and the
+pagination included. For a plain ceiling, set `style="max-block-size: …"`; inside a flex column
+parent, prefer `style="flex: 1; min-block-size: 0"` to a hardcoded height.
 
-L'espace laissé libre sous les dernières lignes reste nu : le zébrage ne se prolonge pas sur des
-lignes qui n'existent pas — les lignes n'ayant pas de hauteur fixe, un motif de fond se
-décalerait dès qu'une cellule passe sur deux lignes.
+The free space left under the last rows stays bare: the striping does not extend onto rows that do
+not exist — since rows have no fixed height, a background pattern would shift as soon as a cell
+wrapped onto two lines.
 
-<Canvas of={VDataTableStories.PleineHauteur} />
+<Canvas of={VDataTableStories.FullHeight} />
 
 ## Responsive
 
-`responsive="scroll"` (défaut) fait défiler la table horizontalement — le header et le footer
-restent en place, seule la table bouge. `responsive="stack"` transforme chaque ligne en carte
-sous 640px de **conteneur** (container query, aucun JS de mesure) : les en-têtes sont réinjectés
-devant chaque cellule via `data-label`, et la case de sélection ouvre la carte.
+`responsive="scroll"` (the default) scrolls the table horizontally — the header and the footer stay
+put, only the table moves. `responsive="stack"` turns each row into a card under 640px of
+**container** (a container query, no measuring JS): the headers are re-injected in front of each
+cell through `data-label`, and the selection box opens the card.
 
 <Canvas of={VDataTableStories.ResponsiveStack} />
 
 ## Slots
 
-- `#header` : zone gauche du header global (prime sur `title`).
-- `#head-<key>` (portée : `{ column }`) : libellé d'un en-tête de colonne — rendu **dans** le
-  bouton de tri si la colonne est triable, y placer du contenu non interactif seulement.
-- `#cell-<key>` (portée : `{ row, value, column }`) : contenu d'une cellule.
+- `#header`: the left zone of the global header (wins over `title`).
+- `#head-<key>` (scope: `{ column }`): the label of a column header — rendered **inside** the sort
+  button when the column is sortable, so place only non-interactive content there.
+- `#cell-<key>` (scope: `{ row, value, column }`): the content of a cell.
 
-<Canvas of={VDataTableStories.EnTetesPersonnalises} />
+<Canvas of={VDataTableStories.CustomHeaders} />
 
-<Canvas of={VDataTableStories.CellulesPersonnalisees} />
+<Canvas of={VDataTableStories.CustomCells} />
 
-## Accessibilité
+## Accessibility
 
-- Table native : `caption` (prop dédiée), `scope="col"` sur les en-têtes, `aria-sort` posé sur
-  le `<th>` trié ; le déclencheur de tri est un vrai `<button>`.
-- Les attributs en fallthrough (`aria-describedby`, `id`…) atterrissent sur la `<table>` ;
-  `class` et `style` restent sur la racine.
-- Ligne sélectionnée : marqueur `data-selected` et **non** `aria-selected` — cet attribut est
-  invalide sur une `row` de `role="table"` (réservé aux grids) ; l'état accessible est porté par
-  la case cochée. Les cases reçoivent leur nom via `selectAllLabel` et `selectRowLabel`.
-- Le texte « X–Y sur Z » est en `aria-live="polite"` : les changements de page sont annoncés.
-- Tous les libellés par défaut sont en français et surchargables par props (`searchLabel`,
-  `perPageLabel`, `selectAllLabel`…).
-- La prop `title` masque l'attribut HTML global homonyme sur le composant : pour poser une
-  infobulle native, viser un élément interne.
+- A native table: `caption` (a dedicated prop), `scope="col"` on the headers, `aria-sort` set on the
+  sorted `<th>`; the sort trigger is a real `<button>`.
+- The attributes passed through fallthrough (`aria-describedby`, `id`…) land on the `<table>`;
+  `class` and `style` stay on the root.
+- A selected row: a `data-selected` marker and **not** `aria-selected` — that attribute is invalid on
+  a `row` of `role="table"` (it is reserved for grids); the accessible state is carried by the
+  checked box. The boxes get their name through `selectAllLabel` and `selectRowLabel`.
+- The "X–Y of Z" text is in `aria-live="polite"`: page changes are announced.
+- Every default label comes from the design system dictionary and is overridable through props
+  (`searchLabel`, `perPageLabel`, `selectAllLabel`…).
+- The `title` prop shadows the global HTML attribute of the same name on the component: to set a
+  native tooltip, target an inner element.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.

@@ -26,16 +26,16 @@ import { useTimer } from '../../composables/useTimer'
 import { useLocale, useMessages } from '../../i18n/state'
 
 /**
- * Tableau de données : <table> sémantique (caption, scope, aria-sort), composé
- * des briques du DS — VInput (recherche), VCheckbox (sélection), VMenu+VButton
- * (lignes par page), VPagination. Le JS se limite à des dérivations pures
- * (filtrage → tri → pagination, états de sélection) et à deux effets justifiés
- * en place : reset de page et debounce de la recherche serveur.
+ * A data table: a semantic <table> (caption, scope, aria-sort), composed from the
+ * design system's bricks — VInput (search), VCheckbox (selection), VMenu+VButton (rows
+ * per page), VPagination. The JS is limited to pure derivations (filtering → sorting →
+ * pagination, selection states) and to two effects justified where they sit: the page
+ * reset and the server-side search debounce.
  *
- * Responsive et hauteur : 100 % CSS. En mode `stack`, sous 640px de conteneur,
- * chaque ligne devient une carte (::before + data-label) — aucun JS de mesure ;
- * 640px en dur, les conditions @container n'acceptent pas var(). La racine est
- * une colonne flex de `block-size: 100%` dont seule la zone défilante s'étire.
+ * Responsiveness and height: 100% CSS. In `stack` mode, under 640px of container, each
+ * row becomes a card (::before + data-label) — with no measuring JS; 640px is
+ * hardcoded, as @container conditions do not accept var(). The root is a flex column
+ * at `block-size: 100%` where only the scroll area stretches.
  */
 export interface DataTableColumn {
   key: string
@@ -44,16 +44,16 @@ export interface DataTableColumn {
   align?: 'start' | 'center' | 'end'
 }
 
-/** Tri actif (`v-model:sort`). */
+/** The active sort (`v-model:sort`). */
 export interface DataTableSort {
   key: string
   direction: 'asc' | 'desc'
 }
 
-/** Identité d'une ligne : valeur de `rowKey` (String()) ou index de secours. */
+/** A row's identity: the `rowKey` value (String()) or a fallback index. */
 export type DataTableRowId = string | number
 
-/** État courant émis par `update:params` (mode `serverSide`). */
+/** The current state emitted by `update:params` (in `serverSide` mode). */
 export interface DataTableParams {
   page: number
   perPage: number | null
@@ -62,81 +62,82 @@ export interface DataTableParams {
   search: string
 }
 
-// Exportée (et non locale) : le SFC générique inline la signature des props
-// dans ses déclarations émises — un nom privé ferait échouer le build des
-// d.ts (TS4025). Générique elle-même : hissée hors de la portée du SFC, elle
-// ne peut pas référencer son paramètre `Row` directement.
+// Exported (and not local): the generic SFC inlines the props signature into its
+// emitted declarations — a private name would fail the d.ts build (TS4025). Generic
+// itself: hoisted out of the SFC's scope, it cannot reference its `Row` parameter
+// directly.
 export interface DataTableProps<Row extends Record<string, unknown>> {
   columns: DataTableColumn[]
   rows: Row[]
-  /** Clé d'identité des lignes (sinon l'index). Requis en pratique dès que `selectable`. */
+  /** Identity key of the rows (otherwise the index). Required in practice as soon as `selectable`. */
   rowKey?: string
-  /** Résumé du tableau (accessibilité). */
+  /** Summary of the table (accessibility). */
   caption?: string
-  /** Habillage du conteneur. `flat` : aucun. `outlined` : fond surélevé, bordure et rayon. */
+  /** Decoration of the container. `flat`: none. `outlined`: a raised background, a border and a radius. */
   variant?: 'flat' | 'outlined'
-  /** `stack` : lignes en cartes sous 640px de conteneur ; `scroll` : défilement horizontal. */
+  /** `stack`: rows as cards under 640px of container; `scroll`: horizontal scrolling. */
   responsive?: 'scroll' | 'stack'
   loading?: boolean
-  /** Texte affiché quand aucune ligne n'est à montrer. Défaut : dictionnaire du DS. */
+  /** Text displayed when there is no row to show. Default: the DS dictionary. */
   emptyText?: string
   /**
-   * Titre de la zone gauche du header (le slot #header prime). NB : masque
-   * l'attribut HTML global homonyme sur le composant (compromis assumé).
+   * Title of the header's left zone (the #header slot wins). Note: it shadows the
+   * global HTML attribute of the same name on the component (an accepted trade-off).
    */
   title?: string
-  /** Champ de recherche à droite du header. */
+  /** A search field on the right of the header. */
   searchable?: boolean
-  /** Placeholder du champ de recherche. Défaut : dictionnaire du DS. */
+  /** Placeholder of the search field. Default: the DS dictionary. */
   searchPlaceholder?: string
-  /** Nom accessible du champ de recherche (aria-label). Défaut : dictionnaire du DS. */
+  /** Accessible name of the search field (aria-label). Default: the DS dictionary. */
   searchLabel?: string
-  /** serverSide : délai (ms) avant émission après saisie. `0` = synchrone. */
+  /** serverSide: the delay (ms) before emitting after typing. `0` = synchronous. */
   searchDebounce?: number
-  /** Alterne le fond des lignes paires. */
+  /** Alternates the background of even rows. */
   striped?: boolean
   /**
-   * Fige l'en-tête au défilement vertical. Suppose une zone défilante bornée :
-   * prop `height` ou parent de hauteur définie.
+   * Freezes the header on vertical scrolling. It assumes a bounded scroll area: the
+   * `height` prop or a parent with a defined height.
    */
   stickyHeader?: boolean
-  /** Paddings de cellules réduits d'un cran, propagé aux composés. */
+  /** Cell paddings reduced by one notch, propagated to the composed parts. */
   compact?: boolean
   /**
-   * Hauteur du composant entier — toolbar et pagination comprises (nombre → px,
-   * chaîne CSS libre sinon). À défaut, le tableau occupe la hauteur de son
-   * parent quand celui-ci en a une.
+   * Height of the whole component — the toolbar and the pagination included (a number
+   * → px, otherwise a free CSS string). By default, the table takes its parent's height
+   * when the parent has one.
    */
   height?: number | string
-  /** Icône d'en-tête d'une colonne triable non triée. */
+  /** Header icon of a sortable but unsorted column. */
   sortIcon?: IconSource
-  /** Icône du tri ascendant (convention tableur : trier de A à Z pointe vers le bas). */
+  /** Icon of the ascending sort (the spreadsheet convention: sorting A to Z points down). */
   sortAscIcon?: IconSource
-  /** Icône du tri descendant. */
+  /** Icon of the descending sort. */
   sortDescIcon?: IconSource
-  /** Choix « lignes par page » (affiché si fourni et pagination active). */
+  /** The "rows per page" choices (displayed when supplied and the pagination is active). */
   perPageOptions?: number[]
-  /** Libellé du sélecteur « lignes par page ». Défaut : dictionnaire du DS. */
+  /** Label of the "rows per page" selector. Default: the DS dictionary. */
   perPageLabel?: string
-  /** serverSide : nombre total de lignes côté serveur (pages + range). */
+  /** serverSide: the total number of rows on the server (pages + range). */
   total?: number
-  /** Affiche « X–Y sur Z » dans le footer. */
+  /** Displays "X–Y of Z" in the footer. */
   showRange?: boolean
-  /** Reformule la plage affichée. Défaut : dictionnaire du DS. */
+  /** Rephrases the displayed range. Default: the DS dictionary. */
   rangeLabel?: (range: { start: number; end: number; total: number }) => string
-  /** Colonne de sélection par checkbox + case « tout sélectionner ». */
+  /** A checkbox selection column + a "select all" box. */
   selectable?: boolean
-  /** Nom accessible de la case « tout sélectionner ». Défaut : dictionnaire du DS. */
+  /** Accessible name of the "select all" box. Default: the DS dictionary. */
   selectAllLabel?: string
   /**
-   * Texte de la zone gauche du footer (`selectable`). Vide à zéro. Défaut : dictionnaire du DS.
+   * Text of the footer's left zone (`selectable`). Empty at zero. Default: the DS
+   * dictionary.
    */
   selectionLabel?: (count: number) => string
-  /** Nom accessible de la case d'une ligne. Défaut : dictionnaire du DS. */
+  /** Accessible name of a row's box. Default: the DS dictionary. */
   selectRowLabel?: (row: Row, index: number) => string
   /**
-   * Aucun filtrage/tri/pagination local : les lignes sont affichées telles
-   * quelles et chaque changement de paramètre émet `update:params`.
+   * No local filtering/sorting/pagination: the rows are displayed as they come and
+   * every parameter change emits `update:params`.
    */
   serverSide?: boolean
 }
@@ -172,8 +173,6 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   serverSide: false,
 })
 
-// Cascade prop > dictionnaire : les props gardent la priorité, leurs défauts
-// suivent désormais la locale du DS.
 const m = useMessages()
 const vectisLocale = useLocale()
 const resolvedEmptyText = computed(() => props.emptyText ?? m.value.dataTable.empty)
@@ -184,45 +183,44 @@ const resolvedSearchLabel = computed(() => props.searchLabel ?? m.value.dataTabl
 const resolvedPerPageLabel = computed(() => props.perPageLabel ?? m.value.dataTable.perPage)
 const resolvedSelectAllLabel = computed(() => props.selectAllLabel ?? m.value.dataTable.selectAll)
 
-/** Tri contrôlable de l'extérieur (v-model:sort) ou interne. */
+/** A sort controllable from outside (v-model:sort) or internal. */
 const sort = defineModel<DataTableSort | null>('sort', { default: null })
 const page = defineModel<number>('page', { default: 1 })
-/** VPagination active ssi > 0 (`:per-page="10"` one-way suffit à l'activer). */
+/** Pagination is active iff > 0 (a one-way `:per-page="10"` is enough to enable it). */
 const perPage = defineModel<number | undefined>('perPage', { default: undefined })
 const selected = defineModel<DataTableRowId[]>('selected', { default: () => [] })
 const search = defineModel<string>('search', { default: '' })
 
 const emit = defineEmits<{
   /**
-   * serverSide : émis à chaque changement de page/perPage/tri/recherche
-   * (recherche débouncée). Pas d'émission au montage — le fetch initial
-   * appartient au consommateur.
+   * serverSide: emitted on every change of page/perPage/sort/search (the search being
+   * debounced). Nothing is emitted on mount — the initial fetch belongs to the consumer.
    */
   'update:params': [params: DataTableParams]
 }>()
 
 defineSlots<{
-  /** Rendu custom d'une cellule : slot nommé `cell-<key>` */
+  /** Custom rendering of a cell: a slot named `cell-<key>` */
   [name: `cell-${string}`]: (scope: {
     row: Row
     value: unknown
     column: DataTableColumn
   }) => unknown
-  /** Libellé custom d'un en-tête de colonne : slot nommé `head-<key>` */
+  /** Custom label of a column header: a slot named `head-<key>` */
   [name: `head-${string}`]: (scope: { column: DataTableColumn }) => unknown
-  /** Zone gauche du header global (prime sur la prop `title`). */
+  /** Left zone of the global header (wins over the `title` prop). */
   header?: () => unknown
 }>()
 
-// Racine wrapper : class/style restent sur la racine, le reste (id, aria-*…)
-// est reporté sur la <table> — seul élément qu'ils décrivent valablement.
+// Wrapper root: class/style stay on the root, the rest (id, aria-*…) is carried over
+// to the <table> — the only element they validly describe.
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 if (isDev) {
   if (props.selectable && !props.rowKey)
     console.warn(
-      '[VDataTable] `selectable` sans `rowKey` — les identités par index se corrompent au tri, au filtrage et à la pagination.',
+      '[VDataTable] `selectable` without `rowKey` — index-based identities are corrupted by sorting, filtering and pagination.',
     )
 }
 
@@ -230,10 +228,10 @@ function rowIdentity(row: Row, index: number): DataTableRowId {
   return props.rowKey ? String(row[props.rowKey]) : index
 }
 
-// ── Filtrage → tri → pagination (dérivations pures) ─────────────────────────
-
-// Périmètre du filtre : les colonnes déclarées (ce que l'utilisateur voit),
-// jamais les autres champs des lignes.
+// Filtering → sorting → pagination (pure derivations).
+//
+// Scope of the filter: the declared columns (what the user sees), never the rows'
+// other fields.
 const filteredRows = computed(() => {
   if (props.serverSide || !props.searchable) return props.rows
   const needle = normalizeText(search.value.trim())
@@ -265,12 +263,12 @@ const totalCount = computed(() =>
 const pageCount = computed(() =>
   paginated.value ? Math.max(1, Math.ceil(totalCount.value / (perPage.value ?? 1))) : 1,
 )
-// Clamp par dérivation, sans muter le model : si le
-// filtre réduit le nombre de pages, l'affichage retombe sur la dernière.
+// Clamped by derivation, without mutating the model: if the filter reduces the number
+// of pages, the display falls back to the last one.
 const currentPage = computed(() => clamp(page.value, 1, pageCount.value))
 
 const displayedRows = computed(() => {
-  // serverSide : les lignes reçues sont déjà la page courante.
+  // serverSide: the rows received are already the current page.
   if (props.serverSide || !paginated.value) return sortedRows.value
   const start = (currentPage.value - 1) * (perPage.value ?? 0)
   return sortedRows.value.slice(start, start + (perPage.value ?? 0))
@@ -289,19 +287,19 @@ function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | undefin
 }
 
 /**
- * Glyphe de tri : neutre hors colonne triée, puis flèche de la direction —
- * convention tableur (trier de A à Z = flèche vers le bas).
+ * The sort glyph: neutral outside the sorted column, then the direction's arrow — the
+ * spreadsheet convention (sorting A to Z = an arrow pointing down).
  */
 function sortIconFor(column: DataTableColumn): IconSource {
   if (sort.value?.key !== column.key) return props.sortIcon
   return sort.value.direction === 'asc' ? props.sortAscIcon : props.sortDescIcon
 }
 
-// ── Recherche : reset de page et debounce serveur ───────────────────────────
-// JS justifié : un filtre qui change invalide la position courante (retour
-// page 1) ; en mode serveur, aucune primitive native ne débounce une saisie.
-// Le report est délégué à `useTimer` (délai ≤ 0 synchrone, annulation au
-// démontage) ; le terme commité est relu par le computed `params`.
+// Search: the page reset and the server-side debounce.
+// JS justified: a filter that changes invalidates the current position (back to page
+// 1); in server mode, no native primitive debounces an input. The deferral is delegated
+// to `useTimer` (a synchronous delay ≤ 0, cancellation on unmount); the committed term
+// is re-read by the `params` computed.
 const committedSearch = ref('')
 const searchTimer = useTimer()
 
@@ -318,7 +316,7 @@ watch(search, () => {
   searchTimer.start(commitSearch, props.searchDebounce)
 })
 
-// ── Mode serveur : émission de l'état courant ───────────────────────────────
+// Server mode: emitting the current state.
 const params = computed<DataTableParams>(() => ({
   page: currentPage.value,
   perPage: perPage.value ?? null,
@@ -327,13 +325,13 @@ const params = computed<DataTableParams>(() => ({
   search: committedSearch.value,
 }))
 
-// Les mutations synchrones (commit de recherche + retour page 1) coalescent
-// en une seule invocation par flush : jamais de double requête.
+// The synchronous mutations (the search commit + the return to page 1) coalesce into a
+// single invocation per flush: never a double request.
 watch(params, (value) => {
   if (props.serverSide) emit('update:params', value)
 })
 
-// ── Sélection (master = page visible, à la Material) ────────────────────────
+// Selection (the master box covers the visible page, the Material way).
 const selectedSet = computed(() => new Set<DataTableRowId>(selected.value))
 const visibleIds = computed(() => displayedRows.value.map((row, index) => rowIdentity(row, index)))
 const allVisibleSelected = computed(
@@ -351,7 +349,7 @@ function toggleRow(row: Row, index: number) {
   selected.value = toggleValue(selected.value, rowIdentity(row, index))
 }
 
-// Ne touche que la page visible : les sélections des autres pages sont préservées.
+// It only touches the visible page: the selections of the other pages are preserved.
 function toggleMaster() {
   const ids = visibleIds.value
   if (allVisibleSelected.value) {
@@ -364,12 +362,11 @@ function toggleMaster() {
 }
 
 function rowSelectLabel(row: Row, index: number): string {
-  // Le dictionnaire reçoit l'index HUMAIN (1-based) ; la prop, elle, garde la
-  // signature d'origine (`row`, index 0-based).
+  // The dictionary receives the HUMAN index (1-based); the prop keeps its original
+  // signature (`row`, a 0-based index).
   return props.selectRowLabel?.(row, index) ?? m.value.dataTable.selectRow(index + 1)
 }
 
-// ── Footer ──────────────────────────────────────────────────────────────────
 function setPerPage(option: number) {
   perPage.value = option
   page.value = 1
@@ -378,9 +375,9 @@ function setPerPage(option: number) {
 const colCount = computed(() => props.columns.length + (props.selectable ? 1 : 0))
 
 /**
- * Zone gauche du footer : rendue (vide) dès `selectable` pour que la région
- * live préexiste à la première sélection — un conteneur aria-live inséré en
- * même temps que son texte n'est pas annoncé.
+ * Left zone of the footer: rendered (empty) as soon as `selectable` is set so the live
+ * region pre-exists the first selection — an aria-live container inserted at the same
+ * time as its text is not announced.
  */
 const selectionText = computed(() => {
   const count = selected.value.length
@@ -397,11 +394,11 @@ const rangeText = computed(() => {
   return props.rangeLabel?.({ start, end, total }) ?? m.value.dataTable.range({ start, end, total })
 })
 
-// Hauteur posée sur la RACINE (et non en max-block-size sur le scroller) : le
-// composant entier occupe la hauteur demandée et la zone défilante absorbe le
-// reste — une page incomplète ne fait plus rétrécir le tableau. Un plafond
-// souple reste accessible au consommateur (`style="max-block-size: …"`), la
-// racine étant une colonne flex dont le scroller peut se comprimer.
+// The height is set on the ROOT (and not as a max-block-size on the scroller): the
+// whole component takes the requested height and the scroll area absorbs the rest — so
+// an incomplete page no longer shrinks the table. A soft ceiling stays available to the
+// consumer (`style="max-block-size: …"`), the root being a flex column whose scroller
+// can compress.
 const heightStyle = computed<StyleValue | undefined>(() =>
   props.height !== undefined ? { blockSize: cssSize(props.height) } : undefined,
 )
@@ -437,7 +434,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       />
     </div>
 
-    <!-- Seule la table défile : toolbar et footer restent en place. -->
+    <!-- Only the table scrolls: the toolbar and the footer stay put. -->
     <div class="v-table-scroller">
       <table class="v-table" v-bind="forwardedAttrs">
         <caption v-if="caption" class="v-table-caption">
@@ -470,8 +467,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 @click="toggleSort(column.key)"
               >
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
-                <!-- décorative : sans `label`, VIcon pose aria-hidden lui-même —
-                     l'état de tri est porté par l'aria-sort du th. -->
+                <!-- decorative: with no `label`, VIcon sets aria-hidden itself — the
+                     sort state is carried by the th's aria-sort. -->
                 <VIcon class="v-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
               </button>
               <template v-else>
@@ -481,7 +478,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
           </tr>
         </thead>
         <tbody>
-          <!-- Ordre des états : chargement → vide → contenu. -->
+          <!-- Order of the states: loading → empty → content. -->
           <tr v-if="loading">
             <td :colspan="colCount" class="v-table-state">
               <VSpinner :label="m.dataTable.loading" />
@@ -496,8 +493,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
               :key="rowIdentity(row, index)"
               :data-selected="selectable && isSelected(row, index) ? '' : undefined"
             >
-              <!-- data-selected et non aria-selected : invalide sur une row de
-                   role=table (grid seulement) — l'état accessible est la case cochée. -->
+              <!-- data-selected and not aria-selected: invalid on a row of role=table
+                   (grid only) — the accessible state is the checked box. -->
               <td v-if="selectable" class="v-table-select">
                 <VCheckbox
                   :model-value="isSelected(row, index)"
@@ -526,7 +523,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       </table>
     </div>
 
-    <!-- Footer : sélection à gauche, lignes par page → plage → pagination à droite. -->
+    <!-- Footer: the selection on the left, rows per page → range → pagination on the right. -->
     <div v-if="paginated || selectable" class="v-table-footer">
       <span v-if="selectable" class="v-table-selection" aria-live="polite">{{
         selectionText
@@ -534,9 +531,9 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       <div v-if="paginated" class="v-table-footer-end">
         <div v-if="perPageOptions?.length" class="v-table-per-page">
           <span class="v-table-per-page-label" aria-hidden="true">{{ resolvedPerPageLabel }}</span>
-          <!-- match-trigger : le panneau épouse l'option la plus large (« 10 »,
-               « 25 »…) au lieu de la largeur minimale par défaut, sans jamais
-               être plus étroit que le bouton qui l'ouvre. -->
+          <!-- match-trigger: the panel matches the widest option ("10", "25"…) instead
+               of the default minimum width, without ever being narrower than the button
+               that opens it. -->
           <VMenu size="sm" :compact="compact" placement="top-end" match-trigger>
             <template #trigger="{ triggerProps }">
               <VButton
@@ -578,33 +575,31 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 <style>
 @layer vectis.components {
   .v-table-wrapper {
-    /* Densité : paddings de cellules, réduits d'un cran en compact (modèle
-       VAccordion — pas d'échelle .v-control : aucune hauteur de contrôle unique). */
+    /* Density: cell paddings, reduced by one notch in compact (the VAccordion model —
+       no .v-control scale: there is no single control height here). */
     --table-pad-block: var(--vectis-space-3);
     --table-pad-inline: var(--vectis-space-3);
     --table-head-pad-block: var(--vectis-space-2);
 
-    /* Marge intérieure du cadre : nulle à plat (légende, toolbar et footer
-       restent à fleur de bord), alignée sur le padding inline des cellules dès
-       qu'une variante encadre la table. */
+    /* Inner margin of the frame: zero when flat (the caption, the toolbar and the
+       footer stay flush with the edge), aligned on the cells' inline padding as soon as a
+       variant frames the table. */
     --table-frame-pad: 0px;
-    /* Fond des en-têtes figés : suit celui du cadre — sans quoi la couture
-       serait visible en thème sombre (surface ≠ surface-raised). */
+    /* Background of the frozen headers: it follows the frame's — otherwise the seam
+       would be visible in the dark theme (surface ≠ surface-raised). */
     --table-surface: var(--vectis-color-surface);
 
     container-type: inline-size;
     font-family: var(--vectis-text-family);
 
     /*
-     * Colonne toolbar / scroller / footer : le composant prend
-     * la hauteur de son parent et c'est la zone défilante qui absorbe le reste
-     * — la table ne rétrécit plus quand une page est incomplète (dernière page
-     * à 2 lignes) et le footer reste collé en bas. Sans hauteur imposée par le
-     * parent, `100%` retombe sur `auto` (pourcentage résolu contre une hauteur
-     * indéfinie) : le rendu historique est conservé tel quel, sans mesure JS.
-     * Pas de `min-block-size: 0` ici, volontairement : dans un parent en
-     * colonne flex trop court, le minimum automatique garde la table à sa
-     * hauteur naturelle au lieu de l'écraser.
+     * A toolbar / scroller / footer column: the component takes its parent's height and
+     * it is the scroll area that absorbs the rest — the table no longer shrinks when a
+     * page is incomplete (a last page with 2 rows) and the footer stays stuck to the
+     * bottom. With no height imposed by the parent, `100%` falls back to `auto` (a
+     * percentage resolved against an undefined height), with no JS measurement.
+     * Deliberately no `min-block-size: 0` here: inside a too-short flex column parent,
+     * the automatic minimum keeps the table at its natural height instead of crushing it.
      */
     display: flex;
     flex-direction: column;
@@ -617,8 +612,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     --table-head-pad-block: var(--vectis-space-1);
   }
 
-  /* Carte bordée ; `flat` (défaut) n'a rien à annuler, il n'ajoute simplement
-     rien — c'est l'hôte qui porte le cadre et la surface. */
+  /* A bordered card; `flat` (the default) has nothing to cancel, it simply adds nothing
+     — the host is what carries the frame and the surface. */
   .v-table-wrapper[data-variant='outlined'] {
     --table-frame-pad: var(--table-pad-inline);
     --table-surface: var(--vectis-color-surface-raised);
@@ -627,27 +622,26 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     border: 1px solid var(--vectis-color-border);
     border-radius: var(--vectis-radius-surface);
     /*
-     * Contrepartie du rayon : fonds de lignes (zébrage, sélection), fond
-     * opaque de l'en-tête figé et coins carrés du scroller déborderaient
-     * sinon des angles. `clip` et non `hidden` : `hidden` ferait de la racine
-     * un conteneur de défilement et l'en-tête `sticky` s'y arrimerait au lieu
-     * du scroller. Conditionné à la variante — à plat, toolbar et footer sont
-     * à fleur de bord, la découpe rognerait leurs anneaux de focus. Le panneau
-     * « lignes par page » est un popover natif (top layer) : jamais rogné.
+     * The counterpart of the radius: row backgrounds (striping, selection), the opaque
+     * background of the frozen header and the scroller's square corners would otherwise
+     * spill out of the corners. `clip` and not `hidden`: `hidden` would make the root a
+     * scroll container and the `sticky` header would anchor to it instead of the
+     * scroller. Conditioned on the variant — when flat, the toolbar and the footer are
+     * flush with the edge and the clip would crop their focus rings. The "rows per page"
+     * panel is a native popover (top layer): never cropped.
      */
     overflow: clip;
   }
 
   /*
-   * La SEULE zone qui défile : occupe l'espace laissé par la toolbar et le
-   * footer. `flex: 1 1 auto` et non `flex: 1`
-   * (= base 0) : la base `auto` part de la hauteur de contenu, donc inerte tant
-   * qu'il n'y a pas d'espace libre à distribuer. `min-block-size: 0` lève le
-   * minimum automatique de l'item flex (= hauteur du contenu), sans quoi le
-   * scroller refuserait de se comprimer et la table déborderait au lieu de
-   * défiler. Non qualifié par `data-responsive` : en `stack` aussi un tableau
-   * plus haut que son hôte doit défiler — sinon il serait rogné, et
-   * inatteignable, par le `overflow: clip` de la variante `outlined`.
+   * The ONLY zone that scrolls: it takes the room left by the toolbar and the footer.
+   * `flex: 1 1 auto` and not `flex: 1` (= base 0): the `auto` base starts from the
+   * content height, hence inert as long as there is no free space to distribute.
+   * `min-block-size: 0` lifts the flex item's automatic minimum (= the content height),
+   * without which the scroller would refuse to compress and the table would overflow
+   * instead of scrolling. Not qualified by `data-responsive`: in `stack` too, a table
+   * taller than its host must scroll — otherwise it would be cropped, and unreachable,
+   * by the `overflow: clip` of the `outlined` variant.
    */
   .v-table-scroller {
     flex: 1 1 auto;
@@ -656,7 +650,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .v-table-toolbar {
-    flex: none; /* fixe en haut, hors zone de défilement */
+    flex: none; /* fixed at the top, outside the scroll area */
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -667,14 +661,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     padding-inline: var(--table-frame-pad);
   }
 
-  /* Titre : rendu par VTypography (heading-4) — la couleur reste explicite,
-     la toolbar peut vivre dans un contexte de texte atténué. */
+  /* Title: rendered by VTypography (heading-4) — the colour stays explicit, as the
+     toolbar may live inside a dimmed text context. */
   .v-table-title {
     color: var(--vectis-color-text);
   }
 
-  /* Surcharge qualifiée (0,2,0) du `.v-input { width: 100% }` (0,1,0)
-     de VInput — indépendante de l'ordre du bundle. */
+  /* A qualified (0,2,0) override of VInput's `.v-input { width: 100% }` (0,1,0) —
+     independent of the bundle order. */
   .v-table-toolbar .v-input {
     inline-size: var(--vectis-control-size-table-search);
     max-inline-size: 100%;
@@ -699,7 +693,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     padding: var(--table-head-pad-block) var(--table-pad-inline);
     text-align: start;
     font-size: var(--vectis-text-body-md-size);
-    /* semibold : emphase d'état, pas un rôle typo */
+    /* semibold: state emphasis, not a type role */
     font-weight: var(--vectis-font-weight-semibold);
     color: var(--vectis-color-text-muted);
     border-block-end: 1px solid var(--vectis-color-border);
@@ -722,7 +716,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     text-align: center;
   }
 
-  /* Colonne de sélection rétrécie au contenu (layout table auto). */
+  /* The selection column shrunk to its content (auto table layout). */
   .v-table .v-table-select {
     inline-size: 0;
   }
@@ -731,14 +725,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     background-color: var(--vectis-color-surface-sunken);
   }
 
-  /* Après le zébrage : à spécificité égale, la sélection gagne à l'ordre. */
+  /* After the striping: at equal specificity, the selection wins by order. */
   .v-table-wrapper[data-selectable] tbody tr[data-selected] {
     background-color: var(--vectis-color-accent-surface);
   }
 
-  /* Fond opaque obligatoire : le contenu défile sous l'en-tête figé. Il doit
-     valoir la surface réelle du tableau, d'où la variable — une valeur en dur
-     laisserait une couture au bord du cadre en thème sombre. */
+  /* A mandatory opaque background: the content scrolls under the frozen header. It must
+     equal the table's real surface, hence the variable — a hardcoded value would leave a
+     seam at the frame's edge in the dark theme. */
   .v-table-wrapper[data-sticky-header] th {
     position: sticky;
     inset-block-start: 0;
@@ -747,8 +741,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .v-table-sort {
-    /* Contexte de VIcon : 20px, opsz 20.
-       Sans lui l'icône retomberait sur 1em, soit la taille de texte du th. */
+    /* VIcon context: 20px, opsz 20. Without it the icon would fall back to 1em, i.e. the
+       th's text size. */
     --vectis-icon-size: var(--vectis-icon-size-md);
     --vectis-icon-opsz: 20;
 
@@ -773,8 +767,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* atténuée tant que la colonne n'est pas celle qui porte le tri : le glyphe
-     neutre annonce l'affordance sans concurrencer la direction active */
+  /* Dimmed as long as the column is not the one carrying the sort: the neutral glyph
+     announces the affordance without competing with the active direction */
   .v-table-sort-icon {
     opacity: 0.35;
   }
@@ -790,7 +784,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .v-table-footer {
-    flex: none; /* fixe en bas, hors zone de défilement */
+    flex: none; /* fixed at the bottom, outside the scroll area */
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -802,10 +796,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   /*
-   * Zone droite d'un seul tenant : `margin-inline-start: auto` la colle au bord
-   * quelle que soit la présence du décompte de sélection à gauche (un simple
-   * justify-content ne suffirait pas — les deux zones sont des items frères et
-   * le décompte doit rester au bord opposé).
+   * The right zone as one block: `margin-inline-start: auto` sticks it to the edge
+   * whether or not the selection count is present on the left (a plain justify-content
+   * would not do — the two zones are sibling items and the count must stay at the
+   * opposite edge).
    */
   .v-table-footer-end {
     display: flex;
@@ -829,7 +823,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     gap: var(--vectis-space-2);
   }
 
-  /* --- Mode stack : cartes sous 640px de conteneur, pur CSS --- */
+  /* Stack mode: cards under 640px of container, pure CSS */
   @container (max-width: 640px) {
     .v-table-wrapper[data-responsive='stack'] .v-table-head {
       position: absolute;
@@ -860,7 +854,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       text-align: end;
     }
 
-    /* Pseudo-en-tête de carte : rôle overline (sans capitales forcées) */
+    /* Card pseudo-header: the overline role (no forced capitals) */
     .v-table-wrapper[data-responsive='stack'] td::before {
       content: attr(data-label);
       font-size: var(--vectis-text-overline-size);
@@ -869,8 +863,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       color: var(--vectis-color-text-muted);
     }
 
-    /* La case de sélection n'a pas de data-label : pas de pseudo-en-tête,
-       elle ouvre la carte. */
+    /* The selection box has no data-label: no pseudo-header, it opens the card. */
     .v-table-wrapper[data-responsive='stack'] td.v-table-select {
       justify-content: flex-start;
     }
@@ -879,8 +872,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       content: none;
     }
 
-    /* Toolbar étroite : le champ de recherche passe sous le titre, pleine
-       largeur (vaut pour scroll ET stack — la toolbar ne défile jamais). */
+    /* A narrow toolbar: the search field moves under the title, full width (this holds
+       for scroll AND stack — the toolbar never scrolls). */
     .v-table-search {
       flex: 1 1 100%;
     }

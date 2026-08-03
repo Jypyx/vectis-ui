@@ -9,16 +9,16 @@ import { isDev } from '../../utils/env'
 import { useMessages } from '../../i18n/state'
 
 /**
- * <input type="range"> natif (clavier, ARIA slider, formulaires gratuits). Le
- * JS se limite à empêcher le croisement des valeurs en mode range (deux inputs
- * superposés — il n'existe pas de primitive double curseur), au pont des champs
- * numériques (le natif ne valide pas une saisie libre) et à des dérivations
- * pures pour ticks/labels/tooltips.
+ * A native <input type="range"> (keyboard, the ARIA slider, forms — all for free). The
+ * JS is limited to preventing the values from crossing in range mode (two
+ * superimposed inputs — there is no dual-thumb primitive), to the numeric fields'
+ * bridge (the native element does not validate free input) and to pure derivations for
+ * the ticks/labels/tooltips.
  *
- * Les custom properties inline (fractions unitless) sont la seule liaison de
- * style : elles alignent fill/ticks/labels/tooltips sur le CENTRE réel du
- * thumb, qui parcourt [thumb/2, 100% − thumb/2] et non [0, 100%].
- * Vertical : support natif du range vertical Chrome/Edge 129+, Safari 18.1+.
+ * The inline custom properties (unitless fractions) are the only style binding: they
+ * align the fill/ticks/labels/tooltips on the thumb's real CENTRE, which travels
+ * [thumb/2, 100% − thumb/2] and not [0, 100%].
+ * Vertical: native support for the vertical range in Chrome/Edge 129+, Safari 18.1+.
  */
 export type SliderLabel = string | { icon: IconSource; label: string }
 
@@ -26,20 +26,20 @@ interface SliderProps {
   min?: number
   max?: number
   step?: number
-  /** Deux curseurs — le v-model devient [début, fin]. */
+  /** Two thumbs — the v-model becomes [start, end]. */
   range?: boolean
   disabled?: boolean
-  /** Libellé accessible (suffixé « début »/« fin » en mode range). */
+  /** Accessible label (suffixed "start"/"end" in range mode). */
   label?: string
-  /** Verticale : min en bas, max en haut. */
+  /** Vertical: min at the bottom, max at the top. */
   orientation?: 'horizontal' | 'vertical'
-  /** Champs numériques d'ajustement précis (un en simple, un par borne en range). */
+  /** Numeric fields for precise adjustment (one in single mode, one per bound in range). */
   inputs?: boolean
-  /** Points sur la piste à chaque pas (implicite si `labels` ; non rendu au-delà de 50 pas). */
+  /** Dots on the track at each step (implied by `labels`; not rendered past 50 steps). */
   ticks?: boolean
-  /** Un libellé par pas ; string = texte, objet = icône Material + libellé accessible. */
+  /** One label per step; a string = text, an object = a Material icon + an accessible label. */
   labels?: SliderLabel[]
-  /** Bulle de valeur suivant le thumb pendant le drag / au focus clavier. */
+  /** A value bubble following the thumb during the drag / on keyboard focus. */
   tooltip?: boolean
 }
 
@@ -64,7 +64,7 @@ const endValue = computed(() =>
   Array.isArray(model.value) ? model.value[1] : (model.value as number),
 )
 
-/** Fraction [0, 1] de la course pour une valeur (le `|| 1` évite min === max). */
+/** Fraction [0, 1] of the run for a value (the `|| 1` guards against min === max). */
 const frac = (v: number) => Math.min(1, Math.max(0, (v - props.min) / (props.max - props.min || 1)))
 
 function onStartInput(event: Event) {
@@ -85,9 +85,7 @@ function onEndInput(event: Event) {
   model.value = [startValue.value, clamped]
 }
 
-// --- Ticks & labels : dérivation pure des positions de pas -----------------
-
-/** Nombre de pas entiers réellement atteignables (le natif s'arrête au dernier pas ≤ max). */
+/** Number of whole steps actually reachable (the native element stops at the last step ≤ max). */
 const stepCount = computed(() => Math.floor((props.max - props.min) / props.step + 1e-9))
 
 const showTicks = computed(
@@ -108,21 +106,19 @@ const tickItems = computed(() => {
 
 const labelFraction = (index: number) => frac(props.min + index * props.step)
 
-/** Libellé textuel du pas correspondant à une valeur (repli : la valeur brute). */
+/** Text label of the step matching a value (fallback: the raw value). */
 function labelTextAt(value: number): string {
   const item = props.labels?.[Math.round((value - props.min) / props.step)]
   if (item === undefined) return String(value)
   return typeof item === 'string' ? item : item.label
 }
 
-/* Noms accessibles des poignées. Aucune prop dédiée : le dictionnaire est le
-   seul point de surcharge. Chaque libellé était écrit DEUX fois (champ
-   numérique et input range) — le computed supprime la duplication.
+/* Accessible names of the thumbs. No dedicated prop: the dictionary is the only
+   override point.
 
-   Hors mode range, l'extrémité haute EST la valeur : elle garde le `label`
-   du consommateur, et reste sans nom accessible s'il n'en a pas fourni (le
-   repli « Valeur » ne vaut que pour le champ numérique, qui a besoin d'un
-   nom propre). */
+   Outside range mode, the upper end IS the value: it keeps the consumer's `label`, and
+   stays without an accessible name if none was supplied (the "Value" fallback only
+   applies to the numeric field, which needs a name of its own). */
 const m = useMessages()
 const startLabel = computed(() =>
   props.label ? m.value.slider.rangeStart(props.label) : m.value.slider.start,
@@ -140,40 +136,40 @@ const endValueText = computed(() => (props.labels ? labelTextAt(endValue.value) 
 
 if (isDev) {
   if ((props.ticks || props.labels) && stepCount.value > 50)
-    console.warn(`[VSlider] ${stepCount.value} pas — ticks/labels non rendus au-delà de 50.`)
+    console.warn(`[VSlider] ${stepCount.value} steps — ticks/labels not rendered past 50.`)
   if (props.labels && props.labels.length !== stepCount.value + 1)
     console.warn(
-      `[VSlider] ${props.labels.length} labels pour ${stepCount.value + 1} pas — un libellé par pas attendu.`,
+      `[VSlider] ${props.labels.length} labels for ${stepCount.value + 1} steps — one label per step expected.`,
     )
 }
 
-// --- Champs numériques : pont v-model string ↔ number ----------------------
-
-// `string | number` : les champs sont des `<input type="number">`, dont Vue
-// caste la valeur en nombre dès qu'elle est parsable — une saisie vide ou
-// intermédiaire reste une chaîne. D'où le String() au commit.
+// Numeric fields: the string ↔ number v-model bridge.
+//
+// `string | number`: the fields are `<input type="number">`, whose value Vue casts to
+// a number as soon as it is parsable — an empty or intermediate entry stays a string.
+// Hence the String() at commit time.
 const startFieldText = ref<string | number>(String(startValue.value))
 const endFieldText = ref<string | number>(String(endValue.value))
 
-// Le drag du slider resynchronise les champs en continu.
+// Dragging the slider resynchronizes the fields continuously.
 watch(startValue, (v) => (startFieldText.value = String(v)))
 watch(endValue, (v) => (endFieldText.value = String(v)))
 
 /**
- * Commit au `change` uniquement (blur/Enter) — jamais à la frappe, sinon on
- * clamperait « 1 » pendant la saisie de « 15 ». Vide/NaN = revert silencieux.
+ * Commit on `change` only (blur/Enter) — never while typing, or "1" would be clamped
+ * halfway through entering "15". Empty/NaN = a silent revert.
  */
 function commitField(which: 'start' | 'end') {
   const raw = which === 'start' ? startFieldText.value : endFieldText.value
-  // parseFloat (et non Number) : sur une chaîne vide il rend NaN → revert,
-  // là où Number('') vaudrait 0 et écraserait la valeur.
+  // parseFloat (and not Number): on an empty string it yields NaN → a revert, where
+  // Number('') would be 0 and would overwrite the value.
   const parsed = Number.parseFloat(String(raw))
   if (Number.isNaN(parsed)) {
     resyncFields()
     return
   }
   const clamped = Math.min(props.max, Math.max(props.min, parsed))
-  // Snap au pas ; l'arrondi 1e10 neutralise le bruit flottant des pas décimaux.
+  // Snap to the step; the 1e10 rounding neutralizes the float noise of decimal steps.
   let value = props.min + Math.round((clamped - props.min) / props.step) * props.step
   value = Math.min(props.max, Math.round(value * 1e10) / 1e10)
   if (!props.range) {
@@ -183,8 +179,8 @@ function commitField(which: 'start' | 'end') {
   } else {
     model.value = [startValue.value, Math.max(value, startValue.value)]
   }
-  // Resync explicite : un commit sans changement de modèle (ex. re-clamp sur
-  // la même valeur) ne déclenche pas les watchers.
+  // An explicit resync: a commit with no model change (e.g. re-clamping onto the same
+  // value) does not trigger the watchers.
   resyncFields()
 }
 
@@ -305,7 +301,6 @@ function resyncFields() {
   .v-slider {
     --slider-thumb: var(--vectis-control-size-slider-thumb);
     --slider-track: var(--vectis-control-size-slider-track);
-    /* Position du centre du thumb pour une fraction f (course insetée de ½ thumb). */
     display: grid;
     grid-template-areas: 'rail';
     grid-template-columns: minmax(0, 1fr);
@@ -394,8 +389,8 @@ function resyncFields() {
     background: var(--vectis-color-text-on-accent);
   }
 
-  /* Les inputs se superposent ; seuls leurs pouces captent le pointeur
-     (indispensable en mode range pour que les deux restent utilisables). */
+  /* The inputs are superimposed; only their thumbs capture the pointer (indispensable
+     in range mode so both stay usable). */
   .v-slider-input {
     position: absolute;
     inset: 0;
@@ -407,9 +402,9 @@ function resyncFields() {
     pointer-events: none;
   }
 
-  /* En simple, tout l'input capte le pointeur : cliquer la piste déplace la
-     valeur nativement (saut + drag immédiat), zéro JS. Effet assumé : le
-     hover du thumb se déclenche au survol de toute la piste. */
+  /* In single mode the whole input captures the pointer: clicking the track moves the
+     value natively (a jump + an immediate drag), with zero JS. An accepted side effect:
+     the thumb's hover triggers when hovering anywhere on the track. */
   .v-slider:not([data-range]) .v-slider-input {
     pointer-events: auto;
     cursor: pointer;
@@ -440,8 +435,8 @@ function resyncFields() {
     transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  /* Hover/drag : fond teinté du thumb. États posés sur l'input host — les
-     pseudo-classes chaînées après le pseudo-thumb sont peu fiables. */
+  /* Hover/drag: the thumb's tinted background. The states are set on the host input —
+     pseudo-classes chained after the pseudo-thumb are unreliable. */
   .v-slider-input:hover:not(:disabled)::-webkit-slider-thumb,
   .v-slider-input:active:not(:disabled)::-webkit-slider-thumb {
     background: var(--vectis-color-accent-surface);
@@ -466,8 +461,8 @@ function resyncFields() {
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* --- VTooltip de valeur : apparence du VTooltip, mais position par fraction —
-     le thumb natif est un pseudo-élément, non ancrable en anchor positioning. */
+  /* A value tooltip: the appearance of VTooltip, but positioned by fraction — the
+     native thumb is a pseudo-element, so it cannot be an anchor-positioning anchor. */
   .v-slider-tooltip {
     position: absolute;
     inset-block-end: calc(100% + var(--vectis-space-2));
@@ -503,19 +498,19 @@ function resyncFields() {
     white-space: nowrap;
   }
 
-  /* --- Labels de pas ------------------------------------------------------ */
   .v-slider-labels {
     grid-area: labels;
     position: relative;
-    /* Enfants absolus : réserve la hauteur (couvre texte xs ET icônes md). */
+    /* Absolutely positioned children: this reserves the height (covering xs text AND md
+       icons). */
     min-block-size: var(--vectis-icon-size-md);
     --vectis-icon-size: var(--vectis-icon-size-md);
     font-size: var(--vectis-text-caption-size);
     color: var(--vectis-color-text-muted);
   }
 
-  /* Boîte de largeur nulle : le contenu déborde symétriquement, donc centré
-     sur le pas — sans transform (physique, casserait en vertical/RTL). */
+  /* A zero-width box: the content overflows symmetrically, hence centred on the step —
+     with no transform (physical, and it would break in vertical/RTL). */
   .v-slider-label {
     position: absolute;
     inset-block-start: 0;
@@ -528,7 +523,6 @@ function resyncFields() {
     white-space: nowrap;
   }
 
-  /* --- Champs numériques -------------------------------------------------- */
   .v-slider-field.v-input {
     inline-size: var(--vectis-control-size-slider-field);
   }
@@ -541,7 +535,6 @@ function resyncFields() {
     grid-area: field-end;
   }
 
-  /* --- Vertical : min en bas, max en haut --------------------------------- */
   .v-slider[data-orientation='vertical'] {
     grid-template-areas: 'rail';
     grid-template-columns: none;
@@ -579,9 +572,9 @@ function resyncFields() {
     block-size: var(--vectis-control-size-slider-length);
   }
 
-  /* Le sous-conteneur porte seul le mode d'écriture : la géométrie logique
-     (inset-inline-*) de track/fill/ticks bascule sans dupliquer de règles ;
-     tooltips et labels restent hors de ce contexte (texte horizontal). */
+  /* The subcontainer alone carries the writing mode: the logical geometry
+     (inset-inline-*) of the track/fill/ticks switches with no duplicated rule, while
+     the tooltips and labels stay outside this context (horizontal text). */
   .v-slider[data-orientation='vertical'] .v-slider-control {
     writing-mode: vertical-lr;
     direction: rtl;
@@ -616,7 +609,7 @@ function resyncFields() {
     justify-content: flex-start;
   }
 
-  /* --- Disabled : nuances de gris (tokens VCheckbox/VSwitch), pas d'opacité -- */
+  /* Disabled: greys (the VCheckbox/VSwitch tokens), with no opacity */
   .v-slider[data-disabled] {
     cursor: not-allowed;
   }
@@ -633,7 +626,7 @@ function resyncFields() {
     background: var(--vectis-color-text-subtle);
   }
 
-  /* Sur le fill gris, le tick repasse en clair (la « coche grise » de VCheckbox). */
+  /* On the grey fill, the tick goes back to a light colour (VCheckbox's "grey tick"). */
   .v-slider[data-disabled] .v-slider-tick[data-filled] {
     background: var(--vectis-color-surface-muted);
   }

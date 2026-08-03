@@ -8,14 +8,14 @@ function renderOtp(props: Record<string, unknown> = {}) {
 }
 
 describe('VInputOTP', () => {
-  it('rend N cases nommées, groupe étiqueté', () => {
+  it('renders N named cells inside a labelled group', () => {
     const { getByRole, getAllByRole } = renderOtp({ length: 4 })
-    expect(getByRole('group', { name: 'Code de vérification' })).toBeTruthy()
+    expect(getByRole('group', { name: 'Verification code' })).toBeTruthy()
     expect(getAllByRole('textbox')).toHaveLength(4)
     expect(getAllByRole('textbox')[0]?.getAttribute('autocomplete')).toBe('one-time-code')
   })
 
-  it('la saisie remplit la case, avance le focus et synchronise le modèle', async () => {
+  it('typing fills the cell, advances the focus and synchronizes the model', async () => {
     const { getAllByRole, emitted } = renderOtp()
     const inputs = getAllByRole('textbox') as HTMLInputElement[]
     await fireEvent.update(inputs[0]!, '1')
@@ -23,7 +23,7 @@ describe('VInputOTP', () => {
     expect(document.activeElement).toBe(inputs[1])
   })
 
-  it('un collage est distribué sur les cases et émet complete', async () => {
+  it('a paste is distributed across the cells and emits complete', async () => {
     const { getAllByRole, emitted } = renderOtp({ length: 4 })
     const inputs = getAllByRole('textbox') as HTMLInputElement[]
     await fireEvent.update(inputs[0]!, '1234')
@@ -31,7 +31,7 @@ describe('VInputOTP', () => {
     expect(emitted('complete')).toEqual([['1234']])
   })
 
-  it('format numeric (défaut) filtre les caractères non numériques', async () => {
+  it('the numeric format (the default) filters out non-numeric characters', async () => {
     const { getAllByRole, emitted } = renderOtp()
     const input = getAllByRole('textbox')[0] as HTMLInputElement
     await fireEvent.update(input, 'a')
@@ -39,7 +39,7 @@ describe('VInputOTP', () => {
     expect(emitted()).not.toHaveProperty('update:modelValue')
   })
 
-  it('format alpha filtre les chiffres et force les majuscules', async () => {
+  it('the alpha format filters out digits and forces capitals', async () => {
     const { getAllByRole, emitted } = renderOtp({ format: 'alpha' })
     const inputs = getAllByRole('textbox') as HTMLInputElement[]
     await fireEvent.update(inputs[0]!, '3')
@@ -49,7 +49,7 @@ describe('VInputOTP', () => {
     expect(emitted('update:modelValue').at(-1)).toEqual(['A'])
   })
 
-  it('format alphanumeric accepte lettres et chiffres, en majuscules', async () => {
+  it('the alphanumeric format accepts letters and digits, in capitals', async () => {
     const { getAllByRole, emitted } = renderOtp({ format: 'alphanumeric', length: 4 })
     const inputs = getAllByRole('textbox') as HTMLInputElement[]
     await fireEvent.update(inputs[0]!, 'a1b2')
@@ -57,7 +57,7 @@ describe('VInputOTP', () => {
     expect(emitted('complete')).toEqual([['A1B2']])
   })
 
-  it('Backspace sur case vide efface la précédente et y retourne', async () => {
+  it('Backspace on an empty cell erases the previous one and goes back to it', async () => {
     const { getAllByRole, emitted } = renderOtp({ modelValue: '12' })
     const inputs = getAllByRole('textbox') as HTMLInputElement[]
     inputs[2]!.focus()
@@ -66,29 +66,29 @@ describe('VInputOTP', () => {
     expect(document.activeElement).toBe(inputs[1])
   })
 
-  it('pattern : les # deviennent des cases, les littéraux du texte décoratif', () => {
+  it('pattern: the # become cells, the literals become decorative text', () => {
     const { container, getAllByRole } = renderOtp({ pattern: '###.###.###' })
     const inputs = getAllByRole('textbox')
     expect(inputs).toHaveLength(9)
-    expect(inputs[3]?.getAttribute('aria-label')).toBe('Caractère 4 sur 9')
+    expect(inputs[3]?.getAttribute('aria-label')).toBe('Character 4 of 9')
     const literals = container.querySelectorAll('.v-otp-literal')
     expect(literals).toHaveLength(2)
     expect(literals[0]?.textContent).toBe('.')
     expect(literals[0]?.getAttribute('aria-hidden')).toBe('true')
   })
 
-  it('pattern prime sur length', () => {
+  it('pattern wins over length', () => {
     expect(renderOtp({ pattern: '##-##', length: 6 }).getAllByRole('textbox')).toHaveLength(4)
   })
 
-  it('pattern sans # replie sur length (avec avertissement DEV)', () => {
+  it('a pattern with no # falls back to length (with a DEV warning)', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     expect(renderOtp({ pattern: 'abc', length: 6 }).getAllByRole('textbox')).toHaveLength(6)
     expect(warn).toHaveBeenCalledOnce()
     warn.mockRestore()
   })
 
-  it('collage de la chaîne formatée : les littéraux sont consommés', async () => {
+  it('pasting the formatted string: the literals are consumed', async () => {
     const { getAllByRole, emitted } = renderOtp({ pattern: '###.###.###' })
     const inputs = getAllByRole('textbox') as HTMLInputElement[]
     await fireEvent.update(inputs[0]!, '123.456.789')
@@ -96,7 +96,7 @@ describe('VInputOTP', () => {
     expect(emitted('complete')).toEqual([['123456789']])
   })
 
-  it('collage avec préfixe littéral (« GT-123 » sur GT-###) ne garde que les cases', async () => {
+  it('a paste with a literal prefix ("GT-123" onto GT-###) keeps only the cells', async () => {
     const { getAllByRole, emitted } = renderOtp({ pattern: 'GT-###' })
     const inputs = getAllByRole('textbox') as HTMLInputElement[]
     await fireEvent.update(inputs[0]!, 'GT-123')
@@ -104,7 +104,7 @@ describe('VInputOTP', () => {
     expect(emitted('complete')).toEqual([['123']])
   })
 
-  it('Backspace traverse un littéral : efface le slot précédent', async () => {
+  it('Backspace crosses a literal: it erases the previous slot', async () => {
     const { getAllByRole, emitted } = renderOtp({ pattern: '##-##', modelValue: '12' })
     const inputs = getAllByRole('textbox') as HTMLInputElement[]
     inputs[2]!.focus()
@@ -113,14 +113,14 @@ describe('VInputOTP', () => {
     expect(document.activeElement).toBe(inputs[1])
   })
 
-  it('separatorIcon remplace les littéraux par une icône', () => {
+  it('separatorIcon replaces the literals with an icon', () => {
     const { container } = renderOtp({ pattern: '##-##', separatorIcon: 'horizontal_rule' })
     const literal = container.querySelector('.v-otp-literal')
     expect(literal?.textContent).not.toContain('-')
     expect(literal?.querySelector('.v-icon-symbol')?.textContent).toBe('horizontal_rule')
   })
 
-  it('pose data-size/data-compact/data-disabled sur la racine', () => {
+  it('sets data-size/data-compact/data-disabled on the root', () => {
     const { getByRole, getAllByRole } = renderOtp({ size: 'sm', compact: true, disabled: true })
     const group = getByRole('group')
     expect(group.getAttribute('data-size')).toBe('sm')

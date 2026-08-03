@@ -2,10 +2,16 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VInputOTP from './VInputOTP.vue'
 
+const t = storyText({
+  en: { code: (size: string) => `Code (${size})` },
+  fr: { code: (size: string) => `Code (${size})` },
+})
+
 const meta = {
-  title: 'Composants/InputOTP',
+  title: 'Components/InputOTP',
   component: VInputOTP,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
@@ -29,7 +35,7 @@ export const Default: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const first = canvas.getByRole('textbox', { name: 'Caractère 1 sur 6' })
+    const first = canvas.getByRole('textbox', { name: 'Character 1 of 6' })
 
     await userEvent.click(first)
     await userEvent.keyboard('123456')
@@ -37,7 +43,7 @@ export const Default: Story = {
   },
 }
 
-export const CollageDistribue: Story = {
+export const DistributedPaste: Story = {
   render: (args) => ({
     components: { VInputOTP },
     setup: () => ({ args, code: ref('') }),
@@ -50,13 +56,13 @@ export const CollageDistribue: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('textbox', { name: 'Caractère 1 sur 6' }))
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Character 1 of 6' }))
     await userEvent.paste('987654')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('987654'))
   },
 }
 
-export const QuatreCases: Story = {
+export const FourCells: Story = {
   args: { length: 4 },
   render: (args) => ({
     components: { VInputOTP },
@@ -65,12 +71,13 @@ export const QuatreCases: Story = {
   }),
 }
 
-export const Tailles: Story = {
+export const Sizes: Story = {
   args: { length: 4 },
   render: (args) => ({
     components: { VInputOTP },
     setup: () => ({
       args,
+      t,
       sm: ref(''),
       md: ref(''),
       lg: ref(''),
@@ -78,16 +85,16 @@ export const Tailles: Story = {
     }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <VInputOTP v-bind="args" v-model="sm" size="sm" label="Code (sm)" />
-        <VInputOTP v-bind="args" v-model="md" size="md" label="Code (md)" />
-        <VInputOTP v-bind="args" v-model="lg" size="lg" label="Code (lg)" />
-        <VInputOTP v-bind="args" v-model="compact" compact label="Code (compact)" />
+        <VInputOTP v-bind="args" v-model="sm" size="sm" :label="t.code('sm')" />
+        <VInputOTP v-bind="args" v-model="md" size="md" :label="t.code('md')" />
+        <VInputOTP v-bind="args" v-model="lg" size="lg" :label="t.code('lg')" />
+        <VInputOTP v-bind="args" v-model="compact" compact :label="t.code('compact')" />
       </div>
     `,
   }),
 }
 
-export const FormatAlphanumerique: Story = {
+export const AlphanumericFormat: Story = {
   args: { format: 'alphanumeric' },
   render: (args) => ({
     components: { VInputOTP },
@@ -101,14 +108,14 @@ export const FormatAlphanumerique: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // les minuscules sont converties : le v-model reste canonique
-    await userEvent.click(canvas.getByRole('textbox', { name: 'Caractère 1 sur 6' }))
+    // lowercase is converted: the v-model stays canonical
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Character 1 of 6' }))
     await userEvent.keyboard('abc123')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('ABC123'))
   },
 }
 
-export const AvecPattern: Story = {
+export const WithPattern: Story = {
   args: { pattern: '###.###.###' },
   render: (args) => ({
     components: { VInputOTP },
@@ -122,14 +129,14 @@ export const AvecPattern: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // collage de la chaîne formatée : les séparateurs sont consommés
-    await userEvent.click(canvas.getByRole('textbox', { name: 'Caractère 1 sur 9' }))
+    // pasting the formatted string: the separators are consumed
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Character 1 of 9' }))
     await userEvent.paste('123.456.789')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('123456789'))
   },
 }
 
-export const PatternPrefixe: Story = {
+export const PrefixedPattern: Story = {
   args: { pattern: 'GT-###', format: 'alphanumeric' },
   render: (args) => ({
     components: { VInputOTP },
@@ -138,7 +145,7 @@ export const PatternPrefixe: Story = {
   }),
 }
 
-export const SeparateurIcone: Story = {
+export const IconSeparator: Story = {
   args: { pattern: '####-####', separatorIcon: 'horizontal_rule', length: 8 },
   render: (args) => ({
     components: { VInputOTP },
@@ -147,7 +154,7 @@ export const SeparateurIcone: Story = {
   }),
 }
 
-export const Invalide: Story = {
+export const Invalid: Story = {
   render: (args) => ({
     components: { VInputOTP },
     setup: () => ({ args, code: ref('123456') }),

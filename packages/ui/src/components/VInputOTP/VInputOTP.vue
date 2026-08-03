@@ -10,41 +10,41 @@ import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
 /**
- * Code à usage unique (OTP). Il n'existe pas de primitive « code à N
- * caractères » : chaque case reste un <input> natif, le JS orchestre le
- * clavier et le collage (justifié) — avance auto, retour arrière, collage
- * distribué sur les cases, flèches. `autocomplete="one-time-code"` sur la
- * première case : le remplissage automatique (SMS/gestionnaire) est distribué.
+ * A one-time code (OTP). There is no "N-character code" primitive: each cell stays a
+ * native <input>, and the JS orchestrates the keyboard and pasting (justified) —
+ * auto-advance, backspace, a paste distributed across the cells, arrows.
+ * `autocomplete="one-time-code"` on the first cell: automatic filling (SMS/password
+ * manager) is distributed.
  *
- * `pattern` découpe le gabarit en cellules : les '#' deviennent des cases,
- * les autres caractères des littéraux affichés (hors v-model). Le collage est
- * « pattern-aware » : les littéraux présents dans le texte collé (« GT-123 »,
- * « 123.456.789 ») sont consommés positionnellement, le reste filtré par
- * `format` (majuscules forcées hors numeric : v-model canonique).
+ * `pattern` cuts the template into cells: the '#' become cells, the other characters
+ * become displayed literals (outside the v-model). Pasting is "pattern-aware": the
+ * literals present in the pasted text ("GT-123", "123.456.789") are consumed
+ * positionally, and the rest is filtered by `format` (capitals forced outside
+ * numeric: a canonical v-model).
  */
 interface InputOTPProps {
-  /** Nombre de cases. Ignoré si `pattern` est fourni. */
+  /** Number of cells. Ignored when `pattern` is supplied. */
   length?: number
-  /** Jeu de caractères accepté : filtre saisie/collage + inputmode. */
+  /** Accepted character set: it filters typing/pasting + the inputmode. */
   format?: 'numeric' | 'alpha' | 'alphanumeric'
   /**
-   * Gabarit : '#' = case éditable, tout autre caractère = littéral affiché
-   * (hors v-model). Prime sur `length`. Ex. 'GT-###', '###.###.###'.
+   * Template: '#' = an editable cell, any other character = a displayed literal
+   * (outside the v-model). Wins over `length`. E.g. 'GT-###', '###.###.###'.
    */
   pattern?: string
   /**
-   * Nom Material Symbols remplaçant TOUS les littéraux du pattern — prévu
-   * pour les gabarits purement séparateurs ('###-###') ; ne pas le fournir
-   * avec un préfixe textuel ('GT-###').
+   * A Material Symbols name replacing EVERY literal of the pattern — meant for purely
+   * separator templates ('###-###'); do not supply it with a textual prefix
+   * ('GT-###').
    */
   separatorIcon?: IconSource
-  /** Côté des cases : sm 32px, md 40px (défaut), lg 48px. */
+  /** Side of the cells: sm 32px, md 40px (the default), lg 48px. */
   size?: 'sm' | 'md' | 'lg'
-  /** Hauteur réduite de 4px ; typo et icônes inchangées (comme VButton/VInput). */
+  /** Height reduced by 4px; type and icons unchanged (as in VButton/VInput). */
   compact?: boolean
   disabled?: boolean
   invalid?: boolean
-  /** Nom accessible du groupe. Défaut : dictionnaire du DS. */
+  /** Accessible name of the group. Default: the DS dictionary. */
   label?: string
 }
 
@@ -66,7 +66,7 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.inputOTP.label)
 const model = defineModel<string>({ default: '' })
 
 const emit = defineEmits<{
-  /** Émis quand toutes les cases sont remplies. */
+  /** Emitted when every cell is filled. */
   complete: [code: string]
 }>()
 
@@ -85,7 +85,7 @@ const slotCount = computed(() => cells.value.filter((cell) => cell.type === 'slo
 
 if (isDev) {
   if (props.pattern && !props.pattern.includes('#'))
-    console.warn("[VInputOTP] pattern sans '#' — repli sur `length`.")
+    console.warn("[VInputOTP] pattern without '#' — falling back to `length`.")
 }
 
 const filters: Record<NonNullable<InputOTPProps['format']>, RegExp> = {
@@ -94,7 +94,7 @@ const filters: Record<NonNullable<InputOTPProps['format']>, RegExp> = {
   alphanumeric: /[^A-Z0-9]/g,
 }
 
-/** Majuscules forcées hors numeric (v-model canonique), puis filtre du format. */
+/** Capitals forced outside numeric (a canonical v-model), then the format filter. */
 function sanitize(text: string) {
   const upper = props.format === 'numeric' ? text : text.toUpperCase()
   return upper.replace(filters[props.format], '')
@@ -104,8 +104,8 @@ const inputs = ref<(HTMLInputElement | null)[]>([])
 const digits = ref<string[]>([])
 
 function syncFromModel(value: string) {
-  // modèle plus long que les cases : tronqué visuellement, sans réécrire le
-  // modèle spontanément (pas de boucle model → digits → model)
+  // a model longer than the cells: truncated visually, without rewriting the model
+  // spontaneously (no model → digits → model loop)
   digits.value = Array.from({ length: slotCount.value }, (_, i) => value[i] ?? '')
 }
 syncFromModel(model.value)
@@ -120,16 +120,16 @@ function commit() {
 }
 
 /**
- * Distribution pattern-aware : marche sur les cellules depuis la case cible —
- * un littéral consomme le caractère collé s'il lui est égal (collage de la
- * chaîne formatée), une case consomme le prochain caractère valide. Renvoie
- * le dernier slot rempli, ou null si rien d'exploitable.
+ * Pattern-aware distribution: it walks the cells from the target one — a literal
+ * consumes the pasted character when it equals it (pasting the formatted string), a
+ * cell consumes the next valid character. Returns the last slot filled, or null when
+ * nothing is usable.
  */
 function distribute(raw: string, startSlot: number): number | null {
   const allCells = cells.value
   let start = allCells.findIndex((cell) => cell.type === 'slot' && cell.slotIndex === startSlot)
-  // remonter la série de littéraux contigus qui précède la case : un collage
-  // de la chaîne complète (« GT-123 » sur slot 0) les inclut
+  // walk back up the run of contiguous literals preceding the cell: pasting the whole
+  // string ("GT-123" onto slot 0) includes them
   while (start > 0 && allCells[start - 1]?.type === 'literal') start--
   const chars = [...raw]
   let charIndex = 0
@@ -154,10 +154,10 @@ function distribute(raw: string, startSlot: number): number | null {
 
 function onInput(slotIndex: number, event: Event) {
   const el = event.target as HTMLInputElement
-  // saisie simple OU collage multi-caractères : distribution à partir de la case
+  // a single keystroke OR a multi-character paste: distributed from this cell on
   const lastFilled = distribute(el.value, slotIndex)
   if (lastFilled === null) {
-    // effacement, ou aucun caractère valide pour le format
+    // an erase, or no character valid for the format
     digits.value[slotIndex] = ''
     el.value = ''
     commit()
@@ -214,7 +214,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
         @keydown="onKeydown(cell.slotIndex, $event)"
         @focus="($event.target as HTMLInputElement).select()"
       />
-      <!-- littéral décoratif du gabarit : jamais focusable, hors v-model -->
+      <!-- a decorative literal of the template: never focusable, outside the v-model -->
       <span v-else class="v-otp-literal" aria-hidden="true">
         <VIcon v-if="separatorIcon" v-bind="iconProps(separatorIcon)" />
         <template v-else>{{ cell.char }}</template>
@@ -227,9 +227,9 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
 @layer vectis.components {
   .v-otp {
     /*
-     * Hauteur/icônes : classe partagée v-control (styles/control-size.css).
-     * La typo garde son échelle propre, majorée d'un à deux crans par rapport
-     * aux autres champs : les chiffres remplissent les cases carrées.
+     * Height/icons: the shared v-control class (styles/control-size.css). The
+     * typography keeps a scale of its own, bumped one or two notches compared with the
+     * other fields: the digits fill the square cells.
      */
     --otp-font-size: var(--vectis-font-size-lg);
 
@@ -239,7 +239,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
   }
 
   .v-otp-input {
-    /* cases carrées : size/compact scalent les deux dimensions d'un coup */
+    /* Square cells: size/compact scale both dimensions at once */
     width: var(--control-height);
     height: var(--control-height);
     text-align: center;
@@ -252,9 +252,9 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     transition: border-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  /* Focus « bordure 2px » : bordure 1px + shadow externe 1px de même couleur
-     (aligné sur VInput/VTextarea) ; l'outline transparent est le filet
-     forced-colors (Windows High Contrast supprime les box-shadow) */
+  /* The "2px border" focus: a 1px border + a 1px outer shadow in the same colour
+     (aligned on VInput/VTextarea); the transparent outline is the forced-colors line
+     (Windows High Contrast removes box-shadows) */
   .v-otp-input:focus-visible {
     border-color: var(--vectis-color-accent);
     box-shadow: 0 0 0 1px var(--vectis-color-accent);
@@ -279,7 +279,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     user-select: none;
   }
 
-  /* Disabled : gris par tokens, sans opacité (aligné sur VInput) */
+  /* Disabled: greys through tokens, with no opacity (aligned on VInput) */
   .v-otp[data-disabled] .v-otp-input {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);
@@ -291,8 +291,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     color: var(--vectis-color-text-subtle);
   }
 
-  /* --- Tailles : seule la typo majorée reste locale, le reste vient de
-     v-control --- */
+  /* Sizes: only the bumped typography stays local, the rest comes from v-control */
   .v-otp[data-size='sm'] {
     --otp-font-size: var(--vectis-font-size-md);
   }

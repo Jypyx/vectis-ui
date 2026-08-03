@@ -2,10 +2,84 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VProgressLinear from './VProgressLinear.vue'
 
+const t = storyText({
+  en: {
+    progress: 'Progress',
+    accent: 'Accent',
+    success: 'Success',
+    warning: 'Warning',
+    error: 'Error',
+    neutral: 'Neutral',
+    purple: 'Purple',
+    defaultThickness: '4px (the default)',
+    start: 'Start',
+    centre: 'Centre',
+    end: 'End',
+    almostDone: 'Almost done',
+    filesSent: 'Files uploaded',
+    files: 'files',
+    spaceUsed: 'Space used',
+    ofGb: (percent: number) => `${percent}% of 500 GB`,
+    roundedDefault: 'Rounded (the default)',
+    square: 'Square',
+    thickSquare: 'Thick square',
+    loading: 'Loading',
+    syncing: 'Syncing',
+    analysis: 'Analysis',
+    default: 'Default',
+    thickSquareBar: 'Thick square bar',
+    withText: 'With text',
+    indeterminate: 'Indeterminate',
+    upload: 'Upload',
+    zero: 'Zero',
+    complete: 'Complete',
+    outOfBounds: 'Out of bounds',
+    defaultThicknessBar: 'Bar at the default thickness',
+    veryLongText: 'Very long text',
+    compressing: 'Compressing the project resources…',
+  },
+  fr: {
+    progress: 'Progression',
+    accent: 'Accent',
+    success: 'Succès',
+    warning: 'Avertissement',
+    error: 'Erreur',
+    neutral: 'Neutre',
+    purple: 'Violet',
+    defaultThickness: '4px (défaut)',
+    start: 'Début',
+    centre: 'Centre',
+    end: 'Fin',
+    almostDone: 'Presque fini',
+    filesSent: 'Fichiers envoyés',
+    files: 'fichiers',
+    spaceUsed: 'Espace utilisé',
+    ofGb: (percent: number) => `${percent} % de 500 Go`,
+    roundedDefault: 'Arrondi (défaut)',
+    square: 'Carré',
+    thickSquare: 'Carré épais',
+    loading: 'Chargement',
+    syncing: 'Synchronisation',
+    analysis: 'Analyse',
+    default: 'Défaut',
+    thickSquareBar: 'Barre épaisse carrée',
+    withText: 'Avec texte',
+    indeterminate: 'Indéterminé',
+    upload: 'Envoi',
+    zero: 'Zéro',
+    complete: 'Complet',
+    outOfBounds: 'Hors bornes',
+    defaultThicknessBar: "Barre à l'épaisseur par défaut",
+    veryLongText: 'Texte très long',
+    compressing: 'Compression des ressources du projet en cours…',
+  },
+})
+
 const meta = {
-  title: 'Composants/ProgressLinear',
+  title: 'Components/ProgressLinear',
   component: VProgressLinear,
   argTypes: {
     tone: { control: 'select', options: ['accent', 'success', 'warning', 'danger', 'neutral'] },
@@ -23,9 +97,9 @@ const meta = {
   },
   render: (args) => ({
     components: { VProgressLinear },
-    setup: () => ({ args }),
+    setup: () => ({ args, t }),
     template:
-      '<div style="width: 320px"><VProgressLinear v-bind="args" aria-label="Progression" /></div>',
+      '<div style="width: 320px"><VProgressLinear v-bind="args" :aria-label="t.progress" /></div>',
   }),
 } satisfies Meta<typeof VProgressLinear>
 
@@ -35,10 +109,10 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const bar = canvas.getByRole('progressbar', { name: 'Progression' })
+    const bar = canvas.getByRole('progressbar', { name: 'Progress' })
     await expect(bar).toHaveAttribute('aria-valuenow', '40')
-    // géométrie réelle : le remplissage vaut 40 % de la piste — la racine EST
-    // la piste (invérifiable en jsdom)
+    // real geometry: the fill is 40% of the track — the root IS the track
+    // (unverifiable in jsdom)
     const fill = bar.querySelector('.v-progress-linear-fill')!
     await waitFor(() =>
       expect(fill.getBoundingClientRect().width).toBeCloseTo(
@@ -52,29 +126,31 @@ export const Default: Story = {
 export const Tones: Story = {
   render: () => ({
     components: { VProgressLinear },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear tone="accent" :value="40" aria-label="Accent" />
-        <VProgressLinear tone="success" :value="100" aria-label="Succès" />
-        <VProgressLinear tone="warning" :value="70" aria-label="Avertissement" />
-        <VProgressLinear tone="danger" :value="25" aria-label="Erreur" />
-        <VProgressLinear tone="neutral" :value="55" aria-label="Neutre" />
+        <VProgressLinear tone="accent" :value="40" :aria-label="t.accent" />
+        <VProgressLinear tone="success" :value="100" :aria-label="t.success" />
+        <VProgressLinear tone="warning" :value="70" :aria-label="t.warning" />
+        <VProgressLinear tone="danger" :value="25" :aria-label="t.error" />
+        <VProgressLinear tone="neutral" :value="55" :aria-label="t.neutral" />
       </div>
     `,
   }),
 }
 
 /**
- * `color` remplace le tone : le remplissage prend la couleur brute, la piste en
- * est dérivée par `color-mix` vers la surface — donc adaptée automatiquement au
- * thème clair comme au thème sombre.
+ * `color` replaces the tone: the fill takes the raw colour, and the track is derived
+ * from it by `color-mix` towards the surface — hence adapted automatically to the
+ * light theme as well as the dark one.
  */
-export const CouleurCustom: Story = {
+export const CustomColor: Story = {
   render: () => ({
     components: { VProgressLinear },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear color="#7c3aed" :value="45" aria-label="Violet" />
+        <VProgressLinear color="#7c3aed" :value="45" :aria-label="t.purple" />
         <VProgressLinear color="teal" :value="65" show-value aria-label="Teal" />
         <VProgressLinear color="oklch(72% 0.18 45)" :value="85" show-value aria-label="Orange" />
       </div>
@@ -82,15 +158,16 @@ export const CouleurCustom: Story = {
   }),
 }
 
-export const Epaisseur: Story = {
+export const Thickness: Story = {
   render: () => ({
     components: { VProgressLinear },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="40" aria-label="4px (défaut)" />
+        <VProgressLinear :value="40" :aria-label="t.defaultThickness" />
         <VProgressLinear :thickness="8" :value="55" aria-label="8px" />
         <VProgressLinear :thickness="16" :value="70" aria-label="16px" />
-        <!-- toujours des pixels : une string numérique équivaut au number -->
+        <!-- always pixels: a numeric string is equivalent to the number -->
         <VProgressLinear thickness="24" :value="85" aria-label="24px" />
       </div>
     `,
@@ -98,20 +175,21 @@ export const Epaisseur: Story = {
 }
 
 /**
- * Le texte est rendu en deux copies superposées : l'une sur la piste, l'autre
- * clippée à la portion remplie et contrastée sur le remplissage. Il reste donc
- * lisible à 5 % comme à 95 %. L'épaisseur par défaut (4px) ne peut pas
- * l'accueillir : afficher un texte suppose une `thickness`.
+ * The text is rendered as two superimposed copies: one on the track, the other clipped
+ * to the filled portion and contrasted on the fill. It therefore stays readable at 5%
+ * as well as at 95%. The default thickness (4px) cannot host it: displaying text
+ * implies a `thickness`.
  */
-export const Valeur: Story = {
+export const Value: Story = {
   render: () => ({
     components: { VProgressLinear },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :thickness="20" show-value value-position="start" :value="35" aria-label="Début" />
-        <VProgressLinear :thickness="20" show-value value-position="center" :value="35" aria-label="Centre" />
-        <VProgressLinear :thickness="20" show-value value-position="end" :value="35" aria-label="Fin" />
-        <VProgressLinear :thickness="20" show-value value-position="center" :value="92" aria-label="Presque fini" />
+        <VProgressLinear :thickness="20" show-value value-position="start" :value="35" :aria-label="t.start" />
+        <VProgressLinear :thickness="20" show-value value-position="center" :value="35" :aria-label="t.centre" />
+        <VProgressLinear :thickness="20" show-value value-position="end" :value="35" :aria-label="t.end" />
+        <VProgressLinear :thickness="20" show-value value-position="center" :value="92" :aria-label="t.almostDone" />
       </div>
     `,
   }),
@@ -119,78 +197,82 @@ export const Valeur: Story = {
     const canvas = within(canvasElement)
     const bar = canvas.getByRole('progressbar', { name: 'Centre' })
     const [base, onFill] = [...bar.querySelectorAll('.v-progress-linear-text')]
-    // la copie clippée est colorée par contraste : couleur distincte de la copie de base
+    // the clipped copy is coloured by contrast: a colour distinct from the base copy's
     await expect(getComputedStyle(base!).color).not.toBe(getComputedStyle(onFill!).color)
     await expect(getComputedStyle(onFill!).clipPath).not.toBe('none')
   },
 }
 
-/** Le slot par défaut reçoit `{ value, max, percent }` et remplace le pourcentage. */
-export const ContenuPersonnalise: Story = {
+/** The default slot receives `{ value, max, percent }` and replaces the percentage. */
+export const CustomContent: Story = {
   render: () => ({
     components: { VProgressLinear },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="3" :max="8" :thickness="24" aria-label="Fichiers envoyés">
-          <template #default="{ value, max }">{{ value }}/{{ max }} fichiers</template>
+        <VProgressLinear :value="3" :max="8" :thickness="24" :aria-label="t.filesSent">
+          <template #default="{ value, max }">{{ value }}/{{ max }} {{ t.files }}</template>
         </VProgressLinear>
-        <VProgressLinear :value="72" :thickness="24" value-position="end" aria-label="Espace utilisé">
-          <template #default="{ percent }">{{ Math.round(percent) }} % de 500 Go</template>
+        <VProgressLinear :value="72" :thickness="24" value-position="end" :aria-label="t.spaceUsed">
+          <template #default="{ percent }">{{ t.ofGb(Math.round(percent)) }}</template>
         </VProgressLinear>
       </div>
     `,
   }),
 }
 
-export const Carre: Story = {
+export const Square: Story = {
   render: () => ({
     components: { VProgressLinear },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear shape="rounded" :value="60" aria-label="Arrondi (défaut)" />
-        <VProgressLinear shape="square" :value="60" aria-label="Carré" />
-        <VProgressLinear shape="square" :value="60" :thickness="20" show-value aria-label="Carré épais" />
+        <VProgressLinear shape="rounded" :value="60" :aria-label="t.roundedDefault" />
+        <VProgressLinear shape="square" :value="60" :aria-label="t.square" />
+        <VProgressLinear shape="square" :value="60" :thickness="20" show-value :aria-label="t.thickSquare" />
       </div>
     `,
   }),
 }
 
-export const Indetermine: Story = {
+export const Indeterminate: Story = {
   args: { indeterminate: true },
   render: () => ({
     components: { VProgressLinear },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear indeterminate aria-label="Chargement" />
-        <VProgressLinear indeterminate tone="success" :thickness="8" aria-label="Synchronisation" />
-        <VProgressLinear indeterminate color="teal" :thickness="12" shape="square" aria-label="Analyse" />
+        <VProgressLinear indeterminate :aria-label="t.loading" />
+        <VProgressLinear indeterminate tone="success" :thickness="8" :aria-label="t.syncing" />
+        <VProgressLinear indeterminate color="teal" :thickness="12" shape="square" :aria-label="t.analysis" />
       </div>
     `,
   }),
 }
 
 /**
- * `orientation="vertical"` : 0 en bas, max en haut, par un simple
- * `writing-mode` sur la racine — remplissage, texte et animation indéterminée
- * basculent d'axe sans règle dupliquée. La longueur se pose en CSS (`height`),
- * comme la largeur en horizontal.
+ * `orientation="vertical"`: 0 at the bottom, max at the top, through a plain
+ * `writing-mode` on the root — the fill, the text and the indeterminate animation all
+ * switch axis with no duplicated rule. The length is set in CSS (`height`), like the
+ * width in horizontal.
  */
 export const Vertical: Story = {
   render: () => ({
     components: { VProgressLinear },
+    setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 32px; align-items: flex-end">
-        <VProgressLinear orientation="vertical" :value="40" aria-label="Défaut" />
+        <VProgressLinear orientation="vertical" :value="40" :aria-label="t.default" />
         <VProgressLinear orientation="vertical" :value="75" style="height: 240px" tone="success" aria-label="240px" />
-        <VProgressLinear orientation="vertical" :value="30" :thickness="20" shape="square" tone="warning" aria-label="Épaisse carrée" />
-        <VProgressLinear orientation="vertical" :value="60" :thickness="32" style="height: 200px" show-value aria-label="Avec texte" />
-        <VProgressLinear orientation="vertical" indeterminate :thickness="12" aria-label="Indéterminé" />
+        <VProgressLinear orientation="vertical" :value="30" :thickness="20" shape="square" tone="warning" :aria-label="t.thickSquareBar" />
+        <VProgressLinear orientation="vertical" :value="60" :thickness="32" style="height: 200px" show-value :aria-label="t.withText" />
+        <VProgressLinear orientation="vertical" indeterminate :thickness="12" :aria-label="t.indeterminate" />
       </div>
     `,
   }),
 }
 
-/** L'animation de progression joue à chaque changement de valeur. */
+/** The progress animation plays on every change of value. */
 export const Progression: Story = {
   render: () => ({
     components: { VProgressLinear },
@@ -199,25 +281,25 @@ export const Progression: Story = {
       const bump = (d: number) => {
         value.value = Math.min(100, Math.max(0, value.value + d))
       }
-      return { value, bump }
+      return { value, bump, t }
     },
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="value" :thickness="20" show-value aria-label="Envoi" />
+        <VProgressLinear :value="value" :thickness="20" show-value :aria-label="t.upload" />
         <div style="display: flex; gap: 8px">
           <button type="button" @click="bump(-10)">−10</button>
           <button type="button" @click="bump(10)">+10</button>
-          <button type="button" @click="value = 80">80 %</button>
+          <button type="button" @click="value = 80">80%</button>
         </div>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const bar = canvas.getByRole('progressbar', { name: 'Envoi' })
-    await userEvent.click(canvas.getByRole('button', { name: '80 %' }))
+    const bar = canvas.getByRole('progressbar', { name: 'Upload' })
+    await userEvent.click(canvas.getByRole('button', { name: '80%' }))
     await waitFor(() => expect(bar).toHaveAttribute('aria-valuenow', '80'))
-    // la transition converge sur la largeur cible
+    // the transition converges on the target width
     const fill = bar.querySelector('.v-progress-linear-fill')!
     await waitFor(() =>
       expect(fill.getBoundingClientRect().width).toBeCloseTo(
@@ -228,24 +310,25 @@ export const Progression: Story = {
   },
 }
 
-/** `max` libre : les bornes ARIA restent fidèles (« 3 sur 8 »). */
-export const MaxPersonnalise: Story = {
+/** A free `max`: the ARIA bounds stay faithful ("3 of 8"). */
+export const CustomMax: Story = {
   args: { value: 3, max: 8, showValue: true, thickness: 20 },
 }
 
-export const CasLimites: Story = {
+export const EdgeCases: Story = {
   render: () => ({
     components: { VProgressLinear },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="0" :thickness="20" show-value aria-label="Zéro" />
-        <VProgressLinear :value="100" :thickness="20" show-value aria-label="Complet" />
-        <!-- au-delà du max : clampé -->
-        <VProgressLinear :value="250" :max="100" :thickness="20" show-value aria-label="Hors bornes" />
-        <!-- texte plus haut que la barre : débordement visible, non rogné -->
-        <VProgressLinear :value="45" show-value aria-label="Barre à l'épaisseur par défaut" />
-        <VProgressLinear :value="45" :thickness="24" aria-label="Texte très long">
-          <template #default>Compression des ressources du projet en cours…</template>
+        <VProgressLinear :value="0" :thickness="20" show-value :aria-label="t.zero" />
+        <VProgressLinear :value="100" :thickness="20" show-value :aria-label="t.complete" />
+        <!-- past the max: clamped -->
+        <VProgressLinear :value="250" :max="100" :thickness="20" show-value :aria-label="t.outOfBounds" />
+        <!-- text taller than the bar: it overflows visibly, uncropped -->
+        <VProgressLinear :value="45" show-value :aria-label="t.defaultThicknessBar" />
+        <VProgressLinear :value="45" :thickness="24" :aria-label="t.veryLongText">
+          <template #default>{{ t.compressing }}</template>
         </VProgressLinear>
       </div>
     `,

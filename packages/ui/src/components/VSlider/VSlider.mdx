@@ -5,16 +5,16 @@ import * as VSliderStories from './VSlider.stories'
 
 # Slider
 
-Curseur construit sur l'`<input type="range">` natif — clavier, rôle ARIA slider et
-participation aux formulaires gratuits. Le JavaScript se limite à l'anti-croisement du mode
-range, au pont des champs numériques et à la dérivation des positions de pas
-(ticks/labels/tooltips) ; aucun comportement navigateur n'est réimplémenté.
+A slider built on the native `<input type="range">` — keyboard, the ARIA slider role and form
+participation all for free. The JavaScript is limited to the anti-crossing of range mode, to the
+numeric fields' bridge and to deriving the step positions (ticks/labels/tooltips); no browser
+behaviour is reimplemented.
 
-La piste (6px, token `--vectis-control-size-slider-track`), le remplissage, les ticks, les
-labels et les bulles s'alignent tous sur le **centre réel du thumb** — qui parcourt
-`[thumb/2, 100% − thumb/2]`, pas `[0, 100%]` — via des fractions unitless posées en custom
-properties. Cliquer la piste déplace la valeur (saut + drag immédiat, natif) ; au survol, le
-thumb prend un fond teinté `--vectis-color-accent-surface`.
+The track (6px, the `--vectis-control-size-slider-track` token), the fill, the ticks, the labels and
+the bubbles all align on the **thumb's real centre** — which travels `[thumb/2, 100% − thumb/2]`, not
+`[0, 100%]` — through unitless fractions set as custom properties. Clicking the track moves the
+value (a jump + an immediate drag, natively); on hover, the thumb takes an
+`--vectis-color-accent-surface` tinted background.
 
 <Canvas of={VSliderStories.Default} />
 
@@ -22,87 +22,87 @@ thumb prend un fond teinté `--vectis-color-accent-surface`.
 
 ## Range
 
-`range` superpose deux inputs natifs (il n'existe pas de primitive double curseur) — seuls
-leurs thumbs captent le pointeur, le JS empêche le croisement des valeurs. Le v-model
-devient un tuple `[début, fin]` et les libellés accessibles sont suffixés « (début) » /
-« (fin) ». Le clic sur la piste est désactivé dans ce mode (il serait ambigu).
+`range` superimposes two native inputs (there is no dual-thumb primitive) — only their thumbs
+capture the pointer, and the JS prevents the values from crossing. The v-model becomes a
+`[start, end]` tuple and the accessible labels are suffixed "(start)" / "(end)". Clicking the track
+is disabled in this mode (it would be ambiguous).
 
 <Canvas of={VSliderStories.Range} />
 
-## Pas et ticks
+## Steps and ticks
 
-`step` s'appuie sur le stepping natif (pointeur comme clavier). La prop opt-in `ticks`
-matérialise chaque pas par un point sur la piste (4px, dérivé du token de piste), contrasté
-selon qu'il est couvert par le remplissage ou non. Garde-fou : au-delà de 50 pas, les ticks
-ne sont pas rendus (avertissement en développement).
+`step` rests on the native stepping (pointer as well as keyboard). The opt-in `ticks` prop
+materializes each step as a dot on the track (4px, derived from the track token), contrasted
+depending on whether the fill covers it. A guard: past 50 steps the ticks are not rendered (with a
+development warning).
 
-<Canvas of={VSliderStories.Pas} />
+<Canvas of={VSliderStories.Steps} />
 
-## Labels de pas
+## Step labels
 
-`labels` associe un libellé à chaque pas, affiché sous le slider (à droite en vertical) :
-une chaîne est rendue en texte, un objet `{ icon, label }` en icône (nom ou rendu explicite) avec
-libellé accessible. Fournir les labels active les ticks implicitement et pose
-`aria-valuetext` sur les inputs : les lecteurs d'écran annoncent « M », pas « 2 ».
+`labels` associates a label with each step, displayed under the slider (to its right in vertical): a
+string is rendered as text, an object `{ icon, label }` as an icon (a name or an explicit render)
+with an accessible label. Supplying the labels enables the ticks implicitly and sets `aria-valuetext`
+on the inputs: screen readers announce "M", not "2".
 
-<Canvas of={VSliderStories.LabelsTexte} />
+<Canvas of={VSliderStories.TextLabels} />
 
-Valeurs non numériques par icônes (ces noms-là viennent de la police du consommateur) :
+Non-numeric values through icons (those names come from the consumer's font):
 
-<Canvas of={VSliderStories.LabelsIcones} />
+<Canvas of={VSliderStories.IconLabels} />
 
-## Champs numériques
+## Numeric fields
 
-`inputs` ajoute des champs `<VInput type="number">` d'ajustement précis : un après le slider
-en mode simple, un par borne en mode range. La saisie est validée au `change` (blur ou
-Entrée), jamais à la frappe : parse, clamp aux bornes, snap au pas et anti-croisement ; une
-saisie vide ou invalide revient silencieusement à la valeur courante.
+`inputs` adds `<VInput type="number">` fields for precise adjustment: one after the slider in single
+mode, one per bound in range mode. The entry is validated on `change` (blur or Enter), never while
+typing: parse, clamp to the bounds, snap to the step and anti-crossing; an empty or invalid entry
+silently reverts to the current value.
 
-<Canvas of={VSliderStories.AvecInputs} />
+<Canvas of={VSliderStories.WithInputs} />
 
-## VTooltip
+## Tooltip
 
-`tooltip` affiche une bulle de valeur qui suit le thumb pendant le drag et au focus clavier
-(seule la bulle du thumb manipulé apparaît). Elle affiche le label du pas si `labels` est
-fourni, la valeur sinon. Positionnée par les mêmes fractions que le remplissage — pas
-d'anchor positioning : le thumb natif est un pseudo-élément non ancrable.
+`tooltip` displays a value bubble following the thumb during the drag and on keyboard focus (only
+the bubble of the manipulated thumb appears). It displays the step's label when `labels` is
+supplied, the value otherwise. It is positioned by the same fractions as the fill — no anchor
+positioning: the native thumb is a pseudo-element and cannot be an anchor.
 
-<Canvas of={VSliderStories.AvecTooltip} />
+<Canvas of={VSliderStories.WithTooltip} />
 
 ## Vertical
 
-`orientation="vertical"` : min en bas, max en haut, via `writing-mode: vertical-lr` +
-`direction: rtl` sur le sous-conteneur de la piste — le natif gère l'axe de drag, le
-clavier (flèche haut = +) et l'orientation ARIA. Longueur par défaut
-`--vectis-control-size-slider-length` (10rem), surchargeable en posant le token sur l'élément.
-Support : Chrome/Edge 129+, Safari 18.1+ (léger relèvement du plancher assumé, voir
-CLAUDE.md).
+`orientation="vertical"`: min at the bottom, max at the top, through `writing-mode: vertical-lr` +
+`direction: rtl` on the track's subcontainer — the native element handles the drag axis, the keyboard
+(up arrow = +) and the ARIA orientation. Default length `--vectis-control-size-slider-length`
+(10rem), overridable by setting the token on the element. Support: Chrome/Edge 129+, Safari 18.1+ (a
+slight raise of the floor, accepted; see CLAUDE.md).
 
 <Canvas of={VSliderStories.Vertical} />
 
-Toutes les options se combinent en vertical — labels et tooltips passent sur les côtés,
-les champs numériques au-dessus/en-dessous :
+Every option combines in vertical — labels and tooltips move to the sides, the numeric fields above
+and below:
 
-<Canvas of={VSliderStories.VerticalComplet} />
+<Canvas of={VSliderStories.FullVertical} />
 
-## États
+## States
 
-`disabled` bascule piste, remplissage, ticks, labels et thumb sur des nuances de gris
-(`--vectis-color-surface-muted`, `--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu
-suit automatiquement le thème dark :
+`disabled` switches the track, the fill, the ticks, the labels and the thumb to greys
+(`--vectis-color-surface-muted`, `--vectis-color-text-subtle`) — no opacity trick, and the rendering
+follows the dark theme automatically:
 
 <Canvas of={VSliderStories.Disabled} />
 
-## Accessibilité
+## Accessibility
 
-- Toujours fournir `label` : il nomme le ou les inputs range (suffixé « (début) » /
-  « (fin) » en mode range) ainsi que les champs numériques.
-- Avec `labels`, `aria-valuetext` traduit la valeur numérique en libellé de pas ; les
-  icônes des labels portent leur libellé accessible (`aria-label` via VIcon).
-- Les bulles de tooltip sont `aria-hidden` : la valeur est déjà annoncée par le rôle
-  slider.
-- Focus visible par anneau (`--vectis-focus-ring-*`) sur le thumb ; la bulle s'affiche aussi au
-  focus clavier.
-- Les transitions (fond du thumb, bulles) respectent `prefers-reduced-motion`.
+- Always supply `label`: it names the range input(s) (suffixed "(start)" / "(end)" in range mode) as
+  well as the numeric fields.
+- With `labels`, `aria-valuetext` translates the numeric value into a step label; the labels' icons
+  carry their accessible label (an `aria-label` through VIcon).
+- The tooltip bubbles are `aria-hidden`: the value is already announced by the slider role.
+- Focus is visible through a ring (`--vectis-focus-ring-*`) on the thumb; the bubble also appears on
+  keyboard focus.
+- The transitions (the thumb's background, the bubbles) respect `prefers-reduced-motion`.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.

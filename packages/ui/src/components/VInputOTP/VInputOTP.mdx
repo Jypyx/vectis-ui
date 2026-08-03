@@ -5,100 +5,99 @@ import * as VInputOTPStories from './VInputOTP.stories'
 
 # InputOTP
 
-Code à usage unique (OTP) — une case par caractère, construites sur des `<input>` natifs.
-Il n'existe pas de primitive HTML « code à N caractères » : le JavaScript orchestre le
-clavier et le collage (avance automatique, retour arrière, distribution sur les cases,
-flèches). `autocomplete="one-time-code"` sur la première case : le remplissage automatique
-(SMS, gestionnaire de mots de passe) est distribué sur l'ensemble.
+A one-time code (OTP) — one cell per character, built on native `<input>`s. There is no
+"N-character code" HTML primitive: the JavaScript orchestrates the keyboard and pasting (auto
+advance, backspace, distribution across the cells, arrows). `autocomplete="one-time-code"` on the
+first cell: automatic filling (SMS, password manager) is distributed across the whole set.
 
-Le v-model est la concaténation des caractères saisis ; `complete` est émis quand toutes
-les cases sont remplies.
+The v-model is the concatenation of the characters typed; `complete` is emitted when every cell is
+filled.
 
 <Canvas of={VInputOTPStories.Default} />
 
 <Controls of={VInputOTPStories.Default} />
 
-## Collage
+## Pasting
 
-Coller un code dans n'importe quelle case le distribue à partir de celle-ci — un seul
-handler `input` couvre saisie et collage, aucun événement `paste` dédié :
+Pasting a code into any cell distributes it from that one on — a single `input` handler covers both
+typing and pasting, with no dedicated `paste` event:
 
-<Canvas of={VInputOTPStories.CollageDistribue} />
+<Canvas of={VInputOTPStories.DistributedPaste} />
 
-## Longueur
+## Length
 
-`length` fixe le nombre de cases (6 par défaut) — ignoré si `pattern` est fourni :
+`length` sets the number of cells (6 by default) — ignored when `pattern` is supplied:
 
-<Canvas of={VInputOTPStories.QuatreCases} />
+<Canvas of={VInputOTPStories.FourCells} />
 
-## Tailles
+## Sizes
 
-Trois tailles (`sm` 32px, `md` 40px — défaut —, `lg` 48px, via les tokens
-`--vectis-control-height-*`) ; comme pour `VInput`, les extrêmes de l'échelle du DS (`xs`, `xl`)
-ne sont pas exposées.
-Les cases sont carrées : la largeur suit la hauteur, la typographie et les icônes de
-séparateur s'ajustent avec. `compact` réduit la hauteur (et donc la largeur) de 4px sans
-toucher à la typographie (comme `VButton`/`VInput`) :
+Three sizes (`sm` 32px, `md` 40px — the default —, `lg` 48px, through the
+`--vectis-control-height-*` tokens); as with `VInput`, the extremes of the design system scale
+(`xs`, `xl`) are not exposed. The cells are square: the width follows the height, and the typography
+and separator icons adjust with it. `compact` reduces the height (and therefore the width) by 4px
+without touching the typography (as in `VButton`/`VInput`):
 
-<Canvas of={VInputOTPStories.Tailles} />
+<Canvas of={VInputOTPStories.Sizes} />
 
 ## Format
 
-`format` définit le jeu de caractères accepté : `numeric` (défaut, chiffres seuls,
-clavier numérique via `inputmode`), `alpha` (lettres) ou `alphanumeric`. Hors `numeric`,
-les minuscules sont converties en majuscules à la saisie : le v-model est canonique, la
-comparaison serveur ne dépend pas de la casse.
+`format` defines the accepted character set: `numeric` (the default, digits only, a numeric keyboard
+through `inputmode`), `alpha` (letters) or `alphanumeric`. Outside `numeric`, lowercase is converted
+to capitals as you type: the v-model is canonical, so the server-side comparison does not depend on
+case.
 
-<Canvas of={VInputOTPStories.FormatAlphanumerique} />
+<Canvas of={VInputOTPStories.AlphanumericFormat} />
 
 ## Pattern
 
-`pattern` décrit un gabarit : chaque `#` devient une case, tout autre caractère un
-littéral décoratif (typo mono, couleur atténuée, `aria-hidden`). Les littéraux ne font
-**pas** partie du v-model — pour `###.###.###` rempli, le modèle vaut `123456789`. Le
-nombre de cases dérive du pattern, qui prime sur `length`.
+`pattern` describes a template: each `#` becomes a cell, and any other character a decorative
+literal (mono typography, dimmed colour, `aria-hidden`). The literals are **not** part of the
+v-model — for a filled `###.###.###`, the model is `123456789`. The number of cells derives from the
+pattern, which wins over `length`.
 
-Le collage est « pattern-aware » : coller la chaîne formatée (`123.456.789`) fonctionne,
-les littéraux collés sont consommés positionnellement, le reste est filtré par `format` :
+Pasting is "pattern-aware": pasting the formatted string (`123.456.789`) works, the pasted literals
+are consumed positionally, and the rest is filtered by `format`:
 
-<Canvas of={VInputOTPStories.AvecPattern} />
+<Canvas of={VInputOTPStories.WithPattern} />
 
-Un préfixe textuel (`GT-###`) est rendu comme littéraux ; coller `GT-123` ne garde que
-`123` :
+A textual prefix (`GT-###`) is rendered as literals; pasting `GT-123` keeps only `123`:
 
-<Canvas of={VInputOTPStories.PatternPrefixe} />
+<Canvas of={VInputOTPStories.PrefixedPattern} />
 
-## Séparateur en icône
+## Separator as an icon
 
-`separator-icon` (nom d'icône ou rendu explicite) remplace **tous** les littéraux du pattern par une
-icône — réservé aux gabarits purement séparateurs (`####-####`), ne pas le combiner avec
-un préfixe textuel. L'icône suit la taille du composant via le contexte `--vectis-icon-size`
-et hérite sa couleur (currentcolor) :
+`separator-icon` (an icon name or an explicit render) replaces **every** literal of the pattern with
+an icon — reserved for purely separator templates (`####-####`), do not combine it with a textual
+prefix. The icon follows the component's size through the `--vectis-icon-size` context and inherits
+its colour (currentcolor):
 
-<Canvas of={VInputOTPStories.SeparateurIcone} />
+<Canvas of={VInputOTPStories.IconSeparator} />
 
-## États
+## States
 
-La prop `invalid` force l'état d'erreur (validation serveur) — bordures rouges et
-`aria-invalid` sur chaque case :
+The `invalid` prop forces the error state (server-side validation) — red borders and `aria-invalid`
+on each cell:
 
-<Canvas of={VInputOTPStories.Invalide} />
+<Canvas of={VInputOTPStories.Invalid} />
 
-`disabled` bascule les cases et les littéraux sur des nuances de gris
-(`--vectis-color-surface-muted`, `--vectis-color-text-subtle`) — pas de jeu d'opacité, et le rendu
-suit automatiquement le thème dark :
+`disabled` switches the cells and the literals to greys (`--vectis-color-surface-muted`,
+`--vectis-color-text-subtle`) — no opacity trick, and the rendering follows the dark theme
+automatically:
 
 <Canvas of={VInputOTPStories.Disabled} />
 
-## Accessibilité
+## Accessibility
 
-- La racine est un `role="group"` nommé par `label` (« Code de vérification » par défaut).
-- Chaque case porte un `aria-label` « Caractère N sur M » compté sur les cases éditables —
-  les littéraux du pattern sont décoratifs (`aria-hidden`) et jamais focusables.
-- Navigation clavier : flèches gauche/droite entre cases, Backspace sur case vide efface
-  la précédente et y retourne — les littéraux sont traversés de façon transparente.
-- Focus visible : bordure 2px visuels (bordure + `box-shadow` même couleur, alignée sur
-  `VInput`), rouge si invalide ; filet `outline` transparent pour le mode forced-colors.
-- Les transitions respectent `prefers-reduced-motion`.
+- The root is a `role="group"` named by `label` ("Verification code" by default).
+- Each cell carries an `aria-label` "Character N of M" counted on the editable cells — the pattern's
+  literals are decorative (`aria-hidden`) and never focusable.
+- Keyboard navigation: left/right arrows between cells, and Backspace on an empty cell erases the
+  previous one and goes back to it — the literals are crossed transparently.
+- Visible focus: a visual 2px border (border + a `box-shadow` in the same colour, aligned on
+  `VInput`), red when invalid; a transparent `outline` line for forced-colors mode.
+- The transitions respect `prefers-reduced-motion`.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.
