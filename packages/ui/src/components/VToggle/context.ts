@@ -3,17 +3,17 @@ import type { InjectionKey } from 'vue'
 import type { ToggleSize, ToggleTone, ToggleValue, ToggleVariant } from './VToggle.vue'
 
 /**
- * Contrat VToggle → VToggleItem. Getters : les props de la racine restent
- * réactives à travers l'injection. Pas d'ids ni de registre :
- * aucun aria-controls dans ce pattern, et la sélection est une pure
- * comparaison de valeurs — déterministe SSR/client.
+ * The VToggle → VToggleItem contract. Getters: the root's props stay reactive
+ * across the injection. No ids and no registry: there is no aria-controls in this
+ * pattern, and the selection is a pure value comparison — deterministic on server
+ * and client.
  *
- * `isSelected` plutôt qu'un getter `value` brut : en `multiple` la comparaison
- * n'est pas une égalité simple, elle doit vivre côté racine.
+ * `isSelected` rather than a raw `value` getter: in `multiple` mode the comparison
+ * is not a simple equality, so it must live on the root.
  *
- * `size`/`compact` transitent par l'injection (et non par héritage CSS comme
- * dans VAccordion) : chaque VToggleItem rend un VButton, qui pose lui-même
- * `v-control[data-size]` sur son propre élément.
+ * `size`/`compact` travel through the injection (and not through CSS inheritance
+ * as in VAccordion): every VToggleItem renders a VButton, which sets
+ * `v-control[data-size]` on its own element.
  */
 export interface ToggleContext {
   isSelected: (value: ToggleValue) => boolean

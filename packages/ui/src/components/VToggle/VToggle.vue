@@ -1,4 +1,16 @@
 <script setup lang="ts">
+/**
+ * A group of selectable buttons driven by a single v-model. Composed: every item
+ * is a `VButton` (the selected one `solid`, the others `ghost`/`outline`) and
+ * `attached` (the default) joins the whole thing in a VButtonGroup as a segmented
+ * control. No state rule is redefined here — hover, focus, disabled and
+ * `prefers-reduced-motion` all come from VButton.
+ *
+ * The behavioural JS is limited to the click → v-model bridge (`select`: the
+ * single/multiple toggle plus the `mandatory` guard, not expressible in HTML/CSS)
+ * and to keyboard navigation (arrows / Home / End), justified at the head of
+ * `onKeydown`.
+ */
 import { provide } from 'vue'
 
 import VButtonGroup from '../VButton/VButtonGroup.vue'
@@ -10,47 +22,36 @@ import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 
 export type ToggleValue = string | number
-/** Le type du v-model suit `multiple` : valeur seule (ou null) en simple, tableau en multiple. */
+/** The v-model's type follows `multiple`: a lone value (or null) in single mode, an array in multiple. */
 export type ToggleModelValue = ToggleValue | ToggleValue[] | null
 export type ToggleVariant = 'ghost' | 'outline'
 export type ToggleTone = 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
 export type ToggleSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 export type ToggleOrientation = 'horizontal' | 'vertical'
 
-/**
- * Groupe de boutons sélectionnables pilotés par un seul v-model. Composé :
- * chaque item est un `VButton` (l'item sélectionné en `solid`, les autres en
- * `ghost`/`outline`) et `attached` (défaut) rattache le tout dans un
- * VButtonGroup en contrôle segmenté. Aucune règle d'état n'est redéfinie ici —
- * hover, focus, disabled, `prefers-reduced-motion` viennent de VButton.
- *
- * Le JS de comportement se limite au pont clic → v-model (`select` : bascule
- * simple/multiple + garde `mandatory`, irréalisable en HTML/CSS) et à la
- * navigation clavier (flèches / Home / End), justifiée en tête de `onKeydown`.
- */
 interface ToggleProps {
-  /** Sélection multiple : le v-model devient un tableau de valeurs. */
+  /** Multiple selection: the v-model becomes an array of values. */
   multiple?: boolean
   /**
-   * La dernière valeur sélectionnée ne peut jamais être désélectionnée. Pure
-   * garde à la désélection : ne force AUCUNE sélection initiale.
+   * The last selected value can never be deselected. Purely a guard against
+   * deselection: it forces NO initial selection.
    */
   mandatory?: boolean
-  /** Rattache les items en contrôle segmenté (VButtonGroup). `false` : boutons séparés. */
+  /** Joins the items into a segmented control (VButtonGroup). `false`: separate buttons. */
   attached?: boolean
   orientation?: ToggleOrientation
-  /** Variante des items NON sélectionnés. L'item sélectionné est toujours `solid`. */
+  /** Variant of the NON-selected items. The selected item is always `solid`. */
   variant?: ToggleVariant
-  /** Tone de l'item sélectionné ; les items non sélectionnés restent neutral. */
+  /** Tone of the selected item; the unselected ones stay neutral. */
   tone?: ToggleTone
   size?: ToggleSize
-  /** Hauteur réduite de 4px, propagée à tous les items. */
+  /** Height reduced by 4px, propagated to every item. */
   compact?: boolean
-  /** Désactive le groupe entier. */
+  /** Disables the whole group. */
   disabled?: boolean
-  /** Remplit l'icône (axe FILL de Material Symbols) de l'item sélectionné. */
+  /** Fills the selected item's icon (the Material Symbols FILL axis). */
   selectedIconFilled?: boolean
-  /** Nom accessible du groupe. Fortement recommandé (aucun défaut générique n'a de sens). */
+  /** Accessible name of the group. Strongly recommended (no generic default makes sense). */
   label?: string
 }
 
@@ -69,7 +70,7 @@ const props = withDefaults(defineProps<ToggleProps>(), {
 })
 
 defineSlots<{
-  /** Les <VToggleItem>. */
+  /** The <VToggleItem> elements. */
   default(): unknown
 }>()
 
@@ -84,10 +85,10 @@ function isSelected(value: ToggleValue): boolean {
 }
 
 /*
- * Pont clic → v-model. En multiple, le tableau n'est JAMAIS muté en place :
- * nouvelle référence à chaque écriture (réactivité des v-model consommateurs) ;
- * un v-model null ou scalaire hérité du mode simple est normalisé en [].
- * Pas de garde `disabled` : un <button disabled> n'émet pas de click.
+ * Click → v-model bridge. In multiple mode the array is NEVER mutated in place: a
+ * new reference on every write (the reactivity of consumer v-models); a null or
+ * scalar v-model inherited from single mode is normalized to []. No `disabled`
+ * guard: a <button disabled> emits no click.
  */
 function select(value: ToggleValue) {
   if (props.multiple) {
@@ -127,13 +128,13 @@ provide(toggleKey, {
 })
 
 /*
- * Navigation clavier (implémentation partagée : `utils/arrowNav`). Pas de
- * roving tabindex — chaque item visible est un arrêt de tabulation (modèle
- * VPagination ; le roving est réservé aux composites tablist/radiogroup). Les
- * items disabled sont des <button disabled>, exclus par le sélecteur.
+ * Keyboard navigation (shared implementation: `utils/arrowNav`). No roving
+ * tabindex — every visible item is a tab stop (the VPagination model; roving is
+ * reserved for tablist/radiogroup composites). Disabled items are
+ * <button disabled>, excluded by the selector.
  *
- * `event.currentTarget` plutôt qu'une ref template : sur `<component :is>`,
- * une ref renverrait tantôt un élément (div), tantôt une instance (VButtonGroup).
+ * `event.currentTarget` rather than a template ref: on `<component :is>`, a ref
+ * would return sometimes an element (div), sometimes an instance (VButtonGroup).
  */
 function onKeydown(event: KeyboardEvent) {
   const group = event.currentTarget as HTMLElement
@@ -144,14 +145,14 @@ function onKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <!-- attached : VButtonGroup fusionne les bordures. Il cible ses enfants
-       DIRECTS `.v-button` — VToggleItem a le VButton pour racine, jamais de
-       wrapper intermédiaire. `orientation`/`data-orientation` en miroir, via
-       UNE seule clé (un binding même `undefined` traverserait en fallthrough
-       et écraserait le data-orientation que VButtonGroup pose lui-même) :
-       VButtonGroup reçoit sa prop, le div détaché l'attribut directement.
-       `role="group"` : nécessaire pour la branche div, coïncide avec celui de
-       VButtonGroup en attached. -->
+  <!-- attached: VButtonGroup merges the borders. It targets its DIRECT
+       `.v-button` children — VToggleItem has the VButton as its root, never an
+       intervening wrapper. `orientation`/`data-orientation` are mirrored through a
+       SINGLE key (a binding, even `undefined`, would pass through by fallthrough
+       and overwrite the data-orientation VButtonGroup sets itself): VButtonGroup
+       gets its prop, the detached div gets the attribute directly. `role="group"`
+       is required for the div branch and coincides with VButtonGroup's when
+       attached. -->
   <component
     :is="attached ? VButtonGroup : 'div'"
     v-bind="attached ? { orientation } : { 'data-orientation': orientation }"
@@ -167,10 +168,10 @@ function onKeydown(event: KeyboardEvent) {
 <style>
 @layer vectis.components {
   /*
-   * Mode détaché seulement. `:not(.v-button-group)` : en attached la racine
-   * porte les DEUX classes — sans cette garde, `align-items: center` entrerait
-   * en conflit d'ordre avec le `stretch` de VButtonGroup (même spécificité).
-   * Rend aussi l'ordre d'export non contraignant.
+   * Detached mode only. `:not(.v-button-group)`: when attached, the root carries
+   * BOTH classes — without this guard, `align-items: center` would conflict by
+   * order with VButtonGroup's `stretch` (same specificity). It also makes the
+   * export order non-constraining.
    */
   .v-toggle:not(.v-button-group) {
     display: inline-flex;

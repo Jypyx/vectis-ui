@@ -7,14 +7,14 @@ import type { ToggleModelValue } from './VToggle.vue'
 import VToggleItem from './VToggleItem.vue'
 
 /**
- * Harnais : le v-model doit être vivant (sans ref locale, cliquer un item ne
- * changerait rien) et la ref est renvoyée pour asserter la valeur émise.
+ * Harness: the v-model must be live (without a local ref, clicking an item would
+ * change nothing) and the ref is returned so the emitted value can be asserted.
  */
 function mount(
   options: {
-    /** Attributs bruts posés sur <VToggle>. */
+    /** Raw attributes set on <VToggle>. */
     toggleAttrs?: string
-    /** Corps du slot par défaut ; par défaut trois items a/b/c. */
+    /** Body of the default slot; three a/b/c items by default. */
     items?: string
     initial?: ToggleModelValue
   } = {},
@@ -47,32 +47,32 @@ const pressedOf = (container: Element) =>
   itemsOf(container).map((el) => el.getAttribute('aria-pressed'))
 
 describe('VToggle', () => {
-  describe('accessibilité', () => {
-    it('rend un groupe nommé de boutons bascule', () => {
+  describe('accessibility', () => {
+    it('renders a named group of toggle buttons', () => {
       const { container } = mount({ toggleAttrs: 'label="Alignement"' })
       const group = container.querySelector('[role="group"]')
       expect(group?.getAttribute('aria-label')).toBe('Alignement')
       expect(pressedOf(container)).toEqual(['false', 'false', 'false'])
     })
 
-    it('marque l’item sélectionné aria-pressed', () => {
+    it('marks the selected item aria-pressed', () => {
       const { container } = mount({ initial: 'b' })
       expect(pressedOf(container)).toEqual(['false', 'true', 'false'])
     })
 
-    it('un aria-label du consommateur remplace la prop label', () => {
+    it('a consumer aria-label replaces the label prop', () => {
       const { container } = mount({ toggleAttrs: 'label="Alignement" aria-label="Style"' })
       expect(container.querySelector('[role="group"]')?.getAttribute('aria-label')).toBe('Style')
     })
 
-    it('un aria-labelledby du consommateur supprime l’aria-label par défaut', () => {
+    it('a consumer aria-labelledby removes the default aria-label', () => {
       const { container } = mount({ toggleAttrs: 'label="Alignement" aria-labelledby="titre"' })
       const group = container.querySelector('[role="group"]')
       expect(group?.hasAttribute('aria-label')).toBe(false)
       expect(group?.getAttribute('aria-labelledby')).toBe('titre')
     })
 
-    it('chaque item reste un .v-button (classes fusionnées, pas remplacées)', () => {
+    it('every item stays a .v-button (classes merged, not replaced)', () => {
       const { container } = mount()
       for (const item of itemsOf(container)) {
         expect(item.classList.contains('v-button')).toBe(true)
@@ -82,21 +82,21 @@ describe('VToggle', () => {
   })
 
   describe('structure', () => {
-    it('attached (défaut) : les items sont enfants DIRECTS du VButtonGroup (couture)', () => {
+    it('attached (the default): the items are DIRECT children of the VButtonGroup (the seam)', () => {
       const { container } = mount()
       expect(container.querySelector('.v-toggle.v-button-group')).not.toBeNull()
-      // garde structurelle : un wrapper intercalé casserait silencieusement la couture
+      // structural guard: an intervening wrapper would silently break the seam
       expect(container.querySelector('.v-button-group > .v-toggle-item')).not.toBeNull()
     })
 
-    it('attached : l’orientation transite par la prop de VButtonGroup', () => {
+    it("attached: the orientation travels through VButtonGroup's prop", () => {
       const { container } = mount({ toggleAttrs: 'orientation="vertical"' })
       expect(container.querySelector('.v-button-group')?.getAttribute('data-orientation')).toBe(
         'vertical',
       )
     })
 
-    it('détaché : un simple div porte le rôle et data-orientation', () => {
+    it('detached: a plain div carries the role and data-orientation', () => {
       const { container } = mount({ toggleAttrs: ':attached="false" orientation="vertical"' })
       expect(container.querySelector('.v-button-group')).toBeNull()
       const group = container.querySelector('.v-toggle')
@@ -105,27 +105,27 @@ describe('VToggle', () => {
     })
   })
 
-  describe('v-model simple', () => {
-    it('un clic sélectionne l’item', async () => {
+  describe('single v-model', () => {
+    it('a click selects the item', async () => {
       const { container, model } = mount()
       await fireEvent.click(itemsOf(container)[1] as HTMLElement)
       expect(model.value).toBe('b')
       expect(pressedOf(container)).toEqual(['false', 'true', 'false'])
     })
 
-    it('un clic sur un autre item bascule la sélection', async () => {
+    it('a click on another item moves the selection', async () => {
       const { container, model } = mount({ initial: 'a' })
       await fireEvent.click(itemsOf(container)[2] as HTMLElement)
       expect(model.value).toBe('c')
     })
 
-    it('re-cliquer l’item sélectionné le désélectionne', async () => {
+    it('clicking the selected item again deselects it', async () => {
       const { container, model } = mount({ initial: 'a' })
       await fireEvent.click(itemsOf(container)[0] as HTMLElement)
       expect(model.value).toBeNull()
     })
 
-    it('mandatory : la dernière valeur ne se désélectionne pas', async () => {
+    it('mandatory: the last value cannot be deselected', async () => {
       const { container, model } = mount({ initial: 'a', toggleAttrs: 'mandatory' })
       await fireEvent.click(itemsOf(container)[0] as HTMLElement)
       expect(model.value).toBe('a')
@@ -135,14 +135,14 @@ describe('VToggle', () => {
     })
   })
 
-  describe('v-model multiple', () => {
-    it('normalise un v-model null en tableau à la première sélection', async () => {
+  describe('multiple v-model', () => {
+    it('normalizes a null v-model to an array on the first selection', async () => {
       const { container, model } = mount({ toggleAttrs: 'multiple' })
       await fireEvent.click(itemsOf(container)[0] as HTMLElement)
       expect(model.value).toEqual(['a'])
     })
 
-    it('cumule puis retire des valeurs', async () => {
+    it('accumulates then removes values', async () => {
       const { container, model } = mount({ initial: ['a'], toggleAttrs: 'multiple' })
       await fireEvent.click(itemsOf(container)[1] as HTMLElement)
       expect(model.value).toEqual(['a', 'b'])
@@ -152,13 +152,13 @@ describe('VToggle', () => {
       expect(model.value).toEqual(['b'])
     })
 
-    it('mandatory : le dernier élément ne se retire pas', async () => {
+    it('mandatory: the last element cannot be removed', async () => {
       const { container, model } = mount({ initial: ['a'], toggleAttrs: 'multiple mandatory' })
       await fireEvent.click(itemsOf(container)[0] as HTMLElement)
       expect(model.value).toEqual(['a'])
     })
 
-    it('chaque écriture produit une nouvelle référence de tableau', async () => {
+    it('every write produces a new array reference', async () => {
       const initial: ToggleModelValue = ['a']
       const { container, model } = mount({ initial, toggleAttrs: 'multiple' })
       await fireEvent.click(itemsOf(container)[1] as HTMLElement)
@@ -167,8 +167,8 @@ describe('VToggle', () => {
     })
   })
 
-  describe('variantes et tones', () => {
-    it('l’item sélectionné est solid au tone du groupe, les autres au variant neutre', () => {
+  describe('variants and tones', () => {
+    it("the selected item is solid in the group's tone, the others in the neutral variant", () => {
       const { container } = mount({
         initial: 'b',
         toggleAttrs: 'variant="outline" tone="danger"',
@@ -181,15 +181,15 @@ describe('VToggle', () => {
     })
   })
 
-  describe('propagation du contexte', () => {
-    it('size et compact atteignent chaque bouton', () => {
+  describe('context propagation', () => {
+    it('size and compact reach every button', () => {
       const { container } = mount({ toggleAttrs: 'size="sm" compact' })
       const items = itemsOf(container)
       expect(items.every((el) => el.dataset.size === 'sm')).toBe(true)
       expect(items.every((el) => el.hasAttribute('data-compact'))).toBe(true)
     })
 
-    it('disabled de groupe désactive tous les items, disabled d’item un seul', () => {
+    it('a group disabled disables every item, an item disabled only one', () => {
       const grouped = mount({ toggleAttrs: 'disabled' })
       expect(itemsOf(grouped.container).every((el) => (el as HTMLButtonElement).disabled)).toBe(
         true,
@@ -206,11 +206,11 @@ describe('VToggle', () => {
     })
   })
 
-  describe('icônes', () => {
+  describe('icons', () => {
     const iconItems = `<VToggleItem value="a" icon="favorite" label="Un" />
                        <VToggleItem value="b" icon="star" label="Deux" />`
 
-    it('selectedIconFilled remplit l’icône du seul item sélectionné', () => {
+    it('selectedIconFilled fills the icon of the selected item alone', () => {
       const { container } = mount({
         initial: 'a',
         toggleAttrs: 'selected-icon-filled',
@@ -221,14 +221,14 @@ describe('VToggle', () => {
       expect(second?.querySelector('.v-icon')?.hasAttribute('data-filled')).toBe(false)
     })
 
-    it('sans la prop, l’icône sélectionnée reste creuse', () => {
+    it('without the prop, the selected icon stays hollow', () => {
       const { container } = mount({ initial: 'a', items: iconItems })
       expect(itemsOf(container)[0]?.querySelector('.v-icon')?.hasAttribute('data-filled')).toBe(
         false,
       )
     })
 
-    it('icône seule : item carré, nom accessible par fallthrough', () => {
+    it('icon only: a square item, accessible name through fallthrough', () => {
       const { container } = mount({
         items: `<VToggleItem value="a" icon="favorite" aria-label="Favori" />`,
       })
@@ -237,7 +237,7 @@ describe('VToggle', () => {
       expect(item?.getAttribute('aria-label')).toBe('Favori')
     })
 
-    it('un libellé annule le mode icône seule', () => {
+    it('a label cancels icon-only mode', () => {
       const { container } = mount({
         items: `<VToggleItem value="a" icon="favorite" label="Favori" />`,
       })
@@ -245,8 +245,8 @@ describe('VToggle', () => {
     })
   })
 
-  describe('navigation clavier', () => {
-    it('les flèches déplacent le focus sans rien sélectionner', async () => {
+  describe('keyboard navigation', () => {
+    it('the arrows move focus without selecting anything', async () => {
       const { container, model } = mount()
       const items = itemsOf(container)
       const group = container.querySelector('[role="group"]') as HTMLElement
@@ -260,7 +260,7 @@ describe('VToggle', () => {
       expect(document.activeElement).toBe(items[0])
     })
 
-    it('boucle aux extrémités et répond à Home/End', async () => {
+    it('wraps at the ends and responds to Home/End', async () => {
       const { container } = mount()
       const items = itemsOf(container)
       const group = container.querySelector('[role="group"]') as HTMLElement
@@ -275,7 +275,7 @@ describe('VToggle', () => {
       expect(document.activeElement).toBe(items[0])
     })
 
-    it('saute les items désactivés', async () => {
+    it('skips the disabled items', async () => {
       const { container } = mount({
         items: `<VToggleItem value="a" label="Un" />
                 <VToggleItem value="b" label="Deux" disabled />
@@ -288,7 +288,7 @@ describe('VToggle', () => {
       expect(document.activeElement).toBe(items[2])
     })
 
-    it('en vertical, seules les flèches haut/bas agissent', async () => {
+    it('in vertical mode, only the up/down arrows act', async () => {
       const { container } = mount({ toggleAttrs: 'orientation="vertical"' })
       const items = itemsOf(container)
       const group = container.querySelector('[role="group"]') as HTMLElement
@@ -304,8 +304,8 @@ describe('VToggle', () => {
     })
   })
 
-  describe('hors contexte', () => {
-    it('un VToggleItem seul se rend, jamais sélectionné, sans erreur au clic', async () => {
+  describe('outside a context', () => {
+    it('a lone VToggleItem renders, never selected, with no error on click', async () => {
       const { container } = render(VToggleItem, { props: { value: 'a', label: 'Seul' } })
       const item = container.querySelector('.v-toggle-item')
       expect(item?.getAttribute('aria-pressed')).toBe('false')

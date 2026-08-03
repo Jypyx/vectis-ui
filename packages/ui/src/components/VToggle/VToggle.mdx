@@ -5,34 +5,32 @@ import * as VToggleStories from './VToggle.stories'
 
 # Toggle
 
-Groupe de boutons sélectionnables pilotés par un **seul v-model**. API composée : `VToggle`
-englobe des `VToggleItem`, et chaque item est un `VButton` — hover, focus, désactivation et
-`prefers-reduced-motion` viennent de lui, aucune règle d'état n'est redéfinie. L'item
-sélectionné est toujours rendu en `solid` (au `tone` du groupe), les autres en `ghost` ou
-`outline`.
+A group of selectable buttons driven by a **single v-model**. Composed API: `VToggle` wraps
+`VToggleItem` elements, and every item is a `VButton` — hover, focus, disabling and
+`prefers-reduced-motion` all come from it, and no state rule is redefined. The selected item is
+always rendered `solid` (in the group's `tone`), the others `ghost` or `outline`.
 
 <Canvas of={VToggleStories.Default} />
 
 <Controls of={VToggleStories.Default} />
 
-## Rattaché ou détaché
+## Attached or detached
 
-Par défaut les items sont **rattachés** dans un `VButtonGroup` (contrôle segmenté, bordures
-fusionnées). `attached: false` les sépare par une gouttière, chaque bouton retrouvant ses
-coins arrondis.
+By default the items are **attached** inside a `VButtonGroup` (a segmented control, merged
+borders). `attached: false` separates them with a gutter, each button regaining its rounded
+corners.
 
-<Canvas of={VToggleStories.Variantes} />
+<Canvas of={VToggleStories.Variants} />
 
-## Sélection
+## Selection
 
-- **Simple** (défaut) : le v-model vaut la valeur sélectionnée, ou `null` ; re-cliquer l'item
-  sélectionné le désélectionne.
-- **`multiple`** : le v-model devient un **tableau** de valeurs, chaque clic ajoute ou retire
-  la sienne.
-- **`mandatory`** : la dernière valeur sélectionnée ne peut jamais être retirée (en simple, le
-  re-clic devient inopérant ; en multiple, le dernier élément reste). C'est une pure garde à
-  la désélection : aucune sélection initiale n'est forcée — poser la valeur de départ dans le
-  v-model.
+- **Single** (the default): the v-model holds the selected value, or `null`; clicking the
+  selected item again deselects it.
+- **`multiple`**: the v-model becomes an **array** of values, and each click adds or removes its
+  own.
+- **`mandatory`**: the last selected value can never be removed (in single mode the second click
+  becomes inoperative; in multiple mode the last element stays). This is purely a guard against
+  deselection: no initial selection is forced — set the starting value in the v-model.
 
 <Canvas of={VToggleStories.Multiple} />
 
@@ -40,51 +38,56 @@ coins arrondis.
 
 ## Tones
 
-Le `tone` colore l'item sélectionné ; les items non sélectionnés restent neutres, comme les
-pages inactives d'une VPagination.
+The `tone` colours the selected item; unselected items stay neutral, like the inactive pages of
+a VPagination.
 
 <Canvas of={VToggleStories.Tones} />
 
-## Icônes
+## Icons
 
-`icon` accepte un nom Material Symbols **ou** une URL d'image. Sans libellé ni slot, l'item se
-réduit à un carré (poser alors un `aria-label`). Avec `selectedIconFilled` sur le groupe,
-l'icône de l'item sélectionné passe en variante **remplie** (axe FILL de la police) — sans
-effet sur une icône fournie par URL.
+`icon` accepts a Material Symbols name **or** an image URL. With neither a label nor a slot, the
+item shrinks to a square (set an `aria-label` in that case). With `selectedIconFilled` on the
+group, the selected item's icon switches to the **filled** variant (the font's FILL axis) — with
+no effect on an icon supplied by URL.
 
-<Canvas of={VToggleStories.IconesRemplies} />
+<Canvas of={VToggleStories.FilledIcons} />
 
-## Tailles
+## Sizes
 
-L'échelle unifiée `xs`–`xl` et `compact` (hauteur réduite de 4px) se posent sur le groupe et
-se propagent à tous les items.
+The unified `xs`–`xl` scale and `compact` (height reduced by 4px) are set on the group and
+propagate to every item.
 
-<Canvas of={VToggleStories.TaillesEtCompact} />
+<Canvas of={VToggleStories.SizesAndCompact} />
 
 ## Orientation
 
-`orientation="vertical"` empile les items — rattachés (couture horizontale) ou détachés
-(largeurs égalisées).
+`orientation="vertical"` stacks the items — attached (a horizontal seam) or detached (widths
+equalized).
 
 <Canvas of={VToggleStories.Vertical} />
 
-## Désactivation
+## Disabling
 
-`disabled` sur le groupe neutralise tous les items ; `disabled` sur un item ne neutralise que
-lui. Un item désactivé est un `<button disabled>` natif : ni cliquable, ni atteignable au
-clavier.
+`disabled` on the group neutralizes every item; `disabled` on an item neutralizes only that one.
+A disabled item is a native `<button disabled>`: neither clickable nor reachable by keyboard.
 
-<Canvas of={VToggleStories.Desactive} />
+<Canvas of={VToggleStories.Disabled} />
 
-## Accessibilité
+## Edge cases
 
-- Le groupe est un `role="group"` nommé : fournir la prop `label` (ou un `aria-label` /
-  `aria-labelledby`, qui priment).
-- Chaque item est un **bouton bascule** : `aria-pressed` est toujours présent, y compris à
-  `false` — c'est sa présence qui fait annoncer l'état.
-- Pas de roving tabindex : chaque item visible est un arrêt de tabulation. Les flèches
-  (haut/bas en vertical) et Home/End **déplacent le focus sans activer** — activer au focus
-  basculerait des valeurs involontairement. Les items désactivés sont sautés.
-- En icône seule, poser un `aria-label` sur l'item (il traverse jusqu'au bouton rendu).
+Long labels stay aligned inside the segmented control.
 
-<Canvas of={VToggleStories.Clavier} />
+<Canvas of={VToggleStories.EdgeCases} />
+
+## Accessibility
+
+- The group is a named `role="group"`: supply the `label` prop (or an `aria-label` /
+  `aria-labelledby`, which take precedence).
+- Every item is a **toggle button**: `aria-pressed` is always present, including at `false` — its
+  presence is what makes the state announced.
+- No roving tabindex: every visible item is a tab stop. The arrows (up/down in vertical mode) and
+  Home/End **move focus without activating** — activating on focus would toggle values
+  unintentionally. Disabled items are skipped.
+- In icon-only mode, set an `aria-label` on the item (it travels through to the rendered button).
+
+<Canvas of={VToggleStories.Keyboard} />
