@@ -858,8 +858,10 @@ watch(
     rotate: 180deg;
   }
 
-  /* VInput's cross: placed to the left of the chevron, centred, negative margin
-     cancelled */
+  /* VInput's cross: placed to the left of the chevron, centred. The action's
+     derived margin makes the GLYPH's edge coincide with inset-inline-end, so the
+     calc reads directly: the chevron occupies one --vectis-icon-size from the
+     field's padding, then space-1 separates the two glyphs. */
   .v-combobox .v-input-clear {
     position: absolute;
     inset-inline-end: calc(

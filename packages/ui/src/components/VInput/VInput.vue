@@ -388,14 +388,18 @@ defineExpose({
   }
 
   /* Internal buttons (clear, clickable icon): dark grey → black on hover, radius
-     aligned with VButton (a square focus ring with rounded edges) */
+     aligned with VButton (a square focus ring with rounded edges). The negative
+     margin is DERIVED, never a literal: it is exactly the half-difference that
+     centres the icon in the (wider) action box, so it cancels that inset and the
+     glyph lands where a decorative .v-icon would — on the field's padding, and one
+     --control-gap away from its neighbour. */
   .v-input-action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: var(--control-action-size);
     height: var(--control-action-size);
-    margin-inline: calc(var(--vectis-space-1) * -1);
+    margin-inline: calc((var(--vectis-icon-size) - var(--control-action-size)) / 2);
     padding: 0;
     border: none;
     background: transparent;
