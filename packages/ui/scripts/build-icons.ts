@@ -28,6 +28,7 @@ const ICONS = [
   'arrow_drop_down',
   'arrow_drop_up',
   'arrow_upward',
+  'attach_file',
   'calendar_today',
   'check',
   'check_circle',

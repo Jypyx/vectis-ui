@@ -149,3 +149,9 @@ export { default as VDatePicker } from './components/VDatePicker/VDatePicker.vue
 export type { DatePickerMode } from './components/VDatePicker/VDatePicker.vue'
 export { default as VTimePicker } from './components/VTimePicker/VTimePicker.vue'
 export type { TimePickerFormat, TimePickerMode } from './components/VTimePicker/VTimePicker.vue'
+export { default as VFilePicker } from './components/VFilePicker/VFilePicker.vue'
+export type {
+  FilePickerDisplay,
+  FilePickerRejectReason,
+  FilePickerRejection,
+} from './components/VFilePicker/VFilePicker.vue'

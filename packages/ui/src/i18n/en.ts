@@ -119,4 +119,11 @@ export const en: VectisMessages = {
     minutesValue: (minute) => `${minute} minutes`,
     maskPlaceholder: 'hh:mm',
   },
+  filePicker: {
+    attach: 'Choose files',
+    clear: 'Clear files',
+    remove: (name) => `Remove ${name}`,
+    files: (count) => `${count} file${count === 1 ? '' : 's'}`,
+    placeholder: 'No file selected',
+  },
 }

@@ -129,4 +129,13 @@ export const fr: VectisMessages = {
     minutesValue: (minute) => `${minute} minutes`,
     maskPlaceholder: 'hh:mm',
   },
+  filePicker: {
+    attach: 'Choisir des fichiers',
+    clear: 'Effacer les fichiers',
+    remove: (name) => `Retirer ${name}`,
+    // Le pluriel français part de 2, l’anglais de 0 : deux ternaires distincts,
+    // pas une règle partagée.
+    files: (count) => `${count} fichier${count > 1 ? 's' : ''}`,
+    placeholder: 'Aucun fichier sélectionné',
+  },
 }

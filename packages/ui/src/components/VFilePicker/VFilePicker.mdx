@@ -1,0 +1,127 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VFilePickerStories from './VFilePicker.stories'
+
+<Meta of={VFilePickerStories} />
+
+# FilePicker
+
+A file field: a hidden native `<input type="file">` and a read-only
+[VInput](?path=/docs/components-input--docs) as the visible control. The selection comes back as a
+plain `File[]` through `v-model` — VFilePicker displays and validates, **the parent previews and
+uploads**.
+
+Two platform rules shape the whole component and are worth knowing before reading further: a file
+dialog only opens from a real click on an `<input type="file">`, and a `FileList` cannot be written
+from a template. The hidden input is therefore a **source** of files, never a mirror of the model.
+
+<Canvas of={VFilePickerStories.Default} />
+<Controls of={VFilePickerStories.Default} />
+
+## Several files (`multiple`, `display`)
+
+`multiple` accepts a whole batch. The default `text` rendering joins the names with commas inside the
+field and truncates the line when it overflows; `display="chip"` gives each file a removable
+[VChip](?path=/docs/components-chip--docs) and lets the field grow with the rows, the paperclip and
+the clear cross staying pinned to its end. Outside `multiple`, `display` is ignored — a single name
+is always text.
+
+<Canvas of={VFilePickerStories.Multiple} />
+<Canvas of={VFilePickerStories.Chips} />
+
+## Limits (`maxSize`, `maxTotalSize`, `maxFiles`)
+
+All three are expressed in plain numbers — **bytes** for the two sizes — and they are limits, not
+warnings: an out-of-bounds file **never enters the model**. Each refusal is reported through
+`reject`, one event per file, carrying `{ file, reason }` with `reason` among `type`, `size`,
+`count` and `total-size`. Writing the message is yours; nothing is displayed for you.
+
+There is deliberately no de-duplication: a `File` is opaque, and two files may legitimately share a
+name across folders.
+
+<Canvas of={VFilePickerStories.Limits} />
+
+## Accepted types (`accept`)
+
+`accept` takes the native syntax (`image/*,.pdf`) and is applied twice: as the attribute, which
+filters the system dialog, and in the component's own matching, which is the only thing that filters
+a **drop** — the attribute has no say there.
+
+Spell extensions alongside the MIME families. `file.type` is the browser's guess and is often empty
+(an extension it does not know, some Linux setups), and a MIME-only `accept` then refuses a perfectly
+valid file.
+
+<Canvas of={VFilePickerStories.Accept} />
+
+## Drag & drop (`droppable`)
+
+Files dropped on the component go through the same acceptance pipeline as the dialog. While a drag
+hovers, the field is highlighted by redefining the very variable that carries its border colour, so
+the drag state and the focus state can never disagree. `droppable: false` opts out, and dropping is
+inert when `disabled` or `readonly`.
+
+<Canvas of={VFilePickerStories.DragAndDrop} />
+
+## The counter (`counter`)
+
+Under the field, on the right: the number of selected files and, in parentheses, their total size.
+The **word** comes from the design system dictionary, the **size** from `Intl` — so
+`setLocale('de-DE')` already gives German byte units. Sizes follow the SI ladder (1 kB = 1000 bytes),
+which is what the unit names mean.
+
+The counter is part of the field's `aria-describedby`: in `display="chip"` the field's value is
+empty, so the counter is the only textual summary of the state.
+
+## Reporting to the parent (`v-model`)
+
+The model is **always** a `File[]`, `multiple` or not — its shape never depends on a prop, so nothing
+has to be narrowed. Single mode is simply a list of at most one.
+
+<Canvas of={VFilePickerStories.Preview} />
+
+## Slots
+
+`#chip` replaces a file's chip and receives `{ file, index, remove, size, compact }` — `remove`,
+without which the file could no longer be taken out, and the `size`/`compact` computed to fit inside
+the field (one step below it). `#counter` receives `{ count, size, text }`, `text` being the
+ready-made string.
+
+<Canvas of={VFilePickerStories.CustomSlots} />
+
+## Sizes and states
+
+<Canvas of={VFilePickerStories.Sizes} />
+<Canvas of={VFilePickerStories.States} />
+
+## Forms
+
+**VFilePicker is a v-model component, not a native form control.** Two consequences:
+
+- `required` is forwarded to the hidden input, which is not focusable: the browser blocks submission
+  with no visible message. Validate the model yourself and reflect the result through `invalid`. A
+  dev-mode warning says so.
+- Removing a file shrinks the model but not the hidden input's `FileList`, so a native submission
+  could still carry it. Build the `FormData` from the `v-model` instead:
+
+```js
+const body = new FormData()
+for (const file of files.value) body.append('attachments', file)
+```
+
+`name`, `required`, `form` and `capture` land on the hidden input; `id`, every `aria-*` and every
+listener land on the visible field, which is what takes focus.
+
+## Accessibility
+
+- The hidden input carries `tabindex="-1"` and `aria-hidden`: the read-only field is the single tab
+  stop and the single announcement.
+- The field opens the dialog on click, on `Enter` and on `Space`; `Enter` cancels the implicit form
+  submission on its way.
+- The paperclip is a real button carrying an accessible name, and it disappears in `readonly` along
+  with the affordance it stood for. The clear cross shows to its left, never in its place.
+- `hint` and the counter are linked to the field through `aria-describedby`, aggregated with any
+  value you pass yourself.
+- Each chip's remove button is named after its file.
+
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**). File sizes follow the locale set by `setLocale`, words
+and format alike.

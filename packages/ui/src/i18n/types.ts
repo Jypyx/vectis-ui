@@ -155,6 +155,21 @@ export interface VectisMessages {
      */
     maskPlaceholder: string
   }
+  filePicker: {
+    /** Accessible name of the end icon button, which opens the file dialog. */
+    attach: string
+    clear: string
+    /** Accessible name of a chip's remove button. */
+    remove: (name: string) => string
+    /**
+     * The counter's WORD only. The total size that follows comes from `Intl`, and
+     * the parentheses around it from neither — universal punctuation, the same
+     * boundary as VBadge's `99+`.
+     */
+    files: (count: number) => string
+    /** Text of the empty field. */
+    placeholder: string
+  }
 }
 
 /**
