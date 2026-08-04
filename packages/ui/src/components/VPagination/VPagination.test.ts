@@ -81,7 +81,7 @@ describe('VPagination', () => {
       expect(last?.hasAttribute('data-edge')).toBe(true)
       expect(before?.dataset.distance).toBe('1')
       expect(after?.dataset.distance).toBe('1')
-      // la page courante n'est jamais masquable
+      // the current page can never be hidden
       expect(current?.hasAttribute('data-distance')).toBe(false)
     })
   })

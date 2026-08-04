@@ -29,12 +29,12 @@ interface TextareaProps {
   size?: 'sm' | 'md' | 'lg'
   /** Minimum height reduced by 4px; padding, type and icons unchanged. */
   compact?: boolean
-  /** Hauteur qui suit le contenu (field-sizing: content ; sans support, textarea classique). */
+  /** Height that follows the content (field-sizing: content; unsupported = a plain textarea). */
   autoGrow?: boolean
   /** Forces the invalid state (server-side validation) — sets aria-invalid. */
   invalid?: boolean
   disabled?: boolean
-  /** Lecture seule : focusable, non modifiable ; masque le bouton d'effacement. */
+  /** Read-only: focusable, not editable; hides the clear button. */
   readonly?: boolean
   /** Label above the field, associated through for/id. */
   label?: string
@@ -53,7 +53,7 @@ interface TextareaProps {
   loading?: boolean
   /** Spinner label for screen readers. Default: the DS dictionary. */
   loadingLabel?: string
-  /** Bouton croix qui vide le champ (visible si non-vide, hors disabled/readonly). */
+  /** A cross button that empties the field (visible when non-empty, outside disabled/readonly). */
   clearable?: boolean
   /** Accessible label of the clear button. Default: the DS dictionary. */
   clearLabel?: string
@@ -254,9 +254,9 @@ const { counterText, over } = useTextLimit({
     color: var(--vectis-color-danger-text);
   }
 
-  /* Le field porte bordure, fond, focus ET le redimensionnement (resize exige
-     overflow ≠ visible); --field-border-color is the single source of truth for the
-     colour (hover/error/disabled redefine it) */
+  /* The field carries the border, the background, the focus AND the resizing (resize
+     requires overflow ≠ visible); --field-border-color is the single source of truth for
+     the colour (hover/error/disabled redefine it) */
   .v-textarea-field {
     --field-border-color: var(--vectis-color-border-strong);
 
@@ -343,9 +343,9 @@ const { counterText, over } = useTextLimit({
      no layout jump. Only the CONTROL's focus is targeted (not :focus-within): when
      an internal button (clear, icon) has keyboard focus, only its own outline
      lights up — otherwise two simultaneous indicators, unreadable.
-     :focus (pas :focus-visible) : un champ texte montre toujours son focus,
-     souris comprise. L'outline transparent est le filet forced-colors
-     (Windows High Contrast supprime les box-shadow). */
+     :focus (not :focus-visible): a text field always shows its focus, mouse included.
+     The transparent outline is the forced-colors safety net (Windows High Contrast drops
+     box-shadows). */
   .v-textarea-field:has(.v-textarea-control:focus) {
     --field-border-color: var(--vectis-color-accent);
 
@@ -434,8 +434,8 @@ const { counterText, over } = useTextLimit({
     field-sizing: content;
   }
 
-  /* --- Tailles : seul le padding-block reste local, le reste vient de
-     v-control ; suit la formule (hauteur - 1lh) / 2 par cran --- */
+  /* Sizes: only padding-block stays local, the rest comes from v-control; it follows the
+     (height - 1lh) / 2 formula at each notch */
   .v-textarea[data-size='sm'] .v-textarea-field {
     padding-block: var(--vectis-space-1);
   }

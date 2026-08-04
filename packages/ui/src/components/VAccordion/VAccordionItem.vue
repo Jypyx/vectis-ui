@@ -34,13 +34,13 @@ const props = withDefaults(defineProps<AccordionItemProps>(), {
 })
 
 defineSlots<{
-  /** Contenu du panneau */
+  /** The panel content */
   default(): unknown
-  /** Titre riche (remplace la prop `title`) */
+  /** Rich title (replaces the `title` prop) */
   title?(): unknown
-  /** Sous-titre riche (remplace la prop `subtitle`) */
+  /** Rich subtitle (replaces the `subtitle` prop) */
   subtitle?(): unknown
-  /** Contenu libre devant le titre (prime sur `iconStart`) */
+  /** Free content before the title (wins over `iconStart`) */
   start?(): unknown
 }>()
 

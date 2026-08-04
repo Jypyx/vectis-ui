@@ -308,9 +308,9 @@ watch(model, () => {
     /*
      * Frame gutter: zero when flat (bar and panels flush with the host container),
      * set by `outlined` — VDataTable's `--table-frame-pad` idiom. Fixed, NOT indexed
-     * on `data-size`/`compact`: it is a card measurement
-     * de carte, et les `--control-*` vivent sur les VButton descendants (chaque
-     * (VTab sets its own `v-control`), hence out of the root's reach.
+     * on `data-size`/`compact`: it is a card measurement, and the `--control-*` variables
+     * live on the descendant VButtons (each VTab sets its own `v-control`), hence out of
+     * the root's reach.
      */
     --tabs-frame-pad: 0px;
 
@@ -326,9 +326,9 @@ watch(model, () => {
 
   /*
    * Bordered card — the decoration scale shared with VAccordion and VDataTable;
-   * `flat` (the default) has nothing to cancel. The frame is on the ROOT, hence around
-   * de la barre ET des panneaux : la piste de la barre devient le filet de
-   * separator between the two, inside the frame.
+   * `flat` (the default) has nothing to cancel. The frame is on the ROOT, hence around the
+   * bar AND the panels: the bar's track becomes the separator between the two, inside the
+   * frame.
    *
    * No `overflow: clip`, unlike VDataTable whose table is edge-to-edge by
    * construction: here the gutter always leaves a band at least equal to the inner
@@ -381,7 +381,7 @@ watch(model, () => {
     justify-content: flex-end;
   }
 
-  /* Piste des variantes `flat` et `outlined` : sur la barre, pour courir aussi
+  /* The track of the `flat` and `outlined` variants: on the bar, so it also runs
      under the scroll buttons (siblings of the list). When framed, it is what
      separates the bar from the panels — hence the end edge left without a gutter,
      since otherwise it would separate nothing. */
@@ -399,8 +399,8 @@ watch(model, () => {
    * Framed and vertical: the track MIGRATES to the end edge. When flat it delimits
    * the tab column, hence the start edge; inside a card that edge is already held by
    * the frame's border (two parallel rules otherwise) and what is missing is the
-   * bar/panels boundary. Specificity EQUAL to the rule above
-   * (0,4,0) : l'ordre tranche, ne pas remonter ce bloc.
+   * bar/panels boundary. Specificity EQUAL to the rule above (0,4,0): order decides, so
+   * do not move this block up.
    */
   .v-tabs[data-variant='outlined'][data-orientation='vertical'] .v-tabs-bar {
     border-inline-start: none;
@@ -412,8 +412,8 @@ watch(model, () => {
     align-items: center;
     gap: var(--vectis-space-1);
     overflow: auto;
-    /* la liste doit pouvoir passer sous sa taille de contenu, sinon elle
-       pushes the bar instead of scrolling */
+    /* the list must be able to shrink below its content size, otherwise it pushes the bar
+       instead of scrolling */
     min-inline-size: 0;
     min-block-size: 0;
     scrollbar-width: none;
@@ -425,8 +425,8 @@ watch(model, () => {
     align-items: stretch;
   }
 
-  /* L'indicateur de 2px recouvre la piste de 1px au lieu de s'empiler dessus
-     (negative margins) */
+  /* The 2px indicator covers the 1px track instead of stacking on top of it (negative
+     margins) */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tabs-list {
     margin-block-end: -1px;
     /* contiguous tabs: on a track they form a row of segments (see the zero radius
@@ -434,8 +434,8 @@ watch(model, () => {
     gap: 0;
   }
 
-  /* since the list is 1px taller than the tabs, they rest on its
-     bord de fin : l'indicateur tombe alors pile sur la piste */
+  /* since the list is 1px taller than the tabs, they rest on its end edge: the indicator
+     then lands exactly on the track */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='horizontal']
     .v-tabs-list {
     align-items: flex-end;
@@ -490,8 +490,8 @@ watch(model, () => {
 
   .v-tabs-scroll {
     flex: none;
-    /* the bar is stretch for the track's sake: the controls centre themselves
-       sur la liste (qui est plus haute qu'eux en variante inset) */
+    /* the bar is stretch for the track's sake: the controls centre themselves on the list
+       (which is taller than they are in the inset variant) */
     align-self: center;
   }
 

@@ -1,7 +1,7 @@
 import { Meta } from '@storybook/addon-docs/blocks'
 import { tokens, flattenTokens } from './index'
 
-<Meta title="Fondations/Tokens" />
+<Meta title="Foundations/Tokens" />
 
 export const mono = { fontFamily: 'var(--vectis-font-family-mono)', fontSize: 12 }
 
@@ -32,9 +32,9 @@ export const TokenTable = ({ flat, preview }) => (
   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
     <thead>
       <tr>
-        <th style={{ textAlign: 'left', padding: 6 }}>Aperçu</th>
+        <th style={{ textAlign: 'left', padding: 6 }}>Preview</th>
         <th style={{ textAlign: 'left', padding: 6 }}>Custom property</th>
-        <th style={{ textAlign: 'left', padding: 6 }}>Valeur source</th>
+        <th style={{ textAlign: 'left', padding: 6 }}>Source value</th>
         <th style={{ textAlign: 'left', padding: 6 }}>Description</th>
       </tr>
     </thead>
@@ -57,20 +57,20 @@ export const TokenTable = ({ flat, preview }) => (
 
 # Tokens
 
-Cette page est **générée depuis la source typée** (`src/tokens/`) — elle ne peut pas
-diverger du code. Les composants ne consomment que les tokens **sémantiques** ;
-les primitifs ne servent qu'à les définir.
+This page is **generated from the typed source** (`src/tokens/`) — it cannot diverge
+from the code. Components only consume the **semantic** tokens; the primitives are
+there only to define them.
 
-Surcharge runtime : redéfinissez n'importe quelle custom property `--vectis-*` sur
-`:root` ou sur un sous-arbre DOM (aucun rebuild). Dark mode : `data-theme="dark"`.
+Runtime override: redefine any `--vectis-*` custom property on `:root` or on a DOM
+subtree (no rebuild). Dark mode: `data-theme="dark"`.
 
-## Palettes primitives
+## Primitive palettes
 
 ### Neutral
 
 <PaletteRow name="neutral" />
 
-### Indigo (accent par défaut)
+### Indigo (the default accent)
 
 <PaletteRow name="indigo" />
 
@@ -86,7 +86,7 @@ Surcharge runtime : redéfinissez n'importe quelle custom property `--vectis-*` 
 
 <PaletteRow name="amber" />
 
-## Couleurs sémantiques
+## Semantic colours
 
 <TokenTable
   flat={flattenTokens(tokens.semantic.color, ['color'])}
@@ -103,7 +103,7 @@ Surcharge runtime : redéfinissez n'importe quelle custom property `--vectis-*` 
   )}
 />
 
-## Espacements
+## Spacing
 
 <div style={{ display: 'grid', gap: 6, margin: '8px 0 24px' }}>
   {flattenTokens(tokens.primitives.space, ['space']).map((f) => (
@@ -117,35 +117,37 @@ Surcharge runtime : redéfinissez n'importe quelle custom property `--vectis-*` 
   ))}
 </div>
 
-## Typographie
+## Typography
 
-### Tailles primitives
+### Primitive sizes
 
 <div style={{ display: 'grid', gap: 8, margin: '8px 0 24px' }}>
   {flattenTokens(tokens.primitives.font.size, ['font', 'size']).map((f) => (
     <div key={f.cssName} style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
       <code style={{ ...mono, width: 140 }}>{f.cssName}</code>
       <span style={{ fontSize: `var(${f.cssName})`, lineHeight: 1.2 }}>
-        Portez ce vieux whisky au juge blond
+        The quick brown fox jumps over the lazy dog
       </span>
       <code style={mono}>{f.token.$value}</code>
     </div>
   ))}
 </div>
 
-### Graisses
+### Weights
 
 <div style={{ display: 'grid', gap: 8, margin: '8px 0 24px' }}>
   {flattenTokens(tokens.primitives.font.weight, ['font', 'weight']).map((f) => (
     <div key={f.cssName} style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
       <code style={{ ...mono, width: 140 }}>{f.cssName}</code>
-      <span style={{ fontWeight: `var(${f.cssName})` }}>Portez ce vieux whisky au juge blond</span>
+      <span style={{ fontWeight: `var(${f.cssName})` }}>
+        The quick brown fox jumps over the lazy dog
+      </span>
       <code style={mono}>{f.token.$value}</code>
     </div>
   ))}
 </div>
 
-### Familles, interlignages et espacements de lettres
+### Families, leadings and letter spacings
 
 <TokenTable
   flat={[
@@ -156,12 +158,12 @@ Surcharge runtime : redéfinissez n'importe quelle custom property `--vectis-*` 
   preview={() => null}
 />
 
-### Échelle sémantique (rôles de texte)
+### Semantic scale (text roles)
 
-Chaque rôle est une recette complète (`--vectis-text-<rôle>-size/weight/leading[/tracking]`),
-consommée par le composant **VTypography** et par le CSS des composants. Le rôle `control`
-est technique (étiquettes de contrôles interactifs) : sa taille vient de l'échelle de
-tailles des contrôles, pas d'un token propre.
+Every role is a complete recipe (`--vectis-text-<role>-size/weight/leading[/tracking]`),
+consumed by the **VTypography** component and by the components' CSS. The `control` role
+is technical (the labels of interactive controls): its size comes from the control size
+scale, not from a token of its own.
 
 <div style={{ display: 'grid', gap: 12, margin: '8px 0 24px' }}>
   {Object.entries(tokens.semantic.text)
@@ -178,14 +180,14 @@ tailles des contrôles, pas d'un token propre.
             letterSpacing: `var(--vectis-text-${role}-tracking, normal)`,
           }}
         >
-          Portez ce vieux whisky au juge blond
+          The quick brown fox jumps over the lazy dog
         </span>
       </div>
     ))}
 </div>
 
-Familles sémantiques : `--vectis-text-family` (texte courant) et `--vectis-text-family-code`
-(contenus code).
+Semantic families: `--vectis-text-family` (running text) and `--vectis-text-family-code`
+(code content).
 
 ## Radii
 
@@ -206,9 +208,9 @@ Familles sémantiques : `--vectis-text-family` (texte courant) et `--vectis-text
   ))}
 </div>
 
-Sémantiques : <code style={mono}>interactive · surface · overlay · pill</code>
+Semantics: <code style={mono}>interactive · surface · overlay · pill</code>
 
-## Ombres
+## Shadows
 
 <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', margin: '8px 0 24px' }}>
   {flattenTokens(tokens.primitives.shadow, ['shadow']).map((f) => (
@@ -227,7 +229,7 @@ Sémantiques : <code style={mono}>interactive · surface · overlay · pill</cod
   ))}
 </div>
 
-## Mouvement
+## Motion
 
 <TokenTable
   flat={[

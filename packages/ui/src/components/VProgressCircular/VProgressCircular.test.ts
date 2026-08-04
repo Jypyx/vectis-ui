@@ -33,7 +33,7 @@ describe('VProgressCircular', () => {
     expect(styleOf(container)).toContain('--fill-fraction: 0')
   })
 
-  it('max: 0 ne produit ni NaN ni Infinity', () => {
+  it('max: 0 produces neither NaN nor Infinity', () => {
     const { container } = render(VProgressCircular, {
       props: { value: 10, max: 0 },
       attrs: { 'aria-label': 'x' },

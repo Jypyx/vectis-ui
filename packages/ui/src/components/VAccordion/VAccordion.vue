@@ -32,7 +32,7 @@ const props = withDefaults(defineProps<AccordionProps>(), {
 })
 
 defineSlots<{
-  /** Les <VAccordionItem> */
+  /** The <VAccordionItem>s */
   default(): unknown
 }>()
 

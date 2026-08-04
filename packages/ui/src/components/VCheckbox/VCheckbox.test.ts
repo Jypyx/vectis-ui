@@ -17,9 +17,9 @@ describe('VCheckbox', () => {
   it('the slot label names the control (a wrapping label)', () => {
     const { getByRole } = render(VCheckbox, {
       props: { modelValue: false },
-      slots: { default: 'Recevoir la newsletter' },
+      slots: { default: 'Receive the newsletter' },
     })
-    expect(getByRole('checkbox', { name: 'Recevoir la newsletter' })).toBeTruthy()
+    expect(getByRole('checkbox', { name: 'Receive the newsletter' })).toBeTruthy()
   })
 
   it('applies the indeterminate DOM property (there is no equivalent HTML attribute)', async () => {

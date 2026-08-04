@@ -140,8 +140,8 @@ export const primitives = {
       relaxed: dimension('1.65'),
     },
     tracking: {
-      tight: dimension('-0.015em', 'Resserrement des grands corps (display, headings hauts)'),
-      wide: dimension('0.05em', 'Espacement des micro-libellés en capitales (overline)'),
+      tight: dimension('-0.015em', 'Tightening for large sizes (display, the top headings)'),
+      wide: dimension('0.05em', 'Letter spacing for all-caps micro labels (overline)'),
     },
   },
   radius: {
@@ -171,7 +171,7 @@ export const primitives = {
     out: cubicBezier('cubic-bezier(0, 0, 0.2, 1)'),
     'in-out': cubicBezier(
       'cubic-bezier(0.4, 0, 0.2, 1)',
-      'Symétrique : départ et arrivée amortis. Animations en boucle qui traversent (VProgressLinear indéterminé).',
+      'Symmetric: both the start and the end are eased. Looping animations that cross the track (an indeterminate VProgressLinear).',
     ),
   },
 } satisfies TokenGroup

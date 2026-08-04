@@ -156,11 +156,11 @@ describe('componentIconResolver', () => {
     setIconResolver(
       componentIconResolver({
         components: { close: Lucide },
-        props: (name, filled) => ({ 'data-nom': name, 'data-filled': String(filled) }),
+        props: (name, filled) => ({ 'data-name': name, 'data-filled': String(filled) }),
       }),
     )
     const svg = iconOf({ name: 'close', filled: true }).querySelector('[data-testid="lucide"]')
-    expect(svg?.getAttribute('data-nom')).toBe('close')
+    expect(svg?.getAttribute('data-name')).toBe('close')
     expect(svg?.getAttribute('data-filled')).toBe('true')
   })
 

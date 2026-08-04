@@ -67,9 +67,9 @@ describe('VAccordion', () => {
   })
 
   it('subtitle: rendered under the title, absent with neither prop nor slot', () => {
-    const { container } = renderWith('', 'subtitle="Sous-titre du premier"')
+    const { container } = renderWith('', 'subtitle="The first subtitle"')
     const [first, second] = [...container.querySelectorAll('details')]
-    expect(first?.querySelector('.v-accordion-subtitle')?.textContent).toBe('Sous-titre du premier')
+    expect(first?.querySelector('.v-accordion-subtitle')?.textContent).toBe('The first subtitle')
     expect(second?.querySelector('.v-accordion-subtitle')).toBeNull()
   })
 

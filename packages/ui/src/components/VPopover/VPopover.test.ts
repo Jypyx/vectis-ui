@@ -4,7 +4,7 @@ import { defineComponent, nextTick, ref } from 'vue'
 
 import VPopover from './VPopover.vue'
 
-/** Unique fabrique de composant du fichier (vue/one-component-per-file). */
+/** The file's single component factory (vue/one-component-per-file). */
 function renderHarness(template: string, bindings: Record<string, unknown> = {}) {
   const Harness = defineComponent({
     components: { VPopover },
@@ -34,7 +34,7 @@ describe('VPopover', () => {
     expect(panelOf(container).classList.contains('v-panel')).toBe(false)
   })
 
-  it('mode=manual coupe le light dismiss natif', () => {
+  it('mode=manual switches off the native light dismiss', () => {
     const { container } = renderHarness('<VPopover mode="manual">Contenu</VPopover>')
     expect(panelOf(container).getAttribute('popover')).toBe('manual')
   })

@@ -25,8 +25,8 @@ function mount(
   const tabs =
     options.tabs ??
     `<VTab value="a" label="Un" />
-     <VTab value="b" label="Deux" />
-     <VTab value="c" label="Trois" />`
+     <VTab value="b" label="Two" />
+     <VTab value="c" label="Three" />`
   const panelsBody =
     typeof options.panels === 'string'
       ? options.panels
@@ -50,7 +50,7 @@ function mount(
   return { model, ...render(Harness) }
 }
 
-/** Onglets dans l'ordre du DOM. */
+/** The tabs in DOM order. */
 const tabsOf = (container: Element) => [...container.querySelectorAll<HTMLElement>('[role="tab"]')]
 
 describe('VTabs', () => {
@@ -176,8 +176,8 @@ describe('VTabs', () => {
 
   describe('disabled tab', () => {
     const tabs = `<VTab value="a" label="Un" />
-                  <VTab value="b" label="Deux" disabled />
-                  <VTab value="c" label="Trois" />`
+                  <VTab value="b" label="Two" disabled />
+                  <VTab value="c" label="Three" />`
 
     it('renders a <button disabled> (the states come from VButton)', () => {
       const { container } = mount({ tabs })

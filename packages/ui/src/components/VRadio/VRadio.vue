@@ -1,8 +1,7 @@
 <script setup lang="ts">
 /**
  * A native <input type="radio">, its rendering replaced by a styled dot (the same
- * approche que VCheckbox : l'input reste dans l'arbre, seul son rendu est
- * hidden). The group is native: several VRadio sharing the same `name`
+ * approach as VCheckbox: the input stays in the tree, only its rendering is hidden). The group is native: several VRadio sharing the same `name`
  * (fallthrough) and the same v-model — arrow navigation is supplied by the
  * browser, zero JS.
  */
@@ -25,8 +24,8 @@ withDefaults(defineProps<RadioProps>(), {
   disabled: false,
 })
 
-// La racine est un <label> : les attributs natifs (name surtout, pour le
-// groupe) doivent atterrir sur l'input.
+// The root is a <label>: the native attributes (`name` above all, for the group) must
+// land on the input.
 defineOptions({ inheritAttrs: false })
 
 const model = defineModel<string>({ default: '' })

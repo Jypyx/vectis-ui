@@ -17,9 +17,9 @@ describe('VSwitch', () => {
   it('aria-label (fallthrough) names the control with no visible label', () => {
     const { getByRole } = render(VSwitch, {
       props: { modelValue: false },
-      attrs: { 'aria-label': 'Activer les notifications' },
+      attrs: { 'aria-label': 'Enable notifications' },
     })
-    expect(getByRole('switch', { name: 'Activer les notifications' })).toBeTruthy()
+    expect(getByRole('switch', { name: 'Enable notifications' })).toBeTruthy()
   })
 
   it('disabled blocks the control', () => {

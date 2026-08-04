@@ -9,8 +9,8 @@ describe('VTextarea', () => {
       props: { modelValue: '' },
     })
     const textarea = getByRole('textbox') as HTMLTextAreaElement
-    await fireEvent.update(textarea, 'ligne 1\nligne 2')
-    expect(emitted('update:modelValue')).toEqual([['ligne 1\nligne 2']])
+    await fireEvent.update(textarea, 'line 1\nline 2')
+    expect(emitted('update:modelValue')).toEqual([['line 1\nline 2']])
   })
 
   it('invalid sets aria-invalid, autoGrow sets data-auto-grow on the field', () => {
@@ -36,21 +36,21 @@ describe('VTextarea', () => {
   it('class and style land on the root, not on the control', () => {
     const { container, getByRole } = render(VTextarea, {
       props: { modelValue: '' },
-      attrs: { class: 'consommateur', style: 'width: 320px' },
+      attrs: { class: 'consumer', style: 'width: 320px' },
     })
     const root = container.querySelector('.v-textarea') as HTMLElement
-    expect(root.classList.contains('consommateur')).toBe(true)
+    expect(root.classList.contains('consumer')).toBe(true)
     expect(root.style.width).toBe('320px')
-    expect(getByRole('textbox').classList.contains('consommateur')).toBe(false)
+    expect(getByRole('textbox').classList.contains('consumer')).toBe(false)
   })
 
   it('the label is associated with the control through for/id, the hint linked through aria-describedby', () => {
     const { getByLabelText, getByText } = render(VTextarea, {
-      props: { modelValue: '', label: 'Bio', hint: '500 caractères max' },
+      props: { modelValue: '', label: 'Bio', hint: '500 characters max' },
     })
     const textarea = getByLabelText('Bio')
     expect(textarea.classList.contains('v-textarea-control')).toBe(true)
-    const hint = getByText('500 caractères max')
+    const hint = getByText('500 characters max')
     expect(textarea.getAttribute('aria-describedby')).toContain(hint.id)
   })
 
@@ -105,7 +105,7 @@ describe('VTextarea', () => {
     })
     const counter = container.querySelector('.v-textarea-meta .v-textarea-counter') as HTMLElement
     expect(counter.textContent?.trim()).toBe('3/10')
-    // jamais de compteur dans le field (différence avec VInput)
+    // never a counter inside the field (unlike VInput)
     expect(container.querySelector('.v-textarea-field .v-textarea-counter')).toBeNull()
     await rerender({ modelValue: 'abcdefghijk' })
     expect(counter.hasAttribute('data-over')).toBe(true)

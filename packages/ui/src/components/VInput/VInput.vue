@@ -263,10 +263,10 @@ defineExpose({
      .v-input-label/.v-input-hint classes stay in place as hooks (consumer
      overrides, the disabled state below). */
 
-  /* Le field porte bordure, fond et focus ; --field-border-color est la seule
-     source of truth for the colour (hover/error/disabled redefine it).
+  /* The field carries the border, the background and the focus; --field-border-color is
+     the single source of truth for the colour (hover/error/disabled redefine it).
      Sizes/compact: --control-* variables inherited from the v-control root
-     (styles/control-size.css), contexte de VIcon compris. */
+     (styles/control-size.css), the VIcon context included. */
   .v-input-field {
     --field-border-color: var(--vectis-color-border-strong);
 
@@ -324,8 +324,8 @@ defineExpose({
     display: none;
   }
 
-  /* le fond autofill du navigateur est peint sur l'input interne : au moins
-     suivre le radius du champ (compromis, la couleur reste celle du navigateur) */
+  /* The browser's autofill background is painted on the inner input: at least follow the
+     field's radius (a trade-off, the colour stays the browser's) */
   .v-input-control:-webkit-autofill {
     border-radius: var(--vectis-radius-interactive);
   }
@@ -348,9 +348,9 @@ defineExpose({
      no layout jump. Only the CONTROL's focus is targeted (not :focus-within): when
      an internal button (clear, icon) has keyboard focus, only its own outline
      lights up — otherwise two simultaneous indicators, unreadable.
-     :focus (pas :focus-visible) : un champ texte montre toujours son focus,
-     souris comprise. L'outline transparent est le filet forced-colors
-     (Windows High Contrast supprime les box-shadow). */
+     :focus (not :focus-visible): a text field always shows its focus, mouse included.
+     The transparent outline is the forced-colors safety net (Windows High Contrast drops
+     box-shadows). */
   .v-input-field:has(.v-input-control:focus) {
     --field-border-color: var(--vectis-color-accent);
 

@@ -107,7 +107,7 @@ describe('VDatePicker — read-only', () => {
     expect(input.getAttribute('aria-expanded')).toBe('false')
   })
 
-  it('ouvre le panneau au clic et rend la grille', async () => {
+  it('opens the panel on click and renders the grid', async () => {
     const { container, getByRole } = mount({ modelValue: JUNE })
     const control = container.querySelector('.v-datepicker-control') as HTMLElement
     await fireEvent.click(control)
@@ -117,7 +117,7 @@ describe('VDatePicker — read-only', () => {
     expect(container.querySelector('input')?.getAttribute('aria-expanded')).toBe('true')
   })
 
-  it('ignore showCalendar (le calendrier y est le seul chemin)', async () => {
+  it('ignores showCalendar (the calendar is the only route there)', async () => {
     const { container, getByRole } = mount({ modelValue: JUNE, showCalendar: false })
     expect(container.querySelector('button[aria-label="Clear date"]')).toBeTruthy()
     await fireEvent.click(container.querySelector('.v-datepicker-control') as HTMLElement)
@@ -160,20 +160,20 @@ describe('VDatePicker — read-only', () => {
     const { container, emitted } = mount({ modelValue: JUNE, clearable: true })
     const clearBtn = container.querySelector('button[aria-label="Clear date"]') as HTMLElement
     expect(clearBtn).toBeTruthy()
-    // Le champ est readonly dans ce mode : la croix n'y survit que parce que
+    // The field is readonly in this mode: the cross only survives there because
     // `clearVisible` is authoritative on the VInput side.
     expect((container.querySelector('input') as HTMLInputElement).readOnly).toBe(true)
     expect(container.querySelector('button[aria-label="Open calendar"]')).toBeTruthy()
 
     await fireEvent.click(clearBtn)
     expect(emitted('update:modelValue')?.at(-1)).toEqual([null])
-    // Le panneau ne s'ouvre pas au refocus rendu au champ.
+    // The panel does not open on the refocus handed back to the field.
     expect(container.querySelector('.v-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
   })
 
-  it('ferme quand le focus sort du composant', async () => {
+  it('closes when focus leaves the component', async () => {
     const { container } = mount({ modelValue: JUNE })
     const root = container.querySelector('.v-datepicker') as HTMLElement
     await fireEvent.click(container.querySelector('.v-datepicker-control') as HTMLElement)
@@ -270,7 +270,7 @@ describe('VDatePicker — input mode', () => {
     await fireEvent.change(input)
     expect(input.value).toBe('10/06/2026')
 
-    await type(input, '10/07/2026') // hors max
+    await type(input, '10/07/2026') // beyond max
     await fireEvent.change(input)
     expect(input.value).toBe('10/06/2026')
 
@@ -323,7 +323,7 @@ describe('VDatePicker — input mode', () => {
     const input = container.querySelector('input') as HTMLInputElement
     await fireEvent.focus(input)
     await nextTick()
-    // le panneau s'ouvre mais le curseur reste dans le champ
+    // the panel opens but the caret stays in the field
     expect(container.querySelector('.v-datepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       true,
     )
@@ -390,7 +390,7 @@ describe('VDatePicker — input mode', () => {
   })
 
   it('raises no warning when mounting an empty input field', () => {
-    // `useIconClickHandlers` avertit AU SETUP quand un `@click:icon-end` est
+    // `useIconClickHandlers` warns AT SETUP when a `@click:icon-end` is
     // attached without an `iconEndLabel` — even with no icon rendered. That is what
     // forces `endIconLabel` to stay defined at all times.
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})

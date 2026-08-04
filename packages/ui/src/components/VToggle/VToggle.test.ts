@@ -23,8 +23,8 @@ function mount(
   const items =
     options.items ??
     `<VToggleItem value="a" label="Un" />
-     <VToggleItem value="b" label="Deux" />
-     <VToggleItem value="c" label="Trois" />`
+     <VToggleItem value="b" label="Two" />
+     <VToggleItem value="c" label="Three" />`
 
   const Harness = defineComponent({
     components: { VToggle, VToggleItem },
@@ -38,7 +38,7 @@ function mount(
   return { model, ...render(Harness) }
 }
 
-/** Items dans l'ordre du DOM. */
+/** The items in DOM order. */
 const itemsOf = (container: Element) => [
   ...container.querySelectorAll<HTMLElement>('.v-toggle-item'),
 ]
@@ -129,7 +129,7 @@ describe('VToggle', () => {
       const { container, model } = mount({ initial: 'a', toggleAttrs: 'mandatory' })
       await fireEvent.click(itemsOf(container)[0] as HTMLElement)
       expect(model.value).toBe('a')
-      // mais changer d'item reste possible
+      // but switching to another item stays possible
       await fireEvent.click(itemsOf(container)[1] as HTMLElement)
       expect(model.value).toBe('b')
     })
@@ -198,7 +198,7 @@ describe('VToggle', () => {
 
       const { container } = mount({
         items: `<VToggleItem value="a" label="Un" />
-                <VToggleItem value="b" label="Deux" disabled />`,
+                <VToggleItem value="b" label="Two" disabled />`,
       })
       const [first, second] = itemsOf(container) as HTMLButtonElement[]
       expect(first?.disabled).toBe(false)
@@ -208,7 +208,7 @@ describe('VToggle', () => {
 
   describe('icons', () => {
     const iconItems = `<VToggleItem value="a" icon="favorite" label="Un" />
-                       <VToggleItem value="b" icon="star" label="Deux" />`
+                       <VToggleItem value="b" icon="star" label="Two" />`
 
     it('selectedIconFilled fills the icon of the selected item alone', () => {
       const { container } = mount({
@@ -278,8 +278,8 @@ describe('VToggle', () => {
     it('skips the disabled items', async () => {
       const { container } = mount({
         items: `<VToggleItem value="a" label="Un" />
-                <VToggleItem value="b" label="Deux" disabled />
-                <VToggleItem value="c" label="Trois" />`,
+                <VToggleItem value="b" label="Two" disabled />
+                <VToggleItem value="c" label="Three" />`,
       })
       const items = itemsOf(container)
       const group = container.querySelector('[role="group"]') as HTMLElement

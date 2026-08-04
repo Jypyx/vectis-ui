@@ -1,13 +1,13 @@
 ﻿# @vectis/ui
 
-Design system **Vue 3 + TypeScript**, compatible **Nuxt 3 (SSR)**, construit sur les primitives natives de la plateforme : Popover API, CSS Anchor Positioning, `<details name>`, `:user-invalid`… Le JavaScript est un dernier recours, jamais un réflexe.
+A **Vue 3 + TypeScript** design system, **Nuxt 3 (SSR)** compatible, built on the platform's native primitives: the Popover API, CSS Anchor Positioning, `<details name>`, `:user-invalid`… JavaScript is a last resort, never a reflex.
 
-## Principes
+## Principles
 
-- **HTML et CSS d'abord.** Les menus, tooltips et toasts reposent sur la Popover API (`popovertarget`, top-layer, light dismiss natif) et l'anchor positioning CSS — **aucune librairie de positionnement**. Les accordéons sont des `<details name>`. Quand du JS existe, il est justifié par un commentaire dans le composant.
-- **Zéro dépendance runtime** hors `vue` (peer dependency).
-- **Tout le style passe par des design tokens** (`--vectis-*`), surchargeables au runtime sans rebuild.
-- **Tree-shaking réel** : ESM, un module par composant, imports nommés.
+- **HTML and CSS first.** Menus, tooltips and toasts rest on the Popover API (`popovertarget`, the top layer, native light dismiss) and CSS anchor positioning — **no positioning library**. Accordions are `<details name>`. Where JS exists, it is justified by a comment in the component.
+- **Zero runtime dependency** besides `vue` (a peer dependency).
+- **All styling goes through design tokens** (`--vectis-*`), overridable at runtime with no rebuild.
+- **Real tree-shaking**: ESM, one module per component, named imports.
 
 ## Installation
 
@@ -29,36 +29,16 @@ const email = ref('')
 </script>
 
 <template>
-  <VInput v-model="email" type="email" required placeholder="votre@email.fr" aria-label="Email" />
-  <VButton @click="toast({ message: `Confirmation envoyée à ${email}`, tone: 'success' })">
-    S'abonner
+  <VInput v-model="email" type="email" required placeholder="you@example.com" aria-label="Email" />
+  <VButton @click="toast({ message: `Confirmation sent to ${email}`, tone: 'success' })">
+    Subscribe
   </VButton>
 </template>
 ```
 
-### Migration depuis `@socle/ui`
-
-Le design system s'appelait **Socle**. Le renommage touche toutes les surfaces publiques d'un coup — c'est un **major**, mais chaque règle est mécanique :
-
-| Avant                                    | Après                                    |
-| ---------------------------------------- | ---------------------------------------- |
-| `@socle/ui`                              | `@vectis/ui`                             |
-| `<Button>`, `<Input>`, `<DataTable>`…    | `<VButton>`, `<VInput>`, `<VDataTable>`… |
-| `--ds-color-accent`                      | `--vectis-color-accent`                  |
-| `.ds-button`, `.ds-control`, `.ds-panel` | `.v-button`, `.v-control`, `.v-panel`    |
-| `@layer ds.components`                   | `@layer vectis.components`               |
-| `DsMessages`, `DsIconName`               | `VectisMessages`, `VectisIconName`       |
-
-Deux points qui ne se déduisent pas du tableau :
-
-- **Les types portés par un composant ne prennent PAS de `V`** : `ButtonTone`, `TabsVariant`, `ComboboxOption`, `DataTableColumn`, `CalendarSelection` gardent leur nom. Seuls les composants et les trois types de marque changent.
-- **Les libellés Storybook restent sans `V`** (`Composants/Button`), donc vos liens de doc existants continuent de fonctionner.
-
-Si vous surchargiez le CSS du DS, `.ds-*` → `.v-*` et `--ds-*` → `--vectis-*` sont deux substitutions littérales sûres : aucune classe ne changeait de spécificité, aucune règle d'ordre n'a bougé.
-
 ## Nuxt 3
 
-La librairie est pré-buildée en ESM et SSR-safe (aucun accès `window`/`document` hors cycle de vie client). Aucun module ni plugin nécessaire :
+The library is pre-built as ESM and SSR-safe (no `window`/`document` access outside the client lifecycle). No module and no plugin needed:
 
 ```ts
 // nuxt.config.ts
@@ -73,18 +53,18 @@ import { VButton, VBadge } from '@vectis/ui'
 </script>
 ```
 
-Les imports nommés sont tree-shakés par Vite/Nitro. Pas besoin de `build.transpile`.
+Named imports are tree-shaken by Vite/Nitro. No `build.transpile` required.
 
-Pour la locale et les icônes, posez la configuration dans un plugin **universel** — `plugins/vectis.ts`, jamais `plugins/vectis.client.ts` : une configuration client-only ferait diverger le rendu serveur et le rendu client, donc un mismatch d'hydratation. Voir [Internationalisation](#internationalisation).
+For the locale and the icons, put the configuration in a **universal** plugin — `plugins/vectis.ts`, never `plugins/vectis.client.ts`: a client-only configuration would make the server and client renders diverge, hence a hydration mismatch. See [Internationalization](#internationalization).
 
 ## Theming
 
-### Architecture des tokens
+### Token architecture
 
-Deux niveaux de custom properties, générés depuis une source TypeScript typée (format inspiré du [W3C DTCG](https://design-tokens.github.io/community-group/format/)) :
+Two levels of custom properties, generated from a typed TypeScript source (a format inspired by the [W3C DTCG](https://design-tokens.github.io/community-group/format/)):
 
-- **Primitifs** : palettes OKLCH (`--vectis-color-indigo-500`), échelles d'espacement (`--vectis-space-4`), typo, radii, ombres, durées/easings.
-- **Sémantiques** — les seuls consommés par les composants : `--vectis-color-surface`, `--vectis-color-text-muted`, `--vectis-color-accent`, `--vectis-radius-interactive`, `--vectis-focus-ring-color`…
+- **Primitives**: OKLCH palettes (`--vectis-color-indigo-500`), spacing scales (`--vectis-space-4`), type, radii, shadows, durations/easings.
+- **Semantics** — the only ones components consume: `--vectis-color-surface`, `--vectis-color-text-muted`, `--vectis-color-accent`, `--vectis-radius-interactive`, `--vectis-focus-ring-color`…
 
 ### Dark mode
 
@@ -92,14 +72,14 @@ Deux niveaux de custom properties, générés depuis une source TypeScript typé
 <html data-theme="dark"></html>
 ```
 
-`data-theme` fonctionne sur **n'importe quel sous-arbre DOM** (un panneau dark dans une page light, ou l'inverse) et pilote aussi `color-scheme` (scrollbars, contrôles natifs).
+`data-theme` works on **any DOM subtree** (a dark panel inside a light page, or the reverse) and also drives `color-scheme` (scrollbars, native controls).
 
-### Surcharge au runtime — aucun rebuild
+### Runtime overrides — no rebuild
 
-Toute personnalisation est une redéfinition de custom properties, en CSS :
+Every customization is a redefinition of custom properties, in CSS:
 
 ```css
-/* charte "corail" : accent + arrondis pilule */
+/* a "coral" theme: accent + pill radii */
 :root {
   --vectis-color-accent: oklch(58% 0.2 25);
   --vectis-color-accent-hover: oklch(51% 0.19 25);
@@ -107,15 +87,15 @@ Toute personnalisation est une redéfinition de custom properties, en CSS :
 }
 ```
 
-…ou en JavaScript, y compris sur un sous-arbre :
+…or in JavaScript, on a subtree included:
 
 ```ts
 panel.style.setProperty('--vectis-color-accent', 'oklch(58% 0.2 25)')
 ```
 
-Le CSS du DS vit dans des layers (`vectis.reset < vectis.tokens < vectis.components < vectis.utilities`) : **tout style consommateur non-layerisé gagne automatiquement** — surcharger un composant ne demande jamais de guerre de spécificité.
+The design system's CSS lives in layers (`vectis.reset < vectis.tokens < vectis.components < vectis.utilities`): **any non-layered consumer style wins automatically** — overriding a component never calls for a specificity war.
 
-### Accès programmatique aux tokens
+### Programmatic access to the tokens
 
 ```ts
 import { tokens, flattenTokens } from '@vectis/ui/tokens'
@@ -124,62 +104,60 @@ import { tokens, flattenTokens } from '@vectis/ui/tokens'
 const semanticColors = flattenTokens(tokens.semantic.color, ['color'])
 ```
 
-`@vectis/ui/tokens.json` expose la même source en JSON brut (outillage, export de configuration). C'est la fondation de l'app de theming à venir : modifier l'objet, injecter les variables, exporter la config.
+`@vectis/ui/tokens.json` exposes the same source as raw JSON (tooling, configuration export). It is the foundation of the theming app to come: modify the object, inject the variables, export the config.
 
-## Icônes
+## Icons
 
-**Aucune police d'icônes n'est requise.** Les icônes que la librairie rend elle-même — croix de `VDialog`, chevrons de `VCalendar` et `VMenu`, icônes de tone des toasts, tri de `VDataTable`… — sont des **SVG embarqués**, répliques exactes de Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24, Apache-2.0 © Google). Elles pèsent ~2 Ko gzip, non tree-shakables : c'est le prix de l'autonomie du DS.
+**No icon font is required.** The icons the library renders itself — `VDialog`'s cross, `VCalendar`'s and `VMenu`'s chevrons, the toasts' tone icons, `VDataTable`'s sorting… — are **embedded SVGs**, exact replicas of Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24, Apache-2.0 © Google). They weigh ~2 kB gzip and are not tree-shakable: that is the price of the design system's autonomy.
 
-Le composant `VIcon` résout sa source dans cet ordre : **`render` explicite → `src` → `name` (résolveur consommateur, puis registre intégré, puis ligature) → slot**.
+The `VIcon` component resolves its source in this order: **an explicit `render` → `src` → `name` (the consumer resolver, then the built-in registry, then the ligature) → the slot**.
 
 ```vue
 <VIcon name="close" />
-<!-- registre intégré : SVG, aucune police nécessaire -->
+<!-- the built-in registry: SVG, no font needed -->
 <VIcon name="favorite" />
-<!-- hors registre : ligature de VOTRE police d'icônes -->
+<!-- outside the registry: a ligature from YOUR icon font -->
 <VIcon src="/logo.svg" label="Logo" />
-<!-- image -->
+<!-- an image -->
 <VIcon><svg …/></VIcon>
-<!-- SVG inline (slot) -->
+<!-- an inline SVG (the slot) -->
 ```
 
-- **Décorative par défaut** (`aria-hidden`) ; la prop `label` la rend informative (`role="img"` + `aria-label`).
-- L'attribut **`data-icon`** porte le nom demandé quelle que soit la source — accroche stable pour du CSS consommateur et pour les tests.
-- Taille : **1em par défaut** — l'icône suit le texte environnant. Surcharge libre en pixels via `:size="32"`. Sans prop, tout parent peut piloter le contexte en posant les custom properties **`--vectis-icon-size`** et **`--vectis-icon-opsz`** (c'est ce que fait la classe partagée `v-control` — VButton, VInput, VTextarea, VInputOTP, VChip… — selon la taille du contrôle) ; la prop numérique prime sur le contexte. `VSpinner` suit le même principe (1em + `:size` en px), sans API de contexte.
-- **`--vectis-icon-opsz` ne s'applique qu'à la ligature** : c'est un axe variable de police, sans prise sur un SVG intégré, une image ou un composant tiers. La taille, elle, vaut pour toutes les sources.
+- **Decorative by default** (`aria-hidden`); the `label` prop makes it informative (`role="img"` + `aria-label`).
+- The **`data-icon`** attribute carries the requested name whatever the source — a stable hook for consumer CSS and for tests.
+- Size: **1em by default** — the icon follows the surrounding text. Override freely in pixels through `:size="32"`. With no prop, any parent can drive the context by setting the **`--vectis-icon-size`** and **`--vectis-icon-opsz`** custom properties (which is what the shared `v-control` class does — VButton, VInput, VTextarea, VInputOTP, VChip… — according to the control's size); the numeric prop wins over the context. `VSpinner` follows the same principle (1em + `:size` in px), with no context API.
+- **`--vectis-icon-opsz` only applies to the ligature**: it is a font variable axis, with no hold on a built-in SVG, an image or a third-party component. The size, by contrast, applies to every source.
 
-### Toute prop d'icône accepte un nom **ou** un rendu explicite
+### Every icon prop takes a name **or** an explicit rendering
 
 ```vue
-<VButton icon-start="download">Exporter</VButton>
+<VButton icon-start="download">Export</VButton>
 <VBreadcrumb :separator="{ src: '/chevron.svg' }" :items="items" />
-<VMenuItem label="Ouvrir" :icon-start="{ component: FolderIcon }" />
+<VMenuItem label="Open" :icon-start="{ component: FolderIcon }" />
 ```
 
-Une chaîne est **toujours** un nom d'icône : le DS ne devine plus qu'une valeur contenant `.`, `/` ou `:` serait une URL. C'est ce qui permet aux conventions de nommage type Iconify (`mdi:close`, `fa6-solid:xmark`) de fonctionner.
+A string is **always** an icon name; an image or a component is declared as an object (`{ src }`, `{ component }`, `{ path }`, `{ text }`, `{ class }`). That is what lets Iconify-style naming conventions (`mdi:close`, `fa6-solid:xmark`) work.
 
-> **Rupture** depuis la 0.1 : une URL passée en chaîne (`separator="/sep.svg"`) doit devenir `:separator="{ src: '/sep.svg' }"`. Le typage ne la signale pas — une URL reste une chaîne valide — mais l'icône s'affichera comme un nom introuvable.
+### Wiring your own icon library
 
-### Brancher votre propre bibliothèque d'icônes
-
-`setIconResolver` est consulté **avant** le registre intégré ; rendre `undefined` signifie « je ne connais pas ce nom » et laisse la main au registre, puis à la ligature. Les mappings **partiels** sont donc utilisables. Le type `VectisIconName` énumère les noms à couvrir.
+`setIconResolver` is consulted **before** the built-in registry; returning `undefined` means "I do not know this name" and hands over to the registry, then to the ligature. **Partial** mappings are therefore usable. The `VectisIconName` type enumerates the names to cover.
 
 ```ts
-// main.ts / plugins/icons.ts — au niveau MODULE, jamais dans un setup()
+// main.ts / plugins/icons.ts — at MODULE level, never inside a setup()
 import { setIconResolver, classIconResolver } from '@vectis/ui'
 
-// Font Awesome, Phosphor, Bootstrap Icons… (polices à classes + ::before)
-// `fa-solid` sans condition : le tier Free ne dessine qu'une petite fraction du
-// catalogue en Regular, donc mapper `filled: false` dessus rendrait des carrés
-// vides. Le contour/plein de FA demande le tier Pro.
+// Font Awesome, Phosphor, Bootstrap Icons… (class-based fonts + ::before)
+// `fa-solid` unconditionally: the Free tier only draws a small fraction of the
+// catalogue in Regular, so mapping `filled: false` onto it would render empty
+// squares. FA's outline/filled pair requires the Pro tier.
 setIconResolver(
   classIconResolver({
     aliases: { close: 'xmark', expand_more: 'angle-down', check_circle: 'circle-check' },
-    className: (nom) => `fa-solid fa-${nom}`,
+    className: (name) => `fa-solid fa-${name}`,
   }),
 )
 
-// Lucide, Untitled UI… (jeux SVG en composants Vue, racine <svg> unique)
+// Lucide, Untitled UI… (SVG sets as Vue components, a single <svg> root)
 import { componentIconResolver } from '@vectis/ui'
 import { X, Check, ChevronDown } from 'lucide-vue-next'
 setIconResolver(
@@ -189,19 +167,20 @@ setIconResolver(
   }),
 )
 
-// Material Symbols, IcoMoon à ligatures… — rend AUSSI les 20 icônes du DS via
-// la police, ce qui restitue l'axe optique --vectis-icon-opsz (20 en xs/sm/md).
+// Material Symbols, ligature-based IcoMoon… — ALSO renders the design system's 20
+// icons through the font, which restores the --vectis-icon-opsz optical axis
+// (20 at xs/sm/md).
 import { ligatureIconResolver } from '@vectis/ui'
 setIconResolver(ligatureIconResolver())
 ```
 
-`classIconResolver` est **strict** par défaut : un nom du registre intégré absent de votre table d'alias retombe sur le SVG embarqué plutôt que de produire une classe inexistante (carré vide). Vos propres noms, eux, passent toujours.
+`classIconResolver` is **strict** by default: a built-in registry name absent from your alias table falls back to the embedded SVG rather than producing a nonexistent class (an empty square). Your own names always pass through.
 
-Pour un besoin ponctuel, `setIconResolver` accepte n'importe quelle fonction rendant l'une des cinq formes : `{ path }`, `{ component }`, `{ src }`, `{ text }`, `{ class }`.
+For a one-off need, `setIconResolver` accepts any function returning one of the five shapes: `{ path }`, `{ component }`, `{ src }`, `{ text }`, `{ class }`.
 
-> **SSR** — posez le résolveur au niveau module (plugin Nuxt, `main.ts`), jamais dans un `setup()` : l'état vit dans le processus, ce qui est correct pour de la configuration et faux pour de l'état par requête. Surtout, **ne l'installez pas en client-only** (`plugins/*.client.ts`) : le serveur rendrait le SVG intégré et le client votre bibliothèque — mismatch d'hydratation. Font Awesome en mode « SVG with JS » (qui remplace les éléments dans le DOM) n'est pas supporté : utilisez son mode CSS.
+> **SSR** — set the resolver at module level (a Nuxt plugin, `main.ts`), never inside a `setup()`: the state lives in the process, which is correct for configuration and wrong for per-request state. Above all, **do not install it client-only** (`plugins/*.client.ts`): the server would render the built-in SVG and the client your library — a hydration mismatch. Font Awesome in "SVG with JS" mode (which replaces elements in the DOM) is not supported: use its CSS mode.
 
-**Charger une police d'icônes reste utile** pour vos propres noms. Exemple avec Material Symbols Rounded via Google Fonts :
+**Loading an icon font stays useful** for your own names. An example with Material Symbols Rounded through Google Fonts:
 
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -212,48 +191,48 @@ Pour un besoin ponctuel, `setIconResolver` accepte n'importe quelle fonction ren
 />
 ```
 
-(ou en self-host du woff2 variable, ex. paquet npm `material-symbols`). `display=block` évite le flash du nom d'icône en toutes lettres. Sans police chargée, la mise en page est préservée (le nom textuel est contenu dans le carré de l'icône). Surcharger le token `--vectis-font-family-icon` suffit pour basculer sur une autre police **à ligatures** (Material Symbols Outlined/Sharp, build IcoMoon) — sans résolveur.
+(or self-host the variable woff2, e.g. the `material-symbols` npm package). `display=block` avoids flashing the icon name in full. With no font loaded, the layout is preserved (the textual name stays inside the icon's box). Overriding the `--vectis-font-family-icon` token is enough to switch to another **ligature-based** font (Material Symbols Outlined/Sharp, an IcoMoon build) — with no resolver.
 
-Sur `VButton` : les props `icon-start` / `icon-end` prennent un nom d'icône ou un rendu explicite (les slots `#start`/`#end` restent disponibles pour du contenu custom et priment sur les props). `VButton` accepte aussi `href` (rendu `<a>` ; `disabled`/`loading` produisent un lien inerte : `href` retiré + `aria-disabled`) et `compact` (hauteur réduite de 4 px : 20/28/36/44/52 px selon la taille `xs`–`xl`).
+On `VButton`: the `icon-start` / `icon-end` props take an icon name or an explicit rendering (the `#start`/`#end` slots stay available for custom content and win over the props). `VButton` also accepts `href` (rendered as `<a>`; `disabled`/`loading` produce an inert link: `href` removed + `aria-disabled`) and `compact` (height reduced by 4px: 20/28/36/44/52px depending on the `xs`–`xl` size).
 
-L'échelle `xs`–`xl` n'est pas exposée par tous les composants : ceux qui embarquent un champ de saisie (`VInput`, `VTextarea`, `VInputOTP`, `VCombobox`, `VDatePicker`, `VTimePicker`) se limitent à **`sm` / `md` / `lg`** (32/40/48 px, défaut `md`), `compact` restant disponible ; `VChip` se limite à `xs`/`sm`.
+The `xs`–`xl` scale is not exposed by every component: those embedding a text input (`VInput`, `VTextarea`, `VInputOTP`, `VCombobox`, `VDatePicker`, `VTimePicker`) restrict themselves to **`sm` / `md` / `lg`** (32/40/48px, default `md`), `compact` remaining available; `VChip` restricts itself to `xs`/`sm`.
 
-## Internationalisation
+## Internationalization
 
-Aucun texte utilisateur n'est en dur dans les composants : tout vient d'un dictionnaire. Le design system est **français par défaut** et fournit l'anglais ; toute autre langue s'ajoute côté consommateur.
+No user-facing text is hardcoded in the components: everything comes from a dictionary. The design system is **English by default** and ships French; any other language is added on the consumer side.
 
-Deux choses se règlent séparément : les **mots** viennent du dictionnaire, les **formats** (noms de mois et de jours, ordre des champs de date, cycle horaire, premier jour de semaine) sont dérivés d'`Intl` à partir de la balise de locale. Poser une locale sans dictionnaire correspondant donne donc déjà des dates correctes, avec des libellés restés en français.
+Two things are settled separately: the **words** come from the dictionary, the **formats** (month and day names, date field order, hour cycle, first day of the week) derive from `Intl` from the locale tag. Setting a locale with no matching dictionary therefore already gives correct dates, with labels left in English.
 
-### Passer le design system en anglais
+### Switching the design system to French
 
 ```ts
 // main.ts
-import { en, registerMessages, setLocale } from '@vectis/ui'
+import { fr, registerMessages, setLocale } from '@vectis/ui'
 
-registerMessages('en', en)
-setLocale('en-GB')
+registerMessages('fr', fr)
+setLocale('fr-FR')
 ```
 
-L'anglais est **opt-in** : il n'entre dans votre bundle que si vous l'importez.
+French is **opt-in**: it only enters your bundle if you import it.
 
-Posez une balise BCP 47 **complète**. `Intl` accepte `'en'`, mais lui applique les conventions par défaut de la langue — `'en'` signifie 12 h et semaine commençant le dimanche, ce qui n'est pas `'en-GB'`.
+Set a **complete** BCP 47 tag. `Intl` accepts `'en'`, but applies the language's default conventions to it — `'en'` means 12 h and a week starting on Sunday, which is not `'en-GB'`.
 
-### Ajuster quelques mots
+### Adjusting a few words
 
-Une surcharge est **partielle** : ce que vous n'écrivez pas reste inchangé, et les appels successifs sur une même langue se cumulent.
+An override is **partial**: what you do not write stays unchanged, and successive calls on the same language accumulate.
 
 ```ts
 import { registerMessages } from '@vectis/ui'
 
-registerMessages('fr', {
-  dataTable: { empty: 'Rien à afficher' },
-  common: { close: 'Quitter' },
+registerMessages('en', {
+  dataTable: { empty: 'Nothing to display' },
+  common: { close: 'Quit' },
 })
 ```
 
-### Ajouter une langue non fournie
+### Adding a language the design system does not ship
 
-Même geste que pour activer l'anglais — il n'y a pas deux catégories de dictionnaires. Ce que vous n'écrivez pas retombe sur le français, jamais sur une chaîne vide : un dictionnaire partiel est utilisable dès la première clé.
+The same gesture as enabling French — there are not two categories of dictionary. What you do not write falls back to English, never to an empty string: a partial dictionary is usable from its very first key.
 
 ```ts
 import { registerMessages, setLocale, type VectisMessagesInput } from '@vectis/ui'
@@ -267,74 +246,74 @@ registerMessages('de', de)
 setLocale('de-DE')
 ```
 
-Une entrée qui dépend d'une valeur est une **fonction TypeScript**, pas une chaîne à placeholders : ni moteur de pluriel, ni syntaxe ICU à apprendre. Typez la constante `VectisMessagesInput` pour l'autocomplétion des clés, ou `VectisMessages` pour que le compilateur exige une couverture totale.
+An entry depending on a value is a **TypeScript function**, not a placeholder string: no plural engine and no ICU syntax to learn. Type the constant as `VectisMessagesInput` for key autocompletion, or as `VectisMessages` to have the compiler require full coverage.
 
-La clé est la **sous-balise de langue** seule : `registerMessages('de', …)` couvre `de-DE`, `de-AT` et `de-CH`.
+The key is the **language subtag** alone: `registerMessages('de', …)` covers `de-DE`, `de-AT` and `de-CH`.
 
-### Précédence
+### Precedence
 
-Une prop texte posée sur un composant reste **prioritaire** : la traduction globale ne change que les défauts. Pour les noms accessibles de conteneurs, la chaîne complète est `aria-labelledby` › `aria-label` › prop `label` › dictionnaire › français.
+A text prop set on a component stays **authoritative**: the global translation only changes the defaults. For containers' accessible names, the full chain is `aria-labelledby` › `aria-label` › the `label` prop › the dictionary › English.
 
-`VCalendar`, `VDatePicker` et `VTimePicker` gardent leur prop `locale`, prioritaire ; sans elle, ils suivent la locale globale.
+`VCalendar`, `VDatePicker` and `VTimePicker` keep their `locale` prop, which takes precedence; without it, they follow the global locale.
 
 ```vue
 <VDatePicker />
-<!-- locale globale -->
+<!-- the global locale -->
 <VDatePicker locale="ja-JP" />
-<!-- forcé -->
+<!-- forced -->
 ```
 
-### Limite : une locale par processus
+### Limit: one locale per process
 
-La configuration vit au niveau module, comme celle des icônes : **une seule locale par processus**. Un site rendu côté serveur qui sert `/fr` et `/en` depuis le même processus Node ne peut pas s'appuyer dessus pour varier la langue par requête — il doit passer les props texte explicitement.
+The configuration lives at module level, like the icons': **a single locale per process**. A server-rendered site serving `/fr` and `/en` from the same Node process cannot rely on it to vary the language per request — it must pass the text props explicitly.
 
-## Composants
+## Components
 
-| Domaine     | Composants                                                                                                                                                                                                          |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actions     | `VButton`, `VIconButton`, `VChip` (sélectionnable, supprimable)                                                                                                                                                     |
-| Formulaires | `VInput`, `VTextarea`, `VCheckbox`, `VRadio`, `VSwitch`, `VSlider` (single/range), `VInputOTP`, `VCombobox` (recherche, multi)                                                                                      |
-| Overlays    | `VTooltip`, `VMenu` + `VMenuItem`/`VMenuGroup`/`VMenuSeparator` (sous-menus récursifs)                                                                                                                              |
-| Structure   | `VAccordion` + `VAccordionItem`, `VDataTable` (tri, responsive), `VBreadcrumb` (data-driven, troncature)                                                                                                            |
-| Feedback    | `VToaster` + `toast()` (notifications), `VBadge`, `VAvatar`, `VSpinner`, `VSkeletonLoader` (silhouettes de chargement), `VProgressLinear`, `VProgressCircular`, `VIcon` (SVG intégrés, police, image ou SVG inline) |
+| Area      | Components                                                                                                                                                                                                           |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actions   | `VButton`, `VIconButton`, `VChip` (selectable, dismissible)                                                                                                                                                          |
+| Forms     | `VInput`, `VTextarea`, `VCheckbox`, `VRadio`, `VSwitch`, `VSlider` (single/range), `VInputOTP`, `VCombobox` (search, multi)                                                                                          |
+| Overlays  | `VTooltip`, `VMenu` + `VMenuItem`/`VMenuGroup`/`VMenuSeparator` (recursive submenus)                                                                                                                                 |
+| Structure | `VAccordion` + `VAccordionItem`, `VDataTable` (sorting, responsive), `VBreadcrumb` (data-driven, truncation)                                                                                                         |
+| Feedback  | `VToaster` + `toast()` (notifications), `VBadge`, `VAvatar`, `VSpinner`, `VSkeletonLoader` (loading silhouettes), `VProgressLinear`, `VProgressCircular`, `VIcon` (built-in SVGs, a font, an image or an inline SVG) |
 
-Notes d'implémentation notables :
+Implementation notes worth knowing:
 
-- **VSlider range** superpose deux `<input type="range">` natifs (chaque curseur reste un vrai slider clavier/ARIA) ; le JS empêche seulement le croisement.
-- **VDataTable responsive** : mode `stack` en pur CSS (container queries) — sous 640px de conteneur, les lignes deviennent des cartes, les en-têtes sont réinjectés par `::before + data-label`.
-- **VCombobox** suit le pattern ARIA combobox/listbox (`aria-activedescendant`, le focus reste dans l'input) ; le panneau est aligné sur le contrôle via `anchor-size(width)`.
-- **VToast** : monter `<VToaster />` une fois (racine de l'app), puis appeler `toast({ message, tone, ... })` depuis n'importe où — composant, store, retour d'API (client uniquement, jamais pendant le rendu SSR). Placements en piles Popover API (top-layer), auto-fermeture (défaut 5 s, `duration: 0` = persistant, pause au survol), `dismissToast(id?)` pour fermer par programme.
+- **VSlider range** superimposes two native `<input type="range">` (each thumb stays a real keyboard/ARIA slider); the JS only prevents them crossing.
+- **VDataTable responsive**: the `stack` mode is pure CSS (container queries) — under a 640px container, rows become cards and the headers are re-injected through `::before + data-label`.
+- **VCombobox** follows the ARIA combobox/listbox pattern (`aria-activedescendant`, focus stays in the input); the panel is aligned on the control through `anchor-size(width)`.
+- **VToast**: mount `<VToaster />` once (at the app root), then call `toast({ message, tone, ... })` from anywhere — a component, a store, an API response (client only, never during SSR). Placements as Popover API stacks (the top layer), auto-dismiss (5 s by default, `duration: 0` = persistent, paused on hover), `dismissToast(id?)` to close programmatically.
 
-Conventions transverses :
+Cross-cutting conventions:
 
-- Variantes pilotées par props → attributs `data-variant` / `data-tone` / `data-size` (ciblables en CSS).
-- `v-model` partout où un état existe (`v-model:open` pour VMenu).
-- Les flottants prennent leur déclencheur en slot scopé : `<template #trigger="{ triggerProps }"><VButton v-bind="triggerProps">…</VButton></template>` — `popovertarget` et les attributs ARIA sont posés pour vous.
-- Formulaires : l'état d'erreur visuel vient de `:user-invalid` natif (zéro JS de validation) ; la prop `invalid` force l'état pour la validation serveur.
+- Prop-driven variants → `data-variant` / `data-tone` / `data-size` attributes (targetable in CSS).
+- `v-model` wherever state exists (`v-model:open` for VMenu).
+- Floating elements take their trigger from a scoped slot: `<template #trigger="{ triggerProps }"><VButton v-bind="triggerProps">…</VButton></template>` — `popovertarget` and the ARIA attributes are set for you.
+- Forms: the visual error state comes from native `:user-invalid` (zero validation JS); the `invalid` prop forces the state for server-side validation.
 
-La documentation vivante (stories, page tokens, switch de thème) : `pnpm storybook`.
+The living documentation (stories, tokens page, theme switch): `pnpm storybook`.
 
-## Support navigateur
+## Browser support
 
-Cible : **navigateurs modernes** — Chrome/Edge 125+, Safari 26+.
+Target: **modern browsers** — Chrome/Edge 125+, Safari 26+.
 
-- Baseline, sans compromis : Popover API, `<dialog>`, `<details name>`, `:user-invalid`, `:has()`, `color-mix()`, `@layer`, custom properties.
-- **CSS Anchor Positioning** (VTooltip, VMenu et ses sous-menus, VCombobox) : pas encore stable sur Firefox — choix assumé de ne pas embarquer de fallback JS ; sur Firefox, les panneaux s'ouvrent (Popover API supportée) mais ne sont pas ancrés à leur déclencheur. Le reste du DS y fonctionne normalement.
-- Progressive enhancement pur (dégradation propre si non supporté) : animations `@starting-style`/`allow-discrete`, `field-sizing: content` (VTextarea `auto-grow`), `::details-content` + `interpolate-size` (animation VAccordion).
+- Baseline, no compromise: the Popover API, `<dialog>`, `<details name>`, `:user-invalid`, `:has()`, `color-mix()`, `@layer`, custom properties.
+- **CSS Anchor Positioning** (VTooltip, VMenu and its submenus, VCombobox): not stable on Firefox yet — a deliberate choice not to ship a JS fallback; on Firefox the panels open (the Popover API is supported) but are not anchored to their trigger. The rest of the design system works there normally.
+- Pure progressive enhancement (clean degradation when unsupported): `@starting-style`/`allow-discrete` animations, `field-sizing: content` (VTextarea `auto-grow`), `::details-content` + `interpolate-size` (the VAccordion animation).
 
-## Accessibilité
+## Accessibility
 
-Navigation clavier et sémantique ARIA sur tous les composants : pattern ARIA menu (roving focus, retour du focus au déclencheur), `role="switch"`, tooltips liés par `aria-describedby` et fermables à Échap (WCAG 1.4.13), `role="status"`/`role="alert"` selon la criticité, libellé accessible **obligatoire** sur `VIconButton`. `prefers-reduced-motion` respecté partout. L'addon a11y de Storybook audite chaque story.
+Keyboard navigation and ARIA semantics on every component: the ARIA menu pattern (roving focus, focus returned to the trigger), `role="switch"`, tooltips linked by `aria-describedby` and dismissible with Escape (WCAG 1.4.13), `role="status"`/`role="alert"` according to criticality, an accessible label **required** on `VIconButton`. `prefers-reduced-motion` respected everywhere. Storybook's a11y addon audits every story.
 
-## Contribuer
+## Contributing
 
 ```bash
 corepack enable pnpm
 pnpm install
-pnpm storybook          # développement
+pnpm storybook          # development
 pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm build && pnpm build-storybook
 ```
 
-- **Tokens** : ne jamais éditer `src/styles/tokens.css` ni `src/tokens/tokens.json` (générés) — modifier la source `src/tokens/*.ts` puis `pnpm tokens`.
-- **Nouveau composant** : un dossier `src/components/VX/` avec `VX.vue` (styles non-scoped dans `@layer vectis.components`, tokens sémantiques uniquement, variantes en `data-*`), `VX.stories.ts` (défaut, variantes, états, cas limites, play functions), `VX.test.ts` (logique seulement — le comportement navigateur se teste dans les play functions), et l'export nommé dans `src/index.ts`. Le `title` Storybook et le titre du `.mdx` s'écrivent **sans le `V`** — seule exception au préfixe.
-- Tout JS de comportement doit être justifié par un commentaire : « est-ce que HTML/CSS moderne sait le faire ? » d'abord.
+- **Tokens**: never edit `src/styles/tokens.css` or `src/tokens/tokens.json` (generated) — change the `src/tokens/*.ts` source then run `pnpm tokens`.
+- **A new component**: a `src/components/VX/` folder with `VX.vue` (non-scoped styles in `@layer vectis.components`, semantic tokens only, variants through `data-*`), `VX.stories.ts` (default, variants, states, edge cases, play functions), `VX.test.ts` (logic only — browser behaviour is tested in the play functions), and the named export in `src/index.ts`. The Storybook `title` and the `.mdx` heading are written **without the `V`** — the only exception to the prefix.
+- Any behavioural JS must be justified by a comment: "can modern HTML/CSS do it?" comes first.

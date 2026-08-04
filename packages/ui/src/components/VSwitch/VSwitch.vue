@@ -18,8 +18,8 @@ withDefaults(defineProps<SwitchProps>(), {
   disabled: false,
 })
 
-// The root is a <label>: the native attributes (name, aria-label…)
-// doivent atterrir sur l'input.
+// The root is a <label>: the native attributes (name, aria-label…) must land on the
+// input.
 defineOptions({ inheritAttrs: false })
 
 const model = defineModel<boolean>({ default: false })

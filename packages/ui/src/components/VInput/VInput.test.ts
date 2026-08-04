@@ -83,10 +83,10 @@ describe('VInput', () => {
   it('clickable icon: an accessible button, the event emitted, no leak onto the input', async () => {
     const onClick = vi.fn()
     const { getByRole, emitted } = render(VInput, {
-      props: { modelValue: '', iconEnd: 'visibility', iconEndLabel: 'Afficher le mot de passe' },
+      props: { modelValue: '', iconEnd: 'visibility', iconEndLabel: 'Show the password' },
       attrs: { 'onClick:iconEnd': onClick },
     })
-    const button = getByRole('button', { name: 'Afficher le mot de passe' })
+    const button = getByRole('button', { name: 'Show the password' })
     await fireEvent.click(button)
     expect(onClick).toHaveBeenCalledOnce()
     expect(emitted('click:icon-end')).toHaveLength(1)
@@ -114,7 +114,7 @@ describe('VInput', () => {
     expect(container.querySelector('.v-input')?.hasAttribute('data-disabled')).toBe(true)
 
     const readonly = render(VInput, {
-      props: { modelValue: 'texte', clearable: true, readonly: true },
+      props: { modelValue: 'text', clearable: true, readonly: true },
     })
     expect(readonly.queryByRole('button', { name: 'Effacer' })).toBeNull()
     expect(readonly.container.querySelector('.v-input')?.hasAttribute('data-readonly')).toBe(true)

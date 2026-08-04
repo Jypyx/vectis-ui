@@ -10,7 +10,7 @@ import type { IconSource } from '../VIcon/types'
  * --accordion-* variables set on the root).
  */
 export interface AccordionContext {
-  /** Nom de groupe pour <details name> ; undefined = ouvertures multiples. */
+  /** Group name for <details name>; undefined = multiple items can be open. */
   name: string | undefined
   /** Icon in the closed state: an icon name, or an explicit render. */
   expandIcon: IconSource

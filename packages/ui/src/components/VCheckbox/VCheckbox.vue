@@ -3,8 +3,8 @@ import { ref, watchEffect } from 'vue'
 
 /**
  * A native <input type="checkbox">, visually replaced by a styled box:
- * l'input reste dans l'arbre (focus, clavier, formulaires, :user-invalid),
- * only its rendering is hidden. All the state logic is native; the only JS beyond
+ * the input stays in the tree (focus, keyboard, forms, :user-invalid) and only its
+ * rendering is hidden. All the state logic is native; the only JS beyond
  * the v-model bridge is `indeterminate`, which exists solely as a DOM property
  * (there is no equivalent HTML attribute).
  */
@@ -28,8 +28,8 @@ const props = withDefaults(defineProps<CheckboxProps>(), {
   disabled: false,
 })
 
-// La racine est un <label> : les attributs natifs (name, value, required,
-// aria-*…) must land on the input.
+// The root is a <label>: the native attributes (name, value, required, aria-*…) must
+// land on the input.
 defineOptions({ inheritAttrs: false })
 
 const model = defineModel<boolean>({ default: false })
