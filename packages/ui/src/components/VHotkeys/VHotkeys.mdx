@@ -93,6 +93,20 @@ height. A cap holding a single character is square; a cap holding a word grows p
 
 <Canvas of={VHotkeysStories.Sizes} />
 
+## Attached
+
+`attached` joins the caps into a **single** key: the variant's decoration — background, border,
+shadow — moves from each cap to the root, so the separator ends up _inside_ the key instead of
+between two of them. The three variants keep their identity, an `elevated` attached hotkey simply
+carrying one shadow instead of one per cap.
+
+<Canvas of={VHotkeysStories.Attached} />
+
+It is purely visual: the markup, the caps and the accessible name are identical either way, so the
+choice is a matter of density. Attached reads as one object and sits well in a tight row; the
+default reads as distinct physical keys. Combined with `separator=""` it gives the most compact
+form the component can produce — `⌘⇧K` inside a single key.
+
 ## Separator
 
 `separator` is the text placed between two caps, `+` by default. Setting it to an empty string gives

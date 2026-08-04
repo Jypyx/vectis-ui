@@ -19,6 +19,8 @@ const t = storyText({
     newFile: 'New file',
     save: 'Save',
     settings: 'Settings',
+    detachedRow: 'Default (one key each)',
+    attachedRow: 'Attached (a single key)',
     defaultSeparator: 'Default separator',
     macConvention: 'macOS convention (no separator)',
     inProse: 'To open the palette, press',
@@ -42,6 +44,8 @@ const t = storyText({
     newFile: 'Nouveau fichier',
     save: 'Enregistrer',
     settings: 'Paramètres',
+    detachedRow: 'Défaut (une touche chacun)',
+    attachedRow: 'Attached (une seule touche)',
     defaultSeparator: 'Séparateur par défaut',
     macConvention: 'Convention macOS (sans séparateur)',
     inProse: 'Pour ouvrir la palette, appuyez sur',
@@ -64,6 +68,7 @@ const meta = {
     variant: { control: 'select', options: ['flat', 'outlined', 'elevated'] },
     size: { control: 'select', options: ['xs', 'sm'] },
     platform: { control: 'select', options: [undefined, 'mac', 'windows', 'linux', 'other'] },
+    attached: { control: 'boolean' },
     compact: { control: 'boolean' },
     listen: { control: 'boolean' },
     preventDefault: { control: 'boolean' },
@@ -75,6 +80,7 @@ const meta = {
   args: {
     keys: 'mod+k',
     variant: 'flat',
+    attached: false,
     size: 'xs',
     compact: false,
     separator: '+',
@@ -134,6 +140,48 @@ export const Platforms: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * `attached` joins the caps into a single key: the variant's decoration moves from each cap
+ * to the root, so the separator ends up inside the key instead of between two of them.
+ */
+export const Attached: Story = {
+  render: () => ({
+    components: { VHotkeys },
+    setup: () => ({ t, variants: ['flat', 'outlined', 'elevated'] }),
+    template: `
+      <div style="display: grid; grid-template-columns: repeat(3, max-content); gap: 16px 32px; align-items: center">
+        <span style="font: inherit; opacity: 0.7">{{ t.detachedRow }}</span>
+        <VHotkeys keys="mod+shift+k" platform="windows" />
+        <VHotkeys keys="k" platform="windows" />
+        <span style="font: inherit; opacity: 0.7">{{ t.attachedRow }}</span>
+        <VHotkeys keys="mod+shift+k" platform="windows" attached />
+        <VHotkeys keys="k" platform="windows" attached />
+        <template v-for="variant in variants" :key="variant">
+          <span style="font: inherit; opacity: 0.7">{{ variant }}</span>
+          <VHotkeys keys="mod+shift+k" platform="windows" attached :variant="variant" />
+          <VHotkeys keys="mod+shift+k" platform="mac" attached :variant="variant" separator="" />
+        </template>
+      </div>
+    `,
+  }),
+  /* The whole feature is one CSS rule with two carriers, and nothing else covers
+     it: jsdom evaluates no styles, and a typo in the `:not([data-attached])` half
+     would decorate BOTH the root and the caps with no error anywhere. Verified
+     red by dropping that `:not()`. */
+  play: async ({ canvasElement }) => {
+    const roots = [...canvasElement.querySelectorAll<HTMLElement>('.v-hotkeys')]
+    const [detached, , attached] = roots
+    const bg = (el: Element) => getComputedStyle(el).backgroundColor
+    const TRANSPARENT = 'rgba(0, 0, 0, 0)'
+    /* Detached: the caps are the keys, the root is bare. */
+    await expect(bg(detached!)).toBe(TRANSPARENT)
+    await expect(bg(detached!.querySelector('.v-hotkeys-key')!)).not.toBe(TRANSPARENT)
+    /* Attached: the decoration has moved to the root, so the separator is inside it. */
+    await expect(bg(attached!)).not.toBe(TRANSPARENT)
+    await expect(bg(attached!.querySelector('.v-hotkeys-key')!)).toBe(TRANSPARENT)
+  },
 }
 
 /** `xs` (the default) and `sm`, the VChip scale — `compact` takes 4px off the height. */

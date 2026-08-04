@@ -49,6 +49,12 @@ interface HotkeysProps {
   keys: string
   /** flat = a tinted cap (the default), outlined = a border, elevated = a raised cap. */
   variant?: HotkeysVariant
+  /**
+   * Joins the caps into a SINGLE key: the variant's decoration moves from each
+   * cap to the root, so the separator ends up inside the key rather than between
+   * two of them. Purely visual — the markup is identical either way.
+   */
+  attached?: boolean
   size?: HotkeysSize
   /** Height reduced by 4px; padding and typography unchanged. */
   compact?: boolean
@@ -75,6 +81,7 @@ interface HotkeysProps {
 
 const props = withDefaults(defineProps<HotkeysProps>(), {
   variant: 'flat',
+  attached: false,
   size: 'xs',
   compact: false,
   platform: undefined,
@@ -124,19 +131,22 @@ const spoken = computed(() =>
 const resolvedLabel = computed(() => props.label ?? m.value.hotkeys.label(spoken.value))
 
 /* Non-reactive `let`: nobody renders it, and a ref would trigger renders for
-   nothing (the `useTimer` idiom). */
-let attached = false
+   nothing (the `useTimer` idiom). Named `listening` and NOT `attached`: every
+   top-level binding of a `<script setup>` is exposed to the template, where it
+   SHADOWS the prop of the same name — `:data-attached="attached && …"` would
+   silently read this flag instead of `props.attached`. */
+let listening = false
 
 function attach() {
-  if (attached || typeof document === 'undefined') return
+  if (listening || typeof document === 'undefined') return
   document.addEventListener('keydown', onKeydown)
-  attached = true
+  listening = true
 }
 
 function detach() {
-  if (!attached) return
+  if (!listening) return
   document.removeEventListener('keydown', onKeydown)
-  attached = false
+  listening = false
 }
 
 function onKeydown(event: KeyboardEvent) {
@@ -162,6 +172,7 @@ onBeforeUnmount(detach)
   <kbd
     class="v-hotkeys v-control"
     :data-variant="variant"
+    :data-attached="attached ? '' : undefined"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
     :data-platform="platform"
@@ -187,6 +198,8 @@ onBeforeUnmount(detach)
   .v-hotkeys {
     display: inline-flex;
     align-items: center;
+    /* Centres the content when min-inline-size wins — an attached single-key. */
+    justify-content: center;
     vertical-align: middle;
     font-family: var(--vectis-text-family);
     font-size: var(--control-font-size);
@@ -206,12 +219,6 @@ onBeforeUnmount(detach)
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: var(--control-height);
-    /* A single-character cap reads as a square, not a sliver (border-box is global). */
-    min-inline-size: var(--control-height);
-    padding-inline: var(--control-padding-inline);
-    border: 1px solid transparent;
-    border-radius: var(--vectis-radius-interactive);
     font-family: inherit;
     font-size: inherit;
     font-weight: var(--vectis-text-control-weight);
@@ -221,19 +228,43 @@ onBeforeUnmount(detach)
   /* The three variants mirror VButton's NEUTRAL tone, declaration for
      declaration: flat = tonal, outlined = outline, elevated = elevated (minus
      the hover shadow — there is no hover here). A single colour set, so no
-     [data-tone] table and no --tone-* locals: indirection with no consumer. */
-  .v-hotkeys[data-variant='flat'] .v-hotkeys-key {
-    background: var(--vectis-color-surface-muted);
+     [data-tone] table.
+     They set LOCALS rather than declaring straight away, because the recipe has
+     two possible carriers (see below). The names are qualified: these variables
+     inherit, so a generic --bg would be captured by any host ancestor defining
+     one. */
+  .v-hotkeys[data-variant='flat'] {
+    --hotkeys-bg: var(--vectis-color-surface-muted);
+    --hotkeys-border: transparent;
+    --hotkeys-shadow: none;
   }
 
-  .v-hotkeys[data-variant='outlined'] .v-hotkeys-key {
-    background: transparent;
-    border-color: var(--vectis-color-border-strong);
+  .v-hotkeys[data-variant='outlined'] {
+    --hotkeys-bg: transparent;
+    --hotkeys-border: var(--vectis-color-border-strong);
+    --hotkeys-shadow: none;
   }
 
-  .v-hotkeys[data-variant='elevated'] .v-hotkeys-key {
-    background: var(--vectis-color-surface-raised);
-    box-shadow: var(--vectis-shadow-2);
+  .v-hotkeys[data-variant='elevated'] {
+    --hotkeys-bg: var(--vectis-color-surface-raised);
+    --hotkeys-border: transparent;
+    --hotkeys-shadow: var(--vectis-shadow-2);
+  }
+
+  /* THE KEY — one recipe, two carriers: every cap by default, the ROOT alone
+     when attached, which is what puts the separator inside the key instead of
+     between two of them. Writing it twice would let the two renderings drift
+     apart on the next token change. */
+  .v-hotkeys[data-attached],
+  .v-hotkeys:not([data-attached]) .v-hotkeys-key {
+    height: var(--control-height);
+    /* A single-character key reads as a square, not a sliver (border-box is global). */
+    min-inline-size: var(--control-height);
+    padding-inline: var(--control-padding-inline);
+    border: 1px solid var(--hotkeys-border);
+    border-radius: var(--vectis-radius-interactive);
+    background: var(--hotkeys-bg);
+    box-shadow: var(--hotkeys-shadow);
   }
 
   /* A dimmed currentcolor rather than text-muted (the .v-chip-remove idiom): the

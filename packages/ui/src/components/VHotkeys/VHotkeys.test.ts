@@ -215,6 +215,31 @@ describe('VHotkeys', () => {
     expect(container.querySelector('.v-visually-hidden')?.textContent).toBe('Open the palette')
   })
 
+  it('attached is opt-in and reflected on data-attached', async () => {
+    const { container, rerender } = render(VHotkeys, { props: { keys: 'mod+k' } })
+    const root = container.firstElementChild as HTMLElement
+    expect(root.hasAttribute('data-attached')).toBe(false)
+
+    await rerender({ attached: true })
+    expect(root.hasAttribute('data-attached')).toBe(true)
+  })
+
+  it('attached is purely visual: identical markup and accessible name', async () => {
+    const props = { keys: 'mod+shift+k', platform: 'windows' } as const
+    const { container, rerender } = render(VHotkeys, { props })
+    const detached = {
+      caps: capsOf(container),
+      separators: container.querySelectorAll('.v-hotkeys-separator').length,
+      name: container.querySelector('.v-visually-hidden')?.textContent,
+    }
+
+    await rerender({ ...props, attached: true })
+    expect(capsOf(container)).toEqual(detached.caps)
+    expect(container.querySelectorAll('.v-hotkeys-separator')).toHaveLength(detached.separators)
+    expect(container.querySelector('.v-visually-hidden')?.textContent).toBe(detached.name)
+    expect(detached.name).toBe('Keyboard shortcut: Ctrl + Shift + K')
+  })
+
   it('an unknown token is displayed as declared, merely capitalized', () => {
     const { container } = render(VHotkeys, { props: { keys: 'ctrl+f5', platform: 'windows' } })
     expect(capsOf(container)).toEqual(['Ctrl', 'F5'])
