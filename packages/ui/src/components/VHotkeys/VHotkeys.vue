@@ -203,6 +203,7 @@ onBeforeUnmount(detach)
     vertical-align: middle;
     font-family: var(--vectis-text-family);
     font-size: var(--control-font-size);
+    --hotkeys-pad: var(--control-padding-inline);
   }
 
   /* Sizes/compact through the shared v-control class (styles/control-size.css),
@@ -251,6 +252,14 @@ onBeforeUnmount(detach)
     --hotkeys-shadow: var(--vectis-shadow-2);
   }
 
+  /* A single key holds the WHOLE combination, so its ends take the same breathing
+     room as the gaps inside it — one uniform rhythm. --control-padding-inline is
+     sized to wrap ONE short label; wrapped around three text runs already spaced
+     by --control-gap, it reads as slack at the edges. */
+  .v-hotkeys[data-attached] {
+    --hotkeys-pad: var(--control-gap);
+  }
+
   /* THE KEY — one recipe, two carriers: every cap by default, the ROOT alone
      when attached, which is what puts the separator inside the key instead of
      between two of them. Writing it twice would let the two renderings drift
@@ -260,7 +269,7 @@ onBeforeUnmount(detach)
     height: var(--control-height);
     /* A single-character key reads as a square, not a sliver (border-box is global). */
     min-inline-size: var(--control-height);
-    padding-inline: var(--control-padding-inline);
+    padding-inline: var(--hotkeys-pad);
     border: 1px solid var(--hotkeys-border);
     border-radius: var(--vectis-radius-interactive);
     background: var(--hotkeys-bg);

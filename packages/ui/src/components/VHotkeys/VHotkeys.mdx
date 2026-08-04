@@ -98,9 +98,16 @@ height. A cap holding a single character is square; a cap holding a word grows p
 `attached` joins the caps into a **single** key: the variant's decoration — background, border,
 shadow — moves from each cap to the root, so the separator ends up _inside_ the key instead of
 between two of them. The three variants keep their identity, an `elevated` attached hotkey simply
-carrying one shadow instead of one per cap.
+carrying one shadow instead of one per cap. Its ends take the same breathing room as the gaps
+between the keys it holds, rather than the wider padding a single cap wraps around one word.
 
 <Canvas of={VHotkeysStories.Attached} />
+
+> Like every root in the design system, the component is stretched by a container that stretches its
+> children — a grid cell, or a flex column, whose default alignment is `stretch`. Detached that goes
+> unnoticed, since the root carries no decoration; attached, the root **is** the key, so it visibly
+> grows past its content. Give it `justify-self: start` (grid) or `align-self: start` (flex column)
+> when that is not what you want.
 
 It is purely visual: the markup, the caps and the accessible name are identical either way, so the
 choice is a matter of density. Attached reads as one object and sits well in a tight row; the
