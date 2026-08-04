@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
 import { storyText } from '../../stories/storyText'
-import VChip from '../VChip/VChip.vue'
+import VBadge from '../VBadge/VBadge.vue'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import VSideNavigation from './VSideNavigation.vue'
 import VSideNavigationGroup from './VSideNavigationGroup.vue'
@@ -14,7 +14,7 @@ const components = {
   VSideNavigationItem,
   VSideNavigationGroup,
   VSideNavigationSeparator,
-  VChip,
+  VBadge,
   VIconButton,
 }
 
@@ -265,7 +265,7 @@ export const EndContent: Story = {
       </VSideNavigationItem>
       <VSideNavigationItem icon="folder">
         {{ t.projects }}
-        <template #end><VChip size="xs" tone="accent">12</VChip></template>
+        <template #end><VBadge size="xs" tone="accent" count="12" /></template>
         <template #items>
           <VSideNavigationItem href="#alpha">Alpha</VSideNavigationItem>
         </template>
@@ -422,7 +422,7 @@ export const LongTexts: Story = {
       </VSideNavigationItem>
       <VSideNavigationItem icon="folder" default-open>
         {{ t.longFolder }}
-        <template #end><VChip size="xs">99+</VChip></template>
+        <template #end><VBadge count="300" /></template>
         <template #items>
           <VSideNavigationItem href="#nested">{{ t.longSubitem }}</VSideNavigationItem>
         </template>
