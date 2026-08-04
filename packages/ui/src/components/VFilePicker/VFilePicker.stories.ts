@@ -146,6 +146,11 @@ export const Multiple: Story = {
 /**
  * `display="chip"` gives each file its own removable chip. The field then grows
  * with the rows, while the paperclip and the cross stay pinned to its end.
+ *
+ * A name longer than 20 characters is cut **in the middle**, so both its start
+ * and its extension stay readable — chips wrap, so a long name would not
+ * overflow a line, it would push the field to another row. The full name stays
+ * on the chip's `title` and in the removal button's accessible name.
  */
 export const Chips: Story = {
   args: { multiple: true, display: 'chip' },
@@ -163,11 +168,18 @@ export const Chips: Story = {
 
     drop(canvasElement, [
       fileOf('report.pdf', 1000, 'application/pdf'),
-      fileOf('photo.jpg', 2000, 'image/jpeg'),
+      fileOf('annual_report_2026_final_v3.jpg', 2000, 'image/jpeg'),
     ])
 
     await waitFor(() => expect(canvasElement.querySelectorAll('.v-chip')).toHaveLength(2))
     await expect(canvas.getByText('2 files (3 kB)')).toBeInTheDocument()
+
+    // The long name is cut in the middle, extension kept; the full name survives
+    // on the title and in the removal button's accessible name.
+    await expect(canvas.getByText('annual_rep…al_v3.jpg')).toBeInTheDocument()
+    await expect(
+      canvas.getByRole('button', { name: 'Remove annual_report_2026_final_v3.jpg' }),
+    ).toBeInTheDocument()
 
     await fireEvent.click(canvas.getByRole('button', { name: 'Remove report.pdf' }))
     await waitFor(() => expect(canvasElement.querySelectorAll('.v-chip')).toHaveLength(1))
@@ -361,7 +373,7 @@ export const CustomSlots: Story = {
     template: `
       <div style="width: 340px">
         <VFilePicker v-bind="args" v-model="files" :label="t.attachments">
-          <template #chip="{ file, remove, size, compact }">
+          <template #chip="{ file, label, remove, size, compact }">
             <VChip
               variant="outline"
               shape="pill"
@@ -371,7 +383,7 @@ export const CustomSlots: Story = {
               dismissible
               :dismiss-label="'Remove ' + file.name"
               @dismiss="remove()"
-              >{{ file.name }}</VChip
+              >{{ label }}</VChip
             >
           </template>
           <template #counter="{ count }">{{ count }} / 5</template>

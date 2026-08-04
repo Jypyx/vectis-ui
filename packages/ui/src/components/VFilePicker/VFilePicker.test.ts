@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { matchesAccept } from './accept'
 import { formatBytes } from './bytes'
+import { CHIP_NAME_MAX, truncateMiddle } from './truncate'
 import VFilePicker from './VFilePicker.vue'
 
 /**
@@ -195,6 +196,25 @@ describe('VFilePicker', () => {
     expect(container.querySelectorAll('.v-chip')).toHaveLength(2)
     expect(container.querySelector<HTMLInputElement>('.v-input-control')!.value).toBe('')
     expect(getByRole('button', { name: 'Remove report.pdf' })).toBeTruthy()
+  })
+
+  it('a chip cuts a long name in the middle but never loses it', async () => {
+    const long = 'annual_report_2026_final_v3.jpg'
+    const { container, getByRole, getByTitle } = renderPicker({
+      multiple: true,
+      display: 'chip',
+      modelValue: [fileOf(long), fileOf('short.pdf')],
+    })
+
+    const labels = [...container.querySelectorAll('.v-chip-action')].map((el) => el.textContent)
+    expect(labels).toEqual(['annual_rep…al_v3.jpg', 'short.pdf'])
+
+    // The full name stays reachable: on the title, and as the removal button's
+    // accessible name.
+    expect(getByTitle(long)).toBeTruthy()
+    expect(getByRole('button', { name: `Remove ${long}` })).toBeTruthy()
+    // A name that was not cut carries no redundant title.
+    expect(container.querySelectorAll('[title]')).toHaveLength(1)
   })
 
   it('a removal shrinks the model and emits change', async () => {
@@ -407,6 +427,29 @@ describe('formatBytes', () => {
   it('falls back to zero rather than producing a nonsensical size', () => {
     expect(formatBytes(Number.NaN, 'en-US')).toBe('0 byte')
     expect(formatBytes(-10, 'en-US')).toBe('0 byte')
+  })
+})
+
+describe('truncateMiddle', () => {
+  it('leaves a name that fits exactly as it is', () => {
+    expect(truncateMiddle('short.pdf')).toBe('short.pdf')
+    expect(truncateMiddle('a'.repeat(CHIP_NAME_MAX))).toHaveLength(CHIP_NAME_MAX)
+  })
+
+  it('cuts in the middle and keeps the extension', () => {
+    expect(truncateMiddle('annual_report_2026_final_v3.jpg')).toBe('annual_rep…al_v3.jpg')
+  })
+
+  it('produces exactly `max` characters, the odd one going to the head', () => {
+    const cut = truncateMiddle('abcdefghijklmnopqrstuvwxyz', 10)
+    expect(cut).toBe('abcde…wxyz')
+    expect(cut).toHaveLength(10)
+  })
+
+  // Counted in code points: a UTF-16 slice would cut the emoji in half and
+  // render a replacement character.
+  it('never splits a surrogate pair', () => {
+    expect(truncateMiddle('🎉🎉🎉🎉🎉🎉', 5)).toBe('🎉🎉…🎉🎉')
   })
 })
 

@@ -26,6 +26,7 @@ import { useLocale, useMessages } from '../../i18n/state'
 import { isDev } from '../../utils/env'
 import { matchesAccept } from './accept'
 import { formatBytes } from './bytes'
+import { truncateMiddle } from './truncate'
 
 /** Rendering of the selection inside the field, in `multiple` mode. */
 export type FilePickerDisplay = 'text' | 'chip'
@@ -121,12 +122,14 @@ const emit = defineEmits<{
 defineSlots<{
   /**
    * A file's chip in `display="chip"` (default: a dismissible `VChip` carrying
-   * the name). `size`/`compact` are the ones computed to fit inside the field —
-   * reuse them to keep the template.
+   * the name). `label` is the name shortened to fit a row (middle-truncated),
+   * and `size`/`compact` are the ones computed to fit inside the field — reuse
+   * all three to keep the template.
    */
   chip?(props: {
     file: File
     index: number
+    label: string
     remove: () => void
     size: 'xs' | 'sm'
     compact: boolean
@@ -255,6 +258,17 @@ const describedBy = computed(
  */
 const chipSize = computed(() => (props.size === 'lg' ? 'sm' : 'xs'))
 const chipCompact = computed(() => (props.size === 'lg' ? props.compact : props.size === 'sm'))
+
+/**
+ * A chip's visible label. Middle truncation rather than the field's
+ * `text-overflow`, because chips WRAP: there is no line to overflow, and a long
+ * name would simply push the field to two or three rows. Cutting the middle also
+ * keeps the extension, which `text-overflow` drops first.
+ *
+ * The full name is never lost: the removal button's accessible name carries it,
+ * and a `title` is set on the chip below whenever the label was actually cut.
+ */
+const chipLabel = (file: File) => truncateMiddle(file.name)
 
 /**
  * The native input keeps the FileList of its last dialog. Without this reset,
@@ -484,6 +498,7 @@ defineExpose({
               name="chip"
               :file="file"
               :index="index"
+              :label="chipLabel(file)"
               :remove="() => removeAt(index)"
               :size="chipSize"
               :compact="chipCompact"
@@ -495,8 +510,9 @@ defineExpose({
                 :dismissible="!readonly && !disabled"
                 :dismiss-label="m.filePicker.remove(file.name)"
                 :disabled="disabled"
+                :title="chipLabel(file) === file.name ? undefined : file.name"
                 @dismiss="removeAt(index)"
-                >{{ file.name }}</VChip
+                >{{ chipLabel(file) }}</VChip
               >
             </slot>
           </template>

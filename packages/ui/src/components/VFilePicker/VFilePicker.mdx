@@ -25,6 +25,12 @@ field and truncates the line when it overflows; `display="chip"` gives each file
 the clear cross staying pinned to its end. Outside `multiple`, `display` is ignored — a single name
 is always text.
 
+A chip's name is capped at **20 characters** and cut **in the middle** past that, so its start and
+its extension both stay readable — chips wrap, so a long name would not overflow a line, it would
+push the field to another row, and `text-overflow` would drop exactly the extension that tells
+`invoice.pdf` from `invoice.png` apart. The full name is never lost: it stays on the chip's `title`
+and in the removal button's accessible name.
+
 <Canvas of={VFilePickerStories.Multiple} />
 <Canvas of={VFilePickerStories.Chips} />
 
@@ -80,10 +86,10 @@ has to be narrowed. Single mode is simply a list of at most one.
 
 ## Slots
 
-`#chip` replaces a file's chip and receives `{ file, index, remove, size, compact }` — `remove`,
-without which the file could no longer be taken out, and the `size`/`compact` computed to fit inside
-the field (one step below it). `#counter` receives `{ count, size, text }`, `text` being the
-ready-made string.
+`#chip` replaces a file's chip and receives `{ file, index, label, remove, size, compact }` —
+`remove`, without which the file could no longer be taken out, `label`, the middle-truncated name,
+and the `size`/`compact` computed to fit inside the field (one step below it). `#counter` receives
+`{ count, size, text }`, `text` being the ready-made string.
 
 <Canvas of={VFilePickerStories.CustomSlots} />
 
