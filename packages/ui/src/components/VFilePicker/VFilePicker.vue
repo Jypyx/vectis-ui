@@ -640,7 +640,6 @@ defineExpose({
     position: absolute;
     top: 50%;
     translate: 0 -50%;
-    margin-inline: 0;
   }
 
   .v-file-picker[data-display='chip'] .v-input-action:not(.v-input-clear) {

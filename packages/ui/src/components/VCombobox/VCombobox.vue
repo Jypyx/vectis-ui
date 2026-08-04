@@ -867,7 +867,6 @@ watch(
     );
     top: 50%;
     translate: 0 -50%;
-    margin-inline: 0;
   }
 
   /* multiple: the field hosts the Chips (which wrap). Height aligned on the control
