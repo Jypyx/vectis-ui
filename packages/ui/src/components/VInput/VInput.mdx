@@ -96,6 +96,13 @@ background and the clear button hidden:
 
 <Canvas of={VInputStories.Readonly} />
 
+`readonly` and `invalid` compose — the sunken background and the red border are two independent
+decisions, and an error stays visible on a field whose value is set elsewhere (a panel, a
+server-side validation). On a read-only field the error can only come from the `invalid` prop:
+a read-only control is barred from constraint validation, so `:user-invalid` never applies to it.
+
+<Canvas of={VInputStories.ReadonlyInvalid} />
+
 `disabled` switches the whole field (background, text, icons) to greys
 (`--vectis-color-surface-muted`, `--vectis-color-text-subtle`) — no opacity trick, and the
 rendering follows the dark theme automatically:

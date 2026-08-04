@@ -41,6 +41,10 @@ const t = storyText({
     greyHint: 'Everything goes grey, with no opacity.',
     overLimit: 'A sentence that goes over the limit',
     tooLong: 'far too long a value',
+    readonlyOnly: 'Read-only',
+    invalidOnly: 'In error',
+    readonlyInvalid: 'Read-only and in error',
+    unknownReference: 'This reference no longer exists.',
   },
   fr: {
     emailLabel: 'Adresse email',
@@ -76,6 +80,10 @@ const t = storyText({
     greyHint: 'Tout passe en gris, sans opacité.',
     overLimit: 'Une phrase qui dépasse la limite',
     tooLong: 'beaucoup trop long',
+    readonlyOnly: 'Lecture seule',
+    invalidOnly: 'En erreur',
+    readonlyInvalid: 'Lecture seule et en erreur',
+    unknownReference: "Cette référence n'existe plus.",
   },
 })
 
@@ -310,6 +318,51 @@ export const Readonly: Story = {
     setup: () => ({ args, value: ref('CMD-2026-0042') }),
     template: '<VInput v-bind="args" v-model="value" />',
   }),
+}
+
+/**
+ * `readonly` and `invalid` compose: the sunken background and the red border are
+ * two independent decisions. On a read-only field the error can only come from
+ * the `invalid` prop (`aria-invalid`) — a `<input readonly>` is barred from
+ * constraint validation, so `:user-invalid` never applies to it.
+ */
+export const ReadonlyInvalid: Story = {
+  render: () => ({
+    components: { VInput },
+    setup: () => ({ t }),
+    template: `
+      <div style="display: grid; gap: 12px; width: 320px">
+        <VInput
+          readonly
+          model-value="CMD-2026-0042"
+          :label="t.readonlyOnly"
+          data-testid="readonly"
+        />
+        <VInput invalid model-value="CMD-2026-0042" :label="t.invalidOnly" data-testid="invalid" />
+        <VInput
+          readonly
+          invalid
+          model-value="CMD-2026-0042"
+          :label="t.readonlyInvalid"
+          :hint="t.unknownReference"
+          data-testid="both"
+        />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    // data-testid lands on the <input> (inheritAttrs: false), hence the closest().
+    const border = (id: string) =>
+      getComputedStyle(
+        canvasElement.querySelector(`[data-testid="${id}"]`)!.closest('.v-input-field')!,
+      ).borderColor
+
+    /* Every state block weighs (0,3,0) — :has() takes the specificity of its
+       argument — so source order alone decides. Verified red by moving the
+       [data-readonly] block back after the invalid one. */
+    await expect(border('both')).toBe(border('invalid'))
+    await expect(border('both')).not.toBe(border('readonly'))
+  },
 }
 
 export const LongPlaceholder: Story = {

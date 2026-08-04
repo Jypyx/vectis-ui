@@ -325,6 +325,20 @@ const { counterText, over } = useTextLimit({
     font-size: var(--vectis-icon-size);
   }
 
+  /* Readonly: a slightly sunken background, normal text (the value stays
+     readable), accent focus kept. [data-readonly] and never :read-only (which also
+     matches :disabled).
+     TRAP — this block must stay FIRST of the state sequence (readonly → hover →
+     focus → invalid → disabled). Every state selector here weighs (0,3,0), :has()
+     taking the specificity of its argument, so ONLY source order arbitrates them:
+     moved back down, this one repaints the error border and the accent focus grey,
+     with no console error. Only a readonly field's BASE colour belongs to it. */
+  .v-textarea[data-readonly] .v-textarea-field {
+    --field-border-color: var(--vectis-color-border);
+
+    background: var(--vectis-color-surface-sunken);
+  }
+
   .v-textarea-field:hover:not(:has(.v-textarea-control:focus)):not(
       :has(
         .v-textarea-control:disabled,
@@ -392,17 +406,10 @@ const { counterText, over } = useTextLimit({
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
-  /* Readonly: a slightly sunken background, normal text (the value stays
-     readable), accent focus kept. [data-readonly] and never :read-only (which also
-     matches :disabled). */
-  .v-textarea[data-readonly] .v-textarea-field {
-    --field-border-color: var(--vectis-color-border);
-
-    background: var(--vectis-color-surface-sunken);
-  }
-
   /* Disabled: a grey shade with no opacity (the same tokens as VCheckbox/VRadio).
-     Placed after the error/readonly states: at equal specificity, it wins. */
+     Last of the state sequence: at equal specificity, it wins over all of them,
+     the error included — a disabled field is not submitted, so it has nothing to
+     report. */
   .v-textarea[data-disabled] .v-textarea-field {
     --field-border-color: var(--vectis-color-border);
 

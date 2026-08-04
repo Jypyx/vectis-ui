@@ -79,6 +79,13 @@ The `invalid` prop forces the error state (server-side validation) — it sets `
 
 <Canvas of={VTextareaStories.Invalid} />
 
+It composes with `readonly` — the sunken background and the red border are two independent
+decisions, and an error stays visible on a field whose value is set elsewhere. On a read-only
+field the error can only come from the `invalid` prop: a read-only control is barred from
+constraint validation, so `:user-invalid` never applies to it.
+
+<Canvas of={VTextareaStories.ReadonlyInvalid} />
+
 ## Showcase
 
 <Canvas of={VTextareaStories.Showcase} />

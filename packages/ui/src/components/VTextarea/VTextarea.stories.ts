@@ -30,6 +30,10 @@ const t = storyText({
     archive: 'Archive',
     disabled: 'Disabled',
     title: 'Title',
+    readonlyOnly: 'Read-only',
+    invalidOnly: 'In error',
+    readonlyInvalid: 'Read-only and in error',
+    rejectedTerms: 'These terms have been rejected.',
   },
   fr: {
     yourMessage: 'Votre message…',
@@ -55,6 +59,10 @@ const t = storyText({
     archive: 'Archive',
     disabled: 'Désactivé',
     title: 'Titre',
+    readonlyOnly: 'Lecture seule',
+    invalidOnly: 'En erreur',
+    readonlyInvalid: 'Lecture seule et en erreur',
+    rejectedTerms: 'Ces conditions ont été refusées.',
   },
 })
 
@@ -225,6 +233,56 @@ export const Readonly: Story = {
     setup: () => ({ args, value: ref('Read-only content, not editable.') }),
     template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
+}
+
+/**
+ * `readonly` and `invalid` compose: the sunken background and the red border are
+ * two independent decisions. On a read-only field the error can only come from
+ * the `invalid` prop (`aria-invalid`) — a `<textarea readonly>` is barred from
+ * constraint validation, so `:user-invalid` never applies to it.
+ */
+export const ReadonlyInvalid: Story = {
+  render: () => ({
+    components: { VTextarea },
+    setup: () => ({ t }),
+    template: `
+      <div style="display: grid; gap: 12px; width: 320px">
+        <VTextarea
+          readonly
+          :model-value="t.readOnlyContent"
+          :label="t.readonlyOnly"
+          data-testid="readonly"
+        />
+        <VTextarea
+          invalid
+          :model-value="t.readOnlyContent"
+          :label="t.invalidOnly"
+          data-testid="invalid"
+        />
+        <VTextarea
+          readonly
+          invalid
+          :model-value="t.readOnlyContent"
+          :label="t.readonlyInvalid"
+          :hint="t.rejectedTerms"
+          data-testid="both"
+        />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    // data-testid lands on the <textarea> (inheritAttrs: false), hence the closest().
+    const border = (id: string) =>
+      getComputedStyle(
+        canvasElement.querySelector(`[data-testid="${id}"]`)!.closest('.v-textarea-field')!,
+      ).borderColor
+
+    /* Every state block weighs (0,3,0) — :has() takes the specificity of its
+       argument — so source order alone decides. Verified red by moving the
+       [data-readonly] block back after the invalid one. */
+    await expect(border('both')).toBe(border('invalid'))
+    await expect(border('both')).not.toBe(border('readonly'))
+  },
 }
 
 export const VModel: Story = {
