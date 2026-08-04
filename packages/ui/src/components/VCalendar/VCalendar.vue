@@ -738,7 +738,6 @@ defineExpose({ focus })
   .v-calendar-nav {
     display: flex;
     align-items: center;
-    gap: var(--vectis-space-1);
   }
 
   /* A stable minimum width so the chevrons do not shift with the length of the
