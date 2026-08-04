@@ -1,0 +1,147 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VSnackbarStories from './VSnackbar.stories'
+
+<Meta of={VSnackbarStories} />
+
+# Snackbar
+
+A short confirmation of something the reader has just done, usually with one button to take it
+back: _"Message deleted — Undo"_. Triggered **programmatically**, exactly like a notification:
+mount `<VSnackbar />` once (at the app root), then call `snackbar(options)` from anywhere — a
+component, a store, an asynchronous API return. The bar is reactive state at module level (no
+provide/inject); it is **client-only**: never call `snackbar()` during SSR rendering.
+
+```vue
+<!-- App.vue -->
+<VSnackbar placement="bottom-center" :duration="4000" />
+```
+
+```ts
+import { snackbar, dismissSnackbar } from '@vectis/ui'
+
+async function remove(message: Message) {
+  await api.delete(message.id)
+  snackbar({ message: 'Message deleted.', action: () => api.restore(message.id) })
+}
+```
+
+<Canvas of={VSnackbarStories.Default} />
+
+<Controls of={VSnackbarStories.Default} />
+
+## Snackbar or Toast?
+
+The two are separate components because they answer different questions, and every difference
+below follows from that one.
+
+|          | `VSnackbar`                           | `VToaster` / `toast()`        |
+| -------- | ------------------------------------- | ----------------------------- |
+| Answers  | "what did I just do?"                 | "what is happening?"          |
+| How many | one at a time — a new one replaces it | a stack, unbounded            |
+| Where    | along the bottom edge                 | any of the six screen corners |
+| Tones    | `neutral`, `danger`                   | five tones × `soft`/`solid`   |
+| Contents | one line, an optional icon            | a title, a message, an icon   |
+| Controls | one action, no close cross            | a close cross, no action      |
+| Stays    | ~4 s                                  | ~5 s, or until dismissed      |
+
+The "one at a time" rule is the deciding one: only the **last** action a reader took is worth
+offering to undo, so a queue would hand out buttons about actions already forgotten. It is also why
+there is no close cross — a bar that tidies itself up should not ask the reader to do it.
+
+Reach for a toast when the message reports a state the reader did not cause (a background job
+finished, the connection dropped), and for a snackbar when it confirms a gesture they just made.
+
+The two share their chassis — the raised box, the one-line alignment, the entry motion — through
+the `.v-banner` class in the core stylesheet, so they cannot drift apart visually. Everything else
+is their own.
+
+## Tones
+
+Two, and deliberately no more: a confirmation says either "done" or "that did not work". Success,
+warning and the accent are **states**, which is a notification's subject.
+
+Both are painted solid — a bar laid over arbitrary content has to read at a glance rather than tint
+into the page. `neutral` is the design system's canonical text/surface inversion: dark on a light
+theme, light on a dark one, with no override of its own.
+
+<Canvas of={VSnackbarStories.Tones} />
+
+## The action
+
+`action` is a callback; without one the bar carries no button at all. Running it always takes the
+bar away, so nothing has to be dismissed afterwards.
+
+`actionLabel` names it — "Undo" by default, from the design system dictionary. It is a `ghost`
+`VButton`, recoloured to the surrounding text colour so that it reads on either tone in either
+theme.
+
+<Canvas of={VSnackbarStories.WithoutAction} />
+
+An icon is opt-in and none is deduced from the tone: a confirmation is read, not scanned.
+
+<Canvas of={VSnackbarStories.WithIcon} />
+
+## Placements
+
+Three, all along the bottom edge, where a bar is out of the content's way. The VSnackbar's
+`placement` prop sets the default; a confirmation's `placement` option overrides it. **Physical**
+coordinates (`left`/`right`): a confirmation is a screen position, independent of the reading
+direction — like the OS messages.
+
+<Canvas of={VSnackbarStories.Placements} />
+
+## One at a time
+
+Raising a confirmation replaces whatever was showing and restarts the countdown from the top, so a
+fresh bar always gets its full time.
+
+<Canvas of={VSnackbarStories.Replacement} />
+
+`dismissSnackbar(id)` takes one away early — the id being what `snackbar()` handed back. It is
+checked against the bar actually on screen, so a stale id is ignored rather than closing the one
+that replaced it. `dismissSnackbar()` with no argument clears whatever is showing.
+
+## Display duration
+
+`duration` (a VSnackbar prop: 4000 ms by default, overridable per confirmation) drives the
+automatic dismissal — shorter than a notification's, the reader already knowing what the message
+says.
+
+<Canvas of={VSnackbarStories.AutoDismiss} />
+
+`duration: 0` makes it persistent: it stays until something replaces it or `dismissSnackbar()` is
+called.
+
+<Canvas of={VSnackbarStories.Persistent} />
+
+## Width
+
+Between `--vectis-control-size-snackbar-min` (18rem) and `--vectis-control-size-snackbar-max`
+(36rem), and never wider than `100vw − margins`, so a bar never overflows the viewport. The message
+wraps, and the action stays centred against the whole bar rather than hooked to the first
+line — the one place the confirmation bar parts company with the notification card, which
+does hook to it.
+
+<Canvas of={VSnackbarStories.LongText} />
+
+## Accessibility
+
+- `role="alert"` (interruptive) on the `danger` tone, `role="status"` (polite) otherwise — the
+  reader asked for the action a plain confirmation reports, so it waits for a pause. The
+  announcement of the first polite bar may be missed by some screen readers, the live region being
+  born with its content; `alert`s are announced on insertion.
+- The container is a `role="region"` landmark named by the `label` prop ("Confirmation") — a
+  different word from the notifications', so a page carrying both offers two areas a screen reader
+  can tell apart.
+- **The countdown holds while the pointer rests on the bar and while the keyboard is inside it**,
+  restarting at the full duration when both have left (WCAG 2.2.1). The focus half is what makes
+  the action reachable at all: without it a reader tabbing towards the button would watch it vanish
+  from under the focus ring.
+- The focus is never stolen: a confirmation appears without interrupting the current input. The
+  action is therefore reached by tabbing to it, which is why it must never be the **only** way to
+  do something — treat it as a shortcut, not as the route.
+- Animations respect `prefers-reduced-motion`.
+
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.
