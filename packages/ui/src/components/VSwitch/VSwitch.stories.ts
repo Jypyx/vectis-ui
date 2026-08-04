@@ -63,7 +63,7 @@ export const Default: Story = {
 export const LabelPosition: Story = {
   render: () => ({
     components: { VSwitch },
-    setup: () => ({ a: ref(false), b: ref(true) }),
+    setup: () => ({ a: ref(false), b: ref(true), t }),
     template: `
       <div style="display: grid; gap: 8px; justify-items: start">
         <VSwitch v-model="a" label-position="end">{{ t.labelAfter }}</VSwitch>
@@ -80,7 +80,7 @@ export const LabelPosition: Story = {
 export const Spread: Story = {
   render: () => ({
     components: { VSwitch },
-    setup: () => ({ a: ref(true), b: ref(false) }),
+    setup: () => ({ a: ref(true), b: ref(false), t }),
     template: `
       <div style="display: grid; gap: 8px; max-width: 320px">
         <VSwitch v-model="a" spread>{{ t.switchRight }}</VSwitch>
@@ -93,7 +93,7 @@ export const Spread: Story = {
 export const Disabled: Story = {
   render: () => ({
     components: { VSwitch },
-    setup: () => ({ on: ref(true), off: ref(false) }),
+    setup: () => ({ on: ref(true), off: ref(false), t }),
     template: `
       <div style="display: grid; gap: 8px">
         <VSwitch v-model="off" disabled>{{ t.disabled }}</VSwitch>

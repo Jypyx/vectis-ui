@@ -267,8 +267,10 @@ export const TimeList: Story = {
     await waitFor(() => expect(document.activeElement).toHaveAttribute('data-value', '14:30'))
     await expect(panel.scrollTop).toBeGreaterThan(0)
 
-    // clicking a row: an immediate commit, closing, focus handed back to the field
-    await userEvent.click(canvas.getByRole('option', { name: '9:00' }))
+    // clicking a row: an immediate commit, closing, focus handed back to the field.
+    // Queried by `data-value`: the row's label is formatted by `Intl`, whose zero
+    // padding differs between the Node and the browser ICU builds.
+    await userEvent.click(panel.querySelector('[data-value="09:00"]') as HTMLElement)
     await waitFor(() => expect(canvas.getByTestId('value')).toHaveTextContent('09:00'))
     await expect(panel.matches(':popover-open')).toBe(false)
     await expect(field).toHaveFocus()

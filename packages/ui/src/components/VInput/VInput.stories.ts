@@ -148,7 +148,7 @@ export const LabelAndHint: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     // the for/id association makes the field queryable by its label
-    const input = canvas.getByLabelText('Adresse email')
+    const input = canvas.getByLabelText('Email address')
     const hint = canvas.getByText('Used only for order confirmation.')
     await expect(input.getAttribute('aria-describedby')).toContain(hint.id)
   },
@@ -216,7 +216,7 @@ export const SoftCounter: Story = {
     await userEvent.type(input, 'far too long a value')
     // the input is not truncated, the counter goes into overflow
     await waitFor(() => expect(input.value).toBe('far too long a value'))
-    await expect(canvas.getByText('21/10')).toHaveAttribute('data-over')
+    await expect(canvas.getByText('20/10')).toHaveAttribute('data-over')
     // the overflow invalidates the field through setCustomValidity. Assert on
     // native validity, not on :user-invalid: that pseudo-state requires a
     // *trusted* interaction, which synthetic events do not provide.

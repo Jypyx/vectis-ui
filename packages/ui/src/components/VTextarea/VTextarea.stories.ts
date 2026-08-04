@@ -157,7 +157,7 @@ export const SoftCounter: Story = {
     const textarea = canvas.getByLabelText('Title') as HTMLTextAreaElement
     await userEvent.type(textarea, 'far too long a value')
     await waitFor(() => expect(textarea.value).toBe('far too long a value'))
-    await expect(canvas.getByText('21/10')).toHaveAttribute('data-over')
+    await expect(canvas.getByText('20/10')).toHaveAttribute('data-over')
     // native validity: setCustomValidity invalidated the field (:user-invalid
     // cannot be asserted, as it requires a *trusted* interaction)
     await waitFor(() => expect(textarea.validity.customError).toBe(true))

@@ -64,7 +64,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const checkbox = within(canvasElement).getByRole('checkbox', {
-      name: 'Recevoir la newsletter',
+      name: 'Receive the newsletter',
     })
     // the hidden input is pointer-events: none, so the wrapping <label> is clicked,
     // as a real user would
@@ -79,6 +79,7 @@ export const Default: Story = {
 export const LabelPosition: Story = {
   render: () => ({
     components: { VCheckbox },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 8px; justify-items: start">
         <VCheckbox label-position="end">{{ t.labelAfter }}</VCheckbox>
@@ -95,6 +96,7 @@ export const LabelPosition: Story = {
 export const Spread: Story = {
   render: () => ({
     components: { VCheckbox },
+    setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 8px; max-width: 320px">
         <VCheckbox spread>{{ t.boxRight }}</VCheckbox>

@@ -360,7 +360,7 @@ export const Disabled: Story = {
     await userEvent.keyboard('{ArrowRight}')
 
     await waitFor(async () => {
-      await expect(canvas.getByRole('tab', { name: 'Historique' })).toHaveFocus()
+      await expect(canvas.getByRole('tab', { name: 'History' })).toHaveFocus()
     })
   },
 }

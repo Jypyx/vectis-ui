@@ -237,7 +237,7 @@ export const Groups: Story = {
 
     // filtering: "Europe" empties out, its label disappears with it, and no rule is
     // left at the head or at the tail of the panel
-    await userEvent.keyboard('mo')
+    await userEvent.keyboard('mor')
     await waitFor(() => expect(canvas.queryByRole('group', { name: 'Africa' })).toBeVisible())
     expect(canvas.queryByRole('group', { name: 'Europe' })).toBeNull()
     expect(listbox.querySelectorAll('.v-combobox-separator').length).toBe(0)
