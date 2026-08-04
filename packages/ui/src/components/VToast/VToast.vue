@@ -73,6 +73,14 @@ const icon = computed(() =>
 <style>
 @layer vectis.components {
   .v-toast {
+    /* Height of ONE line of message text, the alignment unit of the whole card:
+       every satellite (icon, close cross) is given symmetric block margins so its
+       OUTER box measures exactly that. Flex-start then hooks each of them to the
+       first line whatever the number of lines AND, on a single line, coincides with
+       centring — CSS cannot count lines, so the two cases must fall out of one rule.
+       Asymmetric margins are what break it: they shift the item's centre by half the
+       difference and make it drive a flex line taller than the text. */
+    --toast-line: calc(var(--vectis-text-body-md-size) * var(--vectis-text-body-md-leading));
     display: flex;
     align-items: flex-start;
     gap: var(--vectis-space-3);
@@ -168,8 +176,7 @@ const icon = computed(() =>
 
   .v-toast-icon {
     --vectis-icon-size: var(--vectis-icon-size-md);
-    /* Aligns the icon (20px) on the centre of the first line of text */
-    margin-block-start: calc(var(--vectis-space-1) / 2);
+    margin-block: calc((var(--toast-line) - var(--vectis-icon-size-md)) / 2);
   }
 
   .v-toast-body {
@@ -186,12 +193,13 @@ const icon = computed(() =>
   }
 
   .v-toast-close {
-    /* Reduces the button's visual footprint inside the card's padding. The block
-       inset is SYMMETRIC: the cross (28px) stays aligned at the head of the card like
-       the icon (align-items: flex-start, hence hooked to the first line whatever the
-       number of lines), but its overhang no longer pulls the content upwards — on a
-       single line, it ends up vertically centred. */
-    margin-block: calc(-1 * var(--vectis-space-1));
+    /* MIRRORS the size="sm" compact of the VIconButton in the template: the CSS
+       cannot read the button's own --control-height (it lives inside its subtree),
+       and the two must be changed together. */
+    --toast-close-height: calc(var(--vectis-control-height-sm) - var(--vectis-space-1));
+    /* Negative here (the cross is taller than a line), which is also what reduces its
+       visual footprint inside the card's padding — see --toast-line. */
+    margin-block: calc((var(--toast-line) - var(--toast-close-height)) / 2);
     margin-inline-end: calc(-1 * var(--vectis-space-1));
   }
 
