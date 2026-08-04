@@ -184,6 +184,8 @@ Deliberately outside the dictionary:
 - whatever is made only of digits and universal punctuation: VBadge's `99+`, VAvatarGroup's
   `+N`, the `N/M` counter of the fields, the `:` of a time. These components expose a slot when
   a rephrasing is needed;
+- VHotkeys' modifier and arrow **glyphs** (`⌘ ⌃ ⌥ ⇧ ↵ ⌫ ⌦ ⇥ ↑ ↓ ← →`), which are engraved on the
+  hardware and identical in every language — its **words** are translated, see below;
 - **developer** messages (`[Component] …`), which address the integrator.
 
 ## Reference
@@ -199,3 +201,14 @@ Words shared by several components — a single place to translate.
 ### `dataTable`
 
 <Keys namespace="dataTable" />
+
+### `hotkeys`
+
+The names of keyboard keys, and only their **words**: `Shift` becomes `Maj` and `Enter` becomes
+`Entrée` in French, because that is what a French keyboard engraves. The glyphs of the same keys
+(`⌘ ⇧ ⌥ ⌃ ↵ ⌫ ⇥ ↑ ↓ ← →`) never pass through here — they are hardware symbols, not language.
+
+Each entry is the **spoken** form. Where a glyph exists it wins on screen, never in the accessible
+name: VHotkeys displays `⌘` and announces "Command".
+
+<Keys namespace="hotkeys" />

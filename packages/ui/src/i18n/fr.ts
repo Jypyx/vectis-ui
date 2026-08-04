@@ -78,6 +78,25 @@ export const fr: VectisMessages = {
   // convention (English has none). Escaped rather than literal: ESLint rejects
   // the character (`no-irregular-whitespace`), and it would be invisible in review.
   progress: { percent: (percent) => `${percent}\u00A0%` },
+  hotkeys: {
+    command: 'Commande',
+    ctrl: 'Ctrl',
+    alt: 'Alt',
+    shift: 'Maj',
+    windows: 'Win',
+    super: 'Super',
+    enter: 'Entrée',
+    escape: 'Échap',
+    space: 'Espace',
+    backspace: 'Retour arrière',
+    delete: 'Suppr',
+    tab: 'Tab',
+    up: 'Flèche haut',
+    down: 'Flèche bas',
+    left: 'Flèche gauche',
+    right: 'Flèche droite',
+    label: (keys) => `Raccourci clavier : ${keys}`,
+  },
   calendar: {
     previousMonth: 'Mois précédent',
     nextMonth: 'Mois suivant',

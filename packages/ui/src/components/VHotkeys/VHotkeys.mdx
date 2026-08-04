@@ -1,0 +1,145 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VHotkeysStories from './VHotkeys.stories'
+
+<Meta of={VHotkeysStories} />
+
+# Hotkeys
+
+A keyboard shortcut, displayed. `VHotkeys` renders one `<kbd>` cap per key, derived from a single
+`+`-separated string, with the glyphs of the operating system the visitor is actually on — `⌘K` on
+macOS, `Ctrl+K` on Windows and Linux. It is a display component: it is not focusable and has no
+hover or pressed state. It can optionally listen for its own combination and emit `trigger`.
+
+<Canvas of={VHotkeysStories.Default} />
+
+<Controls of={VHotkeysStories.Default} />
+
+## Combination syntax
+
+`keys` is written as the consumer likes: `+`-separated, insensitive to case and surrounding spaces.
+`mod+k`, `Mod + K` and `MOD+K` all declare the same shortcut.
+
+Two modifier tokens deserve the distinction:
+
+- **`mod`** is the _cross-platform_ modifier — `⌘` on macOS, `Ctrl` everywhere else. It is what you
+  want for an application shortcut, and it is what makes one declaration correct on all three
+  systems.
+- **`meta`** is the _literal_ Command / Windows / Super key. Use it when you really mean that
+  physical key on every OS.
+
+Aliases are normalised to a canonical token, so a shortcut cannot be declared in a spelling the
+matcher would not recognise:
+
+| Canonical                  | Also accepted                                                      |
+| -------------------------- | ------------------------------------------------------------------ |
+| `mod`                      | `cmdorctrl`, `commandorcontrol`                                    |
+| `meta`                     | `cmd`, `command`, `win`, `windows`, `super`, `os`                  |
+| `ctrl`                     | `control`                                                          |
+| `alt`                      | `option`, `opt`                                                    |
+| `enter`                    | `return`                                                           |
+| `esc`                      | `escape`                                                           |
+| `space`                    | `spacebar`                                                         |
+| `delete`                   | `del`                                                              |
+| `up` `down` `left` `right` | `arrowup`, `arrowdown`, `arrowleft`, `arrowright`                  |
+| `plus`                     | — the `+` key, which cannot name itself since `+` is the separator |
+
+Any other token is displayed as declared, merely capitalised: `k` renders `K`, `f5` renders `F5`,
+`/` renders `/`. Empty segments are dropped, so a doubled or trailing `+` is harmless.
+
+<Canvas of={VHotkeysStories.KeyGallery} />
+
+## Cross-platform
+
+Each key resolves to at most one **glyph** and at most one **word**. The glyph wins on screen, the
+word wins in the accessible name — `⌘` is displayed but spoken "Command".
+
+| Token                      | macOS                                                             | Windows   | Linux     |
+| -------------------------- | ----------------------------------------------------------------- | --------- | --------- |
+| `mod`                      | `⌘`                                                               | `Ctrl`    | `Ctrl`    |
+| `meta`                     | `⌘`                                                               | `Win`     | `Super`   |
+| `ctrl`                     | `⌃`                                                               | `Ctrl`    | `Ctrl`    |
+| `alt`                      | `⌥`                                                               | `Alt`     | `Alt`     |
+| `shift`                    | `⇧`                                                               | `Shift`   | `Shift`   |
+| `enter`                    | `↵`                                                               | `Enter`   | `Enter`   |
+| `backspace` `delete` `tab` | `⌫` `⌦` `⇥`                                                       | the words | the words |
+| `esc` `space`              | the words — a Mac engraves `esc`, and the space bar has no symbol |           |           |
+| `up` `down` `left` `right` | `↑ ↓ ← →` on every keyboard                                       |           |           |
+
+<Canvas of={VHotkeysStories.Platforms} />
+
+The operating system is detected from `navigator` **on mount**, and nowhere else: the server cannot
+know it, so the first client render has to match what the server produced. The consequence is stated
+plainly — a macOS visitor sees `Ctrl` for one frame before hydration corrects it to `⌘`. Every other
+platform sees its final rendering immediately.
+
+The **`platform`** prop removes that frame entirely, and is the right answer whenever the host
+already knows the OS: an Electron or Tauri shell, a server reading the `User-Agent`, or simply a
+documentation table that wants to show all three side by side.
+
+> The words come from the design system dictionary, so `Shift` becomes `Maj` and `Enter` becomes
+> `Entrée` in French. The glyphs do not: they are engraved on the hardware and identical in every
+> language.
+
+## Variants and sizes
+
+`flat` (the default), `outlined` and `elevated` mirror the neutral tone of `VButton`, declaration
+for declaration. There is a single colour set — a keyboard shortcut is chrome, so there is no `tone`
+prop.
+
+<Canvas of={VHotkeysStories.Variants} />
+
+Sizes are the `VChip` scale, `xs` (the default) and `sm`, plus `compact` which takes 4px off the
+height. A cap holding a single character is square; a cap holding a word grows past it.
+
+<Canvas of={VHotkeysStories.Sizes} />
+
+## Separator
+
+`separator` is the text placed between two caps, `+` by default. Setting it to an empty string gives
+the macOS convention, where the modifiers run into the key.
+
+<Canvas of={VHotkeysStories.Separator} />
+
+The component is inline and aligned on the middle of the line, so it sits correctly inside prose.
+
+<Canvas of={VHotkeysStories.InlineInText} />
+
+<Canvas of={VHotkeysStories.InContext} />
+
+## Listening for the combination
+
+`listen` attaches a `keydown` listener on `document` and emits **`trigger`** with the original
+`KeyboardEvent`. It is **opt-in**: a display component must never silently capture the page's
+keyboard, and a page listing fifty shortcuts must not install fifty listeners.
+
+Modifiers are matched **exactly**, never "at least": `mod+k` deliberately stays silent on
+`mod+shift+k`, otherwise the two could not coexist in the same application.
+
+- **`prevent-default`** (default `true`) calls `preventDefault()` on a match. That is usually the
+  point of taking over `⌘K`, which the browser otherwise routes to its own address bar.
+- **`allow-in-input`** (default `false`) decides whether the shortcut stays live while the focus is
+  in an `<input>`, a `<textarea>`, a `<select>` or a `contenteditable`. Non-text inputs — a
+  checkbox, a radio, a button — never count as a text field.
+- Operating-system auto-repeat is ignored, so holding the combination down emits once.
+
+<Canvas of={VHotkeysStories.Listening} />
+
+<Canvas of={VHotkeysStories.ListeningInInput} />
+
+> Matching is done on `event.key`, which is layout-dependent for shifted non-letters: `shift+1`
+> arrives as `!` on a US layout and as `&` on a French one. `event.code` would fix that case and
+> break a worse one — it names the _physical_ key, so `mod+a` would have to be declared `KeyQ` on
+> AZERTY. Prefer letter and named-key shortcuts.
+
+## Accessibility
+
+- The root is a `<kbd>` containing one nested `<kbd>` per key — the HTML specification's own idiom
+  for a combination, where the outer element is the whole user input and each inner one a key.
+- The visible caps are `aria-hidden`, and the accessible name is carried by a visually hidden span.
+  This is what avoids reading `⌘ K` aloud, which assistive technologies render as silence or as
+  "place of interest sign" depending on the product.
+- That name is spelled entirely in **words** — "Keyboard shortcut: Command + K" — and comes from the
+  dictionary, so it follows the active locale. The `label` prop replaces it whenever the surrounding
+  context already says what the shortcut does.
+- The component is not focusable and carries no ARIA role: it describes a shortcut, it is not a
+  control. When it labels an action, the action itself remains the interactive element.

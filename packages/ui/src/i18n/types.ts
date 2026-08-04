@@ -90,6 +90,35 @@ export interface VectisMessages {
     /** `50%` in English, `50 %` in French (NON-BREAKING space before the sign). */
     percent: (percent: number) => string
   }
+  /**
+   * VHotkeys. WORDS only: the GLYPHS (⌘ ⌃ ⌥ ⇧ ↵ ⌫ ⌦ ⇥ ↑ ↓ ← →) stay in
+   * `VHotkeys/platform.ts` — engraved on the hardware, identical in every
+   * language, exactly like VBadge's `99+`. Each key here is the SPOKEN form:
+   * where a glyph exists it wins on screen, never in the accessible name.
+   */
+  hotkeys: {
+    /** Spoken form of ⌘ — the macOS Command key. */
+    command: string
+    ctrl: string
+    alt: string
+    shift: string
+    /** The `meta` key outside macOS: the Windows key. */
+    windows: string
+    /** The `meta` key on Linux. */
+    super: string
+    enter: string
+    escape: string
+    space: string
+    backspace: string
+    delete: string
+    tab: string
+    up: string
+    down: string
+    left: string
+    right: string
+    /** Accessible name; `keys` is the combination already spelled in WORDS ("Ctrl + K"). */
+    label: (keys: string) => string
+  }
   calendar: {
     previousMonth: string
     nextMonth: string
