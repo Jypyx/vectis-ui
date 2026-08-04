@@ -130,6 +130,115 @@ week are already German (they come from `Intl`), while the labels stay English.
 
 <Canvas of={I18nStories.LanguageWithoutDictionary} />
 
+## Switching language at runtime
+
+A language selector needs nothing beyond what you have just seen. The current dictionary is a
+`shallowRef`, so `setLocale` re-renders every **already mounted** component: no remount, no
+reload, no key to bump on a provider.
+
+<Canvas of={I18nStories.LanguageSwitcher} />
+
+Register every language you offer once, at boot; the selector then only ever calls `setLocale`.
+
+```ts
+// locale.ts — module level, imported by main.ts before the app is mounted
+import { ref } from 'vue'
+import { fr, registerMessages, setLocale } from '@vectis/ui'
+
+registerMessages('fr', fr)
+
+export const appLocale = ref(localStorage.getItem('locale') ?? 'en-US')
+
+export function selectLocale(tag: string) {
+  appLocale.value = tag
+  setLocale(tag)
+  document.documentElement.lang = tag // the DS never touches <html>
+  localStorage.setItem('locale', tag)
+}
+
+selectLocale(appLocale.value)
+```
+
+```vue
+<script setup lang="ts">
+import { computed } from 'vue'
+import { appLocale, selectLocale } from './locale'
+
+import flagUS from './flags/us.svg'
+import flagFR from './flags/fr.svg'
+
+const LANGUAGES = [
+  { tag: 'en-US', flag: { src: flagUS }, label: 'English' },
+  { tag: 'fr-FR', flag: { src: flagFR }, label: 'Français' },
+]
+const current = computed(() => LANGUAGES.find((l) => l.tag === appLocale.value))
+</script>
+
+<template>
+  <VMenu match-trigger>
+    <template #trigger="{ triggerProps }">
+      <VButton
+        v-bind="triggerProps"
+        variant="outline"
+        tone="neutral"
+        :icon-start="current.flag"
+        icon-end="expand_more"
+      >
+        {{ current.label }}
+      </VButton>
+    </template>
+    <VMenuItem
+      v-for="language in LANGUAGES"
+      :key="language.tag"
+      :label="language.label"
+      :icon-start="language.flag"
+      :selected="language.tag === appLocale"
+      @select="selectLocale(language.tag)"
+    />
+  </VMenu>
+</template>
+```
+
+The design system ships no flag — its registry is monochrome Material Symbols — so the artwork is
+yours. Every icon prop takes an `IconSource`, so a plain `.svg` file goes in as `{ src }` and is
+rendered as an `<img>`, sized from the surrounding context. Use `{ component }` instead when the
+SVG must inherit `currentcolor` or react to the theme; a flag never does.
+
+Nothing has to be hidden by hand: VIcon marks any icon without a `label` decorative, so the
+endonym alone carries the accessible name — the same split as VHotkeys, where the glyph wins on
+screen and the word wins in the name. Keep the language written out next to the flag; a flag alone
+names a country, not a language.
+
+The **application owns the locale**; the design system is a sink for it, never a source — there is
+no public getter. Keep a single reference and have both your selector and `setLocale` read from
+it, or the two drift apart the first time anything else calls `setLocale`.
+
+### Module level is about _when_, not _where_
+
+"Never inside a `setup()`" constrains the moment the call runs, not the file it is written in. A
+click handler is legitimate: it only ever runs on the client, after hydration, on a deliberate
+action. What must not happen is `setLocale` running on a component's initialization path — under
+SSR that writes per-request state into per-process state, and even in a SPA it makes the locale
+depend on which components happen to be mounted.
+
+The trap is therefore the eager watcher, which does run once during server rendering:
+
+```ts
+// ✗ inside a component: watchEffect runs on the server too
+watchEffect(() => setLocale(appLocale.value))
+
+// ✓ module level, outside any component
+setLocale(appLocale.value)
+watch(appLocale, (tag) => setLocale(tag))
+```
+
+A lazy `watch` never fires during server rendering; `watchEffect` — and `watch` with
+`immediate: true` — do. That second form is also how you drive the design system from an
+application-level i18n library: watch its locale, map it to a complete BCP 47 tag, forward.
+
+Before wiring any of this into a server-rendered site serving several languages, read the limit
+below.
+
 ## Parameterized messages
 
 An entry that depends on a value is a **TypeScript function**, not a string with placeholders.

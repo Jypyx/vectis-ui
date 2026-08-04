@@ -1,19 +1,26 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { computed, type Component } from 'vue'
 
 import VBreadcrumb from '../components/VBreadcrumb/VBreadcrumb.vue'
+import VButton from '../components/VButton/VButton.vue'
 import VChip from '../components/VChip/VChip.vue'
 import VCombobox from '../components/VCombobox/VCombobox.vue'
 import VDataTableSfc from '../components/VDataTable/VDataTable.vue'
 import VDatePicker from '../components/VDatePicker/VDatePicker.vue'
 import VInput from '../components/VInput/VInput.vue'
+import VMenu from '../components/VMenu/VMenu.vue'
+import VMenuItem from '../components/VMenu/VMenuItem.vue'
 import VPagination from '../components/VPagination/VPagination.vue'
 import VProgressLinear from '../components/VProgressLinear/VProgressLinear.vue'
 import VSpinner from '../components/VSpinner/VSpinner.vue'
 import VTimePicker from '../components/VTimePicker/VTimePicker.vue'
+import flagDE from '../stories/flags/de.svg'
+import flagFR from '../stories/flags/fr.svg'
+import flagUS from '../stories/flags/us.svg'
 import { storyText } from '../stories/storyText'
 
-import { registerMessages } from './state'
+import { registerMessages, setLocale, useLocale } from './state'
 
 // Generic SFC: the `Component` typing does not apply to it, so a cast is
 // mandatory in the stories and the tests (repo convention).
@@ -28,11 +35,14 @@ type Story = StoryObj<typeof meta>
 
 const COMPONENTS = {
   VBreadcrumb,
+  VButton,
   VChip,
   VCombobox,
   VDataTable,
   VDatePicker,
   VInput,
+  VMenu,
+  VMenuItem,
   VPagination,
   VProgressLinear,
   VSpinner,
@@ -118,6 +128,46 @@ const SHOWCASE = `
   </div>
 `
 
+/* Language names are ENDONYMS: demo data, like `Alpha`/`Bravo`, not prose — they
+   stay out of `storyText` and are what the play function queries, since they read
+   the same in every locale. The flags ride as ordinary `iconStart` sources — the
+   `{ src }` form, so VIcon sizes them and marks them decorative (no `label`) and
+   the endonym alone carries the accessible name. Kept as plain `.svg` files rather
+   than inlined: rendered as an `<img>`, each flag is its own document, so the
+   `<marker id>` the US stars hang on cannot collide with the copy of itself that
+   the trigger renders next to the list. */
+const LANGUAGES = [
+  { tag: 'en-US', flag: { src: flagUS }, label: 'English' },
+  { tag: 'fr-FR', flag: { src: flagFR }, label: 'Français' },
+  { tag: 'de-DE', flag: { src: flagDE }, label: 'Deutsch' },
+]
+
+const SWITCHER = `
+  <div style="margin-block-end: var(--vectis-space-6);">
+    <VMenu size="md" match-trigger>
+      <template #trigger="{ triggerProps }">
+        <VButton
+          v-bind="triggerProps"
+          variant="outline"
+          tone="neutral"
+          :icon-start="current.flag"
+          icon-end="expand_more"
+        >
+          {{ current.label }}
+        </VButton>
+      </template>
+      <VMenuItem
+        v-for="language in languages"
+        :key="language.tag"
+        :label="language.label"
+        :icon-start="language.flag"
+        :selected="language.tag === locale"
+        @select="setLocale(language.tag)"
+      />
+    </VMenu>
+  </div>
+`
+
 /* `columns` and `trail` must be computed, not plain arrays built from `t.value`:
    reading `.value` in the setup body would freeze the labels in the language of
    the first render while everything else switched. */
@@ -131,11 +181,28 @@ const trail = computed(() => [
   { label: t.value.components, href: '/components' },
 ])
 
-function showcase(): Story['render'] {
+/* The trigger READS the DS locale and the items WRITE it through `setLocale`: the
+   selector holds no state of its own, so it stays in sync with the toolbar. A
+   CONSUMER does the opposite — they keep their own ref as the source of truth,
+   `useLocale` being internal: the DS is a sink for the locale, never a source. */
+const locale = useLocale()
+const current = computed(() => LANGUAGES.find((l) => l.tag === locale.value) ?? LANGUAGES[0])
+
+function showcase(prefix = ''): Story['render'] {
   return () => ({
     components: COMPONENTS,
-    setup: () => ({ t, rows: ROWS, options: OPTIONS, columns, trail }),
-    template: SHOWCASE,
+    setup: () => ({
+      t,
+      rows: ROWS,
+      options: OPTIONS,
+      columns,
+      trail,
+      languages: LANGUAGES,
+      locale,
+      current,
+      setLocale,
+    }),
+    template: `${prefix}${SHOWCASE}`,
   })
 }
 
@@ -186,4 +253,53 @@ export const PartialOverride: Story = {
 export const LanguageWithoutDictionary: Story = {
   globals: { locale: 'de-DE' },
   render: showcase(),
+}
+
+/**
+ * A language selector inside the page. The dictionary is a `shallowRef`, so a
+ * `setLocale` called from a click handler re-renders every ALREADY MOUNTED
+ * component — nothing is remounted, nothing reloads.
+ *
+ * `Deutsch` is offered WITHOUT a dictionary: the formats follow the tag while the
+ * words stay English, the degraded state of `LanguageWithoutDictionary`. No
+ * `registerMessages` here, hence no registry to tear down — and no interference
+ * with that story, which shares this docs page.
+ *
+ * No teardown either, unlike `PartialOverride`: the `withGlobals` decorator
+ * re-applies the toolbar locale on EVERY story render, so the locale self-heals on
+ * navigation. The registry, which the decorator never touches, does not.
+ */
+export const LanguageSwitcher: Story = {
+  globals: { locale: 'en-US' },
+  render: showcase(SWITCHER),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const menu = canvasElement.querySelector('[role="menu"]') as HTMLElement
+    await expect(canvas.getByText('No data')).toBeVisible()
+
+    /* The trigger is named after the CURRENT language, so it changes as we go —
+       and the flags never enter the query, being aria-hidden. */
+    const trigger = canvas.getByRole('button', { name: 'English' })
+    /* The flag really resolved through VIcon: an unresolved source renders the
+       empty `<slot />`, a silent blank box. `.v-icon-img` is the `{ src }` branch,
+       so the query targets the flag and not the `expand_more` chevron. */
+    await expect(trigger.querySelector('.v-icon-img')).not.toBeNull()
+
+    await userEvent.click(trigger)
+    await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
+    await userEvent.click(canvas.getByRole('menuitem', { name: 'Français' }))
+    await waitFor(async () => {
+      await expect(canvas.getByText('Aucune donnée')).toBeVisible()
+    })
+
+    /* Back to English, and it is load-bearing: the locale is module-level state
+       shared by all five canvases of the docs page — a run left in French would
+       flip the siblings. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Français' }))
+    await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
+    await userEvent.click(canvas.getByRole('menuitem', { name: 'English' }))
+    await waitFor(async () => {
+      await expect(canvas.getByText('No data')).toBeVisible()
+    })
+  },
 }
