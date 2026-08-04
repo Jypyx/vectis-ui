@@ -2,19 +2,18 @@
 import VDialog from './VDialog.vue'
 
 /**
- * Variante d'alerte : même design que <VDialog>, mais `role="alertdialog"` —
- * une modale qui exige une action EXPLICITE de l'utilisateur. Un simple wrapper
- * de <VDialog> suffit : il verrouille la sémantique et coupe tout light dismiss.
- * Pas de croix (`closable=false`), ni clic backdrop, NI Échap (`closedby="none"`
- * dérivé de closeOnBackdrop/closeOnEscape à false) : seuls les boutons du footer
- * ferment la modale.
+ * The alert variant: the same design as <VDialog>, but with `role="alertdialog"` — a
+ * modal requiring an EXPLICIT action from the user. A plain <VDialog> wrapper is
+ * enough: it locks the semantics down and cuts off every light dismiss. No cross
+ * (`closable=false`), no backdrop click, NO Escape (`closedby="none"` derived from
+ * closeOnBackdrop/closeOnEscape being false): only the footer buttons close the modal.
  */
 interface DialogAlertProps {
-  /** Titre du header (ignoré si le slot #header est fourni). */
+  /** Title of the header (ignored when the #header slot is supplied). */
   title?: string
-  /** Sous-titre du header, sous le titre. */
+  /** Subtitle of the header, under the title. */
   subtitle?: string
-  /** Largeur de la modale (toute unité CSS) ; bornée à 100 % du viewport. */
+  /** Width of the modal (any CSS unit); bounded to 100% of the viewport. */
   width?: string
 }
 
@@ -32,13 +31,13 @@ type TriggerProps = {
 }
 
 defineSlots<{
-  /** Contenu de l'alerte. */
+  /** Content of the alert. */
   default(): unknown
-  /** Remplace le bloc titre/sous-titre du header. */
+  /** Replaces the header's title/subtitle block. */
   header?(): unknown
-  /** Actions du footer — obligatoires pour fermer l'alerte. */
+  /** Footer actions — mandatory, since they are the only way to close the alert. */
   footer?(): unknown
-  /** Déclencheur : `v-bind="triggerProps"` sur un <VButton>/<button>. */
+  /** Trigger: `v-bind="triggerProps"` on a <VButton>/<button>. */
   trigger?(props: { triggerProps: TriggerProps }): unknown
 }>()
 </script>

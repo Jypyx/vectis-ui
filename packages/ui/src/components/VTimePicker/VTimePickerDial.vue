@@ -16,27 +16,26 @@ import { pad2 } from '../../utils/text'
 import { useMessages } from '../../i18n/state'
 
 /**
- * Cadran horloge du VTimePicker (interne, non exporté).
+ * VTimePicker's clock dial (internal, not exported).
  *
- * Aucune primitive native ne couvre la sélection angulaire : le JS se limite à
- * (1) la conversion pointeur → valeur (pointerdown/move : mesure du rect puis
- * trigonométrie PURE dans `utils/time` — atan2, seuil d'anneau) et (2) le pattern
- * ARIA « slider » au clavier (flèches / Home / End / PageUp-Down). Tout le
- * rendu — position des chiffres, aiguille — est du CSS (`sin()`/`cos()` sur la
- * fraction de tour unitless `--dial-turn` inline).
+ * No native primitive covers angular selection: the JS is limited to (1) the pointer →
+ * value conversion (pointerdown/move: measuring the rect then PURE trigonometry in
+ * `utils/time` — atan2, the ring threshold) and (2) the ARIA "slider" keyboard pattern
+ * (arrows / Home / End / PageUp-Down). All the rendering — the numerals' positions, the
+ * hand — is CSS (`sin()`/`cos()` on the inline unitless turn fraction `--dial-turn`).
  *
- * Un unique élément focusable `role="slider"` (1 arrêt de tabulation,
- * `aria-valuetext` localisé) : les chiffres sont des repères purement visuels
- * (`aria-hidden`), atteints par l'angle du pointeur, pas par cellule.
+ * A single focusable `role="slider"` element (1 tab stop, a localized `aria-valuetext`):
+ * the numerals are purely visual markers (`aria-hidden`), reached by the pointer's angle,
+ * not cell by cell.
  */
 interface TimePickerDialProps {
-  /** Étape courante : sélection de l'heure ou des minutes. */
+  /** The current step: selecting the hour or the minutes. */
   step: 'hour' | 'minute'
   format: HourFormat
-  /** Heure 24 h canonique (0–23). */
+  /** A canonical 24 h hour (0–23). */
   hour: number
   minute: number
-  /** Granularité des minutes (drag et flèches). */
+  /** Minute granularity (dragging and arrows). */
   minuteStep: number
 }
 
@@ -45,14 +44,14 @@ const props = defineProps<TimePickerDialProps>()
 const emit = defineEmits<{
   'update:hour': [hour: number]
   'update:minute': [minute: number]
-  /** Valeur d'étape arrêtée (relâcher du pointeur, Entrée/Espace). */
+  /** A settled step value (releasing the pointer, Enter/Space). */
   'confirm-step': [via: 'pointer' | 'keyboard']
 }>()
 
 interface DialCell {
   key: string
   label: string
-  /** Fraction de tour [0, 1) de la position du chiffre (0 = midi). */
+  /** The turn fraction [0, 1) of the numeral's position (0 = twelve o'clock). */
   turn: number
   ring: 'outer' | 'inner'
   selected: boolean
@@ -60,7 +59,7 @@ interface DialCell {
 
 const cells = computed<DialCell[]>(() => {
   if (props.step === 'minute') {
-    // Repères 5 min ; la sélection au drag reste à la minute près.
+    // 5-minute markers; the drag selection stays accurate to the minute.
     return Array.from({ length: 12 }, (_, i) => ({
       key: `m-${i}`,
       label: pad2(i * 5),
@@ -107,7 +106,7 @@ const handRing = computed(() =>
   props.step === 'hour' && props.format === '24h' ? hour24ToDial(props.hour).ring : 'outer',
 )
 
-/** Minute hors repère 5 min : l'aiguille porte un point (détail M3). */
+/** A minute off the 5-minute markers: the hand carries a dot (an M3 detail). */
 const handMinor = computed(() => props.step === 'minute' && props.minute % 5 !== 0)
 
 const ariaValueNow = computed(() => {
@@ -118,7 +117,7 @@ const ariaValueMin = computed(() => (props.step === 'minute' ? 0 : props.format 
 const ariaValueMax = computed(() =>
   props.step === 'minute' ? 59 : props.format === '12h' ? 12 : 23,
 )
-// Aucune prop dédiée : le dictionnaire est le seul point de surcharge.
+// No dedicated prop: the dictionary is the only override point.
 const m = useMessages()
 const ariaValueText = computed(() =>
   props.step === 'minute'
@@ -126,7 +125,7 @@ const ariaValueText = computed(() =>
     : m.value.timePicker.hoursValue(ariaValueNow.value),
 )
 
-// ── Pointeur : clic et drag sur la surface ──────────────────────────────────
+// Pointer: clicking and dragging on the face.
 const faceEl = ref<HTMLElement | null>(null)
 const dragging = ref(false)
 
@@ -150,12 +149,12 @@ function applyPoint(event: PointerEvent) {
 }
 
 function onPointerdown(event: PointerEvent) {
-  // try/catch : les PointerEvent synthétiques (play functions) n'ont pas de
-  // pointeur actif → setPointerCapture jetterait NotFoundError.
+  // try/catch: synthetic PointerEvents (play functions) have no active pointer →
+  // setPointerCapture would throw NotFoundError.
   try {
     faceEl.value?.setPointerCapture(event.pointerId)
   } catch {
-    /* pointeur synthétique */
+    /* a synthetic pointer */
   }
   dragging.value = true
   applyPoint(event)
@@ -175,13 +174,13 @@ function onPointercancel() {
   dragging.value = false
 }
 
-// ── Clavier (pattern slider) ────────────────────────────────────────────────
+// Keyboard (the slider pattern).
 function moveHour(delta: number) {
   if (props.format === '24h') {
     emit('update:hour', (props.hour + delta + 24) % 24)
     return
   }
-  // 12h : cycle 1–12 dans le méridien courant (l'AM/PM se change au VToggle).
+  // 12h: a 1–12 cycle within the current meridiem (AM/PM is changed on the VToggle).
   const { hour, meridiem } = to12h(props.hour)
   emit('update:hour', to24h(((hour - 1 + delta + 12) % 12) + 1, meridiem))
 }
@@ -192,8 +191,8 @@ function onKeydown(event: KeyboardEvent) {
     emit('confirm-step', 'keyboard')
     return
   }
-  // Flèches non inversées en RTL : le cadran n'est jamais miroité (le sens
-  // horaire est invariant), + reste « avancer » dans les deux directions.
+  // The arrows are not inverted in RTL: the dial is never mirrored (clockwise is
+  // invariant), and + stays "forward" in both directions.
   const delta =
     event.key === 'ArrowUp' || event.key === 'ArrowRight'
       ? 1
@@ -271,13 +270,13 @@ function onKeydown(event: KeyboardEvent) {
     block-size: var(--vectis-control-size-timepicker-dial);
     border-radius: var(--vectis-radius-pill);
     background: var(--vectis-color-surface-muted);
-    /* le drag sélectionne, il ne doit ni scroller (tactile) ni sélectionner du texte */
+    /* dragging selects: it must neither scroll (touch) nor select text */
     touch-action: none;
     user-select: none;
     cursor: pointer;
-    /* Rayon du centre des chiffres (anneau extérieur). Hérité par chiffres et
-       aiguille ; l'anneau intérieur le redéfinit. À garder en phase avec
-       DIAL_INNER_THRESHOLD (`utils/time`). */
+    /* Radius of the numerals' centre (the outer ring). Inherited by the numerals and the
+       hand; the inner ring redefines it. Keep it in step with DIAL_INNER_THRESHOLD
+       (`utils/time`). */
     --dial-radius: calc(
       var(--vectis-control-size-timepicker-dial) / 2 -
         var(--vectis-control-size-timepicker-number) / 2
@@ -290,10 +289,10 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   /*
-   * Chiffres positionnés par trigonométrie CSS sur la fraction de tour
-   * `--dial-turn` inline (sin()/cos() : Chrome 111+ / Safari 15.4+, très en deçà
-   * du plancher du repo). `left`/`top`/`rotate` PHYSIQUES délibérés : une
-   * horloge ne se miroite jamais en RTL (le sens horaire est universel).
+   * The numerals are positioned by CSS trigonometry on the inline turn fraction
+   * `--dial-turn` (sin()/cos(): Chrome 111+ / Safari 15.4+, well below the repo's floor).
+   * PHYSICAL `left`/`top`/`rotate` on purpose: a clock is never mirrored in RTL
+   * (clockwise is universal).
    */
   .v-timepicker-number {
     position: absolute;
@@ -305,10 +304,10 @@ function onKeydown(event: KeyboardEvent) {
     display: grid;
     place-items: center;
     border-radius: var(--vectis-radius-pill);
-    /* anneau extérieur : lisibilité du cadran, taille du corps de texte large */
+    /* The outer ring: dial legibility, at the large body text size */
     font-size: var(--vectis-text-body-lg-size);
     color: var(--vectis-color-text);
-    /* au-dessus de l'aiguille : le chiffre visé se lit sur sa pastille */
+    /* Above the hand: the targeted numeral reads on its dot */
     z-index: 1;
     pointer-events: none;
   }
@@ -331,10 +330,10 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   /*
-   * Aiguille : trait ancré au centre, tourné par `rotate` sur la même fraction
-   * de tour. PAS de transition sur rotate : entre 55 et 0 min l'angle repasse
-   * de 0.916turn à 0turn, l'interpolation ferait le grand tour à l'envers
-   * (compromis assumé vs Material).
+   * The hand: a stroke anchored at the centre, turned by `rotate` on the same turn
+   * fraction. NO transition on rotate: between 55 and 0 min the angle goes back from
+   * 0.916turn to 0turn, and the interpolation would take the long way round (an accepted
+   * trade-off against Material).
    */
   .v-timepicker-hand {
     position: absolute;
@@ -347,8 +346,8 @@ function onKeydown(event: KeyboardEvent) {
     rotate: calc(var(--dial-turn) * 1turn);
   }
 
-  /* Pastille de pointe : recouvre le chiffre visé (le texte passe en
-     text-on-accent via [data-selected]) */
+  /* The tip dot: it covers the targeted numeral (the text switching to text-on-accent
+     through [data-selected]) */
   .v-timepicker-hand::before {
     content: '';
     position: absolute;
@@ -359,21 +358,20 @@ function onKeydown(event: KeyboardEvent) {
     block-size: var(--vectis-control-size-timepicker-number);
     border-radius: var(--vectis-radius-pill);
     background: var(--vectis-color-accent);
-    /* Seule la BASCULE DE TAILLE (repère ↔ [data-minor]) s'anime : elle
-       interpole entre deux valeurs bornées, contrairement au `rotate` de
-       l'aiguille, laissé sans transition (cf. plus haut). */
+    /* Only the SIZE SWITCH (a marker ↔ [data-minor]) is animated: it interpolates
+       between two bounded values, unlike the hand's `rotate`, left without a transition
+       (see above). */
     transition:
       inline-size var(--vectis-duration-fast) var(--vectis-ease-default),
       block-size var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   /*
-   * Minute hors repère 5 min : la pastille ne recouvre aucun chiffre et
-   * déborderait sur les deux voisins → réduite, elle devient à elle seule le
-   * repère précis (d'où l'abandon du point clair central de M3, qui ferait un
-   * anneau à cette taille). Seule la taille du pseudo change : redéfinir
-   * --vectis-control-size-timepicker-number ici déplacerait aussi --dial-radius, donc la
-   * longueur de l'aiguille et le rayon des anneaux.
+   * A minute off the 5-minute markers: the dot covers no numeral and would spill onto
+   * both neighbours → shrunk, it becomes the precise marker on its own (hence dropping
+   * M3's light central dot, which would make a ring at that size). Only the pseudo's size
+   * changes: redefining --vectis-control-size-timepicker-number here would also move
+   * --dial-radius, hence the hand's length and the rings' radius.
    */
   .v-timepicker-hand[data-minor]::before {
     inline-size: var(--vectis-control-size-timepicker-hand-minor);

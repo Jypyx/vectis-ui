@@ -4,7 +4,7 @@ import { nextTick } from 'vue'
 
 import VTimePicker from './VTimePicker.vue'
 
-/** Ouvre le panneau par clic sur le contrôle. */
+/** Opens the panel by clicking the control. */
 async function openPanel(container: Element) {
   await fireEvent.click(container.querySelector('.v-timepicker-control') as HTMLElement)
   await nextTick()
@@ -14,16 +14,16 @@ const panelOpen = (container: Element) =>
   container.querySelector('.v-timepicker-panel')?.hasAttribute('data-popover-open') === true
 
 const hourCell = (container: Element) =>
-  container.querySelector('button[aria-label="Sélectionner l’heure"]') as HTMLButtonElement
+  container.querySelector('button[aria-label="Select hour"]') as HTMLButtonElement
 
-describe('VTimePicker — défaut', () => {
-  it('est un champ de saisie masqué, sans cadran ni ARIA de popup', async () => {
+describe('VTimePicker — default', () => {
+  it('is a masked input field, with no dial and no popup ARIA', async () => {
     const { container } = render(VTimePicker, { props: { modelValue: '09:30', format: '24h' } })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.readOnly).toBe(false)
     expect(input.value).toBe('09:30')
     expect(input.getAttribute('inputmode')).toBe('numeric')
-    expect(container.querySelector('button[aria-label="Ouvrir le sélecteur d’heure"]')).toBeNull()
+    expect(container.querySelector('button[aria-label="Open time picker"]')).toBeNull()
     expect(input.getAttribute('aria-haspopup')).toBeNull()
     expect(input.getAttribute('aria-controls')).toBeNull()
 
@@ -33,15 +33,15 @@ describe('VTimePicker — défaut', () => {
     expect(container.querySelector('.v-timepicker-panel')).toBeNull()
   })
 
-  it('n’avertit pas dans sa configuration par défaut', () => {
+  it('does not warn in its default configuration', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     render(VTimePicker, { props: { modelValue: '09:15' } })
     expect(warn).not.toHaveBeenCalled()
     warn.mockRestore()
   })
 
-  it('clockIcon : surcharge l’icône du CADRAN, sans effet en mode liste', () => {
-    // `:not(.v-input-clear)` : la croix est rendue AVANT l'icône de fin.
+  it('clockIcon: it overrides the DIAL icon, with no effect in list mode', () => {
+    // `:not(.v-input-clear)`: the cross is rendered BEFORE the end icon.
     const endIcon = (props: Record<string, unknown>) =>
       render(VTimePicker, { props }).container.querySelector<HTMLElement>(
         '.v-input-action:not(.v-input-clear) .v-icon',
@@ -49,31 +49,31 @@ describe('VTimePicker — défaut', () => {
 
     expect(endIcon({ modelValue: null, showDial: true, clockIcon: 'alarm' })).toBe('alarm')
 
-    // En liste, le chevron suit la convention VCombobox : la prop est inerte.
+    // In list mode the chevron follows the VCombobox convention: the prop is inert.
     expect(endIcon({ modelValue: null, mode: 'list', clockIcon: 'alarm' })).toBe('expand_more')
 
-    // Et la croix d'effacement ne la remplace pas : les deux coexistent.
+    // And the clear cross does not replace it: both coexist.
     expect(endIcon({ modelValue: '09:30', showDial: true, clockIcon: 'alarm' })).toBe('alarm')
   })
 
-  it('rend la croix d’effacement à GAUCHE de l’icône de fin', () => {
+  it('renders the clear cross to the LEFT of the end icon', () => {
     const { container } = render(VTimePicker, {
       props: { modelValue: '09:30', mode: 'list', clearable: true },
     })
-    // Croix en premier, chevron ensuite — exactement le couple du VCombobox.
+    // The cross first, then the chevron — exactly VCombobox's pairing.
     const actions = [...container.querySelectorAll('.v-input-field .v-input-action')]
     expect(actions.map((el) => el.getAttribute('aria-label'))).toEqual([
-      "Effacer l'heure",
-      'Ouvrir la liste des heures',
+      'Clear time',
+      'Open the list of times',
     ])
     expect(actions.at(0)?.classList.contains('v-input-clear')).toBe(true)
   })
 })
 
-describe('VTimePicker — lecture seule', () => {
-  it('affiche la valeur formatée dans un champ en lecture seule', () => {
+describe('VTimePicker — read-only', () => {
+  it('displays the formatted value in a read-only field', () => {
     const { container } = render(VTimePicker, {
-      props: { mode: 'readonly', modelValue: '19:05', locale: 'fr-FR', label: 'Heure' },
+      props: { mode: 'readonly', modelValue: '19:05', locale: 'fr-FR', label: 'Time' },
     })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.readOnly).toBe(true)
@@ -82,24 +82,24 @@ describe('VTimePicker — lecture seule', () => {
     expect(input.getAttribute('aria-expanded')).toBe('false')
   })
 
-  it('ouvre le panneau au clic et rend le cadran (slider)', async () => {
+  it('opens the panel on click and renders the dial (a slider)', async () => {
     const { container, getByRole } = render(VTimePicker, {
-      props: { mode: 'readonly', modelValue: '09:15', label: 'Heure' },
+      props: { mode: 'readonly', modelValue: '09:15', label: 'Time' },
     })
     await openPanel(container)
     expect(getByRole('dialog')).toBeTruthy()
     const slider = getByRole('slider')
-    expect(slider.getAttribute('aria-label')).toBe('Heure')
+    expect(slider.getAttribute('aria-label')).toBe('Hour')
     expect(slider.getAttribute('aria-valuenow')).toBe('9')
     expect(container.querySelector('input')?.getAttribute('aria-expanded')).toBe('true')
   })
 
-  it('travaille sur un brouillon : rien n’est émis avant OK', async () => {
+  it('works on a draft: nothing is emitted before OK', async () => {
     const { container, emitted, getByRole, getByText } = render(VTimePicker, {
       props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
     })
     await openPanel(container)
-    // flèche haut sur le cadran : le brouillon avance, le v-model non
+    // the up arrow on the dial: the draft advances, the v-model does not
     await fireEvent.keyDown(getByRole('slider'), { key: 'ArrowUp' })
     await nextTick()
     expect(hourCell(container).textContent?.trim()).toBe('10')
@@ -109,13 +109,13 @@ describe('VTimePicker — lecture seule', () => {
     expect(panelOpen(container)).toBe(false)
   })
 
-  it('annule sans émettre (bouton, Échap, sortie de focus)', async () => {
+  it('cancels without emitting (the button, Escape, focus leaving)', async () => {
     const { container, emitted, getByRole, getByText } = render(VTimePicker, {
       props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
     })
     await openPanel(container)
     await fireEvent.keyDown(getByRole('slider'), { key: 'ArrowUp' })
-    await fireEvent.click(getByText('Annuler'))
+    await fireEvent.click(getByText('Cancel'))
     expect(emitted('update:modelValue')).toBeUndefined()
     expect(panelOpen(container)).toBe(false)
 
@@ -133,7 +133,7 @@ describe('VTimePicker — lecture seule', () => {
     expect(panelOpen(container)).toBe(false)
   })
 
-  it('passe des heures aux minutes (Entrée au cadran, cellules d’en-tête)', async () => {
+  it('moves from hours to minutes (Enter on the dial, the header cells)', async () => {
     const { container, getByRole } = render(VTimePicker, {
       props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
     })
@@ -142,26 +142,26 @@ describe('VTimePicker — lecture seule', () => {
     await nextTick()
     expect(getByRole('slider').getAttribute('aria-label')).toBe('Minutes')
     expect(getByRole('slider').getAttribute('aria-valuemax')).toBe('59')
-    // retour à l'étape heure par la cellule d'en-tête
+    // back to the hour step through the header cell
     await fireEvent.click(hourCell(container))
     await nextTick()
-    expect(getByRole('slider').getAttribute('aria-label')).toBe('Heure')
+    expect(getByRole('slider').getAttribute('aria-label')).toBe('Hour')
   })
 
-  it('Entrée à l’étape minutes commite et ferme', async () => {
+  it('Enter on the minutes step commits and closes', async () => {
     const { container, emitted, getByRole } = render(VTimePicker, {
       props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
     })
     await openPanel(container)
     const slider = getByRole('slider')
-    await fireEvent.keyDown(slider, { key: 'Enter' }) // heure → minutes
+    await fireEvent.keyDown(slider, { key: 'Enter' }) // hour → minutes
     await fireEvent.keyDown(getByRole('slider'), { key: 'ArrowUp' })
     await fireEvent.keyDown(getByRole('slider'), { key: 'Enter' })
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['09:16'])
     expect(panelOpen(container)).toBe(false)
   })
 
-  it('ignore showDial en lecture seule (et l’annonce)', async () => {
+  it('ignores showDial in read-only mode (and says so)', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { container, getByRole } = render(VTimePicker, {
       props: { mode: 'readonly', modelValue: '09:15', format: '24h', showDial: false },
@@ -172,21 +172,21 @@ describe('VTimePicker — lecture seule', () => {
     warn.mockRestore()
   })
 
-  it('n’a plus de bascule de mode dans le pied du panneau', () => {
+  it('has no mode toggle in the panel footer', () => {
     const { container } = render(VTimePicker, { props: { mode: 'readonly', modelValue: '09:15' } })
     expect(container.querySelector('.v-timepicker-mode')).toBeNull()
   })
 
-  it('dérive le format de la locale (en-US → 12h)', async () => {
+  it('derives the format from the locale (en-US → 12h)', async () => {
     const { container, getByRole } = render(VTimePicker, {
       props: { mode: 'readonly', modelValue: '19:00', locale: 'en-US' },
     })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.value).toMatch(/PM/)
-    // le VToggle vit hors du panneau : présent sans même l'ouvrir
+    // the VToggle lives outside the panel: present without even opening it
     expect(container.querySelector('.v-timepicker-meridiem')).toBeTruthy()
     await openPanel(container)
-    // cadran 12h : valeur affichée 7, max 12
+    // a 12h dial: the displayed value is 7, the max 12
     expect(getByRole('slider').getAttribute('aria-valuenow')).toBe('7')
     expect(getByRole('slider').getAttribute('aria-valuemax')).toBe('12')
   })
@@ -200,7 +200,7 @@ describe('VTimePicker — lecture seule', () => {
       vi.useRealTimers()
     })
 
-    it('initialise le brouillon à l’heure courante sans valeur', async () => {
+    it('initializes the draft at the current time when there is no value', async () => {
       const { container } = render(VTimePicker, {
         props: { mode: 'readonly', modelValue: null, format: '24h' },
       })
@@ -209,26 +209,26 @@ describe('VTimePicker — lecture seule', () => {
     })
   })
 
-  it('efface la valeur via la croix, sans perdre l’icône du cadran', async () => {
+  it('clears the value through the cross, without losing the dial icon', async () => {
     const { container, emitted } = render(VTimePicker, {
       props: { mode: 'readonly', modelValue: '09:15', clearable: true },
     })
-    const clearBtn = container.querySelector('button[aria-label="Effacer l\'heure"]') as HTMLElement
+    const clearBtn = container.querySelector('button[aria-label="Clear time"]') as HTMLElement
     expect(clearBtn).toBeTruthy()
-    // Le champ est readonly dans ce mode : la croix n'y survit que parce que
-    // `clearVisible` fait autorité côté VInput.
+    // The field is readonly in this mode: the cross only survives there because
+    // `clearVisible` is authoritative on the VInput side.
     expect((container.querySelector('input') as HTMLInputElement).readOnly).toBe(true)
-    expect(container.querySelector('button[aria-label="Ouvrir le sélecteur d’heure"]')).toBeTruthy()
+    expect(container.querySelector('button[aria-label="Open time picker"]')).toBeTruthy()
 
     await fireEvent.click(clearBtn)
     expect(emitted('update:modelValue')?.at(-1)).toEqual([null])
-    // Le panneau ne s'ouvre pas au refocus rendu au champ.
+    // The panel does not open on the refocus handed back to the field.
     expect(container.querySelector('.v-timepicker-panel')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
   })
 
-  it('expose un slider ARIA complet (valuetext localisé)', async () => {
+  it('exposes a complete ARIA slider (a localized valuetext)', async () => {
     const { container, getByRole } = render(VTimePicker, {
       props: { mode: 'readonly', modelValue: '07:35', format: '24h' },
     })
@@ -236,7 +236,7 @@ describe('VTimePicker — lecture seule', () => {
     const slider = getByRole('slider')
     expect(slider.getAttribute('aria-valuemin')).toBe('0')
     expect(slider.getAttribute('aria-valuemax')).toBe('23')
-    expect(slider.getAttribute('aria-valuetext')).toBe('7 heures')
+    expect(slider.getAttribute('aria-valuetext')).toBe("7 o'clock")
     await fireEvent.keyDown(slider, { key: 'Enter' })
     await nextTick()
     expect(getByRole('slider').getAttribute('aria-valuetext')).toBe('35 minutes')
@@ -244,8 +244,8 @@ describe('VTimePicker — lecture seule', () => {
 })
 
 /**
- * Frappe simulée : jsdom ne pose pas de caret, on le place explicitement en fin
- * de texte comme le ferait une saisie séquentielle.
+ * Simulated typing: jsdom places no caret, so it is set explicitly at the end of the
+ * text, as sequential typing would.
  */
 async function type(input: HTMLInputElement, value: string) {
   input.value = value
@@ -253,13 +253,13 @@ async function type(input: HTMLInputElement, value: string) {
   await fireEvent.input(input)
 }
 
-describe('VTimePicker — mode saisie', () => {
+describe('VTimePicker — input mode', () => {
   const mount = (props: Record<string, unknown> = {}) =>
     render(VTimePicker, {
       props: { mode: 'input', format: '24h', locale: 'fr-FR', label: 'Heure', ...props },
     })
 
-  it('rend un champ éditable au masque HH:MM', () => {
+  it('renders an editable field in the HH:MM mask', () => {
     const { container } = mount({ modelValue: '09:30' })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.readOnly).toBe(false)
@@ -269,7 +269,7 @@ describe('VTimePicker — mode saisie', () => {
     expect(input.getAttribute('placeholder')).toBe('hh:mm')
   })
 
-  it('pose le deux-points au fil de la frappe et ne commite qu’une heure complète', async () => {
+  it('places the colon as you type and only commits a complete time', async () => {
     const { container, emitted } = mount()
     const input = container.querySelector('input') as HTMLInputElement
     await type(input, '0')
@@ -282,10 +282,10 @@ describe('VTimePicker — mode saisie', () => {
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['09:30'])
   })
 
-  it('ignore les caractères refusés sans que le texte brut ne reparaisse', async () => {
-    // Le masque ne change pas → Vue ne repatche rien. Sans le `v-model` sur
-    // le VInput (dont l'état interne recopierait le texte brut) le 5e chiffre
-    // réapparaîtrait dans le DOM au patch suivant.
+  it('ignores rejected characters without the raw text reappearing', async () => {
+    // The mask does not change → Vue re-patches nothing. Without the `v-model` on the
+    // VInput (whose internal state would copy the raw text), the 5th digit would reappear
+    // in the DOM on the next patch.
     const { container } = mount({ modelValue: '09:30' })
     const input = container.querySelector('input') as HTMLInputElement
     await type(input, '09:301')
@@ -293,7 +293,7 @@ describe('VTimePicker — mode saisie', () => {
     expect(input.value).toBe('09:30')
   })
 
-  it('le Retour arrière sur le deux-points efface le chiffre qui le précède', async () => {
+  it('Backspace on the colon erases the digit preceding it', async () => {
     const { container } = mount()
     const input = container.querySelector('input') as HTMLInputElement
     await type(input, '09')
@@ -303,7 +303,7 @@ describe('VTimePicker — mode saisie', () => {
     expect(input.value).toBe('0')
   })
 
-  it('un deux-points tapé complète l’heure par un zéro de tête', async () => {
+  it('a typed colon completes the hour with a leading zero', async () => {
     const { container } = mount()
     const input = container.querySelector('input') as HTMLInputElement
     await type(input, '9')
@@ -311,7 +311,7 @@ describe('VTimePicker — mode saisie', () => {
     expect(input.value).toBe('09:')
   })
 
-  it('revert silencieusement une heure impossible à la sortie du champ', async () => {
+  it('silently reverts an impossible time on leaving the field', async () => {
     const { container, emitted } = mount({ modelValue: '09:30' })
     const input = container.querySelector('input') as HTMLInputElement
     await type(input, '25:00')
@@ -320,7 +320,7 @@ describe('VTimePicker — mode saisie', () => {
     expect(input.value).toBe('09:30')
   })
 
-  it('vide la valeur quand le champ est vidé', async () => {
+  it('empties the value when the field is emptied', async () => {
     const { container, emitted } = mount({ modelValue: '09:30' })
     const input = container.querySelector('input') as HTMLInputElement
     await type(input, '')
@@ -328,26 +328,26 @@ describe('VTimePicker — mode saisie', () => {
     expect(emitted('update:modelValue')?.at(-1)).toEqual([null])
   })
 
-  // « aucun cadran sans showDial » est désormais le comportement PAR DÉFAUT du
-  // composant : le test vit dans le describe « défaut ».
+  // "no dial without showDial" is the component's DEFAULT behaviour: that test lives in
+  // the "default" describe.
 
-  it('showDial rétablit l’icône et l’ouverture au focus, sans voler le curseur', async () => {
-    // sans valeur : l'icône de fin est bien le cadran, pas la croix d'effacement
+  it('showDial restores the icon and the opening on focus, without stealing the caret', async () => {
+    // with no value: the end icon is indeed the dial, not the clear cross
     const { container, getByRole } = mount({ modelValue: null, showDial: true })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.getAttribute('aria-haspopup')).toBe('dialog')
-    expect(container.querySelector('button[aria-label="Ouvrir le sélecteur d’heure"]')).toBeTruthy()
+    expect(container.querySelector('button[aria-label="Open time picker"]')).toBeTruthy()
     await fireEvent.focus(input)
     await nextTick()
     expect(panelOpen(container)).toBe(true)
-    // la flèche bas est le chemin explicite du champ vers le cadran
+    // the down arrow is the explicit route from the field to the dial
     await fireEvent.keyDown(input, { key: 'ArrowDown', bubbles: true })
     await nextTick()
     expect(document.activeElement).toBe(getByRole('slider'))
   })
 })
 
-describe('VTimePicker — mode liste', () => {
+describe('VTimePicker — list mode', () => {
   const mount = (props: Record<string, unknown> = {}) =>
     render(VTimePicker, {
       props: {
@@ -363,7 +363,7 @@ describe('VTimePicker — mode liste', () => {
   const optionsOf = (container: Element) =>
     [...container.querySelectorAll('[role="option"]')] as HTMLElement[]
 
-  it('rend une listbox des heures au pas demandé, champ en lecture seule', async () => {
+  it('renders a listbox of times at the requested step, with a read-only field', async () => {
     const { container, getByRole } = mount({ modelValue: '14:30' })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.readOnly).toBe(true)
@@ -377,7 +377,7 @@ describe('VTimePicker — mode liste', () => {
     expect(selected?.dataset.value).toBe('14:30')
   })
 
-  it('commite directement au clic et ferme (ni brouillon ni OK)', async () => {
+  it('commits directly on click and closes (no draft, no OK)', async () => {
     const { container, emitted } = mount({ modelValue: '14:30' })
     await openPanel(container)
     expect(container.querySelector('.v-timepicker-footer')).toBeNull()
@@ -389,10 +389,10 @@ describe('VTimePicker — mode liste', () => {
     )
   })
 
-  it('l’Entrée sur une rangée commite et ne rouvre pas le panneau', async () => {
-    // Sans le preventDefault de onPanelKeydown, l'Entrée remonte à la racine
-    // sans être marquée consommée et la garde `defaultPrevented` de
-    // useFieldPanel ne joue pas : le panneau se rouvre aussitôt.
+  it('Enter on a row commits and does not reopen the panel', async () => {
+    // Without onPanelKeydown's preventDefault, Enter bubbles to the root without being
+    // marked consumed and useFieldPanel's `defaultPrevented` guard does not apply: the
+    // panel reopens at once.
     const { container, emitted } = mount({ modelValue: '14:30' })
     await openPanel(container)
     const option = optionsOf(container)[5] as HTMLElement // 02:30
@@ -405,7 +405,7 @@ describe('VTimePicker — mode liste', () => {
     )
   })
 
-  it('navigue au clavier dans la liste (flèches, Home, End)', async () => {
+  it('navigates the list with the keyboard (arrows, Home, End)', async () => {
     const { container } = mount({ modelValue: '00:00' })
     await openPanel(container)
     const options = optionsOf(container)
@@ -419,22 +419,22 @@ describe('VTimePicker — mode liste', () => {
     expect(document.activeElement).toBe(options[0])
   })
 
-  it('avertit sur showDial et sur un pas trop fin', () => {
+  it('warns about showDial and about too fine a step', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     mount({ modelValue: null, showDial: true, minuteStep: 1 })
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('showDial'))
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('rangées'))
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('rows'))
     warn.mockRestore()
   })
 })
 
-describe('VTimePicker — méridien hors du panneau', () => {
+describe('VTimePicker — the meridiem outside the panel', () => {
   const pmOf = (container: Element) =>
     [...container.querySelectorAll('.v-timepicker-meridiem button')].find(
       (b) => b.textContent?.trim() === 'PM',
     ) as HTMLElement
 
-  it('pilote le v-model sans ouvrir ni valider', async () => {
+  it('drives the v-model without opening or confirming', async () => {
     const { container, emitted } = render(VTimePicker, {
       props: { modelValue: '07:00', format: '12h' },
     })
@@ -445,18 +445,18 @@ describe('VTimePicker — méridien hors du panneau', () => {
     expect(panelOpen(container)).toBe(false)
   })
 
-  it('sans valeur : le choix est mémorisé et s’applique à la première saisie', async () => {
+  it('with no value: the choice is remembered and applies to the first entry', async () => {
     const { container, emitted } = render(VTimePicker, {
       props: { modelValue: null, format: '12h', mode: 'input' },
     })
     await fireEvent.click(pmOf(container))
-    expect(emitted('update:modelValue')).toBeUndefined() // rien à convertir
+    expect(emitted('update:modelValue')).toBeUndefined() // nothing to convert
     const input = container.querySelector('input') as HTMLInputElement
     await type(input, '07:00')
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['19:00'])
   })
 
-  it('cadran ouvert : le brouillon suit le méridien, OK commite la bonne valeur', async () => {
+  it('with the dial open: the draft follows the meridiem, and OK commits the right value', async () => {
     const { container, emitted, getByText } = render(VTimePicker, {
       props: { mode: 'readonly', modelValue: '07:00', format: '12h' },
     })

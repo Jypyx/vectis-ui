@@ -34,30 +34,30 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 import { useLocale, useMessages } from '../../i18n/state'
 
 /**
- * Sélecteur de date : champ `VInput` + `VCalendar` dans un `VPopover` en
- * `mode="manual"`, ancré en pur CSS. On ne passe pas par le `#trigger` de
- * VPopover (`popovertarget` est invalide sur un `<input>` texte) : l'ouverture
- * est programmatique, ce qui permet de déplacer le focus DOM dans la grille du
- * calendrier. Fermeture par `@focusout` sur la racine + Échap.
+ * A date picker: a `VInput` field + a `VCalendar` inside a `VPopover` in
+ * `mode="manual"`, anchored in pure CSS. VPopover's `#trigger` is not used
+ * (`popovertarget` is invalid on a text `<input>`): the opening is programmatic, which
+ * is what allows moving the DOM focus into the calendar's grid. Closing happens through
+ * `@focusout` on the root + Escape.
  *
- * Deux modes de champ (prop `mode`) : `input` (défaut) où le champ se tape au
- * clavier derrière un masque numérique dérivé de la locale — l'utilisateur ne
- * saisit que des chiffres, les séparateurs sont posés au fil de la frappe — et
- * `readonly`, où la date ne se choisit qu'au calendrier. La prop `selection`,
- * elle, est le passe-plat du mode de sélection du VCalendar.
+ * Two field modes (the `mode` prop): `input` (the default), where the field is typed on
+ * the keyboard behind a numeric mask derived from the locale — the user types digits
+ * only, and the separators are placed as they go — and `readonly`, where the date can
+ * only be chosen from the calendar. The `selection` prop, meanwhile, is the pass-through
+ * of VCalendar's selection mode.
  */
 type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
 
-/** Mode du champ : saisie clavier masquée (défaut) ou lecture seule. */
+/** Field mode: masked keyboard input (the default) or read-only. */
 export type DatePickerMode = 'readonly' | 'input'
 
 const MODES: DatePickerMode[] = ['readonly', 'input']
 
 /**
- * Siècle d'expansion d'une année à 2 chiffres (« 10/06/26 » → 2026), appliqué à
- * la sortie du champ seulement. Pivot FIXE et non glissant : une règle dérivée
- * de l'année courante rendrait le composant non déterministe (même raison que
- * le `today` posé en `onMounted` du VCalendar) et daterait ses tests.
+ * The century a 2-digit year expands into ("10/06/26" → 2026), applied on leaving the
+ * field only. A FIXED pivot, not a sliding one: a rule derived from the current year
+ * would make the component non-deterministic (the same reason as VCalendar's `today`,
+ * set in `onMounted`) and would date its tests.
  */
 const YEAR_PIVOT = 2000
 
@@ -68,13 +68,13 @@ const DEFAULT_DISPLAY_FORMAT: Intl.DateTimeFormatOptions = {
 }
 
 interface DatePickerProps {
-  // Passe-plat vers VCalendar.
+  // Pass-through to VCalendar.
   selection?: CalendarSelection
   /**
-   * Locale BCP 47 (noms de mois/jours, 1er jour de semaine). PRIORITAIRE sur la
-   * locale globale du DS (`setLocale`), sur laquelle elle retombe à défaut —
-   * d'où l'absence de défaut littéral ici : `undefined` doit rester
-   * distinguable pour que la locale globale ait une chance de s'appliquer.
+   * A BCP 47 locale (month/day names, the first day of the week). It TAKES PRECEDENCE
+   * over the DS's global locale (`setLocale`), which it falls back to — hence the
+   * absence of a literal default here: `undefined` must stay distinguishable for the
+   * global locale to have a chance to apply.
    */
   locale?: string
   firstDayOfWeek?: number
@@ -84,44 +84,43 @@ interface DatePickerProps {
   showAdjacentDays?: boolean
   selectAdjacentDays?: boolean
   events?: CalendarEvent[]
-  // Champ.
+  // The field.
   /**
-   * `input` (défaut) : le champ se tape au clavier, au masque numérique de la
-   * locale. `readonly` : la date ne se choisit qu'au calendrier. La saisie est
-   * réservée à la sélection `single` — une plage ou une liste retombe d'office
-   * en `readonly`.
+   * `input` (the default): the field is typed on the keyboard, in the locale's numeric
+   * mask. `readonly`: the date can only be chosen from the calendar. Typing is reserved
+   * for the `single` selection — a range or a list falls back to `readonly`.
    */
   mode?: DatePickerMode
   /**
-   * Affiche le calendrier sous le champ en mode saisie : icône cliquable en fin
-   * de champ + panneau ouvert au focus. Sans effet en lecture seule, où le
-   * calendrier est le seul moyen de choisir une date.
+   * Displays the calendar under the field in input mode: a clickable icon at the end of
+   * the field + a panel opened on focus. No effect in read-only mode, where the calendar
+   * is the only way to choose a date.
    */
   showCalendar?: boolean
   label?: string
   hint?: string
   placeholder?: string
-  /** Hauteur du champ : sm 32px, md 40px (défaut), lg 48px. */
+  /** Field height: sm 32px, md 40px (the default), lg 48px. */
   size?: 'sm' | 'md' | 'lg'
   compact?: boolean
   disabled?: boolean
   invalid?: boolean
-  /** Bouton d'effacement (croix) qui vide la valeur, à gauche de l'icône de fin. */
+  /** A clear button (a cross) emptying the value, to the left of the end icon. */
   clearable?: boolean
   /**
-   * Icône d'ouverture du calendrier, à la fin du champ. La croix d'effacement de
-   * `clearable` s'affiche à sa gauche sans la remplacer ; aucune icône n'est
-   * rendue quand il n'y a pas de panneau (`showCalendar` à false en saisie).
+   * The calendar-opening icon, at the end of the field. `clearable`'s clear cross shows
+   * to its left without replacing it; no icon is rendered when there is no panel
+   * (`showCalendar` false in input mode).
    */
   calendarIcon?: IconSource
   /**
-   * Format d'affichage de la date dans le champ (Intl.DateTimeFormat). Sans
-   * objet en mode `input` (défaut), où le champ porte le masque numérique de la
-   * locale : concerne donc `mode="readonly"` et les sélections `range` et
-   * `multiple`, qui y retombent.
+   * Display format of the date in the field (Intl.DateTimeFormat). Pointless in `input`
+   * mode (the default), where the field carries the locale's numeric mask: it therefore
+   * concerns `mode="readonly"` and the `range` and `multiple` selections, which fall
+   * back to it.
    */
   displayFormat?: Intl.DateTimeFormatOptions
-  /** Placement du panneau par rapport au champ. */
+  /** Placement of the panel relative to the field. */
   placement?: Placement
 }
 
@@ -135,9 +134,9 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   showAdjacentDays: false,
   selectAdjacentDays: false,
   events: undefined,
-  // `undefined` et non `'input'` : c'est ce qui distingue « prop non fournie »
-  // d'un choix explicite, et donc ce qui permet de n'avertir que le
-  // consommateur qui a vraiment demandé quelque chose d'inopérant.
+  // `undefined` and not `'input'`: that is what distinguishes "prop not supplied" from
+  // an explicit choice, and hence what makes it possible to warn only the consumer who
+  // really asked for something inoperative.
   mode: undefined,
   showCalendar: false,
   label: undefined,
@@ -149,8 +148,8 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   invalid: false,
   clearable: true,
   calendarIcon: 'calendar_today',
-  // `undefined` et non l'objet lui-même : c'est ce qui rend la prop détectable
-  // (garde-fou dev en mode saisie, où elle n'a pas cours).
+  // `undefined` and not the object itself: that is what makes the prop detectable (the
+  // dev guard in input mode, where it does not apply).
   displayFormat: undefined,
   placement: 'bottom-start',
 })
@@ -158,7 +157,7 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
 const model = defineModel<CalendarValue>({ default: null })
 
 defineSlots<{
-  /** Contenu personnalisé d'une cellule jour (relayé vers VCalendar). */
+  /** Custom content of a day cell (relayed to VCalendar). */
   day?(props: {
     iso: string
     day: number
@@ -169,11 +168,11 @@ defineSlots<{
     inRange: boolean
     events: CalendarEvent[]
   }): unknown
-  /** Zone footer du panneau ; reçoit `close` pour fermer depuis un bouton/preset. */
+  /** Footer zone of the panel; it receives `close` to close from a button or a preset. */
   footer?(props: { close: () => void }): unknown
 }>()
 
-// Wrapper-root : class/style sur la racine, le reste reporté sur le VInput.
+// Wrapper-root: class/style on the root, the rest carried over to the VInput.
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
@@ -183,16 +182,16 @@ const inputRef = ref<InstanceType<typeof VInput> | null>(null)
 const calendarRef = ref<InstanceType<typeof VCalendar> | null>(null)
 const panelId = useId()
 
-/** L'`<input>` natif du champ (masque, caret) — exposé par `VInput`. */
+/** The field's native `<input>` (mask, caret) — exposed by `VInput`. */
 const fieldEl = computed<HTMLInputElement | null>(() => inputRef.value?.el ?? null)
 
-/** Mode demandé, replié sur le défaut si la valeur est absente ou inconnue. */
+/** The requested mode, folded back to the default when the value is absent or unknown. */
 const requestedMode = computed<DatePickerMode>(() =>
   props.mode !== undefined && MODES.includes(props.mode) ? props.mode : 'input',
 )
 /**
- * Le mode saisie est réservé à la sélection simple : une plage ou une liste de
- * dates ne tient pas dans un champ unique masqué.
+ * Input mode is reserved for the single selection: a range or a list of dates does not
+ * fit in a single masked field.
  */
 const resolvedMode = computed<DatePickerMode>(() =>
   requestedMode.value === 'input' && props.selection === 'single' ? 'input' : 'readonly',
@@ -200,8 +199,8 @@ const resolvedMode = computed<DatePickerMode>(() =>
 const typing = computed(() => resolvedMode.value === 'input')
 
 /**
- * Le calendrier n'est optionnel qu'en saisie : en lecture seule, il est le seul
- * moyen de choisir une date.
+ * The calendar is only optional in input mode: in read-only, it is the only way to
+ * choose a date.
  */
 const hasPanel = computed(() => !typing.value || props.showCalendar)
 
@@ -209,39 +208,39 @@ if (isDev) {
   watchEffect(() => {
     if (props.mode !== undefined && !MODES.includes(props.mode))
       console.warn(
-        `[VDatePicker] mode « ${props.mode} » inconnu : utilisez « input » (défaut) ou « readonly ».`,
+        `[VDatePicker] unknown mode "${props.mode}": use "input" (the default) or "readonly".`,
       )
-    // `props.mode` et NON `requestedMode` : « input » étant le défaut, une
-    // sélection range/multiple y retombe d'elle-même — seul celui qui a
-    // explicitement demandé la saisie doit être averti.
+    // `props.mode` and NOT `requestedMode`: since "input" is the default, a
+    // range/multiple selection falls back on its own — only whoever explicitly asked for
+    // typing should be warned.
     if (props.mode === 'input' && props.selection !== 'single')
       console.warn(
-        `[VDatePicker] mode="input" ignoré en sélection « ${props.selection} » : une plage ou une liste de dates ne se saisit pas au clavier.`,
+        `[VDatePicker] mode="input" ignored in "${props.selection}" selection: a range or a list of dates cannot be typed on the keyboard.`,
       )
-    // `typing` et non `props.mode` : la prop a bien été fournie et se trouve
-    // réellement sans effet — l'avertissement reste actionnable.
+    // `typing` and not `props.mode`: the prop was indeed supplied and really has no
+    // effect — the warning stays actionable.
     if (props.displayFormat && typing.value)
       console.warn(
-        '[VDatePicker] displayFormat est ignoré en mode « input » (défaut) : le champ affiche le masque numérique de la locale, seul format saisissable. Passez mode="readonly" pour un affichage formaté.',
+        '[VDatePicker] displayFormat is ignored in "input" mode (the default): the field displays the locale\'s numeric mask, the only typeable format. Pass mode="readonly" for a formatted display.',
       )
   })
 }
 
-// Coquille champ + panneau `manual` partagée avec le VTimePicker : ouverture,
-// fermeture, sortie de focus, clic sur le contrôle, Échap/ArrowDown/Entrée.
+// The field + `manual` panel shell shared with VTimePicker: opening, closing, focus
+// leaving, a click on the control, Escape/ArrowDown/Enter.
 const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPanelMousedown } =
   useFieldPanel({
     rootEl,
     panelRef,
     fieldEl: inputRef,
-    // Pas de panneau = rien à ouvrir. `disabled` est le point de coupure UNIQUE
-    // du composable (openPanel + onControlClick) et toutes les voies d'ouverture
-    // y passent : clic sur le contrôle, focus du champ, ArrowDown, Entrée, icône
-    // de fin. Inutile de répéter la condition dans chaque handler.
+    // No panel = nothing to open. `disabled` is the composable's SINGLE cut-off point
+    // (openPanel + onControlClick) and every opening route goes through it: a click on
+    // the control, focusing the field, ArrowDown, Enter, the end icon. There is no need
+    // to repeat the condition in each handler.
     disabled: () => props.disabled || !hasPanel.value,
     focusInPanel: () => calendarRef.value?.focus(),
-    // En saisie, le panneau s'ouvre sous le curseur sans le happer : la frappe
-    // continue dans le champ, la flèche bas reste le chemin vers la grille.
+    // In input mode the panel opens under the caret without grabbing it: typing
+    // continues in the field, and the down arrow stays the route to the grid.
     focusOnOpen: () => !typing.value,
   })
 
@@ -255,9 +254,9 @@ const hasValue = computed(() => {
 })
 
 const vectisLocale = useLocale()
-/* Prop prioritaire, sinon locale globale du DS. VDatePicker est la source
-   UNIQUE : c'est `resolvedLocale` qui descend au VCalendar, jamais `locale`
-   (qui vaudrait `undefined`), sinon la balise serait résolue deux fois. */
+/* The prop takes precedence, otherwise the DS's global locale. VDatePicker is the
+   SINGLE source: `resolvedLocale` is what flows down to VCalendar, never `locale` (which
+   would be `undefined`), or the tag would be resolved twice. */
 const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
 
 const displayText = computed(() => {
@@ -278,35 +277,34 @@ const displayText = computed(() => {
   return list.map((iso) => formatDisplay(iso, locale, displayFormat)).join(', ')
 })
 
-/* ── Mode saisie : brouillon masqué ─────────────────────────────────────── */
+/* Input mode: the masked draft. */
 
 const mask = computed(() => dateMaskFor(resolvedLocale.value))
 const maskHint = computed(() => maskPlaceholder(resolvedLocale.value, mask.value))
 const isDisabledDate = computed(() => resolveMatcher(props.disabledDates))
 
 /**
- * Texte du champ PENDANT la frappe. C'est lui la source de vérité tant que la
- * saisie est en cours : le v-model, lui, ne reçoit qu'une date complète, valide
- * et acceptable.
+ * The field's text WHILE typing. It is the source of truth as long as the input is in
+ * progress: the v-model only receives a complete, valid and acceptable date.
  */
 const draft = ref('')
 
 function syncDraftFromModel() {
   const iso = typeof model.value === 'string' && isValidISO(model.value) ? model.value : null
   const next = iso ? isoToMask(iso, mask.value) : ''
-  // Garde anti-boucle : un commit en cours de frappe réécrit le modèle, qui
-  // repasse ici — sans ce test on écraserait le brouillon et le caret par un
-  // texte identique.
+  // An anti-loop guard: a commit made while typing rewrites the model, which comes back
+  // through here — without this test the draft and the caret would be overwritten with an
+  // identical text.
   if (next !== draft.value) draft.value = next
 }
 watch([model, mask], syncDraftFromModel, { immediate: true })
 
 /**
- * `v-model` et non `:model-value` : sans écouteur `onUpdate:modelValue`, le VInput
- * recopierait en interne le texte BRUT tapé (via son propre `v-model`) et le
- * réécrirait dans le DOM au patch suivant, effaçant le masque dès qu'il ne
- * change pas lui-même (9e chiffre, caractère refusé). Avec l'écouteur, son état
- * interne ne bouge plus que par la prop, donc par `draft`.
+ * `v-model` and not `:model-value`: without an `onUpdate:modelValue` listener, the
+ * VInput would internally copy the RAW typed text (through its own `v-model`) and
+ * rewrite it into the DOM on the next patch, erasing the mask as soon as the mask itself
+ * does not change (the 9th digit, a rejected character). With the listener, its internal
+ * state only moves through the prop, hence through `draft`.
  */
 const fieldModel = computed<string | number>({
   get: () => (typing.value ? draft.value : displayText.value),
@@ -315,7 +313,7 @@ const fieldModel = computed<string | number>({
   },
 })
 
-/** Écrit le brouillon ET le DOM : Vue ne repatche pas un texte masqué inchangé. */
+/** Writes the draft AND the DOM: Vue does not re-patch an unchanged masked text. */
 function writeField(text: string, caret?: number) {
   draft.value = text
   const el = fieldEl.value
@@ -328,9 +326,9 @@ const acceptable = (iso: string) =>
   isWithin(iso, props.min, props.max) && !isDisabledDate.value(iso)
 
 /**
- * Commit au fil de la frappe, dès que la date est complète ET acceptable : le
- * calendrier suit la saisie. Sans pivot d'année — « …/26 » ne doit pas commiter
- * 2026 alors que l'utilisateur est en train de taper son année.
+ * A commit as you type, as soon as the date is complete AND acceptable: the calendar
+ * follows the input. With no year pivot — "…/26" must not commit 2026 while the user is
+ * still typing the year.
  */
 function commitLive() {
   const iso = parseDateMask(draft.value, mask.value)
@@ -338,10 +336,10 @@ function commitLive() {
 }
 
 /**
- * Sortie du champ (`change` puis `blur`, d'où l'idempotence) : on normalise, ou
- * on REVERT SILENCIEUSEMENT. Une saisie incomplète, impossible (31/02), hors
- * bornes ou désactivée disparaît au profit de la valeur courante — pas d'état
- * d'erreur maison qui entrerait en concurrence avec la prop `invalid`.
+ * Leaving the field (`change` then `blur`, hence the idempotence): it normalizes, or
+ * REVERTS SILENTLY. An incomplete, impossible (31/02), out-of-bounds or disabled entry
+ * disappears in favour of the current value — no home-made error state to compete with
+ * the `invalid` prop.
  */
 function commitOrRevert() {
   if (!typing.value) return
@@ -353,7 +351,7 @@ function commitOrRevert() {
   const iso = parseDateMask(draft.value, mask.value, { yearPivot: YEAR_PIVOT })
   if (iso && acceptable(iso)) {
     if (iso !== model.value) model.value = iso
-    writeField(isoToMask(iso, mask.value)) // « 5/6/26 » → « 05/06/2026 »
+    writeField(isoToMask(iso, mask.value)) // "5/6/26" → "05/06/2026"
     return
   }
   const current = typeof model.value === 'string' && isValidISO(model.value) ? model.value : ''
@@ -361,9 +359,9 @@ function commitOrRevert() {
 }
 
 /**
- * Masque à la frappe. Invariant : le nombre de chiffres à GAUCHE du caret est
- * conservé par le reformatage — les positions absolues sautent dès qu'un
- * séparateur apparaît ou disparaît.
+ * The mask as you type. Invariant: the number of digits to the LEFT of the caret is
+ * preserved by the reformatting — absolute positions jump as soon as a separator appears
+ * or disappears.
  */
 function onFieldInput(event: Event) {
   if (!typing.value) return
@@ -372,8 +370,8 @@ function onFieldInput(event: Event) {
   const caret = el.selectionStart ?? raw.length
   const before = digitsOf(raw.slice(0, caret)).length
   const digits = digitsOf(raw).slice(0, mask.value.size)
-  // Le caret ne franchit le séparateur qu'en insertion : à la suppression, il
-  // doit rester devant lui, sinon la touche ne progresse jamais.
+  // The caret only crosses the separator on insertion: on deletion it has to stay in
+  // front of it, or the key never makes progress.
   const deleting = String((event as InputEvent).inputType ?? '').startsWith('delete')
   const text = formatDateMask(digits, mask.value)
   writeField(
@@ -388,9 +386,9 @@ function onFieldInput(event: Event) {
 }
 
 /**
- * Un caractère non numérique complète le champ courant par un zéro de tête et
- * passe au suivant (« 5/6/2026 » se tape comme « 05062026 »). Réservé au jour
- * et au mois : une année tronquée n'a pas de convention de zéro de tête.
+ * A non-numeric character completes the current field with a leading zero and moves to
+ * the next ("5/6/2026" is typed as "05062026"). Reserved for the day and the month: a
+ * truncated year has no leading-zero convention.
  */
 function padCurrentField(el: HTMLInputElement) {
   const start = el.selectionStart ?? el.value.length
@@ -417,15 +415,15 @@ function onFieldKeydown(event: KeyboardEvent) {
   if (!el) return
 
   if (event.key === 'Enter') {
-    // preventDefault : neutralise à la fois la soumission du formulaire et la
-    // réouverture par la racine (garde `defaultPrevented` de useFieldPanel).
+    // preventDefault: it neutralizes both the form submission and the reopening by the
+    // root (useFieldPanel's `defaultPrevented` guard).
     event.preventDefault()
     commitOrRevert()
     if (open.value) closeAndFocus()
     return
   }
   if (event.key === 'ArrowDown' && open.value) {
-    // seul chemin explicite du champ vers la grille
+    // the only explicit route from the field to the grid
     event.preventDefault()
     calendarRef.value?.focus()
     return
@@ -438,9 +436,9 @@ function onFieldKeydown(event: KeyboardEvent) {
       start > 0 &&
       !/\d/.test(el.value[start - 1] ?? '')
     ) {
-      // Le séparateur est POSÉ par le masque, jamais saisi : on efface le
-      // chiffre qui le précède — ce que l'utilisateur croit effacer. Sinon le
-      // masque le réécrit aussitôt et la touche paraît morte.
+      // The separator is PLACED by the mask, never typed: the digit preceding it is
+      // erased — what the user believes they are erasing. Otherwise the mask rewrites it
+      // at once and the key appears dead.
       event.preventDefault()
       const n = digitsOf(el.value.slice(0, start)).length
       const digits = digitsOf(el.value)
@@ -463,9 +461,9 @@ function onFieldKeydown(event: KeyboardEvent) {
 }
 
 /**
- * Collage : une date ISO ou déjà masquée est adoptée telle quelle, sinon seuls
- * ses chiffres sont insérés. Sans ce handler, coller « 2026-06-10 » dans un
- * masque jj/mm/aaaa donnerait « 20/26/0610 ».
+ * Pasting: an ISO or already-masked date is adopted as it is, otherwise only its digits
+ * are inserted. Without this handler, pasting "2026-06-10" into a dd/mm/yyyy mask would
+ * give "20/26/0610".
  */
 function onFieldPaste(event: ClipboardEvent) {
   if (!typing.value) return
@@ -495,10 +493,10 @@ function onFieldPaste(event: ClipboardEvent) {
 }
 
 /**
- * Le focus rendu au champ à la fermeture le rouvrirait aussitôt (en saisie, le
- * panneau s'ouvre AU FOCUS) : ce verrou couvre l'appel, synchrone, de `focus()`.
- * Toute fermeture avec refocus doit passer par ici — un `closePanel(true)`
- * direct réintroduit la boucle.
+ * The focus handed back to the field on closing would reopen it at once (in input mode,
+ * the panel opens ON FOCUS): this lock covers the synchronous `focus()` call. Every close
+ * with a refocus has to go through here — a direct `closePanel(true)` reintroduces the
+ * loop.
  */
 let refocusing = false
 function closeAndFocus() {
@@ -522,10 +520,10 @@ function onRootKeydown(event: KeyboardEvent) {
 }
 
 /*
- * La croix d'effacement passe par le `clearable` de le VInput, qui la rend À
- * GAUCHE de l'icône de fin (convention VInput/VTextarea/VCombobox) : les deux
- * affordances coexistent. `clearVisible` est indispensable ici — le champ est
- * readonly hors saisie, et la valeur y vient du panneau.
+ * The clear cross goes through VInput's `clearable`, which renders it to the LEFT of the
+ * end icon (the VInput/VTextarea/VCombobox convention): both affordances coexist.
+ * `clearVisible` is indispensable here — the field is readonly outside input mode, and
+ * its value comes from the panel.
  */
 const canClear = computed(
   () => props.clearable && !props.disabled && (hasValue.value || (typing.value && !!draft.value)),
@@ -534,29 +532,29 @@ const endIcon = computed<IconSource | undefined>(() =>
   hasPanel.value ? props.calendarIcon : undefined,
 )
 /*
- * Le LIBELLÉ, lui, reste toujours défini, même quand aucune icône n'est rendue :
- * `useIconClickHandlers` avertit AU SETUP dès qu'un `@click:icon-end` est
- * attaché sans `iconEndLabel`, sans savoir si une icône est rendue. Le listener
- * étant posé en permanence et sa détection statique, un libellé conditionnel
- * ferait apparaître un faux avertissement au montage d'un champ sans calendrier.
+ * The LABEL, on the other hand, stays defined at all times, even when no icon is
+ * rendered: `useIconClickHandlers` warns AT SETUP as soon as an `@click:icon-end` is
+ * attached without an `iconEndLabel`, with no way to know whether an icon exists. Since
+ * the listener is attached permanently and its detection is static, a conditional label
+ * would raise a false warning when mounting a field with no calendar.
+ *
+ * Labels: no dedicated prop, the dictionary is the only override point — see `src/i18n/`.
  */
-// Libellés : aucune prop dédiée, le dictionnaire est le seul point de
-// surcharge — cf. `src/i18n/`.
 const m = useMessages()
 
 const endIconLabel = computed(() => m.value.datePicker.open)
 
 function onEndIcon() {
   if (open.value) closeAndFocus()
-  // Clic explicite sur l'icône calendrier : le focus a déjà quitté le champ
-  // pour le bouton, l'emmener dans la grille est le bon geste dans les 2 modes.
+  // An explicit click on the calendar icon: the focus has already left the field for the
+  // button, so taking it into the grid is the right move in both modes.
   else openPanel(true)
 }
 /*
- * Appelé par `@clear` de le VInput, DANS son `emit` : le `focus()` posé ici sous
- * verrou rend le `controlEl.focus()` que VInput exécute juste après inopérant
- * (élément déjà focalisé = aucun événement `focus` émis), donc le panneau ne se
- * rouvre pas. Retirer le verrou d'ici le rouvrirait.
+ * Called by VInput's `@clear`, INSIDE its `emit`: the `focus()` placed here under the
+ * lock makes the `controlEl.focus()` VInput runs just afterwards inert (an
+ * already-focused element = no `focus` event emitted), so the panel does not reopen.
+ * Removing the lock from here would reopen it.
  */
 function clearValue() {
   model.value =
@@ -565,15 +563,15 @@ function clearValue() {
       : props.selection === 'range'
         ? { start: null, end: null }
         : null
-  // `draft` explicitement : quand le modèle valait déjà `null`, la garde
-  // anti-boucle de `syncDraftFromModel` ne le viderait pas.
+  // `draft` explicitly: when the model was already `null`, `syncDraftFromModel`'s
+  // anti-loop guard would not empty it.
   if (typing.value) writeField('')
   refocusing = true
   inputRef.value?.focus()
   refocusing = false
 }
 
-/** Sélection dans le calendrier : en mode simple, on ferme. */
+/** A selection in the calendar: in single mode, it closes. */
 function onSelect() {
   if (props.selection === 'single') closeAndFocus()
 }
@@ -626,8 +624,8 @@ const close = () => closeAndFocus()
       />
     </div>
 
-    <!-- Sans panneau monté, `panelRef` est nul : `open`, alimenté par le DOM du
-         popover, ne peut plus passer à `true`. -->
+    <!-- With no panel mounted, `panelRef` is null: `open`, fed by the popover's DOM, can
+         no longer turn `true`. -->
     <VPopover
       v-if="hasPanel"
       :id="panelId"
@@ -670,7 +668,8 @@ const close = () => closeAndFocus()
 <style>
 @layer vectis.components {
   .v-datepicker {
-    /* confine l'ancre à cette instance (racine = ancêtre commun contrôle/panneau) */
+    /* Confines the anchor to this instance (the root = the common ancestor of the
+       control and the panel) */
     anchor-scope: --datepicker-anchor;
     display: block;
     width: 100%;
@@ -683,10 +682,9 @@ const close = () => closeAndFocus()
     cursor: pointer;
   }
 
-  /* Mode saisie : le champ est éditable, le curseur texte de l'<input> reprend
-     la main sur le `pointer` du contrôle (qui, lui, signale « ceci ouvre un
-     panneau »). Le masque a une largeur fixe : chasse tabulaire, sinon le caret
-     vibre d'un chiffre à l'autre. */
+  /* Input mode: the field is editable, and the <input>'s text caret takes over from the
+     control's `pointer` (which signals "this opens a panel"). The mask has a fixed width:
+     tabular figures, otherwise the caret jitters from one digit to the next. */
   .v-datepicker[data-mode='input'] .v-datepicker-control {
     cursor: text;
   }
@@ -695,10 +693,10 @@ const close = () => closeAndFocus()
     font-variant-numeric: tabular-nums;
   }
 
-  /* `position-anchor` et le chrome viennent de VPopover (props `anchor` et
-     `surface`, cette dernière posant `.v-panel`) : il ne reste ici que les
-     dimensions, que `panel.css` ne porte volontairement pas. Padding annulé —
-     le VCalendar gère sa propre respiration. */
+  /* `position-anchor` and the chrome come from VPopover (the `anchor` and `surface`
+     props, the latter setting `.v-panel`): only the dimensions are left here, which
+     `panel.css` deliberately does not carry. The padding is cancelled — VCalendar handles
+     its own breathing room. */
   .v-datepicker-panel {
     width: max-content;
     padding: 0;

@@ -4,7 +4,10 @@ import { nextTick } from 'vue'
 
 import VCalendar from './VCalendar.vue'
 
-// Grille de référence : juin 2026 (le 10 est un mercredi).
+// Reference grid: June 2026 (the 10th is a Wednesday).
+// Several tests pass `locale: 'fr-FR'` on purpose: the `locale` prop is what they
+// assert, so their expectations are French month and day names. The DS dictionary is a
+// separate axis — the navigation buttons stay in the base locale (English).
 const JUNE = '2026-06-10'
 
 function keydown(el: Element, key: string, opts: KeyboardEventInit = {}) {
@@ -12,18 +15,18 @@ function keydown(el: Element, key: string, opts: KeyboardEventInit = {}) {
 }
 
 describe('VCalendar', () => {
-  it('rend 42 cellules et des en-têtes de jours localisés', () => {
+  it('renders 42 cells and localized day headers', () => {
     const { container } = render(VCalendar, {
       props: { modelValue: JUNE, locale: 'fr-FR' },
     })
     expect(container.querySelectorAll('[role="gridcell"]')).toHaveLength(42)
     const headers = container.querySelectorAll('[role="columnheader"]')
     expect(headers).toHaveLength(7)
-    // fr-FR → première colonne = lundi
+    // fr-FR → the first column is Monday
     expect(headers[0]?.getAttribute('aria-label')?.toLowerCase()).toContain('lundi')
   })
 
-  it('sélectionne une date (sélection single) et émet un ISO', async () => {
+  it('selects a date (single selection) and emits an ISO string', async () => {
     const { container, emitted } = render(VCalendar, {
       props: { modelValue: JUNE },
     })
@@ -37,19 +40,19 @@ describe('VCalendar', () => {
     expect(emitted('select')?.at(-1)).toEqual(['2026-06-15'])
   })
 
-  it('construit une plage réordonnée (sélection range)', async () => {
+  it('builds a reordered range (range selection)', async () => {
     const { container, emitted } = render(VCalendar, {
       props: { selection: 'range', modelValue: { start: null, end: null } },
     })
-    // navigue vers juin 2026 via un modelValue de départ n'est pas donné → mois courant.
-    // On force plutôt le mois via clic sur des jours du mois affiché.
+    // No starting modelValue is given → the current month. The month is therefore driven
+    // by clicking days of the displayed month rather than by navigating.
     const days = [
       ...container.querySelectorAll('.v-calendar-day:not([data-outside])'),
     ] as HTMLElement[]
     const d20 = days.find((d) => d.textContent?.trim() === '20')!
     const d10 = days.find((d) => d.textContent?.trim() === '10')!
     await fireEvent.click(d20) // start
-    await fireEvent.click(d10) // end < start → réordonné
+    await fireEvent.click(d10) // end < start → reordered
     const last = (emitted('update:modelValue')?.at(-1) as unknown[])?.[0] as {
       start: string
       end: string
@@ -59,7 +62,7 @@ describe('VCalendar', () => {
     expect(last.start < last.end).toBe(true)
   })
 
-  it('bascule une date dans le tableau (sélection multiple)', async () => {
+  it('toggles a date in the array (multiple selection)', async () => {
     const { container, emitted, rerender } = render(VCalendar, {
       props: { selection: 'multiple', modelValue: [] as string[] },
     })
@@ -76,7 +79,7 @@ describe('VCalendar', () => {
     expect(removed).toHaveLength(0)
   })
 
-  it('désactive les dates hors [min,max] et bloque leur sélection', async () => {
+  it('disables the dates outside [min,max] and blocks their selection', async () => {
     const { container, emitted } = render(VCalendar, {
       props: { modelValue: JUNE, min: '2026-06-05', max: '2026-06-20' },
     })
@@ -87,7 +90,7 @@ describe('VCalendar', () => {
     expect(emitted('update:modelValue')).toBeUndefined()
   })
 
-  it('barre les dates du prédicat disabledDates', () => {
+  it('strikes through the dates matched by the disabledDates predicate', () => {
     const { container } = render(VCalendar, {
       props: {
         modelValue: JUNE,
@@ -99,8 +102,8 @@ describe('VCalendar', () => {
     expect(d12.getAttribute('aria-disabled')).toBe('true')
   })
 
-  it('masque les jours adjacents quand showAdjacentDays est faux', () => {
-    // par défaut selectAdjacentDays=false → jours adjacents rendus en spans statiques
+  it('hides the adjacent days when showAdjacentDays is false', () => {
+    // by default selectAdjacentDays=false → adjacent days are rendered as static spans
     const withAdjacent = render(VCalendar, { props: { modelValue: JUNE, showAdjacentDays: true } })
     const withoutAdjacent = render(VCalendar, {
       props: { modelValue: JUNE, showAdjacentDays: false },
@@ -111,7 +114,7 @@ describe('VCalendar', () => {
     expect(adjacent(withoutAdjacent.container as HTMLElement)).toBe(0)
   })
 
-  it('n’affiche pas les jours adjacents par défaut', () => {
+  it('does not display the adjacent days by default', () => {
     const { container } = render(VCalendar, { props: { modelValue: JUNE } })
     const adjacent = container.querySelectorAll(
       '.v-calendar-day--static, .v-calendar-day[data-outside]',
@@ -119,8 +122,8 @@ describe('VCalendar', () => {
     expect(adjacent).toHaveLength(0)
   })
 
-  it('barre les jours adjacents hors [min,max]', () => {
-    // juin 2026 (débute lundi) → jours de juillet en fin de grille, tous > max
+  it('strikes through the adjacent days outside [min,max]', () => {
+    // June 2026 (starting on a Monday) → July days at the end of the grid, all > max
     const { container } = render(VCalendar, {
       props: { modelValue: JUNE, max: '2026-06-24', showAdjacentDays: true },
     })
@@ -128,29 +131,29 @@ describe('VCalendar', () => {
     expect(struck.length).toBeGreaterThan(0)
   })
 
-  it('applique le slot #day aux jours adjacents statiques', () => {
-    // sinon un contenu multi-lignes ne s'appliquerait qu'aux jours du mois et
-    // décalerait verticalement les numéros des jours adjacents
+  it('applies the #day slot to the static adjacent days', () => {
+    // otherwise multi-line content would only apply to the days of the month and would
+    // vertically shift the numbers of the adjacent days
     const { container } = render(VCalendar, {
       props: { modelValue: JUNE, showAdjacentDays: true },
-      slots: { day: '<span class="marqueur">{{ params.day }}</span>' },
+      slots: { day: '<span class="marker">{{ params.day }}</span>' },
     })
     const statics = [...container.querySelectorAll('.v-calendar-day--static')]
     expect(statics.length).toBeGreaterThan(0)
-    expect(statics.every((s) => s.querySelector('.marqueur') !== null)).toBe(true)
+    expect(statics.every((s) => s.querySelector('.marker') !== null)).toBe(true)
   })
 
-  it('rend les jours adjacents cliquables quand selectAdjacentDays est vrai', () => {
+  it('renders the adjacent days as clickable when selectAdjacentDays is true', () => {
     const { container } = render(VCalendar, {
       props: { modelValue: JUNE, showAdjacentDays: true, selectAdjacentDays: true },
     })
-    // ils deviennent des boutons marqués data-outside
+    // they become buttons marked data-outside
     expect(
       container.querySelectorAll('button.v-calendar-day[data-outside]').length,
     ).toBeGreaterThan(0)
   })
 
-  it('rend des pastilles pour les événements', () => {
+  it('renders dots for the events', () => {
     const { container } = render(VCalendar, {
       props: {
         modelValue: JUNE,
@@ -164,29 +167,29 @@ describe('VCalendar', () => {
     expect(selected.querySelectorAll('.v-calendar-dot')).toHaveLength(2)
   })
 
-  it('change de mois via les chevrons', async () => {
+  it('changes month through the chevrons', async () => {
     const { container, getByRole } = render(VCalendar, {
       props: { modelValue: JUNE, locale: 'fr-FR' },
     })
     const grid = getByRole('grid')
     expect(grid.getAttribute('aria-label')?.toLowerCase()).toContain('juin')
-    await fireEvent.click(getByRole('button', { name: 'Mois suivant' }))
+    await fireEvent.click(getByRole('button', { name: 'Next month' }))
     expect(getByRole('grid').getAttribute('aria-label')?.toLowerCase()).toContain('juillet')
     expect(container).toBeTruthy()
   })
 
-  it('ouvre la vue mois puis sélectionne un mois', async () => {
+  it('opens the months view then selects a month', async () => {
     const { getByRole, getAllByRole } = render(VCalendar, {
       props: { modelValue: JUNE, locale: 'fr-FR' },
     })
     await fireEvent.click(getByRole('button', { expanded: false, name: /juin/i }))
-    const monthsGrid = getByRole('grid', { name: /mois/i })
+    const monthsGrid = getByRole('grid', { name: /month/i })
     expect(monthsGrid).toBeTruthy()
     const cells = getAllByRole('gridcell')
     expect(cells.length).toBe(12)
   })
 
-  it('navigue au clavier (flèches) et sélectionne avec Entrée', async () => {
+  it('navigates with the keyboard (arrows) and selects with Enter', async () => {
     const { container, emitted } = render(VCalendar, { props: { modelValue: JUNE } })
     const grid = container.querySelector('[role="grid"]') as HTMLElement
     const focused = container.querySelector('.v-calendar-day[tabindex="0"]') as HTMLElement

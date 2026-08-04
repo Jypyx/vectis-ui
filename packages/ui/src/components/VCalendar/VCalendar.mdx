@@ -5,103 +5,97 @@ import * as VCalendarStories from './VCalendar.stories'
 
 # Calendar
 
-Calendrier inline (grille) inspiré de Material. Il porte **toute la logique** de
-sélection, de navigation par vues (jours / mois / années) et du clavier ; le
-[VDatePicker](?path=/docs/composants-datepicker--docs) se contente de l'habiller
-d'un champ et d'un panneau flottant.
+An inline calendar (a grid), Material-inspired. It carries **all the logic** of selection, of
+navigation by views (days / months / years) and of the keyboard; the
+[VDatePicker](?path=/docs/components-datepicker--docs) merely dresses it in a field and a floating
+panel.
 
-Le natif ne propose pas de grille de dates accessible et composable
-(`<input type="date">` n'est ni stylable ni décomposable) : le JS implémente donc
-le pattern ARIA **grid** — roving tabindex, flèches, `PageUp`/`PageDown`,
-sélection simple / plage / multiple. Tout se calcule en **heure locale** via des
-chaînes ISO `YYYY-MM-DD` (aucune dérive de fuseau, SSR-safe).
+The platform offers no accessible, composable date grid (`<input type="date">` is neither stylable
+nor decomposable): the JS therefore implements the ARIA **grid** pattern — roving tabindex, arrows,
+`PageUp`/`PageDown`, single / range / multiple selection. Everything is computed in **local time**
+through ISO `YYYY-MM-DD` strings (no timezone drift, SSR-safe).
 
 <Canvas of={VCalendarStories.Default} />
 <Controls of={VCalendarStories.Default} />
 
-## Modes de sélection
+## Selection modes
 
-`selection` accepte `single` (défaut), `range` et `multiple`. Le type du v-model
-suit la sélection : `string | null`, `{ start, end }` (`DateRange`), ou `string[]`.
+`selection` accepts `single` (the default), `range` and `multiple`. The v-model's type follows the
+selection: `string | null`, `{ start, end }` (`DateRange`), or `string[]`.
 
-<Canvas of={VCalendarStories.Plage} />
+<Canvas of={VCalendarStories.Range} />
 <Canvas of={VCalendarStories.Multiple} />
 
-## Bornes min / max
+## min / max bounds
 
-`min` et `max` (ISO) verrouillent la navigation **et** la sélection : les mois
-hors plage ne sont plus atteignables et les jours hors plage sont désactivés.
+`min` and `max` (ISO) lock the navigation **and** the selection: the months outside the range are
+no longer reachable and the days outside it are disabled.
 
 <Canvas of={VCalendarStories.MinMax} />
 
-## Dates désactivées
+## Disabled dates
 
-`disabledDates` accepte un tableau d'ISO **ou** un prédicat `(iso) => boolean`.
-Les dates concernées sont barrées et non sélectionnables (mais restent
-focusables au clavier, conformément au pattern ARIA).
+`disabledDates` accepts an array of ISO strings **or** a predicate `(iso) => boolean`. The dates
+concerned are struck through and non-selectable (but stay keyboard-focusable, as the ARIA pattern
+requires).
 
-<Canvas of={VCalendarStories.DatesDesactivees} />
+<Canvas of={VCalendarStories.DisabledDates} />
 
-## Mois adjacents
+## Adjacent months
 
-`showAdjacentDays` (désactivé par défaut) affiche les jours des mois
-précédent/suivant en grisé — activez-le par simple présence :
-`<VCalendar show-adjacent-days />`. `selectAdjacentDays` les rend cliquables (et
-implique leur affichage) — un clic navigue alors vers leur mois et les
-sélectionne.
+`showAdjacentDays` (off by default) displays the days of the previous/next months in grey — enable
+it by mere presence: `<VCalendar show-adjacent-days />`. `selectAdjacentDays` makes them clickable
+(and implies displaying them) — a click then navigates to their month and selects them.
 
-<Canvas of={VCalendarStories.MoisAdjacents} />
+<Canvas of={VCalendarStories.AdjacentMonths} />
 
-## Événements
+## Events
 
-`events` (`{ date, color?, label? }[]`) affiche jusqu'à trois pastilles colorées
-sous une date.
+`events` (`{ date, color?, label? }[]`) displays up to three coloured dots under a date.
 
-<Canvas of={VCalendarStories.Evenements} />
+<Canvas of={VCalendarStories.Events} />
 
-## Contenu personnalisé (slot `#day`)
+## Custom content (the `#day` slot)
 
-Le slot `#day` remplace le contenu d'une cellule — par exemple un prix de billet
-sous le numéro du jour. Il reçoit `{ iso, day, inMonth, disabled, selected,
-today, inRange, events }`.
+The `#day` slot replaces a cell's content — a ticket price under the day number, for instance. It
+receives `{ iso, day, inMonth, disabled, selected, today, inRange, events }`.
 
-Pour du contenu sur plusieurs lignes, agrandissez le rond via la variable CSS
-publique **`--vectis-calendar-day-size`** (défaut `2rem`) — l'exemple ci-dessous
-utilise des ronds de 40 px et rend toujours la ligne prix (vide si absente) pour
-garder les numéros alignés d'une case à l'autre.
+For content on several lines, enlarge the dot through the public CSS variable
+**`--vectis-calendar-day-size`** (default `2rem`) — the example below uses 40 px dots and always
+renders the price line (empty when absent) to keep the numbers aligned from one cell to the next.
 
-Le slot s'applique aussi aux jours des mois adjacents (`showAdjacentDays`), pour
-que leur numéro reste aligné sur celui des jours du mois : utilisez `inMonth`
-pour n'afficher les données que sur les jours du mois affiché, en gardant la
-même hauteur de contenu.
+The slot also applies to the days of the adjacent months (`showAdjacentDays`), so their number stays
+aligned with the days of the month: use `inMonth` to display the data only on the days of the
+displayed month, while keeping the same content height.
 
-<Canvas of={VCalendarStories.SlotJour} />
+<Canvas of={VCalendarStories.DaySlot} />
 
-## Zone footer
+## Footer zone
 
-Le slot `#footer` accueille des boutons d'action ou des presets
-(« Aujourd'hui », « Demain », …).
+The `#footer` slot takes action buttons or presets ("Today", "Tomorrow", …).
 
-<Canvas of={VCalendarStories.AvecFooter} />
+<Canvas of={VCalendarStories.WithFooter} />
 
-## Localisation
+## Localization
 
-`locale` (défaut `fr-FR`) pilote les noms de mois/jours et le premier jour de
-semaine (dérivé de la locale, surchargeable par `firstDayOfWeek`). Les libellés
-passent par `Intl`, disponible côté serveur.
+`locale` drives the month/day names and the first day of the week (derived from the locale,
+overridable through `firstDayOfWeek`). The labels go through `Intl`, which is available on the
+server.
 
-<Canvas of={VCalendarStories.Localisation} />
+<Canvas of={VCalendarStories.Localization} />
 
-## Accessibilité
+## Accessibility
 
-- La grille des jours est un `role="grid"` nommé par le mois et l'année ; les
-  en-têtes de colonnes portent le nom complet du jour (`aria-label`).
-- **Roving tabindex** : une seule cellule est tabbable ; la sélection et « aujourd'hui »
-  sont signalées par `aria-selected` et `aria-current="date"`.
-- **Clavier** : flèches (± 1 jour / ± 1 semaine), `Home`/`End` (bornes de la
-  semaine), `PageUp`/`PageDown` (± 1 mois, `Shift` → ± 1 an), `Entrée`/`Espace`
-  (sélection). Les vues mois et années sont également navigables aux flèches.
-- Le focus visible utilise l'anneau de focus standard du DS ; toutes les
-  transitions respectent `prefers-reduced-motion`.
+- The days grid is a `role="grid"` named by the month and the year; the column headers carry the
+  full day name (`aria-label`).
+- **Roving tabindex**: a single cell is tabbable; the selection and "today" are signalled by
+  `aria-selected` and `aria-current="date"`.
+- **Keyboard**: arrows (± 1 day / ± 1 week), `Home`/`End` (the week's bounds), `PageUp`/`PageDown`
+  (± 1 month, `Shift` → ± 1 year), `Enter`/`Space` (selection). The month and year views are
+  navigable with the arrows too.
+- The visible focus uses the design system's standard focus ring; every transition respects
+  `prefers-reduced-motion`.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**). La prop `locale` reste prioritaire ; sans elle, le composant suit désormais la locale globale posée par `setLocale`, au lieu du `fr-FR` codé en dur.
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**). The `locale` prop stays authoritative; without it, the
+component follows the global locale set by `setLocale`.

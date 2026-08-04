@@ -17,8 +17,8 @@ async function openHarness(props: Record<string, unknown> = {}) {
     setup: () => ({ open, props }),
     template: `
       <VDialogAlert v-model:open="open" v-bind="props">
-        Voulez-vous vraiment supprimer ?
-        <template #footer><button>Confirmer</button></template>
+        Do you really want to delete?
+        <template #footer><button>Confirm</button></template>
       </VDialogAlert>
     `,
   })
@@ -29,24 +29,24 @@ async function openHarness(props: Record<string, unknown> = {}) {
 }
 
 describe('VDialogAlert', () => {
-  it('pose role="alertdialog"', async () => {
+  it('sets role="alertdialog"', async () => {
     expect((await openHarness()).dialog.getAttribute('role')).toBe('alertdialog')
   })
 
-  it('n’a pas de croix de fermeture', async () => {
+  it('has no close cross', async () => {
     const { queryByRole } = await openHarness()
-    expect(queryByRole('button', { name: 'Fermer' })).toBeNull()
+    expect(queryByRole('button', { name: 'Close' })).toBeNull()
   })
 
-  it('coupe tout light dismiss (closedby="none")', async () => {
+  it('cuts off every light dismiss (closedby="none")', async () => {
     expect((await openHarness()).dialog.getAttribute('closedby')).toBe('none')
   })
 
-  it('défaut width=400px', async () => {
+  it('defaults to width=400px', async () => {
     expect((await openHarness()).dialog.style.getPropertyValue('--dialog-width')).toBe('400px')
   })
 
-  it('reste piloté par le v-model (bouton d’action ferme)', async () => {
+  it('stays driven by the v-model (an action button closes it)', async () => {
     const { open, container } = await openHarness()
     expect(container.querySelector('.v-dialog')).not.toBeNull()
     open.value = false

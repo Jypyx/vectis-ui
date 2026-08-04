@@ -29,65 +29,65 @@ import { clamp } from '../../utils/number'
 import { useLocale, useMessages } from '../../i18n/state'
 
 /**
- * Calendrier inline (grille) réutilisable, inspiration Material. Contient TOUTE
- * la logique de dates, de vues (jours / mois / années) et du clavier ; le
- * VDatePicker se contente de l'habiller d'un champ + popover.
+ * A reusable inline calendar (a grid), Material-inspired. It holds ALL the date, view
+ * (days / months / years) and keyboard logic; VDatePicker merely dresses it in a field
+ * + a popover.
  *
- * Le natif ne fournit pas de grille de dates accessible (`<input type=date>`
- * n'est ni stylable ni composable) : le JS implémente donc le pattern ARIA
- * « grid » — roving tabindex, flèches/PageUp/PageDown, sélection simple/plage/
- * multiple — que HTML/CSS seuls ne couvrent pas. Tout se calcule en heure
- * locale via des chaînes ISO `YYYY-MM-DD` (cf. `utils/date`, SSR-safe).
+ * The platform provides no accessible date grid (`<input type=date>` is neither
+ * stylable nor composable): the JS therefore implements the ARIA "grid" pattern —
+ * roving tabindex, arrows/PageUp/PageDown, single/range/multiple selection — which
+ * HTML/CSS alone do not cover. Everything is computed in local time through ISO
+ * `YYYY-MM-DD` strings (see `utils/date`, SSR-safe).
  */
 export type CalendarSelection = 'single' | 'range' | 'multiple'
 
-/** Plage de dates (sélection `range`). Bornes optionnelles pendant la saisie. */
+/** A date range (the `range` selection). The bounds are optional while typing. */
 export interface DateRange {
   start: string | null
   end: string | null
 }
 
-/** Événement affiché sous une date sous forme de pastille colorée. */
+/** An event displayed under a date as a coloured dot. */
 export interface CalendarEvent {
-  /** Date ISO `YYYY-MM-DD`. */
+  /** ISO `YYYY-MM-DD` date. */
   date: string
-  /** Couleur CSS de la pastille (défaut : accent). */
+  /** CSS colour of the dot (default: accent). */
   color?: string
-  /** Libellé accessible de l'événement. */
+  /** Accessible label of the event. */
   label?: string
 }
 
-/** Liste d'ISO ou prédicat désignant les dates non sélectionnables. */
+/** A list of ISO strings or a predicate designating the non-selectable dates. */
 export type DateMatcher = string[] | ((iso: string) => boolean)
 
-/** Valeur du v-model, selon `selection`. */
+/** Value of the v-model, depending on `selection`. */
 export type CalendarValue = string | null | DateRange | string[]
 
 interface CalendarProps {
-  /** Type de sélection. */
+  /** Kind of selection. */
   selection?: CalendarSelection
   /**
-   * Locale BCP 47 (noms de mois/jours, 1er jour de semaine). PRIORITAIRE sur la
-   * locale globale du DS (`setLocale`), sur laquelle elle retombe à défaut —
-   * d'où l'absence de défaut littéral ici : `undefined` doit rester
-   * distinguable pour que la locale globale ait une chance de s'appliquer.
+   * A BCP 47 locale (month/day names, the first day of the week). It TAKES PRECEDENCE
+   * over the DS's global locale (`setLocale`), which it falls back to — hence the
+   * absence of a literal default here: `undefined` must stay distinguishable for the
+   * global locale to have a chance to apply.
    */
   locale?: string
-  /** Force le 1er jour de semaine (0 = dimanche … 6 = samedi). Défaut : locale. */
+  /** Forces the first day of the week (0 = Sunday … 6 = Saturday). Default: the locale's. */
   firstDayOfWeek?: number
-  /** Borne minimale ISO : navigation et sélection impossibles avant. */
+  /** Minimum ISO bound: neither navigation nor selection is possible before it. */
   min?: string
-  /** Borne maximale ISO : navigation et sélection impossibles après. */
+  /** Maximum ISO bound: neither navigation nor selection is possible after it. */
   max?: string
-  /** Dates non sélectionnables (barrées) : tableau d'ISO ou prédicat. */
+  /** Non-selectable dates (struck through): an array of ISO strings or a predicate. */
   disabledDates?: DateMatcher
-  /** Afficher les jours des mois adjacents (grisés) dans la grille. Désactivé
-      par défaut : activer via `show-adjacent-days`. */
+  /** Displays the days of the adjacent months (greyed) in the grid. Off by default:
+      enable it through `show-adjacent-days`. */
   showAdjacentDays?: boolean
-  /** Rendre cliquables les jours des mois adjacents (navigue vers leur mois).
-      Implique leur affichage. */
+  /** Makes the days of the adjacent months clickable (navigating to their month).
+      It implies displaying them. */
   selectAdjacentDays?: boolean
-  /** Événements → pastilles colorées sous les dates (max 3 par date). */
+  /** Events → coloured dots under the dates (at most 3 per date). */
   events?: CalendarEvent[]
 }
 
@@ -106,13 +106,13 @@ const props = withDefaults(defineProps<CalendarProps>(), {
 const model = defineModel<CalendarValue>({ default: null })
 
 const emit = defineEmits<{
-  /** Émis à chaque sélection (valeur complète courante). Le VDatePicker s'en sert
-      pour fermer en sélection simple. */
+  /** Emitted on every selection (the current full value). VDatePicker uses it to close
+      in single selection. */
   select: [value: CalendarValue]
 }>()
 
 defineSlots<{
-  /** Contenu personnalisé d'une cellule jour (ex. prix d'un billet). */
+  /** Custom content of a day cell (a ticket price, for instance). */
   day?(props: {
     iso: string
     day: number
@@ -123,19 +123,18 @@ defineSlots<{
     inRange: boolean
     events: CalendarEvent[]
   }): unknown
-  /** Zone basse : boutons d'action (Fermer/Sauvegarder) ou presets. */
+  /** The bottom zone: action buttons (Close/Save) or presets. */
   footer?(): unknown
 }>()
 
 const gridLabelId = useId()
 
-// ── Localisation ────────────────────────────────────────────────────────────
-// Libellés de navigation : aucune prop dédiée, le dictionnaire est le seul
-// point de surcharge (globale ou par langue) — cf. `src/i18n/`.
+// Localization. Navigation labels: no dedicated prop, the dictionary is the only
+// override point (globally or per language) — see `src/i18n/`.
 const m = useMessages()
 const vectisLocale = useLocale()
-/* Prop prioritaire, sinon locale globale du DS (idiome `props.x ?? contexte`
-   de VAvatar). Une seule dérivation : toutes les lectures passent par elle. */
+/* The prop takes precedence, otherwise the DS's global locale (the `props.x ?? context`
+   idiom). A single derivation: every read goes through it. */
 const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
 
 const resolvedFirstDay = computed(
@@ -147,7 +146,6 @@ const weekdaysLong = computed(() =>
 )
 const monthLabels = computed(() => monthNamesCompact(resolvedLocale.value))
 
-// ── Valeur normalisée par type de sélection ──────────────────────────────────────────────
 const singleValue = computed(() =>
   props.selection === 'single' && typeof model.value === 'string' && isValidISO(model.value)
     ? model.value
@@ -168,12 +166,12 @@ const multipleValues = computed<string[]>(() =>
   props.selection === 'multiple' && Array.isArray(model.value) ? model.value : [],
 )
 
-// ── État de vue : focusedISO est la source de vérité du mois affiché ─────────
+// View state: focusedISO is the source of truth for the displayed month.
 function initialFocus(): string {
   if (singleValue.value) return singleValue.value
   if (rangeValue.value.start) return rangeValue.value.start
   if (multipleValues.value[0]) return multipleValues.value[0]
-  // Repli : aujourd'hui (heure locale), clampé aux bornes.
+  // Fallback: today (in local time), clamped to the bounds.
   return clampISO(formatISO(new Date()), props.min, props.max)
 }
 const focusedISO = ref(initialFocus())
@@ -186,16 +184,14 @@ const viewMonth0 = computed(() => parseISO(focusedISO.value)?.getMonth() ?? 0)
 const monthLabel = computed(() => monthName(resolvedLocale.value, viewMonth0.value, 'long'))
 const gridLabel = computed(() => `${monthLabel.value} ${viewYear.value}`)
 
-// aujourd'hui : posé au montage (client) → pas de mismatch d'hydratation SSR
+// today: set on mount (client-side) → no SSR hydration mismatch
 const today = ref<string | null>(null)
 onMounted(() => {
   today.value = formatISO(new Date())
 })
 
-// ── Dates désactivées ───────────────────────────────────────────────────────
 const isDisabledDate = computed(() => resolveMatcher(props.disabledDates))
 
-// ── Événements indexés par date ─────────────────────────────────────────────
 const eventsByDate = computed(() => {
   const map = new Map<string, CalendarEvent[]>()
   for (const ev of props.events ?? []) {
@@ -206,7 +202,6 @@ const eventsByDate = computed(() => {
   return map
 })
 
-// ── Plage effective (avec prévisualisation au survol/focus) ─────────────────
 const hoverISO = ref<string | null>(null)
 function orderRange(a: string, b: string): DateRange {
   return compareISO(a, b) <= 0 ? { start: a, end: b } : { start: b, end: a }
@@ -215,7 +210,7 @@ const effectiveRange = computed<DateRange>(() => {
   if (props.selection !== 'range') return { start: null, end: null }
   const r = rangeValue.value
   if (r.start && r.end) return orderRange(r.start, r.end)
-  // start posé, end en attente : prévisualise jusqu'au survol/focus courant
+  // start set, end pending: preview up to the current hover/focus
   const preview = hoverISO.value ?? focusedISO.value
   if (r.start && preview) return orderRange(r.start, preview)
   return { start: r.start, end: r.end }
@@ -224,7 +219,7 @@ const effectiveRange = computed<DateRange>(() => {
 function isSelected(iso: string): boolean {
   if (props.selection === 'single') return isSameISO(iso, singleValue.value)
   if (props.selection === 'multiple') return multipleValues.value.includes(iso)
-  // range : extrémités effectives (prévisualisation comprise)
+  // range: the effective ends (the preview included)
   return isSameISO(iso, effectiveRange.value.start) || isSameISO(iso, effectiveRange.value.end)
 }
 function isInRange(iso: string): boolean {
@@ -232,7 +227,6 @@ function isInRange(iso: string): boolean {
   return !!start && !!end && compareISO(iso, start) >= 0 && compareISO(iso, end) <= 0
 }
 
-// ── Grille des jours ────────────────────────────────────────────────────────
 type DayCell = {
   iso: string
   day: number
@@ -250,7 +244,7 @@ type DayCell = {
 const days = computed<DayCell[]>(() =>
   buildMonthGrid(viewYear.value, viewMonth0.value, resolvedFirstDay.value).map((cell) => {
     const inMonth = cell.adjacent === null
-    // selectAdjacentDays implique l'affichage (un jour cliquable doit être visible)
+    // selectAdjacentDays implies displaying them (a clickable day has to be visible)
     const show = inMonth || props.showAdjacentDays || props.selectAdjacentDays
     const selectable = inMonth || props.selectAdjacentDays
     const disabled = !isWithin(cell.iso, props.min, props.max) || isDisabledDate.value(cell.iso)
@@ -276,7 +270,6 @@ const weeks = computed(() => {
   return rows
 })
 
-// ── Bornes de navigation ────────────────────────────────────────────────────
 function monthHasSelectable(year: number, month0: number): boolean {
   const first = isoOf(year, month0, 1)
   const last = isoOf(year, month0, daysInMonth(year, month0))
@@ -302,13 +295,12 @@ const canNextYear = computed(
   () => !props.max || compareISO(isoOf(viewYear.value + 1, 0, 1), props.max) <= 0,
 )
 
-// ── Focus DOM d'une cellule (roving) ────────────────────────────────────────
+// DOM focus of a cell (roving).
 const dayId = (iso: string) => `${gridLabelId}-d-${iso}`
 function focusDay(iso: string) {
   nextTick(() => document.getElementById(dayId(iso))?.focus())
 }
 
-// ── Navigation ──────────────────────────────────────────────────────────────
 function goTo(iso: string, moveFocus = false) {
   focusedISO.value = clampISO(iso, props.min, props.max)
   if (moveFocus && view.value === 'days') focusDay(focusedISO.value)
@@ -337,7 +329,6 @@ function toggleView(target: 'months' | 'years') {
   }
 }
 
-// ── Sélection ───────────────────────────────────────────────────────────────
 function selectDay(cell: DayCell) {
   if (cell.kind !== 'button' || cell.disabled) return
   focusedISO.value = cell.iso
@@ -346,7 +337,7 @@ function selectDay(cell: DayCell) {
   } else if (props.selection === 'multiple') {
     model.value = toggleValue(multipleValues.value, cell.iso).sort(compareISO)
   } else {
-    // range : 1er clic = start ; 2e = end (réordonné) ; 3e = recommence
+    // range: 1st click = start; 2nd = end (reordered); 3rd starts over
     const r = rangeValue.value
     if (!r.start || (r.start && r.end)) {
       model.value = { start: cell.iso, end: null }
@@ -357,7 +348,7 @@ function selectDay(cell: DayCell) {
   emit('select', model.value)
 }
 
-// ── Clavier (vue jours) ─────────────────────────────────────────────────────
+// Keyboard (the days view).
 function onDaysKeydown(event: KeyboardEvent) {
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
@@ -400,7 +391,7 @@ function onDaysKeydown(event: KeyboardEvent) {
   goTo(next, true)
 }
 
-// ── Vue mois ────────────────────────────────────────────────────────────────
+// Months view.
 const focusedMonth = ref(viewMonth0.value)
 const monthCellEl = (i: number) =>
   document.getElementById(`${gridLabelId}-m-${i}`) as HTMLElement | null
@@ -433,7 +424,7 @@ function onMonthsKeydown(event: KeyboardEvent) {
   monthCellEl(focusedMonth.value)?.focus()
 }
 
-// ── Vue années ──────────────────────────────────────────────────────────────
+// Years view.
 const yearRange = computed(() => {
   const minY = props.min ? parseISO(props.min)!.getFullYear() : viewYear.value - 100
   const maxY = props.max ? parseISO(props.max)!.getFullYear() : viewYear.value + 100
@@ -473,7 +464,7 @@ function onYearsKeydown(event: KeyboardEvent) {
   yearCellEl(focusedYear.value)?.focus()
 }
 
-// Suit la sélection externe : si la valeur primaire change de mois, on recadre.
+// Follows the external selection: if the primary value changes month, the view moves.
 watch(
   () => [singleValue.value, rangeValue.value.start, multipleValues.value[0]],
   () => {
@@ -487,7 +478,7 @@ watch(
   },
 )
 
-/** Amène le focus dans la grille (utilisé par le VDatePicker à l'ouverture). */
+/** Brings the focus into the grid (used by VDatePicker on opening). */
 function focus() {
   view.value = 'days'
   focusDay(focusedISO.value)
@@ -502,7 +493,7 @@ defineExpose({ focus })
     :data-selection="selection"
     @pointerleave="hoverISO = null"
   >
-    <!-- En-tête : sélecteurs mois & année avec chevrons ± -->
+    <!-- Header: month & year selectors with ± chevrons -->
     <div class="v-calendar-header">
       <div class="v-calendar-nav">
         <VIconButton
@@ -568,7 +559,7 @@ defineExpose({ focus })
       </div>
     </div>
 
-    <!-- Vue jours -->
+    <!-- Days view -->
     <div
       v-show="view === 'days'"
       class="v-calendar-grid"
@@ -635,10 +626,10 @@ defineExpose({ focus })
               />
             </span>
           </button>
-          <!-- jour adjacent non sélectionnable : même slot que les jours boutons,
-               sinon un contenu personnalisé multi-lignes ne s'appliquerait qu'aux
-               jours du mois et les numéros ne s'aligneraient plus d'une case à
-               l'autre (le slot reçoit `inMonth` pour différencier le rendu) -->
+          <!-- A non-selectable adjacent day: the same slot as the button days,
+               otherwise multi-line custom content would only apply to the days of the
+               month and the numbers would no longer line up from one cell to the next
+               (the slot receives `inMonth` to differentiate the rendering) -->
           <span
             v-else-if="cell.kind === 'static'"
             class="v-calendar-day v-calendar-day--static"
@@ -662,7 +653,7 @@ defineExpose({ focus })
       </div>
     </div>
 
-    <!-- Vue mois -->
+    <!-- Months view -->
     <div
       v-if="view === 'months'"
       class="v-calendar-picker"
@@ -687,7 +678,7 @@ defineExpose({ focus })
       </button>
     </div>
 
-    <!-- Vue années -->
+    <!-- Years view -->
     <div
       v-if="view === 'years'"
       class="v-calendar-picker v-calendar-picker--years"
@@ -720,8 +711,8 @@ defineExpose({ focus })
 <style>
 @layer vectis.components {
   .v-calendar {
-    /* Taille du rond (jour) configurable par le consommateur ; la cellule (zone
-       de survol / colonne) s'agrandit avec, sans jamais passer sous le token. */
+    /* The dot (day) size is configurable by the consumer; the cell (the hover area /
+       the column) grows with it, never dropping below the token. */
     --calendar-day-size: var(--vectis-calendar-day-size, var(--vectis-control-height-md));
     --calendar-cell: max(
       var(--vectis-control-size-calendar-cell),
@@ -735,8 +726,8 @@ defineExpose({ focus })
     color: var(--vectis-color-text);
   }
 
-  /* Tous les blocs s'étirent sur la largeur du calendrier (stretch par défaut) :
-     la grille jours occupe 100 % via des colonnes 1fr, largeur plancher = 7 cellules. */
+  /* Every block stretches to the calendar's width (stretch by default): the days grid
+     takes 100% through 1fr columns, with a floor width of 7 cells. */
   .v-calendar-header {
     display: flex;
     align-items: center;
@@ -750,18 +741,17 @@ defineExpose({ focus })
     gap: var(--vectis-space-1);
   }
 
-  /* largeur minimale stable pour que les chevrons ne se décalent pas selon la
-     longueur du libellé mois/année */
+  /* A stable minimum width so the chevrons do not shift with the length of the
+     month/year label */
   .v-calendar-picker-toggle {
     min-inline-size: var(--vectis-control-size-calendar-nav-min);
-    /* semibold : emphase du libellé mois/année (repère principal de la grille) */
+    /* semibold: emphasis on the month/year label (the grid's main landmark) */
     font-weight: var(--vectis-font-weight-semibold);
     text-transform: capitalize;
   }
 
-  /* ── Grille jours ── */
-  /* Largeur plancher = 7 cellules ; sinon la grille s'étire à la largeur du
-     calendrier (imposée par l'en-tête) et les colonnes 1fr se répartissent. */
+  /* Days grid. Floor width = 7 cells; otherwise the grid stretches to the calendar's
+     width (set by the header) and the 1fr columns share it out. */
   .v-calendar-grid {
     min-inline-size: calc(7 * var(--calendar-cell));
   }
@@ -777,8 +767,8 @@ defineExpose({ focus })
     align-items: center;
     justify-content: center;
     height: var(--vectis-control-height-sm);
-    /* Micro-en-tête de colonne : rôle overline (la casse reste `capitalize`,
-       convention des calendriers, pas les capitales de la variante VTypography) */
+    /* Column micro-header: the overline role (the case stays `capitalize`, the calendar
+       convention, not the VTypography variant's capitals) */
     font-size: var(--vectis-text-overline-size);
     font-weight: var(--vectis-text-overline-weight);
     letter-spacing: var(--vectis-text-overline-tracking);
@@ -794,12 +784,11 @@ defineExpose({ focus })
     height: var(--calendar-cell);
   }
 
-  /* Bande de plage : fond teinté à la HAUTEUR du rond (pas de la cellule), posé
-     derrière le jour. Marge = demi-écart cellule↔rond, calculée en `%` pour
-     suivre la largeur réelle de la colonne (1fr). Aux extrémités la bande
-     s'arrête pile au bord du rond (inset du côté extérieur) et son coin s'arrondit
-     au rayon du rond (pill plafonné à la moitié de la hauteur = rayon du cercle),
-     sans dépasser. */
+  /* The range band: a tinted background at the HEIGHT of the dot (not the cell's), laid
+     behind the day. The margin = half the cell↔dot gap, computed in `%` so it follows the
+     column's real width (1fr). At the ends the band stops exactly at the dot's edge (an
+     inset on the outer side) and its corner rounds to the dot's radius (a pill capped at
+     half the height = the circle's radius), without overshooting. */
   .v-calendar-cell[data-in-range]::before {
     content: '';
     position: absolute;
@@ -844,8 +833,8 @@ defineExpose({ focus })
       color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  /* hover réservé aux jours cliquables : ni désactivés, ni sélectionnés, ni les
-     jours adjacents non sélectionnables (spans statiques) */
+  /* Hover is reserved for clickable days: neither disabled, nor selected, nor the
+     non-selectable adjacent days (static spans) */
   .v-calendar-day:hover:not([aria-disabled='true']):not([data-selected]):not(
       .v-calendar-day--static
     ) {
@@ -856,8 +845,7 @@ defineExpose({ focus })
     color: var(--vectis-color-text-subtle);
   }
 
-  /* semibold ci-dessous : emphases d'état (aujourd'hui, sélection), pas des
-     rôles typographiques */
+  /* The semibold below: state emphasis (today, the selection), not type roles */
   .v-calendar-day[data-today]:not([data-selected]) {
     box-shadow: inset 0 0 0 1px var(--vectis-color-accent-border);
     color: var(--vectis-color-accent-text);
@@ -881,7 +869,7 @@ defineExpose({ focus })
     cursor: default;
   }
 
-  /* jour adjacent hors [min,max] ou désactivé : barré comme une date désactivée */
+  /* An adjacent day outside [min,max] or disabled: struck through like a disabled date */
   .v-calendar-day--static[data-disabled] {
     text-decoration: line-through;
     cursor: not-allowed;
@@ -912,8 +900,7 @@ defineExpose({ focus })
     background: var(--vectis-color-text-on-accent);
   }
 
-  /* ── Vues mois / années ── */
-  /* Pleine largeur (comme la grille jours) via stretch + colonnes 1fr. */
+  /* Months / years views. Full width (like the days grid) through stretch + 1fr columns. */
   .v-calendar-picker {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -946,7 +933,7 @@ defineExpose({ focus })
   .v-calendar-picker-cell[data-selected] {
     background: var(--vectis-color-accent);
     color: var(--vectis-color-text-on-accent);
-    /* semibold : emphase d'état, pas un rôle typo */
+    /* semibold: state emphasis, not a type role */
     font-weight: var(--vectis-font-weight-semibold);
   }
   .v-calendar-picker-cell:disabled {
@@ -958,7 +945,6 @@ defineExpose({ focus })
     outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
-  /* ── Footer ── */
   .v-calendar-footer {
     display: flex;
     align-items: center;

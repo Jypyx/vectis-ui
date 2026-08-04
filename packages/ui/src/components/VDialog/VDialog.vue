@@ -7,28 +7,28 @@ import VTypography from '../VTypography/VTypography.vue'
 import { useMessages } from '../../i18n/state'
 
 /**
- * Modale bloquante bâtie sur la primitive native `<dialog>` + `showModal()` :
- * top-layer, `::backdrop`, piège de focus, fond inerte et retour du focus au
- * déclencheur sont natifs, et le light dismiss est déclaratif via `closedby`.
- * Le SEUL JS de comportement est le pont `v-model:open` ↔ API impérative
- * (`showModal()`/`close()` n'ont pas d'équivalent déclaratif), gardé SSR-safe.
+ * A blocking modal built on the native `<dialog>` primitive + `showModal()`: the top
+ * layer, `::backdrop`, the focus trap, the inert background and the focus return to the
+ * trigger are all native, and the light dismiss is declarative through `closedby`. The
+ * ONLY behavioural JS is the `v-model:open` ↔ imperative API bridge (`showModal()`
+ * and `close()` have no declarative equivalent), kept SSR-safe.
  */
 interface DialogProps {
-  /** Titre du header (ignoré si le slot #header est fourni). */
+  /** Title of the header (ignored when the #header slot is supplied). */
   title?: string
-  /** Sous-titre du header, sous le titre. */
+  /** Subtitle of the header, under the title. */
   subtitle?: string
-  /** Largeur de la modale (toute unité CSS) ; bornée à 100 % du viewport. */
+  /** Width of the modal (any CSS unit); bounded to 100% of the viewport. */
   width?: string
-  /** `alertdialog` pour une modale exigeant une action explicite (cf. VDialogAlert). */
+  /** `alertdialog` for a modal requiring an explicit action (see VDialogAlert). */
   role?: 'dialog' | 'alertdialog'
-  /** Affiche la croix de fermeture dans le header. */
+  /** Displays the close cross in the header. */
   closable?: boolean
-  /** Le clic sur le backdrop ferme la modale. */
+  /** Clicking the backdrop closes the modal. */
   closeOnBackdrop?: boolean
-  /** La touche Échap ferme la modale. */
+  /** The Escape key closes the modal. */
   closeOnEscape?: boolean
-  /** Nom accessible de la croix de fermeture. Défaut : dictionnaire du DS. */
+  /** Accessible name of the close cross. Default: the DS dictionary. */
   closeLabel?: string
 }
 
@@ -43,29 +43,27 @@ const props = withDefaults(defineProps<DialogProps>(), {
   closeLabel: undefined,
 })
 
-// Cascade prop > dictionnaire : la prop garde la priorité, son défaut suit
-// désormais la locale du DS.
 const m = useMessages()
 const resolvedCloseLabel = computed(() => props.closeLabel ?? m.value.common.close)
 
 const open = defineModel<boolean>('open', { default: false })
 
-/** Props à poser sur un déclencheur (slot #trigger) via `v-bind="triggerProps"`. */
+/** Props to set on a trigger (the #trigger slot) through `v-bind="triggerProps"`. */
 type TriggerProps = {
   onClick: () => void
   'aria-haspopup': 'dialog'
 }
 
 defineSlots<{
-  /** Contenu de la modale (zone scrollable). */
+  /** Content of the modal (the scrollable zone). */
   default(): unknown
-  /** Remplace le bloc titre/sous-titre du header. */
+  /** Replaces the header's title/subtitle block. */
   header?(): unknown
-  /** Actions posées à gauche de la croix (menu, plein écran…). */
+  /** Actions placed to the left of the cross (a menu, full screen…). */
   headerActions?(): unknown
-  /** Actions du footer (boutons). */
+  /** Footer actions (buttons). */
   footer?(): unknown
-  /** Déclencheur : `v-bind="triggerProps"` sur un <VButton>/<button>. */
+  /** Trigger: `v-bind="triggerProps"` on a <VButton>/<button>. */
   trigger?(props: { triggerProps: TriggerProps }): unknown
 }>()
 
@@ -77,25 +75,24 @@ const titleId = useId()
 const subtitleId = useId()
 
 /**
- * `closedby` (déclaratif, natif) : 'any' = backdrop + Échap, 'closerequest' =
- * Échap seul, 'none' = aucun light dismiss. Le combo « backdrop sans Échap »
- * n'est pas exprimable et retombe sur 'any' (non requis par nos composants).
+ * `closedby` (declarative, native): 'any' = backdrop + Escape, 'closerequest' = Escape
+ * alone, 'none' = no light dismiss. The "backdrop without Escape" combination is not
+ * expressible and falls back to 'any' (no component here requires it).
  */
 const closedby = computed(() =>
   props.closeOnBackdrop ? 'any' : props.closeOnEscape ? 'closerequest' : 'none',
 )
 
-// `closedby` n'est pas encore typé sur <dialog> dans lib.dom : on le pose via un
-// objet v-bind (fallthrough + attribut natif), ce qui évite le contrôle
-// d'attribut par élément de vue-tsc. Vue fusionne `class`/`style` du fallthrough
-// avec la classe statique.
+// `closedby` is not yet typed on <dialog> in lib.dom: it is set through a v-bind
+// object (fallthrough + a native attribute), which sidesteps vue-tsc's per-element
+// attribute check. Vue merges the fallthrough's `class`/`style` with the static class.
 const rootAttrs = computed(() => ({ ...attrs, closedby: closedby.value }))
 
-// Montage paresseux : le <dialog> (et son contenu potentiellement lourd) n'existe
-// dans le DOM que pendant qu'il est ouvert. Chaque ouverture crée un élément NEUF
-// → showModal() sur un DOM propre (toujours modal donc centré), et la fermeture le
-// retire entièrement (aucun résidu qui capterait les clics, pas de race à la
-// réouverture). Le slot #trigger, lui, reste toujours rendu.
+// Lazy mounting: the <dialog> (and its potentially heavy content) only exists in the
+// DOM while it is open. Each opening creates a BRAND NEW element → showModal() on a
+// clean DOM (always modal, hence centred), and closing removes it entirely (no leftover
+// capturing clicks, no race on reopening). The #trigger slot, on the other hand, stays
+// rendered at all times.
 const rendered = ref(open.value)
 
 function show() {
@@ -103,7 +100,7 @@ function show() {
 }
 
 function requestClose() {
-  // ferme l'élément natif → déclenche 'close' → onClose met open.value à false
+  // closes the native element → fires 'close' → onClose sets open.value to false
   dialogEl.value?.close()
 }
 
@@ -112,16 +109,16 @@ const triggerProps = computed<TriggerProps>(() => ({
   'aria-haspopup': 'dialog',
 }))
 
-// Asymétrie native de <dialog> : il émet 'close' à toute fermeture, mais AUCUN
-// événement à l'ouverture (contrairement au 'toggle' du popover). D'où deux
-// chemins pour le pont v-model ↔ API impérative (client uniquement) :
-//  - OUVERTURE : monter le <dialog>, puis showModal() une fois le DOM en place.
-//  - FERMETURE : fermeture native (croix, close(), Échap/backdrop) → 'close'
-//    resynchronise le v-model (onClose), puis on démonte.
+// A native asymmetry of <dialog>: it emits 'close' on every close, but NO event on
+// opening (unlike the popover's 'toggle'). Hence two paths for the v-model ↔ imperative
+// API bridge (client only):
+//  - OPENING: mount the <dialog>, then call showModal() once the DOM is in place.
+//  - CLOSING: a native close (the cross, close(), Escape/backdrop) → 'close'
+//    resynchronizes the v-model (onClose), then it is unmounted.
 watch(open, async (value) => {
   if (value) {
     rendered.value = true
-    await nextTick() // laisse Vue monter le <dialog> neuf avant showModal()
+    await nextTick() // lets Vue mount the brand new <dialog> before showModal()
     dialogEl.value?.showModal()
   } else {
     dialogEl.value?.close()
@@ -130,12 +127,12 @@ watch(open, async (value) => {
 })
 
 onMounted(() => {
-  // Les watchers ne tournent pas en SSR : on rejoue l'état initial au montage
-  // (rendered vaut déjà open.value, donc le <dialog> est présent si ouvert).
+  // Watchers do not run in SSR: the initial state is replayed on mount (rendered
+  // already equals open.value, so the <dialog> is present when open).
   if (open.value) dialogEl.value?.showModal()
 })
 
-// 'close' natif (croix, close(), Échap/backdrop via closedby) → resync v-model.
+// The native 'close' (the cross, close(), Escape/backdrop through closedby) → v-model resync.
 function onClose() {
   open.value = false
 }
@@ -157,12 +154,11 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     @close="onClose"
   >
     <!--
-      Header et footer sont des frères FIXES (flex: none) : seul le contenu
-      central défile → la barre de défilement reste confinée à la zone du contenu,
-      sans empiéter sur le header ni le footer. Le conteneur de défilement porte
-      `container-type: scroll-state` ; les séparateurs sont deux sentinelles
-      sticky À L'INTÉRIEUR (donc descendantes interrogeables — les container
-      queries stylent les descendants, jamais les frères).
+      The header and the footer are FIXED siblings (flex: none): only the central content
+      scrolls → the scrollbar stays confined to the content zone, without encroaching on
+      the header or the footer. The scroll container carries
+      `container-type: scroll-state`; the separators are two sticky sentinels INSIDE it
+      (hence queryable descendants — container queries style descendants, never siblings).
     -->
     <header class="v-dialog-header">
       <slot name="header">
@@ -218,17 +214,17 @@ defineExpose({ show, close: requestClose, el: dialogEl })
 <style>
 @layer vectis.components {
   .v-dialog {
-    /* largeur posée inline (prop width) ; jamais plus large/haut que le viewport
-       moins les marges */
+    /* Width set inline (the width prop); never wider or taller than the viewport minus
+       the margins */
     inline-size: var(--dialog-width);
     max-inline-size: calc(100dvi - 2 * var(--vectis-space-4));
     max-block-size: calc(100dvb - 2 * var(--vectis-space-4));
-    /* recentre la modale : l'UA centre les <dialog> modaux via `margin: auto`,
-       mais notre reset (`* { margin: 0 }`, layer vectis.reset) l'écrase — on le
-       restaure ici (layer vectis.components, plus fort que vectis.reset) */
+    /* Re-centres the modal: the UA centres modal <dialog>s through `margin: auto`, but
+       our reset (`* { margin: 0 }`, the vectis.reset layer) overwrites it — it is restored
+       here (the vectis.components layer, stronger than vectis.reset) */
     margin: auto;
-    /* header/footer fixes, seul .v-dialog-scroll défile ; overflow:hidden
-       clippe les coins arrondis */
+    /* A fixed header/footer, only .v-dialog-scroll scrolls; overflow:hidden clips the
+       rounded corners */
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -242,41 +238,39 @@ defineExpose({ show, close: requestClose, el: dialogEl })
   }
 
   /*
-   * Garde-fou indispensable : `.v-dialog { display: flex }` (auteur) battrait le
-   * `dialog:not([open]) { display: none }` de l'UA — une modale fermée resterait
-   * dans le flux, en haut à gauche, captant les clics. On restaure le display:none
-   * fermé (même rôle que `.v-overlay:not(:popover-open)`). Utile aussi le temps
-   * de la frame montage → showModal() et en SSR.
+   * An indispensable guard: `.v-dialog { display: flex }` (an author style) would beat
+   * the UA's `dialog:not([open]) { display: none }` — a closed modal would stay in the
+   * flow, at the top left, capturing clicks. The closed display:none is restored here
+   * (the same role as `.v-overlay:not(:popover-open)`). It also covers the frame between
+   * mounting and showModal(), and SSR.
    */
   .v-dialog:not([open]) {
     display: none;
   }
 
-  /* le conteneur reçoit le focus à l'ouverture (showModal) : pas d'anneau
-     autour de toute la modale, le focus utile est sur les contrôles internes */
+  /* The container receives the focus on opening (showModal): no ring around the whole
+     modal, since the useful focus is on the internal controls */
   .v-dialog:focus-visible {
     outline: none;
   }
 
   .v-dialog-scroll {
-    /* la SEULE zone qui défile : occupe l'espace entre header et footer, la
-       barre de défilement y reste donc confinée */
+    /* The ONLY zone that scrolls: it takes the room between the header and the footer,
+       so the scrollbar stays confined to it */
     flex: 1 1 auto;
     min-block-size: 0;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    /* établit le conteneur de requête d'état de défilement (pas de containment
-       de taille) : ses descendants (les sentinelles) peuvent interroger
-       `scroll-state(...)` */
+    /* Establishes the scroll-state query container (no size containment): its
+       descendants — the sentinels — can query `scroll-state(...)` */
     container-type: scroll-state;
   }
 
   /*
-   * Sentinelles de séparation : fines lignes sticky en haut et en bas de la zone
-   * de défilement (descendantes du conteneur scroll-state). Les marges négatives
-   * évitent qu'elles n'occupent de l'espace. Transparentes par défaut, révélées
-   * au débordement plus bas.
+   * Separator sentinels: thin sticky lines at the top and the bottom of the scroll zone
+   * (descendants of the scroll-state container). The negative margins keep them from
+   * taking up space. Transparent by default, revealed on overflow further down.
    */
   .v-dialog-edge {
     flex: none;
@@ -296,7 +290,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
   }
 
   .v-dialog-header {
-    flex: none; /* fixe en haut, hors zone de défilement */
+    flex: none; /* fixed at the top, outside the scroll area */
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -310,22 +304,22 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     min-inline-size: 0;
   }
 
-  /* Titre et sous-titre : rendus par VTypography (heading-3 / subtitle muted) —
-     les classes .v-dialog-title/.v-dialog-subtitle restent posées comme
-     points d'accroche (surcharges consommateur, tests). */
+  /* Title and subtitle: rendered by VTypography (heading-3 / a muted subtitle) — the
+     .v-dialog-title/.v-dialog-subtitle classes stay in place as hooks (consumer
+     overrides, tests). */
 
   .v-dialog-header-actions {
     display: flex;
     align-items: center;
     gap: var(--vectis-space-1);
-    /* réduit l'emprise de la croix dans le padding du header */
+    /* Reduces the cross's footprint inside the header's padding */
     margin-block-start: calc(-1 * var(--vectis-space-1));
     margin-inline-end: calc(-1 * var(--vectis-space-2));
   }
 
   .v-dialog-body {
-    /* grandit pour remplir la zone quand le contenu est court ; garde sa hauteur
-       naturelle (donc déborde et fait défiler) quand il est long */
+    /* It grows to fill the zone when the content is short; it keeps its natural height
+       (hence overflows and scrolls) when the content is long */
     flex: 1 0 auto;
     padding: var(--vectis-space-1) var(--vectis-space-6) var(--vectis-space-3);
     color: var(--vectis-color-text);
@@ -334,7 +328,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
   }
 
   .v-dialog-footer {
-    flex: none; /* fixe en bas, hors zone de défilement */
+    flex: none; /* fixed at the bottom, outside the scroll area */
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -344,13 +338,12 @@ defineExpose({ show, close: requestClose, el: dialogEl })
   }
 
   /*
-   * Séparateurs conditionnels — dernières features CSS (scroll-state container
-   * queries) sur les sentinelles. `scrollable: top` = du contenu est masqué
-   * AU-DESSUS (on a scrollé) → on révèle le trait sous le header ;
-   * `scrollable: bottom` = du contenu reste EN DESSOUS → on révèle le trait
-   * au-dessus du footer. Exactement « visible seulement si le contenu passe
-   * sous le header/footer ». Support : Chrome 133+ (Safari/Firefox pas encore).
-   * Dégradation gracieuse : là où non supporté, les traits restent transparents.
+   * Conditional separators — scroll-state container queries on the sentinels.
+   * `scrollable: top` = content is hidden ABOVE (we have scrolled) → the rule under the
+   * header is revealed; `scrollable: bottom` = content remains BELOW → the rule above the
+   * footer is revealed. Exactly "visible only when the content passes under the
+   * header/footer". Support: Chrome 133+ (not yet Safari/Firefox). Graceful degradation:
+   * where unsupported, the rules stay transparent.
    */
   @container scroll-state(scrollable: top) {
     .v-dialog-edge--top {
@@ -365,11 +358,11 @@ defineExpose({ show, close: requestClose, el: dialogEl })
   }
 
   /*
-   * Animation d'ENTRÉE uniquement (progressive enhancement, `@starting-style`).
-   * Le montage paresseux retire le <dialog> du DOM à la fermeture : il n'y a plus
-   * d'animation de sortie (le prix d'un DOM propre et sans race de réouverture),
-   * donc pas besoin de `overlay`/`display allow-discrete`. L'élément fraîchement
-   * monté part des valeurs @starting-style puis rejoint l'état ouvert.
+   * ENTRY animation only (progressive enhancement, `@starting-style`). Lazy mounting
+   * removes the <dialog> from the DOM on closing: there is no exit animation (the price
+   * of a clean DOM with no reopening race), so no `overlay`/`display allow-discrete` is
+   * needed. The freshly mounted element starts from the @starting-style values then
+   * reaches the open state.
    */
   .v-dialog {
     transition:

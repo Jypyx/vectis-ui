@@ -5,16 +5,15 @@ import { defineComponent, nextTick, ref } from 'vue'
 import VDialog from './VDialog.vue'
 
 /**
- * Logique uniquement (jsdom + stub showModal/close, voir vitest.setup.ts). Le
- * comportement navigateur réel (top-layer, ::backdrop, piège de focus, light
- * dismiss Échap/backdrop, séparateurs scroll-state) est couvert par les play
- * functions Storybook.
+ * Logic only (jsdom + the showModal/close stub, see vitest.setup.ts). The real browser
+ * behaviour (the top layer, ::backdrop, the focus trap, the Escape/backdrop light
+ * dismiss, the scroll-state separators) is covered by the Storybook play functions.
  *
- * Montage paresseux : le <dialog> n'existe dans le DOM que pendant qu'il est
- * ouvert — les tests ouvrent donc la modale avant d'interroger l'élément.
+ * Lazy mounting: the <dialog> only exists in the DOM while it is open — so the tests
+ * open the modal before querying the element.
  */
 async function flush() {
-  // l'ouverture enchaîne rendered=true → nextTick (montage) → showModal()
+  // opening chains rendered=true → nextTick (mounting) → showModal()
   await nextTick()
   await new Promise((r) => setTimeout(r))
   await nextTick()
@@ -26,12 +25,12 @@ function renderHarness(props: Record<string, unknown> = {}, slots = '') {
     components: { VDialog },
     setup: () => ({ open, props }),
     template: `
-      <button data-testid="ext" @click="open = true">Ouvrir</button>
+      <button data-testid="ext" @click="open = true">Open</button>
       <VDialog v-model:open="open" v-bind="props">
         <template #trigger="{ triggerProps }">
-          <button data-testid="trigger" v-bind="triggerProps">Ouvrir</button>
+          <button data-testid="trigger" v-bind="triggerProps">Open</button>
         </template>
-        Contenu de la modale.
+        Content of the modal.
         ${slots}
       </VDialog>
     `,
@@ -41,7 +40,7 @@ function renderHarness(props: Record<string, unknown> = {}, slots = '') {
   return { open, getDialog, ...utils }
 }
 
-/** Ouvre la modale et renvoie l'élément <dialog> monté. */
+/** Opens the modal and returns the mounted <dialog> element. */
 async function openHarness(props: Record<string, unknown> = {}, slots = '') {
   const h = renderHarness(props, slots)
   h.open.value = true
@@ -50,23 +49,23 @@ async function openHarness(props: Record<string, unknown> = {}, slots = '') {
 }
 
 describe('VDialog', () => {
-  it('pose aria-labelledby/aria-describedby depuis title/subtitle', async () => {
-    const { dialog } = await openHarness({ title: 'Confirmer', subtitle: 'Action irréversible' })
+  it('sets aria-labelledby/aria-describedby from title/subtitle', async () => {
+    const { dialog } = await openHarness({ title: 'Confirm', subtitle: 'An irreversible action' })
     const labelId = dialog.getAttribute('aria-labelledby')
     const descId = dialog.getAttribute('aria-describedby')
     expect(labelId).toBeTruthy()
     expect(descId).toBeTruthy()
-    expect(dialog.querySelector(`#${labelId}`)?.textContent).toBe('Confirmer')
-    expect(dialog.querySelector(`#${descId}`)?.textContent).toBe('Action irréversible')
+    expect(dialog.querySelector(`#${labelId}`)?.textContent).toBe('Confirm')
+    expect(dialog.querySelector(`#${descId}`)?.textContent).toBe('An irreversible action')
   })
 
-  it('sans title/subtitle, aucun aria-labelledby/describedby', async () => {
+  it('without title/subtitle, no aria-labelledby/describedby', async () => {
     const { dialog } = await openHarness()
     expect(dialog.hasAttribute('aria-labelledby')).toBe(false)
     expect(dialog.hasAttribute('aria-describedby')).toBe(false)
   })
 
-  it('le trigger ouvre la modale et synchronise le v-model', async () => {
+  it('the trigger opens the modal and synchronizes the v-model', async () => {
     const { open, getDialog, getByTestId } = renderHarness()
     expect(getDialog()).toBeNull()
     getByTestId('trigger').click()
@@ -75,7 +74,7 @@ describe('VDialog', () => {
     expect(open.value).toBe(true)
   })
 
-  it('ouvre/ferme via le v-model (source de vérité)', async () => {
+  it('opens/closes through the v-model (the source of truth)', async () => {
     const { open, getDialog } = renderHarness()
     open.value = true
     await flush()
@@ -85,36 +84,36 @@ describe('VDialog', () => {
     expect(getDialog()).toBeNull()
   })
 
-  it('la croix ferme la modale (event close resynchronise le v-model)', async () => {
+  it('the cross closes the modal (the close event resynchronizes the v-model)', async () => {
     const { open, getDialog, getByRole } = await openHarness()
     expect(getDialog()?.open).toBe(true)
-    getByRole('button', { name: 'Fermer' }).click()
+    getByRole('button', { name: 'Close' }).click()
     await flush()
     expect(open.value).toBe(false)
     expect(getDialog()).toBeNull()
   })
 
-  it('closable=false masque la croix', async () => {
+  it('closable=false hides the cross', async () => {
     const { queryByRole } = await openHarness({ closable: false })
-    expect(queryByRole('button', { name: 'Fermer' })).toBeNull()
+    expect(queryByRole('button', { name: 'Close' })).toBeNull()
   })
 
-  it('closeLabel personnalise le nom accessible de la croix', async () => {
-    const { getByRole } = await openHarness({ closeLabel: 'Annuler' })
-    expect(getByRole('button', { name: 'Annuler' })).toBeTruthy()
+  it("closeLabel customizes the cross's accessible name", async () => {
+    const { getByRole } = await openHarness({ closeLabel: 'Cancel' })
+    expect(getByRole('button', { name: 'Cancel' })).toBeTruthy()
   })
 
-  it('role=alertdialog est posé sur l’élément', async () => {
+  it('role=alertdialog is set on the element', async () => {
     const { dialog } = await openHarness({ role: 'alertdialog' })
     expect(dialog.getAttribute('role')).toBe('alertdialog')
   })
 
-  it('role dialog (défaut) : pas d’attribut role explicite (rôle natif)', async () => {
+  it('the dialog role (the default): no explicit role attribute (the native role)', async () => {
     const { dialog } = await openHarness()
     expect(dialog.hasAttribute('role')).toBe(false)
   })
 
-  it('closedby dérivé de closeOnBackdrop/closeOnEscape', async () => {
+  it('closedby derived from closeOnBackdrop/closeOnEscape', async () => {
     expect((await openHarness()).dialog.getAttribute('closedby')).toBe('any')
     expect((await openHarness({ closeOnBackdrop: false })).dialog.getAttribute('closedby')).toBe(
       'closerequest',
@@ -126,25 +125,25 @@ describe('VDialog', () => {
     ).toBe('none')
   })
 
-  it('width est posée en style inline --dialog-width', async () => {
+  it('width is set as the inline --dialog-width style', async () => {
     expect((await openHarness()).dialog.style.getPropertyValue('--dialog-width')).toBe('400px')
     expect(
       (await openHarness({ width: '640px' })).dialog.style.getPropertyValue('--dialog-width'),
     ).toBe('640px')
   })
 
-  it('le footer n’est rendu que si le slot #footer est fourni', async () => {
+  it('the footer is only rendered when the #footer slot is supplied', async () => {
     expect((await openHarness()).dialog.querySelector('.v-dialog-footer')).toBeNull()
     const withFooter = await openHarness({}, '<template #footer><button>OK</button></template>')
     expect(withFooter.dialog.querySelector('.v-dialog-footer')).not.toBeNull()
   })
 
-  it('les attributs de fallthrough atterrissent sur le <dialog>', async () => {
-    const { dialog } = await openHarness({ 'data-qa': 'suppression' })
-    expect(dialog.getAttribute('data-qa')).toBe('suppression')
+  it('the fallthrough attributes land on the <dialog>', async () => {
+    const { dialog } = await openHarness({ 'data-qa': 'deletion' })
+    expect(dialog.getAttribute('data-qa')).toBe('deletion')
   })
 
-  it('montage paresseux : absent fermé, présent ouvert, retiré après fermeture', async () => {
+  it('lazy mounting: absent when closed, present when open, removed after closing', async () => {
     const { open, getDialog } = renderHarness()
     expect(getDialog()).toBeNull()
     open.value = true

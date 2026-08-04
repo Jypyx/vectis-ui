@@ -5,31 +5,30 @@ import * as VDialogAlertStories from './VDialogAlert.stories'
 
 # DialogAlert
 
-Variante d'alerte de `VDialog` : **même design**, mais `role="alertdialog"` — une modale qui
-**exige une action explicite** de l'utilisateur (confirmation destructive, perte de données…).
-C'est un simple wrapper de `VDialog` qui verrouille la sémantique et **coupe tout light
-dismiss** : pas de croix, ni clic sur le backdrop, **ni touche Échap** (`closedby="none"`).
-Seuls les boutons du footer ferment la modale.
+The alert variant of `VDialog`: **the same design**, but with `role="alertdialog"` — a modal that
+**requires an explicit action** from the user (a destructive confirmation, a loss of data…). It is
+a plain `VDialog` wrapper that locks the semantics down and **cuts off every light dismiss**: no
+cross, no backdrop click, **no Escape key** (`closedby="none"`). Only the footer buttons close the
+modal.
 
 <Canvas of={VDialogAlertStories.Default} />
 
 <Controls of={VDialogAlertStories.Default} />
 
-## Pourquoi un wrapper
+## Why a wrapper
 
-`VDialogAlert` force `role="alertdialog"`, `closable=false`, `closeOnBackdrop=false` et
-`closeOnEscape=false` sur `VDialog`. Toute la mécanique (top-layer, piège de focus, fond inerte,
-sticky header/footer, séparateurs au défilement, montage paresseux) est héritée telle quelle —
-inutile de dupliquer le composant. La largeur par défaut est `400px` (prop `width`).
+`VDialogAlert` forces `role="alertdialog"`, `closable=false`, `closeOnBackdrop=false` and
+`closeOnEscape=false` on `VDialog`. All the machinery (the top layer, the focus trap, the inert
+background, the sticky header/footer, the scroll separators, the lazy mounting) is inherited as it
+is — there is no point duplicating the component. The default width is `400px` (the `width` prop).
 
 <Canvas of={VDialogAlertStories.Confirmation} />
 
-## Accessibilité
+## Accessibility
 
-- `role="alertdialog"` signale une modale interrompant le flux et attendant une réponse — les
-  lecteurs d'écran l'annoncent en conséquence.
-- `title`/`subtitle` alimentent `aria-labelledby`/`aria-describedby`.
-- Aucune sortie « accidentelle » : ni croix, ni backdrop, ni Échap. Prévoir **toujours** au
-  moins un bouton de fermeture explicite dans le slot `#footer` (par ex. « Annuler »), sans quoi
-  la modale serait un cul-de-sac.
-- Le piège de focus et le retour du focus au déclencheur restent assurés par `showModal()`.
+- `role="alertdialog"` signals a modal interrupting the flow and awaiting an answer — screen
+  readers announce it accordingly.
+- `title`/`subtitle` feed `aria-labelledby`/`aria-describedby`.
+- No "accidental" exit: no cross, no backdrop, no Escape. **Always** provide at least one explicit
+  close button in the `#footer` slot (a "Cancel", for instance), or the modal would be a dead end.
+- The focus trap and the focus return to the trigger stay provided by `showModal()`.

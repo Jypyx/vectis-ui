@@ -2,12 +2,78 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
 import VTypography from '../VTypography/VTypography.vue'
 import VDialog from './VDialog.vue'
 
+const t = storyText({
+  en: {
+    shareDocument: 'Share the document',
+    shareSubtitle: 'Choose who can access this file.',
+    openModal: 'Open the modal',
+    shareBody:
+      'Anyone with the link will be able to view the document. You can revoke access at any time from the sharing settings.',
+    cancel: 'Cancel',
+    share: 'Share',
+    modal: (width: string) => `${width} modal`,
+    widthSubtitle: 'The width is driven by the width prop.',
+    widthBody: (width: string) => `Content of the modal at width ${width}.`,
+    close: 'Close',
+    terms: 'Terms of use',
+    scrollToRead: 'Scroll to read it all.',
+    readTerms: 'Read the terms',
+    decline: 'Decline',
+    accept: 'Accept',
+    newVersionAvailable: 'A new version is available',
+    customHeader: 'Custom header',
+    newVersion: 'New version',
+    versionBody: 'Version 2.0 is ready to install.',
+    later: 'Later',
+    preview: 'Preview',
+    openPreview: 'Open the preview',
+    download: 'Download',
+    fullScreen: 'Full screen',
+    previewArea: 'Document preview area.',
+    openWithoutCross: 'Open without a cross',
+    noCrossBody: 'No cross: use the actions below.',
+    confirm: 'Confirm',
+  },
+  fr: {
+    shareDocument: 'Partager le document',
+    shareSubtitle: 'Choisissez qui peut accéder à ce fichier.',
+    openModal: 'Ouvrir la modale',
+    shareBody:
+      "Toute personne disposant du lien pourra consulter le document. Vous pouvez révoquer l'accès à tout moment depuis les paramètres de partage.",
+    cancel: 'Annuler',
+    share: 'Partager',
+    modal: (width: string) => `Modale ${width}`,
+    widthSubtitle: 'Largeur pilotée par la prop width.',
+    widthBody: (width: string) => `Contenu de la modale en largeur ${width}.`,
+    close: 'Fermer',
+    terms: "Conditions d'utilisation",
+    scrollToRead: 'Faites défiler pour tout lire.',
+    readTerms: 'Lire les conditions',
+    decline: 'Refuser',
+    accept: 'Accepter',
+    newVersionAvailable: 'Nouvelle version disponible',
+    customHeader: 'Header personnalisé',
+    newVersion: 'Nouvelle version',
+    versionBody: 'La version 2.0 est prête à être installée.',
+    later: 'Plus tard',
+    preview: 'Aperçu',
+    openPreview: "Ouvrir l'aperçu",
+    download: 'Télécharger',
+    fullScreen: 'Plein écran',
+    previewArea: "Zone d'aperçu du document.",
+    openWithoutCross: 'Ouvrir sans croix',
+    noCrossBody: 'Pas de croix : utilisez les actions ci-dessous.',
+    confirm: 'Valider',
+  },
+})
+
 const meta = {
-  title: 'Composants/Dialog',
+  title: 'Components/Dialog',
   component: VDialog,
   argTypes: {
     title: { control: 'text' },
@@ -19,8 +85,6 @@ const meta = {
     closeLabel: { control: 'text' },
   },
   args: {
-    title: 'Partager le document',
-    subtitle: 'Choisissez qui peut accéder à ce fichier.',
     width: '400px',
     closable: true,
     closeOnBackdrop: true,
@@ -30,20 +94,17 @@ const meta = {
     components: { VDialog, VButton, VTypography },
     setup() {
       const open = ref(false)
-      return { args, open }
+      return { args, t, open }
     },
     template: `
-      <VDialog v-bind="args" v-model:open="open">
+      <VDialog v-bind="args" v-model:open="open" :title="t.shareDocument" :subtitle="t.shareSubtitle">
         <template #trigger="{ triggerProps }">
-          <VButton v-bind="triggerProps">Ouvrir la modale</VButton>
+          <VButton v-bind="triggerProps">{{ t.openModal }}</VButton>
         </template>
-        <VTypography>
-          Toute personne disposant du lien pourra consulter le document. Vous pouvez
-          révoquer l'accès à tout moment depuis les paramètres de partage.
-        </VTypography>
+        <VTypography>{{ t.shareBody }}</VTypography>
         <template #footer>
-          <VButton variant="ghost" tone="neutral" @click="open = false">Annuler</VButton>
-          <VButton @click="open = false">Partager</VButton>
+          <VButton variant="ghost" tone="neutral" @click="open = false">{{ t.cancel }}</VButton>
+          <VButton @click="open = false">{{ t.share }}</VButton>
         </template>
       </VDialog>
     `,
@@ -57,33 +118,33 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // ouverture via le déclencheur (slot #trigger) : la modale passe en top layer.
-    // Montage paresseux : le <dialog> n'existe dans le DOM qu'une fois ouvert,
-    // il ne peut être requêté qu'après le clic.
-    await userEvent.click(canvas.getByRole('button', { name: 'Ouvrir la modale' }))
+    // opening through the trigger (the #trigger slot): the modal moves to the top layer.
+    // Lazy mounting: the <dialog> only exists in the DOM once open, so it can only be
+    // queried after the click.
+    await userEvent.click(canvas.getByRole('button', { name: 'Open the modal' }))
     const dialog = await waitFor(() => {
       const el = canvasElement.querySelector('.v-dialog') as HTMLDialogElement | null
       expect(el?.open).toBe(true)
       return el!
     })
 
-    // fermeture par la croix : le <dialog> est entièrement démonté
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Fermer' }))
+    // closing through the cross: the <dialog> is entirely unmounted
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Close' }))
     await waitFor(() => expect(canvasElement.querySelector('.v-dialog')).toBeNull())
   },
 }
 
 /**
- * La prop `width` accepte n'importe quelle unité CSS et reste bornée à 100 % du
- * viewport (en réduisant la fenêtre, la modale se rétracte).
+ * The `width` prop accepts any CSS unit and stays bounded to 100% of the viewport
+ * (shrink the window and the modal retracts).
  */
-export const Largeur: Story = {
+export const Width: Story = {
   render: (args) => ({
     components: { VDialog, VButton, VTypography },
     setup() {
       const opened = ref<string | null>(null)
       const widths = ['320px', '480px', '640px'] as const
-      return { args, opened, widths }
+      return { args, t, opened, widths }
     },
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
@@ -95,14 +156,14 @@ export const Largeur: Story = {
         v-for="w in widths"
         :key="w"
         :width="w"
-        :title="'Modale ' + w"
-        subtitle="Largeur pilotée par la prop width."
+        :title="t.modal(w)"
+        :subtitle="t.widthSubtitle"
         :open="opened === w"
         @update:open="(v) => { if (!v) opened = null }"
       >
-        <VTypography>Contenu de la modale en largeur {{ w }}.</VTypography>
+        <VTypography>{{ t.widthBody(w) }}</VTypography>
         <template #footer>
-          <VButton @click="opened = null">Fermer</VButton>
+          <VButton @click="opened = null">{{ t.close }}</VButton>
         </template>
       </VDialog>
     `,
@@ -110,26 +171,22 @@ export const Largeur: Story = {
 }
 
 /**
- * Contenu qui déborde : le corps devient scrollable, header et footer restent
- * collés (sticky). Les séparateurs n'apparaissent que quand du contenu passe
- * sous le header ou sous le footer (scroll-state container queries, Chrome 133+).
+ * Overflowing content: the body becomes scrollable while the header and the footer stay
+ * put. The separators only appear when content passes under the header or under the
+ * footer (scroll-state container queries, Chrome 133+).
  */
-export const ContenuLong: Story = {
+export const LongContent: Story = {
   render: (args) => ({
     components: { VDialog, VButton, VTypography },
     setup() {
       const open = ref(false)
       const paragraphs = Array.from({ length: 12 }, (_, i) => i + 1)
-      return { args, open, paragraphs }
+      return { args, t, open, paragraphs }
     },
     template: `
-      <VDialog
-        title="Conditions d'utilisation"
-        subtitle="Faites défiler pour tout lire."
-        v-model:open="open"
-      >
+      <VDialog :title="t.terms" :subtitle="t.scrollToRead" v-model:open="open">
         <template #trigger="{ triggerProps }">
-          <VButton v-bind="triggerProps">Lire les conditions</VButton>
+          <VButton v-bind="triggerProps">{{ t.readTerms }}</VButton>
         </template>
         <p v-for="n in paragraphs" :key="n" style="margin: 0 0 12px">
           {{ n }}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
@@ -137,26 +194,26 @@ export const ContenuLong: Story = {
           nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
         </p>
         <template #footer>
-          <VButton variant="ghost" tone="neutral" @click="open = false">Refuser</VButton>
-          <VButton @click="open = false">Accepter</VButton>
+          <VButton variant="ghost" tone="neutral" @click="open = false">{{ t.decline }}</VButton>
+          <VButton @click="open = false">{{ t.accept }}</VButton>
         </template>
       </VDialog>
     `,
   }),
 }
 
-/** Le slot `#header` remplace entièrement le bloc titre/sous-titre. */
-export const HeaderPersonnalise: Story = {
+/** The `#header` slot entirely replaces the title/subtitle block. */
+export const CustomHeader: Story = {
   render: (args) => ({
     components: { VDialog, VButton, VTypography },
     setup() {
       const open = ref(false)
-      return { args, open }
+      return { args, t, open }
     },
     template: `
-      <VDialog v-model:open="open" aria-label="Nouvelle version disponible">
+      <VDialog v-model:open="open" :aria-label="t.newVersionAvailable">
         <template #trigger="{ triggerProps }">
-          <VButton v-bind="triggerProps">Header personnalisé</VButton>
+          <VButton v-bind="triggerProps">{{ t.customHeader }}</VButton>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 12px">
@@ -165,82 +222,82 @@ export const HeaderPersonnalise: Story = {
             >
               ✦
             </span>
-            <VTypography variant="heading-3" as="strong">Nouvelle version</VTypography>
+            <VTypography variant="heading-3" as="strong">{{ t.newVersion }}</VTypography>
           </div>
         </template>
-        <VTypography>La version 2.0 est prête à être installée.</VTypography>
+        <VTypography>{{ t.versionBody }}</VTypography>
         <template #footer>
-          <VButton @click="open = false">Plus tard</VButton>
+          <VButton @click="open = false">{{ t.later }}</VButton>
         </template>
       </VDialog>
     `,
   }),
 }
 
-/** Le slot `#headerActions` ajoute des contrôles juste à gauche de la croix. */
-export const ActionsHeader: Story = {
+/** The `#headerActions` slot adds controls just to the left of the cross. */
+export const HeaderActions: Story = {
   render: (args) => ({
     components: { VDialog, VButton, VTypography },
     setup() {
       const open = ref(false)
-      return { args, open }
+      return { args, t, open }
     },
     template: `
-      <VDialog title="Aperçu" subtitle="document.pdf" v-model:open="open">
+      <VDialog :title="t.preview" subtitle="document.pdf" v-model:open="open">
         <template #trigger="{ triggerProps }">
-          <VButton v-bind="triggerProps">Ouvrir l'aperçu</VButton>
+          <VButton v-bind="triggerProps">{{ t.openPreview }}</VButton>
         </template>
         <template #headerActions>
-          <VButton variant="ghost" tone="neutral" size="sm" iconStart="download" aria-label="Télécharger" />
-          <VButton variant="ghost" tone="neutral" size="sm" iconStart="open_in_full" aria-label="Plein écran" />
+          <VButton variant="ghost" tone="neutral" size="sm" iconStart="download" :aria-label="t.download" />
+          <VButton variant="ghost" tone="neutral" size="sm" iconStart="open_in_full" :aria-label="t.fullScreen" />
         </template>
-        <VTypography>Zone d'aperçu du document.</VTypography>
+        <VTypography>{{ t.previewArea }}</VTypography>
       </VDialog>
     `,
   }),
 }
 
-/** `closable=false` retire la croix : la fermeture passe alors par le footer ou Échap. */
-export const SansCroix: Story = {
+/** `closable=false` removes the cross: closing then goes through the footer or Escape. */
+export const WithoutCross: Story = {
   args: { closable: false },
   render: (args) => ({
     components: { VDialog, VButton, VTypography },
     setup() {
       const open = ref(false)
-      return { args, open }
+      return { args, t, open }
     },
     template: `
-      <VDialog v-bind="args" v-model:open="open">
+      <VDialog v-bind="args" v-model:open="open" :title="t.shareDocument">
         <template #trigger="{ triggerProps }">
-          <VButton v-bind="triggerProps">Ouvrir sans croix</VButton>
+          <VButton v-bind="triggerProps">{{ t.openWithoutCross }}</VButton>
         </template>
-        <VTypography>Pas de croix : utilisez les actions ci-dessous.</VTypography>
+        <VTypography>{{ t.noCrossBody }}</VTypography>
         <template #footer>
-          <VButton variant="ghost" tone="neutral" @click="open = false">Annuler</VButton>
-          <VButton @click="open = false">Valider</VButton>
+          <VButton variant="ghost" tone="neutral" @click="open = false">{{ t.cancel }}</VButton>
+          <VButton @click="open = false">{{ t.confirm }}</VButton>
         </template>
       </VDialog>
     `,
   }),
 }
 
-/** Échap ferme la modale par défaut (`closeOnEscape`). */
-export const FermetureEscape: Story = {
+/** Escape closes the modal by default (`closeOnEscape`). */
+export const EscapeDismiss: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // montage paresseux : le <dialog> n'est requêtable qu'une fois ouvert
-    await userEvent.click(canvas.getByRole('button', { name: 'Ouvrir la modale' }))
+    // lazy mounting: the <dialog> is only queryable once open
+    await userEvent.click(canvas.getByRole('button', { name: 'Open the modal' }))
     const dialog = await waitFor(() => {
       const el = canvasElement.querySelector('.v-dialog') as HTMLDialogElement | null
       expect(el?.open).toBe(true)
       return el!
     })
 
-    // Échap passe par le CloseWatcher natif (closedby), qui exige une frappe
-    // *trusted* — impossible à synthétiser en play function. On emprunte la même
-    // voie native (close() → événement 'close') pour vérifier NOTRE pont :
-    // resynchronisation du v-model puis démontage complet.
+    // Escape goes through the native CloseWatcher (closedby), which requires a *trusted*
+    // keystroke — impossible to synthesize in a play function. The same native route is
+    // taken (close() → the 'close' event) to check OUR bridge: the v-model resync then
+    // the complete unmount.
     dialog.close()
     await waitFor(() => expect(canvasElement.querySelector('.v-dialog')).toBeNull())
   },

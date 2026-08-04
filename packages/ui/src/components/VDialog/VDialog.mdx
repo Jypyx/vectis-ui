@@ -5,74 +5,74 @@ import * as VDialogStories from './VDialog.stories'
 
 # Dialog
 
-Modale bloquante bâtie sur la primitive native `<dialog>` + `showModal()` : passage en
-**top-layer**, `::backdrop`, **piège de focus** et **fond inerte** sont natifs — aucun JS pour
-tout cela, et le focus revient au déclencheur à la fermeture. Le light dismiss (clic backdrop /
-Échap) est lui aussi déclaratif via l'attribut `closedby`. Le seul JS de comportement est le
-pont `v-model:open` ↔ API impérative (`showModal()`/`close()` n'ont pas d'équivalent
-déclaratif), confiné à `onMounted`/`watch`/handlers (SSR-safe).
+A blocking modal built on the native `<dialog>` primitive + `showModal()`: the move to the **top
+layer**, `::backdrop`, the **focus trap** and the **inert background** are all native — no JS for
+any of it, and the focus returns to the trigger on closing. The light dismiss (a backdrop click /
+Escape) is declarative too, through the `closedby` attribute. The only behavioural JS is the
+`v-model:open` ↔ imperative API bridge (`showModal()` and `close()` have no declarative
+equivalent), confined to `onMounted`/`watch`/handlers (SSR-safe).
 
 <Canvas of={VDialogStories.Default} />
 
 <Controls of={VDialogStories.Default} />
 
-## Ouverture et fermeture
+## Opening and closing
 
-L'état est piloté par `v-model:open`. Un slot `#trigger` scopé fournit `triggerProps` à poser
-sur un `VButton` (`v-bind="triggerProps"`) — voie explicite, sans pont magique. Comme `<dialog>`
-n'émet aucun événement à l'ouverture, l'ouverture pose `open.value` (le watcher appelle
-`showModal()`) tandis que la fermeture demande la fermeture native ; l'événement `close`
-(croix, Échap, backdrop) resynchronise alors le `v-model`. Les méthodes `show()` / `close()`
-sont aussi exposées via `ref`.
+The state is driven by `v-model:open`. A scoped `#trigger` slot supplies `triggerProps` to set on a
+`VButton` (`v-bind="triggerProps"`) — an explicit route, with no magic bridge. Since `<dialog>`
+emits no event on opening, opening sets `open.value` (the watcher calls `showModal()`) while
+closing requests the native close; the `close` event (the cross, Escape, the backdrop) then
+resynchronizes the `v-model`. The `show()` / `close()` methods are also exposed through `ref`.
 
-**Montage paresseux** : le `<dialog>` (et son contenu, potentiellement coûteux) n'est monté dans
-le DOM que pendant qu'il est ouvert, et en est entièrement retiré à la fermeture — rien ne
-subsiste ni ne capte les clics. Comme chaque ouverture recrée un élément neuf, l'animation
-d'**entrée** est conservée mais il n'y a pas d'animation de **sortie**.
+**Lazy mounting**: the `<dialog>` (and its potentially costly content) is only mounted in the DOM
+while it is open, and is entirely removed from it on closing — nothing lingers or captures clicks.
+Since each opening recreates a brand new element, the **entry** animation is kept but there is no
+**exit** animation.
 
-## Trois zones
+## Three zones
 
-Le **header** contient un titre et un sous-titre — remplaçables intégralement par le slot
-`#header`. À droite, la croix de fermeture (`closable`, masquable) ; juste à sa gauche, le slot
-`#headerActions` accueille des contrôles libres (télécharger, plein écran…). Le **contenu**
-(slot par défaut) est scrollable. Le **footer** (slot `#footer`) porte les actions.
+The **header** holds a title and a subtitle — entirely replaceable through the `#header` slot. On
+the right, the close cross (`closable`, hideable); just to its left, the `#headerActions` slot takes
+free controls (download, full screen…). The **content** (the default slot) is scrollable. The
+**footer** (the `#footer` slot) carries the actions.
 
-<Canvas of={VDialogStories.HeaderPersonnalise} />
+<Canvas of={VDialogStories.CustomHeader} />
 
-<Canvas of={VDialogStories.ActionsHeader} />
+<Canvas of={VDialogStories.HeaderActions} />
 
-## Largeur et responsive
+## Width and responsiveness
 
-`width` accepte n'importe quelle unité CSS (défaut `400px`) et pilote la largeur de la modale.
-Celle-ci ne dépasse jamais `100% − marges`, en largeur comme en hauteur (`max-inline-size`/
-`max-block-size` sur `100dvi`/`100dvb`) : sur petit écran elle se rétracte au viewport.
+`width` accepts any CSS unit (default `400px`) and drives the modal's width. The modal never
+exceeds `100% − margins`, in width as well as in height (`max-inline-size`/`max-block-size` on
+`100dvi`/`100dvb`): on a small screen it retracts to the viewport.
 
-<Canvas of={VDialogStories.Largeur} />
+<Canvas of={VDialogStories.Width} />
 
-## Contenu débordant et séparateurs
+## Overflowing content and separators
 
-Quand le contenu dépasse la hauteur maximale, le corps devient scrollable et **header et footer
-restent visibles** (sticky). Les traits de séparation header/contenu et contenu/footer
-n'apparaissent **que si du contenu passe sous le header ou le footer** — implémenté avec les
-container queries d'état de défilement (`@container scroll-state(scrollable: top | bottom)`).
-C'est une feature CSS récente (Chrome 133+, pas encore Safari/Firefox) : là où elle n'est pas
-supportée, aucun séparateur ne s'affiche (dégradation sans conséquence).
+When the content exceeds the maximum height, the body becomes scrollable and **the header and the
+footer stay visible** (sticky). The header/content and content/footer separating rules appear
+**only when content passes under the header or the footer** — implemented with scroll-state
+container queries (`@container scroll-state(scrollable: top | bottom)`). It is a recent CSS feature
+(Chrome 133+, not yet Safari/Firefox): where it is unsupported, no separator is displayed (a
+degradation with no consequence).
 
-<Canvas of={VDialogStories.ContenuLong} />
+<Canvas of={VDialogStories.LongContent} />
 
-## Sans croix
+## Without a cross
 
-<Canvas of={VDialogStories.SansCroix} />
+<Canvas of={VDialogStories.WithoutCross} />
 
-## Accessibilité
+## Accessibility
 
-- L'élément natif `<dialog>` porte le rôle `dialog` (ou `alertdialog`, cf. `VDialogAlert`).
-- `title` et `subtitle` alimentent `aria-labelledby` / `aria-describedby`. Avec un header
-  personnalisé (slot `#header`), fournir soi-même un `aria-label` (ou `aria-labelledby`) sur la
-  modale.
-- `showModal()` fournit gratuitement le **piège de focus**, le **fond inerte** et le **retour du
-  focus** au déclencheur — rien à recâbler.
-- La croix expose un nom accessible (`closeLabel`, défaut « Fermer »).
-- Toutes les animations passent en `@media (prefers-reduced-motion: reduce)`.
+- The native `<dialog>` element carries the `dialog` role (or `alertdialog`, see `VDialogAlert`).
+- `title` and `subtitle` feed `aria-labelledby` / `aria-describedby`. With a custom header (the
+  `#header` slot), supply an `aria-label` (or `aria-labelledby`) on the modal yourself.
+- `showModal()` provides the **focus trap**, the **inert background** and the **focus return** to
+  the trigger for free — nothing to rewire.
+- The cross exposes an accessible name (`closeLabel`, "Close" by default).
+- Every animation goes through `@media (prefers-reduced-motion: reduce)`.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**), et les props texte restent prioritaires pour un ajustement au cas par cas.
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.

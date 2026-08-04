@@ -5,151 +5,146 @@ import * as VTimePickerStories from './VTimePicker.stories'
 
 # TimePicker
 
-Sélecteur d'heure : un champ [VInput](?path=/docs/composants-input--docs) et,
-optionnellement, un panneau flottant. Trois façons de remplir le champ, choisies
-par la prop `mode` — une **saisie masquée**, un **cadran** ou une **liste
-d'heures**.
+A time picker: a [VInput](?path=/docs/components-input--docs) field and, optionally, a
+floating panel. Three ways of filling the field, chosen through the `mode` prop — a
+**masked entry**, a **dial** or a **list of times**.
 
-**Par défaut, l'heure se tape au clavier et il n'y a pas de panneau** : `mode`
-vaut `input` et `showDial` `false`.
+**By default the time is typed on the keyboard and there is no panel**: `mode` is `input`
+and `showDial` is `false`.
 
-La coquille est celle du [VDatePicker](?path=/docs/composants-datepicker--docs) :
-panneau `popover="manual"` ancré en **pur CSS** (`anchor-scope` sur la racine +
-`anchor-name` sur le contrôle → `position-anchor`), ouverture programmatique qui
-déplace le focus dans le panneau, fermeture par `focusout` racine + `Échap`.
+The shell is the [VDatePicker](?path=/docs/components-datepicker--docs) one: a
+`popover="manual"` panel anchored in **pure CSS** (`anchor-scope` on the root +
+`anchor-name` on the control → `position-anchor`), a programmatic opening that moves focus
+into the panel, and closing through the root's `focusout` + `Escape`.
 
-Quel que soit le mode, le **v-model reste `'HH:mm'` en 24 h canonique** (`null`
-si vide) : choisir 7 h PM produit `'19:00'`.
+Whatever the mode, the **v-model stays `'HH:mm'` in canonical 24 h** (`null` when empty):
+picking 7 PM produces `'19:00'`.
 
 <Canvas of={VTimePickerStories.Default} />
 <Controls of={VTimePickerStories.Default} />
 
-## Trois modes de champ
+## Three field modes
 
-- **`input`** (défaut) : le champ se tape au clavier, derrière un masque
-  « HH:MM ». Le cadran est optionnel (`showDial`) et absent par défaut.
-- **`readonly`** : le champ passe en lecture seule et le cadran devient le seul
-  chemin — `showDial` y est donc forcé à `true`.
-- **`list`** : un panneau `listbox` propose les heures par pas de `minuteStep` ;
-  le champ reste en lecture seule et `showDial` y est sans objet.
+- **`input`** (the default): the field is typed on the keyboard, behind an "HH:MM" mask.
+  The dial is optional (`showDial`) and absent by default.
+- **`readonly`**: the field turns read-only and the dial becomes the only route —
+  `showDial` is therefore forced to `true` there.
+- **`list`**: a `listbox` panel offers the times in steps of `minuteStep`; the field stays
+  read-only and `showDial` is beside the point there.
 
-## Saisie masquée (défaut)
+## Masked entry (the default)
 
-L'utilisateur ne tape que **des chiffres** : le deux-points est posé dès que
-l'heure est complète. Contrairement au masque du VDatePicker, dont l'ordre des
-champs et le séparateur sont dérivés de la locale, celui-ci est **universel** —
-`Intl` ne fait varier que le cycle horaire, jamais le deux-points.
+The user types **digits only**: the colon is placed as soon as the hour is complete.
+Unlike VDatePicker's mask, whose field order and separator derive from the locale, this
+one is **universal** — `Intl` only varies the hour cycle, never the colon.
 
-Règles de saisie :
+Entry rules:
 
-- taper un séparateur est toléré et complète l'heure par un zéro de tête
-  (« 9:30 » donne le même résultat que « 0930 »),
-- le `Retour arrière` sur le deux-points efface le chiffre qui le précède,
-- une saisie incomplète ou impossible (« 25:00 ») **revient silencieusement** à
-  la valeur courante à la sortie du champ ; vider le champ pose la valeur à
-  `null`,
-- `Entrée` valide et ferme, et ne soumet donc pas le formulaire environnant.
+- typing a separator is tolerated and completes the hour with a leading zero ("9:30" gives
+  the same result as "0930"),
+- `Backspace` on the colon erases the digit preceding it,
+- an incomplete or impossible entry ("25:00") **silently reverts** to the current value on
+  leaving the field; emptying the field sets the value to `null`,
+- `Enter` confirms and closes, so it does not submit the surrounding form.
 
-`showDial` ajoute l'icône de fin de champ et le cadran : le panneau s'ouvre alors
-au focus **sans prendre le focus**, la frappe continue dans le champ, et la
-`flèche bas` reste le chemin explicite vers le cadran.
+`showDial` adds the end-of-field icon and the dial: the panel then opens on focus
+**without taking focus**, typing carries on in the field, and the `down arrow` stays the
+explicit route to the dial.
 
-`clockIcon` remplace cette icône-là et elle seule : en `mode="list"` le chevron
-suit la convention du VCombobox. La croix de `clearable` se pose **à sa gauche**
-sans la remplacer — croix + chevron, exactement comme le VCombobox.
+`clockIcon` replaces that icon and only that one: in `mode="list"` the chevron follows the
+VCombobox convention. `clearable`'s cross sits **to its left** without replacing it — the
+cross plus the chevron, exactly like VCombobox.
 
-<Canvas of={VTimePickerStories.SaisieAvecCadran} />
+<Canvas of={VTimePickerStories.InputWithDial} />
 
-## Le cadran
+## The dial
 
-Deux boutons affichent l'heure du brouillon (heure / minutes) et choisissent
-l'étape active : celui de l'étape en cours passe au ton accent. Sur le cadran, un
-clic ou un glisser positionne l'aiguille ; relâcher après le choix de l'heure
-passe automatiquement aux minutes. Les minutes se sélectionnent à la minute près
-(les chiffres ne sont que des repères de 5 minutes) ; `minuteStep` impose une
-granularité.
+Two buttons display the draft time (hour / minutes) and choose the active step: the one
+for the step under way switches to the accent tone. On the dial, a click or a drag
+positions the hand; releasing after the hour has been chosen moves on to the minutes
+automatically. The minutes are selected to the minute (the numerals are only 5-minute
+markers); `minuteStep` imposes a granularity.
 
-Le panneau travaille sur un **brouillon** : seul **OK** écrit le v-model ;
-**Annuler**, `Échap` et la sortie de focus abandonnent la sélection en cours — on
-tâtonne au cadran avant de valider.
+The panel works on a **draft**: only **OK** writes the v-model; **Cancel**, `Escape` and
+focus leaving abandon the selection under way — you can feel your way around the dial
+before confirming.
 
-En 24 h, le cadran porte un **double anneau** : 12 et 1–11 à l'extérieur, 00 et
-13–23 à l'intérieur.
+In 24 h, the dial carries a **double ring**: 12 and 1–11 on the outside, 00 and 13–23 on
+the inside.
 
-Les chiffres et l'aiguille sont positionnés en **CSS pur** — trigonométrie
-`sin()`/`cos()` (CSS Values 4, largement sous le plancher navigateur du DS) sur
-une fraction de tour posée en variable inline. Le JS se limite à la conversion
-pointeur → valeur et au clavier.
+The numerals and the hand are positioned in **pure CSS** — `sin()`/`cos()` trigonometry
+(CSS Values 4, well below the design system's browser floor) on a turn fraction set as an
+inline variable. The JS is limited to the pointer → value conversion and the keyboard.
 
-<Canvas of={VTimePickerStories.LectureSeule} />
-<Canvas of={VTimePickerStories.SelectionAuCadran} />
-<Canvas of={VTimePickerStories.AnneauInterieur} />
-<Canvas of={VTimePickerStories.PasDeCinqMinutes} />
+<Canvas of={VTimePickerStories.ReadOnly} />
+<Canvas of={VTimePickerStories.DialSelection} />
+<Canvas of={VTimePickerStories.InnerRing} />
+<Canvas of={VTimePickerStories.FiveMinuteStep} />
 
-## Liste d'heures
+## The list of times
 
-Le mode `list` énumère la journée par pas de `minuteStep` (15 ou 30 minutes sont
-les valeurs attendues ; un pas plus fin est signalé en développement — au pas de
-1 minute la liste ferait 1440 rangées). À l'ouverture, la valeur courante — ou la
-plus proche — a le focus et la liste est défilée dessus.
+The `list` mode enumerates the day in steps of `minuteStep` (15 or 30 minutes are the
+expected values; a finer step is flagged in development — at a 1-minute step the list
+would be 1440 rows). On opening, the current value — or the closest one — has focus and
+the list is scrolled onto it.
 
-Choisir une heure **commite immédiatement et ferme** : un choix dans une liste
-est un geste unique, il n'y a donc ni brouillon ni bouton OK ici.
+Choosing a time **commits immediately and closes**: picking from a list is a single
+gesture, so there is neither a draft nor an OK button here.
 
-<Canvas of={VTimePickerStories.ListeDHeures} />
-<Canvas of={VTimePickerStories.ListeClavier} />
+<Canvas of={VTimePickerStories.TimeList} />
+<Canvas of={VTimePickerStories.ListKeyboard} />
 
-## Format 12 h / 24 h et AM/PM
+## The 12 h / 24 h format and AM/PM
 
-Le cycle horaire est **dérivé de la locale** (`hourCycle` d'`Intl`) et
-surchargeable par la prop `format`. En 12 h, un sélecteur AM/PM apparaît **à côté
-du champ**, hors du panneau : il sert donc les trois modes et écrit directement
-le v-model, sans qu'il faille ouvrir ni valider quoi que ce soit. Le cadran, lui,
-repasse à un anneau unique.
+The hour cycle **derives from the locale** (`Intl`'s `hourCycle`) and is overridable
+through the `format` prop. In 12 h, an AM/PM picker appears **next to the field**, outside
+the panel: it therefore serves all three modes and writes the v-model directly, with
+nothing to open or confirm. The dial itself goes back to a single ring.
 
-Tant qu'aucune heure n'est posée, le méridien choisi est simplement **mémorisé**
-et s'appliquera à la première heure saisie ou choisie. En mode `list`, les
-libellés des rangées portent déjà « AM »/« PM » : le sélecteur n'y sert plus qu'à
-basculer d'un coup la valeur retenue.
+As long as no time is set, the chosen meridiem is simply **remembered** and will apply to
+the first time entered or picked. In `list` mode the row labels already carry "AM"/"PM":
+the picker is then only there to switch the value that was kept.
 
-Le champ affiche la valeur formatée par `Intl` selon la locale.
+The field displays the value formatted by `Intl` according to the locale.
 
-<Canvas of={VTimePickerStories.DouzeHeures} />
-<Canvas of={VTimePickerStories.MeridienAligne} />
+<Canvas of={VTimePickerStories.TwelveHour} />
+<Canvas of={VTimePickerStories.AlignedMeridiem} />
 
-## États
+## States
 
-Le champ suit l'échelle des composants de saisie — `sm` (32 px), `md` (40 px,
-défaut) et `lg` (48 px), combinables avec `compact` (-4 px) ; le panneau garde
-ses dimensions —, est effaçable (`clearable` : la croix apparaît à gauche de
-l'icône de fin dès qu'une valeur est posée, y compris pendant une saisie en
-cours) et supporte `disabled`. Annuler restaure toujours la dernière valeur commitée.
+The field follows the input-component scale — `sm` (32px), `md` (40px, the default) and
+`lg` (48px), combinable with `compact` (-4px); the panel keeps its dimensions — is
+clearable (`clearable`: the cross appears to the left of the end icon as soon as a value
+is set, including during an entry under way) and supports `disabled`. Cancel always
+restores the last committed value.
 
-<Canvas of={VTimePickerStories.Annulation} />
-<Canvas of={VTimePickerStories.Tailles} />
-<Canvas of={VTimePickerStories.Desactive} />
+<Canvas of={VTimePickerStories.Cancellation} />
+<Canvas of={VTimePickerStories.Sizes} />
+<Canvas of={VTimePickerStories.Disabled} />
 
-## Accessibilité
+## Accessibility
 
-- Quand un panneau existe, le champ porte `aria-haspopup` (`dialog` pour le
-  cadran, `listbox` pour la liste), `aria-expanded` et `aria-controls`. Un champ
-  de saisie sans `showDial` n'annonce aucun popup.
-- **Ouverture** au clic, à l'`Entrée` ou à la `flèche bas` depuis le champ. En
-  `readonly` et en `list`, le focus se déplace aussitôt dans le panneau ; en
-  saisie avec `showDial`, le panneau s'ouvre **sans prendre le focus**.
-- Le cadran est un **`role="slider"` unique** (un seul arrêt de tabulation) :
-  flèches pour ±1 heure ou ±`minuteStep` minutes, `PageUp`/`PageDown` pour ±5
-  minutes, `Home`/`End` pour les bornes, `Entrée` pour arrêter l'étape. Les
-  chiffres du cadran sont purement décoratifs (`aria-hidden`) ; la valeur est
-  annoncée par `aria-valuetext` et le changement d'étape par une live region.
-- La liste est une `listbox` dont chaque rangée est une `option` sélectionnable :
-  flèches et `Home`/`End` déplacent le focus, `Entrée` ou `Espace` choisissent.
-- **Fermeture** par `Échap` ou Annuler (le focus revient au champ, sans commit),
-  par OK, ou — en mode `list` — par le choix d'une heure.
-- Un placeholder n'étant pas une description accessible, décrivez le format
-  attendu via `hint` (lié au champ par `aria-describedby`).
-- Le cadran n'est **pas miroité en RTL** : une horloge est un objet universel, le
-  sens horaire est invariant ; le groupe HH:MM force de même l'ordre visuel
-  heure–minutes. Les transitions respectent `prefers-reduced-motion`.
+- When a panel exists, the field carries `aria-haspopup` (`dialog` for the dial, `listbox`
+  for the list), `aria-expanded` and `aria-controls`. An input field with no `showDial`
+  announces no popup.
+- **Opening** on click, on `Enter` or on the `down arrow` from the field. In `readonly` and
+  in `list`, focus moves into the panel at once; when typing with `showDial`, the panel
+  opens **without taking focus**.
+- The dial is a **single `role="slider"`** (one tab stop): arrows for ±1 hour or
+  ±`minuteStep` minutes, `PageUp`/`PageDown` for ±5 minutes, `Home`/`End` for the bounds,
+  `Enter` to settle the step. The dial's numerals are purely decorative (`aria-hidden`);
+  the value is announced through `aria-valuetext` and the step change through a live
+  region.
+- The list is a `listbox` whose every row is a selectable `option`: arrows and `Home`/`End`
+  move focus, `Enter` or `Space` pick.
+- **Closing** through `Escape` or Cancel (focus returns to the field, with no commit),
+  through OK, or — in `list` mode — by choosing a time.
+- Since a placeholder is not an accessible description, describe the expected format
+  through `hint` (linked to the field by `aria-describedby`).
+- The dial is **not mirrored in RTL**: a clock is a universal object and clockwise is
+  invariant; the HH:MM group likewise forces the hour–minutes visual order. Transitions
+  respect `prefers-reduced-motion`.
 
-Les libellés accessibles de ce composant viennent du dictionnaire du design system : ils se traduisent globalement (voir **Fondations › Internationalisation**). La prop `locale` reste prioritaire ; sans elle, le composant suit désormais la locale globale posée par `setLocale`, au lieu du `fr-FR` codé en dur.
+This component's accessible labels come from the design system dictionary: they are
+translated globally (see **Foundations › Internationalization**). The `locale` prop stays
+authoritative; without it, the component follows the global locale set by `setLocale`.

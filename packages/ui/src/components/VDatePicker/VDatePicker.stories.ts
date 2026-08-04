@@ -1,13 +1,41 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
 import type { DateRange } from '../VCalendar/VCalendar.vue'
 import VDatePicker from './VDatePicker.vue'
 
+const t = storyText({
+  en: {
+    date: 'Date',
+    period: 'Period',
+    dates: 'Dates',
+    // The mask derives from the locale, and so does this hint: switching the Locale
+    // toolbar changes both together.
+    maskHint: 'Format mm/dd/yyyy',
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    inThreeDays: 'In 3 days',
+    juneOnly: 'From 5 to 24 June only',
+    juneWeekdays: 'June 2026, weekdays only',
+  },
+  fr: {
+    date: 'Date',
+    period: 'Période',
+    dates: 'Dates',
+    maskHint: 'Format jj/mm/aaaa',
+    today: "Aujourd'hui",
+    tomorrow: 'Demain',
+    inThreeDays: 'Dans 3 jours',
+    juneOnly: 'Du 5 au 24 juin uniquement',
+    juneWeekdays: 'Juin 2026, jours ouvrés',
+  },
+})
+
 const meta = {
-  title: 'Composants/DatePicker',
+  title: 'Components/DatePicker',
   component: VDatePicker,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
@@ -15,11 +43,11 @@ const meta = {
     mode: { control: 'inline-radio', options: ['readonly', 'input'] },
     showCalendar: { control: 'boolean' },
   },
-  // Ni `mode` ni `selection` : les épingler ferait mentir le panneau Controls,
-  // qui afficherait une valeur courante différente du défaut du composant.
+  // Neither `mode` nor `selection`: pinning them would make the Controls panel lie, as it
+  // would show a current value different from the component's default. No `locale`
+  // either — the picker then follows the design system's global locale, so the Locale
+  // toolbar drives both the mask and the month names.
   args: {
-    locale: 'fr-FR',
-    label: 'Date',
     size: 'md',
     clearable: true,
   },
@@ -29,66 +57,65 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * Par défaut le champ se tape au clavier et pose les séparateurs tout seul,
- * sans calendrier : le champ reste nu tant qu'aucune date n'est saisie, puis
- * affiche la croix d'effacement.
+ * By default the field is typed on the keyboard and places the separators on its own,
+ * with no calendar: the field stays bare until a date is entered, then displays the clear
+ * cross.
  */
 export const Default: Story = {
-  args: { hint: 'Format jj/mm/aaaa' },
   render: (args) => ({
     components: { VDatePicker },
-    setup: () => ({ args, value: ref<string | null>(null) }),
+    setup: () => ({ args, t, value: ref<string | null>(null) }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <VDatePicker v-bind="args" v-model="value" />
+        <VDatePicker v-bind="args" v-model="value" :label="t.date" :hint="t.maskHint" />
         <output>{{ value ?? '—' }}</output>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // getByRole('textbox') : le panneau (role dialog) porterait le même
-    // aria-label que le champ, getByLabelText matcherait les deux
+    // getByRole('textbox'): the panel (role dialog) would carry the same aria-label as
+    // the field, so getByLabelText would match both
     const field = canvas.getByRole('textbox', { name: 'Date' })
 
-    // sans calendrier, le champ n'annonce aucun popup et n'en ouvre aucun
+    // with no calendar, the field announces no popup and opens none
     await expect(field).not.toHaveAttribute('aria-haspopup')
     await userEvent.click(field)
     await expect(canvas.queryByRole('dialog')).toBeNull()
 
-    // seuls les chiffres sont tapés, le masque pose les « / »
-    await userEvent.keyboard('10')
-    await expect(field).toHaveValue('10/')
-    await userEvent.keyboard('062026')
-    await expect(field).toHaveValue('10/06/2026')
+    // only digits are typed, the mask places the "/" (en-US mask: mm/dd/yyyy)
+    await userEvent.keyboard('06')
+    await expect(field).toHaveValue('06/')
+    await userEvent.keyboard('102026')
+    await expect(field).toHaveValue('06/10/2026')
     await expect(field).toHaveFocus()
     await waitFor(() => expect(canvas.getByText('2026-06-10')).toBeVisible())
 
-    // la croix d'effacement, elle, reste disponible (clearable)
-    await expect(canvas.getByRole('button', { name: 'Effacer la date' })).toBeVisible()
+    // the clear cross, meanwhile, stays available (clearable)
+    await expect(canvas.getByRole('button', { name: 'Clear date' })).toBeVisible()
 
-    // le Retour arrière sur le séparateur efface le chiffre qui le précède
+    // Backspace on the separator erases the digit preceding it
     await userEvent.keyboard('{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}')
-    await expect(field).toHaveValue('10/0')
+    await expect(field).toHaveValue('06/1')
 
-    // sortie du champ : la saisie incomplète revient silencieusement à la valeur
+    // leaving the field: the incomplete entry silently returns to the value
     await userEvent.tab()
-    await waitFor(() => expect(field).toHaveValue('10/06/2026'))
+    await waitFor(() => expect(field).toHaveValue('06/10/2026'))
   },
 }
 
 /**
- * `mode="readonly"` : la date ne se choisit qu'au calendrier, qui devient dès
- * lors le seul chemin — `showCalendar` y est sans objet.
+ * `mode="readonly"`: the date can only be chosen from the calendar, which then becomes
+ * the only route — `showCalendar` is pointless there.
  */
-export const LectureSeule: Story = {
+export const ReadOnly: Story = {
   args: { mode: 'readonly' },
   render: (args) => ({
     components: { VDatePicker },
-    setup: () => ({ args, value: ref('2026-06-10') }),
+    setup: () => ({ args, t, value: ref('2026-06-10') }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <VDatePicker v-bind="args" v-model="value" />
+        <VDatePicker v-bind="args" v-model="value" :label="t.date" />
         <output>{{ value ?? '—' }}</output>
       </div>
     `,
@@ -96,24 +123,24 @@ export const LectureSeule: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const field = canvas.getByRole('textbox', { name: 'Date' })
-    // ouverture au clavier (flèche bas), focus déplacé dans la grille
+    // opening with the keyboard (down arrow), the focus moved into the grid
     field.focus()
     await userEvent.keyboard('{ArrowDown}')
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
-    // Échap referme et redonne le focus au champ
+    // Escape closes and hands the focus back to the field
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(field).toHaveFocus())
   },
 }
 
-export const Plage: Story = {
+export const Range: Story = {
   args: { selection: 'range' },
   render: (args) => ({
     components: { VDatePicker },
-    setup: () => ({ args, value: ref<DateRange>({ start: '2026-06-19', end: '2026-06-26' }) }),
+    setup: () => ({ args, t, value: ref<DateRange>({ start: '2026-06-19', end: '2026-06-26' }) }),
     template: `
       <div style="width: 300px">
-        <VDatePicker v-bind="args" label="Période" v-model="value" />
+        <VDatePicker v-bind="args" :label="t.period" v-model="value" />
       </div>
     `,
   }),
@@ -123,17 +150,17 @@ export const Multiple: Story = {
   args: { selection: 'multiple' },
   render: (args) => ({
     components: { VDatePicker },
-    setup: () => ({ args, value: ref<string[]>(['2026-06-05', '2026-06-12']) }),
+    setup: () => ({ args, t, value: ref<string[]>(['2026-06-05', '2026-06-12']) }),
     template: `
       <div style="width: 300px">
-        <VDatePicker v-bind="args" label="Dates" v-model="value" />
+        <VDatePicker v-bind="args" :label="t.dates" v-model="value" />
       </div>
     `,
   }),
 }
 
-// Footer avec presets qui posent la valeur et ferment le panneau.
-export const AvecPresets: Story = {
+// A footer with presets that set the value and close the panel.
+export const WithPresets: Story = {
   args: { mode: 'readonly' },
   render: (args) => ({
     components: { VDatePicker, VButton },
@@ -147,15 +174,15 @@ export const AvecPresets: Story = {
         value.value = fmt(d)
         close()
       }
-      return { args, value, setIn }
+      return { args, t, value, setIn }
     },
     template: `
       <div style="width: 280px">
-        <VDatePicker v-bind="args" v-model="value">
+        <VDatePicker v-bind="args" v-model="value" :label="t.date">
           <template #footer="{ close }">
-            <VButton variant="ghost" size="sm" @click="setIn(0, close)">Aujourd'hui</VButton>
-            <VButton variant="ghost" size="sm" @click="setIn(1, close)">Demain</VButton>
-            <VButton variant="ghost" size="sm" @click="setIn(3, close)">Dans 3 jours</VButton>
+            <VButton variant="ghost" size="sm" @click="setIn(0, close)">{{ t.today }}</VButton>
+            <VButton variant="ghost" size="sm" @click="setIn(1, close)">{{ t.tomorrow }}</VButton>
+            <VButton variant="ghost" size="sm" @click="setIn(3, close)">{{ t.inThreeDays }}</VButton>
           </template>
         </VDatePicker>
       </div>
@@ -167,22 +194,23 @@ export const MinMax: Story = {
   args: { mode: 'readonly' },
   render: (args) => ({
     components: { VDatePicker },
-    setup: () => ({ args, value: ref('2026-06-15') }),
+    setup: () => ({ args, t, value: ref('2026-06-15') }),
     template: `
       <div style="width: 280px">
-        <VDatePicker v-bind="args" v-model="value" min="2026-06-05" max="2026-06-24"
-          hint="Du 5 au 24 juin uniquement" />
+        <VDatePicker v-bind="args" v-model="value" :label="t.date" min="2026-06-05" max="2026-06-24"
+          :hint="t.juneOnly" />
       </div>
     `,
   }),
 }
 
-export const Evenements: Story = {
+export const Events: Story = {
   args: { mode: 'readonly' },
   render: (args) => ({
     components: { VDatePicker },
     setup: () => ({
       args,
+      t,
       value: ref('2026-06-10'),
       events: [
         { date: '2026-06-10', color: 'var(--vectis-color-accent)' },
@@ -191,13 +219,13 @@ export const Evenements: Story = {
     }),
     template: `
       <div style="width: 280px">
-        <VDatePicker v-bind="args" v-model="value" :events="events" />
+        <VDatePicker v-bind="args" v-model="value" :label="t.date" :events="events" />
       </div>
     `,
   }),
 }
 
-export const Tailles: Story = {
+export const Sizes: Story = {
   render: (args) => ({
     components: { VDatePicker },
     setup: () => ({ args, value: ref('2026-06-10') }),
@@ -211,34 +239,34 @@ export const Tailles: Story = {
   }),
 }
 
-export const Desactive: Story = {
+export const Disabled: Story = {
   render: (args) => ({
     components: { VDatePicker },
-    setup: () => ({ args, value: ref('2026-06-10') }),
+    setup: () => ({ args, t, value: ref('2026-06-10') }),
     template: `
       <div style="width: 280px">
-        <VDatePicker v-bind="args" v-model="value" disabled />
+        <VDatePicker v-bind="args" v-model="value" :label="t.date" disabled />
       </div>
     `,
   }),
 }
 
 /**
- * Cliquer dans une zone vide du panneau (padding, gouttière entre les cellules)
- * ne doit RIEN fermer : sans le `mousedown` neutralisé de `useFieldPanel`, le
- * navigateur rendrait le focus au `<body>` et le `focusout` de la racine
- * fermerait un panneau sur lequel on vient de cliquer.
+ * Clicking an empty area of the panel (its padding, the gutter between cells) must close
+ * NOTHING: without `useFieldPanel`'s neutralized `mousedown`, the browser would hand the
+ * focus back to `<body>` and the root's `focusout` would close a panel that was just
+ * clicked.
  *
- * Invisible en jsdom, qui ne simule pas le focus au clic — d'où cette play.
+ * Invisible in jsdom, which does not simulate focus on click — hence this play function.
  */
-export const ClicDansLeVide: Story = {
+export const ClickInTheVoid: Story = {
   args: { mode: 'readonly' },
   render: (args) => ({
     components: { VDatePicker },
-    setup: () => ({ args, value: ref('2026-06-10') }),
+    setup: () => ({ args, t, value: ref('2026-06-10') }),
     template: `
       <div style="width: 280px">
-        <VDatePicker v-bind="args" v-model="value" />
+        <VDatePicker v-bind="args" v-model="value" :label="t.date" />
       </div>
     `,
   }),
@@ -248,38 +276,38 @@ export const ClicDansLeVide: Story = {
     field.focus()
     await userEvent.keyboard('{ArrowDown}')
     const panel = await waitFor(() => canvas.getByRole('dialog'))
-    // le focus est déplacé dans la grille (le panneau `manual` ne le fait pas
-    // seul) — sous rAF, d'où le waitFor
+    // the focus is moved into the grid (a `manual` panel does not do it on its own) —
+    // under a rAF, hence the waitFor
     await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
 
-    // clic sur la grille ELLE-MÊME et non sur une cellule : userEvent dispatche
-    // sur l'élément passé, sans hit-testing — c'est fidèlement le clic qui tombe
-    // dans le padding ou une gouttière, là où rien n'est focusable
+    // a click on the grid ITSELF rather than on a cell: userEvent dispatches on the
+    // element passed, with no hit-testing — faithfully the click that lands in the
+    // padding or a gutter, where nothing is focusable
     await userEvent.click(canvas.getByRole('grid'))
     await expect(panel.matches(':popover-open')).toBe(true)
-    // et le focus n'a pas été rendu au body
+    // and the focus has not been handed back to the body
     await expect(document.body).not.toHaveFocus()
 
-    // un clic sur un vrai jour, lui, garde le comportement natif (focus + choix)
+    // a click on a real day, meanwhile, keeps the native behaviour (focus + choice)
     await userEvent.click(canvas.getByRole('button', { name: '15' }))
     await waitFor(() => expect(panel.matches(':popover-open')).toBe(false))
-    await expect(field).toHaveValue('15 juin 2026')
+    await expect(field).toHaveValue('Jun 15, 2026')
   },
 }
 
 /**
- * `showCalendar` rend le calendrier accessible depuis un champ de saisie : icône
- * cliquable en fin de champ, et panneau ouvert au focus — sans happer le
- * curseur, la frappe continue dans le champ.
+ * `showCalendar` makes the calendar reachable from an input field: a clickable icon at
+ * the end of the field, and a panel opened on focus — without grabbing the caret, so
+ * typing continues in the field.
  */
-export const SaisieAvecCalendrier: Story = {
-  args: { showCalendar: true, hint: 'Format jj/mm/aaaa' },
+export const InputWithCalendar: Story = {
+  args: { showCalendar: true },
   render: (args) => ({
     components: { VDatePicker },
-    setup: () => ({ args, value: ref<string | null>(null) }),
+    setup: () => ({ args, t, value: ref<string | null>(null) }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <VDatePicker v-bind="args" v-model="value" />
+        <VDatePicker v-bind="args" v-model="value" :label="t.date" :hint="t.maskHint" />
         <output>{{ value ?? '—' }}</output>
       </div>
     `,
@@ -288,37 +316,36 @@ export const SaisieAvecCalendrier: Story = {
     const canvas = within(canvasElement)
     const field = canvas.getByRole('textbox', { name: 'Date' })
 
-    // le clic ouvre le panneau SANS happer le curseur : la frappe continue
+    // the click opens the panel WITHOUT grabbing the caret: typing continues
     await userEvent.click(field)
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     await expect(field).toHaveFocus()
-    await userEvent.keyboard('10062026')
-    await expect(field).toHaveValue('10/06/2026')
+    await userEvent.keyboard('06102026')
+    await expect(field).toHaveValue('06/10/2026')
     await expect(field).toHaveFocus()
 
-    // la flèche bas est le chemin explicite vers la grille, Échap en revient
+    // the down arrow is the explicit route to the grid, Escape comes back
     await userEvent.keyboard('{ArrowDown}')
     const panel = canvas.getByRole('dialog')
     await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(field).toHaveFocus())
-    // Échap n'a pas rouvert le panneau via le focus rendu au champ
+    // Escape has not reopened the panel through the focus handed back to the field
     await expect(panel.matches(':popover-open')).toBe(false)
   },
 }
 
 /**
- * Le collage d'une date déjà écrite (ISO, ou masquée dans une autre locale) est
- * reconnu : sans cela, coller « 2026-06-10 » dans un masque jj/mm/aaaa donnerait
- * « 20/26/0610 ».
+ * Pasting an already-written date (ISO, or masked in another locale) is recognized:
+ * without that, pasting "2026-06-10" into a dd/mm/yyyy mask would give "20/26/0610".
  */
-export const SaisieCollage: Story = {
+export const InputPaste: Story = {
   render: (args) => ({
     components: { VDatePicker },
-    setup: () => ({ args, value: ref<string | null>(null) }),
+    setup: () => ({ args, t, value: ref<string | null>(null) }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <VDatePicker v-bind="args" v-model="value" />
+        <VDatePicker v-bind="args" v-model="value" :label="t.date" />
         <output>{{ value ?? '—' }}</output>
       </div>
     `,
@@ -328,16 +355,16 @@ export const SaisieCollage: Story = {
     const field = canvas.getByRole('textbox', { name: 'Date' })
     await userEvent.click(field)
     await userEvent.paste('2026-06-10')
-    await expect(field).toHaveValue('10/06/2026')
+    await expect(field).toHaveValue('06/10/2026')
     await waitFor(() => expect(canvas.getByText('2026-06-10')).toBeVisible())
   },
 }
 
 /**
- * L'ordre des champs et le séparateur sont dérivés de la locale : rien n'est
- * codé en dur, et le gabarit du placeholder suit les noms de champs localisés.
+ * The field order and the separator are derived from the locale: nothing is hardcoded,
+ * and the placeholder template follows the localized field names.
  */
-export const SaisieLocales: Story = {
+export const InputLocales: Story = {
   render: (args) => ({
     components: { VDatePicker },
     setup: () => ({ args, value: ref('2026-06-10') }),
@@ -353,21 +380,23 @@ export const SaisieLocales: Story = {
 }
 
 /**
- * Bornes et dates désactivées valent aussi pour la saisie : une date refusée
- * revient silencieusement à la valeur courante à la sortie du champ.
+ * The bounds and the disabled dates hold for typing too: a rejected date silently returns
+ * to the current value on leaving the field.
  */
-export const SaisieBornee: Story = {
+export const BoundedInput: Story = {
   render: (args) => ({
     components: { VDatePicker },
     setup: () => ({
       args,
+      t,
       value: ref('2026-06-10'),
       weekends: (iso: string) => [0, 6].includes(new Date(`${iso}T00:00:00`).getDay()),
+      hint: computed(() => t.value.juneWeekdays),
     }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <VDatePicker v-bind="args" v-model="value" min="2026-06-01" max="2026-06-30"
-          :disabled-dates="weekends" hint="Juin 2026, jours ouvrés" />
+        <VDatePicker v-bind="args" v-model="value" :label="t.date" min="2026-06-01" max="2026-06-30"
+          :disabled-dates="weekends" :hint="hint" />
         <output>{{ value ?? '—' }}</output>
       </div>
     `,

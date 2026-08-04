@@ -1,17 +1,34 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
+import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
 import VCalendar from './VCalendar.vue'
 import type { DateRange } from './VCalendar.vue'
 
+const t = storyText({
+  en: {
+    deadline: 'Deadline',
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    inThreeDays: 'In 3 days',
+  },
+  fr: {
+    deadline: 'Échéance',
+    today: "Aujourd'hui",
+    tomorrow: 'Demain',
+    inThreeDays: 'Dans 3 jours',
+  },
+})
+
 const meta = {
-  title: 'Composants/Calendar',
+  title: 'Components/Calendar',
   component: VCalendar,
+  // No `locale` arg: the calendar then follows the design system's global locale, so the
+  // Locale toolbar drives it. The Localization story pins explicit locales instead.
   args: {
     selection: 'single',
-    locale: 'fr-FR',
     showAdjacentDays: true,
     selectAdjacentDays: false,
   },
@@ -34,7 +51,7 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const grid = canvas.getByRole('grid')
-    // le 10 est la cellule focusable initiale (roving tabindex 0)
+    // the 10th is the initially focusable cell (roving tabindex 0)
     const start = within(grid).getByRole('button', { name: '10' })
     start.focus()
     await userEvent.keyboard('{ArrowRight}{Enter}')
@@ -42,7 +59,7 @@ export const Default: Story = {
   },
 }
 
-export const Plage: Story = {
+export const Range: Story = {
   render: (args) => ({
     components: { VCalendar },
     setup: () => ({ args, value: ref<DateRange>({ start: '2026-06-19', end: '2026-06-26' }) }),
@@ -78,8 +95,8 @@ export const MinMax: Story = {
   }),
 }
 
-// Week-ends non sélectionnables (barrés) via un prédicat.
-export const DatesDesactivees: Story = {
+// Weekends made non-selectable (struck through) through a predicate.
+export const DisabledDates: Story = {
   render: (args) => ({
     components: { VCalendar },
     setup: () => {
@@ -93,8 +110,8 @@ export const DatesDesactivees: Story = {
   }),
 }
 
-// Jours des mois adjacents affichés ET cliquables.
-export const MoisAdjacents: Story = {
+// The days of the adjacent months, displayed AND clickable.
+export const AdjacentMonths: Story = {
   render: (args) => ({
     components: { VCalendar },
     setup: () => ({ args, value: ref('2026-06-10') }),
@@ -104,36 +121,36 @@ export const MoisAdjacents: Story = {
   }),
 }
 
-// Pastilles d'événements sous les dates.
-export const Evenements: Story = {
+// Event dots under the dates.
+export const Events: Story = {
   render: (args) => ({
     components: { VCalendar },
     setup: () => ({
       args,
       value: ref('2026-06-10'),
-      events: [
+      events: computed(() => [
         { date: '2026-06-10', color: 'var(--vectis-color-accent)' },
         { date: '2026-06-10', color: 'var(--vectis-color-success)' },
-        { date: '2026-06-18', color: 'var(--vectis-color-danger)', label: 'Échéance' },
+        { date: '2026-06-18', color: 'var(--vectis-color-danger)', label: t.value.deadline },
         { date: '2026-06-24', color: 'var(--vectis-color-warning)' },
-      ],
+      ]),
     }),
     template: `<VCalendar v-bind="args" v-model="value" :events="events" />`,
   }),
 }
 
-// Slot #day : afficher un prix sous le numéro (ex. billets d'avion).
-export const SlotJour: Story = {
+// The #day slot: displaying a price under the number (plane tickets, for instance).
+export const DaySlot: Story = {
   render: (args) => ({
     components: { VCalendar },
     setup: () => {
       const value = ref('2026-06-10')
-      const prices: Record<number, string> = { 10: '89€', 11: '120€', 12: '75€', 15: '99€' }
+      const prices: Record<number, string> = { 10: '€89', 11: '€120', 12: '€75', 15: '€99' }
       return { args, value, prices }
     },
-    // --vectis-calendar-day-size agrandit les ronds (40×40) ; la ligne prix est
-    // TOUJOURS rendue (vide si absente, et sur les jours adjacents auxquels le
-    // slot s'applique aussi) pour que tous les numéros s'alignent.
+    // --vectis-calendar-day-size enlarges the dots (40×40); the price line is ALWAYS
+    // rendered (empty when absent, and on the adjacent days the slot also applies to) so
+    // that every number lines up.
     template: `
       <VCalendar v-bind="args" v-model="value" show-adjacent-days style="--vectis-calendar-day-size: 48px">
         <template #day="{ day, inMonth, selected }">
@@ -147,8 +164,8 @@ export const SlotJour: Story = {
   }),
 }
 
-// Zone footer : presets + actions.
-export const AvecFooter: Story = {
+// The footer zone: presets + actions.
+export const WithFooter: Story = {
   render: (args) => ({
     components: { VCalendar, VButton },
     setup: () => {
@@ -160,21 +177,25 @@ export const AvecFooter: Story = {
         d.setDate(d.getDate() + n)
         value.value = fmt(d)
       }
-      return { args, value, inDays }
+      return { args, t, value, inDays }
     },
     template: `
       <VCalendar v-bind="args" v-model="value">
         <template #footer>
-          <VButton variant="ghost" size="sm" @click="inDays(0)">Aujourd'hui</VButton>
-          <VButton variant="ghost" size="sm" @click="inDays(1)">Demain</VButton>
-          <VButton variant="ghost" size="sm" @click="inDays(3)">Dans 3 jours</VButton>
+          <VButton variant="ghost" size="sm" @click="inDays(0)">{{ t.today }}</VButton>
+          <VButton variant="ghost" size="sm" @click="inDays(1)">{{ t.tomorrow }}</VButton>
+          <VButton variant="ghost" size="sm" @click="inDays(3)">{{ t.inThreeDays }}</VButton>
         </template>
       </VCalendar>
     `,
   }),
 }
 
-export const Localisation: Story = {
+/**
+ * The `locale` prop takes precedence over the design system's global locale: these eight
+ * calendars stay pinned whatever the Locale toolbar says.
+ */
+export const Localization: Story = {
   render: (args) => ({
     components: { VCalendar },
     setup: () => ({ args, value: ref('2026-06-10') }),
