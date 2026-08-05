@@ -254,6 +254,9 @@
     --vectis-control-size-timepicker-hand-minor: 1rem;
     --vectis-control-size-timepicker-cell-w: 6rem;
     --vectis-control-size-timepicker-list-max-block: 18rem;
+    --vectis-control-size-upload-min-block: 10rem;
+    --vectis-control-size-upload-icon: 2.5rem;
+    --vectis-control-size-upload-thumb: 2.5rem;
     --vectis-icon-size-sm: 1rem;
     --vectis-icon-size-md: 1.25rem;
     --vectis-icon-size-lg: 1.5rem;
@@ -400,6 +403,9 @@
     --vectis-control-size-timepicker-hand-minor: 1rem;
     --vectis-control-size-timepicker-cell-w: 6rem;
     --vectis-control-size-timepicker-list-max-block: 18rem;
+    --vectis-control-size-upload-min-block: 10rem;
+    --vectis-control-size-upload-icon: 2.5rem;
+    --vectis-control-size-upload-thumb: 2.5rem;
     --vectis-icon-size-sm: 1rem;
     --vectis-icon-size-md: 1.25rem;
     --vectis-icon-size-lg: 1.5rem;

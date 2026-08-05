@@ -127,4 +127,10 @@ export const en: VectisMessages = {
     files: (count) => `${count} file${count === 1 ? '' : 's'}`,
     placeholder: 'No file selected',
   },
+  fileUpload: {
+    browse: 'Browse files',
+    or: 'or',
+    remove: (name) => `Remove ${name}`,
+    list: 'Selected files',
+  },
 }

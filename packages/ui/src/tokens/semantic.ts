@@ -259,6 +259,15 @@ export const semantic = {
       '18rem',
       "The maximum height of VTimePicker's list panel (the scrolling area)",
     ),
+    'size-upload-min-block': dimension(
+      '10rem',
+      "The minimum height of VFileUpload's drop zone — icon, two lines, separator and button",
+    ),
+    'size-upload-icon': dimension('2.5rem', "The large icon at the top of VFileUpload's drop zone"),
+    'size-upload-thumb': dimension(
+      '2.5rem',
+      'The thumbnail square of a VFileUpload preview row (an image, or its type icon)',
+    ),
   },
   icon: {
     'size-sm': dimension('1rem', '16px icons'),

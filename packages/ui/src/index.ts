@@ -155,3 +155,11 @@ export type {
   FilePickerRejectReason,
   FilePickerRejection,
 } from './components/VFilePicker/VFilePicker.vue'
+export { default as VFileUpload } from './components/VFileUpload/VFileUpload.vue'
+export type {
+  FileUploadPreview,
+  FileUploadRejectReason,
+  FileUploadRejection,
+  FileUploadRow,
+} from './components/VFileUpload/VFileUpload.vue'
+export type { FileKind } from './components/VFileUpload/fileKind'

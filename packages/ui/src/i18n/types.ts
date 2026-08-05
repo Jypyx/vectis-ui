@@ -182,6 +182,19 @@ export interface VectisMessages {
     /** Text of the empty field. */
     placeholder: string
   }
+  fileUpload: {
+    /** Text of the button that opens the file dialog. */
+    browse: string
+    /**
+     * The word between the drop instruction and the button. A WORD, hence
+     * translatable — unlike the two rules on either side, which are drawn in CSS.
+     */
+    or: string
+    /** Accessible name of a preview row's remove button. */
+    remove: (name: string) => string
+    /** Accessible name of the preview list. */
+    list: string
+  }
 }
 
 /**
