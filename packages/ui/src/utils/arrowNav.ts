@@ -47,9 +47,13 @@ export function arrowNavigate(
   if (items.length === 0) return false
   event.preventDefault()
 
-  const forward = vertical
-    ? event.key === 'ArrowDown'
-    : (event.key === 'ArrowRight') !== (getComputedStyle(container).direction === 'rtl')
+  // `forward` is only read by the arrow branch, and the inline axis is the only one
+  // that needs the direction: a lazy getter keeps Home/End off the style recalc that
+  // `getComputedStyle` forces.
+  const forward = () =>
+    vertical
+      ? event.key === 'ArrowDown'
+      : (event.key === 'ArrowRight') !== (getComputedStyle(container).direction === 'rtl')
   const current = items.indexOf(document.activeElement as HTMLElement)
   const next =
     event.key === 'Home'
@@ -58,7 +62,7 @@ export function arrowNavigate(
         ? items.length - 1
         : current === -1
           ? 0
-          : (current + (forward ? 1 : -1) + items.length) % items.length
+          : (current + (forward() ? 1 : -1) + items.length) % items.length
   items[next]?.focus()
   return true
 }

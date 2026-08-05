@@ -3,8 +3,38 @@
   "version": "0.1.0",
   "description": "Vue 3 design system — HTML/CSS first, CSS tokens, Nuxt 3 (SSR) compatible",
   "type": "module",
+  "license": "MIT",
+  "author": "Jypyx",
+  "homepage": "https://github.com/Jypyx/vectis-ui#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jypyx/vectis-ui.git",
+    "directory": "packages/ui"
+  },
+  "bugs": {
+    "url": "https://github.com/Jypyx/vectis-ui/issues"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "design-system",
+    "component-library",
+    "design-tokens",
+    "css-tokens",
+    "accessibility",
+    "ssr",
+    "nuxt",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
-    "dist"
+    "dist",
+    "NOTICE"
   ],
   "exports": {
     ".": {
@@ -16,17 +46,24 @@
       "types": "./dist/tokens/index.d.ts",
       "import": "./dist/tokens/index.js"
     },
-    "./tokens.json": "./dist/tokens.json"
+    "./tokens.json": "./dist/tokens.json",
+    "./package.json": "./package.json"
   },
+  "//types": "Fallback for consumers still on moduleResolution node10, which ignores `exports` and would otherwise get NO types at all, silently.",
+  "types": "./dist/index.d.ts",
   "sideEffects": [
     "**/*.css"
   ],
   "scripts": {
     "tokens": "tsx scripts/build-tokens.ts",
+    "tokens:check": "tsx scripts/build-tokens.ts --check",
     "icons": "tsx scripts/build-icons.ts",
     "prebuild": "pnpm run tokens",
     "build": "vite build",
     "postbuild": "tsx scripts/check-css-split.ts",
+    "//check:package": "Run AFTER build, never from postbuild: attw's `--pack` shells out to `npm pack`, which fires `prepack` → `build` → postbuild → attw, i.e. unbounded recursion. CI calls it as its own step. publint reads the manifest; attw resolves every entrypoint under each moduleResolution — `styles.css` is excluded because a CSS export legitimately carries no type declarations.",
+    "check:package": "publint && attw --pack . --profile esm-only --exclude-entrypoints styles.css",
+    "prepack": "pnpm run build",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",
@@ -42,6 +79,7 @@
     "vue": "^3.5.0"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@storybook/addon-a11y": "^10.5.5",
     "@storybook/addon-docs": "^10.5.5",
     "@storybook/addon-vitest": "^10.5.5",
@@ -56,6 +94,7 @@
     "chromatic": "^18.1.0",
     "jsdom": "^29.1.1",
     "playwright": "^1.62.0",
+    "publint": "^0.3.23",
     "storybook": "^10.5.5",
     "tsx": "^4.23.1",
     "typescript": "^5.9.3",

@@ -264,7 +264,9 @@ export const Selection: Story = {
     await userEvent.click(master.closest('label')!)
     await waitFor(() => {
       const boxes = canvas.getAllByRole('checkbox').filter((box) => box !== master)
-      boxes.forEach((box) => expect(box).toBeChecked())
+      // `for…of` rather than `forEach`: Storybook instruments `expect`, so the callback
+      // would be handing a promise to a signature that expects void.
+      for (const box of boxes) expect(box).toBeChecked()
     })
     // the count appears on the left of the footer
     await waitFor(() => {

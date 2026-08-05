@@ -1,3 +1,5 @@
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { dirname, join, resolve as resolvePath } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 
 import vue from '@vitejs/plugin-vue'
@@ -83,17 +85,84 @@ function shipComponentCss(): Plugin {
   }
 }
 
+/**
+ * Gives every relative specifier in the emitted `.d.ts` its explicit `.js` extension.
+ *
+ * TRAP — the source is written for `moduleResolution: bundler`, where
+ * `export … from './i18n/state'` is legal, and TypeScript emits specifiers VERBATIM.
+ * A consumer on `node16`/`nodenext` resolution — the setting for anything targeting
+ * Node rather than a bundler — then fails to resolve those imports and silently gets
+ * NO TYPES AT ALL: not an error, just a package that appears untyped. `bundler`
+ * consumers (Vite, Nuxt) never see it, which is exactly why it survives unnoticed.
+ * `pnpm check:package` (@arethetypeswrong/cli) is what now keeps it fixed.
+ *
+ * It runs at `closeBundle` and `enforce: 'post'`, so vite-plugin-dts has written its
+ * files: the directory test below reads the real tree rather than guessing.
+ */
+function dtsExtensions(): Plugin {
+  return {
+    name: 'vectis:dts-extensions',
+    apply: 'build',
+    enforce: 'post',
+    closeBundle() {
+      const dist = fileURLToPath(new URL('./dist', import.meta.url))
+      if (!existsSync(dist)) return
+
+      const files: string[] = []
+      const walk = (dir: string) => {
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+          const full = join(dir, entry.name)
+          if (entry.isDirectory()) walk(full)
+          else if (entry.name.endsWith('.d.ts')) files.push(full)
+        }
+      }
+      walk(dist)
+
+      for (const file of files) {
+        const source = readFileSync(file, 'utf8')
+        const patched = source.replace(
+          /(\bfrom\s*|\bimport\s*\()(['"])(\.\.?\/[^'"]*)\2/g,
+          (whole, head: string, quote: string, spec: string) => {
+            // Already carries an extension (`.js`, `.json`, `.css`): leave it alone.
+            if (/\.[a-z0-9]+$/i.test(spec)) return whole
+            const target = resolvePath(dirname(file), spec)
+            const suffix =
+              existsSync(target) && existsSync(join(target, 'index.d.ts')) ? '/index.js' : '.js'
+            return `${head}${quote}${spec}${suffix}${quote}`
+          },
+        )
+        if (patched !== source) writeFileSync(file, patched)
+      }
+    },
+  }
+}
+
 export default defineConfig({
   plugins: [
     vue(),
     dts({ tsconfigPath: './tsconfig.build.json', cleanVueFileName: true }),
     emitTokensJson(),
     shipComponentCss(),
+    dtsExtensions(),
   ],
   build: {
     // Each SFC's <style> becomes its own asset, shipped with its module: a consumer
     // downloads the CSS of the components they import, not of the whole library.
     cssCodeSplit: true,
+    // Pinned rather than left to Vite's shifting `'modules'` default: a published
+    // library's output floor is a contract, and this one mirrors tsconfig's `target`.
+    target: 'es2022',
+    /*
+     * TRAP — `cssTarget` defaults to `build.target`, and esbuild reads an ES version
+     * as a very old BROWSER baseline for CSS: setting `target` alone silently
+     * de-optimizes every sheet (measured: the core went from 4.06 to 4.99 kB gzip).
+     * The floor here is the one the README documents, so modern-CSS minification
+     * stays on and nothing this design system relies upon gets lowered.
+     */
+    cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox128'],
+    // A consumer stepping into @vectis/ui otherwise lands in renamed identifiers with
+    // nothing mapping back to the SFC.
+    sourcemap: true,
     lib: {
       entry: {
         index: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
@@ -103,7 +172,13 @@ export default defineConfig({
       cssFileName: 'styles',
     },
     rollupOptions: {
-      external: ['vue'],
+      /*
+       * Regexes, not the bare string: a string external matches the specifier EXACTLY,
+       * so a single `vue/server-renderer` or `@vue/shared` import would be bundled into
+       * `dist/` in silence, duplicating the runtime in the consumer's graph. Nothing
+       * imports those today — which is precisely why the mistake would go unnoticed.
+       */
+      external: [/^vue$/, /^vue\//, /^@vue\//],
       output: {
         // One JS module per source file → per-component tree-shaking for the consumer
         preserveModules: true,

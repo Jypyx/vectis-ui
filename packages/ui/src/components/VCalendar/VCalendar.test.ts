@@ -189,6 +189,21 @@ describe('VCalendar', () => {
     expect(cells.length).toBe(12)
   })
 
+  it('opens the years view with a malformed min/max instead of throwing', async () => {
+    // `min`/`max` are raw consumer strings: the years view is the only place they are
+    // parsed as a Date, so a non-ISO bound must degrade to the open range.
+    const { container } = render(VCalendar, {
+      props: { modelValue: JUNE, min: '01/01/2024', max: 'not-a-date' },
+    })
+    // Two toggles carry the class: [0] opens the months view, [1] the years view.
+    const toggle = container.querySelectorAll('.v-calendar-picker-toggle')[1] as HTMLElement
+    await fireEvent.click(toggle)
+    // 2026 ± 100 → the fallback range, rendered rather than crashed.
+    expect(
+      container.querySelectorAll('.v-calendar-picker--years .v-calendar-picker-cell'),
+    ).toHaveLength(201)
+  })
+
   it('navigates with the keyboard (arrows) and selects with Enter', async () => {
     const { container, emitted } = render(VCalendar, { props: { modelValue: JUNE } })
     const grid = container.querySelector('[role="grid"]') as HTMLElement

@@ -21,7 +21,17 @@ export const SUBMENU_HOVER_DELAY = 150
  * reach.
  */
 export function menuInvoker(id: string): HTMLElement | null {
-  return document.querySelector(`[popovertarget="${id}"]`)
+  /*
+   * The id is ESCAPED, not slugged like VTabs': there the id is BUILT, so hostile
+   * characters can be dropped; here it is the panel's real `id` attribute (a
+   * `useId()`, whose prefix the consumer sets through `app.config.idPrefix`), and
+   * rewriting it would stop the selector matching the element it names.
+   *
+   * Escaping the two characters that can close the quoted attribute string is
+   * enough, and it is deliberately NOT `CSS.escape`: jsdom implements no `CSS`
+   * object at all, so that call is a ReferenceError in every unit test.
+   */
+  return document.querySelector(`[popovertarget="${id.replace(/["\\]/g, '\\$&')}"]`)
 }
 
 /** Placements of the root panel (VMenu's public API). */

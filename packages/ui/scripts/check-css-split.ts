@@ -31,6 +31,7 @@ const CORE_CLASSES: ReadonlySet<string> = new Set([
   '.v-floating',
   '.v-overlay',
   '.v-panel',
+  '.v-tone',
   '.v-visually-hidden',
 ])
 

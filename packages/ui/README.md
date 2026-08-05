@@ -309,6 +309,23 @@ Target: **modern browsers** — Chrome/Edge 125+, Safari 26+.
 
 Keyboard navigation and ARIA semantics on every component: the ARIA menu pattern (roving focus, focus returned to the trigger), `role="switch"`, tooltips linked by `aria-describedby` and dismissible with Escape (WCAG 1.4.13), `role="status"`/`role="alert"` according to criticality, an accessible label **required** on `VIconButton`. `prefers-reduced-motion` respected everywhere. Storybook's a11y addon audits every story.
 
+## Security model
+
+The package has **no runtime dependency** beyond Vue, makes **no network request**, and reads no
+storage. It renders no consumer string as HTML: there is no `v-html` anywhere in the library.
+
+One contract is yours, and it is the standard one for a component library: **the design system does
+not filter URL schemes.** `href` (`VButton`, `VChip`, `VAvatar`, `VMenuItem`, `VSideNavigationItem`,
+`VBreadcrumb`) and `src` (`VIcon`, `VAvatar`) are passed through untouched, so a `javascript:` URL
+coming from your data runs on click. Validate it where the data enters your application — with
+particular care for `VBreadcrumb`, whose `items[].href` is typically built from a CMS or an API
+rather than written by hand.
+
+Custom colour props (`color` on `VChip`, `VBadge`, `VAvatar`, `VCalendar` events) are written to CSS
+custom properties through `style.setProperty`, so they cannot escape the `style` attribute — but a
+hostile value can still be a valid `url(…)`, i.e. a tracking beacon. Treat them as data to validate
+if they come from outside your application.
+
 ## Contributing
 
 ```bash

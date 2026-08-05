@@ -46,7 +46,7 @@ const icon = computed(() =>
 
 <template>
   <div
-    class="v-toast"
+    class="v-toast v-tone"
     :data-tone="item.tone"
     :data-variant="item.variant"
     :role="role"
@@ -95,52 +95,34 @@ const icon = computed(() =>
     line-height: var(--vectis-text-body-md-leading);
   }
 
+  /* The tone table lives in styles/tones.css (class `v-tone`, layer vectis.tokens),
+     shared with VButton and VChip: the four chromatic tones were its values under
+     three other names (--tone-bg-soft, --tone-border-soft, --toast-accent), so the
+     usages below now read the shared contract directly.
+
+     --toast-accent survives as its OWN name because the close cross re-binds
+     --tone-text-tinted inside this subtree (below): aliasing them would make that a
+     self-reference. The value is resolved here, on the toast, so the cross inherits
+     the tone's accent already computed. */
+  .v-toast {
+    --toast-accent: var(--tone-text-tinted);
+  }
+
+  /* The one tone VToast disagrees on: an overlay surface in tonal, an inverted
+     contrast (tooltip style) in solid — neutral has no -surface/-border/-text
+     variants. One layer above the shared table, so it wins whatever the sheet
+     order. */
   .v-toast[data-tone='neutral'] {
-    /* No -surface/-border/-text variants for neutral: an overlay surface in tonal,
-       an inverted contrast (tooltip style) in solid */
-    --tone-bg-tonal: var(--vectis-color-surface-overlay);
-    --tone-border-tonal: var(--vectis-color-border);
+    --tone-bg-soft: var(--vectis-color-surface-overlay);
+    --tone-border-soft: var(--vectis-color-border);
     --toast-accent: var(--vectis-color-text);
     --tone-bg-solid: var(--vectis-color-surface-inverse);
     --tone-text-solid: var(--vectis-color-text-on-inverse);
   }
 
-  .v-toast[data-tone='accent'] {
-    --tone-bg-tonal: var(--vectis-color-accent-surface);
-    --tone-border-tonal: var(--vectis-color-accent-border);
-    --toast-accent: var(--vectis-color-accent-text);
-    --tone-bg-solid: var(--vectis-color-accent);
-    --tone-text-solid: var(--vectis-color-text-on-accent);
-  }
-
-  .v-toast[data-tone='success'] {
-    --tone-bg-tonal: var(--vectis-color-success-surface);
-    --tone-border-tonal: var(--vectis-color-success-border);
-    --toast-accent: var(--vectis-color-success-text);
-    --tone-bg-solid: var(--vectis-color-success);
-    --tone-text-solid: var(--vectis-color-text-on-accent);
-  }
-
-  .v-toast[data-tone='danger'] {
-    --tone-bg-tonal: var(--vectis-color-danger-surface);
-    --tone-border-tonal: var(--vectis-color-danger-border);
-    --toast-accent: var(--vectis-color-danger-text);
-    --tone-bg-solid: var(--vectis-color-danger);
-    --tone-text-solid: var(--vectis-color-text-on-accent);
-  }
-
-  .v-toast[data-tone='warning'] {
-    --tone-bg-tonal: var(--vectis-color-warning-surface);
-    --tone-border-tonal: var(--vectis-color-warning-border);
-    --toast-accent: var(--vectis-color-warning-text);
-    --tone-bg-solid: var(--vectis-color-warning);
-    /* Amber is too light for white: a dedicated token (dark text) */
-    --tone-text-solid: var(--vectis-color-text-on-warning);
-  }
-
   .v-toast[data-variant='tonal'] {
-    background: var(--tone-bg-tonal);
-    border: 1px solid var(--tone-border-tonal);
+    background: var(--tone-bg-soft);
+    border: 1px solid var(--tone-border-soft);
     color: var(--vectis-color-text);
   }
 
@@ -159,10 +141,11 @@ const icon = computed(() =>
   }
 
   /*
-   * Close cross: a ghost/neutral VIconButton, recoloured through VButton's local
-   * variables (--tone-text-tinted / --tone-bg-soft) — a higher specificity than
-   * VButton's tone rules, and VToast is bundled after it. In tonal: a cross in the
-   * tone's accent colour; in solid: currentcolor (readable on the full background).
+   * Close cross: a ghost/neutral VIconButton, recoloured through the shared tone
+   * variables (--tone-text-tinted / --tone-bg-soft). It wins TWICE over the table the
+   * cross gets from `v-tone` — higher specificity (0,3,0) and a layer above — so no
+   * sheet order is involved. In tonal: a cross in the tone's accent colour; in solid:
+   * currentcolor (readable on the full background).
    */
   .v-toast[data-variant='tonal'] .v-toast-close[data-tone] {
     --tone-text-tinted: var(--toast-accent);

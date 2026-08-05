@@ -11,6 +11,7 @@
 
 @import './reset.css';
 @import './tokens.css';
+@import './tones.css';
 @import './floating.css';
 @import './panel.css';
 @import './control-size.css';

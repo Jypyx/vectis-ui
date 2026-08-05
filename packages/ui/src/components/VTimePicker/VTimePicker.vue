@@ -34,6 +34,7 @@ import { digitsOf, pad2 } from '../../utils/text'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFieldPanel } from '../../composables/useFieldPanel'
+import { useMaskedField } from '../../composables/useMaskedField'
 import { useLocale, useMessages } from '../../i18n/state'
 
 /**
@@ -336,84 +337,36 @@ watch(activeStep, (step) => {
 
 /* Input mode: the "HH:MM" mask. */
 
-const maskDraft = ref('')
-
-function syncMaskFromModel() {
-  const next = timeToMask(model.value, resolvedFormat.value)
-  // An anti-loop guard: a commit made while typing comes back through here and would
-  // overwrite the draft AND the caret with an identical text.
-  if (next !== maskDraft.value) maskDraft.value = next
-}
-watch([model, resolvedFormat], syncMaskFromModel, { immediate: true })
-
-/**
- * `v-model` and NEVER `:model-value`: without an `onUpdate:modelValue` listener,
- * `useModel` internally copies the RAW typed text and rewrites it on the next patch,
- * erasing the mask as soon as the mask itself does not change (the 5th digit, a rejected
- * character). Covered by a test.
- */
-const fieldModel = computed<string | number>({
-  get: () => (typing.value ? maskDraft.value : displayText.value),
-  set: (value) => {
-    if (typing.value) maskDraft.value = String(value ?? '')
-  },
-})
-
-/** Writes the draft AND the DOM: Vue does not re-patch an unchanged masked text. */
-function writeField(text: string, caret?: number) {
-  maskDraft.value = text
-  const el = fieldEl.value
-  if (!el) return
-  if (el.value !== text) el.value = text
-  if (caret !== undefined) el.setSelectionRange(caret, caret)
-}
-
 const currentMeridiem = (): Meridiem => (meridiemModel.value === 'PM' ? 'PM' : 'AM')
 
-/** A commit as you type, as soon as the time is complete and valid. */
-function commitLive() {
-  const time = parseTimeMask(maskDraft.value, resolvedFormat.value, currentMeridiem())
-  if (time && time !== model.value) model.value = time
-}
-
-/**
- * Leaving the field (`change` then `blur`, hence the idempotence): normalization or a
- * SILENT REVERT — no home-made error state to compete with the `invalid` prop.
+/*
+ * The mask plumbing (draft, the `v-model` bridge, caret-preserving reformatting, live
+ * commit and silent revert) is shared with VDatePicker — see `useMaskedField`. The
+ * time vocabulary is the simplest of the two: 4 digits and a `:` that is UNIVERSAL,
+ * hence `timeCaret`'s closed form where the date has to scan for its separator.
+ * `parse` ignores `final`: there is no equivalent of the 2-digit-year expansion.
  */
-function commitOrRevert() {
-  if (!typing.value) return
-  if (!digitsOf(maskDraft.value)) {
-    if (model.value !== null) model.value = null
-    writeField('')
-    return
-  }
-  const time = parseTimeMask(maskDraft.value, resolvedFormat.value, currentMeridiem())
-  if (time) {
-    if (time !== model.value) model.value = time
-    writeField(timeToMask(time, resolvedFormat.value))
-    return
-  }
-  writeField(timeToMask(model.value, resolvedFormat.value))
-}
-
-/**
- * The mask as you type. Invariant: the number of digits to the LEFT of the caret is
- * preserved by the reformatting — absolute positions jump as soon as the `:` appears or
- * disappears.
- */
-function onFieldInput(event: Event) {
-  if (!typing.value) return
-  const el = event.target as HTMLInputElement
-  const raw = el.value
-  const caret = el.selectionStart ?? raw.length
-  const before = digitsOf(raw.slice(0, caret)).length
-  const digits = digitsOf(raw).slice(0, 4)
-  // The caret only crosses the separator on insertion: on deletion it has to stay in
-  // front of it, or the key never makes progress.
-  const deleting = String((event as InputEvent).inputType ?? '').startsWith('delete')
-  writeField(formatTimeMask(digits), timeCaret(Math.min(before, digits.length), !deleting))
-  commitLive()
-}
+const {
+  draft: maskDraft,
+  fieldModel,
+  writeField,
+  commitLive,
+  commitOrRevert,
+  onFieldInput,
+} = useMaskedField({
+  fieldEl,
+  typing: () => typing.value,
+  displayText: () => displayText.value,
+  readValue: () => model.value,
+  writeValue: (time) => {
+    model.value = time
+  },
+  maxDigits: () => 4,
+  format: formatTimeMask,
+  caret: (_text, digitsBefore, inserting) => timeCaret(digitsBefore, inserting),
+  parse: (text) => parseTimeMask(text, resolvedFormat.value, currentMeridiem()),
+  toMask: (time) => timeToMask(time, resolvedFormat.value),
+})
 
 function onFieldKeydown(event: KeyboardEvent) {
   if (!typing.value) return

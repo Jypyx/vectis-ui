@@ -174,14 +174,38 @@ export function monthNamesCompact(locale: string): string[] {
   })
 }
 
+/**
+ * One formatter per (locale, options) pair, kept for the lifetime of the module —
+ * the `formatterFor` idiom of `utils/file.ts`, and the counterpart of `time.ts`'s.
+ *
+ * Constructing an `Intl.DateTimeFormat` costs one to two orders of magnitude more
+ * than using it, and the three functions below are all called ONE VALUE AT A TIME
+ * (VDatePicker formats a `multiple` selection inside a `.map`). The neighbouring
+ * `weekdayNames`/`monthNames` already hoist their formatter out of their loop;
+ * this is what gives the per-call ones the same property.
+ *
+ * The options object is part of the key: `JSON.stringify` is stable enough here —
+ * these objects are literals built by the components, not user data — and costs a
+ * fraction of a construction.
+ */
+const formatters = new Map<string, Intl.DateTimeFormat>()
+
+function formatterFor(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = `${locale}|${JSON.stringify(options)}`
+  let formatter = formatters.get(key)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, options)
+    formatters.set(key, formatter)
+  }
+  return formatter
+}
+
 export function monthName(
   locale: string,
   month0: number,
   month: 'long' | 'short' = 'long',
 ): string {
-  return new Intl.DateTimeFormat(locale, { month, timeZone: 'UTC' }).format(
-    Date.UTC(2021, month0, 1),
-  )
+  return formatterFor(locale, { month, timeZone: 'UTC' }).format(Date.UTC(2021, month0, 1))
 }
 
 /** Localized display of a single date, for the VDatePicker field. */
@@ -191,7 +215,7 @@ export function formatDisplay(
   options: Intl.DateTimeFormatOptions,
 ): string {
   const d = parseISO(iso)
-  return d ? new Intl.DateTimeFormat(locale, options).format(d) : ''
+  return d ? formatterFor(locale, options).format(d) : ''
 }
 
 /** Localized display of a range (`formatRange` → "19–26 June 2026"). */
@@ -204,7 +228,7 @@ export function formatDisplayRange(
   const a = parseISO(start)
   const b = parseISO(end)
   if (!a || !b) return ''
-  const fmt = new Intl.DateTimeFormat(locale, options)
+  const fmt = formatterFor(locale, options)
   return compareISO(start, end) === 0 ? fmt.format(a) : fmt.formatRange(a, b)
 }
 

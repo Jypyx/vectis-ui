@@ -9,9 +9,11 @@ import VPopover from '../VPopover/VPopover.vue'
 import VComboboxOption from './VComboboxOption.vue'
 import VComboboxGroup from './VComboboxGroup.vue'
 import VComboboxSeparator from './VComboboxSeparator.vue'
+import { useInfiniteScroll } from './infiniteScroll'
 import VSpinner from '../VSpinner/VSpinner.vue'
 
 import { toggleValue } from '../../utils/array'
+import { chipScaleFor } from '../../utils/chip'
 import { normalizeText } from '../../utils/text'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
@@ -168,15 +170,11 @@ defineSlots<{
   loading?(): unknown
 }>()
 
-// The Chips stay one step below the field so they fit without making it grow: xs
-// (24px) up to `md`, sm (32px) at `lg`. Below the lowest step of each pair, the
-// catch-up goes through `compact` rather than one size less — hence `sm` → xs compact
-// (20px inside 32px) and `lg` compact → sm compact (28px inside 44px). At `md` the
-// margin is already enough, so VCombobox's `compact` does not touch the Chips.
-// Any change to this mapping must be carried over to `--chip-height` (CSS further
-// down): the height is restated on the field side, out of the subtree's reach.
-const chipSize = computed(() => (props.size === 'lg' ? 'sm' : 'xs'))
-const chipCompact = computed(() => (props.size === 'lg' ? props.compact : props.size === 'sm'))
+// Size, compact and HEIGHT of the Chips hosted by the field — see `utils/chip.ts`.
+// The height is set inline below rather than restated as a CSS table: it is what the
+// field forces on its input, and deriving it from the same pair is what stops the two
+// from drifting.
+const chipScale = computed(() => chipScaleFor(props.size, props.compact))
 
 const model = defineModel<string | string[]>({ default: '' })
 
@@ -230,7 +228,26 @@ watchEffect(() => {
   for (const option of allOptions.value) {
     if (wanted.has(option.value)) optionCache.set(option.value, option)
   }
+  // Drop what is no longer selected: without this the cache is bounded by every value
+  // ever chosen in the session rather than by the current selection — a slow leak in a
+  // long-lived multi-select over a paginated remote source.
+  for (const value of optionCache.keys()) if (!wanted.has(value)) optionCache.delete(value)
 })
+
+/*
+ * Value → option, built ONCE per option list. `optionOf` is called several times per
+ * chip and per render (the chip itself, its label, its remove label), so a linear
+ * `find` here is O(chips × options) on every keystroke in the search field. The
+ * first matching option wins, as `find` did: a duplicated value keeps its source order.
+ */
+const optionsByValue = computed(() => {
+  const map = new Map<string, ComboboxOption>()
+  for (const option of allOptions.value) if (!map.has(option.value)) map.set(option.value, option)
+  return map
+})
+
+/** Membership test for the selection, O(1) — the `selectedSet` idiom of VDataTable. */
+const selectedSet = computed(() => new Set(selectedValues.value))
 
 /**
  * The known option for this value: the current `options` first, the cache as a
@@ -238,11 +255,29 @@ watchEffect(() => {
  * object values): compare by `value`, never by identity.
  */
 function optionOf(value: string) {
-  return allOptions.value.find((o) => o.value === value) ?? optionCache.get(value)
+  return optionsByValue.value.get(value) ?? optionCache.get(value)
 }
 
 function labelOf(value: string) {
   return optionOf(value)?.label ?? value
+}
+
+/*
+ * Normalized labels, cached by option identity and REVALIDATED on the label itself.
+ * `normalizeText` is NFD + regex + lowercase and the filter below runs on every
+ * keystroke: without the cache the whole corpus is re-normalized per character typed.
+ *
+ * Reading `option.label` on every call is what keeps the filter reactive — a
+ * `computed` keyed on the option list alone would not track an in-place label
+ * change, since `allOptions` only ever reads the CONTAINERS.
+ */
+const normalizedLabels = new WeakMap<ComboboxOption, { label: string; normalized: string }>()
+function normalizedLabelOf(option: ComboboxOption): string {
+  const hit = normalizedLabels.get(option)
+  if (hit && hit.label === option.label) return hit.normalized
+  const normalized = normalizeText(option.label)
+  normalizedLabels.set(option, { label: option.label, normalized })
+  return normalized
 }
 
 // A single search term, consumed by the local filter AND by the `search` emission:
@@ -261,7 +296,7 @@ const filtered = computed(() => {
   if (!q) return list
   if (typeof matcher === 'function') return list.filter((o) => matcher(o, q))
   const needle = normalizeText(q)
-  return list.filter((o) => normalizeText(o.label).includes(needle))
+  return list.filter((o) => normalizedLabelOf(o).includes(needle))
 })
 
 /** Empty as soon as the panel has options: a live region must only ever hold what is new. */
@@ -419,7 +454,7 @@ function rowProps(entry: RenderedOption) {
     id: optionId(entry.index),
     icon: entry.option.icon,
     active: entry.index === activeIndex.value,
-    selected: selectedValues.value.includes(entry.option.value),
+    selected: selectedSet.value.has(entry.option.value),
     disabled: entry.option.disabled,
   }
 }
@@ -429,7 +464,7 @@ function optionSlotProps(entry: RenderedOption) {
     option: entry.option,
     index: entry.index,
     active: entry.index === activeIndex.value,
-    selected: selectedValues.value.includes(entry.option.value),
+    selected: selectedSet.value.has(entry.option.value),
   }
 }
 
@@ -452,18 +487,29 @@ function openPanel() {
   if (props.disabled || open.value) return
   open.value = true
   const list = filtered.value
-  const selectedIdx = list.findIndex((o) => !o.disabled && selectedValues.value.includes(o.value))
+  const selectedIdx = list.findIndex((o) => !o.disabled && selectedSet.value.has(o.value))
   activeIndex.value = selectedIdx >= 0 ? selectedIdx : list.findIndex((o) => !o.disabled)
   // After `open = true` (the deferred emission re-checks `open`): it lets an external
   // source load its first page on opening.
   emitSearch(searchTerm.value, true)
 }
 
+// Infinite scroll — the observer, its re-observation on each page and the emission
+// lock live in `./infiniteScroll`. Declared here so `closePanel` can reset it.
+const sentinelEl = ref<HTMLElement | null>(null)
+
+const infiniteScroll = useInfiniteScroll({
+  sentinelEl,
+  canLoad: () => open.value && props.hasMore && !props.loading,
+  loadedCount: () => allOptions.value.length,
+  onLoadMore: () => emit('load-more'),
+})
+
 function closePanel() {
   if (!open.value) return
   cancelSearch()
   // a page that never arrived (a failed request) must not freeze the pagination
-  pending = false
+  infiniteScroll.reset()
   open.value = false
   activeIndex.value = -1
   typed.value = false
@@ -593,66 +639,6 @@ function onKeydown(event: KeyboardEvent) {
       break
   }
 }
-
-// Infinite scroll. JS justified: no CSS primitive signals reaching the end of the
-// list. A sentinel at the foot of the panel is observed, the panel (the scroll
-// container) serving as the `root`.
-const sentinelEl = ref<HTMLElement | null>(null)
-let observer: IntersectionObserver | null = null
-// A SYNCHRONOUS lock, on top of `props.loading`: the consumer sets `loading`
-// asynchronously (when its request returns) and the window between the emission and
-// that update would be enough to emit several times.
-let pending = false
-
-function onIntersect(entries: IntersectionObserverEntry[]) {
-  if (!entries.some((entry) => entry.isIntersecting)) return
-  if (!open.value || !props.hasMore || props.loading || pending) return
-  pending = true
-  emit('load-more')
-}
-
-watch(
-  sentinelEl,
-  (el, _previous, onCleanup) => {
-    // `IntersectionObserver` does not exist in jsdom (the same guard as the
-    // `?.scrollIntoView?.()` above) — the behaviour is tested in the browser.
-    if (!el || typeof IntersectionObserver === 'undefined') return
-    // The panel is the scroll container, designated by its ARIA role (a public API)
-    // rather than by an internal class of the listbox. Without it, `root: null` would
-    // target the viewport: since the panel is in the top layer, the sentinel would
-    // always appear visible there → a burst of `load-more`.
-    const root = el.closest('[role="listbox"]')
-    if (!root) return
-    observer = new IntersectionObserver(onIntersect, {
-      root,
-      // preloads half a panel height before the bottom (no dimension literal: it is
-      // relative to the root)
-      rootMargin: '0px 0px 50% 0px',
-    })
-    observer.observe(el)
-    onCleanup(() => {
-      observer?.disconnect()
-      observer = null
-    })
-  },
-  { flush: 'post' },
-)
-
-// The callback is only called when the threshold is CROSSED: if the page received
-// does not fill the panel, the sentinel stays visible without ever re-triggering and
-// the loading would stop at the second page. It is re-observed on every page to force
-// a fresh evaluation — and if the source returned nothing (the same length), nothing
-// relaunches the loop: a free stopping condition.
-watch(
-  () => allOptions.value.length,
-  () => {
-    pending = false
-    const el = sentinelEl.value
-    if (!observer || !el) return
-    observer.unobserve(el)
-    observer.observe(el)
-  },
-)
 </script>
 
 <template>
@@ -660,7 +646,7 @@ watch(
     ref="rootEl"
     class="v-combobox"
     :class="rootClass"
-    :style="rootStyle"
+    :style="[{ '--chip-height': chipScale.height }, rootStyle]"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
     :data-multiple="multiple ? '' : undefined"
@@ -702,13 +688,13 @@ watch(
               :option="optionOf(value)"
               :label="labelOf(value)"
               :remove="() => removeValue(value)"
-              :size="chipSize"
-              :compact="chipCompact"
+              :size="chipScale.size"
+              :compact="chipScale.compact"
             >
               <VChip
                 tone="accent"
-                :size="chipSize"
-                :compact="chipCompact"
+                :size="chipScale.size"
+                :compact="chipScale.compact"
                 dismissible
                 :dismiss-label="m.combobox.remove(labelOf(value))"
                 :disabled="disabled"
@@ -888,31 +874,14 @@ watch(
   }
 
   /* multiple: the field hosts the Chips (which wrap). Height aligned on the control
-     (`--control-height`, size/compact through VInput's .v-control). The Chips' height
-     is restated here as `--chip-height` because it lives inside the VChip subtree, out
-     of the field's reach: these four rules must stay the exact mirror of
-     `chipSize`/`chipCompact` (in the script). The input is forced to that SAME height
-     instead of the `100%` inherited from VInput: otherwise its intrinsic height exceeds
-     the Chips and makes the field grow. The result: the field stays at a constant
-     --control-height, the input is never taller than the Chips, and there is no jump on
-     focus. The order is significant: the sizes are at equal specificity with each
-     other, so the compact variant comes last. */
-  .v-combobox[data-multiple] {
-    --chip-height: var(--vectis-control-height-xs);
-  }
-
-  .v-combobox[data-multiple][data-size='sm'] {
-    --chip-height: calc(var(--vectis-control-height-xs) - var(--vectis-space-1));
-  }
-
-  .v-combobox[data-multiple][data-size='lg'] {
-    --chip-height: var(--vectis-control-height-sm);
-  }
-
-  .v-combobox[data-multiple][data-size='lg'][data-compact] {
-    --chip-height: calc(var(--vectis-control-height-sm) - var(--vectis-space-1));
-  }
-
+     (`--control-height`, size/compact through VInput's .v-control). `--chip-height` is
+     set INLINE by `chipScaleFor` (utils/chip.ts) — the Chips' height lives inside the
+     VChip subtree, out of the field's reach, and deriving it from the same pair as
+     their size/compact is what stops a CSS table here from drifting from the script.
+     The input is forced to that SAME height instead of the `100%` inherited from
+     VInput: otherwise its intrinsic height exceeds the Chips and makes the field grow.
+     The result: the field stays at a constant --control-height, the input is never
+     taller than the Chips, and there is no jump on focus. */
   .v-combobox[data-multiple] .v-input-field {
     flex-wrap: wrap;
     height: auto;

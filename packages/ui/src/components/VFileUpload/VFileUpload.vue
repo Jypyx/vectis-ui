@@ -43,10 +43,11 @@ import VIconButton from '../VIconButton/VIconButton.vue'
 import VTypography from '../VTypography/VTypography.vue'
 
 import { useFileDrop } from '../../composables/useFileDrop'
+import { useFileField } from '../../composables/useFileField'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useLocale, useMessages } from '../../i18n/state'
 import { isDev } from '../../utils/env'
-import { formatBytes, screenFiles } from '../../utils/file'
+import { formatBytes } from '../../utils/file'
 import { fileKind, type FileKind } from './fileKind'
 
 /** Where the loaded files are listed, `false` being nowhere. */
@@ -217,38 +218,43 @@ const model = defineModel<File[]>({ default: () => [] })
 
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
-/*
- * The wrapper-root pattern assumes ONE functional element; there are two here,
- * so the split has three buckets. `class`/`style` stay on the root, the FORM
- * attributes go to the hidden input (`name`, `required`, `form`, `capture`
- * describe submission and the OS picker), and everything else goes to the ZONE —
- * what the user sees, and what takes focus once the browse button is hidden.
- *
- * The buckets are a PARTITION: nothing is applied twice. A duplicated `id` would
- * break any `<label for>` the consumer wired.
- */
-const NATIVE_ONLY = ['name', 'required', 'form', 'capture']
-
-const nativeAttrs = computed(() =>
-  Object.fromEntries(
-    Object.entries(forwardedAttrs.value).filter(([key]) => NATIVE_ONLY.includes(key)),
-  ),
-)
-
-const zoneAttrs = computed(() =>
-  Object.fromEntries(
-    Object.entries(forwardedAttrs.value).filter(([key]) => !NATIVE_ONLY.includes(key)),
-  ),
-)
-
 const m = useMessages()
 const locale = useLocale()
 
-const fileEl = ref<HTMLInputElement | null>(null)
+const interactive = computed(() => !props.disabled && !props.readonly)
+
+/*
+ * The hidden input, the three-bucket attribute split and the whole gate into the
+ * model live in `useFileField` (shared with VFilePicker). Here the CONTROL bucket
+ * is the ZONE — what the user sees, and what takes focus once the browse button is
+ * hidden — and nothing is pulled out of it: unlike VFilePicker, this component
+ * re-aggregates no `aria-describedby`.
+ */
+const {
+  fileEl,
+  nativeAttrs,
+  controlAttrs: zoneAttrs,
+  acceptFiles,
+  onNativeChange,
+  openPicker,
+  resetNative,
+} = useFileField({
+  model,
+  forwardedAttrs,
+  enabled: () => interactive.value,
+  multiple: () => props.multiple,
+  limits: () => ({
+    accept: props.accept,
+    maxSize: props.maxSize,
+    maxFiles: props.maxFiles,
+    maxTotalSize: props.maxTotalSize,
+  }),
+  onReject: (rejection) => emit('reject', rejection),
+  onChange: (files) => emit('change', files),
+})
+
 const zoneEl = ref<HTMLElement | null>(null)
 const listEl = ref<HTMLUListElement | null>(null)
-
-const interactive = computed(() => !props.disabled && !props.readonly)
 /** The zone is the control exactly when there is no button to carry the role. */
 const zoneIsControl = computed(() => !props.showBrowse)
 const showList = computed(() => props.preview !== false && model.value.length > 0)
@@ -267,57 +273,6 @@ const KIND_ICONS: Record<FileKind, IconSource> = {
 }
 
 const iconForKind = (kind: FileKind): IconSource => props.typeIcons?.[kind] ?? KIND_ICONS[kind]
-
-/**
- * The native input keeps the FileList of its last dialog. Without this reset,
- * re-picking the SAME file after a removal fires NO `change` (the control's value
- * never moved) and that file becomes unreachable. Every path that touches the
- * selection goes through here — a fully rejected batch included, since a file
- * refused once must stay re-pickable.
- */
-function resetNative() {
-  if (fileEl.value) fileEl.value.value = ''
-}
-
-/**
- * The single gate into the model: the native dialog and a drop both land here.
- * An over-limit file is REFUSED — it never enters the model, and each refusal is
- * reported through `reject`. The screening itself is pure (`utils/file.ts`),
- * shared with VFilePicker, which is what keeps the order of the reasons single.
- */
-function acceptFiles(incoming: File[]) {
-  const current = props.multiple ? model.value : []
-  const { accepted, rejected } = screenFiles(incoming, current, {
-    accept: props.accept,
-    maxSize: props.maxSize,
-    // Single mode is a list capped at one: every extra file is refused with `count`.
-    maxFiles: props.multiple ? props.maxFiles : 1,
-    maxTotalSize: props.maxTotalSize,
-  })
-
-  for (const rejection of rejected) emit('reject', rejection)
-
-  resetNative()
-  if (accepted.length === 0) return
-
-  model.value = [...current, ...accepted]
-  emit('change', model.value)
-}
-
-function onNativeChange(event: Event) {
-  acceptFiles([...((event.target as HTMLInputElement).files ?? [])])
-}
-
-/**
- * The one imperative call the component cannot avoid. `.click()` and NOT
- * `showPicker()`: both need a transient user activation, but `showPicker()`
- * additionally THROWS without one (and in a cross-origin iframe) where `.click()`
- * is simply inert — for nothing extra on a file input.
- */
-function openPicker() {
-  if (!interactive.value) return
-  fileEl.value?.click()
-}
 
 function onZoneClick(event: MouseEvent) {
   // The browse button carries its own handler: without this guard a click on it

@@ -51,6 +51,26 @@ Long labels are truncated with an ellipsis, and the list wraps when needed:
 
 <Canvas of={VBreadcrumbStories.LongLabels} />
 
+## Validating `href`
+
+`items[].href` is rendered as-is into the link, with no scheme filtering — like every `href` in the
+design system, and like every other Vue component library. A `javascript:` URL therefore runs on
+click.
+
+VBreadcrumb is the one to watch, because its trail is usually built from data (a CMS, an API,
+a route definition) rather than written by hand. **Validate the scheme where the data enters your
+application**, allowing what you actually serve:
+
+```ts
+const SAFE = new Set(['http:', 'https:'])
+
+function safeHref(raw: string): string {
+  // Relative paths are the common case and stay valid: they only need a base to parse.
+  const url = URL.parse(raw, window.location.origin)
+  return url && SAFE.has(url.protocol) ? raw : '#'
+}
+```
+
 ## Accessibility
 
 - `<nav aria-label="Breadcrumb">` (customizable through `label`) + an ordered list: screen readers

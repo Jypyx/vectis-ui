@@ -42,7 +42,22 @@ export default defineConfig({
         'src/index.ts',
         'src/components/VIcon/icons.ts',
       ],
-      reporter: ['text', 'html'],
+      /*
+       * `lcov` and `json-summary` are what a CI job can read; `text`/`html` are for
+       * a human. All four come out of the same run.
+       */
+      reporter: ['text', 'html', 'lcov', 'json-summary'],
+      /*
+       * A RATCHET, set just under the measured figures — the point is to catch a
+       * drop, not to chase a number. Raise it when the suite genuinely climbs;
+       * never lower it to make a red run green.
+       */
+      thresholds: {
+        statements: 90,
+        branches: 88,
+        functions: 90,
+        lines: 90,
+      },
     },
     projects: [
       {

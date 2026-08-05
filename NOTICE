@@ -1,0 +1,27 @@
+Vectis UI
+Copyright (c) 2026 Jypyx
+
+This product includes third-party material, redistributed under its own terms.
+
+--------------------------------------------------------------------------------
+
+Material Symbols (Rounded)
+Copyright (c) Google LLC
+Licensed under the Apache License, Version 2.0
+https://github.com/google/material-design-icons
+
+The built-in icon registry `packages/ui/src/components/VIcon/icons.ts` — and the
+`dist/components/VIcon/icons.js` built from it — embed SVG path data extracted
+from Material Symbols Rounded (weight 400, grade 0, optical size 24). The
+extraction is performed by `packages/ui/scripts/build-icons.ts` from a pinned
+upstream revision; no other part of Material Symbols is redistributed, and the
+library requires no icon font at runtime.
+
+You may obtain a copy of the Apache License, Version 2.0 at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.

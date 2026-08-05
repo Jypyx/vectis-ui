@@ -6,8 +6,8 @@
  *
  * Run with `pnpm tokens` (executed automatically in pre(build|storybook)).
  */
-import { mkdirSync, writeFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { flattenTokens, toCssDeclarations, tokens } from '../src/tokens'
@@ -53,15 +53,33 @@ ${toCssDeclarations(dark, known, INDENT)}
 }
 `
 
-writeFileSync(resolve(pkgRoot, 'src/styles/tokens.css'), css, 'utf8')
+const outputs: [path: string, content: string][] = [
+  [resolve(pkgRoot, 'src/styles/tokens.css'), css],
+  [resolve(pkgRoot, 'src/tokens/tokens.json'), JSON.stringify(tokens, null, 2) + '\n'],
+]
 
-mkdirSync(resolve(pkgRoot, 'src/tokens'), { recursive: true })
-writeFileSync(
-  resolve(pkgRoot, 'src/tokens/tokens.json'),
-  JSON.stringify(tokens, null, 2) + '\n',
-  'utf8',
-)
+/*
+ * `--check` verifies the committed artefacts match the TS source instead of rewriting
+ * them. Both are git-tracked AND regenerated in `prebuild`, so drift is invisible to
+ * `pnpm test` and `pnpm typecheck`: nothing else would ever notice a hand-edited
+ * `tokens.css`. Non-zero exit, naming the file, so CI reads as a fixable instruction.
+ */
+if (process.argv.includes('--check')) {
+  const stale = outputs.filter(
+    ([path, content]) => !existsSync(path) || readFileSync(path, 'utf8') !== content,
+  )
+  if (stale.length) {
+    console.error('tokens: the generated files are out of date with src/tokens/*.ts:')
+    for (const [path] of stale) console.error(`  - ${relative(pkgRoot, path)}`)
+    console.error('Run `pnpm tokens` and commit the result.')
+    process.exit(1)
+  }
+  console.log(`tokens: generated files up to date (${outputs.length} artefacts).`)
+} else {
+  mkdirSync(resolve(pkgRoot, 'src/tokens'), { recursive: true })
+  for (const [path, content] of outputs) writeFileSync(path, content, 'utf8')
 
-console.log(
-  `tokens: ${primitives.length} primitives, ${semantic.length} semantics, ${dark.length} dark overrides → src/styles/tokens.css, src/tokens/tokens.json`,
-)
+  console.log(
+    `tokens: ${primitives.length} primitives, ${semantic.length} semantics, ${dark.length} dark overrides → src/styles/tokens.css, src/tokens/tokens.json`,
+  )
+}

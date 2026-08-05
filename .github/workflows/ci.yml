@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push on a branch supersedes the run in flight for it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Everything that needs neither a browser nor the Playwright binaries.
+  check:
+    name: Lint, types, unit tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format
+        run: pnpm format
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # The generated artefacts are committed AND regenerated in `prebuild`, so a stale
+      # `tokens.css` would never surface: neither `pnpm test` nor `pnpm typecheck`
+      # regenerates it. `--check` compares without writing, and names the file.
+      - name: Generated tokens are up to date
+        run: pnpm --filter @vectis/ui run tokens:check
+
+      - name: Unit tests
+        run: pnpm test
+
+      # `build` chains `check-css-split` through `postbuild` — the repo's only check
+      # on the artefact rather than the source.
+      - name: Build
+        run: pnpm build
+
+      # Its own step, not `postbuild`: attw's `--pack` shells out to `npm pack`, which
+      # would fire `prepack` → `build` again.
+      - name: Package manifest and type resolution
+        run: pnpm --filter @vectis/ui run check:package
+
+      - name: Build Storybook
+        run: pnpm build-storybook
+
+  # axe reads COMPUTED colours, so contrast has to be checked once per theme.
+  # These are the only jobs that need Chromium, hence their own matrix.
+  stories:
+    name: Play functions + axe (${{ matrix.theme }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        theme: [light, dark]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm --filter @vectis/ui exec playwright install --with-deps chromium
+
+      - name: Story tests
+        run: pnpm test:stories
+        env:
+          VECTIS_THEME: ${{ matrix.theme }}
