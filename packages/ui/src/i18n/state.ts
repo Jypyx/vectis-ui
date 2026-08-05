@@ -47,6 +47,9 @@ function resolve(locale: string): VectisMessages {
   return registry.get(langOf(locale)) ?? registry.get(DEFAULT_LANG) ?? en
 }
 
+/** Keys that would reach the prototype chain rather than a namespace. */
+const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+
 /**
  * Merges a partial override onto a complete dictionary.
  *
@@ -58,6 +61,11 @@ function resolve(locale: string): VectisMessages {
 function mergeMessages(base: VectisMessages, patch: VectisMessagesInput): VectisMessages {
   const out: Record<string, object> = { ...base }
   for (const [namespace, section] of Object.entries(patch)) {
+    // A dictionary built by `JSON.parse` can carry `__proto__` as an OWN key, and
+    // `out[namespace] = …` would then set the merged object's prototype instead of a
+    // namespace. Not a global pollution (`out` is a fresh spread), but it silently
+    // yields a dictionary whose every lookup is wrong.
+    if (FORBIDDEN_KEYS.has(namespace)) continue
     if (section) out[namespace] = { ...out[namespace], ...section }
   }
   return out as unknown as VectisMessages

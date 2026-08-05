@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
-import { expect, waitFor, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
 import { storyText } from '../../stories/storyText'
@@ -297,7 +297,9 @@ export const ProgressiveReplacement: Story = {
     const canvas = within(canvasElement)
     await expect(canvasElement.querySelectorAll('.v-skeleton-item').length).toBeGreaterThan(0)
 
-    await canvas.getByRole('button', { name: 'Load' }).click()
+    // `userEvent.click` and not the DOM's own `.click()`, which returns void: the
+    // `await` in front of it was awaiting nothing, so the story raced its own state.
+    await userEvent.click(canvas.getByRole('button', { name: 'Load' }))
     await waitFor(() => expect(canvasElement.querySelector('.v-skeleton')).toBeNull())
   },
 }

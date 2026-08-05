@@ -3,6 +3,11 @@ packages:
   - apps/*
 allowBuilds:
   esbuild: true
+# Supply-chain cooldown, in MINUTES: a version published less than this ago is not
+# resolved. It is what buys time for a compromised release to be yanked before it
+# reaches an install. The exclusions below opt specific PINNED versions out — without
+# this setting they were inert, and no cooldown applied to anything.
+minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - '@storybook/addon-a11y@10.5.5'
   - '@storybook/addon-docs@10.5.5'

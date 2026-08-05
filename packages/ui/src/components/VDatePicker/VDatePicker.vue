@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useId, watch, watchEffect } from 'vue'
+import { computed, ref, useId, watchEffect } from 'vue'
 
 import VCalendar from '../VCalendar/VCalendar.vue'
 import type {
@@ -31,6 +31,7 @@ import VPopover from '../VPopover/VPopover.vue'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFieldPanel } from '../../composables/useFieldPanel'
+import { useMaskedField } from '../../composables/useMaskedField'
 import { useLocale, useMessages } from '../../i18n/state'
 
 /**
@@ -287,103 +288,35 @@ const isDisabledDate = computed(() => resolveMatcher(props.disabledDates))
  * The field's text WHILE typing. It is the source of truth as long as the input is in
  * progress: the v-model only receives a complete, valid and acceptable date.
  */
-const draft = ref('')
-
-function syncDraftFromModel() {
-  const iso = typeof model.value === 'string' && isValidISO(model.value) ? model.value : null
-  const next = iso ? isoToMask(iso, mask.value) : ''
-  // An anti-loop guard: a commit made while typing rewrites the model, which comes back
-  // through here — without this test the draft and the caret would be overwritten with an
-  // identical text.
-  if (next !== draft.value) draft.value = next
-}
-watch([model, mask], syncDraftFromModel, { immediate: true })
-
-/**
- * `v-model` and not `:model-value`: without an `onUpdate:modelValue` listener, the
- * VInput would internally copy the RAW typed text (through its own `v-model`) and
- * rewrite it into the DOM on the next patch, erasing the mask as soon as the mask itself
- * does not change (the 9th digit, a rejected character). With the listener, its internal
- * state only moves through the prop, hence through `draft`.
- */
-const fieldModel = computed<string | number>({
-  get: () => (typing.value ? draft.value : displayText.value),
-  set: (value) => {
-    if (typing.value) draft.value = String(value ?? '')
-  },
-})
-
-/** Writes the draft AND the DOM: Vue does not re-patch an unchanged masked text. */
-function writeField(text: string, caret?: number) {
-  draft.value = text
-  const el = fieldEl.value
-  if (!el) return
-  if (el.value !== text) el.value = text
-  if (caret !== undefined) el.setSelectionRange(caret, caret)
-}
-
 const acceptable = (iso: string) =>
   isWithin(iso, props.min, props.max) && !isDisabledDate.value(iso)
 
-/**
- * A commit as you type, as soon as the date is complete AND acceptable: the calendar
- * follows the input. With no year pivot — "…/26" must not commit 2026 while the user is
- * still typing the year.
+/*
+ * The mask plumbing (draft, the `v-model` bridge, caret-preserving reformatting,
+ * live commit and silent revert) is shared with VTimePicker — see `useMaskedField`.
+ * Only the date vocabulary is injected here: the field order, separator and widths
+ * all come from the locale through `utils/date.ts`.
  */
-function commitLive() {
-  const iso = parseDateMask(draft.value, mask.value)
-  if (iso && acceptable(iso) && iso !== model.value) model.value = iso
-}
-
-/**
- * Leaving the field (`change` then `blur`, hence the idempotence): it normalizes, or
- * REVERTS SILENTLY. An incomplete, impossible (31/02), out-of-bounds or disabled entry
- * disappears in favour of the current value — no home-made error state to compete with
- * the `invalid` prop.
- */
-function commitOrRevert() {
-  if (!typing.value) return
-  if (!digitsOf(draft.value)) {
-    if (model.value !== null) model.value = null
-    writeField('')
-    return
-  }
-  const iso = parseDateMask(draft.value, mask.value, { yearPivot: YEAR_PIVOT })
-  if (iso && acceptable(iso)) {
-    if (iso !== model.value) model.value = iso
-    writeField(isoToMask(iso, mask.value)) // "5/6/26" → "05/06/2026"
-    return
-  }
-  const current = typeof model.value === 'string' && isValidISO(model.value) ? model.value : ''
-  writeField(current ? isoToMask(current, mask.value) : '')
-}
-
-/**
- * The mask as you type. Invariant: the number of digits to the LEFT of the caret is
- * preserved by the reformatting — absolute positions jump as soon as a separator appears
- * or disappears.
- */
-function onFieldInput(event: Event) {
-  if (!typing.value) return
-  const el = event.target as HTMLInputElement
-  const raw = el.value
-  const caret = el.selectionStart ?? raw.length
-  const before = digitsOf(raw.slice(0, caret)).length
-  const digits = digitsOf(raw).slice(0, mask.value.size)
-  // The caret only crosses the separator on insertion: on deletion it has to stay in
-  // front of it, or the key never makes progress.
-  const deleting = String((event as InputEvent).inputType ?? '').startsWith('delete')
-  const text = formatDateMask(digits, mask.value)
-  writeField(
-    text,
-    caretAfterDigits(
-      text,
-      Math.min(before, digits.length),
-      deleting ? undefined : mask.value.separator,
-    ),
-  )
-  commitLive()
-}
+const { draft, fieldModel, writeField, commitLive, commitOrRevert, onFieldInput } = useMaskedField({
+  fieldEl,
+  typing: () => typing.value,
+  displayText: () => displayText.value,
+  readValue: () =>
+    typeof model.value === 'string' && isValidISO(model.value) ? model.value : null,
+  writeValue: (iso) => {
+    model.value = iso
+  },
+  maxDigits: () => mask.value.size,
+  format: (digits) => formatDateMask(digits, mask.value),
+  caret: (text, digitsBefore, inserting) =>
+    caretAfterDigits(text, digitsBefore, inserting ? mask.value.separator : undefined),
+  // The 2-digit year is expanded on the leave commit ONLY: a FIXED pivot, so the
+  // helper stays pure.
+  parse: (text, final) =>
+    parseDateMask(text, mask.value, final ? { yearPivot: YEAR_PIVOT } : undefined),
+  toMask: (iso) => (iso ? isoToMask(iso, mask.value) : ''),
+  acceptable,
+})
 
 /**
  * A non-numeric character completes the current field with a leading zero and moves to

@@ -1,0 +1,86 @@
+/*
+ * Tone table — the single CSS incarnation of the design system's tone contract.
+ *
+ * A component sets `v-tone` on the element carrying `data-tone` and consumes the
+ * `--tone-*` variables in its own CSS. The blocks define ONLY custom properties,
+ * never a visual property: it is each component that decides what `--tone-bg-solid`
+ * paints. VButton is the reference model, and these are its values.
+ *
+ *   --tone-bg-solid / -hover / -active   filled background and its two states
+ *   --tone-text-solid                    text ON that filled background
+ *   --tone-text-tinted                   the tone as TEXT, on the page background
+ *   --tone-bg-soft                       the tinted surface (tonal, hover of a ghost)
+ *   --tone-border-soft                   the border matching that surface
+ *
+ * WHY `vectis.tokens` AND NOT `vectis.components`. This table is a FALLBACK: a
+ * component must be able to override a tone (VChip and VToast both redefine
+ * `neutral`, VChip's `[data-custom]` replaces the whole set). Those rules and these
+ * would sit at EQUAL specificity — `.v-chip[data-tone='neutral']` and
+ * `.v-tone[data-tone='neutral']` are both (0,2,0) — and since the split each
+ * component ships in its own sheet, whose position the consumer's bundler decides,
+ * the winner would depend on an order nobody controls. Declaring the table one layer
+ * lower makes every component rule win by construction, whatever the file order.
+ *
+ * `neutral` is the one tone the components genuinely disagree on, and each states
+ * its reason where it overrides.
+ */
+@layer vectis.tokens {
+  .v-tone[data-tone='accent'] {
+    --tone-bg-solid: var(--vectis-color-accent);
+    --tone-bg-solid-hover: var(--vectis-color-accent-hover);
+    --tone-bg-solid-active: var(--vectis-color-accent-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-accent-text);
+    --tone-bg-soft: var(--vectis-color-accent-surface);
+    --tone-border-soft: var(--vectis-color-accent-border);
+  }
+
+  .v-tone[data-tone='danger'] {
+    --tone-bg-solid: var(--vectis-color-danger);
+    --tone-bg-solid-hover: var(--vectis-color-danger-hover);
+    --tone-bg-solid-active: var(--vectis-color-danger-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-danger-text);
+    --tone-bg-soft: var(--vectis-color-danger-surface);
+    --tone-border-soft: var(--vectis-color-danger-border);
+  }
+
+  .v-tone[data-tone='success'] {
+    --tone-bg-solid: var(--vectis-color-success);
+    --tone-bg-solid-hover: var(--vectis-color-success-hover);
+    --tone-bg-solid-active: var(--vectis-color-success-active);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: var(--vectis-color-success-text);
+    --tone-bg-soft: var(--vectis-color-success-surface);
+    --tone-border-soft: var(--vectis-color-success-border);
+  }
+
+  .v-tone[data-tone='warning'] {
+    --tone-bg-solid: var(--vectis-color-warning);
+    --tone-bg-solid-hover: var(--vectis-color-warning-hover);
+    --tone-bg-solid-active: var(--vectis-color-warning-active);
+    /* Amber is too light for white: a dedicated token (dark text) */
+    --tone-text-solid: var(--vectis-color-text-on-warning);
+    --tone-text-tinted: var(--vectis-color-warning-text);
+    --tone-bg-soft: var(--vectis-color-warning-surface);
+    --tone-border-soft: var(--vectis-color-warning-border);
+  }
+
+  .v-tone[data-tone='neutral'] {
+    --tone-bg-solid: var(--vectis-color-surface-muted);
+    --tone-bg-solid-hover: color-mix(
+      in oklab,
+      var(--vectis-color-surface-muted),
+      var(--vectis-color-text) 8%
+    );
+    --tone-bg-solid-active: color-mix(
+      in oklab,
+      var(--vectis-color-surface-muted),
+      var(--vectis-color-text) 14%
+    );
+    --tone-text-solid: var(--vectis-color-text);
+    --tone-text-tinted: var(--vectis-color-text);
+    --tone-bg-soft: var(--vectis-color-surface-muted);
+    --tone-border-soft: var(--vectis-color-border-strong);
+  }
+}

@@ -22,10 +22,12 @@ import VInput from '../VInput/VInput.vue'
 import VTypography from '../VTypography/VTypography.vue'
 
 import { useFileDrop } from '../../composables/useFileDrop'
+import { useFileField } from '../../composables/useFileField'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useLocale, useMessages } from '../../i18n/state'
+import { chipScaleFor } from '../../utils/chip'
 import { isDev } from '../../utils/env'
-import { formatBytes, screenFiles } from '../../utils/file'
+import { formatBytes } from '../../utils/file'
 import { truncateMiddle } from './truncate'
 
 /** Rendering of the selection inside the field, in `multiple` mode. */
@@ -147,41 +149,40 @@ const model = defineModel<File[]>({ default: () => [] })
 
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
-/*
- * The wrapper-root pattern assumes ONE functional element; there are two here,
- * so the split has three buckets. `class`/`style` stay on the root, and the rest
- * is arbitrated by MEANING: the hidden file input is what the FORM sees (`name`,
- * `required`, `form`, `capture` describe submission and the OS picker), the
- * VInput is what the USER sees and focuses (`id`, the `aria-*`, `title`, the
- * `data-*`, every listener — a consumer's `<label for>` has to point at what
- * actually takes focus).
- *
- * The buckets are a PARTITION: nothing is applied twice. A duplicated `id` or
- * `aria-label` would break `for` and have the field announced twice.
- */
-const NATIVE_ONLY = ['name', 'required', 'form', 'capture']
-
-const nativeAttrs = computed(() =>
-  Object.fromEntries(
-    Object.entries(forwardedAttrs.value).filter(([key]) => NATIVE_ONLY.includes(key)),
-  ),
-)
-
-const fieldAttrs = computed(() =>
-  Object.fromEntries(
-    Object.entries(forwardedAttrs.value).filter(
-      // `aria-describedby` is pulled out of both: it is re-aggregated below, and
-      // an explicit binding placed after `v-bind` would silently overwrite the
-      // consumer's in mergeProps.
-      ([key]) => !NATIVE_ONLY.includes(key) && key !== 'aria-describedby',
-    ),
-  ),
-)
-
 const m = useMessages()
 const locale = useLocale()
 
-const fileEl = ref<HTMLInputElement | null>(null)
+/*
+ * The hidden input, the three-bucket attribute split and the whole gate into the
+ * model live in `useFileField` (shared with VFileUpload). Here the CONTROL bucket
+ * is the VInput — what the user sees and focuses, so a consumer's `<label for>`
+ * points at it — and `aria-describedby` is pulled out of it as well, because it is
+ * re-aggregated below.
+ */
+const {
+  fileEl,
+  nativeAttrs,
+  controlAttrs: fieldAttrs,
+  acceptFiles,
+  onNativeChange,
+  openPicker,
+  resetNative,
+} = useFileField({
+  model,
+  forwardedAttrs,
+  enabled: () => !props.disabled && !props.readonly,
+  multiple: () => props.multiple,
+  limits: () => ({
+    accept: props.accept,
+    maxSize: props.maxSize,
+    maxFiles: props.maxFiles,
+    maxTotalSize: props.maxTotalSize,
+  }),
+  onReject: (rejection) => emit('reject', rejection),
+  onChange: (files) => emit('change', files),
+  excludeFromControl: ['aria-describedby'],
+})
+
 const inputRef = ref<InstanceType<typeof VInput> | null>(null)
 
 // `chip` only means something for a list: a single file always shows as text.
@@ -249,15 +250,10 @@ const describedBy = computed(
       .join(' ') || undefined,
 )
 
-/*
- * Chips one step below the field so they fit without making it grow (the
- * VCombobox mapping): xs up to `md`, sm at `lg`, the catch-up below the lowest
- * step of each pair going through `compact`. Any change here must be carried
- * over to the `--chip-height` rules in the CSS: that height lives inside the
- * VChip subtree, out of the field's reach.
- */
-const chipSize = computed(() => (props.size === 'lg' ? 'sm' : 'xs'))
-const chipCompact = computed(() => (props.size === 'lg' ? props.compact : props.size === 'sm'))
+// Size, compact and HEIGHT of the Chips hosted by the field — see `utils/chip.ts`,
+// shared with VCombobox. The height is set inline on the root rather than restated as
+// a CSS table: it lives inside the VChip subtree, out of the field's reach.
+const chipScale = computed(() => chipScaleFor(props.size, props.compact))
 
 /**
  * A chip's visible label. Middle truncation rather than the field's
@@ -269,61 +265,6 @@ const chipCompact = computed(() => (props.size === 'lg' ? props.compact : props.
  * and a `title` is set on the chip below whenever the label was actually cut.
  */
 const chipLabel = (file: File) => truncateMiddle(file.name)
-
-/**
- * The native input keeps the FileList of its last dialog. Without this reset,
- * re-picking the SAME file after a clear or a removal fires NO `change` (the
- * control's value never moved) and that file becomes unreachable. Every path
- * that touches the selection goes through here — a fully rejected batch
- * included, since a file refused once must stay re-pickable.
- */
-function resetNative() {
-  if (fileEl.value) fileEl.value.value = ''
-}
-
-/**
- * The single gate into the model: the native dialog and a drop both land here.
- * An over-limit file is REFUSED — it never enters the model, and each refusal is
- * reported through `reject`. No `setCustomValidity`: the visible field is
- * read-only, hence barred from constraint validation.
- *
- * The screening itself is pure (`utils/file.ts`), which is what keeps the order
- * of the refusals — a contract this component's docs state — testable without a
- * mount.
- */
-function acceptFiles(incoming: File[]) {
-  const current = props.multiple ? model.value : []
-  const { accepted, rejected } = screenFiles(incoming, current, {
-    accept: props.accept,
-    maxSize: props.maxSize,
-    // Single mode is a list capped at one: every extra file is refused with `count`.
-    maxFiles: props.multiple ? props.maxFiles : 1,
-    maxTotalSize: props.maxTotalSize,
-  })
-
-  for (const rejection of rejected) emit('reject', rejection)
-
-  resetNative()
-  if (accepted.length === 0) return
-
-  model.value = [...current, ...accepted]
-  emit('change', model.value)
-}
-
-function onNativeChange(event: Event) {
-  acceptFiles([...((event.target as HTMLInputElement).files ?? [])])
-}
-
-/**
- * The one imperative call the component cannot avoid. `.click()` and NOT
- * `showPicker()`: both need a transient user activation, but `showPicker()`
- * additionally THROWS without one (and in a cross-origin iframe) where
- * `.click()` is simply inert — for nothing extra on a file input.
- */
-function openPicker() {
-  if (props.disabled || props.readonly) return
-  fileEl.value?.click()
-}
 
 function onControlClick(event: MouseEvent) {
   // The field's own buttons carry their own handlers: without this guard the
@@ -393,7 +334,7 @@ defineExpose({
   <div
     class="v-file-picker"
     :class="rootClass"
-    :style="rootStyle"
+    :style="[{ '--chip-height': chipScale.height }, rootStyle]"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
     :data-display="resolvedDisplay"
@@ -449,13 +390,13 @@ defineExpose({
               :index="index"
               :label="chipLabel(file)"
               :remove="() => removeAt(index)"
-              :size="chipSize"
-              :compact="chipCompact"
+              :size="chipScale.size"
+              :compact="chipScale.compact"
             >
               <VChip
                 tone="accent"
-                :size="chipSize"
-                :compact="chipCompact"
+                :size="chipScale.size"
+                :compact="chipScale.compact"
                 :dismissible="!readonly && !disabled"
                 :dismiss-label="m.filePicker.remove(file.name)"
                 :disabled="disabled"
@@ -534,27 +475,11 @@ defineExpose({
     background: var(--vectis-color-accent-surface);
   }
 
-  /* chip display: the field hosts the Chips, which wrap. Their height is
-     restated here as --chip-height because it lives inside the VChip subtree,
-     out of the field's reach: these four rules must stay the exact mirror of
-     chipSize/chipCompact in the script. Order is significant — equal
-     specificity, so the compact variant comes last. */
-  .v-file-picker[data-display='chip'] {
-    --chip-height: var(--vectis-control-height-xs);
-  }
-
-  .v-file-picker[data-display='chip'][data-size='sm'] {
-    --chip-height: calc(var(--vectis-control-height-xs) - var(--vectis-space-1));
-  }
-
-  .v-file-picker[data-display='chip'][data-size='lg'] {
-    --chip-height: var(--vectis-control-height-sm);
-  }
-
-  .v-file-picker[data-display='chip'][data-size='lg'][data-compact] {
-    --chip-height: calc(var(--vectis-control-height-sm) - var(--vectis-space-1));
-  }
-
+  /* chip display: the field hosts the Chips, which wrap. `--chip-height` is set
+     INLINE by `chipScaleFor` (utils/chip.ts, shared with VCombobox) — that height
+     lives inside the VChip subtree, out of the field's reach, and deriving it from
+     the same pair as their size/compact is what stops a CSS table here from
+     drifting from the script. */
   /* The field grows with the Chips; the input is forced to the Chips' height
      instead of the 100% inherited from VInput, or its intrinsic height would
      stretch every row. The padding reserves the room taken by the end zone,

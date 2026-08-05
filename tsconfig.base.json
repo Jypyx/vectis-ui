@@ -8,6 +8,21 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    // `src/index.ts` imports its CSS for its side effect alone: this is what catches a
+    // path typo there, which would otherwise ship a component with no styles.
+    "noUncheckedSideEffectImports": true,
+    // NOT `noUnusedLocals`/`noUnusedParameters`: vue-tsc does not count a template
+    // string ref (`ref="fileEl"`) as a use of the binding, so both flag a correct SFC
+    // idiom. ESLint's `@typescript-eslint/no-unused-vars` reads the template properly
+    // and already covers this, at error level.
+    //
+    // NOT `exactOptionalPropertyTypes` either — measured at 66 errors, none of them a
+    // bug: they all come from `withDefaults(defineProps<X>(), { foo: undefined })`,
+    // which is a DELIBERATE idiom here (an `undefined` default is what distinguishes
+    // "prop not supplied" from an explicit choice — VDatePicker's `mode`,
+    // VTimePicker's `showDial`). Satisfying it would mean writing `| undefined` on
+    // some forty prop interfaces to weaken the very distinction they encode.
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "esModuleInterop": true,

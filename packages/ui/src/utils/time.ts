@@ -65,6 +65,33 @@ export function hourCycleFor(locale: string): HourFormat {
 }
 
 /**
+ * One formatter per (locale, format) pair, kept for the lifetime of the module —
+ * the `formatterFor` idiom of `utils/file.ts`.
+ *
+ * Constructing an `Intl.DateTimeFormat` costs one to two orders of magnitude more
+ * than using it, and `timeList` formats ONE ENTRY AT A TIME: at `minuteStep: 1`
+ * that is 1440 constructions per recompute (measured at ~82 ms, against ~2 ms
+ * memoized). The pair is the whole key — `format` is forced below, so it does not
+ * follow from the locale.
+ */
+const displayFormatters = new Map<string, Intl.DateTimeFormat>()
+
+function displayFormatterFor(locale: string, format: HourFormat): Intl.DateTimeFormat {
+  const key = `${locale}|${format}`
+  let formatter = displayFormatters.get(key)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      hour: 'numeric',
+      minute: '2-digit',
+      hourCycle: format === '12h' ? 'h12' : 'h23',
+      timeZone: 'UTC',
+    })
+    displayFormatters.set(key, formatter)
+  }
+  return formatter
+}
+
+/**
  * Localized display of the field ("19:05", "7:05 PM"). The `hourCycle` is forced
  * (h23/h12) so it follows the component's resolved `format`, not the locale's raw
  * preference.
@@ -72,13 +99,7 @@ export function hourCycleFor(locale: string): HourFormat {
 export function formatDisplay(time: string, locale: string, format: HourFormat): string {
   const parts = parseTime(time)
   if (!parts) return ''
-  const fmt = new Intl.DateTimeFormat(locale, {
-    hour: 'numeric',
-    minute: '2-digit',
-    hourCycle: format === '12h' ? 'h12' : 'h23',
-    timeZone: 'UTC',
-  })
-  return fmt.format(Date.UTC(2021, 0, 1, parts.hour, parts.minute))
+  return displayFormatterFor(locale, format).format(Date.UTC(2021, 0, 1, parts.hour, parts.minute))
 }
 
 /** Clamps an integer to `[min, max]` (rounded first: input is free-form). */

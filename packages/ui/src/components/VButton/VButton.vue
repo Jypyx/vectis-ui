@@ -86,7 +86,7 @@ const passedAttrs = computed(() => {
   <component
     :is="isLink ? 'a' : 'button'"
     v-bind="passedAttrs"
-    class="v-button v-control"
+    class="v-button v-control v-tone"
     :href="isLink && !isInert ? href : undefined"
     :type="isLink ? undefined : type"
     :disabled="isLink ? undefined : disabled || loading"
@@ -142,64 +142,9 @@ const passedAttrs = computed(() => {
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  .v-button[data-tone='accent'] {
-    --tone-bg-solid: var(--vectis-color-accent);
-    --tone-bg-solid-hover: var(--vectis-color-accent-hover);
-    --tone-bg-solid-active: var(--vectis-color-accent-active);
-    --tone-text-solid: var(--vectis-color-text-on-accent);
-    --tone-text-tinted: var(--vectis-color-accent-text);
-    --tone-bg-soft: var(--vectis-color-accent-surface);
-    --tone-border-soft: var(--vectis-color-accent-border);
-  }
-
-  .v-button[data-tone='danger'] {
-    --tone-bg-solid: var(--vectis-color-danger);
-    --tone-bg-solid-hover: var(--vectis-color-danger-hover);
-    --tone-bg-solid-active: var(--vectis-color-danger-active);
-    --tone-text-solid: var(--vectis-color-text-on-accent);
-    --tone-text-tinted: var(--vectis-color-danger-text);
-    --tone-bg-soft: var(--vectis-color-danger-surface);
-    --tone-border-soft: var(--vectis-color-danger-border);
-  }
-
-  .v-button[data-tone='success'] {
-    --tone-bg-solid: var(--vectis-color-success);
-    --tone-bg-solid-hover: var(--vectis-color-success-hover);
-    --tone-bg-solid-active: var(--vectis-color-success-active);
-    --tone-text-solid: var(--vectis-color-text-on-accent);
-    --tone-text-tinted: var(--vectis-color-success-text);
-    --tone-bg-soft: var(--vectis-color-success-surface);
-    --tone-border-soft: var(--vectis-color-success-border);
-  }
-
-  .v-button[data-tone='warning'] {
-    --tone-bg-solid: var(--vectis-color-warning);
-    --tone-bg-solid-hover: var(--vectis-color-warning-hover);
-    --tone-bg-solid-active: var(--vectis-color-warning-active);
-    /* amber is too light for white: dedicated token (dark text) */
-    --tone-text-solid: var(--vectis-color-text-on-warning);
-    --tone-text-tinted: var(--vectis-color-warning-text);
-    --tone-bg-soft: var(--vectis-color-warning-surface);
-    --tone-border-soft: var(--vectis-color-warning-border);
-  }
-
-  .v-button[data-tone='neutral'] {
-    --tone-bg-solid: var(--vectis-color-surface-muted);
-    --tone-bg-solid-hover: color-mix(
-      in oklab,
-      var(--vectis-color-surface-muted),
-      var(--vectis-color-text) 8%
-    );
-    --tone-bg-solid-active: color-mix(
-      in oklab,
-      var(--vectis-color-surface-muted),
-      var(--vectis-color-text) 14%
-    );
-    --tone-text-solid: var(--vectis-color-text);
-    --tone-text-tinted: var(--vectis-color-text);
-    --tone-bg-soft: var(--vectis-color-surface-muted);
-    --tone-border-soft: var(--vectis-color-border-strong);
-  }
+  /* The tone table lives in styles/tones.css (class `v-tone`, layer vectis.tokens),
+     shared with VChip and VToast. VButton overrides not a single tone: it is the
+     reference model those values were taken from. */
 
   .v-button[data-variant='solid'] {
     background: var(--tone-bg-solid);

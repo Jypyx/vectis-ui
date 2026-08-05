@@ -109,6 +109,17 @@ describe('registerMessages', () => {
     expect(messages().dataTable.selection(3)).toBe('3 row(s)')
   })
 
+  it('ignores a prototype-reaching key instead of merging it', () => {
+    // A dictionary coming from `JSON.parse` can carry `__proto__` as an OWN key,
+    // which the merge would otherwise apply to the object's prototype.
+    const hostile = JSON.parse('{"__proto__":{"polluted":true},"common":{"close":"Fermer"}}')
+    registerMessages('en', hostile)
+
+    expect(messages().common.close).toBe('Fermer')
+    expect(Object.getPrototypeOf(messages())).toBe(Object.prototype)
+    expect('polluted' in messages()).toBe(false)
+  })
+
   it('accumulates successive calls on the same language', () => {
     registerMessages('fr', fr)
     registerMessages('fr', { common: { close: 'Quitter' } })

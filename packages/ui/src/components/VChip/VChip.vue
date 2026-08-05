@@ -127,7 +127,7 @@ const iconOnly = computed(
 
 <template>
   <span
-    class="v-chip v-control"
+    class="v-chip v-control v-tone"
     :class="$attrs.class"
     :style="rootStyle"
     :data-variant="variant"
@@ -197,46 +197,9 @@ const iconOnly = computed(
     border-radius: var(--vectis-radius-pill);
   }
 
-  .v-chip[data-tone='accent'] {
-    --tone-bg-solid: var(--vectis-color-accent);
-    --tone-bg-solid-hover: var(--vectis-color-accent-hover);
-    --tone-bg-solid-active: var(--vectis-color-accent-active);
-    --tone-text-solid: var(--vectis-color-text-on-accent);
-    --tone-text-tinted: var(--vectis-color-accent-text);
-    --tone-bg-soft: var(--vectis-color-accent-surface);
-    --tone-border-soft: var(--vectis-color-accent-border);
-  }
-
-  .v-chip[data-tone='danger'] {
-    --tone-bg-solid: var(--vectis-color-danger);
-    --tone-bg-solid-hover: var(--vectis-color-danger-hover);
-    --tone-bg-solid-active: var(--vectis-color-danger-active);
-    --tone-text-solid: var(--vectis-color-text-on-accent);
-    --tone-text-tinted: var(--vectis-color-danger-text);
-    --tone-bg-soft: var(--vectis-color-danger-surface);
-    --tone-border-soft: var(--vectis-color-danger-border);
-  }
-
-  .v-chip[data-tone='success'] {
-    --tone-bg-solid: var(--vectis-color-success);
-    --tone-bg-solid-hover: var(--vectis-color-success-hover);
-    --tone-bg-solid-active: var(--vectis-color-success-active);
-    --tone-text-solid: var(--vectis-color-text-on-accent);
-    --tone-text-tinted: var(--vectis-color-success-text);
-    --tone-bg-soft: var(--vectis-color-success-surface);
-    --tone-border-soft: var(--vectis-color-success-border);
-  }
-
-  .v-chip[data-tone='warning'] {
-    --tone-bg-solid: var(--vectis-color-warning);
-    --tone-bg-solid-hover: var(--vectis-color-warning-hover);
-    --tone-bg-solid-active: var(--vectis-color-warning-active);
-    /* Amber is too light for white: a dedicated token (dark text) */
-    --tone-text-solid: var(--vectis-color-text-on-warning);
-    --tone-text-tinted: var(--vectis-color-warning-text);
-    --tone-bg-soft: var(--vectis-color-warning-surface);
-    --tone-border-soft: var(--vectis-color-warning-border);
-  }
+  /* The tone table lives in styles/tones.css (class `v-tone`, layer vectis.tokens),
+     shared with VButton and VToast. Only the divergence below is local — being one
+     layer up, it wins over the shared value whatever the sheet order. */
 
   /* A divergence from VButton: VButton's neutral solid (surface-muted) would be
      indistinguishable from the tonal. A full text/surface inversion rather than

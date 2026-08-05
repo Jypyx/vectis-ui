@@ -321,8 +321,11 @@ function toggleView(target: 'months' | 'years') {
   } else if (next === 'years') {
     focusedYear.value = viewYear.value
     nextTick(() => {
-      yearCellEl(viewYear.value)?.scrollIntoView({ block: 'center' })
-      yearCellEl(viewYear.value)?.focus()
+      const cell = yearCellEl(viewYear.value)
+      // Optional call: jsdom does not implement scrollIntoView (same guard as
+      // VTimePicker's list), and centring is an enhancement — the focus below is not.
+      cell?.scrollIntoView?.({ block: 'center' })
+      cell?.focus()
     })
   } else if (view.value === 'days') {
     focusDay(focusedISO.value)
@@ -441,8 +444,15 @@ const monthRows = computed(() => chunk(monthLabels.value.map((name, i) => ({ nam
 
 // Years view.
 const yearRange = computed(() => {
-  const minY = props.min ? parseISO(props.min)!.getFullYear() : viewYear.value - 100
-  const maxY = props.max ? parseISO(props.max)!.getFullYear() : viewYear.value + 100
+  /*
+   * `min`/`max` are raw consumer strings, and the ONLY place they are read as a
+   * Date rather than compared as ISO text (`compareISO`, `isWithin` and
+   * `clampISO` all tolerate a malformed bound). A non-ISO value therefore has to
+   * fall back to the open range here: asserting the parse would throw and take
+   * the whole render down when the years view opens.
+   */
+  const minY = parseISO(props.min)?.getFullYear() ?? viewYear.value - 100
+  const maxY = parseISO(props.max)?.getFullYear() ?? viewYear.value + 100
   const list: number[] = []
   for (let y = minY; y <= maxY; y++) list.push(y)
   return list

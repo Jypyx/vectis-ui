@@ -232,12 +232,37 @@ function rowIdentity(row: Row, index: number): DataTableRowId {
 //
 // Scope of the filter: the declared columns (what the user sees), never the rows'
 // other fields.
+/*
+ * Normalized cell text, cached per (row, column) and REVALIDATED on the raw value.
+ * `normalizeText` is NFD + regex + lowercase, and the filter below re-reads the whole
+ * corpus on every keystroke: 10 000 rows × 5 columns is 50 000 normalizations per
+ * character typed.
+ *
+ * Reading `row[key]` on every call is what keeps the filter reactive — caching the
+ * result outright would freeze it against an in-place cell edit. A WeakMap keyed by
+ * row means a replaced `rows` array is collected with no invalidation to write.
+ */
+const normalizedCells = new WeakMap<Row, Map<string, { raw: string; normalized: string }>>()
+function normalizedCell(row: Row, key: string): string {
+  const raw = String(row[key] ?? '')
+  let cells = normalizedCells.get(row)
+  if (!cells) {
+    cells = new Map()
+    normalizedCells.set(row, cells)
+  }
+  const hit = cells.get(key)
+  if (hit && hit.raw === raw) return hit.normalized
+  const normalized = normalizeText(raw)
+  cells.set(key, { raw, normalized })
+  return normalized
+}
+
 const filteredRows = computed(() => {
   if (props.serverSide || !props.searchable) return props.rows
   const needle = normalizeText(search.value.trim())
   if (!needle) return props.rows
   return props.rows.filter((row) =>
-    props.columns.some((column) => normalizeText(String(row[column.key] ?? '')).includes(needle)),
+    props.columns.some((column) => normalizedCell(row, column.key).includes(needle)),
   )
 })
 
