@@ -157,6 +157,18 @@ export const DialSelection: Story = {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('combobox', { name: 'Time' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
+
+    /*
+     * `.v-popover-panel.v-timepicker-panel` against `.v-panel`, which declares the same
+     * `gap` and `padding` at equal specificity on this very element (the popover is a
+     * `surface`). Only the compound keeps the dial's own rhythm under an order nothing
+     * controls once each sheet ships separately: `--vectis-space-4` (16px) and
+     * `--vectis-space-3` (12px) against `.v-panel`'s `--vectis-space-1` (4px) for both.
+     */
+    const panel = canvas.getByRole('dialog')
+    await expect(getComputedStyle(panel).gap).toBe('16px')
+    await expect(getComputedStyle(panel).padding).toBe('12px')
+
     const face = canvasElement.querySelector('.v-timepicker-dial-face') as HTMLElement
 
     // hour 3 = a quarter turn; releasing moves on to the minutes step

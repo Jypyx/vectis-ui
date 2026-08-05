@@ -26,6 +26,7 @@
     "icons": "tsx scripts/build-icons.ts",
     "prebuild": "pnpm run tokens",
     "build": "vite build",
+    "postbuild": "tsx scripts/check-css-split.ts",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",

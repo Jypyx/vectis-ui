@@ -665,9 +665,13 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   /* Title: rendered by VTypography (heading-4) — the colour stays explicit, as the
-     toolbar may live inside a dimmed text context. */
+     toolbar may live inside a dimmed text context. It goes through
+     `--typography-color`, the custom property `.v-typography` reads, and not through
+     a `color` declaration: that one would collide with `.v-typography`'s own at equal
+     specificity, and the winner would depend on the order in which the consumer's
+     bundler concatenates the CSS. */
   .v-table-title {
-    color: var(--vectis-color-text);
+    --typography-color: var(--vectis-color-text);
   }
 
   /* A qualified (0,2,0) override of VInput's `.v-input { width: 100% }` (0,1,0) —

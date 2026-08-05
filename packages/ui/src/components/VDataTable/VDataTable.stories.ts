@@ -157,6 +157,16 @@ export const Search: Story = {
     const canvas = within(canvasElement)
     const field = canvas.getByRole('searchbox', { name: 'Search the table' })
 
+    /*
+     * The title is a VTypography, so `.v-table-title` and `.v-typography` sit on the
+     * same element at equal specificity. The colour goes through the custom property
+     * `.v-typography` reads, and NOT through a `color` declaration that would collide
+     * with it and be arbitrated by an order nothing controls once each sheet ships
+     * separately. A revert to `color:` empties this property — that is what goes red.
+     */
+    const title = canvasElement.querySelector('.v-table-title') as HTMLElement
+    await expect(getComputedStyle(title).getPropertyValue('--typography-color')).not.toBe('')
+
     // accent-insensitive filtering: "brume" matches, the other rows drop out
     await userEvent.type(field, 'brume')
     await waitFor(() => {

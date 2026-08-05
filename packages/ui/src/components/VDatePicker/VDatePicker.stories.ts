@@ -128,6 +128,16 @@ export const ReadOnly: Story = {
     field.focus()
     await userEvent.keyboard('{ArrowDown}')
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
+
+    /*
+     * `.v-popover-panel.v-datepicker-panel` against `.v-panel`, which declares
+     * `padding` at equal specificity on this very element (the popover is a `surface`).
+     * The cancellation only holds through the compound once each sheet ships
+     * separately: without it, `.v-panel`'s `--vectis-space-1` (4px) may win and inset
+     * the calendar inside a gutter it already handles itself.
+     */
+    await expect(getComputedStyle(canvas.getByRole('dialog')).padding).toBe('0px')
+
     // Escape closes and hands the focus back to the field
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(field).toHaveFocus())
