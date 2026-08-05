@@ -1,26 +1,20 @@
 /**
  * Entry point of `@vectis/ui`. Named exports only (tree-shaking).
  *
- * The CSS import below feeds the extraction into `dist/styles.css`; in library
- * mode Vite strips it from the emitted JS. The consumer therefore imports
- * `@vectis/ui/styles.css` explicitly.
+ * The CSS import below feeds the extraction into `dist/styles.css`, which carries
+ * the CORE alone (reset, tokens, and the shared chrome of `styles/`); Vite strips
+ * the import from the emitted JS, so the consumer imports `@vectis/ui/styles.css`
+ * explicitly. Each component's own CSS ships as `dist/<path>/VX.css`, imported by
+ * its own `VX.js` — see `shipComponentCss` in `vite.config.ts`.
  *
- * The export order fixes the bundled CSS order. Most components are arranged for
- * coherence (dependency → dependent) without their position being constraining:
- * their overrides are qualified (`.v-tab[data-size]`, `.v-table-toolbar .v-input`…)
- * and therefore order-independent. Five constraints are real, because they play
- * out at equal specificity:
- * - VIconButton after VButton (overrides padding and width);
- * - VPagination after VButtonGroup (its pills override the width and padding of
- *   `.v-button`);
- * - VSlider after VInput (overrides the width of `.v-slider-field`);
- * - VTypography FIRST, before any component that renders it internally (VInput,
- *   VTextarea, VDialog, VAccordion, VDataTable): their classes
- *   (`.v-input-label`…) override `.v-typography`;
- * - VPopover FIRST as well, before the panels that render it internally
- *   (VTooltip, VCombobox, VDatePicker, VTimePicker): their classes
- *   (`.v-tooltip-panel`…) sit on the SAME element as `.v-popover-panel`, at
- *   equal specificity (0,1,0).
+ * The export order therefore no longer fixes anything: it is editorial (dependency
+ * → dependent, for reading). NOTHING may depend on it, because the order in which
+ * the consumer's bundler concatenates the sheets is unknowable. A rule that would
+ * collide with another component's at equal specificity is qualified instead —
+ * `[data-size]` (`.v-tab`, `.v-pagination-page`), a compound class
+ * (`.v-popover-panel.v-tooltip-panel`), a descendant (`.v-table-toolbar .v-input`)
+ * — or routed through the custom property the target reads (`--typography-color`).
+ * `scripts/check-css-split.ts` guards the mechanism at `postbuild`.
  *
  * Internal components (VComboboxOption, VMenuPanel…) and the composables are not
  * exported.

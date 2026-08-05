@@ -20,6 +20,8 @@ pnpm add @vectis/ui vue
 import '@vectis/ui/styles.css'
 ```
 
+`styles.css` is the **core**: the reset, the tokens and the chrome shared by every component (3.8 kB gzip). Each component's own CSS ships with the component and is pulled in by the import you already write — nothing else to add, and you download the CSS of what you use. A single `VButton` costs 4.6 kB gzip of CSS instead of the 18.0 kB of a bundled stylesheet.
+
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
@@ -54,6 +56,8 @@ import { VButton, VBadge } from '@vectis/ui'
 ```
 
 Named imports are tree-shaken by Vite/Nitro. No `build.transpile` required.
+
+Component CSS travels with the component as a plain static `import`, which Vite, Nitro and webpack all turn into a render-blocking `<link>` — including for a lazily loaded route, whose stylesheet is awaited before the chunk runs. The one setup that would flash is a hand-rolled SSR server that injects its client CSS **through JavaScript** (`vite-plugin-css-injected-by-js`, webpack's `style-loader`): there, the first paint carries the core (tokens, layout, hidden popovers) but not the components' internal rules. Keep the client CSS extracted to a file and the question does not arise.
 
 For the locale and the icons, put the configuration in a **universal** plugin — `plugins/vectis.ts`, never `plugins/vectis.client.ts`: a client-only configuration would make the server and client renders diverge, hence a hydration mismatch. See [Internationalization](#internationalization).
 
@@ -93,7 +97,7 @@ Every customization is a redefinition of custom properties, in CSS:
 panel.style.setProperty('--vectis-color-accent', 'oklch(58% 0.2 25)')
 ```
 
-The design system's CSS lives in layers (`vectis.reset < vectis.tokens < vectis.components < vectis.utilities`): **any non-layered consumer style wins automatically** — overriding a component never calls for a specificity war.
+The design system's CSS lives in layers (`vectis.reset < vectis.tokens < vectis.components < vectis.utilities`): **any non-layered consumer style wins automatically** — overriding a component never calls for a specificity war. Every sheet the library emits re-declares that order, so it holds whichever one your bundler happens to place first.
 
 ### Programmatic access to the tokens
 
@@ -316,4 +320,5 @@ pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm build && pnpm bu
 
 - **Tokens**: never edit `src/styles/tokens.css` or `src/tokens/tokens.json` (generated) — change the `src/tokens/*.ts` source then run `pnpm tokens`.
 - **A new component**: a `src/components/VX/` folder with `VX.vue` (non-scoped styles in `@layer vectis.components`, semantic tokens only, variants through `data-*`), `VX.stories.ts` (default, variants, states, edge cases, play functions), `VX.test.ts` (logic only — browser behaviour is tested in the play functions), and the named export in `src/index.ts`. The Storybook `title` and the `.mdx` heading are written **without the `V`** — the only exception to the prefix.
+- **Its CSS ships as `dist/components/VX/VX.css`, imported by `VX.js`.** No rule may depend on where another component's sheet lands: a declaration that would collide with another component's at equal specificity is qualified (`[data-size]`, a compound class, a descendant) or routed through the custom property the target reads. `pnpm build` checks the mechanism.
 - Any behavioural JS must be justified by a comment: "can modern HTML/CSS do it?" comes first.
