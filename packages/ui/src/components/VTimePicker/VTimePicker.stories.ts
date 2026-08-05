@@ -79,6 +79,7 @@ export const Default: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
+    // `textbox` and not `combobox`: with no panel the field takes no role at all.
     const field = canvas.getByRole('textbox', { name: 'Time' }) as HTMLInputElement
 
     // with no dial, the field announces no popup and opens none
@@ -127,7 +128,7 @@ export const ReadOnly: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const field = canvas.getByRole('textbox', { name: 'Time' })
+    const field = canvas.getByRole('combobox', { name: 'Time' })
     // keyboard opening (the down arrow), with focus moved into the panel
     field.focus()
     await userEvent.keyboard('{ArrowDown}')
@@ -154,7 +155,7 @@ export const DialSelection: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('textbox', { name: 'Time' }))
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Time' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     const face = canvasElement.querySelector('.v-timepicker-dial-face') as HTMLElement
 
@@ -186,7 +187,7 @@ export const InnerRing: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('textbox', { name: 'Time' }))
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Time' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     const face = canvasElement.querySelector('.v-timepicker-dial-face') as HTMLElement
     const hourCell = () => canvas.getByRole('button', { name: 'Select hour' })
@@ -221,7 +222,7 @@ export const InputWithDial: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const field = canvas.getByRole('textbox', { name: 'Time' })
+    const field = canvas.getByRole('combobox', { name: 'Time' })
 
     // the click opens the panel WITHOUT stealing the caret: typing carries on
     await userEvent.click(field)
@@ -259,7 +260,7 @@ export const TimeList: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const field = canvas.getByRole('textbox', { name: 'Time' })
+    const field = canvas.getByRole('combobox', { name: 'Time' })
     await userEvent.click(field)
     const panel = await waitFor(() => canvas.getByRole('listbox'))
 
@@ -292,7 +293,7 @@ export const ListKeyboard: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const field = canvas.getByRole('textbox', { name: 'Time' })
+    const field = canvas.getByRole('combobox', { name: 'Time' })
     field.focus()
     await userEvent.keyboard('{ArrowDown}')
     const panel = await waitFor(() => canvas.getByRole('listbox'))
@@ -345,7 +346,7 @@ export const Cancellation: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('textbox', { name: 'Time' }))
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Time' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     const face = canvasElement.querySelector('.v-timepicker-dial-face') as HTMLElement
     tapDial(face, 10 / 12)
@@ -393,10 +394,10 @@ export const AlignedMeridiem: Story = {
     setup: () => ({ args, t, value: ref('07:00') }),
     template: `
       <div style="width: 320px; display:grid; gap:12px">
-        <VTimePicker v-bind="args" v-model="value" />
+        <VTimePicker v-bind="args" v-model="value" :aria-label="t.time" />
         <VTimePicker v-bind="args" v-model="value" :label="t.time" />
         <VTimePicker v-bind="args" v-model="value" :label="t.time" :hint="t.meetingTime" />
-        <VTimePicker v-bind="args" v-model="value" :hint="t.noLabel" />
+        <VTimePicker v-bind="args" v-model="value" :aria-label="t.time" :hint="t.noLabel" />
       </div>
     `,
   }),
@@ -437,7 +438,7 @@ export const ClickInTheVoid: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('textbox', { name: 'Time' }))
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Time' }))
     const panel = await waitFor(() => canvas.getByRole('dialog'))
     // focus is moved into the panel under a rAF
     await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))

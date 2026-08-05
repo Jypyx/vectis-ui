@@ -124,9 +124,10 @@ restores the last committed value.
 
 ## Accessibility
 
-- When a panel exists, the field carries `aria-haspopup` (`dialog` for the dial, `listbox`
-  for the list), `aria-expanded` and `aria-controls`. An input field with no `showDial`
-  announces no popup.
+- When a panel exists, the field becomes a `role="combobox"` carrying `aria-haspopup` (`dialog`
+  for the dial, `listbox` for the list), `aria-expanded` and `aria-controls` — a plain text field
+  does not support `aria-expanded`. An input field with no `showDial` keeps its native `textbox`
+  role and announces no popup.
 - **Opening** on click, on `Enter` or on the `down arrow` from the field. In `readonly` and
   in `list`, focus moves into the panel at once; when typing with `showDial`, the panel
   opens **without taking focus**.

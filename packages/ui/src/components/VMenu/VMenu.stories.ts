@@ -529,6 +529,12 @@ export const SubmenusOnHover: Story = {
     await userEvent.unhover(shareItem)
     await userEvent.hover(canvas.getByRole('menuitem', { name: 'New' }))
     await waitFor(() => expect(shareItem).toHaveAttribute('aria-expanded', 'false'))
+
+    // Left OPEN on purpose. The a11y check runs after the play function, so this is the
+    // only story where axe ever sees a nested panel — and a nested panel is precisely
+    // what an ARIA `menu` may not own directly.
+    await userEvent.hover(exportItem)
+    await waitFor(() => expect(exportItem).toHaveAttribute('aria-expanded', 'true'))
   },
 }
 

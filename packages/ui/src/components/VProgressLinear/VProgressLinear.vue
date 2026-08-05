@@ -78,6 +78,7 @@ const { clamped, fraction } = useProgressValue(
   <div
     class="v-progress-linear"
     role="progressbar"
+    :aria-label="m.progress.label"
     :data-tone="tone"
     :data-custom="color !== undefined ? '' : undefined"
     :data-shape="shape"

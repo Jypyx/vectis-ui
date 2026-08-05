@@ -591,6 +591,11 @@ const close = () => closeAndFocus()
     @keydown="onRootKeydown"
   >
     <div class="v-datepicker-control" @click="onControlClick">
+      <!-- `role="combobox"` and not the input's implicit `textbox`, which does not support
+           aria-expanded: a text field with a popup IS the combobox pattern (the role
+           VCombobox already sets on its own VInput). Role and the three aria-* are gated
+           on the SAME `hasPanel`, so the role never appears without the aria-expanded it
+           requires, nor aria-controls without a mounted panel. -->
       <VInput
         ref="inputRef"
         v-model="fieldModel"
@@ -610,6 +615,7 @@ const close = () => closeAndFocus()
         :clear-label="m.datePicker.clear"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
+        :role="hasPanel ? 'combobox' : undefined"
         :aria-haspopup="hasPanel ? 'dialog' : undefined"
         :aria-expanded="hasPanel ? open : undefined"
         :aria-controls="hasPanel ? panelId : undefined"

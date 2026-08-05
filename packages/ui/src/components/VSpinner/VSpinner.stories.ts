@@ -64,7 +64,9 @@ export const Coloured: Story = {
     setup: () => ({ t }),
     template: `
       <!-- the spinner inherits currentcolor: it follows the surrounding text -->
-      <div style="color: var(--vectis-color-accent); display: flex; gap: 8px; align-items: center">
+      <div
+        style="color: var(--vectis-color-accent-text); display: flex; gap: 8px; align-items: center"
+      >
         <VSpinner :label="t.sending" />
         <span>{{ t.sending }}</span>
       </div>

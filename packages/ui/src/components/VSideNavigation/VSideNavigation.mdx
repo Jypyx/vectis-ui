@@ -64,10 +64,10 @@ The `#end` slot sits to the right of the label and, on a branch, **to the left o
 On a **leaf** it takes anything, a control included: the row is a container and the link is
 stretched underneath it, so the whole row stays clickable without the slot's button being nested
 inside the link. On a **branch**, the row is the `<summary>` itself and the slot necessarily lives
-inside it: put only **non-focusable** content there (a counter, a badge). A control would stay
-clickable — its click does not expand the branch — but a `<summary>`'s subtree serves as its
-accessible name and may be flattened by some screen readers: the button would then no longer be
-announced. So an action on a collapsible section belongs next to the navigation, not inside it.
+inside it: put only **non-focusable** content there (a counter, a badge). A control there is a
+control nested inside a control — a WCAG 4.1.2 failure — and a `<summary>`'s subtree also serves as
+its accessible name, which some screen readers flatten: the button would no longer be announced
+either. So an action on a collapsible section belongs next to the navigation, not inside it.
 
 <Canvas of={VSideNavigationStories.EndContent} />
 

@@ -17,8 +17,8 @@ export const dark = {
     'text-on-inverse': color('{color.neutral.50}'),
 
     text: color('{color.neutral.50}'),
-    'text-muted': color('{color.neutral.400}'),
-    'text-subtle': color('{color.neutral.600}'),
+    'text-muted': color('{color.neutral.300}'),
+    'text-subtle': color('{color.neutral.400}'),
     'text-on-accent': color('{color.white}'),
 
     border: color('{color.neutral.800}'),
@@ -31,16 +31,24 @@ export const dark = {
     'accent-border': color('{color.indigo.900}'),
     'accent-text': color('{color.indigo.300}'),
 
-    danger: color('{color.red.500}'),
-    'danger-hover': color('{color.red.400}'),
-    'danger-active': color('{color.red.300}'),
+    /*
+     * Danger and success keep their light-theme steps, brightness included: the solid
+     * variants carry white text, and red only reaches 4.5:1 from red-600 on, green from
+     * green-700 on — there is no lighter step for dark to use. So they go DARKER on
+     * hover here, unlike accent and warning. These entries are deliberately equal to
+     * the light ones; dropping them would let a future edit of `semantic.ts` drag dark
+     * back into the inaccessible range unnoticed.
+     */
+    danger: color('{color.red.600}'),
+    'danger-hover': color('{color.red.700}'),
+    'danger-active': color('{color.red.800}'),
     'danger-surface': color('{color.red.950}'),
     'danger-border': color('{color.red.900}'),
     'danger-text': color('{color.red.300}'),
 
-    success: color('{color.green.500}'),
-    'success-hover': color('{color.green.400}'),
-    'success-active': color('{color.green.300}'),
+    success: color('{color.green.700}'),
+    'success-hover': color('{color.green.800}'),
+    'success-active': color('{color.green.900}'),
     'success-surface': color('{color.green.950}'),
     'success-border': color('{color.green.900}'),
     'success-text': color('{color.green.300}'),

@@ -126,9 +126,9 @@ export const CustomColor: Story = {
     setup: () => ({ selected: ref(true), t }),
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <VChip color="hotpink" variant="tonal" clickable>tonal</VChip>
-        <VChip color="hotpink" variant="solid" clickable>solid</VChip>
-        <VChip color="hotpink" variant="outline" clickable>outline</VChip>
+        <VChip color="mediumvioletred" variant="tonal" clickable>tonal</VChip>
+        <VChip color="mediumvioletred" variant="solid" clickable>solid</VChip>
+        <VChip color="mediumvioletred" variant="outline" clickable>outline</VChip>
         <VChip color="oklch(55% 0.15 150)" variant="tonal" clickable>oklch()</VChip>
         <VChip color="rebeccapurple" selectable check v-model:selected="selected">{{ t.selected }}</VChip>
       </div>
@@ -229,7 +229,7 @@ export const SelectionPerTone: Story = {
         <VChip v-for="tone in tones" :key="tone" :tone="tone" selectable :selected="true">
           {{ tone }}
         </VChip>
-        <VChip color="hotpink" selectable :selected="true">custom</VChip>
+        <VChip color="mediumvioletred" selectable :selected="true">custom</VChip>
       </div>
     `,
   }),

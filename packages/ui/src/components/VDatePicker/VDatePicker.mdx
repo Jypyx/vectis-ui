@@ -109,9 +109,10 @@ once the date is chosen.
 
 ## Accessibility
 
-- When a panel exists, the field carries `aria-haspopup="dialog"`, `aria-expanded` and
-  `aria-controls`; the panel is a named `role="dialog"`. An input field without `showCalendar`
-  announces no popup.
+- When a panel exists, the field becomes a `role="combobox"` carrying `aria-haspopup="dialog"`,
+  `aria-expanded` and `aria-controls`; the panel is a named `role="dialog"`. The role travels with
+  the three attributes because a plain text field does not support `aria-expanded`. An input field
+  without `showCalendar` keeps its native `textbox` role and announces no popup.
 - **Opening** happens on click, on `Enter` or on the `down arrow` from the field. In read-only mode
   the focus moves into the calendar's grid straight away; in input mode with `showCalendar` the
   panel opens **without taking the focus** (typing continues in the field) and the `down arrow`

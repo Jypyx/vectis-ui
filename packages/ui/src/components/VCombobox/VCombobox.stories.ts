@@ -259,12 +259,12 @@ export const MultipleSelection: Story = {
     template: `
       <div style="display: grid; gap: 16px; width: 340px">
         <div style="display: grid; gap: 4px">
-          <span style="font: 12px sans-serif; color: #888">{{ t.clearingOn }}</span>
+          <span style="font: 12px sans-serif; color: var(--vectis-color-text-muted)">{{ t.clearingOn }}</span>
           <VCombobox v-bind="args" multiple v-model="value" :placeholder="t.chooseCountry" :aria-label="t.servedCountries" />
           <output data-testid="mirror">{{ value.join(',') }}</output>
         </div>
         <div style="display: grid; gap: 4px">
-          <span style="font: 12px sans-serif; color: #888">{{ t.clearingOff }}</span>
+          <span style="font: 12px sans-serif; color: var(--vectis-color-text-muted)">{{ t.clearingOff }}</span>
           <VCombobox v-bind="args" multiple :clearable="false" v-model="other" :aria-label="t.otherCountries" />
         </div>
       </div>
@@ -310,7 +310,13 @@ export const NoResults: Story = {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('combobox'))
     await userEvent.keyboard('zzz')
-    await waitFor(() => expect(canvas.getByText('No country found')).toBeVisible())
+    // Scoped to the panel: the same words also fill the live region that announces the
+    // state, since a role="listbox" may own nothing but options.
+    const panel = canvasElement.querySelector('.v-combobox-state') as HTMLElement
+    await waitFor(() => expect(panel).toHaveTextContent('No country found'))
+    await waitFor(() =>
+      expect(canvasElement.querySelector('[role="status"]')).toHaveTextContent('No country found'),
+    )
   },
 }
 
@@ -364,7 +370,7 @@ export const Sizes: Story = {
     template: `
       <div style="display: grid; gap: 16px; width: 340px">
         <div v-for="v in variants" :key="v.label" style="display: grid; gap: 4px">
-          <span style="font: 12px sans-serif; color: #888">{{ v.label }}</span>
+          <span style="font: 12px sans-serif; color: var(--vectis-color-text-muted)">{{ v.label }}</span>
           <VCombobox v-bind="{ ...args, ...v.props }" multiple :model-value="value" :aria-label="t.country" />
         </div>
       </div>

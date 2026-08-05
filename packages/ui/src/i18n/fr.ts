@@ -58,6 +58,7 @@ export const fr: VectisMessages = {
     selection: (count) =>
       `${count} élément${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`,
     range: ({ start, end, total }) => `${start}–${end} sur ${total}`,
+    pagination: 'Pagination du tableau',
   },
   toaster: { label: 'Notifications' },
   inputOTP: {
@@ -77,7 +78,7 @@ export const fr: VectisMessages = {
   // `\u00A0` = a NON-BREAKING space before the sign, a French typographic
   // convention (English has none). Escaped rather than literal: ESLint rejects
   // the character (`no-irregular-whitespace`), and it would be invisible in review.
-  progress: { percent: (percent) => `${percent}\u00A0%` },
+  progress: { percent: (percent) => `${percent}\u00A0%`, label: 'Progression' },
   hotkeys: {
     command: 'Commande',
     ctrl: 'Ctrl',

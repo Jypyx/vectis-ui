@@ -558,8 +558,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
           </VMenu>
         </div>
         <span v-if="showRange" class="v-table-range" aria-live="polite">{{ rangeText }}</span>
+        <!-- Its own name, not `pagination.label`: a page carrying this table AND a
+             standalone VPagination would expose two identically named `<nav>`s. -->
         <VPagination
           v-model="page"
+          :label="m.dataTable.pagination"
           :length="pageCount"
           size="sm"
           :compact="compact"

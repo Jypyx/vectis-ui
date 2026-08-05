@@ -96,8 +96,10 @@ of producing an SVG error), a label wider than the donut hole.
 
 ## Accessibility
 
-- **Always supply `aria-label`** (or `aria-labelledby`): the component has no label prop, and the
-  attribute passes through fallthrough.
+- **Name the bar**: a `progressbar` is never named from its contents, so the component falls back to
+  the dictionary's generic name (`progress.label`). Supply `aria-label` (or `aria-labelledby`)
+  whenever the page holds more than one bar — there is no label prop, the attribute wins through
+  fallthrough.
 - The `progressbar` role is "children presentational": the label displayed in the centre is **not
   announced**. It complements the accessible name, it does not replace it — a validation icon alone
   in the centre needs an explicit `aria-label` all the more.

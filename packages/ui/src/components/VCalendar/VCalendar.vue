@@ -424,6 +424,21 @@ function onMonthsKeydown(event: KeyboardEvent) {
   monthCellEl(focusedMonth.value)?.focus()
 }
 
+/*
+ * Both pickers are a `role="grid"`, which owns rows and NOT cells: a gridcell straight
+ * under the grid fails aria-required-children AND aria-required-parent at once. The
+ * chunk is 3 wide to match `grid-template-columns` (the row itself is `display: contents`,
+ * so the CSS grid is untouched). Keyboard navigation is unaffected: it moves by index
+ * (±1 / ±3) and refocuses through the cell ids, never by walking the DOM.
+ */
+const PICKER_COLUMNS = 3
+const chunk = <T,>(list: T[]) =>
+  Array.from({ length: Math.ceil(list.length / PICKER_COLUMNS) }, (_, r) =>
+    list.slice(r * PICKER_COLUMNS, r * PICKER_COLUMNS + PICKER_COLUMNS),
+  )
+
+const monthRows = computed(() => chunk(monthLabels.value.map((name, i) => ({ name, i }))))
+
 // Years view.
 const yearRange = computed(() => {
   const minY = props.min ? parseISO(props.min)!.getFullYear() : viewYear.value - 100
@@ -432,6 +447,7 @@ const yearRange = computed(() => {
   for (let y = minY; y <= maxY; y++) list.push(y)
   return list
 })
+const yearRows = computed(() => chunk(yearRange.value))
 const focusedYear = ref(viewYear.value)
 const yearCellEl = (y: number) =>
   document.getElementById(`${gridLabelId}-y-${y}`) as HTMLElement | null
@@ -661,21 +677,23 @@ defineExpose({ focus })
       :aria-label="m.calendar.monthPicker"
       @keydown="onMonthsKeydown"
     >
-      <button
-        v-for="(name, i) in monthLabels"
-        :id="`${gridLabelId}-m-${i}`"
-        :key="name"
-        type="button"
-        class="v-calendar-picker-cell"
-        role="gridcell"
-        :tabindex="i === focusedMonth ? 0 : -1"
-        :data-selected="i === viewMonth0 ? '' : undefined"
-        :aria-selected="i === viewMonth0 ? 'true' : undefined"
-        :disabled="!monthSelectable(i)"
-        @click="chooseMonth(i)"
-      >
-        {{ name }}
-      </button>
+      <div v-for="(row, r) in monthRows" :key="r" class="v-calendar-picker-row" role="row">
+        <button
+          v-for="{ name, i } in row"
+          :id="`${gridLabelId}-m-${i}`"
+          :key="name"
+          type="button"
+          class="v-calendar-picker-cell"
+          role="gridcell"
+          :tabindex="i === focusedMonth ? 0 : -1"
+          :data-selected="i === viewMonth0 ? '' : undefined"
+          :aria-selected="i === viewMonth0 ? 'true' : undefined"
+          :disabled="!monthSelectable(i)"
+          @click="chooseMonth(i)"
+        >
+          {{ name }}
+        </button>
+      </div>
     </div>
 
     <!-- Years view -->
@@ -686,20 +704,22 @@ defineExpose({ focus })
       :aria-label="m.calendar.yearPicker"
       @keydown="onYearsKeydown"
     >
-      <button
-        v-for="y in yearRange"
-        :id="`${gridLabelId}-y-${y}`"
-        :key="y"
-        type="button"
-        class="v-calendar-picker-cell"
-        role="gridcell"
-        :tabindex="y === focusedYear ? 0 : -1"
-        :data-selected="y === viewYear ? '' : undefined"
-        :aria-selected="y === viewYear ? 'true' : undefined"
-        @click="chooseYear(y)"
-      >
-        {{ y }}
-      </button>
+      <div v-for="(row, r) in yearRows" :key="r" class="v-calendar-picker-row" role="row">
+        <button
+          v-for="y in row"
+          :id="`${gridLabelId}-y-${y}`"
+          :key="y"
+          type="button"
+          class="v-calendar-picker-cell"
+          role="gridcell"
+          :tabindex="y === focusedYear ? 0 : -1"
+          :data-selected="y === viewYear ? '' : undefined"
+          :aria-selected="y === viewYear ? 'true' : undefined"
+          @click="chooseYear(y)"
+        >
+          {{ y }}
+        </button>
+      </div>
     </div>
 
     <div v-if="$slots.footer" class="v-calendar-footer">
@@ -906,6 +926,12 @@ defineExpose({ focus })
     gap: var(--vectis-space-1);
     min-inline-size: calc(7 * var(--calendar-cell));
   }
+  /* The ARIA rows the grid requires, made transparent to the layout: the cells stay
+     direct grid items of `.v-calendar-picker`. */
+  .v-calendar-picker-row {
+    display: contents;
+  }
+
   .v-calendar-picker--years {
     max-block-size: calc(6 * var(--calendar-cell));
     overflow-y: auto;

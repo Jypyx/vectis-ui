@@ -1,8 +1,10 @@
 <template>
-  <!-- <hr>: implicit role="separator", not focusable, out of the tab order. A direct
-       child of a <ul>, which HTML explicitly allows between two groups of list
-       items. -->
-  <hr class="v-side-nav-separator" />
+  <!-- An <li>, not an <hr>: a <ul> may only own list items, and ARIA is stricter still —
+       `list` owns `listitem` alone, so even an <li role="separator"> is rejected. Hence a
+       plain list item, DECORATIVE: the rule is a visual break between sections, and real
+       grouping is what VSideNavigationGroup is for (a labelled sublist). aria-hidden is
+       what keeps it out of the item count instead of adding an empty one. -->
+  <li class="v-side-nav-separator" aria-hidden="true" />
 </template>
 
 <style>
@@ -13,7 +15,6 @@
        the hierarchy of the rows it frames. */
     margin-block: var(--vectis-space-2);
     margin-inline: var(--control-padding-inline);
-    border: none;
     block-size: 1px;
     background: var(--vectis-color-border);
   }

@@ -609,6 +609,9 @@ function onEndIcon() {
   >
     <div class="v-timepicker-row">
       <div class="v-timepicker-control" @click="onControlClick">
+        <!-- `role="combobox"` and not the input's implicit `textbox`, which does not
+             support aria-expanded — see VDatePicker, same reasoning, and here it also
+             matches the `aria-haspopup="listbox"` of the list mode. -->
         <VInput
           ref="inputRef"
           v-model="fieldModel"
@@ -628,6 +631,7 @@ function onEndIcon() {
           :clear-label="m.timePicker.clear"
           :icon-end="endIcon"
           :icon-end-label="endIconLabel"
+          :role="hasPanel ? 'combobox' : undefined"
           :aria-haspopup="hasPanel ? (isList ? 'listbox' : 'dialog') : undefined"
           :aria-expanded="hasPanel ? open : undefined"
           :aria-controls="hasPanel ? panelId : undefined"

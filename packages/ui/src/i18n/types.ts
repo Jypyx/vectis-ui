@@ -70,6 +70,12 @@ export interface VectisMessages {
     selectRow: (index: number) => string
     selection: (count: number) => string
     range: (range: { start: number; end: number; total: number }) => string
+    /**
+     * Accessible name of the footer's VPagination. Distinct from `pagination.label`
+     * on purpose: a page holding a table AND a standalone pagination would otherwise
+     * expose two `<nav>` landmarks under the same name.
+     */
+    pagination: string
   }
   toaster: { label: string }
   inputOTP: {
@@ -89,6 +95,12 @@ export interface VectisMessages {
   progress: {
     /** `50%` in English, `50 %` in French (NON-BREAKING space before the sign). */
     percent: (percent: number) => string
+    /**
+     * Default accessible name of VProgressLinear/VProgressCircular. `role="progressbar"`
+     * is not named from its contents, so without it the bar is anonymous; a consumer
+     * `aria-label`/`aria-labelledby` wins through fallthrough.
+     */
+    label: string
   }
   /**
    * VHotkeys. WORDS only: the GLYPHS (⌘ ⌃ ⌥ ⇧ ↵ ⌫ ⌦ ⇥ ↑ ↓ ← →) stay in

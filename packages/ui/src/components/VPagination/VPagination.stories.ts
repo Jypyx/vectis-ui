@@ -76,10 +76,12 @@ export const Variants: Story = {
     components: { VPagination },
     setup: () => ({ ghost: ref(6), outline: ref(6) }),
     // The active page is always `solid`: only the inactive pages follow the variant.
+    // `label` on every instance: several `<nav>`s under one name are indistinguishable
+    // in a landmark list — the same reason VDataTable names its own pagination.
     template: `
       <div style="display: grid; gap: 16px">
-        <VPagination :length="12" variant="ghost" v-model="ghost" />
-        <VPagination :length="12" variant="outline" v-model="outline" />
+        <VPagination :length="12" variant="ghost" label="ghost" v-model="ghost" />
+        <VPagination :length="12" variant="outline" label="outline" v-model="outline" />
       </div>
     `,
   }),
@@ -91,7 +93,7 @@ export const Tones: Story = {
     setup: () => ({ tones: ['accent', 'neutral', 'success', 'warning', 'danger'], page: ref(3) }),
     template: `
       <div style="display: grid; gap: 16px">
-        <VPagination v-for="t in tones" :key="t" :length="8" :tone="t" v-model="page" />
+        <VPagination v-for="t in tones" :key="t" :length="8" :tone="t" :label="t" v-model="page" />
       </div>
     `,
   }),
@@ -103,7 +105,7 @@ export const Sizes: Story = {
     setup: () => ({ sizes: ['xs', 'sm', 'md', 'lg', 'xl'], page: ref(3) }),
     template: `
       <div style="display: grid; gap: 16px">
-        <VPagination v-for="s in sizes" :key="s" :length="8" :size="s" v-model="page" />
+        <VPagination v-for="s in sizes" :key="s" :length="8" :size="s" :label="s" v-model="page" />
       </div>
     `,
   }),
@@ -115,8 +117,8 @@ export const Compact: Story = {
     setup: () => ({ normal: ref(3), compact: ref(3) }),
     template: `
       <div style="display: grid; gap: 16px">
-        <VPagination :length="8" v-model="normal" />
-        <VPagination :length="8" compact v-model="compact" />
+        <VPagination :length="8" label="normal" v-model="normal" />
+        <VPagination :length="8" compact label="compact" v-model="compact" />
       </div>
     `,
   }),
@@ -129,19 +131,20 @@ export const Controls: Story = {
     // Custom icons: a Material Symbols name OR an image URL.
     template: `
       <div style="display: grid; gap: 16px">
-        <VPagination :length="10" controls-display="icon" v-model="a" />
-        <VPagination :length="10" controls-display="text" v-model="b" />
-        <VPagination :length="10" controls-display="both" v-model="c" />
+        <VPagination :length="10" controls-display="icon" label="icon" v-model="a" />
+        <VPagination :length="10" controls-display="text" label="text" v-model="b" />
+        <VPagination :length="10" controls-display="both" label="both" v-model="c" />
         <VPagination
           :length="10"
           controls-display="both"
+          label="both custom"
           prev-icon="first_page"
           next-icon="last_page"
           :prev-label="t.back"
           :next-label="t.forward"
           v-model="d"
         />
-        <VPagination :length="10" :show-controls="false" v-model="e" />
+        <VPagination :length="10" :show-controls="false" label="none" v-model="e" />
       </div>
     `,
   }),
@@ -154,8 +157,13 @@ export const DisabledPages: Story = {
     // The controls step over the disabled pages to the nearest activatable one.
     template: `
       <div style="display: grid; gap: 16px">
-        <VPagination :length="12" :disabled-pages="[4, 6]" v-model="list" />
-        <VPagination :length="12" :disabled-pages="(p) => p % 2 === 0" v-model="predicate" />
+        <VPagination :length="12" :disabled-pages="[4, 6]" label="list" v-model="list" />
+        <VPagination
+          :length="12"
+          :disabled-pages="(p) => p % 2 === 0"
+          label="predicate"
+          v-model="predicate"
+        />
       </div>
     `,
   }),
@@ -205,7 +213,7 @@ export const Alignment: Story = {
     // goes through the `align` prop.
     template: `
       <div style="display: grid; gap: 16px; border: 1px dashed var(--vectis-color-border); padding: 8px">
-        <VPagination v-for="a in aligns" :key="a" :length="8" :align="a" v-model="page" />
+        <VPagination v-for="a in aligns" :key="a" :length="8" :align="a" :label="a" v-model="page" />
       </div>
     `,
   }),
@@ -226,13 +234,19 @@ export const EdgeCases: Story = {
     setup: () => ({ one: ref(1), two: ref(1), long: ref(9999) }),
     template: `
       <div style="display: grid; gap: 16px">
-        <VPagination :length="1" v-model="one" />
-        <VPagination :length="2" v-model="two" />
+        <VPagination :length="1" label="length 1" v-model="one" />
+        <VPagination :length="2" label="length 2" v-model="two" />
         <!-- 4-digit numbers: the pills widen beyond the square. Without
              totalVisible, all 12,000 pages would be rendered. -->
-        <VPagination :length="12000" :total-visible="7" v-model="long" />
+        <VPagination :length="12000" :total-visible="7" label="length 12000" v-model="long" />
         <!-- Responsive truncation off: the row overflows rather than shrinking. -->
-        <VPagination :length="12000" :total-visible="7" :responsive="false" v-model="long" />
+        <VPagination
+          :length="12000"
+          :total-visible="7"
+          :responsive="false"
+          label="length 12000 fixed"
+          v-model="long"
+        />
       </div>
     `,
   }),

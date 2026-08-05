@@ -51,6 +51,7 @@ export const en: VectisMessages = {
     // The plural is a ternary — that is the whole plural engine of the DS.
     selection: (count) => `${count} item${count === 1 ? '' : 's'} selected`,
     range: ({ start, end, total }) => `${start}–${end} of ${total}`,
+    pagination: 'Table pagination',
   },
   toaster: { label: 'Notifications' },
   inputOTP: {
@@ -67,7 +68,7 @@ export const en: VectisMessages = {
   field: {
     limitExceeded: (max) => `Exceeds the limit of ${max} characters`,
   },
-  progress: { percent: (percent) => `${percent}%` },
+  progress: { percent: (percent) => `${percent}%`, label: 'Progress' },
   hotkeys: {
     command: 'Command',
     ctrl: 'Ctrl',

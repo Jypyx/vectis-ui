@@ -46,6 +46,29 @@ const withGlobals: Decorator = (story, context) => {
 
 const preview: Preview = {
   parameters: {
+    a11y: {
+      /*
+       * `error` and not the addon's default `todo`, which downgrades every axe violation
+       * to a warning — `pnpm test:stories` would stay green through any regression. One
+       * run covers ONE theme: the dark pass goes through the emulated colour scheme wired
+       * in vitest.config.ts, since the stories' `theme` global resolves to
+       * `prefers-color-scheme`.
+       */
+      test: 'error',
+      /*
+       * Two decorative overlays axe cannot judge: it derives an element's background
+       * from the boxes that CONTAIN its rect, and both of these are painted by a
+       * SIBLING they only partly cover — VProgressLinear's clipped copy sits over the
+       * fill, the dial's selected numeral over the hand's tip dot. axe reads the track
+       * (resp. the panel) underneath and reports ~1.1:1 where the rendering is 6.5:1.
+       * Both are aria-hidden duplicates whose colour is derived FROM the overlay they
+       * sit on (contrast-color() / --tone-text-fallback), so the contrast is guaranteed
+       * by construction, not by this rule.
+       */
+      context: {
+        exclude: ['.v-progress-linear-text[data-on-fill]', '.v-timepicker-number[data-selected]'],
+      },
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,

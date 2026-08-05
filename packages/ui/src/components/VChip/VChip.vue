@@ -371,9 +371,11 @@ const iconOnly = computed(
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* No background, even on hover (the .v-input-action pattern): only the icon's
-     colour goes from a dimmed currentcolor to the full colour — text-muted would be
-     unreadable on the tinted/solid backgrounds */
+  /* No background, even on hover (the .v-input-action pattern). The icon takes the
+     chip's colour WHOLE: dimming currentcolor by 30% dropped the cross to 3.9:1 on a
+     tinted chip and 2.8:1 on a solid one — and since the DS registry carries no cross,
+     it is drawn as a ligature, i.e. a real text node the contrast rule applies to. The
+     hover affordance is the cursor. */
   .v-chip-remove {
     display: inline-flex;
     align-items: center;
@@ -384,15 +386,10 @@ const iconOnly = computed(
     padding: 0;
     border: none;
     background: transparent;
-    color: color-mix(in oklab, currentcolor, transparent 30%);
+    color: inherit;
     border-radius: var(--vectis-radius-full);
     cursor: pointer;
     flex: none;
-    transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
-  }
-
-  .v-chip-remove:hover:not(:disabled) {
-    color: inherit;
   }
 
   .v-chip-remove:focus-visible {

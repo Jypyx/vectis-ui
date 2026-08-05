@@ -264,6 +264,12 @@ const filtered = computed(() => {
   return list.filter((o) => normalizeText(o.label).includes(needle))
 })
 
+/** Empty as soon as the panel has options: a live region must only ever hold what is new. */
+const stateAnnouncement = computed(() => {
+  if (!open.value || filtered.value.length > 0) return ''
+  return props.loading ? resolvedLoadingText.value : resolvedEmptyText.value
+})
+
 // The render tree: the only place that knows about the hierarchy. Each option there
 // carries its index IN `filtered` (and not its position in the tree): ids, highlight
 // and the #option slot stay aligned on the keyboard navigation.
@@ -772,14 +778,20 @@ watch(
       </template>
 
       <!-- Order loading → empty → content: during a request, the panel must not
-           announce "no result". -->
-      <div v-if="loading && filtered.length === 0" class="v-combobox-state">
+           announce "no result".
+           Both states are `aria-hidden`: a `role="listbox"` owns only `option` and
+           `group`, so any other visible child fails aria-required-children — and an
+           EMPTY listbox is fine (axe reviews it rather than failing it). What they say
+           is announced by the live region outside the panel instead, which is also the
+           only way a screen reader hears it: static text inside a combobox popup is not
+           part of what the field walks. -->
+      <div v-if="loading && filtered.length === 0" class="v-combobox-state" aria-hidden="true">
         <slot name="loading">
           <VSpinner :label="resolvedLoadingText" />
-          <span aria-hidden="true">{{ resolvedLoadingText }}</span>
+          <span>{{ resolvedLoadingText }}</span>
         </slot>
       </div>
-      <div v-else-if="filtered.length === 0" class="v-combobox-state">
+      <div v-else-if="filtered.length === 0" class="v-combobox-state" aria-hidden="true">
         <slot name="empty" :query="searchTerm">{{ resolvedEmptyText }}</slot>
       </div>
 
@@ -790,6 +802,10 @@ watch(
         <VSpinner v-if="loading" :label="resolvedLoadingText" />
       </div>
     </VPopover>
+
+    <!-- The spoken counterpart of the two panel states above. Outside the listbox, since
+         it is precisely what may not live inside one. -->
+    <span class="v-visually-hidden" role="status">{{ stateAnnouncement }}</span>
   </div>
 </template>
 

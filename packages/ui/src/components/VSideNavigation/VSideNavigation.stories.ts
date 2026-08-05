@@ -30,7 +30,6 @@ const t = storyText({
     branch: 'branch',
     messages: 'Messages',
     newMessage: 'New message',
-    invite: 'Invite',
     members: 'Members',
     storage: 'Storage',
     archives: 'Archives',
@@ -61,7 +60,6 @@ const t = storyText({
     branch: 'branche',
     messages: 'Messages',
     newMessage: 'Nouveau message',
-    invite: 'Inviter',
     members: 'Membres',
     storage: 'Stockage',
     archives: 'Archives',
@@ -178,8 +176,8 @@ export const Sizes: Story = {
     setup: () => ({ args, t }),
     template: `
       <div style="display: flex; gap: var(--vectis-space-6);">
-        ${['sm', 'md'].map((size) => aside(SIZE_ITEMS, `size="${size}"`)).join('')}
-        ${aside(SIZE_ITEMS, 'size="md" compact')}
+        ${['sm', 'md'].map((size) => aside(SIZE_ITEMS, `size="${size}" label="${size}"`)).join('')}
+        ${aside(SIZE_ITEMS, 'size="md" compact label="md compact"')}
       </div>
     `,
   }),
@@ -272,9 +270,7 @@ export const EndContent: Story = {
       </VSideNavigationItem>
       <VSideNavigationItem icon="group">
         {{ t.team }}
-        <template #end>
-          <VIconButton :label="t.invite" icon="person_add" size="xs" data-testid="invite" />
-        </template>
+        <template #end><span data-testid="count">8</span></template>
         <template #items>
           <VSideNavigationItem href="#members">{{ t.members }}</VSideNavigationItem>
         </template>
@@ -312,9 +308,12 @@ export const EndContent: Story = {
     await userEvent.click(projects)
     await waitFor(() => expect(branch.open).toBe(true))
 
-    // …nor on a control, which is its own activation target
+    // …nor on plain text. A BRANCH's #end is inside its <summary>, so it must hold
+    // nothing focusable: a control there would be a control nested inside a control
+    // (WCAG 4.1.2). The interactive case belongs to a leaf — "Messages" above, where
+    // the end slot is a SIBLING of the action instead.
     const team = canvas.getByText('Team').closest('details') as HTMLDetailsElement
-    await userEvent.click(canvas.getByTestId('invite'))
+    await userEvent.click(canvas.getByTestId('count'))
     await expect(team.open).toBe(false)
   },
 }

@@ -46,7 +46,19 @@ export default defineConfig({
           browser: {
             enabled: true,
             headless: true,
-            provider: playwright(),
+            /*
+             * The theme lever of the a11y pass. `initialGlobals.theme` is `system` and
+             * the preview decorator resolves that through `prefers-color-scheme`, so
+             * emulating the browser's colour scheme replays the WHOLE suite in dark
+             * without touching a single story: `VECTIS_THEME=dark pnpm test:stories`.
+             * One run covers one theme — axe reads computed colours, so contrast has to
+             * be checked in both.
+             */
+            provider: playwright({
+              contextOptions: {
+                colorScheme: process.env.VECTIS_THEME === 'dark' ? 'dark' : 'light',
+              },
+            }),
             instances: [{ browser: 'chromium' }],
           },
         },

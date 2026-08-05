@@ -74,8 +74,9 @@ export const Default: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // getByRole('textbox'): the panel (role dialog) would carry the same aria-label as
-    // the field, so getByLabelText would match both
+    // `textbox` and not `combobox`: with no panel the field takes no role at all — that
+    // pairing is the contract. Going through the role rather than getByLabelText also
+    // avoids matching the panel, which carries the same aria-label as the field.
     const field = canvas.getByRole('textbox', { name: 'Date' })
 
     // with no calendar, the field announces no popup and opens none
@@ -122,7 +123,7 @@ export const ReadOnly: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const field = canvas.getByRole('textbox', { name: 'Date' })
+    const field = canvas.getByRole('combobox', { name: 'Date' })
     // opening with the keyboard (down arrow), the focus moved into the grid
     field.focus()
     await userEvent.keyboard('{ArrowDown}')
@@ -272,7 +273,7 @@ export const ClickInTheVoid: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const field = canvas.getByRole('textbox', { name: 'Date' })
+    const field = canvas.getByRole('combobox', { name: 'Date' })
     field.focus()
     await userEvent.keyboard('{ArrowDown}')
     const panel = await waitFor(() => canvas.getByRole('dialog'))
@@ -314,7 +315,7 @@ export const InputWithCalendar: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const field = canvas.getByRole('textbox', { name: 'Date' })
+    const field = canvas.getByRole('combobox', { name: 'Date' })
 
     // the click opens the panel WITHOUT grabbing the caret: typing continues
     await userEvent.click(field)

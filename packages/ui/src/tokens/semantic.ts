@@ -22,7 +22,7 @@ export const semantic = {
 
     text: color('{color.neutral.900}'),
     'text-muted': color('{color.neutral.600}'),
-    'text-subtle': color('{color.neutral.400}', 'Placeholders, disabled text'),
+    'text-subtle': color('{color.neutral.500}', 'Placeholders, disabled text'),
     'text-on-accent': color('{color.white}', 'Text set on an accent/danger/success background'),
     'text-on-warning': color(
       '{color.neutral.950}',
@@ -46,9 +46,15 @@ export const semantic = {
     'danger-border': color('{color.red.200}'),
     'danger-text': color('{color.red.700}'),
 
-    success: color('{color.green.600}'),
-    'success-hover': color('{color.green.700}'),
-    'success-active': color('{color.green.800}'),
+    /*
+     * Green starts one step lower than the other tones: `text-on-accent` (white) only
+     * reaches 4.5:1 from green-700 on (green-600 caps at 3.2:1). Raising the tone rather
+     * than darkening the text is what keeps "solid = white text" true of every tone but
+     * warning, whose amber has no dark-enough step at all — hence `text-on-warning`.
+     */
+    success: color('{color.green.700}'),
+    'success-hover': color('{color.green.800}'),
+    'success-active': color('{color.green.900}'),
     'success-surface': color('{color.green.50}'),
     'success-border': color('{color.green.200}'),
     'success-text': color('{color.green.800}'),

@@ -409,12 +409,16 @@ const { counterText, over } = useTextLimit({
   /* Disabled: a grey shade with no opacity (the same tokens as VCheckbox/VRadio).
      Last of the state sequence: at equal specificity, it wins over all of them,
      the error included — a disabled field is not submitted, so it has nothing to
-     report. */
+     report.
+     `text-muted` and not `text-subtle` like the label and the hint below: those sit on
+     the page surface, this sits on `surface-muted`, where subtle drops to 4.4:1. The
+     control itself is exempt from the contrast rule (it is natively disabled) but the
+     icons the field CONTAINS are not — and they inherit this colour. */
   .v-textarea[data-disabled] .v-textarea-field {
     --field-border-color: var(--vectis-color-border);
 
     background: var(--vectis-color-surface-muted);
-    color: var(--vectis-color-text-subtle);
+    color: var(--vectis-color-text-muted);
     cursor: not-allowed;
     resize: none;
   }

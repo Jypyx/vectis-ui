@@ -75,8 +75,13 @@ describe('VSideNavigation', () => {
       const list = container.querySelector('nav > ul.v-side-nav-list')
       expect(list).not.toBeNull()
       expect(list?.querySelector(':scope > li.v-side-nav-item')).not.toBeNull()
-      expect(list?.querySelector(':scope > hr.v-side-nav-separator')).not.toBeNull()
       expect(list?.querySelector(':scope > li.v-side-nav-group')).not.toBeNull()
+      // The separator is a list item too: a <ul> may own nothing else, and ARIA is
+      // stricter still — `list` owns `listitem` alone, so not even role="separator"
+      // passes there. Hence a decorative <li>.
+      const separator = list?.querySelector(':scope > li.v-side-nav-separator')
+      expect(separator).not.toBeNull()
+      expect(separator?.getAttribute('aria-hidden')).toBe('true')
     })
 
     it('`v-control` is set ONLY on the <nav> — otherwise compact would be lost from level 2 on', () => {
@@ -288,14 +293,14 @@ describe('VSideNavigation', () => {
       }
     })
 
-    it('group: a <li> + a list named by its label; the separator is an <hr>', () => {
+    it('group: a <li> + a list named by its label; the separator a decorative <li>', () => {
       const { container } = renderTree()
       const group = container.querySelector('li.v-side-nav-group')!
       const label = group.querySelector('.v-side-nav-group-label')!
       expect(label.textContent).toBe('Settings')
       expect(label.id).toBeTruthy()
       expect(group.querySelector('ul')?.getAttribute('aria-labelledby')).toBe(label.id)
-      expect(container.querySelector('hr.v-side-nav-separator')).not.toBeNull()
+      expect(container.querySelector('li.v-side-nav-separator[aria-hidden="true"]')).not.toBeNull()
     })
   })
 

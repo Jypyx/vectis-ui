@@ -113,8 +113,10 @@ A zero, complete or out-of-bounds value (clamped), a bar at the default thicknes
 
 ## Accessibility
 
-- **Always supply `aria-label`** (or `aria-labelledby`): the component has no label prop, and the
-  attribute passes through fallthrough.
+- **Name the bar**: a `progressbar` is never named from its contents, so the component falls back to
+  the dictionary's generic name (`progress.label`). Supply `aria-label` (or `aria-labelledby`)
+  whenever the page holds more than one bar — there is no label prop, the attribute wins through
+  fallthrough.
 - The `progressbar` role is "children presentational": the text visible in the bar is **not
   announced** by assistive technologies. It complements the label, it never replaces it.
 - The announced bounds are faithful to `max` ("3 of 8") rather than normalized to 100.
