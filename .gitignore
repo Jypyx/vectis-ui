@@ -5,3 +5,8 @@ coverage/
 *.log
 .DS_Store
 *.tsbuildinfo
+
+# Secrets. `.env*` covers .env, .env.local, .env.production… The negation keeps the
+# template tracked: it documents which variables are expected and holds no value.
+.env*
+!.env.example
