@@ -702,8 +702,11 @@ const close = () => closeAndFocus()
   /* `position-anchor` and the chrome come from VPopover (the `anchor` and `surface`
      props, the latter setting `.v-panel`): only the dimensions are left here, which
      `panel.css` deliberately does not carry. The padding is cancelled — VCalendar handles
-     its own breathing room. */
-  .v-datepicker-panel {
+     its own breathing room; compounded with `.v-popover-panel` (VPopover puts both
+     classes on the same element) because `.v-panel` declares `padding` too, and at
+     equal specificity the winner would depend on the order in which the consumer's
+     bundler concatenates the CSS. */
+  .v-popover-panel.v-datepicker-panel {
     width: max-content;
     padding: 0;
   }

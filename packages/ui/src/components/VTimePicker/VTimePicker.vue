@@ -814,8 +814,13 @@ function onEndIcon() {
      props, the latter setting `.v-panel`): only the column layout and the padding
      specific to the dial are left here. The author's `display: flex` overrides
      [popover]'s UA `display: none`: the `.v-overlay:not(:popover-open)` guard is what
-     closes it back. */
-  .v-timepicker-panel {
+     closes it back.
+     Compounded with `.v-popover-panel` (VPopover puts both classes on the same
+     element) because `gap` and `padding` are declared by `.v-panel` too: at equal
+     specificity the winner would depend on the order in which the consumer's bundler
+     concatenates the CSS. `[data-size]` is not usable here — the dial panel carries
+     none. */
+  .v-popover-panel.v-timepicker-panel {
     display: flex;
     flex-direction: column;
     gap: var(--vectis-space-4);

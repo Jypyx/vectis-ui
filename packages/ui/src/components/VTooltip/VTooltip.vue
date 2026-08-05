@@ -111,8 +111,13 @@ function onKeydown(event: KeyboardEvent) {
     anchor-scope: --tooltip-anchor;
   }
 
-  /* `position-anchor` comes from VPopover (the `anchor` prop) */
-  .v-tooltip-panel {
+  /* `position-anchor` comes from VPopover (the `anchor` prop). Compounded with
+     `.v-popover-panel` (both classes land on the same element) even though VTooltip
+     passes `surface: false`, so `.v-panel` is never there: the day that prop flips,
+     every declaration below collides with `.v-panel` at equal specificity and the
+     winner would depend on the order in which the consumer's bundler concatenates
+     the CSS. */
+  .v-popover-panel.v-tooltip-panel {
     width: max-content;
     max-width: min(18rem, calc(100vw - var(--vectis-space-8)));
     padding: var(--vectis-space-1) var(--vectis-space-2);

@@ -51,10 +51,18 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(canvas.getByRole('button', { name: 'Page 10' })).toHaveAttribute(
-      'aria-current',
-      'page',
-    )
+    const current = canvas.getByRole('button', { name: 'Page 10' })
+    await expect(current).toHaveAttribute('aria-current', 'page')
+
+    /*
+     * A pill is a VButton, so `.v-pagination-page[data-size]` and `.v-button` both
+     * declare `padding-inline` on this very element. The qualified selector must win
+     * whatever the order in which a consumer's bundler concatenates the two sheets —
+     * which nothing else can check, since jsdom evaluates no style and the split
+     * makes that order unknowable. `--vectis-space-2` (8px) against VButton's
+     * `--control-padding-inline`, i.e. `--vectis-space-3` (12px) at the default size.
+     */
+    await expect(getComputedStyle(current).paddingInline).toBe('8px')
 
     await userEvent.click(canvas.getByRole('button', { name: 'Next page' }))
 

@@ -356,7 +356,10 @@ function onKeydown(event: KeyboardEvent) {
     gap: 0;
   }
 
-  .v-pagination-page {
+  /* The `[data-size]` selector (VButton always renders the attribute) beats
+     `.v-button`'s own `padding-inline` whatever the order in which the consumer's
+     bundler concatenates the CSS — the VIconButton idiom. */
+  .v-pagination-page[data-size] {
     /* A square pill at one digit, widening by itself beyond that: the variable is
        set by v-control on this same element, so one rule covers all 5 sizes ×
        compact. */
