@@ -102,4 +102,12 @@ export type {
   SkeletonAnimation,
   SkeletonSize,
 } from './components/VSkeletonLoader/VSkeletonLoader.vue'
+export { default as VCombobox } from './components/VCombobox/VCombobox.vue'
+export type {
+  ComboboxOption,
+  ComboboxGroup,
+  ComboboxSeparator,
+  ComboboxItem,
+  ComboboxFilter,
+} from './components/VCombobox/VCombobox.vue'
 export { default as VChip } from './components/VChip/VChip.vue'

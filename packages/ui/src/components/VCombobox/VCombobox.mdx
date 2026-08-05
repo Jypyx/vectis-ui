@@ -1,0 +1,225 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VComboboxStories from './VCombobox.stories'
+
+<Meta of={VComboboxStories} />
+
+# Combobox
+
+A search field with a list of suggestions and single or multiple selection — the ARIA
+**combobox/listbox** pattern no native primitive covers (`<datalist>` is neither stylable nor
+multiple). The component is **assembled from the design system's bricks**:
+
+- **`VInput`** for the search field (`role="combobox"`);
+- **`VPopover`** for the list, which itself carries `role="listbox"` (top layer, anchored in pure
+  CSS on the control);
+- **`VChip`** for the values selected in multiple mode.
+
+The DOM focus stays in the input while navigating (`aria-activedescendant`); the opening is driven
+by internal state, the closing by the in-house light dismiss (`focusout`).
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { VCombobox, type ComboboxOption } from '@vectis/ui'
+
+const countries: ComboboxOption[] = [
+  { value: 'fr', label: 'France' },
+  { value: 'be', label: 'Belgium' },
+  { value: 're', label: 'Réunion' },
+]
+const value = ref('')
+</script>
+
+<template>
+  <VCombobox
+    v-model="value"
+    :options="countries"
+    placeholder="Choose a country…"
+    aria-label="Country"
+  />
+</template>
+```
+
+<Canvas of={VComboboxStories.Default} />
+
+<Controls of={VComboboxStories.Default} />
+
+## Options
+
+Each option is a `ComboboxOption` — `{ value, label, disabled? }`. The `label` is displayed and
+filtered, the `value` feeds the `v-model`; a `disabled` option is presented but is neither
+selectable nor keyboard-reachable.
+
+The filtering is **case- and accent-insensitive** (NFD normalization): typing `reun` offers
+`Réunion`.
+
+## Groups and separators
+
+An entry of `options` is not necessarily an option: it may be a **named group** —
+`{ label, options }`, rendered as `role="group"` with a micro-label — or a **separator** —
+`{ separator: true }`, a full-width rule. The three forms mix freely in the same array, in whatever
+order you want.
+
+A group's micro-label occupies the height of an option, its text vertically centred: the list's
+vertical rhythm stays the same from end to end, whatever the field's size and in compact density.
+
+```ts
+const countries: ComboboxItem[] = [
+  { label: 'Europe', options: [{ value: 'fr', label: 'France' }] },
+  { separator: true },
+  { label: 'Africa', options: [{ value: 're', label: 'Réunion' }] },
+  { value: 'other', label: 'Other / not listed' }, // a bare option: always valid
+]
+```
+
+Groups and separators are **rendering, nothing else**: the keyboard navigation walks the list
+**flat** and never stops on a group label or on a rule. On filtering, a group no option of which
+matches **disappears, label included**, and the separators left orphaned (at the head, at the tail,
+or two in a row) are not rendered — so a filtered list never leaves a floating rule.
+
+<Canvas of={VComboboxStories.Groups} />
+
+## Search
+
+The filter only kicks in **on typing**. An already-filled `v-model` displays its label without
+restricting the list: on reopening, **every** option is offered again (the current one receives a
+tick), and only typing narrows the list. **Enter** selects the active option — or the single result
+when only one is left.
+
+A **chevron** on the right indicates the state and rotates on opening. A **cross** (`clearable`,
+enabled by default — `VInput`'s `clearable` prop, rendered to the left of the chevron) appears as
+soon as there is **something to clear** (a value, Chips or a search) and empties **the whole
+selection**.
+
+## Server-side search
+
+By default the filtering is **local**. With a remote source, the list already arrives filtered: pass
+`:filter="false"` — otherwise the local filter would run again on `label` and silently drop the
+results matched on another field. `filter` also accepts a **predicate**
+`(option, query) => boolean` for a custom match (the predicate receives the raw trimmed query, not
+its normalized form).
+
+The **`search`** event carries the term typed. It is **debounced** (`search-debounce`, 250 ms by
+default; `0` = synchronous) except when the panel opens, where it fires immediately to allow a first
+load. The same term is **not re-emitted**: reopening the panel does not relaunch the request. No
+request goes out on a closed panel, including for a keystroke whose delay had not elapsed.
+
+The component does not cancel in-flight requests: it is up to the consumer to ignore stale responses
+(a call token, an `AbortController`…).
+
+<Canvas of={VComboboxStories.AsynchronousSearch} />
+
+The **labels of the selected values are memorized**: a chosen value keeps its label (in the VChip,
+in the field's text) even when the next search makes it disappear from the options. A value that has
+never appeared in any page stays displayed as it is — to avoid that on an edit form, include the
+matching option in the first `options` rendered.
+
+## Loading and pagination
+
+`loading` covers both moments: with no option displayed, the panel shows the loading state (never
+"no results", which would say the opposite of reality); with options already displayed, a spinner
+appears at the foot of the list. In both cases, the field's chevron gives way to a spinner, in the
+same place and with no width jump. `loading-text` customizes the message, and the `#loading` and
+`#empty` slots (the latter receiving `query`) entirely replace those contents — to offer a
+"create…" action, for instance.
+
+`has-more` renders a sentinel at the foot of the panel: its entry into view emits **`load-more`**.
+The detection accounts for the loading in progress and re-runs the evaluation on every page
+received, so that a page too short to fill the panel does not interrupt the pagination.
+
+<Canvas of={VComboboxStories.InfiniteScroll} />
+
+## Option icon
+
+An option's **`icon`** field displays an icon before its label — a Material icon name, or an
+explicit render (`{ src }`). It is rendered in the slot the row provides, hence aligned and spaced
+like the rest of the content.
+
+That is the route to prefer for a simple icon, rather than the `#option` slot: the latter is
+rendered **inside** the label, so an icon placed there would reach neither the start slot nor its
+gutter. The end of the row, meanwhile, is reserved for the selection tick.
+
+<Canvas of={VComboboxStories.WithIcons} />
+
+## Customizing an option
+
+The **`#option`** slot replaces an option's content and receives
+`{ option, index, active, selected }`. The selection tick stays handled by the component.
+
+<Canvas of={VComboboxStories.CustomOption} />
+
+## Multiple selection
+
+With `multiple`, the `v-model` becomes a `string[]` and each value displays as a removable `VChip`.
+The panel stays open after a choice (so selections can be chained); **Backspace** on an empty search
+field removes the last value. Out of focus, the search input folds away to leave only the Chips,
+with no empty space.
+
+<Canvas of={VComboboxStories.MultipleSelection} />
+
+### Customizing the Chips
+
+The **`#chip`** slot replaces the VChip of a selected value. It receives:
+
+- `value` and `label` — the value and its resolved label;
+- `option` — the whole option (hence its `icon`), or `undefined` if that value has never been seen
+  in `options`. The component memorizes the selected options: with an asynchronous source, a chosen
+  value disappears from the next results without losing its label or its icon;
+- `remove` — to wire onto the removal action, without which the value could no longer be removed;
+- `size` and `compact` — the template computed to fit in the field. Reusing them on the custom VChip
+  avoids making the field grow.
+
+<Canvas of={VComboboxStories.CustomChip} />
+
+## Sizes
+
+`size` accepts `sm` (32 px), `md` (40 px, the default — aligned on `VInput`) and `lg` (48 px),
+combinable with `compact` (-4 px). In multiple mode, the Chips stay **one step below the field** so
+they fit without making it grow: `xs` (24 px) up to `md`, `sm` (32 px) at `lg`. Below the lowest
+step of each pair, the catch-up goes through `compact` rather than one size less — `size="sm"` gives
+`xs` compact Chips (20 px), `size="lg"` + `compact` gives `sm` compact Chips (28 px). The options
+panel follows the field's size: rows of 32/40/48 px, and at `lg` the same typography (16 px) and the
+same icons (24 px) as the field — an option's label does not change size on its way into the field.
+
+<Canvas of={VComboboxStories.Sizes} />
+
+## States
+
+`invalid` forces the error state (a red border, for server-side validation); `disabled` greys the
+field (shades through tokens, with no opacity). `placeholder` and `empty-text` (the message when no
+option matches) are customizable.
+
+<Canvas of={VComboboxStories.Invalid} />
+
+<Canvas of={VComboboxStories.NoResults} />
+
+<Canvas of={VComboboxStories.Disabled} />
+
+## Accessibility
+
+- The combobox/listbox ARIA contract: `role="combobox"` + `aria-expanded` / `aria-controls` /
+  `aria-autocomplete="list"` on the input, `role="listbox"` on the panel, `role="option"` +
+  `aria-selected` per option.
+- **The focus stays in the input**; the current option is signalled by `aria-activedescendant`
+  (never a focus moved onto the options).
+- Keyboard: Up/Down arrows (with wrap-around, disabled options skipped), Enter selects, Escape
+  closes, Tab closes and continues the tab order, Backspace removes the last value in multiple mode.
+- Name the field through `aria-label` (or an associated `label`) — the attribute is carried over to
+  the internal input.
+- A group is a `role="group"` named through `aria-labelledby` (the equivalent of an `<optgroup>`), an
+  allowed child of the `role="listbox"`; its label is neither focusable nor selectable. The
+  separator, on the other hand, is **decorative** (`role="presentation"`): the grouping is already
+  carried by the groups and their names, and a `role="separator"` would not be a valid child of a
+  listbox.
+- The **field's** spinner is decorative (`aria-hidden`): the loading announcement comes from the
+  `role="status"` inserted in the panel, once only.
+
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.
+
+## Browser support
+
+The panel rests on the **Popover API** and **CSS Anchor Positioning** (a width aligned on the
+control through `anchor-size(width)`, the anchor confined by `anchor-scope`) **with no fallback** —
+a project decision: Chrome/Edge 125+, Safari 26+, Firefox 147+.
