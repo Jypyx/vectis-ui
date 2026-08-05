@@ -5,10 +5,11 @@
  * (`invoice.pdf` and `invoice.png`), and the tail is also where the version or
  * date suffixes live.
  *
- * Pure, no Vue — the `VHotkeys/platform.ts` precedent, like its two neighbours
- * in this folder. Kept apart from them on purpose: formatting a size, matching
- * an `accept` and cutting a string share no body, and a `helpers.ts` grab-bag is
- * not how this repo is written.
+ * Pure, no Vue — the `VHotkeys/platform.ts` precedent: a single consumer, so it
+ * stays in the component's folder. Deliberately NOT promoted alongside the file
+ * helpers of `utils/file.ts`: cutting a string is a lexical operation, not
+ * something the FILE domain decides — `utils/text.ts` is where it would go the
+ * day a second consumer appears.
  */
 
 /** Ceiling of a chip's label, ellipsis included. Chips wrap, so the point is not

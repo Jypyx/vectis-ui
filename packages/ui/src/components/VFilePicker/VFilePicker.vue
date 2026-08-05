@@ -21,11 +21,11 @@ import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import VTypography from '../VTypography/VTypography.vue'
 
+import { useFileDrop } from '../../composables/useFileDrop'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useLocale, useMessages } from '../../i18n/state'
 import { isDev } from '../../utils/env'
-import { matchesAccept } from './accept'
-import { formatBytes } from './bytes'
+import { formatBytes, screenFiles } from '../../utils/file'
 import { truncateMiddle } from './truncate'
 
 /** Rendering of the selection inside the field, in `multiple` mode. */
@@ -287,42 +287,26 @@ function resetNative() {
  * reported through `reject`. No `setCustomValidity`: the visible field is
  * read-only, hence barred from constraint validation.
  *
- * The order of the checks is the order of the reasons a user can act on, so a
- * wrong TYPE is reported as such even when the file is also too big. No
- * de-duplication: a `File` is opaque, two files may share a name across folders,
- * and `duplicate` is deliberately not one of the reasons.
+ * The screening itself is pure (`utils/file.ts`), which is what keeps the order
+ * of the refusals — a contract this component's docs state — testable without a
+ * mount.
  */
 function acceptFiles(incoming: File[]) {
   const current = props.multiple ? model.value : []
-  const limit = props.multiple ? props.maxFiles : 1
-  const added: File[] = []
-  let total = current.reduce((sum, file) => sum + file.size, 0)
+  const { accepted, rejected } = screenFiles(incoming, current, {
+    accept: props.accept,
+    maxSize: props.maxSize,
+    // Single mode is a list capped at one: every extra file is refused with `count`.
+    maxFiles: props.multiple ? props.maxFiles : 1,
+    maxTotalSize: props.maxTotalSize,
+  })
 
-  for (const file of incoming) {
-    if (!matchesAccept(file, props.accept)) {
-      emit('reject', { file, reason: 'type' })
-      continue
-    }
-    if (props.maxSize !== undefined && file.size > props.maxSize) {
-      emit('reject', { file, reason: 'size' })
-      continue
-    }
-    if (limit !== undefined && current.length + added.length >= limit) {
-      emit('reject', { file, reason: 'count' })
-      continue
-    }
-    if (props.maxTotalSize !== undefined && total + file.size > props.maxTotalSize) {
-      emit('reject', { file, reason: 'total-size' })
-      continue
-    }
-    added.push(file)
-    total += file.size
-  }
+  for (const rejection of rejected) emit('reject', rejection)
 
   resetNative()
-  if (added.length === 0) return
+  if (accepted.length === 0) return
 
-  model.value = [...current, ...added]
+  model.value = [...current, ...accepted]
   emit('change', model.value)
 }
 
@@ -374,46 +358,11 @@ function clearValue() {
   emit('change', model.value)
 }
 
-/*
- * Drag & drop on the component itself, no separate dropzone.
- *
- * `dragover` MUST preventDefault, or the browser refuses the drop and then
- * NAVIGATES to the file, replacing the page.
- *
- * The depth counter is not decoration: `dragleave` fires every time the pointer
- * crosses into a child (the field, a chip, the icon button), so a boolean would
- * flicker off under the cursor. `drop` forces it back to 0 — a drag that leaves
- * the window never sends the matching `dragleave`, and the state would stick.
- * `currentTarget.contains(relatedTarget)` is the other classic fix, rejected
- * here because `relatedTarget` is null precisely in that sticky case.
- */
-const dragDepth = ref(0)
-const dragging = computed(() => dragDepth.value > 0)
-const droppableNow = computed(() => props.droppable && !props.disabled && !props.readonly)
-
-function onDragEnter(event: DragEvent) {
-  if (!droppableNow.value) return
-  event.preventDefault()
-  dragDepth.value += 1
-}
-
-function onDragOver(event: DragEvent) {
-  if (!droppableNow.value) return
-  event.preventDefault()
-  if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy'
-}
-
-function onDragLeave() {
-  if (!droppableNow.value) return
-  dragDepth.value = Math.max(0, dragDepth.value - 1)
-}
-
-function onDrop(event: DragEvent) {
-  if (!droppableNow.value) return
-  event.preventDefault()
-  dragDepth.value = 0
-  acceptFiles([...(event.dataTransfer?.files ?? [])])
-}
+/* Drag & drop on the component itself, no separate dropzone. */
+const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop(
+  () => props.droppable && !props.disabled && !props.readonly,
+  acceptFiles,
+)
 
 if (isDev) {
   watchEffect(() => {
