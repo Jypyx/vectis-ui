@@ -17,6 +17,7 @@ pnpm typecheck         # vue-tsc -r
 pnpm test              # vitest run -r  → `unit` project (jsdom) only
 pnpm test:stories      # play functions + axe in Chromium (Vitest browser mode), light theme
 VECTIS_THEME=dark pnpm test:stories   # the same suite in the dark theme
+pnpm test:coverage     # BOTH projects in one run, merged v8 report → packages/ui/coverage/
 pnpm build             # lib build (regenerates the tokens in prebuild)
 pnpm tokens            # regenerates tokens.css + tokens.json from the TS source
 pnpm icons             # regenerates the SVG icon registry (network; on demand, NOT in prebuild)
@@ -130,6 +131,7 @@ Chain: `i18n/types.ts` (the `VectisMessages` contract) → `en.ts` (the base, al
 - `vitest.config.ts` declares **two projects**: `unit` (jsdom, `src/**/*.test.ts`) and `storybook` (Playwright browser mode, fed by `storybookTest({ configDir: '.storybook' })`). Two traps: a Vitest project **does not inherit** the root's plugins — `vue()` must be repeated in the `storybook` project, otherwise the `.vue` files imported by the stories fail with "invalid JS syntax"; and the plugin applies the `preview.ts` annotations **itself**, so there is no setup file to write (a manual `setProjectAnnotations` would be flagged as redundant).
 - `globals: true` in vitest.config.ts is **required** for @testing-library/vue's automatic cleanup — do not remove it (`unit` project).
 - vitest's `expect` does NOT have the jest-dom matchers (`toBeVisible`, `toHaveFocus`…): in jsdom, assert on DOM properties (`el.hidden`, `document.activeElement`). Those matchers exist only in `storybook/test` (play functions).
+- **Coverage** (`@vitest/coverage-v8`, `pnpm test:coverage`): the ONLY command that filters no `--project`, so the two layers merge into one figure — it therefore needs the Playwright binaries and stays **outside the checkpoint**, like `test:stories`. `coverage` is a ROOT option of `vitest.config.ts`, never a project one. `coverage.include` is what makes a file no test ever imports show up at 0% (without it only the loaded modules count, and the figure flatters); `exclude` carries the two GENERATED artefacts and the `src/index.ts` barrel. Two things to read with care: **a coverage run is also a full test run**, axe included, so it fails on an a11y regression (light theme only — the theme is `VECTIS_THEME`'s); and **v8 instruments the COMPILED SFC** and maps back through the source map, so template branches can read as uncovered while being exercised — the `<script setup>` figure is the reliable one. The `unit` project carries a `testTimeout` above the default for this run alone: alongside Chromium, the jsdom workers no longer compile a file within 5 s.
 
 ## Accessibility (axe, in the `storybook` project)
 

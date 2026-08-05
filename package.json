@@ -10,6 +10,7 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "test:stories": "pnpm --filter @vectis/ui test:stories",
+    "test:coverage": "pnpm --filter @vectis/ui test:coverage",
     "build": "pnpm -r build",
     "tokens": "pnpm --filter @vectis/ui tokens",
     "icons": "pnpm --filter @vectis/ui icons",

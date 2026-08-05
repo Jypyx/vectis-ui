@@ -21,6 +21,29 @@ import { defineConfig } from 'vitest/config'
  */
 export default defineConfig({
   test: {
+    /*
+     * Coverage is a ROOT option, never a project one: it sits next to `projects` and
+     * spans whichever of them the run selected. `pnpm test:coverage` filters neither,
+     * so the report merges the jsdom layer and the browser layer — the coverage of
+     * what actually ships.
+     *
+     * `include` is what makes a file NEVER imported by a test show up at 0%: without
+     * it only the loaded modules are counted, and the figure flatters. `exclude`
+     * carries the two GENERATED artefacts (`pnpm icons`, `pnpm tokens`) and the barrel,
+     * which is nothing but re-exports.
+     */
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,vue}'],
+      exclude: [
+        'src/**/*.test.ts',
+        'src/**/*.stories.ts',
+        'src/stories/**',
+        'src/index.ts',
+        'src/components/VIcon/icons.ts',
+      ],
+      reporter: ['text', 'html'],
+    },
     projects: [
       {
         plugins: [vue()],
@@ -28,6 +51,14 @@ export default defineConfig({
           name: 'unit',
           environment: 'jsdom',
           include: ['src/**/*.test.ts'],
+          /*
+           * Above the 5 s default because `pnpm test:coverage` runs this project
+           * ALONGSIDE the browser one: the jsdom workers then share the machine with
+           * Chromium and the Vite transforms feeding it, and the first render of a
+           * file — the one that compiles it — overran. A ceiling, not a delay: it
+           * costs `pnpm test` nothing.
+           */
+          testTimeout: 20_000,
           setupFiles: ['./vitest.setup.ts'],
           // required for @testing-library/vue's automatic cleanup between tests
           globals: true,

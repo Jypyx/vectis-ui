@@ -8,6 +8,8 @@ export default tseslint.config(
     ignores: [
       '**/dist/**',
       '**/storybook-static/**',
+      // The v8 HTML report ships its own bundled JS (prettify.js, block-navigation.js)
+      '**/coverage/**',
       '**/node_modules/**',
       'packages/ui/src/styles/tokens.css',
     ],
