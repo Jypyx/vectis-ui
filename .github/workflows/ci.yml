@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Lets the documentation be redeployed without a code change — and gives a way back
+  # in when a push produces no run at all, as a visibility change can.
+  workflow_dispatch:
 
 # A new push on a branch supersedes the run in flight for it.
 concurrency:
