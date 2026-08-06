@@ -1,0 +1,31 @@
+{
+  "name": "@vectis/docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Documentation site for Vectis UI, themed with Vectis UI itself.",
+  "//scripts": "The docs consume `dist`, exactly as an npm consumer does, so the library must be BUILT first. `pnpm -r build` orders the workspace topologically and already does it; `dev`, `preview` and `typecheck` are not run under -r, hence their own prerequisite.",
+  "scripts": {
+    "predev": "pnpm --filter @vectis/ui build",
+    "dev": "vitepress dev .",
+    "build": "vitepress build .",
+    "postbuild": "tsx scripts/check-prerender.ts",
+    "prepreview": "pnpm run build",
+    "preview": "vitepress preview .",
+    "pretypecheck": "pnpm --filter @vectis/ui build",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "icons": "tsx scripts/build-icons.ts"
+  },
+  "dependencies": {
+    "@vectis/ui": "workspace:*",
+    "vue": "^3.5.40"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "minisearch": "^7.1.1",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3",
+    "vitepress": "^1.6.4",
+    "vue-tsc": "^3.3.7"
+  }
+}

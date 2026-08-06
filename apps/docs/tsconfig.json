@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // NOT `vite/client`: vite is not a direct dependency here (vitepress bundles its
+    // own), so pnpm's strict layout would not resolve those types, and adding vite
+    // would install a SECOND major alongside vitepress's. Consequence: no
+    // `import.meta.env` in this package — client/server branching goes through
+    // vitepress's `inBrowser` or through `onMounted`.
+    "types": ["node"]
+  },
+  // Every `.ts` we write must be listed: ESLint's type-aware block runs with
+  // `projectService: true` and fails with "file not found in project" otherwise.
+  "include": [
+    ".vitepress/**/*.ts",
+    ".vitepress/**/*.d.ts",
+    ".vitepress/**/*.vue",
+    "scripts/**/*.ts"
+  ]
+}

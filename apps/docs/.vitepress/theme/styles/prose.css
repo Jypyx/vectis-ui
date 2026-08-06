@@ -1,0 +1,109 @@
+/*
+ * Markdown prose.
+ *
+ * EVERY selector here is a DIRECT-CHILD chain from `.vp-doc`, and that is what makes
+ * unlayered docs CSS safe. Markdown renders its nodes as direct children of the
+ * container, while a live demo sits inside `.docs-demo` and a component's internals are
+ * two levels further down. A descendant selector such as `.vp-doc h2` would reach into
+ * VDialog's title and VAccordionItem's header from OUTSIDE every layer, i.e. unbeatably.
+ *
+ * Type comes from the semantic recipes (`--vectis-text-<role>-*`), never from the
+ * `--vectis-font-*` primitives — the same rule the components follow.
+ */
+.vp-doc > h1 {
+  margin-block-end: var(--vectis-space-4);
+  font-size: var(--vectis-text-heading-1-size);
+  font-weight: var(--vectis-text-heading-1-weight);
+  line-height: var(--vectis-text-heading-1-leading);
+  letter-spacing: var(--vectis-text-heading-1-tracking);
+}
+
+.vp-doc > h2 {
+  margin-block: var(--vectis-space-8) var(--vectis-space-4);
+  padding-block-start: var(--vectis-space-6);
+  border-block-start: 1px solid var(--vectis-color-border);
+  font-size: var(--vectis-text-heading-2-size);
+  font-weight: var(--vectis-text-heading-2-weight);
+  line-height: var(--vectis-text-heading-2-leading);
+  letter-spacing: var(--vectis-text-heading-2-tracking);
+}
+
+.vp-doc > h3 {
+  margin-block: var(--vectis-space-6) var(--vectis-space-3);
+  font-size: var(--vectis-text-heading-3-size);
+  font-weight: var(--vectis-text-heading-3-weight);
+  line-height: var(--vectis-text-heading-3-leading);
+}
+
+.vp-doc > p,
+.vp-doc > ul,
+.vp-doc > ol {
+  margin-block: var(--vectis-space-4);
+  font-size: var(--vectis-text-body-md-size);
+  font-weight: var(--vectis-text-body-md-weight);
+  line-height: var(--vectis-text-body-md-leading);
+}
+
+.vp-doc > ul,
+.vp-doc > ol {
+  padding-inline-start: var(--vectis-space-6);
+}
+
+.vp-doc > ul > li,
+.vp-doc > ol > li {
+  margin-block: var(--vectis-space-2);
+}
+
+.vp-doc > blockquote {
+  margin-block: var(--vectis-space-4);
+  padding-inline-start: var(--vectis-space-4);
+  border-inline-start: 2px solid var(--vectis-color-border-strong);
+  color: var(--vectis-color-text-muted);
+}
+
+.vp-doc > p > a,
+.vp-doc > ul > li > a,
+.vp-doc > ol > li > a {
+  color: var(--vectis-color-accent-text);
+  text-underline-offset: 0.2em;
+}
+
+.vp-doc > p > code,
+.vp-doc > ul > li > code,
+.vp-doc > ol > li > code,
+.vp-doc > h2 > code,
+.vp-doc > h3 > code {
+  padding-inline: var(--vectis-space-1);
+  border-radius: var(--vectis-radius-xs);
+  background: var(--vectis-color-surface-muted);
+  font-family: var(--vectis-font-family-mono);
+  font-size: var(--vectis-text-code-size);
+}
+
+.vp-doc > div[class*='language-'] {
+  margin-block: var(--vectis-space-5);
+  padding: var(--vectis-space-4);
+  overflow-x: auto;
+  border: 1px solid var(--vectis-color-border);
+  border-radius: var(--vectis-radius-surface);
+  background: var(--vectis-color-surface-sunken);
+  font-size: var(--vectis-text-code-size);
+  line-height: var(--vectis-text-code-leading);
+}
+
+/*
+ * Shiki's dual theme puts the LIGHT colour in an inline `style` attribute and the dark
+ * one in a custom property; the default theme's stylesheet is what flips them, and this
+ * site never loads it. An inline style outranks every author rule and every layer, so
+ * `!important` is not a shortcut here — it is the only declaration that can beat it.
+ * These are the sole `!important`s in the docs CSS. Keyed on the DS's own signal, which
+ * `appearance: false` makes the only theme attribute in the document.
+ */
+[data-theme='dark'] .shiki,
+[data-theme='dark'] .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}

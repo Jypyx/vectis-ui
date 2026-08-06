@@ -17,6 +17,12 @@ extraction is performed by `packages/ui/scripts/build-icons.ts` from a pinned
 upstream revision; no other part of Material Symbols is redistributed, and the
 library requires no icon font at runtime.
 
+The documentation site embeds a further handful of paths from the same source,
+the same revision and the same axes, in `apps/docs/.vitepress/theme/icons.ts`,
+extracted by `apps/docs/scripts/build-icons.ts`. They cover the icons the site's
+own chrome renders, which the library's registry does not carry; they are part
+of the published site, not of the `@vectis/ui` package.
+
 You may obtain a copy of the Apache License, Version 2.0 at:
 
     http://www.apache.org/licenses/LICENSE-2.0

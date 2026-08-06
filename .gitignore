@@ -1,5 +1,8 @@
 node_modules/
 dist/
+# A pattern holding a slash is anchored to this file's directory, so the glob is what
+# makes it reach apps/docs/.vitepress/cache/ (unlike `dist/` above, which is unanchored).
+**/.vitepress/cache/
 storybook-static/
 coverage/
 *.log
