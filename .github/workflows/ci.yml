@@ -86,3 +86,61 @@ jobs:
         run: pnpm test:stories
         env:
           VECTIS_THEME: ${{ matrix.theme }}
+
+  # GitHub Pages project site: the documentation at /vectis-ui/, the Storybook build under
+  # /vectis-ui/storybook/. ONE artifact and one deployment, so a link from the docs to a
+  # story can never point at a Storybook built from a different commit.
+  #
+  # Requires, once, in the repository settings: Pages → Source → GitHub Actions.
+  pages:
+    name: Deploy documentation
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [check, stories]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # Not the workflow's group: a deployment must never be cancelled halfway, and two of
+    # them must never overlap.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: actions/configure-pages@v5
+
+      # The docs consume `dist`, exactly as an npm consumer does, so the library is built
+      # first. `pnpm build` would do both in topological order; splitting them keeps the
+      # failing step legible.
+      - name: Build the library
+        run: pnpm --filter @vectis/ui build
+
+      # `postbuild` chains `check-prerender`, which asserts that the design system really
+      # rendered on the server — a failure there must stop the deployment, not decorate it.
+      - name: Build the documentation
+        run: pnpm --filter @vectis/docs build
+
+      # Into the SAME directory, AFTER the vitepress build, which empties `dist` first.
+      - name: Build Storybook into the artifact
+        run: pnpm --filter @vectis/ui exec storybook build -o ../../apps/docs/.vitepress/dist/storybook
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: apps/docs/.vitepress/dist
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
