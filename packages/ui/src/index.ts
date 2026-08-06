@@ -112,4 +112,8 @@ export type {
 } from './components/VCombobox/VCombobox.vue'
 export { default as VBreadcrumb } from './components/VBreadcrumb/VBreadcrumb.vue'
 export type { BreadcrumbItem } from './components/VBreadcrumb/VBreadcrumb.vue'
+export { default as VSideNavigation } from './components/VSideNavigation/VSideNavigation.vue'
+export { default as VSideNavigationItem } from './components/VSideNavigation/VSideNavigationItem.vue'
+export { default as VSideNavigationGroup } from './components/VSideNavigation/VSideNavigationGroup.vue'
+export { default as VSideNavigationSeparator } from './components/VSideNavigation/VSideNavigationSeparator.vue'
 export { default as VChip } from './components/VChip/VChip.vue'

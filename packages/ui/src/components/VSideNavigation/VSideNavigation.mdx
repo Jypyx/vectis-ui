@@ -1,0 +1,136 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VSideNavigationStories from './VSideNavigation.stories'
+
+<Meta of={VSideNavigationStories} />
+
+# SideNavigation
+
+Vertical application navigation: a tree of links **rendered inline** in a sidebar, collapsible
+level by level. It is composed of subcomponents — `VSideNavigationItem`, `VSideNavigationGroup`,
+`VSideNavigationSeparator` — rather than an array of items passed as a prop: the labels stay slots,
+hence composable.
+
+The folding is **native**: each branch is a `<details>`/`<summary>`, which gives the state, the
+activation keyboard, exclusivity between siblings and the opening animation without a line of state
+JavaScript. The structure is that of a list (`<nav>` + nested `<ul>`/`<li>`): the element counting
+and the nesting relation announced by screen readers _are_ the hierarchy information.
+
+<Canvas of={VSideNavigationStories.Default} />
+
+<Controls of={VSideNavigationStories.Default} />
+
+## Anatomy of an item
+
+The label is the default slot — it is the only mandatory content. Around it: `sublabel` (or the
+`#sublabel` slot) adds a secondary line, `icon` places an icon before the label (an icon name **or**
+an explicit render `{ src }` / `{ component }`, as everywhere else in the DS; the `#start` slot wins
+for free content), and the `#end` slot takes whatever you want on the right — a counter, a badge, an
+action.
+
+<Canvas of={VSideNavigationStories.Sublabels} />
+
+An item **without** subitems is either a link (`href`, rendered as an `<a>`) or a button emitting
+`select`. The consumer's attributes (`target`, `rel`, `data-*`…) land on the control, never on the
+list element.
+
+<Canvas of={VSideNavigationStories.Links} />
+
+## Subitems
+
+The `#items` slot turns the item into a branch: a chevron appears on the right, the row becomes the
+trigger, and clicking expands the subitems. It is recursive **with no depth limit** — a subitem is a
+`VSideNavigationItem` like any other, which can in turn carry an `#items`.
+
+One level's indent is **exactly the room a start icon takes** — icon plus gutter: a subitem's label
+therefore lands on the same vertical as its parent branch's, and the hierarchy reads effortlessly.
+It follows the size scale on its own. The hover highlight and the current-page one, on the other
+hand, stay full width.
+
+`defaultOpen` opens a branch on the first render; `v-model:open` drives it from the consumer (to
+expand the branch containing the current route, for instance).
+
+<Canvas of={VSideNavigationStories.Depth} />
+
+`exclusive` limits opening to **one branch per level**: opening a section closes its sibling. The
+mechanism is the native `<details name>` attribute, applied level by level — a deep branch never
+closes a branch of another level.
+
+<Canvas of={VSideNavigationStories.Exclusive} />
+
+## Content on the right
+
+The `#end` slot sits to the right of the label and, on a branch, **to the left of the chevron**.
+
+On a **leaf** it takes anything, a control included: the row is a container and the link is
+stretched underneath it, so the whole row stays clickable without the slot's button being nested
+inside the link. On a **branch**, the row is the `<summary>` itself and the slot necessarily lives
+inside it: put only **non-focusable** content there (a counter, a badge). A control there is a
+control nested inside a control — a WCAG 4.1.2 failure — and a `<summary>`'s subtree also serves as
+its accessible name, which some screen readers flatten: the button would no longer be announced
+either. So an action on a collapsible section belongs next to the navigation, not inside it.
+
+<Canvas of={VSideNavigationStories.EndContent} />
+
+## Groups and separators
+
+`VSideNavigationGroup` heads a series of items with a section title, which names the list it
+introduces. `VSideNavigationSeparator` draws a rule between two blocks. Neither counts as a
+hierarchy level: the items they frame keep the indent of their real level.
+
+The title occupies the height of a row, its text vertically centred: the navigation's vertical
+rhythm stays the same from end to end, compact density included.
+
+## Current page
+
+`active` marks the item of the displayed page: an accent highlight and `aria-current`. The consumer
+derives it from its route — the component knows nothing of the router. A collapsed branch containing
+the current page stays discreetly flagged, so the active section can be spotted without expanding
+it.
+
+## Sizes
+
+`size` is `sm` (32px) or `md` (40px, the default) and comes from the DS's common size scale;
+`compact` removes 4px of height. **`compact` is not a "collapsed icon rail" mode**: it is the same
+density as `VButton`'s or `VInput`'s. The size is set once on the root and descends to every level,
+sublists included.
+
+<Canvas of={VSideNavigationStories.Sizes} />
+
+## Opening icons
+
+By default, a chevron rotates 180° on opening. `expandIcon` and `collapseIcon`, set **on the root**,
+customize the iconography of every branch; supplying `collapseIcon` switches to swap mode (both
+icons are rendered and exchanged in CSS), useful for a non-directional pair such as "plus / minus".
+
+<Canvas of={VSideNavigationStories.CustomIcons} />
+
+## Disabled item
+
+`disabled` makes the item inert — a link with no target, a disabled button, a branch that cannot be
+expanded — and switches it to greys through the tokens, never through opacity. It also leaves the
+arrow-navigation path.
+
+<Canvas of={VSideNavigationStories.DisabledItem} />
+
+## Long texts
+
+Label and sublabel are truncated with an ellipsis: the bar keeps its width whatever the length of
+the titles.
+
+<Canvas of={VSideNavigationStories.LongTexts} />
+
+## Accessibility
+
+- The root is a named `<nav>` (`label`, or the DS dictionary): indispensable as soon as a page holds
+  several. A consumer's `aria-label` or `aria-labelledby` wins.
+- The hierarchy is carried by nested lists, not by the visual indent alone.
+- The branches are `<details>`/`<summary>`: the expanded/collapsed state is exposed natively,
+  `Enter` and `Space` toggle the focused section, and the content of a collapsed branch leaves both
+  the tab order and the accessibility tree.
+- No roving focus: **every visible row is a tab stop**, as in an ordinary list of links. The Up/Down
+  arrows and Home/End move the focus in addition — they only move it, never activate — skipping
+  disabled items and those of a collapsed branch.
+- The chevrons are decorative: the state information comes from the `<details>`.
+- A disabled item carries `aria-disabled` and leaves the keyboard path.
+- Every transition (the chevron's rotation, a branch opening) is neutralized under
+  `prefers-reduced-motion`.
