@@ -655,8 +655,8 @@ function onEndIcon() {
       </template>
 
       <template v-else>
-        <!-- The cells switch the active step: `tone` accent = the step under way (the
-             tonal variant supplying the pair of backgrounds). -->
+        <!-- The cells switch the active step: `tone` accent = the step under way,
+             read as text colour (`ghost` has no background of its own at rest). -->
         <div class="v-timepicker-time">
           <VButton
             class="v-timepicker-cell"
@@ -792,9 +792,9 @@ function onEndIcon() {
     direction: ltr;
   }
 
-  /* The HH/MM cells: design system VButtons (the `tonal` variant, an accent tone on the
-     active step — their `--tone-bg-soft`/`--tone-text-tinted` pair supplying the
-     colours). The override is limited to the "large numeral" template: height, states,
+  /* The HH/MM cells: design system VButtons (the `ghost` variant, an accent tone on the
+     active step — `--tone-text-tinted` supplies the numeral's colour, `--tone-bg-soft`
+     only appearing on hover). The override is limited to the "large numeral" template: height, states,
      focus and transitions all come from VButton. Qualified by [data-size] (the
      VIconButton/VTabs model): the export order is not constraining. */
   .v-timepicker-cell[data-size] {

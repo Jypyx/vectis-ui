@@ -18,13 +18,29 @@ describe('VButton', () => {
 
   it('supports every variant/tone and sets data-compact', () => {
     const { getByRole } = render(VButton, {
-      props: { variant: 'tonal', tone: 'warning', compact: true },
-      slots: { default: 'Warning' },
+      props: { variant: 'soft', tone: 'danger', compact: true },
+      slots: { default: 'Delete' },
     })
     const button = getByRole('button')
-    expect(button.dataset.variant).toBe('tonal')
-    expect(button.dataset.tone).toBe('warning')
+    expect(button.dataset.variant).toBe('soft')
+    expect(button.dataset.tone).toBe('danger')
     expect(button.dataset.compact).toBe('')
+  })
+
+  /* Elevation is orthogonal to the variant, so the two attributes must be able to
+     coexist. Everything visual about it is CSS, out of jsdom's reach: only the
+     attribute wiring is testable here. */
+  it('sets data-elevated without touching the variant, and omits it by default', async () => {
+    const { getByRole, rerender } = render(VButton, {
+      props: { variant: 'ghost', elevated: true },
+      slots: { default: 'Raised' },
+    })
+    const button = getByRole('button')
+    expect(button.dataset.elevated).toBe('')
+    expect(button.dataset.variant).toBe('ghost')
+
+    await rerender({ variant: 'ghost', elevated: false })
+    expect(button.dataset.elevated).toBeUndefined()
   })
 
   it('without compact: no data-compact', () => {

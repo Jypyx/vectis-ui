@@ -17,7 +17,7 @@ describe('toast (module state)', () => {
     toast({ message: 'Defaults' })
     expect(toasts[0]).toMatchObject({
       tone: 'neutral',
-      variant: 'tonal',
+      variant: 'soft',
       closable: true,
     })
     // placement and duration stay undefined: they are resolved by the VToaster

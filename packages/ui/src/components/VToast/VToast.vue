@@ -108,30 +108,29 @@ const icon = computed(() =>
     --toast-accent: var(--tone-text-tinted);
   }
 
-  /* The one tone VToast disagrees on: an overlay surface in tonal, an inverted
-     contrast (tooltip style) in solid — neutral has no -surface/-border/-text
-     variants. One layer above the shared table, so it wins whatever the sheet
+  /* Neutral soft only: a toast is a floating surface, so it takes the overlay
+     background rather than the shared muted one, and the plain border that goes with
+     it. The SOLID pair is deliberately left to the shared table (the canonical
+     text/surface inversion). One layer above it, so this wins whatever the sheet
      order. */
   .v-toast[data-tone='neutral'] {
     --tone-bg-soft: var(--vectis-color-surface-overlay);
     --tone-border-soft: var(--vectis-color-border);
     --toast-accent: var(--vectis-color-text);
-    --tone-bg-solid: var(--vectis-color-surface-inverse);
-    --tone-text-solid: var(--vectis-color-text-on-inverse);
   }
 
-  .v-toast[data-variant='tonal'] {
+  .v-toast[data-variant='soft'] {
     background: var(--tone-bg-soft);
     border: 1px solid var(--tone-border-soft);
     color: var(--vectis-color-text);
   }
 
-  .v-toast[data-variant='tonal'] .v-toast-icon,
-  .v-toast[data-variant='tonal'] .v-toast-title {
+  .v-toast[data-variant='soft'] .v-toast-icon,
+  .v-toast[data-variant='soft'] .v-toast-title {
     color: var(--toast-accent);
   }
 
-  .v-toast[data-variant='tonal'] .v-toast-message {
+  .v-toast[data-variant='soft'] .v-toast-message {
     color: var(--vectis-color-text-muted);
   }
 
@@ -144,10 +143,10 @@ const icon = computed(() =>
    * Close cross: a ghost/neutral VIconButton, recoloured through the shared tone
    * variables (--tone-text-tinted / --tone-bg-soft). It wins TWICE over the table the
    * cross gets from `v-tone` — higher specificity (0,3,0) and a layer above — so no
-   * sheet order is involved. In tonal: a cross in the tone's accent colour; in solid:
+   * sheet order is involved. In soft: a cross in the tone's accent colour; in solid:
    * currentcolor (readable on the full background).
    */
-  .v-toast[data-variant='tonal'] .v-toast-close[data-tone] {
+  .v-toast[data-variant='soft'] .v-toast-close[data-tone] {
     --tone-text-tinted: var(--toast-accent);
     --tone-bg-soft: color-mix(in oklab, var(--toast-accent), transparent 88%);
   }

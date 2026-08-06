@@ -83,8 +83,10 @@ documentation table that wants to show all three side by side.
 ## Variants and sizes
 
 `flat` (the default), `outlined` and `elevated` mirror the neutral tone of `VButton`, declaration
-for declaration. There is a single colour set — a keyboard shortcut is chrome, so there is no `tone`
-prop.
+for declaration — respectively its `soft` variant, its `outline` one, and a `ghost` one raised by
+`elevated`. There is a single colour set — a keyboard shortcut is chrome, so there is no `tone`
+prop. It keeps them as three values of one variant, since a `<kbd>` is not interactive and so has
+no state to combine them with.
 
 <Canvas of={VHotkeysStories.Variants} />
 

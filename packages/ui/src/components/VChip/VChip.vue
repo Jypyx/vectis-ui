@@ -17,8 +17,8 @@ import { useMessages } from '../../i18n/state'
  * action element).
  */
 interface ChipProps {
-  /** tonal = tinted background (the default), solid = full colour, outline = a border. */
-  variant?: 'tonal' | 'solid' | 'outline'
+  /** soft = tinted background (the default), solid = full colour, outline = a border. */
+  variant?: 'soft' | 'solid' | 'outline'
   tone?: 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
   /**
    * A custom colour from the consumer (hex, CSS name or oklch()) which REPLACES the
@@ -56,7 +56,7 @@ interface ChipProps {
 }
 
 const props = withDefaults(defineProps<ChipProps>(), {
-  variant: 'tonal',
+  variant: 'soft',
   tone: 'neutral',
   color: undefined,
   shape: 'chip',
@@ -197,37 +197,13 @@ const iconOnly = computed(
     border-radius: var(--vectis-radius-pill);
   }
 
-  /* The tone table lives in styles/tones.css (class `v-tone`, layer vectis.tokens),
-     shared with VButton and VToast. Only the divergence below is local — being one
-     layer up, it wins over the shared value whatever the sheet order. */
-
-  /* A divergence from VButton: VButton's neutral solid (surface-muted) would be
-     indistinguishable from the tonal. A full text/surface inversion rather than
-     surface-inverse: in dark, surface-inverse = surface-muted (neutral-800), so a
-     selected neutral chip would be invisible — text (neutral-50 in dark, neutral-900
-     in light) stays distinct from the tonal background in both themes */
-  .v-chip[data-tone='neutral'] {
-    --tone-bg-solid: var(--vectis-color-text);
-    --tone-bg-solid-hover: color-mix(
-      in oklab,
-      var(--vectis-color-text),
-      var(--vectis-color-surface) 8%
-    );
-    --tone-bg-solid-active: color-mix(
-      in oklab,
-      var(--vectis-color-text),
-      var(--vectis-color-surface) 14%
-    );
-    --tone-text-solid: var(--vectis-color-surface);
-    --tone-text-tinted: var(--vectis-color-text);
-    --tone-bg-soft: var(--vectis-color-surface-muted);
-    --tone-border-soft: var(--vectis-color-border-strong);
-  }
+  /* The tone table lives in styles/tones.css (class `v-tone`, layer vectis.tokens).
+     The five tones are taken as they come; the only local set is [data-custom]
+     below, which wins over the shared table by LAYER, whatever the sheet order. */
 
   /* Custom colour (--custom-color inline): replaces the tone, with every shade
      derived by color-mix from the theme tokens (surface/text swap between light and
-     dark → automatic adaptation). Block placed AFTER the tones: equal specificity, the
-     last one wins. */
+     dark → automatic adaptation). */
   .v-chip[data-custom] {
     --tone-bg-solid: var(--custom-color);
     --tone-bg-solid-hover: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 8%);
@@ -240,7 +216,7 @@ const iconOnly = computed(
     --tone-border-soft: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 60%);
   }
 
-  .v-chip[data-variant='tonal'] {
+  .v-chip[data-variant='soft'] {
     background: var(--tone-bg-soft);
     color: var(--tone-text-tinted);
   }
@@ -267,13 +243,13 @@ const iconOnly = computed(
   /* Hover/active, scoped to the interactive action element — a static chip has no
      hover at all, and hovering the removal button does not change the chip's
      background */
-  .v-chip[data-variant='tonal']:not([data-disabled], [data-selected]):has(
+  .v-chip[data-variant='soft']:not([data-disabled], [data-selected]):has(
       :is(button, a).v-chip-action:hover
     ) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
-  .v-chip[data-variant='tonal']:not([data-disabled], [data-selected]):has(
+  .v-chip[data-variant='soft']:not([data-disabled], [data-selected]):has(
       :is(button, a).v-chip-action:active
     ) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 14%);

@@ -169,7 +169,7 @@ describe('VChip', () => {
   it('default data-attributes, a custom colour as an inline --custom-color', () => {
     const { container, rerender } = render(VChip, { slots: { default: 'Tag' } })
     const root = container.querySelector('.v-chip') as HTMLElement
-    expect(root.getAttribute('data-variant')).toBe('tonal')
+    expect(root.getAttribute('data-variant')).toBe('soft')
     expect(root.getAttribute('data-tone')).toBe('neutral')
     expect(root.getAttribute('data-shape')).toBe('chip')
     expect(root.hasAttribute('data-custom')).toBe(false)

@@ -16,13 +16,14 @@ always a **second** sibling button: never a nested button.
 
 ## Variants and tones
 
-Three variants (`tonal`, `solid`, `outline`) crossed with five tones (`neutral`, `accent`,
+Three variants (`soft`, `solid`, `outline`) crossed with five tones (`neutral`, `accent`,
 `danger`, `success`, `warning`), on the VButton model: the tones define only local CSS variables
 (`--tone-bg-solid`, `--tone-text-tinted`…) which the variants consume.
 
-The particularity of the `neutral` tone in `solid`: a full `text`/`surface` inversion (a dark
-background in light, a light background in dark) — a mid-grey solid would be indistinguishable from
-the tonal, notably in the dark theme.
+The `neutral` tone in `solid` is a full `text`/`surface` inversion (a dark background in light, a
+light background in dark). That is the design system's canonical neutral, shared with every other
+adopter of the tone table — a mid-grey solid would be indistinguishable from the `soft` variant,
+which is exactly the difference a selected chip has to carry.
 
 <Canvas of={VChipStories.Variants} />
 

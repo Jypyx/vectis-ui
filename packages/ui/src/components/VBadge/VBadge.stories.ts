@@ -180,7 +180,7 @@ export const Bordered: Story = {
       <div style="display: flex; flex-direction: column; gap: 16px; align-items: flex-start">
         <div style="display: flex; gap: 24px; align-items: center; padding: 16px; background: var(--vectis-color-accent); border-radius: var(--vectis-radius-surface); --vectis-color-surface: var(--vectis-color-accent)">
           <VBadge overlay tone="danger" :count="3" bordered>
-            <VIconButton :label="t.notifications" variant="elevated" tone="accent">
+            <VIconButton :label="t.notifications" elevated tone="accent">
               <VIcon name="notifications" />
             </VIconButton>
           </VBadge>

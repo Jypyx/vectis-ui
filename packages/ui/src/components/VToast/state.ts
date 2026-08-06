@@ -24,8 +24,8 @@ export interface ToastOptions {
   message: string
   title?: string
   tone?: ToastTone
-  /** `tonal`: tinted background + border; `solid`: full colour. */
-  variant?: 'tonal' | 'solid'
+  /** `soft`: tinted background + border; `solid`: full colour. */
+  variant?: 'soft' | 'solid'
   /**
    * An icon name or an explicit render; `false` = no icon; absent = the tone's
    * default icon.
@@ -51,7 +51,7 @@ export interface ToastOptions {
 export interface ToastItem extends ToastOptions {
   id: number
   tone: ToastTone
-  variant: 'tonal' | 'solid'
+  variant: 'soft' | 'solid'
   closable: boolean
 }
 
@@ -67,7 +67,7 @@ let nextId = 0
  */
 export function toast(options: ToastOptions): number {
   const id = nextId++
-  toasts.push({ tone: 'neutral', variant: 'tonal', closable: true, ...options, id })
+  toasts.push({ tone: 'neutral', variant: 'soft', closable: true, ...options, id })
   return id
 }
 

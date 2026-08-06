@@ -18,8 +18,15 @@ import type { IconSource } from '../VIcon/types'
 import VSpinner from '../VSpinner/VSpinner.vue'
 
 interface ButtonProps {
-  variant?: 'solid' | 'outline' | 'ghost' | 'elevated' | 'tonal'
-  tone?: 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
+  variant?: 'solid' | 'outline' | 'ghost' | 'soft'
+  tone?: 'accent' | 'neutral' | 'danger'
+  /**
+   * Raises the button: a shadow that rises on hover and settles back on press,
+   * whatever the variant. On `ghost` and `outline`, which have no background of
+   * their own, it also paints the raised surface — in the dark theme a shadow over
+   * the page background has nothing casting it.
+   */
+  elevated?: boolean
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   /** Height reduced by 4px; padding, type and icons unchanged. */
   compact?: boolean
@@ -48,6 +55,7 @@ interface ButtonProps {
 const props = withDefaults(defineProps<ButtonProps>(), {
   variant: 'solid',
   tone: 'accent',
+  elevated: false,
   size: 'md',
   compact: false,
   href: undefined,
@@ -93,6 +101,7 @@ const passedAttrs = computed(() => {
     :aria-disabled="isInertLink ? 'true' : undefined"
     :data-variant="variant"
     :data-tone="tone"
+    :data-elevated="elevated ? '' : undefined"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
     :data-loading="loading ? '' : undefined"
@@ -170,47 +179,81 @@ const passedAttrs = computed(() => {
     color: var(--tone-text-tinted);
   }
 
-  .v-button[data-variant='outline']:hover:not(:disabled, [aria-disabled='true']),
-  .v-button[data-variant='ghost']:hover:not(:disabled, [aria-disabled='true']) {
+  /* `:not([data-elevated])` makes these DISJOINT from the elevation rules below,
+     rather than merely less specific: nothing then arbitrates the background of a
+     raised ghost by a one-step specificity margin, so a declaration added to either
+     set later cannot silently leak into the other. */
+  .v-button[data-variant='outline']:not([data-elevated]):hover:not(
+      :disabled,
+      [aria-disabled='true']
+    ),
+  .v-button[data-variant='ghost']:not([data-elevated]):hover:not(
+      :disabled,
+      [aria-disabled='true']
+    ) {
     background: var(--tone-bg-soft);
   }
 
-  .v-button[data-variant='outline']:active:not(:disabled, [aria-disabled='true']),
-  .v-button[data-variant='ghost']:active:not(:disabled, [aria-disabled='true']) {
+  .v-button[data-variant='outline']:not([data-elevated]):active:not(
+      :disabled,
+      [aria-disabled='true']
+    ),
+  .v-button[data-variant='ghost']:not([data-elevated]):active:not(
+      :disabled,
+      [aria-disabled='true']
+    ) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
-  .v-button[data-variant='elevated'] {
-    background: var(--vectis-color-surface-raised);
+  .v-button[data-variant='soft'] {
+    background: var(--tone-bg-soft);
     color: var(--tone-text-tinted);
+  }
+
+  .v-button[data-variant='soft']:hover:not(:disabled, [aria-disabled='true']) {
+    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
+  }
+
+  .v-button[data-variant='soft']:active:not(:disabled, [aria-disabled='true']) {
+    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 14%);
+  }
+
+  /* Elevation is ORTHOGONAL to the variant: the shadow scale applies to all four,
+     the raised surface only to the two that have no background of their own. The
+     `:is()` is not decoration — it carries the (0,3,0) that beats the ghost/outline
+     base (0,2,0) with no dependency on the rule order. */
+  .v-button[data-elevated] {
     box-shadow: var(--vectis-shadow-2);
   }
 
-  .v-button[data-variant='elevated']:hover:not(:disabled, [aria-disabled='true']) {
-    background: color-mix(in oklab, var(--vectis-color-surface-raised), var(--tone-text-tinted) 8%);
+  .v-button[data-elevated]:is([data-variant='ghost'], [data-variant='outline']) {
+    background: var(--vectis-color-surface-raised);
+  }
+
+  .v-button[data-elevated]:hover:not(:disabled, [aria-disabled='true']) {
     box-shadow: var(--vectis-shadow-3);
   }
 
-  .v-button[data-variant='elevated']:active:not(:disabled, [aria-disabled='true']) {
+  .v-button[data-elevated]:is([data-variant='ghost'], [data-variant='outline']):hover:not(
+      :disabled,
+      [aria-disabled='true']
+    ) {
+    background: color-mix(in oklab, var(--vectis-color-surface-raised), var(--tone-text-tinted) 8%);
+  }
+
+  .v-button[data-elevated]:active:not(:disabled, [aria-disabled='true']) {
+    box-shadow: var(--vectis-shadow-2);
+  }
+
+  .v-button[data-elevated]:is([data-variant='ghost'], [data-variant='outline']):active:not(
+      :disabled,
+      [aria-disabled='true']
+    ) {
     background: color-mix(
       in oklab,
       var(--vectis-color-surface-raised),
       var(--tone-text-tinted) 12%
     );
-    box-shadow: var(--vectis-shadow-2);
-  }
-
-  .v-button[data-variant='tonal'] {
-    background: var(--tone-bg-soft);
-    color: var(--tone-text-tinted);
-  }
-
-  .v-button[data-variant='tonal']:hover:not(:disabled, [aria-disabled='true']) {
-    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
-  }
-
-  .v-button[data-variant='tonal']:active:not(:disabled, [aria-disabled='true']) {
-    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 14%);
   }
 
   .v-button:is(:disabled, [aria-disabled='true']) {
@@ -221,15 +264,14 @@ const passedAttrs = computed(() => {
     opacity: 0.5;
   }
 
-  /* Disabled (outside loading): greys through tokens, never opacity. */
+  /* Disabled (outside loading): greys through tokens, never opacity. These three are
+     (0,4,0) and already beat the (0,3,0) raised background, whatever the order. */
   .v-button:is(:disabled, [aria-disabled='true']):not([data-loading]):is(
       [data-variant='solid'],
-      [data-variant='elevated'],
-      [data-variant='tonal']
+      [data-variant='soft']
     ) {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);
-    box-shadow: none;
   }
 
   .v-button:is(:disabled, [aria-disabled='true']):not([data-loading])[data-variant='outline'] {
@@ -241,6 +283,12 @@ const passedAttrs = computed(() => {
   .v-button:is(:disabled, [aria-disabled='true']):not([data-loading])[data-variant='ghost'] {
     background: transparent;
     color: var(--vectis-color-text-subtle);
+  }
+
+  /* The shadow needs its OWN rule: no variant declares one, so none of the three
+     above cancels it, and a disabled raised ghost would go on casting shadow-2. */
+  .v-button:is(:disabled, [aria-disabled='true']):not([data-loading])[data-elevated] {
+    box-shadow: none;
   }
 
   .v-button-spinner {

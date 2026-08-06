@@ -54,7 +54,7 @@ const meta = {
     variant: { control: 'inline-radio', options: ['ghost', 'outline'] },
     tone: {
       control: 'inline-radio',
-      options: ['accent', 'neutral', 'danger', 'success', 'warning'],
+      options: ['accent', 'neutral', 'danger'],
     },
     size: { control: 'inline-radio', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
@@ -158,7 +158,7 @@ export const Tones: Story = {
   render: () => ({
     components: { VToggle, VToggleItem },
     setup: () => ({
-      tones: ['accent', 'neutral', 'success', 'warning', 'danger'],
+      tones: ['accent', 'neutral', 'danger'],
       selection: ref('centre'),
       t,
     }),

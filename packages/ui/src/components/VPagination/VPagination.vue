@@ -40,7 +40,7 @@ interface PaginationProps {
   /** Variant of the NON-active pages and of the controls. The active page is always `solid`. */
   variant?: 'ghost' | 'outline'
   /** Tone of the active page; inactive pages and the controls stay neutral. */
-  tone?: 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
+  tone?: 'accent' | 'neutral' | 'danger'
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   /** Height reduced by 4px, propagated to every button. */
   compact?: boolean

@@ -227,8 +227,8 @@ onBeforeUnmount(detach)
   }
 
   /* The three variants mirror VButton's NEUTRAL tone, declaration for
-     declaration: flat = tonal, outlined = outline, elevated = elevated (minus
-     the hover shadow — there is no hover here). A single colour set, so no
+     declaration: flat = soft, outlined = outline, elevated = ghost + elevated
+     (minus the hover shadow — there is no hover here). A single colour set, so no
      [data-tone] table.
      They set LOCALS rather than declaring straight away, because the recipe has
      two possible carriers (see below). The names are qualified: these variables

@@ -50,7 +50,7 @@ const meta = {
   title: 'Components/Chip',
   component: VChip,
   argTypes: {
-    variant: { control: 'select', options: ['tonal', 'solid', 'outline'] },
+    variant: { control: 'select', options: ['soft', 'solid', 'outline'] },
     tone: { control: 'select', options: ['neutral', 'accent', 'danger', 'success', 'warning'] },
     color: { control: 'color' },
     shape: { control: 'select', options: ['chip', 'pill'] },
@@ -61,7 +61,7 @@ const meta = {
     dismissIcon: { control: 'text' },
   },
   args: {
-    variant: 'tonal',
+    variant: 'soft',
     tone: 'neutral',
     shape: 'chip',
     size: 'xs',
@@ -86,7 +86,7 @@ export const Variants: Story = {
   render: () => ({
     components: { VChip },
     setup: () => ({
-      variants: ['tonal', 'solid', 'outline'],
+      variants: ['soft', 'solid', 'outline'],
       tones: ['neutral', 'accent', 'success', 'warning', 'danger'],
     }),
     template: `
@@ -126,10 +126,10 @@ export const CustomColor: Story = {
     setup: () => ({ selected: ref(true), t }),
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <VChip color="mediumvioletred" variant="tonal" clickable>tonal</VChip>
+        <VChip color="mediumvioletred" variant="soft" clickable>soft</VChip>
         <VChip color="mediumvioletred" variant="solid" clickable>solid</VChip>
         <VChip color="mediumvioletred" variant="outline" clickable>outline</VChip>
-        <VChip color="oklch(55% 0.15 150)" variant="tonal" clickable>oklch()</VChip>
+        <VChip color="oklch(55% 0.15 150)" variant="soft" clickable>oklch()</VChip>
         <VChip color="rebeccapurple" selectable check v-model:selected="selected">{{ t.selected }}</VChip>
       </div>
     `,
@@ -322,7 +322,7 @@ export const Disabled: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <VChip variant="tonal" tone="accent" disabled clickable>tonal</VChip>
+        <VChip variant="soft" tone="accent" disabled clickable>soft</VChip>
         <VChip variant="solid" tone="accent" disabled clickable>solid</VChip>
         <VChip variant="outline" tone="accent" disabled clickable>outline</VChip>
         <VChip selectable :selected="true" dismissible disabled>{{ t.selected }}</VChip>

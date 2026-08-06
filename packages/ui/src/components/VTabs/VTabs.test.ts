@@ -291,12 +291,14 @@ describe('VTabs', () => {
      * reach): `outlined` is a decorated `flat`, so it does not raise the active tab
      * — inside a card, the frame is what carries the elevation.
      */
-    it("only `inset` raises the active tab (mapping to VButton's variant)", () => {
-      const activeVariantOf = (tabsAttrs?: string) =>
-        tabsOf(mount({ tabsAttrs }).container)[0]?.getAttribute('data-variant')
-      expect(activeVariantOf()).toBe('ghost')
-      expect(activeVariantOf('variant="outlined"')).toBe('ghost')
-      expect(activeVariantOf('variant="inset"')).toBe('elevated')
+    it("only `inset` raises the active tab (mapping to VButton's elevated)", () => {
+      const activeTabOf = (tabsAttrs?: string) => tabsOf(mount({ tabsAttrs }).container)[0]
+      // the variant stays ghost throughout: elevation is orthogonal to it
+      expect(activeTabOf()?.getAttribute('data-variant')).toBe('ghost')
+      expect(activeTabOf('variant="inset"')?.getAttribute('data-variant')).toBe('ghost')
+      expect(activeTabOf()?.hasAttribute('data-elevated')).toBe(false)
+      expect(activeTabOf('variant="outlined"')?.hasAttribute('data-elevated')).toBe(false)
+      expect(activeTabOf('variant="inset"')?.hasAttribute('data-elevated')).toBe(true)
     })
   })
 

@@ -56,12 +56,22 @@ describe('VIconButton', () => {
 
   it('supports every variant/tone and forwards compact', () => {
     const { getByRole } = render(VIconButton, {
-      props: { label: 'Confirm', variant: 'tonal', tone: 'success', compact: true },
+      props: { label: 'Confirm', variant: 'soft', tone: 'danger', compact: true },
       slots: { default: '<svg aria-hidden="true" />' },
     })
     const button = getByRole('button')
-    expect(button.dataset.variant).toBe('tonal')
-    expect(button.dataset.tone).toBe('success')
+    expect(button.dataset.variant).toBe('soft')
+    expect(button.dataset.tone).toBe('danger')
     expect(button.dataset.compact).toBe('')
+  })
+
+  /* `elevated` has to be forwarded EXPLICITLY: VIconButton renders a VButton, so an
+     unforwarded prop lands in $attrs and never reaches the data attribute. */
+  it('forwards elevated to the VButton', () => {
+    const { getByRole } = render(VIconButton, {
+      props: { label: 'Confirm', elevated: true },
+      slots: { default: '<svg aria-hidden="true" />' },
+    })
+    expect(getByRole('button').dataset.elevated).toBe('')
   })
 })

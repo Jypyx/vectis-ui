@@ -17,7 +17,7 @@ const meta = {
     variant: { control: 'inline-radio', options: ['ghost', 'outline'] },
     tone: {
       control: 'inline-radio',
-      options: ['accent', 'neutral', 'danger', 'success', 'warning'],
+      options: ['accent', 'neutral', 'danger'],
     },
     size: { control: 'inline-radio', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     align: { control: 'inline-radio', options: ['start', 'center', 'end'] },
@@ -98,7 +98,7 @@ export const Variants: Story = {
 export const Tones: Story = {
   render: () => ({
     components: { VPagination },
-    setup: () => ({ tones: ['accent', 'neutral', 'success', 'warning', 'danger'], page: ref(3) }),
+    setup: () => ({ tones: ['accent', 'neutral', 'danger'], page: ref(3) }),
     template: `
       <div style="display: grid; gap: 16px">
         <VPagination v-for="t in tones" :key="t" :length="8" :tone="t" :label="t" v-model="page" />

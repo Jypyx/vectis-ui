@@ -97,9 +97,9 @@ export const Variants: Story = {
           <VButton variant="outline" tone="neutral">{{ t.month }}</VButton>
         </VButtonGroup>
         <VButtonGroup aria-label="Tonal">
-          <VButton variant="tonal">{{ t.day }}</VButton>
-          <VButton variant="tonal">{{ t.week }}</VButton>
-          <VButton variant="tonal">{{ t.month }}</VButton>
+          <VButton variant="soft">{{ t.day }}</VButton>
+          <VButton variant="soft">{{ t.week }}</VButton>
+          <VButton variant="soft">{{ t.month }}</VButton>
         </VButtonGroup>
       </div>
     `,

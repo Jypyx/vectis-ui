@@ -25,7 +25,7 @@ export type ToggleValue = string | number
 /** The v-model's type follows `multiple`: a lone value (or null) in single mode, an array in multiple. */
 export type ToggleModelValue = ToggleValue | ToggleValue[] | null
 export type ToggleVariant = 'ghost' | 'outline'
-export type ToggleTone = 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
+export type ToggleTone = 'accent' | 'neutral' | 'danger'
 export type ToggleSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 export type ToggleOrientation = 'horizontal' | 'vertical'
 

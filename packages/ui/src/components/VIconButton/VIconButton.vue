@@ -13,8 +13,10 @@ import type { IconSource } from '../VIcon/types'
 interface IconButtonProps {
   /** Accessible label, set as aria-label. */
   label: string
-  variant?: 'solid' | 'outline' | 'ghost' | 'elevated' | 'tonal'
-  tone?: 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
+  variant?: 'solid' | 'outline' | 'ghost' | 'soft'
+  tone?: 'accent' | 'neutral' | 'danger'
+  /** Raises the button (shadow, plus a raised surface on ghost/outline) — see VButton. */
+  elevated?: boolean
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   /** Height (and width) reduced by 4px. */
   compact?: boolean
@@ -30,6 +32,7 @@ interface IconButtonProps {
 withDefaults(defineProps<IconButtonProps>(), {
   variant: 'ghost',
   tone: 'neutral',
+  elevated: false,
   size: 'md',
   compact: false,
   type: 'button',
@@ -50,6 +53,7 @@ defineSlots<{
     class="v-icon-button"
     :variant="variant"
     :tone="tone"
+    :elevated="elevated"
     :size="size"
     :compact="compact"
     :type="type"

@@ -30,9 +30,10 @@ const meta = {
   title: 'Components/IconButton',
   component: VIconButton,
   argTypes: {
-    variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'elevated', 'tonal'] },
-    tone: { control: 'select', options: ['accent', 'neutral', 'danger', 'success', 'warning'] },
+    variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'soft'] },
+    tone: { control: 'select', options: ['accent', 'neutral', 'danger'] },
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
+    elevated: { control: 'boolean' },
     compact: { control: 'boolean' },
     icon: { control: 'text' },
     iconFilled: { control: 'boolean' },
@@ -42,6 +43,7 @@ const meta = {
     variant: 'ghost',
     tone: 'neutral',
     size: 'md',
+    elevated: false,
     compact: false,
     disabled: false,
     loading: false,
@@ -70,9 +72,9 @@ export const Variants: Story = {
     setup: () => ({ args }),
     template: `
       <div style="display: grid; gap: 12px">
-        <div v-for="tone in ['accent', 'neutral', 'danger', 'success', 'warning']" :key="tone" style="display: flex; gap: 8px; flex-wrap: wrap">
+        <div v-for="tone in ['accent', 'neutral', 'danger']" :key="tone" style="display: flex; gap: 8px; flex-wrap: wrap">
           <VIconButton
-            v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']"
+            v-for="variant in ['solid', 'outline', 'ghost', 'soft']"
             :key="variant"
             :label="args.label"
             :tone="tone"
@@ -80,6 +82,33 @@ export const Variants: Story = {
           >
             <VIcon name="favorite" />
           </VIconButton>
+        </div>
+      </div>
+    `,
+  }),
+}
+
+/* Same reading as VButton/Elevated: one group per tone, the plain row above the
+   raised one. */
+export const Elevated: Story = {
+  render: (args) => ({
+    components: { VIconButton, VIcon },
+    setup: () => ({ args }),
+    template: `
+      <div style="display: grid; gap: 20px">
+        <div v-for="tone in ['accent', 'neutral', 'danger']" :key="tone" style="display: grid; gap: 8px">
+          <div v-for="raised in [false, true]" :key="String(raised)" style="display: flex; gap: 8px; flex-wrap: wrap">
+            <VIconButton
+              v-for="variant in ['solid', 'outline', 'ghost', 'soft']"
+              :key="variant"
+              :label="args.label"
+              :tone="tone"
+              :variant="variant"
+              :elevated="raised"
+            >
+              <VIcon name="favorite" />
+            </VIconButton>
+          </div>
         </div>
       </div>
     `,
@@ -164,7 +193,7 @@ export const Disabled: Story = {
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
         <VIconButton
-          v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']"
+          v-for="variant in ['solid', 'outline', 'ghost', 'soft']"
           :key="variant"
           :label="args.label"
           :variant="variant"

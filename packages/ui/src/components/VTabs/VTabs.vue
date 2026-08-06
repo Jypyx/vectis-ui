@@ -14,7 +14,7 @@ import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
 export type TabsVariant = 'flat' | 'outlined' | 'inset'
-export type TabsTone = 'accent' | 'neutral' | 'danger' | 'success' | 'warning'
+export type TabsTone = 'accent' | 'neutral' | 'danger'
 export type TabsSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 export type TabsOrientation = 'horizontal' | 'vertical'
 export type TabsAlign = 'start' | 'center' | 'end'
@@ -23,8 +23,9 @@ export type TabsActivation = 'manual' | 'automatic'
 /**
  * Tab bar (the ARIA tabs pattern) and, optionally, its panels.
  *
- * The component invents no button: every tab is a `VButton` (ghost, or elevated
- * when active in the `inset` variant), and the scroll controls are `VIconButton`.
+ * The component invents no button: every tab is a ghost `VButton` (raised through
+ * `elevated` when active in the `inset` variant), and the scroll controls are
+ * `VIconButton`.
  * Hover, focus, disabling and `prefers-reduced-motion` therefore come from
  * `VButton`, with no state rule redefined here.
  *

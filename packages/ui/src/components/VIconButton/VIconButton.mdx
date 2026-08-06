@@ -21,12 +21,19 @@ sm/md → 20px, lg/xl → 24px).
 
 ## Variants and tones
 
-The same five variants (`solid`, `outline`, `ghost`, `elevated`, `tonal`) and five tones
-(`accent`, `neutral`, `danger`, `success`, `warning`) as `VButton` — see its documentation for
-the detail of each rendering. The defaults suit icon usage: `variant="ghost"` and
+The same four variants (`solid`, `outline`, `ghost`, `soft`) and three tones
+(`accent`, `neutral`, `danger`) as `VButton` — see its documentation for
+the detail of each rendering, and for why `success`/`warning` are not action tones. The defaults suit icon usage: `variant="ghost"` and
 `tone="neutral"` (a VIconButton is typically a discreet toolbar action).
 
 <Canvas of={VIconButtonStories.Variants} />
+
+## Elevation
+
+The `elevated` boolean is forwarded to `VButton` and behaves exactly as it does there: the shadow
+scale on every variant, plus the raised surface on `ghost` and `outline`.
+
+<Canvas of={VIconButtonStories.Elevated} />
 
 ## Sizes
 

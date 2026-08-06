@@ -74,7 +74,7 @@ const meta = {
     variant: { control: 'inline-radio', options: ['flat', 'outlined', 'inset'] },
     tone: {
       control: 'inline-radio',
-      options: ['accent', 'neutral', 'danger', 'success', 'warning'],
+      options: ['accent', 'neutral', 'danger'],
     },
     size: { control: 'inline-radio', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
@@ -172,7 +172,7 @@ export const Tones: Story = {
   render: () => ({
     components: { VTabs, VTab },
     setup: () => ({
-      tones: ['accent', 'neutral', 'success', 'warning', 'danger'],
+      tones: ['accent', 'neutral', 'danger'],
       // `outlined` renders the tones identically to `flat` (the frame is agnostic
       // to the tone): adding it would only double the board.
       variants: ['flat', 'inset'],

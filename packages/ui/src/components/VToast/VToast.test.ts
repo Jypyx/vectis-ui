@@ -8,7 +8,7 @@ const makeItem = (overrides: Partial<ToastItem> = {}): ToastItem => ({
   id: 1,
   message: 'Message',
   tone: 'neutral',
-  variant: 'tonal',
+  variant: 'soft',
   closable: true,
   ...overrides,
 })

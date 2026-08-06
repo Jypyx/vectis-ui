@@ -352,7 +352,7 @@ export const CustomSlots: Story = {
         <VFileUpload v-bind="args" v-model="files" :title="t.title">
           <template #icon><VIcon name="attach_file" /></template>
           <template #browse="{ open, disabled }">
-            <VButton variant="tonal" tone="accent" :disabled="disabled" @click="open">
+            <VButton variant="soft" tone="accent" :disabled="disabled" @click="open">
               {{ t.selection }}
             </VButton>
           </template>

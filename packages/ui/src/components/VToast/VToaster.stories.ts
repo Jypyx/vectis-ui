@@ -21,7 +21,7 @@ const t = storyText({
   en: {
     notify: 'Notify',
     changesSaved: 'Changes saved.',
-    tonalNotification: 'A notification in the tonal variant.',
+    softNotification: 'A notification in the soft variant.',
     solidNotification: 'A notification in the solid variant.',
     placement: (p: string) => `Placement "${p}".`,
     sendFailed: 'Sending failed',
@@ -52,7 +52,7 @@ const t = storyText({
   fr: {
     notify: 'Notifier',
     changesSaved: 'Modifications enregistrées.',
-    tonalNotification: 'Notification en variant tonal.',
+    softNotification: 'Notification en variant soft.',
     solidNotification: 'Notification en variant solid.',
     placement: (p: string) => `Placement « ${p} ».`,
     sendFailed: "Échec de l'envoi",
@@ -144,7 +144,7 @@ export const Tones: Story = {
           :key="tone"
           variant="outline"
           tone="neutral"
-          @click="toast({ tone, title: tone, message: t.tonalNotification, duration: 0 })"
+          @click="toast({ tone, title: tone, message: t.softNotification, duration: 0 })"
         >
           {{ tone }}
         </VButton>
@@ -172,6 +172,23 @@ export const Solid: Story = {
       </div>
     `,
   }),
+  // axe only audits what is left ON SCREEN, and a toast only exists once its
+  // trigger is clicked: without this the solid variant is never contrast-checked.
+  // `neutral` is the tone that earns the play function — it is the one whose solid
+  // is an inversion, so it is also the one whose two themes differ the most.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const stack = canvasElement.querySelector(
+      ".v-toast-stack[data-placement='bottom-right']",
+    ) as HTMLElement
+
+    await userEvent.click(canvas.getByRole('button', { name: 'neutral' }))
+    await waitFor(() => expect(stack.matches(':popover-open')).toBe(true))
+    // waitFor: the toast transitions in from opacity 0 (@starting-style)
+    await waitFor(() =>
+      expect(within(stack).getByText('A notification in the solid variant.')).toBeVisible(),
+    )
+  },
 }
 
 export const Placements: Story = {

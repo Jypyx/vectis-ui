@@ -11,7 +11,6 @@ const t = storyText({
     add: 'Add',
     next: 'Next',
     confirm: 'Confirm',
-    warning: 'Warning',
     delete: 'Delete',
     import: 'Import',
     outline: 'Outline',
@@ -27,7 +26,6 @@ const t = storyText({
     add: 'Ajouter',
     next: 'Suivant',
     confirm: 'Valider',
-    warning: 'Attention',
     delete: 'Supprimer',
     import: 'Importer',
     outline: 'Contour',
@@ -44,9 +42,10 @@ const meta = {
   title: 'Components/Button',
   component: VButton,
   argTypes: {
-    variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'elevated', 'tonal'] },
-    tone: { control: 'select', options: ['accent', 'neutral', 'danger', 'success', 'warning'] },
+    variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'soft'] },
+    tone: { control: 'select', options: ['accent', 'neutral', 'danger'] },
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
+    elevated: { control: 'boolean' },
     compact: { control: 'boolean' },
     iconStart: { control: 'text' },
     iconEnd: { control: 'text' },
@@ -57,6 +56,7 @@ const meta = {
     variant: 'solid',
     tone: 'accent',
     size: 'md',
+    elevated: false,
     compact: false,
     disabled: false,
     loading: false,
@@ -78,10 +78,31 @@ export const Variants: Story = {
     components: { VButton },
     template: `
       <div style="display: grid; gap: 12px">
-        <div v-for="tone in ['accent', 'neutral', 'danger', 'success', 'warning']" :key="tone" style="display: flex; gap: 8px; flex-wrap: wrap">
-          <VButton v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']" :key="variant" :tone="tone" :variant="variant">
+        <div v-for="tone in ['accent', 'neutral', 'danger']" :key="tone" style="display: flex; gap: 8px; flex-wrap: wrap">
+          <VButton v-for="variant in ['solid', 'outline', 'ghost', 'soft']" :key="variant" :tone="tone" :variant="variant">
             {{ tone }} / {{ variant }}
           </VButton>
+        </div>
+      </div>
+    `,
+  }),
+}
+
+/* One group per tone, each pairing the plain row with the raised one: the shadow
+   applies to all four variants, while ghost and outline additionally take the raised
+   surface. The tone is not just a label here — it feeds --tone-text-tinted, which is
+   what the raised background mixes towards on hover and press. */
+export const Elevated: Story = {
+  render: () => ({
+    components: { VButton },
+    template: `
+      <div style="display: grid; gap: 20px">
+        <div v-for="tone in ['accent', 'neutral', 'danger']" :key="tone" style="display: grid; gap: 8px">
+          <div v-for="raised in [false, true]" :key="String(raised)" style="display: flex; gap: 8px; flex-wrap: wrap">
+            <VButton v-for="variant in ['solid', 'outline', 'ghost', 'soft']" :key="variant" :tone="tone" :variant="variant" :elevated="raised">
+              {{ tone }} / {{ variant }}{{ raised ? ' + elevated' : '' }}
+            </VButton>
+          </div>
         </div>
       </div>
     `,
@@ -124,10 +145,10 @@ export const Icons: Story = {
           <VButton icon-end="arrow_forward" size="lg">{{ t.next }}</VButton>
         </div>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-          <VButton icon-start="check" variant="outline" tone="success">{{ t.confirm }}</VButton>
-          <VButton icon-start="warning" variant="tonal" tone="warning">{{ t.warning }}</VButton>
+          <VButton icon-start="check" variant="outline" tone="accent">{{ t.confirm }}</VButton>
+          <VButton icon-start="add" variant="soft" tone="accent">{{ t.add }}</VButton>
           <VButton icon-start="delete" variant="ghost" tone="danger">{{ t.delete }}</VButton>
-          <VButton icon-start="cloud_upload" icon-end="expand_more" variant="elevated" tone="neutral">{{ t.import }}</VButton>
+          <VButton icon-start="cloud_upload" icon-end="expand_more" variant="ghost" elevated tone="neutral">{{ t.import }}</VButton>
         </div>
       </div>
     `,
@@ -148,8 +169,8 @@ export const IconsFilled: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-        <VButton icon-start="favorite" variant="tonal">{{ t.outline }}</VButton>
-        <VButton icon-start="favorite" icon-filled variant="tonal">{{ t.filled }}</VButton>
+        <VButton icon-start="favorite" variant="soft">{{ t.outline }}</VButton>
+        <VButton icon-start="favorite" icon-filled variant="soft">{{ t.filled }}</VButton>
         <VButton icon-start="home" icon-end="star" icon-filled variant="solid">{{ t.bothFilled }}</VButton>
       </div>
     `,
@@ -243,7 +264,7 @@ export const Disabled: Story = {
     components: { VButton },
     template: `
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
-        <VButton v-for="variant in ['solid', 'outline', 'ghost', 'elevated', 'tonal']" :key="variant" :variant="variant" disabled>
+        <VButton v-for="variant in ['solid', 'outline', 'ghost', 'soft']" :key="variant" :variant="variant" disabled>
           {{ variant }}
         </VButton>
       </div>
