@@ -110,4 +110,6 @@ export type {
   ComboboxItem,
   ComboboxFilter,
 } from './components/VCombobox/VCombobox.vue'
+export { default as VBreadcrumb } from './components/VBreadcrumb/VBreadcrumb.vue'
+export type { BreadcrumbItem } from './components/VBreadcrumb/VBreadcrumb.vue'
 export { default as VChip } from './components/VChip/VChip.vue'

@@ -1,0 +1,88 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VBreadcrumbStories from './VBreadcrumb.stories'
+
+<Meta of={VBreadcrumbStories} />
+
+# Breadcrumb
+
+A data-driven breadcrumb trail: a `<nav>` + an ordered list entirely driven by the
+`items: BreadcrumbItem[]` prop (`{ label, href, iconStart? }`, an exported type) — pure data
+derivation, no browser API, SSR-safe. Each item is a link; the **active** item is derived from
+`currentPath`: the one whose `href` matches (trailing slash normalized) stays a clickable link and
+receives `aria-current="page"` — the ARIA APG pattern.
+
+The separators are decorative `<VIcon>`s (`aria-hidden`) placed at the head of each item, the first
+one being hidden in CSS (`:first-child`).
+
+<Canvas of={VBreadcrumbStories.Default} />
+
+<Controls of={VBreadcrumbStories.Default} />
+
+## Separator
+
+`separator` (default `chevron_right`) accepts an icon name **or** an explicit render
+(`{ src: '/chevron.svg' }`): a string is always a name, never a guessed URL. RTL note: a
+directional icon does not flip automatically.
+
+<Canvas of={VBreadcrumbStories.IconSeparator} />
+
+<Canvas of={VBreadcrumbStories.ImageSeparator} />
+
+## Item icons
+
+`iconStart` on an item places an icon before its label — the same name/URL contract as the
+separator. The icons follow the size and the colour of the text through the `--vectis-icon-size`
+context.
+
+<Canvas of={VBreadcrumbStories.WithIcons} />
+
+## Truncation
+
+Past `maxItems` (effective minimum: 3), the list displays the first item + an "…" button + the
+second-to-last + the last. The button opens a VMenu listing the hidden items only, rendered as real
+links (`<a role="menuitem">`). Keyboard: arrows to navigate, Escape closes and hands the focus back
+to the trigger.
+
+<Canvas of={VBreadcrumbStories.Truncated} />
+
+## Edge cases
+
+Long labels are truncated with an ellipsis, and the list wraps when needed:
+
+<Canvas of={VBreadcrumbStories.LongLabels} />
+
+## Validating `href`
+
+`items[].href` is rendered as-is into the link, with no scheme filtering — like every `href` in the
+design system, and like every other Vue component library. A `javascript:` URL therefore runs on
+click.
+
+VBreadcrumb is the one to watch, because its trail is usually built from data (a CMS, an API,
+a route definition) rather than written by hand. **Validate the scheme where the data enters your
+application**, allowing what you actually serve:
+
+```ts
+const SAFE = new Set(['http:', 'https:'])
+
+function safeHref(raw: string): string {
+  // Relative paths are the common case and stay valid: they only need a base to parse.
+  const url = URL.parse(raw, window.location.origin)
+  return url && SAFE.has(url.protocol) ? raw : '#'
+}
+```
+
+## Accessibility
+
+- `<nav aria-label="Breadcrumb">` (customizable through `label`) + an ordered list: screen readers
+  announce the navigation and the position of each segment.
+- The active item stays a link with `aria-current="page"` — it remains reachable and identifiable
+  (the APG pattern).
+- The separators are purely decorative (`aria-hidden`), never announced.
+- The ellipsis button has an explicit label (`ellipsisLabel`, "Show intermediate pages" by default)
+  and its menu follows the ARIA menu pattern (roving focus).
+- The default separator is an embedded SVG; the icon names YOU supply come from your font — plan an
+  acceptable fallback (the icon is decorative, the label carries the meaning).
+
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.
