@@ -117,3 +117,6 @@ export { default as VSideNavigationItem } from './components/VSideNavigation/VSi
 export { default as VSideNavigationGroup } from './components/VSideNavigation/VSideNavigationGroup.vue'
 export { default as VSideNavigationSeparator } from './components/VSideNavigation/VSideNavigationSeparator.vue'
 export { default as VChip } from './components/VChip/VChip.vue'
+export { default as VHotkeys } from './components/VHotkeys/VHotkeys.vue'
+export type { HotkeysVariant, HotkeysSize } from './components/VHotkeys/VHotkeys.vue'
+export type { HotkeysPlatform } from './components/VHotkeys/platform'
