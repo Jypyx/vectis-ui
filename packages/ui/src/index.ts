@@ -120,3 +120,11 @@ export { default as VChip } from './components/VChip/VChip.vue'
 export { default as VHotkeys } from './components/VHotkeys/VHotkeys.vue'
 export type { HotkeysVariant, HotkeysSize } from './components/VHotkeys/VHotkeys.vue'
 export type { HotkeysPlatform } from './components/VHotkeys/platform'
+export { default as VDataTable } from './components/VDataTable/VDataTable.vue'
+export type {
+  DataTableColumn,
+  DataTableSort,
+  DataTableRowId,
+  DataTableParams,
+  DataTableProps,
+} from './components/VDataTable/VDataTable.vue'
