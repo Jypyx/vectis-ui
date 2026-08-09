@@ -170,7 +170,69 @@ describe('VCarousel', () => {
     })
   })
 
-  describe('ends without an observer', () => {
+  /*
+   * `pageCount` falls back to a pure function of the props with no layout, so this is
+   * the one place the multi-item arithmetic is testable at all. In the browser it is
+   * measured off the scroller — see the `Pages` and `Peek` play functions.
+   */
+  describe('pages', () => {
+    const six = [0, 1, 2, 3, 4, 5].map((i) => `<VCarouselItem>S${i}</VCarouselItem>`).join('\n')
+
+    it('renders one indicator per REACHABLE position, not one per slide', () => {
+      const { container } = mount({ attrs: ':items-per-view="3"', slides: six })
+      // 6 slides three at a time: the scroller can only lead with 1 to 4
+      expect(indicatorsOf(container).map((el) => el.getAttribute('aria-label'))).toEqual([
+        '1 of 6',
+        '2 of 6',
+        '3 of 6',
+        '4 of 6',
+      ])
+    })
+
+    it('next and End clamp to the last PAGE, not to the last slide', async () => {
+      const { container, model } = mount({
+        attrs: ':items-per-view="3"',
+        slides: six,
+        initial: 3,
+      })
+      const next = container.querySelectorAll<HTMLButtonElement>('.v-carousel-control')[1]
+      expect(next?.disabled).toBe(true)
+
+      const port = container.querySelector('.v-carousel-viewport') as HTMLElement
+      await fireEvent.keyDown(port, { key: 'End' })
+      expect(model.value).toBe(3)
+    })
+
+    it('autoplay stops on the last page', async () => {
+      vi.useFakeTimers()
+      const { model } = mount({
+        attrs: ':items-per-view="3" :autoplay="1000"',
+        slides: six,
+      })
+      // One tick per step: the timer is re-armed by a watcher, which
+      // `advanceTimersByTime` does not flush on its own.
+      for (let step = 0; step < 6; step += 1) {
+        vi.advanceTimersByTime(1000)
+        await nextTick()
+      }
+      // 6 slides three at a time: it stops on the last PAGE, not the last slide
+      expect(model.value).toBe(3)
+    })
+
+    it('itemsPerView beyond the slide count leaves a single page', () => {
+      const { container } = mount({ attrs: ':items-per-view="6"' })
+      expect(indicatorsOf(container)).toHaveLength(1)
+      const controls = [...container.querySelectorAll<HTMLButtonElement>('.v-carousel-control')]
+      expect(controls.every((el) => el.disabled)).toBe(true)
+    })
+
+    it('an empty carousel renders no indicator', () => {
+      const { container } = mount({ slides: '' })
+      expect(indicatorsOf(container)).toHaveLength(0)
+    })
+  })
+
+  describe('ends, derived from the model and the page count', () => {
     it('falls back to the model, so the controls are already right in SSR', async () => {
       const { container, model } = mount()
       const [previous, next] = [

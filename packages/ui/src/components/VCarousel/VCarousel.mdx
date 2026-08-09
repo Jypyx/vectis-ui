@@ -28,11 +28,40 @@ Narrow the container and the floor takes over on its own.
 
 <Canvas of={VCarouselStories.FluidFloor} />
 
+## Pages, not slides
+
+`v-model` is a slide index, but not every slide can become the leading one. With
+`scroll-snap-align: start`, a position past the end of the track is unreachable — the scroller
+clamps short of it. Six slides three at a time therefore offer **four** positions, not six, and the
+component renders four indicators and stops `next` on the fourth. Anything else would hand out dots
+that scroll nowhere and let the model hold a value the DOM can never satisfy.
+
+That count is measured off the scroller rather than computed from `itemsPerView`, because a `peek`
+or an active `itemMinSize` makes the real slides-per-view fractional, and the fractional part costs
+one further position. Before there is any layout — on the server, and on the first paint — it falls
+back to `count - itemsPerView + 1`, which is exact in the default configuration.
+
+The indicators stay named after the slide they scroll to (`1 of 6` … `4 of 6`): the control parks
+that slide at the start edge, so the name agrees with the slide's own label and with the live
+region. A page ordinal would announce "4 of 4" on a control that reveals slide 4 of 6.
+
+<Canvas of={VCarouselStories.Pages} />
+
+The count follows a resize with no `ResizeObserver`: the number of positions can only change when
+the number of fully visible slides changes, which crosses the intersection observer's `1.0`
+threshold and re-triggers the measurement.
+
+<Canvas of={VCarouselStories.ResponsivePages} />
+
 ## Peek
 
 `peek` reserves a strip past the last fully visible slide so the next one shows through — the
 product-list template. It **includes the gap that precedes it**, which is what lets one formula
 serve every combination without a special case.
+
+One consequence to design around: with a peek, the last slide is never fully revealed. The last
+snap position stops short of the end of the track by the width of the strip, and that is inherent
+to `scroll-snap-align: start` under mandatory snapping.
 
 <Canvas of={VCarouselStories.Peek} />
 
@@ -77,6 +106,9 @@ them). Icons and labels are props (`prevIcon`, `nextIcon`, `prevLabel`…), and 
 `#indicators`, `#indicator` and `#autoplay` slots replace the rendering entirely — `#indicators`
 receives `goTo`, without which the bar could no longer select anything.
 
+A custom bar must render one control per **`pageCount`**, not per `count`: the slots receive both,
+`count` being there for "N of M" labels.
+
 <Canvas of={VCarouselStories.Placement} />
 
 ## Autoplay
@@ -107,8 +139,9 @@ choice.
   registry the slides fed at mount would render zero of them server-side.
 - The scroll track carries `tabindex="0"`, and that is required rather than defensive: a scroll
   container must have a tabbable descendant, and slide content may hold nothing focusable. It is
-  also what makes the component ship **no keyboard handler** — a focused scroll container already
-  moves snap-aware on the arrows, PageUp/PageDown and Home/End.
+  also what makes the track the keyboard target: the arrows move one slide and Home/End jump to
+  the ends. A focused scroll container does move on the arrows by itself, but the browser scrolls
+  it a fixed pixel step that mandatory snapping immediately undoes, so the component handles them.
 - The indicators are ordinary buttons named "N of M", the current one marked with `aria-current`.
   Their hit area is 24px even though the dot is 8px.
 - The autoplay control carries its state in its **label** (start/stop), not in `aria-pressed`.

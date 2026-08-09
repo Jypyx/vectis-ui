@@ -134,8 +134,9 @@ export const ItemsPerView: Story = {
 
 /** A slice of the next slide stays visible — the product-list template. */
 export const Peek: Story = {
-  args: { itemsPerView: 2, peek: '4rem', indicators: false },
+  args: { itemsPerView: 2, peek: '4rem', indicators: 'outside' },
   play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
     const port = canvasElement.querySelector('.v-carousel-viewport') as HTMLElement
     const slide = canvasElement.querySelector('[data-carousel-index="0"]') as HTMLElement
     const gap = Number.parseFloat(getComputedStyle(port).columnGap)
@@ -143,6 +144,24 @@ export const Peek: Story = {
     // the peek strip carries its own leading gap, which is what keeps the formula branch-free
     const expected = (port.clientWidth - gap - 64) / 2
     await expect(Math.abs(slide.getBoundingClientRect().width - expected)).toBeLessThan(1)
+
+    /*
+     * A peek makes the real slides-per-view FRACTIONAL, and that costs one leading
+     * position: `count - floor(perView) + 1` would offer a dot here that scrolls
+     * nowhere. This is the assertion that catches it — the last dot must actually
+     * reach the end of the track.
+     */
+    const dots = canvasElement.querySelectorAll<HTMLButtonElement>('.v-carousel-indicator')
+    await userEvent.click(dots[dots.length - 1] as HTMLElement)
+    await waitFor(
+      async () => {
+        await expect(canvas.getByRole('button', { name: 'Next slide' })).toBeDisabled()
+        await expect(port.scrollWidth - port.clientWidth - port.scrollLeft).toBeLessThan(
+          slide.getBoundingClientRect().width,
+        )
+      },
+      { timeout: 3000 },
+    )
   },
 }
 
@@ -244,8 +263,9 @@ export const Placement: Story = {
 }
 
 /**
- * The viewport is a focusable scroll container: the browser moves it snap-aware on the
- * arrows and Home/End, so the component ships no keyboard handler at all.
+ * The viewport is a focusable scroll container, and the arrows move exactly one slide.
+ * A focused scroller does move natively — but the browser scrolls a fixed pixel step
+ * that mandatory snapping undoes, which is why the component handles the keys itself.
  */
 export const Keyboard: Story = {
   play: async ({ canvasElement }) => {
@@ -283,28 +303,105 @@ export const Keyboard: Story = {
 }
 
 /**
- * The end is read from the intersection ratios, not from the model: with several slides
- * per view the scroller clamps before the last index is ever reachable, and a
- * model-derived end would oscillate forever.
+ * With several slides per view, `scroll-snap-align: start` leaves only
+ * `count - perView + 1` positions the scroller can rest on: 6 slides three at a time
+ * give four, not six. The indicators follow that count, and the model can never hold an
+ * index the DOM cannot satisfy.
  */
-export const ClampedEnd: Story = {
-  args: { itemsPerView: 3, indicators: false },
+export const Pages: Story = {
+  args: { itemsPerView: 3, indicators: 'outside' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const port = canvasElement.querySelector('.v-carousel-viewport') as HTMLElement
+    const left = (index: number) =>
+      (
+        canvasElement.querySelector(`[data-carousel-index="${index}"]`) as HTMLElement
+      ).getBoundingClientRect().left
 
-    port.scrollTo({ left: port.scrollWidth, behavior: 'instant' })
+    // 6 slides three at a time → 4 leading positions, hence 4 dots
+    await expect(canvasElement.querySelectorAll('.v-carousel-indicator')).toHaveLength(4)
+    const step = left(1) - left(0)
+
+    const next = canvas.getByRole('button', { name: 'Next slide' })
+    for (const [clicks, label] of [
+      [1, '2 of 6'],
+      [2, '3 of 6'],
+      [3, '4 of 6'],
+    ] as const) {
+      await userEvent.click(next)
+      await waitFor(
+        async () => {
+          await expect(canvas.getByRole('button', { name: label })).toHaveAttribute(
+            'aria-current',
+            'true',
+          )
+          /*
+           * EXACTLY one slide per click. The read-back used to scan a Map in insertion
+           * order and pick an arbitrary member of the fully-visible tie — a middle
+           * slide — so the following click stepped two at once.
+           */
+          await expect(Math.abs(port.scrollLeft - clicks * step)).toBeLessThan(2)
+        },
+        { timeout: 3000 },
+      )
+    }
+
+    await expect(next).toBeDisabled()
+
+    /*
+     * No ping-pong: a false `atEnd` would let the model request a position the scroller
+     * cannot hold, bounce back, and re-arm autoplay on every bounce. Two samples taken
+     * AFTER the last smooth scroll has landed — one taken immediately would still catch
+     * it settling, which is movement but not a fight.
+     */
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    const settled = port.scrollLeft
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    await expect(port.scrollLeft).toBe(settled)
+    await expect(canvas.getByRole('button', { name: '4 of 6' })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+  },
+}
+
+/**
+ * The page count is MEASURED, so it has to follow a resize with no ResizeObserver: the
+ * intersection observer covers it because a change in the number of fully visible slides
+ * necessarily crosses the 1.0 threshold. This story is that claim's acceptance test.
+ */
+export const ResponsivePages: Story = {
+  args: { itemsPerView: 4, itemMinSize: '10rem', indicators: 'outside' },
+  render: (args) => ({
+    components: { VCarousel, VCarouselItem },
+    setup: () => ({ args, hues: HUES, slideStyle: SLIDE_STYLE }),
+    template: `
+      <div class="resize-host" style="inline-size: 60rem">
+        <VCarousel v-bind="args" label="Responsive pages">
+          <VCarouselItem v-for="(hue, i) in hues" :key="hue">
+            <div :style="slideStyle + 'background: oklch(0.45 0.15 ' + hue + ');'">{{ i + 1 }}</div>
+          </VCarouselItem>
+        </VCarousel>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const host = canvasElement.querySelector('.resize-host') as HTMLElement
+    const dots = () => canvasElement.querySelectorAll('.v-carousel-indicator').length
+
+    // 60rem / 4 per view → 3 pages
+    await waitFor(async () => {
+      await expect(dots()).toBe(3)
+    })
+
+    // 24rem: the 10rem floor lets only 2 fit, so a page appears
+    host.style.inlineSize = '24rem'
     await waitFor(
       async () => {
-        await expect(canvas.getByRole('button', { name: 'Next slide' })).toBeDisabled()
+        await expect(dots()).toBeGreaterThan(3)
       },
       { timeout: 3000 },
     )
-
-    const settled = port.scrollLeft
-    await new Promise((resolve) => setTimeout(resolve, 400))
-    // no ping-pong between the requested index and the clamped one
-    await expect(port.scrollLeft).toBe(settled)
   },
 }
 

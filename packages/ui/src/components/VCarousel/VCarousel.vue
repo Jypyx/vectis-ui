@@ -54,9 +54,10 @@ export type CarouselControls = false | 'inside' | 'outside'
  * - `scrollToIndex`, the v-model → DOM write. No CSS primitive scrolls a
  *   container to its Nth child from a VALUE (`::scroll-button()` is user-driven,
  *   and Chrome 135+, above this repo's floor).
- * - ONE IntersectionObserver, the DOM → v-model read-back, which also answers
- *   both ends. Arithmetic on `scrollLeft` would need the slide sizes (JS anyway)
- *   and is signed in RTL; a ratio is direction- and orientation-agnostic.
+ * - ONE IntersectionObserver, carrying the DOM → v-model read-back AND the page
+ *   measurement. Arithmetic on `scrollLeft` would need the slide sizes (JS
+ *   anyway) and is signed in RTL; a ratio is direction- and orientation-agnostic.
+ *   Not every slide can lead: see `measurePages`.
  * - autoplay, because no CSS advances a value on a clock, plus ONE `matchMedia`
  *   read: a media query stops the CSS, never a timer, and WCAG 2.2.2 is about
  *   the content moving.
@@ -108,7 +109,7 @@ interface CarouselProps {
   height?: number | string
   /**
    * Milliseconds between two automatic advances; `0` disables it. Autoplay stops
-   * at the last slide (there is no loop), pauses on hover and on focus-within,
+   * on the last PAGE (there is no loop), pauses on hover and on focus-within,
    * and is fully disabled under `prefers-reduced-motion`. A pause control is
    * always rendered while it is on — WCAG 2.2.2 is not a styling option.
    */
@@ -178,10 +179,23 @@ defineSlots<{
     atStart: boolean
     atEnd: boolean
     index: number
+    /** Number of slides. */
     count: number
+    /** Number of positions the scroller can rest on — see `pageCount`. */
+    pageCount: number
   }): unknown
-  /** Replaces the whole indicator bar, its group role included. */
-  indicators?(props: { index: number; count: number; goTo: (index: number) => void }): unknown
+  /**
+   * Replaces the whole indicator bar, its group role included. Render one control per
+   * `pageCount`, NOT per `count`: a position past the last page is unreachable, and a
+   * bar built on the slide count offers dots that scroll nowhere. `count` is still
+   * given, for "N of M" labels.
+   */
+  indicators?(props: {
+    index: number
+    count: number
+    pageCount: number
+    goTo: (index: number) => void
+  }): unknown
   /** Replaces ONE indicator's contents; the <button> and its ARIA stay the DS's. */
   indicator?(props: { index: number; active: boolean }): unknown
   /** Replaces the autoplay control. */
@@ -294,40 +308,125 @@ watch(model, (index) => {
   void nextTick(() => scrollToIndex(index))
 })
 
-/*
- * DOM → model, plus both ends, with ONE observer. Ratios are what make `atEnd`
- * correct when several slides fit: the scroller clamps before the last index is
- * ever reachable, and an `atEnd` derived from the model would ping-pong forever
- * between the requested index and the clamped one. It is also why VTabs' two edge
- * sentinels are unnecessary here — we know our slides.
- */
-const ratios = new Map<number, number>()
-const observedStart = ref<boolean>()
-const observedEnd = ref<boolean>()
-const observedIndex = ref<number>()
+/** Ratio at which a slide counts as fully visible — the sub-pixel slack of a
+    fractional flex layout. */
+const FULL = 0.99
 
+const ratios = new Map<number, number>()
+const observedIndex = ref<number>()
+const measuredPages = ref<number>()
+
+/**
+ * How many LEADING positions the scroller can actually rest on. `scroll-snap-align:
+ * start` makes every slide's start edge a snap position, but one lying past
+ * `scrollWidth - clientWidth` is UNREACHABLE — the scroller clamps short of it. One
+ * dot per slide would therefore offer indices the DOM can never satisfy.
+ *
+ * Measured from the scroller itself, and NOT computed as `count - itemsPerView + 1`:
+ * the reachable count is `count - CEIL(slides per view) + 1`, so as soon as `peek` or
+ * an active `itemMinSize` makes that number fractional, the flooring form hands back
+ * one position too many — reintroducing the bug in the two configurations that
+ * motivated measuring at all.
+ *
+ * RECTS and the scroller's own sizes only, never `getComputedStyle`: this runs on
+ * every frame of a smooth scroll. `step` is the delta between the first two slides,
+ * hence physical — RTL and vertical fall out with no direction test, the
+ * `scrollToIndex` idiom.
+ */
+function measurePages(port: HTMLElement) {
+  const boxes = port.querySelectorAll<HTMLElement>('[data-carousel-index]')
+  const first = boxes[0]?.getBoundingClientRect()
+  const second = boxes[1]?.getBoundingClientRect()
+  if (!first || !second) return
+  const step = isVertical.value
+    ? Math.abs(second.top - first.top)
+    : Math.abs(second.left - first.left)
+  const scrollable = isVertical.value
+    ? port.scrollHeight - port.clientHeight
+    : port.scrollWidth - port.clientWidth
+  // No layout at all (jsdom, a display:none ancestor). Writing a 0 here would drag
+  // every clamp down with it; the prop-derived fallback stays the answer until there
+  // IS a layout.
+  if (step <= 0) return
+  // +1: clientWidth/scrollWidth are integers where the flex layout is fractional, so
+  // an exactly reachable last position can measure a hair short.
+  measuredPages.value = Math.floor((scrollable + 1) / step) + 1
+}
+
+/**
+ * SSR, jsdom and the first paint. `itemsPerView` is not a guess there: with no `peek`
+ * and no active `itemMinSize` the flex-basis makes a slide plus its gap exactly
+ * `(100% + gap) / itemsPerView`, so the fit IS `itemsPerView` at every viewport size.
+ * A pure function of the props is also what keeps the dot list identical on the server
+ * and on the client — measuring here would be a hydration mismatch.
+ *
+ * The clamp lives here rather than in `measurePages` so a stale measurement cannot
+ * outlive the removal of a slide: `count` is reactive, the raw measurement is not.
+ */
+const pageCount = computed(() =>
+  count.value === 0
+    ? 0
+    : clamp(measuredPages.value ?? count.value - props.itemsPerView + 1, 1, count.value),
+)
+
+/*
+ * DOM → model, with ONE observer, which also carries the page measurement.
+ *
+ * TRAP — `1` must stay in `threshold`. It is what makes this observer cover a ROOT
+ * RESIZE, which an IntersectionObserver does NOT do on its own (it queues an entry
+ * only when a threshold bucket is crossed): `pageCount` changes exactly when the
+ * number of FULLY visible slides changes, which crosses the 1.0 bucket, which queues
+ * the callback that re-measures. Drop the 1 and the page count silently freezes.
+ * The second premise is that a slide's box never exceeds the port on the cross axis,
+ * so the area ratio equals the scroll-axis ratio — the CSS guarantees it today, and
+ * the `FULL` test below depends on it too.
+ */
 watch(
   [viewportEl, count],
   ([port], _previous, onCleanup) => {
-    // IntersectionObserver exists neither in SSR nor in jsdom: the read-back and
-    // the ends are verified in the browser (play functions).
+    // IntersectionObserver exists neither in SSR nor in jsdom: the read-back and the
+    // measurement are verified in the browser (play functions).
     if (!port || typeof IntersectionObserver === 'undefined') return
     ratios.clear()
     const observer = new IntersectionObserver(
       (entries) => {
+        measurePages(port)
         for (const entry of entries) {
           const index = Number((entry.target as HTMLElement).dataset.carouselIndex)
           ratios.set(index, entry.intersectionRatio)
         }
-        observedStart.value = (ratios.get(0) ?? 0) > 0.99
-        observedEnd.value = (ratios.get(count.value - 1) ?? 0) > 0.99
-        let best = 0
-        for (const [index, ratio] of ratios) if (ratio > (ratios.get(best) ?? 0)) best = index
-        observedIndex.value = best
+        /*
+         * NUMERIC order, and the FIRST full slide. `ratios` is a Map iterated in the
+         * order the observer first delivered each slide, and when several fit they are
+         * all at ratio 1: scanning it with a `>` picks an arbitrary member of the tie —
+         * a MIDDLE slide as often as not, which showed up as a wrong active dot AND a
+         * `next` that then stepped two slides at once. Mid-scroll nothing is full, and
+         * the largest ratio is the best guess: that is the second branch.
+         */
+        let leading = 0
+        let bestRatio = 0
+        for (let index = 0; index < count.value; index += 1) {
+          const ratio = ratios.get(index) ?? 0
+          if (ratio >= FULL) {
+            leading = index
+            break
+          }
+          if (ratio > bestRatio) {
+            bestRatio = ratio
+            leading = index
+          }
+        }
+        /*
+         * Clamped, so the model can never leave the reachable range even transiently:
+         * at the clamped end every remaining slide is full, and mid-drag the
+         * largest-ratio branch can name one past the last page — `watch(model)` fires
+         * on read-back writes too, and `scrollToIndex` would then fight the finger.
+         */
+        observedIndex.value = Math.min(leading, pageCount.value - 1)
         // The request has arrived, so there is nothing left to protect. This is also
         // the ONLY exit when the browser clamps a programmatic scroll to no movement
         // at all — `scrollend` never fires there.
-        if (best === model.value) settling.value = false
+        if (observedIndex.value === model.value) settling.value = false
       },
       { root: port, threshold: [0, 0.25, 0.5, 0.75, 1] },
     )
@@ -346,16 +445,19 @@ watch([observedIndex, settling], () => {
 })
 
 /*
- * Before the observer has ever run (SSR, first paint, jsdom) the model and the
- * count ARE the truth: index 0 is the start. VTabs has to default to "both
- * disabled" because it does not know its items; we do — and that fallback is what
- * makes the disabled states unit-testable.
+ * Pure derivations, and they can be because `pageCount` never over-counts: index 0 is
+ * always reachable, and so is `pageCount - 1` by construction. The observed ends this
+ * replaces existed only to survive a model that could request an unreachable index —
+ * which, with a correct page count, it no longer can. What that insured against was
+ * autoplay-shaped (a false `atEnd` re-arms the timer on every bounce, forever), and
+ * the `Pages` play function is what keeps that honest.
  */
-const atStart = computed(() => observedStart.value ?? model.value <= 0)
-const atEnd = computed(() => observedEnd.value ?? model.value >= count.value - 1)
+const atStart = computed(() => model.value <= 0)
+const atEnd = computed(() => model.value >= pageCount.value - 1)
 
 function goTo(index: number) {
-  model.value = clamp(index, 0, Math.max(0, count.value - 1))
+  // `clamp` returns `min` on an empty interval, which is the right answer with no slide.
+  model.value = clamp(index, 0, pageCount.value - 1)
 }
 const previous = () => goTo(model.value - 1)
 const next = () => goTo(model.value + 1)
@@ -379,7 +481,7 @@ function onKeydown(event: KeyboardEvent) {
 
   if (event.key === 'Home' || event.key === 'End') {
     event.preventDefault()
-    goTo(event.key === 'Home' ? 0 : count.value - 1)
+    goTo(event.key === 'Home' ? 0 : pageCount.value - 1)
     return
   }
 
@@ -500,9 +602,10 @@ if (isDev) {
       <!--
         tabindex="0" is MANDATORY, not defensive: a scroll container needs a
         TABBABLE descendant (axe `scrollable-region-focusable`) and slide content
-        is arbitrary. It is also what hands the arrows and Home/End to the
-        browser, snap-aware, instead of to a handler here. A focusable box with an
-        aria-label must carry a role, or axe reports `aria-prohibited-attr`.
+        is arbitrary. It is also what makes the track the keyboard target of
+        `onKeydown` — the browser's own arrow scrolling is real, but mandatory
+        snapping undoes it, see there. A focusable box with an aria-label must
+        carry a role, or axe reports `aria-prohibited-attr`.
       -->
       <div
         ref="viewportEl"
@@ -524,6 +627,7 @@ if (isDev) {
         :at-end="atEnd"
         :index="model"
         :count="count"
+        :page-count="pageCount"
       >
         <div v-if="controls" class="v-carousel-controls">
           <VIconButton
@@ -569,15 +673,22 @@ if (isDev) {
         </VIconButton>
       </slot>
 
-      <slot name="indicators" :index="model" :count="count" :go-to="goTo">
+      <slot name="indicators" :index="model" :count="count" :page-count="pageCount" :go-to="goTo">
         <div
           v-if="indicators"
           class="v-carousel-indicators"
           role="group"
           :aria-label="m.carousel.indicators"
         >
+          <!--
+            One control per REACHABLE position, not per slide: with 6 slides three at
+            a time the scroller can only lead with 1 to 4, and dots 5 and 6 would
+            scroll nowhere. The label stays slide-based ("4 of 6") because that is what
+            the control does — it parks that slide at the start edge — and it then
+            agrees with the slide's own name and with the live region.
+          -->
           <button
-            v-for="index in count"
+            v-for="index in pageCount"
             :key="index"
             type="button"
             class="v-carousel-indicator"
