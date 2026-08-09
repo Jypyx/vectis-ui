@@ -198,6 +198,18 @@ export const semantic = {
     'size-slider-thumb': dimension('1.25rem', "The diameter of VSlider's thumb"),
     'size-slider-length': dimension('10rem', 'The default length of a vertical VSlider'),
     'size-slider-field': dimension('5rem', "The width of VSlider's number fields"),
+    'size-carousel-block': dimension(
+      '24rem',
+      "The default block size of VCarousel's viewport. Load-bearing in the vertical orientation: a percentage flex-basis has no definite reference on the block axis, and every slide would collapse onto its content without it",
+    ),
+    'size-carousel-indicator': dimension(
+      '0.5rem',
+      'The diameter of a VCarousel indicator dot (its hit area comes from --vectis-control-height-xs)',
+    ),
+    'size-carousel-indicator-active': dimension(
+      '1.5rem',
+      'The main-axis size of the ACTIVE VCarousel indicator, which stretches from a dot into a pill',
+    ),
     'size-combobox-input-min': dimension('4rem', "The minimum width of VCombobox's input area"),
     'size-combobox-list-max-block': dimension(
       '18rem',

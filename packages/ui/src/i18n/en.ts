@@ -133,4 +133,16 @@ export const en: VectisMessages = {
     remove: (name) => `Remove ${name}`,
     list: 'Selected files',
   },
+  carousel: {
+    label: 'Carousel',
+    roleDescription: 'carousel',
+    slideRoleDescription: 'slide',
+    slides: 'Slides',
+    slide: (index, total) => `${index} of ${total}`,
+    previous: 'Previous slide',
+    next: 'Next slide',
+    play: 'Start automatic slide show',
+    pause: 'Stop automatic slide show',
+    indicators: 'Choose slide to display',
+  },
 }

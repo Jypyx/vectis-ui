@@ -195,6 +195,36 @@ export interface VectisMessages {
     /** Accessible name of the preview list. */
     list: string
   }
+  /**
+   * VCarousel. `roleDescription` and `slideRoleDescription` are what a screen
+   * reader SPEAKS in place of "region" and "group": user-facing text, hence
+   * dictionary text — an untranslated `aria-roledescription` is the one a11y
+   * string that stays in English with no visible symptom whatsoever.
+   */
+  carousel: {
+    /** Accessible name of the region, when the consumer passes no `label`. */
+    label: string
+    /** aria-roledescription of the root. Lower case: it replaces a role name. */
+    roleDescription: string
+    /** aria-roledescription of a slide. */
+    slideRoleDescription: string
+    /** Accessible name of the scroll container itself, which is tabbable. */
+    slides: string
+    /**
+     * Accessible name of a slide AND of its indicator. `index` is the HUMAN index
+     * (1-based): the caller passes `i + 1`. It carries the WORD "of" — hence its
+     * place here, unlike VDataTable's bare `N/M` counter.
+     */
+    slide: (index: number, total: number) => string
+    previous: string
+    next: string
+    /** Label of the autoplay control while it is stopped (no aria-pressed: APG). */
+    play: string
+    /** Label of the autoplay control while it is running. */
+    pause: string
+    /** Accessible name of the indicator group. */
+    indicators: string
+  }
 }
 
 /**

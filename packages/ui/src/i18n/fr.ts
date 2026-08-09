@@ -145,4 +145,16 @@ export const fr: VectisMessages = {
     remove: (name) => `Retirer ${name}`,
     list: 'Fichiers sélectionnés',
   },
+  carousel: {
+    label: 'Carrousel',
+    roleDescription: 'carrousel',
+    slideRoleDescription: 'diapositive',
+    slides: 'Diapositives',
+    slide: (index, total) => `${index} sur ${total}`,
+    previous: 'Diapositive précédente',
+    next: 'Diapositive suivante',
+    play: 'Démarrer le défilement automatique',
+    pause: 'Arrêter le défilement automatique',
+    indicators: 'Choisir la diapositive à afficher',
+  },
 }

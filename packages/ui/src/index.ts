@@ -158,3 +158,11 @@ export type {
   FileUploadRow,
 } from './components/VFileUpload/VFileUpload.vue'
 export type { FileKind } from './components/VFileUpload/fileKind'
+export { default as VCarousel } from './components/VCarousel/VCarousel.vue'
+export type {
+  CarouselControls,
+  CarouselEffect,
+  CarouselIndicators,
+  CarouselOrientation,
+} from './components/VCarousel/VCarousel.vue'
+export { default as VCarouselItem } from './components/VCarousel/VCarouselItem.vue'

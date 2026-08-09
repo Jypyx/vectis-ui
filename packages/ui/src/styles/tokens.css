@@ -229,6 +229,9 @@
     --vectis-control-size-slider-thumb: 1.25rem;
     --vectis-control-size-slider-length: 10rem;
     --vectis-control-size-slider-field: 5rem;
+    --vectis-control-size-carousel-block: 24rem;
+    --vectis-control-size-carousel-indicator: 0.5rem;
+    --vectis-control-size-carousel-indicator-active: 1.5rem;
     --vectis-control-size-combobox-input-min: 4rem;
     --vectis-control-size-combobox-list-max-block: 18rem;
     --vectis-control-size-menu-min: 11rem;
@@ -378,6 +381,9 @@
     --vectis-control-size-slider-thumb: 1.25rem;
     --vectis-control-size-slider-length: 10rem;
     --vectis-control-size-slider-field: 5rem;
+    --vectis-control-size-carousel-block: 24rem;
+    --vectis-control-size-carousel-indicator: 0.5rem;
+    --vectis-control-size-carousel-indicator-active: 1.5rem;
     --vectis-control-size-combobox-input-min: 4rem;
     --vectis-control-size-combobox-list-max-block: 18rem;
     --vectis-control-size-menu-min: 11rem;

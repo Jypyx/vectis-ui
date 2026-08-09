@@ -1,0 +1,118 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+
+import * as VCarouselStories from './VCarousel.stories'
+
+<Meta of={VCarouselStories} />
+
+# Carousel
+
+Scrolls through content — images or text — horizontally or vertically. `VCarousel` invents no
+scrolling: it is a native `scroll-snap` container, so touch, trackpad, the scrollbar, the keyboard
+and the snapping all come from the browser. The slides are declared as `VCarouselItem` children,
+and `v-model` carries the index of the current one.
+
+<Canvas of={VCarouselStories.Default} />
+<Controls of={VCarouselStories.Default} />
+
+## Slides per view, and the responsive rule
+
+`itemsPerView` is a **maximum**, not a target, and `itemMinSize` is the floor below which a slide
+must not shrink. The browser fits as many slides as it can and scrolls further when it cannot —
+that arithmetic lives in the slide's `flex-basis`, which is the whole responsiveness: no
+breakpoint, no container query, no observer, and therefore nothing to keep in step with a design
+token.
+
+<Canvas of={VCarouselStories.ItemsPerView} />
+
+Narrow the container and the floor takes over on its own.
+
+<Canvas of={VCarouselStories.FluidFloor} />
+
+## Peek
+
+`peek` reserves a strip past the last fully visible slide so the next one shows through — the
+product-list template. It **includes the gap that precedes it**, which is what lets one formula
+serve every combination without a special case.
+
+<Canvas of={VCarouselStories.Peek} />
+
+## Effects
+
+`effect` picks the transition, and all four are **CSS scroll-driven animations**: they are keyed
+to the slide's position in the scrollport, so they play under the finger during a drag instead of
+running a fixed-duration transition.
+
+- `slide` — no animation beyond the scrolling itself. Works with any `itemsPerView` and any `peek`.
+- `fade` — a dissolve in place. It counter-translates the slide to cancel the scroll travel, which
+  only works when a slide is exactly the size of the viewport: with several items per view, or with
+  a `peek`, every slide would pile onto the same spot, so the effect **downgrades to `slide`** and
+  says so in the console.
+- `scale` — the slide grows into place as it reaches the centre. Fine at any `itemsPerView`.
+- `cover` — a 3D coverflow: the neighbours tilt away and sink back.
+
+Where scroll-driven animations are unavailable, nothing is declared and the carousel is a plain
+`slide` — the same progressive-enhancement contract as anchor positioning elsewhere in the DS.
+`prefers-reduced-motion` cancels them everywhere, and stops autoplay outright.
+
+<Canvas of={VCarouselStories.Effects} />
+
+Two invariants worth knowing before touching the sheet: the animation is carried by an inner box
+and never by the slide itself, because a scroll-snap area is the element's _transformed_ border
+box — animating the slide would make its snap position depend on the scroll position, and the
+symptom is jitter rather than an error. And the animation properties are written as longhands,
+never as the `animation` shorthand, which would silently reset the timeline and the duration.
+
+## Orientation
+
+`orientation="vertical"` scrolls on the block axis. Give it a `height`: a percentage `flex-basis`
+has no definite reference on the block axis, and without one every slide would collapse onto its
+content.
+
+<Canvas of={VCarouselStories.Vertical} />
+
+## Controls and indicators
+
+`controls` and `indicators` each take `false`, `'inside'` (over the slides) or `'outside'` (after
+them). Icons and labels are props (`prevIcon`, `nextIcon`, `prevLabel`…), and the `#controls`,
+`#indicators`, `#indicator` and `#autoplay` slots replace the rendering entirely — `#indicators`
+receives `goTo`, without which the bar could no longer select anything.
+
+<Canvas of={VCarouselStories.Placement} />
+
+## Autoplay
+
+`autoplay` is an interval in milliseconds; `0` disables it. It stops at the last slide — there is
+no loop, which would mean cloning slides and repositioning the scroller in JS. It pauses on hover
+and on focus-within, and `prefers-reduced-motion` disables it completely: a media query stops a
+transition, never a timer.
+
+The pause control is rendered whenever autoplay is on, **whatever `controls` says**. WCAG 2.2.2
+requires a way to stop content that moves on its own, and that floor is not a presentational
+choice.
+
+<Canvas of={VCarouselStories.Autoplay} />
+
+## Edge cases
+
+<Canvas of={VCarouselStories.EdgeCases} />
+
+## Accessibility
+
+- The root is a `role="region"` with a translated `aria-roledescription`, named by `label`; a
+  consumer `aria-label` wins over it and an `aria-labelledby` replaces both. **Give every carousel
+  on a page a distinct name**: a region is a landmark, and two identically named landmarks are a
+  real violation.
+- Each slide is a `role="group"` with `aria-roledescription="slide"` and a "N of M" name. The
+  count comes from the slot's VNodes, so it is identical on the server and on the client — a
+  registry the slides fed at mount would render zero of them server-side.
+- The scroll track carries `tabindex="0"`, and that is required rather than defensive: a scroll
+  container must have a tabbable descendant, and slide content may hold nothing focusable. It is
+  also what makes the component ship **no keyboard handler** — a focused scroll container already
+  moves snap-aware on the arrows, PageUp/PageDown and Home/End.
+- The indicators are ordinary buttons named "N of M", the current one marked with `aria-current`.
+  Their hit area is 24px even though the dot is 8px.
+- The autoplay control carries its state in its **label** (start/stop), not in `aria-pressed`.
+- A visually hidden `role="status"` announces the position — and stays silent while autoplay
+  rotates, because narrating an auto-rotating carousel floods the screen reader.
+
+<Canvas of={VCarouselStories.Localization} />
