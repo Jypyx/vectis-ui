@@ -236,6 +236,12 @@ export const Groups: Story = {
       1,
     )
 
+    // the rule bleeds out to the panel edges (--vectis-space-1 = 0.25rem), which is
+    // the ONE declaration VMenuSeparator adds to VSeparator — and it overrides the
+    // latter's `margin: 0` from another sheet, hence the compound selector.
+    const separator = menu.querySelector('.v-menu-separator') as HTMLElement
+    await expect(getComputedStyle(separator).marginInlineStart).toBe('-4px')
+
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'Rename' })).toHaveFocus())
     await userEvent.keyboard('{ArrowDown}{ArrowDown}')
     await expect(canvas.getByRole('menuitem', { name: 'Invite' })).toHaveFocus()

@@ -15,8 +15,10 @@
        the hierarchy of the rows it frames. */
     margin-block: var(--vectis-space-2);
     margin-inline: var(--control-padding-inline);
-    block-size: 1px;
-    background: var(--vectis-color-border);
+    /* A border, not a background — the VSeparator paint: Windows forced-colors
+       forces backgrounds to Canvas, where the rule would vanish, and border colours
+       to CanvasText, where it survives. */
+    border-block-start: 1px solid var(--vectis-color-border);
   }
 }
 </style>
