@@ -1,0 +1,103 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VInputOTPStories from './VInputOTP.stories'
+
+<Meta of={VInputOTPStories} />
+
+# InputOTP
+
+A one-time code (OTP) — one cell per character, built on native `<input>`s. There is no
+"N-character code" HTML primitive: the JavaScript orchestrates the keyboard and pasting (auto
+advance, backspace, distribution across the cells, arrows). `autocomplete="one-time-code"` on the
+first cell: automatic filling (SMS, password manager) is distributed across the whole set.
+
+The v-model is the concatenation of the characters typed; `complete` is emitted when every cell is
+filled.
+
+<Canvas of={VInputOTPStories.Default} />
+
+<Controls of={VInputOTPStories.Default} />
+
+## Pasting
+
+Pasting a code into any cell distributes it from that one on — a single `input` handler covers both
+typing and pasting, with no dedicated `paste` event:
+
+<Canvas of={VInputOTPStories.DistributedPaste} />
+
+## Length
+
+`length` sets the number of cells (6 by default) — ignored when `pattern` is supplied:
+
+<Canvas of={VInputOTPStories.FourCells} />
+
+## Sizes
+
+Three sizes (`sm` 32px, `md` 40px — the default —, `lg` 48px, through the
+`--vectis-control-height-*` tokens); as with `VInput`, the extremes of the design system scale
+(`xs`, `xl`) are not exposed. The cells are square: the width follows the height, and the typography
+and separator icons adjust with it. `compact` reduces the height (and therefore the width) by 4px
+without touching the typography (as in `VButton`/`VInput`):
+
+<Canvas of={VInputOTPStories.Sizes} />
+
+## Format
+
+`format` defines the accepted character set: `numeric` (the default, digits only, a numeric keyboard
+through `inputmode`), `alpha` (letters) or `alphanumeric`. Outside `numeric`, lowercase is converted
+to capitals as you type: the v-model is canonical, so the server-side comparison does not depend on
+case.
+
+<Canvas of={VInputOTPStories.AlphanumericFormat} />
+
+## Pattern
+
+`pattern` describes a template: each `#` becomes a cell, and any other character a decorative
+literal (mono typography, dimmed colour, `aria-hidden`). The literals are **not** part of the
+v-model — for a filled `###.###.###`, the model is `123456789`. The number of cells derives from the
+pattern, which wins over `length`.
+
+Pasting is "pattern-aware": pasting the formatted string (`123.456.789`) works, the pasted literals
+are consumed positionally, and the rest is filtered by `format`:
+
+<Canvas of={VInputOTPStories.WithPattern} />
+
+A textual prefix (`GT-###`) is rendered as literals; pasting `GT-123` keeps only `123`:
+
+<Canvas of={VInputOTPStories.PrefixedPattern} />
+
+## Separator as an icon
+
+`separator-icon` (an icon name or an explicit render) replaces **every** literal of the pattern with
+an icon — reserved for purely separator templates (`####-####`), do not combine it with a textual
+prefix. The icon follows the component's size through the `--vectis-icon-size` context and inherits
+its colour (currentcolor):
+
+<Canvas of={VInputOTPStories.IconSeparator} />
+
+## States
+
+The `invalid` prop forces the error state (server-side validation) — red borders and `aria-invalid`
+on each cell:
+
+<Canvas of={VInputOTPStories.Invalid} />
+
+`disabled` switches the cells and the literals to greys (`--vectis-color-surface-muted`,
+`--vectis-color-text-subtle`) — no opacity trick, and the rendering follows the dark theme
+automatically:
+
+<Canvas of={VInputOTPStories.Disabled} />
+
+## Accessibility
+
+- The root is a `role="group"` named by `label` ("Verification code" by default).
+- Each cell carries an `aria-label` "Character N of M" counted on the editable cells — the pattern's
+  literals are decorative (`aria-hidden`) and never focusable.
+- Keyboard navigation: left/right arrows between cells, and Backspace on an empty cell erases the
+  previous one and goes back to it — the literals are crossed transparently.
+- Visible focus: a visual 2px border (border + a `box-shadow` in the same colour, aligned on
+  `VInput`), red when invalid; a transparent `outline` line for forced-colors mode.
+- The transitions respect `prefers-reduced-motion`.
+
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.

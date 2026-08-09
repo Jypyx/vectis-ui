@@ -128,3 +128,4 @@ export type {
   DataTableParams,
   DataTableProps,
 } from './components/VDataTable/VDataTable.vue'
+export { default as VInputOTP } from './components/VInputOTP/VInputOTP.vue'
