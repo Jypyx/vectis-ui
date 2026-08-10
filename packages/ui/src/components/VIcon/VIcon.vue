@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @core
 /**
  * Icon, resolved in this order: image (`src`), then `name` — first the consumer
  * RESOLVER if one is set (`setIconResolver`, see `resolver.ts`), then the
@@ -88,6 +89,8 @@ function tag(render: IconRender): Resolved {
   return { kind: 'class', class: render.class }
 }
 
+// @fallback — the resolution ladder itself: each rung hands over to the next, and
+// the ligature is the last resort when no registry entry and no resolver answered.
 /** Explicit `render`, then the consumer resolver, then the built-in registry; otherwise the ligature. */
 const resolved = computed<Resolved | undefined>(() => {
   if (props.render) return tag(props.render)

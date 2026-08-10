@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// @a11y — the component's ONLY behavioural JS, and it is entirely a11y: an <a>
+// has no native `disabled`, so the inert-link bridge reproduces it by hand.
 /**
  * Action button, and the reference model for the tone/variant tables.
  *

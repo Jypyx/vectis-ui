@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @core — no behavioural JS at all: value normalization and the display string.
 /**
  * A progress bar. The root IS the track; the whole geometry derives from an inline
  * unitless `--fill-fraction`, in logical properties — the vertical orientation then

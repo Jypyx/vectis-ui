@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @core — the only JS is deriving the default tag from the variant.
 /**
  * The design system's text element: `variant` selects a complete typographic
  * recipe (family, size, weight, leading, tracking) taken from the semantic

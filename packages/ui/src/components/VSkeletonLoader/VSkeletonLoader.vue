@@ -96,6 +96,7 @@ const props = withDefaults(defineProps<SkeletonLoaderProps>(), {
 // silent bug. A float would render a surprising number of lines.
 const count = computed(() => Math.max(1, Math.trunc(props.lines)))
 
+// @a11y — decorative by default: 12 silhouettes must not produce 12 announcements.
 // Supplying a `label` counts as asking for an announcement, or the prop would be inert.
 const announced = computed(() => props.announce || props.label !== undefined)
 

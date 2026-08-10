@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// @a11y — the MANDATORY label is the component's whole reason to exist next to
+// VButton: an icon alone has no accessible name.
 /**
  * Icon button: the same visual API as VButton, but square and with a MANDATORY
  * accessible label (an icon alone is not enough for screen readers).

@@ -78,6 +78,8 @@ const isInteractive = computed(() => isLink.value || props.clickable)
 const tag = computed(() => (isLink.value ? 'a' : props.clickable ? 'button' : 'span'))
 const isInertLink = computed(() => isLink.value && props.disabled)
 
+// @fallback — the image failed to load: the initials take over, so an avatar is
+// never an empty box.
 const failed = ref(false)
 watch(
   () => props.src,

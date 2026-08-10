@@ -99,6 +99,7 @@ const emit = defineEmits<{
 
 const m = useMessages()
 
+// @ssr — the DS's ONLY `navigator` read, and the reason it sits in onMounted.
 /* The OS is read on mount only: the server has no `navigator`, so rendering the
    detected value directly would be a hydration mismatch. A ref PER INSTANCE, not
    a module-level one — once a module ref held 'mac', a component hydrated later
@@ -114,6 +115,7 @@ const platform = computed(() => props.platform ?? detected.value)
 const tokens = computed(() => parseHotkeys(props.keys))
 const resolved = computed(() => resolveKeys(tokens.value, platform.value))
 
+// @a11y
 /* The two readings of one table: on SCREEN the glyph wins (⌘), in the ACCESSIBLE
    NAME the word does (Command) — U+2318 is silent or read as "place of interest
    sign" depending on the screen reader. That inversion is what avoids a second
@@ -149,6 +151,7 @@ function detach() {
   listening = false
 }
 
+// @keyboard @core — the matcher itself; the pure half lives in `platform.ts`.
 function onKeydown(event: KeyboardEvent) {
   /* `repeat`: holding the combination down would emit at the OS auto-repeat
      rate, reopening the consumer's palette a dozen times. */

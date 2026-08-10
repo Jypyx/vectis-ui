@@ -1,3 +1,5 @@
+// @ssr @core — module-level state, to be set at module level and never
+// client-only: a resolver installed after hydration is a mismatch.
 /**
  * Hook for a third-party icon library. The resolver is consulted BEFORE the
  * built-in registry: that is what lets a consumer move ALL of the DS's icons onto

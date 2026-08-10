@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @a11y
 /**
  * 100% CSS loading indicator. role="status" + a hidden label: announced by screen
  * readers with no visual noise.

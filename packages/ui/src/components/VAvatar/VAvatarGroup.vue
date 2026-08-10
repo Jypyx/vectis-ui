@@ -8,6 +8,8 @@ import { avatarGroupKey } from './context'
 
 import { flattenSlot } from '../../utils/vnode'
 
+// @ssr @core — the count comes from the slot's VNODES (`flattenSlot`), never a
+// registry: a registry renders 0 on the server and N on the client.
 /**
  * Stacks VAvatars (the right-hand one paints over the left-hand one, through a
  * negative overlap + the natural DOM paint order — no positioning JS). The
