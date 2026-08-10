@@ -259,14 +259,22 @@ export const VerticalInside: Story = {
     const port = (
       canvasElement.querySelector('.v-carousel-viewport') as HTMLElement
     ).getBoundingClientRect()
-    const bar = (
-      canvasElement.querySelector('.v-carousel-indicators') as HTMLElement
-    ).getBoundingClientRect()
+    const barEl = canvasElement.querySelector('.v-carousel-indicators') as HTMLElement
+    const bar = barEl.getBoundingClientRect()
 
     // over the slides, at the inline end, block-centred
     await expect(bar.right).toBeLessThanOrEqual(port.right)
     await expect(bar.left).toBeGreaterThan(port.left + port.width / 2)
     await expect(Math.abs(bar.top + bar.height / 2 - (port.top + port.height / 2))).toBeLessThan(2)
+
+    /*
+     * NO surface of its own. A pill behind the dots covers a slice of the slide the
+     * whole time; the legibility lives in the dots, which carry a white fill and a
+     * dark hairline so they read on any media.
+     */
+    await expect(getComputedStyle(barEl).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    const dot = canvasElement.querySelector('.v-carousel-dot') as HTMLElement
+    await expect(getComputedStyle(dot).boxShadow).not.toBe('none')
   },
 }
 

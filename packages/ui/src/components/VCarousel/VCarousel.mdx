@@ -127,6 +127,13 @@ Placement per orientation:
 changes and the slides narrow instead — a carousel does not suddenly overflow its neighbours when
 you move its controls out. The reserved width tracks the size the buttons actually render at.
 
+`indicators="inside"` draws no surface behind the dots: a pill would cover a slice of the slide the
+whole time, which is a lot of media to spend on a few 8px marks. The dots carry their own
+legibility instead — a white fill with a dark hairline, the pair that reads on light and dark media
+alike — and they are deliberately theme-independent, since their backdrop is your content rather
+than the page. Over media busy enough to swallow them anyway, use `indicators="outside"` or the
+`#indicator` slot.
+
 Icons and labels are props (`prevIcon`, `nextIcon`, `prevLabel`…), and the `#controls`,
 `#indicators`, `#indicator` and `#autoplay` slots replace the rendering entirely — `#indicators`
 receives `goTo`, without which the bar could no longer select anything, and both bars receive

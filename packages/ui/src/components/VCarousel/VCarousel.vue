@@ -1193,22 +1193,17 @@ if (isDev) {
   }
 
   /*
-   * `inside`: centred on the block-end edge — the placement the spec asks for —
-   * over an OPAQUE surface. Not a color-mix towards transparent: axe derives a
-   * background from the boxes containing the rect, so a translucent bar over a
-   * photograph is unjudgeable, and an exclusion is for a tool limitation, never
-   * for a real violation.
+   * `inside`: centred on the block-end edge, with NO surface of its own — a pill
+   * behind the dots covers a slice of the slide the whole time, which is a lot of
+   * media to spend on six 8px marks. The legibility moves into the dots instead
+   * (see below), where it costs their own footprint and nothing more.
    */
   .v-carousel[data-indicators='inside'] .v-carousel-indicators {
     position: absolute;
     inset-block-end: var(--vectis-space-3);
     inset-inline: 0;
-    padding: var(--vectis-space-1) var(--vectis-space-2);
     margin-inline: auto;
     inline-size: fit-content;
-    background: var(--vectis-color-surface-overlay);
-    border-radius: var(--vectis-radius-pill);
-    box-shadow: var(--vectis-shadow-2);
   }
 
   .v-carousel[data-orientation='vertical'][data-indicators='inside'] .v-carousel-indicators {
@@ -1266,6 +1261,36 @@ if (isDev) {
   .v-carousel[data-orientation='vertical'] .v-carousel-indicator[aria-current] .v-carousel-dot {
     inline-size: var(--vectis-control-size-carousel-indicator);
     block-size: var(--vectis-control-size-carousel-indicator-active);
+  }
+
+  /*
+   * `inside` dots sit on the SLIDE, not on the page, so they are deliberately
+   * theme-independent: their backdrop is arbitrary media, and `text-on-accent` is
+   * the DS's "drawn on top of a coloured surface" colour — white in both themes,
+   * exactly like the label on an accent button.
+   *
+   * The ring is what replaces the pill. A flat colour cannot be guaranteed against
+   * an unknown image, so the dot carries BOTH halves of the classic pair: a white
+   * fill for dark media and a dark hairline for light media. Drawn with
+   * `box-shadow`, so it costs no layout and the dots stay 8px.
+   *
+   * `surface-inverse` for the ring rather than a colour primitive: it is dark in
+   * BOTH themes (neutral-900 / neutral-800), which is the property the ring needs,
+   * and it keeps this sheet on semantic tokens like every other component.
+   *
+   * Translucency is safe here where it was not on the bar: a dot holds no text, so
+   * `color-contrast` never runs on it — the rule that made the bar opaque was about
+   * text drawn OVER the bar, and there is none. What the ring answers is WCAG
+   * 1.4.11, and it answers it on any backdrop rather than on a judged one.
+   */
+  .v-carousel[data-indicators='inside'] .v-carousel-dot {
+    background: color-mix(in oklab, var(--vectis-color-text-on-accent) 55%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--vectis-color-surface-inverse) 45%, transparent);
+  }
+
+  .v-carousel[data-indicators='inside'] .v-carousel-indicator:hover .v-carousel-dot,
+  .v-carousel[data-indicators='inside'] .v-carousel-indicator[aria-current] .v-carousel-dot {
+    background: var(--vectis-color-text-on-accent);
   }
 
   @media (prefers-reduced-motion: reduce) {
