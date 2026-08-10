@@ -129,3 +129,5 @@ export type {
   DataTableProps,
 } from './components/VDataTable/VDataTable.vue'
 export { default as VInputOTP } from './components/VInputOTP/VInputOTP.vue'
+export { default as VProgressCircular } from './components/VProgressCircular/VProgressCircular.vue'
+export { default as VProgressLinear } from './components/VProgressLinear/VProgressLinear.vue'

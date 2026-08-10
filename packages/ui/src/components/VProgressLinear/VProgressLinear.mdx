@@ -1,0 +1,131 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VProgressLinearStories from './VProgressLinear.stories'
+
+<Meta of={VProgressLinearStories} />
+
+# ProgressLinear
+
+A progress bar: five semantic colours or a free one, thickness and length to the pixel, rounded or
+blunt ends, progress text readable inside the bar, an indeterminate state and a vertical
+orientation.
+
+It is the only component of the design system that **gives up its native primitive**. `<progress>`
+offers the role, the value and `:indeterminate` for free, but its pseudo-elements can only be styled
+as a flat background, accept no child — hence no text inside the bar — and do not switch to vertical
+writing. The `progressbar` ARIA contract is therefore carried explicitly. No behavioural JavaScript
+is introduced in exchange: the whole geometry derives from **a unitless fraction** set as a custom
+property, and the logical properties switch the axis in vertical without duplicating a rule.
+
+<Canvas of={VProgressLinearStories.Default} />
+
+<Controls of={VProgressLinearStories.Default} />
+
+## Tones
+
+The design system's five colours. Each tone defines only local variables — a fill, a track tinted
+from the same family, and the fallback text colour used where automatic contrast is not available.
+The `neutral` tone inverts text and surface rather than using a mid grey, which would be unreadable
+in one of the two themes.
+
+<Canvas of={VProgressLinearStories.Tones} />
+
+## Custom colour
+
+`color` replaces the tone and accepts any CSS colour (hexadecimal, a keyword, `oklch()`). The track
+is derived from it by `color-mix` towards the current surface: the rendering therefore follows the
+light or dark theme automatically, without the consumer having to supply two values.
+
+<Canvas of={VProgressLinearStories.CustomColor} />
+
+## Thickness
+
+`thickness` is **always expressed in pixels**: `12` as well as `'12'` gives twelve pixels. With no
+value, the thickness is 4 pixels — too little to host text, which therefore implies an explicit
+`thickness`.
+
+The **length**, on the other hand, is not a prop: the bar takes all the available room and it is up
+to the container to define it — `width` in horizontal, `height` in vertical.
+
+<Canvas of={VProgressLinearStories.Thickness} />
+
+## Text inside the bar
+
+`showValue` displays the percentage, and `valuePosition` places it at the start, in the centre (the
+default) or at the end. The text is rendered as **two complementary copies**, cut exactly at the
+fill's edge: one in the current text colour over the track, the other over the fill and coloured by
+contrast on it. Each glyph is painted once and once only, so text straddling the two backgrounds
+stays readable on both sides of the boundary, at 5% as well as at 95%.
+
+The automatic contrast rests on `contrast-color()` (Safari 26+); elsewhere, the tone's fallback
+colour applies — the same trade-off already documented for VBadge.
+
+<Canvas of={VProgressLinearStories.Value} />
+
+The default slot receives `{ value, max, percent }` and replaces the percentage with whatever you
+want. It is evaluated twice, once per copy: its content must be pure.
+
+<Canvas of={VProgressLinearStories.CustomContent} />
+
+## Shape
+
+`shape` switches between rounded ends (the default) and square corners — the same values as on
+VProgressCircular, where they drive the stroke's ends.
+
+<Canvas of={VProgressLinearStories.Square} />
+
+## Indeterminate
+
+The `indeterminate` prop switches the bar to a continuous animation; `value` is then ignored and
+`aria-valuenow` disappears.
+
+A fixed-size bar crosses the track, from the outer starting edge to the outer finishing edge. At
+both extremes it is exactly flush with the edge without ever moving away from it: the loop is
+invisible and the track is never empty. The whole quality of the motion rests on the symmetric curve
+— a gradual entry, a fast crossing, a damped exit.
+
+The run is described on logical properties rather than with a transform, which would be physical: a
+single definition serves horizontal, vertical and the reversed reading direction.
+
+<Canvas of={VProgressLinearStories.Indeterminate} />
+
+## Vertical
+
+`orientation="vertical"` puts 0 at the bottom and the maximum at the top, through a plain writing
+mode set on the root: the fill, the text's clip and the indeterminate animation all change axis with
+no extra rule. The text itself stays written horizontally — plan a thickness sufficient to host it.
+The height is set in CSS, for want of a parent of known height to align on.
+
+<Canvas of={VProgressLinearStories.Vertical} />
+
+## Progression
+
+Every change of value is animated, the fill and the contrasted text's boundary sharing exactly the
+same duration and the same curve.
+
+<Canvas of={VProgressLinearStories.Progression} />
+
+## Edge cases
+
+A zero, complete or out-of-bounds value (clamped), a bar at the default thickness carrying text
+(which overflows without being cropped), a very long label.
+
+<Canvas of={VProgressLinearStories.EdgeCases} />
+
+## Accessibility
+
+- **Name the bar**: a `progressbar` is never named from its contents, so the component falls back to
+  the dictionary's generic name (`progress.label`). Supply `aria-label` (or `aria-labelledby`)
+  whenever the page holds more than one bar — there is no label prop, the attribute wins through
+  fallthrough.
+- The `progressbar` role is "children presentational": the text visible in the bar is **not
+  announced** by assistive technologies. It complements the label, it never replaces it.
+- The announced bounds are faithful to `max` ("3 of 8") rather than normalized to 100.
+- `aria-valuenow` is absent when indeterminate, which is precisely how unknown progress is
+  announced.
+- The contrasted text copy duplicates visible content: it is hidden from screen readers.
+- Transitions and the continuous animation respect `prefers-reduced-motion` — the animation is
+  slowed, never frozen, since a motionless loader would lose its purpose.
+
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.
