@@ -135,7 +135,7 @@ than the page. Over media busy enough to swallow them anyway, use `indicators="o
 `#indicator` slot.
 
 Icons and labels are props (`prevIcon`, `nextIcon`, `prevLabel`…), and the `#controls`,
-`#indicators`, `#indicator` and `#autoplay` slots replace the rendering entirely — `#indicators`
+`#indicators` and `#indicator` slots replace the rendering entirely — `#indicators`
 receives `goTo`, without which the bar could no longer select anything, and both bars receive
 `orientation`, without which a custom one cannot pick its icons or its axis.
 
@@ -182,14 +182,21 @@ remedy for it.
 
 ## Autoplay
 
-`autoplay` is an interval in milliseconds; `0` disables it. It stops at the last slide — there is
-no loop, which would mean cloning slides and repositioning the scroller in JS. It pauses on hover
-and on focus-within, and `prefers-reduced-motion` disables it completely: a media query stops a
+`autoplay` is an interval in milliseconds; `0` disables it. It stops on the last page — there is no
+loop, which would mean cloning slides and repositioning the scroller in JS. It pauses on hover and
+on focus-within, and `prefers-reduced-motion` disables it completely: a media query stops a
 transition, never a timer.
 
-The pause control is rendered whenever autoplay is on, **whatever `controls` says**. WCAG 2.2.2
-requires a way to stop content that moves on its own, and that floor is not a presentational
-choice.
+The component renders **no pause button**. The prop is reactive and `0` cancels the timer
+immediately, so a stop control is a binding on your side:
+
+```vue
+<VCarousel :autoplay="paused ? 0 : 5000">…</VCarousel>
+```
+
+One is worth adding. WCAG 2.2.2 asks for a way to stop content that starts moving on its own and
+runs for more than five seconds, and hover and focus leave a touch user with neither — the
+exemption only holds while `interval × (pages − 1)` stays under five seconds.
 
 <Canvas of={VCarouselStories.Autoplay} />
 
@@ -213,7 +220,8 @@ choice.
   it a fixed pixel step that mandatory snapping immediately undoes, so the component handles them.
 - The indicators are ordinary buttons named "N of M", the current one marked with `aria-current`.
   Their hit area is 24px even though the dot is 8px.
-- The autoplay control carries its state in its **label** (start/stop), not in `aria-pressed`.
+- Autoplay ships no control of its own, so if you enable it, add a stop control by binding
+  `autoplay` to `0` — see above.
 - A visually hidden `role="status"` announces the position — and stays silent while autoplay
   rotates, because narrating an auto-rotating carousel floods the screen reader.
 - `controlsVisibility="hover"` hides the pair with an opacity, so the buttons keep their place in

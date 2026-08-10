@@ -218,10 +218,6 @@ export interface VectisMessages {
     slide: (index: number, total: number) => string
     previous: string
     next: string
-    /** Label of the autoplay control while it is stopped (no aria-pressed: APG). */
-    play: string
-    /** Label of the autoplay control while it is running. */
-    pause: string
     /** Accessible name of the indicator group. */
     indicators: string
   }

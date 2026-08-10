@@ -153,8 +153,6 @@ export const fr: VectisMessages = {
     slide: (index, total) => `${index} sur ${total}`,
     previous: 'Diapositive précédente',
     next: 'Diapositive suivante',
-    play: 'Démarrer le défilement automatique',
-    pause: 'Arrêter le défilement automatique',
     indicators: 'Choisir la diapositive à afficher',
   },
 }

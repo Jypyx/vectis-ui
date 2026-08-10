@@ -600,15 +600,30 @@ export const ResponsivePages: Story = {
 }
 
 /**
- * WCAG 2.2.2: the pause control is rendered whatever `controls` says, autoplay pauses on
- * hover and on focus-within, and `prefers-reduced-motion` stops it outright.
+ * The component renders no pause button: autoplay pauses on hover and on focus-within,
+ * stops on the last page, and `prefers-reduced-motion` disables it outright. A stop
+ * control of your own is a binding on the prop — `0` cancels the timer on the spot.
  */
 export const Autoplay: Story = {
   args: { autoplay: 900, indicators: 'inside' },
+  render: (args) => ({
+    components: { VCarousel, VCarouselItem },
+    setup: () => ({ args, index: ref(0), hues: HUES, slideStyle: SLIDE_STYLE, t }),
+    template: `
+      <VCarousel v-bind="args" v-model="index" label="Autoplay">
+        <VCarouselItem v-for="(hue, i) in hues" :key="hue">
+          <div :style="slideStyle + 'background: oklch(0.45 0.15 ' + hue + ');'">
+            {{ t.slide }} {{ i + 1 }}
+          </div>
+        </VCarouselItem>
+      </VCarousel>
+    `,
+  }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const pause = canvas.getByRole('button', { name: 'Stop automatic slide show' })
+    const root = canvasElement.querySelector('.v-carousel') as HTMLElement
 
+    // it advances on its own…
     await waitFor(
       async () => {
         await expect(canvas.getByRole('button', { name: '2 of 6' })).toHaveAttribute(
@@ -619,10 +634,16 @@ export const Autoplay: Story = {
       { timeout: 4000 },
     )
 
-    await userEvent.click(pause)
-    await expect(
-      canvas.getByRole('button', { name: 'Start automatic slide show' }),
-    ).toBeInTheDocument()
+    /*
+     * …and the only buttons in the stage are previous and next: no pause control is
+     * rendered any more.
+     *
+     * The hover and focus pauses are NOT asserted here. This runner's iframe does not
+     * hold document focus, so a programmatic `focus()` is followed by a real
+     * `focusout` and the rotation resumes — the pauses are locked in jsdom instead,
+     * where both flags are driven deterministically.
+     */
+    await expect(root.querySelectorAll('.v-carousel-stage button')).toHaveLength(2)
   },
 }
 

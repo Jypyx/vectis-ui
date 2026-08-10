@@ -111,9 +111,13 @@ interface CarouselProps {
   height?: number | string
   /**
    * Milliseconds between two automatic advances; `0` disables it. Autoplay stops
-   * on the last PAGE (there is no loop), pauses on hover and on focus-within,
-   * and is fully disabled under `prefers-reduced-motion`. A pause control is
-   * always rendered while it is on — WCAG 2.2.2 is not a styling option.
+   * on the last PAGE (there is no loop), pauses on hover and on focus-within, and
+   * is fully disabled under `prefers-reduced-motion`.
+   *
+   * The component renders NO pause button. The prop is reactive and `0` cancels
+   * the timer on the spot, so a stop control is a one-line binding on your side —
+   * and one is worth having: WCAG 2.2.2 asks for a way to stop content that moves
+   * on its own, and hover and focus leave a touch user with none.
    */
   autoplay?: number
   /**
@@ -140,18 +144,10 @@ interface CarouselProps {
   prevIcon?: IconSource
   /** Icon of the next button. Default depends on the orientation. */
   nextIcon?: IconSource
-  /** Icon of the autoplay control while it is stopped. */
-  playIcon?: IconSource
-  /** Icon of the autoplay control while it is running. */
-  pauseIcon?: IconSource
   /** Accessible name of the previous button. Default: the DS dictionary. */
   prevLabel?: string
   /** Accessible name of the next button. Default: the DS dictionary. */
   nextLabel?: string
-  /** Accessible name of the autoplay control while stopped. Default: the dictionary. */
-  playLabel?: string
-  /** Accessible name of the autoplay control while running. Default: the dictionary. */
-  pauseLabel?: string
   /**
    * Accessible name of the region. Give a DISTINCT one to every carousel on a
    * page: `role="region"` is a landmark, and two identically named landmarks are
@@ -174,12 +170,8 @@ const props = withDefaults(defineProps<CarouselProps>(), {
   controlsVisibility: 'always',
   prevIcon: undefined,
   nextIcon: undefined,
-  playIcon: 'play_arrow',
-  pauseIcon: 'pause',
   prevLabel: undefined,
   nextLabel: undefined,
-  playLabel: undefined,
-  pauseLabel: undefined,
   label: undefined,
 })
 
@@ -223,8 +215,6 @@ defineSlots<{
   }): unknown
   /** Replaces ONE indicator's contents; the <button> and its ARIA stay the DS's. */
   indicator?(props: { index: number; active: boolean }): unknown
-  /** Replaces the autoplay control. */
-  autoplay?(props: { playing: boolean; toggle: () => void }): unknown
 }>()
 
 /** Index of the current slide — the FIRST visible one when several fit. */
@@ -489,7 +479,6 @@ function goTo(index: number) {
 }
 const previous = () => goTo(model.value - 1)
 const next = () => goTo(model.value + 1)
-const toggleAutoplay = () => (playing.value = !playing.value)
 
 /**
  * The one keyboard concession, and it is not the one it looks like. A focused
@@ -528,7 +517,6 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 const { start, cancel } = useTimer()
-const playing = ref(props.autoplay > 0)
 const hovered = ref(false)
 const focused = ref(false)
 const reducedMotion = ref(false)
@@ -539,16 +527,13 @@ const reducedMotion = ref(false)
  *
  * `autoplay > 0` is a GUARD, not a default: `useTimer` runs a delay ≤ 0
  * SYNCHRONOUSLY (the DS convention), and a synchronous callback bumping the model
- * would recurse until the stack blows.
+ * would recurse until the stack blows. It is ALSO the consumer's stop control —
+ * the prop is reactive, so binding it to `0` cancels the timer on the spot, which
+ * is what a pause button of your own would drive.
  */
 const rotating = computed(
   () =>
-    playing.value &&
-    props.autoplay > 0 &&
-    !hovered.value &&
-    !focused.value &&
-    !reducedMotion.value &&
-    !atEnd.value,
+    props.autoplay > 0 && !hovered.value && !focused.value && !reducedMotion.value && !atEnd.value,
 )
 
 // `immediate`: without it the first delay would only be armed by a LATER change,
@@ -689,24 +674,6 @@ if (isDev) {
             <VIcon v-bind="iconProps(resolvedNextIcon)" />
           </VIconButton>
         </div>
-      </slot>
-
-      <!--
-        Rendered whatever `controls` says: WCAG 2.2.2 demands a way to stop
-        content that moves on its own, and that floor must not be removable
-        through a presentational prop.
-      -->
-      <slot v-if="autoplay > 0" name="autoplay" :playing="playing" :toggle="toggleAutoplay">
-        <VIconButton
-          class="v-carousel-autoplay"
-          :label="playing ? (pauseLabel ?? m.carousel.pause) : (playLabel ?? m.carousel.play)"
-          variant="solid"
-          tone="neutral"
-          size="sm"
-          @click="toggleAutoplay"
-        >
-          <VIcon v-bind="iconProps(playing ? pauseIcon : playIcon)" />
-        </VIconButton>
       </slot>
     </div>
 
@@ -1172,13 +1139,6 @@ if (isDev) {
 
   .v-carousel-control {
     pointer-events: auto;
-  }
-
-  /* Autoplay sits at the start corner, out of the controls' way in either mode. */
-  .v-carousel-autoplay {
-    position: absolute;
-    inset-block-start: var(--vectis-space-2);
-    inset-inline-start: var(--vectis-space-2);
   }
 
   .v-carousel-indicators {

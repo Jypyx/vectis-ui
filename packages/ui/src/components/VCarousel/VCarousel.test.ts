@@ -17,27 +17,33 @@ import VCarouselItem from './VCarouselItem.vue'
  */
 function mount(
   options: {
-    /** Raw attributes set on <VCarousel>. */
+    /** Raw attributes set on <VCarousel>. Do NOT set `autoplay` here — see below. */
     attrs?: string
     /** Body of the default slot; three slides by default. */
     slides?: string
     initial?: number
+    /**
+     * Bound REACTIVELY, and returned, because the prop is the component's only stop
+     * control now that it renders no pause button: a test has to be able to move it.
+     */
+    autoplay?: number
   } = {},
 ) {
   const model = ref<number>(options.initial ?? 0)
+  const autoplay = ref<number>(options.autoplay ?? 0)
   const slides =
     options.slides ?? [0, 1, 2].map((i) => `<VCarouselItem>Slide ${i}</VCarouselItem>`).join('\n')
 
   const Harness = defineComponent({
     components: { VCarousel, VCarouselItem },
-    setup: () => ({ model }),
+    setup: () => ({ model, autoplay }),
     template: `
-      <VCarousel v-model="model" ${options.attrs ?? ''}>
+      <VCarousel v-model="model" :autoplay="autoplay" ${options.attrs ?? ''}>
         ${slides}
       </VCarousel>
     `,
   })
-  return { model, ...render(Harness) }
+  return { model, autoplay, ...render(Harness) }
 }
 
 const slidesOf = (container: Element) => [
@@ -206,7 +212,8 @@ describe('VCarousel', () => {
     it('autoplay stops on the last page', async () => {
       vi.useFakeTimers()
       const { model } = mount({
-        attrs: ':items-per-view="3" :autoplay="1000"',
+        attrs: ':items-per-view="3"',
+        autoplay: 1000,
         slides: six,
       })
       // One tick per step: the timer is re-armed by a watcher, which
@@ -251,7 +258,7 @@ describe('VCarousel', () => {
   describe('autoplay', () => {
     it('advances on the interval and stops at the last slide (no loop)', async () => {
       vi.useFakeTimers()
-      const { model } = mount({ attrs: ':autoplay="1000"' })
+      const { model } = mount({ autoplay: 1000 })
 
       vi.advanceTimersByTime(1000)
       await nextTick()
@@ -266,32 +273,42 @@ describe('VCarousel', () => {
       expect(model.value).toBe(2)
     })
 
-    it('renders no control and arms nothing at 0 (the synchronous-useTimer guard)', () => {
+    it('arms nothing at 0 (the synchronous-useTimer guard)', () => {
       vi.useFakeTimers()
-      const { container, model } = mount({ attrs: ':autoplay="0"' })
-      expect(container.querySelector('.v-carousel-autoplay')).toBeNull()
+      const { model } = mount({ autoplay: 0 })
       vi.advanceTimersByTime(10_000)
       expect(model.value).toBe(0)
     })
 
-    it('the pause control freezes it and its LABEL carries the state', async () => {
+    it('renders no pause control of its own', () => {
+      const { container } = mount({ autoplay: 1000 })
+      // previous and next, and nothing else
+      expect(container.querySelectorAll('.v-carousel-stage button')).toHaveLength(2)
+    })
+
+    /*
+     * The prop IS the stop control, and it is the only one the component offers now
+     * that no button is rendered: a consumer builds their own by binding it, so the
+     * reactivity has to be locked here.
+     */
+    it('binding autoplay back to 0 cancels the timer on the spot', async () => {
       vi.useFakeTimers()
-      const { container, model } = mount({ attrs: ':autoplay="1000"' })
-      const toggle = container.querySelector('.v-carousel-autoplay') as HTMLButtonElement
-      expect(toggle.getAttribute('aria-label')).toBe('Stop automatic slide show')
-      expect(toggle.hasAttribute('aria-pressed')).toBe(false)
+      const { model, autoplay } = mount({ autoplay: 1000 })
 
-      await fireEvent.click(toggle)
-      expect(toggle.getAttribute('aria-label')).toBe('Start automatic slide show')
-
-      vi.advanceTimersByTime(5000)
+      vi.advanceTimersByTime(1000)
       await nextTick()
-      expect(model.value).toBe(0)
+      expect(model.value).toBe(1)
+
+      autoplay.value = 0
+      await nextTick()
+      vi.advanceTimersByTime(10_000)
+      await nextTick()
+      expect(model.value).toBe(1)
     })
 
     it('pauses on hover and on focus-within', async () => {
       vi.useFakeTimers()
-      const { container, model } = mount({ attrs: ':autoplay="1000"' })
+      const { container, model } = mount({ autoplay: 1000 })
       const root = container.querySelector('.v-carousel') as HTMLElement
 
       await fireEvent.pointerEnter(root)
@@ -307,7 +324,7 @@ describe('VCarousel', () => {
 
     it('the live region stays silent while it rotates', () => {
       vi.useFakeTimers()
-      const { container } = mount({ attrs: ':autoplay="1000"' })
+      const { container } = mount({ autoplay: 1000 })
       expect(container.querySelector('[role="status"]')?.textContent).toBe('')
     })
   })
@@ -328,11 +345,10 @@ describe('VCarousel', () => {
       expect(bar.parentElement).toBe(root)
     })
 
-    it('the controls and the autoplay control stay inside the stage', () => {
-      const { container } = mount({ attrs: ':autoplay="1000"' })
+    it('the controls stay inside the stage, with the viewport', () => {
+      const { container } = mount()
       const stage = container.querySelector('.v-carousel-stage') as HTMLElement
       expect(stage.querySelector('.v-carousel-controls')).not.toBeNull()
-      expect(stage.querySelector('.v-carousel-autoplay')).not.toBeNull()
       expect(stage.querySelector('.v-carousel-viewport')).not.toBeNull()
     })
 

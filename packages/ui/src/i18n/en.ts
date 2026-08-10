@@ -141,8 +141,6 @@ export const en: VectisMessages = {
     slide: (index, total) => `${index} of ${total}`,
     previous: 'Previous slide',
     next: 'Next slide',
-    play: 'Start automatic slide show',
-    pause: 'Stop automatic slide show',
     indicators: 'Choose slide to display',
   },
 }
