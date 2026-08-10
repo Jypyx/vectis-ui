@@ -23,6 +23,8 @@ import {
   weekdayNames,
 } from '../../utils/date'
 
+import { PICKER_COLUMNS, dayStep, gridDelta } from './keyboard'
+
 import { toggleValue } from '../../utils/array'
 import { resolveMatcher } from '../../utils/matcher'
 import { clamp } from '../../utils/number'
@@ -357,7 +359,8 @@ function selectDay(cell: DayCell) {
 }
 
 // @keyboard @a11y
-// Keyboard (the days view).
+// Keyboard (the days view). The key → step table is pure and lives in `./keyboard`;
+// what stays here is the focused date it applies to, and moving the focus.
 function onDaysKeydown(event: KeyboardEvent) {
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
@@ -366,38 +369,17 @@ function onDaysKeydown(event: KeyboardEvent) {
     return
   }
   const d = parseISO(focusedISO.value)!
+  // Offset from the start of the week — what Home and End step back to.
   const offset = (d.getDay() - resolvedFirstDay.value + 7) % 7
-  let next: string
-  switch (event.key) {
-    case 'ArrowRight':
-      next = addDays(focusedISO.value, 1)
-      break
-    case 'ArrowLeft':
-      next = addDays(focusedISO.value, -1)
-      break
-    case 'ArrowDown':
-      next = addDays(focusedISO.value, 7)
-      break
-    case 'ArrowUp':
-      next = addDays(focusedISO.value, -7)
-      break
-    case 'Home':
-      next = addDays(focusedISO.value, -offset)
-      break
-    case 'End':
-      next = addDays(focusedISO.value, 6 - offset)
-      break
-    case 'PageUp':
-      next = addMonths(focusedISO.value, event.shiftKey ? -12 : -1)
-      break
-    case 'PageDown':
-      next = addMonths(focusedISO.value, event.shiftKey ? 12 : 1)
-      break
-    default:
-      return
-  }
+  const step = dayStep(event.key, event.shiftKey, offset)
+  if (!step) return
   event.preventDefault()
-  goTo(next, true)
+  goTo(
+    'days' in step
+      ? addDays(focusedISO.value, step.days)
+      : addMonths(focusedISO.value, step.months),
+    true,
+  )
 }
 
 // Months view.
@@ -416,18 +398,12 @@ function chooseMonth(i: number) {
 }
 // @keyboard @a11y
 function onMonthsKeydown(event: KeyboardEvent) {
-  const deltas: Record<string, number> = {
-    ArrowRight: 1,
-    ArrowLeft: -1,
-    ArrowDown: 3,
-    ArrowUp: -3,
-  }
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
     chooseMonth(focusedMonth.value)
     return
   }
-  const delta = deltas[event.key]
+  const delta = gridDelta(event.key)
   if (delta === undefined) return
   event.preventDefault()
   focusedMonth.value = clamp(focusedMonth.value + delta, 0, 11)
@@ -442,7 +418,6 @@ function onMonthsKeydown(event: KeyboardEvent) {
  * so the CSS grid is untouched). Keyboard navigation is unaffected: it moves by index
  * (±1 / ±3) and refocuses through the cell ids, never by walking the DOM.
  */
-const PICKER_COLUMNS = 3
 const chunk = <T,>(list: T[]) =>
   Array.from({ length: Math.ceil(list.length / PICKER_COLUMNS) }, (_, r) =>
     list.slice(r * PICKER_COLUMNS, r * PICKER_COLUMNS + PICKER_COLUMNS),
@@ -478,18 +453,12 @@ function chooseYear(y: number) {
 }
 // @keyboard @a11y
 function onYearsKeydown(event: KeyboardEvent) {
-  const deltas: Record<string, number> = {
-    ArrowRight: 1,
-    ArrowLeft: -1,
-    ArrowDown: 3,
-    ArrowUp: -3,
-  }
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
     chooseYear(focusedYear.value)
     return
   }
-  const delta = deltas[event.key]
+  const delta = gridDelta(event.key)
   if (delta === undefined) return
   event.preventDefault()
   const list = yearRange.value
