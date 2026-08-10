@@ -8,6 +8,7 @@ import VInput from '../VInput/VInput.vue'
 import { isDev } from '../../utils/env'
 import { useMessages } from '../../i18n/state'
 
+// @core
 /**
  * A native <input type="range"> (keyboard, the ARIA slider, forms — all for free). The
  * JS is limited to preventing the values from crossing in range mode (two
@@ -67,6 +68,8 @@ const endValue = computed(() =>
 /** Fraction [0, 1] of the run for a value (the `|| 1` guards against min === max). */
 const frac = (v: number) => Math.min(1, Math.max(0, (v - props.min) / (props.max - props.min || 1)))
 
+// @core — the anti-crossing clamp: two superimposed native ranges, no dual-thumb
+// primitive to inherit it from.
 function onStartInput(event: Event) {
   const el = event.target as HTMLInputElement
   const clamped = Math.min(Number(el.value), endValue.value)
@@ -113,6 +116,7 @@ function labelTextAt(value: number): string {
   return typeof item === 'string' ? item : item.label
 }
 
+// @a11y
 /* Accessible names of the thumbs. No dedicated prop: the dictionary is the only
    override point.
 
@@ -134,6 +138,7 @@ const fieldEndLabel = computed(() =>
 const startValueText = computed(() => (props.labels ? labelTextAt(startValue.value) : undefined))
 const endValueText = computed(() => (props.labels ? labelTextAt(endValue.value) : undefined))
 
+// @devwarn
 if (isDev) {
   if ((props.ticks || props.labels) && stepCount.value > 50)
     console.warn(`[VSlider] ${stepCount.value} steps — ticks/labels not rendered past 50.`)

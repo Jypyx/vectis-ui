@@ -18,6 +18,7 @@ withDefaults(defineProps<SwitchProps>(), {
   disabled: false,
 })
 
+// @a11y
 // The root is a <label>: the native attributes (name, aria-label…) must land on the
 // input.
 defineOptions({ inheritAttrs: false })

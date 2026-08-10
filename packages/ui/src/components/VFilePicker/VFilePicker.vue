@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @core
 /**
  * File selection: a hidden native `<input type="file">` and a read-only `VInput`
  * as the visible field — the `VDatePicker mode="readonly"` shape, minus the
@@ -205,6 +206,7 @@ const canClear = computed(
   () => props.clearable && !props.disabled && !props.readonly && model.value.length > 0,
 )
 
+// @a11y @devwarn
 /*
  * The icon disappears with the affordance (the VDatePicker rule): read-only,
  * there is nothing to open. Its LABEL, on the other hand, stays defined at all
@@ -230,6 +232,7 @@ const counterText = computed(() => {
 const hintId = useId()
 const counterId = useId()
 
+// @a11y
 /*
  * `aria-describedby` is a LIST of IDREFs, and the hint belongs to OUR meta row
  * (VInput has no bottom row — its counter sits inside the field), so the
@@ -305,6 +308,7 @@ const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop(
   acceptFiles,
 )
 
+// @devwarn
 if (isDev) {
   watchEffect(() => {
     if (props.display === 'chip' && !props.multiple)

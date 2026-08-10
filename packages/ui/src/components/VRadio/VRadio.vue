@@ -24,6 +24,8 @@ withDefaults(defineProps<RadioProps>(), {
   disabled: false,
 })
 
+// @a11y — the component's ONLY behavioural decision: arrow navigation inside the
+// group is the browser's, and it only works if `name` reaches the real input.
 // The root is a <label>: the native attributes (`name` above all, for the group) must
 // land on the input.
 defineOptions({ inheritAttrs: false })
