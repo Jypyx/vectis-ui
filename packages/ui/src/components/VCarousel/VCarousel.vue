@@ -294,6 +294,25 @@ const viewportEl = ref<HTMLElement | null>(null)
 const settling = ref(false)
 const onScrollEnd = () => (settling.value = false)
 
+/*
+ * Raised for exactly the model write the read-back makes, and lowered on the next
+ * tick — once `watch(model)` below has read it.
+ *
+ * It is what stops the two directions from CHAINING, and the bug it fixes is a
+ * touch one: DOM → model runs on every frame of a drag, and each of those writes
+ * came straight back as a programmatic `scrollBy`. The scroller jumped to the
+ * slide the read-back had just named while the finger was still down, the release
+ * then snapped it again, and one gesture produced two animations. A wheel or a
+ * keyboard rarely shows it — they leave the scroller between two snap positions
+ * far less often than a drag does.
+ *
+ * `scrollToIndex`'s own "already there" test does NOT cover this: it only holds at
+ * rest, and mid-gesture the delta is a real one. Nothing needs writing anyway —
+ * the scroller is where the read-back read it, or on its way there under the
+ * browser's own snapping.
+ */
+let readBack = false
+
 /**
  * Writes the DOM from the model. The deltas come from the RECTS, hence physical:
  * LTR, RTL and vertical all fall out with no direction test (the VTabs
@@ -323,6 +342,7 @@ function scrollToIndex(index: number) {
 }
 
 watch(model, (index) => {
+  if (readBack) return
   void nextTick(() => scrollToIndex(index))
 })
 
@@ -459,7 +479,16 @@ watch(
 watch([observedIndex, settling], () => {
   const index = observedIndex.value
   if (settling.value || index === undefined || index === model.value) return
+  readBack = true
   model.value = index
+  /*
+   * Lowered here and not inside `watch(model)`: a CONTROLLED v-model that refuses
+   * the value fires no watcher at all, and the flag would then swallow the
+   * consumer's next legitimate change. The pre-flush watcher runs inside the flush
+   * this write schedules, a `nextTick` callback only after it — so it has read the
+   * flag by the time this lands.
+   */
+  void nextTick(() => (readBack = false))
 })
 
 /*

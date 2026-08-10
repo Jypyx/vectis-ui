@@ -53,9 +53,30 @@ const indicatorsOf = (container: Element) => [
   ...container.querySelectorAll<HTMLButtonElement>('.v-carousel-indicator'),
 ]
 
+/**
+ * jsdom ships no IntersectionObserver, so the read-back is normally out of reach
+ * here. This stub hands the callback back, which is enough to lock the DIRECTION
+ * of the write — not the ratios, which need a real layout (play functions).
+ */
+function stubIntersectionObserver() {
+  let notify: ((entries: Partial<IntersectionObserverEntry>[]) => void) | undefined
+  vi.stubGlobal(
+    'IntersectionObserver',
+    class {
+      constructor(callback: (entries: Partial<IntersectionObserverEntry>[]) => void) {
+        notify = callback
+      }
+      observe() {}
+      disconnect() {}
+    },
+  )
+  return (entries: Partial<IntersectionObserverEntry>[]) => notify?.(entries)
+}
+
 afterEach(() => {
   setLocale('en-US')
   vi.useRealTimers()
+  vi.unstubAllGlobals()
 })
 
 describe('VCarousel', () => {
@@ -173,6 +194,39 @@ describe('VCarousel', () => {
       await nextTick()
       await nextTick()
       expect(scrollBy).toHaveBeenCalledWith({ left: 280, top: 0 })
+    })
+
+    /*
+     * The touch-drag saccade: the read-back writes the model on every frame of a
+     * drag, and each write used to come back as a programmatic scroll fighting the
+     * finger — the scroller jumped to the slide just named, the release snapped it
+     * again, and one gesture played two animations. The scroller is already there,
+     * so the model → DOM direction has nothing to do.
+     */
+    it('a read-back write does not come back as a programmatic scroll', async () => {
+      const notify = stubIntersectionObserver()
+      const { container, model } = mount()
+      await nextTick()
+
+      const port = container.querySelector('.v-carousel-viewport') as HTMLElement
+      const scrollBy = vi.fn()
+      port.scrollBy = scrollBy
+      port.getBoundingClientRect = () => ({ left: 0, top: 0 }) as DOMRect
+      // A real layout, so `scrollToIndex` would have a genuine delta to write and
+      // `measurePages` a reachable position per slide.
+      Object.defineProperty(port, 'scrollWidth', { value: 900 })
+      Object.defineProperty(port, 'clientWidth', { value: 300 })
+      const slides = slidesOf(container)
+      slides.forEach((slide, index) => {
+        slide.getBoundingClientRect = () => ({ left: index * 300, top: 0 }) as DOMRect
+      })
+
+      notify([{ target: slides[1] as Element, intersectionRatio: 1 }])
+      await nextTick()
+      await nextTick()
+
+      expect(model.value).toBe(1)
+      expect(scrollBy).not.toHaveBeenCalled()
     })
   })
 
