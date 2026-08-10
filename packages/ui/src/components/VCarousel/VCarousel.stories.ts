@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import { storyText } from '../../stories/storyText'
 import VTypography from '../VTypography/VTypography.vue'
@@ -32,14 +32,24 @@ const t = storyText({
 const HUES = [220, 280, 340, 20, 90, 160]
 
 /** A slide big enough to be seen, painted from a token so both themes stay legible. */
-const SLIDE_STYLE = `
+const SLIDE_BASE = `
   display: grid;
   place-items: center;
-  block-size: 12rem;
   color: var(--vectis-color-text-on-accent);
   font: var(--vectis-text-heading-3-weight) var(--vectis-text-heading-3-size) / 1.2 var(--vectis-text-family);
   border-radius: var(--vectis-radius-surface);
 `
+
+/*
+ * The two orientations size a slide from opposite ends, so the demo content cannot use
+ * one style for both. HORIZONTAL takes its block size from the slides, so the content
+ * has to carry one. VERTICAL derives the slide's height from `height / itemsPerView`,
+ * so a fixed height on the content just leaves slack inside the slide — which is what
+ * made the controls and the indicators look off-centre against the coloured block while
+ * being perfectly centred on the viewport.
+ */
+const SLIDE_STYLE = `${SLIDE_BASE} block-size: 12rem;`
+const VERTICAL_SLIDE_STYLE = `${SLIDE_BASE} block-size: 100%;`
 
 const meta = {
   title: 'Components/Carousel',
@@ -61,9 +71,19 @@ const meta = {
     autoplay: 0,
   },
   // A live v-model: without a local ref, clicking an indicator would change nothing.
+  // `slideStyle` is a COMPUTED, not a value read at setup time: args are reactive, so
+  // flipping the orientation from the toolbar has to re-pick the content's height.
   render: (args) => ({
     components: { VCarousel, VCarouselItem },
-    setup: () => ({ args, index: ref(0), hues: HUES, slideStyle: SLIDE_STYLE, t }),
+    setup: () => ({
+      args,
+      index: ref(0),
+      hues: HUES,
+      slideStyle: computed(() =>
+        args.orientation === 'vertical' ? VERTICAL_SLIDE_STYLE : SLIDE_STYLE,
+      ),
+      t,
+    }),
     template: `
       <VCarousel v-bind="args" v-model="index" label="Gallery">
         <VCarouselItem v-for="(hue, i) in hues" :key="hue">
@@ -243,6 +263,17 @@ export const Vertical: Story = {
     await expect(prev.bottom).toBeLessThanOrEqual(box.top)
     await expect(next.top).toBeGreaterThanOrEqual(box.bottom)
     await expect(bar.left).toBeGreaterThanOrEqual(box.right)
+
+    /*
+     * One slide per view, so the slide IS the viewport's height — and the demo content
+     * fills it. Content carrying a fixed height instead leaves slack inside the slide,
+     * and the controls then read as off-centre against it while being exactly centred
+     * on the viewport, which is what they are positioned against.
+     */
+    const slide = canvasElement.querySelector('[data-carousel-index="0"]') as HTMLElement
+    const painted = slide.querySelector('.v-carousel-effect > div') as HTMLElement
+    await expect(Math.abs(slide.getBoundingClientRect().height - box.height)).toBeLessThan(1)
+    await expect(Math.abs(painted.getBoundingClientRect().height - box.height)).toBeLessThan(1)
 
     await userEvent.click(canvas.getByRole('button', { name: 'Next slide' }))
     await waitFor(async () => {

@@ -97,6 +97,13 @@ never as the `animation` shorthand, which would silently reset the timeline and 
 has no definite reference on the block axis, and without one every slide would collapse onto its
 content.
 
+The two orientations size a slide from opposite ends, and it is worth knowing which way round:
+**horizontal takes its height from the slides**, so your content carries one; **vertical derives
+each slide's height from `height / itemsPerView`**, so your content should fill it — give it
+`block-size: 100%` rather than a height of its own. Content shorter than its slide leaves slack
+inside it, and the controls then read as off-centre against the visible block while being exactly
+centred on the viewport, which is what they are positioned against.
+
 Both affordances follow the axis: `outside` controls go above and below, and the indicators move to
 the inline end. Note the asymmetry between the orientations — horizontal `outside` controls cost
 inline size at a constant footprint, where vertical ones cost block footprint at a constant slide
