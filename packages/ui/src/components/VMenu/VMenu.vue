@@ -5,6 +5,7 @@ import VMenuPanel from './VMenuPanel.vue'
 import { menuInvoker, menuKey } from './context'
 import type { MenuPlacement } from './context'
 
+// @a11y @core
 /**
  * An action menu (the ARIA menu pattern): Popover API (native light dismiss; pure
  * CSS positioning). The trigger invokes the panel through `popovertarget` (the
@@ -73,6 +74,8 @@ const triggerProps = computed<MenuTriggerProps>(() => ({
 // descendants: the popover's native cascade).
 provide(menuKey, { closeAll: () => panelRef.value?.hide() })
 
+// @a11y — the focus half of the bridge: into the panel on opening, back to the
+// trigger on closing. The state half alone would leave the keyboard stranded.
 function onToggle(value: boolean) {
   shown.value = value
   open.value = value
@@ -94,6 +97,7 @@ watch(open, (value) => {
   else panelRef.value?.hide()
 })
 
+// @ssr — watchers do not run on the server: the initial state is replayed on mount.
 onMounted(() => {
   if (open.value) panelRef.value?.show()
 })

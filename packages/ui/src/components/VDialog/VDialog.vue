@@ -6,6 +6,7 @@ import VIconButton from '../VIconButton/VIconButton.vue'
 import VTypography from '../VTypography/VTypography.vue'
 import { useMessages } from '../../i18n/state'
 
+// @core
 /**
  * A blocking modal built on the native `<dialog>` primitive + `showModal()`: the top
  * layer, `::backdrop`, the focus trap, the inert background and the focus return to the
@@ -83,6 +84,7 @@ const closedby = computed(() =>
   props.closeOnBackdrop ? 'any' : props.closeOnEscape ? 'closerequest' : 'none',
 )
 
+// @fallback
 // `closedby` is not yet typed on <dialog> in lib.dom: it is set through a v-bind
 // object (fallthrough + a native attribute), which sidesteps vue-tsc's per-element
 // attribute check. Vue merges the fallthrough's `class`/`style` with the static class.
@@ -126,6 +128,7 @@ watch(open, async (value) => {
   }
 })
 
+// @ssr
 onMounted(() => {
   // Watchers do not run in SSR: the initial state is replayed on mount (rendered
   // already equals open.value, so the <dialog> is present when open).

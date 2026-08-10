@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useId } from 'vue'
 
+// @a11y @ssr — the whole script is one `useId()`, and it exists only to wire
+// `aria-labelledby`. SSR-safe by construction: `useId` matches server and client.
 /**
  * A named group of items (role="group" + aria-labelledby, the ARIA menu pattern).
  * The label is not selectable: plain text, outside the roving focus.

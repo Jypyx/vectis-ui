@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 
 import type { IconSource } from '../VIcon/types'
 
+// @ssr @core
 /**
  * The global notification queue. JS justified: no HTML primitive covers a
  * programmatic notification queue — the state lives at module level (the sonner

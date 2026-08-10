@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @core
 /**
  * Generic floating panel: the native Popover API + 100% CSS anchoring
  * (`position-anchor`), with no dependency and no JS positioning.
@@ -121,6 +122,7 @@ watch(open, (value) => {
   else hide()
 })
 
+// @ssr — watchers do not run on the server: the initial state is replayed on mount.
 onMounted(() => {
   if (open.value) show()
 })

@@ -50,6 +50,7 @@ defineSlots<{
 }>()
 
 const tooltipId = useId()
+// @a11y
 /*
  * VPopover is driven imperatively (and not through `v-model:open`): keyboard focus
  * must open it SYNCHRONOUSLY — a model would go through VPopover's watch, hence
@@ -61,6 +62,7 @@ const popoverRef = ref<InstanceType<typeof VPopover> | null>(null)
 // Appearance delay (see useTimer: re-arming and cancellation on unmount).
 const timer = useTimer()
 
+// @core
 function show(immediate = false) {
   // a delay of 0 = synchronous execution (the useTimer convention)
   timer.start(() => popoverRef.value?.show(), immediate ? 0 : props.delay)
@@ -71,6 +73,7 @@ function hide() {
   popoverRef.value?.hide()
 }
 
+// @keyboard @a11y — Escape dismisses a hover/focus tooltip (WCAG 1.4.13).
 function onKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') hide()
 }

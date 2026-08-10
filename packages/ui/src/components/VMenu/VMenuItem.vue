@@ -97,6 +97,7 @@ const subPanel = ref<InstanceType<typeof VMenuPanel> | null>(null)
 // positioning.
 const itemEl = ref<HTMLElement | null>(null)
 
+// @keyboard
 // Keyboard opening: the native toggle only covers the click.
 function onKeydown(event: KeyboardEvent) {
   if (!hasSubmenu.value || props.disabled) return
@@ -114,6 +115,7 @@ function onKeydown(event: KeyboardEvent) {
 // a keyboard user.
 const hoverTimer = useTimer()
 
+// @a11y @core
 function onPointerEnter() {
   if (props.disabled) return
   // Hovering also drives the focus: hover and roving focus stay synchronized, a
@@ -123,6 +125,8 @@ function onPointerEnter() {
   hoverTimer.start(() => subPanel.value?.show(itemEl.value ?? undefined), SUBMENU_HOVER_DELAY)
 }
 
+// @a11y @core — the `activeElement` test is the a11y half: a stray pointer must
+// not close a submenu a keyboard user is standing in.
 function onPointerLeave() {
   if (!hasSubmenu.value) return
   hoverTimer.start(() => {
