@@ -1094,6 +1094,15 @@ if (isDev) {
   }
 
   /*
+   * chevrons: the direction is physical, so the icon flips in RTL (the VTabs and
+   * VPagination rule, word for word). Horizontal only — the block axis does not
+   * mirror, so the vertical chevrons are already right.
+   */
+  [dir='rtl'] .v-carousel[data-orientation='horizontal'] .v-carousel-control .v-icon {
+    scale: -1 1;
+  }
+
+  /*
    * BOTH placements are laid out of flow against the STAGE, and that is the whole
    * requirement: the pair is then centred on the slides alone, whatever the indicator
    * bar does. One `align-items: center` serves both orientations — it is the cross

@@ -305,6 +305,45 @@ export const Placement: Story = {
 }
 
 /**
+ * Right-to-left. The layout mirrors itself — logical properties throughout — but a
+ * chevron points at a PHYSICAL direction, so the icons are flipped in CSS (the VTabs
+ * and VPagination rule). Nothing here is observable in jsdom, which evaluates no
+ * styles and lays nothing out.
+ */
+export const Rtl: Story = {
+  globals: { direction: 'rtl' },
+  args: { controls: 'inside', indicators: 'outside' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const port = canvasElement.querySelector('.v-carousel-viewport') as HTMLElement
+    const prev = canvas.getByRole('button', { name: 'Previous slide' })
+    const next = canvas.getByRole('button', { name: 'Next slide' })
+
+    // `space-between` puts `previous` at the inline START, which is the RIGHT here
+    await expect(prev.getBoundingClientRect().left).toBeGreaterThan(
+      next.getBoundingClientRect().left,
+    )
+
+    // the glyph is mirrored, so `previous` points right and `next` points left
+    const icon = prev.querySelector('.v-icon') as HTMLElement
+    await expect(getComputedStyle(icon).scale).toBe('-1 1')
+
+    // and the scroll axis really is reversed: in RTL, scrollLeft goes negative
+    await userEvent.click(next)
+    await waitFor(
+      async () => {
+        await expect(port.scrollLeft).toBeLessThan(0)
+        await expect(canvas.getByRole('button', { name: '2 of 6' })).toHaveAttribute(
+          'aria-current',
+          'true',
+        )
+      },
+      { timeout: 3000 },
+    )
+  },
+}
+
+/**
  * The pair is centred on the SLIDES, never on the slides plus the indicators — which
  * is what putting the indicator bar outside the positioning context buys.
  */
