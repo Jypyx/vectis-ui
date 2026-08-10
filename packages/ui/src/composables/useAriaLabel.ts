@@ -1,5 +1,6 @@
 import { computed, useAttrs, type ComputedRef } from 'vue'
 
+// @a11y
 /**
  * Accessible name of a named container (tablist, group, nav…) following the ARIA
  * precedence: `aria-labelledby` > `aria-label` > `label` prop.

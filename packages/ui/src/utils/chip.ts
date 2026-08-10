@@ -1,3 +1,4 @@
+// @core
 /**
  * The scale of a VChip rendered INSIDE a text field (VCombobox's values,
  * VFilePicker's files).

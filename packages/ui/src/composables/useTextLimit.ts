@@ -7,6 +7,7 @@ interface ValidatableControl {
   setCustomValidity: (message: string) => void
 }
 
+// @core
 /**
  * Typed length vs `maxlength`: the counter text, the overflow and the **soft
  * limit**.

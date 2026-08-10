@@ -1,3 +1,4 @@
+// @ssr @core — module-wide: every export below is @core unless tagged otherwise.
 /**
  * PURE time utilities (VTimePicker, VTimePickerDial).
  *
@@ -51,6 +52,7 @@ export function to24h(hour12: number, meridiem: Meridiem): number {
   return meridiem === 'PM' ? base + 12 : base
 }
 
+// @fallback
 /**
  * Hour cycle of the locale: `h11`/`h12` → 12 h (AM/PM), `h23`/`h24` → 24 h.
  * Falls back to 24 h if the locale is invalid.

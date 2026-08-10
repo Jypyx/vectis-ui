@@ -1,6 +1,7 @@
 import { Comment, Fragment, Text } from 'vue'
 import type { VNode } from 'vue'
 
+// @ssr @core
 /**
  * Flattens a slot's VNodes down to the elements a component actually renders:
  * Fragments (a `v-for`) are unwrapped, comments (a false `v-if`) and whitespace

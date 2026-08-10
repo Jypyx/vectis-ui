@@ -1,3 +1,4 @@
+// @ssr @core — module-wide: every export below is @core unless tagged otherwise.
 /**
  * PURE date utilities (VCalendar, VDatePicker).
  *
@@ -120,6 +121,7 @@ export function buildMonthGrid(year: number, month0: number, firstDayOfWeek: num
   return cells
 }
 
+// @fallback @ssr
 /**
  * First day of the week for the locale (0 = Sunday … 6 = Saturday). Derived from
  * `Intl.Locale.weekInfo` (1 = Monday … 7 = Sunday); falls back to Monday if the
@@ -415,6 +417,7 @@ const PLACEHOLDER_FALLBACK: Record<DateMaskField, string> = { day: 'd', month: '
 /** Ideographic scripts: a repeated "日" does not form a readable template. */
 const IDEOGRAPHIC = /[\p{sc=Han}\p{sc=Hangul}\p{sc=Hiragana}\p{sc=Katakana}]/u
 
+// @fallback
 /**
  * Field template (en "dd/mm/yyyy", fr "jj/mm/aaaa", de "tt.mm.jjjj",
  * ru "дд/мм/гггг"). The letter comes from the localized field name

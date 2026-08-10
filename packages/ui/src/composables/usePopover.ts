@@ -1,5 +1,6 @@
 import { ref, type Ref } from 'vue'
 
+// @core
 /**
  * State plumbing of a `[popover]` element — the counterpart of
  * `styles/floating.css`, which carries the "positioning" half of the same
@@ -20,6 +21,7 @@ import { ref, type Ref } from 'vue'
  * a light dismiss desynchronizes the state and `hide()` becomes a silent no-op.
  */
 
+// @fallback
 // The `source` option of showPopover() is not in lib.dom yet (TS 5.9).
 type PopoverWithSource = HTMLElement & { showPopover(options?: { source?: HTMLElement }): void }
 

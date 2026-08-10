@@ -7,6 +7,7 @@ import { computed, useAttrs, type ComputedRef, type StyleValue } from 'vue'
  */
 type ClassBinding = false | null | undefined | string | Record<string, unknown> | ClassBinding[]
 
+// @a11y
 /**
  * Plumbing of the **wrapper-root pattern**: a component whose root is only a
  * container (VInput/VTextarea fields, VCombobox, VDataTable, VDatePicker,

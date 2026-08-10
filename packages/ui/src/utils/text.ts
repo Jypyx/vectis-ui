@@ -1,3 +1,4 @@
+// @core
 /**
  * Comparison form of a text: insensitive to case AND to accents (NFD
  * decomposition, then diacritics removed). Used everywhere the DS filters a list
@@ -10,11 +11,13 @@ export function normalizeText(s: string): string {
     .toLowerCase()
 }
 
+// @core
 /** Two-digit integer (`7` → `'07'`) — date and time components. */
 export function pad2(n: number): string {
   return String(n).padStart(2, '0')
 }
 
+// @core
 /**
  * The digits of a text. A purely lexical helper, with no domain: the DS's input
  * masks (VDatePicker's date, VTimePicker's time) only ever know the digit run,

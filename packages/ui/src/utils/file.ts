@@ -1,3 +1,4 @@
+// @core — module-wide: pure domain logic, no a11y, no DOM, no environment guard.
 /**
  * The FILE domain: what a browser hands over as a `File`, and what the design
  * system has to decide about it before it enters a model. Grouped by DOMAIN, the

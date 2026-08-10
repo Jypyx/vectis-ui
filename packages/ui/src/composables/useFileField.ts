@@ -1,3 +1,4 @@
+// @core
 /**
  * The hidden `<input type="file">` gate shared by VFilePicker and VFileUpload.
  *
@@ -12,6 +13,7 @@ import { computed, ref, type ComputedRef, type Ref } from 'vue'
 
 import { screenFiles, type FileLimits, type FileRejection } from '../utils/file'
 
+// @a11y
 /**
  * Attributes that belong to the hidden input rather than to the visible control.
  *
@@ -101,6 +103,7 @@ export function useFileField(options: FileFieldOptions) {
     acceptFiles([...((event.target as HTMLInputElement).files ?? [])])
   }
 
+  // @fallback
   /**
    * The one imperative call neither component can avoid. `.click()` and NOT
    * `showPicker()`: both need a transient user activation, but `showPicker()`

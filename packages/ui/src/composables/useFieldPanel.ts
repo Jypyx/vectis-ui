@@ -34,6 +34,7 @@ export interface UseFieldPanelOptions {
   focusOnOpen?: () => boolean
 }
 
+// @a11y @keyboard @core
 /**
  * The "field + floating `mode="manual"` panel" shell, shared by VDatePicker and
  * VTimePicker. Neither of them owns it.
@@ -56,6 +57,7 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     if (options.disabled() || open.value) return
     options.onOpen?.()
     options.panelRef.value?.show()
+    // @a11y
     // DOM focus has to be moved by hand: the platform does not do it for a
     // `manual` popover. rAF: the panel is not painted yet when show() returns.
     if (moveFocus) requestAnimationFrame(() => options.focusInPanel())
@@ -75,9 +77,11 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     openPanel()
   }
 
+  // @a11y
   /** Closes when focus leaves the component (panel included, a DOM descendant). */
   const onFocusout = useFocusoutDismiss(options.rootEl, () => closePanel(false))
 
+  // @a11y
   /*
    * Click on a NON-interactive area of the panel (padding, the gutter between
    * cells, the navigation bar outside its buttons): the browser removes focus from
@@ -98,6 +102,7 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     if (!target?.closest('button, a, input, select, textarea, [tabindex]')) event.preventDefault()
   }
 
+  // @keyboard @a11y
   function onKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
       if (open.value) {

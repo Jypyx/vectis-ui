@@ -2,6 +2,7 @@ import { getCurrentInstance } from 'vue'
 
 import { isDev } from '../utils/env'
 
+// @core
 /**
  * A field's internal icons become `<button>`s as soon as a `@click:icon-start` /
  * `@click:icon-end` listener is attached. Since those emits are declared, Vue
@@ -24,6 +25,7 @@ export function useIconClickHandlers(options: {
     'onClick:iconStart' in vnodeProps || 'onClick:icon-start' in vnodeProps
   const hasIconEndHandler = 'onClick:iconEnd' in vnodeProps || 'onClick:icon-end' in vnodeProps
 
+  // @a11y @devwarn
   if (isDev) {
     if (hasIconStartHandler && !options.iconStartLabel)
       console.warn(

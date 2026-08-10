@@ -1,3 +1,4 @@
+// @core
 /**
  * Clamps `n` to the `[min, max]` interval. On an empty interval (`min > max`,
  * which a derived `max` can produce — `list.length - 1` on an empty list), `min`
