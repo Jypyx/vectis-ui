@@ -34,6 +34,7 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 import { useMaskedField } from '../../composables/useMaskedField'
 import { useLocale, useMessages } from '../../i18n/state'
 
+// @a11y @core
 /**
  * A date picker: a `VInput` field + a `VCalendar` inside a `VPopover` in
  * `mode="manual"`, anchored in pure CSS. VPopover's `#trigger` is not used
@@ -205,6 +206,7 @@ const typing = computed(() => resolvedMode.value === 'input')
  */
 const hasPanel = computed(() => !typing.value || props.showCalendar)
 
+// @devwarn
 if (isDev) {
   watchEffect(() => {
     if (props.mode !== undefined && !MODES.includes(props.mode))
@@ -342,6 +344,8 @@ function padCurrentField(el: HTMLInputElement) {
   }
 }
 
+// @keyboard @core — the mask's own keys (separator completion, Backspace across a
+// separator) plus ArrowDown, the only explicit route from the field to the calendar.
 function onFieldKeydown(event: KeyboardEvent) {
   if (!typing.value) return
   const el = fieldEl.value
@@ -425,6 +429,7 @@ function onFieldPaste(event: ClipboardEvent) {
   commitLive()
 }
 
+// @a11y
 /**
  * The focus handed back to the field on closing would reopen it at once (in input mode,
  * the panel opens ON FOCUS): this lock covers the synchronous `focus()` call. Every close
@@ -443,6 +448,7 @@ function onFieldFocus() {
   openPanel(false)
 }
 
+// @keyboard @a11y
 function onRootKeydown(event: KeyboardEvent) {
   if (typing.value && event.key === 'Escape' && open.value) {
     event.preventDefault()
@@ -464,6 +470,7 @@ const canClear = computed(
 const endIcon = computed<IconSource | undefined>(() =>
   hasPanel.value ? props.calendarIcon : undefined,
 )
+// @a11y @devwarn
 /*
  * The LABEL, on the other hand, stays defined at all times, even when no icon is
  * rendered: `useIconClickHandlers` warns AT SETUP as soon as an `@click:icon-end` is
@@ -483,6 +490,7 @@ function onEndIcon() {
   // button, so taking it into the grid is the right move in both modes.
   else openPanel(true)
 }
+// @a11y
 /*
  * Called by VInput's `@clear`, INSIDE its `emit`: the `focus()` placed here under the
  * lock makes the `controlEl.focus()` VInput runs just afterwards inert (an

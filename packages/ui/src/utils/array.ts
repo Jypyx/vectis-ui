@@ -1,3 +1,4 @@
+// @core
 /**
  * Toggles a value in a selection list: removes it if present, otherwise appends
  * it. ALWAYS returns a new array — the DS's multiple v-models never mutate in

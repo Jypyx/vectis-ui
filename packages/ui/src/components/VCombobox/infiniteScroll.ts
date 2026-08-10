@@ -1,3 +1,4 @@
+// @core
 /**
  * The infinite-scroll plumbing of VCombobox's listbox.
  *
@@ -52,6 +53,7 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
   watch(
     options.sentinelEl,
     (el, _previous, onCleanup) => {
+      // @fallback
       // `IntersectionObserver` does not exist in jsdom (the same guard as the
       // `?.scrollIntoView?.()` in the component) — the behaviour is tested in the browser.
       if (!el || typeof IntersectionObserver === 'undefined') return

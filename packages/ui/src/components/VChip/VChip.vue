@@ -7,6 +7,7 @@ import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import { useMessages } from '../../i18n/state'
 
+// @core
 /**
  * A chip. The native elements cover focus, keyboard and disabling: selectable →
  * <button aria-pressed> (v-model:selected), clickable → <button> (the native click

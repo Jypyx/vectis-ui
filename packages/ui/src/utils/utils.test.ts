@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
+import { Fragment, createCommentVNode, createTextVNode, h } from 'vue'
 
 import { toggleValue } from './array'
 import { px } from './css'
 import { resolveMatcher } from './matcher'
 import { clamp } from './number'
 import { digitsOf, normalizeText, pad2 } from './text'
+import { flattenSlot } from './vnode'
 
 describe('clamp', () => {
   it('clamps at both ends and lets the interval through', () => {
@@ -84,5 +86,26 @@ describe('resolveMatcher', () => {
   it('returns the predicate as-is', () => {
     const predicate = (n: number) => n % 2 === 0
     expect(resolveMatcher(predicate)).toBe(predicate)
+  })
+})
+
+describe('flattenSlot', () => {
+  it('unwraps a Fragment (a v-for) and keeps the elements in order', () => {
+    const nodes = flattenSlot([h('i'), h(Fragment, null, [h('b'), h('em')]), h('s')])
+    expect(nodes.map((node) => node.type)).toEqual(['i', 'b', 'em', 's'])
+  })
+
+  it('drops comments (a false v-if) and whitespace, keeps real text', () => {
+    const nodes = flattenSlot([
+      createTextVNode('\n  '),
+      createCommentVNode('v-if'),
+      createTextVNode('x'),
+      h('i'),
+    ])
+    expect(nodes).toHaveLength(2)
+  })
+
+  it('an absent slot is an empty list, never a throw', () => {
+    expect(flattenSlot(undefined)).toEqual([])
   })
 })

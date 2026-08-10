@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @core — no behavioural JS at all: value normalization and the display string.
 /**
  * Progress as a donut: an SVG driven by CSS, with no geometry JS. The <svg> has NO
  * viewBox (1 user unit = 1 px) and the circles are positioned by the SVG2 `cx`/`cy`/`r`

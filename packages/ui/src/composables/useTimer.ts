@@ -1,5 +1,6 @@
 import { onBeforeUnmount } from 'vue'
 
+// @core
 /**
  * A re-armable `setTimeout`, cancelled on unmount.
  *

@@ -1,3 +1,4 @@
+// @core
 /**
  * Dimensions always in pixels: `12` and `'12'` both give `12px`. A non-numeric
  * value returns undefined rather than an invalid custom property, which would
@@ -9,6 +10,7 @@ export function px(v: number | string | undefined): string | undefined {
   return Number.isFinite(n) ? `${n}px` : undefined
 }
 
+// @core
 /**
  * Dimension with a FREE unit: `12` gives `12px`, but any string passes through
  * as-is (`'100%'`, `'50vh'`, `'max-content'`). Unlike `px`, the string is not

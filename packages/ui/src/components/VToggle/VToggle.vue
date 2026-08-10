@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @keyboard @core
 /**
  * A group of selectable buttons driven by a single v-model. Composed: every item
  * is a `VButton` (the selected one `solid`, the others `ghost`/`outline`) and
@@ -127,6 +128,7 @@ provide(toggleKey, {
   },
 })
 
+// @keyboard @a11y
 /*
  * Keyboard navigation (shared implementation: `utils/arrowNav`). No roving
  * tabindex — every visible item is a tab stop (the VPagination model; roving is

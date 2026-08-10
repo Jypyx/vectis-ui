@@ -1,5 +1,6 @@
 import { computed, ref, type ComputedRef } from 'vue'
 
+// @core
 /**
  * The four handlers of a drop target, and the one piece of state they share.
  *

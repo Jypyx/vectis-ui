@@ -6,6 +6,7 @@ import { menuInvoker, menuKey } from './context'
 import type { MenuPanelPlacement } from './context'
 import { arrowNavigate } from '../../utils/arrowNav'
 
+// @a11y @keyboard @core
 /**
  * INTERNAL popover panel (not exported), shared by VMenu (the root panel) and
  * VMenuItem (submenus). Popover API: native light dismiss, the `popovertarget`
@@ -74,6 +75,7 @@ function onToggle(event: Event) {
   emit('toggle', shown.value)
 }
 
+// @a11y @keyboard
 function items(): HTMLElement[] {
   const panel = panelEl.value
   if (!panel) return []
@@ -92,10 +94,12 @@ function closeAll() {
   else hide()
 }
 
+// @a11y
 function focusFirst() {
   items()[0]?.focus()
 }
 
+// @keyboard @a11y
 function onKeydown(event: KeyboardEvent) {
   const panel = panelEl.value
   // only the panel DIRECTLY containing the target handles the event

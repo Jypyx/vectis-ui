@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @core
 /**
  * A drop zone: a dashed rectangle that takes files by drag & drop or through a
  * hidden native `<input type="file">`, with an optional list of what has been
@@ -287,6 +288,7 @@ const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop(
   acceptFiles,
 )
 
+// @a11y
 /**
  * The zone's focusable element, whatever the mode AND whatever `#browse`
  * rendered: the zone itself when it is the button, its first button otherwise. A
@@ -299,6 +301,7 @@ function focusTarget(): HTMLElement | null {
   return zone.matches('button') ? zone : zone.querySelector('button')
 }
 
+// @a11y @core
 /**
  * The row that held focus is about to disappear, and focus would fall back to
  * <body>: it moves to the row that takes its place, or to the browse control once
@@ -342,6 +345,7 @@ const thumbUrls = reactive(new Map<File, string>())
     the `image` kind (it deserves the image icon) but no engine decodes it. */
 const isThumbable = (file: File) => file.type.startsWith('image/')
 
+// @ssr @core
 /**
  * Reconciles the map with the model: revoke what left, create what arrived.
  * Never called from `setup()`, a `computed` or the render — only from
@@ -368,6 +372,7 @@ function syncThumbnails() {
   }
 }
 
+// @fallback
 /** The <img> could not decode (HEIC, a corrupt file, a lying MIME): the URL goes
     and the type icon takes over — a rendering failure must not leave an empty
     square. */
@@ -378,6 +383,8 @@ function dropThumbnail(file: File) {
   thumbUrls.delete(file)
 }
 
+// @ssr — the object URLs are created on the client only; the server and the first
+// client render both show the type icon, so there is no hydration mismatch.
 onMounted(syncThumbnails)
 /*
  * `deep` costs nothing here and covers a consumer who pushes into the model
@@ -406,6 +413,8 @@ function rowProps(file: File, index: number): FileUploadRow {
   }
 }
 
+// @devwarn — the last two are @a11y guards: an unfocusable `required` and an
+// `aria-label` on a <div>, both of which fail silently at runtime.
 if (isDev) {
   watchEffect(() => {
     if (props.maxFiles !== undefined && !props.multiple)

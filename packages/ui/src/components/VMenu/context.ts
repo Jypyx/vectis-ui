@@ -14,6 +14,7 @@ export const menuKey: InjectionKey<MenuContext> = Symbol('v-menu')
 /** Hover intent delay (ms) before a submenu opens or closes. */
 export const SUBMENU_HOVER_DELAY = 150
 
+// @a11y
 /**
  * The element invoking the panel `id` — that is, its implicit anchor and the target
  * of the focus return on closing. Found by DOM query rather than through a ref: a
@@ -21,6 +22,7 @@ export const SUBMENU_HOVER_DELAY = 150
  * reach.
  */
 export function menuInvoker(id: string): HTMLElement | null {
+  // @fallback
   /*
    * The id is ESCAPED, not slugged like VTabs': there the id is BUILT, so hostile
    * characters can be dropped; here it is the panel's real `id` attribute (a

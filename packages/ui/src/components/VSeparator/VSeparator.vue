@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// @a11y — zero behavioural JS. The `<hr>` root is the a11y decision: `separator`
+// is implicit, and `aria-orientation` is emitted for `vertical` alone.
 /**
  * A 1px rule between two blocks. The root is an `<hr>`: the `separator` role is
  * implicit, the element is not focusable and stays outside every roving focus.

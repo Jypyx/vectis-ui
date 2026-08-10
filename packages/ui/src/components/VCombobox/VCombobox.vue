@@ -23,6 +23,7 @@ import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
 import { useTimer } from '../../composables/useTimer'
 import { useMessages } from '../../i18n/state'
 
+// @a11y @keyboard @core
 /**
  * A combobox with search and multiple selection, composed of `VInput`, `VChip` and
  * a `VPopover` which itself carries `role="listbox"`. The JS implements the ARIA
@@ -299,6 +300,7 @@ const filtered = computed(() => {
   return list.filter((o) => normalizedLabelOf(o).includes(needle))
 })
 
+// @a11y
 /** Empty as soon as the panel has options: a live region must only ever hold what is new. */
 const stateAnnouncement = computed(() => {
   if (!open.value || filtered.value.length > 0) return ''
@@ -472,6 +474,7 @@ function hover(entry: RenderedOption) {
   if (!entry.option.disabled) activeIndex.value = entry.index
 }
 
+// @a11y
 // The DOM focus never leaves the input (navigation through aria-activedescendant), so
 // the browser does not scroll the active option into the `overflow: auto` panel. It is
 // brought into view by hand. `block: 'nearest'` = no jump if already visible.
@@ -520,6 +523,7 @@ function closePanel() {
 /** Closes when the focus leaves the component (the panel included, a DOM descendant). */
 const onFocusout = useFocusoutDismiss(rootEl, closePanel)
 
+// @a11y
 /*
  * The focus must never leave the field: without this preventDefault, clicking an
  * option removes it, the `focusout` above closes the panel BEFORE the selection is
@@ -595,6 +599,7 @@ function onClear() {
   activeIndex.value = -1
 }
 
+// @keyboard — modulo wrap, skipping disabled options.
 function move(delta: number) {
   const list = filtered.value
   if (list.length === 0) return
@@ -606,6 +611,8 @@ function move(delta: number) {
   activeIndex.value = i
 }
 
+// @keyboard @a11y — the ARIA combobox pattern: the arrows move
+// `aria-activedescendant`, never the DOM focus, which stays in the field.
 function onKeydown(event: KeyboardEvent) {
   switch (event.key) {
     case 'ArrowDown':

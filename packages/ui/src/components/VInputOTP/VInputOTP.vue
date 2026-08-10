@@ -9,6 +9,7 @@ import { isDev } from '../../utils/env'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
+// @keyboard @core
 /**
  * A one-time code (OTP). There is no "N-character code" primitive: each cell stays a
  * native <input>, and the JS orchestrates the keyboard and pasting (justified) —
@@ -83,6 +84,7 @@ const cells = computed<Cell[]>(() => {
 })
 const slotCount = computed(() => cells.value.filter((cell) => cell.type === 'slot').length)
 
+// @devwarn
 if (isDev) {
   if (props.pattern && !props.pattern.includes('#'))
     console.warn("[VInputOTP] pattern without '#' — falling back to `length`.")
@@ -119,6 +121,7 @@ function commit() {
   if (code.length === slotCount.value) emit('complete', code)
 }
 
+// @core
 /**
  * Pattern-aware distribution: it walks the cells from the target one — a literal
  * consumes the pasted character when it equals it (pasting the formatted string), a
@@ -152,6 +155,8 @@ function distribute(raw: string, startSlot: number): number | null {
   return lastFilled
 }
 
+// @keyboard @core — the auto-advance focus move is what makes a cell row usable
+// as one field; the distribution itself is @core.
 function onInput(slotIndex: number, event: Event) {
   const el = event.target as HTMLInputElement
   // a single keystroke OR a multi-character paste: distributed from this cell on
@@ -168,6 +173,7 @@ function onInput(slotIndex: number, event: Event) {
   commit()
 }
 
+// @keyboard
 function onKeydown(slotIndex: number, event: KeyboardEvent) {
   if (event.key === 'Backspace' && !digits.value[slotIndex] && slotIndex > 0) {
     event.preventDefault()

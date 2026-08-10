@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 
+// @a11y
 /**
  * Root `@focusout` handler: closes when focus leaves the component, floating
  * panel included — a popover is a DOM descendant of the root even when painted

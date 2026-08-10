@@ -11,6 +11,7 @@
  * Single incarnation for VPagination, VTabs, VToggle and VMenu.
  */
 
+// @keyboard @a11y
 /**
  * The navigable elements of a container: the selector excludes disabled ones,
  * and the `display` filter drops those hidden by a container query
@@ -23,6 +24,7 @@ export function navigableItems(container: HTMLElement, selector: string): HTMLEl
   )
 }
 
+// @keyboard @a11y
 /**
  * Handles ArrowUp/Down/Left/Right + Home/End over `items` and moves focus.
  * Returns `true` if the key was consumed (`preventDefault` already applied),

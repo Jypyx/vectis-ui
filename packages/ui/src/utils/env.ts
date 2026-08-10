@@ -1,3 +1,4 @@
+// @devwarn
 /**
  * Development flag for the guards (a11y warnings, inconsistent props).
  * `import.meta.env` is Vite-specific: accessed optionally because `env` is not

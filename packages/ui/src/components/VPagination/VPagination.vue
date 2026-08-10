@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @keyboard @core
 /**
  * Composed pagination: every pill is a VButton, the previous/next controls a
  * VButton or a VIconButton, and `attached` joins the whole thing in a
@@ -115,6 +116,7 @@ const currentPage = computed(() => clamp(page.value, 1, total.value))
 
 const isPageDisabled = computed(() => resolveMatcher(props.disabledPages))
 
+// @a11y — a pill's visible text is a bare digit; this is what names it "Page 3".
 function pageLabelFor(n: number): string {
   return props.pageLabel ? props.pageLabel(n) : m.value.pagination.page(n)
 }
@@ -185,6 +187,7 @@ function goTo(n: number | undefined) {
 
 const navEl = ref<HTMLElement | null>(null)
 
+// @keyboard @a11y
 /**
  * Keyboard navigation (shared implementation: `utils/arrowNav`). Tab stays
  * natural — every visible pill is a tab stop, as in a list of links. The pills

@@ -1,5 +1,7 @@
 import { isDev } from '../../utils/env'
 
+// @core — module-wide: pure, no Vue and no lifecycle. `detectPlatform` is the
+// exception below.
 /**
  * Which OS the keyboard belongs to, and the token ⇄ glyph ⇄ word ⇄ KeyboardEvent
  * mapping of a shortcut. The ONLY place in the DS that reads `navigator`.
@@ -49,6 +51,7 @@ export interface ResolvedKey {
   word?: HotkeysWord
 }
 
+// @ssr
 /**
  * What the SERVER renders, and therefore what the client's FIRST render must be
  * too. `'other'` shares the non-mac word set (Ctrl, Alt, Shift…): only macOS
@@ -56,6 +59,7 @@ export interface ResolvedKey {
  */
 export const DEFAULT_PLATFORM: HotkeysPlatform = 'other'
 
+// @ssr @fallback — the DS's ONLY `navigator` read, with a two-source ladder.
 /**
  * `navigator.userAgentData.platform` is the modern source; `navigator.platform`
  * is deprecated and frozen, but it is the only one Firefox and Safari ship.
@@ -228,6 +232,7 @@ export function matchesEvent(
   return normalizeEventKey(event) === main
 }
 
+// @keyboard — the `allowInInput` gate: a shortcut must not fire mid-typing.
 export function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false
   if (target.isContentEditable) return true

@@ -28,6 +28,7 @@ const props = withDefaults(defineProps<CheckboxProps>(), {
   disabled: false,
 })
 
+// @a11y
 // The root is a <label>: the native attributes (name, value, required, aria-*…) must
 // land on the input.
 defineOptions({ inheritAttrs: false })
@@ -41,6 +42,7 @@ defineSlots<{
 
 const inputEl = ref<HTMLInputElement | null>(null)
 
+// @ssr @core
 // SSR-safe: inputEl is null on the server, so the effect does nothing.
 // flush: 'post' → the effect runs after the DOM update, once the template ref is
 // set.

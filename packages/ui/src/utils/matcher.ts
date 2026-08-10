@@ -1,3 +1,4 @@
+// @core
 /**
  * The DS convention for "which entries are disabled" props: either an ARRAY of
  * values or a PREDICATE (`disabledDates`, `disabledPages`…).

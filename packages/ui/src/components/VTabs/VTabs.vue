@@ -20,6 +20,7 @@ export type TabsOrientation = 'horizontal' | 'vertical'
 export type TabsAlign = 'start' | 'center' | 'end'
 export type TabsActivation = 'manual' | 'automatic'
 
+// @a11y @keyboard @core
 /**
  * Tab bar (the ARIA tabs pattern) and, optionally, its panels.
  *
@@ -114,6 +115,7 @@ provide(tabsKey, {
   },
   tabId: (value: string | number) => tabIdFor(baseId, value),
   panelId: (value: string | number) => panelIdFor(baseId, value),
+  // @ssr
   /*
    * A slot's presence is decided by the parent's vnode: identical on the server
    * and client renders, so there is no hydration mismatch — where a registry fed
@@ -150,6 +152,7 @@ const resolvedNextIcon = computed(
 
 const listEl = ref<HTMLElement | null>(null)
 
+// @keyboard @a11y
 /*
  * Keyboard navigation (shared implementation: `utils/arrowNav`). The handler ONLY
  * moves focus: selection on focus (`automatic` mode) is set by VTab, which knows
@@ -185,6 +188,7 @@ const atEnd = ref(true)
 watch(
   [listEl, startSentinelEl, endSentinelEl],
   ([root, start, end], _previous, onCleanup) => {
+    // @fallback
     // IntersectionObserver exists neither in SSR nor in jsdom: the ends are
     // verified in the browser (play functions).
     if (!root || !start || !end || typeof IntersectionObserver === 'undefined') return
@@ -218,6 +222,7 @@ function scrollStep(direction: -1 | 1) {
   list.scrollBy?.({ left: direction * list.clientWidth * 0.8 * (rtl ? -1 : 1) })
 }
 
+// @a11y @core
 /*
  * Scrolls the active tab back into view after a programmatic v-model change
  * (keyboard navigation calls `focus()` instead: the browser scrolls on its own).

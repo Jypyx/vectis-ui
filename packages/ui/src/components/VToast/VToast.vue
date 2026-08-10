@@ -6,6 +6,7 @@ import { iconProps } from '../VIcon/iconProps'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import type { ToastItem, ToastTone } from './state'
 
+// @a11y
 /**
  * A notification card — purely presentational, internal (rendered by <VToaster>,
  * not exported). role="alert" (interruptive) for danger/warning, role="status"

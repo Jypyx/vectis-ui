@@ -25,6 +25,7 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useTimer } from '../../composables/useTimer'
 import { useLocale, useMessages } from '../../i18n/state'
 
+// @core
 /**
  * A data table: a semantic <table> (caption, scope, aria-sort), composed from the
  * design system's bricks — VInput (search), VCheckbox (selection), VMenu+VButton (rows
@@ -217,6 +218,7 @@ defineSlots<{
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
+// @devwarn
 if (isDev) {
   if (props.selectable && !props.rowKey)
     console.warn(
@@ -306,6 +308,8 @@ function toggleSort(key: string) {
   else sort.value = null
 }
 
+// @a11y — `aria-sort` on the sorted <th> only: setting it on every column would
+// announce "not sorted" on each header instead of naming the one that is.
 function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | undefined {
   if (sort.value?.key !== column.key) return undefined
   return sort.value.direction === 'asc' ? 'ascending' : 'descending'
@@ -386,6 +390,8 @@ function toggleMaster() {
   }
 }
 
+// @a11y — a bare checkbox column gives every row the same accessible name; this
+// is what makes each one say which row it selects.
 function rowSelectLabel(row: Row, index: number): string {
   // The dictionary receives the HUMAN index (1-based); the prop keeps its original
   // signature (`row`, a 0-based index).
@@ -399,6 +405,7 @@ function setPerPage(option: number) {
 
 const colCount = computed(() => props.columns.length + (props.selectable ? 1 : 0))
 
+// @a11y
 /**
  * Left zone of the footer: rendered (empty) as soon as `selectable` is set so the live
  * region pre-exists the first selection — an aria-live container inserted at the same

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @core
 /**
  * Complete text area: label, internal (clickable) icons, counter, soft limit,
  * loading, clearable — around a styled native <textarea>. A mirror of VInput,
@@ -128,6 +129,8 @@ const showClear = computed(
   () => props.clearable && model.value.length > 0 && !props.disabled && !props.readonly,
 )
 
+// @a11y @core — the refocus is the a11y half: the cross disappears on click, so
+// without it focus falls back to <body> and the keyboard loses its place.
 function onClear() {
   model.value = ''
   emit('clear')

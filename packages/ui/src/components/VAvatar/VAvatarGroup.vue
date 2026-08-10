@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { Comment, Fragment, Text, computed, provide, useSlots } from 'vue'
-import type { StyleValue, VNode } from 'vue'
+import { computed, provide, useSlots } from 'vue'
+import type { StyleValue } from 'vue'
 
 import VAvatar from './VAvatar.vue'
 import type { AvatarSize } from './VAvatar.vue'
 import { avatarGroupKey } from './context'
 
+import { flattenSlot } from '../../utils/vnode'
+
+// @ssr @core — the count comes from the slot's VNODES (`flattenSlot`), never a
+// registry: a registry renders 0 on the server and N on the client.
 /**
  * Stacks VAvatars (the right-hand one paints over the left-hand one, through a
  * negative overlap + the natural DOM paint order — no positioning JS). The
@@ -50,25 +54,7 @@ provide(avatarGroupKey, {
 
 const slots = useSlots()
 
-// Flattens the slot's VNodes: Fragments (v-for) are unwrapped, comments (a false
-// v-if) and whitespace text ignored — for an exact count.
-const flatten = (nodes: VNode[] | undefined): VNode[] => {
-  const out: VNode[] = []
-  for (const node of nodes ?? []) {
-    if (node.type === Fragment) {
-      out.push(...flatten(node.children as VNode[]))
-    } else if (node.type === Comment) {
-      continue
-    } else if (node.type === Text && !String(node.children).trim()) {
-      continue
-    } else {
-      out.push(node)
-    }
-  }
-  return out
-}
-
-const items = computed(() => flatten(slots.default?.()))
+const items = computed(() => flattenSlot(slots.default?.()))
 const visibleItems = computed(() =>
   props.max != null ? items.value.slice(0, props.max) : items.value,
 )

@@ -37,6 +37,7 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 import { useMaskedField } from '../../composables/useMaskedField'
 import { useLocale, useMessages } from '../../i18n/state'
 
+// @a11y @core
 /**
  * A time picker: a `VInput` field + an optional floating panel. The same shell as
  * VDatePicker (a `VPopover` in `mode="manual"` anchored in pure CSS, a programmatic
@@ -165,6 +166,7 @@ const resolvedFormat = computed<TimePickerFormat>(
   () => props.format ?? hourCycleFor(resolvedLocale.value),
 )
 
+// @devwarn
 if (isDev) {
   watchEffect(() => {
     if (props.minuteStep < 1 || 60 % props.minuteStep !== 0)
@@ -230,6 +232,7 @@ const displayText = computed(() =>
   model.value ? formatDisplay(model.value, resolvedLocale.value, resolvedFormat.value) : '',
 )
 
+// @a11y
 // Opening / closing the panel (a manual popover).
 function focusInPanel() {
   const panel = panelRef.value?.el
@@ -274,6 +277,7 @@ const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPa
     },
   })
 
+// @a11y
 /**
  * The focus handed back to the field on closing would reopen it (in input mode, the
  * panel opens ON FOCUS): this lock covers the synchronous `focus()` call. Every close
@@ -304,6 +308,7 @@ function onDialConfirm(via: 'pointer' | 'keyboard') {
   else if (via === 'keyboard') confirm()
 }
 
+// @a11y
 /*
  * Called by VInput's `@clear`, INSIDE its `emit`: the `focus()` placed here under the
  * lock makes the `controlEl.focus()` VInput runs just afterwards inert (an
@@ -323,6 +328,7 @@ function clearValue() {
 // Escape and focus leaving close WITHOUT committing (the dial's Cancel semantics):
 // `closePanel` never writes the v-model, only `confirm()` does.
 
+// @a11y
 // The step is carried only by the slider's aria-label, whose change is not reliably
 // announced: a polite live region doubles the information. No dedicated prop: the
 // dictionary is the only override point.
@@ -368,6 +374,8 @@ const {
   toMask: (time) => timeToMask(time, resolvedFormat.value),
 })
 
+// @keyboard @core — the mask's own keys, plus ArrowDown, the only explicit route
+// from the field into the dial.
 function onFieldKeydown(event: KeyboardEvent) {
   if (!typing.value) return
   const el = fieldEl.value
@@ -465,6 +473,7 @@ const options = computed<TimeOption[]>(() =>
   isList.value ? timeList(props.minuteStep, resolvedLocale.value, resolvedFormat.value) : [],
 )
 
+// @keyboard
 /**
  * OUR OWN list (the VMenuPanel idiom) and not `navigableItems`: the latter calls
  * `getComputedStyle` on EVERY element — unacceptable across dozens of rows, and none of
@@ -474,6 +483,7 @@ const optionEls = (panel: HTMLElement) => [
   ...panel.querySelectorAll<HTMLElement>('[role="option"]'),
 ]
 
+// @a11y
 /** Opening: focus AND scroll onto the current value — or the closest one, since "09:07"
     with a 15-minute step lands on no row at all. */
 function focusListSelection(panel: HTMLElement) {
@@ -496,6 +506,7 @@ function selectTime(value: string) {
   closeAndFocus()
 }
 
+// @keyboard @a11y
 function onPanelKeydown(event: KeyboardEvent) {
   if (!isList.value) return
   const panel = panelRef.value?.el
@@ -532,6 +543,7 @@ const canClear = computed(
 const endIcon = computed<IconSource | undefined>(() =>
   isList.value ? 'expand_more' : hasDial.value ? props.clockIcon : undefined,
 )
+// @a11y @devwarn
 /*
  * The LABEL, on the other hand, stays defined at all times, even when no icon is
  * rendered: `useIconClickHandlers` warns AT SETUP as soon as an `@click:icon-end` is

@@ -1,5 +1,6 @@
 import { computed, useId, type ComputedRef } from 'vue'
 
+// @a11y @ssr
 /**
  * Identifiers of a wrapped field (VInput, VTextarea): label/`for` association,
  * hint id, and `aria-describedby` aggregation.

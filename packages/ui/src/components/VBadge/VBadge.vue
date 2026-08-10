@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @core
 /**
  * A non-interactive information pill: a counter or an icon. HTML + CSS only — the
  * only JS is render computation (detecting the target slot, the "99+" cap, the

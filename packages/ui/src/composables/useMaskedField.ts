@@ -1,3 +1,4 @@
+// @core — module-wide: mask, caret and commit are the field's own behaviour.
 /**
  * The masked text field of VDatePicker and VTimePicker (`mode="input"`).
  *

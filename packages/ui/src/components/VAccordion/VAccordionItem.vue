@@ -50,6 +50,7 @@ const accordion = inject(accordionKey, null)
 const expandIcon = computed(() => accordion?.expandIcon ?? 'expand_more')
 const collapseIcon = computed(() => accordion?.collapseIcon)
 
+// @a11y @core
 /*
  * The component's only behavioural JS: <summary> has no native `disabled`
  * attribute, so the toggling of <details> cannot be blocked any other way — the

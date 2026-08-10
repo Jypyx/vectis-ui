@@ -11,6 +11,7 @@ import VMenuItem from '../VMenu/VMenuItem.vue'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
+// @ssr @core
 /**
  * A breadcrumb trail: <nav> + an ordered list, driven by the `items` prop (pure
  * data derivation, no browser API — SSR-safe). The separators are decorative VIcons
@@ -66,6 +67,7 @@ function normalize(path: string): string {
   return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path
 }
 
+// @a11y — feeds `aria-current="page"`, the only thing marking the trail's end.
 function isCurrent(item: BreadcrumbItem): boolean {
   if (props.currentPath === undefined) return false
   return normalize(item.href) === normalize(props.currentPath)

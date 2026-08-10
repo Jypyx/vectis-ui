@@ -1,6 +1,7 @@
 import { computed, type ComputedRef } from 'vue'
 import { clamp } from '../utils/number'
 
+// @core
 /**
  * Normalized value of a progress indicator, shared by VProgressLinear and
  * VProgressCircular: their entire rendering (fill, dash-offset, text, ARIA)

@@ -8,6 +8,7 @@ import { dismissToast, toasts, type ToastItem, type ToastPlacement } from './sta
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
+// @a11y @core
 /**
  * The notification host, to be mounted ONCE (at the app root). It renders one
  * popover="manual" PER PLACEMENT (a flex stack — the stacking is pure CSS):
@@ -107,6 +108,7 @@ function startTimer(item: ToastItem) {
   )
 }
 
+// @core
 /**
  * Synchronizes queue → DOM: arms the timers of new toasts, purges those of the ones
  * gone, opens the non-empty stacks and closes the empty ones. Called on mount (for
@@ -143,8 +145,10 @@ function sync() {
  * before mounting (watchers do not run in SSR).
  */
 watch(groups, sync, { flush: 'post' })
+// @ssr — watchers do not run on the server: toasts emitted before mount show up here.
 onMounted(sync)
 
+// @a11y — WCAG 2.2.1: a notification that expires on a clock needs a way to hold it.
 /*
  * Pause on hover: suspends the stack's timers; on leave they restart at the FULL
  * duration (no accounting of the time left — simpler, and more generous to the

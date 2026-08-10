@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @core
 /**
  * Complete text field: label, internal (clickable) icons, counter, soft limit,
  * loading, clearable — around a styled native <input>. Wrapper-root: class/style
@@ -147,6 +148,8 @@ const showClear = computed(() => {
   return props.clearVisible ?? (!props.readonly && modelText.value.length > 0)
 })
 
+// @a11y @core — the refocus is the a11y half: the cross disappears on click, so
+// without it focus falls back to <body> and the keyboard loses its place.
 function onClear() {
   model.value = ''
   emit('clear')
