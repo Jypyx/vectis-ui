@@ -306,7 +306,7 @@ describe('VCarousel', () => {
       expect(model.value).toBe(1)
     })
 
-    it('pauses on hover and on focus-within', async () => {
+    it('pauses on hover, and resumes when the pointer leaves', async () => {
       vi.useFakeTimers()
       const { container, model } = mount({ autoplay: 1000 })
       const root = container.querySelector('.v-carousel') as HTMLElement
@@ -319,6 +319,48 @@ describe('VCarousel', () => {
       await fireEvent.pointerLeave(root)
       vi.advanceTimersByTime(1000)
       await nextTick()
+      expect(model.value).toBe(1)
+    })
+
+    /*
+     * `matches` is stubbed on both sides rather than trusted: whether jsdom's selector
+     * engine knows `:focus-visible` is not what these two lock — what they lock is that
+     * the component ASKS, and branches on the answer. `focusin` bubbles, so dispatching
+     * on the element is what gives the root handler the right `event.target`.
+     */
+    it('pauses on KEYBOARD focus, and resumes when focus leaves', async () => {
+      vi.useFakeTimers()
+      const { container, model } = mount({ autoplay: 1000 })
+      const root = container.querySelector('.v-carousel') as HTMLElement
+      const port = container.querySelector('.v-carousel-viewport') as HTMLElement
+      port.matches = () => true
+
+      await fireEvent.focusIn(port)
+      vi.advanceTimersByTime(5000)
+      await nextTick()
+      expect(model.value).toBe(0)
+
+      await fireEvent.focusOut(root)
+      vi.advanceTimersByTime(1000)
+      await nextTick()
+      expect(model.value).toBe(1)
+    })
+
+    /*
+     * The regression: a POINTER click leaves the focus on the control it hit, so a
+     * plain `focusin` flag pinned the pause until the user clicked somewhere outside
+     * the carousel entirely — long after the pointer had left.
+     */
+    it('a pointer click on a control does not pin the pause', async () => {
+      vi.useFakeTimers()
+      const { container, model } = mount({ autoplay: 1000 })
+      const next = container.querySelectorAll<HTMLButtonElement>('.v-carousel-control')[1]!
+      next.matches = () => false
+
+      await fireEvent.focusIn(next)
+      vi.advanceTimersByTime(1000)
+      await nextTick()
+      // still rotating: the focus sits on the button, but the user is not on the keyboard
       expect(model.value).toBe(1)
     })
 

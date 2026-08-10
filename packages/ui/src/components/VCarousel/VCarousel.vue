@@ -111,7 +111,7 @@ interface CarouselProps {
   height?: number | string
   /**
    * Milliseconds between two automatic advances; `0` disables it. Autoplay stops
-   * on the last PAGE (there is no loop), pauses on hover and on focus-within, and
+   * on the last PAGE (there is no loop), pauses on hover and on KEYBOARD focus, and
    * is fully disabled under `prefers-reduced-motion`.
    *
    * The component renders NO pause button. The prop is reactive and `0` cancels
@@ -519,6 +519,25 @@ function onKeydown(event: KeyboardEvent) {
 const { start, cancel } = useTimer()
 const hovered = ref(false)
 const focused = ref(false)
+
+/**
+ * KEYBOARD focus, not any focus. Clicking `next` leaves the focus on it, and a plain
+ * `focusin` flag would then pause the rotation for good — the user has to click
+ * outside the carousel to get it going again, which is not a pause, it is a trap.
+ * What the pause is FOR is the keyboard user reading a slide, and `:focus-visible` is
+ * exactly that distinction: a pointer click on a button does not match it, a Tab does.
+ *
+ * The `try` is for jsdom, whose selector engine may not know the pseudo-class: falling
+ * back to `true` keeps the conservative behaviour (pause) wherever it cannot be asked.
+ */
+function isKeyboardFocus(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false
+  try {
+    return target.matches(':focus-visible')
+  } catch {
+    return true
+  }
+}
 const reducedMotion = ref(false)
 
 /*
@@ -609,7 +628,7 @@ if (isDev) {
     :data-controls-visibility="controlsVisibility"
     @pointerenter="hovered = true"
     @pointerleave="hovered = false"
-    @focusin="focused = true"
+    @focusin="focused = isKeyboardFocus($event.target)"
     @focusout="focused = false"
   >
     <!--
@@ -1116,10 +1135,16 @@ if (isDev) {
    * accessibility tree, where `opacity: 0` keeps both — the hidden-input rule. The
    * reveal costs no layout, so nothing shifts.
    *
-   * `:focus-within` on the ROOT, not on the bar: the reveal boundary is then exactly
-   * the boundary autoplay already pauses on, and a keyboard user who has tabbed to
-   * the track — or into a link inside a slide — sees the navigation before deciding
-   * whether to use it.
+   * The focus branch is read on the ROOT, so a keyboard user who has tabbed to the
+   * track — or into a link inside a slide — sees the navigation before deciding
+   * whether to use it. It is the same boundary autoplay pauses on, and both are read
+   * the same way.
+   *
+   * `:has(:focus-visible)` and NOT `:focus-within`, which was a trap: clicking `next`
+   * leaves the focus on it, so the pair stayed revealed until the user clicked
+   * somewhere outside the carousel — the pointer had long since left. A pointer click
+   * does not match `:focus-visible`, a Tab does, and that is precisely the case the
+   * focus branch exists for.
    *
    * Behind `@media (hover: hover)`: a coarse pointer has no hover to give, so the
    * whole block is inert there and the pair stays permanently visible. NOT
@@ -1132,7 +1157,7 @@ if (isDev) {
     }
 
     .v-carousel[data-controls-visibility='hover']:hover .v-carousel-controls,
-    .v-carousel[data-controls-visibility='hover']:focus-within .v-carousel-controls {
+    .v-carousel[data-controls-visibility='hover']:has(:focus-visible) .v-carousel-controls {
       opacity: 1;
     }
   }

@@ -164,9 +164,14 @@ in CSS, so `previous` points right and `next` points left.
 ## Revealing the controls
 
 `controlsVisibility` takes `'always'` (the default) or `'hover'`, which fades the previous/next
-pair in on hover — or on focus anywhere in the carousel, which is what keeps it usable from the
-keyboard. The reveal boundary is deliberately the same one autoplay pauses on: one boundary, two
-behaviours, nothing to keep in step.
+pair in on hover — or on **keyboard** focus anywhere in the carousel, which is what keeps it usable
+without a pointer. The reveal boundary is deliberately the same one autoplay pauses on: one
+boundary, two behaviours, nothing to keep in step.
+
+Keyboard focus, and not any focus, because a pointer click leaves the focus on the control it hit.
+Reading it as "focused" would keep the pair revealed — and autoplay paused — until you clicked
+somewhere outside the carousel, long after the pointer had left. `:focus-visible` is the
+distinction the platform already draws: a click does not match it, a Tab does.
 
 The pair is **revealed, never removed**. `display: none` and `visibility: hidden` would drop the
 buttons from the tab order and from the accessibility tree; an opacity leaves both intact, and
@@ -174,17 +179,13 @@ costs no layout, so nothing shifts as it fades. On a device with no hover to giv
 — the mode is inert and the pair stays permanently visible, and the indicators are never hidden by
 this prop at all, so a navigation affordance always exists.
 
-One accepted limitation: pressing `next` until it disables itself moves focus to the document,
-which drops `:focus-within`, so with the pointer elsewhere the pair fades out. There is no CSS
-remedy for it.
-
 <Canvas of={VCarouselStories.ControlsOnHover} />
 
 ## Autoplay
 
 `autoplay` is an interval in milliseconds; `0` disables it. It stops on the last page — there is no
 loop, which would mean cloning slides and repositioning the scroller in JS. It pauses on hover and
-on focus-within, and `prefers-reduced-motion` disables it completely: a media query stops a
+on keyboard focus, and `prefers-reduced-motion` disables it completely: a media query stops a
 transition, never a timer.
 
 The component renders **no pause button**. The prop is reactive and `0` cancels the timer
@@ -225,7 +226,8 @@ exemption only holds while `interval × (pages − 1)` stays under five seconds.
 - A visually hidden `role="status"` announces the position — and stays silent while autoplay
   rotates, because narrating an auto-rotating carousel floods the screen reader.
 - `controlsVisibility="hover"` hides the pair with an opacity, so the buttons keep their place in
-  the tab order and in the accessibility tree; focus anywhere in the carousel brings them back, and
+  the tab order and in the accessibility tree; keyboard focus anywhere in the carousel brings them
+  back, and
   a pointer that cannot hover never hides them in the first place.
 
 <Canvas of={VCarouselStories.Localization} />

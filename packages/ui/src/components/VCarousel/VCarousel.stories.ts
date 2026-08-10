@@ -428,12 +428,24 @@ export const ControlsOnHover: Story = {
     await expect(next.tabIndex).toBe(0)
 
     /*
-     * Focus on the TRACK is enough, since the trigger is `:focus-within` on the root.
-     * `userEvent.hover()` deliberately not used: it dispatches synthetic pointer
+     * Focus on the TRACK is enough, since the trigger is `:has(:focus-visible)` on the
+     * root. `userEvent.hover()` deliberately not used: it dispatches synthetic pointer
      * events, where CSS `:hover` is set by the browser's real input pipeline — the
      * assertion would be permanently red. The focus branch is the a11y-critical one
      * anyway; the pure-hover branch is Chromatic's job.
      */
+    port.focus()
+    await waitFor(async () => {
+      await expect(getComputedStyle(bar).opacity).toBe('1')
+    })
+
+    // …and it RELEASES. The reveal used to be pinned by any focus, so clicking a
+    // control left the pair up until the user clicked outside the carousel entirely.
+    port.blur()
+    await waitFor(async () => {
+      await expect(getComputedStyle(bar).opacity).toBe('0')
+    })
+
     port.focus()
     await waitFor(async () => {
       await expect(getComputedStyle(bar).opacity).toBe('1')
@@ -600,7 +612,7 @@ export const ResponsivePages: Story = {
 }
 
 /**
- * The component renders no pause button: autoplay pauses on hover and on focus-within,
+ * The component renders no pause button: autoplay pauses on hover and on keyboard focus,
  * stops on the last page, and `prefers-reduced-motion` disables it outright. A stop
  * control of your own is a binding on the prop — `0` cancels the timer on the spot.
  */
