@@ -147,6 +147,17 @@ export const ItemsPerView: Story = {
     const slide = canvasElement.querySelector('[data-carousel-index="0"]') as HTMLElement
     const gap = Number.parseFloat(getComputedStyle(port).columnGap)
 
+    /*
+     * The basis really resolves, and the slides really cannot shrink. Written as the
+     * `flex` shorthand these came as a package: one bad custom property anywhere in the
+     * formula makes the WHOLE shorthand invalid at computed-value time, and `flex` then
+     * falls back to its initial `0 1 auto` — shrink 1, basis auto, and the snap grid is
+     * gone. As longhands, a bad value can only cost the basis.
+     */
+    const flex = getComputedStyle(slide)
+    await expect(flex.flexBasis).toContain('max(')
+    await expect(flex.flexShrink).toBe('0')
+
     // three slides plus the TWO inner gaps fill the port exactly
     const expected = (port.clientWidth - 2 * gap) / 3
     await expect(Math.abs(slide.getBoundingClientRect().width - expected)).toBeLessThan(1)

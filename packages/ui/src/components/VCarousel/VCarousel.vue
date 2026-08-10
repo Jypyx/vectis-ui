@@ -917,14 +917,26 @@ if (isDev) {
      * exactly to (100% - (N-1)·gap) / N. `max()` makes itemMinSize a floor, never
      * a cap, and IS the responsiveness: no breakpoint, no @container.
      */
-    flex: 0 0
-      max(
-        var(--carousel-item-min),
-        calc(
-          (100% - (var(--carousel-per-view) - 1) * var(--carousel-gap) - var(--carousel-peek)) /
-            var(--carousel-per-view)
-        )
-      );
+    /*
+     * LONGHANDS, never the `flex` shorthand — the `animation` rule further down, for
+     * the same reason. A shorthand whose value contains `var()` becomes a PENDING
+     * SUBSTITUTION value: it cannot be expanded until computed-value time, and if any
+     * one of the four custom properties then resolves to something invalid the WHOLE
+     * declaration is dropped and `flex` reverts to its initial `0 1 auto` — shrink 1
+     * and basis auto, which sizes every slide on its content and destroys the snap
+     * grid. As longhands a bad value can only cost the basis. It also stops devtools
+     * showing the declaration struck through, since a pending shorthand is what it
+     * cannot expand.
+     */
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: max(
+      var(--carousel-item-min),
+      calc(
+        (100% - (var(--carousel-per-view) - 1) * var(--carousel-gap) - var(--carousel-peek)) /
+          var(--carousel-per-view)
+      )
+    );
     /* `auto` is a CONTENT-based floor that can push a flex item past its basis:
        one unbreakable word would desynchronize the whole snap grid. */
     min-inline-size: 0;
