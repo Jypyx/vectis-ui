@@ -203,11 +203,11 @@ export const semantic = {
       "The default block size of VCarousel's viewport. Load-bearing in the vertical orientation: a percentage flex-basis has no definite reference on the block axis, and every slide would collapse onto its content without it",
     ),
     'size-carousel-indicator': dimension(
-      '0.5rem',
+      '0.625rem',
       'The diameter of a VCarousel indicator dot (its hit area comes from --vectis-control-height-xs)',
     ),
     'size-carousel-indicator-active': dimension(
-      '1.5rem',
+      '1.25rem',
       'The main-axis size of the ACTIVE VCarousel indicator, which stretches from a dot into a pill',
     ),
     'size-combobox-input-min': dimension('4rem', "The minimum width of VCombobox's input area"),
