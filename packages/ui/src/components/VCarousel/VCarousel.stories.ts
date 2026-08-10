@@ -49,6 +49,7 @@ const meta = {
     effect: { control: 'inline-radio', options: ['slide', 'fade', 'scale', 'cover'] },
     controls: { control: 'inline-radio', options: [false, 'inside', 'outside'] },
     indicators: { control: 'inline-radio', options: [false, 'inside', 'outside'] },
+    controlsVisibility: { control: 'inline-radio', options: ['always', 'hover'] },
   },
   args: {
     itemsPerView: 1,
@@ -56,6 +57,7 @@ const meta = {
     effect: 'slide',
     controls: 'inside',
     indicators: 'outside',
+    controlsVisibility: 'always',
     autoplay: 0,
   },
   // A live v-model: without a local ref, clicking an indicator would change nothing.
@@ -220,12 +222,27 @@ export const Effects: Story = {
   }),
 }
 
-/** Vertical needs a `height`: a percentage flex-basis has no definite block reference. */
+/**
+ * Vertical needs a `height`: a percentage flex-basis has no definite block reference.
+ * The axes follow: `outside` controls go above and below, and the indicators to the
+ * inline end.
+ */
 export const Vertical: Story = {
   args: { orientation: 'vertical', height: '18rem', indicators: 'outside', controls: 'outside' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const port = canvasElement.querySelector('.v-carousel-viewport') as HTMLElement
+
+    const box = port.getBoundingClientRect()
+    const prev = canvas.getByRole('button', { name: 'Previous slide' }).getBoundingClientRect()
+    const next = canvas.getByRole('button', { name: 'Next slide' }).getBoundingClientRect()
+    const bar = (
+      canvasElement.querySelector('.v-carousel-indicators') as HTMLElement
+    ).getBoundingClientRect()
+
+    await expect(prev.bottom).toBeLessThanOrEqual(box.top)
+    await expect(next.top).toBeGreaterThanOrEqual(box.bottom)
+    await expect(bar.left).toBeGreaterThanOrEqual(box.right)
 
     await userEvent.click(canvas.getByRole('button', { name: 'Next slide' }))
     await waitFor(async () => {
@@ -235,7 +252,30 @@ export const Vertical: Story = {
   },
 }
 
-/** Controls and indicators, over the slides or after them. */
+/** Vertical, indicators laid over the slides at the inline end. */
+export const VerticalInside: Story = {
+  args: { orientation: 'vertical', height: '18rem', indicators: 'inside', controls: 'inside' },
+  play: async ({ canvasElement }) => {
+    const port = (
+      canvasElement.querySelector('.v-carousel-viewport') as HTMLElement
+    ).getBoundingClientRect()
+    const bar = (
+      canvasElement.querySelector('.v-carousel-indicators') as HTMLElement
+    ).getBoundingClientRect()
+
+    // over the slides, at the inline end, block-centred
+    await expect(bar.right).toBeLessThanOrEqual(port.right)
+    await expect(bar.left).toBeGreaterThan(port.left + port.width / 2)
+    await expect(Math.abs(bar.top + bar.height / 2 - (port.top + port.height / 2))).toBeLessThan(2)
+  },
+}
+
+/**
+ * The full matrix. `inside` lays an affordance over the slides, `outside` puts the
+ * controls at the inline edges and the indicators below. Each carousel needs a
+ * DISTINCT `label`: a region is a landmark, and two identically named landmarks are an
+ * axe violation.
+ */
 export const Placement: Story = {
   render: () => ({
     components: { VCarousel, VCarouselItem, VTypography },
@@ -247,19 +287,126 @@ export const Placement: Story = {
     }),
     template: `
       <div style="display: grid; gap: var(--vectis-space-6)">
-        <div v-for="place in places" :key="place">
-          <VTypography variant="overline">{{ place }}</VTypography>
-          <VCarousel :controls="place" :indicators="place" :label="'Placement ' + place">
-            <VCarouselItem v-for="(hue, i) in hues" :key="hue">
-              <div :style="slideStyle + 'background: oklch(0.45 0.15 ' + hue + ');'">
-                {{ t.slide }} {{ i + 1 }}
-              </div>
-            </VCarouselItem>
-          </VCarousel>
-        </div>
+        <template v-for="c in places" :key="c">
+          <div v-for="i in places" :key="c + i">
+            <VTypography variant="overline">controls {{ c }} · indicators {{ i }}</VTypography>
+            <VCarousel :controls="c" :indicators="i" :label="'Controls ' + c + ', indicators ' + i">
+              <VCarouselItem v-for="(hue, n) in hues" :key="hue">
+                <div :style="slideStyle + 'background: oklch(0.45 0.15 ' + hue + ');'">
+                  {{ t.slide }} {{ n + 1 }}
+                </div>
+              </VCarouselItem>
+            </VCarousel>
+          </div>
+        </template>
       </div>
     `,
   }),
+}
+
+/**
+ * The pair is centred on the SLIDES, never on the slides plus the indicators — which
+ * is what putting the indicator bar outside the positioning context buys.
+ */
+export const ControlsCentring: Story = {
+  args: { controls: 'inside', indicators: 'outside' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const root = canvasElement.querySelector('.v-carousel') as HTMLElement
+    const port = canvasElement.querySelector('.v-carousel-viewport') as HTMLElement
+    const bar = canvasElement.querySelector('.v-carousel-indicators') as HTMLElement
+    const middle = (el: Element) => {
+      const rect = el.getBoundingClientRect()
+      return rect.top + rect.height / 2
+    }
+
+    // the bar really is below the slides, or nothing below discriminates
+    await expect(bar.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+      port.getBoundingClientRect().bottom,
+    )
+
+    const prev = canvas.getByRole('button', { name: 'Previous slide' })
+    await expect(Math.abs(middle(prev) - middle(port))).toBeLessThan(2)
+    /*
+     * …and NOT on the root, which also spans the indicator bar. This is the whole
+     * test: the first assertion alone was true of the old markup too, which sat the
+     * pair about 18px low.
+     */
+    await expect(Math.abs(middle(prev) - middle(root))).toBeGreaterThan(8)
+  },
+}
+
+/** `outside` puts the pair at the inline edges, in room the root reserved as padding. */
+export const ControlsOutside: Story = {
+  args: { controls: 'outside', indicators: 'outside' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const root = (canvasElement.querySelector('.v-carousel') as HTMLElement).getBoundingClientRect()
+    const port = (
+      canvasElement.querySelector('.v-carousel-viewport') as HTMLElement
+    ).getBoundingClientRect()
+    const prev = canvas.getByRole('button', { name: 'Previous slide' }).getBoundingClientRect()
+    const next = canvas.getByRole('button', { name: 'Next slide' }).getBoundingClientRect()
+
+    // beside the slides, never below them
+    await expect(prev.right).toBeLessThanOrEqual(port.left)
+    await expect(next.left).toBeGreaterThanOrEqual(port.right)
+    await expect(Math.abs(prev.top + prev.height / 2 - (port.top + port.height / 2))).toBeLessThan(
+      2,
+    )
+
+    // in the RESERVED padding: the footprint is unchanged and nothing overflows
+    await expect(prev.left).toBeGreaterThanOrEqual(root.left - 1)
+    await expect(next.right).toBeLessThanOrEqual(root.right + 1)
+  },
+}
+
+/**
+ * `controlsVisibility="hover"` fades the pair in on hover or on focus anywhere in the
+ * carousel. It is revealed, never removed: the buttons keep their place in the tab
+ * order and in the accessibility tree throughout.
+ */
+export const ControlsOnHover: Story = {
+  args: { controls: 'inside', controlsVisibility: 'hover' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const bar = canvasElement.querySelector('.v-carousel-controls') as HTMLElement
+    const port = canvasElement.querySelector('.v-carousel-viewport') as HTMLElement
+    const next = canvas.getByRole('button', { name: 'Next slide' })
+
+    // hidden, yet a real button: getByRole queries the accessibility tree, which
+    // opacity does not touch, and the tab order is untouched too
+    await expect(getComputedStyle(bar).opacity).toBe('0')
+    await expect(next).not.toBeDisabled()
+    await expect(next.tabIndex).toBe(0)
+
+    /*
+     * Focus on the TRACK is enough, since the trigger is `:focus-within` on the root.
+     * `userEvent.hover()` deliberately not used: it dispatches synthetic pointer
+     * events, where CSS `:hover` is set by the browser's real input pipeline — the
+     * assertion would be permanently red. The focus branch is the a11y-critical one
+     * anyway; the pure-hover branch is Chromatic's job.
+     */
+    port.focus()
+    await waitFor(async () => {
+      await expect(getComputedStyle(bar).opacity).toBe('1')
+    })
+
+    await userEvent.click(next)
+    await waitFor(async () => {
+      await expect(canvas.getByRole('button', { name: '2 of 6' })).toHaveAttribute(
+        'aria-current',
+        'true',
+      )
+    })
+
+    /*
+     * Ends REVEALED on purpose: axe short-circuits `color-contrast` to a pass at an
+     * opacity of exactly 0, but JUDGES any value in between — leaving the bar
+     * mid-transition would make the dark run flaky.
+     */
+    await expect(getComputedStyle(bar).opacity).toBe('1')
+  },
 }
 
 /**

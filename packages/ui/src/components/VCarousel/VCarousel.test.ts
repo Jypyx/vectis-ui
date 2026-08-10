@@ -312,6 +312,40 @@ describe('VCarousel', () => {
     })
   })
 
+  /*
+   * The placement itself is CSS and needs a browser (see the `ControlsCentring` and
+   * `ControlsOutside` play functions). What jsdom CAN lock is the nesting the CSS
+   * rests on — and that is the cheap layer for it.
+   */
+  describe('layout structure', () => {
+    it('the indicator bar is a SIBLING of the stage, never a child of it', () => {
+      const { container } = mount({ attrs: 'indicators="outside"' })
+      const root = container.querySelector('.v-carousel')
+      const stage = container.querySelector('.v-carousel-stage') as HTMLElement
+      const bar = container.querySelector('.v-carousel-indicators') as HTMLElement
+      // inside the stage it would join the height the controls are centred on
+      expect(stage.contains(bar)).toBe(false)
+      expect(bar.parentElement).toBe(root)
+    })
+
+    it('the controls and the autoplay control stay inside the stage', () => {
+      const { container } = mount({ attrs: ':autoplay="1000"' })
+      const stage = container.querySelector('.v-carousel-stage') as HTMLElement
+      expect(stage.querySelector('.v-carousel-controls')).not.toBeNull()
+      expect(stage.querySelector('.v-carousel-autoplay')).not.toBeNull()
+      expect(stage.querySelector('.v-carousel-viewport')).not.toBeNull()
+    })
+
+    it('mirrors controlsVisibility unconditionally, `always` by default', () => {
+      const visibility = (attrs?: string) =>
+        mount({ attrs })
+          .container.querySelector('.v-carousel')
+          ?.getAttribute('data-controls-visibility')
+      expect(visibility()).toBe('always')
+      expect(visibility('controls-visibility="hover"')).toBe('hover')
+    })
+  })
+
   describe('props', () => {
     it('carries the sizing variables inline and omits the ones left undefined', () => {
       const { container } = mount({ attrs: ':items-per-view="3" item-min-size="16rem" :peek="40"' })

@@ -33,6 +33,8 @@ export type CarouselOrientation = 'horizontal' | 'vertical'
 /** Three states, the VFileUpload `preview` precedent: nowhere / over the slides / after them. */
 export type CarouselIndicators = false | 'inside' | 'outside'
 export type CarouselControls = false | 'inside' | 'outside'
+/** A mode, not a boolean: the reveal is hover OR focus, and never on a coarse pointer. */
+export type CarouselControlsVisibility = 'always' | 'hover'
 
 /**
  * Scrolls through content — images or text — horizontally or vertically.
@@ -114,10 +116,26 @@ interface CarouselProps {
    * always rendered while it is on — WCAG 2.2.2 is not a styling option.
    */
   autoplay?: number
-  /** Previous/next buttons: over the slides, after them, or not at all. */
+  /**
+   * Previous/next buttons: over the slides, beside them, or not at all. `outside`
+   * puts them at the inline edges when horizontal and at the block edges when
+   * vertical, reserving their room as padding — the component's footprint is
+   * unchanged and the slides narrow instead. Either way they are centred on the
+   * SLIDES, never on the slides plus the indicators.
+   */
   controls?: CarouselControls
-  /** Position indicators: over the slides, after them, or not at all. */
+  /**
+   * Position indicators: over the slides, after them, or not at all. `outside`
+   * sits below when horizontal and at the inline end when vertical.
+   */
   indicators?: CarouselIndicators
+  /**
+   * `hover` fades the previous/next pair in on hover or on focus anywhere in the
+   * carousel; `always` (the default) keeps it permanently visible. A coarse
+   * pointer has no hover to give, so `hover` is inert there and the pair stays
+   * visible. The indicators are never hidden, whatever this says.
+   */
+  controlsVisibility?: CarouselControlsVisibility
   /** Icon of the previous button. Default depends on the orientation. */
   prevIcon?: IconSource
   /** Icon of the next button. Default depends on the orientation. */
@@ -153,6 +171,7 @@ const props = withDefaults(defineProps<CarouselProps>(), {
   autoplay: 0,
   controls: 'inside',
   indicators: 'outside',
+  controlsVisibility: 'always',
   prevIcon: undefined,
   nextIcon: undefined,
   playIcon: 'play_arrow',
@@ -172,7 +191,10 @@ defineSlots<{
    * `v-for` is fine — but the slot must not depend on a client-only condition.
    */
   default(): unknown
-  /** Replaces the whole previous/next pair. */
+  /**
+   * Replaces the whole previous/next pair — its placement CSS included, so custom
+   * content lays itself out inside the stage and `controlsVisibility` is inert on it.
+   */
   controls?(props: {
     previous: () => void
     next: () => void
@@ -183,6 +205,8 @@ defineSlots<{
     count: number
     /** Number of positions the scroller can rest on — see `pageCount`. */
     pageCount: number
+    /** Which axis scrolls: a custom bar cannot pick its icons or its own axis without it. */
+    orientation: CarouselOrientation
   }): unknown
   /**
    * Replaces the whole indicator bar, its group role included. Render one control per
@@ -195,6 +219,7 @@ defineSlots<{
     count: number
     pageCount: number
     goTo: (index: number) => void
+    orientation: CarouselOrientation
   }): unknown
   /** Replaces ONE indicator's contents; the <button> and its ARIA stay the DS's. */
   indicator?(props: { index: number; active: boolean }): unknown
@@ -291,9 +316,12 @@ function scrollToIndex(index: number) {
   const slide = port?.querySelector<HTMLElement>(`[data-carousel-index='${index}']`)
   if (!port || !slide) return
   const target = slide.getBoundingClientRect()
-  const frame = port.getBoundingClientRect()
-  const left = target.left - frame.left
-  const top = target.top - frame.top
+  // The VIEWPORT's rect, not the stage's: every DOM read in this component is
+  // viewport-scoped, and the `outside` gutter is padding on the root, so nothing here
+  // has to know about it.
+  const origin = port.getBoundingClientRect()
+  const left = target.left - origin.left
+  const top = target.top - origin.top
   /*
    * Already there — which is what a model change coming FROM the read-back looks
    * like. Arming the guard here would be the other way to strand it: no movement
@@ -593,12 +621,19 @@ if (isDev) {
     :data-effect="resolvedEffect"
     :data-controls="controls || undefined"
     :data-indicators="indicators || undefined"
+    :data-controls-visibility="controlsVisibility"
     @pointerenter="hovered = true"
     @pointerleave="hovered = false"
     @focusin="focused = true"
     @focusout="focused = false"
   >
-    <div class="v-carousel-frame">
+    <!--
+      The stage holds the viewport, the controls and the autoplay control — and
+      NOTHING else. The indicator bar is a sibling on purpose: inside this box it
+      would join the height the controls are centred on, and the pair would sit
+      visibly below the middle of the slides.
+    -->
+    <div class="v-carousel-stage">
       <!--
         tabindex="0" is MANDATORY, not defensive: a scroll container needs a
         TABBABLE descendant (axe `scrollable-region-focusable`) and slide content
@@ -628,6 +663,7 @@ if (isDev) {
         :index="model"
         :count="count"
         :page-count="pageCount"
+        :orientation="orientation"
       >
         <div v-if="controls" class="v-carousel-controls">
           <VIconButton
@@ -672,37 +708,44 @@ if (isDev) {
           <VIcon v-bind="iconProps(playing ? pauseIcon : playIcon)" />
         </VIconButton>
       </slot>
+    </div>
 
-      <slot name="indicators" :index="model" :count="count" :page-count="pageCount" :go-to="goTo">
-        <div
-          v-if="indicators"
-          class="v-carousel-indicators"
-          role="group"
-          :aria-label="m.carousel.indicators"
-        >
-          <!--
+    <slot
+      name="indicators"
+      :index="model"
+      :count="count"
+      :page-count="pageCount"
+      :go-to="goTo"
+      :orientation="orientation"
+    >
+      <div
+        v-if="indicators"
+        class="v-carousel-indicators"
+        role="group"
+        :aria-label="m.carousel.indicators"
+      >
+        <!--
             One control per REACHABLE position, not per slide: with 6 slides three at
             a time the scroller can only lead with 1 to 4, and dots 5 and 6 would
             scroll nowhere. The label stays slide-based ("4 of 6") because that is what
             the control does — it parks that slide at the start edge — and it then
             agrees with the slide's own name and with the live region.
           -->
-          <button
-            v-for="index in pageCount"
-            :key="index"
-            type="button"
-            class="v-carousel-indicator"
-            :aria-label="m.carousel.slide(index, count)"
-            :aria-current="index - 1 === model ? 'true' : undefined"
-            @click="goTo(index - 1)"
-          >
-            <slot name="indicator" :index="index - 1" :active="index - 1 === model">
-              <span class="v-carousel-dot" />
-            </slot>
-          </button>
-        </div>
-      </slot>
-    </div>
+        <button
+          v-for="index in pageCount"
+          :key="index"
+          type="button"
+          class="v-carousel-indicator"
+          :aria-label="m.carousel.slide(index, count)"
+          :aria-current="index - 1 === model ? 'true' : undefined"
+          @click="goTo(index - 1)"
+        >
+          <slot name="indicator" :index="index - 1" :active="index - 1 === model">
+            <span class="v-carousel-dot" />
+          </slot>
+        </button>
+      </div>
+    </slot>
 
     <span class="v-visually-hidden" role="status">{{ liveMessage }}</span>
   </div>
@@ -736,16 +779,62 @@ if (isDev) {
     --carousel-item-min: 0px;
     --carousel-peek: 0px;
     --carousel-viewport-block: var(--vectis-control-size-carousel-block);
+    /*
+     * Room reserved on the SCROLL axis for the `outside` controls. `0px` and never
+     * `0`: it feeds a `padding-*`, where a unitless zero is invalid — the
+     * `--carousel-peek` precedent three lines up.
+     */
+    --carousel-outset: 0px;
 
+    /* Positioning context of the `inside` indicator bar, which is deliberately NOT
+       a child of the stage — see .v-carousel-stage. */
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--vectis-space-3);
     font-family: var(--vectis-text-family);
   }
 
+  /*
+   * The gutter is PADDING on the root: the component's footprint is unchanged and
+   * the viewport narrows instead, so the slides' percentage flex-basis follows with
+   * no branch and no second measurement.
+   *
+   * INVARIANT — always on the scroll axis, always SYMMETRIC. That is what lets every
+   * `inside` inset below be written against the stage's edges with no compensation:
+   * an absolutely positioned box resolves against the PADDING box, the edges those
+   * insets pin to are on the cross axis (which this never touches), and the axis they
+   * centre on stays symmetric. Make this one-sided and the `inside` indicator bar
+   * goes off-centre with nothing to report it.
+   */
+  .v-carousel[data-orientation='horizontal'] {
+    padding-inline: var(--carousel-outset);
+  }
+
   .v-carousel[data-orientation='vertical'] {
     --carousel-axis-x: 0;
     --carousel-axis-y: 1;
+
+    /* The indicator bar sits BESIDE the stage here, so the root's own axis follows
+       the scroll axis. */
+    flex-direction: row;
+    padding-block: var(--carousel-outset);
+  }
+
+  /*
+   * TRAP — `control-height-md` is the size the two VIconButtons actually render at:
+   * they pass no `size`, so they take VIconButton's own `md` default and their width
+   * is `--control-height`. The gutter is that button plus one gap, so the pair lands
+   * flush inside the root's border box and never covers a slide. Give the buttons a
+   * `size` and this line has to follow, or the pair either overlaps the first slide
+   * or floats away from it — with no error anywhere.
+   *
+   * The `:has()` is not decoration: a consumer `#controls` slot replaces the whole
+   * bar, and reserving two buttons' worth of padding for a bar nobody rendered would
+   * inset the slides for nothing.
+   */
+  .v-carousel[data-controls='outside']:has(> .v-carousel-stage > .v-carousel-controls) {
+    --carousel-outset: calc(var(--vectis-control-height-md) + var(--vectis-space-2));
   }
 
   /*
@@ -758,13 +847,36 @@ if (isDev) {
     --carousel-dir: -1;
   }
 
-  /* Positioning context of the `inside` controls and indicators. */
-  .v-carousel-frame {
+  /*
+   * Positioning context of the controls and of the autoplay control — and of NOTHING
+   * else. The indicator bar is a SIBLING on purpose: inside this box it would join
+   * the height the controls are centred on, and an `inside` pair would sit visibly
+   * below the middle of the slides. Kept a flex column so a consumer `#controls` slot
+   * still stacks under the viewport with a gutter.
+   */
+  .v-carousel-stage {
     position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--vectis-space-3);
     min-inline-size: 0;
+    min-block-size: 0;
+  }
+
+  /*
+   * Vertical ONLY. The root is a `row` there, so the inline axis is the flex MAIN
+   * axis and the stage would shrink-wrap the widest slide's content — an `inside`
+   * bar's `inset-inline-end` would then land on the ROOT's edge instead of the
+   * slides'. Deliberately NOT applied in horizontal: the main axis is the block one
+   * there, and growing into a consumer-set height would push the stage past the
+   * viewport and re-centre the controls on empty space — the very bug this split
+   * fixes.
+   *
+   * `flex-grow` and not `flex: 1`: the shorthand's `0` basis, together with the
+   * min-size floors above, lets an auto-sized flex container collapse it.
+   */
+  .v-carousel[data-orientation='vertical'] .v-carousel-stage {
+    flex-grow: 1;
   }
 
   .v-carousel-viewport {
@@ -971,30 +1083,82 @@ if (isDev) {
 
   .v-carousel-controls {
     display: flex;
+    /* A floor, not the layout — `space-between` places the pair. It only ever shows
+       on a stage narrow enough to bring the two buttons together. */
     gap: var(--vectis-space-2);
-    justify-content: center;
+    transition: opacity var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .v-carousel[data-orientation='vertical'] .v-carousel-controls {
     flex-direction: column;
-    align-items: center;
   }
 
   /*
-   * `inside`: the pair is laid over the viewport, each button pinned to one edge
-   * of the scroll axis. `pointer-events` is handed back to the buttons alone, so
-   * the strip does not swallow a drag over the slides.
+   * BOTH placements are laid out of flow against the STAGE, and that is the whole
+   * requirement: the pair is then centred on the slides alone, whatever the indicator
+   * bar does. One `align-items: center` serves both orientations — it is the cross
+   * axis in each. `pointer-events` is handed back to the buttons alone, so the strip
+   * does not swallow a drag over the slides.
+   *
+   * Enumerated rather than a bare `[data-controls]`: a third placement has to opt in
+   * by hand (the VTabs `:is()` rule). ORDER IS LOAD-BEARING — the per-placement blocks
+   * below are (0,3,0) like this one.
    */
-  .v-carousel[data-controls='inside'] .v-carousel-controls {
+  .v-carousel:is([data-controls='inside'], [data-controls='outside']) .v-carousel-controls {
     position: absolute;
-    inset: var(--vectis-space-2);
-    justify-content: space-between;
+    inset: 0;
     align-items: center;
+    justify-content: space-between;
     pointer-events: none;
   }
 
-  .v-carousel[data-orientation='vertical'][data-controls='inside'] .v-carousel-controls {
-    justify-content: space-between;
+  .v-carousel[data-controls='inside'] .v-carousel-controls {
+    inset: var(--vectis-space-2);
+  }
+
+  /*
+   * `outside`: the pair is pulled out of the stage by exactly the gutter the root
+   * reserved, so each button sits in that padding, one gap clear of the slides, still
+   * centred on the stage's cross axis.
+   *
+   * RTL is FREE and needs no `--carousel-dir`: `inset-inline` is logical, the two
+   * insets are equal so the box is direction-symmetric, and `space-between` puts
+   * `previous` at the inline START — the right-hand side in RTL, where it belongs.
+   */
+  .v-carousel[data-controls='outside'] .v-carousel-controls {
+    inset-inline: calc(-1 * var(--carousel-outset));
+  }
+
+  .v-carousel[data-orientation='vertical'][data-controls='outside'] .v-carousel-controls {
+    inset-inline: 0;
+    inset-block: calc(-1 * var(--carousel-outset));
+  }
+
+  /*
+   * `hover` REVEALS the pair, it never removes it. `display: none` and
+   * `visibility: hidden` would drop the buttons from the tab order AND from the
+   * accessibility tree, where `opacity: 0` keeps both — the hidden-input rule. The
+   * reveal costs no layout, so nothing shifts.
+   *
+   * `:focus-within` on the ROOT, not on the bar: the reveal boundary is then exactly
+   * the boundary autoplay already pauses on, and a keyboard user who has tabbed to
+   * the track — or into a link inside a slide — sees the navigation before deciding
+   * whether to use it.
+   *
+   * Behind `@media (hover: hover)`: a coarse pointer has no hover to give, so the
+   * whole block is inert there and the pair stays permanently visible. NOT
+   * `any-hover`, which is true as soon as any pointer capable of hovering is attached
+   * and would strand exactly the users this protects.
+   */
+  @media (hover: hover) {
+    .v-carousel[data-controls-visibility='hover'] .v-carousel-controls {
+      opacity: 0;
+    }
+
+    .v-carousel[data-controls-visibility='hover']:hover .v-carousel-controls,
+    .v-carousel[data-controls-visibility='hover']:focus-within .v-carousel-controls {
+      opacity: 1;
+    }
   }
 
   .v-carousel-control {
@@ -1108,6 +1272,7 @@ if (isDev) {
       scroll-behavior: auto;
     }
 
+    .v-carousel-controls,
     .v-carousel-dot {
       transition: none;
     }

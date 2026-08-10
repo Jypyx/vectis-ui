@@ -97,19 +97,71 @@ never as the `animation` shorthand, which would silently reset the timeline and 
 has no definite reference on the block axis, and without one every slide would collapse onto its
 content.
 
+Both affordances follow the axis: `outside` controls go above and below, and the indicators move to
+the inline end. Note the asymmetry between the orientations — horizontal `outside` controls cost
+inline size at a constant footprint, where vertical ones cost block footprint at a constant slide
+size, because the block axis is sized by `height` rather than by the container.
+
 <Canvas of={VCarouselStories.Vertical} />
+<Canvas of={VCarouselStories.VerticalInside} />
 
 ## Controls and indicators
 
-`controls` and `indicators` each take `false`, `'inside'` (over the slides) or `'outside'` (after
-them). Icons and labels are props (`prevIcon`, `nextIcon`, `prevLabel`…), and the `#controls`,
+`controls` and `indicators` each take `false`, `'inside'` (over the slides) or `'outside'`.
+
+The two are placed independently, and the previous/next pair is always centred on **the slides
+alone** — never on the slides plus the indicators. That is why the indicator bar is not a child of
+the box the controls are positioned against: inside it, the bar's height would drag the pair below
+the middle of the slides.
+
+Placement per orientation:
+
+|                         | horizontal                           | vertical                            |
+| ----------------------- | ------------------------------------ | ----------------------------------- |
+| `controls: 'inside'`    | over the slides, at the inline edges | over the slides, at the block edges |
+| `controls: 'outside'`   | left and right of the slides         | above and below the slides          |
+| `indicators: 'inside'`  | over the slides, bottom-centre       | over the slides, at the inline end  |
+| `indicators: 'outside'` | below the slides                     | to the inline end of the slides     |
+
+`controls="outside"` reserves its room as **padding on the component**, so the footprint never
+changes and the slides narrow instead — a carousel does not suddenly overflow its neighbours when
+you move its controls out. The reserved width tracks the size the buttons actually render at.
+
+Icons and labels are props (`prevIcon`, `nextIcon`, `prevLabel`…), and the `#controls`,
 `#indicators`, `#indicator` and `#autoplay` slots replace the rendering entirely — `#indicators`
-receives `goTo`, without which the bar could no longer select anything.
+receives `goTo`, without which the bar could no longer select anything, and both bars receive
+`orientation`, without which a custom one cannot pick its icons or its axis.
 
 A custom bar must render one control per **`pageCount`**, not per `count`: the slots receive both,
-`count` being there for "N of M" labels.
+`count` being there for "N of M" labels. Three consequences of replacing a bar, since the slot
+takes over the container the DS's placement CSS is keyed on: a custom `#controls` lays itself out
+inside the stage rather than being positioned for you, `controls="outside"` then reserves no
+gutter (its footprint is yours to decide), and `controlsVisibility` is inert on it. A custom
+`#indicators` is a direct child of the component, so in the vertical orientation it sits **beside**
+the slides rather than below them.
 
 <Canvas of={VCarouselStories.Placement} />
+
+<Canvas of={VCarouselStories.ControlsOutside} />
+
+## Revealing the controls
+
+`controlsVisibility` takes `'always'` (the default) or `'hover'`, which fades the previous/next
+pair in on hover — or on focus anywhere in the carousel, which is what keeps it usable from the
+keyboard. The reveal boundary is deliberately the same one autoplay pauses on: one boundary, two
+behaviours, nothing to keep in step.
+
+The pair is **revealed, never removed**. `display: none` and `visibility: hidden` would drop the
+buttons from the tab order and from the accessibility tree; an opacity leaves both intact, and
+costs no layout, so nothing shifts as it fades. On a device with no hover to give — a touch screen
+— the mode is inert and the pair stays permanently visible, and the indicators are never hidden by
+this prop at all, so a navigation affordance always exists.
+
+One accepted limitation: pressing `next` until it disables itself moves focus to the document,
+which drops `:focus-within`, so with the pointer elsewhere the pair fades out. There is no CSS
+remedy for it.
+
+<Canvas of={VCarouselStories.ControlsOnHover} />
 
 ## Autoplay
 
@@ -147,5 +199,8 @@ choice.
 - The autoplay control carries its state in its **label** (start/stop), not in `aria-pressed`.
 - A visually hidden `role="status"` announces the position — and stays silent while autoplay
   rotates, because narrating an auto-rotating carousel floods the screen reader.
+- `controlsVisibility="hover"` hides the pair with an opacity, so the buttons keep their place in
+  the tab order and in the accessibility tree; focus anywhere in the carousel brings them back, and
+  a pointer that cannot hover never hides them in the first place.
 
 <Canvas of={VCarouselStories.Localization} />

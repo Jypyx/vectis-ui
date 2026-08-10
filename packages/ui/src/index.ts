@@ -161,6 +161,7 @@ export type { FileKind } from './components/VFileUpload/fileKind'
 export { default as VCarousel } from './components/VCarousel/VCarousel.vue'
 export type {
   CarouselControls,
+  CarouselControlsVisibility,
   CarouselEffect,
   CarouselIndicators,
   CarouselOrientation,
