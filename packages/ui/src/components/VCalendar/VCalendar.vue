@@ -28,6 +28,7 @@ import { resolveMatcher } from '../../utils/matcher'
 import { clamp } from '../../utils/number'
 import { useLocale, useMessages } from '../../i18n/state'
 
+// @a11y @keyboard @core
 /**
  * A reusable inline calendar (a grid), Material-inspired. It holds ALL the date, view
  * (days / months / years) and keyboard logic; VDatePicker merely dresses it in a field
@@ -184,6 +185,7 @@ const viewMonth0 = computed(() => parseISO(focusedISO.value)?.getMonth() ?? 0)
 const monthLabel = computed(() => monthName(resolvedLocale.value, viewMonth0.value, 'long'))
 const gridLabel = computed(() => `${monthLabel.value} ${viewYear.value}`)
 
+// @ssr
 // today: set on mount (client-side) → no SSR hydration mismatch
 const today = ref<string | null>(null)
 onMounted(() => {
@@ -295,6 +297,7 @@ const canNextYear = computed(
   () => !props.max || compareISO(isoOf(viewYear.value + 1, 0, 1), props.max) <= 0,
 )
 
+// @a11y
 // DOM focus of a cell (roving).
 const dayId = (iso: string) => `${gridLabelId}-d-${iso}`
 function focusDay(iso: string) {
@@ -312,6 +315,8 @@ function stepYear(delta: number) {
   goTo(addMonths(focusedISO.value, delta * 12))
 }
 
+// @a11y @core — switching view moves the roving focus onto the cell the new view
+// opens on; without it focus stays on a button the view just unmounted.
 function toggleView(target: 'months' | 'years') {
   const next = view.value === target ? 'days' : target
   view.value = next
@@ -351,6 +356,7 @@ function selectDay(cell: DayCell) {
   emit('select', model.value)
 }
 
+// @keyboard @a11y
 // Keyboard (the days view).
 function onDaysKeydown(event: KeyboardEvent) {
   if (event.key === 'Enter' || event.key === ' ') {
@@ -408,6 +414,7 @@ function chooseMonth(i: number) {
   view.value = 'days'
   focusDay(focusedISO.value)
 }
+// @keyboard @a11y
 function onMonthsKeydown(event: KeyboardEvent) {
   const deltas: Record<string, number> = {
     ArrowRight: 1,
@@ -427,6 +434,7 @@ function onMonthsKeydown(event: KeyboardEvent) {
   monthCellEl(focusedMonth.value)?.focus()
 }
 
+// @a11y
 /*
  * Both pickers are a `role="grid"`, which owns rows and NOT cells: a gridcell straight
  * under the grid fails aria-required-children AND aria-required-parent at once. The
@@ -468,6 +476,7 @@ function chooseYear(y: number) {
   view.value = 'days'
   focusDay(focusedISO.value)
 }
+// @keyboard @a11y
 function onYearsKeydown(event: KeyboardEvent) {
   const deltas: Record<string, number> = {
     ArrowRight: 1,
@@ -504,6 +513,7 @@ watch(
   },
 )
 
+// @a11y
 /** Brings the focus into the grid (used by VDatePicker on opening). */
 function focus() {
   view.value = 'days'

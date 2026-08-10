@@ -15,6 +15,7 @@ import type { HourFormat } from '../../utils/time'
 import { pad2 } from '../../utils/text'
 import { useMessages } from '../../i18n/state'
 
+// @a11y @keyboard @core
 /**
  * VTimePicker's clock dial (internal, not exported).
  *
@@ -109,6 +110,8 @@ const handRing = computed(() =>
 /** A minute off the 5-minute markers: the hand carries a dot (an M3 detail). */
 const handMinor = computed(() => props.step === 'minute' && props.minute % 5 !== 0)
 
+// @a11y — the whole slider value contract: the numerals are aria-hidden markers,
+// so `aria-valuenow`/`-min`/`-max`/`-text` are the ONLY thing AT reads off the dial.
 const ariaValueNow = computed(() => {
   if (props.step === 'minute') return props.minute
   return props.format === '12h' ? to12h(props.hour).hour : props.hour
@@ -149,6 +152,7 @@ function applyPoint(event: PointerEvent) {
 }
 
 function onPointerdown(event: PointerEvent) {
+  // @fallback
   // try/catch: synthetic PointerEvents (play functions) have no active pointer →
   // setPointerCapture would throw NotFoundError.
   try {
@@ -174,6 +178,7 @@ function onPointercancel() {
   dragging.value = false
 }
 
+// @keyboard @a11y
 // Keyboard (the slider pattern).
 function moveHour(delta: number) {
   if (props.format === '24h') {
