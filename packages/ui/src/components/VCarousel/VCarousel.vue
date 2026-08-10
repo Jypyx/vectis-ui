@@ -36,6 +36,8 @@ export type CarouselControls = false | 'inside' | 'outside'
 /** A mode, not a boolean: the reveal is hover OR focus, and never on a coarse pointer. */
 export type CarouselControlsVisibility = 'always' | 'hover'
 
+// @keyboard @a11y @ssr @core — the DS's densest script; every block below carries
+// its own tag.
 /**
  * Scrolls through content — images or text — horizontally or vertically.
  *
@@ -232,6 +234,7 @@ const resolvedNextIcon = computed(
   () => props.nextIcon ?? (isVertical.value ? 'expand_more' : 'chevron_right'),
 )
 
+// @ssr
 /*
  * The count comes from the slot's VNODES, never from a registry the items feed at
  * mount: a registry renders 0 slides on the server and N on the client — a
@@ -391,6 +394,7 @@ function measurePages(port: HTMLElement) {
   measuredPages.value = Math.floor((scrollable + 1) / step) + 1
 }
 
+// @ssr @fallback
 /**
  * SSR, jsdom and the first paint. `itemsPerView` is not a guess there: with no `peek`
  * and no active `itemMinSize` the flex-basis makes a slide plus its gap exactly
@@ -422,6 +426,7 @@ const pageCount = computed(() =>
 watch(
   [viewportEl, count],
   ([port], _previous, onCleanup) => {
+    // @fallback
     // IntersectionObserver exists neither in SSR nor in jsdom: the read-back and the
     // measurement are verified in the browser (play functions).
     if (!port || typeof IntersectionObserver === 'undefined') return
@@ -509,6 +514,7 @@ function goTo(index: number) {
 const previous = () => goTo(model.value - 1)
 const next = () => goTo(model.value + 1)
 
+// @keyboard
 /**
  * The one keyboard concession, and it is not the one it looks like. A focused
  * scroll container DOES move on the arrows — but Chromium scrolls it by a fixed
@@ -549,6 +555,7 @@ const { start, cancel } = useTimer()
 const hovered = ref(false)
 const focused = ref(false)
 
+// @a11y @fallback
 /**
  * KEYBOARD focus, not any focus. Clicking `next` leaves the focus on it, and a plain
  * `focusin` flag would then pause the rotation for good — the user has to click
@@ -595,6 +602,7 @@ watch(
   { immediate: true },
 )
 
+// @a11y @ssr — WCAG 2.2.2. Client-only: the server has no `matchMedia`.
 /*
  * The DS's second browser-preference read (after VHotkeys' `navigator`), and it
  * is not redundant with the CSS media query: that one stops a transition, never a
@@ -612,6 +620,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => releaseMotionQuery?.())
 
+// @a11y
 /*
  * Announced only at rest: narrating an auto-rotating carousel floods the screen
  * reader (APG). The region itself stays mounted — a live container inserted at
@@ -621,6 +630,7 @@ const liveMessage = computed(() =>
   rotating.value || count.value === 0 ? '' : m.value.carousel.slide(model.value + 1, count.value),
 )
 
+// @devwarn
 if (isDev) {
   watchEffect(() => {
     if (props.effect === 'fade' && props.itemsPerView > 1)

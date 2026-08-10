@@ -47,6 +47,7 @@ const panelId = computed(() => (tabs?.hasPanels ? tabs.panelId(props.value) : un
 /** No visible label: the tab shrinks to a square, like a VIconButton. */
 const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.default)
 
+// @keyboard @a11y
 /*
  * Automatic activation (an APG option): selection follows focus. It lives here
  * rather than in VTabs' keyboard handler, which would otherwise have to route the

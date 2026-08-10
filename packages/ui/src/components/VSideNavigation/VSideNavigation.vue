@@ -8,6 +8,7 @@ import { arrowNavigate } from '../../utils/arrowNav'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
+// @keyboard @core
 /**
  * Vertical sidebar navigation: a tree of links rendered INLINE (nothing floats),
  * collapsible level by level, composed from subcomponents —
@@ -78,6 +79,7 @@ provide(sideNavigationKey, {
 
 const rootEl = ref<HTMLElement | null>(null)
 
+// @keyboard @a11y
 /**
  * Focus targets: a branch's <summary>, a leaf's action. Disabled items are excluded
  * — `:disabled` only matches <button>, while an inert link and a summary go through
@@ -85,6 +87,7 @@ const rootEl = ref<HTMLElement | null>(null)
  */
 const ROW_SELECTOR = ':is(summary, .v-side-nav-action):not(:disabled):not([aria-disabled="true"])'
 
+// @keyboard @a11y
 /**
  * Excludes everything living under a COLLAPSED branch — except its own <summary>,
  * which stays focusable. The content of a closed <details> is not `display: none`
@@ -105,6 +108,7 @@ function reachable(el: HTMLElement, root: HTMLElement): boolean {
   return true
 }
 
+// @keyboard @a11y
 /*
  * The only behavioural JS: no native primitive moves the focus between sibling
  * links. The DS contract (utils/arrowNav) — the arrows MOVE the focus, they never
