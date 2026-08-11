@@ -1,10 +1,14 @@
 <script setup lang="ts">
 /**
- * The rule between two blocks of the VCombobox listbox, in `role="presentation"`:
- * the `<hr>`'s implicit `separator` role is legitimate inside a `role="menu"` (see
- * VMenuSeparator) but not among the children of a `role="listbox"`, which admits
- * only `option` and `group`. Here the rule is purely visual — the grouping is
- * already carried by the `role="group"`s and their labels.
+ * The rule drawn between two blocks of options in a VCombobox's list.
+ *
+ * TRAP — it is stripped of the meaning an `<hr>` normally carries. A separator is
+ * perfectly legitimate inside a menu, as VMenuSeparator relies on, but a LIST may
+ * contain nothing but options and blocks of options — so here the rule has to be
+ * declared as pure presentation.
+ *
+ * Nothing is lost by that: what the rule suggests visually is already said properly by
+ * the named blocks around it.
  */
 import VSeparator from '../VSeparator/VSeparator.vue'
 </script>
@@ -15,10 +19,11 @@ import VSeparator from '../VSeparator/VSeparator.vue'
 
 <style>
 @layer vectis.components {
-  /* Compound with `.v-separator`, which sets `margin: 0` from its own sheet: at
-     equal specificity the winner would be whichever sheet the consumer's bundler
-     puts last. Full width up to the panel edges (compensates its padding); the
-     vertical spacing comes from the panel's gap. */
+  /* The rule is bled out to the panel's edges by cancelling its padding. The selector
+     compounds both classes because `.v-separator` sets `margin: 0` from a sheet of its
+     own: at equal specificity the winner would be whichever of the two the consumer's
+     bundler happens to put last. The space above and below comes from the panel's own
+     gap, so no margin is added here. */
   .v-separator.v-combobox-separator {
     margin-inline: calc(-1 * var(--vectis-space-1));
   }

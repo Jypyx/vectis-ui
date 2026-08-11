@@ -2,23 +2,23 @@
 import { useId } from 'vue'
 
 /**
- * A named group of options (internal — rendered by `VCombobox` from a
- * `ComboboxGroup` entry of its `options` prop, never written by the consumer).
+ * A named block of options inside a VCombobox's list. It is internal: the component
+ * renders it from the entries of its own options prop, and a consumer never writes it.
  *
- * `role="group"` is an ALLOWED child of a `role="listbox"` (ARIA 1.2): it is the
- * counterpart of the native `<optgroup>`. The label is neither focusable nor
- * selectable — VCombobox's keyboard navigation indexes `filtered`, a flat list of
- * options, and therefore never sees this node.
+ * A block of this kind is one of the two things a list is allowed to contain — it is the
+ * equivalent of the grouping a native list offers. Its name can be neither focused nor
+ * chosen: the keyboard counts through the flat list of options and therefore never
+ * encounters this element at all.
  */
 interface ComboboxGroupProps {
-  /** Name of the group (not selectable). */
+  /** The name of the block. It is a heading, not something that can be chosen. */
   label: string
 }
 
 defineProps<ComboboxGroupProps>()
 
 defineSlots<{
-  /** The options of the group. */
+  /** The options belonging to this block. */
   default(): unknown
 }>()
 
@@ -34,9 +34,10 @@ const labelId = useId()
 
 <style>
 @layer vectis.components {
-  /* `flex: none` (unlike `.v-menu-group`): VCombobox's panel is a bounded flex
-     column (`max-block-size` + `overflow: auto`), where a group would be squashed —
-     the same reason as `.v-combobox-state` and `.v-combobox-more`. */
+  /* It refuses to shrink, where a menu group has no need to: this panel is a column of
+     bounded height that scrolls, and a block left free to shrink would be squashed to
+     make its content fit — the same reason the state rows and the foot of the list refuse
+     it too. */
   .v-combobox-group {
     display: flex;
     flex: none;
@@ -44,12 +45,13 @@ const labelId = useId()
     gap: var(--vectis-space-1);
   }
 
-  /* Section micro-label: the overline role (no forced capitals — the label's case
-     belongs to the consumer). Indent AND height trace the options' recipe
-     (`--control-padding-inline` and `--control-height`, inherited from the panel):
-     the header holds the same height as a row, compact included, so the list's
-     vertical rhythm does not break. Only the typography stays outside the scale (the
-     overline role), hence the vertical centring. */
+  /* The block heading takes the overline type role, without forcing capitals: how the
+     label is written is the consumer's decision.
+
+     Its indent and its height are the options' own recipe, so a heading occupies exactly
+     the height of a row — compact included — and the vertical rhythm of the list is not
+     broken by it. The type is the one thing staying outside that scale, which is why the
+     text has to be centred vertically by hand. */
   .v-combobox-group-label {
     display: flex;
     align-items: center;

@@ -4,29 +4,28 @@ import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 
 /**
- * A VCombobox option row (`role="option"`), an INTERNAL non-exported component. The
- * DOM focus stays in the field: the highlight comes from the `active` prop (set
- * through `aria-activedescendant`), never from focus. Selecting does not close the
- * panel — VCombobox decides.
+ * One row of a VCombobox's list. It is internal to that component and never exported.
  *
- * `disabled` does NOT set the native attribute: a disabled option must stay in the
- * accessibility tree the field walks, hence `aria-disabled`.
+ * The focus never comes here: it stays in the text field throughout, so the highlight is
+ * told to this row rather than deduced from anything it holds. Choosing it does not close
+ * the panel either — the component above decides that.
  *
- * A single root: `id` and the consumer's listeners (`@pointermove`…) arrive through
- * native fallthrough.
+ * TRAP — a disabled option does NOT carry the native attribute. It has to remain in the
+ * accessibility tree the field walks through, and the native attribute would take it out
+ * of it; `aria-disabled` says the same thing while leaving it in place.
  *
- * The surface is deliberately reduced to what VCombobox uses: the label goes through
- * the #default slot (which VCombobox feeds from its own scoped `#option` slot), not
- * through a prop. A single icon slot, at the start — the end is taken by the
- * selection tick — hence `icon` and not `iconStart`.
+ * Its surface is deliberately reduced to what VCombobox actually uses. The label comes
+ * through the slot rather than a prop, and there is a single icon, at the start: the end
+ * of the row is taken by the selection tick.
  */
 interface ComboboxOptionProps {
-  /** Icon before the label: an icon name, or an explicit render (`{ src }`…). */
+  /** An icon before the label: an icon name, or an explicit render. */
   icon?: IconSource
-  /** Selected option (aria-selected + a tick). */
+  /** Marks the option as one of the chosen ones, which also draws the tick. */
   selected?: boolean
-  /** Active option (highlighted) — set by the field. */
+  /** Marks the option as the one currently highlighted. The field decides this. */
   active?: boolean
+  /** Shows the option without allowing it to be chosen. */
   disabled?: boolean
 }
 
@@ -38,12 +37,12 @@ const props = withDefaults(defineProps<ComboboxOptionProps>(), {
 })
 
 const emit = defineEmits<{
-  /** Emitted on activation (a click). */
+  /** The option was clicked. What that does to the selection is the field's business. */
   select: []
 }>()
 
 defineSlots<{
-  /** Label of the option. */
+  /** What the row shows. */
   default?(): unknown
 }>()
 
@@ -73,10 +72,12 @@ function onClick() {
 <style>
 @layer vectis.components {
   .v-combobox-option {
-    /* Size: the `--control-*` inherited from the panel, which carries `v-control`
-       (styles/control-size.css); the icons follow through the same inheritance.
-       Composite typography as in VMenuItem: the scale's size, `body-md` leading (a
-       unitless ratio) and a regular weight. */
+    /* Every dimension is inherited from the panel, which carries the shared size class,
+       and the icons follow through the same inheritance.
+
+       The type is composite, exactly as in a menu row: the SIZE comes from the scale, the
+       line height stays that of body text — a unitless ratio, so it follows the size —
+       and the weight stays regular, since a row may wrap. */
     display: flex;
     align-items: center;
     gap: var(--control-gap);
@@ -94,15 +95,15 @@ function onClick() {
     cursor: pointer;
   }
 
-  /* `min-inline-size: 0`: without it the flex item's automatic minimum would stop a
-     long label from compressing. */
+  /* The zero minimum is what allows a long label to be compressed at all: a flex item
+     otherwise refuses to shrink below its own content. */
   .v-combobox-option-label {
     flex: 1;
     min-inline-size: 0;
   }
 
-  /* The highlight comes from hover or from `active` (the focus never comes here: it
-     stays in the field). */
+  /* A row is highlighted by the pointer resting on it, or by being the current one. There
+     is deliberately no focus rule: the focus never arrives here, it stays in the field. */
   .v-combobox-option:hover:not([aria-disabled='true']),
   .v-combobox-option[data-active] {
     background: var(--vectis-color-surface-muted);
@@ -113,7 +114,8 @@ function onClick() {
     color: var(--vectis-color-accent-text);
   }
 
-  /* No native `disabled` here (the option stays in the field's a11y tree) */
+  /* Matched on the ARIA state and not on the native one, which this component
+     deliberately never sets — see the introduction. */
   .v-combobox-option[aria-disabled='true'] {
     background: transparent;
     color: var(--vectis-color-text-subtle);

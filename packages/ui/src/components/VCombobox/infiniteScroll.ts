@@ -1,35 +1,39 @@
 // @core
 /**
- * The infinite-scroll plumbing of VCombobox's listbox.
+ * What asks VCombobox for the next page as the reader reaches the end of the list.
  *
- * Justified JS: no CSS primitive signals reaching the end of a list. A sentinel
- * rendered at the foot of the panel is observed, the panel — the scroll container —
- * serving as the observer's `root`.
+ * Nothing in CSS can report that an element has come into view, so this is code by
+ * necessity: a marker is rendered at the foot of the panel and watched, with the panel
+ * itself — the box that scrolls — as the frame it is watched within.
  *
- * It lives in VCombobox's folder rather than in `composables/`: one consumer, so it
- * fails the ≥2-consumers admission rule, and VCombobox is the owner of the contract
- * (`VIcon/resolver.ts` and `VHotkeys/platform.ts` set the precedent). Promote it the
- * day a second panel paginates — and note that this is NOT the deliberately-refused
- * "shared IntersectionObserver for VTabs and VCombobox": VTabs observes two edge
- * sentinels to toggle buttons, which shares nothing with paging a list.
+ * The module lives in the component's folder rather than among the shared ones, for the
+ * usual reason: a single consumer, so it does not qualify as shared code, and VCombobox
+ * owns the contract. Promote it the day a second panel paginates.
+ *
+ * It should not be confused with the shared observer between VTabs and VCombobox that
+ * was deliberately refused: VTabs watches two markers at the ends of a row to enable or
+ * disable buttons, which has nothing in common with paging a list.
  */
 import { watch, type Ref } from 'vue'
 
 export interface InfiniteScrollOptions {
-  /** The sentinel at the foot of the list; `null` when there is no more to load. */
+  /** The marker at the foot of the list. It is absent when there is nothing left to load. */
   sentinelEl: Ref<HTMLElement | null>
-  /** May a page be requested right now? (panel open, more to come, not loading) */
+  /** Whether a page may be asked for right now: the panel open, more to come, none in flight. */
   canLoad: () => boolean
-  /** Grows when a page lands — the signal that a new evaluation is due. */
+  /** How many options are loaded. Its growth is the signal that a page has arrived. */
   loadedCount: () => number
+  /** Asks for the next page. */
   onLoadMore: () => void
 }
 
 export interface InfiniteScroll {
   /**
-   * Releases the emission lock. To be called wherever a requested page can no longer
-   * arrive — closing the panel — otherwise a failed request freezes the pagination
-   * for good.
+   * Releases the lock that stops two requests overlapping.
+   *
+   * It must be called wherever a page that was asked for can no longer arrive — when the
+   * panel closes, above all. Without that, a request which failed would leave the paging
+   * frozen for the rest of the session.
    */
   reset: () => void
 }
@@ -37,9 +41,9 @@ export interface InfiniteScroll {
 export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScroll {
   let observer: IntersectionObserver | null = null
   /*
-   * A SYNCHRONOUS lock, on top of the consumer's `loading`: that prop is set
-   * asynchronously (when the request returns), and the window between the emission
-   * and that update would be enough to emit several times.
+   * A lock of our own, set the instant a page is asked for. The consumer's loading flag
+   * cannot serve: they raise it when their request starts, which is at best a tick
+   * later, and the gap between the two is wide enough for several requests to go out.
    */
   let pending = false
 
@@ -54,19 +58,22 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
     options.sentinelEl,
     (el, _previous, onCleanup) => {
       // @fallback
-      // `IntersectionObserver` does not exist in jsdom (the same guard as the
-      // `?.scrollIntoView?.()` in the component) — the behaviour is tested in the browser.
+      // The observer does not exist in the unit-test environment, so its absence has to
+      // be tolerated rather than assumed away; the behaviour is checked in a real
+      // browser.
       if (!el || typeof IntersectionObserver === 'undefined') return
-      // The panel is the scroll container, designated by its ARIA role (a public API)
-      // rather than by an internal class of the listbox. Without it, `root: null` would
-      // target the viewport: since the panel is in the top layer, the sentinel would
-      // always appear visible there → a burst of load requests.
+      // TRAP — the panel must be named as the frame the marker is watched within, and it
+      // is found by its ARIA role, which is public API, rather than by an internal class.
+      // Left unspecified, the frame would be the VIEWPORT — and since the panel floats
+      // above the page, the marker would count as visible from the very first moment,
+      // firing a burst of requests for every page at once.
       const root = el.closest('[role="listbox"]')
       if (!root) return
       observer = new IntersectionObserver(onIntersect, {
         root,
-        // preloads half a panel height before the bottom (no dimension literal: it is
-        // relative to the root)
+        // The next page is asked for half a panel before the marker is actually reached,
+        // so the list is already growing by the time the reader gets there. It is
+        // expressed as a proportion of the panel rather than as a number of pixels.
         rootMargin: '0px 0px 50% 0px',
       })
       observer.observe(el)
@@ -78,11 +85,13 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
     { flush: 'post' },
   )
 
-  // The callback only fires when the threshold is CROSSED: if the page received does
-  // not fill the panel, the sentinel stays visible without ever re-triggering and the
-  // loading would stop at the second page. It is re-observed on every page to force a
-  // fresh evaluation — and if the source returned nothing (the same count), nothing
-  // relaunches the loop: a free stopping condition.
+  // TRAP — an observer only reports a CROSSING. If the page that arrives is too short to
+  // push the marker out of view, the marker stays visible without ever crossing anything
+  // again, and the loading would stop dead at the second page. Watching it afresh after
+  // each page forces a new answer.
+  //
+  // It also gives the stopping condition away for nothing: a source that returns no new
+  // option leaves the count unchanged, this never runs, and the loop simply ends.
   watch(options.loadedCount, () => {
     pending = false
     const el = options.sentinelEl.value
