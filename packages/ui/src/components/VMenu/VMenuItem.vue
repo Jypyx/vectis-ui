@@ -10,40 +10,56 @@ import { menuKey, SUBMENU_HOVER_DELAY } from './context'
 import { useTimer } from '../../composables/useTimer'
 
 /**
- * Menu item (role="menuitem"): the focus is driven by the panel (roving focus),
- * and selecting closes the whole stack through the injected context. With `href`,
- * the item is an <a>; since an <a> has no native `disabled`, it goes through the
- * "inert link" bridge (href removed + aria-disabled).
+ * One command in a menu. The panel is what moves the focus between items, and
+ * choosing one closes the whole menu, submenus included.
  *
- * With the #submenu slot, the item becomes the `popovertarget` invoker of a nested
- * panel (= its implicit anchor; the panel is a DOM descendant of the parent panel →
- * a native popover stack: full light dismiss, opening a sibling branch closes the
- * other, cascading close). JS justified: keyboard opening and hover with an intent
- * delay — the click goes through the native toggle.
+ * Given an `href` the item becomes a link. A link has no `disabled` attribute of its
+ * own, so a disabled one is made inert by hand: its address is removed, and
+ * `aria-disabled` tells assistive technology why it no longer responds.
+ *
+ * Given the `#submenu` slot it becomes the trigger of a nested panel, which is
+ * rendered INSIDE the parent one. That nesting is what buys the whole submenu
+ * behaviour from the browser: the panels form a stack, clicking outside closes all of
+ * them, and opening one branch closes its sibling.
+ *
+ * The JavaScript is limited to the two ways of opening a submenu the browser does not
+ * cover: the keyboard, and hovering long enough to show it was meant. A click already
+ * opens it natively.
  */
 interface MenuItemProps {
-  /** Label of the item (the #default slot wins). */
+  /** What the command says. The default slot replaces it. */
   label?: string
-  /** Sublabel under the label (the #sublabel slot wins). */
+  /** A second line under the label, for a shortcut or a short explanation. */
   sublabel?: string
   /**
-   * Icon before the label: a Material Symbols Rounded name, an icon URL, or an
-   * explicit render (`{ src }`, `{ component }`…). The #start slot wins.
+   * An icon before the label: an icon name, an image address, or an explicit render.
+   * The `#start` slot replaces it.
    */
   iconStart?: IconSource
-  /** Icon after the label (same forms). The #end slot wins. */
+  /** An icon after the label, in the same forms. The `#end` slot replaces it. */
   iconEnd?: IconSource
-  /** Selected state (accent + aria-current). */
+  /**
+   * Marks this item as the one currently in effect — the chosen sort order, the
+   * active view. It is coloured and announced as such.
+   */
   selected?: boolean
-  /** Destructive item (danger colour). */
+  /**
+   * Marks the command as destructive, which colours it accordingly. Deleting
+   * something belongs here.
+   */
   danger?: boolean
+  /** Makes the item unusable: it no longer responds and the arrows skip over it. */
   disabled?: boolean
-  /** Rendered as <a role="menuitem"> (a navigation item). disabled → an inert link. */
+  /**
+   * Turns the item into a link pointing at this address, for a menu that navigates
+   * rather than acts. A disabled link is made inert by hand.
+   */
   href?: string
 }
 
-// Multi-node root when #submenu is present (the item + the nested panel): the
-// attrs (name, aria-*, class…) go explicitly on the item.
+// With a submenu this component renders two elements — the item and the nested panel
+// — so there is no single root for Vue to put the consumer's attributes on. They are
+// placed on the item explicitly.
 defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<MenuItemProps>(), {
@@ -58,20 +74,26 @@ const props = withDefaults(defineProps<MenuItemProps>(), {
 })
 
 const emit = defineEmits<{
-  /** Emitted on activation (click or Enter/Space), before the menu closes. */
+  /**
+   * The command was chosen, by click or by keyboard. It is emitted before the menu
+   * closes, so the handler runs while the menu is still open.
+   */
   select: []
 }>()
 
 defineSlots<{
-  /** Label of the item (wins over the `label` prop). */
+  /** The label, replacing the `label` prop. */
   default?(): unknown
-  /** Sublabel (wins over the `sublabel` prop). */
+  /** The second line, replacing the `sublabel` prop. */
   sublabel?(): unknown
-  /** Free content before the label (wins over `iconStart`). */
+  /** Free content before the label, which takes the place of `iconStart`. */
   start?(): unknown
-  /** Free content after the label (wins over `iconEnd`). */
+  /** Free content after the label, which takes the place of `iconEnd`. */
   end?(): unknown
-  /** Content of the submenu (VMenuItem/VMenuGroup/VMenuSeparator, recursive). */
+  /**
+   * The contents of a submenu — items, groups and separators, this component
+   * included, so menus may nest as deep as needed.
+   */
   submenu?(): unknown
 }>()
 
@@ -92,41 +114,45 @@ function onClick() {
 const subId = useId()
 const subOpen = ref(false)
 const subPanel = ref<InstanceType<typeof VMenuPanel> | null>(null)
-// Programmatic openings: the item is passed as `source` to showPopover(), or the
-// subpanel has no implicit anchor (set natively on click only) and loses its
-// positioning.
+// TRAP — when a submenu is opened from code rather than by a click, the item must be
+// handed to the browser as the source of that opening. The implicit anchor is only
+// established natively, on click; without it the panel has nothing to position itself
+// against and lands at the corner of the viewport, with no error anywhere.
 const itemEl = ref<HTMLElement | null>(null)
 
 // @keyboard
-// Keyboard opening: the native toggle only covers the click.
+// Opening a submenu from the keyboard, which the browser's own toggle does not cover
+// — it only reacts to a click.
 function onKeydown(event: KeyboardEvent) {
   if (!hasSubmenu.value || props.disabled) return
   if (!['ArrowRight', 'Enter', ' '].includes(event.key)) return
-  // Blocks the button's native activation (a synthetic click would toggle the
-  // panel back shut behind the show() below).
+  // The button's native activation has to be stopped: it would fire a click of its
+  // own, and that click would toggle the panel shut again right behind the opening
+  // below.
   event.preventDefault()
   subPanel.value?.show(itemEl.value ?? undefined)
   subPanel.value?.focusFirst()
 }
 
-// Hover with an intent delay (see useTimer). A single instance: opening and
-// closing are mutually exclusive — arming one always cancels the other. Closing is
-// refused while the focus is inside the subpanel: a stray pointer must not cut off
-// a keyboard user.
+// A submenu opens on hover, but only once the pointer has stayed long enough to show
+// it was meant — otherwise every panel crossed on the way to another one would flash
+// open. ONE timer serves both directions, since opening and closing are mutually
+// exclusive: arming either always cancels the other.
 const hoverTimer = useTimer()
 
 // @a11y @core
 function onPointerEnter() {
   if (props.disabled) return
-  // Hovering also drives the focus: hover and roving focus stay synchronized, a
-  // single highlight at a time (the menu pattern)
+  // Hovering also moves the focus, so that the mouse and the keyboard never highlight
+  // two different items at once — in a menu there is only ever one current item.
   itemEl.value?.focus({ preventScroll: true })
   if (!hasSubmenu.value) return
   hoverTimer.start(() => subPanel.value?.show(itemEl.value ?? undefined), SUBMENU_HOVER_DELAY)
 }
 
-// @a11y @core — the `activeElement` test is the a11y half: a stray pointer must
-// not close a submenu a keyboard user is standing in.
+// @a11y @core — the test on where the focus currently is, is the accessibility half:
+// a pointer drifting off the item must not close a submenu a keyboard user is
+// standing inside.
 function onPointerLeave() {
   if (!hasSubmenu.value) return
   hoverTimer.start(() => {
@@ -171,7 +197,8 @@ function onPointerLeave() {
         <slot name="sublabel">{{ sublabel }}</slot>
       </span>
     </span>
-    <!-- An item with a submenu signals its sideways opening: a chevron, never iconEnd -->
+    <!-- An item opening a submenu always shows the chevron announcing it, and never
+         the end icon: the sideways opening is what the reader needs to be told -->
     <VIcon v-if="hasSubmenu" name="chevron_right" class="v-menu-item-chevron" />
     <slot v-else name="end">
       <VIcon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
@@ -195,15 +222,15 @@ function onPointerLeave() {
 @layer vectis.components {
   .v-menu-item {
     /*
-     * Size: the `--control-*` variables inherited from the root panel, which carries
-     * `v-control` (styles/control-size.css) — a single table for the whole DS. The
-     * icons follow without a line written: `--vectis-icon-size`/`-opsz` are part of
-     * the same block and inherit too.
+     * Every dimension comes from the `--control-*` variables the root panel sets and
+     * this row inherits — one size table for the whole design system. The icons follow
+     * with nothing written for them, their own variables belonging to that same block.
      *
-     * Only the typography is composite: the SIZE comes from the scale, the leading
-     * stays that of `body-md` (a unitless ratio, so it follows) and the weight stays
-     * regular. Not the full `control` recipe: that means medium/1, and a row may wrap
-     * and carry a sublabel.
+     * The type is the one composite part: the SIZE comes from the scale, but the line
+     * height stays that of body text — a unitless ratio, so it still follows the size
+     * — and the weight stays regular. The full `control` type role would mean a medium
+     * weight and lines set tight against each other, which suits a single-line label
+     * and not a row that may wrap and carry a second line under it.
      */
     display: flex;
     align-items: center;
@@ -243,14 +270,17 @@ function onPointerLeave() {
     transform: scaleX(-1);
   }
 
-  /* The focus IS the highlight (programmatic roving focus → :focus, not :focus-visible) */
+  /* In a menu the focus IS the highlight, so it is drawn on `:focus` and not on
+     `:focus-visible`: the focus is moved from code — by the arrows, and by hovering —
+     and the browser would not call that a keyboard focus worth showing. */
   .v-menu-item:hover:not(:disabled, [aria-disabled='true']),
   .v-menu-item:focus {
     background: var(--vectis-color-surface-muted);
     outline: none;
   }
 
-  /* Open submenu: the highlight persists on the parent item */
+  /* While a submenu is open its parent item keeps the highlight, so the path followed
+     through the levels stays visible. */
   .v-menu-item[aria-expanded='true'] {
     background: var(--vectis-color-surface-muted);
   }
@@ -267,7 +297,8 @@ function onPointerLeave() {
   .v-menu-item[data-selected]:hover:not(:disabled, [aria-disabled='true']),
   .v-menu-item[data-selected]:focus,
   .v-menu-item[data-selected][aria-expanded='true'] {
-    /* Slightly darkens the accent surface */
+    /* The selected row is already tinted, so its hover deepens that tint rather than
+       replacing it with the neutral highlight. */
     background: color-mix(
       in oklab,
       var(--vectis-color-accent-surface),
@@ -289,7 +320,8 @@ function onPointerLeave() {
     background: var(--vectis-color-danger-surface);
   }
 
-  /* :disabled only applies to <button>; the inert link goes through aria-disabled */
+  /* Both forms have to be matched: `:disabled` only ever applies to a `<button>`, and
+     an item rendered as a link is made inert through `aria-disabled` instead. */
   .v-menu-item:disabled,
   .v-menu-item[aria-disabled='true'] {
     background: transparent;

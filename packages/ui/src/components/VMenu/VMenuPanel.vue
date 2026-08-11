@@ -8,39 +8,49 @@ import { arrowNavigate } from '../../utils/arrowNav'
 
 // @a11y @keyboard @core
 /**
- * INTERNAL popover panel (not exported), shared by VMenu (the root panel) and
- * VMenuItem (submenus). Popover API: native light dismiss, the `popovertarget`
- * invoker is the implicit anchor, pure CSS positioning (floating.css), common
- * chrome through `.v-panel` (panel.css).
+ * The panel a menu is drawn in. It is internal to VMenu and never exported, and the
+ * same component serves both levels: the menu itself and every submenu inside it.
  *
- * JS justified: the ARIA menu pattern is not covered natively —
- * - roving focus on the arrows/Home/End, confined to the current panel (subpanel
- *   keydowns bubble through the ancestor panels: guard on the event target);
- * - Escape closes THE CURRENT LEVEL (like ArrowLeft in a submenu, returning focus
- *   to the parent item); Tab closes the whole stack — a menu is not traversed
- *   with Tab.
+ * It rests on the browser's popover support, which gives it dismissal on a click
+ * outside, positioning against whatever opened it, and — since a submenu is rendered
+ * inside its parent panel — a stack the browser closes from the outside in. The
+ * panel's own look comes from the shared `.v-panel` class.
+ *
+ * The JavaScript is what the platform does not provide, namely the ARIA menu keyboard:
+ *
+ * - the arrows and Home/End move the focus from item to item, with only one item in
+ *   the tab order at a time, and that movement is confined to the panel the focus is
+ *   actually in — a keystroke inside a submenu also passes through every panel
+ *   containing it, hence the guard on where the event came from;
+ * - Escape closes THE CURRENT LEVEL only, as does the left arrow in a submenu,
+ *   handing the focus back to the item that opened it;
+ * - Tab closes the whole menu, because a menu is not something one tabs through.
  */
 interface MenuPanelProps {
-  /** Id of the panel, set by its owner (the target of the `popovertarget`s). */
+  /** The panel's id, set by whoever owns it. It is what the trigger points at. */
   id: string
+  /** Where the panel opens relative to whatever opened it. */
   placement?: MenuPanelPlacement
-  /** Submenu panel: enables ArrowLeft, no automatic focus. */
+  /**
+   * Marks this panel as a submenu, which enables the left arrow as a way back and
+   * stops the panel from taking the focus by itself when it opens.
+   */
   submenu?: boolean
   /**
-   * Set by the root ONLY (no default: subpanels do not render data-size): the
-   * subpanels inherit through CSS.
+   * The row height, set by the ROOT panel only. Submenus receive no value and inherit
+   * it through CSS instead.
    */
   size?: 'sm' | 'md' | 'lg'
-  /** Set by the root ONLY: the subpanels inherit through CSS. */
+  /** The reduced density, again set by the ROOT panel only and inherited through CSS. */
   compact?: boolean
   /**
-   * Width of the panel (any CSS length/keyword, e.g. `max-content`). Set by the
-   * root ONLY: the subpanels do not render data-width and keep the default width.
+   * An explicit width, set by the ROOT panel only. Submenus render no width attribute
+   * and keep the default one, so an inherited value cannot reach them.
    */
   width?: string
   /**
-   * Width floor = the trigger's width. Set by the root ONLY: the subpanels do not
-   * render data-match-trigger (their trigger is an item, not a control to match).
+   * Stops the panel from being narrower than its trigger, set by the ROOT panel only:
+   * a submenu's trigger is a menu item, not a control worth matching.
    */
   matchTrigger?: boolean
 }
@@ -55,17 +65,21 @@ const props = withDefaults(defineProps<MenuPanelProps>(), {
 })
 
 const emit = defineEmits<{
-  /** Open state of the popover (relayed to the owner). */
+  /**
+   * The panel opened or closed. It is reported by the browser, so it also covers a
+   * dismissal nobody asked for in code.
+   */
   toggle: [open: boolean]
 }>()
 
 defineSlots<{
-  /** The VMenuItem / VMenuGroup / VMenuSeparator elements. */
+  /** The contents of the panel: VMenuItem, VMenuGroup and VMenuSeparator. */
   default(): unknown
 }>()
 
 const panelEl = ref<HTMLElement | null>(null)
-// Open state, idempotence guards and the `source` option: see usePopover.
+// The open state, the guards keeping the calls idempotent, and the option that gives
+// a programmatically opened submenu its anchor, all live in usePopover.
 const { shown, syncShown, show, hide } = usePopover(panelEl)
 
 const menu = inject(menuKey, null)
@@ -76,12 +90,15 @@ function onToggle(event: Event) {
 }
 
 // @a11y @keyboard
+/**
+ * The items the keyboard may move to. Two exclusions matter: `:disabled` only ever
+ * matches a `<button>`, so an inert link is recognized by its `aria-disabled`
+ * instead; and the final filter keeps only the items of THIS panel, since an open
+ * submenu's items are DOM descendants of it and would otherwise join the list.
+ */
 function items(): HTMLElement[] {
   const panel = panelEl.value
   if (!panel) return []
-  // :disabled only matches <button>; inert <a> items carry aria-disabled. The
-  // filter confines the roving to the current panel (the items of open subpanels
-  // are DOM descendants too).
   return [
     ...panel.querySelectorAll<HTMLElement>(
       '[role="menuitem"]:not(:disabled):not([aria-disabled="true"])',
@@ -95,6 +112,7 @@ function closeAll() {
 }
 
 // @a11y
+/** Puts the focus on the first item the keyboard can reach, when the menu opens. */
 function focusFirst() {
   items()[0]?.focus()
 }
@@ -102,7 +120,8 @@ function focusFirst() {
 // @keyboard @a11y
 function onKeydown(event: KeyboardEvent) {
   const panel = panelEl.value
-  // only the panel DIRECTLY containing the target handles the event
+  // A keystroke inside a submenu passes through every panel containing it on its way
+  // up, so only the panel the focused item DIRECTLY belongs to acts on it.
   if (!panel || (event.target as Element).closest('[role="menu"]') !== panel) return
 
   if (event.key === 'Tab') {
@@ -110,22 +129,23 @@ function onKeydown(event: KeyboardEvent) {
     return
   }
   if (event.key === 'Escape' || (props.submenu && event.key === 'ArrowLeft')) {
-    // Escape closes THIS level ONLY. preventDefault: the native close request would
-    // close the popover without handing focus back to the parent item (and our
-    // hide() would already have closed it). At the root, the focus return to the
-    // trigger is handled by VMenu's onToggle.
+    // Escape closes THIS level and no more. The `preventDefault` matters: left to
+    // itself the browser would close the popover on its own, without handing the
+    // focus back to the item that opened it — and our own hide() would already have
+    // closed it anyway. At the top level, VMenu is what returns the focus to the
+    // trigger.
     event.preventDefault()
     hide()
     if (props.submenu) menuInvoker(props.id)?.focus()
     return
   }
-  // Shared vertical roving (`utils/arrowNav`) but on OUR list: it also excludes
-  // aria-disabled items and confines the roving to the current panel, two things
-  // the generic selector does not do.
+  // The movement itself is the shared one from `utils/arrowNav`, but it is handed OUR
+  // list rather than letting it discover the items: ours also drops the disabled
+  // links and stays inside this panel, neither of which the generic selector does.
   arrowNavigate(event, panel, items(), { vertical: true })
 }
 
-// Inline style: the explicit width (the width prop) only.
+// The only thing set inline is an explicit width, when the prop asks for one.
 const panelStyle = computed(() => (props.width ? { '--menu-width': props.width } : undefined))
 
 defineExpose({ show, hide, focusFirst, el: panelEl })
@@ -140,12 +160,14 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
     class="v-overlay v-panel v-menu v-floating"
     :class="{
       /*
-       * `v-control` on the ROOT only: it sets the `--control-*` (height, paddings,
-       * gap, typography, VIcon context) from styles/control-size.css, and the
-       * subpanels — DOM descendants — inherit them. Setting it on them too would
-       * break them: `.v-control` redefines `--control-height` from
-       * `--control-height-base` WITHOUT the `[data-compact]` condition (absent from
-       * the subpanels), which would therefore snap back to its non-compact value.
+       * The size class goes on the ROOT panel only. It sets the whole `--control-*`
+       * family — height, paddings, gap, type, icon context — and the submenus, being
+       * DOM descendants, inherit every one of them.
+       *
+       * Adding it to the submenus as well would BREAK them: the class recomputes the
+       * height from the base one without knowing about the compact attribute, which
+       * submenus do not carry, so a compact menu's submenus would silently snap back
+       * to full height.
        */
       'v-control': !submenu,
     }"
@@ -165,35 +187,37 @@ defineExpose({ show, hide, focusFirst, el: panelEl })
 
 <style>
 @layer vectis.components {
-  /* Chrome (surface, border, shadow, internal rhythm): the shared `.v-panel` class
-     (styles/panel.css). Sizes: the shared `v-control` class set above on the ROOT
-     panel (see the template) — no local table, the items consume the inherited
-     `--control-*`. Only the rules specific to the dropdown menu stay here. */
+  /* The panel's surface, border, shadow and inner rhythm come from the shared
+     `.v-panel` class, and its dimensions from the `v-control` class the template sets
+     on the root panel — there is no size table here, the rows reading the inherited
+     variables directly. Only what is specific to a dropdown menu stays below. */
   .v-menu {
     min-inline-size: var(--vectis-control-size-menu-min);
     max-inline-size: min(var(--vectis-control-size-menu-max), calc(100vw - var(--vectis-space-8)));
   }
 
-  /* Aligns the first subitem on the parent item (compensates padding + border) */
+  /* Pulls a submenu up so that its first item lines up with the item that opened it,
+     by exactly the panel's own padding plus its border. */
   .v-menu .v-menu[data-placement='right-start'] {
     margin-block-start: calc(-1 * (var(--vectis-space-1) + 1px));
   }
 
-  /* Explicit width (the width prop): rendered by the ROOT panel only — the
-     subpanels do not set data-width, so the inherited variable is inert there. The
-     viewport ceiling of max-inline-size stays. */
+  /* An explicit width, which only the ROOT panel ever renders: a submenu sets no such
+     attribute, so the variable it inherits stays inert there. The ceiling that keeps
+     a panel inside the viewport is untouched. */
   .v-menu[data-width] {
     min-inline-size: 0;
     inline-size: var(--menu-width);
   }
 
-  /* Width floor = the trigger's width (the matchTrigger prop). The panel is
-     implicitly anchored to its `popovertarget` invoker, so anchor-size() resolves
-     with no anchor-name — where VCombobox and VTimePicker, anchored to an <input>,
-     have to name their anchor. Rendered by the ROOT panel only.
-     Placed AFTER [data-width] (equal specificity): combined with `width`, this floor
-     wins. A trigger wider than the ceiling widens the panel past it
-     (min-inline-size beats max-inline-size): intended. */
+  /* The panel may not be narrower than its trigger. This works with no anchor name of
+     any kind, because the button that opened the panel is already its implicit anchor
+     — VCombobox and VTimePicker, anchored to a text input, have to name theirs. Like
+     the width above, only the ROOT panel renders it.
+
+     It is placed AFTER the width rule, at equal specificity, so that when both are
+     given the floor wins. A trigger wider than the ceiling therefore widens the panel
+     past it, a minimum width beating a maximum one — which is intended. */
   .v-menu[data-match-trigger] {
     min-inline-size: anchor-size(width);
   }

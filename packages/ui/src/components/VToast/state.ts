@@ -4,15 +4,18 @@ import type { IconSource } from '../VIcon/types'
 
 // @ssr @core
 /**
- * The global notification queue. JS justified: no HTML primitive covers a
- * programmatic notification queue — the state lives at module level (the sonner
- * pattern) so `toast()` can be called ANYWHERE (a component, a store, an API
- * helper), with no provide/inject.
+ * The queue of notifications waiting to be shown. Nothing in HTML covers this, so it
+ * is code by necessity.
  *
- * SSR-safe by contract: `toast()` is only called client-side (handlers,
- * asynchronous API returns), never during server rendering — where module state
- * would be shared between requests. Only the mounted <VToaster> touches the DOM
- * (Popover API) and arms the auto-dismiss timers.
+ * The queue is held at module level rather than inside a component, and that is the
+ * whole point: `toast()` can then be called from ANYWHERE — a component, a store, an
+ * error handler in an API layer — without anything having to be passed down to it.
+ * The price is a contract to respect: since module state is shared by every request a
+ * server handles, `toast()` must only ever be called in the browser, from a handler or
+ * when a request comes back, and never while a page is being rendered on the server.
+ *
+ * The only thing that touches the DOM, and the only thing that arms the timers, is the
+ * mounted VToaster.
  */
 
 export type ToastTone = 'neutral' | 'accent' | 'success' | 'danger' | 'warning'
@@ -20,35 +23,41 @@ export type ToastTone = 'neutral' | 'accent' | 'success' | 'danger' | 'warning'
 export type ToastPlacement =
   'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
 
+/** Everything one can say when raising a notification. */
 export interface ToastOptions {
-  /** Body of the notification. */
+  /** What the notification says. */
   message: string
+  /** A short heading above the message, when the message alone needs framing. */
   title?: string
+  /** What the notification means, expressed as a colour, and which icon it takes by default. */
   tone?: ToastTone
-  /** `soft`: tinted background + border; `solid`: full colour. */
+  /** How strongly it is painted: a tinted background with a border, or the full colour. */
   variant?: 'soft' | 'solid'
   /**
-   * An icon name or an explicit render; `false` = no icon; absent = the tone's
-   * default icon.
+   * The icon to show. Left out, the tone brings its own; `false` removes it
+   * altogether.
    */
   icon?: IconSource | false
   /**
-   * Display duration in ms; `0` = stays until manually dismissed; absent = the
-   * VToaster's duration (5000 by default).
+   * How long it stays, in milliseconds. Setting it to 0 keeps it until it is
+   * dismissed by hand, and leaving it out takes the duration set on the VToaster.
    */
   duration?: number
-  /** Absent = the VToaster's placement (`bottom-right` by default). */
+  /** Which corner it appears in. Left out, it takes the one set on the VToaster. */
   placement?: ToastPlacement
-  /** Displays the close cross. */
+  /** Shows the close cross. */
   closable?: boolean
   /**
-   * Width (a CSS length); default `--vectis-control-size-toast-width`. Always bounded
-   * by the viewport width minus the margins.
+   * How wide it is, as a CSS length. It is never allowed past the width of the
+   * viewport, margins included.
    */
   width?: string
 }
 
-/** A normalized toast in the queue (internal, rendered by <VToaster>). */
+/**
+ * A notification once it is in the queue, with the choices the caller left out filled
+ * in and an id of its own. Internal: it is what VToaster renders.
+ */
 export interface ToastItem extends ToastOptions {
   id: number
   tone: ToastTone
@@ -56,15 +65,19 @@ export interface ToastItem extends ToastOptions {
   closable: boolean
 }
 
-/** The reactive queue, consumed by <VToaster> — not re-exported by index.ts. */
+/** The queue itself. It is internal, read only by VToaster, and not public API. */
 export const toasts = reactive<ToastItem[]>([])
 
 let nextId = 0
 
 /**
- * Adds a notification to the queue and returns its id (usable with `dismissToast`).
- * The defaults that depend on the VToaster (placement, duration) are resolved by it
- * — the single source of truth for its own props.
+ * Raises a notification, and hands back an id that `dismissToast` can use to take it
+ * away again before its time.
+ *
+ * The two defaults that belong to the VToaster — where notifications appear and how
+ * long they stay — are deliberately NOT resolved here: they are read when the
+ * notification is rendered, so the toaster remains the single source of truth for its
+ * own settings.
  */
 export function toast(options: ToastOptions): number {
   const id = nextId++
@@ -72,7 +85,10 @@ export function toast(options: ToastOptions): number {
   return id
 }
 
-/** Removes a toast by id; with no argument, empties the whole queue. */
+/**
+ * Takes a notification away by its id, or clears every one of them when called with
+ * no argument.
+ */
 export function dismissToast(id?: number): void {
   if (id === undefined) {
     toasts.length = 0

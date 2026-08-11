@@ -7,33 +7,47 @@ import type { MenuPlacement } from './context'
 
 // @a11y @core
 /**
- * An action menu (the ARIA menu pattern): Popover API (native light dismiss; pure
- * CSS positioning). The trigger invokes the panel through `popovertarget` (the
- * implicit anchor), focus goes to the first item on opening, and the keyboard
- * (roving focus) lives in VMenuPanel.
+ * A menu of actions, opened by a button and closed as soon as one is chosen. It
+ * follows the ARIA menu pattern, which is what tells a screen reader that these are
+ * commands rather than links or options in a list.
  *
- * JS justified here: the v-model ↔ imperative popover API bridge, focusing the
- * first item, and returning focus to the trigger on closing.
+ * It rests on the browser's own popover support: the panel closes on a click outside
+ * or on Escape without a line of code, and it positions itself in CSS against the
+ * button that opened it — the browser knows which one, since that button names the
+ * panel it opens.
+ *
+ * The JavaScript here is limited to what the platform does not do: keeping
+ * `v-model:open` and the browser's own state in step, moving the focus into the panel
+ * when it opens, and giving it back to the trigger when it closes. The keyboard
+ * inside the panel — the arrows, and the single item in the tab order — lives in
+ * VMenuPanel.
  */
 interface MenuProps {
+  /**
+   * Where the panel opens relative to its trigger. The browser moves it to another
+   * side by itself when there is not enough room.
+   */
   placement?: MenuPlacement
-  /** Minimum height of the items: 32px (sm), 40px (md) or 48px (lg); inherited by the submenus. */
+  /**
+   * How tall the rows are: 32, 40 or 48 pixels. Submenus inherit it, so it is set
+   * once on the menu as a whole.
+   */
   size?: 'sm' | 'md' | 'lg'
-  /** Minimum height of the items reduced by 4px; inherited by the submenus. */
+  /** Takes 4px off the height of every row, submenus included. */
   compact?: boolean
   /**
-   * Width of the root panel (any CSS length/keyword, e.g. `max-content`, `16rem`).
-   * The submenus keep the default width.
+   * A width for the panel, given as any CSS length or keyword — `16rem`,
+   * `max-content`. It applies to the menu itself; submenus keep the default width.
    */
   width?: string
   /**
-   * The root panel cannot be narrower than its trigger (it stays free to widen for
-   * its content). Submenus are unaffected.
+   * Stops the panel from being narrower than the button that opened it, while leaving
+   * it free to grow wider for its content. Submenus are unaffected.
    */
   matchTrigger?: boolean
 }
 
-// Not assigned: the template reads the props directly.
+// Deliberately not assigned to a variable: the template reads the props directly.
 withDefaults(defineProps<MenuProps>(), {
   placement: 'bottom-start',
   size: 'sm',
@@ -44,7 +58,11 @@ withDefaults(defineProps<MenuProps>(), {
 
 const open = defineModel<boolean>('open', { default: false })
 
-/** ARIA props to set on the trigger. */
+/**
+ * What the trigger has to carry: the link to the panel it opens, and the two
+ * attributes telling assistive technology that a menu is attached to this button and
+ * whether it is currently open.
+ */
 type MenuTriggerProps = {
   popovertarget: string
   'aria-haspopup': 'menu'
@@ -53,9 +71,12 @@ type MenuTriggerProps = {
 }
 
 defineSlots<{
-  /** Trigger: set `v-bind="triggerProps"` on a <VButton>/<button>. */
+  /**
+   * The button that opens the menu. Bind the `triggerProps` it receives onto it —
+   * that is what wires the two together.
+   */
   trigger(props: { triggerProps: MenuTriggerProps }): unknown
-  /** The <VMenuItem> / <VMenuGroup> / <VMenuSeparator> elements. */
+  /** The contents of the menu: VMenuItem, VMenuGroup and VMenuSeparator. */
   default(): unknown
 }>()
 
@@ -70,19 +91,22 @@ const triggerProps = computed<MenuTriggerProps>(() => ({
   'aria-controls': menuId,
 }))
 
-// Closing the root panel closes the whole stack (the subpanels are its DOM
-// descendants: the popover's native cascade).
+// Closing this panel closes every submenu with it: they are rendered inside it, and
+// the browser closes a stack of popovers from the outside in.
 provide(menuKey, { closeAll: () => panelRef.value?.hide() })
 
-// @a11y — the focus half of the bridge: into the panel on opening, back to the
-// trigger on closing. The state half alone would leave the keyboard stranded.
+// @a11y — the focus half of the bridge: into the panel when it opens, back to the
+// trigger when it closes. Keeping the state in step alone would leave a keyboard user
+// stranded at the top of the page every time a menu opened or closed.
 function onToggle(value: boolean) {
   shown.value = value
   open.value = value
   if (value) {
     panelRef.value?.focusFirst()
   } else {
-    // Light dismiss leaves the focus orphaned (on body): hand it back to the trigger.
+    // The browser's own dismissal — a click outside, Escape — leaves the focus
+    // nowhere, on the page body. Only then is it handed back to the trigger: if the
+    // focus has already moved somewhere else deliberately, it must be left alone.
     const active = document.activeElement
     if (!active || active === document.body || panelRef.value?.el?.contains(active)) {
       menuInvoker(menuId)?.focus()
@@ -90,14 +114,17 @@ function onToggle(value: boolean) {
   }
 }
 
-// Programmatic opening/closing through v-model (client only).
+// Opening and closing from the model. The guard is what keeps the two directions from
+// chasing each other: a menu the browser has just closed already reports it here.
 watch(open, (value) => {
   if (value === shown.value) return
   if (value) panelRef.value?.show()
   else panelRef.value?.hide()
 })
 
-// @ssr — watchers do not run on the server: the initial state is replayed on mount.
+// @ssr — a watcher does not run during the server render, so a menu asked to be open
+// from the start would never be told to open. Replaying the initial state on mount is
+// what covers that case.
 onMounted(() => {
   if (open.value) panelRef.value?.show()
 })

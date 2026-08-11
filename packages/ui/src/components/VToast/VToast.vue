@@ -8,20 +8,27 @@ import type { ToastItem, ToastTone } from './state'
 
 // @a11y
 /**
- * A notification card — purely presentational, internal (rendered by <VToaster>,
- * not exported). role="alert" (interruptive) for danger/warning, role="status"
- * (polite) otherwise. A deliberate trade-off: the announcement of a stack's first
- * "polite" toast may be missed by some screen readers (the live region is born with
- * its content); role="alert" ones are announced on insertion.
+ * The card one notification is drawn on. It holds no state and decides nothing: the
+ * VToaster renders it, and it is internal to the component — never exported.
+ *
+ * How insistently it is announced follows its tone. A failure or a warning interrupts
+ * whatever a screen reader is saying; anything else waits for a pause. There is a
+ * known trade-off in the polite case: some screen readers miss the FIRST notification
+ * of a stack, because the region that announces it comes into existence already
+ * holding its text. The interruptive ones are always announced.
  */
 const props = defineProps<{
+  /** The notification to draw, with all its options already resolved. */
   item: ToastItem
-  /** Accessible label of the close cross. */
+  /** What the close cross does, in words. */
   closeLabel: string
 }>()
 
 const emit = defineEmits<{
-  /** Dismiss request (the cross) — the queue is managed by the VToaster. */
+  /**
+   * The reader asked for this notification to go. The card removes nothing itself —
+   * the queue belongs to the VToaster.
+   */
   close: [id: number]
 }>()
 
@@ -37,7 +44,10 @@ const DEFAULT_ICONS: Record<ToastTone, string> = {
   warning: 'warning',
 }
 
-/** `false` = no icon; a Material name or a URL, detected by iconProps. */
+/**
+ * The icon to draw: the one the notification asked for, or failing that the one its
+ * tone brings. Asking for `false` means no icon at all.
+ */
 const icon = computed(() =>
   props.item.icon === false
     ? undefined
@@ -74,20 +84,25 @@ const icon = computed(() =>
 <style>
 @layer vectis.components {
   .v-toast {
-    /* Height of ONE line of message text, the alignment unit of the whole card:
-       every satellite (icon, close cross) is given symmetric block margins so its
-       OUTER box measures exactly that. Flex-start then hooks each of them to the
-       first line whatever the number of lines AND, on a single line, coincides with
-       centring — CSS cannot count lines, so the two cases must fall out of one rule.
-       Asymmetric margins are what break it: they shift the item's centre by half the
-       difference and make it drive a flex line taller than the text. */
+    /* The height of ONE line of message text, which is the alignment unit of the whole
+       card: the icon and the close cross are each given equal margins above and below
+       so that their outer box measures exactly that.
+
+       Aligning to the start then does two jobs at once — it hooks them to the FIRST
+       line when the message wraps, and on a single line it comes out identical to
+       centring. That coincidence is the point: CSS cannot count lines, so both cases
+       have to fall out of one rule.
+
+       Unequal margins are what break it: they move the item's centre by half the
+       difference and make it push the flex line taller than the text. */
     --toast-line: calc(var(--vectis-text-body-md-size) * var(--vectis-text-body-md-leading));
     display: flex;
     align-items: flex-start;
     gap: var(--vectis-space-3);
     padding: var(--vectis-space-3) var(--vectis-space-4);
     width: var(--toast-width, var(--vectis-control-size-toast-width));
-    /* Responsive: never wider than the viewport minus the stack's margins */
+    /* On a narrow screen the card is never wider than the viewport, the stack's own
+       margins deducted. */
     max-width: calc(100vw - 2 * var(--vectis-space-4));
     border-radius: var(--vectis-radius-overlay);
     box-shadow: var(--vectis-shadow-4);
@@ -96,24 +111,27 @@ const icon = computed(() =>
     line-height: var(--vectis-text-body-md-leading);
   }
 
-  /* The tone table lives in styles/tones.css (class `v-tone`, layer vectis.tokens),
-     shared with VButton and VChip: the four chromatic tones were its values under
-     three other names (--tone-bg-soft, --tone-border-soft, --toast-accent), so the
-     usages below now read the shared contract directly.
+  /* The tone table itself lives in styles/tones.css, in a layer below the components,
+     and is shared with VButton and VChip. The rules below read that shared contract
+     directly rather than restating any of its colours.
 
-     --toast-accent survives as its OWN name because the close cross re-binds
-     --tone-text-tinted inside this subtree (below): aliasing them would make that a
-     self-reference. The value is resolved here, on the toast, so the cross inherits
-     the tone's accent already computed. */
+     One local name survives, and for a precise reason: the close cross rebinds the
+     tone's text colour inside its own subtree further down, so pointing this variable
+     at that one would turn into a self-reference. It is resolved here, on the card, so
+     that the cross inherits a value already computed rather than recomputing it in a
+     context where it no longer means the same thing. */
   .v-toast {
     --toast-accent: var(--tone-text-tinted);
   }
 
-  /* Neutral soft only: a toast is a floating surface, so it takes the overlay
-     background rather than the shared muted one, and the plain border that goes with
-     it. The SOLID pair is deliberately left to the shared table (the canonical
-     text/surface inversion). One layer above it, so this wins whatever the sheet
-     order. */
+  /* The neutral tone is overridden here, and for the soft variant only. A notification
+     floats above the page rather than sitting in it, so it takes the overlay
+     background and the plain border that goes with it, where the shared table assumes
+     a surface within the page.
+
+     The solid pair is deliberately left alone: its text and surface inversion is
+     canonical across the design system. This block sits one layer above the table, so
+     it wins whatever order the two sheets end up in. */
   .v-toast[data-tone='neutral'] {
     --tone-bg-soft: var(--vectis-color-surface-overlay);
     --tone-border-soft: var(--vectis-color-border);
@@ -141,11 +159,14 @@ const icon = computed(() =>
   }
 
   /*
-   * Close cross: a ghost/neutral VIconButton, recoloured through the shared tone
-   * variables (--tone-text-tinted / --tone-bg-soft). It wins TWICE over the table the
-   * cross gets from `v-tone` — higher specificity (0,3,0) and a layer above — so no
-   * sheet order is involved. In soft: a cross in the tone's accent colour; in solid:
-   * currentcolor (readable on the full background).
+   * The close cross is an ordinary neutral button, recoloured by rebinding the very
+   * variables its own tone table reads. These rules win over that table TWICE — they
+   * are more specific AND they sit in a layer above it — so no sheet order can change
+   * the outcome.
+   *
+   * On a tinted card the cross takes the tone's own accent; on a fully coloured one it
+   * takes the surrounding text colour, which is the only thing guaranteed to be
+   * readable against that background.
    */
   .v-toast[data-variant='soft'] .v-toast-close[data-tone] {
     --tone-text-tinted: var(--toast-accent);
@@ -165,35 +186,40 @@ const icon = computed(() =>
   .v-toast-body {
     flex: 1;
     min-width: 0;
-    /* Messages may contain unbreakable strings (URLs, ids) */
+    /* A message may hold something with nowhere to break — a URL, an identifier — and
+       it has to wrap anyway rather than widen the card. */
     overflow-wrap: anywhere;
   }
 
   .v-toast-title {
     margin-block-end: var(--vectis-space-1);
-    /* semibold: state emphasis, not a type role */
+    /* The heavier weight marks the title against its own message, which is emphasis
+       rather than a typographic role — hence a font token read directly. */
     font-weight: var(--vectis-font-weight-semibold);
   }
 
   .v-toast-close {
-    /* MIRRORS the size="sm" compact of the VIconButton in the template: the CSS
-       cannot read the button's own --control-height (it lives inside its subtree),
-       and the two must be changed together. */
+    /* TRAP — this restates the size the template gives that button, small and compact.
+       The height the button computes for itself lives inside its own subtree, out of
+       reach from here, so the two are written in two places and must be changed
+       together. */
     --toast-close-height: calc(var(--vectis-control-height-sm) - var(--vectis-space-1));
-    /* Negative here (the cross is taller than a line), which is also what reduces its
-       visual footprint inside the card's padding — see --toast-line. */
+    /* The cross is taller than a line of text, so this margin comes out negative —
+       which is also what stops it from pushing the card's padding open. The unit it is
+       measured against is the one-line height defined at the top. */
     margin-block: calc((var(--toast-line) - var(--toast-close-height)) / 2);
     margin-inline-end: calc(-1 * var(--vectis-space-1));
   }
 
   /*
-   * Entry of a toast inserted into an already-open stack: it slides in from the edge
-   * (--toast-enter-y set by .v-toast-stack according to the placement).
-   * @starting-style applies to any DOM insertion — progressive enhancement, an
-   * appearance with no animation otherwise. The exit is not animated: that would mean
-   * holding the item in the queue for the duration of the transition (a simplicity
-   * choice); the stack emptying does fade out, through hidePopover() + allow-discrete
-   * (see VToaster).
+   * A notification joining a stack that is already open slides in from the screen
+   * edge, the direction coming from the stack itself. The starting values apply to any
+   * element being added to the page; where they are not supported it simply appears.
+   *
+   * Leaving is deliberately not animated: keeping the card on screen while it faded
+   * would mean holding it in the queue for the length of the transition, and the
+   * simplicity is worth more than the flourish. The stack as a whole does fade when it
+   * empties, which is handled in the VToaster.
    */
   .v-toast {
     transition:

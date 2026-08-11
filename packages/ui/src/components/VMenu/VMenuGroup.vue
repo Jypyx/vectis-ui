@@ -1,21 +1,23 @@
 <script setup lang="ts">
 import { useId } from 'vue'
 
-// @a11y @ssr — the whole script is one `useId()`, and it exists only to wire
-// `aria-labelledby`. SSR-safe by construction: `useId` matches server and client.
+// @a11y @ssr — the whole script is a single generated id, and it exists only to tie
+// the group to its own label. It matches between server and client by construction,
+// Vue's `useId` guaranteeing exactly that.
 /**
- * A named group of items (role="group" + aria-labelledby, the ARIA menu pattern).
- * The label is not selectable: plain text, outside the roving focus.
+ * A named section inside a menu — "Sort by", "Recent files". The name is announced as
+ * the group's label rather than being read as one more item, and it is plain text: it
+ * cannot be chosen, and the arrow keys walk straight past it.
  */
 interface MenuGroupProps {
-  /** Name of the group (not selectable). */
+  /** The name of the section. It is a heading, not a command: nothing happens on click. */
   label: string
 }
 
 defineProps<MenuGroupProps>()
 
 defineSlots<{
-  /** The group's VMenuItem elements. */
+  /** The commands belonging to this section. */
   default(): unknown
 }>()
 
@@ -37,12 +39,14 @@ const labelId = useId()
     gap: var(--vectis-space-1);
   }
 
-  /* Section micro-label: the overline role (no forced capitals — the label's case
-     belongs to the consumer). Indent AND height trace the items' recipe
-     (`--control-padding-inline` and `--control-height`, inherited from the panel):
-     the header holds the same height as a row, compact included, so the list's
-     vertical rhythm does not break. Only the typography stays outside the scale
-     (the overline role), hence the vertical centring. */
+  /* The section heading takes the overline type role, without forcing capitals: how
+     the label is written is the consumer's decision.
+
+     Its indent and its height are the rows' own recipe, read from the same inherited
+     variables, so a heading occupies exactly the height of a row — compact included —
+     and the vertical rhythm of the list is not broken by it. The type is the one thing
+     staying outside that scale, which is why the text has to be centred vertically by
+     hand. */
   .v-menu-group-label {
     display: flex;
     align-items: center;

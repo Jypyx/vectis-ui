@@ -1,8 +1,9 @@
 <script setup lang="ts">
 /**
- * The rule between two blocks of a VMenu: a VSeparator, whose `<hr>` root carries
- * the implicit `separator` role — legitimate inside a `role="menu"`, and never
- * focusable, so the roving focus walks past it with no exclusion to write.
+ * The rule drawn between two blocks of commands in a menu. It is a VSeparator, whose
+ * `<hr>` already means "separator" to assistive technology — which is allowed inside
+ * a menu — and which nothing can focus, so the arrow keys skip it without a single
+ * exclusion having to be written for it.
  */
 import VSeparator from '../VSeparator/VSeparator.vue'
 </script>
@@ -13,10 +14,11 @@ import VSeparator from '../VSeparator/VSeparator.vue'
 
 <style>
 @layer vectis.components {
-  /* Compound with `.v-separator`, which sets `margin: 0` from its own sheet: at
-     equal specificity the winner would be whichever sheet the consumer's bundler
-     puts last. Full width up to the panel edges (compensates its padding); the
-     vertical spacing comes from the panel's gap. */
+  /* The rule is bled out to the panel's edges by cancelling its padding. The selector
+     compounds both classes because `.v-separator` sets `margin: 0` from a sheet of its
+     own: at equal specificity the winner would be whichever of the two the consumer's
+     bundler happens to put last. The space above and below comes from the panel's own
+     gap, so no margin is added here. */
   .v-separator.v-menu-separator {
     margin-inline: calc(-1 * var(--vectis-space-1));
   }

@@ -2,18 +2,27 @@
 import VDialog from './VDialog.vue'
 
 /**
- * The alert variant: the same design as <VDialog>, but with `role="alertdialog"` — a
- * modal requiring an EXPLICIT action from the user. A plain <VDialog> wrapper is
- * enough: it locks the semantics down and cuts off every light dismiss. No cross
- * (`closable=false`), no backdrop click, NO Escape (`closedby="none"` derived from
- * closeOnBackdrop/closeOnEscape being false): only the footer buttons close the modal.
+ * A dialog demanding an answer: confirming something irreversible, acknowledging a
+ * failure. It looks exactly like VDialog and is nothing more than VDialog with its
+ * options fixed, but those fixed options change what it is.
+ *
+ * It is announced to assistive technology as an alert rather than an ordinary dialog,
+ * and every casual way out is closed off: there is no cross, a click outside does
+ * nothing, and Escape does nothing either. The buttons in the footer are the only way
+ * to dismiss it — which is why supplying them is not optional.
  */
 interface DialogAlertProps {
-  /** Title of the header (ignored when the #header slot is supplied). */
+  /**
+   * The question being asked, which also names the dialog for assistive technology.
+   * It is ignored when the `#header` slot replaces the whole header.
+   */
   title?: string
-  /** Subtitle of the header, under the title. */
+  /** A line under the title, spelling out the consequences of the answer. */
   subtitle?: string
-  /** Width of the modal (any CSS unit); bounded to 100% of the viewport. */
+  /**
+   * How wide the dialog is, in any CSS unit. It is never allowed to exceed the width
+   * of the viewport.
+   */
   width?: string
 }
 
@@ -31,13 +40,18 @@ type TriggerProps = {
 }
 
 defineSlots<{
-  /** Content of the alert. */
+  /** What the alert says. */
   default(): unknown
-  /** Replaces the header's title/subtitle block. */
+  /** Replaces the title and subtitle block with content of your own. */
   header?(): unknown
-  /** Footer actions — mandatory, since they are the only way to close the alert. */
+  /**
+   * The buttons that answer the alert. They are not optional: nothing else can close
+   * this dialog.
+   */
   footer?(): unknown
-  /** Trigger: `v-bind="triggerProps"` on a <VButton>/<button>. */
+  /**
+   * The button that opens the alert. Bind the `triggerProps` it receives onto it.
+   */
   trigger?(props: { triggerProps: TriggerProps }): unknown
 }>()
 </script>
