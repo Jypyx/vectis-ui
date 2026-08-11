@@ -64,6 +64,14 @@ export const Default: Story = {
      */
     await expect(getComputedStyle(current).paddingInline).toBe('8px')
 
+    /*
+     * Same rule, same argument, for the transition VButton declares and the pill drops:
+     * without it the highlight cross-fades between two neighbouring pills every time the
+     * truncation window slides, and the row flickers. Nothing else can check it — jsdom
+     * evaluates no style, and the only symptom is visual.
+     */
+    await expect(getComputedStyle(current).transitionProperty).toBe('none')
+
     await userEvent.click(canvas.getByRole('button', { name: 'Next page' }))
 
     await waitFor(async () => {

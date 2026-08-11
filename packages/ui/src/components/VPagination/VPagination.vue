@@ -182,7 +182,12 @@ const items = computed<PaginationItem[]>(() => {
     for (let n = from; n <= to; n++) out.push(pageItem(n))
     return out
   }
-  const gap = (after: number): PaginationItem => ({ kind: 'gap', key: `gap-${after}` })
+  // Keyed by the side it stands on, never by the page it follows: there is at most one
+  // ellipsis per side, and the left one always comes after the first page while the right
+  // one always comes before the last. A key derived from the window would change on every
+  // navigation, so the right-hand ellipsis would be destroyed and rebuilt each time the
+  // window slid, for a node that never changes.
+  const gap = (side: 'start' | 'end'): PaginationItem => ({ kind: 'gap', key: `gap-${side}` })
 
   // With no limit given, nothing is left out. Below five slots there would be no room
   // for the first page, an ellipsis, the current page, another ellipsis and the last,
@@ -197,9 +202,9 @@ const items = computed<PaginationItem[]>(() => {
   // Close to either end, an ellipsis on that side would stand for no missing page at
   // all. The window is stretched to the bound instead, which both avoids that and
   // keeps the number of slots exactly the same.
-  if (start <= 3) return [...pages(1, visible - 2), gap(visible - 2), pageItem(count)]
-  if (end >= count - 2) return [pageItem(1), gap(1), ...pages(count - visible + 3, count)]
-  return [pageItem(1), gap(1), ...pages(start, end), gap(end), pageItem(count)]
+  if (start <= 3) return [...pages(1, visible - 2), gap('end'), pageItem(count)]
+  if (end >= count - 2) return [pageItem(1), gap('start'), ...pages(count - visible + 3, count)]
+  return [pageItem(1), gap('start'), ...pages(start, end), gap('end'), pageItem(count)]
 })
 
 /**
@@ -408,15 +413,34 @@ function onKeydown(event: KeyboardEvent) {
     gap: 0;
   }
 
-  /* Qualified by an attribute VButton always renders, which is what makes this beat
-     that button's own padding whatever order the two sheets end up in — the
-     VIconButton idiom. */
+  /* Qualified by an attribute VButton always renders, which is what makes both of these
+     beat that button's own padding and its own transition whatever order the two sheets
+     end up in — the VIconButton idiom. */
   .v-pagination-page[data-size] {
     /* A one-digit pill is square, and widens by itself past that. The height variable
        is set by the shared size class on this very element, so this single rule covers
        all five sizes and their compact forms. */
     min-inline-size: var(--control-height);
     padding-inline: var(--vectis-space-2);
+
+    /*
+     * The current page changes appearance instantly, and that is deliberate: VButton
+     * fades `background-color` and `color` over `--vectis-duration-fast`, which is right
+     * for a button that stays put, and wrong here. Truncation SHIFTS its window, so from
+     * one page to the next the highlight keeps its slot but changes ELEMENT — the pill
+     * that was current fades out while its neighbour fades in, over the very same
+     * 120 ms. Delete this line and two adjacent pills are half-tinted for a few frames,
+     * which reads as a flicker; nothing in the console says a word about it.
+     *
+     * No duration avoids that: a symmetric fade overlaps, and an asymmetric one either
+     * leaves the row with no highlight at all or lets the outgoing pill trail at full
+     * strength behind the new one. Keeping the fade for hover alone is not expressible
+     * either — a transition is resolved from the state being entered, and the pill
+     * losing the highlight enters "neither current nor hovered", the exact state of a
+     * pill the pointer has just left. So the hover fade goes with it, on the pills only:
+     * the previous and next controls never change active state and keep theirs.
+     */
+    transition: none;
   }
 
   /* The ellipsis is a disabled button only as a technical device; to the reader it is
