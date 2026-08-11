@@ -47,15 +47,18 @@ Checkpoint before wrapping up a step: `pnpm lint && pnpm typecheck && pnpm test 
 
 ## Comments
 
-The bar is high on purpose: a comment that restates the code is noise, and noise is what makes the load-bearing comments invisible.
+Every comment is written in **English, as complete sentences** rather than telegraphic shorthand. **Length is not a defect**: a comment that takes four lines to be genuinely clear is better than a one-liner only its author can decode. What is still a defect is a comment that says nothing (a banner, a restatement of the identifier on the next line) or that is out of date. Two audiences, so two registers:
+
+- **The module's introduction block is written for anyone** — an integrator, a designer, someone who is not an expert front-end developer. It is the raw material of the documentation, so it says what the thing is and what it is for in plain prose, spelling out the concepts instead of assuming them.
+- **Every other comment is written for a front-end developer.** It may be as long as it needs to be, but it can freely name the platform and the framework (the cascade, the top layer, `flush: 'post'`, hydration) without explaining them from first principles.
 
 **Keep:**
 
-- **One header block per module**, at the very top of `<script setup>` **before the imports**. States what the component is and **why any behavioural JS exists** — philosophy rule 1 makes that justification mandatory, not optional.
-- **JSDoc on props, slots, emits and exported functions.** It is the only source of the description column in Storybook's `<Controls>` table (there are no `argTypes.description` anywhere in the repo), and it drives IDE hovers.
-- **Trap comments**: a comment earns its place when deleting it would let someone silently break the code — a cascade-order dependency, a CSS cycle, a `flush: 'post'`, a guard whose absence produces no error.
+- **One header block per module**, at the very top of `<script setup>` **before the imports**. It introduces the component in plain prose — what it is for the user, how it is built, and **why any behavioural JS exists** (philosophy rule 1 makes that justification mandatory, not optional).
+- **JSDoc on props, slots, emits and exported functions.** It is the only source of the description column in Storybook's `<Controls>` table (there are no `argTypes.description` anywhere in the repo), and it drives IDE hovers — so it is read by integrators, not just by us: write a full sentence, say what the option does and what its default behaviour is.
+- **Trap comments**: wherever deleting a line would let someone silently break the code — a cascade-order dependency, a CSS cycle, a `flush: 'post'`, a guard whose absence produces no error — spell out the mechanism AND the symptom, so the reader can recognize the bug if it ever comes back.
 
-**Delete:** section banners, anything restating the next line, and any comment recording a past state (what a thing used to be called, which bug it fixed, which component did it first). Docs and comments describe the code as it is now.
+**Delete:** section banners, anything that merely restates the next line without adding meaning, and any comment recording a past state (what a thing used to be called, which bug it fixed, which component did it first). Docs and comments describe the code as it is now.
 
 ## JS by intention
 
