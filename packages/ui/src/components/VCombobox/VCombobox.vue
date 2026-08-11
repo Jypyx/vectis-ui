@@ -831,19 +831,23 @@ function onKeydown(event: KeyboardEvent) {
   /* Chevron + cross (VInput's clearable) placed ABSOLUTELY on the right of the field:
      they stay right-aligned and centred whatever the Chips (wrapping) or the folding
      of the input. The corresponding room is reserved on the right so the text/Chips do
-     not pass under them (chevron alone, or cross + chevron). Vertically: translate is
-     kept separate from rotate (the chevron rotates). */
+     not pass under them (chevron alone, or cross + chevron): one glyph
+     (`--vectis-icon-size`) each from the field's padding, `--control-gap` between two
+     of them, and one last gap before the content — the exact measurement
+     `.v-input-field`'s flex flow produces when the end zone is left in place (VInput,
+     VDatePicker, VTimePicker). Written from the same two variables as the insets
+     below, so the reservation and the glyphs it protects can never disagree.
+     Vertically: translate is kept separate from rotate (the chevron rotates). */
   .v-combobox .v-input-field {
     position: relative;
     padding-inline-end: calc(
-      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--vectis-space-2)
+      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
     );
   }
 
   .v-combobox[data-can-clear] .v-input-field {
     padding-inline-end: calc(
-      var(--control-padding-inline-field) + var(--control-action-size) + var(--vectis-icon-size) +
-        var(--vectis-space-2)
+      var(--control-padding-inline-field) + 2 * var(--vectis-icon-size) + 2 * var(--control-gap)
     );
   }
 
@@ -867,14 +871,20 @@ function onKeydown(event: KeyboardEvent) {
     rotate: 180deg;
   }
 
-  /* VInput's cross: placed to the left of the chevron, centred. The action's
-     derived margin makes the GLYPH's edge coincide with inset-inline-end, so the
-     calc reads directly: the chevron occupies one --vectis-icon-size from the
-     field's padding, then space-1 separates the two glyphs. */
+  /* VInput's cross: placed to the left of the chevron, centred. Both insets land
+     on the GLYPH's edge, for two different reasons — the chevron is a bare VIcon,
+     whose box IS the glyph box; the cross is a `.v-input-action`, whose derived
+     negative margin (VInput's `(icon-size - action-size) / 2`) cancels the button
+     box's overhang. So the calc reads directly: the chevron occupies one
+     `--vectis-icon-size` from the field's padding, then `--control-gap` separates
+     the two glyphs — `.v-input-field`'s own gap, i.e. exactly what its flex flow
+     would produce if this end zone were left in place. That agreement is the
+     whole point of the variable: a literal here drifts from every other field in
+     the DS with nothing to signal it. */
   .v-combobox .v-input-clear {
     position: absolute;
     inset-inline-end: calc(
-      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--vectis-space-1)
+      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
     );
     top: 50%;
     translate: 0 -50%;

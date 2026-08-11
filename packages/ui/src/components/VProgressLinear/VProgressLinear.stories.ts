@@ -175,10 +175,10 @@ export const Thickness: Story = {
 }
 
 /**
- * The text is rendered as two superimposed copies: one on the track, the other clipped
- * to the filled portion and contrasted on the fill. It therefore stays readable at 5%
- * as well as at 95%. The default thickness (4px) cannot host it: displaying text
- * implies a `thickness`.
+ * The text is rendered as two complementary copies: one on the track, the other on the
+ * filled portion and contrasted on the fill, each cut to its own side of the fill's
+ * edge. It therefore stays readable at 5% as well as at 95%. The default thickness (4px)
+ * cannot host it: displaying text implies a `thickness`.
  */
 export const Value: Story = {
   render: () => ({
@@ -197,9 +197,18 @@ export const Value: Story = {
     const canvas = within(canvasElement)
     const bar = canvas.getByRole('progressbar', { name: 'Centre' })
     const [base, onFill] = [...bar.querySelectorAll('.v-progress-linear-text')]
-    // the clipped copy is coloured by contrast: a colour distinct from the base copy's
+    // the contrasted copy is coloured by contrast: a colour distinct from the base's
     await expect(getComputedStyle(base!).color).not.toBe(getComputedStyle(onFill!).color)
-    await expect(getComputedStyle(onFill!).clipPath).not.toBe('none')
+    /*
+     * Both copies are cut, on opposite sides of the fill's edge. The base copy's clip is
+     * what stops the two colours from being painted over each other — without it the
+     * glyphs on the filled portion carry a halo, and nothing else here goes red.
+     */
+    const baseClip = getComputedStyle(base!).clipPath
+    const onFillClip = getComputedStyle(onFill!).clipPath
+    await expect(baseClip).not.toBe('none')
+    await expect(onFillClip).not.toBe('none')
+    await expect(baseClip).not.toBe(onFillClip)
   },
 }
 

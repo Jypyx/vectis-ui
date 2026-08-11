@@ -51,10 +51,10 @@ to the container to define it — `width` in horizontal, `height` in vertical.
 ## Text inside the bar
 
 `showValue` displays the percentage, and `valuePosition` places it at the start, in the centre (the
-default) or at the end. The text is rendered as **two superimposed copies**: one in the current text
-colour above the track, the other cut exactly at the fill's edge and coloured by contrast on it.
-Text straddling the two backgrounds therefore stays readable on both sides of the boundary, at 5% as
-well as at 95%.
+default) or at the end. The text is rendered as **two complementary copies**, cut exactly at the
+fill's edge: one in the current text colour over the track, the other over the fill and coloured by
+contrast on it. Each glyph is painted once and once only, so text straddling the two backgrounds
+stays readable on both sides of the boundary, at 5% as well as at 95%.
 
 The automatic contrast rests on `contrast-color()` (Safari 26+); elsewhere, the tone's fallback
 colour applies — the same trade-off already documented for VBadge.

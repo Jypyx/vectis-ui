@@ -57,9 +57,9 @@ const props = withDefaults(defineProps<ProgressLinearProps>(), {
 
 defineSlots<{
   /**
-   * Content displayed inside the bar; wins over `showValue`. Rendered TWICE (a base
-   * copy + a contrasted copy clipped to the fill): the content must be pure, with no
-   * side effect.
+   * Content displayed inside the bar; wins over `showValue`. Rendered TWICE (a copy
+   * over the track + a contrasted copy over the fill, each cut to its own side of the
+   * fill's edge): the content must be pure, with no side effect.
    */
   default?(props: { value: number; max: number; percent: number }): unknown
 }>()
@@ -97,9 +97,10 @@ const { clamped, fraction } = useProgressValue(
   >
     <span class="v-progress-linear-fill" />
     <!--
-      Two superimposed copies of the same content: the first in the text colour over
-      the track, the second clipped to the filled portion and coloured by contrast on
-      the fill. The clipped copy duplicates visible text → aria-hidden.
+      Two complementary copies of the same content, each cut on its own side of the
+      fill's edge: the first in the text colour over the track, the second over the
+      filled portion and coloured by contrast on it. The second duplicates visible
+      text → aria-hidden.
     -->
     <template v-if="!indeterminate && (showValue || $slots.default)">
       <span class="v-progress-linear-text">
@@ -197,10 +198,25 @@ const { clamped, fraction } = useProgressValue(
     --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
-  /* Text inside the bar: two superimposed copies, both aligned on the root's box —
-     which is also the track's, hence a clip landing exactly on the fill's edge. The
-     default thickness (4px) cannot host text: displaying any implies a `thickness`. */
+  /* Text inside the bar: two copies, both aligned on the root's box — which is also the
+     track's, hence a cut landing exactly on the fill's edge. The default thickness (4px)
+     cannot host text: displaying any implies a `thickness`.
+
+     The two copies are COMPLEMENTARY, never superimposed: this one is cut OUT of the
+     fill, the contrasted one cut TO it, so every glyph is painted exactly once. Dropping
+     either clip produces no error and stays invisible for as long as the two copies
+     resolve the SAME colour — which is the case wherever contrast-color() is
+     unsupported, the fallback then agreeing with the page's text colour. Where it IS
+     supported and disagrees (black on the accent fill against white text in the dark
+     theme), the copy underneath shows its antialiased edges all around the glyphs of the
+     one on top, and the label reads as a halo. */
   .v-progress-linear-text {
+    /* The insets carried by the START edge of the fill's axis (where it grows from) and
+       by its END edge — physical sides, hence one geometry rule per orientation and
+       direction below, all three reading these same two variables. This copy cuts on the
+       start side; the contrasted one swaps the pair. */
+    --progress-clip-start: calc(100% * var(--fill-fraction));
+    --progress-clip-end: -100vmax;
     position: absolute;
     inset: 0;
     display: flex;
@@ -208,6 +224,12 @@ const { clamped, fraction } = useProgressValue(
     justify-content: center;
     padding-inline: var(--vectis-space-2);
     color: var(--vectis-color-text);
+    /* The -100vmax overshoot on the sides that do NOT carry the cut avoids cropping text
+       taller (or wider) than the bar. */
+    clip-path: inset(-100vmax var(--progress-clip-end) -100vmax var(--progress-clip-start));
+    /* Same duration and easing as the fill's inline-size, or the colour boundary would
+       come loose from the fill's edge during the transition. */
+    transition: clip-path var(--vectis-duration-base) var(--vectis-ease-default);
     /* The root switches to vertical writing; the text itself stays horizontal */
     writing-mode: horizontal-tb;
     white-space: nowrap;
@@ -223,17 +245,15 @@ const { clamped, fraction } = useProgressValue(
   }
 
   .v-progress-linear-text[data-on-fill] {
+    /* The complement of the base copy: the cut moves to the other end of the axis. */
+    --progress-clip-start: -100vmax;
+    --progress-clip-end: calc(100% * (1 - var(--fill-fraction)));
     /* Per-tone fallback. contrast-color() can NOT be a plain second declaration:
        containing a var(), it is never rejected at parse time by browsers without
        support — it would win the cascade then become invalid at computed-value time
        (IACVT → color: unset → inheritance, and the fallback would never apply). Hence
        the @supports below, which IS evaluated without var() substitution. */
     color: var(--tone-text-fallback);
-    /* inset() is physical: one set of values per orientation and direction. The
-       negative overshoot on the other three sides avoids cropping text taller (or
-       wider) than the bar. */
-    clip-path: inset(-100vmax calc(100% * (1 - var(--fill-fraction))) -100vmax -100vmax);
-    transition: clip-path var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   /* Adaptive black/white text where contrast-color() exists (Safari 26+, Edge 150+). */
@@ -243,8 +263,9 @@ const { clamped, fraction } = useProgressValue(
     }
   }
 
-  .v-progress-linear:dir(rtl) .v-progress-linear-text[data-on-fill] {
-    clip-path: inset(-100vmax -100vmax -100vmax calc(100% * (1 - var(--fill-fraction))));
+  /* The fill grows from the right: the two insets swap physical sides. */
+  .v-progress-linear:dir(rtl) .v-progress-linear-text {
+    clip-path: inset(-100vmax var(--progress-clip-start) -100vmax var(--progress-clip-end));
   }
 
   /* Vertical: 0 at the bottom, max at the top.
@@ -276,12 +297,14 @@ const { clamped, fraction } = useProgressValue(
     padding-block: var(--vectis-space-2);
   }
 
-  /* The clip moves to the vertical axis (the fill rises from the bottom) — hence
-     identical in LTR and RTL, which is why the horizontal :dir(rtl) rule above is
-     neutralized. */
-  .v-progress-linear[data-orientation='vertical'] .v-progress-linear-text[data-on-fill],
-  .v-progress-linear[data-orientation='vertical']:dir(rtl) .v-progress-linear-text[data-on-fill] {
-    clip-path: inset(calc(100% * (1 - var(--fill-fraction))) -100vmax -100vmax -100vmax);
+  /* The clip moves to the vertical axis (the fill rises from the bottom, which is
+     therefore the axis' start) — hence identical in LTR and RTL, which is why the
+     horizontal :dir(rtl) rule above is neutralized. The second selector is what
+     neutralizes it: it is (0,4,0) against that rule's (0,3,0), where the first alone
+     would merely tie and win by source order. */
+  .v-progress-linear[data-orientation='vertical'] .v-progress-linear-text,
+  .v-progress-linear[data-orientation='vertical']:dir(rtl) .v-progress-linear-text {
+    clip-path: inset(var(--progress-clip-end) -100vmax var(--progress-clip-start) -100vmax);
   }
 
   /* Indeterminate: a fixed-size bar crosses the track, from the outer starting edge
@@ -338,7 +361,7 @@ const { clamped, fraction } = useProgressValue(
 
   @media (prefers-reduced-motion: reduce) {
     .v-progress-linear-fill,
-    .v-progress-linear-text[data-on-fill] {
+    .v-progress-linear-text {
       transition: none;
     }
 

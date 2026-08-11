@@ -487,7 +487,12 @@ defineExpose({
   /* The field grows with the Chips; the input is forced to the Chips' height
      instead of the 100% inherited from VInput, or its intrinsic height would
      stretch every row. The padding reserves the room taken by the end zone,
-     which is out of the wrapping flow (below). */
+     which is out of the wrapping flow (below): one glyph (`--vectis-icon-size`)
+     per action from the field's padding, `--control-gap` between two of them,
+     and one last gap before the Chips — the exact measurement the flex flow
+     produces in `text` display, where the end zone is left in place. Written
+     from the same two variables as the insets below so the reservation and the
+     glyphs it protects can never disagree. */
   .v-file-picker[data-display='chip'] .v-input-field {
     position: relative;
     flex-wrap: wrap;
@@ -495,13 +500,13 @@ defineExpose({
     min-height: var(--control-height);
     padding-block: var(--vectis-space-1);
     padding-inline-end: calc(
-      var(--control-padding-inline-field) + var(--control-action-size) + var(--vectis-space-2)
+      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
     );
   }
 
   .v-file-picker[data-display='chip'][data-can-clear] .v-input-field {
     padding-inline-end: calc(
-      var(--control-padding-inline-field) + 2 * var(--control-action-size) + var(--vectis-space-2)
+      var(--control-padding-inline-field) + 2 * var(--vectis-icon-size) + 2 * var(--control-gap)
     );
   }
 
@@ -524,8 +529,20 @@ defineExpose({
     inset-inline-end: var(--control-padding-inline-field);
   }
 
+  /* This is the ONE place the spacing of the end zone has to be restated by
+     hand — everywhere else `.v-input-field`'s flex flow gives it for free, and
+     the two must agree or the same component shows two different gaps. So it is
+     written as what the flow produces: the attach icon occupies one
+     `--vectis-icon-size` from the field's padding, then `--control-gap`
+     separates the two glyphs. The action's derived negative margin (VInput's
+     `(icon-size - action-size) / 2`) makes `inset-inline-end` land on the
+     GLYPH's edge rather than the button's, which is what lets the calc be read
+     directly — measuring in `--control-action-size` instead pulls the cross a
+     `gap` too far right, with nothing to signal it. */
   .v-file-picker[data-display='chip'] .v-input-clear {
-    inset-inline-end: calc(var(--control-padding-inline-field) + var(--control-action-size));
+    inset-inline-end: calc(
+      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
+    );
   }
 
   .v-file-picker-meta {
