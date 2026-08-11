@@ -9,50 +9,77 @@ import { useMessages } from '../../i18n/state'
 
 // @core
 /**
- * A chip. The native elements cover focus, keyboard and disabling: selectable →
- * <button aria-pressed> (v-model:selected), clickable → <button> (the native click
- * through fallthrough), href → <a>. Dismissible → a second sibling <button> — never
- * a nested button (invalid HTML). With no interaction, a static rendering (a span,
- * no hover). The only JS is the "inert link" bridge (href removed + aria-disabled +
- * onClick filtered) and the attrs split (class/style on the root, the rest on the
- * action element).
+ * A chip: a small labelled pill standing for a value — a filter in force, a tag, a
+ * file chosen, a person picked in a field.
+ *
+ * What it renders follows what it is asked to DO, and each shape is the native element
+ * for it, so focus, keyboard and disabling come free: a chip that can be selected is a
+ * button reporting whether it is pressed, one that leads somewhere is a link, one that
+ * merely reacts to clicks is a button, and one that does none of those is plain text
+ * with no hover at all.
+ *
+ * A chip that can be removed carries a SECOND button, beside the first and never
+ * inside it: a button within a button is invalid HTML and unreachable by keyboard.
+ *
+ * The only JavaScript makes a disabled link inert — the platform having no `disabled`
+ * for links — and splits the attributes the consumer passes between the pill and the
+ * element that actually acts.
  */
 interface ChipProps {
-  /** soft = tinted background (the default), solid = full colour, outline = a border. */
+  /**
+   * How strongly the chip is painted: a tinted background, the full colour, or a
+   * border alone.
+   */
   variant?: 'soft' | 'solid' | 'outline'
+  /** What the chip means, expressed as a colour. */
   tone?: 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
   /**
-   * A custom colour from the consumer (hex, CSS name or oklch()) which REPLACES the
-   * tone: set inline as `--custom-color`, with every shade (soft background, tinted
-   * text, hover…) derived by color-mix from the theme tokens — it adapts light/dark
-   * with no rebuild. The contrast of the solid text (white) stays the consumer's
-   * responsibility.
+   * A colour of your own (hex, CSS name or `oklch()`), which REPLACES the tone. Every
+   * shade it needs — the tinted background, the text, the hover — is derived from that
+   * one colour, so it follows the light and the dark theme with nothing to rebuild.
+   * Only the contrast of the text on a fully coloured chip is yours to check.
    */
   color?: string
-  /** chip = --vectis-radius-interactive rounded corners (the default), pill = a pill. */
+  /** The silhouette: softly rounded corners, or a full pill. */
   shape?: 'chip' | 'pill'
+  /** The height of the chip. */
   size?: 'xs' | 'sm'
-  /** Height reduced by 4px; padding, typography and icons unchanged. */
+  /** Takes 4px off the height, leaving the padding, the text and the icons as they are. */
   compact?: boolean
-  /** The action element becomes <button type="button">; the click is native (fallthrough). */
+  /** Makes the chip a button that reacts to clicks, without holding a state. */
   clickable?: boolean
-  /** Rendered as <a>. disabled → an inert link (href removed + aria-disabled). */
+  /**
+   * Where the chip leads, which makes it a link. A disabled link is made inert by
+   * hand.
+   */
   href?: string
-  /** Toggle: an aria-pressed button bound to v-model:selected. Wins over href/clickable. */
+  /**
+   * Makes the chip something that stays chosen, bound to `v-model:selected`. It wins
+   * over `href` and `clickable`.
+   */
   selectable?: boolean
-  /** A check icon before the label when selected — it REPLACES the start slot
-      (iconStart / the #start slot) so the two are never combined. */
+  /**
+   * Shows a tick before the label while the chip is selected. It REPLACES whatever
+   * start icon was given, so the two are never shown together.
+   */
   check?: boolean
-  /** Icon before the label (the #start slot wins). */
+  /** An icon before the label. The `#start` slot replaces it. */
   iconStart?: IconSource
-  /** Icon after the label (the #end slot wins). */
+  /** An icon after the label. The `#end` slot replaces it. */
   iconEnd?: IconSource
-  /** A removal button emitting `dismiss` (making it disappear is up to the consumer). */
+  /**
+   * Adds a button that asks for the chip to be removed. It only EMITS that request:
+   * actually taking the chip away is the consumer's decision.
+   */
   dismissible?: boolean
-  /** Icon of the removal button. */
+  /** The icon of that removal button. */
   dismissIcon?: IconSource
-  /** Accessible label of the removal button. Default: the DS dictionary. */
+  /**
+   * What the removal button does, in words. It falls back to the design system
+   * dictionary.
+   */
   dismissLabel?: string
+  /** Makes the chip unusable, greyed out through the colour tokens. */
   disabled?: boolean
 }
 
@@ -81,16 +108,16 @@ const resolvedDismissLabel = computed(() => props.dismissLabel ?? m.value.common
 const selected = defineModel<boolean>('selected', { default: false })
 
 defineEmits<{
-  /** Emitted on a click on the removal button. */
+  /** The removal button was pressed. The chip is still there: removing it is up to you. */
   dismiss: []
 }>()
 
 defineSlots<{
-  /** Label (optional: an icon-only chip) */
+  /** The label. It may be left out entirely, which gives a chip made of icons alone. */
   default?(): unknown
-  /** Content before the label (wins over iconStart) */
+  /** Content before the label, which takes the place of `iconStart`. */
   start?(): unknown
-  /** Content after the label (wins over iconEnd) */
+  /** Content after the label, which takes the place of `iconEnd`. */
   end?(): unknown
 }>()
 
@@ -98,7 +125,9 @@ defineOptions({ inheritAttrs: false })
 
 const attrs = useAttrs()
 
-/* Interactivity priority: selectable > href > clickable > static. */
+/* What the chip does, in order of precedence: staying selected wins over leading
+   somewhere, which wins over merely reacting to clicks; asked for none of them, it is
+   plain text. */
 const isLink = computed(() => !props.selectable && props.href !== undefined)
 const actionTag = computed(() =>
   props.selectable ? 'button' : isLink.value ? 'a' : props.clickable ? 'button' : 'span',
@@ -119,7 +148,7 @@ const actionAttrs = computed(() => {
 
 const showCheck = computed(() => props.check && props.selectable && selected.value)
 
-/* Icon alone (no label): the chip becomes square (width = height). */
+/* An icon and no label at all: the chip becomes a square, as wide as it is tall. */
 const slots = useSlots()
 const iconOnly = computed(
   () => !slots.default && !!(slots.start || slots.end || props.iconStart || props.iconEnd),
@@ -176,8 +205,9 @@ const iconOnly = computed(
 
 <style>
 @layer vectis.components {
-  /* Sizes/compact: explicit height through the shared v-control class
-     (styles/control-size.css); the TS union restricts it to xs/sm */
+  /* The height comes from the shared size class set on this element. The scale itself
+     holds five steps; the component's type restricts it to the two smallest, a chip
+     larger than that being a button. */
   .v-chip {
     display: inline-flex;
     align-items: center;
@@ -198,19 +228,21 @@ const iconOnly = computed(
     border-radius: var(--vectis-radius-pill);
   }
 
-  /* The tone table lives in styles/tones.css (class `v-tone`, layer vectis.tokens).
-     The five tones are taken as they come; the only local set is [data-custom]
-     below, which wins over the shared table by LAYER, whatever the sheet order. */
+  /* The tone table itself lives in styles/tones.css, in a layer below the components.
+     All five tones are taken exactly as they come; the only values redefined here are
+     those of a custom colour, and they win over the shared table by LAYER rather than
+     by order, so no bundling can change the outcome. */
 
-  /* Custom colour (--custom-color inline): replaces the tone, with every shade
-     derived by color-mix from the theme tokens (surface/text swap between light and
-     dark → automatic adaptation). */
+  /* A custom colour replaces the tone entirely. Every shade it needs is derived from
+     that one colour mixed with the theme's own surface and text, so the same value
+     produces a legible chip in the light theme and in the dark one, with nothing to
+     rebuild. */
   .v-chip[data-custom] {
     --tone-bg-solid: var(--custom-color);
     --tone-bg-solid-hover: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 8%);
     --tone-bg-solid-active: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 14%);
-    /* A fixed white: the contrast against a light colour is the consumer's
-       responsibility */
+    /* Fixed white, whatever the colour: on a fully coloured chip the contrast of the
+       text is the consumer's to check, as it is in VBadge. */
     --tone-text-solid: var(--vectis-color-text-on-accent);
     --tone-text-tinted: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 30%);
     --tone-bg-soft: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
@@ -233,17 +265,19 @@ const iconOnly = computed(
     border-color: var(--tone-border-soft);
   }
 
-  /* Selected: the solid rendering of the CURRENT tone/colour, whatever the variant
-     (block after the variants, equal specificity) */
+  /* A selected chip is painted in the full colour of its CURRENT tone, whichever
+     variant it was given. The block sits after the variants at equal specificity, so
+     it is the order that lets it win. */
   .v-chip[data-selected] {
     background: var(--tone-bg-solid);
     color: var(--tone-text-solid);
     border-color: transparent;
   }
 
-  /* Hover/active, scoped to the interactive action element — a static chip has no
-     hover at all, and hovering the removal button does not change the chip's
-     background */
+  /* Hovering and pressing are conditioned on the ACTION being a real control, which
+     buys two things at once: a chip that merely displays a value never lights up, and
+     hovering the removal button does not repaint the whole chip as though it were
+     about to be activated. */
   .v-chip[data-variant='soft']:not([data-disabled], [data-selected]):has(
       :is(button, a).v-chip-action:hover
     ) {
@@ -294,8 +328,8 @@ const iconOnly = computed(
     cursor: default;
   }
 
-  /* Icon alone: a square action — the aspect-ratio follows the chip's height (with
-     no new dimension) */
+  /* With an icon and no label the action becomes square, its width taken from its own
+     height through the ratio rather than from a new measurement to keep in step. */
   .v-chip[data-icon-only] .v-chip-action {
     aspect-ratio: 1;
     justify-content: center;
@@ -311,11 +345,15 @@ const iconOnly = computed(
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* No background, even on hover (the .v-input-action pattern). The icon takes the
-     chip's colour WHOLE: dimming currentcolor by 30% dropped the cross to 3.9:1 on a
-     tinted chip and 2.8:1 on a solid one — and since the DS registry carries no cross,
-     it is drawn as a ligature, i.e. a real text node the contrast rule applies to. The
-     hover affordance is the cursor. */
+  /* The removal button carries no background of its own, not even on hover — the same
+     treatment as a field's inner buttons — and the cursor is what signals it can be
+     used.
+
+     Its icon takes the chip's colour AT FULL strength. Dimming it, as one would
+     instinctively do for a secondary control, took the cross down to 3.9:1 on a tinted
+     chip and 2.8:1 on a solid one. That matters because the cross is drawn from the
+     icon font here, and a glyph from a font is real text, to which the contrast rule
+     applies. */
   .v-chip-remove {
     display: inline-flex;
     align-items: center;
@@ -337,7 +375,8 @@ const iconOnly = computed(
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
-  /* Disabled: greys through tokens (overridden by the dark theme) */
+  /* A disabled chip greys out through the colour tokens, which is what makes it follow
+     the dark theme without a rule of its own. */
   .v-chip[data-disabled] {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);

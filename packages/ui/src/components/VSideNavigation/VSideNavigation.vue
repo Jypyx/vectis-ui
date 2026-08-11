@@ -10,34 +10,46 @@ import { useMessages } from '../../i18n/state'
 
 // @keyboard @core
 /**
- * Vertical sidebar navigation: a tree of links rendered INLINE (nothing floats),
- * collapsible level by level, composed from subcomponents —
- * `VSideNavigationItem`, `VSideNavigationGroup`, `VSideNavigationSeparator`.
+ * The navigation of a sidebar: a tree of links, shown in place rather than in a
+ * floating panel, whose branches can be opened and closed. It is written out level by
+ * level with its own subcomponents, never described as a list of data.
  *
- * `<ul>`/`<li>` and not divs as in VMenu: the ARIA `menu` pattern forbids lists (it
- * admits only `menuitem`/`group`), and a navigation is the opposite — counting and
- * the nesting relation ARE the hierarchy information.
+ * The markup is real lists, where VMenu uses plain containers, and the difference is
+ * meaningful: the menu pattern forbids lists — it admits nothing but commands and
+ * groups — whereas in a navigation the counting and the nesting ARE the information. A
+ * screen reader announcing "list of 4 items, item 2, itself a list of 3" is describing
+ * the site's structure.
  *
- * The folding is native (`<details>`/`<summary>`, see VSideNavigationItem): state,
- * activation keyboard, exclusivity between siblings (`<details name>`) and animation
- * all come from the browser. The component's only behavioural JS: the arrow
- * navigation below.
+ * The folding is the browser's: the open state, the keyboard that toggles it, the
+ * exclusivity between neighbouring sections and the animation all come from the native
+ * disclosure elements. The only behavioural JavaScript here is moving the focus with
+ * the arrow keys.
  */
 interface SideNavigationProps {
-  /** Accessible name of the <nav>. Default: the DS dictionary. */
+  /**
+   * What screen readers announce for this navigation. A page often has several — a
+   * main one, a sidebar, a footer — and this is what tells them apart. It falls back
+   * to the design system dictionary.
+   */
   label?: string
-  /** Row height: 32px (sm) or 40px (md). Inherited by EVERY level. */
+  /** The height of the rows, 32 or 40 pixels, inherited by every level. */
   size?: 'sm' | 'md'
-  /** Density: −4px of height. This is NOT a "collapsed icon rail" mode. */
+  /**
+   * Takes 4px off the height of every row. It is a density setting and NOT a collapsed
+   * icon-only rail, which this component does not offer.
+   */
   compact?: boolean
   /**
-   * A single sublevel open at a time PER LEVEL (the native `<details name>`
-   * attribute). Default `false`: a sidebar normally keeps several sections open.
+   * Keeps a single section open at a time WITHIN EACH LEVEL, which the browser does on
+   * its own. It is off by default: a sidebar normally lets several sections stay open.
    */
   exclusive?: boolean
-  /** Chevron of collapsed branches: an icon name, or an explicit render (`{ src }`…). */
+  /** The chevron of a closed section: an icon name, or an explicit render. */
   expandIcon?: IconSource
-  /** Chevron of expanded branches; absent = `expandIcon` rotated 180°. */
+  /**
+   * The chevron of an open section. Leave it out and the closed one is simply rotated
+   * by 180°.
+   */
   collapseIcon?: IconSource
 }
 
@@ -51,15 +63,15 @@ const props = withDefaults(defineProps<SideNavigationProps>(), {
 })
 
 defineSlots<{
-  /** The `VSideNavigationItem` / `VSideNavigationGroup` / `VSideNavigationSeparator` elements. */
+  /** The first level of the tree: items, groups and separators. */
   default(): unknown
 }>()
 
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.sideNavigation.label)
 
-// Group name of the FIRST-level <details>; each item provides another one to its own
-// children (see context.ts).
+// The name shared by the first level's sections. Each item mints another for its own
+// children, which is what keeps the exclusivity local to a level (see context.ts).
 const rootName = useId()
 
 provide(sideNavigationKey, {
@@ -81,19 +93,24 @@ const rootEl = ref<HTMLElement | null>(null)
 
 // @keyboard @a11y
 /**
- * Focus targets: a branch's <summary>, a leaf's action. Disabled items are excluded
- * — `:disabled` only matches <button>, while an inert link and a summary go through
- * `aria-disabled` (the VMenuPanel model).
+ * What the arrow keys may move to: the header of a branch, and the link of a leaf.
+ *
+ * Both forms of disabling have to be excluded, since `:disabled` only ever matches a
+ * button — an inert link and a disabled branch header are marked with `aria-disabled`
+ * instead, exactly as in VMenu's panel.
  */
 const ROW_SELECTOR = ':is(summary, .v-side-nav-action):not(:disabled):not([aria-disabled="true"])'
 
 // @keyboard @a11y
 /**
- * Excludes everything living under a COLLAPSED branch — except its own <summary>,
- * which stays focusable. The content of a closed <details> is not `display: none`
- * (the browser "skips" it): `navigableItems`' filter would not see it. So OUR own
- * list is passed to `arrowNavigate`, which also avoids one `getComputedStyle` per
- * row.
+ * Whether a row can actually be reached: everything inside a CLOSED branch is skipped,
+ * except that branch's own header, which stays focusable.
+ *
+ * TRAP — this cannot be left to the shared helper, which skips whatever is not
+ * displayed. The content of a closed disclosure element is not hidden that way: the
+ * browser passes over it by a rule of its own, and it still reports itself as
+ * displayed. Walking the ancestors is the only reliable answer, and it also spares one
+ * style computation per row.
  */
 function reachable(el: HTMLElement, root: HTMLElement): boolean {
   for (
@@ -110,10 +127,12 @@ function reachable(el: HTMLElement, root: HTMLElement): boolean {
 
 // @keyboard @a11y
 /*
- * The only behavioural JS: no native primitive moves the focus between sibling
- * links. The DS contract (utils/arrowNav) — the arrows MOVE the focus, they never
- * activate. No roving tabindex: every visible row stays a tab stop (the VToggle
- * model), as the "disclosure navigation" pattern requires.
+ * The component's only behavioural JavaScript, and it exists because nothing native
+ * moves the focus from one link to the next.
+ *
+ * It follows the design system's contract: the arrows MOVE the focus and never
+ * activate anything. Every visible row also stays a stop in the tab order — the
+ * VToggle model — which is what the disclosure navigation pattern calls for.
  */
 function onKeydown(event: KeyboardEvent) {
   const root = rootEl.value
@@ -144,27 +163,33 @@ function onKeydown(event: KeyboardEvent) {
 @layer vectis.components {
   .v-side-nav {
     /*
-     * Indent of one hierarchy level: exactly the room a start icon takes (icon +
-     * gutter), so that a subitem's label lands on the SAME VERTICAL as its parent's.
-     * Both variables are set by `v-control` on this same root — the indent therefore
-     * follows the size scale with no local table, and a consumer redefining
-     * `--vectis-icon-size` sees it follow. Inherited by every level.
+     * How much one level of the tree is indented by: exactly the room a leading icon
+     * occupies, the icon plus the gap after it. That is what makes a subitem's label
+     * start on the SAME VERTICAL as its parent's, whether or not the parent has an
+     * icon.
+     *
+     * Both measurements come from the shared size class set on this very element, so
+     * the indent follows the size scale with no table of its own, and a consumer who
+     * changes the icon size sees it follow. Every level inherits it.
      */
     --side-nav-indent: calc(var(--vectis-icon-size) + var(--control-gap));
 
     font-family: var(--vectis-text-family);
-    /* Animated folding of `::details-content`: allows block-size 0 → auto
-       (progressive enhancement, the VAccordion idiom). Inherited by the items. */
+    /* What makes a branch able to animate open: without it, a height cannot be
+       transitioned towards `auto`. It is inherited by every item, and where the browser
+       does not support it the branches simply open at once. */
     interpolate-size: allow-keywords;
   }
 
   /*
-   * Reset shared by the three lists, declared ONCE by the root's owner rather than
-   * copied into three SFCs — no cascade arbitration is possible, these classes exist
-   * nowhere else.
+   * The three lists of the tree are stripped of their bullets and their padding here,
+   * once, rather than in each of the three components that render one. Nothing can be
+   * arbitrated wrongly by doing so: these classes exist nowhere else in the design
+   * system.
    *
-   * `flex` and not `block`: it removes all margin collapsing, so a group's margin
-   * cannot leak out of a collapsed branch (block-size: 0).
+   * They are laid out as flex columns and not as ordinary blocks, which removes margin
+   * collapsing entirely — otherwise a group's margin could escape a branch that is
+   * closed, and therefore of zero height, and push the rows apart under it.
    */
   .v-side-nav-list,
   .v-side-nav-children,

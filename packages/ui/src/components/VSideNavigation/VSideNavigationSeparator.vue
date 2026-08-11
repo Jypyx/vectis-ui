@@ -1,9 +1,12 @@
 <template>
-  <!-- An <li>, not an <hr>: a <ul> may only own list items, and ARIA is stricter still —
-       `list` owns `listitem` alone, so even an <li role="separator"> is rejected. Hence a
-       plain list item, DECORATIVE: the rule is a visual break between sections, and real
-       grouping is what VSideNavigationGroup is for (a labelled sublist). aria-hidden is
-       what keeps it out of the item count instead of adding an empty one. -->
+  <!-- A list item and not a horizontal rule, because a list may own nothing but list
+       items — and ARIA is stricter still, admitting only list items, so even giving
+       this one a separator role would be rejected.
+
+       So it is a plain list item, and a DECORATIVE one: the line is a visual break
+       between sections, where real grouping is what VSideNavigationGroup provides.
+       Hiding it from assistive technology is what keeps it OUT of the item count,
+       instead of announcing an empty entry in the middle of the navigation. -->
   <li class="v-side-nav-separator" aria-hidden="true" />
 </template>
 
@@ -11,13 +14,13 @@
 @layer vectis.components {
   .v-side-nav-separator {
     flex: none;
-    /* The indent does not apply here: a rule separates sections, it does not align on
-       the hierarchy of the rows it frames. */
+    /* The depth indent deliberately does not apply here: a rule separates sections,
+       and has no reason to line up with the hierarchy of the rows around it. */
     margin-block: var(--vectis-space-2);
     margin-inline: var(--control-padding-inline);
-    /* A border, not a background — the VSeparator paint: Windows forced-colors
-       forces backgrounds to Canvas, where the rule would vanish, and border colours
-       to CanvasText, where it survives. */
+    /* Painted with a border and not a background, exactly as VSeparator is: under
+       Windows forced colours a background is forced to Canvas, where the line
+       vanishes, while a border colour is forced to CanvasText and survives. */
     border-block-start: 1px solid var(--vectis-color-border);
   }
 }

@@ -9,41 +9,57 @@ import { sideNavigationKey } from './context'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 /**
- * A sidebar navigation item. Two shapes, depending on whether the #items slot is
- * present:
+ * One row of a sidebar navigation. It takes one of two shapes, depending on whether it
+ * was given subitems, and the difference runs deeper than it looks.
  *
- * - BRANCH: native `<details>`/`<summary>` — state, activation keyboard, exclusivity
- *   between siblings (`<details name>`) and animation all come from the browser. The
- *   row IS the `<summary>`, which must contain everything displayed on the line: the
- *   #end slot therefore lives inside it, hence the click cancellation (without it,
- *   any click in that slot would toggle the branch). Documented corollary: put only
- *   NON-focusable content there (a chip, a badge, a counter) — a `<summary>`'s
- *   subtree serves as its accessible name and may be flattened by some screen
- *   readers.
- * - LEAF: the row is a CONTAINER and the action (`<a>`/`<button>`) is stretched over
- *   it by an absolute `::after`. The #end slot thus stays its SIBLING — never a
- *   control nested inside a link — while keeping the whole row clickable.
+ * A BRANCH is a native disclosure element, so its open state, the keyboard that
+ * toggles it, the closing of a neighbouring section and the animation all come from
+ * the browser. Its row IS the header of that element, which must contain everything
+ * shown on the line — the `#end` slot included, which is why a click there has to be
+ * cancelled: otherwise anything put in it would fold the branch. The consequence,
+ * documented for integrators, is that only NON-focusable content belongs there — a
+ * badge, a counter. A control inside would be a control nested inside another, and the
+ * header's whole subtree also serves as its name for assistive technology, which some
+ * screen readers flatten into one string.
+ *
+ * A LEAF is the opposite arrangement: the row is a plain container, and the link is
+ * stretched over it invisibly so the entire row is clickable. The `#end` slot then
+ * stays a SIBLING of that link rather than sitting inside it, which keeps a real
+ * control there legitimate.
  */
 interface SideNavigationItemProps {
-  /** Secondary line under the label (the #sublabel slot wins). */
+  /** A second line under the label, for a status or a short explanation. */
   sublabel?: string
   /**
-   * Icon before the label: a Material Symbols Rounded name, or an explicit render
-   * (`{ src }`, `{ component }`…). The #start slot wins.
+   * An icon before the label: an icon name, or an explicit render. The `#start` slot
+   * replaces it.
    */
   icon?: IconSource
-  /** A leaf rendered as `<a href>`; IGNORED when the #items slot is present. */
+  /**
+   * Where this row leads, which makes it a link. It is IGNORED on a row that has
+   * subitems: such a row opens and closes rather than navigating.
+   */
   href?: string
-  /** Item of the current page: accent highlight + aria-current. */
+  /**
+   * Marks this row as the page currently being viewed. It is highlighted, and
+   * announced as the current page.
+   */
   active?: boolean
-  /** Inert item: greyed through tokens, out of the keyboard path. */
+  /**
+   * Makes the row unusable: it greys out through the colour tokens and leaves the
+   * keyboard path.
+   */
   disabled?: boolean
-  /** Branch open on the first render (the state is then native). */
+  /**
+   * Renders a branch already open. It sets the initial state only; the browser owns it
+   * from then on.
+   */
   defaultOpen?: boolean
 }
 
-// A structural root (<li>): without this split, `target`, `rel`, `download` and the
-// `aria-*` would land on the <li> instead of the control.
+// The root element is a list item, which is structure and not the control. Without
+// redirecting them, `target`, `rel`, `download` and the aria-* would land on that list
+// item instead of on the link or the branch header.
 defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<SideNavigationItemProps>(), {
@@ -56,36 +72,43 @@ const props = withDefaults(defineProps<SideNavigationItemProps>(), {
 })
 
 /**
- * Opening of a branch. With no v-model, the state stays the DOM's (`defaultOpen` as
- * the initial value): since the bound value never changes, Vue does not re-patch and
- * the native toggling stays sovereign.
+ * Whether the branch is open, when the consumer wants to drive or observe it.
  *
- * `null` — and not `undefined` — to distinguish "not bound": a model typed `boolean`
- * alone is declared `type: Boolean` at runtime, and an ABSENT boolean is cast to
- * `false` by Vue, which would overwrite `defaultOpen`. An explicit `default` disarms
- * that cast.
+ * Left unbound, the browser keeps that state entirely to itself, `defaultOpen` giving
+ * only the initial value: the bound value never changes, so Vue never patches the
+ * element back, and the native toggling stays sovereign.
+ *
+ * TRAP — "not bound" is written as `null` and not `undefined`. A model typed as a
+ * plain boolean is declared as such at runtime, and Vue casts an ABSENT boolean prop
+ * to `false`, which would silently overwrite `defaultOpen` on every branch. Giving it
+ * an explicit default disarms that cast.
  */
 const open = defineModel<boolean | null>('open', { default: null })
 
 const emit = defineEmits<{
   /**
-   * Emitted on the activation of an item WITHOUT subitems. Never declare a `click`
-   * emit: Vue would remove it from `$attrs` and the consumer's `@click` would no
-   * longer reach the link.
+   * A row WITHOUT subitems was activated, by click or by keyboard.
+   *
+   * TRAP — never declare a `click` emit alongside it. Vue removes a declared event
+   * from the forwarded attributes, and a consumer's own `@click` would then stop
+   * reaching the link entirely.
    */
   select: []
 }>()
 
 defineSlots<{
-  /** Label of the item — MANDATORY. */
+  /** The label of the row. It is REQUIRED: a navigation row must say where it goes. */
   default(): unknown
-  /** Rich sublabel (wins over the `sublabel` prop). */
+  /** A second line made of markup, replacing the `sublabel` prop. */
   sublabel?(): unknown
-  /** Free content before the label (wins over `icon`). */
+  /** Free content before the label, which takes the place of `icon`. */
   start?(): unknown
-  /** Free content on the right, before the chevron. */
+  /**
+   * Free content at the end of the row, before the chevron — a counter, a badge. On a
+   * BRANCH it must not be focusable (see the introduction).
+   */
   end?(): unknown
-  /** Subitems (VSideNavigationItem/Group/Separator, recursive with no limit). */
+  /** The subitems, which turn this row into a branch. Nesting is not limited. */
   items?(): unknown
 }>()
 
@@ -93,9 +116,12 @@ const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const slots = useSlots()
 /**
- * STATIC presence of the slot (VMenuItem's `hasSubmenu` model, VTabs' `hasPanels`):
- * deterministic in SSR, hence no reactive registry and no hydration mismatch. The
- * trade-off: a present but empty #items displays a chevron on an empty list.
+ * Whether this row has subitems, read from the mere PRESENCE of the slot — the same
+ * device VMenuItem and VTabs use. The answer is the same on the server and in the
+ * browser, so there is no registry to fill in and no hydration mismatch.
+ *
+ * The trade-off is that a slot present but empty still makes the row a branch, chevron
+ * included, over an empty list.
  */
 const hasChildren = computed(() => !!slots.items)
 const tag = computed(() =>
@@ -104,12 +130,16 @@ const tag = computed(() =>
 
 const parent = inject(sideNavigationKey, null)
 
-/** Icons set by the root; the item stays usable on its own. */
+/**
+ * Both chevrons are chosen on the navigation as a whole. The fallback is what keeps an
+ * item rendering correctly when it is used outside one.
+ */
 const expandIcon = computed(() => parent?.expandIcon ?? 'expand_more')
 const collapseIcon = computed(() => parent?.collapseIcon)
 
-// Group name of the CHILD <details>: fresh at each level, which is what makes
-// exclusivity local to a level rather than global to the document.
+// The name shared by THIS row's children. It is minted afresh at every level, and that
+// is what keeps "one section open at a time" local to a level instead of applying
+// across the whole document.
 const childrenName = useId()
 
 provide(sideNavigationKey, {
@@ -129,9 +159,9 @@ provide(sideNavigationKey, {
 
 const openAttr = computed(() => (open.value ?? props.defaultOpen) || undefined)
 
-// The <details> is the source of truth: the model is fed BY the DOM. The `toggle`
-// event does not bubble, so it is listened for on the element itself and never comes
-// up from a nested branch.
+// The element is the source of truth and the model is fed BY it, never the other way
+// round. The event it fires does not bubble, which is convenient here: listening on
+// the element itself cannot pick up a nested branch opening inside it.
 function onToggle(event: Event) {
   const value = (event.target as HTMLDetailsElement).open
   if (open.value !== value) open.value = value
@@ -142,24 +172,26 @@ const ariaCurrent = computed(() =>
 )
 
 /*
- * <summary> has no native `disabled` attribute: cancelling the click is the only way
- * to block the toggling (the keyboard, on the other hand, is covered by
- * `tabindex="-1"`). The VAccordionItem idiom — definitely not `pointer-events: none`,
- * which would kill `cursor: not-allowed`.
+ * A branch header has no `disabled` attribute of its own, so cancelling the click is
+ * the only way to stop it from folding. The keyboard needs nothing here: taking the
+ * header out of the tab order already covers it.
+ *
+ * The same solution as VAccordionItem, and deliberately not `pointer-events: none`,
+ * which would also remove the forbidden cursor telling the reader why nothing happens.
  */
 function onSummaryClick(event: MouseEvent) {
   if (props.disabled) event.preventDefault()
 }
 
 /*
- * A branch's #end slot lives INSIDE the <summary>: `stopPropagation` would not be
- * enough there — toggling the <details> is not a listener but the click's DEFAULT
- * action, which only `preventDefault` cancels.
+ * A branch's end slot sits INSIDE the header, so a click there would fold the branch.
+ * Stopping the event from travelling would not help: folding is not a listener anyone
+ * registered, it is the click's DEFAULT action, and only cancelling that prevents it.
  *
- * Unless the click already targets an activable element: it is then its OWN
- * activation target, the <details> is not concerned, and cancelling the default
- * would break its navigation. The same filter as `useFieldPanel`'s
- * `onPanelMousedown`, for the same reason.
+ * The exception is a click that already landed on something activable. There the click
+ * belongs to that control, the branch is not concerned, and cancelling the default
+ * would break its own behaviour — a link would stop navigating. The same filter as in
+ * `useFieldPanel`, for the same reason.
  */
 function onEndClick(event: MouseEvent) {
   const target = event.target as Element | null
@@ -167,7 +199,8 @@ function onEndClick(event: MouseEvent) {
 }
 
 function onActionClick(event: MouseEvent) {
-  // <button disabled> does not receive the click; an inert link does.
+  // A disabled button never receives the click at all; a link made inert by hand does,
+  // so it is cancelled here.
   if (props.disabled) {
     event.preventDefault()
     return
@@ -205,13 +238,15 @@ function onActionClick(event: MouseEvent) {
             <slot name="sublabel">{{ sublabel }}</slot>
           </span>
         </span>
-        <!-- The slot lives INSIDE the <summary>, where ANY click toggles the
-             <details>: without `onEndClick`, a badge would open the branch. -->
+        <!-- This slot sits INSIDE the branch header, where ANY click folds the
+             branch: without the handler, clicking a badge would close the section
+             under it -->
         <span v-if="$slots.end" class="v-side-nav-end" @click="onEndClick"
           ><slot name="end"
         /></span>
         <VIcon class="v-side-nav-chevron" v-bind="iconProps(expandIcon)" />
-        <!-- Two chevrons rendered, swapped 100% in CSS on [open] (the VAccordion idiom) -->
+        <!-- Both chevrons are always in the DOM; the open state decides which one
+             shows, in CSS alone — the VAccordion idiom -->
         <VIcon
           v-if="collapseIcon"
           class="v-side-nav-chevron v-side-nav-chevron-open"
@@ -258,14 +293,16 @@ function onActionClick(event: MouseEvent) {
 <style>
 @layer vectis.components {
   /*
-   * DEPTH — a 100% CSS counter: no registry, no provide/inject, no inline style, no
-   * `level` prop to pass by hand. The structure supplies two elements per level (<li>
-   * then <ul>), and each element reads a name it does not DECLARE.
+   * How deep an item sits, counted entirely in CSS: no registry, nothing provided down
+   * the tree, no inline style, and no `level` prop for the consumer to keep track of.
+   * The markup gives two elements per level — the item, then the list of its children —
+   * and each of them reads a name the other DECLARES.
    *
-   * ⚠ The single-name form — `--side-nav-level: calc(var(--side-nav-level, 0) + 1)` —
-   * is a CYCLE (CSS Variables §3), including when the value read is the inherited
-   * one: the property falls to "guaranteed-invalid", `var(--side-nav-level, 0)` falls
-   * back to 0 everywhere and the tree displays FLAT, with no console error at all.
+   * TRAP — the obvious one-name form, incrementing a variable by reading itself, is a
+   * CYCLE as far as CSS is concerned, even though the value being read is the inherited
+   * one. The property then falls to invalid, every read falls back to zero, and the
+   * whole tree renders FLAT — with nothing in the console to say why. The two
+   * alternating names are what avoid it.
    */
   .v-side-nav-item {
     --side-nav-parent-level: var(--side-nav-level, 0);
@@ -276,24 +313,25 @@ function onActionClick(event: MouseEvent) {
   }
 
   .v-side-nav-branch {
-    /* The native folding: the animation lives on ::details-content, further down. */
+    /* Lets a long label wrap rather than widening the whole sidebar. The folding
+       animation itself is further down. */
     min-inline-size: 0;
   }
 
   .v-side-nav-row {
     /*
-     * Size: the `--control-*` variables inherited from the <nav>, the only carrier of
-     * `v-control` (styles/control-size.css) — the icons follow without a line of CSS,
-     * `--vectis-icon-size`/`-opsz` being part of the same block.
+     * Every dimension comes from the variables the nav sets and this row inherits — it
+     * is the only element carrying the shared size class. The icons follow with nothing
+     * written for them, their own variables belonging to that same block.
      *
-     * Composite typography, as in .v-menu-item: the SIZE comes from the scale, the
-     * leading stays that of `body-md` (a unitless ratio, so it follows) and the weight
-     * stays regular — the `control` recipe means medium/1, and a row may wrap and carry
-     * a sublabel.
+     * The type is composite, as in a menu row: the SIZE comes from the scale, but the
+     * line height stays that of body text — a unitless ratio, so it still follows the
+     * size — and the weight stays regular. The full `control` type role would suit a
+     * single-line label, and a navigation row may wrap and carry a second line.
      *
-     * The indent `calc` is written HERE and not in a variable set higher up: a custom
-     * property is substituted on the element that DECLARES it, so a
-     * `--side-nav-pad-start` set on the root would be frozen at level 0.
+     * TRAP — the indent is computed HERE and not stored in a variable set higher up. A
+     * custom property is substituted on the element that DECLARES it, so a padding
+     * computed on the nav would be frozen at level zero for the whole tree.
      */
     position: relative;
     display: flex;
@@ -313,14 +351,16 @@ function onActionClick(event: MouseEvent) {
     cursor: pointer;
   }
 
-  /* The <summary>'s native marker: list-style is not enough on WebKit */
+  /* Removing the browser's own disclosure triangle: setting the list style is not
+     enough in WebKit, which draws it through this pseudo-element. */
   .v-side-nav-row::-webkit-details-marker {
     display: none;
   }
 
   .v-side-nav-action {
-    /* Leaf row: the action is a child, the indent stays carried by the row — it is
-       the hover background that must stay full width. */
+    /* On a leaf the link is a CHILD of the row, and the indent deliberately stays on
+       the row itself: what has to run the full width is the hover background, not the
+       link inside it. */
     flex: 1;
     min-inline-size: 0;
     display: flex;
@@ -339,10 +379,11 @@ function onActionClick(event: MouseEvent) {
   }
 
   /*
-   * A clickable area extended to the WHOLE row, without wrapping the end slot.
-   * Painted as a positioned descendant (CSS 2.1 App. E, step 8): it covers the
-   * chevron, which is not positioned, but passes UNDER `.v-side-nav-end`, later in
-   * the tree and positioned too.
+   * This is what stretches the link over the WHOLE row without having to wrap the end
+   * slot inside it. It is an invisible box, positioned, so it is painted above the
+   * chevron — which is not positioned — while passing UNDER the end slot, which is
+   * positioned too and comes later in the document. That layering is exactly what
+   * makes the whole row clickable while leaving a control in the end slot usable.
    */
   .v-side-nav-action::after {
     content: '';
@@ -377,7 +418,8 @@ function onActionClick(event: MouseEvent) {
     color: var(--vectis-color-text-muted);
   }
 
-  /* Positioned → painted above the extended clickable area, hence clickable. */
+  /* Positioned on purpose: that is what paints it above the stretched link, and
+     therefore what keeps whatever it holds clickable. */
   .v-side-nav-end {
     position: relative;
     flex: none;
@@ -386,8 +428,9 @@ function onActionClick(event: MouseEvent) {
     gap: var(--vectis-space-1);
   }
 
-  /* Chevron: down when closed, flipped when open. A rotation on the vertical axis →
-     no RTL mirroring (unlike VMenu's sideways chevron). */
+  /* The chevron points down when the branch is closed and flips when it opens. It
+     turns around a horizontal axis, so unlike VMenu's sideways chevron it needs no
+     mirroring in a right-to-left page. */
   .v-side-nav-chevron {
     flex: none;
     color: var(--vectis-color-text-muted);
@@ -398,7 +441,8 @@ function onActionClick(event: MouseEvent) {
     rotate: 180deg;
   }
 
-  /* Swapping the two chevrons (data-swap = collapseIcon provided) */
+  /* When the navigation supplied a second chevron, each state hides one of the two
+     rendered icons instead of rotating a single one. */
   .v-side-nav-branch[data-swap][open]
     > .v-side-nav-row
     > .v-side-nav-chevron:not(.v-side-nav-chevron-open),
@@ -411,10 +455,12 @@ function onActionClick(event: MouseEvent) {
   }
 
   /*
-   * Focus: a branch is itself focusable; a leaf only is through its action, whose
-   * ring is carried by the extended area — so it frames the whole row. A NEGATIVE
-   * `outline-offset` in both cases: `::details-content` is in `overflow: clip`, and a
-   * ring pulled outwards would be cropped there.
+   * A branch header takes focus itself; a leaf only takes it through its link, and the
+   * ring is then drawn on the stretched box so that it frames the whole row rather than
+   * just the text.
+   *
+   * The ring is pulled INWARDS in both cases: the content of a branch is clipped so it
+   * can be animated open, and a ring drawn outside the row would be cut off there.
    */
   .v-side-nav-row:focus-visible,
   .v-side-nav-action:focus-visible::after {
@@ -426,7 +472,7 @@ function onActionClick(event: MouseEvent) {
     outline: none;
   }
 
-  /* Current page */
+  /* The row of the page currently being viewed. */
   .v-side-nav-row[data-active] {
     background: var(--vectis-color-accent-surface);
     color: var(--vectis-color-accent-text);
@@ -443,7 +489,8 @@ function onActionClick(event: MouseEvent) {
   }
 
   .v-side-nav-row[data-active]:hover {
-    /* Slightly darkens the accent surface (the VMenuItem idiom) */
+    /* The current row is already tinted, so its hover deepens that tint rather than
+       replacing it with the neutral highlight — the VMenuItem idiom. */
     background: color-mix(
       in oklab,
       var(--vectis-color-accent-surface),
@@ -451,27 +498,32 @@ function onActionClick(event: MouseEvent) {
     );
   }
 
-  /* A COLLAPSED branch containing the current page stays flagged. The `:has()` is
-     deliberately descendant: it must match at any depth. */
+  /* A CLOSED branch holding the current page keeps a mark of it, so the reader can see
+     where they are without opening every section. The lookup is deliberately a
+     descendant one: the page may be several levels down. */
   .v-side-nav-branch:not([open]):has(.v-side-nav-children [aria-current])
     > .v-side-nav-row:not([data-active]) {
     color: var(--vectis-color-accent-text);
   }
 
-  /* Disabled: greys through tokens (never opacity) */
+  /* A disabled row greys out through the colour tokens, never through opacity. */
   .v-side-nav-row[data-disabled] {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
-  /* text-muted is darker than text-subtle: everything follows the label */
+  /* The icon, the second line and the chevron default to a colour DARKER than the one
+     a disabled label takes: left alone they would come out stronger than the label
+     itself, so they inherit it instead. */
   .v-side-nav-row[data-disabled] .v-side-nav-icon,
   .v-side-nav-row[data-disabled] .v-side-nav-sublabel,
   .v-side-nav-row[data-disabled] .v-side-nav-chevron {
     color: inherit;
   }
 
-  /* Animated opening in pure CSS (::details-content, progressive enhancement) */
+  /* The opening animates in pure CSS, on the box the browser wraps a branch's content
+     in. A browser without support opens the branch instantly, which is the intended
+     fallback. */
   .v-side-nav-branch::details-content {
     block-size: 0;
     overflow: clip;

@@ -14,25 +14,27 @@ import type { HotkeysPlatform } from './platform'
 import { useMessages } from '../../i18n/state'
 
 /**
- * A keyboard shortcut, displayed. `<kbd>` caps derived from a `+`-separated
- * string, with the glyphs of the OS the visitor is actually on: ⌘K on macOS,
- * Ctrl+K on Windows and Linux.
+ * A keyboard shortcut, shown as the keys one presses. It is written as a plain string
+ * — `mod+k` — and rendered with the symbols of the system the reader is actually on:
+ * ⌘K on a Mac, Ctrl+K on Windows and Linux.
  *
- * Two behavioural JS blocks, both required and both unique in the DS:
+ * Two pieces of behaviour here are unique in the whole library, and both are worth
+ * knowing about.
  *
- * - `detectPlatform()` is the ONLY `navigator` read in the library. It runs in
- *   `onMounted` and nowhere else: the server cannot know the OS, so the first
- *   client render must match what the server wrote (the `today` pattern of
- *   VCalendar). A macOS visitor therefore sees `Ctrl` for one frame; the
- *   `platform` prop is the escape hatch for a host that knows better.
- * - `listen` attaches a `keydown` listener on `document` — the only
- *   document-level listener in the DS, hence OPT-IN: a display component must
- *   never silently capture the page's keyboard. The matching itself is pure and
- *   lives in `platform.ts`.
+ * The first is reading which operating system this is, the only place the library asks
+ * that question. It happens once the component is mounted and nowhere else, because a
+ * server cannot know the answer and the browser's first render has to match what the
+ * server sent — the same reasoning as today's date in VCalendar. A Mac visitor
+ * therefore sees "Ctrl" for a single frame; the `platform` prop is the way out for a
+ * host that already knows better.
  *
- * Not interactive and not focusable: no hover, active or focus rule, and
- * therefore no transition and no reduced-motion block. That absence is
- * deliberate — do not copy VButton's state blocks here.
+ * The second is `listen`, which attaches a key listener to the whole document — the
+ * only one in the library, and therefore something one has to ASK for: a component
+ * whose job is to display a shortcut must not silently capture the page's keyboard.
+ *
+ * The component is not interactive and cannot be focused, so it carries no hover, no
+ * active and no focus rule, and consequently no transition and no reduced-motion
+ * block. That absence is deliberate: do not copy VButton's state rules into it.
  */
 export type HotkeysVariant = 'flat' | 'outlined' | 'elevated'
 export type HotkeysSize = 'xs' | 'sm'
@@ -47,16 +49,18 @@ interface HotkeysProps {
    * is displayed as declared (`k` → K, `f5` → F5). The `+` key is `plus`.
    */
   keys: string
-  /** flat = a tinted cap (the default), outlined = a border, elevated = a raised cap. */
+  /** How a key cap is drawn: tinted, outlined, or raised off the page. */
   variant?: HotkeysVariant
   /**
-   * Joins the caps into a SINGLE key: the variant's decoration moves from each
-   * cap to the root, so the separator ends up inside the key rather than between
-   * two of them. Purely visual — the markup is identical either way.
+   * Draws the whole combination as a SINGLE key rather than as several: the decoration
+   * moves from each cap to the shortcut as a whole, so the separator ends up inside
+   * the key instead of between two of them. It is purely visual — the markup and the
+   * announced name are identical either way.
    */
   attached?: boolean
+  /** The size of the caps. */
   size?: HotkeysSize
-  /** Height reduced by 4px; padding and typography unchanged. */
+  /** Takes 4px off the height, leaving the padding and the text as they are. */
   compact?: boolean
   /**
    * Forces the keyboard's OS instead of detecting it — for a deterministic
@@ -64,18 +68,31 @@ interface HotkeysProps {
    * knows (Electron, Tauri, a server reading the User-Agent).
    */
   platform?: HotkeysPlatform
-  /** Text between two caps. `""` gives the macOS convention (⇧⌘K, nothing between). */
+  /**
+   * What is written between two caps. An empty string gives the macOS convention,
+   * where the symbols simply follow one another: ⇧⌘K.
+   */
   separator?: string
   /**
-   * Listens for the combination on `document` and emits `trigger`. Off by
-   * default: a display component must not capture the page's keyboard.
+   * Actually listens for the combination and reports it. It is off by default: a
+   * component whose job is to display a shortcut must not capture the page's keyboard
+   * without being asked.
    */
   listen?: boolean
-  /** While listening, calls `preventDefault()` on a match — the point of taking over ⌘K. */
+  /**
+   * While listening, stops the browser from doing whatever the combination normally
+   * does — which is the entire point of taking over something like ⌘K.
+   */
   preventDefault?: boolean
-  /** While listening, fires even when the focus is in an input, a textarea or a contenteditable. */
+  /**
+   * While listening, fires even when the reader is typing in a field. It is off by
+   * default, so a shortcut cannot fire in the middle of a sentence.
+   */
   allowInInput?: boolean
-  /** Accessible name. Default: the DS dictionary ("Keyboard shortcut: Ctrl + K"). */
+  /**
+   * What screen readers announce, "Keyboard shortcut: Ctrl + K" by default, from the
+   * design system dictionary.
+   */
   label?: string
 }
 
@@ -93,18 +110,22 @@ const props = withDefaults(defineProps<HotkeysProps>(), {
 })
 
 const emit = defineEmits<{
-  /** The combination was pressed. Only ever emitted while `listen` is set. */
+  /** The combination was pressed. It is only ever emitted while `listen` is on. */
   trigger: [event: KeyboardEvent]
 }>()
 
 const m = useMessages()
 
-// @ssr — the DS's ONLY `navigator` read, and the reason it sits in onMounted.
-/* The OS is read on mount only: the server has no `navigator`, so rendering the
-   detected value directly would be a hydration mismatch. A ref PER INSTANCE, not
-   a module-level one — once a module ref held 'mac', a component hydrated later
-   (a Nuxt island, a route Suspense) would render ⌘ on its first client pass
-   where the server wrote Ctrl. */
+// @ssr — the library's ONLY reading of the visitor's platform, and the reason it
+// happens after mounting.
+/* The operating system is read once the component is in the page and never during
+   setup: a server has nothing to read it from, so rendering the detected value
+   directly would make the two markups differ.
+
+   TRAP — the value is held PER INSTANCE and not at module level. A shared one, having
+   already resolved to macOS, would make a component hydrated later — a Nuxt island, a
+   route loaded on demand — render ⌘ on its very first client pass where the server had
+   written Ctrl. */
 const detected = ref<HotkeysPlatform>(DEFAULT_PLATFORM)
 onMounted(() => {
   detected.value = detectPlatform()
@@ -116,10 +137,11 @@ const tokens = computed(() => parseHotkeys(props.keys))
 const resolved = computed(() => resolveKeys(tokens.value, platform.value))
 
 // @a11y
-/* The two readings of one table: on SCREEN the glyph wins (⌘), in the ACCESSIBLE
-   NAME the word does (Command) — U+2318 is silent or read as "place of interest
-   sign" depending on the screen reader. That inversion is what avoids a second
-   table. */
+/* The same table is read twice, in opposite directions. On SCREEN the symbol wins, ⌘
+   being what is engraved on the key; in the ANNOUNCED NAME the word does, because that
+   symbol is either passed over in silence or read out as "place of interest sign",
+   depending on the screen reader. Inverting the preference is what lets one table
+   serve both. */
 const caps = computed(() =>
   resolved.value.map(
     (key) => key.glyph ?? (key.word ? m.value.hotkeys[key.word] : capLabel(key.token)),
@@ -132,11 +154,14 @@ const spoken = computed(() =>
 )
 const resolvedLabel = computed(() => props.label ?? m.value.hotkeys.label(spoken.value))
 
-/* Non-reactive `let`: nobody renders it, and a ref would trigger renders for
-   nothing (the `useTimer` idiom). Named `listening` and NOT `attached`: every
-   top-level binding of a `<script setup>` is exposed to the template, where it
-   SHADOWS the prop of the same name — `:data-attached="attached && …"` would
-   silently read this flag instead of `props.attached`. */
+/* A plain variable and not a reactive one: nothing renders it, and making it reactive
+   would cause renders for no reason — the same reasoning as in `useTimer`.
+
+   TRAP — it is called `listening` and NOT `attached`. Every top-level binding of a
+   `<script setup>` is exposed to the template, where it SHADOWS the prop of the same
+   name: called `attached`, this flag would silently be what the template read instead
+   of the prop, and the joined rendering would follow whether a listener happened to be
+   installed. */
 let listening = false
 
 function attach() {
@@ -151,10 +176,12 @@ function detach() {
   listening = false
 }
 
-// @keyboard @core — the matcher itself; the pure half lives in `platform.ts`.
+// @keyboard @core — the listening half. Deciding whether a key event IS the
+// combination is pure and lives in `platform.ts`.
 function onKeydown(event: KeyboardEvent) {
-  /* `repeat`: holding the combination down would emit at the OS auto-repeat
-     rate, reopening the consumer's palette a dozen times. */
+  /* A held-down combination repeats at the system's auto-repeat rate, which would
+     reopen the consumer's palette a dozen times a second; only the first press
+     counts. */
   if (!props.listen || event.repeat) return
   if (!props.allowInInput && isEditableTarget(event.target)) return
   if (!matchesEvent(event, tokens.value, platform.value)) return
@@ -162,8 +189,9 @@ function onKeydown(event: KeyboardEvent) {
   emit('trigger', event)
 }
 
-/* Attaching once and returning early in the handler would be shorter, but a docs
-   page listing 50 shortcuts would install 50 inert document listeners. */
+/* Attaching the listener once and simply returning early inside it would be shorter to
+   write, but a documentation page listing fifty shortcuts would then install fifty
+   document listeners that do nothing. Following the prop is what keeps that at zero. */
 watch(
   () => props.listen,
   (on) => (on ? attach() : detach()),
@@ -192,16 +220,20 @@ onBeforeUnmount(detach)
 
 <style>
 @layer vectis.components {
-  /* The UA gives <kbd> `font-family: monospace` AND `font-size: smaller` — and
-     `smaller` COMPOUNDS on a nested <kbd>, which would shrink the caps to ~69%.
-     Both are reset here AND on .v-hotkeys-key: deleting either line silently
-     miniaturizes the component.
-     `vertical-align`: an inline-flex box aligns on the baseline of its first
-     item, which drops the caps below the surrounding prose. */
+  /* TRAP — the browser gives a `<kbd>` a monospaced family AND a smaller size, and
+     that reduction COMPOUNDS when one `<kbd>` sits inside another, as it does here:
+     the caps would come out at roughly 69% of the surrounding text. Both are reset
+     here and again on the caps themselves, and deleting either line silently
+     miniaturizes the whole component.
+
+     The vertical alignment is the second correction: a box laid out this way sits on
+     the baseline of its FIRST item, which drops the caps below the line of prose
+     around them. */
   .v-hotkeys {
     display: inline-flex;
     align-items: center;
-    /* Centres the content when min-inline-size wins — an attached single-key. */
+    /* Centres the content in the cases where the minimum width wins over it: a
+       single-character combination drawn as one key. */
     justify-content: center;
     vertical-align: middle;
     font-family: var(--vectis-text-family);
@@ -209,9 +241,10 @@ onBeforeUnmount(detach)
     --hotkeys-pad: var(--control-padding-inline);
   }
 
-  /* Sizes/compact through the shared v-control class (styles/control-size.css),
-     set on the ROOT — the custom properties inherit, and it is the CAPS that
-     consume --control-height. The TS union restricts the scale to xs/sm. */
+  /* The size comes from the shared class set on the ROOT: its variables inherit down,
+     and it is the CAPS that read the height from them. The scale itself holds five
+     steps; the component's type restricts it to the two smallest, a key cap being
+     smaller than a control. */
   .v-hotkeys-keys {
     display: inline-flex;
     align-items: center;
@@ -229,14 +262,15 @@ onBeforeUnmount(detach)
     line-height: var(--vectis-text-control-leading);
   }
 
-  /* The three variants mirror VButton's NEUTRAL tone, declaration for
-     declaration: flat = soft, outlined = outline, elevated = ghost + elevated
-     (minus the hover shadow — there is no hover here). A single colour set, so no
-     [data-tone] table.
-     They set LOCALS rather than declaring straight away, because the recipe has
-     two possible carriers (see below). The names are qualified: these variables
-     inherit, so a generic --bg would be captured by any host ancestor defining
-     one. */
+  /* The three variants mirror VButton's NEUTRAL tone declaration for declaration —
+     tinted, outlined, and raised — minus everything that reacts to a pointer, since
+     nothing here is interactive. There is a single set of colours and therefore no
+     tone table at all: a shortcut is chrome, never data of the reader's.
+
+     They set VARIABLES rather than declaring the look straight away, because that look
+     has two possible carriers (see below). The names are qualified on purpose: these
+     variables inherit, so a bare `--bg` would be captured by any ancestor in the host
+     application that happened to define one. */
   .v-hotkeys[data-variant='flat'] {
     --hotkeys-bg: var(--vectis-color-surface-muted);
     --hotkeys-border: transparent;
@@ -255,22 +289,23 @@ onBeforeUnmount(detach)
     --hotkeys-shadow: var(--vectis-shadow-2);
   }
 
-  /* A single key holds the WHOLE combination, so its ends take the same breathing
-     room as the gaps inside it — one uniform rhythm. --control-padding-inline is
-     sized to wrap ONE short label; wrapped around three text runs already spaced
-     by --control-gap, it reads as slack at the edges. */
+  /* When one key holds the WHOLE combination, its ends take the same breathing room as
+     the gaps inside it, which gives the key a single rhythm. The usual control padding
+     is sized to wrap ONE short label; around three runs of text already spaced from
+     one another, it reads as slack at the edges. */
   .v-hotkeys[data-attached] {
     --hotkeys-pad: var(--control-gap);
   }
 
-  /* THE KEY — one recipe, two carriers: every cap by default, the ROOT alone
-     when attached, which is what puts the separator inside the key instead of
-     between two of them. Writing it twice would let the two renderings drift
-     apart on the next token change. */
+  /* THE key recipe, written once for its two possible carriers: every cap by default,
+     and the whole shortcut alone when it is drawn as a single key — which is exactly
+     what puts the separator inside the key rather than between two of them. Written
+     out twice, the two renderings would drift apart at the first token change. */
   .v-hotkeys[data-attached],
   .v-hotkeys:not([data-attached]) .v-hotkeys-key {
     height: var(--control-height);
-    /* A single-character key reads as a square, not a sliver (border-box is global). */
+    /* A minimum equal to the height makes a single-character key read as a square
+       rather than as a sliver. */
     min-inline-size: var(--control-height);
     padding-inline: var(--hotkeys-pad);
     border: 1px solid var(--hotkeys-border);
@@ -279,8 +314,9 @@ onBeforeUnmount(detach)
     box-shadow: var(--hotkeys-shadow);
   }
 
-  /* A dimmed currentcolor rather than text-muted (the .v-chip-remove idiom): the
-     separator must stay legible whatever colour the surrounding prose sets. */
+  /* The separator is the surrounding text colour softened, and not a fixed grey: a
+     shortcut may sit in prose of any colour, and a grey chosen against the page would
+     be wrong in half of them. */
   .v-hotkeys-separator {
     color: color-mix(in oklab, currentcolor, transparent 40%);
   }

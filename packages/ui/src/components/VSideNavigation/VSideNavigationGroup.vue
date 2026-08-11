@@ -2,28 +2,30 @@
 import { useId } from 'vue'
 
 /**
- * A named section of the navigation. The label is not focusable: it is text, and the
- * list it heads is named through `aria-labelledby`.
+ * A named section of the navigation — "Workspace", "Settings". The name is plain text:
+ * it cannot be focused or clicked, and it names the sublist under it for assistive
+ * technology.
  *
- * No `role="group"` (unlike VMenuGroup): it cannot be a direct child of a `<ul>`
- * without breaking its required owned elements. A NAMED `<ul>` says the same thing,
- * in strictly valid HTML — and a group then takes exactly the same shape as a
- * branch.
+ * Unlike a menu group, it does NOT claim to be a group in ARIA terms. Such a role
+ * cannot be a direct child of a list without breaking what that list is allowed to
+ * contain. A NAMED sublist says exactly the same thing in strictly valid HTML — and it
+ * gives a group the same shape as a branch, which is what keeps the styling uniform.
  *
- * A group does NOT count as a hierarchy level: it declares neither of the two
- * depth-counter variables, which the level crosses intact.
+ * A group is NOT a level of the hierarchy: it declares neither of the two variables
+ * counting the depth, so that count passes through it untouched and the items inside
+ * are indented as if the group were not there.
  */
 interface SideNavigationGroupProps {
-  /** Name of the section (the #label slot wins). */
+  /** The name of the section. The `#label` slot replaces it. */
   label: string
 }
 
 defineProps<SideNavigationGroupProps>()
 
 defineSlots<{
-  /** The items of the section. */
+  /** The items belonging to this section. */
   default(): unknown
-  /** Rich name (wins over the `label` prop). */
+  /** A name made of markup, replacing the `label` prop. */
   label?(): unknown
 }>()
 
@@ -49,16 +51,17 @@ const labelId = useId()
   }
 
   /*
-   * Section micro-label: the overline role (no forced capitals — the label's case
-   * belongs to the consumer). Indent AND height trace the rows' recipe — the header
-   * holds the same height as a row, compact included (`--control-height` already
-   * derives from it), so the list's vertical rhythm does not break; only the
-   * typography stays outside the scale (the overline role), hence the vertical
-   * centring.
+   * The section heading takes the overline type role, without forcing capitals: how
+   * the label is written is the consumer's decision.
    *
-   * The indent repeats the rows' `calc`, deliberately: a custom property is
-   * substituted on the element that DECLARES it, so a shared variable set higher up
-   * would be frozen at level 0.
+   * Its indent and its height are the rows' own recipe, so a heading occupies exactly
+   * the height of a row — compact included — and the vertical rhythm of the list is
+   * not broken by it. The type is the one thing staying outside that scale, which is
+   * why the text has to be centred vertically by hand.
+   *
+   * TRAP — the indent repeats the rows' computation rather than sharing a variable
+   * with them, and it has to: a custom property is substituted on the element that
+   * DECLARES it, so a shared one set higher up would be frozen at level zero.
    */
   .v-side-nav-group-label {
     display: flex;
