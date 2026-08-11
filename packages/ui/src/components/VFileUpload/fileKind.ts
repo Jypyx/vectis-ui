@@ -1,23 +1,29 @@
 /**
- * The KIND of a file, as far as an icon is concerned — deliberately coarse: the
- * point is choosing one glyph out of eight, not classifying a MIME registry.
+ * What KIND of thing a file is, for the sole purpose of choosing an icon. It is
+ * deliberately coarse: the question is which of eight pictures to show, not how to
+ * classify every type in existence.
  *
- * Resolved from the MIME type FIRST, then from the extension. That order is the
- * contract: `file.type` is authoritative when the browser filled it, but it is
- * empty far more often than one expects (an extension the OS does not know, some
- * Linux setups) — the same trap `matchesAccept` documents.
+ * The answer comes from the type the browser reports FIRST, and from the extension
+ * afterwards. That order is the contract: the reported type is authoritative when there
+ * IS one, but it is empty far more often than one expects — an extension the operating
+ * system does not know, certain Linux setups — which is why the extension has to be
+ * there as a fallback rather than as a first resort.
  *
- * Pure, no Vue — the `VHotkeys/platform.ts` precedent: a single consumer, so it
- * stays in the component's folder. Promote it the day a second appears.
+ * The module is pure and knows nothing of Vue. It lives in the component's folder for
+ * the usual reason: a single consumer, so it does not qualify as shared code — promote
+ * it the day a second one appears.
  *
- * The kind → ICON NAME table is NOT here: it belongs to VFileUpload, which
- * exposes it as the `typeIcons` prop.
+ * What is NOT here is which icon each kind takes. That belongs to VFileUpload, which
+ * exposes it as a prop a consumer can override.
  */
 
 export type FileKind =
   'image' | 'pdf' | 'audio' | 'video' | 'archive' | 'spreadsheet' | 'code' | 'file'
 
-/** What the resolver needs of a `File` — so the tests do not have to forge one. */
+/**
+ * The only two things this module needs of a file. Taking that rather than a File is
+ * what lets the tests describe a case in two lines instead of forging one.
+ */
 export interface FileKindCandidate {
   name: string
   type: string
@@ -108,10 +114,12 @@ const EXTENSION_KINDS: Record<string, FileKind> = {
   yml: 'code',
 }
 
+/** Works out which kind a file belongs to. */
 export function fileKind(file: FileKindCandidate): FileKind {
   const type = file.type.toLowerCase()
 
-  // The families first: `image/*` covers formats no table will ever list.
+  // The whole families first: matching on the family covers every image, audio and
+  // video format, including the ones no table will ever list.
   if (type.startsWith('image/')) return 'image'
   if (type.startsWith('audio/')) return 'audio'
   if (type.startsWith('video/')) return 'video'
@@ -119,8 +127,8 @@ export function fileKind(file: FileKindCandidate): FileKind {
   const byMime = MIME_KINDS[type]
   if (byMime) return byMime
 
-  // `> 0` and not `>= 0`: a `.gitignore` has no extension, it has a name that
-  // starts with a dot.
+  // TRAP — the dot must be found PAST the first character and not at it: a file named
+  // `.gitignore` has no extension at all, it has a name beginning with a dot.
   const dot = file.name.lastIndexOf('.')
   const extension = dot > 0 ? file.name.slice(dot + 1).toLowerCase() : ''
   return EXTENSION_KINDS[extension] ?? 'file'
