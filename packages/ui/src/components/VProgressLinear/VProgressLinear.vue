@@ -1,44 +1,60 @@
 <script setup lang="ts">
 // @core — no behavioural JS at all: value normalization and the display string.
 /**
- * A progress bar. The root IS the track; the whole geometry derives from an inline
- * unitless `--fill-fraction`, in logical properties — the vertical orientation then
- * only needs a `writing-mode`. No behavioural JS.
+ * A bar filling up as something progresses. The element rendered IS the track, and the
+ * whole geometry follows from a single number set on it — the fraction filled, with no
+ * unit. Everything is written in logical properties, so turning the bar vertical needs
+ * nothing but a change of writing direction.
  *
- * Accessible name: pass `aria-label` (through fallthrough). The progressbar role is
- * "children presentational": the text visible inside the bar is NOT announced, so it
- * does not replace an aria-label.
+ * There is no behavioural JavaScript: the value is clamped and a percentage is
+ * formatted, and that is all.
+ *
+ * On naming: pass an `aria-label` saying what is progressing. The text shown inside the
+ * bar cannot serve as that name — the role a progress bar carries makes its content
+ * presentational, so screen readers do not announce it.
  */
 import { useProgressValue } from '../../composables/useProgressValue'
 import { useMessages } from '../../i18n/state'
 import { px } from '../../utils/css'
 
 interface ProgressLinearProps {
-  /** Current value, clamped to [0, max]. */
+  /** How far along it is. Anything outside the range is brought back into it. */
   value?: number
-  /** Upper bound (the lower bound is always 0). */
+  /** What counts as finished. The other end is always zero. */
   max?: number
-  /** Unknown progress: a continuous animation, `value` ignored. */
+  /**
+   * Says that the progress cannot be measured: the bar animates continuously and the
+   * value is ignored. It is what to use while waiting for a server that reports no
+   * percentage.
+   */
   indeterminate?: boolean
-  /** Semantic colour. */
+  /** What the progress means, expressed as a colour. */
   tone?: 'accent' | 'success' | 'warning' | 'danger' | 'neutral'
   /**
-   * Custom colour (hex, CSS name or oklch()) — replaces the tone. The shades (the
-   * track) are derived by color-mix from the theme tokens.
+   * A colour of your own (hex, CSS name or `oklch()`), which replaces the tone. The
+   * track's own shade is derived from it against the theme, so it follows the light and
+   * the dark one.
    */
   color?: string
   /**
-   * Thickness of the bar, **in pixels**: `12` as well as `'12'` gives 12px. Default:
-   * 4px (a token).
+   * How thick the bar is, always IN PIXELS: `12` and `'12'` both give 12px. It is 4px
+   * by default — bear in mind that showing text inside a bar that thin needs an
+   * explicit thickness.
    */
   thickness?: number | string
-  /** Rounded ends (the default) or square corners. */
+  /** Whether the ends of the bar are rounded or square. */
   shape?: 'rounded' | 'square'
-  /** Displays the progress as a percentage inside the bar (ignored when indeterminate). */
+  /**
+   * Writes the percentage inside the bar. It is ignored while the progress is
+   * unmeasurable, there being no figure to write.
+   */
   showValue?: boolean
-  /** Position of the text inside the bar (vertically: start = the 0 side, hence the bottom). */
+  /**
+   * Where that text sits along the bar. On a vertical bar the start is the zero end,
+   * hence the bottom.
+   */
   valuePosition?: 'start' | 'center' | 'end'
-  /** Vertical bar: 0 at the bottom, max at the top. */
+  /** Turns the bar upright, filling from the bottom up. */
   orientation?: 'horizontal' | 'vertical'
 }
 
@@ -57,16 +73,18 @@ const props = withDefaults(defineProps<ProgressLinearProps>(), {
 
 defineSlots<{
   /**
-   * Content displayed inside the bar; wins over `showValue`. Rendered TWICE (a copy
-   * over the track + a contrasted copy over the fill, each cut to its own side of the
-   * fill's edge): the content must be pure, with no side effect.
+   * What to write inside the bar instead of the percentage.
+   *
+   * TRAP — it is rendered TWICE, once over the empty track and once over the filled
+   * part in a colour that contrasts with it, each copy cut at the fill's edge. So
+   * whatever it renders must be pure: anything with a side effect would happen twice.
    */
   default?(props: { value: number; max: number; percent: number }): unknown
 }>()
 
-/* The "%" and the NON-BREAKING space preceding it are a language convention (English
-   uses none): they therefore live in the dictionary. The scoped slot stays the route
-   for an arbitrary format. */
+/* The percent sign, and the non-breaking space French puts before it where English puts
+   nothing, are a convention of the language: they belong in the dictionary rather than
+   in this file. Any other format goes through the slot above. */
 const m = useMessages()
 
 const { clamped, fraction } = useProgressValue(
@@ -97,10 +115,10 @@ const { clamped, fraction } = useProgressValue(
   >
     <span class="v-progress-linear-fill" />
     <!--
-      Two complementary copies of the same content, each cut on its own side of the
-      fill's edge: the first in the text colour over the track, the second over the
-      filled portion and coloured by contrast on it. The second duplicates visible
-      text → aria-hidden.
+      The same text twice, each copy cut at the fill's edge so that the two complete
+      each other exactly: the first in the ordinary text colour over the empty track,
+      the second over the filled part, coloured to contrast with it. The second is
+      hidden from screen readers, being a duplicate of text already there.
     -->
     <template v-if="!indeterminate && (showValue || $slots.default)">
       <span class="v-progress-linear-text">
@@ -120,9 +138,9 @@ const { clamped, fraction } = useProgressValue(
 <style>
 @layer vectis.components {
   /*
-   * The root IS the track. It takes the whole available length: it is up to the
-   * consumer to size it through its parent (or a direct `width`/`height`, which beats
-   * this layer).
+   * The element IS the track, and it takes the whole length available. Sizing it is the
+   * consumer's business, through the parent or through a width of their own — a
+   * consumer's style sits outside our layers and always wins.
    */
   .v-progress-linear {
     --progress-thickness: var(--vectis-control-size-progress-linear-thickness);
@@ -150,10 +168,14 @@ const { clamped, fraction } = useProgressValue(
     border-radius: inherit;
     background: var(--progress-fill);
     /*
-     * The animation runs on inline-size (a layout property, not composited: a
-     * deliberate trade-off — `scale` is physical and would break the vertical and the
-     * RTL). The same duration and easing are reused by the contrasted text's clip, or
-     * the colour boundary would come loose from the fill's edge during the transition.
+     * The fill is animated by changing its LENGTH, which the browser has to lay out
+     * again on every frame. Scaling it would be cheaper, but a scale is physical: it
+     * would have to be undone for the vertical orientation and again for a
+     * right-to-left page, where a logical length simply works.
+     *
+     * The duration and easing are repeated by the clip of the text over the fill, or the
+     * colour boundary would drift away from the fill's own edge for the length of the
+     * transition.
      */
     transition: inline-size var(--vectis-duration-base) var(--vectis-ease-default);
   }
@@ -179,42 +201,46 @@ const { clamped, fraction } = useProgressValue(
   .v-progress-linear[data-tone='warning'] {
     --progress-fill: var(--vectis-color-warning);
     --progress-track: var(--vectis-color-warning-surface);
-    /* White fails AA on amber: a dedicated token */
+    /* White does not reach the required contrast on amber, so this tone has a text
+       colour of its own. */
     --tone-text-fallback: var(--vectis-color-text-on-warning);
   }
 
-  /* Neutral: a text/surface inversion — a mid grey would be unreadable in one of the
-     two themes. */
+  /* The neutral tone inverts text and surface rather than using a mid grey, which would
+     be unreadable in one theme or the other. */
   .v-progress-linear[data-tone='neutral'] {
     --progress-fill: var(--vectis-color-text);
     --progress-track: var(--vectis-color-surface-muted);
     --tone-text-fallback: var(--vectis-color-surface);
   }
 
-  /* Custom colour: after the tones (equal specificity, the last one wins) */
+  /* Placed after the tones on purpose: the specificity is the same, so it is the order
+     that lets a custom colour override the tone it replaces. */
   .v-progress-linear[data-custom] {
     --progress-fill: var(--custom-color);
     --progress-track: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
     --tone-text-fallback: var(--vectis-color-text-on-accent);
   }
 
-  /* Text inside the bar: two copies, both aligned on the root's box — which is also the
-     track's, hence a cut landing exactly on the fill's edge. The default thickness (4px)
-     cannot host text: displaying any implies a `thickness`.
+  /* The text inside the bar, in two copies laid over the same box — the track's own,
+     which is why a cut expressed as a fraction of it lands exactly on the fill's edge.
+     Bear in mind that the default 4px thickness cannot hold text at all: showing any
+     implies asking for a thicker bar.
 
-     The two copies are COMPLEMENTARY, never superimposed: this one is cut OUT of the
-     fill, the contrasted one cut TO it, so every glyph is painted exactly once. Dropping
-     either clip produces no error and stays invisible for as long as the two copies
-     resolve the SAME colour — which is the case wherever contrast-color() is
-     unsupported, the fallback then agreeing with the page's text colour. Where it IS
-     supported and disagrees (black on the accent fill against white text in the dark
-     theme), the copy underneath shows its antialiased edges all around the glyphs of the
-     one on top, and the label reads as a halo. */
+     TRAP — the two copies are COMPLEMENTARY and never superimposed: this one is cut OUT
+     of the filled part, the other cut TO it, so every letter is painted exactly once.
+     Removing either clip raises no error and stays invisible for as long as both copies
+     resolve to the SAME colour, which is what happens wherever the adaptive colour
+     function is unsupported. Where it IS supported and the two disagree — black over an
+     accent fill against white text in the dark theme — the copy underneath shows its
+     antialiased edges all around the letters of the one on top, and the label reads as
+     a halo. */
   .v-progress-linear-text {
-    /* The insets carried by the START edge of the fill's axis (where it grows from) and
-       by its END edge — physical sides, hence one geometry rule per orientation and
-       direction below, all three reading these same two variables. This copy cuts on the
-       start side; the contrasted one swaps the pair. */
+    /* The two insets of the cut: one on the edge the fill grows FROM, one on the edge it
+       grows towards. They are named after those roles rather than after physical sides,
+       so the three geometry rules further down — horizontal, right-to-left, vertical —
+       all read the same pair. This copy cuts on the start side; the one over the fill
+       swaps them. */
     --progress-clip-start: calc(100% * var(--fill-fraction));
     --progress-clip-end: -100vmax;
     position: absolute;
@@ -224,13 +250,14 @@ const { clamped, fraction } = useProgressValue(
     justify-content: center;
     padding-inline: var(--vectis-space-2);
     color: var(--vectis-color-text);
-    /* The -100vmax overshoot on the sides that do NOT carry the cut avoids cropping text
-       taller (or wider) than the bar. */
+    /* The large negative inset on the two sides that do NOT carry the cut is what stops
+       text taller or wider than the bar from being cropped by its own clip. */
     clip-path: inset(-100vmax var(--progress-clip-end) -100vmax var(--progress-clip-start));
-    /* Same duration and easing as the fill's inline-size, or the colour boundary would
-       come loose from the fill's edge during the transition. */
+    /* The same duration and easing as the fill's own length, or the colour boundary
+       would drift away from the fill's edge for the length of the transition. */
     transition: clip-path var(--vectis-duration-base) var(--vectis-ease-default);
-    /* The root switches to vertical writing; the text itself stays horizontal */
+    /* The bar itself is turned on its side in vertical mode; the text is put back
+       upright here, since a label read sideways is not the point. */
     writing-mode: horizontal-tb;
     white-space: nowrap;
     pointer-events: none;
@@ -245,41 +272,46 @@ const { clamped, fraction } = useProgressValue(
   }
 
   .v-progress-linear-text[data-on-fill] {
-    /* The complement of the base copy: the cut moves to the other end of the axis. */
+    /* The exact complement of the copy above: the cut moves to the other end of the
+       axis, so the two together cover the whole bar and overlap nowhere. */
     --progress-clip-start: -100vmax;
     --progress-clip-end: calc(100% * (1 - var(--fill-fraction)));
-    /* Per-tone fallback. contrast-color() can NOT be a plain second declaration:
-       containing a var(), it is never rejected at parse time by browsers without
-       support — it would win the cascade then become invalid at computed-value time
-       (IACVT → color: unset → inheritance, and the fallback would never apply). Hence
-       the @supports below, which IS evaluated without var() substitution. */
+    /* The per-tone fallback colour. The adaptive one cannot simply be written as a
+       second declaration after it: because that declaration contains a var(), a browser
+       with no support does not reject it at parse time — it would win the cascade and
+       only then turn invalid, which resets the colour to inherited and leaves the
+       fallback never applied. The block below is the way round it, being evaluated
+       before any var() substitution. */
     color: var(--tone-text-fallback);
   }
 
-  /* Adaptive black/white text where contrast-color() exists (Safari 26+, Edge 150+). */
+  /* Where the adaptive colour function exists, the text picks black or white against
+     whatever colour the fill ended up with. */
   @supports (color: contrast-color(red)) {
     .v-progress-linear-text[data-on-fill] {
       color: contrast-color(var(--progress-fill));
     }
   }
 
-  /* The fill grows from the right: the two insets swap physical sides. */
+  /* In a right-to-left page the fill grows from the right, so the two insets change
+     physical sides — the variables themselves keep their meaning. */
   .v-progress-linear:dir(rtl) .v-progress-linear-text {
     clip-path: inset(-100vmax var(--progress-clip-start) -100vmax var(--progress-clip-end));
   }
 
-  /* Vertical: 0 at the bottom, max at the top.
-     `writing-mode` on the root is enough: the inline axis becomes vertical, so
-     inline-size = length, block-size = thickness, and both the fill and the animation
-     switch axis with no duplicated rule.
+  /* Upright, the bar fills from the bottom.
 
-     NO `direction: rtl` to put the 0 at the bottom — it would apply to the copies'
-     text and bidi would reorder "50 %" as "% 50". The fill is anchored to the END of
-     the inline axis instead.
+     Changing the writing direction on the element is enough to turn everything: the
+     axis the fill grows along becomes vertical, so the length and the thickness swap
+     places, and both the fill and the animation follow with no rule written twice.
 
-     The length comes from a token for want of being able to inherit from a parent of
-     auto height (it would collapse to zero); a consumer `height`, outside any layer,
-     overrides it. */
+     TRAP — putting zero at the bottom is NOT done by reversing the direction, which
+     would also apply to the text of the two copies: bidirectional reordering would then
+     display "50 %" as "% 50". The fill is anchored to the far end of the axis instead.
+
+     The length comes from a token because there is nothing to inherit it from: in a
+     parent of automatic height the bar would collapse to nothing. A consumer's own
+     height overrides it, sitting outside our layers. */
   .v-progress-linear[data-orientation='vertical'] {
     writing-mode: vertical-lr;
     inline-size: var(--vectis-control-size-progress-linear-length);
@@ -290,50 +322,53 @@ const { clamped, fraction } = useProgressValue(
     inset-inline-end: 0;
   }
 
-  /* The text stacks on the vertical axis, start = the 0 side (hence the bottom). */
+  /* The text now stacks along the vertical axis, whose start is the zero end — the
+     bottom of the bar. */
   .v-progress-linear[data-orientation='vertical'] .v-progress-linear-text {
     flex-direction: column-reverse;
     padding-inline: 0;
     padding-block: var(--vectis-space-2);
   }
 
-  /* The clip moves to the vertical axis (the fill rises from the bottom, which is
-     therefore the axis' start) — hence identical in LTR and RTL, which is why the
-     horizontal :dir(rtl) rule above is neutralized. The second selector is what
-     neutralizes it: it is (0,4,0) against that rule's (0,3,0), where the first alone
-     would merely tie and win by source order. */
+  /* The cut moves to the vertical axis: the fill rises from the bottom, which is that
+     axis' start. It is therefore the same in both reading directions, which means the
+     right-to-left rule further up has to be neutralized.
+
+     TRAP — the second selector is what neutralizes it, and it is written that way on
+     purpose: it is one step MORE specific than that rule, where the first selector alone
+     would merely tie with it and win by source order — a far more fragile arrangement. */
   .v-progress-linear[data-orientation='vertical'] .v-progress-linear-text,
   .v-progress-linear[data-orientation='vertical']:dir(rtl) .v-progress-linear-text {
     clip-path: inset(var(--progress-clip-end) -100vmax var(--progress-clip-start) -100vmax);
   }
 
-  /* Indeterminate: a fixed-size bar crosses the track, from the outer starting edge
-     to the outer finishing edge. At both extremes it is exactly flush with the edge
-     without ever moving away from it: the loop is invisible AND the track is never
-     empty — no second bar is needed.
+  /* When the progress cannot be measured, a bar of fixed size crosses the track from
+     just outside one end to just outside the other. At each extreme it is exactly flush
+     with the edge without ever pulling away from it, which is what makes the loop
+     invisible and keeps the track from ever looking empty — no second bar is needed.
 
-     `ease-in-out` carries the whole rendering: a gradual entry, a fast crossing, a
-     damped exit. An asymmetric curve (or `linear`) makes the loop mechanical.
+     The easing carries the whole impression: a gradual entry, a quick crossing, a damped
+     exit. A linear run, or an asymmetric curve, immediately reads as mechanical.
 
-     The run is described in LOGICAL properties (position and size as a % of the
-     track) rather than in `translate`: a single definition serves horizontal, vertical
-     and RTL, where a transform — being physical — would impose one set of keyframes per
-     axis and a direction flip in RTL. */
+     The movement is expressed in LOGICAL properties — a position and a size as
+     percentages of the track — rather than as a transform. One definition then serves
+     the horizontal, the vertical and the right-to-left cases, where a transform, being
+     physical, would need its own keyframes per axis and a flip per direction. */
   .v-progress-linear[data-indeterminate] {
     overflow: hidden;
   }
 
   .v-progress-linear[data-indeterminate] .v-progress-linear-fill {
-    /* The starting position derives from this size (the two must stay equal for the
-       bar to start exactly off the track). */
+    /* The starting position is derived from this size, and the two must stay tied: that
+       is what has the bar begin exactly off the track rather than half on it. */
     --progress-bar: 40%;
-    /* the anchoring at the start of the inline axis is taken back, including
-       vertically, where the determinate mode anchors at the end (see above) */
+    /* The anchoring is put back at the start of the axis, vertical case included — where
+       a measurable progress anchors at the far end instead. */
     inset-inline-start: 0;
     inset-inline-end: auto;
     inline-size: var(--progress-bar);
-    /* the progress transition has no place here, and would grow the bar on the switch
-       to indeterminate */
+    /* The transition of a measurable progress has no place here: switching to this mode
+       would otherwise be animated as the bar growing to its new size. */
     transition: none;
     animation: v-progress-linear-indeterminate calc(var(--vectis-duration-slow) * 5)
       var(--vectis-ease-in-out) infinite;
@@ -349,12 +384,13 @@ const { clamped, fraction } = useProgressValue(
     }
   }
 
-  /* In vertical writing the inline axis goes down: the bar would travel top to
-     bottom, the opposite of the determinate fill, which starts at the bottom. The same
-     keyframes are read backwards — possible without altering the rendering because the
-     curve is symmetric (with an asymmetric easing a second set of keyframes would be
-     needed). In horizontal RTL there is nothing to do: `inset-inline-start` already
-     follows the reading direction. */
+  /* Turned upright, the axis runs downwards, so the bar would travel from the top down —
+     the opposite of a measurable fill, which rises from the bottom. The same keyframes
+     are simply read backwards, which changes nothing else BECAUSE the easing curve is
+     symmetric; an asymmetric one would need a second set of keyframes.
+
+     Nothing is needed for a right-to-left page: the logical inset already follows the
+     reading direction. */
   .v-progress-linear[data-orientation='vertical'][data-indeterminate] .v-progress-linear-fill {
     animation-direction: reverse;
   }
@@ -365,7 +401,8 @@ const { clamped, fraction } = useProgressValue(
       transition: none;
     }
 
-    /* A motionless loader would lose its purpose: slow down, do not remove. */
+    /* Slowed down and not stopped: a motionless loader no longer says that anything is
+       happening, which is the one thing it exists to say. */
     .v-progress-linear[data-indeterminate] .v-progress-linear-fill {
       animation-duration: calc(var(--vectis-duration-slow) * 15);
     }

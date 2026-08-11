@@ -1,44 +1,52 @@
 <script setup lang="ts">
 // @core — no behavioural JS at all: value normalization and the display string.
 /**
- * Progress as a donut: an SVG driven by CSS, with no geometry JS. The <svg> has NO
- * viewBox (1 user unit = 1 px) and the circles are positioned by the SVG2 `cx`/`cy`/`r`
- * properties as pure lengths — a fixed viewBox would force converting the thickness
- * into viewBox units, hence knowing the ratio in JS and recomputing it on every size
- * change. `pathLength=100` normalizes the path: stroke-dashoffset is then expressed
- * directly as a percentage.
+ * Progress drawn as a ring filling up. It is an SVG whose geometry is entirely
+ * described in CSS, with no JavaScript computing anything.
  *
- * Accessible name: pass `aria-label` (through fallthrough). The progressbar role is
- * "children presentational": the label displayed in the centre is NOT announced.
+ * Two things make that possible. The drawing declares no coordinate system of its own,
+ * so one unit is one pixel and the circles can be placed with plain lengths: with a
+ * fixed coordinate system the thickness would have to be converted into its units,
+ * which means knowing the ratio in code and recomputing it at every change of size.
+ * And the ring's outline is declared to be 100 units long whatever its real
+ * circumference, so the portion drawn is simply a percentage — no π anywhere.
+ *
+ * On naming: pass an `aria-label` saying what is progressing. The figure shown in the
+ * middle cannot serve as that name — the role a progress bar carries makes its content
+ * presentational, so screen readers do not announce it.
  */
 import { useProgressValue } from '../../composables/useProgressValue'
 import { useMessages } from '../../i18n/state'
 import { px } from '../../utils/css'
 
 interface ProgressCircularProps {
-  /** Current value, clamped to [0, max]. */
+  /** How far along it is. Anything outside the range is brought back into it. */
   value?: number
-  /** Upper bound (the lower bound is always 0). */
+  /** What counts as finished. The other end is always zero. */
   max?: number
-  /** Unknown progress: a continuous animation, `value` ignored. */
+  /**
+   * Says that the progress cannot be measured: the ring turns continuously and the
+   * value is ignored.
+   */
   indeterminate?: boolean
-  /** Semantic colour. */
+  /** What the progress means, expressed as a colour. */
   tone?: 'accent' | 'success' | 'warning' | 'danger' | 'neutral'
   /**
-   * Custom colour (hex, CSS name or oklch()) — replaces the tone. The shades (the
-   * track) are derived by color-mix from the theme tokens.
+   * A colour of your own (hex, CSS name or `oklch()`), which replaces the tone. The
+   * unfilled ring's shade is derived from it against the theme, so it follows the light
+   * and the dark one.
    */
   color?: string
-  /** Diameter, **in pixels**: `96` as well as `'96'` gives 96px. Default: a token. */
+  /** The diameter, always IN PIXELS: `96` and `'96'` both give 96px. */
   size?: number | string
-  /**
-   * Stroke thickness, **in pixels**: `8` as well as `'8'` gives 8px. Default: 4px (a
-   * token).
-   */
+  /** How thick the ring is, always IN PIXELS: `8` and `'8'` both give 8px. */
   thickness?: number | string
-  /** Rounded stroke ends (the default) or blunt ones. */
+  /** Whether the ends of the drawn arc are rounded or cut square. */
   shape?: 'rounded' | 'square'
-  /** Displays the progress as a percentage in the centre (ignored when indeterminate). */
+  /**
+   * Writes the percentage in the middle of the ring. It is ignored while the progress is
+   * unmeasurable, there being no figure to write.
+   */
   showValue?: boolean
 }
 
@@ -55,13 +63,16 @@ const props = withDefaults(defineProps<ProgressCircularProps>(), {
 })
 
 defineSlots<{
-  /** Content in the centre of the donut; wins over `showValue`. */
+  /**
+   * What to put in the middle of the ring instead of the percentage — a count of files,
+   * an icon, a shortened figure.
+   */
   default?(props: { value: number; max: number; percent: number }): unknown
 }>()
 
-/* The "%" and the NON-BREAKING space preceding it are a language convention (English
-   uses none): they therefore live in the dictionary. The scoped slot stays the route
-   for an arbitrary format. */
+/* The percent sign, and the non-breaking space French puts before it where English puts
+   nothing, are a convention of the language: they belong in the dictionary rather than
+   in this file. Any other format goes through the slot above. */
 const m = useMessages()
 
 const { clamped, fraction } = useProgressValue(
@@ -103,8 +114,8 @@ const { clamped, fraction } = useProgressValue(
 
 <style>
 @layer vectis.components {
-  /* The dimension custom properties are declared on the root: the inline style set by
-     the props therefore always wins. */
+  /* The two dimensions are declared here as defaults, on the very element the props
+     write to inline — which is what makes an explicit size or thickness always win. */
   .v-progress-circular {
     --progress-diameter: var(--vectis-control-size-progress-circular-diameter);
     --progress-thickness: var(--vectis-control-size-progress-circular-thickness);
@@ -122,27 +133,30 @@ const { clamped, fraction } = useProgressValue(
   .v-progress-circular-svg {
     inline-size: 100%;
     block-size: 100%;
-    /* Starting at twelve o'clock. An individual property: it COMPOSES with the
-       indeterminate mode's `transform` animation instead of being overwritten by it. */
+    /* Turns the ring so that it starts at twelve o'clock rather than at three. It is
+       written as its own property and not as a transform, so that it COMPOSES with the
+       spinning of the unmeasurable mode instead of being overwritten by it. */
     rotate: -90deg;
   }
 
-  /* RTL: the progress follows the reading direction (counter-clockwise). The
-     individual properties compose in the order translate → rotate → scale, so the
-     mirroring applies before the twelve o'clock rotation. */
+  /* In a right-to-left page the ring fills the other way round, following the reading
+     direction. These individual properties are applied in a fixed order — move, turn,
+     then mirror — so the mirroring is taken into account before the quarter turn above. */
   .v-progress-circular:dir(rtl) .v-progress-circular-svg {
     scale: 1 -1;
   }
 
-  /* 100% CSS geometry, in pure lengths (no percentage: resolving `r` as a percentage
-     depends on the "normalized diagonal", and there is no point exposing ourselves to
-     that since the diameter is always a length). */
+  /* The geometry, entirely in CSS and in plain lengths. Percentages are avoided
+     deliberately: a radius given as a percentage is resolved against a normalized
+     diagonal rather than against the width, and there is no reason to expose the
+     component to that when the diameter is always a length to begin with. */
   .v-progress-circular-track,
   .v-progress-circular-bar {
     cx: calc(var(--progress-diameter) / 2);
     cy: calc(var(--progress-diameter) / 2);
-    /* max(0px, …): a thickness ≥ the diameter would give a negative radius, which is
-       an SVG error (the element is not rendered) — it degrades to a zero radius. */
+    /* A thickness as large as the diameter would give a NEGATIVE radius, which is an
+       error in SVG: the circle would simply not be drawn. The floor degrades that case
+       to a radius of zero instead. */
     r: max(0px, calc((var(--progress-diameter) - var(--progress-thickness)) / 2));
     fill: none;
     stroke-width: var(--progress-thickness);
@@ -164,8 +178,8 @@ const { clamped, fraction } = useProgressValue(
     stroke-linecap: butt;
   }
 
-  /* No text fallback colour: the label sits in the donut hole, on the page
-     background, hence in the current text colour. */
+  /* Unlike the linear bar, no tone declares a text colour: the figure sits in the hole
+     of the ring, against the page itself, so it simply takes the ordinary text colour. */
   .v-progress-circular[data-tone='accent'] {
     --progress-fill: var(--vectis-color-accent);
     --progress-track: var(--vectis-color-accent-surface);
@@ -186,13 +200,15 @@ const { clamped, fraction } = useProgressValue(
     --progress-track: var(--vectis-color-warning-surface);
   }
 
-  /* Neutral: a text/surface inversion. */
+  /* The neutral tone inverts text and surface rather than using a mid grey, which would
+     be unreadable in one theme or the other. */
   .v-progress-circular[data-tone='neutral'] {
     --progress-fill: var(--vectis-color-text);
     --progress-track: var(--vectis-color-surface-muted);
   }
 
-  /* After the tones: equal specificity, the last one wins. */
+  /* Placed after the tones on purpose: the specificity is the same, so it is the order
+     that lets a custom colour override the tone it replaces. */
   .v-progress-circular[data-custom] {
     --progress-fill: var(--custom-color);
     --progress-track: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
@@ -202,23 +218,27 @@ const { clamped, fraction } = useProgressValue(
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Centring the BOX in the grid cell: the max-inline-size below prevents the
-       default stretch, and an inapplicable `stretch` falls back to `start` — without
-       this place-self, the label would be stuck to the edge. */
+    /* TRAP — this centres the BOX itself in its cell, and it is not redundant with the
+       centring above. The maximum width below stops the box from being stretched to
+       fill the cell, and a stretch that cannot apply falls back to the START edge: the
+       figure would end up against the side of the ring. */
     place-self: center;
     max-inline-size: calc(var(--progress-diameter) - var(--progress-thickness) * 2);
     color: var(--vectis-color-text);
     font-family: var(--vectis-text-family);
-    /* A ratio proportional to the diameter (the same tolerance already granted to
-       VSpinner's thickness), floored at the smallest token */
+    /* Sized as a fraction of the diameter so it stays in proportion at every size — the
+       same tolerance already granted to VSpinner's stroke — with a floor at the smallest
+       type token, below which it would be unreadable. */
     font-size: max(var(--vectis-text-caption-size), calc(var(--progress-diameter) / 4));
     font-weight: var(--vectis-text-control-weight);
     line-height: var(--vectis-text-control-leading);
     text-align: center;
   }
 
-  /* Indeterminate: a whole-body rotation + an arc whose length varies. The periods
-     differ on purpose (×4 and ×5) — an integer ratio would give a mechanical beat. */
+  /* When the progress cannot be measured, two animations run at once: the whole ring
+     turns, and the arc drawn on it lengthens and shortens. Their periods are
+     deliberately not multiples of one another — an exact ratio would make the pair fall
+     back into step at regular intervals, which reads as a mechanical beat. */
   .v-progress-circular[data-indeterminate] .v-progress-circular-svg {
     animation: v-spin calc(var(--vectis-duration-slow) * 4) linear infinite;
   }
@@ -229,9 +249,9 @@ const { clamped, fraction } = useProgressValue(
     transition: none;
   }
 
-  /* Both ends of the arc move: it lengthens, shortens and slides along the circle.
-     `v-spin` is shared (styles/utilities.css); only the keyframe specific to the arc
-     stays here. */
+  /* Both ends of the arc move, so it lengthens, shortens and travels around the circle
+     at once. The spin it rides on is the shared one from styles/utilities.css; only
+     these keyframes, which belong to this component alone, stay here. */
   @keyframes v-progress-circular-dash {
     0% {
       stroke-dasharray: 5 100;
@@ -254,7 +274,8 @@ const { clamped, fraction } = useProgressValue(
       transition: none;
     }
 
-    /* A motionless loader would lose its purpose: slow down, do not remove. */
+    /* Slowed down and not stopped: a motionless loader no longer says that anything is
+       happening, which is the one thing it exists to say. */
     .v-progress-circular[data-indeterminate] .v-progress-circular-svg {
       animation-duration: calc(var(--vectis-duration-slow) * 12);
     }

@@ -10,37 +10,58 @@ import { useMessages } from '../../i18n/state'
 
 // @core
 /**
- * A native <input type="range"> (keyboard, the ARIA slider, forms — all for free). The
- * JS is limited to preventing the values from crossing in range mode (two
- * superimposed inputs — there is no dual-thumb primitive), to the numeric fields'
- * bridge (the native element does not validate free input) and to pure derivations for
- * the ticks/labels/tooltips.
+ * A value chosen by sliding a thumb along a track, and optionally a range between two
+ * of them.
  *
- * The inline custom properties (unitless fractions) are the only style binding: they
- * align the fill/ticks/labels/tooltips on the thumb's real CENTRE, which travels
- * [thumb/2, 100% − thumb/2] and not [0, 100%].
- * Vertical: native support for the vertical range in Chrome/Edge 129+, Safari 18.1+.
+ * Underneath is the browser's own range control, which brings the keyboard, the correct
+ * announcement to screen readers and the form behaviour with it. The JavaScript covers
+ * only what it cannot: stopping the two values from crossing over each other — there is
+ * no native control with two thumbs, so a range is two of them superimposed — feeding
+ * the optional number fields, which the native element does not validate, and computing
+ * the positions of the ticks, the labels and the tooltip.
+ *
+ * Those positions are handed to the stylesheet as plain fractions written inline, and
+ * that is the only binding between the two. They matter because a thumb's centre does
+ * NOT travel the full width of the track: it runs from half a thumb in to half a thumb
+ * from the end, and everything meant to line up with it has to follow that same run.
  */
 export type SliderLabel = string | { icon: IconSource; label: string }
 
 interface SliderProps {
+  /** The lowest value the thumb can reach. */
   min?: number
+  /** The highest value the thumb can reach. */
   max?: number
+  /** The gap between two values it can stop on. */
   step?: number
-  /** Two thumbs — the v-model becomes [start, end]. */
+  /** Offers two thumbs to pick a range, which makes the v-model a pair of values. */
   range?: boolean
+  /** Makes the slider unusable. */
   disabled?: boolean
-  /** Accessible label (suffixed "start"/"end" in range mode). */
+  /**
+   * What screen readers announce for the slider. In range mode the two thumbs are
+   * announced as the start and the end of it.
+   */
   label?: string
-  /** Vertical: min at the bottom, max at the top. */
+  /** Turns the slider upright, with the lowest value at the bottom. */
   orientation?: 'horizontal' | 'vertical'
-  /** Numeric fields for precise adjustment (one in single mode, one per bound in range). */
+  /**
+   * Adds a number field beside the slider for setting the value exactly — one, or one
+   * per end in range mode. Sliding is quick but imprecise; this is the way out.
+   */
   inputs?: boolean
-  /** Dots on the track at each step (implied by `labels`; not rendered past 50 steps). */
+  /**
+   * Marks each step on the track. Providing labels implies it. Past fifty steps the
+   * marks would be an unreadable comb and are not drawn at all.
+   */
   ticks?: boolean
-  /** One label per step; a string = text, an object = a Material icon + an accessible label. */
+  /**
+   * A label for every step, in order — a piece of text, or an icon with the words that
+   * name it for screen readers. They also become what a screen reader announces in
+   * place of the raw number.
+   */
   labels?: SliderLabel[]
-  /** A value bubble following the thumb during the drag / on keyboard focus. */
+  /** Shows the value in a bubble above the thumb while it is being moved or focused. */
   tooltip?: boolean
 }
 
@@ -65,11 +86,14 @@ const endValue = computed(() =>
   Array.isArray(model.value) ? model.value[1] : (model.value as number),
 )
 
-/** Fraction [0, 1] of the run for a value (the `|| 1` guards against min === max). */
+/**
+ * Where a value sits along the run, as a fraction between 0 and 1. The guard covers a
+ * slider whose two bounds are equal, which would otherwise divide by zero.
+ */
 const frac = (v: number) => Math.min(1, Math.max(0, (v - props.min) / (props.max - props.min || 1)))
 
-// @core — the anti-crossing clamp: two superimposed native ranges, no dual-thumb
-// primitive to inherit it from.
+// @core — what stops the two values from crossing. A range is two native controls laid
+// over one another, and there is no dual-thumb control to inherit this behaviour from.
 function onStartInput(event: Event) {
   const el = event.target as HTMLInputElement
   const clamped = Math.min(Number(el.value), endValue.value)
@@ -88,7 +112,11 @@ function onEndInput(event: Event) {
   model.value = [startValue.value, clamped]
 }
 
-/** Number of whole steps actually reachable (the native element stops at the last step ≤ max). */
+/**
+ * How many whole steps the thumb can actually stop on. It matters when the range does
+ * not divide evenly by the step: the native control stops at the last step that fits,
+ * short of the maximum, and the ticks have to agree with it.
+ */
 const stepCount = computed(() => Math.floor((props.max - props.min) / props.step + 1e-9))
 
 const showTicks = computed(
@@ -109,7 +137,7 @@ const tickItems = computed(() => {
 
 const labelFraction = (index: number) => frac(props.min + index * props.step)
 
-/** Text label of the step matching a value (fallback: the raw value). */
+/** What a value is called, if the consumer named its step; failing that, the number itself. */
 function labelTextAt(value: number): string {
   const item = props.labels?.[Math.round((value - props.min) / props.step)]
   if (item === undefined) return String(value)
@@ -117,12 +145,13 @@ function labelTextAt(value: number): string {
 }
 
 // @a11y
-/* Accessible names of the thumbs. No dedicated prop: the dictionary is the only
-   override point.
+/* What each thumb is announced as. There is no prop for the two halves: the wording
+   comes from the dictionary, which is also where it is changed.
 
-   Outside range mode, the upper end IS the value: it keeps the consumer's `label`, and
-   stays without an accessible name if none was supplied (the "Value" fallback only
-   applies to the numeric field, which needs a name of its own). */
+   With a single thumb there is nothing to distinguish: that thumb IS the value, so it
+   simply takes the consumer's label, and is left unnamed when none was given. The
+   generic fallback applies to the NUMBER FIELD alone, which cannot go unnamed — a bare
+   field in a form has to say what it holds. */
 const m = useMessages()
 const startLabel = computed(() =>
   props.label ? m.value.slider.rangeStart(props.label) : m.value.slider.start,
@@ -148,33 +177,40 @@ if (isDev) {
     )
 }
 
-// Numeric fields: the string ↔ number v-model bridge.
+// The text held by the number fields, kept apart from the slider's own value.
 //
-// `string | number`: the fields are `<input type="number">`, whose value Vue casts to
-// a number as soon as it is parsable — an empty or intermediate entry stays a string.
-// Hence the String() at commit time.
+// It is typed as text OR a number because these are number fields, whose value Vue
+// converts to a number as soon as it can be read as one — while an empty field, or one
+// holding a half-typed "1-", stays text. That is why the value is turned back into text
+// when it is committed.
 const startFieldText = ref<string | number>(String(startValue.value))
 const endFieldText = ref<string | number>(String(endValue.value))
 
-// Dragging the slider resynchronizes the fields continuously.
+// Sliding the thumb keeps the fields in step, continuously.
 watch(startValue, (v) => (startFieldText.value = String(v)))
 watch(endValue, (v) => (endFieldText.value = String(v)))
 
 /**
- * Commit on `change` only (blur/Enter) — never while typing, or "1" would be clamped
- * halfway through entering "15". Empty/NaN = a silent revert.
+ * Takes what was typed in a field and makes it the value — but only once the reader has
+ * finished, on leaving the field or on Enter. Reading it as they type would clamp the
+ * "1" of "15" to the minimum before the 5 was ever pressed.
+ *
+ * Anything unreadable, an empty field included, silently puts the previous value back.
  */
 function commitField(which: 'start' | 'end') {
   const raw = which === 'start' ? startFieldText.value : endFieldText.value
-  // parseFloat (and not Number): on an empty string it yields NaN → a revert, where
-  // Number('') would be 0 and would overwrite the value.
+  // TRAP — parsed rather than converted: an empty string parses to nothing, which is
+  // what triggers the revert below, where converting it would give ZERO and quietly
+  // overwrite the value with it.
   const parsed = Number.parseFloat(String(raw))
   if (Number.isNaN(parsed)) {
     resyncFields()
     return
   }
   const clamped = Math.min(props.max, Math.max(props.min, parsed))
-  // Snap to the step; the 1e10 rounding neutralizes the float noise of decimal steps.
+  // Brought onto the nearest step. The rounding that follows removes the noise decimal
+  // steps leave behind — a tenth cannot be represented exactly, so 0.1 × 3 comes out as
+  // 0.30000000000000004.
   let value = props.min + Math.round((clamped - props.min) / props.step) * props.step
   value = Math.min(props.max, Math.round(value * 1e10) / 1e10)
   if (!props.range) {
@@ -184,8 +220,9 @@ function commitField(which: 'start' | 'end') {
   } else {
     model.value = [startValue.value, Math.max(value, startValue.value)]
   }
-  // An explicit resync: a commit with no model change (e.g. re-clamping onto the same
-  // value) does not trigger the watchers.
+  // Put back explicitly, because a commit that does not change the value — typing 200
+  // where the maximum is 100 — changes nothing for the watchers to react to, and the
+  // field would go on showing what was typed.
   resyncFields()
 }
 
@@ -394,8 +431,9 @@ function resyncFields() {
     background: var(--vectis-color-text-on-accent);
   }
 
-  /* The inputs are superimposed; only their thumbs capture the pointer (indispensable
-     in range mode so both stay usable). */
+  /* The two controls lie exactly on top of one another, so only their thumbs are allowed
+     to receive the pointer. Without that, the one on top would swallow every click and
+     the other thumb could never be grabbed. */
   .v-slider-input {
     position: absolute;
     inset: 0;
@@ -407,9 +445,11 @@ function resyncFields() {
     pointer-events: none;
   }
 
-  /* In single mode the whole input captures the pointer: clicking the track moves the
-     value natively (a jump + an immediate drag), with zero JS. An accepted side effect:
-     the thumb's hover triggers when hovering anywhere on the track. */
+  /* With a single thumb there is nothing underneath to protect, so the whole control
+     takes the pointer again — which is what makes clicking the track jump the value
+     there and start dragging at once, natively and with no code at all. The accepted
+     side effect is that the thumb lights up when the pointer is anywhere over the
+     track. */
   .v-slider:not([data-range]) .v-slider-input {
     pointer-events: auto;
     cursor: pointer;
@@ -440,8 +480,9 @@ function resyncFields() {
     transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  /* Hover/drag: the thumb's tinted background. The states are set on the host input —
-     pseudo-classes chained after the pseudo-thumb are unreliable. */
+  /* The thumb tints as the pointer rests on it or drags it. TRAP — the state is read on
+     the control and the thumb is then addressed, never the reverse: a state pseudo-class
+     written after the thumb's own pseudo-element is unreliable across browsers. */
   .v-slider-input:hover:not(:disabled)::-webkit-slider-thumb,
   .v-slider-input:active:not(:disabled)::-webkit-slider-thumb {
     background: var(--vectis-color-accent-surface);
@@ -466,8 +507,9 @@ function resyncFields() {
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* A value tooltip: the appearance of VTooltip, but positioned by fraction — the
-     native thumb is a pseudo-element, so it cannot be an anchor-positioning anchor. */
+  /* The bubble showing the value. It looks like a VTooltip but is placed by arithmetic
+     rather than anchored to the thumb: a native thumb is a pseudo-element, and the
+     browser's anchoring cannot attach anything to one. */
   .v-slider-tooltip {
     position: absolute;
     inset-block-end: calc(100% + var(--vectis-space-2));
@@ -506,16 +548,19 @@ function resyncFields() {
   .v-slider-labels {
     grid-area: labels;
     position: relative;
-    /* Absolutely positioned children: this reserves the height (covering xs text AND md
-       icons). */
+    /* The labels are positioned individually and therefore contribute no height of
+       their own; this reserves enough room for either kind, a small line of text or an
+       icon. */
     min-block-size: var(--vectis-icon-size-md);
     --vectis-icon-size: var(--vectis-icon-size-md);
     font-size: var(--vectis-text-caption-size);
     color: var(--vectis-color-text-muted);
   }
 
-  /* A zero-width box: the content overflows symmetrically, hence centred on the step —
-     with no transform (physical, and it would break in vertical/RTL). */
+  /* A box of zero width placed exactly on the step: its content then overflows equally
+     on both sides, which centres it there. Centring it with a transform would be the
+     usual trick, but a transform is physical and would have to be undone for the
+     vertical orientation and again for a right-to-left page. */
   .v-slider-label {
     position: absolute;
     inset-block-start: 0;
@@ -577,9 +622,12 @@ function resyncFields() {
     block-size: var(--vectis-control-size-slider-length);
   }
 
-  /* The subcontainer alone carries the writing mode: the logical geometry
-     (inset-inline-*) of the track/fill/ticks switches with no duplicated rule, while
-     the tooltips and labels stay outside this context (horizontal text). */
+  /* Only this inner box is turned upright, and that is the whole trick: the track, the
+     fill and the ticks are all placed with logical properties, so they follow the change
+     of axis with no rule written a second time — while the bubbles and the labels stay
+     outside that box, and therefore keep their text horizontal.
+
+     The direction is reversed with it so that the lowest value ends up at the bottom. */
   .v-slider[data-orientation='vertical'] .v-slider-control {
     writing-mode: vertical-lr;
     direction: rtl;
@@ -614,7 +662,8 @@ function resyncFields() {
     justify-content: flex-start;
   }
 
-  /* Disabled: greys (the VCheckbox/VSwitch tokens), with no opacity */
+  /* A disabled slider greys out through the colour tokens, the same ones VCheckbox and
+     VSwitch use, and never through opacity. */
   .v-slider[data-disabled] {
     cursor: not-allowed;
   }
@@ -631,7 +680,8 @@ function resyncFields() {
     background: var(--vectis-color-text-subtle);
   }
 
-  /* On the grey fill, the tick goes back to a light colour (VCheckbox's "grey tick"). */
+  /* A tick sitting on the greyed fill takes the light colour back, so that it stays
+     visible against it — the same inversion VCheckbox applies to its disabled tick. */
   .v-slider[data-disabled] .v-slider-tick[data-filled] {
     background: var(--vectis-color-surface-muted);
   }
