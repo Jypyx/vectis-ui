@@ -7,8 +7,8 @@ import * as VBadgeStories from './VBadge.stories'
 
 A **non-interactive** information pill: a counter or an icon. No hover, no focus, no event — the
 information alone. Two formats (a 20px pill or a 10px dot through `dot`), three placements
-(standalone, inline, `overlay`), and a single full-colour rendering driven by `tone` or a custom
-colour. For a **textual** status, use a `VChip`.
+(standalone, inline, `overlay` — on the top or bottom corner), and a single full-colour rendering
+driven by `tone` or a custom colour. For a **textual** status, use a `VChip`.
 
 <Canvas of={VBadgeStories.Default} />
 
@@ -71,11 +71,20 @@ With a target element in the default slot, the badge sits to its right, vertical
 
 ## Overlay
 
-`overlay` places the badge on the target's **top-right corner**, slightly tucked inwards (the
-logical corner flips in RTL). The offset is a ratio of the badge's own size: it stays
-proportionate across the pill, the dot and the icon.
+`overlay` places the badge on a **corner** of the target, slightly tucked inwards (the logical
+corner flips in RTL). The offset is a ratio of the badge's own size: it stays proportionate across
+the pill, the dot and the icon.
 
 <Canvas of={VBadgeStories.Overlay} />
+
+### Corner
+
+`overlayPosition` picks the vertical side: `top` (the default) or `bottom` — a presence dot reads
+better at the foot of an avatar, where it does not collide with what sits above. The horizontal
+side is always the end of the reading direction, and is not configurable: a badge on the start
+side would sit under the eye's entry point into the element it annotates.
+
+<Canvas of={VBadgeStories.OverlayPosition} />
 
 ## Bordered
 

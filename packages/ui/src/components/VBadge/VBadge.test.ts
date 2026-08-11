@@ -77,6 +77,24 @@ describe('VBadge', () => {
     expect(container.querySelector('.v-badge-host')!.hasAttribute('data-overlay')).toBe(true)
   })
 
+  it('overlayPosition: mirrored as data-overlay-position, top by default', () => {
+    const { container } = render(VBadge, {
+      props: { count: 3, overlay: true },
+      slots: { default: '<span>Target</span>' },
+    })
+    expect(container.querySelector('.v-badge-host')!.getAttribute('data-overlay-position')).toBe(
+      'top',
+    )
+
+    const { container: bottom } = render(VBadge, {
+      props: { count: 3, overlay: true, overlayPosition: 'bottom' },
+      slots: { default: '<span>Target</span>' },
+    })
+    expect(bottom.querySelector('.v-badge-host')!.getAttribute('data-overlay-position')).toBe(
+      'bottom',
+    )
+  })
+
   it('bordered: data-bordered set on the badge', () => {
     const { container } = render(VBadge, { props: { count: 3, bordered: true } })
     expect(container.querySelector('.v-badge')!.hasAttribute('data-bordered')).toBe(true)

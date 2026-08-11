@@ -22,6 +22,7 @@ const meta = {
     icon: { control: 'text' },
     dot: { control: 'boolean' },
     overlay: { control: 'boolean' },
+    overlayPosition: { control: 'inline-radio', options: ['top', 'bottom'] },
     bordered: { control: 'boolean' },
   },
   args: {
@@ -29,6 +30,7 @@ const meta = {
     count: 8,
     dot: false,
     overlay: false,
+    overlayPosition: 'top',
     bordered: false,
   },
   render: (args) => ({
@@ -143,7 +145,7 @@ export const Inline: Story = {
   }),
 }
 
-/** `overlay` places the badge on the top-right corner, shifted inwards. */
+/** `overlay` places the badge on a corner of the target — top-right by default — shifted inwards. */
 export const Overlay: Story = {
   render: () => ({
     components: { VAvatar, VBadge, VButton },
@@ -162,6 +164,34 @@ export const Overlay: Story = {
         <VBadge overlay tone="danger" :count="120">
           <VButton variant="outline" tone="neutral">{{ t.notifications }}</VButton>
         </VBadge>
+      </div>
+    `,
+  }),
+}
+
+/**
+ * `overlayPosition` chooses the corner: `top` (the default) or `bottom` — a presence
+ * dot belongs at the foot of an avatar. The horizontal side stays the reading
+ * direction's end.
+ */
+export const OverlayPosition: Story = {
+  render: () => ({
+    components: { VAvatar, VBadge },
+    setup: () => ({ positions: ['top', 'bottom'] }),
+    template: `
+      <div style="display: flex; gap: 24px; align-items: center">
+        <div v-for="position in positions" :key="position" style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+          <VBadge overlay :overlay-position="position" dot tone="success" bordered>
+            <VAvatar name="Xavier Darmet" />
+          </VBadge>
+          <small>{{ position }}</small>
+        </div>
+        <div v-for="position in positions" :key="'count-' + position" style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+          <VBadge overlay :overlay-position="position" tone="danger" :count="8">
+            <VAvatar name="Xavier Darmet" />
+          </VBadge>
+          <small>{{ position }}</small>
+        </div>
       </div>
     `,
   }),
