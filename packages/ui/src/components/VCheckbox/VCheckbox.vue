@@ -2,21 +2,38 @@
 import { ref, watchEffect } from 'vue'
 
 /**
- * A native <input type="checkbox">, visually replaced by a styled box:
- * the input stays in the tree (focus, keyboard, forms, :user-invalid) and only its
- * rendering is hidden. All the state logic is native; the only JS beyond
- * the v-model bridge is `indeterminate`, which exists solely as a DOM property
- * (there is no equivalent HTML attribute).
+ * A checkbox whose square is drawn by the design system rather than by the browser.
+ *
+ * The trick is that the real `<input type="checkbox">` is still there: it is only
+ * made invisible, never removed. It therefore keeps everything a checkbox is owed —
+ * it takes focus, answers the keyboard, is submitted with the form and turns invalid
+ * on its own — and the drawn square merely follows its state through CSS.
+ *
+ * The only JavaScript besides the v-model is the indeterminate state, that third
+ * "partially checked" look: it exists solely as a DOM property, with no HTML
+ * attribute to set it from a template.
  */
 interface CheckboxProps {
-  /** The "partially checked" visual state (nested lists). */
+  /**
+   * Shows the box as partially checked, a dash instead of a tick. This is what a
+   * parent checkbox looks like when some of its children are ticked and others are
+   * not; it is a state of its own, not a value the v-model can hold.
+   */
   indeterminate?: boolean
-  /** Position of the label relative to the box. */
+  /** Which side of the box the label sits on. */
   labelPosition?: 'start' | 'end'
-  /** Pushes label and box to opposite ends (the root becomes block, full width). */
+  /**
+   * Pushes the label and the box to opposite ends of the line, the row taking the
+   * full width available. This is the usual shape for a list of settings.
+   */
   spread?: boolean
-  /** Forces the invalid state — sets aria-invalid. */
+  /**
+   * Marks the field as invalid, which colours the box and tells assistive technology
+   * so. Use it for a rule the browser cannot check by itself; native validity is
+   * already handled without it.
+   */
   invalid?: boolean
+  /** Makes the checkbox unusable, greyed out through the colour tokens. */
   disabled?: boolean
 }
 
@@ -29,23 +46,26 @@ const props = withDefaults(defineProps<CheckboxProps>(), {
 })
 
 // @a11y
-// The root is a <label>: the native attributes (name, value, required, aria-*…) must
-// land on the input.
+// The root element is the <label>, so the attributes the consumer passes must be
+// redirected: `name`, `value`, `required` and the aria-* belong on the input, and
+// left on the label they would take part in neither the form nor the accessibility
+// tree.
 defineOptions({ inheritAttrs: false })
 
 const model = defineModel<boolean>({ default: false })
 
 defineSlots<{
-  /** Label, clickable (the <label> wraps everything) */
+  /** The label. It is clickable, the whole component being wrapped in a `<label>`. */
   default?(): unknown
 }>()
 
 const inputEl = ref<HTMLInputElement | null>(null)
 
 // @ssr @core
-// SSR-safe: inputEl is null on the server, so the effect does nothing.
-// flush: 'post' → the effect runs after the DOM update, once the template ref is
-// set.
+// On the server there is no element, so the effect simply does nothing. The
+// `flush: 'post'` is load-bearing: it makes the effect run AFTER the DOM has been
+// updated, and on the very first pass the template ref is not filled in before
+// that — in the default timing the property would be written to nothing at all.
 watchEffect(
   () => {
     if (inputEl.value) inputEl.value.indeterminate = props.indeterminate
@@ -102,8 +122,8 @@ watchEffect(
     cursor: pointer;
   }
 
-  /* The input is position: absolute → outside the flex flow, so the visual order
-     concerns only the box and the label */
+  /* The input is taken out of the flow by its absolute position, so reversing the
+     row only ever swaps the box and the label. */
   .v-checkbox[data-label-position='start'] {
     flex-direction: row-reverse;
   }
@@ -113,7 +133,9 @@ watchEffect(
     justify-content: space-between;
   }
 
-  /* The input stays focusable and submitted with the form; only its rendering goes */
+  /* Hidden with `opacity` and never with `display: none`, which would take the input
+     out of the tab order and out of the form. It stays focusable and submitted; only
+     the browser's own drawing of it disappears. */
   .v-checkbox-input {
     position: absolute;
     opacity: 0;
@@ -192,7 +214,8 @@ watchEffect(
     border-color: var(--vectis-color-danger);
   }
 
-  /* Disabled: greys (the same tokens as VButton), no opacity */
+  /* A disabled checkbox greys out through the colour tokens, the same ones VButton
+     uses, and never through opacity. */
   .v-checkbox:has(.v-checkbox-input:disabled) {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;

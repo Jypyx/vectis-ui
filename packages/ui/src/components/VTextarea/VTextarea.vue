@@ -1,15 +1,19 @@
 <script setup lang="ts">
 // @core
 /**
- * Complete text area: label, internal (clickable) icons, counter, soft limit,
- * loading, clearable — around a styled native <textarea>. A mirror of VInput,
- * with `autoGrow` (pure CSS, `field-sizing: content`) and the counter rendered
- * UNDER the field, never inside it. Wrapper-root: class/style stay on the root,
- * everything else is forwarded to the <textarea>. Validation stays native
- * (`:user-invalid`); the soft limit goes through setCustomValidity.
+ * A field for text running over several lines, with the same label, hint, icons,
+ * counter, loading state and clear button as VInput, arranged around a real
+ * `<textarea>`.
  *
- * Behavioural JS specific to the component: the v-model bridge and clear +
- * refocus (the button disappears on click, so focus would otherwise be lost).
+ * Two things differ from its single-line counterpart. The field can grow with what
+ * is typed into it, and that is pure CSS — a browser without `field-sizing` simply
+ * keeps a fixed height with its usual scrollbar. And the counter is placed UNDER the
+ * field rather than inside it, where several lines of text would run into it.
+ *
+ * As in VInput, the attributes it is given are split — `class` and `style` stay
+ * outside, the rest goes to the textarea — validation stays the browser's, and the
+ * only behavioural JavaScript is the v-model and the clear button, which has to hand
+ * focus back to the field it just emptied.
  */
 import { computed, ref } from 'vue'
 
@@ -26,44 +30,79 @@ import { useTextLimit } from '../../composables/useTextLimit'
 import { useMessages } from '../../i18n/state'
 
 interface TextareaProps {
-  /** Field height: sm 32px, md 40px (default), lg 48px. */
+  /** The size of the field, which sets its minimum height and its type scale. */
   size?: 'sm' | 'md' | 'lg'
-  /** Minimum height reduced by 4px; padding, type and icons unchanged. */
+  /** Takes 4px off the minimum height, leaving the padding, the text and the icons alone. */
   compact?: boolean
-  /** Height that follows the content (field-sizing: content; unsupported = a plain textarea). */
+  /**
+   * Lets the field grow as the text is typed, instead of scrolling inside a fixed
+   * height. It is pure CSS; where the browser does not support it, the field simply
+   * behaves like an ordinary textarea.
+   */
   autoGrow?: boolean
-  /** Forces the invalid state (server-side validation) — sets aria-invalid. */
+  /**
+   * Marks the field as invalid whatever the browser thinks — the route for a rule
+   * only the server can check.
+   */
   invalid?: boolean
+  /** Makes the field unusable, greyed out through the colour tokens. */
   disabled?: boolean
-  /** Read-only: focusable, not editable; hides the clear button. */
+  /**
+   * Shows the text without allowing it to be changed. The field can still be focused
+   * and copied from, and the clear button is hidden.
+   */
   readonly?: boolean
-  /** Label above the field, associated through for/id. */
+  /** The label above the field, tied to it so that clicking it focuses the field. */
   label?: string
-  /** Help text under the field, linked through aria-describedby. */
+  /**
+   * A line of help under the field, tied to the textarea for assistive technology so
+   * that it is read out along with the label.
+   */
   hint?: string
-  /** Icon on the left inside the field (the #start slot wins). Decorative; becomes
-      a button if a @click:icon-start listener is attached. */
+  /**
+   * An icon inside the field, at the start. It is decorative by default and becomes a
+   * real button as soon as a `@click:icon-start` listener is attached — in which case
+   * it needs `iconStartLabel`. The `#start` slot replaces it.
+   */
   iconStart?: IconSource
-  /** Same on the right (the #end slot wins). Replaced by the spinner when loading. */
+  /**
+   * The same at the end of the field. The `#end` slot replaces it, and the loading
+   * spinner takes its place while it turns.
+   */
   iconEnd?: IconSource
-  /** Accessible label of the start icon button (when clickable). */
+  /** What the start icon does, in words, once it is clickable. */
   iconStartLabel?: string
-  /** Accessible label of the end icon button (when clickable). */
+  /** What the end icon does, in words, once it is clickable. */
   iconEndLabel?: string
-  /** A VSpinner on the right, in place of iconEnd / #end. */
+  /** Shows a spinner at the end of the field, in place of the end icon or slot. */
   loading?: boolean
-  /** Spinner label for screen readers. Default: the DS dictionary. */
+  /**
+   * What screen readers announce while the spinner turns. It falls back to the design
+   * system dictionary.
+   */
   loadingLabel?: string
-  /** A cross button that empties the field (visible when non-empty, outside disabled/readonly). */
+  /**
+   * Offers a cross that empties the field. It appears when there is something to
+   * clear and the field can be edited.
+   */
   clearable?: boolean
-  /** Accessible label of the clear button. Default: the DS dictionary. */
+  /** What the clear button does, in words. It falls back to the design system dictionary. */
   clearLabel?: string
-  /** Character limit. By default: the native maxlength attribute (input blocked). */
+  /**
+   * The maximum number of characters. By default this is the browser's own limit,
+   * which simply refuses anything beyond it.
+   */
   maxlength?: number
-  /** Soft limit: input may exceed maxlength and the field goes into error
-      (setCustomValidity → :user-invalid) instead of blocking. */
+  /**
+   * Turns that limit into a soft one: the reader may type past it, and the field goes
+   * into error instead of silently refusing the keystrokes. It is reported through
+   * the native validity, so a form cannot be submitted over the limit.
+   */
   softLimit?: boolean
-  /** Character counter ("12/80", or "12" without maxlength), under the field on the right. */
+  /**
+   * Shows how much has been typed, under the field: "12/80" against a limit, or just
+   * "12" without one.
+   */
   counter?: boolean
 }
 
@@ -92,25 +131,32 @@ const props = withDefaults(defineProps<TextareaProps>(), {
 })
 
 const emit = defineEmits<{
+  /** The start icon was clicked. Attaching this listener is what makes it a button. */
   'click:icon-start': [event: MouseEvent]
+  /** The end icon was clicked. Attaching this listener is what makes it a button. */
   'click:icon-end': [event: MouseEvent]
+  /** The clear button was pressed. The field has already been emptied. */
   clear: []
 }>()
 
 defineSlots<{
-  /** Content at the start of the field (wins over iconStart). */
+  /** Content at the start of the field, which replaces `iconStart`. */
   start?(): unknown
-  /** Content at the end of the field (wins over iconEnd, hidden when loading). */
+  /**
+   * Content at the end of the field, which replaces `iconEnd`. It is hidden while the
+   * field is loading, the spinner taking that place.
+   */
   end?(): unknown
 }>()
 
 const model = defineModel<string>({ default: '' })
 
-// class/style on the root; everything else on the native control
+// `class` and `style` stay on the wrapper, where a consumer expects to style the
+// field; every other attribute goes to the textarea, where it does something.
 const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
 
-// Cascade prop > dictionary: the prop keeps priority, its default follows the DS
-// locale.
+// The prop keeps priority; what it falls back to is the dictionary, so the default
+// wording follows the language the design system is set to.
 const m = useMessages()
 const resolvedLoadingLabel = computed(() => props.loadingLabel ?? m.value.common.loading)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
@@ -129,8 +175,9 @@ const showClear = computed(
   () => props.clearable && model.value.length > 0 && !props.disabled && !props.readonly,
 )
 
-// @a11y @core — the refocus is the a11y half: the cross disappears on click, so
-// without it focus falls back to <body> and the keyboard loses its place.
+// @a11y @core — moving the focus back is the accessibility half of this handler.
+// The cross vanishes the instant it empties the field, so without that call focus
+// falls back to the page body and a keyboard user loses their place in the form.
 function onClear() {
   model.value = ''
   emit('clear')
@@ -234,9 +281,9 @@ const { counterText, over } = useTextLimit({
     font-family: var(--vectis-text-family);
   }
 
-  /* Label and hint: rendered by VTypography (label / muted caption) — the
-     .v-textarea-label/.v-textarea-hint classes stay in place as hooks (consumer
-     overrides, the disabled state below). */
+  /* The label and the hint are rendered by VTypography, which carries their type. The
+     .v-textarea-label and .v-textarea-hint classes remain as hooks: a consumer
+     overrides through them, and the disabled state below reaches them that way. */
 
   .v-textarea-meta {
     display: flex;
@@ -244,8 +291,9 @@ const { counterText, over } = useTextLimit({
     gap: var(--vectis-space-2);
   }
 
-  /* The counter stays styled locally: tabular-nums and the overflow state are not
-     typographic roles. */
+  /* The counter keeps its own local styling rather than going through VTypography:
+     figures of equal width, so the number does not shift as it counts, and a colour
+     that marks the overflow — neither of which is a typographic role. */
   .v-textarea-counter {
     margin-inline-start: auto;
     font-size: var(--vectis-text-caption-size);
@@ -257,17 +305,21 @@ const { counterText, over } = useTextLimit({
     color: var(--vectis-color-danger-text);
   }
 
-  /* The field carries the border, the background, the focus AND the resizing (resize
-     requires overflow ≠ visible); --field-border-color is the single source of truth for
-     the colour (hover/error/disabled redefine it) */
+  /* This is the box that carries the border, the background, the focus ring and the
+     resize handle — which is why it also hides its overflow, `resize` having no
+     effect on a box whose overflow is visible. `--field-border-color` is the single
+     source of truth for its colour, and the hover, error and disabled states do
+     nothing but redefine it. */
   .v-textarea-field {
     --field-border-color: var(--vectis-color-border-strong);
 
     /*
-     * Sizes/compact: --control-* variables inherited from the root
-     * v-control (styles/control-size.css), contexte de VIcon compris.
-     * Minimum height = 2 lines: base + effective height — that is 2×base without
-     * compact, 2×base - 4px with it (the effective height carries the delta).
+     * Nothing here restates the size scale: the `--control-*` variables are inherited
+     * from the v-control root (styles/control-size.css), the icon context included.
+     *
+     * The field is at least two lines tall, and that is written as the base height
+     * plus the effective one: twice the base normally, and 4px less under compact,
+     * since it is the effective height that carries the density delta.
      */
     --textarea-min-height: calc(var(--control-height-base) + var(--control-height));
 
@@ -281,8 +333,9 @@ const { counterText, over } = useTextLimit({
     border: 1px solid var(--field-border-color);
     border-radius: var(--vectis-radius-interactive);
     font-size: var(--control-font-size);
-    /* multi-line text: body leading (the `control` role at leading-none only holds
-       for single-line labels) */
+    /* Text running over several lines takes the body line height. The `control` type
+       role, whose lines are set tight against one another, only makes sense for a
+       single-line label. */
     line-height: var(--vectis-text-body-md-leading);
     resize: vertical;
     overflow: hidden;
@@ -301,15 +354,17 @@ const { counterText, over } = useTextLimit({
     background: none;
     color: inherit;
     font: inherit;
-    outline: none; /* focus is carried by the field (focus-within) */
-    resize: none; /* resizing is carried by the field */
+    outline: none; /* the focus ring is drawn by the field around it, not here */
+    resize: none; /* the resize handle belongs to the field, so there is only one */
   }
 
   .v-textarea-control::placeholder {
     color: var(--vectis-color-text-subtle);
   }
 
-  /* icons and buttons centred on the first line of text */
+  /* The icons and buttons align with the FIRST line of text rather than with the
+     middle of a field whose height varies: half the difference between a line box and
+     the element centres it there. */
   .v-textarea-field > .v-icon,
   .v-textarea-field > .v-spinner {
     margin-block-start: calc((1lh - var(--vectis-icon-size)) / 2);
@@ -319,7 +374,8 @@ const { counterText, over } = useTextLimit({
     margin-block-start: calc((1lh - var(--control-action-size)) / 2);
   }
 
-  /* Decorative icons: dark grey, less present than the typed text */
+  /* A decorative icon is drawn in a muted grey, so it stays quieter than the text
+     being typed beside it. */
   .v-textarea-field > .v-icon {
     color: var(--vectis-color-text-muted);
   }
@@ -328,14 +384,17 @@ const { counterText, over } = useTextLimit({
     font-size: var(--vectis-icon-size);
   }
 
-  /* Readonly: a slightly sunken background, normal text (the value stays
-     readable), accent focus kept. [data-readonly] and never :read-only (which also
-     matches :disabled).
-     TRAP — this block must stay FIRST of the state sequence (readonly → hover →
-     focus → invalid → disabled). Every state selector here weighs (0,3,0), :has()
-     taking the specificity of its argument, so ONLY source order arbitrates them:
-     moved back down, this one repaints the error border and the accent focus grey,
-     with no console error. Only a readonly field's BASE colour belongs to it. */
+  /* A read-only field sinks slightly into the page but keeps its text at full
+     strength — the value is there to be read — and still shows the accent focus ring.
+     The state is read from [data-readonly] and never from `:read-only`, which the
+     browser also matches on a disabled field.
+
+     TRAP — this block must stay FIRST in the sequence of states: read-only, then
+     hover, focus, invalid and disabled. Every one of these selectors weighs (0,3,0),
+     `:has()` taking the specificity of what it contains, so nothing but the source
+     order arbitrates between them. Moved further down, this rule would repaint the
+     error border and the accent focus ring grey, with no error anywhere. What belongs
+     to a read-only field is its BASE colour alone. */
   .v-textarea[data-readonly] .v-textarea-field {
     --field-border-color: var(--vectis-color-border);
 
@@ -356,13 +415,18 @@ const { counterText, over } = useTextLimit({
     );
   }
 
-  /* "2px border" focus: a 1px border + a 1px outer shadow of the same colour, with
-     no layout jump. Only the CONTROL's focus is targeted (not :focus-within): when
-     an internal button (clear, icon) has keyboard focus, only its own outline
-     lights up — otherwise two simultaneous indicators, unreadable.
-     :focus (not :focus-visible): a text field always shows its focus, mouse included.
-     The transparent outline is the forced-colors safety net (Windows High Contrast drops
-     box-shadows). */
+  /* The focused field appears to have a two-pixel border: it is really its own 1px
+     border plus a 1px shadow of the same colour just outside it, which costs no
+     layout and therefore makes nothing jump.
+
+     The selector watches the CONTROL's focus and not `:focus-within`, so that when one
+     of the field's own buttons takes keyboard focus, only that button's outline
+     lights up: two indicators at once would be unreadable. And it is `:focus` rather
+     than `:focus-visible`, because a text field shows its focus even when it was
+     reached with the mouse.
+
+     The transparent outline is the safety net for Windows forced colours, which drop
+     box-shadows entirely; an outline survives and keeps the field marked. */
   .v-textarea-field:has(.v-textarea-control:focus) {
     --field-border-color: var(--vectis-color-accent);
 
@@ -370,19 +434,22 @@ const { counterText, over } = useTextLimit({
     outline: var(--vectis-focus-ring-width) solid transparent;
   }
 
-  /* Invalid state: the native pseudo-class first, the prop (aria-invalid) second.
-     Only the variable changes → both the border AND the focus ring go red. */
+  /* The invalid state, from the browser's own verdict first and from the `invalid`
+     prop second. Only the colour variable is changed, which is why the border AND the
+     focus ring both turn red without either being restated. */
   .v-textarea-field:has(.v-textarea-control:user-invalid),
   .v-textarea-field:has(.v-textarea-control[aria-invalid='true']) {
     --field-border-color: var(--vectis-color-danger);
   }
 
-  /* Internal buttons (clear, clickable icon): dark grey → black on hover, radius
-     aligned with VButton (a square focus ring with rounded edges). The negative
-     margin is DERIVED, never a literal: it is exactly the half-difference that
-     centres the icon in the (wider) action box, so it cancels that inset and the
-     glyph lands where a decorative .v-icon would — on the field's padding, and one
-     --control-gap away from its neighbour. */
+  /* The field's own buttons — the clear cross, a clickable icon — go from muted grey
+     to full strength on hover, and take VButton's radius so their focus ring has the
+     same rounded corners as everything else.
+
+     The negative margin is DERIVED and never written as a number: it is exactly half
+     the difference between the icon and the wider box holding it. Subtracting it
+     cancels that inset, so the glyph lands precisely where a decorative icon would
+     have — against the field's padding, one --control-gap from its neighbour. */
   .v-textarea-action {
     display: inline-flex;
     align-items: center;
@@ -409,14 +476,16 @@ const { counterText, over } = useTextLimit({
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
-  /* Disabled: a grey shade with no opacity (the same tokens as VCheckbox/VRadio).
-     Last of the state sequence: at equal specificity, it wins over all of them,
-     the error included — a disabled field is not submitted, so it has nothing to
-     report.
-     `text-muted` and not `text-subtle` like the label and the hint below: those sit on
-     the page surface, this sits on `surface-muted`, where subtle drops to 4.4:1. The
-     control itself is exempt from the contrast rule (it is natively disabled) but the
-     icons the field CONTAINS are not — and they inherit this colour. */
+  /* A disabled field greys out through the colour tokens, the same ones VCheckbox and
+     VRadio use, and never through opacity. It comes LAST in the sequence of states,
+     which at equal specificity is what makes it win over all of them, the error
+     included: a disabled field is not submitted, so it has nothing to report.
+
+     The text here is `text-muted` and not the `text-subtle` used by the label and the
+     hint below, because those sit on the page surface where this sits on
+     `surface-muted` — against which subtle falls to a 4.4:1 contrast. The control
+     itself is exempt from that rule, being natively disabled, but the icons the field
+     CONTAINS are not, and they inherit this colour. */
   .v-textarea[data-disabled] .v-textarea-field {
     --field-border-color: var(--vectis-color-border);
 
@@ -442,8 +511,10 @@ const { counterText, over } = useTextLimit({
     cursor: not-allowed;
   }
 
-  /* 100% CSS auto-grow: the control's height follows the content (progressive
-     enhancement) and the field follows; no resize handle */
+  /* Growing with the content is pure CSS: `field-sizing` makes the textarea's height
+     follow what is typed, and the field around it follows in turn. The resize handle
+     goes, there being nothing left to resize by hand. A browser without support keeps
+     the fixed height and its scrollbar, which is the intended fallback. */
   .v-textarea-field[data-auto-grow] {
     resize: none;
   }

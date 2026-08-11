@@ -1,14 +1,22 @@
 <script setup lang="ts">
 /**
- * Switch: a native <input type="checkbox" role="switch"> — correct screen-reader
- * semantics (an on/off state), with keyboard and forms for free. The track/thumb
- * rendering is pure CSS driven by :checked. JS limited to the v-model bridge.
+ * A switch, for a setting that takes effect at once — where a checkbox states an
+ * intention to be confirmed later.
+ *
+ * Underneath it is a native checkbox marked `role="switch"`, so a screen reader
+ * announces it as on or off rather than as ticked, and the keyboard and the form
+ * behaviour come along for free. The track and the moving thumb are pure CSS,
+ * following the input's checked state; the only JavaScript is the v-model.
  */
 interface SwitchProps {
-  /** Position of the label relative to the switch. */
+  /** Which side of the switch the label sits on. */
   labelPosition?: 'start' | 'end'
-  /** Pushes label and switch to opposite ends (the root becomes block, full width). */
+  /**
+   * Pushes the label and the switch to opposite ends of the line, the row taking the
+   * full width available — the usual shape for a list of settings.
+   */
   spread?: boolean
+  /** Makes the switch unusable, greyed out through the colour tokens. */
   disabled?: boolean
 }
 
@@ -19,14 +27,15 @@ withDefaults(defineProps<SwitchProps>(), {
 })
 
 // @a11y
-// The root is a <label>: the native attributes (name, aria-label…) must land on the
-// input.
+// The root element is the <label>, so the attributes the consumer passes have to be
+// redirected onto the input: `name` for the form, and the aria-* for the element
+// that actually carries the switch role.
 defineOptions({ inheritAttrs: false })
 
 const model = defineModel<boolean>({ default: false })
 
 defineSlots<{
-  /** Label, clickable (the <label> wraps everything) */
+  /** The label. It is clickable, the whole component being wrapped in a `<label>`. */
   default?(): unknown
 }>()
 </script>
@@ -63,8 +72,8 @@ defineSlots<{
     cursor: pointer;
   }
 
-  /* The input is position: absolute → outside the flex flow, so the visual order
-     concerns only the track and the label */
+  /* The input is taken out of the flow by its absolute position, so reversing the
+     row only ever swaps the track and the label. */
   .v-switch[data-label-position='start'] {
     flex-direction: row-reverse;
   }
@@ -74,6 +83,8 @@ defineSlots<{
     justify-content: space-between;
   }
 
+  /* Hidden with `opacity` and never with `display: none`, which would take the input
+     out of the tab order and out of the form. */
   .v-switch-input {
     position: absolute;
     opacity: 0;
@@ -101,7 +112,10 @@ defineSlots<{
     background: var(--vectis-color-surface);
     border-radius: var(--vectis-radius-full);
     box-shadow: var(--vectis-shadow-1);
-    /* margin-inline rather than translateX: the movement follows the direction (RTL-safe) */
+    /* The thumb travels through `margin-inline-start` rather than a translation,
+       because a logical property follows the reading direction: in a right-to-left
+       page the thumb then moves leftwards on its own, where a translateX would have
+       to be mirrored by a second rule. */
     transition: margin-inline-start var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
@@ -126,9 +140,10 @@ defineSlots<{
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* Disabled: greys (the same tokens as VCheckbox/VRadio), no opacity. The thumb
-     takes text-subtle — the colour of VCheckbox/VRadio's disabled tick and dot — so
-     it stays visible on the grey track in both themes. */
+  /* A disabled switch greys out through the colour tokens, the same ones VCheckbox
+     and VRadio use, and never through opacity. The thumb takes text-subtle — the
+     colour their disabled tick and dot take — which is what keeps it visible against
+     the grey track in both themes. */
   .v-switch:has(.v-switch-input:disabled) {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;

@@ -1,19 +1,33 @@
 <script setup lang="ts">
 /**
- * A native <input type="radio">, its rendering replaced by a styled dot (the same
- * approach as VCheckbox: the input stays in the tree, only its rendering is hidden). The group is native: several VRadio sharing the same `name`
- * (fallthrough) and the same v-model — arrow navigation is supplied by the
- * browser, zero JS.
+ * A radio button whose dot is drawn by the design system, on the same principle as
+ * VCheckbox: the real `<input type="radio">` stays in place and only its own drawing
+ * is hidden.
+ *
+ * The group is native as well. Several VRadio sharing the same `name` and the same
+ * v-model form one choice, and it is the browser that then makes the arrow keys move
+ * between them, that lets only one be selected, and that gives the group a single
+ * stop in the tab order. There is no JavaScript here for any of it.
  */
 interface RadioProps {
-  /** Value carried by this button, compared against the group's v-model. */
+  /**
+   * What choosing this button means. The group's v-model holds the value of the
+   * selected button, so this is what it becomes when this one is picked.
+   */
   value: string
-  /** Position of the label relative to the dot. */
+  /** Which side of the dot the label sits on. */
   labelPosition?: 'start' | 'end'
-  /** Pushes label and dot to opposite ends (the root becomes block, full width). */
+  /**
+   * Pushes the label and the dot to opposite ends of the line, the row taking the
+   * full width available.
+   */
   spread?: boolean
-  /** Forces the invalid state — sets aria-invalid. */
+  /**
+   * Marks the field as invalid, which colours the dot and tells assistive technology
+   * so. It is for a rule the browser cannot check by itself.
+   */
   invalid?: boolean
+  /** Makes this choice unusable, greyed out through the colour tokens. */
   disabled?: boolean
 }
 
@@ -24,16 +38,17 @@ withDefaults(defineProps<RadioProps>(), {
   disabled: false,
 })
 
-// @a11y — the component's ONLY behavioural decision: arrow navigation inside the
-// group is the browser's, and it only works if `name` reaches the real input.
-// The root is a <label>: the native attributes (`name` above all, for the group) must
-// land on the input.
+// @a11y — the component's ONLY behavioural decision, and it buys the whole keyboard.
+// Moving between the buttons of a group is the browser's job, but it only groups
+// inputs that share a `name` — so redirecting the attributes is what makes the arrow
+// keys work at all. The root being the <label>, `name` left on it would reach
+// nothing.
 defineOptions({ inheritAttrs: false })
 
 const model = defineModel<string>({ default: '' })
 
 defineSlots<{
-  /** Label, clickable (the <label> wraps everything) */
+  /** The label. It is clickable, the whole component being wrapped in a `<label>`. */
   default?(): unknown
 }>()
 </script>
@@ -66,8 +81,8 @@ defineSlots<{
     cursor: pointer;
   }
 
-  /* The input is position: absolute → outside the flex flow, so the visual order
-     concerns only the dot and the label */
+  /* The input is taken out of the flow by its absolute position, so reversing the
+     row only ever swaps the dot and the label. */
   .v-radio[data-label-position='start'] {
     flex-direction: row-reverse;
   }
@@ -77,6 +92,8 @@ defineSlots<{
     justify-content: space-between;
   }
 
+  /* Hidden with `opacity` and never with `display: none`, which would take the input
+     out of the tab order, out of the form and out of its own group. */
   .v-radio-input {
     position: absolute;
     opacity: 0;
@@ -86,8 +103,9 @@ defineSlots<{
     pointer-events: none;
   }
 
-  /* Dot: the same mechanics as VCheckbox's box (accent background when checked),
-     with the inner dot as a pseudo-element in currentcolor */
+  /* The dot works exactly like VCheckbox's box — the accent colour fills it once the
+     input is checked — with the small inner disc drawn as a pseudo-element in
+     currentcolor, so it follows whatever colour the ring takes. */
   .v-radio-dot {
     display: inline-grid;
     place-items: center;
@@ -145,7 +163,8 @@ defineSlots<{
     border-color: var(--vectis-color-danger);
   }
 
-  /* Disabled: greys (the same tokens as VButton), no opacity */
+  /* A disabled radio greys out through the colour tokens, the same ones VButton
+     uses, and never through opacity. */
   .v-radio:has(.v-radio-input:disabled) {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;

@@ -11,41 +11,54 @@ import { useMessages } from '../../i18n/state'
 
 // @keyboard @core
 /**
- * A one-time code (OTP). There is no "N-character code" primitive: each cell stays a
- * native <input>, and the JS orchestrates the keyboard and pasting (justified) —
- * auto-advance, backspace, a paste distributed across the cells, arrows.
- * `autocomplete="one-time-code"` on the first cell: automatic filling (SMS/password
- * manager) is distributed.
+ * The row of boxes a one-time code is typed into, one character per box.
  *
- * `pattern` cuts the template into cells: the '#' become cells, the other characters
- * become displayed literals (outside the v-model). Pasting is "pattern-aware": the
- * literals present in the pasted text ("GT-123", "123.456.789") are consumed
- * positionally, and the rest is filtered by `format` (capitals forced outside
- * numeric: a canonical v-model).
+ * The platform has no such control, so each box is a real `<input>` and the
+ * JavaScript is what makes the row behave as a single field: typing a character moves
+ * to the next box, Backspace on an empty one goes back, the arrows walk along, and a
+ * code pasted anywhere is spread across the boxes. The first box carries
+ * `autocomplete="one-time-code"`, so a code filled in from an SMS or a password
+ * manager is spread the same way.
+ *
+ * `pattern` is what cuts the row up: every `#` becomes a box, and every other
+ * character becomes a separator shown between them, which is displayed but never part
+ * of the value. Pasting understands those separators — a code copied in its formatted
+ * shape, "GT-123" or "123.456.789", is consumed with them in place — and everything
+ * else is filtered by `format`, which also forces capitals outside a numeric code so
+ * that the value has one canonical form.
  */
 interface InputOTPProps {
-  /** Number of cells. Ignored when `pattern` is supplied. */
+  /** How many boxes the code has. It is ignored as soon as a `pattern` is given. */
   length?: number
-  /** Accepted character set: it filters typing/pasting + the inputmode. */
+  /**
+   * Which characters the code is made of. It filters what can be typed or pasted, and
+   * decides which keyboard a phone offers.
+   */
   format?: 'numeric' | 'alpha' | 'alphanumeric'
   /**
-   * Template: '#' = an editable cell, any other character = a displayed literal
-   * (outside the v-model). Wins over `length`. E.g. 'GT-###', '###.###.###'.
+   * The shape of the code: each `#` is a box to fill, and every other character is a
+   * separator shown between the boxes without ever being part of the value —
+   * `'GT-###'`, `'###.###.###'`. It wins over `length`.
    */
   pattern?: string
   /**
-   * A Material Symbols name replacing EVERY literal of the pattern — meant for purely
-   * separator templates ('###-###'); do not supply it with a textual prefix
-   * ('GT-###').
+   * An icon drawn in place of EVERY separator of the pattern. It suits a template
+   * whose separators are purely decorative, `'###-###'`, and should not be used with
+   * one carrying meaningful text such as `'GT-###'`, which the icon would erase.
    */
   separatorIcon?: IconSource
-  /** Side of the cells: sm 32px, md 40px (the default), lg 48px. */
+  /** The size of the boxes: 32, 40 or 48 pixels. */
   size?: 'sm' | 'md' | 'lg'
-  /** Height reduced by 4px; type and icons unchanged (as in VButton/VInput). */
+  /** Takes 4px off the boxes, leaving the text and the icons as they are. */
   compact?: boolean
+  /** Makes every box unusable, greyed out through the colour tokens. */
   disabled?: boolean
+  /** Marks the code as wrong, which colours the boxes and tells assistive technology so. */
   invalid?: boolean
-  /** Accessible name of the group. Default: the DS dictionary. */
+  /**
+   * What screen readers announce for the row as a whole. It falls back to the design
+   * system dictionary.
+   */
   label?: string
 }
 
@@ -67,7 +80,7 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.inputOTP.label)
 const model = defineModel<string>({ default: '' })
 
 const emit = defineEmits<{
-  /** Emitted when every cell is filled. */
+  /** Emitted the moment every box is filled, carrying the complete code. */
   complete: [code: string]
 }>()
 
@@ -96,7 +109,11 @@ const filters: Record<NonNullable<InputOTPProps['format']>, RegExp> = {
   alphanumeric: /[^A-Z0-9]/g,
 }
 
-/** Capitals forced outside numeric (a canonical v-model), then the format filter. */
+/**
+ * Keeps only what the format allows. Outside a numeric code the text is put in
+ * capitals first, so that the value has a single canonical form whichever case the
+ * reader typed or pasted.
+ */
 function sanitize(text: string) {
   const upper = props.format === 'numeric' ? text : text.toUpperCase()
   return upper.replace(filters[props.format], '')
@@ -106,8 +123,9 @@ const inputs = ref<(HTMLInputElement | null)[]>([])
 const digits = ref<string[]>([])
 
 function syncFromModel(value: string) {
-  // a model longer than the cells: truncated visually, without rewriting the model
-  // spontaneously (no model → digits → model loop)
+  // A value longer than the row is simply shown cut short, and the model is NOT
+  // rewritten to match: writing back here would feed the watcher below and the two
+  // would keep correcting each other.
   digits.value = Array.from({ length: slotCount.value }, (_, i) => value[i] ?? '')
 }
 syncFromModel(model.value)
@@ -123,16 +141,20 @@ function commit() {
 
 // @core
 /**
- * Pattern-aware distribution: it walks the cells from the target one — a literal
- * consumes the pasted character when it equals it (pasting the formatted string), a
- * cell consumes the next valid character. Returns the last slot filled, or null when
- * nothing is usable.
+ * Spreads a run of characters across the boxes, starting from the one that received
+ * them. It walks the row: a separator swallows the incoming character when the two
+ * match, which is what lets a code pasted in its formatted shape line up, and a box
+ * takes the next character the format accepts.
+ *
+ * It returns the last box it filled, so the caller knows where to put the focus, and
+ * `null` when nothing in the text was usable.
  */
 function distribute(raw: string, startSlot: number): number | null {
   const allCells = cells.value
   let start = allCells.findIndex((cell) => cell.type === 'slot' && cell.slotIndex === startSlot)
-  // walk back up the run of contiguous literals preceding the cell: pasting the whole
-  // string ("GT-123" onto slot 0) includes them
+  // Step back over the separators immediately before that box: pasting the whole
+  // string onto the first box means pasting its prefix too, and "GT-" has to be
+  // matched rather than treated as characters of the code.
   while (start > 0 && allCells[start - 1]?.type === 'literal') start--
   const chars = [...raw]
   let charIndex = 0
@@ -155,14 +177,16 @@ function distribute(raw: string, startSlot: number): number | null {
   return lastFilled
 }
 
-// @keyboard @core — the auto-advance focus move is what makes a cell row usable
-// as one field; the distribution itself is @core.
+// @keyboard @core — moving the focus forward on its own is what turns a row of
+// separate inputs into something that types like one field; spreading the characters
+// is the core behaviour underneath it.
 function onInput(slotIndex: number, event: Event) {
   const el = event.target as HTMLInputElement
-  // a single keystroke OR a multi-character paste: distributed from this cell on
+  // The same path serves a single keystroke and a pasted code: both are spread from
+  // this box onwards.
   const lastFilled = distribute(el.value, slotIndex)
   if (lastFilled === null) {
-    // an erase, or no character valid for the format
+    // Either the box was emptied, or nothing typed was valid for this format.
     digits.value[slotIndex] = ''
     el.value = ''
     commit()
@@ -220,7 +244,9 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
         @keydown="onKeydown(cell.slotIndex, $event)"
         @focus="($event.target as HTMLInputElement).select()"
       />
-      <!-- a decorative literal of the template: never focusable, outside the v-model -->
+      <!-- A separator from the pattern: shown, never focusable, and never part of the
+           value. It is hidden from screen readers, each box already announcing its
+           own position in the code. -->
       <span v-else class="v-otp-literal" aria-hidden="true">
         <VIcon v-if="separatorIcon" v-bind="iconProps(separatorIcon)" />
         <template v-else>{{ cell.char }}</template>
@@ -233,9 +259,10 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
 @layer vectis.components {
   .v-otp {
     /*
-     * Height/icons: the shared v-control class (styles/control-size.css). The
-     * typography keeps a scale of its own, bumped one or two notches compared with the
-     * other fields: the digits fill the square cells.
+     * The heights and the icon context come from the shared v-control class
+     * (styles/control-size.css). The type is the one thing kept local, and set one or
+     * two steps above the other fields: a single character has a whole square to
+     * itself, and at the usual field size it would look lost in it.
      */
     --otp-font-size: var(--vectis-font-size-lg);
 
@@ -245,7 +272,8 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
   }
 
   .v-otp-input {
-    /* Square cells: size/compact scale both dimensions at once */
+    /* The boxes are square: reading the same variable for both dimensions is what
+       makes the size and the density scale them together. */
     width: var(--control-height);
     height: var(--control-height);
     text-align: center;
@@ -258,9 +286,10 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     transition: border-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  /* The "2px border" focus: a 1px border + a 1px outer shadow in the same colour
-     (aligned on VInput/VTextarea); the transparent outline is the forced-colors line
-     (Windows High Contrast removes box-shadows) */
+  /* The focused box appears to have a two-pixel border, exactly as in VInput and
+     VTextarea: its own 1px border plus a 1px shadow of the same colour just outside
+     it. The transparent outline is the safety net for Windows forced colours, which
+     drop box-shadows entirely. */
   .v-otp-input:focus-visible {
     border-color: var(--vectis-color-accent);
     box-shadow: 0 0 0 1px var(--vectis-color-accent);
@@ -285,7 +314,8 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     user-select: none;
   }
 
-  /* Disabled: greys through tokens, with no opacity (aligned on VInput) */
+  /* A disabled row greys out through the colour tokens and never through opacity, the
+     same treatment as VInput. */
   .v-otp[data-disabled] .v-otp-input {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);
@@ -297,7 +327,8 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     color: var(--vectis-color-text-subtle);
   }
 
-  /* Sizes: only the bumped typography stays local, the rest comes from v-control */
+  /* Of the whole size scale, only the raised type is restated here; the dimensions
+     themselves come from v-control. */
   .v-otp[data-size='sm'] {
     --otp-font-size: var(--vectis-font-size-md);
   }
