@@ -1,0 +1,78 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VDialogStories from './VDialog.stories'
+
+<Meta of={VDialogStories} />
+
+# Dialog
+
+A blocking modal built on the native `<dialog>` primitive + `showModal()`: the move to the **top
+layer**, `::backdrop`, the **focus trap** and the **inert background** are all native — no JS for
+any of it, and the focus returns to the trigger on closing. The light dismiss (a backdrop click /
+Escape) is declarative too, through the `closedby` attribute. The only behavioural JS is the
+`v-model:open` ↔ imperative API bridge (`showModal()` and `close()` have no declarative
+equivalent), confined to `onMounted`/`watch`/handlers (SSR-safe).
+
+<Canvas of={VDialogStories.Default} />
+
+<Controls of={VDialogStories.Default} />
+
+## Opening and closing
+
+The state is driven by `v-model:open`. A scoped `#trigger` slot supplies `triggerProps` to set on a
+`VButton` (`v-bind="triggerProps"`) — an explicit route, with no magic bridge. Since `<dialog>`
+emits no event on opening, opening sets `open.value` (the watcher calls `showModal()`) while
+closing requests the native close; the `close` event (the cross, Escape, the backdrop) then
+resynchronizes the `v-model`. The `show()` / `close()` methods are also exposed through `ref`.
+
+**Lazy mounting**: the `<dialog>` (and its potentially costly content) is only mounted in the DOM
+while it is open, and is entirely removed from it on closing — nothing lingers or captures clicks.
+Since each opening recreates a brand new element, the **entry** animation is kept but there is no
+**exit** animation.
+
+## Three zones
+
+The **header** holds a title and a subtitle — entirely replaceable through the `#header` slot. On
+the right, the close cross (`closable`, hideable); just to its left, the `#headerActions` slot takes
+free controls (download, full screen…). The **content** (the default slot) is scrollable. The
+**footer** (the `#footer` slot) carries the actions.
+
+<Canvas of={VDialogStories.CustomHeader} />
+
+<Canvas of={VDialogStories.HeaderActions} />
+
+## Width and responsiveness
+
+`width` accepts any CSS unit (default `400px`) and drives the modal's width. The modal never
+exceeds `100% − margins`, in width as well as in height (`max-inline-size`/`max-block-size` on
+`100dvi`/`100dvb`): on a small screen it retracts to the viewport.
+
+<Canvas of={VDialogStories.Width} />
+
+## Overflowing content and separators
+
+When the content exceeds the maximum height, the body becomes scrollable and **the header and the
+footer stay visible** (sticky). The header/content and content/footer separating rules appear
+**only when content passes under the header or the footer** — implemented with scroll-state
+container queries (`@container scroll-state(scrollable: top | bottom)`). It is a recent CSS feature
+(Chrome 133+, not yet Safari/Firefox): where it is unsupported, no separator is displayed (a
+degradation with no consequence).
+
+<Canvas of={VDialogStories.LongContent} />
+
+## Without a cross
+
+<Canvas of={VDialogStories.WithoutCross} />
+
+## Accessibility
+
+- The native `<dialog>` element carries the `dialog` role (or `alertdialog`, see `VDialogAlert`).
+- `title` and `subtitle` feed `aria-labelledby` / `aria-describedby`. With a custom header (the
+  `#header` slot), supply an `aria-label` (or `aria-labelledby`) on the modal yourself.
+- `showModal()` provides the **focus trap**, the **inert background** and the **focus return** to
+  the trigger for free — nothing to rewire.
+- The cross exposes an accessible name (`closeLabel`, "Close" by default).
+- Every animation goes through `@media (prefers-reduced-motion: reduce)`.
+
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**), and the text props stay authoritative for a
+case-by-case adjustment.
