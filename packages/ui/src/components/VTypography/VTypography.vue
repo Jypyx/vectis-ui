@@ -1,14 +1,15 @@
 <script setup lang="ts">
 // @core — the only JS is deriving the default tag from the variant.
 /**
- * The design system's text element: `variant` selects a complete typographic
- * recipe (family, size, weight, leading, tracking) taken from the semantic
- * `--vectis-text-*` tokens, and `tone` a semantic colour. 100% HTML/CSS — the
- * only JS is deriving the default tag.
+ * The design system's text element. Rather than setting a size here and a weight
+ * there, the writer names the ROLE the text plays — a heading, a caption, a label —
+ * and `variant` applies the complete typographic recipe that goes with it: family,
+ * size, weight, line height and letter spacing, all read from the semantic tokens.
+ * `tone` does the same for colour.
  *
- * The root is a single element: native attributes (id, for, aria-*…) land on it
- * by fallthrough — indispensable when the component serves as a field label
- * (`as="label"` + `for`).
+ * It renders a single element and adds no behaviour, so the attributes it is given
+ * (id, for, aria-*…) land straight on that element. This is what lets it serve as a
+ * real field label, with `as="label"` and a `for`.
  */
 import { computed } from 'vue'
 
@@ -31,15 +32,28 @@ export type TypographyTone =
   'default' | 'muted' | 'subtle' | 'accent' | 'danger' | 'success' | 'warning' | 'on-inverse'
 
 interface TypographyProps {
-  /** Typographic role — a complete recipe of `--vectis-text-*` tokens. */
+  /**
+   * The role this text plays, which selects a complete recipe of typographic
+   * tokens — size, weight, line height and, where the role calls for it, letter
+   * spacing and a monospaced family.
+   */
   variant?: TypographyVariant
-  /** The tag rendered; by default derived from the variant (h1…h4, p, span, code). */
+  /**
+   * The HTML tag to render. Each variant already has a sensible default (h1 to h4,
+   * p, span, code), so this is for the cases where the meaning and the look differ —
+   * a subtitle that is really an `h2`, or a label attached to a field.
+   */
   as?: string
-  /** Semantic text colour; `default` inherits from the context. */
+  /**
+   * The colour of the text. `default` sets none at all, so the text inherits from
+   * whatever surrounds it — which is what lets the same component be used on an
+   * inverted surface or inside a coloured toast.
+   */
   tone?: TypographyTone
   /**
-   * Single-line truncation (ellipsis). The element must have a constrained width
-   * (a block or a flex item) for the cut to apply.
+   * Cuts the text to one line and ends it with an ellipsis. The element needs a
+   * width to be cut against — being a block, or a flex item — otherwise there is
+   * nothing to overflow and the text simply stays whole.
    */
   truncate?: boolean
 }
@@ -56,7 +70,10 @@ defineSlots<{
   default(): unknown
 }>()
 
-/** Default semantic tag of each variant, overridable through `as`. */
+/**
+ * The tag each variant renders when `as` says nothing — the one whose meaning
+ * matches the role.
+ */
 const DEFAULT_TAGS: Record<TypographyVariant, string> = {
   display: 'p',
   'heading-1': 'h1',
@@ -91,21 +108,22 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
 <style>
 @layer vectis.components {
   .v-typography {
-    /* Defaults re-set on every instance: custom properties inherit, so without
-       this a VTypography nested under a tracked variant (display, headings) or
-       under `code` would inherit --typography-tracking / --typography-family. The
-       [data-variant] blocks (higher specificity) override them. */
+    /* These two defaults are re-declared on every instance because custom properties
+       INHERIT: nested inside a variant that sets letter spacing, or inside a `code`,
+       a VTypography would otherwise pick up its ancestor's tracking and monospaced
+       family. The [data-variant] blocks below, being more specific, still win. */
     --typography-family: var(--vectis-text-family);
     --typography-tracking: normal;
 
-    margin: 0; /* no margin: spacing belongs to the parent layout */
+    margin: 0; /* the space around a text block belongs to the layout holding it */
     font-family: var(--typography-family);
     font-size: var(--typography-size);
     font-weight: var(--typography-weight);
     line-height: var(--typography-leading);
     letter-spacing: var(--typography-tracking);
-    /* Tone `default` = inheritance: composable inside already-coloured contexts
-       (an inverted surface, the VToast tones…). */
+    /* With the `default` tone no colour variable is set, and the fallback makes the
+       text inherit — which is what allows the component to be dropped inside an
+       already coloured context, an inverted surface or a tinted toast. */
     color: var(--typography-color, inherit);
     overflow-wrap: break-word;
   }
@@ -195,9 +213,8 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
     --typography-leading: var(--vectis-text-code-leading);
   }
 
-  /* `default` has no block: without --typography-color the text inherits from the
-     context, which is what makes it composable inside an inverted surface or a
-     tinted VToast. */
+  /* There is deliberately no block for the `default` tone: leaving the colour
+     variable unset is precisely what makes the text inherit. */
   .v-typography[data-tone='muted'] {
     --typography-color: var(--vectis-color-text-muted);
   }

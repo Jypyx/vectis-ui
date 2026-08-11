@@ -1,24 +1,25 @@
 <script setup lang="ts">
 // @core
 /**
- * Icon, resolved in this order: image (`src`), then `name` — first the consumer
- * RESOLVER if one is set (`setIconResolver`, see `resolver.ts`), then the
- * BUILT-IN REGISTRY (embedded Material Symbols Rounded SVGs, see `icons.ts`),
- * otherwise the ligature (a font loaded by the CONSUMER, see the README) —
- * otherwise inline SVG through the slot. Decorative by default (aria-hidden);
- * `label` makes it informative (role="img" + aria-label).
+ * An icon, whatever the icons of the host application happen to be made of. The
+ * component's real work is deciding WHERE the drawing comes from, and it asks in a
+ * fixed order: an explicit render first, then an image address, then the name —
+ * which is offered to the consumer's own resolver if one was installed, then to the
+ * registry of icons built into the library, and finally to a ligature font. A raw
+ * SVG can always be passed through the slot instead.
  *
- * The order IS the contract: the resolver comes before the registry, otherwise
- * the DS's icons would stay Material for anyone who wired in their own library;
- * and a resolver returning `undefined` hands over to the registry, which is what
- * makes partial mappings usable.
+ * That order IS the contract. The resolver is asked before the registry, otherwise
+ * the design system's own icons would stay Material for a consumer who has wired in
+ * their own library; and a resolver that answers `undefined` for a name simply hands
+ * over to the registry, which is what makes a PARTIAL mapping usable.
  *
- * The registry is what makes the DS usable WITHOUT an icon font: the icons the
- * library renders itself (crosses, chevrons, VToast tones…) depend on nothing.
- * The ligature stays the fallback for any other name.
+ * The registry is what allows the design system to work with no icon font at all:
+ * the icons the library draws by itself — crosses, chevrons, toast tones — depend on
+ * nothing being installed. The ligature remains the fallback for every other name.
  *
- * No BEHAVIOURAL JS here despite the `computed`: no event, no lifecycle, no DOM
- * access — a pure source resolution, evaluated identically on server and client.
+ * Despite the `computed`, there is no behavioural JavaScript here: no event, no
+ * lifecycle, no DOM. It is a pure choice of source, which the server and the browser
+ * make identically.
  */
 import { computed, type Component } from 'vue'
 
@@ -27,28 +28,35 @@ import { resolveIcon } from './resolver'
 import type { IconRender } from './types'
 
 interface IconProps {
-  /** Icon name: one of the built-in icons, otherwise a ligature of the consumer's font. */
+  /**
+   * The name of the icon. It is offered to the consumer's resolver, then to the
+   * icons built into the library, and finally left to the icon font as a ligature.
+   */
   name?: string
   /**
-   * Explicit render (image, component, path, class…) — takes precedence over
-   * everything else. This is the route the `IconSource` props of the DS's
-   * components take when the consumer does not supply a plain name.
+   * An explicit description of what to draw — an image, a component, a path, a class
+   * — which wins over everything else. This is the route every `IconSource` prop of
+   * the design system takes when it is given something other than a plain name.
    */
   render?: IconRender
-  /** Image source (URL). Takes precedence over `name`. */
+  /** The address of an image to use as the icon. It wins over `name`. */
   src?: string
   /**
-   * Explicit size in pixels (e.g. :size="32"). Without it: the context size
-   * (`--vectis-icon-size` set by a parent, e.g. VButton), otherwise 1em — the
-   * icon follows the surrounding text.
+   * A size in pixels. Left out, the icon takes the size its context imposes — a
+   * button sets one for the icons inside it — and failing that 1em, which makes it
+   * follow the surrounding text.
    */
   size?: number
-  /** Accessible label; absent = a decorative icon (aria-hidden). */
+  /**
+   * What the icon means, for screen readers. Leaving it out marks the icon as
+   * decorative and hides it from them, which is the right thing whenever the
+   * surrounding text already says what it says.
+   */
   label?: string
   /**
-   * Filled variant (`FILL` axis 1 instead of 0): honoured by the built-in
-   * registry when the geometry differs, and by the ligature. No effect on the
-   * `src` (image) and inline-SVG sources.
+   * Draws the filled version of the icon. The built-in icons honour it wherever
+   * filling actually changes the drawing, and the ligature font always does. It
+   * means nothing for an image or an inline SVG, whose shape is fixed.
    */
   filled?: boolean
 }
@@ -63,14 +71,15 @@ const props = withDefaults(defineProps<IconProps>(), {
 })
 
 defineSlots<{
-  /** Inline SVG (used when neither `src` nor `name` is given). */
+  /** An inline SVG, used when neither `src` nor `name` was given. */
   default?(): unknown
 }>()
 
 /**
- * The chosen shape, tagged: the public `IconRender` union is not discriminated
- * (the consumer has nothing to tag), but the template needs a reliable
- * discriminant — and the tag encodes the documented precedence along the way.
+ * The chosen source, labelled with its kind. The public `IconRender` union carries
+ * no such label — the consumer writes it by hand and has nothing to tag it with —
+ * but the template needs one thing it can branch on reliably, and applying the tag
+ * is also where the documented precedence between the shapes gets decided.
  */
 type Resolved =
   | { kind: 'path'; path: string; viewBox: string }
@@ -89,9 +98,15 @@ function tag(render: IconRender): Resolved {
   return { kind: 'class', class: render.class }
 }
 
-// @fallback — the resolution ladder itself: each rung hands over to the next, and
-// the ligature is the last resort when no registry entry and no resolver answered.
-/** Explicit `render`, then the consumer resolver, then the built-in registry; otherwise the ligature. */
+// @fallback — the ladder itself: every rung hands over to the next one, and the
+// ligature is the last resort, reached when neither the resolver nor the registry
+// recognized the name.
+/**
+ * Works out what to draw: an explicit `render` if there is one, then the consumer's
+ * resolver, then the icons built into the library. Answering `undefined` here is not
+ * a failure — it means the template falls through to the image, the ligature or the
+ * slot.
+ */
 const resolved = computed<Resolved | undefined>(() => {
   if (props.render) return tag(props.render)
   if (props.src !== undefined || props.name === undefined) return undefined
@@ -102,7 +117,8 @@ const resolved = computed<Resolved | undefined>(() => {
   const paths: readonly string[] | undefined = (
     builtinIcons as Record<string, readonly string[] | undefined>
   )[props.name]
-  // The filled path only exists if the FILL axis changes the geometry (see icons.ts).
+  // A second path is only stored when filling actually changes the drawing, so most
+  // icons have one path and fall back to it (see icons.ts).
   const path = paths && ((props.filled ? paths[1] : undefined) ?? paths[0])
   return path ? { kind: 'path', path, viewBox: ICON_VIEW_BOX } : undefined
 })
@@ -134,7 +150,8 @@ const resolved = computed<Resolved | undefined>(() => {
         v-bind="resolved.props"
       />
       <img v-else-if="resolved.kind === 'src'" class="v-icon-img" :src="resolved.src" alt="" />
-      <!-- the interpolation touches the tags: a ligature tolerates no surrounding whitespace -->
+      <!-- The interpolation is written flush against the tags: a ligature is matched
+           on the exact text, and any surrounding whitespace would break it -->
       <span v-else-if="resolved.kind === 'text'" class="v-icon-symbol" :class="resolved.class">{{
         resolved.text
       }}</span>
@@ -150,12 +167,13 @@ const resolved = computed<Resolved | undefined>(() => {
 @layer vectis.components {
   .v-icon {
     /*
-     * Size resolution, by priority:
-     * 1. the `size` prop (px) — set as an inline --vectis-icon-size on the
-     *    element: an own declaration beats inheritance and the layer;
-     * 2. --vectis-icon-size / --vectis-icon-opsz inherited from a parent (the
-     *    context API: VButton sets them from its own size);
-     * 3. 1em — the icon follows the parent's text size.
+     * How the size is settled, in order of priority:
+     * 1. the `size` prop, written inline on the element as --vectis-icon-size — a
+     *    declaration made on the element itself beats both inheritance and the
+     *    layer, so it always wins;
+     * 2. the variables inherited from an ancestor, which is the context API: a
+     *    VButton sets them from its own size, and the icons inside follow;
+     * 3. 1em, which makes the icon follow the size of the text around it.
      */
     --icon-size: var(--vectis-icon-size, 1em);
     --icon-opsz: var(--vectis-icon-opsz, 24);
@@ -165,14 +183,15 @@ const resolved = computed<Resolved | undefined>(() => {
     flex: none;
     inline-size: var(--icon-size);
     block-size: var(--icon-size);
-    /* the Material Symbols ligature is sized through font-size */
+    /* a ligature is text, so it is the font-size that sizes it */
     font-size: var(--icon-size);
   }
 
-  /* Degraded state when the font is not loaded: the textual name stays inside the
-     square instead of breaking the layout. Set on the ONLY branch it protects and
-     not on `.v-icon`: a third-party icon font may draw a glyph outside its 1em
-     box, which would then be clipped. */
+  /* When the icon font has not loaded, a ligature shows as its own name in plain
+     text. Clipping keeps that text inside the square instead of letting it push the
+     layout apart. The rule is scoped to the ONE branch it protects rather than to
+     `.v-icon`: a third-party icon font may legitimately draw outside its 1em box,
+     and clipping everything would cut those glyphs. */
   .v-icon:has(> .v-icon-symbol) {
     overflow: hidden;
   }
@@ -186,8 +205,10 @@ const resolved = computed<Resolved | undefined>(() => {
     text-transform: none;
     white-space: nowrap;
     direction: ltr;
-    /* Material Symbols font axes (FILL/wght/GRAD/opsz): a technical contract of
-       the font, not design tokens — literal values tolerated, like opacities */
+    /* The variable axes of the Material Symbols font. These numbers are the font's
+       own technical contract and not design decisions, which is why they are written
+       literally here rather than taken from tokens — the same tolerance as the
+       opacities. */
     font-variation-settings:
       'FILL' var(--icon-fill, 0),
       'wght' 400,
@@ -206,19 +227,22 @@ const resolved = computed<Resolved | undefined>(() => {
     object-fit: contain;
   }
 
-  /* Class font supplied by a resolver (Font Awesome, Phosphor…): the glyph comes
-     from a `::before`, sized by `.v-icon`'s `font-size`. The DS owns the element,
-     so one rule is enough — `font-style` pre-empts the `<i>` conventions, and
-     `line-height` stops the inherited line box off-centring the glyph. */
+  /* An icon coming from a class-based font, as Font Awesome and Phosphor ship them:
+     the glyph is drawn by a `::before`, at the font-size `.v-icon` has set. Because
+     the design system renders this element itself rather than accepting the usual
+     `<i>`, one rule normalizes it for every such library — `font-style` undoes the
+     italics those conventions carry, and `line-height` stops the inherited line box
+     from pushing the glyph off centre. */
   .v-icon-glyph {
     display: block;
     font-style: normal;
     line-height: var(--vectis-font-leading-none);
   }
 
-  /* SVG from the built-in registry. `fill` is set on OUR class and never on
-     `.v-icon > svg`: a multicolour SVG passed through the slot keeps its colours.
-     `display: block` removes the baseline gap under the inline element. */
+  /* An SVG drawn from the built-in icons. The fill is set on OUR class and never on
+     `.v-icon > svg`, so that a multicoloured SVG handed in through the slot keeps
+     its own colours instead of being flattened to the text colour. `display: block`
+     removes the gap an inline element leaves under its baseline. */
   .v-icon-svg {
     display: block;
     fill: currentcolor;
