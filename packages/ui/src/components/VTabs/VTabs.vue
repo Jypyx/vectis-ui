@@ -22,45 +22,61 @@ export type TabsActivation = 'manual' | 'automatic'
 
 // @a11y @keyboard @core
 /**
- * Tab bar (the ARIA tabs pattern) and, optionally, its panels.
+ * A row of tabs, and optionally the panels they show. Only one panel is visible at a
+ * time, and the tabs follow the pattern assistive technology expects of them: the row
+ * is a single stop in the tab order, and the arrow keys move between the tabs inside
+ * it.
  *
- * The component invents no button: every tab is a ghost `VButton` (raised through
- * `elevated` when active in the `inset` variant), and the scroll controls are
- * `VIconButton`.
- * Hover, focus, disabling and `prefers-reduced-motion` therefore come from
- * `VButton`, with no state rule redefined here.
+ * No button is invented here. Every tab is a VButton and the scroll controls are
+ * VIconButtons, so hovering, focusing, disabling and the respect of a reader's
+ * reduced-motion setting all come from there, without a single state rule being
+ * written again in this file.
  *
- * SSR-safe: no DOM access outside handlers and `watch({ flush: 'post' })`.
+ * Nothing touches the DOM outside event handlers and effects that run after the page
+ * has been updated, which is what lets the component render on a server.
  */
 interface TabsProps {
   /**
-   * `flat`: underlined ghost tabs, no decoration. `outlined`: `flat` inside a card
-   * (bar AND panels). `inset`: a segmented control in a hollow track.
+   * How the bar is framed. `flat` draws nothing but a rule under the tabs, with the
+   * selected one underlined; `outlined` puts that same bar and its panels inside a
+   * card; `inset` turns the row into a segmented control sitting in a hollow track.
    */
   variant?: TabsVariant
-  /** Colours the active tab; the inactive ones stay neutral. */
+  /** The colour the selected tab takes. The others stay neutral whatever this says. */
   tone?: TabsTone
+  /** The height of the tabs, from the scale shared by every control. */
   size?: TabsSize
-  /** Height reduced by 4px (propagated to every button). */
+  /** Takes 4px off the height of every tab. */
   compact?: boolean
+  /** Whether the tabs run across the page or down its side. */
   orientation?: TabsOrientation
-  /** Left/centre/right when horizontal, top/middle/bottom when vertical. */
+  /** Where the tabs sit along the bar when they do not fill it. */
   align?: TabsAlign
-  /** The tabs share the whole available width (or height). */
+  /** Makes the tabs share the whole bar between them, in equal parts. */
   grow?: boolean
-  /** Shows two scroll buttons, disabled at the ends. */
+  /**
+   * Adds a button at each end of the bar to scroll it, each disabled once that end is
+   * reached. It only makes sense when the tabs can overflow, so it excludes `grow`.
+   */
   scrollButtons?: boolean
-  /** Icon of the upstream scroll button. Default depends on the orientation. */
+  /** The icon of the button scrolling backwards. It follows the orientation by default. */
   prevIcon?: IconSource
-  /** Icon of the downstream scroll button. Default depends on the orientation. */
+  /** The icon of the button scrolling forwards. It follows the orientation by default. */
   nextIcon?: IconSource
-  /** Accessible label of the upstream scroll button. Default: the DS dictionary. */
+  /** What the backward scroll button does, in words. It falls back to the dictionary. */
   prevLabel?: string
-  /** Accessible label of the downstream scroll button. Default: the DS dictionary. */
+  /** What the forward scroll button does, in words. It falls back to the dictionary. */
   nextLabel?: string
-  /** `automatic`: selection follows focus (the APG recommendation for instant panels). */
+  /**
+   * Whether moving to a tab also selects it. Selecting on arrival is what the ARIA
+   * authoring practices recommend when a panel appears instantly; leave it manual when
+   * showing a panel costs a request, or every tab passed over would fire one.
+   */
   activation?: TabsActivation
-  /** Accessible name of the tab list. Default: the DS dictionary. */
+  /**
+   * What screen readers announce for the row of tabs. It falls back to the design
+   * system dictionary.
+   */
   label?: string
 }
 
@@ -82,21 +98,25 @@ const props = withDefaults(defineProps<TabsProps>(), {
 })
 
 defineSlots<{
-  /** The <VTab> elements */
+  /** The tabs themselves. */
   default(): unknown
-  /** The <VTabPanel> elements; when absent, no panel container is rendered. */
+  /**
+   * The panels the tabs show. Leaving it out renders no panel area at all, which is
+   * how the same component serves as a plain bar or a segmented control.
+   */
   panels?(): unknown
 }>()
 
 const model = defineModel<string | number>()
 
-// Wrapper-root pattern: the root is only a container, and the functional element
-// is the list. class/style stay on the root, everything else (aria-labelledby, id,
-// data-*) goes down onto the [role="tablist"].
+// The root element is only a container; the one that matters is the row of tabs. So
+// `class` and `style` stay outside, where a consumer expects to place the component,
+// and everything else — the id, the aria-* naming it, the data-* — goes down onto the
+// row itself.
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs: listAttrs } = useRootAttrs()
-// Cascade prop > dictionary; for the tablist's name, `useAriaLabel` still places
-// the consumer's `aria-labelledby` and `aria-label` above it.
+// The prop wins over the dictionary, and above both, a consumer's own aria-label or
+// aria-labelledby still wins — that arbitration is what `useAriaLabel` is for.
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.tabs.label)
 const resolvedPrevLabel = computed(() => props.prevLabel ?? m.value.tabs.previous)
@@ -105,7 +125,9 @@ const resolvedNextLabel = computed(() => props.nextLabel ?? m.value.tabs.next)
 const slots = useSlots()
 const baseId = useId()
 
-// Getters: the root's props stay reactive across the injection.
+// Everything is exposed through getters rather than as values: that is what keeps the
+// root's props reactive on the other side of the injection, so a tab re-renders when
+// the size or the tone changes.
 provide(tabsKey, {
   get value() {
     return model.value
@@ -117,10 +139,13 @@ provide(tabsKey, {
   panelId: (value: string | number) => panelIdFor(baseId, value),
   // @ssr
   /*
-   * A slot's presence is decided by the parent's vnode: identical on the server
-   * and client renders, so there is no hydration mismatch — where a registry fed
-   * by the panels' mounting would produce one. The trade-off is that `slots` is
-   * not reactive: the #panels slot must be statically present or absent.
+   * Whether a slot was given is decided by the parent as it renders, so the answer is
+   * the same on the server and in the browser. A registry the panels filled in as they
+   * mounted would instead read as empty on the server and full on the client, which is
+   * a hydration mismatch.
+   *
+   * The trade-off is that this is not reactive: the panels slot must be there or not
+   * there, and cannot appear halfway through the life of the component.
    */
   get hasPanels() {
     return slots.panels !== undefined
@@ -154,10 +179,13 @@ const listEl = ref<HTMLElement | null>(null)
 
 // @keyboard @a11y
 /*
- * Keyboard navigation (shared implementation: `utils/arrowNav`). The handler ONLY
- * moves focus: selection on focus (`automatic` mode) is set by VTab, which knows
- * its typed value and therefore does not have to route it through a DOM attribute.
- * A tab hidden by the consumer is excluded by the helper's `display` filter.
+ * The arrow keys, through the shared implementation in `utils/arrowNav`. This handler
+ * ONLY moves the focus. Selecting the tab that receives it — what `automatic`
+ * activation means — is done by the tab itself, which knows its own typed value and
+ * therefore never has to send it back through a DOM attribute.
+ *
+ * A tab the consumer has hidden is left out by the helper, which skips anything not
+ * displayed.
  */
 function onKeydown(event: KeyboardEvent) {
   const list = listEl.value
@@ -168,17 +196,20 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 /*
- * Ends of the scroll buttons — no CSS primitive can DISABLE a button based on the
- * scroll position (`::scroll-button()` will do it natively, but only from Chrome
- * 135+, and its icon would go through `content`, hence through a font loaded by
- * the consumer).
+ * Whether each end of the bar has been reached, which is what disables the scroll
+ * buttons. No CSS can express that today — the language is gaining a native scroll
+ * button, but only in the newest Chrome, and its icon would have to come from a font
+ * the consumer loads.
  *
- * Two 1px sentinels observed inside the list cover scrolling, container resizing
- * and the addition or removal of tabs with a single observer — where a
- * ResizeObserver would impose a second mechanism for the same signal. Defaults to
- * `true`: buttons disabled on the first render and in SSR, never a wrong state.
- * Nothing overflows ⇒ both sentinels are visible ⇒ both buttons disabled, with no
- * separate test.
+ * Rather than measuring the scroll, two hairline markers are placed at the ends of the
+ * row and watched. One watcher then covers all three things that can change the
+ * answer: scrolling, the bar being resized, and tabs being added or removed — where
+ * measuring would need a second mechanism for the resize alone.
+ *
+ * Both start as reached, so the buttons are disabled on the first render and on the
+ * server, never wrongly enabled. It also gives the "nothing overflows" case for free:
+ * both markers are visible at once, so both buttons stay disabled with no test of
+ * their own.
  */
 const startSentinelEl = ref<HTMLElement | null>(null)
 const endSentinelEl = ref<HTMLElement | null>(null)
@@ -189,8 +220,9 @@ watch(
   [listEl, startSentinelEl, endSentinelEl],
   ([root, start, end], _previous, onCleanup) => {
     // @fallback
-    // IntersectionObserver exists neither in SSR nor in jsdom: the ends are
-    // verified in the browser (play functions).
+    // The observer exists neither on the server nor in the unit-test environment, so
+    // its absence has to be tolerated rather than assumed away. The behaviour of the
+    // ends is checked in a real browser instead, by the play functions.
     if (!root || !start || !end || typeof IntersectionObserver === 'undefined') return
     const observer = new IntersectionObserver(
       (entries) => {
@@ -208,26 +240,36 @@ watch(
   { flush: 'post' },
 )
 
-/** `behavior` omitted: scrolling follows `scroll-behavior`, hence reduced-motion. */
+/**
+ * Scrolls the bar by most of its own length. No scrolling behaviour is requested,
+ * deliberately: leaving it out lets the stylesheet decide, which is what makes the
+ * movement respect a reader who has asked for less motion.
+ */
 function scrollStep(direction: -1 | 1) {
   const list = listEl.value
   if (!list) return
-  // optional call: jsdom does not implement scrolling
+  // Called optionally because the unit-test environment implements no scrolling at
+  // all; this behaviour is covered in a real browser.
   if (isVertical.value) {
     list.scrollBy?.({ top: direction * list.clientHeight * 0.8 })
     return
   }
-  // `left` is physical: in RTL, "next" goes to the left.
+  // The horizontal offset is physical, not logical: in a right-to-left page, moving
+  // forward means moving left, so the direction has to be flipped by hand.
   const rtl = getComputedStyle(list).direction === 'rtl'
   list.scrollBy?.({ left: direction * list.clientWidth * 0.8 * (rtl ? -1 : 1) })
 }
 
 // @a11y @core
 /*
- * Scrolls the active tab back into view after a programmatic v-model change
- * (keyboard navigation calls `focus()` instead: the browser scrolls on its own).
- * The scrolling is bounded to the list. The deltas come from the rects, hence
- * physical: valid in LTR, RTL and vertical with no direction test.
+ * Brings the selected tab back into view when the selection was changed from code.
+ * The keyboard needs nothing here: it moves the focus, and the browser scrolls a
+ * focused element into view by itself.
+ *
+ * The scrolling is confined to the row rather than asking the element to reveal
+ * itself, which would scroll every scrollable ancestor up to the page. The distances
+ * are read from the two boxes, so they are already physical: the same code serves
+ * left-to-right, right-to-left and vertical without a single test of direction.
  */
 watch(model, () => {
   nextTick(() => {
@@ -276,8 +318,9 @@ watch(model, () => {
         :aria-orientation="isVertical ? 'vertical' : undefined"
         @keydown="onKeydown"
       >
-        <!-- end sentinels: outside the accessibility tree, since a `tablist` owns
-             nothing but `tab` children -->
+        <!-- The two markers watched to know whether an end of the bar is reached.
+             They are hidden from assistive technology: a row of tabs may contain
+             nothing but tabs. -->
         <span
           v-if="scrollButtons"
           ref="startSentinelEl"
@@ -312,11 +355,14 @@ watch(model, () => {
 @layer vectis.components {
   .v-tabs {
     /*
-     * Frame gutter: zero when flat (bar and panels flush with the host container),
-     * set by `outlined` — VDataTable's `--table-frame-pad` idiom. Fixed, NOT indexed
-     * on `data-size`/`compact`: it is a card measurement, and the `--control-*` variables
-     * live on the descendant VButtons (each VTab sets its own `v-control`), hence out of
-     * the root's reach.
+     * The gutter between the card's border and what it holds. It is zero when the
+     * component is flat, so the bar and the panels sit flush with whatever contains
+     * them, and only `outlined` gives it a value — the same idiom VDataTable uses.
+     *
+     * It is a FIXED measurement and deliberately not indexed on the size or the
+     * density: it is a property of the card, and in any case the size variables live
+     * on the descendant buttons, each tab declaring its own, so the root could not
+     * read them.
      */
     --tabs-frame-pad: 0px;
 
@@ -325,23 +371,23 @@ watch(model, () => {
     font-family: var(--vectis-text-family);
   }
 
-  /* Vertical: the bar and the panels sit side by side */
+  /* Turned vertical, the bar and the panels sit side by side rather than stacked. */
   .v-tabs[data-orientation='vertical'] {
     flex-direction: row;
   }
 
   /*
-   * Bordered card — the decoration scale shared with VAccordion and VDataTable;
-   * `flat` (the default) has nothing to cancel. The frame is on the ROOT, hence around the
-   * bar AND the panels: the bar's track becomes the separator between the two, inside the
-   * frame.
+   * The card, taken from the decoration scale shared with VAccordion and VDataTable.
+   * The flat default has nothing to undo, since it declares no decoration at all.
    *
-   * No `overflow: clip`, unlike VDataTable whose table is edge-to-edge by
-   * construction: here the gutter always leaves a band at least equal to the inner
-   * radius (no box reaches a corner, so no nested `calc()` radius is needed), the
-   * list already crops its own overflow, and clipping would crop the VTabPanel's
-   * OUTER focus ring — the only one leaving the component — as well as forbidding
-   * the consumer any edge-to-edge panel content.
+   * The frame goes on the ROOT, so it encloses the bar AND the panels, and the rule
+   * under the tabs then becomes the boundary between the two inside it.
+   *
+   * Unlike VDataTable, nothing is clipped here. The gutter always leaves a band at
+   * least as wide as the inner radius, so no box ever reaches a corner and no nested
+   * radius has to be computed; the row already crops its own overflow; and clipping
+   * would cut the panel's focus ring — the only one that leaves the component — as
+   * well as forbidding a consumer any content running edge to edge.
    */
   .v-tabs[data-variant='outlined'] {
     --tabs-frame-pad: var(--vectis-space-3);
@@ -353,20 +399,21 @@ watch(model, () => {
 
   .v-tabs-bar {
     display: flex;
-    /* stretch, not center: the list overflows 1px into the track through a negative
-       margin, and centring would offset it by half a pixel */
+    /* Stretched rather than centred: the row deliberately overlaps the track by one
+       pixel through a negative margin, and centring would displace it by half of
+       that. */
     align-items: stretch;
     /*
-     * The alignment lives on the BAR, not on the list: the latter shrinks
-     * (min-size: 0) as soon as the tabs overflow, leaving no room to distribute. A
-     * `justify-content` set on a scrolling container would instead make the part
-     * overflowing past the start edge permanently unreachable — `scrollLeft` cannot
-     * be negative in LTR.
+     * The alignment belongs to the BAR and not to the row of tabs. The row is allowed
+     * to shrink below its content as soon as the tabs overflow, so there would be
+     * nothing left to distribute; and setting an alignment on a scrolling container
+     * makes whatever overflows past its start edge permanently unreachable, since a
+     * scroll position cannot go negative.
      */
     justify-content: flex-start;
     gap: var(--vectis-space-1);
-    /* Frame gutter (0 when flat). Nothing on the END edge: that is the one the
-       track occupies, and the tabs must stay sitting on it. */
+    /* The card's gutter, which is zero when flat. Nothing is added on the edge the
+       track occupies: the tabs have to stay sitting on that line. */
     padding-block-start: var(--tabs-frame-pad);
     padding-inline: var(--tabs-frame-pad);
   }
@@ -374,7 +421,8 @@ watch(model, () => {
   .v-tabs[data-orientation='vertical'] .v-tabs-bar {
     flex-direction: column;
     align-items: stretch;
-    /* the track's axis switches: the inline END edge is the one left flush */
+    /* Turned vertical, the track changes axis, so it is now the inline end edge that
+       must be left without a gutter. */
     padding-block: var(--tabs-frame-pad);
     padding-inline-end: 0;
   }
@@ -387,10 +435,14 @@ watch(model, () => {
     justify-content: flex-end;
   }
 
-  /* The track of the `flat` and `outlined` variants: on the bar, so it also runs
-     under the scroll buttons (siblings of the list). When framed, it is what
-     separates the bar from the panels — hence the end edge left without a gutter,
-     since otherwise it would separate nothing. */
+  /* The rule the tabs sit on, in the flat and outlined frames. It is drawn on the BAR
+     rather than on the row, so that it also runs under the scroll buttons, which are
+     siblings of the row and not part of it. Inside a card it is what separates the
+     tabs from the panels — which is why that edge is left without a gutter, since
+     otherwise the rule would separate nothing from nothing.
+
+     Both frames are named explicitly rather than excluding the third: a fourth frame
+     will have to opt in by hand instead of inheriting this silently. */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tabs-bar {
     border-block-end: 1px solid var(--vectis-color-border);
   }
@@ -402,11 +454,14 @@ watch(model, () => {
   }
 
   /*
-   * Framed and vertical: the track MIGRATES to the end edge. When flat it delimits
-   * the tab column, hence the start edge; inside a card that edge is already held by
-   * the frame's border (two parallel rules otherwise) and what is missing is the
-   * bar/panels boundary. Specificity EQUAL to the rule above (0,4,0): order decides, so
-   * do not move this block up.
+   * Framed AND vertical, the rule MIGRATES to the other edge. Flat, it marks the edge
+   * of the tab column, hence the start; inside a card that edge is already drawn by
+   * the frame's own border — two parallel lines a pixel apart — and what is missing is
+   * the boundary between the tabs and the panels.
+   *
+   * TRAP — this block has exactly the same specificity as the one above, so it is the
+   * ORDER that decides. Moving it up would leave the vertical framed case with two
+   * rules on one side and none between the two areas.
    */
   .v-tabs[data-variant='outlined'][data-orientation='vertical'] .v-tabs-bar {
     border-inline-start: none;
@@ -418,8 +473,8 @@ watch(model, () => {
     align-items: center;
     gap: var(--vectis-space-1);
     overflow: auto;
-    /* the list must be able to shrink below its content size, otherwise it pushes the bar
-       instead of scrolling */
+    /* Without these the row refuses to shrink below the width of its tabs, and it
+       would widen the whole bar instead of scrolling. */
     min-inline-size: 0;
     min-block-size: 0;
     scrollbar-width: none;
@@ -431,17 +486,19 @@ watch(model, () => {
     align-items: stretch;
   }
 
-  /* The 2px indicator covers the 1px track instead of stacking on top of it (negative
-     margins) */
+  /* Pulling the row one pixel into the track is what lets the selected tab's indicator
+     COVER that line rather than sit on top of it, which would read as a thicker rule.
+   */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tabs-list {
     margin-block-end: -1px;
-    /* contiguous tabs: on a track they form a row of segments (see the zero radius
-       set by VTab.vue), not a queue of buttons */
+    /* On a track the tabs are contiguous segments and not a queue of buttons: no gap
+       here, and no rounded corners on the tabs themselves. */
     gap: 0;
   }
 
-  /* since the list is 1px taller than the tabs, they rest on its end edge: the indicator
-     then lands exactly on the track */
+  /* The row is now a pixel taller than the tabs it holds, so they are pushed against
+     its end edge; the indicator each tab draws there then falls exactly on the
+     track. */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='horizontal']
     .v-tabs-list {
     align-items: flex-end;
@@ -453,18 +510,20 @@ watch(model, () => {
     margin-inline-start: -1px;
   }
 
-  /* Framed and vertical: there is no longer any track at the start edge to cover —
-     the 1px overflow would slide the list under the frame's border. Same specificity
-     as the rule above: order decides. */
+  /* Framed AND vertical, there is no longer a track on that edge to cover, since the
+     rule has migrated to the other side: the one-pixel overlap would simply slide the
+     row under the frame's own border.
+
+     TRAP — same specificity as the rule above, so again it is the order that decides. */
   .v-tabs[data-variant='outlined'][data-orientation='vertical'] .v-tabs-list {
     margin-inline-start: 0;
   }
 
   /*
-   * Edge case: `outlined` with no #panels slot — the card reduces to the bar. There
-   * is no boundary left to mark and the track would double the frame's border,
-   * flush against it: the frame replaces it, the gutter closes on the end edge and
-   * the list stops overflowing.
+   * A framed bar with no panels: the card is reduced to the tabs alone. There is no
+   * longer a boundary to mark, and the track would run right alongside the frame's own
+   * border, doubling it. So the frame takes its place, the gutter closes on that edge,
+   * and the row stops overlapping.
    */
   .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) .v-tabs-bar {
     border-block-end: none;
@@ -477,8 +536,9 @@ watch(model, () => {
     margin-block-end: 0;
   }
 
-  /* Hollow track of the `inset` variant: carried by the scrolling container itself,
-     otherwise its padding does not protect the active tab's shadow */
+  /* The hollow track of the segmented variant is drawn on the scrolling row itself,
+     and not on the bar around it: its padding is what keeps the raised tab's shadow
+     from being clipped as the row scrolls. */
   .v-tabs[data-variant='inset'] .v-tabs-list {
     background: var(--vectis-color-surface-sunken);
     padding: var(--vectis-space-1);
@@ -496,20 +556,22 @@ watch(model, () => {
 
   .v-tabs-scroll {
     flex: none;
-    /* the bar is stretch for the track's sake: the controls centre themselves on the list
-       (which is taller than they are in the inset variant) */
+    /* The bar stretches its children for the track's sake, so the scroll buttons have
+       to re-centre themselves on the row — which in the segmented variant is taller
+       than they are. */
     align-self: center;
   }
 
-  /* chevrons: the direction is physical, so the icon flips in RTL */
+  /* A chevron points at a physical direction, which the logical properties do not
+     mirror: in a right-to-left page it has to be flipped by hand. */
   [dir='rtl'] .v-tabs[data-orientation='horizontal'] .v-tabs-scroll .v-icon {
     scale: -1 1;
   }
 
   .v-tabs-panels {
     min-inline-size: 0;
-    /* frame gutter (0 when flat): the panel is the card's content area, so it takes
-       it on all four sides */
+    /* The panels are the content area of the card, so they take the gutter on all four
+       sides — where the bar takes it on three, the fourth being the track's. */
     padding: var(--tabs-frame-pad);
   }
 

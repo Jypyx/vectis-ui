@@ -4,21 +4,29 @@ import { computed, inject, ref, watchEffect } from 'vue'
 import { tabsKey } from './context'
 
 /**
- * Panel associated with the tab of the same `value`. It is always rendered and
- * hidden by the native `hidden` attribute when inactive: zero JS, and the
- * content's state (typing in progress, scroll position) survives a tab change.
+ * The panel a tab shows, matched to it by the same `value`.
+ *
+ * Every panel is rendered at all times, and the inactive ones are hidden with the
+ * native `hidden` attribute rather than removed. That costs no JavaScript, and it
+ * means the state of what they contain survives a change of tab: a half-typed field
+ * keeps its text, a scrolled list its position, and a form's fields are still
+ * submitted.
  */
 interface TabPanelProps {
-  /** Must match the `value` of a `VTab`. */
+  /** Which tab shows this panel: it must be the `value` of one of them. */
   value: string | number
-  /** Defers mounting the content until first shown, then keeps it. */
+  /**
+   * Holds the content back until the panel is first shown, and keeps it from then on.
+   * It is for a panel expensive to build; the state it holds is still preserved
+   * afterwards.
+   */
   lazy?: boolean
 }
 
 const props = withDefaults(defineProps<TabPanelProps>(), { lazy: false })
 
 defineSlots<{
-  /** Panel content */
+  /** What the panel contains. */
   default(): unknown
 }>()
 
@@ -28,7 +36,7 @@ const selected = computed(() => tabs != null && tabs.value === props.value)
 const tabId = computed(() => tabs?.tabId(props.value))
 const panelId = computed(() => tabs?.panelId(props.value))
 
-/** `lazy`: once revealed, the content stays mounted (no state is lost). */
+/** Once a deferred panel has been shown it stays built, so nothing it holds is lost. */
 const revealed = ref(false)
 watchEffect(() => {
   if (selected.value) revealed.value = true
@@ -51,11 +59,15 @@ watchEffect(() => {
 <style>
 @layer vectis.components {
   /*
-   * Guard: [hidden] comes only from the UA sheet, which the slightest author
-   * `display` declaration overrides — including a non-layered consumer style.
-   * Specificity (0,2,0), and definitely no !important: VTabs would otherwise be the
-   * only component in the DS impossible to override. To set a display on the panel,
-   * target .v-tabs-panel:not([hidden]).
+   * A guard. The `hidden` attribute only hides an element through the browser's own
+   * stylesheet, which ANY author declaration of a display overrides — a consumer's
+   * `.v-tabs-panel { display: flex }` included, and it would then reveal every panel
+   * at once.
+   *
+   * It is deliberately left overridable, with no `!important`: that would make this
+   * the one component of the design system a consumer could not restyle. To give the
+   * panel a display of your own, exclude the hidden ones —
+   * `.v-tabs-panel:not([hidden])`.
    */
   .v-tabs-panel[hidden] {
     display: none;

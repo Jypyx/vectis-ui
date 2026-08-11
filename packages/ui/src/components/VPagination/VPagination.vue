@@ -1,14 +1,19 @@
 <script setup lang="ts">
 // @keyboard @core
 /**
- * Composed pagination: every pill is a VButton, the previous/next controls a
- * VButton or a VIconButton, and `attached` joins the whole thing in a
- * VButtonGroup. No state rule is redefined here.
+ * The row of page numbers under a long list. Every pill is a VButton and the previous
+ * and next controls are buttons too, so nothing about hovering, focusing or disabling
+ * is written again here.
  *
- * Double truncation: logical (`totalVisible`, pure SSR-safe derivation) and
- * responsive (100% CSS through container queries on the nav itself, so no
- * ResizeObserver). The only behavioural JS is keyboard navigation, justified at
- * the head of `onKeydown`.
+ * A long list has more pages than fit on a line, and the row deals with that TWICE,
+ * for two different reasons. First logically: `totalVisible` fixes how many slots are
+ * rendered at all, and the pages that do not fit are replaced by an ellipsis — pure
+ * arithmetic, identical on the server and in the browser. Then visually: as the space
+ * actually available narrows, the neighbours of the current page are hidden one step
+ * at a time, and that half is entirely CSS, the row asking about its own width rather
+ * than being measured from code.
+ *
+ * The only behavioural JavaScript is the keyboard, explained where it is written.
  */
 import { computed, ref } from 'vue'
 
@@ -27,51 +32,78 @@ import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
 interface PaginationProps {
-  /** Total number of pages. */
+  /** How many pages there are in all. */
   length?: number
   /**
-   * Total number of rendered slots, ellipses included (minimum 5: first +
-   * ellipsis + current + ellipsis + last). The window shifts at the ends instead
-   * of shrinking: the bar's width is stable. Absent: every page is rendered.
+   * How many slots to render, ellipses counted among them — so the row keeps exactly
+   * the same width whichever page is current. Below five there would be nothing left
+   * to show around the current page, so five is the effective minimum. Left out, every
+   * page is rendered.
    */
   totalVisible?: number
 
-  /** Joins every button into a segmented control (VButtonGroup). */
+  /** Joins every button into one segmented control. */
   attached?: boolean
-  /** Variant of the NON-active pages and of the controls. The active page is always `solid`. */
+  /**
+   * How the pages OTHER than the current one, and the controls, are drawn. The current
+   * page is always filled, whatever this says.
+   */
   variant?: 'ghost' | 'outline'
-  /** Tone of the active page; inactive pages and the controls stay neutral. */
+  /** The colour the current page takes. The other pages and the controls stay neutral. */
   tone?: 'accent' | 'neutral' | 'danger'
+  /** The height of the buttons, from the scale shared by every control. */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  /** Height reduced by 4px, propagated to every button. */
+  /** Takes 4px off the height of every button. */
   compact?: boolean
-  /** Alignment within the container: the nav takes the full available width (see CSS). */
+  /**
+   * Where the row sits in the space it is given. It only matters in responsive mode,
+   * where the row takes the whole width available.
+   */
   align?: 'start' | 'center' | 'end'
 
-  /** Shows the previous / next buttons. */
+  /** Shows the previous and next buttons on either side of the pages. */
   showControls?: boolean
-  /** Rendering of the controls: icon only, text only, or both. */
+  /** Whether those controls show an icon, their label, or both. */
   controlsDisplay?: 'icon' | 'text' | 'both'
-  /** Icon of the previous control: a name, or an explicit render. */
+  /** The icon of the previous control: an icon name, or an explicit render. */
   prevIcon?: IconSource
-  /** Icon of the next control: a name, or an explicit render. */
+  /** The icon of the next control: an icon name, or an explicit render. */
   nextIcon?: IconSource
-  /** Label of the previous control (visible text and accessible name). Default: the DS dictionary. */
+  /**
+   * The wording of the previous control, used both as its visible text and as what
+   * screen readers announce. It falls back to the design system dictionary.
+   */
   prevLabel?: string
-  /** Label of the next control (visible text and accessible name). Default: the DS dictionary. */
+  /**
+   * The wording of the next control, used both as its visible text and as what screen
+   * readers announce. It falls back to the design system dictionary.
+   */
   nextLabel?: string
 
-  /** Disables the whole component. */
+  /** Makes the whole component unusable. */
   disabled?: boolean
-  /** Disabled pages: a list OR a predicate (the same convention as VCalendar's `disabledDates`). */
+  /**
+   * Which pages cannot be reached, as a list or as a function. The previous and next
+   * controls step OVER them rather than stopping at one.
+   */
   disabledPages?: number[] | ((page: number) => boolean)
 
-  /** Responsive truncation through container queries. */
+  /**
+   * Lets the row shed pages as the space narrows, by asking about its own width. It is
+   * off by default, because it makes the row take the full width available.
+   */
   responsive?: boolean
 
-  /** Accessible name of the navigation. Default: the DS dictionary. */
+  /**
+   * What screen readers announce for the navigation itself. It falls back to the
+   * design system dictionary.
+   */
   label?: string
-  /** Accessible name of a page pill. Default: the DS dictionary. */
+  /**
+   * How a page is announced. A pill shows a bare number, which alone means nothing to
+   * a screen reader — this is what turns it into "Page 3". It falls back to the design
+   * system dictionary.
+   */
   pageLabel?: (page: number) => string
 }
 
@@ -97,8 +129,8 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   pageLabel: undefined,
 })
 
-// Cascade prop > dictionary; for the nav's name, `useAriaLabel` still places the
-// consumer's `aria-labelledby` and `aria-label` above it.
+// The prop wins over the dictionary, and above both, a consumer's own aria-label or
+// aria-labelledby still wins — that arbitration is what `useAriaLabel` is for.
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.pagination.label)
 const resolvedPrevLabel = computed(() => props.prevLabel ?? m.value.pagination.previous)
@@ -106,7 +138,7 @@ const resolvedNextLabel = computed(() => props.nextLabel ?? m.value.pagination.n
 
 const page = defineModel<number>({ default: 1 })
 
-/** A rendered entry: a page pill, or an ellipsis marker. */
+/** One slot in the row: either a page, or the ellipsis standing for those left out. */
 type PaginationItem =
   | { kind: 'page'; key: string; page: number; edge: boolean; distance: number }
   | { kind: 'gap'; key: string }
@@ -116,18 +148,23 @@ const currentPage = computed(() => clamp(page.value, 1, total.value))
 
 const isPageDisabled = computed(() => resolveMatcher(props.disabledPages))
 
-// @a11y — a pill's visible text is a bare digit; this is what names it "Page 3".
+// @a11y — a pill shows nothing but a number, which on its own tells a screen reader
+// nothing at all; this is what has it announced as "Page 3".
 function pageLabelFor(n: number): string {
   return props.pageLabel ? props.pageLabel(n) : m.value.pagination.page(n)
 }
 
 /**
- * Logical truncation with a constant slot count: `totalVisible` counts EVERYTHING
- * rendered, ellipses included. The central window (totalVisible - 4 pages) is
- * centred on the current page and SHIFTS near the ends instead of shrinking — the
- * bar keeps exactly the same width whatever the current page. Each pill carries
- * its distance to the current page — the sort key of the responsive hiding,
- * capped at 3: beyond that, the most distant neighbours share the first step.
+ * Works out which slots the row holds.
+ *
+ * The count is CONSTANT: `totalVisible` counts everything rendered, the ellipses
+ * included, so the row never changes width as one moves through the pages. The window
+ * of pages around the current one is centred on it, and near either end it SHIFTS
+ * rather than shrinking — which is what keeps that count constant there too.
+ *
+ * Each page also carries how far it is from the current one. That distance is what the
+ * responsive hiding sorts by, and it is capped at three: past that, the most distant
+ * neighbours all disappear together at the first step.
  */
 const items = computed<PaginationItem[]>(() => {
   const count = total.value
@@ -147,8 +184,9 @@ const items = computed<PaginationItem[]>(() => {
   }
   const gap = (after: number): PaginationItem => ({ kind: 'gap', key: `gap-${after}` })
 
-  // Without totalVisible: no truncation, every page is rendered.
-  // Useful minimum: 5 (first + ellipsis + current + ellipsis + last).
+  // With no limit given, nothing is left out. Below five slots there would be no room
+  // for the first page, an ellipsis, the current page, another ellipsis and the last,
+  // so that is the floor.
   const visible =
     props.totalVisible === undefined ? count : Math.max(Math.trunc(props.totalVisible), 5)
   if (visible >= count) return pages(1, count)
@@ -156,17 +194,21 @@ const items = computed<PaginationItem[]>(() => {
   const start = current - Math.floor((visible - 5) / 2)
   const end = start + (visible - 5)
 
-  // Near an end (the ellipsis on that side would skip no number), the window
-  // stretches to the bound: always `visible` slots.
+  // Close to either end, an ellipsis on that side would stand for no missing page at
+  // all. The window is stretched to the bound instead, which both avoids that and
+  // keeps the number of slots exactly the same.
   if (start <= 3) return [...pages(1, visible - 2), gap(visible - 2), pageItem(count)]
   if (end >= count - 2) return [pageItem(1), gap(1), ...pages(count - visible + 3, count)]
   return [pageItem(1), gap(1), ...pages(start, end), gap(end), pageItem(count)]
 })
 
 /**
- * Target of a control: the nearest activatable page in the given direction —
- * disabled pages are stepped over. `undefined` = the end of the line, hence a
- * disabled control (which also covers the extremities, with no separate test).
+ * Where a control leads: the nearest page in that direction that can actually be
+ * reached, disabled ones being stepped over rather than stopped at.
+ *
+ * Answering `undefined` means there is none left, which disables the control — and
+ * that single answer also covers being on the first or the last page, with no separate
+ * test for the ends.
  */
 function step(direction: -1 | 1): number | undefined {
   for (let n = currentPage.value + direction; n >= 1 && n <= total.value; n += direction) {
@@ -189,10 +231,11 @@ const navEl = ref<HTMLElement | null>(null)
 
 // @keyboard @a11y
 /**
- * Keyboard navigation (shared implementation: `utils/arrowNav`). Tab stays
- * natural — every visible pill is a tab stop, as in a list of links. The pills
- * hidden by the container queries are excluded by the helper's `display` filter:
- * they do not take focus.
+ * The arrow keys, through the shared implementation in `utils/arrowNav`. Tab is left
+ * alone: every visible pill remains a stop in the tab order, as in any list of links.
+ *
+ * The pills the responsive rules have hidden are left out by the helper, which skips
+ * anything not displayed — so they cannot be focused into.
  */
 function onKeydown(event: KeyboardEvent) {
   const nav = navEl.value
@@ -211,9 +254,10 @@ function onKeydown(event: KeyboardEvent) {
     :data-responsive="responsive ? '' : undefined"
     @keydown="onKeydown"
   >
-    <!-- attached: VButtonGroup merges the borders. It targets its DIRECT
-         `.v-button` children — hence no <ul>/<li>, and an ellipsis rendered as a
-         VIconButton rather than a <span>. -->
+    <!-- Joined, the row is a VButtonGroup, which merges the borders of its DIRECT
+         button children. That is why there is no list markup wrapping the pills, and
+         why the ellipsis is itself an inert button rather than a plain span: anything
+         else between two pills would break the seam. -->
     <component :is="attached ? VButtonGroup : 'div'" class="v-pagination-items">
       <template v-if="showControls">
         <VIconButton
@@ -229,8 +273,9 @@ function onKeydown(event: KeyboardEvent) {
         >
           <VIcon v-bind="iconProps(prevIcon)" />
         </VIconButton>
-        <!-- aria-label set even when the label is visible: the container queries
-             hide it at narrow widths, and the accessible name must survive that. -->
+        <!-- The control is named explicitly even though its label is visible: at
+             narrow widths that label is hidden and only the icon remains, and the name
+             a screen reader announces has to survive that. -->
         <VButton
           v-else
           class="v-pagination-control"
@@ -266,9 +311,10 @@ function onKeydown(event: KeyboardEvent) {
         >
           {{ item.page }}
         </VButton>
-        <!-- Ellipsis: an inert VIconButton (hence a `.v-button`, so the group's
-             seam stays continuous and the height follows size/compact). Hidden
-             from assistive technologies, out of the tab order through disabled. -->
+        <!-- The ellipsis is a disabled button rather than a span: being a button, it
+             keeps the joined row's seam continuous and follows the size and density
+             like everything else. Disabling it takes it out of the tab order, and it
+             is hidden from screen readers, which have the page numbers themselves. -->
         <VIconButton
           v-else
           class="v-pagination-ellipsis"
@@ -326,14 +372,17 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   /*
-   * Containment reserved for responsive mode (every @container below depends on
-   * it): `container-type: inline-size` computes the inline size WITHOUT the
-   * content, so the nav must be block-level (an inline-flex would collapse to
-   * zero) and takes its parent's width — that is what makes the truncation depend
-   * on the space actually allocated, and what obliges a flex parent to give it a
-   * width (`flex: 1`). Outside responsive mode the nav regains an intrinsic width
-   * and sits like any other content. In both cases the alignment goes through
-   * `data-align`, never through the context.
+   * Making the row a query container is reserved for responsive mode, since every
+   * query below depends on it — and it is not free.
+   *
+   * A container of this kind computes its width WITHOUT looking at its content, so the
+   * row has to be block-level: as an inline box it would measure zero and hide
+   * everything at once. It therefore takes its parent's whole width, which is exactly
+   * what makes the hiding follow the space the component was actually given, and what
+   * obliges a flex parent to grant it one.
+   *
+   * Outside responsive mode the row keeps a width of its own and sits like any other
+   * content. Either way the alignment is asked for explicitly and never inferred.
    */
   .v-pagination[data-responsive] {
     container-type: inline-size;
@@ -354,54 +403,59 @@ function onKeydown(event: KeyboardEvent) {
     gap: var(--vectis-space-1);
   }
 
-  /* attached: the joining is done by VButtonGroup's negative margins */
+  /* Joined, the gap goes: VButtonGroup pulls the buttons onto one another itself. */
   .v-button-group.v-pagination-items {
     gap: 0;
   }
 
-  /* The `[data-size]` selector (VButton always renders the attribute) beats
-     `.v-button`'s own `padding-inline` whatever the order in which the consumer's
-     bundler concatenates the CSS — the VIconButton idiom. */
+  /* Qualified by an attribute VButton always renders, which is what makes this beat
+     that button's own padding whatever order the two sheets end up in — the
+     VIconButton idiom. */
   .v-pagination-page[data-size] {
-    /* A square pill at one digit, widening by itself beyond that: the variable is
-       set by v-control on this same element, so one rule covers all 5 sizes ×
-       compact. */
+    /* A one-digit pill is square, and widens by itself past that. The height variable
+       is set by the shared size class on this very element, so this single rule covers
+       all five sizes and their compact forms. */
     min-inline-size: var(--control-height);
     padding-inline: var(--vectis-space-2);
   }
 
-  /* the ellipsis is not a disabled button in the user's sense */
+  /* The ellipsis is a disabled button only as a technical device; to the reader it is
+     not a control that has been turned off, so it does not take the forbidden
+     cursor. */
   .v-pagination-ellipsis {
     cursor: default;
   }
 
-  /* chevrons: the direction is physical, so the icon flips in RTL */
+  /* A chevron points at a physical direction, which the logical properties do not
+     mirror: in a right-to-left page it has to be flipped by hand. */
   [dir='rtl'] .v-pagination-control .v-icon {
     scale: -1 1;
   }
 
   /*
-   * Responsive truncation — the nav is its own query container, so the steps
-   * follow the space allocated to the component, never the viewport (no
-   * ResizeObserver). The thresholds are literals: @container conditions do not
-   * accept var(). They are calibrated on size="md"; for the extreme cases (size
-   * xl, a 5-digit length), the escape hatch is `totalVisible` or
-   * `responsive: false`.
+   * The responsive half of the truncation. The row asks about ITS OWN width, so the
+   * steps follow the space the component was given rather than the size of the window
+   * — a sidebar and a full-width page behave differently, as they should, and nothing
+   * has to be measured from code.
    *
-   * Each threshold is the width NEEDED to display the level concerned — not what
-   * is left after hiding, otherwise the row overflows for the whole interval. At
-   * size md: a pill and a control are one control height wide (2.5rem), the gutter
-   * 0.25rem, so 2.75rem per element. A 13-element row (totalVisible 11) needs
-   * ~35.5rem, 11 elements ~30rem, 9 elements ~24.5rem — hence 36 / 31 / 25rem,
-   * margin included.
+   * The thresholds are written as literal lengths because a container query accepts no
+   * variables. They are calibrated on the default size: there, a pill and a control are
+   * each one control height wide, 2.5rem, plus a 0.25rem gutter, so 2.75rem apiece — a
+   * thirteen-slot row needs about 35.5rem, eleven about 30, nine about 24.5, hence the
+   * three thresholds with a little margin. For the extreme cases, the biggest size or
+   * five-digit page numbers, the way out is `totalVisible` or turning this off.
    *
-   * The most distant neighbours fall first. `[data-edge]` (the bounds) and the
-   * current page carry no `data-distance`, so they are never targeted.
-   * `display: none` also removes them from the tab order and the accessibility
-   * tree — that is intended.
+   * Each threshold is the width NEEDED to show that level, and not what remains once
+   * something is hidden: written the other way round, the row would overflow for the
+   * whole interval before the next step took effect.
    *
-   * No ellipsis is added to compensate for a hidden neighbour: it occupies exactly
-   * the width of a pill, so it would gain nothing.
+   * The most distant neighbours go first. The first and last pages, and the current
+   * one, carry no distance at all, so no rule here can ever reach them. Hiding them
+   * outright also takes them out of the tab order and out of the accessibility tree,
+   * which is intended: a control nobody can see should not be reachable.
+   *
+   * No ellipsis is added in place of a hidden neighbour — it is exactly as wide as the
+   * pill it would replace, so it would free nothing.
    */
   @container v-pagination (max-width: 36rem) {
     .v-pagination[data-responsive] .v-pagination-page[data-distance='3'] {
@@ -414,9 +468,10 @@ function onKeydown(event: KeyboardEvent) {
       display: none;
     }
 
-    /* A control in 'both' mode costs ~4× a pill: folding it down to icon-only
-       frees more room than sacrificing a neighbour, so it comes before the last
-       step. Never in 'text' mode — nothing clickable would be left. */
+    /* A control showing both its icon and its label is about four times as wide as a
+       pill, so dropping its label frees more room than sacrificing another page —
+       which is why it happens before the last step. It is never done when the control
+       shows text alone: there would be nothing left to click. */
     .v-pagination[data-responsive][data-controls-display='both'] .v-pagination-control-label {
       display: none;
     }

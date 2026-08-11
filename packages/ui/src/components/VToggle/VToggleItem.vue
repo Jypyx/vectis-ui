@@ -1,12 +1,15 @@
 <script setup lang="ts">
 /**
- * One item of a VToggle. It IS a `VButton`: tone, variant, size, focus and
- * disabling all come from it, and only the toggle state (`aria-pressed`) is
- * added — it travels through VButton's fallthrough to the rendered <button>,
- * which therefore stays the direct child VButtonGroup's seam requires.
+ * One item of a VToggle. It IS a VButton — the colour, the size, the focus ring and
+ * the disabled state all come from there — and what this component adds is the one
+ * attribute saying whether the button is currently pressed.
  *
- * The item still renders outside a `VToggle` (as VTab does outside VTabs), simply
- * never selected.
+ * That button is also this component's own root element, with nothing wrapped around
+ * it, which is what lets the group merge the borders of neighbouring items: it only
+ * joins its DIRECT children.
+ *
+ * Used outside a VToggle it still renders perfectly well, simply never selected, the
+ * same way a tab does outside its row.
  */
 import { computed, inject, useSlots } from 'vue'
 
@@ -18,13 +21,19 @@ import { toggleKey } from './context'
 import type { ToggleValue } from './VToggle.vue'
 
 interface ToggleItemProps {
-  /** Identifies the item in the group's v-model. Unique within the group. */
+  /**
+   * What choosing this item means. It is what the group's v-model holds when the item
+   * is selected, and it must be unique within the group.
+   */
   value: ToggleValue
-  /** Visible label; the default slot wins. */
+  /** The visible label. The default slot replaces it. */
   label?: string
-  /** Start icon: a name, or an explicit render. */
+  /** An icon before the label: an icon name, or an explicit render. */
   icon?: IconSource
-  /** Inert item: neither clickable nor reachable, greyed through tokens. */
+  /**
+   * Makes this item unusable: it no longer responds, the arrow keys skip over it, and
+   * it greys out through the colour tokens.
+   */
   disabled?: boolean
 }
 
@@ -35,7 +44,7 @@ const props = withDefaults(defineProps<ToggleItemProps>(), {
 })
 
 defineSlots<{
-  /** Free content of the item (replaces `label`). */
+  /** The content of the item, replacing the `label` prop. */
   default?(): unknown
 }>()
 
@@ -44,14 +53,18 @@ const toggle = inject(toggleKey, null)
 
 const selected = computed(() => toggle != null && toggle.isSelected(props.value))
 
-/** No visible label: the item shrinks to a square, like a VIconButton. */
+/** An icon and no label at all: the item becomes a square, like a VIconButton. */
 const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.default)
 </script>
 
 <template>
-  <!-- aria-pressed is always set (even at 'false'): its presence is what makes it
-       announced as a toggle button. `filled` is set directly on VIcon: VButton's
-       `iconFilled` prop has no effect on slots. -->
+  <!-- The pressed state is always rendered, false included: it is its PRESENCE that
+       makes a screen reader announce the button as one that stays pressed, and an
+       attribute appearing only when true would leave the unselected items announced
+       as ordinary buttons.
+
+       The filled form is asked of the icon directly, because VButton's own icon
+       options have no effect on an icon handed to it through a slot. -->
   <VButton
     class="v-toggle-item"
     :aria-pressed="selected ? 'true' : 'false'"
@@ -73,9 +86,9 @@ const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.de
 <style>
 @layer vectis.components {
   /*
-   * Item reduced to its icon: square, like VIconButton. [data-size] (always
-   * rendered by VButton) qualifies the selector so it beats the padding of
-   * .v-button[data-variant='…'] whatever the bundled CSS order.
+   * An item reduced to its icon becomes a square, like a VIconButton. The selector is
+   * qualified by an attribute VButton always renders, which is what makes it beat that
+   * button's own padding whatever order the two sheets end up in.
    */
   .v-toggle-item[data-size][data-icon-only] {
     padding-inline: 0;
