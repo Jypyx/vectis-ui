@@ -8,20 +8,41 @@ import VTypography from '../VTypography/VTypography.vue'
 import { accordionKey } from './context'
 
 /**
- * Accordion item: native <details>/<summary> — state, keyboard and accessibility
- * for free. The opening animation uses `::details-content` + `interpolate-size`
- * (progressive enhancement: with no support, it opens instantly).
+ * One section of an accordion: a heading the reader can click, and the content it
+ * reveals. It is a native `<details>`/`<summary>` pair, so the browser owns the
+ * open and closed state, the keyboard and the accessibility semantics, and this
+ * component adds no code of its own for any of them.
+ *
+ * The opening is animated entirely in CSS, with `::details-content` and
+ * `interpolate-size`. Both are recent additions to the language: where they are
+ * missing the section simply appears at once, which is the intended fallback.
  */
 interface AccordionItemProps {
-  /** Title of the summary; replaceable through the #title slot. */
+  /**
+   * The heading of the section, the line that stays visible when it is closed. Use
+   * the `#title` slot instead when the heading needs markup rather than plain text.
+   */
   title?: string
-  /** Subtitle under the title; replaceable through the #subtitle slot. */
+  /**
+   * A secondary line under the title, for a short explanation or a status. The
+   * `#subtitle` slot replaces it when markup is needed.
+   */
   subtitle?: string
-  /** Icon before the title: a name, or an explicit render (`{ src }`, `{ component }`…). */
+  /**
+   * An icon placed before the title: an icon name, or an explicit render
+   * (`{ src }`, `{ component }`…).
+   */
   iconStart?: IconSource
-  /** Open on the first render (the state is then handled natively). */
+  /**
+   * Renders the section already open. It only sets the state of the first render:
+   * the browser owns it afterwards, so changing this prop later will not close a
+   * section the reader has opened.
+   */
   defaultOpen?: boolean
-  /** Inert item: neither clickable nor keyboard-reachable, greyed through tokens. */
+  /**
+   * Makes the section inert. It can no longer be opened, the keyboard skips over
+   * it, and it is greyed out through the colour tokens.
+   */
   disabled?: boolean
 }
 
@@ -34,27 +55,31 @@ const props = withDefaults(defineProps<AccordionItemProps>(), {
 })
 
 defineSlots<{
-  /** The panel content */
+  /** The content revealed when the section is open. */
   default(): unknown
-  /** Rich title (replaces the `title` prop) */
+  /** A title made of markup, which replaces the `title` prop. */
   title?(): unknown
-  /** Rich subtitle (replaces the `subtitle` prop) */
+  /** A subtitle made of markup, which replaces the `subtitle` prop. */
   subtitle?(): unknown
-  /** Free content before the title (wins over `iconStart`) */
+  /** Free content before the title, which takes the place of `iconStart`. */
   start?(): unknown
 }>()
 
 const accordion = inject(accordionKey, null)
 
-/** Icons set by the group; the item stays usable on its own. */
+/**
+ * Both icons are chosen on the enclosing group. The chevron fallback is what keeps
+ * an item rendering correctly when it is used outside a VAccordion.
+ */
 const expandIcon = computed(() => accordion?.expandIcon ?? 'expand_more')
 const collapseIcon = computed(() => accordion?.collapseIcon)
 
 // @a11y @core
 /*
- * The component's only behavioural JS: <summary> has no native `disabled`
- * attribute, so the toggling of <details> cannot be blocked any other way — the
- * keyboard, on the other hand, is covered with no handler by `tabindex="-1"`.
+ * The component's only behavioural JS. A <summary> has no native `disabled`
+ * attribute, so there is no other way to stop a click from toggling the
+ * <details>. The keyboard needs no handler of its own: `tabindex="-1"` already
+ * takes the summary out of the tab order.
  */
 function onSummaryClick(event: MouseEvent) {
   if (props.disabled) event.preventDefault()
@@ -92,7 +117,7 @@ function onSummaryClick(event: MouseEvent) {
         >
       </span>
       <VIcon class="v-accordion-icon" v-bind="iconProps(expandIcon)" />
-      <!-- Two icons rendered, swapped 100% in CSS on [open] -->
+      <!-- Both icons are always in the DOM; [open] decides which one shows, in CSS alone -->
       <VIcon
         v-if="collapseIcon"
         class="v-accordion-icon v-accordion-icon-open"
@@ -116,15 +141,12 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   .v-accordion-summary {
-    /* VIcon context: 20px whatever the density (only the paddings vary in compact),
-       opsz 20 as in the md mapping of the size table */
     --vectis-icon-size: var(--vectis-icon-size-md);
     --vectis-icon-opsz: 20;
 
     display: flex;
     align-items: center;
     gap: var(--vectis-space-3);
-    /* Density: variables inherited from the group, fallbacks = normal size */
     padding: var(--accordion-pad-block, var(--vectis-space-4))
       var(--accordion-pad-inline, var(--vectis-space-5));
     list-style: none;
@@ -147,12 +169,6 @@ function onSummaryClick(event: MouseEvent) {
     outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
   }
 
-  /*
-   * Corners of the end summaries aligned on the group's inner radius (0 outside a
-   * framed group): the outline follows the border-radius, so the ring becomes
-   * parallel to the `overflow: hidden` clip instead of being cropped by it. The last
-   * summary is only at the bottom edge while the panel is closed.
-   */
   .v-accordion-item:first-child > .v-accordion-summary {
     border-start-start-radius: var(--accordion-corner-radius, 0);
     border-start-end-radius: var(--accordion-corner-radius, 0);
@@ -163,7 +179,6 @@ function onSummaryClick(event: MouseEvent) {
     border-end-end-radius: var(--accordion-corner-radius, 0);
   }
 
-  /* Text block: title alone, or title + subtitle stacked */
   .v-accordion-heading {
     flex: 1;
     display: flex;
@@ -171,11 +186,6 @@ function onSummaryClick(event: MouseEvent) {
     line-height: var(--vectis-text-label-leading);
   }
 
-  /* Subtitle: rendered by VTypography (a muted caption) — the
-     .v-accordion-subtitle class stays in place as a hook (the disabled state
-     below). */
-
-  /* A dedicated class (not .v-accordion-icon: rotation/swap are reserved for the chevron) */
   .v-accordion-icon-start {
     flex: none;
     color: var(--vectis-color-text-muted);
@@ -191,7 +201,8 @@ function onSummaryClick(event: MouseEvent) {
     rotate: 180deg;
   }
 
-  /* Swapping the two icons (data-swap = collapseIcon provided) */
+  /* data-swap marks an item whose group provided a collapseIcon: rather than
+     rotating a single chevron, each state hides one of the two rendered icons. */
   .v-accordion-item[data-swap][open]
     > .v-accordion-summary
     .v-accordion-icon:not(.v-accordion-icon-open),
@@ -199,20 +210,26 @@ function onSummaryClick(event: MouseEvent) {
     display: none;
   }
 
-  /* Disabled: greys through tokens (never opacity) */
+  /* A disabled item greys out through the colour tokens and never through
+     `opacity`, the rule every control in the DS follows. */
   .v-accordion-item[data-disabled] > .v-accordion-summary {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
-  /* text-muted is darker than text-subtle: icons and subtitle follow the title */
+  /* The icons and the subtitle default to text-muted, which is DARKER than the
+     text-subtle a disabled title takes: left to themselves they would come out
+     stronger than the label they belong to, so they inherit it instead. */
   .v-accordion-item[data-disabled] .v-accordion-icon,
   .v-accordion-item[data-disabled] .v-accordion-icon-start,
   .v-accordion-item[data-disabled] .v-accordion-subtitle {
     color: inherit;
   }
 
-  /* Animated opening in pure CSS (::details-content, progressive enhancement) */
+  /* The opening animates in pure CSS: ::details-content targets the box the
+     browser wraps the content in, and the `interpolate-size` declared on the item
+     is what makes a transition towards `auto` possible at all. A browser missing
+     either simply opens the section instantly. */
   .v-accordion-item::details-content {
     block-size: 0;
     overflow: clip;
@@ -226,7 +243,6 @@ function onSummaryClick(event: MouseEvent) {
   }
 
   .v-accordion-content {
-    /* Breathing room under the summary, reduced in compact (the group's variables) */
     padding: var(--accordion-content-pad-start, var(--vectis-space-2))
       var(--accordion-pad-inline, var(--vectis-space-5))
       var(--accordion-pad-block, var(--vectis-space-4));

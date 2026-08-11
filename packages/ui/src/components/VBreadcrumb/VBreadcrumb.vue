@@ -13,40 +13,62 @@ import { useMessages } from '../../i18n/state'
 
 // @ssr @core
 /**
- * A breadcrumb trail: <nav> + an ordered list, driven by the `items` prop (pure
- * data derivation, no browser API — SSR-safe). The separators are decorative VIcons
- * (aria-hidden), and the first one is hidden in CSS. The active item is derived from
- * `currentPath` (aria-current="page" on the item with the matching href, which stays
- * a clickable link — the ARIA APG pattern). Past `maxItems`, the intermediate items
- * are folded into a VMenu opened by an "…" button.
+ * A breadcrumb trail: the path that leads to the page being read, from the most
+ * general section down to the current one. It is a `<nav>` holding an ordered list,
+ * built entirely from the `items` prop — nothing is read from the browser, so the
+ * server and the client render exactly the same thing.
+ *
+ * The separators between the segments are decorative icons, hidden from screen
+ * readers, and the very first one is removed in CSS rather than by a condition in
+ * the markup. The current page is found by comparing each segment's address with
+ * `currentPath`: it is marked with `aria-current="page"` and stays a working link,
+ * as the ARIA authoring practices recommend. When the trail grows past `maxItems`,
+ * the middle segments are folded into a menu opened by an "…" button.
  */
 export interface BreadcrumbItem {
-  /** Label of the segment. */
+  /** The text shown for this segment. */
   label: string
-  /** Destination of the segment; compared with `currentPath` for aria-current. */
+  /**
+   * Where the segment leads. It is also the value compared with `currentPath` to
+   * decide which segment is the current page.
+   */
   href: string
   /**
-   * Icon before the label: a Material Symbols Rounded name, an icon URL, or an
-   * explicit render (`{ src: '/logo.svg' }`, `{ component }`…).
+   * An icon placed before the label: a Material Symbols Rounded name, an icon URL,
+   * or an explicit render (`{ src: '/logo.svg' }`, `{ component }`…).
    */
   iconStart?: IconSource
 }
 
 interface BreadcrumbProps {
-  /** The segments, from the most general to the deepest. */
+  /** The segments of the trail, ordered from the most general down to the deepest. */
   items: BreadcrumbItem[]
-  /** Accessible name of the navigation. Default: the DS dictionary. */
+  /**
+   * The name screen readers announce for this navigation. It falls back to the
+   * wording of the DS dictionary, in the current language.
+   */
   label?: string
-  /** Current path; the item whose href matches receives aria-current="page". */
+  /**
+   * The address of the page being displayed. The segment whose `href` matches it is
+   * the current one; a trailing slash on either side makes no difference.
+   */
   currentPath?: string
-  /** Separator: an icon name, or an explicit render (like `iconStart`). */
+  /**
+   * The icon drawn between two segments: an icon name, or an explicit render,
+   * exactly like `iconStart`.
+   */
   separator?: IconSource
   /**
-   * Past this number of items: first + "…" + second-to-last + last; the "…" button's
-   * menu lists the hidden items only. Effective minimum: 3.
+   * The length past which the trail folds: only the first segment, an "…" button and
+   * the last two remain, the button opening a menu that lists the hidden segments
+   * alone. Below 3 there would be nothing left to fold, so 3 is the effective
+   * minimum.
    */
   maxItems?: number
-  /** Accessible label of the ellipsis button. Default: the DS dictionary. */
+  /**
+   * The name screen readers announce for the "…" button. It falls back to the
+   * wording of the DS dictionary.
+   */
   ellipsisLabel?: string
 }
 
@@ -62,12 +84,16 @@ const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.breadcrumb.label)
 const resolvedEllipsisLabel = computed(() => props.ellipsisLabel ?? m.value.breadcrumb.ellipsis)
 
-/** Pure normalization (SSR-safe): trailing slash removed, except for '/'. */
+/**
+ * Drops a trailing slash so that `/docs` and `/docs/` compare as the same page; the
+ * root `/` is left alone. Pure string handling, hence safe to run on the server.
+ */
 function normalize(path: string): string {
   return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path
 }
 
-// @a11y — feeds `aria-current="page"`, the only thing marking the trail's end.
+// @a11y — this is what feeds `aria-current="page"`, the only marker telling
+// assistive technology where the trail ends.
 function isCurrent(item: BreadcrumbItem): boolean {
   if (props.currentPath === undefined) return false
   return normalize(item.href) === normalize(props.currentPath)
@@ -76,9 +102,12 @@ function isCurrent(item: BreadcrumbItem): boolean {
 const truncated = computed(
   () => props.maxItems !== undefined && props.items.length > Math.max(props.maxItems, 3),
 )
-/** Items folded into the menu (from the second to the third-from-last). */
+/** The segments folded into the menu: everything between the first and the last two. */
 const hiddenItems = computed(() => (truncated.value ? props.items.slice(1, -2) : []))
-/** Items displayed in the list; when truncated: first + second-to-last + last. */
+/**
+ * The segments actually rendered in the list — when the trail is folded, the first
+ * one followed by the last two.
+ */
 const visibleItems = computed(() =>
   truncated.value ? [props.items[0] as BreadcrumbItem, ...props.items.slice(-2)] : props.items,
 )
@@ -88,7 +117,6 @@ const visibleItems = computed(() =>
   <nav class="v-breadcrumb" :aria-label="ariaLabel">
     <ol class="v-breadcrumb-list">
       <template v-for="(item, index) in visibleItems" :key="item.href">
-        <!-- the "…" menu is inserted between the first item and the second-to-last -->
         <li v-if="truncated && index === 1" class="v-breadcrumb-item v-breadcrumb-ellipsis">
           <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separator)" />
           <VMenu compact>
@@ -125,8 +153,6 @@ const visibleItems = computed(() =>
 <style>
 @layer vectis.components {
   .v-breadcrumb {
-    /* VIcon's context API: item icons and separators follow the breadcrumb's sm
-       typography */
     --vectis-icon-size: var(--vectis-icon-size-sm);
     --vectis-icon-opsz: 20;
   }

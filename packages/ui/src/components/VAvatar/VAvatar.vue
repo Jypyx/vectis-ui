@@ -10,14 +10,21 @@ import { avatarGroupKey } from './context'
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 /**
- * A round avatar. Content cascade: image → icon → initials (derived from the name)
- * → default slot (the escape hatch, e.g. VAvatarGroup's "+X" aggregate).
+ * A round avatar standing for a person or an entity. It shows the best of what it
+ * was given, in that order: the picture, failing that an icon, failing that the
+ * initials taken from the name, and failing that whatever the default slot holds —
+ * the escape hatch VAvatarGroup uses to render its "+X" overflow badge.
  *
- * JS justified: detecting an image load failure (`error`) only exists as a DOM
- * event; the initials and the auto hue are derived from the name; the "inert link"
- * bridge (href removed + aria-disabled + onClick filtered); and the attrs split
- * (style kept out of the fallthrough so --avatar-hue/--custom-color can be injected
- * into it).
+ * Four things here genuinely need JavaScript. A picture that fails to download
+ * reports it as a DOM event and nothing else, so the script listens for it and
+ * hands over to the initials rather than leaving an empty circle. The initials and
+ * the automatic colour are both computed from the name, which is arithmetic no
+ * stylesheet can do. A disabled link has no native equivalent of a disabled
+ * button, so it is turned inert by hand (its `href` is removed, `aria-disabled`
+ * announces the state and the click handler is dropped). Finally the attributes
+ * the consumer passes are split so that `style` never reaches the element
+ * directly: the component has to merge its own `--avatar-hue`/`--custom-color`
+ * into it first, and a plain fallthrough would overwrite them.
  */
 interface AvatarProps {
   /** Image URL (priority 1). */
@@ -168,8 +175,6 @@ const passedAttrs = computed(() => {
 <style>
 @layer vectis.components {
   .v-avatar {
-    /* Sizes/compact: explicit height through the shared v-control class
-       (styles/control-size.css); the round square reuses --control-height. */
     --avatar-bg: var(--vectis-color-surface-muted);
     --avatar-text: var(--vectis-color-text-muted);
     display: inline-flex;
@@ -179,45 +184,36 @@ const passedAttrs = computed(() => {
     block-size: var(--control-height);
     flex: none;
     overflow: hidden;
-    /* Resets the <button> UA styles in clickable mode (border/padding) */
     padding: 0;
     border: none;
     background: var(--avatar-bg);
     color: var(--avatar-text);
     border-radius: var(--vectis-radius-full);
     font-family: var(--vectis-text-family);
-    /* Initials: the control typography (a token of the size scale), never a raw
-       ratio on the height — typography goes through tokens (philosophy #3) */
     font-size: var(--control-font-size);
-    /* semibold: state emphasis, not a type role (initials are more legible at small
-       sizes) */
     font-weight: var(--vectis-font-weight-semibold);
     line-height: var(--vectis-text-control-leading);
     text-decoration: none;
     user-select: none;
-    /* Separation ring when stacked (transparent outside VAvatarGroup, which sets
-       --avatar-ring-color) — it does not shrink the box (box-shadow, not border). */
     box-shadow: 0 0 0 var(--vectis-control-size-avatar-ring) var(--avatar-ring-color, transparent);
     transition:
       background-color var(--vectis-duration-fast) var(--vectis-ease-default),
       box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  /* Auto hue (name, no custom colour): fixed L/C, the hue inline. */
+  /* Auto hue */
   .v-avatar[data-auto] {
     --avatar-bg: oklch(0.9 0.06 var(--avatar-hue));
     --avatar-text: oklch(0.42 0.13 var(--avatar-hue));
   }
 
   /* Custom colour (--custom-color inline): wins, with a fixed white text (contrast
-     is the consumer's responsibility). Block placed after data-auto. */
+     is the consumer's responsibility). */
   .v-avatar[data-custom] {
     --avatar-bg: var(--custom-color);
     --avatar-text: var(--vectis-color-text-on-accent);
   }
 
-  /* Dark: a tinted dark background + light text (the theme system is opt-in through
-     [data-theme='dark'], never a media query — see tokens.css). */
   [data-theme='dark'] .v-avatar[data-auto] {
     --avatar-bg: oklch(0.42 0.09 var(--avatar-hue));
     --avatar-text: oklch(0.92 0.05 var(--avatar-hue));

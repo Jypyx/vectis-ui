@@ -6,20 +6,42 @@ import type { IconSource } from '../VIcon/types'
 import { accordionKey } from './context'
 
 /**
- * 100% native accordion: <details>/<summary>. Exclusive mode rests on the `name`
- * attribute shared between items (supplied here through provide/inject) — no state
- * JS at all.
+ * An accordion is a stack of sections whose content the reader can show or hide,
+ * one heading at a time. This component is built entirely on the native HTML
+ * `<details>` and `<summary>` elements: the browser itself handles opening,
+ * closing, the keyboard and the accessibility semantics, so there is no
+ * JavaScript here keeping track of which section is currently open.
+ *
+ * In exclusive mode, opening one section automatically closes the others.
  */
 interface AccordionProps {
-  /** A single item open at a time (the native <details name> attribute). */
+  /**
+   * Only one item may stay open at a time, so opening one closes the previous one.
+   * The browser does this on its own once every item shares the same `<details>`
+   * name. Set it to `false` to let the reader keep several sections open.
+   */
   exclusive?: boolean
-  /** `flat`: no decoration. `outlined`: raised background, border and radius. */
+  /**
+   * How the group is decorated. `flat`, the default, draws nothing and lets the
+   * accordion sit directly on the surface behind it; `outlined` gives it a raised
+   * background, a border and rounded corners, so it reads as a card.
+   */
   variant?: 'flat' | 'outlined'
-  /** Icon of closed items: a name, or `{ src }` / `{ component }`. Default: a rotating chevron. */
+  /**
+   * The icon shown on a closed item: an icon name, or an explicit `{ src }` /
+   * `{ component }`. It is a chevron by default, which rotates by 180° when the
+   * item opens.
+   */
   expandIcon?: IconSource
-  /** Icon of open items; absent = `expandIcon` rotated 180°. */
+  /**
+   * The icon shown on an open item. Leave it out and the `expandIcon` is simply
+   * rotated 180°; provide one and the two icons are swapped instead.
+   */
   collapseIcon?: IconSource
-  /** Reduced density: -4px on every padding (type and icon unchanged). */
+  /**
+   * Reduced density: every padding loses 4px, while the text and the icons keep
+   * their size.
+   */
   compact?: boolean
 }
 
@@ -32,7 +54,7 @@ const props = withDefaults(defineProps<AccordionProps>(), {
 })
 
 defineSlots<{
-  /** The <VAccordionItem>s */
+  /** The `<VAccordionItem>`s that make up the group. */
   default(): unknown
 }>()
 
@@ -59,15 +81,6 @@ provide(accordionKey, {
 <style>
 @layer vectis.components {
   .v-accordion {
-    /*
-     * Density: variables set on the ROOT only (the only element rendering
-     * data-compact) and inherited by the items — the fallbacks live in
-     * VAccordionItem, which stays usable outside a group.
-     *
-     * Compact = -4px on EVERY padding (outside the size scale: the accordion has no
-     * imposed height). A single delta drives all three measurements, so the base
-     * values are written only here.
-     */
     --accordion-pad-delta: 0px;
     --accordion-pad-block: calc(var(--vectis-space-4) - var(--accordion-pad-delta));
     --accordion-pad-inline: calc(var(--vectis-space-5) - var(--accordion-pad-delta));
@@ -77,20 +90,11 @@ provide(accordionKey, {
     overflow: hidden;
   }
 
-  /* Compact: tightened paddings only — type, gutter and icon unchanged */
   .v-accordion[data-compact] {
     --accordion-pad-delta: var(--vectis-space-1);
   }
 
-  /* Bordered card; `flat` (the default) has nothing to cancel — including the
-     background, which belongs to the frame: when flat, the accordion inherits the
-     host surface. */
   .v-accordion[data-variant='outlined'] {
-    /*
-     * NESTED radius (minus the border), picked up by the summaries of the end items:
-     * `overflow: hidden` clips the whole subtree along that curve, so a
-     * square-cornered focus ring would lose its corners there.
-     */
     --accordion-corner-radius: calc(var(--vectis-radius-surface) - 1px);
 
     background: var(--vectis-color-surface-raised);
