@@ -131,3 +131,5 @@ export type {
 export { default as VInputOTP } from './components/VInputOTP/VInputOTP.vue'
 export { default as VProgressCircular } from './components/VProgressCircular/VProgressCircular.vue'
 export { default as VProgressLinear } from './components/VProgressLinear/VProgressLinear.vue'
+export { default as VSlider } from './components/VSlider/VSlider.vue'
+export type { SliderLabel } from './components/VSlider/VSlider.vue'
