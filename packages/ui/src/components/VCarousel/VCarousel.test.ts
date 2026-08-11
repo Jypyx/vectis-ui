@@ -55,8 +55,9 @@ const indicatorsOf = (container: Element) => [
 
 /**
  * jsdom ships no IntersectionObserver, so the read-back is normally out of reach
- * here. This stub hands the callback back, which is enough to lock the DIRECTION
- * of the write — not the ratios, which need a real layout (play functions).
+ * here. This stub hands the callback back — and the ENTRIES it is handed are inert,
+ * since the reading is positional: what a test stubs is the layout, through
+ * `layout()` below. The callback is only the tick that makes the component take it.
  */
 function stubIntersectionObserver() {
   let notify: ((entries: Partial<IntersectionObserverEntry>[]) => void) | undefined
@@ -71,6 +72,30 @@ function stubIntersectionObserver() {
     },
   )
   return (entries: Partial<IntersectionObserverEntry>[]) => notify?.(entries)
+}
+
+/**
+ * The layout jsdom does not have. `measure()` reads exactly four things — two slide
+ * rects it takes a delta from, the port's own rect, and the scroller's sizes — so
+ * stubbing them is enough to exercise the page arithmetic outside a browser, which
+ * the ratio-based reading it replaces could never be. Slides are laid out at
+ * `index * step`, the whole strip shifted back by `offset`: that IS a scroll position.
+ *
+ * `configurable`, so one test can move the scroller and re-stub.
+ */
+function layout(
+  container: Element,
+  sizes: { step: number; offset: number; clientWidth: number; scrollWidth: number },
+) {
+  const port = container.querySelector('.v-carousel-viewport') as HTMLElement
+  port.getBoundingClientRect = () => ({ left: 0, top: 0 }) as DOMRect
+  Object.defineProperty(port, 'clientWidth', { value: sizes.clientWidth, configurable: true })
+  Object.defineProperty(port, 'scrollWidth', { value: sizes.scrollWidth, configurable: true })
+  slidesOf(container).forEach((slide, index) => {
+    slide.getBoundingClientRect = () =>
+      ({ left: index * sizes.step - sizes.offset, top: 0 }) as DOMRect
+  })
+  return port
 }
 
 afterEach(() => {
@@ -208,25 +233,133 @@ describe('VCarousel', () => {
       const { container, model } = mount()
       await nextTick()
 
-      const port = container.querySelector('.v-carousel-viewport') as HTMLElement
+      /*
+       * 260px of a 300px step travelled — MID-DRAG on purpose, which is also what the
+       * bug above is about. At a snap position `scrollToIndex`'s own "already there"
+       * test would return before the flag was ever consulted, and this would pass
+       * green without it.
+       */
+      const port = layout(container, { step: 300, offset: 260, clientWidth: 300, scrollWidth: 900 })
       const scrollBy = vi.fn()
       port.scrollBy = scrollBy
-      port.getBoundingClientRect = () => ({ left: 0, top: 0 }) as DOMRect
-      // A real layout, so `scrollToIndex` would have a genuine delta to write and
-      // `measurePages` a reachable position per slide.
-      Object.defineProperty(port, 'scrollWidth', { value: 900 })
-      Object.defineProperty(port, 'clientWidth', { value: 300 })
-      const slides = slidesOf(container)
-      slides.forEach((slide, index) => {
-        slide.getBoundingClientRect = () => ({ left: index * 300, top: 0 }) as DOMRect
-      })
 
-      notify([{ target: slides[1] as Element, intersectionRatio: 1 }])
+      notify([{ target: slidesOf(container)[1] as Element, intersectionRatio: 1 }])
       await nextTick()
       await nextTick()
 
       expect(model.value).toBe(1)
       expect(scrollBy).not.toHaveBeenCalled()
+    })
+  })
+
+  /*
+   * The MEASURED count, which the prop fallback below only stands in for. It became
+   * testable here the day the reading stopped going through intersection ratios: every
+   * number `measure()` takes is stubbable, so the geometries that used to be
+   * browser-only — a peek, an active floor — are locked in jsdom now, and the play
+   * functions verify that a real browser produces those geometries.
+   */
+  describe('measured pages', () => {
+    const six = [0, 1, 2, 3, 4, 5].map((i) => `<VCarouselItem>S${i}</VCarouselItem>`).join('\n')
+
+    /*
+     * The reported bug: 6 slides two at a time with a 64px peek. The last START-aligned
+     * position is 3, `step - peek` short of the end of the track, so the sixth slide
+     * was never fully revealed and no control could ask for it. The end of the track is
+     * the fifth page, and the slide LEADING there is the fifth.
+     */
+    it('mints the end of the track as a page when a peek leaves a leftover', async () => {
+      const { container, model } = mount({
+        attrs: ':items-per-view="2" :peek="64"',
+        slides: six,
+      })
+      const port = layout(container, {
+        step: 294,
+        offset: 1112,
+        clientWidth: 640,
+        scrollWidth: 1752,
+      })
+      await fireEvent(port, new Event('scrollend'))
+      await nextTick()
+
+      expect(indicatorsOf(container).map((el) => el.getAttribute('aria-label'))).toEqual([
+        '1 of 6',
+        '2 of 6',
+        '3 of 6',
+        '4 of 6',
+        '5 of 6',
+      ])
+      expect(model.value).toBe(4)
+    })
+
+    it('replaces the prop fallback where an active floor makes it over-count', async () => {
+      const { container } = mount({
+        attrs: ':items-per-view="4" item-min-size="10rem"',
+        slides: six,
+      })
+      // The fallback says 6 - 4 + 1 = 3; only three slides actually fit.
+      expect(indicatorsOf(container)).toHaveLength(3)
+
+      const port = layout(container, { step: 172, offset: 0, clientWidth: 384, scrollWidth: 1020 })
+      await fireEvent(port, new Event('scrollend'))
+      await nextTick()
+      expect(indicatorsOf(container)).toHaveLength(5)
+    })
+
+    /*
+     * `scrollWidth` and `clientWidth` are integers where the flex layout is fractional,
+     * so an exactly flush track can measure a pixel long. Minting a page there would
+     * hand out a dot that scrolls by nothing — and would make the count depend on the
+     * canvas width, which is the `Pages` play function going flaky.
+     */
+    it('a sub-pixel leftover mints nothing', async () => {
+      const { container } = mount({ attrs: ':items-per-view="3"', slides: six })
+      const port = layout(container, { step: 300, offset: 0, clientWidth: 900, scrollWidth: 1801 })
+      await fireEvent(port, new Event('scrollend'))
+      await nextTick()
+      expect(indicatorsOf(container)).toHaveLength(4)
+    })
+
+    /*
+     * The backward regression, and the reason `scrollend` measures at all. With a peek
+     * the outgoing slide never stops being fully visible, so the observer's last
+     * delivery is a MID-FLIGHT one naming the page being left; `scrollend` used to do
+     * nothing but lower the guard, and that stale reading went straight into the model
+     * while `readBack` suppressed the scroll that would have corrected it — the dot sat
+     * one page ahead of the content, for good.
+     */
+    it('scrollend re-measures at the arrival position, so a stale reading never lands', async () => {
+      const notify = stubIntersectionObserver()
+      const { container, model } = mount({
+        attrs: ':items-per-view="2" :peek="64"',
+        slides: six,
+        initial: 4,
+      })
+      await nextTick()
+      const port = layout(container, {
+        step: 294,
+        offset: 1112,
+        clientWidth: 640,
+        scrollWidth: 1752,
+      })
+      port.scrollBy = vi.fn()
+
+      // Asking for page 3 from the end of the track raises the guard…
+      model.value = 3
+      await nextTick()
+      await nextTick()
+
+      // …the observer fires MID-FLIGHT, where the scroller is still nearer page 4…
+      layout(container, { step: 294, offset: 1050, clientWidth: 640, scrollWidth: 1752 })
+      notify([{ target: slidesOf(container)[4] as Element, intersectionRatio: 1 }])
+      await nextTick()
+      expect(model.value).toBe(3)
+
+      // …and the ARRIVAL is what `scrollend` reads, not that last delivery.
+      layout(container, { step: 294, offset: 882, clientWidth: 640, scrollWidth: 1752 })
+      await fireEvent(port, new Event('scrollend'))
+      await nextTick()
+      expect(model.value).toBe(3)
     })
   })
 

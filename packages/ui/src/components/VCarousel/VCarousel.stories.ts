@@ -179,22 +179,47 @@ export const Peek: Story = {
     await expect(Math.abs(slide.getBoundingClientRect().width - expected)).toBeLessThan(1)
 
     /*
-     * A peek makes the real slides-per-view FRACTIONAL, and that costs one leading
-     * position: `count - floor(perView) + 1` would offer a dot here that scrolls
-     * nowhere. This is the assertion that catches it — the last dot must actually
-     * reach the end of the track.
+     * A peek makes the real slides-per-view FRACTIONAL, so the last START-aligned
+     * position falls a strip short of the end of the track. What answers for it is the
+     * END of the track, a page of its own — without it the last slide is never fully
+     * revealed and no control can ask for it. Six slides two at a time therefore give
+     * FIVE positions; the last is named after the slide that leads there, and there is
+     * deliberately no "6 of 6", since slide 6 can never lead.
      */
     const dots = canvasElement.querySelectorAll<HTMLButtonElement>('.v-carousel-indicator')
+    await expect(dots).toHaveLength(5)
     await userEvent.click(dots[dots.length - 1] as HTMLElement)
+    const last = canvasElement.querySelector('[data-carousel-index="5"]') as HTMLElement
     await waitFor(
       async () => {
         await expect(canvas.getByRole('button', { name: 'Next slide' })).toBeDisabled()
-        await expect(port.scrollWidth - port.clientWidth - port.scrollLeft).toBeLessThan(
-          slide.getBoundingClientRect().width,
+        // flush against the end of the track, and the sixth slide entirely inside the port
+        await expect(port.scrollWidth - port.clientWidth - port.scrollLeft).toBeLessThan(2)
+        await expect(last.getBoundingClientRect().right).toBeLessThan(
+          port.getBoundingClientRect().right + 1,
         )
       },
       { timeout: 3000 },
     )
+
+    /*
+     * BACKWARDS, which is the direction a peek used to break. The outgoing slide keeps
+     * the strip's worth of slack, so it stays fully visible for the whole travel — the
+     * intersection ratios the read-back used to scan therefore went on naming the page
+     * being LEFT, and `scrollend` handed that stale reading to the model while the
+     * scroll that would have corrected it was suppressed. The dot landed on 2 and then
+     * jumped back. The second sample, taken after everything has settled, is the one
+     * that catches it.
+     */
+    await userEvent.click(dots[1] as HTMLElement)
+    await waitFor(
+      async () => {
+        await expect(dots[1] as HTMLElement).toHaveAttribute('aria-current', 'true')
+      },
+      { timeout: 3000 },
+    )
+    await new Promise((resolve) => setTimeout(resolve, 600))
+    await expect(dots[1] as HTMLElement).toHaveAttribute('aria-current', 'true')
   },
 }
 
@@ -555,6 +580,11 @@ export const Keyboard: Story = {
  * `count - perView + 1` positions the scroller can rest on: 6 slides three at a time
  * give four, not six. The indicators follow that count, and the model can never hold an
  * index the DOM cannot satisfy.
+ *
+ * The count is unchanged by the end-aligned last slide, and that is worth knowing before
+ * wondering why `Peek` gained a dot and this did not: with no peek and no active floor
+ * the track ends exactly on a slide's start edge, so the two positions are one and the
+ * same number.
  */
 export const Pages: Story = {
   args: { itemsPerView: 3, indicators: 'outside' },
@@ -642,7 +672,8 @@ export const ResponsivePages: Story = {
       await expect(dots()).toBe(3)
     })
 
-    // 24rem: the 10rem floor lets only 2 fit, so a page appears
+    // 24rem: the 10rem floor lets only 2 fit, so pages appear — the fractional fit costs
+    // start-aligned positions and the end of the track adds one back
     host.style.inlineSize = '24rem'
     await waitFor(
       async () => {

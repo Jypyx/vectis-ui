@@ -58,10 +58,12 @@ export type CarouselControlsVisibility = 'always' | 'hover'
  * - `scrollToIndex`, the v-model → DOM write. No CSS primitive scrolls a
  *   container to its Nth child from a VALUE (`::scroll-button()` is user-driven,
  *   and Chrome 135+, above this repo's floor).
- * - ONE IntersectionObserver, carrying the DOM → v-model read-back AND the page
- *   measurement. Arithmetic on `scrollLeft` would need the slide sizes (JS
- *   anyway) and is signed in RTL; a ratio is direction- and orientation-agnostic.
- *   Not every slide can lead: see `measurePages`.
+ * - ONE IntersectionObserver, which TRIGGERS both the DOM → v-model read-back and
+ *   the page measurement, plus `scrollend`, which runs that measurement again at
+ *   the arrival position. The reading itself is positional, from rect deltas:
+ *   `scrollLeft` is signed in RTL, where a delta between two rects is physical and
+ *   needs no direction test. Not every slide can lead, and the last position is the
+ *   END of the track rather than a slide's start edge: see `measure`.
  * - autoplay, because no CSS advances a value on a clock, plus ONE `matchMedia`
  *   read: a media query stops the CSS, never a timer, and WCAG 2.2.2 is about
  *   the content moving.
@@ -219,7 +221,10 @@ defineSlots<{
   indicator?(props: { index: number; active: boolean }): unknown
 }>()
 
-/** Index of the current slide — the FIRST visible one when several fit. */
+/**
+ * Index of the current slide — the FIRST fully visible one when several fit, which is
+ * also the position the scroller rests on.
+ */
 const model = defineModel<number>({ default: 0 })
 
 const m = useMessages()
@@ -295,7 +300,25 @@ const viewportEl = ref<HTMLElement | null>(null)
  * desynchronized for good. Caught by the `Default` play function.
  */
 const settling = ref(false)
-const onScrollEnd = () => (settling.value = false)
+
+/*
+ * The arrival position, read AGAIN — and that second reading is the whole point.
+ * The observer is the only other source of one and it delivers on a threshold
+ * crossing alone, so after a backward scroll under a `peek` its last delivery is a
+ * MID-FLIGHT one naming the page being left (see `measure`). Lowering the guard on
+ * its own hands that stale index to the watcher below, which writes it into the model
+ * while `readBack` suppresses the scroll that would have corrected it: the dot then
+ * sits one page ahead of the content, for good.
+ *
+ * It is the CALL that removes the race, not its position: the sync watcher below is a
+ * `pre` one, so both writes land in the same flush and it runs once, on the final
+ * values, whatever the order here. Measuring first is intent, not mechanism.
+ */
+const onScrollEnd = () => {
+  const port = viewportEl.value
+  if (port) measure(port)
+  settling.value = false
+}
 
 /*
  * Raised for exactly the model write the read-back makes, and lowered on the next
@@ -322,6 +345,13 @@ let readBack = false
  * `watch(model)` idiom). `behavior` is omitted so CSS `scroll-behavior` governs,
  * hence `prefers-reduced-motion`; `scrollBy?.()` is optional-called because jsdom
  * implements no scrolling.
+ *
+ * The LAST page is the exception it deliberately does not special-case: its index
+ * names the slide that leads at the END of the track, whose start edge lies past
+ * `scrollWidth - clientWidth`, so the request overshoots and the browser clamps it.
+ * What makes the scroller REST there is the end-aligned last slide in the sheet.
+ * Writing the clamped offset by hand would mean `scrollTo` and a signed `scrollLeft`,
+ * the one thing the rect delta exists to avoid.
  */
 function scrollToIndex(index: number) {
   const port = viewportEl.value
@@ -349,61 +379,110 @@ watch(model, (index) => {
   void nextTick(() => scrollToIndex(index))
 })
 
-/** Ratio at which a slide counts as fully visible — the sub-pixel slack of a
-    fractional flex layout. */
-const FULL = 0.99
-
-const ratios = new Map<number, number>()
 const observedIndex = ref<number>()
 const measuredPages = ref<number>()
 
 /**
- * How many LEADING positions the scroller can actually rest on. `scroll-snap-align:
- * start` makes every slide's start edge a snap position, but one lying past
- * `scrollWidth - clientWidth` is UNREACHABLE — the scroller clamps short of it. One
- * dot per slide would therefore offer indices the DOM can never satisfy.
+ * Slack, in pixels, on every comparison below. `scrollWidth` and `clientWidth` are
+ * INTEGERS where the flex layout is fractional, so a position that is exactly
+ * reachable can measure a hair short — and symmetrically a sub-pixel leftover must
+ * never mint a page, or the dot count would change with the canvas width.
+ */
+const SLACK = 2
+
+/**
+ * Reads the scroller ONCE and answers both questions from the same numbers: how many
+ * positions it can rest on, and which one it is resting on now. They share every
+ * intermediate value, and computing them apart is exactly what let them disagree.
  *
- * Measured from the scroller itself, and NOT computed as `count - itemsPerView + 1`:
- * the reachable count is `count - CEIL(slides per view) + 1`, so as soon as `peek` or
- * an active `itemMinSize` makes that number fractional, the flooring form hands back
- * one position too many — reintroducing the bug in the two configurations that
- * motivated measuring at all.
+ * A position is a PAGE, not a slide. `scroll-snap-align: start` makes each slide's
+ * start edge a position, but one lying past `scrollWidth - clientWidth` is
+ * UNREACHABLE — the scroller clamps short of it — so a `peek` or an active
+ * `itemMinSize` costs the last of them. What replaces it is the END of the track,
+ * declared by `.v-carousel-slide:last-child { scroll-snap-align: end }` in the sheet
+ * and counted here as one extra page whenever the leftover is more than rounding
+ * noise. Without that page the last slide is never fully revealed: the scroller stops
+ * a strip short of the end and no index asks it to go further.
+ *
+ * Page indices ARE slide indices, which is why nothing downstream translates: at
+ * `p · step` slide `p` leads, and at the end of the track the leading fully visible
+ * slide is `ceil(scrollable / step)`, which is `pages - 1` in both branches. The
+ * indicator labels, the live region and `scrollToIndex` all keep reading the model as
+ * a slide index.
+ *
+ * TRAP — the reading is POSITIONAL, and going back to an `intersectionRatio` would
+ * bring back the bug it fixes. A ratio has to be DELIVERED to be read, and an observer
+ * only delivers on a threshold crossing: with a `peek` the outgoing slide keeps a
+ * strip's worth of slack and stays fully visible for the WHOLE of a backward scroll —
+ * including at the destination — so every mid-flight reading names the page being
+ * left, while the incoming slide, parked at 0.997 by a fractional layout, crosses
+ * nothing on arrival. The symptom is a dot stuck one page ahead of the content.
  *
  * RECTS and the scroller's own sizes only, never `getComputedStyle`: this runs on
- * every frame of a smooth scroll. `step` is the delta between the first two slides,
- * hence physical — RTL and vertical fall out with no direction test, the
- * `scrollToIndex` idiom.
+ * every frame of a smooth scroll. `step` and `offset` are both rect DELTAS, hence
+ * physical and unsigned — RTL and vertical fall out with no direction test, the
+ * `scrollToIndex` idiom, where `scrollLeft` would be negative in RTL.
+ *
+ * TRAP — `offset` assumes the viewport carries NO padding and NO border, so that
+ * slide 0's start edge coincides with the port's at rest. The `outside` gutter is
+ * padding on the ROOT for exactly that reason; give the viewport padding of its own
+ * and both this reading and `scrollToIndex`'s delta pick up a constant bias, with
+ * nothing to report it.
  */
-function measurePages(port: HTMLElement) {
+function measure(port: HTMLElement) {
   const boxes = port.querySelectorAll<HTMLElement>('[data-carousel-index]')
   const first = boxes[0]?.getBoundingClientRect()
   const second = boxes[1]?.getBoundingClientRect()
   if (!first || !second) return
-  const step = isVertical.value
-    ? Math.abs(second.top - first.top)
-    : Math.abs(second.left - first.left)
-  const scrollable = isVertical.value
-    ? port.scrollHeight - port.clientHeight
-    : port.scrollWidth - port.clientWidth
+  const origin = port.getBoundingClientRect()
+  const vertical = isVertical.value
+  const step = vertical ? Math.abs(second.top - first.top) : Math.abs(second.left - first.left)
   // No layout at all (jsdom, a display:none ancestor). Writing a 0 here would drag
   // every clamp down with it; the prop-derived fallback stays the answer until there
   // IS a layout.
   if (step <= 0) return
-  // +1: clientWidth/scrollWidth are integers where the flex layout is fractional, so
-  // an exactly reachable last position can measure a hair short.
-  measuredPages.value = Math.floor((scrollable + 1) / step) + 1
+  // How far the scroller has travelled: the first slide's start edge has left the
+  // port's by exactly that much.
+  const offset = vertical ? Math.abs(first.top - origin.top) : Math.abs(first.left - origin.left)
+  const scrollable = vertical
+    ? port.scrollHeight - port.clientHeight
+    : port.scrollWidth - port.clientWidth
+
+  const starts = Math.floor((scrollable + SLACK) / step)
+  const residual = scrollable - starts * step
+  const pages = starts + 1 + (residual > SLACK ? 1 : 0)
+  // The end of the track is recognized by POSITION and not by rounding: it is the one
+  // page that is not a multiple of `step`, so rounding would name the start position
+  // it falls short of — the page the user has just left.
+  const page = offset >= scrollable - SLACK ? pages - 1 : Math.round(offset / step)
+
+  measuredPages.value = pages
+  /*
+   * Clamped against `pageCount` and not against the local `pages`, because that is the
+   * one which also caps at `count`, and the write above is what makes it fresh. A
+   * slide LARGER than the port is the case that needs it: `starts` already reaches the
+   * last slide there and the leftover still mints a page, so the raw answer names an
+   * index no slide carries — `scrollToIndex` would then silently do nothing and
+   * `settling` would never come back down.
+   */
+  observedIndex.value = clamp(page, 0, pageCount.value - 1)
 }
 
 // @ssr @fallback
 /**
- * SSR, jsdom and the first paint. `itemsPerView` is not a guess there: with no `peek`
- * and no active `itemMinSize` the flex-basis makes a slide plus its gap exactly
- * `(100% + gap) / itemsPerView`, so the fit IS `itemsPerView` at every viewport size.
- * A pure function of the props is also what keeps the dot list identical on the server
- * and on the client — measuring here would be a hydration mismatch.
+ * SSR, jsdom and the first paint. `itemsPerView` is not a guess there, and it is exact
+ * for a `peek` too: the strip costs the last START-aligned position and gives back the
+ * END of the track, so the two cancel and the reachable count is
+ * `count - itemsPerView + 1` either way. What still makes this a fallback rather than
+ * the answer is an ACTIVE `itemMinSize`: fewer slides then fit than the prop asks for,
+ * the flooring form over-counts, and only a measurement can tell. A pure function of
+ * the props is also what keeps the dot list identical on the server and on the client —
+ * measuring here would be a hydration mismatch.
  *
- * The clamp lives here rather than in `measurePages` so a stale measurement cannot
- * outlive the removal of a slide: `count` is reactive, the raw measurement is not.
+ * The clamp lives here rather than in `measure` for two reasons: a stale measurement
+ * must not outlive the removal of a slide (`count` is reactive, the raw measurement is
+ * not), and a slide larger than the port mints one page more than there are slides —
+ * see the clamp `measure` takes against this computed.
  */
 const pageCount = computed(() =>
   count.value === 0
@@ -414,58 +493,26 @@ const pageCount = computed(() =>
 /*
  * DOM → model, with ONE observer, which also carries the page measurement.
  *
- * TRAP — `1` must stay in `threshold`. It is what makes this observer cover a ROOT
- * RESIZE, which an IntersectionObserver does NOT do on its own (it queues an entry
- * only when a threshold bucket is crossed): `pageCount` changes exactly when the
- * number of FULLY visible slides changes, which crosses the 1.0 bucket, which queues
- * the callback that re-measures. Drop the 1 and the page count silently freezes.
- * The second premise is that a slide's box never exceeds the port on the cross axis,
- * so the area ratio equals the scroll-axis ratio — the CSS guarantees it today, and
- * the `FULL` test below depends on it too.
+ * TRAP — `1` must stay in `threshold`. Nothing READS an intersection ratio any more,
+ * but the buckets are still what decides WHEN this callback runs, and this observer is
+ * what makes the component cover a ROOT RESIZE — which an IntersectionObserver does
+ * NOT do on its own (it queues an entry only when a threshold bucket is crossed):
+ * `pageCount` changes exactly when the number of FULLY visible slides changes, which
+ * crosses the 1.0 bucket, which queues the callback that re-measures. Drop the 1 and
+ * the page count silently freezes on a resize. Its premise is that a slide's box never
+ * exceeds the port on the cross axis, so the area ratio equals the scroll-axis ratio
+ * and a slide becoming fully visible really does cross 1.0 — the CSS guarantees it.
  */
 watch(
   [viewportEl, count],
   ([port], _previous, onCleanup) => {
     // @fallback
-    // IntersectionObserver exists neither in SSR nor in jsdom: the read-back and the
-    // measurement are verified in the browser (play functions).
+    // IntersectionObserver exists neither in SSR nor in jsdom: `scrollend` still
+    // measures there, and the whole loop is verified in the browser (play functions).
     if (!port || typeof IntersectionObserver === 'undefined') return
-    ratios.clear()
     const observer = new IntersectionObserver(
-      (entries) => {
-        measurePages(port)
-        for (const entry of entries) {
-          const index = Number((entry.target as HTMLElement).dataset.carouselIndex)
-          ratios.set(index, entry.intersectionRatio)
-        }
-        /*
-         * NUMERIC order, and the FIRST full slide. `ratios` is a Map iterated in the
-         * order the observer first delivered each slide, and when several fit they are
-         * all at ratio 1: scanning it with a `>` picks an arbitrary member of the tie —
-         * a MIDDLE slide as often as not, which showed up as a wrong active dot AND a
-         * `next` that then stepped two slides at once. Mid-scroll nothing is full, and
-         * the largest ratio is the best guess: that is the second branch.
-         */
-        let leading = 0
-        let bestRatio = 0
-        for (let index = 0; index < count.value; index += 1) {
-          const ratio = ratios.get(index) ?? 0
-          if (ratio >= FULL) {
-            leading = index
-            break
-          }
-          if (ratio > bestRatio) {
-            bestRatio = ratio
-            leading = index
-          }
-        }
-        /*
-         * Clamped, so the model can never leave the reachable range even transiently:
-         * at the clamped end every remaining slide is full, and mid-drag the
-         * largest-ratio branch can name one past the last page — `watch(model)` fires
-         * on read-back writes too, and `scrollToIndex` would then fight the finger.
-         */
-        observedIndex.value = Math.min(leading, pageCount.value - 1)
+      () => {
+        measure(port)
         // The request has arrived, so there is nothing left to protect. This is also
         // the ONLY exit when the browser clamps a programmatic scroll to no movement
         // at all — `scrollend` never fires there.
@@ -503,6 +550,10 @@ watch([observedIndex, settling], () => {
  * which, with a correct page count, it no longer can. What that insured against was
  * autoplay-shaped (a false `atEnd` re-arms the timer on every bounce, forever), and
  * the `Pages` play function is what keeps that honest.
+ *
+ * Once a `peek` or an active floor makes the fit fractional, `pageCount - 1` is the
+ * END of the track rather than a slide's start edge — a page all the same: `goTo` and
+ * `End` reach it and `measure` reads it back.
  */
 const atStart = computed(() => model.value <= 0)
 const atEnd = computed(() => model.value >= pageCount.value - 1)
@@ -752,9 +803,11 @@ if (isDev) {
         <!--
             One control per REACHABLE position, not per slide: with 6 slides three at
             a time the scroller can only lead with 1 to 4, and dots 5 and 6 would
-            scroll nowhere. The label stays slide-based ("4 of 6") because that is what
-            the control does — it parks that slide at the start edge — and it then
-            agrees with the slide's own name and with the live region.
+            scroll nowhere. With a `peek` the last of them parks the scroller at the
+            END of the track rather than on a slide's start edge. Either way the label
+            stays slide-based ("4 of 6"), naming the slide that LEADS there — which is
+            what the control does — and it then agrees with the slide's own name and
+            with the live region.
           -->
         <button
           v-for="index in pageCount"
@@ -982,6 +1035,35 @@ if (isDev) {
     min-block-size: 0;
     scroll-snap-align: start;
     position: relative;
+  }
+
+  /*
+   * TRAP — the LAST slide is aligned on its END edge, and that is what declares the end
+   * of the track as a snap position in its own right. As soon as a `peek` or an active
+   * `itemMinSize` makes the fit fractional, that slide's START-aligned position lies
+   * past `scrollWidth - clientWidth`, so the only position left near the end is a strip
+   * short of it and the last slide is never fully revealed. `measure()` counts the end
+   * of the track as its final page: delete this rule and the JS keeps offering a page
+   * the scroller is no longer told it may hold.
+   *
+   * It is INSURANCE rather than the mechanism — Chromium clamps an out-of-range snap
+   * position into the scrollable range anyway, which is what lets a `center`-aligned
+   * carousel reach both of its extremes — but a measurement that depends on a clamping
+   * artefact instead of on a declared position is exactly the kind of implicit contract
+   * that breaks silently in another engine.
+   *
+   * It costs nothing in the two other regimes, and both are worth knowing before
+   * touching it: when a slide is exactly the size of the port (one item per view, no
+   * peek) the start-aligned and end-aligned offsets are the SAME number, and when a
+   * slide is LARGER than the port the alignment is ignored altogether — an oversized
+   * snap area makes every position covering the port valid.
+   *
+   * `end` is logical, like `scroll-snap-type: inline mandatory` above: RTL and the
+   * vertical orientation need no second declaration, and the cross-axis half of the
+   * shorthand is inert, only one axis carrying a snap type.
+   */
+  .v-carousel-slide:last-child {
+    scroll-snap-align: end;
   }
 
   .v-carousel-effect {

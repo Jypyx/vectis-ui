@@ -36,14 +36,20 @@ clamps short of it. Six slides three at a time therefore offer **four** position
 component renders four indicators and stops `next` on the fourth. Anything else would hand out dots
 that scroll nowhere and let the model hold a value the DOM can never satisfy.
 
-That count is measured off the scroller rather than computed from `itemsPerView`, because a `peek`
-or an active `itemMinSize` makes the real slides-per-view fractional, and the fractional part costs
-one further position. Before there is any layout — on the server, and on the first paint — it falls
-back to `count - itemsPerView + 1`, which is exact in the default configuration.
+A `peek` or an active `itemMinSize` makes the real slides-per-view fractional, and the fractional
+part costs the last of those start-aligned positions. What answers for it is the **end of the
+track**, which is a position in its own right: the last slide is aligned on its end edge, so the
+scroller can rest flush against the end and reveal that slide entirely. The count is therefore
+measured off the scroller — the start-aligned positions, plus the end of the track when it is not
+already one of them. Before there is any layout — on the server, and on the first paint — it falls
+back to `count - itemsPerView + 1`, which is exact both in the default configuration and with a
+peek (the strip costs one position and the end of the track gives it back); only an active
+`itemMinSize` makes that fallback an over-count until the first measurement.
 
 The indicators stay named after the slide they scroll to (`1 of 6` … `4 of 6`): the control parks
-that slide at the start edge, so the name agrees with the slide's own label and with the live
-region. A page ordinal would announce "4 of 4" on a control that reveals slide 4 of 6.
+that slide at the start edge — or, for the end of the track, leads with it — so the name agrees
+with the slide's own label and with the live region. A page ordinal would announce "4 of 4" on a
+control that reveals slide 4 of 6.
 
 <Canvas of={VCarouselStories.Pages} />
 
@@ -59,9 +65,11 @@ threshold and re-triggers the measurement.
 product-list template. It **includes the gap that precedes it**, which is what lets one formula
 serve every combination without a special case.
 
-One consequence to design around: with a peek, the last slide is never fully revealed. The last
-snap position stops short of the end of the track by the width of the strip, and that is inherent
-to `scroll-snap-align: start` under mandatory snapping.
+Two consequences to design around. The final position is the **end of the track** rather than a
+slide's start edge, so it advances by less than a full slide — the strip of the previous slide is
+what stays visible there, the mirror image of the peek. And no indicator is named after the last
+slide: with six slides two at a time there are five dots, `1 of 6` to `5 of 6`, because slide 6 can
+never be the leading one. It is fully revealed on that last position all the same.
 
 <Canvas of={VCarouselStories.Peek} />
 
