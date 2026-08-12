@@ -1,17 +1,17 @@
 /**
- * Locale and dictionary of the DS. No user-facing text is hardcoded in an SFC:
- * everything goes through this module.
+ * The language the design system speaks, and the words it says. No text a reader will
+ * ever see is written inside a component: all of it comes from here.
  *
- * Module-level state (as in `VIcon/resolver.ts` and `VToast/state.ts`) rather
- * than a Vue plugin or provide/inject: this is configuration, identical for
- * every request of a process, and it must stay settable from any `.ts` (a Nuxt
- * plugin, `main.ts`).
+ * The choice of language is held once for the whole application rather than being handed
+ * down through the component tree, because it is CONFIGURATION — the same for everyone
+ * looking at the site — and because it must remain settable from an ordinary file, a
+ * start-up script or a plugin, without a component being involved.
  *
- * ACCEPTED CONSEQUENCE: one locale per process. Multi-locale SSR PER REQUEST is
- * not covered — a site serving /en and /fr from the same Node process must pass
- * the text props (and `locale` on VCalendar / VDatePicker / VTimePicker)
- * explicitly. That limit can be lifted without touching the components: see
- * `useMessages` at the end of this file.
+ * ACCEPTED CONSEQUENCE — one language at a time per running server. A site serving an
+ * English page and a French one from the same server cannot let those two pages disagree
+ * here; it passes the words to the components explicitly instead, along with the language
+ * for the calendar and the two pickers. Lifting that limit would change only the body of
+ * the last function in this file, and no component at all.
  */
 import { shallowRef, type ShallowRef } from 'vue'
 
@@ -20,25 +20,29 @@ import { isDev } from '../utils/env'
 import { en } from './en'
 import type { VectisMessages, VectisMessagesInput } from './types'
 
-/** Default BCP 47 tag. */
+/** The language tag assumed until one is chosen. */
 export const DEFAULT_LOCALE = 'en-US'
 const DEFAULT_LANG = 'en'
 
 /**
- * Dictionaries indexed by LANGUAGE SUBTAG (`'en'`, `'fr'`, `'de'`) rather than
- * by full tag: `'en-US'`, `'en-GB'` and `'en-AU'` share their words. What
- * varies between them — date field order, first day of week, hour cycle — is
- * derived from `Intl` using the COMPLETE tag, not translated here.
+ * The dictionaries, filed under the LANGUAGE alone — "en", "fr", "de" — and not under the
+ * country as well. British, American and Australian English share every word. What does
+ * separate them, the order of the parts of a date, the day a week starts on, whether the
+ * hours run to twelve or twenty-four, is worked out by the browser from the complete tag
+ * and is never a matter of translation.
  *
- * A non-reactive Map: reactivity is carried by `currentMessages`, which every
- * mutation of the registry recomputes.
+ * The collection itself is deliberately inert: what components watch is the current
+ * dictionary below, which is recalculated whenever the collection changes.
  */
 const registry = new Map<string, VectisMessages>([[DEFAULT_LANG, en]])
 
 const currentLocale = shallowRef<string>(DEFAULT_LOCALE)
 const currentMessages = shallowRef<VectisMessages>(en)
 
-/** `'en-GB'` → `'en'`. An invalid tag comes back as-is: it will match nothing. */
+/**
+ * The language part of a tag: British English is filed under English. A tag that makes no
+ * sense comes back untouched, and will simply match no dictionary.
+ */
 function langOf(locale: string): string {
   return locale.toLowerCase().split('-')[0] ?? locale
 }
@@ -47,24 +51,26 @@ function resolve(locale: string): VectisMessages {
   return registry.get(langOf(locale)) ?? registry.get(DEFAULT_LANG) ?? en
 }
 
-/** Keys that would reach the prototype chain rather than a namespace. */
+/** Names that would reach into an object's own machinery instead of naming a section. */
 const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
 
 /**
- * Merges a partial override onto a complete dictionary.
+ * Lays a handful of replacement words over a complete dictionary.
  *
- * TWO levels, and only two — the `VectisMessages` type guarantees that level 2
- * holds nothing but leaves (a string, or a function). No recursion, therefore
- * no risk of a FUNCTION value being walked as an object and coming back as
- * `{}`: it is copied by reference, exactly like a string.
+ * It descends exactly TWO levels and no further, which the shape of a dictionary
+ * guarantees is enough: below a section there are only finished values, a piece of text or
+ * a function that builds one. Nothing is walked recursively, so a FUNCTION can never be
+ * mistaken for an object and taken apart — which would leave an empty one behind, and a
+ * message that renders as nothing.
  */
 function mergeMessages(base: VectisMessages, patch: VectisMessagesInput): VectisMessages {
   const out: Record<string, object> = { ...base }
   for (const [namespace, section] of Object.entries(patch)) {
-    // A dictionary built by `JSON.parse` can carry `__proto__` as an OWN key, and
-    // `out[namespace] = …` would then set the merged object's prototype instead of a
-    // namespace. Not a global pollution (`out` is a fresh spread), but it silently
-    // yields a dictionary whose every lookup is wrong.
+    // A dictionary that came out of a parsed file can carry one of those names as a
+    // section of its own, and assigning to it would replace the merged dictionary's
+    // machinery rather than adding a section. Nothing outside is affected — the object
+    // being built is a fresh copy — but the result is a dictionary in which every single
+    // lookup is wrong, and nothing says so.
     if (FORBIDDEN_KEYS.has(namespace)) continue
     if (section) out[namespace] = { ...out[namespace], ...section }
   }
@@ -72,22 +78,22 @@ function mergeMessages(base: VectisMessages, patch: VectisMessagesInput): Vectis
 }
 
 /**
- * Sets the DS locale.
+ * Chooses the language the design system speaks.
  *
- * Expects a **complete** BCP 47 tag (`'fr-FR'`, `'en-GB'`, `'de-DE'`) rather
- * than a bare language code — it serves two purposes:
+ * Give it a COMPLETE tag — "fr-FR", "en-GB", "de-DE" — rather than a bare language, since
+ * it is put to two uses. It picks the dictionary, for which only the language matters;
+ * and it is what the calendar and the two pickers hand to the browser, for which the
+ * country matters a great deal. A bare "en" is accepted there but means the conventions
+ * of no country in particular: hours running to twelve and weeks starting on Sunday,
+ * which is not British English. Those three components also take a language of their own,
+ * and it wins over this one.
  *
- * 1. picking the dictionary, through its language subtag (`'fr-CA'` → `'fr'`);
- * 2. feeding `Intl` in VCalendar / VDatePicker / VTimePicker, whose `locale`
- *    prop still takes PRECEDENCE. `Intl` accepts a bare tag (`'en'`) but
- *    applies the language's default conventions to it — `'en'` means 12 h and a
- *    week starting on Sunday, which is not `'en-GB'`.
- *
- * Call it at MODULE level — a Nuxt plugin, `main.ts` — never inside a
- * `setup()`. Under SSR the state lives in the process: correct for
- * configuration, wrong for per-request state. Beware of client-only too: a
- * locale set in a `plugins/*.client.ts` makes server and client diverge, hence
- * a hydration mismatch.
+ * Call it from an ordinary module — a plugin, the file that starts the application — and
+ * never from inside a component. On a server this choice lives for as long as the process
+ * does, which is right for configuration and wrong for anything belonging to one visitor.
+ * Setting it only in the browser is its own trap: the page the server built would then be
+ * in another language than the one the browser expects, and the two would visibly fail to
+ * line up.
  */
 export function setLocale(locale: string): void {
   const lang = langOf(locale)
@@ -103,21 +109,19 @@ export function setLocale(locale: string): void {
 }
 
 /**
- * Registers — or completes — the dictionary of a LANGUAGE. The key is the
- * language subtag alone (`'fr'`, not `'fr-FR'`).
+ * Adds the words of a LANGUAGE, or adjusts the ones already there. What it is filed under
+ * is the language alone — "fr", not "fr-FR".
  *
- * This is the single extension point: enabling the shipped French
- * (`registerMessages('fr', fr)`) and adding a language the DS does not ship
- * (`registerMessages('de', { … })`) are the SAME gesture.
+ * This is the one way in, and deliberately so: turning on the French the library ships
+ * with and adding a language it does not ship at all are the very SAME gesture.
  *
- * The override is PARTIAL: whatever you do not write falls back to the
- * dictionary already registered for that language, otherwise to the `en` base —
- * never to an empty string (the same contract as the partial mappings of
- * `setIconResolver`). Successive calls on the same language ACCUMULATE:
- * `registerMessages('fr', fr)` then `registerMessages('fr', { common: { … } })`
- * adjusts one key without losing the rest of the French.
+ * What is given may be a few words rather than a whole dictionary. Anything left out
+ * falls back to whatever was registered for that language before, and failing that to the
+ * English the library always carries — never to an empty string. Successive calls for one
+ * language ADD UP, so registering the French and then correcting a single word keeps the
+ * rest of the French.
  *
- * `undefined` REMOVES the override (and restores the base for `'en'`).
+ * Passing nothing at all removes what was added, and puts English back as it came.
  */
 export function registerMessages(lang: string, messages: VectisMessagesInput | undefined): void {
   const key = langOf(lang)
@@ -137,31 +141,31 @@ export function registerMessages(lang: string, messages: VectisMessagesInput | u
 }
 
 /**
- * The current dictionary. **Internal** — consumed by the SFCs, not exported
- * from `src/index.ts`.
+ * The dictionary in force. Internal to the library — the components read it, and it is
+ * not part of the public surface.
  *
- * Returning the `ShallowRef` rather than the object is what makes already
- * mounted components RE-RENDER when `setLocale` is called later: reading
- * `.value` inside a `computed` (or the ref in a template, auto-unwrapped)
- * registers the dependency with the render effect.
+ * What is handed back is the holder rather than the words inside it, and that is what
+ * makes components ALREADY on screen redraw themselves when the language is changed
+ * later: reading through the holder is what ties the component to it.
  *
- * ⚠ Usage trap: `const t = useMessages().value.common.loading` in the body of a
- * `setup()` FREEZES the value. Always inside a `computed` or the template.
+ * TRAP — reading a word out of it once, at the top of a component, FREEZES that word. It
+ * must be read where the reading is repeated: inside something derived, or in the
+ * template.
  *
- * The composable shape is deliberate: the day a per-subtree (or per-SSR-request)
- * locale becomes necessary, only the BODY of this function changes —
- * `inject(messagesKey, null) ?? currentMessages` — and none of the consumer SFCs
- * is touched. It also stays callable OUTSIDE a component (it only returns a
- * ref); a future `inject` would therefore need a `getCurrentInstance()` guard.
+ * The shape of a composable is deliberate. The day a language per part of the page, or
+ * per visitor on a server, becomes necessary, only the BODY of this function changes and
+ * no component is touched. It also stays callable outside any component, since all it
+ * does is hand back a holder; a version that looked up the tree would have to check for
+ * that case.
  */
 export function useMessages(): ShallowRef<VectisMessages> {
   return currentMessages
 }
 
 /**
- * The current BCP 47 locale. Internal — serves as the default for the `locale`
- * prop of VCalendar / VDatePicker / VTimePicker, and as VDataTable's sort
- * locale.
+ * The language tag in force. Internal to the library: it is what the calendar and the two
+ * pickers fall back on when they are given no language of their own, and what the table
+ * sorts its rows by.
  */
 export function useLocale(): ShallowRef<string> {
   return currentLocale

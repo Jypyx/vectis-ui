@@ -1,11 +1,21 @@
 /**
- * Token format inspired by the W3C Design Tokens Community Group (DTCG): a token
- * is an object `{ $value, $type, $description? }`, and groups are nested objects.
- * Aliases use the DTCG syntax `{path.to.token}` and are resolved to
- * `var(--vectis-path-to-token)` by the build.
+ * The shape a design token takes in this repository.
  *
- * This typed source is THE source of truth: the CSS is generated from it, and the
- * future theming app will manipulate it programmatically.
+ * A token is a named decision — this blue, this corner radius, this pause before a
+ * tooltip appears — and it is written as a small object holding its value, what KIND of
+ * thing it is, and optionally a sentence explaining it. Tokens are gathered in nested
+ * groups, which is what gives each of them its full name.
+ *
+ * A token may point at another instead of stating a value, by naming it in braces. That
+ * is what lets "the colour of a primary button" be defined as "the indigo at step 600"
+ * rather than as a colour repeated in twenty places.
+ *
+ * The format follows the one the W3C's design tokens group has been settling on, which is
+ * what makes these files legible to tools other than ours.
+ *
+ * This is THE source of truth for every visual decision in the library. The stylesheet is
+ * generated from it, and the live theming application to come will read and rewrite it
+ * directly.
  */
 export type TokenType =
   | 'color'
@@ -27,10 +37,15 @@ export interface TokenGroup {
   [key: string]: DesignToken | TokenGroup
 }
 
+/** Tells a token apart from a group of them, which is what walking the tree rests on. */
 export function isToken(node: DesignToken | TokenGroup): node is DesignToken {
   return typeof (node as DesignToken).$value === 'string'
 }
 
+/**
+ * Builds the small helper used to declare a token of one kind, so that the token files
+ * below read as `color('#fff')` rather than repeating the shape of the object each time.
+ */
 const make =
   ($type: TokenType) =>
   ($value: string, $description?: string): DesignToken =>

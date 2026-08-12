@@ -2,16 +2,19 @@ import type { Ref } from 'vue'
 
 // @a11y
 /**
- * Root `@focusout` handler: closes when focus leaves the component, floating
- * panel included — a popover is a DOM descendant of the root even when painted
- * in the top layer, so `contains` is enough and there is nothing to observe at
- * document level.
+ * Closes something as soon as the focus leaves the component — its floating panel
+ * included.
  *
- * A null `relatedTarget` means focus is leaving the window (or going to the
- * body): that is also an exit, so it closes.
+ * That last part is what makes this so short. A panel painted above the whole page is
+ * still, in the document, a descendant of the component that owns it, so asking whether
+ * the focus went somewhere inside the component is enough; nothing has to be watched at
+ * the level of the page.
  *
- * Needed because a `manual` popover has no light dismiss; `auto` panels (VMenu)
- * do not need it, the platform handles it.
+ * The focus going nowhere in particular — out of the window, or back to the page body —
+ * counts as leaving too, and closes.
+ *
+ * This exists because a panel the browser does not dismiss on its own has to be closed
+ * by hand. The self-dismissing kind, the menu's, needs none of it.
  */
 export function useFocusoutDismiss(
   root: Ref<HTMLElement | null>,

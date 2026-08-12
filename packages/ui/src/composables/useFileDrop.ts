@@ -2,21 +2,26 @@ import { computed, ref, type ComputedRef } from 'vue'
 
 // @core
 /**
- * The four handlers of a drop target, and the one piece of state they share.
+ * Everything an area needs in order to accept files dropped onto it, and to show that it
+ * is ready to receive them. Both the file field and the drop zone are built on it.
  *
- * `dragover` MUST preventDefault, or the browser refuses the drop and then
- * NAVIGATES to the file, replacing the page.
+ * Two traps live here, which is the whole reason this exists once rather than twice.
  *
- * The depth counter is not decoration: `dragleave` fires every time the pointer
- * crosses into a child (a field, a chip, an icon button), so a boolean would
- * flicker off under the cursor. `drop` forces it back to 0 — a drag that leaves
- * the window never sends the matching `dragleave`, and the state would stick.
- * `currentTarget.contains(relatedTarget)` is the other classic fix, rejected
- * here because `relatedTarget` is null precisely in that sticky case.
+ * The browser must be told explicitly, while the file is being dragged over the area,
+ * that a drop is welcome. Left unsaid, it refuses the drop and then NAVIGATES to the
+ * file, replacing the page the reader was on.
  *
- * `enabled` is a getter, not a boolean: it is read at event time, so a component
- * that becomes disabled mid-drag stops accepting without re-binding anything.
- * Adopters: VFilePicker, VFileUpload.
+ * And what is counted is a DEPTH, not a yes-or-no. The browser reports the pointer
+ * LEAVING every time it crosses into a child element — a field, a chip, a button inside
+ * the area — so a simple flag would switch off under the cursor and the highlight would
+ * flicker. A drop forces the count back to zero, because a drag that leaves the window
+ * altogether never reports the departure that would have balanced it; asking instead
+ * whether the pointer went to a descendant, the other well-known fix, is no use since
+ * there is precisely nothing to ask about in that case.
+ *
+ * Whether the area accepts anything is read at the moment of the event rather than
+ * captured once, so a component turned off in the middle of a drag stops accepting
+ * without anything being re-attached.
  */
 export function useFileDrop(
   enabled: () => boolean,

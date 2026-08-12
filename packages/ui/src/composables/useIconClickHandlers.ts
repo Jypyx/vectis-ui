@@ -4,16 +4,23 @@ import { isDev } from '../utils/env'
 
 // @core
 /**
- * A field's internal icons become `<button>`s as soon as a `@click:icon-start` /
- * `@click:icon-end` listener is attached. Since those emits are declared, Vue
- * removes them from `$attrs`: their presence can only be read in `vnode.props`,
- * and in BOTH spellings (kebab from a template, camel from a render function).
+ * Tells a field whether the consumer wants its icons to be CLICKABLE.
  *
- * The list is treated as STATIC: a listener added dynamically after mount is not
- * re-detected (a marginal, accepted case).
+ * An icon inside a field is decoration until someone listens for a click on it, at which
+ * point it becomes a real button — one that can be reached with the keyboard and has a
+ * name of its own. This is what answers the question.
  *
- * The a11y guard lives here rather than in the caller: a button with no
- * accessible name is a flaw of the pattern, not of the component using it.
+ * Because those two events are declared by the component, Vue takes them out of the
+ * attributes it hands down, so the only place left to look is the element description
+ * Vue was given — and in BOTH spellings, since a template writes them with dashes and a
+ * render function in camel case.
+ *
+ * The answer is read ONCE and never revised: a listener attached later is not picked up.
+ * That case is marginal and the cost is accepted.
+ *
+ * The warning about a missing name belongs here rather than in each field. A button
+ * nothing can announce is a flaw of the arrangement itself, not of the component that
+ * happens to use it.
  */
 export function useIconClickHandlers(options: {
   name: string

@@ -1,70 +1,84 @@
 // @core — module-wide: mask, caret and commit are the field's own behaviour.
 /**
- * The masked text field of VDatePicker and VTimePicker (`mode="input"`).
+ * A field one types a date or a time into: the reader enters digits, and the separators
+ * appear as they go.
  *
- * The panel half of these two components is already shared (`useFieldPanel`); this
- * is the field half. `writeField` was byte-identical between them, JSDoc included,
- * and `commitOrRevert`/`onFieldInput` shared their skeleton AND their trap comments
- * — which is precisely where the two had started to drift.
+ * It is the FIELD half of the date and time pickers, the panel half being shared already.
+ * What is injected here is only the vocabulary of the mask itself: how many digits it
+ * holds, how those digits become text, where the caret should land, and how the text
+ * becomes a value.
  *
- * Only the mask's own vocabulary is injected: how many digits it holds, how digits
- * become text, where the caret lands, and how text becomes a canonical value. The
- * date separator is derived from the locale where the time one is a universal `:`,
- * so the two `caret` implementations differ — the composable does not care, it only
- * tells them whether the edit was an INSERTION.
+ * The two differ in one respect worth knowing: a date's separator depends on the reader's
+ * language while a time's is the same everywhere, so they work out the caret differently.
+ * Nothing here cares — it only tells them whether the edit was an INSERTION, which is what
+ * decides whether the caret steps over a separator.
  */
 import { computed, ref, watch, type Ref, type WritableComputedRef } from 'vue'
 
 import { digitsOf } from '../utils/text'
 
 export interface MaskedFieldOptions<T extends string> {
-  /** The native `<input>` of the VInput — written directly, see `writeField`. */
+  /** The real input, which is written to directly — see below. */
   fieldEl: Ref<HTMLInputElement | null>
-  /** The field accepts typing; `false` freezes everything here. */
+  /** Whether the field can be typed into at all. Everything here is inert when it cannot. */
   typing: () => boolean
-  /** What the field shows when NOT typing (the value through `Intl`). */
+  /** What the field shows when it is NOT being typed into: the value, written out in full. */
   displayText: () => string
-  /** The canonical value, already narrowed (`null` when there is none to mask). */
+  /** The current value, or nothing. */
   readValue: () => T | null
+  /** Writes a new value. */
   writeValue: (value: T | null) => void
-  /** How many digits the mask holds — 8 for a date, 4 for a time. */
+  /** How many digits the mask holds: eight for a date, four for a time. */
   maxDigits: () => number
-  /** Digits → masked text. */
+  /** Lays a run of digits out as masked text. */
   format: (digits: string) => string
   /**
-   * Caret position after `digitsBefore` digits of `text`. `inserting` is false on a
-   * deletion, where the caret must stay IN FRONT of the separator — otherwise the
-   * key never makes progress.
+   * Where the caret goes so as to sit after a given number of digits.
+   *
+   * The flag says whether something was INSERTED rather than deleted, and it matters: on
+   * a deletion the caret must stay IN FRONT of the separator, or the next press of the key
+   * would step over it instead of erasing, and the key would appear to do nothing.
    */
   caret: (text: string, digitsBefore: number, inserting: boolean) => number
   /**
-   * Masked text → canonical value, or `null`. `final` is true on the leave commit
-   * alone: VDatePicker expands a 2-digit year only there, since "…/26" must not
-   * commit 2026 while the user is still typing the year.
+   * Reads masked text back into a value, or nothing when it is not one yet.
+   *
+   * The flag marks the FINAL reading, when the reader leaves the field. A date expands a
+   * two-digit year only there: "26" must not be committed as 2026 while it may still be on
+   * its way to becoming it.
    */
   parse: (text: string, final: boolean) => T | null
-  /** Canonical value → masked text; `''` for `null`. */
+  /** Writes a value as masked text, and nothing at all for no value. */
   toMask: (value: T | null) => string
-  /** Extra acceptance on commit (bounds, disabled dates). Default: everything. */
+  /**
+   * Whether a value the reader has finished typing may be taken — within the bounds, not
+   * one of the excluded days. Everything is acceptable by default.
+   */
   acceptable?: (value: T) => boolean
 }
 
 export interface MaskedField {
+  /** The text currently in the field while it is being typed into. */
   draft: Ref<string>
   /**
-   * To be bound with **`v-model`** on the VInput, never `:model-value`: without an
-   * `onUpdate:modelValue` listener `useModel` keeps an internal copy of the RAW
-   * typed text and rewrites it on the next patch, erasing the mask as soon as the
-   * mask itself does not change (a rejected character, the digit past the last).
-   * Covered by a test in both components.
+   * TRAP — bind this with `v-model` on the field and NEVER as a one-way value. Without a
+   * listener for its updates, the field keeps an internal copy of the RAW text typed and
+   * writes it back on the next patch — which erases the mask precisely when the masked
+   * text did NOT change: a rejected character, or a digit past the last. Both components
+   * have a test locking it.
    */
   fieldModel: WritableComputedRef<string | number>
-  /** Writes the draft AND the DOM: Vue does not re-patch an unchanged masked text. */
+  /**
+   * Writes the text into both the draft and the input itself. Both are needed: Vue does
+   * not patch an element whose text it believes is unchanged, and after a reformat it
+   * often is.
+   */
   writeField: (text: string, caret?: number) => void
-  /** Commits as soon as the value is complete and acceptable — the panel follows. */
+  /** Takes the value as soon as what has been typed is complete and acceptable. */
   commitLive: () => void
-  /** Leave handler (`change` then `blur`, hence the idempotence). */
+  /** Called as the reader leaves the field. It is safe to call twice. */
   commitOrRevert: () => void
+  /** The handler to bind to the field's input event. */
   onFieldInput: (event: Event) => void
 }
 
@@ -73,18 +87,19 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
   const acceptable = options.acceptable ?? (() => true)
 
   /*
-   * The masked form of the current value. Being a computed, it tracks whatever
-   * `toMask` reads — the resolved locale mask, the 12/24 h format — so the two
-   * components no longer have to list those dependencies in a `watch` source.
+   * The current value, written as masked text. Being derived, it also tracks whatever the
+   * conversion reads — the language's own mask, the choice of clock — so neither component
+   * has to list those dependencies itself.
    */
   const maskedValue = computed(() => options.toMask(options.readValue()))
 
   watch(
     maskedValue,
     (next) => {
-      // An anti-loop guard: a commit made while typing rewrites the value, which comes
-      // back through here — without this test the draft and the caret would be
-      // overwritten with an identical text.
+      // TRAP — this guard is what stops the field and the value chasing each other. A
+      // commit made while typing writes the value, which comes straight back here; without
+      // the test, the text being typed and the caret with it would be overwritten by text
+      // identical to what is already there.
       if (next !== draft.value) draft.value = next
     },
     { immediate: true },
@@ -111,9 +126,12 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
   }
 
   /**
-   * Normalizes, or REVERTS SILENTLY. An incomplete, impossible (31/02), out-of-bounds
-   * or disabled entry disappears in favour of the current value — no home-made error
-   * state to compete with the `invalid` prop.
+   * Tidies up what was typed, or SILENTLY puts back what was there before.
+   *
+   * An entry that is incomplete, impossible — the 31st of February — outside the allowed
+   * bounds or excluded simply disappears in favour of the current value. There is
+   * deliberately no error state of our own competing with the `invalid` prop a consumer
+   * controls.
    */
   function commitOrRevert() {
     if (!options.typing()) return
@@ -125,15 +143,19 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
     const value = options.parse(draft.value, true)
     if (value && acceptable(value)) {
       if (value !== options.readValue()) options.writeValue(value)
-      writeField(options.toMask(value)) // "5/6/26" → "05/06/2026"
+      // Rewritten in full: "5/6/26" becomes "05/06/2026".
+      writeField(options.toMask(value))
       return
     }
     writeField(options.toMask(options.readValue()))
   }
 
   /**
-   * The mask as you type. Invariant: the number of digits to the LEFT of the caret is
-   * preserved by the reformatting — absolute positions jump as soon as a separator
+   * Reformats the field on every keystroke.
+   *
+   * The invariant to keep is that the number of digits to the LEFT of the caret survives
+   * the reformatting. Restoring an absolute position instead would misplace the caret on
+   * exactly the keystrokes that matter: a position jumps by one the moment a separator
    * appears or disappears.
    */
   function onFieldInput(event: Event) {

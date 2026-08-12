@@ -1,12 +1,12 @@
 import type { VectisMessages } from './types'
 
 /**
- * English — the base dictionary, always bundled. It is what any locale with no
- * registered dictionary falls back to, key by key.
+ * English, the dictionary the library always carries. Any language with no dictionary of
+ * its own falls back to this one, entry by entry, so nothing is ever left unsaid.
  *
- * ⚠ These strings are asserted character for character by the unit tests, and
- * they are the accessible names the play functions query. Changing one means
- * changing its assertions.
+ * Take care changing anything here: these words are checked letter for letter by the
+ * tests, and they are the names the browser tests reach for when they look a control up.
+ * Changing one means changing what expects it.
  */
 export const en: VectisMessages = {
   common: {
@@ -48,7 +48,8 @@ export const en: VectisMessages = {
     perPageValue: (label, value) => `${label}: ${value}`,
     selectAll: 'Select all',
     selectRow: (index) => `Select row ${index}`,
-    // The plural is a ternary — that is the whole plural engine of the DS.
+    // The plural is chosen right here, in the message itself. That one line is the whole
+    // of the design system's handling of plurals, and it is meant to be.
     selection: (count) => `${count} item${count === 1 ? '' : 's'} selected`,
     range: ({ start, end, total }) => `${start}–${end} of ${total}`,
     pagination: 'Table pagination',

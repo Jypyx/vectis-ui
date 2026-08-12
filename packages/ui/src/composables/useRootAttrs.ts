@@ -1,27 +1,32 @@
 import { computed, useAttrs, type ComputedRef, type StyleValue } from 'vue'
 
 /**
- * Shape of a `:class` binding. Redeclared here: `@vue/runtime-dom` exports it as
- * `ClassValue`, but the `vue` package does not re-export it — and without it
- * `attrs.class` stays `unknown`, which the template rejects.
+ * The shape of a class binding. It is written out here rather than imported because the
+ * type exists in Vue's DOM runtime under another name and the `vue` package does not
+ * pass it on. Without it the class stays untyped, and a template refuses to bind it.
  */
 type ClassBinding = false | null | undefined | string | Record<string, unknown> | ClassBinding[]
 
 // @a11y
 /**
- * Plumbing of the **wrapper-root pattern**: a component whose root is only a
- * container (VInput/VTextarea fields, VCombobox, VDataTable, VDatePicker,
- * VTimePicker, the VTabs bar) must split its inherited attributes in two —
- * `class`/`style` stay on the root (that is what the consumer styles), and
- * everything else goes down to the FUNCTIONAL element. Without that split,
- * `name`, `required` or the `aria-*` land on the wrapper and break forms and
- * accessibility.
+ * Splits the attributes a consumer wrote on a component in two, for the components whose
+ * outermost element is only a container: the two text fields, the search field, the
+ * table, the two pickers, the row of tabs.
  *
- * `defineOptions({ inheritAttrs: false })` stays the component's responsibility:
- * it is an SFC compilation option, not state.
+ * Everything a consumer writes on a component lands, by default, on that outermost
+ * element. Here that is the wrong place for most of it. Styling belongs on the container,
+ * since that is the box the consumer sees and positions; everything else belongs on the
+ * element that actually DOES something — the real input, the real control. Left
+ * unsplit, the field's name, the fact that it is required and everything describing it
+ * for a screen reader all end up on a decorative box, where a form ignores them and a
+ * screen reader never finds them.
  *
- * `attrs` is returned as-is for the rare targeted reads (`attrs.id`, which must
- * win over a `useId()`; `attrs['aria-describedby']`, to be aggregated).
+ * Turning the default placement off stays the component's own business: that is a
+ * compilation option of the file, not something that can be arranged from here.
+ *
+ * The whole set is handed back as well, for the few components that need to look
+ * something up in it — an identifier the consumer supplied, which must win over the
+ * generated one, or a description that has to be merged rather than replaced.
  */
 export function useRootAttrs(): {
   attrs: Record<string, unknown>

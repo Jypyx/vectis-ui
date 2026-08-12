@@ -2,24 +2,27 @@ import { computed, watchEffect, type ComputedRef, type Ref } from 'vue'
 
 import { useMessages } from '../i18n/state'
 
-/** Minimal contract of the native control: both `<input>` and `<textarea>` expose it. */
+/** The least this needs of the real control — the two kinds of field both offer it. */
 interface ValidatableControl {
   setCustomValidity: (message: string) => void
 }
 
 // @core
 /**
- * Typed length vs `maxlength`: the counter text, the overflow and the **soft
- * limit**.
+ * How much has been typed against how much is allowed: the "12/80" counter under a
+ * field, whether the allowance has been passed, and the SOFT limit.
  *
- * Soft limit = typing is not blocked, the field goes into error. It goes through
- * `setCustomValidity` rather than a custom event: the red only appears after
- * interaction (`:user-invalid`, the same timing as native), submission is
- * blocked, and the state is readable through the standard `el.validity` API. The
- * component therefore OWNS the custom validity for as long as `softLimit` is on.
+ * A soft limit lets the reader keep typing past the allowance and puts the field in
+ * error instead of cutting them off mid-word. That error is declared to the BROWSER
+ * rather than invented here, and three things follow from it for free: the field only
+ * turns red once the reader has actually interacted with it, exactly as a native error
+ * does; the form refuses to submit; and anyone inspecting the field finds the error where
+ * they would look for any other. The price is that the component then owns that error
+ * outright for as long as the soft limit is on.
  *
- * `flush: 'post'`: the template ref is not set yet in `pre` flush. Inert on the
- * server, where the ref stays null.
+ * The effect runs AFTER the render rather than before it, because the reference to the
+ * real element is not filled in yet at the earlier point. It does nothing at all during a
+ * server render, where there is no element to speak to.
  */
 export function useTextLimit(options: {
   el: Ref<ValidatableControl | null>
@@ -31,9 +34,10 @@ export function useTextLimit(options: {
   const max = computed(() => options.maxlength())
   const m = useMessages()
 
-  // The dictionary read is INSIDE the effect, so the validation message rewrites
-  // itself if `setLocale` is called after mount. `if/else` rather than a ternary,
-  // so that TS narrows `limit` to `number`.
+  // The dictionary is read INSIDE the effect, which is what makes the error message
+  // rewrite itself when the language is changed after the component is on screen. The
+  // branches are spelled out rather than written as a ternary so that TypeScript can
+  // narrow the limit to a number.
   watchEffect(
     () => {
       const el = options.el.value

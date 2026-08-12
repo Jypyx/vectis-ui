@@ -3,52 +3,59 @@ import type { Ref } from 'vue'
 
 import { useFocusoutDismiss } from './useFocusoutDismiss'
 
-/** Minimal contract of the inner field: VDatePicker/VTimePicker expose a `VInput`. */
+/** The least this needs of the field: something it can put the focus back on. */
 interface FocusableField {
   focus: () => void
 }
 
-/** Minimal contract of the panel: VDatePicker/VTimePicker render a `VPopover`. */
+/** The least this needs of the panel: something it can open and close. */
 interface PanelControl {
   show: () => void
   hide: () => void
 }
 
 export interface UseFieldPanelOptions {
+  /** The component's root, against which "the focus has left" is judged. */
   rootEl: Ref<HTMLElement | null>
+  /** The panel to open and close. */
   panelRef: Ref<PanelControl | null>
+  /** The field the focus returns to. */
   fieldEl: Ref<FocusableField | null>
+  /**
+   * Whether opening is refused. It is the SINGLE cut-off point: every route in passes
+   * through it, so a component never has to repeat the condition per handler.
+   */
   disabled: () => boolean
-  /** Moves focus INTO the open panel (called under `requestAnimationFrame`). */
+  /** Moves the focus INTO the open panel — where in it is the component's business. */
   focusInPanel: () => void
-  /** Opening prologue (initializing a draft, resetting a step…). */
+  /** What the component needs to do as the panel opens: prepare a draft, reset a step. */
   onOpen?: () => void
-  /** Closing epilogue (clearing a live region…). */
+  /** What it needs to do as the panel closes: clear an announcement, for instance. */
   onClose?: () => void
   /**
-   * Should focus enter the panel on opening? Default: yes. A TYPING field
-   * (VDatePicker `mode="input"`) opens its panel without moving the caret: the
-   * keyboard keeps writing in the field, and the down arrow stays the only
-   * explicit route to the panel.
+   * Whether the focus should enter the panel when it opens. It does by default.
+   *
+   * A field one TYPES into says no: its panel opens without taking the caret, so typing
+   * carries on and the down arrow remains the one explicit way in.
    */
   focusOnOpen?: () => boolean
 }
 
 // @a11y @keyboard @core
 /**
- * The "field + floating `mode="manual"` panel" shell, shared by VDatePicker and
- * VTimePicker. Neither of them owns it.
+ * The shell shared by the date and the time picker: a field, and a panel below it that
+ * nothing dismisses by itself. Neither component owns this — it belongs to both.
  *
- * A `manual` popover does NOTHING on its own: no light dismiss, no focus move, no
- * focus return to the trigger. Everything below is that minimum and nothing more
- * — behaviour specific to each component goes through
- * `onOpen`/`onClose`/`focusInPanel`.
+ * A panel of that kind does NOTHING on its own: it does not close on a click outside, does
+ * not take the focus, and does not hand it back. What follows is exactly that minimum,
+ * and nothing more; whatever is particular to one component arrives through the three
+ * callbacks above.
  *
- * The panel is WRITTEN imperatively (VPopover's `show`/`hide`) and READ by model:
- * `open` is to be bound as `v-model:open` on the VPopover, which feeds it from DOM
- * events. The write must stay synchronous — the `rAF` that moves focus assumes the
- * panel is already open when it is armed; going through the model would insert a
- * tick.
+ * TRAP — the panel is WRITTEN to directly and READ back through a model. The state here is
+ * meant to be bound to the panel, which feeds it from its own events, but the opening
+ * itself must stay synchronous: the frame scheduled to move the focus assumes the panel is
+ * already open by the time it runs, and going through the model would put a tick in
+ * between.
  */
 export function useFieldPanel(options: UseFieldPanelOptions) {
   const open = ref(false)
@@ -58,8 +65,9 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     options.onOpen?.()
     options.panelRef.value?.show()
     // @a11y
-    // DOM focus has to be moved by hand: the platform does not do it for a
-    // `manual` popover. rAF: the panel is not painted yet when show() returns.
+    // The focus has to be moved by hand — the platform moves it into no panel of this
+    // kind. It waits a frame because the panel has not been painted by the time it is
+    // asked to open, and nothing invisible can take the focus.
     if (moveFocus) requestAnimationFrame(() => options.focusInPanel())
   }
 
@@ -71,31 +79,36 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
   }
 
   function onControlClick(event: MouseEvent) {
-    // click on an internal button (cross/icon): let its own handler act
+    // A click on one of the field's own buttons — the clear cross, an icon — is left to
+    // that button's handler: reacting here as well would open the panel the cross has
+    // just given a reason to close.
     if ((event.target as HTMLElement).closest('.v-input-action')) return
     if (options.disabled()) return
     openPanel()
   }
 
   // @a11y
-  /** Closes when focus leaves the component (panel included, a DOM descendant). */
+  /**
+   * Closes as soon as the focus leaves the component — the panel included, which is a
+   * descendant of it even while floating above the page.
+   */
   const onFocusout = useFocusoutDismiss(options.rootEl, () => closePanel(false))
 
   // @a11y
   /*
-   * Click on a NON-interactive area of the panel (padding, the gutter between
-   * cells, the navigation bar outside its buttons): the browser removes focus from
-   * the current element and hands it back to <body>. The `focusout` then reaches
-   * the root with a null `relatedTarget` — which `useFocusoutDismiss` rightly
-   * reads as an exit — and closes a panel that was just clicked.
+   * TRAP — clicking a part of the panel that cannot take focus (its padding, the gutter
+   * between two cells, the empty space in a navigation bar) makes the browser take the
+   * focus off whatever had it and hand it back to the page body. The handler above then
+   * sees the focus leave with nowhere to go, reads it as an exit — rightly — and closes a
+   * panel the reader has just clicked on.
    *
-   * So focus is kept in place, but ONLY outside interactive elements: an
-   * unconditional `preventDefault` (VCombobox's, whose focus never leaves the
-   * field) would rob the days and the navigation arrows of focus, and
-   * desynchronize VCalendar's roving tabindex.
+   * So the focus is held in place, but ONLY outside things that can take it. An
+   * unconditional cancellation, as VCombobox uses — where the focus never leaves the field
+   * anyway — would here rob the days and the navigation arrows of the focus, and leave the
+   * calendar's keyboard pointing at nothing.
    *
-   * Invisible in jsdom, which does not simulate focus on click: covered by play
-   * functions.
+   * None of this is visible in the unit tests, where clicking moves no focus; browser tests
+   * cover it.
    */
   function onPanelMousedown(event: MouseEvent) {
     const target = event.target as HTMLElement | null
@@ -111,17 +124,18 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
       }
       return
     }
-    // `defaultPrevented`: an Enter already consumed INSIDE the panel (selecting a
-    // day, committing the dial) has just closed it — without this guard it would
-    // reopen it straight away as it bubbles up to the root.
+    // TRAP — a key already consumed INSIDE the panel is ignored here. An Enter that
+    // selected a day or confirmed the dial has just CLOSED the panel, and without this
+    // guard it would reopen it immediately as it travels up to the root.
     if (
       (event.key === 'ArrowDown' || event.key === 'Enter') &&
       !open.value &&
       !event.defaultPrevented
     ) {
       event.preventDefault()
-      // KEYBOARD opening: focus always follows, whatever `focusOnOpen` says —
-      // otherwise the down arrow would open a panel nothing could reach.
+      // Opened from the KEYBOARD, the panel always takes the focus, whatever the component
+      // asked for: otherwise the down arrow would open a panel the keyboard could not
+      // reach.
       openPanel(true)
     }
   }

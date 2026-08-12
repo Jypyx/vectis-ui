@@ -1,22 +1,28 @@
 /**
- * Arrow-key navigation within a row/column of sibling elements.
+ * Moving through a row or a column of neighbouring controls with the arrow keys.
  *
- * Justified JS: no native primitive moves focus between sibling buttons. The
- * contract is the same everywhere in the DS — the arrows and Home/End only ever
- * **MOVE focus**, never activate: activating on focus would trigger an
- * unintended navigation or value toggle. A component that wants activation on
- * focus (VTabs with `activation: 'automatic'`) sets it itself, in its own
- * `@focus`.
+ * There is code here because the browser offers nothing that walks the focus from one
+ * button to the next: the Tab key steps out of the group entirely, and a group of tabs, a
+ * set of pages or a menu is expected to be crossed with the arrows.
  *
- * Single incarnation for VPagination, VTabs, VToggle and VMenu.
+ * The rule is the same everywhere in the design system, and it is worth stating plainly:
+ * the arrow keys and Home and End MOVE the focus and never act on what they land on.
+ * Acting on arrival would navigate somewhere the reader did not ask to go, or turn a
+ * value on merely because they passed over it. A component that genuinely wants the
+ * arrival to select — a row of tabs can be set up that way — arranges that itself.
+ *
+ * This is the single place that behaviour is written: the pages, the tabs, the toggle
+ * group and the menu all use it.
  */
 
 // @keyboard @a11y
 /**
- * The navigable elements of a container: the selector excludes disabled ones,
- * and the `display` filter drops those hidden by a container query
- * (VPagination) or by the consumer (VTabs, VToggle) — a hidden element must not
- * take focus.
+ * The elements inside a container that the arrows may land on. The selector is the
+ * caller's, and it is the one that leaves out anything disabled.
+ *
+ * Anything hidden is dropped here, and it has to be: the pages hide their neighbours as
+ * the bar gets narrower, and a consumer may hide a tab or a toggle outright. An element
+ * nobody can see must not be given the focus.
  */
 export function navigableItems(container: HTMLElement, selector: string): HTMLElement[] {
   return [...container.querySelectorAll<HTMLElement>(selector)].filter(
@@ -26,14 +32,19 @@ export function navigableItems(container: HTMLElement, selector: string): HTMLEl
 
 // @keyboard @a11y
 /**
- * Handles ArrowUp/Down/Left/Right + Home/End over `items` and moves focus.
- * Returns `true` if the key was consumed (`preventDefault` already applied),
- * `false` otherwise — the caller can then let the event through.
+ * Handles the four arrows and the Home and End keys over a list of elements, and moves
+ * the focus.
  *
- * - Modulo wrap at the ends; with no current focus in the list, it starts from
- *   the first element whatever the direction.
- * - The INLINE-axis arrows are physical, hence inverted in RTL; the block-axis
- *   ones are not (the block axis does not flip).
+ * It reports whether it took the key. When it did, the browser's own reaction has already
+ * been suppressed; when it did not, the caller is free to do something else with it.
+ *
+ * The ends WRAP: past the last element the focus comes back to the first. When nothing in
+ * the list has the focus yet, any arrow starts at the beginning.
+ *
+ * The left and right arrows point at a physical side of the screen, so in a language
+ * written right to left they are swapped: pressing right must move towards the NEXT item,
+ * which is then to the left. Up and down need no such treatment, since no language
+ * reverses them.
  */
 export function arrowNavigate(
   event: KeyboardEvent,
@@ -49,9 +60,9 @@ export function arrowNavigate(
   if (items.length === 0) return false
   event.preventDefault()
 
-  // `forward` is only read by the arrow branch, and the inline axis is the only one
-  // that needs the direction: a lazy getter keeps Home/End off the style recalc that
-  // `getComputedStyle` forces.
+  // Only the arrow branch asks which way is forward, and only the horizontal axis needs
+  // the writing direction to answer. Keeping it a function rather than a value is what
+  // spares Home and End the style recalculation that reading the direction forces.
   const forward = () =>
     vertical
       ? event.key === 'ArrowDown'

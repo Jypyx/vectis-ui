@@ -1,7 +1,15 @@
 /**
- * Semantic tokens (light theme, default values).
- * The ONLY tokens consumed by the components. They reference the primitives
- * through DTCG aliases `{path.to.token}`.
+ * The tokens that name a ROLE rather than a value: the page's background, the colour of
+ * ordinary text, the accent an application is built around, the pause before a tooltip
+ * appears.
+ *
+ * These are the ONLY tokens a component ever mentions, and that is the whole point. A
+ * component asks for the accent colour and never for a particular indigo, so an
+ * application can change what the accent IS without a single component knowing.
+ *
+ * Almost every entry points at a step of a palette rather than stating a value, by naming
+ * it in braces. The values written out here are the LIGHT theme; the dark theme restates
+ * the same roles, pointing them elsewhere.
  */
 import { color, dimension, fontFamily, fontWeight, type TokenGroup } from './types'
 
@@ -47,10 +55,13 @@ export const semantic = {
     'danger-text': color('{color.red.700}'),
 
     /*
-     * Green starts one step lower than the other tones: `text-on-accent` (white) only
-     * reaches 4.5:1 from green-700 on (green-600 caps at 3.2:1). Raising the tone rather
-     * than darkening the text is what keeps "solid = white text" true of every tone but
-     * warning, whose amber has no dark-enough step at all — hence `text-on-warning`.
+     * Green starts one step darker than the other colours. White text on a filled button
+     * only becomes readable enough from green 700 onwards — green 600 falls well short of
+     * the threshold. Darkening the colour rather than darkening the text is what keeps one
+     * simple rule true: a filled control carries white text.
+     *
+     * The one exception is the warning colour, since no step of an amber is ever dark
+     * enough for white, which is why it alone declares a text colour of its own.
      */
     success: color('{color.green.700}'),
     'success-hover': color('{color.green.800}'),
@@ -69,9 +80,13 @@ export const semantic = {
     backdrop: color('oklch(0% 0 0 / 0.45)', 'The veil behind modal dialogs'),
   },
   /**
-   * Semantic typographic scale: one role = one complete recipe (size, weight,
-   * leading, and optionally letter spacing). Consumed by the VTypography
-   * component and by the components' CSS.
+   * The typography, described by role rather than by measurement: a heading, a subtitle,
+   * a caption, a piece of code.
+   *
+   * Each role is a COMPLETE recipe — a size, a weight, the space between lines, and where
+   * it matters the space between letters. Asking for a role therefore settles every one of
+   * those at once, and two pieces of text in the same role cannot drift apart. It is what
+   * the typography component renders, and what the components' own stylesheets ask for.
    */
   text: {
     family: fontFamily('{font.family.sans}', 'The font of all the design system text'),
@@ -148,8 +163,11 @@ export const semantic = {
       weight: fontWeight('{font.weight.regular}'),
       leading: dimension('{font.leading.normal}'),
     },
-    /* Technical role: the label of an interactive control (VButton, VChip,
-     * VBadge…). No `size`: it comes from the size scale (`--control-font-size`). */
+    /*
+     * A role of a different sort: the label of a control — a button, a chip, a badge. It
+     * deliberately carries no SIZE, because a control's text size comes from the size it
+     * was given, and this recipe only settles the weight and the space between lines.
+     */
     control: {
       weight: fontWeight('{font.weight.medium}'),
       leading: dimension('{font.leading.none}'),

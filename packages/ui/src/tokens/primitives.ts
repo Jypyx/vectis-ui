@@ -1,9 +1,19 @@
 /**
- * Primitive tokens: palettes, scales. Never consumed directly by the components —
- * only referenced by the semantic tokens.
- * Colours in OKLCH (perceptual interpolation, wide gamut).
- * Palettes taken from Tailwind CSS 4 (`theme.css`); the `neutral` key matches
- * Tailwind's `gray` palette.
+ * The raw material: the colour palettes and the numeric scales the whole design system is
+ * built out of.
+ *
+ * Nothing here is used by a component directly. A component asks for "the accent colour"
+ * or "the page background", and it is those ROLES, defined alongside this file, that point
+ * at a step of a palette. Keeping the two apart is what makes a theme possible at all: a
+ * dark theme moves the roles, and never the palette.
+ *
+ * The colours are written in OKLCH, a way of describing a colour by how bright it LOOKS
+ * rather than by how much of each primary it mixes. Two consequences matter here: a step
+ * of a palette is as light as the same step of any other, and mixing two of these colours
+ * passes through the shades one would expect rather than through grey.
+ *
+ * The palettes themselves come from Tailwind CSS 4, so that anyone already used to them
+ * recognizes the steps; what this file calls neutral is what Tailwind calls gray.
  */
 import {
   color,
@@ -111,8 +121,9 @@ export const primitives = {
       mono: fontFamily(
         "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace",
       ),
-      // Icon font (loaded by the consumer, see README); overriding this token is
-      // what switches to Material Symbols Outlined/Sharp.
+      // The icon font, which the library never bundles: an application that wants icons
+      // drawn from a font loads it itself, as the README explains. Overriding this one
+      // token is what switches the whole system to another cut of Material Symbols.
       icon: fontFamily("'Material Symbols Rounded'"),
     },
     weight: {

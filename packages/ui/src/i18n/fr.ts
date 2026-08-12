@@ -1,19 +1,20 @@
 import type { VectisMessages } from './types'
 
 /**
- * French. **Opt-in**: this module is only reached if you import it, so it is
- * pruned from the bundle of projects that do not use it (`preserveModules` +
- * `sideEffects: ["**\/*.css"]`).
+ * French. Nothing reaches this file unless it is asked for, so a project that does not
+ * use it never carries it: the library is packaged one module at a time, and a module
+ * nobody imports is left out.
  *
- * Enabling it and adding a language the DS does not ship are the SAME gesture —
- * there are no two categories of dictionary:
+ * Turning it on and adding a language the library does not ship at all are the SAME
+ * gesture. There are deliberately not two kinds of dictionary, one blessed and one added
+ * by hand:
  *
  *     import { fr, registerMessages, setLocale } from '@vectis/ui'
  *     registerMessages('fr', fr)
  *     setLocale('fr-FR')
  *
- * ⚠ Typographic apostrophes are meaningful here: some assertions target these
- * strings character for character.
+ * The curly apostrophes below are deliberate and are part of the text: some tests check
+ * these words letter for letter, and a straight apostrophe is a different letter.
  */
 export const fr: VectisMessages = {
   common: {
@@ -75,9 +76,10 @@ export const fr: VectisMessages = {
   field: {
     limitExceeded: (max) => `Dépasse la limite de ${max} caractères`,
   },
-  // `\u00A0` = a NON-BREAKING space before the sign, a French typographic
-  // convention (English has none). Escaped rather than literal: ESLint rejects
-  // the character (`no-irregular-whitespace`), and it would be invisible in review.
+  // The space before the sign is a NON-BREAKING one, as French typography requires and
+  // English does not. It is written as an escape rather than typed in: the linter refuses
+  // the character itself, and it would be indistinguishable from an ordinary space in a
+  // review.
   progress: { percent: (percent) => `${percent}\u00A0%`, label: 'Progression' },
   hotkeys: {
     command: 'Commande',
@@ -134,8 +136,9 @@ export const fr: VectisMessages = {
     attach: 'Choisir des fichiers',
     clear: 'Effacer les fichiers',
     remove: (name) => `Retirer ${name}`,
-    // Le pluriel français part de 2, l’anglais de 0 : deux ternaires distincts,
-    // pas une règle partagée.
+    // The French plural starts at two, the English one at zero — "0 fichier" against
+    // "0 files". Each language therefore makes the choice on its own, and there is no
+    // shared rule for either to inherit.
     files: (count) => `${count} fichier${count > 1 ? 's' : ''}`,
     placeholder: 'Aucun fichier sélectionné',
   },

@@ -2,17 +2,21 @@ import { computed, useAttrs, type ComputedRef } from 'vue'
 
 // @a11y
 /**
- * Accessible name of a named container (tablist, group, nav…) following the ARIA
- * precedence: `aria-labelledby` > `aria-label` > `label` prop.
+ * Works out the name a screen reader announces for a container that has one: a row of
+ * tabs, a group of buttons, a navigation area.
  *
- * The `label` prop is only a DEFAULT. A consumer `aria-label` replaces it; an
- * `aria-labelledby` removes it, otherwise both names would coexist on the
- * element.
+ * A name can be given in three ways, and they are ranked. Pointing at another element
+ * that already carries the text wins; an explicit name written on the component comes
+ * next; the component's own `label` option is only the fallback. So that option is a
+ * DEFAULT and nothing more — an explicit name replaces it, and pointing at another
+ * element removes it altogether, since otherwise the element would carry two names at
+ * once.
  *
- * Required as soon as the component is in `inheritAttrs: false` and renders both
- * `v-bind="forwardedAttrs"` **and** `:aria-label`: without arbitration, both
- * apply. Under natural fallthrough, Vue already lets the consumer's attribute
- * win — there the composable only removes the now-redundant default.
+ * This arbitration has to be done by hand as soon as a component both spreads the
+ * attributes it was given and writes its own name in the same place: nothing would
+ * choose between the two, and both would apply. Elsewhere Vue's normal attribute
+ * fallthrough already lets the consumer's win, and all this does is drop a default that
+ * has become redundant.
  */
 export function useAriaLabel(label: () => string | undefined): ComputedRef<string | undefined> {
   const attrs = useAttrs()

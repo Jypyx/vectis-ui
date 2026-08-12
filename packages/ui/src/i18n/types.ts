@@ -1,37 +1,39 @@
 /**
- * The DS dictionary. Depth EXACTLY 2: `namespace.key`, where the value is a
- * leaf — a string, or a typed function for a parameterized message.
+ * Every word the design system can say to a reader, gathered in one place. This is what a
+ * translator works from, and what a consumer overrides to change a turn of phrase.
  *
- * No plural engine, no ICU, no interpolator: a parameterized entry IS a
- * TypeScript function. The typing of its arguments is the contract (a
- * translation that forgets a parameter does not compile), and a plural rule is
- * written with a ternary — see `dataTable.selection`.
+ * It is arranged in exactly TWO levels: a section, then an entry. An entry is finished
+ * text, or — when something has to be slotted into it — a small function that builds the
+ * sentence.
  *
- * Depth 2 is not decorative: it is what makes merging partial overrides
- * non-recursive (`state.ts`), hence incapable by construction of descending
- * into a FUNCTION value as if it were an object.
+ * There is deliberately no template language and no rules engine for plurals. A message
+ * that takes a value IS a function, written by hand, and its arguments are the contract: a
+ * translation that forgets one does not compile. A plural is a choice between two forms
+ * written inside that function.
  *
- * What is deliberately NOT here:
- * - whatever `Intl` already derives from the locale tag (month and day names,
- *   date field order, date separator, hour cycle);
- * - whatever is made only of digits and universal punctuation (VBadge's `99+`,
- *   VAvatarGroup's `+N`, the `N/M` counter, the `:` of a time);
- * - DEVELOPER messages (`[Component] …`), which are not translated.
+ * Two levels is not an aesthetic choice. It is what allows a handful of replacement words
+ * to be laid over a dictionary without descending into it, and therefore what makes it
+ * impossible to mistake one of those functions for something to be taken apart.
+ *
+ * Three kinds of text are deliberately absent. Anything the browser already knows how to
+ * say in any language: the names of months and days, the order of the parts of a date,
+ * whether hours run to twelve or twenty-four. Anything made only of digits and
+ * punctuation everyone shares — "99+", "+3", a "3/8" counter, the colon in a time.
+ * And the warnings the library prints for the developer, which are not translated at all.
  */
 export interface VectisMessages {
-  /** Words shared by several components — a single place to translate. */
+  /** Words several components share, so that they are translated once rather than five times. */
   common: {
-    /** VSpinner, `loadingLabel` of VInput/VTextarea, `loadingText` of VCombobox. */
+    /** Said by the spinner, and by the fields and the search box while they are loading. */
     loading: string
-    /** `clearLabel` of VInput and VTextarea. */
+    /** The cross that empties a field. */
     clear: string
-    /** `closeLabel` of VDialog and VToaster. */
+    /** The cross that closes a dialog or a notification. */
     close: string
-    /** `dismissLabel` of VChip. */
+    /** The cross that removes a chip. */
     dismiss: string
-    /** VTimePicker dial footer. */
+    /** The two buttons under the clock face. */
     cancel: string
-    /** VTimePicker dial footer. */
     confirm: string
   }
   pagination: {
@@ -39,16 +41,16 @@ export interface VectisMessages {
     previous: string
     next: string
     page: (page: number) => string
-    /** Hidden-pages ellipsis — a decorative element (`aria-hidden`). */
+    /** The ellipsis standing in for the pages that are not shown. It is decorative, and never spoken. */
     hiddenPages: string
   }
   tabs: { label: string; previous: string; next: string }
   breadcrumb: { label: string; ellipsis: string }
   sideNavigation: {
     /**
-     * Accessible name of the `<nav>`. The component's only string: the labels
-     * come from the slots, and the expanded/collapsed state is carried by
-     * `<details>`.
+     * What the navigation area is called. It is the component's only piece of text: the
+     * labels are written by the consumer, and whether a branch is open or closed is
+     * something the browser announces on its own.
      */
     label: string
   }
@@ -63,24 +65,24 @@ export interface VectisMessages {
     searchLabel: string
     searchPlaceholder: string
     perPage: string
-    /** "Rows per page" menu button: label + current value. */
+    /** The "rows per page" button, which shows both the wording and the number in force. */
     perPageValue: (label: string, value: number) => string
     selectAll: string
-    /** `index` is the HUMAN index (1-based): the caller passes `index + 1`. */
+    /** The row number is the one a reader counts, starting at one — the caller adds it. */
     selectRow: (index: number) => string
     selection: (count: number) => string
     range: (range: { start: number; end: number; total: number }) => string
     /**
-     * Accessible name of the footer's VPagination. Distinct from `pagination.label`
-     * on purpose: a page holding a table AND a standalone pagination would otherwise
-     * expose two `<nav>` landmarks under the same name.
+     * What the pagination under a table is called. It is deliberately not the same as the
+     * name a standalone pagination takes: a page holding both would otherwise offer a
+     * screen reader two navigation areas under one name, with no way to tell them apart.
      */
     pagination: string
   }
   toaster: { label: string }
   inputOTP: {
     label: string
-    /** `index` is the HUMAN index (1-based): the caller passes `slotIndex + 1`. */
+    /** The box number is the one a reader counts, starting at one — the caller adds it. */
     slot: (index: number, total: number) => string
   }
   slider: {
@@ -90,33 +92,39 @@ export interface VectisMessages {
     rangeStart: (label: string) => string
     rangeEnd: (label: string) => string
   }
-  /** Shared by VInput and VTextarea through `composables/useTextLimit`. */
+  /** The error both kinds of text field show when what was typed runs past the allowance. */
   field: { limitExceeded: (max: number) => string }
   progress: {
-    /** `50%` in English, `50 %` in French (NON-BREAKING space before the sign). */
+    /**
+     * A percentage. English writes "50%" and French "50 %", with a non-breaking space
+     * before the sign, which is exactly the kind of typographic habit this dictionary is
+     * for.
+     */
     percent: (percent: number) => string
     /**
-     * Default accessible name of VProgressLinear/VProgressCircular. `role="progressbar"`
-     * is not named from its contents, so without it the bar is anonymous; a consumer
-     * `aria-label`/`aria-labelledby` wins through fallthrough.
+     * What a progress indicator is called when the consumer gives it no name of its own.
+     * An indicator takes no name from the text inside it, so without this it would have
+     * none at all; a name the consumer writes wins.
      */
     label: string
   }
   /**
-   * VHotkeys. WORDS only: the GLYPHS (⌘ ⌃ ⌥ ⇧ ↵ ⌫ ⌦ ⇥ ↑ ↓ ← →) stay in
-   * `VHotkeys/platform.ts` — engraved on the hardware, identical in every
-   * language, exactly like VBadge's `99+`. Each key here is the SPOKEN form:
-   * where a glyph exists it wins on screen, never in the accessible name.
+   * The keys of a keyboard shortcut, in WORDS. The symbols themselves — ⌘ ⌃ ⌥ ⇧ ↵ ⌫ ⌦ ⇥
+   * ↑ ↓ ← → — are not here: they are engraved on the hardware and the same in every
+   * language, so they live with the component.
+   *
+   * Every entry below is the SPOKEN form. Where a symbol exists it wins on screen, and
+   * the word wins in what a screen reader says.
    */
   hotkeys: {
-    /** Spoken form of ⌘ — the macOS Command key. */
+    /** How ⌘, the Command key on a Mac, is spoken. */
     command: string
     ctrl: string
     alt: string
     shift: string
-    /** The `meta` key outside macOS: the Windows key. */
+    /** The same key as Command, outside a Mac: the Windows key. */
     windows: string
-    /** The `meta` key on Linux. */
+    /** And the same key again on Linux. */
     super: string
     enter: string
     escape: string
@@ -128,7 +136,7 @@ export interface VectisMessages {
     down: string
     left: string
     right: string
-    /** Accessible name; `keys` is the combination already spelled in WORDS ("Ctrl + K"). */
+    /** What the shortcut is called, the combination arriving already spelled out: "Ctrl + K". */
     label: (keys: string) => string
   }
   calendar: {
@@ -151,85 +159,85 @@ export interface VectisMessages {
     pm: string
     selectHour: string
     selectMinute: string
-    /** Live region: the step currently being selected. */
+    /** Announced when the clock face moves from choosing an hour to choosing a minute. */
     hourStep: string
     minuteStep: string
-    /** Accessible name of the dial, per step. */
+    /** What the clock face itself is called, which changes with the step. */
     hour: string
     minutes: string
-    /** `aria-valuetext` of the dial. */
+    /** What the clock face announces as its value, rather than the bare number behind it. */
     hoursValue: (hour: number) => string
     minutesValue: (minute: number) => string
     /**
-     * Template of the masked field (`hh:mm`). Translatable because `h` and `m`
-     * are the initials of WORDS — unlike the universal `:`, which stays in
-     * `utils/time.ts`.
+     * The grey template shown in an empty field, "hh:mm". It is translatable because those
+     * letters are the initials of WORDS — unlike the colon between them, which is the same
+     * everywhere and lives with the time helpers.
      */
     maskPlaceholder: string
   }
   filePicker: {
-    /** Accessible name of the end icon button, which opens the file dialog. */
+    /** What the button at the end of the field is called — the one that opens the file dialog. */
     attach: string
     clear: string
-    /** Accessible name of a chip's remove button. */
+    /** What the cross on a file's chip is called. */
     remove: (name: string) => string
     /**
-     * The counter's WORD only. The total size that follows comes from `Intl`, and
-     * the parentheses around it from neither — universal punctuation, the same
-     * boundary as VBadge's `99+`.
+     * The WORD of the counter, and only that. The total size that follows is written out
+     * by the browser, and the brackets around it belong to neither — punctuation everyone
+     * shares.
      */
     files: (count: number) => string
-    /** Text of the empty field. */
+    /** What an empty field says. */
     placeholder: string
   }
   fileUpload: {
-    /** Text of the button that opens the file dialog. */
+    /** The button that opens the file dialog. */
     browse: string
     /**
-     * The word between the drop instruction and the button. A WORD, hence
-     * translatable — unlike the two rules on either side, which are drawn in CSS.
+     * The word standing between "drop your files here" and that button. It is a WORD, so
+     * it is translated — unlike the two rules on either side of it, which are drawn.
      */
     or: string
-    /** Accessible name of a preview row's remove button. */
+    /** What the cross beside a chosen file is called. */
     remove: (name: string) => string
-    /** Accessible name of the preview list. */
+    /** What the list of chosen files is called. */
     list: string
   }
   /**
-   * VCarousel. `roleDescription` and `slideRoleDescription` are what a screen
-   * reader SPEAKS in place of "region" and "group": user-facing text, hence
-   * dictionary text — an untranslated `aria-roledescription` is the one a11y
-   * string that stays in English with no visible symptom whatsoever.
+   * The carousel. Two of these entries are what a screen reader SAYS instead of the bare
+   * words "region" and "group", so they are text a reader hears and therefore text that
+   * belongs here. It is worth being deliberate about them: a role description left in
+   * English is the one accessibility string that goes wrong with no visible symptom
+   * whatsoever.
    */
   carousel: {
-    /** Accessible name of the region, when the consumer passes no `label`. */
+    /** What the carousel is called when the consumer gives it no name of its own. */
     label: string
-    /** aria-roledescription of the root. Lower case: it replaces a role name. */
+    /** What the carousel IS, said in place of the word "region". Lower case, as a role name is. */
     roleDescription: string
-    /** aria-roledescription of a slide. */
+    /** And the same for one slide. */
     slideRoleDescription: string
-    /** Accessible name of the scroll container itself, which is tabbable. */
+    /** What the scrolling area itself is called — it can be reached with the Tab key. */
     slides: string
     /**
-     * Accessible name of a slide AND of its indicator. `index` is the HUMAN index
-     * (1-based): the caller passes `i + 1`. It carries the WORD "of" — hence its
-     * place here, unlike VDataTable's bare `N/M` counter.
+     * What a slide is called, and its dot with it. The number is the one a reader counts,
+     * starting at one — the caller adds it. It carries the WORD "of", which is why it is
+     * here where the table's bare "3/8" counter is not.
      */
     slide: (index: number, total: number) => string
     previous: string
     next: string
-    /** Accessible name of the indicator group. */
+    /** What the row of dots is called. */
     indicators: string
   }
 }
 
 /**
- * PARTIAL override: namespaces and keys are optional. Whatever you do not write
- * falls back to the base dictionary — never to an empty string (the same
- * contract as the partial mappings of `setIconResolver`).
+ * A dictionary given in PART: every section and every entry is optional. Anything left
+ * out falls back to the dictionary already in place, and never to an empty string.
  *
- * `Partial<VectisMessages[K]>` does NOT descend into the values: a function
- * stays a whole function. A recursive `DeepPartial<T>` would turn
- * `(n: number) => string` into `{}`.
+ * The optionality stops at the entries and does not descend into them, so a message that
+ * takes a value stays a whole function. Making it recursive would allow one of those
+ * functions to be described as a partial object, which is to say as nothing at all.
  */
 export type VectisMessagesInput = { [K in keyof VectisMessages]?: Partial<VectisMessages[K]> }

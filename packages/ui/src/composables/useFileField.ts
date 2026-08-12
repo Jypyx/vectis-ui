@@ -1,13 +1,16 @@
 // @core
 /**
- * The hidden `<input type="file">` gate shared by VFilePicker and VFileUpload.
+ * The hidden file control both file components are built around — the one that actually
+ * opens the operating system's file dialog.
  *
- * The JS here is forced by the platform, not chosen: a file dialog opens ONLY from
- * a real click on a file input, and a `FileList` cannot be written from a template.
- * So the visible control can never BE the native input, and the native input can
- * only ever be a SOURCE of files — which is exactly the shape this composable
- * carries. `utils/file.ts` already holds the pure screening; what was left
- * duplicated between the two components was this wrapper around it.
+ * The code here is imposed by the browser rather than chosen. A file dialog opens ONLY
+ * from a genuine click on a file control, and the list of chosen files cannot be handed
+ * to that control from a template the way any other value would be. So the thing the
+ * reader sees and clicks can never BE the file control, and the file control can only
+ * ever be a SOURCE of files. That is exactly the shape of what follows.
+ *
+ * The rules deciding which files are acceptable live apart from this, on their own; what
+ * was left duplicated between the two components was the wiring around them.
  */
 import { computed, ref, type ComputedRef, type Ref } from 'vue'
 
@@ -15,34 +18,38 @@ import { screenFiles, type FileLimits, type FileRejection } from '../utils/file'
 
 // @a11y
 /**
- * Attributes that belong to the hidden input rather than to the visible control.
+ * The attributes that belong on the hidden file control rather than on the visible one.
  *
- * The wrapper-root pattern assumes ONE functional element; there are two here, so
- * the split has three buckets: `class`/`style` stay on the root (`useRootAttrs`),
- * these four go to the input — they are what the FORM sees, describing submission
- * and the OS dialog — and everything else goes to what the USER focuses. The
- * buckets are a PARTITION: nothing is applied twice, since a duplicated `id` would
- * break a consumer's `<label for>` and a duplicated `aria-label` would have the
- * field announced twice.
+ * The usual split assumes a single element that does the work, and there are two here, so
+ * the attributes go into three piles instead of two: styling stays on the outermost
+ * element, these four go to the hidden control because they are what the FORM reads —
+ * the field's name, whether it is mandatory, which form it belongs to, and whether the
+ * camera should open — and everything else goes to the element the READER focuses.
+ *
+ * The three piles never overlap, and that matters: an identifier applied twice would
+ * break a label the consumer wrote for the field, and a name applied twice would have it
+ * announced twice.
  */
 const NATIVE_ONLY = ['name', 'required', 'form', 'capture']
 
 export interface FileFieldOptions {
-  /** The component's `File[]` v-model — always a list, `multiple` or not. */
+  /** The component's value — always a list of files, whether one or several are allowed. */
   model: Ref<File[]>
-  /** `forwardedAttrs` from `useRootAttrs`, to be split into the two buckets. */
+  /** The attributes the consumer wrote, minus styling, still to be split in two. */
   forwardedAttrs: ComputedRef<Record<string, unknown>>
-  /** Read at event time: a component disabled mid-interaction stops accepting. */
+  /** Read at the moment of the event, so a component turned off mid-way stops accepting. */
   enabled: () => boolean
   multiple: () => boolean
-  /** `maxFiles` is the RAW prop: single mode is resolved to 1 here. */
+  /** The limits as the consumer set them: capping a single-file field at one happens here. */
   limits: () => FileLimits
   onReject: (rejection: FileRejection) => void
   onChange: (files: File[]) => void
   /**
-   * Attribute keys kept out of the CONTROL bucket as well. VFilePicker pulls
-   * `aria-describedby` out because it re-aggregates it, and an explicit binding
-   * placed after `v-bind` would silently overwrite the consumer's in `mergeProps`.
+   * Attributes to withhold from the visible control as well.
+   *
+   * The file field withholds the link to its descriptive text because it puts that list
+   * together itself, and a binding written after the spread would silently replace the
+   * consumer's rather than being merged with it.
    */
   excludeFromControl?: readonly string[]
 }
@@ -66,19 +73,23 @@ export function useFileField(options: FileFieldOptions) {
   })
 
   /**
-   * Re-picking the SAME file after a clear or a removal fires no `change` at all —
-   * the input's value has not changed — and that file becomes unreachable. Emptying
-   * it on every path is what keeps it selectable again.
+   * TRAP — choosing the SAME file again, after clearing the field or removing that file
+   * from the list, reports nothing at all: as far as the hidden control is concerned its
+   * value never changed. The file then becomes impossible to pick, with nothing to show
+   * for it. Emptying the control on every path out is what keeps it selectable.
    */
   function resetNative() {
     if (fileEl.value) fileEl.value.value = ''
   }
 
   /**
-   * The single gate into the model: the native dialog and a drop both land here.
-   * An over-limit file is REFUSED — it never enters the model, and each refusal is
-   * reported. The screening itself is pure (`utils/file.ts`), which is what keeps
-   * the order of the reasons testable without a mount.
+   * The one way files get into the value: the operating system's dialog and a drop onto
+   * the component both arrive here.
+   *
+   * A file the limits refuse is REFUSED outright — it never enters the value at all — and
+   * every refusal is reported so the component can say why. The screening itself is a
+   * plain function elsewhere, which is what makes the ORDER of the reasons testable
+   * without putting a component on screen.
    */
   function acceptFiles(incoming: File[]) {
     const multiple = options.multiple()
@@ -86,7 +97,8 @@ export function useFileField(options: FileFieldOptions) {
     const limits = options.limits()
     const { accepted, rejected } = screenFiles(incoming, current, {
       ...limits,
-      // Single mode is a list capped at one: every extra file is refused with `count`.
+      // A single-file field is a list capped at one, so extra files are refused for the
+      // same reason as anywhere else: too many.
       maxFiles: multiple ? limits.maxFiles : 1,
     })
 
@@ -105,10 +117,12 @@ export function useFileField(options: FileFieldOptions) {
 
   // @fallback
   /**
-   * The one imperative call neither component can avoid. `.click()` and NOT
-   * `showPicker()`: both need a transient user activation, but `showPicker()`
-   * additionally THROWS without one (and in a cross-origin iframe) where `.click()`
-   * is simply inert — for nothing extra on a file input.
+   * The one call to the browser neither component can do without: opening the dialog.
+   *
+   * It clicks the hidden control rather than using the newer, more explicit request to
+   * open a picker. Both require the reader to have just done something, but the explicit
+   * one THROWS when they have not — and in an embedded page from another site — where a
+   * click simply does nothing. On a file control there is nothing to gain in exchange.
    */
   function openPicker() {
     if (!options.enabled()) return

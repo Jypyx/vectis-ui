@@ -1,6 +1,13 @@
 /**
- * Dark theme: overrides ONLY semantic tokens (the primitives are invariant). The
- * build checks that every key exists in `semantic`.
+ * The dark theme.
+ *
+ * It restates the tokens that describe a ROLE — the page's background, the colour of
+ * ordinary text, the accent — and never the palette those roles draw from. The palette is
+ * the same in both themes; what changes is which step of it each role points at.
+ *
+ * Every entry here must correspond to a role that already exists, and the build checks
+ * it. A theme is allowed to reassign a role, never to invent one: a token existing in
+ * only one theme would leave a component unstyled in the other.
  */
 import { color, type TokenGroup } from '../types'
 
@@ -32,12 +39,15 @@ export const dark = {
     'accent-text': color('{color.indigo.300}'),
 
     /*
-     * Danger and success keep their light-theme steps, brightness included: the solid
-     * variants carry white text, and red only reaches 4.5:1 from red-600 on, green from
-     * green-700 on — there is no lighter step for dark to use. So they go DARKER on
-     * hover here, unlike accent and warning. These entries are deliberately equal to
-     * the light ones; dropping them would let a future edit of `semantic.ts` drag dark
-     * back into the inaccessible range unnoticed.
+     * Danger and success keep exactly the steps the light theme gives them, brightness
+     * included. A filled button in either colour carries white text, and white only
+     * reaches the required contrast from red 600 and green 700 onwards — so there is no
+     * lighter step for the dark theme to move to. They therefore go DARKER on hover here,
+     * the opposite direction from the accent and the warning.
+     *
+     * These entries are deliberately identical to the light ones. Deleting them as
+     * redundant would let a later change to the roles quietly drag the dark theme back
+     * into the range where the text cannot be read.
      */
     danger: color('{color.red.600}'),
     'danger-hover': color('{color.red.700}'),

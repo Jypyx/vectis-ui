@@ -2,17 +2,18 @@ import { onBeforeUnmount } from 'vue'
 
 // @core
 /**
- * A re-armable `setTimeout`, cancelled on unmount.
+ * A delay one can re-arm, and which cancels itself when the component goes away.
  *
- * Three rules:
- * - the handle lives in a NON-reactive `let`: nobody renders it, and making it a
- *   `ref` would trigger renders for nothing;
- * - `start()` always cancels the previous one, otherwise two timers run;
- * - cancelled on unmount, otherwise the callback runs on a dead component.
+ * Three things are true of it, and each is there to prevent a specific bug. The handle is
+ * held in a plain variable rather than a reactive one, because nothing renders it and
+ * making it reactive would cause renders for nothing. Starting a delay always cancels the
+ * one before it, or two would run at once — a tooltip armed twice opens, closes and opens
+ * again. And it is cancelled before the component is torn down, or the callback would run
+ * against a component that no longer exists.
  *
- * `start()` with a delay ≤ 0 runs **synchronously**: `setTimeout(…, 0)` is not,
- * and the DS convention is that 0 disarms the deferral (synchronous debounce,
- * persistent toast).
+ * A delay of zero runs the callback SYNCHRONOUSLY, which a zero timeout does not: the
+ * design system's convention is that zero means no deferral at all. That is what makes a
+ * debounce of zero immediate, and a notification given no duration permanent.
  */
 export function useTimer(): { start: (fn: () => void, delay: number) => void; cancel: () => void } {
   let timer: ReturnType<typeof setTimeout> | undefined
