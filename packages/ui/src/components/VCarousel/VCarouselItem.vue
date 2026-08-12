@@ -4,26 +4,28 @@ import { inject } from 'vue'
 import { carouselKey } from './context'
 
 /**
- * One slide of a VCarousel. Two boxes, and that is the whole component:
+ * One slide of a carousel. It renders two boxes, and that split is the whole component.
  *
- * - `.v-carousel-slide` is the SCROLL-SNAP AREA and the view-timeline subject. It
- *   is never transformed — a snap area is the element's *transformed* border box,
- *   so animating it would make its snap position depend on the scroll position:
- *   a circular dependency whose symptom is jitter and drifting snap points, with
- *   no error anywhere.
- * - `.v-carousel-effect` carries the animation. It resolves the named timeline by
- *   walking up the tree, so every slide finds ITS OWN even though they all share
- *   the ident — no `timeline-scope` needed.
+ * The OUTER one is what the carousel snaps to, and it is never animated. That is not
+ * tidiness: the box a scroller snaps to is the element's TRANSFORMED one, so animating it
+ * would make where it snaps depend on how far the scroller has been scrolled — a circle
+ * whose symptom is jitter and snap positions that drift, with no error anywhere to explain
+ * it.
  *
- * All its styling lives in VCarousel's sheet (every rule is qualified by the
- * root's `data-orientation`/`data-effect`): split across two sheets, the rules
- * would be arbitrated by an order the consumer's bundler decides.
+ * The INNER one carries the transition. It finds the timeline of ITS OWN slide by walking
+ * up the tree, which is why every slide can share the same name without anything having to
+ * scope them apart.
+ *
+ * All of its styling lives in VCarousel's stylesheet, every rule being conditioned on the
+ * carousel's orientation and effect. Split across two sheets, those rules would be
+ * arbitrated by an order the consumer's bundler decides.
  */
 interface CarouselItemProps {
   /**
-   * Position among the sibling slides, injected by VCarousel through `cloneVNode`.
-   * **Never pass it by hand** — it is what makes the "N of M" label identical on
-   * the server and on the client.
+   * Which slide this is among its siblings. The carousel injects it as it renders them.
+   *
+   * NEVER pass it by hand: it is what makes the "3 of 8" a screen reader announces
+   * identical on the server and in the browser.
    */
   index?: number
 }

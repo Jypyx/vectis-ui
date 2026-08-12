@@ -30,132 +30,141 @@ import { useMessages } from '../../i18n/state'
 
 export type CarouselEffect = 'slide' | 'fade' | 'scale' | 'cover'
 export type CarouselOrientation = 'horizontal' | 'vertical'
-/** Three states, the VFileUpload `preview` precedent: nowhere / over the slides / after them. */
+/** Where the position dots go: nowhere, over the slides, or after them. */
 export type CarouselIndicators = false | 'inside' | 'outside'
+/** Where the previous and next buttons go: nowhere, over the slides, or beside them. */
 export type CarouselControls = false | 'inside' | 'outside'
-/** A mode, not a boolean: the reveal is hover OR focus, and never on a coarse pointer. */
+/**
+ * When those buttons are visible. It is a named choice rather than a yes-or-no, because
+ * "on hover" would misname what actually happens: they also appear on keyboard focus, and
+ * they stay permanently visible where there is no pointer to hover with.
+ */
 export type CarouselControlsVisibility = 'always' | 'hover'
 
 // @keyboard @a11y @ssr @core — the DS's densest script; every block below carries
 // its own tag.
 /**
- * Scrolls through content — images or text — horizontally or vertically.
+ * A carousel: content the reader moves through one screenful at a time — images, cards,
+ * text — across the page or down it.
  *
- * ONE mechanism: a native `scroll-snap` scroller. Touch, trackpad, scrollbar,
- * keyboard and snapping all come from the browser, not from a JS-driven
- * `transform` track and not from cloned slides. Responsiveness is 100% CSS —
- * `itemsPerView` is a maximum, `itemMinSize` a floor, and the `max()` in the
- * slide's flex-basis IS the container query: no breakpoint, no `@container`, no
- * ResizeObserver. The peek strip falls out of the same formula.
+ * It is built on ONE thing: a box that scrolls, whose content snaps into place. Touch,
+ * the trackpad, the scrollbar, the keyboard and the snapping itself therefore all come
+ * from the browser. There is no track being moved by code, and no slides cloned to fake a
+ * loop.
  *
- * The `fade`/`scale`/`cover` effects are CSS SCROLL-DRIVEN animations
- * (`view-timeline` + `animation-range: cover`), so they follow the finger during
- * a drag instead of playing a fixed-duration transition. They are progressive
- * enhancement behind `@supports`: without scroll-driven animations the carousel
- * is a plain `slide`, and `prefers-reduced-motion` cancels them everywhere.
+ * How many slides fit is decided entirely in CSS, with no breakpoints and nothing being
+ * measured: `itemsPerView` is a MAXIMUM and `itemMinSize` a floor, and taking whichever of
+ * the two is larger IS the responsive rule. The strip of the next slide left showing falls
+ * out of the same formula.
  *
- * Behavioural JS, in full — nothing else:
- * - `scrollToIndex`, the v-model → DOM write. No CSS primitive scrolls a
- *   container to its Nth child from a VALUE (`::scroll-button()` is user-driven,
- *   and Chrome 135+, above this repo's floor).
- * - ONE IntersectionObserver, which TRIGGERS both the DOM → v-model read-back and
- *   the page measurement, plus `scrollend`, which runs that measurement again at
- *   the arrival position. The reading itself is positional, from rect deltas:
- *   `scrollLeft` is signed in RTL, where a delta between two rects is physical and
- *   needs no direction test. Not every slide can lead, and the last position is the
- *   END of the track rather than a slide's start edge: see `measure`.
- * - autoplay, because no CSS advances a value on a clock, plus ONE `matchMedia`
- *   read: a media query stops the CSS, never a timer, and WCAG 2.2.2 is about
- *   the content moving.
- * - the arrows and Home/End. A focused scroll container does move natively, but
- *   Chromium scrolls it a fixed pixel step that mandatory snapping then undoes —
- *   see `onKeydown`.
+ * The transitions between slides are driven by the SCROLL itself rather than played over
+ * a fixed duration, so they follow the finger during a drag and reverse when it does.
+ * They are an enhancement: where a browser does not support them the carousel simply
+ * slides, and a reader who has asked for less motion never sees them at all.
  *
- * `translate`/`rotate3d`/`translateZ` are physical, hence the `--carousel-dir`
- * sign flipped in RTL; depth has no logical mirror and stays physical, the
- * VTimePickerDial precedent.
+ * The JavaScript is limited to what nothing else can do:
  *
- * SSR-safe: no DOM access outside handlers, `onMounted` and
- * `watch({ flush: 'post' })`.
+ * - moving the scroller when the VALUE changes — nothing in CSS scrolls a box to its Nth
+ *   child on demand;
+ * - reading back which slide the reader has landed on, and measuring how many positions
+ *   there actually are, which is subtler than it sounds: not every slide can lead, and the
+ *   last position is the END of the track rather than any slide's edge;
+ * - advancing on a timer, no stylesheet having a clock, and asking once whether the reader
+ *   wants less motion — a media query can stop an animation but never a timer, and what
+ *   the guideline is about is the CONTENT moving;
+ * - the arrow keys. A focused scrolling box does move by itself, but by a fixed number of
+ *   pixels that the snapping immediately undoes, so the net movement is nothing.
+ *
+ * Nothing touches the page outside handlers and effects that run after it has been
+ * updated, which is what lets the component render on a server.
  */
 interface CarouselProps {
   /**
-   * MAXIMUM number of slides visible at once. A maximum and not a target:
-   * `itemMinSize` is the floor that decides how many actually fit, so the
-   * responsiveness is entirely CSS.
+   * How many slides may be visible at once. It is a MAXIMUM and not a target: the floor
+   * below decides how many actually fit, which is what makes the whole thing responsive
+   * without a single breakpoint.
    */
   itemsPerView?: number
   /**
-   * Floor on a slide's size along the scroll axis. Below it the `100% /
-   * itemsPerView` share loses, fewer slides fit and the scroller simply scrolls
-   * further. A number is read as px; a string passes through (`'20vw'`).
+   * How small a slide is allowed to get. Once an equal share would fall below this, fewer
+   * slides fit and the carousel simply scrolls further instead. A number is read as
+   * pixels; anything else is used as given, so `'20vw'` works.
    */
   itemMinSize?: number | string
   /**
-   * Strip reserved past the last fully visible slide, so the next one shows
-   * through. It INCLUDES the gap that precedes it — that is what keeps the
-   * sizing formula branch-free. Incompatible with `fade`.
+   * How much of the NEXT slide is left showing, as a hint that there is more. It includes
+   * the gap before it, which is what keeps the sizing formula free of special cases.
+   *
+   * It cannot be combined with the fade transition: fading assumes a slide exactly fills
+   * the view.
    */
   peek?: number | string
-  /** Space between two slides. Default: `--vectis-space-3`. */
+  /** The space between two slides. */
   gap?: number | string
-  /** Vertical scrolls on the block axis; the effects follow and the transforms flip. */
+  /** Whether the carousel scrolls across the page or down it. */
   orientation?: CarouselOrientation
   /**
-   * Transition between slides, a 100% CSS scroll-driven animation. `slide` is no
-   * animation at all. `fade` needs `itemsPerView: 1` and no `peek` — every slide
-   * is counter-translated onto the same spot, so past that it downgrades.
+   * How one slide gives way to the next, driven by the scroll itself. Sliding means no
+   * animation at all.
+   *
+   * Fading requires ONE slide at a time and no peek — it works by holding each slide in
+   * place while the scroll moves under it, which only lands correctly when a slide fills
+   * the view exactly. Asked for otherwise, it falls back to sliding rather than degrading.
    */
   effect?: CarouselEffect
   /**
-   * Block size of the viewport. **Give one in the vertical orientation**: a
-   * percentage flex-basis needs a definite main size, and without it every slide
-   * collapses onto its content. Horizontal takes its height from the slides.
+   * The height of the visible area.
+   *
+   * GIVE ONE when the carousel scrolls downwards: a slide sized as a share of the height
+   * needs a height to take a share OF, and without it every slide collapses onto its own
+   * content. Scrolling across the page, the height comes from the slides themselves.
    */
   height?: number | string
   /**
-   * Milliseconds between two automatic advances; `0` disables it. Autoplay stops
-   * on the last PAGE (there is no loop), pauses on hover and on KEYBOARD focus, and
-   * is fully disabled under `prefers-reduced-motion`.
+   * How long each slide is shown before the next one, in milliseconds; zero means it does
+   * not advance by itself. It stops at the last page — there is no loop — pauses while the
+   * pointer rests on it or the KEYBOARD focus is inside it, and never runs at all for a
+   * reader who has asked for less motion.
    *
-   * The component renders NO pause button. The prop is reactive and `0` cancels
-   * the timer on the spot, so a stop control is a one-line binding on your side —
-   * and one is worth having: WCAG 2.2.2 asks for a way to stop content that moves
+   * The component deliberately renders NO pause button. This prop is reactive and setting
+   * it to zero cancels the timer at once, so a stop control is a one-line binding on your
+   * side — and it is worth adding: the guideline asks for a way to stop content that moves
    * on its own, and hover and focus leave a touch user with none.
    */
   autoplay?: number
   /**
-   * Previous/next buttons: over the slides, beside them, or not at all. `outside`
-   * puts them at the inline edges when horizontal and at the block edges when
-   * vertical, reserving their room as padding — the component's footprint is
-   * unchanged and the slides narrow instead. Either way they are centred on the
-   * SLIDES, never on the slides plus the indicators.
+   * Where the previous and next buttons go: over the slides, beside them, or nowhere.
+   *
+   * Placed beside, they sit at the ends of the scrolling axis and their room is reserved
+   * as padding, so the component's footprint is unchanged and the slides narrow instead.
+   * Either way they are centred on the SLIDES and never on the slides plus the dots.
    */
   controls?: CarouselControls
   /**
-   * Position indicators: over the slides, after them, or not at all. `outside`
-   * sits below when horizontal and at the inline end when vertical.
+   * Where the position dots go: over the slides, after them, or nowhere. After them means
+   * below when the carousel scrolls across the page, and beside it when it scrolls down.
    */
   indicators?: CarouselIndicators
   /**
-   * `hover` fades the previous/next pair in on hover or on focus anywhere in the
-   * carousel; `always` (the default) keeps it permanently visible. A coarse
-   * pointer has no hover to give, so `hover` is inert there and the pair stays
-   * visible. The indicators are never hidden, whatever this says.
+   * Whether those buttons are always visible, or appear when the pointer is over the
+   * carousel or the keyboard focus is inside it. Where there is no pointer to hover with,
+   * they stay visible whatever this says. The dots are never hidden.
    */
   controlsVisibility?: CarouselControlsVisibility
-  /** Icon of the previous button. Default depends on the orientation. */
+  /** The icon of the previous button. It follows the orientation by default. */
   prevIcon?: IconSource
-  /** Icon of the next button. Default depends on the orientation. */
+  /** The icon of the next button. It follows the orientation by default. */
   nextIcon?: IconSource
-  /** Accessible name of the previous button. Default: the DS dictionary. */
+  /** What the previous button does, in words. It falls back to the dictionary. */
   prevLabel?: string
-  /** Accessible name of the next button. Default: the DS dictionary. */
+  /** What the next button does, in words. It falls back to the dictionary. */
   nextLabel?: string
   /**
-   * Accessible name of the region. Give a DISTINCT one to every carousel on a
-   * page: `role="region"` is a landmark, and two identically named landmarks are
-   * an axe `landmark-unique` violation.
+   * What screen readers announce for the carousel as a whole.
+   *
+   * Give a DISTINCT one to every carousel on a page: this is a landmark of the page, and
+   * two landmarks bearing the same name cannot be told apart by someone navigating between
+   * them.
    */
   label?: string
 }
@@ -183,13 +192,14 @@ const slots = useSlots()
 
 defineSlots<{
   /**
-   * The <VCarouselItem> elements. Their COUNT is read off the VNodes, so a
-   * `v-for` is fine — but the slot must not depend on a client-only condition.
+   * The slides. How many there are is read from what this slot RENDERS, so a `v-for` is
+   * perfectly fine — but the slot must not depend on something only true in a browser, or
+   * the server and the client would count differently.
    */
   default(): unknown
   /**
-   * Replaces the whole previous/next pair — its placement CSS included, so custom
-   * content lays itself out inside the stage and `controlsVisibility` is inert on it.
+   * Replaces the previous and next buttons entirely, their placement included — so custom
+   * content positions itself, and the visibility setting no longer applies to it.
    */
   controls?(props: {
     previous: () => void
@@ -197,18 +207,19 @@ defineSlots<{
     atStart: boolean
     atEnd: boolean
     index: number
-    /** Number of slides. */
+    /** How many slides there are. */
     count: number
-    /** Number of positions the scroller can rest on — see `pageCount`. */
+    /** How many positions the carousel can actually rest on, which is usually fewer. */
     pageCount: number
-    /** Which axis scrolls: a custom bar cannot pick its icons or its own axis without it. */
+    /** Which way it scrolls — a bar of your own cannot choose its icons without knowing. */
     orientation: CarouselOrientation
   }): unknown
   /**
-   * Replaces the whole indicator bar, its group role included. Render one control per
-   * `pageCount`, NOT per `count`: a position past the last page is unreachable, and a
-   * bar built on the slide count offers dots that scroll nowhere. `count` is still
-   * given, for "N of M" labels.
+   * Replaces the whole bar of dots.
+   *
+   * TRAP — render one control per POSITION and not per slide. A position past the last one
+   * cannot be reached, so a bar built on the number of slides offers dots that scroll
+   * nowhere. The slide count is passed as well, for wording such as "3 of 8".
    */
   indicators?(props: {
     index: number
@@ -217,13 +228,16 @@ defineSlots<{
     goTo: (index: number) => void
     orientation: CarouselOrientation
   }): unknown
-  /** Replaces ONE indicator's contents; the <button> and its ARIA stay the DS's. */
+  /**
+   * Replaces what is drawn INSIDE one dot. The button itself, and everything that makes it
+   * announce and behave correctly, stays the design system's.
+   */
   indicator?(props: { index: number; active: boolean }): unknown
 }>()
 
 /**
- * Index of the current slide — the FIRST fully visible one when several fit, which is
- * also the position the scroller rests on.
+ * Which slide is current: the first one fully visible when several fit at once, which is
+ * also the position the carousel has come to rest on.
  */
 const model = defineModel<number>({ default: 0 })
 

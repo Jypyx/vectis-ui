@@ -39,18 +39,21 @@ import { useLocale, useMessages } from '../../i18n/state'
 
 // @a11y @core
 /**
- * A time picker: a `VInput` field + an optional floating panel. The same shell as
- * VDatePicker (a `VPopover` in `mode="manual"` anchored in pure CSS, a programmatic
- * opening to move the focus into the panel, closing through the root's `@focusout` +
- * Escape).
+ * A field for choosing a time, with an optional panel below it. The shell is the same one
+ * VDatePicker uses: the panel is opened from code, which is what lets the focus be moved
+ * into it, and closed when the focus leaves the component or Escape is pressed.
  *
- * Three field modes (`mode`): `input` (the default — a masked "HH:MM" field, with an
- * optional dial through `showDial`), `readonly` (the dial is the only route) and `list`
- * (a panel listing the times in `minuteStep` increments).
+ * The field comes in three forms. It can be TYPED into, hours and minutes behind a mask,
+ * optionally with a dial beside it. It can be read-only, the dial then being the only way
+ * in. Or it can offer a LIST of times at a fixed interval, which suits booking a slot far
+ * better than pointing at a clock face.
  *
- * The DIAL works on a draft: only OK writes the v-model (a canonical 24 h `'HH:mm'`);
- * Cancel, Escape and focus leaving all discard it. The LIST, on the other hand, commits
- * directly — choosing a time there is a single gesture.
+ * The two panels commit differently, and deliberately so. The DIAL works on a draft that
+ * only OK writes to the value — Cancel, Escape and the focus leaving all discard it —
+ * because dragging a hand across a clock passes over dozens of times nobody meant. The
+ * LIST writes immediately: choosing a row there is one deliberate gesture.
+ *
+ * Whatever is displayed, the value itself is always a 24-hour time.
  */
 export type TimePickerFormat = HourFormat
 export type TimePickerMode = 'readonly' | 'input' | 'list'
@@ -60,59 +63,72 @@ const MODES: TimePickerMode[] = ['readonly', 'input', 'list']
 type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
 
 interface TimePickerProps {
-  /** The hour cycle displayed; default: derived from the locale (Intl's `hourCycle`). */
+  /**
+   * Whether times are shown on a 12- or a 24-hour clock. Left out, the reader's language
+   * decides, which is almost always what one wants.
+   */
   format?: TimePickerFormat
   /**
-   * Field mode:
-   * - `input` (the default): an editable masked "HH:MM" field, with an optional dial;
-   * - `readonly`: read-only, the dial being the only route — hence `showDial` forced to
-   *   `true`;
-   * - `list`: a panel of times in `minuteStep` increments, with a read-only field;
-   *   `showDial` is pointless there.
+   * Which form the field takes: one that can be TYPED into, a read-only one where the
+   * dial is the only way in — so the dial is forced on there — or a LIST of times at a
+   * fixed interval, where a dial would make no sense.
    */
   mode?: TimePickerMode
   /**
-   * A clickable icon at the end of the field + the dial's popover (`input` mode). Left
-   * at `undefined` by default rather than at `false`: that is what makes it possible to
-   * distinguish "not supplied" from an explicit `false`, and hence to warn in `readonly`
-   * mode only the consumer who really asked to disable it.
+   * Offers the dial beside a field one can type into: an icon at the end of the field,
+   * and a panel it opens.
+   *
+   * It is left undefined by default rather than set to off, which is what distinguishes
+   * "not given" from an explicit refusal — and therefore what allows warning only the
+   * consumer who really asked to remove the dial from a read-only field, where it is the
+   * only way in.
    */
   showDial?: boolean
-  /** Minute granularity: the dial, the arrows, and the list's step. */
+  /**
+   * The interval between two times that can be chosen. It applies to the dial, to the
+   * arrow keys and to the rows of the list.
+   */
   minuteStep?: number
   /**
-   * A BCP 47 locale (the hour cycle, the display format). It TAKES PRECEDENCE over the
-   * DS's global locale (`setLocale`), which it falls back to — hence the absence of a
-   * literal default here: `undefined` must stay distinguishable for the global locale to
-   * have a chance to apply.
+   * A BCP 47 locale, which decides the clock and how a time is written out. It TAKES
+   * PRECEDENCE over the design system's global locale and falls back to it — which is why
+   * it has no literal default: `undefined` has to stay recognizable for the global locale
+   * to have its chance.
    */
   locale?: string
-  // The field.
+  // From here on: the field.
+  /** The label above the field. */
   label?: string
+  /** A line of help under the field. */
   hint?: string
+  /** What the field says while empty. */
   placeholder?: string
-  /** Field height: sm 32px, md 40px (the default), lg 48px. */
+  /** The height of the field: 32, 40 or 48 pixels. */
   size?: 'sm' | 'md' | 'lg'
+  /** Takes 4px off the height. */
   compact?: boolean
+  /** Makes the field unusable, greyed out through the colour tokens. */
   disabled?: boolean
+  /** Marks the field as invalid — for a rule of your own. */
   invalid?: boolean
-  /** A clear button (a cross) emptying the value, to the left of the end icon. */
+  /** Offers a cross that empties the value, shown before the end icon. */
   clearable?: boolean
   /**
-   * The DIAL-opening icon, at the end of the field. No effect in `mode="list"`, whose
-   * chevron follows the VCombobox convention. `clearable`'s clear cross shows to its left
-   * without replacing it.
+   * The icon that opens the DIAL, at the end of the field. It has no effect on the list
+   * form, whose chevron follows the combobox convention. The clear cross appears to its
+   * left rather than in its place.
    */
   clockIcon?: IconSource
-  /** Placement of the panel relative to the field. */
+  /** Where the panel opens relative to the field. */
   placement?: Placement
 }
 
 const props = withDefaults(defineProps<TimePickerProps>(), {
   format: undefined,
-  // `undefined` and not `'input'`: that is what distinguishes "prop not supplied" from
-  // an explicit choice, and hence what makes it possible to warn only the consumer who
-  // really asked for something inoperative.
+  // Deliberately left undefined rather than defaulted to the typed mode: that is what
+  // distinguishes "the prop was not given" from "the prop was given this value", and
+  // therefore what allows warning ONLY the consumer who explicitly asked for something
+  // that cannot work.
   mode: undefined,
   showDial: undefined,
   minuteStep: 1,
@@ -129,10 +145,14 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   placement: 'bottom-start',
 })
 
-/** A canonical 24 h `'HH:mm'` time, whatever the 12 h / 24 h display. */
+/**
+ * The time, always as a 24-hour "HH:mm" string whatever clock is displayed. A consumer
+ * therefore never has to know which clock the reader's language uses.
+ */
 const model = defineModel<string | null>({ default: null })
 
-// Wrapper-root: class/style on the root, the rest carried over to the VInput.
+// `class` and `style` stay on the wrapper; everything else goes down to the text field,
+// which is what a consumer's label points at and what assistive technology deals with.
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
@@ -141,25 +161,30 @@ const panelRef = ref<InstanceType<typeof VPopover> | null>(null)
 const inputRef = ref<InstanceType<typeof VInput> | null>(null)
 const panelId = useId()
 
-/** The field's native `<input>` (mask, caret) — exposed by `VInput`. */
+/** The real input inside the field, which the mask and the caret work on. */
 const fieldEl = computed<HTMLInputElement | null>(() => inputRef.value?.el ?? null)
 
 const resolvedMode = computed<TimePickerMode>(() => {
-  // The `??` comes BEFORE the validation: an absent prop is not an "unknown" value, so
-  // it must trigger nothing.
+  // TRAP — the default is applied BEFORE the value is checked. A prop that was never
+  // given is not an unknown value, and treating it as one would warn on a bare
+  // `<VTimePicker />`.
   const mode = props.mode ?? 'input'
   return MODES.includes(mode) ? mode : 'input'
 })
 const typing = computed(() => resolvedMode.value === 'input')
 const isList = computed(() => resolvedMode.value === 'list')
-/** The dial: forced in read-only, opt-in in input mode, pointless in list mode. */
+/**
+ * Whether there is a dial. It is forced on a read-only field, where nothing else could
+ * fill it; offered beside a field one types into; and meaningless in the list form, which
+ * has a panel of its own.
+ */
 const hasDial = computed(
   () => resolvedMode.value === 'readonly' || (typing.value && props.showDial === true),
 )
 const hasPanel = computed(() => hasDial.value || isList.value)
 
 const vectisLocale = useLocale()
-/* The prop takes precedence, otherwise the DS's global locale. */
+/* The prop wins, and the design system's global locale is what it falls back to. */
 const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
 
 const resolvedFormat = computed<TimePickerFormat>(
@@ -192,22 +217,25 @@ if (isDev) {
 
 const activeStep = ref<'hour' | 'minute'>('hour')
 
-// The DIAL's draft (committed by OK only).
-const draftHour = ref(0) // canonical 24 h
+// The time being built on the dial. Nothing here reaches the value until OK is pressed.
+const draftHour = ref(0) // always on the 24-hour clock, whatever is displayed
 const draftMinute = ref(0)
 
 const modelParts = computed(() => parseTime(model.value))
 
 /**
- * The meridiem remembered while NO time is set: the VToggle is `mandatory`, so it always
- * needs a value, and `null` is not one. A hardcoded 'AM' (and not the current time):
- * deterministic, hence SSR-safe and testable.
+ * Which half of the day is chosen while NO time is set at all. The AM/PM control always
+ * needs a value — it refuses to have none — and "nothing" is not one.
+ *
+ * It starts at AM rather than at whatever the current time happens to be, which keeps the
+ * component's first render identical on a server and in a browser, and its tests free of
+ * a clock.
  */
 const pendingMeridiem = ref<Meridiem>('AM')
 
 /**
- * The AM/PM VToggle lives OUTSIDE the panel, on the field's row: it therefore drives the
- * v-model, not the dial's draft.
+ * The AM/PM control sits OUTSIDE the panel, beside the field, so that it serves all three
+ * forms. It therefore writes to the VALUE and not to the dial's draft.
  */
 const meridiemModel = computed<ToggleModelValue>({
   get: () => (modelParts.value ? to12h(modelParts.value.hour).meridiem : pendingMeridiem.value),
@@ -215,10 +243,11 @@ const meridiemModel = computed<ToggleModelValue>({
     const meridiem: Meridiem = value === 'PM' ? 'PM' : 'AM'
     pendingMeridiem.value = meridiem
     const parts = modelParts.value
-    // With no value there is nothing to convert: the choice is REMEMBERED and will apply
-    // to the first time typed or chosen.
+    // With no time set there is nothing to convert, so the choice is simply REMEMBERED
+    // and applies to the first time typed or chosen.
     if (parts) model.value = formatTime(to24h(to12h(parts.hour).hour, meridiem), parts.minute)
-    // With the dial open, the draft follows, or OK would rewrite the old meridiem.
+    // With the dial open the draft has to follow as well, or OK would write back the half
+    // of the day the reader has just changed.
     if (open.value && hasDial.value) draftHour.value = to24h(to12h(draftHour.value).hour, meridiem)
   },
 })
@@ -233,40 +262,44 @@ const displayText = computed(() =>
 )
 
 // @a11y
-// Opening / closing the panel (a manual popover).
+// Where the focus goes when the panel opens.
 function focusInPanel() {
   const panel = panelRef.value?.el
   if (!panel) return
   if (isList.value) focusListSelection(panel)
-  // The panel shows the dial alone: the slider is the useful target. A DOM query rather
-  // than an expose — VTimePickerDial has none, and therefore does not have to change.
+  // On the dial the useful target is the control the arrows drive. It is found by
+  // searching the panel rather than exposed by the dial itself, which therefore has
+  // nothing to publish and nothing to keep in step.
   else panel.querySelector<HTMLElement>('[role="slider"]')?.focus()
 }
 
-// The field + `manual` panel shell shared with VDatePicker. The opening prologue (the
-// draft, the step) and the closing epilogue (the live region) are the only parts
-// specific to VTimePicker.
+// The whole "field plus panel" shell, shared with VDatePicker. What is specific to this
+// component is only what happens around it: preparing the draft as the panel opens, and
+// clearing the announcement as it closes.
 const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPanelMousedown } =
   useFieldPanel({
     rootEl,
     panelRef,
     fieldEl: inputRef,
-    // No panel = nothing to open. `disabled` is the composable's SINGLE cut-off point
-    // (openPanel + onControlClick) and every opening route goes through it: a click,
-    // focus, ArrowDown, Enter, the end icon.
+    // With no panel there is nothing to open. This is the composable's SINGLE cut-off
+    // point, and every way in passes through it — clicking the field, focusing it, the
+    // down arrow, Enter, the icon.
     disabled: () => props.disabled || !hasPanel.value,
     focusInPanel,
-    // In input mode the panel opens under the caret without grabbing it.
+    // Beside a field one types into, the panel opens WITHOUT taking the focus, so typing
+    // carries on.
     focusOnOpen: () => !typing.value,
     onOpen: () => {
-      // The draft: specific to the dial — the list commits directly.
+      // Only the dial works on a draft; the list writes its choice straight away.
       if (!hasDial.value) return
       const parts = modelParts.value
       if (parts) {
         draftHour.value = parts.hour
         draftMinute.value = parts.minute
       } else {
-        const now = new Date() // a handler → client only
+        // Opening on the current time when none is set. Reading the clock is safe here:
+        // this runs from a handler, hence in a browser, never during a render.
+        const now = new Date()
         draftHour.value = now.getHours()
         draftMinute.value = snapMinute(now.getMinutes(), props.minuteStep)
       }
@@ -279,10 +312,12 @@ const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPa
 
 // @a11y
 /**
- * The focus handed back to the field on closing would reopen it (in input mode, the
- * panel opens ON FOCUS): this lock covers the synchronous `focus()` call. Every close
- * with a refocus has to go through here — a direct `closePanel(true)` reintroduces the
- * loop.
+ * TRAP — closing the panel hands the focus back to the field, and beside a field one
+ * types into the panel opens ON FOCUS: the two would chase each other and the panel would
+ * never close.
+ *
+ * This lock covers the focus call, which is synchronous. EVERY close that returns the
+ * focus must go through here; closing directly brings the loop straight back.
  */
 let refocusing = false
 function closeAndFocus() {
@@ -291,7 +326,7 @@ function closeAndFocus() {
   refocusing = false
 }
 
-/** OK: the DIAL's only route that writes the v-model. */
+/** OK: the ONE route by which the dial's draft becomes the value. */
 function confirm() {
   model.value = formatTime(draftHour.value, draftMinute.value)
   closeAndFocus()
@@ -301,8 +336,12 @@ function cancel() {
   closeAndFocus()
 }
 
-/** The step settled on the dial: hour → minutes; minutes → OK on the keyboard ONLY
-    (releasing the pointer must not close the panel). */
+/**
+ * A step of the dial has been settled: after the hour comes the minutes, and after the
+ * minutes comes OK — but by KEYBOARD only. Releasing the pointer must not close the
+ * panel: on a clock face, letting go of the hand is how one stops adjusting it, not how
+ * one confirms.
+ */
 function onDialConfirm(via: 'pointer' | 'keyboard') {
   if (activeStep.value === 'hour') activeStep.value = 'minute'
   else if (via === 'keyboard') confirm()
@@ -310,28 +349,31 @@ function onDialConfirm(via: 'pointer' | 'keyboard') {
 
 // @a11y
 /*
- * Called by VInput's `@clear`, INSIDE its `emit`: the `focus()` placed here under the
- * lock makes the `controlEl.focus()` VInput runs just afterwards inert (an
- * already-focused element = no `focus` event emitted), so the panel does not reopen.
- * Removing the lock from here would reopen it.
+ * Emptying the value, called by the field as it emits its clear event.
+ *
+ * TRAP — the focus is taken here, under the lock, on purpose: the field focuses itself
+ * immediately afterwards, and focusing an element that ALREADY has the focus emits no
+ * event at all. That is what stops the panel reopening. Taking the lock away from this
+ * function brings the reopening straight back.
  */
 function clearValue() {
   model.value = null
-  // `draft` explicitly: when the model was already `null`, `syncMaskFromModel`'s
-  // anti-loop guard would not empty it.
+  // The typed text is emptied EXPLICITLY: when the value was already empty, nothing
+  // changes, and the guard that keeps the field and the value from chasing each other
+  // would leave the text where it was.
   if (typing.value) writeField('')
   refocusing = true
   inputRef.value?.focus()
   refocusing = false
 }
 
-// Escape and focus leaving close WITHOUT committing (the dial's Cancel semantics):
-// `closePanel` never writes the v-model, only `confirm()` does.
+// Escape and the focus leaving both close WITHOUT committing, which is the dial's Cancel
+// behaviour: closing never writes the value, and only OK does.
 
 // @a11y
-// The step is carried only by the slider's aria-label, whose change is not reliably
-// announced: a polite live region doubles the information. No dedicated prop: the
-// dictionary is the only override point.
+// Which step the dial is on is otherwise carried by the control's own name alone, and a
+// change of name is not reliably announced. A politely announced region says it a second
+// time. The wording has no prop: the dictionary is where it is changed.
 const m = useMessages()
 
 const liveMessage = ref('')
@@ -341,16 +383,19 @@ watch(activeStep, (step) => {
       step === 'minute' ? m.value.timePicker.minuteStep : m.value.timePicker.hourStep
 })
 
-/* Input mode: the "HH:MM" mask. */
+/* From here on: everything the typed field needs. */
 
 const currentMeridiem = (): Meridiem => (meridiemModel.value === 'PM' ? 'PM' : 'AM')
 
 /*
- * The mask plumbing (draft, the `v-model` bridge, caret-preserving reformatting, live
- * commit and silent revert) is shared with VDatePicker — see `useMaskedField`. The
- * time vocabulary is the simplest of the two: 4 digits and a `:` that is UNIVERSAL,
- * hence `timeCaret`'s closed form where the date has to scan for its separator.
- * `parse` ignores `final`: there is no equivalent of the 2-digit-year expansion.
+ * The mask machinery — the text being typed, the bridge to the value, the reformatting
+ * that preserves the caret, the commit and the silent revert — is shared with VDatePicker
+ * and lives in `useMaskedField`.
+ *
+ * The time vocabulary is the simpler of the two: four digits, and a separator that is the
+ * SAME in every language. That is why the caret can be computed outright here, where a
+ * date has to look for a separator it cannot predict; and why nothing distinguishes a
+ * final commit from a live one, there being no equivalent of expanding a two-digit year.
  */
 const {
   draft: maskDraft,
@@ -374,23 +419,24 @@ const {
   toMask: (time) => timeToMask(time, resolvedFormat.value),
 })
 
-// @keyboard @core — the mask's own keys, plus ArrowDown, the only explicit route
-// from the field into the dial.
+// @keyboard @core — the keys the mask itself needs, plus the down arrow, which is the one
+// explicit way from the field into the dial.
 function onFieldKeydown(event: KeyboardEvent) {
   if (!typing.value) return
   const el = fieldEl.value
   if (!el) return
 
   if (event.key === 'Enter') {
-    // preventDefault: it neutralizes both the form submission and the reopening by the
-    // root (useFieldPanel's `defaultPrevented` guard).
+    // Cancelling the default does two things at once: it stops the surrounding form from
+    // being submitted, and it stops the panel this keystroke has just closed from being
+    // reopened as the event travels up to the root.
     event.preventDefault()
     commitOrRevert()
     if (open.value) closeAndFocus()
     return
   }
   if (event.key === 'ArrowDown' && open.value && hasDial.value) {
-    // the only explicit route from the field to the dial
+    // The one explicit route from the field into the dial.
     event.preventDefault()
     focusInPanel()
     return
@@ -403,8 +449,9 @@ function onFieldKeydown(event: KeyboardEvent) {
       start > 0 &&
       !/\d/.test(el.value[start - 1] ?? '')
     ) {
-      // The `:` is PLACED by the mask, never typed: the digit preceding it is erased —
-      // otherwise the mask rewrites it and the key appears dead.
+      // TRAP — the separator is PLACED by the mask and never typed, so erasing one has to
+      // erase the DIGIT before it. Left alone, the mask would write it straight back and
+      // the key would look dead.
       event.preventDefault()
       const n = digitsOf(el.value.slice(0, start)).length
       const digits = digitsOf(el.value)
@@ -413,8 +460,9 @@ function onFieldKeydown(event: KeyboardEvent) {
     }
     return
   }
-  // A non-numeric character — the ":" included, so "9:30" is typed as it reads —
-  // completes the hour with a leading zero and moves to the minutes.
+  // Typing anything that is not a digit — the separator included, so that "9:30" can be
+  // typed exactly as it reads — completes the hour with a leading zero and moves on to
+  // the minutes.
   if (
     event.key.length === 1 &&
     !event.ctrlKey &&
@@ -428,14 +476,18 @@ function onFieldKeydown(event: KeyboardEvent) {
   }
 }
 
-/** Pasting: "19:05" or "1905" are adopted, otherwise only the digits come in. */
+/**
+ * Pasting. A time recognizable as a whole is adopted as it stands; anything else
+ * contributes its digits alone.
+ */
 function onFieldPaste(event: ClipboardEvent) {
   if (!typing.value) return
   const el = fieldEl.value
   if (!el) return
   event.preventDefault()
   const pasted = (event.clipboardData?.getData('text') ?? '').trim()
-  // A pasted canonical 24 h time stays read as 24 h, whatever the display.
+  // A pasted 24-hour time is read as one whatever clock is on display: "19:05" means
+  // seven in the evening even in a field showing a 12-hour clock.
   if (isValidTime(pasted)) {
     const text = timeToMask(pasted, resolvedFormat.value)
     writeField(text, text.length)
@@ -467,7 +519,7 @@ function onRootKeydown(event: KeyboardEvent) {
   onKeydown(event)
 }
 
-/* List mode. */
+/* From here on: everything the list form needs. */
 
 const options = computed<TimeOption[]>(() =>
   isList.value ? timeList(props.minuteStep, resolvedLocale.value, resolvedFormat.value) : [],
@@ -475,17 +527,23 @@ const options = computed<TimeOption[]>(() =>
 
 // @keyboard
 /**
- * OUR OWN list (the VMenuPanel idiom) and not `navigableItems`: the latter calls
- * `getComputedStyle` on EVERY element — unacceptable across dozens of rows, and none of
- * them is hidden here.
+ * The rows the arrows may move to, gathered by hand rather than through the shared
+ * helper.
+ *
+ * That helper asks the browser for the computed style of EVERY element it considers, to
+ * skip the hidden ones. Across dozens of rows — a list at a five-minute step holds nearly
+ * three hundred — that is a real cost, and none of these rows is ever hidden.
  */
 const optionEls = (panel: HTMLElement) => [
   ...panel.querySelectorAll<HTMLElement>('[role="option"]'),
 ]
 
 // @a11y
-/** Opening: focus AND scroll onto the current value — or the closest one, since "09:07"
-    with a 15-minute step lands on no row at all. */
+/**
+ * On opening, the list is both scrolled and focused onto the current time — or onto the
+ * NEAREST row, since a value need not be one of them: "09:07" against a list stepping
+ * every fifteen minutes matches nothing at all.
+ */
 function focusListSelection(panel: HTMLElement) {
   const items = optionEls(panel)
   if (!items.length) return
@@ -493,14 +551,17 @@ function focusListSelection(panel: HTMLElement) {
   const index =
     minutes === null ? 0 : clamp(Math.round(minutes / props.minuteStep), 0, items.length - 1)
   const el = items[index]
-  // `?.()`: jsdom does not implement scrollIntoView. No `behavior`, which would ignore
-  // `scroll-behavior` and prefers-reduced-motion.
+  // Called optionally, the unit-test environment implementing no scrolling. No scrolling
+  // behaviour is requested either: leaving it out lets the stylesheet decide, which is
+  // what makes the movement respect a reader who has asked for less motion.
   el?.scrollIntoView?.({ block: 'center' })
   el?.focus({ preventScroll: true })
 }
 
-/** A click or Enter on a row: a DIRECT commit + closing (the `VDatePicker.onSelect`
-    model) — no draft, no panel footer. */
+/**
+ * Choosing a row writes the value straight away and closes — no draft and no footer, the
+ * same way choosing a single date closes the calendar.
+ */
 function selectTime(value: string) {
   model.value = value
   closeAndFocus()
@@ -512,10 +573,11 @@ function onPanelKeydown(event: KeyboardEvent) {
   const panel = panelRef.value?.el
   if (!panel) return
   if (event.key === 'Enter' || event.key === ' ') {
-    // preventDefault is MANDATORY: without it, Enter fires the <button>'s native click
-    // (hence the close) THEN bubbles to the root without being marked consumed —
-    // useFieldPanel's `defaultPrevented` guard does not apply and the panel reopens at
-    // once. So the commit is explicit.
+    // TRAP — cancelling the default here is MANDATORY, and the commit consequently has to
+    // be explicit. Left alone, Enter would fire the row's own click — which closes the
+    // panel — and then travel up to the root WITHOUT being marked as handled, so the
+    // guard that stops a consumed key reopening the panel would not apply, and it would
+    // reopen immediately.
     const value = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>(
       '[role="option"]',
     )?.dataset.value
@@ -528,13 +590,15 @@ function onPanelKeydown(event: KeyboardEvent) {
 }
 
 /*
- * The clear cross and the end icon.
+ * The clear cross and the icon at the end of the field.
  *
- * The cross goes through VInput's `clearable`, which renders it to the LEFT of the end
- * icon (the VInput/VTextarea/VCombobox convention): both affordances coexist, and in list
- * mode this gives exactly VCombobox's cross + chevron pairing. `clearVisible` is
- * indispensable here — the field is readonly outside input mode, and its value comes from
- * the panel.
+ * The cross is the field's own, which renders it BEFORE the end icon rather than in its
+ * place — the convention every field in the design system follows. In the list form that
+ * gives exactly the cross-and-chevron pairing of a combobox, which is the right thing:
+ * the two behave the same way.
+ *
+ * Whether the cross is shown has to be answered explicitly here: outside the typed mode
+ * the field is read-only and would hide it, while the value comes from the panel.
  */
 const canClear = computed(
   () =>
@@ -545,11 +609,13 @@ const endIcon = computed<IconSource | undefined>(() =>
 )
 // @a11y @devwarn
 /*
- * The LABEL, on the other hand, stays defined at all times, even when no icon is
- * rendered: `useIconClickHandlers` warns AT SETUP as soon as an `@click:icon-end` is
- * attached without an `iconEndLabel`, with no way to know whether an icon exists. Since
- * the listener is attached permanently and its detection is static, a conditional label
- * would raise a false warning when mounting an input field with no dial.
+ * TRAP — the LABEL is defined at all times, even when no icon is rendered at all.
+ *
+ * The helper detecting a click handler on an icon warns AT SETUP if one is attached
+ * without a label, and it has no way of knowing whether an icon exists. Since the
+ * listener here is attached permanently and that detection is static, making the label
+ * conditional would produce a false warning every time a typed field without a dial is
+ * mounted.
  */
 const endIconLabel = computed(() =>
   isList.value ? m.value.timePicker.openList : m.value.timePicker.openDial,
@@ -574,9 +640,10 @@ function onEndIcon() {
   >
     <div class="v-timepicker-row">
       <div class="v-timepicker-control" @click="onControlClick">
-        <!-- `role="combobox"` and not the input's implicit `textbox`, which does not
-             support aria-expanded — see VDatePicker, same reasoning, and here it also
-             matches the `aria-haspopup="listbox"` of the list mode. -->
+        <!-- The field is declared a combobox rather than left as the plain text box it
+             implicitly is, because a text box may not carry the attribute saying whether
+             something is expanded — the same reasoning as in VDatePicker. Here it also
+             agrees with the list form, where what the field opens really is a list. -->
         <VInput
           ref="inputRef"
           v-model="fieldModel"
@@ -611,9 +678,10 @@ function onEndIcon() {
         />
       </div>
 
-      <!-- The meridiem lives OUTSIDE the panel: it serves all three modes and drives the
-           v-model directly. Still inside the root, so clicking it does not fire the
-           `focusout` that would close the panel. -->
+      <!-- The AM/PM control sits OUTSIDE the panel, which is what lets it serve all three
+           forms and write to the value directly. It stays INSIDE the component's root,
+           though: clicking it must not count as the focus leaving, which would close the
+           panel under the reader's hand. -->
       <VToggle
         v-if="resolvedFormat === '12h'"
         v-model="meridiemModel"
@@ -629,8 +697,9 @@ function onEndIcon() {
       </VToggle>
     </div>
 
-    <!-- With no panel mounted, `panelRef` is null: `open`, fed by the popover's DOM, can
-         no longer turn `true`. -->
+    <!-- With no panel rendered there is nothing to hold a reference to, and the open state
+         — which is fed by the panel's own events — can no longer become true. The absence
+         of a panel is therefore self-enforcing. -->
     <VPopover
       v-if="hasPanel"
       :id="panelId"
@@ -648,8 +717,9 @@ function onEndIcon() {
       @mousedown="onPanelMousedown"
       @keydown="onPanelKeydown"
     >
-      <!-- List mode: `option` rows, DOM focus inside the panel (the VMenu/VCalendar
-           model), a direct commit on click or on Enter. -->
+      <!-- The list: rows the focus really moves between, as in a menu or a calendar —
+           unlike VCombobox, where the focus stays in the field — and a choice written
+           straight away on a click or on Enter. -->
       <template v-if="isList">
         <button
           v-for="option in options"
@@ -667,8 +737,9 @@ function onEndIcon() {
       </template>
 
       <template v-else>
-        <!-- The cells switch the active step: `tone` accent = the step under way,
-             read as text colour (`ghost` has no background of its own at rest). -->
+        <!-- The two large numerals switch between adjusting the hour and the minutes. The
+             one being adjusted takes the accent tone, which on a quiet button shows as
+             the colour of the numeral rather than as a filled background. -->
         <div class="v-timepicker-time">
           <VButton
             class="v-timepicker-cell"
@@ -720,16 +791,16 @@ function onEndIcon() {
 <style>
 @layer vectis.components {
   .v-timepicker {
-    /* Confines the anchor to this instance (the root = the common ancestor of the
-       control and the panel) */
+    /* Confines the anchor name to this instance. It is declared on the root because that
+       is the common ancestor of the field and the panel. */
     anchor-scope: --timepicker-anchor;
     display: block;
     width: 100%;
     font-family: var(--vectis-text-family);
   }
 
-  /* The field's row: the field takes the remaining room, the AM/PM VToggle its intrinsic
-     width. */
+  /* The row holding the field: the field takes whatever room is left, and the AM/PM
+     control keeps its natural width. */
   .v-timepicker-row {
     display: flex;
     align-items: stretch;
@@ -739,14 +810,15 @@ function onEndIcon() {
   .v-timepicker-control {
     anchor-name: --timepicker-anchor;
     flex: 1;
-    /* without it, the flex item's automatic minimum would make the field overflow */
+    /* Without this the field would refuse to shrink below its own content and would
+       overflow the row. */
     min-inline-size: 0;
     cursor: pointer;
   }
 
-  /* Input mode: the field is editable, and the text caret takes over from the control's
-     `pointer`. The mask has a fixed width: tabular figures, otherwise the caret jitters
-     from one digit to the next. */
+  /* A field one types into shows the text cursor rather than the pointer a clickable
+     control shows. Its figures are also given equal widths: with proportional ones the
+     text shifts as digits are typed, and the caret appears to jitter. */
   .v-timepicker[data-mode='input'] .v-timepicker-control {
     cursor: text;
   }
@@ -755,9 +827,10 @@ function onEndIcon() {
     font-variant-numeric: tabular-nums;
   }
 
-  /* The VToggle aligns on the FIELD, not on the VInput block (which stacks label /
-     field / hint): the label's and the hint's heights are compensated with margins. Its
-     own height equals the field's (same size/compact). */
+  /* The AM/PM control lines up with the FIELD and not with the whole block, which also
+     stacks a label above and a hint below it. Those two are compensated with margins
+     derived from their own type, so the control sits exactly beside the field whatever
+     the field is given. */
   .v-timepicker-meridiem {
     flex: none;
     align-self: center;
@@ -775,16 +848,17 @@ function onEndIcon() {
     );
   }
 
-  /* `position-anchor` and the chrome come from VPopover (the `anchor` and `surface`
-     props, the latter setting `.v-panel`): only the column layout and the padding
-     specific to the dial are left here. The author's `display: flex` overrides
-     [popover]'s UA `display: none`: the `.v-overlay:not(:popover-open)` guard is what
-     closes it back.
-     Compounded with `.v-popover-panel` (VPopover puts both classes on the same
-     element) because `gap` and `padding` are declared by `.v-panel` too: at equal
-     specificity the winner would depend on the order in which the consumer's bundler
-     concatenates the CSS. `[data-size]` is not usable here — the dial panel carries
-     none. */
+  /* The anchoring and the panel's surface both come from VPopover; what is left here is
+     the column layout and the padding the dial needs.
+
+     TRAP — declaring a display here overrides the browser's own rule hiding a closed
+     popover. What closes it back is the shared guard on the overlay class, which is more
+     specific than anything a component can write.
+
+     The selector compounds two classes VPopover puts on the same element, because the gap
+     and the padding are also declared by the shared panel class: at equal specificity the
+     winner would be whichever sheet the consumer's bundler put last. The size attribute
+     cannot serve that purpose here — the dial's panel carries none. */
   .v-popover-panel.v-timepicker-panel {
     display: flex;
     flex-direction: column;
@@ -794,8 +868,9 @@ function onEndIcon() {
     color: var(--vectis-color-text);
   }
 
-  /* A numeric time always reads HH:MM: without this forced ltr, bidi would reorder the
-     cells in RTL. */
+  /* A time written in figures always reads hours then minutes, in every language. Forcing
+     the direction here is what stops bidirectional reordering from swapping the two in a
+     right-to-left page. */
   .v-timepicker-time {
     display: flex;
     align-items: center;
@@ -804,16 +879,17 @@ function onEndIcon() {
     direction: ltr;
   }
 
-  /* The HH/MM cells: design system VButtons (the `ghost` variant, an accent tone on the
-     active step — `--tone-text-tinted` supplies the numeral's colour, `--tone-bg-soft`
-     only appearing on hover). The override is limited to the "large numeral" template: height, states,
-     focus and transitions all come from VButton. Qualified by [data-size] (the
-     VIconButton/VTabs model): the export order is not constraining. */
+  /* The two large numerals are ordinary quiet buttons. What is overridden here is the
+     "large numeral" look alone — the width and the type; the height, the states, the
+     focus ring and the transitions all come from the button itself.
+
+     The selector is qualified by an attribute that button always renders, which is what
+     makes it win whatever order the two sheets end up in. */
   .v-timepicker-cell[data-size] {
     width: var(--control-height);
     font-size: var(--vectis-text-heading-1-size);
     font-weight: var(--vectis-text-heading-2-weight);
-    /* "11" and "00" must not shift the cell */
+    /* Figures of equal width, so that going from "11" to "00" does not shift the cell. */
     font-variant-numeric: tabular-nums;
   }
 
@@ -827,9 +903,9 @@ function onEndIcon() {
     align-self: center;
   }
 
-  /* List mode: the chrome comes from `.v-panel` (VPopover's `surface` prop) and the
-     rows' template from the `v-control` set on the PANEL. Only the dimensions stay here —
-     `panel.css` carries none. */
+  /* The list's surface comes from the shared panel class, and its rows read their
+     dimensions from the size class set on the PANEL. What stays here are the panel's own
+     dimensions, which the shared class deliberately declares none of. */
   .v-timepicker-list {
     min-inline-size: anchor-size(width);
     max-block-size: var(--vectis-control-size-timepicker-list-max-block);
@@ -858,7 +934,8 @@ function onEndIcon() {
     background: var(--vectis-color-surface-muted);
   }
 
-  /* An INNER ring: the panel scrolls, so a positive offset would be cropped. */
+  /* The focus ring is drawn INSIDE the row: the panel scrolls, and a ring sitting outside
+     it would be cropped on the first and last rows. */
   .v-timepicker-option:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(-1 * var(--vectis-focus-ring-width));

@@ -17,50 +17,66 @@ import { useMessages } from '../../i18n/state'
 
 // @a11y @keyboard @core
 /**
- * VTimePicker's clock dial (internal, not exported).
+ * The clock face VTimePicker draws. It is internal to that component and never exported.
  *
- * No native primitive covers angular selection: the JS is limited to (1) the pointer →
- * value conversion (pointerdown/move: measuring the rect then PURE trigonometry in
- * `utils/time` — atan2, the ring threshold) and (2) the ARIA "slider" keyboard pattern
- * (arrows / Home / End / PageUp-Down). All the rendering — the numerals' positions, the
- * hand — is CSS (`sin()`/`cos()` on the inline unitless turn fraction `--dial-turn`).
+ * Nothing native covers choosing a value by pointing at an angle, so the JavaScript does
+ * two things: it turns a point on the face into a time — measuring the face once, then
+ * pure trigonometry that lives in `utils/time` — and it implements the keyboard of a
+ * slider, the arrows and the Home, End and Page keys.
  *
- * A single focusable `role="slider"` element (1 tab stop, a localized `aria-valuetext`):
- * the numerals are purely visual markers (`aria-hidden`), reached by the pointer's angle,
- * not cell by cell.
+ * Everything one SEES is CSS: the numerals are placed around the circle, and the hand is
+ * turned, from a single unitless fraction of a turn written inline.
+ *
+ * There is exactly ONE focusable element, and it is announced as a slider. The numerals
+ * are visual markers hidden from screen readers, reached by the pointer's angle rather
+ * than one cell at a time — which is why the whole spoken value has to be carried by that
+ * one element.
  */
 interface TimePickerDialProps {
-  /** The current step: selecting the hour or the minutes. */
+  /** Which of the two is being adjusted: the hour or the minutes. */
   step: 'hour' | 'minute'
+  /** Whether the face shows a 12- or a 24-hour clock. */
   format: HourFormat
-  /** A canonical 24 h hour (0–23). */
+  /** The hour being adjusted, always on the 24-hour clock. */
   hour: number
+  /** The minutes being adjusted. */
   minute: number
-  /** Minute granularity (dragging and arrows). */
+  /** The interval the minutes snap to, both when dragging and with the arrow keys. */
   minuteStep: number
 }
 
 const props = defineProps<TimePickerDialProps>()
 
 const emit = defineEmits<{
+  /** The hour changed, still on the 24-hour clock. */
   'update:hour': [hour: number]
+  /** The minutes changed. */
   'update:minute': [minute: number]
-  /** A settled step value (releasing the pointer, Enter/Space). */
+  /**
+   * This step has been settled — the pointer released, or Enter pressed. WHICH of the two
+   * is reported, because they do not mean the same thing: releasing a hand one has been
+   * dragging is not a confirmation.
+   */
   'confirm-step': [via: 'pointer' | 'keyboard']
 }>()
 
+/** One numeral on the face. */
 interface DialCell {
   key: string
+  /** What is printed. */
   label: string
-  /** The turn fraction [0, 1) of the numeral's position (0 = twelve o'clock). */
+  /** Where it sits, as a fraction of a full turn from twelve o'clock. */
   turn: number
+  /** Which of the two circles it belongs to, a 24-hour face having an inner one. */
   ring: 'outer' | 'inner'
+  /** Whether it is the value currently being pointed at. */
   selected: boolean
 }
 
 const cells = computed<DialCell[]>(() => {
   if (props.step === 'minute') {
-    // 5-minute markers; the drag selection stays accurate to the minute.
+    // Only twelve markers are printed, one every five minutes — sixty numerals would be
+    // unreadable — while dragging remains accurate to the minute.
     return Array.from({ length: 12 }, (_, i) => ({
       key: `m-${i}`,
       label: pad2(i * 5),
@@ -107,11 +123,16 @@ const handRing = computed(() =>
   props.step === 'hour' && props.format === '24h' ? hour24ToDial(props.hour).ring : 'outer',
 )
 
-/** A minute off the 5-minute markers: the hand carries a dot (an M3 detail). */
+/**
+ * Whether the hand points at a minute that has no marker of its own. The tip is then
+ * drawn small: at full size it would cover the two neighbouring markers and read as
+ * pointing at neither.
+ */
 const handMinor = computed(() => props.step === 'minute' && props.minute % 5 !== 0)
 
-// @a11y — the whole slider value contract: the numerals are aria-hidden markers,
-// so `aria-valuenow`/`-min`/`-max`/`-text` are the ONLY thing AT reads off the dial.
+// @a11y — the entire spoken value of the dial. The numerals are hidden from screen
+// readers, so these four attributes are the ONLY thing assistive technology has: what the
+// value is, what its bounds are, and how to say it.
 const ariaValueNow = computed(() => {
   if (props.step === 'minute') return props.minute
   return props.format === '12h' ? to12h(props.hour).hour : props.hour
@@ -120,7 +141,7 @@ const ariaValueMin = computed(() => (props.step === 'minute' ? 0 : props.format 
 const ariaValueMax = computed(() =>
   props.step === 'minute' ? 59 : props.format === '12h' ? 12 : 23,
 )
-// No dedicated prop: the dictionary is the only override point.
+// The wording has no prop: the dictionary is where it is changed.
 const m = useMessages()
 const ariaValueText = computed(() =>
   props.step === 'minute'
@@ -128,14 +149,16 @@ const ariaValueText = computed(() =>
     : m.value.timePicker.hoursValue(ariaValueNow.value),
 )
 
-// Pointer: clicking and dragging on the face.
+// Pointing at the face, by click or by drag.
 const faceEl = ref<HTMLElement | null>(null)
 const dragging = ref(false)
 
 function applyPoint(event: PointerEvent) {
   const face = faceEl.value
   if (!face) return
-  const rect = face.getBoundingClientRect() // handler → client only (SSR-safe)
+  // Measuring the face is safe here: this runs from a handler, hence in a browser, never
+  // during a render.
+  const rect = face.getBoundingClientRect()
   const dx = event.clientX - (rect.left + rect.width / 2)
   const dy = event.clientY - (rect.top + rect.height / 2)
   if (props.step === 'minute') {
@@ -152,13 +175,15 @@ function applyPoint(event: PointerEvent) {
 }
 
 function onPointerdown(event: PointerEvent) {
-  // @fallback
-  // try/catch: synthetic PointerEvents (play functions) have no active pointer →
-  // setPointerCapture would throw NotFoundError.
+  // Capturing the pointer is what keeps the drag alive when it wanders off the face.
+  //
+  // @fallback — it is wrapped because a pointer event fired by a TEST refers to no real
+  // pointer, and the call then throws. Failing to capture merely means the drag stops at
+  // the edge, which no test is checking.
   try {
     faceEl.value?.setPointerCapture(event.pointerId)
   } catch {
-    /* a synthetic pointer */
+    /* a synthetic pointer: nothing to capture */
   }
   dragging.value = true
   applyPoint(event)
@@ -178,14 +203,14 @@ function onPointercancel() {
   dragging.value = false
 }
 
-// @keyboard @a11y
-// Keyboard (the slider pattern).
+// @keyboard @a11y — the keyboard a slider is expected to have.
 function moveHour(delta: number) {
   if (props.format === '24h') {
     emit('update:hour', (props.hour + delta + 24) % 24)
     return
   }
-  // 12h: a 1–12 cycle within the current meridiem (AM/PM is changed on the VToggle).
+  // On a 12-hour face the hours cycle from 1 to 12 WITHIN the current half of the day:
+  // passing midday is done on the AM/PM control, not by walking the hand past twelve.
   const { hour, meridiem } = to12h(props.hour)
   emit('update:hour', to24h(((hour - 1 + delta + 12) % 12) + 1, meridiem))
 }
@@ -196,8 +221,8 @@ function onKeydown(event: KeyboardEvent) {
     emit('confirm-step', 'keyboard')
     return
   }
-  // The arrows are not inverted in RTL: the dial is never mirrored (clockwise is
-  // invariant), and + stays "forward" in both directions.
+  // The arrows are NOT flipped in a right-to-left page: a clock face is never mirrored —
+  // clockwise means the same thing everywhere — so forward stays forward.
   const delta =
     event.key === 'ArrowUp' || event.key === 'ArrowRight'
       ? 1
@@ -275,13 +300,18 @@ function onKeydown(event: KeyboardEvent) {
     block-size: var(--vectis-control-size-timepicker-dial);
     border-radius: var(--vectis-radius-pill);
     background: var(--vectis-color-surface-muted);
-    /* dragging selects: it must neither scroll (touch) nor select text */
+    /* Dragging across the face IS how one chooses, so it must do nothing else: no
+       scrolling under a finger, and no selecting the numerals as text. */
     touch-action: none;
     user-select: none;
     cursor: pointer;
-    /* Radius of the numerals' centre (the outer ring). Inherited by the numerals and the
-       hand; the inner ring redefines it. Keep it in step with DIAL_INNER_THRESHOLD
-       (`utils/time`). */
+    /* How far from the centre the numerals sit — the outer circle. The numerals and the
+       hand both read it, and the inner circle redefines it for itself.
+
+       TRAP — this is coupled to the threshold that decides which of the two circles a
+       point belongs to, in `utils/time`. Changing one without the other makes the face
+       answer with the wrong ring, and no test can catch it: the unit tests measure
+       nothing. */
     --dial-radius: calc(
       var(--vectis-control-size-timepicker-dial) / 2 -
         var(--vectis-control-size-timepicker-number) / 2
@@ -294,10 +324,12 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   /*
-   * The numerals are positioned by CSS trigonometry on the inline turn fraction
-   * `--dial-turn` (sin()/cos(): Chrome 111+ / Safari 15.4+, well below the repo's floor).
-   * PHYSICAL `left`/`top`/`rotate` on purpose: a clock is never mirrored in RTL
-   * (clockwise is universal).
+   * The numerals are placed around the circle by CSS trigonometry, from the fraction of a
+   * turn each one was given — no coordinates are computed in code.
+   *
+   * The properties used are PHYSICAL on purpose, where the rest of the design system
+   * prefers logical ones: a clock face is never mirrored, clockwise meaning the same thing
+   * in every language.
    */
   .v-timepicker-number {
     position: absolute;
@@ -309,10 +341,12 @@ function onKeydown(event: KeyboardEvent) {
     display: grid;
     place-items: center;
     border-radius: var(--vectis-radius-pill);
-    /* The outer ring: dial legibility, at the large body text size */
+    /* The outer circle is set at the large body size: these numerals are read at arm's
+       length on a phone, not scanned like a label. */
     font-size: var(--vectis-text-body-lg-size);
     color: var(--vectis-color-text);
-    /* Above the hand: the targeted numeral reads on its dot */
+    /* Above the hand, so that the numeral being pointed at reads ON its dot rather than
+       being covered by it. */
     z-index: 1;
     pointer-events: none;
   }
@@ -335,10 +369,12 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   /*
-   * The hand: a stroke anchored at the centre, turned by `rotate` on the same turn
-   * fraction. NO transition on rotate: between 55 and 0 min the angle goes back from
-   * 0.916turn to 0turn, and the interpolation would take the long way round (an accepted
-   * trade-off against Material).
+   * The hand: a stroke anchored at the centre and turned by the same fraction of a turn.
+   *
+   * TRAP — the rotation is deliberately NOT animated. Going from 55 minutes to 0 takes the
+   * angle from nearly a full turn back to none, and an interpolation would sweep the hand
+   * all the way round anticlockwise. That is an accepted departure from the Material
+   * design it follows otherwise.
    */
   .v-timepicker-hand {
     position: absolute;
@@ -351,8 +387,8 @@ function onKeydown(event: KeyboardEvent) {
     rotate: calc(var(--dial-turn) * 1turn);
   }
 
-  /* The tip dot: it covers the targeted numeral (the text switching to text-on-accent
-     through [data-selected]) */
+  /* The dot at the tip of the hand. It is exactly the size of a numeral's cell, so it
+     covers the one being pointed at — whose text turns to the colour that reads on it. */
   .v-timepicker-hand::before {
     content: '';
     position: absolute;
@@ -363,20 +399,23 @@ function onKeydown(event: KeyboardEvent) {
     block-size: var(--vectis-control-size-timepicker-number);
     border-radius: var(--vectis-radius-pill);
     background: var(--vectis-color-accent);
-    /* Only the SIZE SWITCH (a marker ↔ [data-minor]) is animated: it interpolates
-       between two bounded values, unlike the hand's `rotate`, left without a transition
-       (see above). */
+    /* The ONE thing animated on the hand: the dot changing size between its two forms. It
+       interpolates between two bounded values and can therefore never take a wrong path,
+       unlike the rotation above. */
     transition:
       inline-size var(--vectis-duration-fast) var(--vectis-ease-default),
       block-size var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   /*
-   * A minute off the 5-minute markers: the dot covers no numeral and would spill onto
-   * both neighbours → shrunk, it becomes the precise marker on its own (hence dropping
-   * M3's light central dot, which would make a ring at that size). Only the pseudo's size
-   * changes: redefining --vectis-control-size-timepicker-number here would also move
-   * --dial-radius, hence the hand's length and the rings' radius.
+   * On a minute with no marker of its own, the dot covers no numeral and at full size
+   * would spill onto both neighbours, reading as pointing at neither. Shrunk, it becomes
+   * the precise marker itself — which is also why the pale centre Material draws inside it
+   * is dropped here: at this size it would turn the dot into a ring.
+   *
+   * TRAP — only the DOT's own size changes. Redefining the numeral size variable here
+   * would also move the radius derived from it, and with it the hand's length and the
+   * position of both circles.
    */
   .v-timepicker-hand[data-minor]::before {
     inline-size: var(--vectis-control-size-timepicker-hand-minor);
