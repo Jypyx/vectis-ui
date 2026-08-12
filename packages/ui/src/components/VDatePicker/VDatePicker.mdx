@@ -1,0 +1,101 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VDatePickerStories from './VDatePicker.stories'
+
+<Meta of={VDatePickerStories} />
+
+# DatePicker
+
+An inline calendar (a grid), Material-inspired. It carries **all the logic** of selection, of
+navigation by views (days / months / years) and of the keyboard; the
+[VDateInput](?path=/docs/components-dateinput--docs) merely dresses it in a field and a floating
+panel.
+
+The platform offers no accessible, composable date grid (`<input type="date">` is neither stylable
+nor decomposable): the JS therefore implements the ARIA **grid** pattern — roving tabindex, arrows,
+`PageUp`/`PageDown`, single / range / multiple selection. Everything is computed in **local time**
+through ISO `YYYY-MM-DD` strings (no timezone drift, SSR-safe).
+
+<Canvas of={VDatePickerStories.Default} />
+<Controls of={VDatePickerStories.Default} />
+
+## Selection modes
+
+`selection` accepts `single` (the default), `range` and `multiple`. The v-model's type follows the
+selection: `string | null`, `{ start, end }` (`DateRange`), or `string[]`.
+
+<Canvas of={VDatePickerStories.Range} />
+<Canvas of={VDatePickerStories.Multiple} />
+
+## min / max bounds
+
+`min` and `max` (ISO) lock the navigation **and** the selection: the months outside the range are
+no longer reachable and the days outside it are disabled.
+
+<Canvas of={VDatePickerStories.MinMax} />
+
+## Disabled dates
+
+`disabledDates` accepts an array of ISO strings **or** a predicate `(iso) => boolean`. The dates
+concerned are struck through and non-selectable (but stay keyboard-focusable, as the ARIA pattern
+requires).
+
+<Canvas of={VDatePickerStories.DisabledDates} />
+
+## Adjacent months
+
+`showAdjacentDays` (off by default) displays the days of the previous/next months in grey — enable
+it by mere presence: `<VDatePicker show-adjacent-days />`. `selectAdjacentDays` makes them clickable
+(and implies displaying them) — a click then navigates to their month and selects them.
+
+<Canvas of={VDatePickerStories.AdjacentMonths} />
+
+## Events
+
+`events` (`{ date, color?, label? }[]`) displays up to three coloured dots under a date.
+
+<Canvas of={VDatePickerStories.Events} />
+
+## Custom content (the `#day` slot)
+
+The `#day` slot replaces a cell's content — a ticket price under the day number, for instance. It
+receives `{ iso, day, inMonth, disabled, selected, today, inRange, events }`.
+
+For content on several lines, enlarge the dot through the public CSS variable
+**`--vectis-date-picker-day-size`** (default `2.5rem`, the `md` control height) — the example below uses 40 px dots and always
+renders the price line (empty when absent) to keep the numbers aligned from one cell to the next.
+
+The slot also applies to the days of the adjacent months (`showAdjacentDays`), so their number stays
+aligned with the days of the month: use `inMonth` to display the data only on the days of the
+displayed month, while keeping the same content height.
+
+<Canvas of={VDatePickerStories.DaySlot} />
+
+## Footer zone
+
+The `#footer` slot takes action buttons or presets ("Today", "Tomorrow", …).
+
+<Canvas of={VDatePickerStories.WithFooter} />
+
+## Localization
+
+`locale` drives the month/day names and the first day of the week (derived from the locale,
+overridable through `firstDayOfWeek`). The labels go through `Intl`, which is available on the
+server.
+
+<Canvas of={VDatePickerStories.Localization} />
+
+## Accessibility
+
+- The days grid is a `role="grid"` named by the month and the year; the column headers carry the
+  full day name (`aria-label`).
+- **Roving tabindex**: a single cell is tabbable; the selection and "today" are signalled by
+  `aria-selected` and `aria-current="date"`.
+- **Keyboard**: arrows (± 1 day / ± 1 week), `Home`/`End` (the week's bounds), `PageUp`/`PageDown`
+  (± 1 month, `Shift` → ± 1 year), `Enter`/`Space` (selection). The month and year views are
+  navigable with the arrows too.
+- The visible focus uses the design system's standard focus ring; every transition respects
+  `prefers-reduced-motion`.
+
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**). The `locale` prop stays authoritative; without it, the
+component follows the global locale set by `setLocale`.

@@ -135,3 +135,11 @@ export { default as VSlider } from './components/VSlider/VSlider.vue'
 export type { SliderLabel } from './components/VSlider/VSlider.vue'
 export { default as VDialog } from './components/VDialog/VDialog.vue'
 export { default as VDialogAlert } from './components/VDialog/VDialogAlert.vue'
+export { default as VDatePicker } from './components/VDatePicker/VDatePicker.vue'
+export type {
+  DatePickerSelection,
+  DatePickerValue,
+  DateRange,
+  DatePickerEvent,
+  DateMatcher,
+} from './components/VDatePicker/VDatePicker.vue'
