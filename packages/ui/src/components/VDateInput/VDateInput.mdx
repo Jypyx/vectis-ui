@@ -1,0 +1,130 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VDateInputStories from './VDateInput.stories'
+
+<Meta of={VDateInputStories} />
+
+# DateInput
+
+A date picker: a [VInput](?path=/docs/components-input--docs) field and, optionally, a
+[VDatePicker](?path=/docs/components-datepicker--docs) inside a floating panel. The component only
+assembles design system bricks — no dependency and no extra positioning JS.
+
+**By default, the date is typed on the keyboard and there is no panel**: `mode` is `input` and
+`showPicker` is `false`. The calendar is an option, described further down.
+
+When there is a panel, it is a `popover="manual"` anchored in **pure CSS** (`anchor-scope` on the
+root + `anchor-name` on the control → `position-anchor`, as in VTooltip and VCombobox).
+`popovertarget` is not used (it is invalid on a text `<input>`): the opening is programmatic, which
+is what allows **moving the focus into the grid** — the right accessibility model for a calendar,
+and precisely what input mode suspends. Closing follows the VCombobox pattern (`focusout` on the
+root + `Escape`).
+
+<Canvas of={VDateInputStories.Default} />
+<Controls of={VDateInputStories.Default} />
+
+## Selection modes (`selection`)
+
+As in the underlying VDatePicker: `single` (the default), `range` and `multiple` — the prop is called
+`selection` on both sides, `mode` being reserved for the field's display. Since a range or a list
+does not fit in a masked field, `range` and `multiple` **fall back to read-only** and therefore keep
+their calendar. The field then displays the value formatted through `Intl` (a range through
+`formatRange`, several dates separated by commas).
+
+<Canvas of={VDateInputStories.Range} />
+<Canvas of={VDateInputStories.Multiple} />
+
+## Presets & actions (the `#footer` slot)
+
+The `#footer` slot receives `close` to close the panel from a button or a preset. In `single` mode,
+selecting a date closes automatically; in `range`/`multiple`, the panel stays open (the user closes
+it through the footer).
+
+<Canvas of={VDateInputStories.WithPresets} />
+
+## Bounds, events, sizes
+
+`min`/`max`, `events` and `disabledDates` are relayed to VDatePicker. The field follows the input
+components' scale: `sm` (32 px), `md` (40 px, the default) and `lg` (48 px), combinable with
+`compact` (-4 px). The panel's grid, meanwhile, keeps its dimensions.
+
+<Canvas of={VDateInputStories.MinMax} />
+<Canvas of={VDateInputStories.Events} />
+<Canvas of={VDateInputStories.Sizes} />
+
+## States
+
+The field is clearable (`clearable`: the cross appears to the left of the end icon as soon as a
+value is set, as in VInput, VTextarea and VCombobox) and supports `disabled`.
+
+<Canvas of={VDateInputStories.Disabled} />
+
+## Keyboard input (`mode`)
+
+`mode="input"` is the **default**: the field is editable, for those who are faster on the keyboard.
+`mode="readonly"` switches it back to read-only, where the date can only be chosen from the calendar
+— useful when any ambiguous input must be ruled out.
+
+The user types **digits only**: the component places the separators as they go, the way a native
+`<input type="date">` does. The field order and the separator are **derived from the locale**
+(`Intl`), never hardcoded — and the placeholder takes the matching localized template.
+
+<Canvas of={VDateInputStories.InputLocales} />
+<Canvas of={VDateInputStories.ReadOnly} />
+
+The display format of input mode is necessarily numeric: `displayFormat` therefore does not apply
+there ("10 June 2026" cannot be retyped), and supplying the prop raises a development warning. It
+concerns only `mode="readonly"` and the `range` / `multiple` selections, which fall back to it.
+
+Input rules:
+
+- typing a separator is tolerated and completes the current field with a leading zero ("5/6/2026"
+  gives the same result as "05062026"),
+- `Backspace` on a separator erases the digit preceding it,
+- a two-digit year is expanded into the 21st century **on leaving the field**,
+- an incomplete or impossible entry ("31/02"), one outside `min`/`max` or on a disabled date,
+  **silently returns** to the current value; emptying the field sets the value to `null`,
+- pasting an already-written date (ISO or masked) is recognized.
+
+<Canvas of={VDateInputStories.BoundedInput} />
+<Canvas of={VDateInputStories.InputPaste} />
+
+## The calendar in input mode (`showPicker`)
+
+In input mode, the calendar is **opt-in**: a field filled on the keyboard does not necessarily need
+a panel, and in a dense form a popover opening on every focus is noise. The default component
+therefore renders neither a calendar icon, nor a panel, nor an opening shortcut.
+
+`showPicker` restores both: a clickable icon at the end of the field, and the panel opened on
+focus — without taking the focus, so typing continues in the field. The prop has **no effect in
+read-only mode**, where the calendar is the only way to choose a date.
+
+`clearable` (default `true`) keeps its own semantics: the clear cross appears as soon as a date is
+set, calendar or no calendar.
+
+`pickerIcon` replaces the calendar-opening icon. It only shows when there is a panel to open, and
+**the clear cross sits to its left** without replacing it: opening the calendar stays one click away
+once the date is chosen.
+
+<Canvas of={VDateInputStories.InputWithCalendar} />
+
+## Accessibility
+
+- When a panel exists, the field becomes a `role="combobox"` carrying `aria-haspopup="dialog"`,
+  `aria-expanded` and `aria-controls`; the panel is a named `role="dialog"`. The role travels with
+  the three attributes because a plain text field does not support `aria-expanded`. An input field
+  without `showPicker` keeps its native `textbox` role and announces no popup.
+- **Opening** happens on click, on `Enter` or on the `down arrow` from the field. In read-only mode
+  the focus moves into the calendar's grid straight away; in input mode with `showPicker` the
+  panel opens **without taking the focus** (typing continues in the field) and the `down arrow`
+  stays the explicit route to the grid.
+- **Closing** happens on `Escape` (the focus returns to the field), on a click outside the
+  component, or — in single mode — after a selection. In input mode, `Enter` commits and closes, so
+  it does not submit the surrounding form.
+- Since a placeholder is not an accessible description, describe the expected format through `hint`
+  (linked to the field by `aria-describedby`).
+- All the grid's keyboard navigation is inherited from VDatePicker (see its documentation). The
+  transitions respect `prefers-reduced-motion`.
+
+This component's accessible labels come from the design system dictionary: they translate globally
+(see **Foundations › Internationalization**). The `locale` prop stays authoritative; without it, the
+component follows the global locale set by `setLocale`.

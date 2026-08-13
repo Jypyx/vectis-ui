@@ -143,3 +143,5 @@ export type {
   DatePickerEvent,
   DateMatcher,
 } from './components/VDatePicker/VDatePicker.vue'
+export { default as VDateInput } from './components/VDateInput/VDateInput.vue'
+export type { DateInputMode } from './components/VDateInput/VDateInput.vue'
