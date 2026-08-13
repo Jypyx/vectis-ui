@@ -117,7 +117,7 @@ own names always pass through.
 
 This site is itself a partial resolver. Its chrome needs six icons the registry does not
 carry — `menu`, `computer`, `light_mode`, `dark_mode`, `open_in_new`, `content_copy` —
-so it answers for those and lets the other thirty come from the library.
+so it answers for those and lets the other thirty-four come from the library.
 
 ## Server-side rendering
 

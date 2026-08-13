@@ -153,6 +153,11 @@ The previous/next pair is rendered as **circular** `VIconButton`s (`shape="circu
 that holds up over arbitrary media: a rounded rectangle sitting on a photograph competes with
 whatever is behind it. A `#controls` slot renders its own buttons and is free to choose otherwise.
 
+The default glyphs follow the orientation — `arrow_left_alt`/`arrow_right_alt` horizontally,
+`arrow_upward_alt`/`arrow_downward_alt` vertically. Arrows rather than the chevrons of `VTabs` and
+`VPagination`, for the same reason as the disc: a hairline chevron dissolves at the centre of a
+button laid over a photograph, where a shaft reads at a glance.
+
 Icons and labels are props (`prevIcon`, `nextIcon`, `prevLabel`…), and the `#controls`,
 `#indicators` and `#indicator` slots replace the rendering entirely — `#indicators`
 receives `goTo`, without which the bar could no longer select anything, and both bars receive
@@ -175,7 +180,7 @@ the slides rather than below them.
 The layout mirrors itself: everything is written in logical properties, so the scroll axis, the
 snapping, the slide sizing and the placement of both bars follow the direction with no branch —
 and `space-between` puts `previous` at the inline start, which is the right-hand side. The glyphs
-are the exception, because a chevron points at a physical direction: the control icons are flipped
+are the exception, because an arrow points at a physical direction: the control icons are flipped
 in CSS, so `previous` points right and `next` points left.
 
 <Canvas of={VCarouselStories.Rtl} />

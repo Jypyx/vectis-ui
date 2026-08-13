@@ -246,11 +246,16 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.carousel.label)
 const resolvedPrevLabel = computed(() => props.prevLabel ?? m.value.carousel.previous)
 const resolvedNextLabel = computed(() => props.nextLabel ?? m.value.carousel.next)
 const isVertical = computed(() => props.orientation === 'vertical')
+/* Arrows with a shaft rather than the chevrons VTabs and VPagination use, and the
+   difference is the surface they sit on: those two put their control in a dense bar,
+   where a chevron is exactly the right weight, while this pair is a round button laid
+   over whatever media the slides carry. A hairline chevron dissolves at the centre of
+   a 40px disc; a shaft fills it and reads at a glance. */
 const resolvedPrevIcon = computed(
-  () => props.prevIcon ?? (isVertical.value ? 'expand_less' : 'chevron_left'),
+  () => props.prevIcon ?? (isVertical.value ? 'arrow_upward_alt' : 'arrow_left_alt'),
 )
 const resolvedNextIcon = computed(
-  () => props.nextIcon ?? (isVertical.value ? 'expand_more' : 'chevron_right'),
+  () => props.nextIcon ?? (isVertical.value ? 'arrow_downward_alt' : 'arrow_right_alt'),
 )
 
 // @ssr
@@ -1229,9 +1234,10 @@ if (isDev) {
   }
 
   /*
-   * chevrons: the direction is physical, so the icon flips in RTL (the VTabs and
-   * VPagination rule, word for word). Horizontal only — the block axis does not
-   * mirror, so the vertical chevrons are already right.
+   * An arrow points at a physical direction, so the icon flips in RTL (the VTabs and
+   * VPagination rule, word for word — what they share is the rule, not the glyph).
+   * Horizontal only: the block axis does not mirror, so the vertical arrows are
+   * already right.
    */
   [dir='rtl'] .v-carousel[data-orientation='horizontal'] .v-carousel-control .v-icon {
     scale: -1 1;

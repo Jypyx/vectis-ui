@@ -25,9 +25,13 @@ const REVISION = '528cb964c01fb2b09bc3b9208f82b6d8f8c1c1e2'
  */
 const ICONS = [
   'arrow_downward',
+  'arrow_downward_alt',
   'arrow_drop_down',
   'arrow_drop_up',
+  'arrow_left_alt',
+  'arrow_right_alt',
   'arrow_upward',
+  'arrow_upward_alt',
   'attach_file',
   'audio_file',
   'calendar_today',

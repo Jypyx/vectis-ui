@@ -2,7 +2,7 @@
  * Generates `.vitepress/theme/icons.ts`: the SVG paths of the icons the DOCS CHROME
  * renders and the design system's built-in registry does not carry.
  *
- * That registry holds exactly the 30 icons a COMPONENT renders by default — anything a
+ * That registry holds exactly the 34 icons a COMPONENT renders by default — anything a
  * consumer passes in is that consumer's business, and this site is a consumer. It loads
  * no icon font either, so a name the registry does not know would render nothing at all.
  * The docs therefore ship their own paths and feed them to `setIconResolver` as a PARTIAL

@@ -12,9 +12,13 @@ import { builtinIcons, ICON_VIEW_BOX, type VectisIconName } from './icons'
     removed from `scripts/build-icons.ts` — and the other way round. */
 const EXPECTED = [
   'arrow_downward',
+  'arrow_downward_alt',
   'arrow_drop_down',
   'arrow_drop_up',
+  'arrow_left_alt',
+  'arrow_right_alt',
   'arrow_upward',
+  'arrow_upward_alt',
   'attach_file',
   'audio_file',
   'calendar_today',

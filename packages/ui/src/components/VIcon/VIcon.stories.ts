@@ -402,9 +402,13 @@ function fontShowcase(resolver: IconResolver): Story {
     consumers. */
 const PHOSPHOR: Record<VectisIconName, string> = {
   arrow_downward: 'arrow-down',
+  arrow_downward_alt: 'arrow-down',
   arrow_drop_down: 'caret-down',
   arrow_drop_up: 'caret-up',
+  arrow_left_alt: 'arrow-left',
+  arrow_right_alt: 'arrow-right',
   arrow_upward: 'arrow-up',
+  arrow_upward_alt: 'arrow-up',
   attach_file: 'paperclip',
   audio_file: 'file-audio',
   calendar_today: 'calendar-blank',
@@ -435,9 +439,13 @@ const PHOSPHOR: Record<VectisIconName, string> = {
 
 const FONT_AWESOME: Record<VectisIconName, string> = {
   arrow_downward: 'arrow-down',
+  arrow_downward_alt: 'arrow-down',
   arrow_drop_down: 'caret-down',
   arrow_drop_up: 'caret-up',
+  arrow_left_alt: 'arrow-left',
+  arrow_right_alt: 'arrow-right',
   arrow_upward: 'arrow-up',
+  arrow_upward_alt: 'arrow-up',
   attach_file: 'paperclip',
   audio_file: 'file-audio',
   calendar_today: 'calendar',
@@ -468,9 +476,13 @@ const FONT_AWESOME: Record<VectisIconName, string> = {
 
 const BOOTSTRAP: Record<VectisIconName, string> = {
   arrow_downward: 'arrow-down',
+  arrow_downward_alt: 'arrow-down',
   arrow_drop_down: 'caret-down-fill',
   arrow_drop_up: 'caret-up-fill',
+  arrow_left_alt: 'arrow-left',
+  arrow_right_alt: 'arrow-right',
   arrow_upward: 'arrow-up',
+  arrow_upward_alt: 'arrow-up',
   attach_file: 'paperclip',
   audio_file: 'file-earmark-music',
   calendar_today: 'calendar',

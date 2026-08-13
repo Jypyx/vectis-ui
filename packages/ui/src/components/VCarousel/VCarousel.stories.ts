@@ -380,8 +380,8 @@ export const Placement: Story = {
 }
 
 /**
- * Right-to-left. The layout mirrors itself — logical properties throughout — but a
- * chevron points at a PHYSICAL direction, so the icons are flipped in CSS (the VTabs
+ * Right-to-left. The layout mirrors itself — logical properties throughout — but an
+ * arrow points at a PHYSICAL direction, so the icons are flipped in CSS (the VTabs
  * and VPagination rule). Nothing here is observable in jsdom, which evaluates no
  * styles and lays nothing out.
  */
