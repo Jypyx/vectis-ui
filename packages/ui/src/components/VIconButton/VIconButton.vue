@@ -33,6 +33,11 @@ interface IconButtonProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   /** Takes 4px off both sides of the square, which stays square. */
   compact?: boolean
+  /**
+   * The silhouette: a square carrying the corner radius every control shares, or a
+   * circle. The box itself is square either way — only the corners change.
+   */
+  shape?: 'square' | 'circular'
   /** The native type of the button. */
   type?: ButtonHTMLAttributes['type']
   /** Makes the button unusable, greyed out through the colour tokens. */
@@ -54,6 +59,7 @@ withDefaults(defineProps<IconButtonProps>(), {
   elevated: false,
   size: 'md',
   compact: false,
+  shape: 'square',
   type: 'button',
   disabled: false,
   loading: false,
@@ -71,8 +77,15 @@ defineSlots<{
 </script>
 
 <template>
+  <!--
+    `shape` is ours alone: VButton knows nothing about it, so the attribute travels
+    through its $attrs down to the element it renders — the same route the
+    v-icon-button class takes. Everything else is a real VButton prop and has to be
+    forwarded by hand, an unforwarded one never reaching its data attribute.
+  -->
   <VButton
     class="v-icon-button"
+    :data-shape="shape"
     :variant="variant"
     :tone="tone"
     :elevated="elevated"
@@ -102,6 +115,21 @@ defineSlots<{
   .v-icon-button[data-size] {
     width: var(--control-height);
     padding-inline: 0;
+  }
+
+  /*
+   * Same qualification, same reason: [data-shape] takes the selector to (0,2,0), which
+   * beats the border-radius VButton sets on that very element at (0,1,0) whatever the
+   * consumer's bundler decides about the order of the two sheets.
+   *
+   * The `square` value writes nothing — it IS the radius VButton already applies, so a
+   * consumer overriding --vectis-radius-interactive keeps a single place to change.
+   * The token here is the pill one, the convention for a shape table (VChip, the
+   * VSkeletonLoader shapes), --vectis-radius-full being reserved for the components
+   * that are round by nature.
+   */
+  .v-icon-button[data-shape='circular'] {
+    border-radius: var(--vectis-radius-pill);
   }
 }
 </style>

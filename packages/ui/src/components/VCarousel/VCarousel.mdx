@@ -149,6 +149,10 @@ alike — and they are deliberately theme-independent, since their backdrop is y
 than the page. Over media busy enough to swallow them anyway, use `indicators="outside"` or the
 `#indicator` slot.
 
+The previous/next pair is rendered as **circular** `VIconButton`s (`shape="circular"`), the shape
+that holds up over arbitrary media: a rounded rectangle sitting on a photograph competes with
+whatever is behind it. A `#controls` slot renders its own buttons and is free to choose otherwise.
+
 Icons and labels are props (`prevIcon`, `nextIcon`, `prevLabel`…), and the `#controls`,
 `#indicators` and `#indicator` slots replace the rendering entirely — `#indicators`
 receives `goTo`, without which the bar could no longer select anything, and both bars receive

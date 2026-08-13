@@ -6,8 +6,9 @@ import * as VIconButtonStories from './VIconButton.stories'
 # IconButton
 
 Icon-only button: a wrapper around `VButton` rendered **square** (width = height, padding
-removed), with the same visual API. The `label` prop is **mandatory** — it sets the button's
-`aria-label`, because an icon alone gives screen readers no accessible name.
+removed), with the same visual API — plus a `shape` prop, which is what a square box makes
+possible: a disc. The `label` prop is **mandatory** — it sets the button's `aria-label`, because
+an icon alone gives screen readers no accessible name.
 
 The icon can be provided in two ways: through the `icon` prop (an icon name or an explicit
 render, without going through the slot — the fill is then driven by `icon-filled`), or in the
@@ -42,6 +43,23 @@ side by 4px (20/28/36/44/52px) without changing the icon size. The width automat
 the height of the underlying `VButton`, compact included.
 
 <Canvas of={VIconButtonStories.Sizes} />
+
+## Shape
+
+`shape="square"` (the default): the corner radius every control shares
+(`--vectis-radius-interactive`); `shape="circular"`: a disc (`--vectis-radius-pill`). The box is
+square in both cases — only the corners change, so the two shapes take exactly the same room.
+`VButton` has no equivalent prop: a full radius only produces a meaningful silhouette on a box
+that is already square.
+
+A circular button reads well on top of an image or a coloured surface, where a rounded rectangle
+competes with the content behind it — that is why `VCarousel` renders its previous/next arrows
+this way.
+
+Inside a `VButtonGroup`, the group's own corner rules win: a circular button keeps its round
+outer ends and square inner seams, which is what makes the segments read as one control.
+
+<Canvas of={VIconButtonStories.Shapes} />
 
 ## Icon through a prop
 

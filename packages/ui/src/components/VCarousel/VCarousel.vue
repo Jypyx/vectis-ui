@@ -779,6 +779,7 @@ if (isDev) {
             :label="resolvedPrevLabel"
             variant="ghost"
             tone="neutral"
+            shape="circular"
             elevated
             :disabled="atStart"
             @click="previous"
@@ -790,6 +791,7 @@ if (isDev) {
             :label="resolvedNextLabel"
             variant="ghost"
             tone="neutral"
+            shape="circular"
             elevated
             :disabled="atEnd"
             @click="next"

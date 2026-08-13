@@ -74,4 +74,16 @@ describe('VIconButton', () => {
     })
     expect(getByRole('button').dataset.elevated).toBe('')
   })
+
+  it('shape: mirrored as data-shape, square by default', () => {
+    const { getByRole, rerender } = render(VIconButton, {
+      props: { label: 'Next' },
+      slots: { default: '<svg aria-hidden="true" />' },
+    })
+    const button = getByRole('button')
+    expect(button.dataset.shape).toBe('square')
+    return rerender({ shape: 'circular' }).then(() => {
+      expect(button.dataset.shape).toBe('circular')
+    })
+  })
 })

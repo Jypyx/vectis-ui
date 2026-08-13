@@ -33,6 +33,7 @@ const meta = {
     variant: { control: 'select', options: ['solid', 'outline', 'ghost', 'soft'] },
     tone: { control: 'select', options: ['accent', 'neutral', 'danger'] },
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
+    shape: { control: 'select', options: ['square', 'circular'] },
     elevated: { control: 'boolean' },
     compact: { control: 'boolean' },
     icon: { control: 'text' },
@@ -43,6 +44,7 @@ const meta = {
     variant: 'ghost',
     tone: 'neutral',
     size: 'md',
+    shape: 'square',
     elevated: false,
     compact: false,
     disabled: false,
@@ -134,6 +136,31 @@ export const Sizes: Story = {
           <VIconButton v-bind="args" size="md" compact><VIcon name="add" /></VIconButton>
           <VIconButton v-bind="args" size="lg" compact><VIcon name="add" /></VIconButton>
           <VIconButton v-bind="args" size="xl" compact><VIcon name="add" /></VIconButton>
+        </div>
+      </div>
+    `,
+  }),
+}
+
+/** One row per shape, the four variants across: `square` (the default) above,
+    `circular` below. */
+export const Shapes: Story = {
+  render: (args) => ({
+    components: { VIconButton, VIcon },
+    setup: () => ({ args }),
+    template: `
+      <div style="display: grid; gap: 12px">
+        <div v-for="shape in ['square', 'circular']" :key="shape" style="display: flex; gap: 8px; flex-wrap: wrap">
+          <VIconButton
+            v-for="variant in ['solid', 'outline', 'ghost', 'soft']"
+            :key="variant"
+            :label="args.label"
+            :shape="shape"
+            :variant="variant"
+            elevated
+          >
+            <VIcon name="add" />
+          </VIconButton>
         </div>
       </div>
     `,
