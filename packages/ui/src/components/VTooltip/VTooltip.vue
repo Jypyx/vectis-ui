@@ -160,7 +160,7 @@ function onKeydown(event: KeyboardEvent) {
     color: var(--vectis-color-text-on-inverse);
     border: none;
     border-radius: var(--vectis-radius-sm);
-    box-shadow: var(--vectis-shadow-2);
+    box-shadow: var(--vectis-shadow-sm);
     font-family: var(--vectis-text-family);
     font-size: var(--vectis-text-caption-size);
     line-height: var(--vectis-text-caption-leading);

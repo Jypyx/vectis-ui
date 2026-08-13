@@ -13,23 +13,23 @@ import { color, type TokenGroup } from '../types'
 
 export const dark = {
   color: {
-    surface: color('{color.neutral.950}'),
-    'surface-muted': color('{color.neutral.800}'),
-    'surface-raised': color('{color.neutral.900}'),
-    'surface-overlay': color('{color.neutral.900}'),
+    surface: color('{color.gray.950}'),
+    'surface-muted': color('{color.gray.800}'),
+    'surface-raised': color('{color.gray.900}'),
+    'surface-overlay': color('{color.gray.900}'),
     'surface-sunken': color('oklch(11% 0.006 260)'),
-    'surface-inverse': color('{color.neutral.800}'),
-    'surface-skeleton': color('{color.neutral.800}'),
+    'surface-inverse': color('{color.gray.800}'),
+    'surface-skeleton': color('{color.gray.800}'),
 
-    'text-on-inverse': color('{color.neutral.50}'),
+    'text-on-inverse': color('{color.gray.50}'),
 
-    text: color('{color.neutral.50}'),
-    'text-muted': color('{color.neutral.300}'),
-    'text-subtle': color('{color.neutral.400}'),
+    text: color('{color.gray.50}'),
+    'text-muted': color('{color.gray.300}'),
+    'text-subtle': color('{color.gray.400}'),
     'text-on-accent': color('{color.white}'),
 
-    border: color('{color.neutral.800}'),
-    'border-strong': color('{color.neutral.700}'),
+    border: color('{color.gray.800}'),
+    'border-strong': color('{color.gray.700}'),
 
     accent: color('{color.indigo.500}'),
     'accent-hover': color('{color.indigo.400}'),

@@ -28,6 +28,19 @@ export const PaletteRow = ({ name }) => (
   </div>
 )
 
+export const Palettes = () => (
+  <>
+    {Object.keys(tokens.primitives.color)
+      .filter((name) => name !== 'white' && name !== 'black')
+      .map((name) => (
+        <div key={name}>
+          <h3 style={{ textTransform: 'capitalize' }}>{name}</h3>
+          <PaletteRow name={name} />
+        </div>
+      ))}
+  </>
+)
+
 export const TokenTable = ({ flat, preview }) => (
   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
     <thead>
@@ -66,25 +79,17 @@ subtree (no rebuild). Dark mode: `data-theme="dark"`.
 
 ## Primitive palettes
 
-### Neutral
+The palettes are Tailwind CSS 4's, family for family and step for step. Five of them are
+wired to a role: **gray** paints the surfaces, the text and the borders, **indigo** is the
+default accent, and **red**, **green** and **amber** carry danger, success and warning. The
+other twenty-one ship so that an application can point a role at one — nothing consumes
+them until you do.
 
-<PaletteRow name="neutral" />
+`neutral` is Tailwind's pure grey, and no role points at it: the greys this design system
+paints with are `gray`, which is very slightly blue. Do not confuse either with
+`tone="neutral"`, which is a role on a component and not a palette.
 
-### Indigo (the default accent)
-
-<PaletteRow name="indigo" />
-
-### Red
-
-<PaletteRow name="red" />
-
-### Green
-
-<PaletteRow name="green" />
-
-### Amber
-
-<PaletteRow name="amber" />
+<Palettes />
 
 ## Semantic colours
 
@@ -173,7 +178,13 @@ scale, not from a token of its own.
         <code style={{ ...mono, width: 140, flexShrink: 0 }}>{role}</code>
         <span
           style={{
-            fontFamily: 'var(--vectis-text-family)',
+            fontFamily: `var(--vectis-text-family${
+              role === 'code'
+                ? '-code'
+                : role === 'display' || role.startsWith('heading')
+                  ? '-heading'
+                  : ''
+            })`,
             fontSize: `var(--vectis-text-${role}-size, var(--vectis-font-size-sm))`,
             fontWeight: `var(--vectis-text-${role}-weight)`,
             lineHeight: `var(--vectis-text-${role}-leading)`,
@@ -186,8 +197,10 @@ scale, not from a token of its own.
     ))}
 </div>
 
-Semantic families: `--vectis-text-family` (running text) and `--vectis-text-family-code`
-(code content).
+Semantic families: `--vectis-text-family` (running text), `--vectis-text-family-heading`
+(the `display` and `heading-1…4` roles) and `--vectis-text-family-code` (code content).
+The heading one points at the running one out of the box, so giving titles a typeface of
+their own is a matter of redefining that single property.
 
 ## Radii
 
@@ -230,6 +243,15 @@ Semantics: <code style={mono}>interactive · surface · overlay · pill</code>
 </div>
 
 ## Motion
+
+Three roles say how long a change takes. They are what a `transition` asks for, and they
+are the same in both themes.
+
+<TokenTable flat={flattenTokens(tokens.semantic.duration, ['duration'])} preview={() => null} />
+
+Each points at a step of the scale below. A long looping animation — a spinner, a
+skeleton's wave — names a step directly instead: "one second" is the whole point of such a
+loop, and no role would say it better.
 
 <TokenTable
   flat={[

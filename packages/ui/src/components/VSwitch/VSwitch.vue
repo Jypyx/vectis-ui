@@ -111,7 +111,7 @@ defineSlots<{
     height: calc(var(--switch-track-h) - var(--switch-pad) * 2);
     background: var(--vectis-color-surface);
     border-radius: var(--vectis-radius-full);
-    box-shadow: var(--vectis-shadow-1);
+    box-shadow: var(--vectis-shadow-xs);
     /* The thumb travels through `margin-inline-start` rather than a translation,
        because a logical property follows the reading direction: in a right-to-left
        page the thumb then moves leftwards on its own, where a translateX would have

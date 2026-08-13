@@ -270,7 +270,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
     border-radius: var(--vectis-radius-overlay);
     background: var(--vectis-color-surface-overlay);
     color: var(--vectis-color-text);
-    box-shadow: var(--vectis-shadow-5);
+    box-shadow: var(--vectis-shadow-xl);
     font-family: var(--vectis-text-family);
   }
 

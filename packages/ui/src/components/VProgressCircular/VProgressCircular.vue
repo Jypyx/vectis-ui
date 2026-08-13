@@ -236,16 +236,18 @@ const { clamped, fraction } = useProgressValue(
   }
 
   /* When the progress cannot be measured, two animations run at once: the whole ring
-     turns, and the arc drawn on it lengthens and shortens. Their periods are
-     deliberately not multiples of one another — an exact ratio would make the pair fall
-     back into step at regular intervals, which reads as a mechanical beat. */
+     turns, and the arc drawn on it lengthens and shortens. Their periods are deliberately
+     not multiples of one another — were the arc to restart on every rotation, the pair
+     would repeat the same picture over and over and read as a mechanical beat. At 1s and
+     1.5s they only realign every third turn; the slowed-down pair below is 3s and 5s, so
+     every fifth. Keep any change to those four values out of a whole-number ratio. */
   .v-progress-circular[data-indeterminate] .v-progress-circular-svg {
-    animation: v-spin calc(var(--vectis-duration-slow) * 4) linear infinite;
+    animation: v-spin var(--vectis-duration-1000) linear infinite;
   }
 
   .v-progress-circular[data-indeterminate] .v-progress-circular-bar {
-    animation: v-progress-circular-dash calc(var(--vectis-duration-slow) * 5)
-      var(--vectis-ease-default) infinite;
+    animation: v-progress-circular-dash var(--vectis-duration-1500) var(--vectis-ease-default)
+      infinite;
     transition: none;
   }
 
@@ -277,11 +279,11 @@ const { clamped, fraction } = useProgressValue(
     /* Slowed down and not stopped: a motionless loader no longer says that anything is
        happening, which is the one thing it exists to say. */
     .v-progress-circular[data-indeterminate] .v-progress-circular-svg {
-      animation-duration: calc(var(--vectis-duration-slow) * 12);
+      animation-duration: var(--vectis-duration-3000);
     }
 
     .v-progress-circular[data-indeterminate] .v-progress-circular-bar {
-      animation-duration: calc(var(--vectis-duration-slow) * 15);
+      animation-duration: var(--vectis-duration-5000);
     }
   }
 }

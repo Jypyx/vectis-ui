@@ -25,6 +25,12 @@ Thirteen roles: `display`, `heading-1…4`, `subtitle`, `body-lg/md/sm`, `label`
 is a closed recipe — there are no `size`/`weight` props to compose: if an intermediate rendering
 is missing, that is a role to add to the tokens, not a combination to improvise.
 
+Three of the recipes draw their font from a family of their own: `display` and `heading-1…4`
+take `--vectis-text-family-heading`, which points at the running font until you redefine it.
+Giving titles a typeface distinct from the body copy is therefore one custom property, set
+wherever you already set your other tokens — and it reaches every heading the components render
+themselves (a VDialog title, a VDataTable caption) along with the ones you write.
+
 <Canvas of={VTypographyStories.Variants} />
 
 ## Tones

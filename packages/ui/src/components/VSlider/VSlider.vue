@@ -463,7 +463,7 @@ function resyncFields() {
     border-radius: var(--vectis-radius-full);
     background: var(--vectis-color-surface);
     border: var(--vectis-control-border-width) solid var(--vectis-color-accent);
-    box-shadow: var(--vectis-shadow-1);
+    box-shadow: var(--vectis-shadow-xs);
     cursor: pointer;
     transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
@@ -475,7 +475,7 @@ function resyncFields() {
     border-radius: var(--vectis-radius-full);
     background: var(--vectis-color-surface);
     border: var(--vectis-control-border-width) solid var(--vectis-color-accent);
-    box-shadow: var(--vectis-shadow-1);
+    box-shadow: var(--vectis-shadow-xs);
     cursor: pointer;
     transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
@@ -541,7 +541,7 @@ function resyncFields() {
     font-size: var(--vectis-text-caption-size);
     line-height: var(--vectis-text-caption-leading);
     border-radius: var(--vectis-radius-sm);
-    box-shadow: var(--vectis-shadow-2);
+    box-shadow: var(--vectis-shadow-sm);
     white-space: nowrap;
   }
 

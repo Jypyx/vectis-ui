@@ -253,7 +253,7 @@ const passedAttrs = computed(() => {
      these rules a specificity of (0,3,0), beating the (0,2,0) of the ghost and
      outline bases without depending on the order the rules end up in. */
   .v-button[data-elevated] {
-    box-shadow: var(--vectis-shadow-2);
+    box-shadow: var(--vectis-shadow-sm);
   }
 
   .v-button[data-elevated]:is([data-variant='ghost'], [data-variant='outline']) {
@@ -261,7 +261,7 @@ const passedAttrs = computed(() => {
   }
 
   .v-button[data-elevated]:hover:not(:disabled, [aria-disabled='true']) {
-    box-shadow: var(--vectis-shadow-3);
+    box-shadow: var(--vectis-shadow-md);
   }
 
   .v-button[data-elevated]:is([data-variant='ghost'], [data-variant='outline']):hover:not(
@@ -272,7 +272,7 @@ const passedAttrs = computed(() => {
   }
 
   .v-button[data-elevated]:active:not(:disabled, [aria-disabled='true']) {
-    box-shadow: var(--vectis-shadow-2);
+    box-shadow: var(--vectis-shadow-sm);
   }
 
   .v-button[data-elevated]:is([data-variant='ghost'], [data-variant='outline']):active:not(
@@ -318,7 +318,7 @@ const passedAttrs = computed(() => {
 
   /* The shadow needs a rule of its OWN. No variant declares a shadow, so none of the
      three rules above cancels one, and a disabled raised ghost would otherwise go on
-     casting its shadow-2. */
+     casting its shadow-sm. */
   .v-button:is(:disabled, [aria-disabled='true']):not([data-loading])[data-elevated] {
     box-shadow: none;
   }

@@ -284,8 +284,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     position: absolute;
     inset: 0;
     background-color: var(--skeleton-highlight);
-    animation: v-skeleton-pulse calc(var(--vectis-duration-slow) * 5) var(--vectis-ease-in-out)
-      infinite;
+    animation: v-skeleton-pulse var(--vectis-duration-1500) var(--vectis-ease-in-out) infinite;
   }
 
   /*
@@ -309,7 +308,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     position: absolute;
     inset: 0;
     background-image: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
-    animation: v-skeleton-wave calc(var(--vectis-duration-slow) * 5) linear infinite;
+    animation: v-skeleton-wave var(--vectis-duration-1500) linear infinite;
   }
 
   /* Scoped to the wave: the pulse uses the same overlay, but its run is symmetric in
@@ -359,8 +358,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     .v-skeleton:is([data-animation='wave'], [data-animation='pulse']) .v-skeleton-item::after {
       background-image: none;
       background-color: var(--skeleton-highlight);
-      animation: v-skeleton-pulse calc(var(--vectis-duration-slow) * 15) var(--vectis-ease-in-out)
-        infinite;
+      animation: v-skeleton-pulse var(--vectis-duration-5000) var(--vectis-ease-in-out) infinite;
     }
   }
 }

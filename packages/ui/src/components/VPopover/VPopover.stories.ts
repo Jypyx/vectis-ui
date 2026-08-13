@@ -299,7 +299,7 @@ export const WithoutSurface: Story = {
             :alt="t.documentPreview"
             width="240"
             height="160"
-            style="display: block; border-radius: 12px; box-shadow: var(--vectis-shadow-4);"
+            style="display: block; border-radius: 12px; box-shadow: var(--vectis-shadow-lg);"
           />
         </VPopover>
       </div>

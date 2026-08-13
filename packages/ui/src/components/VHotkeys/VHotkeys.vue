@@ -286,7 +286,7 @@ onBeforeUnmount(detach)
   .v-hotkeys[data-variant='elevated'] {
     --hotkeys-bg: var(--vectis-color-surface-raised);
     --hotkeys-border: transparent;
-    --hotkeys-shadow: var(--vectis-shadow-2);
+    --hotkeys-shadow: var(--vectis-shadow-sm);
   }
 
   /* When one key holds the WHOLE combination, its ends take the same breathing room as

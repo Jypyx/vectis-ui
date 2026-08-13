@@ -37,7 +37,7 @@
     color: var(--vectis-color-text);
     border: 1px solid var(--vectis-color-border);
     border-radius: var(--vectis-radius-surface);
-    box-shadow: var(--vectis-shadow-4);
+    box-shadow: var(--vectis-shadow-lg);
     font-family: var(--vectis-text-family);
   }
 }

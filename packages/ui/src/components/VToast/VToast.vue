@@ -105,7 +105,7 @@ const icon = computed(() =>
        margins deducted. */
     max-width: calc(100vw - 2 * var(--vectis-space-4));
     border-radius: var(--vectis-radius-overlay);
-    box-shadow: var(--vectis-shadow-4);
+    box-shadow: var(--vectis-shadow-lg);
     font-family: var(--vectis-text-family);
     font-size: var(--vectis-text-body-md-size);
     line-height: var(--vectis-text-body-md-leading);

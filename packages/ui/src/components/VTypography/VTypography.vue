@@ -129,6 +129,7 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
   }
 
   .v-typography[data-variant='display'] {
+    --typography-family: var(--vectis-text-family-heading);
     --typography-size: var(--vectis-text-display-size);
     --typography-weight: var(--vectis-text-display-weight);
     --typography-leading: var(--vectis-text-display-leading);
@@ -136,6 +137,7 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
   }
 
   .v-typography[data-variant='heading-1'] {
+    --typography-family: var(--vectis-text-family-heading);
     --typography-size: var(--vectis-text-heading-1-size);
     --typography-weight: var(--vectis-text-heading-1-weight);
     --typography-leading: var(--vectis-text-heading-1-leading);
@@ -143,6 +145,7 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
   }
 
   .v-typography[data-variant='heading-2'] {
+    --typography-family: var(--vectis-text-family-heading);
     --typography-size: var(--vectis-text-heading-2-size);
     --typography-weight: var(--vectis-text-heading-2-weight);
     --typography-leading: var(--vectis-text-heading-2-leading);
@@ -150,12 +153,14 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
   }
 
   .v-typography[data-variant='heading-3'] {
+    --typography-family: var(--vectis-text-family-heading);
     --typography-size: var(--vectis-text-heading-3-size);
     --typography-weight: var(--vectis-text-heading-3-weight);
     --typography-leading: var(--vectis-text-heading-3-leading);
   }
 
   .v-typography[data-variant='heading-4'] {
+    --typography-family: var(--vectis-text-family-heading);
     --typography-size: var(--vectis-text-heading-4-size);
     --typography-weight: var(--vectis-text-heading-4-weight);
     --typography-leading: var(--vectis-text-heading-4-leading);

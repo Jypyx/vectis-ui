@@ -11,34 +11,34 @@
  * it in braces. The values written out here are the LIGHT theme; the dark theme restates
  * the same roles, pointing them elsewhere.
  */
-import { color, dimension, fontFamily, fontWeight, type TokenGroup } from './types'
+import { color, dimension, duration, fontFamily, fontWeight, type TokenGroup } from './types'
 
 export const semantic = {
   color: {
     surface: color('{color.white}', 'The default page background'),
-    'surface-muted': color('{color.neutral.100}', 'A muted background (secondary areas)'),
+    'surface-muted': color('{color.gray.100}', 'A muted background (secondary areas)'),
     'surface-raised': color('{color.white}', 'Raised surfaces: cards'),
     'surface-overlay': color('{color.white}', 'Floating surfaces: dialogs, popovers, menus'),
-    'surface-sunken': color('{color.neutral.50}', 'Sunken surfaces: wells, code areas'),
-    'surface-inverse': color('{color.neutral.900}', 'Inverted-contrast surfaces: tooltips'),
+    'surface-sunken': color('{color.gray.50}', 'Sunken surfaces: wells, code areas'),
+    'surface-inverse': color('{color.gray.900}', 'Inverted-contrast surfaces: tooltips'),
     'surface-skeleton': color(
-      '{color.neutral.200}',
+      '{color.gray.200}',
       'The background of the loading silhouettes (VSkeletonLoader); the highlight derives from it in CSS',
     ),
 
     'text-on-inverse': color('{color.white}', 'Text set on an inverted surface'),
 
-    text: color('{color.neutral.900}'),
-    'text-muted': color('{color.neutral.600}'),
-    'text-subtle': color('{color.neutral.500}', 'Placeholders, disabled text'),
+    text: color('{color.gray.900}'),
+    'text-muted': color('{color.gray.600}'),
+    'text-subtle': color('{color.gray.500}', 'Placeholders, disabled text'),
     'text-on-accent': color('{color.white}', 'Text set on an accent/danger/success background'),
     'text-on-warning': color(
-      '{color.neutral.950}',
+      '{color.gray.950}',
       'Text set on a solid warning background (amber too light for white)',
     ),
 
-    border: color('{color.neutral.200}'),
-    'border-strong': color('{color.neutral.300}', 'The borders of form controls'),
+    border: color('{color.gray.200}'),
+    'border-strong': color('{color.gray.300}', 'The borders of form controls'),
 
     accent: color('{color.indigo.600}'),
     'accent-hover': color('{color.indigo.700}'),
@@ -90,6 +90,10 @@ export const semantic = {
    */
   text: {
     family: fontFamily('{font.family.sans}', 'The font of all the design system text'),
+    'family-heading': fontFamily(
+      '{font.family.display}',
+      'The font of the display and heading roles; identical to the running font until it is overridden',
+    ),
     'family-code': fontFamily(
       '{font.family.mono}',
       'The font of code content (the code variant, VInputOTP)',
@@ -178,6 +182,18 @@ export const semantic = {
     surface: dimension('{radius.lg}', 'Cards, alerts'),
     overlay: dimension('{radius.xl}', 'Dialogs, popovers, menus'),
     pill: dimension('{radius.full}'),
+  },
+  /**
+   * How long a change takes, described by what it is: the immediate feedback of a control
+   * under the pointer, the ordinary pace of the design system, a deliberately slower move.
+   *
+   * These three are what a `transition` reaches for. Motion does not vary from one theme to
+   * the next, so unlike the colours they are stated once and never restated.
+   */
+  duration: {
+    fast: duration('{duration.150}', 'Colour and border changes on hover, focus, press'),
+    base: duration('{duration.200}', 'The default: a panel opening, a value moving'),
+    slow: duration('{duration.300}', 'Movements large enough to be followed by the eye'),
   },
   focus: {
     'ring-color': color('{color.indigo.500}'),

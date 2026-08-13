@@ -69,7 +69,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
       color-mix(in oklab, currentcolor, transparent 75%);
     border-block-start-color: currentcolor;
     border-radius: var(--vectis-radius-full);
-    animation: v-spin calc(var(--vectis-duration-slow) * 3.5) linear infinite;
+    animation: v-spin var(--vectis-duration-1000) linear infinite;
   }
 
   /* The `v-spin` keyframes live in styles/utilities.css, shared with
@@ -79,7 +79,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 
   @media (prefers-reduced-motion: reduce) {
     .v-spinner-circle {
-      animation-duration: calc(var(--vectis-duration-slow) * 8);
+      animation-duration: var(--vectis-duration-3000);
     }
   }
 }

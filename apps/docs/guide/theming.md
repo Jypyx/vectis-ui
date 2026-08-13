@@ -7,7 +7,10 @@ a matter of redefining variables rather than overriding rules.
 ## Two levels
 
 **Primitives** are the raw scales: OKLCH palettes (`--vectis-color-indigo-500`), spacing
-(`--vectis-space-4`), type, radii, shadows, durations and easings.
+(`--vectis-space-4`), type, radii, shadows, durations and easings. The palettes are
+Tailwind CSS 4's, all twenty-six families, so a step you already know by name is the step
+you get. Durations are named after the milliseconds they hold —
+`--vectis-duration-150`, `--vectis-duration-1000`.
 
 **Semantics** are the only ones components read: `--vectis-color-surface`,
 `--vectis-color-text-muted`, `--vectis-color-accent`, `--vectis-radius-interactive`,
@@ -36,6 +39,23 @@ There is no build step. A theme is CSS:
 ```ts
 panel.style.setProperty('--vectis-color-accent', 'oklch(58% 0.2 25)')
 ```
+
+## Fonts
+
+Three families cover the whole library: the running text, the headings and code.
+
+```css
+:root {
+  --vectis-font-family-sans: 'Inter', system-ui, sans-serif;
+  --vectis-font-family-display: 'Fraunces', Georgia, serif;
+  --vectis-font-family-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+```
+
+The heading family points at the running one until you redefine it, so a design system
+with a single typeface needs no second declaration. Once set, it reaches the `display` and
+`heading-1…4` roles wherever they appear — the headings you write with `VTypography`, and
+the ones components render themselves, such as a `VDialog` title.
 
 ## Why your overrides win
 

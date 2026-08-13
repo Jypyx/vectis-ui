@@ -55,8 +55,8 @@ the four can be raised. It applies the shadow scale, rising on hover and settlin
 press.
 
 On `ghost` and `outline`, which have no background of their own, it additionally paints
-the raised surface — and that is not cosmetic. In the dark theme the page is `neutral-950`
-and the raised surface `neutral-900`, so without it the shadow would have nothing casting
+the raised surface — and that is not cosmetic. In the dark theme the page is `gray-950`
+and the raised surface `gray-900`, so without it the shadow would have nothing casting
 it. `ghost` plus `elevated` is therefore the combination that reads as a floating card.
 
 <DocsDemo>

@@ -370,8 +370,8 @@ const { clamped, fraction } = useProgressValue(
     /* The transition of a measurable progress has no place here: switching to this mode
        would otherwise be animated as the bar growing to its new size. */
     transition: none;
-    animation: v-progress-linear-indeterminate calc(var(--vectis-duration-slow) * 5)
-      var(--vectis-ease-in-out) infinite;
+    animation: v-progress-linear-indeterminate var(--vectis-duration-1500) var(--vectis-ease-in-out)
+      infinite;
   }
 
   @keyframes v-progress-linear-indeterminate {
@@ -404,7 +404,7 @@ const { clamped, fraction } = useProgressValue(
     /* Slowed down and not stopped: a motionless loader no longer says that anything is
        happening, which is the one thing it exists to say. */
     .v-progress-linear[data-indeterminate] .v-progress-linear-fill {
-      animation-duration: calc(var(--vectis-duration-slow) * 15);
+      animation-duration: var(--vectis-duration-5000);
     }
   }
 }
