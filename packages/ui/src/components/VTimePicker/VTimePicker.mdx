@@ -1,0 +1,91 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VTimePickerStories from './VTimePicker.stories'
+
+<Meta of={VTimePickerStories} />
+
+# TimePicker
+
+A clock shown directly in the page, for choosing a time. It is the hour-and-minute counterpart of
+[VDatePicker](?path=/docs/components-datepicker--docs): it holds **all** the logic of pointing,
+stepping and announcing, while [VTimeInput](?path=/docs/components-timeinput--docs) does no more
+than dress it in a text field and a popover.
+
+It is read in three parts — the two large numerals saying what has been chosen, the choice of
+half-day beside them, and the face one points at.
+
+<Canvas of={VTimePickerStories.Default} />
+<Controls of={VTimePickerStories.Default} />
+
+## The value
+
+`v-model` is always a **24-hour `"HH:mm"` string**, whatever clock is on display: a consumer never
+has to know which one the reader's language uses. With no value at all the clock shows midnight —
+deliberately not the current time, since reading the clock while rendering would make a page drawn
+on a server disagree with the same page in the browser. A component that wants to open on the
+current time sets it from a handler, which is exactly what `VTimeInput` does.
+
+## The two clocks
+
+The `format` prop decides between a 12- and a 24-hour face; left out, the resolved locale decides.
+A 24-hour clock carries a **second ring inside the first** for the hours 13 to 00, and has no
+half-day control — the numerals then centre on their own.
+
+<Canvas of={VTimePickerStories.TwentyFourHour} />
+
+## AM and PM
+
+On a 12-hour clock the half-day is a control of its own, beside the numerals, because the hand
+cannot express it: walking past twelve on a 12-hour face brings you back to one, in the same half of the
+day. It writes straight into the value, and it is remembered even while there is nothing to
+convert — so choosing PM on an empty clock and then an hour gives the afternoon.
+
+<Canvas of={VTimePickerStories.Meridiem} />
+
+## Actions
+
+The footer is a **slot**: a clock shown on its own has nothing to confirm, while one inside a panel
+needs Cancel and OK. `VTimeInput` fills it with exactly those two, and keeps the draft behind them
+so that only OK writes the value.
+
+<Canvas of={VTimePickerStories.Footer} />
+
+The component also emits **`confirm`** when the reader settles the minutes from the keyboard —
+never when the pointer is merely released, since letting go of the hand is how one stops adjusting
+it, not how one confirms.
+
+## Steps and intervals
+
+`minuteStep` is the interval the minutes snap to, under the pointer as on the arrow keys.
+
+<Canvas of={VTimePickerStories.MinuteStep} />
+
+## Language
+
+`locale` takes precedence over the design system's global locale, and falls back to it. Words and
+formats resolve separately: a language with no dictionary of its own still gets its own hour cycle.
+
+<Canvas of={VTimePickerStories.Localization} />
+
+## Accessibility
+
+- The face is a single **`role="slider"`**, and it is the only focusable element in it. The numerals
+  around it are `aria-hidden` visual markers: they are reached by the pointer's angle rather than one
+  cell at a time, so the whole spoken value has to be carried by that one element — `aria-valuenow`,
+  `aria-valuemin`, `aria-valuemax` and a localized `aria-valuetext`.
+- Its accessible name follows the step, "Hour" or "Minutes".
+- A **polite live region** repeats the step whenever the reader moves it. A change of accessible
+  name alone is not reliably announced. Putting the clock back on the hour through `reset()` stays
+  silent, because that is not something the reader did.
+- The keyboard is a slider's: arrows step, `Home` and `End` go to the ends, `PageUp`/`PageDown` move
+  the minutes by five, and `Enter` moves from the hour to the minutes and then confirms.
+- The arrows are **not** flipped in a right-to-left page, and neither is the face: clockwise means
+  the same thing everywhere. Only the half-day control follows the reading direction.
+- The selected numeral is listed in the axe contrast exclusions, and that is a tool limitation
+  rather than a real violation: the numeral is painted over the hand's dot, a **sibling** it only
+  partly covers, so axe measures it against whatever is underneath instead.
+
+## Exposed methods
+
+- **`focus()`** — moves the focus onto the face, which is what the arrows drive.
+- **`reset()`** — puts the clock back on the hour and clears the announcement, without announcing
+  anything. A panel around it calls this as it opens and closes, so every visit starts on the hour.

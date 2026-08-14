@@ -145,3 +145,5 @@ export type {
 } from './components/VDatePicker/VDatePicker.vue'
 export { default as VDateInput } from './components/VDateInput/VDateInput.vue'
 export type { DateInputMode } from './components/VDateInput/VDateInput.vue'
+export { default as VTimePicker } from './components/VTimePicker/VTimePicker.vue'
+export type { TimePickerFormat, TimePickerStep } from './components/VTimePicker/VTimePicker.vue'
