@@ -1,0 +1,151 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VTimeInputStories from './VTimeInput.stories'
+
+<Meta of={VTimeInputStories} />
+
+# TimeInput
+
+A time picker: a [VInput](?path=/docs/components-input--docs) field and, optionally, a
+floating panel. Three ways of filling the field, chosen through the `mode` prop — a
+**masked entry**, a **picker** or a **list of times**.
+
+**By default the time is typed on the keyboard and there is no panel**: `mode` is `input`
+and `showPicker` is `false`.
+
+The shell is the [VDateInput](?path=/docs/components-dateinput--docs) one: a
+`popover="manual"` panel anchored in **pure CSS** (`anchor-scope` on the root +
+`anchor-name` on the control → `position-anchor`), a programmatic opening that moves focus
+into the panel, and closing through the root's `focusout` + `Escape`.
+
+Whatever the mode, the **v-model stays `'HH:mm'` in canonical 24 h** (`null` when empty):
+picking 7 PM produces `'19:00'`.
+
+<Canvas of={VTimeInputStories.Default} />
+<Controls of={VTimeInputStories.Default} />
+
+## Three field modes
+
+- **`input`** (the default): the field is typed on the keyboard, behind an "HH:MM" mask.
+  The picker is optional (`showPicker`) and absent by default.
+- **`readonly`**: the field turns read-only and the picker becomes the only route —
+  `showPicker` is therefore forced to `true` there.
+- **`list`**: a `listbox` panel offers the times in steps of `minuteStep`; the field stays
+  read-only and `showPicker` is beside the point there.
+
+## Masked entry (the default)
+
+The user types **digits only**: the colon is placed as soon as the hour is complete.
+Unlike VDateInput's mask, whose field order and separator derive from the locale, this
+one is **universal** — `Intl` only varies the hour cycle, never the colon.
+
+Entry rules:
+
+- typing a separator is tolerated and completes the hour with a leading zero ("9:30" gives
+  the same result as "0930"),
+- `Backspace` on the colon erases the digit preceding it,
+- an incomplete or impossible entry ("25:00") **silently reverts** to the current value on
+  leaving the field; emptying the field sets the value to `null`,
+- `Enter` confirms and closes, so it does not submit the surrounding form.
+
+`showPicker` adds the end-of-field icon and the picker: the panel then opens on focus
+**without taking focus**, typing carries on in the field, and the `down arrow` stays the
+explicit route to the picker.
+
+`pickerIcon` replaces that icon and only that one: in `mode="list"` the chevron follows the
+VCombobox convention. `clearable`'s cross sits **to its left** without replacing it — the
+cross plus the chevron, exactly like VCombobox.
+
+<Canvas of={VTimeInputStories.InputWithDial} />
+
+## The picker
+
+Two buttons display the draft time (hour / minutes) and choose the active step: the one
+for the step under way switches to the accent tone. On the picker, a click or a drag
+positions the hand; releasing after the hour has been chosen moves on to the minutes
+automatically. The minutes are selected to the minute (the numerals are only 5-minute
+markers); `minuteStep` imposes a granularity.
+
+The panel works on a **draft**: only **OK** writes the v-model; **Cancel**, `Escape` and
+focus leaving abandon the selection under way — you can feel your way around the picker
+before confirming.
+
+In 24 h, the picker carries a **double ring**: 12 and 1–11 on the outside, 00 and 13–23 on
+the inside.
+
+The numerals and the hand are positioned in **pure CSS** — `sin()`/`cos()` trigonometry
+(CSS Values 4, well below the design system's browser floor) on a turn fraction set as an
+inline variable. The JS is limited to the pointer → value conversion and the keyboard.
+
+<Canvas of={VTimeInputStories.ReadOnly} />
+<Canvas of={VTimeInputStories.DialSelection} />
+<Canvas of={VTimeInputStories.InnerRing} />
+<Canvas of={VTimeInputStories.FiveMinuteStep} />
+
+## The list of times
+
+The `list` mode enumerates the day in steps of `minuteStep` (15 or 30 minutes are the
+expected values; a finer step is flagged in development — at a 1-minute step the list
+would be 1440 rows). On opening, the current value — or the closest one — has focus and
+the list is scrolled onto it.
+
+Choosing a time **commits immediately and closes**: picking from a list is a single
+gesture, so there is neither a draft nor an OK button here.
+
+<Canvas of={VTimeInputStories.TimeList} />
+<Canvas of={VTimeInputStories.ListKeyboard} />
+
+## The 12 h / 24 h format and AM/PM
+
+The hour cycle **derives from the locale** (`Intl`'s `hourCycle`) and is overridable
+through the `format` prop. In 12 h, an AM/PM picker appears **next to the field**, outside
+the panel: it therefore serves all three modes and writes the v-model directly, with
+nothing to open or confirm. The picker itself goes back to a single ring.
+
+As long as no time is set, the chosen meridiem is simply **remembered** and will apply to
+the first time entered or picked. In `list` mode the row labels already carry "AM"/"PM":
+the picker is then only there to switch the value that was kept.
+
+The field displays the value formatted by `Intl` according to the locale.
+
+<Canvas of={VTimeInputStories.TwelveHour} />
+<Canvas of={VTimeInputStories.AlignedMeridiem} />
+
+## States
+
+The field follows the input-component scale — `sm` (32px), `md` (40px, the default) and
+`lg` (48px), combinable with `compact` (-4px); the panel keeps its dimensions — is
+clearable (`clearable`: the cross appears to the left of the end icon as soon as a value
+is set, including during an entry under way) and supports `disabled`. Cancel always
+restores the last committed value.
+
+<Canvas of={VTimeInputStories.Cancellation} />
+<Canvas of={VTimeInputStories.Sizes} />
+<Canvas of={VTimeInputStories.Disabled} />
+
+## Accessibility
+
+- When a panel exists, the field becomes a `role="combobox"` carrying `aria-haspopup` (`dialog`
+  for the picker, `listbox` for the list), `aria-expanded` and `aria-controls` — a plain text field
+  does not support `aria-expanded`. An input field with no `showPicker` keeps its native `textbox`
+  role and announces no popup.
+- **Opening** on click, on `Enter` or on the `down arrow` from the field. In `readonly` and
+  in `list`, focus moves into the panel at once; when typing with `showPicker`, the panel
+  opens **without taking focus**.
+- The picker is a **single `role="slider"`** (one tab stop): arrows for ±1 hour or
+  ±`minuteStep` minutes, `PageUp`/`PageDown` for ±5 minutes, `Home`/`End` for the bounds,
+  `Enter` to settle the step. The picker's numerals are purely decorative (`aria-hidden`);
+  the value is announced through `aria-valuetext` and the step change through a live
+  region.
+- The list is a `listbox` whose every row is a selectable `option`: arrows and `Home`/`End`
+  move focus, `Enter` or `Space` pick.
+- **Closing** through `Escape` or Cancel (focus returns to the field, with no commit),
+  through OK, or — in `list` mode — by choosing a time.
+- Since a placeholder is not an accessible description, describe the expected format
+  through `hint` (linked to the field by `aria-describedby`).
+- The picker is **not mirrored in RTL**: a clock is a universal object and clockwise is
+  invariant; the HH:MM group likewise forces the hour–minutes visual order. Transitions
+  respect `prefers-reduced-motion`.
+
+This component's accessible labels come from the design system dictionary: they are
+translated globally (see **Foundations › Internationalization**). The `locale` prop stays
+authoritative; without it, the component follows the global locale set by `setLocale`.
