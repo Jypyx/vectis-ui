@@ -1,10 +1,8 @@
 **/dist/
 **/storybook-static/
 **/coverage/
-**/.vitepress/cache/
 **/node_modules/
 pnpm-lock.yaml
 packages/ui/src/styles/tokens.css
 packages/ui/src/tokens/tokens.json
 packages/ui/src/components/VIcon/icons.ts
-apps/docs/.vitepress/theme/icons.ts

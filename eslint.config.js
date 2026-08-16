@@ -13,8 +13,6 @@ export default tseslint.config(
       '**/storybook-static/**',
       // The v8 HTML report ships its own bundled JS (prettify.js, block-navigation.js)
       '**/coverage/**',
-      // VitePress's dev cache; its build output is already covered by `**/dist/**`.
-      '**/.vitepress/cache/**',
       '**/node_modules/**',
       'packages/ui/src/styles/tokens.css',
     ],

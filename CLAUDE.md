@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## The project
 
-**Vectis UI** (`@vectis/ui`): a Vue 3 + TypeScript design system shipped as an npm library, Nuxt 3 (SSR) compatible. pnpm monorepo — `packages/ui` holds the library; `apps/docs` is the documentation site, which imports `@vectis/ui` as `workspace:*` and is typechecked and built in CI like the library (its `postbuild` runs `scripts/check-prerender.ts`). A live-theming app manipulating the token source programmatically is still to come. Project language: **English** (code, comments, docs). Storybook stories are **bilingual FR/EN** (see Storybook below).
+**Vectis UI** (`@vectis/ui`): a Vue 3 + TypeScript design system shipped as an npm library, Nuxt 3 (SSR) compatible. pnpm monorepo — `packages/ui` holds the library and is, for now, its only workspace; `apps/*` is declared in `pnpm-workspace.yaml` and currently empty. A documentation site (to be rebuilt with Nuxt) and a live-theming app manipulating the token source programmatically are both still to come. Project language: **English** (code, comments, docs). Storybook stories are **bilingual FR/EN** (see Storybook below).
 
 ## Commands
 
@@ -319,6 +319,6 @@ Cross-cutting rules covered above: tone/variant (VButton = the reference), wrapp
 
 ### Next
 
-A live-theming app in `apps/` (manipulating `@vectis/ui/tokens`, injecting the `--vectis-*`, exporting a config); a Nuxt playground to validate SSR end to end.
+The documentation site in `apps/`, to be rebuilt with Nuxt (which also validates SSR end to end); a live-theming app in `apps/` too (manipulating `@vectis/ui/tokens`, injecting the `--vectis-*`, exporting a config).
 
 **Validated method**: implement in batches, with a full checkpoint (lint/format/typecheck/test/build/build-storybook) per batch, and flag any browser-support trade-off explicitly.
