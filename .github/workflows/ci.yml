@@ -134,7 +134,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
 
       # The docs consume `dist`, exactly as an npm consumer does, so the library has to be
       # built first — `pnpm --filter @vectis/docs build` alone would resolve nothing.
@@ -146,9 +146,9 @@ jobs:
       - name: Build the documentation
         run: pnpm --filter @vectis/docs build
 
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: apps/docs/.output/public
 
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
