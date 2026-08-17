@@ -149,3 +149,10 @@ export { default as VTimePicker } from './components/VTimePicker/VTimePicker.vue
 export type { TimePickerFormat, TimePickerStep } from './components/VTimePicker/VTimePicker.vue'
 export { default as VTimeInput } from './components/VTimeInput/VTimeInput.vue'
 export type { TimeInputMode } from './components/VTimeInput/VTimeInput.vue'
+export { default as VCalendar } from './components/VCalendar/VCalendar.vue'
+export type {
+  CalendarEvent,
+  CalendarEventId,
+  CalendarEventTimes,
+  CalendarView,
+} from './components/VCalendar/types'

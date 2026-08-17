@@ -1,0 +1,309 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VCalendarStories from './VCalendar.stories'
+
+<Meta of={VCalendarStories} />
+
+# Calendar
+
+An agenda: the days side by side, the hours running down them, and the events drawn where they
+fall. It is a place to **read and rearrange** a schedule, not to write one — opening an event for
+editing, and adding one by any route other than pointing at an empty slot, stay with you.
+
+Everything is handled in local time through ISO `YYYY-MM-DD` dates and 24-hour `HH:mm` times, which
+is what keeps the server and the browser in agreement. The toolbar is built from the design
+system's own parts: two [VIconButton](?path=/docs/components-iconbutton--docs)s, a
+[VButton](?path=/docs/components-button--docs) and a [VMenu](?path=/docs/components-menu--docs).
+
+<Canvas of={VCalendarStories.Default} />
+<Controls of={VCalendarStories.Default} />
+
+## The event
+
+An event carries a title, the day it starts and ends on, and the times it runs between. Everything
+after that is optional: a `description`, a `color`, and a `timezone`.
+
+```ts
+const events = ref<CalendarEvent[]>([
+  {
+    id: 'standup',
+    title: 'Standup',
+    start: '2026-06-10',
+    end: '2026-06-10',
+    startTime: '09:00',
+    endTime: '09:15',
+  },
+])
+```
+
+**`id` is required** and has to be stable: it is what a move writes back to, what gives a card its
+key, and what decides the colour of an event that names none — so an event keeps its colour as the
+list is filtered or re-sorted.
+
+**Fields of your own** are added by extending the type, and they reach the `#event` slot with their
+own types intact:
+
+```ts
+interface Booking extends CalendarEvent {
+  room: string
+  attendees: number
+}
+```
+
+## Views
+
+`view` is a v-model, and `views` decides what the menu offers. `day`, `4days`, `week` and `custom`
+show a time grid; `month` and `year` are summaries. Previous and Next step by whatever the current
+view is worth, and rename themselves accordingly.
+
+<Canvas of={VCalendarStories.Views} />
+
+### Month
+
+Each day shows as many events as it has room for — `monthEventLimit`, three by default — then says
+how many are left. Choosing a day's number opens that day.
+
+A chip is one lane tall whatever the event is, so an all-day bar and a two-hour meeting look the
+same here: a day in this view is a summary, and several have to fit under the date. The cell is
+sized for the default of three plus the "+N more" line, so raising `monthEventLimit` past three
+means giving the cell more room through `--vectis-control-size-calendar-month-cell` — it clips
+rather than scrolls.
+
+The grid keeps a fixed six rows whichever month is on show, so the page does not jump as you step
+through the year; the days of the neighbouring months are drawn pushed back rather than blank.
+
+<Canvas of={VCalendarStories.Month} />
+
+### Year
+
+The year view is for orientation: twelve months, each marking the days that have something on them.
+Choosing a month opens it.
+
+**The days here are deliberately not controls.** A year is three hundred and sixty-five days, and
+making each one focusable would put that many stops in the tab order for a view meant to be glanced
+at. The month is what can be reached, and its name carries how many of its days are busy — so the
+marks below stay safe to hide from the accessibility tree.
+
+<Canvas of={VCalendarStories.Year} />
+
+Opening a day or a month only changes the view **if you were offering it**. A calendar whose `views`
+are `['week', 'year']` moves its date but stays where it is, rather than jumping into a view you
+deliberately left out.
+
+## Which days, and which hours
+
+`weekdays` says which days appear at all, as numbers from `0` for Sunday — `[1,2,3,4,5]` hides the
+weekend everywhere. Its **order** matters too: the first entry is the day a week starts on, which is
+why there is no separate first-day setting. Left out, it follows the locale.
+
+`dayStart` and `dayEnd` crop the grid to the hours worth showing, and `scrollTime` decides where it
+opens.
+
+Navigation steps over the days you have hidden rather than landing on one: Next from a Friday in a
+Monday-to-Friday calendar goes to the Monday.
+
+<Canvas of={VCalendarStories.WorkingWeek} />
+
+## All-day events
+
+An event goes into the band above the grid when it is marked `allDay`, **or** when its `start` and
+`end` fall on different days — a card running from one day to the next cannot be drawn inside a
+single column, so the band is the only place it can honestly go.
+
+Bars that overlap stack onto rows of their own, and the band scrolls once it has more than it can
+show. `#all-day-label` replaces the words beside it.
+
+<Canvas of={VCalendarStories.AllDay} />
+
+## The current time
+
+`showCurrentTime` (on by default) draws a line across today's column at the time it is now, with a
+dot on its leading edge. It re-reads the clock at the top of each minute, and it is only ever drawn
+when the range on show actually contains today.
+
+It is hidden from screen readers on purpose: it says a second time what the cell labels and the day
+marked as today already carry, and announcing it from the middle of a grid would interrupt without
+informing.
+
+<Canvas of={VCalendarStories.CurrentTime} />
+
+## Events at the same time
+
+Concurrent events share the width of their day. They are grouped into **clusters** first — runs
+joined by overlap — so a crowded morning never narrows a lone afternoon meeting, and an event grows
+into the room beside it whenever nothing is using it.
+
+Two events that merely touch, one ending exactly as the next begins, are not a collision and keep
+the full width.
+
+<Canvas of={VCalendarStories.Overlapping} />
+
+## Short events
+
+**A card is exactly as tall as its event is long, never taller.** Two events that follow one another
+therefore never overlap on screen, whatever `slotDuration` you set.
+
+Fitting the text into that is the card's own job, and it does it by measuring itself rather than by
+counting minutes — so it stays right if you change `--vectis-control-size-calendar-hour`. Below the
+height where two lines fit, title and time go on **one row**, the title ellipsized and the
+description dropped; below the height where even one ordinary line fits, the leading tightens so the
+title still shows.
+
+The floor for all of this is `slotDuration`: no event is ever laid out shorter than one slot, which
+is applied to the events themselves before the overlap layout sees them. That is why what you see
+and what the layout believes are the same box.
+
+## Colour
+
+An event without a `color` is given a hue derived from its `id`. Only the hue varies: the lightness
+and the chroma come from the theme, which is what makes the title's contrast against its card the
+same quantity at every hue rather than something that changes around the colour wheel.
+
+An event **with** a `color` uses it for its leading edge and for a faint wash of its face. The title
+is never written on top of it, so any value you choose stays readable in both themes.
+
+To pin a hue yourself without naming a colour, set `--vectis-calendar-event-hue` on the card.
+
+<Canvas of={VCalendarStories.Colours} />
+
+## Moving, stretching and making events
+
+Drag a card to move it. Drag the strip along its bottom edge to change how long it lasts. Press an
+empty stretch of a day to make an event there — a click makes one `slotDuration` long, and a press
+that travels makes one as long as it was drawn.
+
+Everything snaps to `slotDuration` (fifteen minutes by default), and **the model is written once,
+when the gesture ends** — never while it is under way. A drag that is interrupted, by a context menu
+or by the page starting to scroll, writes nothing at all.
+
+A **faded copy of the event stays where it started** for as long as the drag lasts, so you can see
+what you are moving it from — after a long drag across a week, the place you left is otherwise
+impossible to recall. It appears only once the drag has actually travelled, so a click never flashes
+one, and it is hidden from screen readers and from the pointer: it is a duplicate of an event
+already announced, not a second one.
+
+**Let go outside the calendar and nothing happens.** Drag a card off the view — onto the toolbar, or
+onto the page beside it — and the card says so: it turns the danger colour, stops being lifted, and
+the faded copy goes on showing where it is about to return to. Releasing there writes nothing at
+all, whichever gesture it was: no move, no new length, and no new event. It is how a drag begun by
+mistake is called off with the hand, the way `Escape` calls one off with the keyboard.
+
+<Canvas of={VCalendarStories.Editing} />
+
+Three emits report what happened, so you can save it:
+
+```ts
+// `previous` is where the event came from, so undoing needs no copy of your own.
+@event-move="(event, previous) => save(event)"
+@event-resize="(event, previous) => save(event)"
+// The event has already been added to `events`; this is the cue to name it, or to save it.
+@event-create="(event) => openEditor(event)"
+```
+
+### Across the whole calendar
+
+Dragging is not confined to the time grid or to what is currently on screen:
+
+- **The all-day band** moves by whole days. A bar keeps its length, so a three-day trip dragged two
+  columns along is still three days.
+- **The month view** moves a chip from one day to another, again by whole days. Drop it on one of
+  the greyed days of a neighbouring month to move it there directly.
+- **The edges page.** Hold a dragged event against the left or right side and, after
+  `edgeStepDelay`, the calendar shows the previous or next period and keeps
+  going for as long as you hold. The event stays under the pointer across the boundary.
+- **The top and bottom scroll**, in a time grid, so a nine o'clock meeting can be dragged to the
+  evening without letting go. `autoScroll` turns that off.
+
+**The wait before paging is the point of it.** Turning the page the instant the pointer touched the
+edge would make the last day of a week impossible to aim at: you would have to approach it from
+above and stop dead, and the smallest overshoot would throw you into the following week. The edge
+lights up while it counts down, so it is never a surprise. `edgeStepDelay: 0` switches it off.
+
+**Paging and scrolling carry on while the pointer is outside**, and they have to: pushing past the
+side of the calendar is how you ask it to keep going. Neither ever obliges you to leave, though —
+both reach full speed on the last pixel inside — so being outside is only ever where a gesture is
+abandoned, never somewhere you have to pass through. And what letting go there undoes is the move:
+the weeks you paged through on the way stay paged.
+
+<Canvas of={VCalendarStories.MonthDragging} />
+
+`editable` turns moving and stretching off; `creatable` turns making events off. Turning `creatable`
+off still leaves `slot-activate` firing, so a consumer who wants to open their own form keeps the
+signal without the component acting on it.
+
+**If your event type adds required fields of its own**, a created event will not have them — nothing
+here could invent a room number. `event-create` fires with the event as made: replace that entry
+with a complete one.
+
+### With the keyboard
+
+Every gesture above has a keyboard equivalent, because one that did not would be unreachable for
+anyone who cannot use a pointer.
+
+| key               | what it does                    |
+| ----------------- | ------------------------------- |
+| `Enter` on a card | takes hold of the event         |
+| arrows, once held | moves it by a slot, or by a day |
+| `Shift` + arrows  | changes when it ends            |
+| `Enter`           | places it                       |
+| `Escape`          | puts it back where it was       |
+
+Each step is announced, and taking hold does **not** also open the event — the same keystroke would
+otherwise do both.
+
+<Canvas of={VCalendarStories.KeyboardEditing} />
+
+## Custom content
+
+The `#event` slot replaces a card's content and receives `{ event, layout, timeText, continuesBefore,
+continuesAfter }`. `timeText` is the times already written out for the reader, so you do not have to
+format them again.
+
+`#day-header` does the same for the head of a column, and `#actions` adds controls to the toolbar
+beside the view menu.
+
+<Canvas of={VCalendarStories.EventSlot} />
+
+## Time zones
+
+An event may name a `timezone`, and it is shown beside its times as an annotation —
+`09:00 – 10:00 (Europe/Paris)`. **It is never applied.** A card's place in the grid always comes
+from the local dates and times given, because converting would mean an event moved depending on
+where the page happened to be rendered.
+
+## Localization
+
+`locale` drives the day names, the month names and the clock, and takes precedence over the design
+system's global locale. The words in the toolbar come from the dictionary and translate with
+`setLocale` (see **Foundations › Internationalization**).
+
+<Canvas of={VCalendarStories.Localization} />
+
+## Height
+
+The calendar fills the height it is given: make its parent a fixed height, or a flex column, and the
+grid scrolls inside it while the toolbar stays put. In a parent of automatic height it is simply as
+tall as its content, so there is nothing to switch on.
+
+## Accessibility
+
+- The root is a `region` named by `label` (or by the dictionary), and it says it **is** a calendar
+  rather than being announced as a plain region.
+- The grid is a real `role="grid"`: one row per hour, one cell per day and hour, and a **roving
+  tabindex** so exactly one cell is ever in the tab order. Each cell names its own day and hour in
+  full, so nothing is lost to a reader who cannot see the row of day names above.
+- **Keyboard**: arrows move by a day and by an hour, `Home`/`End` reach the ends of the row,
+  `PageUp`/`PageDown` turn to the previous and next period, and `Enter` takes up whatever is
+  focused. Every gesture the pointer offers is reachable this way — see the table above.
+- Every event is a real button, reachable and activatable without a pointer. Each points at one
+  shared node describing how it can be moved, rather than repeating the sentence on every card.
+- **The resize strip is not a control.** A button inside a button is invalid HTML and a blocking
+  accessibility failure at once, so the strip is a hidden `span` that answers a pointer and nothing
+  else; `Shift` with the arrows is its equivalent.
+- A live region announces every step of a move, and whether it was taken or given up. It is on the
+  page from the first paint and empty — a live region inserted along with its first message is not
+  announced at all.
+- **The pointer says nothing**, on a drop and on an abandoned one alike. The announcements belong to
+  the keyboard grab, which has no pointer to show where the event went; narrating one path and not
+  the other would be a rule nobody could infer.
+- The visible focus uses the design system's standard ring, drawn inwards inside the scrolling area
+  so it is never cropped; every transition respects `prefers-reduced-motion`.
