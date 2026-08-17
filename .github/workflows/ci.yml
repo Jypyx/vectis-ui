@@ -5,13 +5,17 @@ on:
     branches: [main]
   pull_request:
   # Gives a way back in when a push produces no run at all — a delayed webhook is enough
-  # for that.
+  # for that — and a way to redeploy the documentation without an empty commit.
   workflow_dispatch:
 
-# A new push on a branch supersedes the run in flight for it.
+# A new push on a branch supersedes the run in flight for it — EXCEPT on main, which is the
+# branch that deploys. A workflow-level cancellation kills the whole run, `pages` included, and
+# it OUTRANKS that job's own `cancel-in-progress: false`: two pushes in quick succession would
+# otherwise interrupt a deploy in flight and leave the site half-published, which is precisely
+# what the job-level setting is there to prevent.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   # Everything that needs neither a browser nor the Playwright binaries.
@@ -89,3 +93,62 @@ jobs:
         run: pnpm test:stories
         env:
           VECTIS_THEME: ${{ matrix.theme }}
+
+  # Publishes the documentation site. Storybook is NOT part of the artefact: it is an internal
+  # tool, exercised here by `check` and reviewed through Chromatic, and it is deliberately not
+  # made public.
+  #
+  # ONE-TIME REPOSITORY SETTING: Pages → Source → GitHub Actions. Without it every run of
+  # this job fails at the deploy step, with nothing wrong in the build.
+  pages:
+    name: Deploy documentation
+    # A pull request's ref is `refs/pull/N/merge`, so it is excluded by the ref test alone. The
+    # events are an ALLOWLIST rather than `!= 'pull_request'`, so a trigger added later has to
+    # opt into deploying instead of inheriting it silently.
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: [check, stories]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # Deployments are serialized and never cancelled: interrupting one leaves the site
+    # half-published, where a superseded BUILD costs nothing.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: actions/configure-pages@v5
+
+      # The docs consume `dist`, exactly as an npm consumer does, so the library has to be
+      # built first — `pnpm --filter @vectis/docs build` alone would resolve nothing.
+      - name: Build the library
+        run: pnpm --filter @vectis/ui build
+
+      # `build` chains `check-prerender` through `postbuild`: every route in
+      # content/nav.ts must exist as a file, and `.nojekyll` must be there.
+      - name: Build the documentation
+        run: pnpm --filter @vectis/docs build
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: apps/docs/.output/public
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
