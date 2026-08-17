@@ -14,6 +14,11 @@ export default tseslint.config(
       // The v8 HTML report ships its own bundled JS (prettify.js, block-navigation.js)
       '**/coverage/**',
       '**/node_modules/**',
+      // Nuxt's generated types, build output and caches (apps/docs).
+      '**/.nuxt/**',
+      '**/.output/**',
+      '**/.data/**',
+      '**/.nitro/**',
       'packages/ui/src/styles/tokens.css',
     ],
   },

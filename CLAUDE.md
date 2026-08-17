@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## The project
 
-**Vectis UI** (`@vectis/ui`): a Vue 3 + TypeScript design system shipped as an npm library, Nuxt 3 (SSR) compatible. pnpm monorepo — `packages/ui` holds the library and is, for now, its only workspace; `apps/*` is declared in `pnpm-workspace.yaml` and currently empty. A documentation site (to be rebuilt with Nuxt) and a live-theming app manipulating the token source programmatically are both still to come. Project language: **English** (code, comments, docs). Storybook stories are **bilingual FR/EN** (see Storybook below).
+**Vectis UI** (`@vectis/ui`): a Vue 3 + TypeScript design system shipped as an npm library, Nuxt 3 (SSR) compatible. pnpm monorepo — `packages/ui` holds the library, `apps/docs` the documentation site (a Nuxt 3 app, statically generated, published to GitHub Pages — see its own section below). A live-theming app manipulating the token source programmatically is still to come. Project language: **English** (code, comments, docs). Storybook stories are **bilingual FR/EN** (see Storybook below).
 
 ## Commands
 
@@ -26,6 +26,11 @@ pnpm build-storybook
 
 pnpm --filter @vectis/ui run tokens:check    # generated artefacts vs the TS source, without writing
 pnpm --filter @vectis/ui run check:package   # publint + attw, AFTER a build (see below)
+
+pnpm --filter @vectis/docs dev               # documentation site, port 3000 (builds the lib first)
+pnpm --filter @vectis/docs build             # nuxt generate → .output/public, + check-prerender
+pnpm --filter @vectis/docs preview           # serves the ARTEFACT, the only way to exercise the base URL
+pnpm --filter @vectis/docs icons             # regenerates the docs icon registry (network; on demand)
 ```
 
 **`check:package` must never move into `postbuild`**: `attw --pack` shells out to `npm pack`, which fires `prepack` → `build` → `postbuild` → `attw`, unbounded. CI calls it as its own step. It is also what guards the `.d.ts` extension rewrite (`dtsExtensions` in `vite.config.ts`) — without which a consumer on `node16`/`nodenext` resolution gets NO types at all, silently.
@@ -317,8 +322,24 @@ Cross-cutting rules covered above: tone/variant (VButton = the reference), wrapp
   **`controlsVisibility`** (`'always' | 'hover'`, default `'always'`) is a MODE union and not a boolean — the `controlsDisplay` shape of VPagination — because the trigger is hover OR keyboard focus OR unconditional on a coarse pointer, which `onHover` would misname; mirrored unconditionally as `data-controls-visibility` (the DS rule: unions always, booleans only when true). It hides with **`opacity` alone**, never `display`/`visibility`, which would drop the buttons from the tab order and the a11y tree — the hidden-input rule. Behind **`@media (hover: hover)`** (never `any-hover`, true as soon as any hovering pointer is attached) so touch keeps them permanent. axe short-circuits `color-contrast` to a pass at an opacity of exactly `0` but JUDGES anything in between, hence the hard rule that the hover story's play function must end REVEALED. `userEvent.hover()` cannot drive that test — it dispatches synthetic pointer events where `:hover` comes from the browser's real input pipeline — so it is asserted through the focus branch.
   **KEYBOARD focus, both here and for the autoplay pause — `:has(:focus-visible)` on the root, never `:focus-within`, and `matches(':focus-visible')` on the focusin target, never a bare flag.** A pointer click LEAVES the focus on the control it hit, so reading any focus pinned the reveal up and the rotation paused until the user clicked somewhere outside the carousel entirely, long after the pointer had left — reported as a bug, and the shape of it is worth remembering: `focusin` tells you focus arrived, never how. The JS wraps the call in a `try` returning `true`, since jsdom's selector engine may not know the pseudo-class and pausing is the conservative answer; the two jsdom tests stub `matches` on both sides rather than trusting it, because what they lock is that the component ASKS and branches, not what jsdom answers. The browser side asserts the reveal RELEASES on blur (`userEvent.click` cannot be trusted for the pointer branch: Chromium's focus-visible heuristic follows real input modality, not synthetic events).
 
+## The documentation site (`apps/docs`)
+
+A **Nuxt 3** application, `nuxt generate`d to static files and published to GitHub Pages at `/vectis-ui/` by the `pages` job in `ci.yml`. It is the library's end-to-end SSR test: a component reaching for `window` outside a handler fails the prerender rather than the visitor. **One-time repository setting: Pages → Source → GitHub Actions.**
+
+- **Storybook is NOT published.** It is an internal tool — run locally, exercised by CI (`build-storybook`, `test:stories`) and reviewed through Chromatic — and it is deliberately kept off the public site. The docs site therefore links to it nowhere, and `nuxt.config.ts` needs no prerender `ignore` for it. Do not add a Storybook link to a doc page: the crawler would follow it, get a 404 and fail the whole `generate`.
+
+- **It is a CONSUMER, and every deviation goes through the sanctioned override path.** Nothing in it touches `packages/ui`. Its layout, its accent (violet, repointed from the palette) and its two webfonts are all UNLAYERED rules — the mechanism the Theming page documents, practised rather than described. `assets/css/docs-layout.css` holds only what a media query owns; a state (`:hover`, `:focus-visible`) lives in the component's own `<style scoped>`.
+- **The library ships NO webfont.** `--vectis-font-family-display` resolves to the platform stack. 'Josefin Sans' and 'Geist' are the SITE's brand layer (`assets/css/fonts.css`), which is why the Font family page documents the family tokens and how this site wires them, and never claims the library ships a typeface.
+- **`content/nav.ts` is the single source** for the rail, the search index and `nitro.prerender.routes` — the three cannot drift, and `scripts/check-prerender.ts` (`postbuild`) fails the build if a slug in it produced no HTML. 41 component families, 6 written + 35 stubs, plus 6 introduction and 2 utility pages.
+- **Icons**: the built-in registry is 34 icons, and the site's chrome needs five it has no reason to ship (`content_copy`, `open_in_new`, `menu`, `light_mode`, `dark_mode`). `scripts/build-icons.ts` generates `icons/icons.ts` from the SAME pinned revision as the library's twin (on demand, never in a build hook), and `plugins/vectis.ts` installs it through `setIconResolver` **at module level in a UNIVERSAL plugin** — returning `undefined` for every other name, which is what hands them back to the registry. Client-only would be a hydration mismatch on every icon; with no resolver at all, an unknown name renders as its own NAME in text.
+- **Three traps recovered from the deleted VitePress site, all in `nuxt.config.ts`**: `vite.ssr.noExternal: ['@vectis/ui']` (each component module carries `import './VX.css'`, which Node cannot resolve externalised); `vite.resolve.dedupe: ['vue']` (two Vue copies break `provide`/`inject` across the library boundary, silently); and the pre-paint inline script setting `data-theme`, since `tokens.css` carries NO `prefers-color-scheme` query — "follow the system" is the application's job. A fourth is new: **`imports.transform.exclude` must cover `packages/ui/dist`**, or Nuxt's auto-import injects `import { h } from 'vue'` on top of the bundle's own minified `var h` (a pnpm workspace link has no `node_modules` in its path, so the default exclusion misses it).
+- **`features.inlineStyles: false`** — Nuxt inlines critical CSS per page by default, which for 52 prerendered pages means re-sending the same ~50 kB with each and caching none of it.
+- **Theme and locale settle AFTER hydration** (`plugins/*.client.ts`, on `app:mounted`): the artefact is one HTML for everybody, so the server cannot know the scheme and the library accepts one locale per process. The cost is one frame of a light-mode icon, the VHotkeys platform precedent.
+- **Every destination is a real `<a href>`** inside a `<NuxtLink custom>` — the anchor for middle-click and crawlers, `navigate` for the client-side transition. The slot types `href` as `string | null`, hence the `?? undefined` on each library `href` prop.
+- **`BASE_URL` is written once**, at the top of `nuxt.config.ts`. Asset URLs are relative so Vite rewrites them; the two places that need it absolute (the favicon, the `/docs` → `/docs/installation` redirect, whose `<meta http-equiv>` nitro writes VERBATIM) compose it from that constant.
+
 ### Next
 
-The documentation site in `apps/`, to be rebuilt with Nuxt (which also validates SSR end to end); a live-theming app in `apps/` too (manipulating `@vectis/ui/tokens`, injecting the `--vectis-*`, exporting a config).
+A live-theming app in `apps/` (manipulating `@vectis/ui/tokens`, injecting the `--vectis-*`, exporting a config) — the configurator page is its prototype; the remaining 35 component pages, each written from the source rather than approximated.
 
 **Validated method**: implement in batches, with a full checkpoint (lint/format/typecheck/test/build/build-storybook) per batch, and flag any browser-support trade-off explicitly.

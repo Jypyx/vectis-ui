@@ -2,7 +2,12 @@
 **/storybook-static/
 **/coverage/
 **/node_modules/
+**/.nuxt/
+**/.output/
+**/.data/
+**/.nitro/
 pnpm-lock.yaml
 packages/ui/src/styles/tokens.css
 packages/ui/src/tokens/tokens.json
 packages/ui/src/components/VIcon/icons.ts
+apps/docs/icons/icons.ts

@@ -1,0 +1,524 @@
+/* Vectis UI docs — LAYOUT ONLY, and unlayered on purpose: the design system publishes
+ * "any non-layered consumer style wins", so this takes the sanctioned override path rather
+ * than inventing a layer nobody would know to order.
+ *
+ * Only what a media query owns lives here (structure, visibility, grid tracks). Every other
+ * declaration is inline on the element, so it paints as the markup streams. Breakpoints are
+ * raw pixel values because a custom property cannot be used in a media condition at all.
+ *
+ * Mobile first: the base rules are the 0-639px screen.
+ *   640px tablet portrait · 768px tablet landscape · 1024px medium · 1440px large
+ * Content is capped at 1440px and gutters are 24px on every surface.
+ *
+ * Two things a state owns rather than a media query live with their component instead, as
+ * `<style scoped>`: the outline's link states (DocsOutline.vue) and the search results'
+ * (DocsSearch.vue). Both need :hover and :focus-visible, which an inline style cannot carry
+ * and this file has no business holding.
+ */
+:root {
+  --vd-gutter: 24px;
+  --vd-max: 1440px;
+  --vd-header-h: 56px;
+  --vd-aside-w: 248px;
+  --vd-outline-w: 200px;
+}
+
+.vd-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--vectis-color-surface);
+  color: var(--vectis-color-text);
+  font-family: var(--vectis-font-family-sans);
+  font-size: 16px;
+  line-height: var(--vectis-text-body-lg-leading);
+}
+
+.vd-limit {
+  width: 100%;
+  max-width: var(--vd-max);
+  margin-inline: auto;
+  padding-inline: var(--vd-gutter);
+}
+
+/* --- Header --- */
+.vd-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--vd-header-h);
+}
+/* The docs site repoints the accent role to violet — the mechanism the theming page describes,
+   written unlayered so it wins over vectis.tokens without a specificity fight. The steps follow
+   the library's own pattern: 600/700/800 light, 500/400/300 dark, because white text on a filled
+   control only holds from violet 600, and dark mode has no darker step to hover to.
+   The dark selector is heavier than the light one, so the two do not fight. */
+.vd-shell {
+  --vectis-color-accent: var(--vectis-color-violet-600);
+  --vectis-color-accent-hover: var(--vectis-color-violet-700);
+  --vectis-color-accent-active: var(--vectis-color-violet-800);
+  --vectis-color-accent-surface: var(--vectis-color-violet-50);
+  --vectis-color-accent-border: var(--vectis-color-violet-200);
+  --vectis-color-accent-text: var(--vectis-color-violet-700);
+}
+[data-theme='dark'] .vd-shell,
+.vd-shell[data-theme='dark'],
+.vd-shell [data-theme='dark'] {
+  --vectis-color-accent: var(--vectis-color-violet-500);
+  --vectis-color-accent-hover: var(--vectis-color-violet-400);
+  --vectis-color-accent-active: var(--vectis-color-violet-300);
+  --vectis-color-accent-surface: var(--vectis-color-violet-950);
+  --vectis-color-accent-border: var(--vectis-color-violet-900);
+  --vectis-color-accent-text: var(--vectis-color-violet-300);
+}
+
+/* The lockup ships as two files that differ only in the wordmark's ink. Painting it as a
+   background keeps one node and one visible logo, with no request for an unresolved src.
+   The paths are relative to this sheet, so Vite rewrites them with the site's base URL and
+   `/vectis-ui/` never has to be written anywhere but nuxt.config.ts. */
+.vd-logo {
+  background: url('../img/logo-lockup-on-light.svg') left center / contain no-repeat;
+}
+[data-theme='dark'] .vd-logo {
+  background-image: url('../img/logo-lockup-on-dark.svg');
+}
+
+.vd-header-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-inline-start: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.vd-nav-links {
+  display: none;
+  gap: 4px;
+  margin-inline-start: 20px;
+}
+
+/* The search trigger is a field-shaped button: a readonly VInput would take a tab stop that
+   leads nowhere. Below the desktop it is a ghost icon button standing beside the theme
+   button and the burger; the field only appears once the row has room for it. */
+.vd-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--vectis-radius-interactive);
+  background: transparent;
+  /* Same ink as a ghost VIconButton (neutral --tone-text-tinted resolves to this token),
+     so the three compact controls read as one row. */
+  color: var(--vectis-color-text);
+  font-family: inherit;
+  font-size: var(--vectis-text-body-sm-size);
+  cursor: pointer;
+  transition:
+    border-color var(--vectis-duration-fast) var(--vectis-ease-default),
+    background-color var(--vectis-duration-fast) var(--vectis-ease-default);
+}
+.vd-search:hover {
+  background: var(--vectis-color-surface-muted);
+}
+.vd-search:focus-visible {
+  outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+  outline-offset: var(--vectis-focus-ring-offset);
+}
+.vd-search-text {
+  display: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Both wait for the desktop field: in the icon-only state there is nothing to sit in. */
+.vd-search-hot {
+  display: none;
+}
+
+.vd-only-compact {
+  display: inline-flex;
+}
+.vd-from-640,
+.vd-from-768,
+.vd-from-1024 {
+  display: none;
+}
+
+/* --- Home --- */
+/* One centred column since the hero art came out: a second grid track would only leave a
+   hole where the canvas was. */
+.vd-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+  justify-items: center;
+  text-align: center;
+  padding-block: 40px 48px;
+}
+/* The column takes the whole limit width: justify-items would otherwise shrink it to its
+   longest line and park it left of centre. */
+.vd-hero > div {
+  width: 100%;
+}
+.vd-grid-2 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+.vd-grid-3 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+.vd-stats {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* --- Documentation --- */
+.vd-docs {
+  display: block;
+}
+.vd-aside {
+  display: none;
+}
+/* The groups read as three separate shelves rather than one long list. Where a separator sits
+   between two groups it carries the space itself, so the rule above no longer applies. */
+.vd-aside .v-side-nav-group + .v-side-nav-group {
+  margin-block-start: 28px;
+}
+.vd-aside .v-side-nav-separator {
+  margin-block: 20px;
+}
+.vd-outline {
+  display: none;
+}
+.vd-main {
+  min-width: 0;
+  padding-block: 24px 48px;
+}
+.vd-docnav-compact {
+  display: block;
+  padding-block: 12px 0;
+}
+
+/* The compact documentation nav is the SAME tree, revealed by a data attribute rather than a
+   second copy of forty rows. A max-width query is the honest form here: the rule exists only
+   below the medium screen, where the rail is not in the grid. */
+@media (max-width: 1023px) {
+  .vd-docs[data-nav-open] > .vd-aside {
+    display: block;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-block: 12px 16px;
+    border-bottom: 1px solid var(--vectis-color-border);
+  }
+}
+
+/* --- Configurator --- */
+.vd-config {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+.vd-swatches {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+/* --- Search dialog ---
+   The panel is a VDialog, which already takes its width from its `width` prop and caps
+   itself to the viewport. All it wants on top is a shorter ceiling, so the results list
+   starts scrolling well before the dialog reaches the bottom of the screen. */
+.vd-modal {
+  max-block-size: 80vh;
+  /* Pinned near the top rather than centred. A modal <dialog> centres itself with
+     `margin: auto`, which would move the FIELD every time the result list grew or shrank —
+     under the reader's cursor, while they are still typing. Anchored, only the list moves. */
+  margin-block: 7vh auto;
+}
+
+@media (min-width: 640px) {
+  .vd-from-640 {
+    display: inline-flex;
+  }
+  .vd-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .vd-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .vd-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .vd-swatches {
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .vd-from-768 {
+    display: inline-flex;
+  }
+  .vd-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+    padding-block: 56px 64px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .vd-nav-links {
+    display: flex;
+  }
+  .vd-only-compact {
+    display: none;
+  }
+  .vd-from-1024 {
+    display: inline-flex;
+  }
+  .vd-search {
+    width: 240px;
+    justify-content: flex-start;
+    padding-inline: 10px;
+    border-color: var(--vectis-color-border-strong);
+    background: var(--vectis-color-surface);
+    color: var(--vectis-color-text-subtle);
+  }
+  .vd-search:hover {
+    border-color: var(--vectis-color-text-subtle);
+    background: var(--vectis-color-surface);
+  }
+  .vd-search-text {
+    display: block;
+  }
+  .vd-search-hot {
+    display: inline-flex;
+    align-items: center;
+    margin-inline-start: auto;
+    margin-inline-end: -4px;
+  }
+  .vd-docnav-compact {
+    display: none;
+  }
+  .vd-docs {
+    display: grid;
+    grid-template-columns: var(--vd-aside-w) minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+  .vd-aside {
+    display: block;
+    position: sticky;
+    top: var(--vd-header-h);
+    /* A fixed height rather than a max: with the footer gone the column has to reach the bottom
+       of the screen on a short page, not stop where its last row ends. */
+    height: calc(100vh - var(--vd-header-h));
+    overflow-y: auto;
+    padding-block: 24px;
+  }
+  .vd-main {
+    padding-block: 32px 64px;
+  }
+  .vd-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .vd-config {
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 32px;
+  }
+  .vd-swatches {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1440px) {
+  .vd-search {
+    width: 300px;
+  }
+  /* The outline waits for the large screen: at 1024px the three tracks would leave the prose
+     under 520px, which is narrower than the measure a code block needs. */
+  .vd-docs {
+    grid-template-columns: var(--vd-aside-w) minmax(0, 1fr) var(--vd-outline-w);
+  }
+  .vd-outline {
+    display: block;
+    position: sticky;
+    top: var(--vd-header-h);
+    height: calc(100vh - var(--vd-header-h));
+    overflow-y: auto;
+    padding-block: 32px;
+  }
+  .vd-swatches {
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+  }
+}
+
+/* --- Prose ---
+ * EVERY selector is a DIRECT-CHILD chain from `.vd-prose`, which is what makes unlayered docs
+ * CSS safe: the prose renders its nodes as direct children, while a live demo sits inside
+ * `.vd-demo` and a component's internals are two levels further down. A descendant selector
+ * such as `.vd-prose h2` would reach into a component's own title from OUTSIDE every layer,
+ * unbeatably. Type comes from the semantic recipes, never from the font primitives.
+ */
+.vd-prose > h1 {
+  margin: 0 0 12px;
+  font-family: var(--vectis-font-family-display);
+  font-size: var(--vectis-text-heading-1-size);
+  font-weight: var(--vectis-text-heading-1-weight);
+  line-height: var(--vectis-text-heading-1-leading);
+  letter-spacing: var(--vectis-text-heading-1-tracking);
+}
+.vd-prose > h2 {
+  margin: 40px 0 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--vectis-color-border);
+  font-family: var(--vectis-font-family-display);
+  font-size: var(--vectis-text-heading-2-size);
+  font-weight: var(--vectis-text-heading-2-weight);
+  line-height: var(--vectis-text-heading-2-leading);
+  letter-spacing: var(--vectis-text-heading-2-tracking);
+}
+.vd-prose > h3 {
+  margin: 28px 0 12px;
+  font-family: var(--vectis-font-family-display);
+  font-size: var(--vectis-text-heading-3-size);
+  font-weight: var(--vectis-text-heading-3-weight);
+  line-height: var(--vectis-text-heading-3-leading);
+}
+.vd-prose > p,
+.vd-prose > ul,
+.vd-prose > ol {
+  margin: 16px 0;
+  font-size: 16px;
+  line-height: 1.65;
+}
+.vd-prose > p.vd-lead {
+  font-size: 18px;
+  color: var(--vectis-color-text-muted);
+}
+.vd-prose > ul,
+.vd-prose > ol {
+  padding-inline-start: 24px;
+}
+.vd-prose > ul > li,
+.vd-prose > ol > li {
+  margin: 8px 0;
+  line-height: 1.65;
+}
+.vd-prose > blockquote {
+  margin: 16px 0;
+  padding-inline-start: 16px;
+  border-inline-start: 2px solid var(--vectis-color-border-strong);
+  color: var(--vectis-color-text-muted);
+}
+.vd-prose > p > code,
+.vd-prose > ul > li > code,
+.vd-prose > ol > li > code,
+.vd-prose > h2 > code,
+.vd-prose > h3 > code,
+.vd-prose > blockquote > code {
+  padding-inline: 4px;
+  border-radius: var(--vectis-radius-xs);
+  background: var(--vectis-color-surface-muted);
+  font-family: var(--vectis-font-family-mono);
+  font-size: var(--vectis-text-code-size);
+}
+.vd-prose > h2,
+.vd-prose > h3 {
+  scroll-margin-top: 72px;
+}
+
+/* --- Code blocks --- */
+.vd-code {
+  margin: 20px 0;
+  overflow: hidden;
+  border: 1px solid var(--vectis-color-border);
+  border-radius: var(--vectis-radius-surface);
+  background: var(--vectis-color-surface-sunken);
+}
+.vd-code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 4px 4px 16px;
+  border-bottom: 1px solid var(--vectis-color-border);
+}
+.vd-code-lang {
+  font-family: var(--vectis-font-family-mono);
+  font-size: var(--vectis-text-overline-size);
+  letter-spacing: var(--vectis-text-overline-tracking);
+  text-transform: uppercase;
+  color: var(--vectis-color-text-muted);
+}
+.vd-code > pre {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+  font-family: var(--vectis-font-family-mono);
+  font-size: var(--vectis-text-code-size);
+  line-height: var(--vectis-text-code-leading);
+  tab-size: 2;
+}
+
+/* --- Demo surface --- */
+.vd-demo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid var(--vectis-color-border);
+  border-radius: var(--vectis-radius-surface);
+  background: var(--vectis-color-surface-raised);
+}
+.vd-demo[data-stack] {
+  flex-direction: column;
+  align-items: stretch;
+}
+.vd-scroll {
+  overflow-x: auto;
+}
+.vd-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: var(--vectis-text-body-md-size);
+}
+.vd-table th {
+  padding: 8px 12px;
+  text-align: start;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--vectis-color-border-strong);
+  font-weight: var(--vectis-text-label-weight);
+}
+.vd-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--vectis-color-border);
+  color: var(--vectis-color-text-muted);
+  vertical-align: top;
+}
+.vd-table td > code,
+.vd-table th > code {
+  font-family: var(--vectis-font-family-mono);
+  font-size: var(--vectis-text-code-size);
+  color: var(--vectis-color-text);
+}
+
+@media (min-width: 768px) {
+  .vd-demo {
+    padding: 24px;
+    gap: 16px;
+  }
+}
