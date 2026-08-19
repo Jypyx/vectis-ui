@@ -1,0 +1,132 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+
+import * as VFilePickerStories from './VFilePicker.stories'
+
+<Meta of={VFilePickerStories} />
+
+# FilePicker
+
+A drop zone: a dashed rectangle that takes files by drag & drop or through a hidden native
+`<input type="file">`, with an optional list of what has been loaded.
+
+`VFilePicker` **displays and screens — the parent uploads**. The selection is a plain `File[]`
+v-model, `multiple` or not, and no request is ever made by the design system. Its sibling
+`VFileInput` covers the other template: the same contract inside a form FIELD.
+
+<Canvas of={VFilePickerStories.Default} />
+<Controls of={VFilePickerStories.Default} />
+
+## The zone
+
+`title` is required — a drop zone without an instruction is a rectangle — and `subtitle` is where
+the constraints belong, spelled out in words. `icon` replaces the large glyph at the top.
+
+Note that `title` **shadows the global HTML attribute of the same name** on the component: an
+accepted trade-off, shared with `VDataTable`.
+
+## Keyboard, and the two shapes of the zone
+
+Drag & drop is not reachable from a keyboard, so something else always has to be. That is what
+decides the markup:
+
+- with the browse button shown (the default), the zone is a plain container. Clicking it opens the
+  dialog as a convenience, and the **button** is what carries focus and the keyboard;
+- with `showBrowse: false`, the separator and the button disappear and the zone becomes the
+  control itself — a real `<button>`, so Enter, Space, focus and the whole inertness of `disabled`
+  come from the platform rather than from JavaScript.
+
+Two consequences worth knowing before you fill the slots: the content of `#title`, `#subtitle` and
+`#icon` must stay **phrasing content and non-interactive** (a `<button>` may hold neither a block
+nor another control), and the preview list is always rendered **outside** the zone.
+
+<Canvas of={VFilePickerStories.WithoutBrowse} />
+
+## Where the preview goes
+
+`preview` is a single three-state prop: `false` (the default) renders no list at all and leaves the
+v-model to the parent, `bottom` puts it under the zone, `end` beside it.
+
+`end` folds back underneath on a narrow container. This is a **container query**, not a media
+query: the component follows the width it is GIVEN, so it behaves the same in a page, in a dialog
+or in a sidebar.
+
+<Canvas of={VFilePickerStories.PreviewEnd} />
+<Canvas of={VFilePickerStories.PreviewEndNarrow} />
+
+## Thumbnails and type icons
+
+An image gets a real thumbnail; anything else gets the icon of its kind — PDF, audio, video,
+archive, spreadsheet, code, or the generic document. The kind is resolved from the MIME type first,
+then from the extension, because `file.type` is the browser's guess and is empty more often than
+one expects. `typeIcons` overrides one kind without restating the others.
+
+Thumbnails are object URLs, created on the client only and revoked as soon as the file leaves the
+model or the component unmounts. They are therefore absent from the server render and from the
+first client render, which is what keeps hydration identical: the type icon shows until then.
+
+Set `thumbnails: false` when a list holds many, or very large, images — the point is not the bytes
+(the files are already in memory) but the decoded bitmaps. The `#thumbnail` slot is the other
+escape hatch: a server-side preview, a video poster, a format no browser decodes.
+
+<Canvas of={VFilePickerStories.Thumbnails} />
+
+## Screening files
+
+`accept`, `maxSize`, `maxTotalSize` and `maxFiles` apply to the dialog AND to a drop. The `accept`
+attribute filters the system dialog but has **no say over a drop**, so the rule exists a second
+time in JavaScript — without it, drag & drop would smuggle in any type behind an `accept` you
+believe is enforced.
+
+A refused file never enters the model. Each refusal is reported through `reject`, one event per
+file, with a `reason` of `type`, `size`, `count` or `total-size` — in that order, so a wrong type
+is reported as such even when the file is also too big.
+
+Beware of `accept` written in MIME types alone: a file whose type the browser did not guess
+(`file.type === ''`, common with an extension the OS does not know) is refused by `image/*`. Spell
+the extensions alongside — `image/*,.heic`.
+
+<Canvas of={VFilePickerStories.Limits} />
+
+## Slots
+
+Every visible part can be replaced. `#browse` receives `open`, without which a custom button could
+no longer open the dialog; `#item` receives everything a row derives (the resolved icon, the
+thumbnail URL, the size already formatted, and `remove`) so nothing has to be recomputed;
+`#remove` receives `remove` and a ready-made `label` carrying the file name.
+
+<Canvas of={VFilePickerStories.CustomSlots} />
+
+## States
+
+`disabled` greys the zone through tokens — never through opacity — and makes dialog and drop inert.
+`readonly` keeps the selection on screen but takes every way of changing it away.
+
+<Canvas of={VFilePickerStories.States} />
+
+## What this component does not have
+
+- **No `size` prop.** The zone is a surface, not a control: it stays outside the design system's
+  xs–xl height scale, as `VAccordion` does. Its dimensions come from dedicated tokens.
+- **No way to switch dropping off.** A component whose whole function is to be a drop zone cannot
+  stop being one without its visuals lying; `disabled` and `readonly` cover the real need.
+- **No `invalid` prop.** There is no field to carry `aria-invalid`, and refusals already surface
+  through `reject`.
+
+## Accessibility
+
+- The hidden file input is out of the tab order and out of the accessibility tree: the browse
+  button — or the zone once it is the button — is the single stop.
+- The zone is a real `<button>` only when it holds no other control. A button inside a button is
+  invalid markup and an `aria`/interactive nesting violation, which is why the preview list always
+  sits outside the zone.
+- Do **not** put an `aria-label` on the component while the browse button is shown: the attribute
+  lands on a generic container, where it is both inert and reported as a prohibited attribute. Name
+  the zone through `title` instead. A development warning points this out.
+- The preview list is a real `<ul>` with an accessible name, one `<li>` per file, and each remove
+  button is named with the file it removes. Removing a row moves focus to the row that takes its
+  place, or back to the browse control once the list empties.
+- Thumbnails are decorative (`alt=""`): the file name sits right next to them.
+- The drag state is not signalled by colour alone under forced colours — the dashed border turns
+  solid.
+- This component's accessible labels come from the design system dictionary: they translate
+  globally (see **Foundations › Internationalization**).

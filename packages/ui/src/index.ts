@@ -156,3 +156,17 @@ export type {
   CalendarEventTimes,
   CalendarView,
 } from './components/VCalendar/types'
+export { default as VFileInput } from './components/VFileInput/VFileInput.vue'
+export type {
+  FileInputDisplay,
+  FileInputRejectReason,
+  FileInputRejection,
+} from './components/VFileInput/VFileInput.vue'
+export { default as VFilePicker } from './components/VFilePicker/VFilePicker.vue'
+export type {
+  FilePickerPreview,
+  FilePickerRejectReason,
+  FilePickerRejection,
+  FilePickerRow,
+} from './components/VFilePicker/VFilePicker.vue'
+export type { FileKind } from './components/VFilePicker/fileKind'
