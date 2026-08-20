@@ -11,10 +11,11 @@
  * harvesting: the headings it measures are in the prose, not in itself.
  */
 const { outline, activeId, jumpTo } = useDocsOutline()
+const { t } = useI18n()
 </script>
 
 <template>
-  <nav class="vd-outline" aria-label="On this page">
+  <nav class="vd-outline" :aria-label="t('common.outline')">
     <p
       style="
         margin: 0 0 8px;
@@ -25,7 +26,7 @@ const { outline, activeId, jumpTo } = useDocsOutline()
         color: var(--vectis-color-text-muted);
       "
     >
-      On this page
+      {{ t('common.outline') }}
     </p>
     <a
       v-for="heading in outline"

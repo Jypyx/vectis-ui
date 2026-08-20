@@ -29,18 +29,29 @@ import {
 
 const route = useRoute()
 const { theme, setTheme, toggleTheme } = useDocsTheme()
-const { locale, localeOptions, setDocsLocale } = useDocsLocale()
 const { openSearch } = useDocsSearch()
 
-const isHome = computed(() => route.path === '/')
-const isDocs = computed(() => route.path.startsWith('/docs'))
+const { t, locale } = useI18n()
+const localePath = useLocalePath()
+const switchLocalePath = useSwitchLocalePath()
+
+/**
+ * "You are here", measured on the LOCALE-STRIPPED path.
+ *
+ * `route.path` carries the `/fr` segment, so a literal `startsWith('/docs')` would report every
+ * French page as being nowhere and leave both header buttons untinted. `localePath` gives the
+ * same two destinations in the current language, which is what the comparison needs.
+ */
+const homePath = computed(() => localePath('/'))
+const isHome = computed(() => route.path === homePath.value)
+const isDocs = computed(() => route.path.startsWith(localePath('/docs')))
 
 /** The current destination is tinted, the others are bare — the whole of the "you are here". */
 const variantFor = (active: boolean) => (active ? 'soft' : 'ghost')
 
 const themeIcon = computed(() => (theme.value === 'dark' ? 'dark_mode' : 'light_mode'))
 const themeLabel = computed(() =>
-  theme.value === 'dark' ? 'Switch to the light theme' : 'Switch to the dark theme',
+  theme.value === 'dark' ? t('common.header.toLight') : t('common.header.toDark'),
 )
 
 /**
@@ -55,8 +66,13 @@ const hotkeyStyle = {
   '--control-gap': '3px',
 }
 
-/** Where "Docs" and "Get started" go: the section has no index of its own. */
-const DOCS_HOME = '/docs/installation'
+/**
+ * Where "Docs" and "Get started" go: the section has no index of its own.
+ *
+ * Through `localePath` because a bare `/docs/installation` would drop a French reader back into
+ * the English site — silently, since the page exists and renders.
+ */
+const docsHome = computed(() => localePath('/docs/installation'))
 </script>
 
 <template>
@@ -86,7 +102,7 @@ const DOCS_HOME = '/docs/installation'
   >
     <div class="vd-limit vd-header-row">
       <NuxtLink
-        to="/"
+        :to="homePath"
         style="
           display: flex;
           align-items: center;
@@ -104,8 +120,8 @@ const DOCS_HOME = '/docs/installation'
         />
       </NuxtLink>
 
-      <nav class="vd-nav-links" aria-label="Main">
-        <NuxtLink to="/" custom>
+      <nav class="vd-nav-links" :aria-label="t('common.header.mainNav')">
+        <NuxtLink :to="homePath" custom>
           <template #default="{ href, navigate }">
             <VButton
               :variant="variantFor(isHome)"
@@ -114,11 +130,11 @@ const DOCS_HOME = '/docs/installation'
               :href="href ?? undefined"
               @click="navigate"
             >
-              Home
+              {{ t('common.header.home') }}
             </VButton>
           </template>
         </NuxtLink>
-        <NuxtLink :to="DOCS_HOME" custom>
+        <NuxtLink :to="docsHome" custom>
           <template #default="{ href, navigate }">
             <VButton
               :variant="variantFor(isDocs)"
@@ -127,7 +143,7 @@ const DOCS_HOME = '/docs/installation'
               :href="href ?? undefined"
               @click="navigate"
             >
-              Docs
+              {{ t('common.header.docs') }}
             </VButton>
           </template>
         </NuxtLink>
@@ -141,12 +157,12 @@ const DOCS_HOME = '/docs/installation'
         <button
           type="button"
           class="vd-search"
-          aria-label="Search the documentation"
+          :aria-label="t('common.search.label')"
           aria-keyshortcuts="Meta+K Control+K"
           @click="openSearch"
         >
           <VIcon name="search" :size="20" />
-          <span class="vd-search-text">Search</span>
+          <span class="vd-search-text">{{ t('common.search.open') }}</span>
           <span class="vd-search-hot">
             <!--
               The shortcut is the library's own component doing its own job: `listen` attaches
@@ -176,6 +192,13 @@ const DOCS_HOME = '/docs/installation'
           />
         </span>
 
+        <!--
+          Each language is a real LINK, not a click handler, and that is what publishes the
+          French site: the prerender crawler follows anchors, so `/fr/…` is reachable from every
+          page of the English one and vice versa. `switchLocalePath` keeps the reader on the
+          page they are reading — including on the dynamic stub route, where a hard-coded
+          `/fr/` would drop them at the top of the documentation instead.
+        -->
         <span class="vd-from-768">
           <VMenu placement="bottom-end" size="sm" width="13rem">
             <template #trigger="{ triggerProps }">
@@ -189,21 +212,29 @@ const DOCS_HOME = '/docs/installation'
                 {{ locale.toUpperCase() }}
               </VButton>
             </template>
-            <VMenuGroup label="Interface language">
-              <VMenuItem
+            <VMenuGroup :label="t('common.header.language')">
+              <NuxtLink
                 v-for="option in localeOptions"
-                :key="option.id"
-                :label="option.label"
-                :sublabel="option.sublabel"
-                :selected="locale === option.id"
-                @select="setDocsLocale(option.id)"
-              />
+                :key="option.code"
+                :to="switchLocalePath(option.code)"
+                custom
+              >
+                <template #default="{ href, navigate }">
+                  <VMenuItem
+                    :label="option.label"
+                    :sublabel="option.sublabel"
+                    :selected="locale === option.code"
+                    :href="href ?? undefined"
+                    @click="navigate"
+                  />
+                </template>
+              </NuxtLink>
             </VMenuGroup>
           </VMenu>
         </span>
 
         <span class="vd-from-1024">
-          <NuxtLink :to="DOCS_HOME" custom>
+          <NuxtLink :to="docsHome" custom>
             <template #default="{ href, navigate }">
               <VButton
                 variant="solid"
@@ -213,7 +244,7 @@ const DOCS_HOME = '/docs/installation'
                 :href="href ?? undefined"
                 @click="navigate"
               >
-                Get started
+                {{ t('common.header.getStarted') }}
               </VButton>
             </template>
           </NuxtLink>
@@ -223,7 +254,7 @@ const DOCS_HOME = '/docs/installation'
           <VMenu placement="bottom-end" size="md" width="15rem">
             <template #trigger="{ triggerProps }">
               <VIconButton
-                label="Open the navigation"
+                :label="t('common.header.openNavigation')"
                 icon="menu"
                 variant="ghost"
                 tone="neutral"
@@ -232,20 +263,20 @@ const DOCS_HOME = '/docs/installation'
               />
             </template>
 
-            <NuxtLink to="/" custom>
+            <NuxtLink :to="homePath" custom>
               <template #default="{ href, navigate }">
                 <VMenuItem
-                  label="Home"
+                  :label="t('common.header.home')"
                   :href="href ?? undefined"
                   :selected="isHome"
                   @click="navigate"
                 />
               </template>
             </NuxtLink>
-            <NuxtLink :to="DOCS_HOME" custom>
+            <NuxtLink :to="docsHome" custom>
               <template #default="{ href, navigate }">
                 <VMenuItem
-                  label="Docs"
+                  :label="t('common.header.docs')"
                   :href="href ?? undefined"
                   :selected="isDocs"
                   @click="navigate"
@@ -254,15 +285,15 @@ const DOCS_HOME = '/docs/installation'
             </NuxtLink>
 
             <VMenuSeparator />
-            <VMenuGroup label="Colour scheme">
+            <VMenuGroup :label="t('common.header.colourScheme')">
               <VMenuItem
-                label="Light"
+                :label="t('common.header.light')"
                 icon-start="light_mode"
                 :selected="theme === 'light'"
                 @select="setTheme('light')"
               />
               <VMenuItem
-                label="Dark"
+                :label="t('common.header.dark')"
                 icon-start="dark_mode"
                 :selected="theme === 'dark'"
                 @select="setTheme('dark')"
@@ -270,14 +301,22 @@ const DOCS_HOME = '/docs/installation'
             </VMenuGroup>
 
             <VMenuSeparator />
-            <VMenuGroup label="Language">
-              <VMenuItem
-                v-for="option in localeOptions.slice(0, 2)"
-                :key="option.id"
-                :label="option.label"
-                :selected="locale === option.id"
-                @select="setDocsLocale(option.id)"
-              />
+            <VMenuGroup :label="t('common.header.language')">
+              <NuxtLink
+                v-for="option in localeOptions"
+                :key="option.code"
+                :to="switchLocalePath(option.code)"
+                custom
+              >
+                <template #default="{ href, navigate }">
+                  <VMenuItem
+                    :label="option.label"
+                    :selected="locale === option.code"
+                    :href="href ?? undefined"
+                    @click="navigate"
+                  />
+                </template>
+              </NuxtLink>
             </VMenuGroup>
           </VMenu>
         </span>

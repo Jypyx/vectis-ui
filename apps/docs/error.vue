@@ -19,9 +19,21 @@ const props = defineProps<{ error: NuxtError }>()
 
 const notFound = computed(() => props.error.statusCode === 404)
 
-useHead({ title: () => (notFound.value ? 'Page not found' : 'Something went wrong') })
+const { t } = useI18n()
+const localePath = useLocalePath()
 
-const leave = (to: string) => clearError({ redirect: to })
+useHead({
+  title: () => (notFound.value ? t('error.notFoundTitle') : t('error.errorTitle')),
+})
+
+/*
+ * `localePath` on the way out, so a French reader who mistypes a French URL is sent back into
+ * the French site. It is a best effort and not a guarantee: GitHub Pages serves the single
+ * `404.html` for anything it does not recognise, and that file is prerendered in the default
+ * locale — an unknown `/fr/…` address therefore shows the English page before offering these
+ * two ways back.
+ */
+const leave = (to: string) => clearError({ redirect: localePath(to) })
 </script>
 
 <template>
@@ -47,7 +59,7 @@ const leave = (to: string) => clearError({ redirect: to })
           letter-spacing: var(--vectis-text-heading-1-tracking);
         "
       >
-        {{ notFound ? 'This page does not exist' : 'Something went wrong' }}
+        {{ notFound ? t('error.notFoundHeading') : t('error.errorTitle') }}
       </h1>
       <p
         style="
@@ -58,11 +70,10 @@ const leave = (to: string) => clearError({ redirect: to })
         "
       >
         <template v-if="notFound">
-          The address may be out of date, or the component may be listed under another name. The
-          documentation's own search — Ctrl or ⌘ then K — covers every page and every component.
+          {{ t('error.notFoundBody') }}
         </template>
         <template v-else>
-          {{ error.message || 'The page could not be rendered.' }}
+          {{ error.message || t('error.errorBody') }}
         </template>
       </p>
       <div style="display: flex; flex-wrap: wrap; gap: 12px">
@@ -73,10 +84,10 @@ const leave = (to: string) => clearError({ redirect: to })
           icon-end="arrow_right_alt"
           @click="leave('/docs/installation')"
         >
-          Go to the documentation
+          {{ t('error.toDocs') }}
         </VButton>
         <VButton variant="outline" tone="neutral" size="md" @click="leave('/')">
-          Back to the home page
+          {{ t('error.toHome') }}
         </VButton>
       </div>
     </main>

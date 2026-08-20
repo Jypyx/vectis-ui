@@ -1,55 +1,31 @@
 /**
- * The language the DESIGN SYSTEM speaks on this site.
+ * The language of the site, which is the language of everything on it.
  *
- * It changes what the components say — a field's "Clear", a dialog's "Close", a calendar's
- * month names — and not the documentation's own prose, which is written in English. That is
- * the honest reading of the library's own split: the WORDS come from a dictionary, the
- * FORMATS derive from `Intl` from the locale tag. Picking German with no German dictionary
- * registered therefore already gives German months, first day of week and hour cycle, with
- * the labels left in English. A coherent degraded state, and the point of the menu.
+ * One choice drives two things at once: the documentation's own prose, served as prerendered
+ * HTML under `/` or `/fr/`, and the words the design system's components render inside the
+ * demos — a field's "Clear", a dialog's "Close", a calendar's month names. They used to be
+ * separate, and separating them was a lie the header told: the menu said "Interface language"
+ * while translating nothing but the demos.
  *
- * The library accepts one locale per process, so the choice is applied after hydration
- * rather than at prerender: the artefact is English for everyone, and a stored preference
- * settles one tick later. What that costs is a handful of `aria-label`s, which is why it is
- * an acceptable price here and would not be on an application.
+ * The URL is the source of truth, not `localStorage`. That is what makes a language shareable:
+ * a French reader sending a link sends the French page, and a returning reader is wherever
+ * they left off rather than wherever a cookie says. `plugins/vectis.ts` is what carries the
+ * route's locale down into the library.
+ *
+ * The library's own split still holds and is worth remembering when reading a demo: the WORDS
+ * come from a dictionary, the FORMATS from `Intl` on the tag. That is why the tags below are
+ * full ones — `en-GB` and `fr-FR`, not `en` and `fr`.
  */
-import { setLocale } from '@vectis/ui'
-
-export type DocsLocaleId = 'en' | 'fr' | 'de' | 'ja'
-
 export interface DocsLocaleOption {
-  id: DocsLocaleId
-  /** What `setLocale` is given: a full BCP 47 tag, since the formats derive from it. */
-  tag: string
+  /** The route prefix segment, and what `switchLocalePath` is given. */
+  code: 'en' | 'fr'
+  /** The language's own name for itself. Never translated — an endonym has no translation. */
   label: string
-  /** The tag, plus a warning where the library ships no dictionary for that language. */
+  /** The BCP 47 tag handed to the library, shown so the formats/words split stays visible. */
   sublabel: string
 }
 
-export const LOCALE_STORAGE_KEY = 'vectis-docs-locale'
-
-/** Only `en` and `fr` have dictionaries; the other two are here to show the split working. */
 export const localeOptions: DocsLocaleOption[] = [
-  { id: 'en', tag: 'en-GB', label: 'English', sublabel: 'en-GB' },
-  { id: 'fr', tag: 'fr-FR', label: 'Français', sublabel: 'fr-FR' },
-  { id: 'de', tag: 'de-DE', label: 'Deutsch', sublabel: 'de-DE · dictionary missing' },
-  { id: 'ja', tag: 'ja-JP', label: '日本語', sublabel: 'ja-JP · dictionary missing' },
+  { code: 'en', label: 'English', sublabel: 'en-GB' },
+  { code: 'fr', label: 'Français', sublabel: 'fr-FR' },
 ]
-
-export function useDocsLocale() {
-  const locale = useState<DocsLocaleId>('docs-locale', () => 'en')
-
-  function setDocsLocale(next: DocsLocaleId) {
-    const option = localeOptions.find((entry) => entry.id === next)
-    if (!option) return
-    try {
-      localStorage.setItem(LOCALE_STORAGE_KEY, next)
-    } catch {
-      // Persistence is a convenience; losing it must not lose the switch itself.
-    }
-    locale.value = next
-    setLocale(option.tag)
-  }
-
-  return { locale, localeOptions, setDocsLocale }
-}

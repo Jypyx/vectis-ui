@@ -11,28 +11,61 @@ import { VButton } from '@vectis/ui'
 
 import { components } from '~/content/nav'
 
-useHead({ title: 'A modern UI library for HTML and CSS lovers' })
+const { t } = useI18n()
+const localePath = useLocalePath()
+
+useHead({ title: () => t('home.documentTitle') })
 
 const repositoryUrl = 'https://github.com/Jypyx/vectis-ui'
 
-const DOCS_HOME = '/docs/installation'
+const docsHome = computed(() => localePath('/docs/installation'))
 
 const installCode = 'pnpm add @vectis/ui vue'
 const importCode = `import { VButton } from '@vectis/ui'
 import '@vectis/ui/styles.css'`
 
-const codeStyle =
-  'font-family: var(--vectis-font-family-mono); font-size: var(--vectis-text-code-size)'
+/**
+ * The three decisions, as data.
+ *
+ * They were three copies of the same twenty-line `<article>` before the prose moved out; with
+ * the words gone the only thing that differed between them was two keys, so the markup is
+ * written once and the loop supplies those. The card's own chrome moved to a class in the
+ * scoped block for the same reason — an inline style cannot be written once and reused.
+ */
+const cards = [
+  { title: 'home.htmlFirstTitle', body: 'home.htmlFirstBody' },
+  { title: 'home.tokensTitle', body: 'home.tokensBody' },
+  { title: 'home.overridesTitle', body: 'home.overridesBody' },
+]
 
 /** One entry per exported component family — the same list the sidebar is built from. */
 const componentCount = components.length
+
+/**
+ * The figures band. Three of the four values are bare numbers and stay here; the fourth carries
+ * a unit and a decimal mark, both of which are language, so it comes from the catalogue.
+ */
+const stats = computed(() => [
+  { value: String(componentCount), caption: t('home.statFamilies') },
+  { value: '26', caption: t('home.statPalettes') },
+  { value: t('home.statCssValue'), caption: t('home.statCss') },
+  { value: '0', caption: t('home.statDeps') },
+])
 </script>
 
 <template>
   <main class="vd-home">
     <div class="vd-limit vd-hero">
       <div>
-        <h1
+        <!--
+          The headline comes from the catalogue WITH its line break and its accent span: where a
+          headline breaks is a decision about the sentence, and the two languages break in
+          different places. The accent colour is applied from the scoped block through `:deep`,
+          since content rendered as raw HTML carries no scope attribute of its own.
+        -->
+        <DocsProse
+          tag="h1"
+          keypath="home.heroTitle"
           style="
             margin: 0 0 16px;
             font-family: var(--vectis-font-family-display);
@@ -42,11 +75,9 @@ const componentCount = components.length
             letter-spacing: var(--vectis-text-display-tracking);
             text-wrap: pretty;
           "
-        >
-          A modern UI library<br />
-          <span style="color: var(--vectis-color-accent)">for HTML and CSS lovers</span>
-        </h1>
-        <p
+        />
+        <DocsProse
+          keypath="home.heroBody"
           style="
             margin: 0 auto 28px;
             max-width: 52ch;
@@ -55,12 +86,9 @@ const componentCount = components.length
             color: var(--vectis-color-text-muted);
             text-wrap: pretty;
           "
-        >
-          Vectis UI is a component library built on the latest HTML and CSS features, with no
-          compromises and no need for external plugins.
-        </p>
+        />
         <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center">
-          <NuxtLink :to="DOCS_HOME" custom>
+          <NuxtLink :to="docsHome" custom>
             <template #default="{ href, navigate }">
               <VButton
                 variant="solid"
@@ -70,7 +98,7 @@ const componentCount = components.length
                 :href="href ?? undefined"
                 @click="navigate"
               >
-                Install the library
+                {{ t('home.heroCta') }}
               </VButton>
             </template>
           </NuxtLink>
@@ -95,9 +123,10 @@ const componentCount = components.length
             letter-spacing: var(--vectis-text-heading-1-tracking);
           "
         >
-          Why it exists
+          {{ t('home.whyHeading') }}
         </h2>
-        <p
+        <DocsProse
+          keypath="home.whyBody"
           style="
             margin: 0 0 28px;
             max-width: 64ch;
@@ -105,19 +134,9 @@ const componentCount = components.length
             line-height: 1.65;
             color: var(--vectis-color-text-muted);
           "
-        >
-          Three decisions carry the whole library. Each one is stated with its reason, because a
-          rule without a reason is a rule nobody can apply to the next case.
-        </p>
+        />
         <div class="vd-grid-3">
-          <article
-            style="
-              padding: 20px;
-              border: 1px solid var(--vectis-color-border);
-              border-radius: var(--vectis-radius-surface);
-              background: var(--vectis-color-surface-raised);
-            "
-          >
+          <article v-for="card in cards" :key="card.title" class="vd-home-card">
             <h3
               style="
                 margin: 0 0 8px;
@@ -126,83 +145,17 @@ const componentCount = components.length
                 font-weight: var(--vectis-text-heading-3-weight);
               "
             >
-              HTML and CSS first
+              {{ t(card.title) }}
             </h3>
-            <p
+            <DocsProse
+              :keypath="card.body"
               style="
                 margin: 0;
                 font-size: var(--vectis-text-body-md-size);
                 line-height: 1.6;
                 color: var(--vectis-color-text-muted);
               "
-            >
-              Accordions are <code :style="codeStyle">&lt;details&gt;</code>, menus and tooltips
-              rest on the top layer with no positioning library, forms report validity through
-              <code :style="codeStyle">:user-invalid</code>. Where behavioural JavaScript exists, a
-              comment in the file justifies it.
-            </p>
-          </article>
-          <article
-            style="
-              padding: 20px;
-              border: 1px solid var(--vectis-color-border);
-              border-radius: var(--vectis-radius-surface);
-              background: var(--vectis-color-surface-raised);
-            "
-          >
-            <h3
-              style="
-                margin: 0 0 8px;
-                font-family: var(--vectis-font-family-display);
-                font-size: var(--vectis-text-heading-3-size);
-                font-weight: var(--vectis-text-heading-3-weight);
-              "
-            >
-              One typed token source
-            </h3>
-            <p
-              style="
-                margin: 0;
-                font-size: var(--vectis-text-body-md-size);
-                line-height: 1.6;
-                color: var(--vectis-color-text-muted);
-              "
-            >
-              Primitives in OKLCH, then semantic roles — and a component may only name the second. A
-              raw hex in component CSS is treated as a missing token, which is what lets an
-              application repoint the accent without a component knowing.
-            </p>
-          </article>
-          <article
-            style="
-              padding: 20px;
-              border: 1px solid var(--vectis-color-border);
-              border-radius: var(--vectis-radius-surface);
-              background: var(--vectis-color-surface-raised);
-            "
-          >
-            <h3
-              style="
-                margin: 0 0 8px;
-                font-family: var(--vectis-font-family-display);
-                font-size: var(--vectis-text-heading-3-size);
-                font-weight: var(--vectis-text-heading-3-weight);
-              "
-            >
-              Overrides without a fight
-            </h3>
-            <p
-              style="
-                margin: 0;
-                font-size: var(--vectis-text-body-md-size);
-                line-height: 1.6;
-                color: var(--vectis-color-text-muted);
-              "
-            >
-              The CSS lives in four layers, and any non-layered consumer style wins automatically.
-              That is the intended override mechanism, not a loophole: overriding a component never
-              calls for a specificity war.
-            </p>
+            />
           </article>
         </div>
       </div>
@@ -221,20 +174,18 @@ const componentCount = components.length
               letter-spacing: var(--vectis-text-heading-1-tracking);
             "
           >
-            Three lines to install
+            {{ t('home.installHeading') }}
           </h2>
-          <p
+          <DocsProse
+            keypath="home.installBody"
             style="
               margin: 0 0 20px;
               font-size: 16px;
               line-height: 1.65;
               color: var(--vectis-color-text-muted);
             "
-          >
-            The package is pre-built as ESM and SSR-safe. Named imports are tree-shaken by Vite and
-            Nitro, so no <code :style="codeStyle">build.transpile</code> entry is required.
-          </p>
-          <NuxtLink :to="DOCS_HOME" custom>
+          />
+          <NuxtLink :to="docsHome" custom>
             <template #default="{ href, navigate }">
               <VButton
                 variant="soft"
@@ -244,7 +195,7 @@ const componentCount = components.length
                 :href="href ?? undefined"
                 @click="navigate"
               >
-                Read the installation guide
+                {{ t('home.installCta') }}
               </VButton>
             </template>
           </NuxtLink>
@@ -258,7 +209,7 @@ const componentCount = components.length
 
     <section class="vd-limit" style="padding-block: 48px">
       <div class="vd-stats">
-        <div>
+        <div v-for="stat in stats" :key="stat.caption">
           <p
             style="
               margin: 0;
@@ -269,7 +220,7 @@ const componentCount = components.length
               letter-spacing: var(--vectis-text-display-tracking);
             "
           >
-            {{ componentCount }}
+            {{ stat.value }}
           </p>
           <p
             style="
@@ -278,76 +229,7 @@ const componentCount = components.length
               color: var(--vectis-color-text-muted);
             "
           >
-            component families
-          </p>
-        </div>
-        <div>
-          <p
-            style="
-              margin: 0;
-              font-family: var(--vectis-font-family-display);
-              font-size: var(--vectis-text-display-size);
-              font-weight: var(--vectis-text-display-weight);
-              line-height: 1.1;
-              letter-spacing: var(--vectis-text-display-tracking);
-            "
-          >
-            26
-          </p>
-          <p
-            style="
-              margin: 4px 0 0;
-              font-size: var(--vectis-text-body-sm-size);
-              color: var(--vectis-color-text-muted);
-            "
-          >
-            OKLCH palettes, five wired to roles
-          </p>
-        </div>
-        <div>
-          <p
-            style="
-              margin: 0;
-              font-family: var(--vectis-font-family-display);
-              font-size: var(--vectis-text-display-size);
-              font-weight: var(--vectis-text-display-weight);
-              line-height: 1.1;
-              letter-spacing: var(--vectis-text-display-tracking);
-            "
-          >
-            6.7 kB
-          </p>
-          <p
-            style="
-              margin: 4px 0 0;
-              font-size: var(--vectis-text-body-sm-size);
-              color: var(--vectis-color-text-muted);
-            "
-          >
-            gzip, the core stylesheet
-          </p>
-        </div>
-        <div>
-          <p
-            style="
-              margin: 0;
-              font-family: var(--vectis-font-family-display);
-              font-size: var(--vectis-text-display-size);
-              font-weight: var(--vectis-text-display-weight);
-              line-height: 1.1;
-              letter-spacing: var(--vectis-text-display-tracking);
-            "
-          >
-            0
-          </p>
-          <p
-            style="
-              margin: 4px 0 0;
-              font-size: var(--vectis-text-body-sm-size);
-              color: var(--vectis-color-text-muted);
-            "
-          >
-            runtime dependencies beyond Vue
+            {{ stat.caption }}
           </p>
         </div>
       </div>
@@ -365,9 +247,10 @@ const componentCount = components.length
                 font-weight: var(--vectis-text-heading-2-weight);
               "
             >
-              Accessibility, guaranteed
+              {{ t('home.a11yHeading') }}
             </h3>
-            <ul
+            <DocsProseList
+              keypath="home.a11yPoints"
               style="
                 margin: 0;
                 padding-inline-start: 20px;
@@ -375,21 +258,7 @@ const componentCount = components.length
                 line-height: 1.65;
                 color: var(--vectis-color-text-muted);
               "
-            >
-              <li>The ARIA menu pattern: roving focus, focus returned to the trigger.</li>
-              <li>
-                <code :style="codeStyle">role="switch"</code> on VSwitch, announced as on or off
-                rather than ticked.
-              </li>
-              <li>
-                Tooltips linked by <code :style="codeStyle">aria-describedby</code> and dismissible
-                with Escape.
-              </li>
-              <li>
-                <code :style="codeStyle">prefers-reduced-motion</code> honoured in every component:
-                transitions stop, loops slow down.
-              </li>
-            </ul>
+            />
           </article>
           <article>
             <h3
@@ -400,32 +269,26 @@ const componentCount = components.length
                 font-weight: var(--vectis-text-heading-2-weight);
               "
             >
-              Browser support
+              {{ t('home.supportHeading') }}
             </h3>
-            <p
+            <DocsProse
+              keypath="home.supportBody"
               style="
                 margin: 0 0 12px;
                 font-size: 16px;
                 line-height: 1.65;
                 color: var(--vectis-color-text-muted);
               "
-            >
-              Chrome and Edge 125+, Safari 26+. Baseline with no compromise: the Popover API,
-              <code :style="codeStyle">&lt;dialog&gt;</code>,
-              <code :style="codeStyle">:has()</code>, <code :style="codeStyle">color-mix()</code>,
-              <code :style="codeStyle">@layer</code>.
-            </p>
-            <p
+            />
+            <DocsProse
+              keypath="home.supportFirefox"
               style="
                 margin: 0;
                 font-size: 16px;
                 line-height: 1.65;
                 color: var(--vectis-color-text-muted);
               "
-            >
-              CSS anchor positioning is not stable on Firefox, and there is deliberately no
-              JavaScript fallback: panels open there, they are simply not anchored to their trigger.
-            </p>
+            />
             <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px">
               <VButton
                 variant="outline"
@@ -463,6 +326,28 @@ const componentCount = components.length
  * circle from wherever it lands. Repointing the accent repaints the glow, with no hue written
  * as a number and no second place to keep in step.
  */
+/*
+ * Three rules the prose move made necessary, all of them for the same reason: content rendered
+ * from the message catalogue is raw HTML, so it carries no scope attribute and no inline style
+ * of its own. `:deep` is what reaches it — a plain scoped selector matches nothing there, and
+ * fails silently.
+ */
+.vd-home :deep(.vd-hero-accent) {
+  color: var(--vectis-color-accent);
+}
+.vd-home :deep(code) {
+  font-family: var(--vectis-font-family-mono);
+  font-size: var(--vectis-text-code-size);
+}
+
+/* The card chrome, written once now that the three cards are a loop rather than three copies. */
+.vd-home-card {
+  padding: 20px;
+  border: 1px solid var(--vectis-color-border);
+  border-radius: var(--vectis-radius-surface);
+  background: var(--vectis-color-surface-raised);
+}
+
 .vd-home {
   position: relative;
   /*

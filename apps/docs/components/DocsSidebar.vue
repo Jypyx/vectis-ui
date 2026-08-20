@@ -22,8 +22,15 @@ import { groups } from '~/content/nav'
 
 const route = useRoute()
 const { closeNav } = useDocsNav()
+const { t } = useI18n()
+const localePath = useLocalePath()
 
-const isCurrent = (slug: string) => route.path === `/docs/${slug}`
+/*
+ * Compared against the LOCALISED path, not a literal `/docs/${slug}`: on the French site every
+ * route carries the `/fr` segment, so the literal would match nothing and no row would ever be
+ * marked current — a rail that looks identical on all forty-nine pages.
+ */
+const isCurrent = (slug: string) => route.path === localePath(`/docs/${slug}`)
 
 /** Below 1024px the rail is an overlay over the article: following a link has to fold it. */
 function follow(navigate: (event: MouseEvent) => void, event: MouseEvent) {
@@ -33,18 +40,23 @@ function follow(navigate: (event: MouseEvent) => void, event: MouseEvent) {
 </script>
 
 <template>
-  <VSideNavigation label="Documentation" size="sm">
-    <template v-for="(group, index) in groups" :key="group.label">
+  <VSideNavigation :label="t('common.sidebar')" size="sm">
+    <template v-for="(group, index) in groups" :key="group.id">
       <VSideNavigationSeparator v-if="index > 0" />
-      <VSideNavigationGroup :label="group.label">
-        <NuxtLink v-for="page in group.entries" :key="page.slug" :to="`/docs/${page.slug}`" custom>
+      <VSideNavigationGroup :label="t(`nav.group.${group.id}`)">
+        <NuxtLink
+          v-for="page in group.entries"
+          :key="page.slug"
+          :to="localePath(`/docs/${page.slug}`)"
+          custom
+        >
           <template #default="{ href, navigate }">
             <VSideNavigationItem
               :href="href ?? undefined"
               :active="isCurrent(page.slug)"
               @click="follow(navigate, $event)"
             >
-              {{ page.title }}
+              {{ t(`nav.${page.slug}`) }}
             </VSideNavigationItem>
           </template>
         </NuxtLink>

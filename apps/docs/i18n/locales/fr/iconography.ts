@@ -1,0 +1,33 @@
+export default {
+  title: 'Iconographie',
+  lead: "Aucune police d'icônes n'est requise, et aucune n'est embarquée. Les icônes que la bibliothèque dessine elle-même sont des tracés SVG intégrés — répliques exactes de Material Symbols Rounded (graisse 400, GRAD 0, taille optique 24, Apache-2.0 © Google).",
+  weight:
+    "Elles pèsent environ 3,7 ko gzip et ne sont délibérément pas élaguables — la recherche se fait par chaîne à l'exécution, ce qui est le prix de l'autonomie du design system. Le registre intégré compte 34 icônes, et chaque entrée est un <code>[outline, filled?]</code> : le second tracé n'existe que là où l'axe FILL change réellement la géométrie, ce qui est le cas de 15 des 34.",
+  gridCaption: 'Troisième et quatrième, sixième et septième : le même nom, contour puis plein.',
+
+  orderHeading: "L'ordre de résolution",
+  orderBody:
+    "VIcon résout sa source dans cet ordre, et l'ordre EST le contrat : un <code>render</code> explicite → <code>src</code> → <code>name</code> (votre résolveur, puis le registre intégré, puis la police à ligatures) → le slot.",
+  noHeuristic:
+    "Une chaîne est TOUJOURS un nom ; une image ou un composant se déclare explicitement sous forme d'objet (<code>{ src }</code>, <code>{ component }</code>, <code>{ path }</code>, <code>{ text }</code>, <code>{ class }</code>). Il n'y a aucune heuristique, et c'est ce qui permet à un nom de style Iconify comme <code>mdi:close</code> d'atteindre votre résolveur intact au lieu d'être pris pour une adresse.",
+
+  wiringHeading: 'Brancher votre propre bibliothèque',
+  wiringBody:
+    'Le résolveur est consulté AVANT le registre intégré, sans quoi les icônes du design system resteraient Material pour un consommateur ayant branché sa propre bibliothèque. Trois fabriques sont livrées, une par famille de source : <code>ligatureIconResolver</code> pour une police dont la ligature est le glyphe, <code>classIconResolver</code> pour une police pilotée par une classe et un pseudo-élément, et <code>componentIconResolver</code> pour un jeu livré sous forme de composants.',
+  wiringWhere:
+    "Posez-le au niveau du module — un plugin Nuxt, <code>main.ts</code> — jamais dans un <code>setup()</code>, et jamais côté client seul : un résolveur installé après l'hydratation fait dessiner au navigateur des icônes différentes de celles que le serveur a envoyées.",
+
+  partialHeading: 'Correspondances partielles',
+  partialBody:
+    "Un résolveur qui répond <code>undefined</code> dit « je ne connais pas ce nom », et non « ne dessine rien » : VIcon retombe alors sur le registre, puis sur la ligature. C'est cette distinction qui rend utile de mapper cinq noms et de laisser le reste tranquille — ce que fait précisément ce site, dont le décor a besoin de cinq icônes que la bibliothèque n'a aucune raison de livrer.",
+  partialQuote:
+    "Une ligature non chargée affiche son propre NOM en texte brut, rogné à la boîte de l'icône. La mise en page survit dans les deux cas — mais voir un mot là où une icône devrait être est le symptôme d'un nom que rien n'a résolu.",
+
+  sizingHeading: 'Taille et sémantique',
+  sizingBody:
+    "Les icônes font 1em par défaut et suivent le texte environnant. Un parent pose le contexte via <code>--vectis-icon-size</code> et <code>--vectis-icon-opsz</code> — c'est exactement ce que fait <code>v-control</code> pour chaque taille de contrôle — et une prop <code>size</code> numérique l'emporte dessus. À noter : l'axe de taille optique n'atteint qu'une LIGATURE ; les tracés du registre sont dessinés à une seule taille optique et ne peuvent pas le suivre.",
+  semantics:
+    "Les icônes sont décoratives par défaut et portent <code>aria-hidden</code>. Donner un <code>label</code> à l'une d'elles la rend informative — ce qui est juste quand l'icône est la seule chose à dire ce que fait un contrôle, et faux quand le texte à côté le dit déjà.",
+  forcedColors:
+    'Elles sont rendues en <code>&lt;svg&gt;&lt;path&gt;</code> et jamais en fond masqué, pour une seule raison : sous le mode couleurs forcées de Windows, un fond masqué disparaît entièrement, alors que <code>fill: currentcolor</code> survit.',
+}

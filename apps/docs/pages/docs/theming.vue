@@ -2,7 +2,9 @@
 import { VButton, VChip } from '@vectis/ui'
 
 definePageMeta({ layout: 'docs' })
-useHead({ title: 'Theming' })
+
+const { t } = useI18n()
+useHead({ title: () => t('theming.title') })
 
 const darkCode = '<html data-theme="dark">'
 
@@ -20,79 +22,34 @@ const layersCode = `@layer vectis.reset, vectis.tokens, vectis.components, vecti
 </script>
 
 <template>
-  <h1>Theming</h1>
-  <p class="vd-lead">
-    Every customisation is a redefinition of custom properties. There is no rebuild, and no build
-    step to configure.
-  </p>
+  <h1>{{ t('theming.title') }}</h1>
+  <DocsProse class="vd-lead" keypath="theming.lead" />
 
-  <h2 id="token-architecture">Token architecture</h2>
-  <p>
-    Two levels of custom properties, generated from a typed TypeScript source in a format inspired
-    by the W3C DTCG.
-  </p>
-  <ul>
-    <li>
-      <strong>Primitives</strong> — 26 OKLCH palettes of eleven steps each
-      (<code>--vectis-color-indigo-500</code>), plus the space scale, type, radii, shadows,
-      durations and easings.
-    </li>
-    <li>
-      <strong>Semantic roles</strong>, the only ones a component may name:
-      <code>--vectis-color-surface</code>, <code>--vectis-color-text-muted</code>,
-      <code>--vectis-color-accent</code>, <code>--vectis-radius-interactive</code>,
-      <code>--vectis-focus-ring-color</code>.
-    </li>
-  </ul>
-  <p>
-    A component asks for the accent and never for a particular indigo, so an application can change
-    what the accent IS without a single component knowing. A raw hex in component CSS is treated as
-    a missing token.
-  </p>
-  <p>
-    Five palettes are wired to roles — gray for surfaces, text and borders, indigo for the accent,
-    and red, green and amber for danger, success and warning. The other twenty-one ship unused, so
-    pointing a role at one of them costs nothing and waits for no release. This site does exactly
-    that: its accent is violet.
-  </p>
+  <h2 id="token-architecture">{{ t('theming.architectureHeading') }}</h2>
+  <DocsProse keypath="theming.architectureIntro" />
+  <DocsProseList keypath="theming.levels" />
+  <DocsProse keypath="theming.architectureBody" />
+  <DocsProse keypath="theming.palettes" />
 
-  <h2 id="dark-mode">Dark mode</h2>
+  <h2 id="dark-mode">{{ t('theming.darkHeading') }}</h2>
   <DocsCode lang="html" :code="darkCode" />
-  <p>
-    Dark mode moves the ROLES, never the palette. <code>data-theme</code> works on any DOM subtree —
-    a dark panel inside a light page, or the reverse — and also drives <code>color-scheme</code>, so
-    scrollbars and native controls follow.
-  </p>
+  <DocsProse keypath="theming.darkBody" />
   <div class="vd-demo" data-theme="dark" style="background: var(--vectis-color-surface)">
     <VButton variant="solid" tone="accent" size="sm">Accent</VButton>
     <VButton variant="soft" tone="accent" size="sm">Soft</VButton>
     <VButton variant="outline" tone="neutral" size="sm">Outline</VButton>
     <VChip tone="success" size="sm">Deployed</VChip>
     <span style="font-size: var(--vectis-text-body-sm-size); color: var(--vectis-color-text-muted)">
-      One subtree, one attribute.
+      {{ t('theming.darkCaption') }}
     </span>
   </div>
-  <p>
-    There is deliberately no <code>prefers-color-scheme</code> query in the generated tokens:
-    following the system is a decision for the application, not the design system, and it is one
-    line of JavaScript setting the attribute. Doing it in CSS would make the choice un-overridable
-    by the reader.
-  </p>
+  <DocsProse keypath="theming.darkNoQuery" />
 
-  <h2 id="runtime-overrides">Runtime overrides</h2>
+  <h2 id="runtime-overrides">{{ t('theming.overridesHeading') }}</h2>
   <DocsCode lang="css" :code="coralCode" />
-  <p>
-    Colour is written in OKLCH, always, and for two reasons the library states explicitly: one step
-    of a palette is as light as the same step of any other, and mixing two of them passes through
-    the shades one expects rather than through grey. Never convert a token to hex.
-  </p>
+  <DocsProse keypath="theming.oklch" />
 
-  <h3 id="layers">Layers</h3>
-  <p>
-    The CSS lives in layers — <code>vectis.reset</code> &lt; <code>vectis.tokens</code> &lt;
-    <code>vectis.components</code> &lt; <code>vectis.utilities</code> — and any non-layered consumer
-    style wins automatically. That is the intended override mechanism, not a loophole: overriding a
-    component never calls for a specificity war.
-  </p>
+  <h3 id="layers">{{ t('theming.layersHeading') }}</h3>
+  <DocsProse keypath="theming.layers" />
   <DocsCode lang="css" :code="layersCode" />
 </template>

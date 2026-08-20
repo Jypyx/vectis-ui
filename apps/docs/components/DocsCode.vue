@@ -16,6 +16,8 @@ const props = defineProps<{
   code: string
 }>()
 
+const { t } = useI18n()
+
 const text = computed(() => props.code.replace(/^\n/, '').replace(/\s+$/, ''))
 
 async function copy() {
@@ -27,7 +29,7 @@ async function copy() {
     return
   }
   toast({
-    message: 'Copied to the clipboard',
+    message: t('common.code.copied'),
     placement: 'bottom-center',
     duration: 1600,
     closable: false,
@@ -40,7 +42,7 @@ async function copy() {
     <div class="vd-code-head">
       <span class="vd-code-lang">{{ lang }}</span>
       <VIconButton
-        label="Copy the code"
+        :label="t('common.code.copy')"
         icon="content_copy"
         variant="ghost"
         tone="neutral"

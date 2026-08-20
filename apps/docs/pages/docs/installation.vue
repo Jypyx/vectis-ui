@@ -2,8 +2,16 @@
 import { VButton } from '@vectis/ui'
 
 definePageMeta({ layout: 'docs' })
-useHead({ title: 'Installation' })
 
+const { t } = useI18n()
+useHead({ title: () => t('installation.title') })
+
+/*
+ * The samples are NOT translated, here or anywhere on the site: a demo has to match the code
+ * printed beside it, and the code is the same in every language. The heading `id`s are not
+ * translated either — they are the site's permalinks, and a reader who bookmarks
+ * `#component-css` must land there whichever language they read it in.
+ */
 const addCode = 'pnpm add @vectis/ui vue'
 
 const vueCode = `// main.ts
@@ -34,46 +42,25 @@ ${CLOSE_SCRIPT}
 </script>
 
 <template>
-  <h1>Installation</h1>
-  <p class="vd-lead">
-    The library is pre-built as ESM and SSR-safe. Named imports are tree-shaken by Vite and Nitro;
-    no <code>build.transpile</code> is required.
-  </p>
+  <h1>{{ t('installation.title') }}</h1>
+  <DocsProse class="vd-lead" keypath="installation.lead" />
 
   <DocsCode lang="bash" :code="addCode" />
 
-  <h2 id="vue-3">Vue 3</h2>
+  <h2 id="vue-3">{{ t('installation.vueHeading') }}</h2>
   <DocsCode lang="ts" :code="vueCode" />
-  <p>
-    <code>styles.css</code> is the core: the reset, the tokens and the chrome shared by every
-    component, 6.7 kB gzip. Each component's own CSS ships with the component and is pulled in by
-    the import you already write.
-  </p>
+  <DocsProse keypath="installation.vueBody" />
 
-  <h2 id="nuxt-3">Nuxt 3</h2>
+  <h2 id="nuxt-3">{{ t('installation.nuxtHeading') }}</h2>
   <DocsCode lang="ts" :code="nuxtCode" />
-  <p>
-    This site is that configuration: it is a Nuxt 3 application, prerendered to static files, which
-    is also what makes it an end-to-end test of the library's SSR safety — a component reaching for
-    <code>window</code> outside a handler would fail the build rather than the visitor.
-  </p>
+  <DocsProse keypath="installation.nuxtBody" />
 
-  <h3 id="component-css">Component CSS</h3>
-  <p>
-    Component CSS travels with the component as a plain static import, which Vite, Nitro and webpack
-    all turn into a render-blocking link — including for a lazily loaded route. Keep the client CSS
-    extracted to a file and the question of a flash does not arise.
-  </p>
-  <blockquote>
-    A page importing a single VButton downloads 7.25 kB gzip of CSS — the core plus that one
-    component's sheet. The other fifty-five sheets are never requested.
-  </blockquote>
+  <h3 id="component-css">{{ t('installation.cssHeading') }}</h3>
+  <DocsProse keypath="installation.cssBody" />
+  <DocsProse tag="blockquote" keypath="installation.cssQuote" />
 
-  <h2 id="what-you-get">What you get</h2>
-  <p>
-    Named exports only, so the bundler prunes what you do not use. The French dictionary is opt-in
-    for the same reason: not importing it is enough to leave it out.
-  </p>
+  <h2 id="what-you-get">{{ t('installation.getHeading') }}</h2>
+  <DocsProse keypath="installation.getBody" />
   <DocsCode lang="vue" :code="useCode" />
   <DocsDemo>
     <VButton variant="solid" tone="accent" size="md">Create</VButton>

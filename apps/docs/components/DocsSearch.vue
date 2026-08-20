@@ -18,6 +18,7 @@ import { VDialog, VHotkeys, VInput } from '@vectis/ui'
 
 const { open, query, results, closeSearch } = useDocsSearch()
 const router = useRouter()
+const { t } = useI18n()
 
 function go(to: string) {
   closeSearch()
@@ -52,7 +53,7 @@ function onEscape() {
     v-model:open="open"
     class="vd-modal"
     width="640px"
-    aria-label="Search the documentation"
+    :aria-label="t('common.search.label')"
     :closable="false"
   >
     <template #header>
@@ -61,7 +62,7 @@ function onEscape() {
         size="lg"
         type="search"
         icon-start="search"
-        placeholder="Search pages and components"
+        :placeholder="t('common.search.placeholder')"
         clearable
         style="flex: 1 1 auto"
         @keydown.enter="onEnter"
@@ -78,14 +79,14 @@ function onEscape() {
           </a>
         </template>
       </NuxtLink>
-      <p v-if="results.length === 0" class="vd-result-empty">No result</p>
+      <p v-if="results.length === 0" class="vd-result-empty">{{ t('common.search.empty') }}</p>
     </div>
 
     <template #footer>
       <span
         style="font-size: var(--vectis-text-caption-size); color: var(--vectis-color-text-subtle)"
       >
-        Titles of pages and components
+        {{ t('common.search.scope') }}
       </span>
       <VHotkeys keys="esc" size="xs" variant="flat" />
     </template>

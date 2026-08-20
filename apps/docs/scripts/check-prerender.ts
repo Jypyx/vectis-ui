@@ -23,7 +23,20 @@ const outDir = join(appRoot, '.output', 'public')
 const fileFor = (route: string) =>
   join(outDir, route === '/' ? 'index.html' : join(route, 'index.html'))
 
-const routes = ['/', '/docs', ...docRoutes()]
+/**
+ * The locale segments, mirroring `LOCALE_PREFIXES` in nuxt.config.ts.
+ *
+ * They are written out twice rather than shared, and deliberately: this script must be able to
+ * fail when the config and the navigation disagree, which it cannot do if it derives its
+ * expectations from the very file it is checking.
+ */
+const LOCALE_PREFIXES = ['', '/fr']
+
+const routes = LOCALE_PREFIXES.flatMap((prefix) => [
+  `${prefix}/`,
+  `${prefix}/docs`,
+  ...docRoutes(prefix),
+])
 const missing = routes.filter((route) => !existsSync(fileFor(route)))
 
 if (!existsSync(outDir)) {

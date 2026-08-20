@@ -12,6 +12,7 @@
 import { VButton } from '@vectis/ui'
 
 const { navOpen, toggleNav } = useDocsNav()
+const { t } = useI18n()
 </script>
 
 <template>
@@ -31,7 +32,7 @@ const { navOpen, toggleNav } = useDocsNav()
             :aria-expanded="navOpen"
             @click="toggleNav"
           >
-            Documentation
+            {{ t('common.sidebar') }}
           </VButton>
         </div>
 

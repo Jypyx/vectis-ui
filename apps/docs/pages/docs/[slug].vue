@@ -5,6 +5,9 @@
  * Nuxt prefers a static route over this one, so every written page resolves to its own file
  * and only the rest land here. A slug that is not in `content/nav.ts` at all is a genuine 404
  * rather than a stub — the inventory is the contract.
+ *
+ * One file, thirty-five routes, in each of two languages: translating it is what localises
+ * seventy of the site's hundred-odd pages.
  */
 import { VButton } from '@vectis/ui'
 
@@ -19,30 +22,31 @@ if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'No such page', fatal: true })
 }
 
-useHead({ title: () => page.value?.title ?? 'Not found' })
+const { t } = useI18n()
+const localePath = useLocalePath()
+
+const title = computed(() => (page.value ? t(`nav.${page.value.slug}`) : t('stub.notFound')))
+
+useHead({ title })
 
 const sourceUrl = 'https://github.com/Jypyx/vectis-ui/tree/main/packages/ui/src/components'
 </script>
 
 <template>
-  <h1>{{ page?.title }}</h1>
-  <p class="vd-lead">This page is not written yet.</p>
-  <p>
-    {{ page?.title }} exists upstream and is a legitimate part of the inventory; it is listed here
-    so the shape of the library is honest. It is absent because it has not been read in full, not
-    because it was judged unnecessary — and approximating it would document an API the library does
-    not have.
-  </p>
-  <blockquote>
-    Ask for it and it will be written the same way as the others: from the source, with values
-    unrounded.
-  </blockquote>
+  <h1>{{ title }}</h1>
+  <p class="vd-lead">{{ t('stub.lead') }}</p>
+  <!--
+    The body does NOT open on the component's name, unlike an earlier English-only draft.
+    "Avatar exists upstream and is…" needs an article and an agreement in French that the bare
+    noun cannot supply, and it would need a different one for each of the thirty-five. Starting
+    the sentence from "the component" costs the English nothing and makes one message serve all
+    of them in both languages.
+  -->
+  <DocsProse keypath="stub.body" />
+  <blockquote>{{ t('stub.quote') }}</blockquote>
 
-  <h2 id="in-the-meantime">In the meantime</h2>
-  <p>
-    The component's own stories and its <code>.mdx</code> page are the reference until then, and
-    they are generated from the same source this documentation would be.
-  </p>
+  <h2 id="in-the-meantime">{{ t('stub.meantimeHeading') }}</h2>
+  <DocsProse keypath="stub.meantime" />
   <div style="display: flex; flex-wrap: wrap; gap: 12px">
     <VButton
       variant="outline"
@@ -53,9 +57,9 @@ const sourceUrl = 'https://github.com/Jypyx/vectis-ui/tree/main/packages/ui/src/
       target="_blank"
       rel="noreferrer"
     >
-      Read the source
+      {{ t('stub.readSource') }}
     </VButton>
-    <NuxtLink to="/docs/installation" custom>
+    <NuxtLink :to="localePath('/docs/installation')" custom>
       <template #default="{ href, navigate }">
         <VButton
           variant="ghost"
@@ -64,7 +68,7 @@ const sourceUrl = 'https://github.com/Jypyx/vectis-ui/tree/main/packages/ui/src/
           :href="href ?? undefined"
           @click="navigate"
         >
-          Back to installation
+          {{ t('stub.backToInstallation') }}
         </VButton>
       </template>
     </NuxtLink>

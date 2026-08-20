@@ -9,6 +9,16 @@ import { docRoutes } from './content/nav'
 const BASE_URL = '/vectis-ui/'
 
 /**
+ * The locale segment the i18n strategy puts in front of a route.
+ *
+ * `prefix_except_default` means the default locale keeps the bare paths — every URL the site has
+ * ever published stays valid — and the other language lives under its own segment. The empty
+ * string for `en` is not a placeholder: it is what `docRoutes()` prepends, so one call covers
+ * both locales with no branch.
+ */
+const LOCALE_PREFIXES = ['', '/fr']
+
+/**
  * The Vectis UI documentation site.
  *
  * It is a STATIC site: `nuxt generate` prerenders every route, and the artefact is published
@@ -20,13 +30,59 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-08-16',
   devtools: { enabled: false },
 
+  modules: ['@nuxtjs/i18n'],
+
+  /**
+   * English and French, both PRERENDERED.
+   *
+   * The site is an artefact on GitHub Pages, so a language has to exist as a file: a
+   * client-side swap after hydration would ship English HTML to a French reader, flash, and
+   * be invisible to a crawler. Every `/fr/…` page below is therefore rendered at build time,
+   * French words included.
+   *
+   * Version note: this is `@nuxtjs/i18n` 9, not 10 — v10 depends on `@nuxt/kit` 4 and
+   * `vue-router` 5, which is Nuxt 4. Upgrading the module means upgrading the app first.
+   */
+  i18n: {
+    locales: [
+      { code: 'en', language: 'en-GB', file: 'en.ts', name: 'English' },
+      { code: 'fr', language: 'fr-FR', file: 'fr.ts', name: 'Français' },
+    ],
+    defaultLocale: 'en',
+    // The default locale keeps the bare paths, so no URL this site has published ever breaks.
+    strategy: 'prefix_except_default',
+    langDir: 'locales',
+    lazy: true,
+    // Stated rather than left to the default filename: it carries the decision that messages are
+    // plain text, without which `@import` in a sentence fails the build. See the file itself.
+    vueI18n: './i18n.config.ts',
+    /*
+     * A prerendered artefact cannot negotiate a language. The cookie-driven redirect would run
+     * on the client, after the English HTML has already painted, and it would hijack a deep
+     * link one reader shared with another. The switcher in the header is the whole of the
+     * choice, and it changes the URL — which is what makes the choice shareable.
+     */
+    detectBrowserLanguage: false,
+    // Only used to make the `hreflang` alternates absolute; the path comes from `app.baseURL`.
+    baseUrl: 'https://jypyx.github.io',
+    bundle: {
+      // Set EXPLICITLY, and to false, on the module's own advice: the optimisation rewrites the
+      // `v-t` directive, is known to misfire, and is dropped in v10. This site never uses `v-t`
+      // — its prose goes through `DocsProse` — so there is nothing to optimise and the default
+      // buys a build warning for no gain.
+      optimizeTranslationDirective: false,
+    },
+  },
+
   app: {
     baseURL: BASE_URL,
     head: {
-      htmlAttrs: { lang: 'en' },
-      // `titleTemplate` lives in app.vue, not here: this block is serialized into the build,
-      // so it can only hold plain data — and a string template would print " · Vectis UI"
-      // on any page that sets no title of its own.
+      // `lang` is deliberately NOT set here: this block is serialized into the build, so a
+      // literal would say `en` on every French page too. `app.vue` sets it from the active
+      // locale instead, along with the `hreflang` alternates.
+      //
+      // `titleTemplate` lives in app.vue for the same reason — a string template would print
+      // " · Vectis UI" on any page that sets no title of its own.
       link: [{ rel: 'icon', type: 'image/svg+xml', href: `${BASE_URL}favicon.svg` }],
       script: [
         {
@@ -49,8 +105,26 @@ export default defineNuxtConfig({
       crawlLinks: true,
       // Belt as well as braces: the crawler follows the sidebar, but a slug that lost its
       // link would then vanish silently. The list comes from content/nav.ts, so a page
-      // cannot be in the navigation and absent from the build.
-      routes: ['/', '/404.html', ...docRoutes()],
+      // cannot be in the navigation and absent from the build — in either language.
+      routes: [
+        '/',
+        '/404.html',
+        ...LOCALE_PREFIXES.flatMap((prefix) => [`${prefix}/`, ...docRoutes(prefix)]),
+      ],
+      /**
+       * Drop the doubled-locale paths the crawler invents, e.g. `/fr/fr/docs`.
+       *
+       * They come from nitro's own link following, not from the site: every internal `href`
+       * here is absolute and carries the base URL (`/vectis-ui/fr/docs/installation`), and the
+       * crawler resolves a handful of them against the current page's directory after stripping
+       * that base — which turns an absolute link into a relative one and prepends `/fr/` a
+       * second time. Verified: nothing in the generated HTML links to such a path, and removing
+       * the `/fr/docs` redirect rule does not stop them, so the source is the crawler.
+       *
+       * What they cost is 16 kB of orphan page published for each, reachable only by typing it.
+       * The list is DERIVED from the prefixes above so a third language needs no edit here.
+       */
+      ignore: LOCALE_PREFIXES.filter(Boolean).map((prefix) => `${prefix}${prefix}`),
     },
   },
 
@@ -60,8 +134,10 @@ export default defineNuxtConfig({
     //
     // The target carries the base URL, and must: nitro writes it into a `<meta http-equiv>`
     // verbatim, without prepending anything — so a bare `/docs/installation` would send a
-    // GitHub Pages visitor to the root of the domain, which is not this site.
+    // GitHub Pages visitor to the root of the domain, which is not this site. The locale
+    // segment is part of the target for the same reason: `/fr/docs` must land in French.
     '/docs': { redirect: `${BASE_URL}docs/installation` },
+    '/fr/docs': { redirect: `${BASE_URL}fr/docs/installation` },
   },
 
   css: [

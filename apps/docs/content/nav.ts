@@ -1,116 +1,140 @@
 /**
  * The documentation's table of contents, and the ONE list of it.
  *
- * Three consumers read this file: the sidebar rail, the search index, and `nuxt.config.ts`,
- * which turns it into the prerender route list. Keeping them on one source is what makes it
- * impossible to add a page to the navigation and forget to build it, or to build a page
- * nobody can reach.
+ * Four consumers read this file: the sidebar rail, the search index, `nuxt.config.ts` — which
+ * turns it into the prerender route list — and the post-build check that every one of those
+ * routes really produced a file. Keeping them on one source is what makes it impossible to add
+ * a page to the navigation and forget to build it, or to build a page nobody can reach.
  *
  * `written` marks a page that has real content. A slug that is listed but not written renders
  * the stub page, which says so plainly — the inventory stays honest about the shape of the
  * library instead of hiding the components nobody has documented yet.
+ *
+ * There is deliberately NO title here. Titles are language, and this file is read by two NODE
+ * contexts (`nuxt.config.ts` and `scripts/check-prerender.ts`) where no vue-i18n exists; they
+ * only ever needed the slugs. The words live in the message catalogue under `nav.<slug>`, and
+ * `DocsSlug` below is what keeps the two in step: the catalogue is typed as a record over that
+ * union, so adding an entry here without translating it fails `nuxt typecheck` rather than
+ * printing a raw key in the sidebar.
  */
 
 export interface NavEntry {
   /** URL segment under /docs/, and the file name of the page component when written. */
   slug: string
-  /** What the sidebar, the search result and the browser tab show. */
-  title: string
   /** False renders the stub page rather than a page of its own. */
   written: boolean
 }
 
 export interface NavGroup {
-  /** The heading the rail puts above the group. */
-  label: string
+  /** The key of the heading the rail puts above the group, under `nav.group`. */
+  id: NavGroupId
   entries: NavEntry[]
 }
 
-const entry = (slug: string, title: string, written = false): NavEntry => ({ slug, title, written })
+/*
+ * The literal `S` is what makes `DocsSlug` a union of the forty-nine slugs rather than plain
+ * `string` — without the generic, TypeScript widens each one at the call site and the record
+ * type below would accept anything.
+ */
+const entry = <S extends string>(slug: S, written = false) => ({ slug, written }) as const
 
 /** Everything that is not a component: how to install, theme, translate and audit the library. */
-export const intro: NavEntry[] = [
-  entry('installation', 'Installation', true),
-  entry('theming', 'Theming', true),
-  entry('iconography', 'Iconography', true),
-  entry('font-family', 'Font family', true),
-  entry('i18n', 'Localisation (i18n)', true),
-  entry('accessibility', 'Accessibility', true),
-]
+export const intro = [
+  entry('installation', true),
+  entry('theming', true),
+  entry('iconography', true),
+  entry('font-family', true),
+  entry('i18n', true),
+  entry('accessibility', true),
+] as const
 
 /**
  * One entry per exported component FAMILY — a family being a component and the subcomponents
  * that only exist inside it (VTabs owns VTab and VTabPanel, VDialog owns VDialogAlert).
  * Alphabetical, because a reader looking for one knows its name and not its category.
  */
-export const components: NavEntry[] = [
-  entry('accordion', 'Accordion', true),
-  entry('avatar', 'Avatar'),
-  entry('avatar-group', 'Avatar group'),
-  entry('badge', 'Badge'),
-  entry('breadcrumb', 'Breadcrumb'),
-  entry('button', 'Button', true),
-  entry('button-group', 'Button group'),
-  entry('calendar', 'Calendar'),
-  entry('carousel', 'Carousel'),
-  entry('checkbox', 'Checkbox'),
-  entry('chip', 'Chip', true),
-  entry('combobox', 'Combobox'),
-  entry('data-table', 'Data table'),
-  entry('date-picker', 'Date picker'),
-  entry('dialog', 'Dialog'),
-  entry('file-picker', 'File picker'),
-  entry('file-upload', 'File upload'),
-  entry('hotkeys', 'Hotkeys'),
-  entry('icon', 'Icon'),
-  entry('icon-button', 'Icon button'),
-  entry('input', 'Input', true),
-  entry('input-otp', 'Input OTP'),
-  entry('menu', 'Menu'),
-  entry('pagination', 'Pagination'),
-  entry('popover', 'Popover'),
-  entry('progress-circular', 'Progress circular'),
-  entry('progress-linear', 'Progress linear'),
-  entry('radio', 'Radio'),
-  entry('separator', 'Separator'),
-  entry('side-navigation', 'Side navigation', true),
-  entry('skeleton-loader', 'Skeleton loader'),
-  entry('slider', 'Slider'),
-  entry('spinner', 'Spinner'),
-  entry('switch', 'Switch', true),
-  entry('tabs', 'Tabs'),
-  entry('textarea', 'Textarea'),
-  entry('time-picker', 'Time picker'),
-  entry('toast', 'Toast'),
-  entry('toggle', 'Toggle'),
-  entry('tooltip', 'Tooltip'),
-  entry('typography', 'Typography'),
-]
+export const components = [
+  entry('accordion', true),
+  entry('avatar'),
+  entry('avatar-group'),
+  entry('badge'),
+  entry('breadcrumb'),
+  entry('button', true),
+  entry('button-group'),
+  entry('calendar'),
+  entry('carousel'),
+  entry('checkbox'),
+  entry('chip', true),
+  entry('combobox'),
+  entry('data-table'),
+  entry('date-picker'),
+  entry('dialog'),
+  entry('file-picker'),
+  entry('file-upload'),
+  entry('hotkeys'),
+  entry('icon'),
+  entry('icon-button'),
+  entry('input', true),
+  entry('input-otp'),
+  entry('menu'),
+  entry('pagination'),
+  entry('popover'),
+  entry('progress-circular'),
+  entry('progress-linear'),
+  entry('radio'),
+  entry('separator'),
+  entry('side-navigation', true),
+  entry('skeleton-loader'),
+  entry('slider'),
+  entry('spinner'),
+  entry('switch', true),
+  entry('tabs'),
+  entry('textarea'),
+  entry('time-picker'),
+  entry('toast'),
+  entry('toggle'),
+  entry('tooltip'),
+  entry('typography'),
+] as const
 
 /** What the package exports besides components: the functions, and the one CSS class. */
-export const utils: NavEntry[] = [
-  entry('js-helpers', 'JavaScript helpers', true),
-  entry('css-classes', 'CSS helper classes', true),
-]
+export const utils = [entry('js-helpers', true), entry('css-classes', true)] as const
+
+/** The key of a group's heading, under `nav.group` in the message catalogue. */
+export type NavGroupId = 'intro' | 'components' | 'utils'
 
 /** The rail's three shelves, in reading order. */
 export const groups: NavGroup[] = [
-  { label: 'Introduction', entries: intro },
-  { label: 'Components', entries: components },
-  { label: 'Utilities', entries: utils },
+  { id: 'intro', entries: [...intro] },
+  { id: 'components', entries: [...components] },
+  { id: 'utils', entries: [...utils] },
 ]
 
+/** Every slug the documentation offers — the type the message catalogue is a record over. */
+export type DocsSlug =
+  | (typeof intro)[number]['slug']
+  | (typeof components)[number]['slug']
+  | (typeof utils)[number]['slug']
+
 /** Every page, flattened, each carrying the group it came from — the search index. */
-export const allPages: (NavEntry & { section: string })[] = groups.flatMap((group) =>
-  group.entries.map((page) => ({ ...page, section: group.label })),
+export const allPages: (NavEntry & { section: NavGroupId })[] = groups.flatMap((group) =>
+  group.entries.map((page) => ({ ...page, section: group.id })),
 )
 
 /** Looks a slug up. Returns undefined for a slug that is not in the inventory at all. */
-export function pageOf(slug: string): (NavEntry & { section: string }) | undefined {
+export function pageOf(slug: string): (NavEntry & { section: NavGroupId }) | undefined {
   return allPages.find((page) => page.slug === slug)
 }
 
-/** The prerender route list, consumed by nuxt.config.ts. */
-export function docRoutes(): string[] {
-  return allPages.map((page) => `/docs/${page.slug}`)
+/**
+ * The prerender route list, consumed by nuxt.config.ts and by the post-build check.
+ *
+ * `prefix` is the locale segment the i18n strategy adds — empty for the default locale, `/fr`
+ * for the other. Passing it here rather than mapping the result at each call site is what keeps
+ * the two consumers producing the SAME list: a route built one way in the config and another
+ * way in the check would let a missing page pass unnoticed, which is the one thing this file
+ * exists to prevent.
+ */
+export function docRoutes(prefix = ''): string[] {
+  return allPages.map((page) => `${prefix}/docs/${page.slug}`)
 }
