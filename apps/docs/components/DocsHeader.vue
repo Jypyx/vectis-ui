@@ -60,13 +60,27 @@ const DOCS_HOME = '/docs/installation'
 </script>
 
 <template>
+  <!--
+    The background is translucent rather than flat, and that is what lets the home page's glow
+    read THROUGH the bar instead of stopping under it. The blur is what pays for it: a sticky
+    header 42% open onto the page would otherwise have its labels sitting on whatever text is
+    scrolling beneath them. The saturation is not decoration either — what passes through is a
+    0.16-alpha wash, and the mix takes more than half of what is left; boosting the backdrop's
+    chroma buys back the tint without opening the veil any further, which is the half of the
+    trade that costs legibility.
+
+    At the top of a documentation page the mix is indistinguishable from the flat surface it
+    replaces, since that is the very colour it is mixed with — the effect only shows where
+    there is something behind: the glow here, scrolled content elsewhere.
+  -->
   <header
     class="vd-header"
     style="
       position: sticky;
       top: 0;
       z-index: 30;
-      background: var(--vectis-color-surface);
+      background: color-mix(in oklch, var(--vectis-color-surface) 58%, transparent);
+      backdrop-filter: blur(12px) saturate(1.7);
       border-bottom: 1px solid var(--vectis-color-border);
     "
   >

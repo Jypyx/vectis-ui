@@ -29,7 +29,7 @@ const componentCount = components.length
 </script>
 
 <template>
-  <main>
+  <main class="vd-home">
     <div class="vd-limit vd-hero">
       <div>
         <h1
@@ -445,3 +445,63 @@ const componentCount = components.length
     </section>
   </main>
 </template>
+
+<style scoped>
+/*
+ * The hero's glow — two pools of colour bleeding out of the top of the page, so the first
+ * screen is not one flat fill from edge to edge.
+ *
+ * It lives here rather than in docs-layout.css for the reason that file states: a pseudo-
+ * element is one of the things an inline style cannot carry, like the outline's link states
+ * in DocsOutline.vue. It hangs off <main>, which is a direct child of the flex column and so
+ * spans the full width already — anchoring it on .vd-hero instead would stop the glow at the
+ * 1440px content column and leave a vertical seam on a wider screen, and the usual
+ * `calc(50% - 50vw)` bleed would then overflow by half a scrollbar.
+ *
+ * The colours are RELATIVE to the accent role (`oklch(from …)`, the VSkeletonLoader idiom):
+ * this site repoints that role to violet, and the second pool sits 45 degrees round the hue
+ * circle from wherever it lands. Repointing the accent repaints the glow, with no hue written
+ * as a number and no second place to keep in step.
+ */
+.vd-home {
+  position: relative;
+  /*
+   * The glow paints at z-index -1 — above the shell's flat background, below the copy, so no
+   * text contrast is measured against it. The stacking context is what confines that -1:
+   * without it the glow would slide behind .vd-shell's own background and simply not appear,
+   * with nothing in the console to say why.
+   */
+  isolation: isolate;
+}
+.vd-home::before {
+  content: '';
+  position: absolute;
+  /*
+   * Pulled up by exactly the header's height, so the band starts at the very top of the page
+   * rather than under the bar. That is only worth anything because the header's background is
+   * a translucent mix rather than the flat surface — see DocsHeader.vue, where the two halves
+   * of this effect meet. The height gains the same amount, so the 60vh below the bar is
+   * unchanged and the mask still fades over the same visible band.
+   */
+  inset: calc(-1 * var(--vd-header-h)) 0 auto;
+  z-index: -1;
+  block-size: calc(60vh + var(--vd-header-h));
+  /* Two off-centre pools rather than one centred: a single one reads as a vignette, and this
+     pair leaves the middle of the headline on the flat surface. */
+  background:
+    radial-gradient(
+      60% 50% at 18% 0%,
+      oklch(from var(--vectis-color-accent) 70% 0.17 h / 0.16),
+      transparent 68%
+    ),
+    radial-gradient(
+      50% 45% at 82% 8%,
+      oklch(from var(--vectis-color-accent) 72% 0.15 calc(h + 45) / 0.11),
+      transparent 70%
+    );
+  /* Fades the band out well before its own bottom edge, so the glow ends in nothing rather
+     than on a horizontal line. */
+  mask-image: linear-gradient(to bottom, black 40%, transparent);
+  pointer-events: none;
+}
+</style>
