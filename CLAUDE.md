@@ -340,6 +340,6 @@ A **Nuxt 3** application, `nuxt generate`d to static files and published to GitH
 
 ### Next
 
-A live-theming app in `apps/` (manipulating `@vectis/ui/tokens`, injecting the `--vectis-*`, exporting a config) — the configurator page is its prototype; the remaining 35 component pages, each written from the source rather than approximated.
+A live-theming app in `apps/` (manipulating `@vectis/ui/tokens`, injecting the `--vectis-*`, exporting a config); the remaining 35 component pages, each written from the source rather than approximated.
 
 **Validated method**: implement in batches, with a full checkpoint (lint/format/typecheck/test/build/build-storybook) per batch, and flag any browser-support trade-off explicitly.

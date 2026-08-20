@@ -23,7 +23,7 @@ const outDir = join(appRoot, '.output', 'public')
 const fileFor = (route: string) =>
   join(outDir, route === '/' ? 'index.html' : join(route, 'index.html'))
 
-const routes = ['/', '/configurator', '/docs', ...docRoutes()]
+const routes = ['/', '/docs', ...docRoutes()]
 const missing = routes.filter((route) => !existsSync(fileFor(route)))
 
 if (!existsSync(outDir)) {

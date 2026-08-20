@@ -74,19 +74,6 @@ const componentCount = components.length
               </VButton>
             </template>
           </NuxtLink>
-          <NuxtLink to="/configurator" custom>
-            <template #default="{ href, navigate }">
-              <VButton
-                variant="outline"
-                tone="neutral"
-                size="lg"
-                :href="href ?? undefined"
-                @click="navigate"
-              >
-                Open the configurator
-              </VButton>
-            </template>
-          </NuxtLink>
         </div>
       </div>
     </div>

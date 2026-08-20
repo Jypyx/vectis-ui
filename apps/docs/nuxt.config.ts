@@ -50,7 +50,7 @@ export default defineNuxtConfig({
       // Belt as well as braces: the crawler follows the sidebar, but a slug that lost its
       // link would then vanish silently. The list comes from content/nav.ts, so a page
       // cannot be in the navigation and absent from the build.
-      routes: ['/', '/configurator', '/404.html', ...docRoutes()],
+      routes: ['/', '/404.html', ...docRoutes()],
     },
   },
 

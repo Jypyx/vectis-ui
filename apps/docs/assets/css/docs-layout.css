@@ -222,19 +222,6 @@
   }
 }
 
-/* --- Configurator --- */
-.vd-config {
-  display: grid;
-  gap: 24px;
-  grid-template-columns: 1fr;
-  align-items: start;
-}
-.vd-swatches {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-
 /* --- Search dialog ---
    The panel is a VDialog, which already takes its width from its `width` prop and caps
    itself to the viewport. All it wants on top is a shorter ceiling, so the results list
@@ -259,9 +246,6 @@
   }
   .vd-stats {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .vd-swatches {
-    grid-template-columns: repeat(9, minmax(0, 1fr));
   }
 }
 
@@ -332,13 +316,6 @@
   .vd-grid-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  .vd-config {
-    grid-template-columns: 320px minmax(0, 1fr);
-    gap: 32px;
-  }
-  .vd-swatches {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
 }
 
 @media (min-width: 1440px) {
@@ -357,9 +334,6 @@
     height: calc(100vh - var(--vd-header-h));
     overflow-y: auto;
     padding-block: 32px;
-  }
-  .vd-swatches {
-    grid-template-columns: repeat(9, minmax(0, 1fr));
   }
 }
 

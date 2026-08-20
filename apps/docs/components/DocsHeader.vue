@@ -34,7 +34,6 @@ const { openSearch } = useDocsSearch()
 
 const isHome = computed(() => route.path === '/')
 const isDocs = computed(() => route.path.startsWith('/docs'))
-const isConfig = computed(() => route.path.startsWith('/configurator'))
 
 /** The current destination is tinted, the others are bare — the whole of the "you are here". */
 const variantFor = (active: boolean) => (active ? 'soft' : 'ghost')
@@ -115,19 +114,6 @@ const DOCS_HOME = '/docs/installation'
               @click="navigate"
             >
               Docs
-            </VButton>
-          </template>
-        </NuxtLink>
-        <NuxtLink to="/configurator" custom>
-          <template #default="{ href, navigate }">
-            <VButton
-              :variant="variantFor(isConfig)"
-              tone="neutral"
-              size="sm"
-              :href="href ?? undefined"
-              @click="navigate"
-            >
-              Configurator
             </VButton>
           </template>
         </NuxtLink>
@@ -248,16 +234,6 @@ const DOCS_HOME = '/docs/installation'
                   label="Docs"
                   :href="href ?? undefined"
                   :selected="isDocs"
-                  @click="navigate"
-                />
-              </template>
-            </NuxtLink>
-            <NuxtLink to="/configurator" custom>
-              <template #default="{ href, navigate }">
-                <VMenuItem
-                  label="Configurator"
-                  :href="href ?? undefined"
-                  :selected="isConfig"
                   @click="navigate"
                 />
               </template>

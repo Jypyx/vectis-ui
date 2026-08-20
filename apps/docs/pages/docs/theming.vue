@@ -95,26 +95,4 @@ const layersCode = `@layer vectis.reset, vectis.tokens, vectis.components, vecti
     component never calls for a specificity war.
   </p>
   <DocsCode lang="css" :code="layersCode" />
-
-  <h2 id="try-it">Try it</h2>
-  <p>
-    The configurator repoints the accent, the radii and the two families on a live subtree, which is
-    exactly the mechanism described above — and hands you the CSS it applied.
-  </p>
-  <div style="display: flex; flex-wrap: wrap; gap: 12px">
-    <NuxtLink to="/configurator" custom>
-      <template #default="{ href, navigate }">
-        <VButton
-          variant="soft"
-          tone="accent"
-          size="md"
-          icon-end="arrow_right_alt"
-          :href="href ?? undefined"
-          @click="navigate"
-        >
-          Open the configurator
-        </VButton>
-      </template>
-    </NuxtLink>
-  </div>
 </template>
