@@ -170,3 +170,12 @@ export type {
   FilePickerRow,
 } from './components/VFilePicker/VFilePicker.vue'
 export type { FileKind } from './components/VFilePicker/fileKind'
+export { default as VCarousel } from './components/VCarousel/VCarousel.vue'
+export type {
+  CarouselControls,
+  CarouselControlsVisibility,
+  CarouselEffect,
+  CarouselIndicators,
+  CarouselOrientation,
+} from './components/VCarousel/VCarousel.vue'
+export { default as VCarouselItem } from './components/VCarousel/VCarouselItem.vue'

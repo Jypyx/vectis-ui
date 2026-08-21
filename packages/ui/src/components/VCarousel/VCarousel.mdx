@@ -1,0 +1,281 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+
+import * as VCarouselStories from './VCarousel.stories'
+
+<Meta of={VCarouselStories} />
+
+# Carousel
+
+Scrolls through content — images or text — horizontally or vertically. `VCarousel` invents no
+scrolling: it is a native `scroll-snap` container, so touch, trackpad, the scrollbar, the keyboard
+and the snapping all come from the browser. The slides are declared as `VCarouselItem` children,
+and `v-model` carries the index of the current one.
+
+<Canvas of={VCarouselStories.Default} />
+<Controls of={VCarouselStories.Default} />
+
+## Slides per view, and the responsive rule
+
+`itemsPerView` is a **maximum**, not a target, and `itemMinSize` is the floor below which a slide
+must not shrink. The browser fits as many slides as it can and scrolls further when it cannot —
+that arithmetic lives in the slide's `flex-basis`, which is the whole responsiveness: no
+breakpoint, no container query, no observer, and therefore nothing to keep in step with a design
+token.
+
+<Canvas of={VCarouselStories.ItemsPerView} />
+
+Narrow the container and the floor takes over on its own.
+
+<Canvas of={VCarouselStories.FluidFloor} />
+
+## Pages, not slides
+
+`v-model` is a slide index, but not every slide can become the leading one. With
+`scroll-snap-align: start`, a position past the end of the track is unreachable — the scroller
+clamps short of it. Six slides three at a time therefore offer **four** positions, not six, and the
+component renders four indicators and stops `next` on the fourth. Anything else would hand out dots
+that scroll nowhere and let the model hold a value the DOM can never satisfy.
+
+A `peek` or an active `itemMinSize` makes the real slides-per-view fractional, and the fractional
+part costs the last of those start-aligned positions. What answers for it is the **end of the
+track**, which is a position in its own right: the last slide is aligned on its end edge, so the
+scroller can rest flush against the end and reveal that slide entirely. The count is therefore
+measured off the scroller — the start-aligned positions, plus the end of the track when it is not
+already one of them. Before there is any layout — on the server, and on the first paint — it falls
+back to `count - itemsPerView + 1`, which is exact both in the default configuration and with a
+peek (the strip costs one position and the end of the track gives it back); only an active
+`itemMinSize` makes that fallback an over-count until the first measurement.
+
+The indicators stay named after the slide they scroll to (`1 of 6` … `4 of 6`): the control parks
+that slide at the start edge — or, for the end of the track, leads with it — so the name agrees
+with the slide's own label and with the live region. A page ordinal would announce "4 of 4" on a
+control that reveals slide 4 of 6.
+
+<Canvas of={VCarouselStories.Pages} />
+
+The count follows a resize with no `ResizeObserver`: the number of positions can only change when
+the number of fully visible slides changes, which crosses the intersection observer's `1.0`
+threshold and re-triggers the measurement.
+
+<Canvas of={VCarouselStories.ResponsivePages} />
+
+## Loop
+
+`loop` takes the ends off: past the last position the carousel returns to the first, and before the
+first it goes to the last. Both buttons stay enabled, and neither the model nor the page count
+changes meaning — a looping carousel still has exactly the positions measured above.
+
+**Nothing is cloned.** Coming back round scrolls the real track back to the beginning, so over
+several slides the reader watches it rewind. That is the honest rendering of what is happening, and
+it is what a seamless loop buys with duplicated slides: copies in the DOM, announced by screen
+readers, counted by the page arithmetic and re-attached to their scroll-driven effects. The rewind
+follows CSS `scroll-behavior`, so a reader who has asked for less motion gets the cut instead.
+
+What goes round is what STEPS: the two buttons, the arrow keys, and autoplay. The dots and the Home
+and End keys name a position and still go straight to it — `End` on the last page stays there rather
+than wrapping to the first.
+
+It has no effect where there is only one position to rest on. The buttons stay disabled there, which
+is the truth, rather than becoming two controls that move nothing.
+
+<Canvas of={VCarouselStories.Loop} />
+
+## Peek
+
+`peek` reserves a strip past the last fully visible slide so the next one shows through — the
+product-list template. It **includes the gap that precedes it**, which is what lets one formula
+serve every combination without a special case.
+
+Two consequences to design around. The final position is the **end of the track** rather than a
+slide's start edge, so it advances by less than a full slide — the strip of the previous slide is
+what stays visible there, the mirror image of the peek. And no indicator is named after the last
+slide: with six slides two at a time there are five dots, `1 of 6` to `5 of 6`, because slide 6 can
+never be the leading one. It is fully revealed on that last position all the same.
+
+<Canvas of={VCarouselStories.Peek} />
+
+## Effects
+
+`effect` picks the transition, and all four are **CSS scroll-driven animations**: they are keyed
+to the slide's position in the scrollport, so they play under the finger during a drag instead of
+running a fixed-duration transition.
+
+- `slide` — no animation beyond the scrolling itself. Works with any `itemsPerView` and any `peek`.
+- `fade` — a dissolve in place. It counter-translates the slide to cancel the scroll travel, which
+  only works when a slide is exactly the size of the viewport: with several items per view, or with
+  a `peek`, every slide would pile onto the same spot, so the effect **downgrades to `slide`** and
+  says so in the console.
+- `scale` — the slide grows into place as it reaches the centre. Fine at any `itemsPerView`.
+- `cover` — a 3D coverflow: the neighbours tilt away and sink back.
+
+Where scroll-driven animations are unavailable, nothing is declared and the carousel is a plain
+`slide` — the same progressive-enhancement contract as anchor positioning elsewhere in the DS.
+`prefers-reduced-motion` cancels them everywhere, and stops autoplay outright.
+
+<Canvas of={VCarouselStories.Effects} />
+
+Two invariants worth knowing before touching the sheet: the animation is carried by an inner box
+and never by the slide itself, because a scroll-snap area is the element's _transformed_ border
+box — animating the slide would make its snap position depend on the scroll position, and the
+symptom is jitter rather than an error. And the animation properties are written as longhands,
+never as the `animation` shorthand, which would silently reset the timeline and the duration.
+
+## Orientation
+
+`orientation="vertical"` scrolls on the block axis. Give it a `height`: a percentage `flex-basis`
+has no definite reference on the block axis, and without one every slide would collapse onto its
+content.
+
+The two orientations size a slide from opposite ends, and it is worth knowing which way round:
+**horizontal takes its height from the slides**, so your content carries one; **vertical derives
+each slide's height from `height / itemsPerView`**, so your content should fill it — give it
+`block-size: 100%` rather than a height of its own. Content shorter than its slide leaves slack
+inside it, and the controls then read as off-centre against the visible block while being exactly
+centred on the viewport, which is what they are positioned against.
+
+Both affordances follow the axis: `outside` controls go above and below, and the indicators move to
+the inline end. Note the asymmetry between the orientations — horizontal `outside` controls cost
+inline size at a constant footprint, where vertical ones cost block footprint at a constant slide
+size, because the block axis is sized by `height` rather than by the container.
+
+<Canvas of={VCarouselStories.Vertical} />
+<Canvas of={VCarouselStories.VerticalInside} />
+
+## Controls and indicators
+
+`controls` and `indicators` each take `false`, `'inside'` (over the slides) or `'outside'`.
+
+The two are placed independently, and the previous/next pair is always centred on **the slides
+alone** — never on the slides plus the indicators. That is why the indicator bar is not a child of
+the box the controls are positioned against: inside it, the bar's height would drag the pair below
+the middle of the slides.
+
+Placement per orientation:
+
+|                         | horizontal                           | vertical                            |
+| ----------------------- | ------------------------------------ | ----------------------------------- |
+| `controls: 'inside'`    | over the slides, at the inline edges | over the slides, at the block edges |
+| `controls: 'outside'`   | left and right of the slides         | above and below the slides          |
+| `indicators: 'inside'`  | over the slides, bottom-centre       | over the slides, at the inline end  |
+| `indicators: 'outside'` | below the slides                     | to the inline end of the slides     |
+
+`controls="outside"` reserves its room as **padding on the component**, so the footprint never
+changes and the slides narrow instead — a carousel does not suddenly overflow its neighbours when
+you move its controls out. The reserved width tracks the size the buttons actually render at.
+
+`indicators="inside"` draws no surface behind the dots: a pill would cover a slice of the slide the
+whole time, which is a lot of media to spend on a few 8px marks. The dots carry their own
+legibility instead — a white fill with a dark hairline, the pair that reads on light and dark media
+alike — and they are deliberately theme-independent, since their backdrop is your content rather
+than the page. Over media busy enough to swallow them anyway, use `indicators="outside"` or the
+`#indicator` slot.
+
+The previous/next pair is rendered as **circular** `VIconButton`s (`shape="circular"`), the shape
+that holds up over arbitrary media: a rounded rectangle sitting on a photograph competes with
+whatever is behind it. A `#controls` slot renders its own buttons and is free to choose otherwise.
+
+The default glyphs follow the orientation — `arrow_left_alt`/`arrow_right_alt` horizontally,
+`arrow_upward_alt`/`arrow_downward_alt` vertically. Arrows rather than the chevrons of `VTabs` and
+`VPagination`, for the same reason as the disc: a hairline chevron dissolves at the centre of a
+button laid over a photograph, where a shaft reads at a glance.
+
+Icons and labels are props (`prevIcon`, `nextIcon`, `prevLabel`…), and the `#controls`,
+`#indicators` and `#indicator` slots replace the rendering entirely — `#indicators`
+receives `goTo`, without which the bar could no longer select anything, and both bars receive
+`orientation`, without which a custom one cannot pick its icons or its axis.
+
+A custom bar must render one control per **`pageCount`**, not per `count`: the slots receive both,
+`count` being there for "N of M" labels. Three consequences of replacing a bar, since the slot
+takes over the container the DS's placement CSS is keyed on: a custom `#controls` lays itself out
+inside the stage rather than being positioned for you, `controls="outside"` then reserves no
+gutter (its footprint is yours to decide), and `controlsVisibility` is inert on it. A custom
+`#indicators` is a direct child of the component, so in the vertical orientation it sits **beside**
+the slides rather than below them.
+
+<Canvas of={VCarouselStories.Placement} />
+
+<Canvas of={VCarouselStories.ControlsOutside} />
+
+## Right-to-left
+
+The layout mirrors itself: everything is written in logical properties, so the scroll axis, the
+snapping, the slide sizing and the placement of both bars follow the direction with no branch —
+and `space-between` puts `previous` at the inline start, which is the right-hand side. The glyphs
+are the exception, because an arrow points at a physical direction: the control icons are flipped
+in CSS, so `previous` points right and `next` points left.
+
+<Canvas of={VCarouselStories.Rtl} />
+
+## Revealing the controls
+
+`controlsVisibility` takes `'always'` (the default) or `'hover'`, which fades the previous/next
+pair in on hover — or on **keyboard** focus anywhere in the carousel, which is what keeps it usable
+without a pointer. The reveal boundary is deliberately the same one autoplay pauses on: one
+boundary, two behaviours, nothing to keep in step.
+
+Keyboard focus, and not any focus, because a pointer click leaves the focus on the control it hit.
+Reading it as "focused" would keep the pair revealed — and autoplay paused — until you clicked
+somewhere outside the carousel, long after the pointer had left. `:focus-visible` is the
+distinction the platform already draws: a click does not match it, a Tab does.
+
+The pair is **revealed, never removed**. `display: none` and `visibility: hidden` would drop the
+buttons from the tab order and from the accessibility tree; an opacity leaves both intact, and
+costs no layout, so nothing shifts as it fades. On a device with no hover to give — a touch screen
+— the mode is inert and the pair stays permanently visible, and the indicators are never hidden by
+this prop at all, so a navigation affordance always exists.
+
+<Canvas of={VCarouselStories.ControlsOnHover} />
+
+## Autoplay
+
+`autoplay` is an interval in milliseconds; `0` disables it. It stops on the last page — unless the
+carousel loops, in which case it goes round for as long as the page is open. It pauses on hover and
+on keyboard focus, and `prefers-reduced-motion` disables it completely: a media query stops a
+transition, never a timer.
+
+The component renders **no pause button**. The prop is reactive and `0` cancels the timer
+immediately, so a stop control is a binding on your side:
+
+```vue
+<VCarousel :autoplay="paused ? 0 : 5000">…</VCarousel>
+```
+
+One is worth adding, and with `loop` it stops being optional. WCAG 2.2.2 asks for a way to stop
+content that starts moving on its own and runs for more than five seconds, and hover and focus leave
+a touch user with neither. Without a loop the exemption holds while `interval × (pages − 1)` stays
+under five seconds; with one the movement never ends, so nothing exempts it and the component warns
+in development when it sees both.
+
+<Canvas of={VCarouselStories.Autoplay} />
+
+## Edge cases
+
+<Canvas of={VCarouselStories.EdgeCases} />
+
+## Accessibility
+
+- The root is a `role="region"` with a translated `aria-roledescription`, named by `label`; a
+  consumer `aria-label` wins over it and an `aria-labelledby` replaces both. **Give every carousel
+  on a page a distinct name**: a region is a landmark, and two identically named landmarks are a
+  real violation.
+- Each slide is a `role="group"` with `aria-roledescription="slide"` and a "N of M" name. The
+  count comes from the slot's VNodes, so it is identical on the server and on the client — a
+  registry the slides fed at mount would render zero of them server-side.
+- The scroll track carries `tabindex="0"`, and that is required rather than defensive: a scroll
+  container must have a tabbable descendant, and slide content may hold nothing focusable. It is
+  also what makes the track the keyboard target: the arrows move one slide and Home/End jump to
+  the ends. A focused scroll container does move on the arrows by itself, but the browser scrolls
+  it a fixed pixel step that mandatory snapping immediately undoes, so the component handles them.
+- The indicators are ordinary buttons named "N of M", the current one marked with `aria-current`.
+  Their hit area is 24px even though the dot is 8px.
+- Autoplay ships no control of its own, so if you enable it, add a stop control by binding
+  `autoplay` to `0` — see above. With `loop` the rotation never ends on its own, so that control is
+  required rather than advisable.
+- A visually hidden `role="status"` announces the position — and stays silent while autoplay
+  rotates, because narrating an auto-rotating carousel floods the screen reader.
+- `controlsVisibility="hover"` hides the pair with an opacity, so the buttons keep their place in
+  the tab order and in the accessibility tree; keyboard focus anywhere in the carousel brings them
+  back, and
+  a pointer that cannot hover never hides them in the first place.
+
+<Canvas of={VCarouselStories.Localization} />
