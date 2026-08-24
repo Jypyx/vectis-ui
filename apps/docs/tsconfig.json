@@ -1,0 +1,4 @@
+{
+  "//": "Two bases, and both are load-bearing: the repository's own strictness comes from tsconfig.base.json, while .nuxt/tsconfig.json supplies Nuxt's aliases, auto-imported globals and generated types. The latter is written by `nuxt prepare`, which package.json runs on postinstall — ESLint's type-aware block needs every .ts to belong to a project.",
+  "extends": ["../../tsconfig.base.json", "./.nuxt/tsconfig.json"]
+}

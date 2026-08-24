@@ -1,0 +1,699 @@
+/* Vectis UI docs — the site's whole stylesheet, and unlayered on purpose: the design system
+ * publishes "any non-layered consumer style wins", so this takes the sanctioned override path
+ * rather than inventing a layer nobody would know to order.
+ *
+ * IT USED TO BE LAYOUT ONLY, every other declaration written inline on the element so that it
+ * painted as the markup streamed. That argument no longer holds and the policy is now the
+ * opposite one: `nuxt.config.ts` sets `features.inlineStyles: false` and declares the sheets in
+ * `css: []`, so they ship as render-blocking `<link>`s in the head — a class is ready at exactly
+ * the instant an inline attribute would have been, and it is written ONCE instead of being
+ * repeated on every node of 106 prerendered pages, in two languages. `vue/no-static-inline-
+ * styles` is enabled on `apps/docs` in `eslint.config.js` so the rule cannot rot back.
+ *
+ * WHAT DOES NOT LIVE HERE, and the rule is unchanged: what a STATE owns goes with its component
+ * as `<style scoped>` — the outline's link states (DocsOutline.vue), the search results'
+ * (DocsSearch.vue), and the home's animated glow (pages/index.vue, a pseudo-element).
+ *
+ * MEASUREMENTS come from the design system: `--vectis-space-*` for spacing, `--vectis-radius-*`,
+ * and the `--vectis-text-*` recipes wherever the type is not already `VTypography`'s business.
+ * Four kinds of literal legitimately remain, and they are the whole list: media conditions (a
+ * custom property is not allowed in one at all), viewport units, the 1px hairlines the design
+ * system itself tolerates, and the site's OWN measurements — the rail and gutter widths named
+ * `--vd-*` just below, the hero's block padding, and the lockup's intrinsic 137×32 box. Those
+ * last ones are not spacing between things; they are dimensions this site chose, and rounding
+ * them onto a scale they were never on would only make them wrong more quietly.
+ *
+ * Mobile first: the base rules are the 0-639px screen.
+ *   640px tablet portrait · 768px tablet landscape · 1024px medium · 1440px large
+ * Content is capped at 1440px. Gutters are 16px on a phone and 24px from tablet portrait up.
+ */
+:root {
+  /* The gutter is the ONE measurement every surface shares, so it widens with the screen
+     rather than each surface deciding: 16px is what a phone can spare beside a line of text,
+     24px is the breathing room a tablet and up can afford. Mobile first, so the narrow value
+     is the base and the 640px step widens it. */
+  --vd-gutter: var(--vectis-space-4);
+  --vd-max: 1440px;
+  --vd-header-h: 64px;
+  --vd-aside-w: 248px;
+  --vd-outline-w: 200px;
+}
+
+.vd-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--vectis-color-surface);
+  color: var(--vectis-color-text);
+  font-family: var(--vectis-font-family-sans);
+  font-size: var(--vectis-text-body-lg-size);
+  line-height: var(--vectis-text-body-lg-leading);
+}
+
+.vd-limit {
+  width: 100%;
+  max-width: var(--vd-max);
+  margin-inline: auto;
+  padding-inline: var(--vd-gutter);
+}
+
+/* --- Header --- */
+/* The background is translucent rather than flat, and that is what lets the home page's glow
+   read THROUGH the bar instead of stopping under it. The blur is what pays for it: a sticky
+   header 42% open onto the page would otherwise have its labels sitting on whatever text is
+   scrolling beneath them. The saturation is not decoration either — what passes through is a
+   0.16-alpha wash, and the mix takes more than half of what is left; boosting the backdrop's
+   chroma buys back the tint without opening the veil any further, which is the half of the
+   trade that costs legibility.
+
+   At the top of a documentation page the mix is indistinguishable from the flat surface it
+   replaces, since that is the very colour it is mixed with — the effect only shows where
+   there is something behind: the glow here, scrolled content elsewhere. */
+.vd-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: color-mix(in oklch, var(--vectis-color-surface) 75%, transparent);
+  backdrop-filter: blur(12px) saturate(1.7);
+  border-bottom: 1px solid var(--vectis-color-border);
+}
+.vd-header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--vectis-space-2);
+  min-height: var(--vd-header-h);
+}
+/* The lockup and the wordmark beside it are one link, so the anchor is the flex container. */
+.vd-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--vectis-space-2);
+  flex: none;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* --- Footer ---
+   `margin-block-start: auto` is what pins it to the bottom of a short page: `.vd-shell` is a flex
+   column at `min-height: 100vh`, so the free space goes above the footer instead of leaving it
+   floating halfway up. */
+.vd-footer {
+  margin-block-start: auto;
+  border-top: 1px solid var(--vectis-color-border);
+}
+.vd-footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vectis-space-3);
+  padding-block: var(--vectis-space-6);
+}
+.vd-footer-credit {
+  display: flex;
+  align-items: center;
+  gap: var(--vectis-space-2);
+  margin: 0;
+  font-size: var(--vectis-text-body-sm-size);
+  color: var(--vectis-color-text-muted);
+}
+.vd-footer-heart {
+  color: var(--vectis-color-accent-text);
+}
+/* The site's own palette, in its own namespace. The library ships only the five families a
+   role points at, so violet is not one of its tokens and could not be: an unused palette is
+   eleven custom properties every consumer pays for. Declaring the steps here is the whole of
+   what a sixth colour costs, and it is the gesture the theming page describes — which is why
+   these are `--vd-*` and never `--vectis-*`: the site is a consumer, not a fork.
+   The values are Tailwind CSS 4's violet, step for step. */
+:root {
+  --vd-violet-50: oklch(96.9% 0.016 293.756);
+  --vd-violet-100: oklch(94.3% 0.029 294.588);
+  --vd-violet-200: oklch(89.4% 0.057 293.283);
+  --vd-violet-300: oklch(81.1% 0.111 293.571);
+  --vd-violet-400: oklch(70.2% 0.183 293.541);
+  --vd-violet-500: oklch(60.6% 0.25 292.717);
+  --vd-violet-600: oklch(54.1% 0.281 293.009);
+  --vd-violet-700: oklch(49.1% 0.27 292.581);
+  --vd-violet-800: oklch(43.2% 0.232 292.759);
+  --vd-violet-900: oklch(38% 0.189 293.745);
+  --vd-violet-950: oklch(28.3% 0.141 291.089);
+}
+
+/* The docs site repoints the accent role to violet — the mechanism the theming page describes,
+   written unlayered so it wins over vectis.tokens without a specificity fight. The steps follow
+   the library's own pattern: 600/700/800 light, 500/400/300 dark, because white text on a filled
+   control only holds from violet 600, and dark mode has no darker step to hover to.
+   The dark selector is heavier than the light one, so the two do not fight. */
+.vd-shell {
+  --vectis-color-accent: var(--vd-violet-600);
+  --vectis-color-accent-hover: var(--vd-violet-700);
+  --vectis-color-accent-active: var(--vd-violet-800);
+  --vectis-color-accent-surface: var(--vd-violet-50);
+  --vectis-color-accent-border: var(--vd-violet-200);
+  --vectis-color-accent-text: var(--vd-violet-700);
+}
+[data-theme='dark'] .vd-shell,
+.vd-shell[data-theme='dark'],
+.vd-shell [data-theme='dark'] {
+  --vectis-color-accent: var(--vd-violet-500);
+  --vectis-color-accent-hover: var(--vd-violet-400);
+  --vectis-color-accent-active: var(--vd-violet-300);
+  --vectis-color-accent-surface: var(--vd-violet-950);
+  --vectis-color-accent-border: var(--vd-violet-900);
+  --vectis-color-accent-text: var(--vd-violet-300);
+}
+
+/* The lockup ships as two files that differ only in the wordmark's ink. Painting it as a
+   background keeps one node and one visible logo, with no request for an unresolved src.
+   The paths are relative to this sheet, so Vite rewrites them with the site's base URL and
+   `/vectis-ui/` never has to be written anywhere but nuxt.config.ts. */
+.vd-logo {
+  display: block;
+  /* The files are 137×32, and the box is stated rather than derived: a background image has no
+     intrinsic size to lay the element out from. */
+  width: 137px;
+  height: 32px;
+  background: url('../img/logo-lockup-on-light.svg') left center / contain no-repeat;
+}
+[data-theme='dark'] .vd-logo {
+  background-image: url('../img/logo-lockup-on-dark.svg');
+}
+
+.vd-header-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  /* Tighter on a phone, where the row holds four controls and the gutter is already narrow:
+     the pairing has to read as one cluster rather than four scattered targets. The 640px step
+     opens it back up, mobile first like the rest of the file. */
+  gap: var(--vectis-space-1);
+  margin-inline-start: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.vd-nav-links {
+  display: none;
+  gap: var(--vectis-space-1);
+  margin-inline-start: var(--vectis-space-5);
+}
+
+/* The search trigger is a read-only VInput, and it waits for the tablet: on a phone a 240px
+   field has nowhere to sit, so the header renders a ghost icon button instead, under
+   `.vd-under-640`. The field is only HIDDEN and never unmounted, which is what keeps its
+   VHotkeys listening for ⌘K at every width. Its width lives here because that is what the
+   media queries own; everything the field looks like comes from the library. */
+.vd-search {
+  display: none;
+  flex: none;
+}
+
+/* Visibility, mobile first — the base is the 0-639px screen. Each name states the width it
+   is about, because the two compact controls no longer share a threshold: the search button
+   goes at the tablet portrait step, the burger holds until the medium screen, where the links
+   and "Get started" take the row over. */
+.vd-under-640,
+.vd-under-1024 {
+  display: inline-flex;
+}
+.vd-from-1024 {
+  display: none;
+}
+
+/* --- Shared idioms ---
+   The shapes the site repeats often enough that writing them once is the whole point of this
+   file: `.vd-actions` is a row of buttons, `.vd-band` a full-width slice of the home, and
+   `.vd-editor` the mock window the installation steps sit in. */
+.vd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vectis-space-3);
+}
+.vd-band {
+  padding-block: var(--vectis-space-9);
+}
+/* The mock editor window, capped and centred: left at the content column's full width it would
+   stop reading as a window and start reading as a page. The frame itself is the code block's —
+   the tabs above it are `flat`, so nothing here draws a second one. */
+.vd-editor {
+  max-inline-size: 44rem;
+  margin-inline: auto;
+}
+
+/* --- Home --- */
+/* One centred column since the hero art came out: a second grid track would only leave a
+   hole where the canvas was. */
+.vd-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--vectis-space-7);
+  justify-items: center;
+  text-align: center;
+  padding-block: var(--vectis-space-12);
+}
+/* The column takes the whole limit width: justify-items would otherwise shrink it to its
+   longest line and park it left of centre. */
+.vd-hero > div {
+  width: 100%;
+}
+/* `text-wrap: pretty` on both: a headline and its lead are the two places on the site where a
+   widow is actually visible, and they are short enough for the extra line-breaking work to
+   cost nothing. The measures are in `ch` because what they bound is a number of CHARACTERS —
+   the comfortable reading length — and not a distance the spacing scale would have a word on. */
+.vd-hero-title {
+  margin-block-end: var(--vectis-space-4);
+  text-wrap: pretty;
+}
+.vd-hero-body {
+  margin-inline: auto;
+  margin-block-end: var(--vectis-space-7);
+  max-width: 52ch;
+  text-wrap: pretty;
+}
+.vd-hero-actions {
+  justify-content: center;
+}
+/* Every band below the hero is centred like the hero. Applied per block as each one is
+   rewritten, not to the page as a whole: two of the bands are still a two-column grid and a
+   bulleted list, neither of which reads centred. */
+.vd-centered {
+  text-align: center;
+}
+/* The measure of a section's introduction. `margin-inline: auto` is what makes the cap a
+   CENTRED column rather than a left-hand one — without it the text would be centred inside a
+   64ch box parked at the start edge, which reads as a mistake rather than a choice. */
+.vd-measure {
+  max-width: 64ch;
+  margin-inline: auto;
+}
+/* A prose column beside a panel. It holds ONE column until the medium screen rather than
+   splitting at the tablet step like the site's other grids: an accordion in a 300px column is
+   unreadable, and 1024px is where the two tracks finally have the room the pair needs. */
+.vd-split {
+  display: grid;
+  gap: var(--vectis-space-7);
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+/* On a phone the two tracks are stacked, so this column is the whole width and reads better
+   centred — the hero's treatment. From the tablet up it sits beside the accordion and goes back
+   to its start edge. Mobile first, so the centred form is the base and the 640px step undoes it.
+
+   The class exists so the rule CANNOT reach the accordion, which is this column's SIBLING and
+   not its child: centring text there would inherit into VAccordion's own headers and panels,
+   which is reaching inside a component from outside — the very thing this file warns about. */
+.vd-split-prose {
+  text-align: center;
+}
+/* The four engines. A row that wraps rather than a grid: there are four of them, they are never
+   going to be a table, and wrapping is what a narrow screen wants. */
+.vd-browsers {
+  display: flex;
+  flex-wrap: wrap;
+  /* A flex line is not reached by `text-align`, so the row needs its own centring. */
+  justify-content: center;
+  gap: var(--vectis-space-6);
+  margin-block: 0 var(--vectis-space-5);
+  padding: 0;
+  list-style: none;
+}
+.vd-browsers > li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--vectis-space-2);
+}
+/* A square box with `contain`, because the four files do not share an aspect ratio — Firefox's
+   viewBox is 87.419 × 81.967 where the others are square. Without it that one logo alone would
+   render wider than its neighbours. The attributes on the tag reserve the same box before the
+   file arrives, so the row does not reflow around them. */
+.vd-browsers img {
+  inline-size: 40px;
+  block-size: 40px;
+  object-fit: contain;
+}
+.vd-grid-3 {
+  display: grid;
+  gap: var(--vectis-space-4);
+  grid-template-columns: 1fr;
+}
+/* The space under a heading, and under the paragraph that follows it. VTypography ships
+   `margin: 0` on purpose — the space around a text block belongs to the layout holding it,
+   which is here, so these four are the site's answer for its own blocks. */
+.vd-stack-xs {
+  margin-block-end: var(--vectis-space-3);
+}
+.vd-stack-sm {
+  margin-block-end: var(--vectis-space-2);
+}
+.vd-stack-md {
+  margin-block-end: var(--vectis-space-5);
+}
+.vd-stack-lg {
+  margin-block-end: var(--vectis-space-7);
+}
+
+/* --- Error page ---
+   Narrower than the content column: what it holds is four short blocks, and a 1440px measure
+   would strand them across an empty screen. */
+.vd-error {
+  max-width: 72ch;
+  padding-block: var(--vectis-space-10) var(--vectis-space-12);
+}
+
+/* --- Documentation --- */
+.vd-docs {
+  display: block;
+}
+.vd-aside {
+  display: none;
+}
+/* The groups read as three separate shelves rather than one long list. Where a separator sits
+   between two groups it carries the space itself, so the rule above no longer applies. */
+.vd-aside .v-side-nav-group + .v-side-nav-group {
+  margin-block-start: var(--vectis-space-7);
+}
+.vd-aside .v-side-nav-separator {
+  margin-block: var(--vectis-space-5);
+}
+.vd-outline {
+  display: none;
+}
+.vd-outline-title {
+  margin-block-end: var(--vectis-space-2);
+}
+.vd-main {
+  min-width: 0;
+  padding-block: var(--vectis-space-6) var(--vectis-space-9);
+}
+.vd-docnav-compact {
+  display: block;
+  padding-block: var(--vectis-space-3) 0;
+}
+
+/* The compact documentation nav is the SAME tree, revealed by a data attribute rather than a
+   second copy of forty rows. A max-width query is the honest form here: the rule exists only
+   below the medium screen, where the rail is not in the grid. */
+@media (max-width: 1023px) {
+  .vd-docs[data-nav-open] > .vd-aside {
+    display: block;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-block: var(--vectis-space-3) var(--vectis-space-4);
+    border-bottom: 1px solid var(--vectis-color-border);
+  }
+}
+
+/* --- Search dialog ---
+   The panel is a VDialog, which already takes its width from its `width` prop and caps
+   itself to the viewport. All it wants on top is a shorter ceiling, so the results list
+   starts scrolling well before the dialog reaches the bottom of the screen. */
+.vd-modal {
+  max-block-size: 80vh;
+  /* Pinned near the top rather than centred. A modal <dialog> centres itself with
+     `margin: auto`, which would move the FIELD every time the result list grew or shrank —
+     under the reader's cursor, while they are still typing. Anchored, only the list moves. */
+  margin-block: 7vh auto;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --vd-gutter: var(--vectis-space-6);
+  }
+  .vd-under-640 {
+    display: none;
+  }
+  .vd-header-end {
+    gap: var(--vectis-space-2);
+  }
+  .vd-search {
+    display: block;
+    width: 240px;
+  }
+  .vd-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .vd-split-prose {
+    text-align: start;
+  }
+  .vd-browsers {
+    justify-content: flex-start;
+  }
+}
+
+@media (min-width: 768px) {
+  .vd-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--vectis-space-8);
+    padding-block: 128px;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* The prose column takes a little less than the panel: a paragraph has a comfortable measure
+     and stops wanting width, where an accordion keeps using whatever it is given. */
+  .vd-split {
+    grid-template-columns: 5fr 6fr;
+    gap: var(--vectis-space-9);
+  }
+  .vd-nav-links {
+    display: flex;
+  }
+  .vd-under-1024 {
+    display: none;
+  }
+  .vd-from-1024 {
+    display: inline-flex;
+  }
+  .vd-docnav-compact {
+    display: none;
+  }
+  .vd-docs {
+    display: grid;
+    grid-template-columns: var(--vd-aside-w) minmax(0, 1fr);
+    gap: var(--vectis-space-7);
+    align-items: start;
+  }
+  .vd-aside {
+    display: block;
+    position: sticky;
+    top: var(--vd-header-h);
+    /* A fixed height rather than a max: with the footer gone the column has to reach the bottom
+       of the screen on a short page, not stop where its last row ends. */
+    height: calc(100vh - var(--vd-header-h));
+    overflow-y: auto;
+    padding-block: var(--vectis-space-6);
+  }
+  .vd-main {
+    padding-block: var(--vectis-space-7) var(--vectis-space-10);
+  }
+  /* Everything to the right of the rail, the outline column included once it appears. */
+  .vd-docs-footer {
+    grid-column: 2 / -1;
+  }
+  /*
+   * TRAP — this is what keeps the rail reaching the bottom of the window. A sticky box is bound
+   * by its GRID AREA, so left on row 1 alone the rail would have scrolled out of view by the
+   * time the footer came up, and the footer would sit beside an empty column. Spanning both rows
+   * gives its viewport height somewhere to hold on to.
+   */
+  .vd-aside {
+    grid-row: 1 / -1;
+  }
+  .vd-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1440px) {
+  .vd-search {
+    width: 300px;
+  }
+  /* The outline waits for the large screen: at 1024px the three tracks would leave the prose
+     under 520px, which is narrower than the measure a code block needs. */
+  .vd-docs {
+    grid-template-columns: var(--vd-aside-w) minmax(0, 1fr) var(--vd-outline-w);
+  }
+  .vd-outline {
+    display: block;
+    position: sticky;
+    top: var(--vd-header-h);
+    height: calc(100vh - var(--vd-header-h));
+    overflow-y: auto;
+    padding-block: var(--vectis-space-7);
+  }
+}
+
+/* --- Prose ---
+ * EVERY selector is a DIRECT-CHILD chain from `.vd-prose`, which is what makes unlayered docs
+ * CSS safe: the prose renders its nodes as direct children, while a live demo sits inside
+ * `.vd-demo` and a component's internals are two levels further down. A descendant selector
+ * such as `.vd-prose h2` would reach into a component's own title from OUTSIDE every layer,
+ * unbeatably. Type comes from the semantic recipes, never from the font primitives.
+ */
+.vd-prose > h1 {
+  margin: 0 0 var(--vectis-space-3);
+  font-family: var(--vectis-text-family-heading);
+  font-size: var(--vectis-text-heading-1-size);
+  font-weight: var(--vectis-text-heading-1-weight);
+  line-height: var(--vectis-text-heading-1-leading);
+  letter-spacing: var(--vectis-text-heading-1-tracking);
+}
+.vd-prose > h2 {
+  margin: var(--vectis-space-8) 0 var(--vectis-space-4);
+  padding-top: var(--vectis-space-6);
+  border-top: 1px solid var(--vectis-color-border);
+  font-family: var(--vectis-text-family-heading);
+  font-size: var(--vectis-text-heading-2-size);
+  font-weight: var(--vectis-text-heading-2-weight);
+  line-height: var(--vectis-text-heading-2-leading);
+  letter-spacing: var(--vectis-text-heading-2-tracking);
+}
+.vd-prose > h3 {
+  margin: var(--vectis-space-7) 0 var(--vectis-space-3);
+  font-family: var(--vectis-text-family-heading);
+  font-size: var(--vectis-text-heading-3-size);
+  font-weight: var(--vectis-text-heading-3-weight);
+  line-height: var(--vectis-text-heading-3-leading);
+}
+.vd-prose > p,
+.vd-prose > ul,
+.vd-prose > ol {
+  margin: var(--vectis-space-4) 0;
+  font-size: var(--vectis-text-body-lg-size);
+  line-height: var(--vectis-text-body-lg-leading);
+}
+/* The lead is the `body-xl` role — the one step above the running text — written as tokens
+   rather than as a VTypography, because what carries it is a DocsProse and that has to set
+   `innerHTML` (see its own header for why a component node cannot). */
+.vd-prose > p.vd-lead {
+  font-size: var(--vectis-text-body-xl-size);
+  line-height: var(--vectis-text-body-xl-leading);
+  color: var(--vectis-color-text-muted);
+}
+.vd-prose > ul,
+.vd-prose > ol {
+  padding-inline-start: var(--vectis-space-6);
+}
+.vd-prose > ul > li,
+.vd-prose > ol > li {
+  margin: var(--vectis-space-2) 0;
+  line-height: var(--vectis-text-body-lg-leading);
+}
+.vd-prose > blockquote {
+  margin: var(--vectis-space-4) 0;
+  padding-inline-start: var(--vectis-space-4);
+  border-inline-start: 2px solid var(--vectis-color-border-strong);
+  color: var(--vectis-color-text-muted);
+}
+.vd-prose > p > code,
+.vd-prose > ul > li > code,
+.vd-prose > ol > li > code,
+.vd-prose > h2 > code,
+.vd-prose > h3 > code,
+.vd-prose > blockquote > code {
+  padding-inline: var(--vectis-space-1);
+  border-radius: var(--vectis-radius-xs);
+  background: var(--vectis-color-surface-muted);
+  font-family: var(--vectis-text-family-code);
+  font-size: var(--vectis-text-code-size);
+}
+/* Not a value off the spacing scale: it is the height of the sticky bar plus a breath, so
+   writing it that way keeps it right the day the header changes height. */
+.vd-prose > h2,
+.vd-prose > h3 {
+  scroll-margin-top: calc(var(--vd-header-h) + var(--vectis-space-4));
+}
+
+/* --- Code blocks --- */
+.vd-code {
+  /* Never inherits the centring of a `.vd-centered` band: a `<pre>` centred line by line is
+     unreadable, and a code block is not centred content anywhere, so the reset belongs here
+     rather than on the one section that happens to need it. */
+  text-align: start;
+  margin: var(--vectis-space-5) 0;
+  overflow: hidden;
+  border: 1px solid var(--vectis-color-border);
+  border-radius: var(--vectis-radius-surface);
+  background: var(--vectis-color-surface-sunken);
+}
+.vd-code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vectis-space-2);
+  padding: var(--vectis-space-1) var(--vectis-space-1) var(--vectis-space-1) var(--vectis-space-4);
+  border-bottom: 1px solid var(--vectis-color-border);
+}
+/* The language tag is a VTypography `overline` — which already carries the capitals and the
+   widened tracking — plus the ONE thing that role does not and should not own: the monospaced
+   family, since what it names is a language and not a word. */
+.vd-code-lang {
+  font-family: var(--vectis-text-family-code);
+}
+.vd-code > pre {
+  margin: 0;
+  padding: var(--vectis-space-4);
+  overflow-x: auto;
+  font-family: var(--vectis-text-family-code);
+  font-size: var(--vectis-text-code-size);
+  line-height: var(--vectis-text-code-leading);
+  tab-size: 2;
+}
+
+/* --- Demo surface --- */
+.vd-demo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vectis-space-3);
+  align-items: center;
+  margin: var(--vectis-space-5) 0;
+  padding: var(--vectis-space-4);
+  border: 1px solid var(--vectis-color-border);
+  border-radius: var(--vectis-radius-surface);
+  background: var(--vectis-color-surface-raised);
+}
+.vd-demo[data-stack] {
+  flex-direction: column;
+  align-items: stretch;
+}
+/* A demo shown against the opposite theme paints its own ground: the surface token resolves
+   inside the `data-theme` subtree, so the box stops borrowing the page's. */
+.vd-demo[data-theme] {
+  background: var(--vectis-color-surface);
+}
+.vd-scroll {
+  overflow-x: auto;
+}
+.vd-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--vectis-space-5) 0;
+  font-size: var(--vectis-text-body-md-size);
+}
+.vd-table th {
+  padding: var(--vectis-space-2) var(--vectis-space-3);
+  text-align: start;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--vectis-color-border-strong);
+  font-weight: var(--vectis-text-label-weight);
+}
+.vd-table td {
+  padding: var(--vectis-space-2) var(--vectis-space-3);
+  border-bottom: 1px solid var(--vectis-color-border);
+  color: var(--vectis-color-text-muted);
+  vertical-align: top;
+}
+.vd-table td > code,
+.vd-table th > code {
+  font-family: var(--vectis-text-family-code);
+  font-size: var(--vectis-text-code-size);
+  color: var(--vectis-color-text);
+}
+
+@media (min-width: 768px) {
+  .vd-demo {
+    padding: var(--vectis-space-6);
+    gap: var(--vectis-space-4);
+  }
+}

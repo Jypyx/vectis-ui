@@ -1,0 +1,31 @@
+{
+  "name": "@vectis/docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "//scripts": "The docs consume `dist`, exactly as an npm consumer does, so the library must be BUILT first. `pnpm -r build` orders the workspace topologically and already does it; `dev`, `preview` and `typecheck` are not run under -r, hence their own prerequisite. `postinstall` is not optional: it writes .nuxt/tsconfig.json, without which ESLint's type-aware block fails with \"file not found in project\" on every .ts here.",
+  "scripts": {
+    "postinstall": "nuxt prepare",
+    "predev": "pnpm --filter @vectis/ui build",
+    "dev": "nuxt dev",
+    "build": "nuxt generate",
+    "postbuild": "tsx scripts/check-prerender.ts",
+    "prepreview": "pnpm run build",
+    "preview": "nuxt preview",
+    "pretypecheck": "pnpm --filter @vectis/ui build",
+    "typecheck": "nuxt typecheck",
+    "icons": "tsx scripts/build-icons.ts"
+  },
+  "dependencies": {
+    "@vectis/ui": "workspace:*",
+    "vue": "^3.5.40"
+  },
+  "devDependencies": {
+    "@nuxtjs/i18n": "^10.6.0",
+    "@types/node": "^26.1.1",
+    "nuxt": "^4.5.2",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.3.7"
+  }
+}
