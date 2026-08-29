@@ -20,6 +20,7 @@ import VIconButton from '../VIconButton/VIconButton.vue'
 import { carouselKey } from './context'
 
 import { cssSize } from '../../utils/css'
+import { isRtl } from '../../utils/direction'
 import { isDev } from '../../utils/env'
 import { isKeyboardFocus } from '../../utils/focus'
 import { clamp } from '../../utils/number'
@@ -663,7 +664,7 @@ function onKeydown(event: KeyboardEvent) {
   event.preventDefault()
   // The INLINE arrows are physical, hence inverted in RTL (the `arrowNav` rule);
   // the block axis does not flip.
-  const rtl = !isVertical.value && getComputedStyle(port).direction === 'rtl'
+  const rtl = !isVertical.value && isRtl(port)
   goTo(model.value + (rtl ? -step : step))
 }
 

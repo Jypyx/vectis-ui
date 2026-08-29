@@ -14,6 +14,7 @@
  * This is the single place that behaviour is written: the pages, the tabs, the toggle
  * group and the menu all use it.
  */
+import { isRtl } from './direction'
 
 // @keyboard @a11y
 /**
@@ -64,9 +65,7 @@ export function arrowNavigate(
   // the writing direction to answer. Keeping it a function rather than a value is what
   // spares Home and End the style recalculation that reading the direction forces.
   const forward = () =>
-    vertical
-      ? event.key === 'ArrowDown'
-      : (event.key === 'ArrowRight') !== (getComputedStyle(container).direction === 'rtl')
+    vertical ? event.key === 'ArrowDown' : (event.key === 'ArrowRight') !== isRtl(container)
   const current = items.indexOf(document.activeElement as HTMLElement)
   const next =
     event.key === 'Home'

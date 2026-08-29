@@ -8,6 +8,7 @@ import VIconButton from '../VIconButton/VIconButton.vue'
 import { panelIdFor, tabIdFor, tabsKey } from './context'
 
 import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
+import { isRtl } from '../../utils/direction'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useAriaLabel } from '../../composables/useAriaLabel'
@@ -265,7 +266,7 @@ function scrollStep(direction: -1 | 1) {
   }
   // The horizontal offset is physical, not logical: in a right-to-left page, moving
   // forward means moving left, so the direction has to be flipped by hand.
-  const rtl = getComputedStyle(list).direction === 'rtl'
+  const rtl = isRtl(list)
   list.scrollBy?.({ left: direction * list.clientWidth * 0.8 * (rtl ? -1 : 1) })
 }
 
