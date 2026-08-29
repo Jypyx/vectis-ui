@@ -336,18 +336,31 @@ const filteredRows = computed(() => {
   )
 })
 
+/*
+ * The collator is built ONCE per locale rather than per comparison.
+ *
+ * `String.localeCompare` reuses an engine-cached collator only when both the locale and the
+ * options are `undefined`; passing either — and this passes both, deliberately, since the
+ * locale must stay explicit — takes the slow path and constructs an `Intl.Collator` on every
+ * call. That is the cost class `utils/date.ts` already fights: construction runs one to two
+ * orders of magnitude longer than use. It is not paid once, either: `search` feeds
+ * `filteredRows`, which feeds this, so a sorted table re-sorts on every keystroke.
+ *
+ * The locale stays explicit for the reason it always was — an `undefined` locale resolves
+ * differently in Node and in the browser, so the row order would diverge across hydration.
+ */
+const collator = computed(() => new Intl.Collator(vectisLocale.value, { numeric: true }))
+
 const sortedRows = computed(() => {
   const current = sort.value
   if (!current || props.serverSide) return filteredRows.value
   const factor = current.direction === 'asc' ? 1 : -1
+  const compare = collator.value.compare
   return [...filteredRows.value].sort((a, b) => {
     const av = a[current.key]
     const bv = b[current.key]
     if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * factor
-    return (
-      String(av ?? '').localeCompare(String(bv ?? ''), vectisLocale.value, { numeric: true }) *
-      factor
-    )
+    return compare(String(av ?? ''), String(bv ?? '')) * factor
   })
 })
 

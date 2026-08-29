@@ -7,6 +7,7 @@ import {
   pointWithin,
   columnCount,
   daySpan,
+  eventsByDay,
   eventsOnDay,
   inlineEdgeAt,
   moveEventToDay,
@@ -484,6 +485,93 @@ describe('eventsOnDay', () => {
 
   it('leaves out an event that does not reach the day', () => {
     expect(eventsOnDay([event({ id: 'a' })], FRIDAY)).toEqual([])
+  })
+
+  /*
+   * The last tie-break must be a stable total order over the ids and NOTHING else. It used
+   * to be `localeCompare` with no locale, which resolves against the runtime's default and
+   * therefore orders differently in Node and in the browser — and since this order is what
+   * the month view lists chips in, the two renders disagreed across hydration.
+   *
+   * The ids here are chosen so the two rules genuinely disagree: by code point 'Z' (90)
+   * precedes 'a' (97) and 'z' (122) precedes 'é' (233), where an ICU collation puts 'a'
+   * before 'Z' and 'é' next to 'e'. Asserting the code-point order is what makes a
+   * reintroduced `localeCompare` fail here rather than in production.
+   */
+  it('breaks the last tie by code point, not by locale collation', () => {
+    const sameSlot = [
+      event({ id: 'é', startTime: '09:00', endTime: '10:00' }),
+      event({ id: 'a', startTime: '09:00', endTime: '10:00' }),
+      event({ id: 'Z', startTime: '09:00', endTime: '10:00' }),
+      event({ id: 'z', startTime: '09:00', endTime: '10:00' }),
+    ]
+    const order = eventsOnDay(sameSlot, WEDNESDAY).map((e) => e.id)
+    expect(order).toEqual(['Z', 'a', 'z', 'é'])
+
+    // And it does not depend on the order it was handed, which is the point of a tie-break.
+    expect(eventsOnDay([...sameSlot].reverse(), WEDNESDAY).map((e) => e.id)).toEqual(order)
+  })
+})
+
+describe('eventsByDay', () => {
+  const days = [MONDAY, '2026-06-09', WEDNESDAY, '2026-06-11', FRIDAY]
+
+  /*
+   * The contract that matters: it fills every day at once, but the list it puts in each one
+   * must be EXACTLY what `eventsOnDay` would have returned for that day. It is the order
+   * chips are listed in, so any divergence would be visible on screen — and the two now use
+   * different code paths (`eventsByDay` derives its sort key once per event, where
+   * `eventsOnDay` derives it per comparison), which is precisely why this is asserted rather
+   * than assumed.
+   */
+  it('agrees with eventsOnDay, day for day', () => {
+    const events = [
+      event({ id: 'late', start: WEDNESDAY, end: WEDNESDAY, startTime: '16:00', endTime: '17:00' }),
+      event({ id: 'trip', start: MONDAY, end: FRIDAY, allDay: true }),
+      event({
+        id: 'early',
+        start: WEDNESDAY,
+        end: WEDNESDAY,
+        startTime: '08:00',
+        endTime: '09:00',
+      }),
+      event({ id: 'a', start: WEDNESDAY, end: WEDNESDAY, startTime: '08:00', endTime: '09:00' }),
+    ]
+    const byDay = eventsByDay(events, days)
+    for (const iso of days) {
+      expect(byDay.get(iso)?.map((e) => e.id)).toEqual(eventsOnDay(events, iso).map((e) => e.id))
+    }
+  })
+
+  it('gives every requested day a list, even an empty one', () => {
+    const byDay = eventsByDay([], days)
+    expect([...byDay.keys()]).toEqual(days)
+    expect([...byDay.values()].every((list) => list.length === 0)).toBe(true)
+  })
+
+  /*
+   * A day the weekday filter hides simply has no bucket. An event spanning it must still
+   * appear on the visible days either side rather than being dropped — the Monday-to-Friday
+   * calendar showing a Friday-to-Monday trip on both of its ends.
+   */
+  it('skips days that are not on show without losing the event', () => {
+    const visible = [MONDAY, FRIDAY]
+    const byDay = eventsByDay(
+      [event({ id: 'trip', start: MONDAY, end: FRIDAY, allDay: true })],
+      visible,
+    )
+    expect(byDay.get(MONDAY)?.map((e) => e.id)).toEqual(['trip'])
+    expect(byDay.get(FRIDAY)?.map((e) => e.id)).toEqual(['trip'])
+    expect(byDay.has(WEDNESDAY)).toBe(false)
+  })
+
+  it('leaves out an event that never reaches the days on show', () => {
+    const byDay = eventsByDay([event({ id: 'old', start: '2026-01-01', end: '2026-01-02' })], days)
+    expect([...byDay.values()].every((list) => list.length === 0)).toBe(true)
+  })
+
+  it('has no day to fill when given none', () => {
+    expect(eventsByDay([event({ id: 'a' })], []).size).toBe(0)
   })
 })
 
