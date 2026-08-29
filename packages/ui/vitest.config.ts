@@ -99,6 +99,30 @@ export default defineConfig({
         },
       },
       {
+        /*
+         * The benchmarks (`pnpm bench`), kept as their own project for two reasons.
+         *
+         * A third project rather than a `benchmark.include` on `unit`: `vitest bench` with
+         * no filter visits every project, and pointing the browser project at bench files
+         * would boot Chromium to time pure functions. Here `include: []` keeps this project
+         * empty during a normal `vitest run`, so `pnpm test` and `pnpm test:coverage` are
+         * untouched by its existence.
+         *
+         * `node` and not jsdom: everything benchmarked is a pure module — no DOM is
+         * involved, and jsdom's environment setup would be most of the measurement.
+         *
+         * This layer NEVER gates. A timing on a shared runner measures the runner; the
+         * deterministic half is `scripts/bench-size.ts`, which does gate, at postbuild.
+         */
+        plugins: [vue()],
+        test: {
+          name: 'bench',
+          environment: 'node',
+          include: [],
+          benchmark: { include: ['src/**/*.bench.ts'] },
+        },
+      },
+      {
         // `vue()` is indispensable here: a Vitest project does not inherit the
         // root's plugins, and storybookTest only brings the Storybook ones —
         // without it, the .vue files imported by the stories fail with "invalid JS

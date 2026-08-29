@@ -15,10 +15,11 @@
  * `--report` prints the gzip cost of the core plus any number of components — the
  * command behind the figures quoted in the README.
  */
-import { gzipSync } from 'node:zlib'
-import { readdirSync, readFileSync, existsSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { formatKb, gzipBytes, posix as posixFrom, walk } from './lib/measure'
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const dist = resolve(pkgRoot, 'dist')
@@ -36,16 +37,7 @@ const CORE_CLASSES: ReadonlySet<string> = new Set([
   '.v-visually-hidden',
 ])
 
-function walk(dir: string, ext: string, out: string[] = []): string[] {
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const full = join(dir, entry.name)
-    if (entry.isDirectory()) walk(full, ext, out)
-    else if (entry.name.endsWith(ext)) out.push(full)
-  }
-  return out
-}
-
-const posix = (p: string) => relative(dist, p).replace(/\\/g, '/')
+const posix = (p: string) => posixFrom(dist, p)
 const errors: string[] = []
 const fail = (message: string) => errors.push(message)
 
@@ -106,7 +98,7 @@ if (errors.length) {
 console.log(`CSS split OK — ${sfcs.length} component sheets, core ${gzip(core)} gzip.`)
 
 function gzip(source: string | Buffer): string {
-  return `${(gzipSync(Buffer.from(source), { level: 9 }).length / 1024).toFixed(2)} kB`
+  return formatKb(gzipBytes(source))
 }
 
 // `pnpm --filter @vectis/ui exec tsx scripts/check-css-split.ts --report VButton VInput`

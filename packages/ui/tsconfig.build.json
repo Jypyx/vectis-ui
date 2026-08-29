@@ -4,5 +4,11 @@
     "types": []
   },
   "include": ["src/**/*", "src/**/*.vue"],
-  "exclude": ["src/**/*.stories.ts", "src/**/*.test.ts", "src/**/*.mdx", "src/stories/**"]
+  "exclude": [
+    "src/**/*.stories.ts",
+    "src/**/*.test.ts",
+    "src/**/*.bench.ts",
+    "src/**/*.mdx",
+    "src/stories/**"
+  ]
 }

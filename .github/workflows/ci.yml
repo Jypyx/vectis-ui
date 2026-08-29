@@ -52,8 +52,15 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
-      # `build` chains `check-css-split` through `postbuild` — the repo's only check
-      # on the artefact rather than the source.
+      # `build` chains `postbuild`, which is the only place anything is checked against the
+      # ARTEFACT rather than the source: `check-css-split` for the per-component split, then
+      # `bench-size` for the weight. The second one GATES — it holds `dist` to the committed
+      # `bench/size-baseline.json`, so a size regression is red here rather than noticed
+      # later by a reader of the README. Growing a figure on purpose means re-baselining
+      # (`pnpm --filter @vectis/ui bench:size:update`), which shows up as a diff.
+      #
+      # The runtime benchmarks (`pnpm bench`) are deliberately NOT here: a timing on a
+      # shared runner measures the runner.
       - name: Build
         run: pnpm build
 

@@ -99,6 +99,23 @@ export default tseslint.config(
     },
   },
   {
+    /*
+     * The benchmarks. `no-focused-tests` matters more here than in the suite: `bench.only`
+     * does not fail anything, it just silently narrows what was measured, so a committed
+     * one turns a comparison into a different comparison with no sign that it happened.
+     *
+     * A benchmark body deliberately calls a pure function and throws the value away, which
+     * is the one place `no-unused-expressions` is wrong.
+     */
+    files: ['**/*.bench.ts'],
+    plugins: { vitest },
+    rules: {
+      'vitest/no-focused-tests': 'error',
+      'vitest/no-identical-title': 'error',
+      '@typescript-eslint/no-unused-expressions': 'off',
+    },
+  },
+  {
     rules: {
       // The DS SFCs carry simple element names (VButton, VInput…): intended.
       'vue/multi-word-component-names': 'off',
