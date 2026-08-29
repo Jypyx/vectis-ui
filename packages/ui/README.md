@@ -20,7 +20,9 @@ pnpm add @vectis/ui vue
 import '@vectis/ui/styles.css'
 ```
 
-`styles.css` is the **core**: the reset, the tokens and the chrome shared by every component (3.8 kB gzip). Each component's own CSS ships with the component and is pulled in by the import you already write — nothing else to add, and you download the CSS of what you use. A single `VButton` costs 4.6 kB gzip of CSS instead of the 18.0 kB of a bundled stylesheet.
+`styles.css` is the **core**: the reset, the tokens and the chrome shared by every component (4.33 kB gzip). Each component's own CSS ships with the component and is pulled in by the import you already write — nothing else to add, and you download the CSS of what you use. A single `VButton` costs 4.87 kB gzip of CSS instead of the 21.58 kB of a bundled stylesheet.
+
+Those figures are measured, not estimated: `pnpm --filter @vectis/ui bench:size` prints them from the built artefact and holds them to a committed baseline, so they cannot drift out of step with the library again.
 
 ```vue
 <script setup lang="ts">
@@ -112,7 +114,7 @@ const semanticColors = flattenTokens(tokens.semantic.color, ['color'])
 
 ## Icons
 
-**No icon font is required.** The icons the library renders itself — `VDialog`'s cross, `VDatePicker`'s and `VMenu`'s chevrons, the toasts' tone icons, `VDataTable`'s sorting… — are **embedded SVGs**, exact replicas of Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24, Apache-2.0 © Google). They weigh ~2 kB gzip and are not tree-shakable: that is the price of the design system's autonomy.
+**No icon font is required.** The icons the library renders itself — `VDialog`'s cross, `VDatePicker`'s and `VMenu`'s chevrons, the toasts' tone icons, `VDataTable`'s sorting… — are **embedded SVGs**, exact replicas of Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24, Apache-2.0 © Google). They weigh ~3.6 kB gzip and are not tree-shakable: that is the price of the design system's autonomy. It is a real cost rather than a rounding error — the registry is the largest single item in a lone `VButton`'s JavaScript, which comes to 8.12 kB gzip once `VIcon`, `VSpinner` and the dictionary are pulled in with it.
 
 The `VIcon` component resolves its source in this order: **an explicit `render` → `src` → `name` (the consumer resolver, then the built-in registry, then the ligature) → the slot**.
 

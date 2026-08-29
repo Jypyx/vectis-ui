@@ -2,7 +2,7 @@ export default {
   title: 'Iconography',
   lead: 'No icon font is required, and none is bundled. The icons the library renders itself are embedded SVG paths — exact replicas of Material Symbols Rounded (weight 400, GRAD 0, optical size 24, Apache-2.0 © Google).',
   weight:
-    "They weigh about 3.7 kB gzip and are deliberately not tree-shakable — the lookup is by string at runtime, which is the price of the design system's autonomy. The built-in registry holds 34 icons, and each entry is <code>[outline, filled?]</code>: the second path exists only where the FILL axis really changes the geometry, which is the case for 15 of the 34.",
+    "They weigh about 3.6 kB gzip and are deliberately not tree-shakable — the lookup is by string at runtime, which is the price of the design system's autonomy. The built-in registry holds 34 icons, and each entry is <code>[outline, filled?]</code>: the second path exists only where the FILL axis really changes the geometry, which is the case for 15 of the 34.",
   gridCaption: 'Third and fourth, sixth and seventh: the same name, outline then filled.',
 
   orderHeading: 'The resolution order',

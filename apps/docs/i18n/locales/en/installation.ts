@@ -4,7 +4,7 @@ export default {
 
   vueHeading: 'Vue 3',
   vueBody:
-    "<code>styles.css</code> is the core: the reset, the tokens and the chrome shared by every component, 6.7 kB gzip. Each component's own CSS ships with the component and is pulled in by the import you already write.",
+    "<code>styles.css</code> is the core: the reset, the tokens and the chrome shared by every component, 4.33 kB gzip. Each component's own CSS ships with the component and is pulled in by the import you already write.",
 
   nuxtHeading: 'Nuxt 3',
   nuxtBody:
@@ -14,7 +14,7 @@ export default {
   cssBody:
     'Component CSS travels with the component as a plain static import, which Vite, Nitro and webpack all turn into a render-blocking link — including for a lazily loaded route. Keep the client CSS extracted to a file and the question of a flash does not arise.',
   cssQuote:
-    'A page importing a single VButton downloads 7.25 kB gzip of CSS — the core plus that one component’s sheet. The other fifty-five sheets are never requested.',
+    'A page importing a single VButton downloads 4.87 kB gzip of CSS — the core plus that one component’s sheet. The other sixty-one sheets are never requested.',
 
   getHeading: 'What you get',
   getBody:

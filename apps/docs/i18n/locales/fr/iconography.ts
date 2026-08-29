@@ -2,7 +2,7 @@ export default {
   title: 'Iconographie',
   lead: "Aucune police d'icônes n'est requise, et aucune n'est embarquée. Les icônes que la bibliothèque dessine elle-même sont des tracés SVG intégrés — répliques exactes de Material Symbols Rounded (graisse 400, GRAD 0, taille optique 24, Apache-2.0 © Google).",
   weight:
-    "Elles pèsent environ 3,7 ko gzip et ne sont délibérément pas élaguables — la recherche se fait par chaîne à l'exécution, ce qui est le prix de l'autonomie du design system. Le registre intégré compte 34 icônes, et chaque entrée est un <code>[outline, filled?]</code> : le second tracé n'existe que là où l'axe FILL change réellement la géométrie, ce qui est le cas de 15 des 34.",
+    "Elles pèsent environ 3,6 ko gzip et ne sont délibérément pas élaguables — la recherche se fait par chaîne à l'exécution, ce qui est le prix de l'autonomie du design system. Le registre intégré compte 34 icônes, et chaque entrée est un <code>[outline, filled?]</code> : le second tracé n'existe que là où l'axe FILL change réellement la géométrie, ce qui est le cas de 15 des 34.",
   gridCaption: 'Troisième et quatrième, sixième et septième : le même nom, contour puis plein.',
 
   orderHeading: "L'ordre de résolution",

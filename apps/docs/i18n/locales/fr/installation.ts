@@ -4,7 +4,7 @@ export default {
 
   vueHeading: 'Vue 3',
   vueBody:
-    "<code>styles.css</code> est le noyau : le reset, les tokens et le décor commun à tous les composants, 6,7 ko gzip. Le CSS propre à chaque composant voyage avec lui et arrive par l'import que vous écrivez déjà.",
+    "<code>styles.css</code> est le noyau : le reset, les tokens et le décor commun à tous les composants, 4,33 ko gzip. Le CSS propre à chaque composant voyage avec lui et arrive par l'import que vous écrivez déjà.",
 
   nuxtHeading: 'Nuxt 3',
   nuxtBody:
@@ -14,7 +14,7 @@ export default {
   cssBody:
     "Le CSS d'un composant voyage avec lui sous la forme d'un simple import statique, que Vite, Nitro et webpack transforment tous en lien bloquant le rendu — y compris pour une route chargée paresseusement. Gardez le CSS client extrait dans un fichier et la question du flash ne se pose pas.",
   cssQuote:
-    'Une page qui importe un seul VButton télécharge 7,25 ko gzip de CSS — le noyau plus la feuille de ce composant. Les cinquante-cinq autres feuilles ne sont jamais demandées.',
+    'Une page qui importe un seul VButton télécharge 4,87 ko gzip de CSS — le noyau plus la feuille de ce composant. Les soixante et une autres feuilles ne sont jamais demandées.',
 
   getHeading: 'Ce que vous obtenez',
   getBody:
