@@ -66,16 +66,55 @@ const busyDays = computed(() => {
   return days
 })
 
-const weeksOf = (iso: string) => monthWeeks(iso, props.weekdays)
+/*
+ * The twelve grids and their day numbers, built ONCE per render.
+ *
+ * `weeksOf` used to be a plain function, and the template reached it three times per month
+ * — once in the `v-for`, and twice through `busyCount`, which appears in both the `v-if` and
+ * the text beside it. Twelve months therefore rebuilt 36 grids, some 1500 `MonthCell`
+ * objects, on every render; the 504 day numbers were formatted alongside them. None of that
+ * depends on anything but the anchor, the weekdays and the locale.
+ *
+ * `busyCount` is a map for the same reason: reading it twice must not cost twice.
+ */
+const grids = computed(() => {
+  const map = new Map<string, MonthCell[][]>()
+  for (const month of props.months) map.set(month, monthWeeks(month, props.weekdays))
+  return map
+})
 
-const dayNumber = (iso: string) => formatDate(iso, props.locale, { day: 'numeric' })
+const weeksOf = (month: string) => grids.value.get(month) ?? []
+
+const dayNumbers = computed(() => {
+  const map = new Map<string, string>()
+  for (const weeks of grids.value.values()) {
+    for (const week of weeks) {
+      for (const cell of week) {
+        if (!map.has(cell.iso))
+          map.set(cell.iso, formatDate(cell.iso, props.locale, { day: 'numeric' }))
+      }
+    }
+  }
+  return map
+})
+
+const dayNumber = (iso: string) =>
+  dayNumbers.value.get(iso) ?? formatDate(iso, props.locale, { day: 'numeric' })
 
 /** How many of a month's own days carry something, which is what its name announces. */
-function busyCount(month: string): number {
-  return weeksOf(month)
-    .flat()
-    .filter((cell) => cell.adjacent === null && busyDays.value.has(cell.iso)).length
-}
+const busyCounts = computed(() => {
+  const map = new Map<string, number>()
+  for (const [month, weeks] of grids.value) {
+    let count = 0
+    for (const week of weeks) {
+      for (const cell of week) if (cell.adjacent === null && busyDays.value.has(cell.iso)) count++
+    }
+    map.set(month, count)
+  }
+  return map
+})
+
+const busyCount = (month: string) => busyCounts.value.get(month) ?? 0
 
 const isBusy = (cell: MonthCell) => cell.adjacent === null && busyDays.value.has(cell.iso)
 </script>

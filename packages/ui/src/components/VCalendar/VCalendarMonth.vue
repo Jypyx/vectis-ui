@@ -16,6 +16,7 @@
 import { computed, nextTick, ref, useId, watch } from 'vue'
 
 import { formatDisplay as formatDate } from '../../utils/date'
+import { isRtl as isElementRtl } from '../../utils/direction'
 import { clamp } from '../../utils/number'
 import { formatDisplay as formatTimeDisplay, type HourFormat } from '../../utils/time'
 
@@ -26,7 +27,7 @@ import { calendarIntent } from './keyboard'
 import { EDGE_BAND, useEdgeStep } from './edgeStep'
 import {
   DRAG_THRESHOLD,
-  eventsOnDay,
+  eventsByDay,
   inlineEdgeAt,
   isAllDayEvent,
   moveEventToDay,
@@ -93,9 +94,41 @@ const weekdayNames = computed(() =>
   (props.weeks[0] ?? []).map((cell) => formatDate(cell.iso, props.locale, { weekday: 'short' })),
 )
 
-const dayNumber = (iso: string) => formatDate(iso, props.locale, { day: 'numeric' })
+/*
+ * The two labels every square carries, worked out once per cell rather than once per USE.
+ *
+ * `longDay` is asked for twice in the template — the square's own `aria-label`, then the
+ * name of the button that opens the day — so the 42 cells cost 126 `Intl` formats a render,
+ * and the drag re-renders the whole grid on every `pointermove` through `gesture.preview`.
+ * The map depends on the weeks and the locale alone, so it survives every frame of a drag.
+ */
+const dayLabels = computed(() => {
+  const map = new Map<string, { number: string; long: string }>()
+  for (const week of props.weeks) {
+    for (const cell of week) {
+      map.set(cell.iso, {
+        number: formatDate(cell.iso, props.locale, { day: 'numeric' }),
+        long: formatDate(cell.iso, props.locale, {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+        }),
+      })
+    }
+  }
+  return map
+})
 
+const dayNumber = (iso: string) =>
+  dayLabels.value.get(iso)?.number ?? formatDate(iso, props.locale, { day: 'numeric' })
+
+/*
+ * A day outside the grid can reach this — the announcement after a move names the day the
+ * event landed on, which may be the next month — so it falls back to formatting rather than
+ * assuming the map holds it.
+ */
 const longDay = (iso: string) =>
+  dayLabels.value.get(iso)?.long ??
   formatDate(iso, props.locale, { weekday: 'long', day: 'numeric', month: 'long' })
 
 /* ------------------------------------------------------------------- the gesture */
@@ -182,13 +215,12 @@ const drawnEvents = computed<E[]>(() => {
 })
 
 /** Every day's events, worked out once rather than once per chip. */
-const byDay = computed(() => {
-  const map = new Map<string, E[]>()
-  for (const week of props.weeks) {
-    for (const cell of week) map.set(cell.iso, eventsOnDay(drawnEvents.value, cell.iso))
-  }
-  return map
-})
+const byDay = computed(() =>
+  eventsByDay(
+    drawnEvents.value,
+    props.weeks.flatMap((week) => week.map((cell) => cell.iso)),
+  ),
+)
 
 const eventsById = computed(() => new Map(drawnEvents.value.map((item) => [item.id, item])))
 
@@ -281,10 +313,7 @@ function onKeydown(event: KeyboardEvent) {
 
 /* ------------------------------------------------------- the gesture, by pointer */
 
-function isRtl(): boolean {
-  const el = gridEl.value
-  return el !== null && getComputedStyle(el).direction === 'rtl'
-}
+const isRtl = () => isElementRtl(gridEl.value)
 
 /** The grid as the pure geometry wants it: plain numbers, no element. */
 function geometryOf(rect: DOMRect) {

@@ -31,6 +31,7 @@
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 
 import { formatDisplay as formatDate } from '../../utils/date'
+import { isRtl as isElementRtl } from '../../utils/direction'
 import { clamp } from '../../utils/number'
 import { formatDisplay as formatTimeDisplay, type HourFormat } from '../../utils/time'
 
@@ -404,21 +405,60 @@ const byCell = computed(() => {
 
 const cellId = (iso: string, minutes: number) => `${uid}-c-${iso}-${minutes}`
 
+/*
+ * Every label the grid writes, worked out once per day and once per hour instead of once
+ * per CELL — the shape `byCell` above already uses, and for the same reason.
+ *
+ * The grid renders `hours × days` cells, 24 × 7 by default. Reading these straight from
+ * `formatDate` in the template meant 168 `cellLabel` calls per render, each doing a
+ * `parseISO`, a `JSON.stringify` to build the formatter's cache key and two `Intl` formats,
+ * plus `dayName`/`dayNumber` twice per column (slot props, then the fallback content). None
+ * of it depends on the pointer — yet `applyPoint` assigns a new `state.preview` on every
+ * `pointermove`, so the whole template re-renders at pointer rate and all of it was
+ * recomputed on every frame of a drag.
+ *
+ * Two maps of 7 and 24 entries replace that: they recompute when the locale, the days or
+ * the window change, and never because a card moved.
+ */
+const dayLabels = computed(() => {
+  const map = new Map<string, { short: string; number: string; full: string }>()
+  for (const iso of props.days) {
+    map.set(iso, {
+      short: formatDate(iso, props.locale, { weekday: 'short' }),
+      number: formatDate(iso, props.locale, { day: 'numeric' }),
+      full: formatDate(iso, props.locale, { weekday: 'long', day: 'numeric', month: 'long' }),
+    })
+  }
+  return map
+})
+
+const hourLabels = computed(() => {
+  const map = new Map<number, string>()
+  for (const minutes of hours.value)
+    map.set(minutes, formatTimeDisplay(timeOf(minutes), props.locale, props.hourFormat))
+  return map
+})
+
+/*
+ * The hour gutter and the drag readout both ask for an hour that is not always one of the
+ * rows — a preview lands between them — so this falls back to formatting rather than
+ * assuming the map holds every minute.
+ */
 const hourLabel = (minutes: number) =>
-  formatTimeDisplay(
-    `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`,
-    props.locale,
-    props.hourFormat,
-  )
+  hourLabels.value.get(minutes) ??
+  formatTimeDisplay(timeOf(minutes), props.locale, props.hourFormat)
 
 const dayName = (iso: string, weekday: 'short' | 'long') =>
-  formatDate(iso, props.locale, { weekday })
+  weekday === 'short'
+    ? (dayLabels.value.get(iso)?.short ?? formatDate(iso, props.locale, { weekday }))
+    : formatDate(iso, props.locale, { weekday })
 
-const dayNumber = (iso: string) => formatDate(iso, props.locale, { day: 'numeric' })
+const dayNumber = (iso: string) =>
+  dayLabels.value.get(iso)?.number ?? formatDate(iso, props.locale, { day: 'numeric' })
 
 /** What one cell is called: the day in full, then the hour. */
 const cellLabel = (iso: string, minutes: number) =>
-  `${formatDate(iso, props.locale, { weekday: 'long', day: 'numeric', month: 'long' })}, ${hourLabel(minutes)}`
+  `${dayLabels.value.get(iso)?.full ?? iso}, ${hourLabel(minutes)}`
 
 /**
  * An event's times, written out for the reader. The time zone is appended as an annotation
@@ -1210,10 +1250,7 @@ function geometryOf(rect: DOMRect) {
   }
 }
 
-function isRtl(): boolean {
-  const el = columnsEl.value
-  return el !== null && getComputedStyle(el).direction === 'rtl'
-}
+const isRtl = () => isElementRtl(columnsEl.value)
 
 /**
  * Brings a moment of the day to the top of the visible area.
