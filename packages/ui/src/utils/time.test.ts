@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest'
 import {
   DIAL_INNER_THRESHOLD,
   angleToIndex,
-  clampInt,
   dialIndexToHour24,
   distanceFraction,
   formatDisplay,
@@ -96,13 +95,7 @@ describe('formatDisplay', () => {
   })
 })
 
-describe('clampInt / snapMinute', () => {
-  it('clamps and rounds', () => {
-    expect(clampInt(99, 0, 23)).toBe(23)
-    expect(clampInt(-3, 0, 59)).toBe(0)
-    expect(clampInt(7.6, 0, 23)).toBe(8)
-  })
-
+describe('snapMinute', () => {
   it('snaps to the nearest multiple, modulo 60', () => {
     expect(snapMinute(32, 5)).toBe(30)
     expect(snapMinute(58, 5)).toBe(0)

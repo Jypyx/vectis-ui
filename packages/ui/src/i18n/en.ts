@@ -179,7 +179,5 @@ export const en: VectisMessages = {
     dropped: 'Event placed.',
     reverted: 'Move cancelled. The event is back where it was.',
     movedTo: (title, when) => `${title} moved to ${when}.`,
-    createHint: (day) => `Create an event on ${day}`,
-    now: 'Current time',
   },
 }

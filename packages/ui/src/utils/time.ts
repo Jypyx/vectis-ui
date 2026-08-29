@@ -19,7 +19,6 @@
  * layout at all and measures every element as having no size, so a calculation kept
  * inside the component could not be tested.
  */
-import { clamp } from './number'
 import { digitsOf, pad2 } from './text'
 
 export type HourFormat = '12h' | '24h'
@@ -78,7 +77,17 @@ export function to24h(hour12: number, meridiem: Meridiem): number {
  * A language tag it cannot make sense of falls back to the 24-hour clock rather than
  * failing.
  */
+const hourCycleCache = new Map<string, HourFormat>()
+
 export function hourCycleFor(locale: string): HourFormat {
+  const cached = hourCycleCache.get(locale)
+  if (cached) return cached
+  const format = resolveHourCycle(locale)
+  hourCycleCache.set(locale, format)
+  return format
+}
+
+function resolveHourCycle(locale: string): HourFormat {
   try {
     const { hourCycle } = new Intl.DateTimeFormat(locale, { hour: 'numeric' }).resolvedOptions()
     return hourCycle === 'h11' || hourCycle === 'h12' ? '12h' : '24h'
@@ -125,11 +134,6 @@ export function formatDisplay(time: string, locale: string, format: HourFormat):
   const parts = parseTime(time)
   if (!parts) return ''
   return displayFormatterFor(locale, format).format(Date.UTC(2021, 0, 1, parts.hour, parts.minute))
-}
-
-/** Holds a whole number between two bounds, rounding first — what comes in is free-form. */
-export function clampInt(n: number, min: number, max: number): number {
-  return clamp(Math.round(n), min, max)
 }
 
 /**
@@ -250,7 +254,7 @@ export function timeList(step: number, locale: string, format: HourFormat): Time
  * "hh:mm" is made of the initials of WORDS and those do change from one language to the
  * next — where the colon does not.
  */
-export const TIME_SEPARATOR = ':'
+const TIME_SEPARATOR = ':'
 
 /**
  * Lays a run of typed digits out as a time. The colon appears AS SOON AS the hour is

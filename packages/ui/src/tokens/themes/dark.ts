@@ -87,7 +87,6 @@ export const dark = {
     'event-surface': color('oklch(0.3 0.05 var(--vectis-calendar-event-hue, 265))'),
     'event-border': color('oklch(0.42 0.08 var(--vectis-calendar-event-hue, 265))'),
     'event-text': color('oklch(0.9 0.06 var(--vectis-calendar-event-hue, 265))'),
-    'event-solid': color('oklch(0.65 0.15 var(--vectis-calendar-event-hue, 265))'),
   },
   focus: {
     'ring-color': color('{color.indigo.400}'),

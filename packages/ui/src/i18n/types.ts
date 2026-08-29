@@ -312,10 +312,6 @@ export interface VectisMessages {
     reverted: string
     /** How an event's new place is announced, the range already written out. */
     movedTo: (title: string, when: string) => string
-    /** What an empty part of the grid offers, so it can be reached with the Tab key. */
-    createHint: (day: string) => string
-    /** The line across today's column. */
-    now: string
   }
 }
 

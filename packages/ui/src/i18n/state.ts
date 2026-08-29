@@ -47,6 +47,15 @@ function langOf(locale: string): string {
   return locale.toLowerCase().split('-')[0] ?? locale
 }
 
+/**
+ * The dictionary a tag resolves to, falling back to the default language.
+ *
+ * The last `?? en` never fires: `registry` is seeded with `DEFAULT_LANG` and the only path
+ * that could remove it — `registerMessages` passing `undefined` — puts `en` straight back
+ * instead of deleting. It stays because `Map.get` is typed `T | undefined`, so the compiler
+ * demands an exhaustive expression; the alternative is a non-null assertion, which would
+ * hide the reasoning rather than record it. Do not read it as a live third case.
+ */
 function resolve(locale: string): VectisMessages {
   return registry.get(langOf(locale)) ?? registry.get(DEFAULT_LANG) ?? en
 }

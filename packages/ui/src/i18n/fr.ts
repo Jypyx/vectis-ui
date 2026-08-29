@@ -194,7 +194,5 @@ export const fr: VectisMessages = {
     dropped: 'Évènement posé.',
     reverted: "Déplacement annulé. L'évènement est revenu à sa place.",
     movedTo: (title, when) => `${title} déplacé au ${when}.`,
-    createHint: (day) => `Créer un évènement le ${day}`,
-    now: 'Heure actuelle',
   },
 }

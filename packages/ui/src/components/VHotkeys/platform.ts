@@ -203,7 +203,7 @@ export function parseHotkeys(keys: string): string[] {
 }
 
 /** Whether this key is one that is held down rather than pressed. */
-export function isModifier(token: string): boolean {
+function isModifier(token: string): boolean {
   return MODIFIERS.has(token)
 }
 

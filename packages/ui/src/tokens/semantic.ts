@@ -112,10 +112,6 @@ export const semantic = {
       'oklch(0.4 0.11 var(--vectis-calendar-event-hue, 265))',
       'The title written on that face',
     ),
-    'event-solid': color(
-      'oklch(0.55 0.16 var(--vectis-calendar-event-hue, 265))',
-      'The filled form of that colour, for an all-day bar and a dot',
-    ),
   },
   /**
    * The typography, described by role rather than by measurement: a heading, a subtitle,
@@ -262,10 +258,6 @@ export const semantic = {
     'size-check-dot': dimension('0.5rem', "VRadio's inner dot"),
     'size-switch-w': dimension('2.5rem', "The width of VSwitch's track"),
     'size-switch-h': dimension('1.25rem', "The height of VSwitch's track"),
-    'action-size-xs': dimension(
-      '1rem',
-      "The most compact inner buttons (removing VCombobox's tags)",
-    ),
     'action-size-sm': dimension(
       '1.25rem',
       'The inner buttons of sm input fields (clear, a clickable icon)',
@@ -294,7 +286,6 @@ export const semantic = {
       '1.25rem',
       'The main-axis size of the ACTIVE VCarousel indicator, which stretches from a dot into a pill',
     ),
-    'size-combobox-input-min': dimension('4rem', "The minimum width of VCombobox's input area"),
     'size-combobox-list-max-block': dimension(
       '18rem',
       "The maximum height of VCombobox's list panel (the scrolling area)",
