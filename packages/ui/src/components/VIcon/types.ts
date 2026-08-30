@@ -22,6 +22,25 @@ export interface IconContext {
  * several are present is settled by VIcon instead, in the order path, component,
  * src, text, class.
  */
+/**
+ * One of the icons the design system ships with: its canonical NAME together with the
+ * drawing that goes with it, `[outline, filled?]` on the Material Symbols grid — the
+ * second path is only there when filling actually changes the geometry.
+ *
+ * The name travelling WITH the drawing is the whole point of the shape. A component's
+ * default icon is one of these, so the name is still what reaches the consumer's
+ * resolver, and a single `setIconResolver` call still moves the design system's own
+ * icons onto another icon set. Were a default a bare `{ path }`, it would take the
+ * `render` route, the resolver would never be asked, and the library's internals
+ * would stay Material for a consumer who had wired in their own library.
+ *
+ * A consumer never writes one by hand: they are imported from `@vectis/ui/icons`.
+ */
+export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}
+
 export type IconRender =
   /** SVG path data. Without a `viewBox` it is read on the Material Symbols grid. */
   | { path: string; viewBox?: string }
@@ -41,5 +60,9 @@ export type IconRender =
  *
  * That is what allows any naming convention — `mdi:close`, `fa6-solid:xmark` — to
  * reach the resolver intact, where a heuristic would have taken it for an address.
+ *
+ * A `BuiltinIcon` imported from `@vectis/ui/icons` is accepted too, and behaves
+ * exactly like the name it carries: the resolver is asked first, and the drawing it
+ * brought along is used only if nothing answered.
  */
-export type IconSource = string | IconRender
+export type IconSource = string | BuiltinIcon | IconRender

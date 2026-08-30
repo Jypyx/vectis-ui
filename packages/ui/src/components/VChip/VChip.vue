@@ -4,6 +4,8 @@ import type { StyleValue } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { check as checkIcon } from '../VIcon/icons/check'
+import { close as closeIcon } from '../VIcon/icons/close'
 import type { IconSource } from '../VIcon/types'
 import { useMessages } from '../../i18n/state'
 
@@ -97,7 +99,7 @@ const props = withDefaults(defineProps<ChipProps>(), {
   iconStart: undefined,
   iconEnd: undefined,
   dismissible: false,
-  dismissIcon: 'close',
+  dismissIcon: () => closeIcon,
   dismissLabel: undefined,
   disabled: false,
 })
@@ -181,7 +183,7 @@ const iconOnly = computed(
       :aria-pressed="selectable ? selected : undefined"
       @click="selectable && !disabled && (selected = !selected)"
     >
-      <VIcon v-if="showCheck" name="check" />
+      <VIcon v-if="showCheck" :name="checkIcon" />
       <slot v-else name="start">
         <VIcon v-if="iconStart" v-bind="iconProps(iconStart)" />
       </slot>

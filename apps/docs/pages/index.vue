@@ -8,6 +8,7 @@
  * follow.
  */
 import { VButton, VChip, VIcon, VTab, VTabPanel, VTabs, VTypography } from '@vectis/ui'
+import { arrow_right_alt as arrowRightAltIcon } from '@vectis/ui/icons'
 
 import chromeLogo from '~/assets/img/chrome-browser-svg.svg'
 import edgeLogo from '~/assets/img/edge-browser-svg.svg'
@@ -214,7 +215,7 @@ const installStep = ref<string>(STEPS[0]!.value)
                 variant="solid"
                 tone="accent"
                 size="lg"
-                icon-end="arrow_right_alt"
+                :icon-end="arrowRightAltIcon"
                 :href="href ?? undefined"
                 @click="navigate"
               >

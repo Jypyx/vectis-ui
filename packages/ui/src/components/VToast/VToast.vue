@@ -3,6 +3,13 @@ import { computed } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { check_circle as checkCircleIcon } from '../VIcon/icons/check_circle'
+import { close as closeIcon } from '../VIcon/icons/close'
+import { error as errorIcon } from '../VIcon/icons/error'
+import { info as infoIcon } from '../VIcon/icons/info'
+import { notifications as notificationsIcon } from '../VIcon/icons/notifications'
+import { warning as warningIcon } from '../VIcon/icons/warning'
+import type { IconSource } from '../VIcon/types'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import type { ToastItem, ToastTone } from './state'
 
@@ -36,12 +43,12 @@ const role = computed(() =>
   props.item.tone === 'danger' || props.item.tone === 'warning' ? 'alert' : 'status',
 )
 
-const DEFAULT_ICONS: Record<ToastTone, string> = {
-  neutral: 'notifications',
-  accent: 'info',
-  success: 'check_circle',
-  danger: 'error',
-  warning: 'warning',
+const DEFAULT_ICONS: Record<ToastTone, IconSource> = {
+  neutral: notificationsIcon,
+  accent: infoIcon,
+  success: checkCircleIcon,
+  danger: errorIcon,
+  warning: warningIcon,
 }
 
 /**
@@ -75,7 +82,7 @@ const icon = computed(() =>
       size="sm"
       @click="emit('close', item.id)"
     >
-      <VIcon name="close" />
+      <VIcon :name="closeIcon" />
     </VIconButton>
   </div>
 </template>

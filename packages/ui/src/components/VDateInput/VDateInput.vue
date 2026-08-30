@@ -24,6 +24,7 @@ import {
 import { digitsOf } from '../../utils/text'
 import { resolveMatcher } from '../../utils/matcher'
 import { isDev } from '../../utils/env'
+import { calendar_today as calendarTodayIcon } from '../VIcon/icons/calendar_today'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import VPopover from '../VPopover/VPopover.vue'
@@ -171,7 +172,7 @@ const props = withDefaults(defineProps<DateInputProps>(), {
   disabled: false,
   invalid: false,
   clearable: true,
-  pickerIcon: 'calendar_today',
+  pickerIcon: () => calendarTodayIcon,
   // Left undefined rather than defaulted to the format object, for the same reason: it is
   // what lets the component notice that a consumer has asked for a display format in a
   // mode where it has no effect, and say so.

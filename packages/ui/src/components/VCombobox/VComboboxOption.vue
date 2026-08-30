@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { check as checkIcon } from '../VIcon/icons/check'
 import type { IconSource } from '../VIcon/types'
 
 /**
@@ -65,7 +66,7 @@ function onClick() {
   >
     <VIcon v-if="icon" v-bind="iconProps(icon)" />
     <span class="v-combobox-option-label"><slot /></span>
-    <VIcon v-if="selected" name="check" class="v-combobox-option-check" />
+    <VIcon v-if="selected" :name="checkIcon" class="v-combobox-option-check" />
   </button>
 </template>
 

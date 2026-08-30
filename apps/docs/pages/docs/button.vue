@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { VButton, VIconButton, VTypography } from '@vectis/ui'
+import {
+  arrow_right_alt as arrowRightAltIcon,
+  check_circle as checkCircleIcon,
+  close as closeIcon,
+  cloud_upload as cloudUploadIcon,
+  more_horiz as moreHorizIcon,
+} from '@vectis/ui/icons'
 
 definePageMeta({ layout: 'docs' })
 
@@ -63,11 +70,19 @@ const linkCode = `<VButton href="/pricing">Pricing</VButton>
   <h2 id="icons">{{ t('button.iconsHeading') }}</h2>
   <DocsProse keypath="button.iconsBody" />
   <DocsDemo>
-    <VButton icon-start="cloud_upload">Upload</VButton>
-    <VButton variant="outline" tone="neutral" icon-end="arrow_right_alt">Continue</VButton>
-    <VButton variant="soft" tone="accent" icon-start="check_circle" icon-filled>Approved</VButton>
-    <VIconButton label="More actions" icon="more_horiz" variant="ghost" tone="neutral" />
-    <VIconButton label="Dismiss" icon="close" variant="ghost" tone="neutral" shape="circular" />
+    <VButton :icon-start="cloudUploadIcon">Upload</VButton>
+    <VButton variant="outline" tone="neutral" :icon-end="arrowRightAltIcon">Continue</VButton>
+    <VButton variant="soft" tone="accent" :icon-start="checkCircleIcon" icon-filled
+      >Approved</VButton
+    >
+    <VIconButton label="More actions" :icon="moreHorizIcon" variant="ghost" tone="neutral" />
+    <VIconButton
+      label="Dismiss"
+      :icon="closeIcon"
+      variant="ghost"
+      tone="neutral"
+      shape="circular"
+    />
   </DocsDemo>
 
   <h2 id="states">{{ t('button.statesHeading') }}</h2>
@@ -75,7 +90,7 @@ const linkCode = `<VButton href="/pricing">Pricing</VButton>
   <DocsDemo>
     <VButton disabled>Disabled</VButton>
     <VButton variant="outline" tone="neutral" disabled>Disabled</VButton>
-    <VButton :loading="loading" icon-start="cloud_upload" @click="loading = !loading">
+    <VButton :loading="loading" :icon-start="cloudUploadIcon" @click="loading = !loading">
       Deploy
     </VButton>
     <VTypography variant="body-sm" as="span" tone="muted">

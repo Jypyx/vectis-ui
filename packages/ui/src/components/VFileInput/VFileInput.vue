@@ -21,6 +21,7 @@
 import { computed, ref, useId, watchEffect } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
+import { attach_file as attachFileIcon } from '../VIcon/icons/attach_file'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import VTypography from '../VTypography/VTypography.vue'
@@ -118,7 +119,7 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   maxTotalSize: undefined,
   maxFiles: undefined,
   counter: false,
-  attachIcon: 'attach_file',
+  attachIcon: () => attachFileIcon,
   droppable: true,
   size: 'md',
   compact: false,

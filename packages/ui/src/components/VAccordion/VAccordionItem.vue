@@ -3,6 +3,7 @@ import { computed, inject } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import type { IconSource } from '../VIcon/types'
 import VTypography from '../VTypography/VTypography.vue'
 import { accordionKey } from './context'
@@ -71,7 +72,7 @@ const accordion = inject(accordionKey, null)
  * Both icons are chosen on the enclosing group. The chevron fallback is what keeps
  * an item rendering correctly when it is used outside a VAccordion.
  */
-const expandIcon = computed(() => accordion?.expandIcon ?? 'expand_more')
+const expandIcon = computed(() => accordion?.expandIcon ?? expandMoreIcon)
 const collapseIcon = computed(() => accordion?.collapseIcon)
 
 // @a11y @core

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
+import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VAvatar from '../VAvatar/VAvatar.vue'
 import VButton from '../VButton/VButton.vue'
@@ -102,14 +103,15 @@ export const Icon: Story = {
   render: () => ({
     components: { VBadge },
     setup: () => ({
+      icons,
       star: {
         src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8Z' fill='white'/%3E%3C/svg%3E",
       },
     }),
     template: `
       <div style="display: flex; gap: 8px; align-items: center">
-        <VBadge icon="notifications" />
-        <VBadge tone="success" icon="check" />
+        <VBadge :icon="icons.notifications" />
+        <VBadge tone="success" :icon="icons.check" />
         <VBadge tone="warning" icon="priority_high" />
         <VBadge :icon="star" />
       </div>
@@ -205,13 +207,13 @@ export const OverlayPosition: Story = {
 export const Bordered: Story = {
   render: () => ({
     components: { VBadge, VIcon, VIconButton },
-    setup: () => ({ t }),
+    setup: () => ({ icons, t }),
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px; align-items: flex-start">
         <div style="display: flex; gap: 24px; align-items: center; padding: 16px; background: var(--vectis-color-accent); border-radius: var(--vectis-radius-surface); --vectis-color-surface: var(--vectis-color-accent)">
           <VBadge overlay tone="danger" :count="3" bordered>
             <VIconButton :label="t.notifications" elevated tone="accent">
-              <VIcon name="notifications" />
+              <VIcon :name="icons.notifications" />
             </VIconButton>
           </VBadge>
           <VBadge tone="danger" :count="3" bordered />

@@ -182,7 +182,7 @@ const current = computed(() => LANGUAGES.find((l) => l.tag === appLocale.value))
         variant="outline"
         tone="neutral"
         :icon-start="current.flag"
-        icon-end="expand_more"
+        :icon-end="icons.expand_more"
       >
         {{ current.label }}
       </VButton>

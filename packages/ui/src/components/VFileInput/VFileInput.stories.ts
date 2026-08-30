@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fireEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VChip from '../VChip/VChip.vue'
 import type { FileInputRejection } from './VFileInput.vue'
@@ -366,6 +367,7 @@ export const CustomSlots: Story = {
   render: (args) => ({
     components: { VFileInput, VChip },
     setup: () => ({
+      icons,
       args,
       t,
       files: ref([new File(['x'], 'report.pdf'), new File(['x'], 'photo.jpg')]),
@@ -377,7 +379,7 @@ export const CustomSlots: Story = {
             <VChip
               variant="outline"
               shape="pill"
-              icon-start="attach_file"
+              :icon-start="icons.attach_file"
               :size="size"
               :compact="compact"
               dismissible

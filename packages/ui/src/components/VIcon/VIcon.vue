@@ -5,17 +5,19 @@
  * component's real work is deciding WHERE the drawing comes from, and it asks in a
  * fixed order: an explicit render first, then an image address, then the name —
  * which is offered to the consumer's own resolver if one was installed, then to the
- * registry of icons built into the library, and finally to a ligature font. A raw
- * SVG can always be passed through the slot instead.
+ * drawing the icon brought along with it, and finally to a ligature font. A raw SVG
+ * can always be passed through the slot instead.
  *
- * That order IS the contract. The resolver is asked before the registry, otherwise
- * the design system's own icons would stay Material for a consumer who has wired in
- * their own library; and a resolver that answers `undefined` for a name simply hands
- * over to the registry, which is what makes a PARTIAL mapping usable.
+ * That order IS the contract. The resolver is asked before the built-in drawing,
+ * otherwise the design system's own icons would stay Material for a consumer who has
+ * wired in their own library; and a resolver that answers `undefined` for a name
+ * simply hands over to that drawing, which is what makes a PARTIAL mapping usable.
  *
- * The registry is what allows the design system to work with no icon font at all:
- * the icons the library draws by itself — crosses, chevrons, toast tones — depend on
- * nothing being installed. The ligature remains the fallback for every other name.
+ * It is what allows the design system to work with no icon font at all: the icons
+ * the library draws by itself — crosses, chevrons, toast tones — are imported by the
+ * components that render them and travel as a name AND its paths, so they depend on
+ * nothing being installed, and a consumer downloads only the ones their components
+ * actually draw. The ligature remains the fallback for every other name.
  *
  * Despite the `computed`, there is no behavioural JavaScript here: no event, no
  * lifecycle, no DOM. It is a pure choice of source, which the server and the browser
@@ -23,16 +25,19 @@
  */
 import { computed, type Component } from 'vue'
 
-import { builtinIcons, ICON_VIEW_BOX } from './icons'
+import { ICON_VIEW_BOX } from './icons/viewBox'
 import { resolveIcon } from './resolver'
-import type { IconRender } from './types'
+import type { BuiltinIcon, IconRender } from './types'
 
 interface IconProps {
   /**
-   * The name of the icon. It is offered to the consumer's resolver, then to the
-   * icons built into the library, and finally left to the icon font as a ligature.
+   * Which icon to draw. A plain string is a name: it is offered to the consumer's
+   * resolver and then left to the icon font as a ligature. One of the design
+   * system's own icons, imported from `@vectis/ui/icons`, carries its drawing with
+   * it — the resolver is still asked first, and the drawing is what answers when
+   * nothing else does.
    */
-  name?: string
+  name?: string | BuiltinIcon
   /**
    * An explicit description of what to draw — an image, a component, a path, a class
    * — which wins over everything else. This is the route every `IconSource` prop of
@@ -107,20 +112,28 @@ function tag(render: IconRender): Resolved {
  * a failure — it means the template falls through to the image, the ligature or the
  * slot.
  */
+/**
+ * The icon's identity: the name the resolver is asked for, and the one `data-icon`
+ * records whatever the drawing turned out to come from.
+ */
+const iconName = computed(() => (typeof props.name === 'string' ? props.name : props.name?.name))
+
 const resolved = computed<Resolved | undefined>(() => {
   if (props.render) return tag(props.render)
   if (props.src !== undefined || props.name === undefined) return undefined
 
-  const custom = resolveIcon(props.name, { filled: props.filled })
+  const custom = resolveIcon(iconName.value!, { filled: props.filled })
   if (custom) return tag(custom)
 
-  const paths: readonly string[] | undefined = (
-    builtinIcons as Record<string, readonly string[] | undefined>
-  )[props.name]
+  // A bare name has no drawing of its own, so it falls through to the ligature; only
+  // one of the library's own icons brings its paths along.
+  if (typeof props.name === 'string') return undefined
+
+  const { paths } = props.name
   // A second path is only stored when filling actually changes the drawing, so most
   // icons have one path and fall back to it (see icons.ts).
-  const path = paths && ((props.filled ? paths[1] : undefined) ?? paths[0])
-  return path ? { kind: 'path', path, viewBox: ICON_VIEW_BOX } : undefined
+  const path = (props.filled ? paths[1] : undefined) ?? paths[0]
+  return { kind: 'path', path, viewBox: ICON_VIEW_BOX }
 })
 </script>
 
@@ -128,7 +141,7 @@ const resolved = computed<Resolved | undefined>(() => {
   <span
     class="v-icon"
     :style="size !== undefined ? { '--vectis-icon-size': `${size}px` } : undefined"
-    :data-icon="name"
+    :data-icon="iconName"
     :data-filled="filled || undefined"
     :role="label ? 'img' : undefined"
     :aria-label="label"

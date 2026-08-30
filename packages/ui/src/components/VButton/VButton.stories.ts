@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 
+import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VIcon from '../VIcon/VIcon.vue'
 import VButton from './VButton.vue'
@@ -136,7 +137,7 @@ export const Sizes: Story = {
 export const Icons: Story = {
   render: () => ({
     components: { VButton },
-    setup: () => ({ t }),
+    setup: () => ({ icons, t }),
     template: `
       <div style="display: grid; gap: 12px">
         <div style="display: flex; gap: 8px; align-items: center">
@@ -145,10 +146,10 @@ export const Icons: Story = {
           <VButton icon-end="arrow_forward" size="lg">{{ t.next }}</VButton>
         </div>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-          <VButton icon-start="check" variant="outline" tone="accent">{{ t.confirm }}</VButton>
+          <VButton :icon-start="icons.check" variant="outline" tone="accent">{{ t.confirm }}</VButton>
           <VButton icon-start="add" variant="soft" tone="accent">{{ t.add }}</VButton>
           <VButton icon-start="delete" variant="ghost" tone="danger">{{ t.delete }}</VButton>
-          <VButton icon-start="cloud_upload" icon-end="expand_more" variant="ghost" elevated tone="neutral">{{ t.import }}</VButton>
+          <VButton :icon-start="icons.cloud_upload" :icon-end="icons.expand_more" variant="ghost" elevated tone="neutral">{{ t.import }}</VButton>
         </div>
       </div>
     `,

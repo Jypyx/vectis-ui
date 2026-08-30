@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fireEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
@@ -343,6 +344,7 @@ export const CustomSlots: Story = {
   render: (args) => ({
     components: { VFilePicker, VButton, VIcon },
     setup: () => ({
+      icons,
       args,
       t,
       files: ref<File[]>([fileOf('report.pdf', 1200, 'application/pdf')]),
@@ -350,7 +352,7 @@ export const CustomSlots: Story = {
     template: `
       <div style="width: 420px">
         <VFilePicker v-bind="args" v-model="files" :title="t.title">
-          <template #icon><VIcon name="attach_file" /></template>
+          <template #icon><VIcon :name="icons.attach_file" /></template>
           <template #browse="{ open, disabled }">
             <VButton variant="soft" tone="accent" :disabled="disabled" @click="open">
               {{ t.selection }}

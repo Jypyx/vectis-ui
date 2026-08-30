@@ -3,7 +3,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { h } from 'vue'
 
 import VIcon from './VIcon.vue'
-import { builtinIcons } from './icons'
+import { check as checkIcon } from './icons/check'
+import { close as closeIcon } from './icons/close'
+import { swap_vert as swapVertIcon } from './icons/swap_vert'
 import {
   classIconResolver,
   componentIconResolver,
@@ -30,10 +32,10 @@ describe('setIconResolver', () => {
     expect(container.querySelector('.v-icon-svg')).toBeNull()
   })
 
-  it('undefined = "I do not know" → falls back to the registry, then the ligature', () => {
+  it('undefined = "I do not know" → falls back to the drawing, then the ligature', () => {
     setIconResolver(() => undefined)
-    expect(iconOf({ name: 'close' }).querySelector('.v-icon-svg path')?.getAttribute('d')).toBe(
-      builtinIcons.close[0],
+    expect(iconOf({ name: closeIcon }).querySelector('.v-icon-svg path')?.getAttribute('d')).toBe(
+      closeIcon.paths[0],
     )
     expect(iconOf({ name: 'favorite' }).querySelector('.v-icon-symbol')?.textContent).toBe(
       'favorite',
@@ -50,7 +52,7 @@ describe('setIconResolver', () => {
   it('setIconResolver(undefined) restores the default behaviour', () => {
     setIconResolver(() => ({ text: 'xmark' }))
     setIconResolver(undefined)
-    expect(iconOf({ name: 'close' }).querySelector('.v-icon-svg')).not.toBeNull()
+    expect(iconOf({ name: closeIcon }).querySelector('.v-icon-svg')).not.toBeNull()
   })
 
   it('data-icon stays the REQUESTED name, whatever the source', () => {
@@ -142,10 +144,10 @@ describe('classIconResolver', () => {
   it('strict (the default): an un-aliased DS icon falls back to the embedded SVG', () => {
     // Without that guard, `swap_vert` would produce `fa-swap_vert` — an empty square.
     setIconResolver(resolver())
-    expect(iconOf({ name: 'swap_vert' }).querySelector('.v-icon-svg')).not.toBeNull()
+    expect(iconOf({ name: swapVertIcon }).querySelector('.v-icon-svg')).not.toBeNull()
 
     setIconResolver(resolver(false))
-    expect(iconOf({ name: 'swap_vert' }).querySelector('.v-icon-glyph')?.className).toContain(
+    expect(iconOf({ name: swapVertIcon }).querySelector('.v-icon-glyph')?.className).toContain(
       'fa-swap_vert',
     )
   })
@@ -164,9 +166,9 @@ describe('componentIconResolver', () => {
     expect(svg?.getAttribute('data-filled')).toBe('true')
   })
 
-  it('strict by construction: an unmapped name falls back to the registry', () => {
+  it('strict by construction: an unmapped name falls back to its own drawing', () => {
     setIconResolver(componentIconResolver({ components: { close: Lucide } }))
-    expect(iconOf({ name: 'check' }).querySelector('.v-icon-svg')).not.toBeNull()
+    expect(iconOf({ name: checkIcon }).querySelector('.v-icon-svg')).not.toBeNull()
     expect(iconOf({ name: 'favorite' }).querySelector('.v-icon-symbol')?.textContent).toBe(
       'favorite',
     )

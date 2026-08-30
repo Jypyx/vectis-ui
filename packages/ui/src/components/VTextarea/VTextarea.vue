@@ -19,6 +19,7 @@ import { computed, ref } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconName, iconProps } from '../VIcon/iconProps'
+import { close as closeIcon } from '../VIcon/icons/close'
 import type { IconSource } from '../VIcon/types'
 import VSpinner from '../VSpinner/VSpinner.vue'
 import VTypography from '../VTypography/VTypography.vue'
@@ -262,7 +263,7 @@ const { counterText, over } = useTextLimit({
         :aria-label="resolvedClearLabel"
         @click="onClear"
       >
-        <VIcon name="close" />
+        <VIcon :name="closeIcon" />
       </button>
 
       <VSpinner v-if="loading" :label="resolvedLoadingLabel" />

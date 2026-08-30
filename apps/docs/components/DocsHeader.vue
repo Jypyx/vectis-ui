@@ -26,6 +26,7 @@
  * literal attribute value on the anchor, so the coercion is the honest form and not a cast.
  */
 import { VButton, VHotkeys, VIconButton, VInput, VMenu, VMenuItem, VTooltip } from '@vectis/ui'
+import { arrow_right_alt as arrowRightAltIcon, search as searchIcon } from '@vectis/ui/icons'
 
 const route = useRoute()
 const { theme, toggleTheme } = useDocsTheme()
@@ -117,7 +118,7 @@ const docsHome = computed(() => localePath('/docs/installation'))
         <span class="vd-search" @click="openSearch">
           <VInput
             readonly
-            icon-start="search"
+            :icon-start="searchIcon"
             :placeholder="t('common.search.open')"
             :aria-label="t('common.search.label')"
             aria-keyshortcuts="Meta+K Control+K"
@@ -145,7 +146,7 @@ const docsHome = computed(() => localePath('/docs/installation'))
 
         <span class="vd-under-640">
           <VIconButton
-            icon="search"
+            :icon="searchIcon"
             :label="t('common.search.label')"
             variant="ghost"
             tone="neutral"
@@ -243,7 +244,7 @@ const docsHome = computed(() => localePath('/docs/installation'))
               <VButton
                 variant="solid"
                 tone="accent"
-                icon-end="arrow_right_alt"
+                :icon-end="arrowRightAltIcon"
                 :href="href ?? undefined"
                 @click="navigate"
               >

@@ -13,7 +13,7 @@
  */
 import { shallowRef, type Component } from 'vue'
 
-import { builtinIcons, type VectisIconName } from './icons'
+import { builtinIconNames, type VectisIconName } from './icons/names'
 import type { IconContext, IconRender } from './types'
 
 /**
@@ -91,7 +91,10 @@ export function classIconResolver(options: {
   const { aliases, className, strict = true } = options
   return (name, ctx) => {
     const mapped = aliases?.[name]
-    if (mapped === undefined && strict && name in builtinIcons) return undefined
+    // The SET of names, never the icons themselves: this asks whether the design
+    // system ships the name, and reaching for the drawings to answer it would make a
+    // consumer who wired in their OWN icon library download all 34 Material paths.
+    if (mapped === undefined && strict && builtinIconNames.has(name)) return undefined
     return { class: className(mapped ?? name, ctx.filled) }
   }
 }

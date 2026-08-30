@@ -2,6 +2,8 @@
 import { computed, ref, useId, watchEffect } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
+import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
+import { schedule as scheduleIcon } from '../VIcon/icons/schedule'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import VPopover from '../VPopover/VPopover.vue'
@@ -141,7 +143,7 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
   disabled: false,
   invalid: false,
   clearable: true,
-  pickerIcon: 'schedule',
+  pickerIcon: () => scheduleIcon,
   placement: 'bottom-start',
 })
 
@@ -589,7 +591,7 @@ const canClear = computed(
     props.clearable && !props.disabled && (hasValue.value || (typing.value && !!maskDraft.value)),
 )
 const endIcon = computed<IconSource | undefined>(() =>
-  isList.value ? 'expand_more' : hasPicker.value ? props.pickerIcon : undefined,
+  isList.value ? expandMoreIcon : hasPicker.value ? props.pickerIcon : undefined,
 )
 // @a11y @devwarn
 /*

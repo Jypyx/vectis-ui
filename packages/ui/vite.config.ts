@@ -173,6 +173,7 @@ export default defineConfig({
       entry: {
         index: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
         'tokens/index': fileURLToPath(new URL('./src/tokens/index.ts', import.meta.url)),
+        icons: fileURLToPath(new URL('./src/icons.ts', import.meta.url)),
       },
       formats: ['es'],
       cssFileName: 'styles',

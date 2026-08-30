@@ -11,9 +11,11 @@
  * Source: the google/material-design-icons repository, at a pinned revision
  * (REVISION). Apache-2.0 licence © Google.
  */
-import { writeFileSync } from 'node:fs'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { renderIconsModules } from './lib/icons-module'
 
 /** Pinned revision of the source repository (2026-07-24). */
 const REVISION = '528cb964c01fb2b09bc3b9208f82b6d8f8c1c1e2'
@@ -112,33 +114,19 @@ const entries = await Promise.all(
 
 const filledCount = entries.filter(([, paths]) => paths.length === 2).length
 
-const ts = `/*
- * GENERATED FILE — do not edit by hand.
- * Regenerate: pnpm icons  ·  Source: scripts/build-icons.ts
- *
- * Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24)
- * google/material-design-icons @ ${REVISION}
- * Apache-2.0 licence © Google.
- */
-
-/** Material Symbols export grid, shared by every path in the registry. */
-export const ICON_VIEW_BOX = '${VIEW_BOX}'
-
-/**
- * Icons the DS renders by default, in the form \`[outline, filled?]\` — the second
- * path exists only if the FILL axis really changes the geometry.
- */
-export const builtinIcons = {
-${entries.map(([name, paths]) => `  ${name}: [${paths.map((d) => `'${d}'`).join(', ')}],`).join('\n')}
-} as const satisfies Record<string, readonly [string] | readonly [string, string]>
-
-/** The icon names the DS renders itself — the contract of a consumer resolver. */
-export type VectisIconName = keyof typeof builtinIcons
-`
+const files = renderIconsModules(REVISION, VIEW_BOX, entries)
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-writeFileSync(resolve(pkgRoot, 'src/components/VIcon/icons.ts'), ts, 'utf8')
+const outDir = resolve(pkgRoot, 'src/components/VIcon/icons')
+
+// Wiped rather than written over: an icon dropped from ICONS would otherwise leave its
+// module behind, still importable and still shipped, with nothing to point it out.
+rmSync(outDir, { recursive: true, force: true })
+mkdirSync(outDir, { recursive: true })
+for (const [name, source] of Object.entries(files))
+  writeFileSync(resolve(outDir, name), source, 'utf8')
 
 console.log(
-  `icons: ${entries.length} icons (${filledCount} of them with a FILL variant) → src/components/VIcon/icons.ts`,
+  `icons: ${entries.length} icons (${filledCount} of them with a FILL variant) → ` +
+    `src/components/VIcon/icons/ (${Object.keys(files).length} modules)`,
 )

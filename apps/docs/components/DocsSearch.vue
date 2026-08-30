@@ -15,6 +15,7 @@
  * platform already does — and would be flagged, rightly, as an autofocus nobody asked for.
  */
 import { VDialog, VInput } from '@vectis/ui'
+import { search as searchIcon } from '@vectis/ui/icons'
 
 const { open, query, results, closeSearch } = useDocsSearch()
 const router = useRouter()
@@ -61,7 +62,7 @@ function onEscape() {
         v-model="query"
         size="lg"
         type="search"
-        icon-start="search"
+        :icon-start="searchIcon"
         :placeholder="t('common.search.placeholder')"
         clearable
         class="vd-search-field"

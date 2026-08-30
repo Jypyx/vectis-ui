@@ -15,6 +15,10 @@ import type { StyleValue } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { arrow_downward_alt as arrowDownwardAltIcon } from '../VIcon/icons/arrow_downward_alt'
+import { arrow_left_alt as arrowLeftAltIcon } from '../VIcon/icons/arrow_left_alt'
+import { arrow_right_alt as arrowRightAltIcon } from '../VIcon/icons/arrow_right_alt'
+import { arrow_upward_alt as arrowUpwardAltIcon } from '../VIcon/icons/arrow_upward_alt'
 import type { IconSource } from '../VIcon/types'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import { carouselKey } from './context'
@@ -271,10 +275,10 @@ const isVertical = computed(() => props.orientation === 'vertical')
    over whatever media the slides carry. A hairline chevron dissolves at the centre of
    a 40px disc; a shaft fills it and reads at a glance. */
 const resolvedPrevIcon = computed(
-  () => props.prevIcon ?? (isVertical.value ? 'arrow_upward_alt' : 'arrow_left_alt'),
+  () => props.prevIcon ?? (isVertical.value ? arrowUpwardAltIcon : arrowLeftAltIcon),
 )
 const resolvedNextIcon = computed(
-  () => props.nextIcon ?? (isVertical.value ? 'arrow_downward_alt' : 'arrow_right_alt'),
+  () => props.nextIcon ?? (isVertical.value ? arrowDownwardAltIcon : arrowRightAltIcon),
 )
 
 // @ssr

@@ -40,8 +40,10 @@ export {
   componentIconResolver,
 } from './components/VIcon/resolver'
 export type { IconResolver, IconAliases } from './components/VIcon/resolver'
-export type { IconContext, IconRender, IconSource } from './components/VIcon/types'
-export type { VectisIconName } from './components/VIcon/icons'
+export type { BuiltinIcon, IconContext, IconRender, IconSource } from './components/VIcon/types'
+// The icons THEMSELVES are not re-exported here: they live behind '@vectis/ui/icons'
+// so that importing the barrel never drags all 34 drawings into a consumer's bundle.
+export type { VectisIconName } from './components/VIcon/icons/names'
 export { default as VTypography } from './components/VTypography/VTypography.vue'
 export type { TypographyTone, TypographyVariant } from './components/VTypography/VTypography.vue'
 export { default as VPopover } from './components/VPopover/VPopover.vue'

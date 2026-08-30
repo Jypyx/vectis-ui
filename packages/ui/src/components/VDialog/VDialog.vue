@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref, useAttrs, useId, watch } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
+import { close as closeIcon } from '../VIcon/icons/close'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import VTypography from '../VTypography/VTypography.vue'
 import { useMessages } from '../../i18n/state'
@@ -230,7 +231,7 @@ defineExpose({ show, close: requestClose, el: dialogEl })
           size="sm"
           @click="requestClose"
         >
-          <VIcon name="close" />
+          <VIcon :name="closeIcon" />
         </VIconButton>
       </div>
     </header>
