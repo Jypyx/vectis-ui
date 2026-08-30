@@ -5,6 +5,8 @@ import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { arrow_drop_down as arrowDropDownIcon } from '../VIcon/icons/arrow_drop_down'
 import { arrow_drop_up as arrowDropUpIcon } from '../VIcon/icons/arrow_drop_up'
+import { chevron_left as chevronLeftIcon } from '../VIcon/icons/chevron_left'
+import { chevron_right as chevronRightIcon } from '../VIcon/icons/chevron_right'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import {
   addDays,
@@ -567,7 +569,7 @@ defineExpose({ focus })
     <div class="v-date-picker-header">
       <div class="v-date-picker-nav">
         <VIconButton
-          icon="chevron_left"
+          :icon="chevronLeftIcon"
           :label="m.datePicker.previousMonth"
           size="sm"
           :disabled="!canPrevMonth"
@@ -589,7 +591,7 @@ defineExpose({ focus })
           />
         </VButton>
         <VIconButton
-          icon="chevron_right"
+          :icon="chevronRightIcon"
           :label="m.datePicker.nextMonth"
           size="sm"
           :disabled="!canNextMonth"
@@ -599,7 +601,7 @@ defineExpose({ focus })
 
       <div class="v-date-picker-nav">
         <VIconButton
-          icon="chevron_left"
+          :icon="chevronLeftIcon"
           :label="m.datePicker.previousYear"
           size="sm"
           :disabled="!canPrevYear"
@@ -620,7 +622,7 @@ defineExpose({ focus })
           />
         </VButton>
         <VIconButton
-          icon="chevron_right"
+          :icon="chevronRightIcon"
           :label="m.datePicker.nextYear"
           size="sm"
           :disabled="!canNextYear"

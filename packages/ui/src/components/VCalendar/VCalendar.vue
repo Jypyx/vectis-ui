@@ -25,6 +25,8 @@ import { computed, onMounted, ref, useId } from 'vue'
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { arrow_drop_down as arrowDropDownIcon } from '../VIcon/icons/arrow_drop_down'
+import { chevron_left as chevronLeftIcon } from '../VIcon/icons/chevron_left'
+import { chevron_right as chevronRightIcon } from '../VIcon/icons/chevron_right'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import VMenu from '../VMenu/VMenu.vue'
 import VMenuItem from '../VMenu/VMenuItem.vue'
@@ -460,12 +462,17 @@ defineExpose({
       <div class="v-calendar-toolbar">
         <div class="v-calendar-nav">
           <VIconButton
-            icon="chevron_left"
+            :icon="chevronLeftIcon"
             :label="stepLabels.previous"
             size="sm"
             @click="step(-1)"
           />
-          <VIconButton icon="chevron_right" :label="stepLabels.next" size="sm" @click="step(1)" />
+          <VIconButton
+            :icon="chevronRightIcon"
+            :label="stepLabels.next"
+            size="sm"
+            @click="step(1)"
+          />
         </div>
 
         <VButton variant="outline" tone="neutral" size="sm" @click="today_">
