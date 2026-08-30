@@ -287,8 +287,9 @@
   margin-inline: auto;
 }
 /* A prose column beside a panel. It holds ONE column until the medium screen rather than
-   splitting at the tablet step like the site's other grids: an accordion in a 300px column is
-   unreadable, and 1024px is where the two tracks finally have the room the pair needs. */
+   splitting at the tablet step like the site's other grids: three measures side by side in a
+   300px column would each get 100px, which is narrower than the widest of them plus its label,
+   and 1024px is where the two tracks finally have the room the pair needs. */
 .vd-split {
   display: grid;
   gap: var(--vectis-space-7);
@@ -296,15 +297,56 @@
   align-items: start;
 }
 /* On a phone the two tracks are stacked, so this column is the whole width and reads better
-   centred — the hero's treatment. From the tablet up it sits beside the accordion and goes back
-   to its start edge. Mobile first, so the centred form is the base and the 640px step undoes it.
+   centred — the hero's treatment. From the tablet up it sits beside the evidence panel and goes
+   back to its start edge. Mobile first, so the centred form is the base and the 640px step
+   undoes it.
 
-   The class exists so the rule CANNOT reach the accordion, which is this column's SIBLING and
-   not its child: centring text there would inherit into VAccordion's own headers and panels,
-   which is reaching inside a component from outside — the very thing this file warns about. */
+   The class exists so the rule cannot reach the panel, which is this column's SIBLING and not
+   its child. That matters less than it did when the sibling was a component whose internals a
+   stray `text-align` would have reached, but the panel does its own centring and the two must
+   stay free to disagree: this column loses its centring at 640px, where the figures keep theirs
+   at every width. */
 .vd-split-prose {
   text-align: center;
 }
+/* The accessibility band's evidence panel, in the column the accordion used to hold.
+   It lives here and not in the page's scoped block because it has no STATE — no hover, no
+   pseudo-element, nothing a media query does not own — which is the split this file opens with.
+
+   The frame is the decoration scale the design system uses for a surface that groups things:
+   the raised background, a 1px border and the surface radius. The panel is deliberately NOT
+   `.vd-home-card`: that class carries the six-hue wash and the pointer-tracking hairline, and
+   inheriting them here would put a seventh accent on a band that has no hue of its own.
+
+   Three measures on one line, and `minmax(0, 1fr)` rather than `1fr`: a grid track's automatic
+   minimum is its CONTENT, so `4.5:1` would refuse to shrink and push the row wider than its
+   column on a narrow screen. Centred, because a figure and its caption read as a stack.
+
+   The block padding is the wider of the two: the row is all the panel holds, so it is short
+   beside the prose column it sits next to, and equal padding would read as a strip rather than
+   a surface. */
+.vd-proof {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--vectis-space-3);
+  margin: 0;
+  padding: var(--vectis-space-7) var(--vectis-space-5);
+  border: 1px solid var(--vectis-color-border);
+  border-radius: var(--vectis-radius-surface);
+  background: var(--vectis-color-surface-raised);
+  list-style: none;
+  text-align: center;
+}
+/* The figures are the one place on this page where the display role is used at a size it was
+   not written for — a measure, not a headline — so the line height is pulled in to sit the
+   caption under it rather than a headline's worth of air. `tabular-nums` keeps `4.5:1` and
+   `3:1` on the same rhythm as the `0` beside them. */
+.vd-proof-figure {
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--vectis-color-accent-text);
+}
+
 /* The four engines. A row that wraps rather than a grid: there are four of them, they are never
    going to be a table, and wrapping is what a narrow screen wants. */
 .vd-browsers {

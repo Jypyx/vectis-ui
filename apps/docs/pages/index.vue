@@ -7,17 +7,7 @@
  * a column beside its accordion, where centring a bulleted argument would only make it harder to
  * follow.
  */
-import {
-  VAccordion,
-  VAccordionItem,
-  VButton,
-  VChip,
-  VIcon,
-  VTab,
-  VTabPanel,
-  VTabs,
-  VTypography,
-} from '@vectis/ui'
+import { VButton, VChip, VIcon, VTab, VTabPanel, VTabs, VTypography } from '@vectis/ui'
 
 import chromeLogo from '~/assets/img/chrome-browser-svg.svg'
 import edgeLogo from '~/assets/img/edge-browser-svg.svg'
@@ -99,18 +89,22 @@ function onCardPointerLeave(event: PointerEvent) {
 }
 
 /**
- * The accessibility accordion, as data. VAccordionItem already takes `iconStart` and `title`,
- * so the "icon then heading" header the design asks for needs no slot of its own.
+ * The accessibility band's evidence, as data: three measures and the command that produces the
+ * first of them.
  *
- * The first item opens by default, through the index of the loop rather than a flag on the entry:
- * "the first one is open" is a fact about the LIST, and putting a `defaultOpen: true` on one row
- * would let a later reorder leave it on whatever ends up second. `defaultOpen` only seeds the
- * first render — the browser owns the state afterwards, so nothing here fights the reader.
+ * `value` is a TEMPLATE CONSTANT and never a catalogue key. Each is made of digits and universal
+ * punctuation, which is exactly what the dictionary boundary leaves outside — the rule VBadge's
+ * `99+` and the `N/M` counter already follow. Only the words beneath them are translated.
+ *
+ * All three are chosen so that NOTHING HERE DRIFTS. A component count or a story count would be
+ * out of date by the next commit and there is no gate that would say so; a conformance floor and
+ * a violation count that CI enforces on every push are true for as long as the workflow is. That
+ * is the same standard `bench:size` sets for the figures the README publishes.
  */
-const a11yItems = [
-  { title: 'home.keyboardTitle', body: 'home.keyboardBody', icon: 'keyboard' },
-  { title: 'home.semanticsTitle', body: 'home.semanticsBody', icon: 'record_voice_over' },
-  { title: 'home.contrastTitle', body: 'home.contrastBody', icon: 'contrast_square' },
+const a11yStats = [
+  { value: '0', label: 'home.a11yViolationsLabel', note: 'home.a11yViolationsNote' },
+  { value: '4.5:1', label: 'home.a11yContrastLabel', note: 'home.a11yContrastNote' },
+  { value: '3:1', label: 'home.a11yFocusLabel', note: 'home.a11yFocusNote' },
 ]
 
 /**
@@ -291,17 +285,25 @@ const installStep = ref<string>(STEPS[0]!.value)
             </li>
           </ul>
         </div>
-        <VAccordion variant="outlined">
-          <VAccordionItem
-            v-for="(item, index) in a11yItems"
-            :key="item.title"
-            :icon-start="item.icon"
-            :title="t(item.title)"
-            :default-open="index === 0"
-          >
-            <DocsProse :keypath="item.body" variant="body-md" tone="muted" />
-          </VAccordionItem>
-        </VAccordion>
+        <!--
+          Evidence rather than claims: three measures, and nothing arguing for them. What this
+          band can say that no other design system's landing page can is that its accessibility
+          is CHECKED and that the check BLOCKS — the figures are that check's output, so they
+          carry the argument on their own and a sentence restating it would only soften it.
+        -->
+        <ul class="vd-proof">
+          <li v-for="stat in a11yStats" :key="stat.label">
+            <!--
+              The figure is `as="p"`: the page's heading hierarchy belongs to the section, and a
+              measure is not a heading. `display` supplies the size, nothing else does.
+            -->
+            <VTypography variant="display" as="p" class="vd-proof-figure">
+              {{ stat.value }}
+            </VTypography>
+            <VTypography variant="label" as="p">{{ t(stat.label) }}</VTypography>
+            <VTypography variant="caption" as="p" tone="muted">{{ t(stat.note) }}</VTypography>
+          </li>
+        </ul>
       </div>
     </section>
 

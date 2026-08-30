@@ -52,15 +52,24 @@ export default {
   accessibilitySubtitle:
     'Vectis UI is inclusive out of the box and ready for production. Built to meet what the web asks of an interface today, it holds to strict conformance while targeting the newest rendering engines.',
 
-  keyboardTitle: 'Fully navigable',
-  keyboardBody:
-    'Focus is handled logically and predictably, with visible indicators that hold the 3:1 contrast ratio. Whoever navigates by keyboard, or leans on the patterns that come with it — Escape to close a menu, and the rest — gets an interface that answers naturally.',
-  semanticsTitle: 'Semantics and WAI-ARIA',
-  semanticsBody:
-    'Beyond strictly semantic HTML, every interactive component carries the attributes it needs of its own accord: <code>aria-describedby</code>, <code>aria-live</code> and their kin. Navigation through <code>aria-activedescendant</code>, or through the native elements themselves, is what makes an interface read cleanly.',
-  contrastTitle: 'Contrast and WCAG AA conformance',
-  contrastBody:
-    'Colour is never the only carrier of meaning. The system holds to WCAG 2 AA, guaranteeing a contrast ratio of at least 4.5:1 for text.',
+  /*
+   * The three measures that replace what used to be an accordion of three claims. Only the
+   * LABELS are here: the figures themselves (`0`, `4.5:1`, `3:1`) are digits and universal
+   * punctuation, which the dictionary boundary leaves in the template — the rule VBadge's `99+`
+   * and the `N/M` counter already follow.
+   *
+   * Each is a guarantee something MECHANICAL holds, which is the whole reason the band shows
+   * measures rather than sentences: axe runs after every play function with `test: 'error'`, so
+   * a violation fails the suite, and CI runs that suite once per theme on every push and pull
+   * request. Nothing here drifts with the size of the library, so nothing here can rot the way
+   * a component count would.
+   */
+  a11yViolationsLabel: 'axe violations',
+  a11yViolationsNote: 'in both themes, on every run',
+  a11yContrastLabel: 'text contrast',
+  a11yContrastNote: 'the WCAG 2 AA floor',
+  a11yFocusLabel: 'focus indicators',
+  a11yFocusNote: 'visible on every control',
 
   /*
    * The three steps, shown in a mock editor window. Written in French first, like the two bands

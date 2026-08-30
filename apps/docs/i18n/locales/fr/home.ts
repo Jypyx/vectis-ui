@@ -37,15 +37,12 @@ export default {
   accessibilitySubtitle:
     "Vectis UI est nativement inclusif et prêt pour la production. Conçu pour répondre aux exigences du web d'aujourd'hui, le système garantit une conformité stricte tout en ciblant les moteurs de rendu les plus récents.",
 
-  keyboardTitle: 'Entièrement navigable',
-  keyboardBody:
-    'La gestion du focus est traitée de manière logique et prévisible, avec des indicateurs visuels clairs respectant le ratio de contraste de 3:1. Les utilisateurs naviguant au clavier ou utilisant des motifs complexes (comme la touche Échap pour la fermeture des menus) bénéficient d’une expérience fluide et naturelle.',
-  semanticsTitle: 'Sémantique & WAI-ARIA',
-  semanticsBody:
-    "Au-delà d'un code HTML strictement sémantique, chaque composant interactif embarque nativement les attributs indispensables (comme <code>aria-describedby</code> ou <code>aria-live</code>). La navigation via <code>aria-activedescendant</code> ou l'utilisation des balises natives assure une lecture parfaite des interfaces.",
-  contrastTitle: 'Contraste et conformité WCAG AA',
-  contrastBody:
-    "La couleur n'est jamais le seul vecteur d'information. Le système respecte les standards d'accessibilité WCAG 2 AA en garantissant un ratio de contraste d'au moins 4.5:1 pour le texte.",
+  a11yViolationsLabel: 'violation axe',
+  a11yViolationsNote: 'dans les deux thèmes, à chaque exécution',
+  a11yContrastLabel: 'contraste du texte',
+  a11yContrastNote: 'le plancher WCAG 2 AA',
+  a11yFocusLabel: 'indicateurs de focus',
+  a11yFocusNote: 'visibles sur chaque contrôle',
 
   installHeading: 'Installez, importez, développez',
   installSubtitle:
