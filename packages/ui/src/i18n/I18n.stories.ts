@@ -3,6 +3,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { computed, type Component } from 'vue'
 
 import VBreadcrumb from '../components/VBreadcrumb/VBreadcrumb.vue'
+import { builtinIcons as icons } from '../components/VIcon/icons'
 import VButton from '../components/VButton/VButton.vue'
 import VChip from '../components/VChip/VChip.vue'
 import VCombobox from '../components/VCombobox/VCombobox.vue'
@@ -151,7 +152,7 @@ const SWITCHER = `
           variant="outline"
           tone="neutral"
           :icon-start="current.flag"
-          icon-end="expand_more"
+          :icon-end="icons.expand_more"
         >
           {{ current.label }}
         </VButton>
@@ -193,6 +194,7 @@ function showcase(prefix = ''): Story['render'] {
     components: COMPONENTS,
     setup: () => ({
       t,
+      icons,
       rows: ROWS,
       options: OPTIONS,
       columns,

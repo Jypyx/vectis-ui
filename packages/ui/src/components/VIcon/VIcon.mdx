@@ -5,15 +5,32 @@ import * as VIconStories from './VIcon.stories'
 
 # Icon
 
-Icon with four sources, resolved in a fixed order: image (`src`), then `name` — first the
-**built-in registry**, otherwise the **ligature** of the consumer's font — otherwise the
-**inline SVG** passed in the slot.
+Icon with four sources, resolved in a fixed order: image (`src`), then `name` — the consumer's
+resolver first, then the drawing the icon **brought along with it**, otherwise the **ligature**
+of the consumer's font — otherwise the **inline SVG** passed in the slot.
 
 > The icons the library renders itself (crosses, chevrons, the toast tone icons…) are
 > **embedded** SVGs, exact replicas of
 > [Material Symbols Rounded](https://fonts.google.com/icons) (wght 400 · GRAD 0 · opsz 24).
 > **The design system therefore requires no icon font.** The font stays useful for your own
 > icon names; it is loaded by the consuming application (see the README).
+
+Each of them is a **module of its own**, imported from `@vectis/ui/icons` and passed where a
+name would go — so a consumer pays for the icons their components actually draw and for
+nothing else. A lone `VButton` ships none at all.
+
+```ts
+import { close } from '@vectis/ui/icons'
+```
+
+```vue
+<VIcon :name="close" />
+```
+
+A **bare string stays a NAME**: it goes to your resolver and then to the icon font, and it no
+longer reaches the library's own drawings. That is the deliberate half of the arrangement — an
+icon reaches a bundle because a module imported it, never because a string might one day ask
+for it.
 
 <Canvas of={VIconStories.Default} />
 
@@ -28,8 +45,8 @@ The `size` prop (a number, in pixels) allows a free override: `:size="32"` → 3
 
 ## Four sources
 
-`src` wins over `name`, which wins over the slot. A `name` from the built-in registry gives an
-SVG; any other name falls back to the ligature, hence to the consumer's font. The image gets an
+`src` wins over `name`, which wins over the slot. An icon imported from `@vectis/ui/icons`
+gives an SVG; a bare name falls back to the ligature, hence to the consumer's font. The image gets an
 empty `alt` (the accessible name comes from `label`, never from the source); the inline SVG
 fills the icon's square.
 
@@ -74,9 +91,11 @@ an image (`src`) or an inline SVG.
 
 ## Wiring in an icon library
 
-`setIconResolver` is consulted **before** the built-in registry: that is what lets you move all
-of the DS's icons onto your own source. Returning `undefined` means "I do not know this name"
-and hands over to the registry, then to the ligature — so **partial** mappings are usable.
+`setIconResolver` is consulted **before** the icon's own drawing: that is what lets you move all
+of the DS's icons onto your own source with a single call. An imported icon carries its **name**
+as well as its paths, which is exactly what keeps it reaching you — a bare `{ path }` would take
+the `render` route and never be offered. Returning `undefined` means "I do not know this name"
+and hands over to that drawing, then to the ligature — so **partial** mappings are usable.
 
 Set it at **module** level (a Nuxt plugin, `main.ts`), never inside a `setup()`, and never
 client-only: the server would render the embedded SVG and the client your library.
@@ -99,9 +118,10 @@ single rule.
 
 <Canvas of={VIconStories.BootstrapIconsFont} />
 
-The `strict` parameter (the default) protects the DS's icons: a registry name **absent** from
+The `strict` parameter (the default) protects the DS's icons: one of its names **absent** from
 your alias table would fall onto a non-existent class — hence an empty square — so it falls back
-to the embedded SVG instead. Your own names always pass: they are already written in your
+to the embedded SVG instead. It is a **set of names** the resolver consults for that, never the
+drawings, so wiring in your own library downloads none of the Material paths. Your own names always pass: they are already written in your
 library's vocabulary.
 
 <Canvas of={VIconStories.PartialMapping} />

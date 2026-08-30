@@ -3,6 +3,10 @@ import { computed, nextTick, provide, ref, useId, useSlots, watch } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { chevron_left as chevronLeftIcon } from '../VIcon/icons/chevron_left'
+import { chevron_right as chevronRightIcon } from '../VIcon/icons/chevron_right'
+import { expand_less as expandLessIcon } from '../VIcon/icons/expand_less'
+import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import type { IconSource } from '../VIcon/types'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import { panelIdFor, tabIdFor, tabsKey } from './context'
@@ -170,10 +174,10 @@ provide(tabsKey, {
 
 const isVertical = computed(() => props.orientation === 'vertical')
 const resolvedPrevIcon = computed(
-  () => props.prevIcon ?? (isVertical.value ? 'expand_less' : 'chevron_left'),
+  () => props.prevIcon ?? (isVertical.value ? expandLessIcon : chevronLeftIcon),
 )
 const resolvedNextIcon = computed(
-  () => props.nextIcon ?? (isVertical.value ? 'expand_more' : 'chevron_right'),
+  () => props.nextIcon ?? (isVertical.value ? expandMoreIcon : chevronRightIcon),
 )
 
 const listEl = ref<HTMLElement | null>(null)

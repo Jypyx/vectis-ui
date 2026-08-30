@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
+import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VBadge from '../VBadge/VBadge.vue'
 import VIconButton from '../VIconButton/VIconButton.vue'
@@ -414,9 +415,9 @@ export const DisabledItem: Story = {
 export const LongTexts: Story = {
   render: (args) => ({
     components,
-    setup: () => ({ args, t }),
+    setup: () => ({ icons, args, t }),
     template: aside(`
-      <VSideNavigationItem href="#long" icon="description" :sublabel="t.longSublabel">
+      <VSideNavigationItem href="#long" :icon="icons.description" :sublabel="t.longSublabel">
         {{ t.longLabel }}
       </VSideNavigationItem>
       <VSideNavigationItem icon="folder" default-open>

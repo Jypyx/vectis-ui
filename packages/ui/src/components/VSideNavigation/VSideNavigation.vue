@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { provide, ref, useId } from 'vue'
 
+import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import type { IconSource } from '../VIcon/types'
 import { sideNavigationKey } from './context'
 
@@ -58,7 +59,7 @@ const props = withDefaults(defineProps<SideNavigationProps>(), {
   size: 'md',
   compact: false,
   exclusive: false,
-  expandIcon: 'expand_more',
+  expandIcon: () => expandMoreIcon,
   collapseIcon: undefined,
 })
 

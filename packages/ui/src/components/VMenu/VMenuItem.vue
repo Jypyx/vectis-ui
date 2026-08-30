@@ -3,6 +3,7 @@ import { computed, inject, ref, useId, useSlots } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { chevron_right as chevronRightIcon } from '../VIcon/icons/chevron_right'
 import type { IconSource } from '../VIcon/types'
 import VMenuPanel from './VMenuPanel.vue'
 import { menuKey, SUBMENU_HOVER_DELAY } from './context'
@@ -199,7 +200,7 @@ function onPointerLeave() {
     </span>
     <!-- An item opening a submenu always shows the chevron announcing it, and never
          the end icon: the sideways opening is what the reader needs to be told -->
-    <VIcon v-if="hasSubmenu" name="chevron_right" class="v-menu-item-chevron" />
+    <VIcon v-if="hasSubmenu" :name="chevronRightIcon" class="v-menu-item-chevron" />
     <slot v-else name="end">
       <VIcon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
     </slot>

@@ -21,6 +21,9 @@ import VButton from '../VButton/VButton.vue'
 import VButtonGroup from '../VButton/VButtonGroup.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { chevron_left as chevronLeftIcon } from '../VIcon/icons/chevron_left'
+import { chevron_right as chevronRightIcon } from '../VIcon/icons/chevron_right'
+import { more_horiz as moreHorizIcon } from '../VIcon/icons/more_horiz'
 import type { IconSource } from '../VIcon/types'
 import VIconButton from '../VIconButton/VIconButton.vue'
 
@@ -118,8 +121,8 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   align: 'start',
   showControls: true,
   controlsDisplay: 'icon',
-  prevIcon: 'chevron_left',
-  nextIcon: 'chevron_right',
+  prevIcon: () => chevronLeftIcon,
+  nextIcon: () => chevronRightIcon,
   prevLabel: undefined,
   nextLabel: undefined,
   disabled: false,
@@ -331,7 +334,7 @@ function onKeydown(event: KeyboardEvent) {
           :compact="compact"
           disabled
         >
-          <VIcon name="more_horiz" />
+          <VIcon :name="moreHorizIcon" />
         </VIconButton>
       </template>
 

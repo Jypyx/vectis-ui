@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
 import VInput from './VInput.vue'
@@ -429,6 +430,7 @@ export const Showcase: Story = {
   render: () => ({
     components: { VInput },
     setup: () => ({
+      icons,
       search: ref(''),
       nickname: ref('Xavier'),
       bio: ref('A sentence that goes over the limit'),
@@ -443,7 +445,7 @@ export const Showcase: Story = {
           v-model="search"
           :label="t.searchLabel"
           :hint="t.searchHint"
-          icon-start="search"
+          :icon-start="icons.search"
           clearable
           :placeholder="t.searchPlaceholder"
         />
@@ -475,7 +477,7 @@ export const Showcase: Story = {
           v-model="search"
           size="sm"
           :label="t.loading"
-          icon-end="search"
+          :icon-end="icons.search"
           loading
           :placeholder="t.searching"
         />
@@ -483,7 +485,7 @@ export const Showcase: Story = {
           v-model="search"
           compact
           :label="t.compact"
-          icon-start="search"
+          :icon-start="icons.search"
           clearable
           :placeholder="t.reducedHeight"
         />

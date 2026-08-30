@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import {
+  description as descriptionIcon,
+  folder_zip as folderZipIcon,
+  notifications as notificationsIcon,
+  schedule as scheduleIcon,
+  table_chart as tableChartIcon,
+} from '@vectis/ui/icons'
+import {
   VSideNavigation,
   VSideNavigationGroup,
   VSideNavigationItem,
@@ -43,20 +50,22 @@ const routerCode = `<!-- \`active\` is manual: the component knows nothing about
   <DocsDemo stack>
     <VSideNavigation label="Example" size="md">
       <VSideNavigationGroup label="Workspace">
-        <VSideNavigationItem href="#a-tree-of-links" icon="description" active>
+        <VSideNavigationItem href="#a-tree-of-links" :icon="descriptionIcon" active>
           Overview
         </VSideNavigationItem>
-        <VSideNavigationItem href="#a-tree-of-links" icon="table_chart" sublabel="12 tables">
+        <VSideNavigationItem href="#a-tree-of-links" :icon="tableChartIcon" sublabel="12 tables">
           Data
         </VSideNavigationItem>
-        <VSideNavigationItem href="#a-tree-of-links" icon="notifications">
+        <VSideNavigationItem href="#a-tree-of-links" :icon="notificationsIcon">
           Alerts
         </VSideNavigationItem>
       </VSideNavigationGroup>
       <VSideNavigationSeparator />
       <VSideNavigationGroup label="Account">
-        <VSideNavigationItem href="#a-tree-of-links" icon="schedule">Usage</VSideNavigationItem>
-        <VSideNavigationItem icon="folder_zip" disabled>Exports</VSideNavigationItem>
+        <VSideNavigationItem href="#a-tree-of-links" :icon="scheduleIcon"
+          >Usage</VSideNavigationItem
+        >
+        <VSideNavigationItem :icon="folderZipIcon" disabled>Exports</VSideNavigationItem>
       </VSideNavigationGroup>
     </VSideNavigation>
   </DocsDemo>

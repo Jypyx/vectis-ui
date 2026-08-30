@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
+import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VBadge from '../VBadge/VBadge.vue'
 import VTab from './VTab.vue'
@@ -195,13 +196,13 @@ export const Tones: Story = {
 export const Sizes: Story = {
   render: () => ({
     components: { VTabs, VTab },
-    setup: () => ({ sizes: ['xs', 'sm', 'md', 'lg', 'xl'], tab: ref('a') }),
+    setup: () => ({ icons, sizes: ['xs', 'sm', 'md', 'lg', 'xl'], tab: ref('a') }),
     template: `
       <div style="display: grid; gap: 24px">
         <VTabs v-for="s in sizes" :key="s" :size="s" variant="inset" v-model="tab">
           <VTab value="a" label="Overview" />
           <VTab value="b" label="Details" icon="tune" />
-          <VTab value="c" icon="more_horiz" aria-label="Plus" />
+          <VTab value="c" :icon="icons.more_horiz" aria-label="Plus" />
         </VTabs>
       </div>
     `,
@@ -451,7 +452,7 @@ export const ScrollButtons: Story = {
 export const CustomArrows: Story = {
   render: () => ({
     components: { VTabs, VTab },
-    setup: () => ({ cities: CITIES, horizontal: ref('Paris'), vertical: ref('Paris'), t }),
+    setup: () => ({ icons, cities: CITIES, horizontal: ref('Paris'), vertical: ref('Paris'), t }),
     /*
      * `prevIcon`/`nextIcon` accept a Material Symbols name or an image URL, and
      * `prevLabel`/`nextLabel` supply the accessible name. The defaults follow the
@@ -480,8 +481,8 @@ export const CustomArrows: Story = {
             orientation="vertical"
             variant="inset"
             scroll-buttons
-            prev-icon="arrow_drop_up"
-            next-icon="arrow_drop_down"
+            :prev-icon="icons.arrow_drop_up"
+            :next-icon="icons.arrow_drop_down"
             prev-label="Onglets au-dessus"
             next-label="Onglets en dessous"
             v-model="vertical"

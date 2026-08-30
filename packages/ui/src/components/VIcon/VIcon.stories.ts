@@ -113,10 +113,10 @@ export const TextAdapted: Story = {
 export const FourSources: Story = {
   render: () => ({
     components: { VIcon },
-    setup: () => ({ t }),
+    setup: () => ({ icons: builtinIcons, t }),
     template: `
       <div style="display: flex; gap: 12px; align-items: center">
-        <VIcon name="close" :size="24" />
+        <VIcon :name="icons.close" :size="24" />
         <VIcon name="rocket_launch" :size="24" />
         <VIcon
           :size="24"
@@ -137,12 +137,12 @@ export const FourSources: Story = {
 export const Library: Story = {
   render: () => ({
     components: { VIcon },
-    setup: () => ({ names: Object.keys(builtinIcons) }),
+    setup: () => ({ icons: Object.values(builtinIcons) }),
     template: `
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px">
-        <div v-for="name in names" :key="name" style="display: flex; gap: 8px; align-items: center">
-          <VIcon :name="name" :size="24" />
-          <code style="font-size: var(--vectis-font-size-xs)">{{ name }}</code>
+        <div v-for="icon in icons" :key="icon.name" style="display: flex; gap: 8px; align-items: center">
+          <VIcon :name="icon" :size="24" />
+          <code style="font-size: var(--vectis-font-size-xs)">{{ icon.name }}</code>
         </div>
       </div>
     `,
@@ -157,11 +157,11 @@ export const Library: Story = {
 export const WithoutFont: Story = {
   render: () => ({
     components: { VIcon },
-    setup: () => ({ names: Object.keys(builtinIcons), t }),
+    setup: () => ({ icons: Object.values(builtinIcons), t }),
     template: `
       <div style="--vectis-font-family-icon: sans-serif; display: flex; flex-direction: column; gap: 16px">
         <div style="display: flex; gap: 12px; flex-wrap: wrap">
-          <VIcon v-for="name in names" :key="name" :name="name" :size="24" />
+          <VIcon v-for="icon in icons" :key="icon.name" :name="icon" :size="24" />
         </div>
         <div style="display: flex; gap: 12px; align-items: center">
           <VIcon name="favorite" :size="24" />
@@ -183,13 +183,21 @@ export const WithoutFont: Story = {
 export const Filled: Story = {
   render: () => ({
     components: { VIcon },
-    setup: () => ({ t }),
+    setup: () => ({
+      t,
+      filledPairs: [
+        builtinIcons.check_circle,
+        builtinIcons.warning,
+        builtinIcons.info,
+        builtinIcons.notifications,
+      ],
+    }),
     template: `
       <div style="display: flex; flex-direction: column; gap: 12px">
         <div style="display: flex; gap: 16px; align-items: center">
-          <span v-for="name in ['check_circle', 'warning', 'info', 'notifications']" :key="name" style="display: inline-flex; gap: 8px; align-items: center">
-            <VIcon :name="name" :size="24" />
-            <VIcon :name="name" :size="24" filled />
+          <span v-for="icon in filledPairs" :key="icon.name" style="display: inline-flex; gap: 8px; align-items: center">
+            <VIcon :name="icon" :size="24" />
+            <VIcon :name="icon" :size="24" filled />
           </span>
           <span>{{ t.builtinSecondPath }}</span>
         </div>
@@ -293,7 +301,7 @@ export const WithLabel: Story = {
 export const DrivenByParent: Story = {
   render: () => ({
     components: { VIcon },
-    setup: () => ({ t }),
+    setup: () => ({ icons: builtinIcons, t }),
     template: `
       <div style="--vectis-icon-size: var(--vectis-icon-size-lg); --vectis-icon-opsz: 24; display: flex; gap: 12px; align-items: center">
         <VIcon name="palette" />
@@ -344,18 +352,18 @@ const SHOWCASE_COMPONENTS = {
 const SHOWCASE = `
   <div style="display: flex; flex-direction: column; gap: 20px; max-inline-size: 640px">
     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-      <VButton icon-start="search">{{ t.search }}</VButton>
-      <VButton variant="outline" tone="neutral" icon-end="expand_more">{{ t.filters }}</VButton>
+      <VButton :icon-start="icons.search">{{ t.search }}</VButton>
+      <VButton variant="outline" tone="neutral" :icon-end="icons.expand_more">{{ t.filters }}</VButton>
       <VChip dismissible>{{ t.tag }}</VChip>
       <VChip selectable check :selected="true" tone="accent">{{ t.selected }}</VChip>
     </div>
 
-    <VInput v-model="search" :label="t.searchLabel" icon-start="search" clearable />
+    <VInput v-model="search" :label="t.searchLabel" :icon-start="icons.search" clearable />
 
     <VBreadcrumb :items="trail" current-path="/projects/vectis" />
 
     <VAccordion>
-      <VAccordionItem :title="t.collapsedPanel" icon-start="notifications">
+      <VAccordionItem :title="t.collapsedPanel" :icon-start="icons.notifications">
         {{ t.allFromDs }}
       </VAccordionItem>
     </VAccordion>
@@ -363,7 +371,7 @@ const SHOWCASE = `
     <VPagination v-model="page" :length="12" :total-visible="7" />
 
     <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-block-start: 4px">
-      <VIcon v-for="name in names" :key="name" :name="name" :size="24" :title="name" />
+      <VIcon v-for="icon in gallery" :key="icon.name" :name="icon" :size="24" :title="icon.name" />
     </div>
   </div>
 `
@@ -387,9 +395,10 @@ function fontShowcase(resolver: IconResolver): Story {
       components: SHOWCASE_COMPONENTS,
       setup: () => ({
         t,
+        icons: builtinIcons,
         search: 'Vectis',
         page: 4,
-        names: Object.keys(builtinIcons),
+        gallery: Object.values(builtinIcons),
         trail,
       }),
       template: SHOWCASE,

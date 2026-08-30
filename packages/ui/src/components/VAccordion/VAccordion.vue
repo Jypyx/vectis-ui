@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { provide, useId } from 'vue'
 
+import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import type { IconSource } from '../VIcon/types'
 
 import { accordionKey } from './context'
@@ -48,7 +49,7 @@ interface AccordionProps {
 const props = withDefaults(defineProps<AccordionProps>(), {
   exclusive: true,
   variant: 'flat',
-  expandIcon: 'expand_more',
+  expandIcon: () => expandMoreIcon,
   collapseIcon: undefined,
   compact: false,
 })

@@ -3,6 +3,7 @@ import { computed, inject, provide, useId, useSlots } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import type { IconSource } from '../VIcon/types'
 import { sideNavigationKey } from './context'
 
@@ -134,7 +135,7 @@ const parent = inject(sideNavigationKey, null)
  * Both chevrons are chosen on the navigation as a whole. The fallback is what keeps an
  * item rendering correctly when it is used outside one.
  */
-const expandIcon = computed(() => parent?.expandIcon ?? 'expand_more')
+const expandIcon = computed(() => parent?.expandIcon ?? expandMoreIcon)
 const collapseIcon = computed(() => parent?.collapseIcon)
 
 // The name shared by THIS row's children. It is minted afresh at every level, and that

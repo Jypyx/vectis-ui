@@ -3,6 +3,8 @@ import { computed } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { chevron_right as chevronRightIcon } from '../VIcon/icons/chevron_right'
+import { more_horiz as moreHorizIcon } from '../VIcon/icons/more_horiz'
 import type { IconSource } from '../VIcon/types'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import VMenu from '../VMenu/VMenu.vue'
@@ -75,7 +77,7 @@ interface BreadcrumbProps {
 const props = withDefaults(defineProps<BreadcrumbProps>(), {
   label: undefined,
   currentPath: undefined,
-  separator: 'chevron_right',
+  separator: () => chevronRightIcon,
   maxItems: undefined,
   ellipsisLabel: undefined,
 })
@@ -122,7 +124,7 @@ const visibleItems = computed(() =>
           <VMenu compact>
             <template #trigger="{ triggerProps }">
               <VIconButton size="sm" compact :label="resolvedEllipsisLabel" v-bind="triggerProps">
-                <VIcon name="more_horiz" />
+                <VIcon :name="moreHorizIcon" />
               </VIconButton>
             </template>
             <VMenuItem

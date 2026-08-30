@@ -46,6 +46,10 @@
       "types": "./dist/tokens/index.d.ts",
       "import": "./dist/tokens/index.js"
     },
+    "./icons": {
+      "types": "./dist/icons.d.ts",
+      "import": "./dist/icons.js"
+    },
     "./tokens.json": "./dist/tokens.json",
     "./package.json": "./package.json"
   },

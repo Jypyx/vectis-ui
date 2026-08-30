@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { VInput } from '@vectis/ui'
+import { search as searchIcon } from '@vectis/ui/icons'
 
 definePageMeta({ layout: 'docs' })
 
@@ -40,7 +41,7 @@ const softCode = `<!-- the reader may type past 40; the field then goes into
       counter
       :maxlength="32"
     />
-    <VInput label="Search the registry" icon-start="search" placeholder="Package name" />
+    <VInput label="Search the registry" :icon-start="searchIcon" placeholder="Package name" />
   </DocsDemo>
   <DocsProse keypath="input.anatomyBody" />
   <DocsCode lang="vue" :code="anatomyCode" />

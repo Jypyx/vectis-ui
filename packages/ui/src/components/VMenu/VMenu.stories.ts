@@ -1,6 +1,7 @@
 ﻿import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
+import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
 import VMenu from './VMenu.vue'
@@ -163,15 +164,15 @@ export const Default: Story = {
 export const Sublabels: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VButton },
-    setup: () => ({ t }),
+    setup: () => ({ icons, t }),
     template: `
       <VMenu>
         <template #trigger="{ triggerProps }">
           <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.export }}</VButton>
         </template>
-        <VMenuItem label="PDF" :sublabel="t.pdfSublabel" icon-start="picture_as_pdf" />
+        <VMenuItem label="PDF" :sublabel="t.pdfSublabel" :icon-start="icons.picture_as_pdf" />
         <VMenuItem label="CSV" :sublabel="t.csvSublabel" icon-start="csv" />
-        <VMenuItem label="PNG" :sublabel="t.pngSublabel" icon-start="image" />
+        <VMenuItem label="PNG" :sublabel="t.pngSublabel" :icon-start="icons.image" />
       </VMenu>
     `,
   }),
@@ -180,13 +181,13 @@ export const Sublabels: Story = {
 export const Selection: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VButton },
-    setup: () => ({ t }),
+    setup: () => ({ icons, t }),
     template: `
       <VMenu>
         <template #trigger="{ triggerProps }">
           <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.sortBy }}</VButton>
         </template>
-        <VMenuItem :label="t.name" selected icon-end="check" />
+        <VMenuItem :label="t.name" selected :icon-end="icons.check" />
         <VMenuItem :label="t.modifiedDate" />
         <VMenuItem :label="t.size" />
       </VMenu>

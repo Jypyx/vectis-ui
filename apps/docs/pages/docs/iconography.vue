@@ -1,13 +1,28 @@
 <script setup lang="ts">
 import { VIcon, VTypography } from '@vectis/ui'
+import {
+  check_circle as checkCircleIcon,
+  close as closeIcon,
+  code as codeIcon,
+  notifications as notificationsIcon,
+  schedule as scheduleIcon,
+  search as searchIcon,
+  warning as warningIcon,
+} from '@vectis/ui/icons'
 
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 useHead({ title: () => t('iconography.title') })
 
-const basicCode = `<VIcon name="close" />
+const importCode = `import { close, search } from '@vectis/ui/icons'`
+
+const basicCode = `<!-- one of the design system's own icons, imported above -->
+<VIcon :name="close" />
+
+<!-- a bare NAME: your resolver first, then the icon font as a ligature -->
 <VIcon name="favorite" />
+
 <VIcon :render="{ src: '/logo.svg' }" label="Logo" />`
 
 const resolverCode = `import { setIconResolver, ligatureIconResolver } from '@vectis/ui'
@@ -15,8 +30,8 @@ const resolverCode = `import { setIconResolver, ligatureIconResolver } from '@ve
 setIconResolver(ligatureIconResolver())`
 
 const partialCode = `// this site's own resolver: six icons the library does not ship.
-// Answering \`undefined\` hands the name back to the built-in registry,
-// which is what makes a PARTIAL mapping legal.
+// Answering \`undefined\` hands the name back to whatever the icon
+// itself carries, which is what makes a PARTIAL mapping legal.
 setIconResolver((name, context) => {
   const paths = docsIcons[name]
   if (!paths) return undefined
@@ -29,19 +44,24 @@ setIconResolver((name, context) => {
   <DocsProse class="vd-lead" keypath="iconography.lead" />
   <DocsProse keypath="iconography.weight" />
   <DocsDemo>
-    <VIcon name="search" :size="24" />
-    <VIcon name="close" :size="24" />
-    <VIcon name="check_circle" :size="24" />
-    <VIcon name="check_circle" filled :size="24" />
-    <VIcon name="warning" :size="24" />
-    <VIcon name="notifications" :size="24" />
-    <VIcon name="notifications" filled :size="24" />
-    <VIcon name="schedule" :size="24" />
-    <VIcon name="code" :size="24" />
+    <VIcon :name="searchIcon" :size="24" />
+    <VIcon :name="closeIcon" :size="24" />
+    <VIcon :name="checkCircleIcon" :size="24" />
+    <VIcon :name="checkCircleIcon" filled :size="24" />
+    <VIcon :name="warningIcon" :size="24" />
+    <VIcon :name="notificationsIcon" :size="24" />
+    <VIcon :name="notificationsIcon" filled :size="24" />
+    <VIcon :name="scheduleIcon" :size="24" />
+    <VIcon :name="codeIcon" :size="24" />
     <VTypography variant="caption" as="span" tone="muted">
       {{ t('iconography.gridCaption') }}
     </VTypography>
   </DocsDemo>
+
+  <h2 id="importing-an-icon">{{ t('iconography.importHeading') }}</h2>
+  <DocsProse keypath="iconography.importBody" />
+  <DocsCode lang="ts" :code="importCode" />
+  <DocsProse keypath="iconography.importWhy" />
 
   <h2 id="resolution-order">{{ t('iconography.orderHeading') }}</h2>
   <DocsProse keypath="iconography.orderBody" />

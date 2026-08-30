@@ -14,6 +14,7 @@
 import type { NuxtError } from '#app'
 
 import { VButton, VTypography } from '@vectis/ui'
+import { arrow_right_alt as arrowRightAltIcon } from '@vectis/ui/icons'
 
 const props = defineProps<{ error: NuxtError }>()
 
@@ -58,7 +59,7 @@ const leave = (to: string) => clearError({ redirect: localePath(to) })
           variant="solid"
           tone="accent"
           size="md"
-          icon-end="arrow_right_alt"
+          :icon-end="arrowRightAltIcon"
           @click="leave('/docs/installation')"
         >
           {{ t('error.toDocs') }}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { builtinIcons, ICON_VIEW_BOX, type VectisIconName } from './icons'
+import { builtinIconNames, builtinIcons, ICON_VIEW_BOX, type VectisIconName } from './icons'
 
 /**
  * Locks on the GENERATED file (`pnpm icons`): what is tested here is that the
@@ -56,14 +56,28 @@ describe('built-in icon registry', () => {
     expect(ICON_VIEW_BOX).toBe('0 -960 960 960')
   })
 
-  it.each(Object.entries(builtinIcons))('%s : paths exploitables', (_nom, paths) => {
-    expect(paths.length).toBeGreaterThanOrEqual(1)
-    expect(paths.length).toBeLessThanOrEqual(2)
-    for (const d of paths) {
+  it.each(Object.entries(builtinIcons))('%s : paths exploitables', (_nom, icon) => {
+    expect(icon.paths.length).toBeGreaterThanOrEqual(1)
+    expect(icon.paths.length).toBeLessThanOrEqual(2)
+    for (const d of icon.paths) {
       expect(d.length).toBeGreaterThan(0)
       // Every SVG path starts with a moveto.
       expect(d[0]!.toLowerCase()).toBe('m')
     }
+  })
+
+  it.each(Object.entries(builtinIcons))('%s : porte son propre nom', (nom, icon) => {
+    // The name travelling with the drawing is what reaches the consumer's resolver —
+    // a component imports the binding and never restates the name. A generator slip
+    // here would route the resolver to the wrong icon with nothing to show for it.
+    expect(icon.name).toBe(nom)
+  })
+
+  it('expose le jeu de noms seul, aligné sur le registre', () => {
+    // `classIconResolver` asks the SET rather than the icons, so that a consumer who
+    // wired in their own library ships no Material path at all. The two are generated
+    // side by side, and nothing else would notice them drifting apart.
+    expect([...builtinIconNames].sort()).toEqual(Object.keys(builtinIcons).sort())
   })
 
   it('emits a filled path only when it changes the geometry', () => {
@@ -71,14 +85,14 @@ describe('built-in icon registry', () => {
     // icons (chevrons, arrows, close, check…) have identical FILL 0 and FILL 1.
     // The registry is typed in literals (`as const`): without this widening, TS
     // considers the comparison impossible and refuses to compile the test.
-    const registre: Record<string, readonly string[]> = builtinIcons
+    const registre: Record<string, { readonly paths: readonly string[] }> = builtinIcons
     const doublons = Object.entries(registre).filter(
-      ([, paths]) => paths.length === 2 && paths[0] === paths[1],
+      ([, { paths }]) => paths.length === 2 && paths[0] === paths[1],
     )
     expect(doublons).toEqual([])
 
     // And the de-duplication did not flatten everything: the filled icons exist.
-    const avecVariante = Object.values(builtinIcons).filter((paths) => paths.length === 2)
+    const avecVariante = Object.values(builtinIcons).filter((icon) => icon.paths.length === 2)
     expect(avecVariante.length).toBeGreaterThan(0)
   })
 })

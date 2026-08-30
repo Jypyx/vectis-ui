@@ -2,7 +2,9 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
 import VIcon from './VIcon.vue'
-import { builtinIcons } from './icons'
+import { setIconResolver } from './resolver'
+import { check_circle as checkCircleIcon } from './icons/check_circle'
+import { close as closeIcon } from './icons/close'
 
 describe('VIcon', () => {
   it('is decorative by default (aria-hidden, no role)', () => {
@@ -18,11 +20,32 @@ describe('VIcon', () => {
     expect(icon.getAttribute('aria-hidden')).toBeNull()
   })
 
-  it('icon from the built-in registry: inline SVG, with no font dependency', () => {
-    const { container } = render(VIcon, { props: { name: 'close' } })
+  it("one of the DS's own icons: inline SVG, with no font dependency", () => {
+    const { container } = render(VIcon, { props: { name: closeIcon } })
     const path = container.querySelector('.v-icon-svg path') as SVGPathElement
-    expect(path.getAttribute('d')).toBe(builtinIcons.close[0])
+    expect(path.getAttribute('d')).toBe(closeIcon.paths[0])
     expect(container.querySelector('.v-icon-symbol')).toBeNull()
+  })
+
+  it('a bare NAME carries no drawing, even one the DS ships', () => {
+    // The deliberate half of the split: an icon reaches a bundle because a module
+    // imported it, never because a string might one day ask for it. `close` is
+    // shipped, and asking for it by name still lands on the ligature.
+    const { container } = render(VIcon, { props: { name: 'close' } })
+    expect(container.querySelector('.v-icon-symbol')?.textContent).toBe('close')
+    expect(container.querySelector('.v-icon-svg')).toBeNull()
+  })
+
+  it("a resolver still wins over one of the DS's own icons", () => {
+    // THE invariant of the split. The drawing travels with its NAME, so a consumer
+    // who wired in their own icon library moves the design system's internals across
+    // with one `setIconResolver` call — where a bare `{ path }` default would take
+    // the `render` route and never be offered to them.
+    setIconResolver(() => ({ text: 'xmark' }))
+    const { container } = render(VIcon, { props: { name: closeIcon } })
+    expect(container.querySelector('.v-icon-symbol')?.textContent).toBe('xmark')
+    expect(container.querySelector('.v-icon-svg')).toBeNull()
+    setIconResolver(undefined)
   })
 
   it("name outside the registry: falls back to the consumer font's ligature", () => {
@@ -33,7 +56,7 @@ describe('VIcon', () => {
   })
 
   it('data-icon: set whatever the effective source is', () => {
-    const integree = render(VIcon, { props: { name: 'close' } })
+    const integree = render(VIcon, { props: { name: closeIcon } })
     expect(integree.container.querySelector('.v-icon')?.getAttribute('data-icon')).toBe('close')
 
     const ligature = render(VIcon, { props: { name: 'favorite' } })
@@ -44,15 +67,15 @@ describe('VIcon', () => {
   })
 
   it('filled: the filled path when the geometry differs, the outline otherwise', () => {
-    const plein = render(VIcon, { props: { name: 'check_circle', filled: true } })
+    const plein = render(VIcon, { props: { name: checkCircleIcon, filled: true } })
     expect(plein.container.querySelector('.v-icon-svg path')?.getAttribute('d')).toBe(
-      builtinIcons.check_circle[1],
+      checkCircleIcon.paths[1],
     )
 
     // `close` has no distinct FILL variant: the outline serves both.
-    const trait = render(VIcon, { props: { name: 'close', filled: true } })
+    const trait = render(VIcon, { props: { name: closeIcon, filled: true } })
     expect(trait.container.querySelector('.v-icon-svg path')?.getAttribute('d')).toBe(
-      builtinIcons.close[0],
+      closeIcon.paths[0],
     )
   })
 

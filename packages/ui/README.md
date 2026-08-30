@@ -114,20 +114,28 @@ const semanticColors = flattenTokens(tokens.semantic.color, ['color'])
 
 ## Icons
 
-**No icon font is required.** The icons the library renders itself — `VDialog`'s cross, `VDatePicker`'s and `VMenu`'s chevrons, the toasts' tone icons, `VDataTable`'s sorting… — are **embedded SVGs**, exact replicas of Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24, Apache-2.0 © Google). They weigh ~3.6 kB gzip and are not tree-shakable: that is the price of the design system's autonomy. It is a real cost rather than a rounding error — the registry is the largest single item in a lone `VButton`'s JavaScript, which comes to 8.12 kB gzip once `VIcon`, `VSpinner` and the dictionary are pulled in with it.
+**No icon font is required.** The icons the library renders itself — `VDialog`'s cross, `VDatePicker`'s and `VMenu`'s chevrons, the toasts' tone icons, `VDataTable`'s sorting… — are **embedded SVGs**, exact replicas of Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24, Apache-2.0 © Google). There are 34 of them and **each is a module of its own**, imported by the components that draw it: you pay for the icons your components actually render and for nothing else. A lone `VButton` ships none at all, which is most of why its JavaScript comes to 4.62 kB gzip with `VIcon`, `VSpinner` and the dictionary pulled in alongside it.
 
-The `VIcon` component resolves its source in this order: **an explicit `render` → `src` → `name` (the consumer resolver, then the built-in registry, then the ligature) → the slot**.
+Reach for one directly through the `@vectis/ui/icons` subpath, and pass it where a name would go:
+
+```ts
+import { close, search } from '@vectis/ui/icons'
+```
+
+The `VIcon` component resolves its source in this order: **an explicit `render` → `src` → `name` (the consumer resolver first, then the drawing the icon brought along, then the ligature) → the slot**.
 
 ```vue
-<VIcon name="close" />
-<!-- the built-in registry: SVG, no font needed -->
+<VIcon :name="close" />
+<!-- one of the DS's own icons: SVG, no font needed -->
 <VIcon name="favorite" />
-<!-- outside the registry: a ligature from YOUR icon font -->
+<!-- a bare NAME: your resolver, then a ligature from YOUR icon font -->
 <VIcon src="/logo.svg" label="Logo" />
 <!-- an image -->
 <VIcon><svg …/></VIcon>
 <!-- an inline SVG (the slot) -->
 ```
+
+A **bare string is always a NAME**, and it no longer reaches the library's own drawings: an icon is in your bundle because a module imported it, never because a string might one day ask for it.
 
 - **Decorative by default** (`aria-hidden`); the `label` prop makes it informative (`role="img"` + `aria-label`).
 - The **`data-icon`** attribute carries the requested name whatever the source — a stable hook for consumer CSS and for tests.
@@ -138,15 +146,18 @@ The `VIcon` component resolves its source in this order: **an explicit `render` 
 
 ```vue
 <VButton icon-start="download">Export</VButton>
+<VButton :icon-start="cloud_upload">Upload</VButton>
 <VBreadcrumb :separator="{ src: '/chevron.svg' }" :items="items" />
 <VMenuItem label="Open" :icon-start="{ component: FolderIcon }" />
 ```
 
-A string is **always** an icon name; an image or a component is declared as an object (`{ src }`, `{ component }`, `{ path }`, `{ text }`, `{ class }`). That is what lets Iconify-style naming conventions (`mdi:close`, `fa6-solid:xmark`) work.
+A string is **always** an icon name; one of the design system's own icons is imported from `@vectis/ui/icons`; an image or a component is declared as an object (`{ src }`, `{ component }`, `{ path }`, `{ text }`, `{ class }`). That is what lets Iconify-style naming conventions (`mdi:close`, `fa6-solid:xmark`) work.
 
 ### Wiring your own icon library
 
-`setIconResolver` is consulted **before** the built-in registry; returning `undefined` means "I do not know this name" and hands over to the registry, then to the ligature. **Partial** mappings are therefore usable. The `VectisIconName` type enumerates the names to cover.
+`setIconResolver` is consulted **before** the icon's own drawing; returning `undefined` means "I do not know this name" and hands over to that drawing, then to the ligature. **Partial** mappings are therefore usable. The `VectisIconName` type enumerates the names to cover.
+
+An imported icon carries its **name** as well as its paths, which is what keeps a single `setIconResolver` call enough to move the design system's own internals onto your icon set — exactly as it was when those defaults were plain strings.
 
 ```ts
 // main.ts / plugins/icons.ts — at MODULE level, never inside a setup()
@@ -180,7 +191,7 @@ import { ligatureIconResolver } from '@vectis/ui'
 setIconResolver(ligatureIconResolver())
 ```
 
-`classIconResolver` is **strict** by default: a built-in registry name absent from your alias table falls back to the embedded SVG rather than producing a nonexistent class (an empty square). Your own names always pass through.
+`classIconResolver` is **strict** by default: one of the design system's own names absent from your alias table falls back to the embedded SVG rather than producing a nonexistent class (an empty square). Your own names always pass through. It consults a **set of names** to decide, never the drawings, so wiring in your own library downloads none of the Material paths.
 
 For a one-off need, `setIconResolver` accepts any function returning one of the five shapes: `{ path }`, `{ component }`, `{ src }`, `{ text }`, `{ class }`.
 

@@ -38,6 +38,16 @@ import {
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { audio_file as audioFileIcon } from '../VIcon/icons/audio_file'
+import { close as closeIcon } from '../VIcon/icons/close'
+import { cloud_upload as cloudUploadIcon } from '../VIcon/icons/cloud_upload'
+import { code as codeIcon } from '../VIcon/icons/code'
+import { description as descriptionIcon } from '../VIcon/icons/description'
+import { folder_zip as folderZipIcon } from '../VIcon/icons/folder_zip'
+import { image as imageIcon } from '../VIcon/icons/image'
+import { picture_as_pdf as pictureAsPdfIcon } from '../VIcon/icons/picture_as_pdf'
+import { table_chart as tableChartIcon } from '../VIcon/icons/table_chart'
+import { video_file as videoFileIcon } from '../VIcon/icons/video_file'
 import type { IconSource } from '../VIcon/types'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import VTypography from '../VTypography/VTypography.vue'
@@ -162,13 +172,13 @@ defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<FilePickerProps>(), {
   subtitle: undefined,
-  icon: 'cloud_upload',
+  icon: () => cloudUploadIcon,
   showBrowse: true,
   browseLabel: undefined,
   preview: false,
   thumbnails: true,
   typeIcons: undefined,
-  removeIcon: 'close',
+  removeIcon: () => closeIcon,
   multiple: false,
   accept: undefined,
   maxSize: undefined,
@@ -289,14 +299,14 @@ const showList = computed(() => props.preview !== false && model.value.length > 
  * replacing one icon does not mean restating the other seven.
  */
 const KIND_ICONS: Record<FileKind, IconSource> = {
-  image: 'image',
-  pdf: 'picture_as_pdf',
-  audio: 'audio_file',
-  video: 'video_file',
-  archive: 'folder_zip',
-  spreadsheet: 'table_chart',
-  code: 'code',
-  file: 'description',
+  image: imageIcon,
+  pdf: pictureAsPdfIcon,
+  audio: audioFileIcon,
+  video: videoFileIcon,
+  archive: folderZipIcon,
+  spreadsheet: tableChartIcon,
+  code: codeIcon,
+  file: descriptionIcon,
 }
 
 const iconForKind = (kind: FileKind): IconSource => props.typeIcons?.[kind] ?? KIND_ICONS[kind]

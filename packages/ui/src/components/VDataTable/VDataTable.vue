@@ -6,6 +6,10 @@ import VButton from '../VButton/VButton.vue'
 import VCheckbox from '../VCheckbox/VCheckbox.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
+import { arrow_downward as arrowDownwardIcon } from '../VIcon/icons/arrow_downward'
+import { arrow_drop_down as arrowDropDownIcon } from '../VIcon/icons/arrow_drop_down'
+import { arrow_upward as arrowUpwardIcon } from '../VIcon/icons/arrow_upward'
+import { swap_vert as swapVertIcon } from '../VIcon/icons/swap_vert'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import VMenu from '../VMenu/VMenu.vue'
@@ -215,9 +219,9 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   stickyHeader: false,
   compact: false,
   height: undefined,
-  sortIcon: 'swap_vert',
-  sortAscIcon: 'arrow_downward',
-  sortDescIcon: 'arrow_upward',
+  sortIcon: () => swapVertIcon,
+  sortAscIcon: () => arrowDownwardIcon,
+  sortDescIcon: () => arrowUpwardIcon,
   perPageOptions: undefined,
   perPageLabel: undefined,
   total: undefined,
@@ -686,7 +690,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 :aria-label="m.dataTable.perPageValue(resolvedPerPageLabel, perPage ?? 0)"
               >
                 {{ perPage }}
-                <VIcon name="arrow_drop_down" />
+                <VIcon :name="arrowDropDownIcon" />
               </VButton>
             </template>
             <VMenuItem

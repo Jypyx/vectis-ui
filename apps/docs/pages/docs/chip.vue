@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { VChip, VTypography } from '@vectis/ui'
+import { schedule as scheduleIcon } from '@vectis/ui/icons'
 
 definePageMeta({ layout: 'docs' })
 
@@ -48,7 +49,7 @@ const colorCode = `<!-- a tag list out of a database: its colours are DATA,
   <DocsProse keypath="chip.statesBody" />
   <DocsDemo>
     <VChip v-model:selected="only3" selectable check tone="accent">Vue 3 only</VChip>
-    <VChip clickable tone="neutral" icon-start="schedule">Last 7 days</VChip>
+    <VChip clickable tone="neutral" :icon-start="scheduleIcon">Last 7 days</VChip>
     <VChip
       v-for="tag in tags"
       :key="tag"

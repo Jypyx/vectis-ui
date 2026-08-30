@@ -3,6 +3,8 @@ import { computed, nextTick, onMounted, ref, useId, watch } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
+import { arrow_drop_down as arrowDropDownIcon } from '../VIcon/icons/arrow_drop_down'
+import { arrow_drop_up as arrowDropUpIcon } from '../VIcon/icons/arrow_drop_up'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import {
   addDays,
@@ -582,7 +584,7 @@ defineExpose({ focus })
         >
           {{ monthLabels[viewMonth0] }}
           <VIcon
-            :name="view === 'months' ? 'arrow_drop_up' : 'arrow_drop_down'"
+            :name="view === 'months' ? arrowDropUpIcon : arrowDropDownIcon"
             aria-hidden="true"
           />
         </VButton>
@@ -613,7 +615,7 @@ defineExpose({ focus })
         >
           {{ viewYear }}
           <VIcon
-            :name="view === 'years' ? 'arrow_drop_up' : 'arrow_drop_down'"
+            :name="view === 'years' ? arrowDropUpIcon : arrowDropDownIcon"
             aria-hidden="true"
           />
         </VButton>

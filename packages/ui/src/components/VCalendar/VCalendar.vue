@@ -24,6 +24,7 @@ import { computed, onMounted, ref, useId } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
+import { arrow_drop_down as arrowDropDownIcon } from '../VIcon/icons/arrow_drop_down'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import VMenu from '../VMenu/VMenu.vue'
 import VMenuItem from '../VMenu/VMenuItem.vue'
@@ -488,7 +489,7 @@ defineExpose({
                 :aria-label="`${m.calendar.view}: ${viewLabel(view)}`"
               >
                 {{ viewLabel(view) }}
-                <VIcon name="arrow_drop_down" />
+                <VIcon :name="arrowDropDownIcon" />
               </VButton>
             </template>
             <VMenuItem

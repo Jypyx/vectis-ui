@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
+import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VAccordion from './VAccordion.vue'
 import VAccordionItem from './VAccordionItem.vue'
@@ -172,13 +173,13 @@ export const RichTitle: Story = {
 export const SubtitleAndIcon: Story = {
   render: () => ({
     components: { VAccordion, VAccordionItem },
-    setup: () => ({ t }),
+    setup: () => ({ icons, t }),
     template: `
       <VAccordion style="width: 420px">
         <VAccordionItem
           :title="t.notifications"
           :subtitle="t.notificationsSub"
-          icon-start="notifications"
+          :icon-start="icons.notifications"
         >
           {{ t.notificationsBody }}
         </VAccordionItem>

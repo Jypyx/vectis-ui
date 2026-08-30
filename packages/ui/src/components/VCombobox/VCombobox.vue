@@ -3,6 +3,7 @@ import { computed, nextTick, reactive, ref, useId, watch, watchEffect } from 'vu
 
 import VChip from '../VChip/VChip.vue'
 import VIcon from '../VIcon/VIcon.vue'
+import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import VPopover from '../VPopover/VPopover.vue'
@@ -817,7 +818,7 @@ function onKeydown(event: KeyboardEvent) {
              it carries: what announces the loading is the panel, and once is enough. -->
         <template #end>
           <VSpinner v-if="loading" class="v-combobox-spinner" aria-hidden="true" />
-          <VIcon v-else name="expand_more" class="v-combobox-chevron" aria-hidden="true" />
+          <VIcon v-else :name="expandMoreIcon" class="v-combobox-chevron" aria-hidden="true" />
         </template>
       </VInput>
     </div>
