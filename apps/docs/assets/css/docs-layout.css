@@ -173,7 +173,7 @@
   /* The files are 137×32, and the box is stated rather than derived: a background image has no
      intrinsic size to lay the element out from. */
   width: 137px;
-  height: 32px;
+  height: 28px;
   background: url('../img/logo-lockup-on-light.svg') left center / contain no-repeat;
 }
 [data-theme='dark'] .vd-logo {
@@ -249,7 +249,7 @@
   gap: var(--vectis-space-7);
   justify-items: center;
   text-align: center;
-  padding-block: var(--vectis-space-12);
+  padding-block: 96px 72px;
 }
 /* The column takes the whole limit width: justify-items would otherwise shrink it to its
    longest line and park it left of centre. */
@@ -273,9 +273,11 @@
 .vd-hero-actions {
   justify-content: center;
 }
-/* Every band below the hero is centred like the hero. Applied per block as each one is
-   rewritten, not to the page as a whole: two of the bands are still a two-column grid and a
-   bulleted list, neither of which reads centred. */
+/* Every band below the hero is centred like the hero, and all of them now carry this — the
+   accessibility band was the last holdout, back when its right-hand half was an accordion that
+   needed a column of its own. It stays a class applied per SECTION rather than a rule on the
+   page: `.vd-code` already has to undo it (see the reset there), and a blanket `text-align`
+   on the page would mean every future block opting OUT instead of in. */
 .vd-centered {
   text-align: center;
 }
@@ -286,30 +288,8 @@
   max-width: 64ch;
   margin-inline: auto;
 }
-/* A prose column beside a panel. It holds ONE column until the medium screen rather than
-   splitting at the tablet step like the site's other grids: three measures side by side in a
-   300px column would each get 100px, which is narrower than the widest of them plus its label,
-   and 1024px is where the two tracks finally have the room the pair needs. */
-.vd-split {
-  display: grid;
-  gap: var(--vectis-space-7);
-  grid-template-columns: 1fr;
-  align-items: start;
-}
-/* On a phone the two tracks are stacked, so this column is the whole width and reads better
-   centred — the hero's treatment. From the tablet up it sits beside the evidence panel and goes
-   back to its start edge. Mobile first, so the centred form is the base and the 640px step
-   undoes it.
 
-   The class exists so the rule cannot reach the panel, which is this column's SIBLING and not
-   its child. That matters less than it did when the sibling was a component whose internals a
-   stray `text-align` would have reached, but the panel does its own centring and the two must
-   stay free to disagree: this column loses its centring at 640px, where the figures keep theirs
-   at every width. */
-.vd-split-prose {
-  text-align: center;
-}
-/* The accessibility band's evidence panel, in the column the accordion used to hold.
+/* The accessibility band's evidence panel, centred under the band's own introduction.
    It lives here and not in the page's scoped block because it has no STATE — no hover, no
    pseudo-element, nothing a media query does not own — which is the split this file opens with.
 
@@ -322,14 +302,19 @@
    minimum is its CONTENT, so `4.5:1` would refuse to shrink and push the row wider than its
    column on a narrow screen. Centred, because a figure and its caption read as a stack.
 
-   The block padding is the wider of the two: the row is all the panel holds, so it is short
-   beside the prose column it sits next to, and equal padding would read as a strip rather than
-   a surface. */
+   The block padding is the wider of the two: the row is all the panel holds, so equal padding
+   would read as a strip rather than a surface. */
 .vd-proof {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--vectis-space-3);
-  margin: 0;
+  /* Capped and centred on the SAME measure as the installation window below it, so the page's
+     two panels share one width instead of each finding its own. Left at the content column's
+     full 1440px the three figures would sit a third of a screen apart and stop reading as one
+     row. `margin-inline: auto` is what makes the cap a centred box rather than one parked at
+     the start edge — the `.vd-measure` argument. */
+  max-inline-size: 44rem;
+  margin: 0 auto;
   padding: var(--vectis-space-7) var(--vectis-space-5);
   border: 1px solid var(--vectis-color-border);
   border-radius: var(--vectis-radius-surface);
@@ -347,15 +332,20 @@
   color: var(--vectis-color-accent-text);
 }
 
-/* The four engines. A row that wraps rather than a grid: there are four of them, they are never
-   going to be a table, and wrapping is what a narrow screen wants. */
+/* The four engines, under the evidence panel. A row that wraps rather than a grid: there are
+   four of them, they are never going to be a table, and wrapping is what a narrow screen wants.
+   Centred at EVERY width now that the band is — the 1024px rule that sent it back to the start
+   edge went with the two-column split it belonged to. */
 .vd-browsers {
   display: flex;
   flex-wrap: wrap;
   /* A flex line is not reached by `text-align`, so the row needs its own centring. */
   justify-content: center;
   gap: var(--vectis-space-6);
-  margin-block: 0 var(--vectis-space-5);
+  /* The space between the panel and the logos, and it belongs to the row rather than to the
+     panel: the panel is the reusable-looking box of the two, and a trailing margin on it would
+     travel to wherever it was used next. */
+  margin: var(--vectis-space-7) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -475,11 +465,8 @@
   .vd-grid-3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .vd-split-prose {
-    text-align: start;
-  }
-  .vd-browsers {
-    justify-content: flex-start;
+  .vd-logo {
+    height: 32px;
   }
 }
 
@@ -487,17 +474,11 @@
   .vd-hero {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--vectis-space-8);
-    padding-block: 128px;
+    padding-block: 144px 120px;
   }
 }
 
 @media (min-width: 1024px) {
-  /* The prose column takes a little less than the panel: a paragraph has a comfortable measure
-     and stops wanting width, where an accordion keeps using whatever it is given. */
-  .vd-split {
-    grid-template-columns: 5fr 6fr;
-    gap: var(--vectis-space-9);
-  }
   .vd-nav-links {
     display: flex;
   }
@@ -673,10 +654,29 @@
 .vd-code-lang {
   font-family: var(--vectis-text-family-code);
 }
+/* A sample WRAPS rather than scrolling sideways, and that is a readability decision, not a
+   cosmetic one: a horizontal scrollbar inside a bordered card hides content a reader has no
+   reason to suspect is there, where a wrapped line is merely longer. It costs the indentation
+   of a continuation line, which is the smaller loss.
+
+   TWO declarations, and the second is the one that does the work nobody expects. `pre-wrap`
+   only breaks at an existing break OPPORTUNITY — whitespace — so it wraps a Vue tag or an
+   import and does nothing at all for the longest line on the site, the 141-character Google
+   Fonts `@import` URL on the font family page, which contains no space anywhere. That one
+   needs `overflow-wrap`, which is allowed to break INSIDE a word, but only once the word has
+   been given a line of its own and still does not fit. `break-word` and not `anywhere`: the
+   two differ in whether the broken word contributes to the box's intrinsic minimum width, and
+   `anywhere` would let a `<pre>` in a narrow grid track collapse to one character per line.
+
+   `overflow-x: auto` stays as a floor, not as the mechanism. Nothing here should reach it now,
+   but `.vd-code` clips to its own radius with `overflow: hidden`, so a token that somehow
+   defeated both rules above would be CUT rather than reachable. */
 .vd-code > pre {
   margin: 0;
   padding: var(--vectis-space-4);
   overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
   font-family: var(--vectis-text-family-code);
   font-size: var(--vectis-text-code-size);
   line-height: var(--vectis-text-code-leading);

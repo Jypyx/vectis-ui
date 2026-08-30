@@ -62,10 +62,10 @@ export default {
    * measures rather than sentences: axe runs after every play function with `test: 'error'`, so
    * a violation fails the suite, and CI runs that suite once per theme on every push and pull
    * request. Nothing here drifts with the size of the library, so nothing here can rot the way
-   * a component count would.
+   * a component count would.vd-proof
    */
   a11yViolationsLabel: 'axe violations',
-  a11yViolationsNote: 'in both themes, on every run',
+  a11yViolationsNote: 'in both themes',
   a11yContrastLabel: 'text contrast',
   a11yContrastNote: 'the WCAG 2 AA floor',
   a11yFocusLabel: 'focus indicators',

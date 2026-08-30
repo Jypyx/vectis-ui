@@ -38,7 +38,7 @@ export default {
     "Vectis UI est nativement inclusif et prêt pour la production. Conçu pour répondre aux exigences du web d'aujourd'hui, le système garantit une conformité stricte tout en ciblant les moteurs de rendu les plus récents.",
 
   a11yViolationsLabel: 'violation axe',
-  a11yViolationsNote: 'dans les deux thèmes, à chaque exécution',
+  a11yViolationsNote: 'dans les deux thèmes',
   a11yContrastLabel: 'contraste du texte',
   a11yContrastNote: 'le plancher WCAG 2 AA',
   a11yFocusLabel: 'indicateurs de focus',

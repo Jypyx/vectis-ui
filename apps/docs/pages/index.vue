@@ -263,49 +263,47 @@ const installStep = ref<string>(STEPS[0]!.value)
     </section>
 
     <!--
-      Deliberately NOT centred, unlike the band above: the text is read down a column, aligned
-      to the start of the grid, with the accordion beside it.
+      Centred like every other band now: a heading, a sentence, three measures and a row of
+      logos all read down the middle of the page. It was a two-column grid while the right-hand
+      side was an accordion, which needed a column's worth of width to be readable at all;
+      three short figures do not, so the split had nothing left to buy.
     -->
-    <section class="vd-limit vd-band">
-      <div class="vd-split">
-        <div class="vd-split-prose">
-          <VTypography variant="heading-1" as="h2" class="vd-stack-sm">
-            {{ t('home.accessibilityHeading') }}
+    <section class="vd-limit vd-band vd-centered">
+      <VTypography variant="heading-1" as="h2" class="vd-stack-sm">
+        {{ t('home.accessibilityHeading') }}
+      </VTypography>
+      <DocsProse
+        keypath="home.accessibilitySubtitle"
+        variant="body-lg"
+        tone="muted"
+        class="vd-measure vd-stack-lg"
+      />
+      <!--
+        Evidence rather than claims: three measures, and nothing arguing for them. What this
+        band can say that no other design system's landing page can is that its accessibility
+        is CHECKED and that the check BLOCKS — the figures are that check's output, so they
+        carry the argument on their own and a sentence restating it would only soften it.
+      -->
+      <ul class="vd-proof">
+        <li v-for="stat in a11yStats" :key="stat.label">
+          <!--
+            The figure is `as="p"`: the page's heading hierarchy belongs to the section, and a
+            measure is not a heading. `display` supplies the size, nothing else does.
+          -->
+          <VTypography variant="display" as="p" class="vd-proof-figure">
+            {{ stat.value }}
           </VTypography>
-          <DocsProse
-            keypath="home.accessibilitySubtitle"
-            variant="body-lg"
-            tone="muted"
-            class="vd-stack-lg"
-          />
-          <!-- A list because it is an enumeration, and the version reads as the logo's caption. -->
-          <ul class="vd-browsers">
-            <li v-for="browser in browsers" :key="browser.name">
-              <img :src="browser.logo" :alt="browser.name" width="40" height="40" />
-              <VChip size="xs" tone="neutral">{{ browser.version }}</VChip>
-            </li>
-          </ul>
-        </div>
-        <!--
-          Evidence rather than claims: three measures, and nothing arguing for them. What this
-          band can say that no other design system's landing page can is that its accessibility
-          is CHECKED and that the check BLOCKS — the figures are that check's output, so they
-          carry the argument on their own and a sentence restating it would only soften it.
-        -->
-        <ul class="vd-proof">
-          <li v-for="stat in a11yStats" :key="stat.label">
-            <!--
-              The figure is `as="p"`: the page's heading hierarchy belongs to the section, and a
-              measure is not a heading. `display` supplies the size, nothing else does.
-            -->
-            <VTypography variant="display" as="p" class="vd-proof-figure">
-              {{ stat.value }}
-            </VTypography>
-            <VTypography variant="label" as="p">{{ t(stat.label) }}</VTypography>
-            <VTypography variant="caption" as="p" tone="muted">{{ t(stat.note) }}</VTypography>
-          </li>
-        </ul>
-      </div>
+          <VTypography variant="label" as="p">{{ t(stat.label) }}</VTypography>
+          <VTypography variant="caption" as="p" tone="muted">{{ t(stat.note) }}</VTypography>
+        </li>
+      </ul>
+      <!-- A list because it is an enumeration, and the version reads as the logo's caption. -->
+      <ul class="vd-browsers">
+        <li v-for="browser in browsers" :key="browser.name">
+          <img :src="browser.logo" :alt="browser.name" width="40" height="40" />
+          <VChip size="xs" tone="neutral">{{ browser.version }}</VChip>
+        </li>
+      </ul>
     </section>
 
     <section class="vd-limit vd-band vd-centered">
