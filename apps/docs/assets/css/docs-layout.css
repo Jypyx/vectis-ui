@@ -153,6 +153,14 @@ html {
    the library's own pattern: 600/700/800 light, 500/400/300 dark, because white text on a filled
    control only holds from violet 600, and dark mode has no darker step to hover to.
 
+   The focus ring is repointed with them, and it stays a SEPARATE role rather than the accent
+   under another name: the accent is calibrated so that white text reads ON it, the ring so that
+   it reads AGAINST the page. Hence the step above the accent in both themes, the relationship
+   the library keeps with its own indigo (ring 500 against a 600 accent in light, 400 against a
+   500 accent in dark). Leave it out and every button on this violet site draws an indigo ring,
+   while the text fields, which paint their focus from the accent, draw a violet one. The library
+   declares the ring in the same two blocks as the accent, so the lists below already reach it.
+
    TRAP — each list must name the DESCENDANT carrying the attribute, and not only `.vd-shell`.
    The library declares its light semantics on `:root, [data-theme='light']` and its dark ones
    on `[data-theme='dark']`, so ANY element carrying the attribute re-declares the whole set of
@@ -171,6 +179,7 @@ html {
   --vectis-color-accent-surface: var(--vd-violet-50);
   --vectis-color-accent-border: var(--vd-violet-200);
   --vectis-color-accent-text: var(--vd-violet-700);
+  --vectis-focus-ring-color: var(--vd-violet-500);
 }
 [data-theme='dark'] .vd-shell,
 .vd-shell[data-theme='dark'],
@@ -181,6 +190,7 @@ html {
   --vectis-color-accent-surface: var(--vd-violet-950);
   --vectis-color-accent-border: var(--vd-violet-900);
   --vectis-color-accent-text: var(--vd-violet-300);
+  --vectis-focus-ring-color: var(--vd-violet-400);
 }
 
 /* The lockup ships as two files that differ only in the wordmark's ink. Painting it as a
@@ -818,6 +828,10 @@ html {
     var(--vectis-color-accent) 40%,
     var(--vectis-color-surface)
   );
+  /* The focus ring is a role of its own, not the accent under another name: the accent
+     carries white text, the ring has to be seen against the page. This one value clears 3:1
+     on both grounds, so it needs no dark counterpart. */
+  --vectis-focus-ring-color: oklch(58% 0.16 32);
   --vectis-radius-interactive: var(--vectis-radius-pill);
 }
 

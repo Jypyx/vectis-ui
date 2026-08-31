@@ -92,6 +92,10 @@ const coralCode = `/* Any selector at all. This one is on the panel below. */
   /* Mixed towards the surface, so both tints follow whichever theme is showing. */
   --vectis-color-accent-surface: color-mix(in oklch, var(--vectis-color-accent) 14%, var(--vectis-color-surface));
   --vectis-color-accent-border: color-mix(in oklch, var(--vectis-color-accent) 40%, var(--vectis-color-surface));
+  /* The focus ring is a role of its own, not the accent under another name: the accent
+     carries white text, the ring has to be seen against the page. This one value clears 3:1
+     on both grounds, so it needs no dark counterpart. */
+  --vectis-focus-ring-color: oklch(58% 0.16 32);
   --vectis-radius-interactive: var(--vectis-radius-pill);
 }
 
