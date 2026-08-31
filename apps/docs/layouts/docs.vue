@@ -13,7 +13,7 @@
  * asked to withhold its own. Its own would sit full width below the rail; the design calls for it
  * beside the rail, so it has to be a child of the grid.
  */
-import { VButton } from '@vectis/ui'
+import { VButton } from 'vectis-ui'
 
 const { navOpen, toggleNav } = useDocsNav()
 const { t } = useI18n()

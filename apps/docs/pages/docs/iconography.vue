@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VIcon, VTypography } from '@vectis/ui'
+import { VIcon, VTypography } from 'vectis-ui'
 import {
   check_circle as checkCircleIcon,
   close as closeIcon,
@@ -8,14 +8,14 @@ import {
   schedule as scheduleIcon,
   search as searchIcon,
   warning as warningIcon,
-} from '@vectis/ui/icons'
+} from 'vectis-ui/icons'
 
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 useHead({ title: () => t('iconography.title') })
 
-const importCode = `import { close, search } from '@vectis/ui/icons'`
+const importCode = `import { close, search } from 'vectis-ui/icons'`
 
 const basicCode = `<!-- one of the design system's own icons, imported above -->
 <VIcon :name="close" />
@@ -25,7 +25,7 @@ const basicCode = `<!-- one of the design system's own icons, imported above -->
 
 <VIcon :render="{ src: '/logo.svg' }" label="Logo" />`
 
-const resolverCode = `import { setIconResolver, ligatureIconResolver } from '@vectis/ui'
+const resolverCode = `import { setIconResolver, ligatureIconResolver } from 'vectis-ui'
 
 setIconResolver(ligatureIconResolver())`
 

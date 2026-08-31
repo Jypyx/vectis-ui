@@ -9,7 +9,7 @@
  * One file, thirty-six routes, in each of two languages: translating it is what localises
  * seventy of the site's hundred-odd pages.
  */
-import { VButton } from '@vectis/ui'
+import { VButton } from 'vectis-ui'
 
 import { pageOf } from '~/content/nav'
 

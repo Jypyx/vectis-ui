@@ -9,7 +9,7 @@
  * page. Hence a UNIVERSAL plugin (no `.client` suffix), and hence the calls sitting outside
  * `defineNuxtPlugin`, where they run once when the module is first evaluated.
  */
-import { fr, registerMessages, setIconResolver, setLocale } from '@vectis/ui'
+import { fr, registerMessages, setIconResolver, setLocale } from 'vectis-ui'
 
 import { docsIcons, type DocsIconName } from '~/icons/icons'
 

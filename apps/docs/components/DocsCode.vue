@@ -7,7 +7,7 @@
  * an example is written literally instead of as `&lt;`. It also means the copy button has the
  * exact string to hand and never has to read `innerText` back out of the DOM.
  */
-import { VIconButton, VTypography, snackbar } from '@vectis/ui'
+import { VIconButton, VTypography, snackbar } from 'vectis-ui'
 
 const props = defineProps<{
   /** Shown in the header, uppercased by the `overline` role: `vue`, `ts`, `css`, `bash`… */

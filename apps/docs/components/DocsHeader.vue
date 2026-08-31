@@ -25,8 +25,8 @@
  * the library's `href` prop is optional rather than nullable. `null` would be rendered as the
  * literal attribute value on the anchor, so the coercion is the honest form and not a cast.
  */
-import { VButton, VHotkeys, VIconButton, VInput, VMenu, VMenuItem, VTooltip } from '@vectis/ui'
-import { arrow_right_alt as arrowRightAltIcon, search as searchIcon } from '@vectis/ui/icons'
+import { VButton, VHotkeys, VIconButton, VInput, VMenu, VMenuItem, VTooltip } from 'vectis-ui'
+import { arrow_right_alt as arrowRightAltIcon, search as searchIcon } from 'vectis-ui/icons'
 
 const route = useRoute()
 const { theme, toggleTheme } = useDocsTheme()
@@ -209,7 +209,7 @@ const docsHome = computed(() => localePath('/docs/installation'))
               `translate` is one of the six icons the site's own resolver supplies: the
               library ships the thirty-four its components draw, and a language switcher is
               not one of them. Adding a name means adding it to `scripts/build-icons.ts` and
-              running `pnpm --filter @vectis/docs icons` — never leaving it to the ligature,
+              running `pnpm --filter vectis-docs icons` — never leaving it to the ligature,
               which with no Material Symbols font loaded renders as the word "translate".
 
               The current language is no longer written on the trigger; it is the menu's

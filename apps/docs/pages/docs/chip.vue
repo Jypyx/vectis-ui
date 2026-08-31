@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { VChip, VTypography } from '@vectis/ui'
-import { schedule as scheduleIcon } from '@vectis/ui/icons'
+import { VChip, VTypography } from 'vectis-ui'
+import { schedule as scheduleIcon } from 'vectis-ui/icons'
 
 definePageMeta({ layout: 'docs' })
 

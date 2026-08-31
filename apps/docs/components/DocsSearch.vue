@@ -14,8 +14,8 @@
  * inside the dialog by itself, and the field is it. The attribute would only restate what the
  * platform already does — and would be flagged, rightly, as an autofocus nobody asked for.
  */
-import { VDialog, VInput } from '@vectis/ui'
-import { search as searchIcon } from '@vectis/ui/icons'
+import { VDialog, VInput } from 'vectis-ui'
+import { search as searchIcon } from 'vectis-ui/icons'
 
 const { open, query, results, closeSearch } = useDocsSearch()
 const router = useRouter()

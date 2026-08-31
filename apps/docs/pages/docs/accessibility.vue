@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VButton, VInput, VTypography } from '@vectis/ui'
+import { VButton, VInput, VTypography } from 'vectis-ui'
 
 definePageMeta({ layout: 'docs' })
 

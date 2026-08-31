@@ -8,7 +8,7 @@
  * six icons below are the site's chrome, so the site supplies them, through
  * `setIconResolver` (see plugins/vectis.ts).
  *
- * Run with `pnpm --filter @vectis/docs icons` — on demand, NOT in a build hook: the list
+ * Run with `pnpm --filter vectis-docs icons` — on demand, NOT in a build hook: the list
  * only moves when the site's chrome does, and the build must not depend on the network. The
  * generated file is committed.
  *
@@ -100,7 +100,7 @@ const filledCount = entries.filter(([, paths]) => paths.length === 2).length
 
 const ts = `/*
  * GENERATED FILE — do not edit by hand.
- * Regenerate: pnpm --filter @vectis/docs icons  ·  Source: scripts/build-icons.ts
+ * Regenerate: pnpm --filter vectis-docs icons  ·  Source: scripts/build-icons.ts
  *
  * Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24)
  * google/material-design-icons @ ${REVISION}

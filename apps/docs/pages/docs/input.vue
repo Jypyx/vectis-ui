@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { VInput } from '@vectis/ui'
-import { search as searchIcon } from '@vectis/ui/icons'
+import { VInput } from 'vectis-ui'
+import { search as searchIcon } from 'vectis-ui/icons'
 
 definePageMeta({ layout: 'docs' })
 

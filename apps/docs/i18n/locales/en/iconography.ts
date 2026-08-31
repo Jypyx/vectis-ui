@@ -7,7 +7,7 @@ export default {
 
   importHeading: 'Importing an icon',
   importBody:
-    'The icons the library draws by itself are values, imported from <code>@vectis/ui/icons</code> and passed where a name would go. Every icon prop in the design system accepts one.',
+    'The icons the library draws by itself are values, imported from <code>vectis-ui/icons</code> and passed where a name would go. Every icon prop in the design system accepts one.',
   importWhy:
     "A bare string stays a NAME and is handed to your resolver, then to the icon font — it no longer reaches the library's own drawings. That is deliberate: an icon reaches your bundle because a module imported it, never because a string might one day ask for it. It is also why the components you never import cost you none of theirs.",
 

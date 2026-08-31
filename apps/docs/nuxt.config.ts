@@ -156,7 +156,7 @@ export default defineNuxtConfig({
     // Order matters. styles.css carries the `@layer vectis.reset, vectis.tokens,
     // vectis.components, vectis.utilities;` statement, and a component sheet parsed before
     // it would pin its layer FIRST — under the reset — irreversibly.
-    '@vectis/ui/styles.css',
+    'vectis-ui/styles.css',
     '~/assets/css/fonts.css',
     '~/assets/css/docs-layout.css',
   ],
@@ -179,7 +179,7 @@ export default defineNuxtConfig({
       /**
        * Keep Nuxt's auto-import rewriting off the library's own modules.
        *
-       * `ssr.noExternal` below pulls `@vectis/ui` into the build, and a pnpm workspace link
+       * `ssr.noExternal` below pulls `vectis-ui` into the build, and a pnpm workspace link
        * resolves it to `packages/ui/dist/…` — a path with no `node_modules` in it, so the
        * default exclusion does not catch it. Nuxt then scans those files for bare
        * identifiers it can auto-import and injects `import { h } from 'vue'` on top of the
@@ -194,7 +194,7 @@ export default defineNuxtConfig({
     ssr: {
       // Every component module of the library carries `import './VX.css'`. Externalised, Node
       // cannot resolve that specifier and the prerender dies on the first component.
-      noExternal: ['@vectis/ui'],
+      noExternal: ['vectis-ui'],
     },
     resolve: {
       // Two copies of Vue break provide/inject ACROSS the library boundary, with no error:

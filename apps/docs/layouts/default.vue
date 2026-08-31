@@ -17,7 +17,7 @@
  * footer beside its navigation rail rather than full width below it, so it turns this off and
  * mounts its own copy inside the grid. Every other page in this layout gets one without asking.
  */
-import { VSnackbar } from '@vectis/ui'
+import { VSnackbar } from 'vectis-ui'
 
 withDefaults(defineProps<{ showFooter?: boolean }>(), { showFooter: true })
 </script>

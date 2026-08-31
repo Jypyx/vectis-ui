@@ -34,7 +34,7 @@ export interface IconContext {
  * `render` route, the resolver would never be asked, and the library's internals
  * would stay Material for a consumer who had wired in their own library.
  *
- * A consumer never writes one by hand: they are imported from `@vectis/ui/icons`.
+ * A consumer never writes one by hand: they are imported from `vectis-ui/icons`.
  */
 export interface BuiltinIcon {
   name: string
@@ -61,7 +61,7 @@ export type IconRender =
  * That is what allows any naming convention — `mdi:close`, `fa6-solid:xmark` — to
  * reach the resolver intact, where a heuristic would have taken it for an address.
  *
- * A `BuiltinIcon` imported from `@vectis/ui/icons` is accepted too, and behaves
+ * A `BuiltinIcon` imported from `vectis-ui/icons` is accepted too, and behaves
  * exactly like the name it carries: the resolver is asked first, and the drawing it
  * brought along is used only if nothing answered.
  */

@@ -33,7 +33,7 @@ interface IconProps {
   /**
    * Which icon to draw. A plain string is a name: it is offered to the consumer's
    * resolver and then left to the icon font as a ligature. One of the design
-   * system's own icons, imported from `@vectis/ui/icons`, carries its drawing with
+   * system's own icons, imported from `vectis-ui/icons`, carries its drawing with
    * it — the resolver is still asked first, and the drawing is what answers when
    * nothing else does.
    */

@@ -5,13 +5,13 @@ import {
   notifications as notificationsIcon,
   schedule as scheduleIcon,
   table_chart as tableChartIcon,
-} from '@vectis/ui/icons'
+} from 'vectis-ui/icons'
 import {
   VSideNavigation,
   VSideNavigationGroup,
   VSideNavigationItem,
   VSideNavigationSeparator,
-} from '@vectis/ui'
+} from 'vectis-ui'
 
 definePageMeta({ layout: 'docs' })
 

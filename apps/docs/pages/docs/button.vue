@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { VButton, VIconButton, VTypography } from '@vectis/ui'
+import { VButton, VIconButton, VTypography } from 'vectis-ui'
 import {
   arrow_right_alt as arrowRightAltIcon,
   check_circle as checkCircleIcon,
   close as closeIcon,
   cloud_upload as cloudUploadIcon,
   more_horiz as moreHorizIcon,
-} from '@vectis/ui/icons'
+} from 'vectis-ui/icons'
 
 definePageMeta({ layout: 'docs' })
 

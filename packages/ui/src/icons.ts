@@ -1,9 +1,9 @@
 /**
  * The icons the design system draws by itself, as importable values — the public
- * face of `@vectis/ui/icons`.
+ * face of `vectis-ui/icons`.
  *
  * Reach for it when you want to render one of the library's own icons somewhere it
- * does not already appear: `import { search } from '@vectis/ui/icons'`, then
+ * does not already appear: `import { search } from 'vectis-ui/icons'`, then
  * `<VIcon :name="search" />`. A bare `<VIcon name="search" />` no longer finds it,
  * and that is the point — an icon is shipped to a consumer's bundle because a module
  * imported it, never because a string might one day ask for it.

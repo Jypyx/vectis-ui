@@ -1,5 +1,5 @@
 /*
- * CSS entry point of the design system (`@vectis/ui/styles.css`).
+ * CSS entry point of the design system (`vectis-ui/styles.css`).
  *
  * The layer order is declared here, once and for all:
  *   vectis.reset < vectis.tokens < vectis.components < vectis.utilities

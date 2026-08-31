@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VTypography } from '@vectis/ui'
+import { VTypography } from 'vectis-ui'
 
 definePageMeta({ layout: 'docs' })
 

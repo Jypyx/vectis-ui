@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VDatePicker, VToggle, VToggleItem } from '@vectis/ui'
+import { VDatePicker, VToggle, VToggleItem } from 'vectis-ui'
 
 definePageMeta({ layout: 'docs' })
 
@@ -24,12 +24,12 @@ const demoLocale = ref('de-DE')
 /** A fixed date, so the demo renders the same month on the server and in the browser. */
 const demoDate = ref<string | null>('2026-03-17')
 
-const frCode = `import { fr, registerMessages, setLocale } from '@vectis/ui'
+const frCode = `import { fr, registerMessages, setLocale } from 'vectis-ui'
 
 registerMessages('fr', fr)
 setLocale('fr-FR')`
 
-const addCode = `import { registerMessages, setLocale, type VectisMessagesInput } from '@vectis/ui'
+const addCode = `import { registerMessages, setLocale, type VectisMessagesInput } from 'vectis-ui'
 
 const de: VectisMessagesInput = {
   common: { clear: 'Leeren', close: 'Schließen' },

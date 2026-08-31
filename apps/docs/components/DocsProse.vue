@@ -1,8 +1,8 @@
 <script lang="ts">
-import type { TypographyTone, TypographyVariant } from '@vectis/ui'
+import type { TypographyTone, TypographyVariant } from 'vectis-ui'
 import type { PropType } from 'vue'
 
-import { VTypography } from '@vectis/ui'
+import { VTypography } from 'vectis-ui'
 
 /**
  * A paragraph of documentation, taken from the message catalogue.

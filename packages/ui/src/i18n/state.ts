@@ -109,7 +109,7 @@ export function setLocale(locale: string): void {
   if (isDev && !registry.has(lang)) {
     console.warn(
       `[vectis] No dictionary registered for “${lang}”: the text stays in ` +
-        `“${DEFAULT_LANG}”. French is shipped — import { fr } from '@vectis/ui' then ` +
+        `“${DEFAULT_LANG}”. French is shipped — import { fr } from 'vectis-ui' then ` +
         `registerMessages('fr', fr). For another language: registerMessages('${lang}', { … }).`,
     )
   }

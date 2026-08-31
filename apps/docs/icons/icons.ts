@@ -1,6 +1,6 @@
 /*
  * GENERATED FILE — do not edit by hand.
- * Regenerate: pnpm --filter @vectis/docs icons  ·  Source: scripts/build-icons.ts
+ * Regenerate: pnpm --filter vectis-docs icons  ·  Source: scripts/build-icons.ts
  *
  * Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24)
  * google/material-design-icons @ 528cb964c01fb2b09bc3b9208f82b6d8f8c1c1e2

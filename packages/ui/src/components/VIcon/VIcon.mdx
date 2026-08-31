@@ -15,12 +15,12 @@ of the consumer's font — otherwise the **inline SVG** passed in the slot.
 > **The design system therefore requires no icon font.** The font stays useful for your own
 > icon names; it is loaded by the consuming application (see the README).
 
-Each of them is a **module of its own**, imported from `@vectis/ui/icons` and passed where a
+Each of them is a **module of its own**, imported from `vectis-ui/icons` and passed where a
 name would go — so a consumer pays for the icons their components actually draw and for
 nothing else. A lone `VButton` ships none at all.
 
 ```ts
-import { close } from '@vectis/ui/icons'
+import { close } from 'vectis-ui/icons'
 ```
 
 ```vue
@@ -45,7 +45,7 @@ The `size` prop (a number, in pixels) allows a free override: `:size="32"` → 3
 
 ## Four sources
 
-`src` wins over `name`, which wins over the slot. An icon imported from `@vectis/ui/icons`
+`src` wins over `name`, which wins over the slot. An icon imported from `vectis-ui/icons`
 gives an SVG; a bare name falls back to the ligature, hence to the consumer's font. The image gets an
 empty `alt` (the accessible name comes from `label`, never from the source); the inline SVG
 fills the icon's square.

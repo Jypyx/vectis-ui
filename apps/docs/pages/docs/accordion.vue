@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VAccordion, VAccordionItem, VTypography } from '@vectis/ui'
+import { VAccordion, VAccordionItem, VTypography } from 'vectis-ui'
 
 definePageMeta({ layout: 'docs' })
 

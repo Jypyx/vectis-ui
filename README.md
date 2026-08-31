@@ -1,9 +1,9 @@
 # Vectis UI
 
-pnpm monorepo of the **[@vectis/ui](packages/ui/README.md)** design system — Vue 3 + TypeScript, HTML/CSS first, tokens overridable at runtime, Nuxt 3 compatible.
+pnpm monorepo of the **[vectis-ui](packages/ui/README.md)** design system — Vue 3 + TypeScript, HTML/CSS first, tokens overridable at runtime, Nuxt 3 compatible.
 
 ```
-packages/ui   → the design system (@vectis/ui) — see its README for everything: install, theming, contributing
+packages/ui   → the design system (vectis-ui) — see its README for everything: install, theming, contributing
 apps/         → reserved for the future live-theming app
 ```
 

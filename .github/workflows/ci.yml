@@ -47,7 +47,7 @@ jobs:
       # `tokens.css` would never surface: neither `pnpm test` nor `pnpm typecheck`
       # regenerates it. `--check` compares without writing, and names the file.
       - name: Generated tokens are up to date
-        run: pnpm --filter @vectis/ui run tokens:check
+        run: pnpm --filter vectis-ui run tokens:check
 
       - name: Unit tests
         run: pnpm test
@@ -57,7 +57,7 @@ jobs:
       # `bench-size` for the weight. The second one GATES — it holds `dist` to the committed
       # `bench/size-baseline.json`, so a size regression is red here rather than noticed
       # later by a reader of the README. Growing a figure on purpose means re-baselining
-      # (`pnpm --filter @vectis/ui bench:size:update`), which shows up as a diff.
+      # (`pnpm --filter vectis-ui bench:size:update`), which shows up as a diff.
       #
       # The runtime benchmarks (`pnpm bench`) are deliberately NOT here: a timing on a
       # shared runner measures the runner.
@@ -67,7 +67,7 @@ jobs:
       # Its own step, not `postbuild`: attw's `--pack` shells out to `npm pack`, which
       # would fire `prepack` → `build` again.
       - name: Package manifest and type resolution
-        run: pnpm --filter @vectis/ui run check:package
+        run: pnpm --filter vectis-ui run check:package
 
       - name: Build Storybook
         run: pnpm build-storybook
@@ -94,7 +94,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Install Chromium
-        run: pnpm --filter @vectis/ui exec playwright install --with-deps chromium
+        run: pnpm --filter vectis-ui exec playwright install --with-deps chromium
 
       - name: Story tests
         run: pnpm test:stories
@@ -144,14 +144,14 @@ jobs:
       - uses: actions/configure-pages@v6
 
       # The docs consume `dist`, exactly as an npm consumer does, so the library has to be
-      # built first — `pnpm --filter @vectis/docs build` alone would resolve nothing.
+      # built first — `pnpm --filter vectis-docs build` alone would resolve nothing.
       - name: Build the library
-        run: pnpm --filter @vectis/ui build
+        run: pnpm --filter vectis-ui build
 
       # `build` chains `check-prerender` through `postbuild`: every route in
       # content/nav.ts must exist as a file, and `.nojekyll` must be there.
       - name: Build the documentation
-        run: pnpm --filter @vectis/docs build
+        run: pnpm --filter vectis-docs build
 
       - uses: actions/upload-pages-artifact@v5
         with:

@@ -166,7 +166,7 @@ export default defineConfig({
      * follows the README rather than the other way round.
      */
     cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox147'],
-    // A consumer stepping into @vectis/ui otherwise lands in renamed identifiers with
+    // A consumer stepping into vectis-ui otherwise lands in renamed identifiers with
     // nothing mapping back to the SFC.
     sourcemap: true,
     lib: {

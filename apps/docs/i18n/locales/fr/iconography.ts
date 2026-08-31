@@ -7,7 +7,7 @@ export default {
 
   importHeading: 'Importer une icône',
   importBody:
-    "Les icônes que la bibliothèque dessine elle-même sont des valeurs, importées depuis <code>@vectis/ui/icons</code> et passées là où irait un nom. Toutes les props d'icône du design system en acceptent une.",
+    "Les icônes que la bibliothèque dessine elle-même sont des valeurs, importées depuis <code>vectis-ui/icons</code> et passées là où irait un nom. Toutes les props d'icône du design system en acceptent une.",
   importWhy:
     "Une chaîne nue reste un NOM : elle part vers votre résolveur, puis vers la police d'icônes — elle n'atteint plus les tracés de la bibliothèque. C'est délibéré : une icône arrive dans votre bundle parce qu'un module l'a importée, jamais parce qu'une chaîne pourrait un jour la demander. C'est aussi pour cela que les composants que vous n'importez pas ne vous coûtent aucune des leurs.",
 

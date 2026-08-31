@@ -13,8 +13,8 @@
  */
 import type { NuxtError } from '#app'
 
-import { VButton, VTypography } from '@vectis/ui'
-import { arrow_right_alt as arrowRightAltIcon } from '@vectis/ui/icons'
+import { VButton, VTypography } from 'vectis-ui'
+import { arrow_right_alt as arrowRightAltIcon } from 'vectis-ui/icons'
 
 const props = defineProps<{ error: NuxtError }>()
 

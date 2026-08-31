@@ -16,7 +16,7 @@ import {
   VSideNavigationGroup,
   VSideNavigationItem,
   VSideNavigationSeparator,
-} from '@vectis/ui'
+} from 'vectis-ui'
 
 import { groups } from '~/content/nav'
 

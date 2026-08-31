@@ -1,9 +1,9 @@
 /**
- * Entry point of `@vectis/ui`. Named exports only (tree-shaking).
+ * Entry point of `vectis-ui`. Named exports only (tree-shaking).
  *
  * The CSS import below feeds the extraction into `dist/styles.css`, which carries
  * the CORE alone (reset, tokens, and the shared chrome of `styles/`); Vite strips
- * the import from the emitted JS, so the consumer imports `@vectis/ui/styles.css`
+ * the import from the emitted JS, so the consumer imports `vectis-ui/styles.css`
  * explicitly. Each component's own CSS ships as `dist/<path>/VX.css`, imported by
  * its own `VX.js` — see `shipComponentCss` in `vite.config.ts`.
  *
@@ -41,7 +41,7 @@ export {
 } from './components/VIcon/resolver'
 export type { IconResolver, IconAliases } from './components/VIcon/resolver'
 export type { BuiltinIcon, IconContext, IconRender, IconSource } from './components/VIcon/types'
-// The icons THEMSELVES are not re-exported here: they live behind '@vectis/ui/icons'
+// The icons THEMSELVES are not re-exported here: they live behind 'vectis-ui/icons'
 // so that importing the barrel never drags all 34 drawings into a consumer's bundle.
 export type { VectisIconName } from './components/VIcon/icons/names'
 export { default as VTypography } from './components/VTypography/VTypography.vue'

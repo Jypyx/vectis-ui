@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VButton } from '@vectis/ui'
+import { VButton } from 'vectis-ui'
 
 definePageMeta({ layout: 'docs' })
 
@@ -12,13 +12,13 @@ useHead({ title: () => t('installation.title') })
  * translated either — they are the site's permalinks, and a reader who bookmarks
  * `#component-css` must land there whichever language they read it in.
  */
-const addCode = 'pnpm add @vectis/ui vue'
+const addCode = 'pnpm add vectis-ui vue'
 
 const vueCode = `// main.ts
-import '@vectis/ui/styles.css'`
+import 'vectis-ui/styles.css'`
 
 const nuxtCode = `export default defineNuxtConfig({
-  css: ['@vectis/ui/styles.css'],
+  css: ['vectis-ui/styles.css'],
 })`
 
 /*
@@ -32,7 +32,7 @@ const nuxtCode = `export default defineNuxtConfig({
 const CLOSE_SCRIPT = '</scr' + 'ipt>'
 
 const useCode = `<script setup lang="ts">
-import { VButton, VInput } from '@vectis/ui'
+import { VButton, VInput } from 'vectis-ui'
 ${CLOSE_SCRIPT}
 
 <template>

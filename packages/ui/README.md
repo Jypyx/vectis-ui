@@ -1,4 +1,4 @@
-﻿# @vectis/ui
+﻿# vectis-ui
 
 A **Vue 3 + TypeScript** design system, **Nuxt 3 (SSR)** compatible, built on the platform's native primitives: the Popover API, CSS Anchor Positioning, `<details name>`, `:user-invalid`… JavaScript is a last resort, never a reflex.
 
@@ -12,22 +12,22 @@ A **Vue 3 + TypeScript** design system, **Nuxt 3 (SSR)** compatible, built on th
 ## Installation
 
 ```bash
-pnpm add @vectis/ui vue
+pnpm add vectis-ui vue
 ```
 
 ```ts
 // main.ts
-import '@vectis/ui/styles.css'
+import 'vectis-ui/styles.css'
 ```
 
 `styles.css` is the **core**: the reset, the tokens and the chrome shared by every component (4.33 kB gzip). Each component's own CSS ships with the component and is pulled in by the import you already write — nothing else to add, and you download the CSS of what you use. A single `VButton` costs 4.87 kB gzip of CSS instead of the 21.58 kB of a bundled stylesheet.
 
-Those figures are measured, not estimated: `pnpm --filter @vectis/ui bench:size` prints them from the built artefact and holds them to a committed baseline, so they cannot drift out of step with the library again.
+Those figures are measured, not estimated: `pnpm --filter vectis-ui bench:size` prints them from the built artefact and holds them to a committed baseline, so they cannot drift out of step with the library again.
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { VButton, VInput, toast } from '@vectis/ui'
+import { VButton, VInput, toast } from 'vectis-ui'
 
 const email = ref('')
 </script>
@@ -47,13 +47,13 @@ The library is pre-built as ESM and SSR-safe (no `window`/`document` access outs
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  css: ['@vectis/ui/styles.css'],
+  css: ['vectis-ui/styles.css'],
 })
 ```
 
 ```vue
 <script setup lang="ts">
-import { VButton, VBadge } from '@vectis/ui'
+import { VButton, VBadge } from 'vectis-ui'
 </script>
 ```
 
@@ -104,22 +104,22 @@ The design system's CSS lives in layers (`vectis.reset < vectis.tokens < vectis.
 ### Programmatic access to the tokens
 
 ```ts
-import { tokens, flattenTokens } from '@vectis/ui/tokens'
+import { tokens, flattenTokens } from 'vectis-ui/tokens'
 
 // [{ path: ['color', 'surface'], cssName: '--vectis-color-surface', token: {...} }, …]
 const semanticColors = flattenTokens(tokens.semantic.color, ['color'])
 ```
 
-`@vectis/ui/tokens.json` exposes the same source as raw JSON (tooling, configuration export). It is the foundation of the theming app to come: modify the object, inject the variables, export the config.
+`vectis-ui/tokens.json` exposes the same source as raw JSON (tooling, configuration export). It is the foundation of the theming app to come: modify the object, inject the variables, export the config.
 
 ## Icons
 
 **No icon font is required.** The icons the library renders itself — `VDialog`'s cross, `VDatePicker`'s and `VMenu`'s chevrons, the toasts' tone icons, `VDataTable`'s sorting… — are **embedded SVGs**, exact replicas of Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24, Apache-2.0 © Google). There are 34 of them and **each is a module of its own**, imported by the components that draw it: you pay for the icons your components actually render and for nothing else. A lone `VButton` ships none at all, which is most of why its JavaScript comes to 4.62 kB gzip with `VIcon`, `VSpinner` and the dictionary pulled in alongside it.
 
-Reach for one directly through the `@vectis/ui/icons` subpath, and pass it where a name would go:
+Reach for one directly through the `vectis-ui/icons` subpath, and pass it where a name would go:
 
 ```ts
-import { close, search } from '@vectis/ui/icons'
+import { close, search } from 'vectis-ui/icons'
 ```
 
 The `VIcon` component resolves its source in this order: **an explicit `render` → `src` → `name` (the consumer resolver first, then the drawing the icon brought along, then the ligature) → the slot**.
@@ -151,7 +151,7 @@ A **bare string is always a NAME**, and it no longer reaches the library's own d
 <VMenuItem label="Open" :icon-start="{ component: FolderIcon }" />
 ```
 
-A string is **always** an icon name; one of the design system's own icons is imported from `@vectis/ui/icons`; an image or a component is declared as an object (`{ src }`, `{ component }`, `{ path }`, `{ text }`, `{ class }`). That is what lets Iconify-style naming conventions (`mdi:close`, `fa6-solid:xmark`) work.
+A string is **always** an icon name; one of the design system's own icons is imported from `vectis-ui/icons`; an image or a component is declared as an object (`{ src }`, `{ component }`, `{ path }`, `{ text }`, `{ class }`). That is what lets Iconify-style naming conventions (`mdi:close`, `fa6-solid:xmark`) work.
 
 ### Wiring your own icon library
 
@@ -161,7 +161,7 @@ An imported icon carries its **name** as well as its paths, which is what keeps 
 
 ```ts
 // main.ts / plugins/icons.ts — at MODULE level, never inside a setup()
-import { setIconResolver, classIconResolver } from '@vectis/ui'
+import { setIconResolver, classIconResolver } from 'vectis-ui'
 
 // Font Awesome, Phosphor, Bootstrap Icons… (class-based fonts + ::before)
 // `fa-solid` unconditionally: the Free tier only draws a small fraction of the
@@ -175,7 +175,7 @@ setIconResolver(
 )
 
 // Lucide, Untitled UI… (SVG sets as Vue components, a single <svg> root)
-import { componentIconResolver } from '@vectis/ui'
+import { componentIconResolver } from 'vectis-ui'
 import { X, Check, ChevronDown } from 'lucide-vue-next'
 setIconResolver(
   componentIconResolver({
@@ -187,7 +187,7 @@ setIconResolver(
 // Material Symbols, ligature-based IcoMoon… — ALSO renders the design system's 20
 // icons through the font, which restores the --vectis-icon-opsz optical axis
 // (20 at xs/sm/md).
-import { ligatureIconResolver } from '@vectis/ui'
+import { ligatureIconResolver } from 'vectis-ui'
 setIconResolver(ligatureIconResolver())
 ```
 
@@ -224,7 +224,7 @@ Two things are settled separately: the **words** come from the dictionary, the *
 
 ```ts
 // main.ts
-import { fr, registerMessages, setLocale } from '@vectis/ui'
+import { fr, registerMessages, setLocale } from 'vectis-ui'
 
 registerMessages('fr', fr)
 setLocale('fr-FR')
@@ -239,7 +239,7 @@ Set a **complete** BCP 47 tag. `Intl` accepts `'en'`, but applies the language's
 An override is **partial**: what you do not write stays unchanged, and successive calls on the same language accumulate.
 
 ```ts
-import { registerMessages } from '@vectis/ui'
+import { registerMessages } from 'vectis-ui'
 
 registerMessages('en', {
   dataTable: { empty: 'Nothing to display' },
@@ -252,7 +252,7 @@ registerMessages('en', {
 The same gesture as enabling French — there are not two categories of dictionary. What you do not write falls back to English, never to an empty string: a partial dictionary is usable from its very first key.
 
 ```ts
-import { registerMessages, setLocale, type VectisMessagesInput } from '@vectis/ui'
+import { registerMessages, setLocale, type VectisMessagesInput } from 'vectis-ui'
 
 const de: VectisMessagesInput = {
   common: { loading: 'Wird geladen…', close: 'Schließen' },

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VSwitch } from '@vectis/ui'
+import { VSwitch } from 'vectis-ui'
 
 definePageMeta({ layout: 'docs' })
 

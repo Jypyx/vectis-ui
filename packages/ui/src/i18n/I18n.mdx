@@ -70,7 +70,7 @@ times, with the labels left in English. That is a coherent degraded state, not a
 
 ```ts
 // main.ts, or plugins/vectis.ts in Nuxt
-import { fr, registerMessages, setLocale } from '@vectis/ui'
+import { fr, registerMessages, setLocale } from 'vectis-ui'
 
 registerMessages('fr', fr)
 setLocale('fr-FR')
@@ -90,7 +90,7 @@ An override is **partial**: whatever you do not write stays unchanged. Successiv
 same language accumulate.
 
 ```ts
-import { registerMessages } from '@vectis/ui'
+import { registerMessages } from 'vectis-ui'
 
 registerMessages('en', {
   dataTable: { empty: 'Nothing to show' },
@@ -107,7 +107,7 @@ dictionary. Whatever you do not write falls back to English, never to an empty s
 partial dictionary is usable from its very first key.
 
 ```ts
-import { registerMessages, setLocale, type VectisMessagesInput } from '@vectis/ui'
+import { registerMessages, setLocale, type VectisMessagesInput } from 'vectis-ui'
 
 const de: VectisMessagesInput = {
   common: { loading: 'Wird geladen…', close: 'Schließen' },
@@ -143,7 +143,7 @@ Register every language you offer once, at boot; the selector then only ever cal
 ```ts
 // locale.ts — module level, imported by main.ts before the app is mounted
 import { ref } from 'vue'
-import { fr, registerMessages, setLocale } from '@vectis/ui'
+import { fr, registerMessages, setLocale } from 'vectis-ui'
 
 registerMessages('fr', fr)
 

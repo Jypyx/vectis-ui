@@ -14,7 +14,7 @@
  * through DocsProse. The heart does not: a symbol made of no words stays in the template, and it
  * is `aria-hidden` because "black heart suit" adds nothing to the sentence it follows.
  */
-import { VTypography } from '@vectis/ui'
+import { VTypography } from 'vectis-ui'
 
 const { t } = useI18n()
 </script>

@@ -22,9 +22,9 @@
  *
  * Runtime timings live in `*.bench.ts` (`pnpm bench`) and deliberately do NOT gate.
  *
- *   pnpm --filter @vectis/ui exec tsx scripts/bench-size.ts            # measure + gate
- *   pnpm --filter @vectis/ui exec tsx scripts/bench-size.ts --update   # re-baseline
- *   pnpm --filter @vectis/ui exec tsx scripts/bench-size.ts --json     # machine-readable
+ *   pnpm --filter vectis-ui exec tsx scripts/bench-size.ts            # measure + gate
+ *   pnpm --filter vectis-ui exec tsx scripts/bench-size.ts --update   # re-baseline
+ *   pnpm --filter vectis-ui exec tsx scripts/bench-size.ts --json     # machine-readable
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -157,7 +157,7 @@ if (regressions.length > 0) {
   for (const line of regressions) console.error(`  - ${line}`)
   console.error(
     '\nIf the growth is intended, re-baseline deliberately:\n' +
-      '  pnpm --filter @vectis/ui exec tsx scripts/bench-size.ts --update',
+      '  pnpm --filter vectis-ui exec tsx scripts/bench-size.ts --update',
   )
   process.exit(1)
 }

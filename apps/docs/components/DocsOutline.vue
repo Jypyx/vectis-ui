@@ -10,7 +10,7 @@
  * The rail is hidden below 1440px by docs-layout.css, but it is still mounted and still
  * harvesting: the headings it measures are in the prose, not in itself.
  */
-import { VTypography } from '@vectis/ui'
+import { VTypography } from 'vectis-ui'
 
 const { outline, activeId, jumpTo } = useDocsOutline()
 const { t } = useI18n()

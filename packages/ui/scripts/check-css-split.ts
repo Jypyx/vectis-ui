@@ -101,7 +101,7 @@ function gzip(source: string | Buffer): string {
   return formatKb(gzipBytes(source))
 }
 
-// `pnpm --filter @vectis/ui exec tsx scripts/check-css-split.ts --report VButton VInput`
+// `pnpm --filter vectis-ui exec tsx scripts/check-css-split.ts --report VButton VInput`
 if (process.argv.includes('--report')) {
   const wanted = process.argv.slice(process.argv.indexOf('--report') + 1)
   const picked = sheets.filter((s) => wanted.some((w) => posix(s).endsWith(`/${w}.css`)))

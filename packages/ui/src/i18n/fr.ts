@@ -9,7 +9,7 @@ import type { VectisMessages } from './types'
  * gesture. There are deliberately not two kinds of dictionary, one blessed and one added
  * by hand:
  *
- *     import { fr, registerMessages, setLocale } from '@vectis/ui'
+ *     import { fr, registerMessages, setLocale } from 'vectis-ui'
  *     registerMessages('fr', fr)
  *     setLocale('fr-FR')
  *

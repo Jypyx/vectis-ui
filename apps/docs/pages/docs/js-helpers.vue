@@ -15,13 +15,13 @@ import {
   setLocale,
   setIconResolver,
   ligatureIconResolver,
-} from '@vectis/ui'
+} from 'vectis-ui'
 
 registerMessages('fr', fr)
 setLocale('fr-FR')
 setIconResolver(ligatureIconResolver())`
 
-const toastCode = `import { toast } from '@vectis/ui'
+const toastCode = `import { toast } from 'vectis-ui'
 
 // client-side only: the queue is module state, shared by every
 // request a server handles
