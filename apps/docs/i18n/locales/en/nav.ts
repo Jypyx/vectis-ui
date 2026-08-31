@@ -11,7 +11,7 @@ export type NavMessages = Record<DocsSlug, string> & { group: Record<NavGroupId,
 
 const nav: NavMessages = {
   group: {
-    intro: 'Introduction',
+    intro: 'Getting started',
     components: 'Components',
     utils: 'Utilities',
   },

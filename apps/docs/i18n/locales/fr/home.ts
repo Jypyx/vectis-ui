@@ -1,7 +1,7 @@
 export default {
   documentTitle: "L'élégance native pour Vue 3",
   /* La coupure tombe après « moderne » : c'est la phrase française qui la décide, pas la mise
-     en page — l'anglais coupe après « library ». */
+     en page. L'anglais, lui, coupe après « library ». */
   heroTitle:
     'L\'élégance native,<br><span class="vd-hero-accent">sans surcouche artificielle.</span>',
   heroBody:
@@ -48,7 +48,6 @@ export default {
   installSubtitle:
     'Ajoutez la dépendance, chargez les styles globaux, et commencez à utiliser les composants de Vectis UI sans paramétrage supplémentaire.',
   installTabsLabel: "Étapes d'installation",
-  installManagerLabel: 'Gestionnaire de paquets',
 
   stepInstallLabel: 'Installation',
   stepInstallBody: 'Ajoutez le paquet à votre projet via votre gestionnaire favori.',

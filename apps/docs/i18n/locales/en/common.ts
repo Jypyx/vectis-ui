@@ -2,7 +2,7 @@
  * The site's chrome: the header, the search panel, the outline, the code blocks and the tables.
  *
  * Everything here is a label rather than prose, so it is a plain string and never carries
- * markup — `DocsProse` is for paragraphs, `t()` for the words on a control.
+ * markup. `DocsProse` is for paragraphs, `t()` for the words on a control.
  */
 export default {
   header: {
@@ -24,7 +24,7 @@ export default {
     label: 'Search the documentation',
     placeholder: 'Search pages and components',
     empty: 'No result',
-    /** Appended to a stub's section in the result list — better said than discovered. */
+    /** Appended to a stub's section in the result list: better said than discovered. */
     notWritten: 'not written yet',
   },
   outline: 'On this page',
@@ -32,6 +32,8 @@ export default {
   code: {
     copy: 'Copy the code',
     copied: 'Copied to the clipboard',
+    /** Names the toggle an install command carries in its header, in DocsInstall. */
+    packageManager: 'Package manager',
   },
   table: {
     prop: 'Prop',
@@ -43,11 +45,14 @@ export default {
     signature: 'Signature',
     token: 'Token',
     value: 'Value',
+    /* What a Default cell says for a prop that has none. A word rather than a dash: a screen
+       reader announces punctuation as punctuation, or skips it entirely. */
+    noDefault: 'none',
   },
   /*
    * The site's footer.
    *
-   * TRAP — the two anchors are written INTO the message, hrefs and all, which duplicates the two
+   * TRAP: the two anchors are written INTO the message, hrefs and all, which duplicates the two
    * URLs across the locales. Both alternatives are worse. Splitting the sentence around the
    * product names would leave "Built with" and "and" as translation units, exactly what
    * DocsProse's own header calls untranslatable; and parameterising the message is impossible,

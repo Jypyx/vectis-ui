@@ -165,7 +165,8 @@ type Step = {
   lang: string
   /**
    * Absent on the install step alone, whose command is not a constant: it is chosen from the
-   * four package managers below, so it is supplied at render time rather than written here.
+   * package manager the reader picked, so it is supplied at render time rather than written
+   * here.
    */
   code?: string
 }
@@ -197,36 +198,18 @@ const STEPS: Step[] = [
 ]
 
 /**
- * The install command in each of the four package managers, which the install step offers
- * through a toggle in its header.
+ * The four package managers and the one the command is shown in, both from the shared
+ * composable: the installation page offers the same choice twice more, and a reader who has
+ * picked theirs on one of the three should find it made on the others.
  *
- * The names are VALUES, not words: they are what the reader types, so they are never
- * translated and the toggle shows them exactly as they are spelled on a command line. Only the
- * order is editorial — pnpm leads because it is what the repository itself uses and what the
- * rest of the documentation writes.
- *
- * The commands differ in more than the binary's name, which is the whole reason this is a table
- * and not a prefix substitution: npm INSTALLS where the other three ADD.
+ * `mandatory` on the VToggle below is what keeps the value pointing at a real entry: in single
+ * mode a second click on the selected item would otherwise deselect it, and the step would
+ * print its comment above nothing.
  */
-const PACKAGE_MANAGERS = [
-  { value: 'pnpm', command: 'pnpm add vectis-ui vue' },
-  { value: 'npm', command: 'npm install vectis-ui vue' },
-  { value: 'yarn', command: 'yarn add vectis-ui vue' },
-  { value: 'bun', command: 'bun add vectis-ui vue' },
-]
+const { managers, packageManager, commandFor } = usePackageManager()
 
-/**
- * Which manager the command is shown in. `mandatory` on the VToggle is what keeps this pointing
- * at a real entry: in single mode a second click on the selected item would otherwise deselect
- * it, and the step would print its comment above nothing.
- */
-const packageManager = ref<string>(PACKAGE_MANAGERS[0]!.value)
-
-const installCommand = computed(
-  () =>
-    PACKAGE_MANAGERS.find((manager) => manager.value === packageManager.value)?.command ??
-    PACKAGE_MANAGERS[0]!.command,
-)
+/** Vue is a peer dependency here, where a Nuxt project gets it from the framework. */
+const installCommand = computed(() => commandFor('vectis-ui vue'))
 
 const installSteps = computed(() =>
   STEPS.map((step) => {
@@ -416,10 +399,10 @@ const installStep = ref<string>(STEPS[0]!.value)
                     variant="outline"
                     tone="neutral"
                     size="xs"
-                    :label="t('home.installManagerLabel')"
+                    :label="t('common.code.packageManager')"
                   >
                     <VToggleItem
-                      v-for="manager in PACKAGE_MANAGERS"
+                      v-for="manager in managers"
                       :key="manager.value"
                       :value="manager.value"
                     >

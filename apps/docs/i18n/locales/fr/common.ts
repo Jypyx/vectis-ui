@@ -21,6 +21,7 @@ export default {
   code: {
     copy: 'Copier le code',
     copied: 'Copié dans le presse-papiers',
+    packageManager: 'Gestionnaire de paquets',
   },
   table: {
     prop: 'Prop',
@@ -32,6 +33,7 @@ export default {
     signature: 'Signature',
     token: 'Token',
     value: 'Valeur',
+    noDefault: 'aucune',
   },
   footer: {
     licence: 'Licence MIT, © 2026 Jypyx',
