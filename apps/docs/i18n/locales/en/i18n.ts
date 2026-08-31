@@ -30,7 +30,7 @@ export default {
   keysBody:
     'The 134 keys the library reads, across 22 namespaces, with the English default of each: this is the list to write a dictionary against. Only the namespaces you translate need to be present, and only the keys you have inside them.',
   keysFunctions:
-    'Twenty-three of them are parameterised, and a function is what they are. They print no default here because there is nothing useful to show: their parameters are typed by <code>VectisMessages</code>, which your editor spells out at the point of writing the override.',
+    'Twenty-three of them take an argument, and a plain TypeScript function is what they are. Their rows carry that function as the library writes it, so you can see both what comes in and where it lands in the sentence. There is no ICU and no plural engine: where English needs a plural, it is a ternary inside the message, which is also how a language with three forms would write its own.',
   keysColumnKey: 'Key',
   keysColumnDefault: 'English default',
 }

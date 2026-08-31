@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   en as enMessages,
+  fr as frMessages,
   setLocale,
   VButton,
   VDateInput,
@@ -10,6 +11,8 @@ import {
   VTimeInput,
 } from 'vectis-ui'
 import { expand_more as expandMoreIcon } from 'vectis-ui/icons'
+
+import type { VectisMessages } from 'vectis-ui'
 
 definePageMeta({ layout: 'docs' })
 
@@ -89,26 +92,118 @@ const de: VectisMessagesInput = {
 registerMessages('de', de)
 setLocale('de-DE')`
 
+/** The two dictionaries the library ships, and therefore the two this table can show. */
+type DictionaryLanguage = 'en' | 'fr'
+
+/**
+ * Every parameterised message, written out as it is written in the library: the parameters it
+ * takes and the English it builds from them.
+ *
+ * Transcribed from `i18n/en.ts` and `i18n/fr.ts` rather than read off the shipped functions,
+ * because neither half survives the trip. A built bundle has minified parameter names, and
+ * `Function.toString` gives back a body nobody wants to read. What a reader needs here is
+ * exactly what they will have to write themselves, down to where the value lands in the
+ * sentence, which is also why the French is kept: its plurals and its punctuation are not the
+ * English ones.
+ *
+ * `ParameterisedKey` is computed from `VectisMessages`, so the LIST cannot drift: a message
+ * that appears upstream, disappears, or stops being a function fails `nuxt typecheck` here.
+ * The text on the right is not guarded that way. It is copied by hand, and a default reworded
+ * upstream has to be recopied.
+ */
+type ParameterisedKey = {
+  [N in keyof VectisMessages]: {
+    [K in keyof VectisMessages[N]]: VectisMessages[N][K] extends (...args: never[]) => unknown
+      ? `${N & string}.${K & string}`
+      : never
+  }[keyof VectisMessages[N]]
+}[keyof VectisMessages]
+
+const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>> = {
+  en: {
+    'pagination.page': '(page) => `Page ${page}`',
+    'combobox.remove': '(label) => `Remove ${label}`',
+    'dataTable.perPageValue': '(label, value) => `${label}: ${value}`',
+    'dataTable.selectRow': '(index) => `Select row ${index}`',
+    'dataTable.selection': "(count) => `${count} item${count === 1 ? '' : 's'} selected`",
+    'dataTable.range': '({ start, end, total }) => `${start}–${end} of ${total}`',
+    'inputOTP.slot': '(index, total) => `Character ${index} of ${total}`',
+    'slider.rangeStart': '(label) => `${label} (start)`',
+    'slider.rangeEnd': '(label) => `${label} (end)`',
+    'field.limitExceeded': '(max) => `Exceeds the limit of ${max} characters`',
+    'progress.percent': '(percent) => `${percent}%`',
+    'hotkeys.label': '(keys) => `Keyboard shortcut: ${keys}`',
+    'timePicker.hoursValue': "(hour) => `${hour} o'clock`",
+    'timePicker.minutesValue': '(minute) => `${minute} minutes`',
+    'fileInput.remove': '(name) => `Remove ${name}`',
+    'fileInput.files': "(count) => `${count} file${count === 1 ? '' : 's'}`",
+    'filePicker.remove': '(name) => `Remove ${name}`',
+    'carousel.slide': '(index, total) => `${index} of ${total}`',
+    'calendar.viewCustom': '(days) => `${days} days`',
+    'calendar.moreEvents': '(count) => `+${count} more`',
+    'calendar.openDay': '(day) => `Open ${day}`',
+    'calendar.newEvent': '(index) => `Event #${index}`',
+    'calendar.movedTo': '(title, when) => `${title} moved to ${when}.`',
+  },
+  fr: {
+    'pagination.page': '(page) => `Page ${page}`',
+    'combobox.remove': '(label) => `Retirer ${label}`',
+    'dataTable.perPageValue': '(label, value) => `${label} : ${value}`',
+    'dataTable.selectRow': '(index) => `Sélectionner la ligne ${index}`',
+    'dataTable.selection':
+      "(count) => `${count} élément${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`",
+    'dataTable.range': '({ start, end, total }) => `${start}–${end} sur ${total}`',
+    'inputOTP.slot': '(index, total) => `Caractère ${index} sur ${total}`',
+    'slider.rangeStart': '(label) => `${label} (début)`',
+    'slider.rangeEnd': '(label) => `${label} (fin)`',
+    'field.limitExceeded': '(max) => `Dépasse la limite de ${max} caractères`',
+    /* The escape is the library's own, and it is kept for the same reason it is written that
+       way there: the space before a percent sign is a NON-BREAKING one in French, and an
+       escape is the only form of it a reader can tell from an ordinary space. */
+    'progress.percent': '(percent) => `${percent}\\u00A0%`',
+    'hotkeys.label': '(keys) => `Raccourci clavier : ${keys}`',
+    'timePicker.hoursValue': '(hour) => `${hour} heures`',
+    'timePicker.minutesValue': '(minute) => `${minute} minutes`',
+    'fileInput.remove': '(name) => `Retirer ${name}`',
+    'fileInput.files': "(count) => `${count} fichier${count > 1 ? 's' : ''}`",
+    'filePicker.remove': '(name) => `Retirer ${name}`',
+    'carousel.slide': '(index, total) => `${index} sur ${total}`',
+    'calendar.viewCustom': '(days) => `${days} jours`',
+    'calendar.moreEvents': "(count) => `+${count} autre${count > 1 ? 's' : ''}`",
+    'calendar.openDay': '(day) => `Ouvrir le ${day}`',
+    'calendar.newEvent': '(index) => `Évènement n°${index}`',
+    'calendar.movedTo': '(title, when) => `${title} déplacé au ${when}.`',
+  },
+}
+
 /**
  * The whole dictionary, flattened for the reference table at the foot of the page.
  *
- * Read from the shipped `en` rather than transcribed, so a key added upstream appears here
- * with nothing to remember. Declaration order is kept: it groups a namespace's keys the way
- * they are used, where alphabetical order would scatter them, and `Object.keys` gives the same
- * order in Node and in the browser, so hydration has nothing to disagree about.
+ * Read from the shipped dictionary rather than transcribed, so a key added upstream appears
+ * here with nothing to remember. WHICH dictionary follows the language the site is being read
+ * in: a French reader is shown the French words, since those are the ones they would override.
+ * Declaration order is kept: it groups a namespace's keys the way they are used, where
+ * alphabetical order would scatter them, and `Object.keys` gives the same order in Node and in
+ * the browser, so hydration has nothing to disagree about.
  *
- * A function value prints no default. Its parameters are typed by `VectisMessages`, which an
- * editor shows at the point of writing the override, and there is nothing useful to print for
- * them here.
+ * A parameterised message has no plain default to print, so its row carries the function
+ * itself, from the table above: the parameters it takes, and the English it builds with them.
  */
-const namespaces = enMessages as unknown as Record<string, Record<string, unknown>>
+const DICTIONARIES: Record<DictionaryLanguage, VectisMessages> = { en: enMessages, fr: frMessages }
 
-const dictionary = Object.entries(namespaces).flatMap(([namespace, entries]) =>
-  Object.entries(entries).map(([key, value]) => ({
-    path: `${namespace}.${key}`,
-    text: typeof value === 'function' ? null : String(value),
-  })),
-)
+const dictionary = computed(() => {
+  const shown: DictionaryLanguage = locale.value === 'fr' ? 'fr' : 'en'
+  const namespaces = DICTIONARIES[shown] as unknown as Record<string, Record<string, unknown>>
+  const written: Record<string, string> = PARAMETERISED[shown]
+
+  return Object.entries(namespaces).flatMap(([namespace, entries]) =>
+    Object.entries(entries).map(([key, value]) => {
+      const path = `${namespace}.${key}`
+      const fn = typeof value === 'function'
+      return { path, parameterised: fn, text: fn ? written[path]! : String(value) }
+    }),
+  )
+})
 </script>
 
 <template>
@@ -186,8 +281,10 @@ const dictionary = Object.entries(namespaces).flatMap(([namespace, entries]) =>
       <td>
         <code>{{ entry.path }}</code>
       </td>
-      <td v-if="entry.text !== null">{{ entry.text }}</td>
-      <td v-else><code>(…) =&gt; string</code></td>
+      <td v-if="entry.parameterised">
+        <code>{{ entry.text }}</code>
+      </td>
+      <td v-else>{{ entry.text }}</td>
     </tr>
   </DocsTable>
 </template>

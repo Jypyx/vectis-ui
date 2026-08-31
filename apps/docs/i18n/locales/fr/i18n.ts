@@ -28,9 +28,9 @@ export default {
 
   keysHeading: 'Les clés du dictionnaire',
   keysBody:
-    "Les 134 clés que lit la bibliothèque, réparties en 22 espaces de noms, avec la valeur anglaise de chacune : voici la liste contre laquelle écrire un dictionnaire. Seuls les espaces de noms que vous traduisez doivent être présents, et seules les clés que vous avez à l'intérieur.",
+    "Les 134 clés que lit la bibliothèque, réparties en 22 espaces de noms, avec la valeur française de chacune, puisque c'est la langue dans laquelle vous lisez : voici la liste contre laquelle écrire un dictionnaire. Seuls les espaces de noms que vous traduisez doivent être présents, et seules les clés que vous avez à l'intérieur.",
   keysFunctions:
-    "Vingt-trois d'entre elles sont paramétrées, et ce sont des fonctions. Elles n'affichent aucune valeur par défaut ici parce qu'il n'y a rien d'utile à montrer : leurs paramètres sont typés par <code>VectisMessages</code>, que votre éditeur détaille au moment d'écrire la surcharge.",
+    "Vingt-trois d'entre elles prennent un argument, et ce sont de simples fonctions TypeScript. Leurs lignes portent cette fonction telle que la bibliothèque l'écrit : on voit à la fois ce qui entre et où cela tombe dans la phrase. Il n'y a ni ICU ni moteur de pluriel : là où l'anglais a besoin d'un pluriel, c'est un ternaire à l'intérieur du message, et c'est ainsi qu'une langue à trois formes écrirait la sienne.",
   keysColumnKey: 'Clé',
-  keysColumnDefault: 'Valeur anglaise',
+  keysColumnDefault: 'Valeur française',
 }
