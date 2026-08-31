@@ -152,8 +152,19 @@ html {
    written unlayered so it wins over vectis.tokens without a specificity fight. The steps follow
    the library's own pattern: 600/700/800 light, 500/400/300 dark, because white text on a filled
    control only holds from violet 600, and dark mode has no darker step to hover to.
-   The dark selector is heavier than the light one, so the two do not fight. */
-.vd-shell {
+
+   TRAP — each list must name the DESCENDANT carrying the attribute, and not only `.vd-shell`.
+   The library declares its light semantics on `:root, [data-theme='light']` and its dark ones
+   on `[data-theme='dark']`, so ANY element carrying the attribute re-declares the whole set of
+   roles, the accent included, ON ITSELF. A violet set higher up on `.vd-shell` is then merely
+   an inherited value, and the nearer declaration wins whatever the layers say — layers arbitrate
+   declarations on one element, never inheritance. Drop `.vd-shell [data-theme='light']` and the
+   theming page's light panel goes back to shipping indigo next to a violet dark one.
+
+   The two lists cannot fight: no element carries both values. */
+.vd-shell,
+.vd-shell[data-theme='light'],
+.vd-shell [data-theme='light'] {
   --vectis-color-accent: var(--vd-violet-600);
   --vectis-color-accent-hover: var(--vd-violet-700);
   --vectis-color-accent-active: var(--vd-violet-800);
@@ -762,4 +773,92 @@ html {
     padding: var(--vectis-space-6);
     gap: var(--vectis-space-4);
   }
+}
+
+/* --- Theming page ---
+ * The two demonstrations that page needs, and the only rules on this site written for a single
+ * page. They live here rather than in a `<style scoped>` because both are QUOTED on the page as
+ * the code a reader would write: a scoped block would compile to `.coral[data-v-…]`, and the
+ * sample printed beside it would no longer be the rule that paints it.
+ */
+.vd-theme-pair {
+  display: grid;
+  gap: var(--vectis-space-4);
+  margin: var(--vectis-space-5) 0;
+}
+/* The cards carry the pair's gap, so their own vertical margin would double it. */
+.vd-theme-pair > .vd-demo {
+  margin: 0;
+}
+/* Two rows of their own: the theme's name, so the controls under it wrap as one group, and the
+   text field, which is the widest control there — beside a checkbox it would land on a line
+   where neither of the two reads. */
+.vd-theme-name,
+.vd-theme-field {
+  flex-basis: 100%;
+}
+
+/* Printed on the theming page as `coralCode`, declaration for declaration: the panel below
+   that sample is THIS rule and not an illustration of it, so changing one means changing the
+   other. Only the wrapping differs — Prettier breaks the two `color-mix()` calls over four
+   lines here, where the sample keeps each on its own line to stay readable in a code block. */
+.coral {
+  --vectis-color-accent: oklch(64% 0.16 32);
+  --vectis-color-accent-hover: oklch(58% 0.16 32);
+  --vectis-color-accent-active: oklch(52% 0.15 32);
+  --vectis-color-accent-text: oklch(48% 0.15 32);
+  /* Mixed towards the surface, so both tints follow whichever theme is showing. */
+  --vectis-color-accent-surface: color-mix(
+    in oklch,
+    var(--vectis-color-accent) 14%,
+    var(--vectis-color-surface)
+  );
+  --vectis-color-accent-border: color-mix(
+    in oklch,
+    var(--vectis-color-accent) 40%,
+    var(--vectis-color-surface)
+  );
+  --vectis-radius-interactive: var(--vectis-radius-pill);
+}
+
+/* Text needs a lighter step on a dark ground: the one role that has to differ. */
+[data-theme='dark'] .coral {
+  --vectis-color-accent-text: oklch(78% 0.13 32);
+}
+
+@media (min-width: 640px) {
+  .vd-theme-pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* --- Iconography page ---
+ * The gallery of built-in icons. It is a real <ul>, so the prose's own list rules apply to it:
+ * both selectors therefore keep the `.vd-prose >` chain those rules use, since a shorter one
+ * loses to them on specificity and the bullets and item margins would come back inside the
+ * cards. `auto-fill` is what makes the column count follow the width with no media query.
+ */
+.vd-prose > ul.vd-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: var(--vectis-space-2);
+  padding-inline-start: 0;
+  list-style: none;
+}
+.vd-prose > ul.vd-icon-grid > li {
+  display: flex;
+  align-items: center;
+  gap: var(--vectis-space-2);
+  margin: 0;
+  padding: var(--vectis-space-2) var(--vectis-space-3);
+  border: 1px solid var(--vectis-color-border);
+  border-radius: var(--vectis-radius-surface);
+  background: var(--vectis-color-surface-raised);
+}
+/* The name is the thing a reader came to copy, so it gets the code family at full strength
+   rather than the muted inline treatment of a `<code>` inside a paragraph. */
+.vd-icon-grid code {
+  font-family: var(--vectis-text-family-code);
+  font-size: var(--vectis-text-code-size);
+  overflow-wrap: anywhere;
 }
