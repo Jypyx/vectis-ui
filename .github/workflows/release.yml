@@ -1,0 +1,103 @@
+name: Release
+
+# A tag is the ONLY trigger. `workflow_dispatch` is deliberately absent, unlike ci.yml: the
+# guard below compares the manifest version against the tag name, and a dispatch has no tag
+# to compare against — it would publish whatever `version` happens to say on the branch,
+# which is exactly the accident the guard exists to prevent. Re-running a failed release
+# means moving the tag and pushing it again.
+on:
+  push:
+    tags: ['v*']
+
+# Never cancelled, the reasoning of ci.yml's `pages` job: interrupting a publish in flight
+# can leave a version half-registered, where a superseded BUILD costs nothing.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+
+    # `id-token: write` is what lets the runner mint the OIDC token npm exchanges for a
+    # short-lived publish credential. It is the whole reason no NPM_TOKEN is stored here.
+    # Only a GitHub-HOSTED runner can issue a token the npm registry accepts.
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # Reads `packageManager` from the root manifest, so CI runs the pnpm version the repo
+      # pins. That floor matters: OIDC publishing was broken from pnpm 11.0.8 and fixed in
+      # 11.1.3 (pnpm/pnpm#11513). Below it, the publish fails with a bare 404 — an error that
+      # names neither OIDC nor authentication.
+      - uses: pnpm/action-setup@v6
+
+      # `registry-url` is what writes the .npmrc naming the registry. It also writes an auth
+      # line holding `${NODE_AUTH_TOKEN}`, which is NOT set here — that unresolved placeholder
+      # used to be sent verbatim as a bearer token, and the registry answered 404 rather than
+      # falling back to OIDC. pnpm 11.1.3 drops unresolved placeholders, which is what makes
+      # the combination safe; do not lower the pnpm floor without revisiting this.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      # The tag NAMES a version; the manifest DECIDES what is published. Nothing keeps the two
+      # in step, so a `v1.0.0` tag pushed while the manifest still says `0.1.0` would publish
+      # 0.1.0 under a tag claiming otherwise — and an npm version is immutable, so the mistake
+      # cannot be taken back, only superseded. Failing here costs a tag; failing to check
+      # costs the version number.
+      - name: The tag and the manifest agree
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          manifest="$(node -p "require('./packages/ui/package.json').version")"
+          if [ "$tag" != "$manifest" ]; then
+            echo "::error::tag v$tag does not match the manifest version $manifest"
+            exit 1
+          fi
+          echo "publishing vectis-ui@$manifest"
+
+      # The artefact gates, in the order ci.yml runs them. Storybook and the axe matrix are
+      # deliberately NOT here: they guard rendering and accessibility regressions, which the
+      # push to main already exercised, and neither says anything about the tarball. What
+      # follows is what the ARTEFACT is judged on.
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      # Chains `postbuild`: the per-component CSS split, then the size gate against the
+      # committed baseline.
+      - name: Build
+        run: pnpm build
+
+      # Its own step, never `postbuild` — attw's `--pack` shells out to `npm pack`, which
+      # would fire `prepack` → `build` again, unbounded. This is what guards the .d.ts
+      # extension rewrite, without which a consumer on node16 resolution silently gets NO
+      # types at all.
+      - name: Package manifest and type resolution
+        run: pnpm --filter vectis-ui run check:package
+
+      # `--no-git-checks` is required and is not a loosening: a tag is checked out as a
+      # DETACHED HEAD, so pnpm's default check — that the current branch is the publish
+      # branch — can only ever fail here. The cleanliness half of that check is satisfied by
+      # construction, the tree being a fresh checkout.
+      #
+      # No `--provenance` flag: publishing through OIDC generates and publishes the
+      # attestation on its own. Adding it would be redundant, not additive.
+      #
+      # `prepack` rebuilds on the way in, so what ships is built from the tagged tree rather
+      # than from whatever the steps above left in `dist`.
+      - name: Publish
+        run: pnpm --filter vectis-ui publish --no-git-checks
