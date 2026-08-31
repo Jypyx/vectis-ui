@@ -4,8 +4,8 @@
  *
  * Each entry is a real fragment link, so it works with no JavaScript at all and can be
  * copied out of the address bar. The click is intercepted only to add the sticky header's
- * offset, which `scroll-behavior` and `:target` cannot do on their own; a middle-click still
- * opens the anchor in a new tab.
+ * offset and to write the fragment without navigating, neither of which `scroll-behavior` and
+ * `:target` can do on their own; a middle-click still opens the anchor in a new tab.
  *
  * The rail is hidden below 1440px by docs-layout.css, but it is still mounted and still
  * harvesting: the headings it measures are in the prose, not in itself.
@@ -19,10 +19,11 @@ const { t } = useI18n()
 <template>
   <nav class="vd-outline" :aria-label="t('common.outline')">
     <!--
-      `overline` already carries the capitals and the widened tracking that a rail title wants,
-      so the site declares neither: it names the role and the design system supplies the rest.
+      `label` and not `overline`: the latter is the role that CARRIES the capitals and the
+      widened tracking that go with them, so asking for lowercase there would mean undoing half
+      a recipe. Naming the other role is how a consumer changes its mind about a type style.
     -->
-    <VTypography variant="overline" as="p" tone="muted" class="vd-outline-title">
+    <VTypography variant="label" as="p" class="vd-outline-title">
       {{ t('common.outline') }}
     </VTypography>
     <a
@@ -39,6 +40,13 @@ const { t } = useI18n()
 </template>
 
 <style scoped>
+/* The title is as prominent as the entry being read, and more so than the rest of the list:
+   it is what names the rail. `tone` is left at its default, which inherits, and the colour is
+   then stated here rather than through the design system's private `--typography-*` variables
+   — an unlayered consumer declaration is the sanctioned override path. */
+.vd-outline-title {
+  color: var(--vectis-color-text);
+}
 .vd-outline a {
   display: block;
   padding-block: var(--vectis-space-1);

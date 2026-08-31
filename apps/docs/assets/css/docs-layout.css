@@ -39,6 +39,14 @@
   --vd-outline-w: 200px;
 }
 
+/* Where a fragment lands. The header is sticky, so a browser scrolling to `#some-heading` —
+   on a reload, on a link pasted from the outline — would park that heading UNDER it. This is
+   the CSS half of the offset `useDocsOutline` applies in JS, and it is the half that works
+   before any script has run; the two must name the same distance. */
+html {
+  scroll-padding-block-start: calc(var(--vd-header-h) + var(--vectis-space-2));
+}
+
 .vd-shell {
   display: flex;
   flex-direction: column;
