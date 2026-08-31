@@ -1,12 +1,16 @@
 import { docRoutes } from './content/nav'
 
 /**
- * A GitHub Pages PROJECT site is served from a subdirectory, never from the root. This is the
- * ONLY place that path is written: asset URLs are relative and Vite rewrites them, and the two
- * absolute URLs the build needs are composed from it below. Moving the site to a custom domain
- * is this one line.
+ * The site is served from the ROOT of its own domain, vectis-ui.com. This is the ONLY place
+ * that path is written: asset URLs are relative and Vite rewrites them, and the two absolute
+ * URLs the build needs are composed from it below.
+ *
+ * It read `/vectis-ui/` for as long as this was a GitHub Pages PROJECT site, which is served
+ * from a subdirectory — hence the trailing slash every composition below relies on. Moving back
+ * under a subdirectory is this one line; GitHub redirects the old jypyx.github.io/vectis-ui/*
+ * URLs to the custom domain on its own, so nothing published before this breaks.
  */
-const BASE_URL = '/vectis-ui/'
+const BASE_URL = '/'
 
 /**
  * The locale segment the i18n strategy puts in front of a route.
@@ -79,7 +83,7 @@ export default defineNuxtConfig({
      */
     detectBrowserLanguage: false,
     // Only used to make the `hreflang` alternates absolute; the path comes from `app.baseURL`.
-    baseUrl: 'https://jypyx.github.io',
+    baseUrl: 'https://vectis-ui.com',
   },
 
   app: {
@@ -123,7 +127,7 @@ export default defineNuxtConfig({
        * Drop the doubled-locale paths the crawler invents, e.g. `/fr/fr/docs`.
        *
        * They come from nitro's own link following, not from the site: every internal `href`
-       * here is absolute and carries the base URL (`/vectis-ui/fr/docs/installation`), and the
+       * here is absolute and carries the base URL (`/fr/docs/installation`), and the
        * crawler resolves a handful of them against the current page's directory after stripping
        * that base — which turns an absolute link into a relative one and prepends `/fr/` a
        * second time. Verified: nothing in the generated HTML links to such a path, and removing
