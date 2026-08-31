@@ -1,6 +1,6 @@
 {
   "name": "vectis-ui",
-  "version": "0.1.0",
+  "version": "0.1.1-rc.0",
   "description": "Vue 3 design system — HTML/CSS first, CSS tokens, Nuxt 3 (SSR) compatible",
   "type": "module",
   "license": "MIT",
