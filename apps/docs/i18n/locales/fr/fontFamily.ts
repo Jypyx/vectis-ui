@@ -13,28 +13,20 @@ export default {
 
   wiringHeading: 'Brancher une police web',
   wiringBody:
-    "Ce site est l'exemple travaillé. Ses titres sont en Josefin Sans et son texte en Geist, et ni l'un ni l'autre ne vient de la bibliothèque : les deux sont chargés et désignés depuis une feuille de style non calquée, propre au site, et c'est tout.",
-  demoText:
-    'Geist porte tous les rôles à partir du sous-titre, à 14px pour le décor applicatif et 16px pour la prose longue.',
-  wiringCdn:
-    "Charger par <code>@import</code> depuis un CDN est la version la plus courte, pas la meilleure. Un build hors ligne ou soucieux de vie privée voudra plutôt les fichiers woff2 servis depuis sa propre origine et des règles <code>@font-face</code> locales. Rien de ce qui précède ne change, seulement d'où viennent les octets.",
+    "Deux gestes, et aucun des deux n'appartient à la bibliothèque : charger le caractère, puis pointer un token de famille vers lui. Le token est une propriété personnalisée ordinaire : une déclaration sans couche sur <code>:root</code> atteint donc tous les composants d'un coup, et une déclaration sur un élément n'atteint que son sous-arbre.",
+  wiringSelfHosted:
+    "La même chose avec les fichiers servis depuis votre propre origine. C'est la version à préférer pour un build hors ligne, pour un site qui n'envoie aucune requête à un tiers, ou simplement pour maîtriser la mise en cache. Seul le chargement change : les tokens du dessous sont ceux du dessus, à l'identique.",
 
-  splitHeading: 'Où passe la frontière',
+  splitHeading: 'Quel texte utilise quelle famille',
   splitBody:
-    "Cinq rôles prennent la famille de titrage, et ce sont exactement les cinq qui sont des titres : <code>display</code> (48px) et <code>heading-1</code> (36px) jusqu'à <code>heading-4</code> (16px). <code>subtitle</code> et tout ce qui suit restent dans le caractère de texte.",
+    "Donner un caractère de titrage à la bibliothèque tient en une déclaration, mais cela ne repeint pas tout : cinq rôles typographiques lisent la famille de titrage, et le reste de l'interface demeure dans celle de texte. La liste ci-dessous est ce qu'il faut regarder avant de choisir un caractère, puisqu'elle dit quel texte sera réellement composé dedans. Rien n'est à brancher pour cela : un VTypography nomme son rôle par <code>variant</code>, et les composants qui rendent du texte de leur côté, un titre de boîte de dialogue ou un résumé d'accordéon par exemple, choisissent le leur eux-mêmes.",
   splitList: [
-    '<strong>Famille de titrage :</strong> display, heading-1, heading-2, heading-3, heading-4.',
-    '<strong>Famille de texte :</strong> subtitle, body-lg, body-md, body-sm, label, caption, overline.',
-    '<strong>Famille de code :</strong> code, et rien d’autre.',
+    '<strong>Famille de titrage</strong> (<code>--vectis-text-family-heading</code>) : <code>display</code> 48px, <code>heading-1</code> 36px, <code>heading-2</code> 24px, <code>heading-3</code> 18px, <code>heading-4</code> 16px.',
+    '<strong>Famille de texte</strong> (<code>--vectis-text-family</code>) : tout le reste. <code>subtitle</code>, les quatre tailles de corps, <code>label</code>, <code>caption</code>, <code>overline</code>, et le texte à l’intérieur de chaque contrôle.',
+    '<strong>Famille de code</strong> (<code>--vectis-text-family-code</code>) : le rôle <code>code</code>, et rien d’autre.',
   ],
   splitWhy:
-    "Un caractère de titrage géométrique à faible hauteur d'x, et Josefin Sans en est un, se lit bien à 48px et devient flou à 16px. C'est une propriété du CARACTÈRE et non des rôles, et c'est pourquoi la bibliothèque ne tranche pas : elle vous donne la frontière et vous laisse décider jusqu'où elle descend.",
-
-  overrideHeading: 'Surcharger une famille',
-  overrideBody:
-    "Si <code>heading-3</code> (18px) ou <code>heading-4</code> (16px) manquent de tenue dans votre caractère de titrage, surchargez la famille de titrage sur ce sous-arbre plutôt que de modifier les rôles. Ce sont les rôles qui empêchent deux textes d'un même rôle de diverger.",
-  overrideWeights:
-    "Préférez une graisse de 500 à 600 au 400 pour un caractère de titrage, et conservez l'approche de <code>-0.015em</code> que portent déjà les rôles supérieurs. Elle est sur <code>display</code>, <code>heading-1</code> et <code>heading-2</code> seulement, et nulle part ailleurs.",
+    "Deux conséquences en découlent. Un caractère de titrage doit ici tenir jusqu'à 16px, puisque <code>heading-4</code> fait partie du groupe : un caractère qui ne tient qu'au-dessus de 24px est donc le mauvais choix pour cette échelle. Et la frontière se déplace. Redéfinir <code>--vectis-text-family-heading</code> sur un élément rend ce sous-arbre au caractère de texte, titres compris, et un rôle isolé se déplace tout seul en surchargeant la famille qu'il lit, une règle sans couche l'emportant sur celle du composant.",
 
   iconHeading: "L'unique police optionnelle",
   iconBefore:

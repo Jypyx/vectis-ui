@@ -13,28 +13,20 @@ export default {
 
   wiringHeading: 'Wiring a webfont',
   wiringBody:
-    "This site is the worked example. Its titles are Josefin Sans and its text is Geist, and neither comes from the library: both are loaded and pointed at from an unlayered stylesheet of the site's own, and that is the whole of it.",
-  demoText:
-    'Geist carries every role from subtitle downwards, at 14px for application chrome and 16px for long-form prose.',
-  wiringCdn:
-    'Loading by <code>@import</code> from a CDN is the shortest version, not the best one. An offline or privacy-tight build wants the woff2 files served from its own origin and local <code>@font-face</code> rules instead. Nothing above changes, only where the bytes come from.',
+    'Two steps, and neither of them belongs to the library: load the face, then point a family token at it. The token is an ordinary custom property, so an unlayered declaration on <code>:root</code> reaches every component at once, and a declaration on one element reaches that subtree alone.',
+  wiringSelfHosted:
+    'The same thing with the files on your own origin. It is the version to prefer for an offline build, for a site that sends no request to a third party, or simply to control the caching. Only the loading changes: the tokens below it are the ones above, unmodified.',
 
-  splitHeading: 'Where the split falls',
+  splitHeading: 'Which text uses which family',
   splitBody:
-    'Five roles take the heading family, and they are exactly the five that are titles: <code>display</code> (48px) and <code>heading-1</code> (36px) through <code>heading-4</code> (16px). <code>subtitle</code> and everything below stay in the text face.',
+    'Giving the library a title face is one declaration, but it does not repaint everything: five type roles read the heading family and the rest of the interface stays in the text one. The list below is what to check before choosing a face, because it says which text will actually be set in it. Nothing has to be wired up for that to hold: a VTypography names its role through <code>variant</code>, and the components that render text of their own, a dialog title or an accordion summary among them, pick their role themselves.',
   splitList: [
-    '<strong>Heading family:</strong> display, heading-1, heading-2, heading-3, heading-4.',
-    '<strong>Text family:</strong> subtitle, body-lg, body-md, body-sm, label, caption, overline.',
-    '<strong>Code family:</strong> code, and nothing else.',
+    '<strong>Heading family</strong> (<code>--vectis-text-family-heading</code>): <code>display</code> 48px, <code>heading-1</code> 36px, <code>heading-2</code> 24px, <code>heading-3</code> 18px, <code>heading-4</code> 16px.',
+    '<strong>Text family</strong> (<code>--vectis-text-family</code>): everything else. <code>subtitle</code>, the four body sizes, <code>label</code>, <code>caption</code>, <code>overline</code>, and the text inside every control.',
+    '<strong>Code family</strong> (<code>--vectis-text-family-code</code>): the <code>code</code> role, and nothing besides.',
   ],
   splitWhy:
-    'A geometric display face with a low x-height, and Josefin Sans is one, reads well at 48px and goes fuzzy at 16px. That is a property of the FACE and not of the roles, which is why the library does not pick a side: it gives you the split and lets you decide how far down it should reach.',
-
-  overrideHeading: 'Overriding a family',
-  overrideBody:
-    'If <code>heading-3</code> (18px) or <code>heading-4</code> (16px) read weak in your title face, override the heading family on that subtree rather than editing the roles. The roles are what keep two pieces of text in the same role from drifting apart.',
-  overrideWeights:
-    'Prefer 500 to 600 weight over 400 for a title face, and keep the <code>-0.015em</code> tracking the top roles already carry. It is on <code>display</code>, <code>heading-1</code> and <code>heading-2</code> only, and nowhere else.',
+    'Two things follow from that list. A title face is asked to work down to 16px here, since <code>heading-4</code> is in the group, so a face that only holds above 24px is the wrong choice for this scale. And the boundary can be moved. Redefining <code>--vectis-text-family-heading</code> on an element hands that subtree back to the text face, headings included, and a single role moves on its own by overriding the family it reads, since an unlayered rule wins over the component rule it replaces.',
 
   iconHeading: 'The one optional font',
   /*

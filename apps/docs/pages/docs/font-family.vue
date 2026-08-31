@@ -1,23 +1,34 @@
 <script setup lang="ts">
-import { VTypography } from 'vectis-ui'
-
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 const localePath = useLocalePath()
 useHead({ title: () => t('fontFamily.title') })
 
-const wireCode = `/* an unlayered stylesheet, this site's own */
-@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&family=Geist:wght@400;500;600;700&display=swap');
+/*
+ * Both samples do the same thing twice, so that the only difference a reader has to read is
+ * where the font comes from: the token lines are identical on purpose, and so is the family
+ * they name.
+ */
+const importCode = `/* Your own stylesheet, in no layer. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --vectis-font-family-display: 'Josefin Sans', system-ui, sans-serif;
-  --vectis-font-family-sans: 'Geist', system-ui, -apple-system, sans-serif;
+  --vectis-font-family-sans: 'Inter', system-ui, sans-serif;
+  --vectis-font-family-display: 'Inter', system-ui, sans-serif;
 }`
 
-const overrideCode = `/* small headings back to the text face, on this panel only */
-.settings-panel {
-  --vectis-text-family-heading: var(--vectis-font-family-sans);
+const faceCode = `/* Your own stylesheet, in no layer. The files are served from your origin. */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-variable.woff2') format('woff2-variations');
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+:root {
+  --vectis-font-family-sans: 'Inter', system-ui, sans-serif;
+  --vectis-font-family-display: 'Inter', system-ui, sans-serif;
 }`
 </script>
 
@@ -31,23 +42,14 @@ const overrideCode = `/* small headings back to the text face, on this panel onl
 
   <h2 id="wiring-a-webfont">{{ t('fontFamily.wiringHeading') }}</h2>
   <DocsProse keypath="fontFamily.wiringBody" />
-  <DocsCode lang="css" :code="wireCode" />
-  <div class="vd-demo" data-stack>
-    <VTypography variant="display">Josefin Sans</VTypography>
-    <VTypography variant="body-lg" tone="muted">{{ t('fontFamily.demoText') }}</VTypography>
-    <VTypography variant="code" as="p">ui-monospace · 'Cascadia Code' · Consolas</VTypography>
-  </div>
-  <DocsProse keypath="fontFamily.wiringCdn" />
+  <DocsCode lang="css" :code="importCode" />
+  <DocsProse keypath="fontFamily.wiringSelfHosted" />
+  <DocsCode lang="css" :code="faceCode" />
 
-  <h2 id="the-split">{{ t('fontFamily.splitHeading') }}</h2>
+  <h2 id="which-family">{{ t('fontFamily.splitHeading') }}</h2>
   <DocsProse keypath="fontFamily.splitBody" />
   <DocsProseList keypath="fontFamily.splitList" />
   <DocsProse keypath="fontFamily.splitWhy" />
-
-  <h2 id="overriding-a-family">{{ t('fontFamily.overrideHeading') }}</h2>
-  <DocsProse keypath="fontFamily.overrideBody" />
-  <DocsCode lang="css" :code="overrideCode" />
-  <DocsProse keypath="fontFamily.overrideWeights" />
 
   <h2 id="the-icon-font">{{ t('fontFamily.iconHeading') }}</h2>
   <!--
