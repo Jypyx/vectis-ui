@@ -137,6 +137,16 @@ export const DialSelection: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
+
+    /*
+     * The panel BEFORE anything opens it. A closed popover has to be `display: none`, or its
+     * box stays laid out over the page: invisible at `opacity: 0`, `position: fixed`, and
+     * swallowing every click that lands on it. jsdom cannot see this at all, computing no
+     * styles, so the browser suite is the only place it can be held.
+     */
+    const closed = canvasElement.querySelector('.v-time-input-panel') as HTMLElement
+    await expect(getComputedStyle(closed).display).toBe('none')
+
     await userEvent.click(canvas.getByRole('combobox', { name: 'Time' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
 

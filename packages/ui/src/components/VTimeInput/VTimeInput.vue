@@ -811,17 +811,19 @@ function onEndIcon() {
      the padding around the picker. The picker brings its own layout — including the gap
      between its parts and the centring of the face — so nothing of that is declared here.
 
-     TRAP — declaring a display here overrides the browser's own rule hiding a closed
-     popover. What closes it back is the shared guard on the overlay class, which is more
-     specific than anything a component can write.
+     TRAP — NO `display` here, and that is not an omission. The column layout comes from
+     `.v-panel`, which is (0,1,0) and therefore loses to `.v-overlay:not(:popover-open)`, the
+     guard that hides a closed popover. This selector is (0,2,0): declaring a display on it
+     would TIE with that guard, and a tie between two sheets is settled by whichever the
+     consumer's bundler put last. The symptom when the component wins is silent and nasty —
+     the closed panel keeps its box, invisible at `opacity: 0` and fixed over the page, and
+     swallows every click that lands on it.
 
      The selector compounds two classes VPopover puts on the same element, because the
      padding is also declared by the shared panel class: at equal specificity the winner
      would be whichever sheet the consumer's bundler put last. The size attribute cannot
      serve that purpose here — the picker's panel carries none. */
   .v-popover-panel.v-time-input-panel {
-    display: flex;
-    flex-direction: column;
     width: max-content;
     padding: var(--vectis-space-3);
     color: var(--vectis-color-text);

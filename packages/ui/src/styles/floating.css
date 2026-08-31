@@ -39,7 +39,15 @@
     inset: auto;
   }
 
-  .v-overlay:not(:popover-open) {
+  /* A closed popover, hidden. The class is written TWICE on purpose, for (0,3,0).
+     The UA hides a closed `[popover]`, but any author `display` beats a UA rule, and a
+     panel needs one to lay itself out — `.v-panel` is a flex column, the toast stack is
+     one too. This guard puts it back, and it has to outrank not only those (0,1,0) rules
+     but the sanctioned compound form a panel overrides through, `.v-popover-panel.v-x-panel`,
+     which is (0,2,0) and would otherwise TIE with it. A tie is decided by whichever sheet
+     the consumer's bundler put last, and when the component wins the closed panel keeps its
+     box: invisible at `opacity: 0`, fixed over the page, and eating every click on it. */
+  .v-overlay.v-overlay:not(:popover-open) {
     display: none;
   }
 
