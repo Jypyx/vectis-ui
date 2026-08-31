@@ -4,34 +4,33 @@ export default {
   split:
     'Two things are settled separately. The WORDS come from the dictionary, the FORMATS derive from <code>Intl</code> from the locale tag. A locale with no matching dictionary therefore already gives correct dates, numbers, first day of week and hour cycle, with the labels left in English. That is a coherent degraded state, not a bug.',
 
-  demoHeading: 'The split, shown',
-  demoBody:
-    'The calendar below is given a <code>locale</code> prop, which takes precedence over the global locale. Pick German or Japanese, languages the library ships no dictionary for, and the month name, the weekday initials and the first day of the week all move, while the labels the dictionary owns stay English. That is the degraded state, and it is a usable one.',
-  demoLabel: 'Calendar locale',
-  demoQuote:
-    "The prop is scoped to this one calendar; nothing else on the page changes. That is the difference between a component's <code>locale</code> prop and the global <code>setLocale</code>, which moves module-level state for the whole process.",
-
-  frenchHeading: 'Switching to French',
+  frenchHeading: 'Changing the language',
   frenchBody:
-    '<code>fr</code> is opt-in: not importing it is enough to prune it from the bundle. The argument is not its weight, which is under a kilobyte gzipped. It is that enabling the shipped French and adding a language the library does not ship are the SAME gesture, rather than two categories of dictionary.',
+    'Two calls, and only the first is specific to French: register a dictionary, then name the locale. <code>fr</code> is opt-in, and not importing it is enough to prune it from the bundle. The argument is not its weight, which is under a kilobyte gzipped. It is that enabling the shipped French and adding a language the library does not ship are the SAME gesture, rather than two categories of dictionary.',
+  frenchWhere:
+    'Both go at module level, in <code>main.ts</code> or in a Nuxt plugin, never inside a <code>setup()</code>. <code>setLocale</code> can be called again at any moment, from anywhere: the dictionary is a reactive reference, so components already on screen re-render with the new words rather than waiting for a navigation.',
+  processBody:
+    'The state is module-level, which is what makes that possible, and the accepted limit is the other side of it: there is ONE locale per process. Multi-locale SSR per request is not covered, so a single Node process answering in two languages at the same moment has to pass the text props explicitly. A prerender is the case where the limit costs nothing, since routes are rendered one after another: this site sets the locale of the page it is about to render, and every French page here is built with French words in it.',
 
   addHeading: 'Adding a language',
   addBody:
-    'A partial dictionary is legitimate: what is missing falls back to English rather than to a key. The merge is non-recursive by construction, since the dictionary is exactly two levels deep, <code>namespace.key</code>. That is what makes it structurally incapable of descending into a parameterised message, which is a function.',
+    'A dictionary of your own is a plain object, and a partial one is legitimate: what is missing falls back to English rather than to a raw key. Register it under its language subtag, then name a locale that carries it.',
   addTyping:
-    'Parameterised messages are typed TypeScript functions, with no ICU and no plural engine: a plural is a ternary inside the function. Both shipped dictionaries are annotated <code>VectisMessages</code>, so key and signature parity are guaranteed at compile time rather than tested for.',
-
-  precedenceHeading: 'Precedence',
+    'Type it as <code>VectisMessagesInput</code> and your editor will list the namespaces, the keys and the parameters of the messages that take them. Those are typed TypeScript functions, with no ICU and no plural engine: a plural is a ternary written inside the function. The merge is non-recursive by construction, since the dictionary is exactly two levels deep, which is what makes it structurally incapable of descending into a function value.',
   precedenceBody:
-    'A <code>text</code> or <code>label</code> prop set on a component stays authoritative. For a container’s accessible name the chain is <code>aria-labelledby</code> › <code>aria-label</code> › the <code>label</code> prop › the dictionary › English. There is never an empty string, never a technical key on screen, and never silence in development when a language is missing.',
-  precedenceSubtag:
-    'Resolution is by LANGUAGE SUBTAG: <code>en-GB</code> and <code>en-US</code> share their words, and what separates them comes from <code>Intl</code>.',
+    'Resolution is by LANGUAGE SUBTAG, so <code>en-GB</code> and <code>en-US</code> share their words and only their formats differ. Above the dictionary sit the props: a <code>text</code> or <code>label</code> set on a component stays authoritative, and for a container’s accessible name the chain is <code>aria-labelledby</code> › <code>aria-label</code> › the <code>label</code> prop › the dictionary › English. There is never an empty string, never a technical key on screen, and never silence in development when a language is missing.',
 
-  processHeading: 'One locale per process',
-  processBody:
-    'The dictionary is module-level state, which is what lets <code>setLocale</code> be called from any <code>.ts</code> file and still reach components that are already mounted. The accepted limit is the other side of that: multi-locale SSR PER REQUEST is not covered, so a single Node process serving two languages at once must pass the text props explicitly.',
-  processPrerender:
-    'Prerendering is the case where that limit costs nothing, and this site is the demonstration. <code>nuxt generate</code> renders its routes one after another in a single process, so a plugin can set the locale of the page it is about to render and no two ever overlap. Every French page here is built with French words in it, and served as static HTML. What a server rendering two languages CONCURRENTLY cannot do, a build doing them in sequence can.',
-  processQuote:
-    'Reach for the text props when one running process must answer in two languages at the same moment. Everywhere else, whether an application in one language or a site prerendered in several, <code>setLocale</code> is enough.',
+  demoHeading: 'Words and formats',
+  demoBody:
+    'The dictionary and the format locale are two settings, and nothing obliges them to agree. <code>setLocale</code> and <code>registerMessages</code> decide the words a component says; the tag, and the <code>locale</code> prop wherever a component takes one, decides what <code>Intl</code> derives from it: the order of the parts of a date, the separator between them, the day a week starts on, twelve hours or twenty-four. An application can run its words in French and its formats in <code>en-CA</code>, or keep English labels while formatting for Germany, and neither choice constrains the other.',
+  demoLanguage: 'Language',
+  demoFormats: 'Formats',
+
+  keysHeading: 'The dictionary keys',
+  keysBody:
+    'The 134 keys the library reads, across 22 namespaces, with the English default of each: this is the list to write a dictionary against. Only the namespaces you translate need to be present, and only the keys you have inside them.',
+  keysFunctions:
+    'Twenty-three of them are parameterised, and a function is what they are. They print no default here because there is nothing useful to show: their parameters are typed by <code>VectisMessages</code>, which your editor spells out at the point of writing the override.',
+  keysColumnKey: 'Key',
+  keysColumnDefault: 'English default',
 }
