@@ -93,17 +93,17 @@ const softCode = `<!-- the reader may type past 40; the field then goes into
     <tr>
       <td><code>label</code> · <code>hint</code></td>
       <td><code>string</code></td>
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>iconStart</code> · <code>iconEnd</code></td>
       <DocsProse tag="td" keypath="input.apiIcons" />
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>iconStartLabel</code> · <code>iconEndLabel</code></td>
       <DocsProse tag="td" keypath="input.apiIconLabels" />
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>clearable</code> · <code>counter</code> · <code>loading</code></td>
@@ -113,12 +113,12 @@ const softCode = `<!-- the reader may type past 40; the field then goes into
     <tr>
       <td><code>clearVisible</code></td>
       <DocsProse tag="td" keypath="input.apiClearVisible" />
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>maxlength</code></td>
       <td><code>number</code></td>
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>softLimit</code></td>

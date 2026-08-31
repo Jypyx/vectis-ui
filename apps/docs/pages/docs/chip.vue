@@ -87,7 +87,7 @@ const colorCode = `<!-- a tag list out of a database: its colours are DATA,
     <tr>
       <td><code>color</code></td>
       <DocsProse tag="td" keypath="chip.apiColor" />
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>shape</code></td>

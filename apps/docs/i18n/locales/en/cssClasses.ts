@@ -4,20 +4,20 @@ export default {
 
   hiddenHeading: 'v-visually-hidden',
   hiddenBody:
-    'Takes an element out of sight while leaving it in the accessibility tree — the label a screen reader needs and a sighted reader does not. It lives in <code>vectis.utilities</code>, the strongest layer, so it wins over any component rule.',
+    'Takes an element out of sight while leaving it in the accessibility tree, which is what a label a screen reader needs and a sighted reader does not calls for. It lives in <code>vectis.utilities</code>, the strongest layer, so it wins over any component rule.',
   hiddenNot:
-    'Note what it is NOT: <code>display: none</code> and <code>visibility: hidden</code> both remove the element from the accessibility tree as well as from the page, and <code>width: 0</code> is announced by some screen readers and skipped by others. The clip is what keeps it readable and unseen at once.',
+    'Note what it is NOT. <code>display: none</code> and <code>visibility: hidden</code> both remove the element from the accessibility tree as well as from the page, and <code>width: 0</code> is announced by some screen readers and skipped by others. The clip is what keeps it readable and unseen at once.',
 
   layersHeading: 'The layers',
   layersIntro: 'Four, declared in this order, and the order is the whole override model:',
   layersBody:
-    'Any non-layered consumer style wins automatically. Write an unlayered rule, or write into <code>vectis.utilities</code> — never a specificity war, and never <code>!important</code>. Every line of CSS on this site takes that path: its layout, its fonts and its accent are all unlayered rules sitting on top of the library.',
+    'Any non-layered consumer style wins automatically. Write an unlayered rule, or write into <code>vectis.utilities</code>. Never a specificity war, and never <code>!important</code>. Every line of CSS on this site takes that path: its layout, its fonts and its accent are all unlayered rules sitting on top of the library.',
   layersQuote:
-    "One trap comes with it. A layer name is GLOBAL and not namespaced, so writing <code>@layer vectis.components { … }</code> in your own stylesheet puts your rule INSIDE the library's layer, where it is arbitrated by the order above rather than winning over it. Leaving your CSS unlayered is both simpler and stronger.",
+    "One trap comes with it. A layer name is GLOBAL and not namespaced, so writing <code>@layer vectis.components { … }</code> in your own stylesheet puts your rule inside the library's layer, where it is arbitrated by the order above instead of winning over it. Leaving your CSS unlayered is both simpler and stronger.",
 
   internalHeading: 'The internal classes you will see in the DOM',
   internalBody:
-    'These are not an API — they are named here because you will read them in devtools, and because a targeted override needs the right hook. They can change; a custom property cannot.',
+    'These are not an API. They are named here because you will read them in devtools, and because a targeted override needs the right hook. They can change; a custom property cannot.',
   columnClass: 'Class',
   columnCarries: 'What carries it',
   control:
@@ -33,5 +33,5 @@ export default {
 
   propertiesHeading: 'The custom properties to aim at',
   propertiesBody:
-    'Prefer repointing a property to rewriting a rule: <code>--vectis-color-accent</code>, <code>--vectis-radius-interactive</code>, <code>--vectis-icon-size</code>, <code>--vectis-focus-ring-color</code>, <code>--vectis-text-family-heading</code>. A component reads them every render, so the change follows every state — hover, focus, disabled — without a single one of them being restated.',
+    'Prefer repointing a property to rewriting a rule: <code>--vectis-color-accent</code>, <code>--vectis-radius-interactive</code>, <code>--vectis-icon-size</code>, <code>--vectis-focus-ring-color</code>, <code>--vectis-text-family-heading</code>. A component reads them on every render, so the change follows every state it has, hover, focus and disabled included, without a single one of them being restated.',
 }

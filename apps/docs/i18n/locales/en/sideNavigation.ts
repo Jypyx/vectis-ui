@@ -5,7 +5,7 @@ export default {
 
   treeHeading: 'A tree of links',
   treeBody:
-    'A group label is plain text: it cannot be focused or clicked, because a heading that looks clickable and is not is worse than no heading. <code>compact</code> is a DENSITY setting, not a collapsed icon-only rail — this component does not offer one.',
+    'A group label is plain text: it cannot be focused or clicked, because a heading that looks clickable and is not is worse than no heading. <code>compact</code> is a DENSITY setting rather than a collapsed icon-only rail, which this component does not offer.',
 
   branchesHeading: 'Branches',
   branchesBody:
@@ -17,21 +17,20 @@ export default {
 
   invariantsHeading: 'Invariants',
   invariants: [
-    'The label is the DEFAULT SLOT and is required — there is no <code>label</code> prop, so a row can hold a badge or an abbreviation alongside its words.',
+    'The label is the DEFAULT SLOT and is required. There is no <code>label</code> prop, so a row can hold a badge or an abbreviation alongside its words.',
     "An entry never carries both <code>#items</code> and <code>href</code>. Given both it silently becomes a <code>&lt;button&gt;</code>, on which a router's click interception bails.",
-    "The <code>#end</code> slot of a BRANCH must not be focusable: a branch row is a <code>&lt;summary&gt;</code>, and a control inside a control is WCAG 4.1.2 and axe's <code>nested-interactive</code>. On a leaf it is free — the link is stretched over the row by a pseudo-element, so the end slot stays its sibling rather than its child.",
-    'Depth is counted entirely in CSS, through two ALTERNATING custom-property names. TRAP — the obvious one-name form is a cycle as far as CSS is concerned, and the whole tree renders flat with nothing in the console to say why.',
+    "The <code>#end</code> slot of a BRANCH must not be focusable: a branch row is a <code>&lt;summary&gt;</code>, and a control inside a control is WCAG 4.1.2 and axe's <code>nested-interactive</code>. On a leaf it is free, since the link is stretched over the row by a pseudo-element and the end slot stays its sibling rather than its child.",
+    'Depth is counted entirely in CSS, through two ALTERNATING custom-property names. TRAP: the obvious one-name form is a cycle as far as CSS is concerned, and the whole tree renders flat with nothing in the console to say why.',
   ],
 
   apiHeading: 'API',
-  apiNavLabel:
-    '<code>string</code> — what screen readers announce for the <code>&lt;nav&gt;</code>',
+  apiNavLabel: '<code>string</code>: what screen readers announce for the <code>&lt;nav&gt;</code>',
   apiNavLabelDefault: 'dictionary',
-  apiExclusive: '<code>boolean</code> — one branch open per level',
-  apiIcons: '<code>IconSource</code> — give both and they swap instead of rotating',
-  apiActive: '<code>boolean</code> — <code>aria-current</code>',
-  apiHref: '<code>string</code> — ignored on a branch',
-  apiOpen: '<code>boolean | null</code> — <code>null</code> leaves the state to the browser',
+  apiExclusive: '<code>boolean</code>: one branch open per level',
+  apiIcons: '<code>IconSource</code>: give both and they swap instead of rotating',
+  apiActive: '<code>boolean</code>: sets <code>aria-current</code>',
+  apiHref: '<code>string</code>, ignored on a branch',
+  apiOpen: '<code>boolean | null</code>: <code>null</code> leaves the state to the browser',
   apiSlots:
     'Slots: <code>#default</code> (the label, required), <code>#items</code> (the branch), <code>#sublabel</code>, <code>#start</code>, <code>#end</code>. A leaf emits <code>select</code> on click and on keyboard activation; there is deliberately no <code>click</code> emit, so your own <code>@click</code> still reaches the link.',
   apiQuote:

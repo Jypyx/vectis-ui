@@ -10,24 +10,26 @@ export default {
   registerMessages:
     'Registers a dictionary. Partial dictionaries are legitimate: what is missing falls back to English.',
   dictionaries:
-    'The two shipped dictionaries. <code>en</code> is always bundled; <code>fr</code> is opt-in — not importing it prunes it.',
+    'The two shipped dictionaries. <code>en</code> is always bundled; <code>fr</code> is opt-in, and not importing it prunes it.',
   setIconResolver:
     'Wires a third-party icon library. Consulted BEFORE the built-in registry; return <code>undefined</code> to hand over.',
-  ligatureResolver: 'Resolves a name to an icon-font ligature — Material Symbols, IcoMoon.',
+  ligatureResolver:
+    'Resolves a name to an icon-font ligature, such as Material Symbols or IcoMoon.',
   classResolver:
-    'Resolves a name to a class-driven set — Font Awesome, Phosphor, Bootstrap Icons. Strict by default, so an unmapped name falls back to the built-in SVG rather than to an empty square.',
-  componentResolver: 'Resolves a name to a component from your own library — Lucide, Untitled UI.',
+    'Resolves a name to a class-driven set: Font Awesome, Phosphor, Bootstrap Icons. Strict by default, so an unmapped name falls back to the built-in SVG rather than to an empty square.',
+  componentResolver:
+    'Resolves a name to a component from your own library, such as Lucide or Untitled UI.',
   toast:
-    'Adds and removes a notification. The only imperative API in the library — a toast has no place in the tree that asks for it.',
+    'Adds and removes a notification. It is the only imperative API in the library, because a toast has no place in the tree that asks for it.',
 
   moduleState:
     'Everything above writes MODULE-LEVEL state, which is what lets it be called from any <code>.ts</code> file without a plugin or a provider, and what makes already-mounted components re-render when it changes. The same property is the constraint: it belongs to the process rather than to a request, so it is configuration and never anything that varies per visitor.',
   types:
-    'Types are exported alongside them — <code>VectisMessages</code>, <code>VectisMessagesInput</code>, <code>IconSource</code>, <code>IconResolver</code>, <code>ToastOptions</code> — plus one per component whose API needs naming (<code>ComboboxOption</code>, <code>DataTableColumn</code>, <code>DatePickerSelection</code>…).',
+    'Types are exported alongside them (<code>VectisMessages</code>, <code>VectisMessagesInput</code>, <code>IconSource</code>, <code>IconResolver</code>, <code>ToastOptions</code>), plus one per component whose API needs naming, such as <code>ComboboxOption</code>, <code>DataTableColumn</code> or <code>DatePickerSelection</code>.',
 
   internalHeading: 'The internal helpers, and why they stay internal',
   internalBody:
-    'The library carries a full set of date, time, file and text helpers — they are what VDatePicker, VDateInput, VTimePicker and VFilePicker are built on. They are NOT exported, and the reason is stated at the entry point: the internal modules are not part of the public surface, so their signatures stay free to change with the components that use them.',
+    'The library carries a full set of date, time, file and text helpers, and they are what VDatePicker, VDateInput, VTimePicker and VFilePicker are built on. They are NOT exported, and the reason is stated at the entry point: the internal modules are not part of the public surface, so their signatures stay free to change with the components that use them.',
   columnModule: 'Module',
   columnInternal: 'Internal helpers',
   internalQuote:
@@ -35,5 +37,5 @@ export default {
 
   composablesHeading: 'Composables',
   composablesBody:
-    'The same rule covers the thirteen composables — <code>usePopover</code>, <code>useFieldPanel</code>, <code>useMaskedField</code>, <code>useFocusoutDismiss</code>, <code>useTextLimit</code>, <code>useRootAttrs</code>, <code>useTimer</code> and their kin: internal, unexported, and documented in their own files. If you find yourself needing one, that is a request for a component.',
+    'The same rule covers the thirteen composables, <code>usePopover</code>, <code>useFieldPanel</code>, <code>useMaskedField</code>, <code>useFocusoutDismiss</code>, <code>useTextLimit</code>, <code>useRootAttrs</code>, <code>useTimer</code> and their kin: internal, unexported, and documented in their own files. If you find yourself needing one, that is a request for a component.',
 }

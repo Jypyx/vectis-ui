@@ -117,12 +117,12 @@ const routerCode = `<!-- \`active\` is manual: the component knows nothing about
     <tr>
       <td><code>href</code></td>
       <DocsProse tag="td" keypath="sideNavigation.apiHref" />
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>icon</code> · <code>sublabel</code></td>
       <td><code>IconSource</code> · <code>string</code></td>
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>defaultOpen</code> · <code>disabled</code></td>

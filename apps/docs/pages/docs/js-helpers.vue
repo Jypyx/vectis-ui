@@ -8,7 +8,7 @@ useHead({ title: () => t('jsHelpers.title') })
 const exportColumns = computed(() => [t('jsHelpers.columnExport'), t('jsHelpers.columnDoes')])
 const internalColumns = computed(() => [t('jsHelpers.columnModule'), t('jsHelpers.columnInternal')])
 
-const configCode = `// app entry — module level, never inside a setup()
+const configCode = `// app entry: module level, never inside a setup()
 import {
   fr,
   registerMessages,

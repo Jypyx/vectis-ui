@@ -5,7 +5,7 @@ export default {
 
   treeHeading: 'Un arbre de liens',
   treeBody:
-    "Un libellé de groupe est du texte simple : il ne peut être ni focalisé ni cliqué, parce qu'un titre qui a l'air cliquable sans l'être vaut moins que pas de titre du tout. <code>compact</code> est un réglage de DENSITÉ, pas un rail replié réduit aux icônes — ce composant n'en propose pas.",
+    "Un libellé de groupe est du texte simple : il ne peut être ni focalisé ni cliqué, parce qu'un titre qui a l'air cliquable sans l'être vaut moins que pas de titre du tout. <code>compact</code> est un réglage de DENSITÉ plutôt qu'un rail replié réduit aux icônes, que ce composant ne propose pas.",
 
   branchesHeading: 'Branches',
   branchesBody:
@@ -17,21 +17,21 @@ export default {
 
   invariantsHeading: 'Invariants',
   invariants: [
-    "Le libellé est le SLOT PAR DÉFAUT et il est obligatoire — il n'y a pas de prop <code>label</code>, si bien qu'une ligne peut porter un badge ou une abréviation à côté de ses mots.",
+    "Le libellé est le SLOT PAR DÉFAUT et il est obligatoire. Il n'y a pas de prop <code>label</code>, si bien qu'une ligne peut porter un badge ou une abréviation à côté de ses mots.",
     "Une entrée ne porte jamais à la fois <code>#items</code> et <code>href</code>. Si on lui donne les deux, elle devient silencieusement un <code>&lt;button&gt;</code>, sur lequel l'interception de clic d'un routeur renonce.",
-    "Le slot <code>#end</code> d'une BRANCHE ne doit pas être focalisable : une ligne de branche est un <code>&lt;summary&gt;</code>, et un contrôle dans un contrôle relève de WCAG 4.1.2 et du <code>nested-interactive</code> d'axe. Sur une feuille il est libre — le lien est étiré sur la ligne par un pseudo-élément, si bien que le slot de fin reste son frère et non son enfant.",
-    "La profondeur se compte entièrement en CSS, par deux noms de propriétés personnalisées qui ALTERNENT. PIÈGE — la forme évidente à un seul nom est un cycle du point de vue de CSS, et l'arbre entier s'affiche à plat sans rien dans la console pour dire pourquoi.",
+    "Le slot <code>#end</code> d'une BRANCHE ne doit pas être focalisable : une ligne de branche est un <code>&lt;summary&gt;</code>, et un contrôle dans un contrôle relève de WCAG 4.1.2 et du <code>nested-interactive</code> d'axe. Sur une feuille il est libre, puisque le lien est étiré sur la ligne par un pseudo-élément et que le slot de fin reste son frère et non son enfant.",
+    "La profondeur se compte entièrement en CSS, par deux noms de propriétés personnalisées qui ALTERNENT. PIÈGE : la forme évidente à un seul nom est un cycle du point de vue de CSS, et l'arbre entier s'affiche à plat sans rien dans la console pour dire pourquoi.",
   ],
 
   apiHeading: 'API',
   apiNavLabel:
-    "<code>string</code> — ce que les lecteurs d'écran annoncent pour le <code>&lt;nav&gt;</code>",
+    "<code>string</code> : ce que les lecteurs d'écran annoncent pour le <code>&lt;nav&gt;</code>",
   apiNavLabelDefault: 'dictionnaire',
-  apiExclusive: '<code>boolean</code> — une seule branche ouverte par niveau',
-  apiIcons: '<code>IconSource</code> — donnez les deux et elles permutent au lieu de pivoter',
-  apiActive: '<code>boolean</code> — <code>aria-current</code>',
-  apiHref: '<code>string</code> — ignoré sur une branche',
-  apiOpen: "<code>boolean | null</code> — <code>null</code> laisse l'état au navigateur",
+  apiExclusive: '<code>boolean</code> : une seule branche ouverte par niveau',
+  apiIcons: '<code>IconSource</code> : donnez les deux et elles permutent au lieu de pivoter',
+  apiActive: '<code>boolean</code> : pose <code>aria-current</code>',
+  apiHref: '<code>string</code>, ignoré sur une branche',
+  apiOpen: "<code>boolean | null</code> : <code>null</code> laisse l'état au navigateur",
   apiSlots:
     "Slots : <code>#default</code> (le libellé, obligatoire), <code>#items</code> (la branche), <code>#sublabel</code>, <code>#start</code>, <code>#end</code>. Une feuille émet <code>select</code> au clic et à l'activation clavier ; il n'y a délibérément pas d'émission <code>click</code>, si bien que votre propre <code>@click</code> atteint toujours le lien.",
   apiQuote:

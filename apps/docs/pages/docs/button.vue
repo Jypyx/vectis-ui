@@ -124,7 +124,7 @@ const linkCode = `<VButton href="/pricing">Pricing</VButton>
     <tr>
       <td><code>href</code></td>
       <DocsProse tag="td" keypath="button.apiHref" />
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>type</code></td>
@@ -139,7 +139,7 @@ const linkCode = `<VButton href="/pricing">Pricing</VButton>
     <tr>
       <td><code>iconStart</code> · <code>iconEnd</code></td>
       <td><code>IconSource</code></td>
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>iconFilled</code></td>
@@ -154,12 +154,12 @@ const linkCode = `<VButton href="/pricing">Pricing</VButton>
     <tr>
       <td><code>label</code></td>
       <DocsProse tag="td" keypath="button.apiLabel" />
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>icon</code></td>
       <DocsProse tag="td" keypath="button.apiIcon" />
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>shape</code></td>

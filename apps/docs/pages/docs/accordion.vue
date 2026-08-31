@@ -91,17 +91,17 @@ const independentCode = `<!-- exclusive is TRUE by default: opening one closes t
     <tr>
       <td><code>collapseIcon</code></td>
       <DocsProse tag="td" keypath="accordion.apiCollapseIcon" />
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>title</code> · <code>subtitle</code> <span>(VAccordionItem)</span></td>
       <DocsProse tag="td" keypath="accordion.apiTitles" />
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>iconStart</code> <span>(VAccordionItem)</span></td>
       <DocsProse tag="td" keypath="accordion.apiIconStart" />
-      <td>—</td>
+      <td>{{ t('common.table.noDefault') }}</td>
     </tr>
     <tr>
       <td><code>defaultOpen</code></td>

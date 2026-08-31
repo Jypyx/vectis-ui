@@ -5,7 +5,7 @@
  */
 export default {
   lead: "Cette page n'est pas encore rédigée.",
-  body: "Le composant existe en amont et fait pleinement partie de l'inventaire ; il est listé ici pour que la forme de la bibliothèque reste honnête. Il est absent parce qu'il n'a pas été relu en entier, non parce qu'il aurait été jugé superflu — et l'approximer documenterait une API que la bibliothèque n'a pas.",
+  body: "Le composant existe en amont et fait pleinement partie de l'inventaire ; il est listé ici pour que la forme de la bibliothèque reste honnête. Il est absent parce qu'il n'a pas été relu en entier, non parce qu'il aurait été jugé superflu, et l'approximer documenterait une API que la bibliothèque n'a pas.",
   quote:
     'Demandez-la et elle sera écrite comme les autres : depuis la source, sans arrondir les valeurs.',
   meantimeHeading: 'En attendant',

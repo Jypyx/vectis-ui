@@ -7,7 +7,7 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 useHead({ title: () => t('fontFamily.title') })
 
-const wireCode = `/* an unlayered stylesheet — this site's own */
+const wireCode = `/* an unlayered stylesheet, this site's own */
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&family=Geist:wght@400;500;600;700&display=swap');
 
 :root {
