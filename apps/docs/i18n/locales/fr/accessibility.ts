@@ -1,14 +1,15 @@
 export default {
   title: 'Accessibilité',
-  lead: 'Navigation au clavier et sémantique ARIA sur chaque composant. <code>prefers-reduced-motion</code> est respecté partout, et axe audite chaque story dans les deux thèmes à chaque commit. Une violation fait échouer le build au lieu de produire un avertissement que personne ne lit.',
+  lead: 'Navigation au clavier et sémantique ARIA sur chaque composant. <code>prefers-reduced-motion</code> est respecté partout, et axe audite chaque story dans les deux thèmes à chaque commit.',
 
   guaranteedHeading: 'Ce qui est garanti',
   guarantees: [
-    'Le patron ARIA menu : focus itinérant, et focus rendu au déclencheur à la fermeture.',
-    '<code>role="switch"</code> sur VSwitch, pour qu\'il soit annoncé activé ou désactivé plutôt que coché.',
-    'Les infobulles liées par <code>aria-describedby</code> et refermables avec Échap (WCAG 1.4.13).',
-    '<code>role="status"</code> ou <code>role="alert"</code> selon la criticité.',
-    "Un libellé accessible OBLIGATOIRE sur VIconButton. La prop n'est pas optionnelle, donc un bouton icône sans nom ne peut pas s'écrire par accident.",
+    "Tout ce qui est interactif s'atteint et s'utilise au clavier, dans l'ordre où la page se lit, sans impasse pour en sortir.",
+    "Chaque composant porte le patron ARIA que son comportement implique : le rôle qu'il joue, l'état à mesure qu'il change, et les relations entre ses parties. Ce qui est annoncé est ce que la chose fait, pas ce à quoi elle ressemble.",
+    'Le focus est toujours visible, et il retourne là où il était quand un panneau, un menu ou une boîte de dialogue se referme.',
+    "Tout ce qui s'ouvre se referme avec Échap, et tout ce qui apparaît ou se met à jour de lui-même est annoncé au lieu d'être laissé à la vigilance du lecteur.",
+    "Un contrôle qui ne contient qu'une icône ne peut pas s'écrire sans nom accessible : la prop est obligatoire, l'oubli est donc une erreur de compilation et non une erreur silencieuse.",
+    "Le contraste du texte tient le plancher WCAG AA dans le thème clair comme dans le sombre, et les états désactivés se grisent par les tokens de couleur plutôt que par l'opacité, ce qui les garde lisibles sur n'importe quelle surface.",
   ],
   guaranteedBody:
     "La moitié du JavaScript comportemental de la bibliothèque existe pour cela plutôt que pour faire fonctionner quoi que ce soit. Les composants sont accessibles d'abord et interactifs ensuite, et le code est étiqueté pour que ce rapport se compte au lieu de se proclamer.",
@@ -17,7 +18,7 @@ export default {
   focusBody:
     "Le focus est un contour de 2px à 2px de décalage, tracé à l'extérieur de la boîte, donc sans coût de mise en page. Partout où le conteneur rogne son contenu, il est ramené vers l'intérieur : les boutons internes d'un champ, le résumé d'un accordéon, une ligne de navigation dans une branche animable. Un contour tracé hors d'une boîte qui rogne est un contour que personne ne voit.",
   focusCaption:
-    "Un champ de texte fait exception : une bordure d'accent de 1px plus une ombre de la même couleur, parce que le mode couleurs forcées de Windows supprime les ombres portées et que le contour est le filet de sécurité.",
+    "Parcourez-les avec Tab. Un champ de texte fait exception à la règle, avec une bordure d'accent de 1px plus une ombre de la même couleur, et la croix qu'il contient prend l'anneau pour elle.",
 
   validationHeading: 'Validation',
   validationBody:
@@ -30,10 +31,4 @@ export default {
   forcedColorsHeading: 'Couleurs forcées',
   forcedColorsBody:
     "Deux décisions de la bibliothèque existent pour le mode couleurs forcées de Windows, et toutes deux méritent d'être reprises. Les icônes sont dessinées en <code>&lt;svg&gt;&lt;path fill=\"currentcolor\"&gt;</code> et jamais en fond masqué, qui y disparaît. Les filets sont peints avec une bordure plutôt qu'un fond : un fond est forcé à <code>Canvas</code>, la couleur de la page elle-même, tandis qu'une couleur de bordure est forcée à <code>CanvasText</code> et survit.",
-
-  toolHeading: "Ce qu'un outil ne peut pas vous dire",
-  toolBody:
-    "axe lit les couleurs calculées : le contraste doit donc être vérifié deux fois, une par thème, et l'intégration continue de la bibliothèque fait exactement cela. Il ne sait pas non plus juger un texte peint par-dessus un frère qu'il ne recouvre qu'en partie : il déduit un fond des boîtes qui contiennent le rectangle de l'élément, si bien qu'un libellé rogné se mesure contre ce qui se trouve dessous. Les deux cas concernés sont exclus nommément dans la bibliothèque, chacun avec son raisonnement. Une exclusion couvre une limite de l'outil, jamais une vraie violation.",
-  toolQuote:
-    "Un outil qui tourne à chaque commit et bloque le build vaut mieux qu'un audit qui a lieu une fois. Ni l'un ni l'autre ne remplace l'usage de la chose au clavier.",
 }
