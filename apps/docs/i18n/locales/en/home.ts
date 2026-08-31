@@ -86,6 +86,9 @@ export default {
   installSubtitle:
     'Add the dependency, load the global styles, and start using Vectis UI components with nothing else to configure.',
   installTabsLabel: 'Installation steps',
+  // The accessible name of the package-manager toggle. The four names it holds are commands and
+  // stay untranslated; only what the group IS gets a word.
+  installManagerLabel: 'Package manager',
 
   stepInstallLabel: 'Installation',
   stepInstallBody: 'Add the package to your project with whichever manager you prefer.',

@@ -48,6 +48,7 @@ export default {
   installSubtitle:
     'Ajoutez la dépendance, chargez les styles globaux, et commencez à utiliser les composants de Vectis UI sans paramétrage supplémentaire.',
   installTabsLabel: "Étapes d'installation",
+  installManagerLabel: 'Gestionnaire de paquets',
 
   stepInstallLabel: 'Installation',
   stepInstallBody: 'Ajoutez le paquet à votre projet via votre gestionnaire favori.',

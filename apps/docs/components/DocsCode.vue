@@ -16,6 +16,18 @@ const props = defineProps<{
   code: string
 }>()
 
+defineSlots<{
+  /**
+   * A control placed in the header, between the language tag and the copy button — the home
+   * page's package-manager toggle is the only one today. It stays a slot rather than a prop
+   * because the header is chrome this component owns while the CONTENT of such a control is
+   * always the caller's: `code` arrives from outside, so whatever changes it belongs outside
+   * too. Left unused, as it is by every other sample on the site, it renders nothing at all
+   * and the header keeps its two-item layout.
+   */
+  head?(): unknown
+}>()
+
 const { t } = useI18n()
 
 const text = computed(() => props.code.replace(/^\n/, '').replace(/\s+$/, ''))
@@ -48,12 +60,14 @@ async function copy() {
         it names here is a language, not a word.
       -->
       <VTypography variant="overline" tone="muted" class="vd-code-lang">{{ lang }}</VTypography>
+      <slot name="head" />
       <VIconButton
         :label="t('common.code.copy')"
         icon="content_copy"
         variant="ghost"
         tone="neutral"
         size="sm"
+        class="vd-code-copy"
         @click="copy"
       />
     </div>

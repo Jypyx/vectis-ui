@@ -640,10 +640,15 @@
   border-radius: var(--vectis-radius-surface);
   background: var(--vectis-color-surface-sunken);
 }
+/* `wrap` is insurance for the ONE header that carries a third item, the home page's
+   package-manager toggle: four text segments beside a language tag and a copy button is more
+   than a narrow phone fits, and without this the row would overflow a card that clips its own
+   radius with `overflow: hidden` — putting the copy button out of reach rather than merely out
+   of line. It is inert on every other sample, whose two items never fill the row. */
 .vd-code-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  flex-wrap: wrap;
   gap: var(--vectis-space-2);
   padding: var(--vectis-space-1) var(--vectis-space-1) var(--vectis-space-1) var(--vectis-space-4);
   border-bottom: 1px solid var(--vectis-color-border);
@@ -653,6 +658,17 @@
    family, since what it names is a language and not a word. */
 .vd-code-lang {
   font-family: var(--vectis-text-family-code);
+}
+/* The copy button is pushed to the end by an AUTO MARGIN and not by `justify-content`, which
+   this row deliberately no longer sets — the VDataTable footer idiom, and for the same reason.
+   `space-between` distributes free space BETWEEN every item, so the third one a header can now
+   carry (the home page's package-manager toggle) was pinned to the middle of the row with no
+   way to say otherwise. An auto margin gives all the free space to one gap instead, so the tag
+   and the toggle stay grouped at the start whatever their number, and the button still sits at
+   the end when it is the only other item — which is what makes this a no-op for every other
+   sample on the site. */
+.vd-code-copy {
+  margin-inline-start: auto;
 }
 /* A sample WRAPS rather than scrolling sideways, and that is a readability decision, not a
    cosmetic one: a horizontal scrollbar inside a bordered card hides content a reader has no

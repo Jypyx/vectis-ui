@@ -7,7 +7,17 @@
  * a column beside its accordion, where centring a bulleted argument would only make it harder to
  * follow.
  */
-import { VButton, VChip, VIcon, VTab, VTabPanel, VTabs, VTypography } from 'vectis-ui'
+import {
+  VButton,
+  VChip,
+  VIcon,
+  VTab,
+  VTabPanel,
+  VTabs,
+  VToggle,
+  VToggleItem,
+  VTypography,
+} from 'vectis-ui'
 import { arrow_right_alt as arrowRightAltIcon } from 'vectis-ui/icons'
 
 import chromeLogo from '~/assets/img/chrome-browser-svg.svg'
@@ -147,14 +157,26 @@ const browsers = [
  *
  * `file` is a template constant and never a catalogue key: a file name is not translated.
  */
-const STEPS = [
+type Step = {
+  value: string
+  label: string
+  body: string
+  file?: string
+  lang: string
+  /**
+   * Absent on the install step alone, whose command is not a constant: it is chosen from the
+   * four package managers below, so it is supplied at render time rather than written here.
+   */
+  code?: string
+}
+
+const STEPS: Step[] = [
   {
     value: 'install',
     label: 'home.stepInstallLabel',
     body: 'home.stepInstallBody',
     file: undefined,
     lang: 'bash',
-    code: 'pnpm add vectis-ui vue',
   },
   {
     value: 'styles',
@@ -174,6 +196,38 @@ const STEPS = [
   },
 ]
 
+/**
+ * The install command in each of the four package managers, which the install step offers
+ * through a toggle in its header.
+ *
+ * The names are VALUES, not words: they are what the reader types, so they are never
+ * translated and the toggle shows them exactly as they are spelled on a command line. Only the
+ * order is editorial — pnpm leads because it is what the repository itself uses and what the
+ * rest of the documentation writes.
+ *
+ * The commands differ in more than the binary's name, which is the whole reason this is a table
+ * and not a prefix substitution: npm INSTALLS where the other three ADD.
+ */
+const PACKAGE_MANAGERS = [
+  { value: 'pnpm', command: 'pnpm add vectis-ui vue' },
+  { value: 'npm', command: 'npm install vectis-ui vue' },
+  { value: 'yarn', command: 'yarn add vectis-ui vue' },
+  { value: 'bun', command: 'bun add vectis-ui vue' },
+]
+
+/**
+ * Which manager the command is shown in. `mandatory` on the VToggle is what keeps this pointing
+ * at a real entry: in single mode a second click on the selected item would otherwise deselect
+ * it, and the step would print its comment above nothing.
+ */
+const packageManager = ref<string>(PACKAGE_MANAGERS[0]!.value)
+
+const installCommand = computed(
+  () =>
+    PACKAGE_MANAGERS.find((manager) => manager.value === packageManager.value)?.command ??
+    PACKAGE_MANAGERS[0]!.command,
+)
+
 const installSteps = computed(() =>
   STEPS.map((step) => {
     const mark = step.lang === 'bash' ? '#' : '//'
@@ -184,7 +238,15 @@ const installSteps = computed(() =>
       .map((line) => `${mark} ${line}`)
       .join('\n')
 
-    return { ...step, label: t(step.label), code: `${header}\n\n${step.code}` }
+    // The install step is the one without a literal — see `code` on `Step`. `managed` carries
+    // that same test to the template, so which step owns the toggle is decided HERE and once,
+    // rather than by re-testing the step's id in the markup.
+    return {
+      ...step,
+      label: t(step.label),
+      managed: step.code === undefined,
+      code: `${header}\n\n${step.code ?? installCommand.value}`,
+    }
   }),
 )
 
@@ -340,7 +402,32 @@ const installStep = ref<string>(STEPS[0]!.value)
           />
           <template #panels>
             <VTabPanel v-for="step in installSteps" :key="step.value" :value="step.value">
-              <DocsCode :lang="step.lang" :code="step.code" />
+              <DocsCode :lang="step.lang" :code="step.code">
+                <!--
+                  The toggle belongs to the install step alone — the other two import from the
+                  package and name no manager. `size="xs"` against the header's `sm` copy button
+                  is deliberate: four text segments in a title bar are chrome, and at `sm` the
+                  row stops fitting a phone.
+                -->
+                <template v-if="step.managed" #head>
+                  <VToggle
+                    v-model="packageManager"
+                    mandatory
+                    variant="outline"
+                    tone="neutral"
+                    size="xs"
+                    :label="t('home.installManagerLabel')"
+                  >
+                    <VToggleItem
+                      v-for="manager in PACKAGE_MANAGERS"
+                      :key="manager.value"
+                      :value="manager.value"
+                    >
+                      {{ manager.value }}
+                    </VToggleItem>
+                  </VToggle>
+                </template>
+              </DocsCode>
             </VTabPanel>
           </template>
         </VTabs>
