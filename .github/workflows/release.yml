@@ -89,6 +89,11 @@ jobs:
       - name: Package manifest and type resolution
         run: pnpm --filter vectis-ui run check:package
 
+      # The dist-tag is DERIVED from the version, never defaulted: without `--tag`, pnpm
+      # publishes to `latest`, so a `v1.0.0-rc.1` tag would make a prerelease the default
+      # install — `yarn add vectis-ui` would hand a consumer the rc. A version carrying a
+      # prerelease identifier therefore goes to `next` and leaves `latest` where it was.
+      #
       # `--no-git-checks` is required and is not a loosening: a tag is checked out as a
       # DETACHED HEAD, so pnpm's default check — that the current branch is the publish
       # branch — can only ever fail here. The cleanliness half of that check is satisfied by
@@ -99,5 +104,16 @@ jobs:
       #
       # `prepack` rebuilds on the way in, so what ships is built from the tagged tree rather
       # than from whatever the steps above left in `dist`.
+      #
+      # TRAP — a green step does NOT mean anything was published. Asked for a version the
+      # registry already holds, pnpm prints "There are no new packages that should be
+      # published" and exits 0, without ever authenticating. Read the log, not the tick.
       - name: Publish
-        run: pnpm --filter vectis-ui publish --no-git-checks
+        run: |
+          version="$(node -p "require('./packages/ui/package.json').version")"
+          case "$version" in
+            *-*) dist_tag=next ;;
+            *) dist_tag=latest ;;
+          esac
+          echo "publishing vectis-ui@$version under the dist-tag $dist_tag"
+          pnpm --filter vectis-ui publish --no-git-checks --tag "$dist_tag"
