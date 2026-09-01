@@ -50,12 +50,9 @@ Checkpoint before wrapping up a step: `pnpm lint && pnpm typecheck && pnpm test 
 3. **No raw values in component CSS** (colour, radius, spacing, type, shadow, duration): semantic `var(--vectis-*)` tokens only. A duration names the step it wants (`var(--vectis-duration-1000)`), never a multiplier on another one. Tolerated: `1px` borders, opacities.
 4. **SSR-safe (Nuxt)**: no `window`/`document`/browser-API access outside `onMounted`/`watch`/handlers. Support detection (`CSS.supports`) client-side only. IDs through Vue's `useId()`.
 
-## Comments
+## Code Commenting Guidelines
 
-Every comment is written in **English, as complete sentences** rather than telegraphic shorthand. **Length is not a defect**: a comment that takes four lines to be genuinely clear is better than a one-liner only its author can decode. What is still a defect is a comment that says nothing (a banner, a restatement of the identifier on the next line) or that is out of date. Two audiences, so two registers:
-
-- **The module's introduction block is written for anyone** — an integrator, a designer, someone who is not an expert front-end developer. It is the raw material of the documentation, so it says what the thing is and what it is for in plain prose, spelling out the concepts instead of assuming them.
-- **Every other comment is written for a front-end developer.** It may be as long as it needs to be, but it can freely name the platform and the framework (the cascade, the top layer, `flush: 'post'`, hydration) without explaining them from first principles.
+Write clear, concise comments that explain why something is done rather than what the code is doing (let clean, self-documenting code handle the what). Strike a balance by providing enough high-level context so an external developer can understand the intent and architectural reasoning without getting bogged down in overly dense technical jargon or line-by-line narration. Focus on non-obvious design decisions, edge cases, and business logic constraints.
 
 **Keep:**
 
@@ -372,12 +369,13 @@ A **Nuxt 4** application, `nuxt generate`d to static files and published to GitH
 
 ### How the documentation is WRITTEN
 
-Two rules on the prose itself. They cover everything a reader of the site can see: the message catalogues in `i18n/locales/`, the text written straight into a page template, and the comments inside a `DocsCode` sample, which are printed on screen like the code around them. They also cover the JSDoc on anything the package exports, since an IDE hover is documentation too. Source comments in `packages/ui` are a different audience and keep the repo's own comment style.
+Three rules on the prose itself. They cover everything a reader of the site can see: the message catalogues in `i18n/locales/`, the text written straight into a page template, and the comments inside a `DocsCode` sample, which are printed on screen like the code around them. They also cover the JSDoc on anything the package exports, since an IDE hover is documentation too. Source comments in `packages/ui` are a different audience and keep the repo's own comment style.
 
 - **No em dash, anywhere in that prose.** A sentence that reaches for one is a sentence with two clauses in it: give it a comma, a colon, a full stop or a pair of brackets, and it reads better for the change. Two checks: `git grep -n "—" -- apps/docs/i18n/locales/en apps/docs/i18n/locales/fr` covers the catalogues and must return nothing, and the built artefact can be scanned for the character once `nuxt generate` has run, which is the only pass that sees a sample's comments and a template's own text as well (none of the 106 pages carries one today). Hits elsewhere under `apps/docs` are source comments, which the rule does not reach. The same goes for the table cell of a prop with no default: it says `common.table.noDefault` ("none" / "aucune"), a word a screen reader can announce, where a dash is punctuation it skips.
+- **Direct, concise, and recognizably human.** Write like an experienced developer or technical writer addressing peers. No marketing register, no emphatic phrasing, no superlatives, and none of the hollow openings and closings a machine reaches for: "In summary", "It is important to note that", "In today's landscape of", "Let's dive into". A page opens on its subject and stops when the subject is covered. Prefer well-paced sentences and precise facts over transitions that announce what the next paragraph is about to do: a sober technical or conversational tone carries a doc page further than enthusiasm does.
 - **No development history.** The documentation describes the library as it is today. Never "it no longer does X", "it used to be a single table", "since the icon split", "this replaced the old accordion": a reader integrating the package has no idea what came before and does not need one, and a sentence written against a previous state rots the day the next one lands. Say what is true now and why. The reasons are what earn their place; the chronology never does. This applies to code comments in `apps/docs` as well, which are read by whoever writes the next page.
 
-Both rules also mean **the prose should not read as though a machine produced it**: vary the sentence length, do not open three paragraphs running with the same construction, drop the "not X, but Y" cadence when a plain statement does the job, and keep the emphasis for the one or two places in a page where something really is a trap.
+The tone rule has a rhythmic half as well, **the prose should not read as though a machine produced it**: vary the sentence length, do not open three paragraphs running with the same construction, drop the "not X, but Y" cadence when a plain statement does the job, and keep the emphasis for the one or two places in a page where something really is a trap.
 
 ### The site is bilingual (`@nuxtjs/i18n`)
 
