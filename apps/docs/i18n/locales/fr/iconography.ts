@@ -3,7 +3,8 @@ export default {
   lead: "Vectis UI n'utilise ni n'embarque aucune police d'icônes (icon font). Les composants s'appuient exclusivement sur des tracés SVG en ligne (inline SVG), issus directement de la collection Material Symbols Rounded (poids 400, GRAD 0, taille optique 24px, sous licence Apache 2.0 © Google).",
   weight:
     "Vectis UI intègre 34 icônes distribuées dans des modules distincts pour garantir un tree-shaking parfait : seules les icônes réellement importées ou rendues dans votre application sont incluses dans le bundle final. Un composant comme <code>VButton</code> n'embarque ainsi aucune icône par défaut.<br>Chaque icône prend en charge la variante <code>outline</code> et, optionnellement, la version <code>filled</code>. Pour optimiser l'empreinte du code, le tracé <code>filled</code> n'est déclaré que si la propriété <code>FILL</code> modifie la géométrie de l'icône (ce qui concerne 15 des 34 icônes).",
-  gridCaption: "Les positions 3 et 4, ainsi que 6 et 7, illustrent un même symbole décliné successivement dans ses variantes 'outline' et 'filled'",
+  gridCaption:
+    "Les positions 3 et 4, ainsi que 6 et 7, illustrent un même symbole décliné successivement dans ses variantes 'outline' et 'filled'",
 
   importHeading: 'Importer une icône',
   importBody:
@@ -45,15 +46,24 @@ export default {
 
   sizingHeading: 'Taille',
   sizingBody:
-    "Par défaut, une icône adopte une dimension de <code>1em</code>, héritant automatiquement de la taille du texte environnant (font-size). Deux mécanismes permettent de surcharger ce comportement : ",
-  sizingOverrides: ["Surcharge locale : La prop <code>size</code> (en pixels), appliquée directement sur l'icône, prévaut sur toute autre règle stylistique.", "Surcharge contextuelle : La variable CSS <code>--vectis-icon-size</code>, définie sur un élément ancêtre, se propage à toutes les icônes descendantes ne spécifiant pas leur propre prop <code>size</code>."],
-  sizingReason: "C'est cette seconde approche par cascade CSS qui permet aux composants de contrôle (via <code>v-control</code>) d'ajuster automatiquement la taille des icônes enfants selon la variante de taille du composant parent.",
+    'Par défaut, une icône adopte une dimension de <code>1em</code>, héritant automatiquement de la taille du texte environnant (font-size). Deux mécanismes permettent de surcharger ce comportement : ',
+  sizingOverrides: [
+    "Surcharge locale : La prop <code>size</code> (en pixels), appliquée directement sur l'icône, prévaut sur toute autre règle stylistique.",
+    'Surcharge contextuelle : La variable CSS <code>--vectis-icon-size</code>, définie sur un élément ancêtre, se propage à toutes les icônes descendantes ne spécifiant pas leur propre prop <code>size</code>.',
+  ],
+  sizingReason:
+    "C'est cette seconde approche par cascade CSS qui permet aux composants de contrôle (via <code>v-control</code>) d'ajuster automatiquement la taille des icônes enfants selon la variante de taille du composant parent.",
   sizingCaption: 'La même icône à 16, 24 et 40 pixels.',
 
   orderHeading: 'Ordre de résolution',
   orderBody:
     "Le composant <code>VIcon</code> évalue sa source d'affichage selon un ordre de priorité immuable. Cet ordre de précédence constitue le contrat d'interface du composant :",
-  orderRules: ["Prop  <code>render</code> (fonction de rendu explicite)", "Prop  <code>src</code> (valeur ou objet d'icône importé)", "Prop  <code>name</code> (identifiant résolu séquentiellement : résolveur personnalisé -> tracé SVG natif embarqué -> ligature de la police d'icônes)", "Slot par défaut (contenu SVG ou HTML injecté)"],
+  orderRules: [
+    'Prop  <code>render</code> (fonction de rendu explicite)',
+    "Prop  <code>src</code> (valeur ou objet d'icône importé)",
+    "Prop  <code>name</code> (identifiant résolu séquentiellement : résolveur personnalisé -> tracé SVG natif embarqué -> ligature de la police d'icônes)",
+    'Slot par défaut (contenu SVG ou HTML injecté)',
+  ],
   noHeuristic:
     "Une chaîne de caractères est systématiquement traitée comme un nom d'icône. Pour déclarer une image, un composant ou un style spécifique, la valeur doit être passée explicitement sous forme d'objet (<code>{ src }</code>, <code>{ component }</code>, <code>{ path }</code>, <code>{ text }</code> ou <code>{ class }</code>). L'absence totale d'heuristique garantit qu'un identifiant à espace de noms tel que mdi:close (format Iconify) parvienne intact à votre résolveur sans risque d'être interprété à tort comme une URL ou un chemin réseau.",
 

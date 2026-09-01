@@ -29,5 +29,8 @@ export default {
   forcedColorsHeading: 'Couleurs forcées',
   forcedColorsBody:
     "Vectis UI intègre deux choix d'architecture spécifiquement conçus pour le mode Couleurs forcées de Windows (Forced Colors Mode / Contraste élevé) :",
-   forcedColorsRules: ["<strong>Rendu des icônes</strong> : Les icônes sont exclusivement intégrées sous forme de balises <code>&lt;svg&gt;</code> avec <code>fill=\"currentColor\"</code>. L'usage de masques d'arrière-plan CSS (<code>mask-image</code>) est proscrit, car ces derniers sont entièrement masqués par le système en mode couleurs forcées.", "<strong>Lignes de séparation et séparateurs</strong> : Les filets sont réalisés via de véritables bordures CSS (<code>border</code>) plutôt que par des conteneurs filiformes à fond coloré (<code>background-color</code>). En effet, le système réinitialise les fonds sur la couleur système Canvas (identique au fond de page, ce qui rend le composant invisible), tandis que les bordures basculent sur <code>CanvasText</code>, garantissant leur lisibilité."]
+  forcedColorsRules: [
+    '<strong>Rendu des icônes</strong> : Les icônes sont exclusivement intégrées sous forme de balises <code>&lt;svg&gt;</code> avec <code>fill="currentColor"</code>. L\'usage de masques d\'arrière-plan CSS (<code>mask-image</code>) est proscrit, car ces derniers sont entièrement masqués par le système en mode couleurs forcées.',
+    '<strong>Lignes de séparation et séparateurs</strong> : Les filets sont réalisés via de véritables bordures CSS (<code>border</code>) plutôt que par des conteneurs filiformes à fond coloré (<code>background-color</code>). En effet, le système réinitialise les fonds sur la couleur système Canvas (identique au fond de page, ce qui rend le composant invisible), tandis que les bordures basculent sur <code>CanvasText</code>, garantissant leur lisibilité.',
+  ],
 }

@@ -6,7 +6,7 @@ export default {
   families: [
     "<code>--vectis-font-family-sans</code> : Pile de polices système (system font stack) pour l'interface utilisateur (system-ui, -apple-system, Segoe UI, Roboto, etc.). Constitue la famille typographique par défaut de tous les composants.",
     "<code>--vectis-font-family-display</code> : Famille réservée aux titres. Sa valeur pointe par défaut sur var(<code>--vectis-font-family-sans</code>). Cette indirection évite la duplication de variables : une seule surcharge suffit à dissocier les titres du reste de l'interface.",
-    "<code>--vectis-font-family-mono</code> : Pile monospace native (ui-monospace, Cascadia Code, Source Code Pro, Menlo, Consolas, etc.). Garantit la prise en charge du code et des données tabulaires en exploitant les ressources locales de la plateforme.",
+    '<code>--vectis-font-family-mono</code> : Pile monospace native (ui-monospace, Cascadia Code, Source Code Pro, Menlo, Consolas, etc.). Garantit la prise en charge du code et des données tabulaires en exploitant les ressources locales de la plateforme.',
   ],
   roles:
     "Une seconde couche d'abstraction introduit trois tokens sémantiques (ou rôles) directement consommés par l'interface : <code>--vectis-text-family</code>, <code>--vectis-text-family-heading</code> et <code>--vectis-text-family-code</code>. En liant le CSS des composants à ces rôles plutôt qu'aux primitives typographiques, Vectis UI permet de confiner les surcharges à un sous-arbre DOM spécifique sans affecter la configuration globale du document.",
