@@ -1,9 +1,9 @@
 export default {
-  documentTitle: "L'élégance native pour Vue 3",
+  documentTitle: 'Une bibliothèque UI conçue pour les navigateurs modernes',
   /* La coupure tombe après « moderne » : c'est la phrase française qui la décide, pas la mise
      en page. L'anglais, lui, coupe après « library ». */
   heroTitle:
-    'L\'élégance native,<br><span class="vd-hero-accent">sans surcouche artificielle.</span>',
+    'Une bibliothèque UI conçue<br><span class="vd-hero-accent">pour les navigateurs modernes.</span>',
   heroBody:
     'Vectis UI est une suite de composants Vue 3 ultra-légère pilotée par des tokens CSS natifs. Zéro surcouche, zéro dépendance, zéro compromis.',
   heroCta: 'Installer la bibliothèque',

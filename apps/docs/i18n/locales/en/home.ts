@@ -6,8 +6,8 @@
  * "library", French after "moderne", and neither can be derived from the other.
  */
 export default {
-  documentTitle: 'Native elegance for Vue 3',
-  heroTitle: 'Native elegance,<br><span class="vd-hero-accent">without artificial bloat.</span>',
+  documentTitle: 'A UI library designed for modern browsers',
+  heroTitle: 'A UI library designed<br><span class="vd-hero-accent">for modern browsers.</span>',
   heroBody:
     'Vectis UI is an ultra-lightweight suite of Vue 3 components driven by native CSS tokens. Zero overhead, zero dependencies, zero compromises.',
   heroCta: 'Install the library',
