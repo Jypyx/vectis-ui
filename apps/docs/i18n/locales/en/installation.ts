@@ -1,21 +1,21 @@
 export default {
   title: 'Installation',
-  lead: 'Vectis UI is published as a single npm package, and it goes into any Vue 3 project the same way: add the package, load one stylesheet. The two routes below are those same two steps, written for the setup you already have.',
+  lead: "Vectis UI is distributed as a single npm package. Its integration into a Vue 3 project always comes down to two steps: installing the package and importing the stylesheet. The guides below show you how to apply these two steps depending on your setup.",
 
-  viteHeading: 'Using Vite',
+  viteHeading: 'With Vite',
   viteBody:
-    'A Vue 3 application, whether made with <code>create-vue</code> or any other Vite project. Vue is a peer dependency rather than something the library carries inside it, so it is installed alongside and there is only ever one copy of it in your application.',
+    "Vectis UI integrates into any Vue 3 application, whether generated with <code>create-vue</code> or another Vite project. Since Vue is a peer dependency, it is not directly included in our package. This avoids conflicts by ensuring there is always only a single instance of Vue in your final project.",
   viteStyles:
-    "Then load the core stylesheet once, where the application starts. <code>styles.css</code> is the reset, the tokens and the chrome every component shares, 4.33 kB gzip. Each component's own CSS travels with the component and arrives through the import you already write.",
+    "Next, import the global stylesheet once at your application's entry point (e.g., <code>main.ts</code>). The <code>styles.css</code> file includes the CSS reset, design tokens, and common base styles (only 4.33 kB gzipped). Component-specific styles are automatically loaded when they are imported.",
 
-  nuxtHeading: 'Using Nuxt 3 or 4',
-  nuxtBody: 'Nuxt brings Vue with it, so the library is the only thing to add.',
+  nuxtHeading: 'With Nuxt 3 or 4',
+  nuxtBody: "Since Nuxt already includes Vue, you only need to add the Vectis UI package to your project.",
   nuxtStyles:
-    'The stylesheet is declared in the configuration rather than imported from a file, which is what puts it in the <code>&lt;head&gt;</code> of the server-rendered page instead of in a chunk the browser fetches once it is already showing the page.',
+    "Declare the stylesheet directly in <code>nuxt.config.ts</code> rather than importing it in a JavaScript file. Nuxt can then inject it into the page's <code>&lt;head&gt;</code> during server-side rendering (SSR), avoiding asynchronous loading and any visual flash (FOUC).",
   nuxtSsr:
-    "Nothing else is needed. The package is pre-built ESM, so there is no <code>build.transpile</code> entry to write, and every component is safe to render on the server: none of them reads <code>window</code> or <code>document</code> outside a handler or <code>onMounted</code>, and the ids they generate come from Vue's own <code>useId()</code>, so the server and the browser agree on them. This site is the demonstration rather than the promise. It is a Nuxt 4 application prerendered to static files, where a component reaching for the DOM too early would fail the build instead of the visitor.",
+    "No additional configuration is required. Distributed natively in ESM format, the package does not require any <code>build.transpile</code> option. All components are fully SSR-compatible: they only access browser objects (<code>window</code>, <code>document</code>) within <code>onMounted</code> or event handlers. Additionally, they use Vue's <code>useId()</code> composable to ensure identifier consistency between the server and the client.",
 
   cssHeading: 'Component CSS',
   cssBody:
-    'Component CSS travels with the component as a plain static import, which Vite, Nitro and webpack all turn into a render-blocking link, including for a lazily loaded route.',
+    "Each component's CSS is directly linked to it via a static import. Tools like Vite, Nitro, or Webpack automatically transform it into a priority stylesheet, ensuring correct style rendering even for on-demand loaded routes (lazy loading).",
 }

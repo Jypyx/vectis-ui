@@ -1,40 +1,33 @@
 export default {
-  title: 'Font family',
-  lead: 'The library ships NO webfont. Three family tokens are all it declares, and each one falls back to a platform stack, so a design system that is never given a typeface still renders correctly everywhere.',
+  title: 'Font Family',
+  lead: "Vectis UI does not bundle any external web fonts. Its typographical configuration relies exclusively on three family tokens, each associated by default with a platform system font stack. The interface thus benefits from a native, fast, and consistent rendering across all environments, without requiring any preliminary typographical setup.",
 
-  threeHeading: 'The three families',
+  threeHeading: "The 3 Default Fonts",
   families: [
-    '<code>--vectis-font-family-sans</code>: the platform UI stack (<code>system-ui</code>, <code>-apple-system</code>, Segoe UI, Roboto…). Everything is written in it unless something says otherwise.',
-    '<code>--vectis-font-family-display</code>: the title face. Its default value is <code>var(--vectis-font-family-sans)</code>, deliberately. An indirection rather than a duplicated stack means that giving the headings a face of their own is ONE override instead of two.',
-    "<code>--vectis-font-family-mono</code>: <code>ui-monospace</code>, Cascadia Code, Source Code Pro, Menlo, Consolas. There is no monospace webfont to load, and the stack's fallbacks handle absence.",
+    "<code>--vectis-font-family-sans</code>: System font stack for the user interface (system-ui, -apple-system, Segoe UI, Roboto, etc.). Serves as the default typographical family for all components.",
+    "<code>--vectis-font-family-display</code>: Family reserved for titles. Its value defaults to var(<code>--vectis-font-family-sans</code>). This indirection avoids variable duplication: a single override is enough to dissociate headings from the rest of the interface.",
+    "<code>--vectis-font-family-mono</code>: Native monospace stack (ui-monospace, Cascadia Code, Source Code Pro, Menlo, Consolas, etc.). Ensures support for code and tabular data by leveraging local platform resources.",
   ],
   roles:
-    'On top of them sit the three roles a component actually names: <code>--vectis-text-family</code>, <code>--vectis-text-family-heading</code> and <code>--vectis-text-family-code</code>. Component CSS reads the ROLE and never the primitive, which is what lets the override below apply to a subtree rather than to the whole document.',
+    "A second abstraction layer introduces three semantic tokens (or roles) directly consumed by the interface: <code>--vectis-text-family</code>, <code>--vectis-text-family-heading</code>, and <code>--vectis-text-family-code</code>. By binding component CSS to these roles rather than typographical primitives, Vectis UI enables scoping overrides to a specific DOM subtree without affecting the global configuration of the document.",
 
-  wiringHeading: 'Wiring a webfont',
+  wiringHeading: "Integrating a Web Font",
   wiringBody:
-    'Two steps, and neither of them belongs to the library: load the face, then point a family token at it. The token is an ordinary custom property, so an unlayered declaration on <code>:root</code> reaches every component at once, and a declaration on one element reaches that subtree alone.',
+    "Integrating a custom font takes place in two steps, both independent of the design system: loading the typographical resource, and then associating its name with the corresponding family token. Since tokens are simple CSS variables (custom properties), a declaration at the <code>:root</code> selector level propagates the modification across the entire interface, while a declaration targeted at a specific container restricts the new font to its DOM subtree.",
   wiringSelfHosted:
-    'The same thing with the files on your own origin. It is the version to prefer for an offline build, for a site that sends no request to a third party, or simply to control the caching. Only the loading changes: the tokens below it are the ones above, unmodified.',
+    "Local hosting of font files (declared via <code>@font-face</code> and served from your own origin) is the recommended approach for offline builds, applications guaranteeing zero third-party requests, or direct control over HTTP caching. Only the resource loading method differs: connection to Vectis UI's design tokens remains strictly identical.",
 
-  splitHeading: 'Which text uses which family',
+  splitHeading: 'Typographical Role Mapping',
   splitBody:
-    'Giving the library a title face is one declaration, but it does not repaint everything: five type roles read the heading family and the rest of the interface stays in the text one. The list below is what to check before choosing a face, because it says which text will actually be set in it. Nothing has to be wired up for that to hold: a VTypography names its role through <code>variant</code>, and the components that render text of their own, a dialog title or an accordion summary among them, pick their role themselves.',
+    "Assigning a display font is done through a single CSS re-declaration. However, this modification remains targeted: only five typographical roles consume the display family, while the rest of the interface retains the main text font. The nomenclature below details the affected elements to guide you in choosing a suitable typography.<br>This behavior requires no wiring: the <code>VTypography</code> component determines its role via the <code>variant</code> property, while composite components (dialog titles or accordion headers) automatically apply their respective semantic role.",
   splitList: [
-    '<strong>Heading family</strong> (<code>--vectis-text-family-heading</code>): <code>display</code> 48px, <code>heading-1</code> 36px, <code>heading-2</code> 24px, <code>heading-3</code> 18px, <code>heading-4</code> 16px.',
-    '<strong>Text family</strong> (<code>--vectis-text-family</code>): everything else. <code>subtitle</code>, the four body sizes, <code>label</code>, <code>caption</code>, <code>overline</code>, and the text inside every control.',
-    '<strong>Code family</strong> (<code>--vectis-text-family-code</code>): the <code>code</code> role, and nothing besides.',
+    "Display family (<code>--vectis-text-family-heading</code>): Consumed exclusively by the 5 heading variants: <code>display</code> (48px), <code>heading-1</code> (36px), <code>heading-2</code> (24px), <code>heading-3</code> (18px), and <code>heading-4</code> (16px).",
+    "Body text family (<code>--vectis-text-family</code>): Applied by default to all other variants (<code>subtitle</code>, the 4 levels of body text, <code>label</code>, <code>caption</code>, <code>overline</code>) as well as the internal typography of all control components (<code>v-control</code>).",
+    'Code family (<code>--vectis-text-family-code</code>): Strictly restricted to the <code>code</code> role.',
   ],
-  splitWhy:
-    'Two things follow from that list. A title face is asked to work down to 16px here, since <code>heading-4</code> is in the group, so a face that only holds above 24px is the wrong choice for this scale. And the boundary can be moved. Redefining <code>--vectis-text-family-heading</code> on an element hands that subtree back to the text face, headings included, and a single role moves on its own by overriding the family it reads, since an unlayered rule wins over the component rule it replaces.',
 
-  iconHeading: 'The one optional font',
-  /*
-   * Split around the link rather than carried whole: the destination is a Vue component, so the
-   * sentence needs a hole in it. Two keys, and the link's own text is the Iconography page's
-   * title, which the navigation catalogue already translates.
-   */
+  iconHeading: "Icon Font Management (Optional Dependency)",
   iconBefore:
-    '<code>--vectis-font-family-icon</code> names Material Symbols Rounded, and the library never loads it. It is needed only to address glyphs by ligature outside the built-in registry. See',
-  iconAfter: ', where the alternative is a resolver of your own.',
+    "The --vectis-font-family-icon token defaults to referencing the Material Symbols Rounded font. True to the principle of zero network dependencies, the library does not perform any automatic loading of this file. This resource is solely required for rendering icons via ligatures outside of the native registry. To free the application from this dependency, refer to the section ",
+  iconAfter: ' to implement a custom resolver.',
 }

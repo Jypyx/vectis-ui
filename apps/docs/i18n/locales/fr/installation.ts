@@ -1,21 +1,21 @@
 export default {
   title: 'Installation',
-  lead: "Vectis UI est publiée comme un unique paquet npm, et elle entre de la même façon dans n'importe quel projet Vue 3 : ajouter le paquet, charger une feuille de styles. Les deux parcours ci-dessous sont ces deux mêmes gestes, écrits pour la configuration que vous avez déjà.",
+  lead: "Vectis UI est distribué sous la forme d'un unique paquet npm. Son intégration dans un projet Vue 3 se résume toujours à deux étapes : installer le paquet et importer la feuille de styles. Les guides ci-dessous vous montrent comment appliquer ces deux étapes selon votre configuration.",
 
   viteHeading: 'Avec Vite',
   viteBody:
-    "Une application Vue 3, créée avec <code>create-vue</code> ou par n'importe quel autre projet Vite. Vue est une dépendance pair et non quelque chose que la bibliothèque emporte avec elle : elle s'installe à côté, et il n'y a jamais qu'un seul exemplaire de Vue dans votre application.",
+    "Vectis UI s'intègre dans n'importe quelle application Vue 3, qu'elle soit générée avec <code>create-vue</code> ou un autre projet Vite. Vue étant une peer dependency, elle n'est pas directement incluse dans notre paquet. Cela évite les conflits en s'assurant qu'il n'y a toujours qu'une seule instance de Vue dans votre projet final.",
   viteStyles:
-    "Chargez ensuite la feuille de styles du noyau, une seule fois, là où l'application démarre. <code>styles.css</code>, c'est le reset, les tokens et le décor commun à tous les composants, 4,33 ko gzip. Le CSS propre à chaque composant voyage avec lui et arrive par l'import que vous écrivez déjà.",
+    "Importez ensuite la feuille de styles globale une seule fois, au niveau du point d'entrée de votre application (ex. <code>main.ts</code>). Le fichier <code>styles.css</code> inclut le reset CSS, les design tokens et les styles de base communs (seulement 4,33 ko gzippé). Les styles propres à chaque composant sont quant à eux automatiquement chargés lors de leur import.",
 
   nuxtHeading: 'Avec Nuxt 3 ou 4',
-  nuxtBody: 'Nuxt apporte Vue avec lui : la bibliothèque est donc la seule chose à ajouter.',
+  nuxtBody: "Nuxt incluant déjà Vue, vous n'avez qu'à ajouter le paquet Vectis UI à votre projet.",
   nuxtStyles:
-    "La feuille de styles se déclare dans la configuration plutôt que de s'importer depuis un fichier, ce qui la place dans le <code>&lt;head&gt;</code> de la page rendue par le serveur, et non dans un chunk que le navigateur va chercher alors qu'il affiche déjà la page.",
+    "Déclarez la feuille de styles directement dans <code>nuxt.config.ts</code> plutôt que de l'importer dans un fichier JavaScript. Nuxt pourra ainsi l'injecter dans le <code>&lt;head&gt;</code> de la page lors du rendu serveur (SSR), évitant un chargement asynchrone et tout flash visuel (FOUC).",
   nuxtSsr:
-    "Rien d'autre n'est nécessaire. Le paquet est précompilé en ESM, il n'y a donc aucune entrée <code>build.transpile</code> à écrire, et tous les composants sont sûrs au rendu serveur : aucun ne lit <code>window</code> ni <code>document</code> hors d'un gestionnaire ou de <code>onMounted</code>, et les identifiants qu'ils fabriquent viennent du <code>useId()</code> de Vue, si bien que le serveur et le navigateur tombent d'accord dessus. Ce site en est la démonstration plutôt que la promesse. C'est une application Nuxt 4 prérendue en fichiers statiques, où un composant qui irait chercher le DOM trop tôt ferait échouer le build plutôt que le visiteur.",
+    "Aucune configuration supplémentaire n'est requise. Distribué nativement au format ESM, le paquet ne nécessite pas d'option <code>build.transpile</code>. Tous les composants sont totalement compatibles SSR : ils n'accèdent aux objets du navigateur (<code>window</code>, <code>document</code>) qu'au sein de <code>onMounted</code> ou des gestionnaires d'événements. De plus, ils utilisent le composable <code>useId()</code> de Vue pour garantir la cohérence des identifiants entre le serveur et le client.",
 
   cssHeading: 'CSS des composants',
   cssBody:
-    "Le CSS d'un composant voyage avec lui sous la forme d'un simple import statique, que Vite, Nitro et webpack transforment tous en lien bloquant le rendu, y compris pour une route chargée paresseusement.",
+    "Le CSS de chaque composant est directement lié à celui-ci via un import statique. Les outils comme Vite, Nitro ou Webpack le transforment automatiquement en une feuille de styles prioritaire, garantissant l'affichage correct des styles même pour les routes chargées à la demande (lazy loading).",
 }

@@ -1,58 +1,73 @@
 export default {
   title: 'Iconography',
-  lead: 'No icon font is required, and none is bundled. The icons the library renders itself are embedded SVG paths, exact replicas of Material Symbols Rounded (weight 400, GRAD 0, optical size 24, Apache-2.0 © Google).',
+  lead: "Vectis UI neither uses nor bundles any icon font. Components rely exclusively on inline SVG paths, sourced directly from the Material Symbols Rounded collection (weight 400, GRAD 0, optical size 24px, under Apache 2.0 license © Google).",
   weight:
-    'The library draws 34 of them, each one a module of its own, so you pay for the icons your components actually render and for nothing else. A lone VButton ships none at all. Each carries <code>[outline, filled?]</code>: the second path exists only where the FILL axis really changes the geometry, which is the case for 15 of the 34.',
-  gridCaption: 'Third and fourth, sixth and seventh: the same name, outline then filled.',
+    "Vectis UI integrates 34 icons distributed across distinct modules to ensure perfect tree-shaking: only the icons actually imported or rendered in your application are included in the final bundle. A component like <code>VButton</code> thus embeds no icons by default.<br>Each icon supports the <code>outline</code> variant and, optionally, the <code>filled</code> version. To optimize code footprint, the <code>filled</code> path is only declared if the <code>FILL</code> property modifies the icon's geometry (which applies to 15 of the 34 icons).",
+  gridCaption: "Positions 3 and 4, as well as 6 and 7, illustrate the same symbol successively rendered in its 'outline' and 'filled' variants",
 
-  importHeading: 'Importing an icon',
+  importHeading: 'Importing an Icon',
   importBody:
-    'The icons the library draws itself are values, imported from <code>vectis-ui/icons</code> and passed wherever a name would go. Every icon prop in the design system accepts one, so the same value works on <code>VIcon</code>, on a button, on a field or on a menu item.',
+    "Icons provided by the library are exported as JavaScript values from <code>vectis-ui/icons</code>. They are passed directly to dedicated icon props: the exact same icon reference can thus be used interchangeably on the <code>VIcon</code> component, a button, an input field, or a menu item.",
   importWhy:
-    'A plain string is a NAME instead: it is offered to your resolver, and then to an icon font as a ligature. The two forms are not interchangeable, and the difference is what makes the set tree-shakable. A drawing reaches your bundle because a module imported it, never because a string might ask for it once the page is running.',
+    "Passing a simple string to a prop is equivalent to providing an icon name: the value is then forwarded to your icon resolver or injected as a ligature for an icon font.<br>Both mechanisms (string or imported object) serve different constraints, and this distinction is what guarantees tree-shaking. An SVG path is only included in the final bundle because a module explicitly imported it, not based on a dynamically evaluated string at runtime.",
 
-  ownHeading: 'Using your own icons library',
+  ownHeading: "Using Your Own Icon Library",
   ownBody:
-    'Nothing obliges you to use the icons the library draws. Install a <strong>resolver</strong>, one function turning a name into something to draw, and it is consulted before those drawings, so every icon in every component comes from your own set rather than leaving two styles side by side. Three factories ship, one per family an icon library can belong to, and a resolver written by hand is always an option: it is only a function.',
+    "Using Vectis UI's native icons is entirely optional. By configuring an icon resolver (a function responsible for associating a name with a component or an SVG path), it takes precedence over default icons. All your components thus adopt your own icon set, ensuring perfect visual consistency.<br>The library includes three helpers (factories) adapted to various market formats. You can also define your own custom resolver via a simple callback function.",
   ownWhere:
-    'Install it at module level, from a Nuxt plugin or from <code>main.ts</code>, never inside a <code>setup()</code>, and never client-only: a resolver installed after hydration makes the browser draw different icons from the ones the server sent.',
+    "Configure the resolver at the global application scale (in <code>main.ts</code> or via a Nuxt plugin), never within a component's <code>setup()</code> nor in a client-only manner. Registering the resolver after the hydration phase or solely on the browser side causes an hydration mismatch, as client-generated icons will no longer match the initial HTML sent by the server.",
   ownPartial:
-    'Whichever family you are on, a resolver answering <code>undefined</code> means “I do not know this name”, not “draw nothing”: the icon then falls back to the drawing it carries, and after that to the ligature font. That is what makes a <strong>partial mapping</strong> legal, and it is the normal way to use these. Map the names your set has, leave the rest alone.',
+    "Regardless of the resolver family, returning <code>undefined</code> indicates the absence of a match for a given name, rather than an instruction to omit rendering. The component then triggers its fallback mechanism: it uses the component's native SVG path, and lastly falls back to the icon font ligature. This makes partial mapping perfectly valid and recommended: you can intercept only the icon names managed by your custom set and delegate the rest to default values.",
   ownQuote:
-    'A name nothing resolves, with no icon font loaded, renders as the name itself in plain text, clipped to the icon’s box. The layout survives either way, but a word where an icon belongs is the symptom to recognise.',
+    "When an icon name cannot be resolved and no icon font is available, the component displays the raw character string, truncated to the dimensions of the icon container. Although the global layout is preserved, the presence of literal text where a visual symbol should be indicates a resolution failure.",
 
-  classHeading: 'A class-based font',
+  classHeading: 'A Class-Driven Font',
   classBody:
-    'Font Awesome, Phosphor, Bootstrap Icons and their kind: a class names the icon and a pseudo-element draws it. <code>className</code> builds that class from the mapped name and the filled state, and the design system renders it on a <code>&lt;span&gt;</code> of its own so the element can be normalised in one rule.',
+    "For CSS class-based icon libraries (such as Font Awesome, Phosphor, or Bootstrap Icons), display relies on injecting a glyph via a pseudo-element. The <code>className</code> function generates the required CSS class from the mapped identifier and variant (<code>filled</code> or <code>outline</code>). The design system applies this class to an internal <code>&lt;span&gt;</code> element, which normalizes the sizing and alignment of all icons using a single CSS rule.",
   classPartial:
-    '<code>strict</code>, which is on by default, is the partial mapping made safe: a name the design system ships but your table does not translate would otherwise become a class your font never defines, and the icon would render as an empty square. Refusing to answer instead lets the built-in drawing take over. Names of your own always pass, since they are already written in your vocabulary.',
+    "The <code>strict</code> option, enabled by default, secures the use of partial mapping. Without it, a native identifier provided by a component but absent from your dictionary would generate a nonexistent CSS class for the icon font, resulting in a display glitch (empty rectangle). By refraining from resolving unlisted identifiers, strict mode allows the native SVG path to take over. Your custom identifiers remain handled normally as long as they appear in your resolution table.",
 
-  ligatureHeading: 'A ligature font',
+  ligatureHeading: 'A Ligature-Based Font',
   ligatureBody:
-    'Material Symbols in any of its variants, or an IcoMoon build made that way: the name IS the glyph. This resolver answers for every name, since the font itself decides what it recognises, which also makes it the way to have the design system’s own icons drawn by your font rather than by the SVGs shipped with it.',
+    "For ligature-based fonts (such as Material Symbols or an IcoMoon font configured for this purpose), the textual icon identifier corresponds directly to the rendered glyph. This resolver accepts all transmitted names: matching occurs directly at the icon font's ligature table level. This mechanism allows substituting your own font for Vectis UI's native SVG paths across the entire design system.",
   ligaturePartial:
-    'Because it answers to everything, the aliases are the whole of the mapping: a name in the table is translated, a name left out is passed to the font as it stands. There is no fallback to the built-in drawings here, since anything the font does not recognise is a missing glyph. Use it when your font covers the ground.',
+    "Since this resolver intercepts all requests, the alias table serves as the sole correspondence layer: a name present in the table is substituted, while an absent name is transmitted unchanged to the icon font. This mechanism bypasses fallback to native SVG paths: any name not managed by the font will result in a missing glyph. Reserve this resolver for projects whose icon font covers all application needs.",
 
-  componentHeading: 'A component set',
+  componentHeading: 'A Component Set',
   componentBody:
-    'Lucide, Untitled UI and their kind, shipped as Vue components. One contract to honour: each component must have a single <code>&lt;svg&gt;</code> as its root, because that is the element the stylesheet sizes. The optional <code>props</code> function is handed to every component, which is where a stroke width or a variant goes.',
+    "For libraries distributing their icons as Vue components (such as Lucide or Untitled UI), rendering relies directly on the imported components. An architectural constraint must be respected: each icon component must possess a single <code>&lt;svg&gt;</code> root node, which is essential for sizing and CSS targeting by the design system. The optional <code>props</code> function allows injecting specific properties during rendering (such as <code>stroke-width</code> or a variant).",
   componentPartial:
-    'It is strict by construction: a name absent from the table has no component to return, so it falls back to the built-in drawing and then to the ligature. Mapping the eight icons you have drawn and letting the library answer for the rest is a perfectly ordinary configuration.',
+    "This resolver is strict by design: when an identifier is absent from the correspondence table, no component can be returned. Resolution then falls back to the standard fallback string (native SVG path, then ligature). Mapping only a restricted set of custom icons and delegating the rest to the design system's default values is a common and fully supported use case.",
+
+  handHeading: 'Hand-Written',
+  handBody:
+    "The three integrated factories do not necessarily cover all use cases. Since a resolver is merely a function associating an icon name with an element to render (component, SVG path, or class), writing your own resolver constitutes a first-class extension model rather than a last-resort solution.<br>As an example, here is the resolver configured for this documentation site via a universal Nuxt plugin. It handles site UI-specific icons and returns undefined for all other identifiers, triggering the fallback to Vectis UI's native SVG paths.",
 
   sizingHeading: 'Sizing',
   sizingBody:
-    'An icon is <code>1em</code> by default, so it follows the text around it with nothing to set. Two things override that. The <code>size</code> prop, in pixels, applies to one icon and wins over everything else; <code>--vectis-icon-size</code>, set on any ancestor, applies to every icon below it that does not name its own. That second form is how each control size gives the icons inside it theirs, through <code>v-control</code>.',
-  sizingCaption: 'The same icon at 16, 24 and 40 pixels.',
+    "By default, an icon adopts a dimension of <code>1em</code>, automatically inheriting the surrounding text size (font-size). Two mechanisms allow overriding this behavior: ",
+  sizingOverrides: [
+    "Local override: The <code>size</code> prop (in pixels), applied directly to the icon, takes precedence over any other styling rule.", 
+    "Contextual override: The <code>--vectis-icon-size</code> CSS variable, defined on an ancestor element, propagates to all descendant icons that do not specify their own <code>size</code> prop."
+  ],
+  sizingReason: "It is this second CSS cascade approach that allows control components (via <code>v-control</code>) to automatically adjust child icon sizes according to the parent component's size variant.",
+  sizingCaption: 'The same icon at 16, 24, and 40 pixels.',
 
-  orderHeading: 'Resolution order',
+  orderHeading: 'Resolution Order',
   orderBody:
-    'VIcon resolves its source in this order, and the order is the contract: an explicit <code>render</code> › <code>src</code> › <code>name</code> (your resolver first, then the drawing the icon brought along, then the ligature font) › the slot.',
+    "The <code>VIcon</code> component evaluates its display source according to an immutable order of priority. This precedence order forms the component's interface contract:",
+  orderRules: [
+    "Prop <code>render</code> (explicit render function)", 
+    "Prop <code>src</code> (imported icon value or object)", 
+    "Prop <code>name</code> (sequentially resolved identifier: custom resolver -> embedded native SVG path -> icon font ligature)", 
+    "Default slot (injected SVG or HTML content)"
+  ],
   noHeuristic:
-    'A string is ALWAYS a name; an image or a component is declared explicitly as an object (<code>{ src }</code>, <code>{ component }</code>, <code>{ path }</code>, <code>{ text }</code>, <code>{ class }</code>). There is no heuristic, and that is what lets Iconify-style names such as <code>mdi:close</code> reach your resolver intact instead of being mistaken for an address.',
+    "A character string is systematically treated as an icon name. To declare an image, a component, or a specific style, the value must be passed explicitly as an object (<code>{ src }</code>, <code>{ component }</code>, <code>{ path }</code>, <code>{ text }</code>, or <code>{ class }</code>). The complete absence of heuristics ensures that a namespaced identifier such as mdi:close (Iconify format) reaches your resolver intact without risk of being misinterpretated as a URL or network path.",
 
-  listHeading: 'Existing icons',
+  listHeading: 'Existing Icons',
   listBody:
-    'The 34 icons the library draws, each with the name it answers to, which is the vocabulary an alias table is written against. Import the one you need from <code>vectis-ui/icons</code> to render it yourself, or map its name in your resolver to have your own set draw it.',
+    "Vectis UI embeds a set of 34 native icons. Their identifiers constitute the reference vocabulary for establishing your alias tables. You can directly import the necessary icons from the <code>vectis-ui/icons</code> sub-module for explicit rendering, or map their identifiers within your resolver to substitute default iconography with your own visual system.",
   listFilled:
-    'Where two glyphs are shown, filling really changes the drawing and the icon honours <code>filled</code>. Where one is shown, the outline is the whole icon and the prop has nothing to change.',
+    "When two glyph variants coexist, the <code>filled</code> property switches display from the outline style to the solid style. For icons consisting of a single path, the outline represents the entire motif: the <code>filled</code> property then has no effect on visual rendering.",
 }

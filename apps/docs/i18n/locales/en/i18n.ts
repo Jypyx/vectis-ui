@@ -1,36 +1,36 @@
 export default {
-  title: 'Localisation (i18n)',
-  lead: 'No user-facing text is hardcoded in the components: everything comes from a dictionary. The design system is English by default and ships French; any other language is added on the consumer side.',
+  title: 'Localization (i18n)',
+  lead: "No user-facing strings are hardcoded within the components: all character strings are resolved dynamically via a translation dictionary. The library is configured in English (<code>en</code>) by default and natively provides the French locale (<code>fr</code>). Additional languages can be added directly at the consuming application level.",
   split:
-    'Two things are settled separately. The WORDS come from the dictionary, the FORMATS derive from <code>Intl</code> from the locale tag. A locale with no matching dictionary therefore already gives correct dates, numbers, first day of week and hour cycle, with the labels left in English. That is a coherent degraded state, not a bug.',
+    "Localization relies on a strict decoupling between vocabulary and formatting. Text labels come from translation dictionaries, while data formatting (dates, numbers, first day of the week, and 12/24h cycles) relies directly on the native <code>Intl</code> API using the language tag. Thus, declaring a locale without an associated dictionary immediately applies the appropriate regional conventions for data while keeping interface labels in English. This behavior constitutes a perfectly managed graceful degradation strategy.",
 
-  frenchHeading: 'Changing the language',
+  frenchHeading: 'Changing Language',
   frenchBody:
-    'Two calls, and only the first is specific to French: register a dictionary, then name the locale. <code>fr</code> is opt-in, and not importing it is enough to prune it from the bundle. The argument is not its weight, which is under a kilobyte gzipped. It is that enabling the shipped French and adding a language the library does not ship are the SAME gesture, rather than two categories of dictionary.',
+    "Activating a locale relies on two distinct steps: registering the translation dictionary, and choosing the active locale. Although provided by the library, the French dictionary (<code>fr</code>) is optional: omitting it from your imports is enough to exclude it from the final bundle (tree-shaking). Beyond bundle size optimization (under 1 kB gzipped), this model unifies integration: activating the built-in French locale or adding a custom language is done via a rigorously identical mechanism, with no status distinction between native and third-party dictionaries.",
   frenchWhere:
-    'Both go at module level, in <code>main.ts</code> or in a Nuxt plugin, never inside a <code>setup()</code>. <code>setLocale</code> can be called again at any moment, from anywhere: the dictionary is a reactive reference, so components already on screen re-render with the new words rather than waiting for a navigation.',
+    "Dictionary registration and initial locale selection take place at the module level (in <code>main.ts</code> or a Nuxt plugin), outside of component <code>setup()</code> hooks. Subsequently, setLocale can be invoked dynamically from any point in the application. Since the translation table relies on Vue's reactive state, updating it triggers an immediate re-render of all mounted components, without requiring navigation or page reloads.",
   processBody:
-    'The state is module-level, which is what makes that possible, and the accepted limit is the other side of it: there is ONE locale per process. Multi-locale SSR per request is not covered, so a single Node process answering in two languages at the same moment has to pass the text props explicitly. A prerender is the case where the limit costs nothing, since routes are rendered one after another: this site sets the locale of the page it is about to render, and every French page here is built with French words in it.',
+    "Because the i18n state is maintained at the module level, the locale is global for a given execution process. This architectural choice implies an explicit constraint: a single Node.js process maintains only one active locale at a time. Dynamic and concurrent server-side rendering (SSR) per request is therefore not natively supported; in this scenario, labels must be explicitly passed via component props.<br>On the other hand, this limitation has no impact on static pre-rendering (SSG), as routes are generated sequentially: the locale is set just before compiling each page, ensuring compliant generation of the interface in the targeted language.",
 
-  addHeading: 'Adding a language',
+  addHeading: 'Adding a Language',
   addBody:
-    'A dictionary of your own is a plain object, and a partial one is legitimate: what is missing falls back to English rather than to a raw key. Register it under its language subtag, then name a locale that carries it.',
+    "A custom dictionary is a simple JavaScript object. Declaring partial dictionaries is fully valid: any missing key automatically falls back to the English dictionary instead of displaying a raw technical key. Register the object under its language sub-tag, then set the active locale.",
   addTyping:
-    'Type it as <code>VectisMessagesInput</code> and your editor will list the namespaces, the keys and the parameters of the messages that take them. Those are typed TypeScript functions, with no ICU and no plural engine: a plural is a ternary written inside the function. The merge is non-recursive by construction, since the dictionary is exactly two levels deep, which is what makes it structurally incapable of descending into a function value.',
+    "By typing the object with <code>VectisMessagesInput</code>, the editor provides full autocompletion for namespaces, keys, and parameterized message arguments. Text entries are formulated as typed TypeScript functions, without dependency on an ICU engine or complex pluralization: plural management is handled via simple ternary expressions within the functions. Dictionary merging is non-recursive by design, with the tree structure strictly limited to two levels to preserve the integrity of message functions.",
   precedenceBody:
-    'Resolution is by LANGUAGE SUBTAG, so <code>en-GB</code> and <code>en-US</code> share their words and only their formats differ. Above the dictionary sit the props: a <code>text</code> or <code>label</code> set on a component stays authoritative, and for a container’s accessible name the chain is <code>aria-labelledby</code> › <code>aria-label</code> › the <code>label</code> prop › the dictionary › English. There is never an empty string, never a technical key on screen, and never silence in development when a language is missing.',
+    "Text resolution relies on the language <strong>sub-tag</strong> (e.g., <code>en-GB</code> and <code>en-US</code> share the <code>en</code> dictionary and differ only in their <code>Intl</code> formats). At the top of the hierarchy, explicit props remain paramount: the resolution chain for a component's accessible name follows this precedence order: <code>aria-labelledby</code> -> <code>aria-label</code> -> <code>label</code> prop -> active dictionary -> fallback English dictionary. The interface guarantees the absence of empty strings, raw keys on screen, or silent failures in development mode.",
 
-  demoHeading: 'Words and formats',
+  demoHeading: 'Languages and Formats',
   demoBody:
-    'The dictionary and the format locale are two settings, and nothing obliges them to agree. <code>setLocale</code> and <code>registerMessages</code> decide the words a component says; the tag, and the <code>locale</code> prop wherever a component takes one, decides what <code>Intl</code> derives from it: the order of the parts of a date, the separator between them, the day a week starts on, twelve hours or twenty-four. An application can run its words in French and its formats in <code>en-CA</code>, or keep English labels while formatting for Germany, and neither choice constrains the other.',
+    "The translation dictionary and formatting locale constitute two strictly independent settings. While <code>registerMessages</code> and <code>setLocale</code> determine the lexical layer (translated strings), the locale code (along with the <code>locale</code> prop available on relevant components) drives regional conventions derived from the <code>Intl</code> API (date ordering and separators, first day of the week, 12/24h format). This isolation allows freely combining a linguistic dictionary with a distinct regional code: an application can, for example, display its labels in French while applying English Canadian formats (<code>en-CA</code>), or keep an English interface formatted for Germany (<code>de-DE</code>).",
   demoLanguage: 'Language',
   demoFormats: 'Formats',
 
-  keysHeading: 'The dictionary keys',
+  keysHeading: 'Translation Key Nomenclature and Reference',
   keysBody:
-    'The 134 keys the library reads, across 22 namespaces, with the English default of each: this is the list to write a dictionary against. Only the namespaces you translate need to be present, and only the keys you have inside them.',
+    "The complete Vectis UI dictionary spans 134 keys distributed across 22 namespaces, presented below with their French values for reference. Since registration supports partial injection, you only need to declare the namespaces and keys you explicitly wish to translate.",
   keysFunctions:
-    'Twenty-three of them take an argument, and a plain TypeScript function is what they are. Their rows carry that function as the library writes it, so you can see both what comes in and where it lands in the sentence. There is no ICU and no plural engine: where English needs a plural, it is a ternary inside the message, which is also how a language with three forms would write its own.',
+    "Among these keys, 23 are parameterized TypeScript functions. Their signature exposes the expected arguments and their placement within the generated string. In the absence of an ICU engine or dedicated plural parser, grammatical forms (including pluralization) rely directly on native conditional logic (JS/TS ternary expressions), offering the flexibility needed for complex languages.",
   keysColumnKey: 'Key',
-  keysColumnDefault: 'English default',
+  keysColumnDefault: 'English Value',
 }

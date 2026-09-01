@@ -49,7 +49,6 @@ const faceCode = `/* Your own stylesheet, in no layer. The files are served from
   <h2 id="which-family">{{ t('fontFamily.splitHeading') }}</h2>
   <DocsProse keypath="fontFamily.splitBody" />
   <DocsProseList keypath="fontFamily.splitList" />
-  <DocsProse keypath="fontFamily.splitWhy" />
 
   <h2 id="the-icon-font">{{ t('fontFamily.iconHeading') }}</h2>
   <!--

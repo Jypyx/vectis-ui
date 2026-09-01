@@ -62,4 +62,5 @@ const filter = ref(true)
 
   <h2 id="forced-colors">{{ t('accessibility.forcedColorsHeading') }}</h2>
   <DocsProse keypath="accessibility.forcedColorsBody" />
+  <DocsProseList keypath="accessibility.forcedColorsRules" />
 </template>

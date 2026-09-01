@@ -1,34 +1,33 @@
 export default {
   title: 'Accessibilité',
-  lead: 'Navigation au clavier et sémantique ARIA sur chaque composant. <code>prefers-reduced-motion</code> est respecté partout, et axe audite chaque story dans les deux thèmes à chaque commit.',
+  lead: "Navigation clavier intégrale, sémantique ARIA native et respect systématique de <code>prefers-reduced-motion</code> sur l'ensemble des composants.",
 
-  guaranteedHeading: 'Ce qui est garanti',
+  guaranteedHeading: "Exigences et garanties d'accessibilité",
   guarantees: [
-    "Tout ce qui est interactif s'atteint et s'utilise au clavier, dans l'ordre où la page se lit, sans impasse pour en sortir.",
-    "Chaque composant porte le patron ARIA que son comportement implique : le rôle qu'il joue, l'état à mesure qu'il change, et les relations entre ses parties. Ce qui est annoncé est ce que la chose fait, pas ce à quoi elle ressemble.",
-    'Le focus est toujours visible, et il retourne là où il était quand un panneau, un menu ou une boîte de dialogue se referme.',
-    "Tout ce qui s'ouvre se referme avec Échap, et tout ce qui apparaît ou se met à jour de lui-même est annoncé au lieu d'être laissé à la vigilance du lecteur.",
-    "Un contrôle qui ne contient qu'une icône ne peut pas s'écrire sans nom accessible : la prop est obligatoire, l'oubli est donc une erreur de compilation et non une erreur silencieuse.",
-    "Le contraste du texte tient le plancher WCAG AA dans le thème clair comme dans le sombre, et les états désactivés se grisent par les tokens de couleur plutôt que par l'opacité, ce qui les garde lisibles sur n'importe quelle surface.",
+    "<strong>Navigation au clavier & Gestion du focus</strong> : Tous les composants interactifs sont accessibles et manipulables au clavier selon l'ordre logique du DOM, sans piège à focus (focus trap). Le témoin de focalisation (focus ring) est garanti. À la fermeture d'un composant flottant (menu, tiroir, boîte de dialogue), le focus est restitué à son élément déclencheur, et la touche Escape assure la fermeture systématique des vues superposées.",
+    "<strong>Sémantique WAI-ARIA & Annonces dynamiques</strong> : Chaque composant implémente le motif ARIA adapté à son rôle, reflétant ses états dynamiques et les relations structurelles entre ses sous-éléments. Les restitutions sonores privilégient la fonction et le comportement plutôt que l'apparence visuelle. Les mises à jour contextuelles sont notifiées aux technologies d'assistance via des zones réactives (ARIA live regions).",
+    "<strong>Contrainte de compilation sur les noms accessibles</strong> : Les contrôles visuels reposant uniquement sur des icônes exigent obligatoirement un nom accessible via leurs props. L'absence de ce libellé constitue une erreur de typage à la compilation et non un oubli silencieux au runtime.",
+    "<strong>Ratios de contraste & Tokens d'état</strong> : Le contraste textuel respecte le seuil minimal WCAG AA dans les thèmes clair et sombre. Les états désactivés (disabled) sont gérés par des tokens de couleur dédiés plutôt que par une baisse d'opacité, préservant leur lisibilité quelle que soit la surface sous-jacente.",
   ],
   guaranteedBody:
-    "La moitié du JavaScript comportemental de la bibliothèque existe pour cela plutôt que pour faire fonctionner quoi que ce soit. Les composants sont accessibles d'abord et interactifs ensuite, et le code est étiqueté pour que ce rapport se compte au lieu de se proclamer.",
+    "Près de la moitié de la logique JavaScript comportementale du design system est dédiée exclusivement aux mécanismes d'accessibilité (gestion du focus, attributs ARIA, piégeage clavier). Les composants sont conçus selon un paradigme accessibility-first : l'accessibilité constitue la fondation avant toute surcouche d'interactivité. Enfin, la base de code est annotée de façon à pouvoir mesurer et auditer factuellement cette proportion, garantissant un engagement chiffrable plutôt qu'une simple intention.",
 
   focusHeading: 'Focus',
   focusBody:
-    "Le focus est un contour de 2px à 2px de décalage, tracé à l'extérieur de la boîte, donc sans coût de mise en page. Partout où le conteneur rogne son contenu, il est ramené vers l'intérieur : les boutons internes d'un champ, le résumé d'un accordéon, une ligne de navigation dans une branche animable. Un contour tracé hors d'une boîte qui rogne est un contour que personne ne voit.",
+    "L'indicateur de focus se matérialise sous la forme d'un contour de 2px avec un décalage (offset) de 2px, tracé à l'extérieur de la boîte de l'élément (<code>outline</code>). Ce rendu hors-flux garantit zéro coût de recalcul de mise en page (no reflow). Lorsque le composant parent applique un rognage de son contenu (<code>overflow: hidden</code>), l'indicateur est automatiquement ramené vers l'intérieur (notamment pour les boutons d'action intégrés aux champs, les en-têtes d'accordéons ou les lignes d'arborescences animées). En effet, un contour projeté à l'extérieur d'un conteneur avec masque de découpe est tronqué et devient invisible.",
   focusCaption:
     "Parcourez-les avec Tab. Un champ de texte fait exception à la règle, avec une bordure d'accent de 1px plus une ombre de la même couleur, et la croix qu'il contient prend l'anneau pour elle.",
 
   validationHeading: 'Validation',
   validationBody:
-    "<code>:user-invalid</code>, et non <code>:invalid</code> : un champ ne rougit qu'une fois que le lecteur l'a quitté, si bien qu'un e-mail à moitié saisi n'est jamais déclaré faux. La prop <code>invalid</code> force l'état pour une règle que seul le serveur peut vérifier.",
+    "La gestion des erreurs repose sur la pseudo-classe native <code>:user-invalid</code> plutôt que sur <code>:invalid</code>. Le signalement visuel d'erreur ne se déclenche qu'une fois la saisie interrompue et le champ quitté (blur), évitant de marquer comme invalide un contenu en cours de frappe (par exemple une adresse e-mail à moitié renseignée). Pour les règles métiers ne pouvant être validées que par le serveur, la prop <code>invalid</code> permet de forcer programmatiquement l'état d'erreur du composant.",
 
   motionHeading: 'Animation',
   motionBody:
-    "Sous <code>prefers-reduced-motion</code>, les transitions passent à <code>none</code>, tandis que les animations en boucle ralentissent au lieu de s'arrêter. Un indicateur de chargement passe de 1s à 3s, parce qu'un indicateur figé se lit comme une page cassée.",
+    "Lorsque la préférence système <code>prefers-reduced-motion</code> est active, les transitions d'état sont supprimées (<code>transition: none</code>), tandis que les animations en boucle sont ralenties au lieu d'être stoppées. Un indicateur de chargement (spinner) voit par exemple son cycle étendu de 1s à 3s. Ce maintien d'un mouvement minimal prévient toute ambiguïté d'affichage : un composant de statut totalement figé est perçu par l'utilisateur comme un plantage de l'application.",
 
   forcedColorsHeading: 'Couleurs forcées',
   forcedColorsBody:
-    "Deux décisions de la bibliothèque existent pour le mode couleurs forcées de Windows, et toutes deux méritent d'être reprises. Les icônes sont dessinées en <code>&lt;svg&gt;&lt;path fill=\"currentcolor\"&gt;</code> et jamais en fond masqué, qui y disparaît. Les filets sont peints avec une bordure plutôt qu'un fond : un fond est forcé à <code>Canvas</code>, la couleur de la page elle-même, tandis qu'une couleur de bordure est forcée à <code>CanvasText</code> et survit.",
+    "Vectis UI intègre deux choix d'architecture spécifiquement conçus pour le mode Couleurs forcées de Windows (Forced Colors Mode / Contraste élevé) :",
+   forcedColorsRules: ["<strong>Rendu des icônes</strong> : Les icônes sont exclusivement intégrées sous forme de balises <code>&lt;svg&gt;</code> avec <code>fill=\"currentColor\"</code>. L'usage de masques d'arrière-plan CSS (<code>mask-image</code>) est proscrit, car ces derniers sont entièrement masqués par le système en mode couleurs forcées.", "<strong>Lignes de séparation et séparateurs</strong> : Les filets sont réalisés via de véritables bordures CSS (<code>border</code>) plutôt que par des conteneurs filiformes à fond coloré (<code>background-color</code>). En effet, le système réinitialise les fonds sur la couleur système Canvas (identique au fond de page, ce qui rend le composant invisible), tandis que les bordures basculent sur <code>CanvasText</code>, garantissant leur lisibilité."]
 }

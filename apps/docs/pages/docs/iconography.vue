@@ -81,7 +81,11 @@ setIconResolver(
   }),
 )`
 
-const handWrittenCode = `// A resolver is only a function, so a table is not compulsory. This one is
+const handWrittenCode = `import { setIconResolver } from 'vectis-ui'
+
+import { docsIcons } from '~/icons/icons'
+
+// A resolver is only a function, so a table is not compulsory. This one is
 // the site you are reading: the icons its chrome needs, and \`undefined\` for
 // everything else, which hands the name back to the icon that carries it.
 setIconResolver((name, context) => {
@@ -145,9 +149,9 @@ const orderCode = `<!-- an explicit render wins over everything else -->
 
   <h2 id="using-your-own-icons">{{ t('iconography.ownHeading') }}</h2>
   <DocsProse keypath="iconography.ownBody" />
-  <DocsCode lang="ts" :code="handWrittenCode" />
   <DocsProse keypath="iconography.ownWhere" />
   <DocsProse keypath="iconography.ownPartial" />
+  <DocsProse tag="blockquote" keypath="iconography.ownQuote" />
 
   <h3 id="class-based-font">{{ t('iconography.classHeading') }}</h3>
   <DocsProse keypath="iconography.classBody" />
@@ -163,10 +167,15 @@ const orderCode = `<!-- an explicit render wins over everything else -->
   <DocsProse keypath="iconography.componentBody" />
   <DocsCode lang="ts" :code="componentCode" />
   <DocsProse keypath="iconography.componentPartial" />
-  <DocsProse tag="blockquote" keypath="iconography.ownQuote" />
+
+  <h3 id="written-by-hand">{{ t('iconography.handHeading') }}</h3>
+  <DocsProse keypath="iconography.handBody" />
+  <DocsCode lang="ts" :code="handWrittenCode" />
 
   <h2 id="sizing">{{ t('iconography.sizingHeading') }}</h2>
   <DocsProse keypath="iconography.sizingBody" />
+  <DocsProseList keypath="iconography.sizingOverrides" />
+  <DocsProse keypath="iconography.sizingReason" />
   <DocsCode lang="vue" :code="sizingCode" />
   <DocsDemo>
     <VIcon :name="notificationsIcon" :size="16" />
@@ -179,6 +188,7 @@ const orderCode = `<!-- an explicit render wins over everything else -->
 
   <h2 id="resolution-order">{{ t('iconography.orderHeading') }}</h2>
   <DocsProse keypath="iconography.orderBody" />
+  <DocsProseList tag="ol" keypath="iconography.orderRules" />
   <DocsCode lang="vue" :code="orderCode" />
   <DocsProse keypath="iconography.noHeuristic" />
 

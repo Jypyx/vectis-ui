@@ -1,35 +1,33 @@
 export default {
   title: 'Famille de police',
-  lead: "La bibliothèque ne livre AUCUNE police web. Trois tokens de famille sont tout ce qu'elle déclare, et chacun retombe sur une pile de la plateforme, si bien qu'un design system auquel on ne donne jamais de caractère s'affiche correctement partout.",
+  lead: "Vectis UI n'embarque aucune police web externe. Sa configuration typographique repose exclusivement sur trois tokens de famille, chacun associé par défaut à une pile de polices système de la plateforme (system font stack). L'interface bénéficie ainsi d'un rendu natif, rapide et cohérent sur tous les environnements, sans nécessiter la moindre configuration typographique préalable.",
 
-  threeHeading: 'Les trois familles',
+  threeHeading: "Les 3 polices d'écriture par défaut",
   families: [
-    "<code>--vectis-font-family-sans</code> : la pile d'interface de la plateforme (<code>system-ui</code>, <code>-apple-system</code>, Segoe UI, Roboto…). Tout est écrit dedans sauf mention contraire.",
-    "<code>--vectis-font-family-display</code> : le caractère de titrage. Sa valeur par défaut est <code>var(--vectis-font-family-sans)</code>, délibérément. Une indirection plutôt qu'une pile dupliquée fait que donner aux titres un caractère propre est UNE surcharge au lieu de deux.",
-    "<code>--vectis-font-family-mono</code> : <code>ui-monospace</code>, Cascadia Code, Source Code Pro, Menlo, Consolas. Il n'y a aucune police web à charger, et les recours de la pile gèrent l'absence.",
+    "<code>--vectis-font-family-sans</code> : Pile de polices système (system font stack) pour l'interface utilisateur (system-ui, -apple-system, Segoe UI, Roboto, etc.). Constitue la famille typographique par défaut de tous les composants.",
+    "<code>--vectis-font-family-display</code> : Famille réservée aux titres. Sa valeur pointe par défaut sur var(<code>--vectis-font-family-sans</code>). Cette indirection évite la duplication de variables : une seule surcharge suffit à dissocier les titres du reste de l'interface.",
+    "<code>--vectis-font-family-mono</code> : Pile monospace native (ui-monospace, Cascadia Code, Source Code Pro, Menlo, Consolas, etc.). Garantit la prise en charge du code et des données tabulaires en exploitant les ressources locales de la plateforme.",
   ],
   roles:
-    "Par-dessus se posent les trois rôles qu'un composant nomme réellement : <code>--vectis-text-family</code>, <code>--vectis-text-family-heading</code> et <code>--vectis-text-family-code</code>. Le CSS des composants lit le RÔLE et jamais la primitive, ce qui permet à la surcharge ci-dessous de s'appliquer à un sous-arbre plutôt qu'au document entier.",
+    "Une seconde couche d'abstraction introduit trois tokens sémantiques (ou rôles) directement consommés par l'interface : <code>--vectis-text-family</code>, <code>--vectis-text-family-heading</code> et <code>--vectis-text-family-code</code>. En liant le CSS des composants à ces rôles plutôt qu'aux primitives typographiques, Vectis UI permet de confiner les surcharges à un sous-arbre DOM spécifique sans affecter la configuration globale du document.",
 
-  wiringHeading: 'Brancher une police web',
+  wiringHeading: "Intégration d'une police web",
   wiringBody:
-    "Deux gestes, et aucun des deux n'appartient à la bibliothèque : charger le caractère, puis pointer un token de famille vers lui. Le token est une propriété personnalisée ordinaire : une déclaration sans couche sur <code>:root</code> atteint donc tous les composants d'un coup, et une déclaration sur un élément n'atteint que son sous-arbre.",
+    "L'intégration d'une police personnalisée s'effectue en deux étapes, toutes deux indépendantes du design system : charger la ressource typographique, puis associer son nom au token de famille correspondant. Les tokens étant de simples variables CSS (custom properties), une déclaration au niveau du sélecteur <code>:root</code> répercute la modification sur l'intégralité de l'interface, tandis qu'une déclaration ciblée sur un conteneur spécifique restreint la nouvelle police à son sous-arbre DOM.",
   wiringSelfHosted:
-    "La même chose avec les fichiers servis depuis votre propre origine. C'est la version à préférer pour un build hors ligne, pour un site qui n'envoie aucune requête à un tiers, ou simplement pour maîtriser la mise en cache. Seul le chargement change : les tokens du dessous sont ceux du dessus, à l'identique.",
+    "L'hébergement local des fichiers de police (déclarés via <code>@font-face</code> et servis depuis votre propre origine) constitue l'approche recommandée pour les builds hors ligne, les applications garantissant l'absence de requêtes vers des tiers, ou la maîtrise directe de la mise en cache HTTP. Seul le mode de chargement des ressources diffère : le raccordement aux design tokens de Vectis UI demeure strictement identique.",
 
-  splitHeading: 'Quel texte utilise quelle famille',
+  splitHeading: 'Correspondance des rôles typographiques',
   splitBody:
-    "Donner un caractère de titrage à la bibliothèque tient en une déclaration, mais cela ne repeint pas tout : cinq rôles typographiques lisent la famille de titrage, et le reste de l'interface demeure dans celle de texte. La liste ci-dessous est ce qu'il faut regarder avant de choisir un caractère, puisqu'elle dit quel texte sera réellement composé dedans. Rien n'est à brancher pour cela : un VTypography nomme son rôle par <code>variant</code>, et les composants qui rendent du texte de leur côté, un titre de boîte de dialogue ou un résumé d'accordéon par exemple, choisissent le leur eux-mêmes.",
+    "Attribuer une police de titrage (display font) s'effectue en une seule re-déclaration CSS. Cette modification demeure toutefois ciblée : seuls cinq rôles typographiques consomment la famille de titrage, le reste de l'interface conservant la police de texte principale. La nomenclature ci-dessous détaille les éléments concernés afin de vous guider dans le choix d'une typographie adaptée.<br>Ce comportement ne nécessite aucun câblage : le composant <code>VTypography</code> détermine son rôle via la propriété <code>variant</code>, tandis que les composants composites (titres de boîtes de dialogue ou en-têtes d'accordéons) appliquent automatiquement le rôle sémantique qui leur incombe.",
   splitList: [
-    '<strong>Famille de titrage</strong> (<code>--vectis-text-family-heading</code>) : <code>display</code> 48px, <code>heading-1</code> 36px, <code>heading-2</code> 24px, <code>heading-3</code> 18px, <code>heading-4</code> 16px.',
-    '<strong>Famille de texte</strong> (<code>--vectis-text-family</code>) : tout le reste. <code>subtitle</code>, les quatre tailles de corps, <code>label</code>, <code>caption</code>, <code>overline</code>, et le texte à l’intérieur de chaque contrôle.',
-    '<strong>Famille de code</strong> (<code>--vectis-text-family-code</code>) : le rôle <code>code</code>, et rien d’autre.',
+    "Famille de titrage (<code>--vectis-text-family-heading</code>) : Consommée exclusivement par les 5 variantes d'en-tête : <code>display</code> (48px), <code>heading-1</code> (36px), <code>heading-2</code> (24px), <code>heading-3</code> (18px) et <code>heading-4</code> (16px).",
+    "Famille de texte courant (<code>--vectis-text-family</code>) : Appliquée par défaut à l'ensemble des autres variantes (<code>subtitle</code>, les 4 niveaux de corps de texte, <code>label</code>, <code>caption</code>, <code>overline</code>) ainsi qu'à la typographie interne de tous les composants de contrôle (<code>v-control</code>).",
+    'Famille de code (<code>--vectis-text-family-code</code>) : Restreinte strictement au rôle <code>code</code>.',
   ],
-  splitWhy:
-    "Deux conséquences en découlent. Un caractère de titrage doit ici tenir jusqu'à 16px, puisque <code>heading-4</code> fait partie du groupe : un caractère qui ne tient qu'au-dessus de 24px est donc le mauvais choix pour cette échelle. Et la frontière se déplace. Redéfinir <code>--vectis-text-family-heading</code> sur un élément rend ce sous-arbre au caractère de texte, titres compris, et un rôle isolé se déplace tout seul en surchargeant la famille qu'il lit, une règle sans couche l'emportant sur celle du composant.",
 
-  iconHeading: "L'unique police optionnelle",
+  iconHeading: "Gestion de la police d'icônes (dépendance facultative)",
   iconBefore:
-    "<code>--vectis-font-family-icon</code> nomme Material Symbols Rounded, et la bibliothèque ne la charge jamais. Elle n'est nécessaire que pour adresser des glyphes par ligature en dehors du registre intégré. Voyez",
-  iconAfter: ', où l’alternative est un résolveur à vous.',
+    "Le token --vectis-font-family-icon référence par défaut la police Material Symbols Rounded. Fidèle au principe de zéro dépendance réseau, la bibliothèque n'effectue aucun chargement automatique de ce fichier. Cette ressource est uniquement nécessaire pour le rendu d'icônes par ligatures hors du registre natif. Pour affranchir l'application de cette dépendance, reportez-vous à la section ",
+  iconAfter: ' pour implémenter un résolveur personnalisé.',
 }
