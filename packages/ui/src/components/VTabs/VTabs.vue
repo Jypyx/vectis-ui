@@ -1,4 +1,20 @@
 <script setup lang="ts">
+// @a11y @keyboard @core
+/**
+ * A row of tabs, and optionally the panels they show. Only one panel is visible at a
+ * time, and the tabs follow the pattern assistive technology expects of them: the row
+ * is a single stop in the tab order, and the arrow keys move between the tabs inside
+ * it.
+ *
+ * No button is invented here. Every tab is a VButton and the scroll controls are
+ * VIconButtons, so hovering, focusing, disabling and the respect of a reader's
+ * reduced-motion setting all come from there, without a single state rule being
+ * written again in this file.
+ *
+ * Nothing touches the DOM outside event handlers and effects that run after the page
+ * has been updated, which is what lets the component render on a server.
+ */
+
 import { computed, nextTick, provide, ref, useId, useSlots, watch } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
@@ -25,21 +41,6 @@ export type TabsOrientation = 'horizontal' | 'vertical'
 export type TabsAlign = 'start' | 'center' | 'end'
 export type TabsActivation = 'manual' | 'automatic'
 
-// @a11y @keyboard @core
-/**
- * A row of tabs, and optionally the panels they show. Only one panel is visible at a
- * time, and the tabs follow the pattern assistive technology expects of them: the row
- * is a single stop in the tab order, and the arrow keys move between the tabs inside
- * it.
- *
- * No button is invented here. Every tab is a VButton and the scroll controls are
- * VIconButtons, so hovering, focusing, disabling and the respect of a reader's
- * reduced-motion setting all come from there, without a single state rule being
- * written again in this file.
- *
- * Nothing touches the DOM outside event handlers and effects that run after the page
- * has been updated, which is what lets the component render on a server.
- */
 interface TabsProps {
   /**
    * How the bar is framed. `flat` draws nothing but a rule under the tabs, with the
@@ -112,6 +113,13 @@ defineSlots<{
   panels?(): unknown
 }>()
 
+/**
+ * The `value` of the selected tab. There is deliberately no default: the component cannot
+ * know which of the tabs a consumer wrote should open.
+ *
+ * CONTRACT — it must name a tab that exists and is not disabled. Pointing it anywhere else
+ * leaves no tab with a tab stop, and the bar becomes unreachable from the keyboard.
+ */
 const model = defineModel<string | number>()
 
 // The root element is only a container; the one that matters is the row of tabs. So
@@ -201,29 +209,23 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 /*
- * Whether each end of the bar has been reached, which is what disables the scroll
- * buttons.
+ * Whether each end of the bar has been reached, which is what disables the scroll buttons.
  *
- * CSS CAN now ask this question — `@container scroll-state(scrollable: inline-start)`,
- * which VDialog already uses for its scroll shadows — and it still cannot answer this
- * one, for two independent reasons. The query is Chrome/Edge 133 and later, with
- * neither Safari nor Firefox shipping it, and unlike VDialog's hairlines (which merely
- * stay invisible where it is missing) these buttons are functional: relying on it would
- * break them on two of the three engines this library targets. Guarding it with
- * `@supports` would mean keeping everything below anyway, so nothing would be saved.
- * And a stylesheet cannot set `disabled` on a button — CSS could only hide or grey the
- * arrows, which is a different affordance and a different thing for a screen reader to
- * announce, not the same behaviour written another way.
+ * READ THIS BEFORE PROPOSING `@container scroll-state` AGAIN. CSS can ask the question —
+ * VDialog uses that query for its scroll shadows — and still cannot answer this one, for two
+ * independent reasons. It is Chrome/Edge 133+, with neither Safari nor Firefox shipping it,
+ * and where VDialog's hairlines merely stay invisible without it these buttons are
+ * functional; an `@supports` guard would mean keeping everything below anyway. And CSS
+ * cannot set `disabled` on a button: hiding or greying an arrow is a different affordance
+ * and a different announcement, not the same behaviour written another way.
  *
- * Rather than measuring the scroll, two hairline markers are placed at the ends of the
- * row and watched. One watcher then covers all three things that can change the
- * answer: scrolling, the bar being resized, and tabs being added or removed — where
- * measuring would need a second mechanism for the resize alone.
+ * So two hairline sentinels sit at the ends of the row and are observed. ONE observer then
+ * covers all three things that change the answer — scrolling, a resize, tabs added or
+ * removed — where measuring the scroll would need a second mechanism for the resize alone.
  *
- * Both start as reached, so the buttons are disabled on the first render and on the
- * server, never wrongly enabled. It also gives the "nothing overflows" case for free:
- * both markers are visible at once, so both buttons stay disabled with no test of
- * their own.
+ * Both start as reached, so the buttons are disabled on the first render and on the server,
+ * never wrongly enabled. That also gives the "nothing overflows" case for free: both
+ * sentinels are visible at once, so both buttons stay disabled with no test of their own.
  */
 const startSentinelEl = ref<HTMLElement | null>(null)
 const endSentinelEl = ref<HTMLElement | null>(null)
@@ -251,6 +253,9 @@ watch(
     observer.observe(end)
     onCleanup(() => observer.disconnect())
   },
+  // `post` so the effect runs once the DOM is up to date: in the default timing the three
+  // template refs are still null on the first pass, the guard above returns, and the
+  // buttons stay disabled for good — the effect having tracked nothing to wake it again.
   { flush: 'post' },
 )
 

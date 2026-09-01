@@ -22,6 +22,13 @@
     /*
      * Height in two steps: the sizes set --control-height-base, and compact
      * derives the effective height (-4px, padding/type/icons unchanged).
+     *
+     * TRAP — this re-derivation is unconditional, so `v-control` set a second time INSIDE
+     * a subtree that already has it resets the height from the base and drops the compact
+     * the parent had applied. That is why a nested panel takes the class only when it is
+     * not a subpanel (VMenuPanel's `:class="{ 'v-control': !submenu }"`), and why the
+     * shared panel sheet sets no icon context of its own. The symptom is a nested control
+     * four pixels too tall, with nothing anywhere to say so.
      */
     --control-height: var(--control-height-base);
   }

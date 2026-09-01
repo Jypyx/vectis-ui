@@ -1,4 +1,19 @@
 <script setup lang="ts">
+// @core
+/**
+ * A value chosen by sliding a thumb along a track, optionally a range between two.
+ *
+ * Underneath is a native `<input type="range">`, which brings the keyboard, the ARIA and the
+ * form behaviour. The JS covers only what it cannot: stopping the two values crossing —
+ * there is no native two-thumb control, so a range is two superimposed — feeding the
+ * optional number fields, and computing the positions of the ticks, labels and tooltip.
+ *
+ * Those positions reach the stylesheet as unitless inline fractions, and that is the whole
+ * binding between the two. They matter because a thumb's CENTRE does not travel the full
+ * width of the track: it runs from half a thumb in to half a thumb from the end, and
+ * everything meant to line up with it has to follow that same run.
+ */
+
 import { computed, ref, watch } from 'vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -8,31 +23,17 @@ import VInput from '../VInput/VInput.vue'
 import { isDev } from '../../utils/env'
 import { useMessages } from '../../i18n/state'
 
-// @core
-/**
- * A value chosen by sliding a thumb along a track, and optionally a range between two
- * of them.
- *
- * Underneath is the browser's own range control, which brings the keyboard, the correct
- * announcement to screen readers and the form behaviour with it. The JavaScript covers
- * only what it cannot: stopping the two values from crossing over each other — there is
- * no native control with two thumbs, so a range is two of them superimposed — feeding
- * the optional number fields, which the native element does not validate, and computing
- * the positions of the ticks, the labels and the tooltip.
- *
- * Those positions are handed to the stylesheet as plain fractions written inline, and
- * that is the only binding between the two. They matter because a thumb's centre does
- * NOT travel the full width of the track: it runs from half a thumb in to half a thumb
- * from the end, and everything meant to line up with it has to follow that same run.
- */
 export type SliderLabel = string | { icon: IconSource; label: string }
 
 interface SliderProps {
-  /** The lowest value the thumb can reach. */
+  /** The lowest value the thumb can reach. It is 0 by default. */
   min?: number
-  /** The highest value the thumb can reach. */
+  /** The highest value the thumb can reach. It is 100 by default. */
   max?: number
-  /** The gap between two values it can stop on. */
+  /**
+   * The gap between two values the thumb can stop on, 1 by default. It is also what the
+   * arrow keys move by, and what a value typed into the companion field is snapped to.
+   */
   step?: number
   /** Offers two thumbs to pick a range, which makes the v-model a pair of values. */
   range?: boolean
@@ -79,6 +80,11 @@ const props = withDefaults(defineProps<SliderProps>(), {
   tooltip: false,
 })
 
+/**
+ * The value, and its SHAPE is what puts the slider in range mode: a single number — 0 to
+ * begin with — gives one thumb, a pair of them gives two. The pair is always ordered, the
+ * thumbs being stopped from crossing.
+ */
 const model = defineModel<number | [number, number]>({ default: 0 })
 
 const startValue = computed(() => (Array.isArray(model.value) ? model.value[0] : props.min))
@@ -353,6 +359,14 @@ function resyncFields() {
     font-family: var(--vectis-text-family);
   }
 
+  /*
+     The zones the root lays out, from least to most furnished. `:has()` takes the
+     specificity of its argument, so the single-condition rules are all (0,2,0) and the
+     two-condition ones (0,3,0) — which means the five below are arbitrated by SOURCE
+     ORDER as much as by weight, and a range slider with inputs matches three of them at
+     once. They must stay in this order, each configuration overwriting the poorer one it
+     builds on. Alphabetize them, or move `field-start` above `field-end`, and the start
+     field lands outside the grid: no error, just a control sitting where nothing put it. */
   .v-slider:has(.v-slider-labels) {
     grid-template-areas: 'rail' 'labels';
   }

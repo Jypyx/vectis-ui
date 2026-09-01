@@ -1,4 +1,20 @@
 <script setup lang="ts">
+// @a11y @core
+/**
+ * A field for choosing a date: a VInput, and a VDatePicker in a panel below it.
+ *
+ * The panel is `mode="manual"` and driven imperatively, which is not a detail — `popovertarget`
+ * is invalid on a text `<input>`, and opening it ourselves is also what lets focus be moved
+ * INTO the grid so the keyboard lands on the dates. Closing is ours too: `focusout`, or Escape.
+ *
+ * Two FIELD modes, `mode`: `input` (the default) types digits only, the separators appearing
+ * as they go in the order and punctuation of the reader's locale; `readonly` makes the
+ * calendar the only way in.
+ *
+ * That is a different question from WHAT is chosen — one date, a range, or several — which is
+ * `selection`, passed straight through to the picker.
+ */
+
 import { computed, ref, useId, watchEffect } from 'vue'
 
 import VDatePicker from '../VDatePicker/VDatePicker.vue'
@@ -35,24 +51,6 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 import { useMaskedField } from '../../composables/useMaskedField'
 import { useLocale, useMessages } from '../../i18n/state'
 
-// @a11y @core
-/**
- * A field for choosing a date: a text field, and a calendar in a panel below it.
- *
- * The panel is opened from code rather than by the browser, and that is not a detail: a
- * text input cannot be declared as the thing that opens a popover, and opening it
- * ourselves is also what lets the focus be moved INTO the calendar's grid, so the
- * keyboard lands where the dates are. Closing is ours too — the focus leaving the
- * component, or Escape.
- *
- * The field itself comes in two forms. It can be TYPED into, which is the default: the
- * reader types digits only and the separators appear as they go, in the order and with
- * the punctuation their language uses. Or it can be read-only, in which case the calendar
- * is the only way in.
- *
- * That is a different question from WHAT is being chosen — one date, a period, or several
- * dates — which is passed straight through to the calendar.
- */
 type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
 
 /** Whether the field can be typed into, or only filled from the calendar. */
@@ -180,6 +178,15 @@ const props = withDefaults(defineProps<DateInputProps>(), {
   placement: 'bottom-start',
 })
 
+/**
+ * The date or dates chosen, in the shape `selection` calls for: an ISO `YYYY-MM-DD` string
+ * for `single`, a `{ start, end }` pair for `range`, an array for `multiple`. Nothing is
+ * selected to begin with.
+ *
+ * While the reader types, it is only written once what they have entered is a complete and
+ * acceptable date; an unfinished or refused entry leaves it untouched and is reverted when
+ * they leave the field.
+ */
 const model = defineModel<DatePickerValue>({ default: null })
 
 defineSlots<{

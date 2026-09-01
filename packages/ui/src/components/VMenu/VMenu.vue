@@ -1,4 +1,23 @@
 <script setup lang="ts">
+// @a11y @core
+/**
+ * A menu of actions, opened by a button and closed as soon as one is chosen. It follows the
+ * ARIA menu pattern, which is what tells a screen reader these are commands rather than
+ * links or options.
+ *
+ * It rests on `popover="auto"`: the panel light-dismisses without a line of code and
+ * positions itself in CSS against its `popovertarget` invoker, which is its implicit anchor.
+ *
+ * The JS covers only what the platform does not — keeping `v-model:open` in step, moving
+ * focus into the panel and handing it back to the trigger. The keyboard inside the panel
+ * lives in VMenuPanel.
+ *
+ * HOW FAR the focus goes in depends on how the menu was opened: from the keyboard it settles
+ * on the first command, ready to be chosen; by pointer it stops at the panel, so nothing is
+ * singled out for someone who has not asked for a choice yet. The arrows still enter the
+ * list from there.
+ */
+
 import { computed, onMounted, provide, ref, useId, watch } from 'vue'
 
 import VMenuPanel from './VMenuPanel.vue'
@@ -6,27 +25,6 @@ import { menuInvoker, menuKey } from './context'
 import type { MenuPlacement } from './context'
 import { isKeyboardFocus } from '../../utils/focus'
 
-// @a11y @core
-/**
- * A menu of actions, opened by a button and closed as soon as one is chosen. It
- * follows the ARIA menu pattern, which is what tells a screen reader that these are
- * commands rather than links or options in a list.
- *
- * It rests on the browser's own popover support: the panel closes on a click outside
- * or on Escape without a line of code, and it positions itself in CSS against the
- * button that opened it — the browser knows which one, since that button names the
- * panel it opens.
- *
- * The JavaScript here is limited to what the platform does not do: keeping
- * `v-model:open` and the browser's own state in step, moving the focus into the panel
- * when it opens, and giving it back to the trigger when it closes. The keyboard inside
- * the panel — the arrows moving from one command to the next — lives in VMenuPanel.
- *
- * How far the focus goes in depends on how the menu was opened. Opened from the
- * keyboard it settles on the first command, ready to be chosen; opened with a mouse or
- * a finger it stops at the panel, so that nothing is picked out for someone who has
- * not asked for a choice yet — the arrows still enter the list from there.
- */
 interface MenuProps {
   /**
    * Where the panel opens relative to its trigger. The browser moves it to another
@@ -61,6 +59,10 @@ withDefaults(defineProps<MenuProps>(), {
   matchTrigger: false,
 })
 
+/**
+ * Whether the menu is showing. It starts closed and is fed BY the panel, so the browser's
+ * own dismissal — a click outside, Escape, choosing a command — writes back to it.
+ */
 const open = defineModel<boolean>('open', { default: false })
 
 /**

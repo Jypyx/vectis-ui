@@ -1,27 +1,22 @@
 <script setup lang="ts">
 // @core
 /**
- * An icon, whatever the icons of the host application happen to be made of. The
- * component's real work is deciding WHERE the drawing comes from, and it asks in a
- * fixed order: an explicit render first, then an image address, then the name —
- * which is offered to the consumer's own resolver if one was installed, then to the
- * drawing the icon brought along with it, and finally to a ligature font. A raw SVG
- * can always be passed through the slot instead.
+ * An icon, whatever the host application's icons are made of. The real work is deciding
+ * WHERE the drawing comes from, asked in a fixed order: `render`, then `src`, then `name` —
+ * offered to the consumer's resolver if one was installed, then to the drawing the icon
+ * carries, and finally to a ligature font. A raw SVG can always come through the slot.
  *
- * That order IS the contract. The resolver is asked before the built-in drawing,
- * otherwise the design system's own icons would stay Material for a consumer who has
- * wired in their own library; and a resolver that answers `undefined` for a name
- * simply hands over to that drawing, which is what makes a PARTIAL mapping usable.
+ * That order IS the contract. The resolver comes before the built-in drawing, or the
+ * library's own icons would stay Material for a consumer who wired in their own set; and a
+ * resolver returning `undefined` hands over to that drawing, which is what makes a PARTIAL
+ * mapping usable.
  *
- * It is what allows the design system to work with no icon font at all: the icons
- * the library draws by itself — crosses, chevrons, toast tones — are imported by the
- * components that render them and travel as a name AND its paths, so they depend on
- * nothing being installed, and a consumer downloads only the ones their components
- * actually draw. The ligature remains the fallback for every other name.
+ * It is what lets the library require no icon font: the icons it draws by default are
+ * imported by the components that render them and travel as a name AND its paths, so a
+ * consumer downloads only the ones their components actually draw.
  *
- * Despite the `computed`, there is no behavioural JavaScript here: no event, no
- * lifecycle, no DOM. It is a pure choice of source, which the server and the browser
- * make identically.
+ * Despite the `computed`, there is no behavioural JS here — no event, no lifecycle, no DOM.
+ * A pure choice of source, made identically on the server and in the browser.
  */
 import { computed, type Component } from 'vue'
 

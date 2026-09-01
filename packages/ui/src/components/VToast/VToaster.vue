@@ -1,4 +1,21 @@
 <script setup lang="ts">
+// @a11y @core
+/**
+ * Where notifications appear: mounted ONCE at the root, after which every `toast()` call
+ * shows up here.
+ *
+ * One container per placement rather than one popover per notification, each stacking its
+ * own with CSS. These boxes are drawn above the page at physical coordinates, anchored to
+ * nothing, so individually they would all land on the same spot and keeping them apart would
+ * mean measuring and offsetting each in code. The six exist at all times; empty, they cost
+ * nothing and are not displayed.
+ *
+ * The JS covers three things the platform does not: keeping the queue and the containers in
+ * step, the popover being imperative; the per-notification dismissal timers; and pausing
+ * them while the pointer rests on a stack, so something that disappears on a clock can be
+ * held long enough to read (WCAG 2.2.1).
+ */
+
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { usePopover } from '../../composables/usePopover'
@@ -8,24 +25,6 @@ import { dismissToast, toasts, type ToastItem, type ToastPlacement } from './sta
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
-// @a11y @core
-/**
- * Where notifications appear. It is mounted ONCE, at the root of the application, and
- * from then on any call to `toast()` shows up here.
- *
- * It renders one container per corner of the screen rather than one floating box per
- * notification, and each container simply stacks its notifications with CSS. The
- * reason is that these boxes are drawn above the whole page, at fixed coordinates and
- * anchored to nothing: individually they would all land on the same spot, and keeping
- * them apart would mean measuring and offsetting each one in code. The six containers
- * exist at all times — empty, they cost nothing and the browser does not display them.
- *
- * The JavaScript covers three things the platform does not: putting the queue and the
- * containers in step, since drawing above the page can only be asked for by calling a
- * method; the timers that dismiss a notification when its time is up; and pausing
- * those timers while the pointer rests on a stack, so that something disappearing on a
- * clock can be held in place long enough to read (WCAG 2.2.1).
- */
 interface ToasterProps {
   /** Which corner notifications appear in, unless one of them asks for another. */
   placement?: ToastPlacement
@@ -259,7 +258,10 @@ onBeforeUnmount(() => {
        grows at the end, so the stack is simply drawn in reverse. */
     flex-direction: column-reverse;
     /* The direction each card slides in from, read by `.v-banner` in styles/banner.css
-       — the stack is the only thing that knows which edge of the screen it sits on. */
+       — the stack is the only thing that knows which edge of the screen it sits on.
+       That sheet reads it with a `, 0` fallback, so dropping this declaration removes
+       the slide without removing anything else: the cards still fade in, in place, and
+       nothing reports a missing value. */
     --banner-enter-y: calc(-1 * var(--vectis-space-4));
   }
 

@@ -1,4 +1,25 @@
 <script setup lang="ts">
+// @a11y @keyboard @core
+/**
+ * An inline clock for choosing a time, the hour-and-minute counterpart of VDatePicker.
+ * VTimeInput does no more than dress it in a field and a popover; it is usable on its own.
+ *
+ * Three parts: two large numerals saying what has been chosen and switching between hours
+ * and minutes, the AM/PM toggle beside them on a 12-hour clock, and the face below, where a
+ * time is POINTED AT rather than stepped through.
+ *
+ * Nothing native covers choosing a value by angle, so the JS does two things — turning a
+ * point on the face into a time (the face measured once, then pure trigonometry in
+ * `utils/time`) and implementing a slider's keyboard.
+ *
+ * Everything one SEES is CSS: the numerals are placed around the circle and the hand turned,
+ * both from one unitless turn fraction set inline.
+ *
+ * Exactly ONE focusable element on the face, announced as a slider. The numerals are
+ * `aria-hidden` markers reached by angle rather than one cell at a time, which is why that
+ * single element has to carry the whole spoken value.
+ */
+
 import { computed, ref } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
@@ -22,31 +43,6 @@ import type { HourFormat, Meridiem } from '../../utils/time'
 import { pad2 } from '../../utils/text'
 import { useLocale, useMessages } from '../../i18n/state'
 
-// @a11y @keyboard @core
-/**
- * A clock shown directly in the page, for choosing a time. It is the hour-and-minute
- * counterpart of VDatePicker: VTimeInput does no more than dress it in a text field and a
- * popover, and it is perfectly usable on its own.
- *
- * It is read in three parts. Two large numerals at the top say what has been chosen so
- * far, and switch between adjusting the hour and adjusting the minutes; on a 12-hour clock
- * the choice between morning and afternoon sits beside them, since it is read as part of
- * that same time. Below them is the face itself, where one points at a time rather than
- * stepping through it.
- *
- * Nothing native covers choosing a value by pointing at an angle, so the JavaScript does
- * two things: it turns a point on the face into a time — measuring the face once, then
- * pure trigonometry that lives in `utils/time` — and it implements the keyboard of a
- * slider, the arrows and the Home, End and Page keys.
- *
- * Everything one SEES is CSS: the numerals are placed around the circle, and the hand is
- * turned, from a single unitless fraction of a turn written inline.
- *
- * There is exactly ONE focusable element on the face, and it is announced as a slider. The
- * numerals are visual markers hidden from screen readers, reached by the pointer's angle
- * rather than one cell at a time — which is why the whole spoken value has to be carried
- * by that one element.
- */
 export type TimePickerFormat = HourFormat
 
 /** Which of the two halves of a time is being adjusted. */

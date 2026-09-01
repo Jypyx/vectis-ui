@@ -222,11 +222,10 @@ describe('VCarousel', () => {
     })
 
     /*
-     * The touch-drag saccade: the read-back writes the model on every frame of a
-     * drag, and each write used to come back as a programmatic scroll fighting the
-     * finger — the scroller jumped to the slide just named, the release snapped it
-     * again, and one gesture played two animations. The scroller is already there,
-     * so the model → DOM direction has nothing to do.
+     * The touch-drag saccade. The read-back writes the model on every frame of a drag, and
+     * without the guard each write comes back as a programmatic scroll FIGHTING the finger:
+     * the scroller jumps to the slide just named, the release snaps it again, one gesture
+     * plays two animations. The scroller is already there, so model → DOM has nothing to do.
      */
     it('a read-back write does not come back as a programmatic scroll', async () => {
       const notify = stubIntersectionObserver()
@@ -253,11 +252,10 @@ describe('VCarousel', () => {
   })
 
   /*
-   * The MEASURED count, which the prop fallback below only stands in for. It became
-   * testable here the day the reading stopped going through intersection ratios: every
-   * number `measure()` takes is stubbable, so the geometries that used to be
-   * browser-only — a peek, an active floor — are locked in jsdom now, and the play
-   * functions verify that a real browser produces those geometries.
+   * The MEASURED count, which the prop fallback below only stands in for. It is testable
+   * here because the reading is POSITIONAL: every number `measure()` takes is stubbable, so
+   * geometries a ratio-based reading could only exercise in a browser — a peek, an active
+   * floor — are locked in jsdom. The play functions verify a real browser produces them.
    */
   describe('measured pages', () => {
     const six = [0, 1, 2, 3, 4, 5].map((i) => `<VCarouselItem>S${i}</VCarouselItem>`).join('\n')
@@ -321,12 +319,11 @@ describe('VCarousel', () => {
     })
 
     /*
-     * The backward regression, and the reason `scrollend` measures at all. With a peek
-     * the outgoing slide never stops being fully visible, so the observer's last
-     * delivery is a MID-FLIGHT one naming the page being left; `scrollend` used to do
-     * nothing but lower the guard, and that stale reading went straight into the model
-     * while `readBack` suppressed the scroll that would have corrected it — the dot sat
-     * one page ahead of the content, for good.
+     * The backward case, and the reason `scrollend` measures at all. With a peek the
+     * outgoing slide never stops being fully visible, so the observer's last delivery is a
+     * MID-FLIGHT one naming the page being left. Lowering the guard without measuring sends
+     * that stale reading into the model while `readBack` suppresses the correcting scroll,
+     * and the dot sits one page ahead of the content for good.
      */
     it('scrollend re-measures at the arrival position, so a stale reading never lands', async () => {
       const notify = stubIntersectionObserver()

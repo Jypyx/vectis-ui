@@ -1,7 +1,3 @@
-import type { InjectionKey } from 'vue'
-
-import type { TabsActivation, TabsSize, TabsTone, TabsVariant } from './VTabs.vue'
-
 /**
  * What a VTabs passes down to the tabs and panels inside it.
  *
@@ -15,6 +11,11 @@ import type { TabsActivation, TabsSize, TabsTone, TabsVariant } from './VTabs.vu
  * VAccordion, for a concrete reason: each tab renders a button that declares its own
  * size on itself, so an inherited value would never reach it.
  */
+
+import type { InjectionKey } from 'vue'
+
+import type { TabsActivation, TabsSize, TabsTone, TabsVariant } from './VTabs.vue'
+
 export interface TabsContext {
   /** The selected tab, or nothing when the v-model names no tab that exists. */
   readonly value: string | number | undefined

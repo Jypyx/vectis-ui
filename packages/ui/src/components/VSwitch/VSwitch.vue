@@ -32,6 +32,7 @@ withDefaults(defineProps<SwitchProps>(), {
 // that actually carries the switch role.
 defineOptions({ inheritAttrs: false })
 
+/** Whether the switch is on. It starts off. */
 const model = defineModel<boolean>({ default: false })
 
 defineSlots<{

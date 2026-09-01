@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import VDialog from './VDialog.vue'
-
 /**
  * A dialog demanding an answer: confirming something irreversible, acknowledging a
  * failure. It looks exactly like VDialog and is nothing more than VDialog with its
@@ -11,6 +9,9 @@ import VDialog from './VDialog.vue'
  * nothing, and Escape does nothing either. The buttons in the footer are the only way
  * to dismiss it — which is why supplying them is not optional.
  */
+
+import VDialog from './VDialog.vue'
+
 interface DialogAlertProps {
   /**
    * The question being asked, which also names the dialog for assistive technology.
@@ -32,6 +33,7 @@ withDefaults(defineProps<DialogAlertProps>(), {
   width: '400px',
 })
 
+/** Whether the alert is showing. It starts closed, and closing writes back to it. */
 const open = defineModel<boolean>('open', { default: false })
 
 type TriggerProps = {

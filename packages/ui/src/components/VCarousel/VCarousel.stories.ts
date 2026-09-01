@@ -203,13 +203,10 @@ export const Peek: Story = {
     )
 
     /*
-     * BACKWARDS, which is the direction a peek used to break. The outgoing slide keeps
-     * the strip's worth of slack, so it stays fully visible for the whole travel — the
-     * intersection ratios the read-back used to scan therefore went on naming the page
-     * being LEFT, and `scrollend` handed that stale reading to the model while the
-     * scroll that would have corrected it was suppressed. The dot landed on 2 and then
-     * jumped back. The second sample, taken after everything has settled, is the one
-     * that catches it.
+     * BACKWARDS is the fragile direction. With a peek the outgoing slide keeps the strip's
+     * worth of slack and stays fully visible for the whole travel, so a ratio-based read-back
+     * would name the page being LEFT. The second sample, taken once everything has settled,
+     * is what catches a dot that lands and then jumps back.
      */
     await userEvent.click(dots[1] as HTMLElement)
     await waitFor(
@@ -442,9 +439,9 @@ export const ControlsCentring: Story = {
     const prev = canvas.getByRole('button', { name: 'Previous slide' })
     await expect(Math.abs(middle(prev) - middle(port))).toBeLessThan(2)
     /*
-     * …and NOT on the root, which also spans the indicator bar. This is the whole
-     * test: the first assertion alone was true of the old markup too, which sat the
-     * pair about 18px low.
+     * …and NOT on the root, which also spans the indicator bar. This is the whole test: the
+     * first assertion alone holds even when the pair sits ~18px low, which is what putting
+     * the bar inside the stage would do.
      */
     await expect(Math.abs(middle(prev) - middle(root))).toBeGreaterThan(8)
   },
@@ -506,8 +503,8 @@ export const ControlsOnHover: Story = {
       await expect(getComputedStyle(bar).opacity).toBe('1')
     })
 
-    // …and it RELEASES. The reveal used to be pinned by any focus, so clicking a
-    // control left the pair up until the user clicked outside the carousel entirely.
+    // …and it RELEASES. Reading any focus rather than `:focus-visible` would pin the pair
+    // up, a click leaving focus on the control until the reader clicked outside entirely.
     port.blur()
     await waitFor(async () => {
       await expect(getComputedStyle(bar).opacity).toBe('0')
@@ -614,9 +611,9 @@ export const Pages: Story = {
             'true',
           )
           /*
-           * EXACTLY one slide per click. The read-back used to scan a Map in insertion
-           * order and pick an arbitrary member of the fully-visible tie — a middle
-           * slide — so the following click stepped two at once.
+           * EXACTLY one slide per click. A read-back scanning for the first fully visible
+           * slide picks an arbitrary member of the tie — a middle one — and the next click
+           * then steps two at once.
            */
           await expect(Math.abs(port.scrollLeft - clicks * step)).toBeLessThan(2)
         },

@@ -1,28 +1,21 @@
 <script setup lang="ts">
 // @core
 /**
- * A drop zone: a dashed rectangle that accepts files dragged onto it or chosen through
- * a dialog, with an optional list of what has been taken.
+ * A drop zone: a dashed rectangle taking files dragged onto it or chosen from a dialog, with
+ * an optional list of what it holds. The v-model is a plain `File[]`, and the division of
+ * labour matters — this component SHOWS and SCREENS, uploading is the parent's business.
  *
- * The value is a plain list of files, and the division of labour matters: this component
- * SHOWS and SCREENS, while sending anything anywhere is the parent's business.
+ * Four things need JS, each forced by the platform. A dialog opens ONLY from a real click on
+ * a file input, and a `FileList` cannot be written from a template, so the input is a SOURCE
+ * of files rather than a mirror of the value. `accept` has no say over a DROP. The input has
+ * to be reset after every change, or the same file cannot be chosen twice running. And a
+ * thumbnail needs an object URL, which then has to be released.
  *
- * Four pieces of behaviour need JavaScript, each because the platform leaves no choice.
- * A file dialog opens ONLY from a real click on a real file input, and the list of files
- * it holds cannot be written from a template — hence the relayed click, and the hidden
- * input being a source of files rather than a mirror of the value. The `accept`
- * attribute has no say over a DROP, the browser handing the dropped files over
- * untouched, so the screening has to happen in code. That input has to be reset after
- * every change, or the same file cannot be chosen twice in a row. And a thumbnail has no
- * HTML-only form: an image needs an address, a file only yields one through a temporary
- * URL, and that URL then has to be released.
- *
- * What deliberately is NOT JavaScript is the keyboard. With the browse button hidden,
- * the zone becomes a real button, so Enter, Space, the focus, the role and the complete
- * inertness of a disabled control all come from the browser. The other incarnation, a
- * plain container, exists for one reason only: a button inside a button is invalid
- * markup and unusable by keyboard. Nor is any of the drag highlighting, the "or"
- * separator, or the side-by-side layout — all three are CSS.
+ * The KEYBOARD is deliberately not among them: with the browse button hidden the zone
+ * becomes a real `<button>`, so Enter, Space, focus, role and a disabled control's inertness
+ * all come from the browser. The other incarnation, a plain container, exists for one reason
+ * — a button inside a button is invalid markup and unusable by keyboard. The drag highlight,
+ * the "or" separator and the side-by-side layout are CSS too.
  */
 import {
   computed,

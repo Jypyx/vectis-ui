@@ -1,7 +1,3 @@
-import { shallowRef } from 'vue'
-
-import type { IconSource } from '../VIcon/types'
-
 // @ssr @core
 /**
  * The confirmation bar waiting to be shown. Nothing in HTML covers this, so it is code
@@ -30,6 +26,10 @@ import type { IconSource } from '../VIcon/types'
  * The only thing that touches the DOM, and the only thing that arms the countdown, is
  * the mounted VSnackbar.
  */
+
+import { shallowRef } from 'vue'
+
+import type { IconSource } from '../VIcon/types'
 
 /**
  * What a confirmation can mean. There are two, and deliberately no more: a snackbar

@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, useAttrs, useId, watch } from 'vue'
-
-import VIcon from '../VIcon/VIcon.vue'
-import { close as closeIcon } from '../VIcon/icons/close'
-import VIconButton from '../VIconButton/VIconButton.vue'
-import VTypography from '../VTypography/VTypography.vue'
-import { useMessages } from '../../i18n/state'
-
 // @core
 /**
  * A modal dialog: it takes over the page until the reader answers it.
@@ -21,6 +13,15 @@ import { useMessages } from '../../i18n/state'
  * methods the platform offers no declarative equivalent for: opening as a modal, and
  * closing.
  */
+
+import { computed, nextTick, onMounted, ref, useAttrs, useId, watch } from 'vue'
+
+import VIcon from '../VIcon/VIcon.vue'
+import { close as closeIcon } from '../VIcon/icons/close'
+import VIconButton from '../VIconButton/VIconButton.vue'
+import VTypography from '../VTypography/VTypography.vue'
+import { useMessages } from '../../i18n/state'
+
 interface DialogProps {
   /**
    * The title of the dialog, which also names it for assistive technology. It is
@@ -40,11 +41,18 @@ interface DialogProps {
    * VDialogAlert, which is exactly that.
    */
   role?: 'dialog' | 'alertdialog'
-  /** Shows the close cross in the header. */
+  /**
+   * Shows the close cross in the header, which it does by default. Turning it off leaves
+   * the reader with Escape, the backdrop and whatever the footer offers.
+   */
   closable?: boolean
-  /** Lets a click outside the dialog close it. */
+  /** Lets a click outside the dialog close it. It does by default. */
   closeOnBackdrop?: boolean
-  /** Lets the Escape key close the dialog. */
+  /**
+   * Lets the Escape key close the dialog. It does by default. Note that turning this off
+   * while `closeOnBackdrop` stays on cannot be expressed natively, and both are then
+   * allowed.
+   */
   closeOnEscape?: boolean
   /** What the close cross does, in words. It falls back to the design system dictionary. */
   closeLabel?: string
@@ -64,6 +72,11 @@ const props = withDefaults(defineProps<DialogProps>(), {
 const m = useMessages()
 const resolvedCloseLabel = computed(() => props.closeLabel ?? m.value.common.close)
 
+/**
+ * Whether the dialog is showing. It starts closed, and it is BIDIRECTIONAL: the browser
+ * writes back to it whenever the dialog closes on its own, through Escape or the backdrop,
+ * so a consumer never has to reset it by hand.
+ */
 const open = defineModel<boolean>('open', { default: false })
 
 /** What the trigger has to carry: the click that opens the dialog, and the fact that it does. */
@@ -172,7 +185,17 @@ function onClose() {
   open.value = false
 }
 
-defineExpose({ show, close: requestClose, el: dialogEl })
+defineExpose({
+  /** Opens the dialog, exactly as setting `open` does. */
+  show,
+  /**
+   * Closes the dialog. It closes unconditionally, `closeOnEscape` and `closeOnBackdrop`
+   * governing only the two routes the reader can take.
+   */
+  close: requestClose,
+  /** The `<dialog>` element. It is null while closed: each opening builds a fresh one. */
+  el: dialogEl,
+})
 </script>
 
 <template>

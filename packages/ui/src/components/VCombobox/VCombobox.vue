@@ -1,4 +1,21 @@
 <script setup lang="ts">
+// @a11y @keyboard @core
+/**
+ * A field typed into to search a list, and to pick one or several values from. Composed of a
+ * VInput, a VPopover holding the `role="listbox"` panel, and VChips for the chosen values.
+ *
+ * The platform offers nothing to build on — `<datalist>` can be neither styled nor made
+ * multi-select — so the JS here implements the whole ARIA combobox pattern: the filtering,
+ * the highlight and the selection.
+ *
+ * ONE decision shapes the rest: DOM focus NEVER leaves the text field. What moves under the
+ * arrows is `aria-activedescendant`, which is why the panel has no keyboard of its own and
+ * why this component owns the field's entire accessibility contract.
+ *
+ * The panel is `mode="manual"` (no light dismiss) and closes on `focusout` — which works
+ * only because the field is OUTSIDE the panel.
+ */
+
 import { computed, nextTick, reactive, ref, useId, watch, watchEffect } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
@@ -24,26 +41,6 @@ import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
 import { useTimer } from '../../composables/useTimer'
 import { useMessages } from '../../i18n/state'
 
-// @a11y @keyboard @core
-/**
- * A field one types into to search a list, and picks one or several values from. It is
- * built out of a text field, a floating panel holding the list, and chips for the values
- * already chosen.
- *
- * The platform offers nothing to build this on: its own suggestion list can be neither
- * styled nor made to accept several values. So the JavaScript here implements the whole
- * pattern assistive technology expects of a combobox — the filtering, the moving of the
- * highlight, and the selection.
- *
- * One decision shapes all the rest: the DOM focus NEVER leaves the text field. What
- * moves as the reader presses the arrows is a pointer naming the current option, which
- * is why the panel has no keyboard of its own and why this component owns the entire
- * accessibility contract of the field.
- *
- * The panel is opened in the mode where nothing dismisses it by itself, and closing is
- * decided by the focus leaving the component — which the field being OUTSIDE the panel
- * makes possible.
- */
 /** One thing that can be chosen. */
 export interface ComboboxOption {
   /** What choosing it means: this is what the value holds. */
@@ -219,6 +216,11 @@ defineSlots<{
 // input, and deriving both from the same pair is what stops them drifting apart.
 const chipScale = computed(() => chipScaleFor(props.size, props.compact))
 
+/**
+ * The chosen option's `value`, or the list of them when `multiple` is set. It is an empty
+ * string to begin with, and the array is never mutated in place: each change is a new one,
+ * which is what wakes the consumer's binding.
+ */
 const model = defineModel<string | string[]>({ default: '' })
 
 // `class` and `style` stay on the wrapper, where a consumer expects to style the

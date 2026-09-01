@@ -2,20 +2,16 @@
 // @a11y @core
 /**
  * The year view: twelve small months, each marking the days that have something on them.
+ * Internal to VCalendar, whose documentation covers it.
  *
- * It is internal to VCalendar and has no story of its own — its documentation lives with
- * the component that renders it.
+ * WHY THE DAYS ARE NOT BUTTONS, unlike every other view. A year is 365 days, and making each
+ * focusable would put that many stops in the tab order for a view meant to be glanced at.
+ * Twelve roving grids would fix the count but leave the arrows unable to cross from one
+ * month to the next, which is exactly the movement a year view invites.
  *
- * WHY THE DAYS HERE ARE NOT BUTTONS, unlike every other view. A year is three hundred and
- * sixty-five days, and making each one focusable would put that many stops in the tab
- * order for a view whose whole purpose is to be glanced at. Twelve roving grids would fix
- * the count but leave the arrows unable to cross from one month to the next, which is
- * exactly the movement a year view invites.
- *
- * So this view is a SUMMARY and says so: the days are text, with the busy ones ringed, and
- * the thing you can reach and act on is the month, whose name carries how many of its days
- * carry something. Choosing a day is what the month and day views are for, and the heading
- * is the way through to them.
+ * So it is a SUMMARY and says so: the days are text with the busy ones ringed, and what can
+ * be reached and acted on is the MONTH, whose name carries how many of its days are busy.
+ * Choosing a day is what the month and day views are for, and the heading is the way through.
  */
 import { computed } from 'vue'
 
@@ -69,13 +65,12 @@ const busyDays = computed(() => {
 /*
  * The twelve grids and their day numbers, built ONCE per render.
  *
- * `weeksOf` used to be a plain function, and the template reached it three times per month
- * — once in the `v-for`, and twice through `busyCount`, which appears in both the `v-if` and
- * the text beside it. Twelve months therefore rebuilt 36 grids, some 1500 `MonthCell`
- * objects, on every render; the 504 day numbers were formatted alongside them. None of that
- * depends on anything but the anchor, the weekdays and the locale.
- *
- * `busyCount` is a map for the same reason: reading it twice must not cost twice.
+ * The template reaches a month three times — in the `v-for`, and twice through `busyCount`,
+ * which appears in both the `v-if` and the text beside it. A plain function would therefore
+ * build 36 grids and some 1500 `MonthCell` objects per render, and format 504 day numbers
+ * along with them, none of which depends on anything but the anchor, the weekdays and the
+ * locale. `dayNumbers` and `busyCounts` below are maps for the same reason: reading one
+ * twice must not cost twice.
  */
 const grids = computed(() => {
   const map = new Map<string, MonthCell[][]>()
@@ -242,6 +237,13 @@ const isBusy = (cell: MonthCell) => cell.adjacent === null && busyDays.value.has
     color: var(--vectis-color-accent-text);
   }
 
+  /*
+     TRAP — today comes LAST, and the three state rules are all (0,2,0), so their order is
+     the whole of the priority: adjacent, then busy, then today. Today is very often also
+     busy, and moving this rule up paints it as an ordinary busy day — the one square a
+     reader looks for first, quietly indistinguishable. Written as source order rather
+     than as VDatePicker's `[data-today]:not([data-selected])` because there are three
+     states here, not two, and a `:not()` chain would have to name both of the others. */
   .v-calendar-year-day[data-today] {
     background: var(--vectis-color-accent);
     color: var(--vectis-color-text-on-accent);

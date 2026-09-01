@@ -82,6 +82,9 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
         observer = null
       })
     },
+    // `post` so the sentinel and the panel it is measured against are both in the DOM: in
+    // the default timing the refs are still null on the pass that mounts them, and the
+    // observer is never built at all.
     { flush: 'post' },
   )
 

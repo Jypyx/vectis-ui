@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import { computed, inject, useSlots } from 'vue'
-
-import VButton from '../VButton/VButton.vue'
-import VIcon from '../VIcon/VIcon.vue'
-import { iconProps } from '../VIcon/iconProps'
-import type { IconSource } from '../VIcon/types'
-import { tabsKey } from './context'
-
 /**
  * One tab. It IS a VButton — the colour, the size, the focus ring and the disabled
  * state all come from there — and what this component adds is the handful of
@@ -15,6 +7,15 @@ import { tabsKey } from './context'
  * Used outside a VTabs it still renders perfectly well, simply never selected, the
  * same way an accordion item does outside its accordion.
  */
+
+import { computed, inject, useSlots } from 'vue'
+
+import VButton from '../VButton/VButton.vue'
+import VIcon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
+import { tabsKey } from './context'
+
 interface TabProps {
   /**
    * What this tab is called in code. The panel carrying the same value is the one it

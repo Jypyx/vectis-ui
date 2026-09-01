@@ -94,12 +94,12 @@ for (const count of SCALES) {
     /*
      * The month view's real workload, measured both ways.
      *
-     * The first is what VCalendarMonth used to do: one `eventsOnDay` per cell, each
-     * filtering AND sorting the whole list — `cells × events`, with 42 sorts. The second is
-     * what it does now, and the two are kept side by side so the gap is a number anyone can
-     * re-run rather than a claim in a commit message. Both produce the same order.
+     * The naive shape is one `eventsOnDay` per cell, each filtering AND sorting the whole
+     * list — `cells × events`, with 42 sorts. The second is what VCalendarMonth does. The two
+     * stay side by side so the gap is a number anyone can re-run rather than a claim, and
+     * both must produce the same order.
      */
-    bench('byDay — eventsOnDay once per month cell (the old shape)', () => {
+    bench('byDay — eventsOnDay once per month cell (the naive shape)', () => {
       for (const cell of monthCells) eventsOnDay(events, cell.iso)
     })
 

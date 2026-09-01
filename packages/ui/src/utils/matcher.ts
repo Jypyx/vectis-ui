@@ -1,15 +1,11 @@
 // @core
 /**
- * Turns any of the design system's "which entries are unavailable" props into a
- * single function to ask. Those props — `disabledDates`, `disabledPages` and their
- * kind — accept either a LIST of the values concerned or a FUNCTION deciding for
- * each one, and this is what lets the components stop caring which of the two they
- * were handed.
+ * Turns the design system's "which entries are unavailable" props — `disabledDates`,
+ * `disabledPages` and their kind, each accepting a list OR a predicate — into one
+ * function to ask, so components need not care which they were handed.
  *
- * It is meant to be resolved ONCE, inside a `computed`, and not called afresh for
- * every value: a list is converted into a `Set` here, so each lookup is then
- * immediate, where an `includes` would walk the whole list again for every cell on
- * screen.
+ * Resolve it ONCE inside a `computed`, never per value: the list becomes a `Set` here, so
+ * each lookup is immediate where an `includes` would rescan it for every cell on screen.
  */
 export function resolveMatcher<T>(
   matcher: readonly T[] | ((value: T) => boolean) | undefined,

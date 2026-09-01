@@ -1,19 +1,15 @@
 <script setup lang="ts">
 // @core
 /**
- * A field for text running over several lines, with the same label, hint, icons,
- * counter, loading state and clear button as VInput, arranged around a real
- * `<textarea>`.
+ * A multi-line field, with the same label, hint, icons, counter, loading state and clear
+ * cross as VInput, arranged around a real `<textarea>`.
  *
- * Two things differ from its single-line counterpart. The field can grow with what
- * is typed into it, and that is pure CSS — a browser without `field-sizing` simply
- * keeps a fixed height with its usual scrollbar. And the counter is placed UNDER the
- * field rather than inside it, where several lines of text would run into it.
+ * Two things differ. It grows with what is typed, which is pure CSS (`field-sizing`) — a
+ * browser without it keeps a fixed height and its usual scrollbar. And the counter goes
+ * UNDER the field rather than inside it, where several lines of text would run into it.
  *
- * As in VInput, the attributes it is given are split — `class` and `style` stay
- * outside, the rest goes to the textarea — validation stays the browser's, and the
- * only behavioural JavaScript is the v-model and the clear button, which has to hand
- * focus back to the field it just emptied.
+ * As in VInput: the attrs split, validation stays the browser's, and the only behavioural JS
+ * is the v-model and the clear cross, which hands focus back to the field it just emptied.
  */
 import { computed, ref } from 'vue'
 
@@ -160,6 +156,7 @@ defineSlots<{
   end?(): unknown
 }>()
 
+/** The text in the field, empty to begin with. */
 const model = defineModel<string>({ default: '' })
 
 // HTML wants `rows` to be a positive integer, and it drops anything else on the floor:

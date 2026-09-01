@@ -1,21 +1,17 @@
-import { computed, useId, type ComputedRef } from 'vue'
-
 // @a11y @ssr
 /**
- * The identifiers a wrapped field needs — the text input and the multi-line one. They
- * are what ties a label to its field and a field to the help text below it, so that
- * clicking the label focuses the field and a screen reader reads the hint out with it.
+ * The ids tying a wrapped field to its label and its hint — VInput and VTextarea.
  *
- * Two points are worth knowing. An identifier the consumer supplies WINS over the one
- * generated here, or a label they wrote themselves outside the component would point at
- * nothing. And the link to the descriptive text is a LIST rather than a single value, so
- * the component's own hint is ADDED to whatever the consumer already pointed at instead
- * of replacing it.
+ * A consumer `id` WINS over the generated one, or a label they wrote outside the component
+ * would point at nothing. `aria-describedby` is a space-separated LIST, so the component's
+ * hint is APPENDED to whatever the consumer already pointed at rather than replacing it.
  *
- * The generated identifiers come from Vue's own facility rather than a counter of our
- * own, which is what makes them identical in the page rendered on the server and in the
- * one the browser takes over.
+ * Ids come from `useId()` rather than a counter of our own, which is what keeps them
+ * identical across the server render and hydration.
  */
+
+import { computed, useId, type ComputedRef } from 'vue'
+
 export function useFieldIds(
   attrs: Record<string, unknown>,
   hasHint: () => boolean,

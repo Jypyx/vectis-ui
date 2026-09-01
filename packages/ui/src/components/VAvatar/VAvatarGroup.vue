@@ -1,4 +1,20 @@
 <script setup lang="ts">
+// @ssr @core — the number of avatars is read from the slot's VNODES through
+// `flattenSlot`, never from a registry the children would fill at mount: such a
+// registry is empty during the server render and full on the client, which is a
+// hydration mismatch.
+/**
+ * Several VAvatars stacked into an overlapping row — a team, the participants in a
+ * conversation. Each disc bites into the one before it and, coming later in the document, is
+ * painted over it: the browser's paint order does the work, with no positioning code. A ring
+ * in `--avatar-ring-color` keeps the overlapping edges distinct.
+ *
+ * Two things need JS. Counting the avatars given and keeping only the first few, so the rest
+ * can be summed up as one "+N" disc, is expressible in neither HTML nor CSS — and the count
+ * comes from the slot's VNODES, never a registry, which would render 0 on the server and N
+ * in the browser. And the group's size and density reach the avatars through provide/inject.
+ */
+
 import { computed, provide, useSlots } from 'vue'
 import type { StyleValue } from 'vue'
 
@@ -8,24 +24,6 @@ import { avatarGroupKey } from './context'
 
 import { flattenSlot } from '../../utils/vnode'
 
-// @ssr @core — the number of avatars is read from the slot's VNODES through
-// `flattenSlot`, never from a registry the children would fill at mount: such a
-// registry is empty during the server render and full on the client, which is a
-// hydration mismatch.
-/**
- * Stacks several VAvatars into an overlapping row, the usual way of showing the
- * members of a team or the participants in a conversation. Each disc bites into the
- * one before it and, coming later in the document, is painted over it: the
- * browser's own paint order does the work, no positioning code is involved. A ring
- * in `--avatar-ring-color` surrounds every disc so the overlapping edges stay
- * distinct from one another.
- *
- * Two things here do need JavaScript. Counting the avatars the group was given and
- * keeping only the first few, so that the rest can be summed up as a single "+X"
- * disc, is something neither HTML nor CSS can express. And the size and the density
- * chosen on the group are handed down to the avatars inside through Vue's
- * provide/inject.
- */
 interface AvatarGroupProps {
   /**
    * How many avatars to show before the remaining ones are summed up as a single

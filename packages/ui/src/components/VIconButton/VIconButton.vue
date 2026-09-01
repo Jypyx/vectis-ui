@@ -23,9 +23,12 @@ interface IconButtonProps {
    * month") rather than the picture.
    */
   label: string
-  /** How much visual weight the button carries — the VButton variants. */
+  /** How much visual weight the button carries — the VButton variants. `ghost` by default. */
   variant?: 'solid' | 'outline' | 'ghost' | 'soft'
-  /** What the action means, in colour — the VButton tones. */
+  /**
+   * What the action means, in colour — the VButton tones, `neutral` by default. An icon-only
+   * button is usually secondary, which is why it starts neutral where VButton starts accent.
+   */
   tone?: 'accent' | 'neutral' | 'danger'
   /** Raises the button with a shadow, and a raised surface on ghost and outline. */
   elevated?: boolean
@@ -38,7 +41,7 @@ interface IconButtonProps {
    * circle. The box itself is square either way — only the corners change.
    */
   shape?: 'square' | 'circular'
-  /** The native type of the button. */
+  /** The native type of the button, `button` by default. Ignored once `href` makes it a link. */
   type?: ButtonHTMLAttributes['type']
   /** Makes the button unusable, greyed out through the colour tokens. */
   disabled?: boolean

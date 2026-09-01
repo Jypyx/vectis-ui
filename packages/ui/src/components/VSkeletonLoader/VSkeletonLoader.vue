@@ -1,17 +1,15 @@
 <script setup lang="ts">
 /**
- * The grey silhouette standing in for content that has not arrived yet: a line of
- * text, a button, an avatar. It is drawn entirely in CSS.
+ * The silhouette standing in for content that has not arrived: a line of text, a button, an
+ * avatar. Drawn entirely in CSS.
  *
- * The element rendered is a CONTAINER holding its silhouettes, and not itself the
- * painted shape — the opposite of VProgressLinear. That is what makes several lines
- * possible at no cost, and what keeps every rule below uniform: there is no
- * "painted root" case beside a "painted child" one. It carries the shared size class,
+ * The root is a CONTAINER holding its silhouettes rather than being the painted shape — the
+ * opposite of VProgressLinear. That is what makes `lines` free and keeps every rule below
+ * uniform, with no "painted root" case beside a "painted child" one. It carries `v-control`,
  * so a skeleton of a given size is exactly as tall as a button of that size.
  *
- * The component MEASURES nothing. It does not look at what it replaces to work out a
- * shape; the shape is declared. The three derived values are all the JavaScript there
- * is — no event, no lifecycle, no DOM.
+ * It MEASURES nothing: the shape is declared, never inferred from what it replaces. Three
+ * derived values are the whole of the JS — no event, no lifecycle, no DOM.
  */
 import { computed } from 'vue'
 
@@ -155,18 +153,11 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
        visible at all, and the border colour has the right tone but the wrong meaning. */
     --skeleton-base: var(--vectis-color-surface-skeleton);
     /*
-     * The lighter shade the animation sweeps across is DERIVED from the grey rather
-     * than named: it is that same colour, a little lighter.
-     *
-     * Expressing it as a lightness STEP is what makes one declaration correct in both
-     * themes. Mixing towards a target colour would not: in the light theme the
-     * silhouette is darker than the page, in the dark theme it is LIGHTER than it, so
-     * any fixed target would lighten in one and darken in the other. A step in
-     * lightness always goes the same way — and in the light theme it naturally stops at
-     * white, exactly the page's colour.
-     *
-     * It also follows a custom colour with nothing else to set. The step itself is a
-     * bare ratio, the same tolerance as the opacities.
+     * The highlight is DERIVED from the grey rather than named: the same colour, a little
+     * lighter. A lightness STEP is what makes one declaration correct in both themes, where
+     * a `color-mix()` towards a target would not — the silhouette is darker than the page in
+     * light and LIGHTER than it in dark, so a fixed target would lighten in one and darken in
+     * the other. It also follows a custom `color` with nothing else to set.
      */
     --skeleton-highlight: oklch(from var(--skeleton-base) calc(l + 0.06) c h);
     --skeleton-h: var(--control-height);
@@ -290,18 +281,14 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
   /*
    * The wave: a band of light crossing the silhouette.
    *
-   * The gradient is SYMMETRIC — transparent, light, transparent — so the physical angle
-   * it is drawn at makes no observable difference, and there is nothing to mirror in a
-   * right-to-left page. All that matters is the DIRECTION of the run, and reversing the
-   * animation is enough for that. It is exact here because the run is linear, hence
-   * identical read backwards; the same argument VProgressLinear uses for its
-   * indeterminate bar.
+   * The gradient is SYMMETRIC — transparent, light, transparent — so its physical angle makes
+   * no observable difference and there is nothing to mirror in RTL. Only the DIRECTION of the
+   * run matters, and `animation-direction: reverse` covers it exactly, the run being linear
+   * and therefore identical read backwards.
    *
-   * The band is moved by a transform, where VProgressLinear runs a logical property.
-   * The trade-off is genuinely reversed between the two: that component has a vertical
-   * orientation to serve and only ever draws one bar, whereas a page may hold a dozen
-   * skeletons, and here a movement the compositor can handle without laying anything
-   * out is no longer negotiable.
+   * Moved by `translate`, where VProgressLinear animates a logical property: the trade-off is
+   * reversed between the two, that component drawing one bar where a page may hold a dozen
+   * skeletons, so a compositor-only movement is not negotiable here.
    */
   .v-skeleton[data-animation='wave'] .v-skeleton-item::after {
     content: '';
@@ -343,17 +330,14 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 
   @media (prefers-reduced-motion: reduce) {
     /*
-     * The design system's rule for readers who ask for less motion is to slow down
-     * rather than to stop: a motionless placeholder no longer says that anything is in
-     * progress. But the wave is a TRANSLATION, which is exactly what those readers are
-     * flagging, so it FALLS BACK to the pulse — which keeps the signal without moving
-     * anything. Both are then slowed considerably.
+     * Reduced motion SLOWS rather than stops: a motionless placeholder no longer says
+     * anything is in progress. But the wave is a TRANSLATION, precisely what these readers
+     * flag, so it falls back to the pulse — the same signal without movement. Both are then
+     * slowed considerably. The two share one overlay, so all that is left is replacing the
+     * moving gradient with the flat fill.
      *
-     * Since the two animations share the same overlay, all that is left to do is
-     * replace the moving gradient with the flat colour.
-     *
-     * TRAP — this rule has exactly the same specificity as the two it overrides, so it
-     * is its position at the END of the stylesheet that makes it win.
+     * TRAP — this has exactly the specificity of the two rules it overrides, so its position
+     * at the END of the sheet is the whole of what makes it win.
      */
     .v-skeleton:is([data-animation='wave'], [data-animation='pulse']) .v-skeleton-item::after {
       background-image: none;

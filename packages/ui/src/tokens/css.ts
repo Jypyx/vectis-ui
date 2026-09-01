@@ -1,11 +1,8 @@
 /**
- * Turning the design tokens into CSS.
- *
- * The tokens are written as nested groups of typed objects, and what a browser needs is a
- * flat list of custom properties. That translation happens here. The build uses it to
- * produce the stylesheet the library ships, and it is also published as part of the
- * package so that an application can do the same thing at runtime — a live theming tool
- * regenerating the variables as its user moves a slider, or exporting a configuration.
+ * The tokens' nested typed groups flattened into the list of custom properties a browser
+ * needs. `pnpm tokens` uses it to generate the shipped stylesheet, and it is exported
+ * through `vectis-ui/tokens` so an application can do the same at runtime — a theming tool
+ * regenerating the variables as a slider moves, or exporting a configuration.
  */
 import { isToken, type DesignToken, type TokenGroup } from './types'
 

@@ -45,6 +45,10 @@ withDefaults(defineProps<RadioProps>(), {
 // nothing.
 defineOptions({ inheritAttrs: false })
 
+/**
+ * The value selected in the group, shared by every radio carrying the same `name`. It is
+ * empty until one is chosen, and a radio is selected when it matches its own `value`.
+ */
 const model = defineModel<string>({ default: '' })
 
 defineSlots<{

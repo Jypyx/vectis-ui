@@ -1,4 +1,20 @@
 <script setup lang="ts">
+/**
+ * One command in a menu. The panel moves the focus between items, and choosing one closes
+ * the whole menu, submenus included.
+ *
+ * With an `href` it becomes a link, made inert by hand when disabled — a link has no
+ * `disabled` attribute, so the address is removed and `aria-disabled` says why.
+ *
+ * With the `#submenu` slot it becomes the trigger of a nested panel rendered INSIDE the
+ * parent one. That nesting is what buys the submenu behaviour from the browser: the panels
+ * form a native stack, a click outside closes all of them, and opening one branch closes its
+ * sibling.
+ *
+ * The JS covers only the two openings the browser does not: the keyboard, and a hover held
+ * long enough to show it was meant. A click already opens it natively.
+ */
+
 import { computed, inject, ref, useId, useSlots } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
@@ -10,23 +26,6 @@ import { menuKey, SUBMENU_HOVER_DELAY } from './context'
 
 import { useTimer } from '../../composables/useTimer'
 
-/**
- * One command in a menu. The panel is what moves the focus between items, and
- * choosing one closes the whole menu, submenus included.
- *
- * Given an `href` the item becomes a link. A link has no `disabled` attribute of its
- * own, so a disabled one is made inert by hand: its address is removed, and
- * `aria-disabled` tells assistive technology why it no longer responds.
- *
- * Given the `#submenu` slot it becomes the trigger of a nested panel, which is
- * rendered INSIDE the parent one. That nesting is what buys the whole submenu
- * behaviour from the browser: the panels form a stack, clicking outside closes all of
- * them, and opening one branch closes its sibling.
- *
- * The JavaScript is limited to the two ways of opening a submenu the browser does not
- * cover: the keyboard, and hovering long enough to show it was meant. A click already
- * opens it natively.
- */
 interface MenuItemProps {
   /** What the command says. The default slot replaces it. */
   label?: string

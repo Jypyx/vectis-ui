@@ -15,14 +15,12 @@
  *                                        the hover of a ghost)
  *   --tone-border-soft                   the border matching that surface
  *
- * WHY `vectis.tokens` AND NOT `vectis.components`. This table is a FALLBACK: a
- * component must be able to override a tone (VChip and VToast both redefine
- * `neutral`, VChip's `[data-custom]` replaces the whole set). Those rules and these
- * would sit at EQUAL specificity — `.v-chip[data-tone='neutral']` and
- * `.v-tone[data-tone='neutral']` are both (0,2,0) — and since the split each
- * component ships in its own sheet, whose position the consumer's bundler decides,
- * the winner would depend on an order nobody controls. Declaring the table one layer
- * lower makes every component rule win by construction, whatever the file order.
+ * WHY `vectis.tokens` AND NOT `vectis.components`. The table is a FALLBACK a component must
+ * be able to override (VToast and VChip both redefine `neutral`, VChip's `[data-custom]`
+ * replaces the whole set). Those rules sit at EQUAL specificity with these —
+ * `.v-chip[data-tone='neutral']` and `.v-tone[data-tone='neutral']` are both (0,2,0) — and
+ * each component ships its own sheet, so in the same layer the winner would depend on the
+ * bundler's order. One layer lower, every component rule wins by construction.
  */
 @layer vectis.tokens {
   .v-tone[data-tone='accent'] {
@@ -66,15 +64,13 @@
     --tone-border-soft: var(--vectis-color-warning-border);
   }
 
-  /* Neutral has no token family: its solid is a full text/surface INVERSION, and
-     the two obvious alternatives are both dead ends. `surface-muted` would make
-     --tone-bg-solid equal to --tone-bg-soft, so a solid neutral control would be
-     indistinguishable from a soft one — the state a selection has to signal. And
-     `surface-inverse` equals `surface-muted` in dark (both neutral-800), so a
-     selected neutral control would disappear there. The inversion stays distinct
-     from the soft background in BOTH themes: text is neutral-900 in light,
-     neutral-50 in dark. Hover/active therefore mix towards `surface` — the
-     opposite direction from the chromatic tones, which darken. */
+  /* Neutral has no token family: its solid is a full text/surface INVERSION, and both
+     obvious alternatives are dead ends. `surface-muted` would make --tone-bg-solid equal
+     to --tone-bg-soft, so a solid neutral would be indistinguishable from a soft one —
+     the state a selection has to signal. `surface-inverse` equals `surface-muted` in dark,
+     where a selected neutral control would then vanish. The inversion stays distinct in
+     BOTH themes, which is why hover/active mix towards `surface`, the opposite direction
+     from the chromatic tones. VSnackbar consumes it for its own sake, with no override. */
   .v-tone[data-tone='neutral'] {
     --tone-bg-solid: var(--vectis-color-text);
     --tone-bg-solid-hover: color-mix(

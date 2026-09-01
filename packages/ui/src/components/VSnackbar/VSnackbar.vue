@@ -1,4 +1,24 @@
 <script setup lang="ts">
+// @a11y @core
+/**
+ * Where confirmations appear: mounted ONCE at the root, after which every `snackbar()` call
+ * shows up here.
+ *
+ * A confirmation answers something the reader just did — "Message deleted" — usually with
+ * one button to take it back. Everything that separates it from a notification follows from
+ * ONE idea: only the LAST action is worth offering to undo. Hence a single bar at a time (a
+ * new one replaces it), hence no close cross (a bar that tidies itself must not ask the
+ * reader to), hence the bottom edge alone and a shorter delay.
+ *
+ * That "one at a time" is also why this is a single SFC where the notifications need two:
+ * one container, one card, and no book-keeping to tell several countdowns apart.
+ *
+ * The JS covers three things the platform does not: keeping the state and the container in
+ * step, the popover being imperative; the auto-dismiss countdown; and HOLDING that countdown
+ * while the pointer rests on the bar OR the keyboard is inside it, so something that
+ * disappears on a clock can be read and acted on (WCAG 2.2.1).
+ */
+
 import { computed, onMounted, ref, watch } from 'vue'
 
 import { usePopover } from '../../composables/usePopover'
@@ -10,30 +30,6 @@ import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import { current, dismissSnackbar, type SnackbarPlacement } from './state'
 
-// @a11y @core
-/**
- * Where confirmations appear. It is mounted ONCE, at the root of the application, and
- * from then on any call to `snackbar()` shows up here.
- *
- * A confirmation is the short answer to something the reader has just done — "Message
- * deleted", "Settings saved" — usually with one button to take it back. That is a
- * different job from a notification, which reports a state, and the differences are
- * deliberate rather than a matter of styling: there is only ever ONE bar at a time,
- * always along the bottom edge, it carries no close cross, and it leaves on its own after
- * a few seconds. Two of those follow from the same idea: only the LAST thing a reader did
- * is worth offering to undo, so a queue would hand out buttons about actions already
- * forgotten, and a cross would ask them to tidy up after a message that tidies itself.
- *
- * Because there is only one, this is a single file where the notifications need two: one
- * container, one card, and no book-keeping to tell several countdowns apart.
- *
- * The JavaScript covers three things the platform does not: putting the state and the
- * container in step, since drawing above the page can only be asked for by calling a
- * method; the countdown that takes the bar away when its time is up; and holding that
- * countdown while the reader is resting the pointer on the bar OR has moved the keyboard
- * into it, so that something disappearing on a clock can be held long enough to read and
- * to act on (WCAG 2.2.1).
- */
 interface SnackbarProps {
   /** Which end of the bottom edge confirmations appear at, unless one of them asks for another. */
   placement?: SnackbarPlacement
@@ -217,7 +213,9 @@ function runAction() {
     width: fit-content;
     bottom: var(--vectis-space-4);
     /* The direction the bar slides in from, read by `.v-banner` in styles/banner.css.
-       Always positive: this container only ever sits along the bottom edge. */
+       Always positive: this container only ever sits along the bottom edge. That sheet
+       reads it with a `, 0` fallback, so dropping this declaration costs the slide and
+       nothing else — the bar still fades in, in place, and nothing reports it. */
     --banner-enter-y: var(--vectis-space-4);
   }
 

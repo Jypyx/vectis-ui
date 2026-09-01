@@ -1,13 +1,4 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
-
-import VIcon from '../VIcon/VIcon.vue'
-import { iconProps } from '../VIcon/iconProps'
-import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
-import type { IconSource } from '../VIcon/types'
-import VTypography from '../VTypography/VTypography.vue'
-import { accordionKey } from './context'
-
 /**
  * One section of an accordion: a heading the reader can click, and the content it
  * reveals. It is a native `<details>`/`<summary>` pair, so the browser owns the
@@ -18,6 +9,16 @@ import { accordionKey } from './context'
  * `interpolate-size`. Both are recent additions to the language: where they are
  * missing the section simply appears at once, which is the intended fallback.
  */
+
+import { computed, inject } from 'vue'
+
+import VIcon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
+import type { IconSource } from '../VIcon/types'
+import VTypography from '../VTypography/VTypography.vue'
+import { accordionKey } from './context'
+
 interface AccordionItemProps {
   /**
    * The heading of the section, the line that stays visible when it is closed. Use

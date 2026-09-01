@@ -1,25 +1,21 @@
 /**
- * Every word the design system can say to a reader, gathered in one place. This is what a
- * translator works from, and what a consumer overrides to change a turn of phrase.
+ * Every user-facing word the library can say, in one place: what a translator works from and
+ * what a consumer overrides.
  *
- * It is arranged in exactly TWO levels: a section, then an entry. An entry is finished
- * text, or — when something has to be slotted into it — a small function that builds the
- * sentence.
+ * Depth EXACTLY 2 — namespace, then leaf. A leaf is finished text, or a TS function when
+ * something has to be slotted in. There is deliberately no template language and no plural
+ * engine: a parameterized message IS a hand-written function whose signature is the
+ * contract, so a translation that forgets an argument does not compile, and a plural is a
+ * ternary inside it.
  *
- * There is deliberately no template language and no rules engine for plurals. A message
- * that takes a value IS a function, written by hand, and its arguments are the contract: a
- * translation that forgets one does not compile. A plural is a choice between two forms
- * written inside that function.
+ * The two levels are structural, not aesthetic: they are what lets a partial override be
+ * merged NON-RECURSIVELY, and therefore what makes it impossible to descend into one of
+ * those functions and turn it into `{}`.
  *
- * Two levels is not an aesthetic choice. It is what allows a handful of replacement words
- * to be laid over a dictionary without descending into it, and therefore what makes it
- * impossible to mistake one of those functions for something to be taken apart.
- *
- * Three kinds of text are deliberately absent. Anything the browser already knows how to
- * say in any language: the names of months and days, the order of the parts of a date,
- * whether hours run to twelve or twenty-four. Anything made only of digits and
- * punctuation everyone shares — "99+", "+3", a "3/8" counter, the colon in a time.
- * And the warnings the library prints for the developer, which are not translated at all.
+ * Three kinds of text are deliberately absent. Whatever `Intl` derives from the tag (month
+ * and day names, field order, hour cycle); whatever is made only of digits and universal
+ * punctuation (`99+`, `+N`, an `N/M` counter, a time's colon); and the `[Component] …`
+ * warnings, which address the integrator and are never translated.
  */
 export interface VectisMessages {
   /** Words several components share, so that they are translated once rather than five times. */

@@ -35,7 +35,10 @@ import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
 interface PaginationProps {
-  /** How many pages there are in all. */
+  /**
+   * How many pages there are in all. It is 1 by default, which renders a single page: the
+   * real count almost always has to be given.
+   */
   length?: number
   /**
    * How many slots to render, ellipses counted among them — so the row keeps exactly
@@ -139,6 +142,7 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.pagination.label)
 const resolvedPrevLabel = computed(() => props.prevLabel ?? m.value.pagination.previous)
 const resolvedNextLabel = computed(() => props.nextLabel ?? m.value.pagination.next)
 
+/** The page being shown, counted from 1. It starts on the first. */
 const page = defineModel<number>({ default: 1 })
 
 /** One slot in the row: either a page, or the ellipsis standing for those left out. */
@@ -427,21 +431,18 @@ function onKeydown(event: KeyboardEvent) {
     padding-inline: var(--vectis-space-2);
 
     /*
-     * The current page changes appearance instantly, and that is deliberate: VButton
-     * fades `background-color` and `color` over `--vectis-duration-fast`, which is right
-     * for a button that stays put, and wrong here. Truncation SHIFTS its window, so from
-     * one page to the next the highlight keeps its slot but changes ELEMENT — the pill
-     * that was current fades out while its neighbour fades in, over the very same
-     * 120 ms. Delete this line and two adjacent pills are half-tinted for a few frames,
-     * which reads as a flicker; nothing in the console says a word about it.
+     * TRAP — the highlight changes instantly, and this must not be "restored for
+     * consistency". VButton fades `background-color` over `--vectis-duration-fast`, which is
+     * right for a button that stays put and wrong here: truncation SHIFTS its window, so from
+     * one page to the next the highlight keeps its slot but changes ELEMENT, and the outgoing
+     * and incoming pills are both half-tinted for a few frames — read as a flicker, with
+     * nothing in the console.
      *
-     * No duration avoids that: a symmetric fade overlaps, and an asymmetric one either
-     * leaves the row with no highlight at all or lets the outgoing pill trail at full
-     * strength behind the new one. Keeping the fade for hover alone is not expressible
-     * either — a transition is resolved from the state being entered, and the pill
-     * losing the highlight enters "neither current nor hovered", the exact state of a
-     * pill the pointer has just left. So the hover fade goes with it, on the pills only:
-     * the previous and next controls never change active state and keep theirs.
+     * No duration avoids it: symmetric fades overlap, asymmetric ones leave either no
+     * highlight or a trailing one. Keeping the fade for hover alone is not expressible
+     * either — a transition resolves from the state being ENTERED, and "no longer current"
+     * is the same state as "no longer hovered". So the hover fade goes too, on the pills
+     * only; the controls never change active state and keep theirs.
      */
     transition: none;
   }
@@ -460,29 +461,24 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   /*
-   * The responsive half of the truncation. The row asks about ITS OWN width, so the
-   * steps follow the space the component was given rather than the size of the window
-   * — a sidebar and a full-width page behave differently, as they should, and nothing
-   * has to be measured from code.
+   * The responsive half of the truncation. The nav queries ITS OWN width, so the steps follow
+   * the space the component was given rather than the viewport — a sidebar and a full-width
+   * page behave differently, as they should, with nothing measured from code.
    *
-   * The thresholds are written as literal lengths because a container query accepts no
-   * variables. They are calibrated on the default size: there, a pill and a control are
-   * each one control height wide, 2.5rem, plus a 0.25rem gutter, so 2.75rem apiece — a
-   * thirteen-slot row needs about 35.5rem, eleven about 30, nine about 24.5, hence the
-   * three thresholds with a little margin. For the extreme cases, the biggest size or
-   * five-digit page numbers, the way out is `totalVisible` or turning this off.
+   * The thresholds are rem LITERALS, a container query accepting no variables, and are
+   * calibrated on `md`: a pill and a control are each 2.5rem plus a 0.25rem gutter, so
+   * 2.75rem apiece — thirteen slots need ~35.5rem, eleven ~30, nine ~24.5, hence the three
+   * with a little margin. The extremes (the largest size, five-digit page numbers) are what
+   * `totalVisible` and `responsive: false` are for.
    *
-   * Each threshold is the width NEEDED to show that level, and not what remains once
-   * something is hidden: written the other way round, the row would overflow for the
-   * whole interval before the next step took effect.
+   * Each threshold is the width NEEDED to show that level, never what remains after hiding:
+   * written the other way round the row overflows for the whole interval before the next
+   * step takes effect.
    *
-   * The most distant neighbours go first. The first and last pages, and the current
-   * one, carry no distance at all, so no rule here can ever reach them. Hiding them
-   * outright also takes them out of the tab order and out of the accessibility tree,
-   * which is intended: a control nobody can see should not be reachable.
-   *
-   * No ellipsis is added in place of a hidden neighbour — it is exactly as wide as the
-   * pill it would replace, so it would free nothing.
+   * The most distant neighbours go first. The edges and the current page carry no distance,
+   * so no rule here can reach them. `display: none` also takes a hidden pill out of the tab
+   * order and the a11y tree, which is intended. No ellipsis replaces one either — it is
+   * exactly as wide as the pill it would stand for, so it frees nothing.
    */
   @container v-pagination (max-width: 36rem) {
     .v-pagination[data-responsive] .v-pagination-page[data-distance='3'] {

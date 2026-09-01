@@ -1,20 +1,19 @@
-import { onBeforeUnmount } from 'vue'
-
 // @core
 /**
- * A delay one can re-arm, and which cancels itself when the component goes away.
+ * A re-armable delay, cancelled on unmount.
  *
- * Three things are true of it, and each is there to prevent a specific bug. The handle is
- * held in a plain variable rather than a reactive one, because nothing renders it and
- * making it reactive would cause renders for nothing. Starting a delay always cancels the
- * one before it, or two would run at once — a tooltip armed twice opens, closes and opens
- * again. And it is cancelled before the component is torn down, or the callback would run
- * against a component that no longer exists.
+ * `start` always cancels the pending one, or a tooltip armed twice opens, closes and opens
+ * again. The handle is a plain variable: nothing renders it, and making it reactive would
+ * cost renders for nothing.
  *
- * A delay of zero runs the callback SYNCHRONOUSLY, which a zero timeout does not: the
- * design system's convention is that zero means no deferral at all. That is what makes a
- * debounce of zero immediate, and a notification given no duration permanent.
+ * TRAP — a delay of 0 runs the callback SYNCHRONOUSLY, where `setTimeout(fn, 0)` would not.
+ * The library's convention is that zero disarms the deferral, which is what makes a debounce
+ * of 0 immediate. Callers for whom 0 means "never" (VSnackbar's duration, VCarousel's
+ * autoplay) must guard before calling, or the callback fires in the tick that armed it.
  */
+
+import { onBeforeUnmount } from 'vue'
+
 export function useTimer(): { start: (fn: () => void, delay: number) => void; cancel: () => void } {
   let timer: ReturnType<typeof setTimeout> | undefined
 

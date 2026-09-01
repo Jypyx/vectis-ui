@@ -50,10 +50,10 @@ describe('gridDelta', () => {
   })
 
   /*
-   * The regression this module exists for: the vertical step used to be a literal
-   * `3` written twice, while PICKER_COLUMNS — the number that chunks the grid —
-   * lived elsewhere. Widening the picker would have left the arrows stepping three
-   * cells with no error anywhere. Assert the tie, not the value.
+   * Why this module exists. `PICKER_COLUMNS` chunks the months/years grid AND sets the
+   * vertical arrow step, and writing the step as a literal instead would leave the arrows
+   * moving three cells the day the picker widens, with no error anywhere. Assert the TIE,
+   * never the value.
    */
   it('derives the vertical step from PICKER_COLUMNS, never from a literal', () => {
     expect(gridDelta('ArrowDown')).toBe(PICKER_COLUMNS)

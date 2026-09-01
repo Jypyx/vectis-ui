@@ -1,10 +1,11 @@
-import type { Component } from 'vue'
-
 /**
  * What a resolver is told about the icon being asked for, beyond its name. It is an
  * object rather than a bare boolean so that a future need can be added without
  * changing every resolver's signature.
  */
+
+import type { Component } from 'vue'
+
 export interface IconContext {
   /** Whether the caller asked for the filled form — VIcon's prop, VButton's `iconFilled`. */
   filled: boolean

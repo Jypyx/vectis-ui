@@ -1,7 +1,3 @@
-import type { InjectionKey } from 'vue'
-
-import type { IconSource } from '../VIcon/types'
-
 /**
  * The parent→items contract: the shared name set on each <details> activates NATIVE
  * exclusive mode (the `name` attribute, Baseline 2024) — a single item open, with no
@@ -9,6 +5,11 @@ import type { IconSource } from '../VIcon/types'
  * `compact` does NOT travel here, it descends through CSS inheritance (the
  * --accordion-* variables set on the root).
  */
+
+import type { InjectionKey } from 'vue'
+
+import type { IconSource } from '../VIcon/types'
+
 export interface AccordionContext {
   /** Group name for <details name>; undefined = multiple items can be open. */
   name: string | undefined

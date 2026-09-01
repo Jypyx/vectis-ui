@@ -1,13 +1,14 @@
+/**
+ * English, the dictionary always bundled. Any language without one of its own falls back
+ * here entry by entry, so nothing is ever left unsaid.
+ *
+ * TRAP — these strings are asserted letter for letter by the unit tests, and the play
+ * functions query controls BY them (they run with the default globals, so the locale there
+ * is deterministically `en-US`). Changing a word means changing what expects it.
+ */
+
 import type { VectisMessages } from './types'
 
-/**
- * English, the dictionary the library always carries. Any language with no dictionary of
- * its own falls back to this one, entry by entry, so nothing is ever left unsaid.
- *
- * Take care changing anything here: these words are checked letter for letter by the
- * tests, and they are the names the browser tests reach for when they look a control up.
- * Changing one means changing what expects it.
- */
 export const en: VectisMessages = {
   common: {
     loading: 'Loading…',

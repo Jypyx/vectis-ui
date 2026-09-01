@@ -1,4 +1,20 @@
 <script setup lang="ts">
+// @keyboard @core
+/**
+ * A sidebar's navigation: a tree of links shown in place rather than in a panel, its
+ * branches foldable. Written out level by level with its subcomponents, never from an
+ * `items` prop.
+ *
+ * Real `<ul>`/`<li>` markup, where VMenu uses plain containers, and the difference is
+ * meaningful: the ARIA menu pattern forbids lists, admitting only `menuitem` and `group`,
+ * whereas in a navigation the counting and the nesting ARE the information. "List of 4
+ * items, item 2, itself a list of 3" is a screen reader describing the site's structure.
+ *
+ * The folding is native `<details>`: state, keyboard, exclusivity between neighbouring
+ * sections and animation all come from the browser. The only behavioural JS is arrow-key
+ * focus movement.
+ */
+
 import { provide, ref, useId } from 'vue'
 
 import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
@@ -9,23 +25,6 @@ import { arrowNavigate } from '../../utils/arrowNav'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
-// @keyboard @core
-/**
- * The navigation of a sidebar: a tree of links, shown in place rather than in a
- * floating panel, whose branches can be opened and closed. It is written out level by
- * level with its own subcomponents, never described as a list of data.
- *
- * The markup is real lists, where VMenu uses plain containers, and the difference is
- * meaningful: the menu pattern forbids lists — it admits nothing but commands and
- * groups — whereas in a navigation the counting and the nesting ARE the information. A
- * screen reader announcing "list of 4 items, item 2, itself a list of 3" is describing
- * the site's structure.
- *
- * The folding is the browser's: the open state, the keyboard that toggles it, the
- * exclusivity between neighbouring sections and the animation all come from the native
- * disclosure elements. The only behavioural JavaScript here is moving the focus with
- * the arrow keys.
- */
 interface SideNavigationProps {
   /**
    * What screen readers announce for this navigation. A page often has several — a

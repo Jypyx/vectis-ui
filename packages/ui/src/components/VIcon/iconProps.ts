@@ -1,11 +1,12 @@
-import type { BuiltinIcon, IconRender, IconSource } from './types'
-
 /**
  * Tells one of the library's own icons from something the consumer described by
  * hand. Only a `BuiltinIcon` carries `paths`, and the distinction matters: it is
  * what routes a built-in default to `name` — where the resolver still gets first
  * refusal — instead of to `render`, which wins outright and would silence it.
  */
+
+import type { BuiltinIcon, IconRender, IconSource } from './types'
+
 const isBuiltinIcon = (icon: BuiltinIcon | IconRender): icon is BuiltinIcon => 'paths' in icon
 
 /**

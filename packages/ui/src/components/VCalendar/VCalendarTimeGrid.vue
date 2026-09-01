@@ -1,32 +1,23 @@
 <script setup lang="ts" generic="E extends CalendarEvent">
 // @a11y @keyboard @core
 /**
- * The time grid: a column per day on show, an hour per row, and the events drawn over it.
+ * The time grid: a column per day on show, an hour per row, the events drawn over it.
+ * Internal to VCalendar, whose documentation covers it. It computes nothing about dates or
+ * overlaps — it is handed the days and the already-placed segments and turns them into boxes.
  *
- * It is internal to VCalendar and has no story of its own — its documentation lives with
- * the component that renders it. It computes nothing about dates or overlaps: it is handed
- * the days and the already-placed segments, and its whole job is to turn them into boxes.
+ * WHY 168 REAL CELLS rather than one repeating gradient. A background is forced to `Canvas`
+ * under Windows forced-colors and the ruling would vanish, where a border is forced to
+ * `CanvasText` and survives (the VSeparator argument); and the ARIA grid pattern needs real
+ * cells to move focus between, which is also what makes the scrolling region Tab-reachable.
  *
- * WHY EVERY CELL EXISTS. Twenty-four rows times seven days is a hundred and sixty-eight
- * elements, where the rules between the hours could have been one repeating gradient. Two
- * things pay for them. A background is forced to `Canvas` under Windows forced-colors and
- * the ruling would vanish, where a border is forced to `CanvasText` and survives — the
- * argument VSeparator and the VIcon registry both make. And the ARIA "grid" pattern needs
- * real cells to move a focus between, which is what gives the keyboard somewhere to be and
- * what satisfies the rule that a scrolling region must hold something reachable by Tab.
+ * WHY THE CARDS SIT INSIDE THE CELLS, when one overlay layer would be simpler CSS. An
+ * absolutely positioned element leaves its parent's box for LAYOUT while staying inside it
+ * in the document, hence in the accessibility tree. In an overlay they would sit outside the
+ * grid entirely, breaking the reading order and failing `aria-required-children`.
  *
- * WHY THE CARDS SIT INSIDE THE CELLS. An event is placed absolutely against the whole
- * columns box, so putting the cards in one overlay layer would have been simpler CSS. They
- * are instead children of the cell their start falls in, because an absolutely positioned
- * element leaves its parent's box for LAYOUT while staying inside it in the document — and
- * therefore in the accessibility tree. In an overlay they would sit outside the grid
- * entirely, which breaks the reading order and fails `aria-required-children` the moment
- * anything tries to put them back.
- *
- * The day names are NOT marked up as column headers. They live above the scrolling area so
- * that they can stay in view, which puts them outside the grid; instead every cell names
- * its own day in full ("Wednesday 10 June, 09:00"), so nothing is lost to a reader who
- * never sees the row at all.
+ * The day names are NOT column headers: they stay in view above the scrolling area, which
+ * puts them outside the grid. Every cell names its own day in full instead ("Wednesday 10
+ * June, 09:00"), so nothing is lost to a reader who never sees that row.
  */
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 
@@ -259,7 +250,7 @@ const ghostEvent = computed<E | null>(() => {
  * The two helpers are the SAME ones every other box goes through, run on a list of one — so
  * the echo answers to the days on show exactly as an ordinary event does, and in particular
  * is dropped when its day is not among them. That is what makes it leave with its week when
- * a drag held at an edge pages the view, instead of staying on the column it used to occupy.
+ * a drag held at an edge pages the view, rather than squatting a column of the new week.
  * It is also what keeps the two kinds mutually exclusive by construction rather than by
  * chance: `timedSegments` passes over an all-day event and `packAllDay` over a timed one.
  *
@@ -406,19 +397,16 @@ const byCell = computed(() => {
 const cellId = (iso: string, minutes: number) => `${uid}-c-${iso}-${minutes}`
 
 /*
- * Every label the grid writes, worked out once per day and once per hour instead of once
- * per CELL — the shape `byCell` above already uses, and for the same reason.
+ * Every label the grid writes, derived once per day and once per hour rather than once per
+ * CELL — the shape `byCell` above uses, for the same reason.
  *
- * The grid renders `hours × days` cells, 24 × 7 by default. Reading these straight from
- * `formatDate` in the template meant 168 `cellLabel` calls per render, each doing a
- * `parseISO`, a `JSON.stringify` to build the formatter's cache key and two `Intl` formats,
- * plus `dayName`/`dayNumber` twice per column (slot props, then the fallback content). None
- * of it depends on the pointer — yet `applyPoint` assigns a new `state.preview` on every
- * `pointermove`, so the whole template re-renders at pointer rate and all of it was
- * recomputed on every frame of a drag.
- *
- * Two maps of 7 and 24 entries replace that: they recompute when the locale, the days or
- * the window change, and never because a card moved.
+ * The grid renders `hours × days` cells, 24 × 7 by default, and `applyPoint` assigns a new
+ * `state.preview` on every `pointermove`, so the whole template re-renders at pointer rate.
+ * Read straight from `formatDate` in the template that would be 168 `cellLabel` calls per
+ * FRAME of a drag, each doing a `parseISO`, a `JSON.stringify` for the formatter cache key
+ * and two `Intl` formats — none of which depends on the pointer. These two maps, of 7 and 24
+ * entries, recompute when the locale, the days or the window change and never because a card
+ * moved.
  */
 const dayLabels = computed(() => {
   const map = new Map<string, { short: string; number: string; full: string }>()
@@ -574,8 +562,6 @@ function onKeydown(event: KeyboardEvent) {
     emit('cell-activate', iso, minutes)
   }
 }
-
-/* ------------------------------------------------------------------ the gestures */
 
 /**
  * Starts a gesture, from whichever of the three ways one can begin.
@@ -795,26 +781,23 @@ function onPointermove(event: PointerEvent) {
 }
 
 /**
- * Whether the pointer has left the calendar's own box.
+ * Whether the pointer has left the calendar's own box — the WHOLE view, deliberately not
+ * `.v-calendar-columns`, whose rect excludes the sticky day names, the all-day band and the
+ * hour gutter. A bar dropped on the band is ordinary, and measured against the columns it
+ * would read as dropped off the calendar and silently revert.
  *
- * The box is the WHOLE view — the scroller, the element carrying `.v-calendar-view` — and
- * deliberately not `.v-calendar-columns`, whose rect excludes the sticky day names, the all-day
- * band and the hour gutter: a bar dropped on the band is an ordinary thing to do, and measured
- * against the columns it would read as dropped off the calendar and silently revert.
+ * The rect goes in RAW, never through `geometryOf`: containment has no reading direction, and
+ * that function's `inlineStart` is the box's RIGHT edge in RTL, so every RTL drop would read
+ * as outside.
  *
- * The rect goes in RAW and never through `geometryOf`, whose `inlineStart` is the box's RIGHT
- * edge in a right-to-left page: containment has no reading direction, and flipping the axis here
- * would answer a question nobody asked — every right-to-left drop would read as outside.
+ * Called from `onPointermove` ALONE. `applyPoint`'s other two callers — the view paging and
+ * the auto-scroll frame — move the days under a pointer that has not moved, so they cannot
+ * change this answer and recomputing it would force a layout every frame.
  *
- * It is called from `onPointermove` ALONE, and not from `applyPoint`. That function has three
- * callers, and the other two — the view paging, and the auto-scroll frame — move the days and
- * the scroll position under a pointer that has not moved at all: they cannot change this answer,
- * and asking them to recompute it would force a layout on every animation frame.
- *
- * TRAP — neither `applyPoint` nor `watchEdges` is gated on the result, and neither may become
- * so. The card must keep following the pointer while it is out (that is what makes coming back
- * in seamless), and paging must keep running (pushing past the edge is how one crosses into the
- * next week). Being outside decides what happens on RELEASE, and nothing else.
+ * TRAP — neither `applyPoint` nor `watchEdges` is gated on the result, and neither may
+ * become so. The card must keep following the pointer while it is out, which is what makes
+ * coming back in seamless, and paging must keep running, pushing past the edge being how one
+ * crosses into the next week. Being outside decides what happens on RELEASE, nothing else.
  */
 function isPointerOutside(state: Gesture): boolean {
   const rect = rootEl.value?.getBoundingClientRect()
@@ -881,8 +864,6 @@ function applyPoint(state: Gesture) {
     props.window,
   )
 }
-
-/* ------------------------------------------------------- crossing the boundaries */
 
 /**
  * How many pixels a frame the grid scrolls at full tilt.
@@ -999,27 +980,22 @@ function originColumn(state: Gesture): number {
 let justDragged = false
 
 /**
- * Closes the books on whatever gesture came before, at the start of a new press.
+ * Closes the books on the previous gesture, at the start of a new press.
  *
- * TRAP — without this the flag can be left STANDING, and what it then breaks surfaces nowhere
- * near its cause. It is lowered by the click that reads it, and that click only reaches
- * `onCardClick` when it lands on a card: draw a new event and the press began on a CELL, so the
- * click goes there and the flag stays raised.
- *
- * What normally hides that is `onPointerup` overwriting the flag with its own `moved` — so the
- * next press heals it, and only a press that starts NO gesture does not. Which is a real
- * configuration and not a curiosity: a calendar that lets events be drawn but not moved
- * (`creatable` without `editable`) reaches it every time. The reader clicks an event to open it,
- * nothing happens, they click again and it works.
+ * TRAP — without it `justDragged` can be left STANDING, and what that breaks surfaces nowhere
+ * near its cause. The flag is lowered by the click that reads it, and that click only reaches
+ * `onCardClick` when it lands on a card: draw a new event and the press began on a CELL, so
+ * the click goes elsewhere and the flag stays up. `onPointerup` normally heals it on the next
+ * press — but a press that starts NO gesture does not, which `creatable` without `editable`
+ * reaches every time: the reader clicks an event to open it, nothing happens, they click again.
  *
  * Clearing it HERE makes the flag incapable of outliving its own interaction, and the ordering
- * is the whole argument: the click this exists to swallow follows its own `pointerup` with no
- * press in between, so it is still protected — while any LATER click on a card is necessarily
- * preceded by a press on that card, which arrives here first.
+ * is the argument: the click this exists to swallow follows its own `pointerup` with no press
+ * in between, so it stays protected, while any LATER click on a card is necessarily preceded
+ * by a press that arrives here first.
  *
- * It runs before every guard in the three handlers that call it, deliberately: a press that
- * starts no gesture at all is still the start of a new interaction, and those are precisely the
- * cases this is for.
+ * It runs before every guard in its three callers, deliberately — a press that starts no
+ * gesture is still a new interaction, and that is the case this is for.
  */
 function endLastGesture() {
   justDragged = false
@@ -1099,8 +1075,6 @@ function onPointercancel() {
   gesture.value = null
   releaseBoundaries()
 }
-
-/* ------------------------------------------------------------ the keyboard's version */
 
 function announceTimes(title: string, times: CalendarEventTimes) {
   const start = formatTimeDisplay(times.startTime, props.locale, props.hourFormat)
@@ -1231,8 +1205,6 @@ function onCardKeydown(event: KeyboardEvent, card: HTMLElement) {
   }
 }
 
-/* ---------------------------------------------------------------------- measurement */
-
 const rootEl = ref<HTMLElement | null>(null)
 const canvasEl = ref<HTMLElement | null>(null)
 const columnsEl = ref<HTMLElement | null>(null)
@@ -1275,7 +1247,14 @@ function focus() {
   if (cell) document.getElementById(cellId(cell.iso, cell.minutes))?.focus()
 }
 
-defineExpose({ focus, scrollToMinutes })
+// The contract VCalendar drives every view through, so its toolbar need not know which one
+// is on screen. VCalendarMonth answers the same two, its `scrollToMinutes` being a no-op.
+defineExpose({
+  /** Brings the focus onto the cell the grid is currently pointing at. */
+  focus,
+  /** Scrolls the grid so a given moment of the day sits at the top of the visible area. */
+  scrollToMinutes,
+})
 </script>
 
 <template>
@@ -1737,19 +1716,15 @@ defineExpose({ focus, scrollToMinutes })
    * lets it be any length at all.
    */
   /*
-   * TRAP — the height is the event's own length and NOTHING ELSE. There used to be a `max()`
-   * against a floor token here, and it is what made a quarter of an hour spill over the slot
-   * below it.
-   *
-   * The floor it was providing is already applied where it belongs: `timedSegments` stretches
+   * TRAP — the height is the event's own length and NOTHING ELSE. No `max()` against a floor
+   * token here: the minimum is already applied where it belongs, `timedSegments` stretching
    * every segment to at least `slotDuration` BEFORE the overlap packing sees it, so what is
-   * drawn and what the packing believes are the same box. A second floor in CSS could only
-   * ever disagree with the first — the packing cannot see a stylesheet — which is exactly how
-   * two cards came to be laid out side by side and then drawn on top of each other.
+   * drawn and what the packing believes are the same box. A second floor in CSS can only
+   * disagree with the first — the packing cannot read a stylesheet — and the symptom is two
+   * cards packed side by side and then drawn on top of each other.
    *
-   * So a card is never taller than its slot, whatever `slotDuration` is set to. Making the
-   * text fit inside a slot that short is the stylesheet's problem, and VCalendarEvent solves
-   * it by asking how tall the card actually came out.
+   * A card is therefore never taller than its slot. Fitting the text into a short one is the
+   * stylesheet's problem, and VCalendarEvent solves it by asking how tall the card came out.
    */
   .v-calendar-block {
     position: absolute;

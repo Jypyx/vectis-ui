@@ -1,29 +1,24 @@
+// @keyboard @a11y — module-wide: the browser walks focus out of a group with Tab, never
+// from one control to the next, which is what the arrows are expected to do.
 /**
- * Moving through a row or a column of neighbouring controls with the arrow keys.
+ * Arrow-key navigation over a row or column of controls, in one place: VPagination, VTabs,
+ * VToggle and VMenuPanel all use it.
  *
- * There is code here because the browser offers nothing that walks the focus from one
- * button to the next: the Tab key steps out of the group entirely, and a group of tabs, a
- * set of pages or a menu is expected to be crossed with the arrows.
- *
- * The rule is the same everywhere in the design system, and it is worth stating plainly:
- * the arrow keys and Home and End MOVE the focus and never act on what they land on.
- * Acting on arrival would navigate somewhere the reader did not ask to go, or turn a
- * value on merely because they passed over it. A component that genuinely wants the
- * arrival to select — a row of tabs can be set up that way — arranges that itself.
- *
- * This is the single place that behaviour is written: the pages, the tabs, the toggle
- * group and the menu all use it.
+ * CONTRACT — the arrows and Home/End MOVE focus and never activate what they land on.
+ * Activating on arrival would navigate somewhere the reader did not ask to go, or select a
+ * value merely passed over. A component that wants selection on focus (VTabs'
+ * `activation: 'automatic'`) arranges it in its own `@focus`.
  */
 import { isRtl } from './direction'
 
-// @keyboard @a11y
 /**
- * The elements inside a container that the arrows may land on. The selector is the
- * caller's, and it is the one that leaves out anything disabled.
+ * The elements the arrows may land on, discovered from the DOM rather than a registry. The
+ * selector is the caller's, and it is what excludes anything disabled.
  *
- * Anything hidden is dropped here, and it has to be: the pages hide their neighbours as
- * the bar gets narrower, and a consumer may hide a tab or a toggle outright. An element
- * nobody can see must not be given the focus.
+ * `display: none` is filtered here because it has to be: VPagination hides its neighbours
+ * through container queries as the bar narrows, and a consumer may hide a tab outright.
+ * Focus must not land on an element nobody can see. The read costs a style recalculation
+ * per element, so a list of dozens (VTimeInput's rows) passes its own array instead.
  */
 export function navigableItems(container: HTMLElement, selector: string): HTMLElement[] {
   return [...container.querySelectorAll<HTMLElement>(selector)].filter(
@@ -31,21 +26,14 @@ export function navigableItems(container: HTMLElement, selector: string): HTMLEl
   )
 }
 
-// @keyboard @a11y
 /**
- * Handles the four arrows and the Home and End keys over a list of elements, and moves
- * the focus.
+ * Moves focus for the arrows and Home/End, and reports whether it took the key —
+ * `preventDefault` is applied only when it did, leaving the caller free otherwise.
  *
- * It reports whether it took the key. When it did, the browser's own reaction has already
- * been suppressed; when it did not, the caller is free to do something else with it.
- *
- * The ends WRAP: past the last element the focus comes back to the first. When nothing in
- * the list has the focus yet, any arrow starts at the beginning.
- *
- * The left and right arrows point at a physical side of the screen, so in a language
- * written right to left they are swapped: pressing right must move towards the NEXT item,
- * which is then to the left. Up and down need no such treatment, since no language
- * reverses them.
+ * The ends wrap. With nothing in the list focused, any arrow starts at the beginning.
+ * Left and Right name a physical side, so RTL swaps them: Right must reach the NEXT item,
+ * which is then on the left. The block axis needs no such treatment, no language
+ * reversing it.
  */
 export function arrowNavigate(
   event: KeyboardEvent,
@@ -61,9 +49,8 @@ export function arrowNavigate(
   if (items.length === 0) return false
   event.preventDefault()
 
-  // Only the arrow branch asks which way is forward, and only the horizontal axis needs
-  // the writing direction to answer. Keeping it a function rather than a value is what
-  // spares Home and End the style recalculation that reading the direction forces.
+  // A function, not a value: only the arrow branch asks, so Home and End are spared the
+  // style recalculation that reading the direction forces.
   const forward = () =>
     vertical ? event.key === 'ArrowDown' : (event.key === 'ArrowRight') !== isRtl(container)
   const current = items.indexOf(document.activeElement as HTMLElement)

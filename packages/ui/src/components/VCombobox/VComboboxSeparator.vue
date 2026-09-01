@@ -2,13 +2,10 @@
 /**
  * The rule drawn between two blocks of options in a VCombobox's list.
  *
- * TRAP — it is stripped of the meaning an `<hr>` normally carries. A separator is
- * perfectly legitimate inside a menu, as VMenuSeparator relies on, but a LIST may
- * contain nothing but options and blocks of options — so here the rule has to be
- * declared as pure presentation.
- *
- * Nothing is lost by that: what the rule suggests visually is already said properly by
- * the named blocks around it.
+ * TRAP — it carries `role="presentation"`, stripped of the meaning an `<hr>` normally has. A
+ * separator is legitimate inside a menu, which VMenuSeparator relies on, but a `listbox` owns
+ * nothing but `option` and `group`. Nothing is lost: what the rule suggests visually is
+ * already said properly by the named groups around it.
  */
 import VSeparator from '../VSeparator/VSeparator.vue'
 </script>

@@ -1,23 +1,17 @@
 // @ssr @core — module-wide: every export below is @core unless tagged otherwise.
 /**
- * All the reasoning about TIMES that the time picker and its clock face rest on. Nothing
- * here draws anything or touches the page: give it the same numbers twice and it answers
- * the same way twice.
+ * The TIME domain behind VTimePicker and VTimeInput. Pure: nothing here draws or touches
+ * the page, and the same numbers always give the same answer.
  *
- * A time is always carried as text of the form "19:05", counted on the 24-hour clock, no
- * matter how it is being SHOWN — a picker displaying "7:05 PM" still holds "19:05". That
- * one rule is what keeps the value a consumer receives independent of the reader's
- * language and habits.
+ * A time is always the canonical 24-hour string `'HH:mm'`, whatever is being SHOWN — a
+ * picker displaying "7:05 PM" still holds `'19:05'`. That is what keeps the value a
+ * consumer receives independent of the reader's locale.
  *
- * Dates are used only to ask the browser to write a time out in someone's language, and
- * always at a fixed reference instant taken in universal time. Nothing here therefore
- * depends on the clock of the machine it runs on, which is what lets a page rendered on a
- * server and the same page in the browser agree.
+ * `Intl` is asked on UTC reference instants only, so nothing depends on the host clock and
+ * the server render agrees with the browser's.
  *
- * The clock face's geometry — where a finger landed, which ring it fell on — is worked
- * out here too, and for a practical reason: the environment the tests run in has no
- * layout at all and measures every element as having no size, so a calculation kept
- * inside the component could not be tested.
+ * The dial's geometry lives here too, and for a practical reason: jsdom lays nothing out and
+ * measures every element at zero, so a calculation kept inside the component is untestable.
  */
 import { digitsOf, pad2 } from './text'
 
@@ -69,6 +63,8 @@ export function to24h(hour12: number, meridiem: Meridiem): number {
   return meridiem === 'PM' ? base + 12 : base
 }
 
+const hourCycleCache = new Map<string, HourFormat>()
+
 // @fallback
 /**
  * Whether a language counts the hours to twelve, with a morning and an afternoon, or
@@ -77,8 +73,6 @@ export function to24h(hour12: number, meridiem: Meridiem): number {
  * A language tag it cannot make sense of falls back to the 24-hour clock rather than
  * failing.
  */
-const hourCycleCache = new Map<string, HourFormat>()
-
 export function hourCycleFor(locale: string): HourFormat {
   const cached = hourCycleCache.get(locale)
   if (cached) return cached
@@ -97,14 +91,12 @@ function resolveHourCycle(locale: string): HourFormat {
 }
 
 /**
- * One formatter per language and clock, kept for as long as the page lives — the same
- * arrangement as the one that writes out file sizes.
+ * One formatter per locale and clock, module-lived — the `formatterFor` idiom of `file.ts`.
  *
- * Building a formatter costs one to two orders of magnitude more than using one, and the
- * list of times is built ONE ENTRY AT A TIME: a list at one-minute intervals is 1440
- * entries, so 1440 formatters would be built every time it is recalculated — measured at
- * around 82 ms, against 2 ms once they are kept. Both the language AND the clock make up
- * the key, since the clock is imposed below rather than following from the language.
+ * Construction costs one to two orders of magnitude more than use, and `timeList` formats
+ * ONE VALUE AT A TIME: 1440 entries at one-minute steps, so 1440 constructions per rebuild.
+ * Measured at ~82 ms against ~2 ms memoized. The clock is part of the key because it is
+ * imposed below rather than following from the locale.
  */
 const displayFormatters = new Map<string, Intl.DateTimeFormat>()
 
@@ -124,11 +116,11 @@ function displayFormatterFor(locale: string, format: HourFormat): Intl.DateTimeF
 }
 
 /**
- * A time written out for a reader — "19:05", or "7:05 PM".
+ * A time written out for a reader: "19:05", or "7:05 PM".
  *
- * The choice of clock is imposed on the browser rather than left to it, so that the text
- * follows what the component settled on. A consumer may ask for a 24-hour clock in a
- * language that would have chosen otherwise, and their choice must be the one that shows.
+ * `hourCycle` is imposed rather than left to `Intl`, so the text follows what the component
+ * settled on: a consumer asking for a 24-hour clock in a locale that would choose otherwise
+ * must get theirs.
  */
 export function formatDisplay(time: string, locale: string, format: HourFormat): string {
   const parts = parseTime(time)
@@ -137,12 +129,10 @@ export function formatDisplay(time: string, locale: string, format: HourFormat):
 }
 
 /**
- * Snaps a minute to the nearest one the component allows — every five minutes, say — and
- * brings it back inside the hour.
+ * Snaps a minute to the nearest allowed step and wraps it back inside the hour.
  *
- * Both ends need that last part: 58 minutes snapped to five-minute steps lands on 60,
- * which is 0, and stepping back from 0 with the keyboard goes through minus one, which is
- * 59.
+ * Both ends need the wrap: 58 snapped to five-minute steps lands on 60, which is 0, and
+ * stepping back from 0 with the keyboard passes through -1, which is 59.
  */
 export function snapMinute(minute: number, step: number): number {
   const snapped = step <= 1 ? Math.round(minute) : Math.round(minute / step) * step
@@ -150,16 +140,12 @@ export function snapMinute(minute: number, step: number): number {
 }
 
 /**
- * Where a finger landed on the clock face, given as an offset from the centre, becomes
- * which mark it was pointing at.
- *
- * The marks are numbered from the twelve o'clock position and go round clockwise, and the
- * nearest one wins. The offsets are the ones the screen uses, where going DOWN is
- * positive, which is why the vertical one is negated to measure the angle from the top.
+ * Which mark a pointer offset from the dial's centre is aiming at. Marks are numbered
+ * clockwise from twelve o'clock and the nearest wins. `dy` is negated because screen
+ * coordinates grow DOWNWARD and the angle is measured from the top.
  */
 export function angleToIndex(dx: number, dy: number, segments: number): number {
-  // The angle from twelve o'clock, positive going clockwise, then that same angle as a
-  // fraction of a full turn.
+  // The angle from twelve o'clock, clockwise-positive, as a fraction of a full turn.
   const angle = Math.atan2(dx, -dy)
   const turn = (angle / (2 * Math.PI) + 1) % 1
   return Math.round(turn * segments) % segments
@@ -171,34 +157,26 @@ export function distanceFraction(dx: number, dy: number, radius: number): number
 }
 
 /**
- * How close to the centre a finger has to land for it to be aiming at the INNER ring of
- * numbers, the one holding the small hours of a 24-hour clock. It is the halfway mark
- * between the two rings of numerals.
+ * How close to the centre a pointer must land to be aiming at the INNER ring, the one
+ * holding the small hours of a 24-hour dial: the halfway mark between the two rings.
  *
- * TRAP — the number is DERIVED from the dial's size and the size of a numeral, both of
- * which are decided in the stylesheet: a dial of 256px across and numerals of 48px put
- * the two rings' centres at 104px and 56px from the middle, whose halfway point is
- * 0.625 of the radius. Changing either size in the CSS without changing this leaves the
- * threshold between two rings it no longer separates, and a tap near the boundary quietly
- * sets the wrong hour.
+ * TRAP — the number is DERIVED from the dial tokens. A 256px dial with 48px numerals puts
+ * the rings' centres at 104px and 56px from the middle, whose midpoint is 0.625 of the
+ * radius. Change either token without changing this and the threshold no longer separates
+ * the two rings: a tap near the boundary quietly sets the wrong hour.
  */
 export const DIAL_INNER_THRESHOLD = 0.625
 
 /**
- * Which hour a mark stands for, on a dial laid out as two rings: the outer one carries 12
- * then 1 to 11, the inner one carries midnight then 13 to 23. The first mark of each is
- * the one at the twelve o'clock position.
+ * Which hour a mark stands for on the two-ring dial: outer carries 12 then 1-11, inner
+ * carries 00 then 13-23. Index 0 of each is the mark at twelve o'clock.
  */
 export function dialIndexToHour24(index: number, ring: 'outer' | 'inner'): number {
   if (ring === 'outer') return index === 0 ? 12 : index
   return index === 0 ? 0 : index + 12
 }
 
-/**
- * The way back, which is what tells the hand where to point: midnight is the top of the
- * inner ring, noon the top of the outer one, and three in the afternoon the third mark of
- * the inner ring.
- */
+/** The way back, which is what tells the hand where to point. */
 export function hour24ToDial(hour: number): { index: number; ring: 'outer' | 'inner' } {
   if (hour === 0) return { index: 0, ring: 'inner' }
   if (hour === 12) return { index: 0, ring: 'outer' }
@@ -213,25 +191,18 @@ export interface TimeOption {
   label: string
 }
 
-/**
- * A time as a count of minutes since midnight, or nothing if it is not a time. It is what
- * gives a time its position in a list.
- */
+/** A time as minutes since midnight, `null` if it is not one — its position in a list. */
 export function minutesOf(time: string | null | undefined): number | null {
   const parts = parseTime(time)
   return parts ? parts.hour * 60 + parts.minute : null
 }
 
 /**
- * Every time of the day at a given interval, from midnight up to the last one before the
- * next.
+ * Every time of the day at a given interval, midnight to the last one before the next.
  *
- * There is deliberately no earliest or latest here, because the time picker itself has
- * none: do not invent one.
- *
- * An interval that makes no sense — nothing, a fraction, more than an hour — falls back
- * to one an hour. The list has to stay FINITE even when the warning the component prints
- * about it was ignored, since an interval of zero would build times for ever.
+ * There is deliberately no earliest or latest, VTimePicker having none: do not invent one.
+ * A nonsensical step — zero, a fraction, more than an hour — falls back to hourly, so the
+ * list stays FINITE even when the component's warning about it was ignored.
  */
 export function timeList(step: number, locale: string, format: HourFormat): TimeOption[] {
   const safe = Number.isInteger(step) && step >= 1 && step <= 60 ? step : 60
@@ -244,15 +215,10 @@ export function timeList(step: number, locale: string, format: HourFormat): Time
 }
 
 /*
- * What separates the hours from the minutes as a time is typed.
- *
- * Unlike a date's separator, this one is the SAME everywhere: every language writes a
- * time with a colon, and what varies between them is only whether the hours run to twelve
- * or to twenty-four.
- *
- * The grey template shown in an empty field lives in the dictionary instead, because
- * "hh:mm" is made of the initials of WORDS and those do change from one language to the
- * next — where the colon does not.
+ * Unlike a date's separator this one is UNIVERSAL: every language writes a time with a
+ * colon, and only the 12/24-hour cycle varies. It therefore stays out of the dictionary,
+ * where the empty field's `hh:mm` placeholder does belong — that one is made of the
+ * initials of words.
  */
 const TIME_SEPARATOR = ':'
 
@@ -266,15 +232,12 @@ export function formatTimeMask(digits: string): string {
 }
 
 /**
- * Where the caret belongs so as to sit just after a given number of digits.
+ * Where the caret belongs to sit just after `n` digits. A closed formula rather than
+ * `date.ts`'s scan, the colon always being in the same place.
  *
- * It is a plain formula rather than a scan of the text, because a time's separator is
- * always in the same place — which is exactly what the date's equivalent cannot assume,
- * since the order and the width of its parts change from one language to the next.
- *
- * The flag says something was INSERTED, and the caret then steps over the colon into the
- * minutes. On a deletion it stays in FRONT of it, or the next press of the key would step
- * over the colon instead of erasing a digit, and the key would appear to do nothing.
+ * `skipSeparator` means something was INSERTED, and the caret then steps over the colon
+ * into the minutes. On a DELETION it stays in front of it, or the next Backspace steps
+ * over the colon instead of erasing a digit and the key appears to do nothing.
  */
 export function timeCaret(n: number, skipSeparator = false): number {
   if (n < 2) return n
@@ -283,9 +246,9 @@ export function timeCaret(n: number, skipSeparator = false): number {
 }
 
 /**
- * Writes a canonical time into the field, in whichever form is being SHOWN. On a 12-hour
- * clock the hour is brought back into the range 1 to 12: which half of the day it is
- * belongs to the pair of buttons beside the field, and never to the text itself.
+ * A canonical time written into the field in whichever form is SHOWN. On a 12-hour clock the
+ * hour comes back into 1-12: the meridiem belongs to the toggle beside the field, never to
+ * the text.
  */
 export function timeToMask(time: string | null | undefined, format: HourFormat): string {
   const parts = parseTime(time)
@@ -295,11 +258,9 @@ export function timeToMask(time: string | null | undefined, format: HourFormat):
 }
 
 /**
- * Reads what has been typed back into a canonical time, or nothing at all when it is
- * incomplete, too long, or not a time anyone could point to.
- *
- * On a 12-hour clock the half of the day comes from the pair of buttons beside the field.
- * This is the ONE place where what was typed and that choice meet.
+ * What was typed read back into a canonical time, or `null` when it is incomplete, too long
+ * or not a real time. On a 12-hour clock this is the ONE place the typed digits and the
+ * meridiem toggle meet.
  */
 export function parseTimeMask(
   text: string,

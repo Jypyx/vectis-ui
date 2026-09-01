@@ -1,4 +1,27 @@
 <script setup lang="ts">
+// @a11y @keyboard @core
+/**
+ * The panel a menu is drawn in. Internal to VMenu, and the same component serves both
+ * levels — the root menu and every submenu.
+ *
+ * It rests on `popover="auto"`, which gives it light dismiss, positioning against its
+ * invoker, and — a submenu being rendered inside its parent panel — a native stack the
+ * browser closes from the outside in. Its look comes from the shared `.v-panel`.
+ *
+ * It carries `tabindex="-1"` so it can hold the focus itself, which it does whenever the
+ * menu was opened by POINTER: no command is singled out, but the keyboard still has
+ * somewhere to arrive, everything below being listened for on this element.
+ *
+ * The JS is the ARIA menu keyboard, which the platform does not provide:
+ *
+ * - arrows and Home/End move focus item to item, CONFINED to the panel the focus is in — a
+ *   keystroke inside a submenu also bubbles through every panel containing it, hence the
+ *   guard on where the event came from;
+ * - Escape closes the CURRENT LEVEL only, as does ArrowLeft in a submenu, handing focus
+ *   back to the item that opened it;
+ * - Tab closes the whole menu, a menu not being something one tabs through.
+ */
+
 import { computed, inject, ref } from 'vue'
 
 import { usePopover } from '../../composables/usePopover'
@@ -6,30 +29,6 @@ import { menuInvoker, menuKey } from './context'
 import type { MenuPanelPlacement } from './context'
 import { arrowNavigate } from '../../utils/arrowNav'
 
-// @a11y @keyboard @core
-/**
- * The panel a menu is drawn in. It is internal to VMenu and never exported, and the
- * same component serves both levels: the menu itself and every submenu inside it.
- *
- * It rests on the browser's popover support, which gives it dismissal on a click
- * outside, positioning against whatever opened it, and — since a submenu is rendered
- * inside its parent panel — a stack the browser closes from the outside in. The
- * panel's own look comes from the shared `.v-panel` class.
- *
- * The panel can hold the focus itself, and does whenever the menu was opened with a
- * pointer: no command is then singled out, but the keyboard still has somewhere to
- * arrive, since everything below is listened for on this element.
- *
- * The JavaScript is what the platform does not provide, namely the ARIA menu keyboard:
- *
- * - the arrows and Home/End move the focus from item to item, and that movement is
- *   confined to the panel the focus is actually in — a keystroke inside a submenu also
- *   passes through every panel containing it, hence the guard on where the event came
- *   from;
- * - Escape closes THE CURRENT LEVEL only, as does the left arrow in a submenu,
- *   handing the focus back to the item that opened it;
- * - Tab closes the whole menu, because a menu is not something one tabs through.
- */
 interface MenuPanelProps {
   /** The panel's id, set by whoever owns it. It is what the trigger points at. */
   id: string
@@ -179,7 +178,20 @@ function onKeydown(event: KeyboardEvent) {
 // The only thing set inline is an explicit width, when the prop asks for one.
 const panelStyle = computed(() => (props.width ? { '--menu-width': props.width } : undefined))
 
-defineExpose({ show, hide, focusFirst, focusPanel, el: panelEl })
+// Internal to VMenu, which drives the panel from outside: opening has to be synchronous,
+// and where the focus lands depends on whether a pointer or the keyboard asked.
+defineExpose({
+  /** Opens the panel. Pass the invoker, or the popover has no anchor to position against. */
+  show,
+  /** Closes it. */
+  hide,
+  /** Puts the focus on the first reachable item — the keyboard's way in. */
+  focusFirst,
+  /** Puts the focus on the panel itself — the pointer's way in, singling out no command. */
+  focusPanel,
+  /** The panel element, which is the popover. */
+  el: panelEl,
+})
 </script>
 
 <template>

@@ -113,7 +113,12 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
     /* These two defaults are re-declared on every instance because custom properties
        INHERIT: nested inside a variant that sets letter spacing, or inside a `code`,
        a VTypography would otherwise pick up its ancestor's tracking and monospaced
-       family. The [data-variant] blocks below, being more specific, still win. */
+       family. The [data-variant] blocks below, being more specific, still win.
+
+       Size, weight and leading need no such reset, and that is an INVARIANT rather than
+       an oversight: every variant block sets all three, so none can be inherited. A new
+       variant that leaves one out takes it from whichever VTypography encloses it — the
+       same bug these two lines exist to prevent, one step further out. */
     --typography-family: var(--vectis-text-family);
     --typography-tracking: normal;
 

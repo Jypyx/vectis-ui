@@ -1,4 +1,16 @@
 <script setup lang="ts">
+// @a11y
+/**
+ * The card one notification is drawn on. It holds no state and decides nothing: the
+ * VToaster renders it, and it is internal to the component — never exported.
+ *
+ * How insistently it is announced follows its tone. A failure or a warning interrupts
+ * whatever a screen reader is saying; anything else waits for a pause. There is a
+ * known trade-off in the polite case: some screen readers miss the FIRST notification
+ * of a stack, because the region that announces it comes into existence already
+ * holding its text. The interruptive ones are always announced.
+ */
+
 import { computed } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
@@ -13,17 +25,6 @@ import type { IconSource } from '../VIcon/types'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import type { ToastItem, ToastTone } from './state'
 
-// @a11y
-/**
- * The card one notification is drawn on. It holds no state and decides nothing: the
- * VToaster renders it, and it is internal to the component — never exported.
- *
- * How insistently it is announced follows its tone. A failure or a warning interrupts
- * whatever a screen reader is saying; anything else waits for a pause. There is a
- * known trade-off in the polite case: some screen readers miss the FIRST notification
- * of a stack, because the region that announces it comes into existence already
- * holding its text. The interruptive ones are always announced.
- */
 const props = defineProps<{
   /** The notification to draw, with all its options already resolved. */
   item: ToastItem

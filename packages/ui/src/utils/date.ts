@@ -1,20 +1,15 @@
 // @ssr @core — module-wide: every export below is @core unless tagged otherwise.
 /**
- * The date arithmetic behind VDatePicker and VDateInput, written as pure functions:
- * they read nothing outside their arguments and change nothing around them.
+ * The date arithmetic behind VDatePicker and VDateInput, as pure functions. One currency
+ * throughout: the ISO `YYYY-MM-DD` string, computed in LOCAL time.
  *
- * The whole module speaks one language, the ISO `YYYY-MM-DD` string, and computes
- * everything in the reader's LOCAL time. Two shortcuts are therefore banned
- * throughout: `new Date('YYYY-MM-DD')`, which the language interprets as UTC and
- * which consequently lands on the previous or the next day depending on the time
- * zone, and `toISOString()`, which formats in UTC for the same reason. `Date`
- * objects exist here only as an intermediate step, built with `new Date(y, m, d)` —
- * local midnight — and turned back into text by concatenation.
+ * Two shortcuts are banned as a result. `new Date('YYYY-MM-DD')` parses as UTC and lands a
+ * day out depending on the zone, and `toISOString()` formats in UTC for the same reason.
+ * `Date` exists here only as an intermediate, built with `new Date(y, m, d)` — local
+ * midnight — and turned back into text by concatenation.
  *
- * The names of months and days come from `Intl`, which is available on the server as
- * well as in the browser. They are formatted from REFERENCE dates pinned to
- * `timeZone: 'UTC'`, so that the resulting label never depends on the time zone of
- * the machine doing the rendering.
+ * Month and day names come from `Intl` on REFERENCE dates pinned to `timeZone: 'UTC'`, so a
+ * label never depends on the rendering machine's zone and the server agrees with the browser.
  */
 
 import { digitsOf, pad2 } from './text'
@@ -165,6 +160,8 @@ export function buildMonthGrid(year: number, month0: number, firstDayOfWeek: num
   return cells
 }
 
+const firstDayCache = new Map<string, number>()
+
 // @fallback @ssr
 /**
  * The day the week starts on in a given locale, from 0 for Sunday to 6 for Saturday
@@ -176,8 +173,6 @@ export function buildMonthGrid(year: number, month0: number, firstDayOfWeek: num
  * falls back to Monday when it is missing. A component can always override the
  * result with its `firstDayOfWeek` prop.
  */
-const firstDayCache = new Map<string, number>()
-
 export function firstDayOfWeekFor(locale: string): number {
   const cached = firstDayCache.get(locale)
   if (cached !== undefined) return cached
@@ -353,6 +348,8 @@ const REF_MASK_DATE = Date.UTC(2021, 10, 22)
 /** The invisible direction marks some locales insert, such as U+200F before "/" in ar-EG. */
 const BIDI_MARKS = /[‎‏؜]/g
 
+const maskCache = new Map<string, DateMask>()
+
 /**
  * Works out how a date is typed in a given locale, by formatting a known date and
  * looking at what came out.
@@ -363,8 +360,6 @@ const BIDI_MARKS = /[‎‏؜]/g
  * display nor read back. An invalid locale throws, and the answer then falls back to
  * day/month/year separated by "/".
  */
-const maskCache = new Map<string, DateMask>()
-
 export function dateMaskFor(locale: string): DateMask {
   const cached = maskCache.get(locale)
   if (cached) return cached
@@ -557,18 +552,16 @@ export function maskPlaceholder(locale: string, mask: DateMask): string {
   return mask.order.map((f, k) => letters[f].repeat(mask.lengths[k] as number)).join(mask.separator)
 }
 
+const placeholderLetterCache = new Map<string, typeof PLACEHOLDER_FALLBACK>()
+
 /**
  * The three letters a locale writes its date fields with, worked out once per locale.
  *
- * It is the LETTERS that are cached and not the finished placeholder, because the result
- * also depends on the mask handed in — caching the string would be wrong the moment a
- * caller passes a mask that is not `dateMaskFor(locale)`. All of the cost is here anyway:
- * `Intl.DisplayNames` is the most expensive constructor in this file by an order of
- * magnitude (measured at ~0.22 ms a call, against ~0.07 for `dateMaskFor`), and the string
- * assembly below it is a handful of `repeat` calls.
+ * The LETTERS are cached, not the finished placeholder: that also depends on the mask handed
+ * in, and would be wrong the moment a caller passes one that is not `dateMaskFor(locale)`.
+ * All the cost is here anyway — `Intl.DisplayNames` is this file's most expensive
+ * constructor by an order of magnitude (~0.22 ms against ~0.07 for `dateMaskFor`).
  */
-const placeholderLetterCache = new Map<string, typeof PLACEHOLDER_FALLBACK>()
-
 function placeholderLetters(locale: string): typeof PLACEHOLDER_FALLBACK {
   const cached = placeholderLetterCache.get(locale)
   if (cached) return cached

@@ -1,11 +1,4 @@
 <script setup lang="ts">
-import { provide, useId } from 'vue'
-
-import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
-import type { IconSource } from '../VIcon/types'
-
-import { accordionKey } from './context'
-
 /**
  * An accordion is a stack of sections whose content the reader can show or hide,
  * one heading at a time. This component is built entirely on the native HTML
@@ -15,6 +8,14 @@ import { accordionKey } from './context'
  *
  * In exclusive mode, opening one section automatically closes the others.
  */
+
+import { provide, useId } from 'vue'
+
+import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
+import type { IconSource } from '../VIcon/types'
+
+import { accordionKey } from './context'
+
 interface AccordionProps {
   /**
    * Only one item may stay open at a time, so opening one closes the previous one.

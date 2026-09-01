@@ -1,21 +1,13 @@
 /**
- * The shape a design token takes in this repository.
+ * The shape of a design token here: `{ $value, $type, $description? }`, gathered in nested
+ * groups that give each one its full name. The DTCG format, which is what keeps these files
+ * legible to tools other than ours.
  *
- * A token is a named decision — this blue, this corner radius, this pause before a
- * tooltip appears — and it is written as a small object holding its value, what KIND of
- * thing it is, and optionally a sentence explaining it. Tokens are gathered in nested
- * groups, which is what gives each of them its full name.
+ * A token may ALIAS another by naming it in braces instead of stating a value, which is what
+ * lets the accent be "indigo at step 600" rather than a colour repeated in twenty places.
  *
- * A token may point at another instead of stating a value, by naming it in braces. That
- * is what lets "the colour of a primary button" be defined as "the indigo at step 600"
- * rather than as a colour repeated in twenty places.
- *
- * The format follows the one the W3C's design tokens group has been settling on, which is
- * what makes these files legible to tools other than ours.
- *
- * This is THE source of truth for every visual decision in the library. The stylesheet is
- * generated from it, and the live theming application to come will read and rewrite it
- * directly.
+ * This is THE source of truth for every visual decision in the library: `tokens.css` is
+ * generated from it, and the theming app to come will read and rewrite it directly.
  */
 export type TokenType =
   | 'color'

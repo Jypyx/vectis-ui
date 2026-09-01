@@ -1,5 +1,3 @@
-import type { InjectionKey } from 'vue'
-
 /**
  * What a carousel passes down to its slides. Everything is exposed through getters, which
  * is what keeps the props and the dictionary reactive on the other side of the injection.
@@ -10,6 +8,9 @@ import type { InjectionKey } from 'vue'
  * the server render and everything in the browser, so the "3 of 8" announced would differ
  * between the two.
  */
+
+import type { InjectionKey } from 'vue'
+
 export interface CarouselContext {
   /** How many slides there are, counted from what the slot renders. */
   readonly count: number

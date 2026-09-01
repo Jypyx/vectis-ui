@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useId } from 'vue'
-
 /**
  * A named block of options inside a VCombobox's list. It is internal: the component
  * renders it from the entries of its own options prop, and a consumer never writes it.
@@ -10,6 +8,9 @@ import { useId } from 'vue'
  * chosen: the keyboard counts through the flat list of options and therefore never
  * encounters this element at all.
  */
+
+import { useId } from 'vue'
+
 interface ComboboxGroupProps {
   /** The name of the block. It is a heading, not something that can be chosen. */
   label: string

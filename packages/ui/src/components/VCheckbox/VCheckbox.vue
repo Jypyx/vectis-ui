@@ -1,18 +1,17 @@
 <script setup lang="ts">
+/**
+ * A checkbox whose square is drawn by the library rather than by the browser.
+ *
+ * The real `<input type="checkbox">` is still there, hidden with `opacity: 0` and never
+ * removed, so it keeps everything a checkbox is owed — focus, keyboard, form submission,
+ * native validity — and the drawn square follows its state in CSS.
+ *
+ * The only JS besides the v-model is `indeterminate`, the third "partially checked" look: it
+ * exists solely as a DOM property, with no HTML attribute to set it from a template.
+ */
+
 import { ref, watchEffect } from 'vue'
 
-/**
- * A checkbox whose square is drawn by the design system rather than by the browser.
- *
- * The trick is that the real `<input type="checkbox">` is still there: it is only
- * made invisible, never removed. It therefore keeps everything a checkbox is owed —
- * it takes focus, answers the keyboard, is submitted with the form and turns invalid
- * on its own — and the drawn square merely follows its state through CSS.
- *
- * The only JavaScript besides the v-model is the indeterminate state, that third
- * "partially checked" look: it exists solely as a DOM property, with no HTML
- * attribute to set it from a template.
- */
 interface CheckboxProps {
   /**
    * Shows the box as partially checked, a dash instead of a tick. This is what a
@@ -52,6 +51,10 @@ const props = withDefaults(defineProps<CheckboxProps>(), {
 // tree.
 defineOptions({ inheritAttrs: false })
 
+/**
+ * Whether the box is ticked. It starts unticked, and `indeterminate` is a separate prop —
+ * the dash is a third appearance, never a third value of this one.
+ */
 const model = defineModel<boolean>({ default: false })
 
 defineSlots<{
@@ -192,6 +195,13 @@ watchEffect(
     border-color: var(--vectis-color-accent-hover);
   }
 
+  /*
+     TRAP — the two rules below are (0,4,0) and `checked` and `indeterminate` are
+     INDEPENDENT DOM properties, so a box can be both at once. Nothing but the source
+     order decides what such a box shows: the second rule hides the tick and the dash
+     wins. Swap them, or slip a rule between them, and a checked-and-indeterminate box
+     shows the tick with nothing in the console to say why — and this component is the
+     one that sets `indeterminate` by hand, so it is the one that can reach that state. */
   .v-checkbox-input:checked + .v-checkbox-box .v-checkbox-mark-check {
     opacity: 1;
   }

@@ -1,7 +1,3 @@
-import type { InjectionKey } from 'vue'
-
-import type { IconSource } from '../VIcon/types'
-
 /**
  * What each level of a VSideNavigation passes down to the level below it. An item
  * reads the context of ITS level and provides a fresh one to its own children, and
@@ -16,6 +12,11 @@ import type { IconSource } from '../VIcon/types'
  * - the DEPTH of an item, which is counted by the cascade itself (see the alternating
  *   variables in VSideNavigationItem) — no registry, and no inline style.
  */
+
+import type { InjectionKey } from 'vue'
+
+import type { IconSource } from '../VIcon/types'
+
 export interface SideNavigationContext {
   /**
    * The name shared by the collapsible sections of this level. Sections that share one

@@ -1,4 +1,22 @@
 <script setup lang="ts">
+/**
+ * A keyboard shortcut, DISPLAYED. Written as a plain string — `mod+k` — and rendered with
+ * the symbols of the system the reader is on: ⌘K on a Mac, Ctrl+K elsewhere.
+ *
+ * Two things here are unique in the library. It carries the ONLY `navigator` read, in
+ * `onMounted` and nowhere else: the server cannot know the OS and the first client render
+ * has to match what it sent, so a Mac visitor pays one frame of `Ctrl`. The `platform` prop
+ * is the escape hatch, and what makes stories and tests deterministic.
+ *
+ * And `listen` attaches the library's ONLY document-level listener, which is why it must be
+ * asked for: a component whose job is to display a shortcut must not silently capture the
+ * page's keyboard.
+ *
+ * It is not interactive and not focusable, so it carries no hover, active or focus rule, and
+ * therefore no transition and no reduced-motion block. That absence is deliberate — do not
+ * copy VButton's state rules into it.
+ */
+
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import {
@@ -13,29 +31,6 @@ import {
 import type { HotkeysPlatform } from './platform'
 import { useMessages } from '../../i18n/state'
 
-/**
- * A keyboard shortcut, shown as the keys one presses. It is written as a plain string
- * — `mod+k` — and rendered with the symbols of the system the reader is actually on:
- * ⌘K on a Mac, Ctrl+K on Windows and Linux.
- *
- * Two pieces of behaviour here are unique in the whole library, and both are worth
- * knowing about.
- *
- * The first is reading which operating system this is, the only place the library asks
- * that question. It happens once the component is mounted and nowhere else, because a
- * server cannot know the answer and the browser's first render has to match what the
- * server sent — the same reasoning as today's date in VDatePicker. A Mac visitor
- * therefore sees "Ctrl" for a single frame; the `platform` prop is the way out for a
- * host that already knows better.
- *
- * The second is `listen`, which attaches a key listener to the whole document — the
- * only one in the library, and therefore something one has to ASK for: a component
- * whose job is to display a shortcut must not silently capture the page's keyboard.
- *
- * The component is not interactive and cannot be focused, so it carries no hover, no
- * active and no focus rule, and consequently no transition and no reduced-motion
- * block. That absence is deliberate: do not copy VButton's state rules into it.
- */
 export type HotkeysVariant = 'flat' | 'outlined' | 'elevated'
 export type HotkeysSize = 'xs' | 'sm'
 
@@ -58,7 +53,7 @@ interface HotkeysProps {
    * announced name are identical either way.
    */
   attached?: boolean
-  /** The size of the caps. */
+  /** The size of the caps, `xs` by default — a shortcut is chrome beside other text. */
   size?: HotkeysSize
   /** Takes 4px off the height, leaving the padding and the text as they are. */
   compact?: boolean

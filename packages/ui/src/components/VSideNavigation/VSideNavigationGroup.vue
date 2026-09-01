@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useId } from 'vue'
-
 /**
  * A named section of the navigation — "Workspace", "Settings". The name is plain text:
  * it cannot be focused or clicked, and it names the sublist under it for assistive
@@ -15,6 +13,9 @@ import { useId } from 'vue'
  * counting the depth, so that count passes through it untouched and the items inside
  * are indented as if the group were not there.
  */
+
+import { useId } from 'vue'
+
 interface SideNavigationGroupProps {
   /** The name of the section. The `#label` slot replaces it. */
   label: string

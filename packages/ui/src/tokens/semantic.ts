@@ -1,15 +1,13 @@
 /**
- * The tokens that name a ROLE rather than a value: the page's background, the colour of
- * ordinary text, the accent an application is built around, the pause before a tooltip
- * appears.
+ * The tokens naming a ROLE rather than a value: the page background, ordinary text, the
+ * accent an application is built around, the pause before a tooltip.
  *
- * These are the ONLY tokens a component ever mentions, and that is the whole point. A
- * component asks for the accent colour and never for a particular indigo, so an
- * application can change what the accent IS without a single component knowing.
+ * These are the ONLY tokens a component mentions, and that is the whole point — a component
+ * asks for the accent and never for a particular indigo, so an application can change what
+ * the accent IS without any component knowing.
  *
- * Almost every entry points at a step of a palette rather than stating a value, by naming
- * it in braces. The values written out here are the LIGHT theme; the dark theme restates
- * the same roles, pointing them elsewhere.
+ * Almost every entry ALIASES a palette step in braces rather than stating a value. What is
+ * written here is the LIGHT theme; `themes/dark.ts` repoints the same roles.
  */
 import { color, dimension, duration, fontFamily, fontWeight, type TokenGroup } from './types'
 

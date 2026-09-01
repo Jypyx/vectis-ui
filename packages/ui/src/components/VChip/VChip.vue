@@ -1,4 +1,20 @@
 <script setup lang="ts">
+// @core
+/**
+ * A small labelled pill standing for a value: a filter in force, a tag, a chosen file, a
+ * person picked in a field.
+ *
+ * What it renders follows what it is asked to DO, each shape being the native element for
+ * it, so focus, keyboard and disabling come free: selectable is a button with `aria-pressed`,
+ * `href` is a link, `clickable` is a button, and none of those is plain text with no hover.
+ *
+ * A dismissible chip carries a SECOND button BESIDE the first, never inside it — a button
+ * within a button is invalid HTML and unreachable by keyboard.
+ *
+ * The only JS makes a disabled link inert, the platform having no `disabled` for links, and
+ * splits the consumer's attributes between the pill and the element that acts.
+ */
+
 import { computed, useAttrs, useSlots } from 'vue'
 import type { StyleValue } from 'vue'
 
@@ -9,31 +25,17 @@ import { close as closeIcon } from '../VIcon/icons/close'
 import type { IconSource } from '../VIcon/types'
 import { useMessages } from '../../i18n/state'
 
-// @core
-/**
- * A chip: a small labelled pill standing for a value — a filter in force, a tag, a
- * file chosen, a person picked in a field.
- *
- * What it renders follows what it is asked to DO, and each shape is the native element
- * for it, so focus, keyboard and disabling come free: a chip that can be selected is a
- * button reporting whether it is pressed, one that leads somewhere is a link, one that
- * merely reacts to clicks is a button, and one that does none of those is plain text
- * with no hover at all.
- *
- * A chip that can be removed carries a SECOND button, beside the first and never
- * inside it: a button within a button is invalid HTML and unreachable by keyboard.
- *
- * The only JavaScript makes a disabled link inert — the platform having no `disabled`
- * for links — and splits the attributes the consumer passes between the pill and the
- * element that actually acts.
- */
 interface ChipProps {
   /**
    * How strongly the chip is painted: a tinted background, the full colour, or a
    * border alone.
    */
   variant?: 'soft' | 'solid' | 'outline'
-  /** What the chip means, expressed as a colour. */
+  /**
+   * What the chip means, expressed as a colour: `neutral` by default, then `accent` for
+   * something singled out and `danger`/`success`/`warning` for a state being reported. A
+   * chip may report a state where a button may not, which is why it offers five.
+   */
   tone?: 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
   /**
    * A colour of your own (hex, CSS name or `oklch()`), which REPLACES the tone. Every
@@ -107,6 +109,11 @@ const props = withDefaults(defineProps<ChipProps>(), {
 const m = useMessages()
 const resolvedDismissLabel = computed(() => props.dismissLabel ?? m.value.common.dismiss)
 
+/**
+ * Whether the chip is selected, which is also what makes it selectable at all: binding this
+ * turns it into a toggle button and takes precedence over `href` and `clickable`. It starts
+ * unselected.
+ */
 const selected = defineModel<boolean>('selected', { default: false })
 
 defineEmits<{

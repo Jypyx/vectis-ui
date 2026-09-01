@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useId } from 'vue'
-
 // @a11y @ssr — the whole script is a single generated id, and it exists only to tie
 // the group to its own label. It matches between server and client by construction,
 // Vue's `useId` guaranteeing exactly that.
@@ -9,6 +7,9 @@ import { useId } from 'vue'
  * the group's label rather than being read as one more item, and it is plain text: it
  * cannot be chosen, and the arrow keys walk straight past it.
  */
+
+import { useId } from 'vue'
+
 interface MenuGroupProps {
   /** The name of the section. It is a heading, not a command: nothing happens on click. */
   label: string

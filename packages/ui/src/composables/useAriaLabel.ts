@@ -1,23 +1,19 @@
-import { computed, useAttrs, type ComputedRef } from 'vue'
-
 // @a11y
 /**
- * Works out the name a screen reader announces for a container that has one: a row of
- * tabs, a group of buttons, a navigation area.
+ * The accessible name of a labelled container — a tablist, a group, a nav — resolved
+ * `aria-labelledby` > consumer `aria-label` > the `label` prop.
  *
- * A name can be given in three ways, and they are ranked. Pointing at another element
- * that already carries the text wins; an explicit name written on the component comes
- * next; the component's own `label` option is only the fallback. So that option is a
- * DEFAULT and nothing more — an explicit name replaces it, and pointing at another
- * element removes it altogether, since otherwise the element would carry two names at
- * once.
+ * `label` is therefore only a default: `aria-label` replaces it, and `aria-labelledby`
+ * removes it outright, or the element would carry two names at once.
  *
- * This arbitration has to be done by hand as soon as a component both spreads the
- * attributes it was given and writes its own name in the same place: nothing would
- * choose between the two, and both would apply. Elsewhere Vue's normal attribute
- * fallthrough already lets the consumer's win, and all this does is drop a default that
- * has become redundant.
+ * The arbitration is only NEEDED where a component both spreads `$attrs` and binds its own
+ * `:aria-label` on the same element (VTabs, VToggle): nothing would choose, and both would
+ * apply. Elsewhere fallthrough already lets the consumer win and this just drops a default
+ * that has become redundant.
  */
+
+import { computed, useAttrs, type ComputedRef } from 'vue'
+
 export function useAriaLabel(label: () => string | undefined): ComputedRef<string | undefined> {
   const attrs = useAttrs()
   return computed(() =>

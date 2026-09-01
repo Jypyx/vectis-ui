@@ -1,24 +1,22 @@
 <script setup lang="ts" generic="E extends CalendarEvent">
 // @a11y @ssr @core
 /**
- * An agenda: the days laid out side by side with the hours running down them, and the
- * events drawn where they fall.
+ * An agenda: the days side by side, the hours running down them, the events drawn where they
+ * fall.
  *
- * It is a place to READ and REARRANGE a schedule, not to write one. Opening an event for
- * editing, and adding one by any route other than pointing at an empty slot, stay with the
- * consumer — the component tells them what was asked for and leaves the form to them.
+ * A place to READ and REARRANGE a schedule, never to write one. Opening an event for editing
+ * stays with the consumer — this reports what was asked for and leaves the form to them.
  *
- * Everything is handled in local time as ISO `YYYY-MM-DD` dates and 24-hour `HH:mm` times
- * (see `utils/date` and `utils/time`), which is what keeps the server and the browser in
- * agreement. An event may name a time zone, and that name is shown beside its times as an
- * annotation; it is never applied. Converting would mean the card moved depending on where
- * the page was rendered, which is the one thing a calendar must not do.
+ * Everything is local ISO `YYYY-MM-DD` and 24-hour `HH:mm`, which is what keeps the server
+ * and the browser in agreement. An event may name a `timezone`, and that name is SHOWN
+ * beside its times but never applied: converting would move the card depending on where the
+ * page was rendered, the one thing a calendar must not do.
  *
- * The JavaScript here is what the platform gives no way to avoid. There is no accessible
- * time grid to build on and no way to express "these three meetings overlap, so share the
- * width between them" in CSS, so the ARIA grid pattern and the overlap layout are written
- * out by hand. Every geometric and calendrical decision lives in `layout.ts`, pure, because
- * the test environment lays nothing out and that is the only place any of it can be checked.
+ * The JS is what the platform leaves no way round — there is no accessible time grid to
+ * build on and no way to say "these three meetings overlap, share the width" in CSS, so the
+ * ARIA grid pattern and the overlap layout are written by hand. Every geometric and
+ * calendrical decision lives in `layout.ts`, pure, because jsdom lays nothing out and that is
+ * the only place any of it can be tested.
  */
 import { computed, onMounted, ref, useId } from 'vue'
 
@@ -150,6 +148,7 @@ const props = withDefaults(defineProps<CalendarProps>(), {
  */
 defineOptions({ inheritAttrs: false })
 
+/** Which span the calendar is showing. It opens on the week. */
 const view = defineModel<CalendarView>('view', { default: 'week' })
 
 /*
@@ -161,6 +160,14 @@ const view = defineModel<CalendarView>('view', { default: 'week' })
  * `onMounted` where the server cannot see it at all.
  */
 const date = defineModel<string>('date', { default: () => todayISO() })
+/**
+ * What is on the calendar, empty to begin with. It is a MODEL rather than a plain prop
+ * because dragging and resizing write back to it: the calendar rearranges what it is given
+ * and hands the new list back, never mutating the one it received.
+ *
+ * Opening an event for editing stays with the consumer — this component reads and
+ * rearranges, and never creates or deletes.
+ */
 const events = defineModel<E[]>('events', { default: () => [] })
 
 const emit = defineEmits<{
@@ -441,7 +448,9 @@ defineExpose({
   focus: () => gridRef.value?.focus(),
   /** Goes back to the current day, exactly as the Today button does. */
   today: today_,
+  /** Moves back one view — a week, a month, a year — exactly as the toolbar's arrow does. */
   previous: () => step(-1),
+  /** Moves forward one view. */
   next: () => step(1),
   /** Scrolls the grid so a given `HH:mm` sits at the top of the visible area. */
   scrollTo: (time: string) => {

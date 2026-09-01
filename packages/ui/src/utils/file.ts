@@ -1,16 +1,11 @@
 // @core — module-wide: pure domain logic, no a11y, no DOM, no environment guard.
 /**
- * Everything the design system has to decide about a file the browser hands it, before
- * that file is accepted: is it of a kind we asked for, how do we write its size out, and
- * which of a batch may come in.
+ * The FILE domain: whether a file is of an accepted kind, how its size is written out, and
+ * which of a batch may come in. Grouped by subject rather than by shared code, like `text.ts`.
  *
- * The three are grouped because they are about the same SUBJECT, not because they share
- * any code — the same arrangement as the text helpers.
- *
- * Nothing here knows anything about components, which is what gives the screening its
- * shape: it HANDS BACK the files it refused instead of announcing them. One body then
- * serves a component that reports refusals one at a time and a test that reads them all
- * as a list.
+ * Nothing here knows about components, which is what shapes the screening: it RETURNS its
+ * refusals instead of emitting them. One body then serves VFileInput, which reports them one
+ * at a time, and a test that reads them all as a list without a mount.
  */
 
 /** All the matching needs of a file, so that a test does not have to counterfeit one. */
@@ -20,24 +15,17 @@ export interface FileCandidate {
 }
 
 /**
- * Decides whether a file is one of the kinds a component said it would take.
+ * Whether a file matches an `accept` list, written exactly as the HTML attribute is:
+ * `.pdf` (case-insensitive), `image/*`, or one precise MIME type. An empty list accepts
+ * everything.
  *
- * The list of accepted kinds is written exactly as HTML has always written it, and it
- * admits three forms: an extension such as ".pdf", regardless of capitals; a whole family
- * such as "image/*"; or one precise kind. Saying nothing at all accepts everything, which
- * is what saying nothing has always meant.
+ * The rule is applied in JS because the ATTRIBUTE only governs the dialog the browser
+ * opens: a DROPPED file bypasses it entirely. Without this second reading, dropping
+ * smuggles anything past a restriction the consumer believes is enforced.
  *
- * The reason this exists in code rather than being left to the browser is that the
- * browser only applies that list to the dialog it opens. A file DROPPED onto the page
- * goes around it entirely and arrives untouched. Without this second reading, dropping
- * would smuggle in anything at all past a restriction the consumer believes is being
- * enforced.
- *
- * TRAP — the kind of a file is the BROWSER's guess, and it is often simply empty: an
- * extension it has never heard of, or certain Linux setups. A list written only in terms
- * of kinds then turns away a perfectly good file, which is why the documentation asks for
- * extensions to be spelled out alongside them — "image/*,.heic" rather than "image/*" on
- * its own.
+ * TRAP — `file.type` is the browser's GUESS and is often empty (an unknown extension, some
+ * Linux setups). A list written only in MIME types then turns away a perfectly good file,
+ * which is why the docs ask for extensions alongside: `image/*,.heic`, not `image/*` alone.
  */
 export function matchesAccept(file: FileCandidate, accept?: string): boolean {
   if (!accept) return true
@@ -88,22 +76,13 @@ function formatterFor(locale: string, step: number): Intl.NumberFormat {
 }
 
 /**
- * Writes a size out the way a reader expects to see it: 1 200 000 becomes "1.2 MB" in
- * English and "1,2 Mo" in French.
+ * A file size as a reader expects it: 1 200 000 gives "1.2 MB" in English, "1,2 Mo" in
+ * French. Nothing here is translatable — `Intl` knows the unit names and the decimal mark.
  *
- * The design system's rule about language applies here unchanged. The FORM comes from the
- * browser, which already knows the unit in every language and where the decimal mark
- * goes; only the WORDS around it come from the dictionary. Nothing in this function is
- * translatable.
- *
- * A kilobyte is a thousand bytes, and each rung of the ladder is a thousand of the one
- * below. That is exactly what the unit names the browser prints mean. Using the other,
- * computing convention of 1024 would have a file of 1024 bytes shown as "1.02 kB" — a
- * discrepancy no reader could explain to themselves.
- *
- * A size that is negative, or not a number at all, is treated as nothing rather than
- * producing nonsense. The number comes straight from the file, and a size shown beside a
- * name must never be the thing that breaks.
+ * SI base 1000, which is what the unit names `Intl` prints actually mean. The computing
+ * convention of 1024 would show a 1024-byte file as "1.02 kB", a discrepancy no reader can
+ * explain to themselves. A negative or non-finite size reads as 0: the number comes straight
+ * off the file, and a size beside a name must never be the thing that breaks.
  */
 export function formatBytes(bytes: number, locale: string): string {
   const n = Number.isFinite(bytes) && bytes > 0 ? bytes : 0
@@ -112,10 +91,9 @@ export function formatBytes(bytes: number, locale: string): string {
   let value = n / 1000 ** step
 
   /*
-   * The carry. A size of 999 999 bytes belongs on the kilobyte rung, and at one decimal
-   * it ROUNDS to 1000 — so the rung and the rounding have to agree, or the reader is
-   * shown "1,000 kB" where they expect "1 MB". The rounding is done first and the step up
-   * second: the other order lets exactly the same discrepancy through one rung higher.
+   * The carry. 999 999 bytes belongs on the kB rung and ROUNDS to 1000 at one decimal, so
+   * rung and rounding have to agree or the reader is shown "1,000 kB" for "1 MB". Round
+   * first, then step up: the other order lets the same discrepancy through one rung higher.
    */
   const rounded = Math.round(value * 10 ** digitsFor(step)) / 10 ** digitsFor(step)
   if (rounded >= 1000 && step < UNITS.length - 1) {
@@ -147,20 +125,18 @@ export interface FileLimits {
 }
 
 /**
- * Sorts an arriving batch of files into those that may come in and those that may not,
- * given what has already been chosen.
+ * Screens an arriving batch against what is already chosen, returning the accepted files
+ * and one rejection per refusal.
  *
- * The checks run in the order a reader can act on. A file of the wrong KIND is reported
- * as such even when it is also too big, because being told to shrink a file that would
- * never have been accepted anyway is worse than useless.
+ * The order `type → size → count → total-size` is a contract both `.mdx` pages state, and
+ * it is the order a reader can act on: a file of the wrong KIND is reported as such even
+ * when it is also too big, since being told to shrink a file that would never be accepted
+ * is worse than useless.
  *
- * Nothing is set aside for being chosen twice. There is no reliable way to tell one file
- * from another — two files in different folders may perfectly well share a name — so
- * "already chosen" is deliberately not one of the reasons a file can be refused.
- *
- * What is already chosen counts towards BOTH the number of files and the running total,
- * which is what makes a second drop obey the same limits as the first rather than
- * starting again from nothing.
+ * Duplicates are deliberately NOT a reason: two files in different folders may share a
+ * name, and there is no reliable way to tell one from another. What is already chosen
+ * counts towards both the count and the running total, so a second drop obeys the same
+ * limits as the first instead of starting over.
  */
 export function screenFiles(
   incoming: readonly File[],

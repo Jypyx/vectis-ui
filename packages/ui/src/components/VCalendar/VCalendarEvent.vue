@@ -1,18 +1,16 @@
 <script setup lang="ts" generic="E extends CalendarEvent">
 // @a11y @core
 /**
- * One event, as it is drawn on the calendar.
+ * One event as it is drawn on the calendar. Internal to VCalendar, whose documentation
+ * covers it.
  *
- * It is internal to VCalendar and has no story of its own: its documentation lives with
- * the component that renders it (the `VMenuPanel` and `VComboboxOption` precedent). It
- * exists because the same card is drawn from three places in two shapes — a block in a day
- * column, a chip in the all-day band or a month cell — and writing it three times would
+ * It exists because the same card is drawn from three places in two shapes — a block in a
+ * day column, a chip in the all-day band or a month cell — and writing it three times would
  * triplicate the accessible name, the colour table and the slot.
  *
- * It is a real `<button>`, which is what makes an event reachable and activatable with no
- * JavaScript of its own. The only script here derives the colour; everything else — where
- * the card goes, and what happens when it is dragged — belongs to the calendar, which is
- * the thing that knows about the grid.
+ * A real `<button>`, which is what makes an event reachable and activatable with no JS of its
+ * own. The only script here derives the colour; where the card goes and what a drag does
+ * belong to the calendar, the thing that knows about the grid.
  */
 import { computed } from 'vue'
 

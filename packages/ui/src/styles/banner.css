@@ -1,50 +1,27 @@
 /*
- * Common chassis of the messages the design system floats above the page: the
- * notification card (VToast) and the confirmation bar (VSnackbar).
+ * The chassis shared by the messages floated above the page: VToast's card and
+ * VSnackbar's bar. Both are the same object on screen — a raised box one line of body
+ * text tall — so the radius, the shadow and the entry motion live here and cannot move
+ * on one surface without moving on the other.
  *
- * The two are distinct components on purpose — a notification reports a state and
- * stacks, a snackbar confirms an action the reader just took and appears alone — but
- * they are the same OBJECT on screen: a raised box, one line of body text tall, laid
- * out as icon / text / trailing control, sliding in from the edge it came from. That
- * shape is what lives here, so that a change of radius, of shadow or of entry motion
- * cannot move one surface and leave the other behind.
+ * RULE, as in `panel.css`: only declarations no consumer redeclares. `.v-banner` and
+ * `.v-toast`/`.v-snackbar` are all (0,1,0) and each component ships its own sheet, so a
+ * shared declaration would be arbitrated by whatever order the consumer's bundler
+ * chooses. Padding, widths, `align-items` and the whole tone painting therefore stay
+ * with each component, which is exactly where the two differ. To redeclare anyway, use
+ * the compound `.v-banner.v-toast`.
  *
- * The class goes on the card itself, alongside the component's own:
- *   class="v-banner v-toast v-tone"
- *   class="v-banner v-snackbar v-tone"
+ * Two custom properties make the contract:
  *
- * RULE, the same as `panel.css`: put ONLY declarations here that no consumer
- * redeclares. `.v-banner` and `.v-toast`/`.v-snackbar` all have equal specificity
- * (0,1,0), and since the CSS split each component ships in its own sheet, whose
- * position the consumer's bundler decides — on a shared declaration the winner would
- * depend on an order nobody controls. So these stay with each component: `padding`,
- * every width, and the whole of the tone painting (background, border, colour), which
- * is exactly where the two genuinely differ. Where one of them MUST redeclare, the
- * sanctioned form is the compound `.v-banner.v-toast`.
+ *   --banner-line     set here. The height of one line of message text, which an icon or
+ *                     a trailing control is sized against through EQUAL margins above and
+ *                     below. Unequal ones shift the item's centre by half the difference
+ *                     and push the flex line taller than the text.
  *
- * Two custom properties make up the contract:
- *
- *   --banner-line   defined here. The height of ONE line of message text, which is what
- *                   an icon or a trailing control is measured against: each is given
- *                   EQUAL margins above and below so that its outer box comes out at
- *                   exactly that height. Equal is the whole trick — unequal margins move
- *                   the item's centre by half the difference, and it then pushes the
- *                   flex line taller than the text.
- *
- *                   The two cards do DIFFERENT things with it, which is why `align-items`
- *                   is not declared here. VToast aligns to the start, so those margins
- *                   hook its icon and its cross to the FIRST line of a message that
- *                   wraps. VSnackbar centres, so its action sits in the middle of a
- *                   two-line bar rather than in its top corner — there the negative
- *                   margin aligns nothing, it only stops a control taller than a line of
- *                   text from opening the padding.
- *
- *   --banner-enter-y  consumed here, POSED BY THE CONTAINER — the toast stack sets it
- *                   negative at the top of the screen and positive at the bottom, the
- *                   snackbar host always positive. It is what makes the card slide in
- *                   from the edge it belongs to without this sheet knowing where that
- *                   is. The `, 0` fallback is what lets a card render outside any
- *                   container at all.
+ *   --banner-enter-y  read here, POSED BY THE CONTAINER, so a card slides in from its own
+ *                     edge without this sheet knowing where that edge is. The `, 0`
+ *                     fallback lets a card render outside any container — and makes a
+ *                     missing declaration cost the slide silently.
  */
 @layer vectis.components {
   .v-banner {
@@ -58,16 +35,10 @@
     line-height: var(--vectis-text-body-md-leading);
   }
 
-  /*
-   * A card joining a container that is already open slides in from the screen edge, the
-   * direction coming from the container itself. The starting values apply to any
-   * element being added to the page; where they are not supported it simply appears.
-   *
-   * Leaving is deliberately not animated: keeping the card on screen while it faded
-   * would mean holding it in its queue for the length of the transition, and the
-   * simplicity is worth more than the flourish. The container as a whole does fade when
-   * it empties, which each component handles for itself.
-   */
+  /* Entry only. Animating the exit would mean holding a card in its queue for the length
+     of the fade, which is not worth the flourish; the container fades when it empties,
+     and each component does that for itself. `@starting-style` is an enhancement — where
+     it is unsupported the card simply appears. */
   .v-banner {
     transition:
       opacity var(--vectis-duration-base) var(--vectis-ease-default),

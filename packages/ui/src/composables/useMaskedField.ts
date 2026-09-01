@@ -1,17 +1,12 @@
 // @core — module-wide: mask, caret and commit are the field's own behaviour.
 /**
- * A field one types a date or a time into: the reader enters digits, and the separators
- * appear as they go.
+ * The masked field of VDateInput and VTimeInput: the reader types digits, the separators
+ * appear as they go. The FIELD half, `useFieldPanel` being the panel half.
  *
- * It is the FIELD half of the date and time pickers, the panel half being shared already.
- * What is injected here is only the vocabulary of the mask itself: how many digits it
- * holds, how those digits become text, where the caret should land, and how the text
- * becomes a value.
- *
- * The two differ in one respect worth knowing: a date's separator depends on the reader's
- * language while a time's is the same everywhere, so they work out the caret differently.
- * Nothing here cares — it only tells them whether the edit was an INSERTION, which is what
- * decides whether the caret steps over a separator.
+ * Only the mask's vocabulary is injected — how many digits, how they become text, where the
+ * caret lands, how the text becomes a value. A date's separator is locale-dependent where a
+ * time's is universal, so the two compute the caret differently; nothing here cares beyond
+ * telling them whether the edit was an INSERTION.
  */
 import { computed, ref, watch, type Ref, type WritableComputedRef } from 'vue'
 
@@ -61,17 +56,15 @@ export interface MaskedField {
   /** The text currently in the field while it is being typed into. */
   draft: Ref<string>
   /**
-   * TRAP — bind this with `v-model` on the field and NEVER as a one-way value. Without a
-   * listener for its updates, the field keeps an internal copy of the RAW text typed and
-   * writes it back on the next patch — which erases the mask precisely when the masked
-   * text did NOT change: a rejected character, or a digit past the last. Both components
-   * have a test locking it.
+   * TRAP — bind with `v-model` and NEVER `:model-value`. Without an `onUpdate:modelValue`
+   * listener, `useModel` keeps an internal copy of the RAW typed text and rewrites it on the
+   * next patch, erasing the mask exactly when the masked text did NOT change: a rejected
+   * character, or a digit past the last. Both components lock it with a test.
    */
   fieldModel: WritableComputedRef<string | number>
   /**
-   * Writes the text into both the draft and the input itself. Both are needed: Vue does
-   * not patch an element whose text it believes is unchanged, and after a reformat it
-   * often is.
+   * Writes into both the draft and the input. Both are needed: Vue does not patch an element
+   * whose value it believes unchanged, and after a reformat it often is.
    */
   writeField: (text: string, caret?: number) => void
   /** Takes the value as soon as what has been typed is complete and acceptable. */
@@ -87,19 +80,17 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
   const acceptable = options.acceptable ?? (() => true)
 
   /*
-   * The current value, written as masked text. Being derived, it also tracks whatever the
-   * conversion reads — the language's own mask, the choice of clock — so neither component
-   * has to list those dependencies itself.
+   * The value as masked text. Being a computed it also tracks what the conversion reads —
+   * the locale's mask, the hour cycle — so neither component lists those dependencies.
    */
   const maskedValue = computed(() => options.toMask(options.readValue()))
 
   watch(
     maskedValue,
     (next) => {
-      // TRAP — this guard is what stops the field and the value chasing each other. A
-      // commit made while typing writes the value, which comes straight back here; without
-      // the test, the text being typed and the caret with it would be overwritten by text
-      // identical to what is already there.
+      // TRAP — the anti-loop guard. A commit made while typing writes the value, which comes
+      // straight back here; without the test, the text being typed and its caret would be
+      // overwritten by text identical to what is already there.
       if (next !== draft.value) draft.value = next
     },
     { immediate: true },
@@ -126,12 +117,11 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
   }
 
   /**
-   * Tidies up what was typed, or SILENTLY puts back what was there before.
+   * Commits what was typed, or SILENTLY reverts to the current value.
    *
-   * An entry that is incomplete, impossible — the 31st of February — outside the allowed
-   * bounds or excluded simply disappears in favour of the current value. There is
-   * deliberately no error state of our own competing with the `invalid` prop a consumer
-   * controls.
+   * An entry that is incomplete, impossible (31 February), out of bounds or excluded simply
+   * disappears. There is deliberately no error state of our own competing with the `invalid`
+   * prop the consumer controls.
    */
   function commitOrRevert() {
     if (!options.typing()) return

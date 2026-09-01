@@ -1,4 +1,20 @@
 <script setup lang="ts">
+// @keyboard @core
+/**
+ * The row of boxes a one-time code is typed into, one character per box.
+ *
+ * The platform has no such control, so each box is a real `<input>` and the JS is what makes
+ * the row behave as one field: a character moves to the next box, Backspace on an empty one
+ * goes back, the arrows walk along, and a code pasted anywhere is spread across them. The
+ * first box carries `autocomplete="one-time-code"`, so a code arriving from an SMS or a
+ * password manager is spread the same way.
+ *
+ * `pattern` cuts the row up: every `#` is a box, every other character a decorative literal
+ * shown between them and never part of the value. Pasting understands those literals — a
+ * code copied formatted, `GT-123`, is consumed with them in place — and `format` filters the
+ * rest, forcing capitals outside a numeric code so the value has one canonical form.
+ */
+
 import { computed, ref, watch } from 'vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -9,24 +25,6 @@ import { isDev } from '../../utils/env'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
-// @keyboard @core
-/**
- * The row of boxes a one-time code is typed into, one character per box.
- *
- * The platform has no such control, so each box is a real `<input>` and the
- * JavaScript is what makes the row behave as a single field: typing a character moves
- * to the next box, Backspace on an empty one goes back, the arrows walk along, and a
- * code pasted anywhere is spread across the boxes. The first box carries
- * `autocomplete="one-time-code"`, so a code filled in from an SMS or a password
- * manager is spread the same way.
- *
- * `pattern` is what cuts the row up: every `#` becomes a box, and every other
- * character becomes a separator shown between them, which is displayed but never part
- * of the value. Pasting understands those separators — a code copied in its formatted
- * shape, "GT-123" or "123.456.789", is consumed with them in place — and everything
- * else is filtered by `format`, which also forces capitals outside a numeric code so
- * that the value has one canonical form.
- */
 interface InputOTPProps {
   /** How many boxes the code has. It is ignored as soon as a `pattern` is given. */
   length?: number
@@ -77,6 +75,11 @@ const props = withDefaults(defineProps<InputOTPProps>(), {
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.inputOTP.label)
 
+/**
+ * The code as one string, without the separators: a `GT-###` template still yields three
+ * characters. It is empty to begin with, and shorter than the full length while it is being
+ * typed.
+ */
 const model = defineModel<string>({ default: '' })
 
 const emit = defineEmits<{

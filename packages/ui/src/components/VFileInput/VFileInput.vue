@@ -1,22 +1,18 @@
 <script setup lang="ts">
 // @core
 /**
- * Choosing files, presented as an ordinary form field: a read-only text field showing
- * what was picked, with the real file input hidden behind it. It is the shape of a
- * read-only date picker, without the panel.
+ * File selection presented as an ordinary form field: a read-only VInput showing what was
+ * picked, with the real file input hidden behind it — VDateInput's `readonly` shape, minus
+ * the panel. The v-model is always a `File[]`, `multiple` or not, so a consumer never has to
+ * narrow a union TypeScript cannot discriminate.
  *
- * What was chosen is reported as a plain list of files, which is what lets a consumer
- * build whatever preview they like from it.
+ * The JS is imposed by the platform, not chosen. A dialog opens ONLY from a real click on a
+ * file input, and a `FileList` cannot be written from a template — so the visible field can
+ * never BE the native control, and that control is only ever a SOURCE of files.
  *
- * The JavaScript here is imposed by the platform rather than chosen. A file dialog opens
- * ONLY from a real click on a real file input, and the list of files it holds cannot be
- * written from a template — so the visible field can never BE the native control, and
- * that control can only ever be a SOURCE of files, never a mirror of the value.
- *
- * Everything else follows from those two facts: the clicks and keys relayed to the
- * hidden input, the reset of that input after every change — without which the same file
- * cannot be picked twice in a row — and the screening of incoming files in code, since
- * the `accept` attribute has no say whatsoever over a drop.
+ * The rest follows: the relayed click, the reset after every change (without which the same
+ * file cannot be picked twice running), and screening in code, `accept` having no say over
+ * a drop.
  */
 import { computed, ref, useId, watchEffect } from 'vue'
 

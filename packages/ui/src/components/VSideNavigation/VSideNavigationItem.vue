@@ -1,4 +1,21 @@
 <script setup lang="ts">
+/**
+ * One row of a sidebar navigation, in one of two shapes depending on whether it was given
+ * subitems — and the difference runs deeper than it looks.
+ *
+ * A BRANCH is a `<details>`, so its open state, the toggle keyboard, the exclusivity with a
+ * neighbouring section and the animation all come from the browser. Its row IS the
+ * `<summary>`, which must contain the whole line, `#end` included — hence the `@click.stop`
+ * there, or anything put in it would fold the branch. The documented consequence is that
+ * only NON-focusable content belongs in it: a control would be nested inside a control (WCAG
+ * 4.1.2, axe `nested-interactive`), and a `<summary>`'s subtree also serves as its
+ * accessible name, which some screen readers flatten.
+ *
+ * A LEAF is the opposite: the row is a plain container with the action stretched over it by
+ * an absolute `::after`, so the whole row is clickable while `#end` stays a SIBLING of the
+ * action rather than inside it — which is what keeps a real control there legitimate.
+ */
+
 import { computed, inject, provide, useId, useSlots } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
@@ -9,25 +26,6 @@ import { sideNavigationKey } from './context'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
-/**
- * One row of a sidebar navigation. It takes one of two shapes, depending on whether it
- * was given subitems, and the difference runs deeper than it looks.
- *
- * A BRANCH is a native disclosure element, so its open state, the keyboard that
- * toggles it, the closing of a neighbouring section and the animation all come from
- * the browser. Its row IS the header of that element, which must contain everything
- * shown on the line — the `#end` slot included, which is why a click there has to be
- * cancelled: otherwise anything put in it would fold the branch. The consequence,
- * documented for integrators, is that only NON-focusable content belongs there — a
- * badge, a counter. A control inside would be a control nested inside another, and the
- * header's whole subtree also serves as its name for assistive technology, which some
- * screen readers flatten into one string.
- *
- * A LEAF is the opposite arrangement: the row is a plain container, and the link is
- * stretched over it invisibly so the entire row is clickable. The `#end` slot then
- * stays a SIBLING of that link rather than sitting inside it, which keeps a real
- * control there legitimate.
- */
 interface SideNavigationItemProps {
   /** A second line under the label, for a status or a short explanation. */
   sublabel?: string

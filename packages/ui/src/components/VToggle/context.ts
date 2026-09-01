@@ -1,7 +1,3 @@
-import type { InjectionKey } from 'vue'
-
-import type { ToggleSize, ToggleTone, ToggleValue, ToggleVariant } from './VToggle.vue'
-
 /**
  * What a VToggle passes down to the items inside it. Everything is exposed through
  * getters, which is what keeps the group's props reactive on the other side of the
@@ -18,6 +14,11 @@ import type { ToggleSize, ToggleTone, ToggleValue, ToggleVariant } from './VTogg
  * The size travels through here rather than through CSS inheritance, as it does in
  * VAccordion, because each item renders a button that declares its own size on itself.
  */
+
+import type { InjectionKey } from 'vue'
+
+import type { ToggleSize, ToggleTone, ToggleValue, ToggleVariant } from './VToggle.vue'
+
 export interface ToggleContext {
   /** Whether the item carrying this value is currently selected. */
   isSelected: (value: ToggleValue) => boolean

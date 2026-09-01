@@ -1257,12 +1257,12 @@ describe('paging by holding at an edge', () => {
   })
 
   /*
-   * The other half of that, and the one the grid used to get wrong. The echo belongs to a
-   * DATE, and the boxes it is drawn from are described by INDEX into the days on show — so
-   * once the view has turned, the index it was captured with names a different day. It used
-   * to be kept as it was and reappear on the same COLUMN of the new week: a card dragged out
-   * of Wednesday the 10th left its echo on Wednesday the 17th, as though it had come from
-   * there. Recomputing it against the current days is what makes it leave with its own week.
+   * The other half, and the fragile one. The echo belongs to a DATE, but the boxes it is
+   * drawn from are described by INDEX into the days on show, so once the view has turned that
+   * index names a different day. Frozen, the echo reappears on the same COLUMN of the new
+   * week — a card dragged out of Wednesday the 10th leaving its echo on Wednesday the 17th,
+   * as though it had come from there. Recomputing it against the current days is what makes
+   * it leave with its own week.
    */
   it('takes the echo away with the day it belonged to', async () => {
     const { container } = dragging()
@@ -1276,7 +1276,7 @@ describe('paging by holding at an edge', () => {
   })
 
   /* The positive half, said plainly: what is left is the card under the pointer, and nothing
-     squatting the column the echo used to occupy. */
+     squatting the column the echo came from. */
   it('leaves only the card being dragged once its own day is off show', async () => {
     const { container } = dragging()
     vi.advanceTimersByTime(EDGE_STEP_DELAY)
@@ -1311,8 +1311,8 @@ describe('paging by holding at an edge', () => {
   /*
    * A bar is not all-or-nothing: one running past the end of the week still covers the start
    * of the next, so its echo stays — but it now begins BEFORE the range, which is column zero
-   * and not the column it was grabbed on. Frozen, it kept the old index; derived, `packAllDay`
-   * answers that question the same way it does for every other bar.
+   * and not the column it was grabbed on. Frozen it would keep the captured index; derived,
+   * `packAllDay` answers that question the same way it does for every other bar.
    */
   it('re-places the echo of a bar that still reaches into the new range', async () => {
     const { container } = mount({

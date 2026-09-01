@@ -1,11 +1,10 @@
 // @core
 /**
- * A dimension that is always expressed in pixels: both the number twelve and the text
- * "12" come out as "12px".
+ * A dimension always in pixels: `12` and `'12'` both give `12px`.
  *
- * Anything that is not a number at all yields nothing rather than a value CSS cannot
- * read. That distinction matters: a nonsensical value would break the geometry outright,
- * where nothing at all simply lets the component's own default apply.
+ * Anything non-numeric yields `undefined` rather than a custom property CSS cannot read —
+ * an invalid value breaks the geometry outright, where nothing at all lets the component's
+ * own default apply.
  */
 export function px(v: number | string | undefined): string | undefined {
   if (v === undefined) return undefined
@@ -15,13 +14,11 @@ export function px(v: number | string | undefined): string | undefined {
 
 // @core
 /**
- * A dimension in whatever unit the caller likes: a bare number is read as pixels, and any
- * text goes through untouched — a percentage, a fraction of the window, "as wide as the
- * content".
+ * A dimension in any unit: a bare number is read as pixels, a string passes through
+ * untouched — `50%`, `20vw`, `max-content`.
  *
- * The text is deliberately not examined, unlike the pixels-only version above. CSS is
- * left to judge it, and a value it cannot make sense of falls back to what the component
- * declares for itself.
+ * Unlike `px` above, the string is deliberately not examined: CSS judges it, and one it
+ * cannot parse falls back to whatever the component declares for itself.
  */
 export function cssSize(v: number | string | undefined): string | undefined {
   if (v === undefined) return undefined

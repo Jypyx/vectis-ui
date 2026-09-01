@@ -1,52 +1,35 @@
 ﻿/*
- * Common plumbing of the floating elements (VPopover, VMenu, VTooltip…).
+ * The shared plumbing of every floating element (VPopover, VMenu, VTooltip…). Two classes,
+ * set together: `.v-overlay`, the foundation of every popover and of the toast stacks, and
+ * `.v-floating`, anchoring and placement.
  *
- * Two classes, to be set together: `.v-overlay` (the foundation of every popover
- * in the DS, shared with the toast stacks) and `.v-floating` (anchoring +
- * placements).
+ * 100% CSS Anchor Positioning, with NO JS fallback — a deliberate choice, see the browser
+ * floor in README.md. `position-try-fallbacks` flips a panel with no room.
  *
- * 100% CSS Anchor Positioning — NO JS fallback: the project targets modern
- * browsers (Chrome/Edge 125+, Safari 26+; Firefox not yet stable — an accepted
- * choice, see CLAUDE.md/README).
- *
- * Three anchoring cases, all covered by the same placement table:
- * - implicit: the `popovertarget` invoker is the anchor (VMenu);
- * - a static `anchor-name` set by the component on its own wrapper (VTooltip) or
- *   by `VPopover` on its own when a `#trigger` is provided;
- * - a name passed to `VPopover` through the `anchor` prop, the consumer already
- *   owning a root and a control to anchor to (VCombobox, VDateInput,
- *   VTimePicker).
- *
- * `position-try-fallbacks` flips the panel when there is no room.
+ * Three anchoring cases, one placement table:
+ * - implicit, the `popovertarget` invoker being the anchor (VMenu);
+ * - a static `anchor-name` set by the component on its own wrapper (VTooltip), or by
+ *   VPopover when it is given a `#trigger`;
+ * - a name passed to VPopover through the `anchor` prop, the consumer already owning its
+ *   root and its control (VCombobox, VDateInput, VTimeInput).
  */
 @layer vectis.components {
-  /*
-   * The foundation of EVERY popover in the DS, anchored or not — `.v-floating`
-   * (anchored panels) as well as `.v-toast-stack` (stacks positioned in physical
-   * coordinates, with no anchor).
-   *
-   * The `display: none` guard is here rather than in each component: a panel that
-   * sets its own `display` (`.v-panel` as flex, the toast stack as a column)
-   * overrides the UA `[popover] { display: none }` — author styles always beat the
-   * UA, layers or not — and would then stay in layout, invisible but clickable on
-   * top of the content. Its specificity (0,2,0) puts it out of reach of a
-   * component `display`, whatever the bundle order. Each family's
-   * `display … allow-discrete` transitions preserve the exit animation.
-   */
+  /* The foundation of EVERY popover, anchored or not: `.v-floating` panels as well as the
+     `.v-toast-stack` and `.v-snackbar-host` containers, which have no anchor at all. */
   .v-overlay {
     position: fixed;
     /* neutralizes the UA styles of [popover] (inset: 0; margin: auto) */
     inset: auto;
   }
 
-  /* A closed popover, hidden. The class is written TWICE on purpose, for (0,3,0).
-     The UA hides a closed `[popover]`, but any author `display` beats a UA rule, and a
-     panel needs one to lay itself out — `.v-panel` is a flex column, the toast stack is
-     one too. This guard puts it back, and it has to outrank not only those (0,1,0) rules
-     but the sanctioned compound form a panel overrides through, `.v-popover-panel.v-x-panel`,
-     which is (0,2,0) and would otherwise TIE with it. A tie is decided by whichever sheet
-     the consumer's bundler put last, and when the component wins the closed panel keeps its
-     box: invisible at `opacity: 0`, fixed over the page, and eating every click on it. */
+  /* TRAP — the class is written TWICE on purpose, for (0,3,0). The UA hides a closed
+     `[popover]`, but any author `display` beats a UA rule and a panel needs one to lay
+     itself out (`.v-panel` is a flex column, so is the toast stack). This puts the hiding
+     back, and it must outrank not only those (0,1,0) rules but `.v-popover-panel.v-x-panel`,
+     the sanctioned compound a panel overrides through, which is (0,2,0) and would TIE.
+     A tie between two sheets goes to whichever the consumer's bundler put last, and when
+     the component wins, the closed panel keeps its box: invisible at `opacity: 0`, fixed
+     over the page, swallowing every click that lands on it. */
   .v-overlay.v-overlay:not(:popover-open) {
     display: none;
   }
@@ -107,11 +90,13 @@
   }
 
   /*
-   * Aligned side placements (VMenu submenus). The axis is swapped compared to the
-   * top/bottom placements: the gap from the anchor is INLINE and the alignment is
-   * BLOCK — so the inline margin cancelled by the generic `$='-start'`/`$='-end'`
-   * rules above is restored (same specificity, source order decides), and the
-   * block margin on the aligned side is cancelled instead.
+   * Aligned SIDE placements (VMenu's submenus). The axis is swapped against top/bottom: the
+   * gap from the anchor is inline and the alignment block, so the inline margin the generic
+   * `$='-start'`/`$='-end'` rules cancelled is restored and the block one goes instead.
+   *
+   * TRAP — these are (0,2,0), exactly like the rules above that they undo, so SOURCE ORDER
+   * is the whole of the arbitration. Move this group above them and a submenu loses its gap
+   * and sits flush against the item that opened it.
    */
   .v-floating[data-placement='right-start'] {
     position-area: inline-end span-block-end;

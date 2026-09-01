@@ -1,4 +1,20 @@
 <script setup lang="ts">
+// @a11y @keyboard @core
+/**
+ * A calendar shown directly in the page, as a grid of days, with a month view and a
+ * year view behind it. It holds ALL the date, view and keyboard logic of the design
+ * system; VDateInput does no more than dress it in a text field and a popover.
+ *
+ * The platform offers no accessible date grid to build on — `<input type="date">`
+ * can be neither styled nor composed — so the JavaScript here implements the ARIA
+ * "grid" pattern by hand: a single cell in the tab order at a time, arrow and
+ * page keys to move between dates, and selection of one date, a range or a list.
+ * None of that can be expressed in HTML and CSS alone.
+ *
+ * Every date is handled in local time as an ISO `YYYY-MM-DD` string (see
+ * `utils/date`), which is what keeps the server and the browser in agreement.
+ */
+
 import { computed, nextTick, onMounted, ref, useId, watch } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
@@ -34,21 +50,6 @@ import { resolveMatcher } from '../../utils/matcher'
 import { clamp } from '../../utils/number'
 import { useLocale, useMessages } from '../../i18n/state'
 
-// @a11y @keyboard @core
-/**
- * A calendar shown directly in the page, as a grid of days, with a month view and a
- * year view behind it. It holds ALL the date, view and keyboard logic of the design
- * system; VDateInput does no more than dress it in a text field and a popover.
- *
- * The platform offers no accessible date grid to build on — `<input type="date">`
- * can be neither styled nor composed — so the JavaScript here implements the ARIA
- * "grid" pattern by hand: a single cell in the tab order at a time, arrow and
- * page keys to move between dates, and selection of one date, a range or a list.
- * None of that can be expressed in HTML and CSS alone.
- *
- * Every date is handled in local time as an ISO `YYYY-MM-DD` string (see
- * `utils/date`), which is what keeps the server and the browser in agreement.
- */
 export type DatePickerSelection = 'single' | 'range' | 'multiple'
 
 /**
@@ -140,6 +141,14 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   events: undefined,
 })
 
+/**
+ * What is selected, and its SHAPE follows `selection`: an ISO `YYYY-MM-DD` string for
+ * `single`, a `{ start, end }` pair for `range`, an array of strings for `multiple`. Nothing
+ * is selected to begin with.
+ *
+ * Every date is a plain local-time string, never a `Date`, so the value a consumer receives
+ * cannot shift a day across time zones.
+ */
 const model = defineModel<DatePickerValue>({ default: null })
 
 const emit = defineEmits<{
@@ -275,6 +284,14 @@ function isSelected(iso: string): boolean {
   // provisional end shown during the preview.
   return isSameISO(iso, effectiveRange.value.start) || isSameISO(iso, effectiveRange.value.end)
 }
+/**
+ * Whether a day falls inside the selected period, BOTH ends included.
+ *
+ * The inclusiveness is a contract with the stylesheet, not a detail: `[data-in-range]` is
+ * what draws the band's pseudo-element, and the two end rules only round a corner of one
+ * that already exists. Narrowing this to the days strictly between would leave each end
+ * with nothing to cap and silently square off every range.
+ */
 function isInRange(iso: string): boolean {
   const { start, end } = effectiveRange.value
   return !!start && !!end && compareISO(iso, start) >= 0 && compareISO(iso, end) <= 0
@@ -554,7 +571,10 @@ function focus() {
   view.value = 'days'
   focusDay(focusedISO.value)
 }
-defineExpose({ focus })
+defineExpose({
+  /** Brings the focus into the grid, onto the day the calendar is showing. */
+  focus,
+})
 </script>
 
 <template>
@@ -873,7 +893,14 @@ defineExpose({ focus })
      At either end the band stops exactly at the edge of the disc — hence the inset on
      the outer side — and that corner is rounded with the pill radius, which a box
      this height caps at half its height, i.e. precisely the disc's own radius, so it
-     cannot overshoot. */
+     cannot overshoot.
+
+     TRAP — the two cap rules below only shape a pseudo-element that `[data-in-range]`
+     has already created, so they depend on `isInRange` counting BOTH ends of the period
+     as inside it. Make it exclusive and there is no `::before` to cap: both rounded ends
+     of every range vanish, leaving a band that stops square one cell short at each side,
+     with nothing in the console. The last rule is the single-day case, where the two caps
+     would meet and draw a disc behind the disc. */
   .v-date-picker-cell[data-in-range]::before {
     content: '';
     position: absolute;

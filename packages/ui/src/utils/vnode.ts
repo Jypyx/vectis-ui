@@ -3,23 +3,15 @@ import type { VNode } from 'vue'
 
 // @ssr @core
 /**
- * Reduces what a consumer put inside a component down to the elements that will really be
- * rendered.
+ * A slot's VNodes reduced to the elements that will actually render: `v-for` Fragments
+ * unwrapped, a false `v-if`'s Comment and the source text's whitespace dropped.
  *
- * Content written between a component's tags does not arrive as a plain list. A loop
- * arrives as a bundle to be opened up, a condition that turned out false leaves a marker
- * behind, and the line breaks of the source text arrive as content of their own. All of
- * that is removed here, leaving only what will appear on the page.
+ * This is what lets a component count its children without a registry they feed at mount.
+ * A registry fills up in the browser and stays empty on the server, so the two renders
+ * disagree — VAvatarGroup would say "+0" in one and "+3" in the other. Reading the slot
+ * happens while the parent renders, which is the same on both sides.
  *
- * This is what lets a component count its own children WITHOUT the children announcing
- * themselves as they appear. Such an announcement would arrive nowhere during the render
- * done on the server and everywhere in the browser, so the page the server sent and the
- * page the browser builds would disagree — a group of avatars would say "+0" in one and
- * "+3" in the other. The content is inspected while the parent renders, which happens on
- * both sides alike, so the count is the same in both.
- *
- * It is used by the group of avatars, for the "+3" it ends with, and by the carousel, for
- * its dots and for announcing which slide of how many is showing.
+ * Used by VAvatarGroup for its "+N" and by VCarousel for its dots and its live region.
  */
 export function flattenSlot(nodes: VNode[] | undefined): VNode[] {
   const out: VNode[] = []

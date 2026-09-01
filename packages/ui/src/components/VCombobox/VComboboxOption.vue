@@ -1,24 +1,24 @@
 <script setup lang="ts">
+/**
+ * One row of a VCombobox's list. Internal to that component, never exported.
+ *
+ * Focus never comes here — it stays in the field throughout — so the highlight is TOLD to
+ * this row through `active` rather than deduced from anything it holds. Choosing it does not
+ * close the panel either; the component above decides that.
+ *
+ * TRAP — a disabled option carries `aria-disabled` and NOT the native attribute. It has to
+ * stay in the accessibility tree the field walks with `aria-activedescendant`, and the
+ * native attribute would take it out.
+ *
+ * Its surface is deliberately reduced to what VCombobox uses: the label through the slot,
+ * and a single icon at the start, the end of the row being taken by the selection tick.
+ */
+
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import { check as checkIcon } from '../VIcon/icons/check'
 import type { IconSource } from '../VIcon/types'
 
-/**
- * One row of a VCombobox's list. It is internal to that component and never exported.
- *
- * The focus never comes here: it stays in the text field throughout, so the highlight is
- * told to this row rather than deduced from anything it holds. Choosing it does not close
- * the panel either — the component above decides that.
- *
- * TRAP — a disabled option does NOT carry the native attribute. It has to remain in the
- * accessibility tree the field walks through, and the native attribute would take it out
- * of it; `aria-disabled` says the same thing while leaving it in place.
- *
- * Its surface is deliberately reduced to what VCombobox actually uses. The label comes
- * through the slot rather than a prop, and there is a single icon, at the start: the end
- * of the row is taken by the selection tick.
- */
 interface ComboboxOptionProps {
   /** An icon before the label: an icon name, or an explicit render. */
   icon?: IconSource

@@ -1,5 +1,3 @@
-import { isDev } from '../../utils/env'
-
 // @core — module-wide: pure, no Vue and no lifecycle. `detectPlatform` is the
 // exception below.
 /**
@@ -21,6 +19,9 @@ import { isDev } from '../../utils/env'
  * There is nothing to read it from on a server, and sniffing a request header is not
  * this library's business.
  */
+
+import { isDev } from '../../utils/env'
+
 export type HotkeysPlatform = 'mac' | 'windows' | 'linux' | 'other'
 
 /**

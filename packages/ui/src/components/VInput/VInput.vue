@@ -1,23 +1,20 @@
 <script setup lang="ts">
 // @core
 /**
- * A complete text field: a label above, a hint below, icons inside — clickable ones
- * included — a character counter, a clear button and a loading state, all arranged
- * around a real `<input>`.
+ * A complete text field: label above, hint below, icons inside (clickable ones included), a
+ * counter, a clear cross and a loading state, all arranged around a real `<input>`.
  *
- * The component is a wrapper around that input, so the attributes it is given are
- * split: `class` and `style` stay on the outer element, where a consumer expects to
- * style the field, and everything else is forwarded to the input, where `name`,
- * `required` and the aria-* actually do something.
+ * Wrapper-root, so the attrs split: `class`/`style` stay on the root, where a consumer
+ * expects to style the field, and everything else is forwarded to the input, where `name`,
+ * `required` and the `aria-*` actually do something.
  *
- * Validation stays the browser's. The field turns red through `:user-invalid`, which
- * only reacts once the reader has left it, and even the soft limit is reported by
- * marking the input invalid rather than by emitting an event of our own — so a
- * consumer's `<form>` sees exactly what it would see with a bare input.
+ * Validation stays the browser's. The field turns red through `:user-invalid`, which only
+ * reacts once the reader has left it, and even the soft limit is reported by
+ * `setCustomValidity` rather than an event of our own — so a consumer's `<form>` sees
+ * exactly what a bare input would give it.
  *
- * The behavioural JavaScript is limited to the v-model and to the clear button,
- * which has to move focus back to the field: it disappears the moment it is clicked,
- * and focus would otherwise fall back to the page.
+ * The behavioural JS is the v-model and the clear cross, which has to move focus back to the
+ * field: it disappears the moment it is clicked, and focus would otherwise fall to the page.
  */
 import { computed, ref } from 'vue'
 
@@ -226,12 +223,15 @@ const { counterText, over } = useTextLimit({
   softLimit: () => props.softLimit,
 })
 
-// The real input is buried inside the wrapper, out of reach of whoever renders this
-// component. These three exposed members are how the components built on top of it
-// reach it — VCombobox refocuses the field and selects its text this way.
+// The real input sits inside the wrapper, out of reach of whoever renders this component.
+// These three are how the components built on it get there — VCombobox refocuses the field
+// and selects its text this way.
 defineExpose({
+  /** Moves the focus to the real input. */
   focus: (options?: FocusOptions) => controlEl.value?.focus(options),
+  /** Selects everything in the field, as VCombobox does when it reopens its panel. */
   select: () => controlEl.value?.select(),
+  /** The real `<input>`, for what neither of the two above covers. */
   el: controlEl,
 })
 </script>

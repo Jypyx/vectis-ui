@@ -100,6 +100,12 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   surface: true,
 })
 
+/**
+ * Whether the panel is showing. It starts closed and is BIDIRECTIONAL, fed from the DOM: in
+ * `auto` mode the browser's own light dismiss writes back to it. Setting it opens and closes
+ * the panel; a consumer needing the change to be synchronous uses the exposed `show`/`hide`
+ * instead, which is what VTooltip and the pickers do.
+ */
 const open = defineModel<boolean>('open', { default: false })
 
 const slots = defineSlots<{
@@ -166,7 +172,17 @@ onMounted(() => {
   if (open.value) show()
 })
 
-defineExpose({ show, hide, el: panelEl })
+// The imperative counterpart of `v-model:open`, for a consumer whose opening must be
+// SYNCHRONOUS: the model would insert a tick, which is exactly what VTooltip's delay and
+// the pickers' focus frame cannot afford.
+defineExpose({
+  /** Opens the panel at once, without waiting for the model to come round. */
+  show,
+  /** Closes it at once. Safe to call on a panel that is already closed. */
+  hide,
+  /** The panel element itself, which is the popover. */
+  el: panelEl,
+})
 </script>
 
 <template>

@@ -130,8 +130,8 @@ export const Rows: Story = {
        offsets are SYMMETRIC — an asymmetric one leaves the clear cross taller than the
        line box and the field 1.5px over.
 
-       Two: a row costs exactly one line box, so the height is affine in `rows`. Verified
-       red by restoring the old `min-height`, which pinned every one of them to 80px. */
+       Two: a row costs exactly one line box, so the height is affine in `rows`. A
+       `min-height` on the field breaks it, pinning every count to the same height. */
     const boxOf = (id: string, field: string) =>
       canvasElement
         .querySelector(`[data-testid="${id}"]`)!
@@ -243,9 +243,9 @@ export const Clearable: Story = {
        so they read as one row alongside the text — VInput's alignment, on a field whose
        height varies. Nothing but a browser can see this: jsdom lays nothing out.
 
-       Verified red: the offsets used to be written as `1lh`, which the browser resolves
-       against each element's OWN font, and an icon carries a 20px one against the
-       field's 14px — so it sat 4.5px below the cross. */
+       The offsets must NOT be written as `1lh`: the browser resolves that against each
+       element's OWN font, and an icon carries a 20px one against the field's 14px, which
+       sits it 4.5px below the cross. */
     const middleOf = (el: Element) => {
       const rect = el.getBoundingClientRect()
       return rect.top + rect.height / 2

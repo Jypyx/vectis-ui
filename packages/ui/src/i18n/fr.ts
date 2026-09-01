@@ -1,21 +1,20 @@
-import type { VectisMessages } from './types'
-
 /**
- * French. Nothing reaches this file unless it is asked for, so a project that does not
- * use it never carries it: the library is packaged one module at a time, and a module
- * nobody imports is left out.
+ * French, opt-in by import: the package ships one module per file, so a project that never
+ * imports this one never carries it.
  *
- * Turning it on and adding a language the library does not ship at all are the SAME
- * gesture. There are deliberately not two kinds of dictionary, one blessed and one added
- * by hand:
+ * Enabling it and adding a language the library does not ship are the SAME gesture — there
+ * are deliberately not two kinds of dictionary, one blessed and one hand-added:
  *
  *     import { fr, registerMessages, setLocale } from 'vectis-ui'
  *     registerMessages('fr', fr)
  *     setLocale('fr-FR')
  *
- * The curly apostrophes below are deliberate and are part of the text: some tests check
- * these words letter for letter, and a straight apostrophe is a different letter.
+ * TRAP — the curly apostrophes below are part of the text. Some tests assert these strings
+ * letter for letter, and a straight apostrophe is a different character.
  */
+
+import type { VectisMessages } from './types'
+
 export const fr: VectisMessages = {
   common: {
     loading: 'Chargement…',

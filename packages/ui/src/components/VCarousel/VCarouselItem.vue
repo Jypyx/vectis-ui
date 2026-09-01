@@ -1,25 +1,24 @@
 <script setup lang="ts">
+/**
+ * One slide of a carousel: two boxes, and that split is the whole component.
+ *
+ * The OUTER one is the snap area and the view-timeline subject, and it is never animated.
+ * That is correctness, not tidiness: a scroll-snap area is the element's TRANSFORMED border
+ * box, so animating it would make its snap position depend on the scroll position — a
+ * circular dependency whose symptom is jitter, with no error anywhere.
+ *
+ * The INNER one carries the effect. A named timeline resolves by walking up the tree, so
+ * every slide shares one ident and each inner still finds its own.
+ *
+ * All of its styling lives in VCarousel's sheet, each rule qualified by the root's
+ * orientation and effect. Split across two sheets they would be arbitrated by whatever
+ * order the consumer's bundler chooses.
+ */
+
 import { inject } from 'vue'
 
 import { carouselKey } from './context'
 
-/**
- * One slide of a carousel. It renders two boxes, and that split is the whole component.
- *
- * The OUTER one is what the carousel snaps to, and it is never animated. That is not
- * tidiness: the box a scroller snaps to is the element's TRANSFORMED one, so animating it
- * would make where it snaps depend on how far the scroller has been scrolled — a circle
- * whose symptom is jitter and snap positions that drift, with no error anywhere to explain
- * it.
- *
- * The INNER one carries the transition. It finds the timeline of ITS OWN slide by walking
- * up the tree, which is why every slide can share the same name without anything having to
- * scope them apart.
- *
- * All of its styling lives in VCarousel's stylesheet, every rule being conditioned on the
- * carousel's orientation and effect. Split across two sheets, those rules would be
- * arbitrated by an order the consumer's bundler decides.
- */
 interface CarouselItemProps {
   /**
    * Which slide this is among its siblings. The carousel injects it as it renders them.

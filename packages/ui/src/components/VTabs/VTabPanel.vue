@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { computed, inject, ref, watchEffect } from 'vue'
-
-import { tabsKey } from './context'
-
 /**
  * The panel a tab shows, matched to it by the same `value`.
  *
@@ -12,6 +8,11 @@ import { tabsKey } from './context'
  * keeps its text, a scrolled list its position, and a form's fields are still
  * submitted.
  */
+
+import { computed, inject, ref, watchEffect } from 'vue'
+
+import { tabsKey } from './context'
+
 interface TabPanelProps {
   /** Which tab shows this panel: it must be the `value` of one of them. */
   value: string | number

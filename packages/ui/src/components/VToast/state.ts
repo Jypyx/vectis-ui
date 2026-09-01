@@ -1,7 +1,3 @@
-import { reactive } from 'vue'
-
-import type { IconSource } from '../VIcon/types'
-
 // @ssr @core
 /**
  * The queue of notifications waiting to be shown. Nothing in HTML covers this, so it
@@ -17,6 +13,10 @@ import type { IconSource } from '../VIcon/types'
  * The only thing that touches the DOM, and the only thing that arms the timers, is the
  * mounted VToaster.
  */
+
+import { reactive } from 'vue'
+
+import type { IconSource } from '../VIcon/types'
 
 export type ToastTone = 'neutral' | 'accent' | 'success' | 'danger' | 'warning'
 

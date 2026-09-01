@@ -1,4 +1,21 @@
 <script setup lang="ts">
+// @a11y @core
+/**
+ * A field for choosing a time, with an optional panel below it. Same shell as VDateInput
+ * (`useFieldPanel`): the panel is opened imperatively, so the focus can be moved into it, and
+ * closes on `focusout` or Escape.
+ *
+ * Three field modes. `input` types hours and minutes behind a mask, optionally with a clock
+ * beside it; `readonly` makes the clock the only way in; `list` offers times at a fixed
+ * interval, which suits booking a slot far better than pointing at a dial.
+ *
+ * The two panels commit differently, deliberately. The CLOCK works on a draft only OK writes
+ * — Cancel, Escape and focusout all discard it — because dragging a hand passes over dozens
+ * of times nobody meant. The LIST commits immediately: choosing a row is one gesture.
+ *
+ * Whatever is displayed, the value is always a canonical 24-hour `'HH:mm'`.
+ */
+
 import { computed, ref, useId, watchEffect } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
@@ -40,24 +57,6 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 import { useMaskedField } from '../../composables/useMaskedField'
 import { useLocale, useMessages } from '../../i18n/state'
 
-// @a11y @core
-/**
- * A field for choosing a time, with an optional panel below it. The shell is the same one
- * VDateInput uses: the panel is opened from code, which is what lets the focus be moved
- * into it, and closed when the focus leaves the component or Escape is pressed.
- *
- * The field comes in three forms. It can be TYPED into, hours and minutes behind a mask,
- * optionally with a picker beside it. It can be read-only, the picker then being the only way
- * in. Or it can offer a LIST of times at a fixed interval, which suits booking a slot far
- * better than pointing at a clock face.
- *
- * The two panels commit differently, and deliberately so. The PICKER works on a draft that
- * only OK writes to the value — Cancel, Escape and the focus leaving all discard it —
- * because dragging a hand across a clock passes over dozens of times nobody meant. The
- * LIST writes immediately: choosing a row there is one deliberate gesture.
- *
- * Whatever is displayed, the value itself is always a 24-hour time.
- */
 export type TimeInputMode = 'readonly' | 'input' | 'list'
 
 const MODES: TimeInputMode[] = ['readonly', 'input', 'list']

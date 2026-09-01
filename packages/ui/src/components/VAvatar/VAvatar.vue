@@ -1,14 +1,4 @@
 <script setup lang="ts">
-import { computed, inject, ref, useAttrs, watch } from 'vue'
-import type { StyleValue } from 'vue'
-
-import VIcon from '../VIcon/VIcon.vue'
-import { iconProps } from '../VIcon/iconProps'
-import type { IconSource } from '../VIcon/types'
-import { avatarGroupKey } from './context'
-
-export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-
 /**
  * A round avatar standing for a person or an entity. It shows the best of what it
  * was given, in that order: the picture, failing that an icon, failing that the
@@ -26,29 +16,68 @@ export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
  * directly: the component has to merge its own `--avatar-hue`/`--custom-color`
  * into it first, and a plain fallthrough would overwrite them.
  */
+
+import { computed, inject, ref, useAttrs, watch } from 'vue'
+import type { StyleValue } from 'vue'
+
+import VIcon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
+import { avatarGroupKey } from './context'
+
+export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+
 interface AvatarProps {
-  /** Image URL (priority 1). */
+  /**
+   * The picture to show. It is what the avatar prefers above everything else, and an image
+   * that fails to load hands over to the icon or the initials rather than leaving a gap.
+   */
   src?: string
-  /** Icon shown in the absence of an image (priority 2): a name, or an explicit render. */
+  /**
+   * The icon to show when there is no picture. It comes before the initials, so an avatar
+   * given both an icon and a name shows the icon.
+   */
   icon?: IconSource
-  /** Full name — the default alt, the source of the initials and the seed of the auto hue. */
+  /**
+   * The person's full name. It does three things at once: it names the avatar for assistive
+   * technology, its initials are what shows when there is no picture and no icon, and it is
+   * the seed the automatic colour is derived from — so the same person keeps the same colour
+   * everywhere.
+   */
   name?: string
-  /** Explicit alt/label (wins over `name`). */
+  /**
+   * The accessible name, when it should not simply be `name` — an avatar standing for a team
+   * rather than a person, say. It wins over `name`.
+   */
   alt?: string
   /**
-   * Custom colour (hex, CSS name or oklch()) which REPLACES the auto hue: set inline
-   * as `--custom-color`. Otherwise, in the absence of an image, a deterministic OKLCH
-   * hue is derived from `name`.
+   * A colour of your own, as a hex value, a CSS colour name or an `oklch()`. It REPLACES the
+   * hue otherwise derived from `name`, and the text on it is always white, so a light colour
+   * is the consumer's own risk.
    */
   color?: string
-  /** Default `md`. `undefined` = inherited from an enclosing VAvatarGroup. */
+  /**
+   * The diameter of the disc, from the size scale shared by every control. Leaving it out
+   * inside a VAvatarGroup takes the group's size, which is the point of not defaulting it
+   * here; on its own it is `md`.
+   */
   size?: AvatarSize
-  /** Height reduced by 4px (like the other controls). */
+  /** Takes 4px off the diameter, as it does on every other control. */
   compact?: boolean
-  /** Rendered as `<a>`. disabled → an inert link (href removed + aria-disabled). */
+  /**
+   * Turns the avatar into an `<a>` pointing at this address. A disabled link becomes inert:
+   * the address is dropped, so it can be neither focused nor followed.
+   */
   href?: string
-  /** Rendered as `<button type="button">` (a VTooltip's #trigger slot plugs in through fallthrough). */
+  /**
+   * Turns the avatar into a `<button>`. It is ignored as soon as `href` makes it a link.
+   * A VTooltip wrapping the avatar reaches this button through fallthrough.
+   */
   clickable?: boolean
+  /**
+   * Makes an interactive avatar unusable: it stops responding, leaves the tab order and greys
+   * out. It says nothing on a plain avatar, which was never interactive to begin with.
+   */
   disabled?: boolean
 }
 
@@ -195,13 +224,22 @@ const passedAttrs = computed(() => {
     line-height: var(--vectis-text-control-leading);
     text-decoration: none;
     user-select: none;
+    /* `--avatar-ring-color` is a contract with VAvatarGroup, which is the only thing that
+       ever sets it — a private name shared across two sheets, like the `anchor-name`
+       idents. The `transparent` fallback is what lets a lone avatar render ringless, and
+       it is also what makes a divergence silent: rename it on one side and the discs in a
+       group simply stop being separated, with no error and nothing missing from the box. */
     box-shadow: 0 0 0 var(--vectis-control-size-avatar-ring) var(--avatar-ring-color, transparent);
     transition:
       background-color var(--vectis-duration-fast) var(--vectis-ease-default),
       box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  /* Auto hue */
+  /* `--avatar-hue` is set inline by the script, which derives it from the name — so these
+     pairs cannot be tokens: only the hue varies, and it is not known until render. The two
+     themes are written out separately for the same reason relative colours are not used
+     elsewhere in the library: OKLCH's lightness is perceptual, so the dark pair is a
+     design decision rather than a delta off the light one. */
   .v-avatar[data-auto] {
     --avatar-bg: oklch(0.9 0.06 var(--avatar-hue));
     --avatar-text: oklch(0.42 0.13 var(--avatar-hue));

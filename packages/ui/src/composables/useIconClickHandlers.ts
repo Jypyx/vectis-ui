@@ -1,27 +1,21 @@
+// @core
+/**
+ * Whether VInput/VTextarea's icons should render as real buttons: an icon is decoration
+ * until someone listens for `@click:icon-*`, at which point it needs a tab stop and a name.
+ *
+ * Declared emits are removed from `$attrs`, so the only place left to look is
+ * `vnode.props` — in BOTH spellings, a template writing them with dashes and a render
+ * function in camel case. Read ONCE and never revised: a listener attached later is not
+ * picked up, which is marginal enough to accept.
+ *
+ * The missing-name warning lives here rather than in each field: a button nothing can
+ * announce is a flaw of the arrangement, not of the component using it.
+ */
+
 import { getCurrentInstance } from 'vue'
 
 import { isDev } from '../utils/env'
 
-// @core
-/**
- * Tells a field whether the consumer wants its icons to be CLICKABLE.
- *
- * An icon inside a field is decoration until someone listens for a click on it, at which
- * point it becomes a real button — one that can be reached with the keyboard and has a
- * name of its own. This is what answers the question.
- *
- * Because those two events are declared by the component, Vue takes them out of the
- * attributes it hands down, so the only place left to look is the element description
- * Vue was given — and in BOTH spellings, since a template writes them with dashes and a
- * render function in camel case.
- *
- * The answer is read ONCE and never revised: a listener attached later is not picked up.
- * That case is marginal and the cost is accepted.
- *
- * The warning about a missing name belongs here rather than in each field. A button
- * nothing can announce is a flaw of the arrangement itself, not of the component that
- * happens to use it.
- */
 export function useIconClickHandlers(options: {
   name: string
   iconStartLabel?: string

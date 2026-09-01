@@ -131,8 +131,6 @@ const longDay = (iso: string) =>
   dayLabels.value.get(iso)?.long ??
   formatDate(iso, props.locale, { weekday: 'long', day: 'numeric', month: 'long' })
 
-/* ------------------------------------------------------------------- the gesture */
-
 /**
  * A chip being carried from one day to another, by pointer or by keyboard.
  *
@@ -310,8 +308,6 @@ function onKeydown(event: KeyboardEvent) {
     emit('cell-activate', iso)
   }
 }
-
-/* ------------------------------------------------------- the gesture, by pointer */
 
 const isRtl = () => isElementRtl(gridEl.value)
 
@@ -517,8 +513,6 @@ function onCardClick(item: E) {
   emit('event-activate', item)
 }
 
-/* ------------------------------------------------------ the gesture, by keyboard */
-
 function announceMoved(title: string, times: CalendarEventTimes) {
   emit('announce', m.value.calendar.movedTo(title, longDay(times.start)))
 }
@@ -612,7 +606,14 @@ function focus() {
   if (tabbable.value) document.getElementById(cellId(tabbable.value))?.focus()
 }
 
-defineExpose({ focus, scrollToMinutes: () => {} })
+// The same two members VCalendarTimeGrid exposes, so VCalendar drives either view without
+// asking which is on screen. A month has no hours, hence the empty `scrollToMinutes`.
+defineExpose({
+  /** Brings the focus onto the day the grid is currently pointing at. */
+  focus,
+  /** Nothing to scroll to in a month view. */
+  scrollToMinutes: () => {},
+})
 </script>
 
 <template>

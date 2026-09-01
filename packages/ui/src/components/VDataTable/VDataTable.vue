@@ -1,4 +1,21 @@
 ﻿<script setup lang="ts" generic="Row extends Record<string, unknown>">
+// @core
+/**
+ * A table of data with everything usually built around one: a title, a search field, sortable
+ * columns, a selection and pagination.
+ *
+ * A real `<table>` underneath, with a caption, proper column headers and `aria-sort` — which
+ * is what lets a screen reader say "row 3 of 40, column Name" rather than read a grid of
+ * unrelated text. The furniture is composed from the library's own components.
+ *
+ * The JS is almost all derivation — filter, then sort, then slice — plus two effects
+ * explained where they sit.
+ *
+ * Narrow-space behaviour and height-filling are both entirely CSS: `stack` turns each row
+ * into a card once the COMPONENT is narrow, measured by a container query rather than by
+ * code, and the root is a flex column in which only the scroller stretches.
+ */
+
 import { computed, ref, watch } from 'vue'
 import type { StyleValue } from 'vue'
 
@@ -30,24 +47,6 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useTimer } from '../../composables/useTimer'
 import { useLocale, useMessages } from '../../i18n/state'
 
-// @core
-/**
- * A table of data, with everything usually built around one: a title, a search field,
- * sortable columns, a selection, and pagination.
- *
- * It is a real `<table>` underneath, with a caption, proper column headers and the
- * attribute announcing how each is sorted — which is what lets a screen reader say "row
- * 3 of 40, column Name" rather than reading a grid of unrelated text. Everything around
- * it is assembled from the design system's own components rather than reinvented here.
- *
- * The JavaScript is almost all derivation — filter, then sort, then cut into pages —
- * plus two effects explained where they sit.
- *
- * How the table reacts to a narrow space, and how it fills a height, are both entirely
- * CSS: in the stacked mode each row becomes a card once the COMPONENT is narrow, with
- * nothing measured from code, and the whole thing is a column in which only the scrolling
- * area stretches.
- */
 /** One column of the table. */
 export interface DataTableColumn {
   /** Which field of a row it shows, and the name its slots are addressed by. */
@@ -245,16 +244,34 @@ const resolvedSearchLabel = computed(() => props.searchLabel ?? m.value.dataTabl
 const resolvedPerPageLabel = computed(() => props.perPageLabel ?? m.value.dataTable.perPage)
 const resolvedSelectAllLabel = computed(() => props.selectAllLabel ?? m.value.dataTable.selectAll)
 
-/** The current sort. It may be driven from outside, or simply left to the table. */
+/**
+ * Which column the rows are sorted by, and in which direction. Nothing is sorted to begin
+ * with. It may be driven from outside or simply left to the table, which sets it as headers
+ * are clicked; changing it does not send the reader back to the first page.
+ */
 const sort = defineModel<DataTableSort | null>('sort', { default: null })
-/** The page being shown. */
+/**
+ * The page being shown, counted from 1. It starts on the first, and searching or changing
+ * the page size sends it back there. It is clamped by derivation rather than written to, so
+ * a page beyond the last simply displays the last.
+ */
 const page = defineModel<number>('page', { default: 1 })
 /**
  * How many rows a page holds. Any value above zero turns the pagination on, so passing
  * one down without binding it is enough to enable it.
  */
 const perPage = defineModel<number | undefined>('perPage', { default: undefined })
+/**
+ * The selected rows, as the identities `rowKey` gives them — never the row objects
+ * themselves. Nothing is selected to begin with, and a selection SURVIVES a change of page:
+ * the header checkbox covers the visible page alone, which is why it can be indeterminate.
+ */
 const selected = defineModel<DataTableRowId[]>('selected', { default: () => [] })
+/**
+ * What is typed in the search field, empty to begin with. Only the declared columns are
+ * searched, accent- and case-insensitively; in `serverSide` mode nothing is filtered here
+ * and the term is reported through `update:params` instead.
+ */
 const search = defineModel<string>('search', { default: '' })
 
 const emit = defineEmits<{
@@ -305,17 +322,16 @@ function rowIdentity(row: Row, index: number): DataTableRowId {
 // The search only ever looks at the columns that are DISPLAYED. Searching fields the
 // reader cannot see would return rows for reasons nothing on screen explains.
 /*
- * The cells in their accent-insensitive form, remembered per row and column, and
- * re-checked against the raw value.
+ * The cells in accent-insensitive form, memoized per row and column and re-checked against
+ * the raw value.
  *
- * Normalizing a string means decomposing it, stripping what it decomposed into, and
- * lowercasing it — and the filter below re-reads the entire table on every keystroke.
- * Ten thousand rows across five columns is fifty thousand of those per character typed.
+ * Normalizing decomposes, strips the marks and lowercases, and the filter below re-reads the
+ * whole table on every keystroke: ten thousand rows across five columns is fifty thousand of
+ * those per character typed.
  *
- * Reading the cell on every call, rather than deriving the whole table once, is what
- * keeps the filter reactive against a value edited in place. The memory is keyed by ROW,
- * so replacing the rows lets the old entries be collected with no invalidation to write
- * anywhere.
+ * The cell is read on every call rather than the table derived once, which is what keeps the
+ * filter reactive to a value edited in place. Keyed by ROW, so replacing the rows lets the
+ * old entries be collected with no invalidation to write anywhere.
  */
 const normalizedCells = new WeakMap<Row, Map<string, { raw: string; normalized: string }>>()
 function normalizedCell(row: Row, key: string): string {
@@ -344,15 +360,14 @@ const filteredRows = computed(() => {
 /*
  * The collator is built ONCE per locale rather than per comparison.
  *
- * `String.localeCompare` reuses an engine-cached collator only when both the locale and the
- * options are `undefined`; passing either — and this passes both, deliberately, since the
- * locale must stay explicit — takes the slow path and constructs an `Intl.Collator` on every
- * call. That is the cost class `utils/date.ts` already fights: construction runs one to two
- * orders of magnitude longer than use. It is not paid once, either: `search` feeds
- * `filteredRows`, which feeds this, so a sorted table re-sorts on every keystroke.
+ * `String.localeCompare` reuses an engine-cached collator only when the locale AND the
+ * options are both `undefined`; passing either takes the slow path and constructs an
+ * `Intl.Collator` per call — the cost class `utils/date.ts` fights, construction running one
+ * to two orders of magnitude longer than use. Nor is it paid once: `search` feeds
+ * `filteredRows` feeds this, so a sorted table re-sorts on every keystroke.
  *
- * The locale stays explicit for the reason it always was — an `undefined` locale resolves
- * differently in Node and in the browser, so the row order would diverge across hydration.
+ * The locale must nonetheless stay EXPLICIT: an `undefined` one resolves differently in Node
+ * and in the browser, so the row order would diverge across hydration.
  */
 const collator = computed(() => new Intl.Collator(vectisLocale.value, { numeric: true }))
 
@@ -746,16 +761,13 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     font-family: var(--vectis-text-family);
 
     /*
-     * A column of three: toolbar, scrolling area, footer. The component takes its
-     * parent's height and the scrolling area absorbs whatever is left, which is what
-     * stops a last page holding two rows from shrinking the whole table, and what keeps
-     * the footer at the bottom.
+     * A column of three: toolbar, scroller, footer. The root takes its parent's height and
+     * the scroller absorbs what is left, which stops a last page of two rows shrinking the
+     * whole table and keeps the footer at the bottom. With no height on the parent, a
+     * percentage of `auto` resolves to `auto`, so this costs nothing and measures nothing.
      *
-     * When the parent imposes no height at all, a percentage of an undefined height
-     * simply resolves to automatic — so this costs nothing and needs no measurement.
-     *
-     * TRAP — there is deliberately no zero minimum here. Inside a flex column parent too
-     * short for it, that minimum is what keeps the table at its natural height instead of
+     * TRAP — deliberately NO `min-block-size: 0` here. Inside a flex column parent too short
+     * for it, the automatic minimum is what keeps the table at its natural height instead of
      * letting it be crushed to nothing.
      */
     display: flex;
@@ -779,35 +791,31 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     border: 1px solid var(--vectis-color-border);
     border-radius: var(--vectis-radius-surface);
     /*
-     * The price of the rounded corners: the striped and selected row backgrounds, the
-     * opaque background of a frozen heading and the square corners of the scrolling area
-     * would all spill past them.
+     * The price of the rounded corners: striped and selected row backgrounds, the sticky
+     * heading's opaque background and the scroller's square corners would all spill past.
      *
-     * TRAP — clipped and not hidden. Hiding the overflow would make this element a
-     * scrolling box of its own, and the frozen heading would then stick to IT rather than
-     * to the area that actually scrolls, which is to say it would not stick at all.
+     * TRAP — `clip` and not `hidden`. Hiding the overflow would make this element a scroll
+     * container of its own, and the sticky heading would then anchor to IT rather than to
+     * the area that actually scrolls — which is to say it would not stick at all.
      *
-     * It is confined to the framed form on purpose: unframed, the toolbar and the footer
-     * sit flush with the edge and the clip would crop their focus rings. The page-size
-     * menu is drawn above the page and is never affected either way.
+     * Confined to the framed form on purpose: unframed, the toolbar and footer sit flush
+     * with the edge and the clip would crop their focus rings.
      */
     overflow: clip;
   }
 
   /*
-   * The ONE part that scrolls, taking whatever room the toolbar and the footer leave.
+   * The ONE part that scrolls, taking whatever the toolbar and footer leave. The `auto`
+   * basis grows it from its CONTENT, so the whole arrangement is inert while there is no
+   * free space: a table shorter than its container stays exactly as tall as it is.
    *
-   * It grows from its CONTENT's height rather than from zero, which makes the whole thing
-   * inert as long as there is no free space to hand out — a table shorter than its
-   * container is left exactly as tall as it is.
+   * `min-block-size: 0` is load-bearing — a flex item refuses by default to shrink below its
+   * content, so without it the area never compresses and the table overflows instead of
+   * scrolling.
    *
-   * The zero minimum is load-bearing: a flex item refuses by default to shrink below its
-   * content, and without it the area would never compress, so the table would overflow
-   * instead of scrolling.
-   *
-   * It is deliberately not confined to one responsive mode: a table taller than its host
-   * must scroll in the stacked form too, or the clip of the framed variant would crop it
-   * and make the rows below unreachable.
+   * Deliberately NOT confined to `data-responsive='scroll'`: a table taller than its host
+   * must scroll in `stack` too, or `outlined`'s clip crops it and the rows below become
+   * unreachable.
    */
   .v-table-scroller {
     flex: 1 1 auto;

@@ -1,37 +1,33 @@
 ﻿<script setup lang="ts">
+/**
+ * A short explanation appearing beside an element on hover or keyboard focus. A VPopover in
+ * `mode="manual"`, a tooltip having its own rules about when to appear and when to go.
+ *
+ * Those rules are why there is JS here at all: HTML has no stable way to say "show this
+ * after a delay on hover or focus", so the component handles the delay, the pointer, the
+ * focus, a press on the trigger, and Escape — which must dismiss without moving the focus
+ * (WCAG 1.4.13).
+ *
+ * Four ways out, each covering what the others do not: the pointer leaves, the focus leaves,
+ * Escape, or the trigger is PRESSED — that last for a trigger opening a panel, where the
+ * tooltip would otherwise stand over what it just opened.
+ *
+ * Positioning is pure CSS with no generated id: the wrapper names itself as the anchor and
+ * confines that name to its own subtree. The confinement is essential — a shown panel moves
+ * to the top layer, which anchor resolution treats as coming after the whole document, so
+ * without it every tooltip would attach to the last wrapper named on the page.
+ *
+ * The wrapper stays HERE rather than going through VPopover's `#trigger`: a tooltip trigger
+ * is not a `popovertarget` invoker, which would toggle on click, but an element the panel
+ * DESCRIBES.
+ */
+
 import { ref, useId } from 'vue'
 
 import VPopover from '../VPopover/VPopover.vue'
 
 import { useTimer } from '../../composables/useTimer'
 
-/**
- * A short explanation appearing beside an element when the pointer rests on it or
- * when it takes keyboard focus. It is built on VPopover, in the mode where nothing
- * closes by itself, since a tooltip has its own rules about when to appear and when
- * to go.
- *
- * Those rules are why there is JavaScript here at all: HTML has no stable way to say
- * "show this after a short delay on hover or focus" — the proposal for it is still
- * experimental — so the component handles the delay, the pointer, the focus, the press
- * on the trigger, and Escape, which must dismiss a tooltip without moving the focus
- * (WCAG 1.4.13).
- *
- * There are four ways out and each covers a case the others do not: the pointer leaves,
- * the focus leaves, Escape is pressed, or the trigger is PRESSED — that last one for a
- * trigger which opens a panel, where the tooltip would otherwise stand over what it just
- * opened. The template says which browser makes it necessary.
- *
- * The positioning is pure CSS and needs no generated identifier: the wrapper names
- * itself as the anchor and confines that name to its own subtree. The confinement is
- * essential — a visible panel sits in the top layer, which anchor resolution treats
- * as coming after the whole document, so without it every tooltip on the page would
- * attach to the last wrapper carrying the name.
- *
- * The wrapper stays here rather than being delegated to VPopover's trigger slot,
- * because a tooltip trigger is not a button that opens a panel — it would then toggle
- * on click — but an element the panel DESCRIBES.
- */
 type Placement =
   'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'right'
 

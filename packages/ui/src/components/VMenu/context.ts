@@ -1,11 +1,12 @@
-import type { InjectionKey } from 'vue'
-
 /**
  * What the menu passes down to everything inside it. Choosing a command closes the
  * WHOLE menu, however deep in a submenu it was, and closing the outermost panel is
  * all it takes: the submenus are rendered inside it, and the browser closes a stack
  * of popovers from the outside in.
  */
+
+import type { InjectionKey } from 'vue'
+
 export interface MenuContext {
   closeAll: () => void
 }

@@ -1,13 +1,10 @@
 /**
- * The dark theme.
+ * The dark theme: ROLES repointed, never the palette they draw from. The palette is the same
+ * in both themes; what changes is which step each role names.
  *
- * It restates the tokens that describe a ROLE — the page's background, the colour of
- * ordinary text, the accent — and never the palette those roles draw from. The palette is
- * the same in both themes; what changes is which step of it each role points at.
- *
- * Every entry here must correspond to a role that already exists, and the build checks
- * it. A theme is allowed to reassign a role, never to invent one: a token existing in
- * only one theme would leave a component unstyled in the other.
+ * Every key here must already exist in `semantic.ts`, and the build fails otherwise. A theme
+ * may reassign a role, never invent one — a token existing in only one theme leaves a
+ * component unstyled in the other.
  */
 import { color, type TokenGroup } from '../types'
 

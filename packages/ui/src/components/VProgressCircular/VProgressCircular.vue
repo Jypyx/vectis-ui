@@ -1,19 +1,17 @@
 <script setup lang="ts">
 // @core — no behavioural JS at all: value normalization and the display string.
 /**
- * Progress drawn as a ring filling up. It is an SVG whose geometry is entirely
- * described in CSS, with no JavaScript computing anything.
+ * Progress drawn as a ring, an SVG whose geometry is described entirely in CSS with no JS
+ * computing anything.
  *
- * Two things make that possible. The drawing declares no coordinate system of its own,
- * so one unit is one pixel and the circles can be placed with plain lengths: with a
- * fixed coordinate system the thickness would have to be converted into its units,
- * which means knowing the ratio in code and recomputing it at every change of size.
- * And the ring's outline is declared to be 100 units long whatever its real
- * circumference, so the portion drawn is simply a percentage — no π anywhere.
+ * Two things make that possible. There is no `viewBox`, so one user unit is one pixel and
+ * the circles take plain lengths — a fixed coordinate system would mean converting the
+ * thickness into its units, hence knowing the ratio in code and recomputing it at every
+ * change of size. And `pathLength="100"` declares the outline 100 units long whatever its
+ * real circumference, so the portion drawn is a percentage with no π anywhere.
  *
- * On naming: pass an `aria-label` saying what is progressing. The figure shown in the
- * middle cannot serve as that name — the role a progress bar carries makes its content
- * presentational, so screen readers do not announce it.
+ * NAMING — pass an `aria-label` saying what is progressing. The figure in the middle cannot
+ * serve: `role="progressbar"` makes its content presentational, so it is never announced.
  */
 import { useProgressValue } from '../../composables/useProgressValue'
 import { useMessages } from '../../i18n/state'

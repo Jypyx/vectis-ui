@@ -1,4 +1,16 @@
 <script setup lang="ts">
+// @ssr @core
+/**
+ * The path leading to the page being read, from the broadest section down to the current
+ * one: a `<nav>` holding an `<ol>`, built entirely from the `items` prop. Nothing is read
+ * from the browser, so the server and the client render the same thing.
+ *
+ * The separators are decorative `aria-hidden` icons, and the first is removed in CSS rather
+ * than by a condition in the markup. The current page is found by comparing each address
+ * with `currentPath`, carries `aria-current="page"` and stays a working link, as the ARIA
+ * practices recommend. Past `maxItems`, the middle segments fold into a VMenu behind an "…".
+ */
+
 import { computed } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
@@ -13,20 +25,6 @@ import VMenuItem from '../VMenu/VMenuItem.vue'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
-// @ssr @core
-/**
- * A breadcrumb trail: the path that leads to the page being read, from the most
- * general section down to the current one. It is a `<nav>` holding an ordered list,
- * built entirely from the `items` prop — nothing is read from the browser, so the
- * server and the client render exactly the same thing.
- *
- * The separators between the segments are decorative icons, hidden from screen
- * readers, and the very first one is removed in CSS rather than by a condition in
- * the markup. The current page is found by comparing each segment's address with
- * `currentPath`: it is marked with `aria-current="page"` and stays a working link,
- * as the ARIA authoring practices recommend. When the trail grows past `maxItems`,
- * the middle segments are folded into a menu opened by an "…" button.
- */
 export interface BreadcrumbItem {
   /** The text shown for this segment. */
   label: string
@@ -154,6 +152,9 @@ const visibleItems = computed(() =>
 
 <style>
 @layer vectis.components {
+  /* The icon context is set here rather than through `.v-control`, which is the usual
+     route: a trail has no `size` prop and no height to speak of, so the size scale would
+     bring a table of five steps to pick one value from. */
   .v-breadcrumb {
     --vectis-icon-size: var(--vectis-icon-size-sm);
     --vectis-icon-opsz: 20;
@@ -178,6 +179,10 @@ const visibleItems = computed(() =>
     color: var(--vectis-color-text-muted);
   }
 
+  /* TRAP — every item renders its own leading separator and the first one is hidden HERE,
+     which is what keeps the template free of an index test. Delete this rule and the trail
+     opens on a stray chevron; both child combinators are load-bearing too, so wrapping an
+     item or the list in anything puts that chevron straight back. */
   .v-breadcrumb-list > .v-breadcrumb-item:first-child > .v-breadcrumb-separator {
     display: none;
   }

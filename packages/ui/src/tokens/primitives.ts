@@ -1,28 +1,21 @@
 /**
- * The raw material: the colour palettes and the numeric scales the whole design system is
- * built out of.
+ * The raw material: the colour palettes and the numeric scales everything else is built from.
  *
- * Nothing here is used by a component directly. A component asks for "the accent colour"
- * or "the page background", and it is those ROLES, defined alongside this file, that point
- * at a step of a palette. Keeping the two apart is what makes a theme possible at all: a
- * dark theme moves the roles, and never the palette.
+ * No component reads these. A component asks for a ROLE — the accent, the page background —
+ * and `semantic.ts` is what points that role at a step. Keeping the two apart is what makes
+ * theming possible at all: a theme moves the roles, never the palette.
  *
- * The colours are written in OKLCH, a way of describing a colour by how bright it LOOKS
- * rather than by how much of each primary it mixes. Two consequences matter here: a step
- * of a palette is as light as the same step of any other, and mixing two of these colours
- * passes through the shades one would expect rather than through grey.
+ * OKLCH, so a step of one palette is as light as the same step of any other and a
+ * `color-mix()` between two passes through the shades one expects rather than through grey.
+ * The palettes are Tailwind CSS 4's, family for family and step for step.
  *
- * The palettes themselves come from Tailwind CSS 4, family for family and step for step, so
- * that anyone already used to them recognizes the shades. There are exactly five of them,
- * and they are exactly the five a role points at: gray for the surfaces, the text and the
- * borders, indigo for the accent, and red, green and amber for danger, success and warning.
- *
- * The design system ships nothing it does not paint with, and that is a deliberate limit
- * rather than an oversight: a palette costs eleven custom properties in every page that
- * loads the stylesheet, whether or not anything reads them. An application wanting a sixth
- * colour declares its own eleven steps — under its own name, in its own stylesheet — and
- * points the role at them. That is one unlayered rule, it needs no release, and it is what
- * the documentation site does for its violet accent.
+ * Exactly FIVE families, and they are exactly the five a role points at: gray for surfaces,
+ * text and borders, indigo for the accent, red/green/amber for danger/success/warning. The
+ * library ships no palette it does not paint with — a deliberate limit, since a family costs
+ * eleven custom properties in every page that loads the sheet whether or not anything reads
+ * them, and `tokens.test.ts` locks it. An application wanting a sixth declares its own eleven
+ * steps in its own unlayered sheet and repoints the role; the docs site does exactly that
+ * for its violet.
  */
 import {
   color,

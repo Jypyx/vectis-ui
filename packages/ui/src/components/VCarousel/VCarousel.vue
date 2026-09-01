@@ -1,4 +1,29 @@
 <script setup lang="ts">
+// @keyboard @a11y @ssr @core — the DS's densest script; every block below carries
+// its own tag.
+/**
+ * Content the reader moves through one screenful at a time — images, cards, text — across
+ * the page or down it.
+ *
+ * ONE mechanism: a native `scroll-snap` scroller. Touch, the trackpad, the scrollbar and the
+ * snapping all come from the browser, so there is no `transform` track and no cloned slide
+ * anywhere — `loop` included, where going past the last slide scrolls the real track back to
+ * the first.
+ *
+ * Responsiveness is 100% CSS with no breakpoint and no observer: `itemsPerView` is a MAXIMUM,
+ * `itemMinSize` a floor, and `max()` between them inside the slide's `flex-basis` IS the
+ * query. The `peek` strip falls out of the same formula.
+ *
+ * The effects are scroll-driven animations, so they follow the finger and reverse with it.
+ * They are progressive enhancement: without support the carousel simply slides.
+ *
+ * The JS is limited to what nothing else can do — scrolling to the Nth child, reading back
+ * which page the reader landed on and measuring how many pages there are (subtler than it
+ * sounds: not every slide can lead, and the last position is the END of the track), the
+ * autoplay timer, and the arrow keys, which a focused scroller answers with a fixed pixel
+ * step that snapping immediately undoes.
+ */
+
 import {
   cloneVNode,
   computed,
@@ -47,44 +72,6 @@ export type CarouselControls = false | 'inside' | 'outside'
  */
 export type CarouselControlsVisibility = 'always' | 'hover'
 
-// @keyboard @a11y @ssr @core — the DS's densest script; every block below carries
-// its own tag.
-/**
- * A carousel: content the reader moves through one screenful at a time — images, cards,
- * text — across the page or down it.
- *
- * It is built on ONE thing: a box that scrolls, whose content snaps into place. Touch,
- * the trackpad, the scrollbar, the keyboard and the snapping itself therefore all come
- * from the browser. There is no track being moved by code, and no slides cloned anywhere —
- * including for the loop: going past the last slide scrolls the real track back to the
- * first, a rewind the reader sees rather than a seam hidden behind copies.
- *
- * How many slides fit is decided entirely in CSS, with no breakpoints and nothing being
- * measured: `itemsPerView` is a MAXIMUM and `itemMinSize` a floor, and taking whichever of
- * the two is larger IS the responsive rule. The strip of the next slide left showing falls
- * out of the same formula.
- *
- * The transitions between slides are driven by the SCROLL itself rather than played over
- * a fixed duration, so they follow the finger during a drag and reverse when it does.
- * They are an enhancement: where a browser does not support them the carousel simply
- * slides, and a reader who has asked for less motion never sees them at all.
- *
- * The JavaScript is limited to what nothing else can do:
- *
- * - moving the scroller when the VALUE changes — nothing in CSS scrolls a box to its Nth
- *   child on demand;
- * - reading back which slide the reader has landed on, and measuring how many positions
- *   there actually are, which is subtler than it sounds: not every slide can lead, and the
- *   last position is the END of the track rather than any slide's edge;
- * - advancing on a timer, no stylesheet having a clock, and asking once whether the reader
- *   wants less motion — a media query can stop an animation but never a timer, and what
- *   the guideline is about is the CONTENT moving;
- * - the arrow keys. A focused scrolling box does move by itself, but by a fixed number of
- *   pixels that the snapping immediately undoes, so the net movement is nothing.
- *
- * Nothing touches the page outside handlers and effects that run after it has been
- * updated, which is what lets the component render on a server.
- */
 interface CarouselProps {
   /**
    * How many slides may be visible at once. It is a MAXIMUM and not a target: the floor
@@ -330,31 +317,27 @@ const rootStyle = computed<StyleValue>(() => ({
 const viewportEl = ref<HTMLElement | null>(null)
 
 /*
- * Raised while a programmatic scroll is in flight, so the read-back does not fight
- * the request: without it, asking for slide 4 would be overwritten by slides 1, 2
- * and 3 as they pass under the scrollport.
+ * Raised while a programmatic scroll is in flight, so the read-back does not fight the
+ * request: without it, asking for slide 4 is overwritten by 1, 2 and 3 as they pass under
+ * the port.
  *
- * A `ref` and NOT the non-reactive `let` of `useTimer`, because LOWERING it has to
- * be able to re-run the sync. `scrollend` and the observer callback race, and a
- * smooth scroll the user interrupts is exactly the losing order: the observer
- * reports the final position while the flag is still up, the flag drops a moment
- * later, and with a plain `let` nothing would ever come back to write the model —
+ * A `ref` and NOT a plain `let`, because LOWERING it must be able to re-run the sync.
+ * `scrollend` and the observer callback race, and a smooth scroll the user interrupts is the
+ * losing order: the observer reports the final position while the flag is still up, the flag
+ * drops a moment later, and with a `let` nothing ever comes back to write the model —
  * desynchronized for good. Caught by the `Default` play function.
  */
 const settling = ref(false)
 
 /*
- * The arrival position, read AGAIN — and that second reading is the whole point.
- * The observer is the only other source of one and it delivers on a threshold
- * crossing alone, so after a backward scroll under a `peek` its last delivery is a
- * MID-FLIGHT one naming the page being left (see `measure`). Lowering the guard on
- * its own hands that stale index to the watcher below, which writes it into the model
- * while `readBack` suppresses the scroll that would have corrected it: the dot then
- * sits one page ahead of the content, for good.
+ * The arrival position, measured AGAIN — that second reading is the whole point. The
+ * observer delivers only on a threshold crossing, so after a backward scroll under a `peek`
+ * its last delivery is a MID-FLIGHT one naming the page being left (see `measure`). Lowering
+ * the guard alone hands that stale index to the watcher, which writes it while `readBack`
+ * suppresses the correcting scroll: the dot then sits one page ahead, for good.
  *
- * It is the CALL that removes the race, not its position: the sync watcher below is a
- * `pre` one, so both writes land in the same flush and it runs once, on the final
- * values, whatever the order here. Measuring first is intent, not mechanism.
+ * It is the CALL that removes the race, not its position — the sync watcher is a `pre` one,
+ * so both writes land in the same flush and it runs once on the final values.
  */
 const onScrollEnd = () => {
   const port = viewportEl.value
@@ -363,21 +346,20 @@ const onScrollEnd = () => {
 }
 
 /*
- * Raised for exactly the model write the read-back makes, and lowered on the next
- * tick — once `watch(model)` below has read it.
+ * Raised around the model write the read-back makes, lowered on the next tick once
+ * `watch(model)` has seen it. It is what stops the two directions CHAINING.
  *
- * It is what stops the two directions from CHAINING, and the bug it fixes is a
- * touch one: DOM → model runs on every frame of a drag, and each of those writes
- * came straight back as a programmatic `scrollBy`. The scroller jumped to the
- * slide the read-back had just named while the finger was still down, the release
- * then snapped it again, and one gesture produced two animations. A wheel or a
- * keyboard rarely shows it — they leave the scroller between two snap positions
- * far less often than a drag does.
+ * The bug it fixes is a touch one: DOM → model runs on every frame of a drag, and each of
+ * those writes comes back as a programmatic `scrollBy` FIGHTING the finger — the scroller
+ * jumps to the slide just named, the release snaps it again, and one gesture plays two
+ * animations. A wheel shows it rarely, ending between two snap positions far less often.
  *
- * `scrollToIndex`'s own "already there" test does NOT cover this: it only holds at
- * rest, and mid-gesture the delta is a real one. Nothing needs writing anyway —
- * the scroller is where the read-back read it, or on its way there under the
- * browser's own snapping.
+ * `scrollToIndex`'s "already there" test does NOT cover it: that holds only at rest, and
+ * mid-gesture the delta is real. Nothing needs writing anyway — the scroller is already
+ * where the read-back read it.
+ *
+ * Lowered in a `nextTick` and NOT inside `watch(model)`: a controlled v-model that refuses
+ * the value fires no watcher, and the flag would then swallow the consumer's next change.
  */
 let readBack = false
 
@@ -417,6 +399,10 @@ function scrollToIndex(index: number) {
 }
 
 watch(model, (index) => {
+  // The guard is what stops the two directions chaining: without it the model write the
+  // read-back has just made comes straight back as a scroll, fighting the finger mid-drag.
+  // See the flag's own declaration for why `scrollToIndex`'s "already there" test does not
+  // cover it.
   if (readBack) return
   void nextTick(() => scrollToIndex(index))
 })
@@ -434,42 +420,35 @@ const SLACK = 2
 
 /**
  * Reads the scroller ONCE and answers both questions from the same numbers: how many
- * positions it can rest on, and which one it is resting on now. They share every
- * intermediate value, and computing them apart is exactly what let them disagree.
+ * positions it can rest on, and which one it rests on now. Computing them apart is exactly
+ * what let them disagree.
  *
- * A position is a PAGE, not a slide. `scroll-snap-align: start` makes each slide's
- * start edge a position, but one lying past `scrollWidth - clientWidth` is
- * UNREACHABLE — the scroller clamps short of it — so a `peek` or an active
- * `itemMinSize` costs the last of them. What replaces it is the END of the track,
- * declared by `.v-carousel-slide:last-child { scroll-snap-align: end }` in the sheet
- * and counted here as one extra page whenever the leftover is more than rounding
- * noise. Without that page the last slide is never fully revealed: the scroller stops
- * a strip short of the end and no index asks it to go further.
+ * A position is a PAGE, not a slide. `scroll-snap-align: start` makes every slide's start
+ * edge a position, but one past `scrollWidth - clientWidth` is UNREACHABLE — the scroller
+ * clamps short of it — so a `peek` or an active `itemMinSize` costs the last. What replaces
+ * it is the END of the track, declared by `.v-carousel-slide:last-child` in the sheet and
+ * counted here whenever the leftover exceeds rounding noise. Without that page the last
+ * slide is never fully revealed.
  *
- * Page indices ARE slide indices, which is why nothing downstream translates: at
- * `p · step` slide `p` leads, and at the end of the track the leading fully visible
- * slide is `ceil(scrollable / step)`, which is `pages - 1` in both branches. The
- * indicator labels, the live region and `scrollToIndex` all keep reading the model as
- * a slide index.
+ * Page indices ARE slide indices, which is why nothing downstream translates: slide `p`
+ * leads at `p · step`, and at the end of the track the leading fully visible slide is
+ * `ceil(scrollable / step)` — `pages - 1` in both branches.
  *
- * TRAP — the reading is POSITIONAL, and going back to an `intersectionRatio` would
- * bring back the bug it fixes. A ratio has to be DELIVERED to be read, and an observer
- * only delivers on a threshold crossing: with a `peek` the outgoing slide keeps a
- * strip's worth of slack and stays fully visible for the WHOLE of a backward scroll —
- * including at the destination — so every mid-flight reading names the page being
- * left, while the incoming slide, parked at 0.997 by a fractional layout, crosses
- * nothing on arrival. The symptom is a dot stuck one page ahead of the content.
+ * TRAP — the reading is POSITIONAL, and an `intersectionRatio` would bring back the bug it
+ * fixes. A ratio must be DELIVERED to be read and an observer delivers only on a threshold
+ * crossing: with a `peek` the outgoing slide keeps the strip's slack and stays fully visible
+ * for the WHOLE of a backward scroll, destination included, so every mid-flight reading
+ * names the page being LEFT while the incoming slide, parked at 0.997 by a fractional
+ * layout, crosses nothing on arrival. Symptom: a dot stuck one page ahead of the content.
  *
- * RECTS and the scroller's own sizes only, never `getComputedStyle`: this runs on
- * every frame of a smooth scroll. `step` and `offset` are both rect DELTAS, hence
- * physical and unsigned — RTL and vertical fall out with no direction test, the
- * `scrollToIndex` idiom, where `scrollLeft` would be negative in RTL.
+ * RECTS and the scroller's own sizes only, never `getComputedStyle` — this runs on every
+ * frame of a smooth scroll. `step` and `offset` are rect DELTAS, hence unsigned, so RTL and
+ * vertical fall out with no direction test where `scrollLeft` would be negative in RTL.
  *
- * TRAP — `offset` assumes the viewport carries NO padding and NO border, so that
- * slide 0's start edge coincides with the port's at rest. The `outside` gutter is
- * padding on the ROOT for exactly that reason; give the viewport padding of its own
- * and both this reading and `scrollToIndex`'s delta pick up a constant bias, with
- * nothing to report it.
+ * TRAP — `offset` assumes the viewport carries NO padding and NO border, so slide 0's start
+ * edge coincides with the port's at rest. That is why the `outside` gutter is padding on the
+ * ROOT; give the viewport its own and both this reading and `scrollToIndex`'s delta pick up
+ * a constant bias with nothing to report it.
  */
 function measure(port: HTMLElement) {
   const boxes = port.querySelectorAll<HTMLElement>('[data-carousel-index]')
@@ -533,17 +512,16 @@ const pageCount = computed(() =>
 )
 
 /*
- * DOM → model, with ONE observer, which also carries the page measurement.
+ * DOM → model, with ONE observer, which also triggers the page measurement.
  *
- * TRAP — `1` must stay in `threshold`. Nothing READS an intersection ratio any more,
- * but the buckets are still what decides WHEN this callback runs, and this observer is
- * what makes the component cover a ROOT RESIZE — which an IntersectionObserver does
- * NOT do on its own (it queues an entry only when a threshold bucket is crossed):
- * `pageCount` changes exactly when the number of FULLY visible slides changes, which
- * crosses the 1.0 bucket, which queues the callback that re-measures. Drop the 1 and
- * the page count silently freezes on a resize. Its premise is that a slide's box never
- * exceeds the port on the cross axis, so the area ratio equals the scroll-axis ratio
- * and a slide becoming fully visible really does cross 1.0 — the CSS guarantees it.
+ * TRAP — `1` must stay in `threshold`. Nothing READS a ratio, but the buckets still decide
+ * WHEN this callback runs, and this observer is what makes the component cover a ROOT
+ * RESIZE — which an IntersectionObserver does not do on its own, queueing an entry only on a
+ * threshold crossing. `pageCount` changes exactly when the number of FULLY visible slides
+ * changes, which crosses the 1.0 bucket, which queues the re-measure. Drop the 1 and the
+ * page count silently freezes on a resize. Its premise: a slide's box never exceeds the port
+ * on the cross axis, so the area ratio equals the scroll-axis ratio and a slide becoming
+ * fully visible really does cross 1.0.
  */
 watch(
   [viewportEl, count],
@@ -595,22 +573,19 @@ watch([observedIndex, settling], () => {
 const looping = computed(() => props.loop && pageCount.value > 1)
 
 /*
- * Pure derivations, and they can be because `pageCount` never over-counts: index 0 is
- * always reachable, and so is `pageCount - 1` by construction. The observed ends this
- * replaces existed only to survive a model that could request an unreachable index —
- * which, with a correct page count, it no longer can. What that insured against was
- * autoplay-shaped (a false `atEnd` re-arms the timer on every bounce, forever), and
- * the `Pages` play function is what keeps that honest.
+ * Pure derivations, and they may be ONLY because `pageCount` never over-counts: index 0 is
+ * always reachable and so is `pageCount - 1`, by construction. That is the load-bearing
+ * premise — an over-count makes `atEnd` false at the real end, and autoplay then re-arms its
+ * timer on every bounce, forever. The `Pages` play function is what keeps it honest.
  *
- * Once a `peek` or an active floor makes the fit fractional, `pageCount - 1` is the
- * END of the track rather than a slide's start edge — a page all the same: `goTo` and
- * `End` reach it and `measure` reads it back.
+ * Once a `peek` or an active floor makes the fit fractional, `pageCount - 1` is the END of
+ * the track rather than a slide's start edge — a page all the same: `goTo` and `End` reach
+ * it and `measure` reads it back.
  *
- * A looping carousel HAS no ends, which is the whole of what the prop changes here — and,
- * through `atEnd`, the whole of what it changes for autoplay too: `rotating` below already
- * reads this, so the timer keeps re-arming with not a line of its own. That is the same
- * "false `atEnd` re-arms forever" the paragraph above calls a bug, and it is one only
- * where the movement has nowhere to go: each re-arm here advances a page.
+ * A looping carousel HAS no ends, which is all the prop changes here — and, through `atEnd`,
+ * all it changes for autoplay: `rotating` already reads this, so the timer keeps re-arming
+ * with not a line of its own. Endless re-arming is only a bug where the movement has nowhere
+ * to go; here each one advances a page.
  */
 const atStart = computed(() => !looping.value && model.value <= 0)
 const atEnd = computed(() => !looping.value && model.value >= pageCount.value - 1)
@@ -618,17 +593,14 @@ const atEnd = computed(() => !looping.value && model.value >= pageCount.value - 
 function goTo(index: number) {
   const pages = pageCount.value
   /*
-   * TRAP — the double modulo is not superstition: `%` in JS keeps the sign of the
-   * DIVIDEND, so `previous()` on page 0 gives `-1 % 5 === -1` and a single one would
-   * hand the model an index no slide carries, whereupon `scrollToIndex` finds nothing
-   * and the carousel stops dead with no error anywhere.
+   * TRAP — the DOUBLE modulo. JS `%` keeps the sign of the dividend, so `previous()` at 0
+   * gives `-1 % 5 === -1`; a single one hands the model an index no slide carries,
+   * `scrollToIndex` finds nothing, and the carousel stops dead with no error anywhere.
    *
-   * Home and End (and every dot) pass an index already inside the range, where the
-   * modulo is the identity — which is why they stay ABSOLUTE with no guard of their
-   * own. Only a step off either edge, from the buttons, the arrows or autoplay, ever
-   * has anything to wrap.
-   *
-   * `clamp` returns `min` on an empty interval, which is the right answer with no slide.
+   * Home, End and every dot pass an index already in range, where the modulo is the
+   * identity — which is why they stay absolute with no guard of their own. Only a STEP off
+   * an edge ever has anything to wrap. `clamp` returns `min` on an empty interval, the
+   * right answer with no slides at all.
    */
   model.value = looping.value ? ((index % pages) + pages) % pages : clamp(index, 0, pages - 1)
 }
@@ -1117,20 +1089,16 @@ if (isDev) {
    * the scroller is no longer told it may hold.
    *
    * It is INSURANCE rather than the mechanism — Chromium clamps an out-of-range snap
-   * position into the scrollable range anyway, which is what lets a `center`-aligned
-   * carousel reach both of its extremes — but a measurement that depends on a clamping
-   * artefact instead of on a declared position is exactly the kind of implicit contract
-   * that breaks silently in another engine.
+   * position into the scrollable range anyway — but a measurement resting on a clamping
+   * artefact instead of a declared position is the kind of implicit contract that breaks
+   * silently in another engine.
    *
-   * It costs nothing in the two other regimes, and both are worth knowing before
-   * touching it: when a slide is exactly the size of the port (one item per view, no
-   * peek) the start-aligned and end-aligned offsets are the SAME number, and when a
-   * slide is LARGER than the port the alignment is ignored altogether — an oversized
-   * snap area makes every position covering the port valid.
+   * It costs nothing in the other two regimes: with a slide exactly the size of the port the
+   * start- and end-aligned offsets are the SAME number, and with a slide LARGER than the
+   * port the alignment is ignored, an oversized snap area making every covering position
+   * valid.
    *
-   * `end` is logical, like `scroll-snap-type: inline mandatory` above: RTL and the
-   * vertical orientation need no second declaration, and the cross-axis half of the
-   * shorthand is inert, only one axis carrying a snap type.
+   * `end` is logical, so RTL and vertical need no second declaration.
    */
   .v-carousel-slide:last-child {
     scroll-snap-align: end;
@@ -1333,21 +1301,17 @@ if (isDev) {
   }
 
   /*
-   * `hover` REVEALS the pair, it never removes it. `display: none` and
-   * `visibility: hidden` would drop the buttons from the tab order AND from the
-   * accessibility tree, where `opacity: 0` keeps both — the hidden-input rule. The
-   * reveal costs no layout, so nothing shifts.
+   * `hover` REVEALS the pair, it never removes it: `display: none` and `visibility: hidden`
+   * would drop the buttons from the tab order and the a11y tree, where `opacity: 0` keeps
+   * both — the hidden-input rule. It costs no layout, so nothing shifts.
    *
-   * The focus branch is read on the ROOT, so a keyboard user who has tabbed to the
-   * track — or into a link inside a slide — sees the navigation before deciding
-   * whether to use it. It is the same boundary autoplay pauses on, and both are read
-   * the same way.
+   * The focus branch is read on the ROOT, so a keyboard user who has tabbed into the track
+   * sees the navigation before deciding whether to use it. Same boundary autoplay pauses on.
    *
-   * `:has(:focus-visible)` and NOT `:focus-within`, which was a trap: clicking `next`
-   * leaves the focus on it, so the pair stayed revealed until the user clicked
-   * somewhere outside the carousel — the pointer had long since left. A pointer click
-   * does not match `:focus-visible`, a Tab does, and that is precisely the case the
-   * focus branch exists for.
+   * TRAP — `:has(:focus-visible)` and NEVER `:focus-within`. A pointer click LEAVES focus on
+   * the control it hit, so reading any focus pins the pair revealed until the reader clicks
+   * outside the carousel entirely, long after the pointer has gone. A click does not match
+   * `:focus-visible`; a Tab does, which is the only case the focus branch is for.
    *
    * Behind `@media (hover: hover)`: a coarse pointer has no hover to give, so the
    * whole block is inert there and the pair stays permanently visible. NOT
@@ -1452,24 +1416,18 @@ if (isDev) {
   }
 
   /*
-   * `inside` dots sit on the SLIDE, not on the page, so they are deliberately
-   * theme-independent: their backdrop is arbitrary media, and `text-on-accent` is
-   * the DS's "drawn on top of a coloured surface" colour — white in both themes,
-   * exactly like the label on an accent button.
+   * `inside` dots sit on the SLIDE rather than on the page, so they are deliberately
+   * theme-independent: their backdrop is arbitrary media, and `text-on-accent` is the
+   * library's "drawn on a coloured surface" colour, white in both themes.
    *
-   * The ring is what replaces the pill. A flat colour cannot be guaranteed against
-   * an unknown image, so the dot carries BOTH halves of the classic pair: a white
-   * fill for dark media and a dark hairline for light media. Drawn with
-   * `box-shadow`, so it costs no layout and the dots stay 8px.
+   * There is no bar behind them — a pill would cover a slice of the media permanently — so
+   * the legibility lives in the dot itself, which carries both halves of the classic pair:
+   * a light fill for dark media and a dark hairline for light media. `surface-inverse` is
+   * the ring colour because it is dark in BOTH themes, which is the property needed here.
+   * Drawn as a `box-shadow`, so it costs no layout and the dots stay 8px.
    *
-   * `surface-inverse` for the ring rather than a colour primitive: it is dark in
-   * BOTH themes (neutral-900 / neutral-800), which is the property the ring needs,
-   * and it keeps this sheet on semantic tokens like every other component.
-   *
-   * Translucency is safe here where it was not on the bar: a dot holds no text, so
-   * `color-contrast` never runs on it — the rule that made the bar opaque was about
-   * text drawn OVER the bar, and there is none. What the ring answers is WCAG
-   * 1.4.11, and it answers it on any backdrop rather than on a judged one.
+   * Translucency is safe on a dot: it holds no text, so `color-contrast` never runs on it.
+   * What the ring answers is WCAG 1.4.11, on any backdrop rather than on a judged one.
    */
   .v-carousel[data-indicators='inside'] .v-carousel-dot {
     background: color-mix(in oklab, var(--vectis-color-text-on-accent) 55%, transparent);

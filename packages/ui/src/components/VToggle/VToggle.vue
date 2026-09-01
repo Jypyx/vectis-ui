@@ -93,6 +93,14 @@ defineSlots<{
   default(): unknown
 }>()
 
+/**
+ * What is selected, and its SHAPE follows `multiple`: a single value — or `null`, which is
+ * where it starts — when one item may be chosen, and an array when several may. A null or
+ * scalar value passed in `multiple` mode is read as an empty selection.
+ *
+ * The array is never mutated in place; each change is a new one, which is what wakes the
+ * consumer's binding. Re-clicking the selected item deselects it unless `mandatory` is set.
+ */
 const model = defineModel<ToggleModelValue>({ default: null })
 
 const ariaLabel = useAriaLabel(() => props.label)

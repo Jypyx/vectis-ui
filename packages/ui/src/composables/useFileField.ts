@@ -1,16 +1,15 @@
 // @core
 /**
- * The hidden file control both file components are built around — the one that actually
- * opens the operating system's file dialog.
+ * The hidden `<input type="file">` gate of VFileInput and VFilePicker.
  *
- * The code here is imposed by the browser rather than chosen. A file dialog opens ONLY
- * from a genuine click on a file control, and the list of chosen files cannot be handed
- * to that control from a template the way any other value would be. So the thing the
- * reader sees and clicks can never BE the file control, and the file control can only
- * ever be a SOURCE of files. That is exactly the shape of what follows.
+ * The JS here is imposed by the platform, not chosen: a dialog opens ONLY from a real click
+ * on a file input, and a `FileList` cannot be written from a template. So what the reader
+ * clicks can never BE the file input, and the file input can only ever be a SOURCE of files.
  *
- * The rules deciding which files are acceptable live apart from this, on their own; what
- * was left duplicated between the two components was the wiring around them.
+ * Hence `.click()` and not `showPicker()` — both need a transient user activation, but
+ * `showPicker()` THROWS without one where `.click()` is merely inert — and hence
+ * `resetNative()` on every path: without it, re-picking the SAME file after a clear fires no
+ * `change` at all and that file becomes unreachable.
  */
 import { computed, ref, type ComputedRef, type Ref } from 'vue'
 
@@ -18,17 +17,13 @@ import { screenFiles, type FileLimits, type FileRejection } from '../utils/file'
 
 // @a11y
 /**
- * The attributes that belong on the hidden file control rather than on the visible one.
+ * The attributes belonging on the hidden file input rather than on the visible control.
  *
- * The usual split assumes a single element that does the work, and there are two here, so
- * the attributes go into three piles instead of two: styling stays on the outermost
- * element, these four go to the hidden control because they are what the FORM reads —
- * the field's name, whether it is mandatory, which form it belongs to, and whether the
- * camera should open — and everything else goes to the element the READER focuses.
- *
- * The three piles never overlap, and that matters: an identifier applied twice would
- * break a label the consumer wrote for the field, and a name applied twice would have it
- * announced twice.
+ * The wrapper-root pattern assumes ONE functional element and there are two here, so the
+ * attrs split in three: `class`/`style` on the root, these four on the input because they
+ * are what the FORM reads, everything else on the element the READER focuses. The buckets
+ * must not overlap — a duplicated `id` breaks a consumer's `<label for>`, a duplicated
+ * `name` gets the field announced twice.
  */
 const NATIVE_ONLY = ['name', 'required', 'form', 'capture']
 
@@ -45,11 +40,9 @@ export interface FileFieldOptions {
   onReject: (rejection: FileRejection) => void
   onChange: (files: File[]) => void
   /**
-   * Attributes to withhold from the visible control as well.
-   *
-   * The file field withholds the link to its descriptive text because it puts that list
-   * together itself, and a binding written after the spread would silently replace the
-   * consumer's rather than being merged with it.
+   * Attributes to withhold from the visible control too. VFileInput withholds
+   * `aria-describedby`, which it re-aggregates itself: a binding written after the spread
+   * would replace the consumer's rather than merge with it.
    */
   excludeFromControl?: readonly string[]
 }
@@ -73,23 +66,21 @@ export function useFileField(options: FileFieldOptions) {
   })
 
   /**
-   * TRAP — choosing the SAME file again, after clearing the field or removing that file
-   * from the list, reports nothing at all: as far as the hidden control is concerned its
-   * value never changed. The file then becomes impossible to pick, with nothing to show
-   * for it. Emptying the control on every path out is what keeps it selectable.
+   * TRAP — picking the SAME file again after a clear or a removal fires no `change` at all:
+   * as far as the input is concerned its value never changed, and that file becomes
+   * unreachable with nothing to show for it. Emptying it on every path is what keeps it
+   * selectable.
    */
   function resetNative() {
     if (fileEl.value) fileEl.value.value = ''
   }
 
   /**
-   * The one way files get into the value: the operating system's dialog and a drop onto
-   * the component both arrive here.
+   * The single entry into the model: the dialog and a drop both arrive here.
    *
-   * A file the limits refuse is REFUSED outright — it never enters the value at all — and
-   * every refusal is reported so the component can say why. The screening itself is a
-   * plain function elsewhere, which is what makes the ORDER of the reasons testable
-   * without putting a component on screen.
+   * A refused file never enters the model at all, and every refusal is reported so the
+   * component can say why. The screening is a pure function in `utils/file`, which is what
+   * makes the ORDER of the reasons testable without a mount.
    */
   function acceptFiles(incoming: File[]) {
     const multiple = options.multiple()
@@ -117,12 +108,9 @@ export function useFileField(options: FileFieldOptions) {
 
   // @fallback
   /**
-   * The one call to the browser neither component can do without: opening the dialog.
-   *
-   * It clicks the hidden control rather than using the newer, more explicit request to
-   * open a picker. Both require the reader to have just done something, but the explicit
-   * one THROWS when they have not — and in an embedded page from another site — where a
-   * click simply does nothing. On a file control there is nothing to gain in exchange.
+   * `.click()` and not `showPicker()`. Both need a transient user activation, but
+   * `showPicker()` THROWS without one — and inside a cross-origin iframe — where a click is
+   * simply inert. On a file input there is nothing to gain in exchange.
    */
   function openPicker() {
     if (!options.enabled()) return
