@@ -110,7 +110,7 @@ defineSlots<{
   .v-switch-thumb {
     width: calc(var(--switch-track-h) - var(--switch-pad) * 2);
     height: calc(var(--switch-track-h) - var(--switch-pad) * 2);
-    background: var(--vectis-color-surface);
+    background: var(--vectis-color-text-on-accent);
     border-radius: var(--vectis-radius-full);
     box-shadow: var(--vectis-shadow-xs);
     /* The thumb travels through `margin-inline-start` rather than a translation,
