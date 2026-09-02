@@ -154,7 +154,7 @@ watchEffect(
     width: var(--vectis-control-size-check);
     height: var(--vectis-control-size-check);
     flex: none;
-    background: var(--vectis-color-surface);
+    background: transparent;
     border: var(--vectis-control-border-width) solid var(--vectis-color-border-strong);
     border-radius: var(--vectis-radius-sm);
     color: var(--vectis-color-text-on-accent);
