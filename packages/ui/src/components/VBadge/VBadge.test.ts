@@ -100,6 +100,28 @@ describe('VBadge', () => {
     expect(container.querySelector('.v-badge')!.hasAttribute('data-bordered')).toBe(true)
   })
 
+  it('ringColor: an inline --badge-ring-color; no style at all without it', () => {
+    const { container } = render(VBadge, {
+      props: { count: 3, bordered: true, ringColor: 'rebeccapurple' },
+    })
+    const badge = container.querySelector('.v-badge') as HTMLElement
+    expect(badge.style.getPropertyValue('--badge-ring-color')).toBe('rebeccapurple')
+
+    const { container: bare } = render(VBadge, { props: { count: 3, bordered: true } })
+    expect(bare.querySelector('.v-badge')!.getAttribute('style')).toBeNull()
+  })
+
+  // The two colours share one inline style, which is what a return to a single
+  // ternary on `color` would silently break.
+  it('color and ringColor are carried by the same style attribute', () => {
+    const { container } = render(VBadge, {
+      props: { count: 3, bordered: true, color: 'hotpink', ringColor: 'rebeccapurple' },
+    })
+    const style = container.querySelector('.v-badge')!.getAttribute('style')!
+    expect(style).toContain('--custom-color: hotpink')
+    expect(style).toContain('--badge-ring-color: rebeccapurple')
+  })
+
   it('fallthrough: class on .v-badge when standalone, on .v-badge-host with a target', () => {
     const { container } = render(VBadge, {
       props: { count: 3 },

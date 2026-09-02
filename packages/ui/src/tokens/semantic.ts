@@ -315,6 +315,7 @@ export const semantic = {
     'size-snackbar-max': dimension('36rem', 'The maximum width of a snackbar (576px)'),
     'size-badge-h': dimension('1.25rem', 'The height of VBadge (the pill)'),
     'size-badge-dot': dimension('0.625rem', 'The diameter of VBadge in dot mode'),
+    'size-badge-ring': dimension('2px', 'The detaching ring of a bordered VBadge'),
     'size-avatar-ring': dimension('2px', 'The separating ring of stacked Avatars (VAvatarGroup)'),
     'size-date-picker-cell': dimension(
       '2.5rem',

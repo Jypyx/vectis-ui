@@ -17,6 +17,7 @@ export default {
         { name: 'overlay', type: 'boolean' },
         { name: 'overlayPosition', type: 'BadgeOverlayPosition', default: "'top'" },
         { name: 'bordered', type: 'boolean' },
+        { name: 'ringColor', type: 'string' },
       ],
       slots: [
         { name: 'default', type: '{}' },
@@ -26,5 +27,6 @@ export default {
   cssVars: [
     { name: '--vectis-control-size-badge-h', value: '1.25rem' },
     { name: '--vectis-control-size-badge-dot', value: '0.625rem' },
+    { name: '--vectis-control-size-badge-ring', value: '2px' },
   ],
 } satisfies PageApi

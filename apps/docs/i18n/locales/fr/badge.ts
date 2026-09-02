@@ -17,7 +17,9 @@ export default {
         overlayPosition:
           "À quel coin un badge épinglé se fixe : celui du haut par défaut, celui du bas pour un marqueur qui appartient au pied de sa cible, comme un point de présence sous un avatar. Le côté horizontal suit le sens de lecture et n'est pas configurable.",
         bordered:
-          "Dessine un anneau de 2px dans la couleur de la surface derrière le badge, ce qui le détache d'une cible chargée comme une photo.",
+          "Dessine un anneau de 2px dans la couleur de la surface derrière le badge, ce qui le détache d'une cible chargée comme une photo. Cette couleur vaut par défaut le fond de la page, et <code>ringColor</code> est ce qui permet d'en changer.",
+        ringColor:
+          "La couleur de l'anneau dessiné par <code>bordered</code>. Elle vaut par défaut le fond de la page : un badge posé sur une carte ou un bandeau coloré doit donc recevoir la couleur de cette surface. Sans <code>bordered</code>, elle ne fait rien.",
       },
       slots: {
         default:

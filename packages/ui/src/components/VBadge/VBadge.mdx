@@ -88,9 +88,11 @@ side would sit under the eye's entry point into the element it annotates.
 
 ## Bordered
 
-`bordered` draws a 2px ring in the **colour of the background behind** (`--vectis-color-surface`)
-around the badge, to detach it from the element it overlaps. On a different background (a card, a
-coloured banner…), overriding `--vectis-color-surface` on the subtree is enough.
+`bordered` draws a ring (the `--vectis-control-size-badge-ring` token, 2px) in the **colour of the
+background behind** the badge, to detach it from the element it overlaps. That colour defaults to
+`--vectis-color-surface`, the page background — the only one the component can guess at. Anywhere
+else (a card, a coloured banner, a photograph), the consumer is the one who knows what is
+underneath: pass it to `ringColor`.
 
 <Canvas of={VBadgeStories.Bordered} />
 

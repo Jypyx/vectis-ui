@@ -17,7 +17,9 @@ export default {
         overlayPosition:
           'Which corner an overlaid badge is pinned to: the top one by default, the bottom one for a marker that belongs at the foot of its target, such as a presence dot under an avatar. The horizontal side follows the reading direction and is not configurable.',
         bordered:
-          'Draws a 2px ring in the colour of the surface behind the badge, which detaches it from a busy target such as a picture.',
+          'Draws a 2px ring in the colour of the surface behind the badge, which detaches it from a busy target such as a picture. That colour is the page background by default, and <code>ringColor</code> is how you change it.',
+        ringColor:
+          "The colour of the ring <code>bordered</code> draws. It defaults to the page background, so a badge sitting on a card or a coloured banner should be given that surface's colour instead. Without <code>bordered</code> it does nothing.",
       },
       slots: {
         default:

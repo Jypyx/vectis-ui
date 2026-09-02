@@ -8,7 +8,8 @@
  *
  * It is made of HTML and CSS alone. The only JavaScript decides what to render:
  * whether a target element was given at all, capping the counter at "99+", and
- * handing a custom colour to the stylesheet as `--custom-color`.
+ * handing the two colours a consumer may choose to the stylesheet as
+ * `--custom-color` and `--badge-ring-color`.
  */
 import { computed, useSlots } from 'vue'
 
@@ -62,11 +63,18 @@ interface BadgeProps {
    */
   overlayPosition?: BadgeOverlayPosition
   /**
-   * Draws a 2px ring in the colour of the surface behind the badge
-   * (`--vectis-color-surface`, overridable per subtree), which detaches it from a
-   * busy target such as a picture.
+   * Draws a 2px ring around the badge, in the colour of the surface behind it,
+   * which detaches it from a busy target such as a picture. That colour defaults to
+   * the page background and is named through `ringColor` on any other surface.
    */
   bordered?: boolean
+  /**
+   * The colour of the ring drawn by `bordered`. It defaults to the page background,
+   * which is what makes the ring read as a gap around the badge; on another surface
+   * (a card, a coloured banner), pass that surface's colour. It does nothing without
+   * `bordered`.
+   */
+  ringColor?: string
 }
 
 const props = withDefaults(defineProps<BadgeProps>(), {
@@ -75,6 +83,7 @@ const props = withDefaults(defineProps<BadgeProps>(), {
   count: undefined,
   icon: undefined,
   overlayPosition: 'top',
+  ringColor: undefined,
 })
 
 defineSlots<{
@@ -104,7 +113,10 @@ const badgeAttrs = computed(() => ({
   'data-dot': props.dot ? '' : undefined,
   'data-icon-only': !props.dot && props.icon ? '' : undefined,
   'data-bordered': props.bordered ? '' : undefined,
-  style: props.color !== undefined ? { '--custom-color': props.color } : undefined,
+  style: [
+    props.color !== undefined ? { '--custom-color': props.color } : undefined,
+    props.ringColor !== undefined ? { '--badge-ring-color': props.ringColor } : undefined,
+  ],
 }))
 </script>
 
@@ -143,6 +155,10 @@ const badgeAttrs = computed(() => ({
   .v-badge {
     --vectis-icon-size: var(--vectis-icon-size-sm);
     --vectis-icon-opsz: 20;
+    /* The colour of the `bordered` ring: a bet on the page background, the only one a
+       component can make since CSS cannot read what its parent paints. The `ringColor`
+       prop overrides it inline for a badge sitting on anything else. */
+    --badge-ring-color: var(--vectis-color-surface);
 
     display: inline-flex;
     align-items: center;
@@ -215,7 +231,7 @@ const badgeAttrs = computed(() => ({
   }
 
   .v-badge[data-bordered] {
-    box-shadow: 0 0 0 2px var(--vectis-color-surface);
+    box-shadow: 0 0 0 var(--vectis-control-size-badge-ring) var(--badge-ring-color);
   }
 
   /* The tuck-in offset is a ratio of the badge's own size, so it stays proportionate

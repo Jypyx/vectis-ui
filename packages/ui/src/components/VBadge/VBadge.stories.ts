@@ -25,6 +25,7 @@ const meta = {
     overlay: { control: 'boolean' },
     overlayPosition: { control: 'inline-radio', options: ['top', 'bottom'] },
     bordered: { control: 'boolean' },
+    ringColor: { control: 'color' },
   },
   args: {
     tone: 'accent',
@@ -200,9 +201,11 @@ export const OverlayPosition: Story = {
 }
 
 /**
- * `bordered` draws a 2px ring in the colour of the background behind
- * (`--vectis-color-surface`, overridable locally when the background differs). On a
- * VIconButton, the with/without comparison shows the badge detaching.
+ * `bordered` draws a ring (`--vectis-control-size-badge-ring`) in the colour of the
+ * background behind the badge, which detaches it from what it overlaps. That colour is
+ * the page background by default (top row). On any other surface the consumer is the
+ * one who knows what is underneath, and passes it to `ringColor` (bottom row, on an
+ * accent card).
  */
 export const Bordered: Story = {
   render: () => ({
@@ -210,7 +213,7 @@ export const Bordered: Story = {
     setup: () => ({ icons, t }),
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px; align-items: flex-start">
-        <div style="display: flex; gap: 24px; align-items: center; padding: 16px; background: var(--vectis-color-accent); border-radius: var(--vectis-radius-surface); --vectis-color-surface: var(--vectis-color-accent)">
+        <div style="display: flex; gap: 24px; align-items: center">
           <VBadge overlay tone="danger" :count="3" bordered>
             <VIconButton :label="t.notifications" elevated tone="accent">
               <VIcon :name="icons.notifications" />
@@ -219,6 +222,16 @@ export const Bordered: Story = {
           <VBadge tone="danger" :count="3" bordered />
           <VBadge dot tone="success" bordered />
           <VBadge tone="neutral" :count="5" bordered />
+        </div>
+        <div style="display: flex; gap: 24px; align-items: center; padding: 16px; background: var(--vectis-color-accent); border-radius: var(--vectis-radius-surface)">
+          <VBadge overlay tone="danger" :count="3" bordered ring-color="var(--vectis-color-accent)">
+            <VIconButton :label="t.notifications" elevated tone="accent">
+              <VIcon :name="icons.notifications" />
+            </VIconButton>
+          </VBadge>
+          <VBadge tone="danger" :count="3" bordered ring-color="var(--vectis-color-accent)" />
+          <VBadge dot tone="success" bordered ring-color="var(--vectis-color-accent)" />
+          <VBadge tone="neutral" :count="5" bordered ring-color="var(--vectis-color-accent)" />
         </div>
       </div>
     `,
