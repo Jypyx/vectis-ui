@@ -27,6 +27,9 @@ export default {
   },
   outline: 'On this page',
   sidebar: 'Documentation',
+  /* The heading of the section every component page opens on, above its API. It is the same
+     word on all forty-four, so it lives here rather than in each page's own catalogue. */
+  usage: 'Usage',
   code: {
     copy: 'Copy the code',
     copied: 'Copied to the clipboard',

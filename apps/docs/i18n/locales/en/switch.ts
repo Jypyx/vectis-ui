@@ -2,12 +2,6 @@ export default {
   title: 'Switch',
   lead: 'A setting that takes effect immediately. It is announced with <code>role="switch"</code>, so a screen reader says on or off rather than ticked, and that is the whole reason it is not a checkbox.',
 
-  choiceHeading: 'Switch, or checkbox',
-  choiceBody:
-    'A switch acts at once; a checkbox states an intention that a submit will carry out. If the change needs a Save button, it is a checkbox.',
-  spread:
-    '<code>spread</code> pushes the label and the switch to opposite ends. That is the usual shape for a settings list, where the switches then line up down one edge.',
-
   api: {
     VSwitch: {
       props: {

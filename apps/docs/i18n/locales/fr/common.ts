@@ -17,6 +17,7 @@ export default {
   },
   outline: 'Sur cette page',
   sidebar: 'Documentation',
+  usage: 'Utilisation',
   code: {
     copy: 'Copier le code',
     copied: 'Copié dans le presse-papiers',

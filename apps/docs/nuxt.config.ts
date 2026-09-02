@@ -150,7 +150,16 @@ export default defineNuxtConfig({
        * What they cost is 16 kB of orphan page published for each, reachable only by typing it.
        * The list is DERIVED from the prefixes above so a third language needs no edit here.
        */
-      ignore: LOCALE_PREFIXES.filter(Boolean).map((prefix) => `${prefix}${prefix}`),
+      ignore: [
+        ...LOCALE_PREFIXES.filter(Boolean).map((prefix) => `${prefix}${prefix}`),
+        /*
+         * `/app` is where the links inside a live example point. A breadcrumb has to show a real
+         * trail for its code to be worth copying, and those addresses belong to an imaginary
+         * application rather than to this site. The crawler follows every `href` a page renders,
+         * so without this it chases them and fails the build on a 404 it was never meant to find.
+         */
+        '/app',
+      ],
     },
   },
 

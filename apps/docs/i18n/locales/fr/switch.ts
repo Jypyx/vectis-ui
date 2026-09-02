@@ -2,12 +2,6 @@ export default {
   title: 'Interrupteur',
   lead: "Un réglage qui prend effet immédiatement. Il est annoncé avec <code>role=\"switch\"</code>, si bien qu'un lecteur d'écran dit activé ou désactivé plutôt que coché, et c'est toute la raison pour laquelle ce n'est pas une case à cocher.",
 
-  choiceHeading: 'Interrupteur ou case à cocher',
-  choiceBody:
-    "Un interrupteur agit sur-le-champ ; une case à cocher énonce une intention qu'un envoi exécutera. Si le changement demande un bouton Enregistrer, c'est une case à cocher.",
-  spread:
-    "<code>spread</code> pousse le libellé et l'interrupteur aux extrémités opposées. C'est la forme habituelle d'une liste de réglages, où les interrupteurs s'alignent alors le long d'un bord.",
-
   api: {
     VSwitch: {
       props: {

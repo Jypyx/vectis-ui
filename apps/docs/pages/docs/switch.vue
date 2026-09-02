@@ -13,12 +13,10 @@ useHead({ title: () => t('switch.title') })
   <h1>{{ t('switch.title') }}</h1>
   <DocsProse class="vd-lead" keypath="switch.lead" />
 
-  <h2 id="the-choice">{{ t('switch.choiceHeading') }}</h2>
-  <DocsProse keypath="switch.choiceBody" />
-  <DocsExample :source="switchBasicSource" stack>
+  <h2 id="usage">{{ t('common.usage') }}</h2>
+  <DocsExample :source="switchBasicSource">
     <SwitchBasic />
   </DocsExample>
-  <DocsProse keypath="switch.spread" />
 
   <DocsApi page="switch" :api="api" />
 </template>
