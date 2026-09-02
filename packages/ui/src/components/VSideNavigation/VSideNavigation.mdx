@@ -29,6 +29,14 @@ action.
 
 <Canvas of={VSideNavigationStories.Sublabels} />
 
+A row is a control-height surface, and its corner follows `--vectis-radius-interactive` like every
+other clickable box in the library: squaring or rounding the controls of a brand carries the sidebar
+along in the same override. The radius is capped at half a control height, so a row carrying a
+second line keeps the corners of the plain rows around it instead of turning into an ellipse beside
+them. At the shipped radius the cap does nothing.
+
+<Canvas of={VSideNavigationStories.PillRadius} />
+
 An item **without** subitems is either a link (`href`, rendered as an `<a>`) or a button emitting
 `select`. The consumer's attributes (`target`, `rel`, `data-*`…) land on the control, never on the
 list element.

@@ -332,6 +332,26 @@ function onActionClick(event: MouseEvent) {
      * custom property is substituted on the element that DECLARES it, so a padding
      * computed on the nav would be frozen at level zero for the whole tree.
      */
+
+    /*
+     * The corner takes the role every clickable box in the DS takes, so a brand that
+     * squares its controls or rounds them into pills carries the sidebar along in the
+     * one override.
+     *
+     * TRAP — the cap has to stay derived from --control-height. A browser scales down
+     * any radius it cannot fit, so a row exactly one control tall already paints half
+     * that height under a pill override; min() applies the same reduction to a row that
+     * grew past it. Written bare, a row carrying a second line paints half of ITS OWN
+     * height instead, and two rows of the same list come out with different corners. At
+     * the shipped 6px this resolves to 6px on both sizes and under compact, so nothing
+     * at the default value can see the line go — only the PillRadius play function can.
+     *
+     * The variable is what keeps the row and the stretched overlay below in step: that
+     * overlay is positioned against this element, so the two are the same box, and its
+     * ring is drawn on the radius found here.
+     */
+    --side-nav-row-radius: min(var(--vectis-radius-interactive), calc(var(--control-height) / 2));
+
     position: relative;
     display: flex;
     align-items: center;
@@ -342,7 +362,7 @@ function onActionClick(event: MouseEvent) {
         var(--control-padding-inline) + var(--side-nav-level, 0) * var(--side-nav-indent)
       )
       var(--control-padding-inline);
-    border-radius: var(--vectis-radius-sm);
+    border-radius: var(--side-nav-row-radius);
     color: var(--vectis-color-text);
     font-size: var(--control-font-size);
     line-height: var(--vectis-text-body-md-leading);
@@ -388,7 +408,7 @@ function onActionClick(event: MouseEvent) {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: var(--vectis-radius-sm);
+    border-radius: var(--side-nav-row-radius);
   }
 
   .v-side-nav-content {

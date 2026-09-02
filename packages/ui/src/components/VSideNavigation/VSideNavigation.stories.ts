@@ -363,6 +363,63 @@ export const Sublabels: Story = {
   }),
 }
 
+/**
+ * Pointing `--vectis-radius-interactive` at the pill token is how a consumer asks for pill
+ * controls, and the rows follow that override — as they follow a brand that squares its controls.
+ * Each row takes the corner a control of its own size takes, so a row carrying a second line keeps
+ * the corners of the plain row above it.
+ */
+export const PillRadius: Story = {
+  render: (args) => ({
+    components,
+    setup: () => ({ args, t }),
+    template: `
+      <div style="--vectis-radius-interactive: var(--vectis-radius-pill)">
+        ${aside(`
+          <VSideNavigationItem href="#home" icon="home" data-testid="plain-row">{{ t.home }}</VSideNavigationItem>
+          <VSideNavigationItem href="#projects" icon="folder" :sublabel="t.openTasks" data-testid="sublabel-row">
+            {{ t.projects }}
+          </VSideNavigationItem>
+        `)}
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    /* The override sits on the wrapper alone, so the rest of the page keeps the shipped value and
+       the story cannot leak into the next one in the tab.
+
+       The consumer's attributes land on the ACTION, never on the list element, hence the climb
+       back up to the row. */
+    const rowOf = (id: string) =>
+      canvasElement.querySelector(`[data-testid="${id}"]`)!.closest('.v-side-nav-row')!
+
+    const plain = rowOf('plain-row')
+    const withSublabel = rowOf('sublabel-row')
+
+    /* The plain row is what defines the corner: it is exactly one control tall, so whatever the
+       override says, the browser paints half its height. The row below has to COMPUTE that same
+       number.
+
+       `getComputedStyle` reports the COMPUTED radius and never the painted one: scaling a radius
+       down to fit its box is a used-value step and leaves nothing behind here. That is what makes
+       the assertion sharp — uncapped, it reads back 9999px. jsdom sees none of it, applying no
+       stylesheet and laying nothing out. */
+    const half = plain.getBoundingClientRect().height / 2
+    const radius = getComputedStyle(withSublabel).borderTopLeftRadius
+    await expect(Math.abs(Number.parseFloat(radius) - half)).toBeLessThan(0.5)
+
+    // …on a row that really is taller than a control, or the claim above is vacuous.
+    await expect(withSublabel.getBoundingClientRect().height).toBeGreaterThan(
+      plain.getBoundingClientRect().height,
+    )
+
+    /* The stretched overlay is the same box as the row and carries the focus ring, so it has to
+       read the same corner. Both find it through the one variable the row declares. */
+    const overlay = getComputedStyle(withSublabel.querySelector('.v-side-nav-action')!, '::after')
+    await expect(overlay.borderTopLeftRadius).toBe(radius)
+  },
+}
+
 export const Links: Story = {
   render: (args) => ({
     components,
