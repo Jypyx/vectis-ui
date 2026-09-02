@@ -34,21 +34,6 @@ const text = computed(() => trim(props.source))
   <div class="vd-example">
     <div class="vd-example-head">
       <!--
-        `mandatory` is what makes this a two-state switch rather than a pair of buttons: without
-        it, clicking the selected side deselects it and the card would show neither.
-      -->
-      <VToggle
-        v-model="mode"
-        mandatory
-        size="sm"
-        variant="outline"
-        tone="neutral"
-        :label="t('common.example.label')"
-      >
-        <VToggleItem value="preview">{{ t('common.example.preview') }}</VToggleItem>
-        <VToggleItem value="code">{{ t('common.example.code') }}</VToggleItem>
-      </VToggle>
-      <!--
         `overline` supplies the capitals, the tracking and the size; the class adds only the
         monospaced family, which is the one thing that role does not own and should not — what
         it names here is a language, not a word.
@@ -56,6 +41,25 @@ const text = computed(() => trim(props.source))
       <VTypography variant="overline" tone="muted" class="vd-code-lang">
         {{ lang ?? 'vue' }}
       </VTypography>
+      <!--
+        The toggle sits after the language tag and before the copy button, which is the slot
+        `DocsCode` gives its own header control: the two cards then read the same way round,
+        whichever one a page happens to show.
+
+        `mandatory` is what makes this a two-state switch rather than a pair of buttons: without
+        it, clicking the selected side deselects it and the card would show neither.
+      -->
+      <VToggle
+        v-model="mode"
+        mandatory
+        size="xs"
+        variant="outline"
+        tone="neutral"
+        :label="t('common.example.label')"
+      >
+        <VToggleItem value="preview">{{ t('common.example.preview') }}</VToggleItem>
+        <VToggleItem value="code">{{ t('common.example.code') }}</VToggleItem>
+      </VToggle>
       <VIconButton
         :label="t('common.code.copy')"
         icon="content_copy"
