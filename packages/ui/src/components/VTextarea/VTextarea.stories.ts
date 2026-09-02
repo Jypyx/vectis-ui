@@ -180,6 +180,54 @@ export const Compact: Story = {
   }),
 }
 
+/**
+ * Pointing `--vectis-radius-interactive` at the pill token is how a consumer asks for pill
+ * controls. The field follows that override on the corner a control of its own size takes,
+ * so a five-row textarea keeps the corners of the `VInput` above it.
+ */
+export const PillRadius: Story = {
+  render: () => ({
+    components: { VTextarea, VInput },
+    setup: () => ({ t }),
+    template: `
+      <div
+        style="display: grid; gap: 8px; width: 320px; --vectis-radius-interactive: var(--vectis-radius-pill)"
+      >
+        <VInput aria-label="Pill input" data-testid="pill-input" :placeholder="t.forComparison" />
+        <VTextarea aria-label="Pill textarea" data-testid="pill-textarea" :placeholder="t.yourMessage" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    /* The override sits on the wrapper alone, so the rest of the page keeps the shipped
+       value and the story cannot leak into the next one in the tab.
+
+       `getComputedStyle` reports the COMPUTED radius and never the painted one: scaling a
+       radius down to fit its box is a used-value step and leaves nothing behind here. That
+       is what makes this assertion sharp — uncapped, it reads back 9999px while the corner
+       on screen is half the field. jsdom sees none of it, applying no stylesheet and
+       laying nothing out. */
+    const fieldOf = (id: string, field: string) =>
+      canvasElement
+        .querySelector(`[data-testid="${id}"]`)!
+        .closest(field)!
+        .querySelector(`${field}-field`)!
+
+    const input = fieldOf('pill-input', '.v-input')
+    const textarea = fieldOf('pill-textarea', '.v-textarea')
+
+    /* The single-line field is what defines the corner: it is one control tall, so whatever
+       the override says, the browser paints half its height. The textarea has to COMPUTE
+       that same number. */
+    const half = input.getBoundingClientRect().height / 2
+    const radius = Number.parseFloat(getComputedStyle(textarea).borderTopLeftRadius)
+    await expect(Math.abs(radius - half)).toBeLessThan(0.5)
+
+    // …on a field that really is several controls tall, or the claim above is vacuous.
+    await expect(textarea.getBoundingClientRect().height).toBeGreaterThan(half * 3)
+  },
+}
+
 /** Counter under the field on the right, on the same line as the hint. */
 export const LabelHintCounter: Story = {
   args: {

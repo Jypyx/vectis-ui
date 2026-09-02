@@ -161,7 +161,17 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
      */
     --skeleton-highlight: oklch(from var(--skeleton-base) calc(l + 0.06) c h);
     --skeleton-h: var(--control-height);
-    --skeleton-radius: var(--vectis-radius-interactive);
+    /* The corner a CONTROL-sized silhouette takes, whatever height this instance ends up
+       with: a browser scales down a radius it cannot fit, so min() gives a silhouette that
+       grew the same reduction a control-tall one already gets. It resolves to the token
+       itself at the shipped 6px.
+
+       TRAP — the cap is NOT calc(var(--skeleton-h) / 2), which looks like the closer unit
+       and is the wrong one twice over: --skeleton-h is a flex BASIS on an item that grows
+       to fill a taller parent (see below), and the `height` prop overwrites it inline. Two
+       equally tall silhouettes would then round differently depending on how they got
+       there. */
+    --skeleton-radius: min(var(--vectis-radius-interactive), calc(var(--control-height) / 2));
     --skeleton-gap: var(--vectis-space-2);
     display: flex;
     flex-direction: column;

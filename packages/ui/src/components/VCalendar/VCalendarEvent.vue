@@ -218,7 +218,19 @@ const accessibleName = computed(() =>
        is a border and not a background stripe: under Windows forced-colors a background is
        forced to Canvas and vanishes, where a border keeps a colour of its own. */
     border-inline-start: 3px solid var(--calendar-event-edge);
-    border-radius: var(--vectis-radius-interactive);
+    /* TRAP — the cap is measured against the all-day LANE, the shortest thing this same
+       class ever renders, and against nothing else. A browser scales down any radius it
+       cannot fit, so a chip already paints half a lane under a large
+       --vectis-radius-interactive; min() applies that same reduction to a timed block,
+       whose height is the event's DURATION. Written bare, a pill theme paints half of a
+       three-hour block instead: 96px corners on one card and 12px on the chip beside it.
+       Never take the unit from --vectis-control-size-calendar-hour, for the reason the
+       `container-type` comment above already gives — the radius has nothing to do with how
+       tall an hour is, and anyone retuning that token would move it by accident. */
+    border-radius: min(
+      var(--vectis-radius-interactive),
+      calc(var(--vectis-control-size-calendar-allday-lane) / 2)
+    );
     background: var(--calendar-event-face);
     color: var(--calendar-event-ink);
     font-family: var(--vectis-text-family);

@@ -373,7 +373,16 @@ const { counterText, over } = useTextLimit({
     background: var(--vectis-color-surface);
     color: var(--vectis-color-text);
     border: 1px solid var(--field-border-color);
-    border-radius: var(--vectis-radius-interactive);
+    /* TRAP — the cap is what carries the VInput identity above into the OTHER row counts,
+       and it has to stay derived from --control-height. A browser scales down any radius it
+       cannot fit, so on a one-row field a pill override is already painted as half the
+       control height; min() applies that same reduction to a field that is taller. Written
+       bare, the identical override paints half of a FIVE-row box instead: 60px corners on a
+       120px field, an ellipse sitting beside buttons that kept 20px, and the same again on
+       every drag of the resize handle. At the shipped 6px it resolves to 6px on every size,
+       compact included, so nothing at the default value can see this line go — only the
+       PillRadius play function can. */
+    border-radius: min(var(--vectis-radius-interactive), calc(var(--control-height) / 2));
     font-size: var(--control-font-size);
     /* Text running over several lines takes the body line height. The `control` type
        role, whose lines are set tight against one another, only makes sense for a

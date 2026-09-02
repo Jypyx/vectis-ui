@@ -7,6 +7,7 @@ import {
   VInput,
   VRadio,
   VSwitch,
+  VTextarea,
   VTypography,
 } from 'vectis-ui'
 /*
@@ -162,6 +163,8 @@ const layersCode = `/* The order the library declares, for reference. */
     <VButton variant="solid" tone="accent" size="sm">Checkout</VButton>
     <VButton variant="outline" tone="accent" size="sm">Details</VButton>
     <VChip tone="accent" size="sm">Beta</VChip>
+    <VInput size="sm" aria-label="Email" placeholder="Email" />
+    <VTextarea :rows="3" size="sm" aria-label="Notes" placeholder="Notes" />
   </DocsDemo>
   <DocsProse keypath="theming.tokensDemoCaption" variant="body-sm" tone="muted" />
   <DocsProse keypath="theming.tokensOklch" />

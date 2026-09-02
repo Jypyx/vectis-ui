@@ -32,6 +32,13 @@ stopping at a minimum written in CSS.
 
 <Canvas of={VTextareaStories.Rows} />
 
+That height also governs the corners. A large `--vectis-radius-interactive` — a pill theme,
+typically — is capped at half the control height, so a five-row field takes the corner a `VInput`
+of the same size takes, instead of the half-of-its-own-height a browser would otherwise paint. At
+the shipped radius the cap does nothing.
+
+<Canvas of={VTextareaStories.PillRadius} />
+
 ## Auto-grow
 
 `auto-grow` makes the height follow the content through `field-sizing: content` — no measurement
