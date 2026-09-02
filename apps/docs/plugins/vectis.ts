@@ -46,9 +46,13 @@ const TAGS: Record<string, string> = { en: 'en-GB', fr: 'fr-FR' }
  *
  * This is the ONE thing that cannot sit at module level with the two calls above, and the
  * reason is the library's documented limit: `setLocale` moves module-level state, so there is
- * ONE locale per process. A prerender renders its routes SEQUENTIALLY in a single process,
- * which is what makes this correct — the plugin body runs once per render, before the tree is
- * built, so each route sets the locale it is about to be rendered in and no two overlap.
+ * ONE locale per process. The plugin body runs once per render, before the tree is built, so
+ * each route sets the locale it is about to be rendered in.
+ *
+ * That is only correct while no two renders overlap, and nitro prerenders CONCURRENTLY unless
+ * told otherwise — hence `nitro.prerender.concurrency: 1` in nuxt.config.ts, which is what
+ * makes the sentence above true. Remove it and a French route sets the locale mid-way through
+ * an English one: every English page then ships French words, and the build stays green.
  *
  * Move this call out to module level and every prerendered page would carry whichever language
  * happened to be set when the module was first evaluated: English on all fifty-three French

@@ -114,6 +114,20 @@ export default defineNuxtConfig({
     // starts with an underscore, which is where Nuxt puts its build assets.
     preset: 'github-pages',
     prerender: {
+      /**
+       * One route at a time, and this is CORRECTNESS rather than caution.
+       *
+       * The design system keeps its locale in module-level state, one per process, and
+       * `plugins/vectis.ts` sets it from the route about to be rendered. Rendered concurrently,
+       * a French route sets the locale while an English one is still building its tree, and the
+       * English page ships French words: every one of the fifty-three carried
+       * "Raccourci clavier : Ctrl + K" from the header's VHotkeys, with nothing failing.
+       *
+       * It costs about three seconds over the whole build. The way to earn them back is to make
+       * the library resolve its messages per app rather than per process, which is a change to
+       * the library and not to this file.
+       */
+      concurrency: 1,
       crawlLinks: true,
       // Belt as well as braces: the crawler follows the sidebar, but a slug that lost its
       // link would then vanish silently. The list comes from content/nav.ts, so a page
