@@ -24,8 +24,6 @@ export default {
     label: 'Search the documentation',
     placeholder: 'Search pages and components',
     empty: 'No result',
-    /** Appended to a stub's section in the result list: better said than discovered. */
-    notWritten: 'not written yet',
   },
   outline: 'On this page',
   sidebar: 'Documentation',
@@ -35,10 +33,28 @@ export default {
     /** Names the toggle an install command carries in its header, in DocsInstall. */
     packageManager: 'Package manager',
   },
+  /* The two words on the toggle every live example carries, and the name of the toggle itself,
+     which is the only thing a screen reader has to tell the two buttons apart from the page. */
+  example: {
+    label: 'What the example shows',
+    preview: 'Preview',
+    code: 'Code',
+  },
+  /* The headings of a component page's API section. They are the same on all forty-four, so
+     they live here rather than in each page's own catalogue. */
+  api: {
+    heading: 'API',
+    props: 'Props',
+    events: 'Events',
+    slots: 'Slots',
+    cssVariables: 'CSS variables',
+  },
   table: {
     prop: 'Prop',
     type: 'Type',
     default: 'Default',
+    event: 'Event',
+    slot: 'Slot',
     class: 'Class',
     effect: 'Effect',
     helper: 'Helper',

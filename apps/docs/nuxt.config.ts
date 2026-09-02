@@ -186,7 +186,19 @@ export default defineNuxtConfig({
        * bundle's OWN minified `var h`, which fails the build with "Identifier h has already
        * been declared". Single-letter minified names make this a certainty, not a risk.
        */
-      exclude: [/[\\/]node_modules[\\/]/, /[\\/]packages[\\/]ui[\\/]dist[\\/]/],
+      /*
+       * `examples/` is excluded for the opposite reason, and it is a correctness guard rather
+       * than a workaround. Those SFCs are PRINTED beside themselves: the page renders the file
+       * and shows its source, so a reader copies exactly what is on screen. Auto-imports would
+       * make `ref` and `useI18n` work in the example while being absent from the text of it,
+       * and the sample would fail the moment it was pasted into a real project. Excluded, a
+       * missing import is a build error instead.
+       */
+      exclude: [
+        /[\\/]node_modules[\\/]/,
+        /[\\/]packages[\\/]ui[\\/]dist[\\/]/,
+        /[\\/]apps[\\/]docs[\\/]examples[\\/]/,
+      ],
     },
   },
 

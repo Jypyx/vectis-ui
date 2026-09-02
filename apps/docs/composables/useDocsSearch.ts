@@ -12,11 +12,11 @@
  * The open state is shared, because the trigger lives in the header and the dialog is a
  * sibling of it in the layout.
  */
-import { allPages, type NavEntry, type NavGroupId } from '~/content/nav'
+import { allPages, type NavEntry } from '~/content/nav'
 
 export interface SearchResult extends NavEntry {
   title: string
-  /** The group, plus a warning where the page is a stub — better said than discovered. */
+  /** The group the page belongs to, as the rail names it. */
   section: string
   to: string
 }
@@ -56,20 +56,10 @@ export function useDocsSearch() {
       .map(({ page, title }) => ({
         ...page,
         title,
-        section: sectionLabel(page.section, page.written),
+        section: t(`nav.group.${page.section}`),
         to: localePath(`/docs/${page.slug}`),
       }))
   })
-
-  /*
-   * The stub warning is appended rather than built into the group name, because it is a state
-   * of the page and not a place in the table of contents — the same group holds written pages
-   * beside it. The separator is a middle dot in both languages; only the words change.
-   */
-  function sectionLabel(section: NavGroupId, written: boolean): string {
-    const group = t(`nav.group.${section}`)
-    return written ? group : `${group} · ${t('common.search.notWritten')}`
-  }
 
   function openSearch() {
     query.value = ''

@@ -30,6 +30,7 @@ const nav: NavMessages = {
   breadcrumb: 'Breadcrumb',
   button: 'Button',
   'button-group': 'Button group',
+  calendar: 'Calendar',
   carousel: 'Carousel',
   checkbox: 'Checkbox',
   chip: 'Chip',

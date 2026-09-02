@@ -11,3 +11,5 @@ packages/ui/src/styles/tokens.css
 packages/ui/src/tokens/tokens.json
 packages/ui/src/components/VIcon/icons.ts
 apps/docs/icons/icons.ts
+apps/docs/content/api/*.ts
+!apps/docs/content/api/types.ts

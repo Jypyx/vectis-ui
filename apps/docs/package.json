@@ -9,12 +9,13 @@
     "predev": "pnpm --filter vectis-ui build",
     "dev": "nuxt dev",
     "build": "nuxt generate",
-    "postbuild": "tsx scripts/check-prerender.ts",
+    "postbuild": "tsx scripts/check-prerender.ts && tsx scripts/check-api.ts",
     "prepreview": "pnpm run build",
     "preview": "nuxt preview",
     "pretypecheck": "pnpm --filter vectis-ui build",
     "typecheck": "nuxt typecheck",
-    "icons": "tsx scripts/build-icons.ts"
+    "icons": "tsx scripts/build-icons.ts",
+    "api": "tsx scripts/build-api.ts"
   },
   "dependencies": {
     "vectis-ui": "workspace:*",
@@ -26,6 +27,7 @@
     "nuxt": "^4.5.2",
     "tsx": "^4.23.1",
     "typescript": "^5.9.3",
+    "vue-component-meta": "3.3.7",
     "vue-tsc": "^3.3.7"
   }
 }

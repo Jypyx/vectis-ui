@@ -1,39 +1,61 @@
 export default {
   title: 'Navigation latérale',
   lead: "La navigation d'une barre latérale : un arbre de liens, montré sur place plutôt que dans un panneau flottant, dont les branches s'ouvrent et se referment. Il s'écrit niveau par niveau avec ses propres sous-composants, jamais décrit comme une liste de données.",
-  self: 'Le rail à gauche de cette page EST ce composant, alimenté par la liste de pages du site.',
 
-  treeHeading: 'Un arbre de liens',
-  treeBody:
-    "Un libellé de groupe est du texte simple : il ne peut être ni focalisé ni cliqué, parce qu'un titre qui a l'air cliquable sans l'être vaut moins que pas de titre du tout. <code>compact</code> est un réglage de DENSITÉ plutôt qu'un rail replié réduit aux icônes, que ce composant ne propose pas.",
-
-  branchesHeading: 'Branches',
-  branchesBody:
-    "Donner à un élément un slot <code>#items</code> en fait une branche, et l'imbrication n'est pas limitée. Une branche se replie ; elle ne mène nulle part. Le repli est un vrai <code>&lt;details&gt;</code>, si bien que l'état, le clavier et l'animation viennent du navigateur, et <code>exclusive</code> le rend « un seul ouvert à la fois » PAR NIVEAU.",
-
-  routerHeading: 'Avec un routeur',
-  routerBody:
-    "<code>active</code> est MANUEL : le composant ne connaît aucun routeur, et lui en donner un le lierait à celui-là. Comparez la route vous-même et passez-lui la réponse. Il éclaire en revanche tout seul un ancêtre REPLIÉ, en CSS, à partir de l'<code>[aria-current]</code> qu'il trouve à l'intérieur.",
-
-  invariantsHeading: 'Invariants',
-  invariants: [
-    "Le libellé est le SLOT PAR DÉFAUT et il est obligatoire. Il n'y a pas de prop <code>label</code>, si bien qu'une ligne peut porter un badge ou une abréviation à côté de ses mots.",
-    "Une entrée ne porte jamais à la fois <code>#items</code> et <code>href</code>. Si on lui donne les deux, elle devient silencieusement un <code>&lt;button&gt;</code>, sur lequel l'interception de clic d'un routeur renonce.",
-    "Le slot <code>#end</code> d'une BRANCHE ne doit pas être focalisable : une ligne de branche est un <code>&lt;summary&gt;</code>, et un contrôle dans un contrôle relève de WCAG 4.1.2 et du <code>nested-interactive</code> d'axe. Sur une feuille il est libre, puisque le lien est étiré sur la ligne par un pseudo-élément et que le slot de fin reste son frère et non son enfant.",
-    "La profondeur se compte entièrement en CSS, par deux noms de propriétés personnalisées qui ALTERNENT. PIÈGE : la forme évidente à un seul nom est un cycle du point de vue de CSS, et l'arbre entier s'affiche à plat sans rien dans la console pour dire pourquoi.",
-  ],
-
-  apiHeading: 'API',
-  apiNavLabel:
-    "<code>string</code> : ce que les lecteurs d'écran annoncent pour le <code>&lt;nav&gt;</code>",
-  apiNavLabelDefault: 'dictionnaire',
-  apiExclusive: '<code>boolean</code> : une seule branche ouverte par niveau',
-  apiIcons: '<code>IconSource</code> : donnez les deux et elles permutent au lieu de pivoter',
-  apiActive: '<code>boolean</code> : pose <code>aria-current</code>',
-  apiHref: '<code>string</code>, ignoré sur une branche',
-  apiOpen: "<code>boolean | null</code> : <code>null</code> laisse l'état au navigateur",
-  apiSlots:
-    "Slots : <code>#default</code> (le libellé, obligatoire), <code>#items</code> (la branche), <code>#sublabel</code>, <code>#start</code>, <code>#end</code>. Une feuille émet <code>select</code> au clic et à l'activation clavier ; il n'y a délibérément pas d'émission <code>click</code>, si bien que votre propre <code>@click</code> atteint toujours le lien.",
-  apiQuote:
-    "Le balisage est fait de vrais <code>&lt;ul&gt;</code> et <code>&lt;li&gt;</code>, contrairement à celui de VMenu. Ce n'est pas une différence de style : le patron ARIA menu interdit les listes, alors que pour une navigation le dénombrement et l'imbrication SONT l'information.",
+  api: {
+    VSideNavigation: {
+      props: {
+        label:
+          "Ce que les lecteurs d'écran annoncent pour cette navigation. Une page en compte souvent plusieurs, une principale, une latérale, une de pied de page, et c'est ce qui les distingue. Il retombe sur le dictionnaire du design system.",
+        size: 'La hauteur des lignes, 32 ou 40 pixels, héritée par tous les niveaux.',
+        compact:
+          "Retire 4px à la hauteur de chaque ligne. C'est un réglage de densité et non un rail replié en icônes seules, que ce composant ne propose pas.",
+        exclusive:
+          "Ne garde qu'une section ouverte à la fois au sein de chaque niveau, ce que le navigateur fait seul. Désactivé par défaut : une barre latérale laisse normalement plusieurs sections ouvertes.",
+        expandIcon: "Le chevron d'une section fermée.",
+        collapseIcon:
+          "Le chevron d'une section ouverte. Sans lui, celui de la section fermée est simplement pivoté de 180°.",
+      },
+      slots: {
+        default: "Le premier niveau de l'arbre : items, groupes et séparateurs.",
+      },
+    },
+    VSideNavigationItem: {
+      props: {
+        sublabel: 'Une seconde ligne sous le libellé, pour un statut ou une courte explication.',
+        icon: 'Une icône avant le libellé. Le slot <code>#start</code> la remplace.',
+        href: "Où mène cette ligne, ce qui en fait un lien. Elle est ignorée sur une ligne qui a des sous-items : une telle ligne s'ouvre et se referme plutôt que de naviguer.",
+        active:
+          'Marque cette ligne comme la page actuellement consultée. Elle est mise en évidence et annoncée comme la page courante.',
+        disabled:
+          'Rend la ligne inutilisable : elle se grise par les tokens de couleur et quitte le chemin du clavier.',
+        defaultOpen:
+          "Rend une branche déjà ouverte. Cela ne fixe que l'état initial ; le navigateur le possède ensuite.",
+        vModelOpen:
+          "Si la branche est ouverte, quand vous voulez la piloter ou l'observer. Non liée, le navigateur garde cet état pour lui et <code>defaultOpen</code> n'en donne que la valeur initiale.",
+      },
+      events: {
+        select: 'La ligne a été activée. Une branche le rapporte comme un lien.',
+      },
+      slots: {
+        default:
+          'Le libellé de la ligne. Il est obligatoire : une ligne de navigation doit dire où elle mène.',
+        sublabel:
+          'Une seconde ligne faite de balisage, qui remplace la prop <code>sublabel</code>.',
+        start: 'Du contenu libre avant le libellé, qui prend la place de <code>icon</code>.',
+        end: 'Du contenu libre à la fin de la ligne, avant le chevron : un compteur, un badge. Sur une branche il ne doit pas être focalisable, la ligne étant déjà un contrôle.',
+        items:
+          "Les sous-items, qui font de cette ligne une branche. La profondeur n'est pas limitée.",
+      },
+    },
+    VSideNavigationGroup: {
+      props: {
+        label: 'Le nom de la section. Le slot <code>#label</code> le remplace.',
+      },
+      slots: {
+        default: 'Les items appartenant à cette section.',
+        label: 'Un nom fait de balisage, qui remplace la prop <code>label</code>.',
+      },
+    },
+  },
 }

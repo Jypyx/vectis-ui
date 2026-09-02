@@ -6,10 +6,6 @@
  * routes really produced a file. Keeping them on one source is what makes it impossible to add
  * a page to the navigation and forget to build it, or to build a page nobody can reach.
  *
- * `written` marks a page that has real content. A slug that is listed but not written renders
- * the stub page, which says so plainly — the inventory stays honest about the shape of the
- * library instead of hiding the components nobody has documented yet.
- *
  * There is deliberately NO title here. Titles are language, and this file is read by two NODE
  * contexts (`nuxt.config.ts` and `scripts/check-prerender.ts`) where no vue-i18n exists; they
  * only ever needed the slugs. The words live in the message catalogue under `nav.<slug>`, and
@@ -19,10 +15,8 @@
  */
 
 export interface NavEntry {
-  /** URL segment under /docs/, and the file name of the page component when written. */
+  /** URL segment under /docs/, and the file name of the page component. */
   slug: string
-  /** False renders the stub page rather than a page of its own. */
-  written: boolean
 }
 
 export interface NavGroup {
@@ -36,16 +30,16 @@ export interface NavGroup {
  * `string` — without the generic, TypeScript widens each one at the call site and the record
  * type below would accept anything.
  */
-const entry = <S extends string>(slug: S, written = false) => ({ slug, written }) as const
+const entry = <S extends string>(slug: S) => ({ slug }) as const
 
 /** Everything that is not a component: how to install, theme, translate and audit the library. */
 export const intro = [
-  entry('installation', true),
-  entry('theming', true),
-  entry('iconography', true),
-  entry('font-family', true),
-  entry('i18n', true),
-  entry('accessibility', true),
+  entry('installation'),
+  entry('theming'),
+  entry('iconography'),
+  entry('font-family'),
+  entry('i18n'),
+  entry('accessibility'),
 ] as const
 
 /**
@@ -54,16 +48,17 @@ export const intro = [
  * Alphabetical, because a reader looking for one knows its name and not its category.
  */
 export const components = [
-  entry('accordion', true),
+  entry('accordion'),
   entry('avatar'),
   entry('avatar-group'),
   entry('badge'),
   entry('breadcrumb'),
-  entry('button', true),
+  entry('button'),
   entry('button-group'),
+  entry('calendar'),
   entry('carousel'),
   entry('checkbox'),
-  entry('chip', true),
+  entry('chip'),
   entry('combobox'),
   entry('data-table'),
   entry('date-input'),
@@ -74,7 +69,7 @@ export const components = [
   entry('hotkeys'),
   entry('icon'),
   entry('icon-button'),
-  entry('input', true),
+  entry('input'),
   entry('input-otp'),
   entry('menu'),
   entry('pagination'),
@@ -83,12 +78,12 @@ export const components = [
   entry('progress-linear'),
   entry('radio'),
   entry('separator'),
-  entry('side-navigation', true),
+  entry('side-navigation'),
   entry('skeleton-loader'),
   entry('slider'),
   entry('snackbar'),
   entry('spinner'),
-  entry('switch', true),
+  entry('switch'),
   entry('tabs'),
   entry('textarea'),
   entry('time-input'),
@@ -100,7 +95,7 @@ export const components = [
 ] as const
 
 /** What the package exports besides components: the functions, and the one CSS class. */
-export const utils = [entry('js-helpers', true), entry('css-classes', true)] as const
+export const utils = [entry('js-helpers'), entry('css-classes')] as const
 
 /** The key of a group's heading, under `nav.group` in the message catalogue. */
 export type NavGroupId = 'intro' | 'components' | 'utils'

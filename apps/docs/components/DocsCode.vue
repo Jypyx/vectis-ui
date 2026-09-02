@@ -7,7 +7,7 @@
  * an example is written literally instead of as `&lt;`. It also means the copy button has the
  * exact string to hand and never has to read `innerText` back out of the DOM.
  */
-import { VIconButton, VTypography, snackbar } from 'vectis-ui'
+import { VIconButton, VTypography } from 'vectis-ui'
 
 const props = defineProps<{
   /** Shown in the header, uppercased by the `overline` role: `vue`, `ts`, `css`, `bash`… */
@@ -29,26 +29,9 @@ defineSlots<{
 }>()
 
 const { t } = useI18n()
+const { copy, trim } = useCopyCode()
 
-const text = computed(() => props.code.replace(/^\n/, '').replace(/\s+$/, ''))
-
-async function copy() {
-  try {
-    await navigator.clipboard.writeText(text.value)
-  } catch {
-    // A refused clipboard (an insecure origin, a permission policy) must not be reported as
-    // a success — saying nothing is the honest outcome, and the sample is still selectable.
-    return
-  }
-  // No icon, and none is deduced from the tone: a confirmation of six words is read, not
-  // scanned. No close cross either — a bar that tidies itself must not ask to be tidied, which
-  // is why VSnackbar has none to turn off.
-  snackbar({
-    message: t('common.code.copied'),
-    placement: 'bottom-center',
-    duration: 1600,
-  })
-}
+const text = computed(() => trim(props.code))
 </script>
 
 <template>
@@ -68,7 +51,7 @@ async function copy() {
         tone="neutral"
         size="sm"
         class="vd-code-copy"
-        @click="copy"
+        @click="copy(code)"
       />
     </div>
     <pre>{{ text }}</pre>

@@ -10,12 +10,26 @@
 defineProps<{
   /** The header row. Two or three columns, depending on what the table is listing. */
   columns: string[]
+  /**
+   * Names the table, for a page that shows several of the same kind — the props of VTabs, then
+   * of VTab, then of VTabPanel, all under one Props heading.
+   *
+   * A `<caption>` and not a heading: the outline harvests every `h2`/`h3` on the page, and
+   * three sub-headings per component would bury the four the reader actually navigates by. It
+   * is also the element assistive technology reads as the table's own name.
+   */
+  caption?: string
 }>()
 </script>
 
 <template>
   <div class="vd-scroll">
     <table class="vd-table">
+      <caption v-if="caption">
+        {{
+          caption
+        }}
+      </caption>
       <thead>
         <tr>
           <th v-for="column in columns" :key="column">{{ column }}</th>

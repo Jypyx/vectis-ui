@@ -28,6 +28,7 @@ const nav: NavMessages = {
   breadcrumb: "Fil d'Ariane",
   button: 'Bouton',
   'button-group': 'Groupe de boutons',
+  calendar: 'Calendrier',
   carousel: 'Carrousel',
   checkbox: 'Case à cocher',
   chip: 'Puce',

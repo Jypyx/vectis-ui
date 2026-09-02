@@ -29,28 +29,64 @@
  */
 import accessibility from './en/accessibility'
 import accordion from './en/accordion'
+import avatar from './en/avatar'
+import avatarGroup from './en/avatarGroup'
+import badge from './en/badge'
+import breadcrumb from './en/breadcrumb'
 import button from './en/button'
+import buttonGroup from './en/buttonGroup'
+import calendar from './en/calendar'
+import carousel from './en/carousel'
+import checkbox from './en/checkbox'
 import chip from './en/chip'
+import combobox from './en/combobox'
 import common from './en/common'
 import cssClasses from './en/cssClasses'
+import dataTable from './en/dataTable'
+import dateInput from './en/dateInput'
+import datePicker from './en/datePicker'
+import dialog from './en/dialog'
 import error from './en/error'
+import fileInput from './en/fileInput'
+import filePicker from './en/filePicker'
 import fontFamily from './en/fontFamily'
 import home from './en/home'
+import hotkeys from './en/hotkeys'
 import i18n from './en/i18n'
+import icon from './en/icon'
+import iconButton from './en/iconButton'
 import iconography from './en/iconography'
 import input from './en/input'
+import inputOtp from './en/inputOtp'
 import installation from './en/installation'
 import jsHelpers from './en/jsHelpers'
+import menu from './en/menu'
 import nav from './en/nav'
+import pagination from './en/pagination'
+import popover from './en/popover'
+import progressCircular from './en/progressCircular'
+import progressLinear from './en/progressLinear'
+import radio from './en/radio'
+import separator from './en/separator'
 import sideNavigation from './en/sideNavigation'
-import stub from './en/stub'
+import skeletonLoader from './en/skeletonLoader'
+import slider from './en/slider'
+import snackbar from './en/snackbar'
+import spinner from './en/spinner'
 import switchPage from './en/switch'
+import tabs from './en/tabs'
+import textarea from './en/textarea'
 import theming from './en/theming'
+import timeInput from './en/timeInput'
+import timePicker from './en/timePicker'
+import toast from './en/toast'
+import toggle from './en/toggle'
+import tooltip from './en/tooltip'
+import typography from './en/typography'
 
 export interface DocsMessages {
   common: typeof common
   nav: typeof nav
-  stub: typeof stub
   error: typeof error
   home: typeof home
 
@@ -62,13 +98,51 @@ export interface DocsMessages {
   accessibility: typeof accessibility
 
   accordion: typeof accordion
+  avatar: typeof avatar
+  avatarGroup: typeof avatarGroup
+  badge: typeof badge
+  breadcrumb: typeof breadcrumb
   button: typeof button
+  buttonGroup: typeof buttonGroup
+  calendar: typeof calendar
+  carousel: typeof carousel
+  checkbox: typeof checkbox
   chip: typeof chip
+  combobox: typeof combobox
+  dataTable: typeof dataTable
+  dateInput: typeof dateInput
+  datePicker: typeof datePicker
+  dialog: typeof dialog
+  fileInput: typeof fileInput
+  filePicker: typeof filePicker
+  hotkeys: typeof hotkeys
+  icon: typeof icon
+  iconButton: typeof iconButton
   input: typeof input
+  inputOtp: typeof inputOtp
+  menu: typeof menu
+  pagination: typeof pagination
+  popover: typeof popover
+  progressCircular: typeof progressCircular
+  progressLinear: typeof progressLinear
+  radio: typeof radio
+  separator: typeof separator
   sideNavigation: typeof sideNavigation
+  skeletonLoader: typeof skeletonLoader
+  slider: typeof slider
+  snackbar: typeof snackbar
+  spinner: typeof spinner
   /* The import is `switchPage` because `switch` is a reserved word; the KEY is not, and the
      keypath a page writes is `switch.title` like every other. */
   switch: typeof switchPage
+  tabs: typeof tabs
+  textarea: typeof textarea
+  timeInput: typeof timeInput
+  timePicker: typeof timePicker
+  toast: typeof toast
+  toggle: typeof toggle
+  tooltip: typeof tooltip
+  typography: typeof typography
 
   jsHelpers: typeof jsHelpers
   cssClasses: typeof cssClasses
@@ -77,7 +151,6 @@ export interface DocsMessages {
 export default defineI18nLocale((): DocsMessages => ({
   common,
   nav,
-  stub,
   error,
   home,
 
@@ -89,11 +162,49 @@ export default defineI18nLocale((): DocsMessages => ({
   accessibility,
 
   accordion,
+  avatar,
+  avatarGroup,
+  badge,
+  breadcrumb,
   button,
+  buttonGroup,
+  calendar,
+  carousel,
+  checkbox,
   chip,
+  combobox,
+  dataTable,
+  dateInput,
+  datePicker,
+  dialog,
+  fileInput,
+  filePicker,
+  hotkeys,
+  icon,
+  iconButton,
   input,
+  inputOtp,
+  menu,
+  pagination,
+  popover,
+  progressCircular,
+  progressLinear,
+  radio,
+  separator,
   sideNavigation,
+  skeletonLoader,
+  slider,
+  snackbar,
+  spinner,
   switch: switchPage,
+  tabs,
+  textarea,
+  timeInput,
+  timePicker,
+  toast,
+  toggle,
+  tooltip,
+  typography,
 
   jsHelpers,
   cssClasses,

@@ -14,7 +14,7 @@ import { existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { docRoutes } from '../content/nav'
+import { allPages, docRoutes } from '../content/nav'
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const outDir = join(appRoot, '.output', 'public')
@@ -49,6 +49,21 @@ if (!existsSync(join(outDir, '.nojekyll'))) {
     'check-prerender: .nojekyll is missing — GitHub Pages would drop every _nuxt/ asset.\n' +
       "  Expected from nitro's `github-pages` preset.",
   )
+  process.exit(1)
+}
+
+/*
+ * Every slug in the inventory must have a page file of its own. There is no stub route to fall
+ * back on any more, so a slug without one is a 404 the crawler would report as a missing route
+ * — but only if it happened to be linked. Checking the files directly says which one, and why.
+ */
+const pageless = allPages.filter(
+  (page) => !existsSync(join(appRoot, 'pages', 'docs', `${page.slug}.vue`)),
+)
+
+if (pageless.length > 0) {
+  console.error(`check-prerender: ${pageless.length} slug(s) in content/nav.ts have no page file:`)
+  for (const page of pageless) console.error(`  ${page.slug} → pages/docs/${page.slug}.vue`)
   process.exit(1)
 }
 

@@ -658,7 +658,8 @@ html {
 }
 
 /* --- Code blocks --- */
-.vd-code {
+.vd-code,
+.vd-example {
   /* Never inherits the centring of a `.vd-centered` band: a `<pre>` centred line by line is
      unreadable, and a code block is not centred content anywhere, so the reset belongs here
      rather than on the one section that happens to need it. */
@@ -667,14 +668,22 @@ html {
   overflow: hidden;
   border: 1px solid var(--vectis-color-border);
   border-radius: var(--vectis-radius-surface);
+}
+.vd-code {
   background: var(--vectis-color-surface-sunken);
+}
+/* The card carries the PREVIEW's ground, since that is the side it opens on; the code side
+   paints its own sunken ground on the `<pre>` below. */
+.vd-example {
+  background: var(--vectis-color-surface-raised);
 }
 /* `wrap` is insurance for the ONE header that carries a third item, the home page's
    package-manager toggle: four text segments beside a language tag and a copy button is more
    than a narrow phone fits, and without this the row would overflow a card that clips its own
    radius with `overflow: hidden` — putting the copy button out of reach rather than merely out
    of line. It is inert on every other sample, whose two items never fill the row. */
-.vd-code-head {
+.vd-code-head,
+.vd-example-head {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -716,9 +725,14 @@ html {
    `overflow-x: auto` stays as a floor, not as the mechanism. Nothing here should reach it now,
    but `.vd-code` clips to its own radius with `overflow: hidden`, so a token that somehow
    defeated both rules above would be CUT rather than reachable. */
-.vd-code > pre {
+.vd-code > pre,
+.vd-example > pre {
   margin: 0;
   padding: var(--vectis-space-4);
+  /* Inert inside `.vd-code`, which already paints it, and load-bearing inside `.vd-example`,
+     whose card carries the raised ground the PREVIEW side wants. Without it the code pane would
+     read as the preview it replaced. */
+  background: var(--vectis-color-surface-sunken);
   overflow-x: auto;
   white-space: pre-wrap;
   overflow-wrap: break-word;
@@ -728,19 +742,27 @@ html {
   tab-size: 2;
 }
 
-/* --- Demo surface --- */
-.vd-demo {
+/* --- Demo surface ---
+ * Two carriers, and the layout is written once for both: `.vd-demo` is a demo standing on its
+ * own in the prose, `.vd-example-preview` the same surface inside a card that also holds the
+ * code. Only the frame differs — the card already draws it — so only the frame is restated.
+ */
+.vd-demo,
+.vd-example-preview {
   display: flex;
   flex-wrap: wrap;
   gap: var(--vectis-space-3);
   align-items: center;
-  margin: var(--vectis-space-5) 0;
   padding: var(--vectis-space-4);
+}
+.vd-demo {
+  margin: var(--vectis-space-5) 0;
   border: 1px solid var(--vectis-color-border);
   border-radius: var(--vectis-radius-surface);
   background: var(--vectis-color-surface-raised);
 }
-.vd-demo[data-stack] {
+.vd-demo[data-stack],
+.vd-example-preview[data-stack] {
   flex-direction: column;
   align-items: stretch;
 }
@@ -777,9 +799,33 @@ html {
   font-size: var(--vectis-text-code-size);
   color: var(--vectis-color-text);
 }
+/* Names one table among several of the same kind — the props of VTabs, then of VTab. Placed at
+   the START and given the label recipe, so it reads as the table's title rather than as the
+   centred, italic afterthought the UA style makes of it. */
+.vd-table > caption {
+  padding: var(--vectis-space-2) var(--vectis-space-3);
+  text-align: start;
+  font-family: var(--vectis-text-family-code);
+  font-size: var(--vectis-text-code-size);
+  color: var(--vectis-color-text);
+}
+
+/* --- API tables ---
+ * A row and the sentence under it are ONE entry, so the rule falls under the pair and not
+ * between them: the value row gives up its border and its lower padding, and the note keeps
+ * the border that closes the entry.
+ */
+.vd-table tr.vd-api-row > td {
+  padding-block-end: 0;
+  border-bottom: 0;
+}
+.vd-table tr.vd-api-note > td {
+  padding-block-start: var(--vectis-space-1);
+}
 
 @media (min-width: 768px) {
-  .vd-demo {
+  .vd-demo,
+  .vd-example-preview {
     padding: var(--vectis-space-6);
     gap: var(--vectis-space-4);
   }

@@ -1,0 +1,3 @@
+# The examples the documentation prints are read back from disk with `?raw`, so a CRLF
+# checkout would put a carriage return into every prerendered code block.
+* text=auto eol=lf
