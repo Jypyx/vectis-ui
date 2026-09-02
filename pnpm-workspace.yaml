@@ -9,12 +9,12 @@ allowBuilds:
 # this setting they were inert, and no cooldown applied to anything.
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
-  - '@storybook/addon-a11y@10.5.5'
-  - '@storybook/addon-docs@10.5.5'
-  - '@storybook/builder-vite@10.5.5'
-  - '@storybook/csf-plugin@10.5.5'
-  - '@storybook/react-dom-shim@10.5.5'
-  - '@storybook/vue3-vite@10.5.5'
-  - '@storybook/vue3@10.5.5'
-  - storybook@10.5.5
-  - '@storybook/addon-vitest@10.5.5'
+  - '@storybook/addon-a11y@10.6.0'
+  - '@storybook/addon-docs@10.6.0'
+  - '@storybook/addon-vitest@10.6.0'
+  - '@storybook/builder-vite@10.6.0'
+  - '@storybook/react-dom-shim@10.6.0'
+  - '@storybook/vue3-vite@10.6.0'
+  - '@storybook/vue3@10.6.0'
+  - storybook@10.6.0
+  - eslint-plugin-storybook@10.6.0
