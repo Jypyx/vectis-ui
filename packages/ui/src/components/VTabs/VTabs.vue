@@ -313,6 +313,7 @@ watch(model, () => {
     :data-orientation="orientation"
     :data-align="align"
     :data-grow="grow ? '' : undefined"
+    :data-compact="compact ? '' : undefined"
   >
     <div class="v-tabs-bar">
       <VIconButton
@@ -374,20 +375,25 @@ watch(model, () => {
 @layer vectis.components {
   .v-tabs {
     /*
-     * The gutter between the card's border and what it holds. It is zero when the
-     * component is flat, so the bar and the panels sit flush with whatever contains
-     * them, and only `outlined` gives it a value — the same idiom VDataTable uses.
+     * The panels' padding, and the four pixels the compact density takes off it. The
+     * delta is held apart from the value rather than the two being written out, so the
+     * density stays one subtraction wherever the padding is read instead of a second
+     * table to keep in step — the VAccordion idiom.
      *
-     * It is a FIXED measurement and deliberately not indexed on the size or the
-     * density: it is a property of the card, and in any case the size variables live
-     * on the descendant buttons, each tab declaring its own, so the root could not
-     * read them.
+     * It follows the density and deliberately not the SIZE: the padding is a property of
+     * the layout, and in any case the size variables live on the descendant buttons, each
+     * tab declaring its own, so the root could not read them.
      */
-    --tabs-frame-pad: 0px;
+    --tabs-pad-delta: 0px;
+    --tabs-panels-pad: calc(var(--vectis-space-4) - var(--tabs-pad-delta));
 
     display: flex;
     flex-direction: column;
     font-family: var(--vectis-text-family);
+  }
+
+  .v-tabs[data-compact] {
+    --tabs-pad-delta: var(--vectis-space-1);
   }
 
   /* Turned vertical, the bar and the panels sit side by side rather than stacked. */
@@ -402,15 +408,18 @@ watch(model, () => {
    * The frame goes on the ROOT, so it encloses the bar AND the panels, and the rule
    * under the tabs then becomes the boundary between the two inside it.
    *
-   * Unlike VDataTable, nothing is clipped here. The gutter always leaves a band at
-   * least as wide as the inner radius, so no box ever reaches a corner and no nested
-   * radius has to be computed; the row already crops its own overflow; and clipping
-   * would cut the panel's focus ring — the only one that leaves the component — as
-   * well as forbidding a consumer any content running edge to edge.
+   * The bar spends NO gutter: the tabs sit against the card's border and the track runs
+   * from edge to edge, so the whole of the padding is the panels'. That is also what
+   * lands an end tab exactly on a corner of the card, where its outer radius has to be
+   * the frame's INNER one — VTab.vue derives it, and the two cannot move apart without
+   * the corner showing on hover.
+   *
+   * Unlike VDataTable, nothing is clipped here: clipping would cut the panel's focus
+   * ring, the only one that leaves the component, and forbid a consumer any content
+   * running edge to edge. The bar with no panels under it is the single exception, and
+   * it is handled where that case is.
    */
   .v-tabs[data-variant='outlined'] {
-    --tabs-frame-pad: var(--vectis-space-3);
-
     background: var(--vectis-color-surface-raised);
     border: 1px solid var(--vectis-color-border);
     border-radius: var(--vectis-radius-surface);
@@ -431,19 +440,11 @@ watch(model, () => {
      */
     justify-content: flex-start;
     gap: var(--vectis-space-1);
-    /* The card's gutter, which is zero when flat. Nothing is added on the edge the
-       track occupies: the tabs have to stay sitting on that line. */
-    padding-block-start: var(--tabs-frame-pad);
-    padding-inline: var(--tabs-frame-pad);
   }
 
   .v-tabs[data-orientation='vertical'] .v-tabs-bar {
     flex-direction: column;
     align-items: stretch;
-    /* Turned vertical, the track changes axis, so it is now the inline end edge that
-       must be left without a gutter. */
-    padding-block: var(--tabs-frame-pad);
-    padding-inline-end: 0;
   }
 
   .v-tabs[data-align='center'] .v-tabs-bar {
@@ -541,14 +542,21 @@ watch(model, () => {
   /*
    * A framed bar with no panels: the card is reduced to the tabs alone. There is no
    * longer a boundary to mark, and the track would run right alongside the frame's own
-   * border, doubling it. So the frame takes its place, the gutter closes on that edge,
-   * and the row stops overlapping.
+   * border, doubling it. So the frame takes its place and the row stops overlapping.
+   *
+   * This is the one place the card may clip, and the one place it must. The tabs fill
+   * it on all four sides here, so a hovered end tab reaches the two corners no radius
+   * of its own covers — the ends round the edge the track used to occupy, and that one
+   * only. Nothing is lost to the clip: there is no panel, hence no outer focus ring,
+   * and a tab draws its own ring inwards.
    */
+  .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) {
+    overflow: clip;
+  }
+
   .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) .v-tabs-bar {
     border-block-end: none;
     border-inline-end: none;
-    padding-block-end: var(--tabs-frame-pad);
-    padding-inline-end: var(--tabs-frame-pad);
   }
 
   .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) .v-tabs-list {
@@ -589,9 +597,37 @@ watch(model, () => {
 
   .v-tabs-panels {
     min-inline-size: 0;
-    /* The panels are the content area of the card, so they take the gutter on all four
-       sides — where the bar takes it on three, the fourth being the track's. */
-    padding: var(--tabs-frame-pad);
+  }
+
+  /*
+   * Flat and segmented, the panels sit in no card, so they take no gutter: their content
+   * has to stay aligned with whatever the page puts above and below the component, which
+   * an indent would break. What they do owe is the separation from the bar, the boundary
+   * between two parts of the same component rather than the parent layout's business —
+   * which the framed variant folds into the gutter it gives its panels on all four sides.
+   *
+   * The axis follows the ORIENTATION and not the writing mode, so it cannot be a single
+   * logical declaration: the bar is above the panels when horizontal and beside them when
+   * vertical.
+   *
+   * Both variants are named explicitly rather than excluding the framed one, as in the
+   * track rules above: a fourth frame opts in by hand.
+   */
+  .v-tabs:is([data-variant='flat'], [data-variant='inset'])[data-orientation='horizontal']
+    .v-tabs-panels {
+    padding-block-start: var(--tabs-panels-pad);
+  }
+
+  .v-tabs:is([data-variant='flat'], [data-variant='inset'])[data-orientation='vertical']
+    .v-tabs-panels {
+    padding-inline-start: var(--tabs-panels-pad);
+  }
+
+  /* Inside a card the gutter is the panels' alone, on all four sides: the bar spends
+     none, so the tabs and their track reach the frame and the content is the only thing
+     set back from it. */
+  .v-tabs[data-variant='outlined'] .v-tabs-panels {
+    padding: var(--tabs-panels-pad);
   }
 
   .v-tabs[data-orientation='vertical'] .v-tabs-panels {

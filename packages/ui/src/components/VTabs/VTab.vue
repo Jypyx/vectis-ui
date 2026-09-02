@@ -166,8 +166,10 @@ function onFocus() {
    * between tabs staying square — the VButtonGroup idiom, applied to the one edge the
    * track does not occupy.
    *
-   * The radius used is the button's own and not the card's: the row is set back from
-   * the frame by the gutter, so it follows no clip and has no reason to match it.
+   * The radius is the CARD's inner one — its own, less the border it sits behind — and
+   * not the button's. The bar spends no gutter, so an end tab lands exactly on a corner
+   * of the frame and has to follow that curve: a button radius, smaller, would leave a
+   * sliver of card showing outside the tab as soon as it painted a background.
    *
    * TRAP — the selectors ask for the first and last of their TYPE rather than the
    * first and last child, because the scroll markers are the row's real first and last
@@ -175,17 +177,17 @@ function onFocus() {
    * distinction work.
    */
   .v-tabs[data-variant='outlined'] .v-tab[data-size]:first-of-type {
-    border-start-start-radius: var(--vectis-radius-interactive);
+    border-start-start-radius: calc(var(--vectis-radius-surface) - 1px);
   }
 
   .v-tabs[data-variant='outlined'][data-orientation='horizontal'] .v-tab[data-size]:last-of-type {
-    border-start-end-radius: var(--vectis-radius-interactive);
+    border-start-end-radius: calc(var(--vectis-radius-surface) - 1px);
   }
 
   /* Turned vertical, the track has migrated to the end edge, so the free edge is the
      start one: that is where the ends of the column round their corners. */
   .v-tabs[data-variant='outlined'][data-orientation='vertical'] .v-tab[data-size]:last-of-type {
-    border-end-start-radius: var(--vectis-radius-interactive);
+    border-end-start-radius: calc(var(--vectis-radius-surface) - 1px);
   }
 
   /*

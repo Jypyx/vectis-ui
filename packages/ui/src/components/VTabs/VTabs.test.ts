@@ -278,6 +278,19 @@ describe('VTabs', () => {
   })
 
   describe('variants', () => {
+    /*
+     * The density reaches the panels' padding through the root and nothing else: it is
+     * the one measurement the component sets for itself, everything else about compact
+     * travelling to the buttons. jsdom evaluates no styles, so the attribute is all
+     * there is to lock.
+     */
+    it('compact: data-compact set on the root, absent by default', () => {
+      const compactOf = (tabsAttrs?: string) =>
+        mount({ tabsAttrs }).container.querySelector('.v-tabs')?.hasAttribute('data-compact')
+      expect(compactOf()).toBe(false)
+      expect(compactOf('compact')).toBe(true)
+    })
+
     it('variant: data-variant set on the root, flat by default', () => {
       const variantOf = (tabsAttrs?: string) =>
         mount({ tabsAttrs }).container.querySelector('.v-tabs')?.getAttribute('data-variant')

@@ -141,8 +141,8 @@ export const Variants: Story = {
     /*
      * The panels are rendered: it is the WHOLE component that `outlined` encloses in
      * a card, and the bar's track becomes the rule separating them. No padding is set
-     * on the panels — the frame's gutter is what spaces them out in `outlined`, where
-     * `flat` and `inset` leave them flush, at the consumer's charge. The last bar is
+     * on the panels: the frame's gutter is what spaces them out in `outlined`, and the
+     * two bare frames hold their content off the bar with no indent. The last bar is
      * the `outlined` edge case with no #panels slot: nothing left to separate, so the
      * track fades away.
      */
@@ -264,9 +264,9 @@ export const Vertical: Story = {
           <VTab value="details" label="Details" icon="tune" />
           <VTab value="history" label="History" icon="history" />
           <template #panels>
-            <VTabPanel value="overview" style="padding: 16px">{{ t.overviewPanel }}</VTabPanel>
-            <VTabPanel value="details" style="padding: 16px">{{ t.detailsPanel }}</VTabPanel>
-            <VTabPanel value="history" style="padding: 16px">{{ t.historyPanel }}</VTabPanel>
+            <VTabPanel value="overview">{{ t.overviewPanel }}</VTabPanel>
+            <VTabPanel value="details">{{ t.detailsPanel }}</VTabPanel>
+            <VTabPanel value="history">{{ t.historyPanel }}</VTabPanel>
           </template>
         </VTabs>
 
@@ -376,14 +376,14 @@ export const Panels: Story = {
         <VTab value="details" label="Details" />
         <VTab value="history" label="History" />
         <template #panels>
-          <VTabPanel value="overview" style="padding: 16px 0">
+          <VTabPanel value="overview">
             {{ t.activeOnly }}
             <code>hidden</code> {{ t.andKeepState }}
           </VTabPanel>
-          <VTabPanel value="details" style="padding: 16px 0">
+          <VTabPanel value="details">
             <label>{{ t.keptInput }} <input type="text" /></label>
           </VTabPanel>
-          <VTabPanel value="history" style="padding: 16px 0" lazy>
+          <VTabPanel value="history" lazy>
             {{ t.lazyPanel }} <code>lazy</code>{{ t.mountedOnFirst }}
           </VTabPanel>
         </template>

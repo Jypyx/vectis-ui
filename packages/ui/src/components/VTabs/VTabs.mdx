@@ -37,15 +37,21 @@ segments**: it is the indicator and the track that carve the bar, not the button
 `outlined` takes `flat` line for line and encloses it in a card: a rule, rounded corners and a raised
 background, on the decoration scale shared with `VAccordion` and `VDataTable`. The frame surrounds
 the **whole** component, bar and panels: the track then changes role without changing appearance — it
-becomes the rule that separates the tabs from their content, inside the frame. The bar and the panels
-take the frame's gutter; only the track stays flush, edge to edge, since otherwise it would separate
-nothing. The tab row takes its radius back at the ends only — the internal seams stay square, on the
-`VButtonGroup` idiom — on the side the track does not occupy. With no `#panels` slot there is nothing
-to separate: the track fades away and the card's border replaces it.
+becomes the rule that separates the tabs from their content, inside the frame. The bar takes no gutter:
+the tabs sit against the card's border and the track runs edge to edge, so the padding is the panels'
+alone. The tab row takes its radius back at the ends only — the internal seams stay square, on the
+`VButtonGroup` idiom — on the side the track does not occupy, and that radius is the card's inner one,
+since an end tab now lands on the frame's own corner. With no `#panels` slot there is nothing to
+separate: the track fades away, the card's border replaces it, and the card clips its corners, the
+tabs having nothing left to be set back from.
 
 `inset` places the tabs in a hollow track and raises the active one — that is `VButton`'s `elevated`
 prop on a `ghost` tab, shadow included. It is never framed: it is a segmented control, already its
 own surface.
+
+Whatever the frame, the panels are held off the bar. Inside a card they take the whole gutter, on all
+four sides; the two bare variants take that separation alone and no indent, so their content stays
+aligned with whatever the page puts above and below the component.
 
 <Canvas of={VTabsStories.Variants} />
 
@@ -62,6 +68,8 @@ custom colour here — a tab is navigation, not a label.
 
 `size` and `compact` follow the unified control scale and are propagated to every button, including
 the scroll controls. A tab reduced to its icon becomes square, on the `VIconButton` model.
+`compact` also takes four pixels off the padding of the panels, the one measurement the component
+sets for itself rather than passing down.
 
 <Canvas of={VTabsStories.Sizes} />
 <Canvas of={VTabsStories.Compact} />
