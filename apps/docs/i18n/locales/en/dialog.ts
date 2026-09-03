@@ -11,11 +11,11 @@ export default {
         width:
           'How wide the dialog is, in any CSS unit. It is never allowed to exceed the width of the viewport.',
         role: 'What kind of dialog this is. <code>alertdialog</code> is for one that must be answered explicitly, and it makes screen readers announce it more insistently.',
-        closable:
-          'Shows the close cross in the header. Turning it off leaves the reader with Escape, the backdrop and whatever the footer offers.',
-        closeOnBackdrop: 'Lets a click outside the dialog close it.',
-        closeOnEscape:
-          'Lets the Escape key close the dialog. Turning this off while <code>closeOnBackdrop</code> stays on cannot be expressed natively, and both are then allowed.',
+        hideClose:
+          'Takes the close cross out of the header, leaving the reader with Escape, the backdrop and whatever the footer offers.',
+        persistentBackdrop: 'Stops a click outside the dialog from closing it.',
+        persistentEscape:
+          'Stops the Escape key from closing the dialog. Refusing Escape while the backdrop still closes cannot be expressed natively, so both routes are then allowed.',
         closeLabel:
           'What the close cross does, in words. It falls back to the design system dictionary.',
         vModelOpen:

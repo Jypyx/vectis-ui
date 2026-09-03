@@ -55,7 +55,7 @@ function onEscape() {
     class="vd-modal"
     width="640px"
     :aria-label="t('common.search.label')"
-    :closable="false"
+    hide-close
   >
     <template #header>
       <VInput

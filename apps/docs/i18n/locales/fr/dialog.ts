@@ -11,11 +11,11 @@ export default {
         width:
           "La largeur de la boîte, dans n'importe quelle unité CSS. Elle n'est jamais autorisée à dépasser la largeur de la fenêtre.",
         role: "Le genre de boîte. <code>alertdialog</code> est fait pour celle à laquelle il faut répondre explicitement, et il pousse les lecteurs d'écran à l'annoncer avec plus d'insistance.",
-        closable:
-          "Affiche la croix de fermeture dans l'en-tête. La couper laisse au lecteur Échap, l'arrière-plan et ce que le pied propose.",
-        closeOnBackdrop: 'Laisse un clic hors de la boîte la fermer.',
-        closeOnEscape:
-          "Laisse la touche Échap fermer la boîte. La couper tout en gardant <code>closeOnBackdrop</code> ne peut pas s'exprimer nativement, et les deux sont alors permis.",
+        hideClose:
+          "Retire la croix de fermeture de l'en-tête, ne laissant au lecteur qu'Échap, l'arrière-plan et ce que le pied propose.",
+        persistentBackdrop: 'Empêche un clic hors de la boîte de la fermer.',
+        persistentEscape:
+          "Empêche la touche Échap de fermer la boîte. Refuser Échap alors que l'arrière-plan ferme encore ne peut pas s'exprimer nativement : les deux voies restent alors ouvertes.",
         closeLabel:
           'Ce que fait la croix de fermeture, en mots. Elle retombe sur le dictionnaire du design system.',
         vModelOpen:

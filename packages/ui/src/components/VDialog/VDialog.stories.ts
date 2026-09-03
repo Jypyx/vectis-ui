@@ -79,16 +79,13 @@ const meta = {
     title: { control: 'text' },
     subtitle: { control: 'text' },
     width: { control: 'text' },
-    closable: { control: 'boolean' },
-    closeOnBackdrop: { control: 'boolean' },
-    closeOnEscape: { control: 'boolean' },
+    hideClose: { control: 'boolean' },
+    persistentBackdrop: { control: 'boolean' },
+    persistentEscape: { control: 'boolean' },
     closeLabel: { control: 'text' },
   },
   args: {
     width: '400px',
-    closable: true,
-    closeOnBackdrop: true,
-    closeOnEscape: true,
   },
   render: (args) => ({
     components: { VDialog, VButton, VTypography },
@@ -257,9 +254,9 @@ export const HeaderActions: Story = {
   }),
 }
 
-/** `closable=false` removes the cross: closing then goes through the footer or Escape. */
+/** `hideClose` removes the cross: closing then goes through the footer or Escape. */
 export const WithoutCross: Story = {
-  args: { closable: false },
+  args: { hideClose: true },
   render: (args) => ({
     components: { VDialog, VButton, VTypography },
     setup() {
@@ -281,7 +278,7 @@ export const WithoutCross: Story = {
   }),
 }
 
-/** Escape closes the modal by default (`closeOnEscape`). */
+/** Escape closes the modal, unless `persistentEscape` says otherwise. */
 export const EscapeDismiss: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

@@ -42,18 +42,18 @@ interface DialogProps {
    */
   role?: 'dialog' | 'alertdialog'
   /**
-   * Shows the close cross in the header, which it does by default. Turning it off leaves
-   * the reader with Escape, the backdrop and whatever the footer offers.
+   * Takes the close cross out of the header, leaving the reader with Escape, the
+   * backdrop and whatever the footer offers.
    */
-  closable?: boolean
-  /** Lets a click outside the dialog close it. It does by default. */
-  closeOnBackdrop?: boolean
+  hideClose?: boolean
+  /** Stops a click outside the dialog from closing it. */
+  persistentBackdrop?: boolean
   /**
-   * Lets the Escape key close the dialog. It does by default. Note that turning this off
-   * while `closeOnBackdrop` stays on cannot be expressed natively, and both are then
+   * Stops the Escape key from closing the dialog. Note that refusing Escape while the
+   * backdrop still closes cannot be expressed natively, so both routes are then
    * allowed.
    */
-  closeOnEscape?: boolean
+  persistentEscape?: boolean
   /** What the close cross does, in words. It falls back to the design system dictionary. */
   closeLabel?: string
 }
@@ -63,9 +63,9 @@ const props = withDefaults(defineProps<DialogProps>(), {
   subtitle: undefined,
   width: '400px',
   role: 'dialog',
-  closable: true,
-  closeOnBackdrop: true,
-  closeOnEscape: true,
+  hideClose: false,
+  persistentBackdrop: false,
+  persistentEscape: false,
   closeLabel: undefined,
 })
 
@@ -117,7 +117,7 @@ const subtitleId = useId()
  * it, and it would be a strange thing to want.
  */
 const closedby = computed(() =>
-  props.closeOnBackdrop ? 'any' : props.closeOnEscape ? 'closerequest' : 'none',
+  props.persistentBackdrop ? (props.persistentEscape ? 'none' : 'closerequest') : 'any',
 )
 
 // @fallback
@@ -189,8 +189,8 @@ defineExpose({
   /** Opens the dialog, exactly as setting `open` does. */
   show,
   /**
-   * Closes the dialog. It closes unconditionally, `closeOnEscape` and `closeOnBackdrop`
-   * governing only the two routes the reader can take.
+   * Closes the dialog. It closes unconditionally, `persistentEscape` and
+   * `persistentBackdrop` governing only the two routes the reader can take.
    */
   close: requestClose,
   /** The `<dialog>` element. It is null while closed: each opening builds a fresh one. */
@@ -243,10 +243,10 @@ defineExpose({
           </VTypography>
         </div>
       </slot>
-      <div v-if="closable || $slots.headerActions" class="v-dialog-header-actions">
+      <div v-if="!hideClose || $slots.headerActions" class="v-dialog-header-actions">
         <slot name="headerActions" />
         <VIconButton
-          v-if="closable"
+          v-if="!hideClose"
           class="v-dialog-close"
           :label="resolvedCloseLabel"
           variant="ghost"

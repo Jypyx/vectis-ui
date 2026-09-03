@@ -17,8 +17,8 @@ modal.
 
 ## Why a wrapper
 
-`VDialogAlert` forces `role="alertdialog"`, `closable=false`, `closeOnBackdrop=false` and
-`closeOnEscape=false` on `VDialog`. All the machinery (the top layer, the focus trap, the inert
+`VDialogAlert` forces `role="alertdialog"`, `hideClose`, `persistentBackdrop` and
+`persistentEscape` on `VDialog`. All the machinery (the top layer, the focus trap, the inert
 background, the sticky header/footer, the scroll separators, the lazy mounting) is inherited as it
 is — there is no point duplicating the component. The default width is `400px` (the `width` prop).
 

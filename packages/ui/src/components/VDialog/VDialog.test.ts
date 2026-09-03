@@ -93,9 +93,20 @@ describe('VDialog', () => {
     expect(getDialog()).toBeNull()
   })
 
-  it('closable=false hides the cross', async () => {
-    const { queryByRole } = await openHarness({ closable: false })
+  it('hideClose takes the cross out', async () => {
+    const { queryByRole } = await openHarness({ hideClose: true })
     expect(queryByRole('button', { name: 'Close' })).toBeNull()
+  })
+
+  it('hideClose keeps the header actions container for the slot that still fills it', async () => {
+    // The `v-if` is `!hideClose || $slots.headerActions`, not `!(hideClose || …)`: written
+    // the second way the container disappears exactly when a consumer fills the slot.
+    const { container } = await openHarness(
+      { hideClose: true },
+      '<template #headerActions><button data-testid="pin">Pin</button></template>',
+    )
+    expect(container.querySelector('.v-dialog-header-actions')).toBeTruthy()
+    expect(container.querySelector('[data-testid="pin"]')).toBeTruthy()
   })
 
   it("closeLabel customizes the cross's accessible name", async () => {
@@ -113,16 +124,20 @@ describe('VDialog', () => {
     expect(dialog.hasAttribute('role')).toBe(false)
   })
 
-  it('closedby derived from closeOnBackdrop/closeOnEscape', async () => {
+  it('closedby derived from persistentBackdrop/persistentEscape', async () => {
     expect((await openHarness()).dialog.getAttribute('closedby')).toBe('any')
-    expect((await openHarness({ closeOnBackdrop: false })).dialog.getAttribute('closedby')).toBe(
+    expect((await openHarness({ persistentBackdrop: true })).dialog.getAttribute('closedby')).toBe(
       'closerequest',
     )
     expect(
-      (await openHarness({ closeOnBackdrop: false, closeOnEscape: false })).dialog.getAttribute(
+      (await openHarness({ persistentBackdrop: true, persistentEscape: true })).dialog.getAttribute(
         'closedby',
       ),
     ).toBe('none')
+    // Escape alone cannot be refused natively: both routes stay open.
+    expect((await openHarness({ persistentEscape: true })).dialog.getAttribute('closedby')).toBe(
+      'any',
+    )
   })
 
   it('width is set as the inline --dialog-width style', async () => {

@@ -65,9 +65,9 @@ defineSlots<{
     :title="title"
     :subtitle="subtitle"
     :width="width"
-    :closable="false"
-    :close-on-backdrop="false"
-    :close-on-escape="false"
+    hide-close
+    persistent-backdrop
+    persistent-escape
   >
     <template v-if="$slots.trigger" #trigger="{ triggerProps }">
       <slot name="trigger" :trigger-props="triggerProps" />
