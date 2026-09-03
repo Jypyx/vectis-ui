@@ -46,7 +46,7 @@ export default {
         alt: "Le nom accessible, quand il ne doit pas être simplement le nom : un avatar représentant une équipe plutôt qu'une personne, par exemple. Il l'emporte sur <code>name</code>.",
         color:
           'Une couleur à vous, en hexadécimal, en nom CSS ou en <code>oklch()</code>. Elle remplace la teinte autrement dérivée de <code>name</code>, et le texte posé dessus est toujours blanc : une couleur claire reste donc à votre charge.',
-        size: "Le diamètre du disque, tiré de l'échelle de tailles partagée par tous les contrôles. Omise dans un VAvatarGroup, elle prend celle du groupe, ce qui est tout l'intérêt de ne pas lui donner de valeur par défaut ici ; seul, l'avatar est en <code>md</code>.",
+        size: "Le diamètre du disque, tiré de l'échelle de tailles partagée par tous les contrôles. Omise dans un VAvatarGroup, elle prend celle du groupe ; seul, l'avatar est en <code>md</code>.",
         compact: 'Retire 4px au diamètre, comme sur tous les autres contrôles.',
         href: "Transforme l'avatar en <code>&lt;a&gt;</code> pointant vers cette adresse. Un lien désactivé devient inerte : l'adresse est retirée, si bien qu'il ne peut être ni focalisé ni suivi.",
         clickable:

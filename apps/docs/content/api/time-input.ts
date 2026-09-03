@@ -10,8 +10,8 @@ export default {
       name: 'VTimeInput',
       props: [
         { name: 'format', type: 'TimePickerFormat' },
-        { name: 'mode', type: 'TimeInputMode' },
-        { name: 'showPicker', type: 'boolean' },
+        { name: 'mode', type: 'TimeInputMode', default: "'input'" },
+        { name: 'showPicker', type: 'boolean', default: 'false' },
         { name: 'minuteStep', type: 'number', default: '1' },
         { name: 'locale', type: 'string' },
         { name: 'label', type: 'string' },

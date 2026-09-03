@@ -13,10 +13,10 @@ export default {
         { name: 'color', type: 'string' },
         { name: 'count', type: 'number' },
         { name: 'icon', type: 'IconSource' },
-        { name: 'dot', type: 'boolean' },
-        { name: 'overlay', type: 'boolean' },
+        { name: 'dot', type: 'boolean', default: 'false' },
+        { name: 'overlay', type: 'boolean', default: 'false' },
         { name: 'overlayPosition', type: 'BadgeOverlayPosition', default: "'top'" },
-        { name: 'bordered', type: 'boolean' },
+        { name: 'bordered', type: 'boolean', default: 'false' },
         { name: 'ringColor', type: 'string' },
       ],
       slots: [

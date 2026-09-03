@@ -14,7 +14,7 @@ export default {
         { name: 'name', type: 'string' },
         { name: 'alt', type: 'string' },
         { name: 'color', type: 'string' },
-        { name: 'size', type: 'AvatarSize' },
+        { name: 'size', type: 'AvatarSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'href', type: 'string' },
         { name: 'clickable', type: 'boolean', default: 'false' },

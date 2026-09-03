@@ -46,7 +46,7 @@ export default {
         alt: 'The accessible name, when it should not simply be the name: an avatar standing for a team rather than a person, say. It wins over <code>name</code>.',
         color:
           'A colour of your own, as hex, a CSS name or <code>oklch()</code>. It replaces the hue otherwise derived from <code>name</code>, and the text on it is always white, so a light colour is yours to check.',
-        size: "The diameter of the disc, from the size scale shared by every control. Left out inside a VAvatarGroup it takes the group's size, which is the point of not defaulting it here; on its own it is <code>md</code>.",
+        size: "The diameter of the disc, from the size scale shared by every control. Left out inside a VAvatarGroup it takes the group's size; on its own it is <code>md</code>.",
         compact: 'Takes 4px off the diameter, as it does on every other control.',
         href: 'Turns the avatar into an <code>&lt;a&gt;</code> pointing at this address. A disabled link becomes inert: the address is dropped, so it can be neither focused nor followed.',
         clickable:

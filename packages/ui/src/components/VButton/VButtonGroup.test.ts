@@ -75,6 +75,19 @@ describe('VButtonGroup', () => {
     }
   })
 
+  // TRAP — `compact: undefined` and `elevated: undefined` must stay in the group's
+  // withDefaults. Vue casts a Boolean prop with NO default to `false`, and a group
+  // reading `false` would then swallow the compact and the elevation of every button
+  // inside it, silently: the two lines look redundant and are not.
+  it('a silent group does not swallow a compact or elevated button', () => {
+    const { container } = render(VButtonGroup, {
+      slots: { default: () => h(VButton, { compact: true, elevated: true }, () => 'One') },
+    })
+    const segment = segments(container)[0]!
+    expect(segment.dataset.compact).toBe('')
+    expect(segment.dataset.elevated).toBe('')
+  })
+
   it('hands its variant, size, compact and elevated to every button', () => {
     const { container } = render(VButtonGroup, {
       props: { variant: 'outline', size: 'lg', compact: true, elevated: true },

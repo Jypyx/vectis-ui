@@ -108,11 +108,17 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
 /**
  * Defaults the extractor cannot print as the value a reader would act on.
  *
- * Two cases land here. A default computed from a constant is reported as the expression that
+ * Three cases land here. A default computed from a constant is reported as the expression that
  * produced it, and `EDGE_STEP_DELAY` tells nobody anything; and a prop whose default is left
  * `undefined` so that "not given" stays distinguishable is reported as having none at all,
  * where the component does have a last resort and applies it (VButton's `tone`, which falls
- * back to `accent` once its group has had its say).
+ * back to `accent` once its group has had its say); and a Boolean prop absent from its
+ * withDefaults, which Vue casts to `false` while the extractor sees nothing at all.
+ *
+ * What stays OUT is a fallback that is not a value: a label taken from the message dictionary,
+ * a format or a first day of week derived from the locale, an id generated at mount, a width the
+ * CSS decides. Those cells stay empty and their DESCRIPTION says where the value comes from, a
+ * cell being read as something one could type.
  *
  * Keyed `Component.prop`, and deliberately a table rather than a rule: each of these is a
  * decision about what the value MEANS, and the day one of them changes the build should not
@@ -120,10 +126,21 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
  * reported.
  */
 const DEFAULT_OVERRIDES: Record<string, string> = {
+  'VAvatar.size': "'md'",
+  'VAvatarGroup.size': "'md'",
+  // Boolean props absent from their withDefaults: Vue casts them to `false`, which the
+  // extractor reports as no default at all.
+  'VBadge.bordered': 'false',
+  'VBadge.dot': 'false',
+  'VBadge.overlay': 'false',
   'VButton.tone': "'accent'",
   'VCalendar.date': 'today',
   'VCalendar.edgeStepDelay': '800',
+  'VDateInput.displayFormat': "{ day: 'numeric', month: 'short', year: 'numeric' }",
+  'VDateInput.mode': "'input'",
   'VIconButton.tone': "'neutral'",
+  'VTimeInput.mode': "'input'",
+  'VTimeInput.showPicker': 'false',
 }
 
 /** Builds an index of every SFC in the library by its bare name, so no path table is needed. */
