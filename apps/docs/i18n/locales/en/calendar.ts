@@ -20,17 +20,17 @@ export default {
           'The step everything snaps to, in minutes: how far a nudge moves an event, and how long a newly created one is.',
         scrollTime:
           'Where the grid is scrolled to when it first appears, so the working day is in view.',
-        showCurrentTime:
-          "Draws a line across today's column at the time it is now, with a dot on its leading edge. It ticks once a minute while the calendar is on screen.",
+        hideCurrentTime:
+          "Leaves out the line drawn across today's column at the time it is now, and the dot on its leading edge. Left in, it ticks once a minute while the calendar is on screen.",
         monthEventLimit:
           'How many events a day of the month view shows before it starts counting the rest.',
-        editable:
-          'Lets events be moved and stretched, by dragging them and with the keyboard. Turning it off leaves them readable and clickable, and nothing else.',
+        readonly:
+          'Stops events being moved and stretched, by dragging them and with the keyboard. They stay readable and clickable, and nothing else.',
         creatable:
-          'Makes an event when an empty part of a day is taken up: a click makes one a step long, a drag makes one as long as it was drawn. The slot signal still fires either way, so you can turn this off and keep it.',
+          'Makes an event when an empty part of a day is taken up: a click makes one a step long, a drag makes one as long as it was drawn. The slot signal fires either way, so you can leave this off and still get it.',
         edgeStepDelay:
           'How long a dragged event has to rest against the side of the calendar before the view turns to the previous or next period, in milliseconds. Zero turns that off. The wait is the point of it: paging the instant the pointer touched the edge would make the last day of a week impossible to aim at.',
-        autoScroll: 'Whether dragging near the top or bottom of a time grid scrolls it.',
+        noEdgeScroll: 'Stops dragging near the top or bottom of a time grid from scrolling it.',
         label: 'What the calendar is called, for anyone who cannot see it.',
         vModelView: 'Which span the calendar is showing. It opens on the week.',
         vModelDate: 'The day the view is anchored on, as an ISO string. It opens on today.',

@@ -21,17 +21,18 @@ export default {
           "Le pas sur lequel tout s'aligne, en minutes : de combien un coup de pouce déplace un événement, et quelle durée a celui qui vient d'être créé.",
         scrollTime:
           'Où la grille est défilée à sa première apparition, pour que la journée de travail soit en vue.',
-        showCurrentTime:
-          "Trace une ligne en travers de la colonne du jour à l'heure qu'il est, avec un point sur son bord avant. Elle avance d'une minute par minute tant que le calendrier est à l'écran.",
+        hideCurrentTime:
+          "Retire la ligne tracée en travers de la colonne du jour à l'heure qu'il est, et le point sur son bord avant. Laissée en place, elle avance d'une minute par minute tant que le calendrier est à l'écran.",
         monthEventLimit:
           "Combien d'événements un jour de la vue mois montre avant de compter le reste.",
-        editable:
-          "Permet de déplacer et d'étirer les événements, à la souris comme au clavier. Le couper les laisse lisibles et cliquables, et rien de plus.",
+        readonly:
+          "Empêche de déplacer et d'étirer les événements, à la souris comme au clavier. Ils restent lisibles et cliquables, et rien de plus.",
         creatable:
-          "Crée un événement quand une partie vide d'une journée est prise : un clic en fait un long d'un pas, un glissement en fait un aussi long qu'il a été tracé. Le signal de créneau part de toute façon : vous pouvez donc couper ceci et le garder.",
+          "Crée un événement quand une partie vide d'une journée est prise : un clic en fait un long d'un pas, un glissement en fait un aussi long qu'il a été tracé. Le signal de créneau part de toute façon : vous pouvez donc laisser ceci de côté et le garder.",
         edgeStepDelay:
           "Combien de temps un événement déplacé doit reposer contre le bord du calendrier avant que la vue passe à la période précédente ou suivante, en millisecondes. Zéro le désactive. L'attente est tout l'intérêt : tourner la page à l'instant où le pointeur touche le bord rendrait le dernier jour d'une semaine impossible à viser.",
-        autoScroll: "Si un glissement près du haut ou du bas d'une grille horaire la fait défiler.",
+        noEdgeScroll:
+          "Empêche un glissement près du haut ou du bas d'une grille horaire de la faire défiler.",
         label: 'Le nom du calendrier, pour qui ne peut pas le voir.',
         vModelView: 'Quelle étendue le calendrier affiche. Il ouvre sur la semaine.',
         vModelDate:

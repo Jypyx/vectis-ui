@@ -116,9 +116,9 @@ show. `#all-day-label` replaces the words beside it.
 
 ## The current time
 
-`showCurrentTime` (on by default) draws a line across today's column at the time it is now, with a
-dot on its leading edge. It re-reads the clock at the top of each minute, and it is only ever drawn
-when the range on show actually contains today.
+A line is drawn across today's column at the time it is now, with a dot on its leading edge, unless
+`hideCurrentTime` says otherwise. It re-reads the clock at the top of each minute, and it is only
+ever drawn when the range on show actually contains today.
 
 It is hidden from screen readers on purpose: it says a second time what the cell labels and the day
 marked as today already carry, and announcing it from the middle of a grid would interrupt without
@@ -211,7 +211,7 @@ Dragging is not confined to the time grid or to what is currently on screen:
   `edgeStepDelay`, the calendar shows the previous or next period and keeps
   going for as long as you hold. The event stays under the pointer across the boundary.
 - **The top and bottom scroll**, in a time grid, so a nine o'clock meeting can be dragged to the
-  evening without letting go. `autoScroll` turns that off.
+  evening without letting go. `noEdgeScroll` turns that off.
 
 **The wait before paging is the point of it.** Turning the page the instant the pointer touched the
 edge would make the last day of a week impossible to aim at: you would have to approach it from
@@ -226,9 +226,9 @@ the weeks you paged through on the way stay paged.
 
 <Canvas of={VCalendarStories.MonthDragging} />
 
-`editable` turns moving and stretching off; `creatable` turns making events off. Turning `creatable`
-off still leaves `slot-activate` firing, so a consumer who wants to open their own form keeps the
-signal without the component acting on it.
+`readonly` takes moving and stretching away; `creatable` is what adds making an event out of an
+empty slot. Without it `slot-activate` fires all the same, so a consumer who wants to open their own
+form keeps the signal without the component acting on it.
 
 **If your event type adds required fields of its own**, a created event will not have them — nothing
 here could invent a room number. `event-create` fires with the event as made: replace that entry

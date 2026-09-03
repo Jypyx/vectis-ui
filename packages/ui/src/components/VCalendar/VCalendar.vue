@@ -91,21 +91,21 @@ export interface CalendarProps {
   /** Where the grid is scrolled to when it first appears, so the working day is in view. */
   scrollTime?: string
   /**
-   * Draws a line across today's column at the time it is now, with a dot on its leading
-   * edge. It ticks once a minute while the calendar is on screen.
+   * Leaves out the line drawn across today's column at the time it is now, and the dot on
+   * its leading edge. Left in, it ticks once a minute while the calendar is on screen.
    */
-  showCurrentTime?: boolean
+  hideCurrentTime?: boolean
   /** How many events a day of the month view shows before it starts counting the rest. */
   monthEventLimit?: number
   /**
-   * Lets events be moved and stretched — by dragging them, and with the keyboard. Turning it
-   * off leaves them readable and clickable, and nothing else.
+   * Stops events being moved and stretched — by dragging them, and with the keyboard. They
+   * stay readable and clickable, and nothing else.
    */
-  editable?: boolean
+  readonly?: boolean
   /**
    * Makes an event when an empty part of a day is taken up: a click makes one `slotDuration`
-   * long, a drag makes one as long as it was drawn. `slot-activate` still fires either way,
-   * so a consumer who wants their own form can turn this off and keep the signal.
+   * long, a drag makes one as long as it was drawn. `slot-activate` fires either way, so a
+   * consumer who wants their own form can leave this off and still get the signal.
    */
   creatable?: boolean
   /**
@@ -116,8 +116,8 @@ export interface CalendarProps {
    * the last day of a week impossible to aim at.
    */
   edgeStepDelay?: number
-  /** Whether dragging near the top or bottom of a time grid scrolls it. */
-  autoScroll?: boolean
+  /** Stops dragging near the top or bottom of a time grid from scrolling it. */
+  noEdgeScroll?: boolean
   /** What the calendar is called, for anyone who cannot see it. */
   label?: string
 }
@@ -132,12 +132,12 @@ const props = withDefaults(defineProps<CalendarProps>(), {
   dayEnd: 24,
   slotDuration: 15,
   scrollTime: '08:00',
-  showCurrentTime: true,
+  hideCurrentTime: false,
   monthEventLimit: 3,
-  editable: true,
-  creatable: true,
+  readonly: false,
+  creatable: false,
   edgeStepDelay: EDGE_STEP_DELAY,
-  autoScroll: true,
+  noEdgeScroll: false,
   label: undefined,
 })
 
@@ -261,7 +261,7 @@ function tick() {
 
 onMounted(() => {
   today.value = todayISO()
-  if (props.showCurrentTime) tick()
+  if (!props.hideCurrentTime) tick()
   const at = minutesOf(props.scrollTime)
   if (at !== null) gridRef.value?.scrollToMinutes(at)
 })
@@ -519,6 +519,14 @@ defineExpose({
         </div>
       </div>
 
+      <!--
+        The public props say what is REFUSED — `readonly`, `hideCurrentTime`,
+        `noEdgeScroll` — so that none of them has to be turned off with a binding. The two
+        internal grids keep the positive sense they read a dozen times each, and the whole
+        of the inversion lives here, at the boundary: flip a sign on one of these lines and
+        the grid quietly does the opposite of what was asked, since nothing downstream
+        knows which way round the prop was written.
+      -->
       <VCalendarTimeGrid
         v-if="isTimeGrid"
         ref="gridRef"
@@ -531,12 +539,12 @@ defineExpose({
         :locale="resolvedLocale"
         :hour-format="resolvedHourFormat"
         :today="today"
-        :now="showCurrentTime ? now : null"
-        :editable="editable"
+        :now="hideCurrentTime ? null : now"
+        :editable="!readonly"
         :creatable="creatable"
         :hint-id="hintId"
         :edge-step-delay="edgeStepDelay"
-        :auto-scroll="autoScroll"
+        :auto-scroll="!noEdgeScroll"
         :label="rangeText"
         @cell-activate="onCellActivate"
         @event-activate="emit('event-activate', $event)"
@@ -567,7 +575,7 @@ defineExpose({
         :hour-format="resolvedHourFormat"
         :today="today"
         :event-limit="monthEventLimit"
-        :editable="editable"
+        :editable="!readonly"
         :hint-id="hintId"
         :edge-step-delay="edgeStepDelay"
         :label="rangeText"

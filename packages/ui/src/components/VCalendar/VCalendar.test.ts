@@ -403,7 +403,7 @@ describe('the current-time line', () => {
   it('is not drawn at all when it was turned off', async () => {
     const iso = new Date()
     const todayISO = `${iso.getFullYear()}-${String(iso.getMonth() + 1).padStart(2, '0')}-${String(iso.getDate()).padStart(2, '0')}`
-    const { container } = mount({ view: 'day', date: todayISO, showCurrentTime: false })
+    const { container } = mount({ view: 'day', date: todayISO, hideCurrentTime: true })
     await nextTick()
     expect(container.querySelector('.v-calendar-now')).toBeNull()
   })
@@ -562,8 +562,8 @@ describe('dragging in the month view', () => {
     expect(emitted('update:events')).toBeUndefined()
   })
 
-  it('does nothing at all when the calendar is not editable', async () => {
-    const { container, emitted } = month({ editable: false, events: [event({ id: 'a' })] })
+  it('does nothing at all when the calendar is read-only', async () => {
+    const { container, emitted } = month({ readonly: true, events: [event({ id: 'a' })] })
     const chip = container.querySelector('.v-calendar-event')!
     pointer(chip, 'pointerdown', { clientX: 100, clientY: 100 })
     pointer(chip, 'pointermove', { clientX: 300, clientY: 200 })
@@ -796,8 +796,8 @@ describe('dragging an event', () => {
     expect(emitted('event-move')).toBeUndefined()
   })
 
-  it('does nothing at all when it was told not to be editable', async () => {
-    const { container, emitted } = drag({ editable: false })
+  it('does nothing at all when it was told to be read-only', async () => {
+    const { container, emitted } = drag({ readonly: true })
     const card = container.querySelector('.v-calendar-event')!
     pointer(card, 'pointerdown', { clientX: 100, clientY: 100 })
     pointer(card, 'pointermove', { clientX: 100, clientY: 300 })
@@ -806,8 +806,8 @@ describe('dragging an event', () => {
     expect(emitted('event-move')).toBeUndefined()
   })
 
-  it('offers no resize strip when it is not editable', () => {
-    const { container } = drag({ editable: false })
+  it('offers no resize strip when it is read-only', () => {
+    const { container } = drag({ readonly: true })
     expect(container.querySelector('[data-calendar-handle]')).toBeNull()
   })
 
@@ -870,10 +870,10 @@ describe('dragging an event', () => {
     expect(daySpan(moved!)).toBe(2)
   })
 
-  it('leaves a bar alone when the calendar is not editable', async () => {
+  it('leaves a bar alone when the calendar is read-only', async () => {
     const { container, emitted } = mount({
       view: 'week',
-      editable: false,
+      readonly: true,
       events: [event({ id: 'a', allDay: true })],
     })
     const bar = container.querySelector('.v-calendar-bar')!
@@ -988,8 +988,10 @@ describe('the echo left behind while dragging', () => {
 })
 
 describe('creating an event by taking up an empty slot', () => {
+  // `creatable` is opt-in, so the whole block asks for it; the one test about its absence
+  // spreads over it.
   const empty = (props: Record<string, unknown> = {}) =>
-    mount({ view: 'day', dayStart: 9, dayEnd: 17, ...props })
+    mount({ view: 'day', dayStart: 9, dayEnd: 17, creatable: true, ...props })
 
   /*
    * The flag that stops a drag from also OPENING what it just moved is lowered by the click that
@@ -1007,7 +1009,7 @@ describe('creating an event by taking up an empty slot', () => {
       view: 'day',
       dayStart: 9,
       dayEnd: 17,
-      editable: false,
+      readonly: true,
       events: [event({ id: 'a' })],
     })
     const cell = container.querySelector('.v-calendar-cell')!
@@ -1070,10 +1072,10 @@ describe('creating an event by taking up an empty slot', () => {
   })
 
   /*
-   * The signal survives even when the making does not: a consumer with their own form turns
-   * `creatable` off and keeps `slot-activate`.
+   * The signal survives even when the making does not: a consumer with their own form leaves
+   * `creatable` alone and keeps `slot-activate`.
    */
-  it('still reports the slot when it was told not to create', async () => {
+  it('still reports the slot when it was not told to create', async () => {
     const { container, emitted } = empty({ creatable: false })
     await fireEvent.click(container.querySelector('.v-calendar-cell')!)
     expect(emitted('event-create')).toBeUndefined()
@@ -1589,8 +1591,8 @@ describe('moving an event with the keyboard', () => {
     expect(container.querySelector('[role="status"]')!.textContent).toContain('cancelled')
   })
 
-  it('leaves a card alone when the calendar is not editable', async () => {
-    const { container } = await held({ editable: false })
+  it('leaves a card alone when the calendar is read-only', async () => {
+    const { container } = await held({ readonly: true })
     expect(container.querySelector('[data-grabbed]')).toBeNull()
   })
 

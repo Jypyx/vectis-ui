@@ -287,9 +287,9 @@ export const AllDay: Story = {
 }
 
 /**
- * `showCurrentTime` draws a line across today's column at the time it is now, with a dot on
- * its leading edge. It ticks at the top of each minute. This story anchors itself on the
- * real current day, so it is the one place the line can actually be seen.
+ * A line is drawn across today's column at the time it is now, with a dot on its leading
+ * edge, and it ticks at the top of each minute; `hideCurrentTime` leaves it out. This story
+ * anchors itself on the real current day, so it is the one place the line can be seen.
  */
 export const CurrentTime: Story = {
   args: { view: 'day', label: 'Current time' },
@@ -529,12 +529,19 @@ export const EventSlot: Story = {
 }
 
 /**
- * Drag a card to move it, drag its bottom edge to change how long it lasts, and press an
- * empty stretch of a day to make an event there. The model is written once, when the gesture
- * ends — never while it is under way.
+ * Drag a card to move it, drag its bottom edge to change how long it lasts, and — this story
+ * asking for `creatable` — press an empty stretch of a day to make an event there. The model
+ * is written once, when the gesture ends, never while it is under way.
  */
 export const Editing: Story = {
-  args: { view: 'day', dayStart: 8, dayEnd: 18, scrollTime: '08:00', label: 'Editing' },
+  args: {
+    view: 'day',
+    dayStart: 8,
+    dayEnd: 18,
+    scrollTime: '08:00',
+    creatable: true,
+    label: 'Editing',
+  },
   render: (args) => ({
     components: { VCalendar },
     setup: () => {
