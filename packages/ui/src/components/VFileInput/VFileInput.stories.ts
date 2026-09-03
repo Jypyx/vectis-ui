@@ -94,10 +94,12 @@ const fileOf = (name: string, size: number, type: string) =>
 /**
  * A single file. The field is read-only — its value comes from the dialog or
  * from a drop, never from typing — and the paperclip on the right opens the
- * system picker, with the clear cross appearing to its left as soon as there is
- * something to erase.
+ * system picker. `clearable` adds the cross to its left, which appears as soon
+ * as there is something to erase; worth asking for here, since nothing can be
+ * erased by typing.
  */
 export const Default: Story = {
+  args: { clearable: true },
   render: (args) => ({
     components: { VFileInput },
     setup: () => ({ args, t, files: ref<File[]>([]) }),

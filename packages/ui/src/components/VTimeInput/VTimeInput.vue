@@ -141,7 +141,7 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
   compact: false,
   disabled: false,
   invalid: false,
-  clearable: true,
+  clearable: false,
   pickerIcon: () => scheduleIcon,
   placement: 'bottom-start',
 })

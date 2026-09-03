@@ -26,7 +26,7 @@ export default {
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
         { name: 'placeholder', type: 'string' },
-        { name: 'clearable', type: 'boolean', default: 'true' },
+        { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'v-model', key: 'vModel', type: 'File[]', default: '[]' },
       ],
       events: [

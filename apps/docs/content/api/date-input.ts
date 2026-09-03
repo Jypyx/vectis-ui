@@ -27,7 +27,7 @@ export default {
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
-        { name: 'clearable', type: 'boolean', default: 'true' },
+        { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'pickerIcon', type: 'IconSource', default: 'calendar_today' },
         { name: 'displayFormat', type: 'Intl.DateTimeFormatOptions', default: "{ day: 'numeric', month: 'short', year: 'numeric' }" },
         { name: 'placement', type: 'Placement', default: "'bottom-start'" },

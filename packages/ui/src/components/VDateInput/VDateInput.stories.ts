@@ -49,7 +49,6 @@ const meta = {
   // toolbar drives both the mask and the month names.
   args: {
     size: 'md',
-    clearable: true,
   },
 } satisfies Meta<typeof VDateInput>
 
@@ -58,10 +57,11 @@ type Story = StoryObj<typeof meta>
 
 /**
  * By default the field is typed on the keyboard and places the separators on its own,
- * with no calendar: the field stays bare until a date is entered, then displays the clear
- * cross.
+ * with no calendar. `clearable` adds the cross, which appears as soon as a date has been
+ * entered.
  */
 export const Default: Story = {
+  args: { clearable: true },
   render: (args) => ({
     components: { VDateInput },
     setup: () => ({ args, t, value: ref<string | null>(null) }),
@@ -92,7 +92,7 @@ export const Default: Story = {
     await expect(field).toHaveFocus()
     await waitFor(() => expect(canvas.getByText('2026-06-10')).toBeVisible())
 
-    // the clear cross, meanwhile, stays available (clearable)
+    // the clear cross, meanwhile, stays available (this story asks for `clearable`)
     await expect(canvas.getByRole('button', { name: 'Clear date' })).toBeVisible()
 
     // Backspace on the separator erases the digit preceding it

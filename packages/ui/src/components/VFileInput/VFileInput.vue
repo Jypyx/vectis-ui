@@ -101,7 +101,11 @@ interface FileInputProps {
    * dictionary.
    */
   placeholder?: string
-  /** Offers a cross that empties the selection. */
+  /**
+   * Offers a cross that empties the selection. Worth turning on here more than on an
+   * ordinary field: what a picker holds cannot be erased by typing, so the cross is the
+   * only way back out of a wrong choice.
+   */
   clearable?: boolean
 }
 
@@ -125,10 +129,7 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   label: undefined,
   hint: undefined,
   placeholder: undefined,
-  // On by default, unlike an ordinary field: what is in a picker cannot be erased by
-  // typing, so without the cross there would be no way to empty it — the same reasoning
-  // as in a read-only date picker.
-  clearable: true,
+  clearable: false,
 })
 
 const emit = defineEmits<{

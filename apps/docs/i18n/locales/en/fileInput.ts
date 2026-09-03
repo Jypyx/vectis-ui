@@ -30,7 +30,8 @@ export default {
         hint: 'A line of help under the field, to the left of the counter. It is tied to the field for assistive technology.',
         placeholder:
           'What the field says while nothing is chosen. It falls back to the design system dictionary.',
-        clearable: 'Offers a cross that empties the selection.',
+        clearable:
+          'Offers a cross that empties the selection. Worth turning on here more than on an ordinary field: what a picker holds cannot be erased by typing, so the cross is the only way back out of a wrong choice.',
         vModel:
           'Always a list of files, whether or not several are allowed, never a file on its own. The shape does not depend on a prop, so you never have to narrow a union TypeScript cannot discriminate.',
       },

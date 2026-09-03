@@ -53,7 +53,7 @@ components' scale: `sm` (32 px), `md` (40 px, the default) and `lg` (48 px), com
 
 ## States
 
-The field is clearable (`clearable`: the cross appears to the left of the end icon as soon as a
+The field takes `clearable` (the cross then appears to the left of the end icon as soon as a
 value is set, as in VInput, VTextarea and VCombobox) and supports `disabled`.
 
 <Canvas of={VDateInputStories.Disabled} />
@@ -98,8 +98,8 @@ therefore renders neither a calendar icon, nor a panel, nor an opening shortcut.
 focus — without taking the focus, so typing continues in the field. The prop has **no effect in
 read-only mode**, where the calendar is the only way to choose a date.
 
-`clearable` (default `true`) keeps its own semantics: the clear cross appears as soon as a date is
-set, calendar or no calendar.
+`clearable` keeps its own semantics: the clear cross appears as soon as a date is set, calendar or
+no calendar.
 
 `pickerIcon` replaces the calendar-opening icon. It only shows when there is a panel to open, and
 **the clear cross sits to its left** without replacing it: opening the calendar stays one click away

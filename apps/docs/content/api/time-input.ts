@@ -21,7 +21,7 @@ export default {
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
-        { name: 'clearable', type: 'boolean', default: 'true' },
+        { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'pickerIcon', type: 'IconSource', default: 'schedule' },
         { name: 'placement', type: 'Placement', default: "'bottom-start'" },
         { name: 'v-model', key: 'vModel', type: 'string | null', default: 'null' },

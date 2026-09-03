@@ -74,8 +74,8 @@ const t = storyText({
     country: 'Country',
     servedCountries: 'Served countries',
     otherCountries: 'Other countries',
-    clearingOn: 'Clearing enabled (the default)',
-    clearingOff: 'Clearing disabled (clearable=false)',
+    clearingOn: 'Clearing enabled (clearable)',
+    clearingOff: 'Clearing disabled (the default)',
     noCountryFound: 'No country found',
     neighbour: 'Neighbouring element (to move the focus away)',
     reference: 'Reference',
@@ -100,8 +100,8 @@ const t = storyText({
     country: 'Pays',
     servedCountries: 'Pays desservis',
     otherCountries: 'Autres pays',
-    clearingOn: 'Effacement activé (défaut)',
-    clearingOff: 'Effacement désactivé (clearable=false)',
+    clearingOn: 'Effacement activé (clearable)',
+    clearingOff: 'Effacement désactivé (défaut)',
     noCountryFound: 'Aucun pays trouvé',
     neighbour: 'Élément voisin (pour retirer le focus)',
     reference: 'Référence',
@@ -260,12 +260,12 @@ export const MultipleSelection: Story = {
       <div style="display: grid; gap: 16px; width: 340px">
         <div style="display: grid; gap: 4px">
           <span style="font: 12px sans-serif; color: var(--vectis-color-text-muted)">{{ t.clearingOn }}</span>
-          <VCombobox v-bind="args" multiple v-model="value" :placeholder="t.chooseCountry" :aria-label="t.servedCountries" />
+          <VCombobox v-bind="args" multiple clearable v-model="value" :placeholder="t.chooseCountry" :aria-label="t.servedCountries" />
           <output data-testid="mirror">{{ value.join(',') }}</output>
         </div>
         <div style="display: grid; gap: 4px">
           <span style="font: 12px sans-serif; color: var(--vectis-color-text-muted)">{{ t.clearingOff }}</span>
-          <VCombobox v-bind="args" multiple :clearable="false" v-model="other" :aria-label="t.otherCountries" />
+          <VCombobox v-bind="args" multiple v-model="other" :aria-label="t.otherCountries" />
         </div>
       </div>
     `,

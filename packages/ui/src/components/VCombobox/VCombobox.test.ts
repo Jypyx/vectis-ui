@@ -179,7 +179,7 @@ describe('VCombobox', () => {
   })
 
   it("the cross (VInput's clearable) empties the value in single mode", async () => {
-    const { getByRole, emitted } = renderCombobox({ modelValue: 'fr' })
+    const { getByRole, emitted } = renderCombobox({ modelValue: 'fr', clearable: true })
     const input = getByRole('combobox') as HTMLInputElement
     expect(input.value).toBe('France')
     await fireEvent.click(getByRole('button', { name: 'Clear selection' }))
@@ -188,19 +188,23 @@ describe('VCombobox', () => {
   })
 
   it('in multiple mode, the cross shows as soon as there are Chips and empties the whole selection', async () => {
-    const { getByRole, emitted } = renderCombobox({ multiple: true, modelValue: ['fr', 'be'] })
+    const { getByRole, emitted } = renderCombobox({
+      multiple: true,
+      modelValue: ['fr', 'be'],
+      clearable: true,
+    })
     // visible without typing at all (there is a selection)
     await fireEvent.click(getByRole('button', { name: 'Clear selection' }))
     expect(emitted('update:modelValue').at(-1)).toEqual([[]])
   })
 
-  it('no cross without a selection or a search, nor when clearable=false', () => {
-    const empty = renderCombobox()
-    expect(empty.queryByRole('button', { name: 'Clear selection' })).toBeNull()
-    const emptyMulti = renderCombobox({ multiple: true, modelValue: [] })
-    expect(emptyMulti.queryByRole('button', { name: 'Clear selection' })).toBeNull()
-    const off = renderCombobox({ modelValue: 'fr', clearable: false })
+  it('no cross unless it was asked for, and never without a selection or a search', () => {
+    const off = renderCombobox({ modelValue: 'fr' })
     expect(off.queryByRole('button', { name: 'Clear selection' })).toBeNull()
+    const empty = renderCombobox({ clearable: true })
+    expect(empty.queryByRole('button', { name: 'Clear selection' })).toBeNull()
+    const emptyMulti = renderCombobox({ clearable: true, multiple: true, modelValue: [] })
+    expect(emptyMulti.queryByRole('button', { name: 'Clear selection' })).toBeNull()
   })
 
   it('displays a tick on the right of the selected option', () => {

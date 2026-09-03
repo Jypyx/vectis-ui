@@ -16,7 +16,7 @@ export default {
         { name: 'placeholder', type: 'string' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
-        { name: 'clearable', type: 'boolean', default: 'true' },
+        { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'emptyText', type: 'string' },
         { name: 'filter', type: 'ComboboxFilter', default: 'true' },
         { name: 'searchDebounce', type: 'number', default: '250' },

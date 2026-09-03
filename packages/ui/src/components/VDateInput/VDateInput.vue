@@ -169,7 +169,7 @@ const props = withDefaults(defineProps<DateInputProps>(), {
   compact: false,
   disabled: false,
   invalid: false,
-  clearable: true,
+  clearable: false,
   pickerIcon: () => calendarTodayIcon,
   // Left undefined rather than defaulted to the format object, for the same reason: it is
   // what lets the component notice that a consumer has asked for a display format in a

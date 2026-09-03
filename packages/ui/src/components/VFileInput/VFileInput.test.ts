@@ -164,6 +164,7 @@ describe('VFileInput', () => {
       multiple: true,
       display: 'chip',
       maxSize: 100,
+      clearable: true,
     })
     const writes = trackReset(native)
 
@@ -228,14 +229,22 @@ describe('VFileInput', () => {
     expect(emitted('change')).toHaveLength(1)
   })
 
-  it('the cross empties everything, and only shows when there is something to clear', async () => {
-    const empty = renderPicker()
+  it('the cross empties everything, and only shows when asked for and there is something to clear', async () => {
+    // The cross is opt-in, like every other field's.
+    const off = renderPicker({ modelValue: [fileOf('a.pdf')] })
+    expect(off.container.querySelector('.v-input-clear')).toBeNull()
+
+    const empty = renderPicker({ clearable: true })
     expect(empty.container.querySelector('.v-input-clear')).toBeNull()
 
-    const readonly = renderPicker({ readonly: true, modelValue: [fileOf('a.pdf')] })
+    const readonly = renderPicker({
+      clearable: true,
+      readonly: true,
+      modelValue: [fileOf('a.pdf')],
+    })
     expect(readonly.container.querySelector('.v-input-clear')).toBeNull()
 
-    const { container, emitted } = renderPicker({ modelValue: [fileOf('a.pdf')] })
+    const { container, emitted } = renderPicker({ clearable: true, modelValue: [fileOf('a.pdf')] })
     await fireEvent.click(container.querySelector('.v-input-clear')!)
 
     expect(emitted('update:modelValue').at(-1)).toEqual([[]])
@@ -270,7 +279,7 @@ describe('VFileInput', () => {
   })
 
   it('a click on the field opens the dialog — but never a click on one of its buttons', async () => {
-    const { container, native } = renderPicker({ modelValue: [fileOf('a.pdf')] })
+    const { container, native } = renderPicker({ clearable: true, modelValue: [fileOf('a.pdf')] })
     native.click = vi.fn()
 
     await fireEvent.click(container.querySelector('.v-file-input-control')!)

@@ -148,7 +148,7 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   placeholder: undefined,
   disabled: false,
   invalid: false,
-  clearable: true,
+  clearable: false,
   emptyText: undefined,
   filter: true,
   searchDebounce: 250,

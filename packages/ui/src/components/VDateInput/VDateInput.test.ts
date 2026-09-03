@@ -42,7 +42,7 @@ describe('VDateInput — default', () => {
 
   it('pickerIcon: it overrides the opening icon, which the clear cross does not replace', async () => {
     const { container, rerender } = render(VDateInput, {
-      props: { modelValue: null, showPicker: true, pickerIcon: 'event' },
+      props: { modelValue: null, showPicker: true, pickerIcon: 'event', clearable: true },
     })
     // `:not(.v-input-clear)`: the cross is rendered BEFORE the end icon.
     const endIcon = () =>
@@ -118,7 +118,7 @@ describe('VDateInput — read-only', () => {
   })
 
   it('ignores showPicker (the calendar is the only route there)', async () => {
-    const { container, getByRole } = mount({ modelValue: JUNE, showPicker: false })
+    const { container, getByRole } = mount({ modelValue: JUNE, showPicker: false, clearable: true })
     expect(container.querySelector('button[aria-label="Clear date"]')).toBeTruthy()
     await fireEvent.click(container.querySelector('.v-date-input-control') as HTMLElement)
     await nextTick()
@@ -397,7 +397,7 @@ describe('VDateInput — input mode', () => {
   })
 
   it('keeps the clear cross with no calendar', async () => {
-    const { container, emitted } = mount({ modelValue: JUNE })
+    const { container, emitted } = mount({ modelValue: JUNE, clearable: true })
     const clearBtn = container.querySelector('button[aria-label="Clear date"]') as HTMLElement
     expect(clearBtn).toBeTruthy()
     await fireEvent.click(clearBtn)

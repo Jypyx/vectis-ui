@@ -36,7 +36,6 @@ const meta = {
   // cycle along with the words.
   args: {
     size: 'md',
-    clearable: true,
   },
 } satisfies Meta<typeof VTimeInput>
 

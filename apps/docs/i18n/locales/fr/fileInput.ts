@@ -30,7 +30,8 @@ export default {
         hint: "Une ligne d'aide sous le champ, à gauche du compteur. Elle est liée au champ pour les technologies d'assistance.",
         placeholder:
           "Ce que dit le champ tant que rien n'est choisi. Il retombe sur le dictionnaire du design system.",
-        clearable: 'Propose une croix qui vide la sélection.',
+        clearable:
+          "Propose une croix qui vide la sélection. Elle vaut plus la peine ici que sur un champ ordinaire : ce que contient un sélecteur ne s'efface pas en tapant, la croix est donc le seul retour en arrière après un mauvais choix.",
         vModel:
           "Toujours une LISTE de fichiers, que plusieurs soient permis ou non, jamais un fichier seul. La forme ne dépend pas d'une prop : vous n'avez donc jamais à restreindre une union que TypeScript ne sait pas discriminer.",
       },
