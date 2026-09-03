@@ -12,6 +12,13 @@
     // `src/index.ts` imports its CSS for its side effect alone: this is what catches a
     // path typo there, which would otherwise ship a component with no styles.
     "noUncheckedSideEffectImports": true,
+    // What makes that import RESOLVE, through the `styles/index.d.css.ts` companion
+    // next to the sheet: `tsconfig.build.json` carries `types: []`, so `vite/client`
+    // and its `declare module '*.css'` are out of scope there and the flag above has
+    // nothing to resolve the import with — TS2307 on every `pnpm build`, which is
+    // also what `predev` runs before the docs start. A wildcard declaration would
+    // silence it too, but a wildcard matches ANY path, the typo included.
+    "allowArbitraryExtensions": true,
     // NOT `noUnusedLocals`/`noUnusedParameters`: vue-tsc does not count a template
     // string ref (`ref="fileEl"`) as a use of the binding, so both flag a correct SFC
     // idiom. ESLint's `@typescript-eslint/no-unused-vars` reads the template properly
