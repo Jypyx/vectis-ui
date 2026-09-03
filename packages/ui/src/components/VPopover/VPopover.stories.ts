@@ -87,7 +87,6 @@ const meta = {
   args: {
     placement: 'bottom-start',
     mode: 'auto',
-    surface: true,
   },
   render: (args) => ({
     components: { VPopover, VButton, VTypography },
@@ -221,7 +220,7 @@ export const Placements: Story = {
         "
       >
         <template v-for="(placement, index) in placements" :key="index">
-          <VPopover v-if="placement" :placement="placement" :surface="args.surface">
+          <VPopover v-if="placement" :placement="placement" :bare="args.bare">
             <template #trigger="{ triggerProps }">
               <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ placement }}</VButton>
             </template>
@@ -279,12 +278,12 @@ export const InteractiveContent: Story = {
 }
 
 /**
- * `surface: false` removes the decoration (`.v-panel`): the consumer provides its
- * own. This is the mode taken by the DS panels that have their own chrome —
- * VTooltip (inverted contrast), VDateInput and VTimeInput.
+ * `bare` removes the decoration (`.v-panel`): the consumer provides its own. This is
+ * the mode taken by the DS panel that has its own chrome — VTooltip, whose contrast
+ * is inverted.
  */
 export const WithoutSurface: Story = {
-  args: { surface: false },
+  args: { bare: true },
   render: (args) => ({
     components: { VPopover, VButton },
     setup: () => ({ args, t }),

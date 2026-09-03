@@ -7,8 +7,8 @@
  *
  * What it carries is deliberately only the PLUMBING every panel of the design system
  * needs: the popover element and how it opens, the bridge between the browser's own
- * open state and `v-model:open`, the anchoring and the placement, and an optional
- * surface — the background, border and shadow of a panel.
+ * open state and `v-model:open`, the anchoring and the placement, and the surface a
+ * panel is drawn on — its background, border and shadow, which `bare` strips away.
  *
  * What it carries NOT is just as deliberate: no ARIA role, no keyboard, no focus
  * management and no rule about when to close. Those are exactly what makes a menu
@@ -86,10 +86,11 @@ interface PopoverProps {
    */
   anchor?: string
   /**
-   * Gives the panel the look of a surface: background, border, shadow and rounded
-   * corners. Turn it off for a panel that brings its own, as VDatePicker does.
+   * Strips the panel of the design system's surface: no background, no border, no
+   * shadow and no rounded corners. It is what a panel whose content brings its own
+   * asks for, as VDatePicker does.
    */
-  surface?: boolean
+  bare?: boolean
 }
 
 const props = withDefaults(defineProps<PopoverProps>(), {
@@ -97,7 +98,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   placement: 'bottom-start',
   mode: 'auto',
   anchor: undefined,
-  surface: true,
+  bare: false,
 })
 
 /**
@@ -193,7 +194,7 @@ defineExpose({
       ref="panelEl"
       :popover="mode"
       class="v-overlay v-popover-panel v-floating"
-      :class="{ 'v-panel': surface }"
+      :class="{ 'v-panel': !bare }"
       :data-placement="placement"
       :style="panelStyle"
       v-bind="$attrs"

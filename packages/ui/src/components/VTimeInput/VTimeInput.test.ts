@@ -92,6 +92,15 @@ describe('VTimeInput — read-only', () => {
     expect(slider.getAttribute('aria-label')).toBe('Hour')
     expect(slider.getAttribute('aria-valuenow')).toBe('9')
     expect(container.querySelector('input')?.getAttribute('aria-expanded')).toBe('true')
+    // TRAP — VTimePicker paints no background, border or shadow of its own: the panel
+    // takes all of it from `.v-panel`, which VPopover sets on any panel it is not told
+    // is `bare`. Nothing else guards it — jsdom evaluates no styles, and the play
+    // function asserts the padding, which comes from the `.v-popover-panel
+    // .v-time-input-panel` compound and survives the loss of the class. Without this
+    // assertion, a `bare` slipping in leaves the dial floating transparent over the
+    // page, and every check in the repo stays green.
+    const panel = container.querySelector('.v-time-input-panel') as HTMLElement
+    expect(panel.classList.contains('v-panel')).toBe(true)
   })
 
   it('works on a draft: nothing is emitted before OK', async () => {
@@ -377,6 +386,10 @@ describe('VTimeInput — list mode', () => {
     expect(options[0]?.textContent?.trim()).toBe('0:00')
     const selected = options.find((o) => o.getAttribute('aria-selected') === 'true')
     expect(selected?.dataset.value).toBe('14:30')
+    // The list panel takes the same surface as the dial one, from the same VPopover.
+    expect(
+      (container.querySelector('.v-time-input-list') as HTMLElement).classList.contains('v-panel'),
+    ).toBe(true)
   })
 
   it('commits directly on click and closes (no draft, no OK)', async () => {

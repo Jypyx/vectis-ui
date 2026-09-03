@@ -125,6 +125,21 @@ describe('VDateInput — read-only', () => {
     expect(getByRole('grid')).toBeTruthy()
   })
 
+  it('the panel is drawn on the shared surface', async () => {
+    // TRAP — VDatePicker paints no background, border or shadow of its own: the panel
+    // takes all of it from `.v-panel`, which VPopover sets on any panel it is not told
+    // is `bare`. Nothing else guards it — jsdom evaluates no styles, and the play
+    // function asserts the padding, which comes from the `.v-popover-panel
+    // .v-date-input-panel` compound and survives the loss of the class. Without this
+    // assertion, a `bare` slipping in leaves the calendar floating transparent over the
+    // page, and every check in the repo stays green.
+    const { container } = mount({ modelValue: JUNE })
+    await fireEvent.click(container.querySelector('.v-date-input-control') as HTMLElement)
+    await nextTick()
+    const panel = container.querySelector('.v-date-input-panel') as HTMLElement
+    expect(panel.classList.contains('v-panel')).toBe(true)
+  })
+
   it('selects a date, updates the model and closes (single)', async () => {
     const { container, emitted, getByRole } = mount({ modelValue: JUNE })
     await fireEvent.click(container.querySelector('.v-date-input-control') as HTMLElement)

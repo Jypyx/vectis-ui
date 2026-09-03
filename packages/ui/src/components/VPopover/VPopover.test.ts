@@ -29,8 +29,8 @@ describe('VPopover', () => {
     expect(panel.classList.contains('v-panel')).toBe(true)
   })
 
-  it('surface=false removes the decoration (the consumer supplies its own)', () => {
-    const { container } = renderHarness('<VPopover :surface="false">Contenu</VPopover>')
+  it('bare removes the decoration (the consumer supplies its own)', () => {
+    const { container } = renderHarness('<VPopover bare>Contenu</VPopover>')
     expect(panelOf(container).classList.contains('v-panel')).toBe(false)
   })
 

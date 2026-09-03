@@ -140,7 +140,7 @@ function onKeydown(event: KeyboardEvent) {
       mode="manual"
       anchor="--tooltip-anchor"
       :placement="placement"
-      :surface="false"
+      bare
       role="tooltip"
       class="v-tooltip-panel"
     >
@@ -176,7 +176,7 @@ function onKeydown(event: KeyboardEvent) {
 
      The selector is written as a compound of two classes that both land on this same
      element, even though the panel class it guards against — `.v-panel` — is never
-     present here, VTooltip asking for no surface. It is written that way so it cannot
+     present here, VTooltip asking for a `bare` panel. It is written that way so it cannot
      break the day that prop changes: at equal specificity the winner between two
      component sheets is decided by the order the consumer's bundler happens to
      produce, which is nobody's decision. */

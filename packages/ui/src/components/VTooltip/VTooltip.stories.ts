@@ -86,8 +86,8 @@ export const OpenOnFocus: Story = {
 
     /*
      * `.v-popover-panel.v-tooltip-panel`: the compound is what makes the panel's own
-     * chrome immune to `.v-panel`'s, at equal specificity, the day `surface` flips
-     * (VTooltip passes false today). If the compound stopped matching, every
+     * chrome immune to `.v-panel`'s, at equal specificity, the day `bare` flips
+     * (VTooltip passes it today). If the compound stopped matching, every
      * declaration below it would go with it — the padding first.
      */
     await expect(getComputedStyle(tooltip).padding).toBe('4px 8px')

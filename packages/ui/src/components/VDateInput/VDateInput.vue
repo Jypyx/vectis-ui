@@ -650,7 +650,6 @@ const close = () => closeAndFocus()
       mode="manual"
       anchor="--date-input-anchor"
       :placement="placement"
-      surface
       role="dialog"
       :aria-label="label ?? m.dateInput.label"
       class="v-date-input-panel"
@@ -709,8 +708,8 @@ const close = () => closeAndFocus()
     font-variant-numeric: tabular-nums;
   }
 
-  /* `position-anchor` and the chrome come from VPopover (the `anchor` and `surface`
-     props, the latter setting `.v-panel`): only the dimensions are left here, which
+  /* `position-anchor` and the chrome come from VPopover (the `anchor` prop, and the
+     `.v-panel` it sets on any panel that is not `bare`): only the dimensions are left here, which
      `panel.css` deliberately does not carry. The padding is cancelled — VDatePicker handles
      its own breathing room; compounded with `.v-popover-panel` (VPopover puts both
      classes on the same element) because `.v-panel` declares `padding` too, and at

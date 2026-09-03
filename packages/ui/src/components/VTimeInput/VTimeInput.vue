@@ -696,7 +696,6 @@ function onEndIcon() {
       mode="manual"
       anchor="--time-input-anchor"
       :placement="placement"
-      surface
       :role="isList ? 'listbox' : 'dialog'"
       :class="isList ? 'v-time-input-list v-control' : 'v-time-input-panel'"
       :data-size="isList ? size : undefined"

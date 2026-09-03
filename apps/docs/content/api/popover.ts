@@ -13,7 +13,7 @@ export default {
         { name: 'placement', type: 'PopoverPlacement', default: "'bottom-start'" },
         { name: 'mode', type: "'auto' | 'manual'", default: "'auto'" },
         { name: 'anchor', type: 'string' },
-        { name: 'surface', type: 'boolean', default: 'true' },
+        { name: 'bare', type: 'boolean', default: 'false' },
         { name: 'v-model:open', key: 'vModelOpen', type: 'boolean', default: 'false' },
       ],
       slots: [
