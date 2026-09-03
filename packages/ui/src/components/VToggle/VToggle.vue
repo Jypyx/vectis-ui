@@ -43,10 +43,10 @@ interface ToggleProps {
    */
   mandatory?: boolean
   /**
-   * Joins the items into one segmented control. Turning it off leaves them as separate
-   * buttons with a gap between them.
+   * Leaves the items as separate buttons with a gap between them. Left out, they are
+   * joined into one segmented control.
    */
-  attached?: boolean
+  detached?: boolean
   /** Whether the items run across the page or down it. */
   orientation?: ToggleOrientation
   /**
@@ -77,7 +77,7 @@ interface ToggleProps {
 const props = withDefaults(defineProps<ToggleProps>(), {
   multiple: false,
   mandatory: false,
-  attached: true,
+  detached: false,
   orientation: 'horizontal',
   variant: 'ghost',
   tone: 'accent',
@@ -194,8 +194,8 @@ function onKeydown(event: KeyboardEvent) {
        The role is needed for the plain container, and simply repeats what
        VButtonGroup already sets when the row is joined. -->
   <component
-    :is="attached ? VButtonGroup : 'div'"
-    v-bind="attached ? { orientation } : { 'data-orientation': orientation }"
+    :is="detached ? 'div' : VButtonGroup"
+    v-bind="detached ? { 'data-orientation': orientation } : { orientation }"
     class="v-toggle"
     role="group"
     :aria-label="ariaLabel"

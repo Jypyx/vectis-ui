@@ -17,8 +17,8 @@ export default {
           'Ce qui est écrit entre deux touches. Une chaîne vide donne la convention macOS, où les symboles se suivent simplement.',
         listen:
           "Écoute réellement la combinaison et la rapporte. Désactivé par défaut : un composant dont le métier est d'afficher un raccourci ne doit pas capturer le clavier de la page sans qu'on le lui demande.",
-        preventDefault:
-          "Pendant l'écoute, empêche le navigateur de faire ce que la combinaison fait normalement, ce qui est tout l'intérêt d'en reprendre une.",
+        allowDefault:
+          "Pendant l'écoute, laisse le navigateur continuer de faire ce que la combinaison fait normalement. Sans lui, le navigateur est arrêté, ce qui est tout l'intérêt de reprendre une combinaison.",
         allowInInput:
           "Pendant l'écoute, se déclenche même quand le lecteur est en train de saisir dans un champ. Désactivé par défaut, pour qu'un raccourci ne parte pas au milieu d'une phrase.",
         label:

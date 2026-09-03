@@ -10,14 +10,14 @@ export default {
         subtitle:
           'A second line under it, for the constraints in plain words: kinds, sizes, how many.',
         icon: 'The large icon at the top of the zone.',
-        showBrowse:
-          'Shows the separator and the browse button under the instruction. Hiding them changes the nature of the zone: it then becomes the control itself, a real button, so Enter, Space and the focus come from the platform rather than from a container that merely reacts to clicks.',
+        hideBrowse:
+          'Hides the separator and the browse button under the instruction. That changes the nature of the zone: it then becomes the control itself, a real button, so Enter, Space and the focus come from the platform rather than from a container that merely reacts to clicks.',
         browseLabel:
           'The wording of the browse button. It falls back to the design system dictionary.',
         preview:
           'Where the files taken are listed: under the zone, or beside it, which folds back underneath when the component is narrow, following the width it was given rather than the width of the window. By default nothing is listed at all.',
-        thumbnails:
-          'Shows a thumbnail for each image in that list. Every image is given a temporary address, created in the browser only and released as soon as the file leaves the list or the component goes away. Turning it off shows the kind icon instead, the way out when a list holds many images or very large ones.',
+        hideThumbnails:
+          'Shows the kind icon for every file in that list, images included, the way out when a list holds many images or very large ones. Left out, an image is shown as a thumbnail: it is given a temporary address, created in the browser only and released as soon as the file leaves the list or the component goes away.',
         typeIcons: 'Replaces the icon of one or more kinds of file.',
         removeIcon: 'The icon of the button removing a file from the list.',
         multiple:

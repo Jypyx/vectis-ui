@@ -77,7 +77,7 @@ describe('VFilePicker', () => {
   })
 
   it('becomes the control itself — a real <button> — once the browse button is hidden', () => {
-    const { zone } = renderUpload({ showBrowse: false })
+    const { zone } = renderUpload({ hideBrowse: true })
 
     expect(zone.tagName).toBe('BUTTON')
     expect(zone.getAttribute('type')).toBe('button')
@@ -90,7 +90,7 @@ describe('VFilePicker', () => {
   it.each([{ disabled: true }, { readonly: true }])(
     'disables the zone-as-control natively under %o',
     (props) => {
-      const { zone } = renderUpload({ showBrowse: false, ...props })
+      const { zone } = renderUpload({ hideBrowse: true, ...props })
       expect((zone as HTMLButtonElement).disabled).toBe(true)
     },
   )
@@ -212,7 +212,7 @@ describe('VFilePicker preview list', () => {
   it('never renders inside the zone, not even when the zone is a button', () => {
     const { zone } = renderUpload({
       preview: 'bottom',
-      showBrowse: false,
+      hideBrowse: true,
       multiple: true,
       modelValue: files,
     })
@@ -305,8 +305,8 @@ describe('VFilePicker thumbnails', () => {
     expect(second!.querySelector('[data-icon]')!.getAttribute('data-icon')).toBe('picture_as_pdf')
   })
 
-  it('creates no object URL at all when `thumbnails` is off', async () => {
-    renderUpload({ preview: 'bottom', thumbnails: false, modelValue: [png()] })
+  it('creates no object URL at all under `hideThumbnails`', async () => {
+    renderUpload({ preview: 'bottom', hideThumbnails: true, modelValue: [png()] })
     await nextTick()
 
     expect(URL.createObjectURL).not.toHaveBeenCalled()
@@ -448,7 +448,7 @@ describe('VFilePicker dev warnings', () => {
 
   it('stays silent once the zone is the control, where the label is legitimate', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    renderUpload({ showBrowse: false }, { 'aria-label': 'Attachments' })
+    renderUpload({ hideBrowse: true }, { 'aria-label': 'Attachments' })
     expect(warn).not.toHaveBeenCalled()
   })
 })

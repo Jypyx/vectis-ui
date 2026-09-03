@@ -16,8 +16,8 @@ export default {
         maxFiles: 'Combien de fichiers peuvent être choisis au plus.',
         counter: 'Affiche ce qui a été choisi sous le champ, « 3 fichiers (1,2 Mo) ».',
         attachIcon: "L'icône en fin de champ, qui ouvre la boîte de dialogue de fichiers.",
-        droppable:
-          'Accepte les fichiers déposés sur le composant, en plus de ceux choisis par la boîte de dialogue.',
+        noDrop:
+          'Refuse les fichiers déposés sur le composant : seule la boîte de dialogue en ajoute alors.',
         size: 'La hauteur du champ : 32, 40 ou 48 pixels.',
         compact:
           'Retire 4px à la hauteur, en laissant le rembourrage, le texte et les icônes tels quels.',

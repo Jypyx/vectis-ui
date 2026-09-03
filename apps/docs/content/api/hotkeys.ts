@@ -17,7 +17,7 @@ export default {
         { name: 'platform', type: 'HotkeysPlatform' },
         { name: 'separator', type: 'string', default: "'+'" },
         { name: 'listen', type: 'boolean', default: 'false' },
-        { name: 'preventDefault', type: 'boolean', default: 'true' },
+        { name: 'allowDefault', type: 'boolean', default: 'false' },
         { name: 'allowInInput', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
       ],

@@ -75,10 +75,11 @@ interface HotkeysProps {
    */
   listen?: boolean
   /**
-   * While listening, stops the browser from doing whatever the combination normally
-   * does — which is the entire point of taking over something like ⌘K.
+   * While listening, lets the browser go on doing whatever the combination normally
+   * does. Left out, the browser is stopped — which is the entire point of taking over
+   * something like ⌘K.
    */
-  preventDefault?: boolean
+  allowDefault?: boolean
   /**
    * While listening, fires even when the reader is typing in a field. It is off by
    * default, so a shortcut cannot fire in the middle of a sentence.
@@ -99,7 +100,7 @@ const props = withDefaults(defineProps<HotkeysProps>(), {
   platform: undefined,
   separator: '+',
   listen: false,
-  preventDefault: true,
+  allowDefault: false,
   allowInInput: false,
   label: undefined,
 })
@@ -180,7 +181,7 @@ function onKeydown(event: KeyboardEvent) {
   if (!props.listen || event.repeat) return
   if (!props.allowInInput && isEditableTarget(event.target)) return
   if (!matchesEvent(event, tokens.value, platform.value)) return
-  if (props.preventDefault) event.preventDefault()
+  if (!props.allowDefault) event.preventDefault()
   emit('trigger', event)
 }
 

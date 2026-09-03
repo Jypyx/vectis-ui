@@ -10,14 +10,14 @@ export default {
         subtitle:
           'Une seconde ligne dessous, pour les contraintes en clair : genres, tailles, nombre.',
         icon: 'La grande icône en haut de la zone.',
-        showBrowse:
-          "Affiche le séparateur et le bouton de parcours sous la consigne. Les masquer change la NATURE de la zone : elle devient alors le contrôle elle-même, un vrai bouton, si bien qu'Entrée, Espace et le focus viennent de la plateforme plutôt que d'un conteneur qui se contente de réagir aux clics.",
+        hideBrowse:
+          "Masque le séparateur et le bouton de parcours sous la consigne. Cela change la NATURE de la zone : elle devient alors le contrôle elle-même, un vrai bouton, si bien qu'Entrée, Espace et le focus viennent de la plateforme plutôt que d'un conteneur qui se contente de réagir aux clics.",
         browseLabel:
           'Le libellé du bouton de parcours. Il retombe sur le dictionnaire du design system.',
         preview:
           "Où les fichiers pris sont listés : sous la zone, ou à côté, auquel cas la liste repasse dessous quand le COMPOSANT est étroit, en suivant la largeur qu'on lui a donnée et non celle de la fenêtre. Par défaut, rien n'est listé du tout.",
-        thumbnails:
-          "Affiche une vignette pour chaque image de cette liste. Chaque image reçoit une adresse temporaire, créée dans le navigateur seulement et libérée dès que le fichier quitte la liste ou que le composant disparaît. Le couper affiche l'icône de genre à la place, la porte de sortie quand une liste contient beaucoup d'images, ou de très grandes.",
+        hideThumbnails:
+          "Affiche l'icône de genre pour chaque fichier de cette liste, images comprises : la porte de sortie quand une liste contient beaucoup d'images, ou de très grandes. Sans lui, une image est montrée en vignette : elle reçoit une adresse temporaire, créée dans le navigateur seulement et libérée dès que le fichier quitte la liste ou que le composant disparaît.",
         typeIcons: "Remplace l'icône d'un ou plusieurs genres de fichiers.",
         removeIcon: "L'icône du bouton qui retire un fichier de la liste.",
         multiple:

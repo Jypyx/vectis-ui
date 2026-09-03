@@ -138,8 +138,9 @@ keyboard, and a page listing fifty shortcuts must not install fifty listeners.
 Modifiers are matched **exactly**, never "at least": `mod+k` deliberately stays silent on
 `mod+shift+k`, otherwise the two could not coexist in the same application.
 
-- **`prevent-default`** (default `true`) calls `preventDefault()` on a match. That is usually the
-  point of taking over `⌘K`, which the browser otherwise routes to its own address bar.
+- **`allow-default`** lets the browser go on doing what the combination normally does. Left out, a
+  match is cancelled — usually the point of taking over `⌘K`, which the browser otherwise routes to
+  its own address bar.
 - **`allow-in-input`** (default `false`) decides whether the shortcut stays live while the focus is
   in an `<input>`, a `<textarea>`, a `<select>` or a `contenteditable`. Non-text inputs — a
   checkbox, a radio, a button — never count as a text field.

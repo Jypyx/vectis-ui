@@ -31,7 +31,7 @@ decides the markup:
 
 - with the browse button shown (the default), the zone is a plain container. Clicking it opens the
   dialog as a convenience, and the **button** is what carries focus and the keyboard;
-- with `showBrowse: false`, the separator and the button disappear and the zone becomes the
+- with `hideBrowse`, the separator and the button disappear and the zone becomes the
   control itself — a real `<button>`, so Enter, Space, focus and the whole inertness of `disabled`
   come from the platform rather than from JavaScript.
 
@@ -64,7 +64,7 @@ Thumbnails are object URLs, created on the client only and revoked as soon as th
 model or the component unmounts. They are therefore absent from the server render and from the
 first client render, which is what keeps hydration identical: the type icon shows until then.
 
-Set `thumbnails: false` when a list holds many, or very large, images — the point is not the bytes
+Set `hideThumbnails` when a list holds many, or very large, images — the point is not the bytes
 (the files are already in memory) but the decoded bitmaps. The `#thumbnail` slot is the other
 escape hatch: a server-side preview, a video poster, a format no browser decodes.
 

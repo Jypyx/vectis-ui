@@ -14,10 +14,10 @@ always rendered `solid` (in the group's `tone`), the others `ghost` or `outline`
 
 <Controls of={VToggleStories.Default} />
 
-## Attached or detached
+## Joined or detached
 
-By default the items are **attached** inside a `VButtonGroup` (a segmented control, merged
-borders). `attached: false` separates them with a gutter, each button regaining its rounded
+By default the items are joined inside a `VButtonGroup` (a segmented control, merged
+borders). `detached` separates them with a gutter, each button regaining its rounded
 corners.
 
 <Canvas of={VToggleStories.Variants} />
@@ -61,7 +61,7 @@ propagate to every item.
 
 ## Orientation
 
-`orientation="vertical"` stacks the items — attached (a horizontal seam) or detached (widths
+`orientation="vertical"` stacks the items — joined (a horizontal seam) or detached (widths
 equalized).
 
 <Canvas of={VToggleStories.Vertical} />

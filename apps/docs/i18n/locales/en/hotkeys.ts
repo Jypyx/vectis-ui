@@ -17,8 +17,8 @@ export default {
           'What is written between two caps. An empty string gives the macOS convention, where the symbols simply follow one another.',
         listen:
           "Actually listens for the combination and reports it. It is off by default: a component whose job is to display a shortcut must not capture the page's keyboard without being asked.",
-        preventDefault:
-          'While listening, stops the browser from doing whatever the combination normally does, which is the entire point of taking one over.',
+        allowDefault:
+          'While listening, lets the browser go on doing whatever the combination normally does. Left out, the browser is stopped, which is the entire point of taking a combination over.',
         allowInInput:
           'While listening, fires even when the reader is typing in a field. It is off by default, so a shortcut cannot fire in the middle of a sentence.',
         label:

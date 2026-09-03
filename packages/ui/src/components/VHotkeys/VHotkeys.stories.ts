@@ -71,7 +71,7 @@ const meta = {
     attached: { control: 'boolean' },
     compact: { control: 'boolean' },
     listen: { control: 'boolean' },
-    preventDefault: { control: 'boolean' },
+    allowDefault: { control: 'boolean' },
     allowInInput: { control: 'boolean' },
     keys: { control: 'text' },
     separator: { control: 'text' },
@@ -85,7 +85,6 @@ const meta = {
     compact: false,
     separator: '+',
     listen: false,
-    preventDefault: true,
     allowInInput: false,
   },
   render: (args) => ({

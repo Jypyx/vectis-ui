@@ -8,8 +8,8 @@ export default {
         multiple: 'Allows several items to be chosen at once, which makes the value a list.',
         mandatory:
           'Refuses to let the last chosen item be given up, so that something is always selected once something has been. It is a guard and nothing more: it selects nothing on its own at the start.',
-        attached:
-          'Joins the items into one segmented control. Turning it off leaves them as separate buttons with a gap between them.',
+        detached:
+          'Leaves the items as separate buttons with a gap between them. Left out, they are joined into one segmented control.',
         orientation: 'Whether the items run across the page or down it.',
         variant:
           'How the unselected items are drawn. A selected item is always filled, whatever this says.',

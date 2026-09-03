@@ -109,12 +109,12 @@ interface FilePickerProps {
   /** The large icon at the top of the zone. */
   icon?: IconSource
   /**
-   * Shows the separator and the browse button under the instruction. Hiding them
-   * changes the zone's nature: it then becomes the control ITSELF, a real button, so
-   * Enter, Space and the focus come from the platform rather than from a container that
-   * merely reacts to clicks.
+   * Hides the separator and the browse button under the instruction. That changes the
+   * zone's nature: it then becomes the control ITSELF, a real button, so Enter, Space
+   * and the focus come from the platform rather than from a container that merely
+   * reacts to clicks.
    */
-  showBrowse?: boolean
+  hideBrowse?: boolean
   /** The wording of the browse button. It falls back to the design system dictionary. */
   browseLabel?: string
   /**
@@ -127,14 +127,14 @@ interface FilePickerProps {
    */
   preview?: FilePickerPreview
   /**
-   * Shows a thumbnail for each image in that list. Every image is given a temporary
-   * address, created in the browser only and released as soon as the file leaves the
-   * list or the component goes away.
+   * Shows the kind icon for every file in that list, images included — the way out when
+   * a list holds many images, or very large ones.
    *
-   * Turning it off shows the kind icon for every file instead — the way out when a list
-   * holds many images, or very large ones.
+   * Left out, an image is shown as a thumbnail: it is given a temporary address, created
+   * in the browser only and released as soon as the file leaves the list or the
+   * component goes away.
    */
-  thumbnails?: boolean
+  hideThumbnails?: boolean
   /** Replaces the icon of one or more kinds of file. */
   typeIcons?: Partial<Record<FileKind, IconSource>>
   /** The icon of the button removing a file from the list. */
@@ -166,10 +166,10 @@ defineOptions({ inheritAttrs: false })
 const props = withDefaults(defineProps<FilePickerProps>(), {
   subtitle: undefined,
   icon: () => cloudUploadIcon,
-  showBrowse: true,
+  hideBrowse: false,
   browseLabel: undefined,
   preview: false,
-  thumbnails: true,
+  hideThumbnails: false,
   typeIcons: undefined,
   removeIcon: () => closeIcon,
   multiple: false,
@@ -284,7 +284,7 @@ const {
 const zoneEl = ref<HTMLElement | null>(null)
 const listEl = ref<HTMLUListElement | null>(null)
 /** The zone becomes the control exactly when there is no button inside to be one. */
-const zoneIsControl = computed(() => !props.showBrowse)
+const zoneIsControl = computed(() => props.hideBrowse)
 const showList = computed(() => props.preview !== false && model.value.length > 0)
 
 /**
@@ -367,10 +367,6 @@ async function removeAt(index: number) {
  *
  * The map is made reactive rather than held in a plain reference, which is what lets a
  * single row re-render when its address is ready, instead of replacing the whole map.
- *
- * TRAP — it is called `thumbUrls` and NOT `thumbnails`. Every top-level binding of a
- * `<script setup>` is exposed to the template, where it would SHADOW the prop of the
- * same name — the same trap VHotkeys' `listening` flag avoids.
  */
 const thumbUrls = reactive(new Map<File, string>())
 
@@ -397,7 +393,7 @@ function syncThumbnails() {
   // created at all. This gate — and not a warning — is what makes the default
   // configuration cost strictly nothing.
   const wanted = new Set(
-    props.thumbnails && props.preview !== false ? model.value.filter(isThumbable) : [],
+    !props.hideThumbnails && props.preview !== false ? model.value.filter(isThumbable) : [],
   )
 
   for (const [file, url] of thumbUrls) {
@@ -431,7 +427,7 @@ onMounted(syncThumbnails)
  * than replacing it: the walk stops at a File, which is neither a plain object nor a
  * collection, so it never descends past the array itself.
  */
-watch([model, () => props.thumbnails, () => props.preview], syncThumbnails, { deep: true })
+watch([model, () => props.hideThumbnails, () => props.preview], syncThumbnails, { deep: true })
 // Released BEFORE the component is torn down and never after — the same rule `useTimer`
 // and VHotkeys follow.
 onBeforeUnmount(() => {
@@ -471,11 +467,11 @@ if (isDev) {
         '[VFilePicker] `required` lands on the hidden file input, which is not focusable: the browser blocks submission with no visible message. Validate the v-model yourself.',
       )
     if (
-      props.showBrowse &&
+      !props.hideBrowse &&
       (attrs['aria-label'] !== undefined || attrs['aria-labelledby'] !== undefined)
     )
       console.warn(
-        '[VFilePicker] an aria-label on the zone is inert while the browse button is shown: the zone is a plain container then, and axe reports aria-prohibited-attr. Name the zone through `title`, or set `showBrowse: false` to make the zone itself the control.',
+        '[VFilePicker] an aria-label on the zone is inert while the browse button is shown: the zone is a plain container then, and axe reports aria-prohibited-attr. Name the zone through `title`, or set `hide-browse` to make the zone itself the control.',
       )
   })
 }
@@ -556,7 +552,7 @@ defineExpose({
           <slot name="subtitle">{{ subtitle }}</slot>
         </VTypography>
 
-        <template v-if="showBrowse">
+        <template v-if="!hideBrowse">
           <!-- Deliberately not hidden from screen readers: "or" is real text, and it
                reads naturally between the instruction and the button. The two rules on
                either side of it are pseudo-elements, and therefore decorative by

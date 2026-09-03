@@ -16,8 +16,7 @@ export default {
         maxFiles: 'How many files may be chosen at most.',
         counter: 'Shows how much has been chosen under the field, "3 files (1.2 MB)".',
         attachIcon: 'The icon at the end of the field, which opens the file dialog.',
-        droppable:
-          'Accepts files dropped onto the component, as well as chosen through the dialog.',
+        noDrop: 'Refuses files dropped onto the component: only the dialog then adds any.',
         size: 'The height of the field: 32, 40 or 48 pixels.',
         compact:
           'Takes 4px off the height, leaving the padding, the text and the icons as they are.',

@@ -58,11 +58,11 @@ valid file.
 
 <Canvas of={VFileInputStories.Accept} />
 
-## Drag & drop (`droppable`)
+## Drag & drop (`noDrop`)
 
 Files dropped on the component go through the same acceptance pipeline as the dialog. While a drag
 hovers, the field is highlighted by redefining the very variable that carries its border colour, so
-the drag state and the focus state can never disagree. `droppable: false` opts out, and dropping is
+the drag state and the focus state can never disagree. `noDrop` opts out, and dropping is
 inert when `disabled` or `readonly`.
 
 <Canvas of={VFileInputStories.DragAndDrop} />

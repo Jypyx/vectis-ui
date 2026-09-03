@@ -303,13 +303,13 @@ describe('VHotkeys — listen', () => {
     expect(emitted().trigger).toBeUndefined()
   })
 
-  it('preventDefault is applied by default and disarmed by the prop', async () => {
+  it('the browser is stopped by default, and let through by allowDefault', async () => {
     const { rerender } = render(VHotkeys, {
       props: { keys: 'mod+k', platform: 'windows', listen: true },
     })
     expect(keydown({ key: 'k', ctrlKey: true }).defaultPrevented).toBe(true)
 
-    await rerender({ preventDefault: false })
+    await rerender({ allowDefault: true })
     expect(keydown({ key: 'k', ctrlKey: true }).defaultPrevented).toBe(false)
   })
 

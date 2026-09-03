@@ -72,8 +72,8 @@ interface FileInputProps {
   counter?: boolean
   /** The icon at the end of the field, which opens the file dialog. */
   attachIcon?: IconSource
-  /** Accepts files dropped onto the component, as well as chosen through the dialog. */
-  droppable?: boolean
+  /** Refuses files dropped onto the component: only the dialog then adds any. */
+  noDrop?: boolean
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: 'sm' | 'md' | 'lg'
   /** Takes 4px off the height, leaving the padding, the text and the icons as they are. */
@@ -120,7 +120,7 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   maxFiles: undefined,
   counter: false,
   attachIcon: () => attachFileIcon,
-  droppable: true,
+  noDrop: false,
   size: 'md',
   compact: false,
   disabled: false,
@@ -352,7 +352,7 @@ function clearValue() {
 /* Files may be dropped on the component itself; there is no separate drop area here —
    that is what VFilePicker is for. */
 const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop(
-  () => props.droppable && !props.disabled && !props.readonly,
+  () => !props.noDrop && !props.disabled && !props.readonly,
   acceptFiles,
 )
 

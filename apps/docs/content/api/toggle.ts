@@ -11,7 +11,7 @@ export default {
       props: [
         { name: 'multiple', type: 'boolean', default: 'false' },
         { name: 'mandatory', type: 'boolean', default: 'false' },
-        { name: 'attached', type: 'boolean', default: 'true' },
+        { name: 'detached', type: 'boolean', default: 'false' },
         { name: 'orientation', type: 'ToggleOrientation', default: "'horizontal'" },
         { name: 'variant', type: 'ToggleVariant', default: "'ghost'" },
         { name: 'tone', type: 'ToggleTone', default: "'accent'" },

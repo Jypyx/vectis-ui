@@ -62,7 +62,6 @@ const meta = {
   args: {
     multiple: false,
     mandatory: false,
-    attached: true,
     orientation: 'horizontal',
     variant: 'ghost',
     tone: 'accent',
@@ -121,7 +120,7 @@ export const Default: Story = {
 }
 
 export const Detached: Story = {
-  args: { attached: false },
+  args: { detached: true },
 }
 
 export const Variants: Story = {
@@ -129,7 +128,7 @@ export const Variants: Story = {
     components: { VToggle, VToggleItem },
     setup: () => ({
       variants: ['ghost', 'outline'],
-      attachments: [true, false],
+      detachments: [false, true],
       selection: ref('centre'),
       t,
     }),
@@ -137,10 +136,10 @@ export const Variants: Story = {
       <div style="display: grid; gap: 16px; justify-items: start">
         <template v-for="v in variants" :key="v">
           <VToggle
-            v-for="a in attachments"
-            :key="v + a"
+            v-for="d in detachments"
+            :key="v + d"
             :variant="v"
-            :attached="a"
+            :detached="d"
             :label="t.alignment"
             v-model="selection"
           >
@@ -288,7 +287,7 @@ export const Vertical: Story = {
           <VToggleItem value="centre" :label="t.centre" />
           <VToggleItem value="right" :label="t.right" />
         </VToggle>
-        <VToggle orientation="vertical" :attached="false" variant="outline" :label="t.alignment" v-model="selection">
+        <VToggle orientation="vertical" detached variant="outline" :label="t.alignment" v-model="selection">
           <VToggleItem value="left" :label="t.left" />
           <VToggleItem value="centre" :label="t.centre" />
           <VToggleItem value="right" :label="t.right" />

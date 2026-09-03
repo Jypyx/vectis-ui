@@ -268,7 +268,7 @@ export const Accept: Story = {
 /**
  * Dragging over the component highlights the field by redefining the very
  * variable that carries its border colour, so the drag state and the focus state
- * can never disagree. `droppable: false` opts out.
+ * can never disagree. `noDrop` opts out.
  */
 export const DragAndDrop: Story = {
   args: { multiple: true },

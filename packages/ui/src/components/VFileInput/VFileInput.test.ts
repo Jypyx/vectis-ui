@@ -366,7 +366,7 @@ describe('VFileInput drag & drop', () => {
     expect(emitted('reject').at(-1)).toMatchObject([{ reason: 'type' }])
   })
 
-  it.each([{ disabled: true }, { readonly: true }, { droppable: false }])(
+  it.each([{ disabled: true }, { readonly: true }, { noDrop: true }])(
     'is inert under %o',
     async (props) => {
       const { container, emitted } = renderPicker(props)

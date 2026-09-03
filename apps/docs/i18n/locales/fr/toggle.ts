@@ -9,8 +9,8 @@ export default {
           'Permet de choisir plusieurs items à la fois, ce qui fait de la valeur une liste.',
         mandatory:
           "Refuse d'abandonner le dernier item choisi, pour que quelque chose reste toujours sélectionné une fois que ça l'a été. C'est un garde-fou et rien de plus : il ne sélectionne rien de lui-même au départ.",
-        attached:
-          'Assemble les items en un seul contrôle segmenté. Le couper les laisse en boutons séparés avec un écart entre eux.',
+        detached:
+          'Laisse les items en boutons séparés avec un écart entre eux. Sans lui, ils sont assemblés en un seul contrôle segmenté.',
         orientation: 'Si les items courent en travers de la page ou de haut en bas.',
         variant:
           'Comment les items NON sélectionnés sont dessinés. Un item sélectionné est toujours plein, quoi que dise cette prop.',

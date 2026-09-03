@@ -17,7 +17,7 @@ export default {
         { name: 'maxFiles', type: 'number' },
         { name: 'counter', type: 'boolean', default: 'false' },
         { name: 'attachIcon', type: 'IconSource', default: 'attach_file' },
-        { name: 'droppable', type: 'boolean', default: 'true' },
+        { name: 'noDrop', type: 'boolean', default: 'false' },
         { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },

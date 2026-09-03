@@ -82,14 +82,14 @@ describe('VToggle', () => {
   })
 
   describe('structure', () => {
-    it('attached (the default): the items are DIRECT children of the VButtonGroup (the seam)', () => {
+    it('joined (the default): the items are DIRECT children of the VButtonGroup (the seam)', () => {
       const { container } = mount()
       expect(container.querySelector('.v-toggle.v-button-group')).not.toBeNull()
       // structural guard: an intervening wrapper would silently break the seam
       expect(container.querySelector('.v-button-group > .v-toggle-item')).not.toBeNull()
     })
 
-    it("attached: the orientation travels through VButtonGroup's prop", () => {
+    it("joined: the orientation travels through VButtonGroup's prop", () => {
       const { container } = mount({ toggleAttrs: 'orientation="vertical"' })
       expect(container.querySelector('.v-button-group')?.getAttribute('data-orientation')).toBe(
         'vertical',
@@ -97,7 +97,7 @@ describe('VToggle', () => {
     })
 
     it('detached: a plain div carries the role and data-orientation', () => {
-      const { container } = mount({ toggleAttrs: ':attached="false" orientation="vertical"' })
+      const { container } = mount({ toggleAttrs: 'detached orientation="vertical"' })
       expect(container.querySelector('.v-button-group')).toBeNull()
       const group = container.querySelector('.v-toggle')
       expect(group?.getAttribute('role')).toBe('group')

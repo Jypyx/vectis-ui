@@ -149,14 +149,14 @@ export const Default: Story = {
 }
 
 /**
- * `showBrowse: false` keeps the top half alone. Drag & drop is not reachable from
+ * `hideBrowse` keeps the top half alone. Drag & drop is not reachable from
  * a keyboard, so the zone then becomes the control ITSELF — a real `<button>`,
  * which brings Enter, Space, focus and the disabled state along for free. It is
  * exactly because a button may not contain a button that the preview list is
  * always rendered outside the zone.
  */
 export const WithoutBrowse: Story = {
-  args: { showBrowse: false, preview: 'bottom', multiple: true },
+  args: { hideBrowse: true, preview: 'bottom', multiple: true },
   render: (args) => ({
     components: { VFilePicker },
     setup: () => ({ args, t, files: ref<File[]>([]) }),
