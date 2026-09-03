@@ -87,5 +87,7 @@ A lone button keeps all four rounded corners (no joint). Long labels stay aligne
   it an `aria-label` describing the group (e.g. "Alignment", "Formatting").
 - Each `VButton`/`VIconButton` keeps its own semantics and accessible name; a `VIconButton` is
   still required to carry a `label`.
-- The hovered/focused/active button rises above its neighbours (`z-index`): its focus ring and
-  border are never clipped by the adjacent segment.
+- The focused button rises above its neighbours (`z-index`), so the segment next to it never
+  clips its focus ring. It is the only state that rises: a raised segment paints over the pixel
+  its neighbour overlaps it by, which is the seam, and on hover that would rub the separation
+  out under the pointer.

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
-import { expect, within } from 'storybook/test'
+import { expect, userEvent, within } from 'storybook/test'
 
 import { storyText } from '../../stories/storyText'
 import VIconButton from '../VIconButton/VIconButton.vue'
@@ -253,5 +253,27 @@ export const Playground: Story = {
       await expect(button).toHaveAttribute('data-variant', 'outline')
       await expect(button).toHaveAttribute('data-tone', 'neutral')
     }
+
+    // A focused segment rises for its ring, and it is the only state that does: a raised
+    // segment paints over the one pixel its neighbour overlaps it by, and that pixel is
+    // the seam. The hover half of the rule cannot be asserted here, `:hover` coming
+    // from the browser's own input pipeline rather than from a synthetic pointer event.
+    await userEvent.tab()
+    await expect(buttons[0]).toHaveFocus()
+    await expect(getComputedStyle(buttons[0]!).zIndex).toBe('1')
+    await expect(getComputedStyle(buttons[1]!).zIndex).toBe('auto')
+
+    // The seam is a 1px BORDER on a box of its own, and it runs the WHOLE length of the
+    // segment: the neighbour's own border would be mitred where it meets the transparent
+    // top and bottom ones and end in a notch, and a background would be forced to Canvas
+    // under Windows forced-colors, taking the separation away. `content` is what proves
+    // the box is generated at all, the properties below computing just as well on a
+    // pseudo-element the browser never builds.
+    const seam = getComputedStyle(buttons[1]!, '::before')
+    await expect(seam.content).toBe('""')
+    await expect(seam.borderInlineStartStyle).toBe('solid')
+    await expect(seam.borderInlineStartWidth).toBe('1px')
+    await expect(seam.backgroundImage).toBe('none')
+    await expect(parseFloat(seam.height)).toBeCloseTo(buttons[1]!.getBoundingClientRect().height, 1)
   },
 }

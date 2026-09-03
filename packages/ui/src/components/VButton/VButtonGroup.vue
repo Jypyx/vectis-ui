@@ -117,17 +117,16 @@ provide(buttonGroupKey, {
     flex-direction: column;
   }
 
-  /* The negative margin pulls each segment onto its neighbour so their two 1px
-     borders collapse into one, and that single line is then coloured as a neutral
-     seam: it draws the separation the filled variants would otherwise lack (their
-     border is transparent) and unifies the joint between two outlined ones.
+  /* The negative margin pulls each segment onto its neighbour so their two 1px borders
+     collapse into one line, over which the seam below is then laid: it draws the
+     separation the filled variants would otherwise lack (their border is transparent)
+     and unifies the joint between two outlined ones.
 
      Each block is scoped to one orientation on purpose. Left unscoped, the
      horizontal rules would also flatten the side corners and borders in a vertical
      group, where those are precisely the edges that must stay round. */
   .v-button-group[data-orientation='horizontal'] > .v-button:not(:first-child) {
     margin-inline-start: -1px;
-    border-inline-start-color: var(--vectis-color-border);
     border-start-start-radius: 0;
     border-end-start-radius: 0;
   }
@@ -139,7 +138,6 @@ provide(buttonGroupKey, {
 
   .v-button-group[data-orientation='vertical'] > .v-button:not(:first-child) {
     margin-block-start: -1px;
-    border-block-start-color: var(--vectis-color-border);
     border-start-start-radius: 0;
     border-start-end-radius: 0;
   }
@@ -147,6 +145,41 @@ provide(buttonGroupKey, {
   .v-button-group[data-orientation='vertical'] > .v-button:not(:last-child) {
     border-end-start-radius: 0;
     border-end-end-radius: 0;
+  }
+
+  /* The seam is a box of its own, and not the neighbour's own border, because CSS joins
+     two adjacent borders at a MITRE: where a 1px border meets the transparent top and
+     bottom ones of a solid segment, its last pixel is cut on the diagonal and the bar
+     ends in a notch at each end. A box carrying that border on ONE side has no second
+     border to join, so its ends stay square.
+
+     A BORDER and not a background, the VSeparator argument: Windows forced-colors
+     forces a background to Canvas, where the separation would vanish, and a border
+     colour to CanvasText, where it survives.
+
+     Absolute, so the insets resolve against the PADDING box: -1px is exactly the width
+     of the border, which lays the bar over the border area and gives it the full length
+     of the border box. Every segment is positioned so that they all paint in the same
+     phase, in document order, the way they did as plain flex items. */
+  .v-button-group > .v-button {
+    position: relative;
+  }
+
+  .v-button-group > .v-button:not(:first-child)::before {
+    content: '';
+    position: absolute;
+  }
+
+  .v-button-group[data-orientation='horizontal'] > .v-button:not(:first-child)::before {
+    inset-block: -1px;
+    inset-inline-start: -1px;
+    border-inline-start: 1px solid var(--vectis-color-border);
+  }
+
+  .v-button-group[data-orientation='vertical'] > .v-button:not(:first-child)::before {
+    inset-inline: -1px;
+    inset-block-start: -1px;
+    border-block-start: 1px solid var(--vectis-color-border);
   }
 
   /* The elevation belongs to the ROW, not to each segment. Left to the buttons, every
@@ -186,12 +219,18 @@ provide(buttonGroupKey, {
     box-shadow: none;
   }
 
-  /* A button being hovered, focused or pressed rises above its neighbours. Since the
-     segments overlap by one pixel, the one drawn later would otherwise clip its
-     tinted border and, more visibly, cut through its focus ring. */
-  .v-button-group > .v-button:hover,
-  .v-button-group > .v-button:focus-visible,
-  .v-button-group > .v-button:active {
+  /* A FOCUSED segment rises above its neighbours, and it is the ONLY state that does.
+     The ring is drawn outside the border box, so the next segment, painted later, would
+     cut through it along the seam: removing this rule takes the keyboard focus ring away
+     on one side of every segment but the last.
+
+     Hover and active are deliberately not here, and putting them back is a visible bug:
+     segments overlap by one pixel, and that pixel is the neighbour's own border, which
+     is to say the seam. A raised segment paints its background over it, so the
+     separation disappears on the far side of whichever segment the pointer is on, for
+     the whole time it is there. A focused one covers it too, but under a ring that is
+     drawing that edge itself. */
+  .v-button-group > .v-button:focus-visible {
     z-index: 1;
   }
 
