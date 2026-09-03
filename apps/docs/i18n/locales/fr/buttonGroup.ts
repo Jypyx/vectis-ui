@@ -14,7 +14,7 @@ export default {
         compact:
           "Retire 4px à la hauteur de chaque segment. Il l'emporte sur la valeur donnée à un bouton. Omis, chaque bouton garde la sienne.",
         elevated:
-          "Soulève chaque segment de la page avec l'échelle d'ombres, aux conditions de la prop de VButton. Il l'emporte sur la valeur donnée à un bouton. Omis, chaque bouton garde la sienne.",
+          "Soulève la rangée avec l'échelle d'ombres, aux conditions de la prop de VButton. L'ombre est celle de la rangée et non celle de chaque segment, ce qui garde les joints nets : trois ombres qui se chevauchent y dessineraient une bande sombre. Il l'emporte sur la valeur donnée à un bouton. Omis, chaque bouton garde la sienne.",
       },
       slots: {
         default: 'Les VButton et VIconButton à assembler.',

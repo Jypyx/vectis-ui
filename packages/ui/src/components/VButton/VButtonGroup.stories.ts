@@ -150,6 +150,17 @@ export const Elevated: Story = {
       </VButtonGroup>
     `,
   }),
+  // The shadow is the ROW's: three per-segment shadows would each paint one onto the
+  // neighbour they overlap and fill the joints with a dark band. Nothing of this is
+  // observable in jsdom, which lays nothing out and computes no style.
+  play: async ({ canvasElement }) => {
+    const group = within(canvasElement).getByRole('group', { name: 'Alignment' })
+    await expect(getComputedStyle(group).boxShadow).not.toBe('none')
+
+    for (const button of within(group).getAllByRole('button')) {
+      await expect(getComputedStyle(button).boxShadow).toBe('none')
+    }
+  },
 }
 
 export const Vertical: Story = {

@@ -149,6 +149,43 @@ provide(buttonGroupKey, {
     border-end-end-radius: 0;
   }
 
+  /* The elevation belongs to the ROW, not to each segment. Left to the buttons, every
+     one of them casts a shadow onto the neighbour it overlaps, and the joints fill with
+     a dark band instead of the whole reading as one object lifted off the page. So the
+     group takes the shadow and the segments give theirs up, which also means the row
+     rises as a whole when any of it is hovered.
+
+     `:has()` rather than a data attribute on the root: the elevation reaches the
+     buttons either from the group or one by one, and only the buttons know in the end.
+
+     The raised BACKGROUND stays with each button. It is what a ghost or an outline
+     segment is painted on, and in the dark theme it is what the shadow needs in order
+     to have something casting it. */
+  .v-button-group:has(> .v-button[data-elevated]) {
+    border-radius: var(--vectis-radius-interactive);
+    box-shadow: var(--vectis-shadow-sm);
+    transition: box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
+  }
+
+  .v-button-group:has(> .v-button[data-elevated]:hover:not(:disabled, [aria-disabled='true'])) {
+    box-shadow: var(--vectis-shadow-md);
+  }
+
+  /* After the hover rule and at equal specificity, the VButton order: pressing a
+     raised segment settles the row back down. */
+  .v-button-group:has(> .v-button[data-elevated]:active:not(:disabled, [aria-disabled='true'])) {
+    box-shadow: var(--vectis-shadow-sm);
+  }
+
+  /* The class is doubled to reach (0,5,0). VButton's own hover and active shadows are
+     (0,4,0) on this very element, so at equal specificity the winner would be whichever
+     of the two sheets the consumer's bundler happened to put last. */
+  .v-button-group.v-button-group > .v-button[data-elevated],
+  .v-button-group.v-button-group > .v-button[data-elevated]:hover,
+  .v-button-group.v-button-group > .v-button[data-elevated]:active {
+    box-shadow: none;
+  }
+
   /* A button being hovered, focused or pressed rises above its neighbours. Since the
      segments overlap by one pixel, the one drawn later would otherwise clip its
      tinted border and, more visibly, cut through its focus ring. */
@@ -156,6 +193,12 @@ provide(buttonGroupKey, {
   .v-button-group > .v-button:focus-visible,
   .v-button-group > .v-button:active {
     z-index: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .v-button-group:has(> .v-button[data-elevated]) {
+      transition: none;
+    }
   }
 }
 </style>

@@ -40,9 +40,15 @@ One `variant` on the group covers the whole row.
 
 ## Elevation
 
-`elevated` raises every segment, on the terms of `VButton`'s own prop: the shadow scale on all
-four variants, plus the raised surface on `ghost` and `outline`, which have no background of
-their own.
+`elevated` raises the row, on the terms of `VButton`'s own prop: the shadow scale on all four
+variants, plus the raised surface on `ghost` and `outline`, which have no background of their
+own.
+
+The shadow is the ROW's and not each segment's, and that is not a detail: segments overlap by a
+pixel, so three shadows would each fall on the neighbour and fill the joints with a dark band
+instead of lifting one object off the page. The raised background stays with each button, since
+it is what the segment is painted on. Hovering any part of the row therefore raises the whole
+of it.
 
 <Canvas of={VButtonGroupStories.Elevated} />
 

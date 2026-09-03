@@ -14,7 +14,7 @@ export default {
         compact:
           'Takes 4px off the height of every segment. It wins over the value a button inside was given. Left out, each button keeps its own.',
         elevated:
-          "Raises every segment off the page with the shadow scale, on the terms of VButton's own prop. It wins over the value a button inside was given. Left out, each button keeps its own.",
+          "Raises the row off the page with the shadow scale, on the terms of VButton's own prop. The shadow is the row's and not each segment's, which is what keeps the joints clear: three overlapping shadows would draw a dark band down each of them. It wins over the value a button inside was given. Left out, each button keeps its own.",
       },
       slots: {
         default: 'The VButtons and VIconButtons to join together.',
