@@ -45,6 +45,9 @@ const ICONS = [
   'keyboard',
   'record_voice_over',
   'contrast_square',
+  // The pair the Accordion page's icon example swaps, one for the other.
+  'add',
+  'remove',
 ] as const
 
 /** Google's export grid — the library's registry shares it, hence no per-icon viewBox. */

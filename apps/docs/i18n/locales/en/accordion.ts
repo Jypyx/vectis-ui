@@ -2,6 +2,33 @@ export default {
   title: 'Accordion',
   lead: 'Sections that fold. It is built on <code>&lt;details&gt;</code> and <code>&lt;summary&gt;</code>, so the open state, the keyboard behaviour and in-page search all come from the browser.',
 
+  examples: {
+    variants: {
+      title: 'Variants',
+      text: 'Two decorations, chosen on the group. <code>flat</code>, the default, draws nothing at all and lets the accordion sit on the surface behind it; <code>outlined</code> gives it a raised background, a border and rounded corners, so the group reads as a card.',
+    },
+    exclusive: {
+      title: 'One section at a time',
+      text: 'A group keeps a single section open: opening one closes the last, which the browser does on its own once every item shares the same <code>&lt;details&gt;</code> name. The second group sets <code>exclusive</code> to <code>false</code>, and the reader may then keep as many sections open as they like.',
+    },
+    subtitles: {
+      title: 'Subtitles and icons',
+      text: '<code>iconStart</code> places an icon before the title, and <code>subtitle</code> adds a second line under it for a status or a short explanation. Both have a slot counterpart, <code>#start</code> and <code>#subtitle</code>, for when the heading needs markup rather than plain text.',
+    },
+    compact: {
+      title: 'Compact',
+      text: 'Reduced density: every padding loses 4px while the text and the icons keep their size. It is what a settings panel or a sidebar wants, where the sections are short and there are many of them.',
+    },
+    icons: {
+      title: 'Expand and collapse icons',
+      text: "The chevron is replaced by <code>expandIcon</code>. Give a <code>collapseIcon</code> as well and the two are swapped when a section opens, instead of the first being rotated by 180°. Every icon prop takes the same values: one of the library's own icons, an explicit render, or a name the icon set wired into your application answers to, which is how the plus and the minus below are given.",
+    },
+    disabled: {
+      title: 'Disabled sections',
+      text: 'A disabled section can no longer be opened, the keyboard steps over it, and it greys out through the colour tokens. A <code>&lt;summary&gt;</code> has no native <code>disabled</code> attribute, so the component marks it <code>aria-disabled</code> and cancels the click itself.',
+    },
+  },
+
   api: {
     VAccordion: {
       props: {

@@ -30,6 +30,10 @@ export default {
   /* The heading of the section every component page opens on, above its API. It is the same
      word on all forty-four, so it lives here rather than in each page's own catalogue. */
   usage: 'Usage',
+  /* The heading of the section gathering a component's variations, under its Usage example. It
+     is the same word on all forty-four, so it lives here rather than in each page's own
+     catalogue. */
+  examples: 'Examples',
   code: {
     copy: 'Copy the code',
     copied: 'Copied to the clipboard',

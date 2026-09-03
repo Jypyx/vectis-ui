@@ -2,6 +2,33 @@ export default {
   title: 'Accordéon',
   lead: "Des sections qui se replient. Il est construit sur <code>&lt;details&gt;</code> et <code>&lt;summary&gt;</code>, si bien que l'état ouvert, le comportement clavier et la recherche dans la page viennent tous du navigateur.",
 
+  examples: {
+    variants: {
+      title: 'Variantes',
+      text: "Deux décorations, choisies sur le groupe. <code>flat</code>, la valeur par défaut, ne dessine rien et laisse l'accordéon poser sur la surface derrière lui ; <code>outlined</code> lui donne un fond surélevé, une bordure et des coins arrondis, si bien que le groupe se lit comme une carte.",
+    },
+    exclusive: {
+      title: 'Une section à la fois',
+      text: "Un groupe ne garde qu'une section ouverte : en ouvrir une referme la précédente, ce que le navigateur fait seul dès que tous les items partagent un même nom de <code>&lt;details&gt;</code>. Le second groupe met <code>exclusive</code> à <code>false</code>, et le lecteur peut alors en garder autant qu'il veut ouvertes.",
+    },
+    subtitles: {
+      title: 'Sous-titres et icônes',
+      text: '<code>iconStart</code> place une icône avant le titre, et <code>subtitle</code> ajoute une seconde ligne dessous, pour un statut ou une courte explication. Les deux ont un slot équivalent, <code>#start</code> et <code>#subtitle</code>, quand le titre demande du balisage plutôt que du texte simple.',
+    },
+    compact: {
+      title: 'Compact',
+      text: "Densité réduite : chaque rembourrage perd 4px tandis que le texte et les icônes gardent leur taille. C'est ce que veut un panneau de réglages ou une barre latérale, où les sections sont courtes et nombreuses.",
+    },
+    icons: {
+      title: "Icônes d'ouverture et de fermeture",
+      text: "Le chevron est remplacé par <code>expandIcon</code>. Donnez aussi un <code>collapseIcon</code> et les deux sont échangées à l'ouverture, au lieu de pivoter la première de 180°. Toute prop d'icône accepte les mêmes valeurs : une des icônes de la bibliothèque, un rendu explicite, ou un nom auquel répond le jeu d'icônes branché dans votre application, comme le plus et le moins ci-dessous.",
+    },
+    disabled: {
+      title: 'Sections désactivées',
+      text: "Une section désactivée ne peut plus être ouverte, le clavier l'enjambe, et elle se grise par les tokens de couleur. Un <code>&lt;summary&gt;</code> n'a pas d'attribut <code>disabled</code> natif : le composant le marque donc <code>aria-disabled</code> et annule le clic lui-même.",
+    },
+  },
+
   api: {
     VAccordion: {
       props: {
