@@ -17,7 +17,8 @@ export default {
         compact: 'Takes 4px off the height of every button.',
         align:
           'Where the row sits in the space it is given. It only matters in responsive mode, where the row takes the whole width available.',
-        showControls: 'Shows the previous and next buttons on either side of the pages.',
+        hideControls:
+          'Hides the previous and next buttons that otherwise sit on either side of the pages.',
         controlsDisplay: 'Whether those controls show an icon, their label, or both.',
         prevIcon: 'The icon of the previous control.',
         nextIcon: 'The icon of the next control.',

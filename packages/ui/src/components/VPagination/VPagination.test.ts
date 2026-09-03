@@ -220,9 +220,9 @@ describe('VPagination', () => {
   })
 
   describe('controls', () => {
-    it('shows no control with showControls: false', () => {
+    it('hideControls takes both controls out', () => {
       const { container } = render(VPagination, {
-        props: { length: 5, modelValue: 3, showControls: false },
+        props: { length: 5, modelValue: 3, hideControls: true },
       })
 
       expect(container.querySelectorAll('.v-pagination-control')).toHaveLength(0)

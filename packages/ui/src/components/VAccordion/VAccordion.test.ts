@@ -19,8 +19,9 @@ function renderWith(accordionAttrs = '', firstItemAttrs = '') {
   return render(Harness)
 }
 
-const renderAccordion = (exclusive = true) =>
-  renderWith(`:exclusive="${exclusive}"`, 'default-open')
+// The default must MATCH the component's, or `renderAccordion()` below silently exercises
+// the other mode and its assertions go on passing while covering nothing.
+const renderAccordion = (multiple = false) => renderWith(`:multiple="${multiple}"`, 'default-open')
 
 /** Names of the <VIcon> rendered inside an item — `data-icon` is set whatever the
     effective source (embedded SVG, ligature, third-party font). */
@@ -29,15 +30,15 @@ function icones(item: Element) {
 }
 
 describe('VAccordion', () => {
-  it('exclusive mode: the items share the same native name attribute', () => {
-    const { container } = renderAccordion(true)
+  it('one at a time (the default): the items share the same native name attribute', () => {
+    const { container } = renderAccordion(false)
     const [first, second] = [...container.querySelectorAll('details')]
     expect(first?.getAttribute('name')).toBeTruthy()
     expect(first?.getAttribute('name')).toBe(second?.getAttribute('name'))
   })
 
-  it('exclusive=false: no name, multiple items can be open', () => {
-    const { container } = renderAccordion(false)
+  it('multiple: no name, so several items may stay open', () => {
+    const { container } = renderAccordion(true)
     for (const details of container.querySelectorAll('details')) {
       expect(details.hasAttribute('name')).toBe(false)
     }

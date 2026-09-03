@@ -9,7 +9,7 @@ export default {
     },
     exclusive: {
       title: 'Une section à la fois',
-      text: "Un groupe ne garde qu'une section ouverte : en ouvrir une referme la précédente, ce que le navigateur fait seul dès que tous les items partagent un même nom de <code>&lt;details&gt;</code>. Le second groupe met <code>exclusive</code> à <code>false</code>, et le lecteur peut alors en garder autant qu'il veut ouvertes.",
+      text: "Un groupe ne garde qu'une section ouverte : en ouvrir une referme la précédente, ce que le navigateur fait seul dès que tous les items partagent un même nom de <code>&lt;details&gt;</code>. Le second groupe demande <code>multiple</code>, et le lecteur peut alors en garder autant qu'il veut ouvertes.",
     },
     subtitles: {
       title: 'Sous-titres et icônes',
@@ -32,8 +32,8 @@ export default {
   api: {
     VAccordion: {
       props: {
-        exclusive:
-          "Ne garde qu'une section ouverte à la fois : en ouvrir une referme la précédente. Le navigateur s'en charge seul dès que tous les items partagent un même nom de <code>&lt;details&gt;</code>. Mettez <code>false</code> pour laisser le lecteur en garder plusieurs ouvertes.",
+        multiple:
+          'Laisse le lecteur garder plusieurs sections ouvertes à la fois. Sans lui, une seule reste ouverte et en ouvrir une referme la précédente, ce dont le navigateur se charge seul dès que tous les items partagent un même nom de <code>&lt;details&gt;</code>.',
         variant:
           "Comment le groupe est décoré. <code>flat</code> ne dessine rien et laisse l'accordéon poser sur la surface derrière lui ; <code>outlined</code> lui donne un fond surélevé, une bordure et des coins arrondis, si bien qu'il se lit comme une carte.",
         expandIcon:

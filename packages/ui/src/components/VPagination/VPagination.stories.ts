@@ -32,7 +32,6 @@ const meta = {
     size: 'md',
     compact: false,
     align: 'start',
-    showControls: true,
     controlsDisplay: 'icon',
     disabled: false,
     responsive: true,

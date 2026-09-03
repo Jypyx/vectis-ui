@@ -67,8 +67,8 @@ interface PaginationProps {
    */
   align?: 'start' | 'center' | 'end'
 
-  /** Shows the previous and next buttons on either side of the pages. */
-  showControls?: boolean
+  /** Hides the previous and next buttons that otherwise sit on either side of the pages. */
+  hideControls?: boolean
   /** Whether those controls show an icon, their label, or both. */
   controlsDisplay?: 'icon' | 'text' | 'both'
   /** The icon of the previous control: an icon name, or an explicit render. */
@@ -122,7 +122,7 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   size: 'md',
   compact: false,
   align: 'start',
-  showControls: true,
+  hideControls: false,
   controlsDisplay: 'icon',
   prevIcon: () => chevronLeftIcon,
   nextIcon: () => chevronRightIcon,
@@ -271,7 +271,7 @@ function onKeydown(event: KeyboardEvent) {
          why the ellipsis is itself an inert button rather than a plain span: anything
          else between two pills would break the seam. -->
     <component :is="attached ? VButtonGroup : 'div'" class="v-pagination-items">
-      <template v-if="showControls">
+      <template v-if="!hideControls">
         <VIconButton
           v-if="controlsDisplay === 'icon'"
           class="v-pagination-control"
@@ -342,7 +342,7 @@ function onKeydown(event: KeyboardEvent) {
         </VIconButton>
       </template>
 
-      <template v-if="showControls">
+      <template v-if="!hideControls">
         <VIconButton
           v-if="controlsDisplay === 'icon'"
           class="v-pagination-control"

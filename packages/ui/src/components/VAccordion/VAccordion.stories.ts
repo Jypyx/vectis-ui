@@ -94,7 +94,7 @@ const meta = {
   title: 'Components/Accordion',
   component: VAccordion,
   argTypes: {
-    exclusive: { control: 'boolean' },
+    multiple: { control: 'boolean' },
     variant: { control: 'inline-radio', options: ['flat', 'outlined'] },
     compact: { control: 'boolean' },
     expandIcon: { control: 'text' },
@@ -112,7 +112,7 @@ const ITEMS = `
 `
 
 export const Default: Story = {
-  args: { exclusive: true, variant: 'flat', compact: false },
+  args: { variant: 'flat', compact: false },
   render: (args) => ({
     components: { VAccordion, VAccordionItem },
     setup: () => ({ args, t }),
@@ -125,7 +125,7 @@ export const Default: Story = {
     const details = [...canvasElement.querySelectorAll('details')]
     await expect(details[0]?.open).toBe(true)
 
-    // NATIVE exclusive mode (the name attribute): opening the 2nd closes the 1st, with no JS
+    // The NATIVE one-at-a-time mode (the name attribute): opening the 2nd closes the 1st, with no JS
     await userEvent.click(canvas.getByText('How do I customize the theme?'))
     await waitFor(() => expect(details[1]?.open).toBe(true))
     await waitFor(() => expect(details[0]?.open).toBe(false))
@@ -137,7 +137,7 @@ export const MultipleOpen: Story = {
     components: { VAccordion, VAccordionItem },
     setup: () => ({ t }),
     template: `
-      <VAccordion :exclusive="false" style="width: 420px">
+      <VAccordion multiple style="width: 420px">
         <VAccordionItem :title="t.first">{{ t.firstBody }}</VAccordionItem>
         <VAccordionItem :title="t.second">{{ t.secondBody }}</VAccordionItem>
       </VAccordion>

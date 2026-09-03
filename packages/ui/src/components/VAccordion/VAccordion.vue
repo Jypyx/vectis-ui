@@ -6,7 +6,7 @@
  * closing, the keyboard and the accessibility semantics, so there is no
  * JavaScript here keeping track of which section is currently open.
  *
- * In exclusive mode, opening one section automatically closes the others.
+ * Opening one section closes the previous one, unless `multiple` says otherwise.
  */
 
 import { provide, useId } from 'vue'
@@ -18,11 +18,11 @@ import { accordionKey } from './context'
 
 interface AccordionProps {
   /**
-   * Only one item may stay open at a time, so opening one closes the previous one.
-   * The browser does this on its own once every item shares the same `<details>`
-   * name. Set it to `false` to let the reader keep several sections open.
+   * Lets the reader keep several sections open at once. Left out, only one may stay
+   * open and opening one closes the previous one, which the browser does on its own
+   * once every item shares the same `<details>` name.
    */
-  exclusive?: boolean
+  multiple?: boolean
   /**
    * How the group is decorated. `flat`, the default, draws nothing and lets the
    * accordion sit directly on the surface behind it; `outlined` gives it a raised
@@ -48,7 +48,7 @@ interface AccordionProps {
 }
 
 const props = withDefaults(defineProps<AccordionProps>(), {
-  exclusive: true,
+  multiple: false,
   variant: 'flat',
   expandIcon: () => expandMoreIcon,
   collapseIcon: undefined,
@@ -63,7 +63,7 @@ defineSlots<{
 const groupName = useId()
 provide(accordionKey, {
   get name() {
-    return props.exclusive ? groupName : undefined
+    return props.multiple ? undefined : groupName
   },
   get expandIcon() {
     return props.expandIcon

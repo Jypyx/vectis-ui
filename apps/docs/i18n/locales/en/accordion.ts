@@ -9,7 +9,7 @@ export default {
     },
     exclusive: {
       title: 'One section at a time',
-      text: 'A group keeps a single section open: opening one closes the last, which the browser does on its own once every item shares the same <code>&lt;details&gt;</code> name. The second group sets <code>exclusive</code> to <code>false</code>, and the reader may then keep as many sections open as they like.',
+      text: 'A group keeps a single section open: opening one closes the last, which the browser does on its own once every item shares the same <code>&lt;details&gt;</code> name. The second group asks for <code>multiple</code>, and the reader may then keep as many sections open as they like.',
     },
     subtitles: {
       title: 'Subtitles and icons',
@@ -32,8 +32,8 @@ export default {
   api: {
     VAccordion: {
       props: {
-        exclusive:
-          'Keeps a single section open at a time, so opening one closes the last. The browser does this on its own once every item shares a <code>&lt;details&gt;</code> name. Set it to <code>false</code> to let the reader keep several open.',
+        multiple:
+          'Lets the reader keep several sections open at once. Left out, only one stays open and opening one closes the last, which the browser does on its own once every item shares a <code>&lt;details&gt;</code> name.',
         variant:
           'How the group is decorated. <code>flat</code> draws nothing and lets the accordion sit on the surface behind it; <code>outlined</code> gives it a raised background, a border and rounded corners, so it reads as a card.',
         expandIcon:

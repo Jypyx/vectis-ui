@@ -9,7 +9,7 @@ export default {
     {
       name: 'VAccordion',
       props: [
-        { name: 'exclusive', type: 'boolean', default: 'true' },
+        { name: 'multiple', type: 'boolean', default: 'false' },
         { name: 'variant', type: "'flat' | 'outlined'", default: "'flat'" },
         { name: 'expandIcon', type: 'IconSource', default: 'expand_more' },
         { name: 'collapseIcon', type: 'IconSource' },

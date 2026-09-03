@@ -17,7 +17,8 @@ export default {
         compact: 'Retire 4px à la hauteur de chaque bouton.',
         align:
           "Où se place la rangée dans l'espace qu'on lui donne. Cela ne compte qu'en mode responsive, où la rangée prend toute la largeur disponible.",
-        showControls: "Affiche les boutons précédent et suivant de part et d'autre des pages.",
+        hideControls:
+          "Retire les boutons précédent et suivant qui se placent sinon de part et d'autre des pages.",
         controlsDisplay: 'Si ces contrôles montrent une icône, leur libellé, ou les deux.',
         prevIcon: "L'icône du contrôle précédent.",
         nextIcon: "L'icône du contrôle suivant.",

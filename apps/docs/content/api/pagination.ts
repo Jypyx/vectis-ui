@@ -17,7 +17,7 @@ export default {
         { name: 'size', type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'align', type: "'start' | 'center' | 'end'", default: "'start'" },
-        { name: 'showControls', type: 'boolean', default: 'true' },
+        { name: 'hideControls', type: 'boolean', default: 'false' },
         { name: 'controlsDisplay', type: "'icon' | 'text' | 'both'", default: "'icon'" },
         { name: 'prevIcon', type: 'IconSource', default: 'chevron_left' },
         { name: 'nextIcon', type: 'IconSource', default: 'chevron_right' },

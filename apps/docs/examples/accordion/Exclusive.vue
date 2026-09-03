@@ -15,7 +15,7 @@ import { VAccordion, VAccordionItem } from 'vectis-ui'
     </VAccordionItem>
   </VAccordion>
 
-  <VAccordion variant="outlined" :exclusive="false">
+  <VAccordion variant="outlined" multiple>
     <VAccordionItem title="What can I return?" default-open>
       Anything unworn, within thirty days of delivery.
     </VAccordionItem>
