@@ -42,7 +42,7 @@ export default {
       props: {
         variant:
           "Le poids visuel que porte l'action : <code>solid</code> est rempli du ton, <code>soft</code> utilise un fond teinté, <code>outline</code> ne garde qu'une bordure, et <code>ghost</code> ne montre rien jusqu'au survol. Dans un VButtonGroup, c'est le groupe qui en décide, comme de la taille, de la densité et de l'élévation.",
-        tone: "Ce que l'action signifie : <code>accent</code> pour l'action ordinaire, <code>neutral</code> pour une action secondaire, <code>danger</code> pour celle qui détruit quelque chose. Sur un bouton, un ton est une intention, et c'est pourquoi des états comme succès ou avertissement ne sont pas proposés ici. Omis dans un VButtonGroup, il prend celui du groupe, ce qui est tout l'intérêt de ne pas lui donner de valeur par défaut ; seul, le bouton est en <code>accent</code>.",
+        tone: "Ce que l'action signifie : <code>accent</code> pour l'action ordinaire, <code>neutral</code> pour une action secondaire, <code>danger</code> pour celle qui détruit quelque chose. Sur un bouton, un ton est une intention, et c'est pourquoi des états comme succès ou avertissement ne sont pas proposés ici. Omis dans un VButtonGroup, il prend celui du groupe ; seul, le bouton est en <code>accent</code>.",
         elevated:
           "Soulève le bouton de la page avec l'échelle d'ombres, quelle que soit la variante. Un bouton ghost ou outline reçoit en plus une surface surélevée, parce qu'en thème sombre une ombre posée sur le fond de page n'a rien qui la projette.",
         size: "La hauteur du bouton, tirée de l'échelle de tailles partagée par tous les contrôles : 24, 32, 40, 48 et 56 pixels.",

@@ -106,16 +106,24 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
 ]
 
 /**
- * Defaults the extractor can only report as the expression that produced them.
+ * Defaults the extractor cannot print as the value a reader would act on.
  *
- * A reader wants the VALUE, and `EDGE_STEP_DELAY` tells them nothing they can act on. Keyed
- * `Component.prop`, and deliberately a table rather than a rule: each of these is a decision
- * about what the number MEANS, and the day one of them changes the build should not quietly
- * agree with a stale answer here. An entry pointing at a prop that no longer exists is reported.
+ * Two cases land here. A default computed from a constant is reported as the expression that
+ * produced it, and `EDGE_STEP_DELAY` tells nobody anything; and a prop whose default is left
+ * `undefined` so that "not given" stays distinguishable is reported as having none at all,
+ * where the component does have a last resort and applies it (VButton's `tone`, which falls
+ * back to `accent` once its group has had its say).
+ *
+ * Keyed `Component.prop`, and deliberately a table rather than a rule: each of these is a
+ * decision about what the value MEANS, and the day one of them changes the build should not
+ * quietly agree with a stale answer here. An entry pointing at a prop that no longer exists is
+ * reported.
  */
 const DEFAULT_OVERRIDES: Record<string, string> = {
+  'VButton.tone': "'accent'",
   'VCalendar.date': 'today',
   'VCalendar.edgeStepDelay': '800',
+  'VIconButton.tone': "'neutral'",
 }
 
 /** Builds an index of every SFC in the library by its bare name, so no path table is needed. */
