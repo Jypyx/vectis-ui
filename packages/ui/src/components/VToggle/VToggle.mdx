@@ -8,7 +8,8 @@ import * as VToggleStories from './VToggle.stories'
 A group of selectable buttons driven by a **single v-model**. Composed API: `VToggle` wraps
 `VToggleItem` elements, and every item is a `VButton` — hover, focus, disabling and
 `prefers-reduced-motion` all come from it, and no state rule is redefined. The selected item is
-always rendered `solid` (in the group's `tone`), the others `ghost` or `outline`.
+rendered in the group's `tone` (`selectedVariant`, `solid` by default), the others `ghost` or
+`outline`.
 
 <Canvas of={VToggleStories.Default} />
 
@@ -16,11 +17,35 @@ always rendered `solid` (in the group's `tone`), the others `ghost` or `outline`
 
 ## Joined or detached
 
-By default the items are joined inside a `VButtonGroup` (a segmented control, merged
-borders). `detached` separates them with a gutter, each button regaining its rounded
-corners.
+By default the items are joined inside a `VButtonGroup`: one segmented control, drawn as a
+single outer frame with nothing between the segments. `detached` separates them with a gutter,
+each button regaining its rounded corners.
 
 <Canvas of={VToggleStories.Variants} />
+
+## The two appearances
+
+`variant` (`ghost` or `outline`) draws the items that are **not** selected; `selectedVariant`
+draws the one that is, in the group's `tone`:
+
+- **`solid`** (the default): a filled segment, the strongest signal.
+- **`soft`**: the tone as a tinted surface.
+- **`ghost`**: the tone as text alone, leaving the box untouched.
+
+<Canvas of={VToggleStories.SelectedVariants} />
+
+## Divided
+
+A joined row shares its edges with nothing drawn between them: the borders on both sides of every
+joint are cleared, so an `outline` row reads as one frame rather than as three boxes. `divided`
+puts a line back on each shared edge. It is inert under `detached`, where the items are separate
+buttons already.
+
+In an `outline` row a `soft` or `ghost` selection keeps that frame closed. The border VButton
+leaves transparent is restored, in the colour the rest of the row paints, on every edge except
+the ones the segment shares with a neighbour.
+
+<Canvas of={VToggleStories.Divided} />
 
 ## Selection
 
@@ -61,8 +86,8 @@ propagate to every item.
 
 ## Orientation
 
-`orientation="vertical"` stacks the items — joined (a horizontal seam) or detached (widths
-equalized).
+`orientation="vertical"` stacks the items — joined into one frame, whose shared edges are the
+horizontal ones, or detached (widths equalized).
 
 <Canvas of={VToggleStories.Vertical} />
 
@@ -89,5 +114,8 @@ Long labels stay aligned inside the segmented control.
   Home/End **move focus without activating** — activating on focus would toggle values
   unintentionally. Disabled items are skipped.
 - In icon-only mode, set an `aria-label` on the item (it travels through to the rendered button).
+- `selectedVariant="ghost"` tells the selection apart by colour alone. Assistive technology is
+  covered by `aria-pressed`, but a sighted reader is not: pair it with `selectedIconFilled` or a
+  leading icon so the state survives without the colour.
 
 <Canvas of={VToggleStories.Keyboard} />

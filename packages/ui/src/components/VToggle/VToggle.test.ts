@@ -179,6 +179,52 @@ describe('VToggle', () => {
       expect(first?.dataset.variant).toBe('outline')
       expect(first?.dataset.tone).toBe('neutral')
     })
+
+    it('selectedVariant draws the selected item, the others keeping the group variant', () => {
+      const { container } = mount({
+        initial: 'b',
+        toggleAttrs: 'variant="outline" selected-variant="soft"',
+      })
+      const [first, second] = itemsOf(container)
+      expect(second?.dataset.variant).toBe('soft')
+      expect(second?.dataset.tone).toBe('accent')
+      expect(first?.dataset.variant).toBe('outline')
+    })
+  })
+
+  describe('divided', () => {
+    it('the joined row carries no line unless it is asked for', () => {
+      const { container } = mount({ initial: 'a' })
+      expect(container.querySelector('.v-button-group')?.hasAttribute('data-divided')).toBe(false)
+    })
+
+    it('the prop marks the joined root, which is what the seam rule reads', () => {
+      const { container } = mount({ initial: 'a', toggleAttrs: 'divided' })
+      expect(container.querySelector('.v-button-group')?.hasAttribute('data-divided')).toBe(true)
+    })
+
+    it('detached, it is inert: there is no shared edge to draw a line on', () => {
+      const { container } = mount({ initial: 'a', toggleAttrs: 'detached divided' })
+      expect(container.querySelector('.v-toggle')?.hasAttribute('data-divided')).toBe(false)
+    })
+  })
+
+  describe('the row variant on the root', () => {
+    /*
+     * The frame rules need to tell an outline row from a ghost one, and no item can say
+     * it: a selected one carries its OWN variant. Both branches carry the attribute,
+     * since a detached row has a frame to keep closed too.
+     */
+    it('joined and detached alike carry data-variant', () => {
+      const joined = mount({ toggleAttrs: 'variant="outline"' })
+      expect(joined.container.querySelector('.v-toggle')?.getAttribute('data-variant')).toBe(
+        'outline',
+      )
+      joined.unmount()
+
+      const { container } = mount({ toggleAttrs: 'detached variant="outline"' })
+      expect(container.querySelector('.v-toggle')?.getAttribute('data-variant')).toBe('outline')
+    })
   })
 
   describe('context propagation', () => {

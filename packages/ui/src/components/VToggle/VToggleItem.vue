@@ -68,7 +68,7 @@ const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.de
   <VButton
     class="v-toggle-item"
     :aria-pressed="selected ? 'true' : 'false'"
-    :variant="selected ? 'solid' : (toggle?.variant ?? 'ghost')"
+    :variant="selected ? (toggle?.selectedVariant ?? 'solid') : (toggle?.variant ?? 'ghost')"
     :tone="selected ? (toggle?.tone ?? 'accent') : 'neutral'"
     :size="toggle?.size ?? 'md'"
     :compact="toggle?.compact ?? false"

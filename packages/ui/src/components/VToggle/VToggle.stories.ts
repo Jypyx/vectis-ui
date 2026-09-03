@@ -19,6 +19,8 @@ const t = storyText({
     following: 'Following',
     saved: 'Saved',
     alignmentCompact: 'Alignment (compact)',
+    withoutLine: 'Without a line',
+    withLine: 'With a line',
     groupDisabled: 'Group disabled',
     itemDisabled: 'Item disabled',
     periods: 'Periods',
@@ -38,6 +40,8 @@ const t = storyText({
     following: 'Suivis',
     saved: 'Enregistrés',
     alignmentCompact: 'Alignement (compact)',
+    withoutLine: 'Sans trait',
+    withLine: 'Avec trait',
     groupDisabled: 'Groupe désactivé',
     itemDisabled: 'Item désactivé',
     periods: 'Périodes',
@@ -52,6 +56,7 @@ const meta = {
   component: VToggle,
   argTypes: {
     variant: { control: 'inline-radio', options: ['ghost', 'outline'] },
+    selectedVariant: { control: 'inline-radio', options: ['solid', 'soft', 'ghost'] },
     tone: {
       control: 'inline-radio',
       options: ['accent', 'neutral', 'danger'],
@@ -62,8 +67,10 @@ const meta = {
   args: {
     multiple: false,
     mandatory: false,
+    divided: false,
     orientation: 'horizontal',
     variant: 'ghost',
+    selectedVariant: 'solid',
     tone: 'accent',
     size: 'md',
     compact: false,
@@ -151,6 +158,116 @@ export const Variants: Story = {
       </div>
     `,
   }),
+}
+
+export const SelectedVariants: Story = {
+  render: () => ({
+    components: { VToggle, VToggleItem },
+    setup: () => ({
+      selectedVariants: ['solid', 'soft', 'ghost'],
+      variants: ['ghost', 'outline'],
+      selection: ref('centre'),
+      t,
+    }),
+    template: `
+      <div style="display: grid; gap: 16px; justify-items: start">
+        <template v-for="s in selectedVariants" :key="s">
+          <VToggle
+            v-for="v in variants"
+            :key="s + v"
+            :variant="v"
+            :selected-variant="s"
+            :label="t.alignment"
+            v-model="selection"
+          >
+            <VToggleItem value="left" :label="t.left" />
+            <VToggleItem value="centre" :label="t.centre" />
+            <VToggleItem value="right" :label="t.right" />
+          </VToggle>
+        </template>
+      </div>
+    `,
+  }),
+  /*
+   * `soft` and `ghost` leave VButton's border transparent, which would open a gap in an
+   * outline row's frame for the width of the selected segment. None of this is visible
+   * in jsdom, which computes no styles at all.
+   */
+  play: async ({ canvasElement }) => {
+    const TRANSPARENT = 'rgba(0, 0, 0, 0)'
+    const selectedIn = (row: string, selected: string) =>
+      canvasElement.querySelector<HTMLElement>(
+        `.v-toggle[data-variant="${row}"] > .v-toggle-item[aria-pressed="true"][data-variant="${selected}"]`,
+      ) as HTMLElement
+
+    for (const variant of ['soft', 'ghost']) {
+      const item = selectedIn('outline', variant)
+      const neighbour = item.previousElementSibling as HTMLElement
+      const frame = getComputedStyle(item)
+
+      // the frame closes over the selection, in the colour the rest of the row paints
+      await expect(frame.borderBlockStartColor).toBe(
+        getComputedStyle(neighbour).borderBlockStartColor,
+      )
+      await expect(frame.borderBlockEndColor).not.toBe(TRANSPARENT)
+      // and the edge it SHARES stays clear: the frame is the outside of the row
+      await expect(frame.borderInlineStartColor).toBe(TRANSPARENT)
+    }
+
+    // a ghost row has no frame, so nothing is restored there
+    await expect(getComputedStyle(selectedIn('ghost', 'soft')).borderBlockStartColor).toBe(
+      TRANSPARENT,
+    )
+  },
+}
+
+export const Divided: Story = {
+  render: () => ({
+    components: { VToggle, VToggleItem },
+    setup: () => ({ plain: ref('centre'), lined: ref('centre'), t }),
+    template: `
+      <div style="display: grid; gap: 16px; justify-items: start">
+        <VToggle variant="outline" :label="t.withoutLine" v-model="plain">
+          <VToggleItem value="left" :label="t.left" />
+          <VToggleItem value="centre" :label="t.centre" />
+          <VToggleItem value="right" :label="t.right" />
+        </VToggle>
+        <VToggle divided variant="outline" :label="t.withLine" v-model="lined">
+          <VToggleItem value="left" :label="t.left" />
+          <VToggleItem value="centre" :label="t.centre" />
+          <VToggleItem value="right" :label="t.right" />
+        </VToggle>
+      </div>
+    `,
+  }),
+  /*
+   * Undivided, an outline row is a single frame: the seam is not generated at all, and
+   * NEITHER side of a shared edge is painted, while the outer edges stay. jsdom computes
+   * no styles, so the whole rule is only reachable from here.
+   *
+   * The middle item is the selected one, which is why the edges are read off the two
+   * that sit around it: a solid segment has no border of its own to look at.
+   */
+  play: async ({ canvasElement }) => {
+    const TRANSPARENT = 'rgba(0, 0, 0, 0)'
+    const itemsOf = (row: HTMLElement) => [...row.querySelectorAll<HTMLElement>('.v-toggle-item')]
+    const [plain, lined] = [...canvasElement.querySelectorAll<HTMLElement>('.v-toggle')]
+
+    const undivided = itemsOf(plain as HTMLElement).map((el) => getComputedStyle(el))
+    await expect(
+      getComputedStyle(itemsOf(plain as HTMLElement)[1] as HTMLElement, '::before').content,
+    ).toBe('none')
+    await expect(undivided[0]?.borderInlineEndColor).toBe(TRANSPARENT)
+    await expect(undivided[2]?.borderInlineStartColor).toBe(TRANSPARENT)
+    await expect(undivided[0]?.borderInlineStartColor).not.toBe(TRANSPARENT)
+    await expect(undivided[2]?.borderInlineEndColor).not.toBe(TRANSPARENT)
+
+    const divided = itemsOf(lined as HTMLElement).map((el) => getComputedStyle(el))
+    await expect(
+      getComputedStyle(itemsOf(lined as HTMLElement)[1] as HTMLElement, '::before').content,
+    ).not.toBe('none')
+    await expect(divided[0]?.borderInlineEndColor).not.toBe(TRANSPARENT)
+  },
 }
 
 export const Tones: Story = {

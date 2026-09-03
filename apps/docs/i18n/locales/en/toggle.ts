@@ -10,9 +10,13 @@ export default {
           'Refuses to let the last chosen item be given up, so that something is always selected once something has been. It is a guard and nothing more: it selects nothing on its own at the start.',
         detached:
           'Leaves the items as separate buttons with a gap between them. Left out, they are joined into one segmented control.',
+        divided:
+          'Draws a line between the joined items. Left out, they share their edges with nothing between them. It has no effect under <code>detached</code>, where the items are separate buttons already.',
         orientation: 'Whether the items run across the page or down it.',
         variant:
-          'How the unselected items are drawn. A selected item is always filled, whatever this says.',
+          'How the unselected items are drawn. What the selected one takes is <code>selectedVariant</code>.',
+        selectedVariant:
+          "How the selected item is drawn, in the group's tone: filled with <code>solid</code>, tinted with <code>soft</code>, or the colour of its text alone with <code>ghost</code>.",
         tone: 'The colour a selected item takes. The others stay neutral.',
         size: 'The height of the items, from the scale shared by every control.',
         compact: 'Takes 4px off the height of every item.',

@@ -11,9 +11,13 @@ export default {
           "Refuse d'abandonner le dernier item choisi, pour que quelque chose reste toujours sélectionné une fois que ça l'a été. C'est un garde-fou et rien de plus : il ne sélectionne rien de lui-même au départ.",
         detached:
           'Laisse les items en boutons séparés avec un écart entre eux. Sans lui, ils sont assemblés en un seul contrôle segmenté.',
+        divided:
+          'Trace un trait entre les items assemblés. Sans lui, ils partagent leurs bords sans rien entre les deux. Sans effet sous <code>detached</code>, où les items sont déjà des boutons séparés.',
         orientation: 'Si les items courent en travers de la page ou de haut en bas.',
         variant:
-          'Comment les items NON sélectionnés sont dessinés. Un item sélectionné est toujours plein, quoi que dise cette prop.',
+          'Comment les items NON sélectionnés sont dessinés. Ce que prend celui qui est sélectionné relève de <code>selectedVariant</code>.',
+        selectedVariant:
+          "Comment l'item sélectionné est dessiné, dans le ton du groupe : plein avec <code>solid</code>, teinté avec <code>soft</code>, ou la couleur de son seul texte avec <code>ghost</code>.",
         tone: 'La couleur que prend un item sélectionné. Les autres restent neutres.',
         size: "La hauteur des items, tirée de l'échelle partagée par tous les contrôles.",
         compact: 'Retire 4px à la hauteur de chaque item.',
