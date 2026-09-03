@@ -7,8 +7,9 @@ export default {
       props: {
         label:
           "Ce que fait le bouton, en mots. Cela devient l'<code>aria-label</code> et c'est la seule chose dont dispose un lecteur d'écran : nommez donc l'action, « Fermer », « Mois suivant », plutôt que l'image.",
-        variant: "Le poids visuel que porte le bouton, sur l'échelle de VButton.",
-        tone: "Ce que l'action signifie, en couleur. Un bouton réduit à une icône relève le plus souvent du décor, et c'est pourquoi il part en neutre là où VButton part en accent.",
+        variant:
+          "Le poids visuel que porte le bouton, sur l'échelle de VButton. Dans un VButtonGroup, c'est le groupe qui en décide.",
+        tone: "Ce que l'action signifie, en couleur. Un bouton réduit à une icône relève le plus souvent du décor, et c'est pourquoi il part en neutre là où VButton part en accent. Omis dans un VButtonGroup, il prend celui du groupe.",
         elevated:
           'Soulève le bouton avec une ombre, et une surface surélevée sur ghost et outline.',
         size: "La taille du carré, tirée de l'échelle partagée par tous les contrôles.",

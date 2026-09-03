@@ -41,8 +41,8 @@ export default {
     VButton: {
       props: {
         variant:
-          'How much visual weight the action carries: <code>solid</code> is filled with the tone, <code>soft</code> uses a tinted background, <code>outline</code> keeps only a border, and <code>ghost</code> shows nothing until it is hovered.',
-        tone: 'What the action means: <code>accent</code> for the ordinary one, <code>neutral</code> for a secondary one, <code>danger</code> for one that destroys something. On a button a tone is an intention, which is why states such as success or warning are not offered here.',
+          'How much visual weight the action carries: <code>solid</code> is filled with the tone, <code>soft</code> uses a tinted background, <code>outline</code> keeps only a border, and <code>ghost</code> shows nothing until it is hovered. Inside a VButtonGroup the group decides it, as it does the size, the density and the elevation.',
+        tone: "What the action means: <code>accent</code> for the ordinary one, <code>neutral</code> for a secondary one, <code>danger</code> for one that destroys something. On a button a tone is an intention, which is why states such as success or warning are not offered here. Left out inside a VButtonGroup it takes the group's tone, which is the point of not defaulting it; on its own the button is <code>accent</code>.",
         elevated:
           'Raises the button off the page with the shadow scale, whatever the variant. A ghost or outline button also gains a raised surface, because in the dark theme a shadow lying on the page background has nothing casting it.',
         size: 'The height of the button, taken from the size scale shared by every control: 24, 32, 40, 48 and 56 pixels.',

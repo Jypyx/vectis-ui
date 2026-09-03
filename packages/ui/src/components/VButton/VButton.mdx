@@ -30,6 +30,10 @@ Those two tones do exist, on the components that report a state: `VChip`, `VToas
 - **soft**: tinted background + tinted text, between solid and ghost. It is named after the token
   it paints, `--tone-bg-soft`.
 
+Inside a `VButtonGroup` these two props are arbitrated by the row: the group's `variant` wins
+over the button's, and its `tone` only stands in for a button that names none. The same goes for
+`size`, `compact` and `elevated`.
+
 <Canvas of={VButtonStories.Variants} />
 
 ## Elevation

@@ -9,9 +9,12 @@
  * picture says nothing to a screen reader, so the label is what names the action —
  * without it the button would be announced as just "button".
  */
+import { computed, inject } from 'vue'
 import type { ButtonHTMLAttributes } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
+import type { ButtonTone } from '../VButton/VButton.vue'
+import { buttonGroupKey } from '../VButton/context'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
@@ -23,11 +26,15 @@ interface IconButtonProps {
    * month") rather than the picture.
    */
   label: string
-  /** How much visual weight the button carries — the VButton variants. `ghost` by default. */
+  /**
+   * How much visual weight the button carries — the VButton variants. `ghost` by default,
+   * and inside a VButtonGroup the group's own variant wins over it.
+   */
   variant?: 'solid' | 'outline' | 'ghost' | 'soft'
   /**
-   * What the action means, in colour — the VButton tones, `neutral` by default. An icon-only
-   * button is usually secondary, which is why it starts neutral where VButton starts accent.
+   * What the action means, in colour — the VButton tones. An icon-only button is usually
+   * secondary, which is why it starts neutral where VButton starts accent. Left out inside
+   * a VButtonGroup it takes the group's tone; on its own it is `neutral`.
    */
   tone?: 'accent' | 'neutral' | 'danger'
   /** Raises the button with a shadow, and a raised surface on ghost and outline. */
@@ -56,9 +63,11 @@ interface IconButtonProps {
   iconFilled?: boolean
 }
 
-withDefaults(defineProps<IconButtonProps>(), {
+const props = withDefaults(defineProps<IconButtonProps>(), {
   variant: 'ghost',
-  tone: 'neutral',
+  // No default, so that an absent tone stays distinguishable from an explicit one (see
+  // the resolution below and VButton's own `tone`).
+  tone: undefined,
   elevated: false,
   size: 'md',
   compact: false,
@@ -77,6 +86,16 @@ defineSlots<{
    */
   default(): unknown
 }>()
+
+/*
+ * The ONE prop a VButtonGroup cannot arbitrate on its own. The four others are handed
+ * to VButton as they are and the group wins there over whatever arrives, so nothing has
+ * to be resolved here; the tone goes the other way, the button's own answer first, and
+ * VButton would take `accent` as its last resort where an icon-only button takes
+ * `neutral`. Resolving it here is what keeps that difference.
+ */
+const group = inject(buttonGroupKey, null)
+const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'neutral')
 </script>
 
 <template>
@@ -90,7 +109,7 @@ defineSlots<{
     class="v-icon-button"
     :data-shape="shape"
     :variant="variant"
-    :tone="tone"
+    :tone="resolvedTone"
     :elevated="elevated"
     :size="size"
     :compact="compact"

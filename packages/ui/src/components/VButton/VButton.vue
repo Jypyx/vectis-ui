@@ -13,9 +13,15 @@
  * neither focused nor followed — receives `aria-disabled` for assistive technology,
  * and has the click handlers it was given filtered out. Together these reproduce
  * the complete inertness that a <button disabled> gets for free.
+ *
+ * Inside a VButtonGroup it reads what the row decided: the group wins on the four
+ * props that give the control its shape, the button keeps its own tone. The rule and
+ * its reasons live in `context.ts`.
  */
-import { computed, useAttrs } from 'vue'
+import { computed, inject, useAttrs } from 'vue'
 import type { ButtonHTMLAttributes } from 'vue'
+
+import { buttonGroupKey } from './context'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -26,25 +32,35 @@ interface ButtonProps {
   /**
    * How much visual weight the button carries: `solid` is filled with the tone,
    * `soft` uses a tinted background, `outline` keeps only a border, and `ghost`
-   * shows nothing until it is hovered.
+   * shows nothing until it is hovered. Inside a VButtonGroup the group's own variant
+   * wins over this one.
    */
   variant?: 'solid' | 'outline' | 'ghost' | 'soft'
   /**
    * What the action means: `accent` for the ordinary one, `neutral` for a secondary
    * one, `danger` for one that destroys something. On a button a tone is an
    * intention, which is why states such as success or warning are not offered here.
+   * Left out inside a VButtonGroup it takes the group's tone, which is the point of
+   * not defaulting it here; on its own it is `accent`.
    */
   tone?: 'accent' | 'neutral' | 'danger'
   /**
    * Raises the button off the page: a shadow that grows on hover and settles back
    * when pressed, whatever the variant. On `ghost` and `outline`, which have no
    * background of their own, it also paints the raised surface — in the dark theme
-   * a shadow lying straight on the page background has nothing casting it.
+   * a shadow lying straight on the page background has nothing casting it. Inside a
+   * VButtonGroup the group's own value wins over this one.
    */
   elevated?: boolean
-  /** The height of the button, taken from the size scale shared by every control. */
+  /**
+   * The height of the button, taken from the size scale shared by every control.
+   * Inside a VButtonGroup the group's own size wins over this one.
+   */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  /** Takes 4px off the height, leaving the padding, the text and the icons as they are. */
+  /**
+   * Takes 4px off the height, leaving the padding, the text and the icons as they
+   * are. Inside a VButtonGroup the group's own value wins over this one.
+   */
   compact?: boolean
   /**
    * Turns the button into an `<a>` pointing at this address. A disabled or loading
@@ -76,9 +92,23 @@ interface ButtonProps {
   iconFilled?: boolean
 }
 
+/*
+ * The three unions a VButtonGroup has to name in order to hand them down. They are
+ * DERIVED from the props above rather than declared and then referenced there: the
+ * documentation site prints a type as the source spells it (apps/docs, build-api.ts),
+ * so writing `variant?: ButtonVariant` would replace the four values with a name the
+ * reader cannot look up on the page they are most likely to be reading.
+ */
+export type ButtonVariant = NonNullable<ButtonProps['variant']>
+export type ButtonTone = NonNullable<ButtonProps['tone']>
+export type ButtonSize = NonNullable<ButtonProps['size']>
+
 const props = withDefaults(defineProps<ButtonProps>(), {
   variant: 'solid',
-  tone: 'accent',
+  // TRAP — the only one of the five with no default. `tone` is the prop a button keeps
+  // against its group, so `undefined` has to stay distinguishable from an explicit
+  // `accent`, which would otherwise silence the group for every button in the row.
+  tone: undefined,
   elevated: false,
   size: 'md',
   compact: false,
@@ -106,6 +136,17 @@ defineSlots<{
 defineOptions({ inheritAttrs: false })
 
 const attrs = useAttrs()
+const group = inject(buttonGroupKey, null)
+
+// The shape of the segmented control belongs to the row: the group is read first, and a
+// group that named nothing hands the prop straight back. The tone goes the other way,
+// the button's own answer first (see context.ts).
+const resolvedVariant = computed<ButtonVariant>(() => group?.variant ?? props.variant)
+const resolvedSize = computed<ButtonSize>(() => group?.size ?? props.size)
+const resolvedCompact = computed(() => group?.compact ?? props.compact)
+const resolvedElevated = computed(() => group?.elevated ?? props.elevated)
+const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'accent')
+
 const isLink = computed(() => props.href !== undefined)
 const isInert = computed(() => props.disabled || props.loading)
 const isInertLink = computed(() => isLink.value && isInert.value)
@@ -126,11 +167,11 @@ const passedAttrs = computed(() => {
     :type="isLink ? undefined : type"
     :disabled="isLink ? undefined : disabled || loading"
     :aria-disabled="isInertLink ? 'true' : undefined"
-    :data-variant="variant"
-    :data-tone="tone"
-    :data-elevated="elevated ? '' : undefined"
-    :data-size="size"
-    :data-compact="compact ? '' : undefined"
+    :data-variant="resolvedVariant"
+    :data-tone="resolvedTone"
+    :data-elevated="resolvedElevated ? '' : undefined"
+    :data-size="resolvedSize"
+    :data-compact="resolvedCompact ? '' : undefined"
     :data-loading="loading ? '' : undefined"
     :aria-busy="loading || undefined"
   >

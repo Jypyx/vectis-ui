@@ -10,7 +10,7 @@ export default {
       name: 'VButton',
       props: [
         { name: 'variant', type: "'solid' | 'outline' | 'ghost' | 'soft'", default: "'solid'" },
-        { name: 'tone', type: "'accent' | 'neutral' | 'danger'", default: "'accent'" },
+        { name: 'tone', type: "'accent' | 'neutral' | 'danger'" },
         { name: 'elevated', type: 'boolean', default: 'false' },
         { name: 'size', type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },

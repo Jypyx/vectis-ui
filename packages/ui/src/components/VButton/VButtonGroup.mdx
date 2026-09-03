@@ -6,21 +6,45 @@ import * as VButtonGroupStories from './VButtonGroup.stories'
 # ButtonGroup
 
 Visually joins several `VButton`/`VIconButton` into a **segmented control**: adjacent borders
-merged, rounded corners only at the ends of the group. The whole rendering is CSS (no
-`provide`/`inject`) — each button keeps its own props; setting the same
-`variant`/`tone`/`size` on the children gives a homogeneous result.
+merged, rounded corners only at the ends of the group.
+
+Since the row is one object, how it is drawn is its own decision: `variant`, `tone`, `size`,
+`compact` and `elevated` are set **on the group** and reach every button inside it.
 
 <Canvas of={VButtonGroupStories.Default} />
 
 <Controls of={VButtonGroupStories.Default} />
 
+## What the group decides, and what a button keeps
+
+The arbitration is not symmetric, and the asymmetry is the point:
+
+- `variant`, `size`, `compact` and `elevated` are the **shape** of the control, and the group
+  wins over the value a button was given. A segment of another height, silhouette or elevation
+  no longer lines up with its neighbours, and the merged border stops reading as one object.
+- `tone` is **meaning** rather than shape, so the button wins: its own tone first, the group's
+  next, `accent` last. That is what lets a single destructive action stand out in the row.
+
+A group that names none of them leaves every child exactly as it would have rendered on its own,
+which is also why a nested group (a `VToggle`, say) keeps its own rendering inside another one.
+
+<Canvas of={VButtonGroupStories.ToneOverride} />
+
 ## Variants
 
 The seam between segments adapts: for the filled variants (`solid`/`soft`, transparent border) a
 thin `--vectis-color-border` line materializes the separation; for `outline` it unifies the joint.
-Apply the same `variant` to every button in a group.
+One `variant` on the group covers the whole row.
 
 <Canvas of={VButtonGroupStories.Variants} />
+
+## Elevation
+
+`elevated` raises every segment, on the terms of `VButton`'s own prop: the shadow scale on all
+four variants, plus the raised surface on `ghost` and `outline`, which have no background of
+their own.
+
+<Canvas of={VButtonGroupStories.Elevated} />
 
 ## Vertical orientation
 
@@ -32,14 +56,16 @@ Apply the same `variant` to every button in a group.
 ## Icon toolbar
 
 A group of `VIconButton` forms a compact toolbar. Override the default `role` with
-`role="toolbar"` (fallthrough on the root) and give the group an `aria-label`.
+`role="toolbar"` (fallthrough on the root) and give the group an `aria-label`. An icon button
+reads the group like any other segment, its own `neutral` standing in when the group names no
+tone.
 
 <Canvas of={VButtonGroupStories.WithIconButton} />
 
 ## Sizes
 
-A CSS-only approach: the size goes on **each** button (same values → coherence). The group
-propagates nothing.
+The size is a property of the row, so it is named once, on the group: `size` from the scale
+shared by every control, and `compact` for the 4px it takes off.
 
 <Canvas of={VButtonGroupStories.Sizes} />
 

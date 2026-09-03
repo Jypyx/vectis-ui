@@ -5,29 +5,100 @@
  * their rounded corners, so the row reads as one object rather than as buttons
  * placed side by side.
  *
- * Everything here is CSS — the group passes nothing down to its children, and each
- * button keeps the props it was given. Setting the same variant, tone and size on
- * all of them is therefore what makes the group look coherent.
+ * Since the row is one object, how it is drawn is its own decision: the group hands
+ * its variant, size, compact and elevated down to every button inside, and each of
+ * them wins over what the button was given. The tone travels the other way, as a
+ * fallback a button can refuse, so that one segment in the row can be the destructive
+ * one. The rule and its reasons are written out in `context.ts`.
+ *
+ * Naming none of them leaves every child exactly as it would have rendered on its
+ * own: the context then holds `undefined` throughout, and `undefined` is what hands a
+ * prop back to its owner.
  */
+import { provide } from 'vue'
+
+import type { ButtonSize, ButtonTone, ButtonVariant } from './VButton.vue'
+import { buttonGroupKey } from './context'
+
 interface ButtonGroupProps {
   /**
    * The direction the buttons are joined in: a row by default, or a column under
    * `vertical`.
    */
   orientation?: 'horizontal' | 'vertical'
+  /**
+   * How much visual weight every segment carries, on the values of VButton's own
+   * `variant`: `solid`, `outline`, `ghost` or `soft`. It wins over the variant a
+   * button inside was given.
+   */
+  variant?: ButtonVariant
+  /**
+   * The colour the segments take, among `accent`, `neutral` and `danger`. This one is
+   * a fallback rather than an order: a button that names a tone of its own keeps it,
+   * which is what lets a single destructive action stand out in the row.
+   */
+  tone?: ButtonTone
+  /**
+   * The height of the segments, from the size scale shared by every control:
+   * `xs`, `sm`, `md`, `lg` or `xl`. It wins over the size a button inside was given.
+   */
+  size?: ButtonSize
+  /**
+   * Takes 4px off the height of every segment. It wins over the value a button inside
+   * was given.
+   */
+  compact?: boolean
+  /**
+   * Raises every segment off the page, on the terms of VButton's own `elevated`. It
+   * wins over the value a button inside was given.
+   */
+  elevated?: boolean
 }
 
-withDefaults(defineProps<ButtonGroupProps>(), {
+const props = withDefaults(defineProps<ButtonGroupProps>(), {
   orientation: 'horizontal',
+  // All five are `undefined` by default, the booleans included: it is `undefined`, and
+  // not `false`, that means the group has no opinion and lets the button keep its own.
+  variant: undefined,
+  tone: undefined,
+  size: undefined,
+  compact: undefined,
+  elevated: undefined,
 })
 
 defineSlots<{
   /** The VButtons and VIconButtons to join together. */
   default(): unknown
 }>()
+
+// Getters, so the group's props stay reactive on the other side of the injection.
+provide(buttonGroupKey, {
+  get variant() {
+    return props.variant
+  },
+  get tone() {
+    return props.tone
+  },
+  get size() {
+    return props.size
+  },
+  get compact() {
+    return props.compact
+  },
+  get elevated() {
+    return props.elevated
+  },
+})
 </script>
 
 <template>
+  <!--
+    The size travels through the injection alone, and the root deliberately carries
+    neither `v-control` nor `data-size`, where VAvatarGroup carries both: nothing in
+    this sheet reads a `--control-*` variable, and `v-control` set a second time above
+    a subtree that already has it re-derives `--control-height` from the base height,
+    dropping the compact its buttons had applied (styles/control-size.css).
+  -->
   <div class="v-button-group" role="group" :data-orientation="orientation">
     <slot />
   </div>

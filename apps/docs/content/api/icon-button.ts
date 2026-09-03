@@ -11,7 +11,7 @@ export default {
       props: [
         { name: 'label', type: 'string' },
         { name: 'variant', type: "'solid' | 'outline' | 'ghost' | 'soft'", default: "'ghost'" },
-        { name: 'tone', type: "'accent' | 'neutral' | 'danger'", default: "'neutral'" },
+        { name: 'tone', type: "'accent' | 'neutral' | 'danger'" },
         { name: 'elevated', type: 'boolean', default: 'false' },
         { name: 'size', type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },

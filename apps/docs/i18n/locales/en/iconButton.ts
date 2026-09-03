@@ -7,8 +7,9 @@ export default {
       props: {
         label:
           'What the button does, in words. It becomes the <code>aria-label</code> and is the only thing a screen reader has to go on, so it names the action, "Close", "Next month", rather than the picture.',
-        variant: 'How much visual weight the button carries, on the VButton scale.',
-        tone: 'What the action means, in colour. An icon-only button is usually chrome, which is why it starts neutral where VButton starts accent.',
+        variant:
+          'How much visual weight the button carries, on the VButton scale. Inside a VButtonGroup the group decides it.',
+        tone: "What the action means, in colour. An icon-only button is usually chrome, which is why it starts neutral where VButton starts accent. Left out inside a VButtonGroup it takes the group's tone.",
         elevated: 'Raises the button with a shadow, and a raised surface on ghost and outline.',
         size: 'The size of the square, taken from the scale shared by every control.',
         compact: 'Takes 4px off both sides of the square, which stays square.',
