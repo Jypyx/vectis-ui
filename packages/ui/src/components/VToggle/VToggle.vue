@@ -5,9 +5,11 @@
  * a view, a set of filters. A single v-model holds what is chosen.
  *
  * Every item is a VButton, the selected one drawn in the group's tone and the others
- * quiet, and by default the whole row is joined into one segmented control: a single
- * frame, with nothing between the segments until `divided` asks for it. Nothing about
- * hovering, focusing or disabling is written here: it all comes from VButton.
+ * quiet. The row itself is a VButtonGroup, which is where the drawing lives: joining the
+ * items or leaving them apart, the lines between them, the shared size and the shared
+ * elevation are that component's, and the props for them are handed straight over.
+ * Nothing about hovering, focusing or disabling is written here either: it all comes
+ * from VButton.
  *
  * The JavaScript covers the two things HTML has no answer for: what a click does to
  * the selection — toggling it off, or refusing to when the last choice may not be
@@ -50,11 +52,11 @@ interface ToggleProps {
    */
   detached?: boolean
   /**
-   * Draws a line between the joined items. Left out, they share their edges with
-   * nothing between them. It has no effect under `detached`, where the items are
+   * Takes the lines out from between the joined items, so the row reads as one frame
+   * rather than as segments. It has no effect under `detached`, where the items are
    * separate buttons already.
    */
-  divided?: boolean
+  seamless?: boolean
   /** Whether the items run across the page or down it. */
   orientation?: ToggleOrientation
   /**
@@ -73,6 +75,8 @@ interface ToggleProps {
   size?: ToggleSize
   /** Takes 4px off the height of every item. */
   compact?: boolean
+  /** Raises the row off the page, on the terms of VButtonGroup's own `elevated`. */
+  elevated?: boolean
   /** Makes the whole group unusable. */
   disabled?: boolean
   /**
@@ -91,13 +95,14 @@ const props = withDefaults(defineProps<ToggleProps>(), {
   multiple: false,
   mandatory: false,
   detached: false,
-  divided: false,
+  seamless: false,
   orientation: 'horizontal',
   variant: 'ghost',
   selectedVariant: 'solid',
   tone: 'accent',
   size: 'md',
   compact: false,
+  elevated: false,
   disabled: false,
   selectedIconFilled: false,
   label: undefined,
@@ -164,15 +169,6 @@ provide(toggleKey, {
   get tone() {
     return props.tone
   },
-  get size() {
-    return props.size
-  },
-  get compact() {
-    return props.compact
-  },
-  get disabled() {
-    return props.disabled
-  },
   get selectedIconFilled() {
     return props.selectedIconFilled
   },
@@ -187,9 +183,9 @@ provide(toggleKey, {
  * a radio group, and a group of buttons is neither. Disabled items are really disabled
  * buttons, which the selector leaves out.
  *
- * The container is read from the event rather than kept as a reference, because the
- * root is rendered dynamically: a reference would hand back sometimes a plain element,
- * sometimes a component instance.
+ * The container is read from the event rather than kept as a reference: the root is a
+ * VButtonGroup, so a template ref would hand back its component instance rather than the
+ * element the items are navigated inside.
  */
 function onKeydown(event: KeyboardEvent) {
   const group = event.currentTarget as HTMLElement
@@ -200,112 +196,37 @@ function onKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <!-- Joined, the row is a VButtonGroup, which merges the borders of its DIRECT
-       button children — which is why an item renders the button as its own root, with
-       no wrapper in between.
+  <!-- The row is a VButtonGroup, which merges the borders of its DIRECT button children
+       — which is why an item renders the button as its own root, with no wrapper in
+       between. It brings the role and the orientation attribute with it, and of the props
+       handed to it here it forwards the last four to the buttons itself.
 
-       The orientation is passed through ONE key or the other, never both: an
-       attribute bound to `undefined` would still be forwarded and would overwrite the
-       one VButtonGroup sets for itself. So the group receives a prop, and the plain
-       container an attribute.
+       `variant` is deliberately NOT among them, and neither is the tone: the group wins
+       over a button that names its own variant, which would erase the one the selected
+       item carries. Both stay with the items, through the context.
 
-       The role is needed for the plain container, and simply repeats what
-       VButtonGroup already sets when the row is joined.
-
-       `data-divided` goes on the joined branch alone, so the DOM never carries a
-       claim the markup cannot honour: separated, there is no shared edge to draw a
-       line on. `data-variant` goes on BOTH: it is what tells the sheet an outline
-       row from a ghost one, which the items cannot say for themselves — the selected
-       one carries its own variant, not the row's. -->
-  <component
-    :is="detached ? 'div' : VButtonGroup"
-    v-bind="
-      detached
-        ? { 'data-orientation': orientation }
-        : { orientation, 'data-divided': divided ? '' : undefined }
-    "
+       `data-variant` is a plain attribute, and it is what tells the sheet an outline row
+       from a ghost one — something the items cannot say for themselves, since the
+       selected one carries its own variant rather than the row's. -->
+  <VButtonGroup
     class="v-toggle"
-    role="group"
+    :orientation="orientation"
+    :detached="detached"
+    :seamless="seamless"
+    :size="size"
+    :compact="compact"
+    :elevated="elevated"
+    :disabled="disabled"
     :data-variant="variant"
     :aria-label="ariaLabel"
     @keydown="onKeydown"
   >
     <slot />
-  </component>
+  </VButtonGroup>
 </template>
 
 <style>
 @layer vectis.components {
-  /*
-   * These rules are for the separated row alone, and the exclusion is what makes that
-   * true: when the row is joined, the root carries BOTH classes at once. Without it,
-   * the centring here and the stretching VButtonGroup declares would collide at equal
-   * specificity, and the winner would be decided by whichever sheet the consumer's
-   * bundler put last.
-   */
-  .v-toggle:not(.v-button-group) {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--vectis-space-1);
-  }
-
-  .v-toggle:not(.v-button-group)[data-orientation='vertical'] {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  /*
-   * A joined row is ONE object: an outer frame, with nothing drawn inside it unless
-   * `divided` asks for the internal lines. Two things have to go for that — the seam
-   * VButtonGroup lays over each joint, and the items' own borders on the edges they
-   * share.
-   *
-   * The seam is cancelled here rather than made conditional in VButtonGroup because
-   * VPagination, the other consumer of that group, wants it. `content: none` does not
-   * hide the bar, it stops the pseudo-element being generated at all, which is what
-   * makes the group's two orientation rules moot: they only place its insets.
-   *
-   * The doubled qualification reaches (0,4,1) against VButtonGroup's (0,3,1). The two
-   * sheets ship as separate files and the consumer's bundler decides their order, so a
-   * cancel at equal specificity would be a coin toss.
-   */
-  .v-toggle.v-button-group:not([data-divided]) > .v-button::before {
-    content: none;
-  }
-
-  /*
-   * BOTH sides of every shared edge, never just one: the segments overlap by 1px, so a
-   * neighbour's border sits in the very same pixel column. Clearing one side alone
-   * leaves the other showing through wherever the item painted on top has no
-   * background of its own, which is precisely the `ghost` and `outline` case.
-   *
-   * The COLOUR goes transparent rather than the border going away: every box keeps its
-   * 1px on all four sides, so nothing in the row changes width and the corners stay
-   * where VButtonGroup rounded them.
-   *
-   * At (0,6,0) these beat the frame rule below whatever order the two are read in, and
-   * that is the whole arbitration: an internal edge is never part of the frame.
-   */
-  .v-toggle.v-button-group:not([data-divided])[data-orientation='horizontal']
-    > .v-button:not(:first-child) {
-    border-inline-start-color: transparent;
-  }
-
-  .v-toggle.v-button-group:not([data-divided])[data-orientation='horizontal']
-    > .v-button:not(:last-child) {
-    border-inline-end-color: transparent;
-  }
-
-  .v-toggle.v-button-group:not([data-divided])[data-orientation='vertical']
-    > .v-button:not(:first-child) {
-    border-block-start-color: transparent;
-  }
-
-  .v-toggle.v-button-group:not([data-divided])[data-orientation='vertical']
-    > .v-button:not(:last-child) {
-    border-block-end-color: transparent;
-  }
-
   /*
    * The frame of an `outline` row, which only that row has: the colour its unselected
    * items already paint. They are drawn in the NEUTRAL tone, so this is what their
@@ -329,8 +250,11 @@ function onKeydown(event: KeyboardEvent) {
    * `soft` and `ghost` leave VButton's border transparent, which in an outline row
    * opens a gap in the frame for the whole width of the selected segment. Restoring it
    * on all four sides is what keeps the frame closed wherever the selection sits, in
-   * either orientation and in RTL; the shared edges are then cleared again by the
-   * (0,6,0) rules above, so a middle segment keeps its top and bottom alone.
+   * either orientation and in RTL. It is not conditioned on `seamless`, and deliberately
+   * so: the border is transparent whether the internal lines are drawn or not. Seamless,
+   * the shared edges are cleared again by VButtonGroup's own (0,6,0) rules, which is why
+   * they are written at that weight — a middle segment then keeps its top and bottom
+   * alone.
    */
   .v-toggle[data-variant='outline']
     > .v-toggle-item[aria-pressed='true']:is([data-variant='soft'], [data-variant='ghost']) {

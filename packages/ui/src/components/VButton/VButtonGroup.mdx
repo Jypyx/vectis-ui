@@ -8,8 +8,10 @@ import * as VButtonGroupStories from './VButtonGroup.stories'
 Visually joins several `VButton`/`VIconButton` into a **segmented control**: adjacent borders
 merged, rounded corners only at the ends of the group.
 
-Since the row is one object, how it is drawn is its own decision: `variant`, `tone`, `size`,
-`compact` and `elevated` are set **on the group** and reach every button inside it.
+Since the row is one object, how it is drawn is its own decision, and it is made in two places.
+`detached` and `seamless` settle the row itself: whether the buttons are joined at all, and
+whether anything is drawn between them once they are. `variant`, `tone`, `size`, `compact`,
+`elevated` and `disabled` are set **on the group** and reach every button inside it.
 
 <Canvas of={VButtonGroupStories.Default} />
 
@@ -24,11 +26,35 @@ The arbitration is not symmetric, and the asymmetry is the point:
   no longer lines up with its neighbours, and the merged border stops reading as one object.
 - `tone` is **meaning** rather than shape, so the button wins: its own tone first, the group's
   next, `accent` last. That is what lets a single destructive action stand out in the row.
+- `disabled` is neither, and is the one that **adds up**: a row switched off cannot have one of
+  its segments opt back in, and a segment disabled on its own is not revived by a row that says
+  nothing.
 
 A group that names none of them leaves every child exactly as it would have rendered on its own,
 which is also why a nested group (a `VToggle`, say) keeps its own rendering inside another one.
 
 <Canvas of={VButtonGroupStories.ToneOverride} />
+
+## Joined, detached, seamless
+
+Joined is the default: the buttons are pulled onto one another so their borders collapse into a
+single line, and a seam is laid over each joint. That seam is a box of its own carrying a 1px
+border on one side, which is what keeps its ends square — a neighbour's own border would be
+mitred where it meets the transparent top and bottom ones of a filled segment.
+
+`detached` gives up the joining entirely: the buttons are spaced, each keeping its own corners
+and its own borders, and an `elevated` row then lets each of them cast its own shadow. Everything
+the group hands down still travels.
+
+<Canvas of={VButtonGroupStories.Detached} />
+
+`seamless` keeps the row joined and takes the lines out of it: no seam is generated, and the
+borders on **both** sides of every shared edge are cleared, since the segments overlap and a
+neighbour's border sits in the same pixel column. The outer edges stay, so an `outline` row reads
+as one frame rather than as three boxes. It has no effect under `detached`, where there is no
+shared edge to take a line off.
+
+<Canvas of={VButtonGroupStories.Seamless} />
 
 ## Variants
 
@@ -48,7 +74,7 @@ The shadow is the ROW's and not each segment's, and that is not a detail: segmen
 pixel, so three shadows would each fall on the neighbour and fill the joints with a dark band
 instead of lifting one object off the page. The raised background stays with each button, since
 it is what the segment is painted on. Hovering any part of the row therefore raises the whole
-of it.
+of it. Detached, none of that applies and every button casts its own again.
 
 <Canvas of={VButtonGroupStories.Elevated} />
 

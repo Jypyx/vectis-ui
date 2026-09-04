@@ -10,8 +10,8 @@ export default {
           'Refuses to let the last chosen item be given up, so that something is always selected once something has been. It is a guard and nothing more: it selects nothing on its own at the start.',
         detached:
           'Leaves the items as separate buttons with a gap between them. Left out, they are joined into one segmented control.',
-        divided:
-          'Draws a line between the joined items. Left out, they share their edges with nothing between them. It has no effect under <code>detached</code>, where the items are separate buttons already.',
+        seamless:
+          'Takes the lines out from between the joined items, so the row reads as one frame rather than as segments. It has no effect under <code>detached</code>, where the items are separate buttons already.',
         orientation: 'Whether the items run across the page or down it.',
         variant:
           'How the unselected items are drawn. What the selected one takes is <code>selectedVariant</code>.',
@@ -20,6 +20,8 @@ export default {
         tone: 'The colour a selected item takes. The others stay neutral.',
         size: 'The height of the items, from the scale shared by every control.',
         compact: 'Takes 4px off the height of every item.',
+        elevated:
+          "Raises the row off the page, on the terms of VButtonGroup's own prop: the shadow belongs to the row rather than to each item, so the joints stay clear.",
         disabled: 'Makes the whole group unusable.',
         selectedIconFilled:
           "Draws the selected item's icon in its filled form, a common way of reinforcing that it is the one in effect.",

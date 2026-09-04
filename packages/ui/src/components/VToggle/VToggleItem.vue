@@ -6,7 +6,9 @@
  *
  * That button is also this component's own root element, with nothing wrapped around
  * it, which is what lets the group merge the borders of neighbouring items: it only
- * joins its DIRECT children.
+ * joins its DIRECT children. It is also what brings the size, the density, the elevation
+ * and a row-wide disabled state here with nothing asked for: the VButtonGroup the VToggle
+ * renders hands them to every button it contains, this one included.
  *
  * Used outside a VToggle it still renders perfectly well, simply never selected, the
  * same way a tab does outside its row.
@@ -70,9 +72,7 @@ const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.de
     :aria-pressed="selected ? 'true' : 'false'"
     :variant="selected ? (toggle?.selectedVariant ?? 'solid') : (toggle?.variant ?? 'ghost')"
     :tone="selected ? (toggle?.tone ?? 'accent') : 'neutral'"
-    :size="toggle?.size ?? 'md'"
-    :compact="toggle?.compact ?? false"
-    :disabled="disabled || toggle?.disabled"
+    :disabled="disabled"
     :data-icon-only="iconOnly ? '' : undefined"
     @click="toggle?.select(value)"
   >

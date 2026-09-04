@@ -146,9 +146,12 @@ const resolvedSize = computed<ButtonSize>(() => group?.size ?? props.size)
 const resolvedCompact = computed(() => group?.compact ?? props.compact)
 const resolvedElevated = computed(() => group?.elevated ?? props.elevated)
 const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'accent')
+// The one member read as an OR: the row and the button are cumulative, and neither can
+// lift the other's refusal (see context.ts).
+const resolvedDisabled = computed(() => group?.disabled || props.disabled)
 
 const isLink = computed(() => props.href !== undefined)
-const isInert = computed(() => props.disabled || props.loading)
+const isInert = computed(() => resolvedDisabled.value || props.loading)
 const isInertLink = computed(() => isLink.value && isInert.value)
 const passedAttrs = computed(() => {
   if (!isInertLink.value) return attrs
@@ -165,7 +168,7 @@ const passedAttrs = computed(() => {
     class="v-button v-control v-tone"
     :href="isLink && !isInert ? href : undefined"
     :type="isLink ? undefined : type"
-    :disabled="isLink ? undefined : disabled || loading"
+    :disabled="isLink ? undefined : resolvedDisabled || loading"
     :aria-disabled="isInertLink ? 'true' : undefined"
     :data-variant="resolvedVariant"
     :data-tone="resolvedTone"

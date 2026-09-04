@@ -17,9 +17,12 @@ rendered in the group's `tone` (`selectedVariant`, `solid` by default), the othe
 
 ## Joined or detached
 
-By default the items are joined inside a `VButtonGroup`: one segmented control, drawn as a
-single outer frame with nothing between the segments. `detached` separates them with a gutter,
-each button regaining its rounded corners.
+The row **is** a `VButtonGroup`, and that is where the drawing lives: `detached`, `seamless`,
+`orientation`, `size`, `compact` and `elevated` are handed straight over to it. What VToggle
+adds on top is the selection.
+
+Joined by default, the items form one segmented control with a line at each joint. `detached`
+separates them with a gutter, each button regaining its rounded corners.
 
 <Canvas of={VToggleStories.Variants} />
 
@@ -34,18 +37,17 @@ draws the one that is, in the group's `tone`:
 
 <Canvas of={VToggleStories.SelectedVariants} />
 
-## Divided
+## Seamless
 
-A joined row shares its edges with nothing drawn between them: the borders on both sides of every
-joint are cleared, so an `outline` row reads as one frame rather than as three boxes. `divided`
-puts a line back on each shared edge. It is inert under `detached`, where the items are separate
-buttons already.
+A joined row carries a line at every joint. `seamless` takes them out: the borders on both sides
+of each shared edge are cleared as well, so an `outline` row reads as one frame rather than as
+three boxes. It is inert under `detached`, where the items are separate buttons already.
 
-In an `outline` row a `soft` or `ghost` selection keeps that frame closed. The border VButton
-leaves transparent is restored, in the colour the rest of the row paints, on every edge except
-the ones the segment shares with a neighbour.
+In an `outline` row a `soft` or `ghost` selection keeps that frame closed either way. The border
+VButton leaves transparent is restored, in the colour the rest of the row paints, on every edge
+except the ones the segment shares with a neighbour.
 
-<Canvas of={VToggleStories.Divided} />
+<Canvas of={VToggleStories.Seamless} />
 
 ## Selection
 
@@ -86,8 +88,8 @@ propagate to every item.
 
 ## Orientation
 
-`orientation="vertical"` stacks the items — joined into one frame, whose shared edges are the
-horizontal ones, or detached (widths equalized).
+`orientation="vertical"` stacks the items: joined, the shared edges become the horizontal ones,
+and detached the widths are equalized.
 
 <Canvas of={VToggleStories.Vertical} />
 

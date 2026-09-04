@@ -11,19 +11,17 @@
  * with several choices allowed it is no longer a simple equality, and only the group
  * knows which of the two it is doing.
  *
- * The size travels through here rather than through CSS inheritance, as it does in
- * VAccordion, because each item renders a button that declares its own size on itself.
+ * What is here is what SELECTION decides, and nothing else. The size, the density, the
+ * elevation and the disabled state are the row's appearance, so they travel down the
+ * VButtonGroup the group renders and reach each item's button through `buttonGroupKey`
+ * instead. The variant and the tone stay here because they are read per item: which of
+ * the two variants applies, and whether the tone or a quiet neutral is used, is decided
+ * by whether that item is the selected one.
  */
 
 import type { InjectionKey } from 'vue'
 
-import type {
-  ToggleSelectedVariant,
-  ToggleSize,
-  ToggleTone,
-  ToggleValue,
-  ToggleVariant,
-} from './VToggle.vue'
+import type { ToggleSelectedVariant, ToggleTone, ToggleValue, ToggleVariant } from './VToggle.vue'
 
 export interface ToggleContext {
   /** Whether the item carrying this value is currently selected. */
@@ -36,12 +34,6 @@ export interface ToggleContext {
   readonly selectedVariant: ToggleSelectedVariant
   /** The colour a selected item takes. */
   readonly tone: ToggleTone
-  /** The height of the items. */
-  readonly size: ToggleSize
-  /** The reduced density. */
-  readonly compact: boolean
-  /** Whether the whole group is unusable. */
-  readonly disabled: boolean
   /** Whether the selected item draws its icon filled. */
   readonly selectedIconFilled: boolean
 }

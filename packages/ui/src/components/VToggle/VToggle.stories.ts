@@ -67,13 +67,15 @@ const meta = {
   args: {
     multiple: false,
     mandatory: false,
-    divided: false,
+    detached: false,
+    seamless: false,
     orientation: 'horizontal',
     variant: 'ghost',
     selectedVariant: 'solid',
     tone: 'accent',
     size: 'md',
     compact: false,
+    elevated: false,
     disabled: false,
     selectedIconFilled: false,
     label: 'Alignment',
@@ -210,8 +212,10 @@ export const SelectedVariants: Story = {
         getComputedStyle(neighbour).borderBlockStartColor,
       )
       await expect(frame.borderBlockEndColor).not.toBe(TRANSPARENT)
-      // and the edge it SHARES stays clear: the frame is the outside of the row
-      await expect(frame.borderInlineStartColor).toBe(TRANSPARENT)
+      // The row is lined here, so the shared edges are painted too and the border runs
+      // right round the segment. Seamless is where the two rules arbitrate, and that
+      // case is the `Seamless` story's.
+      await expect(frame.borderInlineStartColor).not.toBe(TRANSPARENT)
     }
 
     // a ghost row has no frame, so nothing is restored there
@@ -221,18 +225,24 @@ export const SelectedVariants: Story = {
   },
 }
 
-export const Divided: Story = {
+export const Seamless: Story = {
   render: () => ({
     components: { VToggle, VToggleItem },
-    setup: () => ({ plain: ref('centre'), lined: ref('centre'), t }),
+    setup: () => ({ lined: ref('centre'), plain: ref('centre'), t }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <VToggle variant="outline" :label="t.withoutLine" v-model="plain">
+        <VToggle variant="outline" :label="t.withLine" v-model="lined">
           <VToggleItem value="left" :label="t.left" />
           <VToggleItem value="centre" :label="t.centre" />
           <VToggleItem value="right" :label="t.right" />
         </VToggle>
-        <VToggle divided variant="outline" :label="t.withLine" v-model="lined">
+        <VToggle
+          seamless
+          variant="outline"
+          selected-variant="soft"
+          :label="t.withoutLine"
+          v-model="plain"
+        >
           <VToggleItem value="left" :label="t.left" />
           <VToggleItem value="centre" :label="t.centre" />
           <VToggleItem value="right" :label="t.right" />
@@ -241,32 +251,28 @@ export const Divided: Story = {
     `,
   }),
   /*
-   * Undivided, an outline row is a single frame: the seam is not generated at all, and
-   * NEITHER side of a shared edge is painted, while the outer edges stay. jsdom computes
-   * no styles, so the whole rule is only reachable from here.
+   * What the seamless row itself does — no seam, no shared borders — belongs to
+   * VButtonGroup and is asserted in its own `Seamless` story. What is only true HERE is
+   * the arbitration between the two sheets, and this is the case that exercises it: the
+   * SELECTED segment is `soft`, so VToggle restores its four borders to close the outline
+   * frame, and the group then has to take the two shared ones back off. Those rules are
+   * doubled to (0,6,0) for exactly this, and at equal specificity the winner would be
+   * whichever sheet the bundler put last.
    *
-   * The middle item is the selected one, which is why the edges are read off the two
-   * that sit around it: a solid segment has no border of its own to look at.
+   * The middle item is the selected one, which is why it is the one read.
    */
   play: async ({ canvasElement }) => {
     const TRANSPARENT = 'rgba(0, 0, 0, 0)'
     const itemsOf = (row: HTMLElement) => [...row.querySelectorAll<HTMLElement>('.v-toggle-item')]
-    const [plain, lined] = [...canvasElement.querySelectorAll<HTMLElement>('.v-toggle')]
+    const [, plain] = [...canvasElement.querySelectorAll<HTMLElement>('.v-toggle')]
 
-    const undivided = itemsOf(plain as HTMLElement).map((el) => getComputedStyle(el))
-    await expect(
-      getComputedStyle(itemsOf(plain as HTMLElement)[1] as HTMLElement, '::before').content,
-    ).toBe('none')
-    await expect(undivided[0]?.borderInlineEndColor).toBe(TRANSPARENT)
-    await expect(undivided[2]?.borderInlineStartColor).toBe(TRANSPARENT)
-    await expect(undivided[0]?.borderInlineStartColor).not.toBe(TRANSPARENT)
-    await expect(undivided[2]?.borderInlineEndColor).not.toBe(TRANSPARENT)
-
-    const divided = itemsOf(lined as HTMLElement).map((el) => getComputedStyle(el))
-    await expect(
-      getComputedStyle(itemsOf(lined as HTMLElement)[1] as HTMLElement, '::before').content,
-    ).not.toBe('none')
-    await expect(divided[0]?.borderInlineEndColor).not.toBe(TRANSPARENT)
+    const centre = getComputedStyle(itemsOf(plain as HTMLElement)[1] as HTMLElement)
+    // The group wins on the edges the segment shares…
+    await expect(centre.borderInlineStartColor).toBe(TRANSPARENT)
+    await expect(centre.borderInlineEndColor).toBe(TRANSPARENT)
+    // …and the frame stands everywhere else, which is what keeps it closed.
+    await expect(centre.borderBlockStartColor).not.toBe(TRANSPARENT)
+    await expect(centre.borderBlockEndColor).not.toBe(TRANSPARENT)
   },
 }
 

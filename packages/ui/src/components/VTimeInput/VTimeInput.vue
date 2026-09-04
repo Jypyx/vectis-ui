@@ -675,7 +675,6 @@ function onEndIcon() {
         v-model="meridiemModel"
         class="v-time-input-meridiem"
         mandatory
-        divided
         variant="outline"
         :size="size"
         :compact="compact"

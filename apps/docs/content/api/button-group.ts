@@ -10,11 +10,14 @@ export default {
       name: 'VButtonGroup',
       props: [
         { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+        { name: 'detached', type: 'boolean', default: 'false' },
+        { name: 'seamless', type: 'boolean', default: 'false' },
         { name: 'variant', type: 'ButtonVariant' },
         { name: 'tone', type: 'ButtonTone' },
         { name: 'size', type: 'ButtonSize' },
         { name: 'compact', type: 'boolean' },
         { name: 'elevated', type: 'boolean' },
+        { name: 'disabled', type: 'boolean' },
       ],
       slots: [
         { name: 'default', type: '{}' },

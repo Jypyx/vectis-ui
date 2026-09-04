@@ -11,8 +11,8 @@ export default {
           "Refuse d'abandonner le dernier item choisi, pour que quelque chose reste toujours sélectionné une fois que ça l'a été. C'est un garde-fou et rien de plus : il ne sélectionne rien de lui-même au départ.",
         detached:
           'Laisse les items en boutons séparés avec un écart entre eux. Sans lui, ils sont assemblés en un seul contrôle segmenté.',
-        divided:
-          'Trace un trait entre les items assemblés. Sans lui, ils partagent leurs bords sans rien entre les deux. Sans effet sous <code>detached</code>, où les items sont déjà des boutons séparés.',
+        seamless:
+          'Retire les traits entre les items assemblés, si bien que la rangée se lit comme un cadre unique plutôt que comme des segments. Sans effet sous <code>detached</code>, où les items sont déjà des boutons séparés.',
         orientation: 'Si les items courent en travers de la page ou de haut en bas.',
         variant:
           'Comment les items NON sélectionnés sont dessinés. Ce que prend celui qui est sélectionné relève de <code>selectedVariant</code>.',
@@ -21,6 +21,8 @@ export default {
         tone: 'La couleur que prend un item sélectionné. Les autres restent neutres.',
         size: "La hauteur des items, tirée de l'échelle partagée par tous les contrôles.",
         compact: 'Retire 4px à la hauteur de chaque item.',
+        elevated:
+          "Soulève la rangée, aux conditions de la prop de VButtonGroup : l'ombre appartient à la rangée et non à chaque item, ce qui garde les joints nets.",
         disabled: 'Rend tout le groupe inutilisable.',
         selectedIconFilled:
           "Dessine l'icône de l'item sélectionné dans sa forme pleine, une façon courante de renforcer qu'il est celui en vigueur.",

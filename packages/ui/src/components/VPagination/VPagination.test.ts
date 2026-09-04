@@ -205,17 +205,20 @@ describe('VPagination', () => {
         props: { length: 5, modelValue: 1, attached: true },
       })
 
-      expect(container.querySelector('.v-pagination-items')?.classList).toContain('v-button-group')
+      const row = container.querySelector('.v-pagination-items')
+      expect(row?.classList).toContain('v-button-group')
+      expect(row?.hasAttribute('data-detached')).toBe(false)
       expect(getByRole('group')).toBeTruthy()
     })
 
-    it('stays a plain row by default', () => {
-      const { container, queryByRole } = render(VPagination, {
+    it('stays a spaced row by default, which is the same group detached', () => {
+      const { container } = render(VPagination, {
         props: { length: 5, modelValue: 1 },
       })
 
-      expect(container.querySelector('.v-button-group')).toBeNull()
-      expect(queryByRole('group')).toBeNull()
+      const row = container.querySelector('.v-pagination-items')
+      expect(row?.classList).toContain('v-button-group')
+      expect(row?.hasAttribute('data-detached')).toBe(true)
     })
   })
 

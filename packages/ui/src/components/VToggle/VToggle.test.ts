@@ -96,10 +96,10 @@ describe('VToggle', () => {
       )
     })
 
-    it('detached: a plain div carries the role and data-orientation', () => {
+    it('detached: still the same group, which spaces the items instead of joining them', () => {
       const { container } = mount({ toggleAttrs: 'detached orientation="vertical"' })
-      expect(container.querySelector('.v-button-group')).toBeNull()
-      const group = container.querySelector('.v-toggle')
+      const group = container.querySelector('.v-toggle.v-button-group')
+      expect(group?.hasAttribute('data-detached')).toBe(true)
       expect(group?.getAttribute('role')).toBe('group')
       expect(group?.getAttribute('data-orientation')).toBe('vertical')
     })
@@ -192,20 +192,20 @@ describe('VToggle', () => {
     })
   })
 
-  describe('divided', () => {
-    it('the joined row carries no line unless it is asked for', () => {
+  describe('seamless', () => {
+    it('the joined row keeps its lines unless they are refused', () => {
       const { container } = mount({ initial: 'a' })
-      expect(container.querySelector('.v-button-group')?.hasAttribute('data-divided')).toBe(false)
+      expect(container.querySelector('.v-button-group')?.hasAttribute('data-seamless')).toBe(false)
     })
 
-    it('the prop marks the joined root, which is what the seam rule reads', () => {
-      const { container } = mount({ initial: 'a', toggleAttrs: 'divided' })
-      expect(container.querySelector('.v-button-group')?.hasAttribute('data-divided')).toBe(true)
+    it('the prop marks the joined root, which is what the frame rules read', () => {
+      const { container } = mount({ initial: 'a', toggleAttrs: 'seamless' })
+      expect(container.querySelector('.v-button-group')?.hasAttribute('data-seamless')).toBe(true)
     })
 
-    it('detached, it is inert: there is no shared edge to draw a line on', () => {
-      const { container } = mount({ initial: 'a', toggleAttrs: 'detached divided' })
-      expect(container.querySelector('.v-toggle')?.hasAttribute('data-divided')).toBe(false)
+    it('detached, it is inert: there is no shared edge to take a line off', () => {
+      const { container } = mount({ initial: 'a', toggleAttrs: 'detached seamless' })
+      expect(container.querySelector('.v-toggle')?.hasAttribute('data-seamless')).toBe(false)
     })
   })
 
@@ -228,6 +228,17 @@ describe('VToggle', () => {
   })
 
   describe('context propagation', () => {
+    /*
+     * The four props asserted below — elevated, size, compact, disabled — travel through
+     * the VButtonGroup the row renders, and not through the toggle's own context: they
+     * say how the row is DRAWN, which is that component's decision. What is asserted is
+     * unchanged by that, which is the point.
+     */
+    it('elevated raises every button, so the group can take the shadow', () => {
+      const { container } = mount({ toggleAttrs: 'elevated' })
+      expect(itemsOf(container).every((el) => el.hasAttribute('data-elevated'))).toBe(true)
+    })
+
     it('size and compact reach every button', () => {
       const { container } = mount({ toggleAttrs: 'size="sm" compact' })
       const items = itemsOf(container)

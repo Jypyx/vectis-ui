@@ -23,6 +23,10 @@ const t = storyText({
     bold: 'Bold',
     italic: 'Italic',
     underline: 'Underline',
+    joined: 'Joined',
+    detached: 'Detached',
+    lined: 'Lined',
+    seamless: 'Seamless',
     alone: 'Alone',
     singleButton: 'Single button',
     longLabels: 'Long labels',
@@ -49,6 +53,10 @@ const t = storyText({
     bold: 'Gras',
     italic: 'Italique',
     underline: 'Souligné',
+    joined: 'Joints',
+    detached: 'Séparés',
+    lined: 'Avec traits',
+    seamless: 'Sans traits',
     alone: 'Seul',
     singleButton: 'Bouton unique',
     longLabels: 'Libellés longs',
@@ -72,6 +80,8 @@ const meta = {
   },
   args: {
     orientation: 'horizontal',
+    detached: false,
+    seamless: false,
     variant: 'outline',
     tone: 'neutral',
   },
@@ -120,6 +130,79 @@ export const Variants: Story = {
       </div>
     `,
   }),
+}
+
+export const Detached: Story = {
+  render: () => ({
+    components: { VButtonGroup, VButton },
+    setup: () => ({ t }),
+    // The same row twice: joined, then simply spaced. Detached, each button keeps its own
+    // corners and its own borders, and the group is left holding the gap alone.
+    template: `
+      <div style="display: grid; gap: 16px; justify-items: start">
+        <VButtonGroup variant="outline" tone="neutral" :aria-label="t.joined">
+          <VButton>{{ t.day }}</VButton>
+          <VButton>{{ t.week }}</VButton>
+          <VButton>{{ t.month }}</VButton>
+        </VButtonGroup>
+        <VButtonGroup detached variant="outline" tone="neutral" :aria-label="t.detached">
+          <VButton>{{ t.day }}</VButton>
+          <VButton>{{ t.week }}</VButton>
+          <VButton>{{ t.month }}</VButton>
+        </VButtonGroup>
+      </div>
+    `,
+  }),
+}
+
+export const Seamless: Story = {
+  render: () => ({
+    components: { VButtonGroup, VButton },
+    setup: () => ({ t }),
+    template: `
+      <div style="display: grid; gap: 16px; justify-items: start">
+        <VButtonGroup variant="outline" tone="neutral" :aria-label="t.lined">
+          <VButton>{{ t.day }}</VButton>
+          <VButton>{{ t.week }}</VButton>
+          <VButton>{{ t.month }}</VButton>
+        </VButtonGroup>
+        <VButtonGroup seamless variant="outline" tone="neutral" :aria-label="t.seamless">
+          <VButton>{{ t.day }}</VButton>
+          <VButton>{{ t.week }}</VButton>
+          <VButton>{{ t.month }}</VButton>
+        </VButtonGroup>
+      </div>
+    `,
+  }),
+  /*
+   * Two things make a row seamless, and both are asserted: the seam is not generated at
+   * all, and NEITHER side of a shared edge is painted, while the outer edges stay. jsdom
+   * lays nothing out and computes no style, so this is the only place the rules are
+   * reachable.
+   *
+   * The seam is read as the `content` of the pseudo-element: `""` when it is generated,
+   * and whatever the initial value is when the rule never matched — which is the point,
+   * so the assertion is written against the generated form rather than against `none`.
+   */
+  play: async ({ canvasElement }) => {
+    const TRANSPARENT = 'rgba(0, 0, 0, 0)'
+    const GENERATED = '""'
+    const canvas = within(canvasElement)
+    const segmentsOf = (name: string) =>
+      within(canvas.getByRole('group', { name })).getAllByRole('button')
+
+    const [lined, linedWeek] = segmentsOf('Lined')
+    await expect(getComputedStyle(linedWeek!, '::before').content).toBe(GENERATED)
+    await expect(getComputedStyle(lined!).borderInlineEndColor).not.toBe(TRANSPARENT)
+
+    const [day, week, month] = segmentsOf('Seamless')
+    await expect(getComputedStyle(week!, '::before').content).not.toBe(GENERATED)
+    await expect(getComputedStyle(day!).borderInlineEndColor).toBe(TRANSPARENT)
+    await expect(getComputedStyle(month!).borderInlineStartColor).toBe(TRANSPARENT)
+    // The outer edges are untouched: what goes is the shared ones, and only those.
+    await expect(getComputedStyle(day!).borderInlineStartColor).not.toBe(TRANSPARENT)
+    await expect(getComputedStyle(month!).borderInlineEndColor).not.toBe(TRANSPARENT)
+  },
 }
 
 export const ToneOverride: Story = {

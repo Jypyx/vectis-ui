@@ -34,6 +34,43 @@ describe('VButtonGroup', () => {
     expect(getByRole('group').dataset.orientation).toBe('vertical')
   })
 
+  describe('how the row is drawn', () => {
+    it('joined and lined by default: neither marker is on the root', () => {
+      const { getByRole } = render(VButtonGroup, {
+        slots: { default: '<button>A</button>' },
+      })
+      const group = getByRole('group')
+      expect(group.hasAttribute('data-detached')).toBe(false)
+      expect(group.hasAttribute('data-seamless')).toBe(false)
+    })
+
+    it('detached: the marker the whole joining half of the sheet steps aside for', () => {
+      const { getByRole } = render(VButtonGroup, {
+        props: { detached: true },
+        slots: { default: '<button>A</button>' },
+      })
+      expect(getByRole('group').hasAttribute('data-detached')).toBe(true)
+    })
+
+    it('seamless: the marker the transparent shared edges read', () => {
+      const { getByRole } = render(VButtonGroup, {
+        props: { seamless: true },
+        slots: { default: '<button>A</button>' },
+      })
+      expect(getByRole('group').hasAttribute('data-seamless')).toBe(true)
+    })
+
+    // The DOM never carries a claim the markup cannot honour: apart, the buttons share
+    // no edge for a line to sit on, so there is nothing for `seamless` to take away.
+    it('detached, seamless is withheld', () => {
+      const { getByRole } = render(VButtonGroup, {
+        props: { detached: true, seamless: true },
+        slots: { default: '<button>A</button>' },
+      })
+      expect(getByRole('group').hasAttribute('data-seamless')).toBe(false)
+    })
+  })
+
   it('renders the slot child buttons', () => {
     const { getAllByRole } = render(VButtonGroup, {
       slots: { default: '<button>One</button><button>Two</button><button>Three</button>' },
@@ -141,6 +178,60 @@ describe('VButtonGroup', () => {
     expect(segment.dataset.variant).toBe('outline')
     expect(segment.dataset.size).toBe('lg')
     expect(segment.dataset.tone).toBe('neutral')
+  })
+
+  // The third arbitration: the row and the button add up, and neither lifts the other.
+  describe('disabled', () => {
+    it('a disabled row disables every segment', () => {
+      const { container } = render(VButtonGroup, {
+        props: { disabled: true },
+        slots: { default: () => [h(VButton, () => 'One'), h(VButton, () => 'Two')] },
+      })
+      const rendered = segments(container) as HTMLButtonElement[]
+      expect(rendered).toHaveLength(2)
+      expect(rendered.every((segment) => segment.disabled)).toBe(true)
+    })
+
+    it('a segment that disables itself stays disabled in a row that says nothing', () => {
+      const { container } = render(VButtonGroup, {
+        slots: {
+          default: () => [h(VButton, () => 'One'), h(VButton, { disabled: true }, () => 'Two')],
+        },
+      })
+      const [one, two] = segments(container) as HTMLButtonElement[]
+      expect(one?.disabled).toBe(false)
+      expect(two?.disabled).toBe(true)
+    })
+
+    // The OR read the other way round: a row switched off cannot have one of its
+    // segments opt back in.
+    it('a segment cannot refuse a disabled row', () => {
+      const { container } = render(VButtonGroup, {
+        props: { disabled: true },
+        slots: { default: () => h(VButton, { disabled: false }, () => 'One') },
+      })
+      expect((segments(container)[0] as HTMLButtonElement).disabled).toBe(true)
+    })
+
+    it('reaches a VIconButton too, which forwards it to the button it renders', () => {
+      const { container } = render(VButtonGroup, {
+        props: { disabled: true },
+        slots: { default: () => h(VIconButton, { label: 'Bold', icon: 'edit' }) },
+      })
+      expect((segments(container)[0] as HTMLButtonElement).disabled).toBe(true)
+    })
+
+    // An inert LINK has no `disabled` attribute to take: the group has to reach the
+    // bridge VButton builds instead, or a disabled row of links stays followable.
+    it('makes a link segment inert, the way its own prop does', () => {
+      const { container } = render(VButtonGroup, {
+        props: { disabled: true },
+        slots: { default: () => h(VButton, { href: '/one' }, () => 'One') },
+      })
+      const segment = segments(container)[0]!
+      expect(segment.getAttribute('aria-disabled')).toBe('true')
+      expect(segment.hasAttribute('href')).toBe(false)
+    })
   })
 
   it('gives a VIconButton the group tone, which its own prop still overrides', () => {

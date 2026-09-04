@@ -266,11 +266,12 @@ function onKeydown(event: KeyboardEvent) {
     :data-responsive="responsive ? '' : undefined"
     @keydown="onKeydown"
   >
-    <!-- Joined, the row is a VButtonGroup, which merges the borders of its DIRECT
-         button children. That is why there is no list markup wrapping the pills, and
-         why the ellipsis is itself an inert button rather than a plain span: anything
-         else between two pills would break the seam. -->
-    <component :is="attached ? VButtonGroup : 'div'" class="v-pagination-items">
+    <!-- The row is a VButtonGroup either way: joined it merges the borders of its DIRECT
+         button children, and detached it spaces them, which is all `attached` asks of it.
+         That is why there is no list markup wrapping the pills, and why the ellipsis is
+         itself an inert button rather than a plain span: anything else between two pills
+         would break the seam. -->
+    <VButtonGroup class="v-pagination-items" :detached="!attached">
       <template v-if="!hideControls">
         <VIconButton
           v-if="controlsDisplay === 'icon'"
@@ -373,7 +374,7 @@ function onKeydown(event: KeyboardEvent) {
           <span class="v-pagination-control-label">{{ resolvedNextLabel }}</span>
         </VButton>
       </template>
-    </component>
+    </VButtonGroup>
   </nav>
 </template>
 
@@ -407,17 +408,6 @@ function onKeydown(event: KeyboardEvent) {
 
   .v-pagination[data-align='end'] {
     justify-content: flex-end;
-  }
-
-  .v-pagination-items {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--vectis-space-1);
-  }
-
-  /* Joined, the gap goes: VButtonGroup pulls the buttons onto one another itself. */
-  .v-button-group.v-pagination-items {
-    gap: 0;
   }
 
   /* Qualified by an attribute VButton always renders, which is what makes both of these
