@@ -19,6 +19,10 @@ export default {
       title: 'Compact',
       text: 'Each pair below is one step of the scale, the second of the two <code>compact</code>: 4px come off the height and nothing else moves. It is for a dense toolbar, where a button has to line up with a row rather than stand on its own.',
     },
+    fullWidth: {
+      title: 'Full width',
+      text: '<code>fullWidth</code> stretches the button across the whole inline size of its parent, which is what a form footer or a narrow column usually asks for. The two columns below are the same width and align their contents to the start, so the second pair is wider only because of the prop. The button also becomes block level, so it no longer rests on a line of text and nothing adds a descender underneath it. In a layout that already stretches its children, a grid track or a flex column with the default alignment, the prop has nothing left to do.',
+    },
     icons: {
       title: 'With icons',
       text: '<code>iconStart</code> and <code>iconEnd</code> put an icon on either side of the label, and both can be given at once. <code>iconFilled</code> switches them to their filled form, the FILL axis of the icon: the last two buttons are the same bell, hollow then filled, which is how a state is shown without changing the glyph. The <code>#start</code> and <code>#end</code> slots take over when the content is more than an icon, and <code>iconFilled</code> then has nothing to act on.',
@@ -48,6 +52,8 @@ export default {
         size: 'The height of the button, taken from the size scale shared by every control: 24, 32, 40, 48 and 56 pixels.',
         compact:
           'Takes 4px off the height, leaving the padding, the text and the icons as they are.',
+        fullWidth:
+          'Stretches the button across the whole inline size of its parent instead of leaving it as wide as its label. It also becomes block-level, so it no longer sits on a line of text.',
         href: 'Turns the button into an <code>&lt;a&gt;</code> pointing at this address. A disabled or loading link becomes inert: the address is dropped, so it can be neither focused nor followed.',
         type: 'The native type of the button. It is ignored as soon as <code>href</code> makes it a link.',
         disabled:

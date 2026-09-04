@@ -8,6 +8,8 @@ import ButtonCustomIcons from '~/examples/button/CustomIcons.vue'
 import buttonCustomIconsSource from '~/examples/button/CustomIcons.vue?raw'
 import ButtonElevated from '~/examples/button/Elevated.vue'
 import buttonElevatedSource from '~/examples/button/Elevated.vue?raw'
+import ButtonFullWidth from '~/examples/button/FullWidth.vue'
+import buttonFullWidthSource from '~/examples/button/FullWidth.vue?raw'
 import ButtonIcons from '~/examples/button/Icons.vue'
 import buttonIconsSource from '~/examples/button/Icons.vue?raw'
 import ButtonLink from '~/examples/button/Link.vue'
@@ -58,6 +60,12 @@ useHead({ title: () => t('button.title') })
   <DocsProse keypath="button.examples.compact.text" />
   <DocsExample :source="buttonCompactSource">
     <ButtonCompact />
+  </DocsExample>
+
+  <h3 id="full-width">{{ t('button.examples.fullWidth.title') }}</h3>
+  <DocsProse keypath="button.examples.fullWidth.text" />
+  <DocsExample :source="buttonFullWidthSource">
+    <ButtonFullWidth />
   </DocsExample>
 
   <h3 id="with-icons">{{ t('button.examples.icons.title') }}</h3>

@@ -48,6 +48,20 @@ describe('VButton', () => {
     expect(getByRole('button').dataset.compact).toBeUndefined()
   })
 
+  /* The stretching itself is CSS, out of jsdom reach: only the attribute wiring is
+     testable here, and it is what the rule hangs on. */
+  it('sets data-full-width only when asked', async () => {
+    const { getByRole, rerender } = render(VButton, {
+      props: { fullWidth: true },
+      slots: { default: 'Save' },
+    })
+    const button = getByRole('button')
+    expect(button.dataset.fullWidth).toBe('')
+
+    await rerender({ fullWidth: false })
+    expect(button.dataset.fullWidth).toBeUndefined()
+  })
+
   it('when loading: disabled, aria-busy, spinner present', () => {
     const { getByRole } = render(VButton, {
       props: { loading: true },

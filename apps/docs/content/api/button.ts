@@ -14,6 +14,7 @@ export default {
         { name: 'elevated', type: 'boolean', default: 'false' },
         { name: 'size', type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
+        { name: 'fullWidth', type: 'boolean', default: 'false' },
         { name: 'href', type: 'string' },
         { name: 'type', type: "ButtonHTMLAttributes['type']", default: "'button'" },
         { name: 'disabled', type: 'boolean', default: 'false' },

@@ -19,6 +19,10 @@ export default {
       title: 'Compact',
       text: "Chaque paire ci-dessous est un palier de l'échelle, le second des deux étant <code>compact</code> : 4px partent de la hauteur et rien d'autre ne bouge. C'est pour une barre d'outils dense, où un bouton doit s'aligner sur une rangée plutôt que tenir seul.",
     },
+    fullWidth: {
+      title: 'Pleine largeur',
+      text: "<code>fullWidth</code> étire le bouton sur toute la largeur de son parent, ce que réclament en général un pied de formulaire ou une colonne étroite. Les deux colonnes ci-dessous ont la même largeur et alignent leur contenu au début : la seconde paire n'est donc plus large qu'à cause de la prop. Le bouton devient aussi un élément de bloc, il ne repose donc plus sur une ligne de texte et rien n'ajoute de jambage sous lui. Dans une disposition qui étire déjà ses enfants, une piste de grille ou une colonne flex avec l'alignement par défaut, la prop n'a plus rien à faire.",
+    },
     icons: {
       title: 'Avec des icônes',
       text: "<code>iconStart</code> et <code>iconEnd</code> posent une icône de part et d'autre du libellé, et les deux peuvent être données ensemble. <code>iconFilled</code> les fait passer à leur forme pleine, l'axe FILL de l'icône : les deux derniers boutons sont la même cloche, creuse puis pleine, ce qui montre un état sans changer de glyphe. Les slots <code>#start</code> et <code>#end</code> prennent le relais quand le contenu est plus qu'une icône, et <code>iconFilled</code> n'a alors plus de prise.",
@@ -48,6 +52,8 @@ export default {
         size: "La hauteur du bouton, tirée de l'échelle de tailles partagée par tous les contrôles : 24, 32, 40, 48 et 56 pixels.",
         compact:
           'Retire 4px à la hauteur, en laissant le rembourrage, le texte et les icônes tels quels.',
+        fullWidth:
+          'Étire le bouton sur toute la largeur de son parent au lieu de le laisser à la largeur de son libellé. Il devient également un élément de bloc, et ne repose donc plus sur une ligne de texte.',
         href: "Transforme le bouton en <code>&lt;a&gt;</code> pointant vers cette adresse. Un lien désactivé ou en chargement devient inerte : l'adresse est retirée, si bien qu'il ne peut être ni focalisé ni suivi.",
         type: 'Le type natif du bouton. Il est ignoré dès que <code>href</code> en fait un lien.',
         disabled:

@@ -63,6 +63,12 @@ interface ButtonProps {
    */
   compact?: boolean
   /**
+   * Stretches the button to the whole inline size of its parent, instead of leaving
+   * it only as wide as its content. The label stays centred, and the button becomes
+   * block-level, so it no longer sits on a line of text.
+   */
+  fullWidth?: boolean
+  /**
    * Turns the button into an `<a>` pointing at this address. A disabled or loading
    * link becomes inert: the address is dropped, so it can be neither focused nor
    * followed.
@@ -112,6 +118,7 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   elevated: false,
   size: 'md',
   compact: false,
+  fullWidth: false,
   href: undefined,
   type: 'button',
   disabled: false,
@@ -175,6 +182,7 @@ const passedAttrs = computed(() => {
     :data-elevated="resolvedElevated ? '' : undefined"
     :data-size="resolvedSize"
     :data-compact="resolvedCompact ? '' : undefined"
+    :data-full-width="fullWidth ? '' : undefined"
     :data-loading="loading ? '' : undefined"
     :aria-busy="loading || undefined"
   >
@@ -216,6 +224,14 @@ const passedAttrs = computed(() => {
       border-color var(--vectis-duration-fast) var(--vectis-ease-default),
       color var(--vectis-duration-fast) var(--vectis-ease-default),
       box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
+  }
+
+  /* An explicit display, rather than a width alone: an inline-level box sits on a line
+     box, which would add the strut's descender under a button the consumer asked to
+     fill its parent. Block-level, it measures the parent's content box exactly. */
+  .v-button[data-full-width] {
+    display: flex;
+    inline-size: 100%;
   }
 
   .v-button:focus-visible {

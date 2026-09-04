@@ -14,6 +14,7 @@ const t = storyText({
     confirm: 'Confirm',
     delete: 'Delete',
     import: 'Import',
+    cancel: 'Cancel',
     outline: 'Outline',
     filled: 'Filled',
     bothFilled: 'Start + end filled',
@@ -29,6 +30,7 @@ const t = storyText({
     confirm: 'Valider',
     delete: 'Supprimer',
     import: 'Importer',
+    cancel: 'Annuler',
     outline: 'Contour',
     filled: 'Plein',
     bothFilled: 'Début + fin pleins',
@@ -51,6 +53,7 @@ const meta = {
     iconStart: { control: 'text' },
     iconEnd: { control: 'text' },
     iconFilled: { control: 'boolean' },
+    fullWidth: { control: 'boolean' },
     href: { control: 'text' },
   },
   args: {
@@ -59,6 +62,7 @@ const meta = {
     size: 'md',
     elevated: false,
     compact: false,
+    fullWidth: false,
     disabled: false,
     loading: false,
   },
@@ -128,6 +132,28 @@ export const Sizes: Story = {
           <VButton size="md" compact>Medium 36px</VButton>
           <VButton size="lg" compact>Large 44px</VButton>
           <VButton size="xl" compact>XLarge 52px</VButton>
+        </div>
+      </div>
+    `,
+  }),
+}
+
+/* The same pair of buttons in two identical 220px columns: on the left as wide as
+   their label, on the right filling the column. Both columns align their items to the
+   start, so the width really does come from the prop and not from the layout. */
+export const FullWidth: Story = {
+  render: () => ({
+    components: { VButton },
+    setup: () => ({ t }),
+    template: `
+      <div style="display: flex; gap: 16px">
+        <div style="display: flex; flex-direction: column; align-items: start; gap: 8px; inline-size: 220px">
+          <VButton>{{ t.save }}</VButton>
+          <VButton variant="outline" tone="neutral">{{ t.cancel }}</VButton>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: start; gap: 8px; inline-size: 220px">
+          <VButton full-width>{{ t.save }}</VButton>
+          <VButton full-width variant="outline" tone="neutral">{{ t.cancel }}</VButton>
         </div>
       </div>
     `,

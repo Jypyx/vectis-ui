@@ -59,6 +59,19 @@ size → height/type/icon/padding mapping is shared by every control in the desi
 
 <Canvas of={VButtonStories.Sizes} />
 
+## Full width
+
+`full-width` stretches the button across the whole inline size of its parent, for a form
+footer or a narrow column where an action is expected to fill the line. The label stays
+centred, and the button becomes block-level: it no longer sits on a line of text, so nothing
+adds the strut descender underneath it.
+
+The width comes from the parent, which is what makes the prop unnecessary in a stretching
+layout: a grid item or a flex column with the default `stretch` alignment already fills its
+track.
+
+<Canvas of={VButtonStories.FullWidth} />
+
 ## Icons
 
 The `icon-start` / `icon-end` props take a
