@@ -54,7 +54,8 @@ const text = computed(() => trim(props.source))
         mandatory
         size="xs"
         variant="outline"
-        tone="neutral"
+        selected-variant="soft"
+        tone="accent"
         :label="t('common.example.label')"
       >
         <VToggleItem value="preview">{{ t('common.example.preview') }}</VToggleItem>

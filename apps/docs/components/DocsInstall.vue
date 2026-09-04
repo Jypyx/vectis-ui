@@ -35,7 +35,8 @@ const code = computed(() => commandFor(props.packages))
         v-model="packageManager"
         mandatory
         variant="outline"
-        tone="neutral"
+        selected-variant="soft"
+        tone="accent"
         size="xs"
         :label="t('common.code.packageManager')"
       >
