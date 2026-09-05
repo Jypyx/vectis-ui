@@ -76,6 +76,24 @@ SVG, or an image.
 
 <Canvas of={VIconButtonStories.IconsTypes} />
 
+## Tooltip, badge and menu
+
+An icon-only button is the control the three companions gather on: a `VTooltip` to spell out
+what the picture means, a `VBadge` in `overlay` to mark it, and a `VMenu` it opens. All three
+attach to the same button, and the nesting order is what makes that possible: `VMenu` outermost
+(it renders its panel as a sibling of its trigger, so a wrapper around it would swallow the
+panel), then the two wrappers in either order, then the button.
+
+Both slots hand out a prop named `triggerProps`, so the inner one is renamed and the two are
+merged onto the button — `aria-describedby` from the tooltip, `aria-haspopup`/`aria-expanded`/
+`aria-controls` from the menu. The menu's panel is anchored to its `popovertarget` invoker, which
+is the button itself, so neither wrapper moves it.
+
+The badge is a `<span>` beside the button, never part of its accessible name: what it counts
+belongs in the `label` as well, which is why this button is named "Notifications, 3 unread".
+
+<Canvas of={VIconButtonStories.Companions} />
+
 ## States
 
 `loading` disables the button, shows the spinner and sets `aria-busy`:
