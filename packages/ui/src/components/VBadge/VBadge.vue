@@ -247,6 +247,16 @@ const badgeAttrs = computed(() => ({
     inset-block: 0 auto;
     inset-inline-end: 0;
     translate: var(--badge-overlay-x) var(--badge-overlay-y);
+    /* TRAP — an overlaid badge deliberately leaves its target's box, so it lands on
+       whatever sits beside it, and the host opens no stacking context of its own
+       (`position: relative` with `z-index: auto`). Left at `auto` the badge is painted
+       with the other positioned boxes in TREE ORDER, which means anything positioned
+       after it covers it: inside a VButtonGroup, where every segment is positioned, the
+       badge on one segment disappears under the borders of the next. The lift takes it
+       past that step, and no further: the segment it leans into comes later in tree
+       order, so that segment's focus ring, raised to this same level, is still drawn
+       over the badge rather than under it. */
+    z-index: 1;
   }
 
   .v-badge-host[data-overlay][data-overlay-position='bottom'] > .v-badge {
