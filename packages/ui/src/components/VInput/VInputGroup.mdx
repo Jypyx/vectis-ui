@@ -1,0 +1,120 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+
+import * as VInputGroupStories from './VInputGroup.stories'
+
+<Meta of={VInputGroupStories} />
+
+# InputGroup
+
+Joins two or more form controls into a single object: a country code against a phone number,
+a search field against its magnifier. The shared borders melt into one line and only the two
+ends of the row stay rounded.
+
+It does for fields what VButtonGroup does for buttons. The row owns the label and the hint,
+which is the reason this is a component rather than a CSS recipe: a label above one segment
+alone would push its box a line out of the row.
+
+<Canvas of={VInputGroupStories.Playground} />
+
+<Controls of={VInputGroupStories.Playground} />
+
+## Naming the row and its segments
+
+VInputGroup renders one label and one hint for the whole row, and names itself with them
+through `aria-labelledby` and `aria-describedby` — the ARIA pattern for a composed field.
+Each segment then needs a name of its own, which is what `aria-label` is for. A segment
+carrying a `label` or a `hint` prop is warned about in development, because the row cannot
+draw itself out of the misalignment that follows.
+
+A consumer's own `aria-label` or `aria-labelledby` on the group wins, and a consumer's
+`aria-describedby` is kept: the hint is added to it rather than replacing it.
+
+## Widths
+
+Every segment holding a field takes an equal share of the row, and everything else keeps its
+natural width — a button is measured by its label. Proportions are set on the segment itself,
+with an inline `flex`:
+
+```vue
+<VCombobox :options="codes" aria-label="Country code" style="flex: 0 0 9rem" />
+```
+
+That is also what keeps a combobox panel sensible: the panel is measured against its own
+segment, so a narrow code field opens a narrow list.
+
+## Size and state
+
+`size`, `compact` and `disabled` are set on the row and travel to every segment. Size and
+density are the shape of the control, so the row wins over what a segment asks for itself: a
+segment of another height stops lining up with its neighbours and the merged border no longer
+reads as one object. `disabled` adds instead, so a segment switched off on its own stays off
+under a row that says nothing.
+
+<Canvas of={VInputGroupStories.Sizes} />
+
+Setting none of the three leaves every segment exactly as it was, which is what makes a bare
+`<VInputGroup>` a purely visual wrapper.
+
+<Canvas of={VInputGroupStories.Disabled} />
+
+## Buttons in the row
+
+<Canvas of={VInputGroupStories.SearchField} />
+
+A `solid` or `soft` button covers the shared edge with its own background, which is what an
+attached action should look like. An `outline` button in `tone="neutral"` draws the same
+border colour as the fields, so the outline runs unbroken around the whole row. A `ghost`
+button has no frame at all and floats out of the box, so it is the one variant to avoid in a
+joined row.
+
+A magnifier _inside_ the field is a different thing, and not a segment: that is `iconEnd`
+with a `@click:icon-end` listener on the VInput itself.
+
+## Fields with a panel
+
+<Canvas of={VInputGroupStories.WithCombobox} />
+
+A VTimeInput in 12 hour form carries an AM/PM control beside its field. Inside a group the
+two become one segment, joined to each other and to their neighbours.
+
+<Canvas of={VInputGroupStories.DateAndTime} />
+
+The buttons a panel contains are not segments of the row, and they keep the size their own
+component gave them: the navigation of a calendar stays small in a large row.
+
+## Right to left
+
+<Canvas of={VInputGroupStories.RightToLeft} />
+
+Every declaration is written in logical properties, so the row rounds its other end and pulls
+its segments the other way with no rule of its own.
+
+## What is out of scope
+
+VTextarea is not a segment. Its bordered box is a different element, so a textarea inside a
+group is left entirely alone rather than half painted, and there is no sensible row that joins
+a multi-line box to a single-line one.
+
+A row is a line of single-line controls. A segment that GROWS — a VCombobox in `multiple`, a
+VFileInput showing chips — becomes taller than its neighbours, and the merged border then only
+covers the top of it.
+
+<Canvas of={VInputGroupStories.EdgeCases} />
+
+## Accessibility
+
+- The row is a `role="group"`, named by its own `label` through `aria-labelledby`. That is the
+  pattern for a set of controls that answer one question together, where a `<label for>` could
+  only ever point at one of them.
+- Each segment needs its own accessible name, normally an `aria-label`. Without one, a screen
+  reader announces the group's name and then an unnamed field.
+- The hint is tied to the group with `aria-describedby`, so it is read out along with the
+  name.
+- Focus is never merged: every segment keeps its own focus ring, and the focused one is raised
+  above its neighbours so the ring is drawn whole rather than cut along the shared edge.
+- A field in error keeps its red edge against its neighbour, and a focused field still comes
+  out above it.
+
+<Canvas of={VInputGroupStories.FocusRing} />
+
+<Canvas of={VInputGroupStories.Invalid} />

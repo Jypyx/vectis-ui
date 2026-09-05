@@ -16,7 +16,7 @@
  * only because the field is OUTSIDE the panel.
  */
 
-import { computed, nextTick, reactive, ref, useId, watch, watchEffect } from 'vue'
+import { computed, inject, nextTick, reactive, ref, useId, watch, watchEffect } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
 import VIcon from '../VIcon/VIcon.vue'
@@ -31,6 +31,8 @@ import { useInfiniteScroll } from './infiniteScroll'
 import VSpinner from '../VSpinner/VSpinner.vue'
 
 import { toggleValue } from '../../utils/array'
+import { inputGroupKey } from '../VInput/context'
+
 import { chipScaleFor } from '../../utils/chip'
 import { normalizeText } from '../../utils/text'
 
@@ -210,11 +212,20 @@ defineSlots<{
   loading?(): unknown
 }>()
 
+// A VInputGroup joins several controls into one object, so the shape of this field is the
+// row's decision rather than its own (VInput/context.ts). Everything below reads the
+// RESOLVED values and never the props: the chips, the panel and the field would otherwise
+// come out at three different scales inside the same row.
+const group = inject(inputGroupKey, null)
+const resolvedSize = computed(() => group?.size ?? props.size)
+const resolvedCompact = computed(() => group?.compact ?? props.compact)
+const resolvedDisabled = computed(() => group?.disabled || props.disabled)
+
 // The size, the density and the HEIGHT of the chips sitting inside the field, worked out
 // once in `utils/chip.ts` and shared with VFileInput. The height is set inline below
 // rather than restated as a table of CSS rules: it is the height the field forces on its
 // input, and deriving both from the same pair is what stops them drifting apart.
-const chipScale = computed(() => chipScaleFor(props.size, props.compact))
+const chipScale = computed(() => chipScaleFor(resolvedSize.value, resolvedCompact.value))
 
 /**
  * The chosen option's `value`, or the list of them when `multiple` is set. It is an empty
@@ -519,7 +530,7 @@ const collapsed = computed(
 const canClear = computed(
   () =>
     props.clearable &&
-    !props.disabled &&
+    !resolvedDisabled.value &&
     (selectedValues.value.length > 0 || query.value.length > 0),
 )
 
@@ -565,7 +576,7 @@ watch(activeIndex, (index) => {
 })
 
 function openPanel() {
-  if (props.disabled || open.value) return
+  if (resolvedDisabled.value || open.value) return
   open.value = true
   const list = filtered.value
   const selectedIdx = list.findIndex((o) => !o.disabled && selectedSet.value.has(o.value))
@@ -643,7 +654,7 @@ function onFocus() {
 
 /** A click anywhere on the field focuses it and opens the panel. */
 function onControlClick() {
-  if (props.disabled) return
+  if (resolvedDisabled.value) return
   inputRef.value?.focus()
   openPanel()
   // Selected again AFTER the click, which has just placed the caret somewhere in the
@@ -750,8 +761,8 @@ function onKeydown(event: KeyboardEvent) {
     class="v-combobox"
     :class="rootClass"
     :style="[{ '--chip-height': chipScale.height }, rootStyle]"
-    :data-size="size"
-    :data-compact="compact ? '' : undefined"
+    :data-size="resolvedSize"
+    :data-compact="resolvedCompact ? '' : undefined"
     :data-multiple="multiple ? '' : undefined"
     :data-collapsed="collapsed ? '' : undefined"
     :data-open="open ? '' : undefined"
@@ -768,10 +779,10 @@ function onKeydown(event: KeyboardEvent) {
         :aria-expanded="open"
         :aria-controls="optionsId"
         v-bind="forwardedAttrs"
-        :size="size"
-        :compact="compact"
+        :size="resolvedSize"
+        :compact="resolvedCompact"
         :invalid="invalid"
-        :disabled="disabled"
+        :disabled="resolvedDisabled"
         :clearable="clearable"
         :clear-visible="canClear"
         :clear-label="m.combobox.clear"
@@ -800,7 +811,7 @@ function onKeydown(event: KeyboardEvent) {
                 :compact="chipScale.compact"
                 dismissible
                 :dismiss-label="m.combobox.remove(labelOf(value))"
-                :disabled="disabled"
+                :disabled="resolvedDisabled"
                 @dismiss="removeValue(value)"
                 >{{ labelOf(value) }}</VChip
               >
@@ -837,8 +848,8 @@ function onKeydown(event: KeyboardEvent) {
       placement="bottom-start"
       role="listbox"
       class="v-combobox-panel v-control"
-      :data-size="size"
-      :data-compact="compact ? '' : undefined"
+      :data-size="resolvedSize"
+      :data-compact="resolvedCompact ? '' : undefined"
       :aria-multiselectable="multiple ? 'true' : undefined"
       @mousedown="onPanelMousedown"
     >

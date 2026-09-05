@@ -15,7 +15,10 @@
  * `selection`, passed straight through to the picker.
  */
 
-import { computed, ref, useId, watchEffect } from 'vue'
+import { computed, inject, provide, ref, useId, watchEffect } from 'vue'
+
+import { NO_BUTTON_GROUP, buttonGroupKey } from '../VButton/context'
+import { inputGroupKey } from '../VInput/context'
 
 import VDatePicker from '../VDatePicker/VDatePicker.vue'
 import type {
@@ -265,6 +268,22 @@ if (isDev) {
   })
 }
 
+// A VInputGroup joins several controls into one object, so the shape of this field is the
+// row's decision rather than its own (VInput/context.ts).
+const group = inject(inputGroupKey, null)
+const resolvedSize = computed(() => group?.size ?? props.size)
+const resolvedCompact = computed(() => group?.compact ?? props.compact)
+const resolvedDisabled = computed(() => group?.disabled || props.disabled)
+
+// @core
+// TRAP — this stops a VButtonGroup's or a VInputGroup's row context at this boundary. The
+// VDatePicker below writes `size="sm"` on its own navigation buttons, and a group WINS over
+// a button's prop: without this line a VInputGroup in `lg` would blow the calendar arrows up
+// to `lg`, and nothing in the sheet or the template would say why. It is the JS counterpart
+// of the `.v-overlay` guard every VButtonGroup selector carries — a floating panel is not a
+// segment of the row that opened it.
+provide(buttonGroupKey, NO_BUTTON_GROUP)
+
 // The whole "field plus panel" shell, shared with VTimeInput: opening and closing, the
 // focus leaving the component, a click on the field, and the Escape, ArrowDown and Enter
 // keys.
@@ -277,7 +296,7 @@ const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPa
     // point, and every way in passes through it — clicking the field, focusing it, the
     // down arrow, Enter, the icon — so the condition never has to be repeated in a
     // handler.
-    disabled: () => props.disabled || !hasPanel.value,
+    disabled: () => resolvedDisabled.value || !hasPanel.value,
     focusInPanel: () => pickerRef.value?.focus(),
     // Beside a field one types into, the panel opens WITHOUT taking the focus: typing
     // carries on in the field, and the down arrow remains the way into the grid.
@@ -522,7 +541,10 @@ function onRootKeydown(event: KeyboardEvent) {
  * the value comes from the panel, so there is something to clear all the same.
  */
 const canClear = computed(
-  () => props.clearable && !props.disabled && (hasValue.value || (typing.value && !!draft.value)),
+  () =>
+    props.clearable &&
+    !resolvedDisabled.value &&
+    (hasValue.value || (typing.value && !!draft.value)),
 )
 const endIcon = computed<IconSource | undefined>(() =>
   hasPanel.value ? props.pickerIcon : undefined,
@@ -615,9 +637,9 @@ const close = () => closeAndFocus()
         :label="label"
         :hint="hint"
         :placeholder="placeholder ?? (typing ? maskHint : undefined)"
-        :size="size"
-        :compact="compact"
-        :disabled="disabled"
+        :size="resolvedSize"
+        :compact="resolvedCompact"
+        :disabled="resolvedDisabled"
         :invalid="invalid"
         :clearable="clearable"
         :clear-visible="canClear"

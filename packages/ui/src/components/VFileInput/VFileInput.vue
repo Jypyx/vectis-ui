@@ -14,12 +14,13 @@
  * file cannot be picked twice running), and screening in code, `accept` having no say over
  * a drop.
  */
-import { computed, ref, useId, watchEffect } from 'vue'
+import { computed, inject, ref, useId, watchEffect } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
 import { attach_file as attachFileIcon } from '../VIcon/icons/attach_file'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
+import { inputGroupKey } from '../VInput/context'
 import VTypography from '../VTypography/VTypography.vue'
 
 import { useFileDrop } from '../../composables/useFileDrop'
@@ -182,6 +183,14 @@ const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 const m = useMessages()
 const locale = useLocale()
 
+// A VInputGroup joins several controls into one object, so the shape of this field is the
+// row's decision rather than its own (VInput/context.ts). The chips read the resolved pair
+// too, or they would come out one step off the field they sit in.
+const group = inject(inputGroupKey, null)
+const resolvedSize = computed(() => group?.size ?? props.size)
+const resolvedCompact = computed(() => group?.compact ?? props.compact)
+const resolvedDisabled = computed(() => group?.disabled || props.disabled)
+
 /*
  * The hidden input, the sorting of the consumer's attributes and the single entry point
  * into the value all live in `useFileField`, shared with VFilePicker.
@@ -202,7 +211,7 @@ const {
 } = useFileField({
   model,
   forwardedAttrs,
-  enabled: () => !props.disabled && !props.readonly,
+  enabled: () => !resolvedDisabled.value && !props.readonly,
   multiple: () => props.multiple,
   limits: () => ({
     accept: props.accept,
@@ -235,7 +244,7 @@ const placeholderText = computed(() =>
  * typing, so there is something to clear all the same.
  */
 const canClear = computed(
-  () => props.clearable && !props.disabled && !props.readonly && model.value.length > 0,
+  () => props.clearable && !resolvedDisabled.value && !props.readonly && model.value.length > 0,
 )
 
 // @a11y @devwarn
@@ -296,7 +305,7 @@ const describedBy = computed(
 // restated as a table of CSS rules: it belongs to the chips' own subtree, out of the
 // field's reach, and the field has to force its input to that same height or it grows
 // when focused.
-const chipScale = computed(() => chipScaleFor(props.size, props.compact))
+const chipScale = computed(() => chipScaleFor(resolvedSize.value, resolvedCompact.value))
 
 /**
  * What a chip shows for a file. The name is shortened in the MIDDLE rather than cut off
@@ -352,7 +361,7 @@ function clearValue() {
 /* Files may be dropped on the component itself; there is no separate drop area here —
    that is what VFilePicker is for. */
 const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop(
-  () => !props.noDrop && !props.disabled && !props.readonly,
+  () => !props.noDrop && !resolvedDisabled.value && !props.readonly,
   acceptFiles,
 )
 
@@ -390,8 +399,8 @@ defineExpose({
     class="v-file-input"
     :class="rootClass"
     :style="[{ '--chip-height': chipScale.height }, rootStyle]"
-    :data-size="size"
-    :data-compact="compact ? '' : undefined"
+    :data-size="resolvedSize"
+    :data-compact="resolvedCompact ? '' : undefined"
     :data-display="resolvedDisplay"
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
@@ -423,9 +432,9 @@ defineExpose({
         readonly
         :label="label"
         :placeholder="placeholderText"
-        :size="size"
-        :compact="compact"
-        :disabled="disabled"
+        :size="resolvedSize"
+        :compact="resolvedCompact"
+        :disabled="resolvedDisabled"
         :invalid="invalid"
         :clearable="clearable"
         :clear-visible="canClear"
@@ -452,9 +461,9 @@ defineExpose({
                 tone="accent"
                 :size="chipScale.size"
                 :compact="chipScale.compact"
-                :dismissible="!readonly && !disabled"
+                :dismissible="!readonly && !resolvedDisabled"
                 :dismiss-label="m.fileInput.remove(file.name)"
-                :disabled="disabled"
+                :disabled="resolvedDisabled"
                 :title="chipLabel(file) === file.name ? undefined : file.name"
                 @dismiss="removeAt(index)"
                 >{{ chipLabel(file) }}</VChip

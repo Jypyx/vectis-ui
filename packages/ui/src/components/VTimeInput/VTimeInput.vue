@@ -16,9 +16,11 @@
  * Whatever is displayed, the value is always a canonical 24-hour `'HH:mm'`.
  */
 
-import { computed, ref, useId, watchEffect } from 'vue'
+import { computed, inject, provide, ref, useId, watchEffect } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
+import { NO_BUTTON_GROUP, buttonGroupKey } from '../VButton/context'
+import { inputGroupKey } from '../VInput/context'
 import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import { schedule as scheduleIcon } from '../VIcon/icons/schedule'
 import type { IconSource } from '../VIcon/types'
@@ -281,6 +283,25 @@ function focusInPanel() {
   if (panel) focusListSelection(panel)
 }
 
+// A VInputGroup joins several controls into one object, so the shape of this field is the
+// row's decision rather than its own (VInput/context.ts). `grouped` is what tells the sheet
+// to pull the AM/PM control onto the field: in a row the two are one segment, and left
+// apart the next segment would join the toggle rather than the field.
+const group = inject(inputGroupKey, null)
+const grouped = computed(() => group !== null)
+const resolvedSize = computed(() => group?.size ?? props.size)
+const resolvedCompact = computed(() => group?.compact ?? props.compact)
+const resolvedDisabled = computed(() => group?.disabled || props.disabled)
+
+// @core
+// TRAP — this stops a VButtonGroup's or a VInputGroup's row context at this boundary. The
+// VTimePicker below writes `size="lg"` on its hour and minute cells, and a group WINS over a
+// button's prop: without this line a VInputGroup would resize them to its own height, and it
+// only shows once the panel is open. It is the JS counterpart of the `.v-overlay` guard
+// every VButtonGroup selector carries. The AM/PM VToggle is unaffected either way — it is a
+// VButtonGroup of its own, so it shadows this for its items, and it takes its size as a prop.
+provide(buttonGroupKey, NO_BUTTON_GROUP)
+
 // The whole "field plus panel" shell, shared with VDateInput. What is specific to this
 // component is only what happens around it: preparing the draft as the panel opens, and
 // clearing the announcement as it closes.
@@ -292,7 +313,7 @@ const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPa
     // With no panel there is nothing to open. This is the composable's SINGLE cut-off
     // point, and every way in passes through it — clicking the field, focusing it, the
     // down arrow, Enter, the icon.
-    disabled: () => props.disabled || !hasPanel.value,
+    disabled: () => resolvedDisabled.value || !hasPanel.value,
     focusInPanel,
     // Beside a field one types into, the panel opens WITHOUT taking the focus, so typing
     // carries on.
@@ -587,7 +608,9 @@ function onPanelKeydown(event: KeyboardEvent) {
  */
 const canClear = computed(
   () =>
-    props.clearable && !props.disabled && (hasValue.value || (typing.value && !!maskDraft.value)),
+    props.clearable &&
+    !resolvedDisabled.value &&
+    (hasValue.value || (typing.value && !!maskDraft.value)),
 )
 const endIcon = computed<IconSource | undefined>(() =>
   isList.value ? expandMoreIcon : hasPicker.value ? props.pickerIcon : undefined,
@@ -620,6 +643,7 @@ function onEndIcon() {
     :style="rootStyle"
     :data-open="open ? '' : undefined"
     :data-mode="resolvedMode"
+    :data-grouped="grouped ? '' : undefined"
     @focusout="onFocusout"
     @keydown="onRootKeydown"
   >
@@ -639,9 +663,9 @@ function onEndIcon() {
           :label="label"
           :hint="hint"
           :placeholder="placeholder ?? (typing ? m.timeInput.maskPlaceholder : undefined)"
-          :size="size"
-          :compact="compact"
-          :disabled="disabled"
+          :size="resolvedSize"
+          :compact="resolvedCompact"
+          :disabled="resolvedDisabled"
           :invalid="invalid"
           :clearable="clearable"
           :clear-visible="canClear"
@@ -676,8 +700,8 @@ function onEndIcon() {
         class="v-time-input-meridiem"
         mandatory
         variant="outline"
-        :size="size"
-        :compact="compact"
+        :size="resolvedSize"
+        :compact="resolvedCompact"
         :label="m.timePicker.meridiem"
       >
         <VToggleItem value="AM" :label="m.timePicker.am" />
@@ -803,6 +827,44 @@ function onEndIcon() {
     margin-block-end: calc(
       var(--vectis-text-caption-size) * var(--vectis-text-caption-leading) + var(--vectis-space-1)
     );
+  }
+
+  /* Inside a VInputGroup the AM/PM control is part of the segment: it gives up the gap that
+     detaches it when the field stands alone, and it is pulled onto the field the way a
+     segment is pulled onto its neighbour. Without this, a 12 hour field in a row is TWO
+     separate boxes, and the segment that follows joins the toggle rather than the field.
+     The 12 hour form is the default wherever the locale asks for it, so this is not an edge
+     case.
+
+     The group cannot do it itself: its paint guard excludes `.v-button-group *`, and a
+     VToggle IS a `.v-button-group`, which draws a row of its own. Joining the two therefore
+     belongs to the component that owns them both.
+
+     The block comes AFTER the alignment rules above and cancels their margins outright,
+     which also covers a consumer who ignored the group's development warning and gave the
+     field a label of its own. */
+  .v-time-input[data-grouped] .v-time-input-row {
+    gap: 0;
+  }
+
+  .v-time-input[data-grouped] .v-time-input-meridiem {
+    align-self: stretch;
+    margin-block: 0;
+    margin-inline-start: -1px;
+  }
+
+  .v-time-input[data-grouped] .v-time-input-meridiem > .v-button:first-child {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+  }
+
+  /* The far end of the toggle is the far end of the SEGMENT, so it keeps its rounded corner
+     when this field closes the row and gives it up otherwise. The group's own corner rules
+     cannot reach here — they stop at `.v-button-group *` — so the segment squares its own
+     trailing edge. */
+  .v-time-input[data-grouped]:not(:last-child) .v-time-input-meridiem > .v-button:last-child {
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
   }
 
   /* The anchoring and the panel's surface both come from VPopover; what is left here is

@@ -45,3 +45,17 @@ export interface ButtonGroupContext {
 }
 
 export const buttonGroupKey: InjectionKey<ButtonGroupContext> = Symbol('v-button-group')
+
+/**
+ * The EMPTY context a component provides to stop a row's at its own boundary. Every member
+ * being `undefined`, `??` and `||` hand each button below it back its own prop.
+ *
+ * It exists because `provide` reaches the whole subtree, floating panels included, and a
+ * panel holds buttons that are not segments of the row that opened it: VDatePicker writes
+ * `size="sm"` on its navigation, VTimePicker `size="lg"` on its hour and minute cells. Since
+ * a group WINS over a button's own prop, a VInputGroup in `lg` would otherwise blow the
+ * calendar arrows up to `lg`, and it only shows once the panel is open.
+ *
+ * This is the JS counterpart of the `.v-overlay` guard every VButtonGroup selector carries.
+ */
+export const NO_BUTTON_GROUP: ButtonGroupContext = Object.freeze({})

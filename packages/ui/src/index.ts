@@ -76,6 +76,8 @@ export type {
 } from './components/VToggle/VToggle.vue'
 export { default as VToggleItem } from './components/VToggle/VToggleItem.vue'
 export { default as VInput } from './components/VInput/VInput.vue'
+export { default as VInputGroup } from './components/VInput/VInputGroup.vue'
+export type { InputGroupSize } from './components/VInput/VInputGroup.vue'
 export { default as VTextarea } from './components/VTextarea/VTextarea.vue'
 export { default as VCheckbox } from './components/VCheckbox/VCheckbox.vue'
 export { default as VRadio } from './components/VRadio/VRadio.vue'

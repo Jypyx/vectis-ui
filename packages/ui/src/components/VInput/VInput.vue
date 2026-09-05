@@ -16,7 +16,7 @@
  * The behavioural JS is the v-model and the clear cross, which has to move focus back to the
  * field: it disappears the moment it is clicked, and focus would otherwise fall to the page.
  */
-import { computed, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconName, iconProps } from '../VIcon/iconProps'
@@ -30,6 +30,8 @@ import { useIconClickHandlers } from '../../composables/useIconClickHandlers'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useTextLimit } from '../../composables/useTextLimit'
 import { useMessages } from '../../i18n/state'
+
+import { inputGroupKey } from './context'
 
 interface InputProps {
   /** The height of the field: 32, 40 or 48 pixels. */
@@ -180,6 +182,15 @@ const modelText = computed(() => String(model.value ?? ''))
 
 const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
 
+// A VInputGroup joins several controls into one object, so the shape of this field is the
+// row's decision rather than its own: a segment of another height stops lining up with its
+// neighbours and the merged border no longer reads as a single box. `disabled` is the one
+// read as an OR, the two answers being cumulative (VInput/context.ts).
+const group = inject(inputGroupKey, null)
+const resolvedSize = computed(() => group?.size ?? props.size)
+const resolvedCompact = computed(() => group?.compact ?? props.compact)
+const resolvedDisabled = computed(() => group?.disabled || props.disabled)
+
 // The prop keeps priority; what it falls back to is the dictionary, so the default
 // wording follows the language the design system is set to.
 const m = useMessages()
@@ -197,7 +208,7 @@ const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
 const controlEl = ref<HTMLInputElement | null>(null)
 
 const showClear = computed(() => {
-  if (!props.clearable || props.disabled) return false
+  if (!props.clearable || resolvedDisabled.value) return false
   // When `clearVisible` is supplied it is the consumer's EXPLICIT answer to "is
   // there anything to clear?", and it holds even on a read-only field: the value of
   // a read-only date or time picker changes through its panel rather than by typing.
@@ -241,9 +252,9 @@ defineExpose({
     class="v-input v-control"
     :class="rootClass"
     :style="rootStyle"
-    :data-size="size"
-    :data-compact="compact ? '' : undefined"
-    :data-disabled="disabled ? '' : undefined"
+    :data-size="resolvedSize"
+    :data-compact="resolvedCompact ? '' : undefined"
+    :data-disabled="resolvedDisabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
   >
     <VTypography v-if="label" as="label" variant="label" class="v-input-label" :for="fieldId">
@@ -257,7 +268,7 @@ defineExpose({
           type="button"
           class="v-input-action"
           :aria-label="iconStartLabel ?? iconName(iconStart)"
-          :disabled="disabled"
+          :disabled="resolvedDisabled"
           @click="emit('click:icon-start', $event)"
         >
           <VIcon v-bind="iconProps(iconStart)" />
@@ -273,7 +284,7 @@ defineExpose({
         class="v-input-control"
         :type="type"
         :maxlength="softLimit ? undefined : maxlength"
-        :disabled="disabled"
+        :disabled="resolvedDisabled"
         :readonly="readonly || undefined"
         :aria-invalid="invalid || undefined"
         :aria-describedby="describedBy"
@@ -300,7 +311,7 @@ defineExpose({
           type="button"
           class="v-input-action"
           :aria-label="iconEndLabel ?? iconName(iconEnd)"
-          :disabled="disabled"
+          :disabled="resolvedDisabled"
           @click="emit('click:icon-end', $event)"
         >
           <VIcon v-bind="iconProps(iconEnd)" />
