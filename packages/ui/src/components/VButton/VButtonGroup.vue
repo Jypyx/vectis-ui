@@ -158,6 +158,40 @@ provide(buttonGroupKey, {
 
 <style>
 @layer vectis.components {
+  /*
+   * A SEGMENT is a direct child of the group, and it is not always the button. A
+   * companion puts a wrapper between the two: VTooltip renders `.v-tooltip` around its
+   * trigger, VPopover renders `.v-popover` around the `#trigger` slot, VBadge renders
+   * `.v-badge-host` around the element it pins its pill to, and a consumer may add one of
+   * their own. Written against the button alone, every rule in this sheet would step
+   * aside for a segment carrying any of the three, and the row would quietly come apart
+   * into buttons standing side by side.
+   *
+   * So each of them is written for BOTH shapes:
+   *
+   *   > .v-button<tests>                              the button IS the segment
+   *   > :not(:where(.v-overlay))<tests> > .v-button   the button is one level in
+   *
+   * Where the declarations land is decided by what they do. The PULL, the negative margin
+   * that collapses two borders into one line, belongs to the segment: that is the box the
+   * group lays out. The PAINT, the corners and the seam and the borders and the shadow,
+   * belongs to the button, which carries them. Swapped, a wrapped segment would either be
+   * pulled twice or paint nothing. A full-width row needs neither: its shares are tracks,
+   * declared on the group itself and blind to what stands in them.
+   *
+   * The tests weigh the same on both branches (`:not(:first-child)` and `:has(~ …)` are
+   * (0,1,0) each, and `:where()` weighs nothing), so a pair is always ONE specificity:
+   * every figure quoted below holds for its wrapped half as well.
+   *
+   * ONE wrapper deep, and no more: the second branch uses the child combinator. That is
+   * also what keeps these rules out of a PANEL's content, since VPopover renders its
+   * panel inside the wrapper and a button in there is two levels down. VMenu adds no
+   * wrapper at all, so a menu combines with any of the three.
+   *
+   * TRAP — `:not(:where(.v-overlay))` is what stops a panel from passing for a segment.
+   * VMenu renders its panel as a SIBLING of its trigger, so a group holding a menu has a
+   * child that is no segment, and every panel in the design system carries that class.
+   */
   .v-button-group {
     display: inline-flex;
     /* Gives every segment the same height in a row, and the same width in a column,
@@ -177,21 +211,36 @@ provide(buttonGroupKey, {
     inline-size: 100%;
   }
 
-  /* Equal shares, `1 1 0` and not `1 1 auto`: distributing the free space alone between
-     segments that still measure their own labels leaves the longest word the widest
-     segment, and a row that reads as one object cannot be cut into unequal pieces by
-     whichever words happen to be in it.
+  /* Equal shares, and they are TRACKS rather than flex bases. A row that reads as one
+     object cannot be cut into unequal pieces by whichever words happen to be in it, which
+     rules out distributing the free space alone; and `flex: 1 1 0` cannot do it either,
+     because flex shares out CONTENT boxes: a segment ends up as wide as its share PLUS
+     the padding and border it carries, the same for three buttons but one button's worth
+     of padding narrower for a segment wrapped in a tooltip, a popover or a badge, none of
+     which pad anything. Measured at 34px on an `md` row. A `1fr` track is the share
+     itself, whatever happens to stand in it.
 
-     The automatic minimum size is left in place on purpose: a segment never shrinks
-     below its label, so a row too long for its parent overflows rather than crushing
-     text nothing here could then truncate, a VButton having no label box to put an
-     ellipsis on.
+     `1fr` is `minmax(auto, 1fr)`, so the automatic minimum is kept: a segment never
+     shrinks below its label, and a row of labels too long for its parent overflows rather
+     than crushing text nothing here could then truncate, a VButton having no label box to
+     put an ellipsis on. A menu's panel takes no track either way — closed it is
+     `display: none`, open it is fixed, and neither is a grid item.
 
      Horizontal only. In a column the width is the whole of it, the base `align-items:
-     stretch` already giving every segment the full inline size, and a `0` basis would
-     land on the BLOCK axis, where it would take the segments' `--control-height` away. */
-  .v-button-group[data-full-width][data-orientation='horizontal'] > .v-button {
-    flex: 1 1 0;
+     stretch` already giving every segment the full inline size. */
+  .v-button-group[data-full-width][data-orientation='horizontal'] {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+  }
+
+  /* A wrapped button fills the segment it sits in. The wrapper is what the group
+     stretches, a column stretching every segment across it and a full-width row giving
+     each an equal share, and the button would otherwise stay at the width of its own
+     label and leave the rest of the segment blank. A no-op everywhere else, the segment
+     being sized by that same button to begin with. */
+  .v-button-group > :not(:where(.v-overlay)):has(> .v-button) > .v-button {
+    inline-size: 100%;
   }
 
   /* Detached, the buttons are simply spaced: the base rule already gives the flex box
@@ -215,25 +264,57 @@ provide(buttonGroupKey, {
      Each block is scoped to one orientation on purpose. Left unscoped, the
      horizontal rules would also flatten the side corners and borders in a vertical
      group, where those are precisely the edges that must stay round. */
+  .v-button-group:not([data-detached])[data-orientation='horizontal'] > .v-button:not(:first-child),
   .v-button-group:not([data-detached])[data-orientation='horizontal']
-    > .v-button:not(:first-child) {
+    > :not(:where(.v-overlay)):has(> .v-button):not(:first-child) {
     margin-inline-start: -1px;
+  }
+
+  .v-button-group:not([data-detached])[data-orientation='horizontal'] > .v-button:not(:first-child),
+  .v-button-group:not([data-detached])[data-orientation='horizontal']
+    > :not(:where(.v-overlay)):not(:first-child)
+    > .v-button {
     border-start-start-radius: 0;
     border-end-start-radius: 0;
   }
 
-  .v-button-group:not([data-detached])[data-orientation='horizontal'] > .v-button:not(:last-child) {
+  /* TRAP — the last segment is read as `:has(~ :not(.v-overlay))` and no longer as
+     `:not(:last-child)`, and that is VMenu's doing: it renders its panel as a SIBLING of
+     its trigger, so a menu closing a row would leave its trigger short of `:last-child`,
+     and the row would lose its outer corner there with nothing in the DOM to say why.
+     Asking whether a real SEGMENT follows, rather than whether anything does, makes the
+     panel invisible to the count and weighs exactly what the test it replaces did.
+
+     The first segment needs none of that: a panel is rendered after the trigger it
+     belongs to, so it can never take `:first-child` from a segment. */
+  .v-button-group:not([data-detached])[data-orientation='horizontal']
+    > .v-button:has(~ :not(.v-overlay)),
+  .v-button-group:not([data-detached])[data-orientation='horizontal']
+    > :not(:where(.v-overlay)):has(~ :not(.v-overlay))
+    > .v-button {
     border-start-end-radius: 0;
     border-end-end-radius: 0;
   }
 
-  .v-button-group:not([data-detached])[data-orientation='vertical'] > .v-button:not(:first-child) {
+  .v-button-group:not([data-detached])[data-orientation='vertical'] > .v-button:not(:first-child),
+  .v-button-group:not([data-detached])[data-orientation='vertical']
+    > :not(:where(.v-overlay)):has(> .v-button):not(:first-child) {
     margin-block-start: -1px;
+  }
+
+  .v-button-group:not([data-detached])[data-orientation='vertical'] > .v-button:not(:first-child),
+  .v-button-group:not([data-detached])[data-orientation='vertical']
+    > :not(:where(.v-overlay)):not(:first-child)
+    > .v-button {
     border-start-start-radius: 0;
     border-start-end-radius: 0;
   }
 
-  .v-button-group:not([data-detached])[data-orientation='vertical'] > .v-button:not(:last-child) {
+  .v-button-group:not([data-detached])[data-orientation='vertical']
+    > .v-button:has(~ :not(.v-overlay)),
+  .v-button-group:not([data-detached])[data-orientation='vertical']
+    > :not(:where(.v-overlay)):has(~ :not(.v-overlay))
+    > .v-button {
     border-end-start-radius: 0;
     border-end-end-radius: 0;
   }
@@ -252,24 +333,34 @@ provide(buttonGroupKey, {
      of the border, which lays the bar over the border area and gives it the full length
      of the border box. Every segment is positioned so that they all paint in the same
      phase, in document order, the way they did as plain flex items. */
-  .v-button-group > .v-button {
+  .v-button-group > .v-button,
+  .v-button-group > :not(:where(.v-overlay)) > .v-button {
     position: relative;
   }
 
   /* Only the generating rule is guarded. The two orientation rules below place the insets
      of a pseudo-element that, apart or seamless, is never generated at all. */
-  .v-button-group:not([data-detached]):not([data-seamless]) > .v-button:not(:first-child)::before {
+  .v-button-group:not([data-detached]):not([data-seamless]) > .v-button:not(:first-child)::before,
+  .v-button-group:not([data-detached]):not([data-seamless])
+    > :not(:where(.v-overlay)):not(:first-child)
+    > .v-button::before {
     content: '';
     position: absolute;
   }
 
-  .v-button-group[data-orientation='horizontal'] > .v-button:not(:first-child)::before {
+  .v-button-group[data-orientation='horizontal'] > .v-button:not(:first-child)::before,
+  .v-button-group[data-orientation='horizontal']
+    > :not(:where(.v-overlay)):not(:first-child)
+    > .v-button::before {
     inset-block: -1px;
     inset-inline-start: -1px;
     border-inline-start: 1px solid var(--vectis-color-border);
   }
 
-  .v-button-group[data-orientation='vertical'] > .v-button:not(:first-child)::before {
+  .v-button-group[data-orientation='vertical'] > .v-button:not(:first-child)::before,
+  .v-button-group[data-orientation='vertical']
+    > :not(:where(.v-overlay)):not(:first-child)
+    > .v-button::before {
     inset-inline: -1px;
     inset-block-start: -1px;
     border-block-start: 1px solid var(--vectis-color-border);
@@ -293,24 +384,38 @@ provide(buttonGroupKey, {
      segment's border through (VToggle's outline frame, `.v-toggle[data-variant='outline']
      > .v-toggle-item[aria-pressed='true']:is(…)`), and a tie between two sheets is
      settled by whichever the consumer's bundler put last. An internal edge is never part
-     of a frame, so the group has to win by construction. */
+     of a frame, so the group has to win by construction. VToggle's rules are written for
+     the wrapped shape too, and take the same class there, so the gap between the two
+     holds whether an item is wrapped or not. */
   .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
-    > .v-button:not(:first-child) {
+    > .v-button:not(:first-child),
+  .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
+    > :not(:where(.v-overlay)):not(:first-child)
+    > .v-button {
     border-inline-start-color: transparent;
   }
 
   .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
-    > .v-button:not(:last-child) {
+    > .v-button:has(~ :not(.v-overlay)),
+  .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
+    > :not(:where(.v-overlay)):has(~ :not(.v-overlay))
+    > .v-button {
     border-inline-end-color: transparent;
   }
 
   .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
-    > .v-button:not(:first-child) {
+    > .v-button:not(:first-child),
+  .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
+    > :not(:where(.v-overlay)):not(:first-child)
+    > .v-button {
     border-block-start-color: transparent;
   }
 
   .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
-    > .v-button:not(:last-child) {
+    > .v-button:has(~ :not(.v-overlay)),
+  .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
+    > :not(:where(.v-overlay)):has(~ :not(.v-overlay))
+    > .v-button {
     border-block-end-color: transparent;
   }
 
@@ -322,6 +427,9 @@ provide(buttonGroupKey, {
 
      `:has()` rather than a data attribute on the root: the elevation reaches the
      buttons either from the group or one by one, and only the buttons know in the end.
+     Its argument is a list, so a wrapped segment answers for itself, and since a
+     selector list takes the specificity of its heaviest member, the two branches leave
+     the weight where it was.
 
      The raised BACKGROUND stays with each button. It is what a ghost or an outline
      segment is painted on, and in the dark theme it is what the shadow needs in order
@@ -329,14 +437,19 @@ provide(buttonGroupKey, {
 
      Detached, none of this applies and every rule steps aside: the buttons are apart, so
      there is no joint to fill and each of them casting its own shadow is right. */
-  .v-button-group:not([data-detached]):has(> .v-button[data-elevated]) {
+  .v-button-group:not([data-detached]):has(
+      > .v-button[data-elevated],
+      > :not(:where(.v-overlay)) > .v-button[data-elevated]
+    ) {
     border-radius: var(--vectis-radius-interactive);
     box-shadow: var(--vectis-shadow-sm);
     transition: box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .v-button-group:not([data-detached]):has(
-      > .v-button[data-elevated]:hover:not(:disabled, [aria-disabled='true'])
+      > .v-button[data-elevated]:hover:not(:disabled, [aria-disabled='true']),
+      > :not(:where(.v-overlay))
+        > .v-button[data-elevated]:hover:not(:disabled, [aria-disabled='true'])
     ) {
     box-shadow: var(--vectis-shadow-md);
   }
@@ -344,7 +457,9 @@ provide(buttonGroupKey, {
   /* After the hover rule and at equal specificity, the VButton order: pressing a
      raised segment settles the row back down. */
   .v-button-group:not([data-detached]):has(
-      > .v-button[data-elevated]:active:not(:disabled, [aria-disabled='true'])
+      > .v-button[data-elevated]:active:not(:disabled, [aria-disabled='true']),
+      > :not(:where(.v-overlay))
+        > .v-button[data-elevated]:active:not(:disabled, [aria-disabled='true'])
     ) {
     box-shadow: var(--vectis-shadow-sm);
   }
@@ -354,7 +469,16 @@ provide(buttonGroupKey, {
      of the two sheets the consumer's bundler happened to put last. */
   .v-button-group.v-button-group:not([data-detached]) > .v-button[data-elevated],
   .v-button-group.v-button-group:not([data-detached]) > .v-button[data-elevated]:hover,
-  .v-button-group.v-button-group:not([data-detached]) > .v-button[data-elevated]:active {
+  .v-button-group.v-button-group:not([data-detached]) > .v-button[data-elevated]:active,
+  .v-button-group.v-button-group:not([data-detached])
+    > :not(:where(.v-overlay))
+    > .v-button[data-elevated],
+  .v-button-group.v-button-group:not([data-detached])
+    > :not(:where(.v-overlay))
+    > .v-button[data-elevated]:hover,
+  .v-button-group.v-button-group:not([data-detached])
+    > :not(:where(.v-overlay))
+    > .v-button[data-elevated]:active {
     box-shadow: none;
   }
 
@@ -368,13 +492,23 @@ provide(buttonGroupKey, {
      is to say the seam. A raised segment paints its background over it, so the
      separation disappears on the far side of whichever segment the pointer is on, for
      the whole time it is there. A focused one covers it too, but under a ring that is
-     drawing that edge itself. */
-  .v-button-group > .v-button:focus-visible {
+     drawing that edge itself.
+
+     Wrapped, the `z-index` stays on the BUTTON and still counts among the segments: none
+     of the three wrappers opens a stacking context, two being unpositioned and
+     `.v-badge-host`, which is `position: relative`, keeping `z-index: auto`. Were one of
+     them to take a `z-index`, this rule would raise the button inside that wrapper's own
+     context and nothing on the page. */
+  .v-button-group > .v-button:focus-visible,
+  .v-button-group > :not(:where(.v-overlay)) > .v-button:focus-visible {
     z-index: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .v-button-group:not([data-detached]):has(> .v-button[data-elevated]) {
+    .v-button-group:not([data-detached]):has(
+        > .v-button[data-elevated],
+        > :not(:where(.v-overlay)) > .v-button[data-elevated]
+      ) {
       transition: none;
     }
   }

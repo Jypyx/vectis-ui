@@ -108,6 +108,25 @@ tone.
 
 <Canvas of={VButtonGroupStories.WithIconButton} />
 
+## Tooltips, badges and menus on a segment
+
+A segment is not always the button itself. `VTooltip`, `VPopover` and `VBadge` each render a
+wrapper around what they are attached to, and the row is drawn through it: the merged borders,
+the seam, the corners, the equal shares of a full-width row and the raised focus ring all land
+where they would have without one. Bind the `triggerProps` the companion hands out onto the
+button, exactly as anywhere else.
+
+`VMenu` puts no wrapper there at all — it renders its trigger and its panel as siblings — so it
+combines with any of the three, and the row leaves that panel out of its count: a menu closing a
+row keeps the outer corner its trigger is entitled to.
+
+Two things are worth knowing. The row reaches through ONE wrapper, which is what a companion
+produces; stacking two of them, a badge inside a tooltip say, is outside the contract. And a
+badge on a segment wants `overlay`: an inline badge takes room of its own inside the segment and
+pushes the joint away from the button's edge.
+
+<Canvas of={VButtonGroupStories.Companions} />
+
 ## Sizes
 
 The size is a property of the row, so it is named once, on the group: `size` from the scale

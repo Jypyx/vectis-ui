@@ -3,6 +3,8 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { ref } from 'vue'
 
 import { storyText } from '../../stories/storyText'
+import VBadge from '../VBadge/VBadge.vue'
+import VTooltip from '../VTooltip/VTooltip.vue'
 import VToggle from './VToggle.vue'
 import VToggleItem from './VToggleItem.vue'
 
@@ -27,6 +29,9 @@ const t = storyText({
     day: 'Day',
     veryLong: 'A particularly long period of time',
     customWeek: 'Custom rolling week',
+    week: 'Week',
+    month: 'Month',
+    weekHint: 'Monday to Sunday',
   },
   fr: {
     alignment: 'Alignement',
@@ -48,6 +53,9 @@ const t = storyText({
     day: 'Jour',
     veryLong: 'Une période de temps particulièrement longue',
     customWeek: 'Semaine glissante personnalisée',
+    week: 'Semaine',
+    month: 'Mois',
+    weekHint: 'Du lundi au dimanche',
   },
 })
 
@@ -418,6 +426,63 @@ export const Vertical: Story = {
       </div>
     `,
   }),
+}
+
+/* An item may carry a companion: a VTooltip, a VPopover or a VBadge, each of which puts a
+   wrapper between the row and the item. The row is drawn through that wrapper, so the
+   merged borders and the frame over the selection hold either way. */
+export const Companions: Story = {
+  render: () => ({
+    components: { VToggle, VToggleItem, VTooltip, VBadge },
+    setup: () => ({ selection: ref('week'), t }),
+    template: `
+      <VToggle v-model="selection" variant="outline" selected-variant="soft" :label="t.periods">
+        <VToggleItem value="day" :label="t.day" />
+        <VTooltip :text="t.weekHint">
+          <template #default="{ triggerProps }">
+            <VToggleItem value="week" :label="t.week" v-bind="triggerProps" />
+          </template>
+        </VTooltip>
+        <VBadge :count="2" overlay>
+          <VToggleItem value="month" :label="t.month" />
+        </VBadge>
+      </VToggle>
+    `,
+  }),
+  /*
+   * None of it is visible in jsdom, which lays nothing out and computes no style. The
+   * selected item is the WRAPPED one on purpose: `soft` leaves VButton's border
+   * transparent, so the frame the row restores over the selection is the rule that has to
+   * reach an item one level down, and the story ends on it for the same reason.
+   */
+  play: async ({ canvasElement }) => {
+    const TRANSPARENT = 'rgba(0, 0, 0, 0)'
+    const canvas = within(canvasElement)
+    const row = canvas.getByRole('group', { name: 'Periods' })
+    const [day, week, month] = within(row).getAllByRole('button')
+    const box = (el: HTMLElement) => el.getBoundingClientRect()
+
+    // Pulled onto its neighbour by the pixel the seam is laid over, wrapper or not.
+    await expect(box(day!).right - box(week!).left).toBeCloseTo(1, 0)
+    await expect(box(week!).right - box(month!).left).toBeCloseTo(1, 0)
+
+    const frame = getComputedStyle(week!)
+    await expect(week).toHaveAttribute('aria-pressed', 'true')
+    await expect(frame.borderBlockStartColor).toBe(getComputedStyle(day!).borderBlockStartColor)
+    await expect(frame.borderInlineStartColor).not.toBe(TRANSPARENT)
+
+    // The corners are carved on the item itself, one level inside the segment.
+    await expect(frame.borderStartStartRadius).toBe('0px')
+    await expect(getComputedStyle(month!).borderStartStartRadius).toBe('0px')
+    await expect(parseFloat(getComputedStyle(month!).borderStartEndRadius)).toBeGreaterThan(0)
+
+    // The selection crosses the wrapper in both directions, and the story is left on the
+    // wrapped item so that axe judges the frame above.
+    await userEvent.click(month!)
+    await waitFor(() => expect(month).toHaveAttribute('aria-pressed', 'true'))
+    await userEvent.click(week!)
+    await waitFor(() => expect(week).toHaveAttribute('aria-pressed', 'true'))
+  },
 }
 
 export const EdgeCases: Story = {

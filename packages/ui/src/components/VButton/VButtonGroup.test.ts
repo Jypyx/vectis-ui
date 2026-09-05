@@ -6,6 +6,20 @@ import VButton from './VButton.vue'
 import VButtonGroup from './VButtonGroup.vue'
 
 import VIconButton from '../VIconButton/VIconButton.vue'
+import VMenu from '../VMenu/VMenu.vue'
+import VMenuItem from '../VMenu/VMenuItem.vue'
+import VTooltip from '../VTooltip/VTooltip.vue'
+
+/** A VButton wrapped in the element a VTooltip puts between the group and its trigger. */
+const tooltipSegment = (label: string) =>
+  h(
+    VTooltip,
+    { text: `About ${label}` },
+    {
+      default: ({ triggerProps }: { triggerProps: Record<string, unknown> }) =>
+        h(VButton, triggerProps, () => label),
+    },
+  )
 
 /** The `.v-button` elements in render order, which is where every resolved prop lands. */
 const segments = (container: Element) => [...container.querySelectorAll<HTMLElement>('.v-button')]
@@ -279,5 +293,67 @@ describe('VButtonGroup', () => {
     const [bold, remove] = segments(container)
     expect(bold?.dataset.tone).toBe('accent')
     expect(remove?.dataset.tone).toBe('danger')
+  })
+
+  /*
+   * A companion puts a wrapper between the group and the button: `.v-tooltip`,
+   * `.v-popover`, `.v-badge-host`. What is testable here is the half jsdom can see —
+   * the row still reaching the button through that wrapper, and the DOM shape the sheet
+   * is written against. The drawing itself, the pull and the corners and the seam, is
+   * measured by the `Companions` play function.
+   */
+  describe('a segment carrying a companion', () => {
+    it('hands the row down through the wrapper', () => {
+      const { container } = render(VButtonGroup, {
+        props: { variant: 'outline', size: 'lg', tone: 'neutral' },
+        slots: { default: () => [h(VButton, () => 'One'), tooltipSegment('Two')] },
+      })
+      const rendered = segments(container)
+      expect(rendered).toHaveLength(2)
+      for (const segment of rendered) {
+        expect(segment.dataset.variant).toBe('outline')
+        expect(segment.dataset.size).toBe('lg')
+        expect(segment.dataset.tone).toBe('neutral')
+      }
+    })
+
+    // ONE level, which is what the sheet's second branch reaches for with a child
+    // combinator: the wrapper is a child of the group, and the button a child of it.
+    it('leaves the button exactly one level down', () => {
+      const { getByRole } = render(VButtonGroup, {
+        slots: { default: () => [h(VButton, () => 'One'), tooltipSegment('Two')] },
+      })
+      const group = getByRole('group')
+      const wrapper = group.querySelector('.v-tooltip')
+      expect(wrapper?.parentElement).toBe(group)
+      expect(wrapper?.querySelector(':scope > .v-button')?.textContent?.trim()).toBe('Two')
+    })
+
+    /*
+     * VMenu adds no wrapper: it renders its trigger and its panel as SIBLINGS, so a group
+     * holding a menu has a child that is no segment at all. This is the DOM behind the
+     * sheet reading its last segment as "no real segment follows me" rather than
+     * `:not(:last-child)` — a menu closing a row would otherwise take the row's outer
+     * corner away, and every panel carries `.v-overlay` for the rule to recognize.
+     */
+    it('a menu leaves its panel among the group children, after the trigger', () => {
+      const { getByRole } = render(VButtonGroup, {
+        slots: {
+          default: () => [
+            h(VButton, () => 'One'),
+            h(VMenu, null, {
+              trigger: ({ triggerProps }: { triggerProps: Record<string, unknown> }) =>
+                h(VButton, triggerProps, () => 'More'),
+              default: () => h(VMenuItem, { label: 'Rename' }),
+            }),
+          ],
+        },
+      })
+      const children = [...getByRole('group').children]
+      const panel = children.at(-1)!
+      expect(panel.classList.contains('v-overlay')).toBe(true)
+      expect(panel.getAttribute('role')).toBe('menu')
+      expect(children.at(-2)!.classList.contains('v-button')).toBe(true)
+    })
   })
 })

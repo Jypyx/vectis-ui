@@ -196,10 +196,11 @@ function onKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <!-- The row is a VButtonGroup, which merges the borders of its DIRECT button children
-       — which is why an item renders the button as its own root, with no wrapper in
-       between. It brings the role and the orientation attribute with it, and of the props
-       handed to it here it forwards the last four to the buttons itself.
+  <!-- The row is a VButtonGroup, which merges the borders of the buttons among its
+       children — which is why an item renders the button as its own root, and why the
+       only thing allowed between the two is the single wrapper a VTooltip, a VPopover or
+       a VBadge puts there. It brings the role and the orientation attribute with it, and
+       of the props handed to it here it forwards the last four to the buttons itself.
 
        `variant` is deliberately NOT among them, and neither is the tone: the group wins
        over a button that names its own variant, which would erase the one the selected
@@ -228,6 +229,14 @@ function onKeydown(event: KeyboardEvent) {
 <style>
 @layer vectis.components {
   /*
+   * Both rules below are written for the two shapes an item can take, exactly as
+   * VButtonGroup's own sheet is and for the same reason: a VTooltip, a VPopover or a
+   * VBadge puts a wrapper between the row and the item, and a rule reaching for a direct
+   * child alone would leave a gap in the frame around whichever item carries one. The
+   * `:not(:where(.v-overlay))` guard weighs nothing and keeps a panel from passing for an
+   * item; the pair is one specificity, so the arbitration with the group's seamless rules
+   * holds on both shapes.
+   *
    * The frame of an `outline` row, which only that row has: the colour its unselected
    * items already paint. They are drawn in the NEUTRAL tone, so this is what their
    * `--tone-border-soft` resolves to — naming that variable here instead would read the
@@ -242,7 +251,10 @@ function onKeydown(event: KeyboardEvent) {
     --toggle-frame: var(--vectis-color-border-strong);
   }
 
-  .v-toggle[data-variant='outline'] > .v-toggle-item:is(:disabled, [aria-disabled='true']) {
+  .v-toggle[data-variant='outline'] > .v-toggle-item:is(:disabled, [aria-disabled='true']),
+  .v-toggle[data-variant='outline']
+    > :not(:where(.v-overlay))
+    > .v-toggle-item:is(:disabled, [aria-disabled='true']) {
     --toggle-frame: var(--vectis-color-border);
   }
 
@@ -257,6 +269,9 @@ function onKeydown(event: KeyboardEvent) {
    * alone.
    */
   .v-toggle[data-variant='outline']
+    > .v-toggle-item[aria-pressed='true']:is([data-variant='soft'], [data-variant='ghost']),
+  .v-toggle[data-variant='outline']
+    > :not(:where(.v-overlay))
     > .v-toggle-item[aria-pressed='true']:is([data-variant='soft'], [data-variant='ghost']) {
     border-color: var(--toggle-frame);
   }

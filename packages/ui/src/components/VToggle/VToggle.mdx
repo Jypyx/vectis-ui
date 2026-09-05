@@ -100,6 +100,20 @@ A disabled item is a native `<button disabled>`: neither clickable nor reachable
 
 <Canvas of={VToggleStories.Disabled} />
 
+## Tooltips and badges on an item
+
+An item may carry a companion. `VTooltip`, `VPopover` and `VBadge` each render a wrapper around
+what they are attached to, and the row is drawn through it: the merged borders, the corners and
+the frame an `outline` row closes over the selection all reach the item one level down. Bind the
+`triggerProps` the companion hands out onto the `VToggleItem`, which passes them to the button it
+renders. A badge wants `overlay` here, an inline one taking room of its own inside the item.
+
+A `VMenu` is the one that does not belong: an item is a button with a state, and making it open a
+panel as well puts `aria-pressed` and `aria-haspopup` on the same control, where a single click
+would both select and open. Put the menu in a `VButtonGroup` beside the row instead.
+
+<Canvas of={VToggleStories.Companions} />
+
 ## Edge cases
 
 Long labels stay aligned inside the segmented control.

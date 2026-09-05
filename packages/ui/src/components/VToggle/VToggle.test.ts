@@ -5,6 +5,7 @@ import { defineComponent, ref } from 'vue'
 import VToggle from './VToggle.vue'
 import type { ToggleModelValue } from './VToggle.vue'
 import VToggleItem from './VToggleItem.vue'
+import VTooltip from '../VTooltip/VTooltip.vue'
 
 /**
  * Harness: the v-model must be live (without a local ref, clicking an item would
@@ -17,6 +18,8 @@ function mount(
     /** Body of the default slot; three a/b/c items by default. */
     items?: string
     initial?: ToggleModelValue
+    /** Anything the slot body renders besides the items, such as a companion wrapper. */
+    components?: Record<string, unknown>
   } = {},
 ) {
   const model = ref<ToggleModelValue>(options.initial ?? null)
@@ -27,7 +30,7 @@ function mount(
      <VToggleItem value="c" label="Three" />`
 
   const Harness = defineComponent({
-    components: { VToggle, VToggleItem },
+    components: { VToggle, VToggleItem, ...options.components },
     setup: () => ({ model }),
     template: `
       <VToggle v-model="model" ${options.toggleAttrs ?? ''}>
@@ -85,7 +88,9 @@ describe('VToggle', () => {
     it('joined (the default): the items are DIRECT children of the VButtonGroup (the seam)', () => {
       const { container } = mount()
       expect(container.querySelector('.v-toggle.v-button-group')).not.toBeNull()
-      // structural guard: an intervening wrapper would silently break the seam
+      // Structural guard on VToggleItem's own root: it renders the button and nothing
+      // around it. The single wrapper a companion adds is the one exception, and both
+      // sheets are written for it — see "an item carrying a companion" below.
       expect(container.querySelector('.v-button-group > .v-toggle-item')).not.toBeNull()
     })
 
@@ -358,6 +363,50 @@ describe('VToggle', () => {
       expect(document.activeElement).toBe(items[1])
       await fireEvent.keyDown(group, { key: 'ArrowUp' })
       expect(document.activeElement).toBe(items[0])
+    })
+  })
+
+  /*
+   * An item may carry a companion — a VTooltip, a VPopover, a VBadge — and each of them
+   * puts a wrapper between the row and the item. jsdom can see the two halves that are
+   * not drawing: the selection still crossing that wrapper, and the arrows still finding
+   * the item, which they do because the list is read from a descendant query rather than
+   * from the row's own children. The frame and the merged borders are measured by the
+   * `Companions` play function.
+   */
+  describe('an item carrying a companion', () => {
+    const mountWrapped = () =>
+      mount({
+        components: { VTooltip },
+        items: `<VToggleItem value="a" label="Un" />
+                <VTooltip text="La semaine en cours">
+                  <template #default="{ triggerProps }">
+                    <VToggleItem value="b" label="Two" v-bind="triggerProps" />
+                  </template>
+                </VTooltip>
+                <VToggleItem value="c" label="Three" />`,
+      })
+
+    it('selects through the wrapper', async () => {
+      const { container, model } = mountWrapped()
+      const wrapped = itemsOf(container)[1]!
+      expect(wrapped.parentElement?.classList.contains('v-tooltip')).toBe(true)
+
+      await fireEvent.click(wrapped)
+      expect(model.value).toBe('b')
+      expect(pressedOf(container)).toEqual(['false', 'true', 'false'])
+    })
+
+    it('the arrows still reach it', async () => {
+      const { container } = mountWrapped()
+      const items = itemsOf(container)
+      const group = container.querySelector('[role="group"]') as HTMLElement
+      items[0]?.focus()
+
+      await fireEvent.keyDown(group, { key: 'ArrowRight' })
+      expect(document.activeElement).toBe(items[1])
+      await fireEvent.keyDown(group, { key: 'ArrowRight' })
+      expect(document.activeElement).toBe(items[2])
     })
   })
 
