@@ -169,8 +169,11 @@ provide(buttonGroupKey, {
    *
    * So each of them is written for BOTH shapes:
    *
-   *   > .v-button<tests>                              the button IS the segment
-   *   > :not(:where(.v-overlay))<tests> > .v-button   the button is one level in
+   *   > .v-button<tests>          the button IS the segment
+   *   > WRAPPER<tests> BUTTON     the button is somewhere inside it
+   *
+   * with WRAPPER = `:not(:where(.v-overlay, .v-button-group))` and BUTTON =
+   * `.v-button:not(:where(.v-overlay *))`.
    *
    * Where the declarations land is decided by what they do. The PULL, the negative margin
    * that collapses two borders into one line, belongs to the segment: that is the box the
@@ -183,14 +186,21 @@ provide(buttonGroupKey, {
    * (0,1,0) each, and `:where()` weighs nothing), so a pair is always ONE specificity:
    * every figure quoted below holds for its wrapped half as well.
    *
-   * ONE wrapper deep, and no more: the second branch uses the child combinator. That is
-   * also what keeps these rules out of a PANEL's content, since VPopover renders its
-   * panel inside the wrapper and a button in there is two levels down. VMenu adds no
-   * wrapper at all, so a menu combines with any of the three.
+   * The depth is free, which is what lets companions STACK: a badge inside a tooltip
+   * inside a menu is three of them on one button, and each of the two guards in those
+   * definitions is what makes a descendant combinator safe there.
    *
-   * TRAP — `:not(:where(.v-overlay))` is what stops a panel from passing for a segment.
-   * VMenu renders its panel as a SIBLING of its trigger, so a group holding a menu has a
-   * child that is no segment, and every panel in the design system carries that class.
+   * TRAP — `.v-overlay` appears in both guards, and neither is optional. A panel must not
+   * pass for a segment: VMenu renders its panel as a SIBLING of its trigger, so a group
+   * holding a menu has a child that is no segment at all. And a panel's CONTENT must not
+   * be painted: VTooltip and VPopover render theirs INSIDE the wrapper, so a button
+   * standing in one would otherwise take a segment's corners and seam. Every panel in the
+   * design system carries that class, which is what makes one test cover both.
+   *
+   * TRAP — `.v-button-group` in the wrapper guard keeps a NESTED group out. A VToggle
+   * inside a VButtonGroup is a row of its own, drawn by its own sheet; reaching through
+   * it would flatten the corners of buttons the outer row never laid out and lay a second
+   * seam over its own.
    */
   .v-button-group {
     display: inline-flex;
@@ -234,12 +244,29 @@ provide(buttonGroupKey, {
     grid-auto-columns: 1fr;
   }
 
-  /* A wrapped button fills the segment it sits in. The wrapper is what the group
-     stretches, a column stretching every segment across it and a full-width row giving
-     each an equal share, and the button would otherwise stay at the width of its own
-     label and leave the rest of the segment blank. A no-op everywhere else, the segment
-     being sized by that same button to begin with. */
-  .v-button-group > :not(:where(.v-overlay)):has(> .v-button) > .v-button {
+  /* A wrapped button fills the segment it sits in, wherever the group STRETCHES that
+     segment: down a column, where `align-items: stretch` gives every segment the full
+     inline size, and across a full-width row, where each is given an equal track. The
+     button would otherwise stay at the width of its own label and leave the rest of the
+     segment blank.
+
+     The button AND everything between it and the segment, since companions stack: a badge
+     inside a tooltip has to be stretched itself, or the button fills a box that is still
+     the width of its own label. Panels are left out of the chain, one of them holding a
+     whole floating box that has no business being stretched to a segment.
+
+     TRAP — the two selectors are what keeps this out of a plain horizontal row, and that
+     is not an optimization. Nothing is stretched there, so the fill would have nothing to
+     do but override a control that sizes ITSELF: `.v-icon-button[data-size]` sets its
+     width from `--control-height` at (0,2,0), this rule is heavier, and a wrapped icon
+     button would collapse to the width of its glyph. Stretched, that override is the
+     right answer, an unwrapped icon button being widened by the track just the same. */
+  .v-button-group[data-orientation='vertical']
+    > :not(:where(.v-overlay, .v-button-group)):has(.v-button:not(:where(.v-overlay *)))
+    :is(.v-button, :has(.v-button)):not(:where(.v-overlay, .v-overlay *)),
+  .v-button-group[data-full-width][data-orientation='horizontal']
+    > :not(:where(.v-overlay, .v-button-group)):has(.v-button:not(:where(.v-overlay *)))
+    :is(.v-button, :has(.v-button)):not(:where(.v-overlay, .v-overlay *)) {
     inline-size: 100%;
   }
 
@@ -266,14 +293,16 @@ provide(buttonGroupKey, {
      group, where those are precisely the edges that must stay round. */
   .v-button-group:not([data-detached])[data-orientation='horizontal'] > .v-button:not(:first-child),
   .v-button-group:not([data-detached])[data-orientation='horizontal']
-    > :not(:where(.v-overlay)):has(> .v-button):not(:first-child) {
+    > :not(:where(.v-overlay, .v-button-group)):has(.v-button:not(:where(.v-overlay *))):not(
+      :first-child
+    ) {
     margin-inline-start: -1px;
   }
 
   .v-button-group:not([data-detached])[data-orientation='horizontal'] > .v-button:not(:first-child),
   .v-button-group:not([data-detached])[data-orientation='horizontal']
-    > :not(:where(.v-overlay)):not(:first-child)
-    > .v-button {
+    > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
+    .v-button:not(:where(.v-overlay *)) {
     border-start-start-radius: 0;
     border-end-start-radius: 0;
   }
@@ -290,22 +319,24 @@ provide(buttonGroupKey, {
   .v-button-group:not([data-detached])[data-orientation='horizontal']
     > .v-button:has(~ :not(.v-overlay)),
   .v-button-group:not([data-detached])[data-orientation='horizontal']
-    > :not(:where(.v-overlay)):has(~ :not(.v-overlay))
-    > .v-button {
+    > :not(:where(.v-overlay, .v-button-group)):has(~ :not(.v-overlay))
+    .v-button:not(:where(.v-overlay *)) {
     border-start-end-radius: 0;
     border-end-end-radius: 0;
   }
 
   .v-button-group:not([data-detached])[data-orientation='vertical'] > .v-button:not(:first-child),
   .v-button-group:not([data-detached])[data-orientation='vertical']
-    > :not(:where(.v-overlay)):has(> .v-button):not(:first-child) {
+    > :not(:where(.v-overlay, .v-button-group)):has(.v-button:not(:where(.v-overlay *))):not(
+      :first-child
+    ) {
     margin-block-start: -1px;
   }
 
   .v-button-group:not([data-detached])[data-orientation='vertical'] > .v-button:not(:first-child),
   .v-button-group:not([data-detached])[data-orientation='vertical']
-    > :not(:where(.v-overlay)):not(:first-child)
-    > .v-button {
+    > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
+    .v-button:not(:where(.v-overlay *)) {
     border-start-start-radius: 0;
     border-start-end-radius: 0;
   }
@@ -313,8 +344,8 @@ provide(buttonGroupKey, {
   .v-button-group:not([data-detached])[data-orientation='vertical']
     > .v-button:has(~ :not(.v-overlay)),
   .v-button-group:not([data-detached])[data-orientation='vertical']
-    > :not(:where(.v-overlay)):has(~ :not(.v-overlay))
-    > .v-button {
+    > :not(:where(.v-overlay, .v-button-group)):has(~ :not(.v-overlay))
+    .v-button:not(:where(.v-overlay *)) {
     border-end-start-radius: 0;
     border-end-end-radius: 0;
   }
@@ -334,7 +365,7 @@ provide(buttonGroupKey, {
      of the border box. Every segment is positioned so that they all paint in the same
      phase, in document order, the way they did as plain flex items. */
   .v-button-group > .v-button,
-  .v-button-group > :not(:where(.v-overlay)) > .v-button {
+  .v-button-group > :not(:where(.v-overlay, .v-button-group)) .v-button:not(:where(.v-overlay *)) {
     position: relative;
   }
 
@@ -342,16 +373,16 @@ provide(buttonGroupKey, {
      of a pseudo-element that, apart or seamless, is never generated at all. */
   .v-button-group:not([data-detached]):not([data-seamless]) > .v-button:not(:first-child)::before,
   .v-button-group:not([data-detached]):not([data-seamless])
-    > :not(:where(.v-overlay)):not(:first-child)
-    > .v-button::before {
+    > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
+    .v-button:not(:where(.v-overlay *))::before {
     content: '';
     position: absolute;
   }
 
   .v-button-group[data-orientation='horizontal'] > .v-button:not(:first-child)::before,
   .v-button-group[data-orientation='horizontal']
-    > :not(:where(.v-overlay)):not(:first-child)
-    > .v-button::before {
+    > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
+    .v-button:not(:where(.v-overlay *))::before {
     inset-block: -1px;
     inset-inline-start: -1px;
     border-inline-start: 1px solid var(--vectis-color-border);
@@ -359,8 +390,8 @@ provide(buttonGroupKey, {
 
   .v-button-group[data-orientation='vertical'] > .v-button:not(:first-child)::before,
   .v-button-group[data-orientation='vertical']
-    > :not(:where(.v-overlay)):not(:first-child)
-    > .v-button::before {
+    > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
+    .v-button:not(:where(.v-overlay *))::before {
     inset-inline: -1px;
     inset-block-start: -1px;
     border-block-start: 1px solid var(--vectis-color-border);
@@ -390,32 +421,32 @@ provide(buttonGroupKey, {
   .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
     > .v-button:not(:first-child),
   .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
-    > :not(:where(.v-overlay)):not(:first-child)
-    > .v-button {
+    > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
+    .v-button:not(:where(.v-overlay *)) {
     border-inline-start-color: transparent;
   }
 
   .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
     > .v-button:has(~ :not(.v-overlay)),
   .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
-    > :not(:where(.v-overlay)):has(~ :not(.v-overlay))
-    > .v-button {
+    > :not(:where(.v-overlay, .v-button-group)):has(~ :not(.v-overlay))
+    .v-button:not(:where(.v-overlay *)) {
     border-inline-end-color: transparent;
   }
 
   .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
     > .v-button:not(:first-child),
   .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
-    > :not(:where(.v-overlay)):not(:first-child)
-    > .v-button {
+    > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
+    .v-button:not(:where(.v-overlay *)) {
     border-block-start-color: transparent;
   }
 
   .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
     > .v-button:has(~ :not(.v-overlay)),
   .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
-    > :not(:where(.v-overlay)):has(~ :not(.v-overlay))
-    > .v-button {
+    > :not(:where(.v-overlay, .v-button-group)):has(~ :not(.v-overlay))
+    .v-button:not(:where(.v-overlay *)) {
     border-block-end-color: transparent;
   }
 
@@ -439,7 +470,7 @@ provide(buttonGroupKey, {
      there is no joint to fill and each of them casting its own shadow is right. */
   .v-button-group:not([data-detached]):has(
       > .v-button[data-elevated],
-      > :not(:where(.v-overlay)) > .v-button[data-elevated]
+      > :not(:where(.v-overlay, .v-button-group)) .v-button[data-elevated]:not(:where(.v-overlay *))
     ) {
     border-radius: var(--vectis-radius-interactive);
     box-shadow: var(--vectis-shadow-sm);
@@ -448,8 +479,10 @@ provide(buttonGroupKey, {
 
   .v-button-group:not([data-detached]):has(
       > .v-button[data-elevated]:hover:not(:disabled, [aria-disabled='true']),
-      > :not(:where(.v-overlay))
-        > .v-button[data-elevated]:hover:not(:disabled, [aria-disabled='true'])
+      > :not(:where(.v-overlay, .v-button-group))
+        .v-button[data-elevated]:hover:not(:disabled, [aria-disabled='true']):not(
+          :where(.v-overlay *)
+        )
     ) {
     box-shadow: var(--vectis-shadow-md);
   }
@@ -458,8 +491,10 @@ provide(buttonGroupKey, {
      raised segment settles the row back down. */
   .v-button-group:not([data-detached]):has(
       > .v-button[data-elevated]:active:not(:disabled, [aria-disabled='true']),
-      > :not(:where(.v-overlay))
-        > .v-button[data-elevated]:active:not(:disabled, [aria-disabled='true'])
+      > :not(:where(.v-overlay, .v-button-group))
+        .v-button[data-elevated]:active:not(:disabled, [aria-disabled='true']):not(
+          :where(.v-overlay *)
+        )
     ) {
     box-shadow: var(--vectis-shadow-sm);
   }
@@ -471,14 +506,14 @@ provide(buttonGroupKey, {
   .v-button-group.v-button-group:not([data-detached]) > .v-button[data-elevated]:hover,
   .v-button-group.v-button-group:not([data-detached]) > .v-button[data-elevated]:active,
   .v-button-group.v-button-group:not([data-detached])
-    > :not(:where(.v-overlay))
-    > .v-button[data-elevated],
+    > :not(:where(.v-overlay, .v-button-group))
+    .v-button[data-elevated]:not(:where(.v-overlay *)),
   .v-button-group.v-button-group:not([data-detached])
-    > :not(:where(.v-overlay))
-    > .v-button[data-elevated]:hover,
+    > :not(:where(.v-overlay, .v-button-group))
+    .v-button[data-elevated]:hover:not(:where(.v-overlay *)),
   .v-button-group.v-button-group:not([data-detached])
-    > :not(:where(.v-overlay))
-    > .v-button[data-elevated]:active {
+    > :not(:where(.v-overlay, .v-button-group))
+    .v-button[data-elevated]:active:not(:where(.v-overlay *)) {
     box-shadow: none;
   }
 
@@ -500,14 +535,17 @@ provide(buttonGroupKey, {
      them to take a `z-index`, this rule would raise the button inside that wrapper's own
      context and nothing on the page. */
   .v-button-group > .v-button:focus-visible,
-  .v-button-group > :not(:where(.v-overlay)) > .v-button:focus-visible {
+  .v-button-group
+    > :not(:where(.v-overlay, .v-button-group))
+    .v-button:focus-visible:not(:where(.v-overlay *)) {
     z-index: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .v-button-group:not([data-detached]):has(
         > .v-button[data-elevated],
-        > :not(:where(.v-overlay)) > .v-button[data-elevated]
+        > :not(:where(.v-overlay, .v-button-group))
+          .v-button[data-elevated]:not(:where(.v-overlay *))
       ) {
       transition: none;
     }

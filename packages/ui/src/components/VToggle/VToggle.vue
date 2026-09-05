@@ -197,9 +197,9 @@ function onKeydown(event: KeyboardEvent) {
 
 <template>
   <!-- The row is a VButtonGroup, which merges the borders of the buttons among its
-       children — which is why an item renders the button as its own root, and why the
-       only thing allowed between the two is the single wrapper a VTooltip, a VPopover or
-       a VBadge puts there. It brings the role and the orientation attribute with it, and
+       children — which is why an item renders the button as its own root, and why what
+       may stand between the two is the wrappers a VTooltip, a VPopover or a VBadge put
+       there, and nothing else. It brings the role and the orientation attribute with it, and
        of the props handed to it here it forwards the last four to the buttons itself.
 
        `variant` is deliberately NOT among them, and neither is the tone: the group wins
@@ -253,8 +253,8 @@ function onKeydown(event: KeyboardEvent) {
 
   .v-toggle[data-variant='outline'] > .v-toggle-item:is(:disabled, [aria-disabled='true']),
   .v-toggle[data-variant='outline']
-    > :not(:where(.v-overlay))
-    > .v-toggle-item:is(:disabled, [aria-disabled='true']) {
+    > :not(:where(.v-overlay, .v-button-group))
+    .v-toggle-item:is(:disabled, [aria-disabled='true']):not(:where(.v-overlay *)) {
     --toggle-frame: var(--vectis-color-border);
   }
 
@@ -271,8 +271,10 @@ function onKeydown(event: KeyboardEvent) {
   .v-toggle[data-variant='outline']
     > .v-toggle-item[aria-pressed='true']:is([data-variant='soft'], [data-variant='ghost']),
   .v-toggle[data-variant='outline']
-    > :not(:where(.v-overlay))
-    > .v-toggle-item[aria-pressed='true']:is([data-variant='soft'], [data-variant='ghost']) {
+    > :not(:where(.v-overlay, .v-button-group))
+    .v-toggle-item[aria-pressed='true']:is([data-variant='soft'], [data-variant='ghost']):not(
+      :where(.v-overlay *)
+    ) {
     border-color: var(--toggle-frame);
   }
 }

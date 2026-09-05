@@ -46,6 +46,7 @@ const t = storyText({
     comments: 'Comments',
     moreActions: 'More actions',
     weekHint: 'Monday to Sunday',
+    moreHint: 'Everything else this row can do',
   },
   fr: {
     alignment: 'Alignement',
@@ -82,6 +83,7 @@ const t = storyText({
     comments: 'Commentaires',
     moreActions: 'Autres actions',
     weekHint: 'Du lundi au dimanche',
+    moreHint: 'Tout ce que cette rangée sait faire d’autre',
   },
 })
 
@@ -356,8 +358,9 @@ export const WithIconButton: Story = {
 
 /* A segment is not always the button: a VTooltip, a VPopover and a VBadge each put a
    wrapper around what they are attached to, and a VMenu renders its panel as a sibling of
-   its trigger. The row is drawn through both shapes, so a tooltip, a badge and a menu can
-   be dropped into it without it coming apart. */
+   its trigger. The row is drawn through whatever they stack up, so the last segment here
+   carries all three at once: a menu it opens, a tooltip describing it and a badge
+   counting on it, with the button two wrappers down. */
 export const Companions: Story = {
   render: () => ({
     components: { VButtonGroup, VButton, VIconButton, VTooltip, VBadge, VMenu, VMenuItem },
@@ -375,8 +378,18 @@ export const Companions: Story = {
             <VButton>{{ t.comments }}</VButton>
           </VBadge>
           <VMenu>
-            <template #trigger="{ triggerProps }">
-              <VIconButton v-bind="triggerProps" icon="more_horiz" :label="t.moreActions" />
+            <template #trigger="{ triggerProps: menuProps }">
+              <VTooltip :text="t.moreHint">
+                <template #default="{ triggerProps: tooltipProps }">
+                  <VBadge :count="2" overlay>
+                    <VIconButton
+                      v-bind="{ ...menuProps, ...tooltipProps }"
+                      icon="more_horiz"
+                      :label="t.moreActions"
+                    />
+                  </VBadge>
+                </template>
+              </VTooltip>
             </template>
             <VMenuItem :label="t.exportCsv" />
             <VMenuItem :label="t.exportPdf" />
@@ -431,6 +444,24 @@ export const Companions: Story = {
     const badge = row.querySelector('.v-badge') as HTMLElement
     await expect(badge.getBoundingClientRect().right).toBeGreaterThan(edges(more!).left)
     await expect(getComputedStyle(badge).zIndex).toBe('1')
+
+    /*
+     * The last segment carries all three at once: the menu outermost, since it renders
+     * its panel as a sibling of what it wraps nothing in, then the tooltip, then the
+     * badge, with the button two wrappers down. Everything asserted on it, here and
+     * below, therefore travels that depth.
+     */
+    const stacked = more!.closest('.v-tooltip') as HTMLElement
+    await expect(more!.closest('.v-badge-host')).not.toBeNull()
+    await expect(stacked.parentElement).toBe(row)
+
+    // And it stays SQUARE: a VIconButton sets its own width from `--control-height`, and
+    // the rule that fills a stretched segment is heavier than that. Nothing is stretched
+    // in a plain row, so nothing overrides it — remove the guard on that rule and this
+    // button collapses to the width of its glyph.
+    const square = more!.getBoundingClientRect()
+    await expect(square.width).toBeCloseTo(square.height, 1)
+    await expect(square.width).toBeCloseTo(40, 1)
 
     // The two ends of the row keep their outer corners, and give up their inner ones.
     await expect(parseFloat(getComputedStyle(rename!).borderStartStartRadius)).toBeGreaterThan(0)

@@ -9,6 +9,7 @@ import VIconButton from '../VIconButton/VIconButton.vue'
 import VMenu from '../VMenu/VMenu.vue'
 import VMenuItem from '../VMenu/VMenuItem.vue'
 import VTooltip from '../VTooltip/VTooltip.vue'
+import VBadge from '../VBadge/VBadge.vue'
 
 /** A VButton wrapped in the element a VTooltip puts between the group and its trigger. */
 const tooltipSegment = (label: string) =>
@@ -317,9 +318,9 @@ describe('VButtonGroup', () => {
       }
     })
 
-    // ONE level, which is what the sheet's second branch reaches for with a child
-    // combinator: the wrapper is a child of the group, and the button a child of it.
-    it('leaves the button exactly one level down', () => {
+    // The shape the sheet's second branch reaches through: the wrapper is a child of the
+    // group, and the button stands inside it.
+    it('leaves the wrapper on the group and the button inside it', () => {
       const { getByRole } = render(VButtonGroup, {
         slots: { default: () => [h(VButton, () => 'One'), tooltipSegment('Two')] },
       })
@@ -327,6 +328,38 @@ describe('VButtonGroup', () => {
       const wrapper = group.querySelector('.v-tooltip')
       expect(wrapper?.parentElement).toBe(group)
       expect(wrapper?.querySelector(':scope > .v-button')?.textContent?.trim()).toBe('Two')
+    })
+
+    /*
+     * Companions STACK, and each one is another element between the group and the button:
+     * a badge inside a tooltip puts it two down, which is why the sheet reaches through a
+     * descendant combinator rather than a child one. The drawing at that depth is the
+     * `Companions` play function's; what is locked here is the DOM shape it relies on.
+     */
+    it('a badge inside a tooltip puts the button two wrappers down', () => {
+      const { getByRole } = render(VButtonGroup, {
+        slots: {
+          default: () => [
+            h(VButton, () => 'One'),
+            h(
+              VTooltip,
+              { text: 'About two' },
+              {
+                default: ({ triggerProps }: { triggerProps: Record<string, unknown> }) =>
+                  h(VBadge, { count: 2, overlay: true }, () =>
+                    h(VButton, triggerProps, () => 'Two'),
+                  ),
+              },
+            ),
+          ],
+        },
+      })
+      const group = getByRole('group')
+      const wrapper = group.querySelector('.v-tooltip')
+      expect(wrapper?.parentElement).toBe(group)
+      expect(
+        wrapper?.querySelector(':scope > .v-badge-host > .v-button')?.textContent?.trim(),
+      ).toBe('Two')
     })
 
     /*

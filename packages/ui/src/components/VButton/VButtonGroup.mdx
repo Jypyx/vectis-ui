@@ -120,10 +120,19 @@ button, exactly as anywhere else.
 combines with any of the three, and the row leaves that panel out of its count: a menu closing a
 row keeps the outer corner its trigger is entitled to.
 
-Two things are worth knowing. The row reaches through ONE wrapper, which is what a companion
-produces; stacking two of them, a badge inside a tooltip say, is outside the contract. And a
-badge on a segment wants `overlay`: an inline badge takes room of its own inside the segment and
-pushes the joint away from the button's edge.
+They stack, and the depth is free: the last segment below is a menu, a tooltip and a badge on
+one icon button, with the button two wrappers down. `VMenu` goes outermost, since its panel is
+rendered as a sibling of its trigger and a wrapper put around it would swallow the panel; the
+other two go in either order. Both slots hand out a prop called `triggerProps`, so rename one of
+them and merge the two onto the button.
+
+Two things a row does not reach into. A panel's content is left alone, so a `VButton` standing
+inside a popover attached to a segment is drawn as itself. And a nested row keeps its own
+drawing: a `VToggle` inside a `VButtonGroup` is a segmented control of its own, not four
+segments of the outer one.
+
+A badge on a segment wants `overlay`: an inline badge takes room of its own inside the segment
+and pushes the joint away from the button's edge.
 
 <Canvas of={VButtonGroupStories.Companions} />
 

@@ -89,8 +89,8 @@ describe('VToggle', () => {
       const { container } = mount()
       expect(container.querySelector('.v-toggle.v-button-group')).not.toBeNull()
       // Structural guard on VToggleItem's own root: it renders the button and nothing
-      // around it. The single wrapper a companion adds is the one exception, and both
-      // sheets are written for it — see "an item carrying a companion" below.
+      // around it. The wrappers a companion adds are the exception, and both sheets are
+      // written to reach through them — see "an item carrying a companion" below.
       expect(container.querySelector('.v-button-group > .v-toggle-item')).not.toBeNull()
     })
 
