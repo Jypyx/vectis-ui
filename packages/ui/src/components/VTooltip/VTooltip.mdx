@@ -65,7 +65,13 @@ A long text wraps within the panel's maximum width:
 
 - `role="tooltip"` + an `aria-describedby` set on the trigger through `triggerProps`: the content
   is announced when focus is taken.
-- Keyboard focus: immediate opening (with no delay), closing through Escape or focus loss.
+- Keyboard focus: immediate opening (with no delay), closing through Escape or focus loss. It is
+  the **keyboard** focus specifically, read from `:focus-visible`: a focus given by a click, or
+  handed back to the trigger by a panel that is closing, opens nothing. Otherwise dismissing a
+  menu would raise the tooltip over a page the reader has moved on from.
+- **A tap opens no tooltip.** There is no hover on a touch screen, and a tooltip on tap would
+  stand over whatever the tap just opened. Anything a touch reader needs has to be somewhere
+  else as well: a visible label, a field hint, a panel.
 - Pressing the trigger closes it too. That is what a trigger opening a panel needs: the pointer
   has not left and the focus may not have moved, so the tooltip would otherwise stand over what
   the click just opened.

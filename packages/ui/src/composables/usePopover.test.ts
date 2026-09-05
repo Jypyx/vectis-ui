@@ -84,6 +84,41 @@ describe('usePopover', () => {
     expect(showPopover).toHaveBeenCalledWith({ source: invoker })
   })
 
+  /*
+   * The browser throws when asked to open a popover while it is already busy with another
+   * one, and a component has no way to know it is in that position: the focus a closing
+   * panel hands back to its invoker arrives from INSIDE the browser's own hide, and
+   * whatever answers that focus calls show() from there. The retry is a microtask, which
+   * runs once that operation is over.
+   */
+  it('retries an opening the browser refused mid-operation', async () => {
+    const { el, showPopover } = popoverEl()
+    const { show } = usePopover(el)
+    showPopover.mockImplementationOnce(() => {
+      throw new DOMException('Invalid to show a popover during another show operation')
+    })
+
+    expect(() => show()).not.toThrow()
+    expect(showPopover).toHaveBeenCalledTimes(1)
+
+    await Promise.resolve()
+    expect(showPopover).toHaveBeenCalledTimes(2)
+  })
+
+  it('gives up after one retry rather than letting the error out', async () => {
+    const { el, showPopover } = popoverEl()
+    const { show } = usePopover(el)
+    showPopover.mockImplementation(() => {
+      throw new DOMException('nope')
+    })
+
+    show()
+    await Promise.resolve()
+    await Promise.resolve()
+    // Two attempts and no third: an unopenable panel stays closed, it does not spin.
+    expect(showPopover).toHaveBeenCalledTimes(2)
+  })
+
   it('is inert while the element ref is null', () => {
     const el = ref<HTMLElement | null>(null)
     const { show, hide, shown } = usePopover(el)

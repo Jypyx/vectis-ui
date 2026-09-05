@@ -56,15 +56,33 @@ describe('VTooltip', () => {
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
   })
 
-  it('focus opens immediately, Escape closes (WCAG 1.4.13)', () => {
-    const { container } = render(Harness)
+  it('keyboard focus opens immediately, Escape closes (WCAG 1.4.13)', () => {
+    const { getByTestId, container } = render(Harness)
+    const trigger = getByTestId('trigger')
     const wrapper = container.querySelector('.v-tooltip') as HTMLElement
     const panel = container.querySelector('[role="tooltip"]') as HTMLElement
 
-    wrapper.dispatchEvent(new Event('focusin'))
+    // jsdom answers `false` to `:focus-visible` for everything, focused elements included,
+    // so the branch is chosen by hand here (see utils/focus). What that locks is that the
+    // component ASKS the question, never jsdom's answer to it.
+    vi.spyOn(trigger, 'matches').mockReturnValue(true)
+    trigger.dispatchEvent(new Event('focusin', { bubbles: true }))
     expect(panel.hasAttribute('data-popover-open')).toBe(true)
 
     wrapper.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(panel.hasAttribute('data-popover-open')).toBe(false)
+  })
+
+  // A focus that is not the keyboard's opens nothing, and the case is not theoretical: a
+  // panel opened from this trigger hands the focus BACK to it as it closes, which arrives
+  // here as an ordinary `focusin` — the tooltip would then stand over a page the reader has
+  // just dismissed something on. jsdom's `matches` already answers `false`, which is exactly
+  // the pointer branch, so nothing is stubbed.
+  it('ignores a focus the keyboard did not give', () => {
+    const { getByTestId, container } = render(Harness)
+    const panel = container.querySelector('[role="tooltip"]') as HTMLElement
+
+    getByTestId('trigger').dispatchEvent(new Event('focusin', { bubbles: true }))
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
   })
 

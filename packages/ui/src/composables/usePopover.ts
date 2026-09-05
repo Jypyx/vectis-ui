@@ -4,11 +4,12 @@
  * The JS half of `styles/floating.css`, which places the panel.
  *
  * The Popover API is imperative where the rest of the library is declarative, and it sets
- * two traps a plain boolean would fall into. Closing an already-closed panel throws, hence
- * the idempotence guards. And an `auto` panel dismisses itself on a click outside or on
- * Escape, so the state is READ from the DOM: wire `syncShown` to both `beforetoggle` and
- * `toggle`, the first being the only one that catches light dismiss in time and the second
- * the only one the jsdom stub emits.
+ * three traps a plain boolean would fall into. Closing an already-closed panel throws, hence
+ * the idempotence guards. Opening one while the browser is busy with another popover throws
+ * as well, hence the retry on `show`. And an `auto` panel dismisses itself on a click outside
+ * or on Escape, so the state is READ from the DOM: wire `syncShown` to both `beforetoggle`
+ * and `toggle`, the first being the only one that catches light dismiss in time and the
+ * second the only one the jsdom stub emits.
  *
  * TRAP — never assign `shown` by hand. A panel the browser dismissed would then still read
  * as open, and the guard would swallow the next request to close it.
@@ -41,8 +42,31 @@ export function usePopover(el: Ref<HTMLElement | null>) {
    * against and lands at the corner of the viewport.
    */
   function show(source?: HTMLElement) {
-    if (!shown.value)
-      (el.value as PopoverWithSource | null)?.showPopover(source ? { source } : undefined)
+    if (!shown.value) attempt(source, true)
+  }
+
+  /*
+   * TRAP — the browser REFUSES to open a popover while it is in the middle of another
+   * popover operation, and it throws rather than queueing the request
+   * ("Invalid to show a popover during another show operation").
+   *
+   * The case that reaches it is ordinary: closing a popover that holds the focus hands
+   * that focus back to its invoker SYNCHRONOUSLY, inside the hide, and a component
+   * listening for that focus opens a panel of its own from the handler — a tooltip on the
+   * button a menu has just closed. Nothing in the calling code can see it coming.
+   *
+   * A microtask runs once the stack has unwound, hence after the operation the browser was
+   * in, which is all it takes. A second refusal is left alone: the panel stays closed
+   * rather than the page taking an uncaught error.
+   */
+  function attempt(source: HTMLElement | undefined, retry: boolean) {
+    const panel = el.value as PopoverWithSource | null
+    if (!panel || shown.value) return
+    try {
+      panel.showPopover(source ? { source } : undefined)
+    } catch {
+      if (retry) queueMicrotask(() => attempt(source, false))
+    }
   }
 
   /** Closes the panel. */

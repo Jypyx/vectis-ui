@@ -27,6 +27,7 @@ import { ref, useId } from 'vue'
 import VPopover from '../VPopover/VPopover.vue'
 
 import { useTimer } from '../../composables/useTimer'
+import { isKeyboardFocus } from '../../utils/focus'
 
 type Placement =
   'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'right'
@@ -98,6 +99,23 @@ function hide() {
   popoverRef.value?.hide()
 }
 
+// @a11y
+/*
+ * The tooltip belongs to the KEYBOARD focus, and a `focusin` says the focus arrived, never
+ * how it got there. Three ways in are not a Tab: a click, which the pointer already covers
+ * and which the `pointerdown` above has just closed the tooltip for; a tap, which no browser
+ * agrees on; and a `focus()` from code — the one a closing panel hands back to the button
+ * that opened it, which would raise a tooltip over a page the reader is no longer pointing
+ * at. `:focus-visible` is the browser's own answer to the question, the same one VMenu asks
+ * to decide where a menu's focus lands.
+ *
+ * The consequence to know: a tooltip never opens on a tap. Content a touch reader needs
+ * cannot live here alone.
+ */
+function onFocusIn(event: FocusEvent) {
+  if (isKeyboardFocus(event.target)) show(true)
+}
+
 // @keyboard @a11y — Escape must dismiss a tooltip opened by hover or focus without
 // moving the focus anywhere (WCAG 1.4.13): content appearing on hover has to be
 // dismissible, for a magnifier user whose view it may be covering.
@@ -129,7 +147,7 @@ function onKeydown(event: KeyboardEvent) {
     @pointerenter="show()"
     @pointerleave="hide"
     @pointerdown="hide"
-    @focusin="show(true)"
+    @focusin="onFocusIn"
     @focusout="hide"
     @keydown="onKeydown"
   >

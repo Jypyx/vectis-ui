@@ -77,11 +77,11 @@ Philosophy rule 1 requires every behavioural JS block to be justified. That just
 
 Cumulative, **least specific last** — `@keyboard @a11y`, `@ssr @core`. The tag goes on its **own `//` line ABOVE** the block's existing comment (which is never rewritten), and **NEVER inside a JSDoc body**: prop/slot/emit JSDoc is the sole source of Storybook's `<Controls>` description column, where an unknown tag would be absorbed by the docgen. A trivial one-liner takes no tag — "a comment that restates the code is noise" still wins. The three big pure-domain modules (`utils/date`, `utils/time`, `utils/file`) carry ONE module-wide tag instead of fifty identical per-function ones.
 
-Current state — **208 tag lines over 90 files**:
+Current state — **209 tag lines over 90 files**:
 
 |             | lines | of which pure |
 | ----------- | ----: | ------------: |
-| `@a11y`     |   103 |            35 |
+| `@a11y`     |   104 |            36 |
 | `@core`     |    89 |            36 |
 | `@keyboard` |    44 |             4 |
 | `@ssr`      |    31 |             5 |
