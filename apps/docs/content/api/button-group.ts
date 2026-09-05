@@ -12,6 +12,7 @@ export default {
         { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
         { name: 'detached', type: 'boolean', default: 'false' },
         { name: 'seamless', type: 'boolean', default: 'false' },
+        { name: 'fullWidth', type: 'boolean', default: 'false' },
         { name: 'variant', type: 'ButtonVariant' },
         { name: 'tone', type: 'ButtonTone' },
         { name: 'size', type: 'ButtonSize' },

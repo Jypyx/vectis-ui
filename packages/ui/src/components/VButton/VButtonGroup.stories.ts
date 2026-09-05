@@ -25,6 +25,8 @@ const t = storyText({
     underline: 'Underline',
     joined: 'Joined',
     detached: 'Detached',
+    naturalWidth: 'As wide as its labels',
+    fullWidth: 'Filling the column',
     lined: 'Lined',
     seamless: 'Seamless',
     alone: 'Alone',
@@ -55,6 +57,8 @@ const t = storyText({
     underline: 'Souligné',
     joined: 'Joints',
     detached: 'Séparés',
+    naturalWidth: 'À la largeur de ses libellés',
+    fullWidth: 'Remplissant la colonne',
     lined: 'Avec traits',
     seamless: 'Sans traits',
     alone: 'Seul',
@@ -82,6 +86,7 @@ const meta = {
     orientation: 'horizontal',
     detached: false,
     seamless: false,
+    fullWidth: false,
     variant: 'outline',
     tone: 'neutral',
   },
@@ -258,6 +263,59 @@ export const Vertical: Story = {
       </VButtonGroup>
     `,
   }),
+}
+
+/* The same row twice in one 360px column: as wide as its labels, then filling the
+   column with the three segments sharing that width equally. */
+export const FullWidth: Story = {
+  render: () => ({
+    components: { VButtonGroup, VButton },
+    setup: () => ({ t }),
+    template: `
+      <div style="display: grid; gap: 16px; inline-size: 360px">
+        <div>
+          <p style="margin: 0 0 8px; font: inherit">{{ t.naturalWidth }}</p>
+          <VButtonGroup variant="outline" tone="neutral" aria-label="Natural width">
+            <VButton>{{ t.day }}</VButton>
+            <VButton>{{ t.week }}</VButton>
+            <VButton>{{ t.month }}</VButton>
+          </VButtonGroup>
+        </div>
+        <div>
+          <p style="margin: 0 0 8px; font: inherit">{{ t.fullWidth }}</p>
+          <VButtonGroup full-width variant="outline" tone="neutral" aria-label="Full width">
+            <VButton>{{ t.day }}</VButton>
+            <VButton>{{ t.week }}</VButton>
+            <VButton>{{ t.month }}</VButton>
+          </VButtonGroup>
+        </div>
+      </div>
+    `,
+  }),
+  // Neither half is observable in jsdom, which lays nothing out: the row filling its
+  // parent and the segments sharing that width are measured here or nowhere.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const natural = canvas.getByRole('group', { name: 'Natural width' })
+    const full = canvas.getByRole('group', { name: 'Full width' })
+
+    const parentWidth = full.parentElement!.getBoundingClientRect().width
+    await expect(full.getBoundingClientRect().width).toBeCloseTo(parentWidth, 1)
+    await expect(natural.getBoundingClientRect().width).toBeLessThan(parentWidth)
+
+    // Equal shares, which is what `flex: 1 1 0` buys over the free space alone: the
+    // three labels are of different lengths, and the segments are not.
+    const widths = within(full)
+      .getAllByRole('button')
+      .map((button) => button.getBoundingClientRect().width)
+    await expect(widths).toHaveLength(3)
+    await expect(widths[1]).toBeCloseTo(widths[0]!, 1)
+    await expect(widths[2]).toBeCloseTo(widths[0]!, 1)
+
+    // Nothing of the joining is given up: the segments still overlap by the pixel the
+    // seam is laid over, so the three of them measure more than the row they fill.
+    await expect(widths[0]! + widths[1]! + widths[2]!).toBeGreaterThan(parentWidth)
+  },
 }
 
 export const WithIconButton: Story = {

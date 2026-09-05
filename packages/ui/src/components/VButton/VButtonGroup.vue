@@ -10,6 +10,10 @@
  * `seamless` keeps them joined but takes the lines out from between them, so the row
  * becomes a single frame. Everything else is the joined default.
  *
+ * `fullWidth` is the row's width rather than its drawing: the group fills its parent, and
+ * the segments divide that width into equal shares instead of each measuring its own
+ * label, which is what a segmented control standing on a line of its own is asked for.
+ *
  * Since the row is one object, how its segments are drawn is its decision too: the group
  * hands its variant, size, compact and elevated down to every button inside, and each of
  * them wins over what the button was given. The tone travels the other way, as a
@@ -43,6 +47,13 @@ interface ButtonGroupProps {
    * apart already and there is no shared edge to draw on.
    */
   seamless?: boolean
+  /**
+   * Stretches the row across the whole inline size of its parent, every segment taking
+   * an equal share of that width. A segment never shrinks below its own label, so a row
+   * of labels too long for the parent overflows it rather than being crushed. Under
+   * `vertical` it is the width alone: the segments already stretch across the column.
+   */
+  fullWidth?: boolean
   /**
    * How much visual weight every segment carries, on the values of VButton's own
    * `variant`: `solid`, `outline`, `ghost` or `soft`. It wins over the variant a
@@ -78,13 +89,14 @@ interface ButtonGroupProps {
 }
 
 const props = withDefaults(defineProps<ButtonGroupProps>(), {
-  // `detached` and `seamless` are the group's own layout, and take a real default like
-  // the orientation does. The six that follow travel down to the buttons, and are
-  // `undefined` by default, the booleans included: it is `undefined`, and not `false`,
-  // that means the group has no opinion and lets the button keep its own.
+  // `detached`, `seamless` and `fullWidth` are the group's own layout, and take a real
+  // default like the orientation does. The six that follow travel down to the buttons,
+  // and are `undefined` by default, the booleans included: it is `undefined`, and not
+  // `false`, that means the group has no opinion and lets the button keep its own.
   orientation: 'horizontal',
   detached: false,
   seamless: false,
+  fullWidth: false,
   variant: undefined,
   tone: undefined,
   size: undefined,
@@ -138,6 +150,7 @@ provide(buttonGroupKey, {
     :data-orientation="orientation"
     :data-detached="detached ? '' : undefined"
     :data-seamless="seamless && !detached ? '' : undefined"
+    :data-full-width="fullWidth ? '' : undefined"
   >
     <slot />
   </div>
@@ -154,6 +167,31 @@ provide(buttonGroupKey, {
 
   .v-button-group[data-orientation='vertical'] {
     flex-direction: column;
+  }
+
+  /* An explicit display alongside the inline size, VButton's own full-width argument: an
+     inline-level box sits on a line box, and the strut's descender would show as a few
+     pixels of dead space under a row asked to fill its parent. */
+  .v-button-group[data-full-width] {
+    display: flex;
+    inline-size: 100%;
+  }
+
+  /* Equal shares, `1 1 0` and not `1 1 auto`: distributing the free space alone between
+     segments that still measure their own labels leaves the longest word the widest
+     segment, and a row that reads as one object cannot be cut into unequal pieces by
+     whichever words happen to be in it.
+
+     The automatic minimum size is left in place on purpose: a segment never shrinks
+     below its label, so a row too long for its parent overflows rather than crushing
+     text nothing here could then truncate, a VButton having no label box to put an
+     ellipsis on.
+
+     Horizontal only. In a column the width is the whole of it, the base `align-items:
+     stretch` already giving every segment the full inline size, and a `0` basis would
+     land on the BLOCK axis, where it would take the segments' `--control-height` away. */
+  .v-button-group[data-full-width][data-orientation='horizontal'] > .v-button {
+    flex: 1 1 0;
   }
 
   /* Detached, the buttons are simply spaced: the base rule already gives the flex box

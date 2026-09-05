@@ -11,6 +11,8 @@ export default {
           'Laisse les boutons séparés, avec un écart entre eux et chacun gardant ses propres coins, au lieu de les assembler en contrôle segmenté. Tout ce que le groupe transmet circule toujours, et une rangée surélevée laisse alors chaque bouton porter sa propre ombre.',
         seamless:
           "Retire les traits entre les boutons assemblés : aucune couture n'est dessinée, et les bordures des deux côtés de chaque arête partagée sont effacées, si bien que la rangée se lit comme un cadre unique plutôt que comme des segments. Les arêtes extérieures restent. Sans effet sous <code>detached</code>, où aucune arête n'est partagée.",
+        fullWidth:
+          "Étire la rangée sur toute la largeur de son parent, chaque segment prenant une part égale de cette largeur quel que soit son libellé. Un segment ne descend jamais sous la largeur de son propre libellé : une rangée de libellés trop longs pour le parent le déborde au lieu d'être écrasée. Sous <code>vertical</code>, il ne reste que la largeur, une colonne étirant déjà chaque segment.",
         variant:
           "Le poids visuel que porte chaque segment, sur les valeurs de VButton : <code>solid</code>, <code>outline</code>, <code>ghost</code> ou <code>soft</code>. Il l'emporte sur la variante donnée à un bouton, un segment d'une autre silhouette ne se lisant plus comme un morceau de la rangée. Omis, chaque bouton garde la sienne.",
         tone: 'La couleur des segments, parmi <code>accent</code>, <code>neutral</code> et <code>danger</code>. Celui-ci est un repli et non un ordre : un bouton qui nomme son propre ton le garde, ce qui permet à une seule action destructrice de se signaler dans la rangée.',

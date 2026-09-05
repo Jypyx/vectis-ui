@@ -56,6 +56,20 @@ shared edge to take a line off.
 
 <Canvas of={VButtonGroupStories.Seamless} />
 
+## Full width
+
+`full-width` stretches the row across the whole inline size of its parent, for a segmented
+control that stands on a line of its own rather than beside something else. The segments then
+take an **equal share** of that width each, whatever their labels measure: a row that reads as
+one object cannot be cut into unequal pieces by whichever words happen to be in it.
+
+Nothing of the joining is given up, the segments still overlapping by the pixel the seam is laid
+over, and a segment never shrinks below its own label: a row of labels too long for its parent
+overflows rather than being crushed into text nothing could then truncate. In a vertical group
+it is the width alone, since a column already stretches every segment across it.
+
+<Canvas of={VButtonGroupStories.FullWidth} />
+
 ## Variants
 
 The seam between segments adapts: for the filled variants (`solid`/`soft`, transparent border) a

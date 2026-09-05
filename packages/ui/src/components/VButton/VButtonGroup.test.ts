@@ -71,6 +71,38 @@ describe('VButtonGroup', () => {
     })
   })
 
+  // The stretching and the equal shares are CSS, out of jsdom's reach: what is testable
+  // here is the marker both rules hang on, and that it stays the GROUP's own.
+  describe('full width', () => {
+    it('withheld by default', () => {
+      const { getByRole } = render(VButtonGroup, {
+        slots: { default: '<button>A</button>' },
+      })
+      expect(getByRole('group').hasAttribute('data-full-width')).toBe(false)
+    })
+
+    it('sets the marker on the root', () => {
+      const { getByRole } = render(VButtonGroup, {
+        props: { fullWidth: true },
+        slots: { default: '<button>A</button>' },
+      })
+      expect(getByRole('group').hasAttribute('data-full-width')).toBe(true)
+    })
+
+    // It does not travel down, unlike the six the context carries: a segment given
+    // VButton's own `fullWidth` would take `inline-size: 100%` as a flex item whose
+    // share the group has already settled.
+    it('does not reach the segments', () => {
+      const { container } = render(VButtonGroup, {
+        props: { fullWidth: true },
+        slots: { default: () => [h(VButton, () => 'One'), h(VButton, () => 'Two')] },
+      })
+      for (const segment of segments(container)) {
+        expect(segment.dataset.fullWidth).toBeUndefined()
+      }
+    })
+  })
+
   it('renders the slot child buttons', () => {
     const { getAllByRole } = render(VButtonGroup, {
       slots: { default: '<button>One</button><button>Two</button><button>Three</button>' },
