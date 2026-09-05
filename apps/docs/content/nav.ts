@@ -70,6 +70,7 @@ export const components = [
   entry('icon'),
   entry('icon-button'),
   entry('input'),
+  entry('input-group'),
   entry('input-otp'),
   entry('menu'),
   entry('pagination'),

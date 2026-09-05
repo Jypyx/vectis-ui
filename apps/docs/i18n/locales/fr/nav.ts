@@ -43,6 +43,7 @@ const nav: NavMessages = {
   icon: 'Icône',
   'icon-button': 'Bouton icône',
   input: 'Champ de saisie',
+  'input-group': 'Groupe de champs',
   'input-otp': 'Code à usage unique',
   menu: 'Menu',
   pagination: 'Pagination',

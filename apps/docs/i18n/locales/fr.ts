@@ -41,6 +41,7 @@ import icon from './fr/icon'
 import iconButton from './fr/iconButton'
 import iconography from './fr/iconography'
 import input from './fr/input'
+import inputGroup from './fr/inputGroup'
 import inputOtp from './fr/inputOtp'
 import installation from './fr/installation'
 import jsHelpers from './fr/jsHelpers'
@@ -105,6 +106,7 @@ export default defineI18nLocale((): DocsMessages => ({
   icon,
   iconButton,
   input,
+  inputGroup,
   inputOtp,
   menu,
   pagination,
