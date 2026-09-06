@@ -96,7 +96,7 @@ never be the leading one. It is fully revealed on that last position all the sam
 
 ## Effects
 
-`effect` picks the transition, and all four are **CSS scroll-driven animations**: they are keyed
+`effect` picks the transition, and all three are **CSS scroll-driven animations**: they are keyed
 to the slide's position in the scrollport, so they play under the finger during a drag instead of
 running a fixed-duration transition.
 
@@ -106,7 +106,6 @@ running a fixed-duration transition.
   a `peek`, every slide would pile onto the same spot, so the effect **downgrades to `slide`** and
   says so in the console.
 - `scale` — the slide grows into place as it reaches the centre. Fine at any `itemsPerView`.
-- `cover` — a 3D coverflow: the neighbours tilt away and sink back.
 
 Where scroll-driven animations are unavailable, nothing is declared and the carousel is a plain
 `slide` — the same progressive-enhancement contract as anchor positioning elsewhere in the DS.

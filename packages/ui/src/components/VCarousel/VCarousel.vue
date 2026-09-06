@@ -59,7 +59,7 @@ import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useTimer } from '../../composables/useTimer'
 import { useMessages } from '../../i18n/state'
 
-export type CarouselEffect = 'slide' | 'fade' | 'scale' | 'cover'
+export type CarouselEffect = 'slide' | 'fade' | 'scale'
 export type CarouselOrientation = 'horizontal' | 'vertical'
 /** Where the position dots go: nowhere, over the slides, or after them. */
 export type CarouselIndicators = false | 'inside' | 'outside'
@@ -877,8 +877,7 @@ if (isDev) {
     /*
      * Geometry vector and direction sign. The effect keyframes are written on
      * them ONCE instead of being duplicated per orientation and per direction:
-     * `translate` and `rotate3d()` are physical, and `calc(0 * -100%)` is a valid
-     * zero.
+     * `translate` is physical, and `calc(0 * -100%)` is a valid zero.
      */
     --carousel-axis-x: 1;
     --carousel-axis-y: 0;
@@ -888,10 +887,7 @@ if (isDev) {
      * Effect constants: private, non-contractual geometry with no theming story,
      * hence no --vectis-* token (the qualification rule still applies).
      */
-    --carousel-tilt: 32deg;
-    --carousel-depth: -6rem;
-    --carousel-perspective: 60rem;
-    --carousel-scale-min: 0.86;
+    --carousel-scale-min: 0.75;
 
     /* A true gutter, which is what --vectis-space-* is for. */
     --carousel-gap: var(--vectis-space-3);
@@ -960,8 +956,8 @@ if (isDev) {
   /*
    * The scroll axis is physical, so RTL mirrors the transforms — and ONLY the
    * transforms: flex-basis and the logical `scroll-snap-type` keyword handle
-   * themselves. One sign flips both the fade counter-translate and the coverflow
-   * tilt. Scoped to `horizontal`: the block axis does not flip.
+   * themselves. One sign flips the fade counter-translate. Scoped to
+   * `horizontal`: the block axis does not flip.
    */
   [dir='rtl'] .v-carousel[data-orientation='horizontal'] {
     --carousel-dir: -1;
@@ -1158,10 +1154,6 @@ if (isDev) {
     .v-carousel[data-effect='scale'] .v-carousel-effect {
       animation-name: v-carousel-scale;
     }
-
-    .v-carousel[data-effect='cover'] .v-carousel-effect {
-      animation-name: v-carousel-cover;
-    }
   }
 
   /*
@@ -1190,9 +1182,8 @@ if (isDev) {
   /*
    * Geometry ONLY, no opacity dimming — and that is an accessibility decision, not
    * a taste one: a slide off the centre still holds real text, and fading it is a
-   * measurable contrast loss that axe rightly reports. The scale (and the tilt of
-   * `cover`) already carries the depth. `fade` keeps its opacity, which IS the
-   * effect.
+   * measurable contrast loss that axe rightly reports. The scale alone carries the
+   * depth. `fade` keeps its opacity, which IS the effect.
    */
   @keyframes v-carousel-scale {
     0%,
@@ -1201,39 +1192,6 @@ if (isDev) {
     }
     50% {
       scale: 1;
-    }
-  }
-
-  /*
-   * `transform` and not the individual rotate/translate properties: perspective()
-   * has to sit in the function list. A `perspective` PROPERTY on the viewport
-   * would be inert — an `overflow: auto` box is forced to `transform-style: flat`,
-   * so it can never be its children's 3D context.
-   *
-   * The rotation axis is deliberately swapped: a horizontal carousel (axis-x: 1)
-   * tilts about Y, a vertical one about X.
-   */
-  @keyframes v-carousel-cover {
-    0% {
-      transform: perspective(var(--carousel-perspective)) translateZ(var(--carousel-depth))
-        rotate3d(
-          var(--carousel-axis-y),
-          var(--carousel-axis-x),
-          0,
-          calc(var(--carousel-dir) * var(--carousel-tilt))
-        );
-    }
-    50% {
-      transform: perspective(var(--carousel-perspective)) translateZ(0) rotate3d(0, 1, 0, 0deg);
-    }
-    100% {
-      transform: perspective(var(--carousel-perspective)) translateZ(var(--carousel-depth))
-        rotate3d(
-          var(--carousel-axis-y),
-          var(--carousel-axis-x),
-          0,
-          calc(var(--carousel-dir) * var(--carousel-tilt) * -1)
-        );
     }
   }
 

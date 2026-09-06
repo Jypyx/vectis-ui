@@ -684,10 +684,10 @@ describe('VCarousel', () => {
     })
 
     it('mirrors orientation and effect on the root', () => {
-      const { container } = mount({ attrs: 'orientation="vertical" effect="cover" height="20rem"' })
+      const { container } = mount({ attrs: 'orientation="vertical" effect="scale" height="20rem"' })
       const root = container.querySelector('.v-carousel')
       expect(root?.getAttribute('data-orientation')).toBe('vertical')
-      expect(root?.getAttribute('data-effect')).toBe('cover')
+      expect(root?.getAttribute('data-effect')).toBe('scale')
     })
 
     it('`false` removes the controls and the indicators, attribute included', () => {

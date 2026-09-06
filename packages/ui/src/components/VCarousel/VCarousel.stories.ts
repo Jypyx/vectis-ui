@@ -56,7 +56,7 @@ const meta = {
   component: VCarousel,
   argTypes: {
     orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
-    effect: { control: 'inline-radio', options: ['slide', 'fade', 'scale', 'cover'] },
+    effect: { control: 'inline-radio', options: ['slide', 'fade', 'scale'] },
     controls: { control: 'inline-radio', options: [false, 'inside', 'outside'] },
     indicators: { control: 'inline-radio', options: [false, 'inside', 'outside'] },
     controlsVisibility: { control: 'inline-radio', options: ['always', 'hover'] },
@@ -245,14 +245,14 @@ export const FluidFloor: Story = {
 }
 
 /**
- * The four effects side by side. They are scroll-driven, so they play under the finger;
+ * The three effects side by side. They are scroll-driven, so they play under the finger;
  * where scroll-driven animations are missing they fall back to a plain `slide`.
  */
 export const Effects: Story = {
   render: () => ({
     components: { VCarousel, VCarouselItem, VTypography },
     setup: () => ({
-      effects: ['slide', 'fade', 'scale', 'cover'] as const,
+      effects: ['slide', 'fade', 'scale'] as const,
       hues: HUES,
       slideStyle: SLIDE_STYLE,
       t,
