@@ -1,4 +1,5 @@
 import { docRoutes } from './content/nav'
+import { LOCALE_PREFIXES, SITE_URL } from './content/site'
 
 /**
  * The site is served from the ROOT of its own domain, vectis-ui.com. This is the ONLY place
@@ -11,16 +12,6 @@ import { docRoutes } from './content/nav'
  * URLs to the custom domain on its own, so nothing published before this breaks.
  */
 const BASE_URL = '/'
-
-/**
- * The locale segment the i18n strategy puts in front of a route.
- *
- * `prefix_except_default` means the default locale keeps the bare paths — every URL the site has
- * ever published stays valid — and the other language lives under its own segment. The empty
- * string for `en` is not a placeholder: it is what `docRoutes()` prepends, so one call covers
- * both locales with no branch.
- */
-const LOCALE_PREFIXES = ['', '/fr']
 
 /**
  * The Vectis UI documentation site.
@@ -71,6 +62,20 @@ export default defineNuxtConfig({
     defaultLocale: 'en',
     // The default locale keeps the bare paths, so no URL this site has published ever breaks.
     strategy: 'prefix_except_default',
+    /*
+     * Every URL the site declares carries a trailing slash, because that is the one it serves.
+     *
+     * `nuxt generate` publishes a route as `<route>/index.html`, and GitHub Pages answers the
+     * slashless form with a 301 to the slashed one. A canonical, an `hreflang` alternate or an
+     * `og:url` written without it therefore names an address that redirects, and a crawler is
+     * left to work out that the page it was pointed at and the page it fetched are the same.
+     *
+     * The option reaches further than the SEO head: it is also what puts the slash on every
+     * `localePath()` href and on the route records themselves, so the links, the canonical and
+     * the sitemap agree by construction instead of being kept in step by hand. The redirects
+     * below carry it for the same reason, a target without it costing a second hop.
+     */
+    trailingSlash: true,
     langDir: 'locales',
     // Stated rather than left to the default filename: it carries the decision that messages are
     // plain text, without which `@import` in a sentence fails the build. See the file itself.
@@ -83,7 +88,7 @@ export default defineNuxtConfig({
      */
     detectBrowserLanguage: false,
     // Only used to make the `hreflang` alternates absolute; the path comes from `app.baseURL`.
-    baseUrl: 'https://vectis-ui.com',
+    baseUrl: SITE_URL,
   },
 
   app: {
@@ -135,6 +140,14 @@ export default defineNuxtConfig({
       routes: [
         '/',
         '/404.html',
+        /*
+         * The two SEO files, which are server routes so that they can be derived from
+         * content/nav.ts rather than typed out. Nothing links to either, so the crawler
+         * never reaches them: named here, nitro renders them into the artefact as the
+         * plain `robots.txt` and `sitemap.xml` a crawler asks the origin for.
+         */
+        '/robots.txt',
+        '/sitemap.xml',
         ...LOCALE_PREFIXES.flatMap((prefix) => [`${prefix}/`, ...docRoutes(prefix)]),
       ],
       /**
@@ -171,8 +184,8 @@ export default defineNuxtConfig({
     // verbatim, without prepending anything — so a bare `/docs/installation` would send a
     // GitHub Pages visitor to the root of the domain, which is not this site. The locale
     // segment is part of the target for the same reason: `/fr/docs` must land in French.
-    '/docs': { redirect: `${BASE_URL}docs/installation` },
-    '/fr/docs': { redirect: `${BASE_URL}fr/docs/installation` },
+    '/docs': { redirect: `${BASE_URL}docs/installation/` },
+    '/fr/docs': { redirect: `${BASE_URL}fr/docs/installation/` },
   },
 
   css: [

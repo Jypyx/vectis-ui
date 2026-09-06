@@ -14,7 +14,7 @@ import {
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('iconography.title') })
+useDocsHead('iconography')
 
 /**
  * The whole registry, for the gallery at the foot of the page.

@@ -6,7 +6,7 @@ import spinnerBasicSource from '~/examples/spinner/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('spinner.title') })
+useDocsHead('spinner')
 </script>
 
 <template>

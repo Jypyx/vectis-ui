@@ -12,7 +12,7 @@ import breadcrumbTruncatedSource from '~/examples/breadcrumb/Truncated.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('breadcrumb.title') })
+useDocsHead('breadcrumb')
 </script>
 
 <template>

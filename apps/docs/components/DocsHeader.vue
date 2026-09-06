@@ -42,13 +42,10 @@ const homePath = computed(() => localePath('/'))
 /**
  * "You are here", read off the route's NAME and never off its path.
  *
- * A path comparison is right in the default language and wrong in every other one, in two
- * different ways — both of which were live here. The French home is prerendered as `/fr/`, so a
- * direct load arrives with that trailing slash while `localePath('/')` yields `/fr`: the equality
- * held after a client-side transition and failed on a reload of the very same page. And `/docs`
- * is not a route at all — nitro redirects it to the installation page — so `localePath` has no
- * localized route to resolve and hands back the bare `/docs`, which no `/fr/docs/…` path can
- * ever start with: the Documentation button stayed untinted across the whole French site.
+ * A path comparison is right in the default language and wrong in every other one, because
+ * `/docs` is not a route at all — nitro redirects it to the installation page — so `localePath`
+ * has no localized route to resolve and hands back the bare `/docs`, which no `/fr/docs/…` path
+ * can ever start with. The Documentation button would stay untinted across the whole French site.
  *
  * `useRouteBaseName` returns the matched route's name with the `___<locale>` suffix stripped —
  * `index`, `docs-button`, `docs-slug` — so one test serves every language, and a trailing slash,

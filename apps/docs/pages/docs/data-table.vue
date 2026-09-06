@@ -6,7 +6,7 @@ import dataTableBasicSource from '~/examples/data-table/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('dataTable.title') })
+useDocsHead('dataTable')
 </script>
 
 <template>

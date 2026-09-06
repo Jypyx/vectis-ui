@@ -6,7 +6,7 @@ import filePickerBasicSource from '~/examples/file-picker/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('filePicker.title') })
+useDocsHead('filePicker')
 </script>
 
 <template>

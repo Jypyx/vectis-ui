@@ -6,7 +6,7 @@ import snackbarBasicSource from '~/examples/snackbar/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('snackbar.title') })
+useDocsHead('snackbar')
 </script>
 
 <template>

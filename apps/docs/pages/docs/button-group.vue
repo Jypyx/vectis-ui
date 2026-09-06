@@ -30,7 +30,7 @@ import buttonGroupVariantsAndTonesSource from '~/examples/button-group/VariantsA
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('buttonGroup.title') })
+useDocsHead('buttonGroup')
 </script>
 
 <template>

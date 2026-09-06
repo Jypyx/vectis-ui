@@ -6,7 +6,7 @@ import checkboxBasicSource from '~/examples/checkbox/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('checkbox.title') })
+useDocsHead('checkbox')
 </script>
 
 <template>

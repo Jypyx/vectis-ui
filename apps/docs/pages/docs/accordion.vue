@@ -18,7 +18,7 @@ import accordionVariantsSource from '~/examples/accordion/Variants.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('accordion.title') })
+useDocsHead('accordion')
 </script>
 
 <template>

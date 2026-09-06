@@ -6,7 +6,7 @@ import radioBasicSource from '~/examples/radio/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('radio.title') })
+useDocsHead('radio')
 </script>
 
 <template>

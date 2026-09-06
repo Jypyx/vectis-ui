@@ -6,7 +6,7 @@ import timeInputBasicSource from '~/examples/time-input/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('timeInput.title') })
+useDocsHead('timeInput')
 </script>
 
 <template>

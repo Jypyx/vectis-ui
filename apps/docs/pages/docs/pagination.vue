@@ -6,7 +6,7 @@ import paginationBasicSource from '~/examples/pagination/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('pagination.title') })
+useDocsHead('pagination')
 </script>
 
 <template>

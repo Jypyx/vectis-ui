@@ -10,11 +10,12 @@
  * with an underscore — which is where Nuxt puts its build assets, so the site would load
  * with no CSS and no JavaScript at all.
  */
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { allPages, docRoutes } from '../content/nav'
+import { SITE_URL } from '../content/site'
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const outDir = join(appRoot, '.output', 'public')
@@ -24,11 +25,11 @@ const fileFor = (route: string) =>
   join(outDir, route === '/' ? 'index.html' : join(route, 'index.html'))
 
 /**
- * The locale segments, mirroring `LOCALE_PREFIXES` in nuxt.config.ts.
+ * The locale segments, mirroring `LOCALE_PREFIXES` in content/site.ts.
  *
- * They are written out twice rather than shared, and deliberately: this script must be able to
- * fail when the config and the navigation disagree, which it cannot do if it derives its
- * expectations from the very file it is checking.
+ * The list is written out again rather than imported from `content/site.ts`, and deliberately:
+ * this script must be able to fail when the configuration and the navigation disagree, which it
+ * cannot do if it derives its expectations from the very files it is checking.
  */
 const LOCALE_PREFIXES = ['', '/fr']
 
@@ -73,4 +74,51 @@ if (missing.length > 0) {
   process.exit(1)
 }
 
-console.log(`check-prerender: ${routes.length} routes rendered, .nojekyll present`)
+/*
+ * The two SEO files, and what the sitemap says.
+ *
+ * Both are server routes, so both are RENDERED rather than copied: a route dropped from the
+ * prerender list leaves no file and nothing else complains, and a sitemap that lost a page is
+ * a page a crawler is never told about. Comparing the URLs it lists against the navigation is
+ * the same guard the routes above get, applied to the file that advertises them.
+ *
+ * The origin comes from the same constant the route builds its URLs from, so this cannot catch
+ * a wrong domain. What it catches is drift between the sitemap and the inventory, which is the
+ * failure that actually happens.
+ */
+const seoFiles = ['robots.txt', 'sitemap.xml'].filter((file) => !existsSync(join(outDir, file)))
+
+if (seoFiles.length > 0) {
+  console.error(`check-prerender: ${seoFiles.join(' and ')} missing from the artefact.`)
+  console.error('  Expected from server/routes/, named in nitro.prerender.routes.')
+  process.exit(1)
+}
+
+const sitemapUrls = new Set(
+  LOCALE_PREFIXES.flatMap((prefix) => [
+    `${SITE_URL}${prefix}/`,
+    ...docRoutes(prefix).map((route) => `${SITE_URL}${route}/`),
+  ]),
+)
+
+// A lookbehind and a negated class, rather than a capture group: the match IS the URL, so
+// nothing has to be indexed out of it and the set cannot take in an undefined. `[^<]+` stops
+// at the closing tag on its own.
+const listed = new Set(
+  readFileSync(join(outDir, 'sitemap.xml'), 'utf8').match(/(?<=<loc>)[^<]+/g) ?? [],
+)
+
+const unlisted = [...sitemapUrls].filter((url) => !listed.has(url))
+const strays = [...listed].filter((url) => !sitemapUrls.has(url))
+
+if (unlisted.length > 0 || strays.length > 0) {
+  console.error('check-prerender: sitemap.xml does not match content/nav.ts:')
+  for (const url of unlisted) console.error(`  missing  ${url}`)
+  for (const url of strays) console.error(`  unknown  ${url}`)
+  process.exit(1)
+}
+
+console.log(
+  `check-prerender: ${routes.length} routes rendered, ${sitemapUrls.size} in sitemap.xml, ` +
+    'robots.txt and .nojekyll present',
+)

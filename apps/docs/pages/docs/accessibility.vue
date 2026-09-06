@@ -14,7 +14,7 @@ import { search as searchIcon } from 'vectis-ui/icons'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('accessibility.title') })
+useDocsHead('accessibility')
 
 /*
  * The focus demo is a row of controls of DIFFERENT shapes, because the ring is not one

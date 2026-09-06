@@ -16,7 +16,7 @@ import avatarGroupTooltipsSource from '~/examples/avatar-group/Tooltips.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('avatarGroup.title') })
+useDocsHead('avatarGroup')
 </script>
 
 <template>

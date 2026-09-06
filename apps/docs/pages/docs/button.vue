@@ -24,7 +24,7 @@ import buttonVariantsAndTonesSource from '~/examples/button/VariantsAndTones.vue
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('button.title') })
+useDocsHead('button')
 </script>
 
 <template>

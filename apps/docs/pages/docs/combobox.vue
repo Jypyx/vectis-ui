@@ -6,7 +6,7 @@ import comboboxBasicSource from '~/examples/combobox/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('combobox.title') })
+useDocsHead('combobox')
 </script>
 
 <template>

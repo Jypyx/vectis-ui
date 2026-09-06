@@ -6,7 +6,7 @@ import progressLinearBasicSource from '~/examples/progress-linear/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('progressLinear.title') })
+useDocsHead('progressLinear')
 </script>
 
 <template>

@@ -6,7 +6,7 @@ import textareaBasicSource from '~/examples/textarea/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('textarea.title') })
+useDocsHead('textarea')
 </script>
 
 <template>

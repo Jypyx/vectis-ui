@@ -2,7 +2,7 @@
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('jsHelpers.title') })
+useDocsHead('jsHelpers')
 
 /* Two tables, each with its own pair of headings — neither is the API table's Prop/Type/Default. */
 const exportColumns = computed(() => [t('jsHelpers.columnExport'), t('jsHelpers.columnDoes')])

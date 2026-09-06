@@ -6,7 +6,7 @@ import toastBasicSource from '~/examples/toast/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('toast.title') })
+useDocsHead('toast')
 </script>
 
 <template>

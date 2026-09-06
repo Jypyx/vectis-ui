@@ -3,7 +3,7 @@ definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 const localePath = useLocalePath()
-useHead({ title: () => t('fontFamily.title') })
+useDocsHead('fontFamily')
 
 /*
  * Both samples do the same thing twice, so that the only difference a reader has to read is

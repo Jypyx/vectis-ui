@@ -24,7 +24,7 @@ import badgeTonesSource from '~/examples/badge/Tones.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('badge.title') })
+useDocsHead('badge')
 </script>
 
 <template>

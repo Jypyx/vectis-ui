@@ -6,7 +6,7 @@ import dateInputBasicSource from '~/examples/date-input/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('dateInput.title') })
+useDocsHead('dateInput')
 </script>
 
 <template>

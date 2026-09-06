@@ -17,7 +17,7 @@ import type { VectisMessages } from 'vectis-ui'
 definePageMeta({ layout: 'docs' })
 
 const { t, locale } = useI18n()
-useHead({ title: () => t('i18n.title') })
+useDocsHead('i18n')
 
 /**
  * The demo's two choices, and why they are two.

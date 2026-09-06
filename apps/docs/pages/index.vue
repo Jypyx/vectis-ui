@@ -25,10 +25,73 @@ import edgeLogo from '~/assets/img/edge-browser-svg.svg'
 import firefoxLogo from '~/assets/img/firefox-browser-svg.svg'
 import safariLogo from '~/assets/img/safari-browser-svg.svg'
 
+import { SITE_NAME, SITE_NPM_URL, SITE_REPO_URL, SITE_URL } from '~/content/site'
+
 const { t } = useI18n()
 const localePath = useLocalePath()
+const { app } = useRuntimeConfig()
 
-useHead({ title: () => t('home.documentTitle') })
+/**
+ * The home page's head, and the one place the site tells a search engine what it IS.
+ *
+ * Two nodes, because they answer two different questions. `WebSite` names the SITE, and it
+ * belongs on a home page and only there: it describes the site rather than the page, and it is
+ * the first source Google reads for the name it prints above a result. With none of it declared
+ * the fallbacks are `og:site_name`, then the title, and then the bare domain. `Organization`
+ * names the PROJECT behind it, and its `sameAs` is what ties this domain, the repository and the
+ * published package into one entity instead of three addresses that merely happen to agree.
+ *
+ * The `@id`s are what make that a graph rather than two blobs sharing a script tag, and they are
+ * scoped differently on purpose. A site exists once per LANGUAGE, so its id carries the locale
+ * segment and each home page describes its own. The project exists once, so its id is the same
+ * string on both — two different definitions under one id is the one thing a graph cannot mean.
+ *
+ * The organization's own URLs compose `app.baseURL` instead of assuming a slash: the base is
+ * written once, in nuxt.config.ts, and a site served from a subdirectory would otherwise claim a
+ * logo at the root of the domain.
+ *
+ * The description is the hero paragraph, which already says in one sentence what the library is.
+ */
+useHead(() => {
+  const title = t('home.documentTitle')
+  const description = metaDescription(t('home.heroBody'))
+  const home = `${SITE_URL}${localePath('/')}`
+  const root = `${SITE_URL}${app.baseURL}`
+
+  return {
+    title,
+    meta: [
+      { name: 'description', content: description },
+      { property: 'og:title', content: documentTitle(title) },
+      { property: 'og:description', content: description },
+    ],
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebSite',
+              '@id': `${home}#website`,
+              name: SITE_NAME,
+              url: home,
+              publisher: { '@id': `${root}#organization` },
+            },
+            {
+              '@type': 'Organization',
+              '@id': `${root}#organization`,
+              name: SITE_NAME,
+              url: root,
+              logo: `${root}favicon.svg`,
+              sameAs: [SITE_REPO_URL, SITE_NPM_URL],
+            },
+          ],
+        }),
+      },
+    ],
+  }
+})
 
 const docsHome = computed(() => localePath('/docs/installation'))
 

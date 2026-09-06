@@ -2,7 +2,7 @@
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('installation.title') })
+useDocsHead('installation')
 
 /*
  * The samples are NOT translated, here or anywhere on the site: a demo has to match the code

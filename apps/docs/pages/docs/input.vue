@@ -6,7 +6,7 @@ import inputBasicSource from '~/examples/input/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('input.title') })
+useDocsHead('input')
 </script>
 
 <template>

@@ -6,7 +6,7 @@ import menuBasicSource from '~/examples/menu/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('menu.title') })
+useDocsHead('menu')
 </script>
 
 <template>

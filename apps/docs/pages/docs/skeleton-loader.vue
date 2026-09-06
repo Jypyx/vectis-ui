@@ -6,7 +6,7 @@ import skeletonLoaderBasicSource from '~/examples/skeleton-loader/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('skeletonLoader.title') })
+useDocsHead('skeletonLoader')
 </script>
 
 <template>

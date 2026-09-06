@@ -6,7 +6,7 @@ import separatorBasicSource from '~/examples/separator/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('separator.title') })
+useDocsHead('separator')
 </script>
 
 <template>

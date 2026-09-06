@@ -6,7 +6,7 @@ import fileInputBasicSource from '~/examples/file-input/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('fileInput.title') })
+useDocsHead('fileInput')
 </script>
 
 <template>

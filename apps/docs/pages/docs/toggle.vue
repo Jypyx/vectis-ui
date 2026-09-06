@@ -6,7 +6,7 @@ import toggleBasicSource from '~/examples/toggle/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('toggle.title') })
+useDocsHead('toggle')
 </script>
 
 <template>

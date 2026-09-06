@@ -6,7 +6,7 @@ import tooltipBasicSource from '~/examples/tooltip/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('tooltip.title') })
+useDocsHead('tooltip')
 </script>
 
 <template>

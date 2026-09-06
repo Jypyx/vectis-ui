@@ -6,7 +6,7 @@ import sideNavigationBasicSource from '~/examples/side-navigation/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('sideNavigation.title') })
+useDocsHead('sideNavigation')
 </script>
 
 <template>

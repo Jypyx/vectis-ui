@@ -23,7 +23,7 @@ import { search as searchIcon } from 'vectis-ui/icons'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('theming.title') })
+useDocsHead('theming')
 
 /*
  * The samples are NOT translated, here or anywhere on the site: a demo has to match the code

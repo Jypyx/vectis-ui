@@ -6,7 +6,7 @@ import tabsBasicSource from '~/examples/tabs/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('tabs.title') })
+useDocsHead('tabs')
 </script>
 
 <template>

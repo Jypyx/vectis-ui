@@ -20,7 +20,7 @@ import inputGroupWidthsSource from '~/examples/input-group/Widths.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('inputGroup.title') })
+useDocsHead('inputGroup')
 </script>
 
 <template>

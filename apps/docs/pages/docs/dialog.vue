@@ -6,7 +6,7 @@ import dialogBasicSource from '~/examples/dialog/Basic.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('dialog.title') })
+useDocsHead('dialog')
 </script>
 
 <template>

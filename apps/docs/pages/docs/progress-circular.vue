@@ -6,7 +6,7 @@ import progressCircularBasicSource from '~/examples/progress-circular/Basic.vue?
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('progressCircular.title') })
+useDocsHead('progressCircular')
 </script>
 
 <template>

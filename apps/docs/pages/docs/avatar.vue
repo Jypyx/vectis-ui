@@ -22,7 +22,7 @@ import avatarTooltipSource from '~/examples/avatar/Tooltip.vue?raw'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
-useHead({ title: () => t('avatar.title') })
+useDocsHead('avatar')
 </script>
 
 <template>
