@@ -159,6 +159,13 @@ defineSlots<{
   /** Content at the start of the field, which replaces `iconStart`. */
   start?(): unknown
   /**
+   * Controls of your own inside the field, placed before the field's own — the clear
+   * cross and the end icon. It is the slot for something that acts on the VALUE, such
+   * as the AM/PM button of a 12-hour time field, which belongs beside the text rather
+   * than past the controls that clear and open.
+   */
+  'value-end'?(): unknown
+  /**
    * Content at the end of the field, which replaces `iconEnd`. It is hidden while
    * the field is loading, the spinner taking that place.
    */
@@ -293,6 +300,11 @@ defineExpose({
       <span v-if="counter" class="v-input-counter" :data-over="over ? '' : undefined">
         {{ counterText }}
       </span>
+
+      <!-- Before the clear cross rather than after it, so that a consumer's control reads
+           and tabs in the same order: what acts on the value sits next to the value, and
+           the field's own controls stay together at the end. -->
+      <slot name="value-end" />
 
       <button
         v-if="showClear"

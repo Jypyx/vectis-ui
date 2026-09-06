@@ -301,8 +301,9 @@ export const WithCombobox: Story = {
 }
 
 /**
- * A date and a time in one row. The time field carries its own AM/PM control, which joins
- * the field instead of floating beside it once the two are inside a group.
+ * A date and a time in one row. The time field carries its own AM/PM control inside the
+ * field, so a 12 hour segment is a single box like any other and joins the row with no
+ * treatment of its own.
  */
 export const DateAndTime: Story = {
   render: () => ({
@@ -318,13 +319,16 @@ export const DateAndTime: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
+    const dateField = canvasElement.querySelector('.v-date-input .v-input-field') as HTMLElement
     const timeField = canvasElement.querySelector('.v-time-input .v-input-field') as HTMLElement
     const meridiem = canvasElement.querySelector('.v-time-input-meridiem') as HTMLElement
 
-    // Red without the `[data-grouped]` block in VTimeInput's sheet: the gap would leave the
-    // 12 hour field as two separate boxes inside a joined row.
+    // The AM/PM button is inside the time field's own box, so the row joins two segments
+    // and not three: nothing of the time field sits outside its border.
+    expect(timeField.contains(meridiem)).toBe(true)
+    // The borders are merged, which is the row's whole point.
     expect(
-      meridiem.getBoundingClientRect().left - timeField.getBoundingClientRect().right,
+      timeField.getBoundingClientRect().left - dateField.getBoundingClientRect().right,
     ).toBeCloseTo(-1, 0)
   },
 }

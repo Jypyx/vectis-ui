@@ -263,21 +263,17 @@ describe('VInputGroup', () => {
       expect(fields(container)[0]!.dataset.size).toBe('lg')
     })
 
-    it('VTimeInput follows the row and marks itself grouped', () => {
+    it('VTimeInput follows the row, as one box like any other field', () => {
       const { container } = render(VInputGroup, {
         props: { size: 'lg' },
-        slots: { default: () => h(VTimeInput) },
+        slots: { default: () => h(VTimeInput, { format: '12h' }) },
       })
       expect(fields(container)[0]!.dataset.size).toBe('lg')
-      // The marker the sheet reads to pull the AM/PM control onto the field.
-      expect((container.querySelector('.v-time-input') as HTMLElement).dataset.grouped).toBe('')
-    })
-
-    it('VTimeInput on its own is not grouped', () => {
-      const { container } = render(VTimeInput)
-      expect(
-        (container.querySelector('.v-time-input') as HTMLElement).hasAttribute('data-grouped'),
-      ).toBe(false)
+      // Its AM/PM button lives INSIDE the field, so a 12 hour segment is a single box and
+      // the row has nothing of its own to join. Anything of it outside the field would be
+      // a second box the next segment would join instead.
+      expect(container.querySelector('.v-input-field .v-time-input-meridiem')).toBeTruthy()
+      expect(container.querySelectorAll('.v-time-input > *')).toHaveLength(1)
     })
 
     it('VFileInput follows the row', () => {

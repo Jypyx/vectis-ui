@@ -11,15 +11,11 @@ const t = storyText({
     time: 'Time',
     maskHint: 'Format hh:mm',
     fiveMinuteHint: 'Minutes in steps of 5',
-    meetingTime: 'Meeting time',
-    noLabel: 'No label',
   },
   fr: {
     time: 'Heure',
     maskHint: 'Format hh:mm',
     fiveMinuteHint: 'Minutes par pas de 5',
-    meetingTime: 'Heure de rendez-vous',
-    noLabel: 'Sans étiquette',
   },
 })
 
@@ -249,9 +245,8 @@ export const InputWithDial: Story = {
 }
 
 /**
- * List mode: the available times in steps of `minuteStep`. On opening, the current value
- * has focus and the list is scrolled onto it; choosing a time commits immediately (no
- * draft, no OK button).
+ * List mode is a VCombobox: the times at steps of `minuteStep`, narrowed by typing. On
+ * opening, the panel is scrolled onto the current value; choosing a time commits at once.
  */
 export const TimeList: Story = {
   args: { mode: 'list', minuteStep: 30, format: '24h' },
@@ -271,56 +266,70 @@ export const TimeList: Story = {
     await userEvent.click(field)
     const panel = await waitFor(() => canvas.getByRole('listbox'))
 
-    // the selected row has focus AND the list has scrolled onto it
-    await waitFor(() => expect(document.activeElement).toHaveAttribute('data-value', '14:30'))
-    await expect(panel.scrollTop).toBeGreaterThan(0)
+    // The panel opens ON the current value rather than at midnight, which is what makes a
+    // 48-row list usable with a pointer. jsdom lays nothing out and scrolls nothing.
+    await waitFor(() => expect(panel.scrollTop).toBeGreaterThan(0))
+    const selected = panel.querySelector('[aria-selected="true"]') as HTMLElement
+    await expect(selected).toHaveTextContent('14:30')
 
-    // clicking a row: an immediate commit, closing, focus handed back to the field.
-    // Queried by `data-value`: the row's label is formatted by `Intl`, whose zero
-    // padding differs between the Node and the browser ICU builds.
-    await userEvent.click(panel.querySelector('[data-value="09:00"]') as HTMLElement)
+    // Clicking a row commits at once and closes. Rows are found by their POSITION, the
+    // label being formatted by `Intl`, whose padding differs between the Node and the
+    // browser ICU builds.
+    await userEvent.click(panel.querySelectorAll('[role="option"]')[18] as HTMLElement)
     await waitFor(() => expect(canvas.getByTestId('value')).toHaveTextContent('09:00'))
     await expect(panel.matches(':popover-open')).toBe(false)
     await expect(field).toHaveFocus()
   },
 }
 
-/** The keyboard in the list: arrows, Home/End, and Enter to commit. */
-export const ListKeyboard: Story = {
+/**
+ * The whole point of the combobox: a time is FOUND rather than scrolled to, and the bare
+ * digit run finds it — "930" reaches half past nine without the colon being typed.
+ */
+export const ListSearch: Story = {
   args: { mode: 'list', minuteStep: 30, format: '24h' },
   render: (args) => ({
     components: { VTimeInput },
-    setup: () => ({ args, t, value: ref('00:00') }),
+    setup: () => ({ args, t, value: ref(null) }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
         <VTimeInput v-bind="args" v-model="value" :label="t.time" />
-        <output data-testid="value">{{ value }}</output>
+        <output data-testid="value">{{ value ?? '—' }}</output>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const field = canvas.getByRole('combobox', { name: 'Time' })
-    field.focus()
-    await userEvent.keyboard('{ArrowDown}')
-    const panel = await waitFor(() => canvas.getByRole('listbox'))
-    await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
+    await userEvent.click(field)
+    await waitFor(() => expect(canvas.getByRole('listbox')).toBeVisible())
 
-    // opening put focus on the current value (00:00): two notches down at a 30-minute
-    // step lands on 01:00
-    await userEvent.keyboard('{ArrowDown}{ArrowDown}')
-    await expect(document.activeElement).toHaveAttribute('data-value', '01:00')
+    await userEvent.keyboard('930')
+    const panel = canvas.getByRole('listbox')
+    await waitFor(() => expect(panel.querySelectorAll('[role="option"]')).toHaveLength(1))
+    // Red if the rule reads a 24 hour label as a 12 hour one: 21:30 would answer too.
+    await expect(panel.querySelector('[role="option"]')).toHaveTextContent('30')
+
+    // Enter takes the highlighted row: focus never left the field, this being a combobox.
+    await expect(field).toHaveFocus()
     await userEvent.keyboard('{Enter}')
-    await waitFor(() => expect(canvas.getByTestId('value')).toHaveTextContent('01:00'))
-    // Enter does not reopen the panel it has just closed
+    await waitFor(() => expect(canvas.getByTestId('value')).toHaveTextContent('09:30'))
     await expect(panel.matches(':popover-open')).toBe(false)
+
+    // A search matching nothing leaves the value alone: the list is the contract.
+    // Scoped to the panel — the wording is also in the live region, outside it.
+    await userEvent.click(field)
+    await userEvent.keyboard('0937')
+    await waitFor(() => expect(panel.querySelectorAll('[role="option"]')).toHaveLength(0))
+    await expect(within(panel).getByText('No results')).toBeVisible()
+    await expect(canvas.getByTestId('value')).toHaveTextContent('09:30')
   },
 }
 
-// The v-model stays canonical 24 h: 7 o'clock + PM → '19:00'. The VToggle lives next to
-// the field, outside the panel: no opening and no confirmation needed.
+// The v-model stays canonical 24 h: 7 o'clock + PM → '19:00'. The button sits inside the
+// field, beside the value it qualifies: no opening and no confirmation needed.
 export const TwelveHour: Story = {
-  args: { format: '12h' },
+  args: { format: '12h', clearable: true, showPicker: true },
   render: (args) => ({
     components: { VTimeInput },
     setup: () => ({ args, t, value: ref('07:00') }),
@@ -333,8 +342,30 @@ export const TwelveHour: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('button', { name: 'PM' }))
+    // The name is the label and the current half of the day, so it changes with the state.
+    await userEvent.click(canvas.getByRole('button', { name: 'AM or PM: AM' }))
     await waitFor(() => expect(canvas.getByTestId('value')).toHaveTextContent('19:00'))
+    await expect(canvas.getByRole('button', { name: 'AM or PM: PM' })).toBeVisible()
+
+    // The rule sits between what acts on the VALUE and what acts on the FIELD, and the
+    // three keep the height of the field's own buttons. jsdom lays none of this out.
+    const field = canvasElement.querySelector('.v-input-field') as HTMLElement
+    const rule = canvasElement.querySelector('.v-time-input-divider') as HTMLElement
+    const meridiem = canvasElement.querySelector('.v-time-input-meridiem') as HTMLElement
+    const clear = canvasElement.querySelector('.v-input-clear') as HTMLElement
+    await expect(rule.getBoundingClientRect().height).toBeCloseTo(
+      clear.getBoundingClientRect().height,
+      0,
+    )
+    // Red without `align-self: center`: the rule would stretch to the whole field.
+    await expect(rule.getBoundingClientRect().height).toBeLessThan(
+      field.getBoundingClientRect().height,
+    )
+    await expect(meridiem.getBoundingClientRect().right).toBeLessThanOrEqual(
+      rule.getBoundingClientRect().left,
+    )
+    // Red without the width override: a square action box would clip the word.
+    await expect(meridiem.scrollWidth).toBeLessThanOrEqual(meridiem.clientWidth)
   },
 }
 
@@ -387,24 +418,6 @@ export const Sizes: Story = {
         <VTimeInput v-bind="args" v-model="value" size="sm" label="sm" />
         <VTimeInput v-bind="args" v-model="value" size="md" label="md" />
         <VTimeInput v-bind="args" v-model="value" size="lg" label="lg" />
-      </div>
-    `,
-  }),
-}
-
-/** In 12 h, the AM/PM VToggle aligns on the FIELD, not on the block: its position is
-    compensated by the height of the label and the hint. */
-export const AlignedMeridiem: Story = {
-  args: { format: '12h' },
-  render: (args) => ({
-    components: { VTimeInput },
-    setup: () => ({ args, t, value: ref('07:00') }),
-    template: `
-      <div style="width: 320px; display:grid; gap:12px">
-        <VTimeInput v-bind="args" v-model="value" :aria-label="t.time" />
-        <VTimeInput v-bind="args" v-model="value" :label="t.time" />
-        <VTimeInput v-bind="args" v-model="value" :label="t.time" :hint="t.meetingTime" />
-        <VTimeInput v-bind="args" v-model="value" :aria-label="t.time" :hint="t.noLabel" />
       </div>
     `,
   }),

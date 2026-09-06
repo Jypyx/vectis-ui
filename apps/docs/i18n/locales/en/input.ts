@@ -49,6 +49,8 @@ export default {
       },
       slots: {
         start: 'Content at the start of the field, which replaces <code>iconStart</code>.',
+        valueEnd:
+          "Controls of your own inside the field, placed before the field's own: the clear cross and the end icon. It is where something that acts on the value belongs, so that the reading order and the tab order agree.",
         end: 'Content at the end of the field, which replaces <code>iconEnd</code>. It is hidden while the field is loading, the spinner taking that place.',
       },
     },

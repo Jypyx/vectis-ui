@@ -41,32 +41,52 @@ describe('VTimeInput — default', () => {
   })
 
   it('pickerIcon: it overrides the PICKER icon, with no effect in list mode', () => {
-    // `:not(.v-input-clear)`: the cross is rendered BEFORE the end icon.
-    const endIcon = (props: Record<string, unknown>) =>
-      render(VTimeInput, { props }).container.querySelector<HTMLElement>(
-        '.v-input-action:not(.v-input-clear) .v-icon',
-      )?.dataset.icon
+    const iconsOf = (props: Record<string, unknown>) =>
+      [
+        ...render(VTimeInput, { props }).container.querySelectorAll<HTMLElement>(
+          '.v-input-field .v-icon',
+        ),
+      ].map((el) => el.dataset.icon)
 
-    expect(endIcon({ modelValue: null, showPicker: true, pickerIcon: 'alarm' })).toBe('alarm')
+    expect(iconsOf({ modelValue: null, showPicker: true, pickerIcon: 'alarm' })).toEqual(['alarm'])
 
-    // In list mode the chevron follows the VCombobox convention: the prop is inert.
-    expect(endIcon({ modelValue: null, mode: 'list', pickerIcon: 'alarm' })).toBe('expand_more')
+    // In list mode the chevron is VCombobox's, so the prop reaches nothing at all.
+    expect(iconsOf({ modelValue: null, mode: 'list', pickerIcon: 'alarm' })).toEqual([
+      'expand_more',
+    ])
 
-    // And the clear cross does not replace it: both coexist.
-    expect(endIcon({ modelValue: '09:30', showPicker: true, pickerIcon: 'alarm' })).toBe('alarm')
+    // The clear cross does not replace the end icon: both coexist, the cross first.
+    expect(
+      iconsOf({ modelValue: '09:30', showPicker: true, clearable: true, pickerIcon: 'alarm' }),
+    ).toEqual(['close', 'alarm'])
   })
 
   it('renders the clear cross to the LEFT of the end icon', () => {
     const { container } = render(VTimeInput, {
-      props: { modelValue: '09:30', mode: 'list', clearable: true },
+      // 24 hour, so the AM/PM button is not in the row: what is under test is the order of
+      // the FIELD's own two controls.
+      props: { modelValue: '09:30', format: '24h', showPicker: true, clearable: true },
     })
-    // The cross first, then the chevron — exactly VCombobox's pairing.
+    // The cross first, then the icon that opens the panel.
     const actions = [...container.querySelectorAll('.v-input-field .v-input-action')]
     expect(actions.map((el) => el.getAttribute('aria-label'))).toEqual([
       'Clear time',
-      'Open the list of times',
+      'Open time picker',
     ])
     expect(actions.at(0)?.classList.contains('v-input-clear')).toBe(true)
+  })
+
+  /*
+   * The list form hands its whole field to VCombobox, wording included: the cross there is
+   * the one that empties a SELECTION, not the one that empties a typed time.
+   */
+  it('the list form takes VCombobox’s own cross and chevron', () => {
+    const { container } = render(VTimeInput, {
+      props: { modelValue: '09:30', mode: 'list', clearable: true },
+    })
+    expect(container.querySelector('.v-input-clear')?.getAttribute('aria-label')).toBe(
+      'Clear selection',
+    )
   })
 })
 
@@ -374,64 +394,80 @@ describe('VTimeInput — list mode', () => {
   const optionsOf = (container: Element) =>
     [...container.querySelectorAll('[role="option"]')] as HTMLElement[]
 
-  it('renders a listbox of times at the requested step, with a read-only field', async () => {
+  /** Opens the combobox the way a reader does, by clicking its field. */
+  const openList = async (container: Element) => {
+    await fireEvent.click(container.querySelector('input') as HTMLInputElement)
+    await nextTick()
+  }
+
+  it('is a VCombobox, so the times can be searched rather than only scrolled', async () => {
     const { container, getByRole } = mount({ modelValue: '14:30' })
+    expect(container.querySelector('.v-combobox')).toBeTruthy()
+    // The field is a real search box, not the read-only one the other two forms use.
     const input = container.querySelector('input') as HTMLInputElement
-    expect(input.readOnly).toBe(true)
+    expect(input.readOnly).toBe(false)
     expect(input.getAttribute('aria-haspopup')).toBe('listbox')
-    await openPanel(container)
+    // Nothing of the component's own panel machinery is left in the list form.
+    expect(container.querySelector('.v-time-input-panel')).toBeNull()
+    // `label` and `hint` are not VCombobox props: they reach the field by falling THROUGH
+    // it into the VInput that declares them. Silent if it ever stops working.
+    expect(container.querySelector('.v-input-label')?.textContent?.trim()).toBe('Heure')
+
+    await openList(container)
     expect(getByRole('listbox')).toBeTruthy()
     const options = optionsOf(container)
     expect(options).toHaveLength(48)
     expect(options[0]?.textContent?.trim()).toBe('0:00')
-    const selected = options.find((o) => o.getAttribute('aria-selected') === 'true')
-    expect(selected?.dataset.value).toBe('14:30')
-    // The list panel takes the same surface as the dial one, from the same VPopover.
     expect(
-      (container.querySelector('.v-time-input-list') as HTMLElement).classList.contains('v-panel'),
-    ).toBe(true)
+      options.find((o) => o.getAttribute('aria-selected') === 'true')?.textContent?.trim(),
+    ).toBe('14:30')
   })
 
-  it('commits directly on click and closes (no draft, no OK)', async () => {
-    const { container, emitted } = mount({ modelValue: '14:30' })
-    await openPanel(container)
-    expect(container.querySelector('.v-time-input-footer')).toBeNull()
+  it('narrows the list as one types, digits alone included', async () => {
+    const { container } = mount({ modelValue: null })
+    await openList(container)
+    const input = container.querySelector('input') as HTMLInputElement
+
+    await fireEvent.update(input, '930')
+    await nextTick()
+    // A 30-minute step on a 24 hour clock: only half past nine answers "930". Red if the
+    // rule reads a 24 hour label as a 12 hour one — 21:30 would answer too.
+    expect(optionsOf(container).map((o) => o.textContent?.trim())).toEqual(['9:30'])
+
+    await fireEvent.update(input, 'nope')
+    await nextTick()
+    expect(optionsOf(container)).toHaveLength(0)
+  })
+
+  it('commits on click and empties to null rather than to a blank string', async () => {
+    const { container, emitted } = mount({ modelValue: '14:30', clearable: true })
+    await openList(container)
     await fireEvent.click(optionsOf(container)[3] as HTMLElement) // 01:30
     await nextTick()
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['01:30'])
-    expect(container.querySelector('.v-time-input-list')?.hasAttribute('data-popover-open')).toBe(
-      false,
-    )
-  })
 
-  it('Enter on a row commits and does not reopen the panel', async () => {
-    // Without onPanelKeydown's preventDefault, Enter bubbles to the root without being
-    // marked consumed and useFieldPanel's `defaultPrevented` guard does not apply: the
-    // panel reopens at once.
-    const { container, emitted } = mount({ modelValue: '14:30' })
-    await openPanel(container)
-    const option = optionsOf(container)[5] as HTMLElement // 02:30
-    option.focus()
-    await fireEvent.keyDown(option, { key: 'Enter', bubbles: true })
+    // A combobox says "nothing chosen" with an empty string, which is not a time: the
+    // bridge has to hand a consumer back the null their model is typed for.
+    await fireEvent.click(container.querySelector('.v-input-clear') as HTMLElement)
     await nextTick()
-    expect(emitted('update:modelValue')?.at(-1)).toEqual(['02:30'])
-    expect(container.querySelector('.v-time-input-list')?.hasAttribute('data-popover-open')).toBe(
-      false,
-    )
+    expect(emitted('update:modelValue')?.at(-1)).toEqual([null])
   })
 
-  it('navigates the list with the keyboard (arrows, Home, End)', async () => {
-    const { container } = mount({ modelValue: '00:00' })
-    await openPanel(container)
-    const options = optionsOf(container)
-    const panel = container.querySelector('.v-time-input-list') as HTMLElement
-    options[0]?.focus()
-    await fireEvent.keyDown(panel, { key: 'ArrowDown', bubbles: true })
-    expect(document.activeElement).toBe(options[1])
-    await fireEvent.keyDown(panel, { key: 'End', bubbles: true })
-    expect(document.activeElement).toBe(options.at(-1))
-    await fireEvent.keyDown(panel, { key: 'Home', bubbles: true })
-    expect(document.activeElement).toBe(options[0])
+  /*
+   * A value the consumer set off the step is a real value, and the list is the only thing
+   * that can give the field a word for it.
+   */
+  it('offers a value that is not on the step, in its place', async () => {
+    const { container } = mount({ modelValue: '09:07' })
+    const input = container.querySelector('input') as HTMLInputElement
+    // Red without the inserted row: a combobox names a value through the option carrying
+    // it, so the field would fall back to the raw canonical "09:07".
+    expect(input.value).toBe('9:07')
+
+    await openList(container)
+    const labels = optionsOf(container).map((o) => o.textContent?.trim())
+    expect(labels).toHaveLength(49)
+    expect(labels.slice(18, 21)).toEqual(['9:00', '9:07', '9:30'])
   })
 
   it('warns about showPicker and about too fine a step', () => {
@@ -445,27 +481,37 @@ describe('VTimeInput — list mode', () => {
 
 describe('VTimeInput — the meridiem', () => {
   /**
-   * There are two AM/PM controls in the design, never both at once for the same reason:
-   * the one beside the FIELD serves the forms that can be typed or listed, where the half
-   * of the day has to be known with no panel open; the one inside the PICKER serves the
-   * read-only form, and writes to the draft rather than to the value.
+   * There are two AM/PM controls in the design, never the same one twice: a BUTTON inside
+   * the typed field, which flips the value on the spot because a mask says nothing about
+   * the half of the day; and the PICKER's own pair, which serves the read-only form and
+   * writes to the draft rather than to the value.
+   *
+   * The list form has neither: every row spells its own half of the day out.
    */
-  const pmIn = (container: Element, scope: 'field' | 'picker') =>
-    [
-      ...container.querySelectorAll(
-        `${scope === 'field' ? '.v-time-input-meridiem' : '.v-time-picker-meridiem'} button`,
-      ),
-    ].find((b) => b.textContent?.trim() === 'PM') as HTMLElement
+  const fieldMeridiem = (container: Element) =>
+    container.querySelector('.v-time-input-meridiem') as HTMLElement | null
 
-  const pmOf = (container: Element) => pmIn(container, 'field')
+  const pmInPicker = (container: Element) =>
+    [...container.querySelectorAll('.v-time-picker-meridiem button')].find(
+      (b) => b.textContent?.trim() === 'PM',
+    ) as HTMLElement
 
-  it('drives the v-model without opening or confirming', async () => {
+  it('reads the half of the day off the value, and names it', () => {
+    const { container } = render(VTimeInput, { props: { modelValue: '19:00', format: '12h' } })
+    const button = fieldMeridiem(container)!
+    expect(button.textContent?.trim()).toBe('PM')
+    // The name repeats the visible word rather than replacing it, so a reader arriving on
+    // the button is told which half is chosen.
+    expect(button.getAttribute('aria-label')).toBe('AM or PM: PM')
+  })
+
+  it('flips the v-model without opening or confirming', async () => {
     const { container, emitted } = render(VTimeInput, {
       props: { modelValue: '07:00', format: '12h' },
     })
-    const pm = pmOf(container)
-    expect(pm.getAttribute('aria-pressed')).toBe('false')
-    await fireEvent.click(pm)
+    const button = fieldMeridiem(container)!
+    expect(button.textContent?.trim()).toBe('AM')
+    await fireEvent.click(button)
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['19:00'])
     expect(panelOpen(container)).toBe(false)
   })
@@ -474,11 +520,63 @@ describe('VTimeInput — the meridiem', () => {
     const { container, emitted } = render(VTimeInput, {
       props: { modelValue: null, format: '12h', mode: 'input' },
     })
-    await fireEvent.click(pmOf(container))
+    await fireEvent.click(fieldMeridiem(container)!)
     expect(emitted('update:modelValue')).toBeUndefined() // nothing to convert
+    // The button shows the remembered choice even though nothing is set.
+    expect(fieldMeridiem(container)!.textContent?.trim()).toBe('PM')
     const input = container.querySelector('input') as HTMLInputElement
     await type(input, '07:00')
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['19:00'])
+  })
+
+  it('is rendered by the typed form alone, and only on a 12 hour clock', () => {
+    for (const props of [
+      { format: '24h' as const },
+      { format: '12h' as const, mode: 'list' as const },
+      { format: '12h' as const, mode: 'readonly' as const },
+    ]) {
+      const { container } = render(VTimeInput, { props: { modelValue: '19:00', ...props } })
+      expect(fieldMeridiem(container)).toBeNull()
+    }
+    const { container } = render(VTimeInput, { props: { modelValue: '19:00', format: '12h' } })
+    expect(fieldMeridiem(container)).toBeTruthy()
+  })
+
+  /*
+   * The rule separates what acts on the VALUE from what acts on the FIELD, so it only
+   * belongs there when the field has controls of its own to be separated from.
+   */
+  it('carries a rule after it only when something follows', () => {
+    const bare = render(VTimeInput, { props: { modelValue: '19:00', format: '12h' } })
+    expect(bare.container.querySelector('.v-time-input-divider')).toBeNull()
+
+    const withPicker = render(VTimeInput, {
+      props: { modelValue: '19:00', format: '12h', showPicker: true },
+    })
+    expect(withPicker.container.querySelector('.v-time-input-divider')).toBeTruthy()
+
+    const withClear = render(VTimeInput, {
+      props: { modelValue: '19:00', format: '12h', clearable: true },
+    })
+    expect(withClear.container.querySelector('.v-time-input-divider')).toBeTruthy()
+  })
+
+  /*
+   * What acts on the value comes before what acts on the field, in the DOM and therefore
+   * in the tab order too. Reversing the two would need a CSS `order`, which moves the
+   * painting and leaves the focus where it was.
+   */
+  it('sits before the controls that clear and open', () => {
+    const { container } = render(VTimeInput, {
+      props: { modelValue: '19:00', format: '12h', clearable: true, showPicker: true },
+    })
+    const field = container.querySelector('.v-input-field') as HTMLElement
+    const at = (selector: string) => [...field.children].findIndex((el) => el.matches(selector))
+    expect(at('.v-input-control')).toBe(0)
+    expect(at('.v-time-input-meridiem')).toBe(1)
+    expect(at('.v-time-input-divider')).toBe(2)
+    expect(at('.v-input-clear')).toBe(3)
+    expect(field.children).toHaveLength(5) // the icon that opens the picker closes the row
   })
 
   it('inside the picker: the draft follows the meridiem, and OK commits the right value', async () => {
@@ -486,7 +584,7 @@ describe('VTimeInput — the meridiem', () => {
       props: { mode: 'readonly', modelValue: '07:00', format: '12h' },
     })
     await openPanel(container)
-    await fireEvent.click(pmIn(container, 'picker'))
+    await fireEvent.click(pmInPicker(container))
     await nextTick()
     // Still nothing written: inside the picker the half of the day is part of the draft.
     expect(emitted('update:modelValue')).toBeUndefined()
@@ -499,7 +597,7 @@ describe('VTimeInput — the meridiem', () => {
       props: { mode: 'readonly', modelValue: '07:00', format: '12h' },
     })
     await openPanel(container)
-    await fireEvent.click(pmIn(container, 'picker'))
+    await fireEvent.click(pmInPicker(container))
     await nextTick()
     await fireEvent.click(getByText('Cancel'))
     expect(emitted('update:modelValue')).toBeUndefined()

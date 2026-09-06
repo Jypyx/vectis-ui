@@ -188,6 +188,11 @@ same icons (24 px) as the field — an option's label does not change size on it
 field (shades through tokens, with no opacity). `placeholder` and `empty-text` (the message when no
 option matches) are customizable.
 
+`placement` says where the panel opens relative to the field — `bottom-start` by default,
+and one of `top`/`bottom` optionally aligned to either edge. It is the escape hatch for a
+field near the foot of the page; the panel is anchored in CSS, so a browser that cannot fit
+the panel where it was asked already falls back on its own.
+
 <Canvas of={VComboboxStories.Invalid} />
 
 <Canvas of={VComboboxStories.NoResults} />

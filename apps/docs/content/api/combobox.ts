@@ -23,6 +23,7 @@ export default {
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'loadingText', type: 'string' },
         { name: 'hasMore', type: 'boolean', default: 'false' },
+        { name: 'placement', type: 'Placement', default: "'bottom-start'" },
         { name: 'v-model', key: 'vModel', type: 'string | string[]', default: "''" },
       ],
       events: [

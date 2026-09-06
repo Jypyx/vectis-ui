@@ -119,10 +119,9 @@ export const en: VectisMessages = {
   },
   timeInput: {
     clear: 'Clear time',
-    openList: 'Open the list of times',
     openPicker: 'Open time picker',
-    listLabel: 'Available times',
     pickerLabel: 'Choose a time',
+    meridiem: (value) => `AM or PM: ${value}`,
     maskPlaceholder: 'hh:mm',
   },
   fileInput: {

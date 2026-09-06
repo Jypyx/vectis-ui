@@ -1,17 +1,19 @@
 <script setup lang="ts">
 // @a11y @core
 /**
- * A field for choosing a time, with an optional panel below it. Same shell as VDateInput
- * (`useFieldPanel`): the panel is opened imperatively, so the focus can be moved into it, and
- * closes on `focusout` or Escape.
+ * A field for choosing a time. Three forms, and only two of them are built here.
  *
- * Three field modes. `input` types hours and minutes behind a mask, optionally with a clock
- * beside it; `readonly` makes the clock the only way in; `list` offers times at a fixed
- * interval, which suits booking a slot far better than pointing at a dial.
+ * `input` types hours and minutes behind a mask, optionally with a clock beside it, and
+ * `readonly` makes that clock the only way in. Both use the VDateInput shell
+ * (`useFieldPanel`): the panel is opened imperatively, so the focus can be moved into it,
+ * and closes on `focusout` or Escape. The CLOCK works on a draft only OK writes — Cancel,
+ * Escape and focusout all discard it — because dragging a hand passes over dozens of times
+ * nobody meant.
  *
- * The two panels commit differently, deliberately. The CLOCK works on a draft only OK writes
- * — Cancel, Escape and focusout all discard it — because dragging a hand passes over dozens
- * of times nobody meant. The LIST commits immediately: choosing a row is one gesture.
+ * `list` offers the times at a fixed interval, which suits booking a slot far better than
+ * pointing at a dial. It is a VCombobox outright, so a time is FOUND by typing as much as
+ * scrolled to, and the whole listbox pattern comes from there rather than being written
+ * again. Choosing a row commits at once: picking from a list is a single gesture.
  *
  * Whatever is displayed, the value is always a canonical 24-hour `'HH:mm'`.
  */
@@ -20,15 +22,13 @@ import { computed, inject, provide, ref, useId, watchEffect } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import { NO_BUTTON_GROUP, buttonGroupKey } from '../VButton/context'
+import VCombobox from '../VCombobox/VCombobox.vue'
 import { inputGroupKey } from '../VInput/context'
-import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import { schedule as scheduleIcon } from '../VIcon/icons/schedule'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import VPopover from '../VPopover/VPopover.vue'
-import VToggle from '../VToggle/VToggle.vue'
-import type { ToggleModelValue } from '../VToggle/VToggle.vue'
-import VToggleItem from '../VToggle/VToggleItem.vue'
+import VSeparator from '../VSeparator/VSeparator.vue'
 import VTimePicker from '../VTimePicker/VTimePicker.vue'
 import type { TimePickerFormat } from '../VTimePicker/VTimePicker.vue'
 import {
@@ -37,7 +37,6 @@ import {
   formatTimeMask,
   hourCycleFor,
   isValidTime,
-  minutesOf,
   parseTime,
   parseTimeMask,
   snapMinute,
@@ -48,8 +47,7 @@ import {
   to24h,
 } from '../../utils/time'
 import type { Meridiem, TimeOption } from '../../utils/time'
-import { arrowNavigate } from '../../utils/arrowNav'
-import { clamp } from '../../utils/number'
+import { timeMatches } from './search'
 import { isDev } from '../../utils/env'
 import { digitsOf } from '../../utils/text'
 
@@ -73,8 +71,8 @@ interface TimeInputProps {
   format?: TimePickerFormat
   /**
    * Which form the field takes: one that can be TYPED into, a read-only one where the
-   * picker is the only way in — so the picker is forced on there — or a LIST of times at a
-   * fixed interval, where a picker would make no sense.
+   * picker is the only way in — so the picker is forced on there — or a searchable LIST of
+   * times at a fixed interval, where a picker would make no sense.
    */
   mode?: TimeInputMode
   /**
@@ -122,7 +120,7 @@ interface TimeInputProps {
    * left rather than in its place.
    */
   pickerIcon?: IconSource
-  /** Where the panel opens relative to the field. */
+  /** Where the panel opens relative to the field, whether it holds the clock or the list. */
   placement?: Placement
 }
 
@@ -178,14 +176,14 @@ const resolvedMode = computed<TimeInputMode>(() => {
 const typing = computed(() => resolvedMode.value === 'input')
 const isList = computed(() => resolvedMode.value === 'list')
 /**
- * Whether there is a picker. It is forced on a read-only field, where nothing else could
- * fill it; offered beside a field one types into; and meaningless in the list form, which
- * has a panel of its own.
+ * Whether there is a picker — which here also means whether this component builds a panel
+ * of its own at all, the list form handing that job to VCombobox. It is forced on a
+ * read-only field, where nothing else could fill it, and offered beside a field one types
+ * into.
  */
 const hasPicker = computed(
   () => resolvedMode.value === 'readonly' || (typing.value && props.showPicker === true),
 )
-const hasPanel = computed(() => hasPicker.value || isList.value)
 
 const vectisLocale = useLocale()
 /* The prop wins, and the design system's global locale is what it falls back to. */
@@ -239,31 +237,41 @@ const modelParts = computed(() => parseTime(model.value))
 const pendingMeridiem = ref<Meridiem>('AM')
 
 /**
- * The AM/PM control beside the FIELD. It is what the mask needs — the half of the day has
- * to be known while the panel is shut, and in the list form there is no picker at all — so
- * it is rendered in every form but the read-only one, where the picker carries its own.
+ * The half of the day the FIELD is showing. It is what the mask needs: typing "9:30" says
+ * nothing about the morning or the afternoon, so the answer has to be readable while the
+ * panel is shut.
  */
-const meridiemModel = computed<ToggleModelValue>({
-  get: () => {
-    // With the picker open it is the DRAFT that is on screen, and this control has to read
-    // the same thing: two controls showing opposite halves of the day until OK is pressed
-    // is the one state that must not happen.
-    const parts = open.value && hasPicker.value ? parseTime(draft.value) : modelParts.value
-    return parts ? to12h(parts.hour).meridiem : pendingMeridiem.value
-  },
-  set: (value) => {
-    const meridiem: Meridiem = value === 'PM' ? 'PM' : 'AM'
-    pendingMeridiem.value = meridiem
-    const parts = modelParts.value
-    // With no time set there is nothing to convert, so the choice is simply REMEMBERED
-    // and applies to the first time typed or chosen.
-    if (parts) model.value = formatTime(to24h(to12h(parts.hour).hour, meridiem), parts.minute)
-    // With the picker open the draft has to follow as well, or OK would write back the
-    // half of the day the reader has just changed.
-    const pending = open.value && hasPicker.value ? parseTime(draft.value) : null
-    if (pending) draft.value = formatTime(to24h(to12h(pending.hour).hour, meridiem), pending.minute)
-  },
+const meridiem = computed<Meridiem>(() => {
+  // With the picker open it is the DRAFT that is on screen, and this control has to read
+  // the same thing: two controls showing opposite halves of the day until OK is pressed
+  // is the one state that must not happen.
+  const parts = open.value && hasPicker.value ? parseTime(draft.value) : modelParts.value
+  return parts ? to12h(parts.hour).meridiem : pendingMeridiem.value
 })
+
+/**
+ * The button beside the value flips the half of the day. There is no third state to reach,
+ * so it names the half it is showing and swaps to the other one on a click.
+ */
+function toggleMeridiem() {
+  const next: Meridiem = meridiem.value === 'PM' ? 'AM' : 'PM'
+  pendingMeridiem.value = next
+  const parts = modelParts.value
+  // With no time set there is nothing to convert, so the choice is simply REMEMBERED
+  // and applies to the first time typed or chosen.
+  if (parts) model.value = formatTime(to24h(to12h(parts.hour).hour, next), parts.minute)
+  // With the picker open the draft has to follow as well, or OK would write back the
+  // half of the day the reader has just changed.
+  const pending = open.value && hasPicker.value ? parseTime(draft.value) : null
+  if (pending) draft.value = formatTime(to24h(to12h(pending.hour).hour, next), pending.minute)
+}
+
+/**
+ * Whether the button is rendered at all. Only the typed form needs it: the read-only form
+ * reaches the clock, which carries its own AM/PM, and the list already spells the half of
+ * the day out on every row.
+ */
+const hasMeridiem = computed(() => typing.value && resolvedFormat.value === '12h')
 
 const hasValue = computed(() => !!modelParts.value)
 const displayText = computed(() =>
@@ -271,24 +279,18 @@ const displayText = computed(() =>
 )
 
 // @a11y
-// Where the focus goes when the panel opens.
+// Where the focus goes when the panel opens. The picker publishes where its own focus
+// belongs, so nothing here has to know that the target is a slider — the same arrangement
+// VDateInput has with VDatePicker.
 function focusInPanel() {
-  if (!isList.value) {
-    // The picker publishes where its own focus goes, so nothing here has to know that the
-    // target is a slider — the same arrangement VDateInput has with VDatePicker.
-    pickerRef.value?.focus()
-    return
-  }
-  const panel = panelRef.value?.el
-  if (panel) focusListSelection(panel)
+  pickerRef.value?.focus()
 }
 
 // A VInputGroup joins several controls into one object, so the shape of this field is the
-// row's decision rather than its own (VInput/context.ts). `grouped` is what tells the sheet
-// to pull the AM/PM control onto the field: in a row the two are one segment, and left
-// apart the next segment would join the toggle rather than the field.
+// row's decision rather than its own (VInput/context.ts). Nothing else is needed here: the
+// AM/PM button lives INSIDE the field, so a 12 hour field is one box like any other and
+// the row has nothing of its own to join.
 const group = inject(inputGroupKey, null)
-const grouped = computed(() => group !== null)
 const resolvedSize = computed(() => group?.size ?? props.size)
 const resolvedCompact = computed(() => group?.compact ?? props.compact)
 const resolvedDisabled = computed(() => group?.disabled || props.disabled)
@@ -298,8 +300,7 @@ const resolvedDisabled = computed(() => group?.disabled || props.disabled)
 // VTimePicker below writes `size="lg"` on its hour and minute cells, and a group WINS over a
 // button's prop: without this line a VInputGroup would resize them to its own height, and it
 // only shows once the panel is open. It is the JS counterpart of the `.v-overlay` guard
-// every VButtonGroup selector carries. The AM/PM VToggle is unaffected either way — it is a
-// VButtonGroup of its own, so it shadows this for its items, and it takes its size as a prop.
+// every VButtonGroup selector carries.
 provide(buttonGroupKey, NO_BUTTON_GROUP)
 
 // The whole "field plus panel" shell, shared with VDateInput. What is specific to this
@@ -313,7 +314,7 @@ const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPa
     // With no panel there is nothing to open. This is the composable's SINGLE cut-off
     // point, and every way in passes through it — clicking the field, focusing it, the
     // down arrow, Enter, the icon.
-    disabled: () => resolvedDisabled.value || !hasPanel.value,
+    disabled: () => resolvedDisabled.value || !hasPicker.value,
     focusInPanel,
     // Beside a field one types into, the panel opens WITHOUT taking the focus, so typing
     // carries on.
@@ -391,7 +392,7 @@ const m = useMessages()
 
 /* From here on: everything the typed field needs. */
 
-const currentMeridiem = (): Meridiem => (meridiemModel.value === 'PM' ? 'PM' : 'AM')
+const currentMeridiem = (): Meridiem => meridiem.value
 
 /*
  * The mask machinery — the text being typed, the bridge to the value, the reformatting
@@ -516,7 +517,14 @@ function onFieldFocus() {
   openPanel(false)
 }
 
+/*
+ * TRAP — the list form must not reach these two at all, and being panel-less is not
+ * enough to keep it out. `useFieldPanel.onKeydown` cancels the default on Enter BEFORE
+ * asking whether a panel can open, so an Enter travelling up from the VCombobox would
+ * stop a surrounding form from being submitted with nothing to show for it.
+ */
 function onRootKeydown(event: KeyboardEvent) {
+  if (isList.value) return
   if (typing.value && event.key === 'Escape' && open.value) {
     event.preventDefault()
     closeAndFocus()
@@ -525,83 +533,67 @@ function onRootKeydown(event: KeyboardEvent) {
   onKeydown(event)
 }
 
-/* From here on: everything the list form needs. */
-
-const options = computed<TimeOption[]>(() =>
-  isList.value ? timeList(props.minuteStep, resolvedLocale.value, resolvedFormat.value) : [],
-)
-
-// @keyboard
-/**
- * The rows the arrows may move to, gathered by hand rather than through the shared
- * helper.
- *
- * That helper asks the browser for the computed style of EVERY element it considers, to
- * skip the hidden ones. Across dozens of rows — a list at a five-minute step holds nearly
- * three hundred — that is a real cost, and none of these rows is ever hidden.
- */
-const optionEls = (panel: HTMLElement) => [
-  ...panel.querySelectorAll<HTMLElement>('[role="option"]'),
-]
-
-// @a11y
-/**
- * On opening, the list is both scrolled and focused onto the current time — or onto the
- * NEAREST row, since a value need not be one of them: "09:07" against a list stepping
- * every fifteen minutes matches nothing at all.
- */
-function focusListSelection(panel: HTMLElement) {
-  const items = optionEls(panel)
-  if (!items.length) return
-  const minutes = minutesOf(model.value)
-  const index =
-    minutes === null ? 0 : clamp(Math.round(minutes / props.minuteStep), 0, items.length - 1)
-  const el = items[index]
-  // Called optionally, the unit-test environment implementing no scrolling. No scrolling
-  // behaviour is requested either: leaving it out lets the stylesheet decide, which is
-  // what makes the movement respect a reader who has asked for less motion.
-  el?.scrollIntoView?.({ block: 'center' })
-  el?.focus({ preventScroll: true })
-}
-
-/**
- * Choosing a row writes the value straight away and closes — no draft and no footer, the
- * same way choosing a single date closes the calendar.
- */
-function selectTime(value: string) {
-  model.value = value
-  closeAndFocus()
-}
-
-// @keyboard @a11y
-function onPanelKeydown(event: KeyboardEvent) {
-  if (!isList.value) return
-  const panel = panelRef.value?.el
-  if (!panel) return
-  if (event.key === 'Enter' || event.key === ' ') {
-    // TRAP — cancelling the default here is MANDATORY, and the commit consequently has to
-    // be explicit. Left alone, Enter would fire the row's own click — which closes the
-    // panel — and then travel up to the root WITHOUT being marked as handled, so the
-    // guard that stops a consumed key reopening the panel would not apply, and it would
-    // reopen immediately.
-    const value = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>(
-      '[role="option"]',
-    )?.dataset.value
-    if (!value) return
-    event.preventDefault()
-    selectTime(value)
-    return
-  }
-  arrowNavigate(event, panel, optionEls(panel), { vertical: true })
+function onRootFocusout(event: FocusEvent) {
+  if (!isList.value) onFocusout(event)
 }
 
 /*
- * The clear cross and the icon at the end of the field.
+ * From here on: everything the list form needs.
+ *
+ * The list is a VCombobox, so the whole ARIA listbox pattern — the panel, the highlight,
+ * the scroll onto the chosen row, the commit and the dismissal — comes from there and
+ * NONE of it is written here. What is left is the three things a combobox cannot know
+ * about times: which rows to offer, how a search matches one, and the fact that this
+ * component's value is a nullable string where a combobox's is a plain one.
+ */
+
+/**
+ * The rows on offer.
+ *
+ * A value that is not ON the step is added to them, in order: it is a real value, so the
+ * field has to be able to write it out and the panel to open on it. Without it the field
+ * would fall back to showing the raw canonical string — "09:07" in a field that spells
+ * every other row "9:07 AM" — since a combobox labels a value through the option carrying
+ * it.
+ */
+const options = computed<TimeOption[]>(() => {
+  if (!isList.value) return []
+  const rows = timeList(props.minuteStep, resolvedLocale.value, resolvedFormat.value)
+  const current = model.value
+  if (!isValidTime(current) || rows.some((row) => row.value === current)) return rows
+  const at = rows.findIndex((row) => row.value > current)
+  const extra: TimeOption = {
+    value: current,
+    label: formatDisplay(current, resolvedLocale.value, resolvedFormat.value),
+  }
+  return at < 0 ? [...rows, extra] : [...rows.slice(0, at), extra, ...rows.slice(at)]
+})
+
+/**
+ * The search, which accepts the digit run as well as the words — "930" finds 9:30, the way
+ * the typed form's mask reads what it is given. The rule itself is pure and lives in
+ * `./search`, which says why it is not in `utils/time.ts`.
+ */
+const matchTime = (option: TimeOption, query: string) =>
+  timeMatches(option.label, option.value, query)
+
+/**
+ * The bridge to VCombobox, whose value is a plain string where this component's is
+ * nullable: an emptied combobox says so with an empty string, which is not a time.
+ */
+const listModel = computed<string | string[]>({
+  get: () => model.value ?? '',
+  set: (value) => {
+    model.value = typeof value === 'string' && value ? value : null
+  },
+})
+
+/*
+ * The clear cross and the icon at the end of the field, for the two forms this component
+ * builds itself; the list form gets both from VCombobox.
  *
  * The cross is the field's own, which renders it BEFORE the end icon rather than in its
- * place — the convention every field in the design system follows. In the list form that
- * gives exactly the cross-and-chevron pairing of a combobox, which is the right thing:
- * the two behave the same way.
+ * place — the convention every field in the design system follows.
  *
  * Whether the cross is shown has to be answered explicitly here: outside the typed mode
  * the field is read-only and would hide it, while the value comes from the panel.
@@ -613,11 +605,11 @@ const canClear = computed(
     (hasValue.value || (typing.value && !!maskDraft.value)),
 )
 const endIcon = computed<IconSource | undefined>(() =>
-  isList.value ? expandMoreIcon : hasPicker.value ? props.pickerIcon : undefined,
+  hasPicker.value ? props.pickerIcon : undefined,
 )
 // @a11y @devwarn
 /*
- * TRAP — the LABEL is defined at all times, even when no icon is rendered at all.
+ * TRAP — the LABEL is passed at all times, even when no icon is rendered at all.
  *
  * The helper detecting a click handler on an icon warns AT SETUP if one is attached
  * without a label, and it has no way of knowing whether an icon exists. Since the
@@ -625,9 +617,7 @@ const endIcon = computed<IconSource | undefined>(() =>
  * conditional would produce a false warning every time a typed field without a picker is
  * mounted.
  */
-const endIconLabel = computed(() =>
-  isList.value ? m.value.timeInput.openList : m.value.timeInput.openPicker,
-)
+const endIconLabel = computed(() => m.value.timeInput.openPicker)
 
 function onEndIcon() {
   if (open.value) closeAndFocus()
@@ -643,116 +633,116 @@ function onEndIcon() {
     :style="rootStyle"
     :data-open="open ? '' : undefined"
     :data-mode="resolvedMode"
-    :data-grouped="grouped ? '' : undefined"
-    @focusout="onFocusout"
+    @focusout="onRootFocusout"
     @keydown="onRootKeydown"
   >
-    <div class="v-time-input-row">
-      <div class="v-time-input-control" @click="onControlClick">
-        <!-- The field is declared a combobox rather than left as the plain text box it
-             implicitly is, because a text box may not carry the attribute saying whether
-             something is expanded — the same reasoning as in VDateInput. Here it also
-             agrees with the list form, where what the field opens really is a list. -->
-        <VInput
-          ref="inputRef"
-          v-model="fieldModel"
-          :inputmode="typing ? 'numeric' : undefined"
-          :autocomplete="typing ? 'off' : undefined"
-          v-bind="forwardedAttrs"
-          :readonly="!typing"
-          :label="label"
-          :hint="hint"
-          :placeholder="placeholder ?? (typing ? m.timeInput.maskPlaceholder : undefined)"
-          :size="resolvedSize"
-          :compact="resolvedCompact"
-          :disabled="resolvedDisabled"
-          :invalid="invalid"
-          :clearable="clearable"
-          :clear-visible="canClear"
-          :clear-label="m.timeInput.clear"
-          :icon-end="endIcon"
-          :icon-end-label="endIconLabel"
-          :role="hasPanel ? 'combobox' : undefined"
-          :aria-haspopup="hasPanel ? (isList ? 'listbox' : 'dialog') : undefined"
-          :aria-expanded="hasPanel ? open : undefined"
-          :aria-controls="hasPanel ? panelId : undefined"
-          @click:icon-end="onEndIcon"
-          @clear="clearValue"
-          @focus="onFieldFocus"
-          @input="onFieldInput"
-          @change="commitOrRevert"
-          @blur="commitOrRevert"
-          @keydown="onFieldKeydown"
-          @paste="onFieldPaste"
-        />
-      </div>
+    <!-- The list form is a VCombobox and nothing else: a list one picks a value from and
+         narrows by typing IS the combobox pattern, down to the chevron, the clear cross
+         and the dismissal. All this component adds is the three things a combobox cannot
+         know about times — the rows, the search, and a value that may be nothing. -->
+    <VCombobox
+      v-if="isList"
+      v-model="listModel"
+      v-bind="forwardedAttrs"
+      :options="options"
+      :filter="matchTime"
+      :label="label"
+      :hint="hint"
+      :placeholder="placeholder"
+      :size="resolvedSize"
+      :compact="resolvedCompact"
+      :disabled="resolvedDisabled"
+      :invalid="invalid"
+      :clearable="clearable"
+      :placement="placement"
+    />
 
-      <!-- The AM/PM control beside the field, which the two typed forms cannot do without:
-           the mask needs the half of the day while the panel is shut, and the list form
-           has no picker at all. It is dropped in the READ-ONLY form alone, where the
-           picker is the only way in and carries its own.
-
-           It stays INSIDE the component's root: clicking it must not count as the focus
-           leaving, which would close the panel under the reader's hand. -->
-      <VToggle
-        v-if="resolvedFormat === '12h' && resolvedMode !== 'readonly'"
-        v-model="meridiemModel"
-        class="v-time-input-meridiem"
-        mandatory
-        variant="outline"
+    <div v-else class="v-time-input-control" @click="onControlClick">
+      <!-- The field is declared a combobox rather than left as the plain text box it
+           implicitly is, because a text box may not carry the attribute saying whether
+           something is expanded — the same reasoning as in VDateInput. -->
+      <VInput
+        ref="inputRef"
+        v-model="fieldModel"
+        :inputmode="typing ? 'numeric' : undefined"
+        :autocomplete="typing ? 'off' : undefined"
+        v-bind="forwardedAttrs"
+        :readonly="!typing"
+        :label="label"
+        :hint="hint"
+        :placeholder="placeholder ?? (typing ? m.timeInput.maskPlaceholder : undefined)"
         :size="resolvedSize"
         :compact="resolvedCompact"
-        :label="m.timePicker.meridiem"
+        :disabled="resolvedDisabled"
+        :invalid="invalid"
+        :clearable="clearable"
+        :clear-visible="canClear"
+        :clear-label="m.timeInput.clear"
+        :icon-end="endIcon"
+        :icon-end-label="endIconLabel"
+        :role="hasPicker ? 'combobox' : undefined"
+        :aria-haspopup="hasPicker ? 'dialog' : undefined"
+        :aria-expanded="hasPicker ? open : undefined"
+        :aria-controls="hasPicker ? panelId : undefined"
+        @click:icon-end="onEndIcon"
+        @clear="clearValue"
+        @focus="onFieldFocus"
+        @input="onFieldInput"
+        @change="commitOrRevert"
+        @blur="commitOrRevert"
+        @keydown="onFieldKeydown"
+        @paste="onFieldPaste"
       >
-        <VToggleItem value="AM" :label="m.timePicker.am" />
-        <VToggleItem value="PM" :label="m.timePicker.pm" />
-      </VToggle>
+        <!-- The AM/PM button sits beside the value it qualifies, before the controls that
+             clear the field and open the panel. It carries `.v-input-action`, which is
+             what the field's own buttons wear AND what tells the shell that a click here
+             is that button's business rather than a reason to open the panel.
+
+             The rule after it separates what acts on the VALUE from what acts on the
+             FIELD. It is dropped when nothing follows it, or it would trail off the end
+             of an otherwise bare field. -->
+        <template v-if="hasMeridiem" #value-end>
+          <button
+            type="button"
+            class="v-input-action v-time-input-meridiem"
+            :disabled="resolvedDisabled"
+            :aria-label="
+              m.timeInput.meridiem(meridiem === 'PM' ? m.timePicker.pm : m.timePicker.am)
+            "
+            @click="toggleMeridiem"
+          >
+            {{ meridiem === 'PM' ? m.timePicker.pm : m.timePicker.am }}
+          </button>
+          <VSeparator
+            v-if="canClear || endIcon"
+            orientation="vertical"
+            class="v-time-input-divider"
+          />
+        </template>
+      </VInput>
     </div>
 
     <!-- With no panel rendered there is nothing to hold a reference to, and the open state
          — which is fed by the panel's own events — can no longer become true. The absence
          of a panel is therefore self-enforcing. -->
     <VPopover
-      v-if="hasPanel"
+      v-if="hasPicker"
       :id="panelId"
       ref="panelRef"
       v-model:open="open"
       mode="manual"
       anchor="--time-input-anchor"
       :placement="placement"
-      :role="isList ? 'listbox' : 'dialog'"
-      :class="isList ? 'v-time-input-list v-control' : 'v-time-input-panel'"
-      :data-size="isList ? size : undefined"
-      :data-compact="isList && compact ? '' : undefined"
-      :aria-label="label ?? (isList ? m.timeInput.listLabel : m.timeInput.pickerLabel)"
+      role="dialog"
+      class="v-time-input-panel"
+      :aria-label="label ?? m.timeInput.pickerLabel"
       @mousedown="onPanelMousedown"
-      @keydown="onPanelKeydown"
     >
-      <!-- The list: rows the focus really moves between, as in a menu or a calendar —
-           unlike VCombobox, where the focus stays in the field — and a choice written
-           straight away on a click or on Enter. -->
-      <template v-if="isList">
-        <button
-          v-for="option in options"
-          :key="option.value"
-          type="button"
-          role="option"
-          tabindex="-1"
-          class="v-time-input-option"
-          :data-value="option.value"
-          :aria-selected="option.value === model ? 'true' : 'false'"
-          @click="selectTime(option.value)"
-        >
-          {{ option.label }}
-        </button>
-      </template>
-
       <!-- The picker works on the DRAFT and not on the value, which is what makes OK the
            only way in: Cancel, Escape and the focus leaving simply drop it. The two
            actions are handed to its own footer slot, since they belong to this panel
            rather than to a clock shown on its own. -->
       <VTimePicker
-        v-else
         ref="pickerRef"
         v-model="draft"
         :format="resolvedFormat"
@@ -780,20 +770,8 @@ function onEndIcon() {
     font-family: var(--vectis-text-family);
   }
 
-  /* The row holding the field: the field takes whatever room is left, and the AM/PM
-     control keeps its natural width. */
-  .v-time-input-row {
-    display: flex;
-    align-items: stretch;
-    gap: var(--vectis-space-2);
-  }
-
   .v-time-input-control {
     anchor-name: --time-input-anchor;
-    flex: 1;
-    /* Without this the field would refuse to shrink below its own content and would
-       overflow the row. */
-    min-inline-size: 0;
     cursor: pointer;
   }
 
@@ -808,63 +786,44 @@ function onEndIcon() {
     font-variant-numeric: tabular-nums;
   }
 
-  /* The AM/PM control lines up with the FIELD and not with the whole block, which also
-     stacks a label above and a hint below it. Those two are compensated with margins
-     derived from their own type, so the control sits exactly beside the field whatever
-     the field is given. */
-  .v-time-input-meridiem {
-    flex: none;
+  /* The AM/PM button wears the field's own action recipe — the box, the muted colour that
+     lights up on hover, the focus ring and the disabled state all come from
+     `.v-input-action` — and changes only what a WORD needs that a glyph does not: room to
+     be read, and the field's type rather than the browser's default button font.
+
+     The floor keeps the hit target at the size of its neighbours, so the two spellings do
+     not resize the field between them.
+
+     The padding is DERIVED and not picked from the spacing scale: `.v-input-action` carries
+     a negative inline margin that cancels the slack around a glyph inside its box, so that
+     the row's gap is measured from the INK. A word fills its own box, so it has to put that
+     slack back or it would sit a couple of pixels off the rhythm its neighbours keep —
+     which reads as an asymmetry around the rule, whose two sides are otherwise identical.
+
+     The selector compounds the two classes because they are the same specificity in two
+     different sheets, and which one the consumer's bundler puts last is not ours to
+     decide. */
+  .v-input-action.v-time-input-meridiem {
+    inline-size: auto;
+    min-inline-size: var(--control-action-size);
+    padding-inline: calc((var(--control-action-size) - var(--vectis-icon-size)) / 2);
+    font: inherit;
+  }
+
+  /* The rule between the AM/PM button and the field's own controls, which is what keeps a
+     word from reading as a third icon in the row.
+
+     A vertical VSeparator stretches to its flex line by contract, which here is the full
+     height of the field: it would meet the border at both ends and read as a division of
+     the box rather than a break in the row. It is brought back to the height of the
+     buttons on either side of it.
+
+     `align-self` and the height are declared against the ORIENTATION branch, which is the
+     one that stretches, and beating it takes the extra class: the compound alone would tie
+     with it. */
+  .v-separator[data-orientation='vertical'].v-time-input-divider {
     align-self: center;
-  }
-
-  .v-time-input-row:has(.v-input-label) .v-time-input-meridiem {
-    margin-block-start: calc(
-      var(--vectis-text-label-size) * var(--vectis-text-label-leading) + var(--vectis-space-1)
-    );
-  }
-
-  .v-time-input-row:has(.v-input-hint) .v-time-input-meridiem {
-    margin-block-end: calc(
-      var(--vectis-text-caption-size) * var(--vectis-text-caption-leading) + var(--vectis-space-1)
-    );
-  }
-
-  /* Inside a VInputGroup the AM/PM control is part of the segment: it gives up the gap that
-     detaches it when the field stands alone, and it is pulled onto the field the way a
-     segment is pulled onto its neighbour. Without this, a 12 hour field in a row is TWO
-     separate boxes, and the segment that follows joins the toggle rather than the field.
-     The 12 hour form is the default wherever the locale asks for it, so this is not an edge
-     case.
-
-     The group cannot do it itself: its paint guard excludes `.v-button-group *`, and a
-     VToggle IS a `.v-button-group`, which draws a row of its own. Joining the two therefore
-     belongs to the component that owns them both.
-
-     The block comes AFTER the alignment rules above and cancels their margins outright,
-     which also covers a consumer who ignored the group's development warning and gave the
-     field a label of its own. */
-  .v-time-input[data-grouped] .v-time-input-row {
-    gap: 0;
-  }
-
-  .v-time-input[data-grouped] .v-time-input-meridiem {
-    align-self: stretch;
-    margin-block: 0;
-    margin-inline-start: -1px;
-  }
-
-  .v-time-input[data-grouped] .v-time-input-meridiem > .v-button:first-child {
-    border-start-start-radius: 0;
-    border-end-start-radius: 0;
-  }
-
-  /* The far end of the toggle is the far end of the SEGMENT, so it keeps its rounded corner
-     when this field closes the row and gives it up otherwise. The group's own corner rules
-     cannot reach here — they stop at `.v-button-group *` — so the segment squares its own
-     trailing edge. */
-  .v-time-input[data-grouped]:not(:last-child) .v-time-input-meridiem > .v-button:last-child {
-    border-start-end-radius: 0;
-    border-end-end-radius: 0;
+    block-size: var(--control-action-size);
   }
 
   /* The anchoring and the panel's surface both come from VPopover; what is left here is
@@ -889,54 +848,15 @@ function onEndIcon() {
     color: var(--vectis-color-text);
   }
 
-  /* The list's surface comes from the shared panel class, and its rows read their
-     dimensions from the size class set on the PANEL. What stays here are the panel's own
-     dimensions, which the shared class deliberately declares none of. */
-  .v-time-input-list {
-    min-inline-size: anchor-size(width);
-    max-block-size: var(--vectis-control-size-time-input-list-max-block);
-    overflow: auto;
-  }
+  /* The list form is a VCombobox and takes everything from it — this is the one
+     declaration that does not belong to a combobox in general.
 
-  .v-time-input-option {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    min-height: var(--control-height);
-    padding: var(--vectis-space-1) var(--control-padding-inline);
-    border: none;
-    border-radius: var(--vectis-radius-sm);
-    background: transparent;
-    color: var(--vectis-color-text);
-    font-family: inherit;
-    font-size: var(--control-font-size);
-    line-height: var(--vectis-text-body-md-leading);
+     A column of times read down the panel is a column of FIGURES, and proportional ones
+     slide the colon from row to row. The selector is (0,2,0) against the panel's own
+     (0,1,0), so it wins on specificity and not on the order the consumer's bundler
+     happens to give the two sheets. */
+  .v-time-input[data-mode='list'] .v-combobox-panel {
     font-variant-numeric: tabular-nums;
-    text-align: start;
-    cursor: pointer;
-  }
-
-  .v-time-input-option:hover {
-    background: var(--vectis-color-surface-muted);
-  }
-
-  /* The focus ring is drawn INSIDE the row: the panel scrolls, and a ring sitting outside
-     it would be cropped on the first and last rows. */
-  .v-time-input-option:focus-visible {
-    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
-    outline-offset: calc(-1 * var(--vectis-focus-ring-width));
-  }
-
-  .v-time-input-option[aria-selected='true'] {
-    background: var(--vectis-color-accent-surface);
-    color: var(--vectis-color-accent-text);
-  }
-
-  .v-time-input-footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--vectis-space-2);
   }
 }
 </style>

@@ -26,6 +26,8 @@ export default {
           "Ce qui est dit pendant le chargement, et ce comme quoi l'indicateur est annoncé.",
         hasMore:
           "Dit qu'il reste des pages à venir, ce qui est ce qui pousse le composant à demander la suivante quand la fin de la liste entre dans le champ de vision.",
+        placement:
+          "Où la liste s'ouvre par rapport au champ. Le panneau est ancré en CSS, donc cette valeur nomme une préférence : un navigateur à court de place se rabat déjà tout seul.",
         vModel:
           "La valeur de l'option choisie, ou leur liste quand <code>multiple</code> est posé. Elle part sur une chaîne vide, et le tableau n'est jamais muté sur place.",
       },

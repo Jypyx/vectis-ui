@@ -345,10 +345,6 @@ export const semantic = {
       '1rem',
       "The dot of VTimePicker's hand on a minute off the 5-minute markers",
     ),
-    'size-time-input-list-max-block': dimension(
-      '18rem',
-      "The maximum height of VTimeInput's list panel (the scrolling area)",
-    ),
     'size-file-picker-min-block': dimension(
       '10rem',
       "The minimum height of VFilePicker's drop zone — icon, two lines, separator and button",

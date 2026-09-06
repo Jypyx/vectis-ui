@@ -28,7 +28,4 @@ export default {
       ],
     },
   ],
-  cssVars: [
-    { name: '--vectis-control-size-time-input-list-max-block', value: '18rem' },
-  ],
 } satisfies PageApi

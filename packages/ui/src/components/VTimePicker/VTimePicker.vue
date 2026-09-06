@@ -426,6 +426,7 @@ defineExpose({
         class="v-time-picker-meridiem"
         mandatory
         variant="outline"
+        selected-variant="soft"
         orientation="vertical"
         size="sm"
         :label="m.timePicker.meridiem"

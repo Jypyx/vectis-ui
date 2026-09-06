@@ -50,6 +50,8 @@ export default {
       },
       slots: {
         start: 'Du contenu au début du champ, qui remplace <code>iconStart</code>.',
+        valueEnd:
+          "Vos propres contrôles dans le champ, placés avant ceux du champ lui-même : la croix d'effacement et l'icône de fin. C'est la place de ce qui agit sur la valeur, pour que l'ordre de lecture et l'ordre de tabulation coïncident.",
         end: "Du contenu à la fin du champ, qui remplace <code>iconEnd</code>. Il est masqué pendant le chargement, l'indicateur prenant cette place.",
       },
     },

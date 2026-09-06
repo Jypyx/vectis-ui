@@ -38,6 +38,7 @@ export default {
       ],
       slots: [
         { name: 'start', type: '{}' },
+        { name: 'value-end', key: 'valueEnd', type: '{}' },
         { name: 'end', type: '{}' },
       ],
     },

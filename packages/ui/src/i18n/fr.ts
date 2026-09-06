@@ -128,10 +128,9 @@ export const fr: VectisMessages = {
   },
   timeInput: {
     clear: "Effacer l'heure",
-    openList: 'Ouvrir la liste des heures',
     openPicker: 'Ouvrir le sélecteur d’heure',
-    listLabel: 'Heures disponibles',
     pickerLabel: 'Choisir une heure',
+    meridiem: (value) => `AM ou PM : ${value}`,
     maskPlaceholder: 'hh:mm',
   },
   fileInput: {

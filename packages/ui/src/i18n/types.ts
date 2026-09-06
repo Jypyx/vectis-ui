@@ -178,11 +178,16 @@ export interface VectisMessages {
   }
   timeInput: {
     clear: string
-    openList: string
     openPicker: string
-    listLabel: string
     /** What the panel holding the clock is called. */
     pickerLabel: string
+    /**
+     * What the AM/PM button inside the field is called, the half of the day it currently
+     * shows included. The value is what the button reads on screen, so the name repeats
+     * it rather than replacing it: a reader arriving on the button is told which half is
+     * chosen, and hears the new one as soon as it changes.
+     */
+    meridiem: (value: string) => string
     /**
      * The grey template shown in an empty field, "hh:mm". It is translatable because those
      * letters are the initials of WORDS — unlike the colon between them, which is the same

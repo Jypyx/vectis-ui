@@ -88,6 +88,8 @@ const isSeparator = (item: ComboboxItem): item is ComboboxSeparator => 'separato
  */
 export type ComboboxFilter = boolean | ((option: ComboboxOption, query: string) => boolean)
 
+type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
+
 interface ComboboxProps {
   /**
    * What the list offers. An entry may be an option, a named block of options, or a
@@ -141,6 +143,8 @@ interface ComboboxProps {
    * the next one as the end of the list comes into view.
    */
   hasMore?: boolean
+  /** Where the list opens relative to the field. */
+  placement?: Placement
 }
 
 const props = withDefaults(defineProps<ComboboxProps>(), {
@@ -157,6 +161,7 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   loading: false,
   loadingText: undefined,
   hasMore: false,
+  placement: 'bottom-start',
 })
 
 const m = useMessages()
@@ -845,7 +850,7 @@ function onKeydown(event: KeyboardEvent) {
       v-model:open="open"
       mode="manual"
       anchor="--combobox-anchor"
-      placement="bottom-start"
+      :placement="placement"
       role="listbox"
       class="v-combobox-panel v-control"
       :data-size="resolvedSize"

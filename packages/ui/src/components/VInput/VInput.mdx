@@ -52,6 +52,10 @@ case:
 
 <Canvas of={VInputStories.ClickableIcons} />
 
+A third slot, `#value-end`, sits between the value and the field's own controls — the clear
+cross and the end icon. It is where a control that acts on the VALUE belongs, so that
+reading order and tab order agree: `VTimeInput` puts its AM/PM button there.
+
 ## Counter and limits
 
 `counter` shows "12/80" (or "12" without `maxlength`) on the right inside the field. By default

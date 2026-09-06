@@ -25,6 +25,8 @@ export default {
         loadingText: 'What is said while loading, and what the spinner is announced as.',
         hasMore:
           'Says that there are more pages to come, which is what makes the component ask for the next one as the end of the list comes into view.',
+        placement:
+          'Where the list opens relative to the field. The panel is anchored in CSS, so this names a preference: a browser short of room already falls back on its own.',
         vModel:
           "The chosen option's value, or the list of them when <code>multiple</code> is set. It is an empty string to begin with, and the array is never mutated in place.",
       },
