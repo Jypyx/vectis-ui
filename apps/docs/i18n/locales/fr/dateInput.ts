@@ -2,6 +2,65 @@ export default {
   title: 'Champ de date',
   lead: "Un champ de texte saisissable, avec un VDatePicker dans un panneau à côté. Le masque suit la langue : l'ordre des champs, le séparateur et le gabarit sont tous dérivés de la locale.",
 
+  examples: {
+    labelAndHint: {
+      title: 'Libellé, aide et icône',
+      text: "Le champ est un <code>VInput</code>, donc <code>label</code> et <code>hint</code> se comportent exactement comme partout ailleurs. <code>pickerIcon</code> change le glyphe qui ouvre le calendrier, à la fin du champ. Aucune icône n'est rendue quand il n'y a pas de panneau à ouvrir, ce qui est le cas par défaut d'un champ où l'on peut taper.",
+    },
+    sizes: {
+      title: 'Tailles',
+      text: 'Trois hauteurs, 32, 40 et 48 pixels, chacune avec sa paire <code>compact</code> plus courte de 4px. Le panneau garde ses propres mesures : un calendrier est une surface et non un contrôle, donc la grille ne rétrécit pas avec le champ auquel elle est accrochée, et une date reste aussi facile à viser quelle que soit la hauteur sur laquelle le formulaire est bâti.',
+    },
+    modes: {
+      title: 'Modes',
+      text: 'Deux modes, et une troisième configuration entre les deux. <code>input</code>, la valeur par défaut, masque le champ pour que seuls des chiffres soient tapés et que les séparateurs se placent à mesure que chaque partie se remplit ; le calendrier y est alors facultatif, via <code>showPicker</code>, un panneau à chaque focus étant du bruit dans un formulaire dense. <code>readonly</code> fait du calendrier la seule entrée possible. La saisie est réservée à une date unique : une période ou une liste retombe en lecture seule, faute de manière sensée de les taper.',
+    },
+    range: {
+      title: 'Période',
+      text: "La valeur devient un début et une fin, et le calendrier prend le premier clic pour l'un et le second pour l'autre, en prévisualisant l'intervalle sous le pointeur entre les deux. Le champ écrit les deux dates via <code>Intl</code>, qui met en facteur ce qu'elles ont en commun au lieu de le répéter.",
+    },
+    multiple: {
+      title: 'Dates multiples',
+      text: "La valeur devient une liste, et un jour déjà présent en ressort d'un second clic. Le tableau n'est jamais modifié sur place, donc un observateur posé sur le modèle se déclenche comme il doit. Le champ énumère ce qui a été choisi, ce qui mérite réflexion au-delà d'une poignée de dates : c'est une ligne de texte et non un jeu de puces.",
+    },
+    presets: {
+      title: 'Raccourcis',
+      text: "Le slot <code>#footer</code> est une bande au pied du panneau, pour des actions ou pour les dates qu'un lecteur choisit le plus souvent. Il reçoit <code>close</code>, ce qui permet à un bouton de poser la valeur et de refermer le panneau d'un seul geste. L'horloge est lue dans le gestionnaire et jamais au setup : le serveur ne peut pas savoir quel jour il est là où se trouve le lecteur, et une valeur prise là ne survivrait pas à l'hydratation.",
+    },
+    bounds: {
+      title: 'Bornes et jours fermés',
+      text: "<code>min</code> et <code>max</code> bornent à la fois le choix et la navigation : les flèches s'arrêtent au lieu de partir vers des mois qui ne contiennent rien de choisissable. <code>disabledDates</code> ferme des jours isolés, sous forme de liste ou de fonction répondant pour une date à la fois, ce qui fait d'une règle comme « pas de week-end » une ligne plutôt qu'une énumération. Un jour fermé est barré et reste atteignable au clavier : un lecteur qui parcourt la grille aux flèches n'est jamais sauté en silence.",
+    },
+    events: {
+      title: 'Pastilles',
+      text: "Jusqu'à trois pastilles sous un jour, pour dire qu'il s'y passe quelque chose. La couleur est n'importe quelle couleur CSS, donc un jeton la garde en phase avec les deux thèmes, et une pastille sans couleur prend l'accent. Le <code>label</code> est ce que lisent les technologies d'assistance, la pastille elle-même ne portant rien d'audible.",
+    },
+    customDay: {
+      title: 'Cellules de jour personnalisées',
+      text: "Le slot <code>#day</code> remplace le numéro à l'intérieur d'un jour, ce qu'il faut à un calendrier de réservation affichant un prix par nuit. Il reçoit la date ISO et tout ce que la cellule sait d'elle-même : si le jour appartient au mois affiché, s'il peut être choisi, s'il est sélectionné, s'il est aujourd'hui, ou s'il est dans une période en cours de tracé. La cellule elle-même reste celle du composant : sa taille, sa forme, son fond de sélection et son anneau de focus. Les pastilles d'évènement sont dessinées hors du slot, donc les deux se combinent. Ce que le slot rend doit être dérivé de la date et non tiré au hasard, sans quoi le serveur et le navigateur produisent deux calendriers différents.",
+    },
+    clearable: {
+      title: 'Effacement',
+      text: "La croix vide la valeur, et elle apparaît à gauche de l'icône du calendrier plutôt qu'à sa place : les deux n'échangent donc jamais leurs positions au gré du remplissage du champ. Elle est facultative sur tous les champs de la bibliothèque, une seule valeur par défaut pour un seul mot.",
+    },
+    adjacentDays: {
+      title: 'Jours adjacents',
+      text: 'Un mois commence rarement sur la première colonne, et les coins de la grille sont vides par défaut. <code>showAdjacentDays</code> les remplit avec les mois voisins, grisés et inertes, ce qui fait que les semaines se lisent comme des semaines. <code>selectAdjacentDays</code> rend ces jours choisissables en plus, et en choisir un déplace le calendrier sur son mois.',
+    },
+    states: {
+      title: 'États',
+      text: "Un champ invalide sert à une règle que le navigateur ne sait pas vérifier lui-même, le masque refusant déjà tout ce qui n'est pas une date. Un champ désactivé grise par les jetons de couleur et ne peut plus ouvrir son panneau, ce qui tient en un seul garde plutôt qu'un par gestionnaire : le même point de coupure couvre le clic, le focus, la flèche et l'icône.",
+    },
+    localization: {
+      title: 'Localisation',
+      text: "L'étiquette de langue décide de l'ordre dans lequel le champ se tape, du séparateur qu'il place, des noms de mois et de jours et du premier jour de la semaine, le tout dérivé et non tabulé. <code>locale</code> prend le pas sur la locale globale et retombe dessus si on l'omet. <code>displayFormat</code> est un jeu d'options <code>Intl</code> pour écrire la date, et il s'applique là où rien n'est tapé : le mode lecture seule, et les sélections de période et de liste qui y retombent.",
+    },
+    placement: {
+      title: 'Placement',
+      text: "Où le panneau s'ouvre par rapport au champ. Il est ancré en CSS : cette valeur nomme donc une préférence et non une position, puisqu'un navigateur à court de place en dessous bascule le calendrier au-dessus de lui-même. Seul l'axe de bloc est proposé, un calendrier s'ouvrant à côté d'un champ étant à la fois large et pénible à suivre.",
+    },
+  },
+
   api: {
     VDateInput: {
       props: {
