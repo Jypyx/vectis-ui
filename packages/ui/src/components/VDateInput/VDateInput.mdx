@@ -13,7 +13,10 @@ assembles design system bricks — no dependency and no extra positioning JS.
 `showPicker` is `false`. The calendar is an option, described further down.
 
 When there is a panel, it is a `popover="manual"` anchored in **pure CSS** (`anchor-scope` on the
-root + `anchor-name` on the control → `position-anchor`, as in VTooltip and VCombobox).
+root + `anchor-name` on the field's own box → `position-anchor`, as in VTooltip and VCombobox). The
+anchor is the field and not the component's root, which also holds the label and the hint: the
+calendar opens against the field, and covers the hint while it is open rather than starting a
+hint's height lower down.
 `popovertarget` is not used (it is invalid on a text `<input>`): the opening is programmatic, which
 is what allows **moving the focus into the grid** — the right accessibility model for a calendar,
 and precisely what input mode suspends. Closing follows the VCombobox pattern (`focusout` on the

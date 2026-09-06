@@ -331,6 +331,17 @@ export const InputWithCalendar: Story = {
     await userEvent.click(field)
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     await expect(field).toHaveFocus()
+
+    // The calendar hangs off the FIELD's box and not off the control, which also holds
+    // the label and the hint: it opens against the field and covers the hint instead of
+    // starting a hint's height lower down. jsdom lays nothing out, so this is the only
+    // place it can be asserted; the two bounds hold whatever the gap token is worth.
+    const fieldBox = canvasElement.querySelector('.v-input-field')!.getBoundingClientRect()
+    const hintBox = canvasElement.querySelector('.v-input-hint')!.getBoundingClientRect()
+    const panelBox = canvas.getByRole('dialog').getBoundingClientRect()
+    await expect(panelBox.top).toBeGreaterThanOrEqual(fieldBox.bottom)
+    await expect(panelBox.top).toBeLessThan(hintBox.bottom)
+
     await userEvent.keyboard('06102026')
     await expect(field).toHaveValue('06/10/2026')
     await expect(field).toHaveFocus()

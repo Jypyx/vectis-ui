@@ -771,8 +771,24 @@ function onEndIcon() {
   }
 
   .v-time-input-control {
-    anchor-name: --time-input-anchor;
     cursor: pointer;
+  }
+
+  /* The anchor is the FIELD's box and not this wrapper's, which also holds the label and
+     the hint: anchored to the wrapper, the panel opens a hint's height below the field, and
+     a label's height above it once there is no room below and `flip-block` turns it over.
+     Against the field it covers whichever of the two it lands on, which is what a panel
+     belonging to a control is supposed to do.
+
+     TRAP — the selector has to start at the wrapper and never at the root. In `list` mode
+     that wrapper is not rendered at all and the field on screen belongs to a VCombobox,
+     which names it `--combobox-anchor` from its own sheet at the same (0,2,0): written
+     `.v-time-input .v-input-field`, this rule would put a SECOND `anchor-name` on that very
+     element, and which of the two survived would be decided by the order the consumer's
+     bundler gave the two sheets. The list's panel would then lose its anchor and paint
+     itself at the viewport origin, with nothing in the console to say why. */
+  .v-time-input-control .v-input-field {
+    anchor-name: --time-input-anchor;
   }
 
   /* A field one types into shows the text cursor rather than the pointer a clickable

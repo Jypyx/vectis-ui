@@ -714,9 +714,17 @@ const close = () => closeAndFocus()
   }
 
   .v-date-input-control {
-    anchor-name: --date-input-anchor;
     display: block;
     cursor: pointer;
+  }
+
+  /* The anchor is the FIELD's box and not this wrapper's, which also holds the label and
+     the hint: anchored to the wrapper, the calendar opens a hint's height below the field,
+     and a label's height above it once there is no room below and `flip-block` turns it
+     over. Against the field it covers whichever of the two it lands on, which is what a
+     panel belonging to a control is supposed to do. */
+  .v-date-input-control .v-input-field {
+    anchor-name: --date-input-anchor;
   }
 
   /* Input mode: the field is editable, and the <input>'s text caret takes over from the

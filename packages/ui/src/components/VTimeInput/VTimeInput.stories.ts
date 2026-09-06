@@ -218,7 +218,7 @@ export const InputWithDial: Story = {
     setup: () => ({ args, t, value: ref(null) }),
     template: `
       <div style="width: 280px; display:grid; gap:8px">
-        <VTimeInput v-bind="args" v-model="value" :label="t.time" />
+        <VTimeInput v-bind="args" v-model="value" :label="t.time" :hint="t.maskHint" />
         <output data-testid="value">{{ value ?? '—' }}</output>
       </div>
     `,
@@ -231,6 +231,17 @@ export const InputWithDial: Story = {
     await userEvent.click(field)
     const panel = await waitFor(() => canvas.getByRole('dialog'))
     await expect(field).toHaveFocus()
+
+    // The panel hangs off the FIELD's box and not off the control, which also holds the
+    // label and the hint: it opens against the field and covers the hint instead of
+    // starting a hint's height lower down. jsdom lays nothing out, so this is the only
+    // place it can be asserted; the two bounds hold whatever the gap token is worth.
+    const fieldBox = canvasElement.querySelector('.v-input-field')!.getBoundingClientRect()
+    const hintBox = canvasElement.querySelector('.v-input-hint')!.getBoundingClientRect()
+    const panelTop = panel.getBoundingClientRect().top
+    await expect(panelTop).toBeGreaterThanOrEqual(fieldBox.bottom)
+    await expect(panelTop).toBeLessThan(hintBox.bottom)
+
     await userEvent.keyboard('0930')
     await expect(field).toHaveValue('09:30')
     await expect(field).toHaveFocus()

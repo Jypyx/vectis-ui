@@ -88,7 +88,9 @@ explicitly by the consumer.
 
 When the component using VPopover already owns a root and a control — a text input, for
 instance, on which `popovertarget` would be invalid — it sets `anchor-scope` on its root and
-`anchor-name` on its control itself, then passes the name through the `anchor` prop. VPopover
+`anchor-name` on the box the panel is to hang off, then passes the name through the `anchor` prop.
+That box is the control itself and never the component's root: a field's root also holds its label
+and its hint, and a panel anchored to it would open a hint's height too low. VPopover
 then renders **no layout node**: the `#trigger` slot is omitted and its wrapper switches to
 `display: contents`.
 

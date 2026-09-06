@@ -72,6 +72,7 @@ const t = storyText({
   en: {
     chooseCountry: 'Choose a country…',
     country: 'Country',
+    countryHint: 'Type to narrow the list down.',
     servedCountries: 'Served countries',
     otherCountries: 'Other countries',
     clearingOn: 'Clearing enabled (clearable)',
@@ -98,6 +99,7 @@ const t = storyText({
   fr: {
     chooseCountry: 'Choisir un pays…',
     country: 'Pays',
+    countryHint: 'Tapez pour réduire la liste.',
     servedCountries: 'Pays desservis',
     otherCountries: 'Autres pays',
     clearingOn: 'Effacement activé (clearable)',
@@ -181,6 +183,41 @@ export const Default: Story = {
     await userEvent.keyboard('{ArrowDown}{Enter}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('re'))
     await expect(input).toHaveValue('Réunion')
+  },
+}
+
+/**
+ * The field is a VInput, so it takes a `label` and a `hint` with neither declared here:
+ * both reach it through the attributes. The panel is anchored to the field's own box and
+ * not to the whole component, so it opens against the field and covers the hint rather
+ * than starting below it.
+ */
+export const WithLabelAndHint: Story = {
+  render: (args) => ({
+    components: { VCombobox },
+    setup: () => ({ args, t, value: ref('') }),
+    template: `
+      <div style="width: 300px">
+        <VCombobox v-bind="args" v-model="value" :label="t.country" :hint="t.countryHint" :placeholder="t.chooseCountry" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('combobox', { name: 'Country' })
+
+    await userEvent.click(input)
+    const panel = await waitFor(() => canvas.getByRole('listbox'))
+
+    // The panel hangs off the FIELD's box and not off the component's, which also holds
+    // the label and the hint: it opens against the field and covers the hint instead of
+    // starting a hint's height lower down. jsdom lays nothing out, so this is the only
+    // place it can be asserted; the two bounds hold whatever the gap token is worth.
+    const fieldBox = canvasElement.querySelector('.v-input-field')!.getBoundingClientRect()
+    const hintBox = canvasElement.querySelector('.v-input-hint')!.getBoundingClientRect()
+    const panelTop = panel.getBoundingClientRect().top
+    await expect(panelTop).toBeGreaterThanOrEqual(fieldBox.bottom)
+    await expect(panelTop).toBeLessThan(hintBox.bottom)
   },
 }
 

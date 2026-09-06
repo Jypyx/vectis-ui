@@ -933,8 +933,16 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   .v-combobox-control {
-    anchor-name: --combobox-anchor;
     display: block;
+  }
+
+  /* The anchor is the FIELD's box and not this wrapper's, which also holds the label and
+     the hint: anchored to the wrapper, the panel opens a hint's height below the field, and
+     a label's height above it once there is no room below and `flip-block` turns it over.
+     Against the field it covers whichever of the two it lands on, which is what a panel
+     belonging to a control is supposed to do. */
+  .v-combobox-control .v-input-field {
+    anchor-name: --combobox-anchor;
   }
 
   /* The panel comes from VPopover, which brings the floating element, its open state, its

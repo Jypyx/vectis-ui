@@ -14,8 +14,10 @@ and `showPicker` is `false`.
 
 The shell is the [VDateInput](?path=/docs/components-dateinput--docs) one: a
 `popover="manual"` panel anchored in **pure CSS** (`anchor-scope` on the root +
-`anchor-name` on the control → `position-anchor`), a programmatic opening that moves focus
-into the panel, and closing through the root's `focusout` + `Escape`.
+`anchor-name` on the field's own box → `position-anchor`), a programmatic opening that
+moves focus into the panel, and closing through the root's `focusout` + `Escape`. The
+anchor is the field and not the component's root, which also holds the label and the hint:
+the panel opens against the field, and covers the hint while it is open.
 
 Whatever the mode, the **v-model stays `'HH:mm'` in canonical 24 h** (`null` when empty):
 picking 7 PM produces `'19:00'`.

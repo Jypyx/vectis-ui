@@ -170,6 +170,15 @@ The **`#chip`** slot replaces the VChip of a selected value. It receives:
 
 <Canvas of={VComboboxStories.CustomChip} />
 
+## Label and hint
+
+The field is a `VInput`, so `label` and `hint` reach it through the attributes without being
+declared on VCombobox. The panel is anchored to the **field's own box** and not to the component's
+root, which also holds those two: it opens against the field, and covers the hint while it is open
+rather than starting a hint's height lower down.
+
+<Canvas of={VComboboxStories.WithLabelAndHint} />
+
 ## Sizes
 
 `size` accepts `sm` (32 px), `md` (40 px, the default — aligned on `VInput`) and `lg` (48 px),
@@ -225,5 +234,5 @@ case-by-case adjustment.
 ## Browser support
 
 The panel rests on the **Popover API** and **CSS Anchor Positioning** (a width aligned on the
-control through `anchor-size(width)`, the anchor confined by `anchor-scope`) **with no fallback** —
+field through `anchor-size(width)`, the anchor confined by `anchor-scope`) **with no fallback** —
 a project decision: Chrome/Edge 125+, Safari 26+, Firefox 147+.
