@@ -2,6 +2,41 @@ export default {
   title: 'Input',
   lead: 'A complete text field: label above, hint below, icons inside, a character counter, a clear button and a loading state, all around a real <code>&lt;input&gt;</code>.',
 
+  examples: {
+    labelAndHint: {
+      title: 'Label and hint',
+      text: 'The label is tied to the field, so clicking it puts the cursor in the input. The hint sits under the field and is tied to it too, through <code>aria-describedby</code>, which is what makes a screen reader read it out after the label instead of leaving it as loose text somewhere nearby. Both are plain props; an <code>id</code> of your own wins over the one the component generates for itself.',
+    },
+    sizes: {
+      title: 'Sizes',
+      text: 'Three heights, 32, 40 and 48 pixels, medium by default. <code>compact</code> takes 4 pixels off any of them and leaves the padding, the text and the icons exactly where they were, which is how a dense form gets dense without shrinking what is written in it. The extra small and extra large steps of the scale are deliberately not offered here: 24 pixels is too short for text a reader edits, and 56 is outside the shape of a form.',
+    },
+    icons: {
+      title: 'Icons',
+      text: 'An icon inside the field, at either end. Both are decorative: no label, no focus, nothing announced, which is the right shape for a magnifier that says what the field is for or a tick that reports a state. Attaching a click listener is what turns one into a button, and that is the section below. The <code>#start</code> and <code>#end</code> slots take the same places when an icon is not what belongs there.',
+    },
+    clearable: {
+      title: 'Clearable',
+      text: 'A cross that empties the field. It shows itself only when there is something to clear and the field can be edited, and pressing it hands the focus straight back to the input: the cross vanishes in the same instant, and the focus would otherwise fall to the page. It is drawn before the end icon, so a field can be clearable and still carry a control of its own. For the fields whose value is not their text, a combobox holding chips or a picker filled from a panel, <code>clearVisible</code> answers the question instead.',
+    },
+    states: {
+      title: 'States',
+      text: 'A disabled field greys out through the colour tokens and leaves the tab order. A read-only one stays focusable and copyable, and hides its clear cross unless it is told otherwise. <code>invalid</code> is for a rule the browser cannot check by itself, a name already taken for instance: anything native validation can see already colours the field without it, once the reader has left it. <code>loading</code> puts a spinner where the end icon goes and announces itself.',
+    },
+    clickableIcons: {
+      title: 'Clickable icons',
+      text: 'An icon becomes a real button the moment a <code>@click:icon-start</code> or <code>@click:icon-end</code> listener is attached to it. Nothing else about it changes, same prop and same place in the field. What it does need from that point on is a label, since a button holding an icon has no text to be named by, and the component says so in development when one is missing.',
+    },
+    counters: {
+      title: 'Counters',
+      text: "The counter sits at the end of the field: 12/20 against a limit, or just 12 without one. <code>maxlength</code> on its own is the browser's hard limit, which simply refuses the keystroke past it. <code>softLimit</code> turns it into a line the reader is allowed to cross: the text is never cut, the counter turns red, and the field goes into error through the native validity, so the form refuses to submit rather than quietly truncating what was written.",
+    },
+    pattern: {
+      title: 'Pattern',
+      text: "There is no <code>pattern</code> prop. It is the native attribute, and it reaches the input through fallthrough along with <code>inputmode</code>, <code>title</code>, <code>name</code> and everything else a form needs, so the checking is the browser's and costs nothing here. The field turns red through <code>:user-invalid</code>, which waits until the reader has left it: a postcode is not wrong while it is still being typed.",
+    },
+  },
+
   api: {
     VInput: {
       props: {
