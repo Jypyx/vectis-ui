@@ -17,6 +17,7 @@ export default {
         { name: 'effect', type: 'CarouselEffect', default: "'slide'" },
         { name: 'height', type: 'number | string' },
         { name: 'loop', type: 'boolean', default: 'false' },
+        { name: 'noJump', type: 'boolean', default: 'false' },
         { name: 'autoplay', type: 'number', default: '0' },
         { name: 'controls', type: 'CarouselControls', default: "'inside'" },
         { name: 'indicators', type: 'CarouselIndicators', default: "'outside'" },

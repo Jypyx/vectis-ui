@@ -17,6 +17,11 @@
  * The effects are scroll-driven animations, so they follow the finger and reverse with it.
  * They are progressive enhancement: without support the carousel simply slides.
  *
+ * A move of more than one page is the exception, and it has to be: travelling five pages
+ * would send four slides across the port at speed, each playing its own transition on the
+ * way past. It scrolls instantly and plays the effect ONCE instead, on the slides that
+ * arrive. Stepping one page keeps its scroll, and a drag never reaches that path at all.
+ *
  * The JS is limited to what nothing else can do — scrolling to the Nth child, reading back
  * which page the reader landed on and measuring how many pages there are (subtler than it
  * sounds: not every slide can lead, and the last position is the END of the track), the
@@ -118,15 +123,30 @@ interface CarouselProps {
    * Whether the carousel comes back round: past the last position it returns to the first,
    * and before the first it goes to the last. Off by default, which stops it at both ends.
    *
-   * Nothing is cloned to achieve it. Coming back round scrolls the REAL track back, so the
-   * reader sees it rewind — over several slides that is a visible movement, and it is the
-   * honest one: the carousel really is returning to where it started.
+   * Nothing is cloned to achieve it: the real track goes back to the beginning. Being a
+   * move of more than one page, it goes there at once and plays the transition on
+   * arrival, rather than rewinding past every slide in between — unless `noJump` puts
+   * that rewind back.
    *
    * It has no effect where there is only one position to rest on, and the buttons stay
    * disabled there rather than becoming two controls that do nothing. The dots always go
    * straight to the position they name, and so do the Home and End keys.
    */
   loop?: boolean
+  /**
+   * Whether a move of more than one page keeps the whole scroll instead of going straight
+   * there. Off by default: a dot five pages away lands at once and plays the transition
+   * once, on arrival.
+   *
+   * Turn it on when the travel is the point — a short carousel where watching the track
+   * run past says something about how far the reader has moved. Every route is covered,
+   * the dots, the Home and End keys and a `loop` carousel coming back round, so the
+   * component moves the way it did before there was a shortcut at all.
+   *
+   * It changes nothing for a reader who has asked for less motion: that preference makes
+   * every scroll instant on its own.
+   */
+  noJump?: boolean
   /**
    * How long each slide is shown before the next one, in milliseconds; zero means it does
    * not advance by itself. It stops at the last page unless the carousel loops — in which
@@ -187,6 +207,7 @@ const props = withDefaults(defineProps<CarouselProps>(), {
   effect: 'slide',
   height: undefined,
   loop: false,
+  noJump: false,
   autoplay: 0,
   controls: 'inside',
   indicators: 'outside',
@@ -306,12 +327,29 @@ provide(carouselKey, {
   slideLabel: (index: number) => m.value.carousel.slide(index + 1, count.value),
 })
 
+/*
+ * The jump one-shot, which replaces the travel whenever the model moves by more than
+ * one page (see `scrollToIndex`). Two pieces of state, both read from the sheet:
+ *
+ * `jumpPhase` alternates between two IDENTICAL keyframe names, and that is the whole
+ * reason there are two. Re-setting the same attribute leaves a running animation
+ * running, so a second jump would play nothing at all; changing `animation-name` is
+ * what a CSS animation restarts on.
+ *
+ * `jumpDirection` is the sign the `slide` character is written on, alongside the axis
+ * vector and the RTL sign the effect keyframes already use. It is the LINEAR one, so a
+ * `loop` wrap enters from the side the track actually rewinds towards.
+ */
+const jumpPhase = ref<'a' | 'b'>()
+const jumpDirection = ref(1)
+
 const rootStyle = computed<StyleValue>(() => ({
   '--carousel-per-view': String(props.itemsPerView),
   '--carousel-item-min': cssSize(props.itemMinSize),
   '--carousel-peek': cssSize(props.peek),
   '--carousel-gap': cssSize(props.gap),
   '--carousel-viewport-block': cssSize(props.height),
+  '--carousel-jump-dir': String(jumpDirection.value),
 }))
 
 const viewportEl = ref<HTMLElement | null>(null)
@@ -366,9 +404,21 @@ let readBack = false
 /**
  * Writes the DOM from the model. The deltas come from the RECTS, hence physical:
  * LTR, RTL and vertical all fall out with no direction test (the VTabs
- * `watch(model)` idiom). `behavior` is omitted so CSS `scroll-behavior` governs,
- * hence `prefers-reduced-motion`; `scrollBy?.()` is optional-called because jsdom
- * implements no scrolling.
+ * `watch(model)` idiom); `scrollBy?.()` is optional-called because jsdom implements
+ * no scrolling.
+ *
+ * A move of ONE page keeps the travel and omits `behavior`, so CSS `scroll-behavior`
+ * governs and `prefers-reduced-motion` with it. A move of MORE than one is a JUMP: it
+ * scrolls `instant` and plays a one-shot instead. The whole rule is that distance —
+ * the dots, Home/End and a `loop` wrap are simply the only routes that produce one,
+ * where a step keeps its scroll and a drag never reaches here at all (`readBack`).
+ * That is what keeps `goTo` the single write path rather than splitting it in two,
+ * and what makes `noJump` a single term in one condition rather than a branch per route.
+ *
+ * Cutting a travel of five pages is not a shortcut: what it removes is four slides
+ * crossing the port at speed, and with a scroll-driven effect, four of them playing
+ * their own transition on the way past. `instant` overrides no reduced-motion
+ * preference either — that branch already makes every scroll instant.
  *
  * The LAST page is the exception it deliberately does not special-case: its index
  * names the slide that leads at the END of the track, whose start edge lies past
@@ -377,44 +427,102 @@ let readBack = false
  * Writing the clamped offset by hand would mean `scrollTo` and a signed `scrollLeft`,
  * the one thing the rect delta exists to avoid.
  */
-function scrollToIndex(index: number) {
-  const port = viewportEl.value
-  const slide = port?.querySelector<HTMLElement>(`[data-carousel-index='${index}']`)
-  if (!port || !slide) return
+/**
+ * How far slide `index`'s start edge sits from the port's, right now. `undefined` when
+ * the slide is gone, which the deferred correction below has to ask again about: it runs
+ * a frame later, and a consumer is free to have changed the slides in between.
+ */
+function deltaTo(port: HTMLElement, index: number) {
+  const slide = port.querySelector<HTMLElement>(`[data-carousel-index='${index}']`)
+  if (!slide) return
   const target = slide.getBoundingClientRect()
   // The VIEWPORT's rect, not the stage's: every DOM read in this component is
   // viewport-scoped, and the `outside` gutter is padding on the root, so nothing here
   // has to know about it.
   const origin = port.getBoundingClientRect()
-  const left = target.left - origin.left
-  const top = target.top - origin.top
+  return { left: target.left - origin.left, top: target.top - origin.top }
+}
+
+/** Under a pixel on both axes is the scroller already being where it was asked to go. */
+const arrived = (delta: { left: number; top: number }) =>
+  Math.abs(delta.left) < 1 && Math.abs(delta.top) < 1
+
+function scrollToIndex(index: number, from = index) {
+  const port = viewportEl.value
+  if (!port) return
+  const delta = deltaTo(port, index)
+  if (!delta) return
+  const { left, top } = delta
   /*
    * Already there — which is what a model change coming FROM the read-back looks
    * like. Arming the guard here would be the other way to strand it: no movement
    * means no `scrollend` to lower it again.
    */
-  if (Math.abs(left) < 1 && Math.abs(top) < 1) return
+  if (arrived(delta)) return
+
+  // `noJump` cancels the one-shot along with the cut, and has to: played over a travel
+  // still in flight it would hold `fade`'s opacity at its own value for 200ms while the
+  // scroller was several slides from where the animation says it has arrived.
+  const jump = !props.noJump && Math.abs(index - from) > 1
+  /*
+   * Armed AFTER the guards, so a jump that scrolls nothing animates nothing — and
+   * armed here rather than in the watcher because the flush that carries these two
+   * writes to the DOM is a microtask, hence still ahead of the paint that shows the
+   * new position. Set them a frame later and `fade` flashes its destination at full
+   * opacity before dropping to zero to fade it back in.
+   */
+  if (jump) {
+    jumpDirection.value = index > from ? 1 : -1
+    jumpPhase.value = jumpPhase.value === 'a' ? 'b' : 'a'
+  }
   settling.value = true
-  port.scrollBy?.({ left, top })
+  port.scrollBy?.(jump ? { left, top, behavior: 'instant' } : { left, top })
+
+  /*
+   * TRAP — a jump measures ONCE more, a frame later, and corrects. A relative delta read
+   * while another scroll is in flight is already stale: a smooth scroll is driven off the
+   * main thread, so the rects above lag the position the delta lands on by a frame or two,
+   * and `instant` then freezes the error in — the browser does not re-snap after an
+   * explicit programmatic scroll. Interrupting a step with a jump (clicking `next` twice
+   * on the second-to-last page of a looping carousel) left the first slide short of its
+   * edge with a strip of the second showing, by up to a tenth of a slide and in proportion
+   * to the speed the scroller had reached. One frame is enough BECAUSE the instant scroll
+   * cancels the animation: by then nothing is moving, so the second reading is exact and
+   * there is nothing to iterate on. It cannot be a `scrollTo` of the position read before
+   * the jump either, that number being stale by the same frames.
+   *
+   * Only jumps, and only because they scroll `instant`. A step keeps its smooth scroll,
+   * which the browser composes with the one already in flight and lands exactly on — two
+   * quick clicks on `next` come to rest dead on the slide edge, measured at four points of
+   * the interrupted animation. There is nothing to correct there, and nothing to correct
+   * WITH either: a frame later that scroll is still running.
+   */
+  if (jump)
+    requestAnimationFrame(() => {
+      const again = deltaTo(port, index)
+      if (again && !arrived(again)) port.scrollBy?.({ ...again, behavior: 'instant' })
+    })
 }
 
-watch(model, (index) => {
+watch(model, (index, previous) => {
   // The guard is what stops the two directions chaining: without it the model write the
   // read-back has just made comes straight back as a scroll, fighting the finger mid-drag.
   // See the flag's own declaration for why `scrollToIndex`'s "already there" test does not
   // cover it.
   if (readBack) return
-  void nextTick(() => scrollToIndex(index))
+  // The watcher's own previous value and NOT `observedIndex`: it is the last COMMITTED
+  // page, defined before the first measurement and immune to a reading in flight.
+  void nextTick(() => scrollToIndex(index, previous))
 })
 
 const observedIndex = ref<number>()
 const measuredPages = ref<number>()
 
 /**
- * Slack, in pixels, on every comparison below. `scrollWidth` and `clientWidth` are
- * INTEGERS where the flex layout is fractional, so a position that is exactly
- * reachable can measure a hair short — and symmetrically a sub-pixel leftover must
- * never mint a page, or the dot count would change with the canvas width.
+ * Slack, in pixels, on every comparison below. `clientWidth` is an INTEGER where the
+ * flex layout is fractional, so a position that is exactly reachable can measure a
+ * hair short — and symmetrically a sub-pixel leftover must never mint a page, or the
+ * dot count would change with the canvas width.
  */
 const SLACK = 2
 
@@ -424,7 +532,7 @@ const SLACK = 2
  * what let them disagree.
  *
  * A position is a PAGE, not a slide. `scroll-snap-align: start` makes every slide's start
- * edge a position, but one past `scrollWidth - clientWidth` is UNREACHABLE — the scroller
+ * edge a position, but one past the end of the scroll range is UNREACHABLE — the scroller
  * clamps short of it — so a `peek` or an active `itemMinSize` costs the last. What replaces
  * it is the END of the track, declared by `.v-carousel-slide:last-child` in the sheet and
  * counted here whenever the leftover exceeds rounding noise. Without that page the last
@@ -441,20 +549,32 @@ const SLACK = 2
  * names the page being LEFT while the incoming slide, parked at 0.997 by a fractional
  * layout, crosses nothing on arrival. Symptom: a dot stuck one page ahead of the content.
  *
- * RECTS and the scroller's own sizes only, never `getComputedStyle` — this runs on every
- * frame of a smooth scroll. `step` and `offset` are rect DELTAS, hence unsigned, so RTL and
- * vertical fall out with no direction test where `scrollLeft` would be negative in RTL.
+ * RECTS and the port's own client size only, never `getComputedStyle` — this runs on every
+ * frame of a smooth scroll. `step`, `offset` and `span` are rect DELTAS, hence unsigned, so
+ * RTL and vertical fall out with no direction test where `scrollLeft` would be negative.
  *
- * TRAP — `offset` assumes the viewport carries NO padding and NO border, so slide 0's start
- * edge coincides with the port's at rest. That is why the `outside` gutter is padding on the
- * ROOT; give the viewport its own and both this reading and `scrollToIndex`'s delta pick up
- * a constant bias with nothing to report it.
+ * TRAP — `span` and NOT `scrollWidth - clientWidth`, which is the same number at rest and
+ * the reason this is easy to undo. A scroller's scrollable overflow includes the TRANSFORMED
+ * boxes of its descendants, and only towards the END edge, so any animation that translates
+ * something inside a slide inflates `scrollWidth` for as long as it runs. Measuring in that
+ * window mints a page, and since nothing re-measures once the animation is over, the phantom
+ * dot stays for good (reported against the jump one-shot, whose `slide` form translates the
+ * inner box). Slide rects are never transformed — that is the whole point of VCarouselItem's
+ * two boxes — so taking the span from the outer edges of the strip is immune to it, this
+ * one-shot and any future effect alike.
+ *
+ * TRAP — `offset` and `span` both assume the viewport carries NO padding and NO border, so
+ * slide 0's start edge coincides with the port's at rest and the strip ends where the scroll
+ * range does. That is why the `outside` gutter is padding on the ROOT; give the viewport its
+ * own and this reading, `scrollToIndex`'s delta and the page count all pick up a constant
+ * bias with nothing to report it.
  */
 function measure(port: HTMLElement) {
   const boxes = port.querySelectorAll<HTMLElement>('[data-carousel-index]')
   const first = boxes[0]?.getBoundingClientRect()
   const second = boxes[1]?.getBoundingClientRect()
-  if (!first || !second) return
+  const last = boxes[boxes.length - 1]?.getBoundingClientRect()
+  if (!first || !second || !last) return
   const origin = port.getBoundingClientRect()
   const vertical = isVertical.value
   const step = vertical ? Math.abs(second.top - first.top) : Math.abs(second.left - first.left)
@@ -465,9 +585,12 @@ function measure(port: HTMLElement) {
   // How far the scroller has travelled: the first slide's start edge has left the
   // port's by exactly that much.
   const offset = vertical ? Math.abs(first.top - origin.top) : Math.abs(first.left - origin.left)
-  const scrollable = vertical
-    ? port.scrollHeight - port.clientHeight
-    : port.scrollWidth - port.clientWidth
+  // Outer edge to outer edge, picked by comparison rather than by index: in RTL the last
+  // slide is the LEFTMOST box, so naming the sides would need a direction test.
+  const span = vertical
+    ? Math.max(first.bottom, last.bottom) - Math.min(first.top, last.top)
+    : Math.max(first.right, last.right) - Math.min(first.left, last.left)
+  const scrollable = span - (vertical ? port.clientHeight : port.clientWidth)
 
   const starts = Math.floor((scrollable + SLACK) / step)
   const residual = scrollable - starts * step
@@ -753,6 +876,7 @@ if (isDev) {
     :style="rootStyle"
     :data-orientation="orientation"
     :data-effect="resolvedEffect"
+    :data-jump="jumpPhase"
     :data-controls="controls || undefined"
     :data-indicators="indicators || undefined"
     :data-controls-visibility="controlsVisibility"
@@ -888,6 +1012,17 @@ if (isDev) {
      * hence no --vectis-* token (the qualification rule still applies).
      */
     --carousel-scale-min: 0.75;
+
+    /*
+     * The jump one-shot's starting point, NEUTRAL on all three axes here: each effect
+     * below turns on the one dimension it owns, which is what lets a single pair of
+     * keyframes serve `slide`, `fade` and `scale` instead of one block each. The
+     * direction sign is written from the script, alongside the axis vector above.
+     */
+    --carousel-jump-opacity: 1;
+    --carousel-jump-scale: 1;
+    --carousel-jump-shift: 0%;
+    --carousel-jump-dir: 1;
 
     /* A true gutter, which is what --vectis-space-* is for. */
     --carousel-gap: var(--vectis-space-3);
@@ -1105,8 +1240,62 @@ if (isDev) {
   }
 
   /*
-   * Effects — progressive enhancement. Without scroll-driven animations nothing
-   * below is declared and the carousel is a plain `slide`; Firefox lands there.
+   * Each effect names the keyframes it is written on, and the two mechanisms that
+   * play them read the name from here rather than from a selector of their own —
+   * which is what keeps the animation LISTS below written exactly once.
+   */
+  .v-carousel[data-effect='fade'] {
+    --carousel-effect-name: v-carousel-fade;
+    /* The dissolve, with no travel: the jump is the same gesture as the scroll. */
+    --carousel-jump-opacity: 0;
+  }
+
+  .v-carousel[data-effect='scale'] {
+    --carousel-effect-name: v-carousel-scale;
+    /* Exactly where the scroll-driven effect holds a slide off the centre, so the
+       one-shot ends on the value that takes over from it. */
+    --carousel-jump-scale: var(--carousel-scale-min);
+  }
+
+  .v-carousel[data-effect='slide'] {
+    /*
+     * A TENTH of the slide, not its width. Every inner box shifts at once, so a full
+     * one would park each over its neighbour and the overlap would paint the wrong
+     * slide for the length of the run — invisible at one item per view, plain at
+     * three. A tenth reads as a direction and overlaps nothing at any count.
+     */
+    --carousel-jump-shift: 20%;
+  }
+
+  /*
+   * The JUMP one-shot, and it is declared OUTSIDE the @supports below on purpose: it
+   * is an ordinary time-based animation, and where scroll-driven ones are missing
+   * (Firefox) `animation-duration: auto` is an invalid value that drops the whole
+   * declaration — taking this one's duration to 0s with it. Here it stands alone; the
+   * block below restates it as the second half of a pair.
+   *
+   * TRAP — the pair of names. `jumpPhase` alternates between two identical keyframe
+   * blocks because re-setting an attribute does not restart a running animation, and
+   * `animation-name` is the one thing that does.
+   */
+  .v-carousel-effect {
+    animation-name: var(--carousel-jump-name, none);
+    animation-duration: var(--vectis-duration-base);
+    animation-timing-function: var(--vectis-ease-out);
+  }
+
+  .v-carousel[data-jump='a'] {
+    --carousel-jump-name: v-carousel-jump-a;
+  }
+
+  .v-carousel[data-jump='b'] {
+    --carousel-jump-name: v-carousel-jump-b;
+  }
+
+  /*
+   * Effects — progressive enhancement. Without scroll-driven animations none of the
+   * scroll-keyed half is declared and the carousel is a plain `slide`; Firefox lands
+   * there, and the jump one-shot above keeps working for it.
    *
    * The TIMELINE is declared on the slide and the ANIMATION on its inner box, and
    * that split is load-bearing: a scroll-snap area is the element's TRANSFORMED
@@ -1124,12 +1313,24 @@ if (isDev) {
       view-timeline: --carousel-view block;
     }
 
-    .v-carousel:not([data-effect='slide']) .v-carousel-effect {
+    .v-carousel-effect {
       /*
        * TRAP — longhands, never the `animation` shorthand: `animation-timeline`
        * and `animation-duration` are reset-only sub-properties, so a shorthand
        * written afterwards would silently put the timeline back to `auto` and the
        * duration to 0s, and every effect would vanish with no error.
+       *
+       * TRAP — SIX parallel lists, and their order is the arbitration. The
+       * scroll-keyed effect comes first and the one-shot second, because two
+       * animations touching one property are resolved last-wins: the jump has to
+       * override `fade`'s opacity and `scale`'s scale while it runs. It hands back
+       * cleanly all the same, its `to` being the value the effect holds at rest in
+       * the centre, and `none` fill-mode leaving nothing behind after it. Reading
+       * both names from custom properties is what stops the lists drifting: this
+       * rule is the only place either animation is configured.
+       *
+       * `none` is a valid list item, which is what gives `slide` a first slot with
+       * no effect in it and an unresolved `--carousel-view` nothing to break.
        *
        * `cover` is the only range that spans the full viewport+slide traversal and
        * stays defined for a slide narrower, equal to or wider than the scrollport:
@@ -1138,21 +1339,14 @@ if (isDev) {
        * `linear` is load-bearing too: the default `ease` re-maps the progress and
        * the fade counter-translate would no longer cancel the scroll travel.
        */
-      animation-timeline: --carousel-view;
-      animation-range: cover;
-      animation-fill-mode: both;
-      animation-timing-function: linear;
+      animation-name: var(--carousel-effect-name, none), var(--carousel-jump-name, none);
+      animation-timeline: --carousel-view, auto;
+      animation-range: cover, normal;
+      animation-fill-mode: both, none;
+      animation-timing-function: linear, var(--vectis-ease-out);
       /* `auto` is the whole timeline. A duration in seconds would be taken as a
          PROPORTION of it, and the effect would end a fraction of the way in. */
-      animation-duration: auto;
-    }
-
-    .v-carousel[data-effect='fade'] .v-carousel-effect {
-      animation-name: v-carousel-fade;
-    }
-
-    .v-carousel[data-effect='scale'] .v-carousel-effect {
-      animation-name: v-carousel-scale;
+      animation-duration: auto, var(--vectis-duration-base);
     }
   }
 
@@ -1192,6 +1386,53 @@ if (isDev) {
     }
     50% {
       scale: 1;
+    }
+  }
+
+  /*
+   * The jump one-shot, in ONE body serving all three effects: each turns on the one
+   * dimension it owns and leaves the other two at their neutral value, so what plays
+   * on a jump is recognizably the effect the carousel is set to.
+   *
+   * The `to` is spelled out rather than left implicit, and it is the same value the
+   * scroll-keyed effect holds for a slide at rest in the centre — which is what makes
+   * the handover at the end invisible.
+   *
+   * TWO IDENTICAL BLOCKS, and the duplication is the mechanism rather than an
+   * oversight: `jumpPhase` alternates between these names, because a CSS animation
+   * restarts on a change of `animation-name` and on nothing else. Edit one, edit both.
+   */
+  @keyframes v-carousel-jump-a {
+    from {
+      opacity: var(--carousel-jump-opacity);
+      scale: var(--carousel-jump-scale);
+      translate: calc(
+          var(--carousel-axis-x) * var(--carousel-dir) * var(--carousel-jump-dir) *
+            var(--carousel-jump-shift)
+        )
+        calc(var(--carousel-axis-y) * var(--carousel-jump-dir) * var(--carousel-jump-shift));
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes v-carousel-jump-b {
+    from {
+      opacity: var(--carousel-jump-opacity);
+      scale: var(--carousel-jump-scale);
+      translate: calc(
+          var(--carousel-axis-x) * var(--carousel-dir) * var(--carousel-jump-dir) *
+            var(--carousel-jump-shift)
+        )
+        calc(var(--carousel-axis-y) * var(--carousel-jump-dir) * var(--carousel-jump-shift));
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+      translate: 0 0;
     }
   }
 
@@ -1400,7 +1641,10 @@ if (isDev) {
   @media (prefers-reduced-motion: reduce) {
     /*
      * `animation: none` and not `animation-name: none`: it also drops the timeline
-     * binding, so the effect stops sampling the scroller altogether.
+     * binding, so the effect stops sampling the scroller altogether. Being the
+     * shorthand is also what takes the jump one-shot with it, both animations living
+     * in the same list — a jump then simply lands, which is what the preference asks
+     * for and what `scroll-behavior: auto` below already does to the travel.
      */
     .v-carousel-effect {
       animation: none;

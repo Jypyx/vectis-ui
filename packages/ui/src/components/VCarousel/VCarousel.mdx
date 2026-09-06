@@ -65,11 +65,11 @@ threshold and re-triggers the measurement.
 first it goes to the last. Both buttons stay enabled, and neither the model nor the page count
 changes meaning — a looping carousel still has exactly the positions measured above.
 
-**Nothing is cloned.** Coming back round scrolls the real track back to the beginning, so over
-several slides the reader watches it rewind. That is the honest rendering of what is happening, and
-it is what a seamless loop buys with duplicated slides: copies in the DOM, announced by screen
-readers, counted by the page arithmetic and re-attached to their scroll-driven effects. The rewind
-follows CSS `scroll-behavior`, so a reader who has asked for less motion gets the cut instead.
+**Nothing is cloned.** The real track goes back to the beginning, which is what a seamless loop
+buys with duplicated slides instead: copies in the DOM, announced by screen readers, counted by the
+page arithmetic and re-attached to their scroll-driven effects. Coming back round is a move of more
+than one page, so it lands at once and plays the transition on arrival, the same way a distant dot
+does — see [Jumping more than one page](#jumping-more-than-one-page).
 
 What goes round is what STEPS: the two buttons, the arrow keys, and autoplay. The dots and the Home
 and End keys name a position and still go straight to it — `End` on the last page stays there rather
@@ -118,6 +118,27 @@ and never by the slide itself, because a scroll-snap area is the element's _tran
 box — animating the slide would make its snap position depend on the scroll position, and the
 symptom is jitter rather than an error. And the animation properties are written as longhands,
 never as the `animation` shorthand, which would silently reset the timeline and the duration.
+
+## Jumping more than one page
+
+Clicking a dot five pages away, pressing End, or coming back round with `loop` are all one move
+rather than five, and the carousel treats them as one: it goes to the destination instantly and
+plays the effect **once** on the slides that arrive. The alternative is the four slides in between
+crossing the view at speed, each running its own transition on the way past.
+
+The rule is the distance alone, so nothing else has to opt in. Stepping a single page keeps its
+scroll, which is the transition for that gesture, and a drag or a flick is never touched: it is
+the reader moving the scroller, and the component only reads it back. Under
+`prefers-reduced-motion` a jump simply lands, the one-shot going the same way as the effects.
+
+<Canvas of={VCarouselStories.Jump} />
+
+`noJump` turns the whole thing off, for every route at once — the dots, the Home and End keys, and
+a looping carousel coming back round. Reach for it when the travel is the point: over a handful of
+slides, watching the track run past says something about how far the reader has moved. It takes the
+arrival animation with it, which it has to, since an animation playing over a scroll still in flight
+would hold a slide at its own value several pages from where it claims to be. For a reader who has
+asked for less motion the prop changes nothing, that preference already making every scroll instant.
 
 ## Orientation
 

@@ -75,11 +75,17 @@ function stubIntersectionObserver() {
 }
 
 /**
- * The layout jsdom does not have. `measure()` reads exactly four things — two slide
- * rects it takes a delta from, the port's own rect, and the scroller's sizes — so
- * stubbing them is enough to exercise the page arithmetic outside a browser, which
- * the ratio-based reading it replaces could never be. Slides are laid out at
- * `index * step`, the whole strip shifted back by `offset`: that IS a scroll position.
+ * The layout jsdom does not have. `measure()` reads slide RECTS, the port's own rect and
+ * its client size — nothing else, `scrollWidth` deliberately included, since a running
+ * animation inflates it — so stubbing those is enough to exercise the page arithmetic
+ * outside a browser, which the ratio-based reading it replaces could never be. Slides are
+ * laid out at `index * step`, the whole strip shifted back by `offset`: that IS a scroll
+ * position.
+ *
+ * A slide is narrower than `step` by the gap, and the width is DERIVED from `scrollWidth`
+ * rather than asked for, so the strip spans exactly the number a browser would report at
+ * rest. `scrollWidth` is still stubbed, and a test can then inflate it ALONE — which is what
+ * a running animation does to it — and watch the reading stay put.
  *
  * `configurable`, so one test can move the scroller and re-stub.
  */
@@ -91,9 +97,12 @@ function layout(
   port.getBoundingClientRect = () => ({ left: 0, top: 0 }) as DOMRect
   Object.defineProperty(port, 'clientWidth', { value: sizes.clientWidth, configurable: true })
   Object.defineProperty(port, 'scrollWidth', { value: sizes.scrollWidth, configurable: true })
-  slidesOf(container).forEach((slide, index) => {
+  const slides = slidesOf(container)
+  const width = sizes.scrollWidth - (slides.length - 1) * sizes.step
+  slides.forEach((slide, index) => {
+    const left = index * sizes.step - sizes.offset
     slide.getBoundingClientRect = () =>
-      ({ left: index * sizes.step - sizes.offset, top: 0 }) as DOMRect
+      ({ left, right: left + width, top: 0, bottom: 0 }) as DOMRect
   })
   return port
 }
@@ -220,6 +229,115 @@ describe('VCarousel', () => {
       await nextTick()
       expect(scrollBy).toHaveBeenCalledWith({ left: 280, top: 0 })
     })
+  })
+
+  /*
+   * A move of MORE than one page scrolls instantly and plays the effect once, instead of
+   * sending every slide in between across the port. jsdom animates nothing, so what is
+   * locked here is the two halves of the decision: the scroll option, and the pair of
+   * attributes the sheet reads the one-shot from. The animation itself is a play function.
+   */
+  describe('jump', () => {
+    const SIX = [0, 1, 2, 3, 4, 5]
+      .map((i) => `<VCarouselItem>Slide ${i}</VCarouselItem>`)
+      .join('\n')
+
+    /** Six slides 300px apart, the scroller resting on page `page`. */
+    const at = (container: Element, page: number) =>
+      layout(container, { step: 300, offset: page * 300, clientWidth: 300, scrollWidth: 1800 })
+
+    it('cuts the travel beyond one page and keeps it for a step', async () => {
+      const { container, model } = mount({ slides: SIX })
+      const scrollBy = vi.fn()
+      at(container, 0).scrollBy = scrollBy
+
+      await fireEvent.click(indicatorsOf(container)[5] as HTMLElement)
+      await nextTick()
+      expect(scrollBy).toHaveBeenCalledWith({ left: 1500, top: 0, behavior: 'instant' })
+
+      scrollBy.mockClear()
+      at(container, 5)
+      model.value = 4
+      await nextTick()
+      await nextTick()
+      // One page back: the travel IS the transition, so no `behavior` and CSS governs.
+      expect(scrollBy).toHaveBeenCalledWith({ left: -300, top: 0 })
+    })
+
+    /*
+     * The parity is the restart mechanism, not decoration: a CSS animation restarts on a
+     * change of `animation-name` and on nothing else, so two jumps in a row must not leave
+     * the same value on the attribute — the second would play nothing.
+     */
+    it('alternates the one-shot phase and signs its direction', async () => {
+      const { container } = mount({ slides: SIX })
+      at(container, 0).scrollBy = vi.fn()
+      const root = container.querySelector('.v-carousel') as HTMLElement
+      expect(root.hasAttribute('data-jump')).toBe(false)
+
+      await fireEvent.click(indicatorsOf(container)[5] as HTMLElement)
+      await nextTick()
+      const first = root.getAttribute('data-jump')
+      expect(first).toBeTruthy()
+      expect(root.style.getPropertyValue('--carousel-jump-dir')).toBe('1')
+
+      at(container, 5)
+      await fireEvent.click(indicatorsOf(container)[0] as HTMLElement)
+      await nextTick()
+      expect(root.getAttribute('data-jump')).not.toBe(first)
+      // Backwards, so a `slide` one-shot enters from the side the track rewinds towards.
+      expect(root.style.getPropertyValue('--carousel-jump-dir')).toBe('-1')
+    })
+
+    // A wrap is a jump like any other, and the widest move the component ever makes.
+    it('cuts a loop wrap, whatever asked for it', async () => {
+      const { container } = mount({ slides: SIX, attrs: 'loop', initial: 5 })
+      const scrollBy = vi.fn()
+      at(container, 5).scrollBy = scrollBy
+      const next = container.querySelectorAll<HTMLButtonElement>('.v-carousel-control')[1]
+
+      await fireEvent.click(next as HTMLElement)
+      await nextTick()
+      expect(scrollBy).toHaveBeenCalledWith({ left: -1500, top: 0, behavior: 'instant' })
+    })
+
+    // The step the arrows make outside a wrap is the one move that keeps its travel.
+    it('leaves a control step alone', async () => {
+      const { container } = mount({ slides: SIX, initial: 2 })
+      const scrollBy = vi.fn()
+      at(container, 2).scrollBy = scrollBy
+      const next = container.querySelectorAll<HTMLButtonElement>('.v-carousel-control')[1]
+
+      await fireEvent.click(next as HTMLElement)
+      await nextTick()
+      expect(scrollBy).toHaveBeenCalledWith({ left: 300, top: 0 })
+    })
+
+    /*
+     * `noJump` is a single term in the same condition, so it covers every route at once —
+     * and it must take the ONE-SHOT with it, which is what the absent attribute locks: an
+     * arrival animation played over a travel still in flight would hold a slide at its own
+     * value while the scroller was several pages from where the animation says it is.
+     */
+    it('`noJump` gives every route its travel back, the wrap included', async () => {
+      const { container } = mount({ slides: SIX, attrs: 'no-jump loop', initial: 5 })
+      const scrollBy = vi.fn()
+      at(container, 5).scrollBy = scrollBy
+      const root = container.querySelector('.v-carousel') as HTMLElement
+
+      await fireEvent.click(indicatorsOf(container)[0] as HTMLElement)
+      await nextTick()
+      expect(scrollBy).toHaveBeenCalledWith({ left: -1500, top: 0 })
+      expect(root.hasAttribute('data-jump')).toBe(false)
+
+      // And the wrap, which has the widest delta of all: `previous` on the first page.
+      scrollBy.mockClear()
+      at(container, 0)
+      await fireEvent.click(container.querySelector('.v-carousel-control') as HTMLElement)
+      await nextTick()
+      expect(scrollBy).toHaveBeenCalledWith({ left: 1500, top: 0 })
+      expect(root.hasAttribute('data-jump')).toBe(false)
+    })
 
     /*
      * The touch-drag saccade. The read-back writes the model on every frame of a drag, and
@@ -288,6 +406,28 @@ describe('VCarousel', () => {
         '5 of 6',
       ])
       expect(model.value).toBe(4)
+    })
+
+    /*
+     * A scroller's scrollable overflow takes in the TRANSFORMED boxes of its descendants,
+     * and only towards the END edge, so anything animating a translate inside a slide
+     * inflates `scrollWidth` for as long as it runs — the jump one-shot in its `slide` form
+     * being the case that reported it. A measurement taken in that window minted a page, and
+     * nothing re-measures once an animation is over, so the phantom dot stayed for good. The
+     * count comes from the slide rects, which are never transformed.
+     */
+    it('ignores an inflated scrollWidth, which a running animation produces', async () => {
+      const { container } = mount({ attrs: ':items-per-view="3"', slides: six })
+      const port = layout(container, { step: 300, offset: 0, clientWidth: 900, scrollWidth: 1800 })
+      await fireEvent(port, new Event('scrollend'))
+      await nextTick()
+      expect(indicatorsOf(container)).toHaveLength(4)
+
+      // A tenth of a slide, which is what the `slide` one-shot translates by.
+      Object.defineProperty(port, 'scrollWidth', { value: 1830, configurable: true })
+      await fireEvent(port, new Event('scrollend'))
+      await nextTick()
+      expect(indicatorsOf(container)).toHaveLength(4)
     })
 
     it('replaces the prop fallback where an active floor makes it over-count', async () => {

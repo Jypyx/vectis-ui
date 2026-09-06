@@ -637,6 +637,72 @@ export const Pages: Story = {
       'aria-current',
       'true',
     )
+
+    /*
+     * And the count survives a JUMP, which is the one thing that can move it without the
+     * canvas resizing: the one-shot translates a box inside a slide, a scroller's scrollable
+     * overflow takes in the transformed boxes of its descendants towards the END edge, and a
+     * measurement landing in that window used to mint a fifth dot that never went away. It
+     * has to be FORWARD — start-edge overflow is not scrollable, so a backward jump inflates
+     * nothing — hence the return to the first page before the one being measured.
+     */
+    await userEvent.click(canvas.getByRole('button', { name: '1 of 6' }))
+    await waitFor(async () => await expect(port.scrollLeft).toBeLessThan(2))
+    await userEvent.click(canvas.getByRole('button', { name: '4 of 6' }))
+    await new Promise((resolve) => setTimeout(resolve, 600))
+    await expect(canvasElement.querySelectorAll('.v-carousel-indicator')).toHaveLength(4)
+  },
+}
+
+/**
+ * A dot five pages away cuts the travel rather than sending the four slides in between
+ * across the view. The effect plays ONCE instead, on arrival, in whichever form the
+ * carousel is set to — the dissolve here. Stepping a single page keeps its scroll, which
+ * is what makes the two gestures read differently. `noJump` turns it off for every route
+ * at once, and the whole track scrolls past again.
+ */
+export const Jump: Story = {
+  args: { effect: 'fade', indicators: 'outside' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const root = canvasElement.querySelector('.v-carousel') as HTMLElement
+    const port = canvasElement.querySelector('.v-carousel-viewport') as HTMLElement
+    const effect = canvasElement.querySelector('.v-carousel-effect') as HTMLElement
+    const left = (index: number) =>
+      (
+        canvasElement.querySelector(`[data-carousel-index="${index}"]`) as HTMLElement
+      ).getBoundingClientRect().left
+    const step = left(1) - left(0)
+    const twoFrames = () =>
+      new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+
+    await expect(root).not.toHaveAttribute('data-jump')
+
+    await userEvent.click(canvas.getByRole('button', { name: '6 of 6' }))
+    await twoFrames()
+    /*
+     * Two frames against five slides of track: a smooth scroll is nowhere near done by
+     * then, so this is the assertion that goes red the moment `instant` is dropped.
+     */
+    await expect(Math.abs(port.scrollLeft - 5 * step)).toBeLessThan(2)
+
+    /*
+     * The two animations in ONE list, which is the wiring jsdom cannot see: the
+     * scroll-keyed effect first and the one-shot second, so the jump wins while it runs
+     * and hands back to the effect on the value it holds at rest.
+     */
+    const phase = root.getAttribute('data-jump')
+    await expect(phase).toBeTruthy()
+    await expect(getComputedStyle(effect).animationName).toBe(
+      `v-carousel-fade, v-carousel-jump-${phase}`,
+    )
+
+    // A step keeps its travel, so it arms no one-shot and leaves the phase where it was.
+    await userEvent.click(canvas.getByRole('button', { name: '5 of 6' }))
+    await waitFor(async () => {
+      await expect(Math.abs(port.scrollLeft - 4 * step)).toBeLessThan(2)
+    })
+    await expect(root).toHaveAttribute('data-jump', phase as string)
   },
 }
 
@@ -683,10 +749,10 @@ export const ResponsivePages: Story = {
 
 /**
  * `loop` takes the ends off: past the last position the carousel returns to the first, and
- * before the first it goes to the last. Nothing is cloned to do it — the track really
- * scrolls back, which over six slides is a rewind the reader watches. Going round is what
- * the buttons, the arrow keys and autoplay do; the dots and the Home and End keys name a
- * position and still go straight to it.
+ * before the first it goes to the last. Nothing is cloned to do it — the track really goes
+ * back, and being a move of several pages it lands at once with the effect played on
+ * arrival. Going round is what the buttons, the arrow keys and autoplay do; the dots and
+ * the Home and End keys name a position and still go straight to it.
  */
 export const Loop: Story = {
   args: { loop: true, indicators: 'outside' },
@@ -705,10 +771,9 @@ export const Loop: Story = {
      */
     await userEvent.click(previous)
     /*
-     * The dot follows the MODEL and so turns over at once, where the scroller has five
-     * viewports to travel — hence a generous window, and hence the flush test living in
-     * here rather than after a fixed wait: a bare sample taken while the rewind was still
-     * running read 112px short of the end.
+     * The wrap is a jump, so the scroller is at the end of the track within a frame and
+     * the dot turns over with it. The window stays generous all the same: what it covers
+     * is the model → DOM → read-back round trip, not a travel.
      */
     await waitFor(
       async () => {
@@ -722,10 +787,9 @@ export const Loop: Story = {
     )
 
     /*
-     * The rewind is the longest scroll the component ever performs, hence the longest
-     * window for a mid-flight reading to be handed to the model behind it — the `Peek`
-     * story's second sample, for the same reason, and meaningful only once the travel
-     * above has landed.
+     * The wrap crosses the whole track, so the observer is handed the most readings of any
+     * move the component makes, and a stale one landing behind it would show here — the
+     * `Peek` story's second sample, and meaningful only once the move above has settled.
      */
     await new Promise((resolve) => setTimeout(resolve, 600))
     await expect(canvas.getByRole('button', { name: '6 of 6' })).toHaveAttribute(
@@ -745,6 +809,25 @@ export const Loop: Story = {
       },
       { timeout: 5000 },
     )
+
+    /*
+     * The wrap INTERRUPTING a step, which is the case that needs the jump's deferred
+     * correction: a delta measured while a smooth scroll is in flight lags the position it
+     * lands on, and `instant` freezes that error in rather than re-snapping. Without the
+     * correction the first slide rests short of its edge with a strip of the second
+     * showing — up to a tenth of a slide, in proportion to the speed the scroller had
+     * reached, hence the deliberate wait in the middle of the animation rather than at
+     * either end of it.
+     */
+    await userEvent.click(canvas.getByRole('button', { name: '5 of 6' }))
+    await waitFor(async () => await expect(port.scrollLeft).toBeGreaterThan(0), { timeout: 5000 })
+    await new Promise((resolve) => setTimeout(resolve, 700))
+    const next = canvas.getByRole('button', { name: 'Next slide' })
+    await userEvent.click(next)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    await userEvent.click(next)
+    await new Promise((resolve) => setTimeout(resolve, 900))
+    await expect(port.scrollLeft).toBeLessThan(2)
   },
 }
 
