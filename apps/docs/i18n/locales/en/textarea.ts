@@ -2,6 +2,41 @@ export default {
   title: 'Textarea',
   lead: 'A multi-line text field, with the same chrome as VInput: label above, hint below, icons inside, a counter and a clear button. It can grow as the text is typed.',
 
+  examples: {
+    labelAndHint: {
+      title: 'Label and hint',
+      text: 'The label is a real <code>&lt;label&gt;</code> tied to the field, so clicking the words puts the cursor in the box. The hint goes under the field and is tied to it as well, through <code>aria-describedby</code>, which is what has it read out after the label rather than left on the page as loose text. Both are props and not slots: what they hold is a sentence, and the field needs it as a string to point at.',
+    },
+    sizes: {
+      title: 'Sizes',
+      text: 'Three sizes, the same three every text field in the library offers. A size sets the padding, the type scale and the icons, never the height: that one comes from <code>rows</code>. <code>compact</code> takes 4px off the padding at any of the three, for a dense form, and leaves the number of lines and the type where they were.',
+    },
+    icons: {
+      title: 'Icons',
+      text: 'An icon at either end of the field, or at both. They are decorative here, so the field keeps the name its label gives it. They sit on the first line rather than in the middle of the box, which is what keeps them level with the start of the text in a field several lines tall. The <code>#start</code> and <code>#end</code> slots take their place when what belongs there is not an icon.',
+    },
+    clickableIcons: {
+      title: 'Clickable icons',
+      text: 'An icon becomes a real button as soon as a <code>@click:icon-start</code> or <code>@click:icon-end</code> listener is attached, and it then needs a label, which is the only thing naming that button. Forget it and the field says so in development. Each button is its own tab stop, before or after the text according to the side it sits on, and it stays outside the textarea, so typing is never interrupted by it.',
+    },
+    clearable: {
+      title: 'Clearable',
+      text: 'The cross shows when there is something to clear and the field can be edited, so it is absent while the field is empty, disabled or read only. Pressing it empties the value and hands focus straight back to the textarea: the cross goes with the text, and without that a keyboard user would be left standing on nothing. The <code>clear</code> event fires after the fact, the field already empty.',
+    },
+    counters: {
+      title: 'Counters',
+      text: 'The counter goes under the field, beside the hint, where several lines of text would run into it inside the box. Against <code>maxlength</code> it reads 12/80 and the browser refuses everything past the limit. <code>softLimit</code> turns that refusal into an error: the reader may type on, the counter goes red, and the field reports itself invalid through the native validity, so the form cannot be submitted over the limit. With no limit at all, the counter only counts.',
+    },
+    autoGrow: {
+      title: 'Auto grow',
+      text: '<code>rows</code> gives the field its starting height, and by default that is its height full stop: past it the text scrolls. <code>autoGrow</code> lets the box get taller as the text is typed. It is pure CSS, through <code>field-sizing</code>, so nothing is measured and no JavaScript runs; a browser without it keeps the fixed height and its scrollbar, which is a smaller field rather than a broken one.',
+    },
+    states: {
+      title: 'States',
+      text: 'Invalid, disabled, read only, loading. <code>invalid</code> is for a rule the browser cannot check by itself, a name already taken or anything only the server knows; native validity is handled without it. A disabled field greys out through the colour tokens rather than an opacity, so its text keeps its contrast. A read only one can still be focused and copied from, which is the whole difference, and it hides the clear cross. Loading puts a spinner where the end icon goes, and the field stays usable while it turns.',
+    },
+  },
+
   api: {
     VTextarea: {
       props: {

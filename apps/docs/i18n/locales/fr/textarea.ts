@@ -2,6 +2,41 @@ export default {
   title: 'Zone de texte',
   lead: "Un champ de texte multiligne, avec le même décor que VInput : libellé au-dessus, indication en dessous, icônes à l'intérieur, compteur et bouton d'effacement. Il peut grandir à mesure que le texte est saisi.",
 
+  examples: {
+    labelAndHint: {
+      title: 'Libellé et indication',
+      text: "Le libellé est un vrai <code>&lt;label&gt;</code> lié au champ, donc cliquer les mots place le curseur dans la boîte. L'indication se place sous le champ et lui est liée elle aussi, par <code>aria-describedby</code>, ce qui la fait lire après le libellé au lieu de la laisser traîner sur la page comme un texte isolé. Les deux sont des props et non des slots : ce qu'elles portent est une phrase, et le champ en a besoin sous forme de chaîne pour la désigner.",
+    },
+    sizes: {
+      title: 'Tailles',
+      text: "Trois tailles, les trois mêmes que propose chaque champ de texte de la bibliothèque. Une taille fixe le rembourrage, l'échelle typographique et les icônes, jamais la hauteur : celle-là vient de <code>rows</code>. <code>compact</code> retire 4px de rembourrage à n'importe laquelle des trois, pour un formulaire dense, et laisse le nombre de lignes et la typographie où ils étaient.",
+    },
+    icons: {
+      title: 'Icônes',
+      text: "Une icône à l'une ou l'autre extrémité du champ, ou aux deux. Elles sont décoratives ici, donc le champ garde le nom que lui donne son libellé. Elles se posent sur la première ligne plutôt qu'au milieu de la boîte, ce qui les garde au niveau du début du texte dans un champ de plusieurs lignes. Les slots <code>#start</code> et <code>#end</code> prennent leur place quand ce qui va là n'est pas une icône.",
+    },
+    clickableIcons: {
+      title: 'Icônes cliquables',
+      text: "Une icône devient un vrai bouton dès qu'un écouteur <code>@click:icon-start</code> ou <code>@click:icon-end</code> est attaché, et il lui faut alors un libellé, seule chose qui nomme ce bouton. Oubliez-le et le champ le signale en développement. Chaque bouton est son propre arrêt de tabulation, avant ou après le texte selon le côté où il se trouve, et il reste en dehors de la zone de texte, donc la saisie n'est jamais interrompue par lui.",
+    },
+    clearable: {
+      title: 'Effaçable',
+      text: "La croix apparaît quand il y a quelque chose à effacer et que le champ est modifiable, elle est donc absente tant que le champ est vide, désactivé ou en lecture seule. L'appuyer vide la valeur et rend aussitôt le focus à la zone de texte : la croix s'en va avec le texte, et sans cela un utilisateur au clavier resterait posé sur rien. L'événement <code>clear</code> est émis après coup, le champ déjà vide.",
+    },
+    counters: {
+      title: 'Compteurs',
+      text: "Le compteur se place sous le champ, à côté de l'indication, là où plusieurs lignes de texte lui rentreraient dedans à l'intérieur de la boîte. Face à <code>maxlength</code>, il affiche 12/80 et le navigateur refuse tout ce qui dépasse la limite. <code>softLimit</code> transforme ce refus en erreur : le lecteur peut continuer à écrire, le compteur passe au rouge, et le champ se déclare invalide par la validité native, si bien que le formulaire ne peut pas être envoyé au-delà de la limite. Sans aucune limite, le compteur ne fait que compter.",
+    },
+    autoGrow: {
+      title: 'Croissance automatique',
+      text: "<code>rows</code> donne au champ sa hauteur de départ, et par défaut c'est sa hauteur tout court : au-delà, le texte défile. <code>autoGrow</code> laisse la boîte grandir à mesure que le texte est saisi. C'est du CSS pur, par <code>field-sizing</code>, donc rien n'est mesuré et aucun JavaScript ne tourne ; un navigateur qui ne l'a pas garde la hauteur fixe et sa barre de défilement, ce qui donne un champ plus petit et non un champ cassé.",
+    },
+    states: {
+      title: 'États',
+      text: "Invalide, désactivé, lecture seule, chargement. <code>invalid</code> sert à une règle que le navigateur ne sait pas vérifier seul, un nom déjà pris ou tout ce que seul le serveur connaît ; la validité native est prise en charge sans lui. Un champ désactivé se grise par les tokens de couleur plutôt que par une opacité, donc son texte garde son contraste. Un champ en lecture seule peut encore être focalisé et copié, c'est toute la différence, et il masque la croix d'effacement. Le chargement pose un spinner là où va l'icône de fin, et le champ reste utilisable pendant qu'il tourne.",
+    },
+  },
+
   api: {
     VTextarea: {
       props: {
