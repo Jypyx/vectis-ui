@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420">
+  <defs>
+    <linearGradient id="csky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f8fc4"/>
+      <stop offset=".55" stop-color="#8ed0e6"/>
+      <stop offset="1" stop-color="#e6f6f4"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d6a86"/>
+      <stop offset=".45" stop-color="#189aa6"/>
+      <stop offset="1" stop-color="#5fc9bd"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0dcb2"/>
+      <stop offset="1" stop-color="#d9be8c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="420" fill="url(#csky)"/>
+  <circle cx="228" cy="76" r="38" fill="#fff6d6" opacity=".9"/>
+  <g fill="#ffffff" opacity=".7">
+    <ellipse cx="448" cy="70" rx="64" ry="17"/>
+    <ellipse cx="500" cy="60" rx="44" ry="21"/>
+    <ellipse cx="898" cy="98" rx="78" ry="15"/>
+    <ellipse cx="956" cy="88" rx="42" ry="19"/>
+  </g>
+  <path fill="#2c5f7a" opacity=".45" d="M0 178h318l-52-22-62 9-68-24-60 20-76-14z"/>
+  <rect y="178" width="1200" height="152" fill="url(#sea)"/>
+  <g fill="#eafcf8" opacity=".75">
+    <path d="M50 210c58-9 106 7 170 0s100-13 162-2 110 9 170 0 112-11 176 0 110 9 168 0 108-8 168 2v9c-64-10-112 0-170 8s-104-6-166-2-108 10-170 0-110-7-170 2-112 9-176-2-108-6-162 3z"/>
+    <path d="M0 256c82-13 146 9 236 2s140-15 222 0 140 13 222 0 142-11 228 4 152 5 260-8v13c-114 15-182 6-272-4s-146 6-224 2-134-15-214 0-140 13-228 2-134-8-230 6z"/>
+  </g>
+  <path fill="#ffffff" opacity=".9" d="M0 308c114 15 192-7 304-4s172 20 286 15 178-22 286-17c82 4 202 19 324 4v20H0z"/>
+  <path fill="url(#sand)" d="M0 324c116 17 196-4 306 0s172 22 286 17 178-22 286-17c82 4 202 20 322 6v90H0z"/>
+  <g fill="#c3a678" opacity=".6">
+    <ellipse cx="188" cy="392" rx="26" ry="6"/>
+    <ellipse cx="748" cy="372" rx="17" ry="5"/>
+    <ellipse cx="960" cy="398" rx="32" ry="7"/>
+  </g>
+</svg>

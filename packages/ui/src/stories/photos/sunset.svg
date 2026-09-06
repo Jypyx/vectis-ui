@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#241247"/>
+      <stop offset=".34" stop-color="#7b3268"/>
+      <stop offset=".58" stop-color="#d75f4e"/>
+      <stop offset=".78" stop-color="#f79a4d"/>
+      <stop offset="1" stop-color="#ffd08a"/>
+    </linearGradient>
+    <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dc8656"/>
+      <stop offset=".28" stop-color="#8e4a63"/>
+      <stop offset="1" stop-color="#2a1440"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="420" fill="url(#sky)"/>
+  <circle cx="780" cy="248" r="52" fill="#ffe6a6"/>
+  <circle cx="780" cy="248" r="80" fill="#ffd08a" opacity=".26"/>
+  <g fill="none" stroke="#43214f" stroke-width="3" stroke-linecap="round" opacity=".5">
+    <path d="M188 92c9-9 18-9 26 0M214 92c9-9 18-9 26 0"/>
+    <path d="M286 56c7-7 14-7 20 0M306 56c7-7 14-7 20 0"/>
+  </g>
+  <path fill="#5c3a6d" d="M0 300V244l140-58 108 44 140-70 124 52 138-40 126 54 126-42 128 46 170-32v106z"/>
+  <path fill="#3d2452" d="M0 300v-18l110-38 120 42 126-44 130 46 134-42 128 44 136-40 126 38 120-34 70 18v6z"/>
+  <rect y="300" width="1200" height="120" fill="url(#lake)"/>
+  <g fill="#ffd9a0">
+    <rect x="742" y="308" width="76" height="7" rx="3.5" opacity=".45"/>
+    <rect x="752" y="325" width="56" height="6" rx="3" opacity=".34"/>
+    <rect x="732" y="342" width="96" height="6" rx="3" opacity=".26"/>
+    <rect x="756" y="361" width="48" height="5" rx="2.5" opacity=".2"/>
+    <rect x="722" y="380" width="116" height="5" rx="2.5" opacity=".14"/>
+  </g>
+  <rect y="396" width="1200" height="24" fill="#2a1440" opacity=".55"/>
+</svg>

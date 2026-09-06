@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420">
+  <defs>
+    <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e4efec"/>
+      <stop offset=".5" stop-color="#bcd2cd"/>
+      <stop offset="1" stop-color="#93aca6"/>
+    </linearGradient>
+    <linearGradient id="fog" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eef5f3" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#eef5f3" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#eef5f3" stop-opacity="0"/>
+    </linearGradient>
+    <g id="pine">
+      <path d="M0-96 26-36H-26zM0-60 34 6H-34zM0-24 42 56H-42z"/>
+      <rect x="-4" y="50" width="8" height="20"/>
+    </g>
+  </defs>
+  <rect width="1200" height="420" fill="url(#haze)"/>
+  <circle cx="936" cy="92" r="48" fill="#f6fbf9" opacity=".65"/>
+  <g fill="#82a09a" opacity=".6">
+    <use href="#pine" transform="translate(54,206) scale(.5)"/>
+    <use href="#pine" transform="translate(136,200) scale(.5)"/>
+    <use href="#pine" transform="translate(218,208) scale(.5)"/>
+    <use href="#pine" transform="translate(300,198) scale(.5)"/>
+    <use href="#pine" transform="translate(382,208) scale(.5)"/>
+    <use href="#pine" transform="translate(464,200) scale(.5)"/>
+    <use href="#pine" transform="translate(546,208) scale(.5)"/>
+    <use href="#pine" transform="translate(628,198) scale(.5)"/>
+    <use href="#pine" transform="translate(710,208) scale(.5)"/>
+    <use href="#pine" transform="translate(792,200) scale(.5)"/>
+    <use href="#pine" transform="translate(874,208) scale(.5)"/>
+    <use href="#pine" transform="translate(956,198) scale(.5)"/>
+    <use href="#pine" transform="translate(1038,208) scale(.5)"/>
+    <use href="#pine" transform="translate(1120,200) scale(.5)"/>
+  </g>
+  <rect y="188" width="1200" height="104" fill="url(#fog)"/>
+  <g fill="#4e7166">
+    <use href="#pine" transform="translate(20,254) scale(.95)"/>
+    <use href="#pine" transform="translate(136,262) scale(.95)"/>
+    <use href="#pine" transform="translate(252,252) scale(.95)"/>
+    <use href="#pine" transform="translate(368,264) scale(.95)"/>
+    <use href="#pine" transform="translate(484,252) scale(.95)"/>
+    <use href="#pine" transform="translate(600,262) scale(.95)"/>
+    <use href="#pine" transform="translate(716,252) scale(.95)"/>
+    <use href="#pine" transform="translate(832,264) scale(.95)"/>
+    <use href="#pine" transform="translate(948,252) scale(.95)"/>
+    <use href="#pine" transform="translate(1064,262) scale(.95)"/>
+    <use href="#pine" transform="translate(1180,254) scale(.95)"/>
+  </g>
+  <rect y="272" width="1200" height="96" fill="url(#fog)" opacity=".65"/>
+  <g fill="#22382f">
+    <use href="#pine" transform="translate(-16,311) scale(1.7)"/>
+    <use href="#pine" transform="translate(186,320) scale(1.7)"/>
+    <use href="#pine" transform="translate(392,308) scale(1.7)"/>
+    <use href="#pine" transform="translate(598,320) scale(1.7)"/>
+    <use href="#pine" transform="translate(804,308) scale(1.7)"/>
+    <use href="#pine" transform="translate(1012,320) scale(1.7)"/>
+    <use href="#pine" transform="translate(1214,311) scale(1.7)"/>
+  </g>
+  <path fill="#2b463b" d="M0 358c186-16 332 12 506 8s274-22 442-16c104 4 186 14 252 12v58H0z"/>
+  <path fill="#17251f" d="M0 388c184-12 330 12 504 8s274-18 442-12c104 4 188 10 254 8v28H0z"/>
+</svg>

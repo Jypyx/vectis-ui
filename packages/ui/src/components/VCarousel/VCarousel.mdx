@@ -113,6 +113,11 @@ Where scroll-driven animations are unavailable, nothing is declared and the caro
 
 <Canvas of={VCarouselStories.Effects} />
 
+The effects act on the whole slide, so a flat colour shows almost nothing of them. Over a
+picture, `fade` dissolves one scene into the next and `scale` pushes the neighbours back.
+
+<Canvas of={VCarouselStories.WithImages} />
+
 Two invariants worth knowing before touching the sheet: the animation is carried by an inner box
 and never by the slide itself, because a scroll-snap area is the element's _transformed_ border
 box — animating the slide would make its snap position depend on the scroll position, and the

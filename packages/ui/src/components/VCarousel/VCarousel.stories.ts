@@ -2,6 +2,12 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { computed, ref } from 'vue'
 
+import photoAurora from '../../stories/photos/aurora.svg'
+import photoCity from '../../stories/photos/city.svg'
+import photoCoast from '../../stories/photos/coast.svg'
+import photoDunes from '../../stories/photos/dunes.svg'
+import photoForest from '../../stories/photos/forest.svg'
+import photoSunset from '../../stories/photos/sunset.svg'
 import { storyText } from '../../stories/storyText'
 import VTypography from '../VTypography/VTypography.vue'
 import VCarousel from './VCarousel.vue'
@@ -16,6 +22,15 @@ const t = storyText({
     peekHint: 'One product and a slice of the next — the shopping-list template.',
     fluidHint: 'Narrow the window: the slides stop shrinking and the track scrolls further.',
     currentSlide: 'Current slide',
+    imagesHint: 'A flat colour hides what the effects do to a picture that carries detail.',
+    photoAlts: [
+      'The sun setting behind a mountain range, reflected in a lake.',
+      'Rows of pine trees fading into fog.',
+      'Waves rolling onto a sandy beach under a clear sky.',
+      'Desert dunes at dusk.',
+      'A lit city skyline at night, seen across a river.',
+      'Northern lights over a mountain lake.',
+    ],
   },
   fr: {
     slide: 'Diapositive',
@@ -25,6 +40,16 @@ const t = storyText({
     peekHint: 'Un produit et un morceau du suivant — le gabarit liste de produits.',
     fluidHint: 'Réduisez la fenêtre : les slides cessent de rétrécir et la piste défile plus loin.',
     currentSlide: 'Diapositive courante',
+    imagesHint:
+      'Un aplat de couleur masque ce que les effets font à une image qui porte du détail.',
+    photoAlts: [
+      'Le soleil se couchant derrière une chaîne de montagnes, reflété dans un lac.',
+      'Des rangées de sapins qui se perdent dans la brume.',
+      'Des vagues déroulant sur une plage de sable sous un ciel dégagé.',
+      'Des dunes de sable au crépuscule.',
+      'Les tours éclairées d’une ville la nuit, vues depuis la rive opposée.',
+      'Une aurore boréale au-dessus d’un lac de montagne.',
+    ],
   },
 })
 
@@ -50,6 +75,24 @@ const SLIDE_BASE = `
  */
 const SLIDE_STYLE = `${SLIDE_BASE} block-size: 12rem;`
 const VERTICAL_SLIDE_STYLE = `${SLIDE_BASE} block-size: 100%;`
+
+/*
+ * Six drawn scenes rather than photographs from a CDN: a story must render offline,
+ * and Chromatic diffs and the axe runs both need the same pixels on every pass.
+ */
+const PHOTOS = [photoSunset, photoForest, photoCoast, photoDunes, photoCity, photoAurora]
+
+/**
+ * A slide is far wider than it is tall, so the pictures are drawn panoramic and
+ * `object-fit` crops them rather than stretching them as the width changes.
+ */
+const PHOTO_STYLE = `
+  display: block;
+  inline-size: 100%;
+  block-size: 14rem;
+  object-fit: cover;
+  border-radius: var(--vectis-radius-surface);
+`
 
 const meta = {
   title: 'Components/Carousel',
@@ -267,6 +310,36 @@ export const Effects: Story = {
               <div :style="slideStyle + 'background: oklch(0.45 0.15 ' + hue + ');'">
                 {{ t.slide }} {{ i + 1 }}
               </div>
+            </VCarouselItem>
+          </VCarousel>
+        </div>
+      </div>
+    `,
+  }),
+}
+
+/**
+ * The same three effects over pictures, which is where `fade` and `scale` become
+ * legible: they work on the whole slide, so a flat colour shows nothing of what they
+ * do to its content.
+ */
+export const WithImages: Story = {
+  render: () => ({
+    components: { VCarousel, VCarouselItem, VTypography },
+    setup: () => ({
+      effects: ['slide', 'fade', 'scale'] as const,
+      photos: PHOTOS,
+      photoStyle: PHOTO_STYLE,
+      t,
+    }),
+    template: `
+      <div style="display: grid; gap: var(--vectis-space-6)">
+        <VTypography variant="body-sm" tone="muted">{{ t.imagesHint }}</VTypography>
+        <div v-for="effect in effects" :key="effect">
+          <VTypography variant="overline">{{ effect }}</VTypography>
+          <VCarousel :effect="effect" :label="'Photos ' + effect">
+            <VCarouselItem v-for="(photo, i) in photos" :key="photo">
+              <img :src="photo" :alt="t.photoAlts[i]" :style="photoStyle" />
             </VCarouselItem>
           </VCarousel>
         </div>
