@@ -2,6 +2,41 @@ export default {
   title: 'Date picker',
   lead: 'An inline calendar grid. Every date it holds is a plain local-time <code>YYYY-MM-DD</code> string and never a <code>Date</code>, so a value cannot shift a day across time zones.',
 
+  examples: {
+    range: {
+      title: 'Range',
+      text: 'The value becomes a start and an end. The first click sets one, the second sets the other, and between them the span under the pointer is previewed so the reader sees what they are about to take. Clicking a day before the start begins again from there rather than producing a period that runs backwards.',
+    },
+    multiple: {
+      title: 'Multiple dates',
+      text: 'The value becomes a list, and a day already in it comes back out when it is clicked again. The array is never mutated in place, so a watcher on the model fires as it should. Nothing bounds the count: a calendar with forty days selected is legible, and whether that is sensible is the form to decide.',
+    },
+    presets: {
+      title: 'Presets',
+      text: 'The <code>#footer</code> slot is a strip under the grid, for actions or for the dates a reader reaches for most often. It receives nothing, being simply a place to render into: the buttons below write the model like any other control would. The clock is read inside the handler and never at setup, the server having no way to know what day it is where the reader stands.',
+    },
+    disabledDates: {
+      title: 'Disabled dates',
+      text: 'Given a list, the named days cannot be chosen. Given a function, it is asked about one date at a time, which is what turns a rule such as "no weekends" into a line rather than an enumeration. Either way a closed day stays visible and struck through, and the keyboard still reaches it: a reader arrowing across the grid is never silently jumped over a day, and the calendar says why by drawing it rather than by hiding it.',
+    },
+    bounds: {
+      title: 'Minimum and maximum',
+      text: '<code>min</code> and <code>max</code> bound the navigation as well as the choice, so the arrows stop at the edge instead of wandering into months holding nothing that can be taken. Days outside the bounds are drawn like the closed ones, and the month and year views are bounded in the same way.',
+    },
+    events: {
+      title: 'Event dots',
+      text: 'Up to three dots under a day, to say something is happening there. The colour is any CSS colour, so a token keeps it in step with both themes, and a dot given none takes the accent. Give each one a <code>label</code>: assistive technology reads that, the dot itself carrying nothing anyone can hear.',
+    },
+    adjacentDays: {
+      title: 'Adjacent days',
+      text: 'A month rarely starts on the first column, so the corners of the grid are empty by default. <code>showAdjacentDays</code> fills them with the neighbouring months, greyed and inert, which is what keeps the weeks reading as whole weeks. <code>selectAdjacentDays</code> makes them choosable as well, and picking one moves the calendar to its month, so it implies showing them.',
+    },
+    localization: {
+      title: 'Localization',
+      text: 'The tag decides the month and day names and the day the weeks start on, all of it derived from <code>Intl</code> rather than tabulated here. <code>locale</code> takes precedence over the global one and falls back to it when left out, so a single calendar can differ from the rest of the page. <code>firstDayOfWeek</code> overrides the day the locale would have chosen, for a domain that starts its weeks somewhere else.',
+    },
+  },
+
   api: {
     VDatePicker: {
       props: {
