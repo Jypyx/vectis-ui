@@ -55,4 +55,6 @@ export default {
     builtWith:
       'Réalisé avec <a href="https://github.com/Jypyx/vectis-ui" target="_blank" rel="noreferrer">Vectis UI</a> et <a href="https://nuxt.com" target="_blank" rel="noreferrer">Nuxt</a>',
   },
+
+  ogImageAlt: 'Le logo et le nom Vectis UI sur un fond violet sombre.',
 }

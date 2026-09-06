@@ -89,4 +89,11 @@ export default {
     builtWith:
       'Built with <a href="https://github.com/Jypyx/vectis-ui" target="_blank" rel="noreferrer">Vectis UI</a> and <a href="https://nuxt.com" target="_blank" rel="noreferrer">Nuxt</a>',
   },
+
+  /*
+   * The alternative text of the card image every page carries. It describes the PICTURE and
+   * does not repeat the page: a card shows the title and the description beside the image,
+   * and both of those are already translated.
+   */
+  ogImageAlt: 'The Vectis UI logo and name on a dark violet background.',
 }
