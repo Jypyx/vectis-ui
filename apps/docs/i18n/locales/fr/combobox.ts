@@ -2,6 +2,53 @@ export default {
   title: 'Liste déroulante',
   lead: "Un champ qui cherche dans une liste et retient ce qui est choisi, une valeur ou plusieurs. Les options peuvent être à plat, groupées ou séparées, et elles peuvent arriver d'un serveur à mesure que le lecteur saisit.",
 
+  examples: {
+    labelAndHint: {
+      title: 'Libellé et aide',
+      text: "Le champ est un <code>VInput</code>, donc <code>label</code> et <code>hint</code> lui parviennent sans être déclarés ici. Le panneau est ancré au champ lui-même et non au composant, qui porte aussi ces deux-là : il s'ouvre contre le champ et recouvre l'aide tant qu'il est ouvert, au lieu de commencer une aide plus bas. La saisie réduit la liste sur le libellé en ignorant les accents, si bien que reunion trouve Réunion sans que le lecteur ait à savoir où est passé le diacritique.",
+    },
+    sizes: {
+      title: 'Tailles',
+      text: "Trois hauteurs, 32, 40 et 48 pixels, chacune avec sa paire <code>compact</code> plus courte de 4px. Le panneau reprend la taille donnée au champ : les lignes, leurs icônes et leur rembourrage suivent sans rien d'autre à régler. Les puces d'un champ multiple se placent un cran en dessous du champ, et le champ force sa zone de saisie à leur hauteur, ce qui empêche la ligne de grandir au moment où elle prend le focus.",
+    },
+    states: {
+      title: 'États',
+      text: "Un champ désactivé est hors d'atteinte, et un champ invalide sert à une règle que le navigateur ne sait pas vérifier lui-même. <code>loading</code> sans aucune option le dit sur tout le panneau, et le chevron devient une roue ; avec des options déjà listées, elle passe au pied de la liste, puisque ce qui charge est alors la page suivante. Un panneau qui n'a rien à montrer affiche <code>emptyText</code> au lieu de s'ouvrir vide, et <code>clearable</code> ajoute une croix qui vide la sélection et la recherche d'un coup.",
+    },
+    placement: {
+      title: 'Placement',
+      text: "Où la liste s'ouvre par rapport au champ. Le panneau est ancré en CSS : cette valeur nomme donc une préférence et non une position, puisqu'un navigateur à court de place en dessous bascule déjà le panneau au-dessus de lui-même, et qu'elle décide seulement du côté essayé en premier. Seul l'axe de bloc est proposé, une liste s'ouvrant à côté d'un champ de texte laissant le lecteur chercher au mauvais endroit. Les deux alignements se voient ci-dessous parce que les options sont plus larges que les champs, le panneau étant au moins aussi large que ce à quoi il est ancré et libre de prendre davantage.",
+    },
+    groups: {
+      title: 'Groupes et séparateurs',
+      text: "Une entrée d'<code>options</code> est une option, un bloc nommé d'options ou un séparateur, et les trois se mélangent librement. Le filtrage garde cette structure honnête : un groupe dont aucune option ne survit disparaît avec son nom, et un séparateur laissé seul à une extrémité, ou contre un autre, est supprimé. La navigation au clavier reste plate malgré tout : les flèches parcourent les lignes dans l'ordre où elles se lisent et ne s'arrêtent jamais sur un intitulé.",
+    },
+    multiple: {
+      title: 'Sélection multiple',
+      text: "La valeur devient une liste et chaque option choisie apparaît en puce dans le champ, retirable une par une. Hors focus, la zone de recherche se replie pour ne laisser que les puces, sans bande vide à côté, et elle revient dès que le champ reprend le focus. Le tableau n'est jamais modifié sur place, donc un observateur posé sur le modèle se déclenche comme il doit.",
+    },
+    icons: {
+      title: 'Icônes des options',
+      text: "L'<code>icon</code> d'une option est dessinée dans l'emplacement que la ligne prévoit : elle est donc alignée et espacée comme celles de toutes les autres lignes, ce que ne serait pas une icône posée dans le slot d'option, dont le contenu est rendu à l'intérieur du libellé. Elle accepte les mêmes valeurs que toutes les props d'icône de la bibliothèque. Une ligne sans icône commence directement à son libellé au lieu de réserver une colonne vide.",
+    },
+    asynchronous: {
+      title: 'Recherche asynchrone',
+      text: "Désactivez <code>filter</code> et les options sont affichées exactement comme leur source les livre. <code>search</code> porte le terme, retardé par <code>searchDebounce</code> pendant la frappe et envoyé immédiatement à l'ouverture du panneau pour qu'une première page se charge. Le même terme n'est jamais émis deux fois de suite, donc rouvrir le panneau ne répète aucune requête. Les réponses peuvent tout de même arriver dans le désordre, et c'est à cela que sert le jeton ci-dessous : une réponse lente à une frappe ancienne ne doit pas écraser une réponse fraîche.",
+    },
+    infiniteScroll: {
+      title: 'Défilement infini',
+      text: "<code>hasMore</code> place une sentinelle au pied du panneau, et <code>load-more</code> se déclenche quand elle entre dans le champ de vision. La roue de la page suivante apparaît au même endroit, en laissant en place les options déjà chargées. Chaque page n'est demandée qu'une fois : la sentinelle ne peut pas revenir en vue tant que la page attendue n'a pas atterri et ne l'a pas repoussée vers le bas.",
+    },
+    customOption: {
+      title: 'Options personnalisées',
+      text: "Le slot <code>#option</code> remplace le libellé d'une ligne par un contenu à vous, une seconde ligne ou un badge, et reçoit l'option ainsi que l'information de savoir si la ligne est surlignée et si elle est déjà choisie. Il est rendu à l'intérieur du libellé, si bien que la ligne garde l'alignement, le rembourrage et la coche de sélection que le panneau lui donne. Pour une simple icône, le champ icon de l'option est la meilleure route.",
+    },
+    customChip: {
+      title: 'Puces personnalisées',
+      text: "Le slot <code>#chip</code> remplace la puce qui représente une valeur choisie. Trois des choses qu'il reçoit sont ce qui le rend utilisable : <code>remove</code>, sans quoi la valeur ne pourrait plus être retirée, et <code>size</code> et <code>compact</code>, le cran que le champ a calculé pour ses puces et que rien, hors du composant, ne peut deviner. L'option peut manquer, si cette valeur n'a jamais figuré parmi les options, d'où le chaînage optionnel sur l'icône ci-dessous.",
+    },
+  },
+
   api: {
     VCombobox: {
       props: {
