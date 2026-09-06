@@ -119,9 +119,9 @@ const visibleItems = computed(() =>
       <template v-for="(item, index) in visibleItems" :key="item.href">
         <li v-if="truncated && index === 1" class="v-breadcrumb-item v-breadcrumb-ellipsis">
           <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separator)" />
-          <VMenu compact>
+          <VMenu>
             <template #trigger="{ triggerProps }">
-              <VIconButton size="sm" compact :label="resolvedEllipsisLabel" v-bind="triggerProps">
+              <VIconButton size="sm" :label="resolvedEllipsisLabel" v-bind="triggerProps">
                 <VIcon :name="moreHorizIcon" />
               </VIconButton>
             </template>
