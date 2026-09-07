@@ -431,6 +431,14 @@ export const LoadingAndInvalid: Story = {
   play: async ({ canvasElement }) => {
     const [loading, invalid] = [...canvasElement.querySelectorAll('.v-file-picker')]
     await expect(loading!.querySelector('.v-spinner')).not.toBeNull()
+    // The icon's wrapper is floored at the icon's size, so the zone is exactly as tall
+    // while loading as at rest even though the spinner is drawn smaller — the picker
+    // beside it is that same picture with its icon, and their heights must agree.
+    // jsdom lays nothing out, so this can only be asserted here; verified red at 16px,
+    // the 40px box against the 24px spinner, without the floor.
+    await expect(
+      Math.abs(loading!.getBoundingClientRect().height - invalid!.getBoundingClientRect().height),
+    ).toBeLessThan(1)
     // Loading changes nothing else: the browse button is still there to be pressed.
     await expect(
       loading!.querySelector('.v-file-picker-zone button, button.v-file-picker-zone'),

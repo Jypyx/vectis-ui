@@ -739,7 +739,18 @@ defineExpose({
   .v-file-picker-icon {
     --vectis-icon-size: var(--vectis-control-size-file-picker-icon);
 
+    /* The wrapper is floored at the icon's own size, whatever it holds. The spinner
+       standing in for the icon while loading is drawn smaller than it, and without
+       that floor the zone would lose the difference in height the moment loading
+       starts — the box has to be the icon's even when its content is not. A floor and
+       not a fixed size, so a taller icon of your own still grows it rather than
+       spilling out of it; the centring is what keeps a smaller content in the middle
+       of the box instead of at its start. */
+    min-inline-size: var(--vectis-control-size-file-picker-icon);
+    min-block-size: var(--vectis-control-size-file-picker-icon);
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
     color: var(--file-picker-text-muted);
   }
 
