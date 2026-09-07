@@ -23,7 +23,17 @@ const invalid = ref<string | null>('2026-06-10')
       hint="Greyed through the colour tokens, and the panel can no longer be opened"
     />
 
-    <VDateInput model-value="2026-06-10" disabled mode="readonly" label="Disabled, read-only" />
+    <VDateInput model-value="2026-06-10" disabled mode="picker" label="Disabled, picker only" />
+
+    <!-- Frozen rather than out of reach: it still takes the focus and can be copied from. -->
+    <VDateInput
+      model-value="2026-06-10"
+      readonly
+      show-picker
+      clearable
+      label="Read-only"
+      hint="No typing, no calendar, no clear cross"
+    />
   </div>
 </template>
 

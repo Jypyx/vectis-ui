@@ -28,7 +28,7 @@ const written = ref<string | null>('2026-06-10')
     <VDateInput
       v-model="written"
       locale="fr-FR"
-      mode="readonly"
+      mode="picker"
       :display-format="{ dateStyle: 'full' }"
       label="fr-FR, written out in full"
       hint="displayFormat is an Intl option bag, and it only applies where nothing is typed"

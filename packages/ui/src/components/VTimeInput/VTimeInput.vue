@@ -4,7 +4,8 @@
  * A field for choosing a time. Three forms, and only two of them are built here.
  *
  * `input` types hours and minutes behind a mask, optionally with a clock beside it, and
- * `readonly` makes that clock the only way in. Both use the VDateInput shell
+ * `picker` makes that clock the only way in. What the field is FOR is a different question
+ * from the `readonly` prop, which freezes whatever it holds by every route at once. Both use the VDateInput shell
  * (`useFieldPanel`): the panel is opened imperatively, so the focus can be moved into it,
  * and closes on `focusout` or Escape. The CLOCK works on a draft only OK writes — Cancel,
  * Escape and focusout all discard it — because dragging a hand passes over dozens of times
@@ -64,9 +65,9 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 import { useMaskedField } from '../../composables/useMaskedField'
 import { useLocale, useMessages } from '../../i18n/state'
 
-export type TimeInputMode = 'readonly' | 'input' | 'list'
+export type TimeInputMode = 'picker' | 'input' | 'list'
 
-const MODES: TimeInputMode[] = ['readonly', 'input', 'list']
+const MODES: TimeInputMode[] = ['picker', 'input', 'list']
 
 type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
 
@@ -77,8 +78,8 @@ interface TimeInputProps {
    */
   format?: TimePickerFormat
   /**
-   * Which form the field takes: one that can be TYPED into, a read-only one where the
-   * picker is the only way in — so the picker is forced on there — or a searchable LIST of
+   * Which form the field takes: one that can be TYPED into, a `picker` one where the
+   * clock is the only way in — so the picker is forced on there — or a searchable LIST of
    * times at a fixed interval, where a picker would make no sense.
    */
   mode?: TimeInputMode
@@ -88,7 +89,7 @@ interface TimeInputProps {
    *
    * It is left undefined by default rather than set to off, which is what distinguishes
    * "not given" from an explicit refusal — and therefore what allows warning only the
-   * consumer who really asked to remove the picker from a read-only field, where it is the
+   * consumer who really asked to remove the clock from a `picker` field, where it is the
    * only way in.
    */
   showPicker?: boolean
@@ -132,10 +133,43 @@ interface TimeInputProps {
   compact?: boolean
   /** Makes the field unusable, greyed out through the colour tokens. */
   disabled?: boolean
+  /**
+   * Shows the time without letting it be changed: nothing can be typed, there is no
+   * clock and no clear cross. The field stays focusable and can be copied from, which
+   * is what separates it from `disabled`, and it is a different question from `mode`,
+   * which says how a field that CAN be changed is filled in.
+   */
+  readonly?: boolean
   /** Marks the field as invalid — for a rule of your own. */
   invalid?: boolean
+  /**
+   * An icon inside the field, at the start. It is decorative by default and becomes a
+   * real button as soon as a `@click:icon-start` listener is attached, in which case it
+   * needs `iconStartLabel`.
+   */
+  iconStart?: IconSource
+  /** What the start icon does, in words, once it is clickable. */
+  iconStartLabel?: string
+  /**
+   * What the end icon does, in words. It names the button that opens the clock, and
+   * falls back to the design system dictionary.
+   */
+  iconEndLabel?: string
+  /**
+   * Shows a spinner at the end of the field, in place of the clock icon. It says that
+   * something is being loaded and changes nothing else: the field can still be typed
+   * into and the panel still opens.
+   */
+  loading?: boolean
+  /**
+   * What screen readers announce while the spinner turns. It falls back to the design
+   * system dictionary.
+   */
+  loadingLabel?: string
   /** Offers a cross that empties the value, shown before the end icon. */
   clearable?: boolean
+  /** What that cross does, in words. It falls back to the design system dictionary. */
+  clearLabel?: string
   /**
    * The icon that opens the PICKER, at the end of the field. It has no effect on the list
    * form, whose chevron follows the combobox convention. The clear cross appears to its
@@ -166,8 +200,15 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
   size: 'md',
   compact: false,
   disabled: false,
+  readonly: false,
   invalid: false,
+  iconStart: undefined,
+  iconStartLabel: undefined,
+  iconEndLabel: undefined,
+  loading: false,
+  loadingLabel: undefined,
   clearable: false,
+  clearLabel: undefined,
   pickerIcon: () => scheduleIcon,
   placement: 'bottom-start',
 })
@@ -204,11 +245,13 @@ const isList = computed(() => resolvedMode.value === 'list')
 /**
  * Whether there is a picker — which here also means whether this component builds a panel
  * of its own at all, the list form handing that job to VCombobox. It is forced on a
- * read-only field, where nothing else could fill it, and offered beside a field one types
- * into.
+ * `picker` field, where nothing else could fill it, and offered beside a field one types
+ * into. A frozen field has none: there is nothing left for a panel to do.
  */
 const hasPicker = computed(
-  () => resolvedMode.value === 'readonly' || (typing.value && props.showPicker === true),
+  () =>
+    !props.readonly &&
+    (resolvedMode.value === 'picker' || (typing.value && props.showPicker === true)),
 )
 
 const vectisLocale = useLocale()
@@ -240,11 +283,11 @@ if (isDev) {
       console.warn(`[VTimeInput] minuteStep ${props.minuteStep} — a divisor of 60 is expected.`)
     if (props.mode !== undefined && !MODES.includes(props.mode))
       console.warn(
-        `[VTimeInput] unknown mode "${props.mode}": use "input" (the default), "readonly" or "list".`,
+        `[VTimeInput] unknown mode "${props.mode}": use "input" (the default), "picker" or "list".`,
       )
-    if (resolvedMode.value === 'readonly' && props.showPicker === false)
+    if (resolvedMode.value === 'picker' && !props.readonly && props.showPicker === false)
       console.warn(
-        '[VTimeInput] showPicker is forced to true in "readonly" mode: with no picker, a read-only field would be impossible to fill.',
+        '[VTimeInput] showPicker is forced to true in "picker" mode: with no clock, the field would be impossible to fill.',
       )
     if (isList.value && props.showPicker === true)
       console.warn(
@@ -309,11 +352,13 @@ function toggleMeridiem() {
 }
 
 /**
- * Whether the button is rendered at all. Only the typed form needs it: the read-only form
+ * Whether the button is rendered at all. Only the typed form needs it: the `picker` form
  * reaches the clock, which carries its own AM/PM, and the list already spells the half of
- * the day out on every row.
+ * the day out on every row. It writes the value, so a frozen field renders none.
  */
-const hasMeridiem = computed(() => typing.value && resolvedFormat.value === '12h')
+const hasMeridiem = computed(
+  () => typing.value && !props.readonly && resolvedFormat.value === '12h',
+)
 
 const hasValue = computed(() => !!modelParts.value)
 const displayText = computed(() =>
@@ -676,12 +721,15 @@ const listModel = computed<string | string[]>({
  * place — the convention every field in the design system follows.
  *
  * Whether the cross is shown has to be answered explicitly here: outside the typed mode
- * the field is read-only and would hide it, while the value comes from the panel.
+ * the field is read-only and would hide it, while the value comes from the panel. The
+ * `readonly` PROP is the one case where that default answer was right: frozen, the field
+ * offers no route to a new value, so it offers no route to none either.
  */
 const canClear = computed(
   () =>
     props.clearable &&
     !resolvedDisabled.value &&
+    !props.readonly &&
     (hasValue.value || (typing.value && !!maskDraft.value)),
 )
 const endIcon = computed<IconSource | undefined>(() =>
@@ -697,7 +745,8 @@ const endIcon = computed<IconSource | undefined>(() =>
  * conditional would produce a false warning every time a typed field without a picker is
  * mounted.
  */
-const endIconLabel = computed(() => m.value.timeInput.openPicker)
+const endIconLabel = computed(() => props.iconEndLabel ?? m.value.timeInput.openPicker)
+const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.timeInput.clear)
 
 function onEndIcon() {
   if (open.value) closeAndFocus()
@@ -732,8 +781,12 @@ function onEndIcon() {
       :size="resolvedSize"
       :compact="resolvedCompact"
       :disabled="resolvedDisabled"
+      :readonly="readonly"
       :invalid="invalid"
+      :icon-start="iconStart"
+      :icon-start-label="iconStartLabel"
       :clearable="clearable"
+      :clear-label="clearLabel"
       :placement="placement"
     />
 
@@ -747,7 +800,7 @@ function onEndIcon() {
         :inputmode="typing ? 'numeric' : undefined"
         :autocomplete="typing ? 'off' : undefined"
         v-bind="forwardedAttrs"
-        :readonly="!typing"
+        :readonly="!typing || readonly"
         :label="label"
         :hint="hint"
         :placeholder="placeholder ?? (typing ? m.timeInput.maskPlaceholder : undefined)"
@@ -757,7 +810,11 @@ function onEndIcon() {
         :invalid="invalid"
         :clearable="clearable"
         :clear-visible="canClear"
-        :clear-label="m.timeInput.clear"
+        :clear-label="resolvedClearLabel"
+        :icon-start="iconStart"
+        :icon-start-label="iconStartLabel"
+        :loading="loading"
+        :loading-label="loadingLabel"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
         :role="hasPicker ? 'combobox' : undefined"

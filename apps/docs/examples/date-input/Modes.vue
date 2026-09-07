@@ -24,7 +24,7 @@ const readOnly = ref<string | null>('2026-06-10')
 
     <VDateInput
       v-model="readOnly"
-      mode="readonly"
+      mode="picker"
       label="Read-only"
       hint="Nothing can be typed, so the calendar is the only way in"
     />

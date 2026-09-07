@@ -19,7 +19,7 @@ const events: DatePickerEvent[] = [
     <VDateInput
       v-model="date"
       :events="events"
-      mode="readonly"
+      mode="picker"
       label="Sprint date"
       hint="Open the calendar: June has four marked days"
     />

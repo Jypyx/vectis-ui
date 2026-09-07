@@ -29,7 +29,7 @@ root + `Escape`).
 
 As in the underlying VDatePicker: `single` (the default), `range` and `multiple` — the prop is called
 `selection` on both sides, `mode` being reserved for the field's display. Since a range or a list
-does not fit in a masked field, `range` and `multiple` **fall back to read-only** and therefore keep
+does not fit in a masked field, `range` and `multiple` **fall back to `picker`** and therefore keep
 their calendar. The field then displays the value formatted through `Intl` (a range through
 `formatRange`, several dates separated by commas).
 
@@ -59,12 +59,31 @@ components' scale: `sm` (32 px), `md` (40 px, the default) and `lg` (48 px), com
 The field takes `clearable` (the cross then appears to the left of the end icon as soon as a
 value is set, as in VInput, VTextarea and VCombobox) and supports `disabled`.
 
+`readonly` freezes the date whichever way it could have been changed: nothing can be typed, no
+calendar is rendered and the clear cross goes with it, along with the `aria-haspopup` /
+`aria-expanded` / `aria-controls` that announced a panel. One guard in `hasPanel` does all of it,
+since `useFieldPanel`'s single cut-off point already refuses to open what does not exist. Unlike
+`disabled`, the field keeps its contrast, takes the focus and can be copied from. It answers a
+different question from `mode`, which says how a field that **can** be changed is filled in.
+
+`loading` shows a spinner in place of the calendar icon while something is being fetched, and
+changes nothing else: the field is still typed into and the panel still opens.
+
+`iconStart` puts an icon at the start of the field, decorative until a `@click:icon-start`
+listener turns it into a button — which then needs `iconStartLabel`. `iconEndLabel`, `clearLabel`
+and `loadingLabel` rename the calendar button, the clear cross and the spinner when the
+dictionary's wording is not the right one.
+
 <Canvas of={VDateInputStories.Disabled} />
+
+<Canvas of={VDateInputStories.ReadOnly} />
+
+<Canvas of={VDateInputStories.FieldIcon} />
 
 ## Keyboard input (`mode`)
 
 `mode="input"` is the **default**: the field is editable, for those who are faster on the keyboard.
-`mode="readonly"` switches it back to read-only, where the date can only be chosen from the calendar
+`mode="picker"` hands the field over to the calendar, which then becomes the only way to choose
 — useful when any ambiguous input must be ruled out.
 
 The user types **digits only**: the component places the separators as they go, the way a native
@@ -72,11 +91,11 @@ The user types **digits only**: the component places the separators as they go, 
 (`Intl`), never hardcoded — and the placeholder takes the matching localized template.
 
 <Canvas of={VDateInputStories.InputLocales} />
-<Canvas of={VDateInputStories.ReadOnly} />
+<Canvas of={VDateInputStories.PickerOnly} />
 
 The display format of input mode is necessarily numeric: `displayFormat` therefore does not apply
 there ("10 June 2026" cannot be retyped), and supplying the prop raises a development warning. It
-concerns only `mode="readonly"` and the `range` / `multiple` selections, which fall back to it.
+concerns only `mode="picker"` and the `range` / `multiple` selections, which fall back to it.
 
 Input rules:
 
@@ -99,7 +118,7 @@ therefore renders neither a calendar icon, nor a panel, nor an opening shortcut.
 
 `showPicker` restores both: a clickable icon at the end of the field, and the panel opened on
 focus — without taking the focus, so typing continues in the field. The prop has **no effect in
-read-only mode**, where the calendar is the only way to choose a date.
+`picker` mode**, where the calendar is the only way to choose a date.
 
 `clearable` keeps its own semantics: the clear cross appears as soon as a date is set, calendar or
 no calendar.
@@ -116,7 +135,7 @@ once the date is chosen.
   `aria-expanded` and `aria-controls`; the panel is a named `role="dialog"`. The role travels with
   the three attributes because a plain text field does not support `aria-expanded`. An input field
   without `showPicker` keeps its native `textbox` role and announces no popup.
-- **Opening** happens on click, on `Enter` or on the `down arrow` from the field. In read-only mode
+- **Opening** happens on click, on `Enter` or on the `down arrow` from the field. In `picker` mode
   the focus moves into the calendar's grid straight away; in input mode with `showPicker` the
   panel opens **without taking the focus** (typing continues in the field) and the `down arrow`
   stays the explicit route to the grid.

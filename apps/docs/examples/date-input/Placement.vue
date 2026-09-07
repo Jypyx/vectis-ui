@@ -20,7 +20,7 @@ const dates = ref<Record<string, string | null>>({
       v-model="dates[placement]"
       :placement="placement"
       :label="placement"
-      mode="readonly"
+      mode="picker"
     />
   </div>
 </template>

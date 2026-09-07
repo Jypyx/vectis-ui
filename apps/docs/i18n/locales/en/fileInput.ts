@@ -5,7 +5,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label and hint',
-      text: 'The visible field is a read-only <code>VInput</code>, so <code>label</code> and <code>hint</code> behave as they do on any other field, and the label focuses it when clicked. <code>placeholder</code> is what it says while nothing has been chosen; left out, it falls back to the dictionary. The paperclip at the end opens the system dialog, and the field also accepts a file dropped anywhere on it.',
+      text: 'The visible field is a read-only <code>VInput</code>, so <code>label</code> and <code>hint</code> behave as they do on any other field, and the label focuses it when clicked. <code>placeholder</code> is what it says while nothing has been chosen; left out, it falls back to the dictionary. The paperclip at the end opens the system dialog, and the field also accepts a file dropped anywhere on it. <code>iconStart</code> puts an icon at the other end of the field, rendered before the chips rather than in their place, decorative until a <code>@click:icon-start</code> listener turns it into a button.',
     },
     sizes: {
       title: 'Sizes',
@@ -41,7 +41,7 @@ export default {
     },
     states: {
       title: 'States',
-      text: 'Invalid is for a rule of your own, nothing here being checked by the browser. Read-only keeps the selection on show and refuses every way of changing it, the dialog, the drop and the removal alike. Disabled greys the field through the colour tokens and takes it out of the tab order. <code>noDrop</code> is narrower than either: the dialog still opens, and only dropping is turned away.',
+      text: 'Invalid is for a rule of your own, nothing here being checked by the browser. Read-only keeps the selection on show and refuses every way of changing it, the dialog, the drop and the removal alike. Disabled greys the field through the colour tokens and takes it out of the tab order. <code>noDrop</code> is narrower than either: the dialog still opens, and only dropping is turned away. <code>loading</code> is narrower still, and purely visual: a spinner replaces the attach icon while an upload is under way, and everything else carries on. <code>iconEndLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename the attach button, the clear cross and the spinner when the dictionary wording is not the right one.',
     },
   },
 
@@ -72,8 +72,19 @@ export default {
         hint: 'A line of help under the field, to the left of the counter. It is tied to the field for assistive technology.',
         placeholder:
           'What the field says while nothing is chosen. It falls back to the design system dictionary.',
+        iconStart:
+          'An icon inside the field, at the start. It is rendered before the chips rather than in their place. Decorative until a <code>@click:icon-start</code> listener turns it into a button.',
+        iconStartLabel: 'What the start icon does, in words, once it is clickable.',
+        iconEndLabel:
+          'What the end icon does, in words. It names the button that opens the file dialog, and falls back to the design system dictionary.',
+        loading:
+          'Shows a spinner in place of the attach icon, while an upload is under way. It changes nothing else: files can still be dropped and the dialog still opens.',
+        loadingLabel:
+          'What screen readers announce while the spinner turns. It falls back to the design system dictionary.',
         clearable:
           'Offers a cross that empties the selection. Worth turning on here more than on an ordinary field: what a picker holds cannot be erased by typing, so the cross is the only way back out of a wrong choice.',
+        clearLabel:
+          'What that cross does, in words. It falls back to the design system dictionary.',
         vModel:
           'Always a list of files, whether or not several are allowed, never a file on its own. The shape does not depend on a prop, so you never have to narrow a union TypeScript cannot discriminate.',
       },

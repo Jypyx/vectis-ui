@@ -95,8 +95,19 @@ and the `size`/`compact` computed to fit inside the field (one step below it). `
 
 ## Sizes and states
 
+`loading` shows a spinner where the attach icon was, while an upload is under way. It is purely
+visual: files can still be dropped and the dialog still opens, `disabled` and `readonly` being the
+props that cut that off.
+
+`iconStart` puts an icon at the start of the field, rendered **before** the chips rather than in
+their place, so it survives a chip display. It is decorative until a `@click:icon-start` listener
+is attached, which turns it into a real button and makes `iconStartLabel` necessary.
+`iconEndLabel`, `clearLabel` and `loadingLabel` rename the attach button, the clear cross and the
+spinner when the dictionary's wording is not the right one.
+
 <Canvas of={VFileInputStories.Sizes} />
 <Canvas of={VFileInputStories.States} />
+<Canvas of={VFileInputStories.FieldIcon} />
 
 ## Forms
 

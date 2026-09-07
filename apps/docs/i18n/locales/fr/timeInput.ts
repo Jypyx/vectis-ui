@@ -1,11 +1,11 @@
 export default {
   title: "Champ d'heure",
-  lead: "Un champ d'heure sous l'une de trois formes : saisi avec un masque, en lecture seule avec une horloge, ou une liste d'heures à intervalle fixe. La valeur est toujours une chaîne <code>HH:mm</code> sur 24 heures.",
+  lead: "Un champ d'heure sous l'une de trois formes : saisi avec un masque, rempli depuis une horloge, ou une liste d'heures à intervalle fixe. La valeur est toujours une chaîne <code>HH:mm</code> sur 24 heures.",
 
   examples: {
     labelAndHint: {
       title: 'Libellé, indication et icône',
-      text: "Le champ est un <code>VInput</code> : <code>label</code> et <code>hint</code> s'y comportent exactement comme partout ailleurs. <code>pickerIcon</code> change le glyphe qui ouvre l'horloge, au bout du champ. Aucune icône n'est rendue quand il n'y a pas de panneau à ouvrir, ce qui est le cas par défaut d'un champ dans lequel on peut taper, et la forme liste ignore la prop : son chevron relève de la convention des listes déroulantes.",
+      text: "Le champ est un <code>VInput</code> : <code>label</code> et <code>hint</code> s'y comportent exactement comme partout ailleurs. <code>pickerIcon</code> change le glyphe qui ouvre l'horloge, au bout du champ. Aucune icône n'est rendue quand il n'y a pas de panneau à ouvrir, ce qui est le cas par défaut d'un champ dans lequel on peut taper, et la forme liste ignore la prop : son chevron relève de la convention des listes déroulantes. <code>iconStart</code> place une icône au début du champ, décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton, lequel réclame alors <code>iconStartLabel</code>. À l'autre bout, <code>loading</code> affiche une roue à la place de l'icône de l'horloge pendant qu'une donnée se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours. <code>iconEndLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment le bouton, la croix et la roue quand la formulation du dictionnaire ne convient pas.",
     },
     sizes: {
       title: 'Tailles',
@@ -13,7 +13,7 @@ export default {
     },
     modes: {
       title: 'Modes',
-      text: "Trois formes du même champ, et une quatrième configuration à l'intérieur de la première. <code>input</code>, le mode par défaut, masque le champ pour qu'on n'y tape que des chiffres et place le deux-points dès que l'heure est complète ; l'horloge devient alors optionnelle par <code>showPicker</code>, un panneau à chaque focus n'étant que du bruit dans un formulaire dense. <code>readonly</code> fait de l'horloge la seule voie d'entrée, elle y est donc forcée. <code>list</code> abandonne l'horloge au profit d'une liste d'heures que l'on cherche en tapant, laquelle est une liste déroulante jusqu'à son chevron et sa croix.",
+      text: "Trois formes du même champ, et une quatrième configuration à l'intérieur de la première. <code>input</code>, le mode par défaut, masque le champ pour qu'on n'y tape que des chiffres et place le deux-points dès que l'heure est complète ; l'horloge devient alors optionnelle par <code>showPicker</code>, un panneau à chaque focus n'étant que du bruit dans un formulaire dense. <code>picker</code> fait de l'horloge la seule voie d'entrée, elle y est donc forcée. <code>list</code> abandonne l'horloge au profit d'une liste d'heures que l'on cherche en tapant, laquelle est une liste déroulante jusqu'à son chevron et sa croix.",
     },
     steps: {
       title: 'Pas',
@@ -29,7 +29,7 @@ export default {
     },
     states: {
       title: 'États',
-      text: "Un champ invalide sert à une règle que le navigateur ne sait pas vérifier seul, le masque refusant déjà tout ce qui n'est pas une heure. Un champ désactivé grise par les tokens de couleur et ne peut plus ouvrir son panneau, ce qui tient en un seul garde plutôt qu'un par gestionnaire : le même point de coupure couvre le clic, le focus, la flèche et l'icône.",
+      text: "Un champ invalide sert à une règle que le navigateur ne sait pas vérifier seul, le masque refusant déjà tout ce qui n'est pas une heure. Un champ désactivé grise par les tokens de couleur et ne peut plus ouvrir son panneau, ce qui tient en un seul garde plutôt qu'un par gestionnaire : le même point de coupure couvre le clic, le focus, la flèche et l'icône. <code>readonly</code> se place entre les deux : la valeur est montrée mais gelée, donc rien ne se tape, il n'y a pas d'horloge, le bouton AM/PM disparaît puisqu'il écrit la valeur, et la croix de vidage part avec eux. La prop atteint aussi la forme liste, qui est une liste déroulante. Le champ garde son contraste normal, prend le focus et reste copiable, ce qui le distingue de <code>disabled</code>. Il répond à une autre question que <code>mode</code>, qui dit comment se remplit un champ que l'on peut changer.",
     },
     twelveHour: {
       title: 'Horloge de douze heures',
@@ -50,7 +50,7 @@ export default {
       props: {
         format:
           "Si les heures sont montrées sur une horloge de 12 ou de 24 heures. Omise, la langue du lecteur décide, ce qui est presque toujours ce que l'on veut.",
-        mode: "La forme que prend le champ : saisissable, en lecture seule où le sélecteur est la seule voie d'entrée et se trouve donc forcé, ou une LISTE d'heures à intervalle fixe, où un sélecteur n'aurait aucun sens.",
+        mode: "La forme que prend le champ : saisissable, en mode <code>picker</code> où l'horloge est la seule voie d'entrée et se trouve donc forcée, ou une LISTE d'heures à intervalle fixe, où une horloge n'aurait aucun sens. C'est une autre question que <code>readonly</code>, qui gèle le champ par toutes les voies à la fois.",
         showPicker:
           "Propose le sélecteur à côté d'un champ saisissable : une icône en fin de champ, et un panneau qu'elle ouvre. Elle est laissée indéfinie plutôt que mise à faux, ce qui distingue « non fournie » d'un refus explicite.",
         minuteStep:
@@ -69,8 +69,21 @@ export default {
         size: 'La hauteur du champ : 32, 40 ou 48 pixels.',
         compact: 'Retire 4px à la hauteur.',
         disabled: 'Rend le champ inutilisable, grisé par les tokens de couleur.',
+        readonly:
+          "Montre l'heure sans permettre de la changer : rien ne se tape, il n'y a ni horloge ni croix de vidage, et les attributs qui annonçaient un panneau disparaissent avec eux. Le champ garde le focus et reste copiable, ce qui le distingue de <code>disabled</code>.",
         invalid: 'Marque le champ comme invalide, pour une règle à vous.',
+        iconStart:
+          "Une icône dans le champ, au début. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
+        iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
+        iconEndLabel:
+          "Ce que fait l'icône de fin, en mots. Elle nomme le bouton qui ouvre l'horloge, et sa valeur par défaut vient du dictionnaire du design system.",
+        loading:
+          "Affiche une roue à la place de l'icône de l'horloge. Elle dit que quelque chose se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours.",
+        loadingLabel:
+          "Ce que les lecteurs d'écran annoncent pendant que la roue tourne. Sa valeur par défaut vient du dictionnaire du design system.",
         clearable: "Propose une croix qui vide la valeur, affichée avant l'icône de fin.",
+        clearLabel:
+          'Ce que fait cette croix, en mots. Sa valeur par défaut vient du dictionnaire du design system.',
         pickerIcon:
           "L'icône qui ouvre l'horloge, en fin de champ. Sans effet sur la forme liste, dont le chevron suit la convention de la liste déroulante. La croix d'effacement apparaît à sa gauche plutôt qu'à sa place.",
         placement: "Où le panneau s'ouvre par rapport au champ.",

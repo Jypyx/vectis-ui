@@ -22,7 +22,7 @@ const fromList = ref<string | null>('19:30')
     <VTimeInput
       v-model="onTheClock"
       format="12h"
-      mode="readonly"
+      mode="picker"
       label="Read-only"
       hint="Here the pair belongs to the clock, beside its two large numerals"
     />

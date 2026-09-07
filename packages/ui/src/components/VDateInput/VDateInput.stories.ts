@@ -20,6 +20,11 @@ const t = storyText({
     inThreeDays: 'In 3 days',
     juneOnly: 'From 5 to 24 June only',
     juneWeekdays: 'June 2026, weekdays only',
+    frozenDate: 'Delivery date',
+    frozenHint: 'Set when the order was placed.',
+    checkingDate: 'Checking availability',
+    searchByDate: 'Search by date',
+    switchToRange: 'Switch to a period',
   },
   fr: {
     date: 'Date',
@@ -31,6 +36,11 @@ const t = storyText({
     inThreeDays: 'Dans 3 jours',
     juneOnly: 'Du 5 au 24 juin uniquement',
     juneWeekdays: 'Juin 2026, jours ouvrés',
+    frozenDate: 'Date de livraison',
+    frozenHint: 'Fixée à la commande.',
+    checkingDate: 'Vérification des disponibilités',
+    searchByDate: 'Rechercher par date',
+    switchToRange: 'Passer à une période',
   },
 })
 
@@ -40,7 +50,7 @@ const meta = {
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     selection: { control: 'inline-radio', options: ['single', 'range', 'multiple'] },
-    mode: { control: 'inline-radio', options: ['readonly', 'input'] },
+    mode: { control: 'inline-radio', options: ['picker', 'input'] },
     showPicker: { control: 'boolean' },
   },
   // Neither `mode` nor `selection`: pinning them would make the Controls panel lie, as it
@@ -106,11 +116,11 @@ export const Default: Story = {
 }
 
 /**
- * `mode="readonly"`: the date can only be chosen from the calendar, which then becomes
+ * `mode="picker"`: the date can only be chosen from the calendar, which then becomes
  * the only route — `showPicker` is pointless there.
  */
-export const ReadOnly: Story = {
-  args: { mode: 'readonly' },
+export const PickerOnly: Story = {
+  args: { mode: 'picker' },
   render: (args) => ({
     components: { VDateInput },
     setup: () => ({ args, t, value: ref('2026-06-10') }),
@@ -172,7 +182,7 @@ export const Multiple: Story = {
 
 // A footer with presets that set the value and close the panel.
 export const WithPresets: Story = {
-  args: { mode: 'readonly' },
+  args: { mode: 'picker' },
   render: (args) => ({
     components: { VDateInput, VButton },
     setup: () => {
@@ -202,7 +212,7 @@ export const WithPresets: Story = {
 }
 
 export const MinMax: Story = {
-  args: { mode: 'readonly' },
+  args: { mode: 'picker' },
   render: (args) => ({
     components: { VDateInput },
     setup: () => ({ args, t, value: ref('2026-06-15') }),
@@ -216,7 +226,7 @@ export const MinMax: Story = {
 }
 
 export const Events: Story = {
-  args: { mode: 'readonly' },
+  args: { mode: 'picker' },
   render: (args) => ({
     components: { VDateInput },
     setup: () => ({
@@ -263,6 +273,78 @@ export const Disabled: Story = {
 }
 
 /**
+ * `readonly` freezes the date whichever way it could have been changed: nothing can be
+ * typed, no calendar is rendered and the clear cross goes with it. The attributes
+ * announcing a panel go too, an `aria-controls` pointing at nothing being worse than
+ * none at all. Unlike `disabled` the field keeps its contrast, takes the focus and can
+ * be copied from.
+ *
+ * It is a different question from `mode`, which says how a field that CAN be changed is
+ * filled in.
+ */
+export const ReadOnly: Story = {
+  args: { readonly: true, clearable: true, showPicker: true },
+  render: (args) => ({
+    components: { VDateInput },
+    setup: () => ({ args, t, value: ref('2026-06-10') }),
+    template: `
+      <div style="width: 280px">
+        <VDateInput v-bind="args" v-model="value" :label="t.frozenDate" :hint="t.frozenHint" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = canvas.getByLabelText('Delivery date')
+
+    field.focus()
+    await expect(field).toHaveFocus()
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(canvas.queryByRole('dialog')).toBeNull()
+
+    // The calendar button and the clear cross are the only buttons this field renders.
+    await expect(canvas.queryAllByRole('button')).toHaveLength(0)
+  },
+}
+
+/**
+ * The two ends of the field. `iconStart` puts an icon at the start, decorative until a
+ * `@click:icon-start` listener turns it into a button, which then needs
+ * `iconStartLabel`. At the other end `loading` shows a spinner in place of the calendar
+ * icon while something is being fetched, and changes nothing else: the field is still
+ * typed into and the panel still opens.
+ *
+ * `iconEndLabel` and `clearLabel` rename the calendar button and the clear cross when
+ * the dictionary's wording is not the right one.
+ */
+export const FieldIcon: Story = {
+  render: (args) => ({
+    components: { VDateInput },
+    setup: () => ({ args, t, value: ref('2026-06-10') }),
+    template: `
+      <div style="width: 280px; display:grid; gap:16px">
+        <VDateInput
+          v-bind="args"
+          v-model="value"
+          icon-start="search"
+          :label="t.searchByDate"
+          show-picker
+          clearable
+          icon-end-label="Open the calendar"
+          clear-label="Empty the date"
+        />
+        <VDateInput v-bind="args" v-model="value" loading :label="t.checkingDate" show-picker />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    // The start icon sits ahead of the input, the spinner takes the calendar's place.
+    await expect(canvasElement.querySelector('.v-input-field > .v-icon')).toBeInTheDocument()
+    await expect(canvasElement.querySelectorAll('.v-spinner')).toHaveLength(1)
+  },
+}
+
+/**
  * Clicking an empty area of the panel (its padding, the gutter between cells) must close
  * NOTHING: without `useFieldPanel`'s neutralized `mousedown`, the browser would hand the
  * focus back to `<body>` and the root's `focusout` would close a panel that was just
@@ -271,7 +353,7 @@ export const Disabled: Story = {
  * Invisible in jsdom, which does not simulate focus on click — hence this play function.
  */
 export const ClickInTheVoid: Story = {
-  args: { mode: 'readonly' },
+  args: { mode: 'picker' },
   render: (args) => ({
     components: { VDateInput },
     setup: () => ({ args, t, value: ref('2026-06-10') }),

@@ -321,6 +321,38 @@ describe('VFileInput', () => {
 })
 
 // Drag & drop
+describe('VFileInput — the field props', () => {
+  it('iconStart is rendered beside the chips, not in their place', () => {
+    const { container } = renderPicker({
+      multiple: true,
+      display: 'chip',
+      modelValue: [fileOf('a.pdf'), fileOf('b.pdf')],
+      iconStart: 'search',
+    })
+    expect(container.querySelector('.v-input-field > .v-icon')).not.toBeNull()
+    expect(container.querySelectorAll('.v-chip')).toHaveLength(2)
+  })
+
+  it('loading: a spinner takes the attach icon place, dropping still works', () => {
+    const { container, queryByRole } = renderPicker({ loading: true })
+    expect(container.querySelector('.v-spinner')).not.toBeNull()
+    // Purely visual: the attach button goes with the icon, but nothing else is cut off.
+    expect(queryByRole('button', { name: 'Choose files' })).toBeNull()
+    expect(container.querySelector('.v-file-input')?.hasAttribute('data-disabled')).toBe(false)
+  })
+
+  it('iconEndLabel and clearLabel override the dictionary', () => {
+    const { getByRole } = renderPicker({
+      modelValue: [fileOf('a.pdf')],
+      clearable: true,
+      iconEndLabel: 'Add an attachment',
+      clearLabel: 'Remove every attachment',
+    })
+    expect(getByRole('button', { name: 'Add an attachment' })).toBeTruthy()
+    expect(getByRole('button', { name: 'Remove every attachment' })).toBeTruthy()
+  })
+})
+
 describe('VFileInput drag & drop', () => {
   const root = (container: Element) => container.querySelector('.v-file-input')!
 

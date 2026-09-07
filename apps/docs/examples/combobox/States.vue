@@ -32,6 +32,16 @@ const countries = [
 
     <VCombobox :options="countries" model-value="fr" disabled label="Disabled" />
 
+    <!-- Frozen rather than out of reach: it still takes the focus and can be copied from. -->
+    <VCombobox
+      :options="countries"
+      model-value="fr"
+      readonly
+      clearable
+      label="Read-only"
+      hint="Set by your subscription"
+    />
+
     <VCombobox :options="[]" loading label="Loading" placeholder="Fetching the list" />
 
     <!-- No option and nothing loading: the panel says so rather than opening empty. -->

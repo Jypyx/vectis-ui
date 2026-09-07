@@ -8,8 +8,9 @@
  * INTO the grid so the keyboard lands on the dates. Closing is ours too: `focusout`, or Escape.
  *
  * Two FIELD modes, `mode`: `input` (the default) types digits only, the separators appearing
- * as they go in the order and punctuation of the reader's locale; `readonly` makes the
- * calendar the only way in.
+ * as they go in the order and punctuation of the reader's locale; `picker` makes the calendar
+ * the only way in. What the field is FOR is a different question from the `readonly` prop,
+ * which freezes whatever it holds by every route at once.
  *
  * That is a different question from WHAT is chosen — one date, a range, or several — which is
  * `selection`, passed straight through to the picker.
@@ -57,9 +58,9 @@ import { useLocale, useMessages } from '../../i18n/state'
 type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
 
 /** Whether the field can be typed into, or only filled from the calendar. */
-export type DateInputMode = 'readonly' | 'input'
+export type DateInputMode = 'picker' | 'input'
 
-const MODES: DateInputMode[] = ['readonly', 'input']
+const MODES: DateInputMode[] = ['picker', 'input']
 
 /**
  * The century a two-digit year is expanded into — "10/06/26" becomes 2026 — applied only
@@ -105,16 +106,16 @@ interface DateInputProps {
   // From here on: the field.
   /**
    * Whether the field can be TYPED into — the default, using the numeric form of the
-   * reader's language — or is read-only, the calendar then being the only way in.
+   * reader's language — or is filled from the calendar alone, which is `picker`.
    *
    * Typing is reserved for choosing a SINGLE date: a period or a list falls back to
-   * read-only, there being no sensible way to type either.
+   * `picker`, there being no sensible way to type either.
    */
   mode?: DateInputMode
   /**
    * Offers the date picker alongside a field that can be typed into: an icon at the end of
-   * the field, and a panel that opens on focus. It means nothing in read-only mode, where
-   * the picker is already the only way to choose.
+   * the field, and a panel that opens on focus. It means nothing in `picker` mode, where
+   * the calendar is already the only way to choose.
    */
   showPicker?: boolean
   /** The label above the field. */
@@ -129,10 +130,43 @@ interface DateInputProps {
   compact?: boolean
   /** Makes the field unusable, greyed out through the colour tokens. */
   disabled?: boolean
+  /**
+   * Shows the date without letting it be changed: nothing can be typed, there is no
+   * calendar and no clear cross. The field stays focusable and can be copied from,
+   * which is what separates it from `disabled`, and it is a different question from
+   * `mode`, which says how a field that CAN be changed is filled in.
+   */
+  readonly?: boolean
   /** Marks the field as invalid — for a rule of your own. */
   invalid?: boolean
+  /**
+   * An icon inside the field, at the start. It is decorative by default and becomes a
+   * real button as soon as a `@click:icon-start` listener is attached, in which case it
+   * needs `iconStartLabel`.
+   */
+  iconStart?: IconSource
+  /** What the start icon does, in words, once it is clickable. */
+  iconStartLabel?: string
+  /**
+   * What the end icon does, in words. It names the button that opens the calendar, and
+   * falls back to the design system dictionary.
+   */
+  iconEndLabel?: string
+  /**
+   * Shows a spinner at the end of the field, in place of the calendar icon. It says
+   * that something is being loaded and changes nothing else: the field can still be
+   * typed into and the panel still opens.
+   */
+  loading?: boolean
+  /**
+   * What screen readers announce while the spinner turns. It falls back to the design
+   * system dictionary.
+   */
+  loadingLabel?: string
   /** Offers a cross that empties the value, shown before the end icon. */
   clearable?: boolean
+  /** What that cross does, in words. It falls back to the design system dictionary. */
+  clearLabel?: string
   /**
    * The icon that opens the date picker, at the end of the field. The clear cross appears
    * to its left rather than in its place, and no icon is rendered at all when there is no
@@ -142,7 +176,7 @@ interface DateInputProps {
   /**
    * How the date is WRITTEN OUT in the field. It has no effect on a field being typed
    * into, which necessarily shows the numeric form one types — so it concerns the
-   * read-only mode, and the period and list selections, which fall back to it.
+   * `picker` mode, and the period and list selections, which fall back to it.
    */
   displayFormat?: Intl.DateTimeFormatOptions
   /** Where the panel opens relative to the field. */
@@ -171,8 +205,15 @@ const props = withDefaults(defineProps<DateInputProps>(), {
   size: 'md',
   compact: false,
   disabled: false,
+  readonly: false,
   invalid: false,
+  iconStart: undefined,
+  iconStartLabel: undefined,
+  iconEndLabel: undefined,
+  loading: false,
+  loadingLabel: undefined,
   clearable: false,
+  clearLabel: undefined,
   pickerIcon: () => calendarTodayIcon,
   // Left undefined rather than defaulted to the format object, for the same reason: it is
   // what lets the component notice that a consumer has asked for a display format in a
@@ -234,22 +275,23 @@ const requestedMode = computed<DateInputMode>(() =>
  * has no form one could type into a single field.
  */
 const resolvedMode = computed<DateInputMode>(() =>
-  requestedMode.value === 'input' && props.selection === 'single' ? 'input' : 'readonly',
+  requestedMode.value === 'input' && props.selection === 'single' ? 'input' : 'picker',
 )
 const typing = computed(() => resolvedMode.value === 'input')
 
 /**
  * Whether there is a panel at all. The calendar is only optional beside a field one can
- * type into: read-only, it is the only way to choose anything.
+ * type into: in `picker` mode it is the only way to choose anything, and a frozen field
+ * has none at all.
  */
-const hasPanel = computed(() => !typing.value || props.showPicker)
+const hasPanel = computed(() => !props.readonly && (!typing.value || props.showPicker))
 
 // @devwarn
 if (isDev) {
   watchEffect(() => {
     if (props.mode !== undefined && !MODES.includes(props.mode))
       console.warn(
-        `[VDateInput] unknown mode "${props.mode}": use "input" (the default) or "readonly".`,
+        `[VDateInput] unknown mode "${props.mode}": use "input" (the default) or "picker".`,
       )
     // Tested on the PROP and not on what was resolved from it: typing being the default,
     // a period or a list falls back on its own with nobody having asked for anything.
@@ -263,7 +305,7 @@ if (isDev) {
     // something the consumer can act on.
     if (props.displayFormat && typing.value)
       console.warn(
-        '[VDateInput] displayFormat is ignored in "input" mode (the default): the field displays the locale\'s numeric mask, the only typeable format. Pass mode="readonly" for a formatted display.',
+        '[VDateInput] displayFormat is ignored in "input" mode (the default): the field displays the locale\'s numeric mask, the only typeable format. Pass mode="picker" for a formatted display.',
       )
   })
 }
@@ -538,12 +580,15 @@ function onRootKeydown(event: KeyboardEvent) {
  *
  * Whether it is shown has to be answered explicitly here: outside the typed mode the field
  * is read-only, and a read-only field hides its cross by default, rightly so — but here
- * the value comes from the panel, so there is something to clear all the same.
+ * the value comes from the panel, so there is something to clear all the same. The
+ * `readonly` PROP is the one case where the default answer was right: frozen, the field
+ * offers no route to a new value, so it offers no route to none either.
  */
 const canClear = computed(
   () =>
     props.clearable &&
     !resolvedDisabled.value &&
+    !props.readonly &&
     (hasValue.value || (typing.value && !!draft.value)),
 )
 const endIcon = computed<IconSource | undefined>(() =>
@@ -563,7 +608,8 @@ const endIcon = computed<IconSource | undefined>(() =>
  */
 const m = useMessages()
 
-const endIconLabel = computed(() => m.value.dateInput.open)
+const endIconLabel = computed(() => props.iconEndLabel ?? m.value.dateInput.open)
+const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.dateInput.clear)
 
 function onEndIcon() {
   if (open.value) closeAndFocus()
@@ -633,7 +679,7 @@ const close = () => closeAndFocus()
         :inputmode="typing ? 'numeric' : undefined"
         :autocomplete="typing ? 'off' : undefined"
         v-bind="forwardedAttrs"
-        :readonly="!typing"
+        :readonly="!typing || readonly"
         :label="label"
         :hint="hint"
         :placeholder="placeholder ?? (typing ? maskHint : undefined)"
@@ -643,7 +689,11 @@ const close = () => closeAndFocus()
         :invalid="invalid"
         :clearable="clearable"
         :clear-visible="canClear"
-        :clear-label="m.dateInput.clear"
+        :clear-label="resolvedClearLabel"
+        :icon-start="iconStart"
+        :icon-start-label="iconStartLabel"
+        :loading="loading"
+        :loading-label="loadingLabel"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
         :role="hasPanel ? 'combobox' : undefined"

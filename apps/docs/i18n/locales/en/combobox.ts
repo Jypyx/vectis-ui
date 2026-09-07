@@ -5,7 +5,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label and hint',
-      text: 'The field is a <code>VInput</code>, so <code>label</code> and <code>hint</code> reach it without being declared here. The panel is anchored to the field itself rather than to the component, which also holds those two: it opens against the field and covers the hint while it is open, instead of starting a hint lower down. Typing narrows the list on the label, ignoring accents, so reunion finds Réunion and the reader never has to know where the diacritic went.',
+      text: 'A <code>label</code> is rendered above the field and a <code>hint</code> below it, both tied to it so a screen reader reads them with it. The panel is anchored to the field itself rather than to the component, which also holds those two: it opens against the field and covers the hint while it is open, instead of starting a hint lower down. Typing narrows the list on the label, ignoring accents, so reunion finds Réunion and the reader never has to know where the diacritic went.',
     },
     sizes: {
       title: 'Sizes',
@@ -13,7 +13,7 @@ export default {
     },
     states: {
       title: 'States',
-      text: 'A disabled field cannot be reached at all, and an invalid one is for a rule the browser cannot check by itself. <code>loading</code> with no option yet says so across the whole panel, and the chevron becomes a spinner; with options already listed it moves to the foot of the list, since what is loading is then the next page. A panel with nothing to show says <code>emptyText</code> rather than opening empty, and <code>clearable</code> adds a cross that empties the selection and the search together.',
+      text: 'A disabled field cannot be reached at all, and an invalid one is for a rule the browser cannot check by itself. <code>readonly</code> sits between the two: the choice is shown but frozen, so nothing can be typed, the list never opens and the chips lose their crosses, while the field keeps its normal contrast, takes the focus and can be copied from. <code>loading</code> with no option yet says so across the whole panel, and the chevron becomes a spinner; with options already listed it moves to the foot of the list, since what is loading is then the next page. A panel with nothing to show says <code>emptyText</code> rather than opening empty, and <code>clearable</code> adds a cross that empties the selection and the search together.',
     },
     placement: {
       title: 'Placement',
@@ -26,6 +26,10 @@ export default {
     multiple: {
       title: 'Multiple selection',
       text: 'The value becomes a list and each chosen option shows as a chip inside the field, removable one at a time. Out of focus the search input folds away so the chips alone are left, with no empty strip beside them, and it comes back the moment the field is focused. The array is never mutated in place, so a watcher on the model fires as it should.',
+    },
+    fieldIcon: {
+      title: 'Field icon',
+      text: '<code>iconStart</code> puts an icon inside the field, at the start, and it is rendered before whatever else fills that zone. That is what lets it survive the chips of a multiple field instead of being replaced by them. It is decorative until a <code>@click:icon-start</code> listener is attached, which turns it into a real button and makes <code>iconStartLabel</code> necessary. The end of the field belongs to the component: the chevron, the spinner that takes its place while loading, and the clear cross to their left.',
     },
     icons: {
       title: 'Option icons',
@@ -56,12 +60,21 @@ export default {
           'What the list offers. An entry may be an option, a named block of options, or a separator; a plain list of options remains perfectly valid.',
         multiple:
           'Allows several values to be chosen, which makes the value a list and shows what has been chosen as chips inside the field.',
+        label: 'The label above the field, tied to it so that clicking it focuses the field.',
+        hint: 'A line of help under the field, read out along with the label.',
         size: 'The height of the field: 32, 40 or 48 pixels. The panel and its rows follow it.',
         compact: 'Takes 4px off the height, as everywhere else in the design system.',
         placeholder: 'What the field says while nothing is chosen and nothing has been typed.',
         disabled: 'Makes the field unusable, greyed out through the colour tokens.',
+        readonly:
+          'Shows what has been chosen without letting it be changed: nothing can be typed, the list never opens, the chips lose their crosses and no clear cross is offered. The field keeps the focus and can be copied from, which is what separates it from <code>disabled</code>.',
         invalid: 'Marks the field as invalid, for a rule of your own.',
+        iconStart:
+          'An icon inside the field, at the start. It is rendered before the chips rather than in their place. Decorative until a <code>@click:icon-start</code> listener turns it into a button.',
+        iconStartLabel: 'What the start icon does, in words, once it is clickable.',
         clearable: 'Offers a cross that empties both the selection and the search.',
+        clearLabel:
+          'What that cross does, in words. It falls back to the design system dictionary.',
         emptyText: 'What the panel says when the search matches nothing.',
         filter:
           'How the list is narrowed as one types. Turning it off means the options already arrive filtered by their source and are shown exactly as they come. A rule of your own receives the query as it was typed, merely trimmed, not the accent-insensitive form used internally.',

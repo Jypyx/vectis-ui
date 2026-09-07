@@ -5,7 +5,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Libellé et aide',
-      text: "Le champ est un <code>VInput</code>, donc <code>label</code> et <code>hint</code> lui parviennent sans être déclarés ici. Le panneau est ancré au champ lui-même et non au composant, qui porte aussi ces deux-là : il s'ouvre contre le champ et recouvre l'aide tant qu'il est ouvert, au lieu de commencer une aide plus bas. La saisie réduit la liste sur le libellé en ignorant les accents, si bien que reunion trouve Réunion sans que le lecteur ait à savoir où est passé le diacritique.",
+      text: "Un <code>label</code> est rendu au-dessus du champ et un <code>hint</code> en dessous, tous deux liés à lui pour qu'un lecteur d'écran les lise avec. Le panneau est ancré au champ lui-même et non au composant, qui porte aussi ces deux-là : il s'ouvre contre le champ et recouvre l'aide tant qu'il est ouvert, au lieu de commencer une aide plus bas. La saisie réduit la liste sur le libellé en ignorant les accents, si bien que reunion trouve Réunion sans que le lecteur ait à savoir où est passé le diacritique.",
     },
     sizes: {
       title: 'Tailles',
@@ -13,7 +13,7 @@ export default {
     },
     states: {
       title: 'États',
-      text: "Un champ désactivé est hors d'atteinte, et un champ invalide sert à une règle que le navigateur ne sait pas vérifier lui-même. <code>loading</code> sans aucune option le dit sur tout le panneau, et le chevron devient une roue ; avec des options déjà listées, elle passe au pied de la liste, puisque ce qui charge est alors la page suivante. Un panneau qui n'a rien à montrer affiche <code>emptyText</code> au lieu de s'ouvrir vide, et <code>clearable</code> ajoute une croix qui vide la sélection et la recherche d'un coup.",
+      text: "Un champ désactivé est hors d'atteinte, et un champ invalide sert à une règle que le navigateur ne sait pas vérifier lui-même. <code>readonly</code> se place entre les deux : le choix est montré mais gelé, donc rien ne se tape, la liste ne s'ouvre jamais et les puces perdent leur croix, tandis que le champ garde son contraste normal, prend le focus et reste copiable. <code>loading</code> sans aucune option le dit sur tout le panneau, et le chevron devient une roue ; avec des options déjà listées, elle passe au pied de la liste, puisque ce qui charge est alors la page suivante. Un panneau qui n'a rien à montrer affiche <code>emptyText</code> au lieu de s'ouvrir vide, et <code>clearable</code> ajoute une croix qui vide la sélection et la recherche d'un coup.",
     },
     placement: {
       title: 'Placement',
@@ -26,6 +26,10 @@ export default {
     multiple: {
       title: 'Sélection multiple',
       text: "La valeur devient une liste et chaque option choisie apparaît en puce dans le champ, retirable une par une. Hors focus, la zone de recherche se replie pour ne laisser que les puces, sans bande vide à côté, et elle revient dès que le champ reprend le focus. Le tableau n'est jamais modifié sur place, donc un observateur posé sur le modèle se déclenche comme il doit.",
+    },
+    fieldIcon: {
+      title: 'Icône du champ',
+      text: "<code>iconStart</code> place une icône dans le champ, au début, et elle est rendue avant tout ce qui remplit cette zone. C'est ce qui lui permet de survivre aux puces d'un champ multiple au lieu d'être remplacée par elles. Elle est décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> lui soit attaché, ce qui en fait un vrai bouton et rend <code>iconStartLabel</code> nécessaire. La fin du champ appartient au composant : le chevron, la roue qui prend sa place pendant un chargement, et la croix de vidage à leur gauche.",
     },
     icons: {
       title: 'Icônes des options',
@@ -56,12 +60,21 @@ export default {
           "Ce que la liste propose. Une entrée peut être une option, un bloc nommé d'options, ou un séparateur ; une simple liste d'options reste parfaitement valable.",
         multiple:
           'Permet de choisir plusieurs valeurs, ce qui fait de la valeur une liste et montre ce qui a été choisi en puces dans le champ.',
+        label: "Le libellé au-dessus du champ, lié à lui pour qu'un clic dessus y place le focus.",
+        hint: "Une ligne d'aide sous le champ, lue en même temps que le libellé.",
         size: 'La hauteur du champ : 32, 40 ou 48 pixels. Le panneau et ses lignes la suivent.',
         compact: 'Retire 4px à la hauteur, comme partout ailleurs dans le design system.',
         placeholder: "Ce que dit le champ tant que rien n'est choisi et que rien n'a été saisi.",
         disabled: 'Rend le champ inutilisable, grisé par les tokens de couleur.',
+        readonly:
+          "Montre ce qui a été choisi sans permettre de le changer : rien ne se tape, la liste ne s'ouvre jamais, les chips perdent leur croix et aucune croix de vidage n'est proposée. Le champ garde le focus et reste copiable, ce qui le distingue de <code>disabled</code>.",
         invalid: 'Marque le champ comme invalide, pour une règle à vous.',
+        iconStart:
+          "Une icône dans le champ, au début. Elle est rendue avant les chips et non à leur place. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
+        iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
         clearable: 'Propose une croix qui vide à la fois la sélection et la recherche.',
+        clearLabel:
+          'Ce que fait cette croix, en mots. Sa valeur par défaut vient du dictionnaire du design system.',
         emptyText: 'Ce que dit le panneau quand la recherche ne correspond à rien.',
         filter:
           'Comment la liste se resserre à la saisie. La couper signifie que les options arrivent déjà filtrées par leur source et sont montrées telles quelles. Une règle à vous reçoit la requête TELLE QUE SAISIE, simplement rognée, et non la forme insensible aux accents utilisée en interne.',

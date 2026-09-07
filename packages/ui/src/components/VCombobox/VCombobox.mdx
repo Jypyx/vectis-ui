@@ -172,12 +172,24 @@ The **`#chip`** slot replaces the VChip of a selected value. It receives:
 
 ## Label and hint
 
-The field is a `VInput`, so `label` and `hint` reach it through the attributes without being
-declared on VCombobox. The panel is anchored to the **field's own box** and not to the component's
-root, which also holds those two: it opens against the field, and covers the hint while it is open
-rather than starting a hint's height lower down.
+`label` is rendered above the field and `hint` below it, both tied to it for assistive technology.
+The panel is anchored to the **field's own box** and not to the component's root, which also holds
+those two: it opens against the field, and covers the hint while it is open rather than starting a
+hint's height lower down.
 
 <Canvas of={VComboboxStories.WithLabelAndHint} />
+
+## Field icon
+
+`iconStart` puts an icon inside the field, at the start. It is rendered **before** whatever else
+fills that zone, so in multiple mode it sits ahead of the Chips instead of being replaced by them.
+It is decorative until a `@click:icon-start` listener is attached, which turns it into a real
+button and makes `iconStartLabel` necessary.
+
+The end of the field belongs to the component: the chevron, the spinner that takes its place while
+loading, and the clear cross to their left. There is no `iconEnd` here for that reason.
+
+<Canvas of={VComboboxStories.FieldIcon} />
 
 ## Sizes
 
@@ -197,6 +209,13 @@ same icons (24 px) as the field — an option's label does not change size on it
 field (shades through tokens, with no opacity). `placeholder` and `empty-text` (the message when no
 option matches) are customizable.
 
+`readonly` shows a choice without letting it be changed: nothing can be typed, the list never
+opens, the Chips lose their crosses and no clear cross is offered — one guard in `openPanel`, which
+every route into the list goes through. The field keeps its normal contrast, takes the focus and can
+be copied from, which is what separates it from `disabled`.
+
+`clearLabel` names the clear cross when the dictionary's wording is not the right one.
+
 `placement` says where the panel opens relative to the field — `bottom-start` by default,
 and one of `top`/`bottom` optionally aligned to either edge. It is the escape hatch for a
 field near the foot of the page; the panel is anchored in CSS, so a browser that cannot fit
@@ -207,6 +226,8 @@ the panel where it was asked already falls back on its own.
 <Canvas of={VComboboxStories.NoResults} />
 
 <Canvas of={VComboboxStories.Disabled} />
+
+<Canvas of={VComboboxStories.ReadOnly} />
 
 ## Accessibility
 

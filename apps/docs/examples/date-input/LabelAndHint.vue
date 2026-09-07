@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { VDateInput } from 'vectis-ui'
-import { calendar_today as calendarToday, schedule } from 'vectis-ui/icons'
+import { calendar_today as calendarToday, schedule, search } from 'vectis-ui/icons'
 
 const start = ref<string | null>('2026-06-10')
 const deadline = ref<string | null>(null)
@@ -20,9 +20,18 @@ const deadline = ref<string | null>(null)
     <VDateInput
       v-model="deadline"
       label="Deadline"
-      hint="Read-only: the calendar is the only way in"
-      mode="readonly"
+      hint="The calendar is the only way in"
+      mode="picker"
       :picker-icon="schedule"
+    />
+
+    <!-- The start icon is rendered before whatever else fills that end of the field. -->
+    <VDateInput
+      v-model="start"
+      label="Filter by date"
+      hint="An icon at the start, a spinner at the end while something loads"
+      :icon-start="search"
+      loading
     />
   </div>
 </template>

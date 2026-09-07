@@ -5,7 +5,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label, hint and icon',
-      text: 'The field is a <code>VInput</code>, so <code>label</code> and <code>hint</code> behave exactly as they do everywhere else. <code>pickerIcon</code> changes the glyph that opens the calendar, at the end of the field. No icon is rendered at all when there is no panel to open, which is the default for a field that can be typed into.',
+      text: 'The field is a <code>VInput</code>, so <code>label</code> and <code>hint</code> behave exactly as they do everywhere else. <code>pickerIcon</code> changes the glyph that opens the calendar, at the end of the field. No icon is rendered at all when there is no panel to open, which is the default for a field that can be typed into. <code>iconStart</code> puts an icon at the start of the field, decorative until a <code>@click:icon-start</code> listener turns it into a button, which then needs <code>iconStartLabel</code>. At the other end, <code>loading</code> shows a spinner in place of the calendar icon while something is being fetched and changes nothing else: the field is still typed into and the panel still opens. <code>iconEndLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename the button, the cross and the spinner when the dictionary wording is not the right one.',
     },
     sizes: {
       title: 'Sizes',
@@ -13,7 +13,7 @@ export default {
     },
     modes: {
       title: 'Modes',
-      text: 'Two, and a third configuration between them. <code>input</code>, the default, masks the field so only digits are typed and the separators are placed as each part fills up; the calendar is then opt-in through <code>showPicker</code>, a panel on every focus being noise in a dense form. <code>readonly</code> makes the calendar the only way in. Typing is reserved for a single date: a period or a list falls back to read-only, there being no sensible way to type either.',
+      text: 'Two, and a third configuration between them. <code>input</code>, the default, masks the field so only digits are typed and the separators are placed as each part fills up; the calendar is then opt-in through <code>showPicker</code>, a panel on every focus being noise in a dense form. <code>picker</code> makes the calendar the only way in. Typing is reserved for a single date: a period or a list falls back to <code>picker</code>, there being no sensible way to type either.',
     },
     range: {
       title: 'Range',
@@ -49,11 +49,11 @@ export default {
     },
     states: {
       title: 'States',
-      text: 'An invalid field is for a rule the browser cannot check by itself, the mask already refusing anything that is not a date. A disabled one greys out through the colour tokens and can no longer open its panel, which is one guard rather than one per handler: the same cut-off point covers the click, the focus, the arrow key and the icon.',
+      text: 'An invalid field is for a rule the browser cannot check by itself, the mask already refusing anything that is not a date. A disabled one greys out through the colour tokens and can no longer open its panel, which is one guard rather than one per handler: the same cut-off point covers the click, the focus, the arrow key and the icon. <code>readonly</code> sits between the two: the value is shown but frozen, so nothing can be typed, no calendar is rendered and the clear cross goes with it, along with the attributes that announced a panel. The field keeps its normal contrast, takes the focus and can be copied from, which is what separates it from <code>disabled</code>. It answers a different question from <code>mode</code>, which says how a field that can be changed is filled in.',
     },
     localization: {
       title: 'Localization',
-      text: 'The tag decides the order the field is typed in, the separator it places, the month and day names and the first day of the week, all of it derived rather than tabulated. <code>locale</code> takes precedence over the global one and falls back to it when it is left out. <code>displayFormat</code> is a set of <code>Intl</code> options for writing the date out, and it applies where nothing is typed: the read-only mode, and the period and list selections that fall back to it.',
+      text: 'The tag decides the order the field is typed in, the separator it places, the month and day names and the first day of the week, all of it derived rather than tabulated. <code>locale</code> takes precedence over the global one and falls back to it when it is left out. <code>displayFormat</code> is a set of <code>Intl</code> options for writing the date out, and it applies where nothing is typed: <code>picker</code> mode, and the period and list selections that fall back to it.',
     },
     placement: {
       title: 'Placement',
@@ -76,21 +76,34 @@ export default {
           'Fills the corners of the grid with the greyed days of the neighbouring months.',
         selectAdjacentDays: 'Lets those neighbouring days be clicked, which implies showing them.',
         events: 'Events to mark under the days they fall on.',
-        mode: "Whether the field can be typed into, using the numeric form of the reader's language, or is read-only with the calendar as the only way in. Typing is reserved for choosing a single date: a period or a list falls back to read-only, there being no sensible way to type either.",
+        mode: "Whether the field can be typed into, using the numeric form of the reader's language, or is filled from the calendar alone, which is <code>picker</code>. Typing is reserved for choosing a single date: a period or a list falls back to <code>picker</code>, there being no sensible way to type either. It is a different question from <code>readonly</code>, which freezes the field by every route at once.",
         showPicker:
-          'Offers the date picker alongside a field that can be typed into: an icon at the end of the field, and a panel that opens on focus. It means nothing in read-only mode, where the picker is already the only way to choose.',
+          'Offers the date picker alongside a field that can be typed into: an icon at the end of the field, and a panel that opens on focus. It means nothing in <code>picker</code> mode, where the calendar is already the only way to choose.',
         label: 'The label above the field.',
         hint: 'A line of help under the field.',
         placeholder: 'What the field says while empty.',
         size: 'The height of the field: 32, 40 or 48 pixels.',
         compact: 'Takes 4px off the height.',
         disabled: 'Makes the field unusable, greyed out through the colour tokens.',
+        readonly:
+          'Shows the date without letting it be changed: nothing can be typed, there is no calendar and no clear cross, and the attributes announcing a panel go with it. The field keeps the focus and can be copied from, which is what separates it from <code>disabled</code>.',
         invalid: 'Marks the field as invalid, for a rule of your own.',
+        iconStart:
+          'An icon inside the field, at the start. Decorative until a <code>@click:icon-start</code> listener turns it into a button.',
+        iconStartLabel: 'What the start icon does, in words, once it is clickable.',
+        iconEndLabel:
+          'What the end icon does, in words. It names the button that opens the calendar, and falls back to the design system dictionary.',
+        loading:
+          'Shows a spinner in place of the calendar icon. It says that something is being loaded and changes nothing else: the field can still be typed into and the panel still opens.',
+        loadingLabel:
+          'What screen readers announce while the spinner turns. It falls back to the design system dictionary.',
         clearable: 'Offers a cross that empties the value, shown before the end icon.',
+        clearLabel:
+          'What that cross does, in words. It falls back to the design system dictionary.',
         pickerIcon:
           'The icon that opens the date picker, at the end of the field. The clear cross appears to its left rather than in its place, and no icon is rendered at all when there is no panel to open.',
         displayFormat:
-          'How the date is written out in the field. It has no effect on a field being typed into, which necessarily shows the numeric form one types, so it concerns the read-only mode and the period and list selections.',
+          'How the date is written out in the field. It has no effect on a field being typed into, which necessarily shows the numeric form one types, so it concerns <code>picker</code> mode and the period and list selections.',
         placement: 'Where the panel opens relative to the field.',
         vModel:
           'The date or dates chosen, in the shape <code>selection</code> calls for. While the reader types, it is only written once what they have entered is a complete and acceptable date; an unfinished or refused entry leaves it untouched and is reverted when they leave the field.',

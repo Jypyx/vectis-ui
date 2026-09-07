@@ -21,6 +21,8 @@ const t = storyText({
     selection: 'Selection reported to the parent',
     nothing: 'Nothing selected yet',
     refused: 'Refused',
+    uploading: 'Uploading',
+    searchFiles: 'Search the attachments',
     reasons: {
       type: 'wrong type',
       size: 'file too big',
@@ -40,6 +42,8 @@ const t = storyText({
     selection: 'Sélection remontée au parent',
     nothing: 'Aucun fichier pour le moment',
     refused: 'Refusé',
+    uploading: 'Envoi en cours',
+    searchFiles: 'Rechercher dans les pièces jointes',
     reasons: {
       type: 'mauvais type',
       size: 'fichier trop lourd',
@@ -357,6 +361,49 @@ export const States: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * The two ends of the field. `iconStart` puts an icon at the start, rendered BEFORE the
+ * chips rather than in their place, so it survives a chip display; it is decorative until
+ * a `@click:icon-start` listener turns it into a button, which then needs
+ * `iconStartLabel`. At the other end `loading` shows a spinner where the attach icon
+ * was, and changes nothing else: files can still be dropped and the dialog still opens.
+ *
+ * `iconEndLabel`, `clearLabel` and `loadingLabel` rename the attach button, the clear
+ * cross and the spinner when the dictionary's wording is not the right one.
+ */
+export const FieldIcon: Story = {
+  args: { multiple: true, display: 'chip' },
+  render: (args) => ({
+    components: { VFileInput },
+    setup: () => ({
+      args,
+      t,
+      picked: ref([new File(['x'], 'contract.pdf'), new File(['x'], 'annex.pdf')]),
+    }),
+    template: `
+      <div style="width: 340px; display: grid; gap: 16px">
+        <VFileInput
+          v-bind="args"
+          icon-start="search"
+          clearable
+          clear-visible
+          :label="t.searchFiles"
+          :model-value="picked"
+          icon-end-label="Add an attachment"
+          clear-label="Remove every attachment"
+        />
+        <VFileInput v-bind="args" loading :label="t.uploading" :model-value="picked" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    // The icon comes first, the chips after it, and the spinner takes the attach place.
+    const field = canvasElement.querySelector('.v-input-field')!
+    await expect(field.firstElementChild).toHaveClass('v-icon')
+    await expect(canvasElement.querySelectorAll('.v-spinner')).toHaveLength(1)
+  },
 }
 
 /**

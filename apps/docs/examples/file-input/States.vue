@@ -8,6 +8,7 @@ const invalid = ref(chosen())
 const readOnly = ref(chosen())
 const disabled = ref(chosen())
 const noDrop = ref<File[]>([])
+const uploading = ref(chosen())
 </script>
 
 <template>
@@ -34,6 +35,15 @@ const noDrop = ref<File[]>([])
       display="chip"
       label="Disabled"
       hint="Greyed through the colour tokens, and out of the tab order"
+    />
+
+    <!-- Purely visual: files can still be dropped and the dialog still opens. -->
+    <VFileInput
+      v-model="uploading"
+      loading
+      display="chip"
+      label="Uploading"
+      hint="A spinner where the paperclip was, and nothing else changes"
     />
 
     <VFileInput

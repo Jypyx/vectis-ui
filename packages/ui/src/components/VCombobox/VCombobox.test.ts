@@ -644,4 +644,66 @@ describe('VCombobox asynchronous', () => {
     await rerender({ options: [] })
     expect(container.querySelector('.v-test-chip')?.textContent).toBe('France/flag')
   })
+
+  it('label and hint: rendered by the field and linked to it', () => {
+    const { getByText, getByRole } = render(VCombobox, {
+      props: { options: OPTIONS, modelValue: '', label: 'Country', hint: 'Pick one' },
+    })
+    const input = getByRole('combobox')
+    expect(getByText('Country').getAttribute('for')).toBe(input.id)
+    expect(input.getAttribute('aria-describedby')).toBe(getByText('Pick one').id)
+  })
+
+  it('iconStart is rendered beside the chips, not in their place', () => {
+    const { container } = renderCombobox({
+      multiple: true,
+      modelValue: ['fr'],
+      iconStart: 'search',
+    })
+    expect(container.querySelector('.v-input-field > .v-icon')).not.toBeNull()
+    expect(container.querySelector('.v-chip')).not.toBeNull()
+  })
+
+  it('clearLabel names the cross, the dictionary otherwise', () => {
+    const { getByRole } = renderCombobox({
+      modelValue: 'fr',
+      clearable: true,
+      clearLabel: 'Empty the country',
+    })
+    expect(getByRole('button', { name: 'Empty the country' })).toBeTruthy()
+  })
+
+  it('readonly: the native attribute is set and the list never opens', async () => {
+    const { getByRole, container } = renderCombobox({ readonly: true })
+    const input = getByRole('combobox')
+    expect(input.hasAttribute('readonly')).toBe(true)
+
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
+    expect(input.getAttribute('aria-expanded')).toBe('false')
+    await fireEvent.click(container.querySelector('.v-combobox-control') as HTMLElement)
+    expect(input.getAttribute('aria-expanded')).toBe('false')
+  })
+
+  it('readonly: no clear cross, and the chips lose theirs', () => {
+    const { container, queryByRole } = renderCombobox({
+      multiple: true,
+      modelValue: ['fr', 'be'],
+      clearable: true,
+      readonly: true,
+    })
+    expect(container.querySelectorAll('.v-chip')).toHaveLength(2)
+    // The cross of the field and the crosses of the chips are the only buttons this
+    // field ever renders: frozen, it renders none.
+    expect(queryByRole('button')).toBeNull()
+  })
+
+  it('readonly: Backspace no longer takes the last chip back', async () => {
+    const { getByRole, emitted } = renderCombobox({
+      multiple: true,
+      modelValue: ['fr', 'be'],
+      readonly: true,
+    })
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'Backspace' })
+    expect(emitted('update:modelValue')).toBeUndefined()
+  })
 })

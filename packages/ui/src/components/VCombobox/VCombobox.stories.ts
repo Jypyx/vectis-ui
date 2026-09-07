@@ -95,6 +95,9 @@ const t = storyText({
     countryA: 'Country A',
     countryB: 'Country B',
     remove: (label: string) => `Remove ${label}`,
+    billingCountry: 'Billing country',
+    frozenHint: 'Set by your subscription.',
+    searchCountry: 'Search a country',
   },
   fr: {
     chooseCountry: 'Choisir un pays…',
@@ -122,6 +125,9 @@ const t = storyText({
     countryA: 'Pays A',
     countryB: 'Pays B',
     remove: (label: string) => `Retirer ${label}`,
+    billingCountry: 'Pays de facturation',
+    frozenHint: 'Défini par votre abonnement.',
+    searchCountry: 'Rechercher un pays',
   },
 })
 
@@ -187,10 +193,9 @@ export const Default: Story = {
 }
 
 /**
- * The field is a VInput, so it takes a `label` and a `hint` with neither declared here:
- * both reach it through the attributes. The panel is anchored to the field's own box and
- * not to the whole component, so it opens against the field and covers the hint rather
- * than starting below it.
+ * `label` is rendered above the field and `hint` below it, both tied to it for assistive
+ * technology. The panel is anchored to the field's own box and not to the whole component,
+ * so it opens against the field and covers the hint rather than starting below it.
  */
 export const WithLabelAndHint: Story = {
   render: (args) => ({
@@ -379,6 +384,66 @@ export const Disabled: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * `readonly` shows a choice that has been made without letting it be changed: nothing can
+ * be typed, the list never opens, the chips lose their crosses and no clear cross is
+ * offered. Unlike `disabled` the field keeps its normal contrast, takes the focus and can
+ * be copied from, which is what a value a form still submits needs.
+ */
+export const ReadOnly: Story = {
+  args: { multiple: true, clearable: true, readonly: true },
+  render: (args) => ({
+    components: { VCombobox },
+    setup: () => ({ args, t, value: ref(['fr', 'be']) }),
+    template: `
+      <div style="width: 300px">
+        <VCombobox v-bind="args" v-model="value" :label="t.billingCountry" :hint="t.frozenHint" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('combobox', { name: 'Billing country' })
+
+    // Focusable and copyable, which is the whole difference with a disabled field.
+    await userEvent.click(input)
+    await expect(input).toHaveFocus()
+    await expect(canvas.queryByRole('listbox')).toBeNull()
+
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(canvas.queryByRole('listbox')).toBeNull()
+
+    // The crosses of the chips and the cross of the field are the only buttons this
+    // component ever renders: frozen, it renders none.
+    await expect(canvas.queryAllByRole('button')).toHaveLength(0)
+  },
+}
+
+/**
+ * `iconStart` puts an icon inside the field, at the start. It is rendered BEFORE whatever
+ * fills that zone, so it survives the chips that stand for the chosen values instead of
+ * being replaced by them. A `@click:icon-start` listener turns it into a real button, in
+ * which case it needs `iconStartLabel`.
+ */
+export const FieldIcon: Story = {
+  args: { multiple: true, iconStart: 'search' },
+  render: (args) => ({
+    components: { VCombobox },
+    setup: () => ({ args, t, value: ref(['fr', 'be']) }),
+    template: `
+      <div style="width: 320px">
+        <VCombobox v-bind="args" v-model="value" :label="t.searchCountry" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const field = canvasElement.querySelector('.v-input-field')!
+    // The icon comes first, the chips after it — the order the field lays out.
+    await expect(field.firstElementChild).toHaveClass('v-icon')
+    await expect(canvasElement.querySelectorAll('.v-chip')).toHaveLength(2)
+  },
 }
 
 /**

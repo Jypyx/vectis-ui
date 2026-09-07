@@ -11,7 +11,7 @@ const selectable = ref<string | null>('2026-06-10')
   <div class="column">
     <VDateInput
       v-model="hidden"
-      mode="readonly"
+      mode="picker"
       label="Hidden, the default"
       hint="The grid starts and ends on the month itself"
     />
@@ -19,7 +19,7 @@ const selectable = ref<string | null>('2026-06-10')
     <VDateInput
       v-model="shown"
       show-adjacent-days
-      mode="readonly"
+      mode="picker"
       label="Shown"
       hint="The corners are filled with the neighbouring months, greyed and inert"
     />
@@ -27,7 +27,7 @@ const selectable = ref<string | null>('2026-06-10')
     <VDateInput
       v-model="selectable"
       select-adjacent-days
-      mode="readonly"
+      mode="picker"
       label="Shown and choosable"
       hint="Choosing one moves the calendar to its month"
     />

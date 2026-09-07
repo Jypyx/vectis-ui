@@ -26,7 +26,13 @@ export default {
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
         { name: 'placeholder', type: 'string' },
+        { name: 'iconStart', type: 'IconSource' },
+        { name: 'iconStartLabel', type: 'string' },
+        { name: 'iconEndLabel', type: 'string' },
+        { name: 'loading', type: 'boolean', default: 'false' },
+        { name: 'loadingLabel', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },
+        { name: 'clearLabel', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'File[]', default: '[]' },
       ],
       events: [

@@ -18,7 +18,7 @@ function inDays(offset: number, close: () => void) {
 
 <template>
   <div class="column">
-    <VDateInput v-model="date" mode="readonly" label="Due date" clearable>
+    <VDateInput v-model="date" mode="picker" label="Due date" clearable>
       <template #footer="{ close }">
         <VButton variant="ghost" tone="neutral" size="sm" @click="inDays(0, close)">Today</VButton>
         <VButton variant="ghost" tone="neutral" size="sm" @click="inDays(1, close)">

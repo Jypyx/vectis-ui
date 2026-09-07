@@ -103,11 +103,38 @@ interface FileInputProps {
    */
   placeholder?: string
   /**
+   * An icon inside the field, at the start. It is rendered before the chips rather than
+   * in their place, so it survives a chip display. Decorative by default, it becomes a
+   * real button as soon as a `@click:icon-start` listener is attached, in which case it
+   * needs `iconStartLabel`.
+   */
+  iconStart?: IconSource
+  /** What the start icon does, in words, once it is clickable. */
+  iconStartLabel?: string
+  /**
+   * What the end icon does, in words. It names the button that opens the file dialog,
+   * and falls back to the design system dictionary.
+   */
+  iconEndLabel?: string
+  /**
+   * Shows a spinner at the end of the field, in place of the attach icon — while an
+   * upload is under way, typically. It says that something is happening and changes
+   * nothing else: files can still be dropped and the dialog still opens.
+   */
+  loading?: boolean
+  /**
+   * What screen readers announce while the spinner turns. It falls back to the design
+   * system dictionary.
+   */
+  loadingLabel?: string
+  /**
    * Offers a cross that empties the selection. Worth turning on here more than on an
    * ordinary field: what a picker holds cannot be erased by typing, so the cross is the
    * only way back out of a wrong choice.
    */
   clearable?: boolean
+  /** What that cross does, in words. It falls back to the design system dictionary. */
+  clearLabel?: string
 }
 
 defineOptions({ inheritAttrs: false })
@@ -130,7 +157,13 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   label: undefined,
   hint: undefined,
   placeholder: undefined,
+  iconStart: undefined,
+  iconStartLabel: undefined,
+  iconEndLabel: undefined,
+  loading: false,
+  loadingLabel: undefined,
   clearable: false,
+  clearLabel: undefined,
 })
 
 const emit = defineEmits<{
@@ -260,6 +293,8 @@ const canClear = computed(
 const endIcon = computed<IconSource | undefined>(() =>
   props.readonly ? undefined : props.attachIcon,
 )
+const endIconLabel = computed(() => props.iconEndLabel ?? m.value.fileInput.attach)
+const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.fileInput.clear)
 
 const totalSize = computed(() => model.value.reduce((sum, file) => sum + file.size, 0))
 
@@ -438,9 +473,13 @@ defineExpose({
         :invalid="invalid"
         :clearable="clearable"
         :clear-visible="canClear"
-        :clear-label="m.fileInput.clear"
+        :clear-label="resolvedClearLabel"
+        :icon-start="iconStart"
+        :icon-start-label="iconStartLabel"
+        :loading="loading"
+        :loading-label="loadingLabel"
         :icon-end="endIcon"
-        :icon-end-label="m.fileInput.attach"
+        :icon-end-label="endIconLabel"
         :aria-describedby="describedBy"
         @click:icon-end="openPicker"
         @clear="clearValue"

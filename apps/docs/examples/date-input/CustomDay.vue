@@ -15,7 +15,7 @@ function priceFor(iso: string) {
   <div class="column">
     <VDateInput
       v-model="night"
-      mode="readonly"
+      mode="picker"
       min="2026-06-05"
       max="2026-06-24"
       label="Night"

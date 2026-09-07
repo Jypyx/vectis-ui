@@ -5,7 +5,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Libellé et aide',
-      text: "Le champ visible est un <code>VInput</code> en lecture seule : <code>label</code> et <code>hint</code> s'y comportent comme sur n'importe quel autre champ, et le libellé lui donne le focus au clic. <code>placeholder</code> est ce qu'il affiche tant que rien n'est choisi ; omis, il retombe sur le dictionnaire. Le trombone à la fin ouvre la boîte de dialogue du système, et le champ accepte aussi un fichier déposé n'importe où sur lui.",
+      text: "Le champ visible est un <code>VInput</code> en lecture seule : <code>label</code> et <code>hint</code> s'y comportent comme sur n'importe quel autre champ, et le libellé lui donne le focus au clic. <code>placeholder</code> est ce qu'il affiche tant que rien n'est choisi ; omis, il retombe sur le dictionnaire. Le trombone à la fin ouvre la boîte de dialogue du système, et le champ accepte aussi un fichier déposé n'importe où sur lui. <code>iconStart</code> place une icône à l'autre bout du champ, rendue avant les chips et non à leur place, décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
     },
     sizes: {
       title: 'Tailles',
@@ -41,7 +41,7 @@ export default {
     },
     states: {
       title: 'États',
-      text: "Invalide sert à une règle à vous, rien ici n'étant vérifié par le navigateur. La lecture seule laisse la sélection visible et refuse toutes les façons de la changer, la boîte de dialogue, le dépôt et le retrait. Désactivé grise le champ par les jetons de couleur et le sort de l'ordre de tabulation. <code>noDrop</code> est plus étroit que les deux : la boîte de dialogue s'ouvre toujours, et seul le dépôt est refusé.",
+      text: "Invalide sert à une règle à vous, rien ici n'étant vérifié par le navigateur. La lecture seule laisse la sélection visible et refuse toutes les façons de la changer, la boîte de dialogue, le dépôt et le retrait. Désactivé grise le champ par les jetons de couleur et le sort de l'ordre de tabulation. <code>noDrop</code> est plus étroit que les deux : la boîte de dialogue s'ouvre toujours, et seul le dépôt est refusé. <code>loading</code> est plus étroit encore, et purement visuel : une roue remplace l'icône de trombone pendant un envoi, et tout le reste continue. <code>iconEndLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment le bouton de trombone, la croix de vidage et la roue quand la formulation du dictionnaire ne convient pas.",
     },
   },
 
@@ -73,8 +73,19 @@ export default {
         hint: "Une ligne d'aide sous le champ, à gauche du compteur. Elle est liée au champ pour les technologies d'assistance.",
         placeholder:
           "Ce que dit le champ tant que rien n'est choisi. Il retombe sur le dictionnaire du design system.",
+        iconStart:
+          "Une icône dans le champ, au début. Elle est rendue avant les chips et non à leur place. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
+        iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
+        iconEndLabel:
+          "Ce que fait l'icône de fin, en mots. Elle nomme le bouton qui ouvre la boîte de dialogue de fichiers, et sa valeur par défaut vient du dictionnaire du design system.",
+        loading:
+          "Affiche une roue à la place de l'icône de trombone, pendant un envoi. Elle ne change rien d'autre : les fichiers se déposent toujours et la boîte de dialogue s'ouvre toujours.",
+        loadingLabel:
+          "Ce que les lecteurs d'écran annoncent pendant que la roue tourne. Sa valeur par défaut vient du dictionnaire du design system.",
         clearable:
           "Propose une croix qui vide la sélection. Elle vaut plus la peine ici que sur un champ ordinaire : ce que contient un sélecteur ne s'efface pas en tapant, la croix est donc le seul retour en arrière après un mauvais choix.",
+        clearLabel:
+          'Ce que fait cette croix, en mots. Sa valeur par défaut vient du dictionnaire du design system.',
         vModel:
           "Toujours une LISTE de fichiers, que plusieurs soient permis ou non, jamais un fichier seul. La forme ne dépend pas d'une prop : vous n'avez donc jamais à restreindre une union que TypeScript ne sait pas discriminer.",
       },

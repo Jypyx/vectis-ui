@@ -101,6 +101,13 @@ interface ComboboxProps {
    * been chosen as chips inside the field.
    */
   multiple?: boolean
+  /** The label above the field, tied to it so that clicking it focuses the field. */
+  label?: string
+  /**
+   * A line of help under the field. It is tied to the field for assistive technology,
+   * so it is read out along with the label.
+   */
+  hint?: string
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: 'sm' | 'md' | 'lg'
   /** Takes 4px off the height, as everywhere else in the design system. */
@@ -109,10 +116,27 @@ interface ComboboxProps {
   placeholder?: string
   /** Makes the field unusable, greyed out through the colour tokens. */
   disabled?: boolean
+  /**
+   * Shows what has been chosen without letting it be changed: nothing can be typed,
+   * the list never opens, the chips lose their crosses and no clear cross is offered.
+   * The field stays focusable and can be copied from, which is what separates it from
+   * `disabled`.
+   */
+  readonly?: boolean
   /** Marks the field as invalid — for a rule of your own. */
   invalid?: boolean
+  /**
+   * An icon inside the field, at the start — before the chips when several values can
+   * be chosen. It is decorative by default and becomes a real button as soon as a
+   * `@click:icon-start` listener is attached, in which case it needs `iconStartLabel`.
+   */
+  iconStart?: IconSource
+  /** What the start icon does, in words, once it is clickable. */
+  iconStartLabel?: string
   /** Offers a cross that empties both the selection and the search. */
   clearable?: boolean
+  /** What that cross does, in words. It falls back to the design system dictionary. */
+  clearLabel?: string
   /** What the panel says when the search matches nothing. */
   emptyText?: string
   /**
@@ -149,12 +173,18 @@ interface ComboboxProps {
 
 const props = withDefaults(defineProps<ComboboxProps>(), {
   multiple: false,
+  label: undefined,
+  hint: undefined,
   size: 'md',
   compact: false,
   placeholder: undefined,
   disabled: false,
+  readonly: false,
   invalid: false,
+  iconStart: undefined,
+  iconStartLabel: undefined,
   clearable: false,
+  clearLabel: undefined,
   emptyText: undefined,
   filter: true,
   searchDebounce: 250,
@@ -166,6 +196,7 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
 
 const m = useMessages()
 const resolvedEmptyText = computed(() => props.emptyText ?? m.value.combobox.empty)
+const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.combobox.clear)
 const resolvedLoadingText = computed(() => props.loadingText ?? m.value.common.loading)
 
 const emit = defineEmits<{
@@ -536,6 +567,7 @@ const canClear = computed(
   () =>
     props.clearable &&
     !resolvedDisabled.value &&
+    !props.readonly &&
     (selectedValues.value.length > 0 || query.value.length > 0),
 )
 
@@ -580,8 +612,11 @@ watch(activeIndex, (index) => {
   })
 })
 
+// The single cut-off point of a frozen field: every route into the list — a click on the
+// control, the focus, a keystroke, typing — ends up here, so `readonly` is refused once
+// rather than guarded in each handler.
 function openPanel() {
-  if (resolvedDisabled.value || open.value) return
+  if (resolvedDisabled.value || props.readonly || open.value) return
   open.value = true
   const list = filtered.value
   const selectedIdx = list.findIndex((o) => !o.disabled && selectedSet.value.has(o.value))
@@ -693,7 +728,7 @@ function select(option: ComboboxOption) {
 }
 
 function removeValue(value: string) {
-  if (!props.multiple) return
+  if (!props.multiple || props.readonly) return
   model.value = selectedValues.value.filter((v) => v !== value)
   inputRef.value?.focus()
 }
@@ -784,13 +819,18 @@ function onKeydown(event: KeyboardEvent) {
         :aria-expanded="open"
         :aria-controls="optionsId"
         v-bind="forwardedAttrs"
+        :label="label"
+        :hint="hint"
         :size="resolvedSize"
         :compact="resolvedCompact"
         :invalid="invalid"
         :disabled="resolvedDisabled"
+        :readonly="readonly"
+        :icon-start="iconStart"
+        :icon-start-label="iconStartLabel"
         :clearable="clearable"
         :clear-visible="canClear"
-        :clear-label="m.combobox.clear"
+        :clear-label="resolvedClearLabel"
         :placeholder="selectedValues.length === 0 ? placeholder : undefined"
         :aria-activedescendant="open && activeIndex >= 0 ? optionId(activeIndex) : undefined"
         @input="onInput"
@@ -814,7 +854,7 @@ function onKeydown(event: KeyboardEvent) {
                 tone="accent"
                 :size="chipScale.size"
                 :compact="chipScale.compact"
-                dismissible
+                :dismissible="!readonly"
                 :dismiss-label="m.combobox.remove(labelOf(value))"
                 :disabled="resolvedDisabled"
                 @dismiss="removeValue(value)"

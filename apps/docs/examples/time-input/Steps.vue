@@ -11,7 +11,7 @@ const typed = ref<string | null>('08:00')
   <div class="column">
     <VTimeInput
       v-model="appointment"
-      mode="readonly"
+      mode="picker"
       :minute-step="15"
       label="Quarter hours, on the clock"
       hint="The face offers four minutes an hour, and the arrow keys move by the same step"

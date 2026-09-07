@@ -31,7 +31,7 @@ const picked = ref<string | null>('09:30')
 
     <VTimeInput
       v-model="picked"
-      mode="readonly"
+      mode="picker"
       format="24h"
       :minute-step="30"
       min="09:00"

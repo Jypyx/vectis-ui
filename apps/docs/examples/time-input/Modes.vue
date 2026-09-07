@@ -25,7 +25,7 @@ const fromList = ref<string | null>('09:30')
 
     <VTimeInput
       v-model="readOnly"
-      mode="readonly"
+      mode="picker"
       label="Read-only"
       hint="Nothing can be typed, so the clock is the only way in"
     />

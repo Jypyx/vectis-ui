@@ -91,10 +91,10 @@ describe('VDateInput — default', () => {
   })
 })
 
-describe('VDateInput — read-only', () => {
+describe('VDateInput — picker mode', () => {
   const mount = (props: Record<string, unknown> = {}) =>
     render(VDateInput, {
-      props: { mode: 'readonly', locale: 'fr-FR', label: 'Date', ...props },
+      props: { mode: 'picker', locale: 'fr-FR', label: 'Date', ...props },
     })
 
   it('displays the formatted value in a read-only field', () => {
@@ -421,5 +421,64 @@ describe('VDateInput — input mode', () => {
     })
     expect((container.querySelector('input') as HTMLInputElement).value).toBe('10/06/2026')
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('displayFormat'))
+  })
+})
+
+describe('VDateInput — the field props', () => {
+  it('readonly: no calendar, no popup ARIA, no clear cross', () => {
+    const { container, queryByRole } = render(VDateInput, {
+      props: { mode: 'picker', modelValue: JUNE, label: 'Date', readonly: true, clearable: true },
+    })
+    const input = container.querySelector('input') as HTMLInputElement
+    expect(input.readOnly).toBe(true)
+    // The panel goes, and the attributes announcing one go with it: an aria-controls
+    // pointing at nothing is worse than none at all.
+    expect(input.getAttribute('aria-haspopup')).toBeNull()
+    expect(input.getAttribute('aria-expanded')).toBeNull()
+    expect(input.getAttribute('aria-controls')).toBeNull()
+    expect(queryByRole('button')).toBeNull()
+  })
+
+  it('readonly: the field cannot be typed into and the panel never opens', async () => {
+    const { container, queryByRole } = render(VDateInput, {
+      props: { modelValue: JUNE, label: 'Date', readonly: true, showPicker: true },
+    })
+    const control = container.querySelector('.v-date-input-control') as HTMLElement
+    await fireEvent.click(control)
+    await nextTick()
+    expect(queryByRole('dialog')).toBeNull()
+    expect((container.querySelector('input') as HTMLInputElement).readOnly).toBe(true)
+  })
+
+  it('loading: a spinner takes the calendar icon place, the panel still opens', async () => {
+    const { container, getByRole } = render(VDateInput, {
+      props: { mode: 'picker', modelValue: JUNE, label: 'Date', loading: true },
+    })
+    expect(container.querySelector('.v-spinner')).not.toBeNull()
+    await fireEvent.click(container.querySelector('.v-date-input-control') as HTMLElement)
+    await nextTick()
+    expect(getByRole('dialog')).toBeTruthy()
+  })
+
+  it('iconEndLabel and clearLabel override the dictionary', () => {
+    const { getByRole } = render(VDateInput, {
+      props: {
+        mode: 'picker',
+        modelValue: JUNE,
+        label: 'Date',
+        clearable: true,
+        iconEndLabel: 'Pick a date',
+        clearLabel: 'Empty the date',
+      },
+    })
+    expect(getByRole('button', { name: 'Pick a date' })).toBeTruthy()
+    expect(getByRole('button', { name: 'Empty the date' })).toBeTruthy()
+  })
+
+  it('iconStart is rendered inside the field', () => {
+    const { container } = render(VDateInput, {
+      props: { mode: 'picker', modelValue: JUNE, label: 'Date', iconStart: 'search' },
+    })
+    expect(container.querySelector('.v-input-field > .v-icon')).not.toBeNull()
   })
 })

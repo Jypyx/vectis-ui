@@ -319,7 +319,7 @@ describe('VInputGroup', () => {
     it("VTimeInput: the clock's own cells keep their size", async () => {
       const { container } = render(VInputGroup, {
         props: { size: 'sm' },
-        slots: { default: () => h(VTimeInput, { mode: 'readonly' }) },
+        slots: { default: () => h(VTimeInput, { mode: 'picker' }) },
       })
       await fireEvent.click(container.querySelector('.v-time-input-control') as HTMLElement)
 

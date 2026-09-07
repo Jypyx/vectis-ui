@@ -29,7 +29,7 @@ picking 7 PM produces `'19:00'`.
 
 - **`input`** (the default): the field is typed on the keyboard, behind an "HH:MM" mask.
   The picker is optional (`showPicker`) and absent by default.
-- **`readonly`**: the field turns read-only and the picker becomes the only route —
+- **`picker`**: the field is filled from the clock alone, which becomes the only route —
   `showPicker` is therefore forced to `true` there.
 - **`list`**: a `VCombobox` offers the times in steps of `minuteStep`, searchable by
   typing; `showPicker` is beside the point there.
@@ -48,7 +48,7 @@ mode is a different way of ASKING:
 - **`list`**: the rows that cannot be chosen are left out. A list is read before it is chosen from.
   The row of the value in force is kept even when the restrictions have moved past it, since the
   field names a value through the row that carries it.
-- **`readonly`**, and the picker beside a typed field: what is ruled out is DISABLED on the face.
+- **`picker`**, and the clock beside a typed field: what is ruled out is DISABLED on the face.
   See the picker's own page for how a bound cuts an hour in half rather than closing it.
 
 <Canvas of={VTimeInputStories.Restrictions} />
@@ -98,7 +98,7 @@ The numerals and the hand are positioned in **pure CSS** — `sin()`/`cos()` tri
 (CSS Values 4, well below the design system's browser floor) on a turn fraction set as an
 inline variable. The JS is limited to the pointer → value conversion and the keyboard.
 
-<Canvas of={VTimeInputStories.ReadOnly} />
+<Canvas of={VTimeInputStories.PickerOnly} />
 <Canvas of={VTimeInputStories.DialSelection} />
 <Canvas of={VTimeInputStories.InnerRing} />
 <Canvas of={VTimeInputStories.FiveMinuteStep} />
@@ -133,7 +133,7 @@ In 12 h, the **typed form** shows an AM/PM button **inside the field**, beside t
 it qualifies and before the controls that clear the field and open the panel. It writes
 the v-model directly, with nothing to open or confirm: typing "9:30" says nothing about
 the morning or the afternoon, so the answer has to be readable and changeable with the
-panel shut. It is the only place a 12 h field needs one. The `readonly` form reaches the
+panel shut. It is the only place a 12 h field needs one. The `picker` form reaches the
 clock, which carries its own AM/PM; and every row of the `list` form already spells its
 half of the day out.
 
@@ -152,9 +152,26 @@ The field follows the input-component scale — `sm` (32px), `md` (40px, the def
 set, including during an entry under way) and supports `disabled`. Cancel always
 restores the last committed value.
 
+`readonly` freezes the time whichever way it could have been changed: nothing can be typed, no
+clock is rendered, the AM/PM button goes since it writes the value, and the clear cross goes with
+them, along with the attributes that announced a panel. It reaches the list form too, that one
+being a VCombobox. Unlike `disabled`, the field keeps its contrast, takes the focus and can be
+copied from. It answers a different question from `mode`, which says how a field that **can** be
+changed is filled in.
+
+`loading` shows a spinner in place of the clock icon while something is being fetched, and changes
+nothing else. `iconStart` puts an icon at the start of the field, decorative until a
+`@click:icon-start` listener turns it into a button — which then needs `iconStartLabel`.
+`iconEndLabel`, `clearLabel` and `loadingLabel` rename the clock button, the clear cross and the
+spinner when the dictionary's wording is not the right one.
+
 <Canvas of={VTimeInputStories.Cancellation} />
 <Canvas of={VTimeInputStories.Sizes} />
 <Canvas of={VTimeInputStories.Disabled} />
+
+<Canvas of={VTimeInputStories.ReadOnly} />
+
+<Canvas of={VTimeInputStories.FieldIcon} />
 
 ## Accessibility
 
@@ -163,7 +180,7 @@ restores the last committed value.
   `aria-expanded`. An input field with no `showPicker` keeps its native `textbox` role and
   announces no popup. The `list` mode is a VCombobox and carries that component's contract
   whole.
-- **Opening** on click, on `Enter` or on the `down arrow` from the field. In `readonly`
+- **Opening** on click, on `Enter` or on the `down arrow` from the field. In `picker`
   focus moves into the panel at once; when typing with `showPicker`, the panel opens
   **without taking focus**.
 - The picker is a **single `role="slider"`** (one tab stop): arrows for ±1 hour or

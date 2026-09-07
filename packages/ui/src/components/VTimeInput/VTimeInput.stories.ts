@@ -15,6 +15,10 @@ const t = storyText({
     typed: 'Typed',
     listed: 'Listed',
     picked: 'Picked',
+    slot: 'Appointment slot',
+    slotHint: 'Set by the practice.',
+    checkingTime: 'Checking availability',
+    searchByTime: 'Search by time',
   },
   fr: {
     time: 'Heure',
@@ -24,6 +28,10 @@ const t = storyText({
     typed: 'Saisi',
     listed: 'Liste',
     picked: 'Cadran',
+    slot: 'Créneau du rendez-vous',
+    slotHint: 'Fixé par le cabinet.',
+    checkingTime: 'Vérification des disponibilités',
+    searchByTime: 'Rechercher par heure',
   },
 })
 
@@ -32,7 +40,7 @@ const meta = {
   component: VTimeInput,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
-    mode: { control: 'inline-radio', options: ['readonly', 'input', 'list'] },
+    mode: { control: 'inline-radio', options: ['picker', 'input', 'list'] },
   },
   // No `mode`: pinning it would make the Controls panel lie, as it would show a current
   // value different from the component's default. No `locale` either — the picker then
@@ -96,11 +104,11 @@ export const Default: Story = {
 }
 
 /**
- * `mode="readonly"`: the time can only be chosen on the clock, which then becomes the only
+ * `mode="picker"`: the time can only be chosen on the clock, which then becomes the only
  * route — `showPicker` is beside the point there.
  */
-export const ReadOnly: Story = {
-  args: { mode: 'readonly' },
+export const PickerOnly: Story = {
+  args: { mode: 'picker' },
   render: (args) => ({
     components: { VTimeInput },
     setup: () => ({ args, t, value: ref('09:15') }),
@@ -127,7 +135,7 @@ export const ReadOnly: Story = {
 // A complete pointer selection: hour 3 (the outer ring), the automatic move to the
 // minutes, minute 30, OK.
 export const DialSelection: Story = {
-  args: { mode: 'readonly', format: '24h' },
+  args: { mode: 'picker', format: '24h' },
   render: (args) => ({
     components: { VTimeInput },
     setup: () => ({ args, t, value: ref('09:15') }),
@@ -186,7 +194,7 @@ export const DialSelection: Story = {
 
 // A 24 h clock: the inner ring carries 00 and 13–23.
 export const InnerRing: Story = {
-  args: { mode: 'readonly', format: '24h' },
+  args: { mode: 'picker', format: '24h' },
   render: (args) => ({
     components: { VTimeInput },
     setup: () => ({ args, t, value: ref('09:15') }),
@@ -390,7 +398,7 @@ export const TwelveHour: Story = {
 
 // Cancel abandons the draft: the value does not move.
 export const Cancellation: Story = {
-  args: { mode: 'readonly', format: '24h' },
+  args: { mode: 'picker', format: '24h' },
   render: (args) => ({
     components: { VTimeInput },
     setup: () => ({ args, t, value: ref('09:15') }),
@@ -416,7 +424,7 @@ export const Cancellation: Story = {
 }
 
 export const FiveMinuteStep: Story = {
-  args: { mode: 'readonly', format: '24h', minuteStep: 5 },
+  args: { mode: 'picker', format: '24h', minuteStep: 5 },
   render: (args) => ({
     components: { VTimeInput },
     setup: () => ({ args, t, value: ref('14:35') }),
@@ -452,7 +460,7 @@ export const Restrictions: Story = {
       <div style="width: 280px; display: grid; gap: 16px">
         <VTimeInput v-bind="args" v-model="typed" :label="t.typed" :hint="t.officeHint" />
         <VTimeInput v-bind="args" v-model="listed" mode="list" :label="t.listed" />
-        <VTimeInput v-bind="args" v-model="picked" mode="readonly" :label="t.picked" />
+        <VTimeInput v-bind="args" v-model="picked" mode="picker" :label="t.picked" />
       </div>
     `,
   }),
@@ -500,6 +508,75 @@ export const Disabled: Story = {
 }
 
 /**
+ * `readonly` freezes the time whichever way it could have been changed: nothing can be
+ * typed, no clock is rendered, the AM/PM button goes since it writes the value, and the
+ * clear cross goes with them. The attributes announcing a panel go too. Unlike
+ * `disabled` the field keeps its contrast, takes the focus and can be copied from.
+ *
+ * It is a different question from `mode`, which says how a field that CAN be changed is
+ * filled in, and it reaches the list form just as well, that one being a VCombobox.
+ */
+export const ReadOnly: Story = {
+  args: { readonly: true, clearable: true, format: '12h' },
+  render: (args) => ({
+    components: { VTimeInput },
+    setup: () => ({ args, t, value: ref('09:15') }),
+    template: `
+      <div style="width: 280px">
+        <VTimeInput v-bind="args" v-model="value" :label="t.slot" :hint="t.slotHint" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = canvas.getByLabelText('Appointment slot')
+
+    field.focus()
+    await expect(field).toHaveFocus()
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(canvas.queryByRole('dialog')).toBeNull()
+    await expect(canvas.queryAllByRole('button')).toHaveLength(0)
+  },
+}
+
+/**
+ * The two ends of the field. `iconStart` puts an icon at the start, decorative until a
+ * `@click:icon-start` listener turns it into a button, which then needs
+ * `iconStartLabel`. At the other end `loading` shows a spinner in place of the clock
+ * icon while something is being fetched, and changes nothing else: the field is still
+ * typed into and the panel still opens.
+ *
+ * `iconEndLabel` and `clearLabel` rename the clock button and the clear cross when the
+ * dictionary's wording is not the right one.
+ */
+export const FieldIcon: Story = {
+  args: { format: '24h' },
+  render: (args) => ({
+    components: { VTimeInput },
+    setup: () => ({ args, t, value: ref('09:15') }),
+    template: `
+      <div style="width: 280px; display:grid; gap:16px">
+        <VTimeInput
+          v-bind="args"
+          v-model="value"
+          icon-start="search"
+          :label="t.searchByTime"
+          show-picker
+          clearable
+          icon-end-label="Open the clock"
+          clear-label="Empty the time"
+        />
+        <VTimeInput v-bind="args" v-model="value" loading :label="t.checkingTime" show-picker />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelector('.v-input-field > .v-icon')).toBeInTheDocument()
+    await expect(canvasElement.querySelectorAll('.v-spinner')).toHaveLength(1)
+  },
+}
+
+/**
  * Clicking an empty area of the panel (its padding, the gutter between the picker and the
  * footer) must close NOTHING — and above all abandon nothing: closing by focus leaving
  * amounts to cancelling the draft here.
@@ -509,7 +586,7 @@ export const Disabled: Story = {
  * not simulate focus on click.
  */
 export const ClickInTheVoid: Story = {
-  args: { mode: 'readonly', format: '24h' },
+  args: { mode: 'picker', format: '24h' },
   render: (args) => ({
     components: { VTimeInput },
     setup: () => ({ args, t, value: ref('09:15') }),

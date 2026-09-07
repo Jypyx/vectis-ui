@@ -23,7 +23,17 @@ const invalid = ref<string | null>('09:15')
       hint="Greyed through the colour tokens, and the panel can no longer be opened"
     />
 
-    <VTimeInput model-value="09:15" disabled mode="readonly" label="Disabled, read-only" />
+    <VTimeInput model-value="09:15" disabled mode="picker" label="Disabled, picker only" />
+
+    <!-- Frozen rather than out of reach: it still takes the focus and can be copied from. -->
+    <VTimeInput
+      model-value="09:15"
+      readonly
+      show-picker
+      clearable
+      label="Read-only"
+      hint="No typing, no clock, no clear cross"
+    />
 
     <VTimeInput
       model-value="09:30"

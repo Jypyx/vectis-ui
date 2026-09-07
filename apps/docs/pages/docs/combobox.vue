@@ -8,6 +8,8 @@ import ComboboxCustomChip from '~/examples/combobox/CustomChip.vue'
 import comboboxCustomChipSource from '~/examples/combobox/CustomChip.vue?raw'
 import ComboboxCustomOption from '~/examples/combobox/CustomOption.vue'
 import comboboxCustomOptionSource from '~/examples/combobox/CustomOption.vue?raw'
+import ComboboxFieldIcon from '~/examples/combobox/FieldIcon.vue'
+import comboboxFieldIconSource from '~/examples/combobox/FieldIcon.vue?raw'
 import ComboboxGroups from '~/examples/combobox/Groups.vue'
 import comboboxGroupsSource from '~/examples/combobox/Groups.vue?raw'
 import ComboboxIcons from '~/examples/combobox/Icons.vue'
@@ -76,6 +78,12 @@ useDocsHead('combobox')
   <DocsProse keypath="combobox.examples.multiple.text" />
   <DocsExample :source="comboboxMultipleSource" stack>
     <ComboboxMultiple />
+  </DocsExample>
+
+  <h3 id="field-icon">{{ t('combobox.examples.fieldIcon.title') }}</h3>
+  <DocsProse keypath="combobox.examples.fieldIcon.text" />
+  <DocsExample :source="comboboxFieldIconSource" stack>
+    <ComboboxFieldIcon />
   </DocsExample>
 
   <h3 id="option-icons">{{ t('combobox.examples.icons.title') }}</h3>

@@ -90,10 +90,10 @@ describe('VTimeInput — default', () => {
   })
 })
 
-describe('VTimeInput — read-only', () => {
+describe('VTimeInput — picker mode', () => {
   it('displays the formatted value in a read-only field', () => {
     const { container } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '19:05', locale: 'fr-FR', label: 'Time' },
+      props: { mode: 'picker', modelValue: '19:05', locale: 'fr-FR', label: 'Time' },
     })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.readOnly).toBe(true)
@@ -104,7 +104,7 @@ describe('VTimeInput — read-only', () => {
 
   it('opens the panel on click and renders the picker (a slider)', async () => {
     const { container, getByRole } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '09:15', label: 'Time' },
+      props: { mode: 'picker', modelValue: '09:15', label: 'Time' },
     })
     await openPanel(container)
     expect(getByRole('dialog')).toBeTruthy()
@@ -125,7 +125,7 @@ describe('VTimeInput — read-only', () => {
 
   it('works on a draft: nothing is emitted before OK', async () => {
     const { container, emitted, getByRole, getByText } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
+      props: { mode: 'picker', modelValue: '09:15', format: '24h' },
     })
     await openPanel(container)
     // the up arrow on the picker: the draft advances, the v-model does not
@@ -140,7 +140,7 @@ describe('VTimeInput — read-only', () => {
 
   it('cancels without emitting (the button, Escape, focus leaving)', async () => {
     const { container, emitted, getByRole, getByText } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
+      props: { mode: 'picker', modelValue: '09:15', format: '24h' },
     })
     await openPanel(container)
     await fireEvent.keyDown(getByRole('slider'), { key: 'ArrowUp' })
@@ -164,7 +164,7 @@ describe('VTimeInput — read-only', () => {
 
   it('moves from hours to minutes (Enter on the picker, the header cells)', async () => {
     const { container, getByRole } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
+      props: { mode: 'picker', modelValue: '09:15', format: '24h' },
     })
     await openPanel(container)
     await fireEvent.keyDown(getByRole('slider'), { key: 'Enter' })
@@ -179,7 +179,7 @@ describe('VTimeInput — read-only', () => {
 
   it('Enter on the minutes step commits and closes', async () => {
     const { container, emitted, getByRole } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '09:15', format: '24h' },
+      props: { mode: 'picker', modelValue: '09:15', format: '24h' },
     })
     await openPanel(container)
     const slider = getByRole('slider')
@@ -193,7 +193,7 @@ describe('VTimeInput — read-only', () => {
   it('ignores showPicker in read-only mode (and says so)', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { container, getByRole } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '09:15', format: '24h', showPicker: false },
+      props: { mode: 'picker', modelValue: '09:15', format: '24h', showPicker: false },
     })
     await openPanel(container)
     expect(getByRole('slider')).toBeTruthy()
@@ -202,13 +202,13 @@ describe('VTimeInput — read-only', () => {
   })
 
   it('has no mode toggle in the panel footer', () => {
-    const { container } = render(VTimeInput, { props: { mode: 'readonly', modelValue: '09:15' } })
+    const { container } = render(VTimeInput, { props: { mode: 'picker', modelValue: '09:15' } })
     expect(container.querySelector('.v-time-input-mode')).toBeNull()
   })
 
   it('derives the format from the locale (en-US → 12h)', async () => {
     const { container, getByRole } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '19:00', locale: 'en-US' },
+      props: { mode: 'picker', modelValue: '19:00', locale: 'en-US' },
     })
     const input = container.querySelector('input') as HTMLInputElement
     expect(input.value).toMatch(/PM/)
@@ -233,7 +233,7 @@ describe('VTimeInput — read-only', () => {
 
     it('initializes the draft at the current time when there is no value', async () => {
       const { container } = render(VTimeInput, {
-        props: { mode: 'readonly', modelValue: null, format: '24h' },
+        props: { mode: 'picker', modelValue: null, format: '24h' },
       })
       await openPanel(container)
       expect(hourCell(container).textContent?.trim()).toBe('14')
@@ -242,7 +242,7 @@ describe('VTimeInput — read-only', () => {
 
   it('clears the value through the cross, without losing the picker icon', async () => {
     const { container, emitted } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '09:15', clearable: true },
+      props: { mode: 'picker', modelValue: '09:15', clearable: true },
     })
     const clearBtn = container.querySelector('button[aria-label="Clear time"]') as HTMLElement
     expect(clearBtn).toBeTruthy()
@@ -261,7 +261,7 @@ describe('VTimeInput — read-only', () => {
 
   it('exposes a complete ARIA slider (a localized valuetext)', async () => {
     const { container, getByRole } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '07:35', format: '24h' },
+      props: { mode: 'picker', modelValue: '07:35', format: '24h' },
     })
     await openPanel(container)
     const slider = getByRole('slider')
@@ -411,7 +411,7 @@ describe('VTimeInput — restrictions', () => {
 
   it('hands the restrictions to the picker it opens', async () => {
     const { container } = render(VTimeInput, {
-      props: { modelValue: '09:00', mode: 'readonly', format: '24h', max: '11:00' },
+      props: { modelValue: '09:00', mode: 'picker', format: '24h', max: '11:00' },
     })
     await openPanel(container)
     const disabled = container.querySelectorAll('.v-time-picker-number[data-disabled]')
@@ -608,7 +608,7 @@ describe('VTimeInput — the meridiem', () => {
     for (const props of [
       { format: '24h' as const },
       { format: '12h' as const, mode: 'list' as const },
-      { format: '12h' as const, mode: 'readonly' as const },
+      { format: '12h' as const, mode: 'picker' as const },
     ]) {
       const { container } = render(VTimeInput, { props: { modelValue: '19:00', ...props } })
       expect(fieldMeridiem(container)).toBeNull()
@@ -656,7 +656,7 @@ describe('VTimeInput — the meridiem', () => {
 
   it('inside the picker: the draft follows the meridiem, and OK commits the right value', async () => {
     const { container, emitted, getByText } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '07:00', format: '12h' },
+      props: { mode: 'picker', modelValue: '07:00', format: '12h' },
     })
     await openPanel(container)
     await fireEvent.click(pmInPicker(container))
@@ -669,12 +669,83 @@ describe('VTimeInput — the meridiem', () => {
 
   it('inside the picker: Cancel drops the meridiem along with the rest of the draft', async () => {
     const { container, emitted, getByText } = render(VTimeInput, {
-      props: { mode: 'readonly', modelValue: '07:00', format: '12h' },
+      props: { mode: 'picker', modelValue: '07:00', format: '12h' },
     })
     await openPanel(container)
     await fireEvent.click(pmInPicker(container))
     await nextTick()
     await fireEvent.click(getByText('Cancel'))
     expect(emitted('update:modelValue')).toBeUndefined()
+  })
+})
+
+describe('VTimeInput — the field props', () => {
+  it('readonly: no clock, no popup ARIA, no clear cross, no AM/PM button', () => {
+    const { container, queryByRole } = render(VTimeInput, {
+      props: {
+        mode: 'picker',
+        modelValue: '09:15',
+        label: 'Time',
+        format: '12h',
+        readonly: true,
+        clearable: true,
+      },
+    })
+    const input = container.querySelector('input') as HTMLInputElement
+    expect(input.readOnly).toBe(true)
+    expect(input.getAttribute('aria-haspopup')).toBeNull()
+    expect(input.getAttribute('aria-controls')).toBeNull()
+    // The AM/PM button writes the value, so a frozen field renders none either.
+    expect(container.querySelector('.v-time-input-meridiem')).toBeNull()
+    expect(queryByRole('button')).toBeNull()
+  })
+
+  it('readonly: the panel never opens', async () => {
+    const { container, queryByRole } = render(VTimeInput, {
+      props: { modelValue: '09:15', label: 'Time', readonly: true, showPicker: true },
+    })
+    await fireEvent.click(container.querySelector('.v-time-input-control') as HTMLElement)
+    await nextTick()
+    expect(queryByRole('dialog')).toBeNull()
+  })
+
+  it('readonly reaches the list form, which is a VCombobox', () => {
+    const { container, queryByRole } = render(VTimeInput, {
+      props: { mode: 'list', modelValue: '09:15', label: 'Time', readonly: true, clearable: true },
+    })
+    expect((container.querySelector('input') as HTMLInputElement).readOnly).toBe(true)
+    expect(queryByRole('listbox', { hidden: true })?.hasAttribute('data-popover-open')).toBe(false)
+  })
+
+  it('loading: a spinner takes the clock icon place, the panel still opens', async () => {
+    const { container, getByRole } = render(VTimeInput, {
+      props: { mode: 'picker', modelValue: '09:15', label: 'Time', loading: true },
+    })
+    expect(container.querySelector('.v-spinner')).not.toBeNull()
+    await fireEvent.click(container.querySelector('.v-time-input-control') as HTMLElement)
+    await nextTick()
+    expect(getByRole('dialog')).toBeTruthy()
+  })
+
+  it('iconEndLabel and clearLabel override the dictionary', () => {
+    const { getByRole } = render(VTimeInput, {
+      props: {
+        mode: 'picker',
+        modelValue: '09:15',
+        label: 'Time',
+        clearable: true,
+        iconEndLabel: 'Pick a time',
+        clearLabel: 'Empty the time',
+      },
+    })
+    expect(getByRole('button', { name: 'Pick a time' })).toBeTruthy()
+    expect(getByRole('button', { name: 'Empty the time' })).toBeTruthy()
+  })
+
+  it('iconStart is rendered inside the field', () => {
+    const { container } = render(VTimeInput, {
+      props: { mode: 'picker', modelValue: '09:15', label: 'Time', iconStart: 'search' },
+    })
+    expect(container.querySelector('.v-input-field > .v-icon')).not.toBeNull()
   })
 })

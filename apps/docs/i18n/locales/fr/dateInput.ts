@@ -5,7 +5,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Libellé, aide et icône',
-      text: "Le champ est un <code>VInput</code>, donc <code>label</code> et <code>hint</code> se comportent exactement comme partout ailleurs. <code>pickerIcon</code> change le glyphe qui ouvre le calendrier, à la fin du champ. Aucune icône n'est rendue quand il n'y a pas de panneau à ouvrir, ce qui est le cas par défaut d'un champ où l'on peut taper.",
+      text: "Le champ est un <code>VInput</code>, donc <code>label</code> et <code>hint</code> se comportent exactement comme partout ailleurs. <code>pickerIcon</code> change le glyphe qui ouvre le calendrier, à la fin du champ. Aucune icône n'est rendue quand il n'y a pas de panneau à ouvrir, ce qui est le cas par défaut d'un champ où l'on peut taper. <code>iconStart</code> place une icône au début du champ, décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton, lequel réclame alors <code>iconStartLabel</code>. À l'autre bout, <code>loading</code> affiche une roue à la place de l'icône du calendrier pendant qu'une donnée se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours. <code>iconEndLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment le bouton, la croix et la roue quand la formulation du dictionnaire ne convient pas.",
     },
     sizes: {
       title: 'Tailles',
@@ -13,7 +13,7 @@ export default {
     },
     modes: {
       title: 'Modes',
-      text: 'Deux modes, et une troisième configuration entre les deux. <code>input</code>, la valeur par défaut, masque le champ pour que seuls des chiffres soient tapés et que les séparateurs se placent à mesure que chaque partie se remplit ; le calendrier y est alors facultatif, via <code>showPicker</code>, un panneau à chaque focus étant du bruit dans un formulaire dense. <code>readonly</code> fait du calendrier la seule entrée possible. La saisie est réservée à une date unique : une période ou une liste retombe en lecture seule, faute de manière sensée de les taper.',
+      text: 'Deux modes, et une troisième configuration entre les deux. <code>input</code>, la valeur par défaut, masque le champ pour que seuls des chiffres soient tapés et que les séparateurs se placent à mesure que chaque partie se remplit ; le calendrier y est alors facultatif, via <code>showPicker</code>, un panneau à chaque focus étant du bruit dans un formulaire dense. <code>picker</code> fait du calendrier la seule entrée possible. La saisie est réservée à une date unique : une période ou une liste retombe sur <code>picker</code>, faute de manière sensée de les taper.',
     },
     range: {
       title: 'Période',
@@ -49,11 +49,11 @@ export default {
     },
     states: {
       title: 'États',
-      text: "Un champ invalide sert à une règle que le navigateur ne sait pas vérifier lui-même, le masque refusant déjà tout ce qui n'est pas une date. Un champ désactivé grise par les jetons de couleur et ne peut plus ouvrir son panneau, ce qui tient en un seul garde plutôt qu'un par gestionnaire : le même point de coupure couvre le clic, le focus, la flèche et l'icône.",
+      text: "Un champ invalide sert à une règle que le navigateur ne sait pas vérifier lui-même, le masque refusant déjà tout ce qui n'est pas une date. Un champ désactivé grise par les jetons de couleur et ne peut plus ouvrir son panneau, ce qui tient en un seul garde plutôt qu'un par gestionnaire : le même point de coupure couvre le clic, le focus, la flèche et l'icône. <code>readonly</code> se place entre les deux : la valeur est montrée mais gelée, donc rien ne se tape, il n'y a pas de calendrier et la croix de vidage disparaît avec lui, tout comme les attributs qui annonçaient un panneau. Le champ garde son contraste normal, prend le focus et reste copiable, ce qui le distingue de <code>disabled</code>. Il répond à une autre question que <code>mode</code>, qui dit comment se remplit un champ que l'on peut changer.",
     },
     localization: {
       title: 'Localisation',
-      text: "L'étiquette de langue décide de l'ordre dans lequel le champ se tape, du séparateur qu'il place, des noms de mois et de jours et du premier jour de la semaine, le tout dérivé et non tabulé. <code>locale</code> prend le pas sur la locale globale et retombe dessus si on l'omet. <code>displayFormat</code> est un jeu d'options <code>Intl</code> pour écrire la date, et il s'applique là où rien n'est tapé : le mode lecture seule, et les sélections de période et de liste qui y retombent.",
+      text: "L'étiquette de langue décide de l'ordre dans lequel le champ se tape, du séparateur qu'il place, des noms de mois et de jours et du premier jour de la semaine, le tout dérivé et non tabulé. <code>locale</code> prend le pas sur la locale globale et retombe dessus si on l'omet. <code>displayFormat</code> est un jeu d'options <code>Intl</code> pour écrire la date, et il s'applique là où rien n'est tapé : le mode <code>picker</code>, et les sélections de période et de liste qui y retombent.",
     },
     placement: {
       title: 'Placement',
@@ -76,21 +76,34 @@ export default {
         showAdjacentDays: 'Remplit les coins de la grille avec les jours grisés des mois voisins.',
         selectAdjacentDays: 'Permet de cliquer ces jours voisins, ce qui implique de les afficher.',
         events: 'Les événements à marquer sous les jours concernés.',
-        mode: "Si le champ peut être SAISI, dans la forme numérique de la langue du lecteur, ou s'il est en lecture seule, le calendrier étant alors la seule voie d'entrée. La saisie est réservée au choix d'une date UNIQUE : une période ou une liste retombe en lecture seule, faute de façon sensée de saisir l'une ou l'autre.",
+        mode: "Si le champ peut être SAISI, dans la forme numérique de la langue du lecteur, ou s'il se remplit depuis le seul calendrier, ce qui est <code>picker</code>. La saisie est réservée au choix d'une date UNIQUE : une période ou une liste retombe sur <code>picker</code>, faute de façon sensée de saisir l'une ou l'autre. C'est une autre question que <code>readonly</code>, qui gèle le champ par toutes les voies à la fois.",
         showPicker:
-          "Propose le sélecteur de date à côté d'un champ saisissable : une icône en fin de champ, et un panneau qui s'ouvre au focus. Cela ne signifie rien en lecture seule, où le sélecteur est déjà la seule façon de choisir.",
+          "Propose le sélecteur de date à côté d'un champ saisissable : une icône en fin de champ, et un panneau qui s'ouvre au focus. Cela ne signifie rien en mode <code>picker</code>, où le calendrier est déjà la seule façon de choisir.",
         label: 'Le libellé au-dessus du champ.',
         hint: "Une ligne d'aide sous le champ.",
         placeholder: 'Ce que dit le champ quand il est vide.',
         size: 'La hauteur du champ : 32, 40 ou 48 pixels.',
         compact: 'Retire 4px à la hauteur.',
         disabled: 'Rend le champ inutilisable, grisé par les tokens de couleur.',
+        readonly:
+          "Montre la date sans permettre de la changer : rien ne se tape, il n'y a ni calendrier ni croix de vidage, et les attributs qui annonçaient un panneau disparaissent avec eux. Le champ garde le focus et reste copiable, ce qui le distingue de <code>disabled</code>.",
         invalid: 'Marque le champ comme invalide, pour une règle à vous.',
+        iconStart:
+          "Une icône dans le champ, au début. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
+        iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
+        iconEndLabel:
+          "Ce que fait l'icône de fin, en mots. Elle nomme le bouton qui ouvre le calendrier, et sa valeur par défaut vient du dictionnaire du design system.",
+        loading:
+          "Affiche une roue à la place de l'icône du calendrier. Elle dit que quelque chose se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours.",
+        loadingLabel:
+          "Ce que les lecteurs d'écran annoncent pendant que la roue tourne. Sa valeur par défaut vient du dictionnaire du design system.",
         clearable: "Propose une croix qui vide la valeur, affichée avant l'icône de fin.",
+        clearLabel:
+          'Ce que fait cette croix, en mots. Sa valeur par défaut vient du dictionnaire du design system.',
         pickerIcon:
           "L'icône qui ouvre le sélecteur de date, en fin de champ. La croix d'effacement apparaît à sa gauche plutôt qu'à sa place, et aucune icône n'est rendue du tout quand il n'y a pas de panneau à ouvrir.",
         displayFormat:
-          "Comment la date est ÉCRITE dans le champ. Sans effet sur un champ en cours de saisie, qui montre nécessairement la forme numérique que l'on tape : cette prop concerne donc la lecture seule, ainsi que les sélections de période et de liste.",
+          "Comment la date est ÉCRITE dans le champ. Sans effet sur un champ en cours de saisie, qui montre nécessairement la forme numérique que l'on tape : cette prop concerne donc le mode <code>picker</code>, ainsi que les sélections de période et de liste.",
         placement: "Où le panneau s'ouvre par rapport au champ.",
         vModel:
           "La ou les dates choisies, dans la forme que <code>selection</code> réclame. Pendant la saisie, la valeur n'est écrite qu'une fois que ce qui a été entré est une date complète et acceptable ; une entrée inachevée ou refusée la laisse intacte et est annulée quand le lecteur quitte le champ.",
