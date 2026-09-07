@@ -10,6 +10,6 @@ import { VButton, VMenu, VMenuItem, VMenuSeparator } from 'vectis-ui'
     <VMenuItem label="Rename" />
     <VMenuItem label="Duplicate" />
     <VMenuSeparator />
-    <VMenuItem label="Delete" danger />
+    <VMenuItem label="Delete" tone="danger" />
   </VMenu>
 </template>

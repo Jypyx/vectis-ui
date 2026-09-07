@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VTimeInput from './VTimeInput.vue'
 
@@ -747,5 +747,52 @@ describe('VTimeInput — the field props', () => {
       props: { mode: 'picker', modelValue: '09:15', label: 'Time', iconStart: 'search' },
     })
     expect(container.querySelector('.v-input-field > .v-icon')).not.toBeNull()
+  })
+
+  it('declares clear and click:icon-start rather than letting them slip through the attrs', async () => {
+    const { getByRole, emitted } = render(VTimeInput, {
+      props: { modelValue: '09:15', clearable: true },
+    })
+    await fireEvent.click(getByRole('button', { name: /clear/i }))
+    expect(emitted('clear')).toHaveLength(1)
+  })
+
+  it('the list form reports its own clear, which comes from the combobox', async () => {
+    const { getByRole, emitted } = render(VTimeInput, {
+      props: { mode: 'list', modelValue: '09:15', clearable: true, minuteStep: 30 },
+    })
+    await fireEvent.click(getByRole('button', { name: /clear/i }))
+    expect(emitted('clear')).toHaveLength(1)
+  })
+
+  it('the list form forwards loading, which it used to drop', () => {
+    const { container } = render(VTimeInput, {
+      props: { mode: 'list', modelValue: '09:15', loading: true, minuteStep: 30 },
+    })
+    expect(container.querySelector('.v-combobox-spinner')).not.toBeNull()
+  })
+
+  it('warns for the end-icon props the list form cannot use', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(VTimeInput, {
+      props: { mode: 'list', minuteStep: 30, iconEndLabel: 'Open', loadingLabel: 'Loading' },
+    })
+    expect(warn.mock.calls.map(String).join(' ')).toContain('iconEndLabel, loadingLabel')
+  })
+
+  it('exposes focus and the real input, in the list form too', async () => {
+    for (const mode of ['input', 'list'] as const) {
+      const holder = ref<InstanceType<typeof VTimeInput> | null>(null)
+      const Host = defineComponent({
+        setup: () => () =>
+          h(VTimeInput, { ref: holder, mode, modelValue: '09:15', minuteStep: 30 }),
+      })
+      const el = document.createElement('div')
+      document.body.appendChild(el)
+      render(Host, { container: el })
+      await nextTick()
+      holder.value?.focus()
+      expect(document.activeElement).toBe(holder.value?.el)
+    }
   })
 })

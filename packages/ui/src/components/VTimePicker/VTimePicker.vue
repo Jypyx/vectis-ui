@@ -92,6 +92,17 @@ interface TimePickerProps {
   allowedHours?: TimeMatcher
   /** Which minutes can be chosen: the list of them, or a rule answering for one. */
   allowedMinutes?: TimeMatcher
+  /**
+   * Makes the whole clock unusable: the hand cannot be moved, the half-day cannot be
+   * changed, and everything greys out through the colour tokens.
+   */
+  disabled?: boolean
+  /**
+   * Shows the time without letting it be changed. The face keeps its focus and the two
+   * numerals still switch between the hour and the minutes, so the value can be read in
+   * full — which is what separates it from `disabled`.
+   */
+  readonly?: boolean
 }
 
 const props = withDefaults(defineProps<TimePickerProps>(), {
@@ -102,6 +113,8 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   max: undefined,
   allowedHours: undefined,
   allowedMinutes: undefined,
+  disabled: false,
+  readonly: false,
 })
 
 /**
@@ -174,6 +187,11 @@ const minute = computed(() => parts.value.minute)
  * face, belongs to the consumer and is not ours to round.
  */
 function setHour(value: number | null) {
+  // The two writers below are the ONLY way the value ever changes — pointer, keys and the
+  // half-day control all come through them — so the two states are refused here and
+  // nowhere else. Changing which face is shown stays allowed under `readonly`: reading
+  // the minutes is not changing them.
+  if (props.disabled || props.readonly) return
   if (value === null) return
   const minutes = isTimeAllowed(value, minute.value, limits.value)
     ? minute.value
@@ -184,6 +202,7 @@ function setHour(value: number | null) {
 
 /** Writing the minutes. Null is "there was nowhere to go", which every key can produce. */
 function setMinute(value: number | null) {
+  if (props.disabled || props.readonly) return
   if (value === null || !isTimeAllowed(hour.value, value, limits.value)) return
   model.value = formatTime(hour.value, value)
 }
@@ -547,7 +566,12 @@ defineExpose({
 </script>
 
 <template>
-  <div class="v-time-picker" :data-step="step">
+  <div
+    class="v-time-picker"
+    :data-step="step"
+    :data-disabled="disabled ? '' : undefined"
+    :data-readonly="readonly ? '' : undefined"
+  >
     <!-- The two large numerals switch between adjusting the hour and the minutes. The one
          being adjusted takes the accent tone, which on a quiet button shows as the colour
          of the numeral rather than as a filled background.
@@ -564,6 +588,7 @@ defineExpose({
           :tone="step === 'hour' ? 'accent' : 'neutral'"
           :aria-pressed="step === 'hour' ? 'true' : 'false'"
           :aria-label="m.timePicker.selectHour"
+          :disabled="disabled"
           @click="setStep('hour')"
         >
           {{ displayHourText }}
@@ -576,6 +601,7 @@ defineExpose({
           :tone="step === 'minute' ? 'accent' : 'neutral'"
           :aria-pressed="step === 'minute' ? 'true' : 'false'"
           :aria-label="m.timePicker.selectMinute"
+          :disabled="disabled"
           @click="setStep('minute')"
         >
           {{ pad2(minute) }}
@@ -592,6 +618,7 @@ defineExpose({
         orientation="vertical"
         size="sm"
         :label="m.timePicker.meridiem"
+        :disabled="disabled || readonly"
       >
         <VToggleItem value="AM" :label="m.timePicker.am" :disabled="!meridiemAvailable('AM')" />
         <VToggleItem value="PM" :label="m.timePicker.pm" :disabled="!meridiemAvailable('PM')" />
@@ -601,7 +628,7 @@ defineExpose({
     <div
       ref="faceEl"
       role="slider"
-      tabindex="0"
+      :tabindex="disabled ? -1 : 0"
       class="v-time-picker-face"
       :aria-label="step === 'hour' ? m.timePicker.hour : m.timePicker.minutes"
       :aria-valuemin="ariaValueMin"
@@ -609,6 +636,8 @@ defineExpose({
       :aria-valuenow="ariaValueNow"
       :aria-valuetext="ariaValueText"
       :data-dragging="dragging ? '' : undefined"
+      :aria-disabled="disabled ? 'true' : undefined"
+      :aria-readonly="readonly ? 'true' : undefined"
       @pointerdown="onPointerdown"
       @pointermove="onPointermove"
       @pointerup="onPointerup"
@@ -858,6 +887,36 @@ defineExpose({
     block-size: var(--vectis-control-size-time-picker-center);
     border-radius: var(--vectis-radius-pill);
     background: var(--vectis-color-accent);
+  }
+
+  /* Neither state is a pointer target. A read-only clock is still read, so it keeps the
+     ordinary cursor; a disabled one refuses. */
+  .v-time-picker[data-readonly] .v-time-picker-face {
+    cursor: default;
+  }
+
+  .v-time-picker[data-disabled] .v-time-picker-face {
+    cursor: not-allowed;
+  }
+
+  /*
+   * A disabled clock greys out through the colour tokens and never through opacity: the
+   * hand and its centre dot are the two accent-painted parts, and the numeral under the
+   * dot is painted for an accent background it no longer has.
+   *
+   * The whole block sits AFTER the rules it overrides, every one of them at the same
+   * specificity: this is one sheet, so its own order is what settles them.
+   */
+  .v-time-picker[data-disabled] .v-time-picker-hand,
+  .v-time-picker[data-disabled] .v-time-picker-hand::before,
+  .v-time-picker[data-disabled] .v-time-picker-center {
+    background: var(--vectis-color-border-strong);
+  }
+
+  .v-time-picker[data-disabled] .v-time-picker-sep,
+  .v-time-picker[data-disabled] .v-time-picker-number,
+  .v-time-picker[data-disabled] .v-time-picker-number[data-selected] {
+    color: var(--vectis-color-text-subtle);
   }
 
   .v-time-picker-footer {

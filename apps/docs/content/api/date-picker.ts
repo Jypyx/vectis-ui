@@ -18,6 +18,8 @@ export default {
         { name: 'showAdjacentDays', type: 'boolean', default: 'false' },
         { name: 'selectAdjacentDays', type: 'boolean', default: 'false' },
         { name: 'events', type: 'DatePickerEvent[]' },
+        { name: 'disabled', type: 'boolean', default: 'false' },
+        { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'v-model', key: 'vModel', type: 'DatePickerValue', default: 'null' },
       ],
       events: [

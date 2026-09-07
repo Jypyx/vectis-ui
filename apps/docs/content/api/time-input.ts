@@ -37,6 +37,10 @@ export default {
         { name: 'placement', type: 'Placement', default: "'bottom-start'" },
         { name: 'v-model', key: 'vModel', type: 'string | null', default: 'null' },
       ],
+      events: [
+        { name: 'click:icon-start', key: 'clickIconStart', type: '[event: MouseEvent]' },
+        { name: 'clear', type: '[]' },
+      ],
     },
   ],
 } satisfies PageApi

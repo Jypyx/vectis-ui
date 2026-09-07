@@ -50,22 +50,11 @@ import { useFileField } from '../../composables/useFileField'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useLocale, useMessages } from '../../i18n/state'
 import { isDev } from '../../utils/env'
-import { formatBytes } from '../../utils/file'
+import { formatBytes, type FileRejection } from '../../utils/file'
 import { fileKind, type FileKind } from './fileKind'
 
 /** Where the files taken are listed — under the zone, beside it, or nowhere. */
 export type FilePickerPreview = false | 'bottom' | 'end'
-
-/** Why a file was turned away: its kind, its size, how many there already are, or the total. */
-export type FilePickerRejectReason = 'type' | 'size' | 'count' | 'total-size'
-
-/** One file that was turned away, and the reason it was. */
-export interface FilePickerRejection {
-  /** The file itself, so a message can name it. */
-  file: File
-  /** What it fell foul of. */
-  reason: FilePickerRejectReason
-}
 
 /**
  * Everything known about one row of the list. The same object is handed to both slots
@@ -188,7 +177,7 @@ const emit = defineEmits<{
    * A file was turned away and never joined the selection. It is emitted once PER file,
    * so a batch drop can be reported precisely.
    */
-  reject: [rejection: FilePickerRejection]
+  reject: [rejection: FileRejection]
   /**
    * One file was taken out, and which one. It exists alongside `change`, which only says
    * what is LEFT: an upload already in flight is aborted from here, without having to

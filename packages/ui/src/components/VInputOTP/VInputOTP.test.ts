@@ -129,3 +129,28 @@ describe('VInputOTP', () => {
     expect((getAllByRole('textbox')[0] as HTMLInputElement).disabled).toBe(true)
   })
 })
+
+describe('VInputOTP — hint', () => {
+  it('renders the hint and ties it to the group', () => {
+    const { container } = renderOtp({ hint: 'Sent to +33 6 12 34 56 78' })
+    const group = container.querySelector('[role="group"]') as HTMLElement
+    const hint = container.querySelector('.v-otp-hint') as HTMLElement
+    expect(hint.textContent).toContain('Sent to')
+    expect(group.getAttribute('aria-describedby')).toBe(hint.id)
+  })
+
+  it("appends the hint to the consumer's own describedby rather than replacing it", () => {
+    const { container } = render(VInputOTP, {
+      props: { modelValue: '', hint: 'Six digits' },
+      attrs: { 'aria-describedby': 'outside' },
+    })
+    const group = container.querySelector('[role="group"]') as HTMLElement
+    const hint = container.querySelector('.v-otp-hint') as HTMLElement
+    expect(group.getAttribute('aria-describedby')).toBe('outside ' + hint.id)
+  })
+
+  it('with no hint the group points at nothing of its own', () => {
+    const { container } = renderOtp()
+    expect(container.querySelector('[role="group"]')?.hasAttribute('aria-describedby')).toBe(false)
+  })
+})

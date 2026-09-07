@@ -13,7 +13,7 @@ import { computed, inject } from 'vue'
 import type { ButtonHTMLAttributes } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
-import type { ButtonTone } from '../VButton/VButton.vue'
+import type { ButtonSize, ButtonTone, ButtonVariant } from '../VButton/VButton.vue'
 import { buttonGroupKey } from '../VButton/context'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -30,17 +30,17 @@ interface IconButtonProps {
    * How much visual weight the button carries — the VButton variants. `ghost` by default,
    * and inside a VButtonGroup the group's own variant wins over it.
    */
-  variant?: 'solid' | 'outline' | 'ghost' | 'soft'
+  variant?: ButtonVariant
   /**
    * What the action means, in colour — the VButton tones. An icon-only button is usually
    * secondary, which is why it starts neutral where VButton starts accent. Left out inside
    * a VButtonGroup it takes the group's tone; on its own it is `neutral`.
    */
-  tone?: 'accent' | 'neutral' | 'danger'
+  tone?: ButtonTone
   /** Raises the button with a shadow, and a raised surface on ghost and outline. */
   elevated?: boolean
   /** The size of the square, taken from the scale shared by every control. */
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  size?: ButtonSize
   /** Takes 4px off both sides of the square, which stays square. */
   compact?: boolean
   /**

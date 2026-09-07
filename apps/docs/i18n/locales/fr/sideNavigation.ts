@@ -22,6 +22,7 @@ export default {
     },
     VSideNavigationItem: {
       props: {
+        label: 'Ce que dit la ligne, et où elle mène. Le slot par défaut la remplace.',
         sublabel: 'Une seconde ligne sous le libellé, pour un statut ou une courte explication.',
         icon: 'Une icône avant le libellé. Le slot <code>#start</code> la remplace.',
         href: "Où mène cette ligne, ce qui en fait un lien. Elle est ignorée sur une ligne qui a des sous-items : une telle ligne s'ouvre et se referme plutôt que de naviguer.",

@@ -26,7 +26,7 @@ function renderMenu(onSelect = vi.fn()) {
         </template>
         <VMenuItem label="Rename" @select="onSelect" />
         <VMenuItem label="Archive" disabled />
-        <VMenuItem label="Delete" danger />
+        <VMenuItem label="Delete" tone="danger" />
       </VMenu>
     `,
     onSelect,
@@ -418,7 +418,7 @@ describe('VMenu', () => {
             <VMenuItem label="Duplicate" />
           </VMenuGroup>
           <VMenuSeparator />
-          <VMenuItem label="Delete" danger />
+          <VMenuItem label="Delete" tone="danger" />
         </VMenu>
       `)
     }
@@ -696,5 +696,16 @@ describe('VMenu', () => {
       menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
       expect(getByRole('menuitem', { name: 'Action' })).toBe(document.activeElement)
     })
+  })
+})
+
+describe('VMenuItem — tone', () => {
+  it('mirrors the tone unconditionally, the way every union of the design system does', async () => {
+    const { getByRole, container } = renderMenu()
+    await openMenu(container)
+    expect(getByRole('menuitem', { name: 'Delete' }).dataset.tone).toBe('danger')
+    // The default is written out too: a union is always mirrored, where a boolean would
+    // only appear when true.
+    expect(getByRole('menuitem', { name: 'Rename' }).dataset.tone).toBe('neutral')
   })
 })

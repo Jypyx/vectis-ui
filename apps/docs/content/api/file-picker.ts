@@ -29,7 +29,7 @@ export default {
       ],
       events: [
         { name: 'change', type: '[files: File[]]' },
-        { name: 'reject', type: '[rejection: FilePickerRejection]' },
+        { name: 'reject', type: '[rejection: FileRejection]' },
         { name: 'remove', type: '[file: File, index: number]' },
       ],
       slots: [

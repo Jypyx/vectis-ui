@@ -108,6 +108,11 @@ export default {
         vModel:
           'The date or dates chosen, in the shape <code>selection</code> calls for. While the reader types, it is only written once what they have entered is a complete and acceptable date; an unfinished or refused entry leaves it untouched and is reverted when they leave the field.',
       },
+      events: {
+        clear: 'The clear cross emptied the field. The value has already been reset.',
+        clickIconStart:
+          'The start icon was clicked. Attaching this listener is what turns that icon into a real button, which then needs <code>iconStartLabel</code>.',
+      },
       slots: {
         day: 'What a day cell shows, handed straight to the calendar.',
         footer:

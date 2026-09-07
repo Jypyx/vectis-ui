@@ -30,9 +30,9 @@ The `#title` slot replaces the `title` prop to compose a heading (emphasis, badg
 ## Subtitle and start icon
 
 Each item can complete its title: `subtitle` adds a secondary line under the title (replaceable
-through the `#subtitle` slot for rich content), and `iconStart` places an icon before the text
+through the `#subtitle` slot for rich content), and `icon` places an icon before the text
 block — an icon name **or** an explicit render (`{ src }`, `{ component }`), as everywhere else.
-The `#start` slot wins over `iconStart` for free content (an avatar, a badge…). The two combine
+The `#start` slot wins over `icon` for free content (an avatar, a badge…). The two combine
 freely and stay independent of the opening chevron.
 
 <Canvas of={VAccordionStories.SubtitleAndIcon} />

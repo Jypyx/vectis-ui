@@ -15,14 +15,16 @@
  * rest, forcing capitals outside a numeric code so the value has one canonical form.
  */
 
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useAttrs, watch } from 'vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
+import VTypography from '../VTypography/VTypography.vue'
 
 import { isDev } from '../../utils/env'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useFieldIds } from '../../composables/useFieldIds'
 import { useMessages } from '../../i18n/state'
 
 interface InputOTPProps {
@@ -56,8 +58,17 @@ interface InputOTPProps {
   /**
    * What screen readers announce for the row as a whole. It falls back to the design
    * system dictionary.
+   *
+   * Unlike the `label` of VInput and the other text fields, NOTHING is rendered from it:
+   * a row of boxes carries its own instructions above it, written by the page. Use `hint`
+   * for a line the reader can see.
    */
   label?: string
+  /**
+   * A line of help under the boxes — where the code was sent, how long it lasts. It is
+   * tied to the row for assistive technology, so it is read out along with the label.
+   */
+  hint?: string
 }
 
 const props = withDefaults(defineProps<InputOTPProps>(), {
@@ -70,10 +81,23 @@ const props = withDefaults(defineProps<InputOTPProps>(), {
   disabled: false,
   invalid: false,
   label: undefined,
+  hint: undefined,
 })
 
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.inputOTP.label)
+
+// @a11y
+/*
+ * The root IS the group, so the consumer's attributes belong on it — but they are bound
+ * BEFORE the two the component decides itself. `aria-describedby` is a list, and the hint
+ * is appended to whatever the consumer already pointed at instead of replacing it; left
+ * to the fallthrough, their value would land last and take the hint out of the
+ * announcement with nothing to show for it.
+ */
+defineOptions({ inheritAttrs: false })
+const attrs = useAttrs()
+const { hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
 
 /**
  * The code as one string, without the separators: a `GT-###` template still yields three
@@ -219,42 +243,50 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
 
 <template>
   <div
+    v-bind="attrs"
     class="v-otp v-control"
     role="group"
     :aria-label="ariaLabel"
+    :aria-describedby="describedBy"
     :data-invalid="invalid ? '' : undefined"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
   >
-    <template v-for="(cell, i) in cells" :key="i">
-      <input
-        v-if="cell.type === 'slot'"
-        :ref="
-          (el) => {
-            inputs[cell.slotIndex] = el as HTMLInputElement | null
-          }
-        "
-        type="text"
-        class="v-otp-input"
-        :inputmode="format === 'numeric' ? 'numeric' : 'text'"
-        :autocomplete="cell.slotIndex === 0 ? 'one-time-code' : 'off'"
-        :value="digits[cell.slotIndex]"
-        :disabled="disabled"
-        :aria-label="m.inputOTP.slot(cell.slotIndex + 1, slotCount)"
-        :aria-invalid="invalid || undefined"
-        @input="onInput(cell.slotIndex, $event)"
-        @keydown="onKeydown(cell.slotIndex, $event)"
-        @focus="($event.target as HTMLInputElement).select()"
-      />
-      <!-- A separator from the pattern: shown, never focusable, and never part of the
-           value. It is hidden from screen readers, each box already announcing its
-           own position in the code. -->
-      <span v-else class="v-otp-literal" aria-hidden="true">
-        <VIcon v-if="separatorIcon" v-bind="iconProps(separatorIcon)" />
-        <template v-else>{{ cell.char }}</template>
-      </span>
-    </template>
+    <div class="v-otp-boxes">
+      <template v-for="(cell, i) in cells" :key="i">
+        <input
+          v-if="cell.type === 'slot'"
+          :ref="
+            (el) => {
+              inputs[cell.slotIndex] = el as HTMLInputElement | null
+            }
+          "
+          type="text"
+          class="v-otp-input"
+          :inputmode="format === 'numeric' ? 'numeric' : 'text'"
+          :autocomplete="cell.slotIndex === 0 ? 'one-time-code' : 'off'"
+          :value="digits[cell.slotIndex]"
+          :disabled="disabled"
+          :aria-label="m.inputOTP.slot(cell.slotIndex + 1, slotCount)"
+          :aria-invalid="invalid || undefined"
+          @input="onInput(cell.slotIndex, $event)"
+          @keydown="onKeydown(cell.slotIndex, $event)"
+          @focus="($event.target as HTMLInputElement).select()"
+        />
+        <!-- A separator from the pattern: shown, never focusable, and never part of the
+             value. It is hidden from screen readers, each box already announcing its
+             own position in the code. -->
+        <span v-else class="v-otp-literal" aria-hidden="true">
+          <VIcon v-if="separatorIcon" v-bind="iconProps(separatorIcon)" />
+          <template v-else>{{ cell.char }}</template>
+        </span>
+      </template>
+    </div>
+
+    <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-otp-hint">
+      {{ hint }}
+    </VTypography>
   </div>
 </template>
 
@@ -269,7 +301,17 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
      */
     --otp-font-size: var(--vectis-font-size-lg);
 
+    /* A column, so the hint sits under the boxes rather than beside them; the row itself
+       is the box below. `inline-flex` keeps the component's own width, and the start
+       alignment stops the hint from stretching the row to its own length. */
     display: inline-flex;
+    flex-direction: column;
+    align-items: start;
+    gap: var(--vectis-space-1);
+  }
+
+  .v-otp-boxes {
+    display: flex;
     align-items: center;
     gap: var(--control-gap);
   }
@@ -326,7 +368,8 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     cursor: not-allowed;
   }
 
-  .v-otp[data-disabled] .v-otp-literal {
+  .v-otp[data-disabled] .v-otp-literal,
+  .v-otp[data-disabled] .v-otp-hint {
     color: var(--vectis-color-text-subtle);
   }
 

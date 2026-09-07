@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VDateInput from './VDateInput.vue'
 
@@ -480,5 +480,41 @@ describe('VDateInput — the field props', () => {
       props: { mode: 'picker', modelValue: JUNE, label: 'Date', iconStart: 'search' },
     })
     expect(container.querySelector('.v-input-field > .v-icon')).not.toBeNull()
+  })
+
+  it('declares clear and click:icon-start rather than letting them slip through the attrs', async () => {
+    const { getByRole, emitted } = render(VDateInput, {
+      props: { modelValue: JUNE, clearable: true },
+    })
+    await fireEvent.click(getByRole('button', { name: /clear/i }))
+    expect(emitted('clear')).toHaveLength(1)
+  })
+
+  it('the start icon stays decoration until a listener is attached', async () => {
+    const decorative = render(VDateInput, {
+      props: { modelValue: JUNE, iconStart: 'search', iconStartLabel: 'Search' },
+    })
+    expect(decorative.queryByRole('button', { name: 'Search' })).toBeNull()
+    decorative.unmount()
+
+    const { getByRole, emitted } = render(VDateInput, {
+      props: { modelValue: JUNE, iconStart: 'search', iconStartLabel: 'Search' },
+      attrs: { 'onClick:icon-start': () => {} },
+    })
+    await fireEvent.click(getByRole('button', { name: 'Search' }))
+    expect(emitted('click:icon-start')).toHaveLength(1)
+  })
+
+  it('exposes focus and the real input', async () => {
+    const holder = ref<InstanceType<typeof VDateInput> | null>(null)
+    const Host = defineComponent({
+      setup: () => () => h(VDateInput, { ref: holder, modelValue: JUNE }),
+    })
+    const el = document.createElement('div')
+    document.body.appendChild(el)
+    render(Host, { container: el })
+    await nextTick()
+    holder.value?.focus()
+    expect(document.activeElement).toBe(holder.value?.el)
   })
 })

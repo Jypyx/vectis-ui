@@ -21,7 +21,8 @@ and the nesting relation announced by screen readers _are_ the hierarchy informa
 
 ## Anatomy of an item
 
-The label is the default slot — it is the only mandatory content. Around it: `sublabel` (or the
+The label is either the `label` prop or the default slot, which replaces it — one of the two is
+the only mandatory content. Around it: `sublabel` (or the
 `#sublabel` slot) adds a secondary line, `icon` places an icon before the label (an icon name **or**
 an explicit render `{ src }` / `{ component }`, as everywhere else in the DS; the `#start` slot wins
 for free content), and the `#end` slot takes whatever you want on the right — a counter, a badge, an

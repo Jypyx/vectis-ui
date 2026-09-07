@@ -72,6 +72,8 @@ export default {
         iconStart:
           "Une icône dans le champ, au début. Elle est rendue avant les chips et non à leur place. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
         iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
+        expandIcon:
+          "Le chevron à la fin du champ, qui pivote à l'ouverture de la liste. C'est une décoration : c'est le champ lui-même qui ouvre la liste, donc le chevron est masqué aux lecteurs d'écran et ne prend pas de libellé.",
         clearable: 'Propose une croix qui vide à la fois la sélection et la recherche.',
         clearLabel:
           'Ce que fait cette croix, en mots. Sa valeur par défaut vient du dictionnaire du design system.',
@@ -96,6 +98,9 @@ export default {
           "Ce qui est cherché, à envoyer à la source. C'est retardé de <code>searchDebounce</code> pendant la saisie, et émis aussitôt à l'ouverture du panneau pour qu'une première page puisse être chargée. Le même terme n'est jamais émis deux fois de suite.",
         loadMore:
           'La fin de la liste est entrée dans le champ de vision : envoyez la page suivante.',
+        clear: 'La croix de vidage a vidé la sélection et la recherche.',
+        clickIconStart:
+          "L'icône de début a été cliquée. Attacher cet écouteur est ce qui en fait un vrai bouton, qui demande alors <code>iconStartLabel</code>.",
       },
       slots: {
         option:

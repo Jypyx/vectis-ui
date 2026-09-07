@@ -706,4 +706,49 @@ describe('VCombobox asynchronous', () => {
     await fireEvent.keyDown(getByRole('combobox'), { key: 'Backspace' })
     expect(emitted('update:modelValue')).toBeUndefined()
   })
+
+  it('declares clear and click:icon-start, rather than letting them slip through the attrs', async () => {
+    const { getByRole, emitted } = renderCombobox({ modelValue: 'fr', clearable: true })
+    await fireEvent.click(getByRole('button', { name: /clear/i }))
+    expect(emitted('clear')).toHaveLength(1)
+  })
+
+  it('the start icon stays decoration until a listener is attached', async () => {
+    const decorative = renderCombobox({ iconStart: 'search', iconStartLabel: 'Search' })
+    expect(decorative.queryByRole('button', { name: 'Search' })).toBeNull()
+    decorative.unmount()
+
+    const { getByRole, emitted } = render(VCombobox, {
+      props: { options: OPTIONS, modelValue: '', iconStart: 'search', iconStartLabel: 'Search' },
+      attrs: { 'aria-label': 'Country', 'onClick:icon-start': () => {} },
+    })
+    await fireEvent.click(getByRole('button', { name: 'Search' }))
+    expect(emitted('click:icon-start')).toHaveLength(1)
+  })
+
+  it('expandIcon replaces the chevron, which stays out of the accessibility tree', () => {
+    const { container } = renderCombobox({ expandIcon: 'unfold_more' })
+    const chevron = container.querySelector('.v-combobox-chevron') as HTMLElement
+    expect(chevron.dataset.icon).toBe('unfold_more')
+    expect(chevron.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('exposes focus, select and the real input', async () => {
+    const field = ref<InstanceType<typeof VCombobox> | null>(null)
+    const container = document.createElement('div')
+    document.body.appendChild(container)
+    render(
+      {
+        components: { VCombobox },
+        setup: () => ({ field, options: OPTIONS }),
+        template:
+          '<VCombobox ref="field" :options="options" model-value="" aria-label="Country" />',
+      },
+      { container },
+    )
+    await nextTick()
+    field.value?.focus()
+    expect(document.activeElement).toBe(field.value?.el)
+    expect(field.value?.el?.tagName).toBe('INPUT')
+  })
 })

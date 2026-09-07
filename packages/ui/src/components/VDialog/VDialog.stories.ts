@@ -231,7 +231,7 @@ export const CustomHeader: Story = {
   }),
 }
 
-/** The `#headerActions` slot adds controls just to the left of the cross. */
+/** The `#header-actions` slot adds controls just to the left of the cross. */
 export const HeaderActions: Story = {
   render: (args) => ({
     components: { VDialog, VButton, VTypography },
@@ -244,7 +244,7 @@ export const HeaderActions: Story = {
         <template #trigger="{ triggerProps }">
           <VButton v-bind="triggerProps">{{ t.openPreview }}</VButton>
         </template>
-        <template #headerActions>
+        <template #header-actions>
           <VButton variant="ghost" tone="neutral" size="sm" iconStart="download" :aria-label="t.download" />
           <VButton variant="ghost" tone="neutral" size="sm" iconStart="open_in_full" :aria-label="t.fullScreen" />
         </template>

@@ -401,3 +401,15 @@ describe('VSideNavigation', () => {
     })
   })
 })
+
+describe('VSideNavigationItem — label', () => {
+  it('renders the label prop, and the default slot replaces it', () => {
+    const { getByText, queryByText } = renderNav(`
+      <VSideNavigationItem label="Overview" href="/" />
+      <VSideNavigationItem label="Ignored" href="/reports">Reports</VSideNavigationItem>
+    `)
+    expect(getByText('Overview')).not.toBeNull()
+    expect(getByText('Reports')).not.toBeNull()
+    expect(queryByText('Ignored')).toBeNull()
+  })
+})

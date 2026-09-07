@@ -23,6 +23,7 @@ export default {
     {
       name: 'VSideNavigationItem',
       props: [
+        { name: 'label', type: 'string' },
         { name: 'sublabel', type: 'string' },
         { name: 'icon', type: 'IconSource' },
         { name: 'href', type: 'string' },

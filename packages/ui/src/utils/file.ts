@@ -105,13 +105,23 @@ export function formatBytes(bytes: number, locale: string): string {
 }
 
 /**
- * Why a file was turned away. Each component declares its own public name for this: a
- * type belongs to the component that exposes it, and nothing in here is public.
+ * Why a file was turned away: its kind, its size, how many there already are, or the
+ * total.
+ *
+ * VFileInput and VFilePicker screen a batch through the same `screenFiles` below, so the
+ * two report the same thing and the type is declared ONCE, here, rather than copied into
+ * each of them under a name of its own. It is the `TimeMatcher` arrangement: the type
+ * lives beside the rule that produces it, and `index.ts` is what makes it public — the
+ * MODULE stays internal, and a handler written for one of the two components can be
+ * handed to the other.
  */
 export type FileRejectReason = 'type' | 'size' | 'count' | 'total-size'
 
+/** One file that was turned away, and the reason it was. */
 export interface FileRejection {
+  /** The file itself, so a message can name it. */
   file: File
+  /** What it fell foul of. */
   reason: FileRejectReason
 }
 

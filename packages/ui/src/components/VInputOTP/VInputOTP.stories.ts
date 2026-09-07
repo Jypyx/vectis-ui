@@ -6,8 +6,14 @@ import { storyText } from '../../stories/storyText'
 import VInputOTP from './VInputOTP.vue'
 
 const t = storyText({
-  en: { code: (size: string) => `Code (${size})` },
-  fr: { code: (size: string) => `Code (${size})` },
+  en: {
+    code: (size: string) => `Code (${size})`,
+    hint: 'Sent to +33 6 12 34 56 78, valid for 10 minutes.',
+  },
+  fr: {
+    code: (size: string) => `Code (${size})`,
+    hint: 'Envoyé au +33 6 12 34 56 78, valable 10 minutes.',
+  },
 })
 
 const meta = {
@@ -168,4 +174,26 @@ export const Disabled: Story = {
     setup: () => ({ args, code: ref('123') }),
     template: '<VInputOTP v-bind="args" v-model="code" disabled />',
   }),
+}
+
+/**
+ * `hint` puts a line of help under the boxes and ties it to the row for assistive
+ * technology, exactly as on any other field. `label` is a different thing here: it names
+ * the row for a screen reader and renders nothing, the instructions above the boxes
+ * belonging to the page.
+ */
+export const Hint: Story = {
+  render: (args) => ({
+    components: { VInputOTP },
+    setup: () => ({ args, t, code: ref('') }),
+    template: `
+      <VInputOTP v-bind="args" v-model="code" :hint="t.hint" />
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const group = canvasElement.querySelector('[role="group"]')!
+    const hint = canvasElement.querySelector('.v-otp-hint')!
+    // The row points at the hint, so it is announced along with the row's own name.
+    await expect(group).toHaveAttribute('aria-describedby', hint.id)
+  },
 }

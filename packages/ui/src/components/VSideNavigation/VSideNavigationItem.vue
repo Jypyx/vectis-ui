@@ -27,6 +27,8 @@ import { sideNavigationKey } from './context'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 interface SideNavigationItemProps {
+  /** What the row says, and where it goes. The default slot replaces it. */
+  label?: string
   /** A second line under the label, for a status or a short explanation. */
   sublabel?: string
   /**
@@ -62,6 +64,7 @@ interface SideNavigationItemProps {
 defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<SideNavigationItemProps>(), {
+  label: undefined,
   sublabel: undefined,
   icon: undefined,
   href: undefined,
@@ -96,8 +99,11 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  /** The label of the row. It is REQUIRED: a navigation row must say where it goes. */
-  default(): unknown
+  /**
+   * The label of the row, replacing the `label` prop. One of the two is REQUIRED: a
+   * navigation row must say where it goes.
+   */
+  default?(): unknown
   /** A second line made of markup, replacing the `sublabel` prop. */
   sublabel?(): unknown
   /** Free content before the label, which takes the place of `icon`. */
@@ -232,7 +238,9 @@ function onActionClick(event: MouseEvent) {
           <VIcon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
         </slot>
         <span class="v-side-nav-content">
-          <span class="v-side-nav-label"><slot /></span>
+          <span class="v-side-nav-label"
+            ><slot>{{ label }}</slot></span
+          >
           <span v-if="sublabel !== undefined || $slots.sublabel" class="v-side-nav-sublabel">
             <slot name="sublabel">{{ sublabel }}</slot>
           </span>
@@ -278,7 +286,9 @@ function onActionClick(event: MouseEvent) {
           <VIcon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
         </slot>
         <span class="v-side-nav-content">
-          <span class="v-side-nav-label"><slot /></span>
+          <span class="v-side-nav-label"
+            ><slot>{{ label }}</slot></span
+          >
           <span v-if="sublabel !== undefined || $slots.sublabel" class="v-side-nav-sublabel">
             <slot name="sublabel">{{ sublabel }}</slot>
           </span>

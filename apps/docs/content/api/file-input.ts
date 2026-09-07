@@ -36,9 +36,10 @@ export default {
         { name: 'v-model', key: 'vModel', type: 'File[]', default: '[]' },
       ],
       events: [
-        { name: 'change', type: '[files: File[]]' },
-        { name: 'reject', type: '[rejection: FileInputRejection]' },
+        { name: 'click:icon-start', key: 'clickIconStart', type: '[event: MouseEvent]' },
         { name: 'clear', type: '[]' },
+        { name: 'change', type: '[files: File[]]' },
+        { name: 'reject', type: '[rejection: FileRejection]' },
       ],
       slots: [
         { name: 'chip', type: "{ file: File; index: number; label: string; remove: () => void; size: 'xs' | 'sm'; compact: boolean; }" },

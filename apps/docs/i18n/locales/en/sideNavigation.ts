@@ -22,6 +22,7 @@ export default {
     },
     VSideNavigationItem: {
       props: {
+        label: 'What the row says, and where it goes. The default slot replaces it.',
         sublabel: 'A second line under the label, for a status or a short explanation.',
         icon: 'An icon before the label. The <code>#start</code> slot replaces it.',
         href: 'Where this row leads, which makes it a link. It is ignored on a row that has subitems: such a row opens and closes rather than navigating.',

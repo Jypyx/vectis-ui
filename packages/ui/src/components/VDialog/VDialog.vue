@@ -91,7 +91,7 @@ defineSlots<{
   /** Replaces the title and subtitle block with content of your own. */
   header?(): unknown
   /** Extra controls in the header, placed before the close cross — a menu, a full-screen toggle. */
-  headerActions?(): unknown
+  'header-actions'?(): unknown
   /** The buttons at the foot of the dialog. */
   footer?(): unknown
   /**
@@ -243,8 +243,8 @@ defineExpose({
           </VTypography>
         </div>
       </slot>
-      <div v-if="!hideClose || $slots.headerActions" class="v-dialog-header-actions">
-        <slot name="headerActions" />
+      <div v-if="!hideClose || $slots['header-actions']" class="v-dialog-header-actions">
+        <slot name="header-actions" />
         <VIconButton
           v-if="!hideClose"
           class="v-dialog-close"

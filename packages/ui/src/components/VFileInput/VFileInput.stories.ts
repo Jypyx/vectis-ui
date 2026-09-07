@@ -5,7 +5,7 @@ import { ref } from 'vue'
 import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VChip from '../VChip/VChip.vue'
-import type { FileInputRejection } from './VFileInput.vue'
+import type { FileRejection } from '../../utils/file'
 import VFileInput from './VFileInput.vue'
 
 const t = storyText({
@@ -203,7 +203,7 @@ export const Limits: Story = {
   args: { multiple: true, maxFiles: 3, maxSize: 2_000_000, maxTotalSize: 5_000_000 },
   render: (args) => ({
     components: { VFileInput },
-    setup: () => ({ args, t, files: ref<File[]>([]), refused: ref<FileInputRejection[]>([]) }),
+    setup: () => ({ args, t, files: ref<File[]>([]), refused: ref<FileRejection[]>([]) }),
     template: `
       <div style="width: 340px; display: grid; gap: 8px">
         <VFileInput
@@ -242,7 +242,7 @@ export const Accept: Story = {
   args: { multiple: true, accept: 'image/*,.pdf' },
   render: (args) => ({
     components: { VFileInput },
-    setup: () => ({ args, t, files: ref<File[]>([]), refused: ref<FileInputRejection[]>([]) }),
+    setup: () => ({ args, t, files: ref<File[]>([]), refused: ref<FileRejection[]>([]) }),
     template: `
       <div style="width: 340px; display: grid; gap: 8px">
         <VFileInput

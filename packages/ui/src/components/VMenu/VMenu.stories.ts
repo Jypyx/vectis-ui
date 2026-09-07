@@ -114,7 +114,7 @@ export const Default: Story = {
         <VMenuItem :label="t.duplicate" icon-start="content_copy" @select="onSelect" />
         <VMenuItem :label="t.archiveUnavailable" icon-start="archive" disabled />
         <VMenuSeparator />
-        <VMenuItem :label="t.delete" icon-start="delete" danger @select="onSelect" />
+        <VMenuItem :label="t.delete" icon-start="delete" tone="danger" @select="onSelect" />
       </VMenu>
     `,
   }),
@@ -225,7 +225,7 @@ export const Groups: Story = {
           <VMenuItem :label="t.copyLink" icon-start="link" />
         </VMenuGroup>
         <VMenuSeparator />
-        <VMenuItem :label="t.delete" icon-start="delete" danger />
+        <VMenuItem :label="t.delete" icon-start="delete" tone="danger" />
       </VMenu>
     `,
   }),
@@ -290,7 +290,7 @@ export const Sizes: Story = {
           <VMenuItem :label="t.rename" icon-start="edit" />
           <VMenuItem :label="t.duplicate" icon-start="content_copy" />
           <VMenuSeparator />
-          <VMenuItem :label="t.delete" icon-start="delete" danger />
+          <VMenuItem :label="t.delete" icon-start="delete" tone="danger" />
         </VMenu>
       </div>
     `,
@@ -457,7 +457,7 @@ export const Submenus: Story = {
           </template>
         </VMenuItem>
         <VMenuSeparator />
-        <VMenuItem :label="t.delete" icon-start="delete" danger />
+        <VMenuItem :label="t.delete" icon-start="delete" tone="danger" />
       </VMenu>
     `,
   }),

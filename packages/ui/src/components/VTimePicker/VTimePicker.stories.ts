@@ -13,12 +13,16 @@ const t = storyText({
     nothing: 'nothing yet',
     cancel: 'Cancel',
     ok: 'OK',
+    readonly: 'Read-only',
+    disabled: 'Disabled',
   },
   fr: {
     chosen: 'Choisi',
     nothing: 'rien pour le moment',
     cancel: 'Annuler',
     ok: 'OK',
+    readonly: 'Lecture seule',
+    disabled: 'Désactivé',
   },
 })
 
@@ -256,4 +260,35 @@ export const Localization: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * `readonly` shows the time without letting it be changed, the face keeping its focus and
+ * the two numerals still switching between hours and minutes. `disabled` takes the clock
+ * out of use altogether and out of the tab order.
+ */
+export const States: Story = {
+  render: (args) => ({
+    components: { VTimePicker },
+    setup: () => ({ args, t, readonlyValue: ref('09:15'), disabledValue: ref('09:15') }),
+    template: `
+      <div style="display: flex; gap: 2rem; flex-wrap: wrap">
+        <div>
+          <p style="margin: 0 0 0.5rem">{{ t.readonly }}</p>
+          <VTimePicker v-bind="args" v-model="readonlyValue" readonly />
+        </div>
+        <div>
+          <p style="margin: 0 0 0.5rem">{{ t.disabled }}</p>
+          <VTimePicker v-bind="args" v-model="disabledValue" disabled />
+        </div>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const [readonlyFace, disabledFace] = [...canvasElement.querySelectorAll('[role="slider"]')]
+    await expect(readonlyFace).toHaveAttribute('aria-readonly', 'true')
+    await expect(readonlyFace).toHaveAttribute('tabindex', '0')
+    await expect(disabledFace).toHaveAttribute('aria-disabled', 'true')
+    await expect(disabledFace).toHaveAttribute('tabindex', '-1')
+  },
 }

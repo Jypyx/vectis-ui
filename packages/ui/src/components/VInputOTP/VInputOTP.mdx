@@ -87,6 +87,18 @@ automatically:
 
 <Canvas of={VInputOTPStories.Disabled} />
 
+## Hint
+
+`hint` puts a line of help under the boxes and ties it to the row through `aria-describedby`, so
+it is announced along with the row's own name. A consumer's own `aria-describedby` is added to
+rather than replaced.
+
+It is the one text this component renders. `label` names the row for assistive technology and
+draws nothing: the instructions above the boxes belong to the page around them, which is what
+tells this field apart from VInput and the other text fields.
+
+<Canvas of={VInputOTPStories.Hint} />
+
 ## Accessibility
 
 - The root is a `role="group"` named by `label` ("Verification code" by default).

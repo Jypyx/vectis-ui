@@ -13,12 +13,16 @@ const t = storyText({
     today: 'Today',
     tomorrow: 'Tomorrow',
     inThreeDays: 'In 3 days',
+    readonly: 'Read-only',
+    disabled: 'Disabled',
   },
   fr: {
     deadline: 'Échéance',
     today: "Aujourd'hui",
     tomorrow: 'Demain',
     inThreeDays: 'Dans 3 jours',
+    readonly: 'Lecture seule',
+    disabled: 'Désactivé',
   },
 })
 
@@ -212,4 +216,41 @@ export const Localization: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * `readonly` shows what is selected without letting it be changed, and the calendar can
+ * still be walked through: another month, another year. `disabled` takes the whole thing
+ * out of use, arrows included, and greys it through the colour tokens.
+ */
+export const States: Story = {
+  render: (args) => ({
+    components: { VDatePicker },
+    setup: () => ({ args, t, readonlyValue: ref('2026-06-10'), disabledValue: ref('2026-06-10') }),
+    template: `
+      <div style="display: flex; gap: 2rem; flex-wrap: wrap">
+        <div>
+          <p style="margin: 0 0 0.5rem">{{ t.readonly }}</p>
+          <VDatePicker v-bind="args" v-model="readonlyValue" readonly />
+        </div>
+        <div>
+          <p style="margin: 0 0 0.5rem">{{ t.disabled }}</p>
+          <VDatePicker v-bind="args" v-model="disabledValue" disabled />
+        </div>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const [readonlyGrid, disabledGrid] = [...canvasElement.querySelectorAll('.v-date-picker')]
+    // A day BUTTON, never `.v-date-picker-day` on its own: the story shows the adjacent
+    // months, whose days carry that same class on a plain span.
+    const readonlyDay = readonlyGrid!.querySelector('button.v-date-picker-day')!
+    // Read-only: the days say they cannot be activated, and none of them is struck out.
+    await expect(readonlyDay).toHaveAttribute('aria-disabled', 'true')
+    await expect(readonlyDay).not.toHaveAttribute('data-unavailable')
+    // ... and the month arrows still work, which is the whole difference with disabled.
+    await expect(readonlyGrid!.querySelector('.v-date-picker-nav button')).toBeEnabled()
+    await expect(disabledGrid!.querySelector('.v-date-picker-nav button')).toBeDisabled()
+    await expect(disabledGrid!.querySelector('button.v-date-picker-day')).toBeDisabled()
+  },
 }

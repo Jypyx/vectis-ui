@@ -169,7 +169,7 @@ export const RichTitle: Story = {
   }),
 }
 
-/** `subtitle` + `iconStart`: a subtitle stacked under the title, an icon before the block. */
+/** `subtitle` + `icon`: a subtitle stacked under the title, an icon before the block. */
 export const SubtitleAndIcon: Story = {
   render: () => ({
     components: { VAccordion, VAccordionItem },
@@ -179,14 +179,14 @@ export const SubtitleAndIcon: Story = {
         <VAccordionItem
           :title="t.notifications"
           :subtitle="t.notificationsSub"
-          :icon-start="icons.notifications"
+          :icon="icons.notifications"
         >
           {{ t.notificationsBody }}
         </VAccordionItem>
-        <VAccordionItem :title="t.privacy" :subtitle="t.privacySub" icon-start="lock">
+        <VAccordionItem :title="t.privacy" :subtitle="t.privacySub" icon="lock">
           {{ t.privacyBody }}
         </VAccordionItem>
-        <VAccordionItem :title="t.account" icon-start="person">
+        <VAccordionItem :title="t.account" icon="person">
           {{ t.accountBody }}
         </VAccordionItem>
         <VAccordionItem :title="t.sessions" :subtitle="t.sessionsSub">

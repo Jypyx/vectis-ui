@@ -21,6 +21,7 @@ export default {
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconStartLabel', type: 'string' },
+        { name: 'expandIcon', type: 'IconSource', default: 'expand_more' },
         { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'clearLabel', type: 'string' },
         { name: 'emptyText', type: 'string' },
@@ -34,6 +35,8 @@ export default {
       ],
       events: [
         { name: 'search', type: '[query: string]' },
+        { name: 'click:icon-start', key: 'clickIconStart', type: '[event: MouseEvent]' },
+        { name: 'clear', type: '[]' },
         { name: 'load-more', key: 'loadMore', type: '[]' },
       ],
       slots: [

@@ -208,6 +208,15 @@ const { counterText, over } = useTextLimit({
   maxlength: () => props.maxlength,
   softLimit: () => props.softLimit,
 })
+
+defineExpose({
+  /** Moves the focus to the real textarea. */
+  focus: (options?: FocusOptions) => controlEl.value?.focus(options),
+  /** Selects everything in the field. */
+  select: () => controlEl.value?.select(),
+  /** The real `<textarea>`, for what neither of the two above covers. */
+  el: controlEl,
+})
 </script>
 
 <template>

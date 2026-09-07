@@ -20,6 +20,7 @@ export default {
           "Marque le code comme erroné, ce qui colore les cases et le signale aux technologies d'assistance.",
         label:
           "Ce que les lecteurs d'écran annoncent pour la rangée dans son ensemble. Il retombe sur le dictionnaire du design system.",
+        hint: "Une ligne d'aide sous les cases, pour dire où le code a été envoyé ou combien de temps il vaut. Elle est liée à la rangée pour les technologies d'assistance, donc lue avec le libellé. Contrairement à <code>label</code>, qui nomme la rangée sans rien afficher, ce texte est visible.",
         vModel:
           'Le code en une seule chaîne, sans les séparateurs : un gabarit <code>GT-###</code> donne tout de même trois caractères. Il est vide au départ, et plus court que la longueur complète pendant la saisie.',
       },

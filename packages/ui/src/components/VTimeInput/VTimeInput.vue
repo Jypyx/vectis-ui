@@ -62,6 +62,7 @@ import { digitsOf } from '../../utils/text'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFieldPanel } from '../../composables/useFieldPanel'
+import { iconClickHandlers } from '../../composables/useIconClickHandlers'
 import { useMaskedField } from '../../composables/useMaskedField'
 import { useLocale, useMessages } from '../../i18n/state'
 
@@ -219,14 +220,36 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
  */
 const model = defineModel<string | null>({ default: null })
 
+const emit = defineEmits<{
+  /** The clear cross emptied the field. The value has already been reset. */
+  clear: []
+  /** The start icon was clicked. Attaching this listener is what makes it a button. */
+  'click:icon-start': [event: MouseEvent]
+}>()
+
 // `class` and `style` stay on the wrapper; everything else goes down to the text field,
 // which is what a consumer's label points at and what assistive technology deals with.
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
+// @a11y @core
+/*
+ * Declaring `click:icon-start` is what puts it in the API tables and in a consumer's
+ * editor, and it is also what takes it out of `$attrs`: it no longer travels with the
+ * forwarded attributes and has to be handed to the field by hand. Only when the consumer
+ * really wrote one, or VInput would make the start icon a button on every instance.
+ */
+const iconStartClick = iconClickHandlers().start
+  ? { 'onClick:icon-start': (event: MouseEvent) => emit('click:icon-start', event) }
+  : undefined
+
+/** What reaches the field on screen — the masked VInput or the list's VCombobox. */
+const fieldAttrs = computed(() => ({ ...forwardedAttrs.value, ...iconStartClick }))
+
 const rootEl = ref<HTMLElement | null>(null)
 const panelRef = ref<InstanceType<typeof VPopover> | null>(null)
 const inputRef = ref<InstanceType<typeof VInput> | null>(null)
+const listRef = ref<InstanceType<typeof VCombobox> | null>(null)
 const pickerRef = ref<InstanceType<typeof VTimePicker> | null>(null)
 const panelId = useId()
 
@@ -292,6 +315,19 @@ if (isDev) {
     if (isList.value && props.showPicker === true)
       console.warn(
         '[VTimeInput] showPicker is ignored in "list" mode: the list of times is the only panel.',
+      )
+    // The list form is a VCombobox, which draws the end of the field itself: its own
+    // chevron, and a spinner that names nothing because the panel is what announces the
+    // loading. The three props that describe THIS component's end icon therefore reach
+    // nothing at all, and their absence is invisible on screen.
+    const inert = ([] as string[]).concat(
+      props.pickerIcon !== scheduleIcon ? 'pickerIcon' : [],
+      props.iconEndLabel ? 'iconEndLabel' : [],
+      props.loadingLabel ? 'loadingLabel' : [],
+    )
+    if (isList.value && inert.length > 0)
+      console.warn(
+        `[VTimeInput] ${inert.join(', ')} ${inert.length > 1 ? 'are' : 'is'} ignored in "list" mode: the list draws its own chevron and spinner.`,
       )
     const problem = limitsProblem(limits.value)
     if (problem) console.warn(`[VTimeInput] ${problem}`)
@@ -476,6 +512,7 @@ function clearValue() {
   refocusing = true
   inputRef.value?.focus()
   refocusing = false
+  emit('clear')
 }
 
 // Escape and the focus leaving both close WITHOUT committing, which is the picker's Cancel
@@ -752,6 +789,23 @@ function onEndIcon() {
   if (open.value) closeAndFocus()
   else openPanel(true)
 }
+
+/*
+ * The three of them go through whichever field is on screen: in the list form there is no
+ * VInput of this component's own, the VCombobox owning the one the reader sees. Exposing
+ * the same trio as the other fields is what keeps a consumer's `ref` working whatever the
+ * mode, which is a runtime prop they may well be binding.
+ */
+const field = computed(() => (isList.value ? listRef.value : inputRef.value))
+
+defineExpose({
+  /** Moves the focus to the text field. */
+  focus: (options?: FocusOptions) => field.value?.focus(options),
+  /** Selects what the field is showing. */
+  select: () => field.value?.select(),
+  /** The real `<input>` behind the field, for what neither of the two above covers. */
+  el: computed(() => field.value?.el ?? null),
+})
 </script>
 
 <template>
@@ -771,8 +825,9 @@ function onEndIcon() {
          know about times — the rows, the search, and a value that may be nothing. -->
     <VCombobox
       v-if="isList"
+      ref="listRef"
       v-model="listModel"
-      v-bind="forwardedAttrs"
+      v-bind="fieldAttrs"
       :options="options"
       :filter="matchTime"
       :label="label"
@@ -787,7 +842,9 @@ function onEndIcon() {
       :icon-start-label="iconStartLabel"
       :clearable="clearable"
       :clear-label="clearLabel"
+      :loading="loading"
       :placement="placement"
+      @clear="emit('clear')"
     />
 
     <div v-else class="v-time-input-control" @click="onControlClick">
@@ -799,7 +856,7 @@ function onEndIcon() {
         v-model="fieldModel"
         :inputmode="typing ? 'numeric' : undefined"
         :autocomplete="typing ? 'off' : undefined"
-        v-bind="forwardedAttrs"
+        v-bind="fieldAttrs"
         :readonly="!typing || readonly"
         :label="label"
         :hint="hint"

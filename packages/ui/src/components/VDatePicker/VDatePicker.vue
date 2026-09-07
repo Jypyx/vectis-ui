@@ -127,6 +127,17 @@ interface DatePickerProps {
   selectAdjacentDays?: boolean
   /** The events to mark, as up to three coloured dots under the day they fall on. */
   events?: DatePickerEvent[]
+  /**
+   * Makes the whole calendar unusable: no date can be chosen, no month reached, and
+   * everything greys out through the colour tokens.
+   */
+  disabled?: boolean
+  /**
+   * Shows what is selected without letting it be changed. The calendar can still be
+   * read and walked through — another month, another year — which is what separates it
+   * from `disabled`.
+   */
+  readonly?: boolean
 }
 
 const props = withDefaults(defineProps<DatePickerProps>(), {
@@ -139,6 +150,8 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   showAdjacentDays: false,
   selectAdjacentDays: false,
   events: undefined,
+  disabled: false,
+  readonly: false,
 })
 
 /**
@@ -375,6 +388,10 @@ function focusDay(iso: string) {
 }
 
 function goTo(iso: string, moveFocus = false) {
+  // Every move through the calendar comes here, so one guard covers the arrows, the
+  // month and year cells and the keyboard's own steps. Only `disabled` stops it:
+  // `readonly` leaves the reader free to look around.
+  if (props.disabled) return
   focusedISO.value = clampISO(iso, props.min, props.max)
   if (moveFocus && view.value === 'days') focusDay(focusedISO.value)
 }
@@ -410,6 +427,11 @@ function toggleView(target: 'months' | 'years') {
 }
 
 function selectDay(cell: DayCell) {
+  // The single choke point of the selection, so the two states are refused here rather
+  // than in each of the routes that lead to it — a click, Enter and Space all pass
+  // through. Navigation is deliberately NOT guarded by `readonly`: a calendar one may
+  // read is a calendar one may leaf through.
+  if (props.disabled || props.readonly) return
   if (cell.kind !== 'button' || cell.disabled) return
   focusedISO.value = cell.iso
   if (props.selection === 'single') {
@@ -582,6 +604,8 @@ defineExpose({
     class="v-date-picker"
     :data-view="view"
     :data-selection="selection"
+    :data-disabled="disabled ? '' : undefined"
+    :data-readonly="readonly ? '' : undefined"
     @pointerleave="hoverISO = null"
   >
     <!-- The header: the month and the year, each between two chevrons that step it,
@@ -592,7 +616,7 @@ defineExpose({
           :icon="chevronLeftIcon"
           :label="m.datePicker.previousMonth"
           size="sm"
-          :disabled="!canPrevMonth"
+          :disabled="disabled || !canPrevMonth"
           @click="stepMonth(-1)"
         />
         <VButton
@@ -600,6 +624,7 @@ defineExpose({
           tone="neutral"
           size="sm"
           class="v-date-picker-view-toggle"
+          :disabled="disabled"
           :aria-expanded="view === 'months'"
           :aria-label="monthLabel"
           @click="toggleView('months')"
@@ -614,7 +639,7 @@ defineExpose({
           :icon="chevronRightIcon"
           :label="m.datePicker.nextMonth"
           size="sm"
-          :disabled="!canNextMonth"
+          :disabled="disabled || !canNextMonth"
           @click="stepMonth(1)"
         />
       </div>
@@ -624,7 +649,7 @@ defineExpose({
           :icon="chevronLeftIcon"
           :label="m.datePicker.previousYear"
           size="sm"
-          :disabled="!canPrevYear"
+          :disabled="disabled || !canPrevYear"
           @click="stepYear(-1)"
         />
         <VButton
@@ -632,6 +657,7 @@ defineExpose({
           tone="neutral"
           size="sm"
           class="v-date-picker-view-toggle"
+          :disabled="disabled"
           :aria-expanded="view === 'years'"
           @click="toggleView('years')"
         >
@@ -645,7 +671,7 @@ defineExpose({
           :icon="chevronRightIcon"
           :label="m.datePicker.nextYear"
           size="sm"
-          :disabled="!canNextYear"
+          :disabled="disabled || !canNextYear"
           @click="stepYear(1)"
         />
       </div>
@@ -690,7 +716,9 @@ defineExpose({
             :data-outside="!cell.inMonth ? '' : undefined"
             :data-selected="cell.selected ? '' : undefined"
             :data-today="cell.today ? '' : undefined"
-            :aria-disabled="cell.disabled ? 'true' : undefined"
+            :data-unavailable="cell.disabled ? '' : undefined"
+            :disabled="disabled"
+            :aria-disabled="cell.disabled || readonly ? 'true' : undefined"
             :aria-current="cell.today ? 'date' : undefined"
             @click="selectDay(cell)"
             @pointerenter="hoverISO = cell.iso"
@@ -766,7 +794,7 @@ defineExpose({
           :tabindex="i === focusedMonth ? 0 : -1"
           :data-selected="i === viewMonth0 ? '' : undefined"
           :aria-selected="i === viewMonth0 ? 'true' : undefined"
-          :disabled="!monthSelectable(i)"
+          :disabled="disabled || !monthSelectable(i)"
           @click="chooseMonth(i)"
         >
           {{ name }}
@@ -793,6 +821,7 @@ defineExpose({
           :tabindex="y === focusedYear ? 0 : -1"
           :data-selected="y === viewYear ? '' : undefined"
           :aria-selected="y === viewYear ? 'true' : undefined"
+          :disabled="disabled"
           @click="chooseYear(y)"
         >
           {{ y }}
@@ -971,10 +1000,31 @@ defineExpose({
     font-weight: var(--vectis-font-weight-semibold);
   }
 
-  .v-date-picker-day[aria-disabled='true'] {
+  /* The strike-through says the DATE is unavailable — outside the bounds, or listed in
+     `disabledDates`. It hangs on its own attribute rather than on `aria-disabled`, which
+     a read-only calendar also carries on every day: nothing can be chosen there, but the
+     dates themselves are perfectly available and striking them all out would say the
+     opposite. The hover rule below still reads `aria-disabled`, so neither highlights. */
+  .v-date-picker-day[data-unavailable] {
     color: var(--vectis-color-text-subtle);
     text-decoration: line-through;
     cursor: not-allowed;
+  }
+
+  .v-date-picker[data-readonly] .v-date-picker-day:not([data-unavailable]) {
+    cursor: default;
+  }
+
+  /* A disabled calendar greys out through the colour tokens and never through opacity,
+     the selection included: left in the accent colour it would go on looking live. */
+  .v-date-picker-day:disabled {
+    color: var(--vectis-color-text-subtle);
+    cursor: not-allowed;
+  }
+
+  .v-date-picker[data-disabled] .v-date-picker-day[data-selected] {
+    background: var(--vectis-color-surface-muted);
+    color: var(--vectis-color-text-subtle);
   }
 
   .v-date-picker-day--static {

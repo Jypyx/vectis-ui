@@ -55,6 +55,10 @@ export default {
         selectAdjacentDays:
           'Lets those neighbouring days be clicked, which moves the calendar to their month. A clickable day has to be visible, so this implies showing them.',
         events: 'The events to mark, as up to three coloured dots under the day they fall on.',
+        disabled:
+          'Makes the whole calendar unusable: no date can be chosen, no month reached, and everything greys out through the colour tokens.',
+        readonly:
+          'Shows what is selected without letting it be changed. The calendar can still be read and walked through, another month or another year, which is what separates it from <code>disabled</code>.',
         vModel:
           'What is selected, and its shape follows <code>selection</code>: an ISO string for a single date, a start and end pair for a period, an array for several. Nothing is selected to begin with.',
       },

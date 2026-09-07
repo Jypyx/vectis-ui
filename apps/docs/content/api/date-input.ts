@@ -40,6 +40,10 @@ export default {
         { name: 'placement', type: 'Placement', default: "'bottom-start'" },
         { name: 'v-model', key: 'vModel', type: 'DatePickerValue', default: 'null' },
       ],
+      events: [
+        { name: 'click:icon-start', key: 'clickIconStart', type: '[event: MouseEvent]' },
+        { name: 'clear', type: '[]' },
+      ],
       slots: [
         { name: 'day', type: '{ iso: string; day: number; inMonth: boolean; disabled: boolean; selected: boolean; today: boolean; inRange: boolean; events: DatePickerEvent[]; }' },
         { name: 'footer', type: '{ close: () => void; }' },

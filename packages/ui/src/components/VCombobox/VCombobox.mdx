@@ -187,7 +187,10 @@ It is decorative until a `@click:icon-start` listener is attached, which turns i
 button and makes `iconStartLabel` necessary.
 
 The end of the field belongs to the component: the chevron, the spinner that takes its place while
-loading, and the clear cross to their left. There is no `iconEnd` here for that reason.
+loading, and the clear cross to their left. There is no `iconEnd` here for that reason, but the
+chevron itself can be replaced through `expandIcon`, in the same forms as any other icon prop. It
+is decoration and takes no label: what opens the list is the field, not the chevron, so it stays
+hidden from screen readers.
 
 <Canvas of={VComboboxStories.FieldIcon} />
 

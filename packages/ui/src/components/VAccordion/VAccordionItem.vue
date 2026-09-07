@@ -32,9 +32,13 @@ interface AccordionItemProps {
   subtitle?: string
   /**
    * An icon placed before the title: an icon name, or an explicit render
-   * (`{ src }`, `{ component }`…).
+   * (`{ src }`, `{ component }`…). The `#start` slot replaces it.
+   *
+   * It carries no side in its name because there is only one: the end of the row belongs
+   * to the chevron, so there is nothing for a start to be told apart from. That is the
+   * rule every single-icon component of the design system follows.
    */
-  iconStart?: IconSource
+  icon?: IconSource
   /**
    * Renders the section already open. It only sets the state of the first render:
    * the browser owns it afterwards, so changing this prop later will not close a
@@ -51,7 +55,7 @@ interface AccordionItemProps {
 const props = withDefaults(defineProps<AccordionItemProps>(), {
   title: undefined,
   subtitle: undefined,
-  iconStart: undefined,
+  icon: undefined,
   defaultOpen: false,
   disabled: false,
 })
@@ -63,7 +67,7 @@ defineSlots<{
   title?(): unknown
   /** A subtitle made of markup, which replaces the `subtitle` prop. */
   subtitle?(): unknown
-  /** Free content before the title, which takes the place of `iconStart`. */
+  /** Free content before the title, which takes the place of `icon`. */
   start?(): unknown
 }>()
 
@@ -103,7 +107,7 @@ function onSummaryClick(event: MouseEvent) {
       @click="onSummaryClick"
     >
       <slot name="start">
-        <VIcon v-if="iconStart" class="v-accordion-icon-start" v-bind="iconProps(iconStart)" />
+        <VIcon v-if="icon" class="v-accordion-icon-start" v-bind="iconProps(icon)" />
       </slot>
       <span class="v-accordion-heading">
         <span class="v-accordion-title"

@@ -326,3 +326,31 @@ describe('VTimePicker — the live region', () => {
     expect(live()!.trim()).toBe('Selecting the hour')
   })
 })
+
+describe('VTimePicker — disabled and readonly', () => {
+  it('readonly refuses every write but keeps the face focusable and the steps readable', async () => {
+    const { container, emitted, getByRole } = render(VTimePicker, {
+      props: { modelValue: '09:15', readonly: true },
+    })
+    const slider = face(container)
+    expect(slider.getAttribute('aria-readonly')).toBe('true')
+    expect(slider.getAttribute('tabindex')).toBe('0')
+    await fireEvent.keyDown(slider, { key: 'ArrowUp' })
+    expect(emitted('update:modelValue')).toBeUndefined()
+    // Switching between the hour and the minutes is reading, not writing.
+    await fireEvent.click(getByRole('button', { name: /minute/i }))
+    await nextTick()
+    expect(container.querySelector('.v-time-picker')?.getAttribute('data-step')).toBe('minute')
+  })
+
+  it('disabled refuses the writes and leaves the face out of the tab order', async () => {
+    const { container, emitted } = render(VTimePicker, {
+      props: { modelValue: '09:15', disabled: true },
+    })
+    const slider = face(container)
+    expect(slider.getAttribute('aria-disabled')).toBe('true')
+    expect(slider.getAttribute('tabindex')).toBe('-1')
+    await fireEvent.keyDown(slider, { key: 'ArrowUp' })
+    expect(emitted('update:modelValue')).toBeUndefined()
+  })
+})

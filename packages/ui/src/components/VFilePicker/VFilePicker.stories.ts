@@ -6,7 +6,7 @@ import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
-import type { FilePickerRejection } from './VFilePicker.vue'
+import type { FileRejection } from '../../utils/file'
 import VFilePicker from './VFilePicker.vue'
 
 const t = storyText({
@@ -302,7 +302,7 @@ export const Limits: Story = {
   args: { preview: 'bottom', multiple: true, accept: '.pdf', maxSize: 2000, maxFiles: 2 },
   render: (args) => ({
     components: { VFilePicker },
-    setup: () => ({ args, t, files: ref<File[]>([]), refused: ref<FilePickerRejection[]>([]) }),
+    setup: () => ({ args, t, files: ref<File[]>([]), refused: ref<FileRejection[]>([]) }),
     template: `
       <div style="width: 420px; display: grid; gap: 12px">
         <VFilePicker

@@ -84,6 +84,20 @@ server.
 
 <Canvas of={VDatePickerStories.Localization} />
 
+## Read-only and disabled
+
+`readonly` shows what is selected without letting it be changed, and leaves the calendar to be
+walked through: the month and year arrows still work, and the reader can look at another month.
+Every day says `aria-disabled`, and none of them is struck through — the dates are perfectly
+available, it is the picker that is frozen. The strike-through stays what it has always been, the
+mark of a date `min`, `max` or `disabledDates` rules out.
+
+`disabled` goes further: the days, the arrows and the two view toggles all become real disabled
+buttons, so the calendar leaves the tab order entirely and greys out through the colour tokens,
+the selection included.
+
+<Canvas of={VDatePickerStories.States} />
+
 ## Accessibility
 
 - The days grid is a `role="grid"` named by the month and the year; the column headers carry the

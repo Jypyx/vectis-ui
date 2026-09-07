@@ -29,7 +29,7 @@ export default {
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconEnd', type: 'IconSource' },
         { name: 'selected', type: 'boolean', default: 'false' },
-        { name: 'danger', type: 'boolean', default: 'false' },
+        { name: 'tone', type: 'MenuItemTone', default: "'neutral'" },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'href', type: 'string' },
       ],

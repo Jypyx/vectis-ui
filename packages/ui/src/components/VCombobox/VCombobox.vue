@@ -20,6 +20,7 @@ import { computed, inject, nextTick, reactive, ref, useId, watch, watchEffect } 
 
 import VChip from '../VChip/VChip.vue'
 import VIcon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
 import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
@@ -39,6 +40,8 @@ import { normalizeText } from '../../utils/text'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
+
+import { iconClickHandlers } from '../../composables/useIconClickHandlers'
 
 import { useTimer } from '../../composables/useTimer'
 import { useMessages } from '../../i18n/state'
@@ -133,6 +136,12 @@ interface ComboboxProps {
   iconStart?: IconSource
   /** What the start icon does, in words, once it is clickable. */
   iconStartLabel?: string
+  /**
+   * The chevron at the end of the field, which turns as the list opens: an icon name,
+   * or an explicit render. It is decoration — the field itself is what opens the list,
+   * so the chevron is hidden from screen readers and takes no label.
+   */
+  expandIcon?: IconSource
   /** Offers a cross that empties both the selection and the search. */
   clearable?: boolean
   /** What that cross does, in words. It falls back to the design system dictionary. */
@@ -183,6 +192,7 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   invalid: false,
   iconStart: undefined,
   iconStartLabel: undefined,
+  expandIcon: () => expandMoreIcon,
   clearable: false,
   clearLabel: undefined,
   emptyText: undefined,
@@ -211,6 +221,10 @@ const emit = defineEmits<{
   search: [query: string]
   /** The end of the list has come into view: send the next page. */
   'load-more': []
+  /** The clear cross emptied the selection and the search. */
+  clear: []
+  /** The start icon was clicked. Attaching this listener is what makes it a button. */
+  'click:icon-start': [event: MouseEvent]
 }>()
 
 defineSlots<{
@@ -275,6 +289,20 @@ const model = defineModel<string | string[]>({ default: '' })
 // the element assistive technology treats as the combobox.
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
+
+// @a11y @core
+/*
+ * Declaring `click:icon-start` is what puts it in the API tables and in a consumer's
+ * editor, and it is also what takes it out of `$attrs`: it no longer travels with the
+ * forwarded attributes and has to be handed to the field by hand. Only when the consumer
+ * really wrote one, or VInput would make the start icon a button on every instance.
+ */
+const iconStartClick = iconClickHandlers().start
+  ? { 'onClick:icon-start': (event: MouseEvent) => emit('click:icon-start', event) }
+  : undefined
+
+/** What reaches the field: the consumer's own attributes, plus that listener. */
+const fieldAttrs = computed(() => ({ ...forwardedAttrs.value, ...iconStartClick }))
 
 const rootEl = ref<HTMLElement | null>(null)
 const inputRef = ref<InstanceType<typeof VInput> | null>(null)
@@ -741,6 +769,7 @@ function onClear() {
   model.value = props.multiple ? [] : ''
   typed.value = false
   activeIndex.value = -1
+  emit('clear')
 }
 
 // @keyboard — moves the highlight, skipping over the options that cannot be chosen and
@@ -793,6 +822,15 @@ function onKeydown(event: KeyboardEvent) {
       break
   }
 }
+
+defineExpose({
+  /** Moves the focus to the search field. */
+  focus: (options?: FocusOptions) => inputRef.value?.focus(options),
+  /** Selects what has been typed in the search field. */
+  select: () => inputRef.value?.select(),
+  /** The real `<input>` behind the field, for what neither of the two above covers. */
+  el: computed(() => inputRef.value?.el ?? null),
+})
 </script>
 
 <template>
@@ -818,7 +856,7 @@ function onKeydown(event: KeyboardEvent) {
         aria-autocomplete="list"
         :aria-expanded="open"
         :aria-controls="optionsId"
-        v-bind="forwardedAttrs"
+        v-bind="fieldAttrs"
         :label="label"
         :hint="hint"
         :size="resolvedSize"
@@ -876,7 +914,12 @@ function onKeydown(event: KeyboardEvent) {
              it carries: what announces the loading is the panel, and once is enough. -->
         <template #end>
           <VSpinner v-if="loading" class="v-combobox-spinner" aria-hidden="true" />
-          <VIcon v-else :name="expandMoreIcon" class="v-combobox-chevron" aria-hidden="true" />
+          <VIcon
+            v-else
+            v-bind="iconProps(expandIcon)"
+            class="v-combobox-chevron"
+            aria-hidden="true"
+          />
         </template>
       </VInput>
     </div>

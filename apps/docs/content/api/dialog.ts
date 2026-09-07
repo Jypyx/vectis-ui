@@ -22,7 +22,7 @@ export default {
       slots: [
         { name: 'default', type: '{}' },
         { name: 'header', type: '{}' },
-        { name: 'headerActions', type: '{}' },
+        { name: 'header-actions', key: 'headerActions', type: '{}' },
         { name: 'footer', type: '{}' },
         { name: 'trigger', type: '{ triggerProps: TriggerProps; }' },
       ],

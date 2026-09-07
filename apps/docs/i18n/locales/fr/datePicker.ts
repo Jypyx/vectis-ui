@@ -55,6 +55,10 @@ export default {
         selectAdjacentDays:
           'Permet de cliquer ces jours voisins, ce qui déplace le calendrier sur leur mois. Un jour cliquable doit être visible : cela implique donc de les afficher.',
         events: 'Les événements à marquer, en trois points colorés au plus sous le jour concerné.',
+        disabled:
+          'Rend tout le calendrier inutilisable : aucune date ne peut être choisie, aucun mois atteint, et tout se grise par les jetons de couleur.',
+        readonly:
+          'Montre la sélection sans permettre de la changer. Le calendrier reste lisible et parcourable, un autre mois ou une autre année, ce qui le distingue de <code>disabled</code>.',
         vModel:
           "Ce qui est sélectionné, et sa forme suit <code>selection</code> : une chaîne ISO pour une date unique, une paire début et fin pour une période, un tableau pour plusieurs. Rien n'est sélectionné au départ.",
       },

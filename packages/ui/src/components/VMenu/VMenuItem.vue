@@ -26,6 +26,12 @@ import { menuKey, SUBMENU_HOVER_DELAY } from './context'
 
 import { useTimer } from '../../composables/useTimer'
 
+/**
+ * What a command means, in colour. It is the subset of VButton's tones a menu row can
+ * carry: an ordinary command, or a destructive one.
+ */
+export type MenuItemTone = 'neutral' | 'danger'
+
 interface MenuItemProps {
   /** What the command says. The default slot replaces it. */
   label?: string
@@ -44,10 +50,14 @@ interface MenuItemProps {
    */
   selected?: boolean
   /**
-   * Marks the command as destructive, which colours it accordingly. Deleting
-   * something belongs here.
+   * What the command means, in colour. `danger` marks it destructive — deleting
+   * something belongs there — and `neutral`, the default, is every other command.
+   *
+   * A row is an action, so it takes the vocabulary of one: the same word on the same
+   * prop as a VButton, rather than a boolean of its own. There is no `accent` here,
+   * a menu having no primary command among its rows.
    */
-  danger?: boolean
+  tone?: MenuItemTone
   /** Makes the item unusable: it no longer responds and the arrows skip over it. */
   disabled?: boolean
   /**
@@ -68,7 +78,7 @@ const props = withDefaults(defineProps<MenuItemProps>(), {
   iconStart: undefined,
   iconEnd: undefined,
   selected: false,
-  danger: false,
+  tone: 'neutral',
   disabled: false,
   href: undefined,
 })
@@ -174,7 +184,7 @@ function onPointerLeave() {
     :disabled="tag === 'button' ? disabled : undefined"
     :href="tag === 'a' && !disabled ? href : undefined"
     :aria-disabled="tag === 'a' && disabled ? 'true' : undefined"
-    :data-danger="danger ? '' : undefined"
+    :data-tone="tone"
     :data-selected="selected ? '' : undefined"
     :aria-current="selected ? 'true' : undefined"
     :aria-haspopup="hasSubmenu ? 'menu' : undefined"
@@ -306,17 +316,17 @@ function onPointerLeave() {
     );
   }
 
-  .v-menu-item[data-danger] {
+  .v-menu-item[data-tone='danger'] {
     color: var(--vectis-color-danger-text);
   }
 
-  .v-menu-item[data-danger] .v-menu-item-sublabel {
+  .v-menu-item[data-tone='danger'] .v-menu-item-sublabel {
     color: inherit;
   }
 
-  .v-menu-item[data-danger]:hover:not(:disabled, [aria-disabled='true']),
-  .v-menu-item[data-danger]:focus,
-  .v-menu-item[data-danger][aria-expanded='true'] {
+  .v-menu-item[data-tone='danger']:hover:not(:disabled, [aria-disabled='true']),
+  .v-menu-item[data-tone='danger']:focus,
+  .v-menu-item[data-tone='danger'][aria-expanded='true'] {
     background: var(--vectis-color-danger-surface);
   }
 

@@ -1,5 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
+import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VTextarea from './VTextarea.vue'
 
@@ -171,5 +172,23 @@ describe('VTextarea', () => {
       props: { modelValue: '', compact: true },
     })
     expect(container.querySelector('.v-textarea')?.hasAttribute('data-compact')).toBe(true)
+  })
+})
+
+describe('VTextarea — expose', () => {
+  it('exposes focus, select and the real textarea, as VInput does', async () => {
+    const holder = ref<InstanceType<typeof VTextarea> | null>(null)
+    const Host = defineComponent({
+      setup: () => () => h(VTextarea, { ref: holder, modelValue: 'hello' }),
+    })
+    const el = document.createElement('div')
+    document.body.appendChild(el)
+    render(Host, { container: el })
+    await nextTick()
+    holder.value?.focus()
+    expect(document.activeElement).toBe(holder.value?.el)
+    expect(holder.value?.el?.tagName).toBe('TEXTAREA')
+    holder.value?.select()
+    expect(holder.value?.el?.selectionEnd).toBe(5)
   })
 })

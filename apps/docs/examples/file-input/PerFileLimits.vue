@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { VFileInput, type FileInputRejection } from 'vectis-ui'
+import { VFileInput, type FileRejection } from 'vectis-ui'
 
 const files = ref<File[]>([])
-const refused = ref<FileInputRejection[]>([])
+const refused = ref<FileRejection[]>([])
 
 /* One event per file, so a batch drop is reported precisely rather than as a single
    "something went wrong". The wording is yours: the component never writes it. */
@@ -14,7 +14,7 @@ const reasons: Record<string, string> = {
   'total-size': 'too much altogether',
 }
 
-function onReject(rejection: FileInputRejection) {
+function onReject(rejection: FileRejection) {
   refused.value = [rejection, ...refused.value].slice(0, 4)
 }
 </script>

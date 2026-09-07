@@ -25,26 +25,16 @@ import VTypography from '../VTypography/VTypography.vue'
 
 import { useFileDrop } from '../../composables/useFileDrop'
 import { useFileField } from '../../composables/useFileField'
+import { iconClickHandlers } from '../../composables/useIconClickHandlers'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useLocale, useMessages } from '../../i18n/state'
 import { chipScaleFor } from '../../utils/chip'
 import { isDev } from '../../utils/env'
-import { formatBytes } from '../../utils/file'
+import { formatBytes, type FileRejection } from '../../utils/file'
 import { truncateMiddle } from './truncate'
 
 /** How the chosen files are shown inside the field when several are allowed. */
 export type FileInputDisplay = 'text' | 'chip'
-
-/** Why a file was turned away: its kind, its size, how many there already are, or the total. */
-export type FileInputRejectReason = 'type' | 'size' | 'count' | 'total-size'
-
-/** One file that was turned away, and the reason it was. */
-export interface FileInputRejection {
-  /** The file itself, so a message can name it. */
-  file: File
-  /** What it fell foul of. */
-  reason: FileInputRejectReason
-}
 
 interface FileInputProps {
   /** Allows several files to be chosen. With one only, every extra file is turned away. */
@@ -173,9 +163,11 @@ const emit = defineEmits<{
    * A file was turned away and never joined the selection. It is emitted once PER file,
    * so a batch drop can be reported precisely.
    */
-  reject: [rejection: FileInputRejection]
+  reject: [rejection: FileRejection]
   /** The clear cross emptied the selection. */
   clear: []
+  /** The start icon was clicked. Attaching this listener is what makes it a button. */
+  'click:icon-start': [event: MouseEvent]
 }>()
 
 defineSlots<{
@@ -213,6 +205,17 @@ const model = defineModel<File[]>({ default: () => [] })
 
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
+// @a11y @core
+/*
+ * Declaring `click:icon-start` is what puts it in the API tables and in a consumer's
+ * editor, and it is also what takes it out of `$attrs`: it no longer travels with the
+ * forwarded attributes and has to be handed to the field by hand. Only when the consumer
+ * really wrote one, or VInput would make the start icon a button on every instance.
+ */
+const iconStartClick = iconClickHandlers().start
+  ? { 'onClick:icon-start': (event: MouseEvent) => emit('click:icon-start', event) }
+  : undefined
+
 const m = useMessages()
 const locale = useLocale()
 
@@ -233,29 +236,25 @@ const resolvedDisabled = computed(() => group?.disabled || props.disabled)
  * to point at it. The description attribute is pulled out of that bucket, because this
  * component re-assembles it further down.
  */
-const {
-  fileEl,
-  nativeAttrs,
-  controlAttrs: fieldAttrs,
-  acceptFiles,
-  onNativeChange,
-  openPicker,
-  resetNative,
-} = useFileField({
-  model,
-  forwardedAttrs,
-  enabled: () => !resolvedDisabled.value && !props.readonly,
-  multiple: () => props.multiple,
-  limits: () => ({
-    accept: props.accept,
-    maxSize: props.maxSize,
-    maxFiles: props.maxFiles,
-    maxTotalSize: props.maxTotalSize,
-  }),
-  onReject: (rejection) => emit('reject', rejection),
-  onChange: (files) => emit('change', files),
-  excludeFromControl: ['aria-describedby'],
-})
+const { fileEl, nativeAttrs, controlAttrs, acceptFiles, onNativeChange, openPicker, resetNative } =
+  useFileField({
+    model,
+    forwardedAttrs,
+    enabled: () => !resolvedDisabled.value && !props.readonly,
+    multiple: () => props.multiple,
+    limits: () => ({
+      accept: props.accept,
+      maxSize: props.maxSize,
+      maxFiles: props.maxFiles,
+      maxTotalSize: props.maxTotalSize,
+    }),
+    onReject: (rejection) => emit('reject', rejection),
+    onChange: (files) => emit('change', files),
+    excludeFromControl: ['aria-describedby'],
+  })
+
+/** What reaches the visible field: the consumer's own attributes, plus that listener. */
+const fieldAttrs = computed(() => ({ ...controlAttrs.value, ...iconStartClick }))
 
 const inputRef = ref<InstanceType<typeof VInput> | null>(null)
 

@@ -108,6 +108,11 @@ export default {
         vModel:
           "La ou les dates choisies, dans la forme que <code>selection</code> réclame. Pendant la saisie, la valeur n'est écrite qu'une fois que ce qui a été entré est une date complète et acceptable ; une entrée inachevée ou refusée la laisse intacte et est annulée quand le lecteur quitte le champ.",
       },
+      events: {
+        clear: 'La croix de vidage a vidé le champ. La valeur est déjà remise à zéro.',
+        clickIconStart:
+          "L'icône de début a été cliquée. Attacher cet écouteur est ce qui en fait un vrai bouton, qui demande alors <code>iconStartLabel</code>.",
+      },
       slots: {
         day: 'Ce que montre une cellule de jour, transmis tel quel au calendrier.',
         footer:

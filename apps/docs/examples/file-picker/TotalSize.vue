@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { VFilePicker, type FilePickerRejection } from 'vectis-ui'
+import { VFilePicker, type FileRejection } from 'vectis-ui'
 
 const files = ref<File[]>([])
 const refused = ref('')
 
 /* The reason says which rule was met, and the two here are not the same failure: one
    batch too heavy, or one file too many. */
-function onReject({ file, reason }: FilePickerRejection) {
+function onReject({ file, reason }: FileRejection) {
   refused.value =
     reason === 'count'
       ? `${file.name} was turned away: three files at most.`

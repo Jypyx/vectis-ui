@@ -90,6 +90,11 @@ export default {
         vModel:
           "L'heure, toujours en chaîne sur 24 heures quelle que soit l'horloge affichée : vous n'avez donc jamais à savoir laquelle la langue du lecteur utilise.",
       },
+      events: {
+        clear: 'La croix de vidage a vidé le champ. La valeur est déjà remise à zéro.',
+        clickIconStart:
+          "L'icône de début a été cliquée. Attacher cet écouteur est ce qui en fait un vrai bouton, qui demande alors <code>iconStartLabel</code>.",
+      },
     },
   },
 }

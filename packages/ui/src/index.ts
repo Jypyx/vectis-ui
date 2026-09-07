@@ -69,6 +69,7 @@ export { default as VToggle } from './components/VToggle/VToggle.vue'
 export type {
   ToggleModelValue,
   ToggleOrientation,
+  ToggleSelectedVariant,
   ToggleSize,
   ToggleTone,
   ToggleValue,
@@ -85,6 +86,7 @@ export { default as VSwitch } from './components/VSwitch/VSwitch.vue'
 export { default as VTooltip } from './components/VTooltip/VTooltip.vue'
 export { default as VMenu } from './components/VMenu/VMenu.vue'
 export { default as VMenuItem } from './components/VMenu/VMenuItem.vue'
+export type { MenuItemTone } from './components/VMenu/VMenuItem.vue'
 export { default as VMenuGroup } from './components/VMenu/VMenuGroup.vue'
 export { default as VMenuSeparator } from './components/VMenu/VMenuSeparator.vue'
 export { default as VAccordion } from './components/VAccordion/VAccordion.vue'
@@ -165,18 +167,13 @@ export type {
   CalendarView,
 } from './components/VCalendar/types'
 export { default as VFileInput } from './components/VFileInput/VFileInput.vue'
-export type {
-  FileInputDisplay,
-  FileInputRejectReason,
-  FileInputRejection,
-} from './components/VFileInput/VFileInput.vue'
+export type { FileInputDisplay } from './components/VFileInput/VFileInput.vue'
+/* What `@reject` carries, on VFileInput as on VFilePicker. The two screen a batch through
+   the same rule, so the type is declared beside that rule rather than copied into each of
+   them — the `TimeMatcher` arrangement, and what lets one handler serve both. */
+export type { FileRejectReason, FileRejection } from './utils/file'
 export { default as VFilePicker } from './components/VFilePicker/VFilePicker.vue'
-export type {
-  FilePickerPreview,
-  FilePickerRejectReason,
-  FilePickerRejection,
-  FilePickerRow,
-} from './components/VFilePicker/VFilePicker.vue'
+export type { FilePickerPreview, FilePickerRow } from './components/VFilePicker/VFilePicker.vue'
 export type { FileKind } from './components/VFilePicker/fileKind'
 export { default as VCarousel } from './components/VCarousel/VCarousel.vue'
 export type {

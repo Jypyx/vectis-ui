@@ -30,8 +30,7 @@ export default {
         iconEnd: 'An icon after the label. The <code>#end</code> slot replaces it.',
         selected:
           'Marks this item as the one currently in effect, the chosen sort order or the active view. It is coloured and announced as such.',
-        danger:
-          'Marks the command as destructive, which colours it accordingly. Deleting something belongs here.',
+        tone: 'What the command means, in colour. <code>danger</code> marks it destructive, which is where deleting something belongs, and <code>neutral</code>, the default, covers every other command.',
         disabled: 'Makes the item unusable: it no longer responds and the arrows skip over it.',
         href: 'Turns the item into a link pointing at this address, for a menu that navigates rather than acts.',
       },

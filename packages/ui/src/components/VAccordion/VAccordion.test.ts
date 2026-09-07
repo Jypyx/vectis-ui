@@ -74,8 +74,8 @@ describe('VAccordion', () => {
     expect(second?.querySelector('.v-accordion-subtitle')).toBeNull()
   })
 
-  it('icon-start: a dedicated icon before the title, distinct from the chevron', () => {
-    const { container } = renderWith('', 'icon-start="settings"')
+  it('icon: a dedicated icon before the title, distinct from the chevron', () => {
+    const { container } = renderWith('', 'icon="settings"')
     const [first, second] = [...container.querySelectorAll('details')]
     // both icons coexist: the start icon, then the chevron
     expect(icones(first as Element)).toEqual(['settings', 'expand_more'])

@@ -20,6 +20,7 @@ export default {
           'Marks the code as wrong, which colours the boxes and tells assistive technology so.',
         label:
           'What screen readers announce for the row as a whole. It falls back to the design system dictionary.',
+        hint: 'A line of help under the boxes, where the code was sent or how long it lasts. It is tied to the row for assistive technology, so it is read out along with the label. Unlike <code>label</code>, which names the row without rendering anything, this is text the reader sees.',
         vModel:
           'The code as one string, without the separators: a <code>GT-###</code> template still yields three characters. It is empty to begin with, and shorter than the full length while it is being typed.',
       },

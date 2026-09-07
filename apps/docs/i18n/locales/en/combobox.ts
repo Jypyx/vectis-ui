@@ -72,6 +72,8 @@ export default {
         iconStart:
           'An icon inside the field, at the start. It is rendered before the chips rather than in their place. Decorative until a <code>@click:icon-start</code> listener turns it into a button.',
         iconStartLabel: 'What the start icon does, in words, once it is clickable.',
+        expandIcon:
+          'The chevron at the end of the field, which turns as the list opens. It is decoration: the field itself is what opens the list, so the chevron is hidden from screen readers and takes no label.',
         clearable: 'Offers a cross that empties both the selection and the search.',
         clearLabel:
           'What that cross does, in words. It falls back to the design system dictionary.',
@@ -94,6 +96,9 @@ export default {
         search:
           'What is being searched for, to be sent to the source. It is delayed by <code>searchDebounce</code> while typing, and emitted at once when the panel opens so that a first page can be loaded. The same term is never emitted twice in a row.',
         loadMore: 'The end of the list has come into view: send the next page.',
+        clear: 'The clear cross emptied the selection and the search.',
+        clickIconStart:
+          'The start icon was clicked. Attaching this listener is what turns that icon into a real button, which then needs <code>iconStartLabel</code>.',
       },
       slots: {
         option:

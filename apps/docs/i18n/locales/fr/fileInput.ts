@@ -94,6 +94,8 @@ export default {
         reject:
           'Un fichier a été écarté, avec lequel et pourquoi : son genre, sa taille, ou combien il y en avait déjà.',
         clear: "La croix d'effacement a été pressée. La sélection est déjà vide.",
+        clickIconStart:
+          "L'icône de début a été cliquée. Attacher cet écouteur est ce qui en fait un vrai bouton, qui demande alors <code>iconStartLabel</code>.",
       },
       slots: {
         chip: 'Remplace la puce qui représente un fichier. Elle reçoit le nom déjà raccourci AU MILIEU pour que son extension survive, <code>remove</code>, sans quoi le fichier ne pourrait plus être retiré, et la taille et la densité calculées pour tenir dans le champ.',

@@ -218,3 +218,44 @@ describe('VDatePicker', () => {
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['2026-06-11'])
   })
 })
+
+describe('VDatePicker — disabled and readonly', () => {
+  it('readonly refuses the selection but leaves the calendar to be read and walked through', async () => {
+    const { container, emitted } = render(VDatePicker, {
+      props: { modelValue: '2026-06-10', readonly: true },
+    })
+    const day = container.querySelector('.v-date-picker-day[data-selected]') as HTMLElement
+    // Every day says it cannot be activated, and none of them is struck through: the
+    // dates are perfectly available, it is the picker that is frozen.
+    expect(day.getAttribute('aria-disabled')).toBe('true')
+    expect(day.hasAttribute('data-unavailable')).toBe(false)
+    await fireEvent.click(container.querySelector('.v-date-picker-day:not([data-selected])')!)
+    expect(emitted('update:modelValue')).toBeUndefined()
+
+    const month = container.querySelectorAll('.v-date-picker-nav button')[0] as HTMLButtonElement
+    expect(month.disabled).toBe(false)
+    await fireEvent.click(month)
+    await nextTick()
+    expect(container.querySelector('.v-date-picker-view-toggle')?.textContent?.trim()).not.toBe('')
+  })
+
+  it('disabled takes every control out of the tab order and refuses to navigate', async () => {
+    const { container, emitted } = render(VDatePicker, {
+      props: { modelValue: '2026-06-10', disabled: true },
+    })
+    expect(container.querySelector('.v-date-picker')?.hasAttribute('data-disabled')).toBe(true)
+    const buttons = [...container.querySelectorAll('button')] as HTMLButtonElement[]
+    expect(buttons.every((button) => button.disabled)).toBe(true)
+    await fireEvent.click(container.querySelector('.v-date-picker-day')!)
+    expect(emitted('update:modelValue')).toBeUndefined()
+  })
+
+  it('the strike-through follows the DATE being unavailable, never the frozen picker', () => {
+    const { container } = render(VDatePicker, {
+      props: { modelValue: '2026-06-10', disabledDates: ['2026-06-11'] },
+    })
+    const marked = [...container.querySelectorAll('.v-date-picker-day[data-unavailable]')]
+    expect(marked).toHaveLength(1)
+    expect(marked[0]?.textContent?.trim()).toBe('11')
+  })
+})

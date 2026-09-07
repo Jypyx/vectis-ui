@@ -30,8 +30,7 @@ export default {
         iconEnd: 'Une icône après le libellé. Le slot <code>#end</code> la remplace.',
         selected:
           'Marque cet item comme celui en vigueur, le tri choisi ou la vue active. Il est coloré et annoncé comme tel.',
-        danger:
-          "Marque la commande comme destructrice, ce qui la colore en conséquence. Supprimer quelque chose relève d'ici.",
+        tone: 'Ce que signifie la commande, en couleur. <code>danger</code> la marque comme destructrice, ce dont relève la suppression, et <code>neutral</code>, la valeur par défaut, couvre toutes les autres.',
         disabled: "Rend l'item inutilisable : il ne répond plus et les flèches l'enjambent.",
         href: "Transforme l'item en lien pointant vers cette adresse, pour un menu qui navigue plutôt qu'il n'agit.",
       },

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { VFilePicker, type FilePickerRejection } from 'vectis-ui'
+import { VFilePicker, type FileRejection } from 'vectis-ui'
 
 const files = ref<File[]>([])
 const refused = ref('')
 
-function onReject({ file }: FilePickerRejection) {
+function onReject({ file }: FileRejection) {
   refused.value = `${file.name} was turned away: 500 kB at most per file.`
 }
 </script>

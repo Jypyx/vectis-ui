@@ -32,9 +32,9 @@ export default {
         { name: 'v-model', key: 'vModel', type: 'string', default: "''" },
       ],
       events: [
-        { name: 'clear', type: '[]' },
         { name: 'click:icon-start', key: 'clickIconStart', type: '[event: MouseEvent]' },
         { name: 'click:icon-end', key: 'clickIconEnd', type: '[event: MouseEvent]' },
+        { name: 'clear', type: '[]' },
       ],
       slots: [
         { name: 'start', type: '{}' },

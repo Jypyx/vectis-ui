@@ -99,11 +99,11 @@ describe('VDialog', () => {
   })
 
   it('hideClose keeps the header actions container for the slot that still fills it', async () => {
-    // The `v-if` is `!hideClose || $slots.headerActions`, not `!(hideClose || …)`: written
+    // The `v-if` is `!hideClose || $slots["header-actions"]`, not `!(hideClose || …)`: written
     // the second way the container disappears exactly when a consumer fills the slot.
     const { container } = await openHarness(
       { hideClose: true },
-      '<template #headerActions><button data-testid="pin">Pin</button></template>',
+      '<template #header-actions><button data-testid="pin">Pin</button></template>',
     )
     expect(container.querySelector('.v-dialog-header-actions')).toBeTruthy()
     expect(container.querySelector('[data-testid="pin"]')).toBeTruthy()

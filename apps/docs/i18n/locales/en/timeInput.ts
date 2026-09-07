@@ -90,6 +90,11 @@ export default {
         vModel:
           "The time, always as a 24-hour string whatever clock is displayed, so you never have to know which one the reader's language uses.",
       },
+      events: {
+        clear: 'The clear cross emptied the field. The value has already been reset.',
+        clickIconStart:
+          'The start icon was clicked. Attaching this listener is what turns that icon into a real button, which then needs <code>iconStartLabel</code>.',
+      },
     },
   },
 }

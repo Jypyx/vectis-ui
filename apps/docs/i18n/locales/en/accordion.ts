@@ -13,7 +13,7 @@ export default {
     },
     subtitles: {
       title: 'Subtitles and icons',
-      text: '<code>iconStart</code> places an icon before the title, and <code>subtitle</code> adds a second line under it for a status or a short explanation. Both have a slot counterpart, <code>#start</code> and <code>#subtitle</code>, for when the heading needs markup rather than plain text.',
+      text: '<code>icon</code> places an icon before the title, and <code>subtitle</code> adds a second line under it for a status or a short explanation. Both have a slot counterpart, <code>#start</code> and <code>#subtitle</code>, for when the heading needs markup rather than plain text.',
     },
     compact: {
       title: 'Compact',
@@ -53,7 +53,7 @@ export default {
           'The heading of the section, the line that stays visible when it is closed. Use the <code>#title</code> slot when the heading needs markup rather than plain text.',
         subtitle:
           'A second line under the title, for a short explanation or a status. The <code>#subtitle</code> slot replaces it when markup is needed.',
-        iconStart: 'An icon before the title. The <code>#start</code> slot replaces it.',
+        icon: 'An icon before the title. The <code>#start</code> slot replaces it.',
         defaultOpen:
           'Renders the section already open. It sets the first render only: the browser owns the state afterwards, so changing this later will not close a section the reader has opened.',
         disabled:
@@ -63,7 +63,7 @@ export default {
         default: 'The content revealed when the section is open.',
         title: 'A title made of markup, which replaces the <code>title</code> prop.',
         subtitle: 'A subtitle made of markup, which replaces the <code>subtitle</code> prop.',
-        start: 'Free content before the title, which takes the place of <code>iconStart</code>.',
+        start: 'Free content before the title, which takes the place of <code>icon</code>.',
       },
     },
   },

@@ -10,10 +10,10 @@ export default {
       name: 'VIconButton',
       props: [
         { name: 'label', type: 'string' },
-        { name: 'variant', type: "'solid' | 'outline' | 'ghost' | 'soft'", default: "'ghost'" },
-        { name: 'tone', type: "'accent' | 'neutral' | 'danger'", default: "'neutral'" },
+        { name: 'variant', type: 'ButtonVariant', default: "'ghost'" },
+        { name: 'tone', type: 'ButtonTone', default: "'neutral'" },
         { name: 'elevated', type: 'boolean', default: 'false' },
-        { name: 'size', type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
+        { name: 'size', type: 'ButtonSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'shape', type: "'square' | 'circular'", default: "'square'" },
         { name: 'type', type: "ButtonHTMLAttributes['type']", default: "'button'" },

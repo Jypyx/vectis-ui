@@ -24,7 +24,7 @@ export default {
       props: [
         { name: 'title', type: 'string' },
         { name: 'subtitle', type: 'string' },
-        { name: 'iconStart', type: 'IconSource' },
+        { name: 'icon', type: 'IconSource' },
         { name: 'defaultOpen', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
       ],
