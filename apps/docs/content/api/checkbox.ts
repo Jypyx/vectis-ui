@@ -10,7 +10,7 @@ export default {
       name: 'VCheckbox',
       props: [
         { name: 'indeterminate', type: 'boolean', default: 'false' },
-        { name: 'labelPosition', type: "'start' | 'end'", default: "'end'" },
+        { name: 'labelPosition', type: 'CheckboxLabelPosition', default: "'end'" },
         { name: 'spread', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },

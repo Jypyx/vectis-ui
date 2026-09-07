@@ -796,3 +796,28 @@ describe('VTimeInput — the field props', () => {
     }
   })
 })
+
+describe('VTimeInput — the footer slot', () => {
+  it('replaces Cancel and OK, and is handed both actions', async () => {
+    const { container, getByTestId, emitted } = render(VTimeInput, {
+      props: { mode: 'picker', modelValue: '09:15' },
+      slots: {
+        footer: (scope: { confirm: () => void; cancel: () => void }) => [
+          h('button', { 'data-testid': 'ok', onClick: scope.confirm }, 'Set'),
+          h('button', { 'data-testid': 'back', onClick: scope.cancel }, 'Back'),
+        ],
+      },
+    })
+    await openPanel(container)
+
+    // The component's own two buttons are gone, the slot having taken their place.
+    expect(container.querySelector('.v-time-picker-footer')?.textContent).toBe('SetBack')
+
+    // `confirm` is what commits the draft: without it the panel could change nothing.
+    const face = container.querySelector('[role="slider"]') as HTMLElement
+    await fireEvent.keyDown(face, { key: 'ArrowUp' })
+    getByTestId('ok').click()
+    await nextTick()
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['10:15'])
+  })
+})

@@ -43,6 +43,7 @@ import { table_chart as tableChartIcon } from '../VIcon/icons/table_chart'
 import { video_file as videoFileIcon } from '../VIcon/icons/video_file'
 import type { IconSource } from '../VIcon/types'
 import VIconButton from '../VIconButton/VIconButton.vue'
+import VSpinner from '../VSpinner/VSpinner.vue'
 import VTypography from '../VTypography/VTypography.vue'
 
 import { useFileDrop } from '../../composables/useFileDrop'
@@ -148,6 +149,23 @@ interface FilePickerProps {
   disabled?: boolean
   /** Shows what was taken without allowing it to change: no dialog, no drop, no removal. */
   readonly?: boolean
+  /**
+   * Marks the zone as invalid, which colours its outline. It is for a rule of your own:
+   * nothing here is checked by the browser, the real input being hidden.
+   */
+  invalid?: boolean
+  /**
+   * Shows a spinner in place of the zone icon — while an upload is under way, typically.
+   * It says that something is happening and changes nothing else: files can still be
+   * dropped and the dialog still opens. `disabled` and `readonly` are the props that cut
+   * those off.
+   */
+  loading?: boolean
+  /**
+   * What screen readers announce while the spinner turns. It falls back to the design
+   * system dictionary.
+   */
+  loadingLabel?: string
 }
 
 defineOptions({ inheritAttrs: false })
@@ -168,6 +186,9 @@ const props = withDefaults(defineProps<FilePickerProps>(), {
   maxFiles: undefined,
   disabled: false,
   readonly: false,
+  invalid: false,
+  loading: false,
+  loadingLabel: undefined,
 })
 
 const emit = defineEmits<{
@@ -484,6 +505,7 @@ defineExpose({
     :data-preview="preview || undefined"
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
+    :data-invalid="invalid ? '' : undefined"
     :data-dragging="dragging ? '' : undefined"
     @dragenter="onDragEnter"
     @dragover="onDragOver"
@@ -522,7 +544,10 @@ defineExpose({
         @click="onZoneClick"
       >
         <span class="v-file-picker-icon">
-          <slot name="icon"><VIcon v-bind="iconProps(icon)" /></slot>
+          <slot name="icon">
+            <VSpinner v-if="loading" :size="24" :label="loadingLabel" />
+            <VIcon v-else v-bind="iconProps(icon)" />
+          </slot>
         </span>
 
         <!-- Rendered as a span in BOTH shapes: a paragraph is not allowed inside a
@@ -688,6 +713,12 @@ defineExpose({
 
   .v-file-picker:not([data-disabled]):not([data-readonly]) .v-file-picker-zone:hover {
     --file-picker-border-color: var(--vectis-color-accent);
+  }
+
+  /* Invalid redefines the variable the zone paints its outline with, the way the drag
+     highlight does: the states can then never disagree about what colour the border is. */
+  .v-file-picker[data-invalid] .v-file-picker-zone {
+    --file-picker-border-color: var(--vectis-color-danger);
   }
 
   .v-file-picker-zone:focus-visible {

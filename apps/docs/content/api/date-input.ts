@@ -23,7 +23,7 @@ export default {
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
         { name: 'placeholder', type: 'string' },
-        { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'" },
+        { name: 'size', type: 'DateInputSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
@@ -37,7 +37,7 @@ export default {
         { name: 'clearLabel', type: 'string' },
         { name: 'pickerIcon', type: 'IconSource', default: 'calendar_today' },
         { name: 'displayFormat', type: 'Intl.DateTimeFormatOptions', default: "{ day: 'numeric', month: 'short', year: 'numeric' }" },
-        { name: 'placement', type: 'Placement', default: "'bottom-start'" },
+        { name: 'placement', type: 'DateInputPlacement', default: "'bottom-start'" },
         { name: 'v-model', key: 'vModel', type: 'DatePickerValue', default: 'null' },
       ],
       events: [

@@ -34,6 +34,21 @@ import { resolveMatcher } from '../../utils/matcher'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
+/** How the pages that are not the current one are drawn. */
+export type PaginationVariant = 'ghost' | 'outline'
+
+/** The colour of the current page. */
+export type PaginationTone = 'accent' | 'neutral' | 'danger'
+
+/** The height of the pills, from the scale every control shares. */
+export type PaginationSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+
+/** Where the row sits in the width it is given. */
+export type PaginationAlign = 'start' | 'center' | 'end'
+
+/** What the previous and next controls show. */
+export type PaginationControlsDisplay = 'icon' | 'text' | 'both'
+
 interface PaginationProps {
   /**
    * How many pages there are in all. It is 1 by default, which renders a single page: the
@@ -54,23 +69,23 @@ interface PaginationProps {
    * How the pages OTHER than the current one, and the controls, are drawn. The current
    * page is always filled, whatever this says.
    */
-  variant?: 'ghost' | 'outline'
+  variant?: PaginationVariant
   /** The colour the current page takes. The other pages and the controls stay neutral. */
-  tone?: 'accent' | 'neutral' | 'danger'
+  tone?: PaginationTone
   /** The height of the buttons, from the scale shared by every control. */
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  size?: PaginationSize
   /** Takes 4px off the height of every button. */
   compact?: boolean
   /**
    * Where the row sits in the space it is given. It only matters in responsive mode,
    * where the row takes the whole width available.
    */
-  align?: 'start' | 'center' | 'end'
+  align?: PaginationAlign
 
   /** Hides the previous and next buttons that otherwise sit on either side of the pages. */
   hideControls?: boolean
   /** Whether those controls show an icon, their label, or both. */
-  controlsDisplay?: 'icon' | 'text' | 'both'
+  controlsDisplay?: PaginationControlsDisplay
   /** The icon of the previous control: an icon name, or an explicit render. */
   prevIcon?: IconSource
   /** The icon of the next control: an icon name, or an explicit render. */

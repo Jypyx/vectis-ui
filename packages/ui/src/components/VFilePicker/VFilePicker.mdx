@@ -103,6 +103,11 @@ thumbnail URL, the size already formatted, and `remove`) so nothing has to be re
 
 <Canvas of={VFilePickerStories.States} />
 
+`loading` is deliberately the opposite of those two: purely visual, a spinner in place of the zone
+icon while an upload is under way, with the dialog and the drop left working. `invalid` colours
+the zone's outline by redefining the very variable the drag highlight uses, so the two states can
+never disagree about what colour that border is.
+
 ## What this component does not have
 
 - **No `size` prop.** The zone is a surface, not a control: it stays outside the design system's

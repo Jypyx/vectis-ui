@@ -9,6 +9,9 @@
  * between them, that lets only one be selected, and that gives the group a single
  * stop in the tab order. There is no JavaScript here for any of it.
  */
+/** Which side of the dot the label sits on. */
+export type RadioLabelPosition = 'start' | 'end'
+
 interface RadioProps {
   /**
    * What choosing this button means. The group's v-model holds the value of the
@@ -16,7 +19,7 @@ interface RadioProps {
    */
   value: string
   /** Which side of the dot the label sits on. */
-  labelPosition?: 'start' | 'end'
+  labelPosition?: RadioLabelPosition
   /**
    * Pushes the label and the dot to opposite ends of the line, the row taking the
    * full width available.

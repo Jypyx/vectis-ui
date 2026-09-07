@@ -10,7 +10,7 @@ export default {
       name: 'VSideNavigation',
       props: [
         { name: 'label', type: 'string' },
-        { name: 'size', type: "'sm' | 'md'", default: "'md'" },
+        { name: 'size', type: 'SideNavigationSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'exclusive', type: 'boolean', default: 'false' },
         { name: 'expandIcon', type: 'IconSource', default: 'expand_more' },

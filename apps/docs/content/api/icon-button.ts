@@ -15,7 +15,7 @@ export default {
         { name: 'elevated', type: 'boolean', default: 'false' },
         { name: 'size', type: 'ButtonSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
-        { name: 'shape', type: "'square' | 'circular'", default: "'square'" },
+        { name: 'shape', type: 'IconButtonShape', default: "'square'" },
         { name: 'type', type: "ButtonHTMLAttributes['type']", default: "'button'" },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'loading', type: 'boolean', default: 'false' },

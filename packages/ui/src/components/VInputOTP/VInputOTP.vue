@@ -27,6 +27,12 @@ import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useMessages } from '../../i18n/state'
 
+/** The height of the boxes: 32, 40 or 48 pixels. */
+export type InputOTPSize = 'sm' | 'md' | 'lg'
+
+/** Which characters the code is made of. */
+export type InputOTPFormat = 'numeric' | 'alpha' | 'alphanumeric'
+
 interface InputOTPProps {
   /** How many boxes the code has. It is ignored as soon as a `pattern` is given. */
   length?: number
@@ -34,7 +40,7 @@ interface InputOTPProps {
    * Which characters the code is made of. It filters what can be typed or pasted, and
    * decides which keyboard a phone offers.
    */
-  format?: 'numeric' | 'alpha' | 'alphanumeric'
+  format?: InputOTPFormat
   /**
    * The shape of the code: each `#` is a box to fill, and every other character is a
    * separator shown between the boxes without ever being part of the value —
@@ -48,7 +54,7 @@ interface InputOTPProps {
    */
   separatorIcon?: IconSource
   /** The size of the boxes: 32, 40 or 48 pixels. */
-  size?: 'sm' | 'md' | 'lg'
+  size?: InputOTPSize
   /** Takes 4px off the boxes, leaving the text and the icons as they are. */
   compact?: boolean
   /** Makes every box unusable, greyed out through the colour tokens. */

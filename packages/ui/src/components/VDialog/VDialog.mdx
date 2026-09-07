@@ -29,6 +29,10 @@ while it is open, and is entirely removed from it on closing — nothing lingers
 Since each opening recreates a brand new element, the **entry** animation is kept but there is no
 **exit** animation.
 
+VDialogAlert exposes the same three members, handed straight through: it is VDialog with its
+options fixed, and the one dialog a reader cannot dismiss by Escape or by clicking outside must
+not also be the one you cannot close from code.
+
 ## Three zones
 
 The **header** holds a title and a subtitle — entirely replaceable through the `#header` slot. On

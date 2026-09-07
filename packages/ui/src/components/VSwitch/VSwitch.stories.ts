@@ -14,6 +14,7 @@ const t = storyText({
     switchLeft: 'VSwitch on the left',
     disabled: 'Disabled',
     disabledOn: 'Disabled and on',
+    invalid: 'Accept the terms',
     enableNotifications: 'Enable notifications',
   },
   fr: {
@@ -24,6 +25,7 @@ const t = storyText({
     switchLeft: 'VSwitch à gauche',
     disabled: 'Désactivé',
     disabledOn: 'Désactivé actif',
+    invalid: 'Accepter les conditions',
     enableNotifications: 'Activer les notifications',
   },
 })
@@ -109,4 +111,24 @@ export const WithoutLabel: Story = {
     setup: () => ({ on: ref(false), t }),
     template: '<VSwitch v-model="on" :aria-label="t.enableNotifications" />',
   }),
+}
+
+/**
+ * `invalid` rings the track in the danger colour and sets `aria-invalid` on the input,
+ * the same pair VCheckbox and VRadio use. It is for a rule the browser cannot check on
+ * its own; native validity already colours the switch without it.
+ */
+export const Invalid: Story = {
+  render: () => ({
+    components: { VSwitch },
+    setup: () => ({ accepted: ref(false), t }),
+    template: '<VSwitch v-model="accepted" invalid>{{ t.invalid }}</VSwitch>',
+  }),
+  play: async ({ canvasElement }) => {
+    const input = canvasElement.querySelector('.v-switch-input')!
+    await expect(input).toHaveAttribute('aria-invalid', 'true')
+    // The ring is a shadow, so it changes no geometry and leaves the focus outline alone.
+    const track = canvasElement.querySelector('.v-switch-track')!
+    await expect(getComputedStyle(track).boxShadow).not.toBe('none')
+  },
 }

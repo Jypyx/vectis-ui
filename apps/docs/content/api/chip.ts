@@ -9,11 +9,11 @@ export default {
     {
       name: 'VChip',
       props: [
-        { name: 'variant', type: "'soft' | 'solid' | 'outline'", default: "'soft'" },
-        { name: 'tone', type: "'neutral' | 'accent' | 'danger' | 'success' | 'warning'", default: "'neutral'" },
+        { name: 'variant', type: 'ChipVariant', default: "'soft'" },
+        { name: 'tone', type: 'ChipTone', default: "'neutral'" },
         { name: 'color', type: 'string' },
-        { name: 'shape', type: "'chip' | 'pill'", default: "'chip'" },
-        { name: 'size', type: "'xs' | 'sm'", default: "'xs'" },
+        { name: 'shape', type: 'ChipShape', default: "'chip'" },
+        { name: 'size', type: 'ChipSize', default: "'xs'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'clickable', type: 'boolean', default: 'false' },
         { name: 'href', type: 'string' },

@@ -22,6 +22,9 @@ import VIconButton from '../VIconButton/VIconButton.vue'
 import VTypography from '../VTypography/VTypography.vue'
 import { useMessages } from '../../i18n/state'
 
+/** How assistive technology announces the dialog. */
+export type DialogRole = 'dialog' | 'alertdialog'
+
 interface DialogProps {
   /**
    * The title of the dialog, which also names it for assistive technology. It is
@@ -40,7 +43,7 @@ interface DialogProps {
    * explicitly, and it makes screen readers announce it more insistently — see
    * VDialogAlert, which is exactly that.
    */
-  role?: 'dialog' | 'alertdialog'
+  role?: DialogRole
   /**
    * Takes the close cross out of the header, leaving the reader with Escape, the
    * backdrop and whatever the footer offers.

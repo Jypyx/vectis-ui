@@ -53,6 +53,12 @@ Two modes:
 The trigger needs no click handler: `popovertarget` toggles the panel natively, and
 `aria-expanded` follows the real state.
 
+For the cases where waiting a tick for the model would be too late, the component exposes
+`show()` and `close()` on its instance, plus `el`, the panel element. VTooltip and the date and
+time fields all drive it that way: their opening has to be synchronous, since the focus move that
+follows assumes the panel is already there. `close` is the same verb VDialog uses for the same
+gesture.
+
 <Canvas of={VPopoverStories.OpenedByTheTrigger} />
 
 ## Placements

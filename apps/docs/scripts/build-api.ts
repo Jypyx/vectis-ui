@@ -129,11 +129,6 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
 const DEFAULT_OVERRIDES: Record<string, string> = {
   'VAvatar.size': "'md'",
   'VAvatarGroup.size': "'md'",
-  // Boolean props absent from their withDefaults: Vue casts them to `false`, which the
-  // extractor reports as no default at all.
-  'VBadge.bordered': 'false',
-  'VBadge.dot': 'false',
-  'VBadge.overlay': 'false',
   'VButton.tone': "'accent'",
   'VCalendar.date': 'today',
   'VCalendar.edgeStepDelay': '800',

@@ -84,6 +84,11 @@ const props = withDefaults(defineProps<BadgeProps>(), {
   icon: undefined,
   overlayPosition: 'top',
   ringColor: undefined,
+  // Written out although Vue casts an absent boolean to `false` on its own: left out,
+  // `vue-component-meta` reports no default at all and the docs table's cell goes blank.
+  dot: false,
+  overlay: false,
+  bordered: false,
 })
 
 defineSlots<{

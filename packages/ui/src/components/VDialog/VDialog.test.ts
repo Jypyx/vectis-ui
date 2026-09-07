@@ -1,8 +1,9 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
-import { defineComponent, nextTick, ref } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VDialog from './VDialog.vue'
+import VDialogAlert from './VDialogAlert.vue'
 
 /**
  * Logic only (jsdom + the showModal/close stub, see vitest.setup.ts). The real browser
@@ -167,5 +168,25 @@ describe('VDialog', () => {
     open.value = false
     await flush()
     expect(getDialog()).toBeNull()
+  })
+})
+
+describe('VDialogAlert — the imperative API', () => {
+  it('hands through the same three members VDialog exposes', async () => {
+    const holder = ref<InstanceType<typeof VDialogAlert> | null>(null)
+    const Host = {
+      setup: () => () => h(VDialogAlert, { ref: holder, title: 'Delete?' }, () => 'Sure?'),
+    }
+    render(Host)
+    await flush()
+
+    holder.value?.show()
+    await flush()
+    expect(holder.value?.el?.open).toBe(true)
+
+    holder.value?.close()
+    await flush()
+    // The element is unmounted along with the dialog, which is what `el` follows.
+    expect(holder.value?.el).toBeNull()
   })
 })

@@ -91,6 +91,11 @@ The panel works on a **draft**: only **OK** writes the v-model; **Cancel**, `Esc
 focus leaving abandon the selection under way — you can feel your way around the picker
 before confirming.
 
+The `#footer` slot **replaces** those two buttons rather than joining them, and it receives both
+actions — `{ confirm, cancel }`. That is what makes it usable: the clock writes a draft, so a
+footer of your own without `confirm` would leave the value unchangeable through the panel. It is
+not rendered in the list form, which has no panel of its own.
+
 In 24 h, the picker carries a **double ring**: 12 and 1–11 on the outside, 00 and 13–23 on
 the inside.
 

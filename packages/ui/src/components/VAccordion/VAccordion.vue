@@ -16,6 +16,9 @@ import type { IconSource } from '../VIcon/types'
 
 import { accordionKey } from './context'
 
+/** How much decoration the block carries. */
+export type AccordionVariant = 'flat' | 'outlined'
+
 interface AccordionProps {
   /**
    * Lets the reader keep several sections open at once. Left out, only one may stay
@@ -28,7 +31,7 @@ interface AccordionProps {
    * accordion sit directly on the surface behind it; `outlined` gives it a raised
    * background, a border and rounded corners, so it reads as a card.
    */
-  variant?: 'flat' | 'outlined'
+  variant?: AccordionVariant
   /**
    * The icon shown on a closed item: an icon name, or an explicit `{ src }` /
    * `{ component }`. It is a chevron by default, which rotates by 180° when the

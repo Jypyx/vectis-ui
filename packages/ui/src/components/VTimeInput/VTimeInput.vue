@@ -70,7 +70,12 @@ export type TimeInputMode = 'picker' | 'input' | 'list'
 
 const MODES: TimeInputMode[] = ['picker', 'input', 'list']
 
-type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
+/** Where the panel opens relative to the field, whether it holds the clock or the list. */
+export type TimeInputPlacement =
+  'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
+
+/** The height of the field: 32, 40 or 48 pixels. */
+export type TimeInputSize = 'sm' | 'md' | 'lg'
 
 interface TimeInputProps {
   /**
@@ -129,7 +134,7 @@ interface TimeInputProps {
   /** What the field says while empty. */
   placeholder?: string
   /** The height of the field: 32, 40 or 48 pixels. */
-  size?: 'sm' | 'md' | 'lg'
+  size?: TimeInputSize
   /** Takes 4px off the height. */
   compact?: boolean
   /** Makes the field unusable, greyed out through the colour tokens. */
@@ -178,7 +183,7 @@ interface TimeInputProps {
    */
   pickerIcon?: IconSource
   /** Where the panel opens relative to the field, whether it holds the clock or the list. */
-  placement?: Placement
+  placement?: TimeInputPlacement
 }
 
 const props = withDefaults(defineProps<TimeInputProps>(), {
@@ -225,6 +230,20 @@ const emit = defineEmits<{
   clear: []
   /** The start icon was clicked. Attaching this listener is what makes it a button. */
   'click:icon-start': [event: MouseEvent]
+}>()
+
+defineSlots<{
+  /**
+   * The strip at the foot of the clock, which REPLACES the Cancel and OK buttons rather
+   * than joining them.
+   *
+   * It receives both actions, and they are what make the slot usable: the clock writes a
+   * DRAFT that only `confirm` commits, so a footer of your own without it would leave the
+   * value unchangeable through the panel. `cancel` drops the draft and closes.
+   *
+   * It is not rendered in `list` mode, which has no panel of this component's own.
+   */
+  footer?(props: { confirm: () => void; cancel: () => void }): unknown
 }>()
 
 // `class` and `style` stay on the wrapper; everything else goes down to the text field,
@@ -948,9 +967,16 @@ defineExpose({
         :allowed-minutes="allowedMinutes"
         @confirm="confirm"
       >
+        <!-- The slot REPLACES the two buttons rather than sitting beside them, so it is
+             handed both actions: the clock writes a draft, and without `confirm` a footer
+             of one's own could never commit it — the value would become unchangeable
+             through the panel. The `remove` of VCombobox's `#chip` slot exists for the
+             same reason. -->
         <template #footer>
-          <VButton variant="ghost" tone="neutral" @click="cancel">{{ m.common.cancel }}</VButton>
-          <VButton @click="confirm">{{ m.common.confirm }}</VButton>
+          <slot name="footer" :confirm="confirm" :cancel="cancel">
+            <VButton variant="ghost" tone="neutral" @click="cancel">{{ m.common.cancel }}</VButton>
+            <VButton @click="confirm">{{ m.common.confirm }}</VButton>
+          </slot>
         </template>
       </VTimePicker>
     </VPopover>

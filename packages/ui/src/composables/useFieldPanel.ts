@@ -11,7 +11,7 @@ interface FocusableField {
 /** The least this needs of the panel: something it can open and close. */
 interface PanelControl {
   show: () => void
-  hide: () => void
+  close: () => void
 }
 
 export interface UseFieldPanelOptions {
@@ -69,7 +69,7 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
 
   function closePanel(refocus = false) {
     if (!open.value) return
-    options.panelRef.value?.hide()
+    options.panelRef.value?.close()
     options.onClose?.()
     if (refocus) options.fieldEl.value?.focus()
   }

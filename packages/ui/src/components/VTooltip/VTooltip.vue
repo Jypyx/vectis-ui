@@ -29,7 +29,8 @@ import VPopover from '../VPopover/VPopover.vue'
 import { useTimer } from '../../composables/useTimer'
 import { isKeyboardFocus } from '../../utils/focus'
 
-type Placement =
+/** Which side of the element the tooltip appears on. */
+export type TooltipPlacement =
   'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'right'
 
 interface TooltipProps {
@@ -39,7 +40,7 @@ interface TooltipProps {
    * Which side of the element the tooltip appears on. The browser flips it to the
    * opposite side by itself when there is not enough room.
    */
-  placement?: Placement
+  placement?: TooltipPlacement
   /**
    * How long the pointer must rest on the element before the tooltip appears, in
    * milliseconds. Keyboard focus opens it at once — the intent is not in doubt there
@@ -96,7 +97,7 @@ function show(immediate = false) {
 
 function hide() {
   timer.cancel()
-  popoverRef.value?.hide()
+  popoverRef.value?.close()
 }
 
 // @a11y

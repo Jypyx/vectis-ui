@@ -87,6 +87,12 @@ export interface DataTableParams {
 // declarations it emits, so a name that is not exported cannot be written there and the
 // build of the type declarations fails. And being lifted out of the component's scope, it
 // has no access to that parameter and must take one of its own.
+/** How much decoration the table carries. */
+export type DataTableVariant = 'flat' | 'outlined'
+
+/** What a narrow container does to the rows. */
+export type DataTableResponsive = 'scroll' | 'stack'
+
 export interface DataTableProps<Row extends Record<string, unknown>> {
   /** The columns to show, in order. */
   columns: DataTableColumn[]
@@ -107,12 +113,12 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
    * How the table is framed: nothing at all, or a card with a raised background, a border
    * and rounded corners.
    */
-  variant?: 'flat' | 'outlined'
+  variant?: DataTableVariant
   /**
    * What happens when the component is too narrow: the table scrolls sideways, or each
    * row becomes a card with its column headings repeated inside it.
    */
-  responsive?: 'scroll' | 'stack'
+  responsive?: DataTableResponsive
   /** Shows that the rows are being loaded. */
   loading?: boolean
   /** What is said when there is no row to show. It falls back to the design system dictionary. */
@@ -295,7 +301,7 @@ defineSlots<{
   /** What a column's heading shows: a slot named after that column's key. */
   [name: `head-${string}`]: (scope: { column: DataTableColumn }) => unknown
   /** The left side of the toolbar, replacing the `title` prop. */
-  header?: () => unknown
+  header?(): unknown
 }>()
 
 // `class` and `style` stay on the wrapper, where a consumer expects to place the

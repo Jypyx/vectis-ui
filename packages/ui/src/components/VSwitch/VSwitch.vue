@@ -8,14 +8,23 @@
  * behaviour come along for free. The track and the moving thumb are pure CSS,
  * following the input's checked state; the only JavaScript is the v-model.
  */
+/** Which side of the switch the label sits on. */
+export type SwitchLabelPosition = 'start' | 'end'
+
 interface SwitchProps {
   /** Which side of the switch the label sits on. */
-  labelPosition?: 'start' | 'end'
+  labelPosition?: SwitchLabelPosition
   /**
    * Pushes the label and the switch to opposite ends of the line, the row taking the
    * full width available — the usual shape for a list of settings.
    */
   spread?: boolean
+  /**
+   * Marks the field as invalid, which rings the track and tells assistive technology
+   * so. Use it for a rule the browser cannot check by itself; native validity is
+   * already handled without it.
+   */
+  invalid?: boolean
   /** Makes the switch unusable, greyed out through the colour tokens. */
   disabled?: boolean
 }
@@ -23,6 +32,7 @@ interface SwitchProps {
 withDefaults(defineProps<SwitchProps>(), {
   labelPosition: 'end',
   spread: false,
+  invalid: false,
   disabled: false,
 })
 
@@ -50,6 +60,7 @@ defineSlots<{
       class="v-switch-input"
       v-bind="$attrs"
       :disabled="disabled"
+      :aria-invalid="invalid || undefined"
     />
     <span class="v-switch-track" aria-hidden="true">
       <span class="v-switch-thumb" />
@@ -139,6 +150,16 @@ defineSlots<{
   .v-switch-input:focus-visible + .v-switch-track {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
+  }
+
+  /* The same pair of selectors as VCheckbox and VRadio, so a switch reports a rule the
+     browser checked and one only the consumer can. It is drawn as a RING rather than as
+     a border colour: the track has no border to tint, and a shadow changes no geometry,
+     where a border would eat into the padding the thumb travels in. The focus outline
+     sits further out, at its own offset, so the two never sit on the same pixels. */
+  .v-switch-input:user-invalid + .v-switch-track,
+  .v-switch-input[aria-invalid='true'] + .v-switch-track {
+    box-shadow: 0 0 0 1px var(--vectis-color-danger);
   }
 
   /* A disabled switch greys out through the colour tokens, the same ones VCheckbox

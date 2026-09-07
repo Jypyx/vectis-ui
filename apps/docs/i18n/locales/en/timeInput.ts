@@ -95,6 +95,10 @@ export default {
         clickIconStart:
           'The start icon was clicked. Attaching this listener is what turns that icon into a real button, which then needs <code>iconStartLabel</code>.',
       },
+      slots: {
+        footer:
+          'The strip at the foot of the clock, which replaces the Cancel and OK buttons rather than joining them. It receives both actions, and they are what make it usable: the clock writes a draft that only <code>confirm</code> commits, so a footer of your own without it would leave the value unchangeable through the panel. It is not rendered in list mode, which has no panel of its own.',
+      },
     },
   },
 }

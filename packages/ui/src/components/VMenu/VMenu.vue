@@ -25,6 +25,9 @@ import { menuInvoker, menuKey } from './context'
 import type { MenuPlacement } from './context'
 import { isKeyboardFocus } from '../../utils/focus'
 
+/** The height of the rows: 32, 40 or 48 pixels. */
+export type MenuSize = 'sm' | 'md' | 'lg'
+
 interface MenuProps {
   /**
    * Where the panel opens relative to its trigger. The browser moves it to another
@@ -35,7 +38,7 @@ interface MenuProps {
    * How tall the rows are: 32, 40 or 48 pixels. Submenus inherit it, so it is set
    * once on the menu as a whole.
    */
-  size?: 'sm' | 'md' | 'lg'
+  size?: MenuSize
   /** Takes 4px off the height of every row, submenus included. */
   compact?: boolean
   /**
@@ -100,7 +103,7 @@ const triggerProps = computed<MenuTriggerProps>(() => ({
 
 // Closing this panel closes every submenu with it: they are rendered inside it, and
 // the browser closes a stack of popovers from the outside in.
-provide(menuKey, { closeAll: () => panelRef.value?.hide() })
+provide(menuKey, { closeAll: () => panelRef.value?.close() })
 
 // @a11y — the focus half of the bridge: into the panel when it opens, back to the
 // trigger when it closes. Keeping the state in step alone would leave a keyboard user
@@ -141,7 +144,7 @@ function onToggle(value: boolean) {
 watch(open, (value) => {
   if (value === shown.value) return
   if (value) panelRef.value?.show()
-  else panelRef.value?.hide()
+  else panelRef.value?.close()
 })
 
 // @ssr — a watcher does not run during the server render, so a menu asked to be open

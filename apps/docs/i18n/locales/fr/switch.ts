@@ -25,6 +25,8 @@ export default {
           "Pousse le libellé et l'interrupteur aux extrémités opposées de la ligne, si bien qu'une colonne de réglages aligne ses interrupteurs le long d'un bord.",
         disabled:
           "Rend l'interrupteur inutilisable. Il se grise par les tokens de couleur plutôt que par l'opacité, ce qui le garde lisible sur n'importe quelle surface.",
+        invalid:
+          "Marque le champ comme invalide, ce qui cercle la piste et le signale aux technologies d'assistance. À utiliser pour une règle que le navigateur ne sait pas vérifier ; la validité native est déjà prise en charge sans ça.",
         vModel:
           "Si l'interrupteur est activé. La valeur est liée à un vrai <code>&lt;input type=\"checkbox\"&gt;</code> masqué, donc elle s'envoie avec le formulaire comme n'importe quel autre champ.",
       },

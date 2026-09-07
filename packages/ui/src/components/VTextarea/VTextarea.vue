@@ -26,9 +26,12 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useTextLimit } from '../../composables/useTextLimit'
 import { useMessages } from '../../i18n/state'
 
+/** The height of one line: 32, 40 or 48 pixels. */
+export type TextareaSize = 'sm' | 'md' | 'lg'
+
 interface TextareaProps {
   /** The size of the field, which sets its padding, its type scale and its icons. */
-  size?: 'sm' | 'md' | 'lg'
+  size?: TextareaSize
   /**
    * Takes 4px off the field by tightening its padding, leaving the number of lines,
    * the type and the icons alone.

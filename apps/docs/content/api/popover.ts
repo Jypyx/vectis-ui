@@ -11,7 +11,7 @@ export default {
       props: [
         { name: 'id', type: 'string' },
         { name: 'placement', type: 'PopoverPlacement', default: "'bottom-start'" },
-        { name: 'mode', type: "'auto' | 'manual'", default: "'auto'" },
+        { name: 'mode', type: 'PopoverMode', default: "'auto'" },
         { name: 'anchor', type: 'string' },
         { name: 'bare', type: 'boolean', default: 'false' },
         { name: 'v-model:open', key: 'vModelOpen', type: 'boolean', default: 'false' },

@@ -95,6 +95,10 @@ export default {
         clickIconStart:
           "L'icône de début a été cliquée. Attacher cet écouteur est ce qui en fait un vrai bouton, qui demande alors <code>iconStartLabel</code>.",
       },
+      slots: {
+        footer:
+          "La bande au pied de l'horloge, qui REMPLACE les boutons Annuler et OK au lieu de s'y ajouter. Elle reçoit les deux actions, et c'est ce qui la rend utilisable : l'horloge écrit un brouillon que seul <code>confirm</code> valide, donc un pied à vous sans lui laisserait la valeur inchangeable depuis le panneau. Elle n'est pas rendue en mode liste, qui n'a pas de panneau propre.",
+      },
     },
   },
 }

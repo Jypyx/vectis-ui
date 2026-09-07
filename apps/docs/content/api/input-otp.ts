@@ -10,10 +10,10 @@ export default {
       name: 'VInputOTP',
       props: [
         { name: 'length', type: 'number', default: '6' },
-        { name: 'format', type: "'numeric' | 'alpha' | 'alphanumeric'", default: "'numeric'" },
+        { name: 'format', type: 'InputOTPFormat', default: "'numeric'" },
         { name: 'pattern', type: 'string' },
         { name: 'separatorIcon', type: 'IconSource' },
-        { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'" },
+        { name: 'size', type: 'InputOTPSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },

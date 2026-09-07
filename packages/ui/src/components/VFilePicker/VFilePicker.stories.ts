@@ -410,3 +410,31 @@ export const States: Story = {
     await expect(canvas.getByRole('button', { name: 'Remove report.pdf' })).toBeDisabled()
   },
 }
+
+/**
+ * `loading` is the opposite of `disabled` and `readonly`: purely visual, a spinner in
+ * place of the zone icon while an upload is under way, with the dialog and the drop left
+ * working. `invalid` colours the zone's outline, for a rule of your own — nothing here
+ * is checked by the browser, the real input being hidden.
+ */
+export const LoadingAndInvalid: Story = {
+  render: (args) => ({
+    components: { VFilePicker },
+    setup: () => ({ args, t }),
+    template: `
+      <div style="width: 420px; display: grid; gap: 20px">
+        <VFilePicker v-bind="args" loading :title="t.title" :subtitle="t.subtitle" />
+        <VFilePicker v-bind="args" invalid :title="t.title" :subtitle="t.subtitle" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const [loading, invalid] = [...canvasElement.querySelectorAll('.v-file-picker')]
+    await expect(loading!.querySelector('.v-spinner')).not.toBeNull()
+    // Loading changes nothing else: the browse button is still there to be pressed.
+    await expect(
+      loading!.querySelector('.v-file-picker-zone button, button.v-file-picker-zone'),
+    ).toBeEnabled()
+    await expect(invalid!).toHaveAttribute('data-invalid')
+  },
+}

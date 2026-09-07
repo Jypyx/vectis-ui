@@ -10,7 +10,7 @@ export default {
       name: 'VMenu',
       props: [
         { name: 'placement', type: 'MenuPlacement', default: "'bottom-start'" },
-        { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'sm'" },
+        { name: 'size', type: 'MenuSize', default: "'sm'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'width', type: 'string' },
         { name: 'matchTrigger', type: 'boolean', default: 'false' },

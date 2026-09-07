@@ -167,7 +167,7 @@ function onPointerLeave() {
   if (!hasSubmenu.value) return
   hoverTimer.start(() => {
     if (subPanel.value?.el?.contains(document.activeElement)) return
-    subPanel.value?.hide()
+    subPanel.value?.close()
   }, SUBMENU_HOVER_DELAY)
 }
 </script>

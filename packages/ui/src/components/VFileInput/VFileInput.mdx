@@ -82,6 +82,10 @@ empty, so the counter is the only textual summary of the state.
 The model is **always** a `File[]`, `multiple` or not — its shape never depends on a prop, so nothing
 has to be narrowed. Single mode is simply a list of at most one.
 
+Three events report what the reader did. `@change` carries the whole list after every change,
+`@reject` fires once per file turned away, and `@remove` names the single file taken out through
+its chip along with the position it held — `change` follows it, as it follows everything else.
+
 <Canvas of={VFileInputStories.Preview} />
 
 ## Slots

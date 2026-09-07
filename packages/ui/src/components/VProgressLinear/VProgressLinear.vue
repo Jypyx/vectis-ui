@@ -17,6 +17,18 @@ import { useProgressValue } from '../../composables/useProgressValue'
 import { useMessages } from '../../i18n/state'
 import { px } from '../../utils/css'
 
+/** What the progress means, in colour. */
+export type ProgressLinearTone = 'accent' | 'success' | 'warning' | 'danger' | 'neutral'
+
+/** How the track and the fill end. */
+export type ProgressLinearShape = 'rounded' | 'square'
+
+/** Where the value sits along the bar. */
+export type ProgressLinearValuePosition = 'start' | 'center' | 'end'
+
+/** Which way the bar fills. */
+export type ProgressLinearOrientation = 'horizontal' | 'vertical'
+
 interface ProgressLinearProps {
   /** How far along it is. Anything outside the range is brought back into it. */
   value?: number
@@ -29,7 +41,7 @@ interface ProgressLinearProps {
    */
   indeterminate?: boolean
   /** What the progress means, expressed as a colour. */
-  tone?: 'accent' | 'success' | 'warning' | 'danger' | 'neutral'
+  tone?: ProgressLinearTone
   /**
    * A colour of your own (hex, CSS name or `oklch()`), which replaces the tone. The
    * track's own shade is derived from it against the theme, so it follows the light and
@@ -43,7 +55,7 @@ interface ProgressLinearProps {
    */
   thickness?: number | string
   /** Whether the ends of the bar are rounded or square. */
-  shape?: 'rounded' | 'square'
+  shape?: ProgressLinearShape
   /**
    * Writes the percentage inside the bar. It is ignored while the progress is
    * unmeasurable, there being no figure to write.
@@ -53,9 +65,9 @@ interface ProgressLinearProps {
    * Where that text sits along the bar. On a vertical bar the start is the zero end,
    * hence the bottom.
    */
-  valuePosition?: 'start' | 'center' | 'end'
+  valuePosition?: ProgressLinearValuePosition
   /** Turns the bar upright, filling from the bottom up. */
-  orientation?: 'horizontal' | 'vertical'
+  orientation?: ProgressLinearOrientation
 }
 
 const props = withDefaults(defineProps<ProgressLinearProps>(), {

@@ -10,6 +10,8 @@
  * to dismiss it — which is why supplying them is not optional.
  */
 
+import { computed, ref } from 'vue'
+
 import VDialog from './VDialog.vue'
 
 interface DialogAlertProps {
@@ -56,10 +58,28 @@ defineSlots<{
    */
   trigger?(props: { triggerProps: TriggerProps }): unknown
 }>()
+
+/*
+ * The same three members VDialog exposes, handed straight through. This component is
+ * VDialog with its options fixed, so a ref on it has to answer the same way — without
+ * this, the one dialog that CANNOT be dismissed by Escape or by a click outside would
+ * also be the one a consumer could not close from code.
+ */
+const dialogRef = ref<InstanceType<typeof VDialog> | null>(null)
+
+defineExpose({
+  /** Opens the alert, exactly as setting `open` does. */
+  show: () => dialogRef.value?.show(),
+  /** Closes it. The footer's buttons are the reader's only way out; this is yours. */
+  close: () => dialogRef.value?.close(),
+  /** The `<dialog>` element. It is null while closed: each opening builds a fresh one. */
+  el: computed(() => dialogRef.value?.el ?? null),
+})
 </script>
 
 <template>
   <VDialog
+    ref="dialogRef"
     v-model:open="open"
     role="alertdialog"
     :title="title"

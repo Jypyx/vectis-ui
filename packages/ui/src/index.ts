@@ -47,13 +47,27 @@ export type { VectisIconName } from './components/VIcon/icons/names'
 export { default as VTypography } from './components/VTypography/VTypography.vue'
 export type { TypographyTone, TypographyVariant } from './components/VTypography/VTypography.vue'
 export { default as VPopover } from './components/VPopover/VPopover.vue'
-export type { PopoverPlacement, PopoverTriggerProps } from './components/VPopover/VPopover.vue'
+export type {
+  PopoverMode,
+  PopoverPlacement,
+  PopoverTriggerProps,
+} from './components/VPopover/VPopover.vue'
 export { default as VSeparator } from './components/VSeparator/VSeparator.vue'
+export type { SeparatorOrientation } from './components/VSeparator/VSeparator.vue'
 export { default as VButton } from './components/VButton/VButton.vue'
 export type { ButtonSize, ButtonTone, ButtonVariant } from './components/VButton/VButton.vue'
 export { default as VIconButton } from './components/VIconButton/VIconButton.vue'
+export type { IconButtonShape } from './components/VIconButton/VIconButton.vue'
 export { default as VButtonGroup } from './components/VButton/VButtonGroup.vue'
+export type { ButtonGroupOrientation } from './components/VButton/VButtonGroup.vue'
 export { default as VPagination } from './components/VPagination/VPagination.vue'
+export type {
+  PaginationVariant,
+  PaginationTone,
+  PaginationSize,
+  PaginationAlign,
+  PaginationControlsDisplay,
+} from './components/VPagination/VPagination.vue'
 export { default as VTabs } from './components/VTabs/VTabs.vue'
 export type {
   TabsActivation,
@@ -77,19 +91,28 @@ export type {
 } from './components/VToggle/VToggle.vue'
 export { default as VToggleItem } from './components/VToggle/VToggleItem.vue'
 export { default as VInput } from './components/VInput/VInput.vue'
+export type { InputSize, InputType } from './components/VInput/VInput.vue'
 export { default as VInputGroup } from './components/VInput/VInputGroup.vue'
 export type { InputGroupSize } from './components/VInput/VInputGroup.vue'
 export { default as VTextarea } from './components/VTextarea/VTextarea.vue'
+export type { TextareaSize } from './components/VTextarea/VTextarea.vue'
 export { default as VCheckbox } from './components/VCheckbox/VCheckbox.vue'
+export type { CheckboxLabelPosition } from './components/VCheckbox/VCheckbox.vue'
 export { default as VRadio } from './components/VRadio/VRadio.vue'
+export type { RadioLabelPosition } from './components/VRadio/VRadio.vue'
 export { default as VSwitch } from './components/VSwitch/VSwitch.vue'
+export type { SwitchLabelPosition } from './components/VSwitch/VSwitch.vue'
 export { default as VTooltip } from './components/VTooltip/VTooltip.vue'
+export type { TooltipPlacement } from './components/VTooltip/VTooltip.vue'
 export { default as VMenu } from './components/VMenu/VMenu.vue'
+export type { MenuSize } from './components/VMenu/VMenu.vue'
+export type { MenuPlacement } from './components/VMenu/context'
 export { default as VMenuItem } from './components/VMenu/VMenuItem.vue'
 export type { MenuItemTone } from './components/VMenu/VMenuItem.vue'
 export { default as VMenuGroup } from './components/VMenu/VMenuGroup.vue'
 export { default as VMenuSeparator } from './components/VMenu/VMenuSeparator.vue'
 export { default as VAccordion } from './components/VAccordion/VAccordion.vue'
+export type { AccordionVariant } from './components/VAccordion/VAccordion.vue'
 export { default as VAccordionItem } from './components/VAccordion/VAccordionItem.vue'
 export { default as VToaster } from './components/VToast/VToaster.vue'
 export { toast, dismissToast } from './components/VToast/state'
@@ -116,14 +139,18 @@ export type {
   ComboboxSeparator,
   ComboboxItem,
   ComboboxFilter,
+  ComboboxSize,
+  ComboboxPlacement,
 } from './components/VCombobox/VCombobox.vue'
 export { default as VBreadcrumb } from './components/VBreadcrumb/VBreadcrumb.vue'
 export type { BreadcrumbItem } from './components/VBreadcrumb/VBreadcrumb.vue'
 export { default as VSideNavigation } from './components/VSideNavigation/VSideNavigation.vue'
+export type { SideNavigationSize } from './components/VSideNavigation/VSideNavigation.vue'
 export { default as VSideNavigationItem } from './components/VSideNavigation/VSideNavigationItem.vue'
 export { default as VSideNavigationGroup } from './components/VSideNavigation/VSideNavigationGroup.vue'
 export { default as VSideNavigationSeparator } from './components/VSideNavigation/VSideNavigationSeparator.vue'
 export { default as VChip } from './components/VChip/VChip.vue'
+export type { ChipVariant, ChipTone, ChipShape, ChipSize } from './components/VChip/VChip.vue'
 export { default as VHotkeys } from './components/VHotkeys/VHotkeys.vue'
 export type { HotkeysVariant, HotkeysSize } from './components/VHotkeys/VHotkeys.vue'
 export type { HotkeysPlatform } from './components/VHotkeys/platform'
@@ -134,13 +161,27 @@ export type {
   DataTableRowId,
   DataTableParams,
   DataTableProps,
+  DataTableVariant,
+  DataTableResponsive,
 } from './components/VDataTable/VDataTable.vue'
 export { default as VInputOTP } from './components/VInputOTP/VInputOTP.vue'
+export type { InputOTPSize, InputOTPFormat } from './components/VInputOTP/VInputOTP.vue'
 export { default as VProgressCircular } from './components/VProgressCircular/VProgressCircular.vue'
+export type {
+  ProgressCircularTone,
+  ProgressCircularShape,
+} from './components/VProgressCircular/VProgressCircular.vue'
 export { default as VProgressLinear } from './components/VProgressLinear/VProgressLinear.vue'
+export type {
+  ProgressLinearTone,
+  ProgressLinearShape,
+  ProgressLinearValuePosition,
+  ProgressLinearOrientation,
+} from './components/VProgressLinear/VProgressLinear.vue'
 export { default as VSlider } from './components/VSlider/VSlider.vue'
 export type { SliderLabel } from './components/VSlider/VSlider.vue'
 export { default as VDialog } from './components/VDialog/VDialog.vue'
+export type { DialogRole } from './components/VDialog/VDialog.vue'
 export { default as VDialogAlert } from './components/VDialog/VDialogAlert.vue'
 export { default as VDatePicker } from './components/VDatePicker/VDatePicker.vue'
 export type {
@@ -151,14 +192,22 @@ export type {
   DateMatcher,
 } from './components/VDatePicker/VDatePicker.vue'
 export { default as VDateInput } from './components/VDateInput/VDateInput.vue'
-export type { DateInputMode } from './components/VDateInput/VDateInput.vue'
+export type {
+  DateInputMode,
+  DateInputSize,
+  DateInputPlacement,
+} from './components/VDateInput/VDateInput.vue'
 export { default as VTimePicker } from './components/VTimePicker/VTimePicker.vue'
 export type { TimePickerFormat, TimePickerStep } from './components/VTimePicker/VTimePicker.vue'
 /* The type of `allowedHours` and `allowedMinutes`, which both time components take. It is
    declared beside the rules that read it rather than in the SFC, VTimePicker owning both. */
 export type { TimeMatcher } from './components/VTimePicker/limits'
 export { default as VTimeInput } from './components/VTimeInput/VTimeInput.vue'
-export type { TimeInputMode } from './components/VTimeInput/VTimeInput.vue'
+export type {
+  TimeInputMode,
+  TimeInputSize,
+  TimeInputPlacement,
+} from './components/VTimeInput/VTimeInput.vue'
 export { default as VCalendar } from './components/VCalendar/VCalendar.vue'
 export type {
   CalendarEvent,
@@ -167,7 +216,7 @@ export type {
   CalendarView,
 } from './components/VCalendar/types'
 export { default as VFileInput } from './components/VFileInput/VFileInput.vue'
-export type { FileInputDisplay } from './components/VFileInput/VFileInput.vue'
+export type { FileInputDisplay, FileInputSize } from './components/VFileInput/VFileInput.vue'
 /* What `@reject` carries, on VFileInput as on VFilePicker. The two screen a batch through
    the same rule, so the type is declared beside that rule rather than copied into each of
    them — the `TimeMatcher` arrangement, and what lets one handler serve both. */

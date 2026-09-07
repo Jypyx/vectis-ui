@@ -9,7 +9,7 @@ export default {
     {
       name: 'VTextarea',
       props: [
-        { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'" },
+        { name: 'size', type: 'TextareaSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'rows', type: 'number', default: '5' },
         { name: 'autoGrow', type: 'boolean', default: 'false' },

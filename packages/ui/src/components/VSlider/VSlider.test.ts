@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import VSlider from './VSlider.vue'
 
@@ -224,5 +224,40 @@ describe('VSlider', () => {
       expect(single.getByRole('slider', { name: 'Volume' })).toBeTruthy()
       expect(single.getByRole('spinbutton', { name: 'Volume' })).toBeTruthy()
     })
+  })
+})
+
+describe('VSlider — the wrapper-root split', () => {
+  it('redirects the form attributes onto the range input, not the wrapper', () => {
+    const { container } = render(VSlider, {
+      props: { modelValue: 40 },
+      attrs: { name: 'volume', id: 'volume', required: true, 'aria-describedby': 'hint' },
+    })
+    const root = container.querySelector('.v-slider') as HTMLElement
+    const input = container.querySelector('.v-slider-input-end') as HTMLInputElement
+    expect(root.hasAttribute('name')).toBe(false)
+    expect(root.hasAttribute('id')).toBe(false)
+    expect(input.name).toBe('volume')
+    expect(input.id).toBe('volume')
+    expect(input.required).toBe(true)
+    expect(input.getAttribute('aria-describedby')).toBe('hint')
+  })
+
+  it('keeps class and style on the root, beside the fractions it sets itself', () => {
+    const { container } = render(VSlider, {
+      props: { modelValue: 50 },
+      attrs: { class: 'mine', style: 'margin: 4px' },
+    })
+    const root = container.querySelector('.v-slider') as HTMLElement
+    expect(root.classList.contains('mine')).toBe(true)
+    expect(root.style.margin).toBe('4px')
+    expect(root.style.getPropertyValue('--end-fraction')).toBe('0.5')
+  })
+
+  it('warns about a name on a range, which cannot submit two values under one', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(VSlider, { props: { modelValue: [20, 60], range: true }, attrs: { name: 'span' } })
+    expect(warn.mock.calls.map(String).join(' ')).toContain('only the end thumb carries it')
+    warn.mockRestore()
   })
 })

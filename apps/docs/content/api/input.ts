@@ -9,9 +9,9 @@ export default {
     {
       name: 'VInput',
       props: [
-        { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'" },
+        { name: 'size', type: 'InputSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
-        { name: 'type', type: "'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url'", default: "'text'" },
+        { name: 'type', type: 'InputType', default: "'text'" },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },

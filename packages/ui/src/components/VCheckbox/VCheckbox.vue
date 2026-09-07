@@ -12,6 +12,9 @@
 
 import { ref, watchEffect } from 'vue'
 
+/** Which side of the box the label sits on. */
+export type CheckboxLabelPosition = 'start' | 'end'
+
 interface CheckboxProps {
   /**
    * Shows the box as partially checked, a dash instead of a tick. This is what a
@@ -20,7 +23,7 @@ interface CheckboxProps {
    */
   indeterminate?: boolean
   /** Which side of the box the label sits on. */
-  labelPosition?: 'start' | 'end'
+  labelPosition?: CheckboxLabelPosition
   /**
    * Pushes the label and the box to opposite ends of the line, the row taking the
    * full width available. This is the usual shape for a list of settings.

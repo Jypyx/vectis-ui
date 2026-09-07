@@ -36,6 +36,9 @@ import { truncateMiddle } from './truncate'
 /** How the chosen files are shown inside the field when several are allowed. */
 export type FileInputDisplay = 'text' | 'chip'
 
+/** The height of the field: 32, 40 or 48 pixels. */
+export type FileInputSize = 'sm' | 'md' | 'lg'
+
 interface FileInputProps {
   /** Allows several files to be chosen. With one only, every extra file is turned away. */
   multiple?: boolean
@@ -66,7 +69,7 @@ interface FileInputProps {
   /** Refuses files dropped onto the component: only the dialog then adds any. */
   noDrop?: boolean
   /** The height of the field: 32, 40 or 48 pixels. */
-  size?: 'sm' | 'md' | 'lg'
+  size?: FileInputSize
   /** Takes 4px off the height, leaving the padding, the text and the icons as they are. */
   compact?: boolean
   /** Makes the field unusable, greyed out through the colour tokens. */
@@ -164,6 +167,11 @@ const emit = defineEmits<{
    * so a batch drop can be reported precisely.
    */
   reject: [rejection: FileRejection]
+  /**
+   * ONE file was taken out through its chip, with the file and the position it held.
+   * `change` follows it with the whole list, as it does after every other change.
+   */
+  remove: [file: File, index: number]
   /** The clear cross emptied the selection. */
   clear: []
   /** The start icon was clicked. Attaching this listener is what makes it a button. */
@@ -372,8 +380,12 @@ function onFieldKeydown(event: KeyboardEvent) {
 }
 
 function removeAt(index: number) {
+  const file = model.value[index]
+  if (!file) return
+
   model.value = model.value.filter((_, i) => i !== index)
   resetNative()
+  emit('remove', file, index)
   emit('change', model.value)
   // The removal button disappears along with its chip, so the focus would fall back to
   // the page body. Unlike the date and time pickers, nothing here opens on focus, so

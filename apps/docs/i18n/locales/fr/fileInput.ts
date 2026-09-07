@@ -94,6 +94,8 @@ export default {
         reject:
           'Un fichier a été écarté, avec lequel et pourquoi : son genre, sa taille, ou combien il y en avait déjà.',
         clear: "La croix d'effacement a été pressée. La sélection est déjà vide.",
+        remove:
+          "UN fichier a été retiré par sa puce, avec le fichier et la position qu'il occupait. <code>change</code> suit avec toute la liste.",
         clickIconStart:
           "L'icône de début a été cliquée. Attacher cet écouteur est ce qui en fait un vrai bouton, qui demande alors <code>iconStartLabel</code>.",
       },

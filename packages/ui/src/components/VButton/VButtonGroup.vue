@@ -30,12 +30,15 @@ import { provide } from 'vue'
 import type { ButtonSize, ButtonTone, ButtonVariant } from './VButton.vue'
 import { buttonGroupKey } from './context'
 
+/** Which way the row runs. */
+export type ButtonGroupOrientation = 'horizontal' | 'vertical'
+
 interface ButtonGroupProps {
   /**
    * The direction the buttons are joined in: a row by default, or a column under
    * `vertical`.
    */
-  orientation?: 'horizontal' | 'vertical'
+  orientation?: ButtonGroupOrientation
   /**
    * Leaves the buttons as separate ones, with a gap between them and each keeping its
    * own corners, instead of joining them into a segmented control.

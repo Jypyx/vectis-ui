@@ -123,3 +123,21 @@ describe('VPopover', () => {
     expect(container.querySelector('.v-popover')?.classList.contains('v-custom')).toBe(false)
   })
 })
+
+describe('VPopover — the imperative pair', () => {
+  it('opens and closes through show and close, the two verbs of the panel', async () => {
+    const panelRef = ref<InstanceType<typeof VPopover> | null>(null)
+    const { container } = renderHarness('<VPopover ref="panelRef">Content</VPopover>', { panelRef })
+    await nextTick()
+    const panel = panelOf(container)
+
+    panelRef.value?.show()
+    await nextTick()
+    expect(panel.hasAttribute('data-popover-open')).toBe(true)
+
+    // `close`, not `hide`: the same verb VDialog uses for the same gesture.
+    panelRef.value?.close()
+    await nextTick()
+    expect(panel.hasAttribute('data-popover-open')).toBe(false)
+  })
+})

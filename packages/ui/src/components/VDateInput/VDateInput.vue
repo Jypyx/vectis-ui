@@ -56,7 +56,9 @@ import { iconClickHandlers } from '../../composables/useIconClickHandlers'
 import { useMaskedField } from '../../composables/useMaskedField'
 import { useLocale, useMessages } from '../../i18n/state'
 
-type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
+/** Where the calendar opens relative to the field. */
+export type DateInputPlacement =
+  'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
 
 /** Whether the field can be typed into, or only filled from the calendar. */
 export type DateInputMode = 'picker' | 'input'
@@ -78,6 +80,9 @@ const DEFAULT_DISPLAY_FORMAT: Intl.DateTimeFormatOptions = {
   month: 'short',
   year: 'numeric',
 }
+
+/** The height of the field: 32, 40 or 48 pixels. */
+export type DateInputSize = 'sm' | 'md' | 'lg'
 
 interface DateInputProps {
   // Everything from here to `events` is handed straight to the calendar.
@@ -126,7 +131,7 @@ interface DateInputProps {
   /** What the field says while empty. */
   placeholder?: string
   /** The height of the field: 32, 40 or 48 pixels. */
-  size?: 'sm' | 'md' | 'lg'
+  size?: DateInputSize
   /** Takes 4px off the height. */
   compact?: boolean
   /** Makes the field unusable, greyed out through the colour tokens. */
@@ -181,7 +186,7 @@ interface DateInputProps {
    */
   displayFormat?: Intl.DateTimeFormatOptions
   /** Where the panel opens relative to the field. */
-  placement?: Placement
+  placement?: DateInputPlacement
 }
 
 const props = withDefaults(defineProps<DateInputProps>(), {

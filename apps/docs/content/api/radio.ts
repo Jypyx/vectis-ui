@@ -10,7 +10,7 @@ export default {
       name: 'VRadio',
       props: [
         { name: 'value', type: 'string' },
-        { name: 'labelPosition', type: "'start' | 'end'", default: "'end'" },
+        { name: 'labelPosition', type: 'RadioLabelPosition', default: "'end'" },
         { name: 'spread', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },

@@ -9,7 +9,7 @@ export default {
     {
       name: 'VSeparator',
       props: [
-        { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+        { name: 'orientation', type: 'SeparatorOrientation', default: "'horizontal'" },
       ],
     },
   ],

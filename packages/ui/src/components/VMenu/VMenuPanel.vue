@@ -184,7 +184,7 @@ defineExpose({
   /** Opens the panel. Pass the invoker, or the popover has no anchor to position against. */
   show,
   /** Closes it. */
-  hide,
+  close: hide,
   /** Puts the focus on the first reachable item — the keyboard's way in. */
   focusFirst,
   /** Puts the focus on the panel itself — the pointer's way in, singling out no command. */

@@ -25,6 +25,9 @@ export default {
         { name: 'maxFiles', type: 'number' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
+        { name: 'invalid', type: 'boolean', default: 'false' },
+        { name: 'loading', type: 'boolean', default: 'false' },
+        { name: 'loadingLabel', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'File[]', default: '[]' },
       ],
       events: [

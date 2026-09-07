@@ -464,3 +464,17 @@ describe('truncateMiddle', () => {
     expect(truncateMiddle('🎉🎉🎉🎉🎉🎉', 5)).toBe('🎉🎉…🎉🎉')
   })
 })
+
+describe('VFileInput — remove', () => {
+  it('reports the file taken out of a chip, then the whole list', async () => {
+    const files = [new File(['a'], 'a.txt'), new File(['b'], 'b.txt')]
+    const { container, emitted } = render(VFileInput, {
+      props: { modelValue: files, multiple: true, display: 'chip' },
+    })
+    const crosses = container.querySelectorAll<HTMLElement>('.v-chip button')
+    crosses[1]!.click()
+    expect(emitted('remove')?.[0]).toEqual([files[1], 1])
+    // `change` follows with what is left, as it does after every other change.
+    expect(emitted('change')?.[0]).toEqual([[files[0]]])
+  })
+})

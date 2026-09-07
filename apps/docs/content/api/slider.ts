@@ -15,7 +15,7 @@ export default {
         { name: 'range', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
-        { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+        { name: 'orientation', type: 'SliderOrientation', default: "'horizontal'" },
         { name: 'inputs', type: 'boolean', default: 'false' },
         { name: 'ticks', type: 'boolean', default: 'false' },
         { name: 'labels', type: 'SliderLabel[]' },

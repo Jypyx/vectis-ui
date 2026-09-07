@@ -39,6 +39,12 @@ opacity trick.
 
 <Canvas of={VSwitchStories.Disabled} />
 
+`invalid` rings the track in `--vectis-color-danger` and sets `aria-invalid` on the input, the
+same pair of selectors VCheckbox and VRadio use — so a required switch reports both the rule the
+browser checked and one only you can. It is drawn as a ring rather than as a border colour: the
+track has no border to tint, and a shadow changes no geometry where a border would eat into the
+padding the thumb travels in.
+
 ## Without a visible label
 
 With no slot, supply an `aria-label`: it passes through by fallthrough onto the input (the

@@ -12,7 +12,7 @@ export default {
         { name: 'title', type: 'string' },
         { name: 'subtitle', type: 'string' },
         { name: 'width', type: 'string', default: "'400px'" },
-        { name: 'role', type: "'dialog' | 'alertdialog'", default: "'dialog'" },
+        { name: 'role', type: 'DialogRole', default: "'dialog'" },
         { name: 'hideClose', type: 'boolean', default: 'false' },
         { name: 'persistentBackdrop', type: 'boolean', default: 'false' },
         { name: 'persistentEscape', type: 'boolean', default: 'false' },

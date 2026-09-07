@@ -93,6 +93,8 @@ export default {
         reject:
           'A file was turned away, with which one and why: its kind, its size, or how many there already were.',
         clear: 'The clear cross was pressed. The selection is already empty.',
+        remove:
+          'One file was taken out through its chip, with the file and the position it held. <code>change</code> follows it with the whole list.',
         clickIconStart:
           'The start icon was clicked. Attaching this listener is what turns that icon into a real button, which then needs <code>iconStartLabel</code>.',
       },

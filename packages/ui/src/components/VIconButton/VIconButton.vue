@@ -19,6 +19,9 @@ import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 
+/** The silhouette. The box is square either way; only the corners change. */
+export type IconButtonShape = 'square' | 'circular'
+
 interface IconButtonProps {
   /**
    * What the button does, in words. It becomes the `aria-label` and is the only
@@ -47,7 +50,7 @@ interface IconButtonProps {
    * The silhouette: a square carrying the corner radius every control shares, or a
    * circle. The box itself is square either way — only the corners change.
    */
-  shape?: 'square' | 'circular'
+  shape?: IconButtonShape
   /** The native type of the button, `button` by default. Ignored once `href` makes it a link. */
   type?: ButtonHTMLAttributes['type']
   /** Makes the button unusable, greyed out through the colour tokens. */

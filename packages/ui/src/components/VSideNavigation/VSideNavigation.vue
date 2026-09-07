@@ -25,6 +25,9 @@ import { arrowNavigate } from '../../utils/arrowNav'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
+/** The height of the rows: 32 or 40 pixels. */
+export type SideNavigationSize = 'sm' | 'md'
+
 interface SideNavigationProps {
   /**
    * What screen readers announce for this navigation. A page often has several — a
@@ -33,7 +36,7 @@ interface SideNavigationProps {
    */
   label?: string
   /** The height of the rows, 32 or 40 pixels, inherited by every level. */
-  size?: 'sm' | 'md'
+  size?: SideNavigationSize
   /**
    * Takes 4px off the height of every row. It is a density setting and NOT a collapsed
    * icon-only rail, which this component does not offer.

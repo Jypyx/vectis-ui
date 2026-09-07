@@ -18,7 +18,7 @@ export default {
         { name: 'counter', type: 'boolean', default: 'false' },
         { name: 'attachIcon', type: 'IconSource', default: 'attach_file' },
         { name: 'noDrop', type: 'boolean', default: 'false' },
-        { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'" },
+        { name: 'size', type: 'FileInputSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
@@ -40,6 +40,7 @@ export default {
         { name: 'clear', type: '[]' },
         { name: 'change', type: '[files: File[]]' },
         { name: 'reject', type: '[rejection: FileRejection]' },
+        { name: 'remove', type: '[file: File, index: number]' },
       ],
       slots: [
         { name: 'chip', type: "{ file: File; index: number; label: string; remove: () => void; size: 'xs' | 'sm'; compact: boolean; }" },

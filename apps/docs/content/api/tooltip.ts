@@ -10,7 +10,7 @@ export default {
       name: 'VTooltip',
       props: [
         { name: 'text', type: 'string' },
-        { name: 'placement', type: 'Placement', default: "'top'" },
+        { name: 'placement', type: 'TooltipPlacement', default: "'top'" },
         { name: 'delay', type: 'number', default: '300' },
       ],
       slots: [

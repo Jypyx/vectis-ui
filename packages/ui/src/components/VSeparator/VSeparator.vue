@@ -12,13 +12,16 @@
  * around a rule belongs to the layout placing it — the same rule VTypography
  * follows.
  */
+/** Which way the rule runs. */
+export type SeparatorOrientation = 'horizontal' | 'vertical'
+
 interface SeparatorProps {
   /**
    * The direction the rule runs in: across by default, or down the page under
    * `vertical`. A vertical rule needs a height to show: as a flex or grid item it
    * takes the one of its line, but in ordinary flow the consumer has to set one.
    */
-  orientation?: 'horizontal' | 'vertical'
+  orientation?: SeparatorOrientation
 }
 
 withDefaults(defineProps<SeparatorProps>(), {

@@ -488,3 +488,17 @@ describe('fileKind', () => {
     expect(fileKind({ name: 'archive.zip', type: 'image/png' })).toBe('image')
   })
 })
+
+describe('VFilePicker — loading and invalid', () => {
+  it('loading swaps the zone icon for a spinner and cuts nothing off', () => {
+    const { container } = render(VFilePicker, { props: { title: 'Drop', loading: true } })
+    expect(container.querySelector('.v-spinner')).not.toBeNull()
+    // The zone stays live: only disabled and readonly close the dialog and the drop.
+    expect(container.querySelector('.v-file-picker')?.hasAttribute('data-disabled')).toBe(false)
+  })
+
+  it('invalid marks the root, which is what colours the zone outline', () => {
+    const { container } = render(VFilePicker, { props: { title: 'Drop', invalid: true } })
+    expect(container.querySelector('.v-file-picker')?.hasAttribute('data-invalid')).toBe(true)
+  })
+})

@@ -25,6 +25,8 @@ export default {
           'Pushes the label and the switch to opposite ends of the line, so a column of settings lines its switches up down one edge.',
         disabled:
           'Makes the switch unusable. It greys out through the colour tokens rather than through opacity, so it stays legible on any surface.',
+        invalid:
+          'Marks the field as invalid, which rings the track and tells assistive technology so. Use it for a rule the browser cannot check by itself; native validity is already handled without it.',
         vModel:
           'Whether the switch is on. It is bound to a real hidden <code>&lt;input type="checkbox"&gt;</code>, so the value submits with the form like any other field.',
       },

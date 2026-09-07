@@ -33,16 +33,22 @@ import { useMessages } from '../../i18n/state'
 
 import { inputGroupKey } from './context'
 
+/** The height of the field: 32, 40 or 48 pixels. */
+export type InputSize = 'sm' | 'md' | 'lg'
+
+/** The native type of the input, which also decides the keyboard a phone offers. */
+export type InputType = 'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url'
+
 interface InputProps {
   /** The height of the field: 32, 40 or 48 pixels. */
-  size?: 'sm' | 'md' | 'lg'
+  size?: InputSize
   /** Takes 4px off the height, leaving the padding, the text and the icons as they are. */
   compact?: boolean
   /**
    * The native type of the input, which is also what tells a phone which keyboard to
    * offer — a numeric pad for `number`, an @ key for `email`.
    */
-  type?: 'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url'
+  type?: InputType
   /**
    * Marks the field as invalid whatever the browser thinks. This is the route for a
    * rule only the server can check; anything the browser can validate on its own

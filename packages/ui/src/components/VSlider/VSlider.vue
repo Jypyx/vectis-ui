@@ -20,10 +20,14 @@ import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 
+import { useRootAttrs } from '../../composables/useRootAttrs'
 import { isDev } from '../../utils/env'
 import { useMessages } from '../../i18n/state'
 
 export type SliderLabel = string | { icon: IconSource; label: string }
+
+/** Which way the track runs. */
+export type SliderOrientation = 'horizontal' | 'vertical'
 
 interface SliderProps {
   /** The lowest value the thumb can reach. It is 0 by default. */
@@ -45,7 +49,7 @@ interface SliderProps {
    */
   label?: string
   /** Turns the slider upright, with the lowest value at the bottom. */
-  orientation?: 'horizontal' | 'vertical'
+  orientation?: SliderOrientation
   /**
    * Adds a number field beside the slider for setting the value exactly — one, or one
    * per end in range mode. Sliding is quick but imprecise; this is the way out.
@@ -173,6 +177,20 @@ const fieldEndLabel = computed(() =>
 const startValueText = computed(() => (props.labels ? labelTextAt(startValue.value) : undefined))
 const endValueText = computed(() => (props.labels ? labelTextAt(endValue.value) : undefined))
 
+// @a11y
+/*
+ * The wrapper-root split. The root here is a layout box holding the labels, the track and
+ * the optional number fields, so a consumer's `name`, `id`, `required` and `aria-*` have
+ * to be redirected onto the real `<input type="range">` — left on the wrapper, a `name`
+ * submits nothing and a `<label for>` points at a div.
+ *
+ * They go to the END thumb, which is the one always rendered. A RANGE has two thumbs and
+ * therefore no single value to submit, which the warning below says out loud rather than
+ * letting a form come back with half the answer.
+ */
+defineOptions({ inheritAttrs: false })
+const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
+
 // @devwarn
 if (isDev) {
   if ((props.ticks || props.labels) && stepCount.value > 50)
@@ -180,6 +198,10 @@ if (isDev) {
   if (props.labels && props.labels.length !== stepCount.value + 1)
     console.warn(
       `[VSlider] ${props.labels.length} labels for ${stepCount.value + 1} steps — one label per step expected.`,
+    )
+  if (props.range && attrs.name !== undefined)
+    console.warn(
+      `[VSlider] name="${String(attrs.name)}" on a range: only the end thumb carries it, so the form receives one value of the two. Bind the model to two inputs of your own instead.`,
     )
 }
 
@@ -241,13 +263,17 @@ function resyncFields() {
 <template>
   <div
     class="v-slider"
+    :class="rootClass"
     :data-range="range ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
     :data-orientation="orientation === 'vertical' ? 'vertical' : undefined"
-    :style="{
-      '--start-fraction': String(frac(startValue)),
-      '--end-fraction': String(frac(endValue)),
-    }"
+    :style="[
+      rootStyle,
+      {
+        '--start-fraction': String(frac(startValue)),
+        '--end-fraction': String(frac(endValue)),
+      },
+    ]"
   >
     <VInput
       v-if="inputs && range"
@@ -287,7 +313,13 @@ function resyncFields() {
           :aria-valuetext="startValueText"
           @input="onStartInput"
         />
+        <!-- The consumer's attributes come FIRST, so what the component decides for
+             itself — the bounds, the value, the disabled state and the thumb's own
+             accessible name — cannot be overwritten by one of them. Naming a slider
+             goes through the `label` prop, which is what gives each thumb of a range a
+             name of its own. -->
         <input
+          v-bind="forwardedAttrs"
           type="range"
           class="v-slider-input v-slider-input-end"
           :min="min"

@@ -69,6 +69,12 @@ export default {
         disabled: 'Makes the zone unusable, greyed out through the colour tokens.',
         readonly:
           'Shows what was taken without allowing it to change: no dialog, no drop, no removal.',
+        invalid:
+          'Marks the zone as invalid, which colours its outline. It is for a rule of your own: nothing here is checked by the browser, the real input being hidden.',
+        loading:
+          'Shows a spinner in place of the zone icon, while an upload is under way typically. It says that something is happening and changes nothing else: files can still be dropped and the dialog still opens.',
+        loadingLabel:
+          'What screen readers announce while the spinner turns. It falls back to the design system dictionary.',
         vModel:
           'Always a list of files, whether or not several are allowed, never a file on its own. The shape does not depend on a prop, so you never have to narrow a union TypeScript cannot discriminate.',
       },

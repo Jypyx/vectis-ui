@@ -92,6 +92,21 @@ follows the dark theme automatically:
 
 <Canvas of={VSliderStories.Disabled} />
 
+## Forms
+
+The root is a layout box holding the labels, the track and the optional number fields, so the
+attributes you put on the component are redirected onto the real `<input type="range">`:
+`name`, `id`, `required` and the `aria-*` all land there rather than on the wrapper, where a
+`name` would submit nothing and a `<label for>` would point at a div. Only `class` and `style`
+stay on the root, which is the box you position.
+
+A **range** has two thumbs and therefore no single value to submit. They go to the end thumb, and
+the component says so in development: bind the model to two inputs of your own when a form has to
+receive both bounds.
+
+The accessible name goes through `label` rather than through `aria-label`, which is what gives
+each thumb of a range a name of its own.
+
 ## Accessibility
 
 - Always supply `label`: it names the range input(s) (suffixed "(start)" / "(end)" in range mode) as

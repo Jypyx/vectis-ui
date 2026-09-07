@@ -25,18 +25,30 @@ import { close as closeIcon } from '../VIcon/icons/close'
 import type { IconSource } from '../VIcon/types'
 import { useMessages } from '../../i18n/state'
 
+/** How much visual weight the chip carries. */
+export type ChipVariant = 'soft' | 'solid' | 'outline'
+
+/** What the chip means, in colour. */
+export type ChipTone = 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
+
+/** The silhouette: softly rounded, or a full pill. */
+export type ChipShape = 'chip' | 'pill'
+
+/** The height of the chip: 24 or 32 pixels. */
+export type ChipSize = 'xs' | 'sm'
+
 interface ChipProps {
   /**
    * How strongly the chip is painted: a tinted background, the full colour, or a
    * border alone.
    */
-  variant?: 'soft' | 'solid' | 'outline'
+  variant?: ChipVariant
   /**
    * What the chip means, expressed as a colour: `neutral` by default, then `accent` for
    * something singled out and `danger`/`success`/`warning` for a state being reported. A
    * chip may report a state where a button may not, which is why it offers five.
    */
-  tone?: 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
+  tone?: ChipTone
   /**
    * A colour of your own (hex, CSS name or `oklch()`), which REPLACES the tone. Every
    * shade it needs — the tinted background, the text, the hover — is derived from that
@@ -45,9 +57,9 @@ interface ChipProps {
    */
   color?: string
   /** The silhouette: softly rounded corners, or a full pill. */
-  shape?: 'chip' | 'pill'
+  shape?: ChipShape
   /** The height of the chip. */
-  size?: 'xs' | 'sm'
+  size?: ChipSize
   /** Takes 4px off the height, leaving the padding, the text and the icons as they are. */
   compact?: boolean
   /** Makes the chip a button that reacts to clicks, without holding a state. */

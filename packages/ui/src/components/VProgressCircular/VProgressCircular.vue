@@ -17,6 +17,12 @@ import { useProgressValue } from '../../composables/useProgressValue'
 import { useMessages } from '../../i18n/state'
 import { px } from '../../utils/css'
 
+/** What the progress means, in colour. */
+export type ProgressCircularTone = 'accent' | 'success' | 'warning' | 'danger' | 'neutral'
+
+/** How the arc ends. */
+export type ProgressCircularShape = 'rounded' | 'square'
+
 interface ProgressCircularProps {
   /** How far along it is. Anything outside the range is brought back into it. */
   value?: number
@@ -28,7 +34,7 @@ interface ProgressCircularProps {
    */
   indeterminate?: boolean
   /** What the progress means, expressed as a colour. */
-  tone?: 'accent' | 'success' | 'warning' | 'danger' | 'neutral'
+  tone?: ProgressCircularTone
   /**
    * A colour of your own (hex, CSS name or `oklch()`), which replaces the tone. The
    * unfilled ring's shade is derived from it against the theme, so it follows the light
@@ -40,7 +46,7 @@ interface ProgressCircularProps {
   /** How thick the ring is, always IN PIXELS: `8` and `'8'` both give 8px. */
   thickness?: number | string
   /** Whether the ends of the drawn arc are rounded or cut square. */
-  shape?: 'rounded' | 'square'
+  shape?: ProgressCircularShape
   /**
    * Writes the percentage in the middle of the ring. It is ignored while the progress is
    * unmeasurable, there being no figure to write.

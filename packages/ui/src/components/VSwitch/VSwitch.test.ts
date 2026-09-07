@@ -46,3 +46,15 @@ describe('VSwitch', () => {
     expect(root.hasAttribute('data-spread')).toBe(false)
   })
 })
+
+describe('VSwitch — invalid', () => {
+  it('reports it on the input, where VCheckbox and VRadio report theirs', () => {
+    const { getByRole } = render(VSwitch, { props: { invalid: true } })
+    expect(getByRole('switch').getAttribute('aria-invalid')).toBe('true')
+  })
+
+  it('says nothing when it is valid', () => {
+    const { getByRole } = render(VSwitch)
+    expect(getByRole('switch').hasAttribute('aria-invalid')).toBe(false)
+  })
+})

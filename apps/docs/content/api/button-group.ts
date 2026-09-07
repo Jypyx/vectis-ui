@@ -9,7 +9,7 @@ export default {
     {
       name: 'VButtonGroup',
       props: [
-        { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+        { name: 'orientation', type: 'ButtonGroupOrientation', default: "'horizontal'" },
         { name: 'detached', type: 'boolean', default: 'false' },
         { name: 'seamless', type: 'boolean', default: 'false' },
         { name: 'fullWidth', type: 'boolean', default: 'false' },

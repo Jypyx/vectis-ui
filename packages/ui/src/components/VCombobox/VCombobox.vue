@@ -91,7 +91,12 @@ const isSeparator = (item: ComboboxItem): item is ComboboxSeparator => 'separato
  */
 export type ComboboxFilter = boolean | ((option: ComboboxOption, query: string) => boolean)
 
-type Placement = 'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
+/** Where the list opens relative to the field. */
+export type ComboboxPlacement =
+  'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
+
+/** The height of the field: 32, 40 or 48 pixels. */
+export type ComboboxSize = 'sm' | 'md' | 'lg'
 
 interface ComboboxProps {
   /**
@@ -112,7 +117,7 @@ interface ComboboxProps {
    */
   hint?: string
   /** The height of the field: 32, 40 or 48 pixels. */
-  size?: 'sm' | 'md' | 'lg'
+  size?: ComboboxSize
   /** Takes 4px off the height, as everywhere else in the design system. */
   compact?: boolean
   /** What the field says while nothing is chosen and nothing has been typed. */
@@ -177,7 +182,7 @@ interface ComboboxProps {
    */
   hasMore?: boolean
   /** Where the list opens relative to the field. */
-  placement?: Placement
+  placement?: ComboboxPlacement
 }
 
 const props = withDefaults(defineProps<ComboboxProps>(), {

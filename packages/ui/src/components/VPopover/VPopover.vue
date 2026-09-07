@@ -60,6 +60,9 @@ export type PopoverTriggerProps = {
   'aria-controls': string
 }
 
+/** Whether the browser dismisses the panel on its own. */
+export type PopoverMode = 'auto' | 'manual'
+
 interface PopoverProps {
   /**
    * The id of the panel, which the trigger points at. One is generated when none is
@@ -77,7 +80,7 @@ interface PopoverProps {
    * Escape, and stack it with other panels; `manual` leaves everything to the
    * consumer, which is what a panel with its own focus and dismissal rules needs.
    */
-  mode?: 'auto' | 'manual'
+  mode?: PopoverMode
   /**
    * The name of an anchor the consumer has set on its own control, written as a CSS
    * dashed identifier such as `--tooltip-anchor`. Supplying it replaces the internal
@@ -180,7 +183,7 @@ defineExpose({
   /** Opens the panel at once, without waiting for the model to come round. */
   show,
   /** Closes it at once. Safe to call on a panel that is already closed. */
-  hide,
+  close: hide,
   /** The panel element itself, which is the popover. */
   el: panelEl,
 })
