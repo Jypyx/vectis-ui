@@ -13,7 +13,7 @@ export default {
     },
     icons: {
       title: 'Icônes',
-      text: "Une icône dans le champ, à l'une ou l'autre extrémité. Les deux sont décoratives : pas de libellé, pas de focus, rien d'annoncé, ce qui est la bonne forme pour une loupe qui dit à quoi sert le champ ou une coche qui rapporte un état. Attacher un écouteur de clic est ce qui en fait un bouton, et c'est la section plus bas. Les slots <code>#start</code> et <code>#end</code> occupent les mêmes places quand une icône n'est pas ce qu'il y faut.",
+      text: "Une icône dans le champ, à l'une ou l'autre extrémité. Les deux sont décoratives : pas de libellé, pas de focus, rien d'annoncé, ce qui est la bonne forme pour une loupe qui dit à quoi sert le champ ou une coche qui rapporte un état. Attacher un écouteur de clic est ce qui en fait un bouton, et c'est la section plus bas. Le slot <code>#end</code> remplace l'icône de fin quand ce qu'il y faut n'est pas une icône ; <code>#start</code> est rendu après l'icône de début plutôt qu'à sa place, ce qui permet à un champ bâti sur celui-ci de montrer les deux.",
     },
     clearable: {
       title: 'Effaçable',
@@ -84,7 +84,8 @@ export default {
           "L'icône de fin a été pressée. Attacher cet écouteur est ce qui en fait un bouton.",
       },
       slots: {
-        start: 'Du contenu au début du champ, qui remplace <code>iconStart</code>.',
+        start:
+          "Du contenu au début du champ, rendu après <code>iconStart</code> plutôt qu'à sa place.",
         valueEnd:
           "Vos propres contrôles dans le champ, placés avant ceux du champ lui-même : la croix d'effacement et l'icône de fin. C'est la place de ce qui agit sur la valeur, pour que l'ordre de lecture et l'ordre de tabulation coïncident.",
         end: "Du contenu à la fin du champ, qui remplace <code>iconEnd</code>. Il est masqué pendant le chargement, l'indicateur prenant cette place.",

@@ -13,7 +13,7 @@ export default {
     },
     icons: {
       title: 'Icons',
-      text: 'An icon inside the field, at either end. Both are decorative: no label, no focus, nothing announced, which is the right shape for a magnifier that says what the field is for or a tick that reports a state. Attaching a click listener is what turns one into a button, and that is the section below. The <code>#start</code> and <code>#end</code> slots take the same places when an icon is not what belongs there.',
+      text: 'An icon inside the field, at either end. Both are decorative: no label, no focus, nothing announced, which is the right shape for a magnifier that says what the field is for or a tick that reports a state. Attaching a click listener is what turns one into a button, and that is the section below. The <code>#end</code> slot replaces the end icon when what belongs there is not an icon; <code>#start</code> is rendered after the start icon instead of in its place, which is what lets a field built on this one show both.',
     },
     clearable: {
       title: 'Clearable',
@@ -83,7 +83,8 @@ export default {
           'The end icon was pressed. Attaching this listener is what turns it into a button.',
       },
       slots: {
-        start: 'Content at the start of the field, which replaces <code>iconStart</code>.',
+        start:
+          'Content at the start of the field, rendered after <code>iconStart</code> rather than in its place.',
         valueEnd:
           "Controls of your own inside the field, placed before the field's own: the clear cross and the end icon. It is where something that acts on the value belongs, so that the reading order and the tab order agree.",
         end: 'Content at the end of the field, which replaces <code>iconEnd</code>. It is hidden while the field is loading, the spinner taking that place.',

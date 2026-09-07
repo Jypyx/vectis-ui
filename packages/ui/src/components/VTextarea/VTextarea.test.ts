@@ -82,6 +82,18 @@ describe('VTextarea', () => {
     expect(textarea.getAttribute('aria-describedby')).toContain(hint.id)
   })
 
+  it('the #start slot is rendered AFTER iconStart, never in its place', () => {
+    const { getByTestId, container } = render(VTextarea, {
+      props: { modelValue: '', iconStart: 'search' },
+      slots: { start: '<span data-testid="extra">Alpha</span>' },
+    })
+    // The same asymmetry as VInput: the slot sits beside the icon, not over it.
+    const icon = container.querySelector('.v-icon')
+    const extra = getByTestId('extra')
+    expect(icon).not.toBeNull()
+    expect(icon!.compareDocumentPosition(extra) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
   it('clickable icon: an accessible button and the event emitted', async () => {
     const onClick = vi.fn()
     const { getByRole, emitted } = render(VTextarea, {

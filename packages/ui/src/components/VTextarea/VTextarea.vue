@@ -68,7 +68,8 @@ interface TextareaProps {
   /**
    * An icon inside the field, at the start. It is decorative by default and becomes a
    * real button as soon as a `@click:icon-start` listener is attached — in which case
-   * it needs `iconStartLabel`. The `#start` slot replaces it.
+   * it needs `iconStartLabel`. The `#start` slot is rendered after it, so the two can
+   * be given together.
    */
   iconStart?: IconSource
   /**
@@ -147,7 +148,10 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  /** Content at the start of the field, which replaces `iconStart`. */
+  /**
+   * Content at the start of the field, rendered after `iconStart` rather than in its
+   * place, as in VInput.
+   */
   start?(): unknown
   /**
    * Content at the end of the field, which replaces `iconEnd`. It is hidden while the
@@ -225,19 +229,22 @@ const { counterText, over } = useTextLimit({
       :style="{ '--textarea-rows': resolvedRows }"
       :data-auto-grow="autoGrow ? '' : undefined"
     >
-      <slot name="start">
-        <button
-          v-if="iconStart && hasIconStartHandler"
-          type="button"
-          class="v-textarea-action"
-          :aria-label="iconStartLabel ?? iconName(iconStart)"
-          :disabled="disabled"
-          @click="emit('click:icon-start', $event)"
-        >
-          <VIcon v-bind="iconProps(iconStart)" />
-        </button>
-        <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
-      </slot>
+      <!-- The start icon is rendered BEFORE the slot, where the end icon is the slot's own
+           fallback. The asymmetry is VInput's, mirrored here so the two fields answer the
+           same way: what a composed field puts in that zone is OTHER content beside the
+           icon, not another way of drawing it. -->
+      <button
+        v-if="iconStart && hasIconStartHandler"
+        type="button"
+        class="v-textarea-action"
+        :aria-label="iconStartLabel ?? iconName(iconStart)"
+        :disabled="disabled"
+        @click="emit('click:icon-start', $event)"
+      >
+        <VIcon v-bind="iconProps(iconStart)" />
+      </button>
+      <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
+      <slot name="start" />
 
       <textarea
         v-bind="restAttrs"

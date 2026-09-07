@@ -13,7 +13,7 @@ export default {
     },
     icons: {
       title: 'Icônes',
-      text: "Une icône à l'une ou l'autre extrémité du champ, ou aux deux. Elles sont décoratives ici, donc le champ garde le nom que lui donne son libellé. Elles se posent sur la première ligne plutôt qu'au milieu de la boîte, ce qui les garde au niveau du début du texte dans un champ de plusieurs lignes. Les slots <code>#start</code> et <code>#end</code> prennent leur place quand ce qui va là n'est pas une icône.",
+      text: "Une icône à l'une ou l'autre extrémité du champ, ou aux deux. Elles sont décoratives ici, donc le champ garde le nom que lui donne son libellé. Elles se posent sur la première ligne plutôt qu'au milieu de la boîte, ce qui les garde au niveau du début du texte dans un champ de plusieurs lignes. Le slot <code>#end</code> remplace l'icône de fin quand ce qui va là n'est pas une icône ; <code>#start</code> est rendu après l'icône de début plutôt qu'à sa place, comme dans <code>VInput</code>.",
     },
     clickableIcons: {
       title: 'Icônes cliquables',
@@ -83,7 +83,8 @@ export default {
           "L'icône de fin a été pressée. Attacher cet écouteur est ce qui en fait un bouton.",
       },
       slots: {
-        start: 'Du contenu au début du champ, qui remplace <code>iconStart</code>.',
+        start:
+          "Du contenu au début du champ, rendu après <code>iconStart</code> plutôt qu'à sa place.",
         end: "Du contenu à la fin du champ, qui remplace <code>iconEnd</code>. Il est masqué pendant le chargement, l'indicateur prenant cette place.",
       },
     },

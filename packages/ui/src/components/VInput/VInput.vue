@@ -67,7 +67,8 @@ interface InputProps {
   /**
    * An icon inside the field, at the start. It is decorative by default and becomes
    * a real button as soon as a `@click:icon-start` listener is attached — in which
-   * case it needs `iconStartLabel`. The `#start` slot replaces it.
+   * case it needs `iconStartLabel`. The `#start` slot is rendered after it, so a
+   * field composed on top of this one can show both.
    */
   iconStart?: IconSource
   /**
@@ -156,7 +157,11 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  /** Content at the start of the field, which replaces `iconStart`. */
+  /**
+   * Content at the start of the field, rendered after `iconStart` rather than in its
+   * place — which is what lets a field composed on top of this one put the chips
+   * standing for its values here beside an icon it still wants drawn.
+   */
   start?(): unknown
   /**
    * Controls of your own inside the field, placed before the field's own — the clear
@@ -269,19 +274,25 @@ defineExpose({
     </VTypography>
 
     <div class="v-input-field">
-      <slot name="start">
-        <button
-          v-if="iconStart && hasIconStartHandler"
-          type="button"
-          class="v-input-action"
-          :aria-label="iconStartLabel ?? iconName(iconStart)"
-          :disabled="resolvedDisabled"
-          @click="emit('click:icon-start', $event)"
-        >
-          <VIcon v-bind="iconProps(iconStart)" />
-        </button>
-        <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
-      </slot>
+      <!-- TRAP — the start icon is rendered BEFORE the slot, where the end icon is the
+           slot's own fallback. That asymmetry is what the composed fields need: VCombobox
+           and VFileInput fill `#start` with the chips standing for their values, which is
+           OTHER content in the same zone rather than another way of drawing the icon. As a
+           fallback the icon would vanish the moment a value was chosen — silently, and the
+           clickable variant with it. The end zone has no such consumer: what is put there
+           really does replace the icon. -->
+      <button
+        v-if="iconStart && hasIconStartHandler"
+        type="button"
+        class="v-input-action"
+        :aria-label="iconStartLabel ?? iconName(iconStart)"
+        :disabled="resolvedDisabled"
+        @click="emit('click:icon-start', $event)"
+      >
+        <VIcon v-bind="iconProps(iconStart)" />
+      </button>
+      <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
+      <slot name="start" />
 
       <input
         v-bind="restAttrs"

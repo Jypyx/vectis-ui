@@ -80,6 +80,19 @@ describe('VInput', () => {
     expect(queryByRole('button')).toBeNull()
   })
 
+  it('the #start slot is rendered AFTER iconStart, never in its place', () => {
+    const { getByTestId, container } = render(VInput, {
+      props: { modelValue: '', iconStart: 'search' },
+      slots: { start: '<span data-testid="chip">Alpha</span>' },
+    })
+    // Both are there, and in that order: a composed field fills this slot with the chips
+    // standing for its values, which must not take its own start icon away.
+    const icon = container.querySelector('.v-icon')
+    const chip = getByTestId('chip')
+    expect(icon).not.toBeNull()
+    expect(icon!.compareDocumentPosition(chip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
   it('clickable icon: an accessible button, the event emitted, no leak onto the input', async () => {
     const onClick = vi.fn()
     const { getByRole, emitted } = render(VInput, {

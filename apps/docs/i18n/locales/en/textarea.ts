@@ -13,7 +13,7 @@ export default {
     },
     icons: {
       title: 'Icons',
-      text: 'An icon at either end of the field, or at both. They are decorative here, so the field keeps the name its label gives it. They sit on the first line rather than in the middle of the box, which is what keeps them level with the start of the text in a field several lines tall. The <code>#start</code> and <code>#end</code> slots take their place when what belongs there is not an icon.',
+      text: 'An icon at either end of the field, or at both. They are decorative here, so the field keeps the name its label gives it. They sit on the first line rather than in the middle of the box, which is what keeps them level with the start of the text in a field several lines tall. The <code>#end</code> slot replaces the end icon when what belongs there is not an icon; <code>#start</code> is rendered after the start icon instead of in its place, as in <code>VInput</code>.',
     },
     clickableIcons: {
       title: 'Clickable icons',
@@ -82,7 +82,8 @@ export default {
           'The end icon was pressed. Attaching this listener is what turns it into a button.',
       },
       slots: {
-        start: 'Content at the start of the field, which replaces <code>iconStart</code>.',
+        start:
+          'Content at the start of the field, rendered after <code>iconStart</code> rather than in its place.',
         end: 'Content at the end of the field, which replaces <code>iconEnd</code>. It is hidden while the field is loading, the spinner taking that place.',
       },
     },

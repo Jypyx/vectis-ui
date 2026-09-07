@@ -41,8 +41,10 @@ through `aria-describedby`. Without a `label`, supply an accessible name by fall
 
 ## Icons
 
-`icon-start` / `icon-end` take an icon name or an explicit render (the `#start` / `#end` slots
-win for custom content). By default the icons are **decorative** (`aria-hidden`):
+`icon-start` / `icon-end` take an icon name or an explicit render. `#end` **replaces** `icon-end`,
+where `#start` is rendered **after** `icon-start` and leaves it in place — a field composed on top of
+this one fills that slot with the chips standing for its values, which is other content beside the
+icon rather than another way of drawing it. By default the icons are **decorative** (`aria-hidden`):
 
 <Canvas of={VInputStories.Icons} />
 
