@@ -11,6 +11,14 @@ const cell = (container: Element, which: 'hour' | 'minute') =>
     `button[aria-label="${which === 'hour' ? 'Select hour' : 'Select minutes'}"]`,
   ) as HTMLButtonElement
 
+const disabledNumerals = (container: Element) =>
+  [...container.querySelectorAll('.v-time-picker-number[data-disabled]')].map((n) =>
+    n.textContent!.trim(),
+  )
+
+const numerals = (container: Element) =>
+  [...container.querySelectorAll('.v-time-picker-number')].map((n) => n.textContent!.trim())
+
 const pm = (container: Element) =>
   [...container.querySelectorAll('.v-time-picker-meridiem button')].find(
     (b) => b.textContent?.trim() === 'PM',
@@ -124,6 +132,149 @@ describe('VTimePicker', () => {
     await fireEvent.click(cell(container, 'minute'))
     await fireEvent.keyDown(face(container), { key: 'ArrowUp' })
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['09:15'])
+  })
+
+  it('prints only the minutes the step can reach', async () => {
+    // Every marker on the face has to be a value the hand can come to rest on: pointing at
+    // one it cannot reach and watching the hand settle beside it is the whole bug.
+    const { container, rerender } = render(VTimePicker, {
+      props: { modelValue: '09:00', format: '24h', minuteStep: 15 },
+    })
+    await fireEvent.click(cell(container, 'minute'))
+    expect(numerals(container)).toEqual(['00', '15', '30', '45'])
+
+    // Below a step of five, twelve numerals is already as many as a face can carry, so the
+    // five-minute grid stays — and a step of two, which cannot reach five past, loses half
+    // of it rather than all of it.
+    await rerender({ minuteStep: 2 })
+    expect(numerals(container)).toEqual(['00', '10', '20', '30', '40', '50'])
+
+    // The default reaches everything, so the face is the clock's own reading grid.
+    await rerender({ minuteStep: 1 })
+    expect(numerals(container)).toHaveLength(12)
+    expect(numerals(container)[1]).toBe('05')
+  })
+
+  it('draws the hand small only on a minute with no marker of its own', async () => {
+    // At full size the tip covers a numeral, which is what says "this one". Between two of
+    // them it would cover both and point at neither, so it shrinks. Five past is the case
+    // the marks decide rather than the clock: it is on the five-minute grid, and a face
+    // stepping by a quarter of an hour does not print it.
+    const { container, rerender } = render(VTimePicker, {
+      props: { modelValue: '09:05', format: '24h', minuteStep: 15 },
+    })
+    await fireEvent.click(cell(container, 'minute'))
+    const hand = () => container.querySelector('.v-time-picker-hand') as HTMLElement
+    expect(hand().hasAttribute('data-minor')).toBe(true)
+
+    await rerender({ modelValue: '09:15' })
+    expect(hand().hasAttribute('data-minor')).toBe(false)
+  })
+
+  it('disables what the restrictions rule out rather than hiding it', async () => {
+    // Unlike the minute step, which prints nothing it cannot reach: a bound is only
+    // readable beside the hours it excludes, where a scale with holes in it says nothing.
+    const { container } = render(VTimePicker, {
+      props: { modelValue: '09:00', format: '24h', min: '09:00', max: '11:00' },
+    })
+    expect(disabledNumerals(container)).not.toContain('9')
+    expect(disabledNumerals(container)).toContain('8')
+    // Noon and the whole inner ring are past the bound, so 21 of the 24 hours go.
+    expect(disabledNumerals(container)).toHaveLength(21)
+
+    await fireEvent.click(cell(container, 'minute'))
+    expect(disabledNumerals(container)).toHaveLength(0)
+  })
+
+  it('cuts an hour in half rather than closing it', async () => {
+    // The case the whole thing turns on: nine o'clock is still reachable under a bound of
+    // half past nine, and it is its first thirty minutes that go.
+    const { container } = render(VTimePicker, {
+      props: { modelValue: '09:45', format: '24h', min: '09:30' },
+    })
+    expect(disabledNumerals(container)).not.toContain('9')
+
+    await fireEvent.click(cell(container, 'minute'))
+    expect(disabledNumerals(container)).toEqual(['00', '05', '10', '15', '20', '25'])
+  })
+
+  it('pulls the minutes to what an hour allows, and leaves them alone otherwise', async () => {
+    const { container, emitted, rerender } = render(VTimePicker, {
+      props: { modelValue: '10:00', format: '24h', min: '09:30' },
+    })
+    // Stepping back onto nine o'clock cannot leave the clock holding 09:00.
+    await fireEvent.keyDown(face(container), { key: 'ArrowDown' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['09:30'])
+
+    // With nothing restricted a minute off the step is the consumer's own and is kept.
+    await rerender({ modelValue: '10:07', min: undefined, minuteStep: 15 })
+    await fireEvent.keyDown(face(container), { key: 'ArrowDown' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['09:07'])
+  })
+
+  it('refuses an hour that has nothing left in it', async () => {
+    const { container, emitted } = render(VTimePicker, {
+      props: { modelValue: '09:00', format: '24h', allowedHours: [9, 10, 11] },
+    })
+    // 8 is closed, so the key finds the next hour that is not — going the long way round.
+    await fireEvent.keyDown(face(container), { key: 'ArrowDown' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['11:00'])
+  })
+
+  it('skips the hours and the minutes it may not land on', async () => {
+    const { container, emitted } = render(VTimePicker, {
+      props: {
+        modelValue: '11:00',
+        format: '24h',
+        allowedHours: [9, 10, 11, 14],
+        allowedMinutes: [0, 30],
+      },
+    })
+    // A key that stopped at the first hole could never reach what lies past it.
+    await fireEvent.keyDown(face(container), { key: 'ArrowUp' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['14:00'])
+
+    await fireEvent.click(cell(container, 'minute'))
+    await fireEvent.keyDown(face(container), { key: 'ArrowUp' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['14:30'])
+    await fireEvent.keyDown(face(container), { key: 'Home' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['14:00'])
+    await fireEvent.keyDown(face(container), { key: 'End' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['14:30'])
+  })
+
+  it('holds still when a bound leaves nowhere to go', async () => {
+    // Against a bound the walk comes back empty, which is what a bound means. The key
+    // must not wrap round to the other end of the day to find something.
+    const { container, emitted } = render(VTimePicker, {
+      props: { modelValue: '09:00', format: '24h', min: '09:00', max: '11:00' },
+    })
+    await fireEvent.keyDown(face(container), { key: 'ArrowUp' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['10:00'])
+    await fireEvent.keyDown(face(container), { key: 'Home' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['09:00'])
+    await fireEvent.keyDown(face(container), { key: 'End' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['11:00'])
+  })
+
+  it('takes the AM or PM button away with the half of the day it stands for', () => {
+    const { container } = render(VTimePicker, {
+      props: { modelValue: '09:00', format: '12h', allowedHours: [9, 10, 11] },
+    })
+    const buttons = [...container.querySelectorAll('.v-time-picker-meridiem button')]
+    const am = buttons.find((b) => b.textContent?.trim() === 'AM') as HTMLButtonElement
+    expect(am.disabled).toBe(false)
+    expect(pm(container as Element).hasAttribute('disabled')).toBe(true)
+  })
+
+  it('keeps the hour when the half of the day allows it, and moves it when it does not', async () => {
+    // What is chosen on that control is the HALF OF THE DAY, so the hour gives way to it
+    // rather than the write being refused, which would snap the control back.
+    const { container, emitted } = render(VTimePicker, {
+      props: { modelValue: '09:00', format: '12h', allowedHours: [9, 14, 15] },
+    })
+    await fireEvent.click(pm(container))
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['14:00'])
   })
 
   it('exposes focus and reset, the two things a panel around it needs', async () => {

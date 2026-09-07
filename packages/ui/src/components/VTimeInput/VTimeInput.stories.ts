@@ -11,11 +11,19 @@ const t = storyText({
     time: 'Time',
     maskHint: 'Format hh:mm',
     fiveMinuteHint: 'Minutes in steps of 5',
+    officeHint: 'Between 09:00 and 17:00',
+    typed: 'Typed',
+    listed: 'Listed',
+    picked: 'Picked',
   },
   fr: {
     time: 'Heure',
     maskHint: 'Format hh:mm',
     fiveMinuteHint: 'Minutes par pas de 5',
+    officeHint: 'Entre 09:00 et 17:00',
+    typed: 'Saisi',
+    listed: 'Liste',
+    picked: 'Cadran',
   },
 })
 
@@ -418,6 +426,51 @@ export const FiveMinuteStep: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * The same four restrictions — `min`, `max`, `allowedHours`, `allowedMinutes` — reach the
+ * three modes as three different answers, because a mode is a different way of asking.
+ *
+ * The typed field COMMITS what was typed and turns invalid: the reader is writing, and a
+ * field that swallowed the entry would leave them nothing to correct. The list LEAVES OUT
+ * what cannot be chosen, a list being read before it is chosen from. The picker DISABLES
+ * it, a bound being readable only beside the hours it excludes.
+ */
+export const Restrictions: Story = {
+  args: { format: '24h', minuteStep: 30, min: '09:00', max: '17:00' },
+  render: (args) => ({
+    components: { VTimeInput },
+    setup: () => ({
+      args,
+      t,
+      typed: ref<string | null>('09:30'),
+      listed: ref<string | null>('09:30'),
+      picked: ref<string | null>('09:30'),
+    }),
+    template: `
+      <div style="width: 280px; display: grid; gap: 16px">
+        <VTimeInput v-bind="args" v-model="typed" :label="t.typed" :hint="t.officeHint" />
+        <VTimeInput v-bind="args" v-model="listed" mode="list" :label="t.listed" />
+        <VTimeInput v-bind="args" v-model="picked" mode="readonly" :label="t.picked" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Typed: the value stands, and the browser is what refuses it — which is also what
+    // stops a form leaving with it.
+    // A typed field with no picker carries no combobox role: it points at no panel.
+    const typed = canvas.getByRole('textbox', { name: 'Typed' }) as HTMLInputElement
+    await userEvent.clear(typed)
+    await userEvent.type(typed, '0800')
+    await userEvent.tab()
+    await waitFor(() => expect(typed.validity.customError).toBe(true))
+
+    // Listed: the rows outside the bounds are not there to be chosen at all.
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Listed' }))
+    await waitFor(() => expect(canvas.getAllByRole('option')).toHaveLength(17))
+  },
 }
 
 export const Sizes: Story = {

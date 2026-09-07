@@ -5,7 +5,11 @@ export default {
   examples: {
     minuteStep: {
       title: 'Pas des minutes',
-      text: "Le cadran est un curseur et non une liste, il faut donc lui dire sur quoi il a le droit de se poser. <code>minuteStep</code> est cet intervalle : l'aiguille s'y accroche quand on la fait tourner, et les flèches du clavier avancent de ce pas. Il ne concerne que les minutes. Les repères du cadran ne changent pas avec lui, ce sont les marques de cinq minutes dans tous les cas ; ce que le pas décide, ce sont les valeurs entre elles sur lesquelles l'aiguille peut s'arrêter.",
+      text: "Le cadran est un curseur et non une liste, il faut donc lui dire sur quoi il a le droit de se poser. <code>minuteStep</code> est cet intervalle : l'aiguille s'y accroche quand on la fait tourner, et les flèches du clavier avancent de ce pas. Il ne concerne que les minutes. Le cadran n'affiche que les minutes que le pas atteint : un quart d'heure y marque quatre repères et rien entre eux, car un chiffre que l'on peut viser sans pouvoir s'y poser est un chiffre que l'aiguille dément en s'arrêtant à côté. Un pas trop fin pour douze chiffres conserve les marques de cinq minutes sur lesquelles une horloge se lit, moins celles qu'il ne peut pas atteindre.",
+    },
+    restrictions: {
+      title: 'Ce que l’on peut choisir',
+      text: 'Quatre props restreignent la valeur, et elles se composent en une seule réponse : <code>min</code> et <code>max</code>, deux bornes incluses écrites en chaînes canoniques <code>HH:mm</code>, et <code>allowedHours</code> et <code>allowedMinutes</code>, qui prennent chacune la liste des valeurs autorisées ou une règle qui répond pour l’une d’elles. Ce qu’elles excluent est désactivé et non masqué, l’inverse de <code>minuteStep</code> : une borne ne se lit qu’à côté de ce qu’elle exclut, et une graduation trouée ne dit rien. Une heure n’est fermée que s’il n’y reste rien du tout : une borne à 09:30 garde neuf heures et retire ses trente premières minutes du côté des minutes. Choisir cette heure aligne alors les minutes sur la plus proche qu’elle autorise, et les flèches enjambent ce sur quoi elles n’ont pas le droit de se poser au lieu de s’y arrêter.',
     },
     hourFormat: {
       title: 'Format horaire',
@@ -25,7 +29,13 @@ export default {
         locale:
           "Une locale BCP 47, qui décide de l'horloge. Elle l'emporte sur la locale globale du design system et retombe dessus, ce pourquoi elle n'a pas de valeur par défaut littérale.",
         minuteStep:
-          "L'intervalle sur lequel les minutes s'alignent, au glissement comme aux flèches.",
+          "L'intervalle sur lequel les minutes s'alignent, au glissement comme aux flèches. Le cadran n'affiche que les minutes qu'il peut atteindre : un pas d'un quart d'heure en marque quatre.",
+        min: "L'heure la plus tôt que l'on puisse choisir, incluse, en chaîne canonique sur 24 heures. Le cadran désactive ce qui tombe en dehors plutôt que de le retirer : une borne ne se lit qu'à côté de ce qu'elle exclut.",
+        max: "L'heure la plus tard que l'on puisse choisir, incluse, écrite comme min.",
+        allowedHours:
+          "Les heures que l'on peut choisir : leur liste, ou une règle qui répond pour l'une d'elles. L'heure passée à une règle est toujours celle sur 24 heures, quelle que soit l'horloge affichée.",
+        allowedMinutes:
+          "Les minutes que l'on peut choisir : leur liste, ou une règle qui répond pour l'une d'elles.",
         vModel:
           "L'heure, toujours en chaîne sur 24 heures quelle que soit l'horloge affichée : vous n'avez donc jamais à savoir laquelle la langue utilise. Sans valeur, le cadran affiche minuit plutôt que l'heure courante : lire l'horloge pendant le rendu ferait diverger une page dessinée sur un serveur de la même page dans le navigateur.",
       },

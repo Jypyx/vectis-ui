@@ -6,6 +6,8 @@ import TimePickerHourFormat from '~/examples/time-picker/HourFormat.vue'
 import timePickerHourFormatSource from '~/examples/time-picker/HourFormat.vue?raw'
 import TimePickerLocalization from '~/examples/time-picker/Localization.vue'
 import timePickerLocalizationSource from '~/examples/time-picker/Localization.vue?raw'
+import TimePickerRestrictions from '~/examples/time-picker/Restrictions.vue'
+import timePickerRestrictionsSource from '~/examples/time-picker/Restrictions.vue?raw'
 import TimePickerSteps from '~/examples/time-picker/Steps.vue'
 import timePickerStepsSource from '~/examples/time-picker/Steps.vue?raw'
 
@@ -30,6 +32,12 @@ useDocsHead('timePicker')
   <DocsProse keypath="timePicker.examples.minuteStep.text" />
   <DocsExample :source="timePickerStepsSource">
     <TimePickerSteps />
+  </DocsExample>
+
+  <h3 id="restrictions">{{ t('timePicker.examples.restrictions.title') }}</h3>
+  <DocsProse keypath="timePicker.examples.restrictions.text" />
+  <DocsExample :source="timePickerRestrictionsSource">
+    <TimePickerRestrictions />
   </DocsExample>
 
   <h3 id="hour-format">{{ t('timePicker.examples.hourFormat.title') }}</h3>

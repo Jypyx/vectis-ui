@@ -32,6 +32,13 @@ import VSeparator from '../VSeparator/VSeparator.vue'
 import VTimePicker from '../VTimePicker/VTimePicker.vue'
 import type { TimePickerFormat } from '../VTimePicker/VTimePicker.vue'
 import {
+  isTimeAllowed,
+  limitsProblem,
+  nearestAllowedTime,
+  resolveLimits,
+} from '../VTimePicker/limits'
+import type { TimeMatcher } from '../VTimePicker/limits'
+import {
   formatDisplay,
   formatTime,
   formatTimeMask,
@@ -91,6 +98,21 @@ interface TimeInputProps {
    */
   minuteStep?: number
   /**
+   * The earliest time that can be chosen, inclusive, as a canonical 24-hour `'HH:mm'`.
+   * The picker DISABLES what it rules out, the list leaves it out altogether, and a time
+   * typed past it makes the field invalid.
+   */
+  min?: string
+  /** The latest time that can be chosen, inclusive, written like `min`. */
+  max?: string
+  /**
+   * Which hours can be chosen: the list of them, or a rule answering for one. The hour
+   * handed to a rule is always the 24-hour one, whichever clock is on display.
+   */
+  allowedHours?: TimeMatcher
+  /** Which minutes can be chosen: the list of them, or a rule answering for one. */
+  allowedMinutes?: TimeMatcher
+  /**
    * A BCP 47 locale, which decides the clock and how a time is written out. It TAKES
    * PRECEDENCE over the design system's global locale and falls back to it — which is why
    * it has no literal default: `undefined` has to stay recognizable for the global locale
@@ -133,6 +155,10 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
   mode: undefined,
   showPicker: undefined,
   minuteStep: 1,
+  min: undefined,
+  max: undefined,
+  allowedHours: undefined,
+  allowedMinutes: undefined,
   locale: undefined,
   label: undefined,
   hint: undefined,
@@ -193,6 +219,20 @@ const resolvedFormat = computed<TimePickerFormat>(
   () => props.format ?? hourCycleFor(resolvedLocale.value),
 )
 
+/**
+ * The restrictions, resolved once. VTimePicker resolves the same props again for itself:
+ * they are ITS contract, and this component only consults them for the two things the
+ * picker knows nothing about — which rows the list offers, and whether a typed time is
+ * one the field should be showing as invalid.
+ */
+const limits = computed(() => resolveLimits(props))
+
+/** Whether the value is one the restrictions allow. Nothing at all is not a breach. */
+const valueAllowed = computed(() => {
+  const parts = modelParts.value
+  return !parts || isTimeAllowed(parts.hour, parts.minute, limits.value)
+})
+
 // @devwarn
 if (isDev) {
   watchEffect(() => {
@@ -210,6 +250,8 @@ if (isDev) {
       console.warn(
         '[VTimeInput] showPicker is ignored in "list" mode: the list of times is the only panel.',
       )
+    const problem = limitsProblem(limits.value)
+    if (problem) console.warn(`[VTimeInput] ${problem}`)
     if (isList.value && props.minuteStep < 5)
       console.warn(
         `[VTimeInput] minuteStep ${props.minuteStep} in "list" mode would render ${Math.ceil(1440 / props.minuteStep)} rows: a step of 15 or 30 minutes is expected.`,
@@ -330,7 +372,13 @@ const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPa
         // why the picker itself never reads it, so that it stays identical on both sides
         // of hydration. The instant is taken ONCE: two reads could straddle a minute.
         const now = new Date()
-        draft.value = formatTime(now.getHours(), snapMinute(now.getMinutes(), props.minuteStep))
+        const wanted = snapMinute(now.getMinutes(), props.minuteStep)
+        // Pulled to the nearest time the restrictions allow, so that the panel never opens
+        // on one the reader would be refused. Null is a set of restrictions that allows
+        // nothing at all, which the warning above has already reported.
+        draft.value =
+          nearestAllowedTime(now.getHours(), wanted, limits.value) ??
+          formatTime(now.getHours(), wanted)
       }
       pickerRef.value?.reset()
     },
@@ -389,6 +437,30 @@ function clearValue() {
 // behaviour: closing never writes the value, and only OK does.
 
 const m = useMessages()
+
+// @core
+/**
+ * Saying no to a time that is not one the restrictions allow.
+ *
+ * The value is committed all the same — the field shows what was typed, and a consumer
+ * bound to it reads the same thing — and the refusal is carried by the control's OWN
+ * validity, which is what turns the field red through `:user-invalid` and what stops a
+ * form being submitted with it. That is the design system's route for a rule of its own
+ * making (`useTextLimit`), never an event of its own invention.
+ *
+ * It is written unconditionally rather than only while typing: the browser BARS a
+ * read-only control from constraint validation, so the read-only form settles it without
+ * a branch here. The list form never reaches this at all, having no control of this
+ * component's own to write on.
+ */
+watchEffect(
+  () => {
+    const el = fieldEl.value
+    if (!el) return
+    el.setCustomValidity(valueAllowed.value ? '' : m.value.timeInput.unavailable)
+  },
+  { flush: 'post' },
+)
 
 /* From here on: everything the typed field needs. */
 
@@ -558,7 +630,15 @@ function onRootFocusout(event: FocusEvent) {
  */
 const options = computed<TimeOption[]>(() => {
   if (!isList.value) return []
-  const rows = timeList(props.minuteStep, resolvedLocale.value, resolvedFormat.value)
+  const rows = timeList(props.minuteStep, resolvedLocale.value, resolvedFormat.value).filter(
+    (row) => {
+      // A list is READ before it is chosen from, so a time it may not take has no reason
+      // to be in it — the opposite of the picker, where a disabled numeral is what makes a
+      // bound legible against the hours around it.
+      const parts = parseTime(row.value)
+      return !parts || isTimeAllowed(parts.hour, parts.minute, limits.value)
+    },
+  )
   const current = model.value
   if (!isValidTime(current) || rows.some((row) => row.value === current)) return rows
   const at = rows.findIndex((row) => row.value > current)
@@ -748,6 +828,10 @@ function onEndIcon() {
         :format="resolvedFormat"
         :locale="resolvedLocale"
         :minute-step="minuteStep"
+        :min="min"
+        :max="max"
+        :allowed-hours="allowedHours"
+        :allowed-minutes="allowedMinutes"
         @confirm="confirm"
       >
         <template #footer>

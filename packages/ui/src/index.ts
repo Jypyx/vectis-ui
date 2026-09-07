@@ -152,6 +152,9 @@ export { default as VDateInput } from './components/VDateInput/VDateInput.vue'
 export type { DateInputMode } from './components/VDateInput/VDateInput.vue'
 export { default as VTimePicker } from './components/VTimePicker/VTimePicker.vue'
 export type { TimePickerFormat, TimePickerStep } from './components/VTimePicker/VTimePicker.vue'
+/* The type of `allowedHours` and `allowedMinutes`, which both time components take. It is
+   declared beside the rules that read it rather than in the SFC, VTimePicker owning both. */
+export type { TimeMatcher } from './components/VTimePicker/limits'
 export { default as VTimeInput } from './components/VTimeInput/VTimeInput.vue'
 export type { TimeInputMode } from './components/VTimeInput/VTimeInput.vue'
 export { default as VCalendar } from './components/VCalendar/VCalendar.vue'

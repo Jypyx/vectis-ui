@@ -132,6 +132,7 @@ export const fr: VectisMessages = {
     pickerLabel: 'Choisir une heure',
     meridiem: (value) => `AM ou PM : ${value}`,
     maskPlaceholder: 'hh:mm',
+    unavailable: "Cette heure n'est pas disponible.",
   },
   fileInput: {
     attach: 'Choisir des fichiers',

@@ -378,6 +378,55 @@ describe('VTimeInput — input mode', () => {
   })
 })
 
+describe('VTimeInput — restrictions', () => {
+  it('says no to a typed time through the control own validity', async () => {
+    // The value is committed all the same: the field shows what was typed and so does a
+    // consumer bound to it. What refuses it is the browser, which is also what stops a
+    // form leaving with it.
+    const { container } = render(VTimeInput, {
+      props: { modelValue: null, format: '24h', min: '09:00', max: '17:00' },
+    })
+    const input = container.querySelector('input') as HTMLInputElement
+
+    await fireEvent.update(input, '08:30')
+    await fireEvent.blur(input)
+    await nextTick()
+    expect(input.validity.customError).toBe(true)
+    expect(input.validationMessage).toBe('This time is not available.')
+
+    await fireEvent.update(input, '09:30')
+    await fireEvent.blur(input)
+    await nextTick()
+    expect(input.validity.customError).toBe(false)
+  })
+
+  it('says nothing of an empty field', async () => {
+    const { container } = render(VTimeInput, {
+      props: { modelValue: null, format: '24h', allowedMinutes: [0, 30] },
+    })
+    const input = container.querySelector('input') as HTMLInputElement
+    await nextTick()
+    expect(input.validity.customError).toBe(false)
+  })
+
+  it('hands the restrictions to the picker it opens', async () => {
+    const { container } = render(VTimeInput, {
+      props: { modelValue: '09:00', mode: 'readonly', format: '24h', max: '11:00' },
+    })
+    await openPanel(container)
+    const disabled = container.querySelectorAll('.v-time-picker-number[data-disabled]')
+    expect(disabled.length).toBeGreaterThan(0)
+    expect([...disabled].map((n) => n.textContent!.trim())).not.toContain('9')
+  })
+
+  it('warns about restrictions that leave nothing to choose', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(VTimeInput, { props: { min: '17:00', max: '09:00' } })
+    expect(warn.mock.calls.flat().join(' ')).toContain('falls after max')
+    warn.mockRestore()
+  })
+})
+
 describe('VTimeInput — list mode', () => {
   const mount = (props: Record<string, unknown> = {}) =>
     render(VTimeInput, {
@@ -393,6 +442,32 @@ describe('VTimeInput — list mode', () => {
 
   const optionsOf = (container: Element) =>
     [...container.querySelectorAll('[role="option"]')] as HTMLElement[]
+
+  it('leaves out the times that cannot be chosen', async () => {
+    // A list is READ before it is chosen from, so a row nobody may take has no reason to
+    // be in it. That is the opposite of the picker, where a disabled numeral is what
+    // makes a bound legible against the hours around it.
+    const { container } = mount({ min: '09:00', max: '10:00' })
+    await openList(container)
+    expect(optionsOf(container).map((o) => o.textContent!.trim())).toEqual([
+      '9:00',
+      '9:30',
+      '10:00',
+    ])
+  })
+
+  it('keeps the row of a value that is no longer allowed', async () => {
+    // Without it the field falls back to printing the raw canonical string, a combobox
+    // naming a value through the option that carries it.
+    const { container } = mount({ modelValue: '08:00', min: '09:00', max: '10:00' })
+    await openList(container)
+    expect(optionsOf(container).map((o) => o.textContent!.trim())).toEqual([
+      '8:00',
+      '9:00',
+      '9:30',
+      '10:00',
+    ])
+  })
 
   /** Opens the combobox the way a reader does, by clicking its field. */
   const openList = async (container: Element) => {

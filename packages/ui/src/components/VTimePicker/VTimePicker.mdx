@@ -55,9 +55,29 @@ it, not how one confirms.
 
 ## Steps and intervals
 
-`minuteStep` is the interval the minutes snap to, under the pointer as on the arrow keys.
+`minuteStep` is the interval the minutes snap to, under the pointer as on the arrow keys. The
+face prints only the minutes it reaches — a step of a quarter of an hour marks four — since a
+numeral one can point at and not land on is one the hand contradicts by settling beside it. A step
+too fine for twelve numerals keeps the five-minute grid a clock is read on, minus whatever it
+cannot reach.
 
 <Canvas of={VTimePickerStories.MinuteStep} />
+
+## What may be chosen
+
+Four props restrict the value, and they compose into a single answer: **`min`** and **`max`**, two
+inclusive bounds written as canonical `'HH:mm'` strings, and **`allowedHours`** and
+**`allowedMinutes`**, each taking the list of the values it allows or a rule answering for one — the
+`disabledDates` convention, in the positive. The hour a rule is handed is always the 24-hour one,
+whichever clock is on display.
+
+What they rule out is **disabled rather than hidden**, the opposite of `minuteStep`: a bound is only
+readable beside what it excludes, where a scale with holes in it says nothing. An hour is closed only
+when nothing at all is left in it, so `min: '09:30'` leaves nine o'clock open and takes its first
+thirty minutes from the minutes instead. Choosing that hour then pulls the minutes to the nearest
+one it does allow, and the arrows step over what they may not land on rather than stopping at it.
+
+<Canvas of={VTimePickerStories.Restrictions} />
 
 ## Language
 
@@ -73,6 +93,10 @@ formats resolve separately: a language with no dictionary of its own still gets 
   cell at a time, so the whole spoken value has to be carried by that one element — `aria-valuenow`,
   `aria-valuemin`, `aria-valuemax` and a localized `aria-valuetext`.
 - Its accessible name follows the step, "Hour" or "Minutes".
+- `aria-valuemin` and `aria-valuemax` describe the CLOCK rather than the restrictions, which have
+  no range to state once `allowedHours` may leave holes in it. What a restriction does to the
+  keyboard is skip: the arrows move to the next value that can be chosen, and hold still when there
+  is none, which is how a slider with unavailable values behaves.
 - A **polite live region** repeats the step whenever the reader moves it. A change of accessible
   name alone is not reliably announced. Putting the clock back on the hour through `reset()` stays
   silent, because that is not something the reader did.

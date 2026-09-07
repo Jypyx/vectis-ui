@@ -19,6 +19,10 @@ export default {
       title: 'Steps',
       text: 'One number for three things: <code>minuteStep</code> is what the face offers, what the arrow keys move by, and what the list is cut at. It leaves the mask alone, since typing is how a reader escapes a step that does not fit. It is worth setting on a list before anything else: the default of one minute is 1440 rows, where half hours are 48.',
     },
+    restrictions: {
+      title: 'What may be chosen',
+      text: 'The same four props the picker takes, <code>min</code>, <code>max</code>, <code>allowedHours</code> and <code>allowedMinutes</code>, reach the three modes as three different answers, because a mode is a different way of asking. The typed field commits what was typed and turns invalid: it is carried by the control own validity, so the field goes red once the reader has interacted with it and a form refuses to leave with it, where swallowing the entry would give them nothing to correct. The list leaves out the rows that cannot be chosen, a list being read before it is chosen from, and keeps the row of the value in force even when the restrictions have moved past it. The picker disables what it rules out, and its own page covers how a bound cuts an hour in half rather than closing it.',
+    },
     clearable: {
       title: 'Clearable',
       text: 'The cross empties the value, and it appears to the left of the clock icon rather than in its place, so the two never trade positions as the field fills and empties. It is opt-in on every field in the library, one default for one word. The list form takes its own cross from the combobox it is built on, wording included.',
@@ -51,6 +55,12 @@ export default {
           'Offers the picker beside a field one can type into: an icon at the end of the field, and a panel it opens. It is left undefined rather than set to off, which is what distinguishes "not given" from an explicit refusal.',
         minuteStep:
           'The interval between two times that can be chosen. It applies to the picker, to the arrow keys and to the rows of the list.',
+        min: 'The earliest time that can be chosen, inclusive, as a canonical 24-hour string. The picker disables what it rules out, the list leaves it out, and a time typed past it makes the field invalid.',
+        max: 'The latest time that can be chosen, inclusive, written like min.',
+        allowedHours:
+          'Which hours can be chosen: the list of them, or a rule answering for one. The hour a rule is handed is always the 24-hour one, whichever clock is on display.',
+        allowedMinutes:
+          'Which minutes can be chosen: the list of them, or a rule answering for one.',
         locale:
           "A BCP 47 locale, which decides the clock and how a time is written out. It takes precedence over the design system's global locale and falls back to it.",
         label: 'The label above the field.',

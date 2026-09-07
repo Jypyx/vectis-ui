@@ -5,7 +5,11 @@ export default {
   examples: {
     minuteStep: {
       title: 'Minute step',
-      text: 'The face is a slider and not a list, so it has to be told what it may land on. <code>minuteStep</code> is that interval: the hand snaps to it as it is dragged, and the arrow keys move by it. It applies to the minutes alone. The markers on the face do not change with it, they are the five-minute marks either way; what the step decides is which values between them the hand may come to rest on.',
+      text: 'The face is a slider and not a list, so it has to be told what it may land on. <code>minuteStep</code> is that interval: the hand snaps to it as it is dragged, and the arrow keys move by it. It applies to the minutes alone. The face prints only the minutes the step reaches, so a quarter of an hour marks four and nothing between them: a numeral one can point at and not land on is one the hand contradicts by settling beside it. A step too fine for twelve numerals keeps the five-minute marks a clock is read on, minus any it cannot reach.',
+    },
+    restrictions: {
+      title: 'What may be chosen',
+      text: 'Four props restrict the value, and they compose into a single answer: <code>min</code> and <code>max</code>, two inclusive bounds written as canonical <code>HH:mm</code> strings, and <code>allowedHours</code> and <code>allowedMinutes</code>, each taking the list of the values it allows or a rule answering for one. What they rule out is disabled rather than hidden, the opposite of <code>minuteStep</code>: a bound is only readable beside what it excludes, and a scale with holes in it says nothing. An hour is closed only when nothing at all is left in it, so a bound at 09:30 keeps nine o clock and takes its first thirty minutes from the minutes instead. Choosing that hour then pulls the minutes to the nearest one it does allow, and the arrow keys step over what they may not land on rather than stopping at it.',
     },
     hourFormat: {
       title: 'Hour format',
@@ -24,7 +28,14 @@ export default {
           "Whether the face shows a 12- or a 24-hour clock. Left out, the reader's language decides, which is almost always what one wants.",
         locale:
           "A BCP 47 locale, which decides the clock. It takes precedence over the design system's global locale and falls back to it, which is why it has no literal default.",
-        minuteStep: 'The interval the minutes snap to, both when dragging and with the arrow keys.',
+        minuteStep:
+          'The interval the minutes snap to, both when dragging and with the arrow keys. The face prints only the minutes it can reach, so a step of a quarter of an hour marks four.',
+        min: 'The earliest time that can be chosen, inclusive, as a canonical 24-hour string. The face disables what falls outside it rather than leaving it out, since a bound is only readable beside what it excludes.',
+        max: 'The latest time that can be chosen, inclusive, written like min.',
+        allowedHours:
+          'Which hours can be chosen: the list of them, or a rule answering for one. The hour a rule is handed is always the 24-hour one, whichever clock is on display.',
+        allowedMinutes:
+          'Which minutes can be chosen: the list of them, or a rule answering for one.',
         vModel:
           'The time, always as a 24-hour string whatever clock is displayed, so you never have to know which one the language uses. With no value the clock shows midnight rather than the current time: reading the clock while rendering would make a page drawn on a server disagree with the same page in the browser.',
       },

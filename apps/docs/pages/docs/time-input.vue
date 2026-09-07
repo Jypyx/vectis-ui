@@ -12,6 +12,8 @@ import TimeInputModes from '~/examples/time-input/Modes.vue'
 import timeInputModesSource from '~/examples/time-input/Modes.vue?raw'
 import TimeInputPlacement from '~/examples/time-input/Placement.vue'
 import timeInputPlacementSource from '~/examples/time-input/Placement.vue?raw'
+import TimeInputRestrictions from '~/examples/time-input/Restrictions.vue'
+import timeInputRestrictionsSource from '~/examples/time-input/Restrictions.vue?raw'
 import TimeInputSizes from '~/examples/time-input/Sizes.vue'
 import timeInputSizesSource from '~/examples/time-input/Sizes.vue?raw'
 import TimeInputStates from '~/examples/time-input/States.vue'
@@ -60,6 +62,12 @@ useDocsHead('timeInput')
   <DocsProse keypath="timeInput.examples.steps.text" />
   <DocsExample :source="timeInputStepsSource" stack>
     <TimeInputSteps />
+  </DocsExample>
+
+  <h3 id="restrictions">{{ t('timeInput.examples.restrictions.title') }}</h3>
+  <DocsProse keypath="timeInput.examples.restrictions.text" />
+  <DocsExample :source="timeInputRestrictionsSource" stack>
+    <TimeInputRestrictions />
   </DocsExample>
 
   <h3 id="clearable">{{ t('timeInput.examples.clearable.title') }}</h3>

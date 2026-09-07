@@ -12,6 +12,10 @@ export default {
         { name: 'format', type: 'TimePickerFormat' },
         { name: 'locale', type: 'string' },
         { name: 'minuteStep', type: 'number', default: '1' },
+        { name: 'min', type: 'string' },
+        { name: 'max', type: 'string' },
+        { name: 'allowedHours', type: 'TimeMatcher' },
+        { name: 'allowedMinutes', type: 'TimeMatcher' },
         { name: 'v-model', key: 'vModel', type: 'string | null', default: 'null' },
       ],
       events: [

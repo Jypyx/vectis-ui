@@ -143,9 +143,13 @@ export const Footer: Story = {
   },
 }
 
-/** The minutes snap to a chosen interval, both under the pointer and on the arrow keys. */
+/**
+ * The minutes snap to a chosen interval, both under the pointer and on the arrow keys, and
+ * the face prints only what that interval can reach: a quarter of an hour marks four
+ * minutes and no more.
+ */
 export const MinuteStep: Story = {
-  args: { format: '24h', minuteStep: 5 },
+  args: { format: '24h', minuteStep: 15 },
   render: (args) => ({
     components: { VTimePicker },
     setup: () => ({ args, value: ref<string | null>('10:00') }),
@@ -154,10 +158,59 @@ export const MinuteStep: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('button', { name: 'Select minutes' }))
+    expect(canvasElement.querySelectorAll('.v-time-picker-number')).toHaveLength(4)
     const face = faceOf(canvasElement)
-    // A point between two markers is pulled back to the nearest multiple of five.
+    // A point between two markers is pulled back to the nearest quarter.
     tapDial(face, 0.13)
-    await waitFor(() => expect(Number(face.getAttribute('aria-valuenow')) % 5).toBe(0))
+    await waitFor(() => expect(Number(face.getAttribute('aria-valuenow')) % 15).toBe(0))
+  },
+}
+
+/**
+ * What may be chosen, restricted four ways: the two bounds, and a rule for the hours and
+ * one for the minutes. Unlike the minute step, which prints nothing it cannot reach, these
+ * DISABLE what they rule out — a bound is only readable beside the hours it excludes.
+ *
+ * The two compose: nine o'clock stays open under a bound of half past nine, and it is its
+ * first thirty minutes that go.
+ */
+export const Restrictions: Story = {
+  args: {
+    format: '24h',
+    minuteStep: 15,
+    min: '09:30',
+    max: '17:00',
+    allowedHours: [9, 10, 11, 14, 15, 16, 17],
+  },
+  render: (args) => ({
+    components: { VTimePicker },
+    setup: () => ({ args, t, value: ref<string | null>('10:15') }),
+    template: `
+      <div style="display: grid; gap: 1rem; justify-items: start">
+        <VTimePicker v-bind="args" v-model="value" />
+        <p style="margin: 0">{{ t.chosen }}: {{ value }}</p>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const face = faceOf(canvasElement)
+    face.focus()
+    // Midday is closed, so the key steps over it rather than dying at it: a face with
+    // holes in it would otherwise be unreachable past the first one.
+    await userEvent.keyboard('{ArrowUp}{ArrowUp}')
+    await waitFor(() => expect(canvasElement.textContent).toContain('14:15'))
+
+    // Nine o'clock is only half open, and the minutes follow the hour into what is left.
+    await userEvent.keyboard('{Home}')
+    await waitFor(() => expect(canvasElement.textContent).toContain('09:30'))
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Select minutes' }))
+    await waitFor(() =>
+      expect(canvasElement.querySelectorAll('.v-time-picker-number[data-disabled]')).toHaveLength(
+        2,
+      ),
+    )
   },
 }
 

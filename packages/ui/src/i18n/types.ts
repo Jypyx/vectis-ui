@@ -194,6 +194,12 @@ export interface VectisMessages {
      * everywhere and lives with the time helpers.
      */
     maskPlaceholder: string
+    /**
+     * What the field says of a time the restrictions do not allow. It is carried by the
+     * control's own validity rather than displayed, so a browser is what shows it, and in
+     * the language the browser is being told to speak here.
+     */
+    unavailable: string
   }
   fileInput: {
     /** What the button at the end of the field is called — the one that opens the file dialog. */

@@ -19,6 +19,10 @@ export default {
       title: 'Pas',
       text: "Un seul nombre pour trois choses : <code>minuteStep</code> est ce que le cadran propose, ce dont les flèches avancent, et ce à quoi la liste est découpée. Il laisse le masque tranquille, taper étant justement la façon dont un lecteur échappe à un pas qui ne lui convient pas. C'est la première chose à régler sur une liste : une minute par défaut, cela fait 1440 lignes, contre 48 pour la demi-heure.",
     },
+    restrictions: {
+      title: 'Ce que l’on peut choisir',
+      text: 'Les quatre props du sélecteur, <code>min</code>, <code>max</code>, <code>allowedHours</code> et <code>allowedMinutes</code>, arrivent dans les trois modes sous trois réponses différentes, parce qu’un mode est une façon différente de demander. Le champ saisi valide ce qui a été tapé et passe invalide : c’est la validité propre du contrôle qui le porte, donc le champ rougit dès que le lecteur y a touché et un formulaire refuse de partir avec, là où avaler la saisie ne lui laisserait rien à corriger. La liste retire les lignes que l’on ne peut pas choisir, une liste se lisant avant qu’on y choisisse, et garde la ligne de la valeur en cours même quand les restrictions l’ont dépassée. Le sélecteur désactive ce qu’il exclut, et sa propre page explique comment une borne coupe une heure en deux au lieu de la fermer.',
+    },
     clearable: {
       title: 'Effaçable',
       text: "La croix vide la valeur, et elle apparaît à gauche de l'icône d'horloge plutôt qu'à sa place : les deux n'échangent donc jamais leurs positions à mesure que le champ se remplit et se vide. Elle est optionnelle sur tous les champs de la bibliothèque, un seul comportement par défaut pour un seul mot. La forme liste tient sa propre croix de la liste déroulante sur laquelle elle est bâtie, formulation comprise.",
@@ -51,6 +55,12 @@ export default {
           "Propose le sélecteur à côté d'un champ saisissable : une icône en fin de champ, et un panneau qu'elle ouvre. Elle est laissée indéfinie plutôt que mise à faux, ce qui distingue « non fournie » d'un refus explicite.",
         minuteStep:
           "L'intervalle entre deux heures qui peuvent être choisies. Il s'applique au sélecteur, aux flèches et aux lignes de la liste.",
+        min: "L'heure la plus tôt que l'on puisse choisir, incluse, en chaîne canonique sur 24 heures. Le sélecteur désactive ce qu'elle exclut, la liste le retire, et une heure saisie en dehors rend le champ invalide.",
+        max: "L'heure la plus tard que l'on puisse choisir, incluse, écrite comme min.",
+        allowedHours:
+          "Les heures que l'on peut choisir : leur liste, ou une règle qui répond pour l'une d'elles. L'heure passée à une règle est toujours celle sur 24 heures, quelle que soit l'horloge affichée.",
+        allowedMinutes:
+          "Les minutes que l'on peut choisir : leur liste, ou une règle qui répond pour l'une d'elles.",
         locale:
           "Une locale BCP 47, qui décide de l'horloge et de la façon dont une heure est écrite. Elle l'emporte sur la locale globale du design system et retombe dessus.",
         label: 'Le libellé au-dessus du champ.',

@@ -34,6 +34,25 @@ picking 7 PM produces `'19:00'`.
 - **`list`**: a `VCombobox` offers the times in steps of `minuteStep`, searchable by
   typing; `showPicker` is beside the point there.
 
+## What may be chosen
+
+**`min`** and **`max`** (inclusive bounds, canonical `'HH:mm'`) and **`allowedHours`** and
+**`allowedMinutes`** (a list of the values allowed, or a rule answering for one) restrict the value.
+They are handed to VTimePicker as they stand, and the three modes answer them three ways, because a
+mode is a different way of ASKING:
+
+- **`input`**: what is typed is committed, and the field turns invalid. It is carried by the
+  control's own validity, so the field goes red through `:user-invalid` once the reader has
+  interacted with it, and a form refuses to leave with it. Swallowing the entry instead would give
+  the reader nothing to correct.
+- **`list`**: the rows that cannot be chosen are left out. A list is read before it is chosen from.
+  The row of the value in force is kept even when the restrictions have moved past it, since the
+  field names a value through the row that carries it.
+- **`readonly`**, and the picker beside a typed field: what is ruled out is DISABLED on the face.
+  See the picker's own page for how a bound cuts an hour in half rather than closing it.
+
+<Canvas of={VTimeInputStories.Restrictions} />
+
 ## Masked entry (the default)
 
 The user types **digits only**: the colon is placed as soon as the hour is complete.
@@ -64,8 +83,9 @@ of the picker icon without replacing it.
 Two buttons display the draft time (hour / minutes) and choose the active step: the one
 for the step under way switches to the accent tone. On the picker, a click or a drag
 positions the hand; releasing after the hour has been chosen moves on to the minutes
-automatically. The minutes are selected to the minute (the numerals are only 5-minute
-markers); `minuteStep` imposes a granularity.
+automatically. `minuteStep` imposes a granularity, and the face prints only the
+minutes it reaches: at the default of one minute it marks every five, which is what a
+clock is read on, where a quarter of an hour marks four.
 
 The panel works on a **draft**: only **OK** writes the v-model; **Cancel**, `Escape` and
 focus leaving abandon the selection under way — you can feel your way around the picker

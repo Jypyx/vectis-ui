@@ -20,7 +20,7 @@
  * single element has to carry the whole spoken value.
  */
 
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VToggle from '../VToggle/VToggle.vue'
@@ -40,7 +40,18 @@ import {
   to24h,
 } from '../../utils/time'
 import type { HourFormat, Meridiem } from '../../utils/time'
+import {
+  allowedMinutesFor,
+  firstAllowed,
+  isHourAllowed,
+  isTimeAllowed,
+  limitsProblem,
+  nearestAllowedMinute,
+  resolveLimits,
+} from './limits'
+import type { TimeMatcher } from './limits'
 import { pad2 } from '../../utils/text'
+import { isDev } from '../../utils/env'
 import { useLocale, useMessages } from '../../i18n/state'
 
 export type TimePickerFormat = HourFormat
@@ -60,14 +71,37 @@ interface TimePickerProps {
    * `undefined` has to stay recognizable for the global locale to have its chance.
    */
   locale?: string
-  /** The interval the minutes snap to, both when dragging and with the arrow keys. */
+  /**
+   * The interval the minutes snap to, both when dragging and with the arrow keys. The face
+   * prints only the minutes it can reach, so a step of a quarter of an hour marks four.
+   */
   minuteStep?: number
+  /**
+   * The earliest time that can be chosen, inclusive, as a canonical 24-hour `'HH:mm'`.
+   * What it rules out is DISABLED on the face rather than removed from it: a bound is
+   * only readable beside what it excludes.
+   */
+  min?: string
+  /** The latest time that can be chosen, inclusive, written like `min`. */
+  max?: string
+  /**
+   * Which hours can be chosen: the list of them, or a rule answering for one. The hour
+   * handed to a rule is always the 24-hour one, whichever clock is on display, so the
+   * same rule holds on both faces.
+   */
+  allowedHours?: TimeMatcher
+  /** Which minutes can be chosen: the list of them, or a rule answering for one. */
+  allowedMinutes?: TimeMatcher
 }
 
 const props = withDefaults(defineProps<TimePickerProps>(), {
   format: undefined,
   locale: undefined,
   minuteStep: 1,
+  min: undefined,
+  max: undefined,
+  allowedHours: undefined,
+  allowedMinutes: undefined,
 })
 
 /**
@@ -103,6 +137,20 @@ const resolvedFormat = computed<TimePickerFormat>(
   () => props.format ?? hourCycleFor(resolvedLocale.value),
 )
 
+/** The restrictions, resolved once for the whole render. */
+const limits = computed(() => resolveLimits(props))
+
+/** Whether an hour is one the restrictions still leave something in. */
+const isAvailableHour = (candidate: number) => isHourAllowed(candidate, limits.value)
+
+// @devwarn
+if (isDev) {
+  watchEffect(() => {
+    const problem = limitsProblem(limits.value)
+    if (problem) console.warn(`[VTimePicker] ${problem}`)
+  })
+}
+
 /** Which of the two is being adjusted. It starts on the hour and moves on by itself. */
 const step = ref<TimePickerStep>('hour')
 
@@ -110,11 +158,33 @@ const parts = computed(() => parseTime(model.value) ?? { hour: 0, minute: 0 })
 const hour = computed(() => parts.value.hour)
 const minute = computed(() => parts.value.minute)
 
-function setHour(value: number) {
-  model.value = formatTime(value, minute.value)
+/*
+ * The two writers are the SINGLE cut-off point for the restrictions: the pointer, the six
+ * keys and the AM/PM control all write through them and through nothing else, so not one
+ * handler carries a guard of its own.
+ */
+
+/**
+ * Writing the hour. An hour with nothing left in it has no minute to fall back on, which
+ * is what refuses it; one that is only PARTLY available pulls the minutes to what it does
+ * allow, since `min: '09:30'` must not be left holding 09:00.
+ *
+ * The minute in force is kept whenever it is allowed, which is also what leaves an
+ * unrestricted clock exactly as it was: a value off the step, 09:07 on a quarter-hour
+ * face, belongs to the consumer and is not ours to round.
+ */
+function setHour(value: number | null) {
+  if (value === null) return
+  const minutes = isTimeAllowed(value, minute.value, limits.value)
+    ? minute.value
+    : nearestAllowedMinute(value, minute.value, limits.value)
+  if (minutes === null) return
+  model.value = formatTime(value, minutes)
 }
 
-function setMinute(value: number) {
+/** Writing the minutes. Null is "there was nowhere to go", which every key can produce. */
+function setMinute(value: number | null) {
+  if (value === null || !isTimeAllowed(hour.value, value, limits.value)) return
   model.value = formatTime(hour.value, value)
 }
 
@@ -147,22 +217,48 @@ interface DialCell {
   ring: 'outer' | 'inner'
   /** Whether it is the value currently being pointed at. */
   selected: boolean
+  /** Whether the restrictions rule it out: it is drawn as such, and refuses the pointer. */
+  disabled: boolean
 }
+
+/**
+ * The minutes the face prints. A numeral one can point at and not land on is a lie, which
+ * the hand tells the moment it settles beside it rather than on it, so a marker is only
+ * ever a minute `minuteStep` actually reaches.
+ *
+ * How MANY of them is the other half of the question: sixty numerals would be unreadable,
+ * so a step fine enough to offer more than twelve values keeps the five-minute grid a
+ * clock is read on — minus, again, whatever it cannot reach, a step of two printing ten
+ * past and not five past.
+ */
+const minuteMarks = computed(() => {
+  // A step at or below one minute is what `snapMinute` reads as "every minute".
+  const interval = props.minuteStep > 1 ? props.minuteStep : 1
+  const spacing = 60 / interval <= 12 ? interval : 5
+  const marks: number[] = []
+  for (let minutes = 0; minutes < 60; minutes += spacing)
+    if (minutes % interval === 0) marks.push(minutes)
+  return marks
+})
 
 const cells = computed<DialCell[]>(() => {
   if (step.value === 'minute') {
-    // Only twelve markers are printed, one every five minutes — sixty numerals would be
-    // unreadable — while dragging remains accurate to the minute.
-    return Array.from({ length: 12 }, (_, i) => ({
-      key: `m-${i}`,
-      label: pad2(i * 5),
-      turn: i / 12,
+    return minuteMarks.value.map((minutes) => ({
+      key: `m-${minutes}`,
+      label: pad2(minutes),
+      turn: minutes / 60,
       ring: 'outer' as const,
-      selected: minute.value === i * 5,
+      selected: minute.value === minutes,
+      disabled: !isTimeAllowed(hour.value, minutes, limits.value),
     }))
   }
   const outer: DialCell[] = Array.from({ length: 12 }, (_, i) => {
-    const hour24 = dialIndexToHour24(i, 'outer')
+    // The hour the cell would set, which on a 12-hour face is what the half of the day in
+    // force turns it into: that is the one the restrictions have to be asked about.
+    const hour24 =
+      resolvedFormat.value === '24h'
+        ? dialIndexToHour24(i, 'outer')
+        : to24h(i === 0 ? 12 : i, currentMeridiem.value)
     return {
       key: `o-${i}`,
       label: String(i === 0 ? 12 : i),
@@ -172,6 +268,7 @@ const cells = computed<DialCell[]>(() => {
         resolvedFormat.value === '24h'
           ? hour.value === hour24
           : to12h(hour.value).hour === (i === 0 ? 12 : i),
+      disabled: !isAvailableHour(hour24),
     }
   })
   if (resolvedFormat.value === '12h') return outer
@@ -183,6 +280,7 @@ const cells = computed<DialCell[]>(() => {
       turn: i / 12,
       ring: 'inner' as const,
       selected: hour.value === hour24,
+      disabled: !isAvailableHour(hour24),
     }
   })
   return [...outer, ...inner]
@@ -204,7 +302,9 @@ const handRing = computed(() =>
  * drawn small: at full size it would cover the two neighbouring markers and read as
  * pointing at neither.
  */
-const handMinor = computed(() => step.value === 'minute' && minute.value % 5 !== 0)
+const handMinor = computed(
+  () => step.value === 'minute' && !minuteMarks.value.includes(minute.value),
+)
 
 /** The hour as the two large numerals show it, on whichever clock is displayed. */
 const displayHourText = computed(() =>
@@ -238,9 +338,27 @@ const meridiemModel = computed<ToggleModelValue>({
     pendingMeridiem.value = meridiem
     // With no time set there is nothing to convert, so the choice is simply REMEMBERED
     // and applies to the first time chosen.
-    if (model.value) setHour(to24h(to12h(hour.value).hour, meridiem))
+    if (!model.value) return
+    // What is being chosen here is the HALF OF THE DAY, so the hour gives way to it: kept
+    // when the new half allows it, and otherwise the first hour of that half that does.
+    // Refusing the write instead would leave the control snapping straight back, since it
+    // reads the half of the day off the value.
+    const wanted = to24h(to12h(hour.value).hour, meridiem)
+    setHour(
+      isAvailableHour(wanted)
+        ? wanted
+        : firstAllowed(12, (i) => to24h(i, meridiem), isAvailableHour),
+    )
   },
 })
+
+/**
+ * Whether a half of the day still holds an hour one could choose. An empty one takes its
+ * button with it: a control that can only ever be refused is worse than no control.
+ */
+function meridiemAvailable(meridiem: Meridiem): boolean {
+  return firstAllowed(12, (i) => to24h(i, meridiem), isAvailableHour) !== null
+}
 
 // @a11y — the entire spoken value of the face. The numerals are hidden from screen
 // readers, so these four attributes are the ONLY thing assistive technology has: what the
@@ -325,15 +443,55 @@ function onPointercancel() {
 }
 
 // @keyboard @a11y — the keyboard a slider is expected to have.
+/*
+ * Every key below walks until it finds something it MAY land on, rather than stopping at
+ * the first thing it may not: with scattered hours a key that stopped would die at the
+ * first hole and never reach what lies past it. Against a bound there is nothing past the
+ * hole, so the same walk comes back empty and the key holds still, which is what a bound
+ * means. Restrict nothing and the first candidate answers: the walk is then the plain step
+ * it has always been.
+ */
 function moveHour(delta: number) {
   if (resolvedFormat.value === '24h') {
-    setHour((hour.value + delta + 24) % 24)
+    setHour(firstAllowed(23, (i) => (hour.value + delta * i + 24) % 24, isAvailableHour))
     return
   }
   // On a 12-hour face the hours cycle from 1 to 12 WITHIN the current half of the day:
   // passing midday is done on the AM/PM control, not by walking the hand past twelve.
   const hour12 = to12h(hour.value).hour
-  setHour(to24h(((hour12 - 1 + delta + 12) % 12) + 1, currentMeridiem.value))
+  setHour(
+    firstAllowed(
+      11,
+      (i) => to24h(((hour12 - 1 + delta * i + 12) % 12) + 1, currentMeridiem.value),
+      isAvailableHour,
+    ),
+  )
+}
+
+/** The first or the last hour the face allows, on whichever clock it is showing. */
+function edgeHour(edge: 'first' | 'last'): number | null {
+  if (resolvedFormat.value === '24h')
+    return firstAllowed(24, (i) => (edge === 'first' ? i - 1 : 24 - i), isAvailableHour)
+  return firstAllowed(
+    12,
+    (i) => to24h(edge === 'first' ? i : 13 - i, currentMeridiem.value),
+    isAvailableHour,
+  )
+}
+
+/**
+ * The minute a key lands on: the one it asked for when the hour allows it, and otherwise
+ * the next one the same way round that it does.
+ */
+function minuteFrom(start: number, direction: number): number | null {
+  const interval = props.minuteStep > 1 ? props.minuteStep : 1
+  const allowed = (candidate: number) => isTimeAllowed(hour.value, candidate, limits.value)
+  if (allowed(start)) return start
+  return firstAllowed(
+    Math.ceil(60 / interval),
+    (i) => snapMinute(start + direction * i * interval, interval),
+    allowed,
+  )
 }
 
 function onKeydown(event: KeyboardEvent) {
@@ -352,19 +510,23 @@ function onKeydown(event: KeyboardEvent) {
         : 0
   if (step.value === 'hour') {
     if (delta) moveHour(delta)
-    else if (event.key === 'Home')
-      setHour(resolvedFormat.value === '12h' ? to24h(1, currentMeridiem.value) : 0)
-    else if (event.key === 'End')
-      setHour(resolvedFormat.value === '12h' ? to24h(12, currentMeridiem.value) : 23)
+    else if (event.key === 'Home') setHour(edgeHour('first'))
+    else if (event.key === 'End') setHour(edgeHour('last'))
     else return
     event.preventDefault()
     return
   }
-  if (delta) setMinute(snapMinute(minute.value + delta * props.minuteStep, props.minuteStep))
-  else if (event.key === 'PageUp') setMinute(snapMinute(minute.value + 5, props.minuteStep))
-  else if (event.key === 'PageDown') setMinute(snapMinute(minute.value - 5, props.minuteStep))
-  else if (event.key === 'Home') setMinute(0)
-  else if (event.key === 'End') setMinute(snapMinute(60 - props.minuteStep, props.minuteStep))
+  const minutes = allowedMinutesFor(hour.value, limits.value)
+  if (delta)
+    setMinute(
+      minuteFrom(snapMinute(minute.value + delta * props.minuteStep, props.minuteStep), delta),
+    )
+  else if (event.key === 'PageUp')
+    setMinute(minuteFrom(snapMinute(minute.value + 5, props.minuteStep), 1))
+  else if (event.key === 'PageDown')
+    setMinute(minuteFrom(snapMinute(minute.value - 5, props.minuteStep), -1))
+  else if (event.key === 'Home') setMinute(minutes[0] ?? null)
+  else if (event.key === 'End') setMinute(minutes.at(-1) ?? null)
   else return
   event.preventDefault()
 }
@@ -431,8 +593,8 @@ defineExpose({
         size="sm"
         :label="m.timePicker.meridiem"
       >
-        <VToggleItem value="AM" :label="m.timePicker.am" />
-        <VToggleItem value="PM" :label="m.timePicker.pm" />
+        <VToggleItem value="AM" :label="m.timePicker.am" :disabled="!meridiemAvailable('AM')" />
+        <VToggleItem value="PM" :label="m.timePicker.pm" :disabled="!meridiemAvailable('PM')" />
       </VToggle>
     </div>
 
@@ -468,6 +630,7 @@ defineExpose({
         aria-hidden="true"
         :data-ring="cell.ring"
         :data-selected="cell.selected ? '' : undefined"
+        :data-disabled="cell.disabled ? '' : undefined"
         :style="{ '--dial-turn': String(cell.turn) }"
         >{{ cell.label }}</span
       >
@@ -611,6 +774,21 @@ defineExpose({
   .v-time-picker-number[data-ring='inner'] {
     font-size: var(--vectis-text-body-md-size);
     color: var(--vectis-color-text-muted);
+  }
+
+  /*
+   * A numeral the restrictions rule out. Struck through as well as greyed, the VDatePicker
+   * idiom: colour alone must not be what says a value is unavailable (WCAG 1.4.1).
+   *
+   * TRAP — it is greyed with the MUTED token and not with `text-subtle`, which is the one
+   * named for disabled text. On this face's own surface that token measures 4.39:1, and
+   * where VDatePicker gets away with it these numerals cannot: a disabled BUTTON is exempt
+   * from the contrast rule, a `<span>` is judged like any other text however hidden from
+   * assistive technology it is. Verified by the axe pass on the Restrictions story.
+   */
+  .v-time-picker-number[data-disabled] {
+    color: var(--vectis-color-text-muted);
+    text-decoration: line-through;
   }
 
   .v-time-picker-number[data-selected] {
