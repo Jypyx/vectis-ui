@@ -113,6 +113,16 @@ const layersCode = `/* The order the library declares, for reference. */
 .v-button {
   text-transform: uppercase;
 }`
+
+const buildCode = `// vite.config.ts: the browsers Vectis UI is written for
+export default defineConfig({
+  build: { cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox147'] },
+})
+
+// nuxt.config.ts: the same value, one level down
+export default defineNuxtConfig({
+  vite: { build: { cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox147'] } },
+})`
 </script>
 
 <template>
@@ -175,4 +185,10 @@ const layersCode = `/* The order the library declares, for reference. */
   <DocsCode lang="css" :code="layersCode" />
   <DocsProse keypath="theming.layersConsequence" />
   <DocsProse keypath="theming.layersTrap" />
+
+  <h2 id="modern-css">{{ t('theming.buildHeading') }}</h2>
+  <DocsProse keypath="theming.buildBody" />
+  <DocsProse keypath="theming.buildDir" />
+  <DocsProse keypath="theming.buildFix" />
+  <DocsCode lang="ts" :code="buildCode" />
 </template>

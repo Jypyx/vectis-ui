@@ -318,6 +318,40 @@ Target: **modern browsers** — Chrome/Edge 125+, Safari 26+, Firefox 147+.
 - **CSS Anchor Positioning** (VTooltip, VMenu and its submenus, VCombobox): shipped with no JS fallback, a deliberate choice — every engine above the floor implements it, Firefox from 147.
 - Pure progressive enhancement (clean degradation when unsupported): `@starting-style`/`allow-discrete` animations, `field-sizing: content` (VTextarea `auto-grow`), `::details-content` + `interpolate-size` (the VAccordion animation), and the scroll shadows of `VDialog` (`container-type: scroll-state`, Chrome/Edge 133+ — elsewhere the hairlines simply stay invisible).
 
+### Do not let your build lower this CSS
+
+Your bundler minifies the library's sheets along with the rest of your application, and a minifier
+aimed at older browsers **rewrites** part of what they contain. One of those rewrites is not a
+fallback but a change of meaning: **Lightning CSS** — the default CSS minifier of **Vite 8**, and
+Parcel's — replaces `:dir(rtl)` with an `:is(:lang(ae), :lang(ar), …, :lang(yi))` approximation as
+soon as its targets predate Chrome 120. That list matches on the document's **language** where the
+library flips on its **direction**, so on an `<html dir="rtl" lang="en">` page the rule never
+applies at all.
+
+Eleven components mirror something through `:dir(rtl)` and would silently stop: the arrows of
+VPagination, VTabs, VBreadcrumb, VMenu, VCalendar, VDatePicker and VCarousel, VBadge's overlay
+corner, VProgressCircular's direction of travel, VProgressLinear's clipped text copy and
+VSkeletonLoader's wave. Nothing errors, and a dev server shows none of it: only a production build
+minifies.
+
+Vite derives `build.cssTarget` from `build.target`, whose `'modules'` default stands for Chrome 87.
+Pin it to the floor above, and the modern CSS goes through untouched:
+
+```ts
+// vite.config.ts
+export default defineConfig({
+  build: { cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox147'] },
+})
+
+// nuxt.config.ts — the same value, one level down
+export default defineNuxtConfig({
+  vite: { build: { cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox147'] } },
+})
+```
+
+It is also what keeps the output small: lowered, every OKLCH colour of the palette is emitted twice,
+once as an sRGB hex fallback and once as `lab()`.
+
 ## Accessibility
 
 Keyboard navigation and ARIA semantics on every component: the ARIA menu pattern (roving focus, focus returned to the trigger), `role="switch"`, tooltips linked by `aria-describedby` and dismissible with Escape (WCAG 1.4.13), `role="status"`/`role="alert"` according to criticality, an accessible label **required** on `VIconButton`. `prefers-reduced-motion` respected everywhere. Storybook's a11y addon audits every story.

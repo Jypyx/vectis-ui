@@ -239,6 +239,18 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    build: {
+      /*
+       * The floor the library documents, and here it is correctness rather than weight.
+       * Vite 8 minifies CSS with Lightning CSS, which reads `cssTarget` (derived from
+       * `build.target`, whose default stands for Chrome 87) and rewrites `:dir(rtl)` into a
+       * list of `:lang()` selectors. That list matches on the page LANGUAGE where the
+       * library flips on its DIRECTION, so the eleven components that mirror something stop
+       * mirroring, silently and in the built artefact alone. This site documents that trap
+       * on its Theming page; naming the floor here is what keeps it from shipping it.
+       */
+      cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox147'],
+    },
     ssr: {
       // Every component module of the library carries `import './VX.css'`. Externalised, Node
       // cannot resolve that specifier and the prerender dies on the first component.
