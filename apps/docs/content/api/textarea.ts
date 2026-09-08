@@ -25,6 +25,7 @@ export default {
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'loadingLabel', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },
+        { name: 'clearVisible', type: 'boolean' },
         { name: 'clearLabel', type: 'string' },
         { name: 'maxlength', type: 'number' },
         { name: 'softLimit', type: 'boolean', default: 'false' },
@@ -39,6 +40,7 @@ export default {
       slots: [
         { name: 'start', type: '{}' },
         { name: 'end', type: '{}' },
+        { name: 'value-end', key: 'valueEnd', type: '{}' },
       ],
     },
   ],

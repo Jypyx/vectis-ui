@@ -1,0 +1,28 @@
+/*
+ * The heading of a named block inside a list: VMenuGroup, VComboboxGroup and
+ * VSideNavigationGroup, the only three in the design system.
+ *
+ * It takes the overline type role without forcing capitals — how the label is written is the
+ * consumer's decision — and its INDENT and HEIGHT are the rows' own recipe, read from the
+ * same inherited `--control-*` variables, so a heading occupies exactly the height of a row,
+ * compact included, and the vertical rhythm of the list is not broken by it. The type is the
+ * one thing staying outside that scale, which is why the text has to be centred by hand.
+ *
+ * It is a shared sheet rather than a rule in `panel.css` for two reasons: VSideNavigation is
+ * not a panel, and a declaration in panel.css would sit at equal specificity with each
+ * panel's own rules, where the winner would depend on the sheet order a consumer's bundler
+ * decided.
+ */
+@layer vectis.components {
+  .v-group-label {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--control-height);
+    padding-block: var(--vectis-space-1);
+    padding-inline: var(--control-padding-inline);
+    font-size: var(--vectis-text-overline-size);
+    font-weight: var(--vectis-text-overline-weight);
+    letter-spacing: var(--vectis-text-overline-tracking);
+    color: var(--vectis-color-text-muted);
+  }
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { builtinIconNames, builtinIcons, ICON_VIEW_BOX, type VectisIconName } from './icons'
+import { builtinIconNames, builtinIcons, ICON_VIEW_BOX, type IconName } from './icons'
 
 /**
  * Locks on the GENERATED file (`pnpm icons`): what is tested here is that the
@@ -45,7 +45,7 @@ const EXPECTED = [
   'table_chart',
   'video_file',
   'warning',
-] as const satisfies readonly VectisIconName[]
+] as const satisfies readonly IconName[]
 
 describe('built-in icon registry', () => {
   it('contains exactly the icons the DS renders by default', () => {

@@ -53,6 +53,18 @@ import {
   type TimeWindow,
 } from './layout'
 import { calendarIntent } from './keyboard'
+import {
+  cardIdOf as idOfCard,
+  edgeCueOf,
+  ghostIdOf,
+  isGhostId,
+  isGrabbed,
+  movedPast,
+  originalIdOf,
+  pointerOutside,
+  useCardFocus,
+  useDragGuard,
+} from './gesture'
 import { EDGE_BAND, useEdgeStep } from './edgeStep'
 import type { CalendarEvent, CalendarEventId, CalendarEventTimes } from './types'
 
@@ -79,6 +91,8 @@ export interface TimeGridProps<T> {
   now: number | null
   /** Whether events can be moved and stretched. */
   editable: boolean
+  /** Whether the whole calendar is frozen, which also takes its cards out of the tab order. */
+  disabled: boolean
   /** Whether an empty part of the grid makes an event when it is taken up. */
   creatable: boolean
   /** The node telling a reader how a card can be moved, shared by every card. */
@@ -152,10 +166,6 @@ const DRAFT_ID = '__vectis-calendar-draft__'
  * id, so an echo under a fresh id would come out a different colour from the card it belongs
  * to. `hueOf` reads a number and its digits as the same event, so the string form is enough.
  */
-const GHOST_PREFIX = '__vectis-calendar-ghost__'
-const ghostIdOf = (id: CalendarEventId) => `${GHOST_PREFIX}${id}`
-const originalIdOf = (id: CalendarEventId) => String(id).slice(GHOST_PREFIX.length)
-const isGhostId = (id: CalendarEventId) => String(id).startsWith(GHOST_PREFIX)
 
 /**
  * A gesture under way, whether it came from a pointer or from the keyboard.
@@ -226,7 +236,7 @@ interface Gesture {
 const gesture = ref<Gesture | null>(null)
 
 /** True while a card is being held by the keyboard rather than dragged by a pointer. */
-const grabbing = computed(() => gesture.value !== null && gesture.value.pointerId === null)
+const grabbing = computed(() => isGrabbed(gesture.value))
 
 /**
  * The event the echo stands for: the one being dragged, back where the drag began.
@@ -382,6 +392,10 @@ const placed = computed(() => {
  * the template from asking every cell to search the whole list — a hundred and sixty-eight
  * searches per render otherwise.
  */
+/** An hour with nothing in it, shared rather than allocated per empty cell. */
+const NO_SEGMENTS: readonly PlacedSegment[] = Object.freeze([])
+const segmentsAt = (day: number, row: number) => byCell.value.get(`${day}:${row}`) ?? NO_SEGMENTS
+
 const byCell = computed(() => {
   const map = new Map<string, PlacedSegment[]>()
   for (const segment of placed.value) {
@@ -747,15 +761,7 @@ function onBandPointerdown(event: PointerEvent) {
 }
 
 /** The event a card stands for, read back off the attribute the card publishes. */
-function cardIdOf(card: HTMLElement): CalendarEventId {
-  const raw = card.dataset.eventId ?? ''
-  /*
-   * An id may be a number, and an attribute is always text. The map is keyed by the ORIGINAL
-   * value, so a numeric id has to be turned back into one — otherwise every card belonging
-   * to a numerically-keyed calendar would look up as a miss and nothing would drag.
-   */
-  return eventsById.value.has(raw) ? raw : Number(raw)
-}
+const cardIdOf = (card: HTMLElement) => idOfCard(card, (id) => eventsById.value.has(id))
 
 function onPointermove(event: PointerEvent) {
   const state = gesture.value
@@ -766,13 +772,7 @@ function onPointermove(event: PointerEvent) {
 
   // Below the threshold nothing has happened yet. That is what keeps a click a click: the
   // hand's tremor during a press would otherwise register as a one-pixel drag.
-  if (
-    !state.moved &&
-    Math.abs(event.clientX - state.originX) < DRAG_THRESHOLD &&
-    Math.abs(event.clientY - state.originY) < DRAG_THRESHOLD
-  ) {
-    return
-  }
+  if (!state.moved && !movedPast(state, event.clientX, event.clientY, DRAG_THRESHOLD)) return
 
   state.moved = true
   state.outside = isPointerOutside(state)
@@ -799,10 +799,8 @@ function onPointermove(event: PointerEvent) {
  * coming back in seamless, and paging must keep running, pushing past the edge being how one
  * crosses into the next week. Being outside decides what happens on RELEASE, nothing else.
  */
-function isPointerOutside(state: Gesture): boolean {
-  const rect = rootEl.value?.getBoundingClientRect()
-  return rect ? !pointWithin({ x: state.lastX, y: state.lastY }, rect) : false
-}
+const isPointerOutside = (state: Gesture) =>
+  pointerOutside(state, rootEl.value?.getBoundingClientRect(), pointWithin)
 
 /**
  * Works out where the dragged event now belongs, from wherever the pointer last was.
@@ -879,9 +877,7 @@ const edge = useEdgeStep(
 )
 
 /** Which edge is counting down, in words, for the stylesheet to light up. */
-const edgeCue = computed(() =>
-  edge.pending.value === -1 ? 'start' : edge.pending.value === 1 ? 'end' : undefined,
-)
+const edgeCue = computed(() => edgeCueOf(edge.pending.value))
 
 /** Tells the two boundary mechanisms where the pointer now is. */
 function watchEdges(state: Gesture) {
@@ -977,7 +973,7 @@ function originColumn(state: Gesture): number {
  * Without it, letting go of a card at the end of a drag would ALSO open it — the consumer's
  * editor would appear over every event the reader had just moved.
  */
-let justDragged = false
+const dragGuard = useDragGuard()
 
 /**
  * Closes the books on the previous gesture, at the start of a new press.
@@ -997,15 +993,13 @@ let justDragged = false
  * It runs before every guard in its three callers, deliberately — a press that starts no
  * gesture is still a new interaction, and that is the case this is for.
  */
-function endLastGesture() {
-  justDragged = false
-}
+const endLastGesture = dragGuard.clear
 
 function onPointerup(event: PointerEvent) {
   const state = gesture.value
   if (!state || state.pointerId !== event.pointerId) return
   gesture.value = null
-  justDragged = state.moved
+  dragGuard.set(state.moved)
   releaseBoundaries()
 
   /*
@@ -1041,10 +1035,7 @@ function onPointerup(event: PointerEvent) {
 }
 
 function onCardClick(id: CalendarEventId) {
-  if (justDragged) {
-    justDragged = false
-    return
-  }
+  if (dragGuard.consume()) return
   const item = eventsById.value.get(id)
   if (item && id !== DRAFT_ID) emit('event-activate', item)
 }
@@ -1088,24 +1079,6 @@ function announceTimes(title: string, times: CalendarEventTimes) {
 }
 
 /** Puts the focus back on a card that has just been redrawn somewhere else. */
-function refocusCard(id: CalendarEventId) {
-  void nextTick(() => {
-    /*
-     * The card is found by WALKING the cards rather than by building an attribute selector.
-     * An id belongs to the consumer, so it may hold a quote or a backslash that a selector
-     * would need escaped — and `CSS.escape` cannot do that escaping here: jsdom defines no
-     * `CSS` object at all, so the call threw on every keyboard grab, from inside a `nextTick`
-     * where nothing could catch it (an unhandled rejection, which fails the run while every
-     * assertion still passes). `menuInvoker` in VMenu/context.ts escapes by hand for the same
-     * reason; comparing the attribute's own text sidesteps the question entirely, since
-     * `data-event-id` is written as exactly `String(event.id)`.
-     */
-    const cards = columnsEl.value?.querySelectorAll<HTMLElement>('.v-calendar-event')
-    Array.from(cards ?? [])
-      .find((card) => card.dataset.eventId === String(id))
-      ?.focus()
-  })
-}
 
 function onCardKeydown(event: KeyboardEvent, card: HTMLElement) {
   const item = eventsById.value.get(cardIdOf(card))
@@ -1209,6 +1182,9 @@ const rootEl = ref<HTMLElement | null>(null)
 const canvasEl = ref<HTMLElement | null>(null)
 const columnsEl = ref<HTMLElement | null>(null)
 
+/** Hands the focus back to a card the re-render has just taken it from. */
+const refocusCard = useCardFocus(columnsEl)
+
 /** The columns box as the pure geometry wants it: plain numbers, no element. */
 function geometryOf(rect: DOMRect) {
   const rtl = isRtl()
@@ -1306,6 +1282,7 @@ defineExpose({
             class="v-calendar-bar"
             :event="eventsById.get(span.id)!"
             layout="chip"
+            :disabled="disabled"
             :continues-before="span.continuesBefore"
             :continues-after="span.continuesAfter"
             :dragging="gesture?.id === span.id && gesture.pointerId !== null"
@@ -1361,11 +1338,12 @@ defineExpose({
             :aria-selected="isFocused(iso, minutes) ? true : undefined"
           >
             <VCalendarEvent
-              v-for="segment in byCell.get(`${day}:${row}`) ?? []"
+              v-for="segment in segmentsAt(day, row)"
               :key="segment.id"
               class="v-calendar-block"
               :event="eventsById.get(segment.id)!"
               layout="block"
+              :disabled="disabled"
               :time-text="timeTextOf(eventsById.get(segment.id)!)"
               :continues-before="segment.clippedStart"
               :continues-after="segment.clippedEnd"

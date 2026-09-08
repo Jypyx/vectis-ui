@@ -589,9 +589,11 @@ watch(model, () => {
     align-self: center;
   }
 
-  /* A chevron points at a physical direction, which the logical properties do not
-     mirror: in a right-to-left page it has to be flipped by hand. */
-  [dir='rtl'] .v-tabs[data-orientation='horizontal'] .v-tabs-scroll .v-icon {
+  /* A chevron points at a physical direction, which the logical properties do not mirror:
+     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
+     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
+     individual property, so it composes instead of replacing a transform. */
+  .v-tabs[data-orientation='horizontal']:dir(rtl) .v-tabs-scroll .v-icon {
     scale: -1 1;
   }
 

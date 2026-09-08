@@ -61,11 +61,15 @@ defineSlots<{
 </script>
 
 <template>
-  <label class="v-radio" :data-label-position="labelPosition" :data-spread="spread || undefined">
+  <label
+    class="v-radio v-choice"
+    :data-label-position="labelPosition"
+    :data-spread="spread || undefined"
+  >
     <input
       v-model="model"
       type="radio"
-      class="v-radio-input"
+      class="v-radio-input v-hidden-input"
       v-bind="$attrs"
       :value="value"
       :disabled="disabled"
@@ -78,38 +82,6 @@ defineSlots<{
 
 <style>
 @layer vectis.components {
-  .v-radio {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--vectis-space-2);
-    font-family: var(--vectis-text-family);
-    font-size: var(--vectis-text-label-size);
-    color: var(--vectis-color-text);
-    cursor: pointer;
-  }
-
-  /* The input is taken out of the flow by its absolute position, so reversing the
-     row only ever swaps the dot and the label. */
-  .v-radio[data-label-position='start'] {
-    flex-direction: row-reverse;
-  }
-
-  .v-radio[data-spread] {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  /* Hidden with `opacity` and never with `display: none`, which would take the input
-     out of the tab order, out of the form and out of its own group. */
-  .v-radio-input {
-    position: absolute;
-    opacity: 0;
-    width: 1px;
-    height: 1px;
-    margin: 0;
-    pointer-events: none;
-  }
-
   /* The dot works exactly like VCheckbox's box — the accent colour fills it once the
      input is checked — with the small inner disc drawn as a pseudo-element in
      currentcolor, so it follows whatever colour the ring takes. */
@@ -168,13 +140,6 @@ defineSlots<{
   .v-radio-input:user-invalid + .v-radio-dot,
   .v-radio-input[aria-invalid='true'] + .v-radio-dot {
     border-color: var(--vectis-color-danger);
-  }
-
-  /* A disabled radio greys out through the colour tokens, the same ones VButton
-     uses, and never through opacity. */
-  .v-radio:has(.v-radio-input:disabled) {
-    color: var(--vectis-color-text-subtle);
-    cursor: not-allowed;
   }
 
   .v-radio-input:disabled + .v-radio-dot {

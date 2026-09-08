@@ -31,7 +31,7 @@ export default {
         { name: 'loadingText', type: 'string' },
         { name: 'hasMore', type: 'boolean', default: 'false' },
         { name: 'placement', type: 'ComboboxPlacement', default: "'bottom-start'" },
-        { name: 'v-model', key: 'vModel', type: 'string | string[]', default: "''" },
+        { name: 'v-model', key: 'vModel', type: 'ItemValue | ItemValue[]', default: "''" },
       ],
       events: [
         { name: 'search', type: '[query: string]' },
@@ -40,8 +40,10 @@ export default {
         { name: 'load-more', key: 'loadMore', type: '[]' },
       ],
       slots: [
+        { name: 'start', type: '{}' },
+        { name: 'value-end', key: 'valueEnd', type: '{}' },
         { name: 'option', type: '{ option: ComboboxOption; index: number; active: boolean; selected: boolean; }' },
-        { name: 'chip', type: "{ value: string; option: ComboboxOption | undefined; label: string; remove: () => void; size: 'xs' | 'sm'; compact: boolean; }" },
+        { name: 'chip', type: "{ value: ItemValue; option: ComboboxOption | undefined; label: string; remove: () => void; size: 'xs' | 'sm'; compact: boolean; }" },
         { name: 'empty', type: '{ query: string; }' },
         { name: 'loading', type: '{}' },
       ],

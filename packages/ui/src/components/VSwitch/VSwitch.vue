@@ -52,12 +52,16 @@ defineSlots<{
 </script>
 
 <template>
-  <label class="v-switch" :data-label-position="labelPosition" :data-spread="spread || undefined">
+  <label
+    class="v-switch v-choice"
+    :data-label-position="labelPosition"
+    :data-spread="spread || undefined"
+  >
     <input
       v-model="model"
       type="checkbox"
       role="switch"
-      class="v-switch-input"
+      class="v-switch-input v-hidden-input"
       v-bind="$attrs"
       :disabled="disabled"
       :aria-invalid="invalid || undefined"
@@ -71,39 +75,12 @@ defineSlots<{
 
 <style>
 @layer vectis.components {
+  /* The track's own measurements, which nothing outside this sheet reads. The row they
+     sit in is `.v-choice`'s (styles/choice.css). */
   .v-switch {
     --switch-track-w: var(--vectis-control-size-switch-w);
     --switch-track-h: var(--vectis-control-size-switch-h);
     --switch-pad: 2px;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--vectis-space-2);
-    font-family: var(--vectis-text-family);
-    font-size: var(--vectis-text-label-size);
-    color: var(--vectis-color-text);
-    cursor: pointer;
-  }
-
-  /* The input is taken out of the flow by its absolute position, so reversing the
-     row only ever swaps the track and the label. */
-  .v-switch[data-label-position='start'] {
-    flex-direction: row-reverse;
-  }
-
-  .v-switch[data-spread] {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  /* Hidden with `opacity` and never with `display: none`, which would take the input
-     out of the tab order and out of the form. */
-  .v-switch-input {
-    position: absolute;
-    opacity: 0;
-    width: 1px;
-    height: 1px;
-    margin: 0;
-    pointer-events: none;
   }
 
   .v-switch-track {
@@ -162,15 +139,9 @@ defineSlots<{
     box-shadow: 0 0 0 1px var(--vectis-color-danger);
   }
 
-  /* A disabled switch greys out through the colour tokens, the same ones VCheckbox
-     and VRadio use, and never through opacity. The thumb takes text-subtle — the
-     colour their disabled tick and dot take — which is what keeps it visible against
-     the grey track in both themes. */
-  .v-switch:has(.v-switch-input:disabled) {
-    color: var(--vectis-color-text-subtle);
-    cursor: not-allowed;
-  }
-
+  /* The thumb takes text-subtle — the colour VCheckbox's disabled tick and VRadio's
+     disabled dot take — which is what keeps it visible against the grey track in both
+     themes. The greying of the row itself comes from `.v-choice`. */
   .v-switch-input:disabled + .v-switch-track {
     background: var(--vectis-color-surface-muted);
   }

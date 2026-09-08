@@ -65,6 +65,8 @@ export default {
           "Ce que les lecteurs d'écran annoncent pendant que l'indicateur tourne. Il retombe sur le dictionnaire du design system.",
         clearable:
           'Propose une croix qui vide le champ. Elle apparaît quand il y a quelque chose à effacer et que le champ est modifiable.',
+        clearVisible:
+          "Décide si la croix est affichée, au lieu de laisser le champ le déduire de son propre contenu, champ en lecture seule compris. C'est la même échappatoire que celle de VInput, pour les composants bâtis dessus qui tiennent ailleurs que dans le texte ce qu'il y a à effacer.",
         clearLabel:
           "Ce que fait le bouton d'effacement, en mots. Il retombe sur le dictionnaire du design system.",
         maxlength:
@@ -86,6 +88,8 @@ export default {
         start:
           "Du contenu au début du champ, rendu après <code>iconStart</code> plutôt qu'à sa place.",
         end: "Du contenu à la fin du champ, qui remplace <code>iconEnd</code>. Il est masqué pendant le chargement, l'indicateur prenant cette place.",
+        valueEnd:
+          "Des contrôles à vous à l'intérieur du champ, placés avant ceux que le champ possède : la croix d'effacement et l'icône qui ouvre le panneau. Ces deux-là sont l'affordance propre du composant, ce qui explique l'absence de slot <code>end</code> ici.",
       },
     },
   },

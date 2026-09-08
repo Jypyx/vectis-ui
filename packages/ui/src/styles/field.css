@@ -1,0 +1,58 @@
+/*
+ * The buttons a text field holds INSIDE its own box — the clear cross, a clickable icon,
+ * VTimeInput's AM/PM word.
+ *
+ * It is a shared sheet for the reason `.v-panel` and `.v-banner` are: VInput and VTextarea
+ * both draw one and neither renders the other, so a recipe left in either sheet would have
+ * to be copied into the second, where the two would drift apart on the next token change.
+ * The class goes on the button, beside the component's own, which keeps every per-component
+ * rule — the disabled state, VTimeInput's compound — winning on specificity.
+ *
+ * What is NOT here is anything a field redeclares: VTextarea centres its buttons on the
+ * first LINE rather than on the box, and both fields grey them out from their own root.
+ * Those sit at (0,2,0) and above against this (0,1,0), so no sheet order decides them.
+ */
+@layer vectis.components {
+  /*
+   * From muted grey to full strength on hover, and VButton's radius so the focus ring has
+   * the same rounded corners as everything else.
+   *
+   * The inline margin is DERIVED and never written as a number: it is exactly half the
+   * difference between the icon and the wider box holding it. Subtracting it cancels that
+   * inset, so the glyph lands precisely where a decorative icon would have — against the
+   * field's padding, one --control-gap from its neighbour.
+   */
+  .v-field-action {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--control-action-size);
+    block-size: var(--control-action-size);
+    margin-inline: calc((var(--vectis-icon-size) - var(--control-action-size)) / 2);
+    padding: 0;
+    border: none;
+    border-radius: var(--vectis-radius-interactive);
+    background: transparent;
+    color: var(--vectis-color-text-muted);
+    cursor: pointer;
+    transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
+  }
+
+  .v-field-action:hover:not(:disabled) {
+    color: var(--vectis-color-text);
+  }
+
+  /* The ring is drawn INSIDE the box: the field clips its overflow, and a positive offset
+     would be cropped against its border. */
+  .v-field-action:focus-visible {
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: calc(-1 * var(--vectis-focus-ring-width));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .v-field-action {
+      transition: none;
+    }
+  }
+}

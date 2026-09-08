@@ -59,6 +59,11 @@ interface InputOTPProps {
   compact?: boolean
   /** Makes every box unusable, greyed out through the colour tokens. */
   disabled?: boolean
+  /**
+   * Shows the code without letting it be changed. The boxes keep their focus and the code
+   * can still be selected and copied, which is what separates it from `disabled`.
+   */
+  readonly?: boolean
   /** Marks the code as wrong, which colours the boxes and tells assistive technology so. */
   invalid?: boolean
   /**
@@ -85,6 +90,7 @@ const props = withDefaults(defineProps<InputOTPProps>(), {
   size: 'md',
   compact: false,
   disabled: false,
+  readonly: false,
   invalid: false,
   label: undefined,
   hint: undefined,
@@ -102,6 +108,7 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.inputOTP.label)
  * announcement with nothing to show for it.
  */
 defineOptions({ inheritAttrs: false })
+
 const attrs = useAttrs()
 const { hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
 
@@ -153,6 +160,7 @@ function sanitize(text: string) {
 }
 
 const inputs = ref<(HTMLInputElement | null)[]>([])
+const rootEl = ref<HTMLElement | null>(null)
 const digits = ref<string[]>([])
 
 function syncFromModel(value: string) {
@@ -245,10 +253,31 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     inputs.value[slotIndex + 1]?.focus()
   }
 }
+/*
+ * The same trio every other field of the size scale exposes. `focus` goes to the FIRST
+ * EMPTY box rather than to the first box outright, which is where a reader resuming a
+ * half-entered code expects to land.
+ */
+defineExpose({
+  /** Moves the focus to the first empty box, or to the last one when the code is complete. */
+  focus: (options?: FocusOptions) => {
+    const empty = digits.value.findIndex((d) => !d)
+    const target = empty === -1 ? slotCount.value - 1 : empty
+    inputs.value[target]?.focus(options)
+  },
+  /** Selects the box the focus is on, as clicking into one already does. */
+  select: () => {
+    const active = inputs.value.find((el) => el === document.activeElement)
+    ;(active ?? inputs.value[0])?.select()
+  },
+  /** The row itself, for what neither of the two above covers. */
+  el: rootEl,
+})
 </script>
 
 <template>
   <div
+    ref="rootEl"
     v-bind="attrs"
     class="v-otp v-control"
     role="group"
@@ -258,6 +287,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     :data-size="size"
     :data-compact="compact ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
+    :data-readonly="readonly ? '' : undefined"
   >
     <div class="v-otp-boxes">
       <template v-for="(cell, i) in cells" :key="i">
@@ -274,6 +304,7 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
           :autocomplete="cell.slotIndex === 0 ? 'one-time-code' : 'off'"
           :value="digits[cell.slotIndex]"
           :disabled="disabled"
+          :readonly="readonly || undefined"
           :aria-label="m.inputOTP.slot(cell.slotIndex + 1, slotCount)"
           :aria-invalid="invalid || undefined"
           @input="onInput(cell.slotIndex, $event)"
@@ -345,6 +376,14 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
     border-color: var(--vectis-color-accent);
     box-shadow: 0 0 0 1px var(--vectis-color-accent);
     outline: var(--vectis-focus-ring-width) solid transparent;
+  }
+
+  /* A read-only row takes the sunken background of a read-only VInput, and the state is
+     read from [data-readonly] rather than from `:read-only`, which the browser also matches
+     on a disabled box. It is declared BEFORE the invalid and disabled blocks, all three
+     weighing (0,2,0), so those still win over it. */
+  .v-otp[data-readonly] .v-otp-input {
+    background: var(--vectis-color-surface-sunken);
   }
 
   .v-otp[data-invalid] .v-otp-input {

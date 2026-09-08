@@ -9,7 +9,7 @@ import VSpinner from '../components/VSpinner/VSpinner.vue'
 import { en } from './en'
 import { fr } from './fr'
 import { DEFAULT_LOCALE, registerMessages, setLocale, useMessages } from './state'
-import type { VectisMessages } from './types'
+import type { Messages } from './types'
 
 // The state is module-level (like VToast/state.ts and VIcon/resolver.ts): it
 // survives from one test to the next WITHIN this file. Since Vitest isolates
@@ -22,11 +22,11 @@ afterEach(() => {
 })
 
 const messages = () => useMessages().value
-const namespaces = Object.keys(en) as (keyof VectisMessages)[]
+const namespaces = Object.keys(en) as (keyof Messages)[]
 
 describe('dictionary parity', () => {
   // The typecheck already guarantees that `fr` forgets no key (both are
-  // ANNOTATED `: VectisMessages`). This test covers what the type cannot see: an
+  // ANNOTATED `: Messages`). This test covers what the type cannot see: an
   // `as` slipped in later, a divergent function arity.
   it('en and fr have exactly the same namespaces', () => {
     expect(Object.keys(fr).sort()).toEqual(Object.keys(en).sort())

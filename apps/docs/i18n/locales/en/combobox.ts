@@ -106,6 +106,10 @@ export default {
         chip: 'Replaces the chip standing for one chosen value. It receives <code>remove</code>, without which the value could no longer be taken back, and the size and density worked out to sit inside the field, which cannot be guessed from outside. The option itself may be missing, if that value has never appeared among the options.',
         empty: 'What the panel shows when nothing matches. It receives the term that was searched.',
         loading: 'What the panel shows while loading its first options.',
+        valueEnd:
+          'Controls of your own inside the field, placed before the ones the field owns: the clear cross and the icon that opens the panel. Those two are the component own affordance, which is why there is no <code>end</code> slot here.',
+        start:
+          'Content at the start of the field, rendered after <code>iconStart</code> rather than in its place.',
       },
     },
   },

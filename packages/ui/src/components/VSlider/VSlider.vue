@@ -266,7 +266,7 @@ function resyncFields() {
     :class="rootClass"
     :data-range="range ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
-    :data-orientation="orientation === 'vertical' ? 'vertical' : undefined"
+    :data-orientation="orientation"
     :style="[
       rootStyle,
       {

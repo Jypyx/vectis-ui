@@ -5,7 +5,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Libellé, indication et icône',
-      text: "Le champ est un <code>VInput</code> : <code>label</code> et <code>hint</code> s'y comportent exactement comme partout ailleurs. <code>pickerIcon</code> change le glyphe qui ouvre l'horloge, au bout du champ. Aucune icône n'est rendue quand il n'y a pas de panneau à ouvrir, ce qui est le cas par défaut d'un champ dans lequel on peut taper, et la forme liste ignore la prop : son chevron relève de la convention des listes déroulantes. <code>iconStart</code> place une icône au début du champ, décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton, lequel réclame alors <code>iconStartLabel</code>. À l'autre bout, <code>loading</code> affiche une roue à la place de l'icône de l'horloge pendant qu'une donnée se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours. <code>iconEndLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment le bouton, la croix et la roue quand la formulation du dictionnaire ne convient pas.",
+      text: "Le champ est un <code>VInput</code> : <code>label</code> et <code>hint</code> s'y comportent exactement comme partout ailleurs. <code>pickerIcon</code> change le glyphe qui ouvre l'horloge, au bout du champ. Aucune icône n'est rendue quand il n'y a pas de panneau à ouvrir, ce qui est le cas par défaut d'un champ dans lequel on peut taper, et la forme liste ignore la prop : son chevron relève de la convention des listes déroulantes. <code>iconStart</code> place une icône au début du champ, décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton, lequel réclame alors <code>iconStartLabel</code>. À l'autre bout, <code>loading</code> affiche une roue à la place de l'icône de l'horloge pendant qu'une donnée se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours. <code>pickerIconLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment le bouton, la croix et la roue quand la formulation du dictionnaire ne convient pas.",
     },
     sizes: {
       title: 'Tailles',
@@ -75,7 +75,7 @@ export default {
         iconStart:
           "Une icône dans le champ, au début. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
         iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
-        iconEndLabel:
+        pickerIconLabel:
           "Ce que fait l'icône de fin, en mots. Elle nomme le bouton qui ouvre l'horloge, et sa valeur par défaut vient du dictionnaire du design system.",
         loading:
           "Affiche une roue à la place de l'icône de l'horloge. Elle dit que quelque chose se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours.",
@@ -98,6 +98,10 @@ export default {
       slots: {
         footer:
           "La bande au pied de l'horloge, qui REMPLACE les boutons Annuler et OK au lieu de s'y ajouter. Elle reçoit les deux actions, et c'est ce qui la rend utilisable : l'horloge écrit un brouillon que seul <code>confirm</code> valide, donc un pied à vous sans lui laisserait la valeur inchangeable depuis le panneau. Elle n'est pas rendue en mode liste, qui n'a pas de panneau propre.",
+        valueEnd:
+          "Des contrôles à vous à l'intérieur du champ, placés avant ceux que le champ possède : la croix d'effacement et l'icône qui ouvre le panneau. Ces deux-là sont l'affordance propre du composant, ce qui explique l'absence de slot <code>end</code> ici.",
+        start:
+          "Du contenu au début du champ, rendu après <code>iconStart</code> plutôt qu'à sa place.",
       },
     },
   },

@@ -42,7 +42,7 @@ import { video_file } from './video_file'
 import { warning } from './warning'
 
 export { ICON_VIEW_BOX } from './viewBox'
-export { builtinIconNames, type VectisIconName } from './names'
+export { builtinIconNames, type IconName } from './names'
 export {
   arrow_downward,
   arrow_downward_alt,

@@ -5,7 +5,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Libellé, aide et icône',
-      text: "Le champ est un <code>VInput</code>, donc <code>label</code> et <code>hint</code> se comportent exactement comme partout ailleurs. <code>pickerIcon</code> change le glyphe qui ouvre le calendrier, à la fin du champ. Aucune icône n'est rendue quand il n'y a pas de panneau à ouvrir, ce qui est le cas par défaut d'un champ où l'on peut taper. <code>iconStart</code> place une icône au début du champ, décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton, lequel réclame alors <code>iconStartLabel</code>. À l'autre bout, <code>loading</code> affiche une roue à la place de l'icône du calendrier pendant qu'une donnée se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours. <code>iconEndLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment le bouton, la croix et la roue quand la formulation du dictionnaire ne convient pas.",
+      text: "Le champ est un <code>VInput</code>, donc <code>label</code> et <code>hint</code> se comportent exactement comme partout ailleurs. <code>pickerIcon</code> change le glyphe qui ouvre le calendrier, à la fin du champ. Aucune icône n'est rendue quand il n'y a pas de panneau à ouvrir, ce qui est le cas par défaut d'un champ où l'on peut taper. <code>iconStart</code> place une icône au début du champ, décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton, lequel réclame alors <code>iconStartLabel</code>. À l'autre bout, <code>loading</code> affiche une roue à la place de l'icône du calendrier pendant qu'une donnée se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours. <code>pickerIconLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment le bouton, la croix et la roue quand la formulation du dictionnaire ne convient pas.",
     },
     sizes: {
       title: 'Tailles',
@@ -91,7 +91,7 @@ export default {
         iconStart:
           "Une icône dans le champ, au début. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
         iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
-        iconEndLabel:
+        pickerIconLabel:
           "Ce que fait l'icône de fin, en mots. Elle nomme le bouton qui ouvre le calendrier, et sa valeur par défaut vient du dictionnaire du design system.",
         loading:
           "Affiche une roue à la place de l'icône du calendrier. Elle dit que quelque chose se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours.",
@@ -117,6 +117,10 @@ export default {
         day: 'Ce que montre une cellule de jour, transmis tel quel au calendrier.',
         footer:
           "La bande au pied du panneau : des actions, ou des dates prédéfinies comme aujourd'hui. Elle reçoit <code>close</code>, ce qui permet à l'un de ces boutons de refermer le panneau.",
+        valueEnd:
+          "Des contrôles à vous à l'intérieur du champ, placés avant ceux que le champ possède : la croix d'effacement et l'icône qui ouvre le panneau. Ces deux-là sont l'affordance propre du composant, ce qui explique l'absence de slot <code>end</code> ici.",
+        start:
+          "Du contenu au début du champ, rendu après <code>iconStart</code> plutôt qu'à sa place.",
       },
     },
   },

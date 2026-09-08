@@ -94,7 +94,7 @@ function onSummaryClick(event: MouseEvent) {
 
 <template>
   <details
-    class="v-accordion-item"
+    class="v-accordion-item v-disclosure"
     :name="accordion?.name"
     :open="defaultOpen || undefined"
     :data-swap="collapseIcon ? '' : undefined"
@@ -122,11 +122,11 @@ function onSummaryClick(event: MouseEvent) {
           ><slot name="subtitle">{{ subtitle }}</slot></VTypography
         >
       </span>
-      <VIcon class="v-accordion-icon" v-bind="iconProps(expandIcon)" />
+      <VIcon class="v-accordion-icon v-disclosure-chevron" v-bind="iconProps(expandIcon)" />
       <!-- Both icons are always in the DOM; [open] decides which one shows, in CSS alone -->
       <VIcon
         v-if="collapseIcon"
-        class="v-accordion-icon v-accordion-icon-open"
+        class="v-accordion-icon v-disclosure-chevron v-accordion-icon-open"
         v-bind="iconProps(collapseIcon)"
       />
     </summary>
@@ -172,7 +172,7 @@ function onSummaryClick(event: MouseEvent) {
 
   .v-accordion-summary:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
-    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
+    outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
   .v-accordion-item:first-child > .v-accordion-summary {
@@ -195,12 +195,6 @@ function onSummaryClick(event: MouseEvent) {
   .v-accordion-icon-start {
     flex: none;
     color: var(--vectis-color-text-muted);
-  }
-
-  .v-accordion-icon {
-    flex: none;
-    color: var(--vectis-color-text-muted);
-    transition: rotate var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
   .v-accordion-item[open]:not([data-swap]) > .v-accordion-summary .v-accordion-icon {
@@ -232,22 +226,6 @@ function onSummaryClick(event: MouseEvent) {
     color: inherit;
   }
 
-  /* The opening animates in pure CSS: ::details-content targets the box the
-     browser wraps the content in, and the `interpolate-size` declared on the item
-     is what makes a transition towards `auto` possible at all. A browser missing
-     either simply opens the section instantly. */
-  .v-accordion-item::details-content {
-    block-size: 0;
-    overflow: clip;
-    transition:
-      block-size var(--vectis-duration-base) var(--vectis-ease-default),
-      content-visibility var(--vectis-duration-base) allow-discrete;
-  }
-
-  .v-accordion-item[open]::details-content {
-    block-size: auto;
-  }
-
   .v-accordion-content {
     padding: var(--accordion-content-pad-start, var(--vectis-space-2))
       var(--accordion-pad-inline, var(--vectis-space-5))
@@ -257,14 +235,7 @@ function onSummaryClick(event: MouseEvent) {
     color: var(--vectis-color-text-muted);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .v-accordion-icon {
-      transition: none;
-    }
-
-    .v-accordion-item::details-content {
-      transition: none;
-    }
-  }
+  /* The disclosure animation and the chevron's own transition come from
+     `styles/disclosure.css`, reduced-motion block included. */
 }
 </style>

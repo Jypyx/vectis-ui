@@ -35,7 +35,7 @@ import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
 /** How the pages that are not the current one are drawn. */
-export type PaginationVariant = 'ghost' | 'outline'
+export type PaginationItemVariant = 'ghost' | 'outline'
 
 /** The colour of the current page. */
 export type PaginationTone = 'accent' | 'neutral' | 'danger'
@@ -46,8 +46,8 @@ export type PaginationSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 /** Where the row sits in the width it is given. */
 export type PaginationAlign = 'start' | 'center' | 'end'
 
-/** What the previous and next controls show. */
-export type PaginationControlsDisplay = 'icon' | 'text' | 'both'
+/** Whether the previous and next controls are rendered, and what they show. */
+export type PaginationControls = false | 'icon' | 'text' | 'both'
 
 interface PaginationProps {
   /**
@@ -63,13 +63,17 @@ interface PaginationProps {
    */
   totalVisible?: number
 
-  /** Joins every button into one segmented control. */
-  attached?: boolean
   /**
-   * How the pages OTHER than the current one, and the controls, are drawn. The current
-   * page is always filled, whatever this says.
+   * Separates the buttons instead of joining them into one segmented control. It is the
+   * word VButtonGroup and VToggle use for the same question, in the same direction.
    */
-  variant?: PaginationVariant
+  detached?: boolean
+  /**
+   * How the pages OTHER than the current one, and the controls, are drawn. The current page
+   * is always filled, whatever this says. It is named for the ITEMS because that is what it
+   * paints: on VTabs and VDataTable `variant` names the decoration of the frame instead.
+   */
+  itemVariant?: PaginationItemVariant
   /** The colour the current page takes. The other pages and the controls stay neutral. */
   tone?: PaginationTone
   /** The height of the buttons, from the scale shared by every control. */
@@ -82,10 +86,12 @@ interface PaginationProps {
    */
   align?: PaginationAlign
 
-  /** Hides the previous and next buttons that otherwise sit on either side of the pages. */
-  hideControls?: boolean
-  /** Whether those controls show an icon, their label, or both. */
-  controlsDisplay?: PaginationControlsDisplay
+  /**
+   * The previous and next buttons on either side of the pages: what they show, or `false`
+   * to leave them out. One prop rather than two, the shape VFilePicker's `preview` and
+   * VCarousel's `controls` already use.
+   */
+  controls?: PaginationControls
   /** The icon of the previous control: an icon name, or an explicit render. */
   prevIcon?: IconSource
   /** The icon of the next control: an icon name, or an explicit render. */
@@ -131,14 +137,13 @@ interface PaginationProps {
 const props = withDefaults(defineProps<PaginationProps>(), {
   length: 1,
   totalVisible: undefined,
-  attached: false,
-  variant: 'ghost',
+  detached: false,
+  itemVariant: 'ghost',
   tone: 'accent',
   size: 'md',
   compact: false,
   align: 'start',
-  hideControls: false,
-  controlsDisplay: 'icon',
+  controls: 'icon',
   prevIcon: () => chevronLeftIcon,
   nextIcon: () => chevronRightIcon,
   prevLabel: undefined,
@@ -277,22 +282,22 @@ function onKeydown(event: KeyboardEvent) {
     class="v-pagination"
     :aria-label="ariaLabel"
     :data-align="align"
-    :data-controls-display="controlsDisplay"
+    :data-controls="controls || undefined"
     :data-responsive="responsive ? '' : undefined"
     @keydown="onKeydown"
   >
     <!-- The row is a VButtonGroup either way: joined it merges the borders of its DIRECT
-         button children, and detached it spaces them, which is all `attached` asks of it.
+         button children, and detached it spaces them, which is all this prop asks of it.
          That is why there is no list markup wrapping the pills, and why the ellipsis is
          itself an inert button rather than a plain span: anything else between two pills
          would break the seam. -->
-    <VButtonGroup class="v-pagination-items" :detached="!attached">
-      <template v-if="!hideControls">
+    <VButtonGroup class="v-pagination-items" :detached="detached">
+      <template v-if="controls">
         <VIconButton
-          v-if="controlsDisplay === 'icon'"
+          v-if="controls === 'icon'"
           class="v-pagination-control"
           :label="resolvedPrevLabel"
-          :variant="variant"
+          :variant="itemVariant"
           tone="neutral"
           :size="size"
           :compact="compact"
@@ -307,7 +312,7 @@ function onKeydown(event: KeyboardEvent) {
         <VButton
           v-else
           class="v-pagination-control"
-          :variant="variant"
+          :variant="itemVariant"
           tone="neutral"
           :size="size"
           :compact="compact"
@@ -315,7 +320,7 @@ function onKeydown(event: KeyboardEvent) {
           :aria-label="resolvedPrevLabel"
           @click="goTo(prevTarget)"
         >
-          <template v-if="controlsDisplay === 'both'" #start>
+          <template v-if="controls === 'both'" #start>
             <VIcon v-bind="iconProps(prevIcon)" />
           </template>
           <span class="v-pagination-control-label">{{ resolvedPrevLabel }}</span>
@@ -326,7 +331,7 @@ function onKeydown(event: KeyboardEvent) {
         <VButton
           v-if="item.kind === 'page'"
           class="v-pagination-page"
-          :variant="item.page === currentPage ? 'solid' : variant"
+          :variant="item.page === currentPage ? 'solid' : itemVariant"
           :tone="item.page === currentPage ? tone : 'neutral'"
           :size="size"
           :compact="compact"
@@ -348,7 +353,7 @@ function onKeydown(event: KeyboardEvent) {
           class="v-pagination-ellipsis"
           :label="m.pagination.hiddenPages"
           aria-hidden="true"
-          :variant="variant"
+          :variant="itemVariant"
           tone="neutral"
           :size="size"
           :compact="compact"
@@ -358,12 +363,12 @@ function onKeydown(event: KeyboardEvent) {
         </VIconButton>
       </template>
 
-      <template v-if="!hideControls">
+      <template v-if="controls">
         <VIconButton
-          v-if="controlsDisplay === 'icon'"
+          v-if="controls === 'icon'"
           class="v-pagination-control"
           :label="resolvedNextLabel"
-          :variant="variant"
+          :variant="itemVariant"
           tone="neutral"
           :size="size"
           :compact="compact"
@@ -375,7 +380,7 @@ function onKeydown(event: KeyboardEvent) {
         <VButton
           v-else
           class="v-pagination-control"
-          :variant="variant"
+          :variant="itemVariant"
           tone="neutral"
           :size="size"
           :compact="compact"
@@ -383,7 +388,7 @@ function onKeydown(event: KeyboardEvent) {
           :aria-label="resolvedNextLabel"
           @click="goTo(nextTarget)"
         >
-          <template v-if="controlsDisplay === 'both'" #end>
+          <template v-if="controls === 'both'" #end>
             <VIcon v-bind="iconProps(nextIcon)" />
           </template>
           <span class="v-pagination-control-label">{{ resolvedNextLabel }}</span>
@@ -459,9 +464,11 @@ function onKeydown(event: KeyboardEvent) {
     cursor: default;
   }
 
-  /* A chevron points at a physical direction, which the logical properties do not
-     mirror: in a right-to-left page it has to be flipped by hand. */
-  [dir='rtl'] .v-pagination-control .v-icon {
+  /* A chevron points at a physical direction, which the logical properties do not mirror:
+     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
+     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
+     individual property, so it composes instead of replacing a transform. */
+  .v-pagination-control:dir(rtl) .v-icon {
     scale: -1 1;
   }
 
@@ -500,7 +507,7 @@ function onKeydown(event: KeyboardEvent) {
        pill, so dropping its label frees more room than sacrificing another page —
        which is why it happens before the last step. It is never done when the control
        shows text alone: there would be nothing left to click. */
-    .v-pagination[data-responsive][data-controls-display='both'] .v-pagination-control-label {
+    .v-pagination[data-responsive][data-controls='both'] .v-pagination-control-label {
       display: none;
     }
   }

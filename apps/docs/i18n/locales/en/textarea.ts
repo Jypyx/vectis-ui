@@ -64,6 +64,8 @@ export default {
           'What screen readers announce while the spinner turns. It falls back to the design system dictionary.',
         clearable:
           'Offers a cross that empties the field. It appears when there is something to clear and the field can be edited.',
+        clearVisible:
+          'Decides whether the cross is shown, instead of letting the field work it out from its own content, a read-only field included. It is the same escape hatch VInput offers, for components built on top of this one that hold what there is to clear somewhere other than the text.',
         clearLabel:
           'What the clear button does, in words. It falls back to the design system dictionary.',
         maxlength:
@@ -85,6 +87,8 @@ export default {
         start:
           'Content at the start of the field, rendered after <code>iconStart</code> rather than in its place.',
         end: 'Content at the end of the field, which replaces <code>iconEnd</code>. It is hidden while the field is loading, the spinner taking that place.',
+        valueEnd:
+          'Controls of your own inside the field, placed before the ones the field owns: the clear cross and the icon that opens the panel. Those two are the component own affordance, which is why there is no <code>end</code> slot here.',
       },
     },
   },

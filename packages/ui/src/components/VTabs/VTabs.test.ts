@@ -231,7 +231,7 @@ describe('VTabs', () => {
   describe('content and fallthrough', () => {
     it('icon only: a data-icon-only marker, no label container', () => {
       const { container } = mount({
-        tabs: `<VTab value="a" icon="home" aria-label="Accueil" />`,
+        tabs: `<VTab value="a" icon-start="home" aria-label="Accueil" />`,
       })
       const tab = tabsOf(container)[0]
       expect(tab?.hasAttribute('data-icon-only')).toBe(true)
@@ -240,7 +240,7 @@ describe('VTabs', () => {
     })
 
     it('a label or a slot cancels icon-only mode', () => {
-      const { container } = mount({ tabs: `<VTab value="a" icon="home" label="Accueil" />` })
+      const { container } = mount({ tabs: `<VTab value="a" icon-start="home" label="Accueil" />` })
       const tab = tabsOf(container)[0]
       expect(tab?.hasAttribute('data-icon-only')).toBe(false)
       expect(tab?.querySelector('.v-tab-label')?.textContent).toBe('Accueil')

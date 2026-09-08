@@ -1454,7 +1454,7 @@ if (isDev) {
    * Horizontal only: the block axis does not mirror, so the vertical arrows are
    * already right.
    */
-  [dir='rtl'] .v-carousel[data-orientation='horizontal'] .v-carousel-control .v-icon {
+  .v-carousel[data-orientation='horizontal']:dir(rtl) .v-carousel-control .v-icon {
     scale: -1 1;
   }
 

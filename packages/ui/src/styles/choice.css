@@ -1,0 +1,42 @@
+/*
+ * The chassis of the three controls a reader picks with: VCheckbox, VRadio and VSwitch.
+ *
+ * All three are the same object — a <label> holding a hidden native control, the drawing the
+ * component makes for it, and the text — so the row itself, the side the text sits on and
+ * the greying belong to one recipe rather than to three that have to be kept in step. The
+ * `.v-tone` and `.v-control` arrangement: the class goes on the root beside the component's
+ * own, which keeps every per-component rule winning on specificity.
+ *
+ * What each component still owns is what it DRAWS: the box and its tick, the dot, the track
+ * and its thumb. That is where the three genuinely differ, and none of it is here.
+ */
+@layer vectis.components {
+  .v-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--vectis-space-2);
+    font-family: var(--vectis-text-family);
+    font-size: var(--vectis-text-label-size);
+    color: var(--vectis-color-text);
+    cursor: pointer;
+  }
+
+  /* The native control is taken out of the flow by its absolute position, so reversing the
+     row only ever swaps the drawing and the text. */
+  .v-choice[data-label-position='start'] {
+    flex-direction: row-reverse;
+  }
+
+  .v-choice[data-spread] {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* A disabled control greys out through the colour tokens, the same ones VButton uses, and
+     never through opacity. It is asked of the hidden input, which is the only element of the
+     three that carries the state — hence `.v-hidden-input` rather than three selectors. */
+  .v-choice:has(.v-hidden-input:disabled) {
+    color: var(--vectis-color-text-subtle);
+    cursor: not-allowed;
+  }
+}

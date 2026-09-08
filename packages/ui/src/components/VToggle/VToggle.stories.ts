@@ -63,7 +63,7 @@ const meta = {
   title: 'Components/Toggle',
   component: VToggle,
   argTypes: {
-    variant: { control: 'inline-radio', options: ['ghost', 'outline'] },
+    itemVariant: { control: 'inline-radio', options: ['ghost', 'outline'] },
     selectedVariant: { control: 'inline-radio', options: ['solid', 'soft', 'ghost'] },
     tone: {
       control: 'inline-radio',
@@ -78,7 +78,7 @@ const meta = {
     detached: false,
     seamless: false,
     orientation: 'horizontal',
-    variant: 'ghost',
+    itemVariant: 'ghost',
     selectedVariant: 'solid',
     tone: 'accent',
     size: 'md',
@@ -155,7 +155,7 @@ export const Variants: Story = {
           <VToggle
             v-for="d in detachments"
             :key="v + d"
-            :variant="v"
+            :item-variant="v"
             :detached="d"
             :label="t.alignment"
             v-model="selection"
@@ -185,7 +185,7 @@ export const SelectedVariants: Story = {
           <VToggle
             v-for="v in variants"
             :key="s + v"
-            :variant="v"
+            :item-variant="v"
             :selected-variant="s"
             :label="t.alignment"
             v-model="selection"
@@ -207,7 +207,7 @@ export const SelectedVariants: Story = {
     const TRANSPARENT = 'rgba(0, 0, 0, 0)'
     const selectedIn = (row: string, selected: string) =>
       canvasElement.querySelector<HTMLElement>(
-        `.v-toggle[data-variant="${row}"] > .v-toggle-item[aria-pressed="true"][data-variant="${selected}"]`,
+        `.v-toggle[data-item-variant="${row}"] > .v-toggle-item[aria-pressed="true"][data-variant="${selected}"]`,
       ) as HTMLElement
 
     for (const variant of ['soft', 'ghost']) {
@@ -239,14 +239,14 @@ export const Seamless: Story = {
     setup: () => ({ lined: ref('centre'), plain: ref('centre'), t }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <VToggle variant="outline" :label="t.withLine" v-model="lined">
+        <VToggle item-variant="outline" :label="t.withLine" v-model="lined">
           <VToggleItem value="left" :label="t.left" />
           <VToggleItem value="centre" :label="t.centre" />
           <VToggleItem value="right" :label="t.right" />
         </VToggle>
         <VToggle
           seamless
-          variant="outline"
+          item-variant="outline"
           selected-variant="soft"
           :label="t.withoutLine"
           v-model="plain"
@@ -294,7 +294,7 @@ export const Tones: Story = {
     }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <VToggle v-for="tone in tones" :key="tone" :tone="tone" variant="outline" :label="t.alignment" v-model="selection">
+        <VToggle v-for="tone in tones" :key="tone" :tone="tone" item-variant="outline" :label="t.alignment" v-model="selection">
           <VToggleItem value="left" :label="t.left" />
           <VToggleItem value="centre" :label="t.centre" />
           <VToggleItem value="right" :label="t.right" />
@@ -310,9 +310,9 @@ export const Multiple: Story = {
     setup: () => ({ args, format: ref(['bold']), t }),
     template: `
       <VToggle v-bind="args" v-model="format">
-        <VToggleItem value="bold" icon="format_bold" :aria-label="t.bold" />
-        <VToggleItem value="italic" icon="format_italic" :aria-label="t.italic" />
-        <VToggleItem value="underline" icon="format_underlined" :aria-label="t.underline" />
+        <VToggleItem value="bold" icon-start="format_bold" :aria-label="t.bold" />
+        <VToggleItem value="italic" icon-start="format_italic" :aria-label="t.italic" />
+        <VToggleItem value="underline" icon-start="format_underlined" :aria-label="t.underline" />
       </VToggle>
     `,
   }),
@@ -352,9 +352,9 @@ export const FilledIcons: Story = {
     setup: () => ({ args, shown: ref(['favourites']), t }),
     template: `
       <VToggle v-bind="args" v-model="shown">
-        <VToggleItem value="favourites" icon="favorite" :label="t.favourites" />
-        <VToggleItem value="following" icon="star" :label="t.following" />
-        <VToggleItem value="saved" icon="bookmark" :label="t.saved" />
+        <VToggleItem value="favourites" icon-start="favorite" :label="t.favourites" />
+        <VToggleItem value="following" icon-start="star" :label="t.following" />
+        <VToggleItem value="saved" icon-start="bookmark" :label="t.saved" />
       </VToggle>
     `,
   }),
@@ -418,7 +418,7 @@ export const Vertical: Story = {
           <VToggleItem value="centre" :label="t.centre" />
           <VToggleItem value="right" :label="t.right" />
         </VToggle>
-        <VToggle orientation="vertical" detached variant="outline" :label="t.alignment" v-model="selection">
+        <VToggle orientation="vertical" detached item-variant="outline" :label="t.alignment" v-model="selection">
           <VToggleItem value="left" :label="t.left" />
           <VToggleItem value="centre" :label="t.centre" />
           <VToggleItem value="right" :label="t.right" />
@@ -436,7 +436,7 @@ export const Companions: Story = {
     components: { VToggle, VToggleItem, VTooltip, VBadge },
     setup: () => ({ selection: ref('week'), t }),
     template: `
-      <VToggle v-model="selection" variant="outline" selected-variant="soft" :label="t.periods">
+      <VToggle v-model="selection" item-variant="outline" selected-variant="soft" :label="t.periods">
         <VToggleItem value="day" :label="t.day" />
         <VTooltip :text="t.weekHint">
           <template #default="{ triggerProps }">

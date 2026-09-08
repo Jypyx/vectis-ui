@@ -73,6 +73,23 @@ export interface MaskedField {
   commitOrRevert: () => void
   /** The handler to bind to the field's input event. */
   onFieldInput: (event: Event) => void
+  /**
+   * Backspace over a SEPARATOR, which erases the digit in front of it instead.
+   *
+   * TRAP — a separator is placed by the mask and never typed, so erasing one has to erase
+   * the DIGIT before it, which is what the reader believes they are erasing. Left alone, the
+   * mask writes the separator straight back and the key looks dead.
+   *
+   * It answers whether it handled the press: `false` means the caret was not sitting after a
+   * separator and the browser's own Backspace should run.
+   */
+  backspaceOverSeparator: (el: HTMLInputElement) => boolean
+  /**
+   * Splices a pasted run of digits into the one already in the field, at the selection, and
+   * puts the caret after what was inserted. The whole-value fast path — a complete date or
+   * time recognized as such — belongs to the component and runs before this.
+   */
+  pasteDigits: (el: HTMLInputElement, pasted: string) => void
 }
 
 export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>): MaskedField {
@@ -161,5 +178,45 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
     commitLive()
   }
 
-  return { draft, fieldModel, writeField, commitLive, commitOrRevert, onFieldInput }
+  function backspaceOverSeparator(el: HTMLInputElement) {
+    const start = el.selectionStart
+    if (
+      start === null ||
+      start !== el.selectionEnd ||
+      start === 0 ||
+      /d/.test(el.value[start - 1] ?? '')
+    ) {
+      return false
+    }
+    const before = digitsOf(el.value.slice(0, start)).length
+    const digits = digitsOf(el.value)
+    const text = options.format(digits.slice(0, before - 1) + digits.slice(before))
+    writeField(text, options.caret(text, before - 1, false))
+    commitLive()
+    return true
+  }
+
+  function pasteDigits(el: HTMLInputElement, pasted: string) {
+    const start = el.selectionStart ?? el.value.length
+    const end = el.selectionEnd ?? start
+    const digits = digitsOf(el.value)
+    const from = digitsOf(el.value.slice(0, start)).length
+    const to = digitsOf(el.value.slice(0, end)).length
+    const inserted = digitsOf(pasted)
+    const next = (digits.slice(0, from) + inserted + digits.slice(to)).slice(0, options.maxDigits())
+    const text = options.format(next)
+    writeField(text, options.caret(text, Math.min(from + inserted.length, next.length), true))
+    commitLive()
+  }
+
+  return {
+    draft,
+    fieldModel,
+    writeField,
+    commitLive,
+    commitOrRevert,
+    onFieldInput,
+    backspaceOverSeparator,
+    pasteDigits,
+  }
 }

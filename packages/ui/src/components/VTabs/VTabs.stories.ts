@@ -201,8 +201,8 @@ export const Sizes: Story = {
       <div style="display: grid; gap: 24px">
         <VTabs v-for="s in sizes" :key="s" :size="s" variant="inset" v-model="tab">
           <VTab value="a" label="Overview" />
-          <VTab value="b" label="Details" icon="tune" />
-          <VTab value="c" :icon="icons.more_horiz" aria-label="Plus" />
+          <VTab value="b" label="Details" icon-start="tune" />
+          <VTab value="c" :icon-start="icons.more_horiz" aria-label="Plus" />
         </VTabs>
       </div>
     `,
@@ -236,8 +236,8 @@ export const TabContent: Story = {
     template: `
       <VTabs v-model="tab">
         <VTab value="text" :label="t.textOnly" />
-        <VTab value="icon" :label="t.textAndIcon" icon="tune" />
-        <VTab value="iconOnly" icon="settings" :aria-label="t.settings" />
+        <VTab value="icon" :label="t.textAndIcon" icon-start="tune" />
+        <VTab value="iconOnly" icon-start="settings" :aria-label="t.settings" />
         <VTab value="slot">
           <VBadge :count="3">{{ t.messages }}</VBadge>
         </VTab>
@@ -260,9 +260,9 @@ export const Vertical: Story = {
     template: `
       <div style="display: grid; grid-auto-flow: column; gap: 32px; justify-content: start">
         <VTabs v-bind="args" orientation="vertical" v-model="tab" style="min-height: 220px">
-          <VTab value="overview" label="Overview" icon="dashboard" />
-          <VTab value="details" label="Details" icon="tune" />
-          <VTab value="history" label="History" icon="history" />
+          <VTab value="overview" label="Overview" icon-start="dashboard" />
+          <VTab value="details" label="Details" icon-start="tune" />
+          <VTab value="history" label="History" icon-start="history" />
           <template #panels>
             <VTabPanel value="overview">{{ t.overviewPanel }}</VTabPanel>
             <VTabPanel value="details">{{ t.detailsPanel }}</VTabPanel>
@@ -271,9 +271,9 @@ export const Vertical: Story = {
         </VTabs>
 
         <VTabs variant="outlined" orientation="vertical" v-model="framed" style="min-height: 220px">
-          <VTab value="overview" label="Overview" icon="dashboard" />
-          <VTab value="details" label="Details" icon="tune" />
-          <VTab value="history" label="History" icon="history" />
+          <VTab value="overview" label="Overview" icon-start="dashboard" />
+          <VTab value="details" label="Details" icon-start="tune" />
+          <VTab value="history" label="History" icon-start="history" />
           <template #panels>
             <VTabPanel value="overview">{{ t.overviewPanel }}</VTabPanel>
             <VTabPanel value="details">{{ t.detailsPanel }}</VTabPanel>

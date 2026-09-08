@@ -153,6 +153,20 @@ watch(open, (value) => {
 onMounted(() => {
   if (open.value) panelRef.value?.show()
 })
+
+/*
+ * The same trio VDialog, VDialogAlert and VPopover answer. It is a relay onto the panel,
+ * which has held it all along: opening a menu from code was otherwise only possible through
+ * the model, which inserts a tick where a focus move cannot afford one.
+ */
+defineExpose({
+  /** Opens the menu at once, without waiting for the model to come round. */
+  show: () => panelRef.value?.show(),
+  /** Closes it at once, submenus included. */
+  close: () => panelRef.value?.close(),
+  /** The panel element, for what neither of the two above covers. */
+  el: computed(() => panelRef.value?.el ?? null),
+})
 </script>
 
 <template>

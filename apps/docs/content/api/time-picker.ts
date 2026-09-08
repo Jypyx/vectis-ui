@@ -18,6 +18,7 @@ export default {
         { name: 'allowedMinutes', type: 'TimeMatcher' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
+        { name: 'label', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'string | null', default: 'null' },
       ],
       events: [

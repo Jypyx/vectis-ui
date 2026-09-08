@@ -41,7 +41,7 @@ export default {
     },
     states: {
       title: 'States',
-      text: 'Invalid is for a rule of your own, nothing here being checked by the browser. Read-only keeps the selection on show and refuses every way of changing it, the dialog, the drop and the removal alike. Disabled greys the field through the colour tokens and takes it out of the tab order. <code>noDrop</code> is narrower than either: the dialog still opens, and only dropping is turned away. <code>loading</code> is narrower still, and purely visual: a spinner replaces the attach icon while an upload is under way, and everything else carries on. <code>iconEndLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename the attach button, the clear cross and the spinner when the dictionary wording is not the right one.',
+      text: 'Invalid is for a rule of your own, nothing here being checked by the browser. Read-only keeps the selection on show and refuses every way of changing it, the dialog, the drop and the removal alike. Disabled greys the field through the colour tokens and takes it out of the tab order. <code>noDrop</code> is narrower than either: the dialog still opens, and only dropping is turned away. <code>loading</code> is narrower still, and purely visual: a spinner replaces the attach icon while an upload is under way, and everything else carries on. <code>attachIconLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename the attach button, the clear cross and the spinner when the dictionary wording is not the right one.',
     },
   },
 
@@ -75,7 +75,7 @@ export default {
         iconStart:
           'An icon inside the field, at the start. It is rendered before the chips rather than in their place. Decorative until a <code>@click:icon-start</code> listener turns it into a button.',
         iconStartLabel: 'What the start icon does, in words, once it is clickable.',
-        iconEndLabel:
+        attachIconLabel:
           'What the end icon does, in words. It names the button that opens the file dialog, and falls back to the design system dictionary.',
         loading:
           'Shows a spinner in place of the attach icon, while an upload is under way. It changes nothing else: files can still be dropped and the dialog still opens.',
@@ -102,6 +102,10 @@ export default {
         chip: 'Replaces the chip standing for one file. It receives the name already shortened in the middle so that its extension survives, <code>remove</code>, without which the file could no longer be taken out, and the size and density worked out to sit inside the field.',
         counter:
           'Replaces the counter under the field. <code>text</code> is the sentence already built and translated; the count and the total size are there for a wording of your own.',
+        valueEnd:
+          'Controls of your own inside the field, placed before the ones the field owns: the clear cross and the icon that opens the panel. Those two are the component own affordance, which is why there is no <code>end</code> slot here.',
+        start:
+          'Content at the start of the field, rendered after <code>iconStart</code> rather than in its place.',
       },
     },
   },

@@ -40,6 +40,8 @@ export default {
           "Rend toute l'horloge inutilisable : l'aiguille ne bouge plus, la demi-journée ne change plus, et tout se grise par les jetons de couleur.",
         readonly:
           "Montre l'heure sans permettre de la changer. Le cadran garde son focus et les deux grands chiffres basculent toujours entre heure et minutes, de sorte que la valeur reste lisible en entier.",
+        label:
+          "Le nom accessible de l'horloge entière, ses deux chiffres et son cadran ensemble. Il retombe sur le dictionnaire, et un <code>aria-label</code> du consommateur l'emporte. Le cadran garde son propre nom, qui dit si l'aiguille est sur les heures ou sur les minutes.",
         vModel:
           "L'heure, toujours en chaîne sur 24 heures quelle que soit l'horloge affichée : vous n'avez donc jamais à savoir laquelle la langue utilise. Sans valeur, le cadran affiche minuit plutôt que l'heure courante : lire l'horloge pendant le rendu ferait diverger une page dessinée sur un serveur de la même page dans le navigateur.",
       },

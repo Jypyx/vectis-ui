@@ -336,6 +336,8 @@ const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop(
  * may have replaced the browse button entirely — theirs is not ours to hold a reference
  * to, and it still has to be reachable.
  */
+const rootEl = ref<HTMLElement | null>(null)
+
 function focusTarget(): HTMLElement | null {
   const zone = zoneEl.value
   if (!zone) return null
@@ -494,11 +496,17 @@ defineExpose({
    * click, a key press: browsers refuse to open a file dialog by themselves.
    */
   open: openPicker,
+  /**
+   * The zone's own box, for what neither of the two above covers. It is the wrapper and
+   * not the hidden file input: that one is the FORM's element, this is the reader's.
+   */
+  el: rootEl,
 })
 </script>
 
 <template>
   <div
+    ref="rootEl"
     class="v-file-picker"
     :class="rootClass"
     :style="rootStyle"
@@ -516,7 +524,7 @@ defineExpose({
       v-bind="nativeAttrs"
       ref="fileEl"
       type="file"
-      class="v-file-picker-native"
+      class="v-file-picker-native v-hidden-input"
       tabindex="-1"
       aria-hidden="true"
       :accept="accept"
@@ -661,18 +669,6 @@ defineExpose({
     display: block;
     inline-size: 100%;
     font-family: var(--vectis-text-family);
-  }
-
-  /* The real file input is a SOURCE of files and not a control anyone deals with. It is
-     hidden with `opacity` and never with `display: none`, the design system's rule for a
-     hidden form control, which has to stay submittable; it is given no size and made
-     deaf to the pointer, so it can never swallow a click meant for the zone. */
-  .v-file-picker-native {
-    position: absolute;
-    inline-size: 0;
-    block-size: 0;
-    opacity: 0;
-    pointer-events: none;
   }
 
   .v-file-picker-body {

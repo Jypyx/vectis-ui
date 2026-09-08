@@ -41,7 +41,8 @@ export default {
         value:
           'What this tab is called in code. The panel carrying the same value is the one it shows, and it is also what the value holds when this tab is selected.',
         label: 'The visible label. The default slot replaces it.',
-        icon: 'An icon before the label.',
+        iconStart: 'An icon before the label.',
+        iconEnd: 'An icon after the label, for a count or a state the tab carries.',
         disabled:
           'Makes the tab unusable: it no longer responds, the arrow keys skip over it, and it greys out through the colour tokens.',
       },

@@ -370,7 +370,7 @@ export const States: Story = {
  * `iconStartLabel`. At the other end `loading` shows a spinner where the attach icon
  * was, and changes nothing else: files can still be dropped and the dialog still opens.
  *
- * `iconEndLabel`, `clearLabel` and `loadingLabel` rename the attach button, the clear
+ * `attachIconLabel`, `clearLabel` and `loadingLabel` rename the attach button, the clear
  * cross and the spinner when the dictionary's wording is not the right one.
  */
 export const FieldIcon: Story = {
@@ -391,7 +391,7 @@ export const FieldIcon: Story = {
           clear-visible
           :label="t.searchFiles"
           :model-value="picked"
-          icon-end-label="Add an attachment"
+          attach-icon-label="Add an attachment"
           clear-label="Remove every attachment"
         />
         <VFileInput v-bind="args" loading :label="t.uploading" :model-value="picked" />

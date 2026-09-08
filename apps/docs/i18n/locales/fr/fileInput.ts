@@ -41,7 +41,7 @@ export default {
     },
     states: {
       title: 'États',
-      text: "Invalide sert à une règle à vous, rien ici n'étant vérifié par le navigateur. La lecture seule laisse la sélection visible et refuse toutes les façons de la changer, la boîte de dialogue, le dépôt et le retrait. Désactivé grise le champ par les jetons de couleur et le sort de l'ordre de tabulation. <code>noDrop</code> est plus étroit que les deux : la boîte de dialogue s'ouvre toujours, et seul le dépôt est refusé. <code>loading</code> est plus étroit encore, et purement visuel : une roue remplace l'icône de trombone pendant un envoi, et tout le reste continue. <code>iconEndLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment le bouton de trombone, la croix de vidage et la roue quand la formulation du dictionnaire ne convient pas.",
+      text: "Invalide sert à une règle à vous, rien ici n'étant vérifié par le navigateur. La lecture seule laisse la sélection visible et refuse toutes les façons de la changer, la boîte de dialogue, le dépôt et le retrait. Désactivé grise le champ par les jetons de couleur et le sort de l'ordre de tabulation. <code>noDrop</code> est plus étroit que les deux : la boîte de dialogue s'ouvre toujours, et seul le dépôt est refusé. <code>loading</code> est plus étroit encore, et purement visuel : une roue remplace l'icône de trombone pendant un envoi, et tout le reste continue. <code>attachIconLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment le bouton de trombone, la croix de vidage et la roue quand la formulation du dictionnaire ne convient pas.",
     },
   },
 
@@ -76,7 +76,7 @@ export default {
         iconStart:
           "Une icône dans le champ, au début. Elle est rendue avant les chips et non à leur place. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
         iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
-        iconEndLabel:
+        attachIconLabel:
           "Ce que fait l'icône de fin, en mots. Elle nomme le bouton qui ouvre la boîte de dialogue de fichiers, et sa valeur par défaut vient du dictionnaire du design system.",
         loading:
           "Affiche une roue à la place de l'icône de trombone, pendant un envoi. Elle ne change rien d'autre : les fichiers se déposent toujours et la boîte de dialogue s'ouvre toujours.",
@@ -103,6 +103,10 @@ export default {
         chip: 'Remplace la puce qui représente un fichier. Elle reçoit le nom déjà raccourci AU MILIEU pour que son extension survive, <code>remove</code>, sans quoi le fichier ne pourrait plus être retiré, et la taille et la densité calculées pour tenir dans le champ.',
         counter:
           'Remplace le compteur sous le champ. <code>text</code> est la phrase déjà construite et traduite ; le nombre et la taille totale sont là pour une formulation à vous.',
+        valueEnd:
+          "Des contrôles à vous à l'intérieur du champ, placés avant ceux que le champ possède : la croix d'effacement et l'icône qui ouvre le panneau. Ces deux-là sont l'affordance propre du composant, ce qui explique l'absence de slot <code>end</code> ici.",
+        start:
+          "Du contenu au début du champ, rendu après <code>iconStart</code> plutôt qu'à sa place.",
       },
     },
   },

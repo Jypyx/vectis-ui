@@ -58,7 +58,7 @@ ${names.map((name) => `  ${quote(name)},`).join('\n')}
 ] as const
 
 /** The icon names the DS renders itself — the contract of a consumer resolver. */
-export type VectisIconName = (typeof NAMES)[number]
+export type IconName = (typeof NAMES)[number]
 
 /**
  * The names alone, carrying no drawing at all. \`classIconResolver\` in \`strict\` mode
@@ -87,7 +87,7 @@ ${paths.map((d) => `    ${quote(d)},`).join('\n')}
 ${names.map((name) => `import { ${name} } from './${name}'`).join('\n')}
 
 export { ICON_VIEW_BOX } from './viewBox'
-export { builtinIconNames, type VectisIconName } from './names'
+export { builtinIconNames, type IconName } from './names'
 export {
 ${names.map((name) => `  ${name},`).join('\n')}
 }

@@ -40,6 +40,8 @@ export default {
           'Makes the whole clock unusable: the hand cannot be moved, the half-day cannot be changed, and everything greys out through the colour tokens.',
         readonly:
           'Shows the time without letting it be changed. The face keeps its focus and the two numerals still switch between the hour and the minutes, so the value can be read in full.',
+        label:
+          'The accessible name of the whole clock, its two numerals and its face together. It falls back to the dictionary, and a consumer <code>aria-label</code> wins over it. The face keeps its own name, which says whether the hand is on the hour or the minutes.',
         vModel:
           'The time, always as a 24-hour string whatever clock is displayed, so you never have to know which one the language uses. With no value the clock shows midnight rather than the current time: reading the clock while rendering would make a page drawn on a server disagree with the same page in the browser.',
       },

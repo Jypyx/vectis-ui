@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { VDatePicker, type DateRange } from 'vectis-ui'
+import { VDatePicker, type DatePickerRange } from 'vectis-ui'
 
-const period = ref<DateRange>({ start: '2026-06-19', end: '2026-06-26' })
+const period = ref<DatePickerRange>({ start: '2026-06-19', end: '2026-06-26' })
 </script>
 
 <template>

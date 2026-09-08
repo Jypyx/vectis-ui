@@ -48,7 +48,7 @@ export default {
           'Which weekdays are on show, as numbers from 0 for Sunday. The order matters as well: the first entry is the day a week starts on, which is why there is no separate first-day setting. Left out, the seven days in the order the locale puts them.',
         locale:
           'The language the days, months and times are written in. It falls back to the global one.',
-        hourFormat: 'Whether times are shown on a 12- or a 24-hour clock. It follows the locale.',
+        format: 'Whether times are shown on a 12- or a 24-hour clock. It follows the locale.',
         dayStart: 'The hour the grid starts at, from 0.',
         dayEnd: 'The hour it ends at, up to 24.',
         slotDuration:
@@ -61,6 +61,8 @@ export default {
           'How many events a day of the month view shows before it starts counting the rest.',
         readonly:
           'Stops events being moved and stretched, by dragging them and with the keyboard. They stay readable and clickable, and nothing else.',
+        disabled:
+          'Freezes the whole calendar: nothing can be moved, created or opened, and no other period can be reached. The cards leave the tab order while the grid keeps its own, so the agenda can still be read. That is what separates it from <code>readonly</code>, which stops the editing alone.',
         creatable:
           'Makes an event when an empty part of a day is taken up: a click makes one a step long, a drag makes one as long as it was drawn. The slot signal fires either way, so you can leave this off and still get it.',
         edgeStepDelay:

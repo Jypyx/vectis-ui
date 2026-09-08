@@ -16,6 +16,8 @@ export default {
         size: 'The size of the boxes: 32, 40 or 48 pixels.',
         compact: 'Takes 4px off the boxes, leaving the text and the icons as they are.',
         disabled: 'Makes every box unusable, greyed out through the colour tokens.',
+        readonly:
+          'Shows the code without letting it be changed. The boxes keep their focus and the code can still be selected and copied, which is what separates it from <code>disabled</code>.',
         invalid:
           'Marks the code as wrong, which colours the boxes and tells assistive technology so.',
         label:

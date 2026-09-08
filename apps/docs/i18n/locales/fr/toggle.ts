@@ -14,8 +14,8 @@ export default {
         seamless:
           'Retire les traits entre les items assemblés, si bien que la rangée se lit comme un cadre unique plutôt que comme des segments. Sans effet sous <code>detached</code>, où les items sont déjà des boutons séparés.',
         orientation: 'Si les items courent en travers de la page ou de haut en bas.',
-        variant:
-          'Comment les items NON sélectionnés sont dessinés. Ce que prend celui qui est sélectionné relève de <code>selectedVariant</code>.',
+        itemVariant:
+          "Comment sont dessinés les items non sélectionnés. Ce que prend le sélectionné, c'est <code>selectedVariant</code>. Elle porte le nom des items parce que c'est ce qu'elle peint : sur VTabs et VDataTable, <code>variant</code> nomme la décoration du cadre.",
         selectedVariant:
           "Comment l'item sélectionné est dessiné, dans le ton du groupe : plein avec <code>solid</code>, teinté avec <code>soft</code>, ou la couleur de son seul texte avec <code>ghost</code>.",
         tone: 'La couleur que prend un item sélectionné. Les autres restent neutres.',
@@ -40,7 +40,9 @@ export default {
         value:
           "Ce que signifie le choix de cet item. C'est ce que porte la valeur du groupe quand l'item est sélectionné, et cela doit être unique au sein du groupe.",
         label: 'Le libellé visible. Le slot par défaut le remplace.',
-        icon: 'Une icône avant le libellé.',
+        iconStart: 'Une icône avant le libellé.',
+        iconEnd:
+          "Une icône après le libellé. Elle ne passe pas à sa forme pleine sous l'effet du <code>selectedIconFilled</code> du groupe, qui nomme l'icône représentant l'item et non celle qui le suit.",
         disabled:
           "Rend cet item inutilisable : il ne répond plus, les flèches l'enjambent, et il se grise par les tokens de couleur.",
       },

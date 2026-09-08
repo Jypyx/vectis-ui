@@ -59,6 +59,8 @@ export default {
           'Makes the whole calendar unusable: no date can be chosen, no month reached, and everything greys out through the colour tokens.',
         readonly:
           'Shows what is selected without letting it be changed. The calendar can still be read and walked through, another month or another year, which is what separates it from <code>disabled</code>.',
+        label:
+          'The accessible name of the whole picker, its header and its grid together. A range shown as two calendars side by side needs one each, or a screen reader announces the same group twice. It falls back to the dictionary, and a consumer <code>aria-label</code> wins.',
         vModel:
           'What is selected, and its shape follows <code>selection</code>: an ISO string for a single date, a start and end pair for a period, an array for several. Nothing is selected to begin with.',
       },

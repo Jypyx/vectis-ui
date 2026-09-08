@@ -48,6 +48,7 @@ import { PICKER_COLUMNS, dayStep, gridDelta } from './keyboard'
 import { toggleValue } from '../../utils/array'
 import { resolveMatcher } from '../../utils/matcher'
 import { clamp } from '../../utils/number'
+import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useLocale, useMessages } from '../../i18n/state'
 
 export type DatePickerSelection = 'single' | 'range' | 'multiple'
@@ -56,7 +57,7 @@ export type DatePickerSelection = 'single' | 'range' | 'multiple'
  * A period between two dates, the value of a `range` selection. Either bound may be
  * null: between the first and the second click, a range has a start and no end yet.
  */
-export interface DateRange {
+export interface DatePickerRange {
   /** The first day of the period, as an ISO `YYYY-MM-DD` string. */
   start: string | null
   /** The last day of the period, as an ISO `YYYY-MM-DD` string. */
@@ -77,10 +78,10 @@ export interface DatePickerEvent {
  * Which dates cannot be selected, given either as a list of ISO strings or as a
  * function answering that question for a date.
  */
-export type DateMatcher = string[] | ((iso: string) => boolean)
+export type DatePickerMatcher = string[] | ((iso: string) => boolean)
 
 /** The shape of the v-model, which follows whichever `selection` is in use. */
-export type DatePickerValue = string | null | DateRange | string[]
+export type DatePickerValue = string | null | DatePickerRange | string[]
 
 interface DatePickerProps {
   /**
@@ -114,7 +115,7 @@ interface DatePickerProps {
    * Dates that cannot be chosen, given as a list of ISO strings or as a function.
    * They stay visible, struck through, and can still be reached with the keyboard.
    */
-  disabledDates?: DateMatcher
+  disabledDates?: DatePickerMatcher
   /**
    * Also fills the empty corners of the grid with the greyed days of the neighbouring
    * months. It is off by default.
@@ -138,6 +139,12 @@ interface DatePickerProps {
    * from `disabled`.
    */
   readonly?: boolean
+  /**
+   * The accessible name of the whole picker, its header and its grid together. A range
+   * shown as two calendars side by side needs one each, or a screen reader announces the
+   * same group twice. It falls back to the dictionary, and a consumer `aria-label` wins.
+   */
+  label?: string
 }
 
 const props = withDefaults(defineProps<DatePickerProps>(), {
@@ -152,6 +159,7 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   events: undefined,
   disabled: false,
   readonly: false,
+  label: undefined,
 })
 
 /**
@@ -197,6 +205,9 @@ const gridLabelId = useId()
 // The navigation labels have no prop of their own: the dictionary is the single
 // place to change them, globally or per language — see `src/i18n/`.
 const m = useMessages()
+// @a11y — a roleless box cannot carry an accessible name (axe: aria-prohibited-attr),
+// so the root is a named group: the VCarousel viewport arrangement.
+const ariaLabel = useAriaLabel(() => props.label ?? m.value.datePicker.label)
 const vectisLocale = useLocale()
 /*
  * The prop 'locale' wins, and the design system's global locale is what it falls back to.
@@ -219,14 +230,14 @@ const singleValue = computed(() =>
     ? model.value
     : null,
 )
-const rangeValue = computed<DateRange>(() => {
+const rangeValue = computed<DatePickerRange>(() => {
   if (
     props.selection === 'range' &&
     model.value &&
     typeof model.value === 'object' &&
     !Array.isArray(model.value)
   ) {
-    return model.value as DateRange
+    return model.value as DatePickerRange
   }
   return { start: null, end: null }
 })
@@ -276,10 +287,10 @@ const eventsByDate = computed(() => {
 })
 
 const hoverISO = ref<string | null>(null)
-function orderRange(a: string, b: string): DateRange {
+function orderRange(a: string, b: string): DatePickerRange {
   return compareISO(a, b) <= 0 ? { start: a, end: b } : { start: b, end: a }
 }
-const effectiveRange = computed<DateRange>(() => {
+const effectiveRange = computed<DatePickerRange>(() => {
   if (props.selection !== 'range') return { start: null, end: null }
   const r = rangeValue.value
   if (r.start && r.end) return orderRange(r.start, r.end)
@@ -602,6 +613,8 @@ defineExpose({
 <template>
   <div
     class="v-date-picker"
+    role="group"
+    :aria-label="ariaLabel"
     :data-view="view"
     :data-selection="selection"
     :data-disabled="disabled ? '' : undefined"
@@ -867,6 +880,14 @@ defineExpose({
   .v-date-picker-nav {
     display: flex;
     align-items: center;
+  }
+
+  /* A chevron points at a physical direction, which the logical properties do not mirror:
+     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
+     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
+     individual property, so it composes instead of replacing a transform. */
+  .v-date-picker-nav:dir(rtl) .v-icon {
+    scale: -1 1;
   }
 
   /* A minimum width holds this button steady, so the chevrons on either side do not

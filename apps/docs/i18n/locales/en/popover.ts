@@ -12,6 +12,8 @@ export default {
         anchor:
           "The name of an anchor you have set on your own control, written as a CSS dashed identifier such as <code>--tooltip-anchor</code>. Supplying it replaces the internal wrapper, which is the required route as soon as the trigger is a text input, where the browser's own <code>popovertarget</code> attribute is not allowed.",
         bare: "Strips the panel of the design system's surface: no background, no border, no shadow and no rounded corners. It is what a panel whose content brings its own asks for, as VDatePicker does.",
+        matchTrigger:
+          'Stops the panel being narrower than whatever it is anchored to. It is a floor, so a panel with a width of its own still grows past it rather than being clamped to the trigger, which is what a list of long labels under a short field wants.',
         vModelOpen:
           "Whether the panel is showing. It starts closed and is bidirectional, fed from the DOM: in <code>auto</code> mode the browser's own light dismiss writes back to it. Setting it opens and closes the panel; when the change has to be synchronous, use the exposed <code>show</code> and <code>hide</code> instead, which is what VTooltip and the pickers do.",
       },

@@ -45,7 +45,7 @@ const NAMES = [
 ] as const
 
 /** The icon names the DS renders itself — the contract of a consumer resolver. */
-export type VectisIconName = (typeof NAMES)[number]
+export type IconName = (typeof NAMES)[number]
 
 /**
  * The names alone, carrying no drawing at all. `classIconResolver` in `strict` mode

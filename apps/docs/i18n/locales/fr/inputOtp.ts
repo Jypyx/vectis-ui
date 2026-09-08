@@ -16,6 +16,8 @@ export default {
         size: 'La taille des cases : 32, 40 ou 48 pixels.',
         compact: 'Retire 4px aux cases, en laissant le texte et les icônes tels quels.',
         disabled: 'Rend toutes les cases inutilisables, grisées par les tokens de couleur.',
+        readonly:
+          'Affiche le code sans permettre de le changer. Les cases gardent leur focus et le code reste sélectionnable et copiable, ce qui le distingue de <code>disabled</code>.',
         invalid:
           "Marque le code comme erroné, ce qui colore les cases et le signale aux technologies d'assistance.",
         label:

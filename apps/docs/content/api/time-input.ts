@@ -28,7 +28,7 @@ export default {
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconStartLabel', type: 'string' },
-        { name: 'iconEndLabel', type: 'string' },
+        { name: 'pickerIconLabel', type: 'string' },
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'loadingLabel', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },
@@ -42,6 +42,8 @@ export default {
         { name: 'clear', type: '[]' },
       ],
       slots: [
+        { name: 'start', type: '{}' },
+        { name: 'value-end', key: 'valueEnd', type: '{}' },
         { name: 'footer', type: '{ confirm: () => void; cancel: () => void; }' },
       ],
     },

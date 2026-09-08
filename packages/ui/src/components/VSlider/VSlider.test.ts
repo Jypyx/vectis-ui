@@ -40,12 +40,14 @@ describe('VSlider', () => {
     expect(style).toContain('--end-fraction: 0.75')
   })
 
-  it('orientation: data-orientation set only when vertical', async () => {
+  it('orientation: data-orientation always mirrors the union, both branches', async () => {
     const { container, rerender } = render(VSlider, {
       props: { modelValue: 40, label: 'x' },
     })
     const root = () => container.querySelector('.v-slider')!
-    expect(root().hasAttribute('data-orientation')).toBe(false)
+    // The default branch is written out too, so a consumer styling the horizontal case
+    // from their own sheet has something to select.
+    expect(root().getAttribute('data-orientation')).toBe('horizontal')
     await rerender({ orientation: 'vertical' })
     expect(root().getAttribute('data-orientation')).toBe('vertical')
   })

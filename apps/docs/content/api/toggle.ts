@@ -14,7 +14,7 @@ export default {
         { name: 'detached', type: 'boolean', default: 'false' },
         { name: 'seamless', type: 'boolean', default: 'false' },
         { name: 'orientation', type: 'ToggleOrientation', default: "'horizontal'" },
-        { name: 'variant', type: 'ToggleVariant', default: "'ghost'" },
+        { name: 'itemVariant', type: 'ToggleItemVariant', default: "'ghost'" },
         { name: 'selectedVariant', type: 'ToggleSelectedVariant', default: "'solid'" },
         { name: 'tone', type: 'ToggleTone', default: "'accent'" },
         { name: 'size', type: 'ToggleSize', default: "'md'" },
@@ -34,7 +34,8 @@ export default {
       props: [
         { name: 'value', type: 'ToggleValue' },
         { name: 'label', type: 'string' },
-        { name: 'icon', type: 'IconSource' },
+        { name: 'iconStart', type: 'IconSource' },
+        { name: 'iconEnd', type: 'IconSource' },
         { name: 'disabled', type: 'boolean', default: 'false' },
       ],
       slots: [

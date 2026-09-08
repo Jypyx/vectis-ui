@@ -12,7 +12,7 @@ import VInput from '../VInput/VInput.vue'
 import VPagination from '../VPagination/VPagination.vue'
 
 import VIcon from './VIcon.vue'
-import { builtinIcons, type VectisIconName } from './icons'
+import { builtinIcons, type IconName } from './icons'
 import {
   classIconResolver,
   componentIconResolver,
@@ -406,10 +406,10 @@ function fontShowcase(resolver: IconResolver): Story {
   }
 }
 
-/** Typed `Record<VectisIconName, string>` (and not Partial): TS refuses to compile
+/** Typed `Record<IconName, string>` (and not Partial): TS refuses to compile
     until every DS icon is mapped. This is the exhaustiveness guard to recommend to
     consumers. */
-const PHOSPHOR: Record<VectisIconName, string> = {
+const PHOSPHOR: Record<IconName, string> = {
   arrow_downward: 'arrow-down',
   arrow_downward_alt: 'arrow-down',
   arrow_drop_down: 'caret-down',
@@ -446,7 +446,7 @@ const PHOSPHOR: Record<VectisIconName, string> = {
   warning: 'warning',
 }
 
-const FONT_AWESOME: Record<VectisIconName, string> = {
+const FONT_AWESOME: Record<IconName, string> = {
   arrow_downward: 'arrow-down',
   arrow_downward_alt: 'arrow-down',
   arrow_drop_down: 'caret-down',
@@ -483,7 +483,7 @@ const FONT_AWESOME: Record<VectisIconName, string> = {
   warning: 'triangle-exclamation',
 }
 
-const BOOTSTRAP: Record<VectisIconName, string> = {
+const BOOTSTRAP: Record<IconName, string> = {
   arrow_downward: 'arrow-down',
   arrow_downward_alt: 'arrow-down',
   arrow_drop_down: 'caret-down-fill',

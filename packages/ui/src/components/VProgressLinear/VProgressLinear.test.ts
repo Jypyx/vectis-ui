@@ -118,12 +118,14 @@ describe('VProgressLinear', () => {
     expect(getByRole('progressbar').getAttribute('data-shape')).toBe('square')
   })
 
-  it('orientation: data-orientation set only when vertical', async () => {
+  it('orientation: data-orientation always mirrors the union, both branches', async () => {
     const { getByRole, rerender } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
-    expect(getByRole('progressbar').hasAttribute('data-orientation')).toBe(false)
+    // The default branch is written out too, so a consumer styling the horizontal case
+    // from their own sheet has something to select.
+    expect(getByRole('progressbar').getAttribute('data-orientation')).toBe('horizontal')
     await rerender({ orientation: 'vertical' })
     expect(getByRole('progressbar').getAttribute('data-orientation')).toBe('vertical')
   })

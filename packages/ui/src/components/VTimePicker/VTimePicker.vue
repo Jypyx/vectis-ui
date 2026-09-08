@@ -52,6 +52,7 @@ import {
 import type { TimeMatcher } from './limits'
 import { pad2 } from '../../utils/text'
 import { isDev } from '../../utils/env'
+import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useLocale, useMessages } from '../../i18n/state'
 
 export type TimePickerFormat = HourFormat
@@ -103,6 +104,12 @@ interface TimePickerProps {
    * full — which is what separates it from `disabled`.
    */
   readonly?: boolean
+  /**
+   * The accessible name of the whole clock, its two numerals and its face together. It
+   * falls back to the dictionary, and a consumer `aria-label` wins over it. The face
+   * keeps its own name, which says whether the hand is on the hour or the minutes.
+   */
+  label?: string
 }
 
 const props = withDefaults(defineProps<TimePickerProps>(), {
@@ -115,6 +122,7 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   allowedMinutes: undefined,
   disabled: false,
   readonly: false,
+  label: undefined,
 })
 
 /**
@@ -143,6 +151,9 @@ defineSlots<{
 }>()
 
 const m = useMessages()
+// @a11y — a roleless box cannot carry an accessible name (axe: aria-prohibited-attr),
+// so the root is a named group: the VCarousel viewport arrangement.
+const ariaLabel = useAriaLabel(() => props.label ?? m.value.timePicker.label)
 const vectisLocale = useLocale()
 /* The prop wins, and the design system's global locale is what it falls back to. */
 const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
@@ -568,6 +579,8 @@ defineExpose({
 <template>
   <div
     class="v-time-picker"
+    role="group"
+    :aria-label="ariaLabel"
     :data-step="step"
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"

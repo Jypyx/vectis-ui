@@ -12,7 +12,7 @@ import {
 } from 'vectis-ui'
 import { expand_more as expandMoreIcon } from 'vectis-ui/icons'
 
-import type { VectisMessages } from 'vectis-ui'
+import type { Messages } from 'vectis-ui'
 
 definePageMeta({ layout: 'docs' })
 
@@ -81,10 +81,10 @@ const frCode = `import { fr, registerMessages, setLocale } from 'vectis-ui'
 registerMessages('fr', fr)
 setLocale('fr-FR')`
 
-const addCode = `import { registerMessages, setLocale, type VectisMessagesInput } from 'vectis-ui'
+const addCode = `import { registerMessages, setLocale, type MessagesInput } from 'vectis-ui'
 
 // Partial is legitimate: what is missing falls back to English.
-const de: VectisMessagesInput = {
+const de: MessagesInput = {
   common: { clear: 'Leeren', close: 'Schließen' },
   dataTable: { empty: 'Keine Daten' },
 }
@@ -106,18 +106,18 @@ type DictionaryLanguage = 'en' | 'fr'
  * sentence, which is also why the French is kept: its plurals and its punctuation are not the
  * English ones.
  *
- * `ParameterisedKey` is computed from `VectisMessages`, so the LIST cannot drift: a message
+ * `ParameterisedKey` is computed from `Messages`, so the LIST cannot drift: a message
  * that appears upstream, disappears, or stops being a function fails `nuxt typecheck` here.
  * The text on the right is not guarded that way. It is copied by hand, and a default reworded
  * upstream has to be recopied.
  */
 type ParameterisedKey = {
-  [N in keyof VectisMessages]: {
-    [K in keyof VectisMessages[N]]: VectisMessages[N][K] extends (...args: never[]) => unknown
+  [N in keyof Messages]: {
+    [K in keyof Messages[N]]: Messages[N][K] extends (...args: never[]) => unknown
       ? `${N & string}.${K & string}`
       : never
-  }[keyof VectisMessages[N]]
-}[keyof VectisMessages]
+  }[keyof Messages[N]]
+}[keyof Messages]
 
 const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>> = {
   en: {
@@ -191,7 +191,7 @@ const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>
  * A parameterised message has no plain default to print, so its row carries the function
  * itself, from the table above: the parameters it takes, and the English it builds with them.
  */
-const DICTIONARIES: Record<DictionaryLanguage, VectisMessages> = { en: enMessages, fr: frMessages }
+const DICTIONARIES: Record<DictionaryLanguage, Messages> = { en: enMessages, fr: frMessages }
 
 const dictionary = computed(() => {
   const shown: DictionaryLanguage = locale.value === 'fr' ? 'fr' : 'en'

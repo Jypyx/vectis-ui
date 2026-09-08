@@ -20,6 +20,7 @@ import type { IconSource } from '../VIcon/types'
 import VSpinner from '../VSpinner/VSpinner.vue'
 import VTypography from '../VTypography/VTypography.vue'
 
+import { useClearable } from '../../composables/useClearable'
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useIconClickHandlers } from '../../composables/useIconClickHandlers'
 import { useRootAttrs } from '../../composables/useRootAttrs'
@@ -96,6 +97,13 @@ interface TextareaProps {
    * clear and the field can be edited.
    */
   clearable?: boolean
+  /**
+   * Decides whether the cross is shown, instead of letting the field work it out from its
+   * own content — a read-only field included. It is the same escape hatch VInput offers,
+   * for the same reason: a component built on top of this one may hold what there is to
+   * clear somewhere other than the text.
+   */
+  clearVisible?: boolean
   /** What the clear button does, in words. It falls back to the design system dictionary. */
   clearLabel?: string
   /**
@@ -135,6 +143,7 @@ const props = withDefaults(defineProps<TextareaProps>(), {
   loading: false,
   loadingLabel: undefined,
   clearable: false,
+  clearVisible: undefined,
   clearLabel: undefined,
   maxlength: undefined,
   softLimit: false,
@@ -161,6 +170,12 @@ defineSlots<{
    * field is loading, the spinner taking that place.
    */
   end?(): unknown
+  /**
+   * Controls of your own inside the field, placed before the field's own — the clear cross
+   * and the end icon. It is the slot for something that acts on the VALUE rather than on
+   * the field, and it is VInput's slot of the same name.
+   */
+  'value-end'?(): unknown
 }>()
 
 /** The text in the field, empty to begin with. */
@@ -192,18 +207,18 @@ const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
 
 const controlEl = ref<HTMLTextAreaElement | null>(null)
 
-const showClear = computed(
-  () => props.clearable && model.value.length > 0 && !props.disabled && !props.readonly,
-)
-
-// @a11y @core — moving the focus back is the accessibility half of this handler.
-// The cross vanishes the instant it empties the field, so without that call focus
-// falls back to the page body and a keyboard user loses their place in the form.
-function onClear() {
-  model.value = ''
-  emit('clear')
-  controlEl.value?.focus()
-}
+const { showClear, onClear } = useClearable({
+  clearable: () => props.clearable,
+  clearVisible: () => props.clearVisible,
+  disabled: () => props.disabled,
+  readonly: () => props.readonly,
+  text: () => model.value,
+  controlEl,
+  onCleared: () => {
+    model.value = ''
+    emit('clear')
+  },
+})
 
 const { counterText, over } = useTextLimit({
   el: controlEl,
@@ -248,7 +263,7 @@ defineExpose({
       <button
         v-if="iconStart && hasIconStartHandler"
         type="button"
-        class="v-textarea-action"
+        class="v-textarea-action v-field-action"
         :aria-label="iconStartLabel ?? iconName(iconStart)"
         :disabled="disabled"
         @click="emit('click:icon-start', $event)"
@@ -272,10 +287,12 @@ defineExpose({
         :aria-describedby="describedBy"
       />
 
+      <slot name="value-end" />
+
       <button
         v-if="showClear"
         type="button"
-        class="v-textarea-action v-textarea-clear"
+        class="v-textarea-action v-field-action v-textarea-clear"
         :aria-label="resolvedClearLabel"
         @click="onClear"
       >
@@ -287,7 +304,7 @@ defineExpose({
         <button
           v-if="iconEnd && hasIconEndHandler"
           type="button"
-          class="v-textarea-action"
+          class="v-textarea-action v-field-action"
           :aria-label="iconEndLabel ?? iconName(iconEnd)"
           :disabled="disabled"
           @click="emit('click:icon-end', $event)"
@@ -524,40 +541,9 @@ defineExpose({
     --field-border-color: var(--vectis-color-danger);
   }
 
-  /* The field's own buttons — the clear cross, a clickable icon — go from muted grey
-     to full strength on hover, and take VButton's radius so their focus ring has the
-     same rounded corners as everything else.
-
-     The negative margin is DERIVED and never written as a number: it is exactly half
-     the difference between the icon and the wider box holding it. Subtracting it
-     cancels that inset, so the glyph lands precisely where a decorative icon would
-     have — against the field's padding, one --control-gap from its neighbour. */
-  .v-textarea-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--control-action-size);
-    height: var(--control-action-size);
-    margin-inline: calc((var(--vectis-icon-size) - var(--control-action-size)) / 2);
-    padding: 0;
-    border: none;
-    background: transparent;
-    color: var(--vectis-color-text-muted);
-    border-radius: var(--vectis-radius-interactive);
-    cursor: pointer;
-    flex: none;
-    transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
-  }
-
-  .v-textarea-action:hover:not(:disabled) {
-    color: var(--vectis-color-text);
-  }
-
-  .v-textarea-action:focus-visible {
-    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
-    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
-  }
-
+  /* The field's own buttons — the clear cross, a clickable icon — take their whole
+     recipe from `.v-field-action` (styles/field.css), which VInput and VTextarea share.
+     What stays here is what this field alone decides. */
   /* A disabled field greys out through the colour tokens, the same ones VCheckbox and
      VRadio use, and never through opacity. It comes LAST in the sequence of states,
      which at equal specificity is what makes it win over all of them, the error
@@ -613,8 +599,7 @@ defineExpose({
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .v-textarea-field,
-    .v-textarea-action {
+    .v-textarea-field {
       transition: none;
     }
   }

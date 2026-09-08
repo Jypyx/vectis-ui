@@ -9,10 +9,10 @@ export default {
     {
       name: 'VButton',
       props: [
-        { name: 'variant', type: "'solid' | 'outline' | 'ghost' | 'soft'", default: "'solid'" },
-        { name: 'tone', type: "'accent' | 'neutral' | 'danger'", default: "'accent'" },
+        { name: 'variant', type: 'ButtonVariant', default: "'solid'" },
+        { name: 'tone', type: 'ButtonTone', default: "'accent'" },
         { name: 'elevated', type: 'boolean', default: 'false' },
-        { name: 'size', type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
+        { name: 'size', type: 'ButtonSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'fullWidth', type: 'boolean', default: 'false' },
         { name: 'href', type: 'string' },

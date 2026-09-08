@@ -176,7 +176,7 @@ describe('VToggle', () => {
     it("the selected item is solid in the group's tone, the others in the neutral variant", () => {
       const { container } = mount({
         initial: 'b',
-        toggleAttrs: 'variant="outline" tone="danger"',
+        toggleAttrs: 'item-variant="outline" tone="danger"',
       })
       const [first, second] = itemsOf(container)
       expect(second?.dataset.variant).toBe('solid')
@@ -188,7 +188,7 @@ describe('VToggle', () => {
     it('selectedVariant draws the selected item, the others keeping the group variant', () => {
       const { container } = mount({
         initial: 'b',
-        toggleAttrs: 'variant="outline" selected-variant="soft"',
+        toggleAttrs: 'item-variant="outline" selected-variant="soft"',
       })
       const [first, second] = itemsOf(container)
       expect(second?.dataset.variant).toBe('soft')
@@ -220,15 +220,17 @@ describe('VToggle', () => {
      * it: a selected one carries its OWN variant. Both branches carry the attribute,
      * since a detached row has a frame to keep closed too.
      */
-    it('joined and detached alike carry data-variant', () => {
-      const joined = mount({ toggleAttrs: 'variant="outline"' })
-      expect(joined.container.querySelector('.v-toggle')?.getAttribute('data-variant')).toBe(
+    it('joined and detached alike carry data-item-variant', () => {
+      const joined = mount({ toggleAttrs: 'item-variant="outline"' })
+      expect(joined.container.querySelector('.v-toggle')?.getAttribute('data-item-variant')).toBe(
         'outline',
       )
       joined.unmount()
 
-      const { container } = mount({ toggleAttrs: 'detached variant="outline"' })
-      expect(container.querySelector('.v-toggle')?.getAttribute('data-variant')).toBe('outline')
+      const { container } = mount({ toggleAttrs: 'detached item-variant="outline"' })
+      expect(container.querySelector('.v-toggle')?.getAttribute('data-item-variant')).toBe(
+        'outline',
+      )
     })
   })
 
@@ -269,8 +271,8 @@ describe('VToggle', () => {
   })
 
   describe('icons', () => {
-    const iconItems = `<VToggleItem value="a" icon="favorite" label="Un" />
-                       <VToggleItem value="b" icon="star" label="Two" />`
+    const iconItems = `<VToggleItem value="a" icon-start="favorite" label="Un" />
+                       <VToggleItem value="b" icon-start="star" label="Two" />`
 
     it('selectedIconFilled fills the icon of the selected item alone', () => {
       const { container } = mount({
@@ -292,7 +294,7 @@ describe('VToggle', () => {
 
     it('icon only: a square item, accessible name through fallthrough', () => {
       const { container } = mount({
-        items: `<VToggleItem value="a" icon="favorite" aria-label="Favori" />`,
+        items: `<VToggleItem value="a" icon-start="favorite" aria-label="Favori" />`,
       })
       const item = itemsOf(container)[0]
       expect(item?.hasAttribute('data-icon-only')).toBe(true)
@@ -301,7 +303,7 @@ describe('VToggle', () => {
 
     it('a label cancels icon-only mode', () => {
       const { container } = mount({
-        items: `<VToggleItem value="a" icon="favorite" label="Favori" />`,
+        items: `<VToggleItem value="a" icon-start="favorite" label="Favori" />`,
       })
       expect(itemsOf(container)[0]?.hasAttribute('data-icon-only')).toBe(false)
     })

@@ -25,7 +25,7 @@ export default {
   moduleState:
     'Everything above writes MODULE-LEVEL state, which is what lets it be called from any <code>.ts</code> file without a plugin or a provider, and what makes already-mounted components re-render when it changes. The same property is the constraint: it belongs to the process rather than to a request, so it is configuration and never anything that varies per visitor.',
   types:
-    'Types are exported alongside them (<code>VectisMessages</code>, <code>VectisMessagesInput</code>, <code>IconSource</code>, <code>IconResolver</code>, <code>ToastOptions</code>), plus one per component whose API needs naming, such as <code>ComboboxOption</code>, <code>DataTableColumn</code> or <code>DatePickerSelection</code>.',
+    'Types are exported alongside them (<code>Messages</code>, <code>MessagesInput</code>, <code>IconSource</code>, <code>IconResolver</code>, <code>ToastOptions</code>), plus one per component whose API needs naming, such as <code>ComboboxOption</code>, <code>DataTableColumn</code> or <code>DatePickerSelection</code>.',
 
   internalHeading: 'The internal helpers, and why they stay internal',
   internalBody:

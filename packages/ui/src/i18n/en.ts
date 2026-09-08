@@ -7,9 +7,9 @@
  * is deterministically `en-US`). Changing a word means changing what expects it.
  */
 
-import type { VectisMessages } from './types'
+import type { Messages } from './types'
 
-export const en: VectisMessages = {
+export const en: Messages = {
   common: {
     loading: 'Loading…',
     clear: 'Clear',
@@ -92,6 +92,7 @@ export const en: VectisMessages = {
     label: (keys) => `Keyboard shortcut: ${keys}`,
   },
   datePicker: {
+    label: 'Date picker',
     previousMonth: 'Previous month',
     nextMonth: 'Next month',
     previousYear: 'Previous year',
@@ -105,6 +106,7 @@ export const en: VectisMessages = {
     label: 'Choose a date',
   },
   timePicker: {
+    label: 'Time picker',
     meridiem: 'AM or PM',
     am: 'AM',
     pm: 'PM',

@@ -81,12 +81,16 @@ watchEffect(
 </script>
 
 <template>
-  <label class="v-checkbox" :data-label-position="labelPosition" :data-spread="spread || undefined">
+  <label
+    class="v-checkbox v-choice"
+    :data-label-position="labelPosition"
+    :data-spread="spread || undefined"
+  >
     <input
       ref="inputEl"
       v-model="model"
       type="checkbox"
-      class="v-checkbox-input"
+      class="v-checkbox-input v-hidden-input"
       v-bind="$attrs"
       :disabled="disabled"
       :aria-invalid="invalid || undefined"
@@ -118,39 +122,6 @@ watchEffect(
 
 <style>
 @layer vectis.components {
-  .v-checkbox {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--vectis-space-2);
-    font-family: var(--vectis-text-family);
-    font-size: var(--vectis-text-label-size);
-    color: var(--vectis-color-text);
-    cursor: pointer;
-  }
-
-  /* The input is taken out of the flow by its absolute position, so reversing the
-     row only ever swaps the box and the label. */
-  .v-checkbox[data-label-position='start'] {
-    flex-direction: row-reverse;
-  }
-
-  .v-checkbox[data-spread] {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  /* Hidden with `opacity` and never with `display: none`, which would take the input
-     out of the tab order and out of the form. It stays focusable and submitted; only
-     the browser's own drawing of it disappears. */
-  .v-checkbox-input {
-    position: absolute;
-    opacity: 0;
-    width: 1px;
-    height: 1px;
-    margin: 0;
-    pointer-events: none;
-  }
-
   .v-checkbox-box {
     display: inline-grid;
     place-items: center;
@@ -225,13 +196,6 @@ watchEffect(
   .v-checkbox-input:user-invalid + .v-checkbox-box,
   .v-checkbox-input[aria-invalid='true'] + .v-checkbox-box {
     border-color: var(--vectis-color-danger);
-  }
-
-  /* A disabled checkbox greys out through the colour tokens, the same ones VButton
-     uses, and never through opacity. */
-  .v-checkbox:has(.v-checkbox-input:disabled) {
-    color: var(--vectis-color-text-subtle);
-    cursor: not-allowed;
   }
 
   .v-checkbox-input:disabled + .v-checkbox-box {

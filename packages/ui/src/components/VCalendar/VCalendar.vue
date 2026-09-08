@@ -77,8 +77,11 @@ export interface CalendarProps {
   weekdays?: number[]
   /** The language the days, months and times are written in. Falls back to the global one. */
   locale?: string
-  /** Whether times are shown on a twelve or twenty-four hour clock. Follows the locale. */
-  hourFormat?: HourFormat
+  /**
+   * Whether times are shown on a twelve or twenty-four hour clock. Left out, the reader's
+   * language decides. It is the same prop, under the same name, as VTimePicker's.
+   */
+  format?: HourFormat
   /** The hour the grid starts at, from 0. */
   dayStart?: number
   /** The hour it ends at, up to 24. */
@@ -102,6 +105,13 @@ export interface CalendarProps {
    * stay readable and clickable, and nothing else.
    */
   readonly?: boolean
+  /**
+   * Freezes the whole calendar: nothing can be moved, created or opened, no other period
+   * can be reached, and everything greys out through the colour tokens. The cards leave the
+   * tab order, the grid keeps its own so the agenda can still be read — which is what
+   * separates this from `readonly`, where only the editing stops.
+   */
+  disabled?: boolean
   /**
    * Makes an event when an empty part of a day is taken up: a click makes one `slotDuration`
    * long, a drag makes one as long as it was drawn. `slot-activate` fires either way, so a
@@ -127,7 +137,7 @@ const props = withDefaults(defineProps<CalendarProps>(), {
   customDays: 4,
   weekdays: undefined,
   locale: undefined,
-  hourFormat: undefined,
+  format: undefined,
   dayStart: 0,
   dayEnd: 24,
   slotDuration: 15,
@@ -135,6 +145,7 @@ const props = withDefaults(defineProps<CalendarProps>(), {
   hideCurrentTime: false,
   monthEventLimit: 3,
   readonly: false,
+  disabled: false,
   creatable: false,
   edgeStepDelay: EDGE_STEP_DELAY,
   noEdgeScroll: false,
@@ -216,7 +227,7 @@ const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
  * different order somewhere else.
  */
 const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
-const resolvedHourFormat = computed(() => props.hourFormat ?? hourCycleFor(resolvedLocale.value))
+const resolvedHourFormat = computed(() => props.format ?? hourCycleFor(resolvedLocale.value))
 const resolvedWeekdays = computed(() =>
   normalizeWeekdays(props.weekdays, firstDayOfWeekFor(resolvedLocale.value)),
 )
@@ -343,15 +354,24 @@ const stepLabels = computed(() => {
 
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.calendar.label)
 
+/*
+ * The four ways of reaching another period all pass through here, and `disabled` is refused
+ * in every one of them rather than on the controls alone: the edge step pages the view from a
+ * drag, and the year grid opens a month from a cell, neither of which is a button this
+ * component disabled. It is the VDatePicker arrangement, where the guard sits on `goTo`.
+ */
 function step(delta: -1 | 1) {
+  if (props.disabled) return
   date.value = stepAnchor(date.value, view.value, delta, resolvedWeekdays.value, props.customDays)
 }
 
 function today_() {
+  if (props.disabled) return
   date.value = todayISO()
 }
 
 function setView(value: CalendarView) {
+  if (props.disabled) return
   view.value = value
 }
 
@@ -369,6 +389,7 @@ function onCellActivate(iso: string, minutes: number) {
  * so the date moves and the view stays, which is still a step towards what was asked for.
  */
 function openIn(iso: string, target: CalendarView) {
+  if (props.disabled) return
   date.value = iso
   if (props.views.includes(target)) view.value = target
 }
@@ -461,7 +482,12 @@ defineExpose({
 </script>
 
 <template>
-  <div class="v-calendar" :class="rootClass" :style="rootStyle">
+  <div
+    class="v-calendar"
+    :class="rootClass"
+    :style="rootStyle"
+    :data-disabled="disabled ? '' : undefined"
+  >
     <section
       v-bind="forwardedAttrs"
       class="v-calendar-region"
@@ -474,17 +500,19 @@ defineExpose({
             :icon="chevronLeftIcon"
             :label="stepLabels.previous"
             size="sm"
+            :disabled="disabled"
             @click="step(-1)"
           />
           <VIconButton
             :icon="chevronRightIcon"
             :label="stepLabels.next"
             size="sm"
+            :disabled="disabled"
             @click="step(1)"
           />
         </div>
 
-        <VButton variant="outline" tone="neutral" size="sm" @click="today_">
+        <VButton variant="outline" tone="neutral" size="sm" :disabled="disabled" @click="today_">
           {{ m.calendar.today }}
         </VButton>
 
@@ -501,6 +529,7 @@ defineExpose({
                 variant="outline"
                 tone="neutral"
                 size="sm"
+                :disabled="disabled"
                 v-bind="triggerProps"
                 :aria-label="`${m.calendar.view}: ${viewLabel(view)}`"
               >
@@ -540,8 +569,9 @@ defineExpose({
         :hour-format="resolvedHourFormat"
         :today="today"
         :now="hideCurrentTime ? null : now"
-        :editable="!readonly"
-        :creatable="creatable"
+        :editable="!readonly && !disabled"
+        :disabled="disabled"
+        :creatable="creatable && !disabled"
         :hint-id="hintId"
         :edge-step-delay="edgeStepDelay"
         :auto-scroll="!noEdgeScroll"
@@ -575,7 +605,8 @@ defineExpose({
         :hour-format="resolvedHourFormat"
         :today="today"
         :event-limit="monthEventLimit"
-        :editable="!readonly"
+        :editable="!readonly && !disabled"
+        :disabled="disabled"
         :hint-id="hintId"
         :edge-step-delay="edgeStepDelay"
         :label="rangeText"
@@ -627,6 +658,18 @@ defineExpose({
     color: var(--vectis-color-text);
   }
 
+  /* A frozen calendar greys out through the colour tokens and never through opacity, the
+     design system rule: what a reader keeps here is the agenda itself, which has to stay
+     readable. The cards are real disabled buttons, so they grey themselves. */
+  .v-calendar[data-disabled] {
+    color: var(--vectis-color-text-subtle);
+    cursor: not-allowed;
+  }
+
+  .v-calendar[data-disabled] .v-calendar-view {
+    pointer-events: none;
+  }
+
   /*
    * The height is settled in CSS rather than measured, the VDataTable idiom: the region is
    * a flex column at full height, the toolbar refuses to grow and the grid takes what is
@@ -659,6 +702,14 @@ defineExpose({
     display: flex;
     align-items: center;
     gap: var(--vectis-space-1);
+  }
+
+  /* A chevron points at a physical direction, which the logical properties do not mirror:
+     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
+     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
+     individual property, so it composes instead of replacing a transform. */
+  .v-calendar-nav:dir(rtl) .v-icon {
+    scale: -1 1;
   }
 
   .v-calendar-title {

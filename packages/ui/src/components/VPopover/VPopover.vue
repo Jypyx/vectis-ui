@@ -94,6 +94,12 @@ interface PopoverProps {
    * asks for, as VDatePicker does.
    */
   bare?: boolean
+  /**
+   * Stops the panel being narrower than whatever it is anchored to. It is a FLOOR, so a
+   * panel with a width of its own still grows past it rather than being clamped to the
+   * trigger — which is what a list of long labels under a short field wants.
+   */
+  matchTrigger?: boolean
 }
 
 const props = withDefaults(defineProps<PopoverProps>(), {
@@ -102,6 +108,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   mode: 'auto',
   anchor: undefined,
   bare: false,
+  matchTrigger: false,
 })
 
 /**
@@ -199,6 +206,7 @@ defineExpose({
       class="v-overlay v-popover-panel v-floating"
       :class="{ 'v-panel': !bare }"
       :data-placement="placement"
+      :data-match-trigger="matchTrigger ? '' : undefined"
       :style="panelStyle"
       v-bind="$attrs"
       @beforetoggle="syncShown"
@@ -254,6 +262,20 @@ defineExpose({
    */
   .v-popover-panel {
     position-anchor: var(--anchor-name, --popover-anchor);
+  }
+
+  /*
+   * The one dimension this sheet does carry, and it is a FLOOR rather than a size: a panel
+   * may not come out narrower than what it is anchored to. It is written here rather than in
+   * each consumer because `anchor-size()` resolves against `position-anchor`, which is the
+   * declaration above — the same reason the anchoring itself lives here.
+   *
+   * A minimum beats a maximum, so a consumer's own `max-inline-size` does not clamp it: a
+   * trigger wider than the ceiling widens the panel past it, which is intended. VMenu carries
+   * the twin of this rule, being deliberately outside VPopover, and answers to the same word.
+   */
+  .v-popover-panel[data-match-trigger] {
+    min-inline-size: anchor-size(width);
   }
 }
 </style>

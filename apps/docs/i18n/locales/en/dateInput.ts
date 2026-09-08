@@ -5,7 +5,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label, hint and icon',
-      text: 'The field is a <code>VInput</code>, so <code>label</code> and <code>hint</code> behave exactly as they do everywhere else. <code>pickerIcon</code> changes the glyph that opens the calendar, at the end of the field. No icon is rendered at all when there is no panel to open, which is the default for a field that can be typed into. <code>iconStart</code> puts an icon at the start of the field, decorative until a <code>@click:icon-start</code> listener turns it into a button, which then needs <code>iconStartLabel</code>. At the other end, <code>loading</code> shows a spinner in place of the calendar icon while something is being fetched and changes nothing else: the field is still typed into and the panel still opens. <code>iconEndLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename the button, the cross and the spinner when the dictionary wording is not the right one.',
+      text: 'The field is a <code>VInput</code>, so <code>label</code> and <code>hint</code> behave exactly as they do everywhere else. <code>pickerIcon</code> changes the glyph that opens the calendar, at the end of the field. No icon is rendered at all when there is no panel to open, which is the default for a field that can be typed into. <code>iconStart</code> puts an icon at the start of the field, decorative until a <code>@click:icon-start</code> listener turns it into a button, which then needs <code>iconStartLabel</code>. At the other end, <code>loading</code> shows a spinner in place of the calendar icon while something is being fetched and changes nothing else: the field is still typed into and the panel still opens. <code>pickerIconLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename the button, the cross and the spinner when the dictionary wording is not the right one.',
     },
     sizes: {
       title: 'Sizes',
@@ -91,7 +91,7 @@ export default {
         iconStart:
           'An icon inside the field, at the start. Decorative until a <code>@click:icon-start</code> listener turns it into a button.',
         iconStartLabel: 'What the start icon does, in words, once it is clickable.',
-        iconEndLabel:
+        pickerIconLabel:
           'What the end icon does, in words. It names the button that opens the calendar, and falls back to the design system dictionary.',
         loading:
           'Shows a spinner in place of the calendar icon. It says that something is being loaded and changes nothing else: the field can still be typed into and the panel still opens.',
@@ -117,6 +117,10 @@ export default {
         day: 'What a day cell shows, handed straight to the calendar.',
         footer:
           'The strip at the foot of the panel: actions, or preset dates such as today. It receives <code>close</code>, which is what lets one of those buttons dismiss the panel.',
+        valueEnd:
+          'Controls of your own inside the field, placed before the ones the field owns: the clear cross and the icon that opens the panel. Those two are the component own affordance, which is why there is no <code>end</code> slot here.',
+        start:
+          'Content at the start of the field, rendered after <code>iconStart</code> rather than in its place.',
       },
     },
   },

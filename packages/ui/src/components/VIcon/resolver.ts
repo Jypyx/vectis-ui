@@ -13,7 +13,7 @@
  */
 import { shallowRef, type Component } from 'vue'
 
-import { builtinIconNames, type VectisIconName } from './icons/names'
+import { builtinIconNames, type IconName } from './icons/names'
 import type { IconContext, IconRender } from './types'
 
 /**
@@ -30,7 +30,7 @@ export type IconResolver = (name: string, ctx: IconContext) => IconRender | unde
  * names the library ships with, and any other key is accepted too, so your
  * application's own icons can be aliased through the same table.
  */
-export type IconAliases = Partial<Record<VectisIconName, string>> & Record<string, string>
+export type IconAliases = Partial<Record<IconName, string>> & Record<string, string>
 
 const resolver = shallowRef<IconResolver | undefined>(undefined)
 
@@ -109,7 +109,7 @@ export function classIconResolver(options: {
  * because that is the element the stylesheet sizes.
  */
 export function componentIconResolver(options: {
-  components: Partial<Record<VectisIconName, Component>> & Record<string, Component>
+  components: Partial<Record<IconName, Component>> & Record<string, Component>
   props?: (name: string, filled: boolean) => Record<string, unknown>
 }): IconResolver {
   const { components, props } = options

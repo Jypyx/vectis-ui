@@ -155,7 +155,7 @@ A string is **always** an icon name; one of the design system's own icons is imp
 
 ### Wiring your own icon library
 
-`setIconResolver` is consulted **before** the icon's own drawing; returning `undefined` means "I do not know this name" and hands over to that drawing, then to the ligature. **Partial** mappings are therefore usable. The `VectisIconName` type enumerates the names to cover.
+`setIconResolver` is consulted **before** the icon's own drawing; returning `undefined` means "I do not know this name" and hands over to that drawing, then to the ligature. **Partial** mappings are therefore usable. The `IconName` type enumerates the names to cover.
 
 An imported icon carries its **name** as well as its paths, which is what keeps a single `setIconResolver` call enough to move the design system's own internals onto your icon set — exactly as it was when those defaults were plain strings.
 
@@ -252,9 +252,9 @@ registerMessages('en', {
 The same gesture as enabling French — there are not two categories of dictionary. What you do not write falls back to English, never to an empty string: a partial dictionary is usable from its very first key.
 
 ```ts
-import { registerMessages, setLocale, type VectisMessagesInput } from 'vectis-ui'
+import { registerMessages, setLocale, type MessagesInput } from 'vectis-ui'
 
-const de: VectisMessagesInput = {
+const de: MessagesInput = {
   common: { loading: 'Wird geladen…', close: 'Schließen' },
   pagination: { previous: 'Vorherige Seite', next: 'Nächste Seite', page: (p) => `Seite ${p}` },
 }
@@ -263,7 +263,7 @@ registerMessages('de', de)
 setLocale('de-DE')
 ```
 
-An entry depending on a value is a **TypeScript function**, not a placeholder string: no plural engine and no ICU syntax to learn. Type the constant as `VectisMessagesInput` for key autocompletion, or as `VectisMessages` to have the compiler require full coverage.
+An entry depending on a value is a **TypeScript function**, not a placeholder string: no plural engine and no ICU syntax to learn. Type the constant as `MessagesInput` for key autocompletion, or as `Messages` to have the compiler require full coverage.
 
 The key is the **language subtag** alone: `registerMessages('de', …)` covers `de-DE`, `de-AT` and `de-CH`.
 

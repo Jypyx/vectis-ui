@@ -276,8 +276,12 @@ function onPointerLeave() {
     color: var(--vectis-color-text-muted);
   }
 
+  /* A chevron points at a physical direction, which the logical properties do not mirror:
+     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
+     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
+     individual property, so it composes instead of replacing a transform. */
   .v-menu-item-chevron:dir(rtl) {
-    transform: scaleX(-1);
+    scale: -1 1;
   }
 
   /* In a menu the focus IS the highlight, so it is drawn on `:focus` and not on

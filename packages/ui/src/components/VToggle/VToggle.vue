@@ -24,14 +24,19 @@ import { toggleValue } from '../../utils/array'
 import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
+import type { ItemValue } from '../../types'
 
-export type ToggleValue = string | number
+/**
+ * What identifies an item. It is the design system's own `ItemValue`, re-exported
+ * under the family's name so a consumer typing a toggle need not reach for another module.
+ */
+export type ToggleValue = ItemValue
 /**
  * What the v-model holds, which follows `multiple`: one value or nothing when a single
  * choice is allowed, and a list of them when several are.
  */
 export type ToggleModelValue = ToggleValue | ToggleValue[] | null
-export type ToggleVariant = 'ghost' | 'outline'
+export type ToggleItemVariant = 'ghost' | 'outline'
 export type ToggleSelectedVariant = 'solid' | 'soft' | 'ghost'
 export type ToggleTone = 'accent' | 'neutral' | 'danger'
 export type ToggleSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
@@ -60,10 +65,11 @@ interface ToggleProps {
   /** Whether the items run across the page or down it. */
   orientation?: ToggleOrientation
   /**
-   * How the UNSELECTED items are drawn. What the selected one takes is
-   * `selectedVariant`.
+   * How the UNSELECTED items are drawn. What the selected one takes is `selectedVariant`.
+   * It is named for the ITEMS because that is what it paints: on VTabs and VDataTable
+   * `variant` names the decoration of the frame instead.
    */
-  variant?: ToggleVariant
+  itemVariant?: ToggleItemVariant
   /**
    * How the SELECTED item is drawn, in the group's tone: filled, tinted, or the colour
    * of its text alone.
@@ -97,7 +103,7 @@ const props = withDefaults(defineProps<ToggleProps>(), {
   detached: false,
   seamless: false,
   orientation: 'horizontal',
-  variant: 'ghost',
+  itemVariant: 'ghost',
   selectedVariant: 'solid',
   tone: 'accent',
   size: 'md',
@@ -160,8 +166,8 @@ function select(value: ToggleValue) {
 provide(toggleKey, {
   isSelected,
   select,
-  get variant() {
-    return props.variant
+  get itemVariant() {
+    return props.itemVariant
   },
   get selectedVariant() {
     return props.selectedVariant
@@ -218,7 +224,7 @@ function onKeydown(event: KeyboardEvent) {
     :compact="compact"
     :elevated="elevated"
     :disabled="disabled"
-    :data-variant="variant"
+    :data-item-variant="itemVariant"
     :aria-label="ariaLabel"
     @keydown="onKeydown"
   >
@@ -247,12 +253,12 @@ function onKeydown(event: KeyboardEvent) {
    * Nothing else declares it, so the two rules never arbitrate a border-color between
    * them.
    */
-  .v-toggle[data-variant='outline'] {
+  .v-toggle[data-item-variant='outline'] {
     --toggle-frame: var(--vectis-color-border-strong);
   }
 
-  .v-toggle[data-variant='outline'] > .v-toggle-item:is(:disabled, [aria-disabled='true']),
-  .v-toggle[data-variant='outline']
+  .v-toggle[data-item-variant='outline'] > .v-toggle-item:is(:disabled, [aria-disabled='true']),
+  .v-toggle[data-item-variant='outline']
     > :not(:where(.v-overlay, .v-button-group))
     .v-toggle-item:is(:disabled, [aria-disabled='true']):not(:where(.v-overlay *)) {
     --toggle-frame: var(--vectis-color-border);
@@ -268,9 +274,9 @@ function onKeydown(event: KeyboardEvent) {
    * they are written at that weight — a middle segment then keeps its top and bottom
    * alone.
    */
-  .v-toggle[data-variant='outline']
+  .v-toggle[data-item-variant='outline']
     > .v-toggle-item[aria-pressed='true']:is([data-variant='soft'], [data-variant='ghost']),
-  .v-toggle[data-variant='outline']
+  .v-toggle[data-item-variant='outline']
     > :not(:where(.v-overlay, .v-button-group))
     .v-toggle-item[aria-pressed='true']:is([data-variant='soft'], [data-variant='ghost']):not(
       :where(.v-overlay *)

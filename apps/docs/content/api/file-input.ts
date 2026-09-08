@@ -28,7 +28,7 @@ export default {
         { name: 'placeholder', type: 'string' },
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconStartLabel', type: 'string' },
-        { name: 'iconEndLabel', type: 'string' },
+        { name: 'attachIconLabel', type: 'string' },
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'loadingLabel', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },
@@ -43,6 +43,8 @@ export default {
         { name: 'remove', type: '[file: File, index: number]' },
       ],
       slots: [
+        { name: 'start', type: '{}' },
+        { name: 'value-end', key: 'valueEnd', type: '{}' },
         { name: 'chip', type: "{ file: File; index: number; label: string; remove: () => void; size: 'xs' | 'sm'; compact: boolean; }" },
         { name: 'counter', type: '{ count: number; size: number; text: string; }' },
       ],

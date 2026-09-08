@@ -5,7 +5,7 @@ import { computed, ref } from 'vue'
 import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
 import VDatePicker from './VDatePicker.vue'
-import type { DateRange } from './VDatePicker.vue'
+import type { DatePickerRange } from './VDatePicker.vue'
 
 const t = storyText({
   en: {
@@ -66,7 +66,10 @@ export const Default: Story = {
 export const Range: Story = {
   render: (args) => ({
     components: { VDatePicker },
-    setup: () => ({ args, value: ref<DateRange>({ start: '2026-06-19', end: '2026-06-26' }) }),
+    setup: () => ({
+      args,
+      value: ref<DatePickerRange>({ start: '2026-06-19', end: '2026-06-26' }),
+    }),
     template: `
       <div style="display: grid; gap: 12px; justify-items: start">
         <VDatePicker v-bind="args" selection="range" v-model="value" />
@@ -252,5 +255,25 @@ export const States: Story = {
     await expect(readonlyGrid!.querySelector('.v-date-picker-nav button')).toBeEnabled()
     await expect(disabledGrid!.querySelector('.v-date-picker-nav button')).toBeDisabled()
     await expect(disabledGrid!.querySelector('button.v-date-picker-day')).toBeDisabled()
+  },
+}
+
+/**
+ * The month arrows in a right-to-left page. A chevron points at a physical direction, so the
+ * logical properties do not mirror it and the design system flips it by hand; this is the
+ * mechanical guard on that rule, which VPagination, VTabs, VBreadcrumb, VMenu and VCalendar
+ * carry untested. Verified red with the `:dir(rtl)` block removed.
+ */
+export const Rtl: Story = {
+  globals: { direction: 'rtl' },
+  args: { modelValue: '2026-06-10' },
+  play: async ({ canvasElement }) => {
+    const nav = canvasElement.querySelector('.v-date-picker-nav')!
+    const icon = nav.querySelector('.v-icon') as HTMLElement
+    await expect(getComputedStyle(icon).scale).toBe('-1 1')
+
+    // The picker is a named group, so it has an accessible name of its own rather than
+    // relying on whatever contains it.
+    await expect(canvasElement.querySelector('.v-date-picker')).toHaveAttribute('aria-label')
   },
 }

@@ -15,7 +15,7 @@ import { shallowRef, type ShallowRef } from 'vue'
 import { isDev } from '../utils/env'
 
 import { en } from './en'
-import type { VectisMessages, VectisMessagesInput } from './types'
+import type { Messages, MessagesInput } from './types'
 
 /** The language tag assumed until one is chosen. */
 export const DEFAULT_LOCALE = 'en-US'
@@ -29,10 +29,10 @@ const DEFAULT_LANG = 'en'
  * The Map is deliberately inert: what components track is `currentMessages` below, which is
  * recomputed whenever it changes.
  */
-const registry = new Map<string, VectisMessages>([[DEFAULT_LANG, en]])
+const registry = new Map<string, Messages>([[DEFAULT_LANG, en]])
 
 const currentLocale = shallowRef<string>(DEFAULT_LOCALE)
-const currentMessages = shallowRef<VectisMessages>(en)
+const currentMessages = shallowRef<Messages>(en)
 
 /**
  * The language part of a tag: British English is filed under English. A tag that makes no
@@ -51,7 +51,7 @@ function langOf(locale: string): string {
  * demands an exhaustive expression; the alternative is a non-null assertion, which would
  * hide the reasoning rather than record it. Do not read it as a live third case.
  */
-function resolve(locale: string): VectisMessages {
+function resolve(locale: string): Messages {
   return registry.get(langOf(locale)) ?? registry.get(DEFAULT_LANG) ?? en
 }
 
@@ -66,7 +66,7 @@ const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
  * FUNCTION can never be mistaken for an object and taken apart — which would leave `{}`
  * behind and a message that renders as nothing.
  */
-function mergeMessages(base: VectisMessages, patch: VectisMessagesInput): VectisMessages {
+function mergeMessages(base: Messages, patch: MessagesInput): Messages {
   const out: Record<string, object> = { ...base }
   for (const [namespace, section] of Object.entries(patch)) {
     // A dictionary parsed from a file can carry one of these as a namespace, and assigning
@@ -76,7 +76,7 @@ function mergeMessages(base: VectisMessages, patch: VectisMessagesInput): Vectis
     if (FORBIDDEN_KEYS.has(namespace)) continue
     if (section) out[namespace] = { ...out[namespace], ...section }
   }
-  return out as unknown as VectisMessages
+  return out as unknown as Messages
 }
 
 /**
@@ -117,7 +117,7 @@ export function setLocale(locale: string): void {
  * for one language ADD UP, so registering `fr` then correcting one word keeps the rest.
  * Passing `undefined` removes the override and puts English back as it came.
  */
-export function registerMessages(lang: string, messages: VectisMessagesInput | undefined): void {
+export function registerMessages(lang: string, messages: MessagesInput | undefined): void {
   const key = langOf(lang)
   if (isDev && key !== lang.toLowerCase()) {
     console.warn(
@@ -148,7 +148,7 @@ export function registerMessages(lang: string, messages: VectisMessagesInput | u
  * touched. It also stays callable outside a component, since all it does is return a ref;
  * a version that looked up the tree would need a `getCurrentInstance()` guard.
  */
-export function useMessages(): ShallowRef<VectisMessages> {
+export function useMessages(): ShallowRef<Messages> {
   return currentMessages
 }
 

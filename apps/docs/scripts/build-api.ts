@@ -136,7 +136,6 @@ const DEFAULT_OVERRIDES: Record<string, string> = {
   'VDateInput.mode': "'input'",
   'VIconButton.tone': "'neutral'",
   'VTimeInput.mode': "'input'",
-  'VTimeInput.showPicker': 'false',
 }
 
 /** Builds an index of every SFC in the library by its bare name, so no path table is needed. */

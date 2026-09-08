@@ -33,9 +33,10 @@ export default {
     {
       name: 'VTab',
       props: [
-        { name: 'value', type: 'string | number' },
+        { name: 'value', type: 'ItemValue' },
         { name: 'label', type: 'string' },
-        { name: 'icon', type: 'IconSource' },
+        { name: 'iconStart', type: 'IconSource' },
+        { name: 'iconEnd', type: 'IconSource' },
         { name: 'disabled', type: 'boolean', default: 'false' },
       ],
       slots: [

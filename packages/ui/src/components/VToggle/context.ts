@@ -21,7 +21,12 @@
 
 import type { InjectionKey } from 'vue'
 
-import type { ToggleSelectedVariant, ToggleTone, ToggleValue, ToggleVariant } from './VToggle.vue'
+import type {
+  ToggleSelectedVariant,
+  ToggleTone,
+  ToggleValue,
+  ToggleItemVariant,
+} from './VToggle.vue'
 
 export interface ToggleContext {
   /** Whether the item carrying this value is currently selected. */
@@ -29,7 +34,7 @@ export interface ToggleContext {
   /** Reports that an item was clicked; the group decides what it does to the selection. */
   select: (value: ToggleValue) => void
   /** How the unselected items are drawn. */
-  readonly variant: ToggleVariant
+  readonly itemVariant: ToggleItemVariant
   /** How the selected item is drawn. */
   readonly selectedVariant: ToggleSelectedVariant
   /** The colour a selected item takes. */

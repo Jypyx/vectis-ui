@@ -17,7 +17,7 @@
  * punctuation (`99+`, `+N`, an `N/M` counter, a time's colon); and the `[Component] …`
  * warnings, which address the integrator and are never translated.
  */
-export interface VectisMessages {
+export interface Messages {
   /** Words several components share, so that they are translated once rather than five times. */
   common: {
     /** Said by the spinner, and by the fields and the search box while they are loading. */
@@ -150,6 +150,8 @@ export interface VectisMessages {
     label: (keys: string) => string
   }
   datePicker: {
+    /** What the whole picker is called, header and grid together. */
+    label: string
     previousMonth: string
     nextMonth: string
     previousYear: string
@@ -161,6 +163,8 @@ export interface VectisMessages {
   /** The clock itself. VTimeInput reads the half-day words from here too: there is one
       vocabulary for choosing a time, wherever the control that does it is rendered. */
   timePicker: {
+    /** What the whole clock is called, the numerals and the face together. */
+    label: string
     meridiem: string
     am: string
     pm: string
@@ -330,4 +334,4 @@ export interface VectisMessages {
  * takes a value stays a whole function. Making it recursive would allow one of those
  * functions to be described as a partial object, which is to say as nothing at all.
  */
-export type VectisMessagesInput = { [K in keyof VectisMessages]?: Partial<VectisMessages[K]> }
+export type MessagesInput = { [K in keyof Messages]?: Partial<Messages[K]> }

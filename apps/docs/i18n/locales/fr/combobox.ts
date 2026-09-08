@@ -108,6 +108,10 @@ export default {
         chip: "Remplace la puce qui représente une valeur choisie. Elle reçoit <code>remove</code>, sans quoi la valeur ne pourrait plus être retirée, ainsi que la taille et la densité calculées pour tenir dans le champ, qui ne se devinent pas de l'extérieur. L'option elle-même peut manquer, si cette valeur n'a jamais figuré parmi les options.",
         empty: 'Ce que le panneau montre quand rien ne correspond. Il reçoit le terme cherché.',
         loading: 'Ce que le panneau montre pendant le chargement de ses premières options.',
+        valueEnd:
+          "Des contrôles à vous à l'intérieur du champ, placés avant ceux que le champ possède : la croix d'effacement et l'icône qui ouvre le panneau. Ces deux-là sont l'affordance propre du composant, ce qui explique l'absence de slot <code>end</code> ici.",
+        start:
+          "Du contenu au début du champ, rendu après <code>iconStart</code> plutôt qu'à sa place.",
       },
     },
   },

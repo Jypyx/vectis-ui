@@ -31,7 +31,13 @@ interface ToggleItemProps {
   /** The visible label. The default slot replaces it. */
   label?: string
   /** An icon before the label: an icon name, or an explicit render. */
-  icon?: IconSource
+  iconStart?: IconSource
+  /**
+   * An icon after the label. It is NOT switched to its filled form by the group's
+   * `selectedIconFilled`, which names the icon standing for the item rather than one
+   * trailing it.
+   */
+  iconEnd?: IconSource
   /**
    * Makes this item unusable: it no longer responds, the arrow keys skip over it, and
    * it greys out through the colour tokens.
@@ -41,7 +47,8 @@ interface ToggleItemProps {
 
 const props = withDefaults(defineProps<ToggleItemProps>(), {
   label: undefined,
-  icon: undefined,
+  iconStart: undefined,
+  iconEnd: undefined,
   disabled: false,
 })
 
@@ -56,7 +63,7 @@ const toggle = inject(toggleKey, null)
 const selected = computed(() => toggle != null && toggle.isSelected(props.value))
 
 /** An icon and no label at all: the item becomes a square, like a VIconButton. */
-const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.default)
+const iconOnly = computed(() => Boolean(props.iconStart) && !props.label && !slots.default)
 </script>
 
 <template>
@@ -70,14 +77,20 @@ const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.de
   <VButton
     class="v-toggle-item"
     :aria-pressed="selected ? 'true' : 'false'"
-    :variant="selected ? (toggle?.selectedVariant ?? 'solid') : (toggle?.variant ?? 'ghost')"
+    :variant="selected ? (toggle?.selectedVariant ?? 'solid') : (toggle?.itemVariant ?? 'ghost')"
     :tone="selected ? (toggle?.tone ?? 'accent') : 'neutral'"
     :disabled="disabled"
     :data-icon-only="iconOnly ? '' : undefined"
     @click="toggle?.select(value)"
   >
-    <template v-if="icon" #start>
-      <VIcon v-bind="iconProps(icon)" :filled="selected && (toggle?.selectedIconFilled ?? false)" />
+    <template v-if="iconStart" #start>
+      <VIcon
+        v-bind="iconProps(iconStart)"
+        :filled="selected && (toggle?.selectedIconFilled ?? false)"
+      />
+    </template>
+    <template v-if="iconEnd" #end>
+      <VIcon v-bind="iconProps(iconEnd)" />
     </template>
     <slot v-if="!iconOnly">{{ label }}</slot>
   </VButton>

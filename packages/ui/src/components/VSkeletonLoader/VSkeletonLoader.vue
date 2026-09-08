@@ -16,9 +16,9 @@ import { computed } from 'vue'
 import { useMessages } from '../../i18n/state'
 import { cssSize } from '../../utils/css'
 
-export type SkeletonShape = 'text' | 'control' | 'pill' | 'circle' | 'surface'
-export type SkeletonAnimation = 'wave' | 'pulse' | 'none'
-export type SkeletonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+export type SkeletonLoaderShape = 'text' | 'control' | 'pill' | 'circle' | 'surface'
+export type SkeletonLoaderAnimation = 'wave' | 'pulse' | 'none'
+export type SkeletonLoaderSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 interface SkeletonLoaderProps {
   /**
@@ -32,13 +32,13 @@ interface SkeletonLoaderProps {
    * - `circle` is that height in both dimensions — an avatar, a round icon button;
    * - `surface` is a card or an image, with a height of its own.
    */
-  shape?: SkeletonShape
+  shape?: SkeletonLoaderShape
   /**
    * The size on the scale shared by every control. It only means something for the
    * shapes sized like a control: text follows the typography around it, and a surface
    * has its own height.
    */
-  size?: SkeletonSize
+  size?: SkeletonLoaderSize
   /** Takes 4px off the height, as everywhere else in the design system. */
   compact?: boolean
   /**
@@ -58,7 +58,7 @@ interface SkeletonLoaderProps {
    * How the silhouette shows that something is happening. Turning it off freezes it,
    * which suits printing, a screenshot, or a parent already animating.
    */
-  animation?: SkeletonAnimation
+  animation?: SkeletonLoaderAnimation
   /**
    * A background colour of your own, replacing the token. The wave's highlight is
    * DERIVED from it, so it stays correct with nothing else to set.

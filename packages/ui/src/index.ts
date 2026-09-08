@@ -28,7 +28,8 @@ import './styles/index.css'
 export { setLocale, registerMessages } from './i18n/state'
 export { en } from './i18n/en'
 export { fr } from './i18n/fr'
-export type { VectisMessages, VectisMessagesInput } from './i18n/types'
+export type { ItemValue } from './types'
+export type { Messages, MessagesInput } from './i18n/types'
 
 export { default as VIcon } from './components/VIcon/VIcon.vue'
 // Hook for a third-party icon library — pure TS modules, so no effect on the
@@ -43,7 +44,7 @@ export type { IconResolver, IconAliases } from './components/VIcon/resolver'
 export type { BuiltinIcon, IconContext, IconRender, IconSource } from './components/VIcon/types'
 // The icons THEMSELVES are not re-exported here: they live behind 'vectis-ui/icons'
 // so that importing the barrel never drags all 34 drawings into a consumer's bundle.
-export type { VectisIconName } from './components/VIcon/icons/names'
+export type { IconName } from './components/VIcon/icons/names'
 export { default as VTypography } from './components/VTypography/VTypography.vue'
 export type { TypographyTone, TypographyVariant } from './components/VTypography/VTypography.vue'
 export { default as VPopover } from './components/VPopover/VPopover.vue'
@@ -62,11 +63,11 @@ export { default as VButtonGroup } from './components/VButton/VButtonGroup.vue'
 export type { ButtonGroupOrientation } from './components/VButton/VButtonGroup.vue'
 export { default as VPagination } from './components/VPagination/VPagination.vue'
 export type {
-  PaginationVariant,
+  PaginationItemVariant,
   PaginationTone,
   PaginationSize,
   PaginationAlign,
-  PaginationControlsDisplay,
+  PaginationControls,
 } from './components/VPagination/VPagination.vue'
 export { default as VTabs } from './components/VTabs/VTabs.vue'
 export type {
@@ -87,7 +88,7 @@ export type {
   ToggleSize,
   ToggleTone,
   ToggleValue,
-  ToggleVariant,
+  ToggleItemVariant,
 } from './components/VToggle/VToggle.vue'
 export { default as VToggleItem } from './components/VToggle/VToggleItem.vue'
 export { default as VInput } from './components/VInput/VInput.vue'
@@ -128,9 +129,9 @@ export { default as VAvatarGroup } from './components/VAvatar/VAvatarGroup.vue'
 export { default as VSpinner } from './components/VSpinner/VSpinner.vue'
 export { default as VSkeletonLoader } from './components/VSkeletonLoader/VSkeletonLoader.vue'
 export type {
-  SkeletonShape,
-  SkeletonAnimation,
-  SkeletonSize,
+  SkeletonLoaderShape,
+  SkeletonLoaderAnimation,
+  SkeletonLoaderSize,
 } from './components/VSkeletonLoader/VSkeletonLoader.vue'
 export { default as VCombobox } from './components/VCombobox/VCombobox.vue'
 export type {
@@ -179,7 +180,7 @@ export type {
   ProgressLinearOrientation,
 } from './components/VProgressLinear/VProgressLinear.vue'
 export { default as VSlider } from './components/VSlider/VSlider.vue'
-export type { SliderLabel } from './components/VSlider/VSlider.vue'
+export type { SliderLabel, SliderOrientation } from './components/VSlider/VSlider.vue'
 export { default as VDialog } from './components/VDialog/VDialog.vue'
 export type { DialogRole } from './components/VDialog/VDialog.vue'
 export { default as VDialogAlert } from './components/VDialog/VDialogAlert.vue'
@@ -187,9 +188,9 @@ export { default as VDatePicker } from './components/VDatePicker/VDatePicker.vue
 export type {
   DatePickerSelection,
   DatePickerValue,
-  DateRange,
+  DatePickerRange,
   DatePickerEvent,
-  DateMatcher,
+  DatePickerMatcher,
 } from './components/VDatePicker/VDatePicker.vue'
 export { default as VDateInput } from './components/VDateInput/VDateInput.vue'
 export type {

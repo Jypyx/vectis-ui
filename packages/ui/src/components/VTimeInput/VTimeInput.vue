@@ -24,6 +24,7 @@ import { computed, inject, provide, ref, useId, watchEffect } from 'vue'
 import VButton from '../VButton/VButton.vue'
 import { NO_BUTTON_GROUP, buttonGroupKey } from '../VButton/context'
 import VCombobox from '../VCombobox/VCombobox.vue'
+import type { ComboboxOption } from '../VCombobox/VCombobox.vue'
 import { inputGroupKey } from '../VInput/context'
 import { schedule as scheduleIcon } from '../VIcon/icons/schedule'
 import type { IconSource } from '../VIcon/types'
@@ -59,6 +60,7 @@ import { timeMatches } from './search'
 import { isDev } from '../../utils/env'
 import { digitsOf } from '../../utils/text'
 
+import { useControlShape } from '../../composables/useControlShape'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFieldPanel } from '../../composables/useFieldPanel'
@@ -93,10 +95,8 @@ interface TimeInputProps {
    * Offers the picker beside a field one can type into: an icon at the end of the field,
    * and a panel it opens.
    *
-   * It is left undefined by default rather than set to off, which is what distinguishes
-   * "not given" from an explicit refusal — and therefore what allows warning only the
-   * consumer who really asked to remove the clock from a `picker` field, where it is the
-   * only way in.
+   * It means nothing in `picker` mode, where the clock is already the only way to choose,
+   * nor in `list` mode, which has a panel of its own — VDateInput reads it the same way.
    */
   showPicker?: boolean
   /**
@@ -160,7 +160,11 @@ interface TimeInputProps {
    * What the end icon does, in words. It names the button that opens the clock, and
    * falls back to the design system dictionary.
    */
-  iconEndLabel?: string
+  /**
+   * What the clock button does, in words. It names the button `pickerIcon` renders, and falls back
+   * to the design system dictionary.
+   */
+  pickerIconLabel?: string
   /**
    * Shows a spinner at the end of the field, in place of the clock icon. It says that
    * something is being loaded and changes nothing else: the field can still be typed
@@ -193,7 +197,7 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
   // therefore what allows warning ONLY the consumer who explicitly asked for something
   // that cannot work.
   mode: undefined,
-  showPicker: undefined,
+  showPicker: false,
   minuteStep: 1,
   min: undefined,
   max: undefined,
@@ -210,7 +214,7 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
   invalid: false,
   iconStart: undefined,
   iconStartLabel: undefined,
-  iconEndLabel: undefined,
+  pickerIconLabel: undefined,
   loading: false,
   loadingLabel: undefined,
   clearable: false,
@@ -233,6 +237,17 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
+  /**
+   * Content at the start of the field, rendered after `iconStart` rather than in its place,
+   * as in VInput.
+   */
+  start?(): unknown
+  /**
+   * Controls of your own inside the field, after the AM/PM button when there is one and
+   * before the ones the field owns — the clear cross and the icon that opens the panel.
+   * Those two are this component's own affordance, which is why there is no `#end` here.
+   */
+  'value-end'?(): unknown
   /**
    * The strip at the foot of the clock, which REPLACES the Cancel and OK buttons rather
    * than joining them.
@@ -291,9 +306,7 @@ const isList = computed(() => resolvedMode.value === 'list')
  * into. A frozen field has none: there is nothing left for a panel to do.
  */
 const hasPicker = computed(
-  () =>
-    !props.readonly &&
-    (resolvedMode.value === 'picker' || (typing.value && props.showPicker === true)),
+  () => !props.readonly && (resolvedMode.value === 'picker' || (typing.value && props.showPicker)),
 )
 
 const vectisLocale = useLocale()
@@ -327,10 +340,6 @@ if (isDev) {
       console.warn(
         `[VTimeInput] unknown mode "${props.mode}": use "input" (the default), "picker" or "list".`,
       )
-    if (resolvedMode.value === 'picker' && !props.readonly && props.showPicker === false)
-      console.warn(
-        '[VTimeInput] showPicker is forced to true in "picker" mode: with no clock, the field would be impossible to fill.',
-      )
     if (isList.value && props.showPicker === true)
       console.warn(
         '[VTimeInput] showPicker is ignored in "list" mode: the list of times is the only panel.',
@@ -341,7 +350,7 @@ if (isDev) {
     // nothing at all, and their absence is invisible on screen.
     const inert = ([] as string[]).concat(
       props.pickerIcon !== scheduleIcon ? 'pickerIcon' : [],
-      props.iconEndLabel ? 'iconEndLabel' : [],
+      props.pickerIconLabel ? 'pickerIconLabel' : [],
       props.loadingLabel ? 'loadingLabel' : [],
     )
     if (isList.value && inert.length > 0)
@@ -433,9 +442,11 @@ function focusInPanel() {
 // AM/PM button lives INSIDE the field, so a 12 hour field is one box like any other and
 // the row has nothing of its own to join.
 const group = inject(inputGroupKey, null)
-const resolvedSize = computed(() => group?.size ?? props.size)
-const resolvedCompact = computed(() => group?.compact ?? props.compact)
-const resolvedDisabled = computed(() => group?.disabled || props.disabled)
+const {
+  size: resolvedSize,
+  compact: resolvedCompact,
+  disabled: resolvedDisabled,
+} = useControlShape(props, group)
 
 // @core
 // TRAP — this stops a VButtonGroup's or a VInputGroup's row context at this boundary. The
@@ -581,9 +592,10 @@ const {
   draft: maskDraft,
   fieldModel,
   writeField,
-  commitLive,
   commitOrRevert,
   onFieldInput,
+  backspaceOverSeparator,
+  pasteDigits,
 } = useMaskedField({
   fieldEl,
   typing: () => typing.value,
@@ -622,22 +634,7 @@ function onFieldKeydown(event: KeyboardEvent) {
     return
   }
   if (event.key === 'Backspace') {
-    const start = el.selectionStart
-    if (
-      start !== null &&
-      start === el.selectionEnd &&
-      start > 0 &&
-      !/\d/.test(el.value[start - 1] ?? '')
-    ) {
-      // TRAP — the separator is PLACED by the mask and never typed, so erasing one has to
-      // erase the DIGIT before it. Left alone, the mask would write it straight back and
-      // the key would look dead.
-      event.preventDefault()
-      const n = digitsOf(el.value.slice(0, start)).length
-      const digits = digitsOf(el.value)
-      writeField(formatTimeMask(digits.slice(0, n - 1) + digits.slice(n)), timeCaret(n - 1))
-      commitLive()
-    }
+    if (backspaceOverSeparator(el)) event.preventDefault()
     return
   }
   // Typing anything that is not a digit — the separator included, so that "9:30" can be
@@ -674,15 +671,7 @@ function onFieldPaste(event: ClipboardEvent) {
     if (pasted !== model.value) model.value = pasted
     return
   }
-  const digits = digitsOf(el.value)
-  const start = el.selectionStart ?? el.value.length
-  const end = el.selectionEnd ?? start
-  const from = digitsOf(el.value.slice(0, start)).length
-  const to = digitsOf(el.value.slice(0, end)).length
-  const inserted = digitsOf(pasted)
-  const next = (digits.slice(0, from) + inserted + digits.slice(to)).slice(0, 4)
-  writeField(formatTimeMask(next), timeCaret(Math.min(from + inserted.length, next.length), true))
-  commitLive()
+  pasteDigits(el, pasted)
 }
 
 function onFieldFocus() {
@@ -755,8 +744,8 @@ const options = computed<TimeOption[]>(() => {
  * the typed form's mask reads what it is given. The rule itself is pure and lives in
  * `./search`, which says why it is not in `utils/time.ts`.
  */
-const matchTime = (option: TimeOption, query: string) =>
-  timeMatches(option.label, option.value, query)
+const matchTime = (option: ComboboxOption, query: string) =>
+  timeMatches(option.label, String(option.value), query)
 
 /**
  * The bridge to VCombobox, whose value is a plain string where this component's is
@@ -801,7 +790,7 @@ const endIcon = computed<IconSource | undefined>(() =>
  * conditional would produce a false warning every time a typed field without a picker is
  * mounted.
  */
-const endIconLabel = computed(() => props.iconEndLabel ?? m.value.timeInput.openPicker)
+const endIconLabel = computed(() => props.pickerIconLabel ?? m.value.timeInput.openPicker)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.timeInput.clear)
 
 function onEndIcon() {
@@ -914,10 +903,12 @@ defineExpose({
              The rule after it separates what acts on the VALUE from what acts on the
              FIELD. It is dropped when nothing follows it, or it would trail off the end
              of an otherwise bare field. -->
-        <template v-if="hasMeridiem" #value-end>
+        <template v-if="$slots.start" #start><slot name="start" /></template>
+        <template v-if="hasMeridiem || $slots['value-end']" #value-end>
           <button
+            v-if="hasMeridiem"
             type="button"
-            class="v-input-action v-time-input-meridiem"
+            class="v-input-action v-field-action v-time-input-meridiem"
             :disabled="resolvedDisabled"
             :aria-label="
               m.timeInput.meridiem(meridiem === 'PM' ? m.timePicker.pm : m.timePicker.am)
@@ -927,10 +918,11 @@ defineExpose({
             {{ meridiem === 'PM' ? m.timePicker.pm : m.timePicker.am }}
           </button>
           <VSeparator
-            v-if="canClear || endIcon"
+            v-if="hasMeridiem && (canClear || endIcon)"
             orientation="vertical"
             class="v-time-input-divider"
           />
+          <slot name="value-end" />
         </template>
       </VInput>
     </div>
@@ -1028,13 +1020,13 @@ defineExpose({
 
   /* The AM/PM button wears the field's own action recipe — the box, the muted colour that
      lights up on hover, the focus ring and the disabled state all come from
-     `.v-input-action` — and changes only what a WORD needs that a glyph does not: room to
+     `.v-field-action` — and changes only what a WORD needs that a glyph does not: room to
      be read, and the field's type rather than the browser's default button font.
 
      The floor keeps the hit target at the size of its neighbours, so the two spellings do
      not resize the field between them.
 
-     The padding is DERIVED and not picked from the spacing scale: `.v-input-action` carries
+     The padding is DERIVED and not picked from the spacing scale: `.v-field-action` carries
      a negative inline margin that cancels the slack around a glyph inside its box, so that
      the row's gap is measured from the INK. A word fills its own box, so it has to put that
      slack back or it would sit a couple of pixels off the rhythm its neighbours keep —
@@ -1043,7 +1035,7 @@ defineExpose({
      The selector compounds the two classes because they are the same specificity in two
      different sheets, and which one the consumer's bundler puts last is not ours to
      decide. */
-  .v-input-action.v-time-input-meridiem {
+  .v-field-action.v-time-input-meridiem {
     inline-size: auto;
     min-inline-size: var(--control-action-size);
     padding-inline: calc((var(--control-action-size) - var(--vectis-icon-size)) / 2);

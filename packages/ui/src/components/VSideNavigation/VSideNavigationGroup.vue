@@ -35,7 +35,7 @@ const labelId = useId()
 
 <template>
   <li class="v-side-nav-group">
-    <span :id="labelId" class="v-side-nav-group-label"
+    <span :id="labelId" class="v-side-nav-group-label v-group-label"
       ><slot name="label">{{ label }}</slot></span
     >
     <ul class="v-side-nav-group-list" :aria-labelledby="labelId">
@@ -52,31 +52,23 @@ const labelId = useId()
   }
 
   /*
-   * The section heading takes the overline type role, without forcing capitals: how
-   * the label is written is the consumer's decision.
+   * The whole recipe comes from `.v-group-label` (styles/group-label.css). The one thing
+   * this level changes is where the heading starts, since a section sits at the depth of
+   * the rows it names.
    *
-   * Its indent and its height are the rows' own recipe, so a heading occupies exactly
-   * the height of a row — compact included — and the vertical rhythm of the list is
-   * not broken by it. The type is the one thing staying outside that scale, which is
-   * why the text has to be centred vertically by hand.
+   * TRAP — the indent repeats the rows' computation rather than sharing a variable with
+   * them, and it has to: a custom property is substituted on the element that DECLARES it,
+   * so a shared one set higher up would be frozen at level zero.
    *
-   * TRAP — the indent repeats the rows' computation rather than sharing a variable
-   * with them, and it has to: a custom property is substituted on the element that
-   * DECLARES it, so a shared one set higher up would be frozen at level zero.
+   * The selector COMPOUNDS the two classes: on its own it would sit at equal specificity
+   * with the shared rule in another sheet, and which one a consumer's bundler puts last is
+   * not ours to decide.
    */
-  .v-side-nav-group-label {
-    display: flex;
-    align-items: center;
-    min-block-size: var(--control-height);
-    padding-block: var(--vectis-space-1);
+  .v-group-label.v-side-nav-group-label {
     padding-inline: calc(
         var(--control-padding-inline) + var(--side-nav-level, 0) * var(--side-nav-indent)
       )
       var(--control-padding-inline);
-    font-size: var(--vectis-text-overline-size);
-    font-weight: var(--vectis-text-overline-weight);
-    letter-spacing: var(--vectis-text-overline-tracking);
-    color: var(--vectis-color-text-muted);
   }
 }
 </style>

@@ -26,6 +26,7 @@ import VTypography from '../VTypography/VTypography.vue'
 import { useFileDrop } from '../../composables/useFileDrop'
 import { useFileField } from '../../composables/useFileField'
 import { iconClickHandlers } from '../../composables/useIconClickHandlers'
+import { useControlShape } from '../../composables/useControlShape'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useLocale, useMessages } from '../../i18n/state'
 import { chipScaleFor } from '../../utils/chip'
@@ -108,7 +109,11 @@ interface FileInputProps {
    * What the end icon does, in words. It names the button that opens the file dialog,
    * and falls back to the design system dictionary.
    */
-  iconEndLabel?: string
+  /**
+   * What the attach button does, in words. It names the button `attachIcon` renders, and falls back
+   * to the design system dictionary.
+   */
+  attachIconLabel?: string
   /**
    * Shows a spinner at the end of the field, in place of the attach icon — while an
    * upload is under way, typically. It says that something is happening and changes
@@ -152,7 +157,7 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   placeholder: undefined,
   iconStart: undefined,
   iconStartLabel: undefined,
-  iconEndLabel: undefined,
+  attachIconLabel: undefined,
   loading: false,
   loadingLabel: undefined,
   clearable: false,
@@ -179,6 +184,17 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
+  /**
+   * Content at the start of the field, rendered after the chips standing for the chosen
+   * files rather than in their place.
+   */
+  start?(): unknown
+  /**
+   * Controls of your own inside the field, placed before the ones the field owns — the
+   * clear cross and the icon that opens the file dialog. Those two are this component's
+   * own affordance, which is why there is no `#end` here: it would replace them.
+   */
+  'value-end'?(): unknown
   /**
    * Replaces the chip standing for one file.
    *
@@ -231,9 +247,11 @@ const locale = useLocale()
 // row's decision rather than its own (VInput/context.ts). The chips read the resolved pair
 // too, or they would come out one step off the field they sit in.
 const group = inject(inputGroupKey, null)
-const resolvedSize = computed(() => group?.size ?? props.size)
-const resolvedCompact = computed(() => group?.compact ?? props.compact)
-const resolvedDisabled = computed(() => group?.disabled || props.disabled)
+const {
+  size: resolvedSize,
+  compact: resolvedCompact,
+  disabled: resolvedDisabled,
+} = useControlShape(props, group)
 
 /*
  * The hidden input, the sorting of the consumer's attributes and the single entry point
@@ -265,6 +283,7 @@ const { fileEl, nativeAttrs, controlAttrs, acceptFiles, onNativeChange, openPick
 const fieldAttrs = computed(() => ({ ...controlAttrs.value, ...iconStartClick }))
 
 const inputRef = ref<InstanceType<typeof VInput> | null>(null)
+const rootEl = ref<HTMLElement | null>(null)
 
 // Chips only mean something for a list: a single file always shows as plain text.
 const resolvedDisplay = computed<FileInputDisplay>(() => (props.multiple ? props.display : 'text'))
@@ -300,7 +319,7 @@ const canClear = computed(
 const endIcon = computed<IconSource | undefined>(() =>
   props.readonly ? undefined : props.attachIcon,
 )
-const endIconLabel = computed(() => props.iconEndLabel ?? m.value.fileInput.attach)
+const endIconLabel = computed(() => props.attachIconLabel ?? m.value.fileInput.attach)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.fileInput.clear)
 
 const totalSize = computed(() => model.value.reduce((sum, file) => sum + file.size, 0))
@@ -437,11 +456,17 @@ defineExpose({
    * click, a key press: browsers refuse to open a file dialog by themselves.
    */
   open: openPicker,
+  /**
+   * The component's own box, for what neither of the two above covers. It is the wrapper
+   * and not the hidden file input: that one is the FORM's element, this is the reader's.
+   */
+  el: rootEl,
 })
 </script>
 
 <template>
   <div
+    ref="rootEl"
     class="v-file-input"
     :class="rootClass"
     :style="[{ '--chip-height': chipScale.height }, rootStyle]"
@@ -461,7 +486,7 @@ defineExpose({
       v-bind="nativeAttrs"
       ref="fileEl"
       type="file"
-      class="v-file-input-native"
+      class="v-file-input-native v-hidden-input"
       tabindex="-1"
       aria-hidden="true"
       :accept="accept"
@@ -496,8 +521,11 @@ defineExpose({
         @clear="clearValue"
         @keydown="onFieldKeydown"
       >
-        <template v-if="resolvedDisplay === 'chip'" #start>
-          <template v-for="(file, index) in model" :key="`${index}-${file.name}`">
+        <template v-if="resolvedDisplay === 'chip' || $slots.start" #start>
+          <template
+            v-for="(file, index) in resolvedDisplay === 'chip' ? model : []"
+            :key="`${index}-${file.name}`"
+          >
             <slot
               name="chip"
               :file="file"
@@ -520,7 +548,10 @@ defineExpose({
               >
             </slot>
           </template>
+          <slot name="start" />
         </template>
+
+        <template v-if="$slots['value-end']" #value-end><slot name="value-end" /></template>
       </VInput>
     </div>
 
@@ -556,20 +587,10 @@ defineExpose({
     font-family: var(--vectis-text-family);
   }
 
-  /* The real file input is a SOURCE of files and not a control anyone deals with. It is
-     hidden with `opacity` and never with `display: none`, the design system's rule for a
-     hidden form control, which has to stay submittable; it is given no size and made
-     deaf to the pointer, so it can never swallow a click meant for the field. Taking it
-     out of the tab order and hiding it from screen readers, in the template, is what
-     leaves the visible field as the single stop and the single announcement. */
-  .v-file-input-native {
-    position: absolute;
-    inline-size: 0;
-    block-size: 0;
-    opacity: 0;
-    pointer-events: none;
-  }
-
+  /* The real file input is a SOURCE of files and not a control anyone deals with: it
+     wears `.v-hidden-input`, and taking it out of the tab order and hiding it from screen
+     readers, in the template, is what leaves the visible field as the single stop and the
+     single announcement. */
   .v-file-input:not([data-disabled]):not([data-readonly]) .v-file-input-control,
   .v-file-input:not([data-disabled]):not([data-readonly])[data-display='text'] .v-input-control {
     cursor: pointer;

@@ -9,17 +9,17 @@ export default {
           'Combien de pages il y a en tout. Elle vaut 1 par défaut, ce qui rend une seule page : le vrai nombre doit presque toujours être donné.',
         totalVisible:
           "Combien d'emplacements rendre, ellipses comprises, pour que la rangée garde exactement la même largeur quelle que soit la page courante. En dessous de cinq il ne resterait rien à montrer autour de la page courante : cinq est donc le minimum effectif. Omise, toutes les pages sont rendues.",
-        attached: 'Assemble tous les boutons en un seul contrôle segmenté.',
-        variant:
-          'Comment sont dessinées les pages AUTRES que la courante, ainsi que les contrôles. La page courante est toujours pleine, quoi que dise cette prop.',
+        detached:
+          "Sépare les boutons au lieu de les joindre en un seul contrôle segmenté. C'est le mot que VButtonGroup et VToggle emploient pour la même question, dans le même sens.",
+        itemVariant:
+          "Comment sont dessinées les pages autres que la page courante, ainsi que les contrôles. La page courante est toujours pleine, quoi que dise cette prop. Elle porte le nom des items parce que c'est ce qu'elle peint : sur VTabs et VDataTable, <code>variant</code> nomme la décoration du cadre.",
         tone: 'La couleur que prend la page courante. Les autres pages et les contrôles restent neutres.',
         size: "La hauteur des boutons, tirée de l'échelle partagée par tous les contrôles.",
         compact: 'Retire 4px à la hauteur de chaque bouton.',
         align:
           "Où se place la rangée dans l'espace qu'on lui donne. Cela ne compte qu'en mode responsive, où la rangée prend toute la largeur disponible.",
-        hideControls:
-          "Retire les boutons précédent et suivant qui se placent sinon de part et d'autre des pages.",
-        controlsDisplay: 'Si ces contrôles montrent une icône, leur libellé, ou les deux.',
+        controls:
+          "Les boutons précédent et suivant de part et d'autre des pages : ce qu'ils affichent, ou <code>false</code> pour les retirer. Une prop plutôt que deux, la forme que <code>preview</code> de VFilePicker et <code>controls</code> de VCarousel emploient déjà.",
         prevIcon: "L'icône du contrôle précédent.",
         nextIcon: "L'icône du contrôle suivant.",
         prevLabel:

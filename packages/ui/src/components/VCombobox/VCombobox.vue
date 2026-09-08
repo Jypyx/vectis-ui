@@ -32,11 +32,13 @@ import { useInfiniteScroll } from './infiniteScroll'
 import VSpinner from '../VSpinner/VSpinner.vue'
 
 import { toggleValue } from '../../utils/array'
+import type { ItemValue } from '../../types'
 import { inputGroupKey } from '../VInput/context'
 
 import { chipScaleFor } from '../../utils/chip'
 import { normalizeText } from '../../utils/text'
 
+import { useControlShape } from '../../composables/useControlShape'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
@@ -48,8 +50,11 @@ import { useMessages } from '../../i18n/state'
 
 /** One thing that can be chosen. */
 export interface ComboboxOption {
-  /** What choosing it means: this is what the value holds. */
-  value: string
+  /**
+   * What choosing it means: this is what the value holds. A number is admitted because a
+   * list of options almost always comes from somewhere that keys its rows by one.
+   */
+  value: ItemValue
   /** What it is called on screen, and what the search matches against. */
   label: string
   /** An icon before the label: an icon name, or an explicit render. */
@@ -234,6 +239,17 @@ const emit = defineEmits<{
 
 defineSlots<{
   /**
+   * Content at the start of the field, rendered after the chips standing for the chosen
+   * values rather than in their place.
+   */
+  start?(): unknown
+  /**
+   * Controls of your own inside the field, placed before the ones the field owns — the
+   * clear cross and the chevron. Those two are this component's own affordance, which is
+   * why there is no `#end` here: it would replace them.
+   */
+  'value-end'?(): unknown
+  /**
    * What a row of the list shows, in place of the plain label — a subtitle, an avatar,
    * a badge. It is told whether the row is the highlighted one and whether it is
    * already chosen, so the rendering can react to both.
@@ -254,7 +270,7 @@ defineSlots<{
    * options.
    */
   chip?(props: {
-    value: string
+    value: ItemValue
     option: ComboboxOption | undefined
     label: string
     remove: () => void
@@ -272,9 +288,11 @@ defineSlots<{
 // RESOLVED values and never the props: the chips, the panel and the field would otherwise
 // come out at three different scales inside the same row.
 const group = inject(inputGroupKey, null)
-const resolvedSize = computed(() => group?.size ?? props.size)
-const resolvedCompact = computed(() => group?.compact ?? props.compact)
-const resolvedDisabled = computed(() => group?.disabled || props.disabled)
+const {
+  size: resolvedSize,
+  compact: resolvedCompact,
+  disabled: resolvedDisabled,
+} = useControlShape(props, group)
 
 // The size, the density and the HEIGHT of the chips sitting inside the field, worked out
 // once in `utils/chip.ts` and shared with VFileInput. The height is set inline below
@@ -287,7 +305,7 @@ const chipScale = computed(() => chipScaleFor(resolvedSize.value, resolvedCompac
  * string to begin with, and the array is never mutated in place: each change is a new one,
  * which is what wakes the consumer's binding.
  */
-const model = defineModel<string | string[]>({ default: '' })
+const model = defineModel<ItemValue | ItemValue[]>({ default: '' })
 
 // `class` and `style` stay on the wrapper, where a consumer expects to style the
 // component; everything else — a name above all — goes down to the text field, which is
@@ -326,9 +344,12 @@ const focused = ref(false)
 // the panel offers the whole list again. It only becomes true once the reader types.
 const typed = ref(false)
 
-const selectedValues = computed<string[]>(() => {
+const selectedValues = computed<ItemValue[]>(() => {
   if (props.multiple) return Array.isArray(model.value) ? model.value : []
-  return typeof model.value === 'string' && model.value ? [model.value] : []
+  // An empty string is what an emptied combobox says, and it is not a value. A NUMBER, on
+  // the other hand, is a value even at zero — hence the test on the empty string alone
+  // rather than on falsiness, which would drop the option keyed `0`.
+  return !Array.isArray(model.value) && model.value !== '' ? [model.value] : []
 })
 
 // Every option, flattened: the blocks unwrapped, the separators dropped, in the order
@@ -351,7 +372,7 @@ const allOptions = computed<ComboboxOption[]>(() =>
 // effect tracks the ITERATION and therefore also notices a page appended in place. And
 // it is bounded to what is currently chosen: everything else is read from the options
 // themselves.
-const optionCache = reactive(new Map<string, ComboboxOption>())
+const optionCache = reactive(new Map<ItemValue, ComboboxOption>())
 watchEffect(() => {
   const wanted = new Set(selectedValues.value)
   for (const option of allOptions.value) {
@@ -373,7 +394,7 @@ watchEffect(() => {
  * the option that came first.
  */
 const optionsByValue = computed(() => {
-  const map = new Map<string, ComboboxOption>()
+  const map = new Map<ItemValue, ComboboxOption>()
   for (const option of allOptions.value) if (!map.has(option.value)) map.set(option.value, option)
   return map
 })
@@ -392,12 +413,12 @@ const selectedSet = computed(() => new Set(selectedValues.value))
  * reactive converts the objects inside it. Compare options by their value and never by
  * identity, or the two forms of the same option will not match.
  */
-function optionOf(value: string) {
+function optionOf(value: ItemValue) {
   return optionsByValue.value.get(value) ?? optionCache.get(value)
 }
 
-function labelOf(value: string) {
-  return optionOf(value)?.label ?? value
+function labelOf(value: ItemValue) {
+  return optionOf(value)?.label ?? String(value)
 }
 
 /*
@@ -463,7 +484,7 @@ type RenderedNode =
   | { kind: 'separator'; key: string }
 
 const rendered = computed<RenderedNode[]>(() => {
-  const indexOf = new Map<string, number>()
+  const indexOf = new Map<ItemValue, number>()
   filtered.value.forEach((option, index) => indexOf.set(option.value, index))
 
   const entryOf = (option: ComboboxOption): RenderedOption | null => {
@@ -760,7 +781,7 @@ function select(option: ComboboxOption) {
   }
 }
 
-function removeValue(value: string) {
+function removeValue(value: ItemValue) {
   if (!props.multiple || props.readonly) return
   model.value = selectedValues.value.filter((v) => v !== value)
   inputRef.value?.focus()
@@ -882,8 +903,8 @@ defineExpose({
         @blur="focused = false"
         @clear="onClear"
       >
-        <template v-if="multiple" #start>
-          <template v-for="value in selectedValues" :key="value">
+        <template v-if="multiple || $slots.start" #start>
+          <template v-for="value in multiple ? selectedValues : []" :key="value">
             <slot
               name="chip"
               :value="value"
@@ -905,7 +926,10 @@ defineExpose({
               >
             </slot>
           </template>
+          <slot name="start" />
         </template>
+
+        <template v-if="$slots['value-end']" #value-end><slot name="value-end" /></template>
 
         <!-- The chevron sits at the end of the field and turns as the panel opens; the
              clear cross is rendered by the field itself, to its left.
@@ -938,6 +962,7 @@ defineExpose({
       v-model:open="open"
       mode="manual"
       anchor="--combobox-anchor"
+      match-trigger
       :placement="placement"
       role="listbox"
       class="v-combobox-panel v-control"
@@ -1036,10 +1061,9 @@ defineExpose({
   /* The panel comes from VPopover, which brings the floating element, its open state, its
      anchoring, its placement and its surface. It also carries the shared size class, so
      the options and the state rows read their dimensions from it with no size table
-     here. What stays are the two things specific to a list: a width tied to the field
-     below it, and the scrolling. */
+     here. The width tied to the field is VPopover's `matchTrigger`, so what stays here
+     is the one thing specific to a list: the scrolling. */
   .v-combobox-panel {
-    min-inline-size: anchor-size(width);
     max-block-size: var(--vectis-control-size-combobox-list-max-block);
     overflow: auto;
   }

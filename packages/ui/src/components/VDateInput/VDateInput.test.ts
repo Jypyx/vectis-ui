@@ -406,7 +406,7 @@ describe('VDateInput — input mode', () => {
 
   it('raises no warning when mounting an empty input field', () => {
     // `useIconClickHandlers` warns AT SETUP when a `@click:icon-end` is
-    // attached without an `iconEndLabel` — even with no icon rendered. That is what
+    // attached without an `pickerIconLabel` — even with no icon rendered. That is what
     // forces `endIconLabel` to stay defined at all times.
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     mount()
@@ -460,14 +460,14 @@ describe('VDateInput — the field props', () => {
     expect(getByRole('dialog')).toBeTruthy()
   })
 
-  it('iconEndLabel and clearLabel override the dictionary', () => {
+  it('pickerIconLabel and clearLabel override the dictionary', () => {
     const { getByRole } = render(VDateInput, {
       props: {
         mode: 'picker',
         modelValue: JUNE,
         label: 'Date',
         clearable: true,
-        iconEndLabel: 'Pick a date',
+        pickerIconLabel: 'Pick a date',
         clearLabel: 'Empty the date',
       },
     })

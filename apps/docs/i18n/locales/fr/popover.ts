@@ -12,6 +12,8 @@ export default {
         anchor:
           "Le nom d'une ancre que vous avez posée sur votre propre contrôle, écrit en identifiant CSS à tirets comme <code>--tooltip-anchor</code>. Le fournir remplace l'enveloppe interne, ce qui est la voie obligatoire dès que la gâchette est un champ de texte, où l'attribut <code>popovertarget</code> du navigateur n'est pas admis.",
         bare: "Retire au panneau la surface du design system : ni fond, ni bordure, ni ombre, ni coins arrondis. C'est ce que demande un panneau dont le contenu apporte les siens, comme le fait VDatePicker.",
+        matchTrigger:
+          "Empêche le panneau d'être plus étroit que ce à quoi il est ancré. C'est un plancher : un panneau qui a sa propre largeur la dépasse toujours au lieu d'être ramené à celle du déclencheur, ce que veut une liste de libellés longs sous un champ court.",
         vModelOpen:
           'Si le panneau est affiché. Il part fermé et il est bidirectionnel, alimenté depuis le DOM : en mode <code>auto</code>, la fermeture légère du navigateur y réécrit. Le poser ouvre et ferme le panneau ; quand le changement doit être synchrone, utilisez plutôt les <code>show</code> et <code>hide</code> exposés, ce que font VTooltip et les sélecteurs.',
       },

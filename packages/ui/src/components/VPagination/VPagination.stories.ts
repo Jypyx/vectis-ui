@@ -14,25 +14,25 @@ const meta = {
   title: 'Components/Pagination',
   component: VPagination,
   argTypes: {
-    variant: { control: 'inline-radio', options: ['ghost', 'outline'] },
+    itemVariant: { control: 'inline-radio', options: ['ghost', 'outline'] },
     tone: {
       control: 'inline-radio',
       options: ['accent', 'neutral', 'danger'],
     },
     size: { control: 'inline-radio', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     align: { control: 'inline-radio', options: ['start', 'center', 'end'] },
-    controlsDisplay: { control: 'inline-radio', options: ['icon', 'text', 'both'] },
+    controls: { control: 'inline-radio', options: [false, 'icon', 'text', 'both'] },
   },
   args: {
     length: 20,
     totalVisible: 7,
-    attached: false,
-    variant: 'ghost',
+    detached: false,
+    itemVariant: 'ghost',
     tone: 'accent',
     size: 'md',
     compact: false,
     align: 'start',
-    controlsDisplay: 'icon',
+    controls: 'icon',
     disabled: false,
     responsive: true,
   },
@@ -83,7 +83,7 @@ export const Default: Story = {
 }
 
 export const Attached: Story = {
-  args: { attached: true, variant: 'outline' },
+  args: { itemVariant: 'outline' },
 }
 
 export const Variants: Story = {

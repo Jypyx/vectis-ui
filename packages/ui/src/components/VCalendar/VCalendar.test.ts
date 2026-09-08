@@ -175,7 +175,7 @@ describe('the events', () => {
 
   it('writes those times on the clock the locale uses', () => {
     const { getByRole } = mount({
-      hourFormat: '24h',
+      format: '24h',
       events: [event({ id: 'a', title: 'Standup' })],
     })
     expect(getByRole('button', { name: 'Standup, 09:00 – 10:00' })).toBeTruthy()
@@ -189,7 +189,7 @@ describe('the events', () => {
 
   it('appends a time zone as an annotation, and only as one', () => {
     const { getByRole, container } = mount({
-      hourFormat: '24h',
+      format: '24h',
       events: [event({ id: 'a', title: 'Sync', timezone: 'Europe/Paris' })],
     })
     expect(getByRole('button', { name: 'Sync, 09:00 – 10:00 (Europe/Paris)' })).toBeTruthy()

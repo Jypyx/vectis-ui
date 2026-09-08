@@ -13,9 +13,9 @@
  * letter for letter, and a straight apostrophe is a different character.
  */
 
-import type { VectisMessages } from './types'
+import type { Messages } from './types'
 
-export const fr: VectisMessages = {
+export const fr: Messages = {
   common: {
     loading: 'Chargement…',
     clear: 'Effacer',
@@ -101,6 +101,7 @@ export const fr: VectisMessages = {
     label: (keys) => `Raccourci clavier : ${keys}`,
   },
   datePicker: {
+    label: 'Sélecteur de date',
     previousMonth: 'Mois précédent',
     nextMonth: 'Mois suivant',
     previousYear: 'Année précédente',
@@ -114,6 +115,7 @@ export const fr: VectisMessages = {
     label: 'Choisir une date',
   },
   timePicker: {
+    label: "Sélecteur d'heure",
     meridiem: 'AM ou PM',
     am: 'AM',
     pm: 'PM',

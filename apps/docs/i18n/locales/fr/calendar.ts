@@ -48,7 +48,7 @@ export default {
           "Quels jours de la semaine sont montrés, en nombres à partir de 0 pour dimanche. L'ORDRE compte aussi : la première entrée est le jour où commence une semaine, ce pourquoi il n'y a pas de réglage séparé pour cela. Omis, les sept jours dans l'ordre où la locale les place.",
         locale:
           'La langue dans laquelle les jours, les mois et les heures sont écrits. Elle retombe sur la locale globale.',
-        hourFormat:
+        format:
           'Si les heures sont montrées sur une horloge de 12 ou de 24 heures. Suit la locale.',
         dayStart: "L'heure à laquelle la grille commence, à partir de 0.",
         dayEnd: "L'heure à laquelle elle se termine, jusqu'à 24.",
@@ -62,6 +62,8 @@ export default {
           "Combien d'événements un jour de la vue mois montre avant de compter le reste.",
         readonly:
           "Empêche de déplacer et d'étirer les événements, à la souris comme au clavier. Ils restent lisibles et cliquables, et rien de plus.",
+        disabled:
+          "Fige tout le calendrier : plus rien ne se déplace, ne se crée ni ne s'ouvre, et aucune autre période n'est atteignable. Les cartes sortent du parcours de tabulation, la grille garde le sien, si bien que l'agenda reste lisible. C'est ce qui le distingue de <code>readonly</code>, qui n'arrête que l'édition.",
         creatable:
           "Crée un événement quand une partie vide d'une journée est prise : un clic en fait un long d'un pas, un glissement en fait un aussi long qu'il a été tracé. Le signal de créneau part de toute façon : vous pouvez donc laisser ceci de côté et le garder.",
         edgeStepDelay:

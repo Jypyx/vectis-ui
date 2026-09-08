@@ -4,7 +4,7 @@ import { computed, ref } from 'vue'
 
 import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
-import type { DateRange } from '../VDatePicker/VDatePicker.vue'
+import type { DatePickerRange } from '../VDatePicker/VDatePicker.vue'
 import VDateInput from './VDateInput.vue'
 
 const t = storyText({
@@ -158,7 +158,11 @@ export const Range: Story = {
   args: { selection: 'range' },
   render: (args) => ({
     components: { VDateInput },
-    setup: () => ({ args, t, value: ref<DateRange>({ start: '2026-06-19', end: '2026-06-26' }) }),
+    setup: () => ({
+      args,
+      t,
+      value: ref<DatePickerRange>({ start: '2026-06-19', end: '2026-06-26' }),
+    }),
     template: `
       <div style="width: 300px">
         <VDateInput v-bind="args" :label="t.period" v-model="value" />
@@ -314,7 +318,7 @@ export const ReadOnly: Story = {
  * icon while something is being fetched, and changes nothing else: the field is still
  * typed into and the panel still opens.
  *
- * `iconEndLabel` and `clearLabel` rename the calendar button and the clear cross when
+ * `pickerIconLabel` and `clearLabel` rename the calendar button and the clear cross when
  * the dictionary's wording is not the right one.
  */
 export const FieldIcon: Story = {
@@ -330,7 +334,7 @@ export const FieldIcon: Story = {
           :label="t.searchByDate"
           show-picker
           clearable
-          icon-end-label="Open the calendar"
+          picker-icon-label="Open the calendar"
           clear-label="Empty the date"
         />
         <VDateInput v-bind="args" v-model="value" loading :label="t.checkingDate" show-picker />

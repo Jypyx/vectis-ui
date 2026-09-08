@@ -9,17 +9,17 @@ export default {
           'How many pages there are in all. It is 1 by default, which renders a single page: the real count almost always has to be given.',
         totalVisible:
           'How many slots to render, ellipses counted among them, so the row keeps exactly the same width whichever page is current. Below five there would be nothing left to show around the current page, so five is the effective minimum. Left out, every page is rendered.',
-        attached: 'Joins every button into one segmented control.',
-        variant:
-          'How the pages other than the current one, and the controls, are drawn. The current page is always filled, whatever this says.',
+        detached:
+          'Separates the buttons instead of joining them into one segmented control. It is the word VButtonGroup and VToggle use for the same question, in the same direction.',
+        itemVariant:
+          'How the pages other than the current one, and the controls, are drawn. The current page is always filled, whatever this says. It is named for the items because that is what it paints: on VTabs and VDataTable <code>variant</code> names the decoration of the frame instead.',
         tone: 'The colour the current page takes. The other pages and the controls stay neutral.',
         size: 'The height of the buttons, from the scale shared by every control.',
         compact: 'Takes 4px off the height of every button.',
         align:
           'Where the row sits in the space it is given. It only matters in responsive mode, where the row takes the whole width available.',
-        hideControls:
-          'Hides the previous and next buttons that otherwise sit on either side of the pages.',
-        controlsDisplay: 'Whether those controls show an icon, their label, or both.',
+        controls:
+          'The previous and next buttons on either side of the pages: what they show, or <code>false</code> to leave them out. One prop rather than two, the shape VFilePicker <code>preview</code> and VCarousel <code>controls</code> already use.',
         prevIcon: 'The icon of the previous control.',
         nextIcon: 'The icon of the next control.',
         prevLabel:

@@ -190,14 +190,18 @@ describe('VTimeInput — picker mode', () => {
     expect(panelOpen(container)).toBe(false)
   })
 
-  it('ignores showPicker in read-only mode (and says so)', async () => {
+  // `picker` mode forces the clock whatever `showPicker` says, and says nothing about it:
+  // the prop defaults to `false`, so there is no way to tell a consumer who wrote it from
+  // one who did not, and a warning would fire on a bare `<VTimeInput mode="picker" />`.
+  // VDateInput has always read it this way.
+  it('ignores showPicker in picker mode, in silence', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { container, getByRole } = render(VTimeInput, {
       props: { mode: 'picker', modelValue: '09:15', format: '24h', showPicker: false },
     })
     await openPanel(container)
     expect(getByRole('slider')).toBeTruthy()
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('showPicker'))
+    expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('showPicker'))
     warn.mockRestore()
   })
 
@@ -727,14 +731,14 @@ describe('VTimeInput — the field props', () => {
     expect(getByRole('dialog')).toBeTruthy()
   })
 
-  it('iconEndLabel and clearLabel override the dictionary', () => {
+  it('pickerIconLabel and clearLabel override the dictionary', () => {
     const { getByRole } = render(VTimeInput, {
       props: {
         mode: 'picker',
         modelValue: '09:15',
         label: 'Time',
         clearable: true,
-        iconEndLabel: 'Pick a time',
+        pickerIconLabel: 'Pick a time',
         clearLabel: 'Empty the time',
       },
     })
@@ -775,9 +779,9 @@ describe('VTimeInput — the field props', () => {
   it('warns for the end-icon props the list form cannot use', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     render(VTimeInput, {
-      props: { mode: 'list', minuteStep: 30, iconEndLabel: 'Open', loadingLabel: 'Loading' },
+      props: { mode: 'list', minuteStep: 30, pickerIconLabel: 'Open', loadingLabel: 'Loading' },
     })
-    expect(warn.mock.calls.map(String).join(' ')).toContain('iconEndLabel, loadingLabel')
+    expect(warn.mock.calls.map(String).join(' ')).toContain('pickerIconLabel, loadingLabel')
   })
 
   it('exposes focus and the real input, in the list form too', async () => {

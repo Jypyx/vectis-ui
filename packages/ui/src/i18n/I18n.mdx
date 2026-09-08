@@ -107,9 +107,9 @@ dictionary. Whatever you do not write falls back to English, never to an empty s
 partial dictionary is usable from its very first key.
 
 ```ts
-import { registerMessages, setLocale, type VectisMessagesInput } from 'vectis-ui'
+import { registerMessages, setLocale, type MessagesInput } from 'vectis-ui'
 
-const de: VectisMessagesInput = {
+const de: MessagesInput = {
   common: { loading: 'Wird geladen…', close: 'Schließen' },
   pagination: { previous: 'Vorherige Seite', next: 'Nächste Seite', page: (p) => `Seite ${p}` },
 }
@@ -118,8 +118,8 @@ registerMessages('de', de)
 setLocale('de-DE')
 ```
 
-Type the constant as `VectisMessagesInput` to get key autocompletion and signature checking. To
-make the compiler demand **total** coverage, type it `VectisMessages`: it will then reject any
+Type the constant as `MessagesInput` to get key autocompletion and signature checking. To
+make the compiler demand **total** coverage, type it `Messages`: it will then reject any
 missing key.
 
 The dictionary is indexed by **language subtag**: `registerMessages('de', …)` covers `de-DE`,

@@ -27,6 +27,8 @@ import VTypography from '../VTypography/VTypography.vue'
 
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useIconClickHandlers } from '../../composables/useIconClickHandlers'
+import { useClearable } from '../../composables/useClearable'
+import { useControlShape } from '../../composables/useControlShape'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useTextLimit } from '../../composables/useTextLimit'
 import { useMessages } from '../../i18n/state'
@@ -205,9 +207,11 @@ const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs(
 // neighbours and the merged border no longer reads as a single box. `disabled` is the one
 // read as an OR, the two answers being cumulative (VInput/context.ts).
 const group = inject(inputGroupKey, null)
-const resolvedSize = computed(() => group?.size ?? props.size)
-const resolvedCompact = computed(() => group?.compact ?? props.compact)
-const resolvedDisabled = computed(() => group?.disabled || props.disabled)
+const {
+  size: resolvedSize,
+  compact: resolvedCompact,
+  disabled: resolvedDisabled,
+} = useControlShape(props, group)
 
 // The prop keeps priority; what it falls back to is the dictionary, so the default
 // wording follows the language the design system is set to.
@@ -225,23 +229,18 @@ const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
 
 const controlEl = ref<HTMLInputElement | null>(null)
 
-const showClear = computed(() => {
-  if (!props.clearable || resolvedDisabled.value) return false
-  // When `clearVisible` is supplied it is the consumer's EXPLICIT answer to "is
-  // there anything to clear?", and it holds even on a read-only field: the value of
-  // a read-only date or time picker changes through its panel rather than by typing.
-  // Left out, the field answers for itself — it has text, and it can be edited.
-  return props.clearVisible ?? (!props.readonly && modelText.value.length > 0)
+const { showClear, onClear } = useClearable({
+  clearable: () => props.clearable,
+  clearVisible: () => props.clearVisible,
+  disabled: () => resolvedDisabled.value,
+  readonly: () => props.readonly,
+  text: () => modelText.value,
+  controlEl,
+  onCleared: () => {
+    model.value = ''
+    emit('clear')
+  },
 })
-
-// @a11y @core — moving the focus back is the accessibility half of this handler.
-// The cross vanishes the instant it empties the field, so without that call focus
-// falls back to the page body and a keyboard user loses their place in the form.
-function onClear() {
-  model.value = ''
-  emit('clear')
-  controlEl.value?.focus()
-}
 
 // The counter and the soft limit both measure `modelText` rather than the model
 // itself, a number having no length.
@@ -290,7 +289,7 @@ defineExpose({
       <button
         v-if="iconStart && hasIconStartHandler"
         type="button"
-        class="v-input-action"
+        class="v-input-action v-field-action"
         :aria-label="iconStartLabel ?? iconName(iconStart)"
         :disabled="resolvedDisabled"
         @click="emit('click:icon-start', $event)"
@@ -326,7 +325,7 @@ defineExpose({
       <button
         v-if="showClear"
         type="button"
-        class="v-input-action v-input-clear"
+        class="v-input-action v-field-action v-input-clear"
         :aria-label="resolvedClearLabel"
         @click="onClear"
       >
@@ -338,7 +337,7 @@ defineExpose({
         <button
           v-if="iconEnd && hasIconEndHandler"
           type="button"
-          class="v-input-action"
+          class="v-input-action v-field-action"
           :aria-label="iconEndLabel ?? iconName(iconEnd)"
           :disabled="resolvedDisabled"
           @click="emit('click:icon-end', $event)"
@@ -520,40 +519,9 @@ defineExpose({
     font-size: var(--vectis-icon-size);
   }
 
-  /* The field's own buttons — the clear cross, a clickable icon — go from muted grey
-     to full strength on hover, and take VButton's radius so their focus ring has the
-     same rounded corners as everything else.
-
-     The negative margin is DERIVED and never written as a number: it is exactly half
-     the difference between the icon and the wider box holding it. Subtracting it
-     cancels that inset, so the glyph lands precisely where a decorative icon would
-     have — against the field's padding, one --control-gap from its neighbour. */
-  .v-input-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--control-action-size);
-    height: var(--control-action-size);
-    margin-inline: calc((var(--vectis-icon-size) - var(--control-action-size)) / 2);
-    padding: 0;
-    border: none;
-    background: transparent;
-    color: var(--vectis-color-text-muted);
-    border-radius: var(--vectis-radius-interactive);
-    cursor: pointer;
-    flex: none;
-    transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
-  }
-
-  .v-input-action:hover:not(:disabled) {
-    color: var(--vectis-color-text);
-  }
-
-  .v-input-action:focus-visible {
-    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
-    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
-  }
-
+  /* The field's own buttons — the clear cross, a clickable icon — take their whole
+     recipe from `.v-field-action` (styles/field.css), which VInput and VTextarea share.
+     What stays here is what this field alone decides. */
   /* A disabled field greys out through the colour tokens, the same ones VCheckbox and
      VRadio use, and never through opacity. It comes LAST in the sequence of states,
      which at equal specificity is what makes it win over all of them, the error
@@ -589,8 +557,7 @@ defineExpose({
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .v-input-field,
-    .v-input-action {
+    .v-input-field {
       transition: none;
     }
   }

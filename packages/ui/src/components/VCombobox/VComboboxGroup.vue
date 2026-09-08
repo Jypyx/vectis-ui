@@ -28,7 +28,7 @@ const labelId = useId()
 
 <template>
   <div role="group" class="v-combobox-group" :aria-labelledby="labelId">
-    <span :id="labelId" class="v-combobox-group-label">{{ label }}</span>
+    <span :id="labelId" class="v-combobox-group-label v-group-label">{{ label }}</span>
     <slot />
   </div>
 </template>
@@ -44,24 +44,6 @@ const labelId = useId()
     flex: none;
     flex-direction: column;
     gap: var(--vectis-space-1);
-  }
-
-  /* The block heading takes the overline type role, without forcing capitals: how the
-     label is written is the consumer's decision.
-
-     Its indent and its height are the options' own recipe, so a heading occupies exactly
-     the height of a row — compact included — and the vertical rhythm of the list is not
-     broken by it. The type is the one thing staying outside that scale, which is why the
-     text has to be centred vertically by hand. */
-  .v-combobox-group-label {
-    display: flex;
-    align-items: center;
-    min-height: var(--control-height);
-    padding: var(--vectis-space-1) var(--control-padding-inline);
-    font-size: var(--vectis-text-overline-size);
-    font-weight: var(--vectis-text-overline-weight);
-    letter-spacing: var(--vectis-text-overline-tracking);
-    color: var(--vectis-color-text-muted);
   }
 }
 </style>

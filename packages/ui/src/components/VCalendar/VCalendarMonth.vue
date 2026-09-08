@@ -24,6 +24,18 @@ import { useMessages } from '../../i18n/state'
 
 import VCalendarEvent from './VCalendarEvent.vue'
 import { calendarIntent } from './keyboard'
+import {
+  cardIdOf as idOfCard,
+  edgeCueOf,
+  ghostIdOf,
+  isGhostId,
+  isGrabbed,
+  movedPast,
+  originalIdOf,
+  pointerOutside,
+  useCardFocus,
+  useDragGuard,
+} from './gesture'
 import { EDGE_BAND, useEdgeStep } from './edgeStep'
 import {
   DRAG_THRESHOLD,
@@ -49,6 +61,8 @@ export interface CalendarMonthProps<T> {
   eventLimit: number
   /** Whether events can be moved from one day to another. */
   editable: boolean
+  /** Whether the whole calendar is frozen, which also takes its cards out of the tab order. */
+  disabled: boolean
   /** The node telling a reader how a chip can be moved, shared by every one of them. */
   hintId: string
   /** How long a drag rests against an edge before the month turns. Zero turns paging off. */
@@ -166,7 +180,7 @@ interface Gesture {
 }
 
 const gesture = ref<Gesture | null>(null)
-const grabbing = computed(() => gesture.value !== null && gesture.value.pointerId === null)
+const grabbing = computed(() => isGrabbed(gesture.value))
 const gridEl = ref<HTMLElement | null>(null)
 /** The view's own box, which a drag is measured against to know whether it has left it. */
 const rootEl = ref<HTMLElement | null>(null)
@@ -179,10 +193,6 @@ const rootEl = ref<HTMLElement | null>(null)
  * the colour of an event is derived from its id — under a fresh one the echo would come out
  * a different colour from the chip it belongs to.
  */
-const GHOST_PREFIX = '__vectis-calendar-ghost__'
-const ghostIdOf = (id: CalendarEventId) => `${GHOST_PREFIX}${id}`
-const originalIdOf = (id: CalendarEventId) => String(id).slice(GHOST_PREFIX.length)
-const isGhostId = (id: CalendarEventId) => String(id).startsWith(GHOST_PREFIX)
 
 /**
  * The events as the month should currently DRAW them — the model, with the one being carried
@@ -222,9 +232,28 @@ const byDay = computed(() =>
 
 const eventsById = computed(() => new Map(drawnEvents.value.map((item) => [item.id, item])))
 
-const shownOf = (iso: string) => (byDay.value.get(iso) ?? []).slice(0, props.eventLimit)
-const hiddenOf = (iso: string) =>
-  Math.max(0, (byDay.value.get(iso) ?? []).length - props.eventLimit)
+/**
+ * What each square draws, and how many it had to leave out — one Map, built in a single pass.
+ *
+ * It is the `dayLabels` treatment and it is needed for the same reason: `applyPoint`
+ * assigns a new preview on every `pointermove`, so the whole grid re-renders at pointer
+ * rate. Written as template functions these returned a NEW array per square per frame, and
+ * since one of them is the source of a `v-for`, Vue rediffed all 42 lists each time. The map
+ * depends on the events and the limit alone, so a drag leaves it untouched.
+ */
+const dayEvents = computed(() => {
+  const map = new Map<string, { shown: E[]; hidden: number }>()
+  for (const [iso, all] of byDay.value)
+    map.set(iso, {
+      shown: all.length > props.eventLimit ? all.slice(0, props.eventLimit) : all,
+      hidden: Math.max(0, all.length - props.eventLimit),
+    })
+  return map
+})
+
+/** A square with nothing on it, shared rather than allocated per empty cell. */
+const NO_EVENTS: { shown: E[]; hidden: number } = Object.freeze({ shown: [], hidden: 0 })
+const dayEventsOf = (iso: string) => dayEvents.value.get(iso) ?? NO_EVENTS
 
 /**
  * A chip says when it happens only when that is not obvious: an all-day event has no time
@@ -339,9 +368,7 @@ const edge = useEdgeStep(
 )
 
 /** Which edge is counting down, in words, for the stylesheet to light up. */
-const edgeCue = computed(() =>
-  edge.pending.value === -1 ? 'start' : edge.pending.value === 1 ? 'end' : undefined,
-)
+const edgeCue = computed(() => edgeCueOf(edge.pending.value))
 
 /*
  * Turning the month swaps every square out from under a live drag, and the chip's day is then
@@ -397,11 +424,7 @@ function onGridPointerdown(event: PointerEvent) {
 }
 
 /** The event a chip stands for, read back off the attribute the card publishes. */
-function cardIdOf(card: HTMLElement): CalendarEventId {
-  const raw = card.dataset.eventId ?? ''
-  // An id may be a number and an attribute is always text; the map is keyed by the original.
-  return eventsById.value.has(raw) ? raw : Number(raw)
-}
+const cardIdOf = (card: HTMLElement) => idOfCard(card, (id) => eventsById.value.has(id))
 
 function onPointermove(event: PointerEvent) {
   const state = gesture.value
@@ -410,13 +433,7 @@ function onPointermove(event: PointerEvent) {
   state.lastX = event.clientX
   state.lastY = event.clientY
 
-  if (
-    !state.moved &&
-    Math.abs(event.clientX - state.originX) < DRAG_THRESHOLD &&
-    Math.abs(event.clientY - state.originY) < DRAG_THRESHOLD
-  ) {
-    return
-  }
+  if (!state.moved && !movedPast(state, event.clientX, event.clientY, DRAG_THRESHOLD)) return
 
   state.moved = true
   state.outside = isPointerOutside(state)
@@ -437,10 +454,8 @@ function onPointermove(event: PointerEvent) {
  * Neither `applyPoint` nor the edge watch is gated on the result — see the twin of this function
  * in VCalendarTimeGrid.vue, which carries the reasoning for both.
  */
-function isPointerOutside(state: Gesture): boolean {
-  const rect = rootEl.value?.getBoundingClientRect()
-  return rect ? !pointWithin({ x: state.lastX, y: state.lastY }, rect) : false
-}
+const isPointerOutside = (state: Gesture) =>
+  pointerOutside(state, rootEl.value?.getBoundingClientRect(), pointWithin)
 
 /**
  * Works out which day the chip now belongs to, from wherever the pointer last was.
@@ -467,7 +482,7 @@ function applyPoint(state: Gesture) {
   if (target) state.preview = moveEventToDay(state.origin, target)
 }
 
-let justDragged = false
+const dragGuard = useDragGuard()
 
 /**
  * Closes the books on whatever gesture came before, at the start of a new press — without which
@@ -476,15 +491,13 @@ let justDragged = false
  * `editable`; it is kept in step with the time grid, whose twin of this function carries the
  * reasoning, so the two cannot answer a press differently.
  */
-function endLastGesture() {
-  justDragged = false
-}
+const endLastGesture = dragGuard.clear
 
 function onPointerup(event: PointerEvent) {
   const state = gesture.value
   if (!state || state.pointerId !== event.pointerId) return
   gesture.value = null
-  justDragged = state.moved
+  dragGuard.set(state.moved)
   edge.cancel()
 
   // Let go off the month altogether: nothing is written and the chip goes back where it was.
@@ -506,10 +519,7 @@ function onPointercancel() {
 function onCardClick(item: E) {
   // `pointerup` fires before `click`, so letting go at the end of a drag would ALSO open the
   // event — the consumer's editor over every chip the reader had just moved.
-  if (justDragged) {
-    justDragged = false
-    return
-  }
+  if (dragGuard.consume()) return
   emit('event-activate', item)
 }
 
@@ -517,20 +527,7 @@ function announceMoved(title: string, times: CalendarEventTimes) {
   emit('announce', m.value.calendar.movedTo(title, longDay(times.start)))
 }
 
-function refocusCard(id: CalendarEventId) {
-  void nextTick(() => {
-    /*
-     * Walked rather than selected, for the reason spelled out at the twin of this function in
-     * VCalendarTimeGrid.vue: a consumer's id may need escaping, and `CSS.escape` is unavailable
-     * in jsdom — where the throw lands inside a `nextTick`, so it surfaces as an unhandled
-     * rejection rather than as a failing test.
-     */
-    const cards = gridEl.value?.querySelectorAll<HTMLElement>('.v-calendar-event')
-    Array.from(cards ?? [])
-      .find((card) => card.dataset.eventId === String(id))
-      ?.focus()
-  })
-}
+const refocusCard = useCardFocus(gridEl)
 
 /**
  * A chip answers a different table from the grid it sits in — that is what a grab mode IS.
@@ -671,11 +668,12 @@ defineExpose({
           </button>
 
           <VCalendarEvent
-            v-for="item in shownOf(cell.iso)"
+            v-for="item in dayEventsOf(cell.iso).shown"
             :key="item.id"
             class="v-calendar-month-chip"
             :event="item"
             layout="chip"
+            :disabled="disabled"
             :time-text="timeTextOf(item)"
             :dragging="gesture?.id === item.id && gesture.pointerId !== null"
             :rejected="gesture?.id === item.id && gesture.outside"
@@ -690,13 +688,13 @@ defineExpose({
           </VCalendarEvent>
 
           <button
-            v-if="hiddenOf(cell.iso) > 0"
+            v-if="dayEventsOf(cell.iso).hidden > 0"
             type="button"
             class="v-calendar-month-more"
             tabindex="-1"
             @click="emit('day-activate', cell.iso)"
           >
-            {{ m.calendar.moreEvents(hiddenOf(cell.iso)) }}
+            {{ m.calendar.moreEvents(dayEventsOf(cell.iso).hidden) }}
           </button>
         </div>
       </div>

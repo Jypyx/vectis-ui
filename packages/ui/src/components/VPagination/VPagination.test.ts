@@ -199,10 +199,10 @@ describe('VPagination', () => {
     })
   })
 
-  describe('attached', () => {
+  describe('detached', () => {
     it('joins the buttons inside a VButtonGroup', () => {
       const { container, getByRole } = render(VPagination, {
-        props: { length: 5, modelValue: 1, attached: true },
+        props: { length: 5, modelValue: 1 },
       })
 
       const row = container.querySelector('.v-pagination-items')
@@ -211,9 +211,9 @@ describe('VPagination', () => {
       expect(getByRole('group')).toBeTruthy()
     })
 
-    it('stays a spaced row by default, which is the same group detached', () => {
+    it('spaces the row out when asked, which is the same group detached', () => {
       const { container } = render(VPagination, {
-        props: { length: 5, modelValue: 1 },
+        props: { length: 5, modelValue: 1, detached: true },
       })
 
       const row = container.querySelector('.v-pagination-items')
@@ -223,9 +223,9 @@ describe('VPagination', () => {
   })
 
   describe('controls', () => {
-    it('hideControls takes both controls out', () => {
+    it('controls: false takes both controls out', () => {
       const { container } = render(VPagination, {
-        props: { length: 5, modelValue: 3, hideControls: true },
+        props: { length: 5, modelValue: 3, controls: false as const },
       })
 
       expect(container.querySelectorAll('.v-pagination-control')).toHaveLength(0)
@@ -233,7 +233,7 @@ describe('VPagination', () => {
 
     it('renders a visible label in text mode, with no icon', () => {
       const { container } = render(VPagination, {
-        props: { length: 5, modelValue: 3, controlsDisplay: 'text' },
+        props: { length: 5, modelValue: 3, controls: 'text' },
       })
       const control = container.querySelector('.v-pagination-control')
 
@@ -245,7 +245,7 @@ describe('VPagination', () => {
 
     it('combines icon and label in both mode', () => {
       const { container } = render(VPagination, {
-        props: { length: 5, modelValue: 3, controlsDisplay: 'both' },
+        props: { length: 5, modelValue: 3, controls: 'both' },
       })
       const control = container.querySelector('.v-pagination-control')
 
@@ -255,7 +255,7 @@ describe('VPagination', () => {
 
     it('keeps the accessible name even when the label is visible', () => {
       const { getByRole } = render(VPagination, {
-        props: { length: 5, modelValue: 3, controlsDisplay: 'both' },
+        props: { length: 5, modelValue: 3, controls: 'both' },
       })
 
       expect(getByRole('button', { name: 'Previous page' })).toBeTruthy()
@@ -300,7 +300,7 @@ describe('VPagination', () => {
 
     it('renders the active page as solid and the others in the requested variant', () => {
       const { container } = render(VPagination, {
-        props: { length: 5, modelValue: 3, variant: 'outline' },
+        props: { length: 5, modelValue: 3, itemVariant: 'outline' },
       })
       const pages = [...container.querySelectorAll<HTMLElement>('.v-pagination-page')]
 

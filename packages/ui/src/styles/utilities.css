@@ -13,6 +13,25 @@
 }
 
 @layer vectis.utilities {
+  /*
+   * The native control a component draws its own chrome for: the checkbox behind its box,
+   * the radio behind its dot, the switch behind its track, the file input behind a field or
+   * a dropzone.
+   *
+   * TRAP — it is hidden with `opacity` and NEVER with `display: none` or `visibility`,
+   * either of which takes it out of the tab order and stops a form from submitting it. The
+   * box is kept at 1px rather than zero, the `.v-visually-hidden` form, and the pointer is
+   * sent through it so it can never swallow a click meant for the visible control.
+   */
+  .v-hidden-input {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .v-visually-hidden {
     position: absolute;
     width: 1px;

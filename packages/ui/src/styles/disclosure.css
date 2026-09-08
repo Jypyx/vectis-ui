@@ -1,0 +1,40 @@
+/*
+ * The two things a native <details> needs to open smoothly, shared by the design system's
+ * only two consumers of it: VAccordionItem and VSideNavigationItem.
+ *
+ * `::details-content` targets the box the browser wraps the content in, and the
+ * `interpolate-size` each component declares on its own root is what makes a transition
+ * towards `auto` possible at all. A browser missing either simply opens the section
+ * instantly, which is the intended fallback.
+ *
+ * The chevron is here for the same reason: both draw one, both turn it the same way, and
+ * both turn it around a HORIZONTAL axis, so neither needs the mirroring VMenu's sideways
+ * chevron does. Which icon each renders, and whether a second one replaces the rotation,
+ * stays with the component.
+ */
+@layer vectis.components {
+  .v-disclosure::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size var(--vectis-duration-base) var(--vectis-ease-default),
+      content-visibility var(--vectis-duration-base) allow-discrete;
+  }
+
+  .v-disclosure[open]::details-content {
+    block-size: auto;
+  }
+
+  .v-disclosure-chevron {
+    flex: none;
+    color: var(--vectis-color-text-muted);
+    transition: rotate var(--vectis-duration-base) var(--vectis-ease-default);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .v-disclosure::details-content,
+    .v-disclosure-chevron {
+      transition: none;
+    }
+  }
+}

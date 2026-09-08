@@ -59,6 +59,8 @@ export default {
           'Rend tout le calendrier inutilisable : aucune date ne peut être choisie, aucun mois atteint, et tout se grise par les jetons de couleur.',
         readonly:
           'Montre la sélection sans permettre de la changer. Le calendrier reste lisible et parcourable, un autre mois ou une autre année, ce qui le distingue de <code>disabled</code>.',
+        label:
+          "Le nom accessible du sélecteur entier, son en-tête et sa grille ensemble. Une plage montrée comme deux calendriers côte à côte en demande un chacun, sinon un lecteur d'écran annonce deux fois le même groupe. Il retombe sur le dictionnaire, et un <code>aria-label</code> du consommateur l'emporte.",
         vModel:
           "Ce qui est sélectionné, et sa forme suit <code>selection</code> : une chaîne ISO pour une date unique, une paire début et fin pour une période, un tableau pour plusieurs. Rien n'est sélectionné au départ.",
       },

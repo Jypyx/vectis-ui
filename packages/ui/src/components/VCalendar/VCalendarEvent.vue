@@ -61,6 +61,8 @@ export interface CalendarEventProps<T> {
    * without this the echo would come out a different colour from the card it belongs to.
    */
   ghostOf?: CalendarEventId
+  /** Whether the whole calendar is disabled, which makes the card a real disabled button. */
+  disabled?: boolean
 }
 
 const props = withDefaults(defineProps<CalendarEventProps<E>>(), {
@@ -74,6 +76,7 @@ const props = withDefaults(defineProps<CalendarEventProps<E>>(), {
   grabbed: false,
   hintId: undefined,
   ghostOf: undefined,
+  disabled: false,
 })
 
 defineSlots<{
@@ -133,6 +136,7 @@ const accessibleName = computed(() =>
     :aria-label="accessibleName"
     :aria-roledescription="m.calendar.eventRoleDescription"
     :aria-describedby="hintId"
+    :disabled="disabled || undefined"
     :inert="ghostOf !== undefined ? true : undefined"
   >
     <!--

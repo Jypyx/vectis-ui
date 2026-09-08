@@ -39,7 +39,8 @@ export default {
         value:
           "Le nom de cet onglet dans le code. Le panneau portant la même valeur est celui qu'il montre, et c'est aussi ce que porte la valeur quand cet onglet est sélectionné.",
         label: 'Le libellé visible. Le slot par défaut le remplace.',
-        icon: 'Une icône avant le libellé.',
+        iconStart: 'Une icône avant le libellé.',
+        iconEnd: "Une icône après le libellé, pour un compteur ou un état que l'onglet porte.",
         disabled:
           "Rend l'onglet inutilisable : il ne répond plus, les flèches l'enjambent, et il se grise par les tokens de couleur.",
       },

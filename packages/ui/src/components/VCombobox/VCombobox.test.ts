@@ -362,7 +362,7 @@ describe('VCombobox asynchronous', () => {
       searchDebounce: 0,
       filter: (option: ComboboxOption, query: string) => {
         seen.push(query)
-        return option.value.startsWith(query)
+        return String(option.value).startsWith(query)
       },
     })
     await fireEvent.update(getByRole('combobox'), '  fr  ')

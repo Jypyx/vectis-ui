@@ -113,7 +113,7 @@ const { clamped, fraction } = useProgressValue(
     :data-tone="tone"
     :data-custom="color !== undefined ? '' : undefined"
     :data-shape="shape"
-    :data-orientation="orientation === 'vertical' ? 'vertical' : undefined"
+    :data-orientation="orientation"
     :data-value-position="valuePosition"
     :data-indeterminate="indeterminate ? '' : undefined"
     :aria-valuenow="indeterminate ? undefined : clamped"

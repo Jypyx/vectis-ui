@@ -15,17 +15,20 @@ import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import { tabsKey } from './context'
+import type { ItemValue } from '../../types'
 
 interface TabProps {
   /**
    * What this tab is called in code. The panel carrying the same value is the one it
    * shows, and it is also what the v-model holds when this tab is selected.
    */
-  value: string | number
+  value: ItemValue
   /** The visible label. The default slot replaces it. */
   label?: string
   /** An icon before the label: an icon name, or an explicit render. */
-  icon?: IconSource
+  iconStart?: IconSource
+  /** An icon after the label, for a count or a state the tab carries. */
+  iconEnd?: IconSource
   /**
    * Makes the tab unusable: it no longer responds, the arrow keys skip over it, and it
    * greys out through the colour tokens.
@@ -35,7 +38,8 @@ interface TabProps {
 
 const props = withDefaults(defineProps<TabProps>(), {
   label: undefined,
-  icon: undefined,
+  iconStart: undefined,
+  iconEnd: undefined,
   disabled: false,
 })
 
@@ -52,7 +56,7 @@ const tabId = computed(() => tabs?.tabId(props.value))
 const panelId = computed(() => (tabs?.hasPanels ? tabs.panelId(props.value) : undefined))
 
 /** An icon and no label at all: the tab becomes a square, like a VIconButton. */
-const iconOnly = computed(() => Boolean(props.icon) && !props.label && !slots.default)
+const iconOnly = computed(() => Boolean(props.iconStart) && !props.label && !slots.default)
 
 // @keyboard @a11y
 /*
@@ -85,8 +89,11 @@ function onFocus() {
     @click="tabs?.select(value)"
     @focus="onFocus"
   >
-    <template v-if="icon" #start>
-      <VIcon v-bind="iconProps(icon)" />
+    <template v-if="iconStart" #start>
+      <VIcon v-bind="iconProps(iconStart)" />
+    </template>
+    <template v-if="iconEnd" #end>
+      <VIcon v-bind="iconProps(iconEnd)" />
     </template>
     <!-- The label is wrapped in an element of its own so that it can be truncated:
          an ellipsis cannot be applied to the bare text of a flex container, and tabs
@@ -128,7 +135,7 @@ function onFocus() {
    * tabs.
    */
   .v-tab[data-size]:focus-visible {
-    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
+    outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
   .v-tab-label {

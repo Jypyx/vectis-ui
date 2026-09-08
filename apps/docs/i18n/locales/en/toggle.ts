@@ -13,8 +13,8 @@ export default {
         seamless:
           'Takes the lines out from between the joined items, so the row reads as one frame rather than as segments. It has no effect under <code>detached</code>, where the items are separate buttons already.',
         orientation: 'Whether the items run across the page or down it.',
-        variant:
-          'How the unselected items are drawn. What the selected one takes is <code>selectedVariant</code>.',
+        itemVariant:
+          'How the unselected items are drawn. What the selected one takes is <code>selectedVariant</code>. It is named for the items because that is what it paints: on VTabs and VDataTable <code>variant</code> names the decoration of the frame instead.',
         selectedVariant:
           "How the selected item is drawn, in the group's tone: filled with <code>solid</code>, tinted with <code>soft</code>, or the colour of its text alone with <code>ghost</code>.",
         tone: 'The colour a selected item takes. The others stay neutral.',
@@ -39,7 +39,9 @@ export default {
         value:
           "What choosing this item means. It is what the group's value holds when the item is selected, and it must be unique within the group.",
         label: 'The visible label. The default slot replaces it.',
-        icon: 'An icon before the label.',
+        iconStart: 'An icon before the label.',
+        iconEnd:
+          'An icon after the label. It is not switched to its filled form by the group <code>selectedIconFilled</code>, which names the icon standing for the item rather than one trailing it.',
         disabled:
           'Makes this item unusable: it no longer responds, the arrow keys skip over it, and it greys out through the colour tokens.',
       },

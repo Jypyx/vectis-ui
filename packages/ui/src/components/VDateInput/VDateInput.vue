@@ -26,8 +26,8 @@ import type {
   DatePickerEvent,
   DatePickerSelection,
   DatePickerValue,
-  DateMatcher,
-  DateRange,
+  DatePickerMatcher,
+  DatePickerRange,
 } from '../VDatePicker/VDatePicker.vue'
 import {
   caretAfterDigits,
@@ -49,6 +49,7 @@ import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import VPopover from '../VPopover/VPopover.vue'
 
+import { useControlShape } from '../../composables/useControlShape'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFieldPanel } from '../../composables/useFieldPanel'
@@ -102,7 +103,7 @@ interface DateInputProps {
   /** The latest date that can be chosen, as an ISO string. */
   max?: string
   /** Dates that cannot be chosen, as a list or as a function. */
-  disabledDates?: DateMatcher
+  disabledDates?: DatePickerMatcher
   /** Fills the corners of the grid with the greyed days of the neighbouring months. */
   showAdjacentDays?: boolean
   /** Lets those neighbouring days be clicked, which implies showing them. */
@@ -157,7 +158,11 @@ interface DateInputProps {
    * What the end icon does, in words. It names the button that opens the calendar, and
    * falls back to the design system dictionary.
    */
-  iconEndLabel?: string
+  /**
+   * What the calendar button does, in words. It names the button `pickerIcon` renders, and falls back
+   * to the design system dictionary.
+   */
+  pickerIconLabel?: string
   /**
    * Shows a spinner at the end of the field, in place of the calendar icon. It says
    * that something is being loaded and changes nothing else: the field can still be
@@ -215,7 +220,7 @@ const props = withDefaults(defineProps<DateInputProps>(), {
   invalid: false,
   iconStart: undefined,
   iconStartLabel: undefined,
-  iconEndLabel: undefined,
+  pickerIconLabel: undefined,
   loading: false,
   loadingLabel: undefined,
   clearable: false,
@@ -247,6 +252,17 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
+  /**
+   * Content at the start of the field, rendered after `iconStart` rather than in its place,
+   * as in VInput.
+   */
+  start?(): unknown
+  /**
+   * Controls of your own inside the field, placed before the ones the field owns — the clear
+   * cross and the icon that opens the panel. Those two are this component's own affordance,
+   * which is why there is no `#end` here: it would replace them.
+   */
+  'value-end'?(): unknown
   /** What a day cell shows, handed straight to the calendar. */
   day?(props: {
     iso: string
@@ -340,9 +356,11 @@ if (isDev) {
 // A VInputGroup joins several controls into one object, so the shape of this field is the
 // row's decision rather than its own (VInput/context.ts).
 const group = inject(inputGroupKey, null)
-const resolvedSize = computed(() => group?.size ?? props.size)
-const resolvedCompact = computed(() => group?.compact ?? props.compact)
-const resolvedDisabled = computed(() => group?.disabled || props.disabled)
+const {
+  size: resolvedSize,
+  compact: resolvedCompact,
+  disabled: resolvedDisabled,
+} = useControlShape(props, group)
 
 // @core
 // TRAP — this stops a VButtonGroup's or a VInputGroup's row context at this boundary. The
@@ -375,7 +393,7 @@ const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPa
 const hasValue = computed(() => {
   if (props.selection === 'multiple') return Array.isArray(model.value) && model.value.length > 0
   if (props.selection === 'range') {
-    const r = model.value as DateRange | null
+    const r = model.value as DatePickerRange | null
     return !!(r && (r.start || r.end))
   }
   return typeof model.value === 'string' && !!model.value
@@ -399,7 +417,7 @@ const displayText = computed(() => {
       : ''
   }
   if (props.selection === 'range') {
-    const r = model.value as DateRange | null
+    const r = model.value as DatePickerRange | null
     if (!r?.start) return ''
     if (!r.end) return formatDisplay(r.start, locale, displayFormat)
     return formatDisplayRange(r.start, r.end, locale, displayFormat)
@@ -429,7 +447,16 @@ const acceptable = (iso: string) =>
  * What is injected here is the date VOCABULARY alone: the order of the fields, the
  * separator between them and their widths, all derived from the reader's language.
  */
-const { draft, fieldModel, writeField, commitLive, commitOrRevert, onFieldInput } = useMaskedField({
+const {
+  draft,
+  fieldModel,
+  writeField,
+  commitLive,
+  commitOrRevert,
+  onFieldInput,
+  backspaceOverSeparator,
+  pasteDigits,
+} = useMaskedField({
   fieldEl,
   typing: () => typing.value,
   displayText: () => displayText.value,
@@ -502,24 +529,7 @@ function onFieldKeydown(event: KeyboardEvent) {
     return
   }
   if (event.key === 'Backspace') {
-    const start = el.selectionStart
-    if (
-      start !== null &&
-      start === el.selectionEnd &&
-      start > 0 &&
-      !/\d/.test(el.value[start - 1] ?? '')
-    ) {
-      // TRAP — a separator is PLACED by the mask and never typed, so erasing one has to
-      // erase the DIGIT before it, which is what the reader believes they are erasing.
-      // Left alone, the mask would write the separator straight back and the key would
-      // look dead.
-      event.preventDefault()
-      const n = digitsOf(el.value.slice(0, start)).length
-      const digits = digitsOf(el.value)
-      const text = formatDateMask(digits.slice(0, n - 1) + digits.slice(n), mask.value)
-      writeField(text, caretAfterDigits(text, n - 1))
-      commitLive()
-    }
+    if (backspaceOverSeparator(el)) event.preventDefault()
     return
   }
   if (
@@ -557,16 +567,7 @@ function onFieldPaste(event: ClipboardEvent) {
     commitLive()
     return
   }
-  const start = el.selectionStart ?? el.value.length
-  const end = el.selectionEnd ?? start
-  const digits = digitsOf(el.value)
-  const from = digitsOf(el.value.slice(0, start)).length
-  const to = digitsOf(el.value.slice(0, end)).length
-  const inserted = digitsOf(pasted)
-  const next = (digits.slice(0, from) + inserted + digits.slice(to)).slice(0, mask.value.size)
-  const text = formatDateMask(next, mask.value)
-  writeField(text, caretAfterDigits(text, Math.min(from + inserted.length, next.length)))
-  commitLive()
+  pasteDigits(el, pasted)
 }
 
 // @a11y
@@ -635,7 +636,7 @@ const endIcon = computed<IconSource | undefined>(() =>
  */
 const m = useMessages()
 
-const endIconLabel = computed(() => props.iconEndLabel ?? m.value.dateInput.open)
+const endIconLabel = computed(() => props.pickerIconLabel ?? m.value.dateInput.open)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.dateInput.clear)
 
 function onEndIcon() {
@@ -745,7 +746,10 @@ defineExpose({
         @blur="commitOrRevert"
         @keydown="onFieldKeydown"
         @paste="onFieldPaste"
-      />
+      >
+        <template v-if="$slots.start" #start><slot name="start" /></template>
+        <template v-if="$slots['value-end']" #value-end><slot name="value-end" /></template>
+      </VInput>
     </div>
 
     <!-- With no panel rendered there is nothing to hold a reference to, and the open state

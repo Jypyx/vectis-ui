@@ -16,6 +16,7 @@ export default {
         { name: 'size', type: 'InputOTPSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
+        { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },

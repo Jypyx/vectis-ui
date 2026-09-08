@@ -23,10 +23,23 @@ import type { ButtonHTMLAttributes } from 'vue'
 
 import { buttonGroupKey } from './context'
 
+import { useControlShape } from '../../composables/useControlShape'
+
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import VSpinner from '../VSpinner/VSpinner.vue'
+
+/*
+ * The three unions a VButtonGroup has to name in order to hand them down, declared
+ * BEFORE the interface and referenced from it. `build-api.ts` prints a type as the
+ * source spells it, so this is what makes the documentation site name the type on the
+ * Button page as it already does on the Chip, Tabs and Toggle ones — and what stops
+ * the IconButton page from naming a type its own page leaves unnamed.
+ */
+export type ButtonVariant = 'solid' | 'outline' | 'ghost' | 'soft'
+export type ButtonTone = 'accent' | 'neutral' | 'danger'
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 interface ButtonProps {
   /**
@@ -35,7 +48,7 @@ interface ButtonProps {
    * shows nothing until it is hovered. Inside a VButtonGroup the group's own variant
    * wins over this one.
    */
-  variant?: 'solid' | 'outline' | 'ghost' | 'soft'
+  variant?: ButtonVariant
   /**
    * What the action means: `accent` for the ordinary one, `neutral` for a secondary
    * one, `danger` for one that destroys something. On a button a tone is an
@@ -43,7 +56,7 @@ interface ButtonProps {
    * Left out inside a VButtonGroup it takes the group's tone, which is the point of
    * not defaulting it here; on its own it is `accent`.
    */
-  tone?: 'accent' | 'neutral' | 'danger'
+  tone?: ButtonTone
   /**
    * Raises the button off the page: a shadow that grows on hover and settles back
    * when pressed, whatever the variant. On `ghost` and `outline`, which have no
@@ -56,7 +69,7 @@ interface ButtonProps {
    * The height of the button, taken from the size scale shared by every control.
    * Inside a VButtonGroup the group's own size wins over this one.
    */
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  size?: ButtonSize
   /**
    * Takes 4px off the height, leaving the padding, the text and the icons as they
    * are. Inside a VButtonGroup the group's own value wins over this one.
@@ -98,17 +111,6 @@ interface ButtonProps {
   iconFilled?: boolean
 }
 
-/*
- * The three unions a VButtonGroup has to name in order to hand them down. They are
- * DERIVED from the props above rather than declared and then referenced there: the
- * documentation site prints a type as the source spells it (apps/docs, build-api.ts),
- * so writing `variant?: ButtonVariant` would replace the four values with a name the
- * reader cannot look up on the page they are most likely to be reading.
- */
-export type ButtonVariant = NonNullable<ButtonProps['variant']>
-export type ButtonTone = NonNullable<ButtonProps['tone']>
-export type ButtonSize = NonNullable<ButtonProps['size']>
-
 const props = withDefaults(defineProps<ButtonProps>(), {
   variant: 'solid',
   // TRAP — the only one of the five with no default. `tone` is the prop a button keeps
@@ -148,14 +150,16 @@ const group = inject(buttonGroupKey, null)
 // The shape of the segmented control belongs to the row: the group is read first, and a
 // group that named nothing hands the prop straight back. The tone goes the other way,
 // the button's own answer first (see context.ts).
+const {
+  size: resolvedSize,
+  compact: resolvedCompact,
+  disabled: resolvedDisabled,
+} = useControlShape<ButtonSize>(props, group)
 const resolvedVariant = computed<ButtonVariant>(() => group?.variant ?? props.variant)
-const resolvedSize = computed<ButtonSize>(() => group?.size ?? props.size)
-const resolvedCompact = computed(() => group?.compact ?? props.compact)
 const resolvedElevated = computed(() => group?.elevated ?? props.elevated)
+// The tone goes the OTHER way, the button's own answer first: one action in a row can be
+// the destructive one, and the row has to be able to say so (see context.ts).
 const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'accent')
-// The one member read as an OR: the row and the button are cumulative, and neither can
-// lift the other's refusal (see context.ts).
-const resolvedDisabled = computed(() => group?.disabled || props.disabled)
 
 const isLink = computed(() => props.href !== undefined)
 const isInert = computed(() => resolvedDisabled.value || props.loading)
@@ -172,7 +176,7 @@ const passedAttrs = computed(() => {
   <component
     :is="isLink ? 'a' : 'button'"
     v-bind="passedAttrs"
-    class="v-button v-control v-tone"
+    class="v-button v-control v-tone v-variant"
     :href="isLink && !isInert ? href : undefined"
     :type="isLink ? undefined : type"
     :disabled="isLink ? undefined : resolvedDisabled || loading"
@@ -239,14 +243,10 @@ const passedAttrs = computed(() => {
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* The tone table itself lives in styles/tones.css, on the `v-tone` class in the
-     vectis.tokens layer, and is shared with VChip and VToast. VButton overrides not
-     a single one of its values: it is the reference those values were written for. */
-
-  .v-button[data-variant='solid'] {
-    background: var(--tone-bg-solid);
-    color: var(--tone-text-solid);
-  }
+  /* The tone table and the four ways of painting it both live in styles/tones.css, on
+     the `v-tone` and `v-variant` classes in the vectis.tokens layer. VButton overrides
+     not a single one of their values: it is the reference they were written for, and what
+     stays here is the STATES, which each component answers for itself. */
 
   .v-button[data-variant='solid']:hover:not(:disabled, [aria-disabled='true']) {
     background: var(--tone-bg-solid-hover);
@@ -254,17 +254,6 @@ const passedAttrs = computed(() => {
 
   .v-button[data-variant='solid']:active:not(:disabled, [aria-disabled='true']) {
     background: var(--tone-bg-solid-active);
-  }
-
-  .v-button[data-variant='outline'] {
-    background: transparent;
-    color: var(--tone-text-tinted);
-    border-color: var(--tone-border-soft);
-  }
-
-  .v-button[data-variant='ghost'] {
-    background: transparent;
-    color: var(--tone-text-tinted);
   }
 
   /* The `:not([data-elevated])` is what makes these rules DISJOINT from the
@@ -292,11 +281,6 @@ const passedAttrs = computed(() => {
       [aria-disabled='true']
     ) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
-  }
-
-  .v-button[data-variant='soft'] {
-    background: var(--tone-bg-soft);
-    color: var(--tone-text-tinted);
   }
 
   .v-button[data-variant='soft']:hover:not(:disabled, [aria-disabled='true']) {

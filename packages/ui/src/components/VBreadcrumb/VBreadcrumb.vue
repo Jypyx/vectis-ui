@@ -191,6 +191,14 @@ const visibleItems = computed(() =>
     color: var(--vectis-color-text-subtle);
   }
 
+  /* A chevron points at a physical direction, which the logical properties do not mirror:
+     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
+     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
+     individual property, so it composes instead of replacing a transform. */
+  .v-breadcrumb-separator:dir(rtl) {
+    scale: -1 1;
+  }
+
   .v-breadcrumb-link {
     display: inline-flex;
     align-items: center;

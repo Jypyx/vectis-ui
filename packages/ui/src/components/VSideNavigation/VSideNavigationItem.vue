@@ -218,7 +218,7 @@ function onActionClick(event: MouseEvent) {
   <li class="v-side-nav-item" :class="rootClass" :style="rootStyle">
     <details
       v-if="hasChildren"
-      class="v-side-nav-branch"
+      class="v-side-nav-branch v-disclosure"
       :name="parent?.name"
       :open="openAttr"
       :data-swap="collapseIcon ? '' : undefined"
@@ -251,12 +251,12 @@ function onActionClick(event: MouseEvent) {
         <span v-if="$slots.end" class="v-side-nav-end" @click="onEndClick"
           ><slot name="end"
         /></span>
-        <VIcon class="v-side-nav-chevron" v-bind="iconProps(expandIcon)" />
+        <VIcon class="v-side-nav-chevron v-disclosure-chevron" v-bind="iconProps(expandIcon)" />
         <!-- Both chevrons are always in the DOM; the open state decides which one
              shows, in CSS alone — the VAccordion idiom -->
         <VIcon
           v-if="collapseIcon"
-          class="v-side-nav-chevron v-side-nav-chevron-open"
+          class="v-side-nav-chevron v-disclosure-chevron v-side-nav-chevron-open"
           v-bind="iconProps(collapseIcon)"
         />
       </summary>
@@ -457,15 +457,6 @@ function onActionClick(event: MouseEvent) {
     gap: var(--vectis-space-1);
   }
 
-  /* The chevron points down when the branch is closed and flips when it opens. It
-     turns around a horizontal axis, so unlike VMenu's sideways chevron it needs no
-     mirroring in a right-to-left page. */
-  .v-side-nav-chevron {
-    flex: none;
-    color: var(--vectis-color-text-muted);
-    transition: rotate var(--vectis-duration-base) var(--vectis-ease-default);
-  }
-
   .v-side-nav-branch[open]:not([data-swap]) > .v-side-nav-row > .v-side-nav-chevron {
     rotate: 180deg;
   }
@@ -494,7 +485,7 @@ function onActionClick(event: MouseEvent) {
   .v-side-nav-row:focus-visible,
   .v-side-nav-action:focus-visible::after {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
-    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
+    outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
   .v-side-nav-action:focus-visible {
@@ -550,26 +541,7 @@ function onActionClick(event: MouseEvent) {
     color: inherit;
   }
 
-  /* The opening animates in pure CSS, on the box the browser wraps a branch's content
-     in. A browser without support opens the branch instantly, which is the intended
-     fallback. */
-  .v-side-nav-branch::details-content {
-    block-size: 0;
-    overflow: clip;
-    transition:
-      block-size var(--vectis-duration-base) var(--vectis-ease-default),
-      content-visibility var(--vectis-duration-base) allow-discrete;
-  }
-
-  .v-side-nav-branch[open]::details-content {
-    block-size: auto;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .v-side-nav-chevron,
-    .v-side-nav-branch::details-content {
-      transition: none;
-    }
-  }
+  /* The disclosure animation and the chevron's own transition come from
+     `styles/disclosure.css`, reduced-motion block included. */
 }
 </style>

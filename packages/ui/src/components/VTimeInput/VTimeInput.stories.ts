@@ -546,7 +546,7 @@ export const ReadOnly: Story = {
  * icon while something is being fetched, and changes nothing else: the field is still
  * typed into and the panel still opens.
  *
- * `iconEndLabel` and `clearLabel` rename the clock button and the clear cross when the
+ * `pickerIconLabel` and `clearLabel` rename the clock button and the clear cross when the
  * dictionary's wording is not the right one.
  */
 export const FieldIcon: Story = {
@@ -563,7 +563,7 @@ export const FieldIcon: Story = {
           :label="t.searchByTime"
           show-picker
           clearable
-          icon-end-label="Open the clock"
+          picker-icon-label="Open the clock"
           clear-label="Empty the time"
         />
         <VTimeInput v-bind="args" v-model="value" loading :label="t.checkingTime" show-picker />

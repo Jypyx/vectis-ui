@@ -178,7 +178,7 @@ const iconOnly = computed(
 
 <template>
   <span
-    class="v-chip v-control v-tone"
+    class="v-chip v-control v-tone v-variant"
     :class="$attrs.class"
     :style="rootStyle"
     :data-variant="variant"
@@ -270,26 +270,11 @@ const iconOnly = computed(
     --tone-border-soft: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 60%);
   }
 
-  .v-chip[data-variant='soft'] {
-    background: var(--tone-bg-soft);
-    color: var(--tone-text-tinted);
-  }
-
-  .v-chip[data-variant='solid'] {
-    background: var(--tone-bg-solid);
-    color: var(--tone-text-solid);
-  }
-
-  .v-chip[data-variant='outline'] {
-    background: transparent;
-    color: var(--tone-text-tinted);
-    border-color: var(--tone-border-soft);
-  }
-
-  /* A selected chip is painted in the full colour of its CURRENT tone, whichever
-     variant it was given. The block sits after the variants at equal specificity, so
-     it is the order that lets it win. */
-  .v-chip[data-selected] {
+  /* A selected chip is painted in the full colour of its CURRENT tone, whichever variant it
+     was given. It COMPOUNDS `.v-variant`: the variant table weighs (0,2,0) like this rule and
+     lives in another sheet, so at equal specificity the winner would be whichever one the
+     consumer's bundler put last. At (0,3,0) it wins by construction. */
+  .v-variant.v-chip[data-selected] {
     background: var(--tone-bg-solid);
     color: var(--tone-text-solid);
     border-color: transparent;
@@ -393,18 +378,18 @@ const iconOnly = computed(
 
   .v-chip-remove:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
-    outline-offset: calc(var(--vectis-focus-ring-offset) * -1);
+    outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
   /* A disabled chip greys out through the colour tokens, which is what makes it follow
      the dark theme without a rule of its own. */
-  .v-chip[data-disabled] {
+  .v-variant.v-chip[data-disabled] {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);
     border-color: transparent;
   }
 
-  .v-chip[data-disabled][data-variant='outline'] {
+  .v-variant.v-chip[data-disabled][data-variant='outline'] {
     background: transparent;
     border-color: var(--vectis-color-border);
   }
