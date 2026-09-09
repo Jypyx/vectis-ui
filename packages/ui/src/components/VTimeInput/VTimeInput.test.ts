@@ -418,9 +418,13 @@ describe('VTimeInput — restrictions', () => {
       props: { modelValue: '09:00', mode: 'picker', format: '24h', max: '11:00' },
     })
     await openPanel(container)
-    const disabled = container.querySelectorAll('.v-time-picker-number[data-disabled]')
-    expect(disabled.length).toBeGreaterThan(0)
-    expect([...disabled].map((n) => n.textContent!.trim())).not.toContain('9')
+    // The picker prints what can be chosen and nothing else, so a bound at eleven keeps
+    // the morning and takes noon and the whole afternoon off the face.
+    const printed = [...container.querySelectorAll('.v-time-picker-number')].map((n) =>
+      n.textContent!.trim(),
+    )
+    expect(printed).toContain('9')
+    expect(printed).not.toContain('12')
   })
 
   it('warns about restrictions that leave nothing to choose', () => {

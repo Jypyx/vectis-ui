@@ -38,18 +38,18 @@ picking 7 PM produces `'19:00'`.
 
 **`min`** and **`max`** (inclusive bounds, canonical `'HH:mm'`) and **`allowedHours`** and
 **`allowedMinutes`** (a list of the values allowed, or a rule answering for one) restrict the value.
-They are handed to VTimePicker as they stand, and the three modes answer them three ways, because a
-mode is a different way of ASKING:
+They are handed to VTimePicker as they stand, and the answer follows from what the mode ASKS the
+reader for — a value to pick, or a value to write:
 
-- **`input`**: what is typed is committed, and the field turns invalid. It is carried by the
-  control's own validity, so the field goes red through `:user-invalid` once the reader has
-  interacted with it, and a form refuses to leave with it. Swallowing the entry instead would give
-  the reader nothing to correct.
-- **`list`**: the rows that cannot be chosen are left out. A list is read before it is chosen from.
-  The row of the value in force is kept even when the restrictions have moved past it, since the
-  field names a value through the row that carries it.
-- **`picker`**, and the clock beside a typed field: what is ruled out is DISABLED on the face.
-  See the picker's own page for how a bound cuts an hour in half rather than closing it.
+- **`list`** and **`picker`**, the two that OFFER the times: what cannot be chosen is left out. A
+  list and a face are both read before they are chosen from, and neither has anything to say with a
+  row or a numeral that exists only to be refused. The list keeps the row of the value in force even
+  when the restrictions have moved past it, since the field names a value through the row that
+  carries it; see the picker's own page for how a bound cuts an hour in half rather than closing it.
+- **`input`**, the one that asks the reader to WRITE: what is typed is committed, and the field
+  turns invalid. It is carried by the control's own validity, so the field goes red through
+  `:user-invalid` once the reader has interacted with it, and a form refuses to leave with it.
+  Swallowing the entry instead would give the reader nothing to correct.
 
 <Canvas of={VTimeInputStories.Restrictions} />
 

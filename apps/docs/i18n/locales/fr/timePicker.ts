@@ -9,7 +9,7 @@ export default {
     },
     restrictions: {
       title: 'Ce que l’on peut choisir',
-      text: 'Quatre props restreignent la valeur, et elles se composent en une seule réponse : <code>min</code> et <code>max</code>, deux bornes incluses écrites en chaînes canoniques <code>HH:mm</code>, et <code>allowedHours</code> et <code>allowedMinutes</code>, qui prennent chacune la liste des valeurs autorisées ou une règle qui répond pour l’une d’elles. Ce qu’elles excluent est désactivé et non masqué, l’inverse de <code>minuteStep</code> : une borne ne se lit qu’à côté de ce qu’elle exclut, et une graduation trouée ne dit rien. Une heure n’est fermée que s’il n’y reste rien du tout : une borne à 09:30 garde neuf heures et retire ses trente premières minutes du côté des minutes. Choisir cette heure aligne alors les minutes sur la plus proche qu’elle autorise, et les flèches enjambent ce sur quoi elles n’ont pas le droit de se poser au lieu de s’y arrêter.',
+      text: 'Quatre props restreignent la valeur, et elles se composent en une seule réponse : <code>min</code> et <code>max</code>, deux bornes incluses écrites en chaînes canoniques <code>HH:mm</code>, et <code>allowedHours</code> et <code>allowedMinutes</code>, qui prennent chacune la liste des valeurs autorisées ou une règle qui répond pour l’une d’elles. Ce qu’elles excluent est laissé de côté, la règle que <code>minuteStep</code> suit déjà : le cadran affiche ce que l’on peut choisir et rien d’autre. Une heure n’est fermée que s’il n’y reste rien du tout : une borne à 09:30 garde neuf heures et retire ses trente premières minutes du côté des minutes. Choisir cette heure aligne alors les minutes sur la plus proche qu’elle autorise, et les flèches enjambent ce sur quoi elles n’ont pas le droit de se poser au lieu de s’y arrêter. Le pointeur n’attrape rien qu’il n’ait visé : un secteur laissé sans chiffre ne porte aucune valeur, donc un clic à cet endroit n’écrit rien et ne fait pas non plus avancer l’étape.',
     },
     hourFormat: {
       title: 'Format horaire',
@@ -30,12 +30,12 @@ export default {
           "Une locale BCP 47, qui décide de l'horloge. Elle l'emporte sur la locale globale du design system et retombe dessus, ce pourquoi elle n'a pas de valeur par défaut littérale.",
         minuteStep:
           "L'intervalle sur lequel les minutes s'alignent, au glissement comme aux flèches. Le cadran n'affiche que les minutes qu'il peut atteindre : un pas d'un quart d'heure en marque quatre.",
-        min: "L'heure la plus tôt que l'on puisse choisir, incluse, en chaîne canonique sur 24 heures. Le cadran désactive ce qui tombe en dehors plutôt que de le retirer : une borne ne se lit qu'à côté de ce qu'elle exclut.",
+        min: "L'heure la plus tôt que l'on puisse choisir, incluse, en chaîne canonique sur 24 heures. Le cadran laisse de côté ce qui tombe en dehors, comme il laisse de côté les minutes que le pas n'atteint pas.",
         max: "L'heure la plus tard que l'on puisse choisir, incluse, écrite comme min.",
         allowedHours:
-          "Les heures que l'on peut choisir : leur liste, ou une règle qui répond pour l'une d'elles. L'heure passée à une règle est toujours celle sur 24 heures, quelle que soit l'horloge affichée.",
+          "Les heures que l'on peut choisir : leur liste, ou une règle qui répond pour l'une d'elles. L'heure passée à une règle est toujours celle sur 24 heures, quelle que soit l'horloge affichée. Les heures qu'elle écarte ne sont pas affichées.",
         allowedMinutes:
-          "Les minutes que l'on peut choisir : leur liste, ou une règle qui répond pour l'une d'elles.",
+          "Les minutes que l'on peut choisir : leur liste, ou une règle qui répond pour l'une d'elles. Les minutes qu'elle écarte ne sont pas affichées.",
         disabled:
           "Rend toute l'horloge inutilisable : l'aiguille ne bouge plus, la demi-journée ne change plus, et tout se grise par les jetons de couleur.",
         readonly:

@@ -21,7 +21,7 @@ export default {
     },
     restrictions: {
       title: 'What may be chosen',
-      text: 'The same four props the picker takes, <code>min</code>, <code>max</code>, <code>allowedHours</code> and <code>allowedMinutes</code>, reach the three modes as three different answers, because a mode is a different way of asking. The typed field commits what was typed and turns invalid: it is carried by the control own validity, so the field goes red once the reader has interacted with it and a form refuses to leave with it, where swallowing the entry would give them nothing to correct. The list leaves out the rows that cannot be chosen, a list being read before it is chosen from, and keeps the row of the value in force even when the restrictions have moved past it. The picker disables what it rules out, and its own page covers how a bound cuts an hour in half rather than closing it.',
+      text: 'The same four props the picker takes, <code>min</code>, <code>max</code>, <code>allowedHours</code> and <code>allowedMinutes</code>, reach the three modes as two answers, which follow from what each mode asks the reader for. The list and the picker both offer the times, so both leave out what cannot be chosen: each is read before it is chosen from, and neither has anything to say with a row or a numeral that exists only to be refused. The list keeps the row of the value in force even when the restrictions have moved past it, and the picker page covers how a bound cuts an hour in half rather than closing it. The typed field asks the reader to write instead: it commits what was typed and turns invalid, carried by the control own validity, so the field goes red once the reader has interacted with it and a form refuses to leave with it, where swallowing the entry would give them nothing to correct.',
     },
     clearable: {
       title: 'Clearable',
@@ -55,7 +55,7 @@ export default {
           'Offers the picker beside a field one can type into: an icon at the end of the field, and a panel it opens. It is left undefined rather than set to off, which is what distinguishes "not given" from an explicit refusal.',
         minuteStep:
           'The interval between two times that can be chosen. It applies to the picker, to the arrow keys and to the rows of the list.',
-        min: 'The earliest time that can be chosen, inclusive, as a canonical 24-hour string. The picker disables what it rules out, the list leaves it out, and a time typed past it makes the field invalid.',
+        min: 'The earliest time that can be chosen, inclusive, as a canonical 24-hour string. The picker and the list both leave out what it rules out, and a time typed past it makes the field invalid.',
         max: 'The latest time that can be chosen, inclusive, written like min.',
         allowedHours:
           'Which hours can be chosen: the list of them, or a rule answering for one. The hour a rule is handed is always the 24-hour one, whichever clock is on display.',

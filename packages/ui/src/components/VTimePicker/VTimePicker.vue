@@ -79,8 +79,8 @@ interface TimePickerProps {
   minuteStep?: number
   /**
    * The earliest time that can be chosen, inclusive, as a canonical 24-hour `'HH:mm'`.
-   * What it rules out is DISABLED on the face rather than removed from it: a bound is
-   * only readable beside what it excludes.
+   * What it rules out is LEFT OFF the face, the way `minuteStep` leaves off the minutes
+   * it cannot reach: the clock prints what can be chosen and nothing else.
    */
   min?: string
   /** The latest time that can be chosen, inclusive, written like `min`. */
@@ -88,10 +88,13 @@ interface TimePickerProps {
   /**
    * Which hours can be chosen: the list of them, or a rule answering for one. The hour
    * handed to a rule is always the 24-hour one, whichever clock is on display, so the
-   * same rule holds on both faces.
+   * same rule holds on both faces. The hours it leaves out are not printed.
    */
   allowedHours?: TimeMatcher
-  /** Which minutes can be chosen: the list of them, or a rule answering for one. */
+  /**
+   * Which minutes can be chosen: the list of them, or a rule answering for one. The
+   * minutes it leaves out are not printed.
+   */
   allowedMinutes?: TimeMatcher
   /**
    * Makes the whole clock unusable: the hand cannot be moved, the half-day cannot be
@@ -247,14 +250,23 @@ interface DialCell {
   ring: 'outer' | 'inner'
   /** Whether it is the value currently being pointed at. */
   selected: boolean
-  /** Whether the restrictions rule it out: it is drawn as such, and refuses the pointer. */
-  disabled: boolean
+}
+
+/**
+ * The hour a position on the face stands for. On a 12-hour clock that is what the half of
+ * the day in force turns it into, and it is the 24-hour hour either way: the one the
+ * restrictions answer about, and the one written.
+ */
+function hourAt(index: number, ring: 'outer' | 'inner'): number {
+  return resolvedFormat.value === '24h'
+    ? dialIndexToHour24(index, ring)
+    : to24h(index === 0 ? 12 : index, currentMeridiem.value)
 }
 
 /**
  * The minutes the face prints. A numeral one can point at and not land on is a lie, which
  * the hand tells the moment it settles beside it rather than on it, so a marker is only
- * ever a minute `minuteStep` actually reaches.
+ * ever a minute `minuteStep` actually reaches AND the restrictions allow.
  *
  * How MANY of them is the other half of the question: sixty numerals would be unreadable,
  * so a step fine enough to offer more than twelve values keeps the five-minute grid a
@@ -267,10 +279,18 @@ const minuteMarks = computed(() => {
   const spacing = 60 / interval <= 12 ? interval : 5
   const marks: number[] = []
   for (let minutes = 0; minutes < 60; minutes += spacing)
-    if (minutes % interval === 0) marks.push(minutes)
+    if (minutes % interval === 0 && isTimeAllowed(hour.value, minutes, limits.value))
+      marks.push(minutes)
   return marks
 })
 
+/*
+ * The face prints what can be chosen and nothing else — the minute step's own rule, held
+ * to for all four restrictions rather than for one of them. A numeral that is only there
+ * to be refused says nothing the missing numeral does not say better, and it says it in
+ * grey text a screen reader has no way to reach: the markers are `aria-hidden`, so what
+ * the restrictions leave is spoken by the face's own value and by nothing else.
+ */
 const cells = computed<DialCell[]>(() => {
   if (step.value === 'minute') {
     return minuteMarks.value.map((minutes) => ({
@@ -279,40 +299,31 @@ const cells = computed<DialCell[]>(() => {
       turn: minutes / 60,
       ring: 'outer' as const,
       selected: minute.value === minutes,
-      disabled: !isTimeAllowed(hour.value, minutes, limits.value),
     }))
   }
-  const outer: DialCell[] = Array.from({ length: 12 }, (_, i) => {
-    // The hour the cell would set, which on a 12-hour face is what the half of the day in
-    // force turns it into: that is the one the restrictions have to be asked about.
-    const hour24 =
-      resolvedFormat.value === '24h'
-        ? dialIndexToHour24(i, 'outer')
-        : to24h(i === 0 ? 12 : i, currentMeridiem.value)
-    return {
+  const positions = Array.from({ length: 12 }, (_, i) => i)
+  const outer: DialCell[] = positions
+    .filter((i) => isAvailableHour(hourAt(i, 'outer')))
+    .map((i) => ({
       key: `o-${i}`,
       label: String(i === 0 ? 12 : i),
       turn: i / 12,
       ring: 'outer' as const,
       selected:
         resolvedFormat.value === '24h'
-          ? hour.value === hour24
+          ? hour.value === hourAt(i, 'outer')
           : to12h(hour.value).hour === (i === 0 ? 12 : i),
-      disabled: !isAvailableHour(hour24),
-    }
-  })
+    }))
   if (resolvedFormat.value === '12h') return outer
-  const inner: DialCell[] = Array.from({ length: 12 }, (_, i) => {
-    const hour24 = dialIndexToHour24(i, 'inner')
-    return {
+  const inner: DialCell[] = positions
+    .filter((i) => isAvailableHour(dialIndexToHour24(i, 'inner')))
+    .map((i) => ({
       key: `i-${i}`,
-      label: pad2(hour24),
+      label: pad2(dialIndexToHour24(i, 'inner')),
       turn: i / 12,
       ring: 'inner' as const,
-      selected: hour.value === hour24,
-      disabled: !isAvailableHour(hour24),
-    }
-  })
+      selected: hour.value === dialIndexToHour24(i, 'inner'),
+    }))
   return [...outer, ...inner]
 })
 
@@ -421,26 +432,52 @@ function settleStep(via: 'pointer' | 'keyboard') {
 // Pointing at the face, by click or by drag.
 const faceEl = ref<HTMLElement | null>(null)
 const dragging = ref(false)
+/**
+ * Whether anything in the gesture under way landed on a numeral. It is the whole gesture
+ * and not its last point: a drag that chose an hour and wandered off the ring before
+ * being released has still chosen one, and the step follows the value rather than the
+ * pixel let go of.
+ */
+let landed = false
 
-function applyPoint(event: PointerEvent) {
+/**
+ * Where a point on the face lands, and whether there was anything there at all. A
+ * position the restrictions took a numeral off holds nothing to aim at, so the gesture
+ * does nothing whatever: no value, and — through the answer returned here — no step moved
+ * on either. The pointer catches nothing it was not aimed at.
+ *
+ * The question asked is the FACE's, `isAvailableHour`/`isTimeAllowed` being the pair
+ * `cells` prints from, so "there is a numeral here" and "this can be written" cannot come
+ * apart. The write itself still goes through `setHour`/`setMinute` and their own guards,
+ * which is why `readonly` is refused THERE and not here: a frozen clock is still one
+ * whose numerals are real, and a tap on one moves the step on as it always did.
+ */
+function applyPoint(event: PointerEvent): boolean {
   const face = faceEl.value
-  if (!face) return
+  if (!face) return false
   // Measuring the face is safe here: this runs from a handler, hence in a browser, never
   // during a render.
   const rect = face.getBoundingClientRect()
   const dx = event.clientX - (rect.left + rect.width / 2)
   const dy = event.clientY - (rect.top + rect.height / 2)
   if (step.value === 'minute') {
-    setMinute(snapMinute(angleToIndex(dx, dy, 60), props.minuteStep))
-    return
+    // The step's own snapping stands: a point between two markers has always been pulled
+    // to the one it is nearest. What it is pulled to still has to BE on the face.
+    const minutes = snapMinute(angleToIndex(dx, dy, 60), props.minuteStep)
+    if (!isTimeAllowed(hour.value, minutes, limits.value)) return false
+    setMinute(minutes)
+    return true
   }
   const index = angleToIndex(dx, dy, 12)
-  if (resolvedFormat.value === '24h') {
-    const ring = distanceFraction(dx, dy, rect.width / 2) < DIAL_INNER_THRESHOLD ? 'inner' : 'outer'
-    setHour(dialIndexToHour24(index, ring))
-  } else {
-    setHour(to24h(index === 0 ? 12 : index, currentMeridiem.value))
-  }
+  const ring =
+    resolvedFormat.value === '24h' &&
+    distanceFraction(dx, dy, rect.width / 2) < DIAL_INNER_THRESHOLD
+      ? 'inner'
+      : 'outer'
+  const target = hourAt(index, ring)
+  if (!isAvailableHour(target)) return false
+  setHour(target)
+  return true
 }
 
 function onPointerdown(event: PointerEvent) {
@@ -455,17 +492,19 @@ function onPointerdown(event: PointerEvent) {
     /* a synthetic pointer: nothing to capture */
   }
   dragging.value = true
-  applyPoint(event)
+  landed = applyPoint(event)
 }
 
 function onPointermove(event: PointerEvent) {
-  if (dragging.value) applyPoint(event)
+  if (dragging.value && applyPoint(event)) landed = true
 }
 
 function onPointerup() {
   if (!dragging.value) return
   dragging.value = false
-  settleStep('pointer')
+  // A gesture that never landed on a numeral has chosen nothing, so there is nothing to
+  // move on FROM: the reader is left on the face they aimed at, looking at what they missed.
+  if (landed) settleStep('pointer')
 }
 
 function onPointercancel() {
@@ -672,7 +711,6 @@ defineExpose({
         aria-hidden="true"
         :data-ring="cell.ring"
         :data-selected="cell.selected ? '' : undefined"
-        :data-disabled="cell.disabled ? '' : undefined"
         :style="{ '--dial-turn': String(cell.turn) }"
         >{{ cell.label }}</span
       >
@@ -816,21 +854,6 @@ defineExpose({
   .v-time-picker-number[data-ring='inner'] {
     font-size: var(--vectis-text-body-md-size);
     color: var(--vectis-color-text-muted);
-  }
-
-  /*
-   * A numeral the restrictions rule out. Struck through as well as greyed, the VDatePicker
-   * idiom: colour alone must not be what says a value is unavailable (WCAG 1.4.1).
-   *
-   * TRAP — it is greyed with the MUTED token and not with `text-subtle`, which is the one
-   * named for disabled text. On this face's own surface that token measures 4.39:1, and
-   * where VDatePicker gets away with it these numerals cannot: a disabled BUTTON is exempt
-   * from the contrast rule, a `<span>` is judged like any other text however hidden from
-   * assistive technology it is. Verified by the axe pass on the Restrictions story.
-   */
-  .v-time-picker-number[data-disabled] {
-    color: var(--vectis-color-text-muted);
-    text-decoration: line-through;
   }
 
   .v-time-picker-number[data-selected] {

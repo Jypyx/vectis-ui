@@ -9,7 +9,7 @@ export default {
     },
     restrictions: {
       title: 'What may be chosen',
-      text: 'Four props restrict the value, and they compose into a single answer: <code>min</code> and <code>max</code>, two inclusive bounds written as canonical <code>HH:mm</code> strings, and <code>allowedHours</code> and <code>allowedMinutes</code>, each taking the list of the values it allows or a rule answering for one. What they rule out is disabled rather than hidden, the opposite of <code>minuteStep</code>: a bound is only readable beside what it excludes, and a scale with holes in it says nothing. An hour is closed only when nothing at all is left in it, so a bound at 09:30 keeps nine o clock and takes its first thirty minutes from the minutes instead. Choosing that hour then pulls the minutes to the nearest one it does allow, and the arrow keys step over what they may not land on rather than stopping at it.',
+      text: 'Four props restrict the value, and they compose into a single answer: <code>min</code> and <code>max</code>, two inclusive bounds written as canonical <code>HH:mm</code> strings, and <code>allowedHours</code> and <code>allowedMinutes</code>, each taking the list of the values it allows or a rule answering for one. What they rule out is left off the face, which is the rule <code>minuteStep</code> already follows: the clock prints what can be chosen and nothing else. An hour is closed only when nothing at all is left in it, so a bound at 09:30 keeps nine o clock and takes its first thirty minutes from the minutes instead. Choosing that hour then pulls the minutes to the nearest one it does allow, and the arrow keys step over what they may not land on rather than stopping at it. The pointer catches nothing it was not aimed at: a sector left without a numeral holds no value, so a click there writes nothing and does not move the step on either.',
     },
     hourFormat: {
       title: 'Hour format',
@@ -30,12 +30,12 @@ export default {
           "A BCP 47 locale, which decides the clock. It takes precedence over the design system's global locale and falls back to it, which is why it has no literal default.",
         minuteStep:
           'The interval the minutes snap to, both when dragging and with the arrow keys. The face prints only the minutes it can reach, so a step of a quarter of an hour marks four.',
-        min: 'The earliest time that can be chosen, inclusive, as a canonical 24-hour string. The face disables what falls outside it rather than leaving it out, since a bound is only readable beside what it excludes.',
+        min: 'The earliest time that can be chosen, inclusive, as a canonical 24-hour string. The face leaves off what falls outside it, the way it leaves off the minutes the step cannot reach.',
         max: 'The latest time that can be chosen, inclusive, written like min.',
         allowedHours:
-          'Which hours can be chosen: the list of them, or a rule answering for one. The hour a rule is handed is always the 24-hour one, whichever clock is on display.',
+          'Which hours can be chosen: the list of them, or a rule answering for one. The hour a rule is handed is always the 24-hour one, whichever clock is on display. The hours it leaves out are not printed.',
         allowedMinutes:
-          'Which minutes can be chosen: the list of them, or a rule answering for one.',
+          'Which minutes can be chosen: the list of them, or a rule answering for one. The minutes it leaves out are not printed.',
         disabled:
           'Makes the whole clock unusable: the hand cannot be moved, the half-day cannot be changed, and everything greys out through the colour tokens.',
         readonly:

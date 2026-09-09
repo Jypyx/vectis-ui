@@ -21,7 +21,7 @@ export default {
     },
     restrictions: {
       title: 'Ce que l’on peut choisir',
-      text: 'Les quatre props du sélecteur, <code>min</code>, <code>max</code>, <code>allowedHours</code> et <code>allowedMinutes</code>, arrivent dans les trois modes sous trois réponses différentes, parce qu’un mode est une façon différente de demander. Le champ saisi valide ce qui a été tapé et passe invalide : c’est la validité propre du contrôle qui le porte, donc le champ rougit dès que le lecteur y a touché et un formulaire refuse de partir avec, là où avaler la saisie ne lui laisserait rien à corriger. La liste retire les lignes que l’on ne peut pas choisir, une liste se lisant avant qu’on y choisisse, et garde la ligne de la valeur en cours même quand les restrictions l’ont dépassée. Le sélecteur désactive ce qu’il exclut, et sa propre page explique comment une borne coupe une heure en deux au lieu de la fermer.',
+      text: 'Les quatre props du sélecteur, <code>min</code>, <code>max</code>, <code>allowedHours</code> et <code>allowedMinutes</code>, arrivent dans les trois modes sous deux réponses, qui découlent de ce que chaque mode demande au lecteur. La liste et le sélecteur proposent les heures, donc tous deux retirent ce que l’on ne peut pas choisir : l’une comme l’autre se lisent avant qu’on y choisisse, et ni une ligne ni un chiffre qui n’existent que pour être refusés n’apprennent quoi que ce soit. La liste garde la ligne de la valeur en cours même quand les restrictions l’ont dépassée, et la page du sélecteur explique comment une borne coupe une heure en deux au lieu de la fermer. Le champ saisi, lui, demande d’écrire : il valide ce qui a été tapé et passe invalide, c’est la validité propre du contrôle qui le porte, donc le champ rougit dès que le lecteur y a touché et un formulaire refuse de partir avec, là où avaler la saisie ne lui laisserait rien à corriger.',
     },
     clearable: {
       title: 'Effaçable',
@@ -55,7 +55,7 @@ export default {
           "Propose le sélecteur à côté d'un champ saisissable : une icône en fin de champ, et un panneau qu'elle ouvre. Elle est laissée indéfinie plutôt que mise à faux, ce qui distingue « non fournie » d'un refus explicite.",
         minuteStep:
           "L'intervalle entre deux heures qui peuvent être choisies. Il s'applique au sélecteur, aux flèches et aux lignes de la liste.",
-        min: "L'heure la plus tôt que l'on puisse choisir, incluse, en chaîne canonique sur 24 heures. Le sélecteur désactive ce qu'elle exclut, la liste le retire, et une heure saisie en dehors rend le champ invalide.",
+        min: "L'heure la plus tôt que l'on puisse choisir, incluse, en chaîne canonique sur 24 heures. Le sélecteur et la liste retirent tous deux ce qu'elle exclut, et une heure saisie en dehors rend le champ invalide.",
         max: "L'heure la plus tard que l'on puisse choisir, incluse, écrite comme min.",
         allowedHours:
           "Les heures que l'on peut choisir : leur liste, ou une règle qui répond pour l'une d'elles. L'heure passée à une règle est toujours celle sur 24 heures, quelle que soit l'horloge affichée.",

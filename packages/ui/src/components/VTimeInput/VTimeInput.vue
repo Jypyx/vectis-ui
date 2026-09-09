@@ -106,8 +106,8 @@ interface TimeInputProps {
   minuteStep?: number
   /**
    * The earliest time that can be chosen, inclusive, as a canonical 24-hour `'HH:mm'`.
-   * The picker DISABLES what it rules out, the list leaves it out altogether, and a time
-   * typed past it makes the field invalid.
+   * The picker and the list both LEAVE OUT what it rules out, and a time typed past it
+   * makes the field invalid.
    */
   min?: string
   /** The latest time that can be chosen, inclusive, written like `min`. */

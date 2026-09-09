@@ -71,11 +71,16 @@ inclusive bounds written as canonical `'HH:mm'` strings, and **`allowedHours`** 
 `disabledDates` convention, in the positive. The hour a rule is handed is always the 24-hour one,
 whichever clock is on display.
 
-What they rule out is **disabled rather than hidden**, the opposite of `minuteStep`: a bound is only
-readable beside what it excludes, where a scale with holes in it says nothing. An hour is closed only
-when nothing at all is left in it, so `min: '09:30'` leaves nine o'clock open and takes its first
-thirty minutes from the minutes instead. Choosing that hour then pulls the minutes to the nearest
-one it does allow, and the arrows step over what they may not land on rather than stopping at it.
+What they rule out is **left off the face**, `minuteStep`'s own rule held to for all four: the clock
+prints what can be chosen and nothing else. An hour is closed only when nothing at all is left in it,
+so `min: '09:30'` leaves nine o'clock open and takes its first thirty minutes from the minutes
+instead. Choosing that hour then pulls the minutes to the nearest one it does allow, and the arrows
+step over what they may not land on rather than stopping at it.
+
+The pointer catches nothing it was not aimed at: a sector the restrictions left a numeral off holds
+no value, so a click there writes nothing and does not move the step on either. `minuteStep`'s own
+snapping still applies within the minutes, a point between two markers landing on the nearer of
+them — but what it lands on has to be on the face.
 
 <Canvas of={VTimePickerStories.Restrictions} />
 

@@ -26,7 +26,7 @@ const booking = ref<string | null>('14:15')
         :allowed-minutes="(minute) => minute % 15 === 0"
       />
       <VTypography variant="caption" tone="muted">
-        The face keeps its five minute marks and disables the ones a rule rules out
+        The face keeps only the five minute marks a rule leaves standing
       </VTypography>
     </div>
   </div>

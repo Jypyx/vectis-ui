@@ -172,8 +172,8 @@ export const MinuteStep: Story = {
 
 /**
  * What may be chosen, restricted four ways: the two bounds, and a rule for the hours and
- * one for the minutes. Unlike the minute step, which prints nothing it cannot reach, these
- * DISABLE what they rule out — a bound is only readable beside the hours it excludes.
+ * one for the minutes. What they rule out is LEFT OFF the face, the minute step's own
+ * rule: the clock prints what can be chosen and nothing else.
  *
  * The two compose: nine o'clock stays open under a bound of half past nine, and it is its
  * first thirty minutes that go.
@@ -209,11 +209,18 @@ export const Restrictions: Story = {
     await userEvent.keyboard('{Home}')
     await waitFor(() => expect(canvasElement.textContent).toContain('09:30'))
 
+    // Midday carries no numeral, so aiming at it does nothing whatever: no hour, and no
+    // step moved on either. Only a real face answers this — jsdom lays none out, and
+    // measures the one it does not lay out as a point at the origin.
+    tapDial(face, 0)
+    await waitFor(() => expect(canvasElement.textContent).toContain('09:30'))
+    expect(face.getAttribute('aria-label')).toBe('Hour')
+
     await userEvent.click(canvas.getByRole('button', { name: 'Select minutes' }))
+    // Half past and a quarter to are all that is left of nine o'clock, and they are all
+    // the face prints.
     await waitFor(() =>
-      expect(canvasElement.querySelectorAll('.v-time-picker-number[data-disabled]')).toHaveLength(
-        2,
-      ),
+      expect(canvasElement.querySelectorAll('.v-time-picker-number')).toHaveLength(2),
     )
   },
 }

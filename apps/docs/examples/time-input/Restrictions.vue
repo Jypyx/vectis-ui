@@ -37,7 +37,7 @@ const picked = ref<string | null>('09:30')
       min="09:00"
       max="17:00"
       label="Clock"
-      hint="The face disables the hours it cannot take, and keeps them readable"
+      hint="The face prints only the hours it can take"
     />
   </div>
 </template>

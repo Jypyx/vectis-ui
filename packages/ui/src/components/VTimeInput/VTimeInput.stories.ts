@@ -438,12 +438,12 @@ export const FiveMinuteStep: Story = {
 
 /**
  * The same four restrictions — `min`, `max`, `allowedHours`, `allowedMinutes` — reach the
- * three modes as three different answers, because a mode is a different way of asking.
+ * three modes as two answers, which follow from what each mode asks the reader for.
  *
- * The typed field COMMITS what was typed and turns invalid: the reader is writing, and a
- * field that swallowed the entry would leave them nothing to correct. The list LEAVES OUT
- * what cannot be chosen, a list being read before it is chosen from. The picker DISABLES
- * it, a bound being readable only beside the hours it excludes.
+ * The list and the picker OFFER the times, so both LEAVE OUT what cannot be chosen: each
+ * is read before it is chosen from. The typed field asks the reader to write, so it
+ * COMMITS what was typed and turns invalid — swallowing the entry would leave them
+ * nothing to correct.
  */
 export const Restrictions: Story = {
   args: { format: '24h', minuteStep: 30, min: '09:00', max: '17:00' },
