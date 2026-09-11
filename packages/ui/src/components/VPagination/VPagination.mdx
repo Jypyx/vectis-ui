@@ -7,8 +7,8 @@ import * as VPaginationStories from './VPagination.stories'
 # Pagination
 
 Navigation between the pages of a result set. The component invents no button: every pill is a
-`VButton`, the previous/next controls a `VButton` or a `VIconButton`, and the `attached` option
-joins the whole thing in a `VButtonGroup`. Hover, focus, disabling and respect for
+`VButton`, the previous/next controls a `VButton` or a `VIconButton`, and the whole row is a
+`VButtonGroup`. Hover, focus, disabling and respect for
 `prefers-reduced-motion` therefore come straight from `VButton`, without a single state rule
 redefined here.
 
@@ -22,10 +22,11 @@ JavaScript.
 <Canvas of={VPaginationStories.Default} />
 <Controls of={VPaginationStories.Default} />
 
-## Attached
+## Joined and detached
 
-`attached` places every button inside a `VButtonGroup`: merged borders, rounded corners only at
-the ends. That constraint is what dictates the internal structure — `VButtonGroup` styles only
+The buttons are joined by default: merged borders, rounded corners only at the ends. `detached`
+spaces them out instead and gives each its own corners. Being a `VButtonGroup` is what dictates
+the internal structure — `VButtonGroup` styles only
 its **direct** children, hence no `<ul>`/`<li>` and an ellipsis rendered as an inert button
 rather than a `<span>`: the seam stays continuous, including when a neighbour is hidden by the
 responsive truncation.
@@ -34,7 +35,7 @@ responsive truncation.
 
 ## Variants and tones
 
-The active page is **always** `solid`; `variant` concerns only the inactive pages and the
+The active page is **always** `solid`; `itemVariant` concerns only the inactive pages and the
 controls, in `ghost` (default) or `outline`. `tone` colours the active page, the inactive ones
 staying neutral so that the current number stands out on its own.
 
@@ -53,8 +54,9 @@ uses.
 
 ## Previous / next controls
 
-`hideControls` takes them away, and `controlsDisplay` chooses between icon only, text only or
-both. `prevIcon` and `nextIcon` accept an icon name **or** an explicit render, and
+`controls` says what they show — `'icon'`, `'text'` or `'both'` — or takes them away with
+`false`: one prop rather than a boolean beside a union, since you pick a member rather than
+turning one off. `prevIcon` and `nextIcon` accept an icon name **or** an explicit render, and
 `prevLabel`/`nextLabel` supply both the visible text and the accessible name.
 
 The controls advance by one activatable page, not by one page: they step over disabled pages to
@@ -127,8 +129,8 @@ alignment.
   accessibility tree and the tab order. A known corollary: if focus was on a neighbour when the
   container narrows, it falls back to the document.
 - There is no `<ul>`/`<li>`: `VButtonGroup` styles only its direct children and an intervening
-  list element would break the border merging. The named `<nav>` and the `role="group"` of
-  attached mode provide the grouping.
+  list element would break the border merging. The named `<nav>` and the `role="group"` the
+  `VButtonGroup` carries provide the grouping.
 
 This component's accessible labels come from the design system's dictionary: they translate
 globally (see **Foundations › Internationalization**), and the text props stay authoritative for

@@ -95,8 +95,8 @@ export const Variants: Story = {
     // in a landmark list — the same reason VDataTable names its own pagination.
     template: `
       <div style="display: grid; gap: 16px">
-        <VPagination :length="12" variant="ghost" label="ghost" v-model="ghost" />
-        <VPagination :length="12" variant="outline" label="outline" v-model="outline" />
+        <VPagination :length="12" item-variant="ghost" label="ghost" v-model="ghost" />
+        <VPagination :length="12" item-variant="outline" label="outline" v-model="outline" />
       </div>
     `,
   }),
@@ -146,12 +146,12 @@ export const Controls: Story = {
     // Custom icons: a Material Symbols name OR an image URL.
     template: `
       <div style="display: grid; gap: 16px">
-        <VPagination :length="10" controls-display="icon" label="icon" v-model="a" />
-        <VPagination :length="10" controls-display="text" label="text" v-model="b" />
-        <VPagination :length="10" controls-display="both" label="both" v-model="c" />
+        <VPagination :length="10" controls="icon" label="icon" v-model="a" />
+        <VPagination :length="10" controls="text" label="text" v-model="b" />
+        <VPagination :length="10" controls="both" label="both" v-model="c" />
         <VPagination
           :length="10"
-          controls-display="both"
+          controls="both"
           label="both custom"
           prev-icon="first_page"
           next-icon="last_page"
@@ -159,7 +159,7 @@ export const Controls: Story = {
           :next-label="t.forward"
           v-model="d"
         />
-        <VPagination :length="10" :show-controls="false" label="none" v-model="e" />
+        <VPagination :length="10" :controls="false" label="none" v-model="e" />
       </div>
     `,
   }),
