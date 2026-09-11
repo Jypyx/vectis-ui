@@ -31,7 +31,8 @@ const { t } = useI18n()
           <VButton
             variant="outline"
             tone="neutral"
-            size="sm"
+            size="md"
+            full-width
             icon-start="menu"
             :aria-expanded="navOpen"
             @click="toggleNav"

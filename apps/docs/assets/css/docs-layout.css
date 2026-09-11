@@ -37,6 +37,11 @@
   --vd-header-h: 64px;
   --vd-aside-w: 248px;
   --vd-outline-w: 200px;
+  /* The compact navigation bar, header included in nothing but its own offset: the toggle at its
+     `md` height, the air around it, and the hairline closing it. Written once because three rules
+     subtract it — the rail's offset, the rail's height and a heading's landing place — and a drift
+     between them shows as a rail that either overflows the window or stops short of it. */
+  --vd-docnav-h: calc(var(--vectis-control-height-md) + 2 * var(--vectis-space-2) + 1px);
 }
 
 /* Where a fragment lands. The header is sticky, so a browser scrolling to `#some-heading` —
@@ -447,21 +452,47 @@ html {
   min-width: 0;
   padding-block: var(--vectis-space-6) var(--vectis-space-9);
 }
+/* Flush under the header and sticky with it, so the toggle stays reachable wherever the reader has
+   got to on a page that runs for forty screens. The background is OPAQUE where the header's is
+   translucent: the header pays for its veil with a blur, and the prose scrolls straight under this
+   bar, so anything short of opaque prints two texts on top of each other. `z-index` sits below the
+   header's 30 — the two overlap while a fragment is being scrolled to. */
 .vd-docnav-compact {
   display: block;
-  padding-block: var(--vectis-space-3) 0;
+  position: sticky;
+  top: var(--vd-header-h);
+  z-index: 20;
+  padding-block: var(--vectis-space-2);
+  background: var(--vectis-color-surface);
+  border-bottom: 1px solid var(--vectis-color-border);
 }
 
 /* The compact documentation nav is the SAME tree, revealed by a data attribute rather than a
    second copy of forty rows. A max-width query is the honest form here: the rule exists only
    below the medium screen, where the rail is not in the grid. */
 @media (max-width: 1023px) {
+  /* Pinned directly under the bar that opens it and given every pixel the window has left, so the
+     list reads as one panel instead of a 60vh letterbox the reader has to scroll twice. Its sticky
+     container is `.vd-docs`, which runs the height of the page — that is what keeps it in place for
+     the whole scroll, and what makes the explicit `height` (never a `max-height`) the measurement
+     the rail's own scrollbar is derived from. */
   .vd-docs[data-nav-open] > .vd-aside {
     display: block;
-    max-height: 60vh;
+    position: sticky;
+    top: calc(var(--vd-header-h) + var(--vd-docnav-h));
+    z-index: 20;
+    height: calc(100vh - var(--vd-header-h) - var(--vd-docnav-h));
     overflow-y: auto;
     padding-block: var(--vectis-space-3) var(--vectis-space-4);
+    background: var(--vectis-color-surface);
     border-bottom: 1px solid var(--vectis-color-border);
+  }
+  /* The bar is a second sticky ceiling, and `html`'s `scroll-padding` only knows about the header.
+     Without this a `#fragment` parks its heading behind the bar. Scoped to the prose rather than
+     added to that padding, which is the whole site's and would overshoot on every page that
+     renders no bar. */
+  .vd-prose > :is(h2, h3) {
+    scroll-margin-block-start: var(--vd-docnav-h);
   }
 }
 

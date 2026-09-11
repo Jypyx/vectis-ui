@@ -40,7 +40,7 @@ function follow(navigate: (event: MouseEvent) => void, event: MouseEvent) {
 </script>
 
 <template>
-  <VSideNavigation :label="t('common.sidebar')" size="sm">
+  <VSideNavigation :label="t('common.sidebar')" size="md">
     <template v-for="(group, index) in groups" :key="group.id">
       <VSideNavigationSeparator v-if="index > 0" />
       <VSideNavigationGroup :label="t(`nav.group.${group.id}`)">
