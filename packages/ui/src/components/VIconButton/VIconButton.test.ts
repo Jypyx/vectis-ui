@@ -45,6 +45,30 @@ describe('VIconButton', () => {
     expect(icon.hasAttribute('data-filled')).toBe(true)
   })
 
+  /*
+   * The icon has to REPLACE itself with the spinner rather than sit beside it: the box
+   * is one control high and one control wide, so two glyphs in it overlap. It is what
+   * pins the icon to VButton's `start` slot, the only one loading swaps out.
+   */
+  it('loading: the spinner replaces the icon rather than joining it', () => {
+    const { getByRole } = render(VIconButton, {
+      props: { label: 'Refreshing', icon: 'favorite', loading: true },
+    })
+    const button = getByRole('button')
+    expect(button.querySelector('.v-button-spinner')).not.toBeNull()
+    expect(button.querySelector('.v-icon')).toBeNull()
+  })
+
+  it('loading: the spinner replaces the slot too', () => {
+    const { getByRole } = render(VIconButton, {
+      props: { label: 'Refreshing', loading: true },
+      slots: { default: '<svg data-testid="slot-svg" aria-hidden="true" />' },
+    })
+    const button = getByRole('button')
+    expect(button.querySelector('.v-button-spinner')).not.toBeNull()
+    expect(button.querySelector('[data-testid="slot-svg"]')).toBeNull()
+  })
+
   it('without the icon prop: the default slot is rendered (fallback)', () => {
     const { getByRole } = render(VIconButton, {
       props: { label: 'Close' },

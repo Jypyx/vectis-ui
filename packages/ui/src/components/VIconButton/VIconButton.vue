@@ -121,8 +121,16 @@ const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'ne
     :loading="loading"
     :aria-label="label"
   >
-    <VIcon v-if="icon" v-bind="iconProps(icon)" :filled="iconFilled" />
-    <slot v-else />
+    <!--
+      TRAP — the icon goes in VButton's `start` slot and NOT in its default one. The
+      spinner replaces the start slot alone, the default slot being the label, which a
+      loading button keeps. Rendered in the default slot the icon would sit BESIDE the
+      spinner, both of them in a box only wide enough for one.
+    -->
+    <template #start>
+      <VIcon v-if="icon" v-bind="iconProps(icon)" :filled="iconFilled" />
+      <slot v-else />
+    </template>
   </VButton>
 </template>
 
