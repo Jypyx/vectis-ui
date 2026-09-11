@@ -3,6 +3,10 @@ export default {
   lead: 'Joins two or more form controls into a single object: a country code against a phone number, a search field against its button. The shared borders melt into one line and only the two ends of the row stay rounded.',
 
   examples: {
+    multipleInputs: {
+      title: 'Several fields in one row',
+      text: 'A row is not limited to two. Every segment holding a field takes an equal share of what is left, so the proportions come from the widths you set rather than from the number of fields: here a currency, a scheme and an extension are each pinned to what they hold, and the field that carries the real value takes the rest. The shared borders melt into one line and only the two ends stay rounded, which is what makes several controls read as one.',
+    },
     naming: {
       title: 'Naming the row and its segments',
       text: 'The group renders one label and one hint for the whole row, and names itself with them. Each segment then needs a name of its own, which is what <code>aria-label</code> is for. A segment that brings its own <code>label</code> is pushed a line out of the row, so the component warns about it in development.',
@@ -11,7 +15,7 @@ export default {
       title: 'Widths',
       text: 'Every segment holding a field takes an equal share of the row, and everything else keeps its natural width: a button is measured by its label. Proportions are set on the segment itself, with a class or an inline <code>flex</code>. A consumer rule is unlayered, so it wins over the share the group hands out.',
     },
-    search: {
+    withButton: {
       title: 'A field and its button',
       text: 'A <code>solid</code> or <code>soft</code> button covers the shared edge with its own background, which is what an attached action should look like. An <code>outline</code> button in <code>tone="neutral"</code> draws the same border colour as the fields, so the outline runs unbroken around the whole row. A <code>ghost</code> button has no frame at all and floats out of the box, so it is the one variant to avoid here. A magnifier inside the field is a different thing and not a segment: that is <code>iconEnd</code> with a <code>click:icon-end</code> listener on the field itself.',
     },
@@ -23,13 +27,9 @@ export default {
       title: 'States',
       text: 'A group with none of the three shape props set leaves every segment exactly as it was, which is what makes a bare group a purely visual wrapper. <code>disabled</code> adds instead of replacing, so a segment switched off on its own stays off under a row that says nothing. A field in error keeps its red edge against its neighbour, and a focused field is raised above both so its ring is drawn whole.',
     },
-    panels: {
-      title: 'Fields that open a panel',
-      text: 'A combobox panel is measured against its own segment, so a narrow code field opens a narrow list. A time field in 12 hour form carries an AM/PM control beside it, and inside a group the two become one segment. The buttons a panel contains are not segments of the row and keep the size their own component gave them, so the navigation of a calendar stays small in a large row.',
-    },
-    scope: {
-      title: 'What a group does not join',
-      text: 'A textarea is not a segment. Its bordered box is a different element, so it is left entirely alone rather than half painted, and no sensible row joins a multi line box to a single line one. A row is a line of single line controls: a segment that grows, such as a combobox holding several values, becomes taller than its neighbours and the merged border then only covers the top of it.',
+    pickers: {
+      title: 'Two fields that open a panel',
+      text: "Each panel is anchored to its own field's box rather than to the row, so it opens under the segment it belongs to and not under the group. The buttons a panel contains are not segments of the row: they keep the size their own component gave them, which is what leaves a calendar's navigation small inside a large row. A time field in 12 hour form carries its AM/PM control inside the field itself, so the two still count as one segment. Anything put outside that border would be joined as a segment in its own right.",
     },
   },
 

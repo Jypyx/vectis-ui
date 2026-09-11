@@ -2,20 +2,20 @@
 import api from '~/content/api/input-group'
 import InputGroupBasic from '~/examples/input-group/Basic.vue'
 import inputGroupBasicSource from '~/examples/input-group/Basic.vue?raw'
+import InputGroupMultipleInputs from '~/examples/input-group/MultipleInputs.vue'
+import inputGroupMultipleInputsSource from '~/examples/input-group/MultipleInputs.vue?raw'
 import InputGroupNaming from '~/examples/input-group/Naming.vue'
 import inputGroupNamingSource from '~/examples/input-group/Naming.vue?raw'
-import InputGroupPanels from '~/examples/input-group/Panels.vue'
-import inputGroupPanelsSource from '~/examples/input-group/Panels.vue?raw'
-import InputGroupScope from '~/examples/input-group/Scope.vue'
-import inputGroupScopeSource from '~/examples/input-group/Scope.vue?raw'
-import InputGroupSearch from '~/examples/input-group/Search.vue'
-import inputGroupSearchSource from '~/examples/input-group/Search.vue?raw'
+import InputGroupPickers from '~/examples/input-group/Pickers.vue'
+import inputGroupPickersSource from '~/examples/input-group/Pickers.vue?raw'
 import InputGroupSizes from '~/examples/input-group/Sizes.vue'
 import inputGroupSizesSource from '~/examples/input-group/Sizes.vue?raw'
 import InputGroupStates from '~/examples/input-group/States.vue'
 import inputGroupStatesSource from '~/examples/input-group/States.vue?raw'
 import InputGroupWidths from '~/examples/input-group/Widths.vue'
 import inputGroupWidthsSource from '~/examples/input-group/Widths.vue?raw'
+import InputGroupWithButton from '~/examples/input-group/WithButton.vue'
+import inputGroupWithButtonSource from '~/examples/input-group/WithButton.vue?raw'
 
 definePageMeta({ layout: 'docs' })
 
@@ -34,6 +34,24 @@ useDocsHead('inputGroup')
 
   <h2 id="examples">{{ t('common.examples') }}</h2>
 
+  <h3 id="multiple-inputs">{{ t('inputGroup.examples.multipleInputs.title') }}</h3>
+  <DocsProse keypath="inputGroup.examples.multipleInputs.text" />
+  <DocsExample :source="inputGroupMultipleInputsSource" stack>
+    <InputGroupMultipleInputs />
+  </DocsExample>
+
+  <h3 id="with-button">{{ t('inputGroup.examples.withButton.title') }}</h3>
+  <DocsProse keypath="inputGroup.examples.withButton.text" />
+  <DocsExample :source="inputGroupWithButtonSource" stack>
+    <InputGroupWithButton />
+  </DocsExample>
+
+  <h3 id="pickers">{{ t('inputGroup.examples.pickers.title') }}</h3>
+  <DocsProse keypath="inputGroup.examples.pickers.text" />
+  <DocsExample :source="inputGroupPickersSource" stack>
+    <InputGroupPickers />
+  </DocsExample>
+
   <h3 id="naming">{{ t('inputGroup.examples.naming.title') }}</h3>
   <DocsProse keypath="inputGroup.examples.naming.text" />
   <DocsExample :source="inputGroupNamingSource" stack>
@@ -46,12 +64,6 @@ useDocsHead('inputGroup')
     <InputGroupWidths />
   </DocsExample>
 
-  <h3 id="search">{{ t('inputGroup.examples.search.title') }}</h3>
-  <DocsProse keypath="inputGroup.examples.search.text" />
-  <DocsExample :source="inputGroupSearchSource" stack>
-    <InputGroupSearch />
-  </DocsExample>
-
   <h3 id="sizes">{{ t('inputGroup.examples.sizes.title') }}</h3>
   <DocsProse keypath="inputGroup.examples.sizes.text" />
   <DocsExample :source="inputGroupSizesSource" stack>
@@ -62,18 +74,6 @@ useDocsHead('inputGroup')
   <DocsProse keypath="inputGroup.examples.states.text" />
   <DocsExample :source="inputGroupStatesSource" stack>
     <InputGroupStates />
-  </DocsExample>
-
-  <h3 id="panels">{{ t('inputGroup.examples.panels.title') }}</h3>
-  <DocsProse keypath="inputGroup.examples.panels.text" />
-  <DocsExample :source="inputGroupPanelsSource" stack>
-    <InputGroupPanels />
-  </DocsExample>
-
-  <h3 id="scope">{{ t('inputGroup.examples.scope.title') }}</h3>
-  <DocsProse keypath="inputGroup.examples.scope.text" />
-  <DocsExample :source="inputGroupScopeSource" stack>
-    <InputGroupScope />
   </DocsExample>
 
   <DocsApi page="inputGroup" :api="api" />
