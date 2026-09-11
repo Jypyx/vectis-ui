@@ -15,7 +15,7 @@ export default {
         matchTrigger:
           'Stops the panel being narrower than whatever it is anchored to. It is a floor, so a panel with a width of its own still grows past it rather than being clamped to the trigger, which is what a list of long labels under a short field wants.',
         vModelOpen:
-          "Whether the panel is showing. It starts closed and is bidirectional, fed from the DOM: in <code>auto</code> mode the browser's own light dismiss writes back to it. Setting it opens and closes the panel; when the change has to be synchronous, use the exposed <code>show</code> and <code>hide</code> instead, which is what VTooltip and the pickers do.",
+          "Whether the panel is showing. It starts closed and is bidirectional, fed from the DOM: in <code>auto</code> mode the browser's own light dismiss writes back to it. Setting it opens and closes the panel; when the change has to be synchronous, use the exposed <code>show</code> and <code>close</code> instead, which is what VTooltip and the pickers do.",
       },
       slots: {
         trigger:

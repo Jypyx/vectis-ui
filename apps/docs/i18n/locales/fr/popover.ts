@@ -15,7 +15,7 @@ export default {
         matchTrigger:
           "Empêche le panneau d'être plus étroit que ce à quoi il est ancré. C'est un plancher : un panneau qui a sa propre largeur la dépasse toujours au lieu d'être ramené à celle du déclencheur, ce que veut une liste de libellés longs sous un champ court.",
         vModelOpen:
-          'Si le panneau est affiché. Il part fermé et il est bidirectionnel, alimenté depuis le DOM : en mode <code>auto</code>, la fermeture légère du navigateur y réécrit. Le poser ouvre et ferme le panneau ; quand le changement doit être synchrone, utilisez plutôt les <code>show</code> et <code>hide</code> exposés, ce que font VTooltip et les sélecteurs.',
+          'Si le panneau est affiché. Il part fermé et il est bidirectionnel, alimenté depuis le DOM : en mode <code>auto</code>, la fermeture légère du navigateur y réécrit. Le poser ouvre et ferme le panneau ; quand le changement doit être synchrone, utilisez plutôt les <code>show</code> et <code>close</code> exposés, ce que font VTooltip et les sélecteurs.',
       },
       slots: {
         trigger:

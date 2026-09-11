@@ -114,7 +114,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
 /**
  * Whether the panel is showing. It starts closed and is BIDIRECTIONAL, fed from the DOM: in
  * `auto` mode the browser's own light dismiss writes back to it. Setting it opens and closes
- * the panel; a consumer needing the change to be synchronous uses the exposed `show`/`hide`
+ * the panel; a consumer needing the change to be synchronous uses the exposed `show`/`close`
  * instead, which is what VTooltip and the pickers do.
  */
 const open = defineModel<boolean>('open', { default: false })
