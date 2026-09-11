@@ -245,7 +245,6 @@ onBeforeUnmount(detach)
     display: inline-flex;
     align-items: center;
     gap: var(--control-gap);
-    color: var(--vectis-color-text);
   }
 
   .v-hotkeys-key {
@@ -258,29 +257,41 @@ onBeforeUnmount(detach)
     line-height: var(--vectis-text-control-leading);
   }
 
-  /* The three variants mirror VButton's NEUTRAL tone declaration for declaration —
-     tinted, outlined, and raised — minus everything that reacts to a pointer, since
-     nothing here is interactive. There is a single set of colours and therefore no
-     tone table at all: a shortcut is chrome, never data of the reader's.
+  /* The three variants are tinted, outlined and raised, and EVERY paint here derives
+     from `currentcolor` rather than from a surface token — the argument the separator
+     at the bottom of this sheet already makes, carried through to the caps themselves.
+
+     A shortcut is chrome, so it sits in whatever surrounds it: a paragraph, a field, a
+     menu row, a tooltip painted on an inverse surface. Greys chosen against the page
+     are wrong in half of those, and the failure is silent in the worst way — the caps
+     kept the page's text colour while the ground under them was the opposite one, so
+     on a light theme a shortcut inside a tooltip wrote dark keys on a dark panel.
+     Deriving the whole cap from the inherited colour is what makes the component
+     ground-independent, and it is the same reason there is no tone table at all.
 
      They set VARIABLES rather than declaring the look straight away, because that look
      has two possible carriers (see below). The names are qualified on purpose: these
      variables inherit, so a bare `--bg` would be captured by any ancestor in the host
-     application that happened to define one. */
+     application that happened to define one. `currentcolor` inside them is resolved on
+     whichever element ends up USING them, which is exactly what is wanted here. */
   .v-hotkeys[data-variant='flat'] {
-    --hotkeys-bg: var(--vectis-color-surface-muted);
+    --hotkeys-bg: color-mix(in oklab, currentcolor, transparent 90%);
     --hotkeys-border: transparent;
     --hotkeys-shadow: none;
   }
 
   .v-hotkeys[data-variant='outlined'] {
     --hotkeys-bg: transparent;
-    --hotkeys-border: var(--vectis-color-border-strong);
+    --hotkeys-border: color-mix(in oklab, currentcolor, transparent 70%);
     --hotkeys-shadow: none;
   }
 
+  /* Lifted rather than settled into its ground, so the tint is the lighter of the two
+     and the shadow does the work. That shadow is the one paint left that is not
+     derived: it is a cast rather than a colour, so on a dark ground it simply has
+     nothing to fall on, and the tint is what still separates the cap there. */
   .v-hotkeys[data-variant='elevated'] {
-    --hotkeys-bg: var(--vectis-color-surface-raised);
+    --hotkeys-bg: color-mix(in oklab, currentcolor, transparent 94%);
     --hotkeys-border: transparent;
     --hotkeys-shadow: var(--vectis-shadow-sm);
   }
@@ -310,9 +321,8 @@ onBeforeUnmount(detach)
     box-shadow: var(--hotkeys-shadow);
   }
 
-  /* The separator is the surrounding text colour softened, and not a fixed grey: a
-     shortcut may sit in prose of any colour, and a grey chosen against the page would
-     be wrong in half of them. */
+  /* Softened rather than full strength: the separator is punctuation between two
+     caps, and at the same weight as them it competes with what it separates. */
   .v-hotkeys-separator {
     color: color-mix(in oklab, currentcolor, transparent 40%);
   }

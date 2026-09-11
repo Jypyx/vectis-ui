@@ -11,7 +11,7 @@ export default {
     },
     variants: {
       title: 'Variants',
-      text: 'Three ways to draw a cap: tinted, outlined, or raised off the page. They are three values of one prop rather than a variant plus an elevation flag, because a key cap is not interactive: there is no hover, no active and no focus state for an elevation to combine with. Nothing here is a tone, either. A shortcut is chrome, never data, so the component offers no colour of its own.',
+      text: 'Three ways to draw a cap: tinted, outlined, or raised off the page. They are three values of one prop rather than a variant plus an elevation flag, because a key cap is not interactive: there is no hover, no active and no focus state for an elevation to combine with. Nothing here is a tone, either. A shortcut is chrome, never data, so the component offers no colour of its own: the tint, the outline and the caps themselves are all derived from the colour it inherits. That is what lets a shortcut sit anywhere and still read, in a paragraph, in a field, in a menu row, or inside a tooltip painted on a dark surface.',
     },
     sizes: {
       title: 'Sizes',

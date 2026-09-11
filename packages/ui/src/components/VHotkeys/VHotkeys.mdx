@@ -82,11 +82,16 @@ documentation table that wants to show all three side by side.
 
 ## Variants and sizes
 
-`flat` (the default), `outlined` and `elevated` mirror the neutral tone of `VButton`, declaration
-for declaration — respectively its `soft` variant, its `outline` one, and a `ghost` one raised by
-`elevated`. There is a single colour set — a keyboard shortcut is chrome, so there is no `tone`
-prop. It keeps them as three values of one variant, since a `<kbd>` is not interactive and so has
-no state to combine them with.
+`flat` (the default), `outlined` and `elevated`: tinted, outlined, raised. They stay three values
+of one variant rather than a variant plus an elevation flag, since a `<kbd>` is not interactive and
+so has no state for an elevation to combine with. There is no `tone` prop either — a keyboard
+shortcut is chrome, never data of the reader's.
+
+Every one of them paints from **`currentcolor`**: the tint, the outline and the text are all
+derived from the colour the component inherits, so a shortcut reads on whatever it happens to sit
+on — a paragraph, a field, a menu row, a tooltip painted on an inverse surface. Only the shadow of
+`elevated` is not derived, a cast being a cast: on a dark ground it has nothing to fall on, and the
+tint is what separates the cap there.
 
 <Canvas of={VHotkeysStories.Variants} />
 

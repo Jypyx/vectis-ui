@@ -11,7 +11,7 @@ export default {
     },
     variants: {
       title: 'Variantes',
-      text: "Trois façons de dessiner une touche : teintée, contournée, ou soulevée de la page. Ce sont trois valeurs d'une même prop plutôt qu'une variante doublée d'un indicateur d'élévation, parce qu'une touche n'est pas interactive : il n'y a ni survol, ni état actif, ni focus avec quoi une élévation pourrait se combiner. Rien ici n'est une tonalité non plus. Un raccourci est du décor, jamais une donnée, donc le composant n'offre aucune couleur propre.",
+      text: "Trois façons de dessiner une touche : teintée, contournée, ou soulevée de la page. Ce sont trois valeurs d'une même prop plutôt qu'une variante doublée d'un indicateur d'élévation, parce qu'une touche n'est pas interactive : il n'y a ni survol, ni état actif, ni focus avec quoi une élévation pourrait se combiner. Rien ici n'est une tonalité non plus. Un raccourci est du décor, jamais une donnée, donc le composant n'offre aucune couleur propre : la teinte, le contour et les touches elles-mêmes dérivent tous de la couleur dont il hérite. C'est ce qui permet à un raccourci de se placer n'importe où et de rester lisible, dans un paragraphe, dans un champ, dans une ligne de menu, ou à l'intérieur d'une infobulle peinte sur une surface sombre.",
     },
     sizes: {
       title: 'Tailles',
