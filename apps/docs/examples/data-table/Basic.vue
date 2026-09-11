@@ -15,5 +15,5 @@ const rows = [
 </script>
 
 <template>
-  <VDataTable :columns="columns" :rows="rows" row-key="name" caption="Projects" />
+  <VDataTable :columns="columns" :rows="rows" row-key="name" title="Projects" />
 </template>
