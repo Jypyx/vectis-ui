@@ -6,5 +6,13 @@ const volume = ref(40)
 </script>
 
 <template>
-  <VSlider v-model="volume" label="Volume" />
+  <div class="demo">
+    <VSlider v-model="volume" label="Volume" />
+  </div>
 </template>
+
+<style scoped>
+.demo {
+  inline-size: 20rem;
+}
+</style>
