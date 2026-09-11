@@ -81,6 +81,12 @@ interface PaginationProps {
   /** Takes 4px off the height of every button. */
   compact?: boolean
   /**
+   * Raises the row off the page, on the terms of VButton's own `elevated`. Joined, the
+   * shadow belongs to the ROW and not to each pill, which is what stops it falling into
+   * the joints; detached, every button carries its own.
+   */
+  elevated?: boolean
+  /**
    * Where the row sits in the space it is given. It only matters in responsive mode,
    * where the row takes the whole width available.
    */
@@ -142,6 +148,7 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   tone: 'accent',
   size: 'md',
   compact: false,
+  elevated: false,
   align: 'start',
   controls: 'icon',
   prevIcon: () => chevronLeftIcon,
@@ -291,7 +298,15 @@ function onKeydown(event: KeyboardEvent) {
          That is why there is no list markup wrapping the pills, and why the ellipsis is
          itself an inert button rather than a plain span: anything else between two pills
          would break the seam. -->
-    <VButtonGroup class="v-pagination-items" :detached="detached">
+    <!--
+      The elevation is the ONE appearance prop handed to the group rather than to each
+      button, because that is where VButtonGroup draws it: joined, the row takes the
+      shadow and the segments give theirs up, or it would fall into every joint.
+
+      `|| undefined` keeps the group opinion-free when the row does not ask, `undefined`
+      being what means "no opinion" there where `false` is an order.
+    -->
+    <VButtonGroup class="v-pagination-items" :detached="detached" :elevated="elevated || undefined">
       <template v-if="controls">
         <VIconButton
           v-if="controls === 'icon'"

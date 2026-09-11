@@ -16,6 +16,7 @@ export default {
         { name: 'tone', type: 'PaginationTone', default: "'accent'" },
         { name: 'size', type: 'PaginationSize', default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
+        { name: 'elevated', type: 'boolean', default: 'false' },
         { name: 'align', type: 'PaginationAlign', default: "'start'" },
         { name: 'controls', type: 'PaginationControls', default: "'icon'" },
         { name: 'prevIcon', type: 'IconSource', default: 'chevron_left' },

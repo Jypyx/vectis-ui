@@ -52,6 +52,15 @@ uses.
 <Canvas of={VPaginationStories.Sizes} />
 <Canvas of={VPaginationStories.Compact} />
 
+## Elevated
+
+`elevated` is the one appearance prop handed to the `VButtonGroup` rather than to each button,
+because that is where the shadow is drawn. Joined, it belongs to the ROW and the segments give
+theirs up: a shadow per pill would fall into every joint, the segments overlapping by a pixel.
+Detached, each button carries its own.
+
+<Canvas of={VPaginationStories.Elevated} />
+
 ## Previous / next controls
 
 `controls` says what they show — `'icon'`, `'text'` or `'both'` — or takes them away with

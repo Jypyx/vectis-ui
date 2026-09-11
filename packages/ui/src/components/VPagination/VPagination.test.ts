@@ -298,6 +298,29 @@ describe('VPagination', () => {
       expect(buttons.every((el) => el.hasAttribute('data-compact'))).toBe(true)
     })
 
+    /*
+     * The elevation is the one appearance prop routed through the group rather than
+     * through each button: joined, VButtonGroup draws the shadow for the ROW and the
+     * segments give theirs up. Only the wiring is observable here, the `:has()` rule
+     * that moves the shadow being CSS jsdom never evaluates.
+     */
+    it('elevated reaches every button through the group', () => {
+      const { container } = render(VPagination, {
+        props: { length: 5, modelValue: 3, elevated: true },
+      })
+      const buttons = [...container.querySelectorAll<HTMLElement>('.v-button')]
+
+      expect(buttons.length).toBeGreaterThan(0)
+      expect(buttons.every((el) => el.hasAttribute('data-elevated'))).toBe(true)
+    })
+
+    it('without elevated, the group stays opinion-free and no button is raised', () => {
+      const { container } = render(VPagination, { props: { length: 5, modelValue: 3 } })
+      const buttons = [...container.querySelectorAll<HTMLElement>('.v-button')]
+
+      expect(buttons.some((el) => el.hasAttribute('data-elevated'))).toBe(false)
+    })
+
     it('renders the active page as solid and the others in the requested variant', () => {
       const { container } = render(VPagination, {
         props: { length: 5, modelValue: 3, itemVariant: 'outline' },

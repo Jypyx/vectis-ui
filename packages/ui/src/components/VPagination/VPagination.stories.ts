@@ -139,6 +139,23 @@ export const Compact: Story = {
   }),
 }
 
+/**
+ * Joined, the shadow belongs to the ROW: drawn per pill it would fall into every joint,
+ * the segments overlapping by a pixel. Detached, each button carries its own.
+ */
+export const Elevated: Story = {
+  render: () => ({
+    components: { VPagination },
+    setup: () => ({ joined: ref(3), detached: ref(3) }),
+    template: `
+      <div style="display: grid; gap: 24px">
+        <VPagination :length="8" elevated item-variant="outline" label="joined" v-model="joined" />
+        <VPagination :length="8" elevated detached item-variant="outline" label="detached" v-model="detached" />
+      </div>
+    `,
+  }),
+}
+
 export const Controls: Story = {
   render: () => ({
     components: { VPagination },
