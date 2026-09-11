@@ -264,7 +264,7 @@ export const EndContent: Story = {
       </VSideNavigationItem>
       <VSideNavigationItem icon="folder">
         {{ t.projects }}
-        <template #end><VBadge size="xs" tone="accent" count="12" /></template>
+        <template #end><VBadge tone="accent" :count="12" /></template>
         <template #items>
           <VSideNavigationItem href="#alpha">Alpha</VSideNavigationItem>
         </template>

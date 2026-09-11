@@ -17,11 +17,17 @@
 import { useId } from 'vue'
 
 interface SideNavigationGroupProps {
-  /** The name of the section. The `#label` slot replaces it. */
-  label: string
+  /**
+   * The name of the section, replaced by the `#label` slot. One of the two is
+   * REQUIRED: it is what names the sublist under it, and a section named by neither
+   * points its `aria-labelledby` at an empty element.
+   */
+  label?: string
 }
 
-defineProps<SideNavigationGroupProps>()
+withDefaults(defineProps<SideNavigationGroupProps>(), {
+  label: undefined,
+})
 
 defineSlots<{
   /** The items belonging to this section. */
