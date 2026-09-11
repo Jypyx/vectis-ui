@@ -139,11 +139,25 @@ function onToggle(value: boolean) {
   }
 }
 
+/*
+ * TRAP — every opening that does not come from a click on the trigger has to NAME that
+ * trigger. A popover opened through `popovertarget` takes its invoker as its implicit
+ * anchor; opened from code with no `source`, it has no anchor at all and the browser
+ * paints it at the corner of the viewport. Nothing errors, and the panel is otherwise
+ * perfectly functional there.
+ *
+ * The invoker is searched for rather than held: it is rendered by the consumer, in a
+ * slot this component cannot reach into.
+ */
+function openAtTrigger() {
+  panelRef.value?.show(menuInvoker(menuId) ?? undefined)
+}
+
 // Opening and closing from the model. The guard is what keeps the two directions from
 // chasing each other: a menu the browser has just closed already reports it here.
 watch(open, (value) => {
   if (value === shown.value) return
-  if (value) panelRef.value?.show()
+  if (value) openAtTrigger()
   else panelRef.value?.close()
 })
 
@@ -151,7 +165,7 @@ watch(open, (value) => {
 // from the start would never be told to open. Replaying the initial state on mount is
 // what covers that case.
 onMounted(() => {
-  if (open.value) panelRef.value?.show()
+  if (open.value) openAtTrigger()
 })
 
 /*
@@ -161,7 +175,7 @@ onMounted(() => {
  */
 defineExpose({
   /** Opens the menu at once, without waiting for the model to come round. */
-  show: () => panelRef.value?.show(),
+  show: openAtTrigger,
   /** Closes it at once, submenus included. */
   close: () => panelRef.value?.close(),
   /** The panel element, for what neither of the two above covers. */

@@ -1,6 +1,6 @@
-﻿import { render } from '@testing-library/vue'
+﻿import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
-import { defineComponent, nextTick } from 'vue'
+import { defineComponent, nextTick, ref } from 'vue'
 
 import VMenu from './VMenu.vue'
 import VMenuGroup from './VMenuGroup.vue'
@@ -8,10 +8,16 @@ import VMenuItem from './VMenuItem.vue'
 import VMenuSeparator from './VMenuSeparator.vue'
 import { SUBMENU_HOVER_DELAY } from './context'
 
-function renderHarness(template: string, onSelect = vi.fn()) {
+function renderHarness(
+  template: string,
+  onSelect = vi.fn(),
+  /* Extra bindings the template needs. A second `defineComponent` in this file would
+     trip `vue/one-component-per-file`, so everything goes through this one. */
+  extra: () => Record<string, unknown> = () => ({}),
+) {
   const Harness = defineComponent({
     components: { VMenu, VMenuItem, VMenuGroup, VMenuSeparator },
-    setup: () => ({ onSelect }),
+    setup: () => ({ onSelect, ...extra() }),
     template,
   })
   return { onSelect, ...render(Harness) }
@@ -155,6 +161,56 @@ describe('VMenu', () => {
     expect(trigger.getAttribute('aria-haspopup')).toBe('menu')
     expect(trigger.getAttribute('aria-expanded')).toBe('false')
     expect(trigger.getAttribute('aria-controls')).toBe(menu.id)
+  })
+
+  /*
+   * A popover opened through `popovertarget` takes its invoker as its implicit anchor.
+   * Opened from code with no `source` it has none, and the browser paints the panel at
+   * the corner of the viewport — silently, the panel being otherwise perfectly usable
+   * there. jsdom neither anchors nor lays anything out, so what is locked here is the
+   * ONE observable thing: that the trigger is named as the source.
+   */
+  describe('opened from code, the trigger is named as the popover source', () => {
+    function renderModelMenu(initiallyOpen = false) {
+      const open = ref(initiallyOpen)
+      return renderHarness(
+        `
+          <div>
+            <button data-testid="opener" @click="open = true">Open from code</button>
+            <VMenu v-model:open="open">
+              <template #trigger="{ triggerProps }">
+                <button data-testid="trigger" v-bind="triggerProps">Actions</button>
+              </template>
+              <VMenuItem label="Rename" />
+            </VMenu>
+          </div>
+        `,
+        vi.fn(),
+        () => ({ open }),
+      )
+    }
+
+    it('through the model', async () => {
+      const { getByTestId, container } = renderModelMenu()
+      const panel = container.querySelector('[role="menu"]') as HTMLElement
+      const spy = vi.spyOn(panel, 'showPopover')
+
+      await fireEvent.click(getByTestId('opener'))
+      await nextTick()
+
+      expect(spy).toHaveBeenCalledWith({ source: getByTestId('trigger') })
+    })
+
+    // @ssr — the watcher never ran on the server, so mounting replays the initial
+    // state. That replay is a separate call site and misses the source just as easily.
+    it('and when it is open from the very first render', async () => {
+      const spy = vi.spyOn(HTMLElement.prototype, 'showPopover')
+      const { getByTestId } = renderModelMenu(true)
+      await nextTick()
+
+      expect(spy).toHaveBeenCalledWith({ source: getByTestId('trigger') })
+      spy.mockRestore()
+    })
   })
 
   it('opened from the keyboard, focuses the first item and updates aria-expanded', async () => {
