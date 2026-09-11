@@ -2,6 +2,45 @@ export default {
   title: 'Menu',
   lead: "Une liste de commandes ouverte par un bouton. Il porte tout le patron ARIA menu : focus glissant, sous-menus imbriqués, et l'empilement des panneaux par le navigateur pour qu'une seule fermeture referme la branche.",
 
+  examples: {
+    menuItems: {
+      title: 'Les commandes',
+      text: "Une ligne porte un libellé, une icône à chaque bout, et ce qu'elle signifie. Ce dernier point est une <code>tone</code> plutôt qu'un booléen à elle : le même mot sur la même prop qu'un bouton, <code>danger</code> pour ce qui détruit quelque chose, <code>neutral</code> pour tout le reste. Il n'y a pas d'accent ici, un menu n'ayant pas de commande principale parmi ses lignes. Une ligne désactivée cesse de répondre et les flèches l'enjambent, et <code>href</code> transforme une ligne en vrai lien, ce dont devrait être fait un menu qui navigue au lieu d'agir : on peut alors le cliquer au milieu et copier son adresse. VMenuSeparator trace un filet entre deux suites de commandes.",
+    },
+    sublabels: {
+      title: 'Seconde ligne',
+      text: "Une seconde ligne sous le libellé, pour ce que la commande fait et que son nom ne dit pas déjà, ou pour le raccourci qui la déclenche. La ligne grandit pour les contenir toutes les deux et l'icône reste centrée sur la paire plutôt que sur la première ligne.",
+    },
+    selection: {
+      title: 'Sélection',
+      text: "<code>selected</code> marque la ligne actuellement en vigueur, l'ordre de tri utilisé ou la vue affichée. Elle est colorée et annoncée comme le choix courant : une coche à côté est donc une décoration et non l'information elle-même, un lecteur d'écran étant prévenu dans les deux cas. Un menu reste une liste de commandes et non un jeu de cases à cocher, donc en choisir une referme le panneau.",
+    },
+    groups: {
+      title: 'Groupes',
+      text: "Un bloc nommé de commandes. Le libellé est un titre et non une commande : rien ne se passe quand on le clique et les flèches ne s'y arrêtent jamais. Il prend la même hauteur qu'une ligne, ce qui garde le rythme vertical de la liste même lorsqu'un titre l'interrompt. Séparateurs et groupes se mélangent librement, un séparateur étant un filet là où un groupe est un nom.",
+    },
+    submenus: {
+      title: 'Sous-menus',
+      text: "Une ligne pourvue d'un slot <code>#submenu</code> ouvre un panneau à elle, et ces panneaux s'imbriquent aussi profond qu'il le faut. La survoler l'ouvre après un court délai, assez long pour que passer dessus en allant ailleurs n'ouvre rien. Au clavier, la flèche droite entre dans le sous-menu et la flèche gauche ou Escape remonte d'un cran. Le navigateur empile les panneaux : un clic à l'extérieur referme donc toute la branche d'un coup, et passer à une ligne voisine referme celui qui était ouvert.",
+    },
+    sizes: {
+      title: 'Tailles',
+      text: "Trois hauteurs de ligne, 32, 40 et 48 pixels, chacune avec sa version <code>compact</code> plus courte de 4px. Cela se pose une seule fois sur le menu entier : le panneau porte la taille et chaque ligne l'y lit, sous-menus compris, si bien qu'un panneau imbriqué ne peut pas se désaccorder de son parent.",
+    },
+    width: {
+      title: 'Largeur',
+      text: "Laissé à lui-même, le panneau se tient entre un plancher et un plafond qui lui sont propres, ce qui évite qu'un menu de commandes courtes soit un ruban et qu'un long libellé l'étire à travers la page. <code>width</code> remplace les deux par n'importe quelle longueur ou mot-clé CSS, <code>max-content</code> le resserrant sur sa plus longue ligne. <code>matchTrigger</code> remplace plutôt le plancher : le panneau ne peut plus être plus étroit que le bouton qui l'a ouvert, tout en restant libre de grandir pour une ligne plus longue. Les deux s'appliquent au menu lui-même, les sous-menus gardant la valeur par défaut.",
+    },
+    placement: {
+      title: 'Position',
+      text: "Où le panneau s'ouvre par rapport à son déclencheur. Seul l'axe de bloc est proposé, au-dessus ou en dessous, une liste de commandes s'ouvrant à côté de son bouton laissant le lecteur chercher au mauvais endroit. C'est une préférence et non une position : un navigateur à court de place en dessous bascule le panneau au-dessus de lui-même, la valeur ne décidant que du côté essayé en premier.",
+    },
+    open: {
+      title: 'Savoir si le menu est ouvert',
+      text: "Le modèle est alimenté par le panneau au lieu d'être seulement lu par lui : un clic à l'extérieur, Escape ou le choix d'une commande y réécrivent, si bien que rien n'est à remettre à zéro à la main. Le lire est l'usage courant, pour un déclencheur qui change pendant que son menu est sorti ou pour une page qui doit le savoir. Y écrire est plus rare et mérite d'être dit franchement : fermer depuis le code couvre le cas ordinaire d'une action qui s'achève ailleurs, tandis qu'ouvrir depuis le code ne convient vraiment qu'à un raccourci clavier ou à une visite guidée, un menu appartenant sinon au bouton qui l'ouvre. Un menu ouvert depuis le code s'ancre tout de même sur ce bouton.",
+    },
+  },
+
   api: {
     VMenu: {
       props: {
