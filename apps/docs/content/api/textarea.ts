@@ -9,7 +9,7 @@ export default {
     {
       name: 'VTextarea',
       props: [
-        { name: 'size', type: 'TextareaSize', default: "'md'" },
+        { name: 'size', type: 'TextareaSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'rows', type: 'number', default: '5' },
         { name: 'autoGrow', type: 'boolean', default: 'false' },
@@ -42,6 +42,28 @@ export default {
         { name: 'end', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
   ],
 } satisfies PageApi

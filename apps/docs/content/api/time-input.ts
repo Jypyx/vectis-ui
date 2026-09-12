@@ -9,8 +9,8 @@ export default {
     {
       name: 'VTimeInput',
       props: [
-        { name: 'format', type: 'TimePickerFormat' },
-        { name: 'mode', type: 'TimeInputMode', default: "'input'" },
+        { name: 'format', type: 'TimePickerFormat', values: "'12h' | '24h'" },
+        { name: 'mode', type: 'TimeInputMode', values: "'picker' | 'input' | 'list'", default: "'input'" },
         { name: 'showPicker', type: 'boolean', default: 'false' },
         { name: 'minuteStep', type: 'number', default: '1' },
         { name: 'min', type: 'string' },
@@ -21,7 +21,7 @@ export default {
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
         { name: 'placeholder', type: 'string' },
-        { name: 'size', type: 'TimeInputSize', default: "'md'" },
+        { name: 'size', type: 'TimeInputSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
@@ -34,7 +34,7 @@ export default {
         { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'clearLabel', type: 'string' },
         { name: 'pickerIcon', type: 'IconSource', default: 'schedule' },
-        { name: 'placement', type: 'TimeInputPlacement', default: "'bottom-start'" },
+        { name: 'placement', type: 'TimeInputPlacement', values: "'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'", default: "'bottom-start'" },
         { name: 'v-model', key: 'vModel', type: 'string | null', default: 'null' },
       ],
       events: [
@@ -46,6 +46,32 @@ export default {
         { name: 'value-end', key: 'valueEnd', type: '{}' },
         { name: 'footer', type: '{ confirm: () => void; cancel: () => void; }' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
+    },
+    {
+      name: 'TimeMatcher',
+      definition: `export type TimeMatcher = number[] | ((value: number) => boolean)`,
     },
   ],
 } satisfies PageApi

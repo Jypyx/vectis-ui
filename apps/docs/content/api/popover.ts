@@ -10,8 +10,8 @@ export default {
       name: 'VPopover',
       props: [
         { name: 'id', type: 'string' },
-        { name: 'placement', type: 'PopoverPlacement', default: "'bottom-start'" },
-        { name: 'mode', type: 'PopoverMode', default: "'auto'" },
+        { name: 'placement', type: 'PopoverPlacement', values: "'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' | 'right' | 'right-start' | 'right-end'", default: "'bottom-start'" },
+        { name: 'mode', type: 'PopoverMode', values: "'auto' | 'manual'", default: "'auto'" },
         { name: 'anchor', type: 'string' },
         { name: 'bare', type: 'boolean', default: 'false' },
         { name: 'matchTrigger', type: 'boolean', default: 'false' },
@@ -21,6 +21,16 @@ export default {
         { name: 'trigger', type: '{ triggerProps: PopoverTriggerProps; }' },
         { name: 'default', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'PopoverTriggerProps',
+      definition: `export type PopoverTriggerProps = {
+  popovertarget: string
+  'aria-expanded': boolean
+  'aria-controls': string
+}`,
     },
   ],
 } satisfies PageApi

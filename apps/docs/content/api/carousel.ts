@@ -13,15 +13,15 @@ export default {
         { name: 'itemMinSize', type: 'number | string' },
         { name: 'peek', type: 'number | string' },
         { name: 'gap', type: 'number | string' },
-        { name: 'orientation', type: 'CarouselOrientation', default: "'horizontal'" },
-        { name: 'effect', type: 'CarouselEffect', default: "'slide'" },
+        { name: 'orientation', type: 'CarouselOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
+        { name: 'effect', type: 'CarouselEffect', values: "'slide' | 'fade' | 'scale'", default: "'slide'" },
         { name: 'height', type: 'number | string' },
         { name: 'loop', type: 'boolean', default: 'false' },
         { name: 'noJump', type: 'boolean', default: 'false' },
         { name: 'autoplay', type: 'number', default: '0' },
-        { name: 'controls', type: 'CarouselControls', default: "'inside'" },
-        { name: 'indicators', type: 'CarouselIndicators', default: "'outside'" },
-        { name: 'controlsVisibility', type: 'CarouselControlsVisibility', default: "'always'" },
+        { name: 'controls', type: 'CarouselControls', values: "false | 'inside' | 'outside'", default: "'inside'" },
+        { name: 'indicators', type: 'CarouselIndicators', values: "false | 'inside' | 'outside'", default: "'outside'" },
+        { name: 'controlsVisibility', type: 'CarouselControlsVisibility', values: "'always' | 'hover'", default: "'always'" },
         { name: 'prevIcon', type: 'IconSource' },
         { name: 'nextIcon', type: 'IconSource' },
         { name: 'prevLabel', type: 'string' },
@@ -44,6 +44,32 @@ export default {
       slots: [
         { name: 'default', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'CarouselOrientation',
+      definition: `export type CarouselOrientation = 'horizontal' | 'vertical'`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
   ],
   cssVars: [

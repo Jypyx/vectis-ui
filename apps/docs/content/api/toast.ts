@@ -9,7 +9,7 @@ export default {
     {
       name: 'VToaster',
       props: [
-        { name: 'placement', type: 'ToastPlacement', default: "'bottom-right'" },
+        { name: 'placement', type: 'ToastPlacement', values: "'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'", default: "'bottom-right'" },
         { name: 'duration', type: 'number', default: '5000' },
         { name: 'closeLabel', type: 'string' },
         { name: 'label', type: 'string' },

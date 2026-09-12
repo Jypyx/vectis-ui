@@ -12,11 +12,11 @@ export default {
         { name: 'value', type: 'number', default: '0' },
         { name: 'max', type: 'number', default: '100' },
         { name: 'indeterminate', type: 'boolean', default: 'false' },
-        { name: 'tone', type: 'ProgressCircularTone', default: "'accent'" },
+        { name: 'tone', type: 'ProgressCircularTone', values: "'accent' | 'success' | 'warning' | 'danger' | 'neutral'", default: "'accent'" },
         { name: 'color', type: 'string' },
         { name: 'size', type: 'number | string' },
         { name: 'thickness', type: 'number | string' },
-        { name: 'shape', type: 'ProgressCircularShape', default: "'rounded'" },
+        { name: 'shape', type: 'ProgressCircularShape', values: "'rounded' | 'square'", default: "'rounded'" },
         { name: 'showValue', type: 'boolean', default: 'false' },
       ],
       slots: [

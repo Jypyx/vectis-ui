@@ -13,7 +13,7 @@ export default {
         { name: 'multiple', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
-        { name: 'size', type: 'ComboboxSize', default: "'md'" },
+        { name: 'size', type: 'ComboboxSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'placeholder', type: 'string' },
         { name: 'disabled', type: 'boolean', default: 'false' },
@@ -30,7 +30,7 @@ export default {
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'loadingText', type: 'string' },
         { name: 'hasMore', type: 'boolean', default: 'false' },
-        { name: 'placement', type: 'ComboboxPlacement', default: "'bottom-start'" },
+        { name: 'placement', type: 'ComboboxPlacement', values: "'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'", default: "'bottom-start'" },
         { name: 'v-model', key: 'vModel', type: 'ItemValue | ItemValue[]', default: "''" },
       ],
       events: [
@@ -47,6 +47,62 @@ export default {
         { name: 'empty', type: '{ query: string; }' },
         { name: 'loading', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'ComboboxFilter',
+      definition: `export type ComboboxFilter = boolean | ((option: ComboboxOption, query: string) => boolean)`,
+    },
+    {
+      name: 'ComboboxGroup',
+      definition: `export interface ComboboxGroup {
+  label: string
+  options: ComboboxOption[]
+}`,
+    },
+    {
+      name: 'ComboboxItem',
+      definition: `export type ComboboxItem = ComboboxOption | ComboboxGroup | ComboboxSeparator`,
+    },
+    {
+      name: 'ComboboxOption',
+      definition: `export interface ComboboxOption {
+  value: ItemValue
+  label: string
+  icon?: IconSource
+  disabled?: boolean
+}`,
+    },
+    {
+      name: 'ComboboxSeparator',
+      definition: `export interface ComboboxSeparator {
+  separator: true
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
+    },
+    {
+      name: 'ItemValue',
+      definition: `export type ItemValue = string | number`,
     },
   ],
   cssVars: [

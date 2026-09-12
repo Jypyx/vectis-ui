@@ -9,9 +9,9 @@ export default {
     {
       name: 'VInput',
       props: [
-        { name: 'size', type: 'InputSize', default: "'md'" },
+        { name: 'size', type: 'InputSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
-        { name: 'type', type: 'InputType', default: "'text'" },
+        { name: 'type', type: 'InputType', values: "'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url'", default: "'text'" },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
@@ -41,6 +41,28 @@ export default {
         { name: 'value-end', key: 'valueEnd', type: '{}' },
         { name: 'end', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
   ],
 } satisfies PageApi

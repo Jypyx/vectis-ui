@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * The API section of a component page: props, events, slots and CSS variables.
+ * The API section of a component page: props, events, slots, named types and CSS variables.
  *
  * It renders the whole section, headings included, so that forty-four pages cannot each grow
  * their own shape. The structure comes from `content/api/<slug>.ts`, which a script extracts
@@ -20,7 +20,7 @@
  */
 import type { ApiEntry, ComponentApi, PageApi } from '~/content/api/types'
 
-import { keyOf } from '~/content/api/types'
+import { anchorOf, keyOf } from '~/content/api/types'
 
 const props = defineProps<{
   /** The page's catalogue namespace, e.g. `switch` — the root of every description keypath. */
@@ -71,9 +71,7 @@ const withSlots = computed(() => props.api.components.filter((one) => one.slots?
           <td>
             <code>{{ entry.name }}</code>
           </td>
-          <td>
-            <code>{{ entry.type }}</code>
-          </td>
+          <DocsApiType :entry="entry" :types="api.types" />
           <td>
             <code v-if="entry.default">{{ entry.default }}</code>
             <template v-else>{{ t('common.table.noDefault') }}</template>
@@ -99,9 +97,7 @@ const withSlots = computed(() => props.api.components.filter((one) => one.slots?
           <td>
             <code>{{ entry.name }}</code>
           </td>
-          <td>
-            <code>{{ entry.type }}</code>
-          </td>
+          <DocsApiType :entry="entry" :types="api.types" />
         </tr>
         <tr class="vd-api-note">
           <DocsProse tag="td" :colspan="2" :keypath="keypathOf(component, 'events', entry)" />
@@ -123,15 +119,27 @@ const withSlots = computed(() => props.api.components.filter((one) => one.slots?
           <td>
             <code>{{ entry.name }}</code>
           </td>
-          <td>
-            <code>{{ entry.type }}</code>
-          </td>
+          <DocsApiType :entry="entry" :types="api.types" />
         </tr>
         <tr class="vd-api-note">
           <DocsProse tag="td" :colspan="2" :keypath="keypathOf(component, 'slots', entry)" />
         </tr>
       </template>
     </DocsTable>
+  </template>
+
+  <!--
+    The shapes the tables above could not print in a cell, each under the anchor its Type column
+    links to. A `.vd-code` card and not a DocsCode: a definition is read, never pasted — a
+    consumer imports the type instead of copying it — so the language tag and the copy button
+    would be chrome around nine blocks that nobody presses.
+  -->
+  <template v-if="api.types?.length">
+    <h3 id="types">{{ t('common.api.types') }}</h3>
+    <DocsProse tag="p" keypath="common.api.typesLead" />
+    <div v-for="type in api.types" :id="anchorOf(type.name)" :key="type.name" class="vd-code">
+      <pre>{{ type.definition }}</pre>
+    </div>
   </template>
 
   <template v-if="api.cssVars?.length">

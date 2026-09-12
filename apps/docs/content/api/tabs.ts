@@ -9,19 +9,19 @@ export default {
     {
       name: 'VTabs',
       props: [
-        { name: 'variant', type: 'TabsVariant', default: "'flat'" },
-        { name: 'tone', type: 'TabsTone', default: "'accent'" },
-        { name: 'size', type: 'TabsSize', default: "'md'" },
+        { name: 'variant', type: 'TabsVariant', values: "'flat' | 'outlined' | 'inset'", default: "'flat'" },
+        { name: 'tone', type: 'TabsTone', values: "'accent' | 'neutral' | 'danger'", default: "'accent'" },
+        { name: 'size', type: 'TabsSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
-        { name: 'orientation', type: 'TabsOrientation', default: "'horizontal'" },
-        { name: 'align', type: 'TabsAlign', default: "'start'" },
+        { name: 'orientation', type: 'TabsOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
+        { name: 'align', type: 'TabsAlign', values: "'start' | 'center' | 'end'", default: "'start'" },
         { name: 'grow', type: 'boolean', default: 'false' },
         { name: 'scrollButtons', type: 'boolean', default: 'false' },
         { name: 'prevIcon', type: 'IconSource' },
         { name: 'nextIcon', type: 'IconSource' },
         { name: 'prevLabel', type: 'string' },
         { name: 'nextLabel', type: 'string' },
-        { name: 'activation', type: 'TabsActivation', default: "'manual'" },
+        { name: 'activation', type: 'TabsActivation', values: "'manual' | 'automatic'", default: "'manual'" },
         { name: 'label', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'string | number' },
       ],
@@ -52,6 +52,32 @@ export default {
       slots: [
         { name: 'default', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
+    },
+    {
+      name: 'ItemValue',
+      definition: `export type ItemValue = string | number`,
     },
   ],
   cssVars: [

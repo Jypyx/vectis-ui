@@ -13,7 +13,7 @@ export default {
         { name: 'customDays', type: 'number', default: '4' },
         { name: 'weekdays', type: 'number[]' },
         { name: 'locale', type: 'string' },
-        { name: 'format', type: 'HourFormat' },
+        { name: 'format', type: 'HourFormat', values: "'12h' | '24h'" },
         { name: 'dayStart', type: 'number', default: '0' },
         { name: 'dayEnd', type: 'number', default: '24' },
         { name: 'slotDuration', type: 'number', default: '15' },
@@ -26,7 +26,7 @@ export default {
         { name: 'edgeStepDelay', type: 'number', default: '800' },
         { name: 'noEdgeScroll', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
-        { name: 'v-model:view', key: 'vModelView', type: 'CalendarView', default: "'week'" },
+        { name: 'v-model:view', key: 'vModelView', type: 'CalendarView', values: "'day' | '4days' | 'week' | 'month' | 'year' | 'custom'", default: "'week'" },
         { name: 'v-model:date', key: 'vModelDate', type: 'string', default: 'today' },
         { name: 'v-model:events', key: 'vModelEvents', type: 'E[]', default: '[]' },
       ],
@@ -43,6 +43,40 @@ export default {
         { name: 'day-header', key: 'dayHeader', type: '{ iso: string; weekday: string; day: string; today: boolean; }' },
         { name: 'all-day-label', key: 'allDayLabel', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'CalendarEvent',
+      definition: `export interface CalendarEvent {
+  id: CalendarEventId
+  title: string
+  start: string
+  end: string
+  startTime: string
+  endTime: string
+  description?: string
+  color?: string
+  timezone?: string
+  allDay?: boolean
+}`,
+    },
+    {
+      name: 'CalendarEventId',
+      definition: `export type CalendarEventId = string | number`,
+    },
+    {
+      name: 'CalendarEventTimes',
+      definition: `export interface CalendarEventTimes {
+  start: string
+  end: string
+  startTime: string
+  endTime: string
+}`,
+    },
+    {
+      name: 'CalendarView',
+      definition: `export type CalendarView = 'day' | '4days' | 'week' | 'month' | 'year' | 'custom'`,
     },
   ],
   cssVars: [

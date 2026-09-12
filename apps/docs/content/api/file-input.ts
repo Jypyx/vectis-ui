@@ -11,14 +11,14 @@ export default {
       props: [
         { name: 'multiple', type: 'boolean', default: 'false' },
         { name: 'accept', type: 'string' },
-        { name: 'display', type: 'FileInputDisplay', default: "'text'" },
+        { name: 'display', type: 'FileInputDisplay', values: "'text' | 'chip'", default: "'text'" },
         { name: 'maxSize', type: 'number' },
         { name: 'maxTotalSize', type: 'number' },
         { name: 'maxFiles', type: 'number' },
         { name: 'counter', type: 'boolean', default: 'false' },
         { name: 'attachIcon', type: 'IconSource', default: 'attach_file' },
         { name: 'noDrop', type: 'boolean', default: 'false' },
-        { name: 'size', type: 'FileInputSize', default: "'md'" },
+        { name: 'size', type: 'FileInputSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
@@ -48,6 +48,39 @@ export default {
         { name: 'chip', type: "{ file: File; index: number; label: string; remove: () => void; size: 'xs' | 'sm'; compact: boolean; }" },
         { name: 'counter', type: '{ count: number; size: number; text: string; }' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'FileRejectReason',
+      definition: `export type FileRejectReason = 'type' | 'size' | 'count' | 'total-size'`,
+    },
+    {
+      name: 'FileRejection',
+      definition: `export interface FileRejection {
+  file: File
+  reason: FileRejectReason
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
   ],
 } satisfies PageApi

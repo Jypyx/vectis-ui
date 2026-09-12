@@ -10,7 +10,7 @@ export default {
       name: 'VSideNavigation',
       props: [
         { name: 'label', type: 'string' },
-        { name: 'size', type: 'SideNavigationSize', default: "'md'" },
+        { name: 'size', type: 'SideNavigationSize', values: "'sm' | 'md'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'exclusive', type: 'boolean', default: 'false' },
         { name: 'expandIcon', type: 'IconSource', default: 'expand_more' },
@@ -55,6 +55,28 @@ export default {
     },
     {
       name: 'VSideNavigationSeparator',
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
   ],
 } satisfies PageApi

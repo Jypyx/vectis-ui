@@ -10,7 +10,7 @@ export default {
       name: 'VAccordion',
       props: [
         { name: 'multiple', type: 'boolean', default: 'false' },
-        { name: 'variant', type: 'AccordionVariant', default: "'flat'" },
+        { name: 'variant', type: 'AccordionVariant', values: "'flat' | 'outlined'", default: "'flat'" },
         { name: 'expandIcon', type: 'IconSource', default: 'expand_more' },
         { name: 'collapseIcon', type: 'IconSource' },
         { name: 'compact', type: 'boolean', default: 'false' },
@@ -34,6 +34,28 @@ export default {
         { name: 'subtitle', type: '{}' },
         { name: 'start', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
   ],
 } satisfies PageApi

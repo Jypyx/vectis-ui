@@ -9,9 +9,9 @@ export default {
     {
       name: 'VTypography',
       props: [
-        { name: 'variant', type: 'TypographyVariant', default: "'body-md'" },
+        { name: 'variant', type: 'TypographyVariant', values: "'display' | 'heading-1' | 'heading-2' | 'heading-3' | 'heading-4' | 'subtitle' | 'body-xl' | 'body-lg' | 'body-md' | 'body-sm' | 'label' | 'caption' | 'overline' | 'code'", default: "'body-md'" },
         { name: 'as', type: 'string' },
-        { name: 'tone', type: 'TypographyTone', default: "'default'" },
+        { name: 'tone', type: 'TypographyTone', values: "'default' | 'muted' | 'subtle' | 'accent' | 'danger' | 'success' | 'warning' | 'on-inverse'", default: "'default'" },
         { name: 'truncate', type: 'boolean', default: 'false' },
       ],
       slots: [

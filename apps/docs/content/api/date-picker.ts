@@ -9,7 +9,7 @@ export default {
     {
       name: 'VDatePicker',
       props: [
-        { name: 'selection', type: 'DatePickerSelection', default: "'single'" },
+        { name: 'selection', type: 'DatePickerSelection', values: "'single' | 'range' | 'multiple'", default: "'single'" },
         { name: 'locale', type: 'string' },
         { name: 'firstDayOfWeek', type: 'number' },
         { name: 'min', type: 'string' },
@@ -30,6 +30,31 @@ export default {
         { name: 'day', type: '{ iso: string; day: number; inMonth: boolean; disabled: boolean; selected: boolean; today: boolean; inRange: boolean; events: DatePickerEvent[]; }' },
         { name: 'footer', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'DatePickerEvent',
+      definition: `export interface DatePickerEvent {
+  date: string
+  color?: string
+  label?: string
+}`,
+    },
+    {
+      name: 'DatePickerMatcher',
+      definition: `export type DatePickerMatcher = string[] | ((iso: string) => boolean)`,
+    },
+    {
+      name: 'DatePickerRange',
+      definition: `export interface DatePickerRange {
+  start: string | null
+  end: string | null
+}`,
+    },
+    {
+      name: 'DatePickerValue',
+      definition: `export type DatePickerValue = string | null | DatePickerRange | string[]`,
     },
   ],
   cssVars: [

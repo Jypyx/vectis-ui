@@ -9,13 +9,13 @@ export default {
     {
       name: 'VSkeletonLoader',
       props: [
-        { name: 'shape', type: 'SkeletonLoaderShape', default: "'text'" },
-        { name: 'size', type: 'SkeletonLoaderSize', default: "'md'" },
+        { name: 'shape', type: 'SkeletonLoaderShape', values: "'text' | 'control' | 'pill' | 'circle' | 'surface'", default: "'text'" },
+        { name: 'size', type: 'SkeletonLoaderSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'width', type: 'number | string' },
         { name: 'height', type: 'number | string' },
         { name: 'lines', type: 'number', default: '1' },
-        { name: 'animation', type: 'SkeletonLoaderAnimation', default: "'wave'" },
+        { name: 'animation', type: 'SkeletonLoaderAnimation', values: "'wave' | 'pulse' | 'none'", default: "'wave'" },
         { name: 'color', type: 'string' },
         { name: 'announce', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },

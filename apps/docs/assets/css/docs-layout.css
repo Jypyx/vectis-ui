@@ -854,6 +854,12 @@ html {
 .vd-table tr.vd-api-note > td {
   padding-block-start: var(--vectis-space-1);
 }
+/* A type definition is linked to from the Type column of every table above it, so it takes the
+   same sticky-header allowance the headings do — landing under the bar is landing nowhere. The
+   attribute is the whole condition: a code block nothing points at has nothing to allow for. */
+.vd-code[id] {
+  scroll-margin-top: calc(var(--vd-header-h) + var(--vectis-space-4));
+}
 
 @media (min-width: 768px) {
   .vd-demo,

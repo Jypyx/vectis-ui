@@ -14,7 +14,7 @@ export default {
         { name: 'name', type: 'string' },
         { name: 'alt', type: 'string' },
         { name: 'color', type: 'string' },
-        { name: 'size', type: 'AvatarSize', default: "'md'" },
+        { name: 'size', type: 'AvatarSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'href', type: 'string' },
         { name: 'clickable', type: 'boolean', default: 'false' },
@@ -23,6 +23,28 @@ export default {
       slots: [
         { name: 'default', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
   ],
   cssVars: [

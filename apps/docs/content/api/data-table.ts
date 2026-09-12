@@ -13,8 +13,8 @@ export default {
         { name: 'rows', type: 'Row[]' },
         { name: 'rowKey', type: 'string' },
         { name: 'caption', type: 'string' },
-        { name: 'variant', type: 'DataTableVariant', default: "'flat'" },
-        { name: 'responsive', type: 'DataTableResponsive', default: "'scroll'" },
+        { name: 'variant', type: 'DataTableVariant', values: "'flat' | 'outlined'", default: "'flat'" },
+        { name: 'responsive', type: 'DataTableResponsive', values: "'scroll' | 'stack'", default: "'scroll'" },
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'emptyText', type: 'string' },
         { name: 'title', type: 'string' },
@@ -51,6 +51,58 @@ export default {
       slots: [
         { name: 'header', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'DataTableColumn',
+      definition: `export interface DataTableColumn {
+  key: string
+  label: string
+  sortable?: boolean
+  align?: 'start' | 'center' | 'end'
+}`,
+    },
+    {
+      name: 'DataTableParams',
+      definition: `export interface DataTableParams {
+  page: number
+  perPage: number | null
+  sortKey: string | null
+  sortDirection: 'asc' | 'desc' | null
+  search: string
+}`,
+    },
+    {
+      name: 'DataTableRowId',
+      definition: `export type DataTableRowId = string | number`,
+    },
+    {
+      name: 'DataTableSort',
+      definition: `export interface DataTableSort {
+  key: string
+  direction: 'asc' | 'desc'
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
   ],
   cssVars: [

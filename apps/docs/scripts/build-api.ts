@@ -1,6 +1,6 @@
 /**
- * Generates `content/api/<slug>.ts`: the props, events, slots and CSS variables every component
- * page's API section lists.
+ * Generates `content/api/<slug>.ts`: the props, events, slots, named types and CSS variables every
+ * component page's API section lists.
  *
  * A name, a type and a default are facts about the library, not prose, and forty-four pages
  * transcribing them by hand is forty-four pages that rot the day a default changes. They are
@@ -20,6 +20,7 @@ import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import ts from 'typescript'
 import { createChecker } from 'vue-component-meta'
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -248,21 +249,197 @@ function keyFor(name: string): string {
     .join('')
 }
 
+/**
+ * Every type alias and interface the library declares, printed as the source writes it.
+ *
+ * The tables name a hundred-odd types and used to say nothing about them, which left a reader
+ * holding `ButtonVariant` with no way to learn that it is four words. A declaration is a fact
+ * about the library, like a name or a default, so it is read out of the source too.
+ *
+ * PARSED, never sliced: a declaration spans as many lines as it likes, and `sourceType`'s own
+ * TRAP above is what slicing looks like when it goes wrong. `createSourceFile` is a parse and not
+ * a type-check, so the whole library costs a few milliseconds.
+ *
+ * Local types are indexed alongside the exported ones. `MenuTriggerProps` is not importable, but
+ * it is the shape of what a slot hands out, and a reader binding that object needs to see it.
+ *
+ * Ambiguity is recorded rather than resolved, and refused only if a page ever asks for it: two
+ * declarations of one name would have the page print whichever file happened to be read last.
+ * VCalendarMonth and VCalendarTimeGrid each keep a local `Gesture` of their own shape, and
+ * neither reaches a table, so the collision is a fact about the library and not a problem to
+ * report — what would be one is a TABLE naming a type that could be either.
+ */
+const ambiguous = new Set<string>()
+
+function indexTypes(): Map<string, string> {
+  const declarations = new Map<string, string>()
+
+  const visit = (dir: string) => {
+    for (const entry of readdirSync(dir)) {
+      const path = join(dir, entry)
+      if (statSync(path).isDirectory()) {
+        visit(path)
+        continue
+      }
+      if (/\.(test|stories)\.ts$/.test(entry)) continue
+      if (!entry.endsWith('.ts') && !entry.endsWith('.vue')) continue
+      for (const [name, text] of typesIn(path)) {
+        const known = declarations.get(name)
+        if (known !== undefined && known !== text) ambiguous.add(name)
+        declarations.set(name, text)
+      }
+    }
+  }
+
+  visit(join(uiRoot, 'src'))
+  return declarations
+}
+
+/** The type declarations of one module, an SFC's `<script setup>` included. */
+function typesIn(file: string): [string, string][] {
+  const text = readFileSync(file, 'utf8')
+
+  // An SFC's types live in its script block; handing the parser a template and a stylesheet as
+  // well would make a syntax error of every component in the library.
+  const script = file.endsWith('.vue')
+    ? /<script\b[^>]*>([\s\S]*?)<\/script>/.exec(text)?.[1]
+    : text
+  if (script === undefined) return []
+
+  const source = ts.createSourceFile(file, script, ts.ScriptTarget.Latest, true)
+  const declared: [string, string][] = []
+  for (const node of source.statements) {
+    if (!ts.isTypeAliasDeclaration(node) && !ts.isInterfaceDeclaration(node)) continue
+    declared.push([node.name.text, withoutComments(node.getText(source))])
+  }
+  return declared
+}
+
+/**
+ * A declaration with its comments taken out.
+ *
+ * The library's JSDoc is addressed to an integrator reading an IDE hover: it is English only, and
+ * it carries the em dashes the site's prose rules forbid. What a field MEANS is the page's own
+ * prose to write; what the declaration is asked for here is its shape.
+ *
+ * It strips a comment wherever the two markers appear, a string literal included. No type in the
+ * library carries either inside a string, and a type that did would be printed with a hole in it
+ * rather than silently wrong.
+ */
+function withoutComments(text: string): string {
+  return text
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '')
+    .split('\n')
+    .map((line) => line.replace(/\s+$/, ''))
+    .filter((line) => line !== '')
+    .join('\n')
+}
+
+/**
+ * The values a prop accepts, when its type is a closed set of them.
+ *
+ * That set is the whole of what a reader wants from `ButtonVariant`, and it is short enough to
+ * print in the cell beside the name, which is where the question gets asked. An alias pointing at
+ * an alias is followed (`TimePickerFormat` is `HourFormat` is two words); anything that is not a
+ * union of literals is a SHAPE rather than a set, and it is printed under the Types heading
+ * instead. No threshold on the length: the five placement unions are twelve words and the reader
+ * wants all twelve, so the cell wraps them.
+ */
+function literalValuesOf(name: string, seen = new Set<string>()): string | undefined {
+  if (seen.has(name)) return undefined
+  seen.add(name)
+
+  const declaration = types.get(name)
+  if (declaration === undefined) return undefined
+  const body = /^(?:export )?type \w+\s*=\s*([\s\S]*)$/.exec(declaration)?.[1]
+  if (body === undefined) return undefined
+
+  // Splitting on `|` is only sound on a flat union. A delimiter of any kind means the type is a
+  // function, an object or an array, none of which is a list of values.
+  const text = body.replace(/\s+/g, ' ').trim()
+  if (/[(){}[\]<>]/.test(text)) return undefined
+
+  const members = text
+    .replace(/^\|\s*/, '')
+    .split('|')
+    .map((member) => member.trim())
+  if (members.every((member) => /^('[^']*'|-?\d+|true|false|null)$/.test(member))) {
+    return members.join(' | ')
+  }
+
+  // A one-member union is an alias for another name, which may itself be a set.
+  const alias = members.length === 1 ? members[0]! : undefined
+  return alias !== undefined && /^[A-Z]\w*$/.test(alias) ? literalValuesOf(alias, seen) : undefined
+}
+
+/** The library types a printed type mentions. A name it does not declare is someone else's. */
+function namesIn(text: string): string[] {
+  const found = text.match(/\b[A-Z][A-Za-z0-9]*\b/g) ?? []
+  return [...new Set(found)].filter((name) => types.has(name))
+}
+
 interface Row {
   name: string
   key?: string
   type: string
+  values?: string
   default?: string
+}
+
+interface TypeEntry {
+  name: string
+  definition: string
 }
 
 const row = (name: string, type: string, fallback?: string): Row => {
   const key = keyFor(name)
+  const values = /^[A-Z][A-Za-z0-9]*$/.test(type) ? literalValuesOf(type) : undefined
   return {
     name,
     ...(key === name ? {} : { key }),
     type,
+    ...(values ? { values } : {}),
     ...(fallback ? { default: fallback } : {}),
   }
+}
+
+/**
+ * The types a page's tables name and do not answer in the cell.
+ *
+ * A name standing as the WHOLE of a cell whose values were expanded there is answered already;
+ * every other mention is a shape the reader has to be shown, `CalendarView[]` included — which is
+ * why the test is on the mention and not on the name.
+ */
+function typesOf(components: { props?: Row[]; events?: Row[]; slots?: Row[] }[]): TypeEntry[] {
+  const needed = new Set<string>()
+  for (const component of components) {
+    const entries = [
+      ...(component.props ?? []),
+      ...(component.events ?? []),
+      ...(component.slots ?? []),
+    ]
+    for (const entry of entries) {
+      for (const name of namesIn(entry.type)) {
+        if (entry.values !== undefined && entry.type === name) continue
+        needed.add(name)
+      }
+    }
+  }
+
+  // Closed over the definitions themselves, so a reader following a link never lands on a shape
+  // written in terms they cannot see either (`IconSource` brings `BuiltinIcon` and `IconRender`).
+  // One pass suffices: a Set's iterator visits what the loop adds to it.
+  for (const name of needed) for (const inner of namesIn(types.get(name)!)) needed.add(inner)
+
+  const clashing = [...needed].filter((name) => ambiguous.has(name))
+  if (clashing.length > 0) {
+    throw new Error(
+      `build-api: a table names ${clashing.join(', ')}, which the library declares more than once`,
+    )
+  }
+
+  return [...needed].sort().map((name) => ({ name, definition: types.get(name)! }))
 }
 
 const checker = createChecker(join(uiRoot, 'tsconfig.json'), {
@@ -271,6 +448,7 @@ const checker = createChecker(join(uiRoot, 'tsconfig.json'), {
 })
 
 const index = indexComponents()
+const types = indexTypes()
 const usedOverrides = new Set<string>()
 
 /**
@@ -379,6 +557,29 @@ function printRow(entry: object, indent: string): string {
   return `${indent}{ ${fields.join(', ')} },`
 }
 
+/**
+ * The type blocks, each definition printed as a TEMPLATE LITERAL.
+ *
+ * An interface is several lines and a single-quoted string cannot hold a newline, so the
+ * alternative is a file full of `\n` escapes: the generated source would no longer be the thing
+ * the page renders, which is exactly what makes these files readable. Prettier leaves the content
+ * of a template literal alone, so the indentation printed here is the indentation shown.
+ */
+function printTypes(entries: TypeEntry[], indent: string): string {
+  const quote = (definition: string) =>
+    definition.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${')
+  return [
+    `${indent}types: [`,
+    ...entries.flatMap((entry) => [
+      `${indent}  {`,
+      `${indent}    name: ${lit(entry.name)},`,
+      `${indent}    definition: \`${quote(entry.definition)}\`,`,
+      `${indent}  },`,
+    ]),
+    `${indent}],`,
+  ].join('\n')
+}
+
 function printList(name: string, entries: object[], indent: string) {
   return [
     `${indent}${name}: [`,
@@ -413,6 +614,7 @@ for (const page of PAGES) {
   const components = page.components.map(apiOf)
   const files = [...page.components, ...(page.internals ?? [])].map((name) => index.get(name)!)
   const cssVars = tokensOf(files)
+  const named = typesOf(components)
 
   rows += components.reduce(
     (total, one) =>
@@ -432,6 +634,7 @@ for (const page of PAGES) {
       '    },',
     ]),
     '  ],',
+    ...(named.length ? [printTypes(named, '  ')] : []),
     ...(cssVars.length ? [printList('cssVars', cssVars, '  ')] : []),
     '} satisfies PageApi',
   ]

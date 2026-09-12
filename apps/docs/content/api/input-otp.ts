@@ -10,10 +10,10 @@ export default {
       name: 'VInputOTP',
       props: [
         { name: 'length', type: 'number', default: '6' },
-        { name: 'format', type: 'InputOTPFormat', default: "'numeric'" },
+        { name: 'format', type: 'InputOTPFormat', values: "'numeric' | 'alpha' | 'alphanumeric'", default: "'numeric'" },
         { name: 'pattern', type: 'string' },
         { name: 'separatorIcon', type: 'IconSource' },
-        { name: 'size', type: 'InputOTPSize', default: "'md'" },
+        { name: 'size', type: 'InputOTPSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
@@ -25,6 +25,28 @@ export default {
       events: [
         { name: 'complete', type: '[code: string]' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
   ],
 } satisfies PageApi

@@ -9,8 +9,8 @@ export default {
     {
       name: 'VMenu',
       props: [
-        { name: 'placement', type: 'MenuPlacement', default: "'bottom-start'" },
-        { name: 'size', type: 'MenuSize', default: "'sm'" },
+        { name: 'placement', type: 'MenuPlacement', values: "'bottom-start' | 'bottom-end' | 'bottom' | 'top-start' | 'top-end' | 'top'", default: "'bottom-start'" },
+        { name: 'size', type: 'MenuSize', values: "'sm' | 'md' | 'lg'", default: "'sm'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'width', type: 'string' },
         { name: 'matchTrigger', type: 'boolean', default: 'false' },
@@ -29,7 +29,7 @@ export default {
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconEnd', type: 'IconSource' },
         { name: 'selected', type: 'boolean', default: 'false' },
-        { name: 'tone', type: 'MenuItemTone', default: "'neutral'" },
+        { name: 'tone', type: 'MenuItemTone', values: "'neutral' | 'danger'", default: "'neutral'" },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'href', type: 'string' },
       ],
@@ -55,6 +55,37 @@ export default {
     },
     {
       name: 'VMenuSeparator',
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
+    },
+    {
+      name: 'MenuTriggerProps',
+      definition: `type MenuTriggerProps = {
+  popovertarget: string
+  'aria-haspopup': 'menu'
+  'aria-expanded': boolean
+  'aria-controls': string
+}`,
     },
   ],
   cssVars: [

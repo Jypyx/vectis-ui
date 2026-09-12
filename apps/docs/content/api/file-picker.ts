@@ -14,7 +14,7 @@ export default {
         { name: 'icon', type: 'IconSource', default: 'cloud_upload' },
         { name: 'hideBrowse', type: 'boolean', default: 'false' },
         { name: 'browseLabel', type: 'string' },
-        { name: 'preview', type: 'FilePickerPreview', default: 'false' },
+        { name: 'preview', type: 'FilePickerPreview', values: "false | 'bottom' | 'end'", default: 'false' },
         { name: 'hideThumbnails', type: 'boolean', default: 'false' },
         { name: 'typeIcons', type: 'Partial<Record<FileKind, IconSource>>' },
         { name: 'removeIcon', type: 'IconSource', default: 'close' },
@@ -44,6 +44,56 @@ export default {
         { name: 'thumbnail', type: 'FilePickerRow' },
         { name: 'remove', type: '{ file: File; index: number; remove: () => void; label: string; }' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'FileKind',
+      definition: `export type FileKind =
+  'image' | 'pdf' | 'audio' | 'video' | 'archive' | 'spreadsheet' | 'code' | 'file'`,
+    },
+    {
+      name: 'FilePickerRow',
+      definition: `export interface FilePickerRow {
+  file: File
+  index: number
+  kind: FileKind
+  thumbnail: string | undefined
+  icon: IconSource
+  sizeText: string
+  remove: () => void
+}`,
+    },
+    {
+      name: 'FileRejectReason',
+      definition: `export type FileRejectReason = 'type' | 'size' | 'count' | 'total-size'`,
+    },
+    {
+      name: 'FileRejection',
+      definition: `export interface FileRejection {
+  file: File
+  reason: FileRejectReason
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
   ],
   cssVars: [

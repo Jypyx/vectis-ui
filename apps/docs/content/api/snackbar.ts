@@ -9,7 +9,7 @@ export default {
     {
       name: 'VSnackbar',
       props: [
-        { name: 'placement', type: 'SnackbarPlacement', default: "'bottom-center'" },
+        { name: 'placement', type: 'SnackbarPlacement', values: "'bottom-left' | 'bottom-center' | 'bottom-right'", default: "'bottom-center'" },
         { name: 'duration', type: 'number', default: '4000' },
         { name: 'actionLabel', type: 'string' },
         { name: 'label', type: 'string' },

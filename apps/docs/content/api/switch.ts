@@ -9,7 +9,7 @@ export default {
     {
       name: 'VSwitch',
       props: [
-        { name: 'labelPosition', type: 'SwitchLabelPosition', default: "'end'" },
+        { name: 'labelPosition', type: 'SwitchLabelPosition', values: "'start' | 'end'", default: "'end'" },
         { name: 'spread', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },

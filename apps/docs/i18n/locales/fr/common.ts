@@ -34,6 +34,9 @@ export default {
     props: 'Props',
     events: 'Événements',
     slots: 'Slots',
+    types: 'Types',
+    typesLead:
+      "Les types que les tables ci-dessus nomment, écrits comme la librairie les déclare. Ceux qui portent <code>export</code> s'importent depuis <code>vectis-ui</code> pour typer votre propre code ; les autres décrivent la forme de ce qu'un slot fournit.",
     cssVariables: 'Variables CSS',
   },
   table: {

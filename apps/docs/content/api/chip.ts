@@ -9,11 +9,11 @@ export default {
     {
       name: 'VChip',
       props: [
-        { name: 'variant', type: 'ChipVariant', default: "'soft'" },
-        { name: 'tone', type: 'ChipTone', default: "'neutral'" },
+        { name: 'variant', type: 'ChipVariant', values: "'soft' | 'solid' | 'outline'", default: "'soft'" },
+        { name: 'tone', type: 'ChipTone', values: "'neutral' | 'accent' | 'danger' | 'success' | 'warning'", default: "'neutral'" },
         { name: 'color', type: 'string' },
-        { name: 'shape', type: 'ChipShape', default: "'chip'" },
-        { name: 'size', type: 'ChipSize', default: "'xs'" },
+        { name: 'shape', type: 'ChipShape', values: "'chip' | 'pill'", default: "'chip'" },
+        { name: 'size', type: 'ChipSize', values: "'xs' | 'sm'", default: "'xs'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'clickable', type: 'boolean', default: 'false' },
         { name: 'href', type: 'string' },
@@ -35,6 +35,28 @@ export default {
         { name: 'start', type: '{}' },
         { name: 'end', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
   ],
 } satisfies PageApi

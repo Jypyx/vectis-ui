@@ -9,7 +9,7 @@ export default {
     {
       name: 'VTimePicker',
       props: [
-        { name: 'format', type: 'TimePickerFormat' },
+        { name: 'format', type: 'TimePickerFormat', values: "'12h' | '24h'" },
         { name: 'locale', type: 'string' },
         { name: 'minuteStep', type: 'number', default: '1' },
         { name: 'min', type: 'string' },
@@ -27,6 +27,12 @@ export default {
       slots: [
         { name: 'footer', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'TimeMatcher',
+      definition: `export type TimeMatcher = number[] | ((value: number) => boolean)`,
     },
   ],
   cssVars: [
