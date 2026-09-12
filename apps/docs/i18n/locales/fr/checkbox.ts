@@ -5,19 +5,19 @@ export default {
   examples: {
     labelPosition: {
       title: 'Position du libellé',
-      text: "Le libellé se place après la case par défaut, l'ordre de lecture qu'on attend d'un formulaire. <code>labelPosition</code> le fait passer avant, pour une colonne dont les libellés s'alignent à gauche. Tout le composant est un seul <code>&lt;label&gt;</code>, donc le texte est cliquable dans les deux cas, et la case native est sortie du flux : inverser la ligne ne fait jamais qu'échanger la case et le texte.",
+      text: "<code>labelPosition</code> place le libellé avant la case plutôt qu'après.",
     },
     spread: {
       title: 'Écartement',
-      text: "Une liste de réglages place son libellé d'un côté de la ligne et sa case de l'autre. <code>spread</code> fait exactement cela : la ligne prend toute la largeur qu'on lui offre et écarte les deux, si bien que c'est le conteneur qui décide de la distance. Combiné à <code>labelPosition</code>, il décide aussi de l'extrémité où chacun se rend.",
+      text: '<code>spread</code> prend toute la largeur offerte et pousse le libellé et la case aux deux extrémités de la ligne.',
     },
     indeterminate: {
       title: 'Indéterminé',
-      text: "Un parent dont les enfants ne sont ni tous cochés ni tous décochés affiche un tiret. C'est une troisième apparence et non une troisième valeur : le v-model contient toujours vrai ou faux, et <code>indeterminate</code> est une prop à part, calculée depuis les enfants. Elle n'existe que comme propriété du DOM, sans attribut HTML qu'un template pourrait poser, ce qui en fait la seule chose que ce composant écrit à la main sur la case native.",
+      text: "<code>indeterminate</code> affiche un tiret à la place de la coche. C'est une apparence à part : le v-model contient toujours true ou false.",
     },
     disabled: {
       title: 'Désactivé',
-      text: "Une case désactivée ne peut plus être cochée, le clavier l'enjambe, et elle grise par les jetons de couleur plutôt que par une opacité : le libellé garde donc son contraste. Cela vaut pour les trois apparences. Utilisez-la quand le choix existe mais n'est pas encore disponible ; un choix qui ne s'applique jamais est mieux absent du formulaire.",
+      text: "<code>disabled</code> empêche de cocher la case et la grise par les tokens de couleur. Le clavier l'enjambe.",
     },
   },
 

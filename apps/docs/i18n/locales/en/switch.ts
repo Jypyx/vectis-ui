@@ -5,15 +5,15 @@ export default {
   examples: {
     labelPosition: {
       title: 'Label position',
-      text: 'The label sits after the switch by default. <code>labelPosition</code> moves it before, which is what a row of settings usually wants: the words on one side, the control on the other. The whole component is a single <code>&lt;label&gt;</code>, so the text flicks the switch either way, and the hidden input is out of the flow, so reversing the row only ever swaps the track and the words.',
+      text: '<code>labelPosition</code> moves the label before the switch instead of after it.',
     },
     spread: {
       title: 'Spread',
-      text: 'A settings panel puts the wording at one end of the line and the control at the other, so a column of switches lines up down one edge whatever the length of each label. <code>spread</code> is what does that: the row takes the full width it is offered and pushes the two apart, which leaves the distance to the container. <code>labelPosition</code> still decides which end each of them goes to.',
+      text: '<code>spread</code> takes the full width offered and pushes the label and the switch to opposite ends of the row.',
     },
     disabled: {
       title: 'Disabled',
-      text: 'A disabled switch cannot be flicked and the keyboard steps over it, on as well as off: the state stays readable, since what a setting is currently worth matters even when it cannot be changed. It greys out through the colour tokens rather than through an opacity, so the label keeps its contrast on any surface. Reach for it when a setting exists but is not available yet; one that never applies is better left out of the panel.',
+      text: '<code>disabled</code> prevents the switch from being flicked and greys it out through the colour tokens, on as well as off. The keyboard steps over it.',
     },
   },
 

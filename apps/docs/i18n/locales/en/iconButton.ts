@@ -5,31 +5,31 @@ export default {
   examples: {
     variantsAndTones: {
       title: 'Variants and tones',
-      text: 'The same four variants and three tones as VButton, with two defaults of its own: <code>ghost</code> rather than <code>solid</code>, and <code>neutral</code> rather than <code>accent</code>. An icon-only button is nearly always chrome around the content, a close cross or a menu, so the quiet pair is what it should look like before anything is asked of it. Tones are intentions rather than states, which is why there are three and not five: success and warning belong to what reports a state, never to what starts an action.',
+      text: 'The same four <code>variant</code>s and three <code>tone</code>s as VButton, with two defaults of its own: <code>ghost</code> rather than <code>solid</code>, and <code>neutral</code> rather than <code>accent</code>.',
     },
     elevated: {
       title: 'Elevated',
-      text: 'A shadow under the button, orthogonal to the variant rather than a fifth value of it, so any of the four can be raised. Ghost and outline also gain a raised surface, without which the shadow would have nothing casting it in the dark theme.',
+      text: '<code>elevated</code> applies the shadow scale to whichever variant is in use. Ghost and outline also gain a raised surface.',
     },
     sizes: {
       title: 'Sizes',
-      text: 'The five steps every control in the library shares, 24 to 56 pixels, and the button is square at each: the width reads the same height the scale sets, so one rule covers the whole scale. <code>compact</code> takes 4px off, and off both sides, so the box stays square. The icon follows the step without being told, a control setting the size of whatever is drawn inside it.',
+      text: '<code>size</code> sets the box, square at each of the five steps from 24 to 56 pixels. <code>compact</code> takes 4px off both sides, so the box stays square.',
     },
     shapes: {
       title: 'Shapes',
-      text: 'Square, carrying the corner radius every control shares, or circular. The box is square either way and only the corners change, which is why the prop names the silhouette rather than a radius: a value called "rounded" would stop being true the day a consumer sets that radius to zero, where "square" only becomes truer. It lives here and not on VButton, since a full radius says something only about a box that is already square. Inside a VButtonGroup the row\'s own corner rules win and a circular segment keeps square seams, which is what keeps the row reading as one object.',
+      text: "<code>shape</code> chooses the silhouette, square or circular. Inside a VButtonGroup the row's own corner rules win and a circular segment keeps square seams.",
     },
     icons: {
       title: 'Icons',
-      text: 'The <code>icon</code> prop takes everything an icon prop in the library takes: one of its own icons, a bare name for your resolver, or an explicit render. <code>iconFilled</code> asks for the filled form, which is how a state is marked. The default slot is the way to an icon the prop cannot express, a VIcon you configure yourself or an inline SVG, and whatever goes there stays decorative: the button is already named by its label.',
+      text: '<code>icon</code> takes any icon value and <code>iconFilled</code> asks for its filled form. The default slot is the way to an icon the prop cannot express, and stays decorative: the button is named by its <code>label</code>.',
     },
     link: {
       title: 'As a link',
-      text: '<code>href</code> is not a prop of this component. It falls through to the VButton underneath, which renders an anchor instead of a button, and every other anchor attribute travels the same way. A disabled link keeps its place and loses its destination: the href is removed and the clicks are dropped, since nothing in HTML disables an anchor.',
+      text: '<code>href</code> falls through to the VButton underneath, which renders an anchor. A disabled link keeps its place and loses its destination.',
     },
     states: {
       title: 'States',
-      text: "Disabled is greyed through the colour tokens rather than with an opacity, so the button keeps its shape against every background. Loading puts a spinner where the icon was and disables the button while it turns, which is what stops the same action being asked for twice. The spinner takes the icon's own box, so the square does not change size as it appears.",
+      text: "<code>disabled</code> greys the button out through the colour tokens. <code>loading</code> puts a spinner in the icon's own box and disables the button while it turns.",
     },
   },
 

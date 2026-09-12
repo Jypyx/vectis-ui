@@ -5,35 +5,35 @@ export default {
   examples: {
     range: {
       title: 'Range',
-      text: 'The value becomes a start and an end. The first click sets one, the second sets the other, and between them the span under the pointer is previewed so the reader sees what they are about to take. Clicking a day before the start begins again from there rather than producing a period that runs backwards.',
+      text: '<code>selection</code> set to <code>range</code> makes the value a start and an end, the span under the pointer being previewed between the two clicks.',
     },
     multiple: {
       title: 'Multiple dates',
-      text: 'The value becomes a list, and a day already in it comes back out when it is clicked again. The array is never mutated in place, so a watcher on the model fires as it should. Nothing bounds the count: a calendar with forty days selected is legible, and whether that is sensible is the form to decide.',
+      text: '<code>selection</code> set to <code>multiple</code> makes the value a list, a day already in it coming back out when it is clicked again.',
     },
     presets: {
       title: 'Presets',
-      text: 'The <code>#footer</code> slot is a strip under the grid, for actions or for the dates a reader reaches for most often. It receives nothing, being simply a place to render into: the buttons below write the model like any other control would. The clock is read inside the handler and never at setup, the server having no way to know what day it is where the reader stands.',
+      text: 'The <code>#footer</code> slot is a strip under the grid, for actions or for the dates a reader reaches for most. The buttons in it write the model like any other control.',
     },
     disabledDates: {
       title: 'Disabled dates',
-      text: 'Given a list, the named days cannot be chosen. Given a function, it is asked about one date at a time, which is what turns a rule such as "no weekends" into a line rather than an enumeration. Either way a closed day stays visible and struck through, and the keyboard still reaches it: a reader arrowing across the grid is never silently jumped over a day, and the calendar says why by drawing it rather than by hiding it.',
+      text: '<code>disabledDates</code> takes a list of days, or a function asked about one date at a time. A closed day stays visible, struck through, and reachable by keyboard.',
     },
     bounds: {
       title: 'Minimum and maximum',
-      text: '<code>min</code> and <code>max</code> bound the navigation as well as the choice, so the arrows stop at the edge instead of wandering into months holding nothing that can be taken. Days outside the bounds are drawn like the closed ones, and the month and year views are bounded in the same way.',
+      text: '<code>min</code> and <code>max</code> bound the navigation as well as the choice, in every view.',
     },
     events: {
       title: 'Event dots',
-      text: 'Up to three dots under a day, to say something is happening there. The colour is any CSS colour, so a token keeps it in step with both themes, and a dot given none takes the accent. Give each one a <code>label</code>: assistive technology reads that, the dot itself carrying nothing anyone can hear.',
+      text: '<code>events</code> draws up to three dots under a day. Each takes any CSS colour and a <code>label</code>, which is what assistive technology reads.',
     },
     adjacentDays: {
       title: 'Adjacent days',
-      text: 'A month rarely starts on the first column, so the corners of the grid are empty by default. <code>showAdjacentDays</code> fills them with the neighbouring months, greyed and inert, which is what keeps the weeks reading as whole weeks. <code>selectAdjacentDays</code> makes them choosable as well, and picking one moves the calendar to its month, so it implies showing them.',
+      text: '<code>showAdjacentDays</code> fills the corners of the grid with the neighbouring months, greyed and inert. <code>selectAdjacentDays</code> makes them choosable as well, and picking one moves the calendar to its month.',
     },
     localization: {
       title: 'Localization',
-      text: 'The tag decides the month and day names and the day the weeks start on, all of it derived from <code>Intl</code> rather than tabulated here. <code>locale</code> takes precedence over the global one and falls back to it when left out, so a single calendar can differ from the rest of the page. <code>firstDayOfWeek</code> overrides the day the locale would have chosen, for a domain that starts its weeks somewhere else.',
+      text: '<code>locale</code> decides the month and day names and the day the weeks start on, and takes precedence over the global locale. <code>firstDayOfWeek</code> overrides the day that locale would have chosen.',
     },
   },
 

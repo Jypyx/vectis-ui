@@ -5,31 +5,31 @@ export default {
   examples: {
     variantsAndTones: {
       title: 'Variantes et tonalités',
-      text: "Les mêmes quatre variantes et trois tonalités que VButton, avec deux valeurs par défaut à lui : <code>ghost</code> plutôt que <code>solid</code>, et <code>neutral</code> plutôt que <code>accent</code>. Un bouton sans libellé est presque toujours du décor autour du contenu, une croix de fermeture ou un menu, donc la paire discrète est ce à quoi il doit ressembler avant qu'on lui demande quoi que ce soit. Les tonalités sont des intentions et non des états, d'où trois et non cinq : le succès et l'avertissement appartiennent à ce qui rapporte un état, jamais à ce qui déclenche une action.",
+      text: 'Les mêmes quatre <code>variant</code> et trois <code>tone</code> que VButton, avec deux valeurs par défaut à lui : <code>ghost</code> plutôt que <code>solid</code>, et <code>neutral</code> plutôt que <code>accent</code>.',
     },
     elevated: {
       title: 'Surélevé',
-      text: "Une ombre sous le bouton, orthogonale à la variante plutôt qu'une cinquième valeur de celle-ci : n'importe laquelle des quatre peut donc être surélevée. Les variantes ghost et outline gagnent en plus une surface surélevée, sans laquelle l'ombre n'aurait rien qui la projette dans le thème sombre.",
+      text: "<code>elevated</code> applique l'échelle d'ombres à la variante en cours. Les variantes ghost et outline gagnent en plus une surface surélevée.",
     },
     sizes: {
       title: 'Tailles',
-      text: "Les cinq crans que partagent tous les contrôles de la bibliothèque, de 24 à 56 pixels, et le bouton est carré à chacun : la largeur lit la hauteur même que le cran pose, une seule règle couvrant ainsi toute l'échelle. <code>compact</code> retire 4px, et des deux côtés, pour que la boîte reste carrée. L'icône suit le cran sans qu'on le lui dise, un contrôle fixant la taille de ce qui se dessine à l'intérieur.",
+      text: '<code>size</code> définit la boîte, carrée à chacun des cinq paliers de 24 à 56 pixels. <code>compact</code> retire 4px des deux côtés, si bien que la boîte reste carrée.',
     },
     shapes: {
       title: 'Formes',
-      text: "Carré, portant le rayon de coin que partagent tous les contrôles, ou circulaire. La boîte est carrée dans les deux cas et seuls les coins changent, d'où une prop qui nomme la silhouette plutôt qu'un rayon : une valeur appelée « arrondi » cesserait d'être vraie le jour où un consommateur met ce rayon à zéro, là où « carré » ne devient que plus vrai. Elle vit ici et non sur VButton, un rayon plein ne disant quelque chose que d'une boîte déjà carrée. Dans un VButtonGroup, les règles de coin de la rangée l'emportent et un segment circulaire garde des coutures carrées, ce qui est justement ce qui fait lire la rangée comme un seul objet.",
+      text: "<code>shape</code> choisit la silhouette, carrée ou circulaire. Dans un VButtonGroup, les règles d'angles de la rangée l'emportent et un segment circulaire garde des jonctions droites.",
     },
     icons: {
       title: 'Icônes',
-      text: "La prop <code>icon</code> accepte tout ce qu'accepte une prop d'icône de la bibliothèque : une de ses propres icônes, un simple nom pour votre résolveur, ou un rendu explicite. <code>iconFilled</code> demande la forme pleine, qui sert à marquer un état. Le slot par défaut est la voie vers une icône que la prop ne sait pas exprimer, un VIcon que vous paramétrez vous-même ou un SVG en ligne, et ce qui s'y trouve reste décoratif : le bouton est déjà nommé par son libellé.",
+      text: "<code>icon</code> accepte toute valeur d'icône et <code>iconFilled</code> en demande la forme pleine. Le slot par défaut est la voie vers une icône que la prop ne peut pas exprimer, et reste décoratif : le bouton est nommé par son <code>label</code>.",
     },
     link: {
       title: 'En tant que lien',
-      text: "<code>href</code> n'est pas une prop de ce composant. Il retombe sur le VButton en dessous, qui rend une ancre au lieu d'un bouton, et tout autre attribut d'ancre voyage de la même façon. Un lien désactivé garde sa place et perd sa destination : le href est retiré et les clics sont écartés, rien en HTML ne désactivant une ancre.",
+      text: "<code>href</code> traverse jusqu'au VButton sous-jacent, qui rend une ancre. Un lien désactivé garde sa place et perd sa destination.",
     },
     states: {
       title: 'États',
-      text: "L'état désactivé est grisé par les jetons de couleur plutôt que par une opacité, si bien que le bouton garde sa forme sur n'importe quel fond. Le chargement met un spinner à la place de l'icône et désactive le bouton le temps qu'il tourne, ce qui empêche de demander deux fois la même action. Le spinner prend la boîte de l'icône, de sorte que le carré ne change pas de taille en apparaissant.",
+      text: "<code>disabled</code> grise le bouton par les tokens de couleur. <code>loading</code> place un indicateur dans la boîte de l'icône et désactive le bouton pendant qu'il tourne.",
     },
   },
 

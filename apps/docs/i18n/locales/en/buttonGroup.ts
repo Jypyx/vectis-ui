@@ -5,51 +5,51 @@ export default {
   examples: {
     variantsAndTones: {
       title: 'Variants and tones',
-      text: 'Both are named once on the group, and each row below is one tone: <code>accent</code>, then <code>neutral</code>, then <code>danger</code>, across the four variants VButton offers. The two do not travel the same way. The variant wins over whatever a button inside was given, a segment of another silhouette no longer reading as part of the row; the tone is only a fallback, which is what the next example builds on.',
+      text: '<code>variant</code> and <code>tone</code> are named once on the group. The variant wins over whatever a button inside was given; the tone is only a fallback.',
     },
     toneOverride: {
       title: 'One segment, another tone',
-      text: "The tone is the one appearance prop a button keeps against its group: it is meaning rather than shape, and a row of actions often holds exactly one that destroys something. Here the row is neutral and the last segment alone says <code>danger</code>. Everything else stays the group's, so the destructive action is still the same height, the same variant and the same density as its neighbours.",
+      text: 'A segment keeps its own <code>tone</code> against the group, which is how a neutral row holds a single destructive action.',
     },
     orientation: {
       title: 'Orientation',
-      text: 'A row by default, a column under <code>vertical</code>. The joining follows the axis: the merged borders and the seams move to the horizontal edges, and the rounded corners are kept at the top of the first segment and the bottom of the last. A column also stretches every segment across its width, so the buttons line up whatever their labels measure.',
+      text: '<code>vertical</code> stacks the segments in a column instead of a row, the joining following the axis.',
     },
     detached: {
       title: 'Detached',
-      text: '<code>detached</code> leaves the buttons apart instead of joining them: a gap between them, and each keeping its own corners and its own borders. Everything the group hands down still travels, which is the reason to reach for it rather than drop the group altogether. It suits a row of unrelated actions that share an appearance, where a segmented control would suggest they are one choice made three ways.',
+      text: '<code>detached</code> leaves the buttons apart, each keeping its own corners and borders, while the group still hands its appearance props down.',
     },
     seamless: {
       title: 'Seamless',
-      text: 'A joined row draws a line at every joint, so the segments read as separate choices. <code>seamless</code> takes those lines out: no seam is drawn, and the borders on both sides of each shared edge are cleared, leaving a single frame with its outer edges intact. Both sides go, never one: the segments overlap by a pixel, so a border left on either of them would show through wherever the segment on top has no background of its own.',
+      text: '<code>seamless</code> removes the lines drawn at each joint, leaving a single frame with its outer edges intact.',
     },
     elevated: {
       title: 'Elevated',
-      text: 'The shadow belongs to the row rather than to each segment: three overlapping shadows would each fall on the neighbour they cover and draw a dark band down every joint. So the group casts one shadow and the buttons give theirs up, and the row rises as a whole when any part of it is hovered. Detached, in the third row, that reasoning goes with the overlap and each button casts its own again.',
+      text: '<code>elevated</code> gives the shadow to the row rather than to each segment. Detached, each button casts its own again.',
     },
     sizes: {
       title: 'Sizes',
-      text: 'The five heights of the scale every control shares, named once on the group: 24, 32, 40, 48 and 56 pixels. The size wins over whatever a button inside was given, a segment of another height no longer lining up with its neighbours.',
+      text: '<code>size</code> sets the height of every segment: 24, 32, 40, 48 or 56 pixels. It wins over whatever a button inside was given.',
     },
     compact: {
       title: 'Compact',
-      text: 'Each pair below is one step of the scale, the second of the two <code>compact</code>: 4px come off the height of every segment and nothing else moves. Like the size, it is the group that decides, so a dense toolbar is one prop rather than one per button.',
+      text: '<code>compact</code> takes 4px off the height of every segment.',
     },
     fullWidth: {
       title: 'Full width',
-      text: 'The row is as wide as its labels unless it is told otherwise. <code>fullWidth</code> stretches it across its parent and gives every segment an equal share of that width, whatever the words in it measure, which is what a segmented control standing on a line of its own usually asks for. The shares are grid tracks rather than flex bases, so the three come out the same width whether a segment is a plain button or one wrapped in a tooltip or a badge. A segment never shrinks below its own label: a row of labels too long for the parent overflows rather than crushing text nothing could then truncate.',
+      text: '<code>fullWidth</code> stretches the row across its parent and gives every segment an equal share of that width.',
     },
     icons: {
       title: 'With icons',
-      text: 'Segments carry icons the way any button does, through <code>iconStart</code> and <code>iconEnd</code>. A VIconButton is a segment too, and the second row is the usual case for one: a toolbar of icon-only controls, which takes <code>role="toolbar"</code> through fallthrough since the default <code>group</code> role says less about it. Each of them still needs a <code>label</code>, the accessible name a glyph cannot supply.',
+      text: 'Segments carry <code>iconStart</code> and <code>iconEnd</code> the way any button does. A VIconButton is a segment too, and still needs its <code>label</code>.',
     },
     link: {
       title: 'Link',
-      text: 'A segment given an <code>href</code> renders an <code>&lt;a&gt;</code>, and a row of them is a set of destinations rather than a set of actions: middle-click, open in a new tab and the browser status bar all come back. The row is drawn exactly as before, the joining being a matter of the boxes and not of what each of them turns out to be. A disabled link is made inert rather than merely greyed: the address is dropped, so it can be neither focused nor followed.',
+      text: 'A segment given an <code>href</code> renders an <code>&lt;a&gt;</code>. A disabled link has its address dropped, which leaves it neither focusable nor followable.',
     },
     states: {
       title: 'States',
-      text: "The first row is switched off by the group, the second by its own buttons. <code>disabled</code> is the one prop that adds up rather than overruling: a row that says nothing leaves a button that disabled itself disabled, and a segment cannot opt back in once the row is off. <code>loading</code> stays the button's own, since only it knows what it is waiting for.",
+      text: "<code>disabled</code> on the group adds up with each button's own: a segment cannot opt back in once the row is off. <code>loading</code> stays the button's own.",
     },
   },
 

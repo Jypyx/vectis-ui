@@ -5,19 +5,19 @@ export default {
   examples: {
     minuteStep: {
       title: 'Pas des minutes',
-      text: "Le cadran est un curseur et non une liste, il faut donc lui dire sur quoi il a le droit de se poser. <code>minuteStep</code> est cet intervalle : l'aiguille s'y accroche quand on la fait tourner, et les flèches du clavier avancent de ce pas. Il ne concerne que les minutes. Le cadran n'affiche que les minutes que le pas atteint : un quart d'heure y marque quatre repères et rien entre eux, car un chiffre que l'on peut viser sans pouvoir s'y poser est un chiffre que l'aiguille dément en s'arrêtant à côté. Un pas trop fin pour douze chiffres conserve les marques de cinq minutes sur lesquelles une horloge se lit, moins celles qu'il ne peut pas atteindre.",
+      text: "<code>minuteStep</code> est l'intervalle auquel l'aiguille s'aligne et le pas des flèches du clavier, sur les minutes seules. Le cadran n'imprime que les minutes que le pas atteint.",
     },
     restrictions: {
       title: 'Ce que l’on peut choisir',
-      text: 'Quatre props restreignent la valeur, et elles se composent en une seule réponse : <code>min</code> et <code>max</code>, deux bornes incluses écrites en chaînes canoniques <code>HH:mm</code>, et <code>allowedHours</code> et <code>allowedMinutes</code>, qui prennent chacune la liste des valeurs autorisées ou une règle qui répond pour l’une d’elles. Ce qu’elles excluent est laissé de côté, la règle que <code>minuteStep</code> suit déjà : le cadran affiche ce que l’on peut choisir et rien d’autre. Une heure n’est fermée que s’il n’y reste rien du tout : une borne à 09:30 garde neuf heures et retire ses trente premières minutes du côté des minutes. Choisir cette heure aligne alors les minutes sur la plus proche qu’elle autorise, et les flèches enjambent ce sur quoi elles n’ont pas le droit de se poser au lieu de s’y arrêter. Le pointeur n’attrape rien qu’il n’ait visé : un secteur laissé sans chiffre ne porte aucune valeur, donc un clic à cet endroit n’écrit rien et ne fait pas non plus avancer l’étape.',
+      text: "<code>min</code> et <code>max</code> sont deux bornes inclusives écrites en chaînes canoniques <code>HH:mm</code>, et <code>allowedHours</code> et <code>allowedMinutes</code> acceptent chacune la liste des valeurs autorisées ou une règle répondant pour une valeur. Ce qu'elles écartent est absent du cadran, et une heure n'est fermée que lorsqu'il n'y reste plus rien.",
     },
     hourFormat: {
       title: 'Format horaire',
-      text: "Un cadran de 12 heures porte un seul anneau de chiffres et la paire AM et PM à côté d'eux. Un cadran de 24 heures en porte deux, l'anneau intérieur tenant 00 et 13 à 23, et aucune paire à choisir. <code>format</code> tranche entre les deux, et sans lui c'est la langue du lecteur qui décide, ce qui est presque toujours ce que l'on veut. La valeur est la même de part et d'autre : sept heures et demie du soir est la chaîne 19:30 sur les deux cadrans, donc rien en aval n'a besoin de savoir lequel l'a produite.",
+      text: '<code>format</code> choisit entre un cadran sur 12 heures, un anneau de chiffres avec la paire AM et PM à côté, et un cadran sur 24 heures, deux anneaux et aucune paire. Sans lui, la langue du lecteur décide. La valeur est la même dans les deux cas.',
     },
     localization: {
       title: 'Localisation',
-      text: "La prop <code>locale</code> décide ici d'une seule chose, le cadran. Une balise dont la langue compte en douze heures obtient l'anneau simple et la paire AM et PM, une autre qui compte en vingt-quatre obtient le double anneau. en-US et en-GB forment la paire la plus nette, partageant chaque mot et ne différant en rien d'autre. La prop prend le pas sur la locale globale et se rabat sur elle, donc c'est en l'omettant qu'un cadran suit la langue à laquelle la page est réglée. Les mots sont une autre question : ils viennent du dictionnaire, et une langue que le dictionnaire ne fournit pas garde les mots anglais sur un cadran que la balise a déjà mis juste.",
+      text: "<code>locale</code> décide ici de l'horloge : une langue qui compte en douze heures reçoit l'anneau simple, une qui compte en vingt-quatre l'anneau double. Elle l'emporte sur la locale globale et s'y rabat. Les mots, eux, viennent du dictionnaire.",
     },
   },
 

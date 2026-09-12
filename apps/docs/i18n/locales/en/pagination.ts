@@ -5,47 +5,47 @@ export default {
   examples: {
     variantsAndTones: {
       title: 'Variants and tones',
-      text: 'Every pill is a button, so nothing about hovering, focusing or disabling is written twice. The current page is always filled, whatever the variant says: what <code>itemVariant</code> paints is the OTHER pages and the controls, ghost by default or outlined. The tone is the colour the current page takes, the rest of the row staying neutral, and it offers the three a button offers: an intention rather than a state.',
+      text: '<code>itemVariant</code> paints the pages that are not current and the controls, ghost by default or outlined. <code>tone</code> is the colour the current page takes, the rest of the row staying neutral.',
     },
     detached: {
       title: 'Detached',
-      text: 'The row is a segmented control by default, its buttons joined and only the two ends rounded. <code>detached</code> spaces them out and gives each its own corners, which is the same word in the same direction as VButtonGroup and VToggle.',
+      text: '<code>detached</code> spaces the buttons out and gives each its own corners, instead of joining them into a segmented control.',
     },
     elevated: {
       title: 'Elevated',
-      text: 'Raises the row off the page. Joined, the shadow belongs to the row rather than to each pill: the segments overlap by a pixel, so a shadow apiece would fall into every joint and fill the row with dark bands instead of lifting one object. Detached there are no joints, and every button carries its own.',
+      text: '<code>elevated</code> raises the row off the page. Joined, the shadow belongs to the row; detached, every button carries its own.',
     },
     sizes: {
       title: 'Sizes',
-      text: 'The five steps every control shares, 24 to 56 pixels, each with its <code>compact</code> pair 4px shorter. A pill is square at one digit and widens by itself past that, its minimum width deriving from the control height, so nothing is set per size.',
+      text: '<code>size</code> sets the height, from 24 to 56 pixels, and <code>compact</code> takes 4px off it. A pill is square at one digit and widens by itself past that.',
     },
     length: {
       title: 'Length',
-      text: 'How many pages there are in all. It is one by default, which renders a single page, so the real count almost always has to be given. Every page is rendered unless <code>totalVisible</code> says how many slots to keep.',
+      text: '<code>length</code> is how many pages there are in all, one by default. Every page is rendered unless <code>totalVisible</code> says how many slots to keep.',
     },
     totalVisible: {
       title: 'Total visible',
-      text: 'How many slots the row renders, ellipses counted among them. That is what keeps the width CONSTANT: walk through the pages and nothing moves sideways, because the window around the current page shifts at the ends rather than shrinking. The first and last pages are always kept, and below five slots there would be nothing left to show around the current one, so five is the effective minimum.',
+      text: '<code>totalVisible</code> is how many slots the row renders, ellipses counted among them, which is what keeps its width constant. The first and last pages are always kept, and five is the effective minimum.',
     },
     controls: {
       title: 'Previous and next',
-      text: 'One prop rather than a boolean beside a union: you pick what the controls show, an icon, a word, or both, or leave them out entirely. The icons and the wording are yours, and a label is both the visible text and the accessible name, which is what keeps a control named once a narrow row hides its text and leaves only the glyph.',
+      text: '<code>controls</code> decides what the previous and next buttons show: an icon, a word, both, or nothing at all. Their icons and their wording are yours, a label being both the visible text and the accessible name.',
     },
     unreachablePages: {
       title: 'Unreachable pages',
-      text: 'Which pages cannot be reached, as a list when you know them or as a function when the rule is easier to write than to enumerate. It is a behaviour rather than a state: the previous and next controls step OVER those pages rather than stopping at one, and disable themselves only when there is nothing left to step to, which covers the ends of the row without a rule of their own.',
+      text: '<code>disabledPages</code> takes a list of pages, or a function when the rule is easier to write than to enumerate. The previous and next controls step over those pages and disable themselves only when there is nothing left to step to.',
     },
     states: {
       title: 'States',
-      text: '<code>disabled</code> puts the whole row out of reach, greyed through the colour tokens like every other control. At either end of the range the matching control disables itself, there being nothing to step to, which is the same mechanism an unreachable page runs into.',
+      text: '<code>disabled</code> puts the whole row out of reach, greyed through the colour tokens. At either end of the range the matching control disables itself.',
     },
     alignment: {
       title: 'Alignment',
-      text: 'Where the row sits in the width it is given. It only says something in responsive mode, which is what makes the nav take the whole width available; outside it the row keeps an intrinsic width and sits wherever its parent puts it. That is also why a pagination in a table footer needs no <code>flex</code> of its own.',
+      text: '<code>align</code> says where the row sits in the width it is given. It only says something in responsive mode, which is what makes the nav take the whole width available.',
     },
     responsive: {
       title: 'Narrow containers',
-      text: "The row sheds pages as the space narrows, hiding the neighbours of the current page one step at a time while the first page, the last and the current one never go. It asks about its OWN width rather than the window's, so a pagination inside a narrow panel folds while the page around it stays wide, and the arrow keys skip whatever is hidden. It is off by default because it makes the nav take the full width available. No ellipsis is added to stand for a hidden neighbour: it is as wide as the pill it replaces.",
+      text: "<code>responsive</code> sheds pages as the space narrows, hiding the neighbours of the current page one step at a time while the first page, the last and the current one never go. It measures its own width rather than the window's.",
     },
   },
 

@@ -5,39 +5,39 @@ export default {
   examples: {
     itemsPerView: {
       title: 'Items per view',
-      text: '<code>itemsPerView</code> is how many slides may be visible at once, and <code>itemMinSize</code> is how small each is allowed to get. Between them there is no breakpoint: an equal share of the width is taken while it stays above the floor, and once it would fall below, fewer slides fit and the track simply scrolls further. Narrow this page and the three below become two, then one.',
+      text: '<code>itemsPerView</code> is how many slides may be visible at once, and <code>itemMinSize</code> how small each one may get before fewer of them fit.',
     },
     peek: {
       title: 'Peek',
-      text: '<code>peek</code> leaves a strip of the next slide showing, which is the product list template: it says there is more without asking the reader to trust the dots. The strip includes the gap before it, so a slide is still an equal share of what is left. Two consequences follow. The last position is the end of the track rather than a slide edge, and no dot is named after the last slide, since that slide can never be the leading one.',
+      text: '<code>peek</code> leaves a strip of the next slide showing, the gap before it included.',
     },
     effects: {
       title: 'Effects',
-      text: 'How one slide gives way to the next. The effects are driven by the scroll itself, so they follow the finger and reverse with it rather than playing a fixed animation. <code>slide</code> is the default and animates nothing; <code>fade</code> dissolves each slide in place, which needs one slide at a time and no peek; <code>scale</code> pushes the neighbours back without dimming them. A reader who has asked for less motion gets none of them.',
+      text: '<code>effect</code> decides how one slide gives way to the next: <code>slide</code> animates nothing, <code>fade</code> dissolves each slide in place and needs one slide at a time with no peek, <code>scale</code> pushes the neighbours back.',
     },
     orientation: {
       title: 'Orientation',
-      text: 'Set <code>orientation</code> to <code>vertical</code> and the whole component turns: the wheel and the arrow keys follow the block axis, the buttons take the up and down arrows, and dots placed after the slides move to the side. Give a <code>height</code> as well. A slide sized as a share of the height needs a height to take a share of, and without one every slide collapses onto its own content.',
+      text: '<code>orientation</code> set to <code>vertical</code> turns the whole component onto the block axis. Give a <code>height</code> as well, which the slides take their share of.',
     },
     customIcons: {
       title: 'Custom icons',
-      text: '<code>prevIcon</code> and <code>nextIcon</code> take an <code>IconSource</code>, the same as every icon prop in the library: one of the library icons, a name handed to the resolver your application installed, SVG path data, a component, or an image. The defaults follow the orientation, so a pair of your own has to as well. The words those buttons announce come from <code>prevLabel</code> and <code>nextLabel</code>, which fall back to the dictionary.',
+      text: '<code>prevIcon</code> and <code>nextIcon</code> take an <code>IconSource</code>, and <code>prevLabel</code> and <code>nextLabel</code> the words those buttons announce.',
     },
     placements: {
       title: 'Placements',
-      text: 'The arrows and the dots are placed independently. <code>inside</code> lays them over the slides, <code>outside</code> puts them beside, and <code>false</code> removes them. Placed outside, the arrows have their room reserved as padding on the component, so its footprint is unchanged and the slides narrow instead. Either way they are centred on the slides alone, never on the slides plus the bar of dots.',
+      text: '<code>controls</code> and <code>indicators</code> are placed independently: <code>inside</code> lays them over the slides, <code>outside</code> puts them beside, <code>false</code> removes them.',
     },
     jumps: {
       title: 'Jumps',
-      text: 'Click the last dot of both carousels below. The first goes straight there and plays the effect once, on the slide that arrives; the second keeps the whole travel, so the four slides in between cross the view, each running its own transition on the way past. Going straight there is the default, and <code>noJump</code> is what puts the travel back. It covers every route: the dots, the Home and End keys, and a looping carousel coming back round.',
+      text: 'A move of more than one page goes straight there and plays the effect once on arrival. <code>noJump</code> puts the whole travel back, on every route.',
     },
     loop: {
       title: 'Loop',
-      text: 'With <code>loop</code>, the last position leads back to the first and the first back to the last, so neither button is ever disabled. Nothing is cloned to achieve it: the real track goes back to the beginning. What goes round is what steps, meaning the two buttons, the arrow keys and autoplay. A dot names a position and still goes straight to it, and End on the last page stays there.',
+      text: '<code>loop</code> leads the last position back to the first, so neither button is ever disabled. It applies to the buttons, the arrow keys and autoplay.',
     },
     autoplay: {
       title: 'Autoplay',
-      text: '<code>autoplay</code> is an interval in milliseconds, and zero disables it. It stops on the last page unless the carousel loops, holds while the pointer rests on the carousel or the keyboard focus is inside it, and never runs for a reader who has asked for less motion. The component renders no pause button: the prop is reactive, so binding it to zero cancels the timer on the spot. Add one, as the example does. Hover and focus leave a touch user with no way to stop the movement.',
+      text: '<code>autoplay</code> is an interval in milliseconds, zero disabling it. It holds on hover and on keyboard focus, and never runs for a reader who has asked for less motion. No pause button is rendered: add one, as the example does.',
     },
   },
 

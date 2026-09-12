@@ -7,35 +7,35 @@ export default {
       title: 'What you can write',
       written: 'You write',
       elsewhere: 'Windows and Linux',
-      text: 'The combination is a plain string, <code>+</code>-separated, and neither case nor spaces matter. Two tokens name a modifier and are worth keeping apart: <code>mod</code> is the one that belongs to the system, Command on a Mac and Ctrl everywhere else, and it is what an application shortcut almost always wants; <code>meta</code> names that physical key literally, so it stays Command on a Mac and becomes the Windows key, or Super on Linux. A token the design system does not know is drawn exactly as it was written, which is what makes <code>k</code>, <code>f5</code> and <code>,</code> valid without a list to add them to. The <code>+</code> key is the one exception, written <code>plus</code>, since <code>+</code> is already the separator.',
+      text: '<code>keys</code> is a plain string, <code>+</code>-separated, where neither case nor spaces matter. <code>mod</code> is the modifier that belongs to the system, Command on a Mac and Ctrl everywhere else, where <code>meta</code> names that physical key literally. A token the design system does not know is drawn exactly as it was written, and the <code>+</code> key is written <code>plus</code>.',
     },
     variants: {
       title: 'Variants',
-      text: 'Three ways to draw a cap: tinted, outlined, or raised off the page. They are three values of one prop rather than a variant plus an elevation flag, because a key cap is not interactive: there is no hover, no active and no focus state for an elevation to combine with. Nothing here is a tone, either. A shortcut is chrome, never data, so the component offers no colour of its own: the tint, the outline and the caps themselves are all derived from the colour it inherits. That is what lets a shortcut sit anywhere and still read, in a paragraph, in a field, in a menu row, or inside a tooltip painted on a dark surface.',
+      text: '<code>variant</code> draws the caps tinted, outlined or raised. There is no tone and no colour prop: every paint derives from the colour the component inherits.',
     },
     sizes: {
       title: 'Sizes',
-      text: 'Two sizes, <code>xs</code> by default because a shortcut sits beside other text rather than competing with it, and <code>compact</code> takes 4px off either of them while leaving the padding and the type alone. A cap holding a single character is square, which is what keeps a row of them even.',
+      text: '<code>size</code> takes <code>xs</code> or <code>sm</code>, and <code>compact</code> takes 4px off either of them. A cap holding a single character is square.',
     },
     attached: {
       title: 'Attached',
-      text: "The decoration moves from each cap to the shortcut as a whole, so the combination reads as one key and the separator ends up inside it rather than between two of them. The padding follows: attached, the shortcut takes the rhythm of a cap's insides at its own ends, since the padding sized to wrap one short label reads as slack around three runs of text. It is purely visual. The markup, the caps and the announced name are identical either way.",
+      text: '<code>attached</code> moves the decoration from each cap to the shortcut as a whole, so the combination reads as one key. It is purely visual: the markup, the caps and the announced name are identical either way.',
     },
     platform: {
       title: 'Platform',
-      text: 'Left alone, the component reads the system once it is in the page and never before: a server has nothing to read it from, so the first client render has to match what it sent, and a Mac visitor pays one frame of Ctrl before it becomes Command. The prop forces the answer instead, which is what a table showing every system needs, and what a host that already knows can supply: Electron, Tauri, or a server reading the request.',
+      text: '<code>platform</code> forces the system instead of reading it once the component is in the page, which is what a table showing every system needs.',
     },
     separator: {
       title: 'Separator',
-      text: 'What is written between two caps, <code>+</code> by default. The caps are laid out with a gap of their own, so this is the character and never the space around it: an empty string leaves the gap and gives the macOS convention, where the symbols simply follow one another.',
+      text: '<code>separator</code> is what is written between two caps, <code>+</code> by default. An empty string leaves the gap in place and gives the macOS convention.',
     },
     inText: {
       title: 'In text and in components',
-      text: "A cap takes its size from the text around it, so a shortcut written into a sentence stays on its line rather than pushing it apart. Its usual homes are the end of a command row, where the menu item's own end slot takes it, a tooltip, whose content slot exists for exactly this, and the control the shortcut is a second route to.",
+      text: 'A cap takes its size from the text around it. Its usual homes are the end of a menu row, a tooltip, and the control the shortcut is a second route to.',
     },
     listening: {
       title: 'Listening',
-      text: "The component can also watch for the combination it shows and report it, which is off until you ask: a thing whose job is to display a shortcut must not capture the page's keyboard on its own. Modifiers are matched exactly rather than as a minimum, so <code>mod+k</code> and <code>mod+shift+k</code> can both exist without one swallowing the other. The browser's own binding is cancelled unless <code>allowDefault</code> says otherwise, and a shortcut goes quiet while the reader is typing in a field unless <code>allowInInput</code> says otherwise.",
+      text: '<code>listen</code> makes the component watch for the combination it shows and emit <code>trigger</code>. Modifiers are matched exactly, so <code>mod+k</code> and <code>mod+shift+k</code> can both exist. <code>allowDefault</code> keeps the browser binding, and <code>allowInInput</code> lets the shortcut fire while the reader is typing in a field.',
     },
   },
 

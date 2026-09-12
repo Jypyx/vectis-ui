@@ -5,35 +5,35 @@ export default {
   examples: {
     shapes: {
       title: 'Shapes',
-      text: 'What the silhouette stands for. Each value sets a corner radius and a way of being sized at once: <code>text</code> follows the typography around it, <code>control</code> takes the height of a control, <code>pill</code> is that height with fully rounded ends, <code>circle</code> is that height in both dimensions, and <code>surface</code> is a card or an image with a height of its own. The component has no width of its own and fills what it is given, so the container is what decides how wide a silhouette runs. <code>width</code> names one where that is not enough, a number being read as pixels and anything else as a CSS length; <code>height</code> is read the same way and wins over both the shape and the size, for a silhouette no shape describes.',
+      text: '<code>shape</code> sets a corner radius and a way of being sized at once: <code>text</code> follows the typography around it, <code>control</code> takes the height of a control, <code>pill</code> that height with fully rounded ends, <code>circle</code> that height in both dimensions, <code>surface</code> a card with a height of its own. <code>width</code> and <code>height</code> name their own, a number being read as pixels and anything else as a CSS length.',
     },
     sizes: {
       title: 'Sizes',
-      text: 'The scale shared by every control, 24 to 56 pixels, with <code>compact</code> taking 4px off as it does everywhere else. An <code>md</code> skeleton is exactly as tall as an <code>md</code> button, which is what lets a silhouette hold the place of the control it stands in for rather than approximate it. It means nothing for <code>text</code>, which follows the typography around it, or for <code>surface</code>, which has a height of its own.',
+      text: '<code>size</code> takes the scale every control shares, 24 to 56 pixels, and <code>compact</code> takes 4px off it. It means nothing for <code>text</code> or for <code>surface</code>, which are sized otherwise.',
     },
     paragraph: {
       title: 'Paragraphs of text',
-      text: 'In the text shape a silhouette is one em tall and the gutter between two of them is the leading, so <code>lines</code> silhouettes occupy exactly that many lines of the typography around them: swapping them for the real text shifts nothing on the page. The last line is drawn shorter than the others, and that single detail is what reads as a paragraph rather than as a table.',
+      text: '<code>lines</code> draws that many silhouettes, each one em tall with the leading as the gutter, so they occupy exactly that many lines of the typography around them. The last one is drawn shorter than the others.',
     },
     silhouettes: {
       title: 'The silhouette of a real component',
-      text: 'What the shapes are for. A button is a <code>control</code> at the button size, given the width its label would have taken; an avatar is a <code>circle</code>, a chip a <code>pill</code>, a field two silhouettes since its label is a line of text and its box a control. Nothing here is measured: the component never looks at what it replaces, so a silhouette that matches is one you declared, which is also what keeps it correct before the real thing has ever been rendered.',
+      text: 'Nothing here is measured: a silhouette that matches the component it stands in for is one you declared, shape by shape.',
     },
     animations: {
       title: 'Animations',
-      text: 'Both animations lighten the silhouette with the same highlight, derived from its own background: the wave sends it across, the pulse raises and lowers it in place. Neither fades the silhouette towards the page, which would lighten it in one theme and darken it in the other. <code>none</code> freezes it, which suits printing, a screenshot, or a parent that is already animating. Under <code>prefers-reduced-motion</code> the wave falls back to a slowed pulse rather than stopping, a translation being precisely what that preference is about.',
+      text: '<code>animation</code> sends the highlight across the silhouette as a wave, or raises and lowers it in place as a pulse, and <code>none</code> freezes it. Under <code>prefers-reduced-motion</code> the wave falls back to a slowed pulse.',
     },
     colour: {
       title: 'A colour of your own',
-      text: 'The shipped grey reads as an absence on the page background, and as a hole on a surface that paints its own. <code>color</code> replaces it, and the highlight both animations use is derived from that colour by a lightness delta rather than mixed towards a target, so it stays right on an unusual ground and in either theme with nothing else to set.',
+      text: '<code>color</code> replaces the shipped grey, the highlight both animations use being derived from it by a lightness delta rather than mixed towards a target.',
     },
     replacing: {
       title: 'Replacing the skeleton',
-      text: 'There is no wrapper mode, and that is a decision rather than an omission: wrapping would invite the component to measure what it replaces, and the shape would still have to be declared. The idiom is a plain <code>v-if</code>, with <code>aria-busy</code> on the container. That attribute is what announces the wait for the whole zone, which is the other half of the skeleton being silent.',
+      text: 'There is no wrapper mode: the idiom is a plain <code>v-if</code>, with <code>aria-busy</code> on the container, which is what announces the wait for the whole zone.',
     },
     announcing: {
       title: 'Announcing the wait',
-      text: 'A skeleton is decorative by default and hidden from the accessibility tree: a page holds a dozen of them, and a dozen competing announcements are unreadable. One instance per zone speaks, through <code>announce</code>, or through <code>label</code>, which says what is announced and turns the announcement on by being given. Prefer something situated, "Loading the results", since a generic word is the reason the default is silence.',
+      text: 'A skeleton is decorative and hidden from the accessibility tree by default. <code>announce</code> makes one instance speak, and <code>label</code> says what is announced and turns the announcement on by being given.',
     },
   },
 

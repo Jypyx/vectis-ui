@@ -5,11 +5,11 @@ export default {
   examples: {
     size: {
       title: 'Size',
-      text: 'A number of pixels, and the icon is square. Left out, it takes the size its context imposes: every control in the library sets one for whatever is drawn inside it, so an icon in a button follows the button without being told. With no context either it falls back to <code>1em</code>, which makes it the size of the text it sits in and keeps it on the line rather than pushing it apart. An explicit size wins over both.',
+      text: '<code>size</code> is a number of pixels, the icon being square. Left out, it takes the size its context imposes, and falls back to <code>1em</code> with no context.',
     },
     filled: {
       title: 'Filled',
-      text: 'The same icon with its shape filled in, which is what marks a state: a notification that has arrived, a step that is done. The library ships a filled drawing only where filling really changes the geometry, 15 of its 34 icons, and asking for one that has none draws the icon it always had. So the prop can be bound to a condition without checking whether that particular icon has anything to say about it. It means nothing for an image or an inline SVG, whose shape is fixed, and a ligature font always honours it.',
+      text: '<code>filled</code> asks for the filled form of the icon, which is what marks a state. A library icon with no filled drawing renders the one it always had.',
     },
     rendering: {
       title: 'Where the drawing comes from',
@@ -21,7 +21,7 @@ export default {
         'The default slot, an inline SVG, reached when neither <code>name</code> nor <code>src</code> was given.',
       ],
       moreBefore:
-        "The order is the contract. Your resolver comes before the library's own drawings, so one call moves every icon the components draw onto your set, and a resolver answering nothing for a given name hands it back rather than leaving a gap, which is what makes a partial mapping usable. A plain string is only ever a name, never an address: that is what lets a namespaced identifier such as <code>mdi:close</code> reach your resolver intact. Wiring a set in, and the list of what the library ships, are both on",
+        "The order is the contract: your resolver comes before the library's own drawings, and one answering nothing for a given name hands it back rather than leaving a gap, which is what makes a partial mapping usable. A plain string is only ever a name, never an address. Wiring a set in, and the list of what the library ships, are both on",
       moreAfter: '.',
     },
   },

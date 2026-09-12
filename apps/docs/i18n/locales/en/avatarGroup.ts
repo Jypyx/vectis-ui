@@ -5,23 +5,23 @@ export default {
   examples: {
     overflow: {
       title: 'Overflow',
-      text: "<code>max</code> is how many discs are drawn before the rest are summed up as one. The count comes from the avatars you passed, so nothing has to be told how many there are, and the last disc carries the remainder as <code>+N</code>. Left out, every avatar is shown. Every demo on this page sits on a raised card, hence the <code>ringColor</code> each one passes: over the page's own background the default is already right.",
+      text: '<code>max</code> sets how many avatars are drawn before the rest are summed up as <code>+N</code> on a last disc.',
     },
     size: {
       title: 'Size on the group',
-      text: 'The group hands its <code>size</code> to every avatar inside, the overflow disc included, and the overlap follows: each disc bites into the one before it by a share of its own height, so a row scales with no number to adjust. An avatar that sets a size of its own keeps it, and its overlap follows that size instead.',
+      text: '<code>size</code> on the group applies to every avatar inside, the overflow disc included. An avatar that sets a size of its own keeps it.',
     },
     compact: {
       title: 'Compact',
-      text: 'Same terms as the size: <code>compact</code> reaches every avatar in the row and takes 4px off each. The second row below is the first one with the prop set.',
+      text: '<code>compact</code> on the group takes 4px off every avatar in the row.',
     },
     customOverflow: {
       title: 'Custom overflow',
-      text: 'The <code>#overflow</code> slot replaces the <code>+N</code> disc and receives <code>count</code>, the number of avatars being hidden. That is what lets the disc carry a colour of your own, become a button opening the full list, or say something other than a number. Give it an <code>alt</code> once it is interactive: <code>+2</code> on its own tells a screen reader nothing.',
+      text: 'The <code>#overflow</code> slot replaces the <code>+N</code> disc and receives <code>count</code>, the number of avatars being hidden.',
     },
     tooltips: {
       title: 'With tooltips',
-      text: 'A VTooltip can wrap each avatar, the overflow disc included. Two things follow from that. The trigger has to be able to take focus, so the avatars here are <code>clickable</code>; and the wrapper the tooltip inserts between the group and the avatar changes nothing about the row, the overlap being written against whatever the direct children of the group turn out to be.',
+      text: 'Each avatar can be wrapped in a VTooltip. The trigger has to be focusable, hence <code>clickable</code> here.',
     },
   },
 

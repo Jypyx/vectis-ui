@@ -5,31 +5,31 @@ export default {
   examples: {
     tones: {
       title: 'Tonalités',
-      text: "Deux, et volontairement pas plus : une confirmation dit soit « c'est fait », soit « cela n'a pas marché ». Les deux sont peintes en plein, <code>neutral</code> étant l'inversion canonique du design system, sombre sur un thème clair et claire sur un thème sombre. Le succès, l'avertissement et l'accent sont des états plutôt que des issues, et rapporter un état est le travail d'une notification : ils ne sont donc pas proposés ici.",
+      text: '<code>tone</code> propose deux valeurs et pas plus : une confirmation dit soit que cela a marché, soit que non. Les deux sont peintes en solid.',
     },
     withoutAction: {
       title: 'Sans action',
-      text: "Sans action, la barre ne porte aucun bouton : un simple constat de ce qui vient de se passer, qui s'efface tout seul. C'est la bonne forme chaque fois qu'il n'y a rien à reprendre, un réglage enregistré ou un message envoyé. Quand il y a quelque chose à reprendre, le bouton est tout l'intérêt du composant, et l'exécuter retire toujours la barre : rien n'est à refermer ensuite.",
+      text: "Sans action, la barre ne porte aucun bouton. Quand il y en a un, l'exécuter retire toujours la barre.",
     },
     icon: {
       title: 'Avec une icône',
-      text: "Facultative, et aucune n'est déduite de la tonalité. Une confirmation se lit plutôt qu'elle ne se balaie du regard, contrairement à une notification qui arrive sans prévenir : ce sont les mots qui la portent, et une icône ne fait jamais que s'y ajouter.",
+      text: "<code>icon</code> est optionnelle, et aucune n'est déduite du ton.",
     },
     placements: {
       title: 'Placements',
-      text: "Le long du bord bas et nulle part ailleurs : une confirmation se place hors du chemin du contenu et près de ce que le lecteur vient de faire, ce qui est l'autre raison pour laquelle ce n'est pas une notification. Posé sur le VSnackbar, le placement est celui de toutes les barres ; passé au moment d'en lever une, il n'appartient qu'à elle.",
+      text: "<code>placement</code> pose la barre le long du bord inférieur, au début, au centre ou à la fin. Posé sur le VSnackbar, il est la valeur par défaut de toutes les barres ; passé au moment d'en lever une, il n'appartient qu'à elle.",
     },
     replacement: {
       title: 'Une seule à la fois',
-      text: "Il y a au plus une barre, et en lever une seconde remplace la première sur-le-champ, compte à rebours relancé. Tout le reste du composant en découle : aucune pile à gérer, pas de croix de fermeture puisqu'une barre qui se range seule ne doit pas le demander au lecteur, et une valeur unique plutôt qu'une file pour la tenir. Deux états peuvent être vrais en même temps, et c'est pourquoi les notifications s'empilent ; seule la dernière action du lecteur mérite qu'on propose de la défaire.",
+      text: "Il n'y a au plus qu'une barre : en lever une seconde remplace la première sur-le-champ, compte à rebours relancé.",
     },
     autoDismiss: {
       title: 'Combien de temps elle reste',
-      text: "Quatre secondes par défaut, moins qu'une notification, parce que le lecteur sait déjà ce que dit la barre : il vient de le faire. Le compte à rebours est suspendu tant que le pointeur repose sur la barre et tant que le clavier s'y trouve, et il ne repart que lorsque les deux sont partis : une action vers laquelle on tend la main n'est jamais retirée en route. Posez la durée sur le VSnackbar pour toutes les barres, ou au moment d'en lever une pour celle-là seule.",
+      text: "<code>duration</code> est la durée d'affichage de la barre, quatre secondes par défaut. Le compte à rebours se suspend tant que le pointeur est sur la barre et tant que le clavier y est, et ne repart que lorsque les deux sont partis.",
     },
     persistent: {
       title: "La garder jusqu'à ce qu'on la retire",
-      text: "Une durée de 0 désarme le compte à rebours : la barre reste alors jusqu'à ce que quelque chose la remplace ou la retire. Réservez-le à une confirmation sur laquelle le lecteur doit agir, et donnez-lui une sortie : <code>snackbar</code> renvoie un identifiant, et <code>dismissSnackbar</code> retire cette barre-là. Passer l'identifiant n'est pas une formalité, il est vérifié contre la barre réellement à l'écran : un gestionnaire arrivé en retard ne peut donc pas fermer la confirmation qui vient de remplacer la sienne.",
+      text: "Une <code>duration</code> de 0 désarme le compte à rebours : la barre reste jusqu'à ce que quelque chose la remplace ou la retire. <code>snackbar</code> rend un identifiant, et <code>dismissSnackbar</code> retire cette barre.",
     },
   },
 

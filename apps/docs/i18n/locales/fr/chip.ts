@@ -5,39 +5,39 @@ export default {
   examples: {
     variantsAndTones: {
       title: 'Variantes et tonalités',
-      text: "Trois variantes sur chaque ligne, cinq tonalités en colonne. Les variantes sont celles que partage chaque composant coloré de la bibliothèque : <code>soft</code> teinte le fond, <code>solid</code> le remplit, <code>outline</code> ne garde qu'une bordure. Les tonalités vont deux crans plus loin que celles d'un bouton, parce qu'une puce rapporte un état là où un bouton exprime une intention, et que <code>success</code> et <code>warning</code> sont des états.",
+      text: '<code>variant</code> propose trois façons de peindre la puce, <code>soft</code>, <code>solid</code> et <code>outline</code>, et <code>tone</code> cinq sens.',
     },
     shapes: {
       title: 'Silhouettes',
-      text: "Deux silhouettes. <code>chip</code>, la valeur par défaut, reprend le rayon d'angle de tous les contrôles interactifs de la bibliothèque : la puce se pose donc dans un formulaire à côté d'un bouton et d'un champ sans se démarquer. <code>pill</code> arrondit complètement les extrémités, ce qui se lit mieux là où les puces sont le contenu plutôt qu'une partie d'un contrôle : une ligne d'étiquettes, un jeu de filtres, une liste de catégories.",
+      text: "<code>shape</code> choisit la silhouette : <code>chip</code> prend le rayon d'angle d'un contrôle interactif, <code>pill</code> arrondit complètement les extrémités.",
     },
     sizes: {
       title: 'Tailles',
-      text: "Deux hauteurs, 24 et 32 pixels, le bas de l'échelle que partage chaque contrôle de la bibliothèque. La seconde ligne est la même paire sous <code>compact</code> : 4px partent de la hauteur et rien d'autre ne bouge, si bien qu'une puce continue de s'aligner sur le texte qui la borde. Un champ qui rend ses propres puces, un combobox multiple ou un champ de fichiers, choisit déjà le cran juste en dessous du sien et n'a besoin de rien de tout cela.",
+      text: '<code>size</code> définit la hauteur à 24 ou 32 pixels, et <code>compact</code> lui retire 4px.',
     },
     customColors: {
       title: 'Couleurs personnalisées',
-      text: "Une <code>color</code> remplace la tonalité. Toutes les nuances dont la puce a besoin sont dérivées de cette seule valeur : le fond teinté, la bordure, le texte et le survol la suivent, dans le thème clair comme dans le sombre, sans rien à reconstruire. Elle accepte n'importe quelle couleur CSS, ce qui permet à une puce de porter une couleur venue de vos données : un projet, une étiquette, un agenda. La seule chose à vérifier vous-même est le contraste du texte sur une puce <code>solid</code>.",
+      text: "<code>color</code> remplace le ton, toutes les nuances nécessaires en étant dérivées. Elle accepte n'importe quelle couleur CSS.",
     },
     icons: {
       title: 'Avec des icônes',
-      text: "<code>iconStart</code> et <code>iconEnd</code> acceptent les mêmes valeurs que toutes les props d'icône de la bibliothèque, et les slots <code>#start</code> et <code>#end</code> les remplacent quand le contenu n'est pas une icône du tout, une pastille d'état par exemple. Retirez complètement le libellé et la puce devient carrée ; il faut alors lui donner un nom, puisqu'il ne reste qu'une icône, sans rien à lire.",
+      text: "<code>iconStart</code> et <code>iconEnd</code> posent une icône de part et d'autre du libellé, et les slots <code>#start</code> et <code>#end</code> les remplacent. Une puce sans libellé devient carrée et doit recevoir un nom.",
     },
     clickable: {
       title: 'Cliquable et liens',
-      text: "Une puce rend l'élément que sa fonction réclame. Sans rien, c'est du texte, sans survol et sans rien à focaliser. <code>clickable</code> en fait un vrai bouton, et <code>href</code> un vrai lien : le clavier, l'anneau de focus et le menu contextuel du navigateur viennent donc de la plateforme et non d'un gestionnaire de clic posé sur un span.",
+      text: "<code>clickable</code> rend la puce sous forme de bouton et <code>href</code> sous forme de lien. Sans l'un ni l'autre, c'est du texte simple.",
     },
     selection: {
       title: 'Sélection',
-      text: "<code>selectable</code> fait de la puce un bouton à deux états lié à <code>v-model:selected</code>, et la sélectionner la peint comme le rendu <code>solid</code> de sa tonalité. Ce changement de couleur est tout le signal de la première ligne. Ajoutez <code>check</code> et une coche apparaît en plus devant le libellé, ce qui vaut la peine partout où les tonalités sont proches ou la ligne longue. La coche remplace l'icône de début au lieu de s'y ajouter, si bien que la largeur ne saute pas au moment de la sélection.",
+      text: "<code>selectable</code> transforme la puce en bascule liée à <code>v-model:selected</code>. <code>check</code> ajoute une coche avant le libellé, à la place de l'icône de début.",
     },
     dismissible: {
       title: 'Suppression',
-      text: "<code>dismissible</code> ajoute un second bouton à côté du premier, jamais à l'intérieur, et l'activer émet <code>dismiss</code>. La puce est toujours là ensuite : la retirer de la liste est la décision prise ci-dessous, ce qui permet au même évènement d'archiver, de demander une confirmation ou de proposer une annulation. <code>dismissIcon</code> et <code>dismissLabel</code> changent le glyphe et les mots qu'il annonce.",
+      text: '<code>dismissible</code> ajoute un second bouton qui émet <code>dismiss</code>, le retrait de la liste vous revenant. <code>dismissIcon</code> et <code>dismissLabel</code> changent son glyphe et ses mots.',
     },
     states: {
       title: 'États',
-      text: "Une puce désactivée grise par les jetons de couleur plutôt que par une opacité : elle garde donc son contraste sur toutes les surfaces. Cela vaut quel que soit l'élément rendu, et le lien est le cas à connaître : HTML n'a pas de <code>disabled</code> pour un lien, donc l'adresse est retirée, ce qui le rend ni focalisable ni suivable au lieu de simplement grisé.",
+      text: '<code>disabled</code> grise la puce par les tokens de couleur. Un lien désactivé voit son adresse retirée, ce qui le laisse ni focalisable ni suivable.',
     },
   },
 

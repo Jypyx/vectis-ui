@@ -5,51 +5,51 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label and hint',
-      text: 'A <code>label</code> is rendered above the field and a <code>hint</code> below it, both tied to it so a screen reader reads them with it. The panel is anchored to the field itself rather than to the component, which also holds those two: it opens against the field and covers the hint while it is open, instead of starting a hint lower down. Typing narrows the list on the label, ignoring accents, so reunion finds Réunion and the reader never has to know where the diacritic went.',
+      text: '<code>label</code> renders a descriptive text above the field, and <code>hint</code> renders a helper text below it.',
     },
     sizes: {
       title: 'Sizes',
-      text: 'Three heights, 32, 40 and 48 pixels, each with its <code>compact</code> pair 4px shorter. The panel takes the size the field was given, so the rows, their icons and their padding follow with nothing else to set. The chips of a multiple field sit one step below the field, and the field forces its search input to their height, which is what stops the row growing the moment it takes focus.',
+      text: 'Sets the field height to 32, 40, or 48 pixels. The <code>compact</code> prop reduces this height by 4px.',
     },
     states: {
       title: 'States',
-      text: 'A disabled field cannot be reached at all, and an invalid one is for a rule the browser cannot check by itself. <code>readonly</code> sits between the two: the choice is shown but frozen, so nothing can be typed, the list never opens and the chips lose their crosses, while the field keeps its normal contrast, takes the focus and can be copied from. <code>loading</code> with no option yet says so across the whole panel, and the chevron becomes a spinner; with options already listed it moves to the foot of the list, since what is loading is then the next page. A panel with nothing to show says <code>emptyText</code> rather than opening empty, and <code>clearable</code> adds a cross that empties the selection and the search together.',
+      text: '<code>disabled</code> makes the field unusable. <code>readonly</code> prevents changes but keeps the field focusable. <code>invalid</code> marks the field as having an error. <code>loading</code> displays a loading indicator. <code>emptyText</code> defines the message shown when there are no options. <code>clearable</code> adds an icon to clear the selection.',
     },
     placement: {
       title: 'Placement',
-      text: 'Where the list opens relative to the field. The panel is anchored in CSS, so this names a preference rather than a position: a browser short of room below already flips the panel above on its own, and the value only decides which side is tried first. Only the block axis is offered, since a list opening beside a text field would leave the reader looking in the wrong place. The two alignments are visible below because the options are wider than the fields, the panel being at least as wide as what it is anchored to and free to take more.',
+      text: 'Sets the preferred opening direction (above or below the field) for the options list panel.',
     },
     groups: {
       title: 'Groups and separators',
-      text: 'An entry of <code>options</code> is an option, a named block of them, or a separator, and the three mix freely. Filtering keeps that structure honest: a group none of whose options survive disappears with its name, and a separator left stranded at either end, or against another one, is dropped. Keyboard navigation stays flat all the same, so the arrow keys walk the rows in the order they are read and never stop on a heading.',
+      text: 'The <code>options</code> prop accepts a flat list, or can be structured with named groups and separators.',
     },
     multiple: {
       title: 'Multiple selection',
-      text: 'The value becomes a list and each chosen option shows as a chip inside the field, removable one at a time. Out of focus the search input folds away so the chips alone are left, with no empty strip beside them, and it comes back the moment the field is focused. The array is never mutated in place, so a watcher on the model fires as it should.',
+      text: '<code>multiple</code> allows selecting several values, which are displayed as removable chips inside the field.',
     },
     fieldIcon: {
       title: 'Field icon',
-      text: '<code>iconStart</code> puts an icon inside the field, at the start, and it is rendered before whatever else fills that zone. That is what lets it survive the chips of a multiple field instead of being replaced by them. It is decorative until a <code>@click:icon-start</code> listener is attached, which turns it into a real button and makes <code>iconStartLabel</code> necessary. The end of the field belongs to the component: the chevron, the spinner that takes its place while loading, and the clear cross to their left.',
+      text: '<code>iconStart</code> displays an icon at the beginning of the field. <code>iconStartLabel</code> provides an accessible label if the icon is made interactive.',
     },
     icons: {
       title: 'Option icons',
-      text: "An option's <code>icon</code> is drawn in the slot the row provides, so it is aligned and spaced like every other row's, which an icon put in the option slot would not be, that content being rendered inside the label. It takes the same values as every icon prop in the library. A row given no icon starts straight at its label rather than reserving a blank column for one.",
+      text: "An option's <code>icon</code> property displays an icon alongside its label in the dropdown list.",
     },
     asynchronous: {
       title: 'Asynchronous search',
-      text: 'Turn <code>filter</code> off and the options are shown exactly as their source hands them over. <code>search</code> carries the term, delayed by <code>searchDebounce</code> while typing and sent at once when the panel opens so a first page can load. The same term is never emitted twice in a row, so reopening the panel repeats no request. Answers can still arrive out of order, which the token below is for: a slow reply to an old keystroke must not overwrite a fresh one.',
+      text: 'Disabling <code>filter</code> shows options exactly as provided by the source. <code>searchDebounce</code> sets the delay in milliseconds before emitting the search term.',
     },
     infiniteScroll: {
       title: 'Infinite scroll',
-      text: '<code>hasMore</code> puts a sentinel at the foot of the panel, and <code>load-more</code> fires as it comes into view. The next-page spinner appears in the same place, leaving the options already loaded where they are. Each page is asked for once: the sentinel cannot come back into view until the page being awaited has landed and pushed it down.',
+      text: '<code>hasMore</code> indicates that more pages are available, triggering a <code>load-more</code> event when the end of the list comes into view.',
     },
     customOption: {
       title: 'Custom options',
-      text: 'The <code>#option</code> slot replaces the label of a row with content of your own, a second line or a badge, and receives the option along with whether the row is highlighted and whether it is already chosen. It is rendered inside the label, so the row keeps the alignment, the padding and the selection tick the panel gives it. For an icon alone, the icon field of the option is the better route.',
+      text: 'The <code>#option</code> slot allows customizing the content and layout of an option row (e.g., adding a badge or a second line).',
     },
     customChip: {
       title: 'Custom chips',
-      text: 'The <code>#chip</code> slot replaces the chip standing for one chosen value. Three of the things it receives are what keep it usable: <code>remove</code>, without which the value could no longer be taken back, and <code>size</code> and <code>compact</code>, the step the field worked out for its chips, which nothing outside the component can guess. The option may be missing, if that value has never appeared among the options, which is why the icon below is read through an optional chain.',
+      text: 'The <code>#chip</code> slot allows customizing the appearance of the selected value chips.',
     },
   },
 

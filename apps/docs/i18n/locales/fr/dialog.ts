@@ -5,27 +5,27 @@ export default {
   examples: {
     width: {
       title: 'Largeur',
-      text: "Une longueur CSS dans l'unité de votre choix, 400px à défaut. Quelle qu'elle soit, la boîte ne dépasse jamais la fenêtre et garde une marge de chaque côté : une largeur fixée en pixels n'a donc pas à être défendue contre un petit écran. La hauteur suit la même règle, ce qui fait d'une boîte trop haute une boîte qui défile plutôt qu'une boîte qui sort de l'écran.",
+      text: "<code>width</code> accepte une longueur CSS dans n'importe quelle unité, 400px par défaut. La boîte ne dépasse jamais la fenêtre et garde une marge de chaque côté.",
     },
     longContent: {
       title: 'Contenu long',
-      text: "Seul le corps défile. L'en-tête et le pied restent en place, ce qui garde la barre de défilement hors d'eux et les boutons atteignables sans dérouler jusqu'au bout. Des filets apparaissent sous l'en-tête et au-dessus du pied exactement pendant qu'un contenu passe derrière eux, tracés par deux sentinelles placées dans la zone de défilement, qui lui demandent s'il reste quelque chose de caché. Cette question est récente : là où elle ne peut pas être posée, les filets restent simplement invisibles et rien d'autre ne change.",
+      text: "Seul le corps défile, l'en-tête et le pied restant en place. Des filets apparaissent sous l'en-tête et au-dessus du pied tant que du contenu passe derrière eux.",
     },
     customHeader: {
       title: 'En-tête personnalisé',
-      text: "Le slot <code>#header</code> remplace tout le bloc titre et sous-titre, contrôles compris. La prop <code>title</code> est alors ignorée, et avec elle le nom accessible qu'elle fournissait : nommez donc la boîte par un <code>aria-label</code>. La croix de fermeture, elle, n'est pas touchée : elle appartient aux actions d'en-tête placées à côté du slot, pas à ce que le slot remplace.",
+      text: "Le slot <code>#header</code> remplace tout le bloc titre et sous-titre. La prop <code>title</code> est alors ignorée : nommez la boîte avec un <code>aria-label</code>. La croix de fermeture n'est pas touchée.",
     },
     headerActions: {
       title: "Actions d'en-tête",
-      text: "Le slot <code>#header-actions</code> ajoute des contrôles à l'en-tête, rendus avant la croix pour que celle-ci reste au bord où le lecteur la cherche. C'est la place de ce qui agit sur la boîte elle-même plutôt que sur la réponse qu'elle demande : un menu, un détail à déplier, un passage en plein écran. La réponse, elle, appartient au pied.",
+      text: "Le slot <code>#header-actions</code> ajoute des contrôles à l'en-tête, rendus avant la croix de fermeture pour que celle-ci reste au bord.",
     },
     dismissal: {
       title: 'Fermeture',
-      text: "On sort d'une boîte de trois façons, et chacune peut être condamnée. <code>hideClose</code> retire la croix, <code>persistentBackdrop</code> ignore le clic à l'extérieur, et <code>persistentEscape</code> ignore la touche. Les deux dernières sont déclarées au navigateur plutôt que traitées en code, ce qui a une conséquence à connaître : refuser Escape en laissant le clic extérieur fermer est inexprimable nativement, si bien que le demander réautorise les deux. Condamnez toutes les routes et le pied devient la seule sortie, ce qui rend obligatoire d'en fournir un.",
+      text: "<code>hideClose</code> retire la croix, <code>persistentBackdrop</code> ignore un clic à l'extérieur et <code>persistentEscape</code> ignore la touche. Fermer toutes les issues rend un pied obligatoire.",
     },
     alert: {
       title: "Boîte d'alerte",
-      text: "VDialogAlert est cette même boîte aux options figées, et ce sont ces options figées qui changent sa nature : elle est annoncée comme une alerte plutôt que comme une boîte ordinaire, et il n'y a ni croix, ni Escape, ni clic extérieur. Le pied est la seule sortie du lecteur : il n'est donc pas facultatif. Réservez-la à ce qui exige une réponse explicite, une suppression ou un échec, et laissez tout le reste à VDialog.",
+      text: "VDialogAlert est cette même boîte aux options figées : elle est annoncée comme une alerte, et il n'y a ni croix, ni Échap, ni clic extérieur, si bien que son pied n'est pas optionnel.",
     },
   },
 

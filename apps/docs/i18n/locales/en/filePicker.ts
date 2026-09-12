@@ -5,39 +5,39 @@ export default {
   examples: {
     titleAndSubtitle: {
       title: 'Title and subtitle',
-      text: 'The title is required, a drop zone with no instruction being a rectangle nobody knows what to do with. The subtitle is where the rules go in plain words, and writing them is your job: the component turns a file away, it never explains in advance what it will accept. Both have a slot, and both slots take text and inline elements only, since with the browse button hidden the zone itself is the button and nothing interactive may sit inside one.',
+      text: '<code>title</code> is required and <code>subtitle</code> is where the rules go in plain words. Both have a slot, taking text and inline elements only.',
     },
     preview: {
       title: 'The list of files',
-      text: 'Nothing is listed until <code>preview</code> says where the list goes. Under the zone is what a narrow form wants; beside it reads better when there is room, and it folds back underneath on its own as soon as the component is narrow, which it measures on itself rather than on the window. The value is the same list either way: what this prop changes is whether the reader can see it, never what is held.',
+      text: '<code>preview</code> says where the list of chosen files goes, under the zone or beside it, or removes it. Beside, it folds back underneath as soon as the component is narrow.',
     },
     customIcons: {
       title: 'Custom icons',
-      text: '<code>icon</code> is the large one at the top of the zone. <code>typeIcons</code> replaces the glyph a row shows for a kind of file, and it is a partial map: name only the kinds you want to change, and the eight defaults cover the rest, which is what leaves the archive below on its own. <code>removeIcon</code> does the same for the button that takes a row out.',
+      text: '<code>icon</code> is the large glyph at the top of the zone. <code>typeIcons</code> replaces the glyph a row shows for a kind of file, naming only the kinds you want to change, and <code>removeIcon</code> the button that takes a row out.',
     },
     thumbnails: {
       title: 'Thumbnails',
-      text: 'An image is listed as itself. The browser is handed a temporary address for the file, made in the page and released the moment the file leaves the list or the component goes away, so nothing is ever uploaded to draw it. <code>hideThumbnails</code> is the way out when a list holds many images or very large ones: every row then shows the icon for its kind, as the other files already do.',
+      text: 'An image is listed as itself, through a temporary address made in the page. <code>hideThumbnails</code> shows the icon for its kind instead.',
     },
     multiple: {
       title: 'Multiple files',
-      text: 'A zone takes one file unless <code>multiple</code> says otherwise, and the extra ones are turned away rather than quietly swapped in. The value is a list either way, so nothing downstream changes shape with the prop. What a refusal looks like is yours to write: the component emits <code>reject</code> once per file with the reason, and says nothing on screen by itself.',
+      text: '<code>multiple</code> lets the zone take several files, the extra ones being turned away otherwise. The value is a list either way, and <code>reject</code> fires once per refused file.',
     },
     accept: {
       title: 'Accepted kinds',
-      text: "The browser's own syntax, extensions and wildcards alike. It is applied twice, and it has to be: once as the attribute, which is what narrows the system dialog, and once again in code when the files arrive, because the attribute has no say whatever over something dropped. A file that fails it never joins the list and comes back through <code>reject</code> with the reason <code>type</code>.",
+      text: '<code>accept</code> takes the browser syntax and filters the system dialog as well as a dropped file. A file that fails it comes back through <code>reject</code> with the reason <code>type</code>.',
     },
     maxSize: {
       title: 'Maximum size',
-      text: 'The largest one file may be, in bytes. Each is weighed on its own, so an oversized file is turned away and the ones beside it in the same drop still get through. Sizes are written out in SI units, where a kilobyte is a thousand bytes: what the field shows and what you set are then the same number.',
+      text: '<code>maxSize</code> is the largest one file may be, in bytes. Each file is weighed on its own.',
     },
     totalSize: {
       title: 'Total size and count',
-      text: 'The two limits that are about the selection rather than about one file: how heavy it may be all told, and how many files it may hold. Both count what is already in the list, so they still bite on a second drop. The screening runs in a fixed order, kind, then size, then count, then total size, which is what decides the reason a file comes back with when it breaks more than one rule at once.',
+      text: '<code>maxTotalSize</code> and <code>maxFiles</code> bound the selection as a whole, counting what is already in the list. Screening runs in a fixed order: kind, then size, then count, then total size.',
     },
     states: {
       title: 'States',
-      text: 'A read-only zone shows what was taken and lets nothing change it: no dialog, no drop, and the remove buttons disabled along with the rest. A disabled one greys out through the colour tokens and stops accepting anything, mid-drag included, since the guard is read when the file lands rather than bound once at the start.',
+      text: '<code>readonly</code> shows what was taken and lets nothing change it, the remove buttons included. <code>disabled</code> greys the zone out and stops it accepting anything, mid-drag included.',
     },
   },
 

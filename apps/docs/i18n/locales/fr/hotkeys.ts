@@ -7,35 +7,35 @@ export default {
       title: "Ce qu'on peut écrire",
       written: 'Vous écrivez',
       elsewhere: 'Windows et Linux',
-      text: "La combinaison est une simple chaîne, séparée par des <code>+</code>, où ni la casse ni les espaces ne comptent. Deux jetons désignent un modificateur et méritent d'être distingués : <code>mod</code> est celui qui appartient au système, Command sur un Mac et Ctrl partout ailleurs, et c'est presque toujours ce qu'un raccourci applicatif veut dire ; <code>meta</code> nomme cette touche physique au sens littéral, donc elle reste Command sur un Mac et devient la touche Windows, ou Super sous Linux. Un jeton que le design system ne connaît pas est dessiné exactement tel qu'il a été écrit, ce qui rend <code>k</code>, <code>f5</code> et <code>,</code> valides sans liste où les ajouter. La touche <code>+</code> est la seule exception, écrite <code>plus</code>, puisque <code>+</code> sert déjà de séparateur.",
+      text: "<code>keys</code> est une simple chaîne, séparée par des <code>+</code>, où ni la casse ni les espaces ne comptent. <code>mod</code> est le modificateur qui appartient au système, Command sur un Mac et Ctrl partout ailleurs, là où <code>meta</code> nomme cette touche physique au sens littéral. Un jeton que le design system ne connaît pas est dessiné exactement tel qu'il a été écrit, et la touche <code>+</code> s'écrit <code>plus</code>.",
     },
     variants: {
       title: 'Variantes',
-      text: "Trois façons de dessiner une touche : teintée, contournée, ou soulevée de la page. Ce sont trois valeurs d'une même prop plutôt qu'une variante doublée d'un indicateur d'élévation, parce qu'une touche n'est pas interactive : il n'y a ni survol, ni état actif, ni focus avec quoi une élévation pourrait se combiner. Rien ici n'est une tonalité non plus. Un raccourci est du décor, jamais une donnée, donc le composant n'offre aucune couleur propre : la teinte, le contour et les touches elles-mêmes dérivent tous de la couleur dont il hérite. C'est ce qui permet à un raccourci de se placer n'importe où et de rester lisible, dans un paragraphe, dans un champ, dans une ligne de menu, ou à l'intérieur d'une infobulle peinte sur une surface sombre.",
+      text: "<code>variant</code> dessine les touches teintées, contourées ou surélevées. Il n'y a ni prop de ton ni prop de couleur : toutes les peintures dérivent de la couleur héritée.",
     },
     sizes: {
       title: 'Tailles',
-      text: "Deux tailles, <code>xs</code> par défaut parce qu'un raccourci se pose à côté d'un autre texte au lieu de lui disputer la place, et <code>compact</code> retire 4px à l'une ou l'autre en laissant le rembourrage et la typographie tranquilles. Une touche qui ne porte qu'un caractère est carrée, ce qui garde une rangée régulière.",
+      text: "<code>size</code> accepte <code>xs</code> ou <code>sm</code>, et <code>compact</code> retire 4px à l'une comme à l'autre. Une touche d'un seul caractère est carrée.",
     },
     attached: {
       title: 'Attaché',
-      text: "La décoration passe de chaque touche au raccourci entier : la combinaison se lit comme une seule touche et le séparateur se retrouve dedans plutôt qu'entre deux. Le rembourrage suit : attaché, le raccourci prend à ses extrémités le rythme de l'intérieur d'une touche, celui qui est dimensionné pour entourer un libellé court se lisant comme du jeu autour de trois suites de texte. C'est purement visuel : le balisage, les touches et le nom annoncé sont identiques dans les deux cas.",
+      text: "<code>attached</code> déplace la décoration de chaque touche vers le raccourci entier, si bien que la combinaison se lit comme une seule touche. C'est purement visuel : le balisage, les touches et le nom annoncé sont identiques.",
     },
     platform: {
       title: 'Plateforme',
-      text: "Laissé à lui-même, le composant lit le système une fois dans la page et jamais avant : un serveur n'a rien pour le lire, donc le premier rendu client doit correspondre à ce qu'il a envoyé, et un visiteur Mac paie une image de Ctrl avant que ça devienne Command. La prop force la réponse à la place, ce dont un tableau montrant tous les systèmes a besoin, et ce qu'un hôte déjà au courant peut fournir : Electron, Tauri, ou un serveur qui lit la requête.",
+      text: '<code>platform</code> impose le système au lieu de le lire une fois le composant dans la page, ce dont a besoin un tableau montrant tous les systèmes.',
     },
     separator: {
       title: 'Séparateur',
-      text: "Ce qui s'écrit entre deux touches, <code>+</code> par défaut. Les touches sont disposées avec leur propre écart : il s'agit donc du caractère et jamais de l'espace autour de lui. Une chaîne vide laisse l'écart et donne la convention macOS, où les symboles se suivent simplement.",
+      text: "<code>separator</code> est ce qui s'écrit entre deux touches, <code>+</code> par défaut. Une chaîne vide laisse l'écart en place et donne la convention macOS.",
     },
     inText: {
       title: 'Dans le texte et dans les composants',
-      text: "Une touche prend la taille du texte qui l'entoure : un raccourci écrit dans une phrase reste donc sur sa ligne au lieu de l'écarter. Ses places habituelles sont le bout d'une ligne de commande, où le slot de fin de l'élément de menu l'accueille, une infobulle, dont le slot de contenu existe exactement pour cela, et le contrôle dont le raccourci est la seconde route.",
+      text: "Une touche prend la taille du texte qui l'entoure. Ses places habituelles sont la fin d'une ligne de menu, une infobulle, et le contrôle dont le raccourci est un second chemin.",
     },
     listening: {
       title: 'Écoute',
-      text: "Le composant peut aussi guetter la combinaison qu'il montre et la rapporter, ce qui reste éteint tant qu'on ne le demande pas : une chose dont le métier est d'afficher un raccourci ne doit pas capturer le clavier de la page d'elle-même. Les modificateurs sont comparés exactement plutôt qu'au minimum, si bien que <code>mod+k</code> et <code>mod+shift+k</code> peuvent coexister sans que le premier avale le second. Le comportement natif du navigateur est annulé sauf si <code>allowDefault</code> en décide autrement, et un raccourci se tait pendant que le lecteur écrit dans un champ sauf si <code>allowInInput</code> en décide autrement.",
+      text: "<code>listen</code> fait guetter au composant la combinaison qu'il affiche et émettre <code>trigger</code>. Les modificateurs sont comparés exactement, si bien que <code>mod+k</code> et <code>mod+shift+k</code> peuvent coexister. <code>allowDefault</code> conserve le raccourci du navigateur, et <code>allowInInput</code> laisse le raccourci se déclencher pendant une saisie dans un champ.",
     },
   },
 

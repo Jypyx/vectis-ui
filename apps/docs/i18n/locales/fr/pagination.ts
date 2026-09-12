@@ -5,47 +5,47 @@ export default {
   examples: {
     variantsAndTones: {
       title: 'Variantes et tonalités',
-      text: "Chaque pastille est un bouton : rien du survol, du focus ou de la désactivation n'est réécrit ici. La page courante est toujours pleine, quoi que dise la variante : ce que peint <code>itemVariant</code>, ce sont les AUTRES pages et les contrôles, en ghost par défaut ou en contour. La tonalité est la couleur que prend la page courante, le reste de la rangée restant neutre, et elle offre les trois qu'offre un bouton : une intention plutôt qu'un état.",
+      text: '<code>itemVariant</code> peint les pages qui ne sont pas courantes et les contrôles, en ghost par défaut ou en outlined. <code>tone</code> est la couleur que prend la page courante, le reste de la rangée restant neutre.',
     },
     detached: {
       title: 'Détaché',
-      text: 'La rangée est un contrôle segmenté par défaut, ses boutons joints et seules les deux extrémités arrondies. <code>detached</code> les espace et rend à chacun ses coins, ce qui est le même mot dans le même sens que sur VButtonGroup et VToggle.',
+      text: '<code>detached</code> espace les boutons et rend à chacun ses coins, au lieu de les joindre en contrôle segmenté.',
     },
     elevated: {
       title: 'Surélevé',
-      text: "Soulève la rangée de la page. Jointe, l'ombre appartient à la rangée et non à chaque pastille : les segments se chevauchent d'un pixel, donc une ombre par pastille tomberait dans chaque jointure et remplirait la rangée de bandes sombres au lieu de soulever un seul objet. Détachée il n'y a plus de jointure, et chaque bouton porte la sienne.",
+      text: "<code>elevated</code> soulève la rangée. Jointe, l'ombre appartient à la rangée ; détachée, chaque bouton porte la sienne.",
     },
     sizes: {
       title: 'Tailles',
-      text: "Les cinq crans que partagent tous les contrôles, de 24 à 56 pixels, chacun avec sa version <code>compact</code> plus courte de 4px. Une pastille est carrée à un chiffre et s'élargit d'elle-même au-delà, sa largeur minimale dérivant de la hauteur du contrôle : rien n'est réglé taille par taille.",
+      text: "<code>size</code> définit la hauteur, de 24 à 56 pixels, et <code>compact</code> lui retire 4px. Une pastille est carrée à un chiffre et s'élargit d'elle-même au-delà.",
     },
     length: {
       title: 'Nombre de pages',
-      text: "Combien de pages il y a en tout. Sa valeur par défaut est un, ce qui rend une seule page : le vrai nombre doit donc presque toujours être donné. Toutes les pages sont rendues tant que <code>totalVisible</code> ne dit pas combien d'emplacements garder.",
+      text: "<code>length</code> est le nombre total de pages, une par défaut. Toutes les pages sont rendues tant que <code>totalVisible</code> ne dit pas combien d'emplacements garder.",
     },
     totalVisible: {
       title: "Nombre d'emplacements",
-      text: "Combien d'emplacements la rangée rend, points de suspension compris. C'est ce qui garde la largeur CONSTANTE : parcourez les pages et rien ne se déplace latéralement, la fenêtre autour de la page courante se DÉCALANT aux extrémités au lieu de rétrécir. La première et la dernière page sont toujours gardées, et en dessous de cinq emplacements il ne resterait rien à montrer autour de la page courante : cinq est donc le minimum effectif.",
+      text: "<code>totalVisible</code> est le nombre d'emplacements rendus par la rangée, points de suspension compris, ce qui garde sa largeur constante. La première et la dernière page sont toujours gardées, et cinq est le minimum utile.",
     },
     controls: {
       title: 'Précédent et suivant',
-      text: "Une seule prop plutôt qu'un booléen à côté d'une union : on choisit ce que les contrôles montrent, une icône, un mot, ou les deux, ou bien on les retire entièrement. Les icônes et les mots sont les vôtres, et un libellé sert à la fois de texte visible et de nom accessible, ce qui garde un contrôle nommé quand une rangée étroite masque son texte et ne laisse que le glyphe.",
+      text: '<code>controls</code> décide de ce que montrent les boutons précédent et suivant : une icône, un mot, les deux, ou rien du tout. Leurs icônes et leurs mots vous appartiennent, un libellé étant à la fois le texte visible et le nom accessible.',
     },
     unreachablePages: {
       title: 'Pages inaccessibles',
-      text: "Quelles pages ne peuvent pas être atteintes, sous forme de liste quand on les connaît ou de fonction quand la règle est plus simple à écrire qu'à énumérer. C'est un comportement plutôt qu'un état : les contrôles précédent et suivant ENJAMBENT ces pages au lieu de s'arrêter sur l'une d'elles, et ne se désactivent que lorsqu'il n'y a plus rien à atteindre, ce qui couvre les extrémités de la rangée sans règle à part.",
+      text: "<code>disabledPages</code> accepte une liste de pages, ou une fonction quand la règle s'écrit plus facilement qu'elle ne s'énumère. Les contrôles précédent et suivant enjambent ces pages et ne se désactivent que lorsqu'il n'y a plus rien à atteindre.",
     },
     states: {
       title: 'États',
-      text: "<code>disabled</code> met toute la rangée hors d'atteinte, grisée par les jetons de couleur comme tout autre contrôle. À chaque bout de l'intervalle, le contrôle correspondant se désactive de lui-même faute de destination, ce qui est le mécanisme même que rencontre une page inaccessible.",
+      text: '<code>disabled</code> met toute la rangée hors de portée, grisée par les tokens de couleur. À chaque extrémité de la plage, le contrôle correspondant se désactive de lui-même.',
     },
     alignment: {
       title: 'Alignement',
-      text: "Où la rangée se place dans la largeur qu'on lui donne. Cela ne dit quelque chose qu'en mode responsive, qui est ce qui fait prendre à la navigation toute la largeur disponible ; en dehors, la rangée garde une largeur intrinsèque et se pose là où son parent la met. C'est aussi pourquoi une pagination dans le pied d'un tableau n'a pas besoin d'un <code>flex</code> à elle.",
+      text: "<code>align</code> dit où se place la rangée dans la largeur qui lui est donnée. Il ne veut dire quelque chose qu'en mode responsive, qui fait prendre à la navigation toute la largeur disponible.",
     },
     responsive: {
       title: 'Conteneurs étroits',
-      text: "La rangée perd des pages à mesure que la place se réduit, en masquant les voisines de la page courante un cran à la fois, tandis que la première page, la dernière et la courante ne partent jamais. Elle interroge sa PROPRE largeur et non celle de la fenêtre : une pagination logée dans un panneau étroit se replie donc pendant que la page autour reste large, et les flèches du clavier sautent ce qui est masqué. C'est éteint par défaut, parce que cela fait prendre à la navigation toute la largeur disponible. Aucun point de suspension n'est ajouté pour remplacer une voisine masquée : il est aussi large que la pastille qu'il remplacerait.",
+      text: '<code>responsive</code> abandonne des pages à mesure que la place se réduit, en masquant les voisines de la page courante un cran à la fois, la première, la dernière et la courante ne partant jamais. Il mesure sa propre largeur et non celle de la fenêtre.',
     },
   },
 

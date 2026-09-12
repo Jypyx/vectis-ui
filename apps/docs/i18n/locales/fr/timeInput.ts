@@ -5,43 +5,43 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Libellé, indication et icône',
-      text: "Le champ est un <code>VInput</code> : <code>label</code> et <code>hint</code> s'y comportent exactement comme partout ailleurs. <code>pickerIcon</code> change le glyphe qui ouvre l'horloge, au bout du champ. Aucune icône n'est rendue quand il n'y a pas de panneau à ouvrir, ce qui est le cas par défaut d'un champ dans lequel on peut taper, et la forme liste ignore la prop : son chevron relève de la convention des listes déroulantes. <code>iconStart</code> place une icône au début du champ, décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton, lequel réclame alors <code>iconStartLabel</code>. À l'autre bout, <code>loading</code> affiche une roue à la place de l'icône de l'horloge pendant qu'une donnée se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours. <code>pickerIconLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment le bouton, la croix et la roue quand la formulation du dictionnaire ne convient pas.",
+      text: "<code>label</code> et <code>hint</code> se comportent comme sur n'importe quel champ. <code>pickerIcon</code> change le glyphe qui ouvre l'horloge, <code>iconStart</code> pose une icône au début du champ, et <code>loading</code> affiche un indicateur à la place de l'icône d'horloge. <code>pickerIconLabel</code>, <code>clearLabel</code>, <code>loadingLabel</code> et <code>iconStartLabel</code> renomment ce que chacun annonce.",
     },
     sizes: {
       title: 'Tailles',
-      text: "Trois hauteurs, 32, 40 et 48 pixels, chacune avec sa variante <code>compact</code> plus courte de 4px. L'horloge garde ses propres mesures : un cadran est une surface et non un contrôle, donc les chiffres ne rapetissent pas avec le champ auquel il s'accroche, et une minute reste aussi facile à viser quelle que soit la hauteur du formulaire.",
+      text: "<code>size</code> définit la hauteur du champ à 32, 40 ou 48 pixels, et <code>compact</code> lui retire 4px. L'horloge garde ses propres mesures.",
     },
     modes: {
       title: 'Modes',
-      text: "Trois formes du même champ, et une quatrième configuration à l'intérieur de la première. <code>input</code>, le mode par défaut, masque le champ pour qu'on n'y tape que des chiffres et place le deux-points dès que l'heure est complète ; l'horloge devient alors optionnelle par <code>showPicker</code>, un panneau à chaque focus n'étant que du bruit dans un formulaire dense. <code>picker</code> fait de l'horloge la seule voie d'entrée, elle y est donc forcée. <code>list</code> abandonne l'horloge au profit d'une liste d'heures que l'on cherche en tapant, laquelle est une liste déroulante jusqu'à son chevron et sa croix.",
+      text: "<code>mode</code> choisit la forme du champ : <code>input</code> le masque pour n'y saisir que des chiffres, l'horloge devenant alors optionnelle via <code>showPicker</code> ; <code>picker</code> fait de l'horloge la seule entrée, qui y est donc imposée ; <code>list</code> abandonne l'horloge au profit d'une liste d'heures que l'on filtre.",
     },
     steps: {
       title: 'Pas',
-      text: "Un seul nombre pour trois choses : <code>minuteStep</code> est ce que le cadran propose, ce dont les flèches avancent, et ce à quoi la liste est découpée. Il laisse le masque tranquille, taper étant justement la façon dont un lecteur échappe à un pas qui ne lui convient pas. C'est la première chose à régler sur une liste : une minute par défaut, cela fait 1440 lignes, contre 48 pour la demi-heure.",
+      text: "<code>minuteStep</code> est ce que propose le cadran, le pas des flèches du clavier et la découpe de la liste. Il laisse le masque tranquille, et mérite d'être posé sur une liste avant toute chose : la minute par défaut fait 1440 lignes.",
     },
     restrictions: {
       title: 'Ce que l’on peut choisir',
-      text: 'Les quatre props du sélecteur, <code>min</code>, <code>max</code>, <code>allowedHours</code> et <code>allowedMinutes</code>, arrivent dans les trois modes sous deux réponses, qui découlent de ce que chaque mode demande au lecteur. La liste et le sélecteur proposent les heures, donc tous deux retirent ce que l’on ne peut pas choisir : l’une comme l’autre se lisent avant qu’on y choisisse, et ni une ligne ni un chiffre qui n’existent que pour être refusés n’apprennent quoi que ce soit. La liste garde la ligne de la valeur en cours même quand les restrictions l’ont dépassée, et la page du sélecteur explique comment une borne coupe une heure en deux au lieu de la fermer. Le champ saisi, lui, demande d’écrire : il valide ce qui a été tapé et passe invalide, c’est la validité propre du contrôle qui le porte, donc le champ rougit dès que le lecteur y a touché et un formulaire refuse de partir avec, là où avaler la saisie ne lui laisserait rien à corriger.',
+      text: "<code>min</code>, <code>max</code>, <code>allowedHours</code> et <code>allowedMinutes</code> restreignent ce qui peut être choisi. La liste et l'horloge écartent ce qui ne peut pas l'être ; le champ saisi valide l'entrée et se déclare invalide par la validité du contrôle.",
     },
     clearable: {
       title: 'Effaçable',
-      text: "La croix vide la valeur, et elle apparaît à gauche de l'icône d'horloge plutôt qu'à sa place : les deux n'échangent donc jamais leurs positions à mesure que le champ se remplit et se vide. Elle est optionnelle sur tous les champs de la bibliothèque, un seul comportement par défaut pour un seul mot. La forme liste tient sa propre croix de la liste déroulante sur laquelle elle est bâtie, formulation comprise.",
+      text: "<code>clearable</code> ajoute une croix qui vide la valeur, à gauche de l'icône d'horloge et non à sa place. La forme liste prend sa propre croix du combobox sur lequel elle est bâtie, formulation comprise.",
     },
     states: {
       title: 'États',
-      text: "Un champ invalide sert à une règle que le navigateur ne sait pas vérifier seul, le masque refusant déjà tout ce qui n'est pas une heure. Un champ désactivé grise par les tokens de couleur et ne peut plus ouvrir son panneau, ce qui tient en un seul garde plutôt qu'un par gestionnaire : le même point de coupure couvre le clic, le focus, la flèche et l'icône. <code>readonly</code> se place entre les deux : la valeur est montrée mais gelée, donc rien ne se tape, il n'y a pas d'horloge, le bouton AM/PM disparaît puisqu'il écrit la valeur, et la croix de vidage part avec eux. La prop atteint aussi la forme liste, qui est une liste déroulante. Le champ garde son contraste normal, prend le focus et reste copiable, ce qui le distingue de <code>disabled</code>. Il répond à une autre question que <code>mode</code>, qui dit comment se remplit un champ que l'on peut changer.",
+      text: "<code>invalid</code> sert à une règle que le navigateur ne peut pas vérifier lui-même. <code>disabled</code> grise le champ et empêche l'ouverture du panneau. <code>readonly</code> montre la valeur figée : rien ne se saisit, aucune horloge n'est rendue et le bouton AM/PM disparaît avec elle, tandis que le champ garde son contraste et prend le focus.",
     },
     twelveHour: {
       title: 'Horloge de douze heures',
-      text: "La valeur, elle, ne bouge pas : c'est une chaîne sur 24 heures quoi qu'il y ait à l'écran, si bien que rien en aval n'a besoin de savoir quelle horloge le lecteur a vue. Ce qui change, c'est l'endroit où se choisit la moitié de la journée, et chaque forme y répond à sa manière. Un champ que l'on tape y place un bouton, le masque n'ayant pas la place de dire AM ou PM. L'horloge porte sa propre paire à côté de ses deux grands chiffres. Une liste n'a besoin ni de l'un ni de l'autre, chaque ligne énonçant la sienne.",
+      text: "La valeur est une chaîne sur 24 heures quoi qu'il y ait à l'écran. Là où se choisit la moitié de la journée dépend de la forme : un bouton dans le champ saisi, la paire de l'horloge à côté de ses chiffres, et rien dans une liste, chaque ligne énonçant la sienne.",
     },
     localization: {
       title: 'Localisation',
-      text: "L'étiquette de langue décide de l'horloge, du masque et de la façon dont une heure s'écrit, le tout dérivé plutôt que tabulé : en-US et en-GB partagent tous leurs mots et ne diffèrent que par les heures sur lesquelles ils comptent. <code>locale</code> l'emporte sur la locale globale et retombe sur elle quand on l'omet, et <code>format</code> passe au-dessus des deux pour le champ qui doit se lire d'une seule façon quelle que soit la langue.",
+      text: "<code>locale</code> décide de l'horloge, du masque et de la façon d'écrire une heure, et l'emporte sur la locale globale. <code>format</code> passe au-dessus des deux, pour un champ qui doit se lire d'une seule façon quelle que soit la langue.",
     },
     placement: {
       title: 'Positionnement',
-      text: "L'endroit où le panneau s'ouvre par rapport au champ. L'ancrage est en CSS : ceci nomme donc une préférence et non une position, et un navigateur à court de place en dessous bascule le panneau au-dessus de lui-même. Seul l'axe de bloc est proposé, une horloge qui s'ouvre à côté d'un champ étant à la fois large et difficile à suivre.",
+      text: "<code>placement</code> nomme la direction d'ouverture préférée du panneau, au-dessus ou en dessous du champ.",
     },
   },
 

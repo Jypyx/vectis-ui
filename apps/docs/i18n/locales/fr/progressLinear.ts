@@ -5,35 +5,35 @@ export default {
   examples: {
     value: {
       title: 'Valeur',
-      text: "Où en est la progression, face à un <code>max</code> qui dit ce qui compte comme terminé. L'autre extrémité est toujours zéro, si bien qu'un compte de sept fichiers sur douze s'écrit comme il se lit. Tout ce qui sort de l'intervalle y est ramené : un chiffre venu d'un serveur n'a donc pas à être borné par vos soins.",
+      text: "<code>value</code> est l'avancement, face à un <code>max</code> qui dit ce qui compte comme terminé. Tout ce qui sort de la plage y est ramené.",
     },
     indeterminate: {
       title: 'Indéterminé',
-      text: "Pour une attente qu'on ne peut pas mesurer : la barre s'anime en continu et la valeur est ignorée, puisqu'il n'y a rien à rapporter. Une seule barre traverse la piste, exactement à fleur de chaque bord aux extrêmes, si bien que la boucle est invisible et que la piste n'est jamais vide. Sous réduction des animations elle est ralentie et non arrêtée, un indicateur immobile ne disant plus la seule chose pour laquelle il existe.",
+      text: "<code>indeterminate</code> sert à une attente qui ne se mesure pas : la barre s'anime en continu et la valeur est ignorée. Sous animation réduite, elle est ralentie plutôt qu'arrêtée.",
     },
     tones: {
       title: 'Tonalités',
-      text: "Ce que la progression signifie, en couleur. Cinq ici et non les trois d'un bouton, parce qu'une barre rapporte un ÉTAT au lieu de déclencher une action : un quota qui s'épuise est un avertissement, un envoi terminé un succès.",
+      text: "<code>tone</code> dit ce que signifie la progression, sous forme de couleur. Il y en a cinq plutôt que les trois d'un bouton, une barre rendant compte d'un état plutôt que d'amorcer une action.",
     },
     customColors: {
       title: 'Couleurs personnalisées',
-      text: 'Une couleur à vous remplace la tonalité, en hexadécimal, en nom CSS ou en <code>oklch()</code>. La teinte de la piste en est dérivée face au thème : une seule valeur à poser, et elle reste juste en thème sombre.',
+      text: '<code>color</code> remplace le ton, en hexadécimal, en nom CSS ou en <code>oklch()</code>. La nuance du rail en est dérivée face au thème.',
     },
     thickness: {
       title: 'Épaisseur',
-      text: "Toujours en pixels, que ce soit un nombre ou une chaîne numérique, et 4px à défaut. Aucune prop de longueur ne l'accompagne : la barre prend la largeur de ce qui la contient, sa longueur restant l'affaire du conteneur.",
+      text: "<code>thickness</code> est toujours en pixels, qu'elle soit donnée en nombre ou en chaîne numérique, et vaut 4px sauf indication contraire. Il n'y a pas de prop de longueur à côté : la barre prend la largeur de ce qui la contient.",
     },
     shape: {
       title: 'Forme',
-      text: 'Si les extrémités de la barre sont arrondies ou coupées droit. Cela se voit sur une barre épaisse et à peine sur les 4px par défaut.',
+      text: '<code>shape</code> dit si les extrémités de la barre sont arrondies ou coupées net. Cela se voit sur une barre épaisse et presque pas sur les 4px par défaut.',
     },
     customContent: {
       title: 'Du contenu dans la barre',
-      text: "<code>showValue</code> écrit le pourcentage dans la barre et <code>valuePosition</code> dit où ce texte se place le long d'elle. Le slot par défaut remplace le chiffre par ce que vous voulez, un compte de fichiers ou un nombre abrégé, et reçoit la valeur, le max et le pourcentage qui en découle. Une chose à savoir avant de l'employer : le contenu est rendu DEUX FOIS, une fois sur la piste vide et une fois sur le remplissage dans une couleur contrastée, chaque copie coupée au bord du remplissage, si bien que ce qu'il rend doit être sans effet de bord. La barre fait 4px par défaut : y écrire suppose de lui donner une épaisseur capable de contenir une ligne de texte.",
+      text: '<code>showValue</code> écrit le pourcentage dans la barre et <code>valuePosition</code> dit où ce texte se place le long de celle-ci. Le slot par défaut remplace le chiffre et reçoit la valeur, le max et le pourcentage. Le contenu est rendu deux fois, une fois sur le rail et une fois sur le remplissage : il doit donc être sans effet de bord.',
     },
     orientation: {
       title: 'Orientation',
-      text: "Redressée, la barre se remplit du BAS vers le haut : le zéro est ancré au bord inférieur, elle se lit donc comme une jauge. Elle prend alors la hauteur de ce qui la contient, exactement comme l'horizontale prend la largeur. Les copies de texte restent horizontales, ce qui évite qu'un pourcentage soit réordonné en charabia.",
+      text: '<code>orientation</code> à <code>vertical</code> remplit la barre du bas vers le haut et lui fait prendre la hauteur de ce qui la contient. Les copies de texte restent horizontales.',
     },
   },
 

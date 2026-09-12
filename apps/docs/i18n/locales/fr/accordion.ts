@@ -5,27 +5,27 @@ export default {
   examples: {
     variants: {
       title: 'Variantes',
-      text: "Deux décorations, choisies sur le groupe. <code>flat</code>, la valeur par défaut, ne dessine rien et laisse l'accordéon poser sur la surface derrière lui ; <code>outlined</code> lui donne un fond surélevé, une bordure et des coins arrondis, si bien que le groupe se lit comme une carte.",
+      text: '<code>variant</code> définit la décoration du groupe : <code>flat</code> (par défaut) ne dessine rien, <code>outlined</code> ajoute un fond surélevé, une bordure et des coins arrondis.',
     },
     exclusive: {
       title: 'Une section à la fois',
-      text: "Un groupe ne garde qu'une section ouverte : en ouvrir une referme la précédente, ce que le navigateur fait seul dès que tous les items partagent un même nom de <code>&lt;details&gt;</code>. Le second groupe demande <code>multiple</code>, et le lecteur peut alors en garder autant qu'il veut ouvertes.",
+      text: "Un groupe ne garde qu'une section ouverte par défaut. <code>multiple</code> permet d'en garder plusieurs ouvertes en même temps.",
     },
     subtitles: {
       title: 'Sous-titres et icônes',
-      text: '<code>icon</code> place une icône avant le titre, et <code>subtitle</code> ajoute une seconde ligne dessous, pour un statut ou une courte explication. Les deux ont un slot équivalent, <code>#start</code> et <code>#subtitle</code>, quand le titre demande du balisage plutôt que du texte simple.',
+      text: '<code>icon</code> place une icône avant le titre et <code>subtitle</code> ajoute une seconde ligne en dessous. Les slots <code>#start</code> et <code>#subtitle</code> acceptent du balisage plutôt que du texte simple.',
     },
     compact: {
       title: 'Compact',
-      text: "Densité réduite : chaque rembourrage perd 4px tandis que le texte et les icônes gardent leur taille. C'est ce que veut un panneau de réglages ou une barre latérale, où les sections sont courtes et nombreuses.",
+      text: '<code>compact</code> réduit chaque rembourrage de 4px, le texte et les icônes gardant leur taille.',
     },
     icons: {
       title: "Icônes d'ouverture et de fermeture",
-      text: "Le chevron est remplacé par <code>expandIcon</code>. Donnez aussi un <code>collapseIcon</code> et les deux sont échangées à l'ouverture, au lieu de pivoter la première de 180°. Toute prop d'icône accepte les mêmes valeurs : une des icônes de la bibliothèque, un rendu explicite, ou un nom auquel répond le jeu d'icônes branché dans votre application, comme le plus et le moins ci-dessous.",
+      text: "<code>expandIcon</code> remplace le chevron. Ajouter <code>collapseIcon</code> échange les deux icônes à l'ouverture, au lieu de faire pivoter la première.",
     },
     disabled: {
       title: 'Sections désactivées',
-      text: "Une section désactivée ne peut plus être ouverte, le clavier l'enjambe, et elle se grise par les tokens de couleur. Un <code>&lt;summary&gt;</code> n'a pas d'attribut <code>disabled</code> natif : le composant le marque donc <code>aria-disabled</code> et annule le clic lui-même.",
+      text: "<code>disabled</code> empêche l'ouverture d'une section et la grise. Le clavier l'enjambe.",
     },
   },
 

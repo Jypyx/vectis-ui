@@ -5,43 +5,43 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label, hint and icon',
-      text: 'The field is a <code>VInput</code>, so <code>label</code> and <code>hint</code> behave exactly as they do everywhere else. <code>pickerIcon</code> changes the glyph that opens the clock, at the end of the field. No icon is rendered at all when there is no panel to open, which is the default for a field that can be typed into, and the list form ignores the prop: its chevron is the combobox convention. <code>iconStart</code> puts an icon at the start of the field, decorative until a <code>@click:icon-start</code> listener turns it into a button, which then needs <code>iconStartLabel</code>. At the other end, <code>loading</code> shows a spinner in place of the clock icon while something is being fetched and changes nothing else: the field is still typed into and the panel still opens. <code>pickerIconLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename the button, the cross and the spinner when the dictionary wording is not the right one.',
+      text: '<code>label</code> and <code>hint</code> behave as on any field. <code>pickerIcon</code> changes the glyph that opens the clock, <code>iconStart</code> puts an icon at the start of the field, and <code>loading</code> shows a spinner in place of the clock icon. <code>pickerIconLabel</code>, <code>clearLabel</code>, <code>loadingLabel</code> and <code>iconStartLabel</code> rename what each of them announces.',
     },
     sizes: {
       title: 'Sizes',
-      text: 'Three heights, 32, 40 and 48 pixels, each with its <code>compact</code> pair 4px shorter. The clock keeps its own measurements: a face is a surface rather than a control, so the numerals do not shrink with the field they hang from, and a minute stays as easy to hit whichever height the form is built on.',
+      text: '<code>size</code> sets the field height to 32, 40 or 48 pixels, and <code>compact</code> takes 4px off it. The clock keeps its own measurements.',
     },
     modes: {
       title: 'Modes',
-      text: 'Three forms of the same field, and a fourth configuration inside the first. <code>input</code>, the default, masks the field so only digits are typed and the colon is placed as the hour fills up; the clock is then opt-in through <code>showPicker</code>, a panel on every focus being noise in a dense form. <code>picker</code> makes the clock the only way in, so it is forced on there. <code>list</code> drops the clock altogether for a searchable list of times, which is a combobox down to its chevron and its cross.',
+      text: '<code>mode</code> chooses the form of the field: <code>input</code> masks it so only digits are typed, the clock then being opt-in through <code>showPicker</code>; <code>picker</code> makes the clock the only way in, so it is forced on there; <code>list</code> drops the clock for a searchable list of times.',
     },
     steps: {
       title: 'Steps',
-      text: 'One number for three things: <code>minuteStep</code> is what the face offers, what the arrow keys move by, and what the list is cut at. It leaves the mask alone, since typing is how a reader escapes a step that does not fit. It is worth setting on a list before anything else: the default of one minute is 1440 rows, where half hours are 48.',
+      text: '<code>minuteStep</code> is what the face offers, what the arrow keys move by and what the list is cut at. It leaves the mask alone, and is worth setting on a list before anything else: the default of one minute is 1440 rows.',
     },
     restrictions: {
       title: 'What may be chosen',
-      text: 'The same four props the picker takes, <code>min</code>, <code>max</code>, <code>allowedHours</code> and <code>allowedMinutes</code>, reach the three modes as two answers, which follow from what each mode asks the reader for. The list and the picker both offer the times, so both leave out what cannot be chosen: each is read before it is chosen from, and neither has anything to say with a row or a numeral that exists only to be refused. The list keeps the row of the value in force even when the restrictions have moved past it, and the picker page covers how a bound cuts an hour in half rather than closing it. The typed field asks the reader to write instead: it commits what was typed and turns invalid, carried by the control own validity, so the field goes red once the reader has interacted with it and a form refuses to leave with it, where swallowing the entry would give them nothing to correct.',
+      text: "<code>min</code>, <code>max</code>, <code>allowedHours</code> and <code>allowedMinutes</code> restrict what may be chosen. The list and the clock leave out what cannot be chosen; the typed field commits the entry and turns invalid through the control's own validity instead.",
     },
     clearable: {
       title: 'Clearable',
-      text: 'The cross empties the value, and it appears to the left of the clock icon rather than in its place, so the two never trade positions as the field fills and empties. It is opt-in on every field in the library, one default for one word. The list form takes its own cross from the combobox it is built on, wording included.',
+      text: '<code>clearable</code> adds a cross that empties the value, to the left of the clock icon rather than in its place. The list form takes its own cross from the combobox it is built on, wording included.',
     },
     states: {
       title: 'States',
-      text: 'An invalid field is for a rule the browser cannot check by itself, the mask already refusing anything that is not a time. A disabled one greys out through the colour tokens and can no longer open its panel, which is one guard rather than one per handler: the same cut-off point covers the click, the focus, the arrow key and the icon. <code>readonly</code> sits between the two: the value is shown but frozen, so nothing can be typed, no clock is rendered, the AM/PM button goes since it writes the value, and the clear cross goes with them. It reaches the list form too, that one being a combobox. The field keeps its normal contrast, takes the focus and can be copied from, which is what separates it from <code>disabled</code>. It answers a different question from <code>mode</code>, which says how a field that can be changed is filled in.',
+      text: '<code>invalid</code> is for a rule the browser cannot check by itself. <code>disabled</code> greys the field out and prevents the panel from opening. <code>readonly</code> shows the value frozen: nothing can be typed, no clock is rendered and the AM/PM button goes with it, while the field keeps its contrast and takes the focus.',
     },
     twelveHour: {
       title: 'Twelve-hour clock',
-      text: 'The value never moves: it is a 24-hour string whatever is on screen, so nothing downstream has to know which clock the reader was shown. What changes is where the half of the day is chosen, and each form answers that differently. A typed field puts a button inside it, the mask having no room to say AM or PM. The clock carries its own pair beside the two large numerals. A list needs neither, every row spelling out its own.',
+      text: "The value is a 24-hour string whatever is on screen. Where the half of the day is chosen depends on the form: a button inside a typed field, the clock's own pair beside its numerals, and nothing in a list, every row spelling out its own.",
     },
     localization: {
       title: 'Localization',
-      text: 'The tag decides the clock, the mask and how a time is written out, all of it derived rather than tabulated: en-US and en-GB share every word and differ only in the hours they count on. <code>locale</code> takes precedence over the global one and falls back to it when it is left out, and <code>format</code> sits above both for the field that has to be read one way whatever the language.',
+      text: '<code>locale</code> decides the clock, the mask and how a time is written out, and takes precedence over the global locale. <code>format</code> sits above both, for a field that has to be read one way whatever the language.',
     },
     placement: {
       title: 'Placement',
-      text: 'Where the panel opens relative to the field. It is anchored in CSS, so this names a preference and not a position: a browser short of room below flips the panel above on its own. Only the block axis is offered, a clock opening beside a field being both wide and hard to follow.',
+      text: '<code>placement</code> names the preferred opening direction of the panel, above or below the field.',
     },
   },
 

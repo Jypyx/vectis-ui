@@ -5,31 +5,31 @@ export default {
   examples: {
     multipleInputs: {
       title: 'Several fields in one row',
-      text: 'A row is not limited to two. Every segment holding a field takes an equal share of what is left, so the proportions come from the widths you set rather than from the number of fields: here a currency, a scheme and an extension are each pinned to what they hold, and the field that carries the real value takes the rest. The shared borders melt into one line and only the two ends stay rounded, which is what makes several controls read as one.',
+      text: 'A row takes as many segments as needed. Every segment holding a field takes an equal share of what is left, the others keeping their natural width.',
     },
     naming: {
       title: 'Naming the row and its segments',
-      text: 'The group renders one label and one hint for the whole row, and names itself with them. Each segment then needs a name of its own, which is what <code>aria-label</code> is for. A segment that brings its own <code>label</code> is pushed a line out of the row, so the component warns about it in development.',
+      text: 'The group renders one <code>label</code> and one <code>hint</code> for the whole row. Each segment then needs an <code>aria-label</code> of its own, and one bringing its own <code>label</code> is warned about in development.',
     },
     widths: {
       title: 'Widths',
-      text: 'Every segment holding a field takes an equal share of the row, and everything else keeps its natural width: a button is measured by its label. Proportions are set on the segment itself, with a class or an inline <code>flex</code>. A consumer rule is unlayered, so it wins over the share the group hands out.',
+      text: 'Proportions are set on the segment itself, with a class or an inline <code>flex</code>. A consumer rule is unlayered, so it wins over the share the group hands out.',
     },
     withButton: {
       title: 'A field and its button',
-      text: 'A <code>solid</code> or <code>soft</code> button covers the shared edge with its own background, which is what an attached action should look like. An <code>outline</code> button in <code>tone="neutral"</code> draws the same border colour as the fields, so the outline runs unbroken around the whole row. A <code>ghost</code> button has no frame at all and floats out of the box, so it is the one variant to avoid here. A magnifier inside the field is a different thing and not a segment: that is <code>iconEnd</code> with a <code>click:icon-end</code> listener on the field itself.',
+      text: 'A <code>solid</code> or <code>soft</code> button covers the shared edge with its own background, and an <code>outline</code> button in <code>tone="neutral"</code> draws the same border colour as the fields. A <code>ghost</code> button has no frame at all, so it is the one variant to avoid here.',
     },
     sizes: {
       title: 'Size and density',
-      text: 'The height and the density are set on the row and travel to every segment. They are the shape of the control, so the row wins over what a segment asks for itself: a segment of another height stops lining up with its neighbours and the merged border no longer reads as one object.',
+      text: '<code>size</code> and <code>compact</code> are set on the row and travel to every segment, winning over what a segment asks for itself.',
     },
     states: {
       title: 'States',
-      text: 'A group with none of the three shape props set leaves every segment exactly as it was, which is what makes a bare group a purely visual wrapper. <code>disabled</code> adds instead of replacing, so a segment switched off on its own stays off under a row that says nothing. A field in error keeps its red edge against its neighbour, and a focused field is raised above both so its ring is drawn whole.',
+      text: 'A group with none of the shape props set leaves every segment exactly as it was. <code>disabled</code> adds up instead of replacing, so a segment switched off on its own stays off under a row that says nothing.',
     },
     pickers: {
       title: 'Two fields that open a panel',
-      text: "Each panel is anchored to its own field's box rather than to the row, so it opens under the segment it belongs to and not under the group. The buttons a panel contains are not segments of the row: they keep the size their own component gave them, which is what leaves a calendar's navigation small inside a large row. A time field in 12 hour form carries its AM/PM control inside the field itself, so the two still count as one segment. Anything put outside that border would be joined as a segment in its own right.",
+      text: "Each panel is anchored to its own field's box, so it opens under the segment it belongs to rather than under the group. The buttons a panel contains are not segments of the row and keep the size their own component gave them.",
     },
   },
 

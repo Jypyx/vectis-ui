@@ -5,59 +5,59 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label, hint and icon',
-      text: 'The field is a <code>VInput</code>, so <code>label</code> and <code>hint</code> behave exactly as they do everywhere else. <code>pickerIcon</code> changes the glyph that opens the calendar, at the end of the field. No icon is rendered at all when there is no panel to open, which is the default for a field that can be typed into. <code>iconStart</code> puts an icon at the start of the field, decorative until a <code>@click:icon-start</code> listener turns it into a button, which then needs <code>iconStartLabel</code>. At the other end, <code>loading</code> shows a spinner in place of the calendar icon while something is being fetched and changes nothing else: the field is still typed into and the panel still opens. <code>pickerIconLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename the button, the cross and the spinner when the dictionary wording is not the right one.',
+      text: '<code>label</code> and <code>hint</code> behave as on any field. <code>pickerIcon</code> changes the glyph that opens the calendar, <code>iconStart</code> puts an icon at the start of the field, and <code>loading</code> shows a spinner in place of the calendar icon. <code>pickerIconLabel</code>, <code>clearLabel</code>, <code>loadingLabel</code> and <code>iconStartLabel</code> rename what each of them announces.',
     },
     sizes: {
       title: 'Sizes',
-      text: 'Three heights, 32, 40 and 48 pixels, each with its <code>compact</code> pair 4px shorter. The panel keeps its own measurements: a calendar is a surface rather than a control, so the grid does not shrink with the field it hangs from, and a date stays as easy to hit whichever height the form is built on.',
+      text: '<code>size</code> sets the field height to 32, 40 or 48 pixels, and <code>compact</code> takes 4px off it. The panel keeps its own measurements.',
     },
     modes: {
       title: 'Modes',
-      text: 'Two, and a third configuration between them. <code>input</code>, the default, masks the field so only digits are typed and the separators are placed as each part fills up; the calendar is then opt-in through <code>showPicker</code>, a panel on every focus being noise in a dense form. <code>picker</code> makes the calendar the only way in. Typing is reserved for a single date: a period or a list falls back to <code>picker</code>, there being no sensible way to type either.',
+      text: '<code>mode</code> chooses how the value is filled in: <code>input</code> masks the field so only digits are typed, the calendar then being opt-in through <code>showPicker</code>; <code>picker</code> makes the calendar the only way in. Typing is reserved for a single date.',
     },
     range: {
       title: 'Range',
-      text: 'The value becomes a start and an end, and the calendar takes the first click as one and the second as the other, previewing the span under the pointer in between. The field writes the two out through <code>Intl</code>, which shares what the two dates have in common rather than repeating it.',
+      text: '<code>selection</code> set to <code>range</code> makes the value a start and an end, the calendar taking the first click as one and the second as the other.',
     },
     multiple: {
       title: 'Multiple dates',
-      text: 'The value becomes a list, and a day already in it is taken back out by clicking it again. The array is never mutated in place, so a watcher on the model fires as it should. The field lists what has been chosen, which is worth a thought past a handful of dates: it is one line of text and not a set of chips.',
+      text: '<code>selection</code> set to <code>multiple</code> makes the value a list, a day already in it being taken back out by clicking it again.',
     },
     presets: {
       title: 'Presets',
-      text: 'The <code>#footer</code> slot is a strip at the foot of the panel, for actions or for the dates a reader reaches for most. It receives <code>close</code>, which is what lets a button set the value and dismiss the panel in one gesture. The clock is read inside the handler and never at setup: the server cannot know what day it is where the reader stands, and a value taken there would not survive hydration.',
+      text: 'The <code>#footer</code> slot is a strip at the foot of the panel, for actions or for the dates a reader reaches for most. It receives <code>close</code>, so a button can set the value and dismiss the panel at once.',
     },
     bounds: {
       title: 'Bounds and closed dates',
-      text: '<code>min</code> and <code>max</code> bound both the choice and the navigation, so the arrows stop rather than wandering into months that hold nothing choosable. <code>disabledDates</code> closes individual days, as a list or as a function answering for one date at a time, which is what makes a rule such as "no weekends" one line instead of an enumeration. A closed day is struck through and stays reachable by keyboard, so a reader arrowing across the grid is never silently jumped over.',
+      text: '<code>min</code> and <code>max</code> bound both the choice and the navigation. <code>disabledDates</code> closes individual days, as a list or as a function answering for one date at a time.',
     },
     events: {
       title: 'Event dots',
-      text: 'Up to three dots under a day, to say something is happening there. The colour is any CSS colour, so a token keeps it in step with both themes, and a dot given none takes the accent. A <code>label</code> is what assistive technology reads, the dot itself carrying no meaning anyone can hear.',
+      text: '<code>events</code> draws up to three dots under a day. Each takes any CSS colour and a <code>label</code>, which is what assistive technology reads.',
     },
     customDay: {
       title: 'Custom day cells',
-      text: 'The <code>#day</code> slot replaces the number inside a day, which is what a booking calendar showing a nightly price needs. It receives the ISO date and everything the cell knows about itself: whether the day belongs to the month on screen, whether it can be chosen, whether it is selected, today, or inside a period being drawn. The cell itself is still drawn by the component: its size, its shape, its selected background and its focus ring. Event dots are drawn outside the slot, so the two can be used together. Whatever the slot renders should be derived from the date rather than drawn at random, or the server and the browser produce two different calendars.',
+      text: 'The <code>#day</code> slot replaces the number inside a day and receives the ISO date along with what the cell knows about itself: whether it belongs to the month on screen, whether it can be chosen, whether it is selected, today, or inside a period being drawn.',
     },
     clearable: {
       title: 'Clearable',
-      text: 'The cross empties the value, and it appears to the left of the calendar icon rather than in its place, so the two never trade positions as the field fills and empties. It is opt-in on every field in the library, one default for one word.',
+      text: '<code>clearable</code> adds a cross that empties the value, to the left of the calendar icon rather than in its place.',
     },
     adjacentDays: {
       title: 'Adjacent days',
-      text: 'A month rarely starts on the first column, and the corners of the grid are empty by default. <code>showAdjacentDays</code> fills them with the neighbouring months, greyed and inert, which is what keeps the weeks reading as weeks. <code>selectAdjacentDays</code> makes those days choosable as well, and picking one moves the calendar to its month.',
+      text: '<code>showAdjacentDays</code> fills the corners of the grid with the neighbouring months, greyed and inert. <code>selectAdjacentDays</code> makes those days choosable as well, and picking one moves the calendar to its month.',
     },
     states: {
       title: 'States',
-      text: 'An invalid field is for a rule the browser cannot check by itself, the mask already refusing anything that is not a date. A disabled one greys out through the colour tokens and can no longer open its panel, which is one guard rather than one per handler: the same cut-off point covers the click, the focus, the arrow key and the icon. <code>readonly</code> sits between the two: the value is shown but frozen, so nothing can be typed, no calendar is rendered and the clear cross goes with it, along with the attributes that announced a panel. The field keeps its normal contrast, takes the focus and can be copied from, which is what separates it from <code>disabled</code>. It answers a different question from <code>mode</code>, which says how a field that can be changed is filled in.',
+      text: '<code>invalid</code> marks the field as having an error. <code>disabled</code> greys it out and prevents the panel from opening. <code>readonly</code> shows the value frozen: nothing can be typed and no calendar is rendered, but the field keeps its contrast and takes the focus.',
     },
     localization: {
       title: 'Localization',
-      text: 'The tag decides the order the field is typed in, the separator it places, the month and day names and the first day of the week, all of it derived rather than tabulated. <code>locale</code> takes precedence over the global one and falls back to it when it is left out. <code>displayFormat</code> is a set of <code>Intl</code> options for writing the date out, and it applies where nothing is typed: <code>picker</code> mode, and the period and list selections that fall back to it.',
+      text: '<code>locale</code> decides the typing order, the separator, the month and day names and the first day of the week, and takes precedence over the global locale. <code>displayFormat</code> is a set of <code>Intl</code> options for writing the date out, and applies wherever nothing is typed.',
     },
     placement: {
       title: 'Placement',
-      text: 'Where the panel opens relative to the field. It is anchored in CSS, so this names a preference and not a position: a browser short of room below flips the calendar above on its own. Only the block axis is offered, a calendar opening beside a field being both wide and hard to follow.',
+      text: '<code>placement</code> names the preferred opening direction of the panel, above or below the field.',
     },
   },
 

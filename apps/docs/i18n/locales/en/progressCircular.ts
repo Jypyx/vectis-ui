@@ -5,31 +5,31 @@ export default {
   examples: {
     value: {
       title: 'Value',
-      text: 'How far along it is, against a <code>max</code> that says what counts as finished. The other end is always zero, so a count of seven files out of twelve is written as it reads. Anything outside the range is brought back into it, which means a figure arriving from a server needs no clamping of your own.',
+      text: '<code>value</code> is how far along it is, against a <code>max</code> that says what counts as finished. Anything outside the range is brought back into it.',
     },
     indeterminate: {
       title: 'Indeterminate',
-      text: 'For a wait that cannot be measured: the ring turns and its arc grows and shrinks, the two on periods of their own so the movement never settles into a rhythm, and the value is ignored. Where a spinner is standing in for an icon rather than reporting on a task, VSpinner is the smaller thing to reach for.',
+      text: '<code>indeterminate</code> is for a wait that cannot be measured: the ring turns and the value is ignored. Where a spinner stands in for an icon rather than reporting on a task, VSpinner is the smaller thing to reach for.',
     },
     tones: {
       title: 'Tones',
-      text: "What the progress means, as a colour. Five here rather than a button's three, because a ring reports a STATE rather than starting an action: a quota running out is a warning, a finished upload a success.",
+      text: "<code>tone</code> says what the progress means, as a colour. There are five rather than a button's three, a ring reporting a state rather than starting an action.",
     },
     customColors: {
       title: 'Custom colours',
-      text: "A colour of your own replaces the tone, as a hex value, a CSS name or an <code>oklch()</code>. The unfilled ring's shade is derived from it against the theme, so one value is all you set and it stays right in dark mode.",
+      text: "<code>color</code> replaces the tone, as a hex value, a CSS name or an <code>oklch()</code>. The unfilled ring's shade is derived from it against the theme.",
     },
     sizeAndThickness: {
       title: 'Size and thickness',
-      text: 'The diameter and the ring, both always in pixels whether given as a number or as a numeric string, and independent of one another. The geometry is entirely CSS: the radius is derived from the two, so changing either recomputes nothing in JavaScript and a ring can be resized from a media query or a container query without the component hearing about it.',
+      text: '<code>size</code> and <code>thickness</code> are the diameter and the ring, both always in pixels whether given as a number or a numeric string, and independent of one another.',
     },
     shape: {
       title: 'Shape',
-      text: 'Whether the ends of the drawn arc are rounded or cut square. It shows on a thick ring and is all but invisible on a thin one.',
+      text: '<code>shape</code> says whether the ends of the drawn arc are rounded or cut square. It shows on a thick ring and is all but invisible on a thin one.',
     },
     customContent: {
       title: 'Content in the middle',
-      text: "<code>showValue</code> writes the percentage in the hole of the ring, sized in proportion to the diameter so it stays readable at every size. The default slot replaces it with something of your own, a count, a shortened figure or an icon, and receives the value, the max and the percentage worked out from them. Unlike the bar, this content is rendered once and sits on the page background rather than over the ring, so it simply takes the page's own text colour.",
+      text: '<code>showValue</code> writes the percentage in the hole of the ring, sized in proportion to the diameter. The default slot replaces it with content of your own and receives the value, the max and the percentage worked out from them.',
     },
   },
 

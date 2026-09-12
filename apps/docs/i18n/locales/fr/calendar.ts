@@ -5,35 +5,35 @@ export default {
   examples: {
     month: {
       title: 'Mois',
-      text: "La vue mois troque les heures contre la forme du mois : chaque jour est une case qui tient ses événements sous forme de puces, et un jour qui en compte plus que <code>monthEventLimit</code> dénombre le reste au lieu de s'agrandir. Choisir un numéro de jour ouvre ce jour seul. Un événement qui court d'un jour à l'autre est dessiné comme une barre sur les cases qu'il couvre.",
+      text: 'La vue mois dessine chaque jour comme une case contenant ses événements en puces. <code>monthEventLimit</code> limite le nombre affiché avant que le reste soit compté.',
     },
     year: {
       title: 'Année',
-      text: "Douze petits mois, pour se repérer plutôt que pour lire le détail. Les jours n'y sont délibérément pas des contrôles : trois cent soixante-cinq arrêts de tabulation rendraient la vue inutilisable à qui l'atteint au clavier. Les jours occupés sont donc cerclés et c'est le mois qui peut être choisi, ce qui l'ouvre, son nom portant le nombre de ses jours qui ont quelque chose.",
+      text: "La vue année affiche douze petits mois pour se repérer. Les jours chargés sont cerclés et choisir un mois l'ouvre.",
     },
     customView: {
       title: 'Vue personnalisée',
-      text: "Les préréglages sont le jour, les quatre jours et la semaine. <code>custom</code> est cette même mécanique dont la longueur vous revient : <code>customDays</code> dit combien de jours elle affiche, et de combien avancent Précédent et Suivant. C'est cette seconde moitié qui la sépare de <code>week</code>, laquelle retombe toujours sur les bornes d'une semaine calendaire. Les cinq jours ci-dessous commencent au jour sur lequel le calendrier est ancré et se déplacent de cinq en cinq : une période peut donc tenir à cheval sur un week-end au lieu de s'arrêter devant. Le menu des vues nomme l'entrée d'après sa propre longueur.",
+      text: 'La vue <code>custom</code> vous en laisse la longueur : <code>customDays</code> dit combien de jours elle montre, et de combien avancent Précédent et Suivant.',
     },
     weekdays: {
       title: 'Les jours affichés',
-      text: "<code>weekdays</code> décide des jours qui paraissent, en nombres à partir de 0 pour dimanche : <code>[1, 2, 3, 4, 5]</code> est donc une semaine sans week-end. L'ordre compte aussi : la première entrée est le jour où commence une semaine, et c'est pourquoi aucun réglage distinct n'existe pour cela. Le réglage atteint toutes les vues, et c'est à cela que sert le menu ci-dessous : le week-end manque aux cases du mois et aux petits mois de l'année exactement comme il manque aux colonnes. <code>dayStart</code> et <code>dayEnd</code> rognent les heures dans le même esprit, et n'atteignent que les grilles horaires, les deux autres vues n'ayant aucune heure à rogner.",
+      text: '<code>weekdays</code> décide quels jours apparaissent, en nombres à partir de 0 pour dimanche, sa première entrée étant le jour où commence la semaine. <code>dayStart</code> et <code>dayEnd</code> rognent les heures affichées dans les grilles horaires.',
     },
     allDay: {
       title: 'Événements sur la journée',
-      text: "Un événement passe dans le bandeau au-dessus de la grille lorsqu'il ne peut pas être dessiné dans une seule colonne. <code>allDay</code> l'y place sur un jour unique, et celui dont les champs <code>start</code> et <code>end</code> tombent sur des jours différents s'y trouve déjà sans lui. Les barres qui se chevauchent s'empilent sur des rangs à elles, et le bandeau défile une fois qu'il a grandi autant qu'il le peut.",
+      text: '<code>allDay</code> place un événement dans le bandeau au-dessus de la grille, où va déjà un événement à cheval sur plusieurs jours.',
     },
     overlapping: {
       title: 'Événements qui se chevauchent',
-      text: "Les événements qui ont lieu en même temps se partagent la largeur de leur journée. Ils sont d'abord regroupés en grappes, si bien qu'une matinée chargée ne rétrécit jamais une réunion isolée de l'après-midi : les quatre ci-dessous se partagent la matinée pendant que le déjeuner garde toute la colonne.",
+      text: "Les événements simultanés se partagent la largeur de leur journée, groupés en grappes pour qu'une matinée chargée ne rétrécisse pas un rendez-vous isolé de l'après-midi.",
     },
     colours: {
       title: 'Couleurs',
-      text: "Un événement sans <code>color</code> prend une teinte dérivée de son identifiant : il garde donc la même couleur quels que soient les filtres et les tris appliqués à la liste. Seule la teinte est dérivée, la clarté et le chroma venant du thème, ce qui maintient le contraste d'un titre où que la teinte tombe sur la roue. Un événement qui nomme sa propre couleur l'emploie pour son arête de tête et pour un lavis sur sa face, jamais sous le titre, ce qui garde une valeur arbitraire lisible dans les deux thèmes.",
+      text: "Un événement sans <code>color</code> prend une teinte dérivée de son identifiant. Celui qui nomme sa propre couleur l'emploie pour son bord d'attaque et un voile sur sa face.",
     },
     eventSlot: {
       title: "Contenu d'événement personnalisé",
-      text: "Le slot <code>#event</code> remplace ce qu'une carte affiche et reçoit tout ce que la carte sait : l'événement, le <code>timeText</code> déjà formaté, la disposition <code>layout</code> dans laquelle elle est dessinée (<code>block</code> dans une grille horaire, <code>chip</code> dans une case de mois) et le fait qu'elle se poursuive avant ou après le jour où elle se trouve. Typer les événements avec une interface qui étend <code>CalendarEvent</code> est ce qui amène les champs supplémentaires typés jusqu'au slot, plutôt qu'en quelque chose à convertir sur place. La carte elle-même reste au composant : le bouton, la couleur, le nom accessible et la poignée par laquelle on étire sa fin.",
+      text: "Le slot <code>#event</code> remplace le contenu d'une carte et reçoit l'événement, son <code>timeText</code> formaté, le <code>layout</code> dans lequel il est dessiné, et s'il se poursuit avant ou après la journée.",
     },
   },
 

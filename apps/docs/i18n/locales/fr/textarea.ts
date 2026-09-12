@@ -5,35 +5,35 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Libellé et indication',
-      text: "Le libellé est un vrai <code>&lt;label&gt;</code> lié au champ, donc cliquer les mots place le curseur dans la boîte. L'indication se place sous le champ et lui est liée elle aussi, par <code>aria-describedby</code>, ce qui la fait lire après le libellé au lieu de la laisser traîner sur la page comme un texte isolé. Les deux sont des props et non des slots : ce qu'elles portent est une phrase, et le champ en a besoin sous forme de chaîne pour la désigner.",
+      text: '<code>label</code> est un vrai <code>&lt;label&gt;</code> lié au champ : cliquer les mots place le curseur dans la boîte. <code>hint</code> passe sous le champ et lui est lié par <code>aria-describedby</code>.',
     },
     sizes: {
       title: 'Tailles',
-      text: "Trois tailles, les trois mêmes que propose chaque champ de texte de la bibliothèque. Une taille fixe le rembourrage, l'échelle typographique et les icônes, jamais la hauteur : celle-là vient de <code>rows</code>. <code>compact</code> retire 4px de rembourrage à n'importe laquelle des trois, pour un formulaire dense, et laisse le nombre de lignes et la typographie où ils étaient.",
+      text: "<code>size</code> pose les rembourrages, l'échelle typographique et les icônes, jamais la hauteur, qui vient de <code>rows</code>. <code>compact</code> retire 4px aux rembourrages à chacune des trois tailles.",
     },
     icons: {
       title: 'Icônes',
-      text: "Une icône à l'une ou l'autre extrémité du champ, ou aux deux. Elles sont décoratives ici, donc le champ garde le nom que lui donne son libellé. Elles se posent sur la première ligne plutôt qu'au milieu de la boîte, ce qui les garde au niveau du début du texte dans un champ de plusieurs lignes. Le slot <code>#end</code> remplace l'icône de fin quand ce qui va là n'est pas une icône ; <code>#start</code> est rendu après l'icône de début plutôt qu'à sa place, comme dans <code>VInput</code>.",
+      text: "<code>iconStart</code> et <code>iconEnd</code> posent une icône décorative à chaque extrémité, sur la première ligne plutôt qu'au milieu de la boîte. Le slot <code>#end</code> remplace l'icône de fin, là où <code>#start</code> est rendu après l'icône de début plutôt qu'à sa place.",
     },
     clickableIcons: {
       title: 'Icônes cliquables',
-      text: "Une icône devient un vrai bouton dès qu'un écouteur <code>@click:icon-start</code> ou <code>@click:icon-end</code> est attaché, et il lui faut alors un libellé, seule chose qui nomme ce bouton. Oubliez-le et le champ le signale en développement. Chaque bouton est son propre arrêt de tabulation, avant ou après le texte selon le côté où il se trouve, et il reste en dehors de la zone de texte, donc la saisie n'est jamais interrompue par lui.",
+      text: "Un écouteur <code>@click:icon-start</code> ou <code>@click:icon-end</code> transforme l'icône en vrai bouton, qui demande alors son libellé. Chaque bouton est son propre arrêt de tabulation et reste hors de la zone de saisie.",
     },
     clearable: {
       title: 'Effaçable',
-      text: "La croix apparaît quand il y a quelque chose à effacer et que le champ est modifiable, elle est donc absente tant que le champ est vide, désactivé ou en lecture seule. L'appuyer vide la valeur et rend aussitôt le focus à la zone de texte : la croix s'en va avec le texte, et sans cela un utilisateur au clavier resterait posé sur rien. L'événement <code>clear</code> est émis après coup, le champ déjà vide.",
+      text: "<code>clearable</code> ajoute une croix qui vide le champ, affichée tant qu'il y a quelque chose à vider et que le champ est modifiable. L'appuyer rend aussitôt le focus à la zone de saisie, et <code>clear</code> est émis après coup.",
     },
     counters: {
       title: 'Compteurs',
-      text: "Le compteur se place sous le champ, à côté de l'indication, là où plusieurs lignes de texte lui rentreraient dedans à l'intérieur de la boîte. Face à <code>maxlength</code>, il affiche 12/80 et le navigateur refuse tout ce qui dépasse la limite. <code>softLimit</code> transforme ce refus en erreur : le lecteur peut continuer à écrire, le compteur passe au rouge, et le champ se déclare invalide par la validité native, si bien que le formulaire ne peut pas être envoyé au-delà de la limite. Sans aucune limite, le compteur ne fait que compter.",
+      text: "<code>counter</code> passe sous le champ, à côté du texte d'aide. Face à <code>maxlength</code>, le navigateur refuse tout ce qui dépasse la limite, là où <code>softLimit</code> laisse le lecteur continuer : le compteur passe au rouge et le champ se déclare invalide par la validité native.",
     },
     autoGrow: {
       title: 'Croissance automatique',
-      text: "<code>rows</code> donne au champ sa hauteur de départ, et par défaut c'est sa hauteur tout court : au-delà, le texte défile. <code>autoGrow</code> laisse la boîte grandir à mesure que le texte est saisi. C'est du CSS pur, par <code>field-sizing</code>, donc rien n'est mesuré et aucun JavaScript ne tourne ; un navigateur qui ne l'a pas garde la hauteur fixe et sa barre de défilement, ce qui donne un champ plus petit et non un champ cassé.",
+      text: '<code>rows</code> donne au champ sa hauteur de départ, et par défaut sa hauteur tout court. <code>autoGrow</code> laisse la boîte grandir à mesure que le texte est saisi, en CSS pur.',
     },
     states: {
       title: 'États',
-      text: "Invalide, désactivé, lecture seule, chargement. <code>invalid</code> sert à une règle que le navigateur ne sait pas vérifier seul, un nom déjà pris ou tout ce que seul le serveur connaît ; la validité native est prise en charge sans lui. Un champ désactivé se grise par les tokens de couleur plutôt que par une opacité, donc son texte garde son contraste. Un champ en lecture seule peut encore être focalisé et copié, c'est toute la différence, et il masque la croix d'effacement. Le chargement pose un spinner là où va l'icône de fin, et le champ reste utilisable pendant qu'il tourne.",
+      text: "<code>invalid</code> sert à une règle que le navigateur ne peut pas vérifier lui-même. <code>disabled</code> grise le champ par les tokens de couleur. <code>readonly</code> reste focalisable et copiable, et masque la croix. <code>loading</code> place un indicateur là où va l'icône de fin, le champ restant utilisable.",
     },
   },
 

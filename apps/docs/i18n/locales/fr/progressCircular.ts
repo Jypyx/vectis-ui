@@ -5,31 +5,31 @@ export default {
   examples: {
     value: {
       title: 'Valeur',
-      text: "Où en est la progression, face à un <code>max</code> qui dit ce qui compte comme terminé. L'autre extrémité est toujours zéro, si bien qu'un compte de sept fichiers sur douze s'écrit comme il se lit. Tout ce qui sort de l'intervalle y est ramené : un chiffre venu d'un serveur n'a donc pas à être borné par vos soins.",
+      text: "<code>value</code> est l'avancement, face à un <code>max</code> qui dit ce qui compte comme terminé. Tout ce qui sort de la plage y est ramené.",
     },
     indeterminate: {
       title: 'Indéterminé',
-      text: "Pour une attente qu'on ne peut pas mesurer : l'anneau tourne et son arc s'allonge et se raccourcit, les deux sur des périodes propres pour que le mouvement ne s'installe jamais dans un rythme, et la valeur est ignorée. Là où un indicateur tient la place d'une icône plutôt que de rendre compte d'une tâche, VSpinner est la chose plus petite à employer.",
+      text: "<code>indeterminate</code> sert à une attente qui ne se mesure pas : l'anneau tourne et la valeur est ignorée. Là où un indicateur tient lieu d'icône plutôt que de rendre compte d'une tâche, VSpinner est le plus petit objet à prendre.",
     },
     tones: {
       title: 'Tonalités',
-      text: "Ce que la progression signifie, en couleur. Cinq ici et non les trois d'un bouton, parce qu'un anneau rapporte un ÉTAT au lieu de déclencher une action : un quota qui s'épuise est un avertissement, un envoi terminé un succès.",
+      text: "<code>tone</code> dit ce que signifie la progression, sous forme de couleur. Il y en a cinq plutôt que les trois d'un bouton, un anneau rendant compte d'un état plutôt que d'amorcer une action.",
     },
     customColors: {
       title: 'Couleurs personnalisées',
-      text: 'Une couleur à vous remplace la tonalité, en hexadécimal, en nom CSS ou en <code>oklch()</code>. La teinte de la partie non remplie en est dérivée face au thème : une seule valeur à poser, et elle reste juste en thème sombre.',
+      text: "<code>color</code> remplace le ton, en hexadécimal, en nom CSS ou en <code>oklch()</code>. La nuance de l'anneau non rempli en est dérivée face au thème.",
     },
     sizeAndThickness: {
       title: 'Diamètre et épaisseur',
-      text: "Le diamètre et l'anneau, tous deux toujours en pixels qu'on les donne en nombre ou en chaîne numérique, et indépendants l'un de l'autre. La géométrie est entièrement en CSS : le rayon se dérive des deux, donc changer l'un ou l'autre ne recalcule rien en JavaScript, et un anneau peut être redimensionné depuis une media query ou une container query sans que le composant en soit averti.",
+      text: "<code>size</code> et <code>thickness</code> sont le diamètre et l'anneau, toujours en pixels qu'ils soient donnés en nombre ou en chaîne numérique, et indépendants l'un de l'autre.",
     },
     shape: {
       title: 'Forme',
-      text: "Si les extrémités de l'arc dessiné sont arrondies ou coupées droit. Cela se voit sur un anneau épais et à peine sur un anneau fin.",
+      text: "<code>shape</code> dit si les extrémités de l'arc dessiné sont arrondies ou coupées net. Cela se voit sur un anneau épais et presque pas sur un anneau fin.",
     },
     customContent: {
       title: 'Du contenu au centre',
-      text: "<code>showValue</code> écrit le pourcentage dans le creux de l'anneau, dimensionné proportionnellement au diamètre pour rester lisible à toutes les tailles. Le slot par défaut le remplace par ce que vous voulez, un compte, un nombre abrégé ou une icône, et reçoit la valeur, le max et le pourcentage qui en découle. À la différence de la barre, ce contenu n'est rendu qu'une fois et repose sur le fond de la page plutôt que sur l'anneau : il prend donc simplement la couleur de texte de la page.",
+      text: "<code>showValue</code> écrit le pourcentage dans le creux de l'anneau, dimensionné en proportion du diamètre. Le slot par défaut le remplace par un contenu à vous et reçoit la valeur, le max et le pourcentage qui en découle.",
     },
   },
 

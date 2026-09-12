@@ -5,39 +5,39 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label and hint',
-      text: 'This is the one field in the library whose <code>label</code> renders nothing. It names the row for assistive technology and stops there, because a row of boxes takes its instructions from the page above it, written where they read best and in whatever type that page uses. <code>hint</code> is the text the reader actually sees, tied to the row so it is read out along with the label: where the code was sent, how long it lasts.',
+      text: '<code>label</code> renders nothing here: it names the row for assistive technology. <code>hint</code> is the text the reader sees, tied to the row so it is read out along with the label.',
     },
     sizes: {
       title: 'Sizes',
-      text: "Three heights, 32, 40 and 48 pixels, each with its <code>compact</code> pair 4px shorter. The character inside is scaled a notch or two above the row's own step, a code being read one glyph at a time rather than as a word, and <code>compact</code> leaves it exactly where it was.",
+      text: "<code>size</code> sets the height to 32, 40 or 48 pixels, and <code>compact</code> takes 4px off it. The character inside is scaled a notch or two above the row's own step.",
     },
     length: {
       title: 'Length',
-      text: 'How many boxes the code has, six by default. Four suits a PIN, eight a backup code. It is ignored the moment a <code>pattern</code> is given, the pattern already saying how many boxes there are.',
+      text: '<code>length</code> is how many boxes the code has, six by default. It is ignored the moment a <code>pattern</code> is given.',
     },
     formats: {
       title: 'Formats',
-      text: 'Which characters the code is made of. It filters what can be typed or pasted, and it is also what decides the keyboard a phone offers, a numeric code raising the number pad rather than the full keyboard. Outside a numeric code the value is forced to capitals, whichever case the reader typed, so what reaches your verification has one canonical form.',
+      text: '<code>format</code> decides which characters the code is made of, filtering what can be typed or pasted and choosing the keyboard a phone offers. Outside a numeric code the value is forced to capitals.',
     },
     pattern: {
       title: 'Pattern',
-      text: 'The shape of the code, written out: every <code>#</code> is a box to fill and every other character is a literal drawn between the boxes. A literal is never typed and never enters the value, so a <code>GT-###</code> template still yields three characters. The pattern wins over <code>length</code>, which is then ignored.',
+      text: '<code>pattern</code> writes the shape of the code out: every <code>#</code> is a box to fill and every other character a literal drawn between the boxes, never typed and never part of the value. It wins over <code>length</code>.',
     },
     separators: {
       title: 'Separators',
-      text: 'An icon can replace the literals a pattern draws. It replaces every one of them, so it suits a template whose separators are punctuation and nothing else. Keep it away from a pattern carrying a real prefix such as <code>GT-###</code>, where it would erase the two characters that say what the code is.',
+      text: '<code>separatorIcon</code> replaces the literals a pattern draws, every one of them, so it suits a template whose separators are punctuation and nothing else.',
     },
     pasting: {
       title: 'Pasting and autofill',
-      text: 'A code pasted anywhere in the row is spread across every box, and the pattern\'s literals are consumed with it: a reference copied in its formatted form, <code>GT-4F2</code>, lands as the three characters it really is rather than being refused. The first box carries <code>autocomplete="one-time-code"</code>, so a code arriving from an SMS or a password manager is spread the same way, and anything the format refuses is dropped rather than stopping the paste.',
+      text: 'A code pasted anywhere in the row is spread across every box, the pattern\'s literals consumed with it. The first box carries <code>autocomplete="one-time-code"</code>, so a code arriving from an SMS or a password manager is spread the same way.',
     },
     reading: {
       title: 'Reading the code',
-      text: 'The value is one string of the characters alone, never the separators, and it is shorter than the row while the code is being typed. <code>complete</code> fires once every box is filled, carrying the finished code: that is the cue to verify it, rather than something to work out by measuring the value against the length yourself.',
+      text: 'The value is one string of the characters alone, never the separators. <code>complete</code> fires once every box is filled, carrying the finished code.',
     },
     states: {
       title: 'States',
-      text: '<code>disabled</code> puts the whole row out of reach, greyed through the colour tokens. <code>readonly</code> sits between that and nothing: the code is shown and frozen, while the boxes keep the focus and the code can still be selected and copied, which is what a reference someone has to quote elsewhere needs. <code>invalid</code> colours the boxes and tells assistive technology the code was refused.',
+      text: '<code>disabled</code> puts the whole row out of reach, greyed through the colour tokens. <code>readonly</code> shows the code frozen while the boxes keep the focus and can be copied from. <code>invalid</code> colours the boxes and tells assistive technology the code was refused.',
     },
   },
 

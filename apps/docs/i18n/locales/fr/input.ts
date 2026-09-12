@@ -5,35 +5,35 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Libellé et indication',
-      text: "Le libellé est lié au champ : cliquer dessus place le curseur dans la saisie. L'indication se pose sous le champ et lui est liée elle aussi, par <code>aria-describedby</code>, ce qui fait qu'un lecteur d'écran l'énonce après le libellé au lieu de la laisser traîner à côté comme un texte quelconque. Les deux sont de simples props ; un <code>id</code> à vous l'emporte sur celui que le composant se génère.",
+      text: "<code>label</code> s'affiche au-dessus du champ et y place le curseur au clic. <code>hint</code> s'affiche sous le champ et lui est lié par <code>aria-describedby</code>.",
     },
     sizes: {
       title: 'Tailles',
-      text: "Trois hauteurs, 32, 40 et 48 pixels, moyenne par défaut. <code>compact</code> retire 4 pixels à n'importe laquelle et laisse le rembourrage, le texte et les icônes exactement où ils étaient : c'est ainsi qu'un formulaire se densifie sans rapetisser ce qui y est écrit. Les crans très petit et très grand de l'échelle ne sont volontairement pas proposés ici : 24 pixels sont trop courts pour un texte que l'on modifie, et 56 sortent de la forme d'un formulaire.",
+      text: "<code>size</code> définit la hauteur à 32, 40 ou 48 pixels, et <code>compact</code> retire 4px à l'une quelconque d'entre elles.",
     },
     icons: {
       title: 'Icônes',
-      text: "Une icône dans le champ, à l'une ou l'autre extrémité. Les deux sont décoratives : pas de libellé, pas de focus, rien d'annoncé, ce qui est la bonne forme pour une loupe qui dit à quoi sert le champ ou une coche qui rapporte un état. Attacher un écouteur de clic est ce qui en fait un bouton, et c'est la section plus bas. Le slot <code>#end</code> remplace l'icône de fin quand ce qu'il y faut n'est pas une icône ; <code>#start</code> est rendu après l'icône de début plutôt qu'à sa place, ce qui permet à un champ bâti sur celui-ci de montrer les deux.",
+      text: "<code>iconStart</code> et <code>iconEnd</code> posent une icône décorative à chaque extrémité du champ. Le slot <code>#end</code> remplace l'icône de fin, là où <code>#start</code> est rendu après l'icône de début plutôt qu'à sa place.",
     },
     clearable: {
       title: 'Effaçable',
-      text: "Une croix qui vide le champ. Elle ne se montre que s'il y a quelque chose à effacer et que le champ est modifiable, et l'appuyer rend le focus à la saisie sur-le-champ : la croix disparaît dans le même instant, et le focus retomberait sinon sur la page. Elle est dessinée avant l'icône de fin, si bien qu'un champ peut être effaçable et porter tout de même un contrôle à lui. Pour les champs dont la valeur n'est pas leur texte, une liste déroulante qui porte des puces ou un sélecteur rempli par un panneau, c'est <code>clearVisible</code> qui répond à la question.",
+      text: "<code>clearable</code> ajoute une croix qui vide le champ, affichée tant qu'il y a quelque chose à vider et que le champ est modifiable. <code>clearVisible</code> répond vous-même à cette question, pour un champ dont la valeur n'est pas son texte.",
     },
     states: {
       title: 'États',
-      text: "Un champ désactivé grise par les tokens de couleur et quitte l'ordre de tabulation. Un champ en lecture seule reste focalisable et copiable, et cache sa croix d'effacement sauf mention contraire. <code>invalid</code> sert à une règle que le navigateur ne sait pas vérifier seul, un nom déjà pris par exemple : tout ce que la validation native voit colore déjà le champ sans elle, une fois que le lecteur en est sorti. <code>loading</code> pose un indicateur d'attente à la place de l'icône de fin et s'annonce.",
+      text: "<code>disabled</code> grise le champ et le sort de l'ordre de tabulation. <code>readonly</code> le garde focalisable et copiable, et masque la croix sauf indication contraire. <code>invalid</code> sert à une règle que le navigateur ne peut pas vérifier lui-même, et <code>loading</code> place un indicateur là où va l'icône de fin.",
     },
     clickableIcons: {
       title: 'Icônes cliquables',
-      text: "Une icône devient un vrai bouton dès qu'un écouteur <code>@click:icon-start</code> ou <code>@click:icon-end</code> lui est attaché. Rien d'autre ne change, même prop et même place dans le champ. Ce qu'il lui faut à partir de là, c'est un libellé, un bouton qui ne porte qu'une icône n'ayant aucun texte pour le nommer, et le composant le signale en développement quand il manque.",
+      text: "Un écouteur <code>@click:icon-start</code> ou <code>@click:icon-end</code> transforme l'icône en vrai bouton, qui demande alors <code>iconStartLabel</code> ou <code>iconEndLabel</code>.",
     },
     counters: {
       title: 'Compteurs',
-      text: "Le compteur se tient au bout du champ : 12/20 face à une limite, ou simplement 12 sans limite. <code>maxlength</code> seul est la limite dure du navigateur, qui refuse purement et simplement la frappe au-delà. <code>softLimit</code> en fait une ligne que le lecteur a le droit de franchir : le texte n'est jamais coupé, le compteur passe au rouge, et le champ entre en erreur par la validité native, si bien que le formulaire refuse de s'envoyer au lieu de tronquer en silence ce qui a été écrit.",
+      text: "<code>counter</code> affiche la longueur au bout du champ. <code>maxlength</code> est la limite dure du navigateur, là où <code>softLimit</code> est une ligne que le lecteur peut franchir : le texte n'est jamais coupé, le compteur passe au rouge et le champ tombe en erreur par la validité native.",
     },
     pattern: {
       title: 'Motif',
-      text: "Il n'y a pas de prop <code>pattern</code>. C'est l'attribut natif, et il atteint la saisie par la retransmission des attributs, avec <code>inputmode</code>, <code>title</code>, <code>name</code> et tout ce dont un formulaire a besoin : la vérification est donc celle du navigateur et ne coûte rien ici. Le champ rougit par <code>:user-invalid</code>, qui attend que le lecteur en soit sorti : un code postal n'est pas faux tant qu'on est en train de le taper.",
+      text: "Il n'y a pas de prop <code>pattern</code> : l'attribut natif atteint l'input par fallthrough, avec <code>inputmode</code>, <code>name</code> et tout ce dont un formulaire a besoin. Le champ passe au rouge par <code>:user-invalid</code>, une fois que le lecteur l'a quitté.",
     },
   },
 

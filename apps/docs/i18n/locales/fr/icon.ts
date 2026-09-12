@@ -5,11 +5,11 @@ export default {
   examples: {
     size: {
       title: 'Taille',
-      text: "Un nombre de pixels, et l'icône est carrée. Sans lui, elle prend la taille que son contexte impose : chaque contrôle de la bibliothèque en pose une pour tout ce qui se dessine à l'intérieur, si bien qu'une icône dans un bouton suit le bouton sans qu'on le lui dise. Sans contexte non plus, elle retombe sur <code>1em</code>, ce qui lui donne la taille du texte où elle se trouve et la garde sur la ligne au lieu de l'écarter. Une taille explicite l'emporte sur les deux.",
+      text: "<code>size</code> est un nombre de pixels, l'icône étant carrée. Sans elle, l'icône prend la taille que son contexte impose, et retombe sur <code>1em</code> en l'absence de contexte.",
     },
     filled: {
       title: 'Pleine',
-      text: "La même icône, forme remplie, ce qui sert à marquer un état : une notification arrivée, une étape faite. La bibliothèque n'embarque un dessin plein que là où le remplissage change vraiment la géométrie, 15 de ses 34 icônes, et en demander un à une icône qui n'en a pas dessine l'icône qu'elle a toujours eue. La prop peut donc être liée à une condition sans vérifier d'abord si cette icône-là a quelque chose à en dire. Elle ne veut rien dire pour une image ou un SVG en ligne, dont la forme est fixe, et une police à ligatures l'honore toujours.",
+      text: "<code>filled</code> demande la forme pleine de l'icône, ce qui sert à marquer un état. Une icône de la bibliothèque sans dessin plein rend celui qu'elle a toujours eu.",
     },
     rendering: {
       title: "D'où vient le dessin",
@@ -21,7 +21,7 @@ export default {
         "Le slot par défaut, un SVG en ligne, atteint quand ni <code>name</code> ni <code>src</code> n'ont été donnés.",
       ],
       moreBefore:
-        "L'ordre est le contrat. Votre résolveur passe avant les dessins de la bibliothèque, si bien qu'un seul appel déplace vers votre jeu toutes les icônes que les composants dessinent, et un résolveur qui ne répond rien pour un nom donné le rend au lieu de laisser un trou, ce qui rend utilisable une correspondance partielle. Une simple chaîne n'est jamais qu'un nom, jamais une adresse : c'est ce qui permet à un identifiant à espace de noms comme <code>mdi:close</code> d'atteindre votre résolveur intact. Brancher un jeu, et la liste de ce que la bibliothèque embarque, sont tous deux sur",
+        "L'ordre est le contrat : votre résolveur passe avant les dessins de la bibliothèque, et un résolveur qui ne répond rien pour un nom donné le rend au lieu de laisser un trou, ce qui rend utilisable une correspondance partielle. Une simple chaîne n'est jamais qu'un nom, jamais une adresse. Brancher un jeu, et la liste de ce que la bibliothèque embarque, sont tous deux sur",
       moreAfter: '.',
     },
   },

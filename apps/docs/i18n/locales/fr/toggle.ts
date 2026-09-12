@@ -5,51 +5,51 @@ export default {
   examples: {
     variants: {
       title: 'Variantes et tonalités',
-      text: "<code>itemVariant</code> peint les items qui ne sont PAS choisis : transparents sous <code>ghost</code>, cernés sous <code>outline</code>. Il est nommé d'après les items parce que c'est ce qu'il peint, là où VTabs et VDataTable emploient <code>variant</code> pour la décoration d'un cadre. La tonalité colore l'item choisi et rien d'autre, les autres restant neutres puisqu'un seul affirme quelque chose. Trois tonalités, celles que propose un bouton, puisque chaque item en est un.",
+      text: "<code>itemVariant</code> peint les éléments qui ne sont pas choisis, transparents en <code>ghost</code> et contourés en <code>outline</code>. <code>tone</code> colore l'élément choisi et rien d'autre, avec les trois valeurs qu'offre un bouton.",
     },
     selectedVariants: {
       title: 'Comment la sélection est dessinée',
-      text: "L'autre moitié de la même décision : <code>selectedVariant</code> est la façon dont l'item choisi est peint dans la tonalité du groupe, plein avec <code>solid</code>, teinté avec <code>soft</code>, ou la seule couleur de son texte avec <code>ghost</code>. Le plein est le plus affirmé et le défaut le plus sûr. Le fantôme sert aux rangées qui doivent rester discrètes, et c'est celui à peser : la différence ne tient alors qu'à la couleur du texte, preuve plus mince qu'une boîte pleine.",
+      text: "<code>selectedVariant</code> est la façon dont l'élément choisi est peint dans le ton du groupe : plein en <code>solid</code>, teinté en <code>soft</code>, ou par la seule couleur de son texte en <code>ghost</code>.",
     },
     sizes: {
       title: 'Tailles',
-      text: "L'échelle que partagent tous les contrôles, de 24 à 56 pixels, <code>compact</code> en retirant 4px. Elle se pose une fois sur le groupe et chaque item est un bouton de cette taille : une rangée de bascules et un bouton côte à côte s'alignent, au lieu de presque s'aligner.",
+      text: "<code>size</code> reprend l'échelle partagée par tous les contrôles, de 24 à 56 pixels, et <code>compact</code> lui retire 4px. Elle se pose une fois sur le groupe.",
     },
     itemContent: {
       title: 'Ce que porte un item',
-      text: "Un libellé, une icône à l'une ou l'autre extrémité, ou le slot par défaut pour ce qu'une chaîne ne peut pas contenir. Un item réduit à son icône doit quand même dire ce qu'il est : sans libellé il ne reste aucun nom accessible, donnez-lui-en un. L'icône de fin est la place de ce que l'item porte plutôt que de ce qu'il est, et c'est aussi pourquoi le réglage d'icônes pleines du groupe ne la touche jamais.",
+      text: "Un élément accepte un libellé, une icône à chaque extrémité, ou le slot par défaut pour ce qu'une chaîne ne peut pas porter. Un élément réduit à son icône demande toujours un <code>label</code>, qui est alors son nom accessible.",
     },
     filledIcons: {
       title: 'Icônes pleines',
-      text: "L'item choisi dessine son icône dans sa forme pleine, façon répandue de renforcer lequel est en vigueur, et qui ne repose pas sur la seule couleur. Le réglage désigne l'icône qui TIENT LIEU de l'item : seule celle de début est échangée. Rien n'arrive à une icône sans forme pleine, la bibliothèque ne livrant un second dessin que là où le remplissage change réellement la géométrie, ce qui concerne moins de la moitié des icônes qu'elle embarque.",
+      text: "<code>selectedIconFilled</code> dessine l'icône de début de l'élément choisi dans sa forme pleine. Rien n'arrive à une icône qui n'a pas de dessin plein.",
     },
     detached: {
       title: 'Détaché',
-      text: "Joints par défaut, les items fondus en un seul segmented control, ce qui est la façon de dire qu'ils forment un choix unique. Détaché les laisse en boutons séparés avec un écart entre eux, ce qui convient mieux à une rangée de filtres partageant un modèle qu'à une réponse exclusive.",
+      text: '<code>detached</code> laisse les éléments en boutons séparés avec un écart entre eux, au lieu de les joindre en un contrôle segmenté.',
     },
     seamless: {
       title: 'Sans coutures',
-      text: "Joints, un trait est tracé entre deux items et la rangée se lit comme un ensemble de segments, chacun étant une cible. <code>seamless</code> retire ces traits, et la rangée se lit alors comme un cadre unique contenant une mise en évidence qui se déplace. Cela n'a aucun effet sous <code>detached</code>, où les items sont déjà des boutons séparés.",
+      text: '<code>seamless</code> retire les traits dessinés entre deux éléments : la rangée se lit alors comme un cadre unique portant une surbrillance qui se déplace. Il est sans effet sous <code>detached</code>.',
     },
     elevated: {
       title: 'Surélevé',
-      text: "La rangée est soulevée de la page, aux conditions de la prop de VButtonGroup : l'ombre appartient à la rangée et non à chaque item. Les segments se chevauchent d'un pixel, donc une ombre par item tomberait sur son voisin et remplirait chaque jointure d'une bande sombre au lieu de soulever un objet. Toute la rangée monte ensemble au survol, pour la même raison.",
+      text: "<code>elevated</code> soulève la rangée, l'ombre appartenant à la rangée plutôt qu'à chaque élément.",
     },
     orientation: {
       title: 'Orientation',
-      text: "Vers le bas plutôt qu'en travers. Les jointures passent aux bords horizontaux, les coins sont taillés en haut et en bas de la colonne, et les flèches suivent l'axe. Le mode détaché fonctionne pareil, l'écart courant simplement dans l'autre direction.",
+      text: "<code>orientation</code> à <code>vertical</code> empile les éléments vers le bas, les jonctions et les flèches suivant l'axe.",
     },
     multiple: {
       title: 'Choisir plusieurs items',
-      text: "Plusieurs items à la fois, ce qui transforme le choix exclusif en un jeu de filtres et fait du modèle une liste. Cliquer un item choisi le rend à nouveau. Le tableau n'est jamais modifié sur place : chaque changement en rend un nouveau, et c'est ce qui réveille un observateur qui y est lié. Une valeur nulle ou scalaire passée dans ce mode est lue comme une sélection vide plutôt que comme une erreur.",
+      text: "<code>multiple</code> permet de choisir plusieurs éléments à la fois, ce qui fait de la valeur une liste. Cliquer un élément choisi le rend, et le tableau n'est jamais muté sur place.",
     },
     mandatory: {
       title: 'Garder une sélection',
-      text: "Cliquer l'item choisi le rend normalement, ne laissant rien de sélectionné. <code>mandatory</code> refuse ce dernier pas : une rangée qui a une réponse en garde une, et avec plusieurs items c'est le dernier restant qui ne peut plus être rendu. C'est un garde-fou et rien de plus : il ne sélectionne rien de lui-même, et un groupe qui démarre vide reste vide tant qu'on n'a rien cliqué.",
+      text: "<code>mandatory</code> refuse d'abandonner le dernier élément choisi. C'est une garde et rien de plus : il ne sélectionne rien de lui-même.",
     },
     disabled: {
       title: 'Désactivé',
-      text: "Le groupe entier d'un coup, où plus rien ne répond et où aucun item ne prend le focus, ou bien un item seul, qui cesse de répondre et que les flèches enjambent comme s'il n'était pas dans la rangée. Les deux se grisent par les tokens de couleur plutôt que par une opacité : ils gardent donc leur contraste sur la page.",
+      text: '<code>disabled</code> vaut pour tout le groupe, où rien ne répond et où aucun élément ne prend le focus, ou pour un seul élément, que les flèches enjambent alors. Les deux se grisent par les tokens de couleur.',
     },
   },
 

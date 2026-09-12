@@ -5,19 +5,19 @@ export default {
   examples: {
     minuteStep: {
       title: 'Minute step',
-      text: 'The face is a slider and not a list, so it has to be told what it may land on. <code>minuteStep</code> is that interval: the hand snaps to it as it is dragged, and the arrow keys move by it. It applies to the minutes alone. The face prints only the minutes the step reaches, so a quarter of an hour marks four and nothing between them: a numeral one can point at and not land on is one the hand contradicts by settling beside it. A step too fine for twelve numerals keeps the five-minute marks a clock is read on, minus any it cannot reach.',
+      text: '<code>minuteStep</code> is the interval the hand snaps to and the arrow keys move by, on the minutes alone. The face prints only the minutes the step reaches.',
     },
     restrictions: {
       title: 'What may be chosen',
-      text: 'Four props restrict the value, and they compose into a single answer: <code>min</code> and <code>max</code>, two inclusive bounds written as canonical <code>HH:mm</code> strings, and <code>allowedHours</code> and <code>allowedMinutes</code>, each taking the list of the values it allows or a rule answering for one. What they rule out is left off the face, which is the rule <code>minuteStep</code> already follows: the clock prints what can be chosen and nothing else. An hour is closed only when nothing at all is left in it, so a bound at 09:30 keeps nine o clock and takes its first thirty minutes from the minutes instead. Choosing that hour then pulls the minutes to the nearest one it does allow, and the arrow keys step over what they may not land on rather than stopping at it. The pointer catches nothing it was not aimed at: a sector left without a numeral holds no value, so a click there writes nothing and does not move the step on either.',
+      text: '<code>min</code> and <code>max</code> are two inclusive bounds written as canonical <code>HH:mm</code> strings, and <code>allowedHours</code> and <code>allowedMinutes</code> each take the list of values they allow or a rule answering for one. What they rule out is left off the face, and an hour is closed only when nothing at all is left in it.',
     },
     hourFormat: {
       title: 'Hour format',
-      text: 'A 12-hour face carries one ring of numerals and the AM and PM pair beside them. A 24-hour face carries two rings, the inner one holding 00 and 13 to 23, and no pair to choose from. <code>format</code> picks between the two, and left out the reader language decides, which is almost always what one wants. The value is the same either way: half past seven in the evening is the string 19:30 on both faces, so nothing downstream has to know which one produced it.',
+      text: "<code>format</code> picks between a 12-hour face, one ring of numerals with the AM and PM pair beside them, and a 24-hour face, two rings and no pair. Left out, the reader's language decides. The value is the same either way.",
     },
     localization: {
       title: 'Localization',
-      text: 'The <code>locale</code> prop decides one thing here, the clock. A tag whose language counts in twelve hours gets the single ring and the AM and PM pair, one that counts in twenty-four gets the double ring. en-US and en-GB are the sharp pair, sharing every word and differing in nothing else. The prop takes precedence over the global locale and falls back to it, so leaving it out is what makes a clock follow the language the page is set to. The wording is a separate question: it comes from the dictionary, and a language the dictionary does not ship keeps the English words on a face the tag has already got right.',
+      text: '<code>locale</code> decides the clock here: a language counting in twelve hours gets the single ring, one counting in twenty-four the double ring. It takes precedence over the global locale and falls back to it. The wording comes from the dictionary.',
     },
   },
 

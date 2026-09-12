@@ -5,39 +5,39 @@ export default {
   examples: {
     itemsPerView: {
       title: 'Diapositives par vue',
-      text: "<code>itemsPerView</code> indique combien de diapositives peuvent être visibles à la fois, et <code>itemMinSize</code> jusqu'où chacune peut rétrécir. Entre les deux, aucun point de rupture : une part égale de la largeur est prise tant qu'elle reste au-dessus du plancher, et dès qu'elle passerait en dessous, moins de diapositives tiennent et la piste défile simplement plus loin. Réduisez cette page et les trois ci-dessous deviennent deux, puis une.",
+      text: "<code>itemsPerView</code> est le nombre de diapositives visibles à la fois, et <code>itemMinSize</code> la taille minimale de chacune avant qu'il en tienne moins.",
     },
     peek: {
       title: 'Débord',
-      text: "<code>peek</code> laisse voir une bande de la diapositive suivante, le gabarit de la liste de produits : il dit qu'il y a une suite sans demander au lecteur de se fier aux points. La bande inclut l'écart qui la précède, si bien qu'une diapositive reste une part égale de ce qui reste. Deux conséquences en découlent. La dernière position est la fin de la piste plutôt que le bord d'une diapositive, et aucun point ne porte le nom de la dernière, celle-ci ne pouvant jamais être en tête.",
+      text: '<code>peek</code> laisse dépasser une bande de la diapositive suivante, écart compris.',
     },
     effects: {
       title: 'Effets',
-      text: "La façon dont une diapositive cède la place à la suivante. Les effets sont pilotés par le défilement lui-même : ils suivent donc le doigt et s'inversent avec lui au lieu de jouer une animation figée. <code>slide</code> est la valeur par défaut et n'anime rien ; <code>fade</code> fait fondre chaque diapositive sur place, ce qui exige une diapositive à la fois et aucun débord ; <code>scale</code> repousse les voisines sans les assombrir. Un lecteur ayant demandé moins de mouvement n'en reçoit aucun.",
+      text: "<code>effect</code> décide comment une diapositive cède la place à la suivante : <code>slide</code> n'anime rien, <code>fade</code> fait fondre chaque diapositive sur place et demande une seule diapositive à la fois sans <code>peek</code>, <code>scale</code> recule les voisines.",
     },
     orientation: {
       title: 'Orientation',
-      text: "Passez <code>orientation</code> à <code>vertical</code> et tout le composant pivote : la molette et les flèches suivent l'axe de bloc, les boutons prennent les flèches haut et bas, et les points placés après les diapositives passent sur le côté. Donnez aussi une <code>height</code>. Une diapositive dimensionnée en part de la hauteur a besoin d'une hauteur dont prendre une part, et sans elle chacune s'effondre sur son propre contenu.",
+      text: "<code>orientation</code> à <code>vertical</code> fait pivoter tout le composant sur l'axe de bloc. Donnez aussi une <code>height</code>, dont les diapositives prennent une part.",
     },
     customIcons: {
       title: 'Icônes personnalisées',
-      text: "<code>prevIcon</code> et <code>nextIcon</code> acceptent un <code>IconSource</code>, comme toutes les props d'icône de la bibliothèque : une des icônes fournies, un nom transmis au résolveur installé par votre application, des données de tracé SVG, un composant ou une image. Les valeurs par défaut suivent l'orientation, donc une paire à vous doit le faire aussi. Les mots que ces boutons annoncent viennent de <code>prevLabel</code> et <code>nextLabel</code>, qui retombent sur le dictionnaire.",
+      text: '<code>prevIcon</code> et <code>nextIcon</code> acceptent un <code>IconSource</code>, et <code>prevLabel</code> et <code>nextLabel</code> les mots annoncés par ces boutons.',
     },
     placements: {
       title: 'Placements',
-      text: 'Les flèches et les points se placent indépendamment. <code>inside</code> les pose par-dessus les diapositives, <code>outside</code> les met à côté, et <code>false</code> les retire. Placées à côté, les flèches voient leur place réservée en rembourrage sur le composant : son encombrement est inchangé et ce sont les diapositives qui rétrécissent. Dans les deux cas elles sont centrées sur les seules diapositives, jamais sur les diapositives plus la barre de points.',
+      text: '<code>controls</code> et <code>indicators</code> se placent indépendamment : <code>inside</code> les pose sur les diapositives, <code>outside</code> à côté, <code>false</code> les retire.',
     },
     jumps: {
       title: 'Sauts',
-      text: "Cliquez sur le dernier point des deux carrousels ci-dessous. Le premier va directement à destination et joue l'effet une fois, sur la diapositive qui arrive ; le second conserve tout le trajet, si bien que les quatre diapositives intermédiaires traversent la vue en jouant chacune sa transition au passage. Aller directement est le comportement par défaut, et <code>noJump</code> est ce qui rétablit le trajet. Il couvre tous les chemins : les points, les touches Origine et Fin, et un carrousel en boucle qui revient au début.",
+      text: "Un déplacement de plus d'une page se fait d'un coup, l'effet étant joué une fois à l'arrivée. <code>noJump</code> rétablit le trajet complet, sur tous les chemins.",
     },
     loop: {
       title: 'Boucle',
-      text: "Avec <code>loop</code>, la dernière position ramène à la première et la première à la dernière : aucun des deux boutons n'est jamais désactivé. Rien n'est cloné pour cela, la vraie piste revient au début. Ce qui boucle est ce qui avance pas à pas, à savoir les deux boutons, les flèches du clavier et le défilement automatique. Un point nomme une position et y va toujours directement, et Fin sur la dernière page y reste.",
+      text: "<code>loop</code> ramène la dernière position vers la première, si bien qu'aucun bouton n'est jamais désactivé. Cela vaut pour les boutons, les flèches du clavier et la lecture automatique.",
     },
     autoplay: {
       title: 'Défilement automatique',
-      text: "<code>autoplay</code> est un intervalle en millisecondes, et zéro le désactive. Il s'arrête à la dernière page sauf si le carrousel boucle, se suspend tant que le pointeur repose sur le carrousel ou que le focus clavier est à l'intérieur, et ne tourne jamais pour un lecteur ayant demandé moins de mouvement. Le composant ne rend aucun bouton de pause : la prop est réactive, donc la lier à zéro annule le minuteur sur-le-champ. Ajoutez-en un, comme le fait l'exemple. Le survol et le focus ne laissent aucun moyen d'arrêter le mouvement à un utilisateur tactile.",
+      text: "<code>autoplay</code> est un intervalle en millisecondes, zéro le désactivant. Il se suspend au survol et au focus clavier, et ne tourne jamais pour un lecteur qui a demandé moins d'animation. Aucun bouton de pause n'est rendu : ajoutez-en un, comme le fait l'exemple.",
     },
   },
 

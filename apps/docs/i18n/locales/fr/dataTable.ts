@@ -5,71 +5,71 @@ export default {
   examples: {
     sorting: {
       title: 'Tri',
-      text: "Une colonne marquée <code>sortable</code> reçoit un en-tête cliquable, et le tableau ordonne les lignes lui-même : croissant, puis décroissant, puis retour à l'ordre reçu. L'icône du tri croissant pointe vers le bas, la convention des tableurs, puisqu'un tri de A à Z se lit vers le bas. Le tri est un modèle : le tableau peut donc s'ouvrir sur une colonne déjà triée, et ce que le lecteur clique se relit. En changer laisse le lecteur sur la page où il était.",
+      text: "Une colonne marquée <code>sortable</code> reçoit un en-tête cliquable, qui alterne croissant, décroissant, puis l'ordre dans lequel les lignes ont été données. <code>v-model:sort</code> lit et pose cet état.",
     },
     search: {
       title: 'Recherche',
-      text: "<code>searchable</code> ajoute un champ à la barre d'outils. Seules les colonnes déclarées sont cherchées, sans tenir compte de la casse ni des accents : eclair trouve Éclair, et le lecteur n'a jamais à savoir où le diacritique est passé. Le terme est un modèle à part entière, <code>v-model:search</code>, ce qui permet de piloter la recherche depuis ailleurs dans la page. Chercher ramène à la première page : celle où le lecteur se trouvait ne dit rien des lignes qui restent.",
+      text: "<code>searchable</code> pose un champ dans la barre d'outils, qui cherche dans les colonnes déclarées sans tenir compte de la casse ni des accents. <code>v-model:search</code> pilote le terme depuis ailleurs dans la page.",
     },
     pagination: {
       title: 'Pagination',
-      text: "Toute taille de page supérieure à zéro allume la pagination : il suffit donc de la passer, liée ou non. La page est bornée par dérivation plutôt que réécrite, si bien qu'une page au-delà de la dernière affiche simplement la dernière, et que des lignes disparaissant sous une recherche ne laissent jamais le lecteur devant rien. <code>showRange</code> ajoute le décompte à côté de la navigation, ce qui dit au lecteur ce qu'il reste quand les lignes, elles, ne le disent pas.",
+      text: 'Toute valeur de <code>v-model:per-page</code> supérieure à zéro active la pagination. <code>showRange</code> ajoute le compte des lignes à côté de la navigation.',
     },
     rowsPerPage: {
       title: 'Lignes par page',
-      text: '<code>perPageOptions</code> ajoute un menu au pied du tableau, où le lecteur choisit combien de lignes tient une page. Liez <code>v-model:per-page</code> pour savoir ce qui a été choisi, ou laissez le tableau le garder pour lui. En changer ramène à la première page, le seul numéro qui garde un sens une fois les pages recoupées.',
+      text: '<code>perPageOptions</code> ajoute au pied un menu pour choisir le nombre de lignes par page. <code>v-model:per-page</code> rapporte ce qui a été choisi.',
     },
     selection: {
       title: 'Sélection',
-      text: "Une case sur chaque ligne, et une dans l'en-tête pour la page entière. <code>rowKey</code> devient obligatoire : ce qui revient, ce sont les identités que ce champ donne, jamais les objets de ligne, et sans lui une ligne est identifiée par sa position, que le tri, le filtrage et la pagination corrompent tous. Une sélection survit à un changement de page, alors que la case d'en-tête ne couvre que la page visible, ce qui explique qu'elle puisse être indéterminée. Nommer les cases depuis la ligne elle-même vaut la ligne de code : « Sélectionner la ligne » ne dit rien à un lecteur d'écran sur laquelle.",
+      text: "<code>selectable</code> ajoute une case à chaque ligne et une à l'en-tête pour la page visible. <code>rowKey</code> est alors obligatoire, et <code>v-model:selected</code> contient les identités données par ce champ.",
     },
     toolbar: {
       title: "Barre d'outils",
-      text: "Le slot <code>#header</code> remplace la prop <code>title</code> et occupe la gauche de la barre, le champ de recherche gardant la droite. Les filtres y ont leur place, et le filtrage reste le vôtre : le tableau affiche les lignes qu'on lui donne et les réduit encore avec sa propre recherche, les deux se superposant au lieu de se contrarier.",
+      text: "Le slot <code>#header</code> remplace la prop <code>title</code> et occupe la gauche de la barre d'outils, le champ de recherche gardant la droite.",
     },
     customCells: {
       title: 'Cellules personnalisées',
-      text: "Un slot nommé d'après la clé d'une colonne remplace ce que ses cellules affichent, et reçoit la ligne, la valeur brute et la colonne. La recherche et le tri lisent toujours la valeur sous-jacente : un nombre formaté se trie donc comme un nombre, et un statut dessiné en chip se trouve toujours par le mot qu'il porte.",
+      text: "Un slot nommé d'après la clé d'une colonne remplace le contenu de ses cellules, et reçoit la ligne, la valeur brute et la colonne. La recherche et le tri lisent toujours la valeur sous-jacente.",
     },
     customHeadings: {
       title: 'En-têtes personnalisés',
-      text: "Un slot nommé <code>head-</code> suivi de la clé de la colonne remplace un en-tête. Sur une colonne triable, il est rendu à l'intérieur du bouton de tri : tenez-vous-en donc au texte et à la décoration, un contrôle placé là étant un contrôle dans un contrôle, ce dont rien dans l'arbre d'accessibilité ne peut rendre compte. L'état du tri, lui, est déjà porté par l'en-tête.",
+      text: "Un slot nommé <code>head-</code> suivi de la clé de la colonne remplace un en-tête. Sur une colonne triable, il est rendu à l'intérieur du bouton de tri : tenez-vous-en donc au texte et à la décoration.",
     },
     variants: {
       title: 'Variantes',
-      text: "La variante plate ne porte aucune décoration et se pose sur la surface qui l'accueille. La variante encadrée en fait une carte, avec un fond surélevé, une bordure et des coins arrondis, et ouvre une gouttière pour que la barre d'outils, la légende et le pied ne touchent pas le cadre. L'en-tête prend le fond du cadre, ce qui évite la couture visible sous un en-tête collant.",
+      text: "<code>variant</code> définit la décoration : <code>flat</code> n'en porte aucune, <code>outlined</code> ajoute un fond surélevé, une bordure, des coins arrondis et une gouttière autour de la barre d'outils, de la légende et du pied.",
     },
     compact: {
       title: 'Compact',
-      text: "Un cran plus serré sur chaque cellule, et sur tout ce que le tableau rend avec elles : le champ de recherche, le menu de taille de page et la pagination prennent le même cran, pour que l'ensemble reste un seul objet plutôt qu'un tableau dense entouré de mobilier au large.",
+      text: '<code>compact</code> resserre chaque cellule, et avec elles le champ de recherche, le menu de taille de page et la pagination.',
     },
     striped: {
       title: 'Lignes zébrées',
-      text: "Teinte une ligne sur deux, ce qui aide l'œil à suivre une longue ligne d'un bout à l'autre. L'espace laissé sous la dernière ligne reste nu : les lignes n'ont pas de hauteur fixe, il n'y a donc rien sur quoi mesurer la suite du motif.",
+      text: '<code>striped</code> teinte une ligne sur deux.',
     },
     stickyHeader: {
       title: 'En-tête collant',
-      text: 'Garde les en-têtes de colonne en place pendant que les lignes défilent dessous. Il lui faut une zone de défilement bornée : soit la prop <code>height</code>, comme ci-dessous, soit un parent qui a sa propre hauteur. Les en-têtes sont peints sur la surface du tableau, si bien que les lignes passent derrière eux et non au travers.',
+      text: '<code>stickyHeader</code> garde les en-têtes de colonnes en place pendant le défilement des lignes. Il demande une zone de défilement bornée, par la prop <code>height</code> ou par un parent qui a sa propre hauteur.',
     },
     fullHeight: {
       title: 'Pleine hauteur',
-      text: "<code>height</code> borne le composant entier, barre d'outils et pied compris, un nombre étant lu en pixels. Sans elle, le tableau prend la hauteur de son parent dès que celui-ci en a une : seules les lignes s'étirent et défilent, la barre d'outils et le pied gardant leur place quel que soit le contenu de la page. Un parent sans hauteur propre ne change rien, ce qui ne coûte donc rien là où ce n'est pas voulu.",
+      text: "<code>height</code> borne tout le composant, barre d'outils et pied compris, un nombre étant lu en pixels. Sans elle, le tableau prend la hauteur de son parent dès que celui-ci en a une.",
     },
     responsive: {
       title: 'Conteneurs étroits',
-      text: "Trop étroit pour tenir ses colonnes, le tableau défile latéralement, ou transforme chaque ligne en carte avec ses en-têtes de colonne répétés à l'intérieur. Le seuil est la largeur du composant et non celle de la fenêtre, mesurée par une container query : un tableau logé dans un panneau étroit s'empile donc pendant que la page autour reste large.",
+      text: "<code>responsive</code> décide de ce que fait un conteneur trop étroit pour les colonnes : défiler latéralement, ou transformer chaque ligne en carte avec ses en-têtes de colonnes répétés à l'intérieur.",
     },
     serverSide: {
       title: 'Côté serveur',
-      text: "<code>serverSide</code> délègue la recherche, le tri et la pagination : les lignes sont affichées telles qu'elles arrivent, et <code>update:params</code> rapporte chaque changement de ce qui est demandé. Passez <code>total</code> pour que la pagination et le décompte disent juste sur des lignes que le tableau ne détient jamais. Rien n'est émis à l'apparition du tableau, la première page étant l'affaire de la page elle-même, ce qui évite que chaque tableau charge deux fois. La recherche est différée par <code>searchDebounce</code>, et le terme et le retour à la première page arrivent en une émission plutôt qu'en deux.",
+      text: "<code>serverSide</code> délègue la recherche, le tri et la pagination : les lignes sont affichées telles qu'elles arrivent et <code>update:params</code> rapporte chaque changement. Passez <code>total</code> pour la pagination et la plage, et <code>searchDebounce</code> pour retarder la recherche.",
     },
     states: {
       title: 'Chargement et vide',
-      text: "<code>loading</code> affiche un spinner à la place des lignes, et il est traité avant le vide : un tableau qui attend ses lignes ne prétend donc jamais qu'il n'y en a pas. Sans rien à montrer et rien en cours, c'est <code>emptyText</code> qui est dit, dans les mots du design system à défaut des vôtres.",
+      text: "<code>loading</code> affiche un indicateur à la place des lignes, et passe avant le vide. <code>emptyText</code> est ce que dit le tableau quand il n'y a rien à montrer.",
     },
     fullTable: {
       title: 'Un tableau complet',
-      text: "Tout à la fois : un titre, une recherche, une sélection, quatre colonnes triables, des cellules à soi, et un pied portant le décompte de la sélection, la taille de page, l'étendue et la pagination.",
+      text: 'Tout à la fois : un titre, une recherche, une sélection, quatre colonnes triables, des cellules personnalisées, et un pied portant le compte de la sélection, la taille de page, la plage et la pagination.',
     },
   },
 

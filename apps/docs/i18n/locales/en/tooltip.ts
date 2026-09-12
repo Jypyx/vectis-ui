@@ -5,23 +5,23 @@ export default {
   examples: {
     placements: {
       title: 'Placements',
-      text: 'Eight sides, four of them aligned to an edge of the trigger rather than centred on it, which is what keeps a tooltip from hanging off a wide control. The value names a preference and not a position: the browser moves the panel by itself when the side asked for has no room, so pick the one that reads best where the control usually sits and let the edge cases sort themselves out.',
+      text: '<code>placement</code> offers eight sides, four of them aligned to an edge of the trigger rather than centred on it. It names a preference: the browser moves the panel when the side asked for has no room.',
     },
     edgeFlipping: {
       title: 'At the edge of the screen',
-      text: 'With no room on the side it asked for, the panel takes the opposite one. It is pure CSS and costs no JavaScript, no measurement and no observer: the panel names its fallbacks and the browser does the rest. Scroll the buttons below up against the top and the bottom of the window to watch it happen.',
+      text: 'With no room on the side it asked for, the panel takes the opposite one. It is pure CSS, with no measurement and no observer.',
     },
     delay: {
       title: 'Opening and closing',
-      text: 'The pointer has to rest on the trigger before the tooltip appears, 300ms by default, so passing over something on the way somewhere else opens nothing. A delay of 0 removes the wait entirely. Keyboard focus opens it at once instead, the intent not being in doubt there, and Escape closes it without taking the focus away. Pressing the trigger closes it too, which is what a button opening a panel needs: the pointer has not left and the focus may not have moved, so the tooltip would otherwise stand over what the click just opened.',
+      text: '<code>delay</code> is how long the pointer has to rest on the trigger before the tooltip appears, 300ms by default, and 0 removes the wait. Keyboard focus opens it at once, Escape closes it without taking the focus away, and pressing the trigger closes it too.',
     },
     describing: {
       title: 'Describing, not naming',
-      text: 'A tooltip sets <code>aria-describedby</code> on its trigger, and the trigger keeps its own accessible name. An icon button therefore still carries its <code>label</code>, and the tooltip is the visual confirmation of it rather than a replacement. The corollary is the rule to remember: a tap opens nothing, there being no hover on a touch screen and no room for a panel standing over what the tap just opened, so whatever the tooltip says has to exist somewhere else as well. It complements; it never carries anything on its own.',
+      text: 'The tooltip sets <code>aria-describedby</code> on its trigger, which keeps its own accessible name: an icon button still carries its <code>label</code>. A tap opens nothing, so whatever the tooltip says has to exist somewhere else as well.',
     },
     richContent: {
       title: 'Rich content',
-      text: 'The slot wins over the <code>text</code> prop when both are given, for a description that needs more than one run of text: a heading, a shortcut, an icon. It has to stay non-interactive. The tooltip closes as soon as the pointer leaves the trigger, so a link inside could never be reached, and the description is flattened to plain text for a screen reader anyway. Anything one can act on belongs in a panel that stays open, which is what VPopover and VMenu are for.',
+      text: 'The <code>#content</code> slot wins over the <code>text</code> prop when both are given. It has to stay non-interactive: the tooltip closes as soon as the pointer leaves the trigger, and the description is flattened to plain text for a screen reader.',
     },
   },
 

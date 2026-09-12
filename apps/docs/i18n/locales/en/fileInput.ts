@@ -5,43 +5,43 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label and hint',
-      text: 'The visible field is a read-only <code>VInput</code>, so <code>label</code> and <code>hint</code> behave as they do on any other field, and the label focuses it when clicked. <code>placeholder</code> is what it says while nothing has been chosen; left out, it falls back to the dictionary. The paperclip at the end opens the system dialog, and the field also accepts a file dropped anywhere on it. <code>iconStart</code> puts an icon at the other end of the field, rendered before the chips rather than in their place, decorative until a <code>@click:icon-start</code> listener turns it into a button.',
+      text: '<code>label</code>, <code>hint</code> and <code>placeholder</code> behave as on any other field. <code>iconStart</code> puts an icon at the start of the field, rendered before the chips rather than in their place.',
     },
     sizes: {
       title: 'Sizes',
-      text: 'Three heights, 32, 40 and 48 pixels, each with its <code>compact</code> pair 4px shorter. The chips of a chosen file sit one step below the field, and the field forces its text to their height so the row does not grow the moment something is added.',
+      text: '<code>size</code> sets the field height to 32, 40 or 48 pixels, and <code>compact</code> takes 4px off it. The chips of a chosen file sit one step below the field.',
     },
     multiple: {
       title: 'Multiple files',
-      text: 'Off, a second file is turned away rather than replacing the first. On, the field takes as many as the limits allow. The model is a <code>File</code> array in both cases: the shape does not follow the prop, so nothing downstream has to work out which one it is holding.',
+      text: '<code>multiple</code> lets the field take several files. The model is a <code>File</code> array either way.',
     },
     clearable: {
       title: 'Clearable',
-      text: 'The cross empties the whole selection at once. It is worth turning on here more than on an ordinary field: what a file input holds cannot be erased by typing, so without it a wrong choice has to come out one chip at a time, and in text display it cannot come out at all.',
+      text: '<code>clearable</code> adds a cross that empties the whole selection at once.',
     },
     display: {
       title: 'Display',
-      text: 'Names joined by commas on one line, or one dismissible chip each. A chip label is shortened in the MIDDLE rather than at the end, so the extension survives and two files from the same folder stay tellable apart; the whole name stays on the title and in the removal button. The <code>#chip</code> slot replaces the chip and receives that shortened label, <code>remove</code>, and the size and density the field worked out, none of which can be guessed from outside.',
+      text: '<code>display</code> lists the files as names joined by commas, or as one dismissible chip each. The <code>#chip</code> slot replaces a chip and receives its shortened label, <code>remove</code>, and the size and density the field worked out.',
     },
     perFileLimits: {
       title: 'Per-file limits',
-      text: '<code>accept</code> takes the browser syntax and is applied twice, which it has to be: as an attribute, which filters the system dialog, and again in code, which is the only thing that can filter a file DROPPED on the field. Spell the extensions alongside the MIME families, since a file whose type the system failed to guess arrives with an empty one. <code>maxSize</code> bounds one file. Both are limits and not warnings: a refused file never enters the model, and <code>reject</code> fires once per file so a batch drop is reported precisely.',
+      text: '<code>accept</code> takes the browser syntax and filters the system dialog as well as a file dropped on the field. <code>maxSize</code> bounds one file. A refused file never enters the model, and <code>reject</code> fires once per file.',
     },
     selectionLimits: {
       title: 'Selection limits',
-      text: '<code>maxFiles</code> and <code>maxTotalSize</code> bound the selection as a whole rather than each file. Screening runs in a fixed order, type then size then count then total size, so a file refused for its kind is never also reported as one too many. The message is yours to write: the component turns files away and says which and why, and never renders a word about it.',
+      text: '<code>maxFiles</code> and <code>maxTotalSize</code> bound the selection as a whole. Screening runs in a fixed order: type, then size, then count, then total size.',
     },
     counter: {
       title: 'Counter',
-      text: 'A line under the field saying how much has been chosen, to the right of the hint. The sentence is translated and pluralised, and the size is written in the units <code>Intl</code> actually means, base 1000. The <code>#counter</code> slot replaces it and receives the count and the total in bytes, along with the sentence already built, so a wording of your own does not have to rebuild what it is only rephrasing.',
+      text: '<code>counter</code> adds a line under the field saying how much has been chosen. The <code>#counter</code> slot replaces it and receives the count, the total in bytes and the sentence already built.',
     },
     customIcon: {
       title: 'Custom icon',
-      text: '<code>attachIcon</code> is the glyph at the end of the field that opens the dialog, and it takes the same values as every icon prop in the library. Naming it after what the field accepts says more than a paperclip does, which is worth doing wherever the label alone leaves the kind of file in doubt.',
+      text: '<code>attachIcon</code> is the glyph at the end of the field that opens the system dialog, and it takes any icon value.',
     },
     states: {
       title: 'States',
-      text: 'Invalid is for a rule of your own, nothing here being checked by the browser. Read-only keeps the selection on show and refuses every way of changing it, the dialog, the drop and the removal alike. Disabled greys the field through the colour tokens and takes it out of the tab order. <code>noDrop</code> is narrower than either: the dialog still opens, and only dropping is turned away. <code>loading</code> is narrower still, and purely visual: a spinner replaces the attach icon while an upload is under way, and everything else carries on. <code>attachIconLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename the attach button, the clear cross and the spinner when the dictionary wording is not the right one.',
+      text: '<code>invalid</code> marks the field as having an error. <code>readonly</code> keeps the selection on show and refuses every way of changing it. <code>disabled</code> greys the field out and takes it out of the tab order. <code>noDrop</code> turns dropping away alone, and <code>loading</code> is purely visual, a spinner replacing the attach icon. <code>attachIconLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename what each of them announces.',
     },
   },
 

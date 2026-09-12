@@ -5,39 +5,39 @@ export default {
   examples: {
     variantsAndTones: {
       title: 'Variants and tones',
-      text: 'Four variants across each row, three tones down the column: <code>accent</code>, then <code>neutral</code>, then <code>danger</code>. The tones stop there because on a button a tone is an intention, where success and warning are states: those belong on the components that report one, a chip or a toast. Every other coloured component in the library takes its own table from this one.',
+      text: '<code>variant</code> offers four ways of painting the button, and <code>tone</code> three meanings: <code>accent</code>, <code>neutral</code> and <code>danger</code>.',
     },
     elevated: {
       title: 'Elevated',
-      text: '<code>elevated</code> is a boolean rather than a fifth variant: it applies the shadow scale to whichever variant is in use, as the second row below shows. A ghost or an outline button also gains a raised background, which is not decoration but necessity: in the dark theme a shadow lying straight on the page has nothing casting it.',
+      text: '<code>elevated</code> applies the shadow scale to whichever variant is in use. A ghost or outline button also gains a raised background.',
     },
     sizes: {
       title: 'Sizes',
-      text: 'Five heights, from the scale every control in the library shares: 24, 32, 40, 48 and 56 pixels. The type, the padding and the icons all follow the step, so a size is one prop and not a set of measurements to keep in agreement.',
+      text: '<code>size</code> sets the height: 24, 32, 40, 48 or 56 pixels. The type, the padding and the icons follow.',
     },
     compact: {
       title: 'Compact',
-      text: 'Each pair below is one step of the scale, the second of the two <code>compact</code>: 4px come off the height and nothing else moves. It is for a dense toolbar, where a button has to line up with a row rather than stand on its own.',
+      text: '<code>compact</code> takes 4px off the height, nothing else moving.',
     },
     fullWidth: {
       title: 'Full width',
-      text: '<code>fullWidth</code> stretches the button across the whole inline size of its parent, which is what a form footer or a narrow column usually asks for. The two columns below are the same width and align their contents to the start, so the second pair is wider only because of the prop. The button also becomes block level, so it no longer rests on a line of text and nothing adds a descender underneath it. In a layout that already stretches its children, a grid track or a flex column with the default alignment, the prop has nothing left to do.',
+      text: '<code>fullWidth</code> stretches the button across the inline size of its parent and makes it block level.',
     },
     icons: {
       title: 'With icons',
-      text: '<code>iconStart</code> and <code>iconEnd</code> put an icon on either side of the label, and both can be given at once. <code>iconFilled</code> switches them to their filled form, the FILL axis of the icon: the last two buttons are the same bell, hollow then filled, which is how a state is shown without changing the glyph. The <code>#start</code> and <code>#end</code> slots take over when the content is more than an icon, and <code>iconFilled</code> then has nothing to act on.',
+      text: '<code>iconStart</code> and <code>iconEnd</code> put an icon on either side of the label, and <code>iconFilled</code> switches them to their filled form. The <code>#start</code> and <code>#end</code> slots take over when the content is more than an icon.',
     },
     customIcons: {
       title: 'Custom icons',
-      text: 'Both icon props take an <code>IconSource</code>, which is what every icon prop in the library takes: one of the library icons, a plain name handed to the resolver the application installed, raw SVG path data, a component whose root is a single <code>&lt;svg&gt;</code>, or an image. A string is always a NAME and never an address, which is what lets <code>mdi:close</code> reach a resolver intact. The Iconography page covers the two remaining forms, a ligature font and a class-driven font, each of which needs a font loaded before it shows anything.',
+      text: 'Both icon props take an <code>IconSource</code>: one of the library icons, a name handed to the resolver your application installed, SVG path data, a component, or an image.',
     },
     link: {
       title: 'Link',
-      text: 'Given an <code>href</code>, the button renders an <code>&lt;a&gt;</code>: middle-click, open in a new tab and the browser status bar all come back, none of which a click handler on a <code>&lt;button&gt;</code> can imitate. A disabled or loading link is made inert rather than merely greyed, HTML having no <code>disabled</code> for a link: the address is dropped, so it can be neither focused nor followed.',
+      text: '<code>href</code> renders the button as an <code>&lt;a&gt;</code>. A disabled or loading link is made inert, its address dropped.',
     },
     states: {
       title: 'States',
-      text: 'A disabled button greys out through the colour tokens rather than through opacity, which is what keeps its label legible on every surface. <code>loading</code> is the one exception to that rule, and it does three things at once: it disables the button, announces it as busy, and puts a spinner where the start icon was, so the two are never shown side by side.',
+      text: '<code>disabled</code> greys the button out through the colour tokens. <code>loading</code> disables it, announces it as busy and puts a spinner where the start icon was.',
     },
   },
 

@@ -5,51 +5,51 @@ export default {
   examples: {
     variants: {
       title: 'Variantes et tonalités',
-      text: "La variante empaquette deux décisions dans un mot : la piste sur laquelle reposent les onglets, et le cadre autour de l'ensemble. <code>flat</code> trace une règle sous la rangée et souligne l'onglet sélectionné ; <code>outlined</code> est la même barre avec ses panneaux dans une carte, la règle devenant la frontière entre les deux ; <code>inset</code> pose la rangée dans une piste creusée et en fait un segmented control, ce qui est la raison pour laquelle elle n'est jamais encadrée, étant déjà une surface à elle. La tonalité colore l'onglet sélectionné et rien d'autre : les autres restent neutres quoi qu'elle dise, un seul d'entre eux affirmant quelque chose. Trois tonalités, celles que propose un bouton, puisque chaque onglet en est un.",
+      text: "<code>variant</code> pose d'un mot le rail et le cadre : <code>flat</code> trace un filet sous la rangée et souligne l'onglet choisi, <code>outlined</code> met cette même barre et ses panneaux dans une carte, <code>inset</code> pose la rangée dans un rail creux. <code>tone</code> colore l'onglet choisi et rien d'autre, avec les trois valeurs qu'offre un bouton.",
     },
     sizes: {
       title: 'Tailles',
-      text: "L'échelle que partagent tous les contrôles, de 24 à 56 pixels, <code>compact</code> en retirant 4px. Elle se pose une fois sur la barre et chaque onglet est un bouton de cette taille : un onglet et un bouton côte à côte s'alignent, au lieu de presque s'aligner.",
+      text: "<code>size</code> reprend l'échelle partagée par tous les contrôles, de 24 à 56 pixels, et <code>compact</code> lui retire 4px. Elle se pose une fois sur la barre.",
     },
     tabContent: {
       title: 'Ce que porte un onglet',
-      text: "Un libellé, une icône à l'une ou l'autre extrémité, ou le slot par défaut pour ce qu'une chaîne ne peut pas contenir, un compteur ou un badge. Un onglet réduit à son icône doit quand même dire ce qu'il est : sans libellé il ne reste aucun nom accessible, donnez-lui-en un. L'icône de fin est la place de ce que l'onglet porte plutôt que de ce qu'il est : un nombre d'éléments, un état.",
+      text: "Un onglet accepte un libellé, une icône à chaque extrémité par <code>iconStart</code> et <code>iconEnd</code>, ou le slot par défaut pour ce qu'une chaîne ne peut pas porter. Un onglet réduit à son icône demande toujours un <code>label</code>, qui est alors son nom accessible.",
     },
     panels: {
       title: 'Panneaux',
-      text: "Un panneau masqué est masqué et non détruit : ce qu'il contient garde son état, et un champ à l'intérieur est toujours soumis avec le formulaire. <code>lazy</code> est l'exception, et seulement pour le premier affichage : il retient le contenu jusqu'à ce que le panneau soit ouvert une fois, puis le conserve comme les autres, ce que veut un panneau coûteux. Omettre le slot ne rend aucune zone de panneaux, et c'est l'autre moitié du composant : la même barre devient alors un segmented control qui bascule une vue vivant ailleurs sur la page. Le slot doit être présent ou absent dès le départ, jamais apparaître ensuite : l'existence des panneaux se décide une fois et doit concorder entre le serveur et le navigateur.",
+      text: "Un panneau masqué est masqué et non détruit : son contenu garde son état et un champ qu'il contient est toujours soumis. <code>lazy</code> retient le contenu jusqu'à la première ouverture. Sans le slot <code>#panels</code>, aucune zone de panneaux n'est rendue, et ce slot doit être présent ou absent dès le départ.",
     },
     alignment: {
       title: 'Alignement',
-      text: "Où se placent les onglets le long de la barre quand ils ne la remplissent pas. Cela se pose sur la barre et non sur la liste d'onglets, et ce n'est pas un détail : pousser une liste qui déborde mettrait définitivement hors d'atteinte ce qui dépasse du bord de départ.",
+      text: '<code>align</code> dit où se placent les onglets le long de la barre quand ils ne la remplissent pas. Il se pose sur la barre et non sur la liste des onglets.',
     },
     grow: {
       title: 'Remplir la barre',
-      text: "Les onglets se partagent toute la barre à parts égales, quoi que valent leurs libellés, ce qui transforme une rangée courte en segmented control couvrant son conteneur. Un libellé trop long pour sa part est tronqué plutôt qu'autorisé à l'élargir. Remplir et défiler sont incompatibles par construction : des onglets sommés de remplir la barre ne peuvent jamais la déborder.",
+      text: '<code>grow</code> partage toute la barre entre les onglets en parts égales, un libellé trop long pour sa part étant tronqué. Il est incompatible avec le défilement par construction.',
     },
     orientation: {
       title: 'Orientation',
-      text: "Sur le côté plutôt qu'en travers. Les panneaux se placent alors à côté des onglets et non en dessous, les flèches suivent l'axe, et les boutons de défilement passent aux extrémités de la colonne, leurs icônes tournées en conséquence. Une chose bouge qui mérite d'être sue : encadrée, la règle entre les onglets et les panneaux change de bord, le cadre traçant déjà celle de l'extérieur et ce qui manque étant la frontière entre les deux moitiés.",
+      text: "<code>orientation</code> à <code>vertical</code> fait descendre les onglets sur le côté, les panneaux se plaçant à côté d'eux et les flèches suivant l'axe.",
     },
     scrolling: {
       title: 'Défilement',
-      text: "Trop d'onglets pour la place et la barre défile : au doigt, au trackpad, et au clavier, où les flèches ramènent dans le champ l'onglet qu'elles atteignent. La barre de défilement elle-même est masquée, les onglets qui filent hors du bord étant l'indice. Une chose à savoir sur le conteneur : un élément de grille ou de flex ne rétrécit pas en dessous de son contenu sans qu'on le lui dise, donc sans une taille minimale nulle la liste élargit son parent au lieu de déborder.",
+      text: "Trop d'onglets pour la place et la barre défile, au doigt, au pavé tactile et au clavier. Le conteneur demande une taille minimale nulle, sans quoi la liste élargit son parent au lieu de déborder.",
     },
     scrollButtons: {
       title: 'Boutons de défilement',
-      text: "Un bouton à chaque extrémité de la barre, désactivé dès que cette extrémité est atteinte, pour un pointeur qui n'a pas de molette. Ils sont facultatifs parce que sur une barre qui ne déborde jamais ils seraient deux contrôles désactivés en permanence, et ils excluent <code>grow</code> pour la même raison.",
+      text: '<code>scrollButtons</code> ajoute un bouton à chaque extrémité de la barre, chacun désactivé une fois cette extrémité atteinte. Il est optionnel, et exclut <code>grow</code>.',
     },
     customArrows: {
       title: 'Flèches personnalisées',
-      text: "Les icônes par défaut suivent l'orientation, chevrons en travers et carets en hauteur : il n'y a donc rien à poser sur l'un ou l'autre axe. Remplacez-les quand le design autour en demande un autre glyphe. Les libellés sont ce qu'un lecteur d'écran lit pour ces deux boutons, et ils retombent sur le dictionnaire du design system dans la langue courante.",
+      text: "<code>prevIcon</code> et <code>nextIcon</code> remplacent les flèches, dont les valeurs par défaut suivent l'orientation. <code>prevLabel</code> et <code>nextLabel</code> sont ce que lit un lecteur d'écran pour ces deux boutons, et se rabattent sur le dictionnaire.",
     },
     activation: {
       title: "Sélectionner à l'arrivée",
-      text: "Manuel par défaut : une flèche déplace le focus, Entrée ou Espace sélectionne. En automatique, arriver sur un onglet le sélectionne, ce que recommandent les pratiques ARIA quand le panneau s'affiche instantanément, le lecteur entendant chaque panneau en parcourant la rangée au lieu de confirmer chacun. Restez en manuel quand afficher un panneau coûte une requête, sinon chaque onglet traversé en chemin en déclencherait une.",
+      text: "<code>activation</code> est manuelle par défaut : une flèche déplace le focus, et Entrée ou Espace choisit. En automatique, l'onglet atteint par le focus est choisi, ce qui convient à un panneau qui apparaît instantanément.",
     },
     disabled: {
       title: 'Onglets désactivés',
-      text: "Un onglet désactivé est un bouton désactivé : il ne répond plus, se grise par les tokens de couleur plutôt que par une opacité, et les flèches l'enjambent comme s'il n'était pas dans la rangée. Son panneau n'est simplement jamais affiché. Prenez garde à ne pas laisser la valeur pointer dessus : une barre dont l'onglet sélectionné ne peut pas être activé n'a plus aucun arrêt de tabulation et devient inatteignable au clavier.",
+      text: "Un onglet <code>disabled</code> ne répond plus, se grise par les tokens de couleur et est enjambé par les flèches. Ne laissez pas la valeur pointer dessus, sinon la barre n'a plus aucun arrêt de tabulation.",
     },
   },
 

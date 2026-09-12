@@ -5,27 +5,27 @@ export default {
   examples: {
     width: {
       title: 'Width',
-      text: 'A CSS length in any unit, 400px unless you say otherwise. Whatever is asked for, the dialog never exceeds the viewport and keeps a margin on either side, so a width set in pixels needs no defending against a narrow screen. The height follows the same rule, which is what turns a tall dialog into a scrolling one rather than one running off the screen.',
+      text: '<code>width</code> takes a CSS length in any unit, 400px by default. The dialog never exceeds the viewport and keeps a margin on either side.',
     },
     longContent: {
       title: 'Long content',
-      text: 'Only the body scrolls. The header and the footer stay where they are, which keeps the scrollbar off them and the buttons reachable without scrolling to the end. Hairlines appear under the header and above the footer exactly while content is passing behind them, drawn by two sentinels inside the scrolling area that ask it whether anything is still hidden. That question is a recent one, so where it cannot be asked the lines simply stay invisible and nothing else changes.',
+      text: 'Only the body scrolls, the header and the footer staying where they are. Hairlines appear under the header and above the footer while content is passing behind them.',
     },
     customHeader: {
       title: 'Custom header',
-      text: 'The <code>#header</code> slot replaces the whole title and subtitle block, controls of your own included. The <code>title</code> prop is then ignored, and with it the accessible name it was providing, so name the dialog with an <code>aria-label</code> instead. The close cross is untouched: it belongs to the header actions beside the slot, not to what the slot replaces.',
+      text: 'The <code>#header</code> slot replaces the whole title and subtitle block. The <code>title</code> prop is then ignored, so name the dialog with an <code>aria-label</code> instead. The close cross is untouched.',
     },
     headerActions: {
       title: 'Header actions',
-      text: 'The <code>#header-actions</code> slot adds controls to the header, rendered before the close cross so that the cross stays at the edge where the reader looks for it. It is the place for what acts on the dialog itself rather than on the answer it is asking for: a menu, a details toggle, a full-screen switch. The footer is where the answer belongs.',
+      text: 'The <code>#header-actions</code> slot adds controls to the header, rendered before the close cross so that the cross stays at the edge.',
     },
     dismissal: {
       title: 'Dismissal',
-      text: 'A dialog can be left three ways, and each can be closed off. <code>hideClose</code> takes the cross away, <code>persistentBackdrop</code> ignores a click outside, and <code>persistentEscape</code> ignores the key. The last two are declared to the browser rather than handled in code, which has one consequence worth knowing: refusing Escape while a click outside still closes cannot be expressed natively, so asking for it allows both again. Close every route off and the footer is the only way out, which makes supplying one mandatory.',
+      text: '<code>hideClose</code> takes the cross away, <code>persistentBackdrop</code> ignores a click outside and <code>persistentEscape</code> ignores the key. Closing every route off makes a footer mandatory.',
     },
     alert: {
       title: 'Alert dialog',
-      text: "VDialogAlert is this dialog with its options fixed, and the fixed options are what change its nature: it is announced as an alert rather than an ordinary dialog, and there is no cross, no Escape and no click outside. The footer is the reader's only way out, so it is not optional. Reserve it for what must be answered explicitly, a deletion or a failure, and leave everything else to VDialog.",
+      text: 'VDialogAlert is this dialog with its options fixed: it is announced as an alert, and there is no cross, no Escape and no click outside, so its footer is not optional.',
     },
   },
 

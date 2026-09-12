@@ -5,39 +5,39 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Libellé et aide',
-      text: "C'est le seul champ de la bibliothèque dont le <code>label</code> ne rend rien. Il nomme la rangée pour les technologies d'assistance et s'arrête là, parce qu'une rangée de cases prend ses instructions de la page au-dessus d'elle, écrites là où elles se lisent le mieux et dans la typographie de cette page. <code>hint</code> est le texte que le lecteur voit réellement, rattaché à la rangée pour être annoncé avec le libellé : où le code a été envoyé, combien de temps il dure.",
+      text: "<code>label</code> n'affiche rien ici : il nomme la rangée pour les technologies d'assistance. <code>hint</code> est le texte que voit le lecteur, lié à la rangée pour être lu avec le libellé.",
     },
     sizes: {
       title: 'Tailles',
-      text: "Trois hauteurs, 32, 40 et 48 pixels, chacune avec sa version <code>compact</code> plus courte de 4px. Le caractère à l'intérieur est agrandi d'un cran ou deux au-dessus de celui de la rangée, un code se lisant un glyphe à la fois plutôt que comme un mot, et <code>compact</code> le laisse exactement où il était.",
+      text: "<code>size</code> définit la hauteur à 32, 40 ou 48 pixels, et <code>compact</code> lui retire 4px. Le caractère à l'intérieur est agrandi d'un ou deux crans au-dessus du palier de la rangée.",
     },
     length: {
       title: 'Longueur',
-      text: "Combien de cases le code comporte, six par défaut. Quatre convient à un code PIN, huit à un code de secours. Elle est ignorée dès qu'un <code>pattern</code> est donné, celui-ci disant déjà combien il y a de cases.",
+      text: "<code>length</code> est le nombre de cases du code, six par défaut. Elle est ignorée dès qu'un <code>pattern</code> est donné.",
     },
     formats: {
       title: 'Formats',
-      text: "De quels caractères le code est fait. Cela filtre ce qui peut être saisi ou collé, et décide aussi du clavier qu'un téléphone propose, un code numérique faisant apparaître le pavé de chiffres plutôt que le clavier complet. Hors du format numérique, la valeur est forcée en capitales quelle que soit la casse saisie, si bien que ce qui arrive à votre vérification a une forme canonique unique.",
+      text: "<code>format</code> décide des caractères dont le code est fait, filtre ce qui peut être saisi ou collé et choisit le clavier qu'offre un téléphone. Hors code numérique, la valeur est forcée en majuscules.",
     },
     pattern: {
       title: 'Gabarit',
-      text: "La forme du code, écrite noir sur blanc : chaque <code>#</code> est une case à remplir et tout autre caractère est un littéral dessiné entre les cases. Un littéral ne se saisit jamais et n'entre jamais dans la valeur : un gabarit <code>GT-###</code> donne donc toujours trois caractères. Le gabarit l'emporte sur <code>length</code>, alors ignorée.",
+      text: "<code>pattern</code> écrit la forme du code : chaque <code>#</code> est une case à remplir et tout autre caractère un littéral dessiné entre les cases, jamais saisi et jamais compris dans la valeur. Il l'emporte sur <code>length</code>.",
     },
     separators: {
       title: 'Séparateurs',
-      text: "Une icône peut remplacer les littéraux que dessine un gabarit. Elle les remplace tous, elle convient donc à un gabarit dont les séparateurs sont de la ponctuation et rien d'autre. Tenez-la à l'écart d'un gabarit portant un vrai préfixe comme <code>GT-###</code>, où elle effacerait les deux caractères qui disent ce qu'est le code.",
+      text: '<code>separatorIcon</code> remplace les littéraux dessinés par un pattern, tous sans exception : elle convient donc à un gabarit dont les séparateurs ne sont que de la ponctuation.',
     },
     pasting: {
       title: 'Collage et remplissage automatique',
-      text: "Un code collé n'importe où dans la rangée est réparti sur toutes les cases, et les littéraux du gabarit sont consommés avec lui : une référence copiée dans sa forme formatée, <code>GT-4F2</code>, atterrit comme les trois caractères qu'elle est réellement au lieu d'être refusée. La première case porte <code>autocomplete=\"one-time-code\"</code>, si bien qu'un code arrivant d'un SMS ou d'un gestionnaire de mots de passe est réparti de la même façon, et ce que le format refuse est écarté plutôt que d'interrompre le collage.",
+      text: "Un code collé n'importe où dans la rangée est réparti sur toutes les cases, les littéraux du pattern étant absorbés avec lui. La première case porte <code>autocomplete=\"one-time-code\"</code>, si bien qu'un code venu d'un SMS ou d'un gestionnaire de mots de passe est réparti de la même façon.",
     },
     reading: {
       title: 'Lire le code',
-      text: "La valeur est une seule chaîne faite des caractères seuls, jamais des séparateurs, et elle est plus courte que la rangée pendant la saisie. <code>complete</code> part une fois toutes les cases remplies, en portant le code achevé : c'est le signal de vérification, plutôt qu'une chose à déduire en comparant vous-même la longueur de la valeur au nombre de cases.",
+      text: 'La valeur est une seule chaîne des caractères seuls, jamais des séparateurs. <code>complete</code> est émis dès que toutes les cases sont remplies, avec le code terminé.',
     },
     states: {
       title: 'États',
-      text: "<code>disabled</code> met toute la rangée hors d'atteinte, grisée par les jetons de couleur. <code>readonly</code> se place entre les deux : le code est montré et figé, tandis que les cases gardent le focus et que le code reste sélectionnable et copiable, ce dont a besoin une référence à reporter ailleurs. <code>invalid</code> colore les cases et signale aux technologies d'assistance que le code a été refusé.",
+      text: "<code>disabled</code> met toute la rangée hors de portée, grisée par les tokens de couleur. <code>readonly</code> montre le code figé pendant que les cases gardent le focus et restent copiables. <code>invalid</code> colore les cases et indique aux technologies d'assistance que le code a été refusé.",
     },
   },
 

@@ -5,67 +5,67 @@ export default {
   examples: {
     sorting: {
       title: 'Sorting',
-      text: 'A column marked <code>sortable</code> gets a heading that can be clicked, and the table orders the rows itself: ascending, then descending, then back to the order it was given. The ascending icon points down, the spreadsheet convention, since sorting A to Z reads downwards. The sort is a model, so a table can open on a column already sorted and what the reader clicks can be read back. Changing it leaves the reader on the page they were on.',
+      text: 'A column marked <code>sortable</code> gets a clickable heading, cycling ascending, descending, then the order the rows were given. <code>v-model:sort</code> reads and sets that state.',
     },
     search: {
       title: 'Search',
-      text: '<code>searchable</code> puts a field in the toolbar. Only the declared columns are searched, ignoring case and accents, so eclair finds Éclair and the reader never has to know where the diacritic went. The term is a model of its own, <code>v-model:search</code>, which is what lets the search be driven from elsewhere on the page. Searching sends the reader back to the first page: the page they were on says nothing about the rows that are left.',
+      text: '<code>searchable</code> puts a field in the toolbar, which searches the declared columns while ignoring case and accents. <code>v-model:search</code> drives the term from elsewhere on the page.',
     },
     pagination: {
       title: 'Pagination',
-      text: 'Any page size above zero turns the pagination on, so passing one down is enough, bound or not. The page is clamped by derivation rather than written to, so a page past the last simply shows the last and rows disappearing under a search never leave the reader looking at nothing. <code>showRange</code> adds the count beside the nav, which is what tells the reader how much is left when the rows themselves cannot.',
+      text: 'Any <code>v-model:per-page</code> above zero turns the pagination on. <code>showRange</code> adds the row count beside the nav.',
     },
     rowsPerPage: {
       title: 'Rows per page',
-      text: '<code>perPageOptions</code> adds a menu to the footer, letting the reader choose how many rows a page holds. Bind <code>v-model:per-page</code> to know what was chosen, or leave it and the table keeps it to itself. Changing the size sends the reader back to the first page, the one number that is still meaningful once the pages have been cut differently.',
+      text: '<code>perPageOptions</code> adds a menu to the footer for choosing how many rows a page holds. <code>v-model:per-page</code> reports what was chosen.',
     },
     selection: {
       title: 'Selection',
-      text: 'A checkbox on every row, and one in the heading for the whole page. <code>rowKey</code> is required with it: what comes back are the identities that field gives, never the row objects, and without one a row is identified by its position, which sorting, filtering and paging all corrupt. A selection survives a change of page while the heading checkbox covers the visible page alone, which is why it can be indeterminate. Naming the row checkboxes from the row itself is worth the line: "Select row" tells a screen reader user nothing about which one.',
+      text: '<code>selectable</code> adds a checkbox to every row and one to the heading for the visible page. <code>rowKey</code> is required with it, and <code>v-model:selected</code> holds the identities that field gives.',
     },
     toolbar: {
       title: 'Toolbar',
-      text: 'The <code>#header</code> slot replaces the <code>title</code> prop and takes the left of the toolbar, the search field keeping the right. Filters belong there, and the filtering itself stays yours: the table shows the rows it is given and narrows them further with its own search, so the two work on top of one another rather than against one another.',
+      text: 'The <code>#header</code> slot replaces the <code>title</code> prop and takes the left of the toolbar, the search field keeping the right.',
     },
     customCells: {
       title: 'Custom cells',
-      text: "A slot named after a column key replaces what that column's cells show, and receives the row, the raw value and the column. Searching and sorting still read the underlying value, so a formatted number sorts as a number and a status drawn as a chip is still found by the word it carries.",
+      text: "A slot named after a column key replaces what that column's cells show, and receives the row, the raw value and the column. Searching and sorting still read the underlying value.",
     },
     customHeadings: {
       title: 'Custom headings',
-      text: 'A slot named <code>head-</code> plus the column key replaces a heading. On a sortable column it renders inside the sort button, so keep it to text and decoration: a control there would be a control inside a control, which nothing in the accessibility tree can make sense of. The sort state is already carried by the heading itself.',
+      text: 'A slot named <code>head-</code> plus the column key replaces a heading. On a sortable column it renders inside the sort button, so keep it to text and decoration.',
     },
     variants: {
       title: 'Variants',
-      text: "Flat carries no decoration at all and sits on whatever surface it is placed on. Outlined makes the table a card, with a raised background, a border and rounded corners, and opens a gutter so the toolbar, the caption and the footer do not touch the frame. The heading takes the frame's own background, which is what keeps a sticky heading from showing a seam.",
+      text: '<code>variant</code> sets the decoration: <code>flat</code> carries none, <code>outlined</code> adds a raised background, a border, rounded corners and a gutter around the toolbar, the caption and the footer.',
     },
     compact: {
       title: 'Compact',
-      text: 'One step tighter on every cell, and on everything the table renders with them: the search field, the page size menu and the pagination all take the shorter step, so the whole component stays one object rather than a dense table surrounded by roomy furniture.',
+      text: '<code>compact</code> tightens every cell, and the search field, the page size menu and the pagination with them.',
     },
     striped: {
       title: 'Striped rows',
-      text: 'Tints every other row, which helps the eye follow a long line across the table. The space left under the last row stays bare: rows have no fixed height, so there is nothing to measure a continuing pattern against.',
+      text: '<code>striped</code> tints every other row.',
     },
     stickyHeader: {
       title: 'Sticky header',
-      text: "Keeps the column headings in place while the rows scroll under them. It needs a bounded scrolling area to work, either the <code>height</code> prop as below or a parent with a height of its own. The headings are painted on the table's own surface, so the rows pass behind them rather than through them.",
+      text: '<code>stickyHeader</code> keeps the column headings in place while the rows scroll. It needs a bounded scrolling area, either the <code>height</code> prop or a parent with a height of its own.',
     },
     fullHeight: {
       title: 'Full height',
-      text: "<code>height</code> bounds the whole component, toolbar and footer included, a number being read as pixels. Left out, the table takes its parent's height whenever the parent has one: only the rows stretch and scroll, the toolbar and the footer keeping their places whatever the page holds. A parent with no height of its own changes nothing, so this costs nothing where it is not wanted.",
+      text: "<code>height</code> bounds the whole component, toolbar and footer included, a number being read as pixels. Left out, the table takes its parent's height whenever the parent has one.",
     },
     responsive: {
       title: 'Narrow containers',
-      text: "Too narrow to hold its columns, the table scrolls sideways, or turns each row into a card with its column headings repeated inside it. The threshold is the component's own width rather than the window's, measured by a container query, so a table in a narrow panel stacks while the page around it stays wide.",
+      text: '<code>responsive</code> decides what a container too narrow for the columns does: scroll sideways, or turn each row into a card with its column headings repeated inside it.',
     },
     serverSide: {
       title: 'Server side',
-      text: "<code>serverSide</code> hands the searching, the sorting and the paging over: the rows are shown exactly as they arrive, and <code>update:params</code> reports every change of what is being asked for. Pass <code>total</code> so the pagination and the range can be right about rows the table never holds. Nothing is emitted when the table appears, the first page being the page's own business, which is what stops every table fetching twice. The search is delayed by <code>searchDebounce</code>, and the term and the return to the first page arrive as one emission rather than two.",
+      text: '<code>serverSide</code> hands the searching, the sorting and the paging over: the rows are shown as they arrive and <code>update:params</code> reports every change. Pass <code>total</code> for the pagination and the range, and <code>searchDebounce</code> to delay the search.',
     },
     states: {
       title: 'Loading and empty',
-      text: "<code>loading</code> shows a spinner in place of the rows, and it is answered before emptiness, so a table waiting for its rows never claims there are none. With nothing to show and nothing loading, <code>emptyText</code> is said instead, in the design system's own words unless you supply yours.",
+      text: '<code>loading</code> shows a spinner in place of the rows, and is answered before emptiness. <code>emptyText</code> is what the table says when there is nothing to show.',
     },
     fullTable: {
       title: 'A complete table',

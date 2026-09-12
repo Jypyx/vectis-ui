@@ -5,35 +5,35 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label and hint',
-      text: 'The label is a real <code>&lt;label&gt;</code> tied to the field, so clicking the words puts the cursor in the box. The hint goes under the field and is tied to it as well, through <code>aria-describedby</code>, which is what has it read out after the label rather than left on the page as loose text. Both are props and not slots: what they hold is a sentence, and the field needs it as a string to point at.',
+      text: '<code>label</code> is a real <code>&lt;label&gt;</code> tied to the field, so clicking the words puts the cursor in the box. <code>hint</code> goes under the field and is tied to it through <code>aria-describedby</code>.',
     },
     sizes: {
       title: 'Sizes',
-      text: 'Three sizes, the same three every text field in the library offers. A size sets the padding, the type scale and the icons, never the height: that one comes from <code>rows</code>. <code>compact</code> takes 4px off the padding at any of the three, for a dense form, and leaves the number of lines and the type where they were.',
+      text: '<code>size</code> sets the padding, the type scale and the icons, never the height, which comes from <code>rows</code>. <code>compact</code> takes 4px off the padding at any of the three.',
     },
     icons: {
       title: 'Icons',
-      text: 'An icon at either end of the field, or at both. They are decorative here, so the field keeps the name its label gives it. They sit on the first line rather than in the middle of the box, which is what keeps them level with the start of the text in a field several lines tall. The <code>#end</code> slot replaces the end icon when what belongs there is not an icon; <code>#start</code> is rendered after the start icon instead of in its place, as in <code>VInput</code>.',
+      text: '<code>iconStart</code> and <code>iconEnd</code> place a decorative icon at either end, on the first line rather than in the middle of the box. The <code>#end</code> slot replaces the end icon, where <code>#start</code> is rendered after the start icon rather than in its place.',
     },
     clickableIcons: {
       title: 'Clickable icons',
-      text: 'An icon becomes a real button as soon as a <code>@click:icon-start</code> or <code>@click:icon-end</code> listener is attached, and it then needs a label, which is the only thing naming that button. Forget it and the field says so in development. Each button is its own tab stop, before or after the text according to the side it sits on, and it stays outside the textarea, so typing is never interrupted by it.',
+      text: 'A <code>@click:icon-start</code> or <code>@click:icon-end</code> listener turns that icon into a real button, which then needs its label. Each button is its own tab stop and stays outside the textarea.',
     },
     clearable: {
       title: 'Clearable',
-      text: 'The cross shows when there is something to clear and the field can be edited, so it is absent while the field is empty, disabled or read only. Pressing it empties the value and hands focus straight back to the textarea: the cross goes with the text, and without that a keyboard user would be left standing on nothing. The <code>clear</code> event fires after the fact, the field already empty.',
+      text: '<code>clearable</code> adds a cross that empties the field, shown while there is something to clear and the field can be edited. Pressing it hands the focus straight back to the textarea, and <code>clear</code> fires after the fact.',
     },
     counters: {
       title: 'Counters',
-      text: 'The counter goes under the field, beside the hint, where several lines of text would run into it inside the box. Against <code>maxlength</code> it reads 12/80 and the browser refuses everything past the limit. <code>softLimit</code> turns that refusal into an error: the reader may type on, the counter goes red, and the field reports itself invalid through the native validity, so the form cannot be submitted over the limit. With no limit at all, the counter only counts.',
+      text: '<code>counter</code> goes under the field, beside the hint. Against <code>maxlength</code> the browser refuses everything past the limit, where <code>softLimit</code> lets the reader type on: the counter goes red and the field reports itself invalid through the native validity.',
     },
     autoGrow: {
       title: 'Auto grow',
-      text: '<code>rows</code> gives the field its starting height, and by default that is its height full stop: past it the text scrolls. <code>autoGrow</code> lets the box get taller as the text is typed. It is pure CSS, through <code>field-sizing</code>, so nothing is measured and no JavaScript runs; a browser without it keeps the fixed height and its scrollbar, which is a smaller field rather than a broken one.',
+      text: '<code>rows</code> gives the field its starting height, and by default its height full stop. <code>autoGrow</code> lets the box get taller as the text is typed, in pure CSS.',
     },
     states: {
       title: 'States',
-      text: 'Invalid, disabled, read only, loading. <code>invalid</code> is for a rule the browser cannot check by itself, a name already taken or anything only the server knows; native validity is handled without it. A disabled field greys out through the colour tokens rather than an opacity, so its text keeps its contrast. A read only one can still be focused and copied from, which is the whole difference, and it hides the clear cross. Loading puts a spinner where the end icon goes, and the field stays usable while it turns.',
+      text: '<code>invalid</code> is for a rule the browser cannot check by itself. <code>disabled</code> greys the field out through the colour tokens. <code>readonly</code> can still be focused and copied from, and hides the clear cross. <code>loading</code> puts a spinner where the end icon goes, the field staying usable.',
     },
   },
 
