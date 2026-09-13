@@ -109,15 +109,15 @@ export default {
           'The icon of an ascending sort. It points down by default, the spreadsheet convention: sorting A to Z reads downwards.',
         sortDescIcon: 'The icon of a descending sort.',
         perPageOptions: 'The choices offered for how many rows a page holds.',
-        perPageLabel: 'What that choice is called. It falls back to the design system dictionary.',
+        perPageText: 'What that choice is called. It falls back to the design system dictionary.',
         total:
           'How many rows there are in all on the server. It is what lets the pagination and the range be right when the table only ever holds one page.',
         showRange: 'Shows which rows are being looked at, "1 to 10 of 42", in the footer.',
-        rangeLabel: 'Rephrases that range. It falls back to the design system dictionary.',
+        rangeText: 'Rephrases that range. It falls back to the design system dictionary.',
         selectable: 'Adds a checkbox to every row, and one in the heading to take the whole page.',
         selectAllLabel:
           'What the heading checkbox is announced as. It falls back to the design system dictionary.',
-        selectionLabel:
+        selectionText:
           'How the selection is summed up in the footer. It says nothing at all when nothing is selected, and falls back to the design system dictionary.',
         selectRowLabel:
           'What a row\'s checkbox is announced as. "Select row" tells a screen reader user nothing about which row, so this is worth supplying with something from the row itself. It falls back to the design system dictionary.',

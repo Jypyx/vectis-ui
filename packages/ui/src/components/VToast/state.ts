@@ -20,6 +20,9 @@ import type { IconSource } from '../VIcon/types'
 
 export type ToastTone = 'neutral' | 'accent' | 'success' | 'danger' | 'warning'
 
+/** How strongly a notification is painted: a tinted background with a border, or the full colour. */
+export type ToastVariant = 'soft' | 'solid'
+
 export type ToastPlacement =
   'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
 
@@ -32,7 +35,7 @@ export interface ToastOptions {
   /** What the notification means, expressed as a colour, and which icon it takes by default. */
   tone?: ToastTone
   /** How strongly it is painted: a tinted background with a border, or the full colour. */
-  variant?: 'soft' | 'solid'
+  variant?: ToastVariant
   /**
    * The icon to show. Left out, the tone brings its own; `false` removes it
    * altogether.
@@ -45,8 +48,11 @@ export interface ToastOptions {
   duration?: number
   /** Which corner it appears in. Left out, it takes the one set on the VToaster. */
   placement?: ToastPlacement
-  /** Shows the close cross. */
-  closable?: boolean
+  /**
+   * Takes the close cross away, leaving the notification to its duration or to
+   * `dismissToast`. Keep the cross on a notification that stays until dismissed by hand.
+   */
+  hideClose?: boolean
   /**
    * How wide it is, as a CSS length. It is never allowed past the width of the
    * viewport, margins included.
@@ -61,8 +67,8 @@ export interface ToastOptions {
 export interface ToastItem extends ToastOptions {
   id: number
   tone: ToastTone
-  variant: 'soft' | 'solid'
-  closable: boolean
+  variant: ToastVariant
+  hideClose: boolean
 }
 
 /** The queue itself. It is internal, read only by VToaster, and not public API. */
@@ -81,7 +87,7 @@ let nextId = 0
  */
 export function toast(options: ToastOptions): number {
   const id = nextId++
-  toasts.push({ tone: 'neutral', variant: 'soft', closable: true, ...options, id })
+  toasts.push({ tone: 'neutral', variant: 'soft', hideClose: false, ...options, id })
   return id
 }
 

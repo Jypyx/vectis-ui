@@ -305,14 +305,14 @@ describe('VSideNavigation', () => {
   })
 
   describe('icons and attributes', () => {
-    it('`icon` accepts a name as well as an explicit render; the #start slot wins', () => {
+    it('`icon` accepts a name as well as an explicit render; the #icon slot wins', () => {
       const { container } = renderNav(
         `
           <VSideNavigationItem href="/a" icon="home">Name</VSideNavigationItem>
           <VSideNavigationItem href="/b" :icon="logo">Render</VSideNavigationItem>
           <VSideNavigationItem href="/c" icon="home">
             Slot
-            <template #start><span data-testid="avatar" /></template>
+            <template #icon><span data-testid="avatar" /></template>
           </VSideNavigationItem>
         `,
         '',

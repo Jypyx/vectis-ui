@@ -37,11 +37,11 @@ export default {
     },
     customIcon: {
       title: 'Icône personnalisée',
-      text: "<code>attachIcon</code> est le glyphe en fin de champ qui ouvre la boîte de dialogue système, et il accepte toute valeur d'icône.",
+      text: "<code>pickerIcon</code> est le glyphe en fin de champ qui ouvre la boîte de dialogue système, et il accepte toute valeur d'icône.",
     },
     states: {
       title: 'États',
-      text: "<code>invalid</code> marque le champ en erreur. <code>readonly</code> garde la sélection visible et refuse toute façon de la changer. <code>disabled</code> grise le champ et le sort de l'ordre de tabulation. <code>noDrop</code> n'écarte que le dépôt, et <code>loading</code> est purement visuel, un indicateur remplaçant l'icône de pièce jointe. <code>attachIconLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment ce que chacun annonce.",
+      text: "<code>invalid</code> marque le champ en erreur. <code>readonly</code> garde la sélection visible et refuse toute façon de la changer. <code>disabled</code> grise le champ et le sort de l'ordre de tabulation. <code>noDrop</code> n'écarte que le dépôt, et <code>loading</code> est purement visuel, un indicateur remplaçant l'icône de pièce jointe. <code>pickerIconLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment ce que chacun annonce.",
     },
   },
 
@@ -58,7 +58,7 @@ export default {
         maxTotalSize: 'La taille maximale de toute la sélection, en octets.',
         maxFiles: 'Combien de fichiers peuvent être choisis au plus.',
         counter: 'Affiche ce qui a été choisi sous le champ, « 3 fichiers (1,2 Mo) ».',
-        attachIcon: "L'icône en fin de champ, qui ouvre la boîte de dialogue de fichiers.",
+        pickerIcon: "L'icône en fin de champ, qui ouvre la boîte de dialogue de fichiers.",
         noDrop:
           'Refuse les fichiers déposés sur le composant : seule la boîte de dialogue en ajoute alors.',
         size: 'La hauteur du champ : 32, 40 ou 48 pixels.',
@@ -76,7 +76,7 @@ export default {
         iconStart:
           "Une icône dans le champ, au début. Elle est rendue avant les chips et non à leur place. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
         iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
-        attachIconLabel:
+        pickerIconLabel:
           "Ce que fait l'icône de fin, en mots. Elle nomme le bouton qui ouvre la boîte de dialogue de fichiers, et sa valeur par défaut vient du dictionnaire du design system.",
         loading:
           "Affiche une roue à la place de l'icône de trombone, pendant un envoi. Elle ne change rien d'autre : les fichiers se déposent toujours et la boîte de dialogue s'ouvre toujours.",

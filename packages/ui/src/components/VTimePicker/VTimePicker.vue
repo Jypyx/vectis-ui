@@ -58,7 +58,7 @@ import { useLocale, useMessages } from '../../i18n/state'
 export type TimePickerFormat = HourFormat
 
 /** Which of the two halves of a time is being adjusted. */
-export type TimePickerStep = 'hour' | 'minute'
+type TimePickerStep = 'hour' | 'minute'
 
 interface TimePickerProps {
   /**

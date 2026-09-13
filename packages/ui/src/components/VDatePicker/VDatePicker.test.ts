@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VDatePicker from './VDatePicker.vue'
@@ -249,6 +249,19 @@ describe('VDatePicker', () => {
     await nextTick()
     expect(container.querySelector('.v-date-picker')?.getAttribute('data-view')).toBe('days')
     expect(getByRole('grid').getAttribute('aria-label')?.toLowerCase()).toContain('juin')
+  })
+
+  it('focus(options) hands its FocusOptions to the day it focuses', async () => {
+    const picker = ref<InstanceType<typeof VDatePicker> | null>(null)
+    const { container } = render({
+      setup: () => () => h(VDatePicker, { ref: picker, modelValue: JUNE }),
+    })
+    const day = container.querySelector('.v-date-picker-day[tabindex="0"]') as HTMLElement
+    const spy = vi.spyOn(day, 'focus')
+    picker.value?.focus({ preventScroll: true })
+    await nextTick()
+    expect(spy).toHaveBeenCalledWith({ preventScroll: true })
+    expect(document.activeElement).toBe(day)
   })
 
   it('navigates with the keyboard (arrows) and selects with Enter', async () => {

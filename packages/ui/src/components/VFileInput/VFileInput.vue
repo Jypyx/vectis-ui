@@ -17,6 +17,7 @@
 import { computed, inject, ref, useId, watchEffect } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
+import type { ChipSize } from '../VChip/VChip.vue'
 import { attach_file as attachFileIcon } from '../VIcon/icons/attach_file'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
@@ -66,7 +67,7 @@ interface FileInputProps {
   /** Shows how much has been chosen under the field: "3 files (1.2 MB)". */
   counter?: boolean
   /** The icon at the end of the field, which opens the file dialog. */
-  attachIcon?: IconSource
+  pickerIcon?: IconSource
   /** Refuses files dropped onto the component: only the dialog then adds any. */
   noDrop?: boolean
   /** The height of the field: 32, 40 or 48 pixels. */
@@ -106,14 +107,10 @@ interface FileInputProps {
   /** What the start icon does, in words, once it is clickable. */
   iconStartLabel?: string
   /**
-   * What the end icon does, in words. It names the button that opens the file dialog,
-   * and falls back to the design system dictionary.
+   * What the button at the end of the field does, in words. It names the button
+   * `pickerIcon` renders, and falls back to the design system dictionary.
    */
-  /**
-   * What the attach button does, in words. It names the button `attachIcon` renders, and falls back
-   * to the design system dictionary.
-   */
-  attachIconLabel?: string
+  pickerIconLabel?: string
   /**
    * Shows a spinner at the end of the field, in place of the attach icon — while an
    * upload is under way, typically. It says that something is happening and changes
@@ -145,7 +142,7 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   maxTotalSize: undefined,
   maxFiles: undefined,
   counter: false,
-  attachIcon: () => attachFileIcon,
+  pickerIcon: () => attachFileIcon,
   noDrop: false,
   size: 'md',
   compact: false,
@@ -157,7 +154,7 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   placeholder: undefined,
   iconStart: undefined,
   iconStartLabel: undefined,
-  attachIconLabel: undefined,
+  pickerIconLabel: undefined,
   loading: false,
   loadingLabel: undefined,
   clearable: false,
@@ -209,7 +206,7 @@ defineSlots<{
     index: number
     label: string
     remove: () => void
-    size: 'xs' | 'sm'
+    size: ChipSize
     compact: boolean
   }): unknown
   /**
@@ -317,9 +314,9 @@ const canClear = computed(
  * label, and it has no way of knowing whether an icon exists.
  */
 const endIcon = computed<IconSource | undefined>(() =>
-  props.readonly ? undefined : props.attachIcon,
+  props.readonly ? undefined : props.pickerIcon,
 )
-const endIconLabel = computed(() => props.attachIconLabel ?? m.value.fileInput.attach)
+const endIconLabel = computed(() => props.pickerIconLabel ?? m.value.fileInput.openPicker)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.fileInput.clear)
 
 const totalSize = computed(() => model.value.reduce((sum, file) => sum + file.size, 0))
@@ -540,7 +537,7 @@ defineExpose({
                 :size="chipScale.size"
                 :compact="chipScale.compact"
                 :dismissible="!readonly && !resolvedDisabled"
-                :dismiss-label="m.fileInput.remove(file.name)"
+                :dismiss-label="m.common.remove(file.name)"
                 :disabled="resolvedDisabled"
                 :title="chipLabel(file) === file.name ? undefined : file.name"
                 @dismiss="removeAt(index)"

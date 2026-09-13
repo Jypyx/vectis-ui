@@ -77,7 +77,7 @@ const icon = computed(() =>
       <p class="v-toast-message">{{ item.message }}</p>
     </div>
     <VIconButton
-      v-if="item.closable"
+      v-if="!item.hideClose"
       class="v-toast-close"
       :label="closeLabel"
       size="sm"

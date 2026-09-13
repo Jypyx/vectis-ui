@@ -110,6 +110,10 @@ receive both bounds.
 The accessible name goes through `label` rather than through `aria-label`, which is what gives
 each thumb of a range a name of its own.
 
+`label` **draws nothing**: it is an accessible name, unlike the `label` of VInput and the other
+text fields, which is rendered above the field. A visible caption for the slider belongs to the page
+around it, as it does for VInputOTP.
+
 ## Accessibility
 
 - Always supply `label`: it names the range input(s) (suffixed "(start)" / "(end)" in range mode) as

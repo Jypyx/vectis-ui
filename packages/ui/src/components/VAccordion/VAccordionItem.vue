@@ -32,11 +32,12 @@ interface AccordionItemProps {
   subtitle?: string
   /**
    * An icon placed before the title: an icon name, or an explicit render
-   * (`{ src }`, `{ component }`…). The `#start` slot replaces it.
+   * (`{ src }`, `{ component }`…). The `#icon` slot replaces it.
    *
    * It carries no side in its name because there is only one: the end of the row belongs
    * to the chevron, so there is nothing for a start to be told apart from. That is the
-   * rule every single-icon component of the design system follows.
+   * rule every single-icon component of the design system follows, and its slot is named
+   * `#icon` for the same reason.
    */
   icon?: IconSource
   /**
@@ -68,7 +69,7 @@ defineSlots<{
   /** A subtitle made of markup, which replaces the `subtitle` prop. */
   subtitle?(): unknown
   /** Free content before the title, which takes the place of `icon`. */
-  start?(): unknown
+  icon?(): unknown
 }>()
 
 const accordion = inject(accordionKey, null)
@@ -106,7 +107,7 @@ function onSummaryClick(event: MouseEvent) {
       :tabindex="disabled ? -1 : undefined"
       @click="onSummaryClick"
     >
-      <slot name="start">
+      <slot name="icon">
         <VIcon v-if="icon" class="v-accordion-icon-start" v-bind="iconProps(icon)" />
       </slot>
       <span class="v-accordion-heading">

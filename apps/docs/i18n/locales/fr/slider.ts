@@ -55,7 +55,7 @@ export default {
           'Propose deux poignées pour choisir un intervalle, ce qui fait de la valeur une paire.',
         disabled: 'Rend le curseur inutilisable.',
         label:
-          "Ce que les lecteurs d'écran annoncent pour le curseur. En mode intervalle, les deux poignées sont annoncées comme le début et la fin de celui-ci.",
+          "Ce que les lecteurs d'écran annoncent pour le curseur. C'est un nom accessible, rien ne s'affiche à l'écran. En mode intervalle, les deux poignées sont annoncées comme le début et la fin de celui-ci.",
         orientation: 'Dresse le curseur à la verticale, la valeur la plus basse en bas.',
         inputs:
           "Ajoute un champ numérique à côté du curseur pour poser la valeur exactement, un champ ou un par extrémité en mode intervalle. Glisser est rapide mais imprécis ; c'est la porte de sortie.",

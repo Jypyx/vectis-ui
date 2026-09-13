@@ -6,7 +6,7 @@ import * as VBreadcrumbStories from './VBreadcrumb.stories'
 # Breadcrumb
 
 A data-driven breadcrumb trail: a `<nav>` + an ordered list entirely driven by the
-`items: BreadcrumbItem[]` prop (`{ label, href, iconStart? }`, an exported type) — pure data
+`items: BreadcrumbItem[]` prop (`{ label, href, icon? }`, an exported type) — pure data
 derivation, no browser API, SSR-safe. Each item is a link; the **active** item is derived from
 `currentPath`: the one whose `href` matches (trailing slash normalized) stays a clickable link and
 receives `aria-current="page"` — the ARIA APG pattern.
@@ -30,7 +30,7 @@ directional icon does not flip automatically.
 
 ## Item icons
 
-`iconStart` on an item places an icon before its label — the same name/URL contract as the
+`icon` on an item places an icon before its label — the same name/URL contract as the
 separator. The icons follow the size and the colour of the text through the `--vectis-icon-size`
 context.
 

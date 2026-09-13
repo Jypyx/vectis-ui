@@ -9,7 +9,7 @@ const makeItem = (overrides: Partial<ToastItem> = {}): ToastItem => ({
   message: 'Message',
   tone: 'neutral',
   variant: 'soft',
-  closable: true,
+  hideClose: false,
   ...overrides,
 })
 
@@ -63,12 +63,12 @@ describe('VToast (internal card)', () => {
     expect(withTitle.container.querySelector('.v-toast-title')?.textContent).toBe('Well done')
   })
 
-  it('closable: the cross emits close with the id; closable: false hides it', async () => {
+  it('the cross emits close with the id; hideClose takes it away', async () => {
     const { getByRole, emitted } = renderToast({ id: 42 })
     await fireEvent.click(getByRole('button', { name: 'Close' }))
     expect(emitted('close')).toEqual([[42]])
 
-    const { container } = renderToast({ closable: false })
+    const { container } = renderToast({ hideClose: true })
     expect(container.querySelector('button')).toBeNull()
   })
 

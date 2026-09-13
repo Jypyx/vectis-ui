@@ -30,7 +30,7 @@ export default {
   keysBody:
     "Le dictionnaire complet de Vectis UI s'articule autour de 134 clés réparties au sein de 22 espaces de noms (namespaces), présentées ci-dessous avec leurs valeurs françaises à titre de référence. L'enregistrement supportant l'injection partielle, vous n'avez besoin de déclarer que les espaces de noms et les clés que vous souhaitez explicitement traduire.",
   keysFunctions:
-    "Parmi ces clés, 23 sont des fonctions TypeScript paramétrées. Leur signature expose la liste des arguments attendus ainsi que leur placement dans la chaîne produite. En l'absence de moteur ICU ou de parseur de pluriel dédié, la gestion des formes grammaticales (dont la pluralisation) repose directement sur la logique conditionnelle native (expressions ternaires JS/TS), offrant toute la souplesse nécessaire aux langues complexes.",
+    "Parmi ces clés, 22 sont des fonctions TypeScript paramétrées. Leur signature expose la liste des arguments attendus ainsi que leur placement dans la chaîne produite. En l'absence de moteur ICU ou de parseur de pluriel dédié, la gestion des formes grammaticales (dont la pluralisation) repose directement sur la logique conditionnelle native (expressions ternaires JS/TS), offrant toute la souplesse nécessaire aux langues complexes.",
   keysColumnKey: 'Clé',
   keysColumnDefault: 'Valeur française',
 }

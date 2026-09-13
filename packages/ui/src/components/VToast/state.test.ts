@@ -18,7 +18,7 @@ describe('toast (module state)', () => {
     expect(toasts[0]).toMatchObject({
       tone: 'neutral',
       variant: 'soft',
-      closable: true,
+      hideClose: false,
     })
     // placement and duration stay undefined: they are resolved by the VToaster
     expect(toasts[0]?.placement).toBeUndefined()
@@ -34,7 +34,7 @@ describe('toast (module state)', () => {
       icon: false,
       duration: 0,
       placement: 'top-center',
-      closable: false,
+      hideClose: true,
       width: '30rem',
     })
     expect(toasts[0]).toMatchObject({
@@ -44,7 +44,7 @@ describe('toast (module state)', () => {
       icon: false,
       duration: 0,
       placement: 'top-center',
-      closable: false,
+      hideClose: true,
       width: '30rem',
     })
   })

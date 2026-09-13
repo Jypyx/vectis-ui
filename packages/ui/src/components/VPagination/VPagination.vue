@@ -49,6 +49,12 @@ export type PaginationAlign = 'start' | 'center' | 'end'
 /** Whether the previous and next controls are rendered, and what they show. */
 export type PaginationControls = false | 'icon' | 'text' | 'both'
 
+/**
+ * Which pages cannot be reached, given either as a list of page numbers or as a function
+ * answering that question for a page.
+ */
+export type PaginationMatcher = number[] | ((page: number) => boolean)
+
 interface PaginationProps {
   /**
    * How many pages there are in all. It is 1 by default, which renders a single page: the
@@ -119,7 +125,7 @@ interface PaginationProps {
    * Which pages cannot be reached, as a list or as a function. The previous and next
    * controls step OVER them rather than stopping at one.
    */
-  disabledPages?: number[] | ((page: number) => boolean)
+  disabledPages?: PaginationMatcher
 
   /**
    * Lets the row shed pages as the space narrows, by asking about its own width. It is

@@ -15,16 +15,17 @@
 import type { InjectionKey } from 'vue'
 
 import type { TabsActivation, TabsSize, TabsTone, TabsVariant } from './VTabs.vue'
+import type { ItemValue } from '../../types'
 
 export interface TabsContext {
   /** The selected tab, or nothing when the v-model names no tab that exists. */
-  readonly value: string | number | undefined
+  readonly value: ItemValue | undefined
   /** Selects a tab. */
-  select: (value: string | number) => void
+  select: (value: ItemValue) => void
   /** The identifier of a tab, so its panel can point at it. */
-  tabId: (value: string | number) => string
+  tabId: (value: ItemValue) => string
   /** The identifier of a panel, so its tab can point at it. */
-  panelId: (value: string | number) => string
+  panelId: (value: ItemValue) => string
   /**
    * Whether panels were given at all. Without them the tabs are a bar of buttons and
    * must not claim to control anything.
@@ -56,9 +57,9 @@ export const tabsKey: InjectionKey<TabsContext> = Symbol('v-tabs')
  * apart), and the TYPE leads the result, the number 1 and the string "1" being two
  * different tabs.
  */
-const slug = (value: string | number) =>
+const slug = (value: ItemValue) =>
   (typeof value === 'number' ? 'n-' : 's-') +
   String(value).replace(/[^A-Za-z0-9-]/gu, (char) => `_${char.codePointAt(0)!.toString(16)}_`)
 
-export const tabIdFor = (base: string, value: string | number) => `${base}-tab-${slug(value)}`
-export const panelIdFor = (base: string, value: string | number) => `${base}-panel-${slug(value)}`
+export const tabIdFor = (base: string, value: ItemValue) => `${base}-tab-${slug(value)}`
+export const panelIdFor = (base: string, value: ItemValue) => `${base}-panel-${slug(value)}`

@@ -1,6 +1,8 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
+import { nextTick, ref } from 'vue'
+
 import VSwitch from './VSwitch.vue'
 
 describe('VSwitch', () => {
@@ -56,5 +58,18 @@ describe('VSwitch — invalid', () => {
   it('says nothing when it is valid', () => {
     const { getByRole } = render(VSwitch)
     expect(getByRole('switch').hasAttribute('aria-invalid')).toBe(false)
+  })
+
+  it('exposes focus and the real switch, the root being the label', async () => {
+    const control = ref<InstanceType<typeof VSwitch> | null>(null)
+    render({
+      components: { VSwitch },
+      setup: () => ({ control }),
+      template: '<VSwitch ref="control">Wi-Fi</VSwitch>',
+    })
+    await nextTick()
+    expect(control.value?.el?.getAttribute('role')).toBe('switch')
+    control.value?.focus()
+    expect(document.activeElement).toBe(control.value?.el)
   })
 })

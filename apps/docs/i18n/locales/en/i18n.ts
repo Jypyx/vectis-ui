@@ -30,7 +30,7 @@ export default {
   keysBody:
     'The complete Vectis UI dictionary spans 134 keys distributed across 22 namespaces, presented below with their French values for reference. Since registration supports partial injection, you only need to declare the namespaces and keys you explicitly wish to translate.',
   keysFunctions:
-    'Among these keys, 23 are parameterized TypeScript functions. Their signature exposes the expected arguments and their placement within the generated string. In the absence of an ICU engine or dedicated plural parser, grammatical forms (including pluralization) rely directly on native conditional logic (JS/TS ternary expressions), offering the flexibility needed for complex languages.',
+    'Among these keys, 22 are parameterized TypeScript functions. Their signature exposes the expected arguments and their placement within the generated string. In the absence of an ICU engine or dedicated plural parser, grammatical forms (including pluralization) rely directly on native conditional logic (JS/TS ternary expressions), offering the flexibility needed for complex languages.',
   keysColumnKey: 'Key',
   keysColumnDefault: 'English Value',
 }

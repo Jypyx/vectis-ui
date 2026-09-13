@@ -24,7 +24,7 @@ export default {
         { name: 'prevLabel', type: 'string' },
         { name: 'nextLabel', type: 'string' },
         { name: 'disabled', type: 'boolean', default: 'false' },
-        { name: 'disabledPages', type: 'number[] | ((page: number) => boolean)' },
+        { name: 'disabledPages', type: 'PaginationMatcher' },
         { name: 'responsive', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'pageLabel', type: '(page: number) => string' },
@@ -52,6 +52,10 @@ export default {
     {
       name: 'IconSource',
       definition: `export type IconSource = string | BuiltinIcon | IconRender`,
+    },
+    {
+      name: 'PaginationMatcher',
+      definition: `export type PaginationMatcher = number[] | ((page: number) => boolean)`,
     },
   ],
 } satisfies PageApi

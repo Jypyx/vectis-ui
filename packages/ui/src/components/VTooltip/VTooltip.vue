@@ -33,6 +33,11 @@ import { isKeyboardFocus } from '../../utils/focus'
 export type TooltipPlacement =
   'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'right'
 
+/** What the described element has to carry: the link to the tooltip that describes it. */
+export type TooltipTriggerProps = {
+  'aria-describedby': string
+}
+
 interface TooltipProps {
   /** What the tooltip says. The `#content` slot replaces it when both are given. */
   text?: string
@@ -61,7 +66,7 @@ defineSlots<{
    * that is what ties the two together for assistive technology — and make sure it is
    * something that can take focus, or keyboard users will never see the tooltip.
    */
-  default(props: { triggerProps: { 'aria-describedby': string } }): unknown
+  default(props: { triggerProps: TooltipTriggerProps }): unknown
   /**
    * Content richer than a plain string: formatting, a keyboard shortcut, an icon. It
    * must stay NON-interactive. The tooltip closes as soon as the pointer leaves the

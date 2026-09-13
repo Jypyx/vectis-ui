@@ -121,8 +121,8 @@ type ParameterisedKey = {
 
 const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>> = {
   en: {
+    'common.remove': '(name) => `Remove ${name}`',
     'pagination.page': '(page) => `Page ${page}`',
-    'combobox.remove': '(label) => `Remove ${label}`',
     'dataTable.perPageValue': '(label, value) => `${label}: ${value}`',
     'dataTable.selectRow': '(index) => `Select row ${index}`',
     'dataTable.selection': "(count) => `${count} item${count === 1 ? '' : 's'} selected`",
@@ -136,9 +136,7 @@ const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>
     'timePicker.hoursValue': "(hour) => `${hour} o'clock`",
     'timePicker.minutesValue': '(minute) => `${minute} minutes`',
     'timeInput.meridiem': '(value) => `AM or PM: ${value}`',
-    'fileInput.remove': '(name) => `Remove ${name}`',
     'fileInput.files': "(count) => `${count} file${count === 1 ? '' : 's'}`",
-    'filePicker.remove': '(name) => `Remove ${name}`',
     'carousel.slide': '(index, total) => `${index} of ${total}`',
     'calendar.viewCustom': '(days) => `${days} days`',
     'calendar.moreEvents': '(count) => `+${count} more`',
@@ -147,8 +145,8 @@ const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>
     'calendar.movedTo': '(title, when) => `${title} moved to ${when}.`',
   },
   fr: {
+    'common.remove': '(name) => `Retirer ${name}`',
     'pagination.page': '(page) => `Page ${page}`',
-    'combobox.remove': '(label) => `Retirer ${label}`',
     'dataTable.perPageValue': '(label, value) => `${label} : ${value}`',
     'dataTable.selectRow': '(index) => `Sélectionner la ligne ${index}`',
     'dataTable.selection':
@@ -166,9 +164,7 @@ const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>
     'timePicker.hoursValue': '(hour) => `${hour} heures`',
     'timePicker.minutesValue': '(minute) => `${minute} minutes`',
     'timeInput.meridiem': '(value) => `AM ou PM : ${value}`',
-    'fileInput.remove': '(name) => `Retirer ${name}`',
     'fileInput.files': "(count) => `${count} fichier${count > 1 ? 's' : ''}`",
-    'filePicker.remove': '(name) => `Retirer ${name}`',
     'carousel.slide': '(index, total) => `${index} sur ${total}`',
     'calendar.viewCustom': '(days) => `${days} jours`',
     'calendar.moreEvents': "(count) => `+${count} autre${count > 1 ? 's' : ''}`",

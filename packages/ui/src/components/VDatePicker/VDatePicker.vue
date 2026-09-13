@@ -401,8 +401,8 @@ const canNextYear = computed(
 // Moves the real DOM focus onto a day cell. The grid keeps exactly one cell in the
 // tab order, so navigating means focusing another one.
 const dayId = (iso: string) => `${gridLabelId}-d-${iso}`
-function focusDay(iso: string) {
-  nextTick(() => document.getElementById(dayId(iso))?.focus())
+function focusDay(iso: string, options?: FocusOptions) {
+  nextTick(() => document.getElementById(dayId(iso))?.focus(options))
 }
 
 function goTo(iso: string, moveFocus = false) {
@@ -608,9 +608,9 @@ watch(
  * Brings the focus into the grid, on the day the calendar is currently showing. This
  * is what VDateInput calls when it opens its panel.
  */
-function focus() {
+function focus(options?: FocusOptions) {
   view.value = 'days'
-  focusDay(focusedISO.value)
+  focusDay(focusedISO.value, options)
 }
 
 // @core

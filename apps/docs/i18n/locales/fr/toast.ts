@@ -37,7 +37,7 @@ export default {
     },
     dismissing: {
       title: 'Renvoyer une notification',
-      text: "<code>closable</code> à false retire la croix de fermeture. <code>toast</code> rend un identifiant et <code>dismissToast</code> retire cette notification, ou toutes d'un coup lorsqu'il est appelé sans argument.",
+      text: "<code>hideClose</code> retire la croix de fermeture. <code>toast</code> rend un identifiant et <code>dismissToast</code> retire cette notification, ou toutes d'un coup lorsqu'il est appelé sans argument.",
     },
   },
 

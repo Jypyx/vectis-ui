@@ -16,7 +16,7 @@ export default {
         { name: 'maxTotalSize', type: 'number' },
         { name: 'maxFiles', type: 'number' },
         { name: 'counter', type: 'boolean', default: 'false' },
-        { name: 'attachIcon', type: 'IconSource', default: 'attach_file' },
+        { name: 'pickerIcon', type: 'IconSource', default: 'attach_file' },
         { name: 'noDrop', type: 'boolean', default: 'false' },
         { name: 'size', type: 'FileInputSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
@@ -28,7 +28,7 @@ export default {
         { name: 'placeholder', type: 'string' },
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconStartLabel', type: 'string' },
-        { name: 'attachIconLabel', type: 'string' },
+        { name: 'pickerIconLabel', type: 'string' },
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'loadingLabel', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },
@@ -45,7 +45,7 @@ export default {
       slots: [
         { name: 'start', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
-        { name: 'chip', type: "{ file: File; index: number; label: string; remove: () => void; size: 'xs' | 'sm'; compact: boolean; }" },
+        { name: 'chip', type: '{ file: File; index: number; label: string; remove: () => void; size: ChipSize; compact: boolean; }' },
         { name: 'counter', type: '{ count: number; size: number; text: string; }' },
       ],
     },
@@ -57,6 +57,10 @@ export default {
   name: string
   paths: readonly [string] | readonly [string, string]
 }`,
+    },
+    {
+      name: 'ChipSize',
+      definition: `export type ChipSize = 'xs' | 'sm'`,
     },
     {
       name: 'FileRejectReason',

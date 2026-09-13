@@ -67,7 +67,7 @@ export default {
       props: {
         label: 'Ce que dit la ligne, et où elle mène. Le slot par défaut la remplace.',
         sublabel: 'Une seconde ligne sous le libellé, pour un statut ou une courte explication.',
-        icon: 'Une icône avant le libellé. Le slot <code>#start</code> la remplace.',
+        icon: 'Une icône avant le libellé. Le slot <code>#icon</code> la remplace.',
         href: "Où mène cette ligne, ce qui en fait un lien. Elle est ignorée sur une ligne qui a des sous-items : une telle ligne s'ouvre et se referme plutôt que de naviguer.",
         active:
           'Marque cette ligne comme la page actuellement consultée. Elle est mise en évidence et annoncée comme la page courante.',
@@ -86,7 +86,7 @@ export default {
           'Le libellé de la ligne. Il est obligatoire : une ligne de navigation doit dire où elle mène.',
         sublabel:
           'Une seconde ligne faite de balisage, qui remplace la prop <code>sublabel</code>.',
-        start: 'Du contenu libre avant le libellé, qui prend la place de <code>icon</code>.',
+        icon: 'Du contenu libre avant le libellé, qui prend la place de <code>icon</code>.',
         end: 'Du contenu libre à la fin de la ligne, avant le chevron : un compteur, un badge. Sur une branche il ne doit pas être focalisable, la ligne étant déjà un contrôle.',
         items:
           "Les sous-items, qui font de cette ligne une branche. La profondeur n'est pas limitée.",

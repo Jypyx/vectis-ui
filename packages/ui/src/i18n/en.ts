@@ -15,6 +15,7 @@ export const en: Messages = {
     clear: 'Clear',
     close: 'Close',
     dismiss: 'Remove',
+    remove: (name) => `Remove ${name}`,
     cancel: 'Cancel',
     confirm: 'OK',
   },
@@ -38,7 +39,6 @@ export const en: Messages = {
   combobox: {
     empty: 'No results',
     clear: 'Clear selection',
-    remove: (label) => `Remove ${label}`,
   },
   dataTable: {
     empty: 'No data',
@@ -102,8 +102,8 @@ export const en: Messages = {
   },
   dateInput: {
     clear: 'Clear date',
-    open: 'Open calendar',
-    label: 'Choose a date',
+    openPicker: 'Open calendar',
+    pickerLabel: 'Choose a date',
   },
   timePicker: {
     label: 'Time picker',
@@ -128,16 +128,14 @@ export const en: Messages = {
     unavailable: 'This time is not available.',
   },
   fileInput: {
-    attach: 'Choose files',
+    openPicker: 'Choose files',
     clear: 'Clear files',
-    remove: (name) => `Remove ${name}`,
     files: (count) => `${count} file${count === 1 ? '' : 's'}`,
     placeholder: 'No file selected',
   },
   filePicker: {
     browse: 'Browse files',
     or: 'or',
-    remove: (name) => `Remove ${name}`,
     list: 'Selected files',
   },
   carousel: {

@@ -9,7 +9,7 @@ export default {
     },
     icons: {
       title: 'With icons',
-      text: 'Each segment takes an <code>iconStart</code>, decorative beside the label a screen reader reads.',
+      text: 'Each segment takes an <code>icon</code>, decorative beside the label a screen reader reads.',
     },
     truncated: {
       title: 'Truncation',

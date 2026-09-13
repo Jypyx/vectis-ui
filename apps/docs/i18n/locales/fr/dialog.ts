@@ -36,7 +36,7 @@ export default {
           "Le titre de la boîte, qui la nomme aussi pour les technologies d'assistance. Il est ignoré quand le slot <code>#header</code> remplace tout l'en-tête.",
         subtitle: 'Une ligne sous le titre, qui explique ce que la boîte demande.',
         width:
-          "La largeur de la boîte, dans n'importe quelle unité CSS. Elle n'est jamais autorisée à dépasser la largeur de la fenêtre.",
+          "La largeur de la boîte : un nombre est lu en pixels, une chaîne comme n'importe quelle longueur CSS. Elle n'est jamais autorisée à dépasser la largeur de la fenêtre.",
         role: "Le genre de boîte. <code>alertdialog</code> est fait pour celle à laquelle il faut répondre explicitement, et il pousse les lecteurs d'écran à l'annoncer avec plus d'insistance.",
         hideClose:
           "Retire la croix de fermeture de l'en-tête, ne laissant au lecteur qu'Échap, l'arrière-plan et ce que le pied propose.",
@@ -64,7 +64,7 @@ export default {
           "La question posée, qui nomme aussi la boîte pour les technologies d'assistance. Elle est ignorée quand le slot <code>#header</code> remplace tout l'en-tête.",
         subtitle: 'Une ligne sous le titre, qui détaille les conséquences de la réponse.',
         width:
-          "La largeur de la boîte, dans n'importe quelle unité CSS. Elle n'est jamais autorisée à dépasser la largeur de la fenêtre.",
+          "La largeur de la boîte : un nombre est lu en pixels, une chaîne comme n'importe quelle longueur CSS. Elle n'est jamais autorisée à dépasser la largeur de la fenêtre.",
         vModelOpen: "Si l'alerte est affichée. Elle part fermée, et la fermeture y réécrit.",
       },
       slots: {

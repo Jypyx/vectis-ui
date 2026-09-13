@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
-import { defineComponent, ref } from 'vue'
+import { defineComponent, nextTick, ref } from 'vue'
 
 import VToggle from './VToggle.vue'
 import type { ToggleModelValue } from './VToggle.vue'
@@ -419,6 +419,39 @@ describe('VToggle', () => {
       expect(item?.getAttribute('aria-pressed')).toBe('false')
       await fireEvent.click(item as HTMLElement)
       expect(item?.getAttribute('aria-pressed')).toBe('false')
+    })
+  })
+
+  describe('exposed members', () => {
+    const mountWithRef = (template: string) => {
+      const toggle = ref<InstanceType<typeof VToggle> | null>(null)
+      const utils = render({
+        components: { VToggle, VToggleItem },
+        setup: () => ({ toggle }),
+        template,
+      })
+      return { toggle, ...utils }
+    }
+
+    it('focus lands on the selected item, and el is the group', async () => {
+      const { toggle, container } = mountWithRef(`
+        <VToggle ref="toggle" model-value="b" label="Align">
+          <VToggleItem value="a" label="Left" /><VToggleItem value="b" label="Center" />
+        </VToggle>`)
+      await nextTick()
+      expect(toggle.value?.el).toBe(container.querySelector('[role="group"]'))
+      toggle.value?.focus()
+      expect(document.activeElement?.textContent).toBe('Center')
+    })
+
+    it('falls back to the first enabled item when nothing is selected', async () => {
+      const { toggle } = mountWithRef(`
+        <VToggle ref="toggle" label="Align">
+          <VToggleItem value="a" label="Left" disabled /><VToggleItem value="b" label="Center" />
+        </VToggle>`)
+      await nextTick()
+      toggle.value?.focus()
+      expect(document.activeElement?.textContent).toBe('Center')
     })
   })
 })

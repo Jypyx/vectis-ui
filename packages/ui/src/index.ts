@@ -68,6 +68,7 @@ export type {
   PaginationSize,
   PaginationAlign,
   PaginationControls,
+  PaginationMatcher,
 } from './components/VPagination/VPagination.vue'
 export { default as VTabs } from './components/VTabs/VTabs.vue'
 export type {
@@ -104,10 +105,10 @@ export type { RadioLabelPosition } from './components/VRadio/VRadio.vue'
 export { default as VSwitch } from './components/VSwitch/VSwitch.vue'
 export type { SwitchLabelPosition } from './components/VSwitch/VSwitch.vue'
 export { default as VTooltip } from './components/VTooltip/VTooltip.vue'
-export type { TooltipPlacement } from './components/VTooltip/VTooltip.vue'
+export type { TooltipPlacement, TooltipTriggerProps } from './components/VTooltip/VTooltip.vue'
 export { default as VMenu } from './components/VMenu/VMenu.vue'
-export type { MenuSize } from './components/VMenu/VMenu.vue'
-export type { MenuPlacement } from './components/VMenu/context'
+export type { MenuTriggerProps } from './components/VMenu/VMenu.vue'
+export type { MenuPlacement, MenuSize } from './components/VMenu/context'
 export { default as VMenuItem } from './components/VMenu/VMenuItem.vue'
 export type { MenuItemTone } from './components/VMenu/VMenuItem.vue'
 export { default as VMenuGroup } from './components/VMenu/VMenuGroup.vue'
@@ -117,7 +118,12 @@ export type { AccordionVariant } from './components/VAccordion/VAccordion.vue'
 export { default as VAccordionItem } from './components/VAccordion/VAccordionItem.vue'
 export { default as VToaster } from './components/VToast/VToaster.vue'
 export { toast, dismissToast } from './components/VToast/state'
-export type { ToastOptions, ToastTone, ToastPlacement } from './components/VToast/state'
+export type {
+  ToastOptions,
+  ToastTone,
+  ToastVariant,
+  ToastPlacement,
+} from './components/VToast/state'
 export { default as VSnackbar } from './components/VSnackbar/VSnackbar.vue'
 export { snackbar, dismissSnackbar } from './components/VSnackbar/state'
 export type { SnackbarOptions, SnackbarTone, SnackbarPlacement } from './components/VSnackbar/state'
@@ -180,9 +186,9 @@ export type {
   ProgressLinearOrientation,
 } from './components/VProgressLinear/VProgressLinear.vue'
 export { default as VSlider } from './components/VSlider/VSlider.vue'
-export type { SliderLabel, SliderOrientation } from './components/VSlider/VSlider.vue'
+export type { SliderLabel, SliderOrientation, SliderValue } from './components/VSlider/VSlider.vue'
 export { default as VDialog } from './components/VDialog/VDialog.vue'
-export type { DialogRole } from './components/VDialog/VDialog.vue'
+export type { DialogRole, DialogTriggerProps } from './components/VDialog/VDialog.vue'
 export { default as VDialogAlert } from './components/VDialog/VDialogAlert.vue'
 export { default as VDatePicker } from './components/VDatePicker/VDatePicker.vue'
 export type {
@@ -199,7 +205,7 @@ export type {
   DateInputPlacement,
 } from './components/VDateInput/VDateInput.vue'
 export { default as VTimePicker } from './components/VTimePicker/VTimePicker.vue'
-export type { TimePickerFormat, TimePickerStep } from './components/VTimePicker/VTimePicker.vue'
+export type { TimePickerFormat } from './components/VTimePicker/VTimePicker.vue'
 /* The type of `allowedHours` and `allowedMinutes`, which both time components take. It is
    declared beside the rules that read it rather than in the SFC, VTimePicker owning both. */
 export type { TimeMatcher } from './components/VTimePicker/limits'
@@ -213,7 +219,9 @@ export { default as VCalendar } from './components/VCalendar/VCalendar.vue'
 export type {
   CalendarEvent,
   CalendarEventId,
+  CalendarEventLayout,
   CalendarEventTimes,
+  CalendarFormat,
   CalendarView,
 } from './components/VCalendar/types'
 export { default as VFileInput } from './components/VFileInput/VFileInput.vue'

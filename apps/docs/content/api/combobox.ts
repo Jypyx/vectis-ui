@@ -43,7 +43,7 @@ export default {
         { name: 'start', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
         { name: 'option', type: '{ option: ComboboxOption; index: number; active: boolean; selected: boolean; }' },
-        { name: 'chip', type: "{ value: ItemValue; option: ComboboxOption | undefined; label: string; remove: () => void; size: 'xs' | 'sm'; compact: boolean; }" },
+        { name: 'chip', type: '{ value: ItemValue; option: ComboboxOption | undefined; label: string; remove: () => void; size: ChipSize; compact: boolean; }' },
         { name: 'empty', type: '{ query: string; }' },
         { name: 'loading', type: '{}' },
       ],
@@ -56,6 +56,10 @@ export default {
   name: string
   paths: readonly [string] | readonly [string, string]
 }`,
+    },
+    {
+      name: 'ChipSize',
+      definition: `export type ChipSize = 'xs' | 'sm'`,
     },
     {
       name: 'ComboboxFilter',

@@ -32,7 +32,7 @@ export default {
         { name: 'default', type: '{}' },
         { name: 'title', type: '{}' },
         { name: 'subtitle', type: '{}' },
-        { name: 'start', type: '{}' },
+        { name: 'icon', type: '{}' },
       ],
     },
   ],

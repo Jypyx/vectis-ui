@@ -260,8 +260,9 @@ function keyFor(name: string): string {
  * TRAP above is what slicing looks like when it goes wrong. `createSourceFile` is a parse and not
  * a type-check, so the whole library costs a few milliseconds.
  *
- * Local types are indexed alongside the exported ones. `MenuTriggerProps` is not importable, but
- * it is the shape of what a slot hands out, and a reader binding that object needs to see it.
+ * Local types are indexed alongside the exported ones. A type a slot hands out is the shape a
+ * reader binding that object needs to see, whether or not it can be imported; the library exports
+ * every one of them today, and the printed keyword is what tells a reader which is which.
  *
  * Ambiguity is recorded rather than resolved, and refused only if a page ever asks for it: two
  * declarations of one name would have the page print whichever file happened to be read last.

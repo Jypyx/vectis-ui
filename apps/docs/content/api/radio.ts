@@ -9,16 +9,22 @@ export default {
     {
       name: 'VRadio',
       props: [
-        { name: 'value', type: 'string' },
+        { name: 'value', type: 'ItemValue' },
         { name: 'labelPosition', type: 'RadioLabelPosition', values: "'start' | 'end'", default: "'end'" },
         { name: 'spread', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
-        { name: 'v-model', key: 'vModel', type: 'string', default: "''" },
+        { name: 'v-model', key: 'vModel', type: 'ItemValue', default: "''" },
       ],
       slots: [
         { name: 'default', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'ItemValue',
+      definition: `export type ItemValue = string | number`,
     },
   ],
   cssVars: [

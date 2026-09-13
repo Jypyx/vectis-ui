@@ -100,6 +100,20 @@ describe('VMenu', () => {
     expect(menu.style.getPropertyValue('--menu-width')).toBe('max-content')
   })
 
+  it('width prop: a number is read as pixels', () => {
+    const { container } = renderHarness(`
+      <VMenu :width="240">
+        <template #trigger="{ triggerProps }">
+          <button v-bind="triggerProps">Actions</button>
+        </template>
+        <VMenuItem label="Rename" />
+      </VMenu>
+    `)
+    const menu = container.querySelector('[role="menu"]') as HTMLElement
+    expect(menu.hasAttribute('data-width')).toBe(true)
+    expect(menu.style.getPropertyValue('--menu-width')).toBe('240px')
+  })
+
   it('the subpanels do not render data-width (default width)', () => {
     const { container } = renderHarness(`
       <VMenu width="max-content">

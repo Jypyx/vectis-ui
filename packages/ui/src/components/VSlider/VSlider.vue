@@ -26,6 +26,9 @@ import { useMessages } from '../../i18n/state'
 
 export type SliderLabel = string | { icon: IconSource; label: string }
 
+/** The value of a slider: one number, or an ordered pair of them in range mode. */
+export type SliderValue = number | [number, number]
+
 /** Which way the track runs. */
 export type SliderOrientation = 'horizontal' | 'vertical'
 
@@ -44,8 +47,9 @@ interface SliderProps {
   /** Makes the slider unusable. */
   disabled?: boolean
   /**
-   * What screen readers announce for the slider. In range mode the two thumbs are
-   * announced as the start and the end of it.
+   * What screen readers announce for the slider. It is an accessible name and draws
+   * nothing on screen. In range mode the two thumbs are announced as the start and the
+   * end of it.
    */
   label?: string
   /** Turns the slider upright, with the lowest value at the bottom. */
@@ -89,7 +93,7 @@ const props = withDefaults(defineProps<SliderProps>(), {
  * begin with — gives one thumb, a pair of them gives two. The pair is always ordered, the
  * thumbs being stopped from crossing.
  */
-const model = defineModel<number | [number, number]>({ default: 0 })
+const model = defineModel<SliderValue>({ default: 0 })
 
 const emit = defineEmits<{
   /**
@@ -97,7 +101,7 @@ const emit = defineEmits<{
    * field was committed. It carries the whole value, a pair in range mode, and fires for
    * either thumb, where the v-model follows every step of a drag.
    */
-  change: [value: number | [number, number]]
+  change: [value: SliderValue]
 }>()
 
 const startValue = computed(() => (Array.isArray(model.value) ? model.value[0] : props.min))
@@ -289,6 +293,18 @@ function resyncFields() {
   startFieldText.value = String(startValue.value)
   endFieldText.value = String(endValue.value)
 }
+
+const endThumbEl = ref<HTMLInputElement | null>(null)
+
+// The root is a layout box, so a template ref on the component reaches the wrapper and not
+// the control. Both members point at the END thumb: it is the one always rendered, and the
+// one the consumer's `id` lands on, so `focus()` goes where a `<label for>` would send it.
+defineExpose({
+  /** Moves the focus to the end thumb, the only thumb outside range mode. */
+  focus: (options?: FocusOptions) => endThumbEl.value?.focus(options),
+  /** The end thumb's real `<input type="range">`, for what `focus` does not cover. */
+  el: endThumbEl,
+})
 </script>
 
 <template>
@@ -351,6 +367,7 @@ function resyncFields() {
              goes through the `label` prop, which is what gives each thumb of a range a
              name of its own. -->
         <input
+          ref="endThumbEl"
           v-bind="forwardedAttrs"
           type="range"
           class="v-slider-input v-slider-input-end"

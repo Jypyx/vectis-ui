@@ -350,4 +350,37 @@ describe('VTabs', () => {
       expect(container.querySelectorAll('.v-tabs-sentinel')).toHaveLength(2)
     })
   })
+
+  describe('exposed members', () => {
+    const mountWithRef = (template: string) => {
+      const tabs = ref<InstanceType<typeof VTabs> | null>(null)
+      const utils = render({
+        components: { VTabs, VTab },
+        setup: () => ({ tabs }),
+        template,
+      })
+      return { tabs, ...utils }
+    }
+
+    it('focus lands on the selected tab, and el is the tablist', async () => {
+      const { tabs, container } = mountWithRef(`
+        <VTabs ref="tabs" model-value="b" label="Sections">
+          <VTab value="a" label="One" /><VTab value="b" label="Two" />
+        </VTabs>`)
+      await nextTick()
+      expect(tabs.value?.el).toBe(container.querySelector('[role="tablist"]'))
+      tabs.value?.focus()
+      expect(document.activeElement?.textContent).toBe('Two')
+    })
+
+    it('falls back to the first enabled tab when the model names none', async () => {
+      const { tabs } = mountWithRef(`
+        <VTabs ref="tabs" label="Sections">
+          <VTab value="a" label="One" disabled /><VTab value="b" label="Two" />
+        </VTabs>`)
+      await nextTick()
+      tabs.value?.focus()
+      expect(document.activeElement?.textContent).toBe('Two')
+    })
+  })
 })

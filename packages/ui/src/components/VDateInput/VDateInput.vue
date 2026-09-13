@@ -640,7 +640,7 @@ const endIcon = computed<IconSource | undefined>(() =>
  */
 const m = useMessages()
 
-const endIconLabel = computed(() => props.pickerIconLabel ?? m.value.dateInput.open)
+const endIconLabel = computed(() => props.pickerIconLabel ?? m.value.dateInput.openPicker)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.dateInput.clear)
 
 function onEndIcon() {
@@ -768,7 +768,7 @@ defineExpose({
       anchor="--date-input-anchor"
       :placement="placement"
       role="dialog"
-      :aria-label="label ?? m.dateInput.label"
+      :aria-label="label ?? m.dateInput.pickerLabel"
       class="v-date-input-panel"
       @mousedown="onPanelMousedown"
     >

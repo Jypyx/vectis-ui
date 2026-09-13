@@ -4,7 +4,7 @@
  * A type is normally named after whatever owns it — `ButtonTone` for VButton,
  * `DatePickerRange` for the component that defines its shape, `FileRejection` for the module
  * that produces it. This file is for the case where nothing does: an item's value is shared
- * by a tab, a toggle item and a combobox option, and naming it after any one of the three
+ * by a tab, a toggle item, a radio button and a combobox option, and naming it after any one of the three
  * would say something untrue about the other two.
  *
  * It stays small on purpose. A type reaching for it should first be asked whether a component
@@ -18,8 +18,8 @@
  * consumer whose options come from an API should not have to convert on the way in and back
  * on the way out. Where the value reaches the DOM the component converts it itself.
  *
- * VRadio is the ONE deliberate exception and stays `string`: the `value` of a native radio is
- * always text, so widening it would only move the conversion into the component and hand the
- * consumer back a different type from the one they put in.
+ * VRadio takes it too, and needs no conversion for it: the `value` ATTRIBUTE of a native radio
+ * is text, but Vue's radio v-model reads back the value exactly as it was bound rather than
+ * the attribute, so a number put in is the number handed back.
  */
 export type ItemValue = string | number

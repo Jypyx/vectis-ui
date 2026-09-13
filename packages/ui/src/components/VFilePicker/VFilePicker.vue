@@ -627,13 +627,13 @@ defineExpose({
               :file="file"
               :index="index"
               :remove="() => removeAt(index)"
-              :label="m.filePicker.remove(file.name)"
+              :label="m.common.remove(file.name)"
             >
               <VIconButton
                 class="v-file-picker-remove"
                 size="sm"
                 :icon="removeIcon"
-                :label="m.filePicker.remove(file.name)"
+                :label="m.common.remove(file.name)"
                 :disabled="!interactive"
                 @click="removeAt(index)"
               />

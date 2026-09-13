@@ -25,7 +25,7 @@
  * own: the context then holds `undefined` throughout, and `undefined` is what hands a
  * prop back to its owner.
  */
-import { provide } from 'vue'
+import { provide, ref } from 'vue'
 
 import type { ButtonSize, ButtonTone, ButtonVariant } from './VButton.vue'
 import { buttonGroupKey } from './context'
@@ -134,6 +134,16 @@ provide(buttonGroupKey, {
     return props.disabled
   },
 })
+
+const groupEl = ref<HTMLElement | null>(null)
+
+// A template ref on this component is not a safe way to its element: the comment above the
+// root makes the template a fragment in development, where `$el` is a text anchor. VToggle,
+// whose root this group is, reads the element from here.
+defineExpose({
+  /** The `role="group"` element. */
+  el: groupEl,
+})
 </script>
 
 <template>
@@ -148,6 +158,7 @@ provide(buttonGroupKey, {
     markup cannot honour: apart, the buttons share no edge for a line to sit on.
   -->
   <div
+    ref="groupEl"
     class="v-button-group"
     role="group"
     :data-orientation="orientation"

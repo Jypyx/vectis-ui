@@ -12,10 +12,11 @@
 import { computed, inject, ref, watchEffect } from 'vue'
 
 import { tabsKey } from './context'
+import type { ItemValue } from '../../types'
 
 interface TabPanelProps {
   /** Which tab shows this panel: it must be the `value` of one of them. */
-  value: string | number
+  value: ItemValue
   /**
    * Holds the content back until the panel is first shown, and keeps it from then on.
    * It is for a panel expensive to build; the state it holds is still preserved

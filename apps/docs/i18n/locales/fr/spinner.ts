@@ -20,7 +20,7 @@ export default {
   api: {
     VSpinner: {
       props: {
-        size: "Une taille en pixels, comprise exactement comme celle de VIcon : c'est la BOÎTE qu'occupe l'indicateur, pas le diamètre de l'anneau, dessiné un peu plus petit à l'intérieur. Sans elle, la boîte mesure 1em et suit la taille du texte alentour, ce qui garde l'indicateur proportionné dans un bouton sans rien avoir à lui dire.",
+        size: "Une taille en pixels, en nombre ou en chaîne numérique, comprise exactement comme celle de VIcon : c'est la BOÎTE qu'occupe l'indicateur, pas le diamètre de l'anneau, dessiné un peu plus petit à l'intérieur. Sans elle, la boîte mesure 1em et suit la taille du texte alentour, ce qui garde l'indicateur proportionné dans un bouton sans rien avoir à lui dire.",
         label:
           "Ce que les lecteurs d'écran annoncent pendant qu'il tourne. Il retombe sur le dictionnaire du design system, dans la langue courante.",
       },

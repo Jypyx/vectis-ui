@@ -27,6 +27,7 @@ import type { IconSource } from '../VIcon/types'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import { panelIdFor, tabIdFor, tabsKey } from './context'
 
+import type { ItemValue } from '../../types'
 import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
 import { isRtl } from '../../utils/direction'
 
@@ -120,7 +121,7 @@ defineSlots<{
  * CONTRACT — it must name a tab that exists and is not disabled. Pointing it anywhere else
  * leaves no tab with a tab stop, and the bar becomes unreachable from the keyboard.
  */
-const model = defineModel<string | number>()
+const model = defineModel<ItemValue>()
 
 // The root element is only a container; the one that matters is the row of tabs. So
 // `class` and `style` stay outside, where a consumer expects to place the component,
@@ -145,11 +146,11 @@ provide(tabsKey, {
   get value() {
     return model.value
   },
-  select(value: string | number) {
+  select(value: ItemValue) {
     model.value = value
   },
-  tabId: (value: string | number) => tabIdFor(baseId, value),
-  panelId: (value: string | number) => panelIdFor(baseId, value),
+  tabId: (value: ItemValue) => tabIdFor(baseId, value),
+  panelId: (value: ItemValue) => panelIdFor(baseId, value),
   // @ssr
   /*
    * Whether a slot was given is decided by the parent as it renders, so the answer is
@@ -302,6 +303,25 @@ watch(model, () => {
       top: t.top < c.top ? t.top - c.top : t.bottom > c.bottom ? t.bottom - c.bottom : 0,
     })
   })
+})
+
+// The root is a container and the tabs are rendered by the consumer's slot, so a template
+// ref reaches neither the row nor a tab. `focus` goes where the Tab key would land: the
+// selected tab, which holds the row's single tab stop.
+defineExpose({
+  /**
+   * Moves the focus to the selected tab, or to the first tab that can take it when the
+   * v-model names none.
+   */
+  focus: (options?: FocusOptions) => {
+    const list = listEl.value
+    const tab =
+      list?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]:not(:disabled)') ??
+      list?.querySelector<HTMLElement>('[role="tab"]:not(:disabled)')
+    tab?.focus(options)
+  },
+  /** The `role="tablist"` row, which is also where the consumer's attributes land. */
+  el: listEl,
 })
 </script>
 

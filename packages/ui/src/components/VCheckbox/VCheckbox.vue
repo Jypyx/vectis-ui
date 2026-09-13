@@ -78,6 +78,15 @@ watchEffect(
   },
   { flush: 'post' },
 )
+
+// The root is the <label>, so a template ref on the component reaches the wrapper and not
+// the control: these two are the way to the real checkbox.
+defineExpose({
+  /** Moves the focus to the real checkbox. */
+  focus: (options?: FocusOptions) => inputEl.value?.focus(options),
+  /** The real `<input type="checkbox">`, for what `focus` does not cover. */
+  el: inputEl,
+})
 </script>
 
 <template>

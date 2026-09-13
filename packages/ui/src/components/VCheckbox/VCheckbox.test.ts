@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
-import { nextTick } from 'vue'
+import { nextTick, ref } from 'vue'
 
 import VCheckbox from './VCheckbox.vue'
 
@@ -58,5 +58,18 @@ describe('VCheckbox', () => {
     const input = getByRole('checkbox')
     expect(input.getAttribute('name')).toBe('cgu')
     expect(input.hasAttribute('required')).toBe(true)
+  })
+
+  it('exposes focus and the real checkbox, the root being the label', async () => {
+    const box = ref<InstanceType<typeof VCheckbox> | null>(null)
+    render({
+      components: { VCheckbox },
+      setup: () => ({ box }),
+      template: '<VCheckbox ref="box">Terms</VCheckbox>',
+    })
+    await nextTick()
+    expect(box.value?.el?.type).toBe('checkbox')
+    box.value?.focus({ preventScroll: true })
+    expect(document.activeElement).toBe(box.value?.el)
   })
 })

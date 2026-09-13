@@ -30,13 +30,13 @@ export default {
         { name: 'sortAscIcon', type: 'IconSource', default: 'arrow_downward' },
         { name: 'sortDescIcon', type: 'IconSource', default: 'arrow_upward' },
         { name: 'perPageOptions', type: 'number[]' },
-        { name: 'perPageLabel', type: 'string' },
+        { name: 'perPageText', type: 'string' },
         { name: 'total', type: 'number' },
         { name: 'showRange', type: 'boolean', default: 'false' },
-        { name: 'rangeLabel', type: '(range: { start: number; end: number; total: number }) => string' },
+        { name: 'rangeText', type: '(range: { start: number; end: number; total: number }) => string' },
         { name: 'selectable', type: 'boolean', default: 'false' },
         { name: 'selectAllLabel', type: 'string' },
-        { name: 'selectionLabel', type: '(count: number) => string' },
+        { name: 'selectionText', type: '(count: number) => string' },
         { name: 'selectRowLabel', type: '(row: Row, index: number) => string' },
         { name: 'serverSide', type: 'boolean', default: 'false' },
         { name: 'v-model:sort', key: 'vModelSort', type: 'DataTableSort | null', default: 'null' },
@@ -76,7 +76,7 @@ export default {
   page: number
   perPage: number | null
   sortKey: string | null
-  sortDirection: 'asc' | 'desc' | null
+  sortDirection: DataTableSortDirection | null
   search: string
 }`,
     },
@@ -88,8 +88,12 @@ export default {
       name: 'DataTableSort',
       definition: `export interface DataTableSort {
   key: string
-  direction: 'asc' | 'desc'
+  direction: DataTableSortDirection
 }`,
+    },
+    {
+      name: 'DataTableSortDirection',
+      definition: `export type DataTableSortDirection = 'asc' | 'desc'`,
     },
     {
       name: 'IconRender',

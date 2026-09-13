@@ -196,7 +196,7 @@ describe('VDataTable', () => {
     expect(firstColumnCells(container)).toEqual(['Brume', 'Atlas', 'Vectis', 'Éclair'])
   })
 
-  /* The button's name is COMPOSITE: the `perPageLabel` prop (or its dictionary default)
+  /* The button's name is COMPOSITE: the `perPageText` prop (or its dictionary default)
      is passed to `dataTable.perPageValue`, which places the separator — and that varies
      by language (" : " in French, ": " with no space in English). A custom prop must
      therefore travel through the function, not short-circuit it. */
@@ -208,7 +208,7 @@ describe('VDataTable', () => {
         rowKey: 'name',
         perPage: 2,
         perPageOptions: [2, 4],
-        perPageLabel: 'Per page',
+        perPageText: 'Per page',
       },
     })
     expect(getByRole('button', { name: 'Per page: 2' })).toBeTruthy()

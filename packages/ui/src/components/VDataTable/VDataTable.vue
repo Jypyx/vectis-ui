@@ -59,10 +59,13 @@ export interface DataTableColumn {
   align?: 'start' | 'center' | 'end'
 }
 
+/** Which way a column is sorted: A to Z, or Z to A. */
+export type DataTableSortDirection = 'asc' | 'desc'
+
 /** Which column the table is sorted by, and in which direction. */
 export interface DataTableSort {
   key: string
-  direction: 'asc' | 'desc'
+  direction: DataTableSortDirection
 }
 
 /** How a row is identified: by the field named in `rowKey`, or failing that by its position. */
@@ -76,7 +79,7 @@ export interface DataTableParams {
   page: number
   perPage: number | null
   sortKey: string | null
-  sortDirection: 'asc' | 'desc' | null
+  sortDirection: DataTableSortDirection | null
   search: string
 }
 
@@ -173,7 +176,7 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   /** The choices offered for how many rows a page holds. */
   perPageOptions?: number[]
   /** What that choice is called. It falls back to the design system dictionary. */
-  perPageLabel?: string
+  perPageText?: string
   /**
    * How many rows there are in all on the server. It is what lets the pagination and the
    * range be right when the table only ever holds one page.
@@ -182,7 +185,7 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   /** Shows which rows are being looked at — "1–10 of 42" — in the footer. */
   showRange?: boolean
   /** Rephrases that range. It falls back to the design system dictionary. */
-  rangeLabel?: (range: { start: number; end: number; total: number }) => string
+  rangeText?: (range: { start: number; end: number; total: number }) => string
   /** Adds a checkbox to every row, and one in the heading to take the whole page. */
   selectable?: boolean
   /**
@@ -194,7 +197,7 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
    * How the selection is summed up in the footer. It says nothing at all when nothing is
    * selected, and falls back to the design system dictionary.
    */
-  selectionLabel?: (count: number) => string
+  selectionText?: (count: number) => string
   /**
    * What a row's checkbox is announced as. "Select row" tells a screen reader user
    * nothing about WHICH row, so this is worth supplying with something from the row
@@ -229,13 +232,13 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   sortAscIcon: () => arrowDownwardIcon,
   sortDescIcon: () => arrowUpwardIcon,
   perPageOptions: undefined,
-  perPageLabel: undefined,
+  perPageText: undefined,
   total: undefined,
   showRange: false,
-  rangeLabel: undefined,
+  rangeText: undefined,
   selectable: false,
   selectAllLabel: undefined,
-  selectionLabel: undefined,
+  selectionText: undefined,
   selectRowLabel: undefined,
   serverSide: false,
 })
@@ -247,7 +250,7 @@ const resolvedSearchPlaceholder = computed(
   () => props.searchPlaceholder ?? m.value.dataTable.searchPlaceholder,
 )
 const resolvedSearchLabel = computed(() => props.searchLabel ?? m.value.dataTable.searchLabel)
-const resolvedPerPageLabel = computed(() => props.perPageLabel ?? m.value.dataTable.perPage)
+const resolvedPerPageText = computed(() => props.perPageText ?? m.value.dataTable.perPage)
 const resolvedSelectAllLabel = computed(() => props.selectAllLabel ?? m.value.dataTable.selectAll)
 
 /**
@@ -547,19 +550,19 @@ const colCount = computed(() => props.columns.length + (props.selectable ? 1 : 0
  * page at the same moment as its text, it announces nothing, and the first row selected
  * would pass in silence.
  */
-const selectionText = computed(() => {
+const selectionSummary = computed(() => {
   const count = selected.value.length
-  if (props.selectionLabel) return props.selectionLabel(count)
+  if (props.selectionText) return props.selectionText(count)
   if (count === 0) return ''
   return m.value.dataTable.selection(count)
 })
 
-const rangeText = computed(() => {
+const rangeSummary = computed(() => {
   const per = perPage.value ?? 0
   const total = totalCount.value
   const start = total === 0 ? 0 : (currentPage.value - 1) * per + 1
   const end = Math.min(currentPage.value * per, total)
-  return props.rangeLabel?.({ start, end, total }) ?? m.value.dataTable.range({ start, end, total })
+  return props.rangeText?.({ start, end, total }) ?? m.value.dataTable.range({ start, end, total })
 })
 
 // The height is applied to the WHOLE component and not as a ceiling on the scrolling
@@ -702,11 +705,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
          size, the range and the pagination, in that order. -->
     <div v-if="paginated || selectable" class="v-table-footer">
       <span v-if="selectable" class="v-table-selection" aria-live="polite">{{
-        selectionText
+        selectionSummary
       }}</span>
       <div v-if="paginated" class="v-table-footer-end">
         <div v-if="perPageOptions?.length" class="v-table-per-page">
-          <span class="v-table-per-page-label" aria-hidden="true">{{ resolvedPerPageLabel }}</span>
+          <span class="v-table-per-page-label" aria-hidden="true">{{ resolvedPerPageText }}</span>
           <!-- The panel is told to match its trigger, which here replaces the default
                minimum width with something sensible: a menu of "10", "25", "50" has no
                use for the width a menu of commands assumes, and it still cannot end up
@@ -719,7 +722,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 size="sm"
                 :compact="compact"
                 v-bind="triggerProps"
-                :aria-label="m.dataTable.perPageValue(resolvedPerPageLabel, perPage ?? 0)"
+                :aria-label="m.dataTable.perPageValue(resolvedPerPageText, perPage ?? 0)"
               >
                 {{ perPage }}
                 <VIcon :name="arrowDropDownIcon" />
@@ -734,7 +737,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
             />
           </VMenu>
         </div>
-        <span v-if="showRange" class="v-table-range" aria-live="polite">{{ rangeText }}</span>
+        <span v-if="showRange" class="v-table-range" aria-live="polite">{{ rangeSummary }}</span>
         <!-- Named after the table rather than with the generic pagination wording: a page
              holding this table AND a pagination of its own would otherwise expose two
              navigation landmarks with the same name, and a screen reader user could not

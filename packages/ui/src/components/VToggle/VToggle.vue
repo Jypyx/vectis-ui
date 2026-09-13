@@ -15,7 +15,7 @@
  * the selection — toggling it off, or refusing to when the last choice may not be
  * given up — and moving between the items with the arrow keys.
  */
-import { provide } from 'vue'
+import { computed, provide, ref } from 'vue'
 
 import VButtonGroup from '../VButton/VButtonGroup.vue'
 import { toggleKey } from './context'
@@ -199,6 +199,29 @@ function onKeydown(event: KeyboardEvent) {
     vertical: props.orientation === 'vertical',
   })
 }
+
+const groupRef = ref<InstanceType<typeof VButtonGroup> | null>(null)
+const groupEl = computed(() => groupRef.value?.el ?? null)
+
+// The root is a VButtonGroup and the items come from the consumer's slot, so a template ref
+// on the toggle reaches no button. `focus` goes to the item that stands for the current
+// choice, the one a keyboard user would expect to resume from.
+defineExpose({
+  /**
+   * Moves the focus to the selected item (the first of them when several are), or to the
+   * first item that can take it when nothing is selected.
+   */
+  focus: (options?: FocusOptions) => {
+    const group = groupEl.value
+    const enabled = '.v-toggle-item:not(:disabled, [aria-disabled="true"])'
+    const item =
+      group?.querySelector<HTMLElement>(`${enabled}[aria-pressed="true"]`) ??
+      group?.querySelector<HTMLElement>(enabled)
+    item?.focus(options)
+  },
+  /** The `role="group"` row, which is also where the consumer's attributes land. */
+  el: groupEl,
+})
 </script>
 
 <template>
@@ -216,6 +239,7 @@ function onKeydown(event: KeyboardEvent) {
        from a ghost one — something the items cannot say for themselves, since the
        selected one carries its own variant rather than the row's. -->
   <VButtonGroup
+    ref="groupRef"
     class="v-toggle"
     :orientation="orientation"
     :detached="detached"

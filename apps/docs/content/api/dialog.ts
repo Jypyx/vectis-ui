@@ -11,7 +11,7 @@ export default {
       props: [
         { name: 'title', type: 'string' },
         { name: 'subtitle', type: 'string' },
-        { name: 'width', type: 'string', default: "'400px'" },
+        { name: 'width', type: 'number | string', default: "'400px'" },
         { name: 'role', type: 'DialogRole', values: "'dialog' | 'alertdialog'", default: "'dialog'" },
         { name: 'hideClose', type: 'boolean', default: 'false' },
         { name: 'persistentBackdrop', type: 'boolean', default: 'false' },
@@ -24,7 +24,7 @@ export default {
         { name: 'header', type: '{}' },
         { name: 'header-actions', key: 'headerActions', type: '{}' },
         { name: 'footer', type: '{}' },
-        { name: 'trigger', type: '{ triggerProps: TriggerProps; }' },
+        { name: 'trigger', type: '{ triggerProps: DialogTriggerProps; }' },
       ],
     },
     {
@@ -32,21 +32,21 @@ export default {
       props: [
         { name: 'title', type: 'string' },
         { name: 'subtitle', type: 'string' },
-        { name: 'width', type: 'string', default: "'400px'" },
+        { name: 'width', type: 'number | string', default: "'400px'" },
         { name: 'v-model:open', key: 'vModelOpen', type: 'boolean', default: 'false' },
       ],
       slots: [
         { name: 'default', type: '{}' },
         { name: 'header', type: '{}' },
         { name: 'footer', type: '{}' },
-        { name: 'trigger', type: '{ triggerProps: TriggerProps; }' },
+        { name: 'trigger', type: '{ triggerProps: DialogTriggerProps; }' },
       ],
     },
   ],
   types: [
     {
-      name: 'TriggerProps',
-      definition: `type TriggerProps = {
+      name: 'DialogTriggerProps',
+      definition: `export type DialogTriggerProps = {
   onClick: () => void
   'aria-haspopup': 'dialog'
 }`,

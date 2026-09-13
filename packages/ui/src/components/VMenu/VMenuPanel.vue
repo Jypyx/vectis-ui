@@ -26,8 +26,9 @@ import { computed, inject, ref } from 'vue'
 
 import { usePopover } from '../../composables/usePopover'
 import { menuInvoker, menuKey } from './context'
-import type { MenuPanelPlacement } from './context'
+import type { MenuPanelPlacement, MenuSize } from './context'
 import { arrowNavigate } from '../../utils/arrowNav'
+import { cssSize } from '../../utils/css'
 
 interface MenuPanelProps {
   /** The panel's id, set by whoever owns it. It is what the trigger points at. */
@@ -43,14 +44,14 @@ interface MenuPanelProps {
    * The row height, set by the ROOT panel only. Submenus receive no value and inherit
    * it through CSS instead.
    */
-  size?: 'sm' | 'md' | 'lg'
+  size?: MenuSize
   /** The reduced density, again set by the ROOT panel only and inherited through CSS. */
   compact?: boolean
   /**
    * An explicit width, set by the ROOT panel only. Submenus render no width attribute
    * and keep the default one, so an inherited value cannot reach them.
    */
-  width?: string
+  width?: number | string
   /**
    * Stops the panel from being narrower than its trigger, set by the ROOT panel only:
    * a submenu's trigger is a menu item, not a control worth matching.
@@ -176,7 +177,10 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 // The only thing set inline is an explicit width, when the prop asks for one.
-const panelStyle = computed(() => (props.width ? { '--menu-width': props.width } : undefined))
+const resolvedWidth = computed(() => cssSize(props.width) || undefined)
+const panelStyle = computed(() =>
+  resolvedWidth.value ? { '--menu-width': resolvedWidth.value } : undefined,
+)
 
 // Internal to VMenu, which drives the panel from outside: opening has to be synchronous,
 // and where the focus lands depends on whether a pointer or the keyboard asked.
@@ -218,7 +222,7 @@ defineExpose({
     :data-placement="placement"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
-    :data-width="width ? '' : undefined"
+    :data-width="resolvedWidth ? '' : undefined"
     :data-match-trigger="matchTrigger ? '' : undefined"
     :style="panelStyle"
     @beforetoggle="syncShown"

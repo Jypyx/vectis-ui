@@ -23,7 +23,7 @@ export default {
         { name: 'nextLabel', type: 'string' },
         { name: 'activation', type: 'TabsActivation', values: "'manual' | 'automatic'", default: "'manual'" },
         { name: 'label', type: 'string' },
-        { name: 'v-model', key: 'vModel', type: 'string | number' },
+        { name: 'v-model', key: 'vModel', type: 'ItemValue' },
       ],
       slots: [
         { name: 'default', type: '{}' },
@@ -46,7 +46,7 @@ export default {
     {
       name: 'VTabPanel',
       props: [
-        { name: 'value', type: 'string | number' },
+        { name: 'value', type: 'ItemValue' },
         { name: 'lazy', type: 'boolean', default: 'false' },
       ],
       slots: [

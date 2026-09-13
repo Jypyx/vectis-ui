@@ -38,7 +38,7 @@ import {
   formatDisplay as formatDate,
   formatDisplayRange,
 } from '../../utils/date'
-import { hourCycleFor, minutesOf, type HourFormat } from '../../utils/time'
+import { hourCycleFor, minutesOf } from '../../utils/time'
 
 import { useLocale, useMessages } from '../../i18n/state'
 
@@ -58,7 +58,14 @@ import {
   visibleRange,
   windowOf,
 } from './layout'
-import type { CalendarEvent, CalendarEventId, CalendarEventTimes, CalendarView } from './types'
+import type {
+  CalendarEvent,
+  CalendarEventId,
+  CalendarEventLayout,
+  CalendarEventTimes,
+  CalendarFormat,
+  CalendarView,
+} from './types'
 
 export interface CalendarProps {
   /**
@@ -81,7 +88,7 @@ export interface CalendarProps {
    * Whether times are shown on a twelve or twenty-four hour clock. Left out, the reader's
    * language decides. It is the same prop, under the same name, as VTimePicker's.
    */
-  format?: HourFormat
+  format?: CalendarFormat
   /** The hour the grid starts at, from 0. */
   dayStart?: number
   /** The hour it ends at, up to 24. */
@@ -206,7 +213,7 @@ defineSlots<{
   /** The content of one event's card, replacing the title and times. */
   event?(props: {
     event: E
-    layout: 'block' | 'chip'
+    layout: CalendarEventLayout
     timeText: string
     continuesBefore: boolean
     continuesAfter: boolean

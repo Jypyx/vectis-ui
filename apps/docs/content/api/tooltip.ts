@@ -14,9 +14,17 @@ export default {
         { name: 'delay', type: 'number', default: '300' },
       ],
       slots: [
-        { name: 'default', type: "{ triggerProps: { 'aria-describedby': string; }; }" },
+        { name: 'default', type: '{ triggerProps: TooltipTriggerProps; }' },
         { name: 'content', type: '{}' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'TooltipTriggerProps',
+      definition: `export type TooltipTriggerProps = {
+  'aria-describedby': string
+}`,
     },
   ],
 } satisfies PageApi

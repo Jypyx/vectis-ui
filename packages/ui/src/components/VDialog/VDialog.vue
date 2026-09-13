@@ -21,6 +21,7 @@ import { close as closeIcon } from '../VIcon/icons/close'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import VTypography from '../VTypography/VTypography.vue'
 import { useMessages } from '../../i18n/state'
+import { cssSize } from '../../utils/css'
 
 /** How assistive technology announces the dialog. */
 export type DialogRole = 'dialog' | 'alertdialog'
@@ -34,10 +35,10 @@ interface DialogProps {
   /** A line under the title, explaining what the dialog is asking. */
   subtitle?: string
   /**
-   * How wide the dialog is, in any CSS unit. It is never allowed to exceed the width
-   * of the viewport.
+   * How wide the dialog is: a number is read as pixels, a string as any CSS length. It
+   * is never allowed to exceed the width of the viewport.
    */
-  width?: string
+  width?: number | string
   /**
    * What kind of dialog this is. `alertdialog` is for one that must be answered
    * explicitly, and it makes screen readers announce it more insistently — see
@@ -83,7 +84,7 @@ const resolvedCloseLabel = computed(() => props.closeLabel ?? m.value.common.clo
 const open = defineModel<boolean>('open', { default: false })
 
 /** What the trigger has to carry: the click that opens the dialog, and the fact that it does. */
-type TriggerProps = {
+export type DialogTriggerProps = {
   onClick: () => void
   'aria-haspopup': 'dialog'
 }
@@ -101,7 +102,7 @@ defineSlots<{
    * The button that opens the dialog. Bind the `triggerProps` it receives onto it. It
    * stays rendered at all times, unlike the dialog itself.
    */
-  trigger?(props: { triggerProps: TriggerProps }): unknown
+  trigger?(props: { triggerProps: DialogTriggerProps }): unknown
 }>()
 
 defineOptions({ inheritAttrs: false })
@@ -139,8 +140,17 @@ const rootAttrs = computed(() => ({ ...attrs, closedby: closedby.value }))
 // all times.
 const rendered = ref(open.value)
 
-function show() {
+/**
+ * Settles once the dialog opened by the latest change of `open` is actually showing. The
+ * opening waits for the element to be rendered, so it is always a tick behind the model.
+ */
+let opening: Promise<void> = Promise.resolve()
+
+function show(): Promise<void> {
   open.value = true
+  // The watcher below only runs when the scheduler flushes, so `opening` is read from a
+  // tick later: read at once, it would still be the promise of the previous opening.
+  return nextTick(() => opening)
 }
 
 function requestClose() {
@@ -149,7 +159,7 @@ function requestClose() {
   dialogEl.value?.close()
 }
 
-const triggerProps = computed<TriggerProps>(() => ({
+const triggerProps = computed<DialogTriggerProps>(() => ({
   onClick: show,
   'aria-haspopup': 'dialog',
 }))
@@ -163,11 +173,11 @@ const triggerProps = computed<TriggerProps>(() => ({
 //  - closing: whatever closed it — the cross, our own call, Escape, a click outside —
 //    the browser's close event is what puts the model back in step, and only then is
 //    the element removed.
-watch(open, async (value) => {
+watch(open, (value) => {
   if (value) {
     rendered.value = true
-    await nextTick() // the brand new <dialog> has to exist before it can be opened
-    dialogEl.value?.showModal()
+    // the brand new <dialog> has to exist before it can be opened
+    opening = nextTick(() => dialogEl.value?.showModal())
   } else {
     dialogEl.value?.close()
     rendered.value = false
@@ -189,7 +199,11 @@ function onClose() {
 }
 
 defineExpose({
-  /** Opens the dialog, exactly as setting `open` does. */
+  /**
+   * Opens the dialog, exactly as setting `open` does. The opening lands on the next tick,
+   * once the element has been rendered: `el` is still null right after the call, and the
+   * promise returned settles once the dialog is showing.
+   */
   show,
   /**
    * Closes the dialog. It closes unconditionally, `persistentEscape` and
@@ -208,7 +222,7 @@ defineExpose({
     ref="dialogEl"
     v-bind="rootAttrs"
     class="v-dialog"
-    :style="{ '--dialog-width': width }"
+    :style="{ '--dialog-width': cssSize(width) }"
     :role="role === 'alertdialog' ? 'alertdialog' : undefined"
     :aria-labelledby="title ? titleId : undefined"
     :aria-describedby="subtitle ? subtitleId : undefined"

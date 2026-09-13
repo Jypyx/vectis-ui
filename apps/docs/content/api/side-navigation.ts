@@ -38,7 +38,7 @@ export default {
       slots: [
         { name: 'default', type: '{}' },
         { name: 'sublabel', type: '{}' },
-        { name: 'start', type: '{}' },
+        { name: 'icon', type: '{}' },
         { name: 'end', type: '{}' },
         { name: 'items', type: '{}' },
       ],

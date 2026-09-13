@@ -13,6 +13,8 @@
  * can shift a card between the two renders.
  */
 
+import type { HourFormat } from '../../utils/time'
+
 /** What identifies one event, and what the move and resize events refer back to. */
 export type CalendarEventId = string | number
 
@@ -68,6 +70,15 @@ export interface CalendarEvent {
  * preset on the same machinery — they differ only in where the number of days comes from.
  */
 export type CalendarView = 'day' | '4days' | 'week' | 'month' | 'year' | 'custom'
+
+/** Whether times are written on a twelve or a twenty-four hour clock. */
+export type CalendarFormat = HourFormat
+
+/**
+ * The shape an event's card takes: a block, which fills the box the calendar gives it and
+ * can show a second line, or a chip, one line high in a row of others.
+ */
+export type CalendarEventLayout = 'block' | 'chip'
 
 /**
  * Where an event sits in time, and nothing else. The move and resize events carry one of

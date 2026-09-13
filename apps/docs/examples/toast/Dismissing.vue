@@ -25,7 +25,7 @@ function dismissOne() {
     <VButton
       variant="outline"
       tone="neutral"
-      @click="toast({ tone: 'success', message: 'Saved.', closable: false })"
+      @click="toast({ tone: 'success', message: 'Saved.', hideClose: true })"
     >
       No cross
     </VButton>

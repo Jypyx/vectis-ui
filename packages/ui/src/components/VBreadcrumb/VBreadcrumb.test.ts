@@ -77,10 +77,10 @@ describe('VBreadcrumb', () => {
     })
   })
 
-  describe('item icon (iconStart)', () => {
+  describe('item icon (icon)', () => {
     it('an icon name → an icon before the label', () => {
       const { getByRole } = render(VBreadcrumb, {
-        props: { items: [{ label: 'Home', href: '/', iconStart: 'home' }] },
+        props: { items: [{ label: 'Home', href: '/', icon: 'home' }] },
       })
       const link = getByRole('link', { name: 'Home' })
       expect(link.querySelector<HTMLElement>('.v-icon')?.dataset.icon).toBe('home')
@@ -88,7 +88,7 @@ describe('VBreadcrumb', () => {
 
     it('`{ src }` → an image', () => {
       const { getByRole } = render(VBreadcrumb, {
-        props: { items: [{ label: 'Home', href: '/', iconStart: { src: '/home.png' } }] },
+        props: { items: [{ label: 'Home', href: '/', icon: { src: '/home.png' } }] },
       })
       const img = getByRole('link', { name: 'Home' }).querySelector('img')
       expect(img?.getAttribute('src')).toBe('/home.png')
@@ -98,7 +98,7 @@ describe('VBreadcrumb', () => {
   describe('maxItems', () => {
     const sixItems: BreadcrumbItem[] = [
       { label: 'Home', href: '/' },
-      { label: 'Alpha', href: '/a', iconStart: 'folder' },
+      { label: 'Alpha', href: '/a', icon: 'folder' },
       { label: 'Bravo', href: '/a/b' },
       { label: 'Charlie', href: '/a/b/c' },
       { label: 'Delta', href: '/a/b/c/d' },

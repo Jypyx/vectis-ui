@@ -7,9 +7,9 @@ import {
 } from 'vectis-ui/icons'
 
 const items = [
-  { label: 'Uploads', href: '/app/files', iconStart: cloudUpload },
-  { label: 'Reports', href: '/app/files/reports', iconStart: tableChart },
-  { label: 'Third quarter', href: '/app/files/reports/q3', iconStart: pictureAsPdf },
+  { label: 'Uploads', href: '/app/files', icon: cloudUpload },
+  { label: 'Reports', href: '/app/files/reports', icon: tableChart },
+  { label: 'Third quarter', href: '/app/files/reports/q3', icon: pictureAsPdf },
 ]
 </script>
 

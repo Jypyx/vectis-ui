@@ -1,3 +1,5 @@
+import type { ChipSize } from '../components/VChip/VChip.vue'
+
 // @core
 /**
  * The scale of a VChip rendered INSIDE a text field: VCombobox's values, VFileInput's files.
@@ -15,7 +17,7 @@
 export type ChipFieldSize = 'sm' | 'md' | 'lg'
 
 export interface ChipScale {
-  size: 'xs' | 'sm'
+  size: ChipSize
   compact: boolean
   /** The chips' height, ready to be set on the field so it can match its own text to it. */
   height: string

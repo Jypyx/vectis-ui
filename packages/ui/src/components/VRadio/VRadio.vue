@@ -9,6 +9,11 @@
  * between them, that lets only one be selected, and that gives the group a single
  * stop in the tab order. There is no JavaScript here for any of it.
  */
+
+import { ref } from 'vue'
+
+import type { ItemValue } from '../../types'
+
 /** Which side of the dot the label sits on. */
 export type RadioLabelPosition = 'start' | 'end'
 
@@ -17,7 +22,7 @@ interface RadioProps {
    * What choosing this button means. The group's v-model holds the value of the
    * selected button, so this is what it becomes when this one is picked.
    */
-  value: string
+  value: ItemValue
   /** Which side of the dot the label sits on. */
   labelPosition?: RadioLabelPosition
   /**
@@ -52,12 +57,23 @@ defineOptions({ inheritAttrs: false })
  * The value selected in the group, shared by every radio carrying the same `name`. It is
  * empty until one is chosen, and a radio is selected when it matches its own `value`.
  */
-const model = defineModel<string>({ default: '' })
+const model = defineModel<ItemValue>({ default: '' })
 
 defineSlots<{
   /** The label. It is clickable, the whole component being wrapped in a `<label>`. */
   default?(): unknown
 }>()
+
+const inputEl = ref<HTMLInputElement | null>(null)
+
+// The root is the <label>, so a template ref on the component reaches the wrapper and not
+// the control: these two are the way to the real radio button.
+defineExpose({
+  /** Moves the focus to the real radio button. */
+  focus: (options?: FocusOptions) => inputEl.value?.focus(options),
+  /** The real `<input type="radio">`, for what `focus` does not cover. */
+  el: inputEl,
+})
 </script>
 
 <template>
@@ -67,6 +83,7 @@ defineSlots<{
     :data-spread="spread || undefined"
   >
     <input
+      ref="inputEl"
       v-model="model"
       type="radio"
       class="v-radio-input v-hidden-input"

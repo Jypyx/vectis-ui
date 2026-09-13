@@ -11,16 +11,16 @@ const photos = ref<File[]>([])
   <div class="column">
     <VFileInput
       v-model="documents"
-      :attach-icon="cloudUpload"
+      :picker-icon="cloudUpload"
       multiple
       display="chip"
       label="Documents"
-      hint="attachIcon takes the same values as every icon prop in the library"
+      hint="pickerIcon takes the same values as every icon prop in the library"
     />
 
     <VFileInput
       v-model="photos"
-      :attach-icon="image"
+      :picker-icon="image"
       accept="image/*"
       multiple
       display="chip"

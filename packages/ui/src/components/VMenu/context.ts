@@ -45,6 +45,9 @@ export function menuInvoker(id: string): HTMLElement | null {
   return document.querySelector(`[popovertarget="${id.replace(/["\\]/g, '\\$&')}"]`)
 }
 
+/** The height of the rows: 32, 40 or 48 pixels. This is public API. */
+export type MenuSize = 'sm' | 'md' | 'lg'
+
 /** Where the menu itself may open, relative to its trigger. This is public API. */
 export type MenuPlacement =
   'bottom-start' | 'bottom-end' | 'bottom' | 'top-start' | 'top-end' | 'top'

@@ -22,11 +22,8 @@ import { computed, onMounted, provide, ref, useId, watch } from 'vue'
 
 import VMenuPanel from './VMenuPanel.vue'
 import { menuInvoker, menuKey } from './context'
-import type { MenuPlacement } from './context'
+import type { MenuPlacement, MenuSize } from './context'
 import { isKeyboardFocus } from '../../utils/focus'
-
-/** The height of the rows: 32, 40 or 48 pixels. */
-export type MenuSize = 'sm' | 'md' | 'lg'
 
 interface MenuProps {
   /**
@@ -42,10 +39,11 @@ interface MenuProps {
   /** Takes 4px off the height of every row, submenus included. */
   compact?: boolean
   /**
-   * A width for the panel, given as any CSS length or keyword — `16rem`,
-   * `max-content`. It applies to the menu itself; submenus keep the default width.
+   * A width for the panel: a number is read as pixels, a string as any CSS length or
+   * keyword — `16rem`, `max-content`. It applies to the menu itself; submenus keep the
+   * default width.
    */
-  width?: string
+  width?: number | string
   /**
    * Stops the panel from being narrower than the button that opened it, while leaving
    * it free to grow wider for its content. Submenus are unaffected.
@@ -73,7 +71,7 @@ const open = defineModel<boolean>('open', { default: false })
  * attributes telling assistive technology that a menu is attached to this button and
  * whether it is currently open.
  */
-type MenuTriggerProps = {
+export type MenuTriggerProps = {
   popovertarget: string
   'aria-haspopup': 'menu'
   'aria-expanded': boolean

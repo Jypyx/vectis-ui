@@ -21,6 +21,7 @@ export const fr: Messages = {
     clear: 'Effacer',
     close: 'Fermer',
     dismiss: 'Retirer',
+    remove: (name) => `Retirer ${name}`,
     cancel: 'Annuler',
     confirm: 'OK',
   },
@@ -44,7 +45,6 @@ export const fr: Messages = {
   combobox: {
     empty: 'Aucun résultat',
     clear: 'Effacer la sélection',
-    remove: (label) => `Retirer ${label}`,
   },
   dataTable: {
     empty: 'Aucune donnée',
@@ -111,8 +111,8 @@ export const fr: Messages = {
   },
   dateInput: {
     clear: 'Effacer la date',
-    open: 'Ouvrir le calendrier',
-    label: 'Choisir une date',
+    openPicker: 'Ouvrir le calendrier',
+    pickerLabel: 'Choisir une date',
   },
   timePicker: {
     label: "Sélecteur d'heure",
@@ -137,9 +137,8 @@ export const fr: Messages = {
     unavailable: "Cette heure n'est pas disponible.",
   },
   fileInput: {
-    attach: 'Choisir des fichiers',
+    openPicker: 'Choisir des fichiers',
     clear: 'Effacer les fichiers',
-    remove: (name) => `Retirer ${name}`,
     // The French plural starts at two, the English one at zero — "0 fichier" against
     // "0 files". Each language therefore makes the choice on its own, and there is no
     // shared rule for either to inherit.
@@ -149,7 +148,6 @@ export const fr: Messages = {
   filePicker: {
     browse: 'Parcourir les fichiers',
     or: 'ou',
-    remove: (name) => `Retirer ${name}`,
     list: 'Fichiers sélectionnés',
   },
   carousel: {

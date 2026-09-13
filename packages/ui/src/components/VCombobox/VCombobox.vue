@@ -19,6 +19,7 @@
 import { computed, inject, nextTick, reactive, ref, useId, watch, watchEffect } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
+import type { ChipSize } from '../VChip/VChip.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
@@ -274,7 +275,7 @@ defineSlots<{
     option: ComboboxOption | undefined
     label: string
     remove: () => void
-    size: 'xs' | 'sm'
+    size: ChipSize
     compact: boolean
   }): unknown
   /** What the panel shows when nothing matches. It receives the term that was searched. */
@@ -928,7 +929,7 @@ defineExpose({
                 :size="chipScale.size"
                 :compact="chipScale.compact"
                 :dismissible="!readonly && !resolvedDisabled"
-                :dismiss-label="m.combobox.remove(labelOf(value))"
+                :dismiss-label="m.common.remove(labelOf(value))"
                 :disabled="resolvedDisabled"
                 @dismiss="removeValue(value)"
                 >{{ labelOf(value) }}</VChip

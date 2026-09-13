@@ -67,7 +67,12 @@ import {
   useDragGuard,
 } from './gesture'
 import { EDGE_BAND, useEdgeStep } from './edgeStep'
-import type { CalendarEvent, CalendarEventId, CalendarEventTimes } from './types'
+import type {
+  CalendarEvent,
+  CalendarEventId,
+  CalendarEventLayout,
+  CalendarEventTimes,
+} from './types'
 
 /** Where the keyboard focus is in the grid, as a day and a moment in it. */
 export interface FocusedCell {
@@ -134,7 +139,7 @@ const focused = defineModel<FocusedCell>('focused', { required: true })
 defineSlots<{
   event?(props: {
     event: E
-    layout: 'block' | 'chip'
+    layout: CalendarEventLayout
     timeText: string
     continuesBefore: boolean
     continuesAfter: boolean

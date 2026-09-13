@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
-import { defineComponent, ref } from 'vue'
+import { defineComponent, nextTick, ref } from 'vue'
 
 import VRadio from './VRadio.vue'
 
@@ -41,5 +41,33 @@ describe('VRadio', () => {
       slots: { default: 'X' },
     })
     expect(getByRole('radio').getAttribute('name')).toBe('groupe')
+  })
+
+  it('a numeric value makes the round trip as a number', async () => {
+    const plan = ref<number>(1)
+    const { getByRole } = render({
+      components: { VRadio },
+      setup: () => ({ plan }),
+      template: `
+        <VRadio v-model="plan" name="plan" :value="1">One</VRadio>
+        <VRadio v-model="plan" name="plan" :value="2">Two</VRadio>
+      `,
+    })
+    expect((getByRole('radio', { name: 'One' }) as HTMLInputElement).checked).toBe(true)
+    await fireEvent.click(getByRole('radio', { name: 'Two' }))
+    expect(plan.value).toBe(2)
+  })
+
+  it('exposes focus and the real radio button, the root being the label', async () => {
+    const radio = ref<InstanceType<typeof VRadio> | null>(null)
+    render({
+      components: { VRadio },
+      setup: () => ({ radio }),
+      template: '<VRadio ref="radio" value="a">Alpha</VRadio>',
+    })
+    await nextTick()
+    expect(radio.value?.el?.type).toBe('radio')
+    radio.value?.focus()
+    expect(document.activeElement).toBe(radio.value?.el)
   })
 })

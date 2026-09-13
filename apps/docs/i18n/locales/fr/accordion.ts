@@ -13,7 +13,7 @@ export default {
     },
     subtitles: {
       title: 'Sous-titres et icônes',
-      text: '<code>icon</code> place une icône avant le titre et <code>subtitle</code> ajoute une seconde ligne en dessous. Les slots <code>#start</code> et <code>#subtitle</code> acceptent du balisage plutôt que du texte simple.',
+      text: '<code>icon</code> place une icône avant le titre et <code>subtitle</code> ajoute une seconde ligne en dessous. Les slots <code>#icon</code> et <code>#subtitle</code> acceptent du balisage plutôt que du texte simple.',
     },
     compact: {
       title: 'Compact',
@@ -53,7 +53,7 @@ export default {
           'Le titre de la section, la ligne qui reste visible quand elle est fermée. Utilisez le slot <code>#title</code> quand le titre demande du balisage plutôt que du texte simple.',
         subtitle:
           'Une seconde ligne sous le titre, pour une courte explication ou un statut. Le slot <code>#subtitle</code> la remplace quand du balisage est nécessaire.',
-        icon: 'Une icône avant le titre. Le slot <code>#start</code> la remplace.',
+        icon: 'Une icône avant le titre. Le slot <code>#icon</code> la remplace.',
         defaultOpen:
           "Rend la section déjà ouverte. Cela ne fixe que le premier rendu : le navigateur possède l'état ensuite, donc changer cette prop plus tard ne refermera pas une section que le lecteur a ouverte.",
         disabled:
@@ -63,7 +63,7 @@ export default {
         default: 'Le contenu révélé quand la section est ouverte.',
         title: 'Un titre fait de balisage, qui remplace la prop <code>title</code>.',
         subtitle: 'Un sous-titre fait de balisage, qui remplace la prop <code>subtitle</code>.',
-        start: 'Du contenu libre avant le titre, qui prend la place de <code>icon</code>.',
+        icon: 'Du contenu libre avant le titre, qui prend la place de <code>icon</code>.',
       },
     },
   },

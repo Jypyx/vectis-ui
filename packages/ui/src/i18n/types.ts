@@ -28,6 +28,11 @@ export interface Messages {
     close: string
     /** The cross that removes a chip. */
     dismiss: string
+    /**
+     * The same cross when it has to say WHICH thing it removes: a value of a combobox, a
+     * file of either file component. The name is the thing's own label.
+     */
+    remove: (name: string) => string
     /** The two buttons under the clock face. */
     cancel: string
     confirm: string
@@ -53,7 +58,6 @@ export interface Messages {
   combobox: {
     empty: string
     clear: string
-    remove: (label: string) => string
   }
   dataTable: {
     empty: string
@@ -159,7 +163,13 @@ export interface Messages {
     monthPicker: string
     yearPicker: string
   }
-  dateInput: { clear: string; open: string; label: string }
+  dateInput: {
+    clear: string
+    /** What the button at the end of the field is called: the one that opens the calendar. */
+    openPicker: string
+    /** What the panel holding the calendar is called. */
+    pickerLabel: string
+  }
   /** The clock itself. VTimeInput reads the half-day words from here too: there is one
       vocabulary for choosing a time, wherever the control that does it is rendered. */
   timePicker: {
@@ -182,6 +192,7 @@ export interface Messages {
   }
   timeInput: {
     clear: string
+    /** What the button at the end of the field is called: the one that opens the clock. */
     openPicker: string
     /** What the panel holding the clock is called. */
     pickerLabel: string
@@ -206,11 +217,9 @@ export interface Messages {
     unavailable: string
   }
   fileInput: {
-    /** What the button at the end of the field is called — the one that opens the file dialog. */
-    attach: string
+    /** What the button at the end of the field is called: the one that opens the file dialog. */
+    openPicker: string
     clear: string
-    /** What the cross on a file's chip is called. */
-    remove: (name: string) => string
     /**
      * The WORD of the counter, and only that. The total size that follows is written out
      * by the browser, and the brackets around it belong to neither — punctuation everyone
@@ -228,8 +237,6 @@ export interface Messages {
      * it is translated — unlike the two rules on either side of it, which are drawn.
      */
     or: string
-    /** What the cross beside a chosen file is called. */
-    remove: (name: string) => string
     /** What the list of chosen files is called. */
     list: string
   }

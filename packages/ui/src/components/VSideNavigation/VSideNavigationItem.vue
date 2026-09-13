@@ -32,7 +32,7 @@ interface SideNavigationItemProps {
   /** A second line under the label, for a status or a short explanation. */
   sublabel?: string
   /**
-   * An icon before the label: an icon name, or an explicit render. The `#start` slot
+   * An icon before the label: an icon name, or an explicit render. The `#icon` slot
    * replaces it.
    */
   icon?: IconSource
@@ -107,7 +107,7 @@ defineSlots<{
   /** A second line made of markup, replacing the `sublabel` prop. */
   sublabel?(): unknown
   /** Free content before the label, which takes the place of `icon`. */
-  start?(): unknown
+  icon?(): unknown
   /**
    * Free content at the end of the row, before the chevron — a counter, a badge. On a
    * BRANCH it must not be focusable (see the introduction).
@@ -234,7 +234,7 @@ function onActionClick(event: MouseEvent) {
         :tabindex="disabled ? -1 : undefined"
         @click="onSummaryClick"
       >
-        <slot name="start">
+        <slot name="icon">
           <VIcon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
         </slot>
         <span class="v-side-nav-content">
@@ -282,7 +282,7 @@ function onActionClick(event: MouseEvent) {
         :aria-current="ariaCurrent"
         @click="onActionClick"
       >
-        <slot name="start">
+        <slot name="icon">
           <VIcon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
         </slot>
         <span class="v-side-nav-content">

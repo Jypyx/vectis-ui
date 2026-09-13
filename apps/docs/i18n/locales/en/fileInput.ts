@@ -37,11 +37,11 @@ export default {
     },
     customIcon: {
       title: 'Custom icon',
-      text: '<code>attachIcon</code> is the glyph at the end of the field that opens the system dialog, and it takes any icon value.',
+      text: '<code>pickerIcon</code> is the glyph at the end of the field that opens the system dialog, and it takes any icon value.',
     },
     states: {
       title: 'States',
-      text: '<code>invalid</code> marks the field as having an error. <code>readonly</code> keeps the selection on show and refuses every way of changing it. <code>disabled</code> greys the field out and takes it out of the tab order. <code>noDrop</code> turns dropping away alone, and <code>loading</code> is purely visual, a spinner replacing the attach icon. <code>attachIconLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename what each of them announces.',
+      text: '<code>invalid</code> marks the field as having an error. <code>readonly</code> keeps the selection on show and refuses every way of changing it. <code>disabled</code> greys the field out and takes it out of the tab order. <code>noDrop</code> turns dropping away alone, and <code>loading</code> is purely visual, a spinner replacing the attach icon. <code>pickerIconLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename what each of them announces.',
     },
   },
 
@@ -58,7 +58,7 @@ export default {
         maxTotalSize: 'The largest the whole selection may be, in bytes.',
         maxFiles: 'How many files may be chosen at most.',
         counter: 'Shows how much has been chosen under the field, "3 files (1.2 MB)".',
-        attachIcon: 'The icon at the end of the field, which opens the file dialog.',
+        pickerIcon: 'The icon at the end of the field, which opens the file dialog.',
         noDrop: 'Refuses files dropped onto the component: only the dialog then adds any.',
         size: 'The height of the field: 32, 40 or 48 pixels.',
         compact:
@@ -75,7 +75,7 @@ export default {
         iconStart:
           'An icon inside the field, at the start. It is rendered before the chips rather than in their place. Decorative until a <code>@click:icon-start</code> listener turns it into a button.',
         iconStartLabel: 'What the start icon does, in words, once it is clickable.',
-        attachIconLabel:
+        pickerIconLabel:
           'What the end icon does, in words. It names the button that opens the file dialog, and falls back to the design system dictionary.',
         loading:
           'Shows a spinner in place of the attach icon, while an upload is under way. It changes nothing else: files can still be dropped and the dialog still opens.',

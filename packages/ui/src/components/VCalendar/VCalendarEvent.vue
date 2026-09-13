@@ -19,7 +19,7 @@ import VTypography from '../VTypography/VTypography.vue'
 import { useMessages } from '../../i18n/state'
 
 import { hueOf } from './color'
-import type { CalendarEvent, CalendarEventId } from './types'
+import type { CalendarEvent, CalendarEventId, CalendarEventLayout } from './types'
 
 export interface CalendarEventProps<T> {
   /** The event this card stands for. */
@@ -28,7 +28,7 @@ export interface CalendarEventProps<T> {
    * Which shape to take: a block, which fills the box the calendar gives it and can show a
    * second line, or a chip, which is one line high and sits in a row of others.
    */
-  layout?: 'block' | 'chip'
+  layout?: CalendarEventLayout
   /** The event's times, already written out for the reader by the calendar. */
   timeText?: string
   /** Whether the event carries on past the start or the end of what is on show. */
@@ -83,7 +83,7 @@ defineSlots<{
   /** The whole content of the card, replacing the title and the times. */
   default?(props: {
     event: E
-    layout: 'block' | 'chip'
+    layout: CalendarEventLayout
     timeText: string
     continuesBefore: boolean
     continuesAfter: boolean

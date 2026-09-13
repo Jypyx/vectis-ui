@@ -23,4 +23,15 @@ describe('VSpinner', () => {
     const implicitSpinner = implicit.container.querySelector('.v-spinner') as HTMLElement
     expect(implicitSpinner.hasAttribute('style')).toBe(false)
   })
+
+  it('size accepts a numeric string, and ignores what is not a number rather than writing NaNpx', () => {
+    const text = render(VSpinner, { props: { size: '24' } })
+    const fromString = text.container.querySelector('.v-spinner') as HTMLElement
+    expect(fromString.style.getPropertyValue('--spinner-size')).toBe('24px')
+
+    const invalid = render(VSpinner, { props: { size: 'large' } })
+    expect(
+      (invalid.container.querySelector('.v-spinner') as HTMLElement).hasAttribute('style'),
+    ).toBe(false)
+  })
 })

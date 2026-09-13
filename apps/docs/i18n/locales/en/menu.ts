@@ -49,7 +49,7 @@ export default {
         size: 'How tall the rows are: 32, 40 or 48 pixels. Submenus inherit it, so it is set once on the menu as a whole.',
         compact: 'Takes 4px off the height of every row, submenus included.',
         width:
-          'A width for the panel, given as any CSS length or keyword, <code>16rem</code> or <code>max-content</code>. It applies to the menu itself; submenus keep the default width.',
+          'A width for the panel: a number is read as pixels, a string as any CSS length or keyword, <code>16rem</code> or <code>max-content</code>. It applies to the menu itself; submenus keep the default width.',
         matchTrigger:
           'Stops the panel from being narrower than the button that opened it, while leaving it free to grow wider for its content. Submenus are unaffected.',
         vModelOpen:

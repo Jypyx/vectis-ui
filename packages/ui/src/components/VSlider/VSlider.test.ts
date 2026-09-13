@@ -1,6 +1,8 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
+import { nextTick, ref } from 'vue'
+
 import VSlider from './VSlider.vue'
 
 describe('VSlider', () => {
@@ -314,5 +316,20 @@ describe('VSlider — the wrapper-root split', () => {
     render(VSlider, { props: { modelValue: [20, 60], range: true }, attrs: { name: 'span' } })
     expect(warn.mock.calls.map(String).join(' ')).toContain('only the end thumb carries it')
     warn.mockRestore()
+  })
+
+  it('exposes focus and the end thumb, the one carrying the consumer id', async () => {
+    const slider = ref<InstanceType<typeof VSlider> | null>(null)
+    const { container } = render({
+      components: { VSlider },
+      setup: () => ({ slider }),
+      template: '<VSlider ref="slider" :model-value="[20, 60]" range label="Price" id="price" />',
+    })
+    await nextTick()
+    const end = container.querySelector('.v-slider-input-end')
+    expect(slider.value?.el).toBe(end)
+    expect(slider.value?.el?.id).toBe('price')
+    slider.value?.focus()
+    expect(document.activeElement).toBe(end)
   })
 })

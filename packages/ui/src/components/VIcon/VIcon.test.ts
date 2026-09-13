@@ -139,4 +139,15 @@ describe('VIcon', () => {
     const iconContextuelle = contextuelle.container.querySelector('.v-icon') as HTMLElement
     expect(iconContextuelle.hasAttribute('style')).toBe(false)
   })
+
+  it('size accepts a numeric string, and ignores what is not a number rather than writing NaNpx', () => {
+    const text = render(VIcon, { props: { name: 'add', size: '24' } })
+    const fromString = text.container.querySelector('.v-icon') as HTMLElement
+    expect(fromString.style.getPropertyValue('--vectis-icon-size')).toBe('24px')
+
+    const invalid = render(VIcon, { props: { name: 'add', size: Number.NaN } })
+    expect((invalid.container.querySelector('.v-icon') as HTMLElement).hasAttribute('style')).toBe(
+      false,
+    )
+  })
 })

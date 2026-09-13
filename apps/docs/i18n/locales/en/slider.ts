@@ -54,7 +54,7 @@ export default {
         range: 'Offers two thumbs to pick a range, which makes the value a pair.',
         disabled: 'Makes the slider unusable.',
         label:
-          'What screen readers announce for the slider. In range mode the two thumbs are announced as the start and the end of it.',
+          'What screen readers announce for the slider. It is an accessible name and draws nothing on screen. In range mode the two thumbs are announced as the start and the end of it.',
         orientation: 'Turns the slider upright, with the lowest value at the bottom.',
         inputs:
           'Adds a number field beside the slider for setting the value exactly, one field or one per end in range mode. Sliding is quick but imprecise; this is the way out.',

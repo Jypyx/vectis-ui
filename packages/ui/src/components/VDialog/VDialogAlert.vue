@@ -13,6 +13,7 @@
 import { computed, ref } from 'vue'
 
 import VDialog from './VDialog.vue'
+import type { DialogTriggerProps } from './VDialog.vue'
 
 interface DialogAlertProps {
   /**
@@ -23,10 +24,10 @@ interface DialogAlertProps {
   /** A line under the title, spelling out the consequences of the answer. */
   subtitle?: string
   /**
-   * How wide the dialog is, in any CSS unit. It is never allowed to exceed the width
-   * of the viewport.
+   * How wide the dialog is: a number is read as pixels, a string as any CSS length. It
+   * is never allowed to exceed the width of the viewport.
    */
-  width?: string
+  width?: number | string
 }
 
 withDefaults(defineProps<DialogAlertProps>(), {
@@ -37,11 +38,6 @@ withDefaults(defineProps<DialogAlertProps>(), {
 
 /** Whether the alert is showing. It starts closed, and closing writes back to it. */
 const open = defineModel<boolean>('open', { default: false })
-
-type TriggerProps = {
-  onClick: () => void
-  'aria-haspopup': 'dialog'
-}
 
 defineSlots<{
   /** What the alert says. */
@@ -56,7 +52,7 @@ defineSlots<{
   /**
    * The button that opens the alert. Bind the `triggerProps` it receives onto it.
    */
-  trigger?(props: { triggerProps: TriggerProps }): unknown
+  trigger?(props: { triggerProps: DialogTriggerProps }): unknown
 }>()
 
 /*
@@ -68,8 +64,11 @@ defineSlots<{
 const dialogRef = ref<InstanceType<typeof VDialog> | null>(null)
 
 defineExpose({
-  /** Opens the alert, exactly as setting `open` does. */
-  show: () => dialogRef.value?.show(),
+  /**
+   * Opens the alert, exactly as setting `open` does. The opening lands on the next tick:
+   * the promise returned settles once the alert is showing.
+   */
+  show: (): Promise<void> => dialogRef.value?.show() ?? Promise.resolve(),
   /** Closes it. The footer's buttons are the reader's only way out; this is yours. */
   close: () => dialogRef.value?.close(),
   /** The `<dialog>` element. It is null while closed: each opening builds a fresh one. */

@@ -13,16 +13,17 @@
 import { computed } from 'vue'
 
 import { useMessages } from '../../i18n/state'
+import { px } from '../../utils/css'
 
 interface SpinnerProps {
   /**
-   * A size in pixels, understood exactly as VIcon's: it is the BOX the spinner
-   * occupies, not the diameter of the ring, which is drawn slightly smaller inside
-   * it. Left out, the box measures 1em and therefore follows the size of the text
-   * around it, which is how the spinner stays proportionate inside a button or a
+   * A size in pixels, as a number or a numeric string, understood exactly as VIcon's: it
+   * is the BOX the spinner occupies, not the diameter of the ring, which is drawn slightly
+   * smaller inside it. Left out, the box measures 1em and therefore follows the size of the
+   * text around it, which is how the spinner stays proportionate inside a button or a
    * paragraph without being told anything.
    */
-  size?: number
+  size?: number | string
   /**
    * What screen readers announce while it turns. It falls back to the wording of the
    * design system dictionary, in the current language.
@@ -42,7 +43,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 <template>
   <span
     class="v-spinner"
-    :style="size !== undefined ? { '--spinner-size': `${size}px` } : undefined"
+    :style="px(size) !== undefined ? { '--spinner-size': px(size) } : undefined"
     role="status"
   >
     <span class="v-spinner-circle" aria-hidden="true" />

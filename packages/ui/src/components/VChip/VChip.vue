@@ -214,7 +214,7 @@ const iconOnly = computed(
     <button
       v-if="dismissible"
       type="button"
-      class="v-chip-remove"
+      class="v-chip-dismiss"
       :aria-label="resolvedDismissLabel"
       :disabled="disabled"
       @click="$emit('dismiss')"
@@ -360,7 +360,7 @@ const iconOnly = computed(
      chip and 2.8:1 on a solid one. That matters because the cross is drawn from the
      icon font here, and a glyph from a font is real text, to which the contrast rule
      applies. */
-  .v-chip-remove {
+  .v-chip-dismiss {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -376,7 +376,7 @@ const iconOnly = computed(
     flex: none;
   }
 
-  .v-chip-remove:focus-visible {
+  .v-chip-dismiss:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
@@ -394,17 +394,17 @@ const iconOnly = computed(
     border-color: var(--vectis-color-border);
   }
 
-  .v-chip[data-disabled] :is(:is(button, a).v-chip-action, .v-chip-remove) {
+  .v-chip[data-disabled] :is(:is(button, a).v-chip-action, .v-chip-dismiss) {
     cursor: not-allowed;
   }
 
-  .v-chip[data-disabled] .v-chip-remove {
+  .v-chip[data-disabled] .v-chip-dismiss {
     color: inherit;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .v-chip,
-    .v-chip-remove {
+    .v-chip-dismiss {
       transition: none;
     }
   }

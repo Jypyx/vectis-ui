@@ -8,6 +8,9 @@
  * behaviour come along for free. The track and the moving thumb are pure CSS,
  * following the input's checked state; the only JavaScript is the v-model.
  */
+
+import { ref } from 'vue'
+
 /** Which side of the switch the label sits on. */
 export type SwitchLabelPosition = 'start' | 'end'
 
@@ -49,6 +52,17 @@ defineSlots<{
   /** The label. It is clickable, the whole component being wrapped in a `<label>`. */
   default?(): unknown
 }>()
+
+const inputEl = ref<HTMLInputElement | null>(null)
+
+// The root is the <label>, so a template ref on the component reaches the wrapper and not
+// the control: these two are the way to the real switch.
+defineExpose({
+  /** Moves the focus to the real switch. */
+  focus: (options?: FocusOptions) => inputEl.value?.focus(options),
+  /** The real `<input type="checkbox" role="switch">`, for what `focus` does not cover. */
+  el: inputEl,
+})
 </script>
 
 <template>
@@ -58,6 +72,7 @@ defineSlots<{
     :data-spread="spread || undefined"
   >
     <input
+      ref="inputEl"
       v-model="model"
       type="checkbox"
       role="switch"

@@ -9,7 +9,7 @@ export default {
     },
     icons: {
       title: 'Avec des icônes',
-      text: "Chaque segment accepte une <code>iconStart</code>, décorative à côté du libellé que lit un lecteur d'écran.",
+      text: "Chaque segment accepte une <code>icon</code>, décorative à côté du libellé que lit un lecteur d'écran.",
     },
     truncated: {
       title: 'Troncature',

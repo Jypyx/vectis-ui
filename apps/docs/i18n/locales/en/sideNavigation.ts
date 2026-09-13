@@ -67,7 +67,7 @@ export default {
       props: {
         label: 'What the row says, and where it goes. The default slot replaces it.',
         sublabel: 'A second line under the label, for a status or a short explanation.',
-        icon: 'An icon before the label. The <code>#start</code> slot replaces it.',
+        icon: 'An icon before the label. The <code>#icon</code> slot replaces it.',
         href: 'Where this row leads, which makes it a link. It is ignored on a row that has subitems: such a row opens and closes rather than navigating.',
         active:
           'Marks this row as the page currently being viewed. It is highlighted, and announced as the current page.',
@@ -84,7 +84,7 @@ export default {
       slots: {
         default: 'The label of the row. It is required: a navigation row must say where it goes.',
         sublabel: 'A second line made of markup, replacing the <code>sublabel</code> prop.',
-        start: 'Free content before the label, which takes the place of <code>icon</code>.',
+        icon: 'Free content before the label, which takes the place of <code>icon</code>.',
         end: 'Free content at the end of the row, before the chevron: a counter, a badge. On a branch it must not be focusable, since the row is already a control.',
         items: 'The subitems, which turn this row into a branch. Nesting is not limited.',
       },

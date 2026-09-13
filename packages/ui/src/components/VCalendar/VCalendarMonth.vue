@@ -49,7 +49,12 @@ import {
   timesOf,
   type MonthCell,
 } from './layout'
-import type { CalendarEvent, CalendarEventId, CalendarEventTimes } from './types'
+import type {
+  CalendarEvent,
+  CalendarEventId,
+  CalendarEventLayout,
+  CalendarEventTimes,
+} from './types'
 
 export interface CalendarMonthProps<T> {
   /** The weeks, already padded to a fixed height and filtered to the visible weekdays. */
@@ -92,7 +97,7 @@ const focused = defineModel<string>('focused', { required: true })
 defineSlots<{
   event?(props: {
     event: E
-    layout: 'block' | 'chip'
+    layout: CalendarEventLayout
     timeText: string
     continuesBefore: boolean
     continuesAfter: boolean

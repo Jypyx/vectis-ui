@@ -36,7 +36,7 @@ export default {
           'The title of the dialog, which also names it for assistive technology. It is ignored when the <code>#header</code> slot replaces the whole header.',
         subtitle: 'A line under the title, explaining what the dialog is asking.',
         width:
-          'How wide the dialog is, in any CSS unit. It is never allowed to exceed the width of the viewport.',
+          'How wide the dialog is: a number is read as pixels, a string as any CSS length. It is never allowed to exceed the width of the viewport.',
         role: 'What kind of dialog this is. <code>alertdialog</code> is for one that must be answered explicitly, and it makes screen readers announce it more insistently.',
         hideClose:
           'Takes the close cross out of the header, leaving the reader with Escape, the backdrop and whatever the footer offers.',
@@ -65,7 +65,7 @@ export default {
           'The question being asked, which also names the dialog for assistive technology. It is ignored when the <code>#header</code> slot replaces the whole header.',
         subtitle: 'A line under the title, spelling out the consequences of the answer.',
         width:
-          'How wide the dialog is, in any CSS unit. It is never allowed to exceed the width of the viewport.',
+          'How wide the dialog is: a number is read as pixels, a string as any CSS length. It is never allowed to exceed the width of the viewport.',
         vModelOpen:
           'Whether the alert is showing. It starts closed, and closing writes back to it.',
       },

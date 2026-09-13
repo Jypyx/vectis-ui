@@ -13,7 +13,7 @@ export default {
         { name: 'customDays', type: 'number', default: '4' },
         { name: 'weekdays', type: 'number[]' },
         { name: 'locale', type: 'string' },
-        { name: 'format', type: 'HourFormat', values: "'12h' | '24h'" },
+        { name: 'format', type: 'CalendarFormat', values: "'12h' | '24h'" },
         { name: 'dayStart', type: 'number', default: '0' },
         { name: 'dayEnd', type: 'number', default: '24' },
         { name: 'slotDuration', type: 'number', default: '15' },
@@ -39,7 +39,7 @@ export default {
       ],
       slots: [
         { name: 'actions', type: '{}' },
-        { name: 'event', type: "{ event: E; layout: 'block' | 'chip'; timeText: string; continuesBefore: boolean; continuesAfter: boolean; }" },
+        { name: 'event', type: '{ event: E; layout: CalendarEventLayout; timeText: string; continuesBefore: boolean; continuesAfter: boolean; }' },
         { name: 'day-header', key: 'dayHeader', type: '{ iso: string; weekday: string; day: string; today: boolean; }' },
         { name: 'all-day-label', key: 'allDayLabel', type: '{}' },
       ],
@@ -64,6 +64,10 @@ export default {
     {
       name: 'CalendarEventId',
       definition: `export type CalendarEventId = string | number`,
+    },
+    {
+      name: 'CalendarEventLayout',
+      definition: `export type CalendarEventLayout = 'block' | 'chip'`,
     },
     {
       name: 'CalendarEventTimes',

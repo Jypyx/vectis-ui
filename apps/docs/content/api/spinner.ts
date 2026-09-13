@@ -9,7 +9,7 @@ export default {
     {
       name: 'VSpinner',
       props: [
-        { name: 'size', type: 'number' },
+        { name: 'size', type: 'number | string' },
         { name: 'label', type: 'string' },
       ],
     },

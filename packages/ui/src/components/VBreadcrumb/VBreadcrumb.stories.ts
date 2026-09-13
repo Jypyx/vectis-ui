@@ -118,12 +118,12 @@ export const WithIcons: Story = {
     components: { VBreadcrumb },
     setup: () => ({
       items: computed(() => [
-        { label: t.value.home, href: '/', iconStart: 'home' },
-        { label: t.value.projects, href: '/projects', iconStart: 'folder' },
+        { label: t.value.home, href: '/', icon: 'home' },
+        { label: t.value.projects, href: '/projects', icon: 'folder' },
         {
           label: 'Vectis',
           href: '/projects/vectis',
-          iconStart: {
+          icon: {
             src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2' y='2' width='12' height='12' rx='3' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E",
           },
         },
@@ -138,7 +138,7 @@ export const Truncated: Story = {
     components: { VBreadcrumb },
     setup: () => ({
       items: computed(() => [
-        { label: t.value.home, href: '/', iconStart: 'home' },
+        { label: t.value.home, href: '/', icon: 'home' },
         { label: t.value.projects, href: '/a' },
         { label: t.value.designSystem, href: '/a/b' },
         { label: 'Vectis', href: '/a/b/c' },

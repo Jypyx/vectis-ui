@@ -12,7 +12,7 @@ export default {
         { name: 'name', type: 'string | BuiltinIcon' },
         { name: 'render', type: 'IconRender' },
         { name: 'src', type: 'string' },
-        { name: 'size', type: 'number' },
+        { name: 'size', type: 'number | string' },
         { name: 'label', type: 'string' },
         { name: 'filled', type: 'boolean', default: 'false' },
       ],

@@ -121,11 +121,11 @@ describe('VChip', () => {
       props: { dismissible: true },
       slots: { default: 'Tag' },
     })
-    expect(container.querySelector<HTMLElement>('.v-chip-remove .v-icon')?.dataset.icon).toBe(
+    expect(container.querySelector<HTMLElement>('.v-chip-dismiss .v-icon')?.dataset.icon).toBe(
       'close',
     )
     return rerender({ dismissIcon: { src: 'https://example.com/x.svg' } }).then(() => {
-      expect(container.querySelector('.v-chip-remove img')?.getAttribute('src')).toBe(
+      expect(container.querySelector('.v-chip-dismiss img')?.getAttribute('src')).toBe(
         'https://example.com/x.svg',
       )
     })

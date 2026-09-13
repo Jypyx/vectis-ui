@@ -24,6 +24,8 @@ import { ICON_VIEW_BOX } from './icons/viewBox'
 import { resolveIcon } from './resolver'
 import type { BuiltinIcon, IconRender } from './types'
 
+import { px } from '../../utils/css'
+
 interface IconProps {
   /**
    * Which icon to draw. A plain string is a name: it is offered to the consumer's
@@ -42,11 +44,12 @@ interface IconProps {
   /** The address of an image to use as the icon. It wins over `name`. */
   src?: string
   /**
-   * A size in pixels. Left out, the icon takes the size its context imposes — a
-   * button sets one for the icons inside it — and failing that 1em, which makes it
-   * follow the surrounding text.
+   * A size in pixels, as a number or a numeric string. Left out, or given something that
+   * is not a number, the icon takes the size its context imposes — a button sets one for
+   * the icons inside it — and failing that 1em, which makes it follow the surrounding
+   * text.
    */
-  size?: number
+  size?: number | string
   /**
    * What the icon means, for screen readers. Leaving it out marks the icon as
    * decorative and hides it from them, which is the right thing whenever the
@@ -137,7 +140,7 @@ const resolved = computed<Resolved | undefined>(() => {
 <template>
   <span
     class="v-icon"
-    :style="size !== undefined ? { '--vectis-icon-size': `${size}px` } : undefined"
+    :style="px(size) !== undefined ? { '--vectis-icon-size': px(size) } : undefined"
     :data-icon="iconName"
     :data-filled="filled || undefined"
     :role="label ? 'img' : undefined"

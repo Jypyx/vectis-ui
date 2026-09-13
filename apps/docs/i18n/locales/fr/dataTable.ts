@@ -110,16 +110,16 @@ export default {
           "L'icône d'un tri croissant. Elle pointe vers le BAS par défaut, convention du tableur : trier de A à Z se lit vers le bas.",
         sortDescIcon: "L'icône d'un tri décroissant.",
         perPageOptions: 'Les choix proposés pour le nombre de lignes par page.',
-        perPageLabel: 'Le nom de ce choix. Il retombe sur le dictionnaire du design system.',
+        perPageText: 'Le nom de ce choix. Il retombe sur le dictionnaire du design system.',
         total:
           "Combien de lignes il y a en tout sur le serveur. C'est ce qui permet à la pagination et à la plage d'être justes quand le tableau ne détient jamais qu'une page.",
         showRange: 'Affiche quelles lignes sont consultées, « 1 à 10 sur 42 », dans le pied.',
-        rangeLabel: 'Reformule cette plage. Elle retombe sur le dictionnaire du design system.',
+        rangeText: 'Reformule cette plage. Elle retombe sur le dictionnaire du design system.',
         selectable:
           "Ajoute une case à cocher à chaque ligne, et une dans l'en-tête pour prendre toute la page.",
         selectAllLabel:
           "Ce comme quoi la case d'en-tête est annoncée. Elle retombe sur le dictionnaire du design system.",
-        selectionLabel:
+        selectionText:
           "Comment la sélection est résumée dans le pied. Elle ne dit rien du tout quand rien n'est sélectionné, et retombe sur le dictionnaire du design system.",
         selectRowLabel:
           "Ce comme quoi la case d'une ligne est annoncée. « Sélectionner la ligne » ne dit rien à un utilisateur de lecteur d'écran sur QUELLE ligne : cela vaut donc la peine de fournir quelque chose venu de la ligne elle-même. Elle retombe sur le dictionnaire du design system.",

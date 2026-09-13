@@ -33,7 +33,7 @@ export default {
         render:
           "Une description explicite de ce qu'il faut dessiner, une image, un composant, un tracé ou une classe, qui l'emporte sur tout le reste. C'est la voie que prend chaque prop d'icône de la bibliothèque quand on lui donne autre chose qu'un simple nom.",
         src: "L'adresse d'une image à utiliser comme icône. Elle l'emporte sur <code>name</code>.",
-        size: "Une taille en pixels. Sans elle, l'icône prend la taille que son contexte impose, un bouton en fixant une pour les icônes qu'il contient, et à défaut 1em, ce qui la fait suivre le texte alentour.",
+        size: "Une taille en pixels, en nombre ou en chaîne numérique. Sans elle, ou avec autre chose qu'un nombre, l'icône prend la taille que son contexte impose, un bouton en fixant une pour les icônes qu'il contient, et à défaut 1em, ce qui la fait suivre le texte alentour.",
         label:
           "Ce que l'icône signifie, pour les lecteurs d'écran. L'omettre marque l'icône comme décorative et la masque à ces derniers, ce qui est juste dès que le texte alentour dit déjà ce qu'elle dit.",
         filled:

@@ -48,7 +48,7 @@ const selected = ref<DataTableRowId[]>([])
 const numbers = new Intl.NumberFormat('en-GB')
 
 const selectRowLabel = (row: Project) => `Select ${row.name}`
-const selectionLabel = (count: number) => `${count} project${count > 1 ? 's' : ''} selected`
+const selectionText = (count: number) => `${count} project${count > 1 ? 's' : ''} selected`
 </script>
 
 <template>
@@ -63,7 +63,7 @@ const selectionLabel = (count: number) => `${count} project${count > 1 ? 's' : '
     search-placeholder="Search projects"
     selectable
     :select-row-label="selectRowLabel"
-    :selection-label="selectionLabel"
+    :selection-text="selectionText"
     sticky-header
     :height="420"
     :per-page="8"

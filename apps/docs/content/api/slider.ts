@@ -20,10 +20,10 @@ export default {
         { name: 'ticks', type: 'boolean', default: 'false' },
         { name: 'labels', type: 'SliderLabel[]' },
         { name: 'tooltip', type: 'boolean', default: 'false' },
-        { name: 'v-model', key: 'vModel', type: 'number | [number, number]', default: '0' },
+        { name: 'v-model', key: 'vModel', type: 'SliderValue', default: '0' },
       ],
       events: [
-        { name: 'change', type: '[value: number | [number, number]]' },
+        { name: 'change', type: '[value: SliderValue]' },
       ],
     },
   ],
@@ -51,6 +51,10 @@ export default {
     {
       name: 'SliderLabel',
       definition: `export type SliderLabel = string | { icon: IconSource; label: string }`,
+    },
+    {
+      name: 'SliderValue',
+      definition: `export type SliderValue = number | [number, number]`,
     },
   ],
   cssVars: [

@@ -33,7 +33,7 @@ export default {
         render:
           'An explicit description of what to draw, an image, a component, a path or a class, which wins over everything else. This is the route every icon prop of the library takes when it is given something other than a plain name.',
         src: 'The address of an image to use as the icon. It wins over <code>name</code>.',
-        size: 'A size in pixels. Left out, the icon takes the size its context imposes, a button setting one for the icons inside it, and failing that 1em, which makes it follow the surrounding text.',
+        size: 'A size in pixels, as a number or a numeric string. Left out, or given something that is not a number, the icon takes the size its context imposes, a button setting one for the icons inside it, and failing that 1em, which makes it follow the surrounding text.',
         label:
           'What the icon means, for screen readers. Leaving it out marks the icon as decorative and hides it from them, which is right whenever the surrounding text already says what it says.',
         filled:

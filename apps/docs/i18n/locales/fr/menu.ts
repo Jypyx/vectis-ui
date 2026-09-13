@@ -49,7 +49,7 @@ export default {
         size: 'La hauteur des lignes : 32, 40 ou 48 pixels. Les sous-menus en héritent, elle se pose donc une fois sur le menu dans son ensemble.',
         compact: 'Retire 4px à la hauteur de chaque ligne, sous-menus compris.',
         width:
-          "Une largeur pour le panneau, donnée en n'importe quelle longueur ou mot-clé CSS, <code>16rem</code> ou <code>max-content</code>. Elle s'applique au menu lui-même ; les sous-menus gardent la largeur par défaut.",
+          "Une largeur pour le panneau : un nombre est lu en pixels, une chaîne comme n'importe quelle longueur ou mot-clé CSS, <code>16rem</code> ou <code>max-content</code>. Elle s'applique au menu lui-même ; les sous-menus gardent la largeur par défaut.",
         matchTrigger:
           "Empêche le panneau d'être plus étroit que le bouton qui l'a ouvert, tout en le laissant libre de s'élargir pour son contenu. Les sous-menus ne sont pas concernés.",
         vModelOpen:

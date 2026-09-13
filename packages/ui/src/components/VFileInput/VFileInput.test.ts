@@ -362,11 +362,11 @@ describe('VFileInput — the field props', () => {
     expect(container.querySelector('.v-file-input')?.hasAttribute('data-disabled')).toBe(false)
   })
 
-  it('attachIconLabel and clearLabel override the dictionary', () => {
+  it('pickerIconLabel and clearLabel override the dictionary', () => {
     const { getByRole } = renderPicker({
       modelValue: [fileOf('a.pdf')],
       clearable: true,
-      attachIconLabel: 'Add an attachment',
+      pickerIconLabel: 'Add an attachment',
       clearLabel: 'Remove every attachment',
     })
     expect(getByRole('button', { name: 'Add an attachment' })).toBeTruthy()

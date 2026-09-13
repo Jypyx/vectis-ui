@@ -37,7 +37,7 @@ export interface BreadcrumbItem {
    * An icon placed before the label: a Material Symbols Rounded name, an icon URL,
    * or an explicit render (`{ src: '/logo.svg' }`, `{ component }`…).
    */
-  iconStart?: IconSource
+  icon?: IconSource
 }
 
 interface BreadcrumbProps {
@@ -55,7 +55,7 @@ interface BreadcrumbProps {
   currentPath?: string
   /**
    * The icon drawn between two segments: an icon name, or an explicit render,
-   * exactly like `iconStart`.
+   * exactly like an item's `icon`.
    */
   separator?: IconSource
   /**
@@ -130,7 +130,7 @@ const visibleItems = computed(() =>
               :key="hidden.href"
               :href="hidden.href"
               :label="hidden.label"
-              :icon-start="hidden.iconStart"
+              :icon-start="hidden.icon"
             />
           </VMenu>
         </li>
@@ -141,7 +141,7 @@ const visibleItems = computed(() =>
             :href="item.href"
             :aria-current="isCurrent(item) ? 'page' : undefined"
           >
-            <VIcon v-if="item.iconStart" v-bind="iconProps(item.iconStart)" />
+            <VIcon v-if="item.icon" v-bind="iconProps(item.icon)" />
             {{ item.label }}
           </a>
         </li>

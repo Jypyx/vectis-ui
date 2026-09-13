@@ -37,7 +37,7 @@ export default {
     },
     dismissing: {
       title: 'Dismissing',
-      text: '<code>closable</code> set to false takes the close cross away. <code>toast</code> hands back an id and <code>dismissToast</code> takes that notification away, or every one at once when called with no argument.',
+      text: '<code>hideClose</code> takes the close cross away. <code>toast</code> hands back an id and <code>dismissToast</code> takes that notification away, or every one at once when called with no argument.',
     },
   },
 

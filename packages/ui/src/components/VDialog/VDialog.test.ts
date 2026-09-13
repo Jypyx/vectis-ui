@@ -146,6 +146,20 @@ describe('VDialog', () => {
     expect(
       (await openHarness({ width: '640px' })).dialog.style.getPropertyValue('--dialog-width'),
     ).toBe('640px')
+    // A number is read as pixels, as on every free dimension of the design system.
+    expect(
+      (await openHarness({ width: 560 })).dialog.style.getPropertyValue('--dialog-width'),
+    ).toBe('560px')
+  })
+
+  it('show() settles once the dialog is showing, the opening landing a tick later', async () => {
+    const holder = ref<InstanceType<typeof VDialog> | null>(null)
+    render({ setup: () => () => h(VDialog, { ref: holder, title: 'Edit' }, () => 'Body') })
+    await nextTick()
+    const opened = holder.value?.show()
+    expect(holder.value?.el).toBeNull()
+    await opened
+    expect(holder.value?.el?.open).toBe(true)
   })
 
   it('the footer is only rendered when the #footer slot is supplied', async () => {
@@ -180,8 +194,7 @@ describe('VDialogAlert — the imperative API', () => {
     render(Host)
     await flush()
 
-    holder.value?.show()
-    await flush()
+    await holder.value?.show()
     expect(holder.value?.el?.open).toBe(true)
 
     holder.value?.close()

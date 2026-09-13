@@ -24,7 +24,7 @@ export default {
       definition: `export interface BreadcrumbItem {
   label: string
   href: string
-  iconStart?: IconSource
+  icon?: IconSource
 }`,
     },
     {
