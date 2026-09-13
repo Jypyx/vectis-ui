@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, nextTick, ref } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 
 import { fr } from '../../i18n/fr'
 import { registerMessages, setLocale } from '../../i18n/state'
@@ -841,6 +841,56 @@ describe('VCarousel', () => {
     it('downgrades `fade` to `slide` where it would pile the slides up', () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
       const { container } = mount({ attrs: 'effect="fade" :items-per-view="3"' })
+      expect(container.querySelector('.v-carousel')?.getAttribute('data-effect')).toBe('slide')
+      warn.mockRestore()
+    })
+
+    // The sizing formula collapses exactly to the peekless one at zero, so a zero peek
+    // must neither cost the effect nor warn.
+    // Same count, other keys: Vue mounts new slide elements, and an observer left on the
+    // detached ones never fires again.
+    it('re-observes the slides when they are replaced by as many new ones', async () => {
+      const observed: Element[][] = []
+      vi.stubGlobal(
+        'IntersectionObserver',
+        class {
+          elements: Element[] = []
+          constructor() {
+            observed.push(this.elements)
+          }
+          observe(el: Element) {
+            this.elements.push(el)
+          }
+          disconnect() {}
+        },
+      )
+      const items = ref(['a', 'b', 'c'])
+      const { container } = render(VCarousel, {
+        props: { label: 'Replaced' },
+        slots: {
+          default: () => items.value.map((item) => h(VCarouselItem, { key: item }, () => item)),
+        },
+      })
+      await nextTick()
+
+      items.value = ['d', 'e', 'f']
+      await nextTick()
+      await nextTick()
+      const current = slidesOf(container)
+      expect(current.map((slide) => slide.textContent?.trim())).toEqual(['d', 'e', 'f'])
+      expect(observed.at(-1)).toEqual(current)
+    })
+
+    it('keeps `fade` with a peek of zero, and downgrades it with a real one', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      for (const peek of [':peek="0"', 'peek="0px"']) {
+        const { container, unmount } = mount({ attrs: `effect="fade" ${peek}` })
+        expect(container.querySelector('.v-carousel')?.getAttribute('data-effect')).toBe('fade')
+        unmount()
+      }
+      expect(warn).not.toHaveBeenCalled()
+
+      const { container } = mount({ attrs: 'effect="fade" :peek="40"' })
       expect(container.querySelector('.v-carousel')?.getAttribute('data-effect')).toBe('slide')
       warn.mockRestore()
     })

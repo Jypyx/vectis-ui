@@ -236,6 +236,12 @@ export const Year: Story = {
       </div>
     `,
   }),
+  // The column count reaches the sheet as an inline variable, which jsdom cannot resolve:
+  // left unset, `repeat()` is invalid and every mini-month collapses to a single column.
+  play: async ({ canvasElement }) => {
+    const grid = canvasElement.querySelector<HTMLElement>('.v-calendar-year-grid')!
+    await expect(getComputedStyle(grid).gridTemplateColumns.split(' ')).toHaveLength(7)
+  },
 }
 
 /**

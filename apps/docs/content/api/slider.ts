@@ -22,6 +22,9 @@ export default {
         { name: 'tooltip', type: 'boolean', default: 'false' },
         { name: 'v-model', key: 'vModel', type: 'number | [number, number]', default: '0' },
       ],
+      events: [
+        { name: 'change', type: '[value: number | [number, number]]' },
+      ],
     },
   ],
   types: [

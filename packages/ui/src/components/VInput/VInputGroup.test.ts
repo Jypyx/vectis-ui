@@ -72,6 +72,15 @@ describe('VInputGroup', () => {
       expect(root(container).hasAttribute('aria-labelledby')).toBe(false)
     })
 
+    it('an empty label or hint renders nothing and points at nothing', () => {
+      const { container } = render(VInputGroup, {
+        props: { label: '', hint: '' },
+        slots: { default: () => h(VInput) },
+      })
+      expect(root(container).hasAttribute('aria-labelledby')).toBe(false)
+      expect(root(container).hasAttribute('aria-describedby')).toBe(false)
+    })
+
     // aria-labelledby wins over aria-label in the name computation, so emitting ours on top
     // of a consumer's aria-label would silently cancel it.
     it('a consumer aria-label holds ours back', () => {
@@ -282,6 +291,17 @@ describe('VInputGroup', () => {
         slots: { default: () => h(VFileInput) },
       })
       expect((container.querySelector('.v-file-input') as HTMLElement).dataset.size).toBe('lg')
+    })
+
+    // The hidden file input is what the FORM submits: left enabled under a disabled row, its
+    // `name` still goes out with the form.
+    it('VFileInput: a disabled row disables the hidden file input too', () => {
+      const { container } = render(VInputGroup, {
+        props: { disabled: true },
+        slots: { default: () => h(VFileInput, { name: 'attachments' }) },
+      })
+      expect(container.querySelector<HTMLInputElement>('input[type="file"]')!.disabled).toBe(true)
+      expect(container.querySelector('.v-file-input')!.hasAttribute('data-disabled')).toBe(true)
     })
 
     // VTextarea is out of scope by construction: its bordered box is `.v-textarea-field`,

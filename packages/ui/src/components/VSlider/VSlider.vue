@@ -91,6 +91,15 @@ const props = withDefaults(defineProps<SliderProps>(), {
  */
 const model = defineModel<number | [number, number]>({ default: 0 })
 
+const emit = defineEmits<{
+  /**
+   * The reader has SETTLED on a value: a thumb was released or moved by a key, or a number
+   * field was committed. It carries the whole value, a pair in range mode, and fires for
+   * either thumb, where the v-model follows every step of a drag.
+   */
+  change: [value: number | [number, number]]
+}>()
+
 const startValue = computed(() => (Array.isArray(model.value) ? model.value[0] : props.min))
 const endValue = computed(() =>
   Array.isArray(model.value) ? model.value[1] : (model.value as number),
@@ -120,6 +129,23 @@ function onEndInput(event: Event) {
   const clamped = Math.max(Number(el.value), startValue.value)
   el.value = String(clamped)
   model.value = [startValue.value, clamped]
+}
+
+// @core
+/*
+ * A range is two native controls, and a consumer's `@change` could only ever reach ONE of
+ * them through the forwarded attributes: moving the start thumb told nobody. So `change` is
+ * declared and fed by both.
+ *
+ * TRAP — the settled value is read off the THUMB, never off the model. A key press fires
+ * `input` and `change` back to back in one task, and under a parent `v-model` the model's
+ * local copy only catches up when the parent re-renders, so it would still hold the value
+ * from before the key.
+ */
+function onThumbChange(which: 'start' | 'end', event: Event) {
+  const value = Number((event.target as HTMLInputElement).value)
+  if (!props.range) emit('change', value)
+  else emit('change', which === 'start' ? [value, endValue.value] : [startValue.value, value])
 }
 
 /**
@@ -241,13 +267,18 @@ function commitField(which: 'start' | 'end') {
   // 0.30000000000000004.
   let value = props.min + Math.round((clamped - props.min) / props.step) * props.step
   value = Math.min(props.max, Math.round(value * 1e10) / 1e10)
-  if (!props.range) {
-    model.value = value
-  } else if (which === 'start') {
-    model.value = [Math.min(value, endValue.value), endValue.value]
-  } else {
-    model.value = [startValue.value, Math.max(value, startValue.value)]
-  }
+  const next: number | [number, number] = !props.range
+    ? value
+    : which === 'start'
+      ? [Math.min(value, endValue.value), endValue.value]
+      : [startValue.value, Math.max(value, startValue.value)]
+  const previous = which === 'start' ? startValue.value : endValue.value
+  const settled = Array.isArray(next) ? next[which === 'start' ? 0 : 1] : next
+  model.value = next
+  // Emitted only when the value MOVED, as a native range emits nothing for a key that
+  // cannot move its thumb — and the payload is `next`, the model's local copy lagging a
+  // parent `v-model` (see `onThumbChange`).
+  if (settled !== previous) emit('change', next)
   // Put back explicitly, because a commit that does not change the value — typing 200
   // where the maximum is 100 — changes nothing for the watchers to react to, and the
   // field would go on showing what was typed.
@@ -312,6 +343,7 @@ function resyncFields() {
           :aria-label="startLabel"
           :aria-valuetext="startValueText"
           @input="onStartInput"
+          @change="onThumbChange('start', $event)"
         />
         <!-- The consumer's attributes come FIRST, so what the component decides for
              itself — the bounds, the value, the disabled state and the thumb's own
@@ -330,6 +362,7 @@ function resyncFields() {
           :aria-label="rangeEndLabel"
           :aria-valuetext="endValueText"
           @input="onEndInput"
+          @change="onThumbChange('end', $event)"
         />
       </span>
       <span

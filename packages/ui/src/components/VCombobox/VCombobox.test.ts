@@ -715,6 +715,42 @@ describe('VCombobox asynchronous', () => {
     expect(queryByRole('button')).toBeNull()
   })
 
+  // The VFileInput rule: a disabled field offers no removal at all, rather than a row of
+  // greyed crosses that suggest one.
+  it('disabled: the chips render no dismiss cross', () => {
+    const { container } = renderCombobox({
+      multiple: true,
+      modelValue: ['fr', 'be'],
+      disabled: true,
+    })
+    expect(container.querySelectorAll('.v-chip')).toHaveLength(2)
+    expect(container.querySelector('.v-chip button')).toBeNull()
+  })
+
+  // Keyed by value, `1` and `'1'` (or a duplicated value) shared one position: both rows
+  // lit up as active and Vue patched them under one key.
+  it('two options sharing a value keep distinct ids and a single active row', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { getByRole, container } = renderCombobox({
+      options: [
+        { value: 1, label: 'One (number)' },
+        { value: '1', label: 'One (string)' },
+        { value: 'x', label: 'Ex' },
+        { value: 'x', label: 'Ex again' },
+      ],
+    })
+    const input = getByRole('combobox')
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
+    const options = [...container.querySelectorAll('[role="option"]')]
+    expect(options).toHaveLength(4)
+    expect(new Set(options.map((o) => o.id)).size).toBe(4)
+    expect(container.querySelectorAll('[role="option"][data-active]')).toHaveLength(1)
+    await fireEvent.keyDown(input, { key: 'End' })
+    expect(container.querySelectorAll('[role="option"][data-active]')).toHaveLength(1)
+    expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('Duplicate keys'), ...[])
+    warn.mockRestore()
+  })
+
   it('readonly: Backspace no longer takes the last chip back', async () => {
     const { getByRole, emitted } = renderCombobox({
       multiple: true,

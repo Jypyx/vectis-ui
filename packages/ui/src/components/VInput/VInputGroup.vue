@@ -110,7 +110,9 @@ const hintId = useId()
 const labelledBy = computed(() => {
   const own = attrs['aria-labelledby'] as string | undefined
   if (own !== undefined) return own
-  return props.label !== undefined && attrs['aria-label'] === undefined ? labelId : undefined
+  // TRUTHINESS, the test the template renders the label with: an empty `label=""` renders
+  // no element, and naming the group after an id nothing carries leaves it nameless.
+  return props.label && attrs['aria-label'] === undefined ? labelId : undefined
 })
 
 // @a11y — `aria-describedby` is a LIST, so the hint is ADDED to whatever the consumer
@@ -120,7 +122,7 @@ const labelledBy = computed(() => {
 // being announced, with nothing to show for it.
 const describedBy = computed(
   () =>
-    [attrs['aria-describedby'] as string | undefined, props.hint !== undefined ? hintId : undefined]
+    [attrs['aria-describedby'] as string | undefined, props.hint ? hintId : undefined]
       .filter(Boolean)
       .join(' ') || undefined,
 )

@@ -31,6 +31,17 @@ describe('px', () => {
     expect(px(undefined)).toBeUndefined()
     expect(px('auto')).toBeUndefined()
   })
+
+  // `parseFloat` reads a numeric PREFIX, so a length in another unit came out in pixels:
+  // `12rem` silently became `12px`.
+  it('refuses a string that is not wholly a number, and an empty one', () => {
+    expect(px('12rem')).toBeUndefined()
+    expect(px('12px')).toBeUndefined()
+    expect(px('')).toBeUndefined()
+    expect(px('  ')).toBeUndefined()
+    expect(px(' 8 ')).toBe('8px')
+    expect(px(Number.NaN)).toBeUndefined()
+  })
 })
 
 describe('normalizeText', () => {

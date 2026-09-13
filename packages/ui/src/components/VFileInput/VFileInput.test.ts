@@ -333,6 +333,27 @@ describe('VFileInput — the field props', () => {
     expect(container.querySelectorAll('.v-chip')).toHaveLength(2)
   })
 
+  // The chip display lifts the END icon out of the wrapping flow by its class. A clickable
+  // START icon is a `.v-input-action` too, so only a position class tells the two apart.
+  it('a clickable start icon and the attach button carry distinct position classes', () => {
+    const { container } = render(VFileInput, {
+      props: {
+        multiple: true,
+        display: 'chip',
+        modelValue: [fileOf('a.pdf')],
+        iconStart: 'search',
+        iconStartLabel: 'Search',
+      },
+      attrs: { 'aria-label': 'Attachments', 'onClick:icon-start': () => {} },
+    })
+    const start = container.querySelector('.v-input-icon-start')!
+    const end = container.querySelector('.v-input-icon-end')!
+    expect(start.tagName).toBe('BUTTON')
+    expect(end.tagName).toBe('BUTTON')
+    expect(start).not.toBe(end)
+    expect(end.getAttribute('aria-label')).toBe('Choose files')
+  })
+
   it('loading: a spinner takes the attach icon place, dropping still works', () => {
     const { container, queryByRole } = renderPicker({ loading: true })
     expect(container.querySelector('.v-spinner')).not.toBeNull()

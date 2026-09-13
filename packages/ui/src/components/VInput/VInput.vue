@@ -289,14 +289,14 @@ defineExpose({
       <button
         v-if="iconStart && hasIconStartHandler"
         type="button"
-        class="v-input-action v-field-action"
+        class="v-input-action v-field-action v-input-icon-start"
         :aria-label="iconStartLabel ?? iconName(iconStart)"
         :disabled="resolvedDisabled"
         @click="emit('click:icon-start', $event)"
       >
         <VIcon v-bind="iconProps(iconStart)" />
       </button>
-      <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
+      <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" class="v-input-icon-start" />
       <slot name="start" />
 
       <input
@@ -337,14 +337,14 @@ defineExpose({
         <button
           v-if="iconEnd && hasIconEndHandler"
           type="button"
-          class="v-input-action v-field-action"
+          class="v-input-action v-field-action v-input-icon-end"
           :aria-label="iconEndLabel ?? iconName(iconEnd)"
           :disabled="resolvedDisabled"
           @click="emit('click:icon-end', $event)"
         >
           <VIcon v-bind="iconProps(iconEnd)" />
         </button>
-        <VIcon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" />
+        <VIcon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" class="v-input-icon-end" />
       </slot>
     </div>
 

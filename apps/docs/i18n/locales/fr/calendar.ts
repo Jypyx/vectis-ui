@@ -65,7 +65,7 @@ export default {
         disabled:
           "Fige tout le calendrier : plus rien ne se déplace, ne se crée ni ne s'ouvre, et aucune autre période n'est atteignable. Les cartes sortent du parcours de tabulation, la grille garde le sien, si bien que l'agenda reste lisible. C'est ce qui le distingue de <code>readonly</code>, qui n'arrête que l'édition.",
         creatable:
-          "Crée un événement quand une partie vide d'une journée est prise : un clic en fait un long d'un pas, un glissement en fait un aussi long qu'il a été tracé. Le signal de créneau part de toute façon : vous pouvez donc laisser ceci de côté et le garder.",
+          "Crée un événement quand une partie vide d'une journée est prise : un clic ou Entrée sur une cellule en fait un long d'un pas, un glissement en fait un aussi long qu'il a été tracé. Le signal de créneau part de toute façon : vous pouvez donc laisser ceci de côté et le garder.",
         edgeStepDelay:
           "Combien de temps un événement déplacé doit reposer contre le bord du calendrier avant que la vue passe à la période précédente ou suivante, en millisecondes. Zéro le désactive. L'attente est tout l'intérêt : tourner la page à l'instant où le pointeur touche le bord rendrait le dernier jour d'une semaine impossible à viser.",
         noEdgeScroll:

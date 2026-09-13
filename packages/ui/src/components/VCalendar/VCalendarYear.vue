@@ -127,7 +127,11 @@ const isBusy = (cell: MonthCell) => cell.adjacent === null && busyDays.value.has
         </span>
       </button>
 
-      <div class="v-calendar-year-grid" aria-hidden="true">
+      <div
+        class="v-calendar-year-grid"
+        aria-hidden="true"
+        :style="{ '--calendar-columns': String(weekdays.length) }"
+      >
         <template v-for="(week, row) in weeksOf(month)" :key="row">
           <span
             v-for="cell in week"
@@ -207,9 +211,12 @@ const isBusy = (cell: MonthCell) => cell.adjacent === null && busyDays.value.has
     font-weight: var(--vectis-font-weight-medium);
   }
 
+  /* As many columns as weekdays on show, set inline by the template exactly as the month
+     view does. Written as a literal 7, a calendar showing the working week alone wrapped
+     every five-day row of `monthWeeks` onto the next line. */
   .v-calendar-year-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(var(--calendar-columns), 1fr);
     gap: 1px;
   }
 

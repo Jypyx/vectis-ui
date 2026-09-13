@@ -93,6 +93,32 @@ export const AutoColor: Story = {
   }),
 }
 
+/**
+ * The auto colour follows the NEAREST theme scope: a light subtree inside a dark one
+ * paints the light pair. jsdom evaluates no stylesheet, so this is the only guard.
+ */
+export const NestedTheme: Story = {
+  render: () => ({
+    components: { VAvatar },
+    template: `
+      <div style="display: flex; gap: 8px">
+        <div data-theme="light" data-testid="light"><VAvatar name="Ada Lovelace" /></div>
+        <div data-theme="dark" data-testid="dark">
+          <VAvatar name="Ada Lovelace" />
+          <div data-theme="light" data-testid="nested"><VAvatar name="Ada Lovelace" /></div>
+        </div>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const bg = (testId: string) =>
+      getComputedStyle(canvasElement.querySelector(`[data-testid="${testId}"] > .v-avatar`)!)
+        .backgroundColor
+    await expect(bg('nested')).toBe(bg('light'))
+    await expect(bg('nested')).not.toBe(bg('dark'))
+  },
+}
+
 /** The `color` prop replaces the auto hue (white text, contrast on the consumer). */
 export const CustomColor: Story = {
   args: { color: 'teal' },

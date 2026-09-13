@@ -29,7 +29,7 @@ export default {
     },
     autoDismiss: {
       title: 'How long it stays',
-      text: '<code>duration</code> is how long a notification stays, five seconds by default, and every one may ask for its own. The countdown holds while the pointer rests anywhere on the stack.',
+      text: '<code>duration</code> is how long a notification stays, five seconds by default, and every one may ask for its own. The countdown holds while the pointer rests anywhere on the stack and while the keyboard is inside it, and is released only when both are gone.',
     },
     persistent: {
       title: 'Persistent notifications',

@@ -79,7 +79,11 @@ defineSlots<{
    in this file. Any other format goes through the slot above. */
 const m = useMessages()
 
-const { clamped, fraction } = useProgressValue(
+const {
+  max: normalizedMax,
+  clamped,
+  fraction,
+} = useProgressValue(
   () => props.value,
   () => props.max,
 )
@@ -96,7 +100,7 @@ const { clamped, fraction } = useProgressValue(
     :data-indeterminate="indeterminate ? '' : undefined"
     :aria-valuenow="indeterminate ? undefined : clamped"
     aria-valuemin="0"
-    :aria-valuemax="max"
+    :aria-valuemax="normalizedMax"
     :style="{
       '--fill-fraction': String(fraction),
       '--custom-color': color,
@@ -109,7 +113,7 @@ const { clamped, fraction } = useProgressValue(
       <circle class="v-progress-circular-bar" pathLength="100" />
     </svg>
     <span v-if="!indeterminate && (showValue || $slots.default)" class="v-progress-circular-label">
-      <slot :value="clamped" :max="max" :percent="fraction * 100">
+      <slot :value="clamped" :max="normalizedMax" :percent="fraction * 100">
         {{ m.progress.percent(Math.round(fraction * 100)) }}
       </slot>
     </span>

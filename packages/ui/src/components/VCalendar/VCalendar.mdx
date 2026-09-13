@@ -239,13 +239,14 @@ with a complete one.
 Every gesture above has a keyboard equivalent, because one that did not would be unreachable for
 anyone who cannot use a pointer.
 
-| key               | what it does                    |
-| ----------------- | ------------------------------- |
-| `Enter` on a card | takes hold of the event         |
-| arrows, once held | moves it by a slot, or by a day |
-| `Shift` + arrows  | changes when it ends            |
-| `Enter`           | places it                       |
-| `Escape`          | puts it back where it was       |
+| key                      | what it does                                             |
+| ------------------------ | -------------------------------------------------------- |
+| `Enter` on an empty cell | with `creatable`, makes an event there, as a click would |
+| `Enter` on a card        | takes hold of the event                                  |
+| arrows, once held        | moves it by a slot, or by a day                          |
+| `Shift` + arrows         | changes when it ends                                     |
+| `Enter`                  | places it                                                |
+| `Escape`                 | puts it back where it was                                |
 
 Each step is announced, and taking hold does **not** also open the event — the same keystroke would
 otherwise do both.

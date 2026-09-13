@@ -21,6 +21,16 @@ describe('VProgressCircular', () => {
     expect(styleOf(container)).toContain('--fill-fraction: 0.5')
   })
 
+  it('announces the normalized bound, never a negative max', () => {
+    const { getByRole } = render(VProgressCircular, {
+      props: { value: 10, max: -5 },
+      attrs: { 'aria-label': 'x' },
+    })
+    const bar = getByRole('progressbar')
+    expect(bar.getAttribute('aria-valuemax')).toBe('0')
+    expect(bar.getAttribute('aria-valuenow')).toBe('0')
+  })
+
   it('clamps above the max and below zero', async () => {
     const { getByRole, container, rerender } = render(VProgressCircular, {
       props: { value: 250, max: 100 },

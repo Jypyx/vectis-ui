@@ -44,10 +44,8 @@ describe('VDateInput — default', () => {
     const { container, rerender } = render(VDateInput, {
       props: { modelValue: null, showPicker: true, pickerIcon: 'event', clearable: true },
     })
-    // `:not(.v-input-clear)`: the cross is rendered BEFORE the end icon.
     const endIcon = () =>
-      container.querySelector<HTMLElement>('.v-input-action:not(.v-input-clear) .v-icon')?.dataset
-        .icon
+      container.querySelector<HTMLElement>('.v-input-icon-end .v-icon')?.dataset.icon
     expect(endIcon()).toBe('event')
 
     // With something to clear, the two coexist — the VInput/VTextarea/VCombobox
@@ -201,6 +199,25 @@ describe('VDateInput — picker mode', () => {
     expect(container.querySelector('.v-date-input-panel')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
+  })
+
+  // The calendar stays mounted behind a closed panel: without the reset, the months view
+  // a reader left open is what the next opening shows.
+  it('reopens on the days view, whatever view the panel was closed on', async () => {
+    const { container, getByRole } = mount({ modelValue: JUNE })
+    const control = container.querySelector('.v-date-input-control') as HTMLElement
+    const view = () => container.querySelector('.v-date-picker')?.getAttribute('data-view')
+    await fireEvent.click(control)
+    await nextTick()
+    await fireEvent.click(getByRole('button', { expanded: false, name: /juin/i }))
+    expect(view()).toBe('months')
+
+    const root = container.querySelector('.v-date-input') as HTMLElement
+    root.dispatchEvent(new FocusEvent('focusout', { relatedTarget: null, bubbles: true }))
+    await nextTick()
+    await fireEvent.click(control)
+    await nextTick()
+    expect(view()).toBe('days')
   })
 
   it('displays a formatted range (range selection)', () => {

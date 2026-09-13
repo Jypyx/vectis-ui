@@ -239,10 +239,28 @@ const passedAttrs = computed(() => {
      pairs cannot be tokens: only the hue varies, and it is not known until render. The two
      themes are written out separately for the same reason relative colours are not used
      elsewhere in the library: OKLCH's lightness is perceptual, so the dark pair is a
-     design decision rather than a delta off the light one. */
+     design decision rather than a delta off the light one.
+
+     TRAP — the lightness/chroma pairs are set on the THEME scopes and INHERITED, rather
+     than written in a `[data-theme='dark'] .v-avatar` rule: a descendant selector matches
+     ANY dark ancestor, so a light subtree nested in a dark page kept the dark discs. An
+     inherited value is resolved by the NEAREST scope, which is exactly how the semantic
+     tokens behave. The selectors and their order are `tokens.css`'s own: all three are
+     (0,1,0), so on a dark root the later block wins. */
+  :root,
+  [data-theme='light'] {
+    --avatar-auto-bg-lc: 0.9 0.06;
+    --avatar-auto-text-lc: 0.42 0.13;
+  }
+
+  [data-theme='dark'] {
+    --avatar-auto-bg-lc: 0.42 0.09;
+    --avatar-auto-text-lc: 0.92 0.05;
+  }
+
   .v-avatar[data-auto] {
-    --avatar-bg: oklch(0.9 0.06 var(--avatar-hue));
-    --avatar-text: oklch(0.42 0.13 var(--avatar-hue));
+    --avatar-bg: oklch(var(--avatar-auto-bg-lc) var(--avatar-hue));
+    --avatar-text: oklch(var(--avatar-auto-text-lc) var(--avatar-hue));
   }
 
   /* Custom colour (--custom-color inline): wins, with a fixed white text (contrast
@@ -250,11 +268,6 @@ const passedAttrs = computed(() => {
   .v-avatar[data-custom] {
     --avatar-bg: var(--custom-color);
     --avatar-text: var(--vectis-color-text-on-accent);
-  }
-
-  [data-theme='dark'] .v-avatar[data-auto] {
-    --avatar-bg: oklch(0.42 0.09 var(--avatar-hue));
-    --avatar-text: oklch(0.92 0.05 var(--avatar-hue));
   }
 
   .v-avatar-image {

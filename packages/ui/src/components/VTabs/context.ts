@@ -48,9 +48,17 @@ export const tabsKey: InjectionKey<TabsContext> = Symbol('v-tabs')
  * Makes a tab's value safe to use inside an identifier. The attribute tying a tab to
  * its panel holds a LIST of identifiers separated by spaces, so a value containing a
  * space would be read there as two references, both to elements that do not exist.
- * Everything a selector would choke on is replaced along the way.
+ *
+ * TRAP — the encoding has to be INJECTIVE, or two tabs get one identifier and a tab
+ * points its panel reference at its neighbour's panel, with no error anywhere. So every
+ * character outside `[A-Za-z0-9-]` is spelled out as its code point between two
+ * underscores (the underscore itself included, which is what keeps `a b` and `a_b`
+ * apart), and the TYPE leads the result, the number 1 and the string "1" being two
+ * different tabs.
  */
-const slug = (value: string | number) => String(value).replace(/[^\w-]+/g, '_')
+const slug = (value: string | number) =>
+  (typeof value === 'number' ? 'n-' : 's-') +
+  String(value).replace(/[^A-Za-z0-9-]/gu, (char) => `_${char.codePointAt(0)!.toString(16)}_`)
 
 export const tabIdFor = (base: string, value: string | number) => `${base}-tab-${slug(value)}`
 export const panelIdFor = (base: string, value: string | number) => `${base}-panel-${slug(value)}`

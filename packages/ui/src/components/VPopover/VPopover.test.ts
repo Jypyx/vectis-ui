@@ -41,7 +41,23 @@ describe('VPopover', () => {
 
   it('anchor is exposed as an inline variable (position-anchor in CSS)', () => {
     const { container } = renderHarness('<VPopover anchor="--ancre-test">Contenu</VPopover>')
-    expect(panelOf(container).style.getPropertyValue('--anchor-name')).toBe('--ancre-test')
+    expect(panelOf(container).style.getPropertyValue('--popover-anchor-name')).toBe('--ancre-test')
+  })
+
+  // A custom property inherits: left unset in the #trigger mode, the panel would read an
+  // ancestor's anchor (a VPopover in VDateInput's footer opened under the date field).
+  it('the #trigger mode sets its own anchor inline too, so an ancestor cannot leak one in', () => {
+    const { container } = renderHarness(`
+      <div style="--popover-anchor-name: --outer">
+        <VPopover>
+          <template #trigger="{ triggerProps }"><button v-bind="triggerProps">Open</button></template>
+          Content
+        </VPopover>
+      </div>
+    `)
+    expect(panelOf(container).style.getPropertyValue('--popover-anchor-name')).toBe(
+      '--popover-anchor',
+    )
   })
 
   it('with no trigger the wrapper is not anchored (display: contents in CSS)', () => {

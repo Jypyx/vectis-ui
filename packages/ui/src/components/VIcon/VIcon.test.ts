@@ -88,6 +88,15 @@ describe('VIcon', () => {
     expect(container.querySelector('svg')).toBeNull()
   })
 
+  // An empty `src` renders no image. Treated as "given", it kept a built-in icon from its
+  // drawing and fell to the text fallback, which printed the icon OBJECT.
+  it('an empty src draws the name, and never prints a built-in icon object', () => {
+    const { container } = render(VIcon, { props: { name: closeIcon, src: '' } })
+    expect(container.querySelector('img')).toBeNull()
+    expect(container.querySelector('svg path')).not.toBeNull()
+    expect(container.textContent).not.toContain('{')
+  })
+
   it('a name containing "/" or ":" stays a NAME (no URL detection)', () => {
     // This is what lets Iconify-style conventions (`mdi:close`) reach the icon
     // resolver instead of going out as an <img>.

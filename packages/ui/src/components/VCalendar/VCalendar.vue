@@ -113,8 +113,8 @@ export interface CalendarProps {
    */
   disabled?: boolean
   /**
-   * Makes an event when an empty part of a day is taken up: a click makes one `slotDuration`
-   * long, a drag makes one as long as it was drawn. `slot-activate` fires either way, so a
+   * Makes an event when an empty part of a day is taken up: a click, or Enter on a focused
+   * cell, makes one `slotDuration` long, a drag makes one as long as it was drawn. `slot-activate` fires either way, so a
    * consumer who wants their own form can leave this off and still get the signal.
    */
   creatable?: boolean
@@ -437,20 +437,26 @@ function onEventDrop(id: CalendarEventId, times: CalendarEventTimes, kind: 'move
  *
  * It counts from one per calendar rather than from the length of the list, so removing an
  * event does not make the next one reuse its name.
+ *
+ * TRAP — it is the ONE counter, and the grid titles the card being drawn out from it too
+ * (`draftTitle`). Two counts — this one and the length of the list — named the card one
+ * thing while it was drawn and another once released, as soon as an event had been removed.
  */
-let created = 0
+const created = ref(0)
+const draftTitle = computed(() => m.value.calendar.newEvent(created.value + 1))
 
 function onSlotCreate(times: CalendarEventTimes) {
   // The grid only ever asks for this when it was told it could create, so there is no second
   // guard here: `creatable` is decided once, where the press is read.
   emit('slot-activate', { date: times.start, time: times.startTime })
 
-  created++
+  const title = draftTitle.value
+  created.value++
   const draft: CalendarEvent = {
     // Vue's own id makes it unique to this calendar, so two on one page cannot collide, and
     // it is stable across the server and the client.
-    id: `${uid}-${created}`,
-    title: m.value.calendar.newEvent(created),
+    id: `${uid}-${created.value}`,
+    title,
     ...times,
   }
 
@@ -572,6 +578,7 @@ defineExpose({
         :editable="!readonly && !disabled"
         :disabled="disabled"
         :creatable="creatable && !disabled"
+        :draft-title="draftTitle"
         :hint-id="hintId"
         :edge-step-delay="edgeStepDelay"
         :auto-scroll="!noEdgeScroll"

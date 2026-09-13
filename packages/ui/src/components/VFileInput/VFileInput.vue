@@ -473,7 +473,7 @@ defineExpose({
     :data-size="resolvedSize"
     :data-compact="resolvedCompact ? '' : undefined"
     :data-display="resolvedDisplay"
-    :data-disabled="disabled ? '' : undefined"
+    :data-disabled="resolvedDisabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
     :data-dragging="dragging ? '' : undefined"
     :data-can-clear="canClear ? '' : undefined"
@@ -491,7 +491,7 @@ defineExpose({
       aria-hidden="true"
       :accept="accept"
       :multiple="multiple || undefined"
-      :disabled="disabled || undefined"
+      :disabled="resolvedDisabled || undefined"
       @change="onNativeChange"
     />
 
@@ -650,16 +650,16 @@ defineExpose({
 
   /* The two icons are lifted out of the wrapping flow — the same recipe VCombobox uses —
      so that they stay pinned to the end of the field and vertically centred whatever the
-     chips do. VInput renders the clear cross FIRST and the end icon after it, which is
-     why the icon has to be addressed by excluding the cross. */
+     chips do. Each is addressed by the POSITION class VInput gives it: `.v-input-action`
+     alone also names a clickable START icon, which would be pulled across to the end. */
   .v-file-input[data-display='chip'] .v-input-clear,
-  .v-file-input[data-display='chip'] .v-input-action:not(.v-input-clear) {
+  .v-file-input[data-display='chip'] .v-input-icon-end {
     position: absolute;
     top: 50%;
     translate: 0 -50%;
   }
 
-  .v-file-input[data-display='chip'] .v-input-action:not(.v-input-clear) {
+  .v-file-input[data-display='chip'] .v-input-icon-end {
     inset-inline-end: var(--control-padding-inline-field);
   }
 

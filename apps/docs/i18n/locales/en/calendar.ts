@@ -64,7 +64,7 @@ export default {
         disabled:
           'Freezes the whole calendar: nothing can be moved, created or opened, and no other period can be reached. The cards leave the tab order while the grid keeps its own, so the agenda can still be read. That is what separates it from <code>readonly</code>, which stops the editing alone.',
         creatable:
-          'Makes an event when an empty part of a day is taken up: a click makes one a step long, a drag makes one as long as it was drawn. The slot signal fires either way, so you can leave this off and still get it.',
+          'Makes an event when an empty part of a day is taken up: a click or Enter on a cell makes one a step long, a drag makes one as long as it was drawn. The slot signal fires either way, so you can leave this off and still get it.',
         edgeStepDelay:
           'How long a dragged event has to rest against the side of the calendar before the view turns to the previous or next period, in milliseconds. Zero turns that off. The wait is the point of it: paging the instant the pointer touched the edge would make the last day of a week impossible to aim at.',
         noEdgeScroll: 'Stops dragging near the top or bottom of a time grid from scrolling it.',

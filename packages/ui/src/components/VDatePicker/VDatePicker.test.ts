@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
-import { nextTick } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VDatePicker from './VDatePicker.vue'
 
@@ -217,6 +217,38 @@ describe('VDatePicker', () => {
     expect(
       container.querySelectorAll('.v-date-picker-view--years .v-date-picker-view-cell'),
     ).toHaveLength(201)
+  })
+
+  // A range or a list reaches the picker as the consumer wrote it: a malformed entry must
+  // not become the focused date, whose parse the month arrows assert.
+  it('renders a malformed range or list instead of throwing', () => {
+    const range = render(VDatePicker, {
+      props: { selection: 'range', modelValue: { start: 'foo', end: null } },
+    })
+    expect(range.container.querySelectorAll('[role="gridcell"]')).toHaveLength(42)
+    range.unmount()
+
+    const list = render(VDatePicker, {
+      props: { selection: 'multiple', modelValue: ['nope', JUNE], locale: 'fr-FR' },
+    })
+    // The first VALID entry is what the calendar opens on.
+    expect(list.getByRole('grid').getAttribute('aria-label')?.toLowerCase()).toContain('juin')
+  })
+
+  it('reset() returns to the days view, on the selected month', async () => {
+    const picker = ref<InstanceType<typeof VDatePicker> | null>(null)
+    const { container, getByRole } = render(
+      defineComponent({
+        setup: () => () => h(VDatePicker, { ref: picker, modelValue: JUNE, locale: 'fr-FR' }),
+      }),
+    )
+    await fireEvent.click(getByRole('button', { name: 'Next month' }))
+    await fireEvent.click(getByRole('button', { expanded: false, name: /juillet/i }))
+    expect(container.querySelector('.v-date-picker')?.getAttribute('data-view')).toBe('months')
+    picker.value?.reset()
+    await nextTick()
+    expect(container.querySelector('.v-date-picker')?.getAttribute('data-view')).toBe('days')
+    expect(getByRole('grid').getAttribute('aria-label')?.toLowerCase()).toContain('juin')
   })
 
   it('navigates with the keyboard (arrows) and selects with Enter', async () => {

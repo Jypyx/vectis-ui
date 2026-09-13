@@ -31,6 +31,59 @@ describe('VSlider', () => {
     expect(emitted('update:modelValue')).toEqual([[[60, 60]]])
   })
 
+  // A range is two native controls: forwarded through $attrs, a consumer's @change only
+  // ever reached the END thumb, and moving the start one told nobody.
+  it('change: emitted with the whole pair by EITHER thumb of a range', async () => {
+    const { getByRole, emitted } = render(VSlider, {
+      props: { modelValue: [20, 60], range: true, label: 'Budget' },
+    })
+    const start = getByRole('slider', { name: 'Budget (start)' }) as HTMLInputElement
+    start.value = '30'
+    await fireEvent.input(start)
+    await fireEvent.change(start)
+    expect(emitted('change')).toEqual([[[30, 60]]])
+
+    const end = getByRole('slider', { name: 'Budget (end)' }) as HTMLInputElement
+    end.value = '70'
+    await fireEvent.input(end)
+    await fireEvent.change(end)
+    expect(emitted('change')?.at(-1)).toEqual([[30, 70]])
+  })
+
+  // A key press fires input and change in the same task: under a parent v-model the
+  // model's local copy has not caught up yet, so the payload must not be read from it.
+  it('change: carries the settled value under a parent v-model, not the one before', () => {
+    const onChange = vi.fn()
+    let value: number | [number, number] = 40
+    const { getByRole } = render(VSlider, {
+      props: {
+        modelValue: value,
+        label: 'Volume',
+        'onUpdate:modelValue': (v: number | [number, number]) => (value = v),
+        onChange,
+      },
+    })
+    const slider = getByRole('slider') as HTMLInputElement
+    slider.value = '41'
+    slider.dispatchEvent(new Event('input', { bubbles: true }))
+    slider.dispatchEvent(new Event('change', { bubbles: true }))
+    expect(value).toBe(41)
+    expect(onChange).toHaveBeenCalledWith(41)
+  })
+
+  it('change: a committed number field emits it too, and only when the value moved', async () => {
+    const { getByRole, emitted } = render(VSlider, {
+      props: { modelValue: 40, inputs: true, label: 'Volume' },
+    })
+    const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
+    await fireEvent.update(field, '55')
+    await fireEvent.change(field)
+    expect(emitted('change')).toEqual([[55]])
+    await fireEvent.update(field, '55')
+    await fireEvent.change(field)
+    expect(emitted('change')).toHaveLength(1)
+  })
+
   it('the fill follows the values (unitless fractions)', () => {
     const { container } = render(VSlider, {
       props: { modelValue: [25, 75], range: true, label: 'x' },

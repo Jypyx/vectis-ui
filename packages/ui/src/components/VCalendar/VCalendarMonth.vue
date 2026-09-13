@@ -563,6 +563,22 @@ function onCardClick(item: E) {
   emit('event-activate', item)
 }
 
+/**
+ * A click on the empty part of a day: the pointer's side of the Enter that activates a cell,
+ * so a square drawn with a pointer cursor answers a click as it answers the key.
+ *
+ * The chips and the two buttons a square holds answer their own clicks, so a click that came
+ * from one of them is theirs alone. And a click ending a drag is swallowed like the one a chip
+ * would have received: the drop has already said what the gesture meant.
+ */
+function onGridClick(event: MouseEvent) {
+  const target = event.target as HTMLElement | null
+  if (target?.closest('.v-calendar-event, button')) return
+  const cell = target?.closest<HTMLElement>('.v-calendar-month-cell')
+  if (!cell || dragGuard.consume()) return
+  emit('cell-activate', cell.dataset.iso!)
+}
+
 function announceMoved(title: string, times: CalendarEventTimes) {
   emit('announce', m.value.calendar.movedTo(title, longDay(times.start)))
 }
@@ -678,6 +694,7 @@ defineExpose({
       @pointermove="onPointermove"
       @pointerup="onPointerup"
       @pointercancel="onPointercancel"
+      @click="onGridClick"
     >
       <div
         v-for="(week, row) in weeks"

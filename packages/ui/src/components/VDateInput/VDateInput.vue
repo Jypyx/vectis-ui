@@ -385,6 +385,10 @@ const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPa
     // handler.
     disabled: () => resolvedDisabled.value || !hasPanel.value,
     focusInPanel: () => pickerRef.value?.focus(),
+    // The calendar stays mounted while the panel is closed, so it is put back on the days
+    // view both ways: a field that opens on focus never goes through `focus()`.
+    onOpen: () => pickerRef.value?.reset(),
+    onClose: () => pickerRef.value?.reset(),
     // Beside a field one types into, the panel opens WITHOUT taking the focus: typing
     // carries on in the field, and the down arrow remains the way into the grid.
     focusOnOpen: () => !typing.value,

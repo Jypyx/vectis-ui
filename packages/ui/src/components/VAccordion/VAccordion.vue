@@ -92,7 +92,6 @@ provide(accordionKey, {
     --accordion-content-pad-start: calc(var(--vectis-space-2) - var(--accordion-pad-delta));
 
     font-family: var(--vectis-text-family);
-    overflow: hidden;
   }
 
   .v-accordion[data-compact] {
@@ -105,6 +104,11 @@ provide(accordionKey, {
     background: var(--vectis-color-surface-raised);
     border: 1px solid var(--vectis-color-border);
     border-radius: var(--vectis-radius-surface);
+    /* The clip is what keeps the first and last rows' hover inside the rounded corners, so
+       it belongs to the variant that HAS corners. `clip` and not `hidden`: `hidden` makes
+       the box a scroll container, which captures every `position: sticky` in the content
+       and pins it to the accordion instead of the page. */
+    overflow: clip;
   }
 }
 </style>

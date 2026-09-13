@@ -29,7 +29,7 @@ export default {
     },
     autoDismiss: {
       title: 'Combien de temps elle reste',
-      text: "<code>duration</code> est la durée d'affichage d'une notification, cinq secondes par défaut, et chacune peut demander la sienne. Le compte à rebours se suspend tant que le pointeur repose quelque part sur la pile.",
+      text: "<code>duration</code> est la durée d'affichage d'une notification, cinq secondes par défaut, et chacune peut demander la sienne. Le compte à rebours se suspend tant que le pointeur repose quelque part sur la pile et tant que le clavier y est, et ne repart que lorsque les deux sont partis.",
     },
     persistent: {
       title: 'Notifications persistantes',

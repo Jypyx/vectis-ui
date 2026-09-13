@@ -310,11 +310,16 @@ const Slides = () =>
  * `fade` counter-translates every slide onto the same spot, so past one item per
  * view — or with a peek strip — the slides do not merely look degraded, they pile
  * up. The downgrade makes the combination unrepresentable; the dev warn explains.
+ *
+ * A peek of ZERO is no peek: the sizing formula collapses exactly to the peekless one, so
+ * `peek: 0` (or `'0px'`) must not cost the effect. A length `parseFloat` cannot read — a
+ * `calc()` — is taken as a real strip, the side that never piles slides up.
  */
+const hasPeek = computed(
+  () => props.peek !== undefined && Number.parseFloat(String(props.peek)) !== 0,
+)
 const resolvedEffect = computed<CarouselEffect>(() =>
-  props.effect === 'fade' && (props.itemsPerView > 1 || props.peek !== undefined)
-    ? 'slide'
-    : props.effect,
+  props.effect === 'fade' && (props.itemsPerView > 1 || hasPeek.value) ? 'slide' : props.effect,
 )
 
 provide(carouselKey, {
@@ -635,6 +640,18 @@ const pageCount = computed(() =>
 )
 
 /*
+ * TRAP — the observer watches ELEMENTS, so it is re-armed whenever the slides are, and the
+ * count alone does not say so: the same number of slides under other keys mounts a new DOM,
+ * and an observer left on the detached nodes never fires again, freezing the page count on
+ * a resize with nothing to show for it. The keys are what Vue re-mounts on, so they are what
+ * this watches — as one string, which only changes when a key does, rather than a fresh
+ * array the watcher would take for a change on every render of the parent.
+ */
+const slideKeys = computed(() =>
+  JSON.stringify(slides.value.map((node, index) => String(node.key ?? index))),
+)
+
+/*
  * DOM → model, with ONE observer, which also triggers the page measurement.
  *
  * TRAP — `1` must stay in `threshold`. Nothing READS a ratio, but the buckets still decide
@@ -647,7 +664,7 @@ const pageCount = computed(() =>
  * fully visible really does cross 1.0.
  */
 watch(
-  [viewportEl, count],
+  [viewportEl, slideKeys],
   ([port], _previous, onCleanup) => {
     // @fallback
     // IntersectionObserver exists neither in SSR nor in jsdom: `scrollend` still
@@ -839,7 +856,7 @@ if (isDev) {
       console.warn(
         '[VCarousel] `fade` needs one item per view: over a single view timeline every slide is counter-translated onto the same spot, so they would pile up. Downgraded to `slide`.',
       )
-    if (props.effect === 'fade' && props.peek !== undefined)
+    if (props.effect === 'fade' && hasPeek.value)
       console.warn(
         '[VCarousel] `fade` and `peek` are mutually exclusive: the counter-translate parks every slide over the viewport, so the peeked strip is covered. Downgraded to `slide`.',
       )

@@ -60,8 +60,9 @@ a screen position, independent of the reading direction — like the OS notifica
 ## Display duration
 
 `duration` (a VToaster prop: 5000 ms by default, overridable per toast) drives the automatic
-dismissal. Hovering a stack **suspends its timers**; they restart at the full duration when the
-pointer leaves (WCAG 2.2.1).
+dismissal. Hovering a stack, or moving the keyboard into it, **suspends its timers**; they restart
+at the full duration once both the pointer and the focus have left (WCAG 2.2.1). The focus half is
+what keeps a close cross from vanishing under the focus ring of a reader who tabbed to it.
 
 <Canvas of={VToasterStories.AutoDismiss} />
 
@@ -110,7 +111,7 @@ emptying fades out.
 - Each stack is a `role="region"` landmark named by the `label` prop ("Notifications"); the cross
   receives `closeLabel` ("Close").
 - The focus is never stolen: a toast appears without interrupting the current input.
-- Timers pause on hover; the animations respect `prefers-reduced-motion`.
+- Timers pause on hover and while the keyboard is inside a stack; the animations respect `prefers-reduced-motion`.
 
 This component's accessible labels come from the design system dictionary: they translate globally
 (see **Foundations › Internationalization**), and the text props stay authoritative for a

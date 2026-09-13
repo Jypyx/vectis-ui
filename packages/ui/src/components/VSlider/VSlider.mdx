@@ -27,6 +27,9 @@ capture the pointer, and the JS prevents the values from crossing. The v-model b
 `[start, end]` tuple and the accessible labels are suffixed "(start)" / "(end)". Clicking the track
 is disabled in this mode (it would be ambiguous).
 
+`@change` fires once the reader settles on a value, from either thumb, with the whole
+`[start, end]` pair; the v-model follows every step of the drag in between.
+
 <Canvas of={VSliderStories.Range} />
 
 ## Steps and ticks

@@ -68,6 +68,10 @@ export default {
         vModel:
           'La valeur, et sa FORME est ce qui met le curseur en mode intervalle : un nombre unique donne une poignée, une paire en donne deux. La paire est toujours ordonnée, les poignées étant empêchées de se croiser.',
       },
+      events: {
+        change:
+          "Le lecteur s'est arrêté sur une valeur : une poignée a été relâchée ou déplacée au clavier, ou un champ numérique a été validé. L'événement porte la valeur entière, une paire en mode intervalle, et part de l'une ou l'autre poignée, là où le v-model suit chaque pas d'un glissement.",
+      },
     },
   },
 }

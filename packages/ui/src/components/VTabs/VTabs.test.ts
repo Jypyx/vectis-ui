@@ -102,6 +102,25 @@ describe('VTabs', () => {
       expect(container.querySelector('[role="tab"]')?.id).not.toContain(' ')
     })
 
+    it('two values the sanitizing could confuse still get distinct ids', () => {
+      const { container } = mount({
+        initial: 'a b',
+        tabs: `<VTab value="a b" label="Space" />
+               <VTab value="a_b" label="Underscore" />
+               <VTab :value="1" label="Number" />
+               <VTab value="1" label="String" />`,
+        panels: `<VTabPanel value="a b">1</VTabPanel>
+                 <VTabPanel value="a_b">2</VTabPanel>
+                 <VTabPanel :value="1">3</VTabPanel>
+                 <VTabPanel value="1">4</VTabPanel>`,
+      })
+      const ids = tabsOf(container).map((tab) => tab.id)
+      expect(new Set(ids).size).toBe(4)
+      const panelIds = [...container.querySelectorAll('[role="tabpanel"]')].map((p) => p.id)
+      expect(new Set(panelIds).size).toBe(4)
+      for (const id of ids) expect(id).toMatch(/^[\w-]+$/)
+    })
+
     it('roving tabindex: only the active tab is in the tab order', () => {
       const { container } = mount()
       expect(tabsOf(container).map((el) => el.getAttribute('tabindex'))).toEqual(['0', '-1', '-1'])

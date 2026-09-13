@@ -96,6 +96,11 @@ export interface TimeGridProps<T> {
   disabled: boolean
   /** Whether an empty part of the grid makes an event when it is taken up. */
   creatable: boolean
+  /**
+   * What the event being drawn out is called while it is drawn — the name the calendar will
+   * give it on release, so the card does not rename itself under the finger.
+   */
+  draftTitle: string
   /** The node telling a reader how a card can be moved, shared by every card. */
   hintId: string
   /** How long a drag rests against an edge before the view pages. Zero turns paging off. */
@@ -330,7 +335,7 @@ const drawnTimed = computed<E[]>(() => {
   if (state.kind === 'create') {
     const draft = {
       id: DRAFT_ID,
-      title: m.value.calendar.newEvent(props.events.length + 1),
+      title: props.draftTitle,
       ...state.preview,
       // A draft carries exactly the fields `CalendarEvent` declares, and a consumer's own
       // type may require more. It exists for one render and never reaches the model, which
@@ -673,7 +678,22 @@ function onKeydown(event: KeyboardEvent) {
 
   if (intent.kind === 'activate') {
     event.preventDefault()
-    emit('cell-activate', iso, minutes)
+    /*
+     * With `creatable` the key makes the event the pointer would (WCAG 2.1.1): one slot long,
+     * from the top of the slot the focused cell starts on — the times a press that never
+     * moved hands over on release. Without it, the cell is only reported, as a click is.
+     */
+    if (!props.creatable) {
+      emit('cell-activate', iso, minutes)
+      return
+    }
+    const start = floorToSlot(minutes, props.slotDuration)
+    emit('slot-create', {
+      start: iso,
+      end: iso,
+      startTime: timeOf(start),
+      endTime: timeOf(Math.min(start + props.slotDuration, props.window.end)),
+    })
   }
 }
 

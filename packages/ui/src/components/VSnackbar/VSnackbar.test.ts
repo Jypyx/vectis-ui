@@ -225,6 +225,24 @@ describe('VSnackbar', () => {
     expect(current.value).not.toBeNull()
   })
 
+  // The focused action button leaves the page with the bar. A synthetic focusin with no
+  // matching focusout is exactly an engine that sends none for a removed element.
+  it('a bar taken away while holding the focus does not hold the next one', async () => {
+    const { container, getByRole } = render(VSnackbar)
+    snackbar({ message: 'First', action: () => {} })
+    await nextTick()
+    await fireEvent.focusIn(getHost(container))
+    await fireEvent.click(getByRole('button', { name: 'Undo' }))
+    await nextTick()
+    expect(current.value).toBeNull()
+
+    snackbar({ message: 'Second' })
+    await nextTick()
+    vi.advanceTimersByTime(4000)
+    await nextTick()
+    expect(current.value).toBeNull()
+  })
+
   it('a confirmation raised BEFORE mounting shows up on mount (and its countdown starts)', async () => {
     snackbar({ message: 'Early' })
     const { container, getByText } = render(VSnackbar)

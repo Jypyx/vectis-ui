@@ -66,6 +66,10 @@ export default {
         vModel:
           'The value, and its shape is what puts the slider in range mode: a single number gives one thumb, a pair of them gives two. The pair is always ordered, the thumbs being stopped from crossing.',
       },
+      events: {
+        change:
+          'The reader settled on a value: a thumb was released or moved by a key, or a number field was committed. It carries the whole value, a pair in range mode, and fires for either thumb, where the v-model follows every step of a drag.',
+      },
     },
   },
 }

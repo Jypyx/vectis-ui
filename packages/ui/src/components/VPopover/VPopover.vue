@@ -158,9 +158,16 @@ const triggerProps = computed<PopoverTriggerProps>(() => ({
   'aria-controls': panelId.value,
 }))
 
-// Both anchoring modes are served by one CSS declaration: the panel reads this
-// variable, and falls back to the wrapper's own anchor name when it is not set.
-const panelStyle = computed(() => (props.anchor ? { '--anchor-name': props.anchor } : undefined))
+// Both anchoring modes are served by one CSS declaration: the panel reads this variable,
+// which names either the consumer's anchor or the wrapper's own.
+//
+// TRAP — it is set inline in BOTH modes, never left to a fallback. A custom property
+// INHERITS: left unset in the `#trigger` mode, the panel read whatever an ancestor had
+// set — a VPopover placed in VDateInput's `#footer` inherited the date field's anchor and
+// opened under the field instead of under its own trigger, with no error anywhere.
+const panelStyle = computed(() => ({
+  '--popover-anchor-name': props.anchor ?? '--popover-anchor',
+}))
 
 function onToggle(event: Event) {
   syncShown(event)
@@ -261,7 +268,7 @@ defineExpose({
    * produce.
    */
   .v-popover-panel {
-    position-anchor: var(--anchor-name, --popover-anchor);
+    position-anchor: var(--popover-anchor-name);
   }
 
   /*

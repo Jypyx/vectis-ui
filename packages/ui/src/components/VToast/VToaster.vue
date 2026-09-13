@@ -11,9 +11,9 @@
  * nothing and are not displayed.
  *
  * The JS covers three things the platform does not: keeping the queue and the containers in
- * step, the popover being imperative; the per-notification dismissal timers; and pausing
- * them while the pointer rests on a stack, so something that disappears on a clock can be
- * held long enough to read (WCAG 2.2.1).
+ * step, the popover being imperative; the per-notification dismissal timers; and holding
+ * them while the pointer rests on a stack OR the keyboard is inside it, so something that
+ * disappears on a clock can be read and closed (WCAG 2.2.1).
  */
 
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -101,15 +101,26 @@ function syncStack(placement: ToastPlacement, event: Event) {
   stacks.get(placement)?.syncShown(event)
 }
 
-/* The running countdowns, and the notifications already given one — a notification is
-   armed once and only once, however many times the queue changes around it. */
+/* The running countdowns, one per notification. */
 const timers = new Map<number, ReturnType<typeof setTimeout>>()
-const armed = new Set<number>()
-/* The corners the pointer is currently resting on, whose countdowns are suspended. */
-const paused = new Set<ToastPlacement>()
+/* The corners holding their countdowns, one set per reason. Two sets rather than one
+   because the reasons overlap and end independently: a reader tabs to a close cross, then
+   moves the pointer over the stack and away, and the corner must stay held while the cross
+   still has the focus — VSnackbar's two flags, per corner. */
+const hovered = new Set<ToastPlacement>()
+const focused = new Set<ToastPlacement>()
 
 function effectivePlacement(item: ToastItem): ToastPlacement {
   return item.placement ?? props.placement
+}
+
+const isHeld = (placement: ToastPlacement) => hovered.has(placement) || focused.has(placement)
+
+function stopTimer(id: number) {
+  const timer = timers.get(id)
+  if (timer === undefined) return
+  clearTimeout(timer)
+  timers.delete(id)
 }
 
 function startTimer(item: ToastItem) {
@@ -126,26 +137,36 @@ function startTimer(item: ToastItem) {
 
 // @core
 /**
- * Brings the page into line with the queue: it starts the countdown of every
- * notification that has just arrived, throws away the countdowns of those that have
- * gone, and then shows the corners holding something while hiding the empty ones.
+ * Brings the page into line with the queue: it throws away the countdowns of the
+ * notifications that have gone, gives every other one a countdown exactly when its corner
+ * is not held, and then shows the corners holding something while hiding the empty ones.
+ *
+ * TRAP — the countdown follows the corner a notification is in NOW, re-derived on every
+ * pass rather than remembered per notification. The default corner is a prop, so a
+ * notification can change corner while the pointer rests on the old one: a memory of
+ * "already armed" then outlived the countdown the hold had cancelled, the release looked
+ * in the old corner, and the notification never got a countdown again.
  *
  * It runs once on mount — which is what makes a notification raised before this
  * component existed appear all the same — and after that on every change to the queue.
  */
 function sync() {
   const alive = new Set(toasts.map((item) => item.id))
-  for (const [id, timer] of timers) {
-    if (!alive.has(id)) {
-      clearTimeout(timer)
-      timers.delete(id)
-    }
+  for (const id of timers.keys()) if (!alive.has(id)) stopTimer(id)
+
+  for (const placement of PLACEMENTS) {
+    const stackEl = stacks.get(placement)?.el.value
+    // TRAP — a hold is dropped here as soon as it can no longer be true, rather than
+    // trusted to its closing event. A close cross leaves the page while it has the focus,
+    // and an engine that sends no `focusout` for a removed element would keep the corner
+    // held for good; an emptied stack is hidden under the pointer, with no `pointerleave`.
+    if (!stackEl?.contains(document.activeElement)) focused.delete(placement)
+    if ((groups.value.get(placement)?.length ?? 0) === 0) hovered.delete(placement)
   }
-  for (const id of armed) if (!alive.has(id)) armed.delete(id)
+
   for (const item of toasts) {
-    if (armed.has(item.id)) continue
-    armed.add(item.id)
-    if (!paused.has(effectivePlacement(item))) startTimer(item)
+    if (isHeld(effectivePlacement(item))) stopTimer(item.id)
+    else startTimer(item)
   }
 
   // Showing and hiding are safe to call on a container already in that state, the
@@ -173,27 +194,25 @@ onMounted(sync)
 // @a11y — WCAG 2.2.1: something that disappears on a clock has to be holdable, or a
 // slow reader simply never finishes it.
 /*
- * Resting the pointer on a corner suspends its countdowns. Leaving restarts them from
- * the FULL duration rather than from what was left: simpler, and more generous to the
- * reader who has just interrupted themselves.
+ * Resting the pointer on a corner suspends its countdowns, and so does moving the keyboard
+ * into it: each notification carries a close cross, a real button a reader tabs to, which
+ * would otherwise vanish from under the focus ring. The same verbs and the same two
+ * reasons as VSnackbar.
+ *
+ * Leaving restarts them from the FULL duration rather than from what was left: simpler,
+ * and more generous to the reader who has just interrupted themselves.
  */
-function pause(placement: ToastPlacement) {
-  paused.add(placement)
-  for (const item of toasts) {
-    if (effectivePlacement(item) !== placement) continue
-    const timer = timers.get(item.id)
-    if (timer !== undefined) {
-      clearTimeout(timer)
-      timers.delete(item.id)
-    }
-  }
+function hold(placement: ToastPlacement, which: 'pointer' | 'focus') {
+  const reason = which === 'pointer' ? hovered : focused
+  reason.add(placement)
+  for (const item of toasts) if (effectivePlacement(item) === placement) stopTimer(item.id)
 }
 
-function resume(placement: ToastPlacement) {
-  paused.delete(placement)
-  for (const item of toasts) {
-    if (effectivePlacement(item) === placement) startTimer(item)
-  }
+function release(placement: ToastPlacement, which: 'pointer' | 'focus') {
+  const reason = which === 'pointer' ? hovered : focused
+  reason.delete(placement)
+  if (isHeld(placement)) return
+  for (const item of toasts) if (effectivePlacement(item) === placement) startTimer(item)
 }
 
 /* The queue lives outside this component and survives it being unmounted and mounted
@@ -214,8 +233,10 @@ onBeforeUnmount(() => {
     :data-placement="p"
     role="region"
     :aria-label="ariaLabel"
-    @pointerenter="pause(p)"
-    @pointerleave="resume(p)"
+    @pointerenter="hold(p, 'pointer')"
+    @pointerleave="release(p, 'pointer')"
+    @focusin="hold(p, 'focus')"
+    @focusout="release(p, 'focus')"
     @beforetoggle="syncStack(p, $event)"
     @toggle="syncStack(p, $event)"
   >

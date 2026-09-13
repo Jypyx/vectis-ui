@@ -5,10 +5,14 @@
  * Anything non-numeric yields `undefined` rather than a custom property CSS cannot read —
  * an invalid value breaks the geometry outright, where nothing at all lets the component's
  * own default apply.
+ *
+ * TRAP — `Number`, never `parseFloat`: the latter reads a numeric PREFIX, so `'12rem'`
+ * would come out as `12px`, a wrong size with nothing to say so. `Number('')` being 0, a
+ * blank string is refused before it gets there.
  */
 export function px(v: number | string | undefined): string | undefined {
   if (v === undefined) return undefined
-  const n = typeof v === 'number' ? v : Number.parseFloat(v)
+  const n = typeof v === 'number' ? v : v.trim() === '' ? Number.NaN : Number(v)
   return Number.isFinite(n) ? `${n}px` : undefined
 }
 

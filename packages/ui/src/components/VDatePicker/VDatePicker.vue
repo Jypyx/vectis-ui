@@ -247,10 +247,17 @@ const multipleValues = computed<string[]>(() =>
 
 // `focusedISO` is the single source of truth for the view: the month on display is
 // derived from it, never stored separately, so the two cannot drift apart.
+//
+// TRAP — a range start or a list entry is validated HERE, the way the single value is
+// validated upstream. Those two reach this component exactly as the consumer wrote them,
+// and a malformed one (`{ start: 'foo' }`) made the focused date unparseable: the month
+// arrows assert that parse, so the first render threw.
 function initialFocus(): string {
   if (singleValue.value) return singleValue.value
-  if (rangeValue.value.start) return rangeValue.value.start
-  if (multipleValues.value[0]) return multipleValues.value[0]
+  const start = rangeValue.value.start
+  if (start && isValidISO(start)) return start
+  const listed = multipleValues.value.find(isValidISO)
+  if (listed) return listed
   // With nothing selected, the calendar opens on today, brought back inside the
   // allowed bounds.
   return clampISO(formatISO(new Date()), props.min, props.max)
@@ -605,9 +612,31 @@ function focus() {
   view.value = 'days'
   focusDay(focusedISO.value)
 }
+
+// @core
+/*
+ * Puts the calendar back the way it opens: the days view, on the selected date (today
+ * failing that), with no range preview pending. It moves no focus and announces nothing,
+ * a panel reopening not being something the reader did.
+ *
+ * TRAP — a panel's content stays MOUNTED while the panel is closed, so without this the
+ * months or years view a reader left open is what the next opening shows — and a field
+ * that opens its panel on focus never calls `focus()`, the one place that reset the view.
+ */
+function reset() {
+  view.value = 'days'
+  hoverISO.value = null
+  focusedISO.value = initialFocus()
+}
+
 defineExpose({
   /** Brings the focus into the grid, onto the day the calendar is showing. */
   focus,
+  /**
+   * Returns to the days view, on the selected date or today, without moving the focus.
+   * VDateInput calls it each time its panel opens and closes.
+   */
+  reset,
 })
 </script>
 

@@ -483,14 +483,20 @@ type RenderedNode =
   | { kind: 'group'; key: string; label: string; options: RenderedOption[] }
   | { kind: 'separator'; key: string }
 
+//
+// TRAP — nothing here is keyed by VALUE. Two options may share one (a consumer's
+// duplicate, or `1` beside `'1'`, which a template literal spells the same), and a
+// value-keyed index hands both the same position, so both light up as active and Vue
+// patches two rows under one key. The index is COUNTED instead, walking the tree in the
+// order `allOptions` flattens it, which `filtered` keeps; the key is the position in the
+// tree, which filtering does not move.
 const rendered = computed<RenderedNode[]>(() => {
-  const indexOf = new Map<ItemValue, number>()
-  filtered.value.forEach((option, index) => indexOf.set(option.value, index))
+  const kept = new Set(filtered.value)
+  let next = 0
 
-  const entryOf = (option: ComboboxOption): RenderedOption | null => {
-    const index = indexOf.get(option.value)
-    if (index === undefined) return null
-    return { kind: 'option', key: `option:${option.value}`, option, index }
+  const entryOf = (option: ComboboxOption, key: string): RenderedOption | null => {
+    if (!kept.has(option)) return null
+    return { kind: 'option', key: `option:${key}`, option, index: next++ }
   }
 
   const nodes: RenderedNode[] = []
@@ -508,14 +514,14 @@ const rendered = computed<RenderedNode[]>(() => {
     let node: RenderedNode | null
     if (isGroup(item)) {
       const options = item.options
-        .map(entryOf)
+        .map((option, j) => entryOf(option, `${i}.${j}`))
         .filter((entry): entry is RenderedOption => entry !== null)
       // A block none of whose options survived is dropped entirely, its name included:
       // a heading over nothing is worse than no heading.
       node =
         options.length > 0 ? { kind: 'group', key: `group:${i}`, label: item.label, options } : null
     } else {
-      node = entryOf(item)
+      node = entryOf(item, String(i))
     }
     if (!node) continue
 
@@ -921,7 +927,7 @@ defineExpose({
                 tone="accent"
                 :size="chipScale.size"
                 :compact="chipScale.compact"
-                :dismissible="!readonly"
+                :dismissible="!readonly && !resolvedDisabled"
                 :dismiss-label="m.combobox.remove(labelOf(value))"
                 :disabled="resolvedDisabled"
                 @dismiss="removeValue(value)"

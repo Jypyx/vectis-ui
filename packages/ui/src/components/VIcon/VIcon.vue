@@ -115,7 +115,9 @@ const iconName = computed(() => (typeof props.name === 'string' ? props.name : p
 
 const resolved = computed<Resolved | undefined>(() => {
   if (props.render) return tag(props.render)
-  if (props.src !== undefined || props.name === undefined) return undefined
+  // TRUTHINESS on `src`, the test the template renders the image with: an empty `src=""`
+  // renders no image, so it must not stop the name from being drawn either.
+  if (props.src || props.name === undefined) return undefined
 
   const custom = resolveIcon(iconName.value!, { filled: props.filled })
   if (custom) return tag(custom)
@@ -166,7 +168,7 @@ const resolved = computed<Resolved | undefined>(() => {
       <span v-else class="v-icon-glyph" :class="resolved.class" />
     </template>
     <img v-else-if="src" class="v-icon-img" :src="src" alt="" />
-    <span v-else-if="name" class="v-icon-symbol">{{ name }}</span>
+    <span v-else-if="name" class="v-icon-symbol">{{ iconName }}</span>
     <slot v-else />
   </span>
 </template>

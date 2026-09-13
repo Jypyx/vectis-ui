@@ -346,6 +346,43 @@ describe('VDataTable', () => {
     expect(emitted('update:params')).toHaveLength(1)
   })
 
+  it('serverSide: a search given at mount is the one every request reports', async () => {
+    const { getByRole, emitted } = render(VDataTable, {
+      props: { columns: COLUMNS, rows: ROWS, serverSide: true, search: 'atlas', perPage: 3 },
+    })
+    await fireEvent.click(getByRole('button', { name: 'Name' }))
+    const payloads = emitted('update:params') as [{ search: string }][]
+    expect(payloads.at(-1)?.[0].search).toBe('atlas')
+  })
+
+  // The selection is looked up with a Set, which tells 7 from "7": turned into text, a
+  // numeric key never matched a selected id again.
+  it('selection: a numeric rowKey keeps its identities numbers, and finds them again', async () => {
+    const rows = [
+      { id: 7, name: 'Brume', count: 12 },
+      { id: 8, name: 'Atlas', count: 3 },
+    ]
+    const selected = ref<(string | number)[]>([8])
+    const Harness = harness(
+      () => ({ columns: COLUMNS, rows, selected }),
+      `<VDataTable :columns="columns" :rows="rows" row-key="id" selectable v-model:selected="selected" />`,
+    )
+    const { getByRole } = render(Harness)
+    expect((getByRole('checkbox', { name: 'Select row 2' }) as HTMLInputElement).checked).toBe(true)
+
+    await fireEvent.click(getByRole('checkbox', { name: 'Select row 1' }))
+    expect(selected.value).toEqual([8, 7])
+  })
+
+  // VPagination has no `variant` prop: passed anyway, it lands on the <nav> as a stray
+  // HTML attribute.
+  it('hands the pagination no attribute it does not declare', () => {
+    const { container } = render(VDataTable, {
+      props: { columns: COLUMNS, rows: ROWS_MANY, perPage: 2 },
+    })
+    expect(container.querySelector('.v-pagination')?.hasAttribute('variant')).toBe(false)
+  })
+
   it('fallthrough: class on the wrapper, the rest on the table', () => {
     const { container } = render(VDataTable, {
       props: { columns: COLUMNS, rows: ROWS },

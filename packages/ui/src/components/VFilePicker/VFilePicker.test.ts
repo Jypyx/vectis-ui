@@ -484,6 +484,15 @@ describe('fileKind', () => {
     expect(fileKind({ name, type: '' })).toBe(expected)
   })
 
+  // The tables are object literals: a key inherited from Object.prototype must not read
+  // as a kind, or the component would look an icon up with a function.
+  it('never mistakes an inherited property name for a kind', () => {
+    expect(fileKind({ name: 'x.constructor', type: '' })).toBe('file')
+    expect(fileKind({ name: 'x.__proto__', type: '' })).toBe('file')
+    expect(fileKind({ name: 'x.bin', type: 'constructor' })).toBe('file')
+    expect(fileKind({ name: 'x.bin', type: '__proto__' })).toBe('file')
+  })
+
   it('lets the MIME type win over a misleading extension', () => {
     expect(fileKind({ name: 'archive.zip', type: 'image/png' })).toBe('image')
   })

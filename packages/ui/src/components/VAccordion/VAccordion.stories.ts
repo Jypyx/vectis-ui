@@ -240,6 +240,14 @@ export const Variants: Story = {
       </div>
     `,
   }),
+  // jsdom computes no style, so this is the only guard: a flat accordion must not become a
+  // scroll container (it would capture a `position: sticky` in its content), and the
+  // outlined one clips its rows to its corners without becoming one either.
+  play: async ({ canvasElement }) => {
+    const [flat, outlined] = [...canvasElement.querySelectorAll<HTMLElement>('.v-accordion')]
+    await expect(getComputedStyle(flat!).overflow).toBe('visible')
+    await expect(getComputedStyle(outlined!).overflow).toBe('clip')
+  },
 }
 
 /** `compact`: -4px on every padding, type and icons unchanged. */

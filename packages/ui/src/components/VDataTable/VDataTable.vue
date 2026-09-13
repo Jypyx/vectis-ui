@@ -318,8 +318,16 @@ if (isDev) {
     )
 }
 
+/*
+ * TRAP — a key that is already a string or a number is returned AS IT IS. The selection
+ * holds these identities and is looked up with a Set, which tells the number 7 from the
+ * string "7": turned into text, a table keyed by numeric ids never found a selected row
+ * again, so every checkbox stayed unticked.
+ */
 function rowIdentity(row: Row, index: number): DataTableRowId {
-  return props.rowKey ? String(row[props.rowKey]) : index
+  if (!props.rowKey) return index
+  const key = row[props.rowKey]
+  return typeof key === 'string' || typeof key === 'number' ? key : String(key)
 }
 
 // From here on: filter, then sort, then cut into pages — three derivations, each reading
@@ -448,7 +456,9 @@ function sortIconFor(column: DataTableColumn): IconSource {
 // The waiting is delegated to `useTimer` — a delay of zero running at once, cancellation
 // when the component goes away — and the term that was actually committed is what the
 // parameters below report.
-const committedSearch = ref('')
+// It starts from the search the table was GIVEN: starting empty, a table mounted with a
+// search already in place reported an empty one in every request until the reader typed.
+const committedSearch = ref(search.value)
 const searchTimer = useTimer()
 
 function commitSearch() {
@@ -736,7 +746,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
           size="sm"
           :compact="compact"
           align="end"
-          variant="ghost"
           :total-visible="7"
         />
       </div>

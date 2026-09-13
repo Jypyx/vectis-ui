@@ -124,12 +124,20 @@ export function fileKind(file: FileKindCandidate): FileKind {
   if (type.startsWith('audio/')) return 'audio'
   if (type.startsWith('video/')) return 'video'
 
-  const byMime = MIME_KINDS[type]
+  const byMime = lookup(MIME_KINDS, type)
   if (byMime) return byMime
 
   // TRAP — the dot must be found PAST the first character and not at it: a file named
   // `.gitignore` has no extension at all, it has a name beginning with a dot.
   const dot = file.name.lastIndexOf('.')
   const extension = dot > 0 ? file.name.slice(dot + 1).toLowerCase() : ''
-  return EXTENSION_KINDS[extension] ?? 'file'
+  return lookup(EXTENSION_KINDS, extension) ?? 'file'
 }
+
+/**
+ * TRAP — the tables are object literals, so a bare index also answers for what they
+ * INHERIT: a file named `x.constructor` would get a function back, and the component would
+ * look its icon up with it. Only a table's own keys are kinds.
+ */
+const lookup = (table: Record<string, FileKind>, key: string): FileKind | undefined =>
+  Object.hasOwn(table, key) ? table[key] : undefined

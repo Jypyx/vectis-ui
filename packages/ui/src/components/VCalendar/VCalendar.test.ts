@@ -519,6 +519,24 @@ describe('the month view', () => {
     const { container } = month()
     expect(container.querySelectorAll('.v-calendar-month-cell[tabindex="0"]')).toHaveLength(1)
   })
+
+  // The square is drawn with a pointer cursor: a click on its empty part reports it as Enter
+  // does, and a click on what the square holds stays that element's own.
+  it('reports a click on the empty part of a day, as Enter does', async () => {
+    const { container, emitted } = month({ events: [event({ id: 'a' })] })
+    const cell = container.querySelector<HTMLElement>(
+      `.v-calendar-month-cell[data-iso="${WEDNESDAY}"]`,
+    )!
+    await fireEvent.click(cell)
+    expect(emitted('slot-activate')).toEqual([[{ date: WEDNESDAY, time: '00:00' }]])
+
+    await fireEvent.keyDown(cell, { key: 'Enter' })
+    expect(emitted('slot-activate')?.at(-1)).toEqual([{ date: WEDNESDAY, time: '00:00' }])
+
+    await fireEvent.click(cell.querySelector('.v-calendar-event')!)
+    await fireEvent.click(cell.querySelector('.v-calendar-month-day')!)
+    expect(emitted('slot-activate')).toHaveLength(2)
+  })
 })
 
 /*
@@ -686,6 +704,14 @@ describe('the year view', () => {
       events: [event({ id: 'a' }), event({ id: 'b', start: MONDAY, end: MONDAY })],
     })
     expect(getByRole('button', { name: /June\s*2/ })).toBeTruthy()
+  })
+
+  // The sheet reads the column count from this variable: a literal 7 wrapped every five-day
+  // row onto the next line. The `Year` play function checks the sheet consumes it.
+  it('gives each mini-month as many columns as weekdays on show', () => {
+    const { container } = year({ weekdays: [1, 2, 3, 4, 5] })
+    const grid = container.querySelector<HTMLElement>('.v-calendar-year-grid')!
+    expect(grid.style.getPropertyValue('--calendar-columns')).toBe('5')
   })
 
   it('opens a month when its name is chosen', async () => {
@@ -1101,6 +1127,38 @@ describe('creating an event by taking up an empty slot', () => {
     }
     const titles = (emitted('event-create') as CalendarEvent[][]).map(([e]) => e!.title)
     expect(titles).toEqual(['Event #1', 'Event #2'])
+  })
+
+  // WCAG 2.1.1: every gesture the pointer offers has a keyboard equivalent, and Enter on an
+  // empty cell is the one `keyboard.ts` names for creating.
+  it('makes the same event from the keyboard, with Enter on a cell', async () => {
+    const { container, emitted } = empty({ slotDuration: 30 })
+    const cell = container.querySelector('.v-calendar-cell[tabindex="0"]') as HTMLElement
+    await fireEvent.keyDown(cell, { key: 'Enter' })
+    const created = (emitted('event-create')!.at(-1) as CalendarEvent[])[0]!
+    expect(created).toMatchObject({
+      title: 'Event #1',
+      start: WEDNESDAY,
+      end: WEDNESDAY,
+      startTime: '09:00',
+      endTime: '09:30',
+    })
+    expect(emitted('update:events')).toHaveLength(1)
+    expect(emitted('slot-activate')).toEqual([[{ date: WEDNESDAY, time: '09:00' }]])
+  })
+
+  // One counter names the card while it is drawn AND once released: counted from the list,
+  // the draft was "Event #2" over a calendar holding one event, then became "Event #1".
+  it('names the card it draws out as it will name the event', async () => {
+    const { container } = empty({
+      events: [event({ id: 'a', startTime: '14:00', endTime: '15:00' })],
+    })
+    const cell = container.querySelector('.v-calendar-cell')!
+    pointer(cell, 'pointerdown', { clientX: 0, clientY: 0 })
+    await nextTick()
+    const draft = container.querySelector('[data-event-id="__vectis-calendar-draft__"]')!
+    expect(draft.textContent).toContain('Event #1')
+    pointer(cell, 'pointerup', { clientX: 0, clientY: 0 })
   })
 
   /*

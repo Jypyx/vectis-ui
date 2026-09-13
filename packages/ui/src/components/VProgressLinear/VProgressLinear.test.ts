@@ -21,6 +21,26 @@ describe('VProgressLinear', () => {
     expect(styleOf(container)).toContain('--fill-fraction: 0.5')
   })
 
+  // The value is clamped against the normalized bound, so announcing the raw one would put
+  // `aria-valuenow` above `aria-valuemax`.
+  it('announces the normalized bound, never a negative max', () => {
+    const { getByRole } = render(VProgressLinear, {
+      props: { value: 10, max: -5 },
+      attrs: { 'aria-label': 'x' },
+    })
+    const bar = getByRole('progressbar')
+    expect(bar.getAttribute('aria-valuemax')).toBe('0')
+    expect(bar.getAttribute('aria-valuenow')).toBe('0')
+  })
+
+  it('a thickness in another unit is refused rather than read as pixels', () => {
+    const { container } = render(VProgressLinear, {
+      props: { value: 10, thickness: '1rem' },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(styleOf(container)).not.toContain('--progress-thickness')
+  })
+
   it('clamps above the max', () => {
     const { getByRole, container } = render(VProgressLinear, {
       props: { value: 250, max: 100 },

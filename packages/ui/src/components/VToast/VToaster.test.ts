@@ -98,6 +98,74 @@ describe('VToaster', () => {
     expect(toasts).toHaveLength(0)
   })
 
+  // The default corner is a prop: a toast can move while the pointer rests on its old
+  // corner, and the release there must not leave it without a countdown for good.
+  it('a toast moved to another corner while held still gets its countdown', async () => {
+    const { container, rerender } = render(VToaster)
+    toast({ message: 'Moving' })
+    await nextTick()
+
+    getStack(container, 'bottom-right').dispatchEvent(new Event('pointerenter'))
+    await rerender({ placement: 'top-left' })
+    await nextTick()
+    getStack(container, 'bottom-right').dispatchEvent(new Event('pointerleave'))
+
+    vi.advanceTimersByTime(5000)
+    await nextTick()
+    expect(toasts).toHaveLength(0)
+  })
+
+  // The close cross is a real button a reader tabs to: it must not vanish from under the
+  // focus ring.
+  it('moving the keyboard into a stack suspends its timers, leaving re-arms them', async () => {
+    const { container } = render(VToaster)
+    toast({ message: 'Focused' })
+    await nextTick()
+    const stack = getStack(container, 'bottom-right')
+
+    await fireEvent.focusIn(stack)
+    vi.advanceTimersByTime(60_000)
+    await nextTick()
+    expect(toasts).toHaveLength(1)
+
+    await fireEvent.focusOut(stack)
+    vi.advanceTimersByTime(5000)
+    await nextTick()
+    expect(toasts).toHaveLength(0)
+  })
+
+  it('a pointer still resting on the stack keeps it after the focus leaves', async () => {
+    const { container } = render(VToaster)
+    toast({ message: 'Both' })
+    await nextTick()
+    const stack = getStack(container, 'bottom-right')
+
+    stack.dispatchEvent(new Event('pointerenter'))
+    await fireEvent.focusIn(stack)
+    await fireEvent.focusOut(stack)
+    vi.advanceTimersByTime(60_000)
+    await nextTick()
+    expect(toasts).toHaveLength(1)
+  })
+
+  // A synthetic focusin with no focusout is an engine that sends none for the focused
+  // cross removed with its toast: the corner must not stay held for the toasts left in it.
+  it('a cross closed while holding the focus does not hold the rest of the stack', async () => {
+    const { container, getAllByRole } = render(VToaster)
+    toast({ message: 'First' })
+    toast({ message: 'Second' })
+    await nextTick()
+
+    await fireEvent.focusIn(getStack(container, 'bottom-right'))
+    await fireEvent.click(getAllByRole('button', { name: 'Close' })[0]!)
+    await nextTick()
+    expect(toasts.map((item) => item.message)).toEqual(['Second'])
+
+    vi.advanceTimersByTime(5000)
+    await nextTick()
+    expect(toasts).toHaveLength(0)
+  })
+
   it('the cross removes the toast from the queue', async () => {
     const { getByRole } = render(VToaster)
     toast({ message: 'To be closed', duration: 0 })

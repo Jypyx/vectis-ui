@@ -107,6 +107,12 @@ function arm() {
  */
 function sync() {
   cancel()
+  // TRAP — with no bar left, nothing can still be hovered or focused, so both flags are
+  // dropped here rather than trusted to their events. The action button leaves the page
+  // WITH the bar while it holds the focus, and an engine that sends no `focusout` for a
+  // removed element would leave `focused` standing: every later confirmation would then
+  // stay on screen for good, far from the gesture that caused it.
+  if (!item.value) hovered = focused = false
   // Showing and hiding are safe to call on a container already in that state, the guards
   // living in the popover plumbing — so there is no need to remember which it is in.
   if (item.value) show()
@@ -129,9 +135,9 @@ onMounted(sync)
 // reader simply never finishes it — and here they would also never reach the button.
 /*
  * Resting the pointer on the bar suspends its countdown, and so does moving the keyboard
- * into it. The focus half is what the notifications do not need and this cannot do
- * without: the action is a real button, so a reader tabbing towards it would otherwise
- * watch it vanish from under the focus ring.
+ * into it: the action is a real button, so a reader tabbing towards it would otherwise
+ * watch it vanish from under the focus ring. VToaster holds its stacks on the same two
+ * reasons, with the same verbs, for its close crosses.
  *
  * Any focus counts, not just a keyboard one: a pointer landing on the button is about to
  * run the action anyway, so there is nothing to lose by holding as well.
