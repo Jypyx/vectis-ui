@@ -44,6 +44,7 @@ import {
   pointToCell,
   pointWithin,
   resizeEvent,
+  sameTimes,
   snapToSlot,
   timeOf,
   timedSegments,
@@ -283,17 +284,48 @@ const ghostSpan = computed<AllDaySpan | null>(() => {
   return span ? { ...span, lane: state.ghostLane } : null
 })
 
+/*
+ * The model split in two, once per change to it: the timed events the columns draw, and the
+ * all-day ones the band above them draws. The split is what lets a gesture rebuild only its
+ * own half — see `drawnTimed`.
+ */
+const timedEvents = computed(() => props.events.filter((event) => !isAllDayEvent(event)))
+const allDayEvents = computed(() => props.events.filter((event) => isAllDayEvent(event)))
+
+/** The event being gestured at, moved to wherever it is now, plus the echo of where it began. */
+function withPreview(events: E[], state: Gesture): E[] {
+  const moving = events.map((event) =>
+    event.id === state.id ? ({ ...event, ...state.preview } as E) : event,
+  )
+
+  /*
+   * The echo of where it started. It is listed here whether or not it has a box to draw on,
+   * because this is what the id maps below are built from and the template reads a card's
+   * event back out of them. An echo whose day the view has paged past simply produces no
+   * placement — which is what happens to any ordinary event on a day that is off show.
+   */
+  return ghostEvent.value ? [...moving, ghostEvent.value] : moving
+}
+
 /**
- * The events as the grid should currently DRAW them — which is the model, with the one being
- * gestured at moved to wherever it is now.
+ * The timed events as the columns should currently DRAW them — which is the model, with the
+ * one being gestured at moved to wherever it is now.
  *
  * Running the preview through the same packing as everything else is what makes the other
  * events reflow live around the one being dragged, with no special case anywhere: the layout
  * does not know a gesture is happening, only that an event is somewhere.
+ *
+ * TRAP — the half a gesture belongs to is decided by its KIND and never by looking at the
+ * preview. `move-days` is the only gesture that starts on the band, and the three others only
+ * start on a timed card or an empty cell (both press handlers and the keyboard grab refuse an
+ * all-day event), so the two lists below can each return their untouched half as the SAME
+ * array. A computed whose value keeps its identity wakes nothing downstream: that is the whole
+ * of why a timed drag does not re-pack the band, and a bar dragged along the band does not
+ * re-pack seven columns. Reading `state.preview` in the wrong half would silently undo it.
  */
-const drawnEvents = computed<E[]>(() => {
+const drawnTimed = computed<E[]>(() => {
   const state = gesture.value
-  if (!state) return props.events
+  if (!state || state.kind === 'move-days') return timedEvents.value
 
   if (state.kind === 'create') {
     const draft = {
@@ -304,23 +336,23 @@ const drawnEvents = computed<E[]>(() => {
       // type may require more. It exists for one render and never reaches the model, which
       // is what makes the cast safe — the calendar mints the real event on release.
     } as unknown as E
-    return [...props.events, draft]
+    return [...timedEvents.value, draft]
   }
 
-  const moving = props.events.map((event) =>
-    event.id === state.id ? ({ ...event, ...state.preview } as E) : event,
-  )
-
-  /*
-   * The echo of where it started. It is listed here whether or not it has a box to draw on,
-   * because this is what `eventsById` is built from and the template reads a card's event
-   * back out of that map. An echo whose day the view has paged past simply produces no
-   * placement below — which is what happens to any ordinary event on a day that is off show.
-   */
-  return ghostEvent.value ? [...moving, ghostEvent.value] : moving
+  return withPreview(timedEvents.value, state)
 })
 
-const eventsById = computed(() => new Map(drawnEvents.value.map((event) => [event.id, event])))
+/** The all-day bars as the band should currently draw them — see `drawnTimed`. */
+const drawnAllDay = computed<E[]>(() => {
+  const state = gesture.value
+  return state?.kind === 'move-days' ? withPreview(allDayEvents.value, state) : allDayEvents.value
+})
+
+const timedById = computed(() => new Map(drawnTimed.value.map((event) => [event.id, event])))
+const allDayById = computed(() => new Map(drawnAllDay.value.map((event) => [event.id, event])))
+
+/** Any event on show, as it is currently drawn. For the handlers; the template reads a half. */
+const eventOf = (id: CalendarEventId) => timedById.value.get(id) ?? allDayById.value.get(id)
 
 /**
  * The bars above the grid, and how many rows they need between them.
@@ -332,7 +364,7 @@ const eventsById = computed(() => new Map(drawnEvents.value.map((event) => [even
 const allDay = computed(() => {
   const ghost = ghostSpan.value
   const spans = packAllDay(
-    ghost ? drawnEvents.value.filter((event) => event.id !== ghost.id) : drawnEvents.value,
+    ghost ? drawnAllDay.value.filter((event) => event.id !== ghost.id) : drawnAllDay.value,
     props.days,
   )
   return ghost ? [...spans, ghost] : spans
@@ -353,9 +385,9 @@ const nowMark = computed(() => {
   if (props.now < props.window.start || props.now > props.window.end) return null
   const row = Math.floor((props.now - props.window.start) / MINUTES_PER_HOUR)
   return {
-    dayIndex,
+    day: dayIndex,
     // Clamped so the line at the very end of the window still has a cell to live in.
-    cell: `${dayIndex}:${clamp(row, 0, hours.value.length - 1)}`,
+    row: clamp(row, 0, hours.value.length - 1),
     fraction: fractionOf(props.now, props.window),
   }
 })
@@ -366,7 +398,7 @@ const nowMark = computed(() => {
  * and packing them together would make a busy Monday narrow a quiet Tuesday.
  */
 const placed = computed(() => {
-  const segments = timedSegments(drawnEvents.value, props.days, props.window, props.slotDuration)
+  const segments = timedSegments(drawnTimed.value, props.days, props.window, props.slotDuration)
   const ghost = ghostSegment.value
 
   const byDay = new Map<number, typeof segments>()
@@ -387,40 +419,18 @@ const placed = computed(() => {
   return ghost ? [...real, ghost] : real
 })
 
-/**
- * The cards, filed under the cell their start falls in. Grouping once here is what keeps
- * the template from asking every cell to search the whole list — a hundred and sixty-eight
- * searches per render otherwise.
- */
-/** An hour with nothing in it, shared rather than allocated per empty cell. */
-const NO_SEGMENTS: readonly PlacedSegment[] = Object.freeze([])
-const segmentsAt = (day: number, row: number) => byCell.value.get(`${day}:${row}`) ?? NO_SEGMENTS
-
-const byCell = computed(() => {
-  const map = new Map<string, PlacedSegment[]>()
-  for (const segment of placed.value) {
-    const row = Math.floor((segment.start - props.window.start) / MINUTES_PER_HOUR)
-    const key = `${segment.dayIndex}:${clamp(row, 0, hours.value.length - 1)}`
-    const list = map.get(key)
-    if (list) list.push(segment)
-    else map.set(key, [segment])
-  }
-  return map
-})
-
 const cellId = (iso: string, minutes: number) => `${uid}-c-${iso}-${minutes}`
 
 /*
  * Every label the grid writes, derived once per day and once per hour rather than once per
- * CELL — the shape `byCell` above uses, for the same reason.
+ * CELL — the shape `byCell` below uses, for the same reason.
  *
- * The grid renders `hours × days` cells, 24 × 7 by default, and `applyPoint` assigns a new
- * `state.preview` on every `pointermove`, so the whole template re-renders at pointer rate.
- * Read straight from `formatDate` in the template that would be 168 `cellLabel` calls per
- * FRAME of a drag, each doing a `parseISO`, a `JSON.stringify` for the formatter cache key
- * and two `Intl` formats — none of which depends on the pointer. These two maps, of 7 and 24
- * entries, recompute when the locale, the days or the window change and never because a card
- * moved.
+ * The grid renders `hours × days` cells, 24 × 7 by default, and a drag re-renders the whole
+ * template every time it carries its event into another slot. Read straight from `formatDate`
+ * in the template that would be 168 `cellLabel` calls per such frame, each doing a
+ * `parseISO`, a `JSON.stringify` for the formatter cache key and two `Intl` formats — none of
+ * which depends on the pointer. These two maps, of 7 and 24 entries, recompute when the
+ * locale, the days or the window change and never because a card moved.
  */
 const dayLabels = computed(() => {
   const map = new Map<string, { short: string; number: string; full: string }>()
@@ -463,27 +473,117 @@ const cellLabel = (iso: string, minutes: number) =>
   `${dayLabels.value.get(iso)?.full ?? iso}, ${hourLabel(minutes)}`
 
 /**
+ * The cells, row by row, with everything about them that no gesture can change: the id the
+ * focus is moved by, the name a reader hears, and the number `byCell` files cards under.
+ *
+ * The labels' argument carried one step further. Written in the template, each of the 168
+ * cells built its id and its label on every render, and a `${day}:${row}` string twice more,
+ * once to look its cards up and once to ask whether the current-time line was in it. Here that
+ * is paid when the days, the window or the locale change, and a render only reads it.
+ */
+const gridRows = computed(() => {
+  const columns = props.days.length
+  return hours.value.map((minutes, row) => ({
+    minutes,
+    cells: props.days.map((iso, day) => ({
+      iso,
+      day,
+      row,
+      key: row * columns + day,
+      id: cellId(iso, minutes),
+      label: cellLabel(iso, minutes),
+    })),
+  }))
+})
+
+/**
  * An event's times, written out for the reader. The time zone is appended as an annotation
  * and never applied: the card's place in the grid comes from the local times given, which
  * is the whole of the design system's position on the matter.
+ *
+ * Memoized by the three fields the text is made of, because `byCell` asks for every card each
+ * time a drag changes slot and all but one of them still say what they said before: two `Intl`
+ * formats per card otherwise. The cache lives INSIDE the computed, so a change of locale or
+ * hour format throws it away whole.
+ *
+ * TRAP — what a dependant reads has to be this computed, never a cache held beside it. A hit
+ * reads no prop, so a computed that only ever hit would track neither the locale nor the hour
+ * format, and would go on printing the old ones after either changed.
  */
-function timeTextOf(event: E): string {
-  const start = formatTimeDisplay(event.startTime, props.locale, props.hourFormat)
-  const end = formatTimeDisplay(event.endTime, props.locale, props.hourFormat)
-  const range = `${start} – ${end}`
-  return event.timezone ? `${range} (${event.timezone})` : range
+const timeTextOf = computed(() => {
+  const { locale, hourFormat } = props
+  const cache = new Map<string, string>()
+  return (event: CalendarEvent): string => {
+    const key = `${event.startTime}|${event.endTime}|${event.timezone ?? ''}`
+    let text = cache.get(key)
+    if (text === undefined) {
+      const start = formatTimeDisplay(event.startTime, locale, hourFormat)
+      const end = formatTimeDisplay(event.endTime, locale, hourFormat)
+      const range = `${start} – ${end}`
+      text = event.timezone ? `${range} (${event.timezone})` : range
+      cache.set(key, text)
+    }
+    return text
+  }
+})
+
+/** One card as the template draws it, with its event and its box already worked out. */
+interface Card {
+  segment: PlacedSegment
+  event: E
+  timeText: string
+  style: Record<string, string>
 }
 
-function styleFor(segment: PlacedSegment) {
-  return {
-    '--event-start': String(fractionOf(segment.start, props.window)),
-    '--event-end': String(fractionOf(segment.end, props.window)),
-    '--event-day': String(segment.dayIndex),
-    '--event-column': String(segment.column),
-    '--event-span': String(segment.span),
-    '--event-columns': String(segment.columns),
+/**
+ * The cards, filed under the cell their start falls in. Grouping once here is what keeps
+ * the template from asking every cell to search the whole list — a hundred and sixty-eight
+ * searches per render otherwise.
+ *
+ * Each card also carries what the template would otherwise work out per card per render: its
+ * event, its time text and its style object. A render the layout did not cause — the edge cue
+ * lighting up, the pointer leaving the calendar, the tab stop moving — rebuilds none of it.
+ */
+const byCell = computed(() => {
+  const map = new Map<number, Card[]>()
+  const columns = props.days.length
+  const lastRow = hours.value.length - 1
+  const events = timedById.value
+  const textOf = timeTextOf.value
+  for (const segment of placed.value) {
+    // A placement always has an event behind it. Skipping rather than asserting turns a
+    // mismatch between the two into one missing card instead of a grid that fails to render.
+    const event = events.get(segment.id)
+    if (!event) continue
+    const row = clamp(
+      Math.floor((segment.start - props.window.start) / MINUTES_PER_HOUR),
+      0,
+      lastRow,
+    )
+    const key = row * columns + segment.dayIndex
+    const card: Card = {
+      segment,
+      event,
+      timeText: textOf(event),
+      style: {
+        '--event-start': String(fractionOf(segment.start, props.window)),
+        '--event-end': String(fractionOf(segment.end, props.window)),
+        '--event-day': String(segment.dayIndex),
+        '--event-column': String(segment.column),
+        '--event-span': String(segment.span),
+        '--event-columns': String(segment.columns),
+      },
+    }
+    const list = map.get(key)
+    if (list) list.push(card)
+    else map.set(key, [card])
   }
-}
+  return map
+})
+
+/** An hour with nothing in it, shared rather than allocated per empty cell. */
+const NO_CARDS: readonly Card[] = Object.freeze([])
+const cardsAt = (key: number) => byCell.value.get(key) ?? NO_CARDS
 
 const isFocused = (iso: string, minutes: number) =>
   focused.value.iso === iso && focused.value.minutes === minutes
@@ -592,7 +692,7 @@ function begin(
   event?: PointerEvent,
 ) {
   /*
-   * Read BEFORE the gesture is set. Both are derived from `drawnEvents`, which the gesture
+   * Read BEFORE the gesture is set. Both are derived from the drawn events, which the gesture
    * immediately starts rewriting — a line later and they would already describe the preview
    * rather than the place it came from. Which of the two answers is also what says whether
    * this is a timed card or an all-day bar, and therefore which of the echo's two shapes the
@@ -666,7 +766,7 @@ function onGridPointerdown(event: PointerEvent) {
   const card = target.closest<HTMLElement>('.v-calendar-event')
   if (card) {
     if (!props.editable) return
-    const item = eventsById.value.get(cardIdOf(card))
+    const item = eventOf(cardIdOf(card))
     if (!item || isAllDayEvent(item)) return
 
     const resizing = target.closest('[data-calendar-handle]') !== null
@@ -733,7 +833,7 @@ function onBandPointerdown(event: PointerEvent) {
 
   const card = (event.target as HTMLElement | null)?.closest<HTMLElement>('.v-calendar-event')
   if (!card) return
-  const item = eventsById.value.get(cardIdOf(card))
+  const item = eventOf(cardIdOf(card))
   if (!item) return
 
   const rect = columnsEl.value?.getBoundingClientRect()
@@ -761,7 +861,7 @@ function onBandPointerdown(event: PointerEvent) {
 }
 
 /** The event a card stands for, read back off the attribute the card publishes. */
-const cardIdOf = (card: HTMLElement) => idOfCard(card, (id) => eventsById.value.has(id))
+const cardIdOf = (card: HTMLElement) => idOfCard(card, (id) => eventOf(id) !== undefined)
 
 function onPointermove(event: PointerEvent) {
   const state = gesture.value
@@ -821,19 +921,31 @@ function applyPoint(state: Gesture) {
     isRtl(),
   )
 
+  /*
+   * The slot the pointer is over, reduced to the two numbers the preview is computed from —
+   * a bar reads only the column, a stretch or a new event only the minute. `grabOffset` is
+   * zero for every kind but `move`, so this one expression is each branch's own snapping.
+   */
+  const column = state.kind === 'resize' || state.kind === 'create' ? 0 : point.columnIndex
+  const minutes =
+    state.kind === 'move-days'
+      ? 0
+      : snapToSlot(point.minutes - state.grabOffset, props.slotDuration)
+  if (isLastApplied(state, column, minutes)) return
+
   if (state.kind === 'move-days') {
     /*
      * A bar keeps its length in days, so the target is its START shifted by however many
      * columns the pointer has crossed — not the column the pointer is over. Grab a
      * Monday-to-Wednesday bar by its Tuesday and the pointer stays on its Tuesday.
      */
-    const column = clamp(
-      originColumn(state) + (point.columnIndex - state.grabColumn),
+    const target = clamp(
+      originColumn(state) + (column - state.grabColumn),
       0,
       props.days.length - 1,
     )
-    const iso = props.days[column]
-    if (iso) state.preview = moveEventToDay(state.origin, iso)
+    const iso = props.days[target]
+    if (iso) setPreview(state, moveEventToDay(state.origin, iso))
     return
   }
 
@@ -843,24 +955,72 @@ function applyPoint(state: Gesture) {
      * show — never from date arithmetic on how many columns were crossed, which would count
      * the days the calendar is hiding and land the event on a Saturday nobody can see.
      */
-    const column = clamp(
-      originColumn(state) + (point.columnIndex - state.grabColumn),
+    const target = clamp(
+      originColumn(state) + (column - state.grabColumn),
       0,
       props.days.length - 1,
     )
-    const iso = props.days[column]!
-    const start = snapToSlot(point.minutes - state.grabOffset, props.slotDuration)
-    const delta = start - minutesAt(state.origin.startTime, props.window.start)
-    state.preview = { ...moveEvent(state.origin, 0, delta, props.window), start: iso, end: iso }
+    const iso = props.days[target]!
+    const delta = minutes - minutesAt(state.origin.startTime, props.window.start)
+    setPreview(state, { ...moveEvent(state.origin, 0, delta, props.window), start: iso, end: iso })
     return
   }
 
-  state.preview = resizeEvent(
-    state.origin,
-    snapToSlot(point.minutes, props.slotDuration),
-    props.slotDuration,
-    props.window,
-  )
+  setPreview(state, resizeEvent(state.origin, minutes, props.slotDuration, props.window))
+}
+
+/**
+ * The slot `applyPoint` last worked a preview out for.
+ *
+ * `pointermove` fires many times per slot, and so does the auto-scroll frame. Every one of
+ * them that lands on the slot already shown returns here, before any date arithmetic. The
+ * days, the window and the step are part of what the slot MEANS, so a change to any of them
+ * (paging under a still pointer, most of all) reads as a new slot even at the same indices.
+ * It is a plain variable rather than a field of the gesture: nothing renders it, and the
+ * gesture's own identity is what says a new press has begun.
+ */
+let lastApplied: {
+  state: Gesture
+  days: readonly string[]
+  window: TimeWindow
+  step: number
+  column: number
+  minutes: number
+} | null = null
+
+function isLastApplied(state: Gesture, column: number, minutes: number): boolean {
+  const last = lastApplied
+  if (
+    last?.state === state &&
+    last.days === props.days &&
+    last.window === props.window &&
+    last.step === props.slotDuration &&
+    last.column === column &&
+    last.minutes === minutes
+  ) {
+    return true
+  }
+  lastApplied = {
+    state,
+    days: props.days,
+    window: props.window,
+    step: props.slotDuration,
+    column,
+    minutes,
+  }
+  return false
+}
+
+/**
+ * Writes the preview only when it says something new.
+ *
+ * TRAP — the comparison is the whole point, not a nicety. The gesture is a deep ref, so any
+ * assignment to `preview`, an equal object included, wakes the drawn events, the packing of
+ * every column and a render of all 168 cells. Two positions inside one slot, or two slots that
+ * clamp to the same times against the end of the window, must cost nothing.
+ */
+function setPreview(state: Gesture, next: CalendarEventTimes) {
+  if (!sameTimes(state.preview, next)) state.preview = next
 }
 
 /**
@@ -1036,7 +1196,7 @@ function onPointerup(event: PointerEvent) {
 
 function onCardClick(id: CalendarEventId) {
   if (dragGuard.consume()) return
-  const item = eventsById.value.get(id)
+  const item = eventOf(id)
   if (item && id !== DRAFT_ID) emit('event-activate', item)
 }
 
@@ -1081,7 +1241,7 @@ function announceTimes(title: string, times: CalendarEventTimes) {
 /** Puts the focus back on a card that has just been redrawn somewhere else. */
 
 function onCardKeydown(event: KeyboardEvent, card: HTMLElement) {
-  const item = eventsById.value.get(cardIdOf(card))
+  const item = eventOf(cardIdOf(card))
   if (!item) return
 
   const held = grabbing.value && gesture.value?.id === item.id
@@ -1280,7 +1440,7 @@ defineExpose({
             v-for="span in allDay"
             :key="span.id"
             class="v-calendar-bar"
-            :event="eventsById.get(span.id)!"
+            :event="allDayById.get(span.id)!"
             layout="chip"
             :disabled="disabled"
             :continues-before="span.continuesBefore"
@@ -1323,38 +1483,38 @@ defineExpose({
         @click="onGridClick"
         @pointerdown="onGridPointerdown"
       >
-        <div v-for="(minutes, row) in hours" :key="minutes" role="row" class="v-calendar-row">
+        <div v-for="gridRow in gridRows" :key="gridRow.minutes" role="row" class="v-calendar-row">
           <div
-            v-for="(iso, day) in days"
-            :id="cellId(iso, minutes)"
-            :key="iso"
+            v-for="cell in gridRow.cells"
+            :id="cell.id"
+            :key="cell.iso"
             role="gridcell"
             class="v-calendar-cell"
-            :data-iso="iso"
-            :data-minutes="minutes"
-            :data-today="iso === today ? '' : undefined"
-            :tabindex="isTabStop(iso, minutes) ? 0 : -1"
-            :aria-label="cellLabel(iso, minutes)"
-            :aria-selected="isFocused(iso, minutes) ? true : undefined"
+            :data-iso="cell.iso"
+            :data-minutes="gridRow.minutes"
+            :data-today="cell.iso === today ? '' : undefined"
+            :tabindex="isTabStop(cell.iso, gridRow.minutes) ? 0 : -1"
+            :aria-label="cell.label"
+            :aria-selected="isFocused(cell.iso, gridRow.minutes) ? true : undefined"
           >
             <VCalendarEvent
-              v-for="segment in segmentsAt(day, row)"
-              :key="segment.id"
+              v-for="card in cardsAt(cell.key)"
+              :key="card.segment.id"
               class="v-calendar-block"
-              :event="eventsById.get(segment.id)!"
+              :event="card.event"
               layout="block"
               :disabled="disabled"
-              :time-text="timeTextOf(eventsById.get(segment.id)!)"
-              :continues-before="segment.clippedStart"
-              :continues-after="segment.clippedEnd"
-              :resizable="editable && segment.id !== DRAFT_ID"
-              :dragging="gesture?.id === segment.id && gesture.pointerId !== null"
-              :rejected="gesture?.id === segment.id && gesture.outside"
-              :grabbed="grabbing && gesture?.id === segment.id"
-              :hint-id="editable && !isGhostId(segment.id) ? hintId : undefined"
-              :ghost-of="isGhostId(segment.id) ? originalIdOf(segment.id) : undefined"
-              :style="styleFor(segment)"
-              @click="onCardClick(segment.id)"
+              :time-text="card.timeText"
+              :continues-before="card.segment.clippedStart"
+              :continues-after="card.segment.clippedEnd"
+              :resizable="editable && card.segment.id !== DRAFT_ID"
+              :dragging="gesture?.id === card.segment.id && gesture.pointerId !== null"
+              :rejected="gesture?.id === card.segment.id && gesture.outside"
+              :grabbed="grabbing && gesture?.id === card.segment.id"
+              :hint-id="editable && !isGhostId(card.segment.id) ? hintId : undefined"
+              :ghost-of="isGhostId(card.segment.id) ? originalIdOf(card.segment.id) : undefined"
+              :style="card.style"
+              @click="onCardClick(card.segment.id)"
             >
               <template v-if="$slots.event" #default="slotProps">
                 <slot name="event" v-bind="slotProps" />
@@ -1365,11 +1525,11 @@ defineExpose({
                  direct child of the grid or of a row: a `grid` owns only rows and a row only
                  cells, so an extra box at either level fails `aria-required-children`. -->
             <div
-              v-if="nowMark && nowMark.cell === `${day}:${row}`"
+              v-if="nowMark && nowMark.day === cell.day && nowMark.row === cell.row"
               class="v-calendar-now"
               aria-hidden="true"
               :style="{
-                '--event-day': String(nowMark.dayIndex),
+                '--event-day': String(nowMark.day),
                 '--calendar-now': String(nowMark.fraction),
               }"
             />

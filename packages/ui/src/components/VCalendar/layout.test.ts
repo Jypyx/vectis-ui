@@ -25,6 +25,7 @@ import {
   packDayColumn,
   pointToCell,
   resizeEvent,
+  sameTimes,
   snapToSlot,
   snapToVisibleDay,
   stepAnchor,
@@ -965,6 +966,29 @@ describe('resizeEvent', () => {
 
   it('keeps the end inside the window', () => {
     expect(resizeEvent(origin, 5000, 15, DAY).endTime).toBe('23:59')
+  })
+})
+
+describe('sameTimes', () => {
+  const origin = { start: WEDNESDAY, end: WEDNESDAY, startTime: '09:00', endTime: '10:00' }
+
+  it('holds two distinct objects carrying the same placement to be equal', () => {
+    expect(sameTimes(origin, { ...origin })).toBe(true)
+  })
+
+  /* Each field on its own: a drag that changes only the day, or only the end, is still a move
+     the grid has to draw. */
+  it.each([
+    ['start', { start: '2026-06-11' }],
+    ['end', { end: '2026-06-11' }],
+    ['startTime', { startTime: '09:15' }],
+    ['endTime', { endTime: '10:15' }],
+  ])('tells them apart when only %s differs', (_, change) => {
+    expect(sameTimes(origin, { ...origin, ...change })).toBe(false)
+  })
+
+  it('reads only the four times, not whatever else an event carries', () => {
+    expect(sameTimes(origin, { ...origin, title: 'Standup' } as typeof origin)).toBe(true)
   })
 })
 

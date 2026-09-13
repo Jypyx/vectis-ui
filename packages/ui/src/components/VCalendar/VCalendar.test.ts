@@ -4,8 +4,21 @@ import { nextTick } from 'vue'
 
 import VCalendar from './VCalendar.vue'
 import { EDGE_STEP_DELAY } from './edgeStep'
-import { daySpan } from './layout'
+import { daySpan, packAllDay, packDayColumn } from './layout'
 import type { CalendarEvent } from './types'
+
+/*
+ * The two packers are wrapped, never replaced: every test in this file runs the real layout,
+ * and `what a drag recomputes` reads the call counts to pin which half of it a gesture wakes.
+ */
+vi.mock('./layout', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./layout')>()
+  return {
+    ...actual,
+    packAllDay: vi.fn(actual.packAllDay),
+    packDayColumn: vi.fn(actual.packDayColumn),
+  }
+})
 
 /*
  * Reference week: June 2026. The 8th is a Monday, so the 10th is a Wednesday and the 13th
@@ -180,6 +193,25 @@ describe('the events', () => {
     })
     expect(getByRole('button', { name: 'Standup, 09:00 – 10:00' })).toBeTruthy()
   })
+
+  /*
+   * The card texts are memoized. A cache that outlived the clock format it was filled under
+   * would keep announcing "9:00 AM" after the calendar had switched to a 24-hour clock, since
+   * a cache hit reads no prop and so tracks none.
+   */
+  it.each(['week', 'month'])(
+    'rewrites the times of a %s view when the clock format changes',
+    async (view) => {
+      const { getByRole, rerender } = mount({
+        view,
+        views: [view],
+        events: [event({ id: 'a', title: 'Standup' })],
+      })
+      expect(getByRole('button', { name: /^Standup, 9:00 AM/ })).toBeTruthy()
+      await rerender({ format: '24h' })
+      expect(getByRole('button', { name: /^Standup, 09:00/ })).toBeTruthy()
+    },
+  )
 
   it('says what an event IS, rather than letting it be announced as a button', () => {
     const { getByRole } = mount({ events: [event({ id: 'a', title: 'Standup' })] })
@@ -1347,6 +1379,130 @@ describe('paging by holding at an edge', () => {
     vi.advanceTimersByTime(EDGE_STEP_DELAY)
     await nextTick()
     expect(emitted('update:date')?.at(-1)).toEqual(['2026-07-10'])
+  })
+})
+
+/*
+ * What a drag costs between two slots. None of it is visible — the picture is the same either
+ * way — so these count the work instead: how often the cards are rendered, read through the
+ * `#event` slot every card calls, and how often each half of the layout is packed.
+ *
+ * A pointer fires many times per slot, and the gesture state is a deep ref: an equal preview
+ * written as a NEW object re-packs every column and re-renders every cell. On a busy week that
+ * is the difference between a drag that follows the hand and one that stutters behind it.
+ */
+describe('what a drag recomputes', () => {
+  /*
+   * The moves are dispatched on the element that LISTENS, never on the card: a card carried
+   * into another hour is a new element in another cell, so the one first pressed is detached
+   * after the first slot and nothing dispatched on it would reach the grid. A real pointer is
+   * captured by the grid and never has the question.
+   */
+  const counted = (props: Record<string, unknown>, surface: string) => {
+    let renders = 0
+    const utils = render(Calendar, {
+      props: { label: 'Schedule', date: WEDNESDAY, ...props },
+      slots: {
+        event: ({ event: item }: { event: CalendarEvent }) => {
+          renders++
+          return item.title
+        },
+      },
+    })
+    layOut(utils.container, surface)
+    layOut(utils.container, '.v-calendar-columns')
+    const target = utils.container.querySelector(surface)!
+    const moveTo = async (clientX: number, clientY: number) => {
+      pointer(target, 'pointermove', { clientX, clientY })
+      await nextTick()
+    }
+    return { ...utils, moveTo, renders: () => renders }
+  }
+
+  /* One column, 08:00 to 18:00 over the stubbed 600 pixels: a pixel is a minute, so a quarter
+     of an hour is fifteen of them. */
+  it('renders nothing when the pointer moves inside the slot already shown', async () => {
+    const { container, moveTo, renders } = counted(
+      { view: 'day', dayStart: 8, dayEnd: 18, events: [event({ id: 'a' })] },
+      '.v-calendar-grid',
+    )
+    pointer(container.querySelector('.v-calendar-event')!, 'pointerdown', {
+      clientX: 350,
+      clientY: 60,
+    })
+    await moveTo(350, 120)
+    const before = renders()
+
+    // A pointer three minutes further down snaps back to the slot already on show.
+    await moveTo(350, 123)
+    expect(renders()).toBe(before)
+
+    // And the counter is live: the next slot does render.
+    await moveTo(350, 160)
+    expect(renders()).toBeGreaterThan(before)
+  })
+
+  it('renders nothing when a chip moves inside the square already shown', async () => {
+    const { container, moveTo, renders } = counted(
+      { view: 'month', views: ['month'], events: [event({ id: 'a' })] },
+      '.v-calendar-month-grid',
+    )
+    // Six weeks over 600 pixels and seven days over 700: Wednesday the 10th is row 1, column 3.
+    pointer(container.querySelector('.v-calendar-event')!, 'pointerdown', {
+      clientX: 350,
+      clientY: 150,
+    })
+    await moveTo(450, 150)
+    const before = renders()
+
+    await moveTo(460, 160)
+    expect(renders()).toBe(before)
+
+    await moveTo(550, 150)
+    expect(renders()).toBeGreaterThan(before)
+  })
+
+  it('does not re-pack the all-day band while a timed card is dragged', async () => {
+    const { container, moveTo } = counted(
+      {
+        view: 'day',
+        dayStart: 8,
+        dayEnd: 18,
+        events: [event({ id: 'a' }), event({ id: 'b', allDay: true })],
+      },
+      '.v-calendar-grid',
+    )
+    pointer(container.querySelector('.v-calendar-block')!, 'pointerdown', {
+      clientX: 350,
+      clientY: 60,
+    })
+    vi.mocked(packAllDay).mockClear()
+    vi.mocked(packDayColumn).mockClear()
+
+    await moveTo(350, 120)
+    await moveTo(350, 160)
+
+    expect(vi.mocked(packDayColumn)).toHaveBeenCalled()
+    expect(vi.mocked(packAllDay)).not.toHaveBeenCalled()
+  })
+
+  it('does not re-pack the columns while an all-day bar is dragged', async () => {
+    const { container, moveTo } = counted(
+      { view: 'week', events: [event({ id: 'a' }), event({ id: 'b', allDay: true })] },
+      '.v-calendar-grid',
+    )
+    pointer(container.querySelector('.v-calendar-bar')!, 'pointerdown', {
+      clientX: 350,
+      clientY: 20,
+    })
+    vi.mocked(packAllDay).mockClear()
+    vi.mocked(packDayColumn).mockClear()
+
+    await moveTo(450, 20)
+    await moveTo(550, 20)
+
+    expect(vi.mocked(packAllDay)).toHaveBeenCalled()
+    expect(vi.mocked(packDayColumn)).not.toHaveBeenCalled()
   })
 })
 

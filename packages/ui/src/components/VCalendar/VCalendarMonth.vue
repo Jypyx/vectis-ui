@@ -45,6 +45,7 @@ import {
   moveEventToDay,
   pointToMonthCell,
   pointWithin,
+  sameTimes,
   timesOf,
   type MonthCell,
 } from './layout'
@@ -113,8 +114,8 @@ const weekdayNames = computed(() =>
  *
  * `longDay` is asked for twice in the template — the square's own `aria-label`, then the
  * name of the button that opens the day — so the 42 cells cost 126 `Intl` formats a render,
- * and the drag re-renders the whole grid on every `pointermove` through `gesture.preview`.
- * The map depends on the weeks and the locale alone, so it survives every frame of a drag.
+ * and a drag re-renders the whole grid each time it carries a chip onto another day. The map
+ * depends on the weeks and the locale alone, so it survives every frame of a drag.
  */
 const dayLabels = computed(() => {
   const map = new Map<string, { number: string; long: string }>()
@@ -233,36 +234,58 @@ const byDay = computed(() =>
 const eventsById = computed(() => new Map(drawnEvents.value.map((item) => [item.id, item])))
 
 /**
+ * A chip says when it happens only when that is not obvious: an all-day event has no time
+ * to give, and the day it sits in already says which day it is.
+ *
+ * Memoized by start time inside the computed, so a change of locale or hour format throws the
+ * cache away whole — the twin in VCalendarTimeGrid.vue carries the trap that makes reading
+ * the computed, and not a cache beside it, the only correct shape.
+ */
+const timeTextOf = computed(() => {
+  const { locale, hourFormat } = props
+  const cache = new Map<string, string>()
+  return (event: E): string => {
+    if (isAllDayEvent(event)) return ''
+    let text = cache.get(event.startTime)
+    if (text === undefined) {
+      text = formatTimeDisplay(event.startTime, locale, hourFormat)
+      cache.set(event.startTime, text)
+    }
+    return text
+  }
+})
+
+/** One chip as the template draws it, its time already written out. */
+interface Chip {
+  event: E
+  timeText: string
+}
+
+/**
  * What each square draws, and how many it had to leave out — one Map, built in a single pass.
  *
- * It is the `dayLabels` treatment and it is needed for the same reason: `applyPoint`
- * assigns a new preview on every `pointermove`, so the whole grid re-renders at pointer
- * rate. Written as template functions these returned a NEW array per square per frame, and
- * since one of them is the source of a `v-for`, Vue rediffed all 42 lists each time. The map
- * depends on the events and the limit alone, so a drag leaves it untouched.
+ * It is the `dayLabels` treatment. Written as template functions these returned a NEW array
+ * per square per render, and since one of them is the source of a `v-for`, Vue rediffed all
+ * 42 lists each time; each chip also formatted its own time. The map is rebuilt with `byDay`,
+ * which a drag changes only when it carries its chip onto another day (`applyPoint` writes
+ * nothing otherwise), and survives every other render.
  */
 const dayEvents = computed(() => {
-  const map = new Map<string, { shown: E[]; hidden: number }>()
-  for (const [iso, all] of byDay.value)
+  const map = new Map<string, { shown: Chip[]; hidden: number }>()
+  const textOf = timeTextOf.value
+  for (const [iso, all] of byDay.value) {
+    const shown = all.length > props.eventLimit ? all.slice(0, props.eventLimit) : all
     map.set(iso, {
-      shown: all.length > props.eventLimit ? all.slice(0, props.eventLimit) : all,
+      shown: shown.map((event) => ({ event, timeText: textOf(event) })),
       hidden: Math.max(0, all.length - props.eventLimit),
     })
+  }
   return map
 })
 
 /** A square with nothing on it, shared rather than allocated per empty cell. */
-const NO_EVENTS: { shown: E[]; hidden: number } = Object.freeze({ shown: [], hidden: 0 })
+const NO_EVENTS: { shown: Chip[]; hidden: number } = Object.freeze({ shown: [], hidden: 0 })
 const dayEventsOf = (iso: string) => dayEvents.value.get(iso) ?? NO_EVENTS
-
-/**
- * A chip says when it happens only when that is not obvious: an all-day event has no time
- * to give, and the day it sits in already says which day it is.
- */
-function timeTextOf(event: E): string {
-  if (isAllDayEvent(event)) return ''
-  return formatTimeDisplay(event.startTime, props.locale, props.hourFormat)
-}
 
 /** The flattened list of days, which is what the arrows travel along. */
 const flat = computed(() => props.weeks.flat().map((cell) => cell.iso))
@@ -466,6 +489,9 @@ const isPointerOutside = (state: Gesture) =>
 function applyPoint(state: Gesture) {
   const index = indexAt(state.lastX, state.lastY)
   if (index === null) return
+  const last = lastApplied
+  if (last?.state === state && last.weeks === props.weeks && last.index === index) return
+  lastApplied = { state, weeks: props.weeks, index }
 
   /*
    * The target is the event's START shifted by however many squares the pointer has crossed,
@@ -479,8 +505,22 @@ function applyPoint(state: Gesture) {
     days[
       clamp((from === -1 ? state.grabIndex : from) + index - state.grabIndex, 0, days.length - 1)
     ]
-  if (target) state.preview = moveEventToDay(state.origin, target)
+  if (!target) return
+  /*
+   * TRAP — written only when the day changes. The gesture is a deep ref, so an equal but new
+   * preview would still re-bucket and re-sort every event and re-render all 42 squares.
+   */
+  const next = moveEventToDay(state.origin, target)
+  if (!sameTimes(state.preview, next)) state.preview = next
 }
+
+/**
+ * The square `applyPoint` last placed the chip from, so the many `pointermove`s that fire
+ * inside one square return before any date arithmetic. The weeks belong to what the index
+ * MEANS: the month turning under a still pointer reads as a new square at the same index.
+ * A plain variable, since nothing renders it; the gesture's identity says a new press began.
+ */
+let lastApplied: { state: Gesture; weeks: MonthCell[][]; index: number } | null = null
 
 const dragGuard = useDragGuard()
 
@@ -668,19 +708,19 @@ defineExpose({
           </button>
 
           <VCalendarEvent
-            v-for="item in dayEventsOf(cell.iso).shown"
-            :key="item.id"
+            v-for="chip in dayEventsOf(cell.iso).shown"
+            :key="chip.event.id"
             class="v-calendar-month-chip"
-            :event="item"
+            :event="chip.event"
             layout="chip"
             :disabled="disabled"
-            :time-text="timeTextOf(item)"
-            :dragging="gesture?.id === item.id && gesture.pointerId !== null"
-            :rejected="gesture?.id === item.id && gesture.outside"
-            :grabbed="grabbing && gesture?.id === item.id"
-            :hint-id="editable && !isGhostId(item.id) ? hintId : undefined"
-            :ghost-of="isGhostId(item.id) ? originalIdOf(item.id) : undefined"
-            @click="onCardClick(item)"
+            :time-text="chip.timeText"
+            :dragging="gesture?.id === chip.event.id && gesture.pointerId !== null"
+            :rejected="gesture?.id === chip.event.id && gesture.outside"
+            :grabbed="grabbing && gesture?.id === chip.event.id"
+            :hint-id="editable && !isGhostId(chip.event.id) ? hintId : undefined"
+            :ghost-of="isGhostId(chip.event.id) ? originalIdOf(chip.event.id) : undefined"
+            @click="onCardClick(chip.event)"
           >
             <template v-if="$slots.event" #default="slotProps">
               <slot name="event" v-bind="slotProps" />

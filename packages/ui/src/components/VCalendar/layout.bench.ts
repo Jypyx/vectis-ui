@@ -1,10 +1,11 @@
 /**
  * The cost of VCalendar's layout maths, which is the DS's heaviest pure computation.
  *
- * WHY THESE FOUR. Every one of them runs on a render, and two of them run on every frame
- * of a drag — `VCalendarTimeGrid` rebuilds `placed` from `timedSegments` + `packDayColumn`
- * whenever the pointer moves, and `VCalendarMonth` rebuilds `byDay` the same way. So their
- * cost is not paid once when the view opens; it is paid at pointer rate.
+ * WHY THESE FOUR. Every one of them runs on a render, and two of them run again during a
+ * drag — `VCalendarTimeGrid` rebuilds `placed` from `timedSegments` + `packDayColumn` each
+ * time a timed card changes slot (`packAllDay` only when a bar changes day), and
+ * `VCalendarMonth` rebuilds `byDay` each time a chip changes day. So their cost is not paid
+ * once when the view opens; it is paid at the rate a hand crosses slots.
  *
  * WHAT THE NUMBERS ARE FOR. `eventsOnDay` is measured the way `VCalendarMonth` actually
  * calls it — once per cell over the whole event list — because that shape, and not the
@@ -114,7 +115,7 @@ for (const count of SCALES) {
       eventsOnDay(events, isoAt(3))
     })
 
-    // The time grid's two halves, both rebuilt on every pointermove during a drag.
+    // The time grid's two halves, each rebuilt when a drag of its own kind changes slot.
     bench('timedSegments — a week', () => {
       timedSegments(events, week, WINDOW, 15)
     })

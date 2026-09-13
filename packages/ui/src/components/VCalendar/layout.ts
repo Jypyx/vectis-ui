@@ -72,8 +72,8 @@ export const DRAG_THRESHOLD = 3
  * a hydration mismatch, silent in dev and visible only as a card in the wrong place. It is
  * the same hazard `VDataTable` avoids by passing its locale explicitly.
  *
- * Comparing by code point is also allocation-free, which matters because all three run on
- * every frame of a drag.
+ * Comparing by code point is also allocation-free, which matters because all three run again
+ * every time a drag carries its event into another slot.
  */
 function compareId(a: CalendarEventId, b: CalendarEventId): number {
   const left = String(a)
@@ -504,8 +504,8 @@ function compareForDay(a: CalendarEvent, b: CalendarEvent): number {
  * WHY THIS EXISTS RATHER THAN A LOOP OVER `eventsOnDay`. The month view needs all 42 squares
  * filled, and asking `eventsOnDay` once per square walks the whole event list 42 times and
  * sorts it 42 times — `cells × events`, with a sort each. Measured on the bench: 7.8 ms per
- * render at 2000 events, and the month view re-renders on every `pointermove` of a drag, so
- * that is roughly half a frame spent rebuilding lists no gesture changed.
+ * render at 2000 events, and the month view rebuilds it every time a drag carries a chip onto
+ * another day, so that is roughly half a frame spent rebuilding lists the gesture left alone.
  *
  * Here each event is placed once, into the days it actually covers, and each day is sorted
  * once — `events × span + cells × k log k`. The walk is bounded to the grid on both ends, so
@@ -923,6 +923,21 @@ export function timesOf(event: CalendarEvent): CalendarEventTimes {
     startTime: event.startTime,
     endTime: event.endTime,
   }
+}
+
+/**
+ * Whether two placements are the same, field for field.
+ *
+ * It is what a drag asks before it writes its preview. A slot is a quarter of an hour, some
+ * sixteen pixels at the default hour height, so most pointer moves land on the times already
+ * shown — and the gesture state is deeply reactive, so an EQUAL but new object would still
+ * re-run the whole layout and re-render every cell of the grid for a picture that did not
+ * change.
+ */
+export function sameTimes(a: CalendarEventTimes, b: CalendarEventTimes): boolean {
+  return (
+    a.start === b.start && a.end === b.end && a.startTime === b.startTime && a.endTime === b.endTime
+  )
 }
 
 /** Today, as the calendar reads it. Kept here so the component has one place to call. */
