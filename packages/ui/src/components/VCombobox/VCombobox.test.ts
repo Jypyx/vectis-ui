@@ -178,6 +178,24 @@ describe('VCombobox', () => {
     expect(emitted('update:modelValue').at(-1)).toEqual([[]])
   })
 
+  it('numeric values: the single field shows the label, and Backspace removes the chip keyed 0', async () => {
+    const numeric = [
+      { value: 0, label: 'Zero' },
+      { value: 7, label: 'Seven' },
+    ]
+    const single = renderCombobox({ options: numeric, modelValue: 7 })
+    expect((single.getByRole('combobox') as HTMLInputElement).value).toBe('Seven')
+    single.unmount()
+
+    const { getByRole, emitted } = renderCombobox({
+      options: numeric,
+      multiple: true,
+      modelValue: [7, 0],
+    })
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'Backspace' })
+    expect(emitted('update:modelValue').at(-1)).toEqual([[7]])
+  })
+
   it("the cross (VInput's clearable) empties the value in single mode", async () => {
     const { getByRole, emitted } = renderCombobox({ modelValue: 'fr', clearable: true })
     const input = getByRole('combobox') as HTMLInputElement

@@ -37,6 +37,15 @@ describe('VAvatarGroup', () => {
     expect(container.textContent).not.toContain('+')
   })
 
+  it('`max: 0` shows every avatar, as documented', () => {
+    const { container } = render(VAvatarGroup, {
+      props: { max: 0 },
+      slots: { default: () => avatars(['Ada', 'Linus', 'Grace']) },
+    })
+    expect(discs(container)).toHaveLength(3)
+    expect(container.textContent).not.toContain('+')
+  })
+
   it('counts through a v-for Fragment and ignores comments and blank text', () => {
     // The flattening is the component's whole reason for having JS: a Fragment must
     // count as its children, a `v-if` false (a Comment) as nothing.

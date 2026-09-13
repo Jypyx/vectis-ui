@@ -445,22 +445,23 @@ function selectDay(cell: DayCell) {
   if (props.disabled || props.readonly) return
   if (cell.kind !== 'button' || cell.disabled) return
   focusedISO.value = cell.iso
+  let next: DatePickerValue
   if (props.selection === 'single') {
-    model.value = cell.iso
+    next = cell.iso
   } else if (props.selection === 'multiple') {
-    model.value = toggleValue(multipleValues.value, cell.iso).sort(compareISO)
+    next = toggleValue(multipleValues.value, cell.iso).sort(compareISO)
   } else {
     // Range selection reads three clicks: the first sets the start, the second the
     // end (reordered if it comes before the start), and the third starts a new
     // period.
     const r = rangeValue.value
-    if (!r.start || (r.start && r.end)) {
-      model.value = { start: cell.iso, end: null }
-    } else {
-      model.value = orderRange(r.start, cell.iso)
-    }
+    next = !r.start || r.end ? { start: cell.iso, end: null } : orderRange(r.start, cell.iso)
   }
-  emit('select', model.value)
+  model.value = next
+  // TRAP: emit what was just computed, never `model.value` read back. Under a parent
+  // `v-model`, `defineModel` does not update its local copy on write — it waits for the
+  // parent to re-render — so the read would hand `select` the PREVIOUS value.
+  emit('select', next)
 }
 
 // @keyboard @a11y

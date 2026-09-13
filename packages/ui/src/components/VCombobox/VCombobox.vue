@@ -585,10 +585,14 @@ watch(filtered, (list) => {
 })
 
 // With a single value, the field shows its label as ordinary text whenever it is not
-// being edited.
-if (!props.multiple && typeof model.value === 'string' && model.value) {
-  query.value = labelOf(model.value)
+// being edited. Read through `selectedValues`, which is what knows that a number is a
+// value even at zero: a test on the string type would leave a numeric value unlabelled.
+function singleLabel() {
+  const value = props.multiple ? undefined : selectedValues.value[0]
+  return value === undefined ? '' : labelOf(value)
 }
+
+query.value = singleLabel()
 
 // That label is a COPY and not something derived, so it has to be refreshed when the
 // options arrive later — otherwise a field mounted with a value but no options yet would
@@ -601,7 +605,7 @@ watch(
   allOptions,
   () => {
     if (props.multiple || open.value || typed.value) return
-    if (typeof model.value === 'string' && model.value) query.value = labelOf(model.value)
+    if (selectedValues.value.length) query.value = singleLabel()
   },
   { flush: 'post' },
 )
@@ -702,8 +706,7 @@ function closePanel() {
   open.value = false
   activeIndex.value = -1
   typed.value = false
-  query.value =
-    !props.multiple && typeof model.value === 'string' && model.value ? labelOf(model.value) : ''
+  query.value = singleLabel()
 }
 
 /**
@@ -843,7 +846,7 @@ function onKeydown(event: KeyboardEvent) {
     case 'Backspace':
       if (props.multiple && !query.value) {
         const last = selectedValues.value.at(-1)
-        if (last) removeValue(last)
+        if (last !== undefined) removeValue(last)
       }
       break
   }

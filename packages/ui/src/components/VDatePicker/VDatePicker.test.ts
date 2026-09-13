@@ -40,6 +40,19 @@ describe('VDatePicker', () => {
     expect(emitted('select')?.at(-1)).toEqual(['2026-06-15'])
   })
 
+  it('select carries the NEW value under a parent v-model', async () => {
+    // With an update listener, defineModel waits for the parent before updating its
+    // local copy, so re-reading the model after writing it would hand back the old date.
+    const { container, emitted } = render(VDatePicker, {
+      props: { modelValue: JUNE, 'onUpdate:modelValue': () => {} },
+    })
+    const cell15 = [...container.querySelectorAll('.v-date-picker-day')].find(
+      (b) => b.textContent?.trim() === '15' && !b.hasAttribute('data-outside'),
+    ) as HTMLElement
+    await fireEvent.click(cell15)
+    expect(emitted('select')?.at(-1)).toEqual(['2026-06-15'])
+  })
+
   it('builds a reordered range (range selection)', async () => {
     const { container, emitted } = render(VDatePicker, {
       props: { selection: 'range', modelValue: { start: null, end: null } },

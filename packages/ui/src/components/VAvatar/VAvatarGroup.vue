@@ -73,9 +73,9 @@ provide(avatarGroupKey, {
 const slots = useSlots()
 
 const items = computed(() => flattenSlot(slots.default?.()))
-const visibleItems = computed(() =>
-  props.max != null ? items.value.slice(0, props.max) : items.value,
-)
+// `max: 0` means "no limit", as documented: a truthiness test, never `!= null`, which would
+// slice everything away and sum the whole group into the "+X" disc.
+const visibleItems = computed(() => (props.max ? items.value.slice(0, props.max) : items.value))
 const overflowCount = computed(() => items.value.length - visibleItems.value.length)
 
 // A functional component is the only way to render VNodes that have already been
