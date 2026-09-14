@@ -5,7 +5,7 @@ import { nextTick } from 'vue'
 import VCalendar from './VCalendar.vue'
 import { EDGE_STEP_DELAY } from './edgeStep'
 import { daySpan, packAllDay, packDayColumn } from './layout'
-import type { CalendarEvent } from './types'
+import type { CalendarEvent, CalendarEventSlotProps } from './types'
 
 /*
  * The two packers are wrapped, never replaced: every test in this file runs the real layout,
@@ -84,6 +84,29 @@ describe('the days on show', () => {
   it('starts the week on the first weekday given', () => {
     const { container } = mount({ weekdays: [1, 2, 3, 4, 5, 6, 0] })
     expect(cells(container)[0]).toHaveProperty('dataset.iso', MONDAY)
+  })
+
+  // `en-US` starts the week on a Sunday; the shorthand overrides the locale, never `weekdays`.
+  it('starts the week on firstDayOfWeek when no weekdays are given', () => {
+    const { container } = mount({ firstDayOfWeek: 1 })
+    expect(cells(container)[0]).toHaveProperty('dataset.iso', MONDAY)
+    expect(columnsOf(container).size).toBe(7)
+  })
+
+  it('lets weekdays win over firstDayOfWeek', () => {
+    const { container } = mount({ firstDayOfWeek: 1, weekdays: [3, 4, 5] })
+    expect(cells(container)[0]).toHaveProperty('dataset.iso', WEDNESDAY)
+  })
+
+  it('hands the day header its number as text', () => {
+    const { getByText } = render(Calendar, {
+      props: { label: 'Schedule', date: WEDNESDAY, view: 'day' },
+      slots: {
+        'day-header': ({ weekday, dayText }: { weekday: string; dayText: string }) =>
+          `${weekday} / ${dayText}`,
+      },
+    })
+    expect(getByText('Wed / 10')).toBeTruthy()
   })
 })
 
@@ -358,13 +381,22 @@ describe('the keyboard', () => {
     const { container, emitted } = mount({ view: 'day', dayStart: 9, dayEnd: 17 })
     const first = container.querySelector('.v-calendar-cell[tabindex="0"]') as HTMLElement
     await fireEvent.keyDown(first, { key: 'Enter' })
-    expect(emitted('slot-activate')?.at(-1)).toEqual([{ date: WEDNESDAY, time: '09:00' }])
+    expect(emitted('cell-activate')?.at(-1)).toEqual([{ date: WEDNESDAY, time: '09:00' }])
   })
 
   /*
    * A card is a button with a keyboard of its own. If the grid answered keys aimed at one,
    * arriving at an event would be the same keystroke as acting on it.
    */
+  it('reports no slot when the calendar is disabled', async () => {
+    const { container, emitted } = mount({ view: 'day', disabled: true })
+    const first = container.querySelector('.v-calendar-cell[tabindex="0"]') as HTMLElement
+    await fireEvent.keyDown(first, { key: 'Enter' })
+    await fireEvent.click(first)
+    expect(emitted('cell-activate')).toBeUndefined()
+    expect(emitted('event-create')).toBeUndefined()
+  })
+
   it('leaves keys aimed at a card entirely alone', async () => {
     const { container, emitted } = mount({ events: [event({ id: 'a' })] })
     const card = container.querySelector('.v-calendar-event') as HTMLElement
@@ -386,8 +418,8 @@ describe('the all-day band', () => {
       events: [event({ id: 'a', start: '2026-06-09', end: '2026-06-11' })],
     })
     const bar = container.querySelector('.v-calendar-bar') as HTMLElement
-    expect(bar.style.getPropertyValue('--event-day')).toBe('2')
-    expect(bar.style.getPropertyValue('--event-span')).toBe('3')
+    expect(bar.style.getPropertyValue('--calendar-day-index')).toBe('2')
+    expect(bar.style.getPropertyValue('--calendar-bar-span')).toBe('3')
   })
 
   it('stacks two overlapping bars onto separate rows', () => {
@@ -398,7 +430,7 @@ describe('the all-day band', () => {
       ],
     })
     const lanes = [...container.querySelectorAll('.v-calendar-bar')].map((bar) =>
-      (bar as HTMLElement).style.getPropertyValue('--event-lane'),
+      (bar as HTMLElement).style.getPropertyValue('--calendar-bar-lane'),
     )
     expect(new Set(lanes).size).toBe(2)
   })
@@ -528,14 +560,29 @@ describe('the month view', () => {
       `.v-calendar-month-cell[data-iso="${WEDNESDAY}"]`,
     )!
     await fireEvent.click(cell)
-    expect(emitted('slot-activate')).toEqual([[{ date: WEDNESDAY, time: '00:00' }]])
+    expect(emitted('cell-activate')).toEqual([[{ date: WEDNESDAY, time: '00:00' }]])
 
     await fireEvent.keyDown(cell, { key: 'Enter' })
-    expect(emitted('slot-activate')?.at(-1)).toEqual([{ date: WEDNESDAY, time: '00:00' }])
+    expect(emitted('cell-activate')?.at(-1)).toEqual([{ date: WEDNESDAY, time: '00:00' }])
 
     await fireEvent.click(cell.querySelector('.v-calendar-event')!)
     await fireEvent.click(cell.querySelector('.v-calendar-month-day')!)
-    expect(emitted('slot-activate')).toHaveLength(2)
+    expect(emitted('cell-activate')).toHaveLength(2)
+  })
+
+  /*
+   * A frozen calendar keeps its tab stop so the agenda stays readable, and a click is stopped
+   * only by the stylesheet, which jsdom does not apply — so both routes reach the handler here
+   * exactly as Enter does in a browser, and the calendar has to refuse them itself.
+   */
+  it('reports nothing about a day when the calendar is disabled', async () => {
+    const { container, emitted } = month({ disabled: true })
+    const cell = container.querySelector<HTMLElement>(
+      `.v-calendar-month-cell[data-iso="${WEDNESDAY}"]`,
+    )!
+    await fireEvent.click(cell)
+    await fireEvent.keyDown(cell, { key: 'Enter' })
+    expect(emitted('cell-activate')).toBeUndefined()
   })
 })
 
@@ -708,6 +755,18 @@ describe('the year view', () => {
 
   // The sheet reads the column count from this variable: a literal 7 wrapped every five-day
   // row onto the next line. The `Year` play function checks the sheet consumes it.
+  // Only the year on show is walked: a trip from last December marks its January days alone.
+  it('marks only the days of the year on show', () => {
+    const { getByRole } = year({
+      events: [
+        event({ id: 'old', start: '2025-03-02', end: '2025-03-04', allDay: true }),
+        event({ id: 'trip', start: '2025-12-30', end: '2026-01-02', allDay: true }),
+      ],
+    })
+    expect(getByRole('button', { name: /^January\s*2$/ })).toBeTruthy()
+    expect(getByRole('button', { name: /^March$/ })).toBeTruthy()
+  })
+
   it('gives each mini-month as many columns as weekdays on show', () => {
     const { container } = year({ weekdays: [1, 2, 3, 4, 5] })
     const grid = container.querySelector<HTMLElement>('.v-calendar-year-grid')!
@@ -1144,7 +1203,32 @@ describe('creating an event by taking up an empty slot', () => {
       endTime: '09:30',
     })
     expect(emitted('update:events')).toHaveLength(1)
-    expect(emitted('slot-activate')).toEqual([[{ date: WEDNESDAY, time: '09:00' }]])
+    expect(emitted('cell-activate')).toEqual([[{ date: WEDNESDAY, time: '09:00' }]])
+  })
+
+  /*
+   * The keyboard leaves the focus on its cell, so a reader who cannot see the grid would get
+   * no sign that anything was made. The name is the one the card was given, read before the
+   * calendar's count moved on.
+   */
+  it('says what it made from the keyboard, and where', async () => {
+    const { container } = empty({ slotDuration: 30 })
+    const cell = container.querySelector('.v-calendar-cell[tabindex="0"]') as HTMLElement
+    await fireEvent.keyDown(cell, { key: 'Enter' })
+    const status = container.querySelector('[role="status"]')!.textContent!
+    expect(status).toContain('Event #1 created on')
+    expect(status).toContain('9:00 AM')
+    expect(status).toContain('9:30 AM')
+  })
+
+  // The pointer says nothing, on a drop or on a creation: the card appears under the pointer.
+  it('says nothing when a slot is drawn with the pointer', async () => {
+    const { container } = empty()
+    const cell = container.querySelector('.v-calendar-cell')!
+    pointer(cell, 'pointerdown', { clientX: 0, clientY: 0 })
+    pointer(cell, 'pointerup', { clientX: 0, clientY: 0 })
+    await nextTick()
+    expect(container.querySelector('[role="status"]')!.textContent).toBe('')
   })
 
   // One counter names the card while it is drawn AND once released: counted from the list,
@@ -1163,14 +1247,14 @@ describe('creating an event by taking up an empty slot', () => {
 
   /*
    * The signal survives even when the making does not: a consumer with their own form leaves
-   * `creatable` alone and keeps `slot-activate`.
+   * `creatable` alone and keeps `cell-activate`.
    */
   it('still reports the slot when it was not told to create', async () => {
     const { container, emitted } = empty({ creatable: false })
     await fireEvent.click(container.querySelector('.v-calendar-cell')!)
     expect(emitted('event-create')).toBeUndefined()
     expect(emitted('update:events')).toBeUndefined()
-    expect(emitted('slot-activate')).toEqual([[{ date: WEDNESDAY, time: '09:00' }]])
+    expect(emitted('cell-activate')).toEqual([[{ date: WEDNESDAY, time: '09:00' }]])
   })
 
   /*
@@ -1183,7 +1267,7 @@ describe('creating an event by taking up an empty slot', () => {
     pointer(cell, 'pointerdown', { clientX: 0, clientY: 0 })
     pointer(cell, 'pointerup', { clientX: 0, clientY: 0 })
     await fireEvent.click(cell)
-    expect(emitted('slot-activate')).toHaveLength(1)
+    expect(emitted('cell-activate')).toHaveLength(1)
   })
 })
 
@@ -1228,7 +1312,7 @@ describe('paging by holding at an edge', () => {
   const dragging = (props: Record<string, unknown> = {}) => {
     const utils = mount({ view: 'week', events: [event({ id: 'a' })], ...props })
     layOut(utils.container, '.v-calendar-columns')
-    layOut(utils.container, '.v-calendar-grid')
+    layOut(utils.container, '.v-calendar-time-grid')
     const card = utils.container.querySelector('.v-calendar-event') as HTMLElement
     pointer(card, 'pointerdown', { clientX: 350, clientY: 300 })
     // 690 of 700 is inside the end band, which is 48 wide.
@@ -1254,7 +1338,7 @@ describe('paging by holding at an edge', () => {
   it('pages backwards from the other edge', async () => {
     const { container, emitted } = mount({ view: 'week', events: [event({ id: 'a' })] })
     layOut(container, '.v-calendar-columns')
-    layOut(container, '.v-calendar-grid')
+    layOut(container, '.v-calendar-time-grid')
     const card = container.querySelector('.v-calendar-event')!
     pointer(card, 'pointerdown', { clientX: 350, clientY: 300 })
     pointer(card, 'pointermove', { clientX: 10, clientY: 300 })
@@ -1266,7 +1350,7 @@ describe('paging by holding at an edge', () => {
   it('leaves the middle of the grid alone', async () => {
     const { container, emitted } = mount({ view: 'week', events: [event({ id: 'a' })] })
     layOut(container, '.v-calendar-columns')
-    layOut(container, '.v-calendar-grid')
+    layOut(container, '.v-calendar-time-grid')
     const card = container.querySelector('.v-calendar-event')!
     pointer(card, 'pointerdown', { clientX: 350, clientY: 300 })
     pointer(card, 'pointermove', { clientX: 350, clientY: 300 })
@@ -1291,7 +1375,7 @@ describe('paging by holding at an edge', () => {
   it('keeps paging while the drag is held right off the calendar', async () => {
     const { container, emitted } = mount({ view: 'week', events: [event({ id: 'a' })] })
     layOut(container, '.v-calendar-columns')
-    layOut(container, '.v-calendar-grid')
+    layOut(container, '.v-calendar-time-grid')
     const card = container.querySelector('.v-calendar-event')!
     pointer(card, 'pointerdown', { clientX: 350, clientY: 300 })
     pointer(card, 'pointermove', { clientX: 900, clientY: 300 })
@@ -1412,7 +1496,7 @@ describe('paging by holding at an edge', () => {
       events: [event({ id: 'a', allDay: true, start: WEDNESDAY, end: '2026-06-20' })],
     })
     layOut(container, '.v-calendar-columns')
-    layOut(container, '.v-calendar-grid')
+    layOut(container, '.v-calendar-time-grid')
     const bar = container.querySelector('.v-calendar-bar')!
     pointer(bar, 'pointerdown', { clientX: 350, clientY: 20 })
     pointer(bar, 'pointermove', { clientX: 690, clientY: 20 })
@@ -1421,7 +1505,7 @@ describe('paging by holding at an edge', () => {
 
     const ghost = container.querySelector('[data-ghost]') as HTMLElement | null
     expect(ghost).not.toBeNull()
-    expect(ghost!.style.getPropertyValue('--event-day')).toBe('0')
+    expect(ghost!.style.getPropertyValue('--calendar-day-index')).toBe('0')
   })
 
   it('turns the month view a month at a time', async () => {
@@ -1482,7 +1566,7 @@ describe('what a drag recomputes', () => {
   it('renders nothing when the pointer moves inside the slot already shown', async () => {
     const { container, moveTo, renders } = counted(
       { view: 'day', dayStart: 8, dayEnd: 18, events: [event({ id: 'a' })] },
-      '.v-calendar-grid',
+      '.v-calendar-time-grid',
     )
     pointer(container.querySelector('.v-calendar-event')!, 'pointerdown', {
       clientX: 350,
@@ -1528,7 +1612,7 @@ describe('what a drag recomputes', () => {
         dayEnd: 18,
         events: [event({ id: 'a' }), event({ id: 'b', allDay: true })],
       },
-      '.v-calendar-grid',
+      '.v-calendar-time-grid',
     )
     pointer(container.querySelector('.v-calendar-block')!, 'pointerdown', {
       clientX: 350,
@@ -1547,7 +1631,7 @@ describe('what a drag recomputes', () => {
   it('does not re-pack the columns while an all-day bar is dragged', async () => {
     const { container, moveTo } = counted(
       { view: 'week', events: [event({ id: 'a' }), event({ id: 'b', allDay: true })] },
-      '.v-calendar-grid',
+      '.v-calendar-time-grid',
     )
     pointer(container.querySelector('.v-calendar-bar')!, 'pointerdown', {
       clientX: 350,
@@ -1582,7 +1666,7 @@ describe('letting go outside the calendar', () => {
       events: [event({ id: 'a' })],
       ...props,
     })
-    layOut(utils.container, '.v-calendar-grid')
+    layOut(utils.container, '.v-calendar-time-grid')
     layOut(utils.container, '.v-calendar-columns')
     return utils
   }
@@ -1651,7 +1735,9 @@ describe('letting go outside the calendar', () => {
     pointer(card, 'pointermove', { clientX: 900, clientY: 300 })
     await nextTick()
     expect(container.querySelector('[data-rejected]')).not.toBeNull()
-    expect(container.querySelector('.v-calendar-grid')!.hasAttribute('data-outside')).toBe(true)
+    expect(container.querySelector('.v-calendar-time-grid')!.hasAttribute('data-outside')).toBe(
+      true,
+    )
   })
 
   /* The echo is what says where the event is about to go back to, so it is needed MORE out
@@ -1666,7 +1752,7 @@ describe('letting go outside the calendar', () => {
   })
 
   /*
-   * `pointerup` fires before `click`. Without `justDragged` being set on this path too, an
+   * `pointerup` fires before `click`. Without the drag flag being set on this path too, an
    * abandoned drag would end by opening the very event it has just refused to move.
    */
   it('does not open the event it has just refused to move', async () => {
@@ -1726,6 +1812,26 @@ describe('moving an event with the keyboard', () => {
     await fireEvent.keyDown(card, { key: 'Enter' })
     return { ...utils, card }
   }
+
+  it('tells the #event slot the card is held', async () => {
+    const seen: boolean[] = []
+    const { container } = render(Calendar, {
+      props: {
+        label: 'Schedule',
+        date: WEDNESDAY,
+        view: 'week',
+        events: [event({ id: 'a', title: 'Standup' })],
+      },
+      slots: {
+        event: ({ event: item, grabbed, dragging }: CalendarEventSlotProps) => {
+          seen.push(grabbed && !dragging)
+          return item.title
+        },
+      },
+    })
+    await fireEvent.keyDown(container.querySelector('.v-calendar-event')!, { key: 'Enter' })
+    expect(seen.at(-1)).toBe(true)
+  })
 
   it('takes hold on Enter and says so', async () => {
     const { container, emitted } = await held()

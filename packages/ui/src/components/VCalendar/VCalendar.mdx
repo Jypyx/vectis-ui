@@ -92,8 +92,9 @@ deliberately left out.
 ## Which days, and which hours
 
 `weekdays` says which days appear at all, as numbers from `0` for Sunday — `[1,2,3,4,5]` hides the
-weekend everywhere. Its **order** matters too: the first entry is the day a week starts on, which is
-why there is no separate first-day setting. Left out, it follows the locale.
+weekend everywhere. Its **order** matters too: the first entry is the day a week starts on. Left out,
+the seven days start on `firstDayOfWeek` (from `0` for Sunday), and without that on the day the
+locale starts its week.
 
 `dayStart` and `dayEnd` crop the grid to the hours worth showing, and `scrollTime` decides where it
 opens.
@@ -227,7 +228,7 @@ the weeks you paged through on the way stay paged.
 <Canvas of={VCalendarStories.MonthDragging} />
 
 `readonly` takes moving and stretching away; `creatable` is what adds making an event out of an
-empty slot. Without it `slot-activate` fires all the same, so a consumer who wants to open their own
+empty slot. Without it `cell-activate` fires all the same, so a consumer who wants to open their own
 form keeps the signal without the component acting on it.
 
 **If your event type adds required fields of its own**, a created event will not have them — nothing
@@ -255,11 +256,12 @@ otherwise do both.
 
 ## Custom content
 
-The `#event` slot replaces a card's content and receives `{ event, layout, timeText, continuesBefore,
-continuesAfter }`. `timeText` is the times already written out for the reader, so you do not have to
-format them again.
+The `#event` slot replaces a card's content and receives `CalendarEventSlotProps`: `{ event, layout,
+timeText, continuesBefore, continuesAfter, dragging, grabbed }`. `timeText` is the times already
+written out for the reader, so you do not have to format them again, and the last two say whether the
+card is being carried by a pointer or held by the keyboard.
 
-`#day-header` does the same for the head of a column, and `#actions` adds controls to the toolbar
+`#day-header` does the same for the head of a column, with `{ iso, weekday, dayText, today }`, and `#actions` adds controls to the toolbar
 beside the view menu.
 
 <Canvas of={VCalendarStories.EventSlot} />
@@ -300,11 +302,12 @@ tall as its content, so there is nothing to switch on.
 - **The resize strip is not a control.** A button inside a button is invalid HTML and a blocking
   accessibility failure at once, so the strip is a hidden `span` that answers a pointer and nothing
   else; `Shift` with the arrows is its equivalent.
-- A live region announces every step of a move, and whether it was taken or given up. It is on the
-  page from the first paint and empty — a live region inserted along with its first message is not
-  announced at all.
-- **The pointer says nothing**, on a drop and on an abandoned one alike. The announcements belong to
-  the keyboard grab, which has no pointer to show where the event went; narrating one path and not
-  the other would be a rule nobody could infer.
+- A live region announces every step of a keyboard move, whether it was taken or given up, and an
+  event made with `Enter`. It is on the page from the first paint and empty — a live region inserted
+  along with its first message is not announced at all.
+- **The pointer says nothing**, on a drop, an abandoned one or a creation alike. The announcements
+  belong to the keyboard, which has no pointer to show where the event went.
+- A `disabled` calendar reports no cell, from a click or from `Enter`: the grid keeps its tab stop
+  so the agenda can be read, and nothing it holds can be taken up.
 - The visible focus uses the design system's standard ring, drawn inwards inside the scrolling area
   so it is never cropped; every transition respects `prefers-reduced-motion`.

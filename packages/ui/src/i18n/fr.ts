@@ -193,5 +193,6 @@ export const fr: Messages = {
     dropped: 'Évènement posé.',
     reverted: "Déplacement annulé. L'évènement est revenu à sa place.",
     movedTo: (title, when) => `${title} déplacé au ${when}.`,
+    createdAt: (title, when) => `${title} créé le ${when}.`,
   },
 }

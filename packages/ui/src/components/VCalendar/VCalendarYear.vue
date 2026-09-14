@@ -15,9 +15,9 @@
  */
 import { computed } from 'vue'
 
-import { addDays, formatDateDisplay, parseISO } from '../../utils/date'
+import { addDays, addMonths, compareISO, formatDateDisplay, parseISO } from '../../utils/date'
 
-import { coversDay, monthWeeks, type MonthCell } from './layout'
+import { monthWeeks, type MonthCell } from './layout'
 import type { CalendarEvent } from './types'
 
 export interface CalendarYearProps<T> {
@@ -38,51 +38,41 @@ const emit = defineEmits<{
   'month-activate': [iso: string]
 }>()
 
-const monthName = (iso: string) => formatDateDisplay(iso, props.locale, { month: 'long' })
-
-/** The days of the year that have something on them, worked out once for all twelve. */
+/**
+ * The days of the year on show that have something on them, worked out once for all twelve.
+ *
+ * Walked day by day rather than tested against every square: a year holds far more squares
+ * than a schedule holds days, so filling a set from the events and asking it one question per
+ * square is the cheaper way round. Each walk is CLAMPED to the year on show, the only days a
+ * mini-month marks — so an event from another year costs one comparison, and a range running
+ * across several years walks only the part of it this year holds.
+ */
 const busyDays = computed(() => {
   const days = new Set<string>()
+  const first = props.months[0]
+  const lastMonth = props.months.at(-1)
+  if (!first || !lastMonth) return days
+  const last = addDays(addMonths(lastMonth, 1), -1)
+
   for (const event of props.events) {
-    const start = parseISO(event.start)
-    const end = parseISO(event.end)
-    if (!start || !end) continue
-    /*
-     * Walked day by day rather than tested against every square: a year holds far more
-     * squares than a schedule holds days, so filling a set from the events and asking it
-     * one question per square is the cheaper way round. The walk is bounded to a year so a
-     * malformed range cannot spin.
-     */
-    let iso = event.start
-    for (let guard = 0; guard < 366 && coversDay(event, iso); guard++) {
-      days.add(iso)
-      iso = addDays(iso, 1)
-    }
+    if (!parseISO(event.start) || !parseISO(event.end)) continue
+    const from = compareISO(event.start, first) > 0 ? event.start : first
+    const to = compareISO(event.end, last) < 0 ? event.end : last
+    for (let iso = from; compareISO(iso, to) <= 0; iso = addDays(iso, 1)) days.add(iso)
   }
   return days
 })
 
 /*
- * The twelve grids and their day numbers, built ONCE per render.
- *
- * The template reaches a month three times — in the `v-for`, and twice through `busyCount`,
- * which appears in both the `v-if` and the text beside it. A plain function would therefore
- * build 36 grids and some 1500 `MonthCell` objects per render, and format 504 day numbers
- * along with them, none of which depends on anything but the anchor, the weekdays and the
- * locale. `dayNumbers` and `busyCounts` below are maps for the same reason: reading one
- * twice must not cost twice.
+ * The twelve grids, built ONCE per change of anchor or weekdays, and their day numbers once per
+ * locale: the adjacent days repeat across neighbouring months, and none of it depends on the
+ * events. The busy marks are laid over both in `yearMonths` below.
  */
-const grids = computed(() => {
-  const map = new Map<string, MonthCell[][]>()
-  for (const month of props.months) map.set(month, monthWeeks(month, props.weekdays))
-  return map
-})
-
-const weeksOf = (month: string) => grids.value.get(month) ?? []
+const grids = computed(() => props.months.map((month) => monthWeeks(month, props.weekdays)))
 
 const dayNumbers = computed(() => {
   const map = new Map<string, string>()
-  for (const weeks of grids.value.values()) {
+  for (const weeks of grids.value) {
     for (const week of weeks) {
       for (const cell of week) {
         if (!map.has(cell.iso))
@@ -93,37 +83,63 @@ const dayNumbers = computed(() => {
   return map
 })
 
-const dayNumber = (iso: string) =>
-  dayNumbers.value.get(iso) ?? formatDateDisplay(iso, props.locale, { day: 'numeric' })
+/** One square of a mini-month, with everything the template writes on it already settled. */
+interface YearDay {
+  iso: string
+  adjacent: MonthCell['adjacent']
+  number: string
+  /** Only a day of the month itself is marked: a neighbour's day belongs to its own month. */
+  busy: boolean
+}
 
-/** How many of a month's own days carry something, which is what its name announces. */
-const busyCounts = computed(() => {
-  const map = new Map<string, number>()
-  for (const [month, weeks] of grids.value) {
-    let count = 0
-    for (const week of weeks) {
-      for (const cell of week) if (cell.adjacent === null && busyDays.value.has(cell.iso)) count++
+/**
+ * What the template draws, each month with its name, its squares and how many of them are busy.
+ *
+ * The template reaches a month's count twice, in the `v-if` and in the text beside it, and each
+ * square asks whether it is busy: reading them here means the busy set is walked once per
+ * render rather than once per square, and the count is never computed twice.
+ */
+const yearMonths = computed(() => {
+  const busy = busyDays.value
+  const numbers = dayNumbers.value
+  return props.months.map((month, index) => {
+    let busyCount = 0
+    const weeks: YearDay[][] = (grids.value[index] ?? []).map((week) =>
+      week.map((cell) => {
+        const isBusy = cell.adjacent === null && busy.has(cell.iso)
+        if (isBusy) busyCount++
+        return {
+          iso: cell.iso,
+          adjacent: cell.adjacent,
+          number: numbers.get(cell.iso) ?? '',
+          busy: isBusy,
+        }
+      }),
+    )
+    return {
+      month,
+      name: formatDateDisplay(month, props.locale, { month: 'long' }),
+      weeks,
+      busyCount,
     }
-    map.set(month, count)
-  }
-  return map
+  })
 })
-
-const busyCount = (month: string) => busyCounts.value.get(month) ?? 0
-
-const isBusy = (cell: MonthCell) => cell.adjacent === null && busyDays.value.has(cell.iso)
 </script>
 
 <template>
   <div class="v-calendar-year" role="group" :aria-label="label">
-    <section v-for="month in months" :key="month" class="v-calendar-year-month">
-      <button type="button" class="v-calendar-year-title" @click="emit('month-activate', month)">
-        {{ monthName(month) }}
+    <section v-for="entry in yearMonths" :key="entry.month" class="v-calendar-year-month">
+      <button
+        type="button"
+        class="v-calendar-button v-calendar-year-title"
+        @click="emit('month-activate', entry.month)"
+      >
+        {{ entry.name }}
         <!-- The count is part of the button's own text, so a month that has something on it
              says so in its accessible name — which is what makes the days below safe to hide
              from the accessibility tree. -->
-        <span v-if="busyCount(month) > 0" class="v-calendar-year-count">
-          {{ busyCount(month) }}
+        <span v-if="entry.busyCount > 0" class="v-calendar-year-count">
+          {{ entry.busyCount }}
         </span>
       </button>
 
@@ -132,16 +148,16 @@ const isBusy = (cell: MonthCell) => cell.adjacent === null && busyDays.value.has
         aria-hidden="true"
         :style="{ '--calendar-columns': String(weekdays.length) }"
       >
-        <template v-for="(week, row) in weeksOf(month)" :key="row">
+        <template v-for="(week, row) in entry.weeks" :key="row">
           <span
-            v-for="cell in week"
-            :key="cell.iso"
+            v-for="day in week"
+            :key="day.iso"
             class="v-calendar-year-day"
-            :data-adjacent="cell.adjacent ?? undefined"
-            :data-today="cell.iso === today ? '' : undefined"
-            :data-busy="isBusy(cell) ? '' : undefined"
+            :class="{ 'v-calendar-today': day.iso === today }"
+            :data-adjacent="day.adjacent ?? undefined"
+            :data-busy="day.busy ? '' : undefined"
           >
-            {{ dayNumber(cell.iso) }}
+            {{ day.number }}
           </span>
         </template>
       </div>
@@ -155,12 +171,7 @@ const isBusy = (cell: MonthCell) => cell.adjacent === null && busyDays.value.has
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
     gap: var(--vectis-space-4);
-    overflow: auto;
-    block-size: 100%;
-    min-block-size: 0;
     padding: var(--vectis-space-3);
-    font-family: var(--vectis-text-family);
-    color: var(--vectis-color-text);
   }
 
   .v-calendar-year-month {
@@ -175,26 +186,16 @@ const isBusy = (cell: MonthCell) => cell.adjacent === null && busyDays.value.has
     justify-content: space-between;
     gap: var(--vectis-space-2);
     padding: var(--vectis-space-1) var(--vectis-space-2);
-    border: none;
     border-radius: var(--vectis-radius-interactive);
-    background: none;
     color: var(--vectis-color-text);
-    font-family: inherit;
     font-size: var(--vectis-text-heading-4-size);
     font-weight: var(--vectis-text-heading-4-weight);
     text-align: start;
     text-transform: capitalize;
-    cursor: pointer;
-    transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .v-calendar-year-title:hover {
     background: var(--vectis-color-surface-muted);
-  }
-
-  .v-calendar-year-title:focus-visible {
-    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
-    outline-offset: var(--vectis-focus-ring-offset);
   }
 
   .v-calendar-year-count {
@@ -230,37 +231,29 @@ const isBusy = (cell: MonthCell) => cell.adjacent === null && busyDays.value.has
     font-size: var(--vectis-text-caption-size);
   }
 
-  .v-calendar-year-day[data-adjacent] {
+  /*
+   * TRAP — both states are written DISJOINT from today rather than below it. Today is very
+   * often also busy, and its paint is `.v-calendar-today`, in VCalendar's sheet: at equal
+   * specificity the winner between two sheets is whichever the consumer's bundler emitted last,
+   * and losing that draw paints today as an ordinary busy day — the one square a reader looks
+   * for first, quietly indistinguishable.
+   */
+  .v-calendar-year-day[data-adjacent]:not(.v-calendar-today) {
     color: var(--vectis-color-text-subtle);
   }
 
   /* A busy day is RINGED rather than dotted: at this size a dot would be about one pixel,
      and it would be drawn as a background, which Windows forced-colors flattens away —
      where a border keeps a colour of its own. The tint is a second, redundant signal for
-     anyone the ring alone is too fine for. */
+     anyone the ring alone is too fine for — and the ring alone is what today keeps, being
+     painted over the tint. */
   .v-calendar-year-day[data-busy] {
     border: 1px solid var(--vectis-color-accent-border);
+  }
+
+  .v-calendar-year-day[data-busy]:not(.v-calendar-today) {
     background: var(--vectis-color-accent-surface);
     color: var(--vectis-color-accent-text);
-  }
-
-  /*
-     TRAP — today comes LAST, and the three state rules are all (0,2,0), so their order is
-     the whole of the priority: adjacent, then busy, then today. Today is very often also
-     busy, and moving this rule up paints it as an ordinary busy day — the one square a
-     reader looks for first, quietly indistinguishable. Written as source order rather
-     than as VDatePicker's `[data-today]:not([data-selected])` because there are three
-     states here, not two, and a `:not()` chain would have to name both of the others. */
-  .v-calendar-year-day[data-today] {
-    background: var(--vectis-color-accent);
-    color: var(--vectis-color-text-on-accent);
-    font-weight: var(--vectis-font-weight-semibold);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .v-calendar-year-title {
-      transition: none;
-    }
   }
 }
 </style>

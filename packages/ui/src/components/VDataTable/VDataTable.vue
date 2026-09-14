@@ -40,7 +40,7 @@ import { toggleValue } from '../../utils/array'
 import { cssSize } from '../../utils/css'
 import { isDev } from '../../utils/env'
 import { clamp } from '../../utils/number'
-import { normalizeText } from '../../utils/text'
+import { createNormalizedCache, normalizeText } from '../../utils/text'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
@@ -73,7 +73,8 @@ export type DataTableRowId = string | number
 
 /**
  * Everything the table is currently being asked for, reported whenever it changes so a
- * server can answer it.
+ * server can answer it. What is not set is `null` rather than left out, so the object keeps
+ * the same keys once serialized into a request.
  */
 export interface DataTableParams {
   page: number
@@ -124,6 +125,11 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   responsive?: DataTableResponsive
   /** Shows that the rows are being loaded. */
   loading?: boolean
+  /**
+   * What is written beside the spinner while the rows are loading. It falls back to the design
+   * system dictionary.
+   */
+  loadingText?: string
   /** What is said when there is no row to show. It falls back to the design system dictionary. */
   emptyText?: string
   /**
@@ -218,6 +224,7 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   variant: 'flat',
   responsive: 'scroll',
   loading: false,
+  loadingText: undefined,
   emptyText: undefined,
   title: undefined,
   searchable: false,
@@ -246,6 +253,7 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
 const m = useMessages()
 const vectisLocale = useLocale()
 const resolvedEmptyText = computed(() => props.emptyText ?? m.value.dataTable.empty)
+const resolvedLoadingText = computed(() => props.loadingText ?? m.value.dataTable.loading)
 const resolvedSearchPlaceholder = computed(
   () => props.searchPlaceholder ?? m.value.dataTable.searchPlaceholder,
 )
@@ -270,6 +278,13 @@ const page = defineModel<number>('page', { default: 1 })
  * one down without binding it is enough to enable it.
  */
 const perPage = defineModel<number | undefined>('perPage', { default: undefined })
+/*
+ * "No value" is spelled two ways on purpose. `sort` is `null` because the TABLE writes that
+ * state itself, a third click on a heading clearing the order, and a model the component
+ * writes needs a value a consumer can store and compare. `perPage` is `undefined` because
+ * nothing here ever clears it: it is simply a model that was not given. `DataTableParams`
+ * reports both as `null`, being a request body rather than a model.
+ */
 /**
  * The selected rows, as the identities `rowKey` gives them — never the row objects
  * themselves. Nothing is selected to begin with, and a selection SURVIVES a change of page:
@@ -304,7 +319,14 @@ defineSlots<{
   /** What a column's heading shows: a slot named after that column's key. */
   [name: `head-${string}`]: (scope: { column: DataTableColumn }) => unknown
   /** The left side of the toolbar, replacing the `title` prop. */
-  header?(): unknown
+  title?(): unknown
+  /** What the table shows while its rows are loading, replacing the spinner and its text. */
+  loading?(): unknown
+  /**
+   * What the table shows when there is no row to show, replacing `emptyText`. It receives the
+   * search that produced the empty result, empty when nothing was searched for.
+   */
+  empty?(scope: { search: string }): unknown
 }>()
 
 // `class` and `style` stay on the wrapper, where a consumer expects to place the
@@ -340,30 +362,12 @@ function rowIdentity(row: Row, index: number): DataTableRowId {
 // reader cannot see would return rows for reasons nothing on screen explains.
 /*
  * The cells in accent-insensitive form, memoized per row and column and re-checked against
- * the raw value.
- *
- * Normalizing decomposes, strips the marks and lowercases, and the filter below re-reads the
- * whole table on every keystroke: ten thousand rows across five columns is fifty thousand of
- * those per character typed.
- *
- * The cell is read on every call rather than the table derived once, which is what keeps the
- * filter reactive to a value edited in place. Keyed by ROW, so replacing the rows lets the
- * old entries be collected with no invalidation to write anywhere.
+ * the raw value, so a value edited in place is noticed. The filter below re-reads the whole
+ * table on every keystroke: ten thousand rows across five columns is fifty thousand
+ * normalizations per character typed without it.
  */
-const normalizedCells = new WeakMap<Row, Map<string, { raw: string; normalized: string }>>()
-function normalizedCell(row: Row, key: string): string {
-  const raw = String(row[key] ?? '')
-  let cells = normalizedCells.get(row)
-  if (!cells) {
-    cells = new Map()
-    normalizedCells.set(row, cells)
-  }
-  const hit = cells.get(key)
-  if (hit && hit.raw === raw) return hit.normalized
-  const normalized = normalizeText(raw)
-  cells.set(key, { raw, normalized })
-  return normalized
-}
+const normalizedOf = createNormalizedCache<Row>()
+const normalizedCell = (row: Row, key: string) => normalizedOf(row, String(row[key] ?? ''), key)
 
 const filteredRows = computed(() => {
   if (props.serverSide || !props.searchable) return props.rows
@@ -477,6 +481,9 @@ watch(search, () => {
   searchTimer.start(commitSearch, props.searchDebounce)
 })
 
+// The search the rows on show answer to: the committed one when a server does the searching.
+const emptySearch = computed(() => (props.serverSide ? committedSearch.value : search.value))
+
 // What the table is asking for, as one value.
 const params = computed<DataTableParams>(() => ({
   page: currentPage.value,
@@ -504,12 +511,15 @@ const masterIndeterminate = computed(
   () => !allVisibleSelected.value && visibleIds.value.some((id) => selectedSet.value.has(id)),
 )
 
-function isSelected(row: Row, index: number): boolean {
-  return selectedSet.value.has(rowIdentity(row, index))
-}
+/*
+ * A row is asked about by the identity `visibleIds` already holds for it: the template reads
+ * `visibleIds[index]` for the key, the tint and the checkbox alike, rather than deriving it
+ * again three or four times per row per render.
+ */
+const isSelected = (id: DataTableRowId) => selectedSet.value.has(id)
 
-function toggleRow(row: Row, index: number) {
-  selected.value = toggleValue(selected.value, rowIdentity(row, index))
+function toggleRow(id: DataTableRowId) {
+  selected.value = toggleValue(selected.value, id)
 }
 
 // It only ever touches the rows on screen, so what was selected on the other pages
@@ -579,7 +589,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
 <template>
   <div
-    class="v-table-wrapper"
+    class="v-data-table"
     :class="rootClass"
     :style="[heightStyle, rootStyle]"
     :data-variant="variant"
@@ -589,14 +599,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     :data-sticky-header="stickyHeader ? '' : undefined"
     :data-selectable="selectable ? '' : undefined"
   >
-    <div v-if="title || $slots.header || searchable" class="v-table-toolbar">
-      <VTypography as="div" variant="heading-4" class="v-table-title">
-        <slot name="header">{{ title }}</slot>
+    <div v-if="title || $slots.title || searchable" class="v-data-table-toolbar">
+      <VTypography as="div" variant="heading-4" class="v-data-table-title">
+        <slot name="title">{{ title }}</slot>
       </VTypography>
       <VInput
         v-if="searchable"
         v-model="search"
-        class="v-table-search"
+        class="v-data-table-search"
         type="search"
         size="sm"
         :compact="compact"
@@ -609,16 +619,16 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
     <!-- Only the table itself scrolls; the toolbar above and the footer below stay
          where they are. -->
-    <div class="v-table-scroller">
-      <table class="v-table" v-bind="forwardedAttrs">
-        <caption v-if="caption" class="v-table-caption">
+    <div class="v-data-table-scroller">
+      <table class="v-data-table-table" v-bind="forwardedAttrs">
+        <caption v-if="caption" class="v-data-table-caption">
           {{
             caption
           }}
         </caption>
-        <thead class="v-table-head">
+        <thead class="v-data-table-head">
           <tr>
-            <th v-if="selectable" scope="col" class="v-table-select">
+            <th v-if="selectable" scope="col" class="v-data-table-select">
               <VCheckbox
                 :model-value="allVisibleSelected"
                 :indeterminate="masterIndeterminate"
@@ -636,7 +646,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
               <button
                 v-if="column.sortable"
                 type="button"
-                class="v-table-sort"
+                class="v-data-table-sort"
                 :data-direction="sort?.key === column.key ? sort.direction : undefined"
                 @click="toggleSort(column.key)"
               >
@@ -644,7 +654,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 <!-- Decorative, and deliberately so: given no label, an icon hides itself
                      from screen readers. What the sort state is, is already carried by
                      the heading itself. -->
-                <VIcon class="v-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
+                <VIcon class="v-data-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
               </button>
               <template v-else>
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
@@ -656,28 +666,37 @@ const heightStyle = computed<StyleValue | undefined>(() =>
           <!-- The order matters: loading is checked BEFORE emptiness, so a table waiting
                for its rows never claims there are none. -->
           <tr v-if="loading">
-            <td :colspan="colCount" class="v-table-state">
-              <VSpinner :label="m.dataTable.loading" />
+            <td :colspan="colCount" class="v-data-table-state">
+              <slot name="loading">
+                <!-- The spinner carries the text for a screen reader, so the visible copy is
+                     hidden from it: read twice, the cell would say it is loading twice. -->
+                <span class="v-data-table-state-loading">
+                  <VSpinner :label="resolvedLoadingText" />
+                  <span aria-hidden="true">{{ resolvedLoadingText }}</span>
+                </span>
+              </slot>
             </td>
           </tr>
           <tr v-else-if="displayedRows.length === 0">
-            <td :colspan="colCount" class="v-table-state">{{ resolvedEmptyText }}</td>
+            <td :colspan="colCount" class="v-data-table-state">
+              <slot name="empty" :search="emptySearch">{{ resolvedEmptyText }}</slot>
+            </td>
           </tr>
           <template v-else>
             <tr
               v-for="(row, index) in displayedRows"
-              :key="rowIdentity(row, index)"
-              :data-selected="selectable && isSelected(row, index) ? '' : undefined"
+              :key="visibleIds[index]"
+              :data-selected="selectable && isSelected(visibleIds[index]!) ? '' : undefined"
             >
               <!-- TRAP — the selection is marked with a plain attribute and NOT with the
                    ARIA selected state, which is invalid on the row of a table: it belongs
                    to a grid. What tells assistive technology that a row is selected is
                    its checkbox being checked. -->
-              <td v-if="selectable" class="v-table-select">
+              <td v-if="selectable" class="v-data-table-select">
                 <VCheckbox
-                  :model-value="isSelected(row, index)"
+                  :model-value="isSelected(visibleIds[index]!)"
                   :aria-label="rowSelectLabel(row, index)"
-                  @update:model-value="toggleRow(row, index)"
+                  @update:model-value="toggleRow(visibleIds[index]!)"
                 />
               </td>
               <td
@@ -703,13 +722,15 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
     <!-- The footer has two zones: what is selected on the left, and on the right the page
          size, the range and the pagination, in that order. -->
-    <div v-if="paginated || selectable" class="v-table-footer">
-      <span v-if="selectable" class="v-table-selection" aria-live="polite">{{
+    <div v-if="paginated || selectable" class="v-data-table-footer">
+      <span v-if="selectable" class="v-data-table-selection" aria-live="polite">{{
         selectionSummary
       }}</span>
-      <div v-if="paginated" class="v-table-footer-end">
-        <div v-if="perPageOptions?.length" class="v-table-per-page">
-          <span class="v-table-per-page-label" aria-hidden="true">{{ resolvedPerPageText }}</span>
+      <div v-if="paginated" class="v-data-table-footer-end">
+        <div v-if="perPageOptions?.length" class="v-data-table-per-page">
+          <span class="v-data-table-per-page-label" aria-hidden="true">{{
+            resolvedPerPageText
+          }}</span>
           <!-- The panel is told to match its trigger, which here replaces the default
                minimum width with something sensible: a menu of "10", "25", "50" has no
                use for the width a menu of commands assumes, and it still cannot end up
@@ -737,7 +758,9 @@ const heightStyle = computed<StyleValue | undefined>(() =>
             />
           </VMenu>
         </div>
-        <span v-if="showRange" class="v-table-range" aria-live="polite">{{ rangeSummary }}</span>
+        <span v-if="showRange" class="v-data-table-range" aria-live="polite">{{
+          rangeSummary
+        }}</span>
         <!-- Named after the table rather than with the generic pagination wording: a page
              holding this table AND a pagination of its own would otherwise expose two
              navigation landmarks with the same name, and a screen reader user could not
@@ -758,22 +781,22 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
 <style>
 @layer vectis.components {
-  .v-table-wrapper {
+  .v-data-table {
     /* The density, expressed as the cells' padding and tightened by one step in the
        compact form. It does not go through the shared control scale — there is no single
        control height in a table — which is the same case VAccordion is in. */
-    --table-pad-block: var(--vectis-space-3);
-    --table-pad-inline: var(--vectis-space-3);
-    --table-head-pad-block: var(--vectis-space-2);
+    --data-table-pad-block: var(--vectis-space-3);
+    --data-table-pad-inline: var(--vectis-space-3);
+    --data-table-head-pad-block: var(--vectis-space-2);
 
     /* The gutter between the frame and what it holds: nothing when the table is
        unframed, so the caption, the toolbar and the footer sit flush with the edge, and
        the cells' own inline padding as soon as a frame appears. */
-    --table-frame-pad: 0px;
+    --data-table-frame-pad: 0px;
     /* The colour a frozen heading is painted with. It follows the frame's own background:
        any other value would show as a visible seam in the dark theme, where the two
        surfaces differ. */
-    --table-surface: var(--vectis-color-surface);
+    --data-table-surface: var(--vectis-color-surface);
 
     container-type: inline-size;
     font-family: var(--vectis-text-family);
@@ -793,19 +816,19 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     block-size: 100%;
   }
 
-  .v-table-wrapper[data-compact] {
-    --table-pad-block: var(--vectis-space-2);
-    --table-pad-inline: var(--vectis-space-2);
-    --table-head-pad-block: var(--vectis-space-1);
+  .v-data-table[data-compact] {
+    --data-table-pad-block: var(--vectis-space-2);
+    --data-table-pad-inline: var(--vectis-space-2);
+    --data-table-head-pad-block: var(--vectis-space-1);
   }
 
   /* The card. The unframed default has nothing to undo, since it declares no decoration
      at all — whatever surrounds the table is what provides the surface then. */
-  .v-table-wrapper[data-variant='outlined'] {
-    --table-frame-pad: var(--table-pad-inline);
-    --table-surface: var(--vectis-color-surface-raised);
+  .v-data-table[data-variant='outlined'] {
+    --data-table-frame-pad: var(--data-table-pad-inline);
+    --data-table-surface: var(--vectis-color-surface-raised);
 
-    background: var(--table-surface);
+    background: var(--data-table-surface);
     border: 1px solid var(--vectis-color-border);
     border-radius: var(--vectis-radius-surface);
     /*
@@ -835,22 +858,22 @@ const heightStyle = computed<StyleValue | undefined>(() =>
    * must scroll in `stack` too, or `outlined`'s clip crops it and the rows below become
    * unreachable.
    */
-  .v-table-scroller {
+  .v-data-table-scroller {
     flex: 1 1 auto;
     min-block-size: 0;
     overflow: auto;
   }
 
-  .v-table-toolbar {
+  .v-data-table-toolbar {
     flex: none; /* stays at the top, outside whatever scrolls */
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--vectis-space-3);
-    padding-block-start: var(--table-frame-pad);
+    padding-block-start: var(--data-table-frame-pad);
     padding-block-end: var(--vectis-space-3);
-    padding-inline: var(--table-frame-pad);
+    padding-inline: var(--data-table-frame-pad);
   }
 
   /* The title is rendered by VTypography, and its colour is stated explicitly because the
@@ -860,7 +883,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
      plain colour declaration. That declaration would collide with VTypography's own at
      equal specificity, and the winner would be decided by whichever sheet the consumer's
      bundler put last. */
-  .v-table-title {
+  .v-data-table-title {
     --typography-color: var(--vectis-color-text);
   }
 
@@ -868,28 +891,28 @@ const heightStyle = computed<StyleValue | undefined>(() =>
      by default. The selector is qualified by its context, which makes it one step more
      specific than VInput's own rule and therefore independent of the order the two sheets
      end up in. */
-  .v-table-toolbar .v-input {
+  .v-data-table-toolbar .v-input {
     inline-size: var(--vectis-control-size-table-search);
     max-inline-size: 100%;
   }
 
-  .v-table {
+  .v-data-table-table {
     width: 100%;
     border-collapse: collapse;
     font-size: var(--vectis-text-body-md-size);
     color: var(--vectis-color-text);
   }
 
-  .v-table-caption {
+  .v-data-table-caption {
     padding-block-end: var(--vectis-space-3);
-    padding-inline: var(--table-frame-pad);
+    padding-inline: var(--data-table-frame-pad);
     text-align: start;
     font-size: var(--vectis-text-body-md-size);
     color: var(--vectis-color-text-muted);
   }
 
-  .v-table th {
-    padding: var(--table-head-pad-block) var(--table-pad-inline);
+  .v-data-table-table th {
+    padding: var(--data-table-head-pad-block) var(--data-table-pad-inline);
     text-align: start;
     font-size: var(--vectis-text-body-md-size);
     /* The heavier weight distinguishes a heading from the data under it, which is
@@ -899,37 +922,37 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     border-block-end: 1px solid var(--vectis-color-border);
   }
 
-  .v-table td {
-    padding: var(--table-pad-block) var(--table-pad-inline);
+  .v-data-table-table td {
+    padding: var(--data-table-pad-block) var(--data-table-pad-inline);
     border-block-end: 1px solid var(--vectis-color-border);
   }
 
-  .v-table tbody tr:last-child td {
+  .v-data-table-table tbody tr:last-child td {
     border-block-end: none;
   }
 
-  .v-table [data-align='end'] {
+  .v-data-table-table [data-align='end'] {
     text-align: end;
   }
 
-  .v-table [data-align='center'] {
+  .v-data-table-table [data-align='center'] {
     text-align: center;
   }
 
   /* The checkbox column is reduced to the width of its content. A table lays its columns
      out automatically, so asking for no width at all is what makes it take the least
      possible. */
-  .v-table .v-table-select {
+  .v-data-table-table .v-data-table-select {
     inline-size: 0;
   }
 
-  .v-table-wrapper[data-striped] tbody tr:nth-child(even) {
+  .v-data-table[data-striped] tbody tr:nth-child(even) {
     background-color: var(--vectis-color-surface-sunken);
   }
 
   /* Placed after the striping on purpose: the specificity is the same, so it is the order
      that makes a selected row keep its tint on both odd and even rows. */
-  .v-table-wrapper[data-selectable] tbody tr[data-selected] {
+  .v-data-table[data-selectable] tbody tr[data-selected] {
     background-color: var(--vectis-color-accent-surface);
   }
 
@@ -937,14 +960,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
      background they would show through. Its colour is read from the variable holding the
      table's real surface — a fixed value would leave a visible seam along the frame's
      edge in the dark theme, where the two surfaces differ. */
-  .v-table-wrapper[data-sticky-header] th {
+  .v-data-table[data-sticky-header] th {
     position: sticky;
     inset-block-start: 0;
     z-index: 1;
-    background-color: var(--table-surface);
+    background-color: var(--data-table-surface);
   }
 
-  .v-table-sort {
+  .v-data-table-sort {
     /* The icon context for the sort glyph. Without it the icon would fall back to one em
        — the heading's own text size — and come out visibly smaller than every other icon
        in the component. */
@@ -965,11 +988,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     border-radius: min(var(--vectis-radius-interactive), 0.5lh);
   }
 
-  .v-table-sort:hover {
+  .v-data-table-sort:hover {
     color: var(--vectis-color-text);
   }
 
-  .v-table-sort:focus-visible {
+  .v-data-table-sort:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
@@ -977,21 +1000,27 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   /* The glyph stays faint on every column that merely COULD be sorted: it announces that
      the heading can be clicked without competing for attention with the one column
      actually carrying the order. */
-  .v-table-sort-icon {
+  .v-data-table-sort-icon {
     opacity: 0.35;
   }
 
-  .v-table-sort[data-direction] .v-table-sort-icon {
+  .v-data-table-sort[data-direction] .v-data-table-sort-icon {
     opacity: 1;
   }
 
-  .v-table-state {
+  .v-data-table-state {
     padding: var(--vectis-space-6);
     text-align: center;
     color: var(--vectis-color-text-muted);
   }
 
-  .v-table-footer {
+  .v-data-table-state-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--vectis-space-2);
+  }
+
+  .v-data-table-footer {
     flex: none; /* stays at the bottom, outside whatever scrolls */
     display: flex;
     flex-wrap: wrap;
@@ -999,8 +1028,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     justify-content: flex-end;
     gap: var(--vectis-space-4);
     padding-block-start: var(--vectis-space-3);
-    padding-block-end: var(--table-frame-pad);
-    padding-inline: var(--table-frame-pad);
+    padding-block-end: var(--data-table-frame-pad);
+    padding-inline: var(--data-table-frame-pad);
   }
 
   /*
@@ -1012,7 +1041,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
    * The margin also does the right thing when there is no count at all, the zone simply
    * being pushed against the far edge on its own.
    */
-  .v-table-footer-end {
+  .v-data-table-footer-end {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -1021,14 +1050,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     margin-inline-start: auto;
   }
 
-  .v-table-selection,
-  .v-table-range,
-  .v-table-per-page-label {
+  .v-data-table-selection,
+  .v-data-table-range,
+  .v-data-table-per-page-label {
     font-size: var(--vectis-text-body-md-size);
     color: var(--vectis-color-text-muted);
   }
 
-  .v-table-per-page {
+  .v-data-table-per-page {
     display: flex;
     align-items: center;
     gap: var(--vectis-space-2);
@@ -1042,7 +1071,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
      still name each column for a screen reader, which reads the cells in the same order
      either way. */
   @container (max-width: 640px) {
-    .v-table-wrapper[data-responsive='stack'] .v-table-head {
+    .v-data-table[data-responsive='stack'] .v-data-table-head {
       position: absolute;
       width: 1px;
       height: 1px;
@@ -1051,17 +1080,17 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       clip-path: inset(50%);
     }
 
-    .v-table-wrapper[data-responsive='stack'] tbody tr {
+    .v-data-table[data-responsive='stack'] tbody tr {
       display: block;
       padding-block: var(--vectis-space-2);
       border-block-end: 1px solid var(--vectis-color-border);
     }
 
-    .v-table-wrapper[data-responsive='stack'] tbody tr:last-child {
+    .v-data-table[data-responsive='stack'] tbody tr:last-child {
       border-block-end: none;
     }
 
-    .v-table-wrapper[data-responsive='stack'] td {
+    .v-data-table[data-responsive='stack'] td {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
@@ -1073,7 +1102,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
     /* Each cell writes its own column's name before itself, taken from the attribute the
        template put there. It takes the overline type role, without forcing capitals. */
-    .v-table-wrapper[data-responsive='stack'] td::before {
+    .v-data-table[data-responsive='stack'] td::before {
       content: attr(data-label);
       font-size: var(--vectis-text-overline-size);
       font-weight: var(--vectis-text-overline-weight);
@@ -1083,18 +1112,18 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
     /* The checkbox cell carries no column name — there is none — so it gets no heading
        and opens the card on its own line. */
-    .v-table-wrapper[data-responsive='stack'] td.v-table-select {
+    .v-data-table[data-responsive='stack'] td.v-data-table-select {
       justify-content: flex-start;
     }
 
-    .v-table-wrapper[data-responsive='stack'] td.v-table-select::before {
+    .v-data-table[data-responsive='stack'] td.v-data-table-select::before {
       content: none;
     }
 
     /* In a narrow component the search field drops under the title and takes the whole
        width. This applies to both responsive forms, the toolbar never being part of what
        scrolls. */
-    .v-table-search {
+    .v-data-table-search {
       flex: 1 1 100%;
     }
   }

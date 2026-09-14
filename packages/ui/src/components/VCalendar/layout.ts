@@ -37,8 +37,11 @@ import { minutesOf } from '../../utils/time'
 import type { MonthCell } from '../../utils/date'
 import type { CalendarEvent, CalendarEventId, CalendarEventTimes, CalendarView } from './types'
 
+/** An hour, in the minutes every time here is counted in: one row of a time grid. */
+export const MINUTES_PER_HOUR = 60
+
 /** How many minutes a day holds. The upper bound of every time computed here. */
-const MINUTES_PER_DAY = 24 * 60
+const MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR
 
 const DAYS_PER_WEEK = 7
 
@@ -68,7 +71,7 @@ export const DRAG_THRESHOLD = 3
  * so there is nothing here to collate; and `localeCompare` with no locale resolves against
  * the RUNTIME's default, which differs between Node and the browser. The three orderings it
  * settles all decide rendered markup — `packDayColumn` assigns columns, `packAllDay`
- * assigns lanes, `eventsOnDay` sets the order chips are listed in — so a divergent order is
+ * assigns lanes, `eventsByDay` sets the order chips are listed in — so a divergent order is
  * a hydration mismatch, silent in dev and visible only as a card in the wrong place. It is
  * the same hazard `VDataTable` avoids by passing its locale explicitly.
  *
@@ -89,8 +92,12 @@ export interface TimeWindow {
 
 /** Turns the `dayStart`/`dayEnd` props, given in hours, into the window the rest works in. */
 export function windowOf(startHour: number, endHour: number): TimeWindow {
-  const start = clamp(Math.round(startHour * 60), 0, MINUTES_PER_DAY)
-  const end = clamp(Math.round(endHour * 60), start + 60, MINUTES_PER_DAY)
+  const start = clamp(Math.round(startHour * MINUTES_PER_HOUR), 0, MINUTES_PER_DAY)
+  const end = clamp(
+    Math.round(endHour * MINUTES_PER_HOUR),
+    start + MINUTES_PER_HOUR,
+    MINUTES_PER_DAY,
+  )
   return { start, end }
 }
 
@@ -106,7 +113,7 @@ export function windowOf(startHour: number, endHour: number): TimeWindow {
  */
 export function timeOf(minutes: number): string {
   const held = clamp(Math.round(minutes), 0, MINUTES_PER_DAY - 1)
-  return `${pad2(Math.floor(held / 60))}:${pad2(held % 60)}`
+  return `${pad2(Math.floor(held / MINUTES_PER_HOUR))}:${pad2(held % MINUTES_PER_HOUR)}`
 }
 
 /** An `HH:mm` string into minutes since midnight; `fallback` when it is not one. */
@@ -117,10 +124,10 @@ export function minutesAt(time: string | undefined, fallback: number): number {
 /**
  * The weekdays a calendar shows, in reading order.
  *
- * The array does double duty, which is why there is no separate "first day of week" prop:
- * it says which days are VISIBLE — `[1,2,3,4,5]` hides the weekend everywhere — and its
- * first entry is the day a week starts on. Given nothing, the seven days rotated to the
- * locale's own first day.
+ * The array does double duty: it says which days are VISIBLE — `[1,2,3,4,5]` hides the
+ * weekend everywhere — and its first entry is the day a week starts on. Given nothing, the
+ * seven days rotated to `firstDayOfWeek`, which the calendar takes from its prop of that
+ * name or from the locale.
  */
 export function normalizeWeekdays(
   weekdays: readonly number[] | undefined,
@@ -320,7 +327,7 @@ export interface EventSegment {
 export function timedSegments(
   events: readonly CalendarEvent[],
   days: readonly string[],
-  window: TimeWindow,
+  timeWindow: TimeWindow,
   minDuration: number,
 ): EventSegment[] {
   const index = new Map(days.map((iso, i) => [iso, i]))
@@ -331,19 +338,19 @@ export function timedSegments(
     const dayIndex = index.get(event.start)
     if (dayIndex === undefined) continue
 
-    const rawStart = minutesAt(event.startTime, window.start)
+    const rawStart = minutesAt(event.startTime, timeWindow.start)
     const rawEnd = Math.max(minutesAt(event.endTime, rawStart + minDuration), rawStart + 1)
-    if (rawEnd <= window.start || rawStart >= window.end) continue
+    if (rawEnd <= timeWindow.start || rawStart >= timeWindow.end) continue
 
-    const start = clamp(rawStart, window.start, window.end - 1)
-    const end = clamp(Math.max(rawEnd, start + minDuration), start + 1, window.end)
+    const start = clamp(rawStart, timeWindow.start, timeWindow.end - 1)
+    const end = clamp(Math.max(rawEnd, start + minDuration), start + 1, timeWindow.end)
     segments.push({
       id: event.id,
       dayIndex,
       start,
       end,
-      clippedStart: rawStart < window.start,
-      clippedEnd: rawEnd > window.end,
+      clippedStart: rawStart < timeWindow.start,
+      clippedEnd: rawEnd > timeWindow.end,
     })
   }
 
@@ -392,13 +399,19 @@ export function packDayColumn(segments: readonly EventSegment[]): PlacedSegment[
 
   const flush = () => {
     const columns = columnEnds.length
+    /*
+     * The cluster filed by column first, so asking "is the room beside me free?" reads that one
+     * column's occupants rather than the whole cluster: a crowded morning of k events across c
+     * columns otherwise costs k squared per column crossed.
+     */
+    const byColumn: PlacedSegment[][] = Array.from({ length: columns }, () => [])
+    for (const item of cluster) byColumn[item.column]!.push(item)
     for (const item of cluster) {
       let span = 1
       while (
         item.column + span < columns &&
-        !cluster.some(
-          (other) =>
-            other.column === item.column + span && other.start < item.end && item.start < other.end,
+        !byColumn[item.column + span]!.some(
+          (other) => other.start < item.end && item.start < other.end,
         )
       ) {
         span++
@@ -479,40 +492,19 @@ export function coversDay(event: CalendarEvent, iso: string): boolean {
 }
 
 /**
- * The events falling on one day, in the order a summary should list them: the all-day ones
- * first, since they frame the day rather than sit inside it, then the rest by when they
- * start. The last tie is broken by id so the list cannot reshuffle for no reason.
- */
-export function eventsOnDay<T extends CalendarEvent>(events: readonly T[], iso: string): T[] {
-  return events.filter((event) => coversDay(event, iso)).sort(compareForDay)
-}
-
-/** The order `eventsOnDay` and `eventsByDay` both list a day in — see `eventsOnDay`. */
-function compareForDay(a: CalendarEvent, b: CalendarEvent): number {
-  const allDayA = isAllDayEvent(a) ? 0 : 1
-  const allDayB = isAllDayEvent(b) ? 0 : 1
-  return (
-    allDayA - allDayB ||
-    minutesAt(a.startTime, 0) - minutesAt(b.startTime, 0) ||
-    compareId(a.id, b.id)
-  )
-}
-
-/**
- * Every visible day's events at once, in one pass over the list.
+ * Every visible day's events, in the order a summary lists them: the all-day ones first, since
+ * they frame the day rather than sit inside it, then the rest by when they start, the last tie
+ * broken by id so the list cannot reshuffle for no reason.
  *
- * WHY THIS EXISTS RATHER THAN A LOOP OVER `eventsOnDay`. The month view needs all 42 squares
- * filled, and asking `eventsOnDay` once per square walks the whole event list 42 times and
- * sorts it 42 times — `cells × events`, with a sort each. Measured on the bench: 7.8 ms per
- * render at 2000 events, and the month view rebuilds it every time a drag carries a chip onto
- * another day, so that is roughly half a frame spent rebuilding lists the gesture left alone.
+ * WHY ONE PASS RATHER THAN A FILTER PER DAY. The month view needs all 42 squares filled, and
+ * filtering and sorting the list once per square walks the whole event list 42 times and sorts
+ * it 42 times — `cells × events`, with a sort each. Measured on the bench: 7.8 ms per render at
+ * 2000 events, and the month view rebuilds it every time a drag carries a chip onto another
+ * day, so that is roughly half a frame spent rebuilding lists the gesture left alone.
  *
  * Here each event is placed once, into the days it actually covers, and each day is sorted
  * once — `events × span + cells × k log k`. The walk is bounded to the grid on both ends, so
  * an event running from last year costs its visible part and nothing more.
- *
- * The ORDER is identical to `eventsOnDay`'s, because both sort with `compareForDay`. That
- * matters: it is the order chips are listed in, so a difference would be visible.
  */
 export function eventsByDay<T extends CalendarEvent>(
   events: readonly T[],
@@ -535,8 +527,8 @@ export function eventsByDay<T extends CalendarEvent>(
     /*
      * Decorate-sort-undecorate, for the classic reason: the sort key is derived ONCE per
      * event rather than once per comparison, which is where the time in this function goes.
-     * `compareForDay` calls `minutesAt`, which re-parses an `HH:mm` string on every ask, and
-     * a 42-square month holding 2000 events sorts some 17 000 pairs. Measured at 9.97 ms
+     * `minutesAt` re-parses an `HH:mm` string on every ask, and a 42-square month holding
+     * 2000 events sorts some 17 000 pairs. Measured at 9.97 ms
      * against 4.19 ms with the key hoisted.
      */
     const ranked: Ranked<T> = {
@@ -572,9 +564,9 @@ interface Ranked<T> {
   id: string
 }
 
-/** `compareForDay`, reading keys that are already computed rather than deriving them. */
+/** The order `eventsByDay` lists a day in, reading keys that are already computed. */
 function compareRanked<T>(a: Ranked<T>, b: Ranked<T>): number {
-  return a.allDay - b.allDay || a.minutes - b.minutes || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+  return a.allDay - b.allDay || a.minutes - b.minutes || compareId(a.id, b.id)
 }
 
 /** One bar in the all-day band: the columns it covers, and the row it sits on. */
@@ -650,9 +642,9 @@ export function packAllDay(
 }
 
 /** Where a moment sits in the visible window, as a unitless fraction the stylesheet scales. */
-export function fractionOf(minutes: number, window: TimeWindow): number {
-  const span = window.end - window.start
-  return span > 0 ? clamp((minutes - window.start) / span, 0, 1) : 0
+export function fractionOf(minutes: number, timeWindow: TimeWindow): number {
+  const span = timeWindow.end - timeWindow.start
+  return span > 0 ? clamp((minutes - timeWindow.start) / span, 0, 1) : 0
 }
 
 /** The measurements of the grid a pointer is being read against, in viewport coordinates. */
@@ -676,19 +668,16 @@ export interface GridGeometry {
 export function pointToCell(
   point: { x: number; y: number },
   geometry: GridGeometry,
-  window: TimeWindow,
+  timeWindow: TimeWindow,
   rtl: boolean,
 ): { columnIndex: number; minutes: number } {
-  const columns = Math.max(1, geometry.columns)
-  const columnSize = geometry.inlineSize / columns
-  const offset = rtl ? geometry.inlineStart - point.x : point.x - geometry.inlineStart
-  const columnIndex = clamp(columnSize > 0 ? Math.floor(offset / columnSize) : 0, 0, columns - 1)
+  const columnIndex = columnAt(point.x, geometry, rtl)
 
   const fraction = geometry.height > 0 ? (point.y - geometry.top) / geometry.height : 0
   const minutes = clamp(
-    window.start + fraction * (window.end - window.start),
-    window.start,
-    window.end,
+    timeWindow.start + fraction * (timeWindow.end - timeWindow.start),
+    timeWindow.start,
+    timeWindow.end,
   )
 
   return { columnIndex, minutes }
@@ -707,8 +696,9 @@ export function floorToSlot(minutes: number, step: number): number {
 }
 
 /**
- * Where an event lands when it is dragged or nudged: it keeps its length and moves by whole
- * days and whole steps.
+ * Where an event lands when it is dragged or nudged along its day: it keeps its length and
+ * moves by `minuteDelta`. Which DAY it lands on is the caller's to set, read from the days on
+ * show rather than counted here, so a hidden weekday is never landed on.
  *
  * An event pushed past the end of the window is held against it rather than having its tail
  * cut off — moving something must never change how long it is, which is the other gesture's
@@ -716,29 +706,22 @@ export function floorToSlot(minutes: number, step: number): number {
  */
 export function moveEvent(
   origin: CalendarEventTimes,
-  dayDelta: number,
   minuteDelta: number,
-  window: TimeWindow,
-  weekdays?: readonly number[],
+  timeWindow: TimeWindow,
 ): CalendarEventTimes {
-  const startMinutes = minutesAt(origin.startTime, window.start)
+  const startMinutes = minutesAt(origin.startTime, timeWindow.start)
   const endMinutes = Math.max(minutesAt(origin.endTime, startMinutes), startMinutes + 1)
   const duration = endMinutes - startMinutes
 
-  const start =
-    weekdays && weekdays.length > 0
-      ? advanceVisibleDays(origin.start, dayDelta, weekdays)
-      : addDays(origin.start, dayDelta)
-
   const nextStart = clamp(
     startMinutes + minuteDelta,
-    window.start,
-    Math.max(window.start, window.end - duration),
+    timeWindow.start,
+    Math.max(timeWindow.start, timeWindow.end - duration),
   )
 
   return {
-    start,
-    end: start,
+    start: origin.start,
+    end: origin.start,
     startTime: timeOf(nextStart),
     endTime: timeOf(nextStart + duration),
   }
@@ -753,11 +736,11 @@ export function resizeEvent(
   origin: CalendarEventTimes,
   endMinutes: number,
   minDuration: number,
-  window: TimeWindow,
+  timeWindow: TimeWindow,
 ): CalendarEventTimes {
-  const startMinutes = minutesAt(origin.startTime, window.start)
+  const startMinutes = minutesAt(origin.startTime, timeWindow.start)
   const floor = Math.max(minDuration, 1)
-  const end = clamp(endMinutes, startMinutes + floor, window.end)
+  const end = clamp(endMinutes, startMinutes + floor, timeWindow.end)
 
   return {
     start: origin.start,
@@ -797,13 +780,20 @@ export function moveEventToDay(origin: CalendarEventTimes, target: string): Cale
   }
 }
 
+/**
+ * Which column a horizontal position falls in, counted in reading order and held inside the
+ * grid. The inline half both grids share: the time grid's block axis is a moment, the month's
+ * a row.
+ */
+function columnAt(x: number, geometry: GridGeometry, rtl: boolean): number {
+  const columns = Math.max(1, geometry.columns)
+  const columnSize = geometry.inlineSize / columns
+  const offset = rtl ? geometry.inlineStart - x : x - geometry.inlineStart
+  return clamp(columnSize > 0 ? Math.floor(offset / columnSize) : 0, 0, columns - 1)
+}
+
 /** The measurements of a month grid — the same struct, with rows where a time window was. */
-export interface MonthGeometry {
-  top: number
-  height: number
-  inlineStart: number
-  inlineSize: number
-  columns: number
+export interface MonthGeometry extends GridGeometry {
   rows: number
 }
 
@@ -820,12 +810,8 @@ export function pointToMonthCell(
   geometry: MonthGeometry,
   rtl: boolean,
 ): { columnIndex: number; rowIndex: number } {
-  const columns = Math.max(1, geometry.columns)
   const rows = Math.max(1, geometry.rows)
-
-  const columnSize = geometry.inlineSize / columns
-  const offset = rtl ? geometry.inlineStart - point.x : point.x - geometry.inlineStart
-  const columnIndex = clamp(columnSize > 0 ? Math.floor(offset / columnSize) : 0, 0, columns - 1)
+  const columnIndex = columnAt(point.x, geometry, rtl)
 
   const rowSize = geometry.height / rows
   const rowIndex = clamp(

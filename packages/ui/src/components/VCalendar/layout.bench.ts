@@ -7,11 +7,9 @@
  * `VCalendarMonth` rebuilds `byDay` each time a chip changes day. So their cost is not paid
  * once when the view opens; it is paid at the rate a hand crosses slots.
  *
- * WHAT THE NUMBERS ARE FOR. `eventsOnDay` is measured the way `VCalendarMonth` actually
- * calls it — once per cell over the whole event list — because that shape, and not the
- * function alone, is what a bucketing pass would replace. The month case is therefore the
- * one to read before deciding whether that rewrite earns its complexity: it is quadratic in
- * principle, and the question is only where the event count makes that matter.
+ * WHAT THE NUMBERS ARE FOR. The month case sets `eventsByDay` beside the shape it replaced —
+ * one filter and one sort per cell over the whole event list, written out below since nothing
+ * ships it — so the gap stays a number anyone can re-run rather than a claim.
  *
  * The scales are deliberately spread. A calendar with 50 events is the ordinary case and
  * has to stay free; 2000 is a busy shared agenda, where an O(cells × events) pass either
@@ -21,8 +19,10 @@
 import { bench, describe } from 'vitest'
 
 import {
+  coversDay,
   eventsByDay,
-  eventsOnDay,
+  isAllDayEvent,
+  minutesAt,
   monthWeeks,
   packAllDay,
   packDayColumn,
@@ -32,6 +32,18 @@ import {
 import type { CalendarEvent } from './types'
 
 const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6]
+
+/** The naive reading of a day: filter the whole list, sort it, derive every key per comparison. */
+function eventsOnDay(events: readonly CalendarEvent[], iso: string): CalendarEvent[] {
+  return events
+    .filter((event) => coversDay(event, iso))
+    .sort(
+      (a, b) =>
+        (isAllDayEvent(a) ? 0 : 1) - (isAllDayEvent(b) ? 0 : 1) ||
+        minutesAt(a.startTime, 0) - minutesAt(b.startTime, 0) ||
+        (String(a.id) < String(b.id) ? -1 : String(a.id) > String(b.id) ? 1 : 0),
+    )
+}
 const WINDOW = windowOf(0, 24)
 
 /** A day offset applied to a fixed anchor, so every fixture is deterministic. */
@@ -95,12 +107,10 @@ for (const count of SCALES) {
     /*
      * The month view's real workload, measured both ways.
      *
-     * The naive shape is one `eventsOnDay` per cell, each filtering AND sorting the whole
-     * list — `cells × events`, with 42 sorts. The second is what VCalendarMonth does. The two
-     * stay side by side so the gap is a number anyone can re-run rather than a claim, and
-     * both must produce the same order.
+     * The naive shape is one filter per cell, each filtering AND sorting the whole list —
+     * `cells × events`, with 42 sorts. The second is what VCalendarMonth does.
      */
-    bench('byDay — eventsOnDay once per month cell (the naive shape)', () => {
+    bench('byDay — a filter and a sort per month cell (the naive shape)', () => {
       for (const cell of monthCells) eventsOnDay(events, cell.iso)
     })
 
@@ -111,8 +121,8 @@ for (const count of SCALES) {
       )
     })
 
-    bench('eventsOnDay — a single day', () => {
-      eventsOnDay(events, isoAt(3))
+    bench('eventsByDay — a single day', () => {
+      eventsByDay(events, [isoAt(3)])
     })
 
     // The time grid's two halves, each rebuilt when a drag of its own kind changes slot.

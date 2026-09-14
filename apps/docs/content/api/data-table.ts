@@ -16,6 +16,7 @@ export default {
         { name: 'variant', type: 'DataTableVariant', values: "'flat' | 'outlined'", default: "'flat'" },
         { name: 'responsive', type: 'DataTableResponsive', values: "'scroll' | 'stack'", default: "'scroll'" },
         { name: 'loading', type: 'boolean', default: 'false' },
+        { name: 'loadingText', type: 'string' },
         { name: 'emptyText', type: 'string' },
         { name: 'title', type: 'string' },
         { name: 'searchable', type: 'boolean', default: 'false' },
@@ -49,7 +50,9 @@ export default {
         { name: 'update:params', key: 'updateParams', type: '[params: DataTableParams]' },
       ],
       slots: [
-        { name: 'header', type: '{}' },
+        { name: 'title', type: '{}' },
+        { name: 'loading', type: '{}' },
+        { name: 'empty', type: '{ search: string; }' },
       ],
     },
   ],

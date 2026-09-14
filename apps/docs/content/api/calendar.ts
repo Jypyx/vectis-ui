@@ -12,6 +12,7 @@ export default {
         { name: 'views', type: 'CalendarView[]', default: "['day', '4days', 'week']" },
         { name: 'customDays', type: 'number', default: '4' },
         { name: 'weekdays', type: 'number[]' },
+        { name: 'firstDayOfWeek', type: 'number' },
         { name: 'locale', type: 'string' },
         { name: 'format', type: 'CalendarFormat', values: "'12h' | '24h'" },
         { name: 'dayStart', type: 'number', default: '0' },
@@ -32,20 +33,27 @@ export default {
       ],
       events: [
         { name: 'event-activate', key: 'eventActivate', type: '[event: E]' },
-        { name: 'slot-activate', key: 'slotActivate', type: '[slot: { date: string; time: string; }]' },
+        { name: 'cell-activate', key: 'cellActivate', type: '[cell: CalendarCell]' },
         { name: 'event-move', key: 'eventMove', type: '[event: E, previous: CalendarEventTimes]' },
         { name: 'event-resize', key: 'eventResize', type: '[event: E, previous: CalendarEventTimes]' },
         { name: 'event-create', key: 'eventCreate', type: '[event: CalendarEvent]' },
       ],
       slots: [
         { name: 'actions', type: '{}' },
-        { name: 'event', type: '{ event: E; layout: CalendarEventLayout; timeText: string; continuesBefore: boolean; continuesAfter: boolean; }' },
-        { name: 'day-header', key: 'dayHeader', type: '{ iso: string; weekday: string; day: string; today: boolean; }' },
+        { name: 'event', type: 'CalendarEventSlotProps<E>' },
+        { name: 'day-header', key: 'dayHeader', type: '{ iso: string; weekday: string; dayText: string; today: boolean; }' },
         { name: 'all-day-label', key: 'allDayLabel', type: '{}' },
       ],
     },
   ],
   types: [
+    {
+      name: 'CalendarCell',
+      definition: `export interface CalendarCell {
+  date: string
+  time: string
+}`,
+    },
     {
       name: 'CalendarEvent',
       definition: `export interface CalendarEvent {
@@ -68,6 +76,18 @@ export default {
     {
       name: 'CalendarEventLayout',
       definition: `export type CalendarEventLayout = 'block' | 'chip'`,
+    },
+    {
+      name: 'CalendarEventSlotProps',
+      definition: `export interface CalendarEventSlotProps<E extends CalendarEvent = CalendarEvent> {
+  event: E
+  layout: CalendarEventLayout
+  timeText: string
+  continuesBefore: boolean
+  continuesAfter: boolean
+  dragging: boolean
+  grabbed: boolean
+}`,
     },
     {
       name: 'CalendarEventTimes',

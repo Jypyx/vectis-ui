@@ -330,6 +330,8 @@ export interface Messages {
     reverted: string
     /** How an event's new place is announced, the range already written out. */
     movedTo: (title: string, when: string) => string
+    /** How an event made from the keyboard is announced, its day and times already written out. */
+    createdAt: (title: string, when: string) => string
   }
 }
 

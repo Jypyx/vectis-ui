@@ -17,7 +17,7 @@ export default {
     },
     weekdays: {
       title: 'Which days are shown',
-      text: '<code>weekdays</code> decides which days appear at all, as numbers from 0 for Sunday, its first entry being the day a week starts on. <code>dayStart</code> and <code>dayEnd</code> crop the hours shown in the time grids.',
+      text: '<code>weekdays</code> decides which days appear at all, as numbers from 0 for Sunday, its first entry being the day a week starts on. Without it, <code>firstDayOfWeek</code> sets that first day over the locale. <code>dayStart</code> and <code>dayEnd</code> crop the hours shown in the time grids.',
     },
     allDay: {
       title: 'All-day events',
@@ -33,7 +33,7 @@ export default {
     },
     eventSlot: {
       title: 'Custom event content',
-      text: 'The <code>#event</code> slot replaces what a card shows and receives the event, its formatted <code>timeText</code>, the <code>layout</code> it is drawn in, and whether it continues before or after the day.',
+      text: 'The <code>#event</code> slot replaces what a card shows and receives the event, its formatted <code>timeText</code>, the <code>layout</code> it is drawn in, whether it continues before or after the day, and whether it is being dragged or held by the keyboard.',
     },
   },
 
@@ -45,7 +45,9 @@ export default {
         customDays:
           'How many days the custom view shows, and how far Previous and Next step in it.',
         weekdays:
-          'Which weekdays are on show, as numbers from 0 for Sunday. The order matters as well: the first entry is the day a week starts on, which is why there is no separate first-day setting. Left out, the seven days in the order the locale puts them.',
+          'Which weekdays are on show, as numbers from 0 for Sunday. The order matters as well: the first entry is the day a week starts on, and it wins over <code>firstDayOfWeek</code>. Left out, the seven days starting on <code>firstDayOfWeek</code>.',
+        firstDayOfWeek:
+          'The day a week starts on, from 0 for Sunday, when <code>weekdays</code> is not given. Left out, the locale decides.',
         locale:
           'The language the days, months and times are written in. It falls back to the global one.',
         format: 'Whether times are shown on a 12- or a 24-hour clock. It follows the locale.',
@@ -64,7 +66,7 @@ export default {
         disabled:
           'Freezes the whole calendar: nothing can be moved, created or opened, and no other period can be reached. The cards leave the tab order while the grid keeps its own, so the agenda can still be read. That is what separates it from <code>readonly</code>, which stops the editing alone.',
         creatable:
-          'Makes an event when an empty part of a day is taken up: a click or Enter on a cell makes one a step long, a drag makes one as long as it was drawn. The slot signal fires either way, so you can leave this off and still get it.',
+          'Makes an event when an empty part of a day is taken up: a click or Enter on a cell makes one a step long, a drag makes one as long as it was drawn. The <code>cell-activate</code> event fires either way, so you can leave this off and still get it.',
         edgeStepDelay:
           'How long a dragged event has to rest against the side of the calendar before the view turns to the previous or next period, in milliseconds. Zero turns that off. The wait is the point of it: paging the instant the pointer touched the edge would make the last day of a week impossible to aim at.',
         noEdgeScroll: 'Stops dragging near the top or bottom of a time grid from scrolling it.',
@@ -76,7 +78,8 @@ export default {
       },
       events: {
         eventActivate: 'A card was clicked or activated, the cue to open an editor of your own.',
-        slotActivate: 'An empty part of the grid was activated, at this day and this time.',
+        cellActivate:
+          'An empty part of the grid was activated, at this day and this time. A day of the month view has no hour of its own, and reports the one the time grids start at.',
         eventMove:
           'An event was dragged or nudged somewhere else. It carries the event as it now stands and where it came from, so undoing it needs no copy of your own.',
         eventResize: "An event's end was dragged or nudged, in the same two parts.",

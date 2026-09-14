@@ -25,7 +25,7 @@ export default {
     },
     toolbar: {
       title: "Barre d'outils",
-      text: "Le slot <code>#header</code> remplace la prop <code>title</code> et occupe la gauche de la barre d'outils, le champ de recherche gardant la droite.",
+      text: "Le slot <code>#title</code> remplace la prop <code>title</code> et occupe la gauche de la barre d'outils, le champ de recherche gardant la droite.",
     },
     customCells: {
       title: 'Cellules personnalisées',
@@ -65,7 +65,7 @@ export default {
     },
     states: {
       title: 'Chargement et vide',
-      text: "<code>loading</code> affiche un indicateur à la place des lignes, et passe avant le vide. <code>emptyText</code> est ce que dit le tableau quand il n'y a rien à montrer.",
+      text: "<code>loading</code> affiche un indicateur et <code>loadingText</code> à la place des lignes, et passe avant le vide. <code>emptyText</code> est ce que dit le tableau quand il n'y a rien à montrer. Les slots <code>#loading</code> et <code>#empty</code> remplacent l'un ou l'autre état, le second recevant la recherche (<code>search</code>) qui a vidé le tableau.",
     },
     fullTable: {
       title: 'Un tableau complet',
@@ -87,6 +87,8 @@ export default {
         responsive:
           "Ce qui se passe quand le composant est trop étroit : le tableau défile latéralement, ou chaque ligne devient une carte avec ses en-têtes de colonne répétés à l'intérieur.",
         loading: 'Montre que les lignes sont en cours de chargement.',
+        loadingText:
+          "Ce qui est écrit à côté de l'indicateur pendant le chargement des lignes. Il retombe sur le dictionnaire du design system.",
         emptyText:
           "Ce qui est dit quand il n'y a aucune ligne à montrer. Il retombe sur le dictionnaire du design system.",
         title:
@@ -141,7 +143,11 @@ export default {
           'Ce qui est demandé au tableau, en mode serveur : la recherche, le tri, la page et la taille de page. Il part à chaque changement et jamais au montage.',
       },
       slots: {
-        header: "Le côté gauche de la barre d'outils, qui remplace la prop <code>title</code>.",
+        title: "Le côté gauche de la barre d'outils, qui remplace la prop <code>title</code>.",
+        loading:
+          "Ce que montre le tableau pendant le chargement de ses lignes, à la place de l'indicateur et de son texte.",
+        empty:
+          "Ce que montre le tableau quand il n'a aucune ligne à montrer, à la place de <code>emptyText</code>. Il reçoit la recherche qui a produit ce résultat vide, vide si rien n'a été cherché.",
       },
     },
   },

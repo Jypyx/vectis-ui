@@ -25,7 +25,7 @@ export default {
     },
     toolbar: {
       title: 'Toolbar',
-      text: 'The <code>#header</code> slot replaces the <code>title</code> prop and takes the left of the toolbar, the search field keeping the right.',
+      text: 'The <code>#title</code> slot replaces the <code>title</code> prop and takes the left of the toolbar, the search field keeping the right.',
     },
     customCells: {
       title: 'Custom cells',
@@ -65,7 +65,7 @@ export default {
     },
     states: {
       title: 'Loading and empty',
-      text: '<code>loading</code> shows a spinner in place of the rows, and is answered before emptiness. <code>emptyText</code> is what the table says when there is nothing to show.',
+      text: '<code>loading</code> shows a spinner and <code>loadingText</code> in place of the rows, and is answered before emptiness. <code>emptyText</code> is what the table says when there is nothing to show. The <code>#loading</code> and <code>#empty</code> slots replace either state, the second receiving the <code>search</code> that emptied the table.',
     },
     fullTable: {
       title: 'A complete table',
@@ -87,6 +87,8 @@ export default {
         responsive:
           'What happens when the component is too narrow: the table scrolls sideways, or each row becomes a card with its column headings repeated inside it.',
         loading: 'Shows that the rows are being loaded.',
+        loadingText:
+          'What is written beside the spinner while the rows are loading. It falls back to the design system dictionary.',
         emptyText:
           'What is said when there is no row to show. It falls back to the design system dictionary.',
         title:
@@ -139,7 +141,11 @@ export default {
           'What the table is being asked for, in server mode: the search, the sort, the page and the page size. It fires on every change and never on mount.',
       },
       slots: {
-        header: 'The left side of the toolbar, replacing the <code>title</code> prop.',
+        title: 'The left side of the toolbar, replacing the <code>title</code> prop.',
+        loading:
+          'What the table shows while its rows are loading, replacing the spinner and its text.',
+        empty:
+          'What the table shows when there is no row to show, replacing <code>emptyText</code>. It receives the search that produced the empty result, empty when nothing was searched for.',
       },
     },
   },

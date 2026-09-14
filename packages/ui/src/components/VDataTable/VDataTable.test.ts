@@ -63,7 +63,7 @@ describe('VDataTable', () => {
   it('variant: data-variant set on the root, flat by default', () => {
     const variantOf = (variant?: 'flat' | 'outlined') =>
       render(VDataTable, { props: { columns: COLUMNS, rows: ROWS, variant } })
-        .container.querySelector('.v-table-wrapper')
+        .container.querySelector('.v-data-table')
         ?.getAttribute('data-variant')
     expect(variantOf()).toBe('flat')
     expect(variantOf('outlined')).toBe('outlined')
@@ -76,7 +76,8 @@ describe('VDataTable', () => {
     const sortButton = getByRole('button', { name: 'Total' })
     const th = sortButton.closest('th') as HTMLElement
     // `data-icon` names the icon whatever its source (an embedded SVG, a ligature…)
-    const glyph = () => sortButton.querySelector<HTMLElement>('.v-table-sort-icon')?.dataset.icon
+    const glyph = () =>
+      sortButton.querySelector<HTMLElement>('.v-data-table-sort-icon')?.dataset.icon
 
     // the accessible name keeps only the label: the icon is decorative
     expect(glyph()).toBe('swap_vert')
@@ -108,7 +109,8 @@ describe('VDataTable', () => {
       },
     })
     const sortButton = getByRole('button', { name: 'Total' })
-    const glyph = () => sortButton.querySelector<HTMLElement>('.v-table-sort-icon')?.dataset.icon
+    const glyph = () =>
+      sortButton.querySelector<HTMLElement>('.v-data-table-sort-icon')?.dataset.icon
 
     expect(glyph()).toBe('unfold_more')
     await fireEvent.click(sortButton)
@@ -126,6 +128,56 @@ describe('VDataTable', () => {
     expect(getByText('Nothing to show')).toBeTruthy()
     await rerender({ loading: true })
     expect(getByRole('status')).toBeTruthy()
+  })
+
+  it('writes the loading text beside the spinner, from the dictionary or the prop', async () => {
+    const { container, getByRole, rerender } = render(VDataTable, {
+      props: { columns: COLUMNS, rows: [], loading: true },
+    })
+    const state = container.querySelector('.v-data-table-state') as HTMLElement
+    // The spinner names the state once for a screen reader; the visible copy is hidden from it.
+    expect(getByRole('status').textContent).toContain('Loading data…')
+    expect(
+      state.querySelector('.v-data-table-state-loading > span[aria-hidden="true"]')?.textContent,
+    ).toBe('Loading data…')
+    await rerender({ loadingText: 'Fetching projects' })
+    expect(state.textContent).toContain('Fetching projects')
+  })
+
+  it('lets the empty and loading states be replaced, handing the empty one the search', async () => {
+    const loading = ref(false)
+    const Harness = harness(
+      () => ({ columns: COLUMNS, rows: ROWS, loading }),
+      `
+        <VDataTable :columns="columns" :rows="rows" :loading="loading" searchable>
+          <template #empty="{ search }"><p>No match for {{ search }}</p></template>
+          <template #loading><p>Hold on</p></template>
+        </VDataTable>
+      `,
+    )
+    const { getByRole, getByText, queryByRole } = render(Harness)
+    await fireEvent.update(getByRole('searchbox'), 'zzz')
+    expect(getByText('No match for zzz')).toBeTruthy()
+
+    loading.value = true
+    await nextTick()
+    expect(getByText('Hold on')).toBeTruthy()
+    expect(queryByRole('status')).toBeNull()
+  })
+
+  it('puts the #title slot where the title prop goes', () => {
+    const Harness = harness(
+      () => ({ columns: COLUMNS, rows: ROWS }),
+      `
+        <VDataTable :columns="columns" :rows="rows" title="Ignored">
+          <template #title><strong>Projects</strong></template>
+        </VDataTable>
+      `,
+    )
+    const { container } = render(Harness)
+    const title = container.querySelector('.v-data-table-title') as HTMLElement
+    expect(title.querySelector('strong')?.textContent).toBe('Projects')
+    expect(title.textContent).not.toContain('Ignored')
   })
 
   it('custom cell (with the column scope) and header slots', () => {
@@ -254,8 +306,8 @@ describe('VDataTable', () => {
       `,
     )
     const { container, getByRole } = render(Harness)
-    const footer = container.querySelector('.v-table-footer') as HTMLElement
-    const selection = footer.querySelector('.v-table-selection') as HTMLElement
+    const footer = container.querySelector('.v-data-table-footer') as HTMLElement
+    const selection = footer.querySelector('.v-data-table-selection') as HTMLElement
 
     // the live region is set as soon as `selectable` is (empty at zero selection)
     expect([...footer.children].indexOf(selection)).toBe(0)
@@ -266,10 +318,10 @@ describe('VDataTable', () => {
     await fireEvent.click(getByRole('checkbox', { name: 'Select row 2' }))
     expect(selection.textContent).toBe('2 items selected')
 
-    const end = footer.querySelector('.v-table-footer-end') as HTMLElement
+    const end = footer.querySelector('.v-data-table-footer-end') as HTMLElement
     expect([...end.children].map((el) => el.classList[0])).toEqual([
-      'v-table-per-page',
-      'v-table-range',
+      'v-data-table-per-page',
+      'v-data-table-range',
       'v-pagination',
     ])
   })
@@ -388,7 +440,7 @@ describe('VDataTable', () => {
       props: { columns: COLUMNS, rows: ROWS },
       attrs: { class: 'my-class', 'aria-describedby': 'caption' },
     })
-    const wrapper = container.querySelector('.v-table-wrapper') as HTMLElement
+    const wrapper = container.querySelector('.v-data-table') as HTMLElement
     expect(wrapper.classList.contains('my-class')).toBe(true)
     expect(wrapper.hasAttribute('aria-describedby')).toBe(false)
     expect(container.querySelector('table')?.getAttribute('aria-describedby')).toBe('caption')
@@ -404,18 +456,18 @@ describe('VDataTable', () => {
         props: { columns: COLUMNS, rows: ROWS, height },
         attrs: { style: 'width: 640px' },
       })
-      const wrapper = container.querySelector('.v-table-wrapper') as HTMLElement
+      const wrapper = container.querySelector('.v-data-table') as HTMLElement
       expect(wrapper.style.blockSize).toBe(typeof height === 'number' ? '320px' : '60vh')
       // the consumer's style comes after the prop's: it survives
       expect(wrapper.style.width).toBe('640px')
-      expect(container.querySelector('.v-table-scroller')?.hasAttribute('style')).toBe(false)
+      expect(container.querySelector('.v-data-table-scroller')?.hasAttribute('style')).toBe(false)
     }
   })
 
   it('without height: no inline height, the parent decides', () => {
     const { container } = render(VDataTable, { props: { columns: COLUMNS, rows: ROWS } })
-    const wrapper = container.querySelector('.v-table-wrapper') as HTMLElement
+    const wrapper = container.querySelector('.v-data-table') as HTMLElement
     expect(wrapper.style.blockSize).toBe('')
-    expect(container.querySelector('.v-table-scroller')?.hasAttribute('style')).toBe(false)
+    expect(container.querySelector('.v-data-table-scroller')?.hasAttribute('style')).toBe(false)
   })
 })

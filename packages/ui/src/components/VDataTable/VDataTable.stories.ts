@@ -144,7 +144,7 @@ export const Sorting: Story = {
   },
 }
 
-/** The global header: the title on the left (the `title` prop or the #header slot), the search on the right. */
+/** The global header: the title on the left (the `title` prop or the #title slot), the search on the right. */
 export const Search: Story = {
   args: { searchable: true },
   render: (args) => ({
@@ -158,13 +158,13 @@ export const Search: Story = {
     const field = canvas.getByRole('searchbox', { name: 'Search the table' })
 
     /*
-     * The title is a VTypography, so `.v-table-title` and `.v-typography` sit on the
+     * The title is a VTypography, so `.v-data-table-title` and `.v-typography` sit on the
      * same element at equal specificity. The colour goes through the custom property
      * `.v-typography` reads, and NOT through a `color` declaration that would collide
      * with it and be arbitrated by an order nothing controls once each sheet ships
      * separately. A revert to `color:` empties this property — that is what goes red.
      */
-    const title = canvasElement.querySelector('.v-table-title') as HTMLElement
+    const title = canvasElement.querySelector('.v-data-table-title') as HTMLElement
     await expect(getComputedStyle(title).getPropertyValue('--typography-color')).not.toBe('')
 
     // accent-insensitive filtering: "brume" matches, the other rows drop out
@@ -195,9 +195,9 @@ export const LocalPagination: Story = {
   // confined) has an intrinsic width and the right-hand group is stuck to the footer's
   // edge.
   play: async ({ canvasElement }) => {
-    const footer = canvasElement.querySelector('.v-table-footer') as HTMLElement
+    const footer = canvasElement.querySelector('.v-data-table-footer') as HTMLElement
     const nav = footer.querySelector('.v-pagination') as HTMLElement
-    const perPage = footer.querySelector('.v-table-per-page') as HTMLElement
+    const perPage = footer.querySelector('.v-data-table-per-page') as HTMLElement
     await waitFor(() => {
       expect(nav.getBoundingClientRect().width).toBeGreaterThan(0)
       expect(perPage.getBoundingClientRect().right).toBeLessThanOrEqual(
@@ -412,8 +412,8 @@ export const FullHeight: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const wrapper = canvasElement.querySelector('.v-table-wrapper') as HTMLElement
-    const scroller = canvasElement.querySelector('.v-table-scroller') as HTMLElement
+    const wrapper = canvasElement.querySelector('.v-data-table') as HTMLElement
+    const scroller = canvasElement.querySelector('.v-data-table-scroller') as HTMLElement
 
     // the component matches the parent, and the overflow scrolls (instead of being
     // cropped by the outlined variant's `overflow: clip`)

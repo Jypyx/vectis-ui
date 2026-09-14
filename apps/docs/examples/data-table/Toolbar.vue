@@ -34,7 +34,7 @@ const filtered = computed(() =>
     searchable
     caption="Organisation projects"
   >
-    <template #header>
+    <template #title>
       <div class="toolbar">
         <span>Projects</span>
         <VMenu match-trigger>

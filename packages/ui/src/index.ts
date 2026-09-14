@@ -12,7 +12,7 @@
  * the consumer's bundler concatenates the sheets is unknowable. A rule that would
  * collide with another component's at equal specificity is qualified instead —
  * `[data-size]` (`.v-tab`, `.v-pagination-page`), a compound class
- * (`.v-popover-panel.v-tooltip-panel`), a descendant (`.v-table-toolbar .v-input`)
+ * (`.v-popover-panel.v-tooltip-panel`), a descendant (`.v-data-table-toolbar .v-input`)
  * — or routed through the custom property the target reads (`--typography-color`).
  * `scripts/check-css-split.ts` guards the mechanism at `postbuild`.
  *
@@ -165,6 +165,7 @@ export { default as VDataTable } from './components/VDataTable/VDataTable.vue'
 export type {
   DataTableColumn,
   DataTableSort,
+  DataTableSortDirection,
   DataTableRowId,
   DataTableParams,
   DataTableProps,
@@ -218,9 +219,11 @@ export type {
 } from './components/VTimeInput/VTimeInput.vue'
 export { default as VCalendar } from './components/VCalendar/VCalendar.vue'
 export type {
+  CalendarCell,
   CalendarEvent,
   CalendarEventId,
   CalendarEventLayout,
+  CalendarEventSlotProps,
   CalendarEventTimes,
   CalendarFormat,
   CalendarView,

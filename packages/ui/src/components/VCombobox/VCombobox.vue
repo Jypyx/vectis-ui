@@ -37,7 +37,7 @@ import type { ItemValue } from '../../types'
 import { inputGroupKey } from '../VInput/context'
 
 import { chipScaleFor } from '../../utils/chip'
-import { normalizeText } from '../../utils/text'
+import { createNormalizedCache, normalizeText } from '../../utils/text'
 
 import { useControlShape } from '../../composables/useControlShape'
 import { useRootAttrs } from '../../composables/useRootAttrs'
@@ -417,25 +417,12 @@ function labelOf(value: ItemValue) {
 }
 
 /*
- * The labels in their accent-insensitive form, remembered per option and re-checked
- * against the label itself.
- *
- * Normalizing a string means decomposing it, stripping what it decomposed into, and
- * lowercasing it — and the filter below runs on every keystroke. Without this memory the
- * entire list would be normalized again for each character typed.
- *
- * Reading the label on every call, rather than deriving the whole table once, is what
- * keeps the filter reactive: a derived value keyed on the list alone would not notice a
- * label changed in place, since flattening the options only ever touches the containers.
+ * The labels in their accent-insensitive form, remembered per option. Reading the label on
+ * every call is what keeps the filter reactive: flattening the options only ever touches the
+ * containers, so a label changed in place would go unnoticed by anything keyed on the list.
  */
-const normalizedLabels = new WeakMap<ComboboxOption, { label: string; normalized: string }>()
-function normalizedLabelOf(option: ComboboxOption): string {
-  const hit = normalizedLabels.get(option)
-  if (hit && hit.label === option.label) return hit.normalized
-  const normalized = normalizeText(option.label)
-  normalizedLabels.set(option, { label: option.label, normalized })
-  return normalized
-}
+const normalizedOf = createNormalizedCache<ComboboxOption>()
+const normalizedLabelOf = (option: ComboboxOption) => normalizedOf(option, option.label)
 
 // ONE search term, read both by the local filter and by what is sent to the source: the
 // list on screen and the request in flight therefore cannot describe different searches.

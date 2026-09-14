@@ -14,6 +14,35 @@ export function normalizeText(s: string): string {
 }
 
 // @core
+/**
+ * A memory of `normalizeText` results, filed under the object a text belongs to — a table row,
+ * a combobox option — and under a field name when one object holds several texts.
+ *
+ * A filter normalizes the whole list again on every keystroke, and normalizing decomposes,
+ * strips and lowercases each string: this is what makes the second keystroke cost a lookup.
+ *
+ * The raw text is passed on EVERY call and compared with the one remembered, rather than the
+ * list being derived once: that is what notices a label edited in place, which a value keyed
+ * on the list alone would not. And the memory is a `WeakMap` keyed by the owner, so replacing
+ * the list lets the old entries be collected with no invalidation written anywhere.
+ */
+export function createNormalizedCache<K extends object>() {
+  const cache = new WeakMap<K, Map<string, { raw: string; normalized: string }>>()
+  return (owner: K, raw: string, field = ''): string => {
+    let texts = cache.get(owner)
+    if (!texts) {
+      texts = new Map()
+      cache.set(owner, texts)
+    }
+    const hit = texts.get(field)
+    if (hit && hit.raw === raw) return hit.normalized
+    const normalized = normalizeText(raw)
+    texts.set(field, { raw, normalized })
+    return normalized
+  }
+}
+
+// @core
 /** A whole number written on two digits, so that 7 becomes "07" — as dates and times are. */
 export function pad2(n: number): string {
   return String(n).padStart(2, '0')

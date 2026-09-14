@@ -8,7 +8,6 @@ import {
   columnCount,
   daySpan,
   eventsByDay,
-  eventsOnDay,
   inlineEdgeAt,
   moveEventToDay,
   pointToMonthCell,
@@ -466,7 +465,10 @@ describe('monthsOfYear', () => {
   })
 })
 
-describe('eventsOnDay', () => {
+/** One day's list, as the month view's single-square case reads it. */
+const eventsOnDay = (events: CalendarEvent[], iso: string) => eventsByDay(events, [iso]).get(iso)!
+
+describe('the order of a day', () => {
   it('lists the all-day events first, then the rest by when they start', () => {
     const list = eventsOnDay(
       [
@@ -519,13 +521,10 @@ describe('eventsByDay', () => {
 
   /*
    * The contract that matters: it fills every day at once, but the list it puts in each one
-   * must be EXACTLY what `eventsOnDay` would have returned for that day. It is the order
-   * chips are listed in, so any divergence would be visible on screen — and the two now use
-   * different code paths (`eventsByDay` derives its sort key once per event, where
-   * `eventsOnDay` derives it per comparison), which is precisely why this is asserted rather
-   * than assumed.
+   * must be EXACTLY what it gives that day asked about alone. It is the order chips are listed
+   * in, so a multi-day event walked into a bucket out of turn would be visible on screen.
    */
-  it('agrees with eventsOnDay, day for day', () => {
+  it('fills a week exactly as it fills each of its days alone', () => {
     const events = [
       event({ id: 'late', start: WEDNESDAY, end: WEDNESDAY, startTime: '16:00', endTime: '17:00' }),
       event({ id: 'trip', start: MONDAY, end: FRIDAY, allDay: true }),
@@ -724,18 +723,13 @@ describe('snapping', () => {
 describe('moveEvent', () => {
   const origin = { start: WEDNESDAY, end: WEDNESDAY, startTime: '09:00', endTime: '10:30' }
 
-  it('carries the event whole, keeping how long it lasts', () => {
-    expect(moveEvent(origin, 1, 30, DAY)).toEqual({
-      start: '2026-06-11',
-      end: '2026-06-11',
+  it('carries the event whole along its day, keeping how long it lasts', () => {
+    expect(moveEvent(origin, 30, DAY)).toEqual({
+      start: WEDNESDAY,
+      end: WEDNESDAY,
       startTime: '09:30',
       endTime: '11:00',
     })
-  })
-
-  it('steps over the hidden days when it is given a week', () => {
-    const friday = { ...origin, start: FRIDAY, end: FRIDAY }
-    expect(moveEvent(friday, 1, 0, DAY, WORKING_DAYS).start).toBe('2026-06-15')
   })
 
   /*
@@ -743,13 +737,13 @@ describe('moveEvent', () => {
    * So an event pushed past the end of the window is held against it instead of being cut.
    */
   it('holds an event at the edge rather than shortening it', () => {
-    const late = moveEvent(origin, 0, 10_000, DAY)
+    const late = moveEvent(origin, 10_000, DAY)
     expect(late.startTime).toBe('22:30')
     expect(late.endTime).toBe('23:59')
   })
 
   it('holds it at the top edge the same way', () => {
-    expect(moveEvent(origin, 0, -10_000, DAY)).toMatchObject({
+    expect(moveEvent(origin, -10_000, DAY)).toMatchObject({
       startTime: '00:00',
       endTime: '01:30',
     })

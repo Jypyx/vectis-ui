@@ -17,7 +17,7 @@ export default {
     },
     weekdays: {
       title: 'Les jours affichés',
-      text: '<code>weekdays</code> décide quels jours apparaissent, en nombres à partir de 0 pour dimanche, sa première entrée étant le jour où commence la semaine. <code>dayStart</code> et <code>dayEnd</code> rognent les heures affichées dans les grilles horaires.',
+      text: '<code>weekdays</code> décide quels jours apparaissent, en nombres à partir de 0 pour dimanche, sa première entrée étant le jour où commence la semaine. Sans lui, <code>firstDayOfWeek</code> fixe ce premier jour à la place de la locale. <code>dayStart</code> et <code>dayEnd</code> rognent les heures affichées dans les grilles horaires.',
     },
     allDay: {
       title: 'Événements sur la journée',
@@ -33,7 +33,7 @@ export default {
     },
     eventSlot: {
       title: "Contenu d'événement personnalisé",
-      text: "Le slot <code>#event</code> remplace le contenu d'une carte et reçoit l'événement, son <code>timeText</code> formaté, le <code>layout</code> dans lequel il est dessiné, et s'il se poursuit avant ou après la journée.",
+      text: "Le slot <code>#event</code> remplace le contenu d'une carte et reçoit l'événement, son <code>timeText</code> formaté, le <code>layout</code> dans lequel il est dessiné, s'il se poursuit avant ou après la journée, et s'il est en train d'être glissé ou saisi au clavier.",
     },
   },
 
@@ -45,7 +45,9 @@ export default {
         customDays:
           'Combien de jours la vue personnalisée montre, et de combien Précédent et Suivant y avancent.',
         weekdays:
-          "Quels jours de la semaine sont montrés, en nombres à partir de 0 pour dimanche. L'ORDRE compte aussi : la première entrée est le jour où commence une semaine, ce pourquoi il n'y a pas de réglage séparé pour cela. Omis, les sept jours dans l'ordre où la locale les place.",
+          "Quels jours de la semaine sont montrés, en nombres à partir de 0 pour dimanche. L'ORDRE compte aussi : la première entrée est le jour où commence une semaine, et elle l'emporte sur <code>firstDayOfWeek</code>. Omis, les sept jours à partir de <code>firstDayOfWeek</code>.",
+        firstDayOfWeek:
+          "Le jour où commence une semaine, à partir de 0 pour dimanche, quand <code>weekdays</code> n'est pas donné. Omis, la locale décide.",
         locale:
           'La langue dans laquelle les jours, les mois et les heures sont écrits. Elle retombe sur la locale globale.',
         format:
@@ -65,7 +67,7 @@ export default {
         disabled:
           "Fige tout le calendrier : plus rien ne se déplace, ne se crée ni ne s'ouvre, et aucune autre période n'est atteignable. Les cartes sortent du parcours de tabulation, la grille garde le sien, si bien que l'agenda reste lisible. C'est ce qui le distingue de <code>readonly</code>, qui n'arrête que l'édition.",
         creatable:
-          "Crée un événement quand une partie vide d'une journée est prise : un clic ou Entrée sur une cellule en fait un long d'un pas, un glissement en fait un aussi long qu'il a été tracé. Le signal de créneau part de toute façon : vous pouvez donc laisser ceci de côté et le garder.",
+          "Crée un événement quand une partie vide d'une journée est prise : un clic ou Entrée sur une cellule en fait un long d'un pas, un glissement en fait un aussi long qu'il a été tracé. L'événement <code>cell-activate</code> part de toute façon : vous pouvez donc laisser ceci de côté et le garder.",
         edgeStepDelay:
           "Combien de temps un événement déplacé doit reposer contre le bord du calendrier avant que la vue passe à la période précédente ou suivante, en millisecondes. Zéro le désactive. L'attente est tout l'intérêt : tourner la page à l'instant où le pointeur touche le bord rendrait le dernier jour d'une semaine impossible à viser.",
         noEdgeScroll:
@@ -80,7 +82,8 @@ export default {
       events: {
         eventActivate:
           'Une carte a été cliquée ou activée, le signal pour ouvrir un éditeur à vous.',
-        slotActivate: 'Une partie vide de la grille a été activée, à ce jour et à cette heure.',
+        cellActivate:
+          "Une partie vide de la grille a été activée, à ce jour et à cette heure. Un jour de la vue mois n'a pas d'heure à lui, et donne celle à laquelle commencent les grilles horaires.",
         eventMove:
           "Un événement a été déplacé ou poussé ailleurs. Il porte l'événement tel qu'il est désormais et d'où il vient, si bien qu'annuler ne demande aucune copie de votre part.",
         eventResize: "La fin d'un événement a été déplacée ou poussée, en ces deux mêmes parties.",

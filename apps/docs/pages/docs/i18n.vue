@@ -143,6 +143,7 @@ const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>
     'calendar.openDay': '(day) => `Open ${day}`',
     'calendar.newEvent': '(index) => `Event #${index}`',
     'calendar.movedTo': '(title, when) => `${title} moved to ${when}.`',
+    'calendar.createdAt': '(title, when) => `${title} created on ${when}.`',
   },
   fr: {
     'common.remove': '(name) => `Retirer ${name}`',
@@ -171,6 +172,7 @@ const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>
     'calendar.openDay': '(day) => `Ouvrir le ${day}`',
     'calendar.newEvent': '(index) => `Évènement n°${index}`',
     'calendar.movedTo': '(title, when) => `${title} déplacé au ${when}.`',
+    'calendar.createdAt': '(title, when) => `${title} créé le ${when}.`',
   },
 }
 

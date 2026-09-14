@@ -23,6 +23,8 @@
  * thing a pointer drag has that a keypress does not: the chance to change your mind.
  */
 
+import { MINUTES_PER_HOUR } from './layout'
+
 /** What one key means, given where the focus is. */
 export type CalendarIntent =
   /** Move the focused cell by whole days and whole hours. */
@@ -33,7 +35,7 @@ export type CalendarIntent =
   | { kind: 'period'; delta: -1 | 1 }
   /** Take up what is focused: create here, open a card, or commit a move under way. */
   | { kind: 'activate' }
-  /** Back out: leave a card for its cell, or abandon a move and put the event back. */
+  /** Abandon a move under way and put the event back. */
   | { kind: 'cancel' }
   /** Move the grabbed event. */
   | { kind: 'grabMove'; days: number; minutes: number }
@@ -44,14 +46,11 @@ export type CalendarIntent =
  * Where the focus is when the key arrives, which is what decides the answer:
  *
  * - `cell` — an empty part of the grid. The arrows travel, Enter creates.
- * - `event` — a card, at rest. Enter takes hold of it, Escape goes back to the grid.
+ * - `event` — a card, at rest. Enter takes hold of it; every other key is the browser's.
  * - `grabbed` — a card being moved. The arrows now move the EVENT, Enter commits, Escape
  *   puts it back where it was.
  */
 export type CalendarFocus = 'cell' | 'event' | 'grabbed'
-
-/** How far one press of an arrow travels vertically in the grid: one hour. */
-const MINUTES_PER_ROW = 60
 
 /**
  * What a key means. Returning nothing says the key is none of this table's business and
@@ -97,17 +96,7 @@ export function calendarIntent(
     }
   }
 
-  if (focus === 'event') {
-    switch (key) {
-      case 'Enter':
-      case ' ':
-        return { kind: 'activate' }
-      case 'Escape':
-        return { kind: 'cancel' }
-      default:
-        return undefined
-    }
-  }
+  if (focus === 'event') return key === 'Enter' || key === ' ' ? { kind: 'activate' } : undefined
 
   switch (key) {
     case 'ArrowLeft':
@@ -115,9 +104,9 @@ export function calendarIntent(
     case 'ArrowRight':
       return { kind: 'moveFocus', days: inline, minutes: 0 }
     case 'ArrowUp':
-      return { kind: 'moveFocus', days: 0, minutes: -MINUTES_PER_ROW }
+      return { kind: 'moveFocus', days: 0, minutes: -MINUTES_PER_HOUR }
     case 'ArrowDown':
-      return { kind: 'moveFocus', days: 0, minutes: MINUTES_PER_ROW }
+      return { kind: 'moveFocus', days: 0, minutes: MINUTES_PER_HOUR }
     case 'Home':
       return { kind: 'rowEdge', edge: 'start' }
     case 'End':

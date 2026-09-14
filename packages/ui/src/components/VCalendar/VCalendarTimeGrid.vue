@@ -18,23 +18,34 @@
  * The day names are NOT column headers: they stay in view above the scrolling area, which
  * puts them outside the grid. Every cell names its own day in full instead ("Wednesday 10
  * June, 09:00"), so nothing is lost to a reader who never sees that row.
+ *
+ * The drag and the keyboard grab are `gesture.ts`'s. What stays here is what a moment of the
+ * day means: the point under the pointer turned into a slot, and the four kinds of gesture a
+ * time grid offers.
  */
-import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, useId } from 'vue'
 
 import { formatDateDisplay } from '../../utils/date'
-import { isRtl as isElementRtl } from '../../utils/direction'
 import { clamp } from '../../utils/number'
-import { formatTimeDisplay, type HourFormat } from '../../utils/time'
+import { formatTimeDisplay } from '../../utils/time'
 
 import { useMessages } from '../../i18n/state'
 
 import VCalendarEvent from './VCalendarEvent.vue'
+import { EDGE_BAND } from './edgeStep'
 import {
-  DRAG_THRESHOLD,
+  gridGeometryOf,
+  useCalendarGesture,
+  type GestureBase,
+  type GestureInit,
+  type GrabStep,
+} from './gesture'
+import { calendarIntent } from './keyboard'
+import {
+  MINUTES_PER_HOUR,
   blockEdgeAt,
   floorToSlot,
   fractionOf,
-  inlineEdgeAt,
   isAllDayEvent,
   minutesAt,
   moveEvent,
@@ -42,7 +53,6 @@ import {
   packAllDay,
   packDayColumn,
   pointToCell,
-  pointWithin,
   resizeEvent,
   sameTimes,
   snapToSlot,
@@ -53,25 +63,13 @@ import {
   type PlacedSegment,
   type TimeWindow,
 } from './layout'
-import { calendarIntent } from './keyboard'
-import {
-  cardIdOf as idOfCard,
-  edgeCueOf,
-  ghostIdOf,
-  isGhostId,
-  isGrabbed,
-  movedPast,
-  originalIdOf,
-  pointerOutside,
-  useCardFocus,
-  useDragGuard,
-} from './gesture'
-import { EDGE_BAND, useEdgeStep } from './edgeStep'
 import type {
+  ActivatedCell,
   CalendarEvent,
   CalendarEventId,
-  CalendarEventLayout,
+  CalendarEventSlotProps,
   CalendarEventTimes,
+  CalendarFormat,
 } from './types'
 
 /** Where the keyboard focus is in the grid, as a day and a moment in it. */
@@ -80,13 +78,13 @@ export interface FocusedCell {
   minutes: number
 }
 
-export interface TimeGridProps<T> {
+export interface CalendarTimeGridProps<T> {
   days: string[]
   events: T[]
-  window: TimeWindow
+  timeWindow: TimeWindow
   slotDuration: number
   locale: string
-  hourFormat: HourFormat
+  format: CalendarFormat
   /** Today's date, or nothing on the server, where it cannot be known. */
   today: string | null
   /**
@@ -116,11 +114,11 @@ export interface TimeGridProps<T> {
   label: string
 }
 
-const props = defineProps<TimeGridProps<E>>()
+const props = defineProps<CalendarTimeGridProps<E>>()
 
 const emit = defineEmits<{
   /** An empty part of the grid was activated, at this day and this moment. */
-  'cell-activate': [iso: string, minutes: number]
+  'cell-activate': [cell: ActivatedCell]
   /** A card was clicked or activated. */
   'event-activate': [event: E]
   /** An event was dropped somewhere else, or stretched to a new end. */
@@ -137,28 +135,19 @@ const emit = defineEmits<{
 const focused = defineModel<FocusedCell>('focused', { required: true })
 
 defineSlots<{
-  event?(props: {
-    event: E
-    layout: CalendarEventLayout
-    timeText: string
-    continuesBefore: boolean
-    continuesAfter: boolean
-    dragging: boolean
-    grabbed: boolean
-  }): unknown
-  'day-header'?(props: { iso: string; weekday: string; day: string; today: boolean }): unknown
+  event?(props: CalendarEventSlotProps<E>): unknown
+  'day-header'?(props: { iso: string; weekday: string; dayText: string; today: boolean }): unknown
   'all-day-label'?(): unknown
 }>()
 
 const m = useMessages()
 const uid = useId()
 
-const MINUTES_PER_HOUR = 60
-
 /** The hour each row stands for, as minutes since midnight. */
 const hours = computed(() => {
   const rows: number[] = []
-  for (let at = props.window.start; at < props.window.end; at += MINUTES_PER_HOUR) rows.push(at)
+  const { start, end } = props.timeWindow
+  for (let at = start; at < end; at += MINUTES_PER_HOUR) rows.push(at)
   return rows
 })
 
@@ -176,32 +165,11 @@ const DRAFT_ID = '__vectis-calendar-draft__'
  * questions — one asks what MOMENT the pointer is over, the other only what day — and because
  * a bar spanning three days must keep spanning three when it lands.
  */
-interface Gesture {
+interface Gesture extends GestureBase {
   kind: 'move' | 'move-days' | 'resize' | 'create'
-  id: CalendarEventId
-  /**
-   * Where the event was when the gesture began. Every frame is computed from THIS and never
-   * from the frame before it, so a long drag cannot accumulate rounding drift.
-   */
-  origin: CalendarEventTimes
-  /** What the card shows right now. The model is not touched until the gesture ends. */
-  preview: CalendarEventTimes
-  pointerId: number | null
-  originX: number
-  originY: number
   /** How far into the card the pointer took hold, so the card does not jump under it. */
   grabOffset: number
   grabColumn: number
-  /**
-   * Where the pointer last was.
-   *
-   * Kept because two things move the calendar UNDER a still pointer — paging at an edge, and
-   * auto-scrolling — and each has to work out afresh what the pointer is now over. Without it
-   * a hand held motionless at an edge would page the view and leave the card behind on a day
-   * that is no longer on screen.
-   */
-  lastX: number
-  lastY: number
   /**
    * The share of its column the dragged card had when the gesture began — and nothing else.
    *
@@ -221,38 +189,74 @@ interface Gesture {
    */
   ghostColumn: Pick<PlacedSegment, 'column' | 'span' | 'columns'> | null
   ghostLane: number | null
-  /** Whether the pointer has travelled far enough for this to be a drag and not a click. */
-  moved: boolean
-  /**
-   * Whether the pointer is off the calendar altogether — over the toolbar, or over the page
-   * beside it. Letting go here abandons the gesture whole and writes nothing.
-   *
-   * A KEYBOARD grab can never set it, and structurally rather than by a guard: `onPointermove`
-   * is the only thing that writes it, and it returns on the id mismatch before reaching that
-   * line — a grab's `pointerId` is null, which no real pointer's id ever equals.
-   */
-  outside: boolean
 }
 
-const gesture = ref<Gesture | null>(null)
+const rootEl = ref<HTMLElement | null>(null)
+const canvasEl = ref<HTMLElement | null>(null)
+const columnsEl = ref<HTMLElement | null>(null)
 
-/** True while a card is being held by the keyboard rather than dragged by a pointer. */
-const grabbing = computed(() => isGrabbed(gesture.value))
-
-/**
- * The event the echo stands for: the one being dragged, back where the drag began.
- *
- * ONE predicate, read by the three places that have to agree — the event list, the packing
- * and the band. They were briefly allowed to disagree, and the failure was immediate and
- * total: a placement with no event behind it, and every card in the grid failing to render.
- * A press that has not travelled yet produces none, or a click would flash a second card
- * over the first.
- */
-const ghostEvent = computed<E | null>(() => {
-  const state = gesture.value
-  if (!state?.moved) return null
-  const original = props.events.find((event) => event.id === state.id)
-  return original ? ({ ...original, ...state.origin, id: ghostIdOf(state.id) } as E) : null
+const {
+  gesture,
+  ghostEvent,
+  withPreview,
+  edgeCue,
+  isRtl,
+  start,
+  reapply,
+  endLastGesture,
+  consumeDrag,
+  onPointermove,
+  onPointerup,
+  onPointercancel,
+  onCardKeydown,
+  focusCell,
+  idOfCard,
+  cardState,
+} = useCalendarGesture<E, Gesture>({
+  events: () => props.events,
+  eventOf: (id): E | undefined => eventOf(id),
+  rootEl,
+  // The SCROLLER, not the columns box: the all-day band sits in the sticky header, and this is
+  // the only element that contains both it and the canvas.
+  captureEl: rootEl,
+  measureEl: columnsEl,
+  columns: () => props.days.length,
+  editable: () => props.editable,
+  hintId: () => props.hintId,
+  slotMinutes: () => props.slotDuration,
+  edgeStepDelay: () => props.edgeStepDelay,
+  layout: () => props.days,
+  applyPoint,
+  // Scrolling is measured against the SCROLLER, which is what actually moves; paging, in the
+  // composable, against the columns the days occupy.
+  onEdges: (state, scroller) =>
+    setScrollSpeed(
+      props.autoScroll && scroller ? blockEdgeAt(state.lastY, scroller, EDGE_BAND) : 0,
+    ),
+  onRelease: stopScrolling,
+  onLetGo: (state) => {
+    if (state.kind !== 'create') return false
+    emit('slot-create', state.preview)
+    return true
+  },
+  onDrop: (state) =>
+    emit('event-drop', state.id, state.preview, state.kind === 'resize' ? 'resize' : 'move'),
+  grab: (item) =>
+    props.editable && !isAllDayEvent(item)
+      ? initFor({
+          kind: 'move',
+          id: item.id,
+          origin: timesOf(item),
+          pointerId: null,
+          originX: 0,
+          originY: 0,
+          grabOffset: 0,
+          grabColumn: 0,
+        })
+      : null,
+  onGrabStep,
+  step: (delta) => emit('step', delta),
+  announce: (message) => emit('announce', message),
 })
 
 /**
@@ -272,7 +276,7 @@ const ghostSegment = computed<PlacedSegment | null>(() => {
   const state = gesture.value
   const event = ghostEvent.value
   if (!event || !state?.ghostColumn) return null
-  const [segment] = timedSegments([event], props.days, props.window, props.slotDuration)
+  const [segment] = timedSegments([event], props.days, props.timeWindow, props.slotDuration)
   return segment ? { ...segment, ...state.ghostColumn } : null
 })
 
@@ -291,21 +295,6 @@ const ghostSpan = computed<AllDaySpan | null>(() => {
  */
 const timedEvents = computed(() => props.events.filter((event) => !isAllDayEvent(event)))
 const allDayEvents = computed(() => props.events.filter((event) => isAllDayEvent(event)))
-
-/** The event being gestured at, moved to wherever it is now, plus the echo of where it began. */
-function withPreview(events: E[], state: Gesture): E[] {
-  const moving = events.map((event) =>
-    event.id === state.id ? ({ ...event, ...state.preview } as E) : event,
-  )
-
-  /*
-   * The echo of where it started. It is listed here whether or not it has a box to draw on,
-   * because this is what the id maps below are built from and the template reads a card's
-   * event back out of them. An echo whose day the view has paged past simply produces no
-   * placement — which is what happens to any ordinary event on a day that is off show.
-   */
-  return ghostEvent.value ? [...moving, ghostEvent.value] : moving
-}
 
 /**
  * The timed events as the columns should currently DRAW them — which is the model, with the
@@ -339,20 +328,24 @@ const drawnTimed = computed<E[]>(() => {
     return [...timedEvents.value, draft]
   }
 
-  return withPreview(timedEvents.value, state)
+  return withPreview(timedEvents.value)
 })
 
 /** The all-day bars as the band should currently draw them — see `drawnTimed`. */
-const drawnAllDay = computed<E[]>(() => {
-  const state = gesture.value
-  return state?.kind === 'move-days' ? withPreview(allDayEvents.value, state) : allDayEvents.value
-})
+const drawnAllDay = computed<E[]>(() =>
+  gesture.value?.kind === 'move-days' ? withPreview(allDayEvents.value) : allDayEvents.value,
+)
 
-const timedById = computed(() => new Map(drawnTimed.value.map((event) => [event.id, event])))
-const allDayById = computed(() => new Map(drawnAllDay.value.map((event) => [event.id, event])))
+const timedById = computed(
+  () => new Map<CalendarEventId, E>(drawnTimed.value.map((event) => [event.id, event])),
+)
+const allDayById = computed(
+  () => new Map<CalendarEventId, E>(drawnAllDay.value.map((event) => [event.id, event])),
+)
 
 /** Any event on show, as it is currently drawn. For the handlers; the template reads a half. */
-const eventOf = (id: CalendarEventId) => timedById.value.get(id) ?? allDayById.value.get(id)
+const eventOf = (id: CalendarEventId): E | undefined =>
+  timedById.value.get(id) ?? allDayById.value.get(id)
 
 /**
  * The bars above the grid, and how many rows they need between them.
@@ -373,6 +366,14 @@ const allDayLanes = computed(() =>
   allDay.value.reduce((most, span) => Math.max(most, span.lane + 1), 0),
 )
 
+/** The row a moment of the window is drawn in, held inside the grid. */
+const rowOf = (minutes: number) =>
+  clamp(
+    Math.floor((minutes - props.timeWindow.start) / MINUTES_PER_HOUR),
+    0,
+    hours.value.length - 1,
+  )
+
 /**
  * Where the current-time line goes, or nothing when it has no business being drawn: on the
  * server, on a range that does not include today, or at an hour the window has cropped
@@ -382,13 +383,12 @@ const nowMark = computed(() => {
   if (props.now === null || props.today === null) return null
   const dayIndex = props.days.indexOf(props.today)
   if (dayIndex === -1) return null
-  if (props.now < props.window.start || props.now > props.window.end) return null
-  const row = Math.floor((props.now - props.window.start) / MINUTES_PER_HOUR)
+  if (props.now < props.timeWindow.start || props.now > props.timeWindow.end) return null
   return {
     day: dayIndex,
     // Clamped so the line at the very end of the window still has a cell to live in.
-    row: clamp(row, 0, hours.value.length - 1),
-    fraction: fractionOf(props.now, props.window),
+    row: rowOf(props.now),
+    fraction: fractionOf(props.now, props.timeWindow),
   }
 })
 
@@ -398,7 +398,7 @@ const nowMark = computed(() => {
  * and packing them together would make a busy Monday narrow a quiet Tuesday.
  */
 const placed = computed(() => {
-  const segments = timedSegments(drawnTimed.value, props.days, props.window, props.slotDuration)
+  const segments = timedSegments(drawnTimed.value, props.days, props.timeWindow, props.slotDuration)
   const ghost = ghostSegment.value
 
   const byDay = new Map<number, typeof segments>()
@@ -426,11 +426,14 @@ const cellId = (iso: string, minutes: number) => `${uid}-c-${iso}-${minutes}`
  * CELL — the shape `byCell` below uses, for the same reason.
  *
  * The grid renders `hours × days` cells, 24 × 7 by default, and a drag re-renders the whole
- * template every time it carries its event into another slot. Read straight from `formatDateDisplay`
- * in the template that would be 168 `cellLabel` calls per such frame, each doing a
- * `parseISO`, a `JSON.stringify` for the formatter cache key and two `Intl` formats — none of
- * which depends on the pointer. These two maps, of 7 and 24 entries, recompute when the
+ * template every time it carries its event into another slot. Read straight from
+ * `formatDateDisplay` in the template that would be 168 `cellLabel` calls per such frame, each
+ * doing a `parseISO`, a `JSON.stringify` for the formatter cache key and two `Intl` formats —
+ * none of which depends on the pointer. These two maps, of 7 and 24 entries, recompute when the
  * locale, the days or the window change and never because a card moved.
+ *
+ * Both are keyed by exactly what the template walks, `days` and `hours`, so every lookup is
+ * a hit and none of them needs a formatting fallback.
  */
 const dayLabels = computed(() => {
   const map = new Map<string, { short: string; number: string; full: string }>()
@@ -451,30 +454,13 @@ const dayLabels = computed(() => {
 const hourLabels = computed(() => {
   const map = new Map<number, string>()
   for (const minutes of hours.value)
-    map.set(minutes, formatTimeDisplay(timeOf(minutes), props.locale, props.hourFormat))
+    map.set(minutes, formatTimeDisplay(timeOf(minutes), props.locale, props.format))
   return map
 })
 
-/*
- * The hour gutter and the drag readout both ask for an hour that is not always one of the
- * rows — a preview lands between them — so this falls back to formatting rather than
- * assuming the map holds every minute.
- */
-const hourLabel = (minutes: number) =>
-  hourLabels.value.get(minutes) ??
-  formatTimeDisplay(timeOf(minutes), props.locale, props.hourFormat)
-
-const dayName = (iso: string, weekday: 'short' | 'long') =>
-  weekday === 'short'
-    ? (dayLabels.value.get(iso)?.short ?? formatDateDisplay(iso, props.locale, { weekday }))
-    : formatDateDisplay(iso, props.locale, { weekday })
-
-const dayNumber = (iso: string) =>
-  dayLabels.value.get(iso)?.number ?? formatDateDisplay(iso, props.locale, { day: 'numeric' })
-
-/** What one cell is called: the day in full, then the hour. */
-const cellLabel = (iso: string, minutes: number) =>
-  `${dayLabels.value.get(iso)?.full ?? iso}, ${hourLabel(minutes)}`
+const hourLabel = (minutes: number) => hourLabels.value.get(minutes) ?? ''
+const dayName = (iso: string) => dayLabels.value.get(iso)?.short ?? ''
+const dayNumber = (iso: string) => dayLabels.value.get(iso)?.number ?? ''
 
 /**
  * The cells, row by row, with everything about them that no gesture can change: the id the
@@ -495,7 +481,8 @@ const gridRows = computed(() => {
       row,
       key: row * columns + day,
       id: cellId(iso, minutes),
-      label: cellLabel(iso, minutes),
+      // The day in full, then the hour.
+      label: `${dayLabels.value.get(iso)?.full ?? iso}, ${hourLabel(minutes)}`,
     })),
   }))
 })
@@ -515,14 +502,14 @@ const gridRows = computed(() => {
  * format, and would go on printing the old ones after either changed.
  */
 const timeTextOf = computed(() => {
-  const { locale, hourFormat } = props
+  const { locale, format } = props
   const cache = new Map<string, string>()
   return (event: CalendarEvent): string => {
     const key = `${event.startTime}|${event.endTime}|${event.timezone ?? ''}`
     let text = cache.get(key)
     if (text === undefined) {
-      const start = formatTimeDisplay(event.startTime, locale, hourFormat)
-      const end = formatTimeDisplay(event.endTime, locale, hourFormat)
+      const start = formatTimeDisplay(event.startTime, locale, format)
+      const end = formatTimeDisplay(event.endTime, locale, format)
       const range = `${start} – ${end}`
       text = event.timezone ? `${range} (${event.timezone})` : range
       cache.set(key, text)
@@ -551,7 +538,6 @@ interface Card {
 const byCell = computed(() => {
   const map = new Map<number, Card[]>()
   const columns = props.days.length
-  const lastRow = hours.value.length - 1
   const events = timedById.value
   const textOf = timeTextOf.value
   for (const segment of placed.value) {
@@ -559,23 +545,18 @@ const byCell = computed(() => {
     // mismatch between the two into one missing card instead of a grid that fails to render.
     const event = events.get(segment.id)
     if (!event) continue
-    const row = clamp(
-      Math.floor((segment.start - props.window.start) / MINUTES_PER_HOUR),
-      0,
-      lastRow,
-    )
-    const key = row * columns + segment.dayIndex
+    const key = rowOf(segment.start) * columns + segment.dayIndex
     const card: Card = {
       segment,
       event,
       timeText: textOf(event),
       style: {
-        '--event-start': String(fractionOf(segment.start, props.window)),
-        '--event-end': String(fractionOf(segment.end, props.window)),
-        '--event-day': String(segment.dayIndex),
-        '--event-column': String(segment.column),
-        '--event-span': String(segment.span),
-        '--event-columns': String(segment.columns),
+        '--calendar-day-index': String(segment.dayIndex),
+        '--calendar-block-start-fraction': String(fractionOf(segment.start, props.timeWindow)),
+        '--calendar-block-end-fraction': String(fractionOf(segment.end, props.timeWindow)),
+        '--calendar-block-column': String(segment.column),
+        '--calendar-block-span': String(segment.span),
+        '--calendar-block-columns': String(segment.columns),
       },
     }
     const list = map.get(key)
@@ -593,29 +574,22 @@ const isFocused = (iso: string, minutes: number) =>
   focused.value.iso === iso && focused.value.minutes === minutes
 
 /**
- * Where the tab stop goes when the focused cell is not one of the cells on screen — after
- * a view change, or before anything has been focused at all. Without it no cell would carry
- * `tabindex="0"`, the grid would drop out of the tab order, and the scrolling region would
- * have nothing reachable inside it, which is an accessibility failure and not merely an
- * inconvenience.
+ * Which cell holds the tab stop: the focused one, rounded to its row — or, when that cell is
+ * not on screen (after a view change, or before anything has been focused at all), the first
+ * cell. Without the fallback no cell would carry `tabindex="0"`, the grid would drop out of the
+ * tab order, and the scrolling region would have nothing reachable inside it, which is an
+ * accessibility failure and not merely an inconvenience.
  */
-const fallbackCell = computed(() => {
-  const iso = props.days[0]
-  if (!iso) return null
-  return { iso, minutes: props.window.start }
-})
-
 const tabbable = computed<FocusedCell | null>(() => {
   const current = focused.value
+  const { start, end } = props.timeWindow
   if (props.days.includes(current.iso)) {
     const rounded =
-      Math.floor((current.minutes - props.window.start) / MINUTES_PER_HOUR) * MINUTES_PER_HOUR +
-      props.window.start
-    if (rounded >= props.window.start && rounded < props.window.end) {
-      return { iso: current.iso, minutes: rounded }
-    }
+      Math.floor((current.minutes - start) / MINUTES_PER_HOUR) * MINUTES_PER_HOUR + start
+    if (rounded >= start && rounded < end) return { iso: current.iso, minutes: rounded }
   }
-  return fallbackCell.value
+  const iso = props.days[0]
+  return iso ? { iso, minutes: start } : null
 })
 
 const isTabStop = (iso: string, minutes: number) =>
@@ -625,7 +599,19 @@ function moveFocusTo(iso: string, minutes: number) {
   focused.value = { iso, minutes }
   // @a11y — the model is what decides which cell is tabbable, so the DOM focus can only be
   // moved once the render that applied it has run.
-  void nextTick(() => document.getElementById(cellId(iso, minutes))?.focus())
+  focusCell(cellId(iso, minutes), true)
+}
+
+/** A day, then a start and an end: where a reader is told an event now is. */
+function timesText(times: CalendarEventTimes) {
+  const start = formatTimeDisplay(times.startTime, props.locale, props.format)
+  const end = formatTimeDisplay(times.endTime, props.locale, props.format)
+  const day = formatDateDisplay(times.start, props.locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+  return `${day}, ${start} – ${end}`
 }
 
 function onKeydown(event: KeyboardEvent) {
@@ -653,8 +639,8 @@ function onKeydown(event: KeyboardEvent) {
     const day = props.days[clamp(index + intent.days, 0, props.days.length - 1)]!
     const at = clamp(
       minutes + intent.minutes,
-      props.window.start,
-      props.window.end - MINUTES_PER_HOUR,
+      props.timeWindow.start,
+      props.timeWindow.end - MINUTES_PER_HOUR,
     )
     event.preventDefault()
     moveFocusTo(day, at)
@@ -677,83 +663,59 @@ function onKeydown(event: KeyboardEvent) {
 
   if (intent.kind === 'activate') {
     event.preventDefault()
+    if (!props.creatable) {
+      emit('cell-activate', { date: iso, minutes })
+      return
+    }
     /*
      * With `creatable` the key makes the event the pointer would (WCAG 2.1.1): one slot long,
      * from the top of the slot the focused cell starts on — the times a press that never
-     * moved hands over on release. Without it, the cell is only reported, as a click is.
+     * moved hands over on release.
+     *
+     * Unlike the pointer, it SAYS so. A click leaves the new card under the pointer, where the
+     * reader is looking; the keyboard leaves the focus on its cell, and a reader who cannot
+     * see the grid would get no sign that anything happened. The title is read BEFORE the
+     * event is asked for, since that request is what moves the calendar's count on.
      */
-    if (!props.creatable) {
-      emit('cell-activate', iso, minutes)
-      return
-    }
-    const start = floorToSlot(minutes, props.slotDuration)
-    emit('slot-create', {
+    const from = floorToSlot(minutes, props.slotDuration)
+    const times = {
       start: iso,
       end: iso,
-      startTime: timeOf(start),
-      endTime: timeOf(Math.min(start + props.slotDuration, props.window.end)),
-    })
+      startTime: timeOf(from),
+      endTime: timeOf(Math.min(from + props.slotDuration, props.timeWindow.end)),
+    }
+    const title = props.draftTitle
+    emit('slot-create', times)
+    emit('announce', m.value.calendar.createdAt(title, timesText(times)))
   }
 }
 
 /**
- * Starts a gesture, from whichever of the three ways one can begin.
+ * A gesture's opening state, with the echo's shape read off the layout as it stands.
  *
- * Every entry point funnels through here, so the rules that make a gesture safe — one at a
- * time, the origin captured once, the pointer taken hold of on the GRID — are written once
- * rather than three times.
+ * TRAP — read BEFORE the gesture is set. Both are derived from the drawn events, which the
+ * gesture immediately starts rewriting — a line later and they would already describe the
+ * preview rather than the place it came from. Which of the two answers is also what says
+ * whether this is a timed card or an all-day bar, and therefore which of the echo's two shapes
+ * the gesture has to carry.
  */
-function begin(
-  state: Omit<
-    Gesture,
-    'preview' | 'moved' | 'outside' | 'lastX' | 'lastY' | 'ghostColumn' | 'ghostLane'
-  >,
-  event?: PointerEvent,
-) {
-  /*
-   * Read BEFORE the gesture is set. Both are derived from the drawn events, which the gesture
-   * immediately starts rewriting — a line later and they would already describe the preview
-   * rather than the place it came from. Which of the two answers is also what says whether
-   * this is a timed card or an all-day bar, and therefore which of the echo's two shapes the
-   * gesture has to carry.
-   */
-  const segment = placed.value.find((item) => item.id === state.id)
-  const span = allDay.value.find((item) => item.id === state.id)
-
-  gesture.value = {
-    ...state,
-    preview: { ...state.origin },
-    lastX: state.originX,
-    lastY: state.originY,
+function initFor(
+  init: Omit<GestureInit<Gesture>, 'ghostColumn' | 'ghostLane'>,
+): GestureInit<Gesture> {
+  const segment = placed.value.find((item) => item.id === init.id)
+  const span = allDay.value.find((item) => item.id === init.id)
+  return {
+    ...init,
     ghostColumn: segment
       ? { column: segment.column, span: segment.span, columns: segment.columns }
       : null,
     ghostLane: span ? span.lane : null,
-    moved: false,
-    outside: false,
-  }
-
-  if (!event) return
-  /*
-   * @fallback — capturing the pointer on the COLUMNS box, and not on the card, is what makes
-   * one set of move and up handlers serve all three gestures and what keeps a drag alive
-   * when the pointer wanders off the grid: capture retargets every later pointer event back
-   * to the captured element, so the bindings in the template are the whole of it — no
-   * document listener, no release, nothing to tear down on unmount.
-   *
-   * It is wrapped because a pointer event fired by a TEST refers to no real pointer, and the
-   * call then throws. Failing to capture merely means the drag stops at the edge, which no
-   * test is checking.
-   */
-  try {
-    // The SCROLLER, not the columns box: the all-day band sits in the sticky header, and this
-    // is the only element that contains both it and the canvas. Capture retargets every later
-    // pointer event here, which is why one set of move and up bindings serves all four kinds.
-    rootEl.value?.setPointerCapture(event.pointerId)
-  } catch {
-    /* a synthetic pointer: nothing to capture */
   }
 }
+
+/** The slot under a point, read against the measured columns box. */
+const pointAt = (x: number, y: number, rect: DOMRect, rtl: boolean) =>
+  pointToCell({ x, y }, gridGeometryOf(rect, props.days.length, rtl), props.timeWindow, rtl)
 
 /**
  * Every press on the grid, dispatched by WHAT it landed on.
@@ -771,37 +733,33 @@ function onGridPointerdown(event: PointerEvent) {
   if (gesture.value || event.button !== 0) return
 
   const target = event.target as HTMLElement | null
-  if (!target) return
   const rect = columnsEl.value?.getBoundingClientRect()
-  if (!rect) return
-
-  const point = pointToCell(
-    { x: event.clientX, y: event.clientY },
-    geometryOf(rect),
-    props.window,
-    isRtl(),
-  )
+  if (!target || !rect) return
+  const rtl = isRtl()
+  const point = pointAt(event.clientX, event.clientY, rect, rtl)
 
   const card = target.closest<HTMLElement>('.v-calendar-event')
   if (card) {
     if (!props.editable) return
-    const item = eventOf(cardIdOf(card))
+    const item = eventOf(idOfCard(card))
     if (!item || isAllDayEvent(item)) return
 
     const resizing = target.closest('[data-calendar-handle]') !== null
-    begin(
-      {
+    start(
+      initFor({
         kind: resizing ? 'resize' : 'move',
         id: item.id,
         origin: timesOf(item),
         pointerId: event.pointerId,
         originX: event.clientX,
         originY: event.clientY,
-        // Where inside the card the pointer took hold, so it does not jump under the finger.
-        grabOffset: resizing ? 0 : point.minutes - minutesAt(item.startTime, props.window.start),
+        grabOffset: resizing
+          ? 0
+          : point.minutes - minutesAt(item.startTime, props.timeWindow.start),
         grabColumn: point.columnIndex,
-      },
+      }),
       event,
+      rtl,
     )
     return
   }
@@ -817,24 +775,25 @@ function onGridPointerdown(event: PointerEvent) {
    * exactly the short event a click is meant to create, and a press that travels stretches
    * its end instead. One path serves both, and a click is simply the drag that stayed still.
    */
-  const start = floorToSlot(point.minutes, props.slotDuration)
-  begin(
-    {
+  const from = floorToSlot(point.minutes, props.slotDuration)
+  start(
+    initFor({
       kind: 'create',
       id: DRAFT_ID,
       origin: {
         start: iso,
         end: iso,
-        startTime: timeOf(start),
-        endTime: timeOf(Math.min(start + props.slotDuration, props.window.end)),
+        startTime: timeOf(from),
+        endTime: timeOf(Math.min(from + props.slotDuration, props.timeWindow.end)),
       },
       pointerId: event.pointerId,
       originX: event.clientX,
       originY: event.clientY,
       grabOffset: 0,
       grabColumn: point.columnIndex,
-    },
+    }),
     event,
+    rtl,
   )
 }
 
@@ -851,21 +810,13 @@ function onBandPointerdown(event: PointerEvent) {
   if (gesture.value || !props.editable || event.button !== 0) return
 
   const card = (event.target as HTMLElement | null)?.closest<HTMLElement>('.v-calendar-event')
-  if (!card) return
-  const item = eventOf(cardIdOf(card))
-  if (!item) return
-
+  const item = card ? eventOf(idOfCard(card)) : undefined
   const rect = columnsEl.value?.getBoundingClientRect()
-  if (!rect) return
-  const point = pointToCell(
-    { x: event.clientX, y: event.clientY },
-    geometryOf(rect),
-    props.window,
-    isRtl(),
-  )
+  if (!item || !rect) return
+  const rtl = isRtl()
 
-  begin(
-    {
+  start(
+    initFor({
       kind: 'move-days',
       id: item.id,
       origin: timesOf(item),
@@ -873,53 +824,12 @@ function onBandPointerdown(event: PointerEvent) {
       originX: event.clientX,
       originY: event.clientY,
       grabOffset: 0,
-      grabColumn: point.columnIndex,
-    },
+      grabColumn: pointAt(event.clientX, event.clientY, rect, rtl).columnIndex,
+    }),
     event,
+    rtl,
   )
 }
-
-/** The event a card stands for, read back off the attribute the card publishes. */
-const cardIdOf = (card: HTMLElement) => idOfCard(card, (id) => eventOf(id) !== undefined)
-
-function onPointermove(event: PointerEvent) {
-  const state = gesture.value
-  if (!state || state.pointerId !== event.pointerId) return
-
-  state.lastX = event.clientX
-  state.lastY = event.clientY
-
-  // Below the threshold nothing has happened yet. That is what keeps a click a click: the
-  // hand's tremor during a press would otherwise register as a one-pixel drag.
-  if (!state.moved && !movedPast(state, event.clientX, event.clientY, DRAG_THRESHOLD)) return
-
-  state.moved = true
-  state.outside = isPointerOutside(state)
-  applyPoint(state)
-  watchEdges(state)
-}
-
-/**
- * Whether the pointer has left the calendar's own box — the WHOLE view, deliberately not
- * `.v-calendar-columns`, whose rect excludes the sticky day names, the all-day band and the
- * hour gutter. A bar dropped on the band is ordinary, and measured against the columns it
- * would read as dropped off the calendar and silently revert.
- *
- * The rect goes in RAW, never through `geometryOf`: containment has no reading direction, and
- * that function's `inlineStart` is the box's RIGHT edge in RTL, so every RTL drop would read
- * as outside.
- *
- * Called from `onPointermove` ALONE. `applyPoint`'s other two callers — the view paging and
- * the auto-scroll frame — move the days under a pointer that has not moved, so they cannot
- * change this answer and recomputing it would force a layout every frame.
- *
- * TRAP — neither `applyPoint` nor `watchEdges` is gated on the result, and neither may
- * become so. The card must keep following the pointer while it is out, which is what makes
- * coming back in seamless, and paging must keep running, pushing past the edge being how one
- * crosses into the next week. Being outside decides what happens on RELEASE, nothing else.
- */
-const isPointerOutside = (state: Gesture) =>
-  pointerOutside(state, rootEl.value?.getBoundingClientRect(), pointWithin)
 
 /**
  * Works out where the dragged event now belongs, from wherever the pointer last was.
@@ -928,17 +838,8 @@ const isPointerOutside = (state: Gesture) =>
  * paging out from under a still pointer, and the grid scrolling under one. The last two would
  * otherwise leave the card behind on a day or an hour that is no longer where the pointer is.
  */
-function applyPoint(state: Gesture) {
-  const rect = columnsEl.value?.getBoundingClientRect()
-  if (!rect) return
-  // Measuring here is safe: this runs from a handler or a frame, hence in a browser, never
-  // in a render.
-  const point = pointToCell(
-    { x: state.lastX, y: state.lastY },
-    geometryOf(rect),
-    props.window,
-    isRtl(),
-  )
+function applyPoint(state: Gesture, rect: DOMRect) {
+  const point = pointAt(state.lastX, state.lastY, rect, state.rtl)
 
   /*
    * The slot the pointer is over, reduced to the two numbers the preview is computed from —
@@ -952,40 +853,30 @@ function applyPoint(state: Gesture) {
       : snapToSlot(point.minutes - state.grabOffset, props.slotDuration)
   if (isLastApplied(state, column, minutes)) return
 
+  if (state.kind === 'resize' || state.kind === 'create') {
+    setPreview(state, resizeEvent(state.origin, minutes, props.slotDuration, props.timeWindow))
+    return
+  }
+
+  /*
+   * The target is the event's START shifted by however many columns the pointer has crossed,
+   * not the column the pointer is over: grab a Monday-to-Wednesday bar by its Tuesday and the
+   * pointer stays on its Tuesday. The day is read out of the list of days on show — never from
+   * date arithmetic on how many columns were crossed, which would count the days the calendar
+   * is hiding and land the event on a Saturday nobody can see.
+   */
+  const target = clamp(originColumn(state) + (column - state.grabColumn), 0, props.days.length - 1)
+  const iso = props.days[target]
+  if (!iso) return
+
   if (state.kind === 'move-days') {
-    /*
-     * A bar keeps its length in days, so the target is its START shifted by however many
-     * columns the pointer has crossed — not the column the pointer is over. Grab a
-     * Monday-to-Wednesday bar by its Tuesday and the pointer stays on its Tuesday.
-     */
-    const target = clamp(
-      originColumn(state) + (column - state.grabColumn),
-      0,
-      props.days.length - 1,
-    )
-    const iso = props.days[target]
-    if (iso) setPreview(state, moveEventToDay(state.origin, iso))
+    // A bar keeps its length in days.
+    setPreview(state, moveEventToDay(state.origin, iso))
     return
   }
 
-  if (state.kind === 'move') {
-    /*
-     * The day comes from the COLUMN the pointer is over, read out of the list of days on
-     * show — never from date arithmetic on how many columns were crossed, which would count
-     * the days the calendar is hiding and land the event on a Saturday nobody can see.
-     */
-    const target = clamp(
-      originColumn(state) + (column - state.grabColumn),
-      0,
-      props.days.length - 1,
-    )
-    const iso = props.days[target]!
-    const delta = minutes - minutesAt(state.origin.startTime, props.window.start)
-    setPreview(state, { ...moveEvent(state.origin, 0, delta, props.window), start: iso, end: iso })
-    return
-  }
-
-  setPreview(state, resizeEvent(state.origin, minutes, props.slotDuration, props.window))
+  const delta = minutes - minutesAt(state.origin.startTime, props.timeWindow.start)
+  setPreview(state, { ...moveEvent(state.origin, delta, props.timeWindow), start: iso, end: iso })
 }
 
 /**
@@ -1001,7 +892,7 @@ function applyPoint(state: Gesture) {
 let lastApplied: {
   state: Gesture
   days: readonly string[]
-  window: TimeWindow
+  timeWindow: TimeWindow
   step: number
   column: number
   minutes: number
@@ -1012,7 +903,7 @@ function isLastApplied(state: Gesture, column: number, minutes: number): boolean
   if (
     last?.state === state &&
     last.days === props.days &&
-    last.window === props.window &&
+    last.timeWindow === props.timeWindow &&
     last.step === props.slotDuration &&
     last.column === column &&
     last.minutes === minutes
@@ -1022,7 +913,7 @@ function isLastApplied(state: Gesture, column: number, minutes: number): boolean
   lastApplied = {
     state,
     days: props.days,
-    window: props.window,
+    timeWindow: props.timeWindow,
     step: props.slotDuration,
     column,
     minutes,
@@ -1043,32 +934,63 @@ function setPreview(state: Gesture, next: CalendarEventTimes) {
 }
 
 /**
+ * Which column the event being moved started in.
+ *
+ * The fallback is what makes the formula above general rather than a special case. For a
+ * TIMED card these two are necessarily equal — you grab a card, and a card lives inside its
+ * own column — so the offset is zero and the event simply follows the pointer. For a BAR they
+ * differ, which is what keeps a three-day one from jumping when grabbed by its middle. And
+ * when the origin day is not on screen at all — a bar that began before this range, or an
+ * event whose view has been paged out from under the drag — falling back to the grab column
+ * makes the offset zero again, so the event lands under the pointer instead of nowhere.
+ */
+function originColumn(state: Gesture): number {
+  const index = props.days.indexOf(state.origin.start)
+  return index === -1 ? state.grabColumn : index
+}
+
+/**
+ * One arrow press on a card held by the keyboard.
+ *
+ * Each step is applied to the PREVIEW rather than to the origin, so the arrows accumulate the
+ * way a reader expects — three presses of Down move three slots, not one. That is the opposite
+ * of the pointer, which recomputes from the origin every frame because it always knows where it
+ * is; the keyboard only knows how far it has just asked to go.
+ */
+function onGrabStep(state: Gesture, step: GrabStep, item: E): boolean {
+  if (step.kind === 'grabResize') {
+    state.preview = resizeEvent(
+      state.preview,
+      minutesAt(state.preview.endTime, props.timeWindow.end) + step.minutes,
+      props.slotDuration,
+      props.timeWindow,
+    )
+  } else {
+    // Sideways is a step along the days ON SHOW, exactly as the pointer's is: date
+    // arithmetic would count the days the calendar is hiding.
+    const column = clamp(
+      props.days.indexOf(state.preview.start) + step.days,
+      0,
+      props.days.length - 1,
+    )
+    const iso = props.days[column] ?? state.preview.start
+    state.preview = {
+      ...moveEvent(state.preview, step.minutes, props.timeWindow),
+      start: iso,
+      end: iso,
+    }
+  }
+  emit('announce', m.value.calendar.movedTo(item.title, timesText(state.preview)))
+  return true
+}
+
+/**
  * How many pixels a frame the grid scrolls at full tilt.
  *
  * At sixty frames a second that is roughly eight hundred a second, which crosses a whole
  * twenty-four-hour day in about two — fast enough to be worth doing, slow enough to stop on.
  */
 const AUTO_SCROLL_SPEED = 14
-
-const edge = useEdgeStep(
-  (direction) => emit('step', direction),
-  () => props.edgeStepDelay,
-)
-
-/** Which edge is counting down, in words, for the stylesheet to light up. */
-const edgeCue = computed(() => edgeCueOf(edge.pending.value))
-
-/** Tells the two boundary mechanisms where the pointer now is. */
-function watchEdges(state: Gesture) {
-  const columns = columnsEl.value?.getBoundingClientRect()
-  const scroller = rootEl.value?.getBoundingClientRect()
-  if (!columns || !scroller) return
-
-  // Paging is measured against the COLUMNS, which is what the days occupy; scrolling against
-  // the SCROLLER, which is what actually moves.
-  edge.watchEdge(inlineEdgeAt(state.lastX, geometryOf(columns), EDGE_BAND, isRtl()))
-  setScrollSpeed(props.autoScroll ? blockEdgeAt(state.lastY, scroller, EDGE_BAND) : 0)
-}
 
 /*
  * The design system's only `requestAnimationFrame` loop, and it earns that: a pointer held
@@ -1095,7 +1017,7 @@ function scrollStep() {
 
   root.scrollTop += scrollSpeed * AUTO_SCROLL_SPEED
   // The hours have moved under a pointer that has not, so what it is over has changed.
-  applyPoint(state)
+  reapply(state)
   scrollFrame = requestAnimationFrame(scrollStep)
 }
 
@@ -1105,116 +1027,12 @@ function stopScrolling() {
   scrollSpeed = 0
 }
 
-/** Everything a gesture leaves running, dropped on every path out of one. */
-function releaseBoundaries() {
-  edge.cancel()
-  stopScrolling()
-}
-
 onBeforeUnmount(stopScrolling)
 
-/*
- * Paging swaps the days out from under a live drag, and the dragged event's day is then off
- * screen — the card would vanish until the next pointer move, which never comes if the hand
- * is holding still against the edge. Re-applying the last position as soon as the new days
- * are rendered is what keeps the card under the pointer across the boundary.
- */
-watch(
-  () => props.days,
-  () => {
-    const state = gesture.value
-    if (state?.moved) applyPoint(state)
-  },
-  { flush: 'post' },
-)
-
-/**
- * Which column the event being moved started in.
- *
- * The fallback is what makes the formula above general rather than a special case. For a
- * TIMED card these two are necessarily equal — you grab a card, and a card lives inside its
- * own column — so the offset is zero and the event simply follows the pointer. For a BAR they
- * differ, which is what keeps a three-day one from jumping when grabbed by its middle. And
- * when the origin day is not on screen at all — a bar that began before this range, or an
- * event whose view has been paged out from under the drag — falling back to the grab column
- * makes the offset zero again, so the event lands under the pointer instead of nowhere.
- */
-function originColumn(state: Gesture): number {
-  const index = props.days.indexOf(state.origin.start)
-  return index === -1 ? state.grabColumn : index
-}
-
-/**
- * Whether the press that is about to become a click was a drag.
- *
- * A plain `let`, since nothing renders it: `pointerup` always fires before `click`, so this
- * is written on the way out of the gesture and read by the click that immediately follows.
- * Without it, letting go of a card at the end of a drag would ALSO open it — the consumer's
- * editor would appear over every event the reader had just moved.
- */
-const dragGuard = useDragGuard()
-
-/**
- * Closes the books on the previous gesture, at the start of a new press.
- *
- * TRAP — without it `justDragged` can be left STANDING, and what that breaks surfaces nowhere
- * near its cause. The flag is lowered by the click that reads it, and that click only reaches
- * `onCardClick` when it lands on a card: draw a new event and the press began on a CELL, so
- * the click goes elsewhere and the flag stays up. `onPointerup` normally heals it on the next
- * press — but a press that starts NO gesture does not, which `creatable` without `editable`
- * reaches every time: the reader clicks an event to open it, nothing happens, they click again.
- *
- * Clearing it HERE makes the flag incapable of outliving its own interaction, and the ordering
- * is the argument: the click this exists to swallow follows its own `pointerup` with no press
- * in between, so it stays protected, while any LATER click on a card is necessarily preceded
- * by a press that arrives here first.
- *
- * It runs before every guard in its three callers, deliberately — a press that starts no
- * gesture is still a new interaction, and that is the case this is for.
- */
-const endLastGesture = dragGuard.clear
-
-function onPointerup(event: PointerEvent) {
-  const state = gesture.value
-  if (!state || state.pointerId !== event.pointerId) return
-  gesture.value = null
-  dragGuard.set(state.moved)
-  releaseBoundaries()
-
-  /*
-   * Let go with the pointer off the calendar and the gesture is abandoned whole: no move, no new
-   * length, and no new event either. The card goes back to where the model still says it is,
-   * which is where the echo has been showing all along. It is the hand's version of the Escape
-   * the keyboard grab already has — a gesture that ends somewhere it cannot mean anything must
-   * mean nothing.
-   *
-   * TRAP — `justDragged` above is what still has to happen, and it is the ONE thing the cancel
-   * path deliberately does not do: `pointerup` fires before `click`, so without it an abandoned
-   * drag would end by OPENING the very event it has just refused to move. Which is also why
-   * this branch and `onPointercancel` must NOT be factored into one helper. They differ by
-   * exactly that line and it is correct in both directions — no click follows a cancel, so a
-   * `true` left behind there would swallow the next genuine one instead.
-   *
-   * Nothing is announced. The pointer says nothing on a SUCCESSFUL drop either: `grabbed`,
-   * `dropped` and `reverted` belong to the keyboard grab, which has no pointer to show where the
-   * event went. A revert that spoke would be the only thing the pointer ever said.
-   */
-  if (state.outside) return
-
-  if (state.kind === 'create') {
-    emit('slot-create', state.preview)
-    return
-  }
-
-  // A press that never travelled is an ordinary click, which the button's own click event is
-  // about to report. Writing anything here would move an event nobody dragged.
-  if (!state.moved) return
-
-  emit('event-drop', state.id, state.preview, state.kind === 'resize' ? 'resize' : 'move')
-}
-
 function onCardClick(id: CalendarEventId) {
-  if (dragGuard.consume()) return
+  // `pointerup` fires before `click`, so letting go at the end of a drag would ALSO open the
+  // event — the consumer's editor over every card the reader had just moved.
+  if (consumeDrag()) return
   const item = eventOf(id)
   if (item && id !== DRAFT_ID) emit('event-activate', item)
 }
@@ -1233,151 +1051,8 @@ function onGridClick(event: MouseEvent) {
   if (target?.closest('.v-calendar-event')) return
   const cell = target?.closest<HTMLElement>('.v-calendar-cell')
   if (!cell) return
-  emit('cell-activate', cell.dataset.iso!, Number(cell.dataset.minutes))
+  emit('cell-activate', { date: cell.dataset.iso!, minutes: Number(cell.dataset.minutes) })
 }
-
-function onPointercancel() {
-  /*
-   * The gesture was taken away — a system gesture, a context menu, the page starting to
-   * scroll. Nothing is written and nothing is announced: the card simply goes back to where
-   * the model still says it is.
-   */
-  gesture.value = null
-  releaseBoundaries()
-}
-
-function announceTimes(title: string, times: CalendarEventTimes) {
-  const start = formatTimeDisplay(times.startTime, props.locale, props.hourFormat)
-  const end = formatTimeDisplay(times.endTime, props.locale, props.hourFormat)
-  const day = formatDateDisplay(times.start, props.locale, {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
-  emit('announce', m.value.calendar.movedTo(title, `${day}, ${start} – ${end}`))
-}
-
-/** Puts the focus back on a card that has just been redrawn somewhere else. */
-
-function onCardKeydown(event: KeyboardEvent, card: HTMLElement) {
-  const item = eventOf(cardIdOf(card))
-  if (!item) return
-
-  const held = grabbing.value && gesture.value?.id === item.id
-  const intent = calendarIntent(
-    event.key,
-    event.shiftKey,
-    held ? 'grabbed' : 'event',
-    props.slotDuration,
-    isRtl(),
-  )
-  if (!intent) return
-
-  if (!held) {
-    if (intent.kind !== 'activate') return
-    // An event that cannot be moved keeps a button's ordinary behaviour: Enter opens it,
-    // which the click handler below already reports.
-    if (!props.editable || isAllDayEvent(item)) return
-    /*
-     * Enter and Space are ALSO how a button is pressed. Without this the same keystroke
-     * would take hold of the event and open it at once, and every attempt to move something
-     * would fire the consumer's editor over the top of it.
-     */
-    event.preventDefault()
-    begin({
-      kind: 'move',
-      id: item.id,
-      origin: timesOf(item),
-      pointerId: null,
-      originX: 0,
-      originY: 0,
-      grabOffset: 0,
-      grabColumn: 0,
-    })
-    emit('announce', m.value.calendar.grabbed)
-    return
-  }
-
-  const state = gesture.value!
-  event.preventDefault()
-
-  if (intent.kind === 'grabResize') {
-    /*
-     * Each step is applied to the PREVIEW rather than to the origin, so the arrows accumulate
-     * the way a reader expects — three presses of Down move three slots, not one. That is the
-     * opposite of the pointer, which recomputes from the origin every frame because it always
-     * knows where it is; the keyboard only knows how far it has just asked to go.
-     */
-    state.preview = resizeEvent(
-      state.preview,
-      minutesAt(state.preview.endTime, props.window.end) + intent.minutes,
-      props.slotDuration,
-      props.window,
-    )
-    state.moved = true
-    announceTimes(item.title, state.preview)
-    refocusCard(state.id)
-    return
-  }
-
-  if (intent.kind === 'grabMove') {
-    // Sideways is a step along the days ON SHOW, exactly as the pointer's is: date
-    // arithmetic would count the days the calendar is hiding.
-    const column = clamp(
-      props.days.indexOf(state.preview.start) + intent.days,
-      0,
-      props.days.length - 1,
-    )
-    const iso = props.days[column] ?? state.preview.start
-    state.preview = {
-      ...moveEvent(state.preview, 0, intent.minutes, props.window),
-      start: iso,
-      end: iso,
-    }
-    state.moved = true
-    announceTimes(item.title, state.preview)
-    refocusCard(state.id)
-    return
-  }
-
-  if (intent.kind === 'activate') {
-    gesture.value = null
-    if (state.moved) {
-      emit('event-drop', state.id, state.preview, state.kind === 'resize' ? 'resize' : 'move')
-    }
-    emit('announce', m.value.calendar.dropped)
-    refocusCard(state.id)
-    return
-  }
-
-  if (intent.kind === 'cancel') {
-    gesture.value = null
-    emit('announce', m.value.calendar.reverted)
-    refocusCard(state.id)
-  }
-}
-
-const rootEl = ref<HTMLElement | null>(null)
-const canvasEl = ref<HTMLElement | null>(null)
-const columnsEl = ref<HTMLElement | null>(null)
-
-/** Hands the focus back to a card the re-render has just taken it from. */
-const refocusCard = useCardFocus(columnsEl)
-
-/** The columns box as the pure geometry wants it: plain numbers, no element. */
-function geometryOf(rect: DOMRect) {
-  const rtl = isRtl()
-  return {
-    top: rect.top,
-    height: rect.height,
-    // The edge the first column starts at, which is the other one in a right-to-left page.
-    inlineStart: rtl ? rect.right : rect.left,
-    inlineSize: rect.width,
-    columns: props.days.length,
-  }
-}
-
-const isRtl = () => isElementRtl(columnsEl.value)
 
 /**
  * Brings a moment of the day to the top of the visible area.
@@ -1393,20 +1068,17 @@ function scrollToMinutes(minutes: number) {
   if (!root || !canvas || hours.value.length === 0) return
   const rowHeight = canvas.offsetHeight / hours.value.length
   if (rowHeight <= 0) return
-  root.scrollTop = ((minutes - props.window.start) / MINUTES_PER_HOUR) * rowHeight
-}
-
-/** Puts the focus on whichever cell currently holds the tab stop. */
-function focus() {
-  const cell = tabbable.value
-  if (cell) document.getElementById(cellId(cell.iso, cell.minutes))?.focus()
+  root.scrollTop = ((minutes - props.timeWindow.start) / MINUTES_PER_HOUR) * rowHeight
 }
 
 // The contract VCalendar drives every view through, so its toolbar need not know which one
 // is on screen. VCalendarMonth answers the same two, its `scrollToMinutes` being a no-op.
 defineExpose({
   /** Brings the focus onto the cell the grid is currently pointing at. */
-  focus,
+  focus: () => {
+    const cell = tabbable.value
+    if (cell) focusCell(cellId(cell.iso, cell.minutes))
+  },
   /** Scrolls the grid so a given moment of the day sits at the top of the visible area. */
   scrollToMinutes,
 })
@@ -1415,7 +1087,7 @@ defineExpose({
 <template>
   <div
     ref="rootEl"
-    class="v-calendar-grid"
+    class="v-calendar-time-grid"
     :data-outside="gesture?.outside ? '' : undefined"
     :style="{ '--calendar-columns': String(days.length) }"
     @pointermove="onPointermove"
@@ -1424,21 +1096,18 @@ defineExpose({
   >
     <div class="v-calendar-head">
       <div class="v-calendar-head-gutter" />
-      <div
-        v-for="iso in days"
-        :key="iso"
-        class="v-calendar-head-day"
-        :data-today="iso === today ? '' : undefined"
-      >
+      <div v-for="iso in days" :key="iso" class="v-calendar-head-day">
         <slot
           name="day-header"
           :iso="iso"
-          :weekday="dayName(iso, 'short')"
-          :day="dayNumber(iso)"
+          :weekday="dayName(iso)"
+          :day-text="dayNumber(iso)"
           :today="iso === today"
         >
-          <span class="v-calendar-head-weekday">{{ dayName(iso, 'short') }}</span>
-          <span class="v-calendar-head-number">{{ dayNumber(iso) }}</span>
+          <span class="v-calendar-weekday">{{ dayName(iso) }}</span>
+          <span class="v-calendar-head-number" :class="{ 'v-calendar-today': iso === today }">
+            {{ dayNumber(iso) }}
+          </span>
         </slot>
       </div>
 
@@ -1464,15 +1133,11 @@ defineExpose({
             :disabled="disabled"
             :continues-before="span.continuesBefore"
             :continues-after="span.continuesAfter"
-            :dragging="gesture?.id === span.id && gesture.pointerId !== null"
-            :rejected="gesture?.id === span.id && gesture.outside"
-            :grabbed="grabbing && gesture?.id === span.id"
-            :hint-id="editable && !isGhostId(span.id) ? hintId : undefined"
-            :ghost-of="isGhostId(span.id) ? originalIdOf(span.id) : undefined"
+            v-bind="cardState(span.id)"
             :style="{
-              '--event-day': String(span.startIndex),
-              '--event-span': String(span.span),
-              '--event-lane': String(span.lane),
+              '--calendar-day-index': String(span.startIndex),
+              '--calendar-bar-span': String(span.span),
+              '--calendar-bar-lane': String(span.lane),
             }"
             @click="onCardClick(span.id)"
           >
@@ -1493,10 +1158,9 @@ defineExpose({
 
       <div
         ref="columnsEl"
-        class="v-calendar-columns"
+        class="v-calendar-columns v-calendar-edge-cue"
         role="grid"
         :aria-label="label"
-        :data-gesture="gesture?.kind"
         :data-edge="edgeCue"
         @keydown="onKeydown"
         @click="onGridClick"
@@ -1527,11 +1191,7 @@ defineExpose({
               :continues-before="card.segment.clippedStart"
               :continues-after="card.segment.clippedEnd"
               :resizable="editable && card.segment.id !== DRAFT_ID"
-              :dragging="gesture?.id === card.segment.id && gesture.pointerId !== null"
-              :rejected="gesture?.id === card.segment.id && gesture.outside"
-              :grabbed="grabbing && gesture?.id === card.segment.id"
-              :hint-id="editable && !isGhostId(card.segment.id) ? hintId : undefined"
-              :ghost-of="isGhostId(card.segment.id) ? originalIdOf(card.segment.id) : undefined"
+              v-bind="cardState(card.segment.id)"
               :style="card.style"
               @click="onCardClick(card.segment.id)"
             >
@@ -1548,8 +1208,8 @@ defineExpose({
               class="v-calendar-now"
               aria-hidden="true"
               :style="{
-                '--event-day': String(nowMark.day),
-                '--calendar-now': String(nowMark.fraction),
+                '--calendar-day-index': String(nowMark.day),
+                '--calendar-now-fraction': String(nowMark.fraction),
               }"
             />
           </div>
@@ -1561,15 +1221,30 @@ defineExpose({
 
 <style>
 @layer vectis.components {
-  .v-calendar-grid {
+  .v-calendar-time-grid {
     /*
-     * The one scrolling box. The day names are sticky INSIDE it rather than in a container
-     * of their own, which is what keeps them aligned with the columns for free: a separate
-     * header would have to be told how far the body had scrolled sideways, and told again
-     * every time the column widths changed.
+     * The one scrolling box — its scrolling itself is `.v-calendar-view`'s, in VCalendar's
+     * sheet. The day names are sticky INSIDE it rather than in a container of their own, which
+     * is what keeps them aligned with the columns for free: a separate header would have to be
+     * told how far the body had scrolled sideways, and told again every time the column widths
+     * changed.
      */
     --calendar-hour: var(--vectis-control-size-calendar-hour);
     --calendar-gutter: var(--vectis-control-size-calendar-gutter);
+    /*
+     * The day columns, written once for the three boxes that lay them out: the header and the
+     * canvas behind the hour gutter, the all-day band and the columns box without it. The three
+     * must resolve to identical tracks — a bar is dropped by reading the pointer against the
+     * COLUMNS' geometry — so one definition is what keeps them from drifting apart.
+     *
+     * It is declared on the element that also carries `--calendar-columns` inline, where the
+     * inner `var()` is resolved before the value is inherited: declared any higher, it would
+     * be frozen at whatever column count that ancestor saw, which is none.
+     */
+    --calendar-tracks: repeat(
+      var(--calendar-columns),
+      minmax(var(--vectis-control-size-calendar-day-min), 1fr)
+    );
     /*
      * Half a line of an hour label. It is used TWICE and in opposite directions — the label
      * is pulled up by it so it straddles its rule, and the tick is pushed back down by it so
@@ -1581,33 +1256,12 @@ defineExpose({
     );
 
     position: relative;
-    overflow: auto;
-    block-size: 100%;
-    min-block-size: 0;
-    font-family: var(--vectis-text-family);
-    color: var(--vectis-color-text);
-  }
-
-  /*
-   * A drag currently held off the calendar. `not-allowed` is the word the library already uses
-   * for "you cannot do this", on every disabled control.
-   *
-   * BEST-EFFORT, and never the signal: while a pointer is captured the cursor is resolved
-   * against the capture target rather than against whatever sits under the pointer, and engines
-   * differ on it. What carries the message is the card's own paint, which is why this is a
-   * second cue and not the first.
-   */
-  .v-calendar-grid[data-outside] {
-    cursor: not-allowed;
   }
 
   .v-calendar-head,
   .v-calendar-canvas {
     display: grid;
-    grid-template-columns: var(--calendar-gutter) repeat(
-        var(--calendar-columns),
-        minmax(var(--vectis-control-size-calendar-day-min), 1fr)
-      );
+    grid-template-columns: var(--calendar-gutter) var(--calendar-tracks);
     /*
      * The tracks have a floor, so on a narrow screen they add up to more than the box and
      * the calendar scrolls sideways. Without this the BOX would stay the width of the
@@ -1624,14 +1278,16 @@ defineExpose({
    *
    *   1  .v-calendar-block          an event card
    *   2  .v-calendar-now            the current-time line, over every card
+   *      .v-calendar-edge-cue       the edge strip, in VCalendar's sheet
    *   3  [data-dragging] / [data-grabbed]   a card being moved, over the line
    *   4  .v-calendar-head           the sticky day names, over everything
    *
-   * Neither `.v-calendar-grid` nor `.v-calendar-columns` establishes a stacking context —
+   * Neither `.v-calendar-time-grid` nor `.v-calendar-columns` establishes a stacking context —
    * both are `relative` with no `z-index` — so all four compete at the root, and any TIE is
    * broken by document order. That is what put the current-time line over the header while
    * both sat at 2: the line is further down the template. The header has to sit above the
-   * dragged card as well, which is why it is 4 and not 3.
+   * dragged card as well, which is why it is 4 and not 3. The month view's header takes the
+   * same 4, for the same reason.
    */
   .v-calendar-head {
     position: sticky;
@@ -1656,14 +1312,8 @@ defineExpose({
     padding-inline: var(--vectis-space-1);
   }
 
-  .v-calendar-head-weekday {
-    color: var(--vectis-color-text-muted);
-    font-size: var(--vectis-text-overline-size);
-    font-weight: var(--vectis-text-overline-weight);
-    letter-spacing: var(--vectis-text-overline-tracking);
-    text-transform: uppercase;
-  }
-
+  /* Today is marked on the number alone, the way a calendar marks a date rather than a
+     column — the `.v-calendar-today` paint, in VCalendar's sheet. */
   .v-calendar-head-number {
     display: flex;
     align-items: center;
@@ -1672,14 +1322,6 @@ defineExpose({
     block-size: var(--vectis-control-height-sm);
     border-radius: var(--vectis-radius-pill);
     font-size: var(--vectis-text-body-lg-size);
-  }
-
-  /* Today is marked on the number alone, the way a calendar marks a date rather than a
-     column. Semibold here is state emphasis, not a type role. */
-  .v-calendar-head-day[data-today] .v-calendar-head-number {
-    background: var(--vectis-color-accent);
-    color: var(--vectis-color-text-on-accent);
-    font-weight: var(--vectis-font-weight-semibold);
   }
 
   .v-calendar-allday-label {
@@ -1704,10 +1346,7 @@ defineExpose({
      */
     display: grid;
     grid-column: 2 / -1;
-    grid-template-columns: repeat(
-      var(--calendar-columns),
-      minmax(var(--vectis-control-size-calendar-day-min), 1fr)
-    );
+    grid-template-columns: var(--calendar-tracks);
     grid-template-rows: repeat(
       var(--calendar-lanes),
       var(--vectis-control-size-calendar-allday-lane)
@@ -1727,8 +1366,8 @@ defineExpose({
   }
 
   .v-calendar-bar {
-    grid-column: calc(var(--event-day) + 1) / span var(--event-span);
-    grid-row: calc(var(--event-lane) + 1);
+    grid-column: calc(var(--calendar-day-index) + 1) / span var(--calendar-bar-span);
+    grid-row: calc(var(--calendar-bar-lane) + 1);
     min-inline-size: 0;
   }
 
@@ -1788,54 +1427,19 @@ defineExpose({
   }
 
   .v-calendar-columns {
-    /* The containing block every card is placed against. The rows below are `display:
-       contents`, so the cells themselves are this grid's items. */
+    /* The containing block every card and the edge strip are placed against. The rows below
+       are `display: contents`, so the cells themselves are this grid's items. */
     position: relative;
     display: grid;
     grid-column: 2 / -1;
     /*
-     * The same track recipe as the canvas above, deliberately restated rather than borrowed
-     * with `subgrid`. This box spans exactly the canvas columns it repeats, and both sides
-     * divide the same width by the same rule, so the two resolve identically — which makes
-     * subgrid a second mechanism buying nothing, the conclusion the library's own audit of
-     * it reached.
+     * The canvas's own tracks, deliberately restated rather than borrowed with `subgrid`. This
+     * box spans exactly the canvas columns it repeats, and both sides divide the same width by
+     * the same rule, so the two resolve identically — which makes subgrid a second mechanism
+     * buying nothing, the conclusion the library's own audit of it reached.
      */
-    grid-template-columns: repeat(
-      var(--calendar-columns),
-      minmax(var(--vectis-control-size-calendar-day-min), 1fr)
-    );
+    grid-template-columns: var(--calendar-tracks);
     grid-auto-rows: var(--calendar-hour);
-  }
-
-  /*
-   * The strip that lights up when a drag is resting against an edge, counting down to turn
-   * the page. It is what stops the paging being a surprise.
-   *
-   * Drawn INSIDE the columns box rather than on the scroller, because a scroller's absolutely
-   * positioned child is placed against its content and scrolls away with it — here the box is
-   * as tall as the whole day, so the strip is visible wherever the reader happens to be. An
-   * absolutely positioned pseudo-element is not a grid item, so it disturbs no column.
-   *
-   * Its width is `--vectis-control-size-calendar-edge`, whose twin is `EDGE_BAND` in
-   * `edgeStep.ts` — the JavaScript that decides where the countdown actually starts. Neither
-   * may move without the other.
-   */
-  .v-calendar-columns[data-edge]::after {
-    content: '';
-    position: absolute;
-    inset-block: 0;
-    inline-size: var(--vectis-control-size-calendar-edge);
-    background: var(--vectis-color-accent-surface);
-    z-index: 2;
-    pointer-events: none;
-  }
-
-  .v-calendar-columns[data-edge='start']::after {
-    inset-inline-start: 0;
-  }
-
-  .v-calendar-columns[data-edge='end']::after {
-    inset-inline-end: 0;
   }
 
   .v-calendar-row {
@@ -1843,23 +1447,6 @@ defineExpose({
        box here would make the cells its children instead of the grid's, and every column
        would collapse. */
     display: contents;
-  }
-
-  .v-calendar-cell {
-    border-block-start: 1px solid var(--vectis-color-border);
-    border-inline-start: 1px solid var(--vectis-color-border);
-    cursor: pointer;
-  }
-
-  .v-calendar-cell:first-child {
-    border-inline-start: none;
-  }
-
-  .v-calendar-cell:focus-visible {
-    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
-    /* Drawn inwards: the grid is a scrolling box, and an outward ring on a cell at the edge
-       would be cropped by it. */
-    outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
   .v-calendar-cell[data-today] {
@@ -1871,8 +1458,7 @@ defineExpose({
    * the horizontal formula carries the day index. Being a child of the cell is what keeps
    * it in the accessibility tree in the right place; being placed against the grid is what
    * lets it be any length at all.
-   */
-  /*
+   *
    * TRAP — the height is the event's own length and NOTHING ELSE. No `max()` against a floor
    * token here: the minimum is already applied where it belongs, `timedSegments` stretching
    * every segment to at least `slotDuration` BEFORE the overlap packing sees it, so what is
@@ -1885,14 +1471,17 @@ defineExpose({
    */
   .v-calendar-block {
     position: absolute;
-    inset-block-start: calc(var(--event-start) * 100%);
-    block-size: calc((var(--event-end) - var(--event-start)) * 100%);
+    inset-block-start: calc(var(--calendar-block-start-fraction) * 100%);
+    block-size: calc(
+      (var(--calendar-block-end-fraction) - var(--calendar-block-start-fraction)) * 100%
+    );
     inset-inline-start: calc(
-      (var(--event-day) + var(--event-column) / var(--event-columns)) / var(--calendar-columns) *
-        100%
+      (var(--calendar-day-index) + var(--calendar-block-column) / var(--calendar-block-columns)) /
+        var(--calendar-columns) * 100%
     );
     inline-size: calc(
-      var(--event-span) / var(--event-columns) / var(--calendar-columns) * 100% - 2px
+      var(--calendar-block-span) / var(--calendar-block-columns) / var(--calendar-columns) * 100% -
+        2px
     );
     z-index: 1;
   }
@@ -1905,8 +1494,8 @@ defineExpose({
    */
   .v-calendar-now {
     position: absolute;
-    inset-block-start: calc(var(--calendar-now) * 100%);
-    inset-inline-start: calc(var(--event-day) / var(--calendar-columns) * 100%);
+    inset-block-start: calc(var(--calendar-now-fraction) * 100%);
+    inset-inline-start: calc(var(--calendar-day-index) / var(--calendar-columns) * 100%);
     inline-size: calc(100% / var(--calendar-columns));
     border-block-start: 1px solid var(--vectis-color-danger);
     /* Above the cards: it is the one thing that must stay readable over a full day. */

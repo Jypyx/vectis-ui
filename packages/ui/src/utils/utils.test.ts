@@ -6,7 +6,7 @@ import { px } from './css'
 import { joinIds } from './ids'
 import { resolveMatcher } from './matcher'
 import { clamp } from './number'
-import { digitsOf, normalizeText, pad2 } from './text'
+import { createNormalizedCache, digitsOf, normalizeText, pad2 } from './text'
 import { flattenSlot } from './vnode'
 
 describe('clamp', () => {
@@ -49,6 +49,19 @@ describe('normalizeText', () => {
   it('ignores case and accents', () => {
     expect(normalizeText('Éléphant')).toBe('elephant')
     expect(normalizeText('ÀÇÜñ')).toBe('acun')
+  })
+})
+
+describe('createNormalizedCache', () => {
+  it('normalizes once per owner and field, and again when the text changes', () => {
+    const owner = { label: 'Éclair' }
+    const normalizedOf = createNormalizedCache<typeof owner>()
+    expect(normalizedOf(owner, owner.label)).toBe('eclair')
+    expect(normalizedOf(owner, 'Brûlé', 'other')).toBe('brule')
+    // Edited in place: the raw text no longer matches what was remembered.
+    owner.label = 'Émile'
+    expect(normalizedOf(owner, owner.label)).toBe('emile')
+    expect(normalizedOf(owner, 'Brûlé', 'other')).toBe('brule')
   })
 })
 

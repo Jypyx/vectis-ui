@@ -180,5 +180,6 @@ export const en: Messages = {
     dropped: 'Event placed.',
     reverted: 'Move cancelled. The event is back where it was.',
     movedTo: (title, when) => `${title} moved to ${when}.`,
+    createdAt: (title, when) => `${title} created on ${when}.`,
   },
 }

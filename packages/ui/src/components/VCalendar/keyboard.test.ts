@@ -57,9 +57,9 @@ describe('moving about the grid', () => {
 })
 
 describe('a card at rest', () => {
-  it('is taken hold of by Enter and left by Escape', () => {
+  it('is taken hold of by Enter, and leaves Escape to the browser', () => {
     expect(calendarIntent('Enter', false, 'event', SLOT, false)).toEqual({ kind: 'activate' })
-    expect(calendarIntent('Escape', false, 'event', SLOT, false)).toEqual({ kind: 'cancel' })
+    expect(calendarIntent('Escape', false, 'event', SLOT, false)).toBeUndefined()
   })
 
   /*

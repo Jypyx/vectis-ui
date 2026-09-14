@@ -91,3 +91,37 @@ export interface CalendarEventTimes {
   startTime: string
   endTime: string
 }
+
+/** An empty part of the grid that was activated: its day, and the time it stands for. */
+export interface CalendarCell {
+  date: string
+  time: string
+}
+
+/**
+ * What the `#event` slot receives: the event, how its card is drawn, and what is happening
+ * to it right now.
+ */
+export interface CalendarEventSlotProps<E extends CalendarEvent = CalendarEvent> {
+  event: E
+  /** The shape the card takes. */
+  layout: CalendarEventLayout
+  /** The event's times, already written out for the reader. Empty for an all-day chip. */
+  timeText: string
+  /** Whether the event carries on before or after what is on show. */
+  continuesBefore: boolean
+  continuesAfter: boolean
+  /** Whether the card is being dragged with a pointer right now. */
+  dragging: boolean
+  /** Whether the card has been taken hold of with the keyboard. */
+  grabbed: boolean
+}
+
+/**
+ * The cell one of the internal grids reports as activated. A month has no hours, so its
+ * `minutes` is null and VCalendar supplies the time, which is the one place it is decided.
+ */
+export interface ActivatedCell {
+  date: string
+  minutes: number | null
+}

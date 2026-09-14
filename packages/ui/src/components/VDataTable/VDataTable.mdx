@@ -33,7 +33,7 @@ Overriding only one leaves the other two at their default.
 
 ## Header and search
 
-`title` (or the `#header` slot, which wins) fills the left zone of the global header; `searchable`
+`title` (or the `#title` slot, which wins) fills the left zone of the global header; `searchable`
 displays a clearable search-type `VInput` on the right, bound to `v-model:search`. The local filter
 is case- and accent-insensitive and only walks the **declared columns** — never the rows' other
 fields. A change of term returns to page 1.
@@ -130,7 +130,11 @@ cell through `data-label`, and the selection box opens the card.
 
 ## Slots
 
-- `#header`: the left zone of the global header (wins over `title`).
+- `#title`: the left zone of the global header (wins over `title`).
+- `#loading`: what the table shows while `loading` is set, in place of the spinner and the
+  `loadingText` beside it.
+- `#empty` (scope: `{ search }`): what the table shows when no row is left, in place of
+  `emptyText`. `search` is the term that emptied it, the committed one in `serverSide` mode.
 - `#head-<key>` (scope: `{ column }`): the label of a column header — rendered **inside** the sort
   button when the column is sortable, so place only non-interactive content there.
 - `#cell-<key>` (scope: `{ row, value, column }`): the content of a cell.

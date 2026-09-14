@@ -55,9 +55,11 @@ import {
   windowOf,
 } from './layout'
 import type {
+  ActivatedCell,
+  CalendarCell,
   CalendarEvent,
   CalendarEventId,
-  CalendarEventLayout,
+  CalendarEventSlotProps,
   CalendarEventTimes,
   CalendarFormat,
   CalendarView,
@@ -74,10 +76,15 @@ export interface CalendarProps {
   /**
    * Which weekdays are on show, as numbers from 0 for Sunday. `[1,2,3,4,5]` hides the
    * weekend everywhere. The ORDER matters as well: the first entry is the day a week
-   * starts on, which is why there is no separate first-day setting. Left out, the seven
-   * days in the order the locale puts them.
+   * starts on, and it wins over `firstDayOfWeek`. Left out, the seven days starting on
+   * `firstDayOfWeek`.
    */
   weekdays?: number[]
+  /**
+   * The day a week starts on, from 0 for Sunday, when `weekdays` is not given. Left out,
+   * the locale decides.
+   */
+  firstDayOfWeek?: number
   /** The language the days, months and times are written in. Falls back to the global one. */
   locale?: string
   /**
@@ -117,8 +124,9 @@ export interface CalendarProps {
   disabled?: boolean
   /**
    * Makes an event when an empty part of a day is taken up: a click, or Enter on a focused
-   * cell, makes one `slotDuration` long, a drag makes one as long as it was drawn. `slot-activate` fires either way, so a
-   * consumer who wants their own form can leave this off and still get the signal.
+   * cell, makes one `slotDuration` long, a drag makes one as long as it was drawn.
+   * `cell-activate` fires either way, so a consumer who wants their own form can leave this
+   * off and still get the signal.
    */
   creatable?: boolean
   /**
@@ -139,6 +147,7 @@ const props = withDefaults(defineProps<CalendarProps>(), {
   views: () => ['day', '4days', 'week'],
   customDays: 4,
   weekdays: undefined,
+  firstDayOfWeek: undefined,
   locale: undefined,
   format: undefined,
   dayStart: 0,
@@ -187,8 +196,11 @@ const events = defineModel<E[]>('events', { default: () => [] })
 const emit = defineEmits<{
   /** A card was clicked or activated — the cue to open an editor of your own. */
   'event-activate': [event: E]
-  /** An empty part of the grid was activated, at this day and this time. */
-  'slot-activate': [slot: { date: string; time: string }]
+  /**
+   * An empty part of the grid was activated, at this day and this time. A day of the month
+   * view has no hour of its own, and reports the one the time grids start at.
+   */
+  'cell-activate': [cell: CalendarCell]
   /**
    * An event was dragged or nudged somewhere else. It carries the event as it now stands and
    * where it came from, so undoing it needs no copy of your own.
@@ -207,15 +219,9 @@ defineSlots<{
   /** Extra controls in the toolbar, between the range and the view menu. */
   actions?(): unknown
   /** The content of one event's card, replacing the title and times. */
-  event?(props: {
-    event: E
-    layout: CalendarEventLayout
-    timeText: string
-    continuesBefore: boolean
-    continuesAfter: boolean
-  }): unknown
+  event?(props: CalendarEventSlotProps<E>): unknown
   /** The head of one day column, replacing the weekday and the number. */
-  'day-header'?(props: { iso: string; weekday: string; day: string; today: boolean }): unknown
+  'day-header'?(props: { iso: string; weekday: string; dayText: string; today: boolean }): unknown
   /** The label beside the band of all-day events. */
   'all-day-label'?(): unknown
 }>()
@@ -224,12 +230,15 @@ const m = useMessages()
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const resolvedLocale = useResolvedLocale(() => props.locale)
-const resolvedHourFormat = computed(() => props.format ?? hourCycleFor(resolvedLocale.value))
+const resolvedFormat = computed(() => props.format ?? hourCycleFor(resolvedLocale.value))
 const resolvedWeekdays = computed(() =>
-  normalizeWeekdays(props.weekdays, firstDayOfWeekFor(resolvedLocale.value)),
+  normalizeWeekdays(
+    props.weekdays,
+    props.firstDayOfWeek ?? firstDayOfWeekFor(resolvedLocale.value),
+  ),
 )
 
-const window = computed(() => windowOf(props.dayStart, props.dayEnd))
+const timeWindow = computed(() => windowOf(props.dayStart, props.dayEnd))
 
 const days = computed(() =>
   visibleDays(date.value, view.value, resolvedWeekdays.value, props.customDays),
@@ -292,7 +301,7 @@ const gridRef = ref<{ focus(): void; scrollToMinutes(minutes: number): void } | 
  * carrying an hour the month ignores would leave that hour to go stale, and the grid would
  * then reopen on whatever the month happened to leave behind.
  */
-const focused = ref<FocusedCell>({ iso: date.value, minutes: window.value.start })
+const focused = ref<FocusedCell>({ iso: date.value, minutes: timeWindow.value.start })
 const focusedDay = ref(date.value)
 
 const range = computed(() =>
@@ -357,13 +366,14 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.calendar.label)
  * in every one of them rather than on the controls alone: the edge step pages the view from a
  * drag, and the year grid opens a month from a cell, neither of which is a button this
  * component disabled. It is the VDatePicker arrangement, where the guard sits on `goTo`.
+ * `onCellActivate` below takes the same guard, for the same reason.
  */
 function step(delta: -1 | 1) {
   if (props.disabled) return
   date.value = stepAnchor(date.value, view.value, delta, resolvedWeekdays.value, props.customDays)
 }
 
-function today_() {
+function goToToday() {
   if (props.disabled) return
   date.value = todayISO()
 }
@@ -373,8 +383,21 @@ function setView(value: CalendarView) {
   view.value = value
 }
 
-function onCellActivate(iso: string, minutes: number) {
-  emit('slot-activate', { date: iso, time: timeOf(minutes) })
+/**
+ * An empty cell taken up, from either grid. The one place the time a month day stands for is
+ * decided: the hour the time grids start at.
+ *
+ * TRAP — `disabled` is refused HERE, and not by the stylesheet's `pointer-events: none`
+ * alone. That rule stops a click, but the grid keeps its tab stop so the agenda stays
+ * readable, and Enter on a focused cell reaches this with nothing in its way — a frozen
+ * calendar would go on reporting cells to a consumer's form.
+ */
+function onCellActivate(cell: ActivatedCell) {
+  if (props.disabled) return
+  emit('cell-activate', {
+    date: cell.date,
+    time: timeOf(cell.minutes ?? timeWindow.value.start),
+  })
 }
 
 /**
@@ -446,7 +469,7 @@ const draftTitle = computed(() => m.value.calendar.newEvent(created.value + 1))
 function onSlotCreate(times: CalendarEventTimes) {
   // The grid only ever asks for this when it was told it could create, so there is no second
   // guard here: `creatable` is decided once, where the press is read.
-  emit('slot-activate', { date: times.start, time: times.startTime })
+  emit('cell-activate', { date: times.start, time: times.startTime })
 
   const title = draftTitle.value
   created.value++
@@ -472,7 +495,7 @@ defineExpose({
   /** Brings the focus into the grid, onto the cell it is currently showing. */
   focus: () => gridRef.value?.focus(),
   /** Goes back to the current day, exactly as the Today button does. */
-  today: today_,
+  today: goToToday,
   /** Moves back one view — a week, a month, a year — exactly as the toolbar's arrow does. */
   previous: () => step(-1),
   /** Moves forward one view. */
@@ -513,7 +536,7 @@ defineExpose({
           </VIconButton>
         </div>
 
-        <VButton variant="outline" tone="neutral" size="sm" :disabled="disabled" @click="today_">
+        <VButton variant="outline" tone="neutral" size="sm" :disabled="disabled" @click="goToToday">
           {{ m.calendar.today }}
         </VButton>
 
@@ -564,10 +587,10 @@ defineExpose({
         class="v-calendar-view"
         :days="days"
         :events="events"
-        :window="window"
+        :time-window="timeWindow"
         :slot-duration="slotDuration"
         :locale="resolvedLocale"
-        :hour-format="resolvedHourFormat"
+        :format="resolvedFormat"
         :today="today"
         :now="hideCurrentTime ? null : now"
         :editable="!readonly && !disabled"
@@ -604,16 +627,16 @@ defineExpose({
         :weeks="weeks"
         :events="events"
         :locale="resolvedLocale"
-        :hour-format="resolvedHourFormat"
+        :format="resolvedFormat"
         :today="today"
-        :event-limit="monthEventLimit"
+        :month-event-limit="monthEventLimit"
         :editable="!readonly && !disabled"
         :disabled="disabled"
         :hint-id="hintId"
         :edge-step-delay="edgeStepDelay"
         :label="rangeText"
         @day-activate="openIn($event, 'day')"
-        @cell-activate="onCellActivate($event, window.start)"
+        @cell-activate="onCellActivate"
         @event-activate="emit('event-activate', $event)"
         @event-drop="onEventDrop"
         @announce="announce"
@@ -724,11 +747,127 @@ defineExpose({
     margin-inline-start: auto;
   }
 
+  /*
+   * The view on show, whichever it is: the one box that scrolls. The views inherit the family
+   * and the colour from `.v-calendar` and declare neither again.
+   */
   .v-calendar-view {
     flex: 1;
+    overflow: auto;
+    block-size: 100%;
     min-block-size: 0;
     border: 1px solid var(--vectis-color-border);
     border-radius: var(--vectis-radius-surface);
+  }
+
+  /*
+   * What the three views share lives HERE rather than in each of their sheets. They are only
+   * ever rendered by this component, so this sheet ships wherever they do — the
+   * VCarousel/VCarouselItem arrangement. Every rule a view writes against one of these classes
+   * is either disjoint from it or more specific, never tied: a tie between two sheets would be
+   * settled by the consumer's bundler.
+   */
+
+  /*
+   * A drag currently held off the calendar. `not-allowed` is the word the library already uses
+   * for "you cannot do this", on every disabled control.
+   *
+   * BEST-EFFORT, and never the signal: while a pointer is captured the cursor is resolved
+   * against the capture target rather than against whatever sits under the pointer, and engines
+   * differ on it. What carries the message is the card's own paint.
+   */
+  .v-calendar-view[data-outside] {
+    cursor: not-allowed;
+  }
+
+  .v-calendar-weekday {
+    color: var(--vectis-color-text-muted);
+    font-size: var(--vectis-text-overline-size);
+    font-weight: var(--vectis-text-overline-weight);
+    letter-spacing: var(--vectis-text-overline-tracking);
+    text-transform: uppercase;
+  }
+
+  /*
+   * Today's date, marked on the number the way a calendar marks a date rather than a column.
+   * Semibold here marks a state, not a type role. Written at (0,2,0) so it wins over each view's
+   * own (0,1,0) rule for the element it lands on.
+   */
+  .v-calendar-view .v-calendar-today {
+    background: var(--vectis-color-accent);
+    color: var(--vectis-color-text-on-accent);
+    font-weight: var(--vectis-font-weight-semibold);
+  }
+
+  /* A cell of either grid: ruled on two sides, the other two drawn by its neighbours. */
+  .v-calendar-cell {
+    border-block-start: 1px solid var(--vectis-color-border);
+    border-inline-start: 1px solid var(--vectis-color-border);
+    cursor: pointer;
+  }
+
+  .v-calendar-cell:first-child {
+    border-inline-start: none;
+  }
+
+  .v-calendar-cell:focus-visible {
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    /* Drawn inwards: the view is a scrolling box, and an outward ring on a cell at the edge
+       would be cropped by it. */
+    outline-offset: calc(-1 * var(--vectis-focus-ring-width));
+  }
+
+  /* The plain buttons the month and year views draw: a day number, the "+2 more", a month. */
+  .v-calendar-button {
+    /* A button carries a border and a background from the browser, which around a round day
+       number read as a stray ring. Neither is optional. */
+    border: none;
+    background: none;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color var(--vectis-duration-fast) var(--vectis-ease-default);
+  }
+
+  .v-calendar-button:focus-visible {
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
+  }
+
+  /*
+   * The strip that lights up while a drag rests against an edge, counting down to turn the
+   * page. It is what stops the paging being a surprise.
+   *
+   * Drawn INSIDE the box the cells occupy rather than on the scroller, because a scroller's
+   * absolutely positioned child is placed against its content and scrolls away with it. That
+   * box has to be positioned, which each view's own sheet sees to. An absolutely positioned
+   * pseudo-element is not a grid item, so it disturbs no column.
+   *
+   * Its width is `--vectis-control-size-calendar-edge`, whose twin is `EDGE_BAND` in
+   * `edgeStep.ts` — the JavaScript that decides where the countdown actually starts. Neither
+   * may move without the other. The layer, 2, is the time grid's stacking table.
+   */
+  .v-calendar-edge-cue[data-edge]::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inline-size: var(--vectis-control-size-calendar-edge);
+    background: var(--vectis-color-accent-surface);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .v-calendar-edge-cue[data-edge='start']::after {
+    inset-inline-start: 0;
+  }
+
+  .v-calendar-edge-cue[data-edge='end']::after {
+    inset-inline-end: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .v-calendar-button {
+      transition: none;
+    }
   }
 }
 </style>

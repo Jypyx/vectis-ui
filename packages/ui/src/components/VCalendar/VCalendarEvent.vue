@@ -19,7 +19,12 @@ import VTypography from '../VTypography/VTypography.vue'
 import { useMessages } from '../../i18n/state'
 
 import { hueOf } from './color'
-import type { CalendarEvent, CalendarEventId, CalendarEventLayout } from './types'
+import type {
+  CalendarEvent,
+  CalendarEventId,
+  CalendarEventLayout,
+  CalendarEventSlotProps,
+} from './types'
 
 export interface CalendarEventProps<T> {
   /** The event this card stands for. */
@@ -81,15 +86,7 @@ const props = withDefaults(defineProps<CalendarEventProps<E>>(), {
 
 defineSlots<{
   /** The whole content of the card, replacing the title and the times. */
-  default?(props: {
-    event: E
-    layout: CalendarEventLayout
-    timeText: string
-    continuesBefore: boolean
-    continuesAfter: boolean
-    dragging: boolean
-    grabbed: boolean
-  }): unknown
+  default?(props: CalendarEventSlotProps<E>): unknown
 }>()
 
 const m = useMessages()
@@ -467,7 +464,7 @@ const accessibleName = computed(() =>
    * ANOTHER SHEET: matching specificity would hand the winner to whichever order the
    * consumer's bundler happens to emit, and beating it would need a three-class compound.
    * Routing through a property this rule already reads is the library's documented way out,
-   * the one `.v-table-title` takes on `--typography-color`.
+   * the one `.v-data-table-title` takes on `--typography-color`.
    */
   .v-calendar-event[data-layout='chip'] {
     block-size: var(--calendar-chip-height, 100%);
