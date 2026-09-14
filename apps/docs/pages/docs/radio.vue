@@ -4,8 +4,12 @@ import RadioBasic from '~/examples/radio/Basic.vue'
 import radioBasicSource from '~/examples/radio/Basic.vue?raw'
 import RadioDisabled from '~/examples/radio/Disabled.vue'
 import radioDisabledSource from '~/examples/radio/Disabled.vue?raw'
+import RadioHint from '~/examples/radio/Hint.vue'
+import radioHintSource from '~/examples/radio/Hint.vue?raw'
 import RadioLabelPosition from '~/examples/radio/LabelPosition.vue'
 import radioLabelPositionSource from '~/examples/radio/LabelPosition.vue?raw'
+import RadioReadOnly from '~/examples/radio/ReadOnly.vue'
+import radioReadOnlySource from '~/examples/radio/ReadOnly.vue?raw'
 import RadioSpread from '~/examples/radio/Spread.vue'
 import radioSpreadSource from '~/examples/radio/Spread.vue?raw'
 
@@ -26,6 +30,12 @@ useDocsHead('radio')
 
   <h2 id="examples">{{ t('common.examples') }}</h2>
 
+  <h3 id="hint">{{ t('radio.examples.hint.title') }}</h3>
+  <DocsProse keypath="radio.examples.hint.text" />
+  <DocsExample :source="radioHintSource" stack>
+    <RadioHint />
+  </DocsExample>
+
   <h3 id="label-position">{{ t('radio.examples.labelPosition.title') }}</h3>
   <DocsProse keypath="radio.examples.labelPosition.text" />
   <DocsExample :source="radioLabelPositionSource" stack>
@@ -36,6 +46,12 @@ useDocsHead('radio')
   <DocsProse keypath="radio.examples.spread.text" />
   <DocsExample :source="radioSpreadSource" stack>
     <RadioSpread />
+  </DocsExample>
+
+  <h3 id="readonly">{{ t('radio.examples.readonly.title') }}</h3>
+  <DocsProse keypath="radio.examples.readonly.text" />
+  <DocsExample :source="radioReadOnlySource" stack>
+    <RadioReadOnly />
   </DocsExample>
 
   <h3 id="disabled">{{ t('radio.examples.disabled.title') }}</h3>

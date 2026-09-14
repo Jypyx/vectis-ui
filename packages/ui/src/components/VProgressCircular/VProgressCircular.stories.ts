@@ -71,7 +71,7 @@ const meta = {
   render: (args) => ({
     components: { VProgressCircular },
     setup: () => ({ args, t }),
-    template: '<VProgressCircular v-bind="args" :aria-label="t.progress" />',
+    template: '<VProgressCircular v-bind="args" :label="t.progress" />',
   }),
 } satisfies Meta<typeof VProgressCircular>
 
@@ -105,11 +105,11 @@ export const Tones: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <VProgressCircular tone="accent" :value="40" show-value :aria-label="t.accent" />
-        <VProgressCircular tone="success" :value="100" show-value :aria-label="t.success" />
-        <VProgressCircular tone="warning" :value="70" show-value :aria-label="t.warning" />
-        <VProgressCircular tone="danger" :value="25" show-value :aria-label="t.error" />
-        <VProgressCircular tone="neutral" :value="55" show-value :aria-label="t.neutral" />
+        <VProgressCircular tone="accent" :value="40" show-value :label="t.accent" />
+        <VProgressCircular tone="success" :value="100" show-value :label="t.success" />
+        <VProgressCircular tone="warning" :value="70" show-value :label="t.warning" />
+        <VProgressCircular tone="danger" :value="25" show-value :label="t.error" />
+        <VProgressCircular tone="neutral" :value="55" show-value :label="t.neutral" />
       </div>
     `,
   }),
@@ -126,9 +126,9 @@ export const CustomColor: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <VProgressCircular color="#7c3aed" :value="45" show-value :aria-label="t.purple" />
-        <VProgressCircular color="teal" :value="65" show-value aria-label="Teal" />
-        <VProgressCircular color="oklch(72% 0.18 45)" :value="85" show-value aria-label="Orange" />
+        <VProgressCircular color="#7c3aed" :value="45" show-value :label="t.purple" />
+        <VProgressCircular color="teal" :value="65" show-value label="Teal" />
+        <VProgressCircular color="oklch(72% 0.18 45)" :value="85" show-value label="Orange" />
       </div>
     `,
   }),
@@ -140,11 +140,11 @@ export const Size: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <VProgressCircular :size="24" :thickness="3" :value="60" aria-label="24px" />
-        <VProgressCircular :size="48" :value="60" :aria-label="t.defaultDiameter" />
-        <VProgressCircular :size="80" :value="60" show-value aria-label="80px" />
+        <VProgressCircular :size="24" :thickness="3" :value="60" label="24px" />
+        <VProgressCircular :size="48" :value="60" :label="t.defaultDiameter" />
+        <VProgressCircular :size="80" :value="60" show-value label="80px" />
         <!-- always pixels: a numeric string is equivalent to the number -->
-        <VProgressCircular size="96" :value="60" show-value :aria-label="t.stringDiameter" />
+        <VProgressCircular size="96" :value="60" show-value :label="t.stringDiameter" />
       </div>
     `,
   }),
@@ -157,10 +157,10 @@ export const Thickness: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <VProgressCircular :size="72" :thickness="2" :value="60" aria-label="2px" />
-        <VProgressCircular :size="72" :thickness="4" :value="60" :aria-label="t.defaultThickness" />
-        <VProgressCircular :size="72" :thickness="8" :value="60" aria-label="8px" />
-        <VProgressCircular :size="72" :thickness="16" :value="60" aria-label="16px" />
+        <VProgressCircular :size="72" :thickness="2" :value="60" label="2px" />
+        <VProgressCircular :size="72" :thickness="4" :value="60" :label="t.defaultThickness" />
+        <VProgressCircular :size="72" :thickness="8" :value="60" label="8px" />
+        <VProgressCircular :size="72" :thickness="16" :value="60" label="16px" />
       </div>
     `,
   }),
@@ -172,9 +172,9 @@ export const Value: Story = {
     components: { VProgressCircular },
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <VProgressCircular :size="48" :value="35" show-value aria-label="48px" />
-        <VProgressCircular :size="72" :value="35" show-value aria-label="72px" />
-        <VProgressCircular :size="112" :value="35" show-value aria-label="112px" />
+        <VProgressCircular :size="48" :value="35" show-value label="48px" />
+        <VProgressCircular :size="72" :value="35" show-value label="72px" />
+        <VProgressCircular :size="112" :value="35" show-value label="112px" />
       </div>
     `,
   }),
@@ -187,7 +187,7 @@ export const CentreLabel: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 24px; align-items: center">
-        <VProgressCircular :size="112" :thickness="10" :value="7" :max="10" :aria-label="t.steps">
+        <VProgressCircular :size="112" :thickness="10" :value="7" :max="10" :label="t.steps">
           <template #default="{ value, max }">
             <span style="display: grid; gap: 2px; justify-items: center">
               <VTypography variant="heading-2" as="strong">{{ value }}</VTypography>
@@ -195,12 +195,12 @@ export const CentreLabel: Story = {
             </span>
           </template>
         </VProgressCircular>
-        <VProgressCircular :size="96" :value="100" tone="success" :aria-label="t.done">
+        <VProgressCircular :size="96" :value="100" tone="success" :label="t.done">
           <template #default>
             <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 2rem">check</span>
           </template>
         </VProgressCircular>
-        <VProgressCircular :size="96" :thickness="8" :value="42" show-value :aria-label="t.compression" />
+        <VProgressCircular :size="96" :thickness="8" :value="42" show-value :label="t.compression" />
       </div>
     `,
   }),
@@ -212,8 +212,8 @@ export const Square: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <VProgressCircular :size="72" :thickness="10" :value="35" shape="rounded" :aria-label="t.roundedEnds" />
-        <VProgressCircular :size="72" :thickness="10" :value="35" shape="square" :aria-label="t.bluntEnds" />
+        <VProgressCircular :size="72" :thickness="10" :value="35" shape="rounded" :label="t.roundedEnds" />
+        <VProgressCircular :size="72" :thickness="10" :value="35" shape="square" :label="t.bluntEnds" />
       </div>
     `,
   }),
@@ -226,9 +226,9 @@ export const Indeterminate: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <VProgressCircular indeterminate :aria-label="t.loading" />
-        <VProgressCircular indeterminate :size="72" :thickness="8" tone="success" :aria-label="t.syncing" />
-        <VProgressCircular indeterminate :size="96" :thickness="4" shape="square" color="teal" :aria-label="t.analysis" />
+        <VProgressCircular indeterminate :label="t.loading" />
+        <VProgressCircular indeterminate :size="72" :thickness="8" tone="success" :label="t.syncing" />
+        <VProgressCircular indeterminate :size="96" :thickness="4" shape="square" color="teal" :label="t.analysis" />
       </div>
     `,
   }),
@@ -240,12 +240,12 @@ export const EdgeCases: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 16px; align-items: center">
-        <VProgressCircular :value="0" show-value :aria-label="t.zero" />
-        <VProgressCircular :value="100" show-value :aria-label="t.complete" />
+        <VProgressCircular :value="0" show-value :label="t.zero" />
+        <VProgressCircular :value="100" show-value :label="t.complete" />
         <!-- a thickness ≥ the diameter: a zero radius, degrading cleanly (no SVG error) -->
-        <VProgressCircular :size="48" :thickness="64" :value="50" :aria-label="t.excessiveThickness" />
+        <VProgressCircular :size="48" :thickness="64" :value="50" :label="t.excessiveThickness" />
         <!-- a label too long for the donut hole -->
-        <VProgressCircular :size="72" :thickness="6" :value="50" :aria-label="t.labelTooLong">
+        <VProgressCircular :size="72" :thickness="6" :value="50" :label="t.labelTooLong">
           <template #default>{{ t.compressing }}</template>
         </VProgressCircular>
       </div>

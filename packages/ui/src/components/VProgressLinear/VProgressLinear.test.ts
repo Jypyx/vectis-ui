@@ -250,4 +250,26 @@ describe('VProgressLinear', () => {
     expect(style).toContain('margin-top: 4px')
     expect(style).toContain('--fill-fraction: 0.4')
   })
+
+  it('label: names the indicator, in place of the dictionary default', async () => {
+    const { getByRole, rerender } = render(VProgressLinear, { props: { value: 40 } })
+    expect(getByRole('progressbar', { name: 'Progress' })).toBeTruthy()
+    await rerender({ label: 'Upload' })
+    expect(getByRole('progressbar', { name: 'Upload' })).toBeTruthy()
+  })
+
+  it('label: a consumer aria-label wins, and aria-labelledby removes it', () => {
+    const labelled = render(VProgressLinear, {
+      props: { value: 40, label: 'Upload' },
+      attrs: { 'aria-label': 'Mine' },
+    })
+    expect(labelled.getByRole('progressbar').getAttribute('aria-label')).toBe('Mine')
+    const byRef = render(VProgressLinear, {
+      props: { value: 40, label: 'Upload' },
+      attrs: { 'aria-labelledby': 'heading' },
+    })
+    expect(byRef.container.querySelector('[role="progressbar"]')!.hasAttribute('aria-label')).toBe(
+      false,
+    )
+  })
 })

@@ -9,11 +9,14 @@ export default {
     {
       name: 'VCheckbox',
       props: [
+        { name: 'label', type: 'string' },
+        { name: 'hint', type: 'string' },
         { name: 'indeterminate', type: 'boolean', default: 'false' },
         { name: 'labelPosition', type: 'CheckboxLabelPosition', values: "'start' | 'end'", default: "'end'" },
         { name: 'spread', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
+        { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'v-model', key: 'vModel', type: 'boolean', default: 'false' },
       ],
       slots: [

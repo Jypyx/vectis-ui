@@ -12,13 +12,13 @@ import { VProgressLinear, VTypography } from 'vectis-ui'
         :value="value"
         orientation="vertical"
         thickness="14"
-        :aria-label="`Tank, ${value} percent`"
+        :label="`Tank, ${value} percent`"
       />
       <VTypography variant="caption" tone="muted">{{ value }}%</VTypography>
     </div>
 
     <div class="gauge">
-      <VProgressLinear indeterminate orientation="vertical" thickness="14" aria-label="Filling" />
+      <VProgressLinear indeterminate orientation="vertical" thickness="14" label="Filling" />
       <VTypography variant="caption" tone="muted">indeterminate</VTypography>
     </div>
   </div>

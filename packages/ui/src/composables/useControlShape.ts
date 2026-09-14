@@ -1,8 +1,9 @@
 /**
  * The arbitration between a control and the row it sits in, resolved once.
  *
- * Six components read a group context — VButton from a VButtonGroup, and the five fields
- * from a VInputGroup — and each of them wrote the same three computeds by hand. Two of the
+ * Seven components read a group context — VButton from a VButtonGroup, and the five fields
+ * and VSlider's number fields from a VInputGroup — and each of them wrote the same three
+ * computeds by hand. Two of the
  * three use `??` and the third uses `||`, and that asymmetry is the whole rule: `size` and
  * `compact` are the SHAPE of the control, which belongs to the row, while `disabled` is
  * CUMULATIVE, so a row switched off cannot have one of its segments opt back in. Written out

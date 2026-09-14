@@ -10,10 +10,13 @@ export default {
       name: 'VRadio',
       props: [
         { name: 'value', type: 'ItemValue' },
+        { name: 'label', type: 'string' },
+        { name: 'hint', type: 'string' },
         { name: 'labelPosition', type: 'RadioLabelPosition', values: "'start' | 'end'", default: "'end'" },
         { name: 'spread', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
+        { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'v-model', key: 'vModel', type: 'ItemValue', default: "''" },
       ],
       slots: [

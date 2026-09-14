@@ -16,7 +16,7 @@ const POSITIONS: ProgressLinearValuePosition[] = ['start', 'center', 'end']
         thickness="22"
         show-value
         :value-position="position"
-        :aria-label="`Upload, ${position}`"
+        :label="`Upload, ${position}`"
       />
     </div>
 
@@ -24,7 +24,7 @@ const POSITIONS: ProgressLinearValuePosition[] = ['start', 'center', 'end']
          percentage worked out from them. -->
     <div class="labelled">
       <VTypography variant="caption" tone="muted">A slot of your own</VTypography>
-      <VProgressLinear :value="7" :max="12" thickness="22" aria-label="Files uploaded">
+      <VProgressLinear :value="7" :max="12" thickness="22" label="Files uploaded">
         <template #default="{ value, max }">{{ value }} of {{ max }} files</template>
       </VProgressLinear>
     </div>

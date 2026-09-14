@@ -8,7 +8,7 @@ const TONES: ProgressLinearTone[] = ['accent', 'success', 'warning', 'danger', '
   <div class="column">
     <div v-for="tone in TONES" :key="tone" class="row">
       <VTypography variant="caption" tone="muted" class="name">{{ tone }}</VTypography>
-      <VProgressLinear :value="60" :tone="tone" :aria-label="`Upload, ${tone}`" />
+      <VProgressLinear :value="60" :tone="tone" :label="`Upload, ${tone}`" />
     </div>
   </div>
 </template>

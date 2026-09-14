@@ -7,9 +7,9 @@ import { VProgressLinear, VTypography } from 'vectis-ui'
     <!-- One bar crosses the track, flush with each edge at the extremes, so the loop is
          invisible and the track is never empty. The value is ignored: there is nothing
          to report. -->
-    <VProgressLinear indeterminate aria-label="Waiting for the server" />
+    <VProgressLinear indeterminate label="Waiting for the server" />
 
-    <VProgressLinear indeterminate tone="neutral" thickness="8" aria-label="Loading" />
+    <VProgressLinear indeterminate tone="neutral" thickness="8" label="Loading" />
 
     <VTypography variant="body-sm" tone="muted">
       For a server that reports no percentage. Under reduced motion the bar is slowed rather than

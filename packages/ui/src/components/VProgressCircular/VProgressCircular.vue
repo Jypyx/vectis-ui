@@ -10,9 +10,10 @@
  * change of size. And `pathLength="100"` declares the outline 100 units long whatever its
  * real circumference, so the portion drawn is a percentage with no π anywhere.
  *
- * NAMING — pass an `aria-label` saying what is progressing. The figure in the middle cannot
+ * NAMING — pass a `label` saying what is progressing. The figure in the middle cannot
  * serve: `role="progressbar"` makes its content presentational, so it is never announced.
  */
+import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useProgressValue } from '../../composables/useProgressValue'
 import { useMessages } from '../../i18n/state'
 import { px } from '../../utils/css'
@@ -26,6 +27,12 @@ export type ProgressCircularShape = 'rounded' | 'square'
 interface ProgressCircularProps {
   /** How far along it is. Anything outside the range is brought back into it. */
   value?: number
+  /**
+   * What is progressing, in words, for screen readers. It draws nothing on screen, and falls
+   * back to the design system dictionary; an `aria-label` or `aria-labelledby` of your own
+   * takes precedence over it.
+   */
+  label?: string
   /** What counts as finished. The other end is always zero. */
   max?: number
   /**
@@ -56,6 +63,7 @@ interface ProgressCircularProps {
 
 const props = withDefaults(defineProps<ProgressCircularProps>(), {
   value: 0,
+  label: undefined,
   max: 100,
   indeterminate: false,
   tone: 'accent',
@@ -83,17 +91,25 @@ const {
   max: normalizedMax,
   clamped,
   fraction,
+  percent,
+  roundedPercent,
 } = useProgressValue(
   () => props.value,
   () => props.max,
 )
+
+// @a11y
+// The canonical cascade: a consumer's `aria-labelledby`, then their `aria-label`, then the
+// `label` prop, then the dictionary. An indicator takes no name from the text inside it, so
+// without the last step it would have none at all.
+const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
 </script>
 
 <template>
   <span
     class="v-progress-circular v-tone"
     role="progressbar"
-    :aria-label="m.progress.label"
+    :aria-label="ariaLabel"
     :data-tone="tone"
     :data-custom="color !== undefined ? '' : undefined"
     :data-shape="shape"
@@ -113,8 +129,8 @@ const {
       <circle class="v-progress-circular-bar" pathLength="100" />
     </svg>
     <span v-if="!indeterminate && (showValue || $slots.default)" class="v-progress-circular-label">
-      <slot :value="clamped" :max="normalizedMax" :percent="fraction * 100">
-        {{ m.progress.percent(Math.round(fraction * 100)) }}
+      <slot :value="clamped" :max="normalizedMax" :percent="percent">
+        {{ m.progress.percent(roundedPercent) }}
       </slot>
     </span>
   </span>

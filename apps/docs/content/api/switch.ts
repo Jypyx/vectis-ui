@@ -9,10 +9,13 @@ export default {
     {
       name: 'VSwitch',
       props: [
+        { name: 'label', type: 'string' },
+        { name: 'hint', type: 'string' },
         { name: 'labelPosition', type: 'SwitchLabelPosition', values: "'start' | 'end'", default: "'end'" },
         { name: 'spread', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
+        { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'v-model', key: 'vModel', type: 'boolean', default: 'false' },
       ],
       slots: [
@@ -23,5 +26,6 @@ export default {
   cssVars: [
     { name: '--vectis-control-size-switch-w', value: '2.5rem' },
     { name: '--vectis-control-size-switch-h', value: '1.25rem' },
+    { name: '--vectis-control-size-switch-pad', value: '0.125rem' },
   ],
 } satisfies PageApi

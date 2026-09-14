@@ -15,11 +15,23 @@ export default {
       title: 'Disabled',
       text: '<code>disabled</code> prevents the button from being picked and greys it out through the colour tokens. A button both selected and disabled keeps its dot.',
     },
+    hint: {
+      title: 'Hint',
+      text: '<code>label</code> writes the text beside the dot, and the default slot replaces it. <code>hint</code> adds a caption underneath, tied to the button through <code>aria-describedby</code>, which is the place to say what an option implies.',
+    },
+    readonly: {
+      title: 'Read-only',
+      text: '<code>readonly</code>, set on every button of the group, keeps the selection where it is. The component cancels the click, and the arrow keys are covered too, since the browser selects the next button through a click: the focus moves, the selection does not.',
+    },
   },
 
   api: {
     VRadio: {
       props: {
+        label: 'The text beside the dot, which names it. The default slot replaces it.',
+        hint: 'A line of help under the label. It is tied to the radio button for assistive technology, so it is read out after the label rather than as part of it.',
+        readonly:
+          'Shows the selection without allowing it to be changed. The button can still be focused and is still submitted with its form; a click or an arrow key simply selects nothing. Set it on every button of the group.',
         value:
           "What choosing this button means. The group's v-model holds the value of the selected button, so this is what it becomes when this one is picked.",
         labelPosition: 'Which side of the dot the label sits on.',
@@ -33,7 +45,7 @@ export default {
       },
       slots: {
         default:
-          'The label. It is clickable, the whole component being wrapped in a <code>&lt;label&gt;</code>.',
+          "The label, when it needs more than the <code>label</code> prop's text. It is clickable.",
       },
     },
   },

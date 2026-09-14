@@ -30,6 +30,9 @@ const LAYER_ORDER = '@layer vectis.reset, vectis.tokens, vectis.components, vect
 const CORE_CLASSES: ReadonlySet<string> = new Set([
   '.v-banner',
   '.v-choice',
+  '.v-choice-hint',
+  '.v-choice-label',
+  '.v-choice-row',
   '.v-control',
   '.v-disclosure',
   '.v-disclosure-chevron',

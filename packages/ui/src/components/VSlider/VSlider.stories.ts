@@ -17,6 +17,10 @@ const t = storyText({
     low: 'Low',
     loud: 'Loud',
     maximum: 'Maximum',
+    small: 'Small fields',
+    medium: 'Medium fields (default)',
+    large: 'Large fields',
+    quota: 'Quota',
   },
   fr: {
     volume: 'Volume',
@@ -29,6 +33,10 @@ const t = storyText({
     low: 'Faible',
     loud: 'Fort',
     maximum: 'Maximum',
+    small: 'Petits champs',
+    medium: 'Champs moyens (défaut)',
+    large: 'Grands champs',
+    quota: 'Quota',
   },
 })
 
@@ -260,4 +268,80 @@ export const FullVertical: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * `readonly` keeps the thumbs focusable and announced, and refuses every change: the keys
+ * that move a thumb are cancelled, and a thumb the pointer has already moved is put back
+ * before the browser paints. The number fields turn read-only with them.
+ */
+export const ReadOnly: Story = {
+  render: (args) => ({
+    components: { VSlider },
+    setup: () => ({ args, t, value: ref(40), rangeValue: ref<[number, number]>([20, 60]) }),
+    template: `
+      <div style="display: grid; gap: 24px; width: 420px">
+        <VSlider v-bind="args" v-model="value" readonly inputs :step="10" ticks :label="t.volume" />
+        <output data-testid="mirror">{{ value }}</output>
+        <VSlider v-bind="args" v-model="rangeValue" readonly range :label="t.budget" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const slider = canvas.getByRole('slider', { name: 'Volume' }) as HTMLInputElement
+    await expect(slider).toHaveAttribute('aria-readonly', 'true')
+    await expect(slider).not.toBeDisabled()
+    // A key: cancelled before the browser can apply it.
+    slider.focus()
+    const key = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
+    slider.dispatchEvent(key)
+    await expect(key.defaultPrevented).toBe(true)
+    // A pointer: the native thumb has moved when `input` fires, and is put back.
+    slider.value = '80'
+    await fireEvent.input(slider)
+    await expect(slider.value).toBe('40')
+    await expect(canvas.getByTestId('mirror')).toHaveTextContent('40')
+    await expect(slider).toHaveFocus()
+    await expect(canvas.getByRole('spinbutton', { name: 'Volume' })).toHaveAttribute('readonly')
+  },
+}
+
+/** `invalid` rings the thumbs in the danger colour and sets `aria-invalid` on each. */
+export const Invalid: Story = {
+  render: (args) => ({
+    components: { VSlider },
+    setup: () => ({ args, t, value: ref<[number, number]>([30, 90]) }),
+    template: `
+      <div style="width: 420px">
+        <VSlider v-bind="args" v-model="value" range inputs invalid :label="t.quota" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    for (const thumb of canvas.getAllByRole('slider'))
+      await expect(thumb).toHaveAttribute('aria-invalid', 'true')
+  },
+}
+
+/** `size` sets the height of the number fields, md by default, as on every other field. */
+export const Sizes: Story = {
+  render: (args) => ({
+    components: { VSlider },
+    setup: () => ({ args, t, a: ref(20), b: ref(40), c: ref(60) }),
+    template: `
+      <div style="display: grid; gap: 24px; width: 420px">
+        <VSlider v-bind="args" v-model="a" inputs size="sm" :label="t.small" />
+        <VSlider v-bind="args" v-model="b" inputs :label="t.medium" />
+        <VSlider v-bind="args" v-model="c" inputs size="lg" :label="t.large" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const heights = [...canvasElement.querySelectorAll('.v-slider-field .v-input-field')].map(
+      (el) => Math.round(el.getBoundingClientRect().height),
+    )
+    await expect(heights).toEqual([32, 40, 48])
+  },
 }

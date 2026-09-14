@@ -4,10 +4,14 @@ import CheckboxBasic from '~/examples/checkbox/Basic.vue'
 import checkboxBasicSource from '~/examples/checkbox/Basic.vue?raw'
 import CheckboxDisabled from '~/examples/checkbox/Disabled.vue'
 import checkboxDisabledSource from '~/examples/checkbox/Disabled.vue?raw'
+import CheckboxHint from '~/examples/checkbox/Hint.vue'
+import checkboxHintSource from '~/examples/checkbox/Hint.vue?raw'
 import CheckboxIndeterminate from '~/examples/checkbox/Indeterminate.vue'
 import checkboxIndeterminateSource from '~/examples/checkbox/Indeterminate.vue?raw'
 import CheckboxLabelPosition from '~/examples/checkbox/LabelPosition.vue'
 import checkboxLabelPositionSource from '~/examples/checkbox/LabelPosition.vue?raw'
+import CheckboxReadOnly from '~/examples/checkbox/ReadOnly.vue'
+import checkboxReadOnlySource from '~/examples/checkbox/ReadOnly.vue?raw'
 import CheckboxSpread from '~/examples/checkbox/Spread.vue'
 import checkboxSpreadSource from '~/examples/checkbox/Spread.vue?raw'
 
@@ -28,6 +32,12 @@ useDocsHead('checkbox')
 
   <h2 id="examples">{{ t('common.examples') }}</h2>
 
+  <h3 id="hint">{{ t('checkbox.examples.hint.title') }}</h3>
+  <DocsProse keypath="checkbox.examples.hint.text" />
+  <DocsExample :source="checkboxHintSource" stack>
+    <CheckboxHint />
+  </DocsExample>
+
   <h3 id="label-position">{{ t('checkbox.examples.labelPosition.title') }}</h3>
   <DocsProse keypath="checkbox.examples.labelPosition.text" />
   <DocsExample :source="checkboxLabelPositionSource" stack>
@@ -44,6 +54,12 @@ useDocsHead('checkbox')
   <DocsProse keypath="checkbox.examples.indeterminate.text" />
   <DocsExample :source="checkboxIndeterminateSource" stack>
     <CheckboxIndeterminate />
+  </DocsExample>
+
+  <h3 id="readonly">{{ t('checkbox.examples.readonly.title') }}</h3>
+  <DocsProse keypath="checkbox.examples.readonly.text" />
+  <DocsExample :source="checkboxReadOnlySource" stack>
+    <CheckboxReadOnly />
   </DocsExample>
 
   <h3 id="disabled">{{ t('checkbox.examples.disabled.title') }}</h3>

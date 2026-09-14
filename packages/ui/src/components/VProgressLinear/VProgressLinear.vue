@@ -9,10 +9,11 @@
  * There is no behavioural JavaScript: the value is clamped and a percentage is
  * formatted, and that is all.
  *
- * On naming: pass an `aria-label` saying what is progressing. The text shown inside the
+ * On naming: pass a `label` saying what is progressing. The text shown inside the
  * bar cannot serve as that name — the role a progress bar carries makes its content
  * presentational, so screen readers do not announce it.
  */
+import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useProgressValue } from '../../composables/useProgressValue'
 import { useMessages } from '../../i18n/state'
 import { px } from '../../utils/css'
@@ -32,6 +33,12 @@ export type ProgressLinearOrientation = 'horizontal' | 'vertical'
 interface ProgressLinearProps {
   /** How far along it is. Anything outside the range is brought back into it. */
   value?: number
+  /**
+   * What is progressing, in words, for screen readers. It draws nothing on screen, and falls
+   * back to the design system dictionary; an `aria-label` or `aria-labelledby` of your own
+   * takes precedence over it.
+   */
+  label?: string
   /** What counts as finished. The other end is always zero. */
   max?: number
   /**
@@ -72,6 +79,7 @@ interface ProgressLinearProps {
 
 const props = withDefaults(defineProps<ProgressLinearProps>(), {
   value: 0,
+  label: undefined,
   max: 100,
   indeterminate: false,
   tone: 'accent',
@@ -103,17 +111,25 @@ const {
   max: normalizedMax,
   clamped,
   fraction,
+  percent,
+  roundedPercent,
 } = useProgressValue(
   () => props.value,
   () => props.max,
 )
+
+// @a11y
+// The canonical cascade: a consumer's `aria-labelledby`, then their `aria-label`, then the
+// `label` prop, then the dictionary. An indicator takes no name from the text inside it, so
+// without the last step it would have none at all.
+const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
 </script>
 
 <template>
   <div
     class="v-progress-linear v-tone"
     role="progressbar"
-    :aria-label="m.progress.label"
+    :aria-label="ariaLabel"
     :data-tone="tone"
     :data-custom="color !== undefined ? '' : undefined"
     :data-shape="shape"
@@ -138,13 +154,13 @@ const {
     -->
     <template v-if="!indeterminate && (showValue || $slots.default)">
       <span class="v-progress-linear-text">
-        <slot :value="clamped" :max="normalizedMax" :percent="fraction * 100">
-          {{ m.progress.percent(Math.round(fraction * 100)) }}
+        <slot :value="clamped" :max="normalizedMax" :percent="percent">
+          {{ m.progress.percent(roundedPercent) }}
         </slot>
       </span>
       <span class="v-progress-linear-text" data-on-fill aria-hidden="true">
-        <slot :value="clamped" :max="normalizedMax" :percent="fraction * 100">
-          {{ m.progress.percent(Math.round(fraction * 100)) }}
+        <slot :value="clamped" :max="normalizedMax" :percent="percent">
+          {{ m.progress.percent(roundedPercent) }}
         </slot>
       </span>
     </template>

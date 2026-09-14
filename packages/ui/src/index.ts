@@ -187,7 +187,12 @@ export type {
   ProgressLinearOrientation,
 } from './components/VProgressLinear/VProgressLinear.vue'
 export { default as VSlider } from './components/VSlider/VSlider.vue'
-export type { SliderLabel, SliderOrientation, SliderValue } from './components/VSlider/VSlider.vue'
+export type {
+  SliderLabel,
+  SliderOrientation,
+  SliderSize,
+  SliderValue,
+} from './components/VSlider/VSlider.vue'
 export { default as VDialog } from './components/VDialog/VDialog.vue'
 export type { DialogRole, DialogTriggerProps } from './components/VDialog/VDialog.vue'
 export { default as VDialogAlert } from './components/VDialog/VDialogAlert.vue'

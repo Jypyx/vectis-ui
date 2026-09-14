@@ -2,34 +2,88 @@
  * The chassis of the three controls a reader picks with: VCheckbox, VRadio and VSwitch.
  *
  * All three are the same object — a <label> holding a hidden native control, the drawing the
- * component makes for it, and the text — so the row itself, the side the text sits on and
- * the greying belong to one recipe rather than to three that have to be kept in step. The
- * `.v-tone` and `.v-control` arrangement: the class goes on the root beside the component's
- * own, which keeps every per-component rule winning on specificity.
+ * component makes for it and the text, with an optional hint underneath — so the layout, the
+ * side the text sits on, the focus ring and the greying belong to one recipe rather than to
+ * three that have to be kept in step. The `.v-tone` and `.v-control` arrangement: the class
+ * goes on the root beside the component's own, which keeps every per-component rule winning
+ * on specificity.
  *
- * What each component still owns is what it DRAWS: the box and its tick, the dot, the track
- * and its thumb. That is where the three genuinely differ, and none of it is here.
+ * What each component still owns is what it DRAWS and how each state paints it: the box and
+ * its tick, the dot, the track and its thumb. VCheckbox and VRadio paint their states with the
+ * same rules, and those stay ALIGNED COPIES in the two sheets rather than a recipe here:
+ * measured, sharing them added ~250 B gzip to this core sheet, which every consumer pays.
  */
 @layer vectis.components {
+  /*
+   * Two tracks: the drawing, then the text. The hint is NOT inside the <label>, whose content
+   * is the control's accessible name: a caption in there would be read as part of the name
+   * instead of as a description. So the root holds the label as its first row and the hint as
+   * its second, and the label is a SUBGRID of the root's columns — which is what puts the
+   * hint exactly under the text, whatever width the drawing has (a box, a dot, a track).
+   *
+   * TRAP — the space between the drawing and the text is a MARGIN on the text, never a
+   * `column-gap`. A gap opens between the two tracks even when the second one is empty, so
+   * a control with no text (a row checkbox in VDataTable) would carry 8px of dead space
+   * beside it, off-centre in its cell with nothing to say why.
+   */
   .v-choice {
-    display: inline-flex;
+    display: inline-grid;
+    grid-template-columns: auto auto;
     align-items: center;
-    gap: var(--vectis-space-2);
     font-family: var(--vectis-text-family);
     font-size: var(--vectis-text-label-size);
     color: var(--vectis-color-text);
+  }
+
+  .v-choice-row {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: center;
     cursor: pointer;
   }
 
-  /* The native control is taken out of the flow by its absolute position, so reversing the
-     row only ever swaps the drawing and the text. */
-  .v-choice[data-label-position='start'] {
-    flex-direction: row-reverse;
+  .v-choice-label,
+  .v-choice-hint {
+    margin-inline-start: var(--vectis-space-2);
   }
 
+  .v-choice-hint {
+    grid-column: 2;
+    font-size: var(--vectis-text-caption-size);
+    line-height: var(--vectis-text-caption-leading);
+    color: var(--vectis-color-text-muted);
+  }
+
+  /* The native control is out of the flow, so reordering the text is all it takes to put it
+     first; the hint follows it into the first track. */
+  .v-choice[data-label-position='start'] .v-choice-label {
+    order: -1;
+  }
+
+  .v-choice[data-label-position='start'] :is(.v-choice-label, .v-choice-hint) {
+    margin-inline: 0 var(--vectis-space-2);
+  }
+
+  .v-choice[data-label-position='start'] .v-choice-hint {
+    grid-column: 1;
+  }
+
+  /* The label spans both tracks, so the space distributed between them stays clickable. */
   .v-choice[data-spread] {
-    display: flex;
+    display: grid;
     justify-content: space-between;
+  }
+
+  /* Whatever the component draws, it is the element right after the hidden input, and the
+     ring goes on it: the input itself is invisible. */
+  .v-choice-row .v-hidden-input:focus-visible + * {
+    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
+    outline-offset: var(--vectis-focus-ring-offset);
+  }
+
+  .v-choice[data-readonly] .v-choice-row {
+    cursor: default;
   }
 
   /* A disabled control greys out through the colour tokens, the same ones VButton uses, and
@@ -37,6 +91,13 @@
      three that carries the state — hence `.v-hidden-input` rather than three selectors. */
   .v-choice:has(.v-hidden-input:disabled) {
     color: var(--vectis-color-text-subtle);
+  }
+
+  .v-choice:has(.v-hidden-input:disabled) .v-choice-row {
     cursor: not-allowed;
+  }
+
+  .v-choice:has(.v-hidden-input:disabled) .v-choice-hint {
+    color: var(--vectis-color-text-subtle);
   }
 }

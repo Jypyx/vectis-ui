@@ -9,7 +9,8 @@ type ClassBinding = false | null | undefined | string | Record<string, unknown> 
 // @a11y
 /**
  * The attribute split of the wrapper-root pattern, for components whose root is only a
- * container: VInput, VTextarea, VTabs, VCombobox, VDataTable, VDateInput, VTimeInput.
+ * container: VInput, VTextarea, VTabs, VCombobox, VDataTable, VDateInput, VTimeInput, VSlider,
+ * and the three choice controls, whose root holds the <label> and its hint.
  *
  * `class`/`style` stay on the root, which is the box the consumer positions; everything
  * else is forwarded to the functional element. Unsplit, `name`, `required` and every

@@ -3,5 +3,5 @@ import { VProgressLinear } from 'vectis-ui'
 </script>
 
 <template>
-  <VProgressLinear :value="40" aria-label="Upload" />
+  <VProgressLinear :value="40" label="Upload" />
 </template>

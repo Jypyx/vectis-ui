@@ -14,11 +14,7 @@ const COLORS = [
       <VTypography variant="caption" tone="muted" class="name">{{ colour.caption }}</VTypography>
       <!-- The track's own shade is derived from the colour against the theme, so both
            follow: one value to set, and it stays right in dark mode. -->
-      <VProgressLinear
-        :value="60"
-        :color="colour.value"
-        :aria-label="`Upload, ${colour.caption}`"
-      />
+      <VProgressLinear :value="60" :color="colour.value" :label="`Upload, ${colour.caption}`" />
     </div>
   </div>
 </template>

@@ -16,6 +16,9 @@ const t = storyText({
     disabledOn: 'Disabled and on',
     invalid: 'Accept the terms',
     enableNotifications: 'Enable notifications',
+    wifi: 'Wi-Fi',
+    wifiHint: 'Joins known networks automatically.',
+    managed: 'Managed by your administrator',
   },
   fr: {
     notifications: 'Notifications',
@@ -27,6 +30,9 @@ const t = storyText({
     disabledOn: 'Désactivé actif',
     invalid: 'Accepter les conditions',
     enableNotifications: 'Activer les notifications',
+    wifi: 'Wi-Fi',
+    wifiHint: 'Rejoint automatiquement les réseaux connus.',
+    managed: 'Géré par votre administrateur',
   },
 })
 
@@ -37,6 +43,7 @@ const meta = {
     labelPosition: { control: 'select', options: ['start', 'end'] },
   },
   args: {
+    readonly: false,
     labelPosition: 'end',
     spread: false,
     disabled: false,
@@ -76,7 +83,7 @@ export const LabelPosition: Story = {
 }
 
 /**
- * `spread`: the root becomes full-width flex, and label and switch are pushed to
+ * `spread`: the root takes the full width, and label and switch are pushed to
  * the container's opposite ends.
  */
 export const Spread: Story = {
@@ -130,5 +137,40 @@ export const Invalid: Story = {
     // The ring is a shadow, so it changes no geometry and leaves the focus outline alone.
     const track = canvasElement.querySelector('.v-switch-track')!
     await expect(getComputedStyle(track).boxShadow).not.toBe('none')
+  },
+}
+
+/** `label` stands in for the default slot, and `hint` draws a caption under it. */
+export const WithHint: Story = {
+  render: () => ({
+    components: { VSwitch },
+    setup: () => ({ on: ref(true), t }),
+    template: `
+      <div style="max-width: 360px">
+        <VSwitch v-model="on" :label="t.wifi" :hint="t.wifiHint" spread label-position="start" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const sw = within(canvasElement).getByRole('switch', { name: 'Wi-Fi' })
+    await expect(sw).toHaveAccessibleDescription('Joins known networks automatically.')
+  },
+}
+
+/** `readonly` keeps the switch focusable and announced, and refuses the change. */
+export const ReadOnly: Story = {
+  render: () => ({
+    components: { VSwitch },
+    setup: () => ({ on: ref(true), t }),
+    template: '<VSwitch v-model="on" readonly :label="t.managed" />',
+  }),
+  play: async ({ canvasElement }) => {
+    const sw = within(canvasElement).getByRole('switch', { name: 'Managed by your administrator' })
+    await expect(sw).toHaveAttribute('aria-readonly', 'true')
+    await userEvent.click(sw.closest('label')!)
+    await expect(sw).toBeChecked()
+    sw.focus()
+    await userEvent.keyboard(' ')
+    await expect(sw).toBeChecked()
   },
 }

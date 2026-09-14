@@ -11,7 +11,7 @@ const THICKNESSES = [2, 4, 8, 14]
          thickness, so changing either recomputes nothing in JavaScript. -->
     <div class="row">
       <div v-for="size in SIZES" :key="size" class="cell">
-        <VProgressCircular :value="65" :size="size" :aria-label="`Upload, ${size}px`" />
+        <VProgressCircular :value="65" :size="size" :label="`Upload, ${size}px`" />
         <VTypography variant="caption" tone="muted">{{ size }}px</VTypography>
       </div>
     </div>
@@ -24,7 +24,7 @@ const THICKNESSES = [2, 4, 8, 14]
           :value="65"
           :size="64"
           :thickness="thickness"
-          :aria-label="`Upload, ${thickness}px ring`"
+          :label="`Upload, ${thickness}px ring`"
         />
         <VTypography variant="caption" tone="muted">{{ thickness }}px ring</VTypography>
       </div>

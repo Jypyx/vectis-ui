@@ -3,5 +3,5 @@ import { VProgressCircular } from 'vectis-ui'
 </script>
 
 <template>
-  <VProgressCircular :value="65" aria-label="Upload" show-value />
+  <VProgressCircular :value="65" label="Upload" show-value />
 </template>

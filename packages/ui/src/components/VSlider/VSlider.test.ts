@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { nextTick, ref } from 'vue'
 
+import VInputGroup from '../VInput/VInputGroup.vue'
 import VSlider from './VSlider.vue'
 
 describe('VSlider', () => {
@@ -331,5 +332,106 @@ describe('VSlider — the wrapper-root split', () => {
     expect(slider.value?.el?.id).toBe('price')
     slider.value?.focus()
     expect(document.activeElement).toBe(end)
+  })
+
+  // A range input has no native read-only: an input event has already moved the thumb and
+  // cannot be cancelled, so the value is put back and the model never hears of it.
+  it('readonly: a moved thumb is put back, nothing is emitted, and it says so', async () => {
+    const { getAllByRole, emitted } = render(VSlider, {
+      props: { modelValue: [20, 60], range: true, readonly: true, label: 'Budget' },
+    })
+    for (const thumb of getAllByRole('slider') as HTMLInputElement[]) {
+      const before = thumb.value
+      thumb.value = '40'
+      await fireEvent.input(thumb)
+      await fireEvent.change(thumb)
+      expect(thumb.value).toBe(before)
+      expect(thumb.getAttribute('aria-readonly')).toBe('true')
+      expect(thumb.disabled).toBe(false)
+    }
+    expect(emitted('update:modelValue')).toBeUndefined()
+    expect(emitted('change')).toBeUndefined()
+  })
+
+  it('readonly: the keys that move a thumb are cancelled, Tab is not', () => {
+    const { getByRole } = render(VSlider, {
+      props: { modelValue: 40, readonly: true, label: 'Volume' },
+    })
+    const thumb = getByRole('slider')
+    for (const key of ['ArrowRight', 'ArrowUp', 'Home', 'End', 'PageUp']) {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+      thumb.dispatchEvent(event)
+      expect(event.defaultPrevented).toBe(true)
+    }
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true })
+    thumb.dispatchEvent(tab)
+    expect(tab.defaultPrevented).toBe(false)
+  })
+
+  it('readonly: the number fields turn read-only with the thumbs', () => {
+    const { getByRole } = render(VSlider, {
+      props: { modelValue: 40, readonly: true, inputs: true, label: 'Volume' },
+    })
+    expect((getByRole('spinbutton') as HTMLInputElement).readOnly).toBe(true)
+  })
+
+  it('not readonly: the keys are left to the browser', () => {
+    const { getByRole } = render(VSlider, { props: { modelValue: 40, label: 'Volume' } })
+    const event = new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true })
+    getByRole('slider').dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(false)
+  })
+
+  it('invalid: data-invalid on the root, aria-invalid on every thumb and field', () => {
+    const { container, getAllByRole } = render(VSlider, {
+      props: { modelValue: [20, 60], range: true, invalid: true, inputs: true, label: 'x' },
+    })
+    expect(container.querySelector('.v-slider')!.hasAttribute('data-invalid')).toBe(true)
+    for (const el of [...getAllByRole('slider'), ...getAllByRole('spinbutton')])
+      expect(el.getAttribute('aria-invalid')).toBe('true')
+  })
+
+  it('size: md by default on the number fields, an explicit one carried over', async () => {
+    const { container, rerender } = render(VSlider, {
+      props: { modelValue: 40, inputs: true, label: 'x' },
+    })
+    const field = () => container.querySelector('.v-slider-field')!
+    expect(field().getAttribute('data-size')).toBe('md')
+    await rerender({ size: 'lg' })
+    expect(field().getAttribute('data-size')).toBe('lg')
+  })
+
+  it('size and disabled: a VInputGroup row wins, as it does for every field', () => {
+    const { container, getByRole } = render({
+      components: { VInputGroup, VSlider },
+      template: `
+        <VInputGroup size="sm" disabled label="Row">
+          <VSlider :model-value="40" inputs size="lg" label="Volume" />
+        </VInputGroup>
+      `,
+    })
+    expect(container.querySelector('.v-slider-field')!.getAttribute('data-size')).toBe('sm')
+    expect((getByRole('slider') as HTMLInputElement).disabled).toBe(true)
+  })
+
+  it('single mode: no start fraction, which only a range reads', () => {
+    const { container } = render(VSlider, { props: { modelValue: 40, label: 'x' } })
+    const root = container.querySelector('.v-slider') as HTMLElement
+    expect(root.style.getPropertyValue('--start-fraction')).toBe('')
+    expect(root.style.getPropertyValue('--end-fraction')).toBe('0.4')
+  })
+
+  // The places depend on the bounds and the step alone: moving the value must hand the
+  // ticks back the SAME style objects, which is what spares Vue re-patching every one.
+  it('ticks: moving the value changes which are filled, not where they sit', async () => {
+    const { container, rerender } = render(VSlider, {
+      props: { modelValue: 20, step: 10, ticks: true, label: 'x' },
+    })
+    const ticks = () => [...container.querySelectorAll('.v-slider-tick')] as HTMLElement[]
+    const before = ticks().map((t) => t.getAttribute('style'))
+    expect(ticks().filter((t) => t.hasAttribute('data-filled'))).toHaveLength(3)
+    await rerender({ modelValue: 70 })
+    expect(ticks().map((t) => t.getAttribute('style'))).toEqual(before)
+    expect(ticks().filter((t) => t.hasAttribute('data-filled'))).toHaveLength(8)
   })
 })

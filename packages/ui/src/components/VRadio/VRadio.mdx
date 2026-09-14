@@ -8,7 +8,8 @@ import * as VRadioStories from './VRadio.stories'
 Radio button built on the native `<input type="radio">`, visually replaced by a styled dot (the
 same approach as `VCheckbox`: the input stays in the tree, and only its rendering is hidden). The
 group is **native**: several VRadio sharing the same `name` (fallthrough) and the same v-model —
-arrow navigation is supplied by the browser, zero JavaScript.
+arrow navigation is supplied by the browser. The one piece of JavaScript is the refusal
+`readonly` asks for.
 
 A single size: a 20px dot with a 2px border (the `--vectis-control-size-check` and
 `--vectis-control-border-width` tokens), and an 8px inner dot
@@ -27,9 +28,19 @@ button.
 
 <Canvas of={VRadioStories.LabelPosition} />
 
+## Label and hint
+
+`label` is the text beside the dot, and the default slot replaces it when the label needs
+more than text. `hint` draws a caption underneath, tied to the input through
+`aria-describedby`: a consumer's own `aria-describedby` is kept and the hint appended to it. The
+hint is rendered outside the `<label>`, since everything inside a label becomes the accessible
+name, and it lines up with the text on either side (`label-position`, `spread`).
+
+<Canvas of={VRadioStories.WithHint} />
+
 ## Spread
 
-`spread` switches the root to full-width flex: label and dot are pushed to the container's
+`spread` makes the root take the full width: label and dot are pushed to the container's
 opposite ends. It combines with `label-position` to choose which side the dot goes to.
 
 <Canvas of={VRadioStories.Spread} />
@@ -42,16 +53,26 @@ automatically:
 
 <Canvas of={VRadioStories.Disabled} />
 
+## Read-only
+
+`readonly`, set on every button of the group, shows the selection without letting it change.
+The component cancels the click, and the browser puts the previous selection back. The arrow keys
+are covered by the same cancel, since the browser selects the next button through a click it
+dispatches on it: the focus moves, the selection does not. No `aria-readonly` is written,
+because ARIA allows it on a `radiogroup` and not on a `radio`.
+
+<Canvas of={VRadioStories.ReadOnly} />
+
 ## Forms and validation
 
 The native attributes (`name` above all, to form the group, but also `required`, `aria-*`…) pass
-through by fallthrough onto the input, not onto the label. The invalid state is styled through
+through by fallthrough onto the input, not onto the wrapper. The invalid state is styled through
 `:user-invalid` (native validation); the `invalid` prop allows forcing it — it sets
 `aria-invalid`.
 
 ## Accessibility
 
-- The slot label names the control (a wrapping label); wrap the group in a `<fieldset>` with a
+- The label (prop or slot) names the control and the hint describes it; wrap the group in a `<fieldset>` with a
   `<legend>` to name the question.
 - The input is hidden with `opacity: 0` (never `display: none`): it stays focusable and submitted
   with the form; the arrows navigate within the group (native behaviour).

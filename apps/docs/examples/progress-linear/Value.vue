@@ -8,7 +8,7 @@ const step = (delta: number) => (value.value += delta)
 
 <template>
   <div class="column">
-    <VProgressLinear :value="value" thickness="10" aria-label="Upload" show-value />
+    <VProgressLinear :value="value" thickness="10" label="Upload" show-value />
 
     <div class="row">
       <VButton variant="outline" tone="neutral" size="sm" @click="step(-25)">-25</VButton>
@@ -21,7 +21,7 @@ const step = (delta: number) => (value.value += delta)
     <!-- `max` says what counts as finished. The other end is always zero. -->
     <div class="labelled">
       <VTypography variant="caption" tone="muted">7 of 12 files, max = 12</VTypography>
-      <VProgressLinear :value="7" :max="12" thickness="10" aria-label="Files" show-value />
+      <VProgressLinear :value="7" :max="12" thickness="10" label="Files" show-value />
     </div>
   </div>
 </template>

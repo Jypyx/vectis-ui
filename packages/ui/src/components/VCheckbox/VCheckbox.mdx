@@ -7,9 +7,10 @@ import * as VCheckboxStories from './VCheckbox.stories'
 
 Checkbox built on the native `<input type="checkbox">`, visually replaced by a styled box: the
 input stays in the tree (focus, keyboard, forms, `:user-invalid`), and only its rendering is
-hidden. The root is a wrapping `<label>` — clicking the label ticks the box, with no `for`/`id`.
-The only JavaScript beyond the v-model bridge is `indeterminate`, which exists solely as a DOM
-property.
+hidden. The input sits inside a `<label>`, so clicking the label ticks the box with no
+`for`/`id`; the root is a layout box around that label and the optional hint. The JavaScript
+beyond the v-model bridge is `indeterminate`, which exists solely as a DOM property, and the
+refusal `readonly` asks for.
 
 A single size: a 20px box with a 2px border (the `--vectis-control-size-check` and
 `--vectis-control-border-width` tokens), and a 14px tick (`--vectis-control-size-check-mark`).
@@ -24,9 +25,19 @@ A single size: a 20px box with a 2px border (the `--vectis-control-size-check` a
 
 <Canvas of={VCheckboxStories.LabelPosition} />
 
+## Label and hint
+
+`label` is the text beside the box, and the default slot replaces it when the label needs
+more than text. `hint` draws a caption underneath, tied to the input through
+`aria-describedby`: a consumer's own `aria-describedby` is kept and the hint appended to it. The
+hint is rendered outside the `<label>`, since everything inside a label becomes the accessible
+name, and it lines up with the text on either side (`label-position`, `spread`).
+
+<Canvas of={VCheckboxStories.WithHint} />
+
 ## Spread
 
-`spread` switches the root to full-width flex: label and box are pushed to the container's
+`spread` makes the root take the full width: label and box are pushed to the container's
 opposite ends. It combines with `label-position` to choose which side the box goes to.
 
 <Canvas of={VCheckboxStories.Spread} />
@@ -47,6 +58,17 @@ automatically:
 
 <Canvas of={VCheckboxStories.Disabled} />
 
+## Read-only
+
+`readonly` shows the state without letting it change. The native attribute has no effect on a
+checkbox, so the component cancels the click, which also covers Space and a click on the label:
+the browser puts `checked` and `indeterminate` back and fires no `change`. The box stays
+focusable, is submitted with its form and carries `aria-readonly`. It sinks like a read-only
+field (`--vectis-color-surface-sunken`), and a ticked box trades the accent for
+`--vectis-color-text-muted`.
+
+<Canvas of={VCheckboxStories.ReadOnly} />
+
 A long label wraps, and the box stays aligned on the first line without being compressed:
 
 <Canvas of={VCheckboxStories.LongLabel} />
@@ -54,15 +76,16 @@ A long label wraps, and the box stays aligned on the first line without being co
 ## Forms and validation
 
 The native attributes (`name`, `value`, `required`, `aria-*`…) pass through by fallthrough onto
-the input, not onto the label: the box takes part in forms normally. The invalid state is styled
+the input, not onto the wrapper, where only `class` and `style` stay: the box takes part in forms normally. The invalid state is styled
 through `:user-invalid` (native validation, after interaction); the `invalid` prop allows forcing
 it server-side — it sets `aria-invalid`.
 
 ## Accessibility
 
-- The slot label names the control (a wrapping label): always supply a label, or an `aria-label`
+- The label (prop or slot) names the control, and the hint describes it: always supply a label, or an `aria-label`
   by fallthrough failing that.
 - The input is hidden with `opacity: 0` (never `display: none`): it stays focusable by keyboard
   and submitted with the form.
 - Visible focus through a ring (`--vectis-focus-ring-*`) on the box, never removed.
+- `readonly` keeps the box in the tab order and sets `aria-readonly`.
 - The transitions respect `prefers-reduced-motion`.

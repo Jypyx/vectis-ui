@@ -19,11 +19,23 @@ export default {
       title: 'Désactivé',
       text: "<code>disabled</code> empêche de cocher la case et la grise par les tokens de couleur. Le clavier l'enjambe.",
     },
+    hint: {
+      title: 'Aide',
+      text: '<code>label</code> écrit le texte à côté de la case, et le slot par défaut le remplace quand le libellé demande plus que du texte. <code>hint</code> ajoute une légende en dessous, reliée à la case par <code>aria-describedby</code> et gardée hors du <code>&lt;label&gt;</code> : elle est annoncée comme une description et non comme une partie du nom.',
+    },
+    readonly: {
+      title: 'Lecture seule',
+      text: "<code>readonly</code> montre l'état sans permettre de le changer. L'attribut natif n'a aucun effet sur une case à cocher, donc le composant annule le clic, ce qui couvre aussi la barre d'espace. La case reste focalisable, s'envoie avec son formulaire et est annoncée en lecture seule.",
+    },
   },
 
   api: {
     VCheckbox: {
       props: {
+        label: 'Le texte à côté de la case, qui la nomme. Le slot par défaut le remplace.',
+        hint: "Une ligne d'aide sous le libellé. Elle est reliée à la case pour les technologies d'assistance, qui la lisent après le libellé et non comme une partie de celui-ci.",
+        readonly:
+          "Montre l'état sans permettre de le changer. La case reste focalisable, est annoncée en lecture seule et s'envoie toujours avec son formulaire ; un clic ou la barre d'espace ne changent simplement rien.",
         indeterminate:
           "Affiche la case comme partiellement cochée, un tiret au lieu d'une coche. C'est l'allure d'une case parente dont certains enfants sont cochés et d'autres non. C'est un état à part, pas une valeur que le v-model peut porter.",
         labelPosition: 'De quel côté de la case se place le libellé.',
@@ -37,7 +49,7 @@ export default {
       },
       slots: {
         default:
-          'Le libellé. Il est cliquable, tout le composant étant enveloppé dans un <code>&lt;label&gt;</code>.',
+          'Le libellé, quand il demande plus que le texte de la prop <code>label</code>. Il est cliquable.',
       },
     },
   },

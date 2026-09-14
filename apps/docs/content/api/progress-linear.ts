@@ -10,6 +10,7 @@ export default {
       name: 'VProgressLinear',
       props: [
         { name: 'value', type: 'number', default: '0' },
+        { name: 'label', type: 'string' },
         { name: 'max', type: 'number', default: '100' },
         { name: 'indeterminate', type: 'boolean', default: 'false' },
         { name: 'tone', type: 'ProgressLinearTone', values: "'accent' | 'success' | 'warning' | 'danger' | 'neutral'", default: "'accent'" },

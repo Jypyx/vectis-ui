@@ -99,7 +99,7 @@ const meta = {
     components: { VProgressLinear },
     setup: () => ({ args, t }),
     template:
-      '<div style="width: 320px"><VProgressLinear v-bind="args" :aria-label="t.progress" /></div>',
+      '<div style="width: 320px"><VProgressLinear v-bind="args" :label="t.progress" /></div>',
   }),
 } satisfies Meta<typeof VProgressLinear>
 
@@ -129,11 +129,11 @@ export const Tones: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear tone="accent" :value="40" :aria-label="t.accent" />
-        <VProgressLinear tone="success" :value="100" :aria-label="t.success" />
-        <VProgressLinear tone="warning" :value="70" :aria-label="t.warning" />
-        <VProgressLinear tone="danger" :value="25" :aria-label="t.error" />
-        <VProgressLinear tone="neutral" :value="55" :aria-label="t.neutral" />
+        <VProgressLinear tone="accent" :value="40" :label="t.accent" />
+        <VProgressLinear tone="success" :value="100" :label="t.success" />
+        <VProgressLinear tone="warning" :value="70" :label="t.warning" />
+        <VProgressLinear tone="danger" :value="25" :label="t.error" />
+        <VProgressLinear tone="neutral" :value="55" :label="t.neutral" />
       </div>
     `,
   }),
@@ -150,9 +150,9 @@ export const CustomColor: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear color="#7c3aed" :value="45" :aria-label="t.purple" />
-        <VProgressLinear color="teal" :value="65" show-value aria-label="Teal" />
-        <VProgressLinear color="oklch(72% 0.18 45)" :value="85" show-value aria-label="Orange" />
+        <VProgressLinear color="#7c3aed" :value="45" :label="t.purple" />
+        <VProgressLinear color="teal" :value="65" show-value label="Teal" />
+        <VProgressLinear color="oklch(72% 0.18 45)" :value="85" show-value label="Orange" />
       </div>
     `,
   }),
@@ -164,11 +164,11 @@ export const Thickness: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="40" :aria-label="t.defaultThickness" />
-        <VProgressLinear :thickness="8" :value="55" aria-label="8px" />
-        <VProgressLinear :thickness="16" :value="70" aria-label="16px" />
+        <VProgressLinear :value="40" :label="t.defaultThickness" />
+        <VProgressLinear :thickness="8" :value="55" label="8px" />
+        <VProgressLinear :thickness="16" :value="70" label="16px" />
         <!-- always pixels: a numeric string is equivalent to the number -->
-        <VProgressLinear thickness="24" :value="85" aria-label="24px" />
+        <VProgressLinear thickness="24" :value="85" label="24px" />
       </div>
     `,
   }),
@@ -186,10 +186,10 @@ export const Value: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :thickness="20" show-value value-position="start" :value="35" :aria-label="t.start" />
-        <VProgressLinear :thickness="20" show-value value-position="center" :value="35" :aria-label="t.centre" />
-        <VProgressLinear :thickness="20" show-value value-position="end" :value="35" :aria-label="t.end" />
-        <VProgressLinear :thickness="20" show-value value-position="center" :value="92" :aria-label="t.almostDone" />
+        <VProgressLinear :thickness="20" show-value value-position="start" :value="35" :label="t.start" />
+        <VProgressLinear :thickness="20" show-value value-position="center" :value="35" :label="t.centre" />
+        <VProgressLinear :thickness="20" show-value value-position="end" :value="35" :label="t.end" />
+        <VProgressLinear :thickness="20" show-value value-position="center" :value="92" :label="t.almostDone" />
       </div>
     `,
   }),
@@ -219,10 +219,10 @@ export const CustomContent: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="3" :max="8" :thickness="24" :aria-label="t.filesSent">
+        <VProgressLinear :value="3" :max="8" :thickness="24" :label="t.filesSent">
           <template #default="{ value, max }">{{ value }}/{{ max }} {{ t.files }}</template>
         </VProgressLinear>
-        <VProgressLinear :value="72" :thickness="24" value-position="end" :aria-label="t.spaceUsed">
+        <VProgressLinear :value="72" :thickness="24" value-position="end" :label="t.spaceUsed">
           <template #default="{ percent }">{{ t.ofGb(Math.round(percent)) }}</template>
         </VProgressLinear>
       </div>
@@ -236,9 +236,9 @@ export const Square: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear shape="rounded" :value="60" :aria-label="t.roundedDefault" />
-        <VProgressLinear shape="square" :value="60" :aria-label="t.square" />
-        <VProgressLinear shape="square" :value="60" :thickness="20" show-value :aria-label="t.thickSquare" />
+        <VProgressLinear shape="rounded" :value="60" :label="t.roundedDefault" />
+        <VProgressLinear shape="square" :value="60" :label="t.square" />
+        <VProgressLinear shape="square" :value="60" :thickness="20" show-value :label="t.thickSquare" />
       </div>
     `,
   }),
@@ -251,9 +251,9 @@ export const Indeterminate: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear indeterminate :aria-label="t.loading" />
-        <VProgressLinear indeterminate tone="success" :thickness="8" :aria-label="t.syncing" />
-        <VProgressLinear indeterminate color="teal" :thickness="12" shape="square" :aria-label="t.analysis" />
+        <VProgressLinear indeterminate :label="t.loading" />
+        <VProgressLinear indeterminate tone="success" :thickness="8" :label="t.syncing" />
+        <VProgressLinear indeterminate color="teal" :thickness="12" shape="square" :label="t.analysis" />
       </div>
     `,
   }),
@@ -271,11 +271,11 @@ export const Vertical: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: flex; gap: 32px; align-items: flex-end">
-        <VProgressLinear orientation="vertical" :value="40" :aria-label="t.default" />
-        <VProgressLinear orientation="vertical" :value="75" style="height: 240px" tone="success" aria-label="240px" />
-        <VProgressLinear orientation="vertical" :value="30" :thickness="20" shape="square" tone="warning" :aria-label="t.thickSquareBar" />
-        <VProgressLinear orientation="vertical" :value="60" :thickness="32" style="height: 200px" show-value :aria-label="t.withText" />
-        <VProgressLinear orientation="vertical" indeterminate :thickness="12" :aria-label="t.indeterminate" />
+        <VProgressLinear orientation="vertical" :value="40" :label="t.default" />
+        <VProgressLinear orientation="vertical" :value="75" style="height: 240px" tone="success" label="240px" />
+        <VProgressLinear orientation="vertical" :value="30" :thickness="20" shape="square" tone="warning" :label="t.thickSquareBar" />
+        <VProgressLinear orientation="vertical" :value="60" :thickness="32" style="height: 200px" show-value :label="t.withText" />
+        <VProgressLinear orientation="vertical" indeterminate :thickness="12" :label="t.indeterminate" />
       </div>
     `,
   }),
@@ -294,7 +294,7 @@ export const Progression: Story = {
     },
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="value" :thickness="20" show-value :aria-label="t.upload" />
+        <VProgressLinear :value="value" :thickness="20" show-value :label="t.upload" />
         <div style="display: flex; gap: 8px">
           <button type="button" @click="bump(-10)">−10</button>
           <button type="button" @click="bump(10)">+10</button>
@@ -330,13 +330,13 @@ export const EdgeCases: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="0" :thickness="20" show-value :aria-label="t.zero" />
-        <VProgressLinear :value="100" :thickness="20" show-value :aria-label="t.complete" />
+        <VProgressLinear :value="0" :thickness="20" show-value :label="t.zero" />
+        <VProgressLinear :value="100" :thickness="20" show-value :label="t.complete" />
         <!-- past the max: clamped -->
-        <VProgressLinear :value="250" :max="100" :thickness="20" show-value :aria-label="t.outOfBounds" />
+        <VProgressLinear :value="250" :max="100" :thickness="20" show-value :label="t.outOfBounds" />
         <!-- text taller than the bar: it overflows visibly, uncropped -->
-        <VProgressLinear :value="45" show-value :aria-label="t.defaultThicknessBar" />
-        <VProgressLinear :value="45" :thickness="24" :aria-label="t.veryLongText">
+        <VProgressLinear :value="45" show-value :label="t.defaultThicknessBar" />
+        <VProgressLinear :value="45" :thickness="24" :label="t.veryLongText">
           <template #default>{{ t.compressing }}</template>
         </VProgressLinear>
       </div>

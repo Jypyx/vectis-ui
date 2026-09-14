@@ -214,7 +214,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     --skeleton-h: 1em;
     --skeleton-radius: var(--vectis-radius-pill);
     --skeleton-gap: max(0px, calc(1lh - 1em));
-    padding-block: calc(max(0px, calc(1lh - 1em)) / 2);
+    padding-block: calc(var(--skeleton-gap) / 2);
   }
 
   /* A line of text keeps the height its typography gives it: unlike the other shapes it
@@ -271,6 +271,13 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     --skeleton-radius: var(--vectis-radius-surface);
   }
 
+  /* The overlay both animations paint on, laid over the whole silhouette. */
+  .v-skeleton:is([data-animation='wave'], [data-animation='pulse']) .v-skeleton-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
   /*
    * The pulse: a flat sheet of the lighter shade fades in and out OVER the silhouette.
    *
@@ -281,9 +288,6 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * being animated, so it costs no layout.
    */
   .v-skeleton[data-animation='pulse'] .v-skeleton-item::after {
-    content: '';
-    position: absolute;
-    inset: 0;
     background-color: var(--skeleton-highlight);
     animation: v-skeleton-pulse var(--vectis-duration-1500) var(--vectis-ease-in-out) infinite;
   }
@@ -301,9 +305,6 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * skeletons, so a compositor-only movement is not negotiable here.
    */
   .v-skeleton[data-animation='wave'] .v-skeleton-item::after {
-    content: '';
-    position: absolute;
-    inset: 0;
     background-image: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
     animation: v-skeleton-wave var(--vectis-duration-1500) linear infinite;
   }

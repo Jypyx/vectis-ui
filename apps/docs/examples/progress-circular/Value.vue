@@ -9,10 +9,10 @@ const step = (delta: number) => (value.value += delta)
 <template>
   <div class="column">
     <div class="row">
-      <VProgressCircular :value="value" :size="96" show-value aria-label="Upload" />
+      <VProgressCircular :value="value" :size="96" show-value label="Upload" />
 
       <!-- `max` says what counts as finished. The other end is always zero. -->
-      <VProgressCircular :value="7" :max="12" :size="96" show-value aria-label="Files" />
+      <VProgressCircular :value="7" :max="12" :size="96" show-value label="Files" />
     </div>
 
     <div class="row">

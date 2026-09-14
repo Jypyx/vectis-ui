@@ -40,6 +40,8 @@ export default {
   api: {
     VProgressLinear: {
       props: {
+        label:
+          "Ce qui progresse, en mots, pour les lecteurs d'écran. Rien ne s'affiche à l'écran, et le dictionnaire du design system sert de repli ; un <code>aria-label</code> ou un <code>aria-labelledby</code> à vous l'emporte sur lui.",
         value: "Où en est la progression. Tout ce qui sort de l'intervalle y est ramené.",
         max: "Ce qui compte comme terminé. L'autre extrémité est toujours zéro.",
         indeterminate:

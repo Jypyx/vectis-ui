@@ -7,7 +7,7 @@ const TONES: ProgressCircularTone[] = ['accent', 'success', 'warning', 'danger',
 <template>
   <div class="row">
     <div v-for="tone in TONES" :key="tone" class="cell">
-      <VProgressCircular :value="65" :tone="tone" :aria-label="`Upload, ${tone}`" />
+      <VProgressCircular :value="65" :tone="tone" :label="`Upload, ${tone}`" />
       <VTypography variant="caption" tone="muted">{{ tone }}</VTypography>
     </div>
   </div>

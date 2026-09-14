@@ -43,11 +43,28 @@ export default {
       title: 'Dans un formulaire',
       text: "<code>name</code>, <code>id</code> et les aria-* sont redirigés sur le vrai input range sous-jacent. Le nommage passe par la prop <code>label</code>, qui pose un aria-label : choisissez donc entre elle et un libellé visible à vous. Une plage n'a pas de valeur unique à soumettre : seule la poignée de fin porte le nom.",
     },
+    sizes: {
+      title: 'Taille des champs',
+      text: "<code>size</code> règle la hauteur des champs numériques qu'ajoute <code>inputs</code>, <code>md</code> par défaut comme sur tout champ. Dans un VInputGroup, c'est la rangée qui décide, comme pour ses autres champs.",
+    },
+    readonly: {
+      title: 'Lecture seule',
+      text: "<code>readonly</code> montre la valeur sans permettre de la changer. Une entrée de plage n'a pas de lecture seule native, donc le composant annule les touches qui déplacent une poignée et remet en place une poignée que le pointeur a déplacée. Les poignées restent focalisables et annoncées, et les champs numériques passent en lecture seule avec elles.",
+    },
+    invalid: {
+      title: 'Invalide',
+      text: "<code>invalid</code> cercle les poignées de la couleur de danger, comme une case à cocher colore sa bordure, et le signale aux technologies d'assistance par <code>aria-invalid</code> sur chaque poignée et chaque champ.",
+    },
   },
 
   api: {
     VSlider: {
       props: {
+        readonly:
+          'Montre la valeur sans permettre de la changer. Les poignées restent focalisables et sont annoncées en lecture seule, mais ni le pointeur ni le clavier ne les déplacent, et les champs numériques passent en lecture seule avec elles.',
+        invalid:
+          "Marque la valeur comme invalide, ce qui colore les poignées et le signale aux technologies d'assistance. C'est pour une règle que le navigateur ne sait pas vérifier seul.",
+        size: "La hauteur des champs numériques qu'ajoute <code>inputs</code>. Dans un VInputGroup, la taille du groupe l'emporte, comme pour chaque champ de la rangée.",
         min: 'La valeur la plus basse que la poignée peut atteindre.',
         max: 'La valeur la plus haute que la poignée peut atteindre.',
         step: "L'écart entre deux valeurs sur lesquelles la poignée peut s'arrêter. C'est aussi le pas des flèches, et ce sur quoi une valeur saisie dans le champ voisin est alignée.",

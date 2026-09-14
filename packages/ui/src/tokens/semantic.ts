@@ -256,6 +256,10 @@ export const semantic = {
     'size-check-dot': dimension('0.5rem', "VRadio's inner dot"),
     'size-switch-w': dimension('2.5rem', "The width of VSwitch's track"),
     'size-switch-h': dimension('1.25rem', "The height of VSwitch's track"),
+    'size-switch-pad': dimension(
+      '0.125rem',
+      "The gap between VSwitch's thumb and the edge of its track",
+    ),
     'action-size-sm': dimension(
       '1.25rem',
       'The inner buttons of sm input fields (clear, a clickable icon)',

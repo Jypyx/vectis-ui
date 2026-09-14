@@ -6,9 +6,9 @@ import * as VSliderStories from './VSlider.stories'
 # Slider
 
 A slider built on the native `<input type="range">` — keyboard, the ARIA slider role and form
-participation all for free. The JavaScript is limited to the anti-crossing of range mode, to the
-numeric fields' bridge and to deriving the step positions (ticks/labels/tooltips); no browser
-behaviour is reimplemented.
+participation all for free. The JavaScript is limited to the anti-crossing of range mode, the
+refusal `readonly` asks for, the numeric fields' bridge and deriving the step positions (ticks and
+labels); no browser behaviour is reimplemented.
 
 The track (6px, the `--vectis-control-size-slider-track` token), the fill, the ticks, the labels and
 the bubbles all align on the **thumb's real centre** — which travels `[thumb/2, 100% − thumb/2]`, not
@@ -63,6 +63,12 @@ silently reverts to the current value.
 
 <Canvas of={VSliderStories.WithInputs} />
 
+`size` sets the height of those fields, `md` by default like every other field of the design
+system. Inside a VInputGroup the row's size and its `disabled` win, the arbitration every field
+follows.
+
+<Canvas of={VSliderStories.Sizes} />
+
 ## Tooltip
 
 `tooltip` displays a value bubble following the thumb during the drag and on keyboard focus (only
@@ -94,6 +100,19 @@ and below:
 follows the dark theme automatically:
 
 <Canvas of={VSliderStories.Disabled} />
+
+`readonly` shows the value without letting it change. A range input has no native read-only, so
+the component cancels the keys that move a thumb and, for the pointer, puts back a thumb the browser
+has already moved before it is painted. The thumbs stay focusable and carry `aria-readonly`, the
+number fields turn read-only with them, and the fill and the thumbs' ring take
+`--vectis-color-text-muted`.
+
+<Canvas of={VSliderStories.ReadOnly} />
+
+`invalid` rings the thumbs in `--vectis-color-danger`, as VCheckbox and VRadio colour their
+border, and sets `aria-invalid` on each thumb and field.
+
+<Canvas of={VSliderStories.Invalid} />
 
 ## Forms
 

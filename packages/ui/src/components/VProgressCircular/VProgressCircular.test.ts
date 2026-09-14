@@ -153,7 +153,7 @@ describe('VProgressCircular', () => {
       props: { value: 40 },
       attrs: { 'aria-label': 'Name through fallthrough' },
     })
-    // the name comes from aria-label through fallthrough, not from a dedicated `label` prop
+    // a consumer aria-label wins over the dictionary default, as it would over `label`
     expect(getByRole('progressbar', { name: 'Name through fallthrough' })).toBeTruthy()
     // the fraction is a PRIVATE custom property: nothing public is exposed
     expect(styleOf(container)).not.toContain('--vectis-progress-value')
@@ -171,5 +171,27 @@ describe('VProgressCircular', () => {
     const style = bar.getAttribute('style') ?? ''
     expect(style).toContain('margin: 4px')
     expect(style).toContain('--fill-fraction: 0.4')
+  })
+
+  it('label: names the indicator, in place of the dictionary default', async () => {
+    const { getByRole, rerender } = render(VProgressCircular, { props: { value: 40 } })
+    expect(getByRole('progressbar', { name: 'Progress' })).toBeTruthy()
+    await rerender({ label: 'Upload' })
+    expect(getByRole('progressbar', { name: 'Upload' })).toBeTruthy()
+  })
+
+  it('label: a consumer aria-label wins, and aria-labelledby removes it', () => {
+    const labelled = render(VProgressCircular, {
+      props: { value: 40, label: 'Upload' },
+      attrs: { 'aria-label': 'Mine' },
+    })
+    expect(labelled.getByRole('progressbar').getAttribute('aria-label')).toBe('Mine')
+    const byRef = render(VProgressCircular, {
+      props: { value: 40, label: 'Upload' },
+      attrs: { 'aria-labelledby': 'heading' },
+    })
+    expect(byRef.container.querySelector('[role="progressbar"]')!.hasAttribute('aria-label')).toBe(
+      false,
+    )
   })
 })

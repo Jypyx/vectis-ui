@@ -15,11 +15,23 @@ export default {
       title: 'Désactivé',
       text: '<code>disabled</code> empêche de choisir le bouton et le grise par les tokens de couleur. Un bouton à la fois sélectionné et désactivé garde son point.',
     },
+    hint: {
+      title: 'Aide',
+      text: "<code>label</code> écrit le texte à côté du point, et le slot par défaut le remplace. <code>hint</code> ajoute une légende en dessous, reliée au bouton par <code>aria-describedby</code> : c'est l'endroit où dire ce qu'une option implique.",
+    },
+    readonly: {
+      title: 'Lecture seule',
+      text: '<code>readonly</code>, posé sur chaque bouton du groupe, laisse la sélection où elle est. Le composant annule le clic, et les flèches sont couvertes aussi, puisque le navigateur sélectionne le bouton suivant par un clic : le focus se déplace, la sélection non.',
+    },
   },
 
   api: {
     VRadio: {
       props: {
+        label: 'Le texte à côté du point, qui le nomme. Le slot par défaut le remplace.',
+        hint: "Une ligne d'aide sous le libellé. Elle est reliée au bouton pour les technologies d'assistance, qui la lisent après le libellé et non comme une partie de celui-ci.",
+        readonly:
+          "Montre la sélection sans permettre de la changer. Le bouton reste focalisable et s'envoie toujours avec son formulaire ; un clic ou une flèche ne sélectionnent simplement rien. À poser sur chaque bouton du groupe.",
         value:
           "Ce que signifie le choix de ce bouton. Le v-model du groupe porte la valeur du bouton sélectionné : c'est donc ce qu'il devient quand celui-ci est choisi.",
         labelPosition: 'De quel côté du point se place le libellé.',
@@ -33,7 +45,7 @@ export default {
       },
       slots: {
         default:
-          'Le libellé. Il est cliquable, tout le composant étant enveloppé dans un <code>&lt;label&gt;</code>.',
+          'Le libellé, quand il demande plus que le texte de la prop <code>label</code>. Il est cliquable.',
       },
     },
   },

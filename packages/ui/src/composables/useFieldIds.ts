@@ -1,6 +1,7 @@
 // @a11y @ssr
 /**
- * The ids tying a wrapped field to its label and its hint — VInput and VTextarea.
+ * The ids tying a wrapped field to its label and its hint — VInput and VTextarea, and the hint
+ * of VCheckbox, VRadio and VSwitch.
  *
  * A consumer `id` WINS over the generated one, or a label they wrote outside the component
  * would point at nothing. `aria-describedby` is a space-separated LIST, so the component's

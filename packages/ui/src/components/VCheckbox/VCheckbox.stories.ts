@@ -20,6 +20,12 @@ const t = storyText({
     disabledChecked: 'Disabled and checked',
     terms:
       'I accept the terms and conditions as well as the privacy policy, including the processing of my personal data.',
+    digest: 'Weekly digest',
+    digestHint: 'A summary of the week, every Monday morning.',
+    mentions: 'Mentions',
+    mentionsHint: 'Only when someone names you.',
+    lockedOn: 'Set by your organisation',
+    lockedOff: 'Not available on your plan',
   },
   fr: {
     newsletter: 'Recevoir la newsletter',
@@ -35,6 +41,12 @@ const t = storyText({
     disabledChecked: 'Désactivée cochée',
     terms:
       "J'accepte les conditions générales d'utilisation ainsi que la politique de confidentialité, y compris le traitement de mes données personnelles.",
+    digest: 'Résumé hebdomadaire',
+    digestHint: 'Un résumé de la semaine, chaque lundi matin.',
+    mentions: 'Mentions',
+    mentionsHint: 'Seulement quand quelqu’un vous cite.',
+    lockedOn: 'Imposé par votre organisation',
+    lockedOff: 'Indisponible avec votre formule',
   },
 })
 
@@ -45,6 +57,7 @@ const meta = {
     labelPosition: { control: 'select', options: ['start', 'end'] },
   },
   args: {
+    readonly: false,
     indeterminate: false,
     labelPosition: 'end',
     spread: false,
@@ -90,7 +103,7 @@ export const LabelPosition: Story = {
 }
 
 /**
- * `spread`: the root becomes full-width flex, and label and box are pushed to the
+ * `spread`: the root takes the full width, and label and box are pushed to the
  * container's opposite ends.
  */
 export const Spread: Story = {
@@ -164,4 +177,64 @@ export const LongLabel: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * `label` stands in for the default slot, and `hint` draws a caption under it. The hint
+ * sits outside the `<label>`, so it is announced as the description rather than read as
+ * part of the name, and it lines up with the text whatever side the box is on.
+ */
+export const WithHint: Story = {
+  render: () => ({
+    components: { VCheckbox },
+    setup: () => ({ digest: ref(true), mentions: ref(false), t }),
+    template: `
+      <div style="display: grid; gap: 16px; max-width: 360px">
+        <VCheckbox v-model="digest" :label="t.digest" :hint="t.digestHint" />
+        <VCheckbox v-model="mentions" :label="t.mentions" :hint="t.mentionsHint" spread label-position="start" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const box = canvas.getByRole('checkbox', { name: 'Weekly digest' })
+    await expect(box).toHaveAccessibleDescription('A summary of the week, every Monday morning.')
+    // The text and the hint share a track: their start edges are the same pixel.
+    const root = box.closest('.v-choice')!
+    const label = root.querySelector('.v-choice-label')!.getBoundingClientRect()
+    const hint = root.querySelector('.v-choice-hint')!.getBoundingClientRect()
+    await expect(Math.abs(label.left - hint.left)).toBeLessThan(1)
+    await expect(hint.top).toBeGreaterThanOrEqual(label.bottom - 1)
+  },
+}
+
+/**
+ * `readonly` keeps the box focusable and announced, and refuses the change: a checkbox has
+ * no native read-only, so the component cancels the click, which also covers Space.
+ */
+export const ReadOnly: Story = {
+  render: () => ({
+    components: { VCheckbox },
+    setup: () => ({ on: ref(true), off: ref(false), t }),
+    template: `
+      <div style="display: grid; gap: 8px">
+        <VCheckbox v-model="on" readonly :label="t.lockedOn" />
+        <VCheckbox v-model="off" readonly :label="t.lockedOff" />
+        <output data-testid="mirror">{{ on }} {{ off }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const on = canvas.getByRole('checkbox', { name: 'Set by your organisation' })
+    const off = canvas.getByRole('checkbox', { name: 'Not available on your plan' })
+    await expect(on).toHaveAttribute('aria-readonly', 'true')
+    await userEvent.click(off.closest('label')!)
+    await expect(off).not.toBeChecked()
+    on.focus()
+    await userEvent.keyboard(' ')
+    await expect(on).toBeChecked()
+    await expect(on).toHaveFocus()
+    await expect(canvas.getByTestId('mirror')).toHaveTextContent('true false')
+  },
 }

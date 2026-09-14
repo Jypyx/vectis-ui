@@ -7,11 +7,12 @@ import * as VSwitchStories from './VSwitch.stories'
 
 Switch built on the native `<input type="checkbox" role="switch">` — correct on/off semantics for
 screen readers, with keyboard and forms for free. The track/thumb rendering is pure CSS driven by
-`:checked`; the JavaScript is limited to the v-model bridge. The root is a wrapping `<label>`:
-clicking the label toggles the switch, with no `for`/`id`.
+`:checked`; the JavaScript is limited to the v-model bridge and the refusal `readonly` asks
+for. The input sits inside a `<label>`, so clicking the label toggles the switch with no
+`for`/`id`; the root is a layout box around that label and the optional hint.
 
 A single size: a 40×20px track (the `--vectis-control-size-switch-w/h` tokens), aligned on the
-height of VCheckbox/VRadio.
+height of VCheckbox/VRadio, with the thumb inset by `--vectis-control-size-switch-pad`.
 
 <Canvas of={VSwitchStories.Default} />
 
@@ -23,9 +24,19 @@ height of VCheckbox/VRadio.
 
 <Canvas of={VSwitchStories.LabelPosition} />
 
+## Label and hint
+
+`label` is the text beside the switch, and the default slot replaces it when the label needs
+more than text. `hint` draws a caption underneath, tied to the input through
+`aria-describedby`: a consumer's own `aria-describedby` is kept and the hint appended to it. The
+hint is rendered outside the `<label>`, since everything inside a label becomes the accessible
+name, and it lines up with the text on either side (`label-position`, `spread`).
+
+<Canvas of={VSwitchStories.WithHint} />
+
 ## Spread
 
-`spread` switches the root to full-width flex: label and switch are pushed to the container's
+`spread` makes the root take the full width: label and switch are pushed to the container's
 opposite ends. It combines with `label-position` to choose which side the switch goes to.
 
 <Canvas of={VSwitchStories.Spread} />
@@ -45,17 +56,25 @@ browser checked and one only you can. It is drawn as a ring rather than as a bor
 track has no border to tint, and a shadow changes no geometry where a border would eat into the
 padding the thumb travels in.
 
+## Read-only
+
+`readonly` shows the setting without letting it change. The component cancels the click, which
+also covers Space and a click on the label. The switch stays focusable, is submitted with its form
+and carries `aria-readonly`; an ON switch trades the accent for `--vectis-color-text-muted`.
+
+<Canvas of={VSwitchStories.ReadOnly} />
+
 ## Without a visible label
 
-With no slot, supply an `aria-label`: it passes through by fallthrough onto the input (the
-`<label>` root does not receive the native attributes).
+With neither `label` nor slot, supply an `aria-label`: it passes through by fallthrough onto
+the input.
 
 <Canvas of={VSwitchStories.WithoutLabel} />
 
 ## Forms
 
 The native attributes (`name`, `value`, `required`, `aria-*`…) pass through by fallthrough onto
-the input, not onto the label: the switch takes part in forms normally.
+the input, not onto the wrapper: the switch takes part in forms normally.
 
 ## Accessibility
 

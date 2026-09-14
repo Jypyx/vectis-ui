@@ -10,12 +10,18 @@ import SliderIconLabels from '~/examples/slider/IconLabels.vue'
 import sliderIconLabelsSource from '~/examples/slider/IconLabels.vue?raw'
 import SliderInputs from '~/examples/slider/Inputs.vue'
 import sliderInputsSource from '~/examples/slider/Inputs.vue?raw'
+import SliderInvalid from '~/examples/slider/Invalid.vue'
+import sliderInvalidSource from '~/examples/slider/Invalid.vue?raw'
 import SliderMinMax from '~/examples/slider/MinMax.vue'
 import sliderMinMaxSource from '~/examples/slider/MinMax.vue?raw'
 import SliderOrientation from '~/examples/slider/Orientation.vue'
 import sliderOrientationSource from '~/examples/slider/Orientation.vue?raw'
 import SliderRange from '~/examples/slider/Range.vue'
 import sliderRangeSource from '~/examples/slider/Range.vue?raw'
+import SliderReadOnly from '~/examples/slider/ReadOnly.vue'
+import sliderReadOnlySource from '~/examples/slider/ReadOnly.vue?raw'
+import SliderSizes from '~/examples/slider/Sizes.vue'
+import sliderSizesSource from '~/examples/slider/Sizes.vue?raw'
 import SliderSteps from '~/examples/slider/Steps.vue'
 import sliderStepsSource from '~/examples/slider/Steps.vue?raw'
 import SliderTextLabels from '~/examples/slider/TextLabels.vue'
@@ -82,6 +88,12 @@ useDocsHead('slider')
     <SliderInputs />
   </DocsExample>
 
+  <h3 id="sizes">{{ t('slider.examples.sizes.title') }}</h3>
+  <DocsProse keypath="slider.examples.sizes.text" />
+  <DocsExample :source="sliderSizesSource" stack>
+    <SliderSizes />
+  </DocsExample>
+
   <h3 id="orientation">{{ t('slider.examples.orientation.title') }}</h3>
   <DocsProse keypath="slider.examples.orientation.text" />
   <DocsExample :source="sliderOrientationSource" stack>
@@ -92,6 +104,18 @@ useDocsHead('slider')
   <DocsProse keypath="slider.examples.disabled.text" />
   <DocsExample :source="sliderDisabledSource" stack>
     <SliderDisabled />
+  </DocsExample>
+
+  <h3 id="readonly">{{ t('slider.examples.readonly.title') }}</h3>
+  <DocsProse keypath="slider.examples.readonly.text" />
+  <DocsExample :source="sliderReadOnlySource" stack>
+    <SliderReadOnly />
+  </DocsExample>
+
+  <h3 id="invalid">{{ t('slider.examples.invalid.title') }}</h3>
+  <DocsProse keypath="slider.examples.invalid.text" />
+  <DocsExample :source="sliderInvalidSource" stack>
+    <SliderInvalid />
   </DocsExample>
 
   <h3 id="form">{{ t('slider.examples.form.title') }}</h3>

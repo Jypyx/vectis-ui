@@ -15,11 +15,23 @@ export default {
       title: 'Désactivé',
       text: "<code>disabled</code> empêche de basculer l'interrupteur et le grise par les tokens de couleur, allumé comme éteint. Le clavier l'enjambe.",
     },
+    hint: {
+      title: 'Aide',
+      text: "<code>label</code> écrit le texte à côté de l'interrupteur, et le slot par défaut le remplace. <code>hint</code> ajoute une légende en dessous, reliée à l'interrupteur par <code>aria-describedby</code> : c'est là qu'un réglage dit ce que l'activer change.",
+    },
+    readonly: {
+      title: 'Lecture seule',
+      text: "<code>readonly</code> montre le réglage sans permettre de le changer : un clic ou la barre d'espace sont annulés. L'interrupteur reste focalisable, s'envoie avec son formulaire et est annoncé en lecture seule.",
+    },
   },
 
   api: {
     VSwitch: {
       props: {
+        label: "Le texte à côté de l'interrupteur, qui le nomme. Le slot par défaut le remplace.",
+        hint: "Une ligne d'aide sous le libellé. Elle est reliée à l'interrupteur pour les technologies d'assistance, qui la lisent après le libellé et non comme une partie de celui-ci.",
+        readonly:
+          "Montre le réglage sans permettre de le changer. L'interrupteur reste focalisable, est annoncé en lecture seule et s'envoie toujours avec son formulaire ; un clic ou la barre d'espace ne changent simplement rien.",
         labelPosition: "De quel côté de l'interrupteur se place le libellé.",
         spread:
           "Pousse le libellé et l'interrupteur aux extrémités opposées de la ligne, si bien qu'une colonne de réglages aligne ses interrupteurs le long d'un bord.",
@@ -32,7 +44,7 @@ export default {
       },
       slots: {
         default:
-          "Le libellé. C'est un slot plutôt qu'une prop pour qu'il puisse contenir un lien ou une emphase, et il se trouve à l'intérieur du <code>&lt;label&gt;</code> englobant, donc cliquer les mots bascule l'interrupteur.",
+          "Le libellé, quand il demande plus que le texte de la prop <code>label</code>, un lien ou une emphase. Il se trouve à l'intérieur du <code>&lt;label&gt;</code>, donc cliquer les mots bascule l'interrupteur.",
       },
     },
   },

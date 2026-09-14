@@ -38,7 +38,7 @@ describe('VSwitch', () => {
     })
     const root = container.querySelector('.v-switch') as HTMLElement
     expect(root.getAttribute('data-label-position')).toBe('start')
-    expect(root.hasAttribute('data-spread')).toBe(true)
+    expect(root.getAttribute('data-spread')).toBe('')
   })
 
   it('spread absent by default (no data-spread attribute)', () => {
@@ -60,7 +60,7 @@ describe('VSwitch — invalid', () => {
     expect(getByRole('switch').hasAttribute('aria-invalid')).toBe(false)
   })
 
-  it('exposes focus and the real switch, the root being the label', async () => {
+  it('exposes focus and the real switch, the root being a wrapper', async () => {
     const control = ref<InstanceType<typeof VSwitch> | null>(null)
     render({
       components: { VSwitch },
@@ -71,5 +71,60 @@ describe('VSwitch — invalid', () => {
     expect(control.value?.el?.getAttribute('role')).toBe('switch')
     control.value?.focus()
     expect(document.activeElement).toBe(control.value?.el)
+  })
+})
+
+describe('VSwitch — label, hint and readonly', () => {
+  it('label: the prop names the control, and the slot replaces it', () => {
+    const { getByRole } = render(VSwitch, { props: { label: 'From the prop' } })
+    expect(getByRole('switch', { name: 'From the prop' })).toBeTruthy()
+    const slotted = render(VSwitch, {
+      props: { label: 'Ignored' },
+      slots: { default: 'From the slot' },
+    })
+    expect(slotted.getByRole('switch', { name: 'From the slot' })).toBeTruthy()
+  })
+
+  // The hint sits OUTSIDE the <label>: inside it, it would be read as part of the name.
+  it('hint: a description aggregated with the consumer one, never part of the name', () => {
+    const { getByRole, getByText } = render(VSwitch, {
+      props: { label: 'Notifications', hint: 'Sent once a day' },
+      attrs: { 'aria-describedby': 'mine' },
+    })
+    const control = getByRole('switch', { name: 'Notifications' })
+    const hint = getByText('Sent once a day')
+    expect(hint.closest('label')).toBeNull()
+    expect(control.getAttribute('aria-describedby')).toBe(`mine ${hint.id}`)
+  })
+
+  it('no hint: the consumer aria-describedby passes through untouched', () => {
+    const { getByRole } = render(VSwitch, {
+      props: { label: 'x' },
+      attrs: { 'aria-describedby': 'mine' },
+    })
+    expect(getByRole('switch').getAttribute('aria-describedby')).toBe('mine')
+  })
+
+  it('keeps class and style on the root, the rest on the input', () => {
+    const { container, getByRole } = render(VSwitch, {
+      props: { label: 'x' },
+      attrs: { class: 'mine', style: 'margin: 4px', name: 'n' },
+    })
+    const root = container.firstElementChild as HTMLElement
+    expect(root.classList.contains('mine')).toBe(true)
+    expect(root.style.margin).toBe('4px')
+    expect(getByRole('switch').classList.contains('mine')).toBe(false)
+    expect(getByRole('switch').getAttribute('name')).toBe('n')
+  })
+
+  it('readonly: a click changes nothing, and the switch says so', async () => {
+    const { getByRole, emitted } = render(VSwitch, {
+      props: { modelValue: true, readonly: true, label: 'Locked' },
+    })
+    const input = getByRole('switch') as HTMLInputElement
+    expect(input.getAttribute('aria-readonly')).toBe('true')
+    await fireEvent.click(input)
+    expect(input.checked).toBe(true)
+    expect(emitted('update:modelValue')).toBeUndefined()
   })
 })

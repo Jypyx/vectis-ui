@@ -36,6 +36,8 @@ export default {
   api: {
     VProgressCircular: {
       props: {
+        label:
+          'What is progressing, in words, for screen readers. It draws nothing on screen and falls back to the design system dictionary; an <code>aria-label</code> or <code>aria-labelledby</code> of your own takes precedence over it.',
         value: 'How far along it is. Anything outside the range is brought back into it.',
         max: 'What counts as finished. The other end is always zero.',
         indeterminate:

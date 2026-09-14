@@ -31,7 +31,7 @@ describe('VRadio', () => {
     })
     const root = container.querySelector('.v-radio') as HTMLElement
     expect(root.getAttribute('data-label-position')).toBe('start')
-    expect(root.hasAttribute('data-spread')).toBe(true)
+    expect(root.getAttribute('data-spread')).toBe('')
   })
 
   it('name (fallthrough) lands on the input to form the native group', () => {
@@ -58,7 +58,7 @@ describe('VRadio', () => {
     expect(plan.value).toBe(2)
   })
 
-  it('exposes focus and the real radio button, the root being the label', async () => {
+  it('exposes focus and the real radio button, the root being a wrapper', async () => {
     const radio = ref<InstanceType<typeof VRadio> | null>(null)
     render({
       components: { VRadio },
@@ -69,5 +69,67 @@ describe('VRadio', () => {
     expect(radio.value?.el?.type).toBe('radio')
     radio.value?.focus()
     expect(document.activeElement).toBe(radio.value?.el)
+  })
+
+  it('label: the prop names the control, and the slot replaces it', () => {
+    const { getByRole } = render(VRadio, { props: { value: 'a', label: 'From the prop' } })
+    expect(getByRole('radio', { name: 'From the prop' })).toBeTruthy()
+    const slotted = render(VRadio, {
+      props: { value: 'a', label: 'Ignored' },
+      slots: { default: 'From the slot' },
+    })
+    expect(slotted.getByRole('radio', { name: 'From the slot' })).toBeTruthy()
+  })
+
+  // The hint sits OUTSIDE the <label>: inside it, it would be read as part of the name.
+  it('hint: a description aggregated with the consumer one, never part of the name', () => {
+    const { getByRole, getByText } = render(VRadio, {
+      props: { value: 'a', label: 'Notifications', hint: 'Sent once a day' },
+      attrs: { 'aria-describedby': 'mine' },
+    })
+    const control = getByRole('radio', { name: 'Notifications' })
+    const hint = getByText('Sent once a day')
+    expect(hint.closest('label')).toBeNull()
+    expect(control.getAttribute('aria-describedby')).toBe(`mine ${hint.id}`)
+  })
+
+  it('no hint: the consumer aria-describedby passes through untouched', () => {
+    const { getByRole } = render(VRadio, {
+      props: { value: 'a', label: 'x' },
+      attrs: { 'aria-describedby': 'mine' },
+    })
+    expect(getByRole('radio').getAttribute('aria-describedby')).toBe('mine')
+  })
+
+  it('keeps class and style on the root, the rest on the input', () => {
+    const { container, getByRole } = render(VRadio, {
+      props: { value: 'a', label: 'x' },
+      attrs: { class: 'mine', style: 'margin: 4px', name: 'n' },
+    })
+    const root = container.firstElementChild as HTMLElement
+    expect(root.classList.contains('mine')).toBe(true)
+    expect(root.style.margin).toBe('4px')
+    expect(getByRole('radio').classList.contains('mine')).toBe(false)
+    expect(getByRole('radio').getAttribute('name')).toBe('n')
+  })
+
+  it('readonly: a click selects nothing, and no aria-readonly is written on a radio', async () => {
+    const plan = ref('a')
+    const { getByRole } = render({
+      components: { VRadio },
+      setup: () => ({ plan }),
+      template: `
+        <VRadio v-model="plan" name="plan" value="a" readonly>Alpha</VRadio>
+        <VRadio v-model="plan" name="plan" value="b" readonly>Beta</VRadio>
+      `,
+    })
+    const beta = getByRole('radio', { name: 'Beta' }) as HTMLInputElement
+    await fireEvent.click(beta)
+    expect(beta.checked).toBe(false)
+    expect(plan.value).toBe('a')
+    // A browser also puts the previous selection back on Alpha; jsdom does not restore the
+    // OTHER button of a cancelled click, which the ReadOnly play function checks instead.
+    // ARIA allows aria-readonly on a radiogroup, never on a radio: axe would fail the page.
+    expect(beta.hasAttribute('aria-readonly')).toBe(false)
   })
 })

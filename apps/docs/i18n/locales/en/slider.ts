@@ -43,11 +43,28 @@ export default {
       title: 'In a form',
       text: '<code>name</code>, <code>id</code> and the aria-* are redirected onto the real range input underneath. Naming goes through the <code>label</code> prop, which sets an aria-label, so pick either it or a visible label of your own. A range has no single value to submit: only the end thumb carries the name.',
     },
+    sizes: {
+      title: 'Field sizes',
+      text: '<code>size</code> sets the height of the number fields <code>inputs</code> adds, <code>md</code> by default as on every field. Inside a VInputGroup the row decides, as it does for its other fields.',
+    },
+    readonly: {
+      title: 'Read-only',
+      text: '<code>readonly</code> shows the value without letting it change. A range input has no native read-only, so the component cancels the keys that move a thumb and puts back a thumb the pointer has moved. The thumbs stay focusable and announced, and the number fields turn read-only with them.',
+    },
+    invalid: {
+      title: 'Invalid',
+      text: '<code>invalid</code> rings the thumbs in the danger colour, as a checkbox colours its border, and tells assistive technology through <code>aria-invalid</code> on every thumb and field.',
+    },
   },
 
   api: {
     VSlider: {
       props: {
+        readonly:
+          'Shows the value without allowing it to be changed. The thumbs can still be focused and are announced as read-only, but neither the pointer nor the keyboard moves them, and the number fields turn read-only with them.',
+        invalid:
+          'Marks the value as invalid, which colours the thumbs and tells assistive technology so. It is for a rule the browser cannot check by itself.',
+        size: "The height of the number fields <code>inputs</code> adds. Inside a VInputGroup the group's size wins, as it does for every field of the row.",
         min: 'The lowest value the thumb can reach.',
         max: 'The highest value the thumb can reach.',
         step: 'The gap between two values the thumb can stop on. It is also what the arrow keys move by, and what a value typed into the companion field is snapped to.',
