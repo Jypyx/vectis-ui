@@ -9,7 +9,7 @@ export default {
     },
     detached: {
       title: 'Detached',
-      text: '<code>detached</code> spaces the buttons out and gives each its own corners, instead of joining them into a segmented control.',
+      text: '<code>detached</code> spaces the buttons out and gives each its own corners, instead of joining them into a segmented control. <code>seamless</code> keeps them joined and takes the lines out from between them, so the row reads as one frame.',
     },
     elevated: {
       title: 'Elevated',
@@ -58,6 +58,8 @@ export default {
           'How many slots to render, ellipses counted among them, so the row keeps exactly the same width whichever page is current. Below five there would be nothing left to show around the current page, so five is the effective minimum. Left out, every page is rendered.',
         detached:
           'Separates the buttons instead of joining them into one segmented control. It is the word VButtonGroup and VToggle use for the same question, in the same direction.',
+        seamless:
+          "Takes the lines out from between the joined buttons, so the row reads as one frame rather than as segments, on the terms of VButtonGroup's own prop. It has no effect under <code>detached</code>.",
         itemVariant:
           'How the pages other than the current one, and the controls, are drawn. The current page is always filled, whatever this says. It is named for the items because that is what it paints: on VTabs and VDataTable <code>variant</code> names the decoration of the frame instead.',
         tone: 'The colour the current page takes. The other pages and the controls stay neutral.',

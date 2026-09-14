@@ -21,7 +21,7 @@ export default {
     },
     icons: {
       title: 'With icons',
-      text: '<code>iconStart</code> and <code>iconEnd</code> place an icon on either side of the label, and the <code>#start</code> and <code>#end</code> slots replace them. A chip with no label becomes square and has to be given a name.',
+      text: '<code>iconStart</code> and <code>iconEnd</code> place an icon on either side of the label, and the <code>#start</code> and <code>#end</code> slots replace them. <code>iconFilled</code> draws the two icons filled. A chip with no label becomes square and has to be given a name.',
     },
     clickable: {
       title: 'Clickable and links',
@@ -61,6 +61,8 @@ export default {
           'Shows a tick before the label while the chip is selected. It replaces whatever start icon was given, so the two are never shown together.',
         iconStart: 'An icon before the label. The <code>#start</code> slot replaces it.',
         iconEnd: 'An icon after the label. The <code>#end</code> slot replaces it.',
+        iconFilled:
+          "Renders <code>iconStart</code> and <code>iconEnd</code> in their filled form, the font's <code>FILL</code> axis. It has no effect on the slots, nor on the tick or the removal cross.",
         dismissible:
           'Adds a button that asks for the chip to be removed. It only emits that request: taking the chip away is your decision.',
         dismissIcon: 'The icon of that removal button.',

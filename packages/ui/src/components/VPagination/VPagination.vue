@@ -15,7 +15,8 @@
  *
  * The only behavioural JavaScript is the keyboard, explained where it is written.
  */
-import { computed, ref } from 'vue'
+import { computed, h, ref } from 'vue'
+import type { FunctionalComponent } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VButtonGroup from '../VButton/VButtonGroup.vue'
@@ -74,6 +75,12 @@ interface PaginationProps {
    * word VButtonGroup and VToggle use for the same question, in the same direction.
    */
   detached?: boolean
+  /**
+   * Takes the lines out from between the joined buttons, so the row reads as one frame rather
+   * than as segments, on the terms of VButtonGroup's own `seamless`. It has no effect under
+   * `detached`.
+   */
+  seamless?: boolean
   /**
    * How the pages OTHER than the current one, and the controls, are drawn. The current page
    * is always filled, whatever this says. It is named for the ITEMS because that is what it
@@ -150,6 +157,7 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   length: 1,
   totalVisible: undefined,
   detached: false,
+  seamless: false,
   itemVariant: 'ghost',
   tone: 'accent',
   size: 'md',
@@ -272,6 +280,42 @@ function goTo(n: number | undefined) {
   page.value = clamp(n, 1, total.value)
 }
 
+/*
+ * The previous and next controls, written ONCE: the two differ only by their direction, and
+ * a pair of template blocks drifting apart on the next change is exactly what this avoids.
+ * A functional component because the two sit at either end of the row, with the pages in
+ * between, where a `v-for` over two descriptors could not put them.
+ *
+ * The icon goes on the side the control points to — before the word going back, after it
+ * going forward — and every icon mirrors in a right-to-left page, an arrow pointing at a
+ * physical direction.
+ *
+ * The control is named explicitly even though its label is visible: at narrow widths that
+ * label is hidden and only the icon remains, and the name a screen reader announces has to
+ * survive that.
+ */
+const PageControl: FunctionalComponent<{ side: 'prev' | 'next' }> = ({ side }) => {
+  const prev = side === 'prev'
+  const label = prev ? resolvedPrevLabel.value : resolvedNextLabel.value
+  const icon = prev ? props.prevIcon : props.nextIcon
+  const common = {
+    class: 'v-pagination-control',
+    variant: props.itemVariant,
+    disabled: prev ? prevDisabled.value : nextDisabled.value,
+    onClick: () => goTo(prev ? prevTarget.value : nextTarget.value),
+  }
+  const glyph = () => h(VIcon, { ...iconProps(icon), mirrored: true })
+  if (props.controls === 'icon') return h(VIconButton, { ...common, label }, glyph)
+  return h(
+    VButton,
+    { ...common, tone: 'neutral', 'aria-label': label },
+    {
+      ...(props.controls === 'both' ? { [prev ? 'start' : 'end']: glyph } : {}),
+      default: () => h('span', { class: 'v-pagination-control-label' }, label),
+    },
+  )
+}
+
 const navEl = ref<HTMLElement | null>(null)
 
 // @keyboard @a11y
@@ -305,48 +349,24 @@ function onKeydown(event: KeyboardEvent) {
          itself an inert button rather than a plain span: anything else between two pills
          would break the seam. -->
     <!--
-      The elevation is the ONE appearance prop handed to the group rather than to each
-      button, because that is where VButtonGroup draws it: joined, the row takes the
-      shadow and the segments give theirs up, or it would fall into every joint.
+      The size, the density and the elevation are handed to the GROUP, which gives them to
+      every button inside, rather than repeated on each child. The elevation has to be there
+      in any case, since that is where VButtonGroup draws it: joined, the row takes the shadow
+      and the segments give theirs up, or it would fall into every joint.
 
       `|| undefined` keeps the group opinion-free when the row does not ask, `undefined`
-      being what means "no opinion" there where `false` is an order.
+      being what means "no opinion" there where `false` is an order. The size is always an
+      opinion, the pagination having a default of its own.
     -->
-    <VButtonGroup class="v-pagination-items" :detached="detached" :elevated="elevated || undefined">
-      <template v-if="controls">
-        <VIconButton
-          v-if="controls === 'icon'"
-          class="v-pagination-control"
-          :label="resolvedPrevLabel"
-          :variant="itemVariant"
-          tone="neutral"
-          :size="size"
-          :compact="compact"
-          :disabled="prevDisabled"
-          @click="goTo(prevTarget)"
-        >
-          <VIcon v-bind="iconProps(prevIcon)" mirrored />
-        </VIconButton>
-        <!-- The control is named explicitly even though its label is visible: at
-             narrow widths that label is hidden and only the icon remains, and the name
-             a screen reader announces has to survive that. -->
-        <VButton
-          v-else
-          class="v-pagination-control"
-          :variant="itemVariant"
-          tone="neutral"
-          :size="size"
-          :compact="compact"
-          :disabled="prevDisabled"
-          :aria-label="resolvedPrevLabel"
-          @click="goTo(prevTarget)"
-        >
-          <template v-if="controls === 'both'" #start>
-            <VIcon v-bind="iconProps(prevIcon)" mirrored />
-          </template>
-          <span class="v-pagination-control-label">{{ resolvedPrevLabel }}</span>
-        </VButton>
-      </template>
+    <VButtonGroup
+      class="v-pagination-items"
+      :detached="detached"
+      :seamless="seamless"
+      :size="size"
+      :compact="compact || undefined"
+      :elevated="elevated || undefined"
+    >
+      <PageControl v-if="controls" side="prev" />
 
       <template v-for="item in items" :key="item.key">
         <VButton
@@ -354,8 +374,6 @@ function onKeydown(event: KeyboardEvent) {
           class="v-pagination-page"
           :variant="item.page === currentPage ? 'solid' : itemVariant"
           :tone="item.page === currentPage ? tone : 'neutral'"
-          :size="size"
-          :compact="compact"
           :disabled="disabled || isPageDisabled(item.page)"
           :aria-label="pageLabelFor(item.page)"
           :aria-current="item.page === currentPage ? 'page' : undefined"
@@ -365,56 +383,28 @@ function onKeydown(event: KeyboardEvent) {
         >
           {{ item.page }}
         </VButton>
-        <!-- The ellipsis is a disabled button rather than a span: being a button, it
-             keeps the joined row's seam continuous and follows the size and density
-             like everything else. Disabling it takes it out of the tab order, and it
-             is hidden from screen readers, which have the page numbers themselves. -->
-        <VIconButton
-          v-else
-          class="v-pagination-ellipsis"
-          :label="m.pagination.hiddenPages"
-          aria-hidden="true"
-          :variant="itemVariant"
-          tone="neutral"
-          :size="size"
-          :compact="compact"
-          disabled
-        >
-          <VIcon :name="moreHorizIcon" />
-        </VIconButton>
-      </template>
-
-      <template v-if="controls">
-        <VIconButton
-          v-if="controls === 'icon'"
-          class="v-pagination-control"
-          :label="resolvedNextLabel"
-          :variant="itemVariant"
-          tone="neutral"
-          :size="size"
-          :compact="compact"
-          :disabled="nextDisabled"
-          @click="goTo(nextTarget)"
-        >
-          <VIcon v-bind="iconProps(nextIcon)" mirrored />
-        </VIconButton>
+        <!-- The ellipsis is a disabled icon-only button rather than a span: being a button,
+             it keeps the joined row's seam continuous and follows the size and density like
+             everything else. Disabling it takes it out of the tab order, and it is hidden
+             from screen readers, which have the page numbers themselves — which is also why
+             it is a VButton and not a VIconButton, whose required label would name something
+             nobody can reach. -->
         <VButton
           v-else
-          class="v-pagination-control"
+          class="v-pagination-ellipsis"
+          aria-hidden="true"
+          data-icon-only
           :variant="itemVariant"
           tone="neutral"
-          :size="size"
-          :compact="compact"
-          :disabled="nextDisabled"
-          :aria-label="resolvedNextLabel"
-          @click="goTo(nextTarget)"
+          disabled
         >
-          <template v-if="controls === 'both'" #end>
-            <VIcon v-bind="iconProps(nextIcon)" mirrored />
+          <template #start>
+            <VIcon :name="moreHorizIcon" />
           </template>
-          <span class="v-pagination-control-label">{{ resolvedNextLabel }}</span>
         </VButton>
       </template>
+
+      <PageControl v-if="controls" side="next" />
     </VButtonGroup>
   </nav>
 </template>

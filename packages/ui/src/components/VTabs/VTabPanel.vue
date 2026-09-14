@@ -9,7 +9,7 @@
  * submitted.
  */
 
-import { computed, inject, ref, watchEffect } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 
 import { tabsKey } from './context'
 import type { ItemValue } from '../../types'
@@ -38,11 +38,22 @@ const selected = computed(() => tabs != null && tabs.value === props.value)
 const tabId = computed(() => tabs?.tabId(props.value))
 const panelId = computed(() => tabs?.panelId(props.value))
 
-/** Once a deferred panel has been shown it stays built, so nothing it holds is lost. */
+/*
+ * Once a deferred panel has been shown it stays built, so nothing it holds is lost.
+ *
+ * The `&&` is what keeps a panel that is not lazy out of the selection's dependencies: its
+ * getter stops at `props.lazy`, so changing tab re-runs nothing for it. `immediate` latches
+ * a lazy panel that starts selected during setup, on the server too, so its content is in
+ * the first render rather than one tick later.
+ */
 const revealed = ref(false)
-watchEffect(() => {
-  if (selected.value) revealed.value = true
-})
+watch(
+  () => props.lazy && selected.value,
+  (shown) => {
+    if (shown) revealed.value = true
+  },
+  { immediate: true },
+)
 </script>
 
 <template>

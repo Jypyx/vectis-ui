@@ -10,6 +10,8 @@ import ToggleElevated from '~/examples/toggle/Elevated.vue'
 import toggleElevatedSource from '~/examples/toggle/Elevated.vue?raw'
 import ToggleFilledIcons from '~/examples/toggle/FilledIcons.vue'
 import toggleFilledIconsSource from '~/examples/toggle/FilledIcons.vue?raw'
+import ToggleFullWidth from '~/examples/toggle/FullWidth.vue'
+import toggleFullWidthSource from '~/examples/toggle/FullWidth.vue?raw'
 import ToggleItemContent from '~/examples/toggle/ItemContent.vue'
 import toggleItemContentSource from '~/examples/toggle/ItemContent.vue?raw'
 import ToggleMandatory from '~/examples/toggle/Mandatory.vue'
@@ -84,6 +86,12 @@ useDocsHead('toggle')
   <DocsProse keypath="toggle.examples.seamless.text" />
   <DocsExample :source="toggleSeamlessSource" stack>
     <ToggleSeamless />
+  </DocsExample>
+
+  <h3 id="full-width">{{ t('toggle.examples.fullWidth.title') }}</h3>
+  <DocsProse keypath="toggle.examples.fullWidth.text" />
+  <DocsExample :source="toggleFullWidthSource">
+    <ToggleFullWidth />
   </DocsExample>
 
   <h3 id="elevated">{{ t('toggle.examples.elevated.title') }}</h3>

@@ -20,7 +20,7 @@ import type { StyleValue } from 'vue'
 
 import VAvatar from './VAvatar.vue'
 import type { AvatarSize } from './VAvatar.vue'
-import { avatarGroupKey } from './context'
+import { AVATAR_DEFAULT_SIZE, avatarGroupKey } from './context'
 
 import { flattenSlot } from '../../utils/vnode'
 
@@ -35,7 +35,10 @@ interface AvatarGroupProps {
    * of its own keeps it.
    */
   size?: AvatarSize
-  /** Applies the reduced density to the avatars inside, on the same terms as `size`. */
+  /**
+   * Applies the reduced density to every avatar inside. Unlike `size` it is cumulative: an
+   * avatar cannot opt back out of a compact group.
+   */
   compact?: boolean
   /**
    * The colour of the ring drawn around each disc. It defaults to the page
@@ -91,7 +94,7 @@ const rootStyle = computed<StyleValue>(() =>
 // instance, inserts a <span> between the group and the VAvatar. An avatar given a
 // size of its own redefines --control-height on itself, so its own overlap follows
 // that size rather than the group's.
-const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? 'md')
+const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? AVATAR_DEFAULT_SIZE)
 </script>
 
 <template>

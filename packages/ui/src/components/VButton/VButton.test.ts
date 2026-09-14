@@ -163,6 +163,9 @@ describe('VButton', () => {
     expect(anchor).not.toBeNull()
     expect(anchor.getAttribute('href')).toBeNull()
     expect(anchor.getAttribute('aria-disabled')).toBe('true')
+    // Without an href the <a> is generic, where aria-disabled means nothing and aria-label is
+    // prohibited: the role keeps it a link.
+    expect(anchor.getAttribute('role')).toBe('link')
     anchor.click()
     expect(onClick).not.toHaveBeenCalled()
   })

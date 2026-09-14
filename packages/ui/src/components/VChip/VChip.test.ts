@@ -142,6 +142,19 @@ describe('VChip', () => {
     expect(queryByText('cancel')).toBeNull()
   })
 
+  it('iconFilled fills iconStart and iconEnd, never the tick or the cross', () => {
+    const { container } = render(VChip, {
+      props: { iconStart: 'star', iconEnd: 'favorite', iconFilled: true, dismissible: true },
+      slots: { default: 'Tag' },
+    })
+    const icon = (name: string) => container.querySelector(`.v-icon[data-icon='${name}']`)
+    expect(icon('star')?.hasAttribute('data-filled')).toBe(true)
+    expect(icon('favorite')?.hasAttribute('data-filled')).toBe(true)
+    expect(container.querySelector('.v-chip-dismiss .v-icon')?.hasAttribute('data-filled')).toBe(
+      false,
+    )
+  })
+
   it('icon alone: data-icon-only set only when there is no label', () => {
     const { container } = render(VChip, { props: { iconStart: 'favorite' } })
     expect(container.querySelector('.v-chip')?.hasAttribute('data-icon-only')).toBe(true)

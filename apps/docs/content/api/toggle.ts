@@ -14,6 +14,7 @@ export default {
         { name: 'detached', type: 'boolean', default: 'false' },
         { name: 'seamless', type: 'boolean', default: 'false' },
         { name: 'orientation', type: 'ToggleOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
+        { name: 'fullWidth', type: 'boolean', default: 'false' },
         { name: 'itemVariant', type: 'ToggleItemVariant', values: "'ghost' | 'outline'", default: "'ghost'" },
         { name: 'selectedVariant', type: 'ToggleSelectedVariant', values: "'solid' | 'soft' | 'ghost'", default: "'solid'" },
         { name: 'tone', type: 'ToggleTone', values: "'accent' | 'neutral' | 'danger'", default: "'accent'" },
@@ -36,6 +37,7 @@ export default {
         { name: 'label', type: 'string' },
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconEnd', type: 'IconSource' },
+        { name: 'iconFilled', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
       ],
       slots: [

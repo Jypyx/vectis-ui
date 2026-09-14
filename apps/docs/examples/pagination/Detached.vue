@@ -4,6 +4,7 @@ import { VPagination, VTypography } from 'vectis-ui'
 
 const joined = ref(3)
 const detached = ref(3)
+const seamless = ref(3)
 </script>
 
 <template>
@@ -24,6 +25,19 @@ const detached = ref(3)
         label="Detached pages"
       />
       <VTypography variant="caption" tone="muted">detached</VTypography>
+    </div>
+
+    <!-- Joined again, with the lines between the buttons taken out: one frame, and the
+         current page as a highlight that moves inside it. -->
+    <div class="row">
+      <VPagination
+        v-model="seamless"
+        :length="6"
+        seamless
+        item-variant="outline"
+        label="Seamless pages"
+      />
+      <VTypography variant="caption" tone="muted">seamless</VTypography>
     </div>
   </div>
 </template>

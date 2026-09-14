@@ -26,7 +26,8 @@ initials follow the control's tokenized typography (`--control-font-size`).
 ## Compact
 
 `compact` takes 4px off the height at every size (type and icon unchanged) — consistent with the
-other controls.
+other controls. Inside a `VAvatarGroup` it is cumulative: a compact group makes every avatar
+compact, and an avatar cannot opt back out.
 
 <Canvas of={VAvatarStories.Compact} />
 
@@ -75,7 +76,7 @@ white text (the contrast of a light colour is the consumer's responsibility).
 ## Clickable
 
 By priority: `href` → `<a>`, otherwise `clickable` → `<button>`, otherwise a static `<span>`. A
-`disabled` link becomes **inert** (href removed + `aria-disabled`, the `VButton` model). Only the
+`disabled` link becomes **inert** (href removed + `role="link"` + `aria-disabled`, the `VButton` model). Only the
 interactive avatar exposes a hover state and a keyboard focus ring.
 
 <Canvas of={VAvatarStories.Clickable} />

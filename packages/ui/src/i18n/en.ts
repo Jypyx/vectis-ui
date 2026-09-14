@@ -24,7 +24,6 @@ export const en: Messages = {
     previous: 'Previous page',
     next: 'Next page',
     page: (page) => `Page ${page}`,
-    hiddenPages: 'Hidden pages',
   },
   tabs: {
     label: 'Tabs',

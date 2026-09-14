@@ -30,7 +30,6 @@ export const fr: Messages = {
     previous: 'Page précédente',
     next: 'Page suivante',
     page: (page) => `Page ${page}`,
-    hiddenPages: 'Pages masquées',
   },
   tabs: {
     label: 'Onglets',

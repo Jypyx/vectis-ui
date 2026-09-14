@@ -15,7 +15,7 @@
  * has been updated, which is what lets the component render on a server.
  */
 
-import { computed, nextTick, provide, ref, useId, useSlots, watch } from 'vue'
+import { computed, provide, ref, useId, useSlots, watch } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -81,6 +81,12 @@ interface TabsProps {
    */
   activation?: TabsActivation
   /**
+   * Makes every tab unusable, and the scroll buttons with them: the tabs leave the tab order
+   * and grey out through the colour tokens. A tab disabled on its own stays disabled either
+   * way. The panel on show stays on show.
+   */
+  disabled?: boolean
+  /**
    * What screen readers announce for the row of tabs. It falls back to the design
    * system dictionary.
    */
@@ -101,6 +107,7 @@ const props = withDefaults(defineProps<TabsProps>(), {
   prevLabel: undefined,
   nextLabel: undefined,
   activation: 'manual',
+  disabled: false,
   label: undefined,
 })
 
@@ -178,6 +185,9 @@ provide(tabsKey, {
   },
   get activation() {
     return props.activation
+  },
+  get disabled() {
+    return props.disabled
   },
 })
 
@@ -291,8 +301,9 @@ function scrollStep(direction: -1 | 1) {
  * are read from the two boxes, so they are already physical: the same code serves
  * left-to-right, right-to-left and vertical without a single test of direction.
  */
-watch(model, () => {
-  nextTick(() => {
+watch(
+  model,
+  () => {
     const list = listEl.value
     const tab = list?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
     if (!list || !tab) return
@@ -302,8 +313,11 @@ watch(model, () => {
       left: t.left < c.left ? t.left - c.left : t.right > c.right ? t.right - c.right : 0,
       top: t.top < c.top ? t.top - c.top : t.bottom > c.bottom ? t.bottom - c.bottom : 0,
     })
-  })
-})
+  },
+  // `post`, so the tab that is now selected already carries `aria-selected` when it is looked
+  // for: in the default timing the query would find the one that was selected before.
+  { flush: 'post' },
+)
 
 // The root is a container and the tabs are rendered by the consumer's slot, so a template
 // ref reaches neither the row nor a tab. `focus` goes where the Tab key would land: the
@@ -340,10 +354,9 @@ defineExpose({
         v-if="scrollButtons"
         class="v-tabs-scroll"
         :label="resolvedPrevLabel"
-        tone="neutral"
         :size="size"
         :compact="compact"
-        :disabled="atStart"
+        :disabled="disabled || atStart"
         @click="scrollStep(-1)"
       >
         <VIcon v-bind="iconProps(resolvedPrevIcon)" :mirrored="!isVertical" />
@@ -375,10 +388,9 @@ defineExpose({
         v-if="scrollButtons"
         class="v-tabs-scroll"
         :label="resolvedNextLabel"
-        tone="neutral"
         :size="size"
         :compact="compact"
-        :disabled="atEnd"
+        :disabled="disabled || atEnd"
         @click="scrollStep(1)"
       >
         <VIcon v-bind="iconProps(resolvedNextIcon)" :mirrored="!isVertical" />
@@ -464,7 +476,6 @@ defineExpose({
 
   .v-tabs[data-orientation='vertical'] .v-tabs-bar {
     flex-direction: column;
-    align-items: stretch;
   }
 
   .v-tabs[data-align='center'] .v-tabs-bar {

@@ -102,7 +102,7 @@ of it. Detached, none of that applies and every button casts its own again.
 ## Icon toolbar
 
 A group of `VIconButton` forms a compact toolbar. Override the default `role` with
-`role="toolbar"` (fallthrough on the root) and give the group an `aria-label`. An icon button
+`role="toolbar"` (fallthrough on the root) and name the group through `label`. An icon button
 reads the group like any other segment, its own `neutral` standing in when the group names no
 tone.
 
@@ -151,8 +151,9 @@ A lone button keeps all four rounded corners (no joint). Long labels stay aligne
 
 ## Accessibility
 
-- The root is a `role="group"` container (overridable to `role="toolbar"` by fallthrough) — give
-  it an `aria-label` describing the group (e.g. "Alignment", "Formatting").
+- The root is a `role="group"` container (overridable to `role="toolbar"` by fallthrough) — name
+  it through the `label` prop (e.g. "Alignment", "Formatting"). A consumer `aria-label` replaces
+  it and an `aria-labelledby` removes it, so the group never carries two names.
 - Each `VButton`/`VIconButton` keeps its own semantics and accessible name; a `VIconButton` is
   still required to carry a `label`.
 - The focused button rises above its neighbours (`z-index`), so the segment next to it never

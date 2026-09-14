@@ -4,13 +4,13 @@ import { VButton, VButtonGroup } from 'vectis-ui'
 
 <template>
   <div class="column">
-    <VButtonGroup variant="outline" tone="neutral" aria-label="As wide as its labels">
+    <VButtonGroup variant="outline" tone="neutral" label="As wide as its labels">
       <VButton>Day</VButton>
       <VButton>Week</VButton>
       <VButton>Month</VButton>
     </VButtonGroup>
 
-    <VButtonGroup full-width variant="outline" tone="neutral" aria-label="Filling the column">
+    <VButtonGroup full-width variant="outline" tone="neutral" label="Filling the column">
       <VButton>Day</VButton>
       <VButton>Week</VButton>
       <VButton>Month</VButton>

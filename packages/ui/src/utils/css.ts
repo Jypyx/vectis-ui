@@ -28,3 +28,17 @@ export function cssSize(v: number | string | undefined): string | undefined {
   if (v === undefined) return undefined
   return typeof v === 'number' ? `${v}px` : v
 }
+
+// @core
+/**
+ * The inline style carrying a consumer's own colour to a component's sheet, which derives
+ * every shade from `--custom-color`: VChip, VAvatar and VBadge.
+ *
+ * `undefined` when no colour was given, so a style array holding it binds nothing and the
+ * tone the sheet already paints stays in force.
+ */
+export function customColorStyle(
+  color: string | undefined,
+): { '--custom-color': string } | undefined {
+  return color === undefined ? undefined : { '--custom-color': color }
+}

@@ -42,8 +42,6 @@ export interface Messages {
     previous: string
     next: string
     page: (page: number) => string
-    /** The ellipsis standing in for the pages that are not shown. It is decorative, and never spoken. */
-    hiddenPages: string
   }
   tabs: { label: string; previous: string; next: string }
   breadcrumb: { label: string; ellipsis: string }

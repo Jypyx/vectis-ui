@@ -135,6 +135,36 @@ describe('VButtonGroup', () => {
     expect(getByRole('group').getAttribute('aria-label')).toBe('Text format')
   })
 
+  describe('label', () => {
+    it('names the group', () => {
+      const { getByRole } = render(VButtonGroup, {
+        props: { label: 'Text format' },
+        slots: { default: '<button>A</button>' },
+      })
+      expect(getByRole('group').getAttribute('aria-label')).toBe('Text format')
+    })
+
+    it('a consumer aria-label replaces it', () => {
+      const { getByRole } = render(VButtonGroup, {
+        props: { label: 'Text format' },
+        attrs: { 'aria-label': 'Formatting' },
+        slots: { default: '<button>A</button>' },
+      })
+      expect(getByRole('group').getAttribute('aria-label')).toBe('Formatting')
+    })
+
+    it('a consumer aria-labelledby removes it, so the group carries one name', () => {
+      const { getByRole } = render(VButtonGroup, {
+        props: { label: 'Text format' },
+        attrs: { 'aria-labelledby': 'heading' },
+        slots: { default: '<button>A</button>' },
+      })
+      const group = getByRole('group')
+      expect(group.getAttribute('aria-labelledby')).toBe('heading')
+      expect(group.hasAttribute('aria-label')).toBe(false)
+    })
+  })
+
   it('an overridden role (toolbar) lands on the root', () => {
     const { getByRole } = render(VButtonGroup, {
       attrs: { role: 'toolbar' },

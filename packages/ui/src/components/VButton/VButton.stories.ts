@@ -268,10 +268,9 @@ export const DisabledLink: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // An <a> with no href has no link role: the inert link leaves the
-    // accessibility tree as a link.
-    await expect(canvas.queryByRole('link')).toBeNull()
-    const anchor = canvasElement.querySelector('a.v-button') as HTMLAnchorElement
+    // An <a> with no href has no link role of its own, so the inert link restores it: it
+    // stays announced as a link, a disabled one, and an aria-label on it stays permitted.
+    const anchor = canvas.getByRole('link', { name: 'Disabled link' })
     await expect(anchor).not.toHaveAttribute('href')
     await expect(anchor).toHaveAttribute('aria-disabled', 'true')
   },

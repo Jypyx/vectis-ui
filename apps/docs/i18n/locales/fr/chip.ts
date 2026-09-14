@@ -21,7 +21,7 @@ export default {
     },
     icons: {
       title: 'Avec des icônes',
-      text: "<code>iconStart</code> et <code>iconEnd</code> posent une icône de part et d'autre du libellé, et les slots <code>#start</code> et <code>#end</code> les remplacent. Une puce sans libellé devient carrée et doit recevoir un nom.",
+      text: "<code>iconStart</code> et <code>iconEnd</code> posent une icône de part et d'autre du libellé, et les slots <code>#start</code> et <code>#end</code> les remplacent. <code>iconFilled</code> dessine les deux icônes pleines. Une puce sans libellé devient carrée et doit recevoir un nom.",
     },
     clickable: {
       title: 'Cliquable et liens',
@@ -61,6 +61,8 @@ export default {
           "Affiche une coche avant le libellé tant que la puce est sélectionnée. Elle remplace l'icône de début qui aurait été donnée, si bien que les deux ne sont jamais montrées ensemble.",
         iconStart: 'Une icône avant le libellé. Le slot <code>#start</code> la remplace.',
         iconEnd: 'Une icône après le libellé. Le slot <code>#end</code> la remplace.',
+        iconFilled:
+          "Rend <code>iconStart</code> et <code>iconEnd</code> dans leur forme pleine, l'axe <code>FILL</code> de la police. Sans effet sur les slots, ni sur la coche ou la croix de retrait.",
         dismissible:
           "Ajoute un bouton qui demande le retrait de la puce. Il ne fait qu'émettre cette demande : retirer la puce est votre décision.",
         dismissIcon: "L'icône de ce bouton de retrait.",

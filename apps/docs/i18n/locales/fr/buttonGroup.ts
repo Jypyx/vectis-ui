@@ -74,6 +74,8 @@ export default {
           "Soulève la rangée avec l'échelle d'ombres, aux conditions de la prop de VButton. L'ombre est celle de la rangée et non celle de chaque segment, ce qui garde les joints nets : trois ombres qui se chevauchent y dessineraient une bande sombre. Il l'emporte sur la valeur donnée à un bouton. Omis, chaque bouton garde la sienne.",
         disabled:
           "Rend chaque segment inutilisable. Celui-ci s'ajoute au lieu de trancher : un bouton qui se désactive lui-même le reste dans une rangée qui ne dit rien, et un segment ne peut pas se réactiver une fois la rangée éteinte.",
+        label:
+          'Ce que les lecteurs d\'écran annoncent pour la rangée, qui est un <code>role="group"</code> : « Mise en forme », « Affichage ». Un groupe sans nom est annoncé comme un simple groupe. Un <code>aria-label</code> ou un <code>aria-labelledby</code> posé par le consommateur l\'emporte.',
       },
       slots: {
         default: 'Les VButton et VIconButton à assembler.',

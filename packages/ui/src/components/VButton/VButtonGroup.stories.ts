@@ -110,7 +110,7 @@ const meta = {
     components: { VButtonGroup, VButton },
     setup: () => ({ args, t }),
     template: `
-      <VButtonGroup v-bind="args" :aria-label="t.alignment">
+      <VButtonGroup v-bind="args" :label="t.alignment">
         <VButton>{{ t.left }}</VButton>
         <VButton>{{ t.centre }}</VButton>
         <VButton>{{ t.right }}</VButton>
@@ -131,17 +131,17 @@ export const Variants: Story = {
     // One variant per row, named once on the group.
     template: `
       <div style="display: grid; gap: 16px">
-        <VButtonGroup variant="solid" aria-label="Solid">
+        <VButtonGroup variant="solid" label="Solid">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
         </VButtonGroup>
-        <VButtonGroup variant="outline" tone="neutral" aria-label="Outline">
+        <VButtonGroup variant="outline" tone="neutral" label="Outline">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
         </VButtonGroup>
-        <VButtonGroup variant="soft" aria-label="Tonal">
+        <VButtonGroup variant="soft" label="Tonal">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
@@ -159,12 +159,12 @@ export const Detached: Story = {
     // corners and its own borders, and the group is left holding the gap alone.
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <VButtonGroup variant="outline" tone="neutral" :aria-label="t.joined">
+        <VButtonGroup variant="outline" tone="neutral" :label="t.joined">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
         </VButtonGroup>
-        <VButtonGroup detached variant="outline" tone="neutral" :aria-label="t.detached">
+        <VButtonGroup detached variant="outline" tone="neutral" :label="t.detached">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
@@ -180,12 +180,12 @@ export const Seamless: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <VButtonGroup variant="outline" tone="neutral" :aria-label="t.lined">
+        <VButtonGroup variant="outline" tone="neutral" :label="t.lined">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
         </VButtonGroup>
-        <VButtonGroup seamless variant="outline" tone="neutral" :aria-label="t.seamless">
+        <VButtonGroup seamless variant="outline" tone="neutral" :label="t.seamless">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
@@ -231,7 +231,7 @@ export const ToneOverride: Story = {
     // The tone is the one prop a segment keeps against its group: the row is neutral,
     // the destructive action says so.
     template: `
-      <VButtonGroup variant="outline" tone="neutral" :aria-label="t.rowActions">
+      <VButtonGroup variant="outline" tone="neutral" :label="t.rowActions">
         <VButton>{{ t.rename }}</VButton>
         <VButton>{{ t.duplicate }}</VButton>
         <VButton tone="danger">{{ t.remove }}</VButton>
@@ -245,7 +245,7 @@ export const Elevated: Story = {
     components: { VButtonGroup, VButton },
     setup: () => ({ t }),
     template: `
-      <VButtonGroup elevated variant="ghost" tone="neutral" :aria-label="t.alignment">
+      <VButtonGroup elevated variant="ghost" tone="neutral" :label="t.alignment">
         <VButton>{{ t.left }}</VButton>
         <VButton>{{ t.centre }}</VButton>
         <VButton>{{ t.right }}</VButton>
@@ -270,7 +270,7 @@ export const Vertical: Story = {
     components: { VButtonGroup, VButton },
     setup: () => ({ t }),
     template: `
-      <VButtonGroup orientation="vertical" variant="outline" tone="neutral" :aria-label="t.navigation">
+      <VButtonGroup orientation="vertical" variant="outline" tone="neutral" :label="t.navigation">
         <VButton icon-start="home">{{ t.home }}</VButton>
         <VButton icon-start="folder">{{ t.projects }}</VButton>
         <VButton icon-start="settings">{{ t.settings }}</VButton>
@@ -289,7 +289,7 @@ export const FullWidth: Story = {
       <div style="display: grid; gap: 16px; inline-size: 360px">
         <div>
           <p style="margin: 0 0 8px; font: inherit">{{ t.naturalWidth }}</p>
-          <VButtonGroup variant="outline" tone="neutral" aria-label="Natural width">
+          <VButtonGroup variant="outline" tone="neutral" label="Natural width">
             <VButton>{{ t.day }}</VButton>
             <VButton>{{ t.week }}</VButton>
             <VButton>{{ t.month }}</VButton>
@@ -297,7 +297,7 @@ export const FullWidth: Story = {
         </div>
         <div>
           <p style="margin: 0 0 8px; font: inherit">{{ t.fullWidth }}</p>
-          <VButtonGroup full-width variant="outline" tone="neutral" aria-label="Full width">
+          <VButtonGroup full-width variant="outline" tone="neutral" label="Full width">
             <VButton>{{ t.day }}</VButton>
             <VButton>{{ t.week }}</VButton>
             <VButton>{{ t.month }}</VButton>
@@ -341,7 +341,7 @@ export const WithIconButton: Story = {
     // role="toolbar" (overriding the default role): a text-formatting toolbar. The icon
     // buttons take the group's appearance the same way a VButton does.
     template: `
-      <VButtonGroup role="toolbar" variant="outline" tone="neutral" :aria-label="t.formatting">
+      <VButtonGroup role="toolbar" variant="outline" tone="neutral" :label="t.formatting">
         <VIconButton :label="t.bold">
           <span style="font-weight: 700">B</span>
         </VIconButton>
@@ -367,7 +367,7 @@ export const Companions: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 24px; inline-size: 360px">
-        <VButtonGroup variant="outline" tone="neutral" :aria-label="t.rowActions">
+        <VButtonGroup variant="outline" tone="neutral" :label="t.rowActions">
           <VButton>{{ t.rename }}</VButton>
           <VTooltip :text="t.duplicateHint">
             <template #default="{ triggerProps }">
@@ -396,7 +396,7 @@ export const Companions: Story = {
           </VMenu>
         </VButtonGroup>
 
-        <VButtonGroup full-width variant="outline" tone="neutral" aria-label="Full width">
+        <VButtonGroup full-width variant="outline" tone="neutral" label="Full width">
           <VButton>{{ t.day }}</VButton>
           <VTooltip :text="t.weekHint">
             <template #default="{ triggerProps }">
@@ -497,16 +497,16 @@ export const Sizes: Story = {
     // The size is a property of the row, so it is named once, on the group.
     template: `
       <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap">
-        <VButtonGroup size="sm" variant="outline" tone="neutral" aria-label="Small">
+        <VButtonGroup size="sm" variant="outline" tone="neutral" label="Small">
           <VButton v-for="l in ['A', 'B', 'C']" :key="l">{{ l }}</VButton>
         </VButtonGroup>
-        <VButtonGroup size="md" variant="outline" tone="neutral" aria-label="Medium">
+        <VButtonGroup size="md" variant="outline" tone="neutral" label="Medium">
           <VButton v-for="l in ['A', 'B', 'C']" :key="l">{{ l }}</VButton>
         </VButtonGroup>
-        <VButtonGroup size="lg" variant="outline" tone="neutral" aria-label="Large">
+        <VButtonGroup size="lg" variant="outline" tone="neutral" label="Large">
           <VButton v-for="l in ['A', 'B', 'C']" :key="l">{{ l }}</VButton>
         </VButtonGroup>
-        <VButtonGroup size="lg" compact variant="outline" tone="neutral" aria-label="Large compact">
+        <VButtonGroup size="lg" compact variant="outline" tone="neutral" label="Large compact">
           <VButton v-for="l in ['A', 'B', 'C']" :key="l">{{ l }}</VButton>
         </VButtonGroup>
       </div>
@@ -520,10 +520,10 @@ export const EdgeCases: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; max-width: 420px">
-        <VButtonGroup variant="outline" tone="neutral" :aria-label="t.alone">
+        <VButtonGroup variant="outline" tone="neutral" :label="t.alone">
           <VButton>{{ t.singleButton }}</VButton>
         </VButtonGroup>
-        <VButtonGroup variant="outline" tone="neutral" :aria-label="t.longLabels">
+        <VButtonGroup variant="outline" tone="neutral" :label="t.longLabels">
           <VButton>{{ t.exportCsv }}</VButton>
           <VButton>{{ t.exportPdf }}</VButton>
         </VButtonGroup>

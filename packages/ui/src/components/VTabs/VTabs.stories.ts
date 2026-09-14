@@ -244,6 +244,15 @@ export const TabContent: Story = {
       </VTabs>
     `,
   }),
+  // A tab with an icon and no label is squared by VButton's own `[data-icon-only]` rule.
+  play: async ({ canvasElement }) => {
+    const boxes = [...canvasElement.querySelectorAll<HTMLElement>('.v-tab[data-icon-only]')]
+    await expect(boxes.length).toBeGreaterThan(0)
+    for (const box of boxes) {
+      const { width, height } = box.getBoundingClientRect()
+      await expect(Math.abs(width - height)).toBeLessThan(1)
+    }
+  },
 }
 
 export const Vertical: Story = {
@@ -343,18 +352,27 @@ export const Grow: Story = {
 export const Disabled: Story = {
   render: () => ({
     components: { VTabs, VTab },
-    setup: () => ({ tab: ref('a') }),
-    // the inert tab is a <button disabled>: greyed through tokens, skipped by the arrows
+    setup: () => ({ tab: ref('a'), off: ref('a') }),
+    // the inert tab is a <button disabled>: greyed through tokens, skipped by the arrows; a
+    // disabled VTabs switches every tab off at once
     template: `
-      <VTabs v-model="tab">
-        <VTab value="a" label="Overview" />
-        <VTab value="b" label="Details" disabled />
-        <VTab value="c" label="History" />
-      </VTabs>
+      <div style="display: grid; gap: 24px">
+        <VTabs v-model="tab" label="One tab off">
+          <VTab value="a" label="Overview" />
+          <VTab value="b" label="Details" disabled />
+          <VTab value="c" label="History" />
+        </VTabs>
+        <VTabs v-model="off" label="Row off" disabled>
+          <VTab value="a" label="Summary" />
+          <VTab value="b" label="Activity" />
+        </VTabs>
+      </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
+    await expect(canvas.getByRole('tab', { name: 'Summary' })).toBeDisabled()
+    await expect(canvas.getByRole('tab', { name: 'Activity' })).toBeDisabled()
     await expect(canvas.getByRole('tab', { name: 'Details' })).toBeDisabled()
 
     canvas.getByRole('tab', { name: 'Overview' }).focus()

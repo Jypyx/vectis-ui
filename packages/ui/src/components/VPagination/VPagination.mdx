@@ -25,7 +25,8 @@ JavaScript.
 ## Joined and detached
 
 The buttons are joined by default: merged borders, rounded corners only at the ends. `detached`
-spaces them out instead and gives each its own corners. Being a `VButtonGroup` is what dictates
+spaces them out instead and gives each its own corners, and `seamless` keeps them joined while
+taking the lines out from between them, both on the terms of `VButtonGroup`'s own props. Being a `VButtonGroup` is what dictates
 the internal structure — `VButtonGroup` styles only
 its **direct** children, hence no `<ul>`/`<li>` and an ellipsis rendered as an inert button
 rather than a `<span>`: the seam stays continuous, including when a neighbour is hidden by the
@@ -128,8 +129,8 @@ alignment.
   `pageLabel` — because an isolated number is meaningless out of context.
 - The controls keep their `aria-label` even when their label is visible: responsive truncation
   can hide the text, and the accessible name must survive that.
-- The ellipsis is an inert button hidden from assistive technologies: it is neither announced nor
-  reachable by keyboard.
+- The ellipsis is an inert, icon-only button hidden from assistive technologies: it is neither
+  announced nor reachable by keyboard, which is also why it carries no accessible name at all.
 - Tabbing is natural — every visible button is a stop, as in a list of links. The left/right
   arrows and Home/End only **move** focus, without changing page: a pagination that activated on
   focus would trigger unintended navigations. The arrows are physical, hence inverted in RTL,

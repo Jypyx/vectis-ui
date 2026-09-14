@@ -25,7 +25,7 @@ export default {
     },
     link: {
       title: 'En tant que lien',
-      text: "<code>href</code> traverse jusqu'au VButton sous-jacent, qui rend une ancre. Un lien désactivé garde sa place et perd sa destination.",
+      text: '<code>href</code> rend le bouton comme une ancre, aux conditions de VButton. Un lien désactivé garde sa place et perd sa destination.',
     },
     states: {
       title: 'États',
@@ -47,6 +47,7 @@ export default {
         compact: 'Retire 4px des deux côtés du carré, qui reste carré.',
         shape:
           'La silhouette : un carré portant le rayon de coin commun à tous les contrôles, ou un cercle. La boîte reste carrée dans les deux cas, seuls les coins changent.',
+        href: "Transforme le bouton en <code>&lt;a&gt;</code> pointant vers cette adresse. Un lien désactivé ou en chargement devient inerte : l'adresse est retirée, si bien qu'il ne peut être ni focalisé ni suivi.",
         type: 'Le type natif du bouton. Il est ignoré dès que <code>href</code> en fait un lien.',
         disabled: 'Rend le bouton inutilisable, grisé par les tokens de couleur.',
         loading: "Remplace l'icône par un indicateur et désactive le bouton pendant qu'il tourne.",

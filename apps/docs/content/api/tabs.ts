@@ -22,6 +22,7 @@ export default {
         { name: 'prevLabel', type: 'string' },
         { name: 'nextLabel', type: 'string' },
         { name: 'activation', type: 'TabsActivation', values: "'manual' | 'automatic'", default: "'manual'" },
+        { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'ItemValue' },
       ],
@@ -37,6 +38,7 @@ export default {
         { name: 'label', type: 'string' },
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconEnd', type: 'IconSource' },
+        { name: 'iconFilled', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
       ],
       slots: [

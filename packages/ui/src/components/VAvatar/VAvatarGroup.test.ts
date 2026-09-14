@@ -88,6 +88,14 @@ describe('VAvatarGroup', () => {
     expect(discs(container)[0]?.getAttribute('data-size')).toBe('lg')
   })
 
+  it('compact is cumulative: an avatar cannot opt out of a compact group', () => {
+    const { container } = render(VAvatarGroup, {
+      props: { compact: true },
+      slots: { default: () => [h(VAvatar, { name: 'Ada', compact: false })] },
+    })
+    expect(discs(container)[0]?.hasAttribute('data-compact')).toBe(true)
+  })
+
   it('sets the ring colour as a custom property, and nothing when absent', () => {
     const withRing = render(VAvatarGroup, {
       props: { ringColor: 'rebeccapurple' },

@@ -10,7 +10,7 @@ export default {
       name: 'VHotkeys',
       props: [
         { name: 'keys', type: 'string' },
-        { name: 'variant', type: 'HotkeysVariant', values: "'flat' | 'outlined' | 'elevated'", default: "'flat'" },
+        { name: 'variant', type: 'HotkeysVariant', values: "'soft' | 'outlined' | 'elevated'", default: "'soft'" },
         { name: 'attached', type: 'boolean', default: 'false' },
         { name: 'size', type: 'HotkeysSize', values: "'xs' | 'sm'", default: "'xs'" },
         { name: 'compact', type: 'boolean', default: 'false' },

@@ -74,6 +74,8 @@ export default {
           "Raises the row off the page with the shadow scale, on the terms of VButton's own prop. The shadow is the row's and not each segment's, which is what keeps the joints clear: three overlapping shadows would draw a dark band down each of them. It wins over the value a button inside was given. Left out, each button keeps its own.",
         disabled:
           'Makes every segment unusable. This one adds up rather than overruling: a button that disables itself stays disabled in a row that says nothing, and a segment cannot opt back in once the row is switched off.',
+        label:
+          'What screen readers announce for the row, which is a <code>role="group"</code>: "Text formatting", "View". A group with no name is announced as a bare group. A consumer <code>aria-label</code> or <code>aria-labelledby</code> wins over it.',
       },
       slots: {
         default: 'The VButtons and VIconButtons to join together.',

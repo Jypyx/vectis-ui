@@ -47,7 +47,8 @@ export default {
         color:
           'Une couleur à vous, en hexadécimal, en nom CSS ou en <code>oklch()</code>. Elle remplace la teinte autrement dérivée de <code>name</code>, et le texte posé dessus est toujours blanc : une couleur claire reste donc à votre charge.',
         size: "Le diamètre du disque, tiré de l'échelle de tailles partagée par tous les contrôles. Omise dans un VAvatarGroup, elle prend celle du groupe ; seul, l'avatar est en <code>md</code>.",
-        compact: 'Retire 4px au diamètre, comme sur tous les autres contrôles.',
+        compact:
+          "Retire 4px au diamètre, comme sur tous les autres contrôles. Contrairement à la taille, elle se cumule : dans un VAvatarGroup compact, l'avatar est compact quoi que dise cette prop.",
         href: "Transforme l'avatar en <code>&lt;a&gt;</code> pointant vers cette adresse. Un lien désactivé devient inerte : l'adresse est retirée, si bien qu'il ne peut être ni focalisé ni suivi.",
         clickable:
           "Transforme l'avatar en <code>&lt;button&gt;</code>. Cette prop est ignorée dès que <code>href</code> en fait un lien.",

@@ -6,19 +6,13 @@ const sizes = ['sm', 'md', 'lg'] as const
 
 <template>
   <div v-for="size in sizes" :key="size" class="row">
-    <VButtonGroup :size="size" variant="outline" tone="neutral" :aria-label="size">
+    <VButtonGroup :size="size" variant="outline" tone="neutral" :label="size">
       <VButton>Day</VButton>
       <VButton>Week</VButton>
       <VButton>Month</VButton>
     </VButtonGroup>
 
-    <VButtonGroup
-      :size="size"
-      compact
-      variant="outline"
-      tone="neutral"
-      :aria-label="`${size} compact`"
-    >
+    <VButtonGroup :size="size" compact variant="outline" tone="neutral" :label="`${size} compact`">
       <VButton>Day</VButton>
       <VButton>Week</VButton>
       <VButton>Month</VButton>

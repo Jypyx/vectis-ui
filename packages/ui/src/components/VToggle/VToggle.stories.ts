@@ -77,6 +77,7 @@ const meta = {
     mandatory: false,
     detached: false,
     seamless: false,
+    fullWidth: false,
     orientation: 'horizontal',
     itemVariant: 'ghost',
     selectedVariant: 'solid',
@@ -284,6 +285,27 @@ export const Seamless: Story = {
   },
 }
 
+/** `fullWidth` stretches the row across its parent, every item taking an equal share. */
+export const FullWidth: Story = {
+  render: () => ({
+    components: { VToggle, VToggleItem },
+    setup: () => ({ period: ref('week'), t }),
+    template: `
+      <div style="inline-size: 360px">
+        <VToggle full-width item-variant="outline" :label="t.periods" v-model="period">
+          <VToggleItem value="day" :label="t.day" />
+          <VToggleItem value="week" :label="t.week" />
+          <VToggleItem value="month" :label="t.month" />
+        </VToggle>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const row = canvasElement.querySelector<HTMLElement>('.v-toggle')!
+    await expect(row.getBoundingClientRect().width).toBe(360)
+  },
+}
+
 export const Tones: Story = {
   render: () => ({
     components: { VToggle, VToggleItem },
@@ -318,6 +340,13 @@ export const Multiple: Story = {
   }),
   args: { multiple: true, label: 'Format' },
   play: async ({ canvasElement }) => {
+    // An item with an icon and no label is squared by VButton's own `[data-icon-only]` rule.
+    const boxes = [...canvasElement.querySelectorAll<HTMLElement>('.v-toggle-item')]
+    await expect(boxes.length).toBeGreaterThan(0)
+    for (const box of boxes) {
+      const { width, height } = box.getBoundingClientRect()
+      await expect(Math.abs(width - height)).toBeLessThan(1)
+    }
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('button', { name: 'Italic' }))
     await waitFor(async () => {

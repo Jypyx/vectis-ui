@@ -31,7 +31,7 @@ import {
 import type { HotkeysPlatform } from './platform'
 import { useMessages } from '../../i18n/state'
 
-export type HotkeysVariant = 'flat' | 'outlined' | 'elevated'
+export type HotkeysVariant = 'soft' | 'outlined' | 'elevated'
 export type HotkeysSize = 'xs' | 'sm'
 
 interface HotkeysProps {
@@ -93,7 +93,7 @@ interface HotkeysProps {
 }
 
 const props = withDefaults(defineProps<HotkeysProps>(), {
-  variant: 'flat',
+  variant: 'soft',
   attached: false,
   size: 'xs',
   compact: false,
@@ -257,7 +257,9 @@ onBeforeUnmount(detach)
     line-height: var(--vectis-text-control-leading);
   }
 
-  /* The three variants are tinted, outlined and raised, and EVERY paint here derives
+  /* The three variants are tinted (`soft`, the word VButton and VChip use for a tinted
+     surface, where `flat` names the absence of decoration on VTabs, VAccordion and
+     VDataTable), outlined and raised, and EVERY paint here derives
      from `currentcolor` rather than from a surface token — the argument the separator
      at the bottom of this sheet already makes, carried through to the caps themselves.
 
@@ -274,7 +276,7 @@ onBeforeUnmount(detach)
      variables inherit, so a bare `--bg` would be captured by any ancestor in the host
      application that happened to define one. `currentcolor` inside them is resolved on
      whichever element ends up USING them, which is exactly what is wanted here. */
-  .v-hotkeys[data-variant='flat'] {
+  .v-hotkeys[data-variant='soft'] {
     --hotkeys-bg: color-mix(in oklab, currentcolor, transparent 90%);
     --hotkeys-border: transparent;
     --hotkeys-shadow: none;

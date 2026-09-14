@@ -81,6 +81,26 @@ export const Default: Story = {
   },
 }
 
+/** `href` renders an `<a>`, on VButton's terms: a disabled link keeps its place and loses its address. */
+export const Link: Story = {
+  render: (args) => ({
+    components: { VIconButton, VIcon },
+    setup: () => ({ args }),
+    template: `
+      <div style="display: flex; gap: 8px">
+        <VIconButton :label="args.label" href="#" variant="outline"><VIcon name="add" /></VIconButton>
+        <VIconButton :label="args.label" href="#" variant="outline" disabled><VIcon name="add" /></VIconButton>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const [live, inert] = [...canvasElement.querySelectorAll<HTMLAnchorElement>('a.v-icon-button')]
+    await expect(live).toHaveAttribute('href', '#')
+    await expect(inert).not.toHaveAttribute('href')
+    await expect(inert).toHaveAttribute('aria-disabled', 'true')
+  },
+}
+
 export const Variants: Story = {
   render: (args) => ({
     components: { VIconButton, VIcon },
@@ -153,6 +173,16 @@ export const Sizes: Story = {
       </div>
     `,
   }),
+  // The square is VButton's `[data-icon-only]` rule, which this component opts into: at every
+  // step of the scale, compact included, the box is as wide as it is tall.
+  play: async ({ canvasElement }) => {
+    const boxes = [...canvasElement.querySelectorAll<HTMLElement>('.v-icon-button')]
+    await expect(boxes.length).toBeGreaterThan(0)
+    for (const box of boxes) {
+      const { width, height } = box.getBoundingClientRect()
+      await expect(Math.abs(width - height)).toBeLessThan(1)
+    }
+  },
 }
 
 /** One row per shape, the four variants across: `square` (the default) above,

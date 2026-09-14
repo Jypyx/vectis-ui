@@ -3,7 +3,7 @@ import { VButton, VButtonGroup } from 'vectis-ui'
 </script>
 
 <template>
-  <VButtonGroup variant="outline" tone="neutral" aria-label="Sections of this page">
+  <VButtonGroup variant="outline" tone="neutral" label="Sections of this page">
     <VButton href="#usage">Usage</VButton>
     <VButton href="#examples">Examples</VButton>
     <VButton href="#api">API</VButton>

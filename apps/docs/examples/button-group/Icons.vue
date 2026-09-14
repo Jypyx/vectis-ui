@@ -11,13 +11,13 @@ import {
 </script>
 
 <template>
-  <VButtonGroup variant="outline" tone="neutral" aria-label="View">
+  <VButtonGroup variant="outline" tone="neutral" label="View">
     <VButton :icon-start="description">List</VButton>
     <VButton :icon-start="tableChart">Table</VButton>
     <VButton :icon-start="image">Gallery</VButton>
   </VButtonGroup>
 
-  <VButtonGroup role="toolbar" variant="outline" tone="neutral" aria-label="Sort">
+  <VButtonGroup role="toolbar" variant="outline" tone="neutral" label="Sort">
     <VIconButton :icon="arrowUpward" label="Ascending" />
     <VIconButton :icon="swapVert" label="Unsorted" />
     <VIconButton :icon="arrowDownward" label="Descending" />

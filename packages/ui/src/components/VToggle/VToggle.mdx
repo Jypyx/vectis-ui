@@ -72,10 +72,11 @@ a VPagination.
 
 ## Icons
 
-`icon` accepts a Material Symbols name **or** an image URL. With neither a label nor a slot, the
-item shrinks to a square (set an `aria-label` in that case). With `selectedIconFilled` on the
-group, the selected item's icon switches to the **filled** variant (the font's FILL axis) — with
-no effect on an icon supplied by URL.
+`iconStart` and `iconEnd` accept an icon name or an explicit render. With an icon on either side
+and neither a label nor a slot, the item shrinks to a square, the VChip definition (set an
+`aria-label` in that case). With `selectedIconFilled` on the group, the selected item's start
+icon switches to the **filled** variant (the font's FILL axis); `iconFilled` on an item fills
+both of its icons whatever is selected. Neither has any effect on an icon supplied by URL.
 
 <Canvas of={VToggleStories.FilledIcons} />
 
@@ -114,6 +115,13 @@ panel as well puts `aria-pressed` and `aria-haspopup` on the same control, where
 would both select and open. Put the menu in a `VButtonGroup` beside the row instead.
 
 <Canvas of={VToggleStories.Companions} />
+
+## Full width
+
+`fullWidth` stretches the row across its parent, every item taking an equal share of that width,
+on the terms of VButtonGroup's own prop.
+
+<Canvas of={VToggleStories.FullWidth} />
 
 ## Edge cases
 

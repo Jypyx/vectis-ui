@@ -30,6 +30,8 @@ import { provide, ref } from 'vue'
 import type { ButtonSize, ButtonTone, ButtonVariant } from './VButton.vue'
 import { buttonGroupKey } from './context'
 
+import { useAriaLabel } from '../../composables/useAriaLabel'
+
 /** Which way the row runs. */
 export type ButtonGroupOrientation = 'horizontal' | 'vertical'
 
@@ -89,6 +91,13 @@ interface ButtonGroupProps {
    * way: the two answers add up rather than one overruling the other.
    */
   disabled?: boolean
+  /**
+   * What screen readers announce for the row, which is a `role="group"`: "Text formatting",
+   * "View". A group with no name is announced as a bare group, so give one whenever the
+   * buttons do not say on their own what they are for. A consumer `aria-label` or
+   * `aria-labelledby` wins over it.
+   */
+  label?: string
 }
 
 const props = withDefaults(defineProps<ButtonGroupProps>(), {
@@ -106,7 +115,10 @@ const props = withDefaults(defineProps<ButtonGroupProps>(), {
   compact: undefined,
   elevated: undefined,
   disabled: undefined,
+  label: undefined,
 })
+
+const ariaLabel = useAriaLabel(() => props.label)
 
 defineSlots<{
   /** The VButtons and VIconButtons to join together. */
@@ -161,6 +173,7 @@ defineExpose({
     ref="groupEl"
     class="v-button-group"
     role="group"
+    :aria-label="ariaLabel"
     :data-orientation="orientation"
     :data-detached="detached ? '' : undefined"
     :data-seamless="seamless && !detached ? '' : undefined"
@@ -221,6 +234,10 @@ defineExpose({
     /* Gives every segment the same height in a row, and the same width in a column,
        whatever each button's own content measures. */
     align-items: stretch;
+    /* Declared on every group although only a raised one ever moves its shadow: that is
+       what lets the reduced-motion block cancel it with a bare selector rather than
+       repeating the elevation `:has()` below. */
+    transition: box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .v-button-group[data-orientation='vertical'] {
@@ -270,11 +287,10 @@ defineExpose({
      whole floating box that has no business being stretched to a segment.
 
      TRAP — the two selectors are what keeps this out of a plain horizontal row, and that
-     is not an optimization. Nothing is stretched there, so the fill would have nothing to
-     do but override a control that sizes ITSELF: `.v-icon-button[data-size]` sets its
-     width from `--control-height` at (0,2,0), this rule is heavier, and a wrapped icon
-     button would collapse to the width of its glyph. Stretched, that override is the
-     right answer, an unwrapped icon button being widened by the track just the same. */
+     is not an optimization. Nothing is stretched there: each segment is as wide as its own
+     content, so a percentage on the button would resolve against a wrapper whose width
+     depends on that very button, which is circular, and a wrapped segment would stop
+     measuring its label. */
   .v-button-group[data-orientation='vertical']
     > :not(:where(.v-overlay, .v-button-group)):has(.v-button:not(:where(.v-overlay *)))
     :is(.v-button, :has(.v-button)):not(:where(.v-overlay, .v-overlay *)),
@@ -488,7 +504,6 @@ defineExpose({
     ) {
     border-radius: var(--vectis-radius-interactive);
     box-shadow: var(--vectis-shadow-sm);
-    transition: box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
   .v-button-group:not([data-detached]):has(
@@ -556,11 +571,7 @@ defineExpose({
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .v-button-group:not([data-detached]):has(
-        > .v-button[data-elevated],
-        > :not(:where(.v-overlay, .v-button-group))
-          .v-button[data-elevated]:not(:where(.v-overlay *))
-      ) {
+    .v-button-group {
       transition: none;
     }
   }

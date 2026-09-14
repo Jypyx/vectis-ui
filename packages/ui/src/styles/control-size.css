@@ -13,6 +13,12 @@
  * (VInput, VTextarea, VDateInput), which are tighter.
  * `--control-gap`: internal spacing (icon/label, OTP cells…).
  *
+ * The table is NOT complete on purpose: a column is only written for the steps something
+ * reads it at. The text fields stop at sm–lg, so the field padding has no xs or xl entry,
+ * and nothing at xl holds a field action (`--control-action-size`), so neither has that
+ * one. This sheet is paid for by every consumer; a step added to a component's scale that
+ * needs one of these columns adds the entry here.
+ *
  * `--vectis-icon-size`/`--vectis-icon-opsz` = VIcon's public context API; the
  * opsz stays a literal (a Material Symbols font axis: a technical contract, not a
  * design token — see VIcon.vue).
@@ -41,7 +47,6 @@
     --control-height-base: var(--vectis-control-height-xs);
     --control-font-size: var(--vectis-font-size-xs);
     --control-padding-inline: var(--vectis-space-2);
-    --control-padding-inline-field: var(--vectis-space-1);
     --control-gap: var(--vectis-space-1);
     --control-action-size: var(--vectis-control-action-size-sm);
     --vectis-icon-size: var(--vectis-icon-size-sm);
@@ -85,9 +90,7 @@
     --control-height-base: var(--vectis-control-height-xl);
     --control-font-size: var(--vectis-font-size-md);
     --control-padding-inline: var(--vectis-space-6);
-    --control-padding-inline-field: var(--vectis-space-5);
     --control-gap: var(--vectis-space-3);
-    --control-action-size: var(--vectis-control-action-size-lg);
     --vectis-icon-size: var(--vectis-icon-size-lg);
     --vectis-icon-opsz: 24;
   }

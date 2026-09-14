@@ -19,6 +19,7 @@ export default {
         { name: 'compact', type: 'boolean' },
         { name: 'elevated', type: 'boolean' },
         { name: 'disabled', type: 'boolean' },
+        { name: 'label', type: 'string' },
       ],
       slots: [
         { name: 'default', type: '{}' },

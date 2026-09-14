@@ -94,6 +94,13 @@ belongs in the `label` as well, which is why this button is named "Notifications
 
 <Canvas of={VIconButtonStories.Companions} />
 
+## As a link
+
+`href` renders the button as an `<a>`, on VButton's terms: a disabled or loading link keeps its
+place and loses its address, and `aria-disabled` says why.
+
+<Canvas of={VIconButtonStories.Link} />
+
 ## States
 
 `loading` disables the button, shows the spinner and sets `aria-busy`:

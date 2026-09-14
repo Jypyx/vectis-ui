@@ -9,7 +9,7 @@ export default {
     },
     detached: {
       title: 'Détaché',
-      text: '<code>detached</code> espace les boutons et rend à chacun ses coins, au lieu de les joindre en contrôle segmenté.',
+      text: '<code>detached</code> espace les boutons et rend à chacun ses coins, au lieu de les joindre en contrôle segmenté. <code>seamless</code> les garde joints et retire les traits entre eux, si bien que la rangée se lit comme un cadre unique.',
     },
     elevated: {
       title: 'Surélevé',
@@ -58,6 +58,8 @@ export default {
           "Combien d'emplacements rendre, ellipses comprises, pour que la rangée garde exactement la même largeur quelle que soit la page courante. En dessous de cinq il ne resterait rien à montrer autour de la page courante : cinq est donc le minimum effectif. Omise, toutes les pages sont rendues.",
         detached:
           "Sépare les boutons au lieu de les joindre en un seul contrôle segmenté. C'est le mot que VButtonGroup et VToggle emploient pour la même question, dans le même sens.",
+        seamless:
+          'Retire les traits entre les boutons joints, si bien que la rangée se lit comme un cadre unique plutôt que comme des segments, aux conditions de la prop de VButtonGroup. Sans effet sous <code>detached</code>.',
         itemVariant:
           "Comment sont dessinées les pages autres que la page courante, ainsi que les contrôles. La page courante est toujours pleine, quoi que dise cette prop. Elle porte le nom des items parce que c'est ce qu'elle peint : sur VTabs et VDataTable, <code>variant</code> nomme la décoration du cadre.",
         tone: 'La couleur que prend la page courante. Les autres pages et les contrôles restent neutres.',

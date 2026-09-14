@@ -25,7 +25,7 @@ export default {
     },
     link: {
       title: 'As a link',
-      text: '<code>href</code> falls through to the VButton underneath, which renders an anchor. A disabled link keeps its place and loses its destination.',
+      text: '<code>href</code> renders the button as an anchor, on the terms of VButton. A disabled link keeps its place and loses its destination.',
     },
     states: {
       title: 'States',
@@ -46,6 +46,7 @@ export default {
         compact: 'Takes 4px off both sides of the square, which stays square.',
         shape:
           'The silhouette: a square carrying the corner radius every control shares, or a circle. The box itself is square either way, only the corners change.',
+        href: 'Turns the button into an <code>&lt;a&gt;</code> pointing at this address. A disabled or loading link becomes inert: the address is dropped, so it can be neither focused nor followed.',
         type: 'The native type of the button. It is ignored as soon as <code>href</code> makes it a link.',
         disabled: 'Makes the button unusable, greyed out through the colour tokens.',
         loading: 'Replaces the icon with a spinner and disables the button while it turns.',

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { VHotkeys, VTypography, type HotkeysVariant } from 'vectis-ui'
 
-const VARIANTS: HotkeysVariant[] = ['flat', 'outlined', 'elevated']
+const VARIANTS: HotkeysVariant[] = ['soft', 'outlined', 'elevated']
 </script>
 
 <template>

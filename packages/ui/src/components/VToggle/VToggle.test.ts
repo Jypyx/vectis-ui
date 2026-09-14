@@ -253,6 +253,16 @@ describe('VToggle', () => {
       expect(items.every((el) => el.hasAttribute('data-compact'))).toBe(true)
     })
 
+    it('fullWidth reaches the row the items are laid out in', () => {
+      const plain = mount()
+      expect(plain.container.querySelector('.v-toggle')?.hasAttribute('data-full-width')).toBe(
+        false,
+      )
+      plain.unmount()
+      const { container } = mount({ toggleAttrs: 'full-width' })
+      expect(container.querySelector('.v-toggle')?.hasAttribute('data-full-width')).toBe(true)
+    })
+
     it('a group disabled disables every item, an item disabled only one', () => {
       const grouped = mount({ toggleAttrs: 'disabled' })
       expect(itemsOf(grouped.container).every((el) => (el as HTMLButtonElement).disabled)).toBe(
@@ -299,6 +309,22 @@ describe('VToggle', () => {
       const item = itemsOf(container)[0]
       expect(item?.hasAttribute('data-icon-only')).toBe(true)
       expect(item?.getAttribute('aria-label')).toBe('Favori')
+    })
+
+    it('icon only takes an end icon alone too, the VChip definition', () => {
+      const { container } = mount({
+        items: `<VToggleItem value="a" icon-end="favorite" aria-label="Favori" />`,
+      })
+      expect(itemsOf(container)[0]?.hasAttribute('data-icon-only')).toBe(true)
+    })
+
+    it('iconFilled fills both icons whether the item is selected or not', () => {
+      const { container } = mount({
+        items: `<VToggleItem value="a" icon-start="favorite" icon-end="star" label="Un" icon-filled />`,
+      })
+      const icons = [...itemsOf(container)[0]!.querySelectorAll('.v-icon')]
+      expect(icons).toHaveLength(2)
+      expect(icons.every((icon) => icon.hasAttribute('data-filled'))).toBe(true)
     })
 
     it('a label cancels icon-only mode', () => {

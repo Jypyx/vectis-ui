@@ -21,6 +21,7 @@ export default {
         { name: 'check', type: 'boolean', default: 'false' },
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconEnd', type: 'IconSource' },
+        { name: 'iconFilled', type: 'boolean', default: 'false' },
         { name: 'dismissible', type: 'boolean', default: 'false' },
         { name: 'dismissIcon', type: 'IconSource', default: 'close' },
         { name: 'dismissLabel', type: 'string' },

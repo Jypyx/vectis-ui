@@ -65,7 +65,7 @@ const meta = {
   title: 'Components/Hotkeys',
   component: VHotkeys,
   argTypes: {
-    variant: { control: 'select', options: ['flat', 'outlined', 'elevated'] },
+    variant: { control: 'select', options: ['soft', 'outlined', 'elevated'] },
     size: { control: 'select', options: ['xs', 'sm'] },
     platform: { control: 'select', options: [undefined, 'mac', 'windows', 'linux', 'other'] },
     attached: { control: 'boolean' },
@@ -79,7 +79,7 @@ const meta = {
   },
   args: {
     keys: 'mod+k',
-    variant: 'flat',
+    variant: 'soft',
     attached: false,
     size: 'xs',
     compact: false,
@@ -99,11 +99,11 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/** `flat` (the default), `outlined` and `elevated` mirror the neutral tone of VButton. */
+/** `soft` (the default), `outlined` and `elevated` mirror the neutral tone of VButton. */
 export const Variants: Story = {
   render: () => ({
     components: { VHotkeys },
-    setup: () => ({ variants: ['flat', 'outlined', 'elevated'] }),
+    setup: () => ({ variants: ['soft', 'outlined', 'elevated'] }),
     template: `
       <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center">
         <VHotkeys v-for="variant in variants" :key="variant" :variant="variant" keys="mod+shift+k" />
@@ -148,7 +148,7 @@ export const Platforms: Story = {
 export const Attached: Story = {
   render: () => ({
     components: { VHotkeys },
-    setup: () => ({ t, variants: ['flat', 'outlined', 'elevated'] }),
+    setup: () => ({ t, variants: ['soft', 'outlined', 'elevated'] }),
     template: `
       <div style="display: grid; grid-template-columns: repeat(3, max-content); gap: 16px 32px; align-items: center; justify-items: start">
         <span style="font: inherit; opacity: 0.7">{{ t.detachedRow }}</span>

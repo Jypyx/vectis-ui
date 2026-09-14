@@ -15,7 +15,7 @@
  * splits the consumer's attributes between the pill and the element that acts.
  */
 
-import { computed, useAttrs } from 'vue'
+import { computed } from 'vue'
 import type { StyleValue } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
@@ -24,6 +24,10 @@ import { check as checkIcon } from '../VIcon/icons/check'
 import { close as closeIcon } from '../VIcon/icons/close'
 import type { IconSource } from '../VIcon/types'
 import { useMessages } from '../../i18n/state'
+
+import { useInertLink } from '../../composables/useInertLink'
+import { useRootAttrs } from '../../composables/useRootAttrs'
+import { customColorStyle } from '../../utils/css'
 
 /** How much visual weight the chip carries. */
 export type ChipVariant = 'soft' | 'solid' | 'outline'
@@ -84,6 +88,12 @@ interface ChipProps {
   /** An icon after the label. The `#end` slot replaces it. */
   iconEnd?: IconSource
   /**
+   * Renders `iconStart` and `iconEnd` in their filled form (the font's `FILL` axis). It has
+   * no effect on the `#start`/`#end` slots, whose icons the consumer builds, nor on the tick
+   * or the removal cross.
+   */
+  iconFilled?: boolean
+  /**
    * Adds a button that asks for the chip to be removed. It only EMITS that request:
    * actually taking the chip away is the consumer's decision.
    */
@@ -112,6 +122,7 @@ const props = withDefaults(defineProps<ChipProps>(), {
   check: false,
   iconStart: undefined,
   iconEnd: undefined,
+  iconFilled: false,
   dismissible: false,
   dismissIcon: () => closeIcon,
   dismissLabel: undefined,
@@ -144,28 +155,28 @@ const slots = defineSlots<{
 
 defineOptions({ inheritAttrs: false })
 
-const attrs = useAttrs()
+// The wrapper-root split: the pill is the box a consumer positions, and the ACTION is the
+// element that is focused, named and clicked, so everything else goes there.
+const { rootClass, rootStyle: consumerStyle, forwardedAttrs } = useRootAttrs()
 
 /* What the chip does, in order of precedence: staying selected wins over leading
    somewhere, which wins over merely reacting to clicks; asked for none of them, it is
-   plain text. */
-const isLink = computed(() => !props.selectable && props.href !== undefined)
+   plain text. A selectable chip is therefore never a link, whatever `href` says. */
+const {
+  isLink,
+  isInertLink,
+  linkHref,
+  attrs: actionAttrs,
+} = useInertLink({
+  href: () => (props.selectable ? undefined : props.href),
+  inert: () => props.disabled,
+  attrs: () => forwardedAttrs.value,
+})
 const actionTag = computed(() =>
   props.selectable ? 'button' : isLink.value ? 'a' : props.clickable ? 'button' : 'span',
 )
-const isInertLink = computed(() => isLink.value && props.disabled)
 
-const rootStyle = computed<StyleValue>(() => [
-  props.color !== undefined ? { '--custom-color': props.color } : undefined,
-  attrs.style as StyleValue,
-])
-const actionAttrs = computed(() => {
-  const rest = Object.fromEntries(
-    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
-  )
-  if (isInertLink.value) delete rest.onClick
-  return rest
-})
+const rootStyle = computed<StyleValue>(() => [customColorStyle(props.color), consumerStyle.value])
 
 const showCheck = computed(() => props.check && props.selectable && selected.value)
 
@@ -179,8 +190,7 @@ function iconOnly() {
 
 <template>
   <span
-    class="v-chip v-control v-tone v-variant"
-    :class="$attrs.class"
+    :class="['v-chip v-control v-tone v-variant', rootClass]"
     :style="rootStyle"
     :data-variant="variant"
     :data-tone="tone"
@@ -197,7 +207,7 @@ function iconOnly() {
       v-bind="actionAttrs"
       class="v-chip-action"
       :type="actionTag === 'button' ? 'button' : undefined"
-      :href="isLink && !disabled ? href : undefined"
+      :href="linkHref"
       :disabled="actionTag === 'button' ? disabled : undefined"
       :aria-disabled="isInertLink ? 'true' : undefined"
       :aria-pressed="selectable ? selected : undefined"
@@ -205,11 +215,11 @@ function iconOnly() {
     >
       <VIcon v-if="showCheck" :name="checkIcon" />
       <slot v-else name="start">
-        <VIcon v-if="iconStart" v-bind="iconProps(iconStart)" />
+        <VIcon v-if="iconStart" v-bind="iconProps(iconStart)" :filled="iconFilled" />
       </slot>
       <slot />
       <slot name="end">
-        <VIcon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
+        <VIcon v-if="iconEnd" v-bind="iconProps(iconEnd)" :filled="iconFilled" />
       </slot>
     </component>
     <button
@@ -285,6 +295,19 @@ function iconOnly() {
      buys two things at once: a chip that merely displays a value never lights up, and
      hovering the removal button does not repaint the whole chip as though it were
      about to be activated. */
+  /* The same steps as VButton's, rule for rule: an outline sits on the soft surface while
+     hovered and one tint further when pressed, and that tint is where a soft chip starts
+     on hover. Held in each sheet rather than in `variants.css`, which every consumer
+     downloads whether or not it renders a single button or chip. */
+  .v-chip[data-variant='outline']:not([data-disabled], [data-selected]):has(
+      :is(button, a).v-chip-action:hover
+    ) {
+    background: var(--tone-bg-soft);
+  }
+
+  .v-chip[data-variant='outline']:not([data-disabled], [data-selected]):has(
+      :is(button, a).v-chip-action:active
+    ),
   .v-chip[data-variant='soft']:not([data-disabled], [data-selected]):has(
       :is(button, a).v-chip-action:hover
     ) {
@@ -295,18 +318,6 @@ function iconOnly() {
       :is(button, a).v-chip-action:active
     ) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 14%);
-  }
-
-  .v-chip[data-variant='outline']:not([data-disabled], [data-selected]):has(
-      :is(button, a).v-chip-action:hover
-    ) {
-    background: var(--tone-bg-soft);
-  }
-
-  .v-chip[data-variant='outline']:not([data-disabled], [data-selected]):has(
-      :is(button, a).v-chip-action:active
-    ) {
-    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
 
   .v-chip[data-variant='solid']:not([data-disabled]):has(:is(button, a).v-chip-action:hover),
@@ -399,13 +410,8 @@ function iconOnly() {
     cursor: not-allowed;
   }
 
-  .v-chip[data-disabled] .v-chip-dismiss {
-    color: inherit;
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .v-chip,
-    .v-chip-dismiss {
+    .v-chip {
       transition: none;
     }
   }

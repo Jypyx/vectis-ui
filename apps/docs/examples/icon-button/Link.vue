@@ -4,8 +4,7 @@ import { arrow_right_alt as arrowRightAlt, code } from 'vectis-ui/icons'
 </script>
 
 <template>
-  <!-- `href` is not a prop of this component: it falls through to the VButton
-       underneath, which renders an <a> instead of a <button>. -->
+  <!-- `href` renders an <a> instead of a <button>. -->
   <VIconButton href="#usage" :icon="arrowRightAlt" variant="outline" label="Back to usage" />
 
   <VIconButton

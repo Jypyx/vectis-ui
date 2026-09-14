@@ -13,7 +13,7 @@ export default {
     },
     tabContent: {
       title: 'Ce que porte un onglet',
-      text: "Un onglet accepte un libellé, une icône à chaque extrémité par <code>iconStart</code> et <code>iconEnd</code>, ou le slot par défaut pour ce qu'une chaîne ne peut pas porter. Un onglet réduit à son icône demande toujours un <code>label</code>, qui est alors son nom accessible.",
+      text: "Un onglet accepte un libellé, une icône à chaque extrémité par <code>iconStart</code> et <code>iconEnd</code>, dessinée pleine sous <code>iconFilled</code>, ou le slot par défaut pour ce qu'une chaîne ne peut pas porter. Un onglet réduit à son icône demande toujours un <code>label</code>, qui est alors son nom accessible.",
     },
     panels: {
       title: 'Panneaux',
@@ -49,7 +49,7 @@ export default {
     },
     disabled: {
       title: 'Onglets désactivés',
-      text: "Un onglet <code>disabled</code> ne répond plus, se grise par les tokens de couleur et est enjambé par les flèches. Ne laissez pas la valeur pointer dessus, sinon la barre n'a plus aucun arrêt de tabulation.",
+      text: "Un onglet <code>disabled</code> ne répond plus, se grise par les tokens de couleur et est enjambé par les flèches. Ne laissez pas la valeur pointer dessus, sinon la barre n'a plus aucun arrêt de tabulation. <code>disabled</code> posé sur VTabs éteint d'un coup tous les onglets et les boutons de défilement, le panneau affiché restant affiché.",
     },
   },
 
@@ -74,6 +74,8 @@ export default {
           'Ce que fait le bouton de défilement avant, en mots. Il retombe sur le dictionnaire.',
         activation:
           "Si se déplacer sur un onglet le sélectionne aussi. Sélectionner à l'arrivée est ce que recommandent les pratiques ARIA quand un panneau apparaît instantanément ; laissez en manuel quand afficher un panneau coûte une requête, sinon chaque onglet survolé en déclencherait une.",
+        disabled:
+          "Rend tous les onglets inutilisables, et les boutons de défilement avec eux : les onglets quittent l'ordre de tabulation et se grisent par les tokens de couleur. Un onglet désactivé de lui-même le reste dans tous les cas. Le panneau affiché reste affiché.",
         label:
           "Ce que les lecteurs d'écran annoncent pour la rangée d'onglets. Il retombe sur le dictionnaire du design system.",
         vModel:
@@ -92,8 +94,10 @@ export default {
         label: 'Le libellé visible. Le slot par défaut le remplace.',
         iconStart: 'Une icône avant le libellé.',
         iconEnd: "Une icône après le libellé, pour un compteur ou un état que l'onglet porte.",
+        iconFilled:
+          "Rend <code>iconStart</code> et <code>iconEnd</code> dans leur forme pleine, l'axe <code>FILL</code> de la police.",
         disabled:
-          "Rend l'onglet inutilisable : il ne répond plus, les flèches l'enjambent, et il se grise par les tokens de couleur.",
+          "Rend l'onglet inutilisable : il ne répond plus, les flèches l'enjambent, et il se grise par les tokens de couleur. Un VTabs posé <code>disabled</code> désactive tous les onglets, celui-ci compris, quoi que dise cette prop.",
       },
       slots: {
         default: "Le contenu de l'onglet, qui remplace la prop <code>label</code>.",

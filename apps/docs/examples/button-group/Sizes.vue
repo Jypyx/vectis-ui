@@ -12,7 +12,7 @@ const sizes = ['xs', 'sm', 'md', 'lg', 'xl'] as const
       :size="size"
       variant="outline"
       tone="neutral"
-      :aria-label="`Range, ${size}`"
+      :label="`Range, ${size}`"
     >
       <VButton>Day</VButton>
       <VButton>Week</VButton>

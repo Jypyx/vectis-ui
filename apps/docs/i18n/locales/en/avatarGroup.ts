@@ -31,7 +31,7 @@ export default {
         max: 'How many avatars to show before the remaining ones are summed up as a single "+X" disc. Left out, or set to 0, every avatar is shown.',
         size: 'The size given to the avatars inside the group. An avatar that sets a size of its own keeps it.',
         compact:
-          'Applies the reduced density to the avatars inside, on the same terms as the size.',
+          'Applies the reduced density to every avatar inside. Unlike the size it is cumulative: an avatar cannot opt back out of a compact group.',
         ringColor:
           'The colour of the ring drawn around each disc. It defaults to the page background, which is what makes the ring read as a gap between two avatars.',
       },

@@ -10,8 +10,8 @@
  * and a row-wide disabled state here with nothing asked for: the VButtonGroup the VToggle
  * renders hands them to every button it contains, this one included.
  *
- * Used outside a VToggle it still renders perfectly well, simply never selected, the
- * same way a tab does outside its row.
+ * Used outside a VToggle it renders as a plain neutral VButton that is never pressed: the
+ * way it is drawn is the group's decision, and there is no group to take it.
  */
 import { computed, inject } from 'vue'
 
@@ -35,9 +35,15 @@ interface ToggleItemProps {
   /**
    * An icon after the label. It is NOT switched to its filled form by the group's
    * `selectedIconFilled`, which names the icon standing for the item rather than one
-   * trailing it.
+   * trailing it; `iconFilled` fills it for good.
    */
   iconEnd?: IconSource
+  /**
+   * Renders `iconStart` and `iconEnd` in their filled form (the font's `FILL` axis), whether
+   * the item is selected or not. The group's `selectedIconFilled` still fills the start icon
+   * of the selected item when this is left out.
+   */
+  iconFilled?: boolean
   /**
    * Makes this item unusable: it no longer responds, the arrow keys skip over it, and
    * it greys out through the colour tokens.
@@ -49,6 +55,7 @@ const props = withDefaults(defineProps<ToggleItemProps>(), {
   label: undefined,
   iconStart: undefined,
   iconEnd: undefined,
+  iconFilled: false,
   disabled: false,
 })
 
@@ -63,9 +70,12 @@ const selected = computed(() => toggle != null && toggle.isSelected(props.value)
 
 // TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
 // computed would keep its first answer while a slot behind a `v-if` comes and goes.
-/** An icon and no label at all: the item becomes a square, like a VIconButton. */
+/**
+ * An icon, on either side, and no label at all: the item becomes a square, like a VIconButton.
+ * The same definition as VChip's, and the square itself is VButton's `[data-icon-only]` rule.
+ */
 function iconOnly() {
-  return Boolean(props.iconStart) && !props.label && !slots.default
+  return !props.label && !slots.default && Boolean(props.iconStart || props.iconEnd)
 }
 </script>
 
@@ -80,8 +90,8 @@ function iconOnly() {
   <VButton
     class="v-toggle-item"
     :aria-pressed="selected ? 'true' : 'false'"
-    :variant="selected ? (toggle?.selectedVariant ?? 'solid') : (toggle?.itemVariant ?? 'ghost')"
-    :tone="selected ? (toggle?.tone ?? 'accent') : 'neutral'"
+    :variant="selected && toggle ? toggle.selectedVariant : toggle?.itemVariant"
+    :tone="selected && toggle ? toggle.tone : 'neutral'"
     :disabled="disabled"
     :data-icon-only="iconOnly() ? '' : undefined"
     @click="toggle?.select(value)"
@@ -89,26 +99,12 @@ function iconOnly() {
     <template v-if="iconStart" #start>
       <VIcon
         v-bind="iconProps(iconStart)"
-        :filled="selected && (toggle?.selectedIconFilled ?? false)"
+        :filled="iconFilled || (selected && toggle?.selectedIconFilled)"
       />
     </template>
     <template v-if="iconEnd" #end>
-      <VIcon v-bind="iconProps(iconEnd)" />
+      <VIcon v-bind="iconProps(iconEnd)" :filled="iconFilled" />
     </template>
     <slot v-if="!iconOnly()">{{ label }}</slot>
   </VButton>
 </template>
-
-<style>
-@layer vectis.components {
-  /*
-   * An item reduced to its icon becomes a square, like a VIconButton. The selector is
-   * qualified by an attribute VButton always renders, which is what makes it beat that
-   * button's own padding whatever order the two sheets end up in.
-   */
-  .v-toggle-item[data-size][data-icon-only] {
-    padding-inline: 0;
-    min-inline-size: var(--control-height);
-  }
-}
-</style>

@@ -279,6 +279,7 @@ export const Icons: Story = {
         <VChip iconStart="palette" tone="accent">{{ t.startIcon }}</VChip>
         <VChip iconEnd="arrow_forward" tone="accent">{{ t.endIcon }}</VChip>
         <VChip iconStart="favorite" iconEnd="arrow_forward" tone="accent">{{ t.both }}</VChip>
+        <VChip iconStart="favorite" iconEnd="arrow_forward" icon-filled tone="accent">{{ t.both }}</VChip>
         <VChip iconStart="favorite" tone="danger" clickable :aria-label="t.favourite" />
         <VChip tone="success">
           <template #start><span aria-hidden="true">✓</span></template>

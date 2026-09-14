@@ -99,6 +99,30 @@ describe('VIconButton', () => {
     expect(getByRole('button').dataset.elevated).toBe('')
   })
 
+  it('always marks itself icon-only, which is what VButton squares', () => {
+    const { getByRole } = render(VIconButton, {
+      props: { label: 'Next' },
+      slots: { default: '<svg aria-hidden="true" />' },
+    })
+    expect(getByRole('button').hasAttribute('data-icon-only')).toBe(true)
+  })
+
+  it('href: a declared prop that makes the VButton a link, inert when disabled', async () => {
+    const { container, rerender } = render(VIconButton, {
+      props: { label: 'Open', href: '/docs' },
+      slots: { default: '<svg aria-hidden="true" />' },
+    })
+    const anchor = container.querySelector('a') as HTMLAnchorElement
+    expect(anchor.getAttribute('href')).toBe('/docs')
+    expect(anchor.getAttribute('aria-label')).toBe('Open')
+    expect(anchor.hasAttribute('role')).toBe(false)
+    await rerender({ disabled: true })
+    expect(anchor.hasAttribute('href')).toBe(false)
+    expect(anchor.getAttribute('aria-disabled')).toBe('true')
+    // The accessible name survives only on a link: axe prohibits aria-label on a generic <a>.
+    expect(anchor.getAttribute('role')).toBe('link')
+  })
+
   it('shape: mirrored as data-shape, square by default', () => {
     const { getByRole, rerender } = render(VIconButton, {
       props: { label: 'Next' },

@@ -13,7 +13,7 @@ export default {
     },
     tabContent: {
       title: 'What a tab holds',
-      text: 'A tab takes a label, an icon at either end through <code>iconStart</code> and <code>iconEnd</code>, or the default slot for what a string cannot hold. A tab reduced to its icon still needs a <code>label</code>, which is then its accessible name.',
+      text: 'A tab takes a label, an icon at either end through <code>iconStart</code> and <code>iconEnd</code>, drawn filled under <code>iconFilled</code>, or the default slot for what a string cannot hold. A tab reduced to its icon still needs a <code>label</code>, which is then its accessible name.',
     },
     panels: {
       title: 'Panels',
@@ -49,7 +49,7 @@ export default {
     },
     disabled: {
       title: 'Disabled tabs',
-      text: 'A <code>disabled</code> tab stops responding, greys out through the colour tokens and is stepped over by the arrow keys. Do not leave the value pointing at it, or the bar has no tab stop at all.',
+      text: 'A <code>disabled</code> tab stops responding, greys out through the colour tokens and is stepped over by the arrow keys. Do not leave the value pointing at it, or the bar has no tab stop at all. <code>disabled</code> on VTabs switches off every tab and the scroll buttons at once, the panel on show staying on show.',
     },
   },
 
@@ -76,6 +76,8 @@ export default {
           'What the forward scroll button does, in words. It falls back to the dictionary.',
         activation:
           'Whether moving to a tab also selects it. Selecting on arrival is what the ARIA authoring practices recommend when a panel appears instantly; leave it manual when showing a panel costs a request, or every tab passed over would fire one.',
+        disabled:
+          'Makes every tab unusable, and the scroll buttons with them: the tabs leave the tab order and grey out through the colour tokens. A tab disabled on its own stays disabled either way. The panel on show stays on show.',
         label:
           'What screen readers announce for the row of tabs. It falls back to the design system dictionary.',
         vModel:
@@ -94,8 +96,10 @@ export default {
         label: 'The visible label. The default slot replaces it.',
         iconStart: 'An icon before the label.',
         iconEnd: 'An icon after the label, for a count or a state the tab carries.',
+        iconFilled:
+          "Renders <code>iconStart</code> and <code>iconEnd</code> in their filled form, the font's <code>FILL</code> axis.",
         disabled:
-          'Makes the tab unusable: it no longer responds, the arrow keys skip over it, and it greys out through the colour tokens.',
+          'Makes the tab unusable: it no longer responds, the arrow keys skip over it, and it greys out through the colour tokens. A VTabs set <code>disabled</code> disables every tab, this one included, whatever this says.',
       },
       slots: {
         default: 'The content of the tab, replacing the <code>label</code> prop.',

@@ -4,8 +4,9 @@
  * A component sets `v-tone` on the element carrying `data-tone` and consumes the
  * `--tone-*` variables in its own CSS. The blocks define ONLY custom properties,
  * never a visual property: it is each component that decides what `--tone-bg-solid`
- * paints. The four chromatic tones are VButton's values; `neutral`, which no token
- * family covers, is the canonical inversion described below.
+ * paints. The four chromatic tones follow the semantic colour families; VButton takes two of
+ * them, `accent` and `danger`, success and warning being STATES a button never reports.
+ * `neutral`, which no token family covers, is the canonical inversion described below.
  *
  *   --tone-bg-solid / -hover / -active   filled background and its two states
  *   --tone-text-solid                    text ON that filled background
@@ -16,9 +17,9 @@
  *   --tone-border-soft                   the border matching that surface
  *
  * WHY `vectis.tokens` AND NOT `vectis.components`. The table is a FALLBACK a component must
- * be able to override (VToast and VChip both redefine `neutral`, VChip's `[data-custom]`
- * replaces the whole set). Those rules sit at EQUAL specificity with these —
- * `.v-chip[data-tone='neutral']` and `.v-tone[data-tone='neutral']` are both (0,2,0) — and
+ * be able to override (VToast redefines `neutral`, VChip's `[data-custom]` replaces the whole
+ * set). Those rules sit at EQUAL specificity with these — `.v-toast[data-tone='neutral']` and
+ * `.v-tone[data-tone='neutral']` are both (0,2,0) — and
  * each component ships its own sheet, so in the same layer the winner would depend on the
  * bundler's order. One layer lower, every component rule wins by construction.
  */

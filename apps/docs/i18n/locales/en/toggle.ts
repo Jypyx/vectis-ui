@@ -21,7 +21,7 @@ export default {
     },
     filledIcons: {
       title: 'Filled icons',
-      text: "<code>selectedIconFilled</code> draws the chosen item's start icon in its filled form. Nothing happens to an icon that has no filled drawing.",
+      text: "<code>selectedIconFilled</code> draws the chosen item's start icon in its filled form. <code>iconFilled</code> on an item fills its icons whatever is chosen. Nothing happens to an icon that has no filled drawing.",
     },
     detached: {
       title: 'Detached',
@@ -30,6 +30,10 @@ export default {
     seamless: {
       title: 'Seamless',
       text: '<code>seamless</code> takes out the lines drawn between two items, so the row reads as one frame holding a highlight that moves. It has no effect under <code>detached</code>.',
+    },
+    fullWidth: {
+      title: 'Full width',
+      text: '<code>fullWidth</code> stretches the row across its parent and gives every item an equal share of that width.',
     },
     elevated: {
       title: 'Elevated',
@@ -64,6 +68,8 @@ export default {
         seamless:
           'Takes the lines out from between the joined items, so the row reads as one frame rather than as segments. It has no effect under <code>detached</code>, where the items are separate buttons already.',
         orientation: 'Whether the items run across the page or down it.',
+        fullWidth:
+          "Stretches the row across the whole inline size of its parent, every item taking an equal share of it, on the terms of VButtonGroup's own prop.",
         itemVariant:
           'How the unselected items are drawn. What the selected one takes is <code>selectedVariant</code>. It is named for the items because that is what it paints: on VTabs and VDataTable <code>variant</code> names the decoration of the frame instead.',
         selectedVariant:
@@ -92,7 +98,9 @@ export default {
         label: 'The visible label. The default slot replaces it.',
         iconStart: 'An icon before the label.',
         iconEnd:
-          'An icon after the label. It is not switched to its filled form by the group <code>selectedIconFilled</code>, which names the icon standing for the item rather than one trailing it.',
+          'An icon after the label. It is not switched to its filled form by the group <code>selectedIconFilled</code>, which names the icon standing for the item rather than one trailing it; <code>iconFilled</code> fills it for good.',
+        iconFilled:
+          "Renders <code>iconStart</code> and <code>iconEnd</code> in their filled form, whether the item is selected or not. The group's <code>selectedIconFilled</code> still fills the start icon of the selected item when this is left out.",
         disabled:
           'Makes this item unusable: it no longer responds, the arrow keys skip over it, and it greys out through the colour tokens.',
       },

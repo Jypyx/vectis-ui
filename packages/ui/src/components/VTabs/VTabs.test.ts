@@ -213,6 +213,22 @@ describe('VTabs', () => {
     })
   })
 
+  describe('disabled row', () => {
+    it('disables every tab and the scroll buttons, whatever each tab says', () => {
+      const { container } = mount({ tabsAttrs: 'disabled scroll-buttons' })
+      expect(tabsOf(container).every((tab) => (tab as HTMLButtonElement).disabled)).toBe(true)
+      const controls = [...container.querySelectorAll<HTMLButtonElement>('.v-tabs-scroll')]
+      expect(controls.every((el) => el.disabled)).toBe(true)
+    })
+
+    it('a disabled row does not select on focus under automatic activation', async () => {
+      const { container, model } = mount({ tabsAttrs: 'disabled activation="automatic"' })
+      tabsOf(container)[1]?.dispatchEvent(new FocusEvent('focus'))
+      await nextTick()
+      expect(model.value).toBe('a')
+    })
+  })
+
   describe('panels', () => {
     it('only the active panel is visible, the others carry hidden', async () => {
       const { container, model } = mount({ panels: true })
@@ -256,6 +272,22 @@ describe('VTabs', () => {
       expect(tab?.hasAttribute('data-icon-only')).toBe(true)
       expect(tab?.getAttribute('aria-label')).toBe('Accueil')
       expect(tab?.querySelector('.v-tab-label')).toBeNull()
+    })
+
+    it('icon only takes an end icon alone too, the VChip definition', () => {
+      const { container } = mount({
+        tabs: `<VTab value="a" icon-end="home" aria-label="Accueil" />`,
+      })
+      expect(tabsOf(container)[0]?.hasAttribute('data-icon-only')).toBe(true)
+    })
+
+    it('iconFilled fills both icons', () => {
+      const { container } = mount({
+        tabs: `<VTab value="a" icon-start="home" icon-end="star" label="Accueil" icon-filled />`,
+      })
+      const icons = [...tabsOf(container)[0]!.querySelectorAll('.v-icon')]
+      expect(icons).toHaveLength(2)
+      expect(icons.every((icon) => icon.hasAttribute('data-filled'))).toBe(true)
     })
 
     it('a label or a slot cancels icon-only mode', () => {

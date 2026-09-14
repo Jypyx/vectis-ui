@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { h } from 'vue'
 
 import VAvatar from './VAvatar.vue'
@@ -67,13 +67,19 @@ describe('VAvatar', () => {
     expect(link.getAttribute('href')).toBe('/u/ada')
   })
 
-  it('an inert link when disabled (href removed + aria-disabled)', () => {
+  it('an inert link when disabled (href removed + aria-disabled + click filtered out)', async () => {
+    const onClick = vi.fn()
     const { container } = render(VAvatar, {
       props: { name: 'Ada', href: '/u/ada', disabled: true },
+      attrs: { onClick, style: 'margin: 1px' },
     })
     const a = container.querySelector('a.v-avatar') as HTMLElement
     expect(a.getAttribute('href')).toBeNull()
     expect(a.getAttribute('aria-disabled')).toBe('true')
+    // The consumer's style is merged, not dropped with the attributes the link filters.
+    expect(a.style.margin).toBe('1px')
+    await fireEvent.click(a)
+    expect(onClick).not.toHaveBeenCalled()
   })
 
   it('with neither name nor image: decorative (no role="img")', () => {

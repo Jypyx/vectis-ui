@@ -51,6 +51,12 @@ interface IconButtonProps {
    * circle. The box itself is square either way — only the corners change.
    */
   shape?: IconButtonShape
+  /**
+   * Turns the button into an `<a>` pointing at this address, on VButton's terms: a disabled
+   * or loading link becomes inert, the address dropped so it can be neither focused nor
+   * followed.
+   */
+  href?: string
   /** The native type of the button, `button` by default. Ignored once `href` makes it a link. */
   type?: ButtonHTMLAttributes['type']
   /** Makes the button unusable, greyed out through the colour tokens. */
@@ -75,6 +81,7 @@ const props = withDefaults(defineProps<IconButtonProps>(), {
   size: 'md',
   compact: false,
   shape: 'square',
+  href: undefined,
   type: 'button',
   disabled: false,
   loading: false,
@@ -105,17 +112,20 @@ const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'ne
   <!--
     `shape` is ours alone: VButton knows nothing about it, so the attribute travels
     through its $attrs down to the element it renders — the same route the
-    v-icon-button class takes. Everything else is a real VButton prop and has to be
-    forwarded by hand, an unforwarded one never reaching its data attribute.
+    v-icon-button class and `data-icon-only` take, the latter picked up by VButton's own
+    square rule. Everything else is a real VButton prop and has to be forwarded by hand,
+    an unforwarded one never reaching its data attribute.
   -->
   <VButton
     class="v-icon-button"
     :data-shape="shape"
+    data-icon-only
     :variant="variant"
     :tone="resolvedTone"
     :elevated="elevated"
     :size="size"
     :compact="compact"
+    :href="href"
     :type="type"
     :disabled="disabled"
     :loading="loading"
@@ -137,22 +147,9 @@ const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'ne
 <style>
 @layer vectis.components {
   /*
-   * Qualifying the selector with [data-size] is what makes this rule beat VButton's
-   * padding whatever order the two sheets end up in — this component renders a
-   * VButton, so both sets of rules apply to the very same element.
-   *
-   * The width reads --control-height, which the shared v-control class sets on that
-   * element for the current size and density. One rule therefore covers the whole
-   * scale, compact included, instead of a table repeating each value.
-   */
-  .v-icon-button[data-size] {
-    width: var(--control-height);
-    padding-inline: 0;
-  }
-
-  /*
-   * Same qualification, same reason: [data-shape] takes the selector to (0,2,0), which
-   * beats the border-radius VButton sets on that very element at (0,1,0) whatever the
+   * The square itself is VButton's `[data-icon-only]` rule, which this component opts
+   * into; what is left here is the silhouette. [data-shape] takes the selector to (0,2,0),
+   * which beats the border-radius VButton sets on that very element at (0,1,0) whatever the
    * consumer's bundler decides about the order of the two sheets.
    *
    * The `square` value writes nothing — it IS the radius VButton already applies, so a

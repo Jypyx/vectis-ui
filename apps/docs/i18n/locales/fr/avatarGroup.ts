@@ -31,7 +31,7 @@ export default {
         max: "Combien d'avatars montrer avant que les restants ne soient résumés en un seul disque « +X ». Omise, ou mise à 0, tous les avatars sont montrés.",
         size: 'La taille donnée aux avatars du groupe. Un avatar qui fixe une taille à lui la garde.',
         compact:
-          'Applique la densité réduite aux avatars du groupe, aux mêmes conditions que la taille.',
+          "Applique la densité réduite à chaque avatar du groupe. Contrairement à la taille, elle se cumule : un avatar ne peut pas s'en retirer dans un groupe compact.",
         ringColor:
           "La couleur de l'anneau dessiné autour de chaque disque. Elle vaut par défaut le fond de la page, et c'est ce qui fait lire l'anneau comme un écart entre deux avatars.",
       },

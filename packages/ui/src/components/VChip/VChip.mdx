@@ -58,7 +58,7 @@ stays inert**: no hover, the default cursor.
 
 `href` renders the action as an `<a>`; the link attributes (`target`, `rel`…) pass through
 fallthrough. A `disabled` link becomes an **inert link** (the VButton pattern): `href` removed,
-`aria-disabled="true"`, `click` handlers filtered.
+`role="link"` + `aria-disabled="true"`, `click` handlers filtered.
 
 <Canvas of={VChipStories.Link} />
 
@@ -102,8 +102,9 @@ Selection and removal combine — two sibling buttons, never nested:
 ## Icons
 
 `icon-start` / `icon-end` accept an icon name or an explicit render (`{ src }`). The `#start` /
-`#end` slots win over the props for custom content. With no label (no default slot), the chip
-becomes **square** (width = height, the VIconButton model): remember the `aria-label`.
+`#end` slots win over the props for custom content, and `icon-filled` draws the two prop icons
+in their filled form (never the tick or the removal cross). With no label (no default slot), the
+chip becomes **square** (width = height, the VIconButton model): remember the `aria-label`.
 
 <Canvas of={VChipStories.Icons} />
 

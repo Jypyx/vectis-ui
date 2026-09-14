@@ -4,8 +4,9 @@
  * state all come from there — and what this component adds is the handful of
  * attributes that make a button part of a tab row for assistive technology.
  *
- * Used outside a VTabs it still renders perfectly well, simply never selected, the
- * same way an accordion item does outside its accordion.
+ * Used outside a VTabs it still renders, simply never selected, as a quiet neutral button
+ * at VButton's own size: the row's decisions all come from the context, and a tab with no
+ * row takes VButton's defaults rather than a copy of the row's.
  */
 
 import { computed, inject } from 'vue'
@@ -29,9 +30,12 @@ interface TabProps {
   iconStart?: IconSource
   /** An icon after the label, for a count or a state the tab carries. */
   iconEnd?: IconSource
+  /** Renders `iconStart` and `iconEnd` in their filled form (the font's `FILL` axis). */
+  iconFilled?: boolean
   /**
    * Makes the tab unusable: it no longer responds, the arrow keys skip over it, and it
-   * greys out through the colour tokens.
+   * greys out through the colour tokens. A VTabs set `disabled` disables every tab, this
+   * one included, whatever this says.
    */
   disabled?: boolean
 }
@@ -40,6 +44,7 @@ const props = withDefaults(defineProps<TabProps>(), {
   label: undefined,
   iconStart: undefined,
   iconEnd: undefined,
+  iconFilled: false,
   disabled: false,
 })
 
@@ -53,12 +58,17 @@ const tabs = inject(tabsKey, null)
 const selected = computed(() => tabs != null && tabs.value === props.value)
 const tabId = computed(() => tabs?.tabId(props.value))
 const panelId = computed(() => (tabs?.hasPanels ? tabs.panelId(props.value) : undefined))
+// Cumulative, the VButtonGroup rule: a row switched off has no tab that can opt back in.
+const resolvedDisabled = computed(() => props.disabled || Boolean(tabs?.disabled))
 
 // TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
 // computed would keep its first answer while a slot behind a `v-if` comes and goes.
-/** An icon and no label at all: the tab becomes a square, like a VIconButton. */
+/**
+ * An icon, on either side, and no label at all: the tab becomes a square, like a VIconButton.
+ * The same definition as VChip's, and the square itself is VButton's `[data-icon-only]` rule.
+ */
 function iconOnly() {
-  return Boolean(props.iconStart) && !props.label && !slots.default
+  return !props.label && !slots.default && Boolean(props.iconStart || props.iconEnd)
 }
 
 // @keyboard @a11y
@@ -70,7 +80,7 @@ function iconOnly() {
  * doing so.
  */
 function onFocus() {
-  if (tabs?.activation === 'automatic' && !props.disabled) tabs.select(props.value)
+  if (tabs?.activation === 'automatic' && !resolvedDisabled.value) tabs.select(props.value)
 }
 </script>
 
@@ -84,19 +94,19 @@ function onFocus() {
     :tabindex="selected ? 0 : -1"
     variant="ghost"
     :elevated="selected && tabs?.variant === 'inset'"
-    :tone="selected ? (tabs?.tone ?? 'accent') : 'neutral'"
-    :size="tabs?.size ?? 'md'"
-    :compact="tabs?.compact ?? false"
-    :disabled="disabled"
+    :tone="selected && tabs ? tabs.tone : 'neutral'"
+    :size="tabs?.size"
+    :compact="tabs?.compact"
+    :disabled="resolvedDisabled"
     :data-icon-only="iconOnly() ? '' : undefined"
     @click="tabs?.select(value)"
     @focus="onFocus"
   >
     <template v-if="iconStart" #start>
-      <VIcon v-bind="iconProps(iconStart)" />
+      <VIcon v-bind="iconProps(iconStart)" :filled="iconFilled" />
     </template>
     <template v-if="iconEnd" #end>
-      <VIcon v-bind="iconProps(iconEnd)" />
+      <VIcon v-bind="iconProps(iconEnd)" :filled="iconFilled" />
     </template>
     <!-- The label is wrapped in an element of its own so that it can be truncated:
          an ellipsis cannot be applied to the bare text of a flex container, and tabs
@@ -125,11 +135,6 @@ function onFocus() {
      */
     flex: none;
     white-space: nowrap;
-  }
-
-  .v-tab[data-size][data-icon-only] {
-    padding-inline: 0;
-    min-inline-size: var(--control-height);
   }
 
   /*

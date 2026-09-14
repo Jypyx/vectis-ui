@@ -4,13 +4,13 @@ import { VButton, VButtonGroup } from 'vectis-ui'
 
 <template>
   <div class="column">
-    <VButtonGroup variant="outline" tone="neutral" aria-label="Row actions, outline">
+    <VButtonGroup variant="outline" tone="neutral" label="Row actions, outline">
       <VButton>Rename</VButton>
       <VButton>Duplicate</VButton>
       <VButton tone="danger">Delete</VButton>
     </VButtonGroup>
 
-    <VButtonGroup variant="soft" tone="neutral" aria-label="Row actions, tonal">
+    <VButtonGroup variant="soft" tone="neutral" label="Row actions, tonal">
       <VButton>Rename</VButton>
       <VButton>Duplicate</VButton>
       <VButton tone="danger">Delete</VButton>

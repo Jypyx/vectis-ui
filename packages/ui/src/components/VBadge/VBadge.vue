@@ -11,11 +11,14 @@
  * handing the two colours a consumer may choose to the stylesheet as
  * `--custom-color` and `--badge-ring-color`.
  */
-import { computed } from 'vue'
+import { computed, h } from 'vue'
+import type { FunctionalComponent } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
+
+import { customColorStyle } from '../../utils/css'
 
 export type BadgeTone = 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
 export type BadgeOverlayPosition = 'top' | 'bottom'
@@ -111,21 +114,37 @@ const displayCount = computed(() =>
 )
 
 /*
- * The attributes of the pill itself. The template has two roots — one wrapping a
- * target, one standing alone — and both render the same badge, so the attributes
- * are computed once here rather than written twice.
+ * The pill itself, written once. The template has two roots — one wrapping a target, one
+ * standing alone — and both render the same badge; a functional component is the one way
+ * to put the same markup in two places of a template without writing it twice.
  */
-const badgeAttrs = computed(() => ({
-  'data-tone': props.tone,
-  'data-custom': props.color !== undefined ? '' : undefined,
-  'data-dot': props.dot ? '' : undefined,
-  'data-icon-only': !props.dot && props.icon ? '' : undefined,
-  'data-bordered': props.bordered ? '' : undefined,
-  style: [
-    props.color !== undefined ? { '--custom-color': props.color } : undefined,
-    props.ringColor !== undefined ? { '--badge-ring-color': props.ringColor } : undefined,
-  ],
-}))
+const Pill: FunctionalComponent = () =>
+  h(
+    'span',
+    {
+      class: 'v-badge v-tone',
+      'data-tone': props.tone,
+      'data-custom': props.color !== undefined ? '' : undefined,
+      'data-dot': props.dot ? '' : undefined,
+      'data-icon-only': !props.dot && props.icon ? '' : undefined,
+      'data-bordered': props.bordered ? '' : undefined,
+      style: [
+        customColorStyle(props.color),
+        props.ringColor !== undefined ? { '--badge-ring-color': props.ringColor } : undefined,
+      ],
+    },
+    props.dot
+      ? undefined
+      : props.icon
+        ? [h(VIcon, iconProps(props.icon))]
+        : displayCount.value === undefined
+          ? undefined
+          : String(displayCount.value),
+  )
+// TRAP — the empty list is not decoration. A functional component that declares no props lets
+// only `class`, `style` and listeners fall through, so a standalone badge, whose root this is,
+// would silently drop every other attribute a consumer set on VBadge (an `id`, a `data-*`).
+Pill.props = []
 </script>
 
 <template>
@@ -136,19 +155,9 @@ const badgeAttrs = computed(() => ({
     :data-overlay-position="overlayPosition"
   >
     <slot />
-    <span class="v-badge v-tone" v-bind="badgeAttrs">
-      <template v-if="!dot">
-        <VIcon v-if="icon" v-bind="iconProps(icon)" />
-        <template v-else>{{ displayCount }}</template>
-      </template>
-    </span>
+    <Pill />
   </span>
-  <span v-else class="v-badge v-tone" v-bind="badgeAttrs">
-    <template v-if="!dot">
-      <VIcon v-if="icon" v-bind="iconProps(icon)" />
-      <template v-else>{{ displayCount }}</template>
-    </template>
-  </span>
+  <Pill v-else />
 </template>
 
 <style>

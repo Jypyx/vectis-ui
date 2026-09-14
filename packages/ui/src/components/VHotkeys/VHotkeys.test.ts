@@ -147,7 +147,7 @@ describe('VHotkeys', () => {
   it('default data-attributes, and rerender updates them', async () => {
     const { container, rerender } = render(VHotkeys, { props: { keys: 'esc' } })
     const root = container.firstElementChild as HTMLElement
-    expect(root.getAttribute('data-variant')).toBe('flat')
+    expect(root.getAttribute('data-variant')).toBe('soft')
     expect(root.getAttribute('data-size')).toBe('xs')
     expect(root.hasAttribute('data-compact')).toBe(false)
 

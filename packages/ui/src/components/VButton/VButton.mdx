@@ -104,8 +104,8 @@ the link attributes (`target`, `rel`…) pass through by fallthrough.
 <Canvas of={VButtonStories.Link} />
 
 Since an `<a>` has no native `disabled`, a `disabled` (or `loading`) link becomes an **inert
-link**: `href` removed (not focusable, no navigation), `aria-disabled="true"` for assistive
-technologies, `click` handlers filtered out. This is the component's only behavioural
+link**: `href` removed (not focusable, no navigation), `role="link"` and `aria-disabled="true"`
+so assistive technologies still announce a link, a disabled one, `click` handlers filtered out. This is the component's only behavioural
 JavaScript.
 
 <Canvas of={VButtonStories.DisabledLink} />
@@ -129,5 +129,6 @@ automatically:
 - Visible focus through a ring (`--vectis-focus-ring-*`), never removed.
 - Decorative icons: the accessible name is always the default slot's label. For an icon-only
   button, use `VIconButton` (where the `aria-label` is mandatory).
-- `loading` → `aria-busy="true"`; an inert link → `aria-disabled="true"` with no `href`.
+- `loading` → `aria-busy="true"`; an inert link → `role="link"` + `aria-disabled="true"` with no `href` (an `<a>` without
+  `href` is otherwise a generic element, on which an `aria-label` is not even permitted).
 - The transitions respect `prefers-reduced-motion`.

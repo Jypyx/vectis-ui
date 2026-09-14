@@ -10,8 +10,7 @@
  * hands over to the initials rather than leaving an empty circle. The initials and
  * the automatic colour are both computed from the name, which is arithmetic no
  * stylesheet can do. A disabled link has no native equivalent of a disabled
- * button, so it is turned inert by hand (its `href` is removed, `aria-disabled`
- * announces the state and the click handler is dropped). Finally the attributes
+ * button, so it is turned inert by hand (composables/useInertLink). Finally the attributes
  * the consumer passes are split so that `style` never reaches the element
  * directly: the component has to merge its own `--avatar-hue`/`--custom-color`
  * into it first, and a plain fallthrough would overwrite them.
@@ -23,7 +22,10 @@ import type { StyleValue } from 'vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import { avatarGroupKey } from './context'
+import { AVATAR_DEFAULT_SIZE, avatarGroupKey } from './context'
+
+import { useInertLink } from '../../composables/useInertLink'
+import { customColorStyle } from '../../utils/css'
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
@@ -62,7 +64,11 @@ interface AvatarProps {
    * here; on its own it is `md`.
    */
   size?: AvatarSize
-  /** Takes 4px off the diameter, as it does on every other control. */
+  /**
+   * Takes 4px off the diameter, as it does on every other control. Unlike `size` it is
+   * cumulative: inside a compact VAvatarGroup the avatar is compact whatever this says, and
+   * setting it on one avatar of a regular group makes that one compact alone.
+   */
   compact?: boolean
   /**
    * Turns the avatar into an `<a>` pointing at this address. A disabled link becomes inert:
@@ -104,15 +110,27 @@ defineOptions({ inheritAttrs: false })
 const attrs = useAttrs()
 const group = inject(avatarGroupKey, null)
 
-// Size/compact: the explicit prop, else the group's, else the default.
-const resolvedSize = computed<AvatarSize>(() => props.size ?? group?.size ?? 'md')
-const resolvedCompact = computed(() => props.compact || (group?.compact ?? false))
+// The size is the avatar's own answer first, then the group's; the density is cumulative,
+// the two terms written out in context.ts.
+const resolvedSize = computed<AvatarSize>(() => props.size ?? group?.size ?? AVATAR_DEFAULT_SIZE)
+const resolvedCompact = computed(() => props.compact || Boolean(group?.compact))
+
+// Fallthrough without `style`, which rootStyle merges with the component's own; the click
+// handler is also dropped on an inert link.
+const {
+  isLink,
+  isInertLink,
+  linkHref,
+  attrs: passedAttrs,
+} = useInertLink({
+  href: () => props.href,
+  inert: () => props.disabled,
+  attrs: () => Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== 'style')),
+})
 
 /* Interactivity priority: href > clickable > static. */
-const isLink = computed(() => props.href !== undefined)
 const isInteractive = computed(() => isLink.value || props.clickable)
 const tag = computed(() => (isLink.value ? 'a' : props.clickable ? 'button' : 'span'))
-const isInertLink = computed(() => isLink.value && props.disabled)
 
 // @fallback — the image failed to load: the initials take over, so an avatar is
 // never an empty box.
@@ -141,6 +159,11 @@ const initials = computed(() => {
  * inline (a unitless scalar); the CSS composes background/text with L/C fixed per
  * theme (light/dark adaptation without depending on contrast-color). A colour
  * computed outside the tokens, a deliberate exception. SSR-safe: no browser API.
+ *
+ * VCalendar derives an event's hue the same way (`VCalendar/color.ts`, `hueOf`) with a hash
+ * of its own, and the two stay apart ON PURPOSE: changing this one would give every person
+ * already shown in an application a new colour. Nothing ties an avatar's hue to an event's,
+ * so a person and an event sharing a string do not share a colour.
  */
 const hue = computed(() => {
   if (!props.name) return null
@@ -152,22 +175,19 @@ const hue = computed(() => {
 })
 const isAuto = computed(() => props.color === undefined && hue.value !== null)
 
+// A static avatar with no picture is an image named by `alt`/`name`. Anything else keeps the
+// role that arrived in the attributes — `link` on an inert link, a consumer's own otherwise.
+const role = computed(() =>
+  !isInteractive.value && !showImage.value && accessibleName.value
+    ? 'img'
+    : (passedAttrs.value.role as string | undefined),
+)
+
 const rootStyle = computed<StyleValue>(() => [
-  props.color !== undefined
-    ? { '--custom-color': props.color }
-    : isAuto.value
-      ? { '--avatar-hue': String(hue.value) }
-      : undefined,
+  customColorStyle(props.color) ??
+    (isAuto.value ? { '--avatar-hue': String(hue.value) } : undefined),
   attrs.style as StyleValue,
 ])
-
-// Fallthrough without `style` (handled by rootStyle); onClick removed on an inert link.
-const passedAttrs = computed(() => {
-  const rest = { ...(attrs as Record<string, unknown>) }
-  delete rest.style
-  if (isInertLink.value) delete rest.onClick
-  return rest
-})
 </script>
 
 <template>
@@ -180,11 +200,11 @@ const passedAttrs = computed(() => {
     :data-compact="resolvedCompact ? '' : undefined"
     :data-custom="color !== undefined ? '' : undefined"
     :data-auto="isAuto ? '' : undefined"
-    :href="isLink && !disabled ? href : undefined"
+    :href="linkHref"
     :type="tag === 'button' ? 'button' : undefined"
     :disabled="tag === 'button' ? disabled : undefined"
     :aria-disabled="isInertLink ? 'true' : undefined"
-    :role="!isInteractive && !showImage && accessibleName ? 'img' : undefined"
+    :role="role"
     :aria-label="!showImage ? accessibleName : undefined"
   >
     <img

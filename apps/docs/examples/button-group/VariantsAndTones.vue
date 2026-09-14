@@ -12,7 +12,7 @@ const tones = ['accent', 'neutral', 'danger'] as const
       :key="variant"
       :variant="variant"
       :tone="tone"
-      :aria-label="`${variant} ${tone}`"
+      :label="`${variant} ${tone}`"
     >
       <VButton>Day</VButton>
       <VButton>Week</VButton>

@@ -21,7 +21,7 @@ export default {
     },
     filledIcons: {
       title: 'Icônes pleines',
-      text: "<code>selectedIconFilled</code> dessine l'icône de début de l'élément choisi dans sa forme pleine. Rien n'arrive à une icône qui n'a pas de dessin plein.",
+      text: "<code>selectedIconFilled</code> dessine l'icône de début de l'élément choisi dans sa forme pleine. <code>iconFilled</code> posé sur un élément remplit ses icônes quel que soit le choix. Rien n'arrive à une icône qui n'a pas de dessin plein.",
     },
     detached: {
       title: 'Détaché',
@@ -30,6 +30,10 @@ export default {
     seamless: {
       title: 'Sans coutures',
       text: '<code>seamless</code> retire les traits dessinés entre deux éléments : la rangée se lit alors comme un cadre unique portant une surbrillance qui se déplace. Il est sans effet sous <code>detached</code>.',
+    },
+    fullWidth: {
+      title: 'Pleine largeur',
+      text: '<code>fullWidth</code> étire la rangée sur toute la largeur de son parent et donne à chaque élément une part égale de cette largeur.',
     },
     elevated: {
       title: 'Surélevé',
@@ -65,6 +69,8 @@ export default {
         seamless:
           'Retire les traits entre les items assemblés, si bien que la rangée se lit comme un cadre unique plutôt que comme des segments. Sans effet sous <code>detached</code>, où les items sont déjà des boutons séparés.',
         orientation: 'Si les items courent en travers de la page ou de haut en bas.',
+        fullWidth:
+          'Étire la rangée sur toute la largeur de son parent, chaque item en prenant une part égale, aux conditions de la prop de VButtonGroup.',
         itemVariant:
           "Comment sont dessinés les items non sélectionnés. Ce que prend le sélectionné, c'est <code>selectedVariant</code>. Elle porte le nom des items parce que c'est ce qu'elle peint : sur VTabs et VDataTable, <code>variant</code> nomme la décoration du cadre.",
         selectedVariant:
@@ -93,7 +99,9 @@ export default {
         label: 'Le libellé visible. Le slot par défaut le remplace.',
         iconStart: 'Une icône avant le libellé.',
         iconEnd:
-          "Une icône après le libellé. Elle ne passe pas à sa forme pleine sous l'effet du <code>selectedIconFilled</code> du groupe, qui nomme l'icône représentant l'item et non celle qui le suit.",
+          "Une icône après le libellé. Elle ne passe pas à sa forme pleine sous l'effet du <code>selectedIconFilled</code> du groupe, qui nomme l'icône représentant l'item et non celle qui le suit ; <code>iconFilled</code> la remplit pour de bon.",
+        iconFilled:
+          "Rend <code>iconStart</code> et <code>iconEnd</code> dans leur forme pleine, que l'item soit sélectionné ou non. Le <code>selectedIconFilled</code> du groupe remplit toujours l'icône de début de l'item sélectionné quand celle-ci est omise.",
         disabled:
           "Rend cet item inutilisable : il ne répond plus, les flèches l'enjambent, et il se grise par les tokens de couleur.",
       },

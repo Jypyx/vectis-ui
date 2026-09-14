@@ -14,8 +14,8 @@
  * attribute — so a component overriding a variant compounds the two classes, as
  * `.v-variant.v-chip[data-selected]` does.
  *
- * VHotkeys stays out: its three variants are named for what a `<kbd>` is rather than for how
- * a tone is painted, and it carries no tone at all.
+ * VHotkeys stays out although it has a `soft` of its own: it carries no tone at all, and its
+ * three variants derive every paint from `currentcolor` instead of from this contract.
  */
 @layer vectis.components {
   .v-variant[data-variant='solid'] {

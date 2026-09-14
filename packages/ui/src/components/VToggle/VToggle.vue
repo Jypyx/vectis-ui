@@ -23,7 +23,6 @@ import { toggleKey } from './context'
 import { toggleValue } from '../../utils/array'
 import { arrowNavigate, navigableItems } from '../../utils/arrowNav'
 
-import { useAriaLabel } from '../../composables/useAriaLabel'
 import type { ItemValue } from '../../types'
 
 /**
@@ -65,6 +64,11 @@ interface ToggleProps {
   /** Whether the items run across the page or down it. */
   orientation?: ToggleOrientation
   /**
+   * Stretches the row across the whole inline size of its parent, every item taking an equal
+   * share of it, on the terms of VButtonGroup's own `fullWidth`.
+   */
+  fullWidth?: boolean
+  /**
    * How the UNSELECTED items are drawn. What the selected one takes is `selectedVariant`.
    * It is named for the ITEMS because that is what it paints: on VTabs and VDataTable
    * `variant` names the decoration of the frame instead.
@@ -103,6 +107,7 @@ const props = withDefaults(defineProps<ToggleProps>(), {
   detached: false,
   seamless: false,
   orientation: 'horizontal',
+  fullWidth: false,
   itemVariant: 'ghost',
   selectedVariant: 'solid',
   tone: 'accent',
@@ -128,8 +133,6 @@ defineSlots<{
  * consumer's binding. Re-clicking the selected item deselects it unless `mandatory` is set.
  */
 const model = defineModel<ToggleModelValue>({ default: null })
-
-const ariaLabel = useAriaLabel(() => props.label)
 
 function isSelected(value: ToggleValue): boolean {
   return props.multiple
@@ -228,8 +231,17 @@ defineExpose({
   <!-- The row is a VButtonGroup, which merges the borders of the buttons among its
        children — which is why an item renders the button as its own root, and why what
        may stand between the two is the wrappers a VTooltip, a VPopover or a VBadge put
-       there, and nothing else. It brings the role and the orientation attribute with it, and
-       of the props handed to it here it forwards the last four to the buttons itself.
+       there, and nothing else. It brings the role, its accessible name and the orientation
+       attribute with it, and of the props handed to it here it forwards the size, the density,
+       the elevation and the disabled state to the buttons itself.
+
+       The three booleans go down as `|| undefined`, the VPagination idiom: `undefined` is
+       what means "no opinion" to a group, where `false` is an order every item would obey,
+       and a toggle left at its defaults has no opinion to give. The size is always one, the
+       toggle having a default of its own.
+
+       The name is resolved by the group, which sees a consumer's `aria-label` or
+       `aria-labelledby` too: they fall through this component onto it.
 
        `variant` is deliberately NOT among them, and neither is the tone: the group wins
        over a button that names its own variant, which would erase the one the selected
@@ -244,12 +256,13 @@ defineExpose({
     :orientation="orientation"
     :detached="detached"
     :seamless="seamless"
+    :full-width="fullWidth"
     :size="size"
-    :compact="compact"
-    :elevated="elevated"
-    :disabled="disabled"
+    :compact="compact || undefined"
+    :elevated="elevated || undefined"
+    :disabled="disabled || undefined"
+    :label="label"
     :data-item-variant="itemVariant"
-    :aria-label="ariaLabel"
     @keydown="onKeydown"
   >
     <slot />

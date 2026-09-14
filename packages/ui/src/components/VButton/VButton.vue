@@ -24,6 +24,7 @@ import type { ButtonHTMLAttributes } from 'vue'
 import { buttonGroupKey } from './context'
 
 import { useControlShape } from '../../composables/useControlShape'
+import { useInertLink } from '../../composables/useInertLink'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -161,14 +162,16 @@ const resolvedElevated = computed(() => group?.elevated ?? props.elevated)
 // the destructive one, and the row has to be able to say so (see context.ts).
 const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'accent')
 
-const isLink = computed(() => props.href !== undefined)
 const isInert = computed(() => resolvedDisabled.value || props.loading)
-const isInertLink = computed(() => isLink.value && isInert.value)
-const passedAttrs = computed(() => {
-  if (!isInertLink.value) return attrs
-  const rest = { ...(attrs as Record<string, unknown>) }
-  delete rest.onClick
-  return rest
+const {
+  isLink,
+  isInertLink,
+  linkHref,
+  attrs: passedAttrs,
+} = useInertLink({
+  href: () => props.href,
+  inert: () => isInert.value,
+  attrs: () => attrs,
 })
 </script>
 
@@ -177,9 +180,9 @@ const passedAttrs = computed(() => {
     :is="isLink ? 'a' : 'button'"
     v-bind="passedAttrs"
     class="v-button v-control v-tone v-variant"
-    :href="isLink && !isInert ? href : undefined"
+    :href="linkHref"
     :type="isLink ? undefined : type"
-    :disabled="isLink ? undefined : resolvedDisabled || loading"
+    :disabled="isLink ? undefined : isInert"
     :aria-disabled="isInertLink ? 'true' : undefined"
     :data-variant="resolvedVariant"
     :data-tone="resolvedTone"
@@ -238,15 +241,33 @@ const passedAttrs = computed(() => {
     inline-size: 100%;
   }
 
+  /* An icon and no label: the button becomes a square, as wide as it is tall. The attribute
+     is set by whatever renders the button that way — VIconButton always, a VTab or a
+     VToggleItem given an icon and no label — and the rule lives here because this sheet
+     owns the padding it cancels.
+
+     A FLOOR rather than a width, so a box that is stretched (a column of segments, a
+     full-width row) still fills its track, and an icon wider than the box still fits.
+
+     TRAP — at (0,2,0) it beats this sheet's own padding by weight, and it is the only rule
+     that may touch that padding on an icon-only button. A consumer of VButton restyling the
+     padding of its own buttons at (0,2,0) from another sheet would tie with it, and the
+     bundler would decide: such a rule has to exclude `[data-icon-only]`. */
+  .v-button[data-icon-only] {
+    min-inline-size: var(--control-height);
+    padding-inline: 0;
+  }
+
   .v-button:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* The tone table and the four ways of painting it both live in styles/tones.css, on
-     the `v-tone` and `v-variant` classes in the vectis.tokens layer. VButton overrides
-     not a single one of their values: it is the reference they were written for, and what
-     stays here is the STATES, which each component answers for itself. */
+  /* The tone table lives in styles/tones.css (`v-tone`, in the vectis.tokens layer) and the
+     four ways of painting it in styles/variants.css (`v-variant`, in vectis.components).
+     VButton overrides not a single one of their values: it is the reference they were
+     written for, and what stays here is the STATES, which each component answers for
+     itself. */
 
   .v-button[data-variant='solid']:hover:not(:disabled, [aria-disabled='true']) {
     background: var(--tone-bg-solid-hover);
@@ -261,28 +282,21 @@ const passedAttrs = computed(() => {
      arbitrates the background of a raised ghost by a one-step specificity margin,
      so a declaration added to either set later cannot silently leak into the other
      case. */
-  .v-button[data-variant='outline']:not([data-elevated]):hover:not(
-      :disabled,
-      [aria-disabled='true']
-    ),
-  .v-button[data-variant='ghost']:not([data-elevated]):hover:not(
+  .v-button:is([data-variant='outline'], [data-variant='ghost']):not([data-elevated]):hover:not(
       :disabled,
       [aria-disabled='true']
     ) {
     background: var(--tone-bg-soft);
   }
 
-  .v-button[data-variant='outline']:not([data-elevated]):active:not(
+  /* One step of tint, reached two ways: pressing a ghost or an outline, which already sit on
+     the soft surface while hovered, and hovering a soft one. A selector list keeps each
+     member's own weight, so merging them moves no arbitration: the outline/ghost half is
+     still (0,5,0) after its hover, the soft half still (0,4,0) before its active. */
+  .v-button:is([data-variant='outline'], [data-variant='ghost']):not([data-elevated]):active:not(
       :disabled,
       [aria-disabled='true']
     ),
-  .v-button[data-variant='ghost']:not([data-elevated]):active:not(
-      :disabled,
-      [aria-disabled='true']
-    ) {
-    background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
-  }
-
   .v-button[data-variant='soft']:hover:not(:disabled, [aria-disabled='true']) {
     background: color-mix(in oklab, var(--tone-bg-soft), var(--tone-text-tinted) 8%);
   }
