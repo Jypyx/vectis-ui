@@ -192,7 +192,7 @@ export const Hint: Story = {
   }),
   play: async ({ canvasElement }) => {
     const group = canvasElement.querySelector('[role="group"]')!
-    const hint = canvasElement.querySelector('.v-otp-hint')!
+    const hint = canvasElement.querySelector('.v-input-otp-hint')!
     // The row points at the hint, so it is announced along with the row's own name.
     await expect(group).toHaveAttribute('aria-describedby', hint.id)
   },

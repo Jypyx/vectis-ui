@@ -1,16 +1,22 @@
 /*
- * The buttons a text field holds INSIDE its own box — the clear cross, a clickable icon,
- * VTimeInput's AM/PM word.
+ * What the text fields share and none of them renders for another: the buttons a field
+ * holds INSIDE its own box — the clear cross, a clickable icon, VTimeInput's AM/PM word —
+ * and the counter, with the row under the field that carries it beside the hint.
  *
- * It is a shared sheet for the reason `.v-panel` and `.v-banner` are: VInput and VTextarea
- * both draw one and neither renders the other, so a recipe left in either sheet would have
- * to be copied into the second, where the two would drift apart on the next token change.
- * The class goes on the button, beside the component's own, which keeps every per-component
- * rule — the disabled state, VTimeInput's compound — winning on specificity.
+ * It is a shared sheet for the reason `.v-panel` and `.v-banner` are: VInput, VTextarea
+ * and VFileInput each draw some of it and none renders the others, so a recipe left in one
+ * sheet would have to be copied into the next, where the copies would drift apart on the
+ * next token change. Each class goes on the element beside the component's own, which keeps
+ * every per-component rule — the disabled state, VTimeInput's compound — winning on
+ * specificity.
  *
  * What is NOT here is anything a field redeclares: VTextarea centres its buttons on the
- * first LINE rather than on the box, and both fields grey them out from their own root.
+ * first LINE rather than on the box, and every field greys them out from its own root.
  * Those sit at (0,2,0) and above against this (0,1,0), so no sheet order decides them.
+ *
+ * Nor is the field box's own state machine — hover, focus, invalid, read-only, disabled —
+ * although VInput and VTextarea write it identically. Every consumer pays for this sheet,
+ * and those rules weigh more than the whole of it: they stay as two aligned copies.
  */
 @layer vectis.components {
   /*
@@ -48,6 +54,30 @@
   .v-field-action:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(-1 * var(--vectis-focus-ring-width));
+  }
+
+  /* The row under a field: the hint at the start, the counter pushed to the end. */
+  .v-field-meta {
+    display: flex;
+    align-items: baseline;
+    gap: var(--vectis-space-2);
+  }
+
+  /* The counter keeps its own styling rather than going through VTypography: figures of
+     equal width, so the number does not shift as it counts, and a colour that marks the
+     overflow — neither of which is a typographic role. */
+  .v-field-counter {
+    font-size: var(--vectis-text-caption-size);
+    color: var(--vectis-color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .v-field-meta > .v-field-counter {
+    margin-inline-start: auto;
+  }
+
+  .v-field-counter[data-over] {
+    color: var(--vectis-color-danger-text);
   }
 
   @media (prefers-reduced-motion: reduce) {

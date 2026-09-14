@@ -70,7 +70,9 @@ untouched.
 ## Label, hint and counter
 
 `label` is associated through `for`/`id`, `hint` through `aria-describedby`. The counter
-(`counter`) appears under the field, on the right, on the same line as the hint.
+(`counter`) appears under the field, on the right, on the same line as the hint. It counts
+**characters**, as on `VInput`, and takes no slot; on `VFileInput` the same prop counts files and
+bytes, with a `#counter` slot to reword it.
 
 <Canvas of={VTextareaStories.LabelHintCounter} />
 

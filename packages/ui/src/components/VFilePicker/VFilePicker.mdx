@@ -92,7 +92,8 @@ the extensions alongside — `image/*,.heic`.
 Every visible part can be replaced. `#browse` receives `open`, without which a custom button could
 no longer open the dialog; `#item` receives everything a row derives (the resolved icon, the
 thumbnail URL, the size already formatted, and `remove`) so nothing has to be recomputed;
-`#remove` receives `remove` and a ready-made `label` carrying the file name.
+`#remove` receives `remove` and a ready-made `removeLabel`, the accessible name carrying the file
+name.
 
 <Canvas of={VFilePickerStories.CustomSlots} />
 

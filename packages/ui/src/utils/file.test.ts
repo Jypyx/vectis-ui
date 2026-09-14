@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatBytes, matchesAccept, screenFiles } from './file'
+import { fileKey, formatBytes, matchesAccept, parseAccept, screenFiles } from './file'
 
 /**
  * A `File` of an arbitrary size, without allocating it: `size` is a getter on
@@ -29,6 +29,13 @@ describe('matchesAccept', () => {
     ['a list where one token matches', 'image/*,.pdf', true],
   ])('%s', (_label, accept, expected) => {
     expect(matchesAccept(pdf, accept)).toBe(expected)
+  })
+
+  it('reads the list once into lowercased tokens, and answers the same from them', () => {
+    const tokens = parseAccept(' Image/* , .PDF ,, ')
+    expect(tokens).toEqual(['image/*', '.pdf'])
+    expect(matchesAccept(pdf, tokens)).toBe(matchesAccept(pdf, ' Image/* , .PDF ,, '))
+    expect(matchesAccept(pdf, [])).toBe(true)
   })
 
   it('a file whose type the browser did not guess is refused by a MIME-only accept', () => {
@@ -116,5 +123,14 @@ describe('screenFiles', () => {
     const file = fileOf('a.pdf')
 
     expect(screenFiles([file, file], [file], {}).accepted).toHaveLength(2)
+  })
+})
+
+describe('fileKey', () => {
+  it('is stable for one file object and distinct between two, whatever their names', () => {
+    const a = fileOf('same.pdf')
+    const b = fileOf('same.pdf')
+    expect(fileKey(a)).toBe(fileKey(a))
+    expect(fileKey(a)).not.toBe(fileKey(b))
   })
 })

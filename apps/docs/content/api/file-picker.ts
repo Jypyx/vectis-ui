@@ -42,7 +42,7 @@ export default {
         { name: 'browse', type: '{ open: () => void; disabled: boolean; }' },
         { name: 'item', type: 'FilePickerRow' },
         { name: 'thumbnail', type: 'FilePickerRow' },
-        { name: 'remove', type: '{ file: File; index: number; remove: () => void; label: string; }' },
+        { name: 'remove', type: '{ file: File; index: number; remove: () => void; removeLabel: string; }' },
       ],
     },
   ],

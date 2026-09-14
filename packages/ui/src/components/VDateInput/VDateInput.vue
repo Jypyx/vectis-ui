@@ -53,7 +53,8 @@ import { useControlShape } from '../../composables/useControlShape'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFieldPanel } from '../../composables/useFieldPanel'
-import { iconClickHandlers } from '../../composables/useIconClickHandlers'
+import { canClear } from '../../composables/useClearable'
+import { iconStartListener } from '../../composables/useIconClickHandlers'
 import { useMaskedField } from '../../composables/useMaskedField'
 import { useLocale, useMessages } from '../../i18n/state'
 
@@ -282,16 +283,9 @@ defineSlots<{
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
-// @a11y @core
-/*
- * Declaring `click:icon-start` is what puts it in the API tables and in a consumer's
- * editor, and it is also what takes it out of `$attrs`: it no longer travels with the
- * forwarded attributes and has to be handed to the field by hand. Only when the consumer
- * really wrote one, or VInput would make the start icon a button on every instance.
- */
-const iconStartClick = iconClickHandlers().start
-  ? { 'onClick:icon-start': (event: MouseEvent) => emit('click:icon-start', event) }
-  : undefined
+// Declared as this component's own event, `click:icon-start` is out of `$attrs`, so the
+// listener is relayed to the field by hand — and only when the consumer wrote one.
+const iconStartClick = iconStartListener((event) => emit('click:icon-start', event))
 
 /** What reaches the field: the consumer's own attributes, plus that listener. */
 const fieldAttrs = computed(() => ({ ...forwardedAttrs.value, ...iconStartClick }))
@@ -612,12 +606,8 @@ function onRootKeydown(event: KeyboardEvent) {
  * `readonly` PROP is the one case where the default answer was right: frozen, the field
  * offers no route to a new value, so it offers no route to none either.
  */
-const canClear = computed(
-  () =>
-    props.clearable &&
-    !resolvedDisabled.value &&
-    !props.readonly &&
-    (hasValue.value || (typing.value && !!draft.value)),
+const clearVisible = computed(() =>
+  canClear(props, resolvedDisabled.value, hasValue.value || (typing.value && !!draft.value)),
 )
 const endIcon = computed<IconSource | undefined>(() =>
   hasPanel.value ? props.pickerIcon : undefined,
@@ -726,7 +716,7 @@ defineExpose({
         :disabled="resolvedDisabled"
         :invalid="invalid"
         :clearable="clearable"
-        :clear-visible="canClear"
+        :clear-visible="clearVisible"
         :clear-label="resolvedClearLabel"
         :icon-start="iconStart"
         :icon-start-label="iconStartLabel"

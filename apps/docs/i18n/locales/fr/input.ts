@@ -29,7 +29,7 @@ export default {
     },
     counters: {
       title: 'Compteurs',
-      text: "<code>counter</code> affiche la longueur au bout du champ. <code>maxlength</code> est la limite dure du navigateur, là où <code>softLimit</code> est une ligne que le lecteur peut franchir : le texte n'est jamais coupé, le compteur passe au rouge et le champ tombe en erreur par la validité native.",
+      text: "<code>counter</code> affiche la longueur au bout du champ. <code>maxlength</code> est la limite dure du navigateur, là où <code>softLimit</code> est une ligne que le lecteur peut franchir : le texte n'est jamais coupé, le compteur passe au rouge et le champ tombe en erreur par la validité native. La prop compte des caractères, comme sur VTextarea ; sur VFileInput, le même nom compte des fichiers et leur taille.",
     },
     pattern: {
       title: 'Motif',

@@ -46,7 +46,7 @@ export default {
         { name: 'start', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
         { name: 'chip', type: '{ file: File; index: number; label: string; remove: () => void; size: ChipSize; compact: boolean; }' },
-        { name: 'counter', type: '{ count: number; size: number; text: string; }' },
+        { name: 'counter', type: '{ count: number; bytes: number; text: string; }' },
       ],
     },
   ],

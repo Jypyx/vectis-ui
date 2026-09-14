@@ -70,6 +70,9 @@ inert when `disabled` or `readonly`.
 ## The counter (`counter`)
 
 Under the field, on the right: the number of selected files and, in parentheses, their total size.
+The prop shares its name with the character counter of `VInput` and `VTextarea`, which counts
+characters against `maxlength` and takes no slot; here it counts files and bytes, and `#counter`
+rewords it.
 The **word** comes from the design system dictionary, the **size** from `Intl` — so
 `setLocale('de-DE')` already gives German byte units. Sizes follow the SI ladder (1 kB = 1000 bytes),
 which is what the unit names mean.
@@ -93,7 +96,7 @@ its chip along with the position it held — `change` follows it, as it follows 
 `#chip` replaces a file's chip and receives `{ file, index, label, remove, size, compact }` —
 `remove`, without which the file could no longer be taken out, `label`, the middle-truncated name,
 and the `size`/`compact` computed to fit inside the field (one step below it). `#counter` receives
-`{ count, size, text }`, `text` being the ready-made string.
+`{ count, bytes, text }`, `bytes` being the total size and `text` the ready-made string.
 
 <Canvas of={VFileInputStories.CustomSlots} />
 

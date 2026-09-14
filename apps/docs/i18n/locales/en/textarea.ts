@@ -25,7 +25,7 @@ export default {
     },
     counters: {
       title: 'Counters',
-      text: '<code>counter</code> goes under the field, beside the hint. Against <code>maxlength</code> the browser refuses everything past the limit, where <code>softLimit</code> lets the reader type on: the counter goes red and the field reports itself invalid through the native validity.',
+      text: '<code>counter</code> goes under the field, beside the hint. Against <code>maxlength</code> the browser refuses everything past the limit, where <code>softLimit</code> lets the reader type on: the counter goes red and the field reports itself invalid through the native validity. It counts characters, as on VInput; on VFileInput the same prop counts files and their size.',
     },
     autoGrow: {
       title: 'Auto grow',

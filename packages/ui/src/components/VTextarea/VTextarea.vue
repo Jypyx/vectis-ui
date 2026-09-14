@@ -194,7 +194,6 @@ const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs(
 // The prop keeps priority; what it falls back to is the dictionary, so the default
 // wording follows the language the design system is set to.
 const m = useMessages()
-const resolvedLoadingLabel = computed(() => props.loadingLabel ?? m.value.common.loading)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
 
 const { fieldId, hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
@@ -299,7 +298,7 @@ defineExpose({
         <VIcon :name="closeIcon" />
       </button>
 
-      <VSpinner v-if="loading" :label="resolvedLoadingLabel" />
+      <VSpinner v-if="loading" :label="loadingLabel" />
       <slot v-else name="end">
         <button
           v-if="iconEnd && hasIconEndHandler"
@@ -315,11 +314,15 @@ defineExpose({
       </slot>
     </div>
 
-    <div v-if="hint || counter" class="v-textarea-meta">
+    <div v-if="hint || counter" class="v-textarea-meta v-field-meta">
       <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-textarea-hint">
         {{ hint }}
       </VTypography>
-      <span v-if="counter" class="v-textarea-counter" :data-over="over ? '' : undefined">
+      <span
+        v-if="counter"
+        class="v-textarea-counter v-field-counter"
+        :data-over="over ? '' : undefined"
+      >
         {{ counterText }}
       </span>
     </div>
@@ -339,26 +342,6 @@ defineExpose({
   /* The label and the hint are rendered by VTypography, which carries their type. The
      .v-textarea-label and .v-textarea-hint classes remain as hooks: a consumer
      overrides through them, and the disabled state below reaches them that way. */
-
-  .v-textarea-meta {
-    display: flex;
-    align-items: baseline;
-    gap: var(--vectis-space-2);
-  }
-
-  /* The counter keeps its own local styling rather than going through VTypography:
-     figures of equal width, so the number does not shift as it counts, and a colour
-     that marks the overflow — neither of which is a typographic role. */
-  .v-textarea-counter {
-    margin-inline-start: auto;
-    font-size: var(--vectis-text-caption-size);
-    color: var(--vectis-color-text-muted);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .v-textarea-counter[data-over] {
-    color: var(--vectis-color-danger-text);
-  }
 
   /* This is the box that carries the border, the background, the focus ring and the
      resize handle — which is why it also hides its overflow, `resize` having no
@@ -541,9 +524,6 @@ defineExpose({
     --field-border-color: var(--vectis-color-danger);
   }
 
-  /* The field's own buttons — the clear cross, a clickable icon — take their whole
-     recipe from `.v-field-action` (styles/field.css), which VInput and VTextarea share.
-     What stays here is what this field alone decides. */
   /* A disabled field greys out through the colour tokens, the same ones VCheckbox and
      VRadio use, and never through opacity. It comes LAST in the sequence of states,
      which at equal specificity is what makes it win over all of them, the error

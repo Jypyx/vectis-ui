@@ -93,7 +93,7 @@ export default {
         thumbnail:
           "The square at the start of a row alone: for a thumbnail produced by your server, a video's poster frame, or a format the browser cannot decode.",
         remove:
-          "The control that removes a row. <code>remove</code> is the only thing that can take the file out, and <code>label</code> is the ready-made name, including the file's own, without which the button would be announced as nothing at all.",
+          "The control that removes a row. <code>remove</code> is the only thing that can take the file out, and <code>removeLabel</code> is the ready-made accessible name, including the file's own, without which the button would be announced as nothing at all.",
       },
     },
   },

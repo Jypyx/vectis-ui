@@ -499,3 +499,57 @@ describe('VFileInput — remove', () => {
     expect(emitted('change')?.[0]).toEqual([[files[0]]])
   })
 })
+
+describe('VFileInput — slots and keys', () => {
+  it('#counter receives the total size as `bytes`', () => {
+    const { getByText } = render(VFileInput, {
+      props: {
+        counter: true,
+        multiple: true,
+        modelValue: [fileOf('a.pdf', 1500), fileOf('b.pdf', 500)],
+      },
+      slots: {
+        counter: '<template #counter="{ count, bytes }">{{ count }}:{{ bytes }}</template>',
+      },
+    })
+    expect(getByText('2:2000')).toBeTruthy()
+  })
+
+  it('the remove a custom chip receives is refused while the field is read-only', async () => {
+    const files = [fileOf('a.pdf'), fileOf('b.pdf')]
+    const { getAllByRole, emitted } = render(VFileInput, {
+      props: { multiple: true, display: 'chip', readonly: true, modelValue: files },
+      slots: {
+        chip: '<template #chip="{ remove, file }"><button type="button" @click="remove">{{ file.name }}</button></template>',
+      },
+    })
+    await fireEvent.click(getAllByRole('button', { name: 'a.pdf' })[0]!)
+    expect(emitted('remove')).toBeUndefined()
+    expect(emitted('update:modelValue')).toBeUndefined()
+  })
+
+  // Keyed by index, removing the first chip re-keys every chip after it, and Vue patches
+  // the first chip's element into the second's place instead of dropping it.
+  it('keys the chips by file identity, so a removal keeps the elements of the rest', async () => {
+    const { container, getByRole } = render(VFileInput, {
+      props: {
+        multiple: true,
+        display: 'chip',
+        modelValue: [fileOf('a.pdf'), fileOf('b.pdf')],
+      },
+    })
+    const second = container.querySelectorAll('.v-chip')[1]
+    await fireEvent.click(getByRole('button', { name: 'Remove a.pdf' }))
+    expect(container.querySelectorAll('.v-chip')).toHaveLength(1)
+    expect(container.querySelector('.v-chip')).toBe(second)
+  })
+
+  it('gives each development warning once, however often the component re-renders', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { rerender } = renderPicker({ maxFiles: 3 })
+    await rerender({ maxFiles: 4 })
+    await rerender({ maxFiles: 5 })
+    expect(warn.mock.calls.filter(([m]) => /`maxFiles` ignored/.test(String(m)))).toHaveLength(1)
+    warn.mockRestore()
+  })
+})

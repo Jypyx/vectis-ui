@@ -1,5 +1,6 @@
 /**
- * The cross that empties a field, shared by VInput and VTextarea.
+ * The cross that empties a field, shared by VInput and VTextarea — and, through
+ * `canClear`, the answer the fields composed on top of VInput give it.
  *
  * The two halves of it are one decision: WHEN the cross is shown, and what pressing it does.
  * They were written out in both components and had already started to drift — one asked
@@ -35,10 +36,30 @@ interface ClearableOptions {
   onCleared: () => void
 }
 
+/**
+ * Whether a field offers its cross: it asks for one, it can be used and changed, and it holds
+ * something. The fields composed on top of VInput — VCombobox, VDateInput, VTimeInput,
+ * VFileInput — hold their value somewhere other than the text, so they work out `filled`
+ * themselves and hand VInput the result as `clearVisible`; the other terms are the same for
+ * every field and are written here once.
+ *
+ * `disabled` is passed apart from the props because it is the value RESOLVED against the row
+ * the field sits in, which the prop alone is not.
+ */
+export function canClear(
+  props: { clearable: boolean; readonly: boolean },
+  disabled: boolean,
+  filled: boolean,
+): boolean {
+  return props.clearable && !disabled && !props.readonly && filled
+}
+
 export function useClearable(options: ClearableOptions): {
   showClear: ComputedRef<boolean>
   onClear: () => void
 } {
+  // An explicit `clearVisible` replaces the read-only and the content terms together: a
+  // composed field has already asked both through `canClear`.
   const showClear = computed(() => {
     if (!options.clearable() || options.disabled()) return false
     return options.clearVisible() ?? (!options.readonly() && options.text().length > 0)

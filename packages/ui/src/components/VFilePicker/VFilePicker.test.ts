@@ -262,6 +262,33 @@ describe('VFilePicker preview list', () => {
     expect(document.activeElement).toBe(getByRole('button', { name: 'Browse files' }))
   })
 
+  it('#remove receives the ready-made accessible name as `removeLabel`', () => {
+    const { getByRole } = render(VFilePicker, {
+      props: { title: 'Drop your files', preview: 'bottom', modelValue: [files[0]!] },
+      slots: {
+        remove:
+          '<template #remove="{ removeLabel }"><button type="button" :aria-label="removeLabel">x</button></template>',
+      },
+    })
+    expect(getByRole('button', { name: 'Remove report.pdf' })).toBeTruthy()
+  })
+
+  // Keyed by index, removing the first row re-keys every row after it: Vue patches the
+  // first row's element into the second's place, which remounts a thumbnail's <img>.
+  it('keys the rows by file identity, so a removal keeps the elements of the rest', async () => {
+    const { getByRole, container } = renderUpload({
+      preview: 'bottom',
+      multiple: true,
+      modelValue: files,
+    })
+    const second = container.querySelectorAll('.v-file-picker-item')[1]
+
+    await fireEvent.click(getByRole('button', { name: 'Remove report.pdf' }))
+
+    expect(container.querySelectorAll('.v-file-picker-item')).toHaveLength(1)
+    expect(container.querySelector('.v-file-picker-item')).toBe(second)
+  })
+
   it('readonly keeps the list but takes the removal away', async () => {
     const { getByRole, emitted } = renderUpload({
       preview: 'bottom',
@@ -444,6 +471,14 @@ describe('VFilePicker dev warnings', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     renderUpload({}, { 'aria-label': 'Attachments' })
     expect(warn).toHaveBeenCalledWith(expect.stringMatching(/aria-prohibited-attr/))
+  })
+
+  it('gives each warning once, however often the component re-renders', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { rerender } = renderUpload({ maxFiles: 3 }, { 'aria-label': 'Attachments' })
+    await rerender({ maxFiles: 4 })
+    await rerender({ maxFiles: 5 })
+    expect(warn).toHaveBeenCalledTimes(2)
   })
 
   it('stays silent once the zone is the control, where the label is legitimate', () => {

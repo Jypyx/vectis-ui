@@ -15,6 +15,18 @@ export interface FileCandidate {
 }
 
 /**
+ * An `accept` list read into its tokens: split on commas, trimmed, lowercased, the empty ones
+ * dropped. An empty result accepts everything.
+ */
+export function parseAccept(accept?: string): string[] {
+  if (!accept) return []
+  return accept
+    .split(',')
+    .map((token) => token.trim().toLowerCase())
+    .filter(Boolean)
+}
+
+/**
  * Whether a file matches an `accept` list, written exactly as the HTML attribute is:
  * `.pdf` (case-insensitive), `image/*`, or one precise MIME type. An empty list accepts
  * everything.
@@ -23,17 +35,15 @@ export interface FileCandidate {
  * opens: a DROPPED file bypasses it entirely. Without this second reading, dropping
  * smuggles anything past a restriction the consumer believes is enforced.
  *
+ * The list may be handed over already read by `parseAccept`, which is what a batch does:
+ * screening a hundred dropped files would otherwise split the same string a hundred times.
+ *
  * TRAP — `file.type` is the browser's GUESS and is often empty (an unknown extension, some
  * Linux setups). A list written only in MIME types then turns away a perfectly good file,
  * which is why the docs ask for extensions alongside: `image/*,.heic`, not `image/*` alone.
  */
-export function matchesAccept(file: FileCandidate, accept?: string): boolean {
-  if (!accept) return true
-
-  const tokens = accept
-    .split(',')
-    .map((token) => token.trim().toLowerCase())
-    .filter(Boolean)
+export function matchesAccept(file: FileCandidate, accept?: string | readonly string[]): boolean {
+  const tokens = typeof accept === 'string' || accept === undefined ? parseAccept(accept) : accept
   if (tokens.length === 0) return true
 
   const name = file.name.toLowerCase()
@@ -45,6 +55,26 @@ export function matchesAccept(file: FileCandidate, accept?: string): boolean {
     if (token.endsWith('/*')) return type !== '' && type.startsWith(token.slice(0, -1))
     return type === token
   })
+}
+
+/**
+ * A stable key per FILE OBJECT, for the `v-for` of a file list.
+ *
+ * An index-based key re-keys every row after a removal, which remounts them — a thumbnail's
+ * `<img>` included — and a name is not unique across folders. A File travels through a
+ * v-model unproxied (reactivity only wraps plain objects and collections), so its identity is
+ * a key that survives both. The map is weak, so a file that leaves every list is not held.
+ */
+const fileIds = new WeakMap<File, number>()
+let nextFileId = 0
+
+export function fileKey(file: File): number {
+  let id = fileIds.get(file)
+  if (id === undefined) {
+    id = nextFileId++
+    fileIds.set(file, id)
+  }
+  return id
 }
 
 /** The units a size can be written in, smallest first — the rungs of the ladder. */
@@ -156,9 +186,10 @@ export function screenFiles(
   const accepted: File[] = []
   const rejected: FileRejection[] = []
   let total = current.reduce((sum, file) => sum + file.size, 0)
+  const accept = parseAccept(limits.accept)
 
   for (const file of incoming) {
-    if (!matchesAccept(file, limits.accept)) {
+    if (!matchesAccept(file, accept)) {
       rejected.push({ file, reason: 'type' })
       continue
     }

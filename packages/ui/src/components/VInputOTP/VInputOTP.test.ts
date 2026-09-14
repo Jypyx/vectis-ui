@@ -71,7 +71,7 @@ describe('VInputOTP', () => {
     const inputs = getAllByRole('textbox')
     expect(inputs).toHaveLength(9)
     expect(inputs[3]?.getAttribute('aria-label')).toBe('Character 4 of 9')
-    const literals = container.querySelectorAll('.v-otp-literal')
+    const literals = container.querySelectorAll('.v-input-otp-literal')
     expect(literals).toHaveLength(2)
     expect(literals[0]?.textContent).toBe('.')
     expect(literals[0]?.getAttribute('aria-hidden')).toBe('true')
@@ -115,7 +115,7 @@ describe('VInputOTP', () => {
 
   it('separatorIcon replaces the literals with an icon', () => {
     const { container } = renderOtp({ pattern: '##-##', separatorIcon: 'horizontal_rule' })
-    const literal = container.querySelector('.v-otp-literal')
+    const literal = container.querySelector('.v-input-otp-literal')
     expect(literal?.textContent).not.toContain('-')
     expect(literal?.querySelector('.v-icon-symbol')?.textContent).toBe('horizontal_rule')
   })
@@ -134,7 +134,7 @@ describe('VInputOTP — hint', () => {
   it('renders the hint and ties it to the group', () => {
     const { container } = renderOtp({ hint: 'Sent to +33 6 12 34 56 78' })
     const group = container.querySelector('[role="group"]') as HTMLElement
-    const hint = container.querySelector('.v-otp-hint') as HTMLElement
+    const hint = container.querySelector('.v-input-otp-hint') as HTMLElement
     expect(hint.textContent).toContain('Sent to')
     expect(group.getAttribute('aria-describedby')).toBe(hint.id)
   })
@@ -145,7 +145,7 @@ describe('VInputOTP — hint', () => {
       attrs: { 'aria-describedby': 'outside' },
     })
     const group = container.querySelector('[role="group"]') as HTMLElement
-    const hint = container.querySelector('.v-otp-hint') as HTMLElement
+    const hint = container.querySelector('.v-input-otp-hint') as HTMLElement
     expect(group.getAttribute('aria-describedby')).toBe('outside ' + hint.id)
   })
 

@@ -336,7 +336,7 @@ export const Limits: Story = {
 /**
  * Every visible part is a slot. `#browse` receives `open`, without which a custom
  * button could no longer open the dialog; `#remove` receives `remove` and a
- * ready-made `label` carrying the file name — dropping it would leave an unnamed
+ * ready-made `removeLabel` carrying the file name — dropping it would leave an unnamed
  * button, which axe fails.
  */
 export const CustomSlots: Story = {
@@ -358,8 +358,8 @@ export const CustomSlots: Story = {
               {{ t.selection }}
             </VButton>
           </template>
-          <template #remove="{ remove, label }">
-            <VButton variant="ghost" tone="danger" size="sm" :aria-label="label" @click="remove">
+          <template #remove="{ remove, removeLabel }">
+            <VButton variant="ghost" tone="danger" size="sm" :aria-label="removeLabel" @click="remove">
               ✕
             </VButton>
           </template>
@@ -431,11 +431,14 @@ export const LoadingAndInvalid: Story = {
   play: async ({ canvasElement }) => {
     const [loading, invalid] = [...canvasElement.querySelectorAll('.v-file-picker')]
     await expect(loading!.querySelector('.v-spinner')).not.toBeNull()
-    // The icon's wrapper is floored at the icon's size, so the zone is exactly as tall
-    // while loading as at rest even though the spinner is drawn smaller — the picker
-    // beside it is that same picture with its icon, and their heights must agree.
-    // jsdom lays nothing out, so this can only be asserted here; verified red at 16px,
-    // the 40px box against the 24px spinner, without the floor.
+    // The spinner stands in for the icon, so it takes the icon's box — the picker beside it
+    // is that same picture with its icon, and the two boxes and the two zones must agree.
+    // jsdom lays nothing out, so this can only be asserted here.
+    const spinner = loading!.querySelector('.v-file-picker-icon .v-spinner')!
+    const icon = invalid!.querySelector('.v-file-picker-icon .v-icon')!
+    await expect(
+      Math.abs(spinner.getBoundingClientRect().width - icon.getBoundingClientRect().width),
+    ).toBeLessThan(1)
     await expect(
       Math.abs(loading!.getBoundingClientRect().height - invalid!.getBoundingClientRect().height),
     ).toBeLessThan(1)

@@ -63,6 +63,9 @@ reading order and tab order agree: `VTimeInput` puts its AM/PM button there.
 `counter` shows "12/80" (or "12" without `maxlength`) on the right inside the field. By default
 `maxlength` is the native attribute: input is **blocked** at the limit.
 
+The prop counts **characters** here, as on `VTextarea`, and takes no slot. On `VFileInput` the same
+name counts the chosen files and their total size, under the field, and `#counter` rewords it.
+
 <Canvas of={VInputStories.Counter} />
 
 `soft-limit` makes the limit soft: input may go over, the field enters error through native

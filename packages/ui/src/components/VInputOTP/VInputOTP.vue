@@ -15,16 +15,16 @@
  * rest, forcing capitals outside a numeric code so the value has one canonical form.
  */
 
-import { computed, ref, useAttrs, watch } from 'vue'
+import { computed, ref, useAttrs, useId, watch } from 'vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import VTypography from '../VTypography/VTypography.vue'
 
 import { isDev } from '../../utils/env'
+import { joinIds } from '../../utils/ids'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
-import { useFieldIds } from '../../composables/useFieldIds'
 import { useMessages } from '../../i18n/state'
 
 /** The height of the boxes: 32, 40 or 48 pixels. */
@@ -110,7 +110,12 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.inputOTP.label)
 defineOptions({ inheritAttrs: false })
 
 const attrs = useAttrs()
-const { hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
+// No `useFieldIds` here: the row is named by `aria-label` and renders no `<label>`, so the
+// field id that composable generates would have nothing to point it at.
+const hintId = useId()
+const describedBy = computed(() =>
+  joinIds(attrs['aria-describedby'] as string | undefined, !!props.hint && hintId),
+)
 
 /**
  * The code as one string, without the separators: a `GT-###` template still yields three
@@ -173,6 +178,20 @@ syncFromModel(model.value)
 watch([model, slotCount], ([value, count]) => {
   if (value !== digits.value.join('') || digits.value.length !== count) syncFromModel(value)
 })
+
+/*
+ * TRAP — the list of boxes is trimmed AFTER the render, never before it. A box that
+ * disappears calls its function ref with `null` while it is being unmounted, at its OLD
+ * position: trimmed in a `pre` watcher, that late assignment would stretch the array back
+ * out, and a pattern that shortened would keep its departed boxes as trailing entries.
+ */
+watch(
+  slotCount,
+  (count) => {
+    inputs.value.length = count
+  },
+  { flush: 'post' },
+)
 
 function commit() {
   const code = digits.value.join('')
@@ -279,7 +298,7 @@ defineExpose({
   <div
     ref="rootEl"
     v-bind="attrs"
-    class="v-otp v-control"
+    class="v-input-otp v-control"
     role="group"
     :aria-label="ariaLabel"
     :aria-describedby="describedBy"
@@ -289,7 +308,7 @@ defineExpose({
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
   >
-    <div class="v-otp-boxes">
+    <div class="v-input-otp-boxes">
       <template v-for="(cell, i) in cells" :key="i">
         <input
           v-if="cell.type === 'slot'"
@@ -299,7 +318,7 @@ defineExpose({
             }
           "
           type="text"
-          class="v-otp-input"
+          class="v-input-otp-input"
           :inputmode="format === 'numeric' ? 'numeric' : 'text'"
           :autocomplete="cell.slotIndex === 0 ? 'one-time-code' : 'off'"
           :value="digits[cell.slotIndex]"
@@ -314,14 +333,14 @@ defineExpose({
         <!-- A separator from the pattern: shown, never focusable, and never part of the
              value. It is hidden from screen readers, each box already announcing its
              own position in the code. -->
-        <span v-else class="v-otp-literal" aria-hidden="true">
+        <span v-else class="v-input-otp-literal" aria-hidden="true">
           <VIcon v-if="separatorIcon" v-bind="iconProps(separatorIcon)" />
           <template v-else>{{ cell.char }}</template>
         </span>
       </template>
     </div>
 
-    <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-otp-hint">
+    <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-input-otp-hint">
       {{ hint }}
     </VTypography>
   </div>
@@ -329,14 +348,14 @@ defineExpose({
 
 <style>
 @layer vectis.components {
-  .v-otp {
+  .v-input-otp {
     /*
      * The heights and the icon context come from the shared v-control class
      * (styles/control-size.css). The type is the one thing kept local, and set one or
      * two steps above the other fields: a single character has a whole square to
      * itself, and at the usual field size it would look lost in it.
      */
-    --otp-font-size: var(--vectis-font-size-lg);
+    --input-otp-font-size: var(--vectis-font-size-lg);
 
     /* A column, so the hint sits under the boxes rather than beside them; the row itself
        is the box below. `inline-flex` keeps the component's own width, and the start
@@ -347,13 +366,13 @@ defineExpose({
     gap: var(--vectis-space-1);
   }
 
-  .v-otp-boxes {
+  .v-input-otp-boxes {
     display: flex;
     align-items: center;
     gap: var(--control-gap);
   }
 
-  .v-otp-input {
+  .v-input-otp-input {
     /* The boxes are square: reading the same variable for both dimensions is what
        makes the size and the density scale them together. */
     width: var(--control-height);
@@ -364,7 +383,7 @@ defineExpose({
     border: 1px solid var(--vectis-color-border-strong);
     border-radius: var(--vectis-radius-interactive);
     font-family: var(--vectis-text-family-code);
-    font-size: var(--otp-font-size);
+    font-size: var(--input-otp-font-size);
     transition: border-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
@@ -372,7 +391,7 @@ defineExpose({
      VTextarea: its own 1px border plus a 1px shadow of the same colour just outside
      it. The transparent outline is the safety net for Windows forced colours, which
      drop box-shadows entirely. */
-  .v-otp-input:focus-visible {
+  .v-input-otp-input:focus-visible {
     border-color: var(--vectis-color-accent);
     box-shadow: 0 0 0 1px var(--vectis-color-accent);
     outline: var(--vectis-focus-ring-width) solid transparent;
@@ -382,54 +401,54 @@ defineExpose({
      read from [data-readonly] rather than from `:read-only`, which the browser also matches
      on a disabled box. It is declared BEFORE the invalid and disabled blocks, all three
      weighing (0,2,0), so those still win over it. */
-  .v-otp[data-readonly] .v-otp-input {
+  .v-input-otp[data-readonly] .v-input-otp-input {
     background: var(--vectis-color-surface-sunken);
   }
 
-  .v-otp[data-invalid] .v-otp-input {
+  .v-input-otp[data-invalid] .v-input-otp-input {
     border-color: var(--vectis-color-danger);
   }
 
-  .v-otp[data-invalid] .v-otp-input:focus-visible {
+  .v-input-otp[data-invalid] .v-input-otp-input:focus-visible {
     box-shadow: 0 0 0 1px var(--vectis-color-danger);
   }
 
-  .v-otp-literal {
+  .v-input-otp-literal {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--vectis-color-text-muted);
     font-family: var(--vectis-text-family-code);
-    font-size: var(--otp-font-size);
+    font-size: var(--input-otp-font-size);
     user-select: none;
   }
 
   /* A disabled row greys out through the colour tokens and never through opacity, the
      same treatment as VInput. */
-  .v-otp[data-disabled] .v-otp-input {
+  .v-input-otp[data-disabled] .v-input-otp-input {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);
     border-color: var(--vectis-color-border);
     cursor: not-allowed;
   }
 
-  .v-otp[data-disabled] .v-otp-literal,
-  .v-otp[data-disabled] .v-otp-hint {
+  .v-input-otp[data-disabled] .v-input-otp-literal,
+  .v-input-otp[data-disabled] .v-input-otp-hint {
     color: var(--vectis-color-text-subtle);
   }
 
   /* Of the whole size scale, only the raised type is restated here; the dimensions
      themselves come from v-control. */
-  .v-otp[data-size='sm'] {
-    --otp-font-size: var(--vectis-font-size-md);
+  .v-input-otp[data-size='sm'] {
+    --input-otp-font-size: var(--vectis-font-size-md);
   }
 
-  .v-otp[data-size='lg'] {
-    --otp-font-size: var(--vectis-font-size-xl);
+  .v-input-otp[data-size='lg'] {
+    --input-otp-font-size: var(--vectis-font-size-xl);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .v-otp-input {
+    .v-input-otp-input {
       transition: none;
     }
   }

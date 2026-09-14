@@ -33,7 +33,7 @@ export default {
     },
     counter: {
       title: 'Counter',
-      text: '<code>counter</code> adds a line under the field saying how much has been chosen. The <code>#counter</code> slot replaces it and receives the count, the total in bytes and the sentence already built.',
+      text: '<code>counter</code> adds a line under the field saying how much has been chosen. The <code>#counter</code> slot replaces it and receives the count, the total in bytes and the sentence already built. Where the <code>counter</code> of VInput and VTextarea counts characters and takes no slot, this one counts files.',
     },
     customIcon: {
       title: 'Custom icon',
@@ -101,7 +101,7 @@ export default {
       slots: {
         chip: 'Replaces the chip standing for one file. It receives the name already shortened in the middle so that its extension survives, <code>remove</code>, without which the file could no longer be taken out, and the size and density worked out to sit inside the field.',
         counter:
-          'Replaces the counter under the field. <code>text</code> is the sentence already built and translated; the count and the total size are there for a wording of your own.',
+          'Replaces the counter under the field. <code>text</code> is the sentence already built and translated; the count and the total size in <code>bytes</code> are there for a wording of your own.',
         valueEnd:
           'Controls of your own inside the field, placed before the ones the field owns: the clear cross and the icon that opens the panel. Those two are the component own affordance, which is why there is no <code>end</code> slot here.',
         start:

@@ -25,7 +25,7 @@ export default {
     },
     counters: {
       title: 'Compteurs',
-      text: "<code>counter</code> passe sous le champ, à côté du texte d'aide. Face à <code>maxlength</code>, le navigateur refuse tout ce qui dépasse la limite, là où <code>softLimit</code> laisse le lecteur continuer : le compteur passe au rouge et le champ se déclare invalide par la validité native.",
+      text: "<code>counter</code> passe sous le champ, à côté du texte d'aide. Face à <code>maxlength</code>, le navigateur refuse tout ce qui dépasse la limite, là où <code>softLimit</code> laisse le lecteur continuer : le compteur passe au rouge et le champ se déclare invalide par la validité native. Il compte des caractères, comme sur VInput ; sur VFileInput, la même prop compte des fichiers et leur taille.",
     },
     autoGrow: {
       title: 'Croissance automatique',

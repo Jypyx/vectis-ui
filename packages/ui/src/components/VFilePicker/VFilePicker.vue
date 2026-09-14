@@ -17,16 +17,7 @@
  * — a button inside a button is invalid markup and unusable by keyboard. The drag highlight,
  * the "or" separator and the side-by-side layout are CSS too.
  */
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  reactive,
-  ref,
-  watch,
-  watchEffect,
-} from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
@@ -51,7 +42,7 @@ import { useFileField } from '../../composables/useFileField'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useLocale, useMessages } from '../../i18n/state'
 import { isDev } from '../../utils/env'
-import { formatBytes, type FileRejection } from '../../utils/file'
+import { fileKey, formatBytes, type FileRejection } from '../../utils/file'
 import { fileKind, type FileKind } from './fileKind'
 
 /** Where the files taken are listed — under the zone, beside it, or nowhere. */
@@ -237,11 +228,11 @@ defineSlots<{
   thumbnail?(props: FilePickerRow): unknown
   /**
    * The control that removes a row. Two of the values it receives are not optional in
-   * practice: `remove` is the only thing that can take the file out, and `label` is the
-   * ready-made name — including the file's own — without which the button would be
-   * announced as nothing at all.
+   * practice: `remove` is the only thing that can take the file out, and `removeLabel` is
+   * the ready-made accessible name — including the file's own — without which the button
+   * would be announced as nothing at all.
    */
-  remove?(props: { file: File; index: number; remove: () => void; label: string }): unknown
+  remove?(props: { file: File; index: number; remove: () => void; removeLabel: string }): unknown
 }>()
 
 /**
@@ -257,44 +248,45 @@ const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 const m = useMessages()
 const locale = useLocale()
 
-const interactive = computed(() => !props.disabled && !props.readonly)
-
 /*
- * The hidden input, the sorting of the consumer's attributes and the single entry point
- * into the value all live in `useFileField`, shared with VFileInput.
+ * The hidden input, the sorting of the consumer's attributes, the single entry point into
+ * the value and the removal of a file live in `useFileField`, shared with VFileInput.
  *
  * Here, the bucket meant for "the control the user deals with" goes to the ZONE: that is
  * what they see, and what takes the focus once the browse button is hidden. Nothing is
  * pulled out of it, unlike in VFileInput — this component assembles no description of
  * its own.
+ *
+ * The zone becomes the control exactly when there is no browse button inside to be one,
+ * which is what `hideBrowse` decides.
  */
 const {
   fileEl,
-  nativeAttrs,
+  enabled: interactive,
+  nativeInputAttrs,
   controlAttrs: zoneAttrs,
   acceptFiles,
-  onNativeChange,
   openPicker,
-  resetNative,
+  removeAt: removeFile,
 } = useFileField({
   model,
+  props,
+  emit,
   forwardedAttrs,
-  enabled: () => interactive.value,
-  multiple: () => props.multiple,
-  limits: () => ({
-    accept: props.accept,
-    maxSize: props.maxSize,
-    maxFiles: props.maxFiles,
-    maxTotalSize: props.maxTotalSize,
-  }),
-  onReject: (rejection) => emit('reject', rejection),
-  onChange: (files) => emit('change', files),
+  // @a11y @devwarn — the name a consumer gives a plain container is ignored by assistive
+  // technology, and axe reports it, so this one fails SILENTLY at runtime too. Behind
+  // `isDev`, which a production build folds to false, so the message is dropped.
+  warnings: isDev
+    ? () => [
+        !props.hideBrowse &&
+          (attrs['aria-label'] !== undefined || attrs['aria-labelledby'] !== undefined) &&
+          'an aria-label on the zone is inert while the browse button is shown: the zone is a plain container then, and axe reports aria-prohibited-attr. Name the zone through `title`, or set `hide-browse` to make the zone itself the control.',
+      ]
+    : undefined,
 })
 
 const zoneEl = ref<HTMLElement | null>(null)
 const listEl = ref<HTMLUListElement | null>(null)
-/** The zone becomes the control exactly when there is no button inside to be one. */
-const zoneIsControl = computed(() => props.hideBrowse)
 const showList = computed(() => props.preview !== false && model.value.length > 0)
 
 /**
@@ -318,7 +310,7 @@ function onZoneClick(event: MouseEvent) {
   // The browse button already handles its own click, and that click also reaches the
   // zone: without this guard it would open the dialog twice. The test is inert when the
   // zone IS the button, there being nothing inside it to match.
-  if (!zoneIsControl.value && (event.target as HTMLElement).closest('button')) return
+  if (!props.hideBrowse && (event.target as HTMLElement).closest('button')) return
   openPicker()
 }
 
@@ -354,13 +346,7 @@ function focusTarget(): HTMLElement | null {
  * page still shows the old one at the moment the value is written.
  */
 async function removeAt(index: number) {
-  const file = model.value[index]
-  if (!file || !interactive.value) return
-
-  model.value = model.value.filter((_, i) => i !== index)
-  resetNative()
-  emit('remove', file, index)
-  emit('change', model.value)
+  if (!removeFile(index)) return
 
   await nextTick()
   const items = listEl.value?.querySelectorAll<HTMLElement>('.v-file-picker-item') ?? []
@@ -448,45 +434,34 @@ onBeforeUnmount(() => {
 })
 
 /**
- * Everything one row of the list needs, assembled in one place. A Vue template has no
- * way of declaring a reusable fragment, so this is what keeps the two slots that can
- * replace part of a row fed from a single source.
+ * Everything each row of the list needs, assembled in one place and once per change of the
+ * list, the language, the icons or a thumbnail — not once per render. A drag over the zone
+ * re-renders the component at the pointer's rate, and the rows would otherwise work out
+ * their kind and their size again every time, for every slot that reads them.
+ *
+ * A Vue template has no way of declaring a reusable fragment, so this is also what keeps
+ * the slots that can replace part of a row fed from a single source.
  */
-function rowProps(file: File, index: number): FilePickerRow {
-  const kind = fileKind(file)
-  return {
-    file,
-    index,
-    kind,
-    thumbnail: thumbUrls.get(file),
-    icon: iconForKind(kind),
-    sizeText: formatBytes(file.size, locale.value),
-    remove: () => removeAt(index),
-  }
-}
-
-// @devwarn — the last two are accessibility guards, and both describe things that fail
-// SILENTLY at runtime: a required control nobody can focus, and a name given to a plain
-// container, which assistive technology ignores.
-if (isDev) {
-  watchEffect(() => {
-    if (props.maxFiles !== undefined && !props.multiple)
-      console.warn(
-        '[VFilePicker] `maxFiles` ignored without `multiple`: single mode already caps at one file.',
-      )
-    if (attrs.required !== undefined)
-      console.warn(
-        '[VFilePicker] `required` lands on the hidden file input, which is not focusable: the browser blocks submission with no visible message. Validate the v-model yourself.',
-      )
-    if (
-      !props.hideBrowse &&
-      (attrs['aria-label'] !== undefined || attrs['aria-labelledby'] !== undefined)
-    )
-      console.warn(
-        '[VFilePicker] an aria-label on the zone is inert while the browse button is shown: the zone is a plain container then, and axe reports aria-prohibited-attr. Name the zone through `title`, or set `hide-browse` to make the zone itself the control.',
-      )
-  })
-}
+const rows = computed<{ key: number; row: FilePickerRow; removeLabel: string }[]>(() =>
+  showList.value
+    ? model.value.map((file, index) => {
+        const kind = fileKind(file)
+        return {
+          key: fileKey(file),
+          row: {
+            file,
+            index,
+            kind,
+            thumbnail: thumbUrls.get(file),
+            icon: iconForKind(kind),
+            sizeText: formatBytes(file.size, locale.value),
+            remove: () => removeAt(index),
+          },
+          removeLabel: m.value.common.remove(file.name),
+        }
+      })
+    : [],
+)
 
 defineExpose({
   /** Moves the focus to the browse control — the button, or the zone when it is one. */
@@ -520,18 +495,7 @@ defineExpose({
     @dragleave="onDragLeave"
     @drop="onDrop"
   >
-    <input
-      v-bind="nativeAttrs"
-      ref="fileEl"
-      type="file"
-      class="v-file-picker-native v-hidden-input"
-      tabindex="-1"
-      aria-hidden="true"
-      :accept="accept"
-      :multiple="multiple || undefined"
-      :disabled="disabled || undefined"
-      @change="onNativeChange"
-    />
+    <input v-bind="nativeInputAttrs" ref="fileEl" class="v-file-picker-native v-hidden-input" />
 
     <!-- TRAP — this wrapper is not decoration. The root is what the layout asks about
          its own width, and an element cannot ask about ITSELF: whatever flips has to be
@@ -543,17 +507,17 @@ defineExpose({
            platform. A plain container otherwise — a button inside a button is invalid
            markup, and unreachable by keyboard. -->
       <component
-        :is="zoneIsControl ? 'button' : 'div'"
+        :is="hideBrowse ? 'button' : 'div'"
         v-bind="zoneAttrs"
         ref="zoneEl"
         class="v-file-picker-zone"
-        :type="zoneIsControl ? 'button' : undefined"
-        :disabled="zoneIsControl && !interactive ? true : undefined"
+        :type="hideBrowse ? 'button' : undefined"
+        :disabled="hideBrowse && !interactive ? true : undefined"
         @click="onZoneClick"
       >
         <span class="v-file-picker-icon">
           <slot name="icon">
-            <VSpinner v-if="loading" :size="24" :label="loadingLabel" />
+            <VSpinner v-if="loading" :label="loadingLabel" />
             <VIcon v-else v-bind="iconProps(icon)" />
           </slot>
         </span>
@@ -596,46 +560,42 @@ defineExpose({
       </component>
 
       <ul v-if="showList" ref="listEl" class="v-file-picker-list" :aria-label="m.filePicker.list">
-        <li
-          v-for="(file, index) in model"
-          :key="`${index}-${file.name}`"
-          class="v-file-picker-item"
-        >
-          <slot name="item" v-bind="rowProps(file, index)">
+        <li v-for="{ key, row, removeLabel } in rows" :key="key" class="v-file-picker-item">
+          <slot name="item" v-bind="row">
             <span class="v-file-picker-thumb">
-              <slot name="thumbnail" v-bind="rowProps(file, index)">
+              <slot name="thumbnail" v-bind="row">
                 <img
-                  v-if="thumbUrls.get(file)"
+                  v-if="row.thumbnail"
                   class="v-file-picker-image"
-                  :src="thumbUrls.get(file)"
+                  :src="row.thumbnail"
                   alt=""
                   loading="lazy"
                   decoding="async"
-                  @error="dropThumbnail(file)"
+                  @error="dropThumbnail(row.file)"
                 />
-                <VIcon v-else v-bind="iconProps(iconForKind(fileKind(file)))" />
+                <VIcon v-else v-bind="iconProps(row.icon)" />
               </slot>
             </span>
 
             <span class="v-file-picker-info">
-              <span class="v-file-picker-name" :title="file.name">{{ file.name }}</span>
-              <span class="v-file-picker-size">{{ formatBytes(file.size, locale) }}</span>
+              <span class="v-file-picker-name" :title="row.file.name">{{ row.file.name }}</span>
+              <span class="v-file-picker-size">{{ row.sizeText }}</span>
             </span>
 
             <slot
               name="remove"
-              :file="file"
-              :index="index"
-              :remove="() => removeAt(index)"
-              :label="m.common.remove(file.name)"
+              :file="row.file"
+              :index="row.index"
+              :remove="row.remove"
+              :remove-label="removeLabel"
             >
               <VIconButton
                 class="v-file-picker-remove"
                 size="sm"
                 :icon="removeIcon"
-                :label="m.common.remove(file.name)"
+                :label="removeLabel"
                 :disabled="!interactive"
-                @click="removeAt(index)"
+                @click="row.remove"
               />
             </slot>
           </slot>
@@ -735,19 +695,25 @@ defineExpose({
   .v-file-picker-icon {
     --vectis-icon-size: var(--vectis-control-size-file-picker-icon);
 
-    /* The wrapper is floored at the icon's own size, whatever it holds. The spinner
-       standing in for the icon while loading is drawn smaller than it, and without
-       that floor the zone would lose the difference in height the moment loading
-       starts — the box has to be the icon's even when its content is not. A floor and
-       not a fixed size, so a taller icon of your own still grows it rather than
-       spilling out of it; the centring is what keeps a smaller content in the middle
-       of the box instead of at its start. */
+    /* The wrapper is floored at the icon's own size, whatever it holds. An illustration of
+       your own in the `#icon` slot may be drawn smaller than the icon, and without that
+       floor the zone would change height with it — the box has to be the icon's even when
+       its content is not. A floor and not a fixed size, so a taller one still grows it
+       rather than spilling out of it; the centring is what keeps a smaller content in the
+       middle of the box instead of at its start. */
     min-inline-size: var(--vectis-control-size-file-picker-icon);
     min-block-size: var(--vectis-control-size-file-picker-icon);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--file-picker-text-muted);
+  }
+
+  /* The spinner standing in for the icon while loading takes the icon's box, the way it
+     does in every field: a spinner's size is the box it occupies, and the icon size is
+     set on this wrapper. */
+  .v-file-picker-icon > .v-spinner {
+    font-size: var(--vectis-icon-size);
   }
 
   .v-file-picker-subtitle {

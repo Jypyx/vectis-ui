@@ -14,7 +14,7 @@
  * file cannot be picked twice running), and screening in code, `accept` having no say over
  * a drop.
  */
-import { computed, inject, ref, useId, watchEffect } from 'vue'
+import { computed, inject, ref, useId } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
 import type { ChipSize } from '../VChip/VChip.vue'
@@ -24,15 +24,17 @@ import VInput from '../VInput/VInput.vue'
 import { inputGroupKey } from '../VInput/context'
 import VTypography from '../VTypography/VTypography.vue'
 
+import { canClear } from '../../composables/useClearable'
+import { useControlShape } from '../../composables/useControlShape'
 import { useFileDrop } from '../../composables/useFileDrop'
 import { useFileField } from '../../composables/useFileField'
-import { iconClickHandlers } from '../../composables/useIconClickHandlers'
-import { useControlShape } from '../../composables/useControlShape'
+import { iconStartListener } from '../../composables/useIconClickHandlers'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useLocale, useMessages } from '../../i18n/state'
 import { chipScaleFor } from '../../utils/chip'
 import { isDev } from '../../utils/env'
-import { formatBytes, type FileRejection } from '../../utils/file'
+import { fileKey, formatBytes, type FileRejection } from '../../utils/file'
+import { joinIds } from '../../utils/ids'
 import { truncateMiddle } from './truncate'
 
 /** How the chosen files are shown inside the field when several are allowed. */
@@ -211,9 +213,9 @@ defineSlots<{
   }): unknown
   /**
    * Replaces the counter under the field. `text` is the sentence already built and
-   * translated; the count and the total size are there for a wording of your own.
+   * translated; the count and the total size in `bytes` are there for a wording of your own.
    */
-  counter?(props: { count: number; size: number; text: string }): unknown
+  counter?(props: { count: number; bytes: number; text: string }): unknown
 }>()
 
 /**
@@ -226,16 +228,9 @@ const model = defineModel<File[]>({ default: () => [] })
 
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
-// @a11y @core
-/*
- * Declaring `click:icon-start` is what puts it in the API tables and in a consumer's
- * editor, and it is also what takes it out of `$attrs`: it no longer travels with the
- * forwarded attributes and has to be handed to the field by hand. Only when the consumer
- * really wrote one, or VInput would make the start icon a button on every instance.
- */
-const iconStartClick = iconClickHandlers().start
-  ? { 'onClick:icon-start': (event: MouseEvent) => emit('click:icon-start', event) }
-  : undefined
+// Declared as this component's own event, `click:icon-start` is out of `$attrs`, so the
+// listener is relayed to the field by hand — and only when the consumer wrote one.
+const iconStartClick = iconStartListener((event) => emit('click:icon-start', event))
 
 const m = useMessages()
 const locale = useLocale()
@@ -251,30 +246,41 @@ const {
 } = useControlShape(props, group)
 
 /*
- * The hidden input, the sorting of the consumer's attributes and the single entry point
- * into the value all live in `useFileField`, shared with VFilePicker.
+ * The hidden input, the sorting of the consumer's attributes, the single entry point into
+ * the value, the removal of a file and the emptying of all of them live in `useFileField`,
+ * shared with VFilePicker.
  *
  * Here, the bucket meant for "the control the user deals with" goes to the visible
  * field: that is what they see, focus and click, so a consumer's own `<label for>` has
  * to point at it. The description attribute is pulled out of that bucket, because this
  * component re-assembles it further down.
  */
-const { fileEl, nativeAttrs, controlAttrs, acceptFiles, onNativeChange, openPicker, resetNative } =
-  useFileField({
-    model,
-    forwardedAttrs,
-    enabled: () => !resolvedDisabled.value && !props.readonly,
-    multiple: () => props.multiple,
-    limits: () => ({
-      accept: props.accept,
-      maxSize: props.maxSize,
-      maxFiles: props.maxFiles,
-      maxTotalSize: props.maxTotalSize,
-    }),
-    onReject: (rejection) => emit('reject', rejection),
-    onChange: (files) => emit('change', files),
-    excludeFromControl: ['aria-describedby'],
-  })
+const {
+  fileEl,
+  enabled,
+  nativeInputAttrs,
+  controlAttrs,
+  acceptFiles,
+  openPicker,
+  removeAt,
+  clear,
+} = useFileField({
+  model,
+  props,
+  emit,
+  forwardedAttrs,
+  disabled: resolvedDisabled,
+  excludeFromControl: ['aria-describedby'],
+  onClear: () => emit('clear'),
+  // Behind `isDev`, which a production build folds to false, so the message is dropped.
+  warnings: isDev
+    ? () => [
+        props.display === 'chip' &&
+          !props.multiple &&
+          'display="chip" ignored without `multiple`: a single file shows as text.',
+      ]
+    : undefined,
+})
 
 /** What reaches the visible field: the consumer's own attributes, plus that listener. */
 const fieldAttrs = computed(() => ({ ...controlAttrs.value, ...iconStartClick }))
@@ -299,9 +305,7 @@ const placeholderText = computed(() =>
  * text cannot be edited. Here the value comes from the file dialog rather than from
  * typing, so there is something to clear all the same.
  */
-const canClear = computed(
-  () => props.clearable && !resolvedDisabled.value && !props.readonly && model.value.length > 0,
-)
+const clearVisible = computed(() => canClear(props, resolvedDisabled.value, model.value.length > 0))
 
 // @a11y @devwarn
 /*
@@ -347,15 +351,12 @@ const counterId = useId()
  * shown as chips the field's own text is EMPTY, and the counter is then the only spoken
  * summary of what has been chosen.
  */
-const describedBy = computed(
-  () =>
-    [
-      attrs['aria-describedby'] as string | undefined,
-      props.hint ? hintId : undefined,
-      props.counter ? counterId : undefined,
-    ]
-      .filter(Boolean)
-      .join(' ') || undefined,
+const describedBy = computed(() =>
+  joinIds(
+    attrs['aria-describedby'] as string | undefined,
+    !!props.hint && hintId,
+    props.counter && counterId,
+  ),
 )
 
 // The size, the density and the HEIGHT of the chips sitting inside the field, worked out
@@ -366,8 +367,9 @@ const describedBy = computed(
 const chipScale = computed(() => chipScaleFor(resolvedSize.value, resolvedCompact.value))
 
 /**
- * What a chip shows for a file. The name is shortened in the MIDDLE rather than cut off
- * at the end, for two reasons.
+ * What each chip shows for its file, worked out once per change of the selection rather
+ * than on every render, which reads it three times per chip. The name is shortened in the
+ * MIDDLE rather than cut off at the end, for two reasons.
  *
  * The chips WRAP, so there is no line for a long name to overflow: left whole it would
  * simply push the field onto two or three rows. And cutting the middle preserves the
@@ -377,7 +379,8 @@ const chipScale = computed(() => chipScaleFor(resolvedSize.value, resolvedCompac
  * The full name is never lost: the removal button is named with it, and the chip carries
  * it as a tooltip whenever the label was actually shortened.
  */
-const chipLabel = (file: File) => truncateMiddle(file.name)
+// Computed lazily, so a text display, which never reads it, never pays for it.
+const chipLabels = computed(() => model.value.map((file) => truncateMiddle(file.name)))
 
 function onControlClick(event: MouseEvent) {
   // The field's own buttons already handle their clicks, and the click also reaches the
@@ -395,55 +398,19 @@ function onFieldKeydown(event: KeyboardEvent) {
   openPicker()
 }
 
-function removeAt(index: number) {
-  const file = model.value[index]
-  if (!file) return
-
-  model.value = model.value.filter((_, i) => i !== index)
-  resetNative()
-  emit('remove', file, index)
-  emit('change', model.value)
+function removeFile(index: number) {
   // The removal button disappears along with its chip, so the focus would fall back to
   // the page body. Unlike the date and time pickers, nothing here opens on focus, so
   // this needs no guard against re-entering.
-  inputRef.value?.focus()
-}
-
-/**
- * Empties the selection, and the hidden input with it — without that reset the same file
- * could not be chosen again straight afterwards.
- */
-function clearValue() {
-  model.value = []
-  resetNative()
-  emit('clear')
-  emit('change', model.value)
+  if (removeAt(index)) inputRef.value?.focus()
 }
 
 /* Files may be dropped on the component itself; there is no separate drop area here —
    that is what VFilePicker is for. */
 const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop(
-  () => !props.noDrop && !resolvedDisabled.value && !props.readonly,
+  () => !props.noDrop && enabled.value,
   acceptFiles,
 )
-
-// @devwarn
-if (isDev) {
-  watchEffect(() => {
-    if (props.display === 'chip' && !props.multiple)
-      console.warn(
-        '[VFileInput] display="chip" ignored without `multiple`: a single file shows as text.',
-      )
-    if (props.maxFiles !== undefined && !props.multiple)
-      console.warn(
-        '[VFileInput] `maxFiles` ignored without `multiple`: single mode already caps at one file.',
-      )
-    if (attrs.required !== undefined)
-      console.warn(
-        '[VFileInput] `required` lands on the hidden file input, which is not focusable: the browser blocks submission with no visible message. Validate the v-model yourself and use the `invalid` prop.',
-      )
-  })
-}
 
 defineExpose({
   /** Moves the focus to the visible field. */
@@ -473,29 +440,20 @@ defineExpose({
     :data-disabled="resolvedDisabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
     :data-dragging="dragging ? '' : undefined"
-    :data-can-clear="canClear ? '' : undefined"
     @dragenter="onDragEnter"
     @dragover="onDragOver"
     @dragleave="onDragLeave"
     @drop="onDrop"
   >
-    <input
-      v-bind="nativeAttrs"
-      ref="fileEl"
-      type="file"
-      class="v-file-input-native v-hidden-input"
-      tabindex="-1"
-      aria-hidden="true"
-      :accept="accept"
-      :multiple="multiple || undefined"
-      :disabled="resolvedDisabled || undefined"
-      @change="onNativeChange"
-    />
+    <input v-bind="nativeInputAttrs" ref="fileEl" class="v-file-input-native v-hidden-input" />
 
     <div class="v-file-input-control" @click="onControlClick">
+      <!-- Shown as chips, the field takes VInput's two arrangements for chips: its end
+           controls lifted out of the flow, and the chips wrapping onto several rows. -->
       <VInput
         v-bind="fieldAttrs"
         ref="inputRef"
+        :class="{ 'v-input-end-pinned v-input-chips': resolvedDisplay === 'chip' }"
         :model-value="displayText"
         readonly
         :label="label"
@@ -505,7 +463,7 @@ defineExpose({
         :disabled="resolvedDisabled"
         :invalid="invalid"
         :clearable="clearable"
-        :clear-visible="canClear"
+        :clear-visible="clearVisible"
         :clear-label="resolvedClearLabel"
         :icon-start="iconStart"
         :icon-start-label="iconStartLabel"
@@ -515,20 +473,20 @@ defineExpose({
         :icon-end-label="endIconLabel"
         :aria-describedby="describedBy"
         @click:icon-end="openPicker"
-        @clear="clearValue"
+        @clear="clear"
         @keydown="onFieldKeydown"
       >
         <template v-if="resolvedDisplay === 'chip' || $slots.start" #start>
           <template
             v-for="(file, index) in resolvedDisplay === 'chip' ? model : []"
-            :key="`${index}-${file.name}`"
+            :key="fileKey(file)"
           >
             <slot
               name="chip"
               :file="file"
               :index="index"
-              :label="chipLabel(file)"
-              :remove="() => removeAt(index)"
+              :label="chipLabels[index]!"
+              :remove="() => removeFile(index)"
               :size="chipScale.size"
               :compact="chipScale.compact"
             >
@@ -536,12 +494,12 @@ defineExpose({
                 tone="accent"
                 :size="chipScale.size"
                 :compact="chipScale.compact"
-                :dismissible="!readonly && !resolvedDisabled"
+                :dismissible="enabled"
                 :dismiss-label="m.common.remove(file.name)"
                 :disabled="resolvedDisabled"
-                :title="chipLabel(file) === file.name ? undefined : file.name"
-                @dismiss="removeAt(index)"
-                >{{ chipLabel(file) }}</VChip
+                :title="chipLabels[index] === file.name ? undefined : file.name"
+                @dismiss="removeFile(index)"
+                >{{ chipLabels[index] }}</VChip
               >
             </slot>
           </template>
@@ -552,7 +510,7 @@ defineExpose({
       </VInput>
     </div>
 
-    <div v-if="hint || counter" class="v-file-input-meta">
+    <div v-if="hint || counter" class="v-file-input-meta v-field-meta">
       <VTypography
         v-if="hint"
         :id="hintId"
@@ -562,8 +520,8 @@ defineExpose({
       >
         {{ hint }}
       </VTypography>
-      <span v-if="counter" :id="counterId" class="v-file-input-counter">
-        <slot name="counter" :count="model.length" :size="totalSize" :text="counterText">
+      <span v-if="counter" :id="counterId" class="v-file-input-counter v-field-counter">
+        <slot name="counter" :count="model.length" :bytes="totalSize" :text="counterText">
           {{ counterText }}
         </slot>
       </span>
@@ -586,7 +544,7 @@ defineExpose({
 
   /* The real file input is a SOURCE of files and not a control anyone deals with: it
      wears `.v-hidden-input`, and taking it out of the tab order and hiding it from screen
-     readers, in the template, is what leaves the visible field as the single stop and the
+     readers, in `useFileField`, is what leaves the visible field as the single stop and the
      single announcement. */
   .v-file-input:not([data-disabled]):not([data-readonly]) .v-file-input-control,
   .v-file-input:not([data-disabled]):not([data-readonly])[data-display='text'] .v-input-control {
@@ -603,95 +561,14 @@ defineExpose({
 
   /* While a file is being dragged over it, the field is highlighted by redefining the
      very variable VInput uses for its own border colour — so the two can never disagree.
-     The selector is one step more specific than VInput's, which is what makes it win
-     whatever order the two sheets end up in. */
-  .v-file-input[data-dragging] .v-input-field {
+
+     TRAP — the selector weighs (0,4,0), one step above VInput's states, and it has to. The
+     field inside is ALWAYS read-only, and VInput's read-only background weighs (0,3,0): at
+     that weight the winner would be whichever of the two sheets a bundler put last. */
+  .v-file-input[data-dragging] .v-input .v-input-field {
     --field-border-color: var(--vectis-color-accent);
 
     background: var(--vectis-color-accent-surface);
-  }
-
-  /* Shown as chips, the field holds them and lets them WRAP onto several rows, so it
-     grows instead of scrolling.
-
-     Two things have to be forced for that to hold together. The input inside is given
-     the chips' own height rather than the full height it inherits, or its natural height
-     would stretch every row it shares. And the padding at the end reserves exactly the
-     room the icons take, since those are lifted out of the wrapping flow just below.
-
-     That reservation is written as what the flow itself produces when the files are
-     shown as text and nothing is lifted out: one glyph's width per action from the
-     field's padding, one gap between two of them. It reads from the same two variables
-     as the insets further down, so the room reserved and the glyphs it protects cannot
-     drift apart. */
-  .v-file-input[data-display='chip'] .v-input-field {
-    position: relative;
-    flex-wrap: wrap;
-    height: auto;
-    min-height: var(--control-height);
-    padding-block: var(--vectis-space-1);
-    padding-inline-end: calc(
-      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
-    );
-  }
-
-  .v-file-input[data-display='chip'][data-can-clear] .v-input-field {
-    padding-inline-end: calc(
-      var(--control-padding-inline-field) + 2 * var(--vectis-icon-size) + 2 * var(--control-gap)
-    );
-  }
-
-  .v-file-input[data-display='chip'] .v-input-control {
-    height: var(--chip-height);
-  }
-
-  /* The two icons are lifted out of the wrapping flow — the same recipe VCombobox uses —
-     so that they stay pinned to the end of the field and vertically centred whatever the
-     chips do. Each is addressed by the POSITION class VInput gives it: `.v-input-action`
-     alone also names a clickable START icon, which would be pulled across to the end. */
-  .v-file-input[data-display='chip'] .v-input-clear,
-  .v-file-input[data-display='chip'] .v-input-icon-end {
-    position: absolute;
-    top: 50%;
-    translate: 0 -50%;
-  }
-
-  .v-file-input[data-display='chip'] .v-input-icon-end {
-    inset-inline-end: var(--control-padding-inline-field);
-  }
-
-  /* This is the ONE place where the spacing between the two icons has to be written by
-     hand. Everywhere else the field's own flow produces it for free, and the two must
-     agree, or the same component would show two different gaps depending on how the
-     files are displayed.
-
-     So it is written as exactly what that flow produces: the end icon occupies one
-     glyph's width from the field's padding, then one gap separates the two.
-
-     TRAP — this reads in GLYPHS and not in buttons. VInput gives its inner buttons a
-     negative margin equal to half the difference between the two, which makes an inset
-     land on the glyph's edge rather than on the button's. Measuring in button widths
-     instead pushes the cross a whole gap too far, with nothing anywhere to signal it. */
-  .v-file-input[data-display='chip'] .v-input-clear {
-    inset-inline-end: calc(
-      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
-    );
-  }
-
-  .v-file-input-meta {
-    display: flex;
-    align-items: baseline;
-    gap: var(--vectis-space-2);
-  }
-
-  /* The counter stays styled locally: tabular-nums is not a typographic role.
-     No overflow state — an over-limit file never enters the model, so the
-     counter cannot overflow. */
-  .v-file-input-counter {
-    margin-inline-start: auto;
-    font-size: var(--vectis-text-caption-size);
-    color: var(--vectis-color-text-muted);
-    font-variant-numeric: tabular-nums;
   }
 
   .v-file-input[data-disabled] .v-file-input-hint,

@@ -3,6 +3,7 @@ import { Fragment, createCommentVNode, createTextVNode, h } from 'vue'
 
 import { toggleValue } from './array'
 import { px } from './css'
+import { joinIds } from './ids'
 import { resolveMatcher } from './matcher'
 import { clamp } from './number'
 import { digitsOf, normalizeText, pad2 } from './text'
@@ -118,5 +119,15 @@ describe('flattenSlot', () => {
 
   it('an absent slot is an empty list, never a throw', () => {
     expect(flattenSlot(undefined)).toEqual([])
+  })
+})
+
+describe('joinIds', () => {
+  it('joins the references present, dropping every empty one by truthiness', () => {
+    expect(joinIds('own', undefined, false, '', null, 'hint')).toBe('own hint')
+  })
+
+  it('is undefined rather than an empty string when nothing is left', () => {
+    expect(joinIds(undefined, '', false)).toBeUndefined()
   })
 })

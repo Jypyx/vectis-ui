@@ -12,6 +12,8 @@
 
 import { computed, useId, type ComputedRef } from 'vue'
 
+import { joinIds } from '../utils/ids'
+
 export function useFieldIds(
   attrs: Record<string, unknown>,
   hasHint: () => boolean,
@@ -22,9 +24,8 @@ export function useFieldIds(
   return {
     fieldId: computed(() => (attrs.id as string | undefined) ?? uid),
     hintId,
-    describedBy: computed(() => {
-      const ids = [attrs['aria-describedby'] as string | undefined, hasHint() ? hintId : undefined]
-      return ids.filter(Boolean).join(' ') || undefined
-    }),
+    describedBy: computed(() =>
+      joinIds(attrs['aria-describedby'] as string | undefined, hasHint() && hintId),
+    ),
   }
 }

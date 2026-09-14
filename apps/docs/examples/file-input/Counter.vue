@@ -24,8 +24,8 @@ const custom = ref(start())
     />
 
     <VFileInput v-model="custom" counter multiple display="chip" label="A wording of your own">
-      <template #counter="{ count, size }">
-        <span class="own">{{ count }} of 5 · {{ Math.round(size / 1000) }} kB</span>
+      <template #counter="{ count, bytes }">
+        <span class="own">{{ count }} of 5 · {{ Math.round(bytes / 1000) }} kB</span>
       </template>
     </VFileInput>
   </div>

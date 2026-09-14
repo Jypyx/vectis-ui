@@ -216,7 +216,6 @@ const {
 // The prop keeps priority; what it falls back to is the dictionary, so the default
 // wording follows the language the design system is set to.
 const m = useMessages()
-const resolvedLoadingLabel = computed(() => props.loadingLabel ?? m.value.common.loading)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
 
 const { fieldId, hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
@@ -313,7 +312,11 @@ defineExpose({
         :aria-describedby="describedBy"
       />
 
-      <span v-if="counter" class="v-input-counter" :data-over="over ? '' : undefined">
+      <span
+        v-if="counter"
+        class="v-input-counter v-field-counter"
+        :data-over="over ? '' : undefined"
+      >
         {{ counterText }}
       </span>
 
@@ -332,7 +335,7 @@ defineExpose({
         <VIcon :name="closeIcon" />
       </button>
 
-      <VSpinner v-if="loading" :label="resolvedLoadingLabel" />
+      <VSpinner v-if="loading" :label="loadingLabel" />
       <slot v-else name="end">
         <button
           v-if="iconEnd && hasIconEndHandler"
@@ -495,18 +498,11 @@ defineExpose({
     --field-border-color: var(--vectis-color-danger);
   }
 
-  /* The counter keeps its own local styling rather than going through VTypography:
-     figures of equal width, so the number does not shift as it counts, and a colour
-     that marks the overflow — neither of which is a typographic role. */
+  /* The counter's type and its overflow colour are `.v-field-counter`'s (styles/field.css),
+     shared with the counters VTextarea and VFileInput draw under their field. Inside the
+     box it must not shrink, or a long value would squeeze its figures. */
   .v-input-counter {
     flex: none;
-    font-size: var(--vectis-text-caption-size);
-    color: var(--vectis-color-text-muted);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .v-input-counter[data-over] {
-    color: var(--vectis-color-danger-text);
   }
 
   /* A decorative icon is drawn in a muted grey, so it stays quieter than the text
@@ -519,9 +515,6 @@ defineExpose({
     font-size: var(--vectis-icon-size);
   }
 
-  /* The field's own buttons — the clear cross, a clickable icon — take their whole
-     recipe from `.v-field-action` (styles/field.css), which VInput and VTextarea share.
-     What stays here is what this field alone decides. */
   /* A disabled field greys out through the colour tokens, the same ones VCheckbox and
      VRadio use, and never through opacity. It comes LAST in the sequence of states,
      which at equal specificity is what makes it win over all of them, the error
@@ -554,6 +547,78 @@ defineExpose({
 
   .v-input-control:disabled {
     cursor: not-allowed;
+  }
+
+  /* Two arrangements a field composed on top of this one opts into with a class on this
+     root: VCombobox and VFileInput, the two that put chips inside the field. They live in
+     THIS sheet because it is the one both are guaranteed to load, being built on VInput —
+     the core sheet would charge every consumer for them.
+
+     `.v-input-end-pinned` lifts the clear cross and whatever carries `.v-input-icon-end` —
+     the end icon, or a composed field's own chevron and spinner — out of the flow, so they
+     stay pinned to the end of the field and vertically centred whatever the chips do. The
+     room they occupy is then reserved with padding, or the text and the chips would run
+     underneath. That reservation is written as exactly what the flow would have produced
+     with them left in place — one glyph's width each from the field's padding, one gap
+     between two of them — and reads the same two variables as the insets below, so the room
+     reserved and the glyphs it protects cannot drift apart.
+
+     Whether the cross takes its room is read off the markup (`:has`): the cross is rendered
+     exactly when there is something to clear, so the padding cannot disagree with it.
+
+     The centring is a translation kept SEPARATE from `rotate`, which VCombobox's chevron
+     turns when its panel opens. */
+  .v-input-end-pinned .v-input-field {
+    position: relative;
+    padding-inline-end: calc(
+      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
+    );
+  }
+
+  .v-input-end-pinned .v-input-field:has(> .v-input-clear) {
+    padding-inline-end: calc(
+      var(--control-padding-inline-field) + 2 * var(--vectis-icon-size) + 2 * var(--control-gap)
+    );
+  }
+
+  .v-input-end-pinned :is(.v-input-clear, .v-input-icon-end) {
+    position: absolute;
+    inset-inline-end: var(--control-padding-inline-field);
+    top: 50%;
+    translate: 0 -50%;
+  }
+
+  /* TRAP — this inset reads in GLYPHS and not in buttons. The cross is one of the field's
+     buttons, whose negative margin — half the difference between icon and button — already
+     cancels its own overhang, so an inset lands on the glyph's edge. Measured in button
+     widths instead, it pushes the cross a whole gap too far, with nothing to signal it.
+     It overrides the rule above at the same weight, so it has to stay after it. */
+  .v-input-end-pinned .v-input-clear {
+    inset-inline-end: calc(
+      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
+    );
+  }
+
+  /* `.v-input-chips` lets the chips WRAP onto several rows, the field growing instead of
+     scrolling but never shrinking below an ordinary control.
+
+     The input is forced to the chips' height rather than the full height it inherits: its
+     natural height is greater than a chip's, and the field would grow the moment it was
+     focused. That height is `--chip-height`, written inline on the composed field's root
+     by the helper that also picks the chips' size (utils/chip.ts), so the two cannot drift.
+
+     TRAP — the control rule must stay at (0,2,0). VCombobox folds its search input away
+     with a (0,3,0) rule that zeroes this height, and at equal weight the winner would be
+     whichever of the two sheets a bundler put last. */
+  .v-input-chips .v-input-field {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: var(--control-height);
+    padding-block: var(--vectis-space-1);
+  }
+
+  .v-input-chips .v-input-control {
+    height: var(--chip-height);
   }
 
   @media (prefers-reduced-motion: reduce) {

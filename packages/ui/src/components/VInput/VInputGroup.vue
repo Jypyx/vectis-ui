@@ -40,6 +40,7 @@ import { buttonGroupKey } from '../VButton/context'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { isDev } from '../../utils/env'
+import { joinIds } from '../../utils/ids'
 import { flattenSlot } from '../../utils/vnode'
 
 import { inputGroupKey } from './context'
@@ -120,11 +121,8 @@ const labelledBy = computed(() => {
 // why the component takes `inheritAttrs: false` despite having a single root: left to
 // fallthrough, a consumer's `aria-describedby` would overwrite ours and the hint would stop
 // being announced, with nothing to show for it.
-const describedBy = computed(
-  () =>
-    [attrs['aria-describedby'] as string | undefined, props.hint ? hintId : undefined]
-      .filter(Boolean)
-      .join(' ') || undefined,
+const describedBy = computed(() =>
+  joinIds(attrs['aria-describedby'] as string | undefined, !!props.hint && hintId),
 )
 
 /**
@@ -268,7 +266,7 @@ provide(buttonGroupKey, rowContext)
    * No doubled class is needed anywhere here, which is worth stating so nobody adds one "for
    * safety". Our corners weigh (0,3,0) against the (0,1,0) that `.v-input-field` and
    * `.v-button` put on themselves; `position: relative` matches the (0,2,0) of
-   * `.v-combobox .v-input-field` at the same value; nothing else sets a `z-index` on these
+   * `.v-input-end-pinned > .v-input-field` at the same value; nothing else sets a `z-index` on these
    * elements. VButtonGroup's own (0,4,0) corners are unreachable — a button cannot be both a
    * direct child of `.v-input-group-row` and inside a `.v-button-group`, the WRAPPER guard
    * excludes it.
@@ -323,8 +321,8 @@ provide(buttonGroupKey, rowContext)
   /* Every box is positioned, so they all paint in the SAME phase and in document order.
 
      TRAP — without this rule the paint order would depend on which components the row
-     happens to hold. `.v-combobox .v-input-field` is already `position: relative` (its
-     chevron and its cross are absolute) where a bare `.v-input-field` is not, and a
+     happens to hold. A combobox's field is already `position: relative` (VInput's
+     `.v-input-end-pinned`, which lifts its chevron and its cross out of the flow) where a bare `.v-input-field` is not, and a
      positioned element paints AFTER every in-flow block whatever the document order. So a
      combobox would paint over a VInput placed BEFORE it, and the joint would show the wrong
      one of the two borders. The symptom is a hairline that changes colour when the template

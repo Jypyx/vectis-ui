@@ -33,7 +33,7 @@ export default {
     },
     counter: {
       title: 'Compteur',
-      text: '<code>counter</code> ajoute une ligne sous le champ indiquant ce qui a été choisi. Le slot <code>#counter</code> la remplace et reçoit le nombre, le total en octets et la phrase déjà construite.',
+      text: '<code>counter</code> ajoute une ligne sous le champ indiquant ce qui a été choisi. Le slot <code>#counter</code> la remplace et reçoit le nombre, le total en octets et la phrase déjà construite. Là où le <code>counter</code> de VInput et VTextarea compte des caractères sans slot, celui-ci compte des fichiers.',
     },
     customIcon: {
       title: 'Icône personnalisée',
@@ -102,7 +102,7 @@ export default {
       slots: {
         chip: 'Remplace la puce qui représente un fichier. Elle reçoit le nom déjà raccourci AU MILIEU pour que son extension survive, <code>remove</code>, sans quoi le fichier ne pourrait plus être retiré, et la taille et la densité calculées pour tenir dans le champ.',
         counter:
-          'Remplace le compteur sous le champ. <code>text</code> est la phrase déjà construite et traduite ; le nombre et la taille totale sont là pour une formulation à vous.',
+          'Remplace le compteur sous le champ. <code>text</code> est la phrase déjà construite et traduite ; le nombre et la taille totale en octets, <code>bytes</code>, sont là pour une formulation à vous.',
         valueEnd:
           "Des contrôles à vous à l'intérieur du champ, placés avant ceux que le champ possède : la croix d'effacement et l'icône qui ouvre le panneau. Ces deux-là sont l'affordance propre du composant, ce qui explique l'absence de slot <code>end</code> ici.",
         start:

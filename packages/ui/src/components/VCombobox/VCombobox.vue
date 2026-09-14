@@ -44,7 +44,8 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
 
-import { iconClickHandlers } from '../../composables/useIconClickHandlers'
+import { canClear } from '../../composables/useClearable'
+import { iconStartListener } from '../../composables/useIconClickHandlers'
 
 import { useTimer } from '../../composables/useTimer'
 import { useMessages } from '../../i18n/state'
@@ -314,16 +315,9 @@ const model = defineModel<ItemValue | ItemValue[]>({ default: '' })
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
-// @a11y @core
-/*
- * Declaring `click:icon-start` is what puts it in the API tables and in a consumer's
- * editor, and it is also what takes it out of `$attrs`: it no longer travels with the
- * forwarded attributes and has to be handed to the field by hand. Only when the consumer
- * really wrote one, or VInput would make the start icon a button on every instance.
- */
-const iconStartClick = iconClickHandlers().start
-  ? { 'onClick:icon-start': (event: MouseEvent) => emit('click:icon-start', event) }
-  : undefined
+// Declared as this component's own event, `click:icon-start` is out of `$attrs`, so the
+// listener is relayed to the field by hand — and only when the consumer wrote one.
+const iconStartClick = iconStartListener((event) => emit('click:icon-start', event))
 
 /** What reaches the field: the consumer's own attributes, plus that listener. */
 const fieldAttrs = computed(() => ({ ...forwardedAttrs.value, ...iconStartClick }))
@@ -628,37 +622,56 @@ const collapsed = computed(
 // or a search in progress — and not merely when the text field holds text. The field
 // cannot work that out for itself, since the chips live outside its value, so the answer
 // is given to it explicitly, and the room for the cross is reserved accordingly.
-const canClear = computed(
-  () =>
-    props.clearable &&
-    !resolvedDisabled.value &&
-    !props.readonly &&
-    (selectedValues.value.length > 0 || query.value.length > 0),
+const clearVisible = computed(() =>
+  canClear(
+    props,
+    resolvedDisabled.value,
+    selectedValues.value.length > 0 || query.value.length > 0,
+  ),
 )
 
 const optionId = (index: number) => `${optionsId}-option-${index}`
 
-// A row has to be written twice in the template, once inside a block and once at the top
-// level of the panel, a Vue template having no way to declare a reusable fragment. These
-// two builders are what reduce that duplication to a single line on each side.
-function rowProps(entry: RenderedOption) {
+/**
+ * A rendered option with its state worked out, ONCE per row: `row` is what the option
+ * element takes, `slot` what the `#option` slot receives, and both read the same two answers.
+ */
+type OptionRow = RenderedOption & {
+  row: { id: string; icon?: IconSource; active: boolean; selected: boolean; disabled?: boolean }
+  slot: { option: ComboboxOption; index: number; active: boolean; selected: boolean }
+}
+type RowNode =
+  | OptionRow
+  | { kind: 'group'; key: string; label: string; options: OptionRow[] }
+  | { kind: 'separator'; key: string }
+
+function withState(entry: RenderedOption): OptionRow {
+  const active = entry.index === activeIndex.value
+  const selected = selectedSet.value.has(entry.option.value)
   return {
-    id: optionId(entry.index),
-    icon: entry.option.icon,
-    active: entry.index === activeIndex.value,
-    selected: selectedSet.value.has(entry.option.value),
-    disabled: entry.option.disabled,
+    ...entry,
+    row: {
+      id: optionId(entry.index),
+      icon: entry.option.icon,
+      active,
+      selected,
+      disabled: entry.option.disabled,
+    },
+    slot: { option: entry.option, index: entry.index, active, selected },
   }
 }
 
-function optionSlotProps(entry: RenderedOption) {
-  return {
-    option: entry.option,
-    index: entry.index,
-    active: entry.index === activeIndex.value,
-    selected: selectedSet.value.has(entry.option.value),
-  }
-}
+// A row has to be written twice in the template, once inside a block and once at the top
+// level of the panel, a Vue template having no way to declare a reusable fragment. Kept
+// apart from `rendered` on purpose: the highlight moves on every arrow key, and only this
+// cheap pass over the tree follows it — the filtering and the grouping stay where they are.
+const rows = computed<RowNode[]>(() =>
+  rendered.value.map((node) => {
+    if (node.kind === 'option') return withState(node)
+    if (node.kind === 'group') return { ...node, options: node.options.map(withState) }
+    return node
+  }),
+)
 
 function hover(entry: RenderedOption) {
   if (!entry.option.disabled) activeIndex.value = entry.index
@@ -880,13 +893,17 @@ defineExpose({
     :data-multiple="multiple ? '' : undefined"
     :data-collapsed="collapsed ? '' : undefined"
     :data-open="open ? '' : undefined"
-    :data-can-clear="canClear ? '' : undefined"
     @focusout="onFocusout"
   >
     <div class="v-combobox-control" @click="onControlClick">
+      <!-- The two arrangements VInput offers a field holding chips: its end controls lifted
+           out of the flow, always — the chevron and the cross stay put whether or not the
+           input has folded away — and the chips wrapping, when there are chips at all. -->
       <VInput
         ref="inputRef"
         v-model="query"
+        class="v-input-end-pinned"
+        :class="{ 'v-input-chips': multiple }"
         role="combobox"
         aria-haspopup="listbox"
         aria-autocomplete="list"
@@ -903,7 +920,7 @@ defineExpose({
         :icon-start="iconStart"
         :icon-start-label="iconStartLabel"
         :clearable="clearable"
-        :clear-visible="canClear"
+        :clear-visible="clearVisible"
         :clear-label="resolvedClearLabel"
         :placeholder="selectedValues.length === 0 ? placeholder : undefined"
         :aria-activedescendant="open && activeIndex >= 0 ? optionId(activeIndex) : undefined"
@@ -952,11 +969,11 @@ defineExpose({
              The spinner is hidden from screen readers, which neutralizes the status role
              it carries: what announces the loading is the panel, and once is enough. -->
         <template #end>
-          <VSpinner v-if="loading" class="v-combobox-spinner" aria-hidden="true" />
+          <VSpinner v-if="loading" class="v-combobox-spinner v-input-icon-end" aria-hidden="true" />
           <VIcon
             v-else
             v-bind="iconProps(expandIcon)"
-            class="v-combobox-chevron"
+            class="v-combobox-chevron v-input-icon-end"
             aria-hidden="true"
           />
         </template>
@@ -983,28 +1000,28 @@ defineExpose({
     >
       <!-- Blocks and separators exist for the eye alone: the keyboard counts through the
            flat list of surviving options and therefore never encounters one. -->
-      <template v-for="node in rendered" :key="node.key">
+      <template v-for="node in rows" :key="node.key">
         <VComboboxSeparator v-if="node.kind === 'separator'" />
 
         <VComboboxGroup v-else-if="node.kind === 'group'" :label="node.label">
           <VComboboxOption
             v-for="entry in node.options"
             :key="entry.key"
-            v-bind="rowProps(entry)"
+            v-bind="entry.row"
             @select="select(entry.option)"
             @pointermove="hover(entry)"
           >
-            <slot name="option" v-bind="optionSlotProps(entry)">{{ entry.option.label }}</slot>
+            <slot name="option" v-bind="entry.slot">{{ entry.option.label }}</slot>
           </VComboboxOption>
         </VComboboxGroup>
 
         <VComboboxOption
           v-else
-          v-bind="rowProps(node)"
+          v-bind="node.row"
           @select="select(node.option)"
           @pointermove="hover(node)"
         >
-          <slot name="option" v-bind="optionSlotProps(node)">{{ node.option.label }}</slot>
+          <slot name="option" v-bind="node.slot">{{ node.option.label }}</slot>
         </VComboboxOption>
       </template>
 
@@ -1078,42 +1095,12 @@ defineExpose({
     overflow: auto;
   }
 
-  /* The chevron and the clear cross are lifted out of the field's flow, so that they stay
-     pinned to its end and vertically centred whatever the chips do and whether or not the
-     input has folded away.
-
-     The room they occupy is then reserved with padding, or the text and the chips would
-     run underneath them. That reservation is written as exactly what the flow would have
-     produced with them left in place — one glyph's width each from the field's padding,
-     one gap between two of them — which is what keeps this field's spacing identical to
-     every other field in the design system. It reads from the same two variables as the
-     insets below, so the room reserved and the glyphs it protects cannot drift apart.
-
-     Vertically they are centred with a translation kept SEPARATE from the rotation, since
-     the chevron turns when the panel opens. */
-  .v-combobox .v-input-field {
-    position: relative;
-    padding-inline-end: calc(
-      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
-    );
-  }
-
-  .v-combobox[data-can-clear] .v-input-field {
-    padding-inline-end: calc(
-      var(--control-padding-inline-field) + 2 * var(--vectis-icon-size) + 2 * var(--control-gap)
-    );
-  }
-
-  /* The chevron and the spinner take turns in the same place and occupy the same box —
-     the field gives a spinner among its direct children the size of an icon — so the
-     padding reserved above serves both, and swapping one for the other shifts
-     nothing. */
+  /* The chevron and the clear cross are pinned to the end of the field by VInput's
+     `.v-input-end-pinned`, which also reserves their room. The chevron and the spinner take
+     turns in the same place and occupy the same box — the field gives a spinner among its
+     direct children the size of an icon — so swapping one for the other shifts nothing. */
   .v-combobox-chevron,
   .v-combobox-spinner {
-    position: absolute;
-    inset-inline-end: var(--control-padding-inline-field);
-    top: 50%;
-    translate: 0 -50%;
     color: var(--vectis-color-text-muted);
   }
 
@@ -1123,48 +1110,6 @@ defineExpose({
 
   .v-combobox[data-open] .v-combobox-chevron {
     rotate: 180deg;
-  }
-
-  /* The clear cross goes just before the chevron, centred the same way.
-
-     TRAP — both insets are measured to the GLYPH's edge, and they get there by different
-     routes: the chevron is a bare icon, whose box IS its glyph, while the cross is one of
-     the field's buttons, whose negative margin — half the difference between icon and
-     button — cancels its own overhang. Because of that the arithmetic reads directly: one
-     glyph's width from the field's padding, then one gap between the two.
-
-     That gap is the field's own, which is the entire point: a number written here instead
-     would drift from every other field in the design system, with nothing to signal
-     it. */
-  .v-combobox .v-input-clear {
-    position: absolute;
-    inset-inline-end: calc(
-      var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
-    );
-    top: 50%;
-    translate: 0 -50%;
-  }
-
-  /* With several values allowed, the field holds the chips and lets them WRAP onto
-     several rows, growing instead of scrolling — but never shrinking below the height of
-     an ordinary control.
-
-     The chips' height is written inline by the same helper that gives them their size,
-     because it belongs to their own subtree and the field cannot read it. The input is
-     then forced to that SAME height rather than the full height it inherits: its natural
-     height is greater than a chip's, and the field would grow the moment it was focused.
-
-     The result is a field that stays exactly one control tall, an input never taller than
-     the chips beside it, and no jump when the focus arrives. */
-  .v-combobox[data-multiple] .v-input-field {
-    flex-wrap: wrap;
-    height: auto;
-    min-height: var(--control-height);
-    padding-block: var(--vectis-space-1);
-  }
-
-  .v-combobox[data-multiple] .v-input-control {
-    height: var(--chip-height);
   }
 
   /* Folded away, the input is taken out of the flow entirely rather than merely narrowed:

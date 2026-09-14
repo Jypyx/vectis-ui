@@ -93,7 +93,7 @@ export default {
         thumbnail:
           "Le carré en début de ligne seulement : pour une vignette produite par votre serveur, l'image d'accroche d'une vidéo, ou un format que le navigateur ne sait pas décoder.",
         remove:
-          'Le contrôle qui retire une ligne. <code>remove</code> est la seule chose qui peut sortir le fichier, et <code>label</code> est le nom tout prêt, celui du fichier compris, sans lequel le bouton ne serait annoncé comme rien du tout.',
+          'Le contrôle qui retire une ligne. <code>remove</code> est la seule chose qui peut sortir le fichier, et <code>removeLabel</code> est le nom accessible tout prêt, celui du fichier compris, sans lequel le bouton ne serait annoncé comme rien du tout.',
       },
     },
   },

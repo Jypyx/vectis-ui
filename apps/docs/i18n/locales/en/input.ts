@@ -29,7 +29,7 @@ export default {
     },
     counters: {
       title: 'Counters',
-      text: "<code>counter</code> shows the length at the end of the field. <code>maxlength</code> is the browser's hard limit, where <code>softLimit</code> is a line the reader may cross: the text is never cut, the counter turns red and the field goes into error through the native validity.",
+      text: "<code>counter</code> shows the length at the end of the field. <code>maxlength</code> is the browser's hard limit, where <code>softLimit</code> is a line the reader may cross: the text is never cut, the counter turns red and the field goes into error through the native validity. The prop counts characters, as on VTextarea; on VFileInput the same name counts files and their size.",
     },
     pattern: {
       title: 'Pattern',

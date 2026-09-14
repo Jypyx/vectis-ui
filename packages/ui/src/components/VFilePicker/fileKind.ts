@@ -17,17 +17,10 @@
  * exposes it as a prop a consumer can override.
  */
 
+import type { FileCandidate } from '../../utils/file'
+
 export type FileKind =
   'image' | 'pdf' | 'audio' | 'video' | 'archive' | 'spreadsheet' | 'code' | 'file'
-
-/**
- * The only two things this module needs of a file. Taking that rather than a File is
- * what lets the tests describe a case in two lines instead of forging one.
- */
-export interface FileKindCandidate {
-  name: string
-  type: string
-}
 
 const MIME_KINDS: Record<string, FileKind> = {
   'application/pdf': 'pdf',
@@ -115,7 +108,7 @@ const EXTENSION_KINDS: Record<string, FileKind> = {
 }
 
 /** Works out which kind a file belongs to. */
-export function fileKind(file: FileKindCandidate): FileKind {
+export function fileKind(file: FileCandidate): FileKind {
   const type = file.type.toLowerCase()
 
   // The whole families first: matching on the family covers every image, audio and
