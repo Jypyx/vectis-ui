@@ -6,7 +6,7 @@ export default {
   viteBody:
     "Vectis UI s'intègre dans n'importe quelle application Vue 3, qu'elle soit générée avec <code>create-vue</code> ou un autre projet Vite. Vue étant une peer dependency, elle n'est pas directement incluse dans notre paquet. Cela évite les conflits en s'assurant qu'il n'y a toujours qu'une seule instance de Vue dans votre projet final.",
   viteStyles:
-    "Importez ensuite la feuille de styles globale une seule fois, au niveau du point d'entrée de votre application (ex. <code>main.ts</code>). Le fichier <code>styles.css</code> inclut le reset CSS, les design tokens et les styles de base communs (seulement 4,33 ko gzippé). Les styles propres à chaque composant sont quant à eux automatiquement chargés lors de leur import.",
+    "Importez ensuite la feuille de styles globale une seule fois, au niveau du point d'entrée de votre application (ex. <code>main.ts</code>). Le fichier <code>styles.css</code> inclut le reset CSS, les design tokens et les styles de base communs (5,27 ko gzippé). Les styles propres à chaque composant sont quant à eux automatiquement chargés lors de leur import.",
 
   nuxtHeading: 'Avec Nuxt 3 ou 4',
   nuxtBody: "Nuxt incluant déjà Vue, vous n'avez qu'à ajouter le paquet Vectis UI à votre projet.",

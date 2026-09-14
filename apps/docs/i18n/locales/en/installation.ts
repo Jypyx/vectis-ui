@@ -6,7 +6,7 @@ export default {
   viteBody:
     'Vectis UI integrates into any Vue 3 application, whether generated with <code>create-vue</code> or another Vite project. Since Vue is a peer dependency, it is not directly included in our package. This avoids conflicts by ensuring there is always only a single instance of Vue in your final project.',
   viteStyles:
-    "Next, import the global stylesheet once at your application's entry point (e.g., <code>main.ts</code>). The <code>styles.css</code> file includes the CSS reset, design tokens, and common base styles (only 4.33 kB gzipped). Component-specific styles are automatically loaded when they are imported.",
+    "Next, import the global stylesheet once at your application's entry point (e.g., <code>main.ts</code>). The <code>styles.css</code> file includes the CSS reset, design tokens, and common base styles (5.27 kB gzipped). Component-specific styles are automatically loaded when they are imported.",
 
   nuxtHeading: 'With Nuxt 3 or 4',
   nuxtBody:

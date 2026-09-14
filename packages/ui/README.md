@@ -20,7 +20,7 @@ pnpm add vectis-ui vue
 import 'vectis-ui/styles.css'
 ```
 
-`styles.css` is the **core**: the reset, the tokens and the chrome shared by every component (4.33 kB gzip). Each component's own CSS ships with the component and is pulled in by the import you already write — nothing else to add, and you download the CSS of what you use. A single `VButton` costs 4.87 kB gzip of CSS instead of the 21.58 kB of a bundled stylesheet.
+`styles.css` is the **core**: the reset, the tokens and the chrome shared by every component (5.27 kB gzip). Each component's own CSS ships with the component and is pulled in by the import you already write — nothing else to add, and you download the CSS of what you use. A single `VButton` costs 6.08 kB gzip of CSS instead of the 22.41 kB of a bundled stylesheet.
 
 Those figures are measured, not estimated: `pnpm --filter vectis-ui bench:size` prints them from the built artefact and holds them to a committed baseline, so they cannot drift out of step with the library again.
 
