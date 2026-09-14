@@ -11,7 +11,7 @@ import { description, image, schedule, table_chart as tableChart } from 'vectis-
 <template>
   <aside class="sidebar">
     <VSideNavigation label="Workspace">
-      <VSideNavigationItem href="#usage" :icon="tableChart" active>Overview</VSideNavigationItem>
+      <VSideNavigationItem href="#usage" :icon="tableChart" current>Overview</VSideNavigationItem>
 
       <!-- A rule, for a break between two runs of rows. It says nothing and is
            announced as nothing: real grouping is the group's job. -->

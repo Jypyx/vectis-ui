@@ -195,7 +195,7 @@ provide(toggleKey, {
  */
 function onKeydown(event: KeyboardEvent) {
   const group = event.currentTarget as HTMLElement
-  arrowNavigate(event, group, navigableItems(group, '.v-toggle-item:not(:disabled)'), {
+  arrowNavigate(event, group, () => navigableItems(group, '.v-toggle-item:not(:disabled)'), {
     vertical: props.orientation === 'vertical',
   })
 }

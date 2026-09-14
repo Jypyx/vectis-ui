@@ -5,7 +5,7 @@ export default {
   examples: {
     separator: {
       title: 'Séparateur personnalisé',
-      text: "<code>separator</code> remplace le chevron dessiné entre deux segments, et accepte toute valeur d'icône.",
+      text: "<code>separatorIcon</code> remplace le chevron dessiné entre deux segments, et accepte toute valeur d'icône.",
     },
     icons: {
       title: 'Avec des icônes',
@@ -25,7 +25,7 @@ export default {
           "Le nom que les lecteurs d'écran annoncent pour cette navigation. Il retombe sur le dictionnaire du design system, dans la langue courante.",
         currentPath:
           "L'adresse de la page affichée. Le segment dont le <code>href</code> lui correspond est le segment courant ; une barre oblique finale d'un côté ou de l'autre ne change rien.",
-        separator: "L'icône dessinée entre deux segments.",
+        separatorIcon: "L'icône dessinée entre deux segments.",
         maxItems:
           "La longueur au-delà de laquelle le fil se replie : il ne reste que le premier segment, un bouton de points de suspension et les deux derniers, le bouton ouvrant un menu qui liste les seuls segments masqués. En dessous de 3 il n'y aurait plus rien à replier : 3 est donc le minimum effectif.",
         ellipsisLabel:

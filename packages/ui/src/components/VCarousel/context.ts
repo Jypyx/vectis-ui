@@ -12,8 +12,6 @@
 import type { InjectionKey } from 'vue'
 
 export interface CarouselContext {
-  /** How many slides there are, counted from what the slot renders. */
-  readonly count: number
   /** What a screen reader says a slide IS, in place of the bare word "group". */
   readonly slideRoleDescription: string
   /**

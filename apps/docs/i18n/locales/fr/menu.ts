@@ -87,10 +87,12 @@ export default {
     },
     VMenuGroup: {
       props: {
-        label: "Le nom de la section. C'est un titre, pas une commande : rien ne se passe au clic.",
+        label:
+          "Le nom de la section, que le slot <code>#label</code> remplace. L'un des deux est nécessaire : c'est lui qui nomme le groupe. C'est un titre, pas une commande : rien ne se passe au clic.",
       },
       slots: {
         default: 'Les commandes appartenant à cette section.',
+        label: 'Un nom fait de balisage, qui remplace la prop <code>label</code>.',
       },
     },
   },

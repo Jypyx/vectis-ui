@@ -2,7 +2,7 @@
 // from one control to the next, which is what the arrows are expected to do.
 /**
  * Arrow-key navigation over a row or column of controls, in one place: VPagination, VTabs,
- * VToggle and VMenuPanel all use it.
+ * VToggle, VMenuPanel and VSideNavigation all use it.
  *
  * CONTRACT — the arrows and Home/End MOVE focus and never activate what they land on.
  * Activating on arrival would navigate somewhere the reader did not ask to go, or select a
@@ -18,7 +18,8 @@ import { isRtl } from './direction'
  * `display: none` is filtered here because it has to be: VPagination hides its neighbours
  * through container queries as the bar narrows, and a consumer may hide a tab outright.
  * Focus must not land on an element nobody can see. The read costs a style recalculation
- * per element, so a list of dozens (VTimeInput's rows) passes its own array instead.
+ * per element, which is why `arrowNavigate` asks for the list only once it knows the key is
+ * one it handles.
  */
 export function navigableItems(container: HTMLElement, selector: string): HTMLElement[] {
   return [...container.querySelectorAll<HTMLElement>(selector)].filter(
@@ -34,11 +35,15 @@ export function navigableItems(container: HTMLElement, selector: string): HTMLEl
  * Left and Right name a physical side, so RTL swaps them: Right must reach the NEXT item,
  * which is then on the left. The block axis needs no such treatment, no language
  * reversing it.
+ *
+ * `items` is a FUNCTION, called only once the key is known to be one of the four. A keydown
+ * handler on a container sees every key typed inside it (Tab, Enter, letters), and collecting
+ * the list costs a query plus, for most callers, one style read per element.
  */
 export function arrowNavigate(
   event: KeyboardEvent,
   container: HTMLElement,
-  items: HTMLElement[],
+  items: () => HTMLElement[],
   options: { vertical?: boolean } = {},
 ): boolean {
   const vertical = options.vertical ?? false
@@ -46,22 +51,23 @@ export function arrowNavigate(
     ? ['ArrowDown', 'ArrowUp', 'Home', 'End']
     : ['ArrowRight', 'ArrowLeft', 'Home', 'End']
   if (!keys.includes(event.key)) return false
-  if (items.length === 0) return false
+  const list = items()
+  if (list.length === 0) return false
   event.preventDefault()
 
   // A function, not a value: only the arrow branch asks, so Home and End are spared the
   // style recalculation that reading the direction forces.
   const forward = () =>
     vertical ? event.key === 'ArrowDown' : (event.key === 'ArrowRight') !== isRtl(container)
-  const current = items.indexOf(document.activeElement as HTMLElement)
+  const current = list.indexOf(document.activeElement as HTMLElement)
   const next =
     event.key === 'Home'
       ? 0
       : event.key === 'End'
-        ? items.length - 1
+        ? list.length - 1
         : current === -1
           ? 0
-          : (current + (forward() ? 1 : -1) + items.length) % items.length
-  items[next]?.focus()
+          : (current + (forward() ? 1 : -1) + list.length) % list.length
+  list[next]?.focus()
   return true
 }

@@ -5,7 +5,7 @@ export default {
   examples: {
     links: {
       title: 'Liens et actions',
-      text: "<code>href</code> rend une ligne sous forme de vrai lien ; sans lui, la ligne est un bouton qui rapporte son activation par <code>select</code>. <code>active</code> marque la ligne où se trouve le lecteur et l'annonce comme la page courante. Une ligne qui porte des sous-éléments ignore <code>href</code>.",
+      text: "<code>href</code> rend une ligne sous forme de vrai lien ; sans lui, la ligne est un bouton qui rapporte son activation par <code>select</code>. <code>current</code> marque la ligne où se trouve le lecteur et l'annonce comme la page courante. Une ligne qui porte des sous-éléments ignore <code>href</code>.",
     },
     sublabels: {
       title: 'Sous-libellés',
@@ -21,7 +21,7 @@ export default {
     },
     depth: {
       title: 'Imbrication',
-      text: "Une ligne à laquelle on donne un slot <code>#items</code> devient une branche, et une branche peut porter ses propres branches aussi loin que va l'arbre. Chaque niveau est indenté exactement de la place que prend une icône de début.",
+      text: "Une ligne à laquelle on donne un slot <code>#children</code> devient une branche, et une branche peut porter ses propres branches aussi loin que va l'arbre. Chaque niveau est indenté exactement de la place que prend une icône de début.",
     },
     chevrons: {
       title: 'Le chevron des sections',
@@ -29,7 +29,7 @@ export default {
     },
     exclusive: {
       title: 'Une section à la fois',
-      text: "<code>exclusive</code> ne garde qu'une section ouverte à la fois au sein de chaque niveau. Il est désactivé par défaut.",
+      text: "<code>exclusive</code> ne garde qu'une section ouverte à la fois au sein de chaque niveau. Il est désactivé par défaut, à l'inverse de VAccordion, dont les sections se referment l'une l'autre sauf si <code>multiple</code> est posé.",
     },
     openState: {
       title: 'Savoir si une section est ouverte',
@@ -69,12 +69,12 @@ export default {
         sublabel: 'Une seconde ligne sous le libellé, pour un statut ou une courte explication.',
         icon: 'Une icône avant le libellé. Le slot <code>#icon</code> la remplace.',
         href: "Où mène cette ligne, ce qui en fait un lien. Elle est ignorée sur une ligne qui a des sous-items : une telle ligne s'ouvre et se referme plutôt que de naviguer.",
-        active:
+        current:
           'Marque cette ligne comme la page actuellement consultée. Elle est mise en évidence et annoncée comme la page courante.',
         disabled:
           'Rend la ligne inutilisable : elle se grise par les tokens de couleur et quitte le chemin du clavier.',
         defaultOpen:
-          "Rend une branche déjà ouverte. Cela ne fixe que l'état initial ; le navigateur le possède ensuite.",
+          "Rend une branche déjà ouverte. Seule sa valeur initiale est lue : le navigateur possède l'état ensuite, et la changer plus tard ne referme pas une branche que le lecteur a ouverte.",
         vModelOpen:
           "Si la branche est ouverte, quand vous voulez la piloter ou l'observer. Non liée, le navigateur garde cet état pour lui et <code>defaultOpen</code> n'en donne que la valeur initiale.",
       },
@@ -88,7 +88,7 @@ export default {
           'Une seconde ligne faite de balisage, qui remplace la prop <code>sublabel</code>.',
         icon: 'Du contenu libre avant le libellé, qui prend la place de <code>icon</code>.',
         end: 'Du contenu libre à la fin de la ligne, avant le chevron : un compteur, un badge. Sur une branche il ne doit pas être focalisable, la ligne étant déjà un contrôle.',
-        items:
+        children:
           "Les sous-items, qui font de cette ligne une branche. La profondeur n'est pas limitée.",
       },
     },

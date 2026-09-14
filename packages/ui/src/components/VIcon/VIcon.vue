@@ -20,6 +20,7 @@
  */
 import { computed, type Component } from 'vue'
 
+import { iconName as nameOf } from './iconProps'
 import { ICON_VIEW_BOX } from './icons/viewBox'
 import { resolveIcon } from './resolver'
 import type { BuiltinIcon, IconRender } from './types'
@@ -113,7 +114,7 @@ function tag(render: IconRender): Resolved {
  * The icon's identity: the name the resolver is asked for, and the one `data-icon`
  * records whatever the drawing turned out to come from.
  */
-const iconName = computed(() => (typeof props.name === 'string' ? props.name : props.name?.name))
+const iconName = computed(() => nameOf(props.name))
 
 // @fallback — the ladder itself: every rung hands over to the next one, and the
 // ligature is the last resort, reached when neither the resolver nor the registry

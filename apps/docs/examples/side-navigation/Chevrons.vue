@@ -16,13 +16,13 @@ import {
       <VSideNavigation label="Rotated chevron" :expand-icon="arrowDropDown">
         <VSideNavigationItem default-open>
           Documents
-          <template #items>
+          <template #children>
             <VSideNavigationItem href="#usage">Drafts</VSideNavigationItem>
           </template>
         </VSideNavigationItem>
         <VSideNavigationItem>
           Media
-          <template #items>
+          <template #children>
             <VSideNavigationItem href="#usage">Images</VSideNavigationItem>
           </template>
         </VSideNavigationItem>
@@ -41,13 +41,13 @@ import {
       >
         <VSideNavigationItem default-open>
           Documents
-          <template #items>
+          <template #children>
             <VSideNavigationItem href="#usage">Drafts</VSideNavigationItem>
           </template>
         </VSideNavigationItem>
         <VSideNavigationItem>
           Media
-          <template #items>
+          <template #children>
             <VSideNavigationItem href="#usage">Images</VSideNavigationItem>
           </template>
         </VSideNavigationItem>

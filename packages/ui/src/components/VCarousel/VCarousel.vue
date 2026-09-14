@@ -323,9 +323,6 @@ const resolvedEffect = computed<CarouselEffect>(() =>
 )
 
 provide(carouselKey, {
-  get count() {
-    return count.value
-  },
   get slideRoleDescription() {
     return m.value.carousel.slideRoleDescription
   },
@@ -852,13 +849,11 @@ const liveMessage = computed(() =>
 // @devwarn
 if (isDev) {
   watchEffect(() => {
-    if (props.effect === 'fade' && props.itemsPerView > 1)
+    if (props.effect !== resolvedEffect.value)
       console.warn(
-        '[VCarousel] `fade` needs one item per view: over a single view timeline every slide is counter-translated onto the same spot, so they would pile up. Downgraded to `slide`.',
-      )
-    if (props.effect === 'fade' && hasPeek.value)
-      console.warn(
-        '[VCarousel] `fade` and `peek` are mutually exclusive: the counter-translate parks every slide over the viewport, so the peeked strip is covered. Downgraded to `slide`.',
+        props.itemsPerView > 1
+          ? '[VCarousel] `fade` needs one item per view: over a single view timeline every slide is counter-translated onto the same spot, so they would pile up. Downgraded to `slide`.'
+          : '[VCarousel] `fade` and `peek` are mutually exclusive: the counter-translate parks every slide over the viewport, so the peeked strip is covered. Downgraded to `slide`.',
       )
     /*
      * Not a misuse — the combination is supported and does exactly what it says. What it
@@ -903,8 +898,7 @@ if (isDev) {
     @focusout="focused = false"
   >
     <!--
-      The stage holds the viewport, the controls and the autoplay control — and
-      NOTHING else. The indicator bar is a sibling on purpose: inside this box it
+      The stage holds the viewport and the controls — and NOTHING else. The indicator bar is a sibling on purpose: inside this box it
       would join the height the controls are centred on, and the pair would sit
       visibly below the middle of the slides.
     -->
@@ -1116,8 +1110,7 @@ if (isDev) {
   }
 
   /*
-   * Positioning context of the controls and of the autoplay control — and of NOTHING
-   * else. The indicator bar is a SIBLING on purpose: inside this box it would join
+   * Positioning context of the controls — and of NOTHING else. The indicator bar is a SIBLING on purpose: inside this box it would join
    * the height the controls are centred on, and an `inside` pair would sit visibly
    * below the middle of the slides. Kept a flex column so a consumer `#controls` slot
    * still stacks under the viewport with a gutter.
@@ -1252,10 +1245,6 @@ if (isDev) {
     scroll-snap-align: end;
   }
 
-  .v-carousel-effect {
-    block-size: 100%;
-  }
-
   /*
    * Each effect names the keyframes it is written on, and the two mechanisms that
    * play them read the name from here rather than from a selector of their own —
@@ -1276,10 +1265,10 @@ if (isDev) {
 
   .v-carousel[data-effect='slide'] {
     /*
-     * A TENTH of the slide, not its width. Every inner box shifts at once, so a full
+     * A FIFTH of the slide, not its width. Every inner box shifts at once, so a full
      * one would park each over its neighbour and the overlap would paint the wrong
      * slide for the length of the run — invisible at one item per view, plain at
-     * three. A tenth reads as a direction and overlaps nothing at any count.
+     * three. A fifth reads as a direction and overlaps nothing at any count.
      */
     --carousel-jump-shift: 20%;
   }
@@ -1296,6 +1285,7 @@ if (isDev) {
    * `animation-name` is the one thing that does.
    */
   .v-carousel-effect {
+    block-size: 100%;
     animation-name: var(--carousel-jump-name, none);
     animation-duration: var(--vectis-duration-base);
     animation-timing-function: var(--vectis-ease-out);

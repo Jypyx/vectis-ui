@@ -44,7 +44,7 @@ const t = storyText({
     options: 'Options',
     exportSelectionCsv: 'Export the selection as CSV with the headers',
     longLabel: 'An abnormally long label that must be bounded by the menu maximum width',
-    longSublabel: 'An equally verbose sublabel that wraps over several lines without overflowing',
+    longSublabel: 'An equally verbose sublabel, truncated as well rather than wrapped',
   },
   fr: {
     actions: 'Actions',
@@ -80,7 +80,8 @@ const t = storyText({
     options: 'Options',
     exportSelectionCsv: 'Exporter la sélection au format CSV avec les en-têtes',
     longLabel: 'Un libellé anormalement long qui doit être borné par la largeur maximale du menu',
-    longSublabel: 'Un sous-libellé tout aussi verbeux qui passe sur plusieurs lignes sans déborder',
+    longSublabel:
+      'Un sous-libellé tout aussi verbeux, tronqué lui aussi plutôt que renvoyé à la ligne',
   },
 })
 
@@ -581,4 +582,21 @@ export const LongLabels: Story = {
       </VMenu>
     `,
   }),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Options' })
+    const panel = document.getElementById(
+      trigger.getAttribute('popovertarget') ?? '',
+    ) as HTMLElement
+    await userEvent.click(trigger)
+    await waitFor(() => expect(panel.matches(':popover-open')).toBe(true))
+
+    // The long row stays ONE line of label and one of sublabel: both are cut with an
+    // ellipsis at the panel's ceiling instead of wrapping (jsdom lays nothing out).
+    const label = panel.querySelectorAll<HTMLElement>('.v-menu-item-label')[1]!
+    const sublabel = panel.querySelector<HTMLElement>('.v-menu-item-sublabel')!
+    for (const line of [label, sublabel]) {
+      await expect(line.scrollWidth).toBeGreaterThan(line.clientWidth)
+      await expect(getComputedStyle(line).whiteSpace).toBe('nowrap')
+    }
+  },
 }

@@ -6,7 +6,7 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
 <template>
   <aside class="sidebar">
     <VSideNavigation label="Workspace">
-      <VSideNavigationItem href="#usage" :icon="description" active>Documents</VSideNavigationItem>
+      <VSideNavigationItem href="#usage" :icon="description" current>Documents</VSideNavigationItem>
 
       <!-- A disabled link stops leading anywhere and the arrow keys step over it. It
            greys out through the colour tokens rather than through an opacity, so it
@@ -17,7 +17,7 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
            it holds is out of reach for good. -->
       <VSideNavigationItem :icon="tableChart" disabled>
         Reports
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#usage">Weekly</VSideNavigationItem>
         </template>
       </VSideNavigationItem>

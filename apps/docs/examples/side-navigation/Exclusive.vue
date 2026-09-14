@@ -12,7 +12,7 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
     <VSideNavigation label="Workspace" exclusive>
       <VSideNavigationItem :icon="description" default-open>
         Documents
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#usage">Drafts</VSideNavigationItem>
           <VSideNavigationItem href="#usage">Published</VSideNavigationItem>
         </template>
@@ -20,7 +20,7 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
 
       <VSideNavigationItem :icon="image">
         Media
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#usage">Images</VSideNavigationItem>
           <VSideNavigationItem href="#usage">Video</VSideNavigationItem>
         </template>
@@ -28,7 +28,7 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
 
       <VSideNavigationItem :icon="tableChart">
         Reports
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#usage">Weekly</VSideNavigationItem>
         </template>
       </VSideNavigationItem>

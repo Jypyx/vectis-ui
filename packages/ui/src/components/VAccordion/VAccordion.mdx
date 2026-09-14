@@ -19,6 +19,13 @@ no support, it is simply instant.
 
 `multiple` removes the shared `name`: each panel then opens and closes independently.
 
+The polarity is the opposite of `VSideNavigation`, whose `exclusive` prop turns the shared name ON:
+a sidebar usually lets several sections stay open, an accordion usually does not. Both follow the
+rule that a boolean prop defaults to `false`, so each is named for the behaviour it adds.
+
+Each `VAccordionItem` takes `defaultOpen` (its initial value only) and `v-model:open`, to drive or
+observe the section from the consumer, the pair `VSideNavigationItem` offers too.
+
 <Canvas of={VAccordionStories.MultipleOpen} />
 
 ## Rich title

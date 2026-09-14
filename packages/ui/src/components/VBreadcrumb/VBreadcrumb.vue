@@ -57,7 +57,7 @@ interface BreadcrumbProps {
    * The icon drawn between two segments: an icon name, or an explicit render,
    * exactly like an item's `icon`.
    */
-  separator?: IconSource
+  separatorIcon?: IconSource
   /**
    * The length past which the trail folds: only the first segment, an "…" button and
    * the last two remain, the button opening a menu that lists the hidden segments
@@ -75,7 +75,7 @@ interface BreadcrumbProps {
 const props = withDefaults(defineProps<BreadcrumbProps>(), {
   label: undefined,
   currentPath: undefined,
-  separator: () => chevronRightIcon,
+  separatorIcon: () => chevronRightIcon,
   maxItems: undefined,
   ellipsisLabel: undefined,
 })
@@ -92,11 +92,15 @@ function normalize(path: string): string {
   return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path
 }
 
+// Normalized once per change of the prop rather than once per segment on every render.
+const normalizedCurrent = computed(() =>
+  props.currentPath === undefined ? undefined : normalize(props.currentPath),
+)
+
 // @a11y — this is what feeds `aria-current="page"`, the only marker telling
 // assistive technology where the trail ends.
 function isCurrent(item: BreadcrumbItem): boolean {
-  if (props.currentPath === undefined) return false
-  return normalize(item.href) === normalize(props.currentPath)
+  return normalizedCurrent.value !== undefined && normalize(item.href) === normalizedCurrent.value
 }
 
 const truncated = computed(
@@ -118,12 +122,15 @@ const visibleItems = computed(() =>
     <ol class="v-breadcrumb-list">
       <template v-for="(item, index) in visibleItems" :key="item.href">
         <li v-if="truncated && index === 1" class="v-breadcrumb-item v-breadcrumb-ellipsis">
-          <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separator)" mirrored />
+          <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separatorIcon)" mirrored />
           <VMenu>
             <template #trigger="{ triggerProps }">
-              <VIconButton size="sm" :label="resolvedEllipsisLabel" v-bind="triggerProps">
-                <VIcon :name="moreHorizIcon" />
-              </VIconButton>
+              <VIconButton
+                size="sm"
+                :label="resolvedEllipsisLabel"
+                :icon="moreHorizIcon"
+                v-bind="triggerProps"
+              />
             </template>
             <VMenuItem
               v-for="hidden in hiddenItems"
@@ -135,7 +142,7 @@ const visibleItems = computed(() =>
           </VMenu>
         </li>
         <li class="v-breadcrumb-item">
-          <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separator)" mirrored />
+          <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separatorIcon)" mirrored />
           <a
             class="v-breadcrumb-link"
             :href="item.href"

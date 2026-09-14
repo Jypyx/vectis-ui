@@ -11,7 +11,8 @@ import type { VNode } from 'vue'
  * disagree — VAvatarGroup would say "+0" in one and "+3" in the other. Reading the slot
  * happens while the parent renders, which is the same on both sides.
  *
- * Used by VAvatarGroup for its "+N" and by VCarousel for its dots and its live region.
+ * Used by VAvatarGroup for its "+N", by VCarousel for its slide count and the index each
+ * slide is handed, and by VInputGroup for its dev warning on a segment carrying a label.
  */
 export function flattenSlot(nodes: VNode[] | undefined): VNode[] {
   const out: VNode[] = []

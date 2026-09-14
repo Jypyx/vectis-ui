@@ -285,7 +285,7 @@ const navEl = ref<HTMLElement | null>(null)
 function onKeydown(event: KeyboardEvent) {
   const nav = navEl.value
   if (!nav) return
-  arrowNavigate(event, nav, navigableItems(nav, '.v-pagination-page:not(:disabled)'))
+  arrowNavigate(event, nav, () => navigableItems(nav, '.v-pagination-page:not(:disabled)'))
 }
 </script>
 

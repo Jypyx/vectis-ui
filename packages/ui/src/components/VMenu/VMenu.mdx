@@ -114,7 +114,8 @@ assumes a browser that implements anchor positioning.
 
 `placement` (`bottom-start` by default, `bottom`, `bottom-end`, `top-start`, `top`, `top-end`)
 rests on `position-area` with automatic flipping (`position-try-fallbacks`) when room runs out.
-Submenus open in `right-start`. Labels are bounded by the panel's maximum width:
+Submenus open in `right-start`. Labels are bounded by the panel's maximum width, and a label or
+sublabel longer than that is truncated with an ellipsis rather than wrapped, as in `VSideNavigation`:
 
 <Canvas of={VMenuStories.LongLabels} />
 

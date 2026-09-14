@@ -5,7 +5,7 @@ import { VSideNavigation, VSideNavigationItem } from 'vectis-ui'
 <template>
   <aside class="sidebar">
     <VSideNavigation label="Project">
-      <VSideNavigationItem href="#usage" active>Overview</VSideNavigationItem>
+      <VSideNavigationItem href="#usage" current>Overview</VSideNavigationItem>
       <VSideNavigationItem href="#usage">Activity</VSideNavigationItem>
       <VSideNavigationItem href="#usage">Settings</VSideNavigationItem>
     </VSideNavigation>

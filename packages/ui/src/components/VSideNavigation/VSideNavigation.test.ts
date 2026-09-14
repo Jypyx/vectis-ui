@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
-import { defineComponent, ref } from 'vue'
+import { defineComponent, nextTick, ref } from 'vue'
 
 import VSideNavigation from './VSideNavigation.vue'
 import VSideNavigationGroup from './VSideNavigationGroup.vue'
@@ -22,16 +22,16 @@ function renderNav(inner: string, navAttrs = '', state: Record<string, unknown> 
   return render(Harness)
 }
 
-/** Reference tree: 3 levels, a group, a separator, an active leaf. */
+/** Reference tree: 3 levels, a group, a separator, a current leaf. */
 const TREE = `
-  <VSideNavigationItem href="/" active icon="home">Home</VSideNavigationItem>
+  <VSideNavigationItem href="/" current icon="home">Home</VSideNavigationItem>
   <VSideNavigationItem icon="folder" default-open>
     Projects
-    <template #items>
+    <template #children>
       <VSideNavigationItem href="/a">Alpha</VSideNavigationItem>
       <VSideNavigationItem>
         Beta
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="/b/1">Beta 1</VSideNavigationItem>
         </template>
       </VSideNavigationItem>
@@ -119,12 +119,12 @@ describe('VSideNavigation', () => {
       expect(onSelect).toHaveBeenCalledTimes(1)
     })
 
-    it('active: aria-current="page" on a link, "true" on a button, data-active on the row', () => {
+    it('current: aria-current="page" on a link, "true" on a button, data-current on the row', () => {
       const { container } = renderNav(`
-        <VSideNavigationItem href="/x" active>Link</VSideNavigationItem>
-        <VSideNavigationItem active>Button</VSideNavigationItem>
+        <VSideNavigationItem href="/x" current>Link</VSideNavigationItem>
+        <VSideNavigationItem current>Button</VSideNavigationItem>
       `)
-      expect(row(container, 'Link').dataset.active).toBe('')
+      expect(row(container, 'Link').dataset.current).toBe('')
       expect(row(container, 'Link').querySelector('a')?.getAttribute('aria-current')).toBe('page')
       expect(row(container, 'Button').querySelector('button')?.getAttribute('aria-current')).toBe(
         'true',
@@ -169,7 +169,7 @@ describe('VSideNavigation', () => {
     const BRANCH = `
       <VSideNavigationItem @select="onSelect">
         Parent
-        <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+        <template #children><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
       </VSideNavigationItem>
     `
 
@@ -194,13 +194,44 @@ describe('VSideNavigation', () => {
       expect(beta?.open).toBe(false)
     })
 
+    it('`default-open` is read once: changing it later leaves the branch as it is', async () => {
+      const initial = ref(true)
+      const { container } = renderNav(
+        `
+          <VSideNavigationItem :default-open="initial">
+            Parent
+            <template #children><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+          </VSideNavigationItem>
+        `,
+        '',
+        { initial },
+      )
+      const details = container.querySelector('details')!
+      expect(details.open).toBe(true)
+      initial.value = false
+      await nextTick()
+      expect(details.open).toBe(true)
+    })
+
+    it('current: data-current on a branch row, aria-current="true" on its summary', () => {
+      const { container } = renderNav(`
+        <VSideNavigationItem current>
+          Parent
+          <template #children><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+        </VSideNavigationItem>
+      `)
+      const summary = container.querySelector('summary')!
+      expect(summary.dataset.current).toBe('')
+      expect(summary.getAttribute('aria-current')).toBe('true')
+    })
+
     it('v-model:open — driven from the parent, and rewritten by the native `toggle` event', async () => {
       const open = ref(false)
       const { container } = renderNav(
         `
           <VSideNavigationItem v-model:open="open">
             Parent
-            <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+            <template #children><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
           </VSideNavigationItem>
         `,
         '',
@@ -223,7 +254,7 @@ describe('VSideNavigation', () => {
       const { container } = renderNav(`
         <VSideNavigationItem disabled>
           Parent
-          <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+          <template #children><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
         </VSideNavigationItem>
       `)
       const summary = container.querySelector('summary')!
@@ -239,7 +270,7 @@ describe('VSideNavigation', () => {
         <VSideNavigationItem>
           Parent
           <template #end><span data-testid="badge">3</span></template>
-          <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+          <template #children><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
         </VSideNavigationItem>
       `)
       const children = [...container.querySelector('summary')!.children]
@@ -254,7 +285,7 @@ describe('VSideNavigation', () => {
         `
           <VSideNavigationItem>
             Parent
-            <template #items><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
+            <template #children><VSideNavigationItem href="/a">Alpha</VSideNavigationItem></template>
           </VSideNavigationItem>
         `,
         'expand-icon="add" collapse-icon="remove"',
@@ -362,7 +393,7 @@ describe('VSideNavigation', () => {
       <VSideNavigationItem href="/3">Three</VSideNavigationItem>
       <VSideNavigationItem href="/4">
         Four
-        <template #items><VSideNavigationItem href="/4-1">Hidden</VSideNavigationItem></template>
+        <template #children><VSideNavigationItem href="/4-1">Hidden</VSideNavigationItem></template>
       </VSideNavigationItem>
     `
 

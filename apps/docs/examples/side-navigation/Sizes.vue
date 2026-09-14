@@ -11,12 +11,12 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
     <aside class="sidebar">
       <p class="caption">sm</p>
       <VSideNavigation label="Rows of 32px" size="sm">
-        <VSideNavigationItem href="#usage" :icon="description" active
+        <VSideNavigationItem href="#usage" :icon="description" current
           >Documents</VSideNavigationItem
         >
         <VSideNavigationItem :icon="image" default-open>
           Media
-          <template #items>
+          <template #children>
             <VSideNavigationItem href="#usage">Images</VSideNavigationItem>
           </template>
         </VSideNavigationItem>
@@ -27,12 +27,12 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
     <aside class="sidebar">
       <p class="caption">md</p>
       <VSideNavigation label="Rows of 40px" size="md">
-        <VSideNavigationItem href="#usage" :icon="description" active
+        <VSideNavigationItem href="#usage" :icon="description" current
           >Documents</VSideNavigationItem
         >
         <VSideNavigationItem :icon="image" default-open>
           Media
-          <template #items>
+          <template #children>
             <VSideNavigationItem href="#usage">Images</VSideNavigationItem>
           </template>
         </VSideNavigationItem>
@@ -43,12 +43,12 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
     <aside class="sidebar">
       <p class="caption">md compact</p>
       <VSideNavigation label="Rows of 36px" size="md" compact>
-        <VSideNavigationItem href="#usage" :icon="description" active
+        <VSideNavigationItem href="#usage" :icon="description" current
           >Documents</VSideNavigationItem
         >
         <VSideNavigationItem :icon="image" default-open>
           Media
-          <template #items>
+          <template #children>
             <VSideNavigationItem href="#usage">Images</VSideNavigationItem>
           </template>
         </VSideNavigationItem>

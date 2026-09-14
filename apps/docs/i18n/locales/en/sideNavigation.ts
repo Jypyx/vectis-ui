@@ -5,7 +5,7 @@ export default {
   examples: {
     links: {
       title: 'Links and actions',
-      text: '<code>href</code> renders a row as a real link; without it the row is a button reporting its activation through <code>select</code>. <code>active</code> marks the row the reader is on and announces it as the current page. A row with subitems ignores <code>href</code>.',
+      text: '<code>href</code> renders a row as a real link; without it the row is a button reporting its activation through <code>select</code>. <code>current</code> marks the row the reader is on and announces it as the current page. A row with subitems ignores <code>href</code>.',
     },
     sublabels: {
       title: 'Sublabels',
@@ -21,7 +21,7 @@ export default {
     },
     depth: {
       title: 'Nesting',
-      text: 'A row given an <code>#items</code> slot becomes a branch, and a branch may hold branches of its own as deep as the tree goes. Each level is indented by exactly the room a start icon takes.',
+      text: 'A row given an <code>#children</code> slot becomes a branch, and a branch may hold branches of its own as deep as the tree goes. Each level is indented by exactly the room a start icon takes.',
     },
     chevrons: {
       title: 'Section chevrons',
@@ -29,7 +29,7 @@ export default {
     },
     exclusive: {
       title: 'One section at a time',
-      text: '<code>exclusive</code> keeps a single section open at a time within each level. It is off by default.',
+      text: '<code>exclusive</code> keeps a single section open at a time within each level. It is off by default, the opposite of VAccordion, whose sections close each other unless <code>multiple</code> is set.',
     },
     openState: {
       title: 'Knowing whether a section is open',
@@ -69,12 +69,12 @@ export default {
         sublabel: 'A second line under the label, for a status or a short explanation.',
         icon: 'An icon before the label. The <code>#icon</code> slot replaces it.',
         href: 'Where this row leads, which makes it a link. It is ignored on a row that has subitems: such a row opens and closes rather than navigating.',
-        active:
+        current:
           'Marks this row as the page currently being viewed. It is highlighted, and announced as the current page.',
         disabled:
           'Makes the row unusable: it greys out through the colour tokens and leaves the keyboard path.',
         defaultOpen:
-          'Renders a branch already open. It sets the initial state only; the browser owns it from then on.',
+          'Renders a branch already open. Only its initial value is read: the browser owns the state from then on, so changing it later does not fold a branch the reader has opened.',
         vModelOpen:
           'Whether the branch is open, when you want to drive or observe it. Left unbound, the browser keeps that state to itself and <code>defaultOpen</code> gives only the initial value.',
       },
@@ -86,7 +86,7 @@ export default {
         sublabel: 'A second line made of markup, replacing the <code>sublabel</code> prop.',
         icon: 'Free content before the label, which takes the place of <code>icon</code>.',
         end: 'Free content at the end of the row, before the chevron: a counter, a badge. On a branch it must not be focusable, since the row is already a control.',
-        items: 'The subitems, which turn this row into a branch. Nesting is not limited.',
+        children: 'The subitems, which turn this row into a branch. Nesting is not limited.',
       },
     },
     VSideNavigationGroup: {

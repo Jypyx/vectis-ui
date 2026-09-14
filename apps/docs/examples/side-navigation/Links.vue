@@ -16,9 +16,9 @@ const selected = ref<string | null>(null)
   <aside class="sidebar">
     <VSideNavigation label="Workspace">
       <!-- With `href` the row is a real link: it can be middle-clicked, its address
-           copied, and a crawler follows it. `active` says which one is the page being
+           copied, and a crawler follows it. `current` says which one is the page being
            read, and that is what a screen reader announces as the current page. -->
-      <VSideNavigationItem href="#usage" :icon="description" active>Usage</VSideNavigationItem>
+      <VSideNavigationItem href="#usage" :icon="description" current>Usage</VSideNavigationItem>
       <VSideNavigationItem href="#api" :icon="info">API</VSideNavigationItem>
       <VSideNavigationItem
         href="https://vuejs.org"

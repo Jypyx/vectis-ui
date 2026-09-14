@@ -5,7 +5,7 @@
  *
  * A BRANCH is a `<details>`, so its open state, the toggle keyboard, the exclusivity with a
  * neighbouring section and the animation all come from the browser. Its row IS the
- * `<summary>`, which must contain the whole line, `#end` included — hence the `@click.stop`
+ * `<summary>`, which must contain the whole line, `#end` included — hence the click handler
  * there, or anything put in it would fold the branch. The documented consequence is that
  * only NON-focusable content belongs in it: a control would be nested inside a control (WCAG
  * 4.1.2, axe `nested-interactive`), and a `<summary>`'s subtree also serves as its
@@ -14,9 +14,12 @@
  * A LEAF is the opposite: the row is a plain container with the action stretched over it by
  * an absolute `::after`, so the whole row is clickable while `#end` stays a SIBLING of the
  * action rather than inside it — which is what keeps a real control there legitimate.
+ *
+ * The branch's open state and its disabled summary go through `useDetailsOpen`, shared with
+ * VAccordionItem.
  */
 
-import { computed, inject, provide, useId, useSlots } from 'vue'
+import { computed, h, inject, provide, renderSlot, useId, useSlots } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -24,6 +27,7 @@ import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import type { IconSource } from '../VIcon/types'
 import { sideNavigationKey } from './context'
 
+import { useDetailsOpen } from '../../composables/useDetailsOpen'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 interface SideNavigationItemProps {
@@ -43,17 +47,18 @@ interface SideNavigationItemProps {
   href?: string
   /**
    * Marks this row as the page currently being viewed. It is highlighted, and
-   * announced as the current page.
+   * announced as the current page (`aria-current`).
    */
-  active?: boolean
+  current?: boolean
   /**
    * Makes the row unusable: it greys out through the colour tokens and leaves the
    * keyboard path.
    */
   disabled?: boolean
   /**
-   * Renders a branch already open. It sets the initial state only; the browser owns it
-   * from then on.
+   * Renders a branch already open. Only its initial value is read: the browser owns the
+   * state from then on, so changing this prop later will not fold a branch the reader
+   * has opened. Bind `v-model:open` to drive it instead.
    */
   defaultOpen?: boolean
 }
@@ -68,7 +73,7 @@ const props = withDefaults(defineProps<SideNavigationItemProps>(), {
   sublabel: undefined,
   icon: undefined,
   href: undefined,
-  active: false,
+  current: false,
   disabled: false,
   defaultOpen: false,
 })
@@ -113,8 +118,12 @@ defineSlots<{
    * BRANCH it must not be focusable (see the introduction).
    */
   end?(): unknown
-  /** The subitems, which turn this row into a branch. Nesting is not limited. */
-  items?(): unknown
+  /**
+   * The subitems, which turn this row into a branch. Nesting is not limited. The slot
+   * must be statically present or absent: whether a row is a branch is decided when it
+   * is created.
+   */
+  children?(): unknown
 }>()
 
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
@@ -128,7 +137,7 @@ const slots = useSlots()
  * The trade-off is that a slot present but empty still makes the row a branch, chevron
  * included, over an empty list.
  */
-const hasChildren = computed(() => !!slots.items)
+const hasChildren = computed(() => !!slots.children)
 const tag = computed(() =>
   !hasChildren.value && props.href !== undefined ? ('a' as const) : ('button' as const),
 )
@@ -142,51 +151,64 @@ const parent = inject(sideNavigationKey, null)
 const expandIcon = computed(() => parent?.expandIcon ?? expandMoreIcon)
 const collapseIcon = computed(() => parent?.collapseIcon)
 
-// The name shared by THIS row's children. It is minted afresh at every level, and that
-// is what keeps "one section open at a time" local to a level instead of applying
-// across the whole document.
-const childrenName = useId()
+// @ssr @core
+// Only a BRANCH has children to hand a context to, so a leaf — most rows of a sidebar —
+// mints no id and provides nothing. The test runs once, at setup: the server and the
+// client take the same path because they see the same slot, which is what keeps `useId`
+// in step across hydration, and also why the slot must not come and go later.
+if (slots.children) {
+  // The name shared by THIS row's children. It is minted afresh at every level, and that
+  // is what keeps "one section open at a time" local to a level instead of applying
+  // across the whole document.
+  const childrenName = useId()
 
-provide(sideNavigationKey, {
-  get name() {
-    return parent?.exclusive ? childrenName : undefined
-  },
-  get exclusive() {
-    return parent?.exclusive ?? false
-  },
-  get expandIcon() {
-    return expandIcon.value
-  },
-  get collapseIcon() {
-    return collapseIcon.value
-  },
-})
-
-const openAttr = computed(() => (open.value ?? props.defaultOpen) || undefined)
-
-// The element is the source of truth and the model is fed BY it, never the other way
-// round. The event it fires does not bubble, which is convenient here: listening on
-// the element itself cannot pick up a nested branch opening inside it.
-function onToggle(event: Event) {
-  const value = (event.target as HTMLDetailsElement).open
-  if (open.value !== value) open.value = value
+  provide(sideNavigationKey, {
+    get name() {
+      return parent?.exclusive ? childrenName : undefined
+    },
+    get exclusive() {
+      return parent?.exclusive ?? false
+    },
+    get expandIcon() {
+      return expandIcon.value
+    },
+    get collapseIcon() {
+      return collapseIcon.value
+    },
+  })
 }
 
+const { openAttr, onToggle, onSummaryClick } = useDetailsOpen(open, {
+  defaultOpen: () => props.defaultOpen,
+  disabled: () => props.disabled,
+})
+
+// A link says "page"; a button, a branch header included, can only say "true".
 const ariaCurrent = computed(() =>
-  props.active ? (tag.value === 'a' && !hasChildren.value ? 'page' : 'true') : undefined,
+  props.current ? (tag.value === 'a' ? 'page' : 'true') : undefined,
 )
 
 /*
- * A branch header has no `disabled` attribute of its own, so cancelling the click is
- * the only way to stop it from folding. The keyboard needs nothing here: taking the
- * header out of the tab order already covers it.
- *
- * The same solution as VAccordionItem, and deliberately not `pointer-events: none`,
- * which would also remove the forbidden cursor telling the reader why nothing happens.
+ * The icon and the label column, identical in both row shapes. A functional component
+ * rather than two copies of the markup, a Vue template having no reusable fragment.
+ * `renderSlot` is what a compiled `<slot>` calls, so each fallback behaves exactly as it
+ * would in the template.
  */
-function onSummaryClick(event: MouseEvent) {
-  if (props.disabled) event.preventDefault()
-}
+const RowBody = () => [
+  renderSlot(slots, 'icon', {}, () =>
+    props.icon ? [h(VIcon, { class: 'v-side-nav-icon', ...iconProps(props.icon) })] : [],
+  ),
+  h('span', { class: 'v-side-nav-content' }, [
+    h('span', { class: 'v-side-nav-label' }, [
+      renderSlot(slots, 'default', {}, () => [props.label]),
+    ]),
+    props.sublabel !== undefined || slots.sublabel
+      ? h('span', { class: 'v-side-nav-sublabel' }, [
+          renderSlot(slots, 'sublabel', {}, () => [props.sublabel]),
+        ])
+      : null,
+  ]),
+]
 
 /*
  * A branch's end slot sits INSIDE the header, so a click there would fold the branch.
@@ -227,24 +249,14 @@ function onActionClick(event: MouseEvent) {
       <summary
         v-bind="forwardedAttrs"
         class="v-side-nav-row"
-        :data-active="active ? '' : undefined"
+        :data-current="current ? '' : undefined"
         :data-disabled="disabled ? '' : undefined"
         :aria-current="ariaCurrent"
         :aria-disabled="disabled || undefined"
         :tabindex="disabled ? -1 : undefined"
         @click="onSummaryClick"
       >
-        <slot name="icon">
-          <VIcon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
-        </slot>
-        <span class="v-side-nav-content">
-          <span class="v-side-nav-label"
-            ><slot>{{ label }}</slot></span
-          >
-          <span v-if="sublabel !== undefined || $slots.sublabel" class="v-side-nav-sublabel">
-            <slot name="sublabel">{{ sublabel }}</slot>
-          </span>
-        </span>
+        <RowBody />
         <!-- This slot sits INSIDE the branch header, where ANY click folds the
              branch: without the handler, clicking a badge would close the section
              under it -->
@@ -253,22 +265,22 @@ function onActionClick(event: MouseEvent) {
         /></span>
         <VIcon class="v-side-nav-chevron v-disclosure-chevron" v-bind="iconProps(expandIcon)" />
         <!-- Both chevrons are always in the DOM; the open state decides which one
-             shows, in CSS alone — the VAccordion idiom -->
+             shows, in CSS alone -->
         <VIcon
           v-if="collapseIcon"
-          class="v-side-nav-chevron v-disclosure-chevron v-side-nav-chevron-open"
+          class="v-side-nav-chevron v-side-nav-chevron-open v-disclosure-chevron v-disclosure-chevron-open"
           v-bind="iconProps(collapseIcon)"
         />
       </summary>
       <ul class="v-side-nav-children">
-        <slot name="items" />
+        <slot name="children" />
       </ul>
     </details>
 
     <div
       v-else
       class="v-side-nav-row"
-      :data-active="active ? '' : undefined"
+      :data-current="current ? '' : undefined"
       :data-disabled="disabled ? '' : undefined"
     >
       <component
@@ -282,17 +294,7 @@ function onActionClick(event: MouseEvent) {
         :aria-current="ariaCurrent"
         @click="onActionClick"
       >
-        <slot name="icon">
-          <VIcon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
-        </slot>
-        <span class="v-side-nav-content">
-          <span class="v-side-nav-label"
-            ><slot>{{ label }}</slot></span
-          >
-          <span v-if="sublabel !== undefined || $slots.sublabel" class="v-side-nav-sublabel">
-            <slot name="sublabel">{{ sublabel }}</slot>
-          </span>
-        </span>
+        <RowBody />
       </component>
       <span v-if="$slots.end" class="v-side-nav-end"><slot name="end" /></span>
     </div>
@@ -321,12 +323,6 @@ function onActionClick(event: MouseEvent) {
     --side-nav-level: calc(var(--side-nav-parent-level) + 1);
   }
 
-  .v-side-nav-branch {
-    /* Lets a long label wrap rather than widening the whole sidebar. The folding
-       animation itself is further down. */
-    min-inline-size: 0;
-  }
-
   .v-side-nav-row {
     /*
      * Every dimension comes from the variables the nav sets and this row inherits — it
@@ -335,8 +331,12 @@ function onActionClick(event: MouseEvent) {
      *
      * The type is composite, as in a menu row: the SIZE comes from the scale, but the
      * line height stays that of body text — a unitless ratio, so it still follows the
-     * size — and the weight stays regular. The full `control` type role would suit a
-     * single-line label, and a navigation row may wrap and carry a second line.
+     * size — and the weight stays regular. The full `control` type role would set its
+     * lines tight against each other, and a row may carry a second line under the label.
+     *
+     * The label and that second line TRUNCATE rather than wrap: a sidebar has a fixed
+     * width, and a row that grew a line would break the rhythm of the list. VMenuItem
+     * follows the same recipe.
      *
      * TRAP — the indent is computed HERE and not stored in a variable set higher up. A
      * custom property is substituted on the element that DECLARES it, so a padding
@@ -376,14 +376,7 @@ function onActionClick(event: MouseEvent) {
     color: var(--vectis-color-text);
     font-size: var(--control-font-size);
     line-height: var(--vectis-text-body-md-leading);
-    list-style: none;
     cursor: pointer;
-  }
-
-  /* Removing the browser's own disclosure triangle: setting the list style is not
-     enough in WebKit, which draws it through this pseudo-element. */
-  .v-side-nav-row::-webkit-details-marker {
-    display: none;
   }
 
   .v-side-nav-action {
@@ -457,19 +450,6 @@ function onActionClick(event: MouseEvent) {
     gap: var(--vectis-space-1);
   }
 
-  .v-side-nav-branch[open]:not([data-swap]) > .v-side-nav-row > .v-side-nav-chevron {
-    rotate: 180deg;
-  }
-
-  /* When the navigation supplied a second chevron, each state hides one of the two
-     rendered icons instead of rotating a single one. */
-  .v-side-nav-branch[data-swap][open]
-    > .v-side-nav-row
-    > .v-side-nav-chevron:not(.v-side-nav-chevron-open),
-  .v-side-nav-branch[data-swap]:not([open]) > .v-side-nav-row > .v-side-nav-chevron-open {
-    display: none;
-  }
-
   .v-side-nav-row:hover:not([data-disabled]) {
     background: var(--vectis-color-surface-muted);
   }
@@ -493,22 +473,22 @@ function onActionClick(event: MouseEvent) {
   }
 
   /* The row of the page currently being viewed. */
-  .v-side-nav-row[data-active] {
+  .v-side-nav-row[data-current] {
     background: var(--vectis-color-accent-surface);
     color: var(--vectis-color-accent-text);
   }
 
-  .v-side-nav-row[data-active] .v-side-nav-label {
+  .v-side-nav-row[data-current] .v-side-nav-label {
     font-weight: var(--vectis-text-label-weight);
   }
 
-  .v-side-nav-row[data-active] .v-side-nav-icon,
-  .v-side-nav-row[data-active] .v-side-nav-sublabel,
-  .v-side-nav-row[data-active] .v-side-nav-chevron {
+  .v-side-nav-row[data-current] .v-side-nav-icon,
+  .v-side-nav-row[data-current] .v-side-nav-sublabel,
+  .v-side-nav-row[data-current] .v-side-nav-chevron {
     color: inherit;
   }
 
-  .v-side-nav-row[data-active]:hover {
+  .v-side-nav-row[data-current]:hover {
     /* The current row is already tinted, so its hover deepens that tint rather than
        replacing it with the neutral highlight — the VMenuItem idiom. */
     background: color-mix(
@@ -522,7 +502,7 @@ function onActionClick(event: MouseEvent) {
      where they are without opening every section. The lookup is deliberately a
      descendant one: the page may be several levels down. */
   .v-side-nav-branch:not([open]):has(.v-side-nav-children [aria-current])
-    > .v-side-nav-row:not([data-active]) {
+    > .v-side-nav-row:not([data-current]) {
     color: var(--vectis-color-accent-text);
   }
 
@@ -532,16 +512,15 @@ function onActionClick(event: MouseEvent) {
     cursor: not-allowed;
   }
 
-  /* The icon, the second line and the chevron default to a colour DARKER than the one
-     a disabled label takes: left alone they would come out stronger than the label
-     itself, so they inherit it instead. */
+  /* The icon and the second line default to a colour DARKER than the one a disabled
+     label takes: left alone they would come out stronger than the label itself, so they
+     inherit it instead. The chevron gets the same treatment from `styles/disclosure.css`. */
   .v-side-nav-row[data-disabled] .v-side-nav-icon,
-  .v-side-nav-row[data-disabled] .v-side-nav-sublabel,
-  .v-side-nav-row[data-disabled] .v-side-nav-chevron {
+  .v-side-nav-row[data-disabled] .v-side-nav-sublabel {
     color: inherit;
   }
 
-  /* The disclosure animation and the chevron's own transition come from
-     `styles/disclosure.css`, reduced-motion block included. */
+  /* The disclosure animation, the chevron's rotation or swap and the WebKit marker come
+     from `styles/disclosure.css`, reduced-motion block included. */
 }
 </style>

@@ -27,6 +27,7 @@ export default {
         { name: 'icon', type: 'IconSource' },
         { name: 'defaultOpen', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
+        { name: 'v-model:open', key: 'vModelOpen', type: 'boolean | null', default: 'null' },
       ],
       slots: [
         { name: 'default', type: '{}' },

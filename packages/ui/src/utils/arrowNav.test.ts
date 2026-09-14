@@ -13,7 +13,12 @@ function build(html: string): HTMLElement {
 
 function press(container: HTMLElement, key: string, options: { vertical?: boolean } = {}) {
   const event = new KeyboardEvent('keydown', { key, cancelable: true })
-  const handled = arrowNavigate(event, container, navigableItems(container, SELECTOR), options)
+  const handled = arrowNavigate(
+    event,
+    container,
+    () => navigableItems(container, SELECTOR),
+    options,
+  )
   return { handled, prevented: event.defaultPrevented }
 }
 
@@ -41,6 +46,21 @@ describe('arrowNavigate', () => {
     const { handled, prevented } = press(container, 'x')
     expect(handled).toBe(false)
     expect(prevented).toBe(false)
+  })
+
+  it('collects the items only for a key it handles', () => {
+    const container = build(three)
+    let calls = 0
+    const items = () => {
+      calls++
+      return navigableItems(container, SELECTOR)
+    }
+    for (const key of ['Tab', 'Enter', 'a', 'ArrowDown']) {
+      arrowNavigate(new KeyboardEvent('keydown', { key, cancelable: true }), container, items)
+    }
+    expect(calls).toBe(0)
+    arrowNavigate(new KeyboardEvent('keydown', { key: 'End', cancelable: true }), container, items)
+    expect(calls).toBe(1)
   })
 
   it('on the inline axis, ArrowDown/Up are not handled (and vice versa)', () => {

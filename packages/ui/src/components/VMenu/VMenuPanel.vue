@@ -173,7 +173,7 @@ function onKeydown(event: KeyboardEvent) {
   // The movement itself is the shared one from `utils/arrowNav`, but it is handed OUR
   // list rather than letting it discover the items: ours also drops the disabled
   // links and stays inside this panel, neither of which the generic selector does.
-  arrowNavigate(event, panel, items(), { vertical: true })
+  arrowNavigate(event, panel, items, { vertical: true })
 }
 
 // The only thing set inline is an explicit width, when the prop asks for one.

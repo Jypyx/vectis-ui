@@ -11,15 +11,24 @@
 import { useId } from 'vue'
 
 interface MenuGroupProps {
-  /** The name of the section. It is a heading, not a command: nothing happens on click. */
-  label: string
+  /**
+   * The name of the section, replaced by the `#label` slot. One of the two is REQUIRED:
+   * it is what names the group, and a section named by neither points its
+   * `aria-labelledby` at an empty element. It is a heading, not a command: nothing
+   * happens on click.
+   */
+  label?: string
 }
 
-defineProps<MenuGroupProps>()
+withDefaults(defineProps<MenuGroupProps>(), {
+  label: undefined,
+})
 
 defineSlots<{
   /** The commands belonging to this section. */
   default(): unknown
+  /** A name made of markup, replacing the `label` prop. */
+  label?(): unknown
 }>()
 
 const labelId = useId()
@@ -27,7 +36,9 @@ const labelId = useId()
 
 <template>
   <div role="group" class="v-menu-group" :aria-labelledby="labelId">
-    <span :id="labelId" class="v-menu-group-label v-group-label">{{ label }}</span>
+    <span :id="labelId" class="v-menu-group-label v-group-label"
+      ><slot name="label">{{ label }}</slot></span
+    >
     <slot />
   </div>
 </template>

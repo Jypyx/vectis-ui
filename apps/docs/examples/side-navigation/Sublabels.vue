@@ -17,7 +17,7 @@ import { cloud_upload as cloudUpload, description, folder_zip as folderZip } fro
         Storage
         <!-- The slot takes markup where the prop takes a string. -->
         <template #sublabel>Synced <strong>2 min</strong> ago</template>
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#usage" :icon="folderZip" sublabel="4.2 GB">
             Archives
           </VSideNavigationItem>

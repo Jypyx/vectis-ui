@@ -15,14 +15,14 @@ const items = [
   <VBreadcrumb
     :items="items"
     current-path="/app/projects/vectis-ui"
-    :separator="arrowRightAlt"
+    :separator-icon="arrowRightAlt"
     label="Trail with an icon separator"
   />
 
   <VBreadcrumb
     :items="items"
     current-path="/app/projects/vectis-ui"
-    :separator="{ src: slash }"
+    :separator-icon="{ src: slash }"
     label="Trail with an image separator"
   />
 </template>

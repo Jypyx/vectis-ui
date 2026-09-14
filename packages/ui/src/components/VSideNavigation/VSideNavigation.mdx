@@ -46,16 +46,16 @@ list element.
 
 ## Subitems
 
-The `#items` slot turns the item into a branch: a chevron appears on the right, the row becomes the
+The `#children` slot turns the item into a branch: a chevron appears on the right, the row becomes the
 trigger, and clicking expands the subitems. It is recursive **with no depth limit** — a subitem is a
-`VSideNavigationItem` like any other, which can in turn carry an `#items`.
+`VSideNavigationItem` like any other, which can in turn carry a `#children`.
 
 One level's indent is **exactly the room a start icon takes** — icon plus gutter: a subitem's label
 therefore lands on the same vertical as its parent branch's, and the hierarchy reads effortlessly.
 It follows the size scale on its own. The hover highlight and the current-page one, on the other
 hand, stay full width.
 
-`defaultOpen` opens a branch on the first render; `v-model:open` drives it from the consumer (to
+`defaultOpen` opens a branch on the first render (only its initial value is read); `v-model:open` drives it from the consumer (to
 expand the branch containing the current route, for instance).
 
 <Canvas of={VSideNavigationStories.Depth} />
@@ -63,6 +63,10 @@ expand the branch containing the current route, for instance).
 `exclusive` limits opening to **one branch per level**: opening a section closes its sibling. The
 mechanism is the native `<details name>` attribute, applied level by level — a deep branch never
 closes a branch of another level.
+
+The polarity is the opposite of `VAccordion`, whose sections close each other unless `multiple` is
+set: a sidebar usually lets several sections stay open. Both follow the rule that a boolean prop
+defaults to `false`, so each is named for the behaviour it adds.
 
 <Canvas of={VSideNavigationStories.Exclusive} />
 
@@ -91,7 +95,7 @@ rhythm stays the same from end to end, compact density included.
 
 ## Current page
 
-`active` marks the item of the displayed page: an accent highlight and `aria-current`. The consumer
+`current` marks the item of the displayed page: an accent highlight and `aria-current`. The consumer
 derives it from its route — the component knows nothing of the router. A collapsed branch containing
 the current page stays discreetly flagged, so the active section can be spotted without expanding
 it.

@@ -16,7 +16,7 @@ const documentsOpen = ref<boolean | null>(true)
            the branch from code. -->
       <VSideNavigationItem v-model:open="documentsOpen" :icon="description">
         Documents
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#usage">Drafts</VSideNavigationItem>
           <VSideNavigationItem href="#usage">Published</VSideNavigationItem>
         </template>
@@ -26,7 +26,7 @@ const documentsOpen = ref<boolean | null>(true)
            gives only the value it starts on. -->
       <VSideNavigationItem :icon="image" default-open>
         Media
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#usage">Images</VSideNavigationItem>
         </template>
       </VSideNavigationItem>

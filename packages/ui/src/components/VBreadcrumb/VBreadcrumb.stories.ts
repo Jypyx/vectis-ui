@@ -80,7 +80,7 @@ export const IconSeparator: Story = {
       ]),
     }),
     template: `
-      <VBreadcrumb :items="items" separator="arrow_forward" current-path="/projects/vectis" />
+      <VBreadcrumb :items="items" separator-icon="arrow_forward" current-path="/projects/vectis" />
     `,
   }),
   play: async ({ canvasElement }) => {
@@ -108,7 +108,7 @@ export const ImageSeparator: Story = {
       ]),
     }),
     template: `
-      <VBreadcrumb :items="items" :separator="separator" current-path="/projects/vectis" />
+      <VBreadcrumb :items="items" :separator-icon="separator" current-path="/projects/vectis" />
     `,
   }),
 }

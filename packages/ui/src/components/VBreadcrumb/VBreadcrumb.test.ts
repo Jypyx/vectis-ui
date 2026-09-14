@@ -59,17 +59,17 @@ describe('VBreadcrumb', () => {
       }
     })
 
-    it('separator: a custom name', () => {
+    it('separatorIcon: a custom name', () => {
       const { container } = render(VBreadcrumb, {
-        props: { items, separator: 'arrow_forward' },
+        props: { items, separatorIcon: 'arrow_forward' },
       })
       const icon = container.querySelector<HTMLElement>('.v-breadcrumb-separator')
       expect(icon?.dataset.icon).toBe('arrow_forward')
     })
 
-    it('separator `{ src }`: an explicit image, never guessed from the string', () => {
+    it('separatorIcon `{ src }`: an explicit image, never guessed from the string', () => {
       const { container } = render(VBreadcrumb, {
-        props: { items, separator: { src: '/sep.svg' } },
+        props: { items, separatorIcon: { src: '/sep.svg' } },
       })
       const img = container.querySelector('.v-breadcrumb-separator img')
       expect(img?.getAttribute('src')).toBe('/sep.svg')

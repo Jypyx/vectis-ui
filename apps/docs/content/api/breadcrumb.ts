@@ -12,7 +12,7 @@ export default {
         { name: 'items', type: 'BreadcrumbItem[]' },
         { name: 'label', type: 'string' },
         { name: 'currentPath', type: 'string' },
-        { name: 'separator', type: 'IconSource', default: 'chevron_right' },
+        { name: 'separatorIcon', type: 'IconSource', default: 'chevron_right' },
         { name: 'maxItems', type: 'number' },
         { name: 'ellipsisLabel', type: 'string' },
       ],

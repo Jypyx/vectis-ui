@@ -27,7 +27,7 @@ export default {
         { name: 'sublabel', type: 'string' },
         { name: 'icon', type: 'IconSource' },
         { name: 'href', type: 'string' },
-        { name: 'active', type: 'boolean', default: 'false' },
+        { name: 'current', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'defaultOpen', type: 'boolean', default: 'false' },
         { name: 'v-model:open', key: 'vModelOpen', type: 'boolean | null', default: 'null' },
@@ -40,7 +40,7 @@ export default {
         { name: 'sublabel', type: '{}' },
         { name: 'icon', type: '{}' },
         { name: 'end', type: '{}' },
-        { name: 'items', type: '{}' },
+        { name: 'children', type: '{}' },
       ],
     },
     {

@@ -29,7 +29,7 @@ import { description, more_horiz as moreHoriz, notifications, search } from 'vec
       <VSideNavigationItem :icon="notifications">
         Notifications
         <template #end><VBadge :count="12" tone="accent" /></template>
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#usage">Mentions</VSideNavigationItem>
           <VSideNavigationItem href="#usage">Replies</VSideNavigationItem>
         </template>
@@ -38,7 +38,7 @@ import { description, more_horiz as moreHoriz, notifications, search } from 'vec
       <VSideNavigationItem :icon="search">
         Saved searches
         <template #end><span class="count">8</span></template>
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#usage">Open bugs</VSideNavigationItem>
         </template>
       </VSideNavigationItem>

@@ -1,14 +1,15 @@
-import { render } from '@testing-library/vue'
+import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
-import { defineComponent } from 'vue'
+import { defineComponent, nextTick, ref } from 'vue'
 
 import VAccordion from './VAccordion.vue'
 import VAccordionItem from './VAccordionItem.vue'
 
-/** Raw attributes set on the group and on the first item. */
-function renderWith(accordionAttrs = '', firstItemAttrs = '') {
+/** Raw attributes set on the group and on the first item, plus the bindings they read. */
+function renderWith(accordionAttrs = '', firstItemAttrs = '', state: Record<string, unknown> = {}) {
   const Harness = defineComponent({
     components: { VAccordion, VAccordionItem },
+    setup: () => state,
     template: `
       <VAccordion ${accordionAttrs}>
         <VAccordionItem title="Premier" ${firstItemAttrs}>Contenu 1</VAccordionItem>
@@ -51,6 +52,37 @@ describe('VAccordion', () => {
     expect(second?.open).toBe(false)
   })
 
+  it('default-open is read once: changing it later leaves the section as it is', async () => {
+    const initial = ref(true)
+    const { container } = renderWith('', ':default-open="initial"', { initial })
+    const details = container.querySelector('details')!
+    expect(details.open).toBe(true)
+    initial.value = false
+    await nextTick()
+    expect(details.open).toBe(true)
+  })
+
+  it('v-model:open: driven from the parent, and rewritten by the native `toggle` event', async () => {
+    const open = ref<boolean | null>(false)
+    const { container } = renderWith('multiple', 'v-model:open="open"', { open })
+    const details = container.querySelector('details')!
+    expect(details.open).toBe(false)
+
+    open.value = true
+    await nextTick()
+    expect(details.open).toBe(true)
+
+    // the element is the source of truth: the model is fed by `toggle`
+    details.open = false
+    await fireEvent(details, new Event('toggle'))
+    expect(open.value).toBe(false)
+  })
+
+  it('an empty subtitle still renders its line (presence, not truthiness)', () => {
+    const { container } = renderWith('', 'subtitle=""')
+    expect(container.querySelector('.v-accordion-subtitle')).not.toBeNull()
+  })
+
   it('default icon: a single expand_more icon per item (CSS rotation)', () => {
     const { container } = renderWith()
     for (const details of container.querySelectorAll('details')) {
@@ -79,10 +111,8 @@ describe('VAccordion', () => {
     const [first, second] = [...container.querySelectorAll('details')]
     // both icons coexist: the start icon, then the chevron
     expect(icones(first as Element)).toEqual(['settings', 'expand_more'])
-    expect(first?.querySelector<HTMLElement>('.v-accordion-icon-start')?.dataset.icon).toBe(
-      'settings',
-    )
-    expect(second?.querySelector('.v-accordion-icon-start')).toBeNull()
+    expect(first?.querySelector<HTMLElement>('.v-accordion-icon')?.dataset.icon).toBe('settings')
+    expect(second?.querySelector('.v-accordion-icon')).toBeNull()
   })
 
   it('variant: data-variant set on the root, flat by default', () => {
@@ -106,6 +136,9 @@ describe('VAccordion', () => {
     const [first, second] = [...container.querySelectorAll('summary')]
     expect(first?.getAttribute('aria-disabled')).toBe('true')
     expect(first?.getAttribute('tabindex')).toBe('-1')
+    // the marker sits on the row, as on VSideNavigationItem, not on the <details>
+    expect(first?.hasAttribute('data-disabled')).toBe(true)
+    expect(first?.parentElement?.hasAttribute('data-disabled')).toBe(false)
     expect(second?.hasAttribute('aria-disabled')).toBe(false)
     expect(second?.hasAttribute('tabindex')).toBe(false)
 

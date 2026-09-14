@@ -87,10 +87,12 @@ export default {
     },
     VMenuGroup: {
       props: {
-        label: 'The name of the section. It is a heading, not a command: nothing happens on click.',
+        label:
+          'The name of the section, replaced by the <code>#label</code> slot. One of the two is needed: it is what names the group. It is a heading, not a command: nothing happens on click.',
       },
       slots: {
         default: 'The commands belonging to this section.',
+        label: 'A name made of markup, replacing the <code>label</code> prop.',
       },
     },
   },

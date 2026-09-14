@@ -506,6 +506,25 @@ describe('VMenu', () => {
       expect(getByRole('menuitem', { name: 'Rename' })).toBe(document.activeElement)
     })
 
+    it('the #label slot names the group in place of the prop', async () => {
+      const { getByRole, container } = renderHarness(`
+        <VMenu>
+          <template #trigger="{ triggerProps }">
+            <button v-bind="triggerProps">Actions</button>
+          </template>
+          <VMenuGroup>
+            <template #label><em>Recent</em> files</template>
+            <VMenuItem label="Report.pdf" />
+          </VMenuGroup>
+        </VMenu>
+      `)
+      await openMenu(container)
+      const group = getByRole('group', { name: 'Recent files' })
+      expect(
+        document.getElementById(group.getAttribute('aria-labelledby')!)?.querySelector('em'),
+      ).not.toBeNull()
+    })
+
     it('the roving focus crosses the groups and ignores the separators', async () => {
       const { getByRole, container } = renderGrouped()
       const menu = await openMenu(container)

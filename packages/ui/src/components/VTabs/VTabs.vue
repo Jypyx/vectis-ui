@@ -204,7 +204,7 @@ const listEl = ref<HTMLElement | null>(null)
 function onKeydown(event: KeyboardEvent) {
   const list = listEl.value
   if (!list) return
-  arrowNavigate(event, list, navigableItems(list, '[role="tab"]:not(:disabled)'), {
+  arrowNavigate(event, list, () => navigableItems(list, '[role="tab"]:not(:disabled)'), {
     vertical: isVertical.value,
   })
 }

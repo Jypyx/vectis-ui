@@ -108,14 +108,14 @@ export const Default: Story = {
     components,
     setup: () => ({ args, t }),
     template: aside(`
-      <VSideNavigationItem href="#home" icon="home" active>{{ t.home }}</VSideNavigationItem>
+      <VSideNavigationItem href="#home" icon="home" current>{{ t.home }}</VSideNavigationItem>
       <VSideNavigationItem icon="folder" default-open>
         {{ t.projects }}
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#alpha">Alpha</VSideNavigationItem>
           <VSideNavigationItem>
             Beta
-            <template #items>
+            <template #children>
               <VSideNavigationItem href="#beta-api">API</VSideNavigationItem>
               <VSideNavigationItem href="#beta-web">Web</VSideNavigationItem>
             </template>
@@ -164,7 +164,7 @@ const SIZE_ITEMS = `
   <VSideNavigationGroup :label="t.workspace">
     <VSideNavigationItem icon="folder" default-open>
       {{ t.projects }}
-      <template #items>
+      <template #children>
         <VSideNavigationItem href="#alpha">Alpha</VSideNavigationItem>
       </template>
     </VSideNavigationItem>
@@ -208,15 +208,15 @@ export const Depth: Story = {
       <VSideNavigationItem href="#n0" icon="folder">{{ t.level }} 0</VSideNavigationItem>
       <VSideNavigationItem icon="folder" default-open>
         {{ t.level }} 0 ({{ t.branch }})
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#n1">{{ t.level }} 1</VSideNavigationItem>
           <VSideNavigationItem icon="folder" default-open>
             {{ t.level }} 1 ({{ t.branch }})
-            <template #items>
+            <template #children>
               <VSideNavigationItem href="#n2">{{ t.level }} 2</VSideNavigationItem>
               <VSideNavigationItem icon="folder" default-open>
                 {{ t.level }} 2 ({{ t.branch }})
-                <template #items>
+                <template #children>
                   <VSideNavigationItem href="#n3">{{ t.level }} 3</VSideNavigationItem>
                 </template>
               </VSideNavigationItem>
@@ -265,14 +265,14 @@ export const EndContent: Story = {
       <VSideNavigationItem icon="folder">
         {{ t.projects }}
         <template #end><VBadge tone="accent" :count="12" /></template>
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#alpha">Alpha</VSideNavigationItem>
         </template>
       </VSideNavigationItem>
       <VSideNavigationItem icon="group">
         {{ t.team }}
         <template #end><span data-testid="count">8</span></template>
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#members">{{ t.members }}</VSideNavigationItem>
         </template>
       </VSideNavigationItem>
@@ -327,11 +327,11 @@ export const Exclusive: Story = {
     template: aside(`
       <VSideNavigationItem icon="folder" default-open>
         {{ t.projects }}
-        <template #items><VSideNavigationItem href="#alpha">Alpha</VSideNavigationItem></template>
+        <template #children><VSideNavigationItem href="#alpha">Alpha</VSideNavigationItem></template>
       </VSideNavigationItem>
       <VSideNavigationItem icon="group">
         {{ t.team }}
-        <template #items><VSideNavigationItem href="#members">{{ t.members }}</VSideNavigationItem></template>
+        <template #children><VSideNavigationItem href="#members">{{ t.members }}</VSideNavigationItem></template>
       </VSideNavigationItem>
     `),
   }),
@@ -355,7 +355,7 @@ export const Sublabels: Story = {
       <VSideNavigationItem href="#alpha" icon="folder" :sublabel="t.openTasks">Alpha</VSideNavigationItem>
       <VSideNavigationItem icon="cloud" :sublabel="t.syncedAgo" default-open>
         {{ t.storage }}
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#archives" sublabel="4.2 GB">{{ t.archives }}</VSideNavigationItem>
         </template>
       </VSideNavigationItem>
@@ -425,7 +425,7 @@ export const Links: Story = {
     components,
     setup: () => ({ args, t, onSelect: fn() }),
     template: aside(`
-      <VSideNavigationItem href="#dashboard" icon="dashboard" active>{{ t.dashboard }}</VSideNavigationItem>
+      <VSideNavigationItem href="#dashboard" icon="dashboard" current>{{ t.dashboard }}</VSideNavigationItem>
       <VSideNavigationItem href="https://example.com" icon="open_in_new" target="_blank" rel="noreferrer">
         {{ t.documentation }}
       </VSideNavigationItem>
@@ -442,11 +442,11 @@ export const CustomIcons: Story = {
       `
       <VSideNavigationItem default-open>
         {{ t.open }}
-        <template #items><VSideNavigationItem href="#a">Alpha</VSideNavigationItem></template>
+        <template #children><VSideNavigationItem href="#a">Alpha</VSideNavigationItem></template>
       </VSideNavigationItem>
       <VSideNavigationItem>
         {{ t.closed }}
-        <template #items><VSideNavigationItem href="#b">Beta</VSideNavigationItem></template>
+        <template #children><VSideNavigationItem href="#b">Beta</VSideNavigationItem></template>
       </VSideNavigationItem>
     `,
       'v-bind="args" expand-icon="add" collapse-icon="remove"',
@@ -463,7 +463,7 @@ export const DisabledItem: Story = {
       <VSideNavigationItem href="#inactive" icon="lock" disabled>{{ t.unavailableLink }}</VSideNavigationItem>
       <VSideNavigationItem icon="folder" disabled>
         {{ t.unavailableBranch }}
-        <template #items><VSideNavigationItem href="#x">{{ t.neverReachable }}</VSideNavigationItem></template>
+        <template #children><VSideNavigationItem href="#x">{{ t.neverReachable }}</VSideNavigationItem></template>
       </VSideNavigationItem>
     `),
   }),
@@ -480,7 +480,7 @@ export const LongTexts: Story = {
       <VSideNavigationItem icon="folder" default-open>
         {{ t.longFolder }}
         <template #end><VBadge count="300" /></template>
-        <template #items>
+        <template #children>
           <VSideNavigationItem href="#nested">{{ t.longSubitem }}</VSideNavigationItem>
         </template>
       </VSideNavigationItem>

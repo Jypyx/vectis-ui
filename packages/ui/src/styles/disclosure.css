@@ -1,18 +1,26 @@
 /*
- * The two things a native <details> needs to open smoothly, shared by the design system's
- * only two consumers of it: VAccordionItem and VSideNavigationItem.
+ * The recipe of a native <details>, shared by the design system's only two consumers of it:
+ * VAccordionItem and VSideNavigationItem. What lives here is what a <details> needs whatever
+ * it holds; the row's box, its type and its states stay with each component.
  *
- * `::details-content` targets the box the browser wraps the content in, and the
- * `interpolate-size` each component declares on its own root is what makes a transition
- * towards `auto` possible at all. A browser missing either simply opens the section
- * instantly, which is the intended fallback.
+ * `::details-content` targets the box the browser wraps the content in, and
+ * `interpolate-size` is what makes a transition towards `auto` possible at all. A browser
+ * missing either simply opens the section instantly, which is the intended fallback.
  *
- * The chevron is here for the same reason: both draw one, both turn it the same way, and
- * both turn it around a HORIZONTAL axis, so neither needs the mirroring VMenu's sideways
- * chevron does. Which icon each renders, and whether a second one replaces the rotation,
- * stays with the component.
+ * Both draw a chevron, both turn it the same way, and both turn it around a HORIZONTAL axis,
+ * so neither needs the mirroring VMenu's sideways chevron does. Which icon each renders stays
+ * with the component; when a second one is supplied (`data-swap`), each state hides one of the
+ * two instead of rotating a single one.
+ *
+ * TRAP — every selector reaching the summary or the chevron goes through `>`. Navigation
+ * branches NEST: a descendant selector on an open branch would turn the chevrons of every
+ * closed branch inside it too.
  */
 @layer vectis.components {
+  .v-disclosure {
+    interpolate-size: allow-keywords;
+  }
+
   .v-disclosure::details-content {
     block-size: 0;
     overflow: clip;
@@ -25,10 +33,31 @@
     block-size: auto;
   }
 
+  /* The summary is laid out as flex by each component, which already drops the list marker;
+     WebKit draws its triangle through this pseudo-element instead. */
+  .v-disclosure > summary::-webkit-details-marker {
+    display: none;
+  }
+
   .v-disclosure-chevron {
     flex: none;
     color: var(--vectis-color-text-muted);
     transition: rotate var(--vectis-duration-base) var(--vectis-ease-default);
+  }
+
+  .v-disclosure[open]:not([data-swap]) > summary > .v-disclosure-chevron {
+    rotate: 180deg;
+  }
+
+  .v-disclosure[data-swap][open] > summary > .v-disclosure-chevron:not(.v-disclosure-chevron-open),
+  .v-disclosure[data-swap]:not([open]) > summary > .v-disclosure-chevron-open {
+    display: none;
+  }
+
+  /* The chevron defaults to a colour DARKER than the one a disabled label takes: left alone it
+     would come out stronger than the label itself. */
+  .v-disclosure > summary[data-disabled] > .v-disclosure-chevron {
+    color: inherit;
   }
 
   @media (prefers-reduced-motion: reduce) {

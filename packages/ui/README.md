@@ -147,7 +147,7 @@ A **bare string is always a NAME**, and it no longer reaches the library's own d
 ```vue
 <VButton icon-start="download">Export</VButton>
 <VButton :icon-start="cloud_upload">Upload</VButton>
-<VBreadcrumb :separator="{ src: '/chevron.svg' }" :items="items" />
+<VBreadcrumb :separator-icon="{ src: '/chevron.svg' }" :items="items" />
 <VMenuItem label="Open" :icon-start="{ component: FolderIcon }" />
 ```
 

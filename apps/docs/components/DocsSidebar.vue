@@ -5,7 +5,7 @@
  *
  * The tree is rendered inline from `content/nav.ts` rather than handed to the component as
  * data, which is the component's own contract: it composes from subcomponents and never
- * takes an `items` prop. `active` is manual there too — VSideNavigation knows nothing about
+ * takes an `items` prop. `current` is manual there too — VSideNavigation knows nothing about
  * a router — so the current route is compared here.
  *
  * Every row is a real `<a href>`; `navigate` from NuxtLink turns an ordinary click into a
@@ -53,7 +53,7 @@ function follow(navigate: (event: MouseEvent) => void, event: MouseEvent) {
           <template #default="{ href, navigate }">
             <VSideNavigationItem
               :href="href ?? undefined"
-              :active="isCurrent(page.slug)"
+              :current="isCurrent(page.slug)"
               @click="follow(navigate, $event)"
             >
               {{ t(`nav.${page.slug}`) }}

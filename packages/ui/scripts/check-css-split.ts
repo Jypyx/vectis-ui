@@ -33,6 +33,7 @@ const CORE_CLASSES: ReadonlySet<string> = new Set([
   '.v-control',
   '.v-disclosure',
   '.v-disclosure-chevron',
+  '.v-disclosure-chevron-open',
   '.v-field-action',
   '.v-field-counter',
   '.v-field-meta',

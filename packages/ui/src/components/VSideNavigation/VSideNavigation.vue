@@ -140,10 +140,12 @@ function reachable(el: HTMLElement, root: HTMLElement): boolean {
 function onKeydown(event: KeyboardEvent) {
   const root = rootEl.value
   if (!root) return
-  const items = [...root.querySelectorAll<HTMLElement>(ROW_SELECTOR)].filter((el) =>
-    reachable(el, root),
+  arrowNavigate(
+    event,
+    root,
+    () => [...root.querySelectorAll<HTMLElement>(ROW_SELECTOR)].filter((el) => reachable(el, root)),
+    { vertical: true },
   )
-  arrowNavigate(event, root, items, { vertical: true })
 }
 </script>
 
@@ -178,10 +180,6 @@ function onKeydown(event: KeyboardEvent) {
     --side-nav-indent: calc(var(--vectis-icon-size) + var(--control-gap));
 
     font-family: var(--vectis-text-family);
-    /* What makes a branch able to animate open: without it, a height cannot be
-       transitioned towards `auto`. It is inherited by every item, and where the browser
-       does not support it the branches simply open at once. */
-    interpolate-size: allow-keywords;
   }
 
   /*

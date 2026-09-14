@@ -11,14 +11,14 @@ import { code, description, folder_zip as folderZip } from 'vectis-ui/icons'
            branch holding it. -->
       <VSideNavigationItem :icon="folderZip" default-open>
         src
-        <template #items>
+        <template #children>
           <VSideNavigationItem :icon="folderZip" default-open>
             components
-            <template #items>
+            <template #children>
               <VSideNavigationItem href="#usage" :icon="code">VButton.vue</VSideNavigationItem>
               <VSideNavigationItem :icon="folderZip" default-open>
                 icons
-                <template #items>
+                <template #children>
                   <VSideNavigationItem href="#usage" :icon="code">index.ts</VSideNavigationItem>
                 </template>
               </VSideNavigationItem>

@@ -9,7 +9,7 @@ export default {
     },
     exclusive: {
       title: 'Une section à la fois',
-      text: "Un groupe ne garde qu'une section ouverte par défaut. <code>multiple</code> permet d'en garder plusieurs ouvertes en même temps.",
+      text: "Un groupe ne garde qu'une section ouverte par défaut. <code>multiple</code> permet d'en garder plusieurs ouvertes en même temps. VSideNavigation a le défaut et la prop inverses, <code>exclusive</code> : une barre latérale laisse d'ordinaire plusieurs sections ouvertes.",
     },
     subtitles: {
       title: 'Sous-titres et icônes',
@@ -55,7 +55,9 @@ export default {
           'Une seconde ligne sous le titre, pour une courte explication ou un statut. Le slot <code>#subtitle</code> la remplace quand du balisage est nécessaire.',
         icon: 'Une icône avant le titre. Le slot <code>#icon</code> la remplace.',
         defaultOpen:
-          "Rend la section déjà ouverte. Cela ne fixe que le premier rendu : le navigateur possède l'état ensuite, donc changer cette prop plus tard ne refermera pas une section que le lecteur a ouverte.",
+          "Rend la section déjà ouverte. Seule sa valeur initiale est lue : le navigateur possède l'état ensuite, donc changer cette prop plus tard ne refermera pas une section que le lecteur a ouverte.",
+        vModelOpen:
+          "Si la section est ouverte, quand vous voulez la piloter ou l'observer. Non liée, le navigateur garde cet état pour lui et <code>defaultOpen</code> n'en donne que la valeur initiale.",
         disabled:
           "Rend la section inerte. Elle ne peut plus être ouverte, le clavier l'enjambe, et elle se grise par les tokens de couleur.",
       },

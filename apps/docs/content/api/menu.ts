@@ -51,6 +51,7 @@ export default {
       ],
       slots: [
         { name: 'default', type: '{}' },
+        { name: 'label', type: '{}' },
       ],
     },
     {

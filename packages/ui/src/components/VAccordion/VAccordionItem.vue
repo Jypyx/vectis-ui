@@ -2,12 +2,14 @@
 /**
  * One section of an accordion: a heading the reader can click, and the content it
  * reveals. It is a native `<details>`/`<summary>` pair, so the browser owns the
- * open and closed state, the keyboard and the accessibility semantics, and this
- * component adds no code of its own for any of them.
+ * open and closed state, the keyboard and the accessibility semantics. The only JS
+ * is the `v-model:open` bridge, fed by the element, and the click a disabled summary
+ * has to cancel, both shared with VSideNavigationItem through `useDetailsOpen`.
  *
  * The opening is animated entirely in CSS, with `::details-content` and
- * `interpolate-size`. Both are recent additions to the language: where they are
- * missing the section simply appears at once, which is the intended fallback.
+ * `interpolate-size` (`styles/disclosure.css`). Both are recent additions to the
+ * language: where they are missing the section simply appears at once, which is the
+ * intended fallback.
  */
 
 import { computed, inject } from 'vue'
@@ -18,6 +20,8 @@ import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import type { IconSource } from '../VIcon/types'
 import VTypography from '../VTypography/VTypography.vue'
 import { accordionKey } from './context'
+
+import { useDetailsOpen } from '../../composables/useDetailsOpen'
 
 interface AccordionItemProps {
   /**
@@ -41,9 +45,9 @@ interface AccordionItemProps {
    */
   icon?: IconSource
   /**
-   * Renders the section already open. It only sets the state of the first render:
-   * the browser owns it afterwards, so changing this prop later will not close a
-   * section the reader has opened.
+   * Renders the section already open. Only its initial value is read: the browser
+   * owns the state afterwards, so changing this prop later will not close a section
+   * the reader has opened. Bind `v-model:open` to drive it instead.
    */
   defaultOpen?: boolean
   /**
@@ -60,6 +64,18 @@ const props = withDefaults(defineProps<AccordionItemProps>(), {
   defaultOpen: false,
   disabled: false,
 })
+
+/**
+ * Whether the section is open, when the consumer wants to drive or observe it. Left
+ * unbound, the browser keeps that state to itself, `defaultOpen` giving only the initial
+ * value.
+ *
+ * TRAP — "not bound" is written as `null` and not `undefined`. A model typed as a plain
+ * boolean is declared as such at runtime, and Vue casts an ABSENT boolean prop to
+ * `false`, which would silently overwrite `defaultOpen`. The explicit default disarms
+ * that cast.
+ */
+const open = defineModel<boolean | null>('open', { default: null })
 
 defineSlots<{
   /** The content revealed when the section is open. */
@@ -81,41 +97,36 @@ const accordion = inject(accordionKey, null)
 const expandIcon = computed(() => accordion?.expandIcon ?? expandMoreIcon)
 const collapseIcon = computed(() => accordion?.collapseIcon)
 
-// @a11y @core
-/*
- * The component's only behavioural JS. A <summary> has no native `disabled`
- * attribute, so there is no other way to stop a click from toggling the
- * <details>. The keyboard needs no handler of its own: `tabindex="-1"` already
- * takes the summary out of the tab order.
- */
-function onSummaryClick(event: MouseEvent) {
-  if (props.disabled) event.preventDefault()
-}
+const { openAttr, onToggle, onSummaryClick } = useDetailsOpen(open, {
+  defaultOpen: () => props.defaultOpen,
+  disabled: () => props.disabled,
+})
 </script>
 
 <template>
   <details
     class="v-accordion-item v-disclosure"
     :name="accordion?.name"
-    :open="defaultOpen || undefined"
+    :open="openAttr"
     :data-swap="collapseIcon ? '' : undefined"
-    :data-disabled="disabled ? '' : undefined"
+    @toggle="onToggle"
   >
     <summary
       class="v-accordion-summary"
+      :data-disabled="disabled ? '' : undefined"
       :aria-disabled="disabled || undefined"
       :tabindex="disabled ? -1 : undefined"
       @click="onSummaryClick"
     >
       <slot name="icon">
-        <VIcon v-if="icon" class="v-accordion-icon-start" v-bind="iconProps(icon)" />
+        <VIcon v-if="icon" class="v-accordion-icon" v-bind="iconProps(icon)" />
       </slot>
       <span class="v-accordion-heading">
         <span class="v-accordion-title"
           ><slot name="title">{{ title }}</slot></span
         >
         <VTypography
-          v-if="subtitle || $slots.subtitle"
+          v-if="subtitle !== undefined || $slots.subtitle"
           as="span"
           variant="caption"
           tone="muted"
@@ -123,11 +134,11 @@ function onSummaryClick(event: MouseEvent) {
           ><slot name="subtitle">{{ subtitle }}</slot></VTypography
         >
       </span>
-      <VIcon class="v-accordion-icon v-disclosure-chevron" v-bind="iconProps(expandIcon)" />
+      <VIcon class="v-accordion-chevron v-disclosure-chevron" v-bind="iconProps(expandIcon)" />
       <!-- Both icons are always in the DOM; [open] decides which one shows, in CSS alone -->
       <VIcon
         v-if="collapseIcon"
-        class="v-accordion-icon v-disclosure-chevron v-accordion-icon-open"
+        class="v-accordion-chevron v-accordion-chevron-open v-disclosure-chevron v-disclosure-chevron-open"
         v-bind="iconProps(collapseIcon)"
       />
     </summary>
@@ -139,10 +150,6 @@ function onSummaryClick(event: MouseEvent) {
 
 <style>
 @layer vectis.components {
-  .v-accordion-item {
-    interpolate-size: allow-keywords;
-  }
-
   .v-accordion-item + .v-accordion-item {
     border-block-start: 1px solid var(--vectis-color-border);
   }
@@ -156,18 +163,13 @@ function onSummaryClick(event: MouseEvent) {
     gap: var(--vectis-space-3);
     padding: var(--accordion-pad-block, var(--vectis-space-4))
       var(--accordion-pad-inline, var(--vectis-space-5));
-    list-style: none;
     cursor: pointer;
     font-size: var(--vectis-text-label-size);
     font-weight: var(--vectis-text-label-weight);
     color: var(--vectis-color-text);
   }
 
-  .v-accordion-summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .v-accordion-item:not([data-disabled]) > .v-accordion-summary:hover {
+  .v-accordion-summary:hover:not([data-disabled]) {
     background: var(--vectis-color-surface-muted);
   }
 
@@ -193,37 +195,24 @@ function onSummaryClick(event: MouseEvent) {
     line-height: var(--vectis-text-label-leading);
   }
 
-  .v-accordion-icon-start {
+  .v-accordion-icon {
     flex: none;
     color: var(--vectis-color-text-muted);
   }
 
-  .v-accordion-item[open]:not([data-swap]) > .v-accordion-summary .v-accordion-icon {
-    rotate: 180deg;
-  }
-
-  /* data-swap marks an item whose group provided a collapseIcon: rather than
-     rotating a single chevron, each state hides one of the two rendered icons. */
-  .v-accordion-item[data-swap][open]
-    > .v-accordion-summary
-    .v-accordion-icon:not(.v-accordion-icon-open),
-  .v-accordion-item[data-swap]:not([open]) > .v-accordion-summary .v-accordion-icon-open {
-    display: none;
-  }
-
   /* A disabled item greys out through the colour tokens and never through
      `opacity`, the rule every control in the DS follows. */
-  .v-accordion-item[data-disabled] > .v-accordion-summary {
+  .v-accordion-summary[data-disabled] {
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 
-  /* The icons and the subtitle default to text-muted, which is DARKER than the
+  /* The icon and the subtitle default to text-muted, which is DARKER than the
      text-subtle a disabled title takes: left to themselves they would come out
-     stronger than the label they belong to, so they inherit it instead. */
-  .v-accordion-item[data-disabled] .v-accordion-icon,
-  .v-accordion-item[data-disabled] .v-accordion-icon-start,
-  .v-accordion-item[data-disabled] .v-accordion-subtitle {
+     stronger than the label they belong to, so they inherit it instead. The chevron
+     gets the same treatment from `styles/disclosure.css`. */
+  .v-accordion-summary[data-disabled] .v-accordion-icon,
+  .v-accordion-summary[data-disabled] .v-accordion-subtitle {
     color: inherit;
   }
 
@@ -236,7 +225,7 @@ function onSummaryClick(event: MouseEvent) {
     color: var(--vectis-color-text-muted);
   }
 
-  /* The disclosure animation and the chevron's own transition come from
-     `styles/disclosure.css`, reduced-motion block included. */
+  /* The disclosure animation, the chevron's rotation or swap and the WebKit marker come
+     from `styles/disclosure.css`, reduced-motion block included. */
 }
 </style>

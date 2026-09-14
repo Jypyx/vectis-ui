@@ -200,7 +200,7 @@ function onPointerLeave() {
     @pointerleave="onPointerLeave"
   >
     <slot name="start">
-      <VIcon v-if="iconStart" v-bind="iconProps(iconStart)" />
+      <VIcon v-if="iconStart" class="v-menu-item-icon" v-bind="iconProps(iconStart)" />
     </slot>
     <span class="v-menu-item-content">
       <span class="v-menu-item-label"
@@ -242,8 +242,12 @@ function onPointerLeave() {
      * The type is the one composite part: the SIZE comes from the scale, but the line
      * height stays that of body text — a unitless ratio, so it still follows the size
      * — and the weight stays regular. The full `control` type role would mean a medium
-     * weight and lines set tight against each other, which suits a single-line label
-     * and not a row that may wrap and carry a second line under it.
+     * weight and lines set tight against each other, and a row may carry a second line
+     * under its label.
+     *
+     * The label and that second line TRUNCATE rather than wrap, the VSideNavigationItem
+     * recipe: the panel has a ceiling, and a command that grew a line would break the
+     * rhythm of the list. `width` on VMenu is the way to give long labels more room.
      *
      * The corner is VSideNavigationItem's: the control radius capped at half a control
      * height, so a pill override paints every row of a menu alike, a row carrying a
@@ -252,9 +256,10 @@ function onPointerLeave() {
     display: flex;
     align-items: center;
     gap: var(--control-gap);
-    width: 100%;
-    min-height: var(--control-height);
-    padding: var(--vectis-space-1) var(--control-padding-inline);
+    inline-size: 100%;
+    min-block-size: var(--control-height);
+    padding-block: var(--vectis-space-1);
+    padding-inline: var(--control-padding-inline);
     border: none;
     background: transparent;
     color: var(--vectis-color-text);
@@ -269,17 +274,30 @@ function onPointerLeave() {
 
   .v-menu-item-content {
     flex: 1;
-    min-width: 0;
+    min-inline-size: 0;
     display: flex;
     flex-direction: column;
   }
 
-  .v-menu-item-sublabel {
-    font-size: var(--vectis-text-caption-size);
-    color: var(--vectis-color-text-muted);
+  .v-menu-item-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
+  .v-menu-item-sublabel {
+    overflow: hidden;
+    font-size: var(--vectis-text-caption-size);
+    color: var(--vectis-color-text-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The start icon is muted, as on every row of the design system (VSideNavigationItem,
+     VAccordionItem): the label carries the command, the icon only helps find it. */
+  .v-menu-item-icon,
   .v-menu-item-chevron {
+    flex: none;
     color: var(--vectis-color-text-muted);
   }
 
@@ -303,6 +321,7 @@ function onPointerLeave() {
     color: var(--vectis-color-accent-text);
   }
 
+  .v-menu-item[data-selected] .v-menu-item-icon,
   .v-menu-item[data-selected] .v-menu-item-sublabel {
     color: inherit;
   }
@@ -323,6 +342,7 @@ function onPointerLeave() {
     color: var(--vectis-color-danger-text);
   }
 
+  .v-menu-item[data-tone='danger'] .v-menu-item-icon,
   .v-menu-item[data-tone='danger'] .v-menu-item-sublabel {
     color: inherit;
   }
@@ -342,7 +362,11 @@ function onPointerLeave() {
     cursor: not-allowed;
   }
 
+  /* Muted defaults DARKER than the subtle grey a disabled label takes, so the icon and
+     the second line inherit it rather than outshining the label. */
+  .v-menu-item:disabled .v-menu-item-icon,
   .v-menu-item:disabled .v-menu-item-sublabel,
+  .v-menu-item[aria-disabled='true'] .v-menu-item-icon,
   .v-menu-item[aria-disabled='true'] .v-menu-item-sublabel {
     color: inherit;
   }

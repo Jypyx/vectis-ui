@@ -9,7 +9,7 @@ export default {
     },
     exclusive: {
       title: 'One section at a time',
-      text: 'A group keeps a single section open by default. <code>multiple</code> allows several sections to stay open at the same time.',
+      text: 'A group keeps a single section open by default. <code>multiple</code> allows several sections to stay open at the same time. VSideNavigation has the opposite default and the opposite prop, <code>exclusive</code>: a sidebar usually lets several sections stay open.',
     },
     subtitles: {
       title: 'Subtitles and icons',
@@ -55,7 +55,9 @@ export default {
           'A second line under the title, for a short explanation or a status. The <code>#subtitle</code> slot replaces it when markup is needed.',
         icon: 'An icon before the title. The <code>#icon</code> slot replaces it.',
         defaultOpen:
-          'Renders the section already open. It sets the first render only: the browser owns the state afterwards, so changing this later will not close a section the reader has opened.',
+          'Renders the section already open. Only its initial value is read: the browser owns the state afterwards, so changing this later will not close a section the reader has opened.',
+        vModelOpen:
+          'Whether the section is open, when you want to drive or observe it. Left unbound, the browser keeps that state to itself and <code>defaultOpen</code> gives only the initial value.',
         disabled:
           'Makes the section inert. It can no longer be opened, the keyboard steps over it, and it greys out through the colour tokens.',
       },
