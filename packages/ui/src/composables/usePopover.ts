@@ -15,14 +15,14 @@
  * as open, and the guard would swallow the next request to close it.
  */
 
-import { ref, type Ref } from 'vue'
+import { onMounted, ref, watch, type Ref } from 'vue'
 
 // @fallback
 // The option below is newer than the type definitions shipped with TypeScript, so the
 // element is described locally rather than being cast about at each call site.
 type PopoverWithSource = HTMLElement & { showPopover(options?: { source?: HTMLElement }): void }
 
-export function usePopover(el: Ref<HTMLElement | null>) {
+export function usePopover(el: Readonly<Ref<HTMLElement | null>>) {
   const shown = ref(false)
 
   /**
@@ -42,7 +42,7 @@ export function usePopover(el: Ref<HTMLElement | null>) {
    * against and lands at the corner of the viewport.
    */
   function show(source?: HTMLElement) {
-    if (!shown.value) attempt(source, true)
+    attempt(source, true)
   }
 
   /*
@@ -75,4 +75,38 @@ export function usePopover(el: Ref<HTMLElement | null>) {
   }
 
   return { shown, syncShown, show, hide }
+}
+
+// @core
+/**
+ * The model half of a popover's `v-model:open`, for a component that publishes its open
+ * state: a change to the model opens or closes the panel. The other half — writing the
+ * DOM's state back into the model — stays with the component, in its own toggle handler,
+ * because that is where it knows the state has settled.
+ *
+ * `shown` is a getter so that the state may live in a child: VPopover reads its own
+ * `usePopover`, VMenu reads the one VMenuPanel exposes.
+ *
+ * TRAP — the `value === shown()` guard is what keeps the two directions from chasing each
+ * other. A panel the browser has just dismissed writes `false` into the model; without the
+ * guard that write would come back here as a request to close a panel already closed.
+ */
+export function usePopoverModel(
+  open: Ref<boolean>,
+  shown: () => boolean,
+  show: () => void,
+  hide: () => void,
+) {
+  watch(open, (value) => {
+    if (value === shown()) return
+    if (value) show()
+    else hide()
+  })
+
+  // @ssr — a watcher does not run during the server render, so a panel asked to be open
+  // from the start would never be told to open. Replaying the initial state on mount is
+  // what covers that case.
+  onMounted(() => {
+    if (open.value) show()
+  })
 }

@@ -29,6 +29,8 @@ const LAYER_ORDER = '@layer vectis.reset, vectis.tokens, vectis.components, vect
 /** The only classes `styles.css` may carry once the components ship their own sheet. */
 const CORE_CLASSES: ReadonlySet<string> = new Set([
   '.v-banner',
+  '.v-banner-control',
+  '.v-banner-text',
   '.v-choice',
   '.v-choice-hint',
   '.v-choice-label',

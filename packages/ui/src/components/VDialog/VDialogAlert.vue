@@ -24,8 +24,9 @@ interface DialogAlertProps {
   /** A line under the title, spelling out the consequences of the answer. */
   subtitle?: string
   /**
-   * How wide the dialog is: a number is read as pixels, a string as any CSS length. It
-   * is never allowed to exceed the width of the viewport.
+   * How wide the alert is: a number is read as pixels, a string as any CSS length. Left
+   * out, it takes the `--vectis-control-size-dialog-width` token, 400px by default. It is
+   * never allowed to exceed the width of the viewport.
    */
   width?: number | string
 }
@@ -33,7 +34,7 @@ interface DialogAlertProps {
 withDefaults(defineProps<DialogAlertProps>(), {
   title: undefined,
   subtitle: undefined,
-  width: '400px',
+  width: undefined,
 })
 
 /** Whether the alert is showing. It starts closed, and closing writes back to it. */
@@ -44,6 +45,11 @@ defineSlots<{
   default(): unknown
   /** Replaces the title and subtitle block with content of your own. */
   header?(): unknown
+  /**
+   * Extra controls in the header, where a dialog puts them before its cross: a link to help,
+   * for instance. An alert has no cross, so they sit at the end of the header alone.
+   */
+  'header-actions'?(): unknown
   /**
    * The buttons that answer the alert. They are not optional: nothing else can close
    * this dialog.
@@ -93,6 +99,9 @@ defineExpose({
     </template>
     <template v-if="$slots.header" #header>
       <slot name="header" />
+    </template>
+    <template v-if="$slots['header-actions']" #header-actions>
+      <slot name="header-actions" />
     </template>
     <slot />
     <template v-if="$slots.footer" #footer>

@@ -1,7 +1,8 @@
 /*
  * The chrome shared by the panels that list rows (VMenu, VCombobox): surface, border,
  * shadow, internal rhythm. The decoration counterpart of `floating.css`, which positions the
- * same panels. Set by VPopover's `surface` prop.
+ * same panels. Set by VPopover on every panel it is not told is `bare`, and by VMenuPanel
+ * directly.
  *
  * RULE: only declarations no panel redeclares. `.v-panel` and `.v-menu`/`.v-combobox-panel`
  * are all (0,1,0) and each ships its own sheet, so a shared declaration would be arbitrated

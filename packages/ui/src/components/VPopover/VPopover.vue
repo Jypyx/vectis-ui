@@ -30,9 +30,9 @@
  * The only JavaScript is the bridge between `v-model:open` and the browser's own
  * imperative popover methods.
  */
-import { computed, onMounted, ref, useId, watch } from 'vue'
+import { computed, ref, useId } from 'vue'
 
-import { usePopover } from '../../composables/usePopover'
+import { usePopover, usePopoverModel } from '../../composables/usePopover'
 
 export type PopoverPlacement =
   | 'top'
@@ -178,21 +178,7 @@ function onToggle(event: Event) {
   open.value = shown.value
 }
 
-// Opening and closing from the model. The guard is what keeps the two directions
-// from chasing each other: a panel closed by the browser has already updated `shown`,
-// and calling hide() again would be pointless at best.
-watch(open, (value) => {
-  if (value === shown.value) return
-  if (value) show()
-  else hide()
-})
-
-// @ssr — a watcher does not run during the server render, so a panel asked to be
-// open from the start would never be told to open. Replaying the initial state on
-// mount is what covers that case.
-onMounted(() => {
-  if (open.value) show()
-})
+usePopoverModel(open, () => shown.value, show, hide)
 
 // The imperative counterpart of `v-model:open`, for a consumer whose opening must be
 // SYNCHRONOUS: the model would insert a tick, which is exactly what VTooltip's delay and

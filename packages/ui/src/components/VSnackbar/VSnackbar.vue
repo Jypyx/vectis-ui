@@ -62,15 +62,14 @@ const props = withDefaults(defineProps<SnackbarProps>(), {
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.snackbar.label)
 
-const item = computed(() => current.value)
-const placement = computed(() => item.value?.placement ?? props.placement)
+const placement = computed(() => current.value?.placement ?? props.placement)
 /* A failure interrupts whatever a screen reader is saying; a plain confirmation waits for
    a pause, the reader having asked for the action it reports. */
-const role = computed(() => (item.value?.tone === 'danger' ? 'alert' : 'status'))
+const role = computed(() => (current.value?.tone === 'danger' ? 'alert' : 'status'))
 const actionLabel = computed(
-  () => item.value?.actionLabel ?? props.actionLabel ?? m.value.snackbar.action,
+  () => current.value?.actionLabel ?? props.actionLabel ?? m.value.snackbar.action,
 )
-const icon = computed(() => (item.value?.icon ? iconProps(item.value.icon) : undefined))
+const icon = computed(() => (current.value?.icon ? iconProps(current.value.icon) : undefined))
 
 const hostEl = ref<HTMLElement | null>(null)
 const { syncShown, show, hide } = usePopover(hostEl)
@@ -84,7 +83,7 @@ let hovered = false
 let focused = false
 
 function arm() {
-  const bar = item.value
+  const bar = current.value
   if (!bar || hovered || focused) return
   const duration = bar.duration ?? props.duration
   /* GUARD, not a default: `useTimer` runs a delay of 0 SYNCHRONOUSLY, which is the design
@@ -112,10 +111,10 @@ function sync() {
   // WITH the bar while it holds the focus, and an engine that sends no `focusout` for a
   // removed element would leave `focused` standing: every later confirmation would then
   // stay on screen for good, far from the gesture that caused it.
-  if (!item.value) hovered = focused = false
+  if (!current.value) hovered = focused = false
   // Showing and hiding are safe to call on a container already in that state, the guards
   // living in the popover plumbing — so there is no need to remember which it is in.
-  if (item.value) show()
+  if (current.value) show()
   else hide()
   arm()
 }
@@ -125,7 +124,7 @@ function sync() {
  * `post` timing is load-bearing: the card must already be in the page before its container
  * is told to show itself.
  */
-watch(item, sync, { flush: 'post' })
+watch(current, sync, { flush: 'post' })
 // @ssr — a watcher does not run during the server render, so a confirmation raised before
 // this component mounted would never be picked up. Running the same synchronization on
 // mount is what brings it in.
@@ -160,7 +159,7 @@ function release(which: 'pointer' | 'focus') {
 /* The action always takes the bar away: it answers the confirmation, so leaving it on
    screen would invite the reader to answer it twice. */
 function runAction() {
-  const bar = item.value
+  const bar = current.value
   if (!bar) return
   bar.action?.()
   dismissSnackbar(bar.id)
@@ -183,17 +182,17 @@ function runAction() {
     @toggle="syncShown"
   >
     <div
-      v-if="item"
-      :key="item.id"
+      v-if="current"
+      :key="current.id"
       class="v-banner v-snackbar v-tone"
-      :data-tone="item.tone"
+      :data-tone="current.tone"
       :role="role"
     >
       <VIcon v-if="icon" class="v-snackbar-icon" v-bind="icon" />
-      <p class="v-snackbar-message">{{ item.message }}</p>
+      <p class="v-banner-text v-snackbar-message">{{ current.message }}</p>
       <VButton
-        v-if="item.action"
-        class="v-snackbar-action"
+        v-if="current.action"
+        class="v-banner-control v-snackbar-action"
         variant="ghost"
         tone="neutral"
         size="sm"
@@ -207,9 +206,17 @@ function runAction() {
 
 <style>
 @layer vectis.components {
-  /* The fixed positioning and the guard hiding a closed container come from the shared
-     `.v-overlay` class, set on this same element. What stays here is the browser's own
-     popover decoration to undo — its border, its padding, its opaque background. */
+  /*
+   * The container. Its rules are an ALIGNED COPY of VToaster's stacks: the two containers are the
+   * same object, a popover at a physical corner that fades when it empties, and the copy is
+   * kept line for line, the one difference being the top edge, which only the notifications take.
+   * They are not factored into styles/banner.css because that sheet is paid for by every
+   * consumer, and these rules cost more than the size gate allows; change one, change the other.
+   *
+   * The fixed positioning and the guard hiding a closed container come from the shared
+   * `.v-overlay` class, set on this same element. What is undone here is the browser's own
+   * popover decoration: its border, its padding, its opaque background.
+   */
   .v-snackbar-host {
     margin: 0;
     border: none;
@@ -217,29 +224,32 @@ function runAction() {
     background: transparent;
     overflow: visible;
     width: fit-content;
-    bottom: var(--vectis-space-4);
-    /* The direction the bar slides in from, read by `.v-banner` in styles/banner.css.
-       Always positive: this container only ever sits along the bottom edge. That sheet
-       reads it with a `, 0` fallback, so dropping this declaration costs the slide and
-       nothing else — the bar still fades in, in place, and nothing reports it. */
-    --banner-enter-y: var(--vectis-space-4);
   }
 
   /*
-   * These coordinates are deliberately PHYSICAL rather than logical: a confirmation
-   * appears at a place on the screen, and that place does not flip with the reading
-   * direction — the same argument as the notification stacks, and the same as the
-   * operating system's own messages.
+   * PHYSICAL coordinates rather than logical ones: a message appears at a place on the
+   * screen, and that place does not flip with the reading direction — the operating
+   * system's own notifications behave the same way.
+   *
+   * `--banner-enter-y` is the direction each card slides in from, read by `.v-banner` in
+   * styles/banner.css: the container is the only thing that knows which edge of the screen
+   * it sits on. That sheet reads it with a `, 0` fallback, so dropping the declaration costs
+   * the slide and nothing else, and nothing reports it.
    */
-  .v-snackbar-host[data-placement='bottom-left'] {
+  .v-snackbar-host[data-placement^='bottom-'] {
+    bottom: var(--vectis-space-4);
+    --banner-enter-y: var(--vectis-space-4);
+  }
+
+  .v-snackbar-host[data-placement$='-left'] {
     left: var(--vectis-space-4);
   }
 
-  .v-snackbar-host[data-placement='bottom-right'] {
+  .v-snackbar-host[data-placement$='-right'] {
     right: var(--vectis-space-4);
   }
 
-  .v-snackbar-host[data-placement='bottom-center'] {
+  .v-snackbar-host[data-placement$='-center'] {
     left: 0;
     right: 0;
     margin-inline: auto;
@@ -274,9 +284,9 @@ function runAction() {
 
   /* The box, the decoration, the typography and the entry motion come from the shared
      `.v-banner` class set on this same element — the chassis this bar has in common with
-     the notification card, in `styles/banner.css`. What stays here is what the two
-     genuinely differ on: the alignment, the padding, the width, and the tone painting.
-     `--banner-line`, the one-line alignment unit both use, is defined there. */
+     the notification card, in `styles/banner.css`, along with the message block and the
+     trailing control. What stays here is what the two genuinely differ on: the alignment,
+     the padding, the width, and the tone painting. */
   .v-snackbar {
     /* Centred, where the notification hooks to its first line. A confirmation is ONE
        short sentence and it carries a real button: on a message that wraps, aligning to
@@ -285,9 +295,8 @@ function runAction() {
        bar reading as one row. */
     align-items: center;
     padding-block: var(--vectis-space-3);
-    /* Tighter at the end than at the start: the action button brings padding of its own,
-       and the two together would read as a hole — hence the negative inline margin it
-       pulls back with, rather than a smaller padding declared here. */
+    /* The action pulls back into this gutter with a negative margin (`.v-banner-control`),
+       rather than the bar declaring a smaller padding at its end. */
     padding-inline: var(--vectis-space-4);
     min-inline-size: var(--vectis-control-size-snackbar-min);
     /* Wide enough for a sentence, never wider than the viewport with the container's own
@@ -307,7 +316,8 @@ function runAction() {
    * is shared with VButton, VChip and VToast. Neutral needs no override here — its solid
    * pair IS the design system's canonical text/surface inversion, dark on a light theme
    * and light on a dark one, which is exactly what a snackbar wants and is why it is
-   * expressed there rather than restated here.
+   * expressed there rather than restated here. The action button reads on both through
+   * the rebind `.v-banner-control` carries.
    */
   .v-snackbar {
     background: var(--tone-bg-solid);
@@ -319,52 +329,6 @@ function runAction() {
      nothing at all — it would be a declaration that does no work. */
   .v-snackbar-icon {
     --vectis-icon-size: var(--vectis-icon-size-md);
-  }
-
-  .v-snackbar-message {
-    flex: 1;
-    min-width: 0;
-    /* A message may hold something with nowhere to break — a file name, an identifier —
-       and it has to wrap anyway rather than widen the bar. */
-    overflow-wrap: anywhere;
-  }
-
-  /*
-   * The action is an ordinary neutral ghost button, recoloured by rebinding the very
-   * variables its own tone table reads. These rules win over that table TWICE — they are
-   * more specific AND they sit in a layer above it — so no sheet order can change the
-   * outcome.
-   *
-   * Without the rebind a neutral ghost paints its text `--vectis-color-text`, which is the
-   * very colour the bar's background is: the button would be invisible, in both themes.
-   * The surrounding text colour is the only thing guaranteed to be readable against that
-   * background, whichever of the two tones is showing.
-   *
-   * Not observable in jsdom, which lays nothing out and evaluates no colour: the guard is
-   * the `Tones` play function, which deliberately ends with a bar OPEN so that axe judges
-   * this button. Verified red — without the rule axe reports `color-contrast` on
-   * `.v-snackbar-action`, in both themes.
-   */
-  .v-snackbar .v-snackbar-action[data-tone] {
-    --tone-text-tinted: currentcolor;
-    --tone-bg-soft: color-mix(in oklab, currentcolor, transparent 85%);
-  }
-
-  .v-snackbar-action {
-    /* TRAP — this restates the size the template gives that button, small. The height the
-       button computes for itself lives inside its own subtree, out of reach from here, so
-       the two are written in two places and must be changed together. */
-    --snackbar-action-height: var(--vectis-control-height-sm);
-    /* The button is taller than a line of text, so this margin comes out negative. Under
-       `align-items: center` it ALIGNS nothing — an equal margin does not move a centred
-       item — and its one job is to keep the bar exactly one line tall on a single-line
-       message: without it the row would take the button's height instead, and the bar
-       would grow by the difference for no reason the reader can see. The unit it is
-       measured against is the one-line height `.v-banner` defines. */
-    margin-block: calc((var(--banner-line) - var(--snackbar-action-height)) / 2);
-    /* Kept equal to VToast's close cross, which pulls back by the same amount from the
-       same gutter — see the note there. */
-    margin-inline-end: calc(-1 * var(--vectis-space-2));
   }
 }
 </style>

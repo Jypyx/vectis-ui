@@ -69,7 +69,7 @@ const PLACEMENTS: ToastPlacement[] = [
 const groups = computed(() => {
   const map = new Map<ToastPlacement, ToastItem[]>()
   for (const item of toasts) {
-    const placement = item.placement ?? props.placement
+    const placement = effectivePlacement(item)
     const list = map.get(placement)
     if (list) list.push(item)
     else map.set(placement, [item])
@@ -77,25 +77,31 @@ const groups = computed(() => {
   return map
 })
 
+/* The six containers, collected by the `v-for` itself. A plain template ref rather than a
+   function one: a function written inline in the template is a new function on every
+   render, which Vue answers by calling the old one with null and the new one with the
+   element — twelve calls each time a notification comes or goes. */
+const stackEls = ref<HTMLElement[]>([])
+
 /*
  * One instance of the popover plumbing PER corner. Each carries its own element, its
  * own open state — fed by that element's events — and the guards that make opening and
  * closing safe to call twice: asking the browser to show an already-shown popover
  * throws.
  *
+ * The element is looked up by its placement rather than by its index: Vue does not
+ * promise that a `v-for` ref array follows the order of the list.
+ *
  * The containers being permanent, this runs once and never again.
  */
 const stacks = new Map(
   PLACEMENTS.map((placement) => {
-    const el = ref<HTMLElement | null>(null)
+    const el = computed(
+      () => stackEls.value.find((stack) => stack.dataset.placement === placement) ?? null,
+    )
     return [placement, { el, ...usePopover(el) }] as const
   }),
 )
-
-function setStackEl(placement: ToastPlacement, el: unknown) {
-  const stack = stacks.get(placement)
-  if (stack) stack.el.value = (el as HTMLElement | null) ?? null
-}
 
 function syncStack(placement: ToastPlacement, event: Event) {
   stacks.get(placement)?.syncShown(event)
@@ -205,14 +211,14 @@ onMounted(sync)
 function hold(placement: ToastPlacement, which: 'pointer' | 'focus') {
   const reason = which === 'pointer' ? hovered : focused
   reason.add(placement)
-  for (const item of toasts) if (effectivePlacement(item) === placement) stopTimer(item.id)
+  for (const item of groups.value.get(placement) ?? []) stopTimer(item.id)
 }
 
 function release(placement: ToastPlacement, which: 'pointer' | 'focus') {
   const reason = which === 'pointer' ? hovered : focused
   reason.delete(placement)
   if (isHeld(placement)) return
-  for (const item of toasts) if (effectivePlacement(item) === placement) startTimer(item)
+  for (const item of groups.value.get(placement) ?? []) startTimer(item)
 }
 
 /* The queue lives outside this component and survives it being unmounted and mounted
@@ -227,7 +233,7 @@ onBeforeUnmount(() => {
   <div
     v-for="p in PLACEMENTS"
     :key="p"
-    :ref="(el) => setStackEl(p, el)"
+    ref="stackEls"
     class="v-overlay v-toast-stack"
     popover="manual"
     :data-placement="p"
@@ -252,10 +258,17 @@ onBeforeUnmount(() => {
 
 <style>
 @layer vectis.components {
-  /* The fixed positioning and the guard hiding a closed container come from the shared
-     `.v-overlay` class, set on this same element. What stays here is the browser's own
-     popover decoration to undo — its border, its padding, its opaque background — and
-     the stack's own layout. */
+  /*
+   * The container. Its rules are an ALIGNED COPY of VSnackbar's host: the two containers are the
+   * same object, a popover at a physical corner that fades when it empties, and the copy is
+   * kept line for line, the one difference being the top edge, which a confirmation never takes.
+   * They are not factored into styles/banner.css because that sheet is paid for by every
+   * consumer, and these rules cost more than the size gate allows; change one, change the other.
+   *
+   * The fixed positioning and the guard hiding a closed container come from the shared
+   * `.v-overlay` class, set on this same element. What is undone here is the browser's own
+   * popover decoration: its border, its padding, its opaque background.
+   */
   .v-toast-stack {
     margin: 0;
     border: none;
@@ -263,26 +276,20 @@ onBeforeUnmount(() => {
     background: transparent;
     overflow: visible;
     width: fit-content;
-    display: flex;
-    flex-direction: column;
-    gap: var(--vectis-space-3);
   }
 
   /*
-   * These coordinates are deliberately PHYSICAL rather than logical: a notification
-   * appears at a place on the screen, and that place does not flip with the reading
-   * direction — the operating system's own notifications behave the same way.
+   * PHYSICAL coordinates rather than logical ones: a message appears at a place on the
+   * screen, and that place does not flip with the reading direction — the operating
+   * system's own notifications behave the same way.
+   *
+   * `--banner-enter-y` is the direction each card slides in from, read by `.v-banner` in
+   * styles/banner.css: the container is the only thing that knows which edge of the screen
+   * it sits on. That sheet reads it with a `, 0` fallback, so dropping the declaration costs
+   * the slide and nothing else, and nothing reports it.
    */
   .v-toast-stack[data-placement^='top-'] {
     top: var(--vectis-space-4);
-    /* The newest notification should sit nearest the screen edge. The queue only ever
-       grows at the end, so the stack is simply drawn in reverse. */
-    flex-direction: column-reverse;
-    /* The direction each card slides in from, read by `.v-banner` in styles/banner.css
-       — the stack is the only thing that knows which edge of the screen it sits on.
-       That sheet reads it with a `, 0` fallback, so dropping this declaration removes
-       the slide without removing anything else: the cards still fade in, in place, and
-       nothing reports a missing value. */
     --banner-enter-y: calc(-1 * var(--vectis-space-4));
   }
 
@@ -305,7 +312,7 @@ onBeforeUnmount(() => {
     margin-inline: auto;
   }
 
-  /* The stack fades in and out. Animating an element that is being added to or removed
+  /* The container fades in and out. Animating an element that is being added to or removed
      from the page needs the two `allow-discrete` declarations and the starting values
      below; a browser missing either simply shows and hides it at once. */
   .v-toast-stack {
@@ -330,6 +337,19 @@ onBeforeUnmount(() => {
     .v-toast-stack {
       transition: none;
     }
+  }
+
+  /* The stack's own layout, which the snackbar's single bar has no use for. The newest
+     notification should sit nearest the screen edge; the queue only ever grows at the end,
+     so a stack along the top is simply drawn in reverse. */
+  .v-toast-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vectis-space-3);
+  }
+
+  .v-toast-stack[data-placement^='top-'] {
+    flex-direction: column-reverse;
   }
 }
 </style>

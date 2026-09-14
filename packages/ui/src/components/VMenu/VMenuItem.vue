@@ -303,27 +303,19 @@ function onPointerLeave() {
 
   /* In a menu the focus IS the highlight, so it is drawn on `:focus` and not on
      `:focus-visible`: the focus is moved from code — by the arrows, and by hovering —
-     and the browser would not call that a keyboard focus worth showing. */
+     and the browser would not call that a keyboard focus worth showing. While a submenu is
+     open its parent item keeps the highlight too, so the path followed through the levels
+     stays visible. */
   .v-menu-item:hover:not(:disabled, [aria-disabled='true']),
-  .v-menu-item:focus {
-    background: var(--vectis-color-surface-muted);
-    outline: none;
-  }
-
-  /* While a submenu is open its parent item keeps the highlight, so the path followed
-     through the levels stays visible. */
+  .v-menu-item:focus,
   .v-menu-item[aria-expanded='true'] {
     background: var(--vectis-color-surface-muted);
+    outline: none;
   }
 
   .v-menu-item[data-selected] {
     background: var(--vectis-color-accent-surface);
     color: var(--vectis-color-accent-text);
-  }
-
-  .v-menu-item[data-selected] .v-menu-item-icon,
-  .v-menu-item[data-selected] .v-menu-item-sublabel {
-    color: inherit;
   }
 
   .v-menu-item[data-selected]:hover:not(:disabled, [aria-disabled='true']),
@@ -342,11 +334,6 @@ function onPointerLeave() {
     color: var(--vectis-color-danger-text);
   }
 
-  .v-menu-item[data-tone='danger'] .v-menu-item-icon,
-  .v-menu-item[data-tone='danger'] .v-menu-item-sublabel {
-    color: inherit;
-  }
-
   .v-menu-item[data-tone='danger']:hover:not(:disabled, [aria-disabled='true']),
   .v-menu-item[data-tone='danger']:focus,
   .v-menu-item[data-tone='danger'][aria-expanded='true'] {
@@ -362,12 +349,13 @@ function onPointerLeave() {
     cursor: not-allowed;
   }
 
-  /* Muted defaults DARKER than the subtle grey a disabled label takes, so the icon and
-     the second line inherit it rather than outshining the label. */
-  .v-menu-item:disabled .v-menu-item-icon,
-  .v-menu-item:disabled .v-menu-item-sublabel,
-  .v-menu-item[aria-disabled='true'] .v-menu-item-icon,
-  .v-menu-item[aria-disabled='true'] .v-menu-item-sublabel {
+  /* On a row painted in a colour of its own, the start icon and the second line take the
+     label's colour rather than the muted grey: muted would clash with the selected and the
+     danger tints, and on a disabled row it is DARKER than the subtle grey the label takes,
+     so they would outshine it. Each `:is()` counts for its most specific member, which
+     keeps the rule at (0,3,0), above the two (0,1,0) base rules. */
+  .v-menu-item:is([data-selected], [data-tone='danger'], :disabled, [aria-disabled='true'])
+    :is(.v-menu-item-icon, .v-menu-item-sublabel) {
     color: inherit;
   }
 }

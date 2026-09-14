@@ -35,8 +35,9 @@ interface DialogProps {
   /** A line under the title, explaining what the dialog is asking. */
   subtitle?: string
   /**
-   * How wide the dialog is: a number is read as pixels, a string as any CSS length. It
-   * is never allowed to exceed the width of the viewport.
+   * How wide the dialog is: a number is read as pixels, a string as any CSS length. Left
+   * out, it takes the `--vectis-control-size-dialog-width` token, 400px by default. It is
+   * never allowed to exceed the width of the viewport.
    */
   width?: number | string
   /**
@@ -65,7 +66,7 @@ interface DialogProps {
 const props = withDefaults(defineProps<DialogProps>(), {
   title: undefined,
   subtitle: undefined,
-  width: '400px',
+  width: undefined,
   role: 'dialog',
   hideClose: false,
   persistentBackdrop: false,
@@ -94,7 +95,7 @@ defineSlots<{
   default(): unknown
   /** Replaces the title and subtitle block with content of your own. */
   header?(): unknown
-  /** Extra controls in the header, placed before the close cross — a menu, a full-screen toggle. */
+  /** Extra controls in the header, placed before the close cross: a menu, a full-screen toggle. */
   'header-actions'?(): unknown
   /** The buttons at the foot of the dialog. */
   footer?(): unknown
@@ -291,8 +292,14 @@ defineExpose({
 <style>
 @layer vectis.components {
   .v-dialog {
-    /* The width comes from the prop, set inline. Whatever it asks for, the dialog is
-       never allowed past the viewport, margins included. */
+    /* The width comes from the prop, set inline, or from the token when there is none.
+       Whatever it asks for, the dialog is never allowed past the viewport, margins included.
+
+       TRAP — the token is declared ON the element rather than written as a `var()` fallback.
+       A custom property inherits, and a dialog opened from inside another one is its DOM
+       descendant: with a fallback, an alert confirming something in an 800px dialog would
+       read that dialog's inline width and open 800px wide itself, with no error anywhere. */
+    --dialog-width: var(--vectis-control-size-dialog-width);
     inline-size: var(--dialog-width);
     max-inline-size: calc(100dvi - 2 * var(--vectis-space-4));
     max-block-size: calc(100dvb - 2 * var(--vectis-space-4));
@@ -408,7 +415,6 @@ defineExpose({
        height, overflows, and is what scrolls. */
     flex: 1 0 auto;
     padding: var(--vectis-space-1) var(--vectis-space-6) var(--vectis-space-3);
-    color: var(--vectis-color-text);
     font-size: var(--vectis-text-body-md-size);
     line-height: var(--vectis-text-body-md-leading);
   }

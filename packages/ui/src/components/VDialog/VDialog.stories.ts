@@ -84,9 +84,6 @@ const meta = {
     persistentEscape: { control: 'boolean' },
     closeLabel: { control: 'text' },
   },
-  args: {
-    width: '400px',
-  },
   render: (args) => ({
     components: { VDialog, VButton, VTypography },
     setup() {

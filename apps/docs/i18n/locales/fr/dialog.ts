@@ -36,7 +36,7 @@ export default {
           "Le titre de la boîte, qui la nomme aussi pour les technologies d'assistance. Il est ignoré quand le slot <code>#header</code> remplace tout l'en-tête.",
         subtitle: 'Une ligne sous le titre, qui explique ce que la boîte demande.',
         width:
-          "La largeur de la boîte : un nombre est lu en pixels, une chaîne comme n'importe quelle longueur CSS. Elle n'est jamais autorisée à dépasser la largeur de la fenêtre.",
+          "La largeur de la boîte : un nombre est lu en pixels, une chaîne comme n'importe quelle longueur CSS. Sans valeur, elle prend le token <code>--vectis-control-size-dialog-width</code>, 400px par défaut. Elle n'est jamais autorisée à dépasser la largeur de la fenêtre.",
         role: "Le genre de boîte. <code>alertdialog</code> est fait pour celle à laquelle il faut répondre explicitement, et il pousse les lecteurs d'écran à l'annoncer avec plus d'insistance.",
         hideClose:
           "Retire la croix de fermeture de l'en-tête, ne laissant au lecteur qu'Échap, l'arrière-plan et ce que le pied propose.",
@@ -64,12 +64,14 @@ export default {
           "La question posée, qui nomme aussi la boîte pour les technologies d'assistance. Elle est ignorée quand le slot <code>#header</code> remplace tout l'en-tête.",
         subtitle: 'Une ligne sous le titre, qui détaille les conséquences de la réponse.',
         width:
-          "La largeur de la boîte : un nombre est lu en pixels, une chaîne comme n'importe quelle longueur CSS. Elle n'est jamais autorisée à dépasser la largeur de la fenêtre.",
+          "La largeur de la boîte : un nombre est lu en pixels, une chaîne comme n'importe quelle longueur CSS. Sans valeur, elle prend le token <code>--vectis-control-size-dialog-width</code>, 400px par défaut. Elle n'est jamais autorisée à dépasser la largeur de la fenêtre.",
         vModelOpen: "Si l'alerte est affichée. Elle part fermée, et la fermeture y réécrit.",
       },
       slots: {
         default: "Ce que dit l'alerte.",
         header: 'Remplace le bloc titre et sous-titre par un contenu à vous.',
+        headerActions:
+          "Des contrôles supplémentaires dans l'en-tête, là où une boîte les place avant sa croix : un lien vers l'aide, par exemple. Une alerte n'a pas de croix, ils se placent donc seuls au bout de l'en-tête.",
         footer:
           "Les boutons qui répondent à l'alerte. Ils ne sont pas optionnels : rien d'autre ne peut fermer cette boîte.",
         trigger:

@@ -18,11 +18,12 @@
  * list from there.
  */
 
-import { computed, onMounted, provide, ref, useId, watch } from 'vue'
+import { computed, provide, ref, useId } from 'vue'
 
 import VMenuPanel from './VMenuPanel.vue'
 import { menuInvoker, menuKey } from './context'
 import type { MenuPlacement, MenuSize } from './context'
+import { usePopoverModel } from '../../composables/usePopover'
 import { isKeyboardFocus } from '../../utils/focus'
 
 interface MenuProps {
@@ -90,7 +91,6 @@ defineSlots<{
 
 const panelRef = ref<InstanceType<typeof VMenuPanel> | null>(null)
 const menuId = useId()
-const shown = ref(false)
 
 const triggerProps = computed<MenuTriggerProps>(() => ({
   popovertarget: menuId,
@@ -121,7 +121,6 @@ provide(menuKey, { closeAll: () => panelRef.value?.close() })
 // symmetric: a misread pointer costs one extra keystroke, a misread keyboard gives back
 // the older behaviour.
 function onToggle(value: boolean) {
-  shown.value = value
   open.value = value
   if (value) {
     if (isKeyboardFocus(document.activeElement)) panelRef.value?.focusFirst()
@@ -151,20 +150,14 @@ function openAtTrigger() {
   panelRef.value?.show(menuInvoker(menuId) ?? undefined)
 }
 
-// Opening and closing from the model. The guard is what keeps the two directions from
-// chasing each other: a menu the browser has just closed already reports it here.
-watch(open, (value) => {
-  if (value === shown.value) return
-  if (value) openAtTrigger()
-  else panelRef.value?.close()
-})
-
-// @ssr — a watcher does not run during the server render, so a menu asked to be open
-// from the start would never be told to open. Replaying the initial state on mount is
-// what covers that case.
-onMounted(() => {
-  if (open.value) openAtTrigger()
-})
+// The open state is the panel's, read back from it rather than copied here: the panel has
+// already recorded the browser's answer by the time it reports the toggle.
+usePopoverModel(
+  open,
+  () => panelRef.value?.shown ?? false,
+  openAtTrigger,
+  () => panelRef.value?.close(),
+)
 
 /*
  * The same trio VDialog, VDialogAlert and VPopover answer. It is a relay onto the panel,

@@ -10,7 +10,7 @@ async function flush() {
   await nextTick()
 }
 
-async function openHarness(props: Record<string, unknown> = {}) {
+async function openHarness(props: Record<string, unknown> = {}, slots = '') {
   const open = ref(true)
   const Harness = defineComponent({
     components: { VDialogAlert },
@@ -19,6 +19,7 @@ async function openHarness(props: Record<string, unknown> = {}) {
       <VDialogAlert v-model:open="open" v-bind="props">
         Do you really want to delete?
         <template #footer><button>Confirm</button></template>
+        ${slots}
       </VDialogAlert>
     `,
   })
@@ -42,8 +43,22 @@ describe('VDialogAlert', () => {
     expect((await openHarness()).dialog.getAttribute('closedby')).toBe('none')
   })
 
-  it('defaults to width=400px', async () => {
-    expect((await openHarness()).dialog.style.getPropertyValue('--dialog-width')).toBe('400px')
+  // The default width is the token's, read by the stylesheet: nothing is written inline, so
+  // the alert cannot drift from VDialog's own default.
+  it('leaves the width to the token unless one is given', async () => {
+    expect((await openHarness()).dialog.style.getPropertyValue('--dialog-width')).toBe('')
+    expect(
+      (await openHarness({ width: 320 })).dialog.style.getPropertyValue('--dialog-width'),
+    ).toBe('320px')
+  })
+
+  it('relays the #header-actions slot', async () => {
+    const { container } = await openHarness(
+      { title: 'Delete?' },
+      '<template #header-actions><a data-testid="help" href="#help">Help</a></template>',
+    )
+    const actions = container.querySelector('.v-dialog-header-actions')
+    expect(actions?.querySelector('[data-testid="help"]')).toBeTruthy()
   })
 
   it('stays driven by the v-model (an action button closes it)', async () => {

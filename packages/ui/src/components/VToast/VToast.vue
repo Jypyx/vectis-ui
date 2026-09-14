@@ -72,13 +72,13 @@ const icon = computed(() =>
     :style="item.width ? { '--toast-width': item.width } : undefined"
   >
     <VIcon v-if="icon" class="v-toast-icon" v-bind="icon" />
-    <div class="v-toast-body">
+    <div class="v-banner-text v-toast-body">
       <p v-if="item.title" class="v-toast-title">{{ item.title }}</p>
       <p class="v-toast-message">{{ item.message }}</p>
     </div>
     <VIconButton
       v-if="!item.hideClose"
-      class="v-toast-close"
+      class="v-banner-control v-toast-close"
       :label="closeLabel"
       size="sm"
       @click="emit('close', item.id)"
@@ -92,9 +92,10 @@ const icon = computed(() =>
 @layer vectis.components {
   /* The box, the decoration, the typography and the entry motion come from the shared
      `.v-banner` class set on this same element — the chassis this card has in common
-     with the snackbar, in `styles/banner.css`. What stays here is what the two
-     genuinely differ on: the alignment, the padding, the width, and the whole of the tone
-     painting.
+     with the snackbar, in `styles/banner.css`, along with the message block
+     (`.v-banner-text`) and the close cross's margins (`.v-banner-control`). What stays here
+     is what the two genuinely differ on: the alignment, the padding, the width, and the
+     whole of the tone painting.
      `--banner-line`, the one-line alignment unit both use, is defined there. */
   .v-toast {
     /* A notification hooks its icon and its cross to the FIRST line of the message: it
@@ -158,23 +159,17 @@ const icon = computed(() =>
   }
 
   /*
-   * The close cross is an ordinary neutral button, recoloured by rebinding the very
-   * variables its own tone table reads. These rules win over that table TWICE — they
-   * are more specific AND they sit in a layer above it — so no sheet order can change
-   * the outcome.
+   * On a tinted card the close cross takes the tone's own accent. On a solid one it keeps
+   * the surrounding text colour the shared `.v-banner-control` rule gives it — the only thing
+   * guaranteed readable against that background.
    *
-   * On a tinted card the cross takes the tone's own accent; on a fully coloured one it
-   * takes the surrounding text colour, which is the only thing guaranteed to be
-   * readable against that background.
+   * TRAP — (0,4,0) is load-bearing: the shared rebind is (0,3,0) in the same layer and ships
+   * in another sheet, so at equal specificity the winner would be whichever sheet the
+   * consumer's bundler put last.
    */
   .v-toast[data-variant='soft'] .v-toast-close[data-tone] {
     --tone-text-tinted: var(--toast-accent);
     --tone-bg-soft: color-mix(in oklab, var(--toast-accent), transparent 88%);
-  }
-
-  .v-toast[data-variant='solid'] .v-toast-close[data-tone] {
-    --tone-text-tinted: currentcolor;
-    --tone-bg-soft: color-mix(in oklab, currentcolor, transparent 85%);
   }
 
   .v-toast-icon {
@@ -182,37 +177,11 @@ const icon = computed(() =>
     margin-block: calc((var(--banner-line) - var(--vectis-icon-size-md)) / 2);
   }
 
-  .v-toast-body {
-    flex: 1;
-    min-width: 0;
-    /* A message may hold something with nowhere to break — a URL, an identifier — and
-       it has to wrap anyway rather than widen the card. */
-    overflow-wrap: anywhere;
-  }
-
   .v-toast-title {
     margin-block-end: var(--vectis-space-1);
     /* The heavier weight marks the title against its own message, which is emphasis
        rather than a typographic role — hence a font token read directly. */
     font-weight: var(--vectis-font-weight-semibold);
-  }
-
-  .v-toast-close {
-    /* TRAP — this restates the size the template gives that button, small. The height the
-       button computes for itself lives inside its own subtree, out of reach from here, so
-       the two are written in two places and must be changed together — dropping `compact`
-       from the template without dropping the subtraction here is the exact bug this
-       comment exists for. */
-    --toast-close-height: var(--vectis-control-height-sm);
-    /* The cross is taller than a line of text, so this margin comes out negative —
-       which is also what stops it from pushing the card's padding open. The unit it is
-       measured against is the one-line height `.v-banner` defines. */
-    margin-block: calc((var(--banner-line) - var(--toast-close-height)) / 2);
-    /* The same inline pull-back as VSnackbar's action: both are a `sm` ghost control sitting
-       at the end of a `--vectis-space-4` gutter, and a reader seeing a toast and a snackbar
-       on one page would read two different gutters as a misalignment rather than as two
-       components. Keep the two in step. */
-    margin-inline-end: calc(-1 * var(--vectis-space-2));
   }
 }
 </style>

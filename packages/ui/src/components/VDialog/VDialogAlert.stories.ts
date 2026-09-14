@@ -45,7 +45,6 @@ const meta = {
     subtitle: { control: 'text' },
     width: { control: 'text' },
   },
-  args: { width: '400px' },
   render: (args) => ({
     components: { VDialogAlert, VButton, VTypography },
     setup() {

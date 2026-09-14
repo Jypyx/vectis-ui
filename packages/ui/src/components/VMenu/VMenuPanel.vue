@@ -86,7 +86,9 @@ const panelEl = ref<HTMLElement | null>(null)
 // a programmatically opened submenu its anchor, all live in usePopover.
 const { shown, syncShown, show, hide } = usePopover(panelEl)
 
-const menu = inject(menuKey, null)
+// Never absent: this panel is internal, rendered only by VMenu and by the VMenuItems inside
+// one, and VMenu provides the key before either exists.
+const menu = inject(menuKey)!
 
 function onToggle(event: Event) {
   syncShown(event)
@@ -108,11 +110,6 @@ function items(): HTMLElement[] {
       '[role="menuitem"]:not(:disabled):not([aria-disabled="true"])',
     ),
   ].filter((el) => el.closest('[role="menu"]') === panel)
-}
-
-function closeAll() {
-  if (menu) menu.closeAll()
-  else hide()
 }
 
 // @a11y
@@ -140,7 +137,7 @@ function onKeydown(event: KeyboardEvent) {
   if (!panel || (event.target as Element).closest('[role="menu"]') !== panel) return
 
   if (event.key === 'Tab') {
-    closeAll()
+    menu.closeAll()
     return
   }
   if (event.key === 'Escape' || (props.submenu && event.key === 'ArrowLeft')) {
@@ -189,6 +186,8 @@ defineExpose({
   show,
   /** Closes it. */
   close: hide,
+  /** Whether it is open, as the browser last reported it. VMenu's model is checked against it. */
+  shown,
   /** Puts the focus on the first reachable item — the keyboard's way in. */
   focusFirst,
   /** Puts the focus on the panel itself — the pointer's way in, singling out no command. */

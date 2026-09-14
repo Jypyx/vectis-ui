@@ -142,7 +142,8 @@ describe('VDialog', () => {
   })
 
   it('width is set as the inline --dialog-width style', async () => {
-    expect((await openHarness()).dialog.style.getPropertyValue('--dialog-width')).toBe('400px')
+    // No width, no inline value: the stylesheet falls back on the dialog-width token.
+    expect((await openHarness()).dialog.style.getPropertyValue('--dialog-width')).toBe('')
     expect(
       (await openHarness({ width: '640px' })).dialog.style.getPropertyValue('--dialog-width'),
     ).toBe('640px')

@@ -20,7 +20,9 @@ modal.
 `VDialogAlert` forces `role="alertdialog"`, `hideClose`, `persistentBackdrop` and
 `persistentEscape` on `VDialog`. All the machinery (the top layer, the focus trap, the inert
 background, the sticky header/footer, the scroll separators, the lazy mounting) is inherited as it
-is — there is no point duplicating the component. The default width is `400px` (the `width` prop).
+is — there is no point duplicating the component. With no `width`, it takes the same default as
+`VDialog`, the `--vectis-control-size-dialog-width` token (400px). The `#header-actions` slot is
+relayed as well: with no cross beside them, its controls sit at the end of the header.
 
 <Canvas of={VDialogAlertStories.Confirmation} />
 

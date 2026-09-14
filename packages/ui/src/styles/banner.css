@@ -1,8 +1,9 @@
 /*
  * The chassis shared by the messages floated above the page: VToast's card and
  * VSnackbar's bar. Both are the same object on screen — a raised box one line of body
- * text tall — so the radius, the shadow and the entry motion live here and cannot move
- * on one surface without moving on the other.
+ * text tall, holding a message and, at its end, one small ghost button — so the radius,
+ * the shadow, the entry motion, the message block and that button's placement live here
+ * and cannot move on one surface without moving on the other.
  *
  * RULE, as in `panel.css`: only declarations no consumer redeclares. `.v-banner` and
  * `.v-toast`/`.v-snackbar` are all (0,1,0) and each component ships its own sheet, so a
@@ -10,6 +11,10 @@
  * chooses. Padding, widths, `align-items` and the whole tone painting therefore stay
  * with each component, which is exactly where the two differ. To redeclare anyway, use
  * the compound `.v-banner.v-toast`.
+ *
+ * The CONTAINERS (`.v-toast-stack`, `.v-snackbar-host`) are not here, although their rules
+ * are the same: this sheet is paid for by every consumer, and the containers' forty lines
+ * cost more than the size gate allows. Each component keeps an aligned copy.
  *
  * Two custom properties make the contract:
  *
@@ -50,6 +55,48 @@
       opacity: 0;
       translate: 0 var(--banner-enter-y, 0);
     }
+  }
+
+  /* The message block: it takes the room left by the icon and the control, and a message
+     holding something with nowhere to break — a URL, a file name — wraps anyway rather than
+     widening the card. */
+  .v-banner-text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /*
+   * The trailing control: VToast's close cross, VSnackbar's action. Both are a `sm` ghost
+   * button at the end of a `--vectis-space-4` gutter.
+   *
+   * TRAP — `--banner-control-height` restates the size both templates give that button. The
+   * height the button computes lives inside its own subtree, out of reach from here, so a
+   * template moving to another size must move this too. The control is taller than a line of
+   * text, so the margin comes out negative: under start alignment it hooks the control to the
+   * first line, under centring it moves nothing and only keeps the card one line tall.
+   */
+  .v-banner-control {
+    --banner-control-height: var(--vectis-control-height-sm);
+    margin-block: calc((var(--banner-line) - var(--banner-control-height)) / 2);
+    /* The button brings padding of its own, which against the card's gutter would read as a
+       hole: pulled back by it instead of the card taking a smaller padding. */
+    margin-inline-end: calc(-1 * var(--vectis-space-2));
+  }
+
+  /*
+   * The control is an ordinary neutral ghost button, recoloured by rebinding the variables its
+   * own tone table reads to the surrounding text colour, the one thing guaranteed readable on
+   * a solid card. Without it a neutral ghost paints `--vectis-color-text`, which is the very
+   * colour of a solid neutral card's background: invisible, in both themes.
+   *
+   * (0,3,0) on purpose: it beats the tone table twice (specificity and layer), and it stays
+   * BELOW VToast's soft-variant rebind at (0,4,0), which tints the cross with the tone instead.
+   * Guarded by VSnackbar's `Tones` play function, which ends with a bar open so axe judges it.
+   */
+  .v-banner .v-banner-control[data-tone] {
+    --tone-text-tinted: currentcolor;
+    --tone-bg-soft: color-mix(in oklab, currentcolor, transparent 85%);
   }
 
   @media (prefers-reduced-motion: reduce) {
