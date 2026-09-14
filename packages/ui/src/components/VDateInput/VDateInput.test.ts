@@ -535,3 +535,45 @@ describe('VDateInput — the field props', () => {
     expect(document.activeElement).toBe(holder.value?.el)
   })
 })
+
+describe('VDateInput — development warnings and the mask keys', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('says min > max ONCE, under its own name, with the calendar mounted in its panel', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { container } = render(VDateInput, {
+      props: { mode: 'picker', min: '2026-06-30', max: '2026-06-01' },
+    })
+    expect(container.querySelector('.v-date-picker')).not.toBeNull()
+    const said = warn.mock.calls.map(String).filter((line) => line.includes('falls after max'))
+    expect(said).toHaveLength(1)
+    expect(said[0]).toMatch(/^\[VDateInput\]/)
+  })
+
+  it('warns for the picker props a typed field without the picker cannot use', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(VDateInput, { props: { pickerIconLabel: 'Calendar' } })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('pickerIconLabel is ignored'))
+    warn.mockClear()
+    render(VDateInput, { props: { pickerIconLabel: 'Calendar', showPicker: true } })
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it('leaves a Backspace after a DIGIT to the browser', async () => {
+    // Only a separator needs the mask's help; cancelling every Backspace would take the
+    // browser's own editing away from the digits too.
+    const { container } = render(VDateInput, { props: { locale: 'fr-FR' } })
+    const input = container.querySelector('input') as HTMLInputElement
+    await type(input, '1')
+    input.setSelectionRange(1, 1)
+    const press = new KeyboardEvent('keydown', {
+      key: 'Backspace',
+      bubbles: true,
+      cancelable: true,
+    })
+    input.dispatchEvent(press)
+    expect(press.defaultPrevented).toBe(false)
+  })
+})

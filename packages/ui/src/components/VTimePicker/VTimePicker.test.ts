@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { nextTick, onMounted, ref } from 'vue'
 
 import VTimePicker from './VTimePicker.vue'
@@ -56,7 +56,8 @@ describe('VTimePicker', () => {
     await fireEvent.keyDown(face(container), { key: 'Enter' })
     expect(emitted('confirm')).toBeUndefined()
     await fireEvent.keyDown(face(container), { key: 'Enter' })
-    expect(emitted('confirm')).toHaveLength(1)
+    // It carries the time as it stands, as VDatePicker's `select` carries the date.
+    expect(emitted('confirm')).toEqual([['09:30']])
   })
 
   it('never confirms when the pointer is merely released', async () => {
@@ -391,5 +392,21 @@ describe('VTimePicker — disabled and readonly', () => {
     expect(slider.getAttribute('tabindex')).toBe('-1')
     await fireEvent.keyDown(slider, { key: 'ArrowUp' })
     expect(emitted('update:modelValue')).toBeUndefined()
+  })
+})
+
+describe('VTimePicker — development warnings', () => {
+  it('warns about a minute step that does not divide the hour', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(VTimePicker, { props: { minuteStep: 7 } })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[VTimePicker] minuteStep 7'))
+    warn.mockRestore()
+  })
+
+  it('warns about restrictions that leave nothing to choose', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(VTimePicker, { props: { min: '17:00', max: '09:00' } })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[VTimePicker] min "17:00"'))
+    warn.mockRestore()
   })
 })

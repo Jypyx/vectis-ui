@@ -26,6 +26,13 @@ selection: `string | null`, `{ start, end }` (`DatePickerRange`), or `string[]`.
 <Canvas of={VDatePickerStories.Range} />
 <Canvas of={VDatePickerStories.Multiple} />
 
+### Choosing, not finishing
+
+Every choice emits **`select`**, carrying the value as it now stands. It says a date was
+**chosen**, not that the reader is done: the first click of a range emits it too, the period still
+waiting for its end. `VTimePicker` names the other moment `confirm`, the choosing being over, and
+`VDateInput` closes its panel on `select` in a single selection only for that reason.
+
 ## min / max bounds
 
 `min` and `max` (ISO) lock the navigation **and** the selection: the months outside the range are
@@ -60,9 +67,9 @@ it by mere presence: `<VDatePicker show-adjacent-days />`. `selectAdjacentDays` 
 The `#day` slot replaces a cell's content — a ticket price under the day number, for instance. It
 receives `{ iso, day, inMonth, disabled, selected, today, inRange, events }`.
 
-For content on several lines, enlarge the dot through the public CSS variable
-**`--vectis-date-picker-day-size`** (default `2.5rem`, the `md` control height) — the example below uses 40 px dots and always
-renders the price line (empty when absent) to keep the numbers aligned from one cell to the next.
+For content on several lines, enlarge the day's disc through its token,
+**`--vectis-control-size-date-picker-day`** (the `md` control height by default), set on the picker
+or on any ancestor. The example below uses 48 px discs and always renders the price line (empty when absent) to keep the numbers aligned from one cell to the next.
 
 The slot also applies to the days of the adjacent months (`showAdjacentDays`), so their number stays
 aligned with the days of the month: use `inMonth` to display the data only on the days of the

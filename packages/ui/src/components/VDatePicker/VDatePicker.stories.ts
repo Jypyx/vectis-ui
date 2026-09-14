@@ -155,11 +155,11 @@ export const DaySlot: Story = {
       const prices: Record<number, string> = { 10: '€89', 11: '€120', 12: '€75', 15: '€99' }
       return { args, value, prices }
     },
-    // --vectis-date-picker-day-size enlarges the dots (40×40); the price line is ALWAYS
+    // --vectis-control-size-date-picker-day enlarges the discs (48×48); the price line is ALWAYS
     // rendered (empty when absent, and on the adjacent days the slot also applies to) so
     // that every number lines up.
     template: `
-      <VDatePicker v-bind="args" v-model="value" show-adjacent-days style="--vectis-date-picker-day-size: 48px">
+      <VDatePicker v-bind="args" v-model="value" show-adjacent-days style="--vectis-control-size-date-picker-day: 48px">
         <template #day="{ day, inMonth, selected }">
           <span style="line-height:1.2">{{ day }}</span>
           <span :style="{ fontSize: '0.625rem', lineHeight: 1.2, minHeight: '0.75rem', color: selected ? 'inherit' : 'var(--vectis-color-success-text)' }">

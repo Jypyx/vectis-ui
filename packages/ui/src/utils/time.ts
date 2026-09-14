@@ -13,6 +13,7 @@
  * The dial's geometry lives here too, and for a practical reason: jsdom lays nothing out and
  * measures every element at zero, so a calculation kept inside the component is untestable.
  */
+import { memo } from './memo'
 import { digitsOf, pad2 } from './text'
 
 export type HourFormat = '12h' | '24h'
@@ -63,6 +64,23 @@ export function to24h(hour12: number, meridiem: Meridiem): number {
   return meridiem === 'PM' ? base + 12 : base
 }
 
+/**
+ * The same hour moved into the other half of the day, or left where it is: 9 with PM gives
+ * 21, and 21 with PM stays 21. It is what an AM/PM control does to the hour it qualifies.
+ */
+export function hourWithMeridiem(hour24: number, meridiem: Meridiem): number {
+  return to24h(to12h(hour24).hour, meridiem)
+}
+
+/**
+ * A canonical time moved into a half of the day, its minutes untouched, or `null` when it is
+ * not a time at all: `'09:30'` with PM gives `'21:30'`.
+ */
+export function withMeridiem(time: string | null | undefined, meridiem: Meridiem): string | null {
+  const parts = parseTime(time)
+  return parts ? formatTime(hourWithMeridiem(parts.hour, meridiem), parts.minute) : null
+}
+
 const hourCycleCache = new Map<string, HourFormat>()
 
 // @fallback
@@ -74,11 +92,7 @@ const hourCycleCache = new Map<string, HourFormat>()
  * failing.
  */
 export function hourCycleFor(locale: string): HourFormat {
-  const cached = hourCycleCache.get(locale)
-  if (cached) return cached
-  const format = resolveHourCycle(locale)
-  hourCycleCache.set(locale, format)
-  return format
+  return memo(hourCycleCache, locale, () => resolveHourCycle(locale))
 }
 
 function resolveHourCycle(locale: string): HourFormat {
@@ -101,18 +115,17 @@ function resolveHourCycle(locale: string): HourFormat {
 const displayFormatters = new Map<string, Intl.DateTimeFormat>()
 
 function displayFormatterFor(locale: string, format: HourFormat): Intl.DateTimeFormat {
-  const key = `${locale}|${format}`
-  let formatter = displayFormatters.get(key)
-  if (!formatter) {
-    formatter = new Intl.DateTimeFormat(locale, {
-      hour: 'numeric',
-      minute: '2-digit',
-      hourCycle: format === '12h' ? 'h12' : 'h23',
-      timeZone: 'UTC',
-    })
-    displayFormatters.set(key, formatter)
-  }
-  return formatter
+  return memo(
+    displayFormatters,
+    `${locale}|${format}`,
+    () =>
+      new Intl.DateTimeFormat(locale, {
+        hour: 'numeric',
+        minute: '2-digit',
+        hourCycle: format === '12h' ? 'h12' : 'h23',
+        timeZone: 'UTC',
+      }),
+  )
 }
 
 /**
@@ -122,7 +135,7 @@ function displayFormatterFor(locale: string, format: HourFormat): Intl.DateTimeF
  * settled on: a consumer asking for a 24-hour clock in a locale that would choose otherwise
  * must get theirs.
  */
-export function formatDisplay(time: string, locale: string, format: HourFormat): string {
+export function formatTimeDisplay(time: string, locale: string, format: HourFormat): string {
   const parts = parseTime(time)
   if (!parts) return ''
   return displayFormatterFor(locale, format).format(Date.UTC(2021, 0, 1, parts.hour, parts.minute))
@@ -209,7 +222,7 @@ export function timeList(step: number, locale: string, format: HourFormat): Time
   const out: TimeOption[] = []
   for (let m = 0; m < 24 * 60; m += safe) {
     const value = formatTime(Math.floor(m / 60), m % 60)
-    out.push({ value, label: formatDisplay(value, locale, format) })
+    out.push({ value, label: formatTimeDisplay(value, locale, format) })
   }
   return out
 }

@@ -317,3 +317,12 @@ describe('VDatePicker — disabled and readonly', () => {
     expect(marked[0]?.textContent?.trim()).toBe('11')
   })
 })
+
+describe('VDatePicker — development warnings', () => {
+  it('warns about a min that falls after max', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(VDatePicker, { props: { min: '2026-06-30', max: '2026-06-01' } })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[VDatePicker] min "2026-06-30"'))
+    warn.mockRestore()
+  })
+})

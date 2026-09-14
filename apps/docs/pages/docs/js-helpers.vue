@@ -79,9 +79,9 @@ toast({ message: 'Copied to the clipboard', duration: 1600 })`
       <td><code>utils/date.ts</code></td>
       <td>
         <code>parseISO</code>, <code>formatISO</code>, <code>addDays</code>, <code>addMonths</code>,
-        <code>clampISO</code>, <code>isWithin</code>, <code>buildMonthGrid</code>,
-        <code>firstDayOfWeekFor</code>, <code>weekdayNames</code>, <code>monthNames</code>,
-        <code>formatDisplay</code>, <code>dateMaskFor</code>,
+        <code>clampISO</code>, <code>isWithin</code>, <code>isDateAllowed</code>,
+        <code>buildMonthGrid</code>, <code>firstDayOfWeekFor</code>, <code>weekdayNames</code>,
+        <code>monthNames</code>, <code>formatDateDisplay</code>, <code>dateMaskFor</code>,
         <code>parseDateMask</code>
       </td>
     </tr>
@@ -89,8 +89,9 @@ toast({ message: 'Copied to the clipboard', duration: 1600 })`
       <td><code>utils/time.ts</code></td>
       <td>
         <code>parseTime</code>, <code>formatTime</code>, <code>to12h</code>, <code>to24h</code>,
-        <code>hourCycleFor</code>, <code>snapMinute</code>, <code>timeList</code>,
-        <code>timeToMask</code>, <code>parseTimeMask</code>
+        <code>withMeridiem</code>, <code>hourCycleFor</code>, <code>formatTimeDisplay</code>,
+        <code>snapMinute</code>, <code>timeList</code>, <code>timeToMask</code>,
+        <code>parseTimeMask</code>
       </td>
     </tr>
     <tr>
@@ -109,8 +110,14 @@ toast({ message: 'Copied to the clipboard', duration: 1600 })`
       <td><code>navigableItems</code>, <code>arrowNavigate</code>, <code>resolveMatcher</code></td>
     </tr>
     <tr>
-      <td><code>utils/css.ts</code> · <code>vnode.ts</code> · <code>env.ts</code></td>
-      <td><code>px</code>, <code>cssSize</code>, <code>flattenSlot</code>, <code>isDev</code></td>
+      <td>
+        <code>utils/css.ts</code> · <code>vnode.ts</code> · <code>env.ts</code> ·
+        <code>memo.ts</code>
+      </td>
+      <td>
+        <code>px</code>, <code>cssSize</code>, <code>flattenSlot</code>, <code>isDev</code>,
+        <code>memo</code>
+      </td>
     </tr>
   </DocsTable>
   <DocsProse tag="blockquote" keypath="jsHelpers.internalQuote" />

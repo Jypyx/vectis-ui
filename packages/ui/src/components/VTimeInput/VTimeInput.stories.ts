@@ -162,18 +162,16 @@ export const DialSelection: Story = {
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
 
     /*
-     * `.v-popover-panel.v-time-input-panel` against `.v-panel`, which declares the same
+     * `.v-popover-panel.v-time-input-panel` against `.v-panel`, which declares a
      * `padding` at equal specificity on this very element (the popover is a `surface`).
-     * Only the compound keeps the panel's own rhythm under an order nothing controls once
-     * each sheet ships separately: `--vectis-space-3` (12px) against `.v-panel`'s
-     * `--vectis-space-1` (4px).
-     *
-     * The gap between the clock's own parts is asserted on the CLOCK, which is where it
-     * now lives — the panel no longer declares one, having a single child.
+     * Only the compound cancels it under an order nothing controls once each sheet ships
+     * separately: `0px` against `.v-panel`'s `--vectis-space-1` (4px). The room around the
+     * clock is the CLOCK's own, as VDatePicker's is, and so is the gap between its parts.
      */
     const panel = canvas.getByRole('dialog')
-    await expect(getComputedStyle(panel).padding).toBe('12px')
+    await expect(getComputedStyle(panel).padding).toBe('0px')
     const picker = canvasElement.querySelector('.v-time-picker') as HTMLElement
+    await expect(getComputedStyle(picker).padding).toBe('12px')
     await expect(getComputedStyle(picker).gap).toBe('16px')
 
     const face = canvasElement.querySelector('.v-time-picker-face') as HTMLElement

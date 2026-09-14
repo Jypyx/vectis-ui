@@ -65,7 +65,8 @@ export default {
           "Ce qui est sélectionné, et sa forme suit <code>selection</code> : une chaîne ISO pour une date unique, une paire début et fin pour une période, un tableau pour plusieurs. Rien n'est sélectionné au départ.",
       },
       events: {
-        select: "Une date a été choisie, avec la valeur telle qu'elle est désormais.",
+        select:
+          "Une date a été choisie, avec la valeur telle qu'elle est désormais. Choisi ne veut pas dire terminé : une période ou une liste est encore en construction après lui, et c'est pourquoi VTimePicker nomme <code>confirm</code> la fin d'un choix.",
       },
       slots: {
         day: "Remplace le contenu d'une cellule de jour, pour afficher un prix ou une disponibilité sous le numéro. Elle reçoit tout ce que l'on sait de ce jour, y compris s'il appartient au mois affiché.",

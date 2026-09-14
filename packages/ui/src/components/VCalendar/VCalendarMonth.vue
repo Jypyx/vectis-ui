@@ -15,10 +15,10 @@
  */
 import { computed, nextTick, ref, useId, watch } from 'vue'
 
-import { formatDisplay as formatDate } from '../../utils/date'
+import { formatDateDisplay } from '../../utils/date'
 import { isRtl as isElementRtl } from '../../utils/direction'
 import { clamp } from '../../utils/number'
-import { formatDisplay as formatTimeDisplay, type HourFormat } from '../../utils/time'
+import { formatTimeDisplay, type HourFormat } from '../../utils/time'
 
 import { useMessages } from '../../i18n/state'
 
@@ -111,7 +111,9 @@ const cellId = (iso: string) => `${uid}-m-${iso}`
 
 /** The column headings, taken from the first week so they always match the columns drawn. */
 const weekdayNames = computed(() =>
-  (props.weeks[0] ?? []).map((cell) => formatDate(cell.iso, props.locale, { weekday: 'short' })),
+  (props.weeks[0] ?? []).map((cell) =>
+    formatDateDisplay(cell.iso, props.locale, { weekday: 'short' }),
+  ),
 )
 
 /*
@@ -127,8 +129,8 @@ const dayLabels = computed(() => {
   for (const week of props.weeks) {
     for (const cell of week) {
       map.set(cell.iso, {
-        number: formatDate(cell.iso, props.locale, { day: 'numeric' }),
-        long: formatDate(cell.iso, props.locale, {
+        number: formatDateDisplay(cell.iso, props.locale, { day: 'numeric' }),
+        long: formatDateDisplay(cell.iso, props.locale, {
           weekday: 'long',
           day: 'numeric',
           month: 'long',
@@ -140,7 +142,7 @@ const dayLabels = computed(() => {
 })
 
 const dayNumber = (iso: string) =>
-  dayLabels.value.get(iso)?.number ?? formatDate(iso, props.locale, { day: 'numeric' })
+  dayLabels.value.get(iso)?.number ?? formatDateDisplay(iso, props.locale, { day: 'numeric' })
 
 /*
  * A day outside the grid can reach this — the announcement after a move names the day the
@@ -149,7 +151,7 @@ const dayNumber = (iso: string) =>
  */
 const longDay = (iso: string) =>
   dayLabels.value.get(iso)?.long ??
-  formatDate(iso, props.locale, { weekday: 'long', day: 'numeric', month: 'long' })
+  formatDateDisplay(iso, props.locale, { weekday: 'long', day: 'numeric', month: 'long' })
 
 /**
  * A chip being carried from one day to another, by pointer or by keyboard.

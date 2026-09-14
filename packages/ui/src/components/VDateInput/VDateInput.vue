@@ -16,13 +16,13 @@
  * `selection`, passed straight through to the picker.
  */
 
-import { computed, inject, provide, ref, useId, watchEffect } from 'vue'
+import { computed, inject, provide, ref, watchEffect } from 'vue'
 
-import { NO_BUTTON_GROUP, buttonGroupKey } from '../VButton/context'
 import { inputGroupKey } from '../VInput/context'
 
 import VDatePicker from '../VDatePicker/VDatePicker.vue'
 import type {
+  DatePickerDaySlotProps,
   DatePickerEvent,
   DatePickerSelection,
   DatePickerValue,
@@ -31,12 +31,13 @@ import type {
 } from '../VDatePicker/VDatePicker.vue'
 import {
   caretAfterDigits,
+  compareISO,
   dateMaskFor,
+  formatDateDisplay,
   formatDateMask,
-  formatDisplay,
   formatDisplayRange,
+  isDateAllowed,
   isValidISO,
-  isWithin,
   isoToMask,
   maskPlaceholder,
   parseDateMask,
@@ -44,6 +45,7 @@ import {
 import { digitsOf } from '../../utils/text'
 import { resolveMatcher } from '../../utils/matcher'
 import { isDev } from '../../utils/env'
+import { hostWarnsKey } from '../../utils/hostWarns'
 import { calendar_today as calendarTodayIcon } from '../VIcon/icons/calendar_today'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
@@ -56,7 +58,7 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 import { canClear } from '../../composables/useClearable'
 import { iconStartListener } from '../../composables/useIconClickHandlers'
 import { useMaskedField } from '../../composables/useMaskedField'
-import { useLocale, useMessages } from '../../i18n/state'
+import { useMessages, useResolvedLocale } from '../../i18n/state'
 
 /** Where the calendar opens relative to the field. */
 export type DateInputPlacement =
@@ -261,16 +263,7 @@ defineSlots<{
    */
   'value-end'?(): unknown
   /** What a day cell shows, handed straight to the calendar. */
-  day?(props: {
-    iso: string
-    day: number
-    inMonth: boolean
-    disabled: boolean
-    selected: boolean
-    today: boolean
-    inRange: boolean
-    events: DatePickerEvent[]
-  }): unknown
+  day?(props: DatePickerDaySlotProps): unknown
   /**
    * The strip at the foot of the panel — actions, or preset dates such as "today". It
    * receives `close`, which is what lets one of those buttons dismiss the panel.
@@ -294,7 +287,6 @@ const rootEl = ref<HTMLElement | null>(null)
 const panelRef = ref<InstanceType<typeof VPopover> | null>(null)
 const inputRef = ref<InstanceType<typeof VInput> | null>(null)
 const pickerRef = ref<InstanceType<typeof VDatePicker> | null>(null)
-const panelId = useId()
 
 /** The real input inside the field, which the mask and the caret work on. */
 const fieldEl = computed<HTMLInputElement | null>(() => inputRef.value?.el ?? null)
@@ -321,7 +313,26 @@ const hasPanel = computed(() => !props.readonly && (!typing.value || props.showP
 
 // @devwarn
 if (isDev) {
+  // The calendar receives `min` and `max` as they stand, so what it would say about them is
+  // said here, under the name the consumer wrote (utils/hostWarns).
+  provide(hostWarnsKey, true)
   watchEffect(() => {
+    if (props.min && props.max && compareISO(props.min, props.max) > 0)
+      console.warn(
+        `[VDateInput] min "${props.min}" falls after max "${props.max}", so no date can be chosen.`,
+      )
+    // Without a panel there is no icon to draw and no button to name. A read-only field is
+    // left out: it is a state that comes and goes, not a configuration to correct.
+    if (typing.value && !props.showPicker) {
+      const inert = ([] as string[]).concat(
+        props.pickerIcon !== calendarTodayIcon ? 'pickerIcon' : [],
+        props.pickerIconLabel ? 'pickerIconLabel' : [],
+      )
+      if (inert.length > 0)
+        console.warn(
+          `[VDateInput] ${inert.join(', ')} ${inert.length > 1 ? 'are' : 'is'} ignored without showPicker: a field one types into has no calendar icon unless it offers the calendar.`,
+        )
+    }
     if (props.mode !== undefined && !MODES.includes(props.mode))
       console.warn(
         `[VDateInput] unknown mode "${props.mode}": use "input" (the default) or "picker".`,
@@ -352,37 +363,38 @@ const {
   disabled: resolvedDisabled,
 } = useControlShape(props, group)
 
-// @core
-// TRAP — this stops a VButtonGroup's or a VInputGroup's row context at this boundary. The
-// VDatePicker below writes `size="sm"` on its own navigation buttons, and a group WINS over
-// a button's prop: without this line a VInputGroup in `lg` would blow the calendar arrows up
-// to `lg`, and nothing in the sheet or the template would say why. It is the JS counterpart
-// of the `.v-overlay` guard every VButtonGroup selector carries — a floating panel is not a
-// segment of the row that opened it.
-provide(buttonGroupKey, NO_BUTTON_GROUP)
-
 // The whole "field plus panel" shell, shared with VTimeInput: opening and closing, the
-// focus leaving the component, a click on the field, and the Escape, ArrowDown and Enter
-// keys.
-const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPanelMousedown } =
-  useFieldPanel({
-    rootEl,
-    panelRef,
-    fieldEl: inputRef,
-    // With no panel there is nothing to open. This is the composable's SINGLE cut-off
-    // point, and every way in passes through it — clicking the field, focusing it, the
-    // down arrow, Enter, the icon — so the condition never has to be repeated in a
-    // handler.
-    disabled: () => resolvedDisabled.value || !hasPanel.value,
-    focusInPanel: () => pickerRef.value?.focus(),
-    // The calendar stays mounted while the panel is closed, so it is put back on the days
-    // view both ways: a field that opens on focus never goes through `focus()`.
-    onOpen: () => pickerRef.value?.reset(),
-    onClose: () => pickerRef.value?.reset(),
-    // Beside a field one types into, the panel opens WITHOUT taking the focus: typing
-    // carries on in the field, and the down arrow remains the way into the grid.
-    focusOnOpen: () => !typing.value,
-  })
+// focus leaving the component and coming back to the field, a click on the field or its
+// icon, and the Escape, ArrowDown and Enter keys.
+const {
+  open,
+  panelId,
+  closeAndFocus,
+  focusField,
+  onFieldFocus,
+  toggleFromIcon,
+  onControlClick,
+  onFocusout,
+  onKeydown,
+  onPanelMousedown,
+} = useFieldPanel({
+  rootEl,
+  panelRef,
+  field: inputRef,
+  // With no panel there is nothing to open. This is the composable's SINGLE cut-off
+  // point, and every way in passes through it — clicking the field, focusing it, the
+  // down arrow, Enter, the icon — so the condition never has to be repeated in a
+  // handler.
+  disabled: () => resolvedDisabled.value || !hasPanel.value,
+  focusInPanel: () => pickerRef.value?.focus(),
+  // The calendar stays mounted while the panel is closed, so it is put back on the days
+  // view both ways: a field that opens on focus never goes through `focus()`.
+  onOpen: () => pickerRef.value?.reset(),
+  onClose: () => pickerRef.value?.reset(),
+  // Beside a field one types into, the panel opens on focus WITHOUT taking it: typing
+  // carries on in the field, and the down arrow remains the way into the grid.
+  openOnFocus: () => typing.value,
+})
 
 const hasValue = computed(() => {
   if (props.selection === 'multiple') return Array.isArray(model.value) && model.value.length > 0
@@ -393,31 +405,28 @@ const hasValue = computed(() => {
   return typeof model.value === 'string' && !!model.value
 })
 
-const vectisLocale = useLocale()
-/* The prop wins, and the design system's global locale is what it falls back to.
-
-   TRAP — this component is the SINGLE place that resolution happens: what flows down to
-   the calendar is the RESULT, never the prop, which would usually be undefined and would
-   have the calendar resolve the language a second time — with every chance of the two
+/* TRAP — this component is the SINGLE place the locale is resolved: what flows down to the
+   calendar is the RESULT, never the prop, which would usually be undefined and would have
+   the calendar resolve the language a second time — with every chance of the two
    disagreeing after a later change. */
-const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
+const resolvedLocale = useResolvedLocale(() => props.locale)
 
 const displayText = computed(() => {
   const locale = resolvedLocale.value
   const displayFormat = props.displayFormat ?? DEFAULT_DISPLAY_FORMAT
   if (props.selection === 'single') {
     return typeof model.value === 'string' && isValidISO(model.value)
-      ? formatDisplay(model.value, locale, displayFormat)
+      ? formatDateDisplay(model.value, locale, displayFormat)
       : ''
   }
   if (props.selection === 'range') {
     const r = model.value as DatePickerRange | null
     if (!r?.start) return ''
-    if (!r.end) return formatDisplay(r.start, locale, displayFormat)
+    if (!r.end) return formatDateDisplay(r.start, locale, displayFormat)
     return formatDisplayRange(r.start, r.end, locale, displayFormat)
   }
   const list = Array.isArray(model.value) ? model.value : []
-  return list.map((iso) => formatDisplay(iso, locale, displayFormat)).join(', ')
+  return list.map((iso) => formatDateDisplay(iso, locale, displayFormat)).join(', ')
 })
 
 /* From here on: everything the typed field needs. */
@@ -430,8 +439,7 @@ const isDisabledDate = computed(() => resolveMatcher(props.disabledDates))
  * Whether a date the reader has finished typing may actually be taken: it has to fall
  * within the allowed bounds and not be one of the excluded days.
  */
-const acceptable = (iso: string) =>
-  isWithin(iso, props.min, props.max) && !isDisabledDate.value(iso)
+const acceptable = (iso: string) => isDateAllowed(iso, props.min, props.max, isDisabledDate.value)
 
 /*
  * The mask machinery — the text being typed, the bridge to the value, the reformatting
@@ -445,11 +453,10 @@ const {
   draft,
   fieldModel,
   writeField,
-  commitLive,
   commitOrRevert,
   onFieldInput,
-  backspaceOverSeparator,
-  pasteDigits,
+  onKeydown: onMaskKeydown,
+  onPaste,
 } = useMaskedField({
   fieldEl,
   typing: () => typing.value,
@@ -499,100 +506,29 @@ function padCurrentField(el: HTMLInputElement) {
   }
 }
 
-// @keyboard @core — the keys the mask itself needs: completing a field with a separator,
-// erasing across one, and the down arrow, which is the one explicit way from the field
-// into the calendar.
+// @keyboard — what the mask's keys mean for a date: a separator completes the field being
+// typed, and the down arrow is the one explicit way from the field into the calendar.
 function onFieldKeydown(event: KeyboardEvent) {
-  if (!typing.value) return
-  const el = fieldEl.value
-  if (!el) return
-
-  if (event.key === 'Enter') {
-    // Cancelling the default does two things at once: it stops the surrounding form from
-    // being submitted, and it stops the panel this keystroke has just closed from being
-    // reopened as the event travels up to the root.
-    event.preventDefault()
-    commitOrRevert()
-    if (open.value) closeAndFocus()
-    return
-  }
-  if (event.key === 'ArrowDown' && open.value) {
-    // The one explicit route from the field into the grid of days.
-    event.preventDefault()
-    pickerRef.value?.focus()
-    return
-  }
-  if (event.key === 'Backspace') {
-    if (backspaceOverSeparator(el)) event.preventDefault()
-    return
-  }
-  if (
-    event.key.length === 1 &&
-    !event.ctrlKey &&
-    !event.metaKey &&
-    !event.altKey &&
-    !/\d/.test(event.key)
-  ) {
-    event.preventDefault()
-    padCurrentField(el)
-  }
+  onMaskKeydown(event, {
+    onSeparator: padCurrentField,
+    onArrowDown: () => {
+      if (!open.value) return false
+      pickerRef.value?.focus()
+      return true
+    },
+    onEnter: closeAndFocus,
+  })
 }
 
 /**
  * Pasting. A date recognizable as a whole — in the ISO form, or already written the way
  * this field writes them — is adopted as it stands; anything else contributes its digits
  * alone.
- *
- * Without this, pasting "2026-06-10" into a field expecting day, month, year would
- * produce "20/26/0610": the digits would be taken in order and the separators ignored.
  */
 function onFieldPaste(event: ClipboardEvent) {
-  if (!typing.value) return
-  const el = fieldEl.value
-  if (!el) return
-  event.preventDefault()
-  const pasted = (event.clipboardData?.getData('text') ?? '').trim()
-  const iso = isValidISO(pasted)
-    ? pasted
-    : parseDateMask(pasted, mask.value, { yearPivot: YEAR_PIVOT })
-  if (iso) {
-    const text = isoToMask(iso, mask.value)
-    writeField(text, text.length)
-    commitLive()
-    return
-  }
-  pasteDigits(el, pasted)
-}
-
-// @a11y
-/**
- * TRAP — closing the panel hands the focus back to the field, and beside a field one
- * types into the panel opens ON FOCUS: the two would chase each other and the panel would
- * never close.
- *
- * This lock covers the focus call, which is synchronous. EVERY close that returns the
- * focus must go through here; closing directly brings the loop straight back.
- */
-let refocusing = false
-function closeAndFocus() {
-  refocusing = true
-  closePanel(true)
-  refocusing = false
-}
-
-function onFieldFocus() {
-  if (!typing.value || refocusing) return
-  openPanel(false)
-}
-
-// @keyboard @a11y
-function onRootKeydown(event: KeyboardEvent) {
-  if (typing.value && event.key === 'Escape' && open.value) {
-    event.preventDefault()
-    closeAndFocus()
-    return
-  }
-  onKeydown(event)
+  onPaste(event, (pasted) =>
+    isValidISO(pasted) ? pasted : parseDateMask(pasted, mask.value, { yearPivot: YEAR_PIVOT }),
+  )
 }
 
 /*
@@ -629,20 +565,9 @@ const m = useMessages()
 const endIconLabel = computed(() => props.pickerIconLabel ?? m.value.dateInput.openPicker)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.dateInput.clear)
 
-function onEndIcon() {
-  if (open.value) closeAndFocus()
-  // Clicking the icon is an explicit request for the calendar, and the focus has already
-  // left the field for the button — so carrying it into the grid is right in both modes.
-  else openPanel(true)
-}
-// @a11y
 /*
- * Emptying the value, called by the field as it emits its clear event.
- *
- * TRAP — the focus is taken here, under the lock, on purpose: the field focuses itself
- * immediately afterwards, and focusing an element that ALREADY has the focus emits no
- * event at all. That is what stops the panel reopening. Taking the lock away from this
- * function brings the reopening straight back.
+ * Emptying the value, called by the field as it emits its clear event. The focus is taken
+ * through `focusField`, whose note says why that stops the panel reopening.
  */
 function clearValue() {
   model.value =
@@ -655,9 +580,7 @@ function clearValue() {
   // changes, and the guard that keeps the field and the value from chasing each other
   // would leave the text where it was.
   if (typing.value) writeField('')
-  refocusing = true
-  inputRef.value?.focus()
-  refocusing = false
+  focusField()
   emit('clear')
 }
 
@@ -668,8 +591,6 @@ function clearValue() {
 function onSelect() {
   if (props.selection === 'single') closeAndFocus()
 }
-
-const close = () => closeAndFocus()
 
 defineExpose({
   /** Moves the focus to the text field. */
@@ -690,7 +611,7 @@ defineExpose({
     :data-open="open ? '' : undefined"
     :data-mode="resolvedMode"
     @focusout="onFocusout"
-    @keydown="onRootKeydown"
+    @keydown="onKeydown"
   >
     <div class="v-date-input-control" @click="onControlClick">
       <!-- The field is declared a combobox rather than left as the plain text box it
@@ -728,7 +649,7 @@ defineExpose({
         :aria-haspopup="hasPanel ? 'dialog' : undefined"
         :aria-expanded="hasPanel ? open : undefined"
         :aria-controls="hasPanel ? panelId : undefined"
-        @click:icon-end="onEndIcon"
+        @click:icon-end="toggleFromIcon"
         @clear="clearValue"
         @focus="onFieldFocus"
         @input="onFieldInput"
@@ -776,7 +697,7 @@ defineExpose({
           <slot name="day" v-bind="slotProps" />
         </template>
         <template v-if="$slots.footer" #footer>
-          <slot name="footer" :close="close" />
+          <slot name="footer" :close="closeAndFocus" />
         </template>
       </VDatePicker>
     </VPopover>
@@ -820,9 +741,10 @@ defineExpose({
   }
 
   /* `position-anchor` and the chrome come from VPopover (the `anchor` prop, and the
-     `.v-panel` it sets on any panel that is not `bare`): only the dimensions are left here, which
-     `panel.css` deliberately does not carry. The padding is cancelled — VDatePicker handles
-     its own breathing room; compounded with `.v-popover-panel` (VPopover puts both
+     `.v-panel` it sets on any panel that is not `bare`): only the dimensions are left here,
+     which `panel.css` deliberately does not carry. The panel's OWN padding is cancelled,
+     VDatePicker padding itself as VTimePicker does, so both pickers keep the same room
+     on a page and in a panel. Compounded with `.v-popover-panel` (VPopover puts both
      classes on the same element) because `.v-panel` declares `padding` too, and at
      equal specificity the winner would depend on the order in which the consumer's
      bundler concatenates the CSS. */

@@ -15,7 +15,7 @@
  */
 import { bench, describe } from 'vitest'
 
-import { formatDisplay, hourCycleFor, parseTime, snapMinute, timeList } from './time'
+import { formatTimeDisplay, hourCycleFor, parseTime, snapMinute, timeList } from './time'
 
 const LOCALE = 'en-US'
 
@@ -32,8 +32,8 @@ describe('timeList — the memo the comment is about', () => {
 })
 
 describe('memoized — the floor', () => {
-  bench('formatDisplay', () => {
-    formatDisplay('14:30', LOCALE, '12h')
+  bench('formatTimeDisplay', () => {
+    formatTimeDisplay('14:30', LOCALE, '12h')
   })
 })
 

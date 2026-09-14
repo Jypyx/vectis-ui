@@ -20,7 +20,7 @@
  * single element has to carry the whole spoken value.
  */
 
-import { computed, ref, watchEffect } from 'vue'
+import { computed, inject, ref, watchEffect } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VToggle from '../VToggle/VToggle.vue'
@@ -34,6 +34,7 @@ import {
   formatTime,
   hour24ToDial,
   hourCycleFor,
+  hourWithMeridiem,
   parseTime,
   snapMinute,
   to12h,
@@ -46,14 +47,16 @@ import {
   isHourAllowed,
   isTimeAllowed,
   limitsProblem,
+  minuteInterval,
   nearestAllowedMinute,
   resolveLimits,
 } from './limits'
-import type { TimeMatcher } from './limits'
+import type { TimePickerAllowed } from './limits'
 import { pad2 } from '../../utils/text'
 import { isDev } from '../../utils/env'
+import { hostWarnsKey } from '../../utils/hostWarns'
 import { useAriaLabel } from '../../composables/useAriaLabel'
-import { useLocale, useMessages } from '../../i18n/state'
+import { useMessages, useResolvedLocale } from '../../i18n/state'
 
 export type TimePickerFormat = HourFormat
 
@@ -90,12 +93,12 @@ interface TimePickerProps {
    * handed to a rule is always the 24-hour one, whichever clock is on display, so the
    * same rule holds on both faces. The hours it leaves out are not printed.
    */
-  allowedHours?: TimeMatcher
+  allowedHours?: TimePickerAllowed
   /**
    * Which minutes can be chosen: the list of them, or a rule answering for one. The
    * minutes it leaves out are not printed.
    */
-  allowedMinutes?: TimeMatcher
+  allowedMinutes?: TimePickerAllowed
   /**
    * Makes the whole clock unusable: the hand cannot be moved, the half-day cannot be
    * changed, and everything greys out through the colour tokens.
@@ -141,11 +144,12 @@ const model = defineModel<string | null>({ default: null })
 
 const emit = defineEmits<{
   /**
-   * The reader has finished: the minutes were settled from the KEYBOARD. Releasing the
-   * pointer does not count — on a clock face, letting go of the hand is how one stops
-   * adjusting it, not how one confirms.
+   * The reader has FINISHED, carrying the time as it stands: the minutes were settled from
+   * the keyboard. Releasing the pointer does not count — on a clock face, letting go of the
+   * hand is how one stops adjusting it, not how one confirms. VTimeInput listens to it to
+   * commit its draft and close its panel.
    */
-  confirm: []
+  confirm: [value: string | null]
 }>()
 
 defineSlots<{
@@ -157,9 +161,7 @@ const m = useMessages()
 // @a11y — a roleless box cannot carry an accessible name (axe: aria-prohibited-attr),
 // so the root is a named group: the VCarousel viewport arrangement.
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.timePicker.label)
-const vectisLocale = useLocale()
-/* The prop wins, and the design system's global locale is what it falls back to. */
-const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
+const resolvedLocale = useResolvedLocale(() => props.locale)
 const resolvedFormat = computed<TimePickerFormat>(
   () => props.format ?? hourCycleFor(resolvedLocale.value),
 )
@@ -167,12 +169,28 @@ const resolvedFormat = computed<TimePickerFormat>(
 /** The restrictions, resolved once for the whole render. */
 const limits = computed(() => resolveLimits(props))
 
+/**
+ * The hours the restrictions still leave something in, worked out once per set of
+ * restrictions. Every hour on the face, both AM/PM buttons and every key ask the question,
+ * and each answer walks a whole hour of minutes: asked afresh, a drag re-walked all 24 of
+ * them at pointer rate.
+ */
+const availableHours = computed(() => {
+  const hours = new Set<number>()
+  for (let candidate = 0; candidate < 24; candidate += 1)
+    if (isHourAllowed(candidate, limits.value)) hours.add(candidate)
+  return hours
+})
+
 /** Whether an hour is one the restrictions still leave something in. */
-const isAvailableHour = (candidate: number) => isHourAllowed(candidate, limits.value)
+const isAvailableHour = (candidate: number) => availableHours.value.has(candidate)
 
 // @devwarn
-if (isDev) {
+// Silent inside a host that forwards these props and reports on them itself (utils/hostWarns).
+if (isDev && !inject(hostWarnsKey, false)) {
   watchEffect(() => {
+    if (props.minuteStep < 1 || 60 % props.minuteStep !== 0)
+      console.warn(`[VTimePicker] minuteStep ${props.minuteStep} — a divisor of 60 is expected.`)
     const problem = limitsProblem(limits.value)
     if (problem) console.warn(`[VTimePicker] ${problem}`)
   })
@@ -236,7 +254,7 @@ const liveMessage = ref('')
 function setStep(next: TimePickerStep) {
   step.value = next
   liveMessage.value =
-    next === 'minute' ? m.value.timePicker.minuteStep : m.value.timePicker.hourStep
+    next === 'minute' ? m.value.timePicker.choosingMinutes : m.value.timePicker.choosingHour
 }
 
 /** One numeral on the face. */
@@ -274,8 +292,7 @@ function hourAt(index: number, ring: 'outer' | 'inner'): number {
  * past and not five past.
  */
 const minuteMarks = computed(() => {
-  // A step at or below one minute is what `snapMinute` reads as "every minute".
-  const interval = props.minuteStep > 1 ? props.minuteStep : 1
+  const interval = minuteInterval(props.minuteStep)
   const spacing = 60 / interval <= 12 ? interval : 5
   const marks: number[] = []
   for (let minutes = 0; minutes < 60; minutes += spacing)
@@ -301,30 +318,27 @@ const cells = computed<DialCell[]>(() => {
       selected: minute.value === minutes,
     }))
   }
-  const positions = Array.from({ length: 12 }, (_, i) => i)
-  const outer: DialCell[] = positions
-    .filter((i) => isAvailableHour(hourAt(i, 'outer')))
-    .map((i) => ({
-      key: `o-${i}`,
-      label: String(i === 0 ? 12 : i),
-      turn: i / 12,
-      ring: 'outer' as const,
-      selected:
-        resolvedFormat.value === '24h'
-          ? hour.value === hourAt(i, 'outer')
-          : to12h(hour.value).hour === (i === 0 ? 12 : i),
-    }))
-  if (resolvedFormat.value === '12h') return outer
-  const inner: DialCell[] = positions
-    .filter((i) => isAvailableHour(dialIndexToHour24(i, 'inner')))
-    .map((i) => ({
-      key: `i-${i}`,
-      label: pad2(dialIndexToHour24(i, 'inner')),
-      turn: i / 12,
-      ring: 'inner' as const,
-      selected: hour.value === dialIndexToHour24(i, 'inner'),
-    }))
-  return [...outer, ...inner]
+  // Each position's hour is worked out ONCE, since on a 12-hour face that takes the half of
+  // the day in force. The selection there still compares numerals and not hours: an empty
+  // clock holding a PM choice sits on midnight, and its hand points at the 12 all the same.
+  const twelve = resolvedFormat.value === '12h'
+  const shown12 = to12h(hour.value).hour
+  const rings: DialCell['ring'][] = twelve ? ['outer'] : ['outer', 'inner']
+  const out: DialCell[] = []
+  for (const ring of rings)
+    for (let i = 0; i < 12; i += 1) {
+      const target = hourAt(i, ring)
+      if (!isAvailableHour(target)) continue
+      const numeral = i === 0 ? 12 : i
+      out.push({
+        key: `${ring === 'outer' ? 'o' : 'i'}-${i}`,
+        label: ring === 'inner' ? pad2(target) : String(numeral),
+        turn: i / 12,
+        ring,
+        selected: twelve ? shown12 === numeral : hour.value === target,
+      })
+    }
+  return out
 })
 
 const handTurn = computed(() => {
@@ -358,7 +372,7 @@ const displayHourText = computed(() =>
  *
  * It starts at AM rather than at whatever the current time happens to be, which keeps the
  * component's first render identical on a server and in a browser, and its tests free of
- * a clock.
+ * a clock. VTimeInput keeps one for its own AM/PM button, on the same terms.
  */
 const pendingMeridiem = ref<Meridiem>('AM')
 
@@ -384,7 +398,7 @@ const meridiemModel = computed<ToggleModelValue>({
     // when the new half allows it, and otherwise the first hour of that half that does.
     // Refusing the write instead would leave the control snapping straight back, since it
     // reads the half of the day off the value.
-    const wanted = to24h(to12h(hour.value).hour, meridiem)
+    const wanted = hourWithMeridiem(hour.value, meridiem)
     setHour(
       isAvailableHour(wanted)
         ? wanted
@@ -394,12 +408,13 @@ const meridiemModel = computed<ToggleModelValue>({
 })
 
 /**
- * Whether a half of the day still holds an hour one could choose. An empty one takes its
+ * Whether each half of the day still holds an hour one could choose. An empty one takes its
  * button with it: a control that can only ever be refused is worse than no control.
  */
-function meridiemAvailable(meridiem: Meridiem): boolean {
-  return firstAllowed(12, (i) => to24h(i, meridiem), isAvailableHour) !== null
-}
+const meridiemAvailable = computed<Record<Meridiem, boolean>>(() => ({
+  AM: firstAllowed(12, (i) => to24h(i, 'AM'), isAvailableHour) !== null,
+  PM: firstAllowed(12, (i) => to24h(i, 'PM'), isAvailableHour) !== null,
+}))
 
 // @a11y — the entire spoken value of the face. The numerals are hidden from screen
 // readers, so these four attributes are the ONLY thing assistive technology has: what the
@@ -417,7 +432,7 @@ const ariaValueMax = computed(() =>
 const ariaValueText = computed(() =>
   step.value === 'minute'
     ? m.value.timePicker.minutesValue(minute.value)
-    : m.value.timePicker.hoursValue(ariaValueNow.value),
+    : m.value.timePicker.hourValue(ariaValueNow.value),
 )
 
 /**
@@ -426,7 +441,7 @@ const ariaValueText = computed(() =>
  */
 function settleStep(via: 'pointer' | 'keyboard') {
   if (step.value === 'hour') setStep('minute')
-  else if (via === 'keyboard') emit('confirm')
+  else if (via === 'keyboard') emit('confirm', model.value)
 }
 
 // Pointing at the face, by click or by drag.
@@ -553,7 +568,7 @@ function edgeHour(edge: 'first' | 'last'): number | null {
  * the next one the same way round that it does.
  */
 function minuteFrom(start: number, direction: number): number | null {
-  const interval = props.minuteStep > 1 ? props.minuteStep : 1
+  const interval = minuteInterval(props.minuteStep)
   const allowed = (candidate: number) => isTimeAllowed(hour.value, candidate, limits.value)
   if (allowed(start)) return start
   return firstAllowed(
@@ -585,7 +600,6 @@ function onKeydown(event: KeyboardEvent) {
     event.preventDefault()
     return
   }
-  const minutes = allowedMinutesFor(hour.value, limits.value)
   if (delta)
     setMinute(
       minuteFrom(snapMinute(minute.value + delta * props.minuteStep, props.minuteStep), delta),
@@ -594,8 +608,11 @@ function onKeydown(event: KeyboardEvent) {
     setMinute(minuteFrom(snapMinute(minute.value + 5, props.minuteStep), 1))
   else if (event.key === 'PageDown')
     setMinute(minuteFrom(snapMinute(minute.value - 5, props.minuteStep), -1))
-  else if (event.key === 'Home') setMinute(minutes[0] ?? null)
-  else if (event.key === 'End') setMinute(minutes.at(-1) ?? null)
+  // The list is built in these two branches alone: the arrows walk to a neighbour and never
+  // need the whole of it.
+  else if (event.key === 'Home') setMinute(allowedMinutesFor(hour.value, limits.value)[0] ?? null)
+  else if (event.key === 'End')
+    setMinute(allowedMinutesFor(hour.value, limits.value).at(-1) ?? null)
   else return
   event.preventDefault()
 }
@@ -652,7 +669,7 @@ defineExpose({
           size="lg"
           :tone="step === 'minute' ? 'accent' : 'neutral'"
           :aria-pressed="step === 'minute' ? 'true' : 'false'"
-          :aria-label="m.timePicker.selectMinute"
+          :aria-label="m.timePicker.selectMinutes"
           :disabled="disabled"
           @click="setStep('minute')"
         >
@@ -672,8 +689,8 @@ defineExpose({
         :label="m.timePicker.meridiem"
         :disabled="disabled || readonly"
       >
-        <VToggleItem value="AM" :label="m.timePicker.am" :disabled="!meridiemAvailable('AM')" />
-        <VToggleItem value="PM" :label="m.timePicker.pm" :disabled="!meridiemAvailable('PM')" />
+        <VToggleItem value="AM" :label="m.timePicker.am" :disabled="!meridiemAvailable.AM" />
+        <VToggleItem value="PM" :label="m.timePicker.pm" :disabled="!meridiemAvailable.PM" />
       </VToggle>
     </div>
 
@@ -724,11 +741,14 @@ defineExpose({
 
 <style>
 @layer vectis.components {
+  /* The same root as VDatePicker's: an inline column that sizes to its content and pads
+     itself, so the clock reads the same on a page as in VTimeInput's panel, which adds no
+     padding of its own. The gap is the clock's, its parts being larger. */
   .v-time-picker {
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     gap: var(--vectis-space-4);
-    width: max-content;
+    padding: var(--vectis-space-3);
     font-family: var(--vectis-text-family);
     color: var(--vectis-color-text);
   }
@@ -955,11 +975,14 @@ defineExpose({
     color: var(--vectis-color-text-subtle);
   }
 
+  /* The foot of the clock, separated from the face the way VDatePicker's is from its grid. */
   .v-time-picker-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: var(--vectis-space-2);
+    padding-block-start: var(--vectis-space-2);
+    border-block-start: 1px solid var(--vectis-color-border);
   }
 
   @media (prefers-reduced-motion: reduce) {

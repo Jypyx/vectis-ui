@@ -65,7 +65,8 @@ export default {
           'What is selected, and its shape follows <code>selection</code>: an ISO string for a single date, a start and end pair for a period, an array for several. Nothing is selected to begin with.',
       },
       events: {
-        select: 'A date was chosen, with the value as it now stands.',
+        select:
+          'A date was chosen, with the value as it now stands. Chosen is not finished: a period or a list is still being built after it, which is why VTimePicker names its own end of a choice <code>confirm</code>.',
       },
       slots: {
         day: 'Replaces the content of a day cell, to show a price or an availability under the number. It receives everything known about that day, including whether it belongs to the displayed month.',

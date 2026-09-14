@@ -15,7 +15,8 @@
  * `utils/date`), which is what keeps the server and the browser in agreement.
  */
 
-import { computed, nextTick, onMounted, ref, useId, watch } from 'vue'
+import { computed, inject, nextTick, onMounted, ref, useId, watch, watchEffect } from 'vue'
+import type { Ref } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
@@ -33,10 +34,10 @@ import {
   daysInMonth,
   firstDayOfWeekFor,
   formatISO,
+  isDateAllowed,
   isoOf,
   isSameISO,
   isValidISO,
-  isWithin,
   monthName,
   monthNamesCompact,
   parseISO,
@@ -46,10 +47,12 @@ import {
 import { PICKER_COLUMNS, dayStep, gridDelta } from './keyboard'
 
 import { toggleValue } from '../../utils/array'
+import { isDev } from '../../utils/env'
+import { hostWarnsKey } from '../../utils/hostWarns'
 import { resolveMatcher } from '../../utils/matcher'
 import { clamp } from '../../utils/number'
 import { useAriaLabel } from '../../composables/useAriaLabel'
-import { useLocale, useMessages } from '../../i18n/state'
+import { useMessages, useResolvedLocale } from '../../i18n/state'
 
 export type DatePickerSelection = 'single' | 'range' | 'multiple'
 
@@ -82,6 +85,26 @@ export type DatePickerMatcher = string[] | ((iso: string) => boolean)
 
 /** The shape of the v-model, which follows whichever `selection` is in use. */
 export type DatePickerValue = string | null | DatePickerRange | string[]
+
+/** Everything the `#day` slot is told about the day it draws. */
+export interface DatePickerDaySlotProps {
+  /** The day, as an ISO `YYYY-MM-DD` string. */
+  iso: string
+  /** The day of the month. */
+  day: number
+  /** Whether it belongs to the month on display rather than to a neighbouring one. */
+  inMonth: boolean
+  /** Whether it cannot be chosen: outside the bounds, or excluded by `disabledDates`. */
+  disabled: boolean
+  /** Whether it is selected. */
+  selected: boolean
+  /** Whether it is today. */
+  today: boolean
+  /** Whether it falls inside the selected period, both ends included. */
+  inRange: boolean
+  /** The events that fall on it. */
+  events: DatePickerEvent[]
+}
 
 interface DatePickerProps {
   /**
@@ -186,16 +209,7 @@ defineSlots<{
    * number, for instance. It receives everything known about that day, including
    * whether it belongs to the displayed month.
    */
-  day?(props: {
-    iso: string
-    day: number
-    inMonth: boolean
-    disabled: boolean
-    selected: boolean
-    today: boolean
-    inRange: boolean
-    events: DatePickerEvent[]
-  }): unknown
+  day?(props: DatePickerDaySlotProps): unknown
   /** The strip under the grid, for actions such as Close or Save, or for preset dates. */
   footer?(): unknown
 }>()
@@ -208,13 +222,18 @@ const m = useMessages()
 // @a11y — a roleless box cannot carry an accessible name (axe: aria-prohibited-attr),
 // so the root is a named group: the VCarousel viewport arrangement.
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.datePicker.label)
-const vectisLocale = useLocale()
-/*
- * The prop 'locale' wins, and the design system's global locale is what it falls back to.
- * Every read below goes through this one derivation, so the two sources can never be consulted
- * in a different order somewhere else.
- */
-const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
+const resolvedLocale = useResolvedLocale(() => props.locale)
+
+// @devwarn
+// Silent inside a host that forwards these props and reports on them itself (utils/hostWarns).
+if (isDev && !inject(hostWarnsKey, false)) {
+  watchEffect(() => {
+    if (props.min && props.max && compareISO(props.min, props.max) > 0)
+      console.warn(
+        `[VDatePicker] min "${props.min}" falls after max "${props.max}", so no date can be chosen.`,
+      )
+  })
+}
 
 const resolvedFirstDay = computed(
   () => props.firstDayOfWeek ?? firstDayOfWeekFor(resolvedLocale.value),
@@ -269,7 +288,7 @@ const viewYear = computed(
   () => parseISO(focusedISO.value)?.getFullYear() ?? new Date().getFullYear(),
 )
 const viewMonth0 = computed(() => parseISO(focusedISO.value)?.getMonth() ?? 0)
-const monthLabel = computed(() => monthName(resolvedLocale.value, viewMonth0.value, 'long'))
+const monthLabel = computed(() => monthName(resolvedLocale.value, viewMonth0.value))
 const gridLabel = computed(() => `${monthLabel.value} ${viewYear.value}`)
 
 // @ssr
@@ -340,20 +359,36 @@ type DayCell = {
   inRange: boolean
   today: boolean
   events: DatePickerEvent[]
+  /** The events drawn as dots under the number, three at most. */
+  dots: DatePickerEvent[]
 }
 
+/**
+ * The 42 squares of the month on display, rebuilt only when the MONTH changes. The two
+ * computeds are split on purpose: a range being previewed changes `hoverISO` on every
+ * `pointerenter`, and that has to repaint the decoration below without building 42 dates
+ * again. `viewYear` and `viewMonth0` are numbers, so moving the focus inside the month
+ * leaves them — and this — untouched.
+ */
+const grid = computed(() =>
+  buildMonthGrid(viewYear.value, viewMonth0.value, resolvedFirstDay.value),
+)
+
+const NO_EVENTS: DatePickerEvent[] = []
+
 const days = computed<DayCell[]>(() =>
-  buildMonthGrid(viewYear.value, viewMonth0.value, resolvedFirstDay.value).map((cell) => {
+  grid.value.map((cell) => {
     const inMonth = cell.adjacent === null
     // Making the neighbouring days clickable implies showing them: a day nobody can
     // see cannot be clicked.
     const show = inMonth || props.showAdjacentDays || props.selectAdjacentDays
     const selectable = inMonth || props.selectAdjacentDays
-    const disabled = !isWithin(cell.iso, props.min, props.max) || isDisabledDate.value(cell.iso)
+    const disabled = !isDateAllowed(cell.iso, props.min, props.max, isDisabledDate.value)
     const kind: DayCell['kind'] = !show ? 'empty' : selectable ? 'button' : 'static'
+    const events = eventsByDate.value.get(cell.iso) ?? NO_EVENTS
     return {
       iso: cell.iso,
-      day: parseISO(cell.iso)?.getDate() ?? 0,
+      day: cell.day,
       kind,
       inMonth,
       disabled,
@@ -362,10 +397,25 @@ const days = computed<DayCell[]>(() =>
       rangeEnd: props.selection === 'range' && isSameISO(cell.iso, effectiveRange.value.end),
       inRange: props.selection === 'range' && isInRange(cell.iso),
       today: isSameISO(cell.iso, today.value),
-      events: eventsByDate.value.get(cell.iso) ?? [],
+      events,
+      dots: events.length > 3 ? events.slice(0, 3) : events,
     }
   }),
 )
+
+/** What the `#day` slot receives for a square: the same object for both kinds of cell. */
+function daySlotProps(cell: DayCell): DatePickerDaySlotProps {
+  return {
+    iso: cell.iso,
+    day: cell.day,
+    inMonth: cell.inMonth,
+    disabled: cell.disabled,
+    selected: cell.selected,
+    today: cell.today,
+    inRange: cell.inRange,
+    events: cell.events,
+  }
+}
 const weeks = computed(() => {
   const rows: DayCell[][] = []
   for (let i = 0; i < days.value.length; i += 7) rows.push(days.value.slice(i, i + 7))
@@ -380,16 +430,18 @@ function monthHasSelectable(year: number, month0: number): boolean {
     (!props.min || compareISO(last, props.min) >= 0)
   )
 }
-const canPrevMonth = computed(() => {
-  const prev = addMonths(focusedISO.value, -1)
-  const d = parseISO(prev)!
-  return monthHasSelectable(d.getFullYear(), d.getMonth())
-})
-const canNextMonth = computed(() => {
-  const next = addMonths(focusedISO.value, 1)
-  const d = parseISO(next)!
-  return monthHasSelectable(d.getFullYear(), d.getMonth())
-})
+// Derived from the month on display, not from the focused day, so an arrow key moving the
+// focus inside the month does not recompute them.
+const canPrevMonth = computed(() =>
+  viewMonth0.value === 0
+    ? monthHasSelectable(viewYear.value - 1, 11)
+    : monthHasSelectable(viewYear.value, viewMonth0.value - 1),
+)
+const canNextMonth = computed(() =>
+  viewMonth0.value === 11
+    ? monthHasSelectable(viewYear.value + 1, 0)
+    : monthHasSelectable(viewYear.value, viewMonth0.value + 1),
+)
 const canPrevYear = computed(
   () => !props.min || compareISO(isoOf(viewYear.value - 1, 11, 31), props.min) >= 0,
 )
@@ -497,7 +549,45 @@ function onDaysKeydown(event: KeyboardEvent) {
   )
 }
 
+/**
+ * Leaving the months or the years view for the days of the month chosen, keeping the day of
+ * the month where the new month has one — the 31st becoming the 30th, say.
+ */
+function chooseYearMonth(year: number, month0: number) {
+  const day = Math.min(parseISO(focusedISO.value)!.getDate(), daysInMonth(year, month0))
+  goTo(isoOf(year, month0, day))
+  view.value = 'days'
+  focusDay(focusedISO.value)
+}
+
+// @keyboard @a11y
+/**
+ * The keyboard of the months and the years views, which differ only in what their cells
+ * hold: Enter or Space chooses the focused cell, and the arrows walk the list of cells a row
+ * or a column at a time, stopping at either end.
+ */
+function onViewKeydown(
+  event: KeyboardEvent,
+  cells: readonly number[],
+  focused: Ref<number>,
+  cellEl: (value: number) => HTMLElement | null,
+  choose: (value: number) => void,
+) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    choose(focused.value)
+    return
+  }
+  const delta = gridDelta(event.key)
+  if (delta === undefined) return
+  event.preventDefault()
+  const next = clamp(cells.indexOf(focused.value) + delta, 0, cells.length - 1)
+  focused.value = cells[next] ?? focused.value
+  cellEl(focused.value)?.focus()
+}
+
 // The months view, opened from the month button in the header.
+const MONTHS = Array.from({ length: 12 }, (_, i) => i)
 const focusedMonth = ref(viewMonth0.value)
 const monthCellEl = (i: number) =>
   document.getElementById(`${gridLabelId}-m-${i}`) as HTMLElement | null
@@ -505,25 +595,10 @@ function monthSelectable(i: number) {
   return monthHasSelectable(viewYear.value, i)
 }
 function chooseMonth(i: number) {
-  if (!monthSelectable(i)) return
-  const day = Math.min(parseISO(focusedISO.value)!.getDate(), daysInMonth(viewYear.value, i))
-  goTo(isoOf(viewYear.value, i, day))
-  view.value = 'days'
-  focusDay(focusedISO.value)
+  if (monthSelectable(i)) chooseYearMonth(viewYear.value, i)
 }
-// @keyboard @a11y
-function onMonthsKeydown(event: KeyboardEvent) {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault()
-    chooseMonth(focusedMonth.value)
-    return
-  }
-  const delta = gridDelta(event.key)
-  if (delta === undefined) return
-  event.preventDefault()
-  focusedMonth.value = clamp(focusedMonth.value + delta, 0, 11)
-  monthCellEl(focusedMonth.value)?.focus()
-}
+const onMonthsKeydown = (event: KeyboardEvent) =>
+  onViewKeydown(event, MONTHS, focusedMonth, monthCellEl, chooseMonth)
 
 // @a11y
 /*
@@ -563,29 +638,9 @@ const yearRows = computed(() => chunk(yearRange.value))
 const focusedYear = ref(viewYear.value)
 const yearCellEl = (y: number) =>
   document.getElementById(`${gridLabelId}-y-${y}`) as HTMLElement | null
-function chooseYear(y: number) {
-  const month = viewMonth0.value
-  const day = Math.min(parseISO(focusedISO.value)!.getDate(), daysInMonth(y, month))
-  goTo(isoOf(y, month, day))
-  view.value = 'days'
-  focusDay(focusedISO.value)
-}
-// @keyboard @a11y
-function onYearsKeydown(event: KeyboardEvent) {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault()
-    chooseYear(focusedYear.value)
-    return
-  }
-  const delta = gridDelta(event.key)
-  if (delta === undefined) return
-  event.preventDefault()
-  const list = yearRange.value
-  const idx = list.indexOf(focusedYear.value)
-  const nextIdx = clamp(idx + delta, 0, list.length - 1)
-  focusedYear.value = list[nextIdx] ?? focusedYear.value
-  yearCellEl(focusedYear.value)?.focus()
-}
+const chooseYear = (y: number) => chooseYearMonth(y, viewMonth0.value)
+const onYearsKeydown = (event: KeyboardEvent) =>
+  onViewKeydown(event, yearRange.value, focusedYear, yearCellEl, chooseYear)
 
 // Follows a selection changed from the outside: when the leading value lands in
 // another month, the calendar moves to it rather than leaving the reader in front of
@@ -771,22 +826,12 @@ defineExpose({
             @pointerenter="hoverISO = cell.iso"
             @focus="hoverISO = cell.iso"
           >
-            <slot
-              name="day"
-              :iso="cell.iso"
-              :day="cell.day"
-              :in-month="cell.inMonth"
-              :disabled="cell.disabled"
-              :selected="cell.selected"
-              :today="cell.today"
-              :in-range="cell.inRange"
-              :events="cell.events"
-            >
+            <slot name="day" v-bind="daySlotProps(cell)">
               <span class="v-date-picker-day-num">{{ cell.day }}</span>
             </slot>
-            <span v-if="cell.events.length" class="v-date-picker-dots" aria-hidden="true">
+            <span v-if="cell.dots.length" class="v-date-picker-dots" aria-hidden="true">
               <span
-                v-for="(ev, ei) in cell.events.slice(0, 3)"
+                v-for="(ev, ei) in cell.dots"
                 :key="ei"
                 class="v-date-picker-dot"
                 :style="ev.color ? { '--date-picker-dot-color': ev.color } : undefined"
@@ -804,17 +849,7 @@ defineExpose({
             class="v-date-picker-day v-date-picker-day--static"
             :data-disabled="cell.disabled ? '' : undefined"
           >
-            <slot
-              name="day"
-              :iso="cell.iso"
-              :day="cell.day"
-              :in-month="cell.inMonth"
-              :disabled="cell.disabled"
-              :selected="cell.selected"
-              :today="cell.today"
-              :in-range="cell.inRange"
-              :events="cell.events"
-            >
+            <slot name="day" v-bind="daySlotProps(cell)">
               <span class="v-date-picker-day-num">{{ cell.day }}</span>
             </slot>
           </span>
@@ -885,13 +920,12 @@ defineExpose({
 <style>
 @layer vectis.components {
   .v-date-picker {
-    /* The consumer sets the size of the day disc; the cell around it — the hover area
-       and the width of the column — grows to follow, and never falls below the size
-       the token sets. */
-    --date-picker-day-size: var(--vectis-date-picker-day-size, var(--vectis-control-height-md));
+    /* The consumer sets the size of the day disc through its token; the cell around it —
+       the hover area and the width of the column — grows to follow, and never falls below
+       the size the cell token sets. */
     --date-picker-cell: max(
       var(--vectis-control-size-date-picker-cell),
-      calc(var(--date-picker-day-size) + var(--vectis-space-1))
+      calc(var(--vectis-control-size-date-picker-day) + var(--vectis-space-1))
     );
     display: inline-flex;
     flex-direction: column;
@@ -980,18 +1014,18 @@ defineExpose({
   .v-date-picker-cell[data-in-range]::before {
     content: '';
     position: absolute;
-    inset-block: calc((100% - var(--date-picker-day-size)) / 2);
+    inset-block: calc((100% - var(--vectis-control-size-date-picker-day)) / 2);
     inset-inline: 0;
     background: var(--vectis-color-accent-surface);
     z-index: 0;
   }
   .v-date-picker-cell[data-range-start]::before {
-    inset-inline-start: calc((100% - var(--date-picker-day-size)) / 2);
+    inset-inline-start: calc((100% - var(--vectis-control-size-date-picker-day)) / 2);
     border-start-start-radius: var(--vectis-radius-pill);
     border-end-start-radius: var(--vectis-radius-pill);
   }
   .v-date-picker-cell[data-range-end]::before {
-    inset-inline-end: calc((100% - var(--date-picker-day-size)) / 2);
+    inset-inline-end: calc((100% - var(--vectis-control-size-date-picker-day)) / 2);
     border-start-end-radius: var(--vectis-radius-pill);
     border-end-end-radius: var(--vectis-radius-pill);
   }
@@ -1006,8 +1040,8 @@ defineExpose({
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    inline-size: var(--date-picker-day-size);
-    block-size: var(--date-picker-day-size);
+    inline-size: var(--vectis-control-size-date-picker-day);
+    block-size: var(--vectis-control-size-date-picker-day);
     padding: 0;
     border: none;
     border-radius: var(--vectis-radius-pill);

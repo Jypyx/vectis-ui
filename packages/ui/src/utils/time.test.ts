@@ -5,11 +5,12 @@ import {
   angleToIndex,
   dialIndexToHour24,
   distanceFraction,
-  formatDisplay,
+  formatTimeDisplay,
   formatTime,
   formatTimeMask,
   hour24ToDial,
   hourCycleFor,
+  hourWithMeridiem,
   isValidTime,
   minutesOf,
   parseTime,
@@ -18,6 +19,7 @@ import {
   timeCaret,
   timeList,
   timeToMask,
+  withMeridiem,
   to12h,
   to24h,
 } from './time'
@@ -75,23 +77,23 @@ describe('hourCycleFor', () => {
   })
 })
 
-describe('formatDisplay', () => {
+describe('formatTimeDisplay', () => {
   it('displays in 24 h for fr-FR', () => {
-    expect(formatDisplay('19:05', 'fr-FR', '24h')).toBe('19:05')
+    expect(formatTimeDisplay('19:05', 'fr-FR', '24h')).toBe('19:05')
   })
 
   it('displays in 12 h with a meridiem for en-US', () => {
-    const text = formatDisplay('19:05', 'en-US', '12h')
+    const text = formatTimeDisplay('19:05', 'en-US', '12h')
     expect(text).toContain('7:05')
     expect(text).toMatch(/PM/)
   })
 
   it('forces the cycle independently of the locale', () => {
-    expect(formatDisplay('19:05', 'en-US', '24h')).toBe('19:05')
+    expect(formatTimeDisplay('19:05', 'en-US', '24h')).toBe('19:05')
   })
 
   it('returns an empty string on invalid input', () => {
-    expect(formatDisplay('25:00', 'fr-FR', '24h')).toBe('')
+    expect(formatTimeDisplay('25:00', 'fr-FR', '24h')).toBe('')
   })
 })
 
@@ -180,7 +182,7 @@ describe('timeList', () => {
   })
 
   it('localizes the labels according to the format', () => {
-    // The same formatting as the field (`formatDisplay`): what you pick in the
+    // The same formatting as the field (`formatTimeDisplay`): what you pick in the
     // list is exactly what will be shown — hence "0:30" and not "00:30".
     expect(timeList(30, 'fr-FR', '24h')[1]?.label).toBe('0:30')
     expect(timeList(30, 'fr-FR', '24h')[28]?.label).toBe('14:00')
@@ -235,5 +237,24 @@ describe('HH:MM mask', () => {
     expect(parseTimeMask('12:00', '12h', 'PM')).toBe('12:00')
     expect(parseTimeMask('00:30', '12h', 'AM')).toBeNull() // 0 is outside 1–12
     expect(parseTimeMask('13:00', '12h', 'PM')).toBeNull()
+  })
+})
+
+describe('withMeridiem', () => {
+  it('moves a time into a half of the day, its minutes untouched', () => {
+    expect(withMeridiem('09:30', 'PM')).toBe('21:30')
+    expect(withMeridiem('21:30', 'PM')).toBe('21:30')
+    expect(withMeridiem('12:05', 'AM')).toBe('00:05')
+    expect(withMeridiem('00:05', 'PM')).toBe('12:05')
+  })
+
+  it('answers nothing for what is not a time', () => {
+    expect(withMeridiem(null, 'PM')).toBeNull()
+    expect(withMeridiem('25:00', 'AM')).toBeNull()
+  })
+
+  it('does the same to a bare hour', () => {
+    expect(hourWithMeridiem(9, 'PM')).toBe(21)
+    expect(hourWithMeridiem(12, 'AM')).toBe(0)
   })
 })

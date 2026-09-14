@@ -197,6 +197,7 @@ export type {
   DatePickerRange,
   DatePickerEvent,
   DatePickerMatcher,
+  DatePickerDaySlotProps,
 } from './components/VDatePicker/VDatePicker.vue'
 export { default as VDateInput } from './components/VDateInput/VDateInput.vue'
 export type {
@@ -208,7 +209,7 @@ export { default as VTimePicker } from './components/VTimePicker/VTimePicker.vue
 export type { TimePickerFormat } from './components/VTimePicker/VTimePicker.vue'
 /* The type of `allowedHours` and `allowedMinutes`, which both time components take. It is
    declared beside the rules that read it rather than in the SFC, VTimePicker owning both. */
-export type { TimeMatcher } from './components/VTimePicker/limits'
+export type { TimePickerAllowed } from './components/VTimePicker/limits'
 export { default as VTimeInput } from './components/VTimeInput/VTimeInput.vue'
 export type {
   TimeInputMode,
@@ -228,7 +229,7 @@ export { default as VFileInput } from './components/VFileInput/VFileInput.vue'
 export type { FileInputDisplay, FileInputSize } from './components/VFileInput/VFileInput.vue'
 /* What `@reject` carries, on VFileInput as on VFilePicker. The two screen a batch through
    the same rule, so the type is declared beside that rule rather than copied into each of
-   them — the `TimeMatcher` arrangement, and what lets one handler serve both. */
+   them — the `TimePickerAllowed` arrangement, and what lets one handler serve both. */
 export type { FileRejectReason, FileRejection } from './utils/file'
 export { default as VFilePicker } from './components/VFilePicker/VFilePicker.vue'
 export type { FilePickerPreview, FilePickerRow } from './components/VFilePicker/VFilePicker.vue'

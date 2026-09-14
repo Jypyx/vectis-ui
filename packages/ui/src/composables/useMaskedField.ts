@@ -52,7 +52,25 @@ export interface MaskedFieldOptions<T extends string> {
   acceptable?: (value: T) => boolean
 }
 
-export interface MaskedField {
+/** What a component adds to the mask's own keys. */
+export interface MaskedKeyHooks {
+  /**
+   * A key that is not a digit was typed — a separator, most often. Its character never
+   * reaches the field; what it MEANS is the component's: a date pads the field being typed
+   * and moves on to the next, a time pads the hour.
+   */
+  onSeparator: (el: HTMLInputElement) => void
+  /**
+   * The down arrow, which a component with a panel turns into the way into it. It answers
+   * whether it handled the press: only then is the default cancelled, and a press left
+   * alone travels on to whatever opens the panel.
+   */
+  onArrowDown?: () => boolean
+  /** Runs once Enter has committed or reverted what was typed: closing a panel, say. */
+  onEnter?: () => void
+}
+
+export interface MaskedField<T extends string> {
   /** The text currently in the field while it is being typed into. */
   draft: Ref<string>
   /**
@@ -73,26 +91,17 @@ export interface MaskedField {
   commitOrRevert: () => void
   /** The handler to bind to the field's input event. */
   onFieldInput: (event: Event) => void
+  /** The handler for the field's keydown event, with what the component adds to it. */
+  onKeydown: (event: KeyboardEvent, hooks: MaskedKeyHooks) => void
   /**
-   * Backspace over a SEPARATOR, which erases the digit in front of it instead.
-   *
-   * TRAP — a separator is placed by the mask and never typed, so erasing one has to erase
-   * the DIGIT before it, which is what the reader believes they are erasing. Left alone, the
-   * mask writes the separator straight back and the key looks dead.
-   *
-   * It answers whether it handled the press: `false` means the caret was not sitting after a
-   * separator and the browser's own Backspace should run.
+   * The handler for the field's paste event. `recognize` reads the pasted text as a WHOLE
+   * value when it is one — a date in ISO form, a canonical time — and answers nothing
+   * otherwise, in which case only the digits of what was pasted are taken.
    */
-  backspaceOverSeparator: (el: HTMLInputElement) => boolean
-  /**
-   * Splices a pasted run of digits into the one already in the field, at the selection, and
-   * puts the caret after what was inserted. The whole-value fast path — a complete date or
-   * time recognized as such — belongs to the component and runs before this.
-   */
-  pasteDigits: (el: HTMLInputElement, pasted: string) => void
+  onPaste: (event: ClipboardEvent, recognize: (pasted: string) => T | null) => void
 }
 
-export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>): MaskedField {
+export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>): MaskedField<T> {
   const draft = ref('')
   const acceptable = options.acceptable ?? (() => true)
 
@@ -178,13 +187,23 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
     commitLive()
   }
 
+  /*
+   * Backspace over a SEPARATOR, which erases the digit in front of it instead.
+   *
+   * TRAP — a separator is placed by the mask and never typed, so erasing one has to erase
+   * the DIGIT before it, which is what the reader believes they are erasing. Left alone, the
+   * mask writes the separator straight back and the key looks dead.
+   *
+   * It answers whether it handled the press: `false` means the caret was not sitting after a
+   * separator and the browser's own Backspace should run.
+   */
   function backspaceOverSeparator(el: HTMLInputElement) {
     const start = el.selectionStart
     if (
       start === null ||
       start !== el.selectionEnd ||
       start === 0 ||
-      /d/.test(el.value[start - 1] ?? '')
+      /\d/.test(el.value[start - 1] ?? '')
     ) {
       return false
     }
@@ -196,6 +215,10 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
     return true
   }
 
+  /**
+   * Splices a pasted run of digits into the one already in the field, at the selection, and
+   * puts the caret after what was inserted.
+   */
   function pasteDigits(el: HTMLInputElement, pasted: string) {
     const start = el.selectionStart ?? el.value.length
     const end = el.selectionEnd ?? start
@@ -209,6 +232,66 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
     commitLive()
   }
 
+  // @keyboard
+  function onKeydown(event: KeyboardEvent, hooks: MaskedKeyHooks) {
+    if (!options.typing()) return
+    const el = options.fieldEl.value
+    if (!el) return
+
+    if (event.key === 'Enter') {
+      // Cancelling the default does two things at once: it stops the surrounding form from
+      // being submitted, and it stops a panel this keystroke closes from being reopened as
+      // the event travels up to the component's root.
+      event.preventDefault()
+      commitOrRevert()
+      hooks.onEnter?.()
+      return
+    }
+    if (event.key === 'ArrowDown') {
+      if (hooks.onArrowDown?.()) event.preventDefault()
+      return
+    }
+    if (event.key === 'Backspace') {
+      if (backspaceOverSeparator(el)) event.preventDefault()
+      return
+    }
+    if (
+      event.key.length === 1 &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.altKey &&
+      !/\d/.test(event.key)
+    ) {
+      event.preventDefault()
+      hooks.onSeparator(el)
+    }
+  }
+
+  /**
+   * Pasting. Without the whole-value path, pasting "2026-06-10" into a field expecting day,
+   * month, year would produce "20/26/0610": the digits would be taken in order and the
+   * separators ignored.
+   *
+   * A whole value is written as it stands rather than read back from the mask, which is not
+   * a detail on a 12-hour clock: "19:05" shows as "07:05", and reading that text back would
+   * take the half of the day from the AM/PM button instead of from what was pasted.
+   */
+  function onPaste(event: ClipboardEvent, recognize: (pasted: string) => T | null) {
+    if (!options.typing()) return
+    const el = options.fieldEl.value
+    if (!el) return
+    event.preventDefault()
+    const pasted = (event.clipboardData?.getData('text') ?? '').trim()
+    const whole = recognize(pasted)
+    if (whole) {
+      const text = options.toMask(whole)
+      writeField(text, text.length)
+      if (acceptable(whole) && whole !== options.readValue()) options.writeValue(whole)
+      return
+    }
+    pasteDigits(el, pasted)
+  }
+
   return {
     draft,
     fieldModel,
@@ -216,7 +299,7 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
     commitLive,
     commitOrRevert,
     onFieldInput,
-    backspaceOverSeparator,
-    pasteDigits,
+    onKeydown,
+    onPaste,
   }
 }

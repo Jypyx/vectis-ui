@@ -437,7 +437,7 @@ describe('monthWeeks', () => {
 
   it('pads with the neighbouring months and says which days those are', () => {
     const weeks = monthWeeks(WEDNESDAY, WEEK_FROM_MONDAY)
-    expect(weeks[0]![0]).toEqual({ iso: '2026-06-01', adjacent: null })
+    expect(weeks[0]![0]).toEqual({ iso: '2026-06-01', day: 1, adjacent: null })
     expect(weeks.at(-1)!.at(-1)!.adjacent).toBe('next')
   })
 

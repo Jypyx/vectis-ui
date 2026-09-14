@@ -19,10 +19,9 @@
  * Whatever is displayed, the value is always a canonical 24-hour `'HH:mm'`.
  */
 
-import { computed, inject, provide, ref, useId, watchEffect } from 'vue'
+import { computed, inject, provide, ref, watchEffect } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
-import { NO_BUTTON_GROUP, buttonGroupKey } from '../VButton/context'
 import VCombobox from '../VCombobox/VCombobox.vue'
 import type { ComboboxOption } from '../VCombobox/VCombobox.vue'
 import { inputGroupKey } from '../VInput/context'
@@ -39,10 +38,10 @@ import {
   nearestAllowedTime,
   resolveLimits,
 } from '../VTimePicker/limits'
-import type { TimeMatcher } from '../VTimePicker/limits'
+import type { TimePickerAllowed } from '../VTimePicker/limits'
 import {
-  formatDisplay,
   formatTime,
+  formatTimeDisplay,
   formatTimeMask,
   hourCycleFor,
   isValidTime,
@@ -53,11 +52,12 @@ import {
   timeList,
   timeToMask,
   to12h,
-  to24h,
+  withMeridiem,
 } from '../../utils/time'
 import type { Meridiem, TimeOption } from '../../utils/time'
 import { timeMatches } from './search'
 import { isDev } from '../../utils/env'
+import { hostWarnsKey } from '../../utils/hostWarns'
 import { digitsOf } from '../../utils/text'
 
 import { useControlShape } from '../../composables/useControlShape'
@@ -67,7 +67,7 @@ import { useFieldPanel } from '../../composables/useFieldPanel'
 import { canClear } from '../../composables/useClearable'
 import { iconStartListener } from '../../composables/useIconClickHandlers'
 import { useMaskedField } from '../../composables/useMaskedField'
-import { useLocale, useMessages } from '../../i18n/state'
+import { useMessages, useResolvedLocale } from '../../i18n/state'
 
 export type TimeInputMode = 'picker' | 'input' | 'list'
 
@@ -117,9 +117,9 @@ interface TimeInputProps {
    * Which hours can be chosen: the list of them, or a rule answering for one. The hour
    * handed to a rule is always the 24-hour one, whichever clock is on display.
    */
-  allowedHours?: TimeMatcher
+  allowedHours?: TimePickerAllowed
   /** Which minutes can be chosen: the list of them, or a rule answering for one. */
-  allowedMinutes?: TimeMatcher
+  allowedMinutes?: TimePickerAllowed
   /**
    * A BCP 47 locale, which decides the clock and how a time is written out. It TAKES
    * PRECEDENCE over the design system's global locale and falls back to it — which is why
@@ -251,11 +251,12 @@ defineSlots<{
    *
    * It receives both actions, and they are what make the slot usable: the clock writes a
    * DRAFT that only `confirm` commits, so a footer of your own without it would leave the
-   * value unchangeable through the panel. `cancel` drops the draft and closes.
+   * value unchangeable through the panel. `cancel` drops the draft and closes, and `close`
+   * is the same function under the name VDateInput's footer hands out.
    *
    * It is not rendered in `list` mode, which has no panel of this component's own.
    */
-  footer?(props: { confirm: () => void; cancel: () => void }): unknown
+  footer?(props: { confirm: () => void; cancel: () => void; close: () => void }): unknown
 }>()
 
 // `class` and `style` stay on the wrapper; everything else goes down to the text field,
@@ -275,7 +276,6 @@ const panelRef = ref<InstanceType<typeof VPopover> | null>(null)
 const inputRef = ref<InstanceType<typeof VInput> | null>(null)
 const listRef = ref<InstanceType<typeof VCombobox> | null>(null)
 const pickerRef = ref<InstanceType<typeof VTimePicker> | null>(null)
-const panelId = useId()
 
 /** The real input inside the field, which the mask and the caret work on. */
 const fieldEl = computed<HTMLInputElement | null>(() => inputRef.value?.el ?? null)
@@ -290,18 +290,16 @@ const resolvedMode = computed<TimeInputMode>(() => {
 const typing = computed(() => resolvedMode.value === 'input')
 const isList = computed(() => resolvedMode.value === 'list')
 /**
- * Whether there is a picker — which here also means whether this component builds a panel
- * of its own at all, the list form handing that job to VCombobox. It is forced on a
- * `picker` field, where nothing else could fill it, and offered beside a field one types
- * into. A frozen field has none: there is nothing left for a panel to do.
+ * Whether this component builds a panel of its own, which is the clock's: the list form
+ * hands that job to VCombobox. It is forced on a `picker` field, where nothing else could
+ * fill it, and offered beside a field one types into. A frozen field has none: there is
+ * nothing left for a panel to do.
  */
-const hasPicker = computed(
+const hasPanel = computed(
   () => !props.readonly && (resolvedMode.value === 'picker' || (typing.value && props.showPicker)),
 )
 
-const vectisLocale = useLocale()
-/* The prop wins, and the design system's global locale is what it falls back to. */
-const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
+const resolvedLocale = useResolvedLocale(() => props.locale)
 
 const resolvedFormat = computed<TimePickerFormat>(
   () => props.format ?? hourCycleFor(resolvedLocale.value),
@@ -323,6 +321,9 @@ const valueAllowed = computed(() => {
 
 // @devwarn
 if (isDev) {
+  // The clock receives `minuteStep` and the restrictions as they stand, so what it would say
+  // about them is said here, under the name the consumer wrote (utils/hostWarns).
+  provide(hostWarnsKey, true)
   watchEffect(() => {
     if (props.minuteStep < 1 || 60 % props.minuteStep !== 0)
       console.warn(`[VTimeInput] minuteStep ${props.minuteStep} — a divisor of 60 is expected.`)
@@ -330,7 +331,7 @@ if (isDev) {
       console.warn(
         `[VTimeInput] unknown mode "${props.mode}": use "input" (the default), "picker" or "list".`,
       )
-    if (isList.value && props.showPicker === true)
+    if (isList.value && props.showPicker)
       console.warn(
         '[VTimeInput] showPicker is ignored in "list" mode: the list of times is the only panel.',
       )
@@ -347,6 +348,17 @@ if (isDev) {
       console.warn(
         `[VTimeInput] ${inert.join(', ')} ${inert.length > 1 ? 'are' : 'is'} ignored in "list" mode: the list draws its own chevron and spinner.`,
       )
+    // A field one types into without the picker has no end icon either, as in VDateInput.
+    // A read-only field is left out: it is a state that comes and goes, not a configuration
+    // to correct.
+    const iconless = ([] as string[]).concat(
+      props.pickerIcon !== scheduleIcon ? 'pickerIcon' : [],
+      props.pickerIconLabel ? 'pickerIconLabel' : [],
+    )
+    if (typing.value && !props.showPicker && iconless.length > 0)
+      console.warn(
+        `[VTimeInput] ${iconless.join(', ')} ${iconless.length > 1 ? 'are' : 'is'} ignored without showPicker: a field one types into has no clock icon unless it offers the clock.`,
+      )
     const problem = limitsProblem(limits.value)
     if (problem) console.warn(`[VTimeInput] ${problem}`)
     if (isList.value && props.minuteStep < 5)
@@ -361,18 +373,11 @@ if (isDev) {
  * Nothing here reaches the value until OK is pressed — which is the whole reason the
  * picker is bound to THIS rather than to the model.
  */
-const draft = ref<string | null>(null)
+const pickerDraft = ref<string | null>(null)
 
 const modelParts = computed(() => parseTime(model.value))
 
-/**
- * Which half of the day is chosen while NO time is set at all. The AM/PM control always
- * needs a value — it refuses to have none — and "nothing" is not one.
- *
- * It starts at AM rather than at whatever the current time happens to be, which keeps the
- * component's first render identical on a server and in a browser, and its tests free of
- * a clock.
- */
+/** The half of the day chosen while no time is set: VTimePicker's own `pendingMeridiem`. */
 const pendingMeridiem = ref<Meridiem>('AM')
 
 /**
@@ -380,11 +385,11 @@ const pendingMeridiem = ref<Meridiem>('AM')
  * nothing about the morning or the afternoon, so the answer has to be readable while the
  * panel is shut.
  */
-const meridiem = computed<Meridiem>(() => {
+const currentMeridiem = computed<Meridiem>(() => {
   // With the picker open it is the DRAFT that is on screen, and this control has to read
   // the same thing: two controls showing opposite halves of the day until OK is pressed
   // is the one state that must not happen.
-  const parts = open.value && hasPicker.value ? parseTime(draft.value) : modelParts.value
+  const parts = open.value && hasPanel.value ? parseTime(pickerDraft.value) : modelParts.value
   return parts ? to12h(parts.hour).meridiem : pendingMeridiem.value
 })
 
@@ -393,16 +398,16 @@ const meridiem = computed<Meridiem>(() => {
  * so it names the half it is showing and swaps to the other one on a click.
  */
 function toggleMeridiem() {
-  const next: Meridiem = meridiem.value === 'PM' ? 'AM' : 'PM'
+  const next: Meridiem = currentMeridiem.value === 'PM' ? 'AM' : 'PM'
   pendingMeridiem.value = next
-  const parts = modelParts.value
   // With no time set there is nothing to convert, so the choice is simply REMEMBERED
   // and applies to the first time typed or chosen.
-  if (parts) model.value = formatTime(to24h(to12h(parts.hour).hour, next), parts.minute)
+  const moved = withMeridiem(model.value, next)
+  if (moved) model.value = moved
   // With the picker open the draft has to follow as well, or OK would write back the
   // half of the day the reader has just changed.
-  const pending = open.value && hasPicker.value ? parseTime(draft.value) : null
-  if (pending) draft.value = formatTime(to24h(to12h(pending.hour).hour, next), pending.minute)
+  const pending = open.value && hasPanel.value ? withMeridiem(pickerDraft.value, next) : null
+  if (pending) pickerDraft.value = pending
 }
 
 /**
@@ -416,7 +421,7 @@ const hasMeridiem = computed(
 
 const hasValue = computed(() => !!modelParts.value)
 const displayText = computed(() =>
-  model.value ? formatDisplay(model.value, resolvedLocale.value, resolvedFormat.value) : '',
+  model.value ? formatTimeDisplay(model.value, resolvedLocale.value, resolvedFormat.value) : '',
 )
 
 // @a11y
@@ -438,90 +443,70 @@ const {
   disabled: resolvedDisabled,
 } = useControlShape(props, group)
 
-// @core
-// TRAP — this stops a VButtonGroup's or a VInputGroup's row context at this boundary. The
-// VTimePicker below writes `size="lg"` on its hour and minute cells, and a group WINS over a
-// button's prop: without this line a VInputGroup would resize them to its own height, and it
-// only shows once the panel is open. It is the JS counterpart of the `.v-overlay` guard
-// every VButtonGroup selector carries.
-provide(buttonGroupKey, NO_BUTTON_GROUP)
-
 // The whole "field plus panel" shell, shared with VDateInput. What is specific to this
 // component is only what happens around it: preparing the draft as the panel opens, and
 // clearing the announcement as it closes.
-const { open, openPanel, closePanel, onControlClick, onFocusout, onKeydown, onPanelMousedown } =
-  useFieldPanel({
-    rootEl,
-    panelRef,
-    fieldEl: inputRef,
-    // With no panel there is nothing to open. This is the composable's SINGLE cut-off
-    // point, and every way in passes through it — clicking the field, focusing it, the
-    // down arrow, Enter, the icon.
-    disabled: () => resolvedDisabled.value || !hasPicker.value,
-    focusInPanel,
-    // Beside a field one types into, the panel opens WITHOUT taking the focus, so typing
-    // carries on.
-    focusOnOpen: () => !typing.value,
-    onOpen: () => {
-      // Only the picker works on a draft; the list writes its choice straight away.
-      if (!hasPicker.value) return
-      const parts = modelParts.value
-      if (parts) draft.value = formatTime(parts.hour, parts.minute)
-      else {
-        // Opening on the current time when none is set. Reading the clock is safe here:
-        // this runs from a handler, hence in a browser, never during a render — and it is
-        // why the picker itself never reads it, so that it stays identical on both sides
-        // of hydration. The instant is taken ONCE: two reads could straddle a minute.
-        const now = new Date()
-        const wanted = snapMinute(now.getMinutes(), props.minuteStep)
-        // Pulled to the nearest time the restrictions allow, so that the panel never opens
-        // on one the reader would be refused. Null is a set of restrictions that allows
-        // nothing at all, which the warning above has already reported.
-        draft.value =
-          nearestAllowedTime(now.getHours(), wanted, limits.value) ??
-          formatTime(now.getHours(), wanted)
-      }
-      pickerRef.value?.reset()
-    },
-    onClose: () => {
-      pickerRef.value?.reset()
-    },
-  })
-
-// @a11y
-/**
- * TRAP — closing the panel hands the focus back to the field, and beside a field one
- * types into the panel opens ON FOCUS: the two would chase each other and the panel would
- * never close.
- *
- * This lock covers the focus call, which is synchronous. EVERY close that returns the
- * focus must go through here; closing directly brings the loop straight back.
- */
-let refocusing = false
-function closeAndFocus() {
-  refocusing = true
-  closePanel(true)
-  refocusing = false
-}
+const {
+  open,
+  panelId,
+  closeAndFocus,
+  focusField,
+  onFieldFocus,
+  toggleFromIcon,
+  onControlClick,
+  onFocusout,
+  onKeydown,
+  onPanelMousedown,
+} = useFieldPanel({
+  rootEl,
+  panelRef,
+  field: inputRef,
+  // With no panel there is nothing to open. This is the composable's SINGLE cut-off
+  // point, and every way in passes through it — clicking the field, focusing it, the
+  // down arrow, Enter, the icon.
+  disabled: () => resolvedDisabled.value || !hasPanel.value,
+  focusInPanel,
+  // Beside a field one types into, the panel opens on focus WITHOUT taking it, so typing
+  // carries on.
+  openOnFocus: () => typing.value,
+  onOpen: () => {
+    // Only the picker works on a draft; the list writes its choice straight away.
+    if (!hasPanel.value) return
+    const parts = modelParts.value
+    if (parts) pickerDraft.value = formatTime(parts.hour, parts.minute)
+    else {
+      // Opening on the current time when none is set. Reading the clock is safe here:
+      // this runs from a handler, hence in a browser, never during a render — and it is
+      // why the picker itself never reads it, so that it stays identical on both sides
+      // of hydration. The instant is taken ONCE: two reads could straddle a minute.
+      const now = new Date()
+      const wanted = snapMinute(now.getMinutes(), props.minuteStep)
+      // Pulled to the nearest time the restrictions allow, so that the panel never opens
+      // on one the reader would be refused. Null is a set of restrictions that allows
+      // nothing at all, which the warning above has already reported.
+      pickerDraft.value =
+        nearestAllowedTime(now.getHours(), wanted, limits.value) ??
+        formatTime(now.getHours(), wanted)
+    }
+    pickerRef.value?.reset()
+  },
+  onClose: () => {
+    pickerRef.value?.reset()
+  },
+})
 
 /** OK: the ONE route by which the picker's draft becomes the value. */
 function confirm() {
-  if (draft.value) model.value = draft.value
+  if (pickerDraft.value) model.value = pickerDraft.value
   closeAndFocus()
 }
 
-function cancel() {
-  closeAndFocus()
-}
+/** Cancel: the draft is simply dropped with the panel. */
+const cancel = closeAndFocus
 
-// @a11y
 /*
- * Emptying the value, called by the field as it emits its clear event.
- *
- * TRAP — the focus is taken here, under the lock, on purpose: the field focuses itself
- * immediately afterwards, and focusing an element that ALREADY has the focus emits no
- * event at all. That is what stops the panel reopening. Taking the lock away from this
- * function brings the reopening straight back.
+ * Emptying the value, called by the field as it emits its clear event. The focus is taken
+ * through `focusField`, whose note says why that stops the panel reopening.
  */
 function clearValue() {
   model.value = null
@@ -529,9 +514,7 @@ function clearValue() {
   // changes, and the guard that keeps the field and the value from chasing each other
   // would leave the text where it was.
   if (typing.value) writeField('')
-  refocusing = true
-  inputRef.value?.focus()
-  refocusing = false
+  focusField()
   emit('clear')
 }
 
@@ -566,8 +549,6 @@ watchEffect(
 
 /* From here on: everything the typed field needs. */
 
-const currentMeridiem = (): Meridiem => meridiem.value
-
 /*
  * The mask machinery — the text being typed, the bridge to the value, the reformatting
  * that preserves the caret, the commit and the silent revert — is shared with VDateInput
@@ -579,13 +560,13 @@ const currentMeridiem = (): Meridiem => meridiem.value
  * final commit from a live one, there being no equivalent of expanding a two-digit year.
  */
 const {
-  draft: maskDraft,
+  draft,
   fieldModel,
   writeField,
   commitOrRevert,
   onFieldInput,
-  backspaceOverSeparator,
-  pasteDigits,
+  onKeydown: onMaskKeydown,
+  onPaste,
 } = useMaskedField({
   fieldEl,
   typing: () => typing.value,
@@ -597,76 +578,36 @@ const {
   maxDigits: () => 4,
   format: formatTimeMask,
   caret: (_text, digitsBefore, inserting) => timeCaret(digitsBefore, inserting),
-  parse: (text) => parseTimeMask(text, resolvedFormat.value, currentMeridiem()),
+  parse: (text) => parseTimeMask(text, resolvedFormat.value, currentMeridiem.value),
   toMask: (time) => timeToMask(time, resolvedFormat.value),
 })
 
-// @keyboard @core — the keys the mask itself needs, plus the down arrow, which is the one
-// explicit way from the field into the picker.
+// @keyboard — what the mask's keys mean for a time: typing anything that is not a digit,
+// the separator included so that "9:30" can be typed exactly as it reads, completes the
+// hour with a leading zero and moves on to the minutes; the down arrow is the one explicit
+// way from the field into the picker.
 function onFieldKeydown(event: KeyboardEvent) {
-  if (!typing.value) return
-  const el = fieldEl.value
-  if (!el) return
-
-  if (event.key === 'Enter') {
-    // Cancelling the default does two things at once: it stops the surrounding form from
-    // being submitted, and it stops the panel this keystroke has just closed from being
-    // reopened as the event travels up to the root.
-    event.preventDefault()
-    commitOrRevert()
-    if (open.value) closeAndFocus()
-    return
-  }
-  if (event.key === 'ArrowDown' && open.value && hasPicker.value) {
-    // The one explicit route from the field into the picker.
-    event.preventDefault()
-    focusInPanel()
-    return
-  }
-  if (event.key === 'Backspace') {
-    if (backspaceOverSeparator(el)) event.preventDefault()
-    return
-  }
-  // Typing anything that is not a digit — the separator included, so that "9:30" can be
-  // typed exactly as it reads — completes the hour with a leading zero and moves on to
-  // the minutes.
-  if (
-    event.key.length === 1 &&
-    !event.ctrlKey &&
-    !event.metaKey &&
-    !event.altKey &&
-    !/\d/.test(event.key)
-  ) {
-    event.preventDefault()
-    const digits = digitsOf(el.value)
-    if (digits.length === 1) writeField(formatTimeMask(`0${digits}`), 3)
-  }
+  onMaskKeydown(event, {
+    onSeparator: (el) => {
+      const digits = digitsOf(el.value)
+      if (digits.length === 1) writeField(formatTimeMask(`0${digits}`), 3)
+    },
+    onArrowDown: () => {
+      if (!open.value) return false
+      focusInPanel()
+      return true
+    },
+    onEnter: closeAndFocus,
+  })
 }
 
 /**
- * Pasting. A time recognizable as a whole is adopted as it stands; anything else
- * contributes its digits alone.
+ * Pasting. A time recognizable as a whole is adopted as it stands — and a pasted 24-hour
+ * time is read as one whatever clock is on display: "19:05" means seven in the evening
+ * even in a field showing a 12-hour clock. Anything else contributes its digits alone.
  */
 function onFieldPaste(event: ClipboardEvent) {
-  if (!typing.value) return
-  const el = fieldEl.value
-  if (!el) return
-  event.preventDefault()
-  const pasted = (event.clipboardData?.getData('text') ?? '').trim()
-  // A pasted 24-hour time is read as one whatever clock is on display: "19:05" means
-  // seven in the evening even in a field showing a 12-hour clock.
-  if (isValidTime(pasted)) {
-    const text = timeToMask(pasted, resolvedFormat.value)
-    writeField(text, text.length)
-    if (pasted !== model.value) model.value = pasted
-    return
-  }
-  pasteDigits(el, pasted)
-}
-
-function onFieldFocus() {
-  if (!typing.value || refocusing) return
-  openPanel(false)
+  onPaste(event, (pasted) => (isValidTime(pasted) ? pasted : null))
 }
 
 /*
@@ -676,13 +617,7 @@ function onFieldFocus() {
  * stop a surrounding form from being submitted with nothing to show for it.
  */
 function onRootKeydown(event: KeyboardEvent) {
-  if (isList.value) return
-  if (typing.value && event.key === 'Escape' && open.value) {
-    event.preventDefault()
-    closeAndFocus()
-    return
-  }
-  onKeydown(event)
+  if (!isList.value) onKeydown(event)
 }
 
 function onRootFocusout(event: FocusEvent) {
@@ -700,6 +635,20 @@ function onRootFocusout(event: FocusEvent) {
  */
 
 /**
+ * The rows the step and the restrictions offer, which the value does not enter into: a
+ * change of value must not format up to 1440 times again.
+ */
+const baseOptions = computed<TimeOption[]>(() => {
+  if (!isList.value) return []
+  return timeList(props.minuteStep, resolvedLocale.value, resolvedFormat.value).filter((row) => {
+    // A list is READ before it is chosen from, so a time it may not take has no reason to be
+    // in it, which is the picker's own rule for its numerals.
+    const parts = parseTime(row.value)
+    return !parts || isTimeAllowed(parts.hour, parts.minute, limits.value)
+  })
+})
+
+/**
  * The rows on offer.
  *
  * A value that is not ON the step is added to them, in order: it is a real value, so the
@@ -709,22 +658,13 @@ function onRootFocusout(event: FocusEvent) {
  * it.
  */
 const options = computed<TimeOption[]>(() => {
-  if (!isList.value) return []
-  const rows = timeList(props.minuteStep, resolvedLocale.value, resolvedFormat.value).filter(
-    (row) => {
-      // A list is READ before it is chosen from, so a time it may not take has no reason
-      // to be in it — the opposite of the picker, where a disabled numeral is what makes a
-      // bound legible against the hours around it.
-      const parts = parseTime(row.value)
-      return !parts || isTimeAllowed(parts.hour, parts.minute, limits.value)
-    },
-  )
+  const rows = baseOptions.value
   const current = model.value
   if (!isValidTime(current) || rows.some((row) => row.value === current)) return rows
   const at = rows.findIndex((row) => row.value > current)
   const extra: TimeOption = {
     value: current,
-    label: formatDisplay(current, resolvedLocale.value, resolvedFormat.value),
+    label: formatTimeDisplay(current, resolvedLocale.value, resolvedFormat.value),
   }
   return at < 0 ? [...rows, extra] : [...rows.slice(0, at), extra, ...rows.slice(at)]
 })
@@ -761,10 +701,10 @@ const listModel = computed<string | string[]>({
  * offers no route to a new value, so it offers no route to none either.
  */
 const clearVisible = computed(() =>
-  canClear(props, resolvedDisabled.value, hasValue.value || (typing.value && !!maskDraft.value)),
+  canClear(props, resolvedDisabled.value, hasValue.value || (typing.value && !!draft.value)),
 )
 const endIcon = computed<IconSource | undefined>(() =>
-  hasPicker.value ? props.pickerIcon : undefined,
+  hasPanel.value ? props.pickerIcon : undefined,
 )
 // @a11y @devwarn
 /*
@@ -778,11 +718,6 @@ const endIcon = computed<IconSource | undefined>(() =>
  */
 const endIconLabel = computed(() => props.pickerIconLabel ?? m.value.timeInput.openPicker)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.timeInput.clear)
-
-function onEndIcon() {
-  if (open.value) closeAndFocus()
-  else openPanel(true)
-}
 
 /*
  * The three of them go through whichever field is on screen: in the list form there is no
@@ -868,11 +803,11 @@ defineExpose({
         :loading-label="loadingLabel"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
-        :role="hasPicker ? 'combobox' : undefined"
-        :aria-haspopup="hasPicker ? 'dialog' : undefined"
-        :aria-expanded="hasPicker ? open : undefined"
-        :aria-controls="hasPicker ? panelId : undefined"
-        @click:icon-end="onEndIcon"
+        :role="hasPanel ? 'combobox' : undefined"
+        :aria-haspopup="hasPanel ? 'dialog' : undefined"
+        :aria-expanded="hasPanel ? open : undefined"
+        :aria-controls="hasPanel ? panelId : undefined"
+        @click:icon-end="toggleFromIcon"
         @clear="clearValue"
         @focus="onFieldFocus"
         @input="onFieldInput"
@@ -897,11 +832,13 @@ defineExpose({
             class="v-input-action v-field-action v-time-input-meridiem"
             :disabled="resolvedDisabled"
             :aria-label="
-              m.timeInput.meridiem(meridiem === 'PM' ? m.timePicker.pm : m.timePicker.am)
+              m.timeInput.meridiemValue(
+                currentMeridiem === 'PM' ? m.timePicker.pm : m.timePicker.am,
+              )
             "
             @click="toggleMeridiem"
           >
-            {{ meridiem === 'PM' ? m.timePicker.pm : m.timePicker.am }}
+            {{ currentMeridiem === 'PM' ? m.timePicker.pm : m.timePicker.am }}
           </button>
           <VSeparator
             v-if="hasMeridiem && (clearVisible || endIcon)"
@@ -917,7 +854,7 @@ defineExpose({
          — which is fed by the panel's own events — can no longer become true. The absence
          of a panel is therefore self-enforcing. -->
     <VPopover
-      v-if="hasPicker"
+      v-if="hasPanel"
       :id="panelId"
       ref="panelRef"
       v-model:open="open"
@@ -935,7 +872,7 @@ defineExpose({
            rather than to a clock shown on its own. -->
       <VTimePicker
         ref="pickerRef"
-        v-model="draft"
+        v-model="pickerDraft"
         :format="resolvedFormat"
         :locale="resolvedLocale"
         :minute-step="minuteStep"
@@ -951,7 +888,7 @@ defineExpose({
              through the panel. The `remove` of VCombobox's `#chip` slot exists for the
              same reason. -->
         <template #footer>
-          <slot name="footer" :confirm="confirm" :cancel="cancel">
+          <slot name="footer" :confirm="confirm" :cancel="cancel" :close="cancel">
             <VButton variant="ghost" tone="neutral" @click="cancel">{{ m.common.cancel }}</VButton>
             <VButton @click="confirm">{{ m.common.confirm }}</VButton>
           </slot>
@@ -1044,8 +981,9 @@ defineExpose({
     block-size: var(--control-action-size);
   }
 
-  /* The anchoring and the panel's surface both come from VPopover; what is left here is
-     the padding around the picker. The picker brings its own layout — including the gap
+  /* The anchoring and the panel's surface both come from VPopover. The panel's OWN padding
+     is cancelled: VTimePicker pads itself, as VDatePicker does, so both pickers keep the
+     same room on a page and in a panel. The picker brings its own layout too — the gap
      between its parts and the centring of the face — so nothing of that is declared here.
 
      TRAP — NO `display` here, and that is not an omission. The column layout comes from
@@ -1062,7 +1000,7 @@ defineExpose({
      serve that purpose here — the picker's panel carries none. */
   .v-popover-panel.v-time-input-panel {
     width: max-content;
-    padding: var(--vectis-space-3);
+    padding: 0;
     color: var(--vectis-color-text);
   }
 

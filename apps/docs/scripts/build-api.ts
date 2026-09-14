@@ -533,7 +533,19 @@ function tokensOf(files: string[]): { name: string; value: string }[] {
   return Object.entries(control)
     .filter(([key]) => !key.startsWith('height-') && key !== 'border-width')
     .filter(([key]) => text.includes(`--vectis-control-${key}`))
-    .map(([key, token]) => ({ name: `--vectis-control-${key}`, value: token.$value }))
+    .map(([key, token]) => ({ name: `--vectis-control-${key}`, value: cssValueOf(token.$value) }))
+}
+
+/**
+ * A token value as the stylesheet carries it: an alias in braces (`{control.height.md}`)
+ * becomes the `var()` it is generated as, which is what a reader overriding it will see in
+ * devtools, rather than the source notation nothing in CSS understands.
+ */
+function cssValueOf(value: string): string {
+  return value.replace(
+    /\{([^}]+)\}/g,
+    (_match, ref: string) => `var(--vectis-${ref.split('.').join('-')})`,
+  )
 }
 
 const HEADER = `/*

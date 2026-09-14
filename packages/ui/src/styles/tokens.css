@@ -285,6 +285,7 @@
     --vectis-control-size-badge-ring: 2px;
     --vectis-control-size-avatar-ring: 2px;
     --vectis-control-size-date-picker-cell: 2.5rem;
+    --vectis-control-size-date-picker-day: var(--vectis-control-height-md);
     --vectis-control-size-date-picker-dot: 0.25rem;
     --vectis-control-size-date-picker-nav-min: 5.375rem;
     --vectis-control-size-tab-indicator: 2px;

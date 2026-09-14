@@ -47,7 +47,7 @@ export default {
       },
       events: {
         confirm:
-          'The minutes were settled from the keyboard. Releasing a pointer is how one stops adjusting the hand, not how one confirms, so it does not fire.',
+          "The reader has finished, with the time as it stands: the minutes were settled from the keyboard. Releasing a pointer is how one stops adjusting the hand, not how one confirms, so it does not fire. Where VDatePicker's <code>select</code> says a date was chosen, this says the choosing is over.",
       },
       slots: {
         footer: 'A strip at the foot of the clock, the place for actions such as Cancel and OK.',

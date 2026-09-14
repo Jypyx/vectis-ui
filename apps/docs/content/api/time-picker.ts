@@ -14,15 +14,15 @@ export default {
         { name: 'minuteStep', type: 'number', default: '1' },
         { name: 'min', type: 'string' },
         { name: 'max', type: 'string' },
-        { name: 'allowedHours', type: 'TimeMatcher' },
-        { name: 'allowedMinutes', type: 'TimeMatcher' },
+        { name: 'allowedHours', type: 'TimePickerAllowed' },
+        { name: 'allowedMinutes', type: 'TimePickerAllowed' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'string | null', default: 'null' },
       ],
       events: [
-        { name: 'confirm', type: '[]' },
+        { name: 'confirm', type: '[value: string | null]' },
       ],
       slots: [
         { name: 'footer', type: '{}' },
@@ -31,8 +31,8 @@ export default {
   ],
   types: [
     {
-      name: 'TimeMatcher',
-      definition: `export type TimeMatcher = number[] | ((value: number) => boolean)`,
+      name: 'TimePickerAllowed',
+      definition: `export type TimePickerAllowed = number[] | ((value: number) => boolean)`,
     },
   ],
   cssVars: [

@@ -97,7 +97,7 @@ export default {
       },
       slots: {
         footer:
-          'The strip at the foot of the clock, which replaces the Cancel and OK buttons rather than joining them. It receives both actions, and they are what make it usable: the clock writes a draft that only <code>confirm</code> commits, so a footer of your own without it would leave the value unchangeable through the panel. It is not rendered in list mode, which has no panel of its own.',
+          "The strip at the foot of the clock, which replaces the Cancel and OK buttons rather than joining them. It receives both actions, and they are what make it usable: the clock writes a draft that only <code>confirm</code> commits, so a footer of your own without it would leave the value unchangeable through the panel. It also receives <code>cancel</code>, and <code>close</code>, the same function under the name VDateInput's footer hands out. It is not rendered in list mode, which has no panel of its own.",
         valueEnd:
           'Controls of your own inside the field, placed before the ones the field owns: the clear cross and the icon that opens the panel. Those two are the component own affordance, which is why there is no <code>end</code> slot here.',
         start:

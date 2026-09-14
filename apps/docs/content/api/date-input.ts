@@ -47,7 +47,7 @@ export default {
       slots: [
         { name: 'start', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
-        { name: 'day', type: '{ iso: string; day: number; inMonth: boolean; disabled: boolean; selected: boolean; today: boolean; inRange: boolean; events: DatePickerEvent[]; }' },
+        { name: 'day', type: 'DatePickerDaySlotProps' },
         { name: 'footer', type: '{ close: () => void; }' },
       ],
     },
@@ -58,6 +58,19 @@ export default {
       definition: `export interface BuiltinIcon {
   name: string
   paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'DatePickerDaySlotProps',
+      definition: `export interface DatePickerDaySlotProps {
+  iso: string
+  day: number
+  inMonth: boolean
+  disabled: boolean
+  selected: boolean
+  today: boolean
+  inRange: boolean
+  events: DatePickerEvent[]
 }`,
     },
     {

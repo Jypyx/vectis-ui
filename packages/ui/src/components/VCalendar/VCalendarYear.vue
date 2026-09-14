@@ -15,7 +15,7 @@
  */
 import { computed } from 'vue'
 
-import { addDays, formatDisplay as formatDate, parseISO } from '../../utils/date'
+import { addDays, formatDateDisplay, parseISO } from '../../utils/date'
 
 import { coversDay, monthWeeks, type MonthCell } from './layout'
 import type { CalendarEvent } from './types'
@@ -38,7 +38,7 @@ const emit = defineEmits<{
   'month-activate': [iso: string]
 }>()
 
-const monthName = (iso: string) => formatDate(iso, props.locale, { month: 'long' })
+const monthName = (iso: string) => formatDateDisplay(iso, props.locale, { month: 'long' })
 
 /** The days of the year that have something on them, worked out once for all twelve. */
 const busyDays = computed(() => {
@@ -86,7 +86,7 @@ const dayNumbers = computed(() => {
     for (const week of weeks) {
       for (const cell of week) {
         if (!map.has(cell.iso))
-          map.set(cell.iso, formatDate(cell.iso, props.locale, { day: 'numeric' }))
+          map.set(cell.iso, formatDateDisplay(cell.iso, props.locale, { day: 'numeric' }))
       }
     }
   }
@@ -94,7 +94,7 @@ const dayNumbers = computed(() => {
 })
 
 const dayNumber = (iso: string) =>
-  dayNumbers.value.get(iso) ?? formatDate(iso, props.locale, { day: 'numeric' })
+  dayNumbers.value.get(iso) ?? formatDateDisplay(iso, props.locale, { day: 'numeric' })
 
 /** How many of a month's own days carry something, which is what its name announces. */
 const busyCounts = computed(() => {

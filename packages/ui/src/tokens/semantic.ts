@@ -321,6 +321,10 @@ export const semantic = {
       '2.5rem',
       'The side (height/width) of a VDatePicker day cell',
     ),
+    'size-date-picker-day': dimension(
+      '{control.height.md}',
+      'The diameter of the disc a VDatePicker day is drawn on; the cell grows to hold it',
+    ),
     'size-date-picker-dot': dimension('0.25rem', 'The diameter of a VDatePicker event dot'),
     'size-date-picker-nav-min': dimension(
       '5.375rem',

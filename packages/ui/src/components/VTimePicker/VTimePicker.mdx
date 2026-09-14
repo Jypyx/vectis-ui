@@ -49,9 +49,14 @@ so that only OK writes the value.
 
 <Canvas of={VTimePickerStories.Footer} />
 
-The component also emits **`confirm`** when the reader settles the minutes from the keyboard —
-never when the pointer is merely released, since letting go of the hand is how one stops adjusting
-it, not how one confirms.
+The component also emits **`confirm`**, carrying the time, when the reader settles the minutes
+from the keyboard — never when the pointer is merely released, since letting go of the hand is how
+one stops adjusting it, not how one confirms.
+
+The two pickers name two different moments. `VDatePicker`'s `select` says a date was **chosen**,
+and fires on every choice, a period still being built included; `confirm` says the choosing is
+**finished**. That is why `VTimeInput` closes its panel on `confirm` and `VDateInput` closes
+its own on `select` in a single selection only.
 
 ## Steps and intervals
 

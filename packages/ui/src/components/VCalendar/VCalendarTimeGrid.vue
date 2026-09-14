@@ -21,10 +21,10 @@
  */
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 
-import { formatDisplay as formatDate } from '../../utils/date'
+import { formatDateDisplay } from '../../utils/date'
 import { isRtl as isElementRtl } from '../../utils/direction'
 import { clamp } from '../../utils/number'
-import { formatDisplay as formatTimeDisplay, type HourFormat } from '../../utils/time'
+import { formatTimeDisplay, type HourFormat } from '../../utils/time'
 
 import { useMessages } from '../../i18n/state'
 
@@ -426,7 +426,7 @@ const cellId = (iso: string, minutes: number) => `${uid}-c-${iso}-${minutes}`
  * CELL — the shape `byCell` below uses, for the same reason.
  *
  * The grid renders `hours × days` cells, 24 × 7 by default, and a drag re-renders the whole
- * template every time it carries its event into another slot. Read straight from `formatDate`
+ * template every time it carries its event into another slot. Read straight from `formatDateDisplay`
  * in the template that would be 168 `cellLabel` calls per such frame, each doing a
  * `parseISO`, a `JSON.stringify` for the formatter cache key and two `Intl` formats — none of
  * which depends on the pointer. These two maps, of 7 and 24 entries, recompute when the
@@ -436,9 +436,13 @@ const dayLabels = computed(() => {
   const map = new Map<string, { short: string; number: string; full: string }>()
   for (const iso of props.days) {
     map.set(iso, {
-      short: formatDate(iso, props.locale, { weekday: 'short' }),
-      number: formatDate(iso, props.locale, { day: 'numeric' }),
-      full: formatDate(iso, props.locale, { weekday: 'long', day: 'numeric', month: 'long' }),
+      short: formatDateDisplay(iso, props.locale, { weekday: 'short' }),
+      number: formatDateDisplay(iso, props.locale, { day: 'numeric' }),
+      full: formatDateDisplay(iso, props.locale, {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      }),
     })
   }
   return map
@@ -462,11 +466,11 @@ const hourLabel = (minutes: number) =>
 
 const dayName = (iso: string, weekday: 'short' | 'long') =>
   weekday === 'short'
-    ? (dayLabels.value.get(iso)?.short ?? formatDate(iso, props.locale, { weekday }))
-    : formatDate(iso, props.locale, { weekday })
+    ? (dayLabels.value.get(iso)?.short ?? formatDateDisplay(iso, props.locale, { weekday }))
+    : formatDateDisplay(iso, props.locale, { weekday })
 
 const dayNumber = (iso: string) =>
-  dayLabels.value.get(iso)?.number ?? formatDate(iso, props.locale, { day: 'numeric' })
+  dayLabels.value.get(iso)?.number ?? formatDateDisplay(iso, props.locale, { day: 'numeric' })
 
 /** What one cell is called: the day in full, then the hour. */
 const cellLabel = (iso: string, minutes: number) =>
@@ -1245,7 +1249,7 @@ function onPointercancel() {
 function announceTimes(title: string, times: CalendarEventTimes) {
   const start = formatTimeDisplay(times.startTime, props.locale, props.hourFormat)
   const end = formatTimeDisplay(times.endTime, props.locale, props.hourFormat)
-  const day = formatDate(times.start, props.locale, {
+  const day = formatDateDisplay(times.start, props.locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',

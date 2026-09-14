@@ -7,6 +7,7 @@
  * refusals instead of emitting them. One body then serves VFileInput, which reports them one
  * at a time, and a test that reads them all as a list without a mount.
  */
+import { memo } from './memo'
 
 /** All the matching needs of a file, so that a test does not have to counterfeit one. */
 export interface FileCandidate {
@@ -91,18 +92,17 @@ const formatters = new Map<string, Intl.NumberFormat>()
 const digitsFor = (step: number) => (step === 0 ? 0 : 1)
 
 function formatterFor(locale: string, step: number): Intl.NumberFormat {
-  const key = `${locale}|${step}`
-  let formatter = formatters.get(key)
-  if (!formatter) {
-    formatter = new Intl.NumberFormat(locale, {
-      style: 'unit',
-      unit: UNITS[step]!,
-      unitDisplay: 'short',
-      maximumFractionDigits: digitsFor(step),
-    })
-    formatters.set(key, formatter)
-  }
-  return formatter
+  return memo(
+    formatters,
+    `${locale}|${step}`,
+    () =>
+      new Intl.NumberFormat(locale, {
+        style: 'unit',
+        unit: UNITS[step]!,
+        unitDisplay: 'short',
+        maximumFractionDigits: digitsFor(step),
+      }),
+  )
 }
 
 /**
@@ -140,7 +140,7 @@ export function formatBytes(bytes: number, locale: string): string {
  *
  * VFileInput and VFilePicker screen a batch through the same `screenFiles` below, so the
  * two report the same thing and the type is declared ONCE, here, rather than copied into
- * each of them under a name of its own. It is the `TimeMatcher` arrangement: the type
+ * each of them under a name of its own. It is the `TimePickerAllowed` arrangement: the type
  * lives beside the rule that produces it, and `index.ts` is what makes it public — the
  * MODULE stays internal, and a handler written for one of the two components can be
  * handed to the other.

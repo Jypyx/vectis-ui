@@ -27,12 +27,25 @@ export default {
         { name: 'select', type: '[value: DatePickerValue]' },
       ],
       slots: [
-        { name: 'day', type: '{ iso: string; day: number; inMonth: boolean; disabled: boolean; selected: boolean; today: boolean; inRange: boolean; events: DatePickerEvent[]; }' },
+        { name: 'day', type: 'DatePickerDaySlotProps' },
         { name: 'footer', type: '{}' },
       ],
     },
   ],
   types: [
+    {
+      name: 'DatePickerDaySlotProps',
+      definition: `export interface DatePickerDaySlotProps {
+  iso: string
+  day: number
+  inMonth: boolean
+  disabled: boolean
+  selected: boolean
+  today: boolean
+  inRange: boolean
+  events: DatePickerEvent[]
+}`,
+    },
     {
       name: 'DatePickerEvent',
       definition: `export interface DatePickerEvent {
@@ -59,6 +72,7 @@ export default {
   ],
   cssVars: [
     { name: '--vectis-control-size-date-picker-cell', value: '2.5rem' },
+    { name: '--vectis-control-size-date-picker-day', value: 'var(--vectis-control-height-md)' },
     { name: '--vectis-control-size-date-picker-dot', value: '0.25rem' },
     { name: '--vectis-control-size-date-picker-nav-min', value: '5.375rem' },
   ],

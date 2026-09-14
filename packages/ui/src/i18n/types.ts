@@ -179,15 +179,15 @@ export interface Messages {
     am: string
     pm: string
     selectHour: string
-    selectMinute: string
-    /** Announced when the clock face moves from choosing an hour to choosing a minute. */
-    hourStep: string
-    minuteStep: string
+    selectMinutes: string
+    /** Announced when the clock face moves between choosing the hour and the minutes. */
+    choosingHour: string
+    choosingMinutes: string
     /** What the clock face itself is called, which changes with the step. */
     hour: string
     minutes: string
     /** What the clock face announces as its value, rather than the bare number behind it. */
-    hoursValue: (hour: number) => string
+    hourValue: (hour: number) => string
     minutesValue: (minute: number) => string
   }
   timeInput: {
@@ -202,7 +202,7 @@ export interface Messages {
      * it rather than replacing it: a reader arriving on the button is told which half is
      * chosen, and hears the new one as soon as it changes.
      */
-    meridiem: (value: string) => string
+    meridiemValue: (value: string) => string
     /**
      * The grey template shown in an empty field, "hh:mm". It is translatable because those
      * letters are the initials of WORDS — unlike the colon between them, which is the same

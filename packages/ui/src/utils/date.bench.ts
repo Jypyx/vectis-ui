@@ -13,7 +13,7 @@
  * figures collapse if one is removed, and `× 20` is the line that would say so loudest.
  *
  * `formatterFor`'s cache key is built with `JSON.stringify(options)` on every call, so the
- * `formatDisplay` figure includes that stringify. It is measured here rather than assumed:
+ * `formatDateDisplay` figure includes that stringify. It is measured here rather than assumed:
  * the year view calls it 504 times per render.
  */
 import { bench, describe } from 'vitest'
@@ -22,7 +22,7 @@ import {
   buildMonthGrid,
   dateMaskFor,
   firstDayOfWeekFor,
-  formatDisplay,
+  formatDateDisplay,
   maskPlaceholder,
   monthNames,
   weekdayNames,
@@ -34,13 +34,13 @@ const ISO = '2021-11-22'
 describe('memoized — the floor', () => {
   // The formatter is cached after the first call, so this measures a Map lookup, a
   // JSON.stringify of the options literal, and one Intl format.
-  bench('formatDisplay', () => {
-    formatDisplay(ISO, LOCALE, { day: 'numeric' })
+  bench('formatDateDisplay', () => {
+    formatDateDisplay(ISO, LOCALE, { day: 'numeric' })
   })
 
   // The VCalendarYear render: one formatted day number per square, twelve months of them.
-  bench('formatDisplay × 504 (a year of day numbers)', () => {
-    for (let i = 0; i < 504; i++) formatDisplay(ISO, LOCALE, { day: 'numeric' })
+  bench('formatDateDisplay × 504 (a year of day numbers)', () => {
+    for (let i = 0; i < 504; i++) formatDateDisplay(ISO, LOCALE, { day: 'numeric' })
   })
 
   // These two already hoist their formatter out of the loop.
@@ -49,7 +49,7 @@ describe('memoized — the floor', () => {
   })
 
   bench('monthNames', () => {
-    monthNames(LOCALE, 'long')
+    monthNames(LOCALE)
   })
 })
 

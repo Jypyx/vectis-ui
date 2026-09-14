@@ -15,8 +15,8 @@ export default {
         { name: 'minuteStep', type: 'number', default: '1' },
         { name: 'min', type: 'string' },
         { name: 'max', type: 'string' },
-        { name: 'allowedHours', type: 'TimeMatcher' },
-        { name: 'allowedMinutes', type: 'TimeMatcher' },
+        { name: 'allowedHours', type: 'TimePickerAllowed' },
+        { name: 'allowedMinutes', type: 'TimePickerAllowed' },
         { name: 'locale', type: 'string' },
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
@@ -44,7 +44,7 @@ export default {
       slots: [
         { name: 'start', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
-        { name: 'footer', type: '{ confirm: () => void; cancel: () => void; }' },
+        { name: 'footer', type: '{ confirm: () => void; cancel: () => void; close: () => void; }' },
       ],
     },
   ],
@@ -70,8 +70,8 @@ export default {
       definition: `export type IconSource = string | BuiltinIcon | IconRender`,
     },
     {
-      name: 'TimeMatcher',
-      definition: `export type TimeMatcher = number[] | ((value: number) => boolean)`,
+      name: 'TimePickerAllowed',
+      definition: `export type TimePickerAllowed = number[] | ((value: number) => boolean)`,
     },
   ],
 } satisfies PageApi

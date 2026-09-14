@@ -10,6 +10,7 @@ import {
   dateMaskFor,
   formatDateMask,
   formatDisplayRange,
+  isDateAllowed,
   isoToMask,
   isValidISO,
   isWithin,
@@ -57,7 +58,7 @@ describe('utils/date', () => {
   })
 
   it('produces localized names that are independent of the time zone', () => {
-    expect(monthNames('fr-FR', 'long')[5]).toBe('juin')
+    expect(monthNames('fr-FR')[5]).toBe('juin')
     // first day of week Monday → Monday first
     expect(weekdayNames('fr-FR', 1, 'long')[0]?.toLowerCase()).toContain('lundi')
   })
@@ -156,5 +157,24 @@ describe('utils/date — input mask', () => {
     expect(maskPlaceholder('de-DE', dateMaskFor('de-DE'))).toBe('tt.mm.jjjj')
     // ideographic script ("日日/月月/年年年年" would be unreadable) → Latin fallback
     expect(maskPlaceholder('ja-JP', dateMaskFor('ja-JP'))).toBe('yyyy/mm/dd')
+  })
+})
+
+describe('isDateAllowed', () => {
+  it('asks the bounds and the exclusion together', () => {
+    const excluded = (iso: string) => iso === '2026-06-12'
+    expect(isDateAllowed('2026-06-10', '2026-06-01', '2026-06-30', excluded)).toBe(true)
+    expect(isDateAllowed('2026-05-31', '2026-06-01', '2026-06-30', excluded)).toBe(false)
+    expect(isDateAllowed('2026-07-01', '2026-06-01', '2026-06-30', excluded)).toBe(false)
+    expect(isDateAllowed('2026-06-12', undefined, undefined, excluded)).toBe(false)
+  })
+})
+
+describe('buildMonthGrid', () => {
+  it('carries the day of the month on every square, across both neighbouring months', () => {
+    const cells = buildMonthGrid(2026, 5, 1)
+    for (const cell of cells) expect(cell.day).toBe(parseISO(cell.iso)!.getDate())
+    expect(cells[0]).toEqual({ iso: '2026-06-01', day: 1, adjacent: null })
+    expect(cells.at(-1)).toEqual({ iso: '2026-07-12', day: 12, adjacent: 'next' })
   })
 })

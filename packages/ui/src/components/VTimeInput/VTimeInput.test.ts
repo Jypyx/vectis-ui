@@ -433,6 +433,28 @@ describe('VTimeInput — restrictions', () => {
     expect(warn.mock.calls.flat().join(' ')).toContain('falls after max')
     warn.mockRestore()
   })
+
+  it('says it ONCE, under its own name, with the clock mounted in its panel', () => {
+    // The clock receives the same props and would say the same sentences under a name the
+    // consumer never wrote.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { container } = render(VTimeInput, {
+      props: { mode: 'picker', min: '17:00', max: '09:00', minuteStep: 7 },
+    })
+    expect(container.querySelector('.v-time-picker')).not.toBeNull()
+    const said = warn.mock.calls.map(String)
+    expect(said.filter((line) => line.includes('falls after max'))).toHaveLength(1)
+    expect(said.filter((line) => line.includes('minuteStep 7'))).toHaveLength(1)
+    expect(said.some((line) => line.startsWith('[VTimePicker]'))).toBe(false)
+    warn.mockRestore()
+  })
+
+  it('warns for the picker props a typed field without the picker cannot use', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(VTimeInput, { props: { pickerIconLabel: 'Clock' } })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('pickerIconLabel is ignored'))
+    warn.mockRestore()
+  })
 })
 
 describe('VTimeInput — list mode', () => {
@@ -810,9 +832,10 @@ describe('VTimeInput — the footer slot', () => {
     const { container, getByTestId, emitted } = render(VTimeInput, {
       props: { mode: 'picker', modelValue: '09:15' },
       slots: {
-        footer: (scope: { confirm: () => void; cancel: () => void }) => [
+        footer: (scope: { confirm: () => void; cancel: () => void; close: () => void }) => [
           h('button', { 'data-testid': 'ok', onClick: scope.confirm }, 'Set'),
           h('button', { 'data-testid': 'back', onClick: scope.cancel }, 'Back'),
+          h('button', { 'data-testid': 'close', onClick: scope.close }, ''),
         ],
       },
     })
@@ -820,6 +843,8 @@ describe('VTimeInput — the footer slot', () => {
 
     // The component's own two buttons are gone, the slot having taken their place.
     expect(container.querySelector('.v-time-picker-footer')?.textContent).toBe('SetBack')
+    // `close` is VDateInput's name for the same gesture, so one footer serves both fields.
+    expect(getByTestId('close')).not.toBeNull()
 
     // `confirm` is what commits the draft: without it the panel could change nothing.
     const face = container.querySelector('[role="slider"]') as HTMLElement

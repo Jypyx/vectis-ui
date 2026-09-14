@@ -97,7 +97,7 @@ export default {
       },
       slots: {
         footer:
-          "La bande au pied de l'horloge, qui REMPLACE les boutons Annuler et OK au lieu de s'y ajouter. Elle reçoit les deux actions, et c'est ce qui la rend utilisable : l'horloge écrit un brouillon que seul <code>confirm</code> valide, donc un pied à vous sans lui laisserait la valeur inchangeable depuis le panneau. Elle n'est pas rendue en mode liste, qui n'a pas de panneau propre.",
+          "La bande au pied de l'horloge, qui REMPLACE les boutons Annuler et OK au lieu de s'y ajouter. Elle reçoit les deux actions, et c'est ce qui la rend utilisable : l'horloge écrit un brouillon que seul <code>confirm</code> valide, donc un pied à vous sans lui laisserait la valeur inchangeable depuis le panneau. Elle reçoit aussi <code>cancel</code>, et <code>close</code>, la même fonction sous le nom que donne le pied de VDateInput. Elle n'est pas rendue en mode liste, qui n'a pas de panneau propre.",
         valueEnd:
           "Des contrôles à vous à l'intérieur du champ, placés avant ceux que le champ possède : la croix d'effacement et l'icône qui ouvre le panneau. Ces deux-là sont l'affordance propre du composant, ce qui explique l'absence de slot <code>end</code> ici.",
         start:

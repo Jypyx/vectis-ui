@@ -14,10 +14,15 @@
  * decides has to be decidable from numbers alone.
  */
 import { resolveMatcher } from '../../utils/matcher'
+import { memo } from '../../utils/memo'
 import { formatTime } from '../../utils/time'
 
-/** Which values are allowed: the list of them, or a rule answering for one. */
-export type TimeMatcher = number[] | ((value: number) => boolean)
+/**
+ * Which values are ALLOWED: the list of them, or a rule answering for one. The polarity is
+ * the opposite of `DatePickerMatcher`, which names what is excluded — hence a name that
+ * says so rather than a shared suffix.
+ */
+export type TimePickerAllowed = number[] | ((value: number) => boolean)
 
 /**
  * The restrictions in force, resolved ONCE — the matchers already turned into functions,
@@ -41,8 +46,8 @@ export interface TimeLimits {
 export interface TimeLimitProps {
   min?: string
   max?: string
-  allowedHours?: TimeMatcher
-  allowedMinutes?: TimeMatcher
+  allowedHours?: TimePickerAllowed
+  allowedMinutes?: TimePickerAllowed
   minuteStep: number
 }
 
@@ -68,14 +73,28 @@ export function resolveLimits(props: TimeLimitProps): TimeLimits {
 }
 
 /**
- * The minutes an interval leaves reachable inside an hour. A step at or below one minute
- * is every minute, which is what `snapMinute` reads it as.
+ * The interval a `minuteStep` actually walks by. A step at or below one minute is every
+ * minute, which is what `snapMinute` reads it as.
  */
-function minuteGrid(step: number): number[] {
-  const interval = step > 1 ? step : 1
-  const grid: number[] = []
-  for (let minute = 0; minute < 60; minute += interval) grid.push(minute)
-  return grid
+export function minuteInterval(step: number): number {
+  return step > 1 ? step : 1
+}
+
+const minuteGrids = new Map<number, readonly number[]>()
+
+/**
+ * The minutes an interval leaves reachable inside an hour, built once per step. Every
+ * question about an hour walks this list, and the face asks it for each of its 24 hours on
+ * every render, so rebuilding it per call allocated for nothing. The list is shared:
+ * read-only.
+ */
+function minuteGrid(step: number): readonly number[] {
+  return memo(minuteGrids, step, () => {
+    const interval = minuteInterval(step)
+    const grid: number[] = []
+    for (let minute = 0; minute < 60; minute += interval) grid.push(minute)
+    return grid
+  })
 }
 
 /**
@@ -87,6 +106,8 @@ function minuteGrid(step: number): number[] {
  */
 export function isTimeAllowed(hour: number, minute: number, limits: TimeLimits): boolean {
   if (!limits.hour(hour) || !limits.minute(minute)) return false
+  // Without a bound there is nothing to compare, and no string worth formatting.
+  if (!limits.min && !limits.max) return true
   const time = formatTime(hour, minute)
   return (!limits.min || time >= limits.min) && (!limits.max || time <= limits.max)
 }

@@ -12,6 +12,7 @@
  * label never depends on the rendering machine's zone and the server agrees with the browser.
  */
 
+import { memo } from './memo'
 import { digitsOf, pad2 } from './text'
 
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/
@@ -123,10 +124,26 @@ export function isWithin(iso: string, min?: string, max?: string): boolean {
   return true
 }
 
+/**
+ * Whether a date may be chosen: inside the bounds, and not one the matcher excludes. It is
+ * the ONE rule behind both a struck-through day in VDatePicker and a typed date VDateInput
+ * refuses, so the two cannot come to disagree about what "unavailable" means.
+ */
+export function isDateAllowed(
+  iso: string,
+  min: string | undefined,
+  max: string | undefined,
+  excluded: (iso: string) => boolean,
+): boolean {
+  return isWithin(iso, min, max) && !excluded(iso)
+}
+
 /** One square of a month grid. */
 export interface MonthCell {
   /** The day it stands for, as an ISO `YYYY-MM-DD` string. */
   iso: string
+  /** The day of the month, carried so a caller does not parse back what was just formatted. */
+  day: number
   /**
    * Which side of the displayed month this day belongs to when it is not part of it,
    * and `null` when it is.
@@ -146,16 +163,13 @@ export function buildMonthGrid(year: number, month0: number, firstDayOfWeek: num
   // exactly how many days of the previous month the grid has to open with.
   const offset = (first.getDay() - firstDayOfWeek + 7) % 7
   const cells: MonthCell[] = []
-  const start = new Date(year, month0, 1 - offset)
   for (let i = 0; i < 42; i++) {
-    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i)
+    // Built from the 1st rather than stepped from a start date, so the month and year
+    // rolling over at either end is `Date`'s arithmetic and not ours.
+    const d = new Date(year, month0, 1 - offset + i)
     const adjacent =
-      d.getMonth() === month0 && d.getFullYear() === year
-        ? null
-        : compareISO(formatISO(d), formatISO(first)) < 0
-          ? 'prev'
-          : 'next'
-    cells.push({ iso: formatISO(d), adjacent })
+      d.getMonth() === month0 && d.getFullYear() === year ? null : d < first ? 'prev' : 'next'
+    cells.push({ iso: formatISO(d), day: d.getDate(), adjacent })
   }
   return cells
 }
@@ -174,11 +188,7 @@ const firstDayCache = new Map<string, number>()
  * result with its `firstDayOfWeek` prop.
  */
 export function firstDayOfWeekFor(locale: string): number {
-  const cached = firstDayCache.get(locale)
-  if (cached !== undefined) return cached
-  const first = resolveFirstDayOfWeek(locale)
-  firstDayCache.set(locale, first)
-  return first
+  return memo(firstDayCache, locale, () => resolveFirstDayOfWeek(locale))
 }
 
 function resolveFirstDayOfWeek(locale: string): number {
@@ -210,7 +220,7 @@ const MS_DAY = 86_400_000
 export function weekdayNames(
   locale: string,
   firstDayOfWeek: number,
-  weekday: 'narrow' | 'short' | 'long' = 'short',
+  weekday: 'short' | 'long' = 'short',
 ): string[] {
   const fmt = new Intl.DateTimeFormat(locale, { weekday, timeZone: 'UTC' })
   return Array.from({ length: 7 }, (_, i) =>
@@ -218,9 +228,9 @@ export function weekdayNames(
   )
 }
 
-/** The names of the twelve months, in January-to-December order. */
-export function monthNames(locale: string, month: 'long' | 'short' = 'long'): string[] {
-  const fmt = new Intl.DateTimeFormat(locale, { month, timeZone: 'UTC' })
+/** The full names of the twelve months, in January-to-December order. */
+export function monthNames(locale: string): string[] {
+  const fmt = new Intl.DateTimeFormat(locale, { month: 'long', timeZone: 'UTC' })
   return Array.from({ length: 12 }, (_, i) => fmt.format(Date.UTC(2021, i, 1)))
 }
 
@@ -232,7 +242,7 @@ export function monthNames(locale: string, month: 'long' | 'short' = 'long'): st
  * one character and is never cut in half.
  */
 export function monthNamesCompact(locale: string): string[] {
-  return monthNames(locale, 'long').map((n) => {
+  return monthNames(locale).map((n) => {
     const chars = [...n]
     return chars.length <= 4 ? n : chars.slice(0, 3).join('') + '.'
   })
@@ -255,22 +265,16 @@ export function monthNamesCompact(locale: string): string[] {
 const formatters = new Map<string, Intl.DateTimeFormat>()
 
 function formatterFor(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
-  const key = `${locale}|${JSON.stringify(options)}`
-  let formatter = formatters.get(key)
-  if (!formatter) {
-    formatter = new Intl.DateTimeFormat(locale, options)
-    formatters.set(key, formatter)
-  }
-  return formatter
+  return memo(
+    formatters,
+    `${locale}|${JSON.stringify(options)}`,
+    () => new Intl.DateTimeFormat(locale, options),
+  )
 }
 
-/** The name of one month, 0 being January. */
-export function monthName(
-  locale: string,
-  month0: number,
-  month: 'long' | 'short' = 'long',
-): string {
-  return formatterFor(locale, { month, timeZone: 'UTC' }).format(Date.UTC(2021, month0, 1))
+/** The full name of one month, 0 being January. */
+export function monthName(locale: string, month0: number): string {
+  return formatterFor(locale, { month: 'long', timeZone: 'UTC' }).format(Date.UTC(2021, month0, 1))
 }
 
 /**
@@ -278,7 +282,7 @@ export function monthName(
  * what VDateInput shows in its field. An unparsable date yields an empty string
  * rather than a broken one.
  */
-export function formatDisplay(
+export function formatDateDisplay(
   iso: string,
   locale: string,
   options: Intl.DateTimeFormatOptions,
@@ -361,11 +365,7 @@ const maskCache = new Map<string, DateMask>()
  * day/month/year separated by "/".
  */
 export function dateMaskFor(locale: string): DateMask {
-  const cached = maskCache.get(locale)
-  if (cached) return cached
-  const mask = buildDateMask(locale)
-  maskCache.set(locale, mask)
-  return mask
+  return memo(maskCache, locale, () => buildDateMask(locale))
 }
 
 /*
@@ -563,9 +563,10 @@ const placeholderLetterCache = new Map<string, typeof PLACEHOLDER_FALLBACK>()
  * constructor by an order of magnitude (~0.22 ms against ~0.07 for `dateMaskFor`).
  */
 function placeholderLetters(locale: string): typeof PLACEHOLDER_FALLBACK {
-  const cached = placeholderLetterCache.get(locale)
-  if (cached) return cached
+  return memo(placeholderLetterCache, locale, () => buildPlaceholderLetters(locale))
+}
 
+function buildPlaceholderLetters(locale: string): typeof PLACEHOLDER_FALLBACK {
   const letters = { ...PLACEHOLDER_FALLBACK }
   try {
     const names = new Intl.DisplayNames(locale, { type: 'dateTimeField' })
@@ -577,6 +578,5 @@ function placeholderLetters(locale: string): typeof PLACEHOLDER_FALLBACK {
   } catch {
     /* Intl.DisplayNames is unavailable here: keep the Latin letters */
   }
-  placeholderLetterCache.set(locale, letters)
   return letters
 }

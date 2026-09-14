@@ -10,7 +10,7 @@
  * let the two disagree here; it passes the text props explicitly instead. Lifting the limit
  * would change only the body of `useMessages` below, and no component at all.
  */
-import { shallowRef, type ShallowRef } from 'vue'
+import { computed, shallowRef, type ComputedRef, type ShallowRef } from 'vue'
 
 import { isDev } from '../utils/env'
 
@@ -158,4 +158,17 @@ export function useMessages(): ShallowRef<Messages> {
  */
 export function useLocale(): ShallowRef<string> {
   return currentLocale
+}
+
+/**
+ * The locale a component with a `locale` prop of its own actually uses: the prop when it is
+ * given, the locale in force otherwise. Internal, like the two above.
+ *
+ * The prop has no literal default in any of the components that read it, and that is what
+ * this relies on: `undefined` is the "not given" that lets the global locale have its
+ * chance. Every read of the language inside such a component goes through the one computed
+ * returned here, so the two sources are never consulted in a different order somewhere else.
+ */
+export function useResolvedLocale(locale: () => string | undefined): ComputedRef<string> {
+  return computed(() => locale() ?? currentLocale.value)
 }

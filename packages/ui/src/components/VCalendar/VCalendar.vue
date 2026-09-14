@@ -33,14 +33,10 @@ import VTypography from '../VTypography/VTypography.vue'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useTimer } from '../../composables/useTimer'
-import {
-  firstDayOfWeekFor,
-  formatDisplay as formatDate,
-  formatDisplayRange,
-} from '../../utils/date'
+import { firstDayOfWeekFor, formatDateDisplay, formatDisplayRange } from '../../utils/date'
 import { hourCycleFor, minutesOf } from '../../utils/time'
 
-import { useLocale, useMessages } from '../../i18n/state'
+import { useMessages, useResolvedLocale } from '../../i18n/state'
 
 import VCalendarMonth from './VCalendarMonth.vue'
 import VCalendarTimeGrid, { type FocusedCell } from './VCalendarTimeGrid.vue'
@@ -225,15 +221,9 @@ defineSlots<{
 }>()
 
 const m = useMessages()
-const vectisLocale = useLocale()
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
-/*
- * The prop wins, and the design system's global locale is what it falls back to. Every read
- * goes through this one derivation, so the two sources can never be consulted in a
- * different order somewhere else.
- */
-const resolvedLocale = computed(() => props.locale ?? vectisLocale.value)
+const resolvedLocale = useResolvedLocale(() => props.locale)
 const resolvedHourFormat = computed(() => props.format ?? hourCycleFor(resolvedLocale.value))
 const resolvedWeekdays = computed(() =>
   normalizeWeekdays(props.weekdays, firstDayOfWeekFor(resolvedLocale.value)),
@@ -316,12 +306,13 @@ const range = computed(() =>
  */
 const rangeText = computed(() => {
   const locale = resolvedLocale.value
-  if (view.value === 'year') return formatDate(range.value.start, locale, { year: 'numeric' })
+  if (view.value === 'year')
+    return formatDateDisplay(range.value.start, locale, { year: 'numeric' })
   if (view.value === 'month') {
-    return formatDate(range.value.start, locale, { month: 'long', year: 'numeric' })
+    return formatDateDisplay(range.value.start, locale, { month: 'long', year: 'numeric' })
   }
   if (view.value === 'day') {
-    return formatDate(range.value.start, locale, {
+    return formatDateDisplay(range.value.start, locale, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',

@@ -47,7 +47,7 @@ export default {
       },
       events: {
         confirm:
-          "Les minutes ont été arrêtées AU CLAVIER. Relâcher un pointeur est la façon de cesser d'ajuster l'aiguille, pas de confirmer : cet événement ne part donc pas.",
+          "Le lecteur a terminé, avec l'heure telle qu'elle est : les minutes ont été arrêtées AU CLAVIER. Relâcher un pointeur est la façon de cesser d'ajuster l'aiguille, pas de confirmer : cet événement ne part donc pas. Là où <code>select</code> de VDatePicker dit qu'une date a été choisie, celui-ci dit que le choix est fini.",
       },
       slots: {
         footer: "Une bande au pied de l'horloge, la place des actions comme Annuler et OK.",
