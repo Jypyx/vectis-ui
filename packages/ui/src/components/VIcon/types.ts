@@ -1,28 +1,15 @@
+import type { Component } from 'vue'
+
 /**
  * What a resolver is told about the icon being asked for, beyond its name. It is an
  * object rather than a bare boolean so that a future need can be added without
  * changing every resolver's signature.
  */
-
-import type { Component } from 'vue'
-
 export interface IconContext {
   /** Whether the caller asked for the filled form — VIcon's prop, VButton's `iconFilled`. */
   filled: boolean
 }
 
-/**
- * The five ways an icon can be described. Between them they cover every family of
- * icon source in use: raw SVG paths, icon sets shipped as components (Lucide,
- * Untitled UI), sprites and image files, ligature or codepoint fonts (Material,
- * IcoMoon), and fonts driven by a class and a pseudo-element (Font Awesome,
- * Phosphor, Bootstrap Icons).
- *
- * The union carries no discriminating field, because this is what a consumer writes
- * by hand and there would be nothing for them to tag it with. Which shape wins when
- * several are present is settled by VIcon instead, in the order path, component,
- * src, text, class.
- */
 /**
  * One of the icons the design system ships with: its canonical NAME together with the
  * drawing that goes with it, `[outline, filled?]` on the Material Symbols grid — the
@@ -42,6 +29,18 @@ export interface BuiltinIcon {
   paths: readonly [string] | readonly [string, string]
 }
 
+/**
+ * The five ways an icon can be described. Between them they cover every family of
+ * icon source in use: raw SVG paths, icon sets shipped as components (Lucide,
+ * Untitled UI), sprites and image files, ligature or codepoint fonts (Material,
+ * IcoMoon), and fonts driven by a class and a pseudo-element (Font Awesome,
+ * Phosphor, Bootstrap Icons).
+ *
+ * The union carries no discriminating field, because this is what a consumer writes
+ * by hand and there would be nothing for them to tag it with. Which shape wins when
+ * several are present is settled by VIcon instead, in the order path, component,
+ * src, text, class.
+ */
 export type IconRender =
   /** SVG path data. Without a `viewBox` it is read on the Material Symbols grid. */
   | { path: string; viewBox?: string }

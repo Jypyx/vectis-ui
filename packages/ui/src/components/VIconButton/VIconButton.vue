@@ -157,9 +157,6 @@ const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'ne
    *
    * The `square` value writes nothing — it IS the radius VButton already applies, so a
    * consumer overriding --vectis-radius-interactive keeps a single place to change.
-   * The token here is the pill one, the convention for a shape table (VChip, the
-   * VSkeletonLoader shapes), --vectis-radius-full being reserved for the components
-   * that are round by nature.
    */
   .v-icon-button[data-shape='circular'] {
     border-radius: var(--vectis-radius-pill);

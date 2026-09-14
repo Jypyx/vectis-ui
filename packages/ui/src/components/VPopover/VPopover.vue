@@ -150,7 +150,11 @@ const panelId = computed(() => props.id ?? generatedId)
 // without asking us.
 const { shown, syncShown, show, hide } = usePopover(panelEl)
 
-const hasTrigger = computed(() => slots.trigger !== undefined)
+// TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
+// computed would keep its first answer while a slot behind a `v-if` comes and goes.
+function hasTrigger() {
+  return slots.trigger !== undefined
+}
 
 const triggerProps = computed<PopoverTriggerProps>(() => ({
   popovertarget: panelId.value,
@@ -204,7 +208,7 @@ defineExpose({
 </script>
 
 <template>
-  <span class="v-popover" :data-trigger="hasTrigger ? '' : undefined">
+  <span class="v-popover" :data-trigger="hasTrigger() ? '' : undefined">
     <slot name="trigger" :trigger-props="triggerProps" />
     <div
       :id="panelId"

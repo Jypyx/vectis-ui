@@ -192,15 +192,6 @@ const gridEl = ref<HTMLElement | null>(null)
 const rootEl = ref<HTMLElement | null>(null)
 
 /**
- * The id the faded echo of a dragged chip carries.
- *
- * It must DIFFER from the event's own, or the two would collide in the map the day grouping
- * keys by id. The original is recovered from it and handed to the card as `ghostOf`, because
- * the colour of an event is derived from its id — under a fresh one the echo would come out
- * a different colour from the chip it belongs to.
- */
-
-/**
  * The events as the month should currently DRAW them — the model, with the one being carried
  * put wherever it now is. Running the preview through the same grouping as everything else is
  * what makes the day it leaves and the day it arrives at both redraw with no special case.

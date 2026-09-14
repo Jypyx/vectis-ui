@@ -325,7 +325,7 @@ function onKeydown(event: KeyboardEvent) {
           :disabled="prevDisabled"
           @click="goTo(prevTarget)"
         >
-          <VIcon v-bind="iconProps(prevIcon)" />
+          <VIcon v-bind="iconProps(prevIcon)" mirrored />
         </VIconButton>
         <!-- The control is named explicitly even though its label is visible: at
              narrow widths that label is hidden and only the icon remains, and the name
@@ -342,7 +342,7 @@ function onKeydown(event: KeyboardEvent) {
           @click="goTo(prevTarget)"
         >
           <template v-if="controls === 'both'" #start>
-            <VIcon v-bind="iconProps(prevIcon)" />
+            <VIcon v-bind="iconProps(prevIcon)" mirrored />
           </template>
           <span class="v-pagination-control-label">{{ resolvedPrevLabel }}</span>
         </VButton>
@@ -396,7 +396,7 @@ function onKeydown(event: KeyboardEvent) {
           :disabled="nextDisabled"
           @click="goTo(nextTarget)"
         >
-          <VIcon v-bind="iconProps(nextIcon)" />
+          <VIcon v-bind="iconProps(nextIcon)" mirrored />
         </VIconButton>
         <VButton
           v-else
@@ -410,7 +410,7 @@ function onKeydown(event: KeyboardEvent) {
           @click="goTo(nextTarget)"
         >
           <template v-if="controls === 'both'" #end>
-            <VIcon v-bind="iconProps(nextIcon)" />
+            <VIcon v-bind="iconProps(nextIcon)" mirrored />
           </template>
           <span class="v-pagination-control-label">{{ resolvedNextLabel }}</span>
         </VButton>
@@ -483,14 +483,6 @@ function onKeydown(event: KeyboardEvent) {
      cursor. */
   .v-pagination-ellipsis {
     cursor: default;
-  }
-
-  /* A chevron points at a physical direction, which the logical properties do not mirror:
-     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
-     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
-     individual property, so it composes instead of replacing a transform. */
-  .v-pagination-control:dir(rtl) .v-icon {
-    scale: -1 1;
   }
 
   /*

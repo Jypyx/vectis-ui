@@ -4,6 +4,8 @@ import IconBasic from '~/examples/icon/Basic.vue'
 import iconBasicSource from '~/examples/icon/Basic.vue?raw'
 import IconFilled from '~/examples/icon/Filled.vue'
 import iconFilledSource from '~/examples/icon/Filled.vue?raw'
+import IconMirrored from '~/examples/icon/Mirrored.vue'
+import iconMirroredSource from '~/examples/icon/Mirrored.vue?raw'
 import IconRendering from '~/examples/icon/Rendering.vue'
 import iconRenderingSource from '~/examples/icon/Rendering.vue?raw'
 import IconSize from '~/examples/icon/Size.vue'
@@ -37,6 +39,12 @@ useDocsHead('icon')
   <DocsProse keypath="icon.examples.filled.text" />
   <DocsExample :source="iconFilledSource">
     <IconFilled />
+  </DocsExample>
+
+  <h3 id="mirrored">{{ t('icon.examples.mirrored.title') }}</h3>
+  <DocsProse keypath="icon.examples.mirrored.text" />
+  <DocsExample :source="iconMirroredSource">
+    <IconMirrored />
   </DocsExample>
 
   <h3 id="rendering">{{ t('icon.examples.rendering.title') }}</h3>

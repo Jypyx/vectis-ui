@@ -8,7 +8,7 @@
  * same way an accordion item does outside its accordion.
  */
 
-import { computed, inject, useSlots } from 'vue'
+import { computed, inject } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
@@ -43,20 +43,23 @@ const props = withDefaults(defineProps<TabProps>(), {
   disabled: false,
 })
 
-defineSlots<{
+const slots = defineSlots<{
   /** The content of the tab, replacing the `label` prop. */
   default?(): unknown
 }>()
 
-const slots = useSlots()
 const tabs = inject(tabsKey, null)
 
 const selected = computed(() => tabs != null && tabs.value === props.value)
 const tabId = computed(() => tabs?.tabId(props.value))
 const panelId = computed(() => (tabs?.hasPanels ? tabs.panelId(props.value) : undefined))
 
+// TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
+// computed would keep its first answer while a slot behind a `v-if` comes and goes.
 /** An icon and no label at all: the tab becomes a square, like a VIconButton. */
-const iconOnly = computed(() => Boolean(props.iconStart) && !props.label && !slots.default)
+function iconOnly() {
+  return Boolean(props.iconStart) && !props.label && !slots.default
+}
 
 // @keyboard @a11y
 /*
@@ -85,7 +88,7 @@ function onFocus() {
     :size="tabs?.size ?? 'md'"
     :compact="tabs?.compact ?? false"
     :disabled="disabled"
-    :data-icon-only="iconOnly ? '' : undefined"
+    :data-icon-only="iconOnly() ? '' : undefined"
     @click="tabs?.select(value)"
     @focus="onFocus"
   >
@@ -98,7 +101,7 @@ function onFocus() {
     <!-- The label is wrapped in an element of its own so that it can be truncated:
          an ellipsis cannot be applied to the bare text of a flex container, and tabs
          sharing the bar equally have to be able to cut their labels short -->
-    <span v-if="!iconOnly" class="v-tab-label"
+    <span v-if="!iconOnly()" class="v-tab-label"
       ><slot>{{ label }}</slot></span
     >
   </VButton>

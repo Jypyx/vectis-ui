@@ -346,7 +346,7 @@ defineExpose({
         :disabled="atStart"
         @click="scrollStep(-1)"
       >
-        <VIcon v-bind="iconProps(resolvedPrevIcon)" />
+        <VIcon v-bind="iconProps(resolvedPrevIcon)" :mirrored="!isVertical" />
       </VIconButton>
 
       <div
@@ -381,7 +381,7 @@ defineExpose({
         :disabled="atEnd"
         @click="scrollStep(1)"
       >
-        <VIcon v-bind="iconProps(resolvedNextIcon)" />
+        <VIcon v-bind="iconProps(resolvedNextIcon)" :mirrored="!isVertical" />
       </VIconButton>
     </div>
 
@@ -607,14 +607,6 @@ defineExpose({
        to re-centre themselves on the row — which in the segmented variant is taller
        than they are. */
     align-self: center;
-  }
-
-  /* A chevron points at a physical direction, which the logical properties do not mirror:
-     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
-     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
-     individual property, so it composes instead of replacing a transform. */
-  .v-tabs[data-orientation='horizontal']:dir(rtl) .v-tabs-scroll .v-icon {
-    scale: -1 1;
   }
 
   .v-tabs-panels {

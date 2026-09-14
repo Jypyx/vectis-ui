@@ -11,7 +11,7 @@
  * handing the two colours a consumer may choose to the stylesheet as
  * `--custom-color` and `--badge-ring-color`.
  */
-import { computed, useSlots } from 'vue'
+import { computed } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -91,7 +91,7 @@ const props = withDefaults(defineProps<BadgeProps>(), {
   bordered: false,
 })
 
-defineSlots<{
+const slots = defineSlots<{
   /**
    * The element the badge belongs to. Without it the badge stands on its own; with
    * it, the badge is placed beside the element, or in its corner under `overlay`.
@@ -99,8 +99,11 @@ defineSlots<{
   default?(): unknown
 }>()
 
-const slots = useSlots()
-const hasTarget = computed(() => slots.default !== undefined)
+// TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
+// computed would keep its first answer while a slot behind a `v-if` comes and goes.
+function hasTarget() {
+  return slots.default !== undefined
+}
 
 /** The counter as it is actually displayed: anything past 99 becomes "99+". */
 const displayCount = computed(() =>
@@ -127,20 +130,20 @@ const badgeAttrs = computed(() => ({
 
 <template>
   <span
-    v-if="hasTarget"
+    v-if="hasTarget()"
     class="v-badge-host"
     :data-overlay="overlay ? '' : undefined"
     :data-overlay-position="overlayPosition"
   >
     <slot />
-    <span class="v-badge" v-bind="badgeAttrs">
+    <span class="v-badge v-tone" v-bind="badgeAttrs">
       <template v-if="!dot">
         <VIcon v-if="icon" v-bind="iconProps(icon)" />
         <template v-else>{{ displayCount }}</template>
       </template>
     </span>
   </span>
-  <span v-else class="v-badge" v-bind="badgeAttrs">
+  <span v-else class="v-badge v-tone" v-bind="badgeAttrs">
     <template v-if="!dot">
       <VIcon v-if="icon" v-bind="iconProps(icon)" />
       <template v-else>{{ displayCount }}</template>
@@ -164,6 +167,11 @@ const badgeAttrs = computed(() => ({
        component can make since CSS cannot read what its parent paints. The `ringColor`
        prop overrides it inline for a badge sitting on anything else. */
     --badge-ring-color: var(--vectis-color-surface);
+    /* The pill is the tone's solid pair, read from the shared table (`.v-tone`, set in the
+       template). Its neutral is the text/surface inversion, which is what lets the
+       fallback text and contrast-color() agree in both themes. */
+    --badge-bg: var(--tone-bg-solid);
+    --badge-text-fallback: var(--tone-text-solid);
 
     display: inline-flex;
     align-items: center;
@@ -179,7 +187,7 @@ const badgeAttrs = computed(() => ({
     font-size: var(--vectis-text-caption-size);
     font-weight: var(--vectis-text-control-weight);
     line-height: var(--vectis-text-control-leading);
-    color: var(--tone-text-fallback);
+    color: var(--badge-text-fallback);
   }
 
   @supports (color: contrast-color(red)) {
@@ -188,40 +196,11 @@ const badgeAttrs = computed(() => ({
     }
   }
 
-  .v-badge[data-tone='accent'] {
-    --badge-bg: var(--vectis-color-accent);
-    --tone-text-fallback: var(--vectis-color-text-on-accent);
-  }
-
-  .v-badge[data-tone='danger'] {
-    --badge-bg: var(--vectis-color-danger);
-    --tone-text-fallback: var(--vectis-color-text-on-accent);
-  }
-
-  .v-badge[data-tone='success'] {
-    --badge-bg: var(--vectis-color-success);
-    --tone-text-fallback: var(--vectis-color-text-on-accent);
-  }
-
-  .v-badge[data-tone='warning'] {
-    --badge-bg: var(--vectis-color-warning);
-    --tone-text-fallback: var(--vectis-color-text-on-warning);
-  }
-
-  /* The neutral tone inverts text and surface rather than using a grey. A grey of
-     the text-muted kind resolves to neutral-400 in the dark theme, where the white
-     fallback would no longer contrast with it; with the inversion, the fallback and
-     contrast-color() agree in both themes. */
-  .v-badge[data-tone='neutral'] {
-    --badge-bg: var(--vectis-color-text);
-    --tone-text-fallback: var(--vectis-color-surface);
-  }
-
-  /* Placed after the tones on purpose: the specificity is the same, so it is the
-     order that lets a custom colour override the tone it replaces. */
+  /* A custom colour replaces the tone: at (0,2,0) it beats the base rule's mapping
+     whatever the order the two are written in. */
   .v-badge[data-custom] {
     --badge-bg: var(--custom-color);
-    --tone-text-fallback: var(--vectis-color-text-on-accent);
+    --badge-text-fallback: var(--vectis-color-text-on-accent);
   }
 
   .v-badge[data-icon-only] {

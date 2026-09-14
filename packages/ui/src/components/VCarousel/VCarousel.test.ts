@@ -187,6 +187,17 @@ describe('VCarousel', () => {
     })
   })
 
+  describe('controls', () => {
+    it('mirrors the arrows for RTL in horizontal only, the block axis never flipping', () => {
+      const mirrorOf = (container: Element) =>
+        [...container.querySelectorAll('.v-carousel-control .v-icon')].map((icon) =>
+          icon.hasAttribute('data-mirror'),
+        )
+      expect(mirrorOf(mount().container)).toEqual([true, true])
+      expect(mirrorOf(mount({ attrs: 'orientation="vertical"' }).container)).toEqual([false, false])
+    })
+  })
+
   describe('v-model', () => {
     it('an indicator selects its slide', async () => {
       const { container, model } = mount()

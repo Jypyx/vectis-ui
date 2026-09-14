@@ -214,6 +214,36 @@ export const Filled: Story = {
 }
 
 /**
+ * `mirrored` flips a directional glyph under a right-to-left direction and nowhere else.
+ * The rule reads `:dir(rtl)`, which jsdom does not evaluate, so the play function is the
+ * only guard on the one declaration every arrow of the design system relies on.
+ */
+export const Mirrored: Story = {
+  render: () => ({
+    components: { VIcon },
+    setup: () => ({ chevron: builtinIcons.chevron_left }),
+    template: `
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div v-for="dir in ['ltr', 'rtl']" :key="dir" :dir="dir" :data-testid="dir" style="display: flex; gap: 16px; align-items: center">
+          <VIcon :name="chevron" :size="24" mirrored />
+          <VIcon :name="chevron" :size="24" />
+          <code>{{ dir }}</code>
+        </div>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const scales = (dir: string) =>
+      [...canvas.getByTestId(dir).querySelectorAll('.v-icon')].map(
+        (icon) => getComputedStyle(icon).scale,
+      )
+    await expect(scales('ltr')).toEqual(['none', 'none'])
+    await expect(scales('rtl')).toEqual(['-1 1', 'none'])
+  },
+}
+
+/**
  * The DS invariant: whatever the SOURCE of the icon, its size stays that of the
  * context (here the VButton's — lg → 24px, xs → 16px). Measured for real: jsdom
  * does no layout, so this check exists only here.

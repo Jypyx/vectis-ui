@@ -86,7 +86,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     border: max(1px, calc(var(--spinner-ring) / 10)) solid
       color-mix(in oklab, currentcolor, transparent 75%);
     border-block-start-color: currentcolor;
-    border-radius: var(--vectis-radius-full);
+    border-radius: var(--vectis-radius-pill);
     animation: v-spin var(--vectis-duration-1000) linear infinite;
   }
 

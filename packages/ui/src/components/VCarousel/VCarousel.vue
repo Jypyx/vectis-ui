@@ -407,6 +407,26 @@ const onScrollEnd = () => {
 let readBack = false
 
 /**
+ * How far slide `index`'s start edge sits from the port's, right now. `undefined` when
+ * the slide is gone, which the deferred correction below has to ask again about: it runs
+ * a frame later, and a consumer is free to have changed the slides in between.
+ */
+function deltaTo(port: HTMLElement, index: number) {
+  const slide = port.querySelector<HTMLElement>(`[data-carousel-index='${index}']`)
+  if (!slide) return
+  const target = slide.getBoundingClientRect()
+  // The VIEWPORT's rect, not the stage's: every DOM read in this component is
+  // viewport-scoped, and the `outside` gutter is padding on the root, so nothing here
+  // has to know about it.
+  const origin = port.getBoundingClientRect()
+  return { left: target.left - origin.left, top: target.top - origin.top }
+}
+
+/** Under a pixel on both axes is the scroller already being where it was asked to go. */
+const arrived = (delta: { left: number; top: number }) =>
+  Math.abs(delta.left) < 1 && Math.abs(delta.top) < 1
+
+/**
  * Writes the DOM from the model. The deltas come from the RECTS, hence physical:
  * LTR, RTL and vertical all fall out with no direction test (the VTabs
  * `watch(model)` idiom); `scrollBy?.()` is optional-called because jsdom implements
@@ -432,26 +452,6 @@ let readBack = false
  * Writing the clamped offset by hand would mean `scrollTo` and a signed `scrollLeft`,
  * the one thing the rect delta exists to avoid.
  */
-/**
- * How far slide `index`'s start edge sits from the port's, right now. `undefined` when
- * the slide is gone, which the deferred correction below has to ask again about: it runs
- * a frame later, and a consumer is free to have changed the slides in between.
- */
-function deltaTo(port: HTMLElement, index: number) {
-  const slide = port.querySelector<HTMLElement>(`[data-carousel-index='${index}']`)
-  if (!slide) return
-  const target = slide.getBoundingClientRect()
-  // The VIEWPORT's rect, not the stage's: every DOM read in this component is
-  // viewport-scoped, and the `outside` gutter is padding on the root, so nothing here
-  // has to know about it.
-  const origin = port.getBoundingClientRect()
-  return { left: target.left - origin.left, top: target.top - origin.top }
-}
-
-/** Under a pixel on both axes is the scroller already being where it was asked to go. */
-const arrived = (delta: { left: number; top: number }) =>
-  Math.abs(delta.left) < 1 && Math.abs(delta.top) < 1
-
 function scrollToIndex(index: number, from = index) {
   const port = viewportEl.value
   if (!port) return
@@ -951,7 +951,7 @@ if (isDev) {
             :disabled="atStart"
             @click="previous"
           >
-            <VIcon v-bind="iconProps(resolvedPrevIcon)" />
+            <VIcon v-bind="iconProps(resolvedPrevIcon)" :mirrored="!isVertical" />
           </VIconButton>
           <VIconButton
             class="v-carousel-control"
@@ -963,7 +963,7 @@ if (isDev) {
             :disabled="atEnd"
             @click="next"
           >
-            <VIcon v-bind="iconProps(resolvedNextIcon)" />
+            <VIcon v-bind="iconProps(resolvedNextIcon)" :mirrored="!isVertical" />
           </VIconButton>
         </div>
       </slot>
@@ -1463,16 +1463,6 @@ if (isDev) {
 
   .v-carousel[data-orientation='vertical'] .v-carousel-controls {
     flex-direction: column;
-  }
-
-  /*
-   * An arrow points at a physical direction, so the icon flips in RTL (the VTabs and
-   * VPagination rule, word for word — what they share is the rule, not the glyph).
-   * Horizontal only: the block axis does not mirror, so the vertical arrows are
-   * already right.
-   */
-  .v-carousel[data-orientation='horizontal']:dir(rtl) .v-carousel-control .v-icon {
-    scale: -1 1;
   }
 
   /*

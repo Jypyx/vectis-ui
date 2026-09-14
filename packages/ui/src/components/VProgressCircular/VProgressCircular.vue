@@ -91,7 +91,7 @@ const {
 
 <template>
   <span
-    class="v-progress-circular"
+    class="v-progress-circular v-tone"
     role="progressbar"
     :aria-label="m.progress.label"
     :data-tone="tone"
@@ -127,6 +127,11 @@ const {
   .v-progress-circular {
     --progress-diameter: var(--vectis-control-size-progress-circular-diameter);
     --progress-thickness: var(--vectis-control-size-progress-circular-thickness);
+    /* Arc and track are the tone's solid and soft colours, read from the shared table
+       (`.v-tone`, set in the template). No text colour is taken from it: the figure sits
+       in the hole of the ring, against the page, in the ordinary text colour. */
+    --progress-fill: var(--tone-bg-solid);
+    --progress-track: var(--tone-bg-soft);
     display: inline-grid;
     inline-size: var(--progress-diameter);
     block-size: var(--progress-diameter);
@@ -186,37 +191,8 @@ const {
     stroke-linecap: butt;
   }
 
-  /* Unlike the linear bar, no tone declares a text colour: the figure sits in the hole
-     of the ring, against the page itself, so it simply takes the ordinary text colour. */
-  .v-progress-circular[data-tone='accent'] {
-    --progress-fill: var(--vectis-color-accent);
-    --progress-track: var(--vectis-color-accent-surface);
-  }
-
-  .v-progress-circular[data-tone='success'] {
-    --progress-fill: var(--vectis-color-success);
-    --progress-track: var(--vectis-color-success-surface);
-  }
-
-  .v-progress-circular[data-tone='danger'] {
-    --progress-fill: var(--vectis-color-danger);
-    --progress-track: var(--vectis-color-danger-surface);
-  }
-
-  .v-progress-circular[data-tone='warning'] {
-    --progress-fill: var(--vectis-color-warning);
-    --progress-track: var(--vectis-color-warning-surface);
-  }
-
-  /* The neutral tone inverts text and surface rather than using a mid grey, which would
-     be unreadable in one theme or the other. */
-  .v-progress-circular[data-tone='neutral'] {
-    --progress-fill: var(--vectis-color-text);
-    --progress-track: var(--vectis-color-surface-muted);
-  }
-
-  /* Placed after the tones on purpose: the specificity is the same, so it is the order
-     that lets a custom colour override the tone it replaces. */
+  /* A custom colour replaces the tone: at (0,2,0) it beats the base rule's mapping
+     whatever the order the two are written in. */
   .v-progress-circular[data-custom] {
     --progress-fill: var(--custom-color);
     --progress-track: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);

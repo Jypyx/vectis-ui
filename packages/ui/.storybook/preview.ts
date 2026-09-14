@@ -62,7 +62,7 @@ const preview: Preview = {
        * fill, the dial's selected numeral over the hand's tip dot. axe reads the track
        * (resp. the panel) underneath and reports ~1.1:1 where the rendering is 6.5:1.
        * Both are aria-hidden duplicates whose colour is derived FROM the overlay they
-       * sit on (contrast-color() / --tone-text-fallback), so the contrast is guaranteed
+       * sit on (contrast-color() / --progress-text-fallback), so the contrast is guaranteed
        * by construction, not by this rule.
        */
       context: {

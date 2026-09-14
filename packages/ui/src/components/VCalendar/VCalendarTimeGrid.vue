@@ -169,16 +169,6 @@ const hours = computed(() => {
 const DRAFT_ID = '__vectis-calendar-draft__'
 
 /**
- * The id the faded echo of a dragged event carries.
- *
- * It has to DIFFER from the event's own, or the two would collide in every map the layout
- * keys by id and only one of them would ever be drawn. The original is recovered from it —
- * and handed to the card as `ghostOf` — because the colour of an event is derived from its
- * id, so an echo under a fresh id would come out a different colour from the card it belongs
- * to. `hueOf` reads a number and its digits as the same event, so the string form is enough.
- */
-
-/**
  * A gesture under way, whether it came from a pointer or from the keyboard.
  *
  * `move-days` is the whole-day one: an all-day bar dragged along the band above the grid. It

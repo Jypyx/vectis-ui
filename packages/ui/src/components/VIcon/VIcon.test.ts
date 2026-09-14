@@ -130,6 +130,14 @@ describe('VIcon', () => {
     expect(iconContour.hasAttribute('data-filled')).toBe(false)
   })
 
+  it('mirrored: sets data-mirror on the root, absent by default', () => {
+    const mirrored = render(VIcon, { props: { name: 'chevron_left', mirrored: true } })
+    expect(mirrored.container.querySelector('.v-icon')?.hasAttribute('data-mirror')).toBe(true)
+
+    const plain = render(VIcon, { props: { name: 'chevron_left' } })
+    expect(plain.container.querySelector('.v-icon')?.hasAttribute('data-mirror')).toBe(false)
+  })
+
   it('numeric size prop: sets --vectis-icon-size as an inline style, nothing otherwise', () => {
     const explicite = render(VIcon, { props: { name: 'add', size: 32 } })
     const iconExplicite = explicite.container.querySelector('.v-icon') as HTMLElement

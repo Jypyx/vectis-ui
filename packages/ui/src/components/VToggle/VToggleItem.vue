@@ -13,7 +13,7 @@
  * Used outside a VToggle it still renders perfectly well, simply never selected, the
  * same way a tab does outside its row.
  */
-import { computed, inject, useSlots } from 'vue'
+import { computed, inject } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
@@ -52,18 +52,21 @@ const props = withDefaults(defineProps<ToggleItemProps>(), {
   disabled: false,
 })
 
-defineSlots<{
+const slots = defineSlots<{
   /** The content of the item, replacing the `label` prop. */
   default?(): unknown
 }>()
 
-const slots = useSlots()
 const toggle = inject(toggleKey, null)
 
 const selected = computed(() => toggle != null && toggle.isSelected(props.value))
 
+// TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
+// computed would keep its first answer while a slot behind a `v-if` comes and goes.
 /** An icon and no label at all: the item becomes a square, like a VIconButton. */
-const iconOnly = computed(() => Boolean(props.iconStart) && !props.label && !slots.default)
+function iconOnly() {
+  return Boolean(props.iconStart) && !props.label && !slots.default
+}
 </script>
 
 <template>
@@ -80,7 +83,7 @@ const iconOnly = computed(() => Boolean(props.iconStart) && !props.label && !slo
     :variant="selected ? (toggle?.selectedVariant ?? 'solid') : (toggle?.itemVariant ?? 'ghost')"
     :tone="selected ? (toggle?.tone ?? 'accent') : 'neutral'"
     :disabled="disabled"
-    :data-icon-only="iconOnly ? '' : undefined"
+    :data-icon-only="iconOnly() ? '' : undefined"
     @click="toggle?.select(value)"
   >
     <template v-if="iconStart" #start>
@@ -92,7 +95,7 @@ const iconOnly = computed(() => Boolean(props.iconStart) && !props.label && !slo
     <template v-if="iconEnd" #end>
       <VIcon v-bind="iconProps(iconEnd)" />
     </template>
-    <slot v-if="!iconOnly">{{ label }}</slot>
+    <slot v-if="!iconOnly()">{{ label }}</slot>
   </VButton>
 </template>
 

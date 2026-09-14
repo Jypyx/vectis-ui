@@ -217,7 +217,7 @@ const passedAttrs = computed(() => {
     border: none;
     background: var(--avatar-bg);
     color: var(--avatar-text);
-    border-radius: var(--vectis-radius-full);
+    border-radius: var(--vectis-radius-pill);
     font-family: var(--vectis-text-family);
     font-size: var(--control-font-size);
     font-weight: var(--vectis-font-weight-semibold);

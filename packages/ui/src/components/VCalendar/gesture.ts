@@ -28,7 +28,17 @@ import type { CalendarEventId } from './types'
  */
 const GHOST_PREFIX = '__vectis-calendar-ghost__'
 
+/**
+ * The id the ghost of a dragged event carries. It has to DIFFER from the event's own, or the
+ * two would collide in every map the layout keys by id and only one would ever be drawn.
+ */
 export const ghostIdOf = (id: CalendarEventId) => `${GHOST_PREFIX}${id}`
+/**
+ * The dragged event's own id, read back off its ghost's. It is what the card is handed as
+ * `ghostOf`: an event's colour is derived from its id, so a ghost coloured from its own
+ * would not match the card it belongs to. `hueOf` reads a number and its digits as the same
+ * event, so the string form returned here is enough.
+ */
 export const originalIdOf = (id: CalendarEventId) => String(id).slice(GHOST_PREFIX.length)
 export const isGhostId = (id: CalendarEventId) => String(id).startsWith(GHOST_PREFIX)
 

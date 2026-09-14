@@ -11,6 +11,10 @@ export default {
       title: 'Pleine',
       text: "<code>filled</code> demande la forme pleine de l'icône, ce qui sert à marquer un état. Une icône de la bibliothèque sans dessin plein rend celui qu'elle a toujours eu.",
     },
+    mirrored: {
+      title: 'En miroir',
+      text: "<code>mirrored</code> retourne l'icône dans un contexte de droite à gauche, pour un glyphe qui désigne une direction physique : un chevron « précédent » pointe à gauche en français et à droite en arabe. La direction est celle que le navigateur a calculée, donc un <code>dir</code> sur n'importe quel ancêtre suffit. La plupart des icônes disent la même chose dans les deux sens et ne se retournent pas.",
+    },
     rendering: {
       title: "D'où vient le dessin",
       text: 'Une icône peut venir de cinq endroits, interrogés dans un ordre fixe, et le premier qui répond est celui qui est dessiné :',
@@ -38,6 +42,8 @@ export default {
           "Ce que l'icône signifie, pour les lecteurs d'écran. L'omettre marque l'icône comme décorative et la masque à ces derniers, ce qui est juste dès que le texte alentour dit déjà ce qu'elle dit.",
         filled:
           "Dessine la version pleine de l'icône. Les icônes intégrées l'honorent partout où le remplissage change réellement le dessin, et une police à ligatures le fait toujours. Cela ne signifie rien pour une image ou un SVG en ligne, dont la forme est fixe.",
+        mirrored:
+          "Retourne l'icône horizontalement dans un contexte de droite à gauche, pour un glyphe qui désigne une direction physique : un chevron « précédent » pointe à gauche en français et à droite en arabe. Désactivé par défaut, la plupart des icônes disant la même chose dans les deux sens. La direction est celle que le navigateur a calculée, donc le <code>dir</code> d'un ancêtre suffit.",
       },
       slots: {
         default:

@@ -118,7 +118,7 @@ const visibleItems = computed(() =>
     <ol class="v-breadcrumb-list">
       <template v-for="(item, index) in visibleItems" :key="item.href">
         <li v-if="truncated && index === 1" class="v-breadcrumb-item v-breadcrumb-ellipsis">
-          <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separator)" />
+          <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separator)" mirrored />
           <VMenu>
             <template #trigger="{ triggerProps }">
               <VIconButton size="sm" :label="resolvedEllipsisLabel" v-bind="triggerProps">
@@ -135,7 +135,7 @@ const visibleItems = computed(() =>
           </VMenu>
         </li>
         <li class="v-breadcrumb-item">
-          <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separator)" />
+          <VIcon class="v-breadcrumb-separator" v-bind="iconProps(separator)" mirrored />
           <a
             class="v-breadcrumb-link"
             :href="item.href"
@@ -191,21 +191,17 @@ const visibleItems = computed(() =>
     color: var(--vectis-color-text-subtle);
   }
 
-  /* A chevron points at a physical direction, which the logical properties do not mirror:
-     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
-     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
-     individual property, so it composes instead of replacing a transform. */
-  .v-breadcrumb-separator:dir(rtl) {
-    scale: -1 1;
-  }
-
+  /* The corner is only ever seen on the focus ring, which follows it. It is the control
+     radius capped at half a line, the row recipe of VSideNavigationItem with the line
+     standing in for a control height the link does not have: a label that wraps keeps
+     the corner of a one-line one under a pill override. */
   .v-breadcrumb-link {
     display: inline-flex;
     align-items: center;
     gap: var(--vectis-space-1);
     color: var(--vectis-color-text-muted);
     text-decoration: none;
-    border-radius: var(--vectis-radius-xs);
+    border-radius: min(var(--vectis-radius-interactive), 0.5lh);
     transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 

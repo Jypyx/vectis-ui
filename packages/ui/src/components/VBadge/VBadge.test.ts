@@ -1,5 +1,6 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
+import { defineComponent, nextTick, ref } from 'vue'
 
 import VBadge from './VBadge.vue'
 
@@ -11,6 +12,30 @@ describe('VBadge', () => {
     expect(container.querySelector('.v-badge-host')).toBeNull()
     expect(root.getAttribute('data-tone')).toBe('accent')
     expect(getByText('3')).toBeTruthy()
+  })
+
+  it('follows a target slot that appears and disappears with no prop changing', async () => {
+    const show = ref(false)
+    const Harness = defineComponent({
+      components: { VBadge },
+      setup: () => ({ show }),
+      template: `<VBadge :count="3"><template v-if="show" #default><span>Inbox</span></template></VBadge>`,
+    })
+    const { container } = render(Harness)
+    expect(container.querySelector('.v-badge-host')).toBeNull()
+
+    show.value = true
+    await nextTick()
+    expect(container.querySelector('.v-badge-host')).not.toBeNull()
+
+    show.value = false
+    await nextTick()
+    expect(container.querySelector('.v-badge-host')).toBeNull()
+  })
+
+  it('carries .v-tone beside data-tone, the shared table being what paints it', () => {
+    const { container } = render(VBadge, { props: { count: 3 } })
+    expect(container.querySelector('.v-badge')!.classList.contains('v-tone')).toBe(true)
   })
 
   it('an explicit tone is set as data-tone', () => {

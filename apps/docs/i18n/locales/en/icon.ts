@@ -11,6 +11,10 @@ export default {
       title: 'Filled',
       text: '<code>filled</code> asks for the filled form of the icon, which is what marks a state. A library icon with no filled drawing renders the one it always had.',
     },
+    mirrored: {
+      title: 'Mirrored',
+      text: '<code>mirrored</code> flips the icon in a right-to-left context, for a glyph that points at a physical direction: a "previous" chevron points left in English and right in Arabic. The direction is the one the browser computed, so a <code>dir</code> on any ancestor is enough. Most icons mean the same thing both ways and take no flip.',
+    },
     rendering: {
       title: 'Where the drawing comes from',
       text: 'An icon can come from five places, asked in a fixed order, and the first that answers is the one drawn:',
@@ -38,6 +42,8 @@ export default {
           'What the icon means, for screen readers. Leaving it out marks the icon as decorative and hides it from them, which is right whenever the surrounding text already says what it says.',
         filled:
           'Draws the filled version of the icon. The built-in icons honour it wherever filling actually changes the drawing, and a ligature font always does. It means nothing for an image or an inline SVG, whose shape is fixed.',
+        mirrored:
+          'Flips the icon horizontally in a right-to-left context, for a glyph that points at a physical direction: a "previous" chevron points left in English and right in Arabic. Off by default, since most icons mean the same thing in both directions. The direction is the one the browser computed, so a <code>dir</code> on any ancestor is enough.',
       },
       slots: {
         default:

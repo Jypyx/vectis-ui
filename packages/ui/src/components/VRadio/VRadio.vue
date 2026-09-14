@@ -110,7 +110,7 @@ defineExpose({
     flex: none;
     background: transparent;
     border: var(--vectis-control-border-width) solid var(--vectis-color-border-strong);
-    border-radius: var(--vectis-radius-full);
+    border-radius: var(--vectis-radius-pill);
     color: var(--vectis-color-text-on-accent);
     transition:
       background-color var(--vectis-duration-fast) var(--vectis-ease-default),
@@ -121,7 +121,7 @@ defineExpose({
     content: '';
     width: var(--vectis-control-size-check-dot);
     height: var(--vectis-control-size-check-dot);
-    border-radius: var(--vectis-radius-full);
+    border-radius: var(--vectis-radius-pill);
     background: currentcolor;
     opacity: 0;
     transition: opacity var(--vectis-duration-fast) var(--vectis-ease-default);

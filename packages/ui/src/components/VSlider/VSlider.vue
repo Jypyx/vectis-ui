@@ -488,7 +488,7 @@ defineExpose({
     inset-block: 0;
     margin-block: auto;
     block-size: var(--slider-track);
-    border-radius: var(--vectis-radius-full);
+    border-radius: var(--vectis-radius-pill);
     background: var(--vectis-color-border);
     overflow: hidden;
   }
@@ -519,7 +519,7 @@ defineExpose({
     );
     inline-size: var(--slider-tick);
     block-size: var(--slider-tick);
-    border-radius: var(--vectis-radius-full);
+    border-radius: var(--vectis-radius-pill);
     background: var(--vectis-color-border-strong);
   }
 
@@ -556,7 +556,7 @@ defineExpose({
     pointer-events: auto;
     width: var(--slider-thumb);
     height: var(--slider-thumb);
-    border-radius: var(--vectis-radius-full);
+    border-radius: var(--vectis-radius-pill);
     background: var(--vectis-color-surface);
     border: var(--vectis-control-border-width) solid var(--vectis-color-accent);
     box-shadow: var(--vectis-shadow-xs);
@@ -568,7 +568,7 @@ defineExpose({
     pointer-events: auto;
     width: var(--slider-thumb);
     height: var(--slider-thumb);
-    border-radius: var(--vectis-radius-full);
+    border-radius: var(--vectis-radius-pill);
     background: var(--vectis-color-surface);
     border: var(--vectis-control-border-width) solid var(--vectis-color-accent);
     box-shadow: var(--vectis-shadow-xs);
@@ -636,7 +636,8 @@ defineExpose({
     color: var(--vectis-color-text-on-inverse);
     font-size: var(--vectis-text-caption-size);
     line-height: var(--vectis-text-caption-leading);
-    border-radius: var(--vectis-radius-sm);
+    /* VTooltip's bubble corner, so the two tooltips of the design system stay one shape. */
+    border-radius: min(var(--vectis-radius-interactive), calc(0.5lh + var(--vectis-space-1)));
     box-shadow: var(--vectis-shadow-sm);
     white-space: nowrap;
   }

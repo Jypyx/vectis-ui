@@ -510,19 +510,16 @@ defineExpose({
       <div class="v-calendar-toolbar">
         <div class="v-calendar-nav">
           <VIconButton
-            :icon="chevronLeftIcon"
             :label="stepLabels.previous"
             size="sm"
             :disabled="disabled"
             @click="step(-1)"
-          />
-          <VIconButton
-            :icon="chevronRightIcon"
-            :label="stepLabels.next"
-            size="sm"
-            :disabled="disabled"
-            @click="step(1)"
-          />
+          >
+            <VIcon :name="chevronLeftIcon" mirrored />
+          </VIconButton>
+          <VIconButton :label="stepLabels.next" size="sm" :disabled="disabled" @click="step(1)">
+            <VIcon :name="chevronRightIcon" mirrored />
+          </VIconButton>
         </div>
 
         <VButton variant="outline" tone="neutral" size="sm" :disabled="disabled" @click="today_">
@@ -716,14 +713,6 @@ defineExpose({
     display: flex;
     align-items: center;
     gap: var(--vectis-space-1);
-  }
-
-  /* A chevron points at a physical direction, which the logical properties do not mirror:
-     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
-     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
-     individual property, so it composes instead of replacing a transform. */
-  .v-calendar-nav:dir(rtl) .v-icon {
-    scale: -1 1;
   }
 
   .v-calendar-title {

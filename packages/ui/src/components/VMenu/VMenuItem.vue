@@ -15,7 +15,7 @@
  * long enough to show it was meant. A click already opens it natively.
  */
 
-import { computed, inject, ref, useId, useSlots } from 'vue'
+import { inject, ref, useId } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -91,7 +91,7 @@ const emit = defineEmits<{
   select: []
 }>()
 
-defineSlots<{
+const slots = defineSlots<{
   /** The label, replacing the `label` prop. */
   default?(): unknown
   /** The second line, replacing the `sublabel` prop. */
@@ -107,16 +107,19 @@ defineSlots<{
   submenu?(): unknown
 }>()
 
-const slots = useSlots()
-const hasSubmenu = computed(() => !!slots.submenu)
-const tag = computed(() =>
-  !hasSubmenu.value && props.href !== undefined ? ('a' as const) : ('button' as const),
-)
+// TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
+// computed would keep its first answer while a slot behind a `v-if` comes and goes.
+function hasSubmenu() {
+  return !!slots.submenu
+}
+function tag() {
+  return !hasSubmenu() && props.href !== undefined ? ('a' as const) : ('button' as const)
+}
 
 const menu = inject(menuKey, null)
 
 function onClick() {
-  if (props.disabled || hasSubmenu.value) return
+  if (props.disabled || hasSubmenu()) return
   emit('select')
   menu?.closeAll()
 }
@@ -134,7 +137,7 @@ const itemEl = ref<HTMLElement | null>(null)
 // Opening a submenu from the keyboard, which the browser's own toggle does not cover
 // — it only reacts to a click.
 function onKeydown(event: KeyboardEvent) {
-  if (!hasSubmenu.value || props.disabled) return
+  if (!hasSubmenu() || props.disabled) return
   if (!['ArrowRight', 'Enter', ' '].includes(event.key)) return
   // The button's native activation has to be stopped: it would fire a click of its
   // own, and that click would toggle the panel shut again right behind the opening
@@ -156,7 +159,7 @@ function onPointerEnter() {
   // Hovering also moves the focus, so that the mouse and the keyboard never highlight
   // two different items at once — in a menu there is only ever one current item.
   itemEl.value?.focus({ preventScroll: true })
-  if (!hasSubmenu.value) return
+  if (!hasSubmenu()) return
   hoverTimer.start(() => subPanel.value?.show(itemEl.value ?? undefined), SUBMENU_HOVER_DELAY)
 }
 
@@ -164,7 +167,7 @@ function onPointerEnter() {
 // a pointer drifting off the item must not close a submenu a keyboard user is
 // standing inside.
 function onPointerLeave() {
-  if (!hasSubmenu.value) return
+  if (!hasSubmenu()) return
   hoverTimer.start(() => {
     if (subPanel.value?.el?.contains(document.activeElement)) return
     subPanel.value?.close()
@@ -174,23 +177,23 @@ function onPointerLeave() {
 
 <template>
   <component
-    :is="tag"
+    :is="tag()"
     ref="itemEl"
     v-bind="$attrs"
     role="menuitem"
     tabindex="-1"
     class="v-menu-item"
-    :type="tag === 'button' ? 'button' : undefined"
-    :disabled="tag === 'button' ? disabled : undefined"
-    :href="tag === 'a' && !disabled ? href : undefined"
-    :aria-disabled="tag === 'a' && disabled ? 'true' : undefined"
+    :type="tag() === 'button' ? 'button' : undefined"
+    :disabled="tag() === 'button' ? disabled : undefined"
+    :href="tag() === 'a' && !disabled ? href : undefined"
+    :aria-disabled="tag() === 'a' && disabled ? 'true' : undefined"
     :data-tone="tone"
     :data-selected="selected ? '' : undefined"
     :aria-current="selected ? 'true' : undefined"
-    :aria-haspopup="hasSubmenu ? 'menu' : undefined"
-    :aria-expanded="hasSubmenu ? subOpen : undefined"
-    :aria-controls="hasSubmenu ? subId : undefined"
-    :popovertarget="hasSubmenu ? subId : undefined"
+    :aria-haspopup="hasSubmenu() ? 'menu' : undefined"
+    :aria-expanded="hasSubmenu() ? subOpen : undefined"
+    :aria-controls="hasSubmenu() ? subId : undefined"
+    :popovertarget="hasSubmenu() ? subId : undefined"
     @click="onClick"
     @keydown="onKeydown"
     @pointerenter="onPointerEnter"
@@ -209,13 +212,13 @@ function onPointerLeave() {
     </span>
     <!-- An item opening a submenu always shows the chevron announcing it, and never
          the end icon: the sideways opening is what the reader needs to be told -->
-    <VIcon v-if="hasSubmenu" :name="chevronRightIcon" class="v-menu-item-chevron" />
+    <VIcon v-if="hasSubmenu()" :name="chevronRightIcon" class="v-menu-item-chevron" mirrored />
     <slot v-else name="end">
       <VIcon v-if="iconEnd" v-bind="iconProps(iconEnd)" />
     </slot>
   </component>
   <VMenuPanel
-    v-if="hasSubmenu"
+    v-if="hasSubmenu()"
     :id="subId"
     ref="subPanel"
     placement="right-start"
@@ -241,6 +244,10 @@ function onPointerLeave() {
      * — and the weight stays regular. The full `control` type role would mean a medium
      * weight and lines set tight against each other, which suits a single-line label
      * and not a row that may wrap and carry a second line under it.
+     *
+     * The corner is VSideNavigationItem's: the control radius capped at half a control
+     * height, so a pill override paints every row of a menu alike, a row carrying a
+     * sublabel included, instead of rounding each one to half of its own height.
      */
     display: flex;
     align-items: center;
@@ -251,7 +258,7 @@ function onPointerLeave() {
     border: none;
     background: transparent;
     color: var(--vectis-color-text);
-    border-radius: var(--vectis-radius-sm);
+    border-radius: min(var(--vectis-radius-interactive), calc(var(--control-height) / 2));
     font-family: inherit;
     font-size: var(--control-font-size);
     line-height: var(--vectis-text-body-md-leading);
@@ -274,14 +281,6 @@ function onPointerLeave() {
 
   .v-menu-item-chevron {
     color: var(--vectis-color-text-muted);
-  }
-
-  /* A chevron points at a physical direction, which the logical properties do not mirror:
-     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
-     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
-     individual property, so it composes instead of replacing a transform. */
-  .v-menu-item-chevron:dir(rtl) {
-    scale: -1 1;
   }
 
   /* In a menu the focus IS the highlight, so it is drawn on `:focus` and not on

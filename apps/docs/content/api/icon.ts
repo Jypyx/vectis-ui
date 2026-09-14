@@ -15,6 +15,7 @@ export default {
         { name: 'size', type: 'number | string' },
         { name: 'label', type: 'string' },
         { name: 'filled', type: 'boolean', default: 'false' },
+        { name: 'mirrored', type: 'boolean', default: 'false' },
       ],
       slots: [
         { name: 'default', type: '{}' },

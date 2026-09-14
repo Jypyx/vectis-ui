@@ -83,6 +83,12 @@ export interface DataTableParams {
   search: string
 }
 
+/** How much decoration the table carries. */
+export type DataTableVariant = 'flat' | 'outlined'
+
+/** What a narrow container does to the rows. */
+export type DataTableResponsive = 'scroll' | 'stack'
+
 // TRAP — this interface is exported rather than kept local, and it is generic rather than
 // referring to the component's own type parameter.
 //
@@ -90,12 +96,6 @@ export interface DataTableParams {
 // declarations it emits, so a name that is not exported cannot be written there and the
 // build of the type declarations fails. And being lifted out of the component's scope, it
 // has no access to that parameter and must take one of its own.
-/** How much decoration the table carries. */
-export type DataTableVariant = 'flat' | 'outlined'
-
-/** What a narrow container does to the rows. */
-export type DataTableResponsive = 'scroll' | 'stack'
-
 export interface DataTableProps<Row extends Record<string, unknown>> {
   /** The columns to show, in order. */
   columns: DataTableColumn[]
@@ -960,7 +960,9 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     color: inherit;
     font: inherit;
     cursor: pointer;
-    border-radius: var(--vectis-radius-xs);
+    /* Seen only on the focus ring: the control radius capped at half a line, VBreadcrumb's
+       link recipe, since a heading that wraps would otherwise round to half its height. */
+    border-radius: min(var(--vectis-radius-interactive), 0.5lh);
   }
 
   .v-table-sort:hover {

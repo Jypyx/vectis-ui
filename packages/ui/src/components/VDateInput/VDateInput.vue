@@ -155,12 +155,8 @@ interface DateInputProps {
   /** What the start icon does, in words, once it is clickable. */
   iconStartLabel?: string
   /**
-   * What the end icon does, in words. It names the button that opens the calendar, and
-   * falls back to the design system dictionary.
-   */
-  /**
-   * What the calendar button does, in words. It names the button `pickerIcon` renders, and falls back
-   * to the design system dictionary.
+   * What the calendar button does, in words. It names the button `pickerIcon` renders,
+   * and falls back to the design system dictionary.
    */
   pickerIconLabel?: string
   /**

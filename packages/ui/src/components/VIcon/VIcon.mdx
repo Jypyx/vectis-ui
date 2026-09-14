@@ -89,6 +89,17 @@ an image (`src`) or an inline SVG.
 
 <Canvas of={VIconStories.Filled} />
 
+## Mirrored
+
+The `mirrored` prop flips the icon horizontally when the direction the browser computed is
+right-to-left, for a glyph that points at a physical direction: a "previous" chevron points left
+in English and right in Arabic. It is off by default, since most icons mean the same thing both
+ways. It is the one rule every directional icon of the design system goes through — the arrows of
+VPagination, VTabs and VCarousel, the chevrons of VDatePicker, VCalendar, VMenuItem and
+VBreadcrumb.
+
+<Canvas of={VIconStories.Mirrored} />
+
 ## Wiring in an icon library
 
 `setIconResolver` is consulted **before** the icon's own drawing: that is what lets you move all

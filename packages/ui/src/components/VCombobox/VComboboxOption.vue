@@ -78,7 +78,8 @@ function onClick() {
 
        The type is composite, exactly as in a menu row: the SIZE comes from the scale, the
        line height stays that of body text — a unitless ratio, so it follows the size —
-       and the weight stays regular, since a row may wrap. */
+       and the weight stays regular, since a row may wrap. The corner is a menu row's too,
+       capped at half a control height so a wrapped option keeps its neighbours' corner. */
     display: flex;
     align-items: center;
     gap: var(--control-gap);
@@ -88,7 +89,7 @@ function onClick() {
     border: none;
     background: transparent;
     color: var(--vectis-color-text);
-    border-radius: var(--vectis-radius-sm);
+    border-radius: min(var(--vectis-radius-interactive), calc(var(--control-height) / 2));
     font-family: inherit;
     font-size: var(--control-font-size);
     line-height: var(--vectis-text-body-md-leading);

@@ -656,12 +656,13 @@ defineExpose({
     <div class="v-date-picker-header">
       <div class="v-date-picker-nav">
         <VIconButton
-          :icon="chevronLeftIcon"
           :label="m.datePicker.previousMonth"
           size="sm"
           :disabled="disabled || !canPrevMonth"
           @click="stepMonth(-1)"
-        />
+        >
+          <VIcon :name="chevronLeftIcon" mirrored />
+        </VIconButton>
         <VButton
           variant="ghost"
           tone="neutral"
@@ -679,22 +680,24 @@ defineExpose({
           />
         </VButton>
         <VIconButton
-          :icon="chevronRightIcon"
           :label="m.datePicker.nextMonth"
           size="sm"
           :disabled="disabled || !canNextMonth"
           @click="stepMonth(1)"
-        />
+        >
+          <VIcon :name="chevronRightIcon" mirrored />
+        </VIconButton>
       </div>
 
       <div class="v-date-picker-nav">
         <VIconButton
-          :icon="chevronLeftIcon"
           :label="m.datePicker.previousYear"
           size="sm"
           :disabled="disabled || !canPrevYear"
           @click="stepYear(-1)"
-        />
+        >
+          <VIcon :name="chevronLeftIcon" mirrored />
+        </VIconButton>
         <VButton
           variant="ghost"
           tone="neutral"
@@ -711,12 +714,13 @@ defineExpose({
           />
         </VButton>
         <VIconButton
-          :icon="chevronRightIcon"
           :label="m.datePicker.nextYear"
           size="sm"
           :disabled="disabled || !canNextYear"
           @click="stepYear(1)"
-        />
+        >
+          <VIcon :name="chevronRightIcon" mirrored />
+        </VIconButton>
       </div>
     </div>
 
@@ -910,14 +914,6 @@ defineExpose({
   .v-date-picker-nav {
     display: flex;
     align-items: center;
-  }
-
-  /* A chevron points at a physical direction, which the logical properties do not mirror:
-     in a right-to-left page it has to be flipped by hand. `:dir()` reads the direction the
-     browser computed rather than an attribute spelled on an ancestor, and `scale` is the
-     individual property, so it composes instead of replacing a transform. */
-  .v-date-picker-nav:dir(rtl) .v-icon {
-    scale: -1 1;
   }
 
   /* A minimum width holds this button steady, so the chevrons on either side do not

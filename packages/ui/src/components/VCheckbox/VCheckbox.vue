@@ -139,7 +139,13 @@ defineExpose({
     flex: none;
     background: transparent;
     border: var(--vectis-control-border-width) solid var(--vectis-color-border-strong);
-    border-radius: var(--vectis-radius-sm);
+    /* The corner follows the control radius, capped at a QUARTER of the box rather than
+       at the half a row takes. A pill override on --vectis-radius-interactive would
+       otherwise turn the box into a disc, and a round checkbox reads as a radio. */
+    border-radius: min(
+      var(--vectis-radius-interactive),
+      calc(var(--vectis-control-size-check) / 4)
+    );
     color: var(--vectis-color-text-on-accent);
     transition:
       background-color var(--vectis-duration-fast) var(--vectis-ease-default),

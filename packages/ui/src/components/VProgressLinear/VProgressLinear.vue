@@ -111,7 +111,7 @@ const {
 
 <template>
   <div
-    class="v-progress-linear"
+    class="v-progress-linear v-tone"
     role="progressbar"
     :aria-label="m.progress.label"
     :data-tone="tone"
@@ -160,6 +160,11 @@ const {
    */
   .v-progress-linear {
     --progress-thickness: var(--vectis-control-size-progress-linear-thickness);
+    /* Fill, track and the text over the fill are the tone's solid, soft and on-solid
+       colours, read from the shared table (`.v-tone`, set in the template). */
+    --progress-fill: var(--tone-bg-solid);
+    --progress-track: var(--tone-bg-soft);
+    --progress-text-fallback: var(--tone-text-solid);
     position: relative;
     display: block;
     inline-size: 100%;
@@ -196,46 +201,12 @@ const {
     transition: inline-size var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
-  .v-progress-linear[data-tone='accent'] {
-    --progress-fill: var(--vectis-color-accent);
-    --progress-track: var(--vectis-color-accent-surface);
-    --tone-text-fallback: var(--vectis-color-text-on-accent);
-  }
-
-  .v-progress-linear[data-tone='success'] {
-    --progress-fill: var(--vectis-color-success);
-    --progress-track: var(--vectis-color-success-surface);
-    --tone-text-fallback: var(--vectis-color-text-on-accent);
-  }
-
-  .v-progress-linear[data-tone='danger'] {
-    --progress-fill: var(--vectis-color-danger);
-    --progress-track: var(--vectis-color-danger-surface);
-    --tone-text-fallback: var(--vectis-color-text-on-accent);
-  }
-
-  .v-progress-linear[data-tone='warning'] {
-    --progress-fill: var(--vectis-color-warning);
-    --progress-track: var(--vectis-color-warning-surface);
-    /* White does not reach the required contrast on amber, so this tone has a text
-       colour of its own. */
-    --tone-text-fallback: var(--vectis-color-text-on-warning);
-  }
-
-  /* The neutral tone inverts text and surface rather than using a mid grey, which would
-     be unreadable in one theme or the other. */
-  .v-progress-linear[data-tone='neutral'] {
-    --progress-fill: var(--vectis-color-text);
-    --progress-track: var(--vectis-color-surface-muted);
-    --tone-text-fallback: var(--vectis-color-surface);
-  }
-
-  /* Placed after the tones on purpose: the specificity is the same, so it is the order
-     that lets a custom colour override the tone it replaces. */
+  /* A custom colour replaces the tone: at (0,2,0) it beats the base rule's mapping
+     whatever the order the two are written in. */
   .v-progress-linear[data-custom] {
     --progress-fill: var(--custom-color);
     --progress-track: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
-    --tone-text-fallback: var(--vectis-color-text-on-accent);
+    --progress-text-fallback: var(--vectis-color-text-on-accent);
   }
 
   /* The text inside the bar, in two copies laid over the same box — the track's own,
@@ -298,7 +269,7 @@ const {
        only then turn invalid, which resets the colour to inherited and leaves the
        fallback never applied. The block below is the way round it, being evaluated
        before any var() substitution. */
-    color: var(--tone-text-fallback);
+    color: var(--progress-text-fallback);
   }
 
   /* Where the adaptive colour function exists, the text picks black or white against

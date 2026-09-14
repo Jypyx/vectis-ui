@@ -15,7 +15,7 @@
  * splits the consumer's attributes between the pill and the element that acts.
  */
 
-import { computed, useAttrs, useSlots } from 'vue'
+import { computed, useAttrs } from 'vue'
 import type { StyleValue } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
@@ -133,7 +133,7 @@ defineEmits<{
   dismiss: []
 }>()
 
-defineSlots<{
+const slots = defineSlots<{
   /** The label. It may be left out entirely, which gives a chip made of icons alone. */
   default?(): unknown
   /** Content before the label, which takes the place of `iconStart`. */
@@ -169,11 +169,12 @@ const actionAttrs = computed(() => {
 
 const showCheck = computed(() => props.check && props.selectable && selected.value)
 
-/* An icon and no label at all: the chip becomes a square, as wide as it is tall. */
-const slots = useSlots()
-const iconOnly = computed(
-  () => !slots.default && !!(slots.start || slots.end || props.iconStart || props.iconEnd),
-)
+// TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
+// computed would keep its first answer while a slot behind a `v-if` comes and goes.
+/** An icon and no label at all: the chip becomes a square, as wide as it is tall. */
+function iconOnly() {
+  return !slots.default && !!(slots.start || slots.end || props.iconStart || props.iconEnd)
+}
 </script>
 
 <template>
@@ -189,7 +190,7 @@ const iconOnly = computed(
     :data-compact="compact ? '' : undefined"
     :data-selected="selectable && selected ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
-    :data-icon-only="iconOnly ? '' : undefined"
+    :data-icon-only="iconOnly() ? '' : undefined"
   >
     <component
       :is="actionTag"
@@ -371,7 +372,7 @@ const iconOnly = computed(
     border: none;
     background: transparent;
     color: inherit;
-    border-radius: var(--vectis-radius-full);
+    border-radius: var(--vectis-radius-pill);
     cursor: pointer;
     flex: none;
   }

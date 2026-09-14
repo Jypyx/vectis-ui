@@ -62,6 +62,13 @@ interface IconProps {
    * means nothing for an image or an inline SVG, whose shape is fixed.
    */
   filled?: boolean
+  /**
+   * Flips the icon horizontally in a right-to-left context, for a glyph that points
+   * at a physical direction: a "previous" chevron points left in English and right in
+   * Arabic. Off by default, since most icons mean the same thing in both directions.
+   * The direction is the one the browser computed, so an ancestor's `dir` is enough.
+   */
+  mirrored?: boolean
 }
 
 const props = withDefaults(defineProps<IconProps>(), {
@@ -71,6 +78,7 @@ const props = withDefaults(defineProps<IconProps>(), {
   size: undefined,
   label: undefined,
   filled: false,
+  mirrored: false,
 })
 
 defineSlots<{
@@ -101,6 +109,12 @@ function tag(render: IconRender): Resolved {
   return { kind: 'class', class: render.class }
 }
 
+/**
+ * The icon's identity: the name the resolver is asked for, and the one `data-icon`
+ * records whatever the drawing turned out to come from.
+ */
+const iconName = computed(() => (typeof props.name === 'string' ? props.name : props.name?.name))
+
 // @fallback — the ladder itself: every rung hands over to the next one, and the
 // ligature is the last resort, reached when neither the resolver nor the registry
 // recognized the name.
@@ -110,12 +124,6 @@ function tag(render: IconRender): Resolved {
  * a failure — it means the template falls through to the image, the ligature or the
  * slot.
  */
-/**
- * The icon's identity: the name the resolver is asked for, and the one `data-icon`
- * records whatever the drawing turned out to come from.
- */
-const iconName = computed(() => (typeof props.name === 'string' ? props.name : props.name?.name))
-
 const resolved = computed<Resolved | undefined>(() => {
   if (props.render) return tag(props.render)
   // TRUTHINESS on `src`, the test the template renders the image with: an empty `src=""`
@@ -143,6 +151,7 @@ const resolved = computed<Resolved | undefined>(() => {
     :style="px(size) !== undefined ? { '--vectis-icon-size': px(size) } : undefined"
     :data-icon="iconName"
     :data-filled="filled || undefined"
+    :data-mirror="mirrored || undefined"
     :role="label ? 'img' : undefined"
     :aria-label="label"
     :aria-hidden="label ? undefined : 'true'"
@@ -231,6 +240,13 @@ const resolved = computed<Resolved | undefined>(() => {
 
   .v-icon[data-filled] .v-icon-symbol {
     --icon-fill: 1;
+  }
+
+  /* `:dir()` reads the direction the browser computed rather than an attribute spelled on
+     an ancestor, and `scale` is the individual property, so it composes with a rotation
+     a consumer applies (a disclosure chevron) instead of replacing its transform. */
+  .v-icon[data-mirror]:dir(rtl) {
+    scale: -1 1;
   }
 
   .v-icon-img,

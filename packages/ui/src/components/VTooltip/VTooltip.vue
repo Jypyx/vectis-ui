@@ -214,7 +214,10 @@ function onKeydown(event: KeyboardEvent) {
     background: var(--vectis-color-surface-inverse);
     color: var(--vectis-color-text-on-inverse);
     border: none;
-    border-radius: var(--vectis-radius-sm);
+    /* The control radius capped at half the height of a ONE-line bubble, the row recipe
+       of VSideNavigationItem: a tooltip wraps past its max-width, and under a pill
+       override a two-line bubble would otherwise round to half of its own height. */
+    border-radius: min(var(--vectis-radius-interactive), calc(0.5lh + var(--vectis-space-1)));
     box-shadow: var(--vectis-shadow-sm);
     font-family: var(--vectis-text-family);
     font-size: var(--vectis-text-caption-size);
